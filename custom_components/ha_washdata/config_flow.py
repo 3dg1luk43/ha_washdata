@@ -78,16 +78,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             {
                 vol.Optional(
                     CONF_MIN_POWER,
-                    default=self.config_entry.options.get(
+                    default=self._config_entry.options.get(
                         CONF_MIN_POWER,
-                        self.config_entry.data.get(CONF_MIN_POWER, DEFAULT_MIN_POWER),
+                        self._config_entry.data.get(CONF_MIN_POWER, DEFAULT_MIN_POWER),
                     ),
                 ): vol.Coerce(float),
                 vol.Optional(
                     CONF_OFF_DELAY,
-                    default=self.config_entry.options.get(
+                    default=self._config_entry.options.get(
                         CONF_OFF_DELAY,
-                        self.config_entry.data.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY),
+                        self._config_entry.data.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY),
                     ),
                 ): vol.Coerce(int),
             }
