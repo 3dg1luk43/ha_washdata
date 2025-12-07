@@ -1,7 +1,7 @@
 """Sensors for HA WashData."""
 from __future__ import annotations
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
@@ -60,9 +60,17 @@ class WasherBaseSensor(SensorEntity):
         self.async_write_ha_state()
 
 
+from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+
+# ... imports ...
+
 class WasherStateSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
-        self.entity_description = type("EntityDescription", (), {"key": "washer_state", "name": "State"})() # dynamic hack
+        self.entity_description = SensorEntityDescription(
+            key="washer_state",
+            name="State",
+            icon="mdi:washing-machine"
+        )
         super().__init__(manager, entry)
     
     @property
@@ -72,7 +80,11 @@ class WasherStateSensor(WasherBaseSensor):
 
 class WasherProgramSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
-        self.entity_description = type("EntityDescription", (), {"key": "washer_program", "name": "Program"})()
+        self.entity_description = SensorEntityDescription(
+            key="washer_program",
+            name="Program",
+            icon="mdi:file-document-outline"
+        )
         super().__init__(manager, entry)
 
     @property
@@ -82,9 +94,13 @@ class WasherProgramSensor(WasherBaseSensor):
 
 class WasherTimeRemainingSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
-        self.entity_description = type("EntityDescription", (), {"key": "time_remaining", "name": "Time Remaining"})()
+        self.entity_description = SensorEntityDescription(
+            key="time_remaining",
+            name="Time Remaining",
+            native_unit_of_measurement="min",
+            icon="mdi:timer-sand"
+        )
         super().__init__(manager, entry)
-        self._attr_native_unit_of_measurement = "min"
 
     @property
     def native_value(self):
@@ -94,9 +110,14 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
 
 class WasherProgressSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
-        self.entity_description = type("EntityDescription", (), {"key": "cycle_progress", "name": "Progress"})()
+        self.entity_description = SensorEntityDescription(
+            key="cycle_progress",
+            name="Progress",
+            native_unit_of_measurement="%",
+            icon="mdi:progress-clock"
+        )
         super().__init__(manager, entry)
-        self._attr_native_unit_of_measurement = "%"
+
 
     @property
     def native_value(self):

@@ -1,0 +1,32 @@
+"""Diagnostics support for HA WashData."""
+from __future__ import annotations
+
+from typing import Any
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceEntry
+
+from .const import DOMAIN
+from .manager import WashDataManager
+
+async def async_get_config_entry_diagnostics(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> dict[str, Any]:
+    """Return diagnostics for a config entry."""
+    manager: WashDataManager = hass.data[DOMAIN][entry.entry_id]
+    
+    # Get internal data from the store
+    # We access the protected _data just for diagnostics dump
+    store_data = manager.profile_store._data
+    
+    return {
+        "entry": entry.as_dict(),
+        "manager_state": {
+            "current_state": manager.check_state,
+            "current_program": manager.current_program,
+            "time_remaining": manager.time_remaining,
+            "cycle_progress": manager.cycle_progress,
+        },
+        "store_data": store_data
+    }
