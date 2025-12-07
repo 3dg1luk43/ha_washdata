@@ -1,0 +1,12 @@
+{
+  "domain": "ha_washdata",
+  "name": "HA WashData",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/username/ha_washdata",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/username/ha_washdata/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}
