@@ -1,0 +1,23 @@
+label_cycle:
+  name: Label Cycle
+  description: Assign a profile name to a past cycle.
+  fields:
+    device_id:
+      name: Device
+      description: The washing machine device to label.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+    cycle_id:
+      name: Cycle ID
+      description: The ID of the cycle to label.
+      required: true
+      selector:
+        text:
+    profile_name:
+      name: Profile Name
+      description: The name of the profile (e.g. Cotton 60).
+      required: true
+      selector:
+        text:

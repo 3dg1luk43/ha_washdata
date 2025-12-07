@@ -26,6 +26,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+    
+    # Register service if not already
+    if not hass.services.has_service(DOMAIN, "label_cycle"):
+        async def handle_label_cycle(call):
+            device_id = call.data.get("device_id")
+            cycle_id = call.data.get("cycle_id")
+            profile_name = call.data.get("profile_name")
+            
+            # Find the config entry for this device
+            dr = hass.helpers.device_registry.async_get(hass)
+            device = dr.async_get(device_id)
+            if not device:
+                raise ValueError("Device not found")
+                
+            entry_id = next(iter(device.config_entries))
+            if entry_id not in hass.data[DOMAIN]:
+                raise ValueError("Integration not loaded for this device")
+                
+            manager = hass.data[DOMAIN][entry_id]
+            manager.profile_store.create_profile(profile_name, cycle_id)
+            
+        hass.services.async_register(DOMAIN, "label_cycle", handle_label_cycle)
+
     return True
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:

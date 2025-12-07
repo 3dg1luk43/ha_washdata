@@ -7,6 +7,11 @@ CONF_POWER_SENSOR = "power_sensor"
 CONF_NAME = "name"
 CONF_MIN_POWER = "min_power"
 CONF_OFF_DELAY = "off_delay"
+CONF_NOTIFY_SERVICE = "notify_service"
+CONF_NOTIFY_EVENTS = "notify_events"
+
+NOTIFY_EVENT_START = "cycle_start"
+NOTIFY_EVENT_FINISH = "cycle_finish"
 
 # Defaults
 DEFAULT_MIN_POWER = 5.0  # Watts

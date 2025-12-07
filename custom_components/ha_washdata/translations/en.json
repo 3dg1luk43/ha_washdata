@@ -1,0 +1,49 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "power_sensor": "Power Sensor",
+          "min_power": "Minimum Power (W)",
+          "name": "Name"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "menu_options": {
+          "settings": "Settings",
+          "manage_profiles": "Manage Profiles"
+        }
+      },
+      "settings": {
+        "data": {
+          "min_power": "Minimum Power (W)",
+          "off_delay": "Cycle End Delay (seconds)",
+          "notify_service": "Notification Service (e.g. notify.mobile_app)",
+          "notify_events": "Events to Notify"
+        }
+      },
+      "manage_profiles": {
+        "data": {
+          "cycle_id": "Select Cycle to Label"
+        }
+      },
+      "label_cycle": {
+        "data": {
+          "profile_name": "Profile Name"
+        }
+      }
+    }
+  }
+}

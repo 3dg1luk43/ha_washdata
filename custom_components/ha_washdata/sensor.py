@@ -23,6 +23,7 @@ async def async_setup_entry(
         WasherProgramSensor(manager, entry),
         WasherTimeRemainingSensor(manager, entry),
         WasherProgressSensor(manager, entry),
+        WasherPowerSensor(manager, entry),
     ]
     
     async_add_entities(entities)
@@ -60,9 +61,6 @@ class WasherBaseSensor(SensorEntity):
         self.async_write_ha_state()
 
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
-
-# ... imports ...
 
 class WasherStateSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
@@ -76,6 +74,13 @@ class WasherStateSensor(WasherBaseSensor):
     @property
     def native_value(self):
         return self._manager.check_state
+
+    @property
+    def extra_state_attributes(self):
+        return {
+            "samples_recorded": self._manager.samples_recorded,
+            "current_program_guess": self._manager.current_program
+        }
 
 
 class WasherProgramSensor(WasherBaseSensor):
@@ -122,3 +127,19 @@ class WasherProgressSensor(WasherBaseSensor):
     @property
     def native_value(self):
         return self._manager.cycle_progress
+
+
+class WasherPowerSensor(WasherBaseSensor):
+    def __init__(self, manager, entry):
+        self.entity_description = SensorEntityDescription(
+            key="current_power",
+            name="Current Power",
+            native_unit_of_measurement="W",
+            device_class="power",
+            icon="mdi:flash"
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self):
+        return self._manager.current_power
