@@ -53,6 +53,7 @@ class WashDataManager:
         self._current_program = "unknown"
         self._time_remaining: float | None = None
         self._cycle_progress: float = 0.0
+        self._last_reading_time: datetime | None = None
 
     async def async_setup(self) -> None:
         """Set up the manager."""
@@ -68,6 +69,8 @@ class WashDataManager:
         if self._remove_listener:
             self._remove_listener()
 
+        self._last_reading_time = None
+
     @callback
     def _async_power_changed(self, event) -> None:
         """Handle power sensor state change."""
@@ -79,8 +82,14 @@ class WashDataManager:
             power = float(new_state.state)
         except ValueError:
             return
+
+        now = datetime.now()
+        # Throttle updates to avoid CPU overload on noisy sensors
+        if self._last_reading_time and (now - self._last_reading_time).total_seconds() < 2.0:
+            return
             
-        self.detector.process_reading(power, datetime.now())
+        self._last_reading_time = now
+        self.detector.process_reading(power, now)
         
         # If running, try to match profile and update estimates
         if self.detector.state == "running":
