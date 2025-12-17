@@ -1,6 +1,7 @@
 """Config flow for HA WashData integration."""
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -20,11 +21,43 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_EVENTS,
+    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+    CONF_SMOOTHING_WINDOW,
+    CONF_PROFILE_DURATION_TOLERANCE,
+    CONF_AUTO_MERGE_LOOKBACK_HOURS,
+    CONF_AUTO_MERGE_GAP_SECONDS,
+    CONF_INTERRUPTED_MIN_SECONDS,
+    CONF_ABRUPT_DROP_WATTS,
+    CONF_ABRUPT_DROP_RATIO,
+    CONF_ABRUPT_HIGH_LOAD_FACTOR,
+    CONF_PROGRESS_RESET_DELAY,
+    CONF_LEARNING_CONFIDENCE,
+    CONF_DURATION_TOLERANCE,
+    CONF_AUTO_LABEL_CONFIDENCE,
+    CONF_PROFILE_MATCH_INTERVAL,
+    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     DEFAULT_NAME,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
+    DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
+    DEFAULT_SMOOTHING_WINDOW,
+    DEFAULT_PROFILE_DURATION_TOLERANCE,
+    DEFAULT_AUTO_MERGE_LOOKBACK_HOURS,
+    DEFAULT_AUTO_MERGE_GAP_SECONDS,
+    DEFAULT_INTERRUPTED_MIN_SECONDS,
+    DEFAULT_ABRUPT_DROP_WATTS,
+    DEFAULT_ABRUPT_DROP_RATIO,
+    DEFAULT_ABRUPT_HIGH_LOAD_FACTOR,
+    DEFAULT_PROGRESS_RESET_DELAY,
+    DEFAULT_LEARNING_CONFIDENCE,
+    DEFAULT_DURATION_TOLERANCE,
+    DEFAULT_AUTO_LABEL_CONFIDENCE,
+    DEFAULT_PROFILE_MATCH_INTERVAL,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DOMAIN,
 )
 
@@ -43,7 +76,48 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for HA WashData."""
 
-    VERSION = 1
+    VERSION = 3
+
+    async def async_migrate_entry(self, config_entry: config_entries.ConfigEntry) -> bool:
+        """Migrate old entry to the latest version while preserving user settings."""
+        data = {**config_entry.data}
+        options = {**config_entry.options}
+
+        # Ensure min_power/off_delay from data are preserved into options if missing
+        if CONF_MIN_POWER not in options and CONF_MIN_POWER in data:
+            options[CONF_MIN_POWER] = data[CONF_MIN_POWER]
+        if CONF_OFF_DELAY not in options and CONF_OFF_DELAY in data:
+            options[CONF_OFF_DELAY] = data[CONF_OFF_DELAY]
+
+        # Seed new configurable values with defaults if missing
+        options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
+        options.setdefault(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE)
+        options.setdefault(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE)
+        options.setdefault(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE)
+        options.setdefault(CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE)
+        # Seed detector settings if missing
+        options.setdefault(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
+        options.setdefault(CONF_NO_UPDATE_ACTIVE_TIMEOUT, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
+        options.setdefault(CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE)
+        options.setdefault(CONF_AUTO_MERGE_LOOKBACK_HOURS, DEFAULT_AUTO_MERGE_LOOKBACK_HOURS)
+        options.setdefault(CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS)
+        options.setdefault(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS)
+        options.setdefault(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS)
+        options.setdefault(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO)
+        options.setdefault(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR)
+        options.setdefault(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL)
+        options.setdefault(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
+        options.setdefault(CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)
+
+        # Bump version and save
+        self.hass.config_entries.async_update_entry(
+            config_entry,
+            data=data,
+            options=options,
+            version=self.VERSION,
+        )
+        _LOGGER.info("Migrated HA WashData entry to version %s", self.VERSION)
+        return True
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -79,7 +153,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Manage the options."""
         return self.async_show_menu(
             step_id="init",
-            menu_options=["settings", "manage_profiles", "post_process", "migrate_data", "wipe_history"]
+            menu_options=["settings", "manage_profiles", "diagnostics"]
         )
 
     async def async_step_settings(
@@ -87,7 +161,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage configuration settings."""
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            # Merge with existing options to preserve settings not shown in this form
+            merged_options = {**self._config_entry.options, **user_input}
+            return self.async_create_entry(title="", data=merged_options)
 
         # Populate notify services
         notify_services = []
@@ -123,6 +199,62 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         ),
                     ): vol.Coerce(int),
                     vol.Optional(
+                        CONF_PROGRESS_RESET_DELAY,
+                        default=self._config_entry.options.get(
+                            CONF_PROGRESS_RESET_DELAY,
+                            DEFAULT_PROGRESS_RESET_DELAY,
+                        ),
+                    ): vol.Coerce(int),
+                    vol.Optional(
+                        CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                        default=self._config_entry.options.get(
+                            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                            DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
+                        ),
+                    ): vol.Coerce(int),
+                    vol.Optional(
+                        CONF_AUTO_LABEL_CONFIDENCE,
+                        default=self._config_entry.options.get(
+                            CONF_AUTO_LABEL_CONFIDENCE,
+                            DEFAULT_AUTO_LABEL_CONFIDENCE,
+                        ),
+                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
+                    vol.Optional(
+                        CONF_LEARNING_CONFIDENCE,
+                        default=self._config_entry.options.get(
+                            CONF_LEARNING_CONFIDENCE,
+                            DEFAULT_LEARNING_CONFIDENCE,
+                        ),
+                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
+                    vol.Optional(
+                        CONF_DURATION_TOLERANCE,
+                        default=self._config_entry.options.get(
+                            CONF_DURATION_TOLERANCE,
+                            DEFAULT_DURATION_TOLERANCE,
+                        ),
+                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=0.5)),
+                    vol.Optional(
+                        CONF_PROFILE_MATCH_INTERVAL,
+                        default=self._config_entry.options.get(
+                            CONF_PROFILE_MATCH_INTERVAL,
+                            DEFAULT_PROFILE_MATCH_INTERVAL,
+                        ),
+                    ): vol.Coerce(int),
+                    vol.Optional(
+                        CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                        default=self._config_entry.options.get(
+                            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                            DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+                        ),
+                    ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=1.0)),
+                    vol.Optional(
+                        CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+                        default=self._config_entry.options.get(
+                            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+                            DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+                        ),
+                    ): vol.All(vol.Coerce(float), vol.Range(min=1.0, max=3.0)),
+                    vol.Optional(
                         CONF_NOTIFY_SERVICE,
                         default=self._config_entry.options.get(
                             CONF_NOTIFY_SERVICE,
@@ -151,29 +283,426 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             mode=selector.SelectSelectorMode.LIST,
                         )
                     ),
+                    vol.Optional(
+                        CONF_SMOOTHING_WINDOW,
+                        default=self._config_entry.options.get(
+                            CONF_SMOOTHING_WINDOW,
+                            DEFAULT_SMOOTHING_WINDOW,
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=1, max=20)),
+                    vol.Optional(
+                        CONF_PROFILE_DURATION_TOLERANCE,
+                        default=self._config_entry.options.get(
+                            CONF_PROFILE_DURATION_TOLERANCE,
+                            DEFAULT_PROFILE_DURATION_TOLERANCE,
+                        ),
+                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=0.5)),
+                    vol.Optional(
+                        CONF_AUTO_MERGE_LOOKBACK_HOURS,
+                        default=self._config_entry.options.get(
+                            CONF_AUTO_MERGE_LOOKBACK_HOURS,
+                            DEFAULT_AUTO_MERGE_LOOKBACK_HOURS,
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=168)),
+                    vol.Optional(
+                        CONF_AUTO_MERGE_GAP_SECONDS,
+                        default=self._config_entry.options.get(
+                            CONF_AUTO_MERGE_GAP_SECONDS,
+                            DEFAULT_AUTO_MERGE_GAP_SECONDS,
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=60, max=7200)),
+                    vol.Optional(
+                        CONF_INTERRUPTED_MIN_SECONDS,
+                        default=self._config_entry.options.get(
+                            CONF_INTERRUPTED_MIN_SECONDS,
+                            DEFAULT_INTERRUPTED_MIN_SECONDS,
+                        ),
+                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=900)),
+                    vol.Optional(
+                        CONF_ABRUPT_DROP_WATTS,
+                        default=self._config_entry.options.get(
+                            CONF_ABRUPT_DROP_WATTS,
+                            DEFAULT_ABRUPT_DROP_WATTS,
+                        ),
+                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=5000.0)),
+                    vol.Optional(
+                        CONF_ABRUPT_DROP_RATIO,
+                        default=self._config_entry.options.get(
+                            CONF_ABRUPT_DROP_RATIO,
+                            DEFAULT_ABRUPT_DROP_RATIO,
+                        ),
+                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
+                    vol.Optional(
+                        CONF_ABRUPT_HIGH_LOAD_FACTOR,
+                        default=self._config_entry.options.get(
+                            CONF_ABRUPT_HIGH_LOAD_FACTOR,
+                            DEFAULT_ABRUPT_HIGH_LOAD_FACTOR,
+                        ),
+                    ): vol.All(vol.Coerce(float), vol.Range(min=1.0, max=20.0)),
                 }
             ),
+        )
+
+    async def async_step_diagnostics(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Diagnostics submenu for maintenance actions."""
+        if user_input is not None:
+            choice = user_input["action"]
+            if choice == "post_process":
+                return await self.async_step_post_process()
+            if choice == "migrate_data":
+                return await self.async_step_migrate_data()
+            if choice == "wipe_history":
+                return await self.async_step_wipe_history()
+            if choice == "export_import":
+                return await self.async_step_export_import()
+
+        return self.async_show_form(
+            step_id="diagnostics",
+            data_schema=vol.Schema({
+                vol.Required("action"): vol.In({
+                    "post_process": "Merge fragmented cycles (configure lookback/gap in Settings)",
+                    "migrate_data": "Migrate/compress stored data to latest format",
+                    "wipe_history": "Wipe ALL data for this device (irreversible)",
+                    "export_import": "Export/Import JSON with settings (copy/paste)"
+                })
+            })
+        )
+
+    async def async_step_export_import(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Export or import profile/cycle data via JSON copy/paste."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        export_payload = manager.profile_store.export_data(
+            entry_data=dict(self.config_entry.data),
+            entry_options=dict(self.config_entry.options),
+        )
+        export_str = json.dumps(export_payload, indent=2)
+
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            mode = user_input.get("mode", "export")
+            payload_str = user_input.get("json_payload", "")
+
+            if mode == "import":
+                try:
+                    payload = json.loads(payload_str)
+                    config_updates = await manager.profile_store.async_import_data(payload)
+                    
+                    # Apply imported settings to config entry if present
+                    entry_data = config_updates.get("entry_data", {})
+                    entry_options = config_updates.get("entry_options", {})
+                    
+                    if entry_data or entry_options:
+                        # Merge imported options with current data/options
+                        new_data = {**self.config_entry.data}
+                        new_options = {**self.config_entry.options}
+                        
+                        # Only update settings that exist in the import (don't overwrite power_sensor/name)
+                        for key in [CONF_MIN_POWER, CONF_OFF_DELAY]:
+                            if key in entry_data:
+                                new_data[key] = entry_data[key]
+                        
+                        # Update all options from import
+                        new_options.update(entry_options)
+                        
+                        self.hass.config_entries.async_update_entry(
+                            self.config_entry,
+                            data=new_data,
+                            options=new_options,
+                        )
+                        _LOGGER.info("Applied imported settings to config entry")
+                        
+                except Exception:  # noqa: BLE001
+                    errors["base"] = "import_failed"
+                    # Re-show form with error
+                    return self.async_show_form(
+                        step_id="export_import",
+                        data_schema=vol.Schema({
+                            vol.Required("mode", default=mode): selector.SelectSelector(
+                                selector.SelectSelectorConfig(
+                                    options=[
+                                        selector.SelectOptionDict(value="export", label="Export only"),
+                                        selector.SelectOptionDict(value="import", label="Import from JSON"),
+                                    ]
+                                )
+                            ),
+                            vol.Optional("json_payload", default=payload_str): selector.TextSelector(
+                                selector.TextSelectorConfig(multiline=True)
+                            ),
+                        }),
+                        errors=errors,
+                    )
+
+            return self.async_create_entry(title="", data={})
+
+        return self.async_show_form(
+            step_id="export_import",
+            data_schema=vol.Schema({
+                vol.Required("mode", default="export"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            selector.SelectOptionDict(value="export", label="Export only"),
+                            selector.SelectOptionDict(value="import", label="Import from JSON"),
+                        ]
+                    )
+                ),
+                vol.Optional("json_payload", default=export_str): selector.TextSelector(
+                    selector.TextSelectorConfig(multiline=True)
+                ),
+            }),
         )
 
     async def async_step_manage_profiles(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Choose what to do with cycles."""
+        """Main menu for profile and cycle management."""
         if user_input is not None:
             action = user_input["action"]
-            if action == "label":
+            if action == "create_profile":
+                return await self.async_step_create_profile()
+            elif action == "edit_profile":
+                return await self.async_step_edit_profile()
+            elif action == "delete_profile":
+                return await self.async_step_delete_profile_select()
+            elif action == "label_cycle":
                 return await self.async_step_select_cycle_to_label()
-            elif action == "delete":
+            elif action == "auto_label":
+                return await self.async_step_auto_label_cycles()
+            elif action == "delete_cycle":
                 return await self.async_step_select_cycle_to_delete()
 
         return self.async_show_form(
             step_id="manage_profiles",
             data_schema=vol.Schema({
                 vol.Required("action"): vol.In({
-                    "label": "Label a Cycle",
-                    "delete": "Delete a Cycle"
+                    "create_profile": "➕ Create New Profile",
+                    "edit_profile": "✏️ Edit/Rename Profile",
+                    "delete_profile": "🗑️ Delete Profile",
+                    "label_cycle": "🏷️ Label a Cycle",
+                    "auto_label": "🤖 Auto-Label Old Cycles",
+                    "delete_cycle": "❌ Delete a Cycle",
                 })
             })
+        )
+
+    async def async_step_create_profile(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Create a new profile."""
+        errors = {}
+        
+        if user_input is not None:
+            name = user_input["profile_name"].strip()
+            reference_cycle = user_input.get("reference_cycle")
+            
+            if not name:
+                errors["profile_name"] = "empty_name"
+            else:
+                manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+                try:
+                    await manager.profile_store.create_profile_standalone(
+                        name, 
+                        reference_cycle if reference_cycle != "none" else None
+                    )
+                    return self.async_create_entry(title="", data={})
+                except ValueError as e:
+                    errors["base"] = "profile_exists"
+        
+        # Build cycle options for reference
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        cycles = store._data.get("past_cycles", [])[-20:]
+        
+        cycle_options = [selector.SelectOptionDict(value="none", label="(No reference cycle)")]
+        for c in reversed(cycles):
+            start = c["start_time"].split(".")[0].replace("T", " ")
+            duration_min = int(c['duration']/60)
+            prof = c.get("profile") or "Unlabeled"
+            label = f"{start} - {duration_min}m - {prof}"
+            cycle_options.append(selector.SelectOptionDict(value=c["id"], label=label))
+        
+        return self.async_show_form(
+            step_id="create_profile",
+            data_schema=vol.Schema({
+                vol.Required("profile_name"): str,
+                vol.Optional("reference_cycle", default="none"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=cycle_options,
+                        mode=selector.SelectSelectorMode.DROPDOWN
+                    )
+                )
+            }),
+            errors=errors,
+            description_placeholders={
+                "info": "Profile name examples: 'Delicates', 'Heavy Duty', 'Quick Wash'"
+            }
+        )
+
+    async def async_step_edit_profile(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Select profile to edit/rename."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        profiles = store.list_profiles()
+        
+        if not profiles:
+            return self.async_abort(reason="no_profiles_found")
+        
+        if user_input is not None:
+            self._selected_profile = user_input["profile"]
+            return await self.async_step_rename_profile()
+        
+        # Build profile options
+        options = []
+        for p in profiles:
+            count = p["cycle_count"]
+            duration_min = int(p["avg_duration"] / 60) if p["avg_duration"] else 0
+            label = f"{p['name']} ({count} cycles, ~{duration_min}m avg)"
+            options.append(selector.SelectOptionDict(value=p["name"], label=label))
+        
+        return self.async_show_form(
+            step_id="edit_profile",
+            data_schema=vol.Schema({
+                vol.Required("profile"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=options,
+                        mode=selector.SelectSelectorMode.DROPDOWN
+                    )
+                )
+            })
+        )
+
+    async def async_step_rename_profile(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Rename the selected profile."""
+        errors = {}
+        
+        if user_input is not None:
+            new_name = user_input["new_name"].strip()
+            
+            if not new_name:
+                errors["new_name"] = "empty_name"
+            else:
+                manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+                try:
+                    count = await manager.profile_store.rename_profile(self._selected_profile, new_name)
+                    return self.async_create_entry(title="", data={})
+                except ValueError as e:
+                    errors["base"] = "rename_failed"
+        
+        return self.async_show_form(
+            step_id="rename_profile",
+            data_schema=vol.Schema({
+                vol.Required("new_name", default=self._selected_profile): str
+            }),
+            errors=errors,
+            description_placeholders={
+                "current_name": self._selected_profile
+            }
+        )
+
+    async def async_step_delete_profile_select(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Select profile to delete."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        profiles = store.list_profiles()
+        
+        if not profiles:
+            return self.async_abort(reason="no_profiles_found")
+        
+        if user_input is not None:
+            self._selected_profile = user_input["profile"]
+            return await self.async_step_delete_profile_confirm()
+        
+        # Build profile options
+        options = []
+        for p in profiles:
+            count = p["cycle_count"]
+            duration_min = int(p["avg_duration"] / 60) if p["avg_duration"] else 0
+            label = f"{p['name']} ({count} cycles, ~{duration_min}m avg)"
+            options.append(selector.SelectOptionDict(value=p["name"], label=label))
+        
+        return self.async_show_form(
+            step_id="delete_profile_select",
+            data_schema=vol.Schema({
+                vol.Required("profile"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=options,
+                        mode=selector.SelectSelectorMode.DROPDOWN
+                    )
+                )
+            })
+        )
+
+    async def async_step_delete_profile_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Confirm profile deletion."""
+        if user_input is not None:
+            unlabel = user_input["unlabel_cycles"]
+            manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+            count = await manager.profile_store.delete_profile(self._selected_profile, unlabel)
+            return self.async_create_entry(title="", data={})
+        
+        return self.async_show_form(
+            step_id="delete_profile_confirm",
+            data_schema=vol.Schema({
+                vol.Required("unlabel_cycles", default=True): bool
+            }),
+            description_placeholders={
+                "profile_name": self._selected_profile,
+                "warning": "⚠️ This will permanently delete the profile."
+            }
+        )
+
+    async def async_step_auto_label_cycles(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Auto-label unlabeled cycles retroactively."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        
+        # Check if there are any profiles to match against
+        profiles = store.list_profiles()
+        if not profiles:
+            return self.async_abort(reason="no_profiles_for_matching")
+        
+        # Count unlabeled cycles
+        unlabeled_count = sum(1 for c in store._data.get("past_cycles", []) if not c.get("profile"))
+        if unlabeled_count == 0:
+            return self.async_abort(reason="no_unlabeled_cycles")
+        
+        if user_input is not None:
+            threshold = user_input["confidence_threshold"]
+            stats = await store.auto_label_unlabeled_cycles(threshold)
+            return self.async_create_entry(
+                title="",
+                data={},
+            )
+        
+        return self.async_show_form(
+            step_id="auto_label_cycles",
+            data_schema=vol.Schema({
+                vol.Required("confidence_threshold", default=0.70): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0.50,
+                        max=0.95,
+                        step=0.05,
+                        mode=selector.NumberSelectorMode.SLIDER
+                    )
+                )
+            }),
+            description_placeholders={
+                "info": f"Found {unlabeled_count} unlabeled cycles. Profiles: {', '.join(p['name'] for p in profiles)}"
+            }
         )
 
     async def async_step_select_cycle_to_label(
@@ -193,7 +722,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             duration_min = int(c['duration']/60)
             prof = c.get("profile") or "Unlabeled"
             status = c.get("status", "completed")
-            status_icon = "✓" if status == "completed" else "⚠" if status == "resumed" else "✗"
+            # ✓ = completed/force_stopped (natural end), ⚠ = resumed, ✗ = interrupted (user stopped)
+            status_icon = "✓" if status in ("completed", "force_stopped") else "⚠" if status == "resumed" else "✗"
             label = f"[{status_icon}] {start} - {duration_min}m - {prof}"
             options.append(selector.SelectOptionDict(value=c["id"], label=label))
             
@@ -233,7 +763,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             duration_min = int(c['duration']/60)
             prof = c.get("profile") or "Unlabeled"
             status = c.get("status", "completed")
-            status_icon = "✓" if status == "completed" else "⚠" if status == "resumed" else "✗"
+            # ✓ = completed/force_stopped (natural end), ⚠ = resumed, ✗ = interrupted (user stopped)
+            status_icon = "✓" if status in ("completed", "force_stopped") else "⚠" if status == "resumed" else "✗"
             label = f"[{status_icon}] {start} - {duration_min}m - {prof}"
             options.append(selector.SelectOptionDict(value=c["id"], label=label))
             
@@ -262,18 +793,77 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_label_cycle(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Name the selected cycle."""
+        """Assign profile to the selected cycle."""
+        errors = {}
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        
         if user_input is not None:
-            name = user_input["profile_name"]
-            manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
-            await manager.profile_store.create_profile(name, self._selected_cycle_id)
-            return self.async_create_entry(title="", data={})
-
+            profile_choice = user_input["profile_name"]
+            
+            # Handle "create new" option
+            if profile_choice == "__create_new__":
+                new_name = user_input.get("new_profile_name", "").strip()
+                if not new_name:
+                    errors["new_profile_name"] = "empty_name"
+                else:
+                    try:
+                        # Create profile from this cycle
+                        await store.create_profile(new_name, self._selected_cycle_id)
+                        return self.async_create_entry(title="", data={})
+                    except ValueError:
+                        errors["base"] = "profile_exists"
+            elif profile_choice == "__remove_label__":
+                # Remove label from cycle
+                await store.assign_profile_to_cycle(self._selected_cycle_id, None)
+                return self.async_create_entry(title="", data={})
+            else:
+                # Assign existing profile
+                try:
+                    await store.assign_profile_to_cycle(self._selected_cycle_id, profile_choice)
+                    return self.async_create_entry(title="", data={})
+                except ValueError as e:
+                    errors["base"] = "assignment_failed"
+        
+        # Build profile dropdown options
+        profiles = store.list_profiles()
+        profile_options = [
+            selector.SelectOptionDict(value="__create_new__", label="➕ Create New Profile"),
+            selector.SelectOptionDict(value="__remove_label__", label="🗑️ Remove Label"),
+        ]
+        for p in profiles:
+            count = p["cycle_count"]
+            duration_min = int(p["avg_duration"] / 60) if p["avg_duration"] else 0
+            label = f"{p['name']} ({count} cycles, ~{duration_min}m)"
+            profile_options.append(selector.SelectOptionDict(value=p["name"], label=label))
+        
+        # Get cycle info for display
+        cycle = next((c for c in store._data.get("past_cycles", []) if c["id"] == self._selected_cycle_id), None)
+        cycle_info = ""
+        if cycle:
+            start = cycle["start_time"].split(".")[0].replace("T", " ")
+            duration_min = int(cycle['duration']/60)
+            current_label = cycle.get("profile") or "Unlabeled"
+            cycle_info = f"Cycle: {start}, {duration_min}m, Current: {current_label}"
+        
+        schema = {
+            vol.Required("profile_name", default="__create_new__" if not profiles else profiles[0]["name"]): 
+                selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=profile_options,
+                        mode=selector.SelectSelectorMode.DROPDOWN
+                    )
+                )
+        }
+        
+        # Add new profile name field (shown when "__create_new__" selected)
+        schema[vol.Optional("new_profile_name")] = str
+        
         return self.async_show_form(
             step_id="label_cycle",
-            data_schema=vol.Schema({
-                vol.Required("profile_name"): str
-            })
+            data_schema=vol.Schema(schema),
+            errors=errors,
+            description_placeholders={"cycle_info": cycle_info}
         )
 
     async def async_step_post_process(

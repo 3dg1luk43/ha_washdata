@@ -4,3 +4,4 @@ devtools/__pycache__
 mock_data
 custom_components/ha_washdata/__pycache__
 tests
+mqtt-mock.log
