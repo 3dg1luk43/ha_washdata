@@ -14,8 +14,8 @@ NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
 
 # Defaults
-DEFAULT_MIN_POWER = 5.0  # Watts
-DEFAULT_OFF_DELAY = 60  # Seconds
+DEFAULT_MIN_POWER = 2.0  # Watts
+DEFAULT_OFF_DELAY = 120  # Seconds (2 minutes, like proven automation)
 DEFAULT_NAME = "Washing Machine"
 
 # States
@@ -24,6 +24,12 @@ STATE_IDLE = "idle"
 STATE_RUNNING = "running"
 STATE_RINSE = "rinse"
 STATE_UNKNOWN = "unknown"
+
+# Cycle Status (how the cycle ended)
+CYCLE_STATUS_COMPLETED = "completed"
+CYCLE_STATUS_INTERRUPTED = "interrupted"  # User manually stopped
+CYCLE_STATUS_FORCE_STOPPED = "force_stopped"  # Watchdog/timeout forced end
+CYCLE_STATUS_RESUMED = "resumed"  # Cycle was restored from storage after restart
 
 # Storage
 STORAGE_VERSION = 1

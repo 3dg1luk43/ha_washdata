@@ -102,13 +102,22 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
         self.entity_description = SensorEntityDescription(
             key="time_remaining",
             name="Time Remaining",
-            native_unit_of_measurement="min",
+            # native_unit_of_measurement="min",  # Removed static unit
             icon="mdi:timer-sand"
         )
         super().__init__(manager, entry)
 
     @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit of measurement."""
+        if self._manager.check_state == "off":
+            return None
+        return "min"
+
+    @property
     def native_value(self):
+        if self._manager.check_state == "off":
+            return "off"
         if self._manager.time_remaining:
             return int(self._manager.time_remaining / 60)
         return None

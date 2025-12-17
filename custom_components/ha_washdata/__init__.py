@@ -45,7 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 raise ValueError("Integration not loaded for this device")
                 
             manager = hass.data[DOMAIN][entry_id]
-            manager.profile_store.create_profile(profile_name, cycle_id)
+            await manager.profile_store.create_profile(profile_name, cycle_id)
             
         hass.services.async_register(DOMAIN, "label_cycle", handle_label_cycle)
 

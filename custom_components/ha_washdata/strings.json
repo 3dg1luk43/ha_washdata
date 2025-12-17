@@ -23,7 +23,10 @@
       "init": {
         "menu_options": {
           "settings": "Settings",
-          "manage_profiles": "Manage Profiles"
+          "manage_profiles": "Manage Profiles",
+          "post_process": "Post-Process History",
+          "migrate_data": "Migrate Data Format",
+          "wipe_history": "Wipe History (Testing)"
         }
       },
       "settings": {
@@ -35,14 +38,45 @@
         }
       },
       "manage_profiles": {
+        "title": "Manage Cycles",
+        "description": "Choose an action to perform on your saved cycles.",
         "data": {
-          "cycle_id": "Select Cycle to Label"
+          "action": "Action"
+        }
+      },
+      "select_cycle_to_label": {
+        "title": "Select Cycle to Label",
+        "description": "✓ = completed, ⚠ = resumed, ✗ = interrupted",
+        "data": {
+          "cycle_id": "Cycle"
+        }
+      },
+      "select_cycle_to_delete": {
+        "title": "Delete Cycle",
+        "description": "⚠️ This will permanently delete the selected cycle",
+        "data": {
+          "cycle_id": "Cycle to Delete"
         }
       },
       "label_cycle": {
         "data": {
           "profile_name": "Profile Name"
         }
+      },
+      "post_process": {
+        "title": "Post-Process Cycle History",
+        "description": "Merge fragmented cycles (junk data) into single entries.",
+        "data": {
+          "time_range": "Time Window"
+        }
+      },
+      "migrate_data": {
+        "title": "Migrate Data Format",
+        "description": "Re-compress all saved cycle data to ensure it's in the latest format. This is safe and can be run multiple times."
+      },
+      "wipe_history": {
+        "title": "Wipe History (Testing Only)",
+        "description": "⚠️ This will permanently delete ALL stored cycles and profiles for this device. This cannot be undone!"
       }
     }
   }

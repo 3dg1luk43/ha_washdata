@@ -1,2 +1,4 @@
 deploy_to_ha.sh
 backups
+devtools/__pycache__
+mock_data
