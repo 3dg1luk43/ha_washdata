@@ -8,6 +8,8 @@
 - [Test 1: Cycle Duration Variance](#test-1-cycle-duration-variance)
 - [Test 2: Progress Management](#test-2-progress-management)
 - [Test 3: Learning Feedback System](#test-3-learning-feedback-system)
+- [Test 4: Cycle Status Classification](#test-4-cycle-status-classification)
+- [Test 5: Publish-on-Change Sockets](#test-5-publish-on-change-sockets)
 - [Mock Socket Reference](#mock-socket-reference)
 - [Debugging](#debugging)
 
@@ -124,7 +126,7 @@ grep -n "variance_factor" devtools/mqtt_mock_socket.py
 # 1. Mock socket: ±15% to simulated cycle durations
 # 2. Profile matching: ±25% tolerance for duration matching
 
-# Check profile matching tolerance:
+# Check profile matching tolerance (±25%):
 grep -n "0.75\|1.25" custom_components/ha_washdata/profile_store.py
 ```
 
@@ -437,6 +439,64 @@ sensor.washdata_learning_stats:
 
 ---
 
+  ## Test 4: Cycle Status Classification
+
+  ### Goal
+
+  Verify that natural finishes show ✓ (completed or force_stopped) and abnormal endings show ✗ (interrupted).
+
+  ### Steps
+
+  1. Normal completion (✓ completed):
+    - Run a normal cycle with the mock socket (e.g., LONG) and let it finish.
+    - Verify status in logs/diagnostics shows `status: completed`.
+
+  2. Watchdog finish while low-power waiting (✓ force_stopped):
+    - Stop mock publishing right after entering low-power wait phase.
+    - Ensure no updates for ≥ `off_delay`; the manager will call `force_end()`.
+    - Verify status shows `status: force_stopped` (treated as ✓ in UI).
+
+  3. Interrupted (✗ interrupted):
+    - Start a cycle, then abruptly cut power to 0W early (e.g., after ~60s).
+    - Or use a fault profile (e.g., `LONG_INCOMPLETE`) and stop updates before low-power wait.
+    - Verify status shows `status: interrupted`.
+
+  ### Verify
+
+  ```bash
+  grep -i "status:\|force_end\|interrupted" /config/home-assistant.log
+  ```
+
+  Expected lines:
+  - `status: completed` or `status: force_stopped` for ✓ cases
+  - `status: interrupted` for abnormal endings
+
+  ---
+
+  ## Test 5: Publish-on-Change Sockets
+
+  ### Goal
+
+  Validate watchdog behavior with devices that publish every ~60s and pause when values are steady.
+
+  ### Steps
+
+  1. Configure `no_update_active_timeout` (e.g., 600s) in Options.
+  2. Run a cycle and simulate 60s publishing intervals (`--sample 60`).
+  3. During an active phase, pause updates for < `no_update_active_timeout` (e.g., 5 minutes when timeout is 10 minutes).
+  4. Confirm the cycle is NOT force-ended while power is still high.
+  5. Enter low-power wait and pause updates for ≥ `off_delay`; confirm the cycle is completed (✓) even without new publishes.
+
+  ### Verify
+
+  ```bash
+  grep -i "watchdog\|no_update_active_timeout\|low-power wait" /config/home-assistant.log
+  ```
+
+  Expected behavior:
+  - Active but no updates < timeout → no force-end.
+  - Low-power wait ≥ off_delay without updates → natural completion (✓).
+
 ## Mock Socket Reference
 
 ### Quick Start
@@ -489,6 +549,8 @@ Append suffixes to cycle types to simulate real-world failures:
 | `_GLITCH` | `MEDIUM_GLITCH` | Power noise/spikes | Smoothing filter |
 | `_STUCK` | `SHORT_STUCK` | Phase loops | Forced cycle end |
 | `_INCOMPLETE` | `LONG_INCOMPLETE` | Never finishes | Stale detection |
+
+Note: The examples above use both a generic topic (e.g., `home/laundry/power`) and the mock's command topic (`homeassistant/mock_washer_power/cmd`). Adjust topics to match your environment.
 
 **Usage:**
 ```bash

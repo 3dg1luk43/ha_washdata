@@ -19,15 +19,24 @@ _LOGGER = logging.getLogger(__name__)
 class ProfileStore:
     """Manages storage of washer profiles and past cycles."""
 
-    def __init__(self, hass: HomeAssistant, entry_id: str) -> None:
+    def __init__(
+        self, 
+        hass: HomeAssistant, 
+        entry_id: str,
+        min_duration_ratio: float = 0.50,
+        max_duration_ratio: float = 1.50,
+    ) -> None:
         """Initialize the profile store."""
         self.hass = hass
         self.entry_id = entry_id
+        self._min_duration_ratio = min_duration_ratio
+        self._max_duration_ratio = max_duration_ratio
         # Separate store for each entry to avoid giant files
         self._store = Store(hass, STORAGE_VERSION, f"{STORAGE_KEY}.{entry_id}")
         self._data: dict[str, Any] = {
             "profiles": {},
-            "past_cycles": []
+            "past_cycles": [],
+            "envelopes": {},  # Cached statistical envelopes per profile
         }
 
     async def async_load(self) -> None:
@@ -80,44 +89,45 @@ class ProfileStore:
         
         cycle_data["profile"] = None  # Initially unknown
         
-        # Compress power data (Smart Downsampling + Relative Time)
-        # Convert to [seconds_offset, power] to save massive space (recoverable)
+        # Store power data at native sampling resolution
+        # Format: [seconds_offset, power] preserves actual sample rate from device
+        # (e.g., 3s intervals from test socket, 60s intervals from real socket)
         raw_data = cycle_data.get("power_data", [])
-        _LOGGER.debug(f"add_cycle: raw_data has {len(raw_data)} points, first={raw_data[0] if raw_data else 'none'}")
+        _LOGGER.debug(f"add_cycle: raw_data has {len(raw_data)} points")
+        
         if raw_data:
             start_ts = datetime.fromisoformat(cycle_data["start_time"]).timestamp()
-            compressed = []
+            stored = []
+            offsets = []
             
             # Helper to parse time
             def get_ts(item):
-                # item is [iso_str, power] (usually)
                 if isinstance(item[0], str):
                     return datetime.fromisoformat(item[0]).timestamp()
-                return float(item[0]) # Start timestamp relative? No, usually iso.
+                return float(item[0])
 
-            last_saved_p = -999.0
-            last_saved_t = -999.0
-            
-            for i, point in enumerate(raw_data):
+            for point in raw_data:
                 t_val = get_ts(point)
                 p_val = point[1]
                 
-                # Relative offset rounded to 1 decimal place
+                # Store as [offset_seconds, power] for consistency
                 offset = round(t_val - start_ts, 1)
-                
-                # Save first and last point always
-                is_endpoint = (i == 0 or i == len(raw_data) - 1)
-                
-                # Filter: Only save if power changed > 1.0W OR time gap > 60s
-                # AND always save endpoints
-                if is_endpoint or abs(p_val - last_saved_p) > 1.0 or (offset - last_saved_t) > 60:
-                    # Append [offset, power]
-                    compressed.append([offset, round(p_val, 1)])
-                    last_saved_p = p_val
-                    last_saved_t = offset
+                offsets.append(offset)
+                stored.append([offset, round(p_val, 1)])
             
-            _LOGGER.debug(f"add_cycle: compressed to {len(compressed)} points, first={compressed[0] if compressed else 'none'}")
-            cycle_data["power_data"] = compressed
+            # Calculate average sampling interval (in seconds)
+            if len(offsets) > 1:
+                intervals = np.diff(offsets)
+                sampling_interval = float(np.median(intervals[intervals > 0]))
+            else:
+                sampling_interval = 1.0  # Default fallback
+            
+            cycle_data["power_data"] = stored
+            cycle_data["sampling_interval"] = round(sampling_interval, 1)
+            
+            _LOGGER.debug(
+                f"add_cycle: stored {len(stored)} samples at {sampling_interval:.1f}s intervals"
+            )
 
         self._data["past_cycles"].append(cycle_data)
         # Keep last 50 cycles
@@ -125,21 +135,185 @@ class ProfileStore:
              self._data["past_cycles"].pop(0)
 
     def delete_cycle(self, cycle_id: str) -> bool:
-        """Delete a cycle by ID. Returns True if deleted, False if not found."""
+        """Delete a cycle by ID. Returns True if deleted, False if not found.
+        Also removes any profiles that reference this cycle."""
         cycles = self._data["past_cycles"]
         for i, cycle in enumerate(cycles):
             if cycle.get("id") == cycle_id:
                 cycles.pop(i)
+                # Clean up any profiles referencing this cycle
+                orphaned_profiles = [
+                    name for name, profile in self._data["profiles"].items()
+                    if profile.get("sample_cycle_id") == cycle_id
+                ]
+                for name in orphaned_profiles:
+                    del self._data["profiles"][name]
+                    _LOGGER.info(f"Removed orphaned profile '{name}' (referenced deleted cycle {cycle_id})")
                 _LOGGER.info(f"Deleted cycle {cycle_id}")
                 return True
         _LOGGER.warning(f"Cycle {cycle_id} not found for deletion")
         return False
+
+    def cleanup_orphaned_profiles(self) -> int:
+        """Remove profiles that reference non-existent cycles.
+        Returns number of profiles removed."""
+        cycle_ids = {c["id"] for c in self._data.get("past_cycles", [])}
+        orphaned = [
+            name for name, profile in self._data["profiles"].items()
+            if profile.get("sample_cycle_id") not in cycle_ids
+        ]
+        
+        for name in orphaned:
+            del self._data["profiles"][name]
+            _LOGGER.info(f"Cleaned up orphaned profile '{name}' (cycle no longer exists)")
+        
+        return len(orphaned)
+
+    async def async_run_maintenance(self, lookback_hours: int = 24, gap_seconds: int = 1800) -> dict[str, int]:
+        """Run full maintenance: cleanup orphans, merge fragments, trim old cycles, rebuild envelopes.
+        Returns stats dict with counts of actions taken."""
+        stats = {
+            "orphaned_profiles": 0,
+            "merged_cycles": 0,
+            "rebuilt_envelopes": 0,
+        }
+        
+        # 1. Clean up orphaned profiles
+        stats["orphaned_profiles"] = self.cleanup_orphaned_profiles()
+        
+        # 2. Merge fragmented cycles (recent history)
+        stats["merged_cycles"] = self.merge_cycles(hours=lookback_hours, gap_threshold=gap_seconds)
+        
+        # 3. Rebuild all envelopes (they may be stale after merges/deletions)
+        stats["rebuilt_envelopes"] = self.rebuild_all_envelopes()
+        
+        # 4. Save if any changes made
+        if any(stats.values()):
+            await self.async_save()
+            _LOGGER.info(f"Maintenance completed: {stats}")
+        
+        return stats
+
+    def rebuild_all_envelopes(self) -> int:
+        """Rebuild envelopes for all profiles. Returns count of envelopes rebuilt."""
+        count = 0
+        for profile_name in list(self._data["profiles"].keys()):
+            if self.rebuild_envelope(profile_name):
+                count += 1
+        return count
+
+    def rebuild_envelope(self, profile_name: str) -> bool:
+        """
+        Build/rebuild statistical envelope for a profile from all labeled cycles.
+        
+        Creates min/max/avg/std power curves by normalizing all cycles to same
+        TIME DURATION (not sample count), accounting for different sampling rates
+        (e.g., 3s intervals vs 60s intervals).
+        
+        Returns True if envelope was built, False if insufficient data.
+        """
+        # Get ALL completed cycles labeled with this profile
+        labeled_cycles = [
+            c for c in self._data["past_cycles"]
+            if c.get("profile_name") == profile_name and c.get("status") in ("completed", "force_stopped")
+        ]
+        
+        if not labeled_cycles or len(labeled_cycles) < 1:
+            # Clear envelope if it exists
+            if profile_name in self._data.get("envelopes", {}):
+                del self._data["envelopes"][profile_name]
+            return False
+        
+        # Extract and normalize all power curves
+        normalized_curves = []
+        sampling_rates = []
+        
+        for cycle in labeled_cycles:
+            power_data = cycle.get("power_data", [])
+            if not power_data or len(power_data) < 3:
+                continue
+            
+            # Extract power values from [offset, power] pairs
+            offsets = np.array([o for o, _ in power_data])
+            values = np.array([p for _, p in power_data])
+            
+            if len(values) >= 3:
+                # Use TIME as x-axis, not sample index
+                # This accounts for different sampling rates (3s vs 60s intervals)
+                normalized_curves.append((offsets, values))
+                
+                # Track sampling interval for diagnostics
+                if len(offsets) > 1:
+                    intervals = np.diff(offsets)
+                    sampling_rate = float(np.median(intervals[intervals > 0]))
+                    sampling_rates.append(sampling_rate)
+        
+        if not normalized_curves:
+            if profile_name in self._data.get("envelopes", {}):
+                del self._data["envelopes"][profile_name]
+            return False
+        
+        # Find common time range (0 to max_time_duration)
+        max_times = [offsets[-1] for offsets, _ in normalized_curves]
+        target_duration = np.median(max_times)  # Use median duration
+        
+        # Resample all curves to same TIME axis
+        # Create uniform time grid from 0 to target_duration
+        num_points = max(50, int(target_duration / np.median(sampling_rates)))  # ~50-300 points
+        time_grid = np.linspace(0, target_duration, num_points)
+        
+        resampled = []
+        for offsets, values in normalized_curves:
+            # Interpolate this cycle to the common time grid
+            curve_resampled = np.interp(time_grid, offsets, values)
+            resampled.append(curve_resampled)
+        
+        # Stack into 2D array and calculate statistics
+        curves_array = np.array(resampled)
+        
+        envelope = {
+            "min": np.min(curves_array, axis=0).tolist(),
+            "max": np.max(curves_array, axis=0).tolist(),
+            "avg": np.mean(curves_array, axis=0).tolist(),
+            "std": np.std(curves_array, axis=0).tolist(),
+            "time_grid": time_grid.tolist(),  # Store time axis for reference
+            "cycle_count": len(resampled),
+            "target_duration": float(target_duration),
+            "sampling_rates": list(sampling_rates),
+            "updated_at": datetime.now().isoformat(),
+        }
+        
+        # Cache in storage
+        if "envelopes" not in self._data:
+            self._data["envelopes"] = {}
+        self._data["envelopes"][profile_name] = envelope
+        
+        avg_sample_rate = np.median(sampling_rates) if sampling_rates else 1.0
+        _LOGGER.debug(
+            f"Rebuilt envelope for '{profile_name}': {len(resampled)} cycles, "
+            f"duration={target_duration:.0f}s, avg_sample_rate={avg_sample_rate:.1f}s, "
+            f"normalized_to={num_points} time-aligned points"
+        )
+        
+        _LOGGER.debug(
+            f"Built envelope for '{profile_name}': {len(resampled)} cycles, "
+            f"length={target_length}, avg_power={np.mean(envelope['avg']):.1f}W"
+        )
+        
+        return True
+
+    def get_envelope(self, profile_name: str) -> dict | None:
+        """Get cached envelope for a profile, or None if not available."""
+        return self._data.get("envelopes", {}).get(profile_name)
 
     def match_profile(self, current_power_data: list[tuple[str, float]], current_duration: float) -> tuple[str | None, float]:
         """
         Attempt to match current running cycle to a known profile using NumPy.
         Returns (profile_name, confidence).
         Prefers complete cycles over interrupted ones.
+        
+        Note: Both current and stored sample cycles are full-resolution uncompressed,
+        ensuring fair apples-to-apples comparison.
         """
         if not current_power_data or len(current_power_data) < 10:
             return (None, 0.0)
@@ -158,43 +332,38 @@ class ProfileStore:
             if not sample_cycle:
                 continue
             
-            # Handle both compressed [offset, power] and old [iso_timestamp, power] formats
+            # Extract power values from [offset, power] pairs (full resolution)
             sample_data = sample_cycle["power_data"]
             if not sample_data:
                 continue
             
-            # Check format by inspecting first element
-            if isinstance(sample_data[0][0], (int, float)):
-                # Compressed format: [offset_seconds, power]
-                sample_values = np.array([p for _, p in sample_data])
-            else:
-                # Old format: [iso_timestamp, power]
-                sample_values = np.array([p for _, p in sample_data])
+            sample_values = np.array([p for _, p in sample_data])
             
             if len(sample_values) == 0:
                 continue
 
-            # Check duration mismatch - reject if too different from profile's expected duration
-            # Allow ±25% variance to account for load-dependent cycle duration variation
-            # (real washers vary by 10-20% depending on clothes load, water temp, soil level, etc.)
+            # Check duration mismatch for running cycles
+            # For running cycles, we need more lenient matching since we don't know final duration
+            # Use configurable duration range (default: 50%-150% of profile duration)
             profile_duration = profile.get("avg_duration", sample_cycle.get("duration", 0))
             if profile_duration > 0:
                 duration_ratio = current_duration / profile_duration
-                # Allow 75% to 125% of profile duration (increased from 50-150%)
-                if duration_ratio < 0.75 or duration_ratio > 1.25:
+                if duration_ratio < self._min_duration_ratio or duration_ratio > self._max_duration_ratio:
+                    _LOGGER.debug(f"Profile {name}: duration mismatch (current={current_duration:.0f}s, expected={profile_duration:.0f}s, ratio={duration_ratio:.2f}, range={self._min_duration_ratio:.2f}-{self._max_duration_ratio:.2f})")
                     continue
 
             # Calculate similarity
             score = self._calculate_similarity(current_values, sample_values)
+            _LOGGER.debug(f"Profile {name}: similarity={score:.3f} (samples: current={len(current_values)}, sample={len(sample_values)})")
             
             # Apply status penalty: prefer complete cycles
             status = sample_cycle.get("status", "completed")
-            if status == "completed":
-                score *= 1.0  # No penalty
+            if status in ("completed", "force_stopped"):
+                score *= 1.0  # No penalty (both are natural completions)
             elif status == "resumed":
                 score *= 0.85  # 15% penalty for resumed
-            elif status in ("interrupted", "force_stopped"):
-                score *= 0.7  # 30% penalty for interrupted/stopped
+            elif status == "interrupted":
+                score *= 0.7  # 30% penalty for interrupted (user stopped)
             
             if score > best_score:
                 best_score = score
@@ -271,9 +440,175 @@ class ProfileStore:
         # Save to persist the label
         await self.async_save()
 
+    def list_profiles(self) -> list[dict[str, Any]]:
+        """List all profiles with metadata."""
+        profiles = []
+        for name, data in self._data.get("profiles", {}).items():
+            # Count cycles using this profile
+            cycle_count = sum(1 for c in self._data.get("past_cycles", []) if c.get("profile") == name)
+            profiles.append({
+                "name": name,
+                "avg_duration": data.get("avg_duration", 0),
+                "sample_cycle_id": data.get("sample_cycle_id"),
+                "cycle_count": cycle_count,
+            })
+        return sorted(profiles, key=lambda p: p["name"])
+
+    async def create_profile_standalone(self, name: str, reference_cycle_id: str = None) -> None:
+        """Create a profile without immediately labeling a cycle.
+        If reference_cycle_id is provided, use that cycle's characteristics."""
+        if name in self._data.get("profiles", {}):
+            raise ValueError(f"Profile '{name}' already exists")
+        
+        profile_data = {}
+        if reference_cycle_id:
+            cycle = next((c for c in self._data["past_cycles"] if c["id"] == reference_cycle_id), None)
+            if cycle:
+                profile_data = {
+                    "avg_duration": cycle["duration"],
+                    "sample_cycle_id": reference_cycle_id
+                }
+        
+        # Create profile with minimal data (will be updated when cycles are labeled)
+        self._data.setdefault("profiles", {})[name] = profile_data
+        await self.async_save()
+        _LOGGER.info(f"Created standalone profile '{name}'")
+
+    async def rename_profile(self, old_name: str, new_name: str) -> int:
+        """Rename a profile and update all cycles using it.
+        Returns number of cycles updated."""
+        if old_name not in self._data.get("profiles", {}):
+            raise ValueError(f"Profile '{old_name}' not found")
+        if new_name in self._data.get("profiles", {}):
+            raise ValueError(f"Profile '{new_name}' already exists")
+        
+        # Rename in profiles dict
+        self._data["profiles"][new_name] = self._data["profiles"].pop(old_name)
+        
+        # Update all cycles
+        count = 0
+        for cycle in self._data.get("past_cycles", []):
+            if cycle.get("profile") == old_name:
+                cycle["profile"] = new_name
+                count += 1
+        
+        await self.async_save()
+        _LOGGER.info(f"Renamed profile '{old_name}' to '{new_name}', updated {count} cycles")
+        return count
+
+    async def delete_profile(self, name: str, unlabel_cycles: bool = True) -> int:
+        """Delete a profile.
+        If unlabel_cycles=True, removes profile label from cycles.
+        If unlabel_cycles=False, cycles keep the label (orphaned).
+        Returns number of cycles affected."""
+        if name not in self._data.get("profiles", {}):
+            raise ValueError(f"Profile '{name}' not found")
+        
+        # Delete profile
+        del self._data["profiles"][name]
+        
+        # Handle cycles
+        count = 0
+        for cycle in self._data.get("past_cycles", []):
+            if cycle.get("profile") == name:
+                if unlabel_cycles:
+                    cycle["profile"] = None
+                count += 1
+        
+        await self.async_save()
+        action = "unlabeled" if unlabel_cycles else "orphaned"
+        _LOGGER.info(f"Deleted profile '{name}', {action} {count} cycles")
+        return count
+
+    async def assign_profile_to_cycle(self, cycle_id: str, profile_name: str) -> None:
+        """Assign an existing profile to a cycle. Rebuilds envelope."""
+        old_profile = None
+        cycle = next((c for c in self._data["past_cycles"] if c["id"] == cycle_id), None)
+        if not cycle:
+            raise ValueError(f"Cycle {cycle_id} not found")
+        
+        # Track old profile for envelope rebuild
+        old_profile = cycle.get("profile_name")
+        
+        if profile_name and profile_name not in self._data.get("profiles", {}):
+            raise ValueError(f"Profile '{profile_name}' not found. Create it first.")
+        
+        # Update cycle
+        cycle["profile_name"] = profile_name if profile_name else None
+        
+        # Update profile metadata if this is the first cycle
+        if profile_name:
+            profile = self._data["profiles"][profile_name]
+            if not profile.get("sample_cycle_id"):
+                profile["sample_cycle_id"] = cycle_id
+                profile["avg_duration"] = cycle["duration"]
+        
+        # Rebuild envelopes for affected profiles
+        if old_profile and old_profile != profile_name:
+            self.rebuild_envelope(old_profile)  # Old profile lost a cycle
+        if profile_name:
+            self.rebuild_envelope(profile_name)  # New profile gained a cycle
+        
+        await self.async_save()
+        _LOGGER.info(f"Assigned profile '{profile_name}' to cycle {cycle_id}")
+
+    async def auto_label_unlabeled_cycles(self, confidence_threshold: float = 0.7) -> dict[str, int]:
+        """Retroactively auto-label unlabeled cycles using profile matching.
+        Returns stats: {labeled: int, skipped: int, total: int}"""
+        stats = {"labeled": 0, "skipped": 0, "total": 0}
+        
+        unlabeled = [c for c in self._data.get("past_cycles", []) if not c.get("profile")]
+        stats["total"] = len(unlabeled)
+        
+        for cycle in unlabeled:
+            # Reconstruct power data for matching
+            power_data = self._decompress_power_data(cycle)
+            if not power_data or len(power_data) < 10:
+                stats["skipped"] += 1
+                continue
+            
+            # Try to match
+            matched_profile, confidence = self.match_profile(power_data, cycle["duration"])
+            
+            if matched_profile and confidence >= confidence_threshold:
+                cycle["profile"] = matched_profile
+                stats["labeled"] += 1
+                _LOGGER.info(f"Auto-labeled cycle {cycle['id']} as '{matched_profile}' (confidence: {confidence:.2f})")
+            else:
+                stats["skipped"] += 1
+        
+        if stats["labeled"] > 0:
+            await self.async_save()
+        
+        _LOGGER.info(f"Auto-labeling complete: {stats['labeled']} labeled, {stats['skipped']} skipped")
+        return stats
+
+    def _decompress_power_data(self, cycle: dict) -> list[tuple[str, float]]:
+        """Decompress cycle power data for matching."""
+        compressed = cycle.get("power_data", [])
+        if not compressed:
+            return []
+        
+        start_time = datetime.fromisoformat(cycle["start_time"])
+        result = []
+        
+        for item in compressed:
+            if isinstance(item, (list, tuple)) and len(item) == 2:
+                offset_seconds, power = item
+                timestamp = (start_time.timestamp() + offset_seconds)
+                result.append((datetime.fromtimestamp(timestamp).isoformat(), power))
+        
+        return result
+
     async def async_save_cycle(self, cycle_data: dict[str, Any]) -> None:
-        """Add and save a cycle."""
+        """Add and save a cycle. Rebuilds envelope if cycle is labeled."""
         self.add_cycle(cycle_data)
+        
+        # If cycle has a profile, rebuild that profile's envelope
+        profile_name = cycle_data.get("profile_name")
+        if profile_name:
+            self.rebuild_envelope(profile_name)
+        
         await self.async_save()
 
     async def async_migrate_cycles_to_compressed(self) -> int:
@@ -442,3 +777,38 @@ class ProfileStore:
                 i += 1
                 
         return merged_count
+
+    def export_data(self, entry_data: dict = None, entry_options: dict = None) -> dict[str, Any]:
+        """Return a serializable snapshot of the store for backup/export.
+        Includes config entry data/options so users can transfer fine-tuned settings."""
+        return {
+            "version": STORAGE_VERSION,
+            "entry_id": self.entry_id,
+            "exported_at": datetime.now().isoformat(),
+            "data": self._data,
+            "entry_data": entry_data or {},
+            "entry_options": entry_options or {},
+        }
+
+    async def async_import_data(self, payload: dict[str, Any]) -> dict[str, dict]:
+        """Load store data from an export payload and persist it.
+        Returns dict with 'entry_data' and 'entry_options' keys for updating the config entry."""
+        if not isinstance(payload, dict):
+            raise ValueError("Invalid export payload (not a dict)")
+
+        data = payload.get("data")
+        if not isinstance(data, dict):
+            raise ValueError("Invalid export payload (missing data)")
+
+        # Basic shape repair to avoid key errors
+        data.setdefault("profiles", {})
+        data.setdefault("past_cycles", [])
+
+        self._data = data
+        await self.async_save()
+        
+        # Return config data/options for caller to apply
+        return {
+            "entry_data": payload.get("entry_data", {}),
+            "entry_options": payload.get("entry_options", {}),
+        }

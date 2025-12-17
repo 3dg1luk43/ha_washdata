@@ -1,6 +1,6 @@
 label_cycle:
   name: Label Cycle
-  description: Assign a profile name to a past cycle.
+  description: Assign an existing profile to a past cycle, or remove the label.
   fields:
     device_id:
       name: Device
@@ -17,7 +17,112 @@ label_cycle:
         text:
     profile_name:
       name: Profile Name
-      description: The name of the profile (e.g. Cotton 60).
+      description: The name of an existing profile (create profiles in Manage Profiles menu). Leave blank to remove label.
+      required: false
+      selector:
+        text:
+
+create_profile:
+  name: Create Profile
+  description: Create a new profile (standalone or based on a reference cycle).
+  fields:
+    device_id:
+      name: Device
+      description: The washing machine device.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+    profile_name:
+      name: Profile Name
+      description: Name for the new profile (e.g. "Heavy Duty", "Delicates").
+      required: true
+      selector:
+        text:
+    reference_cycle_id:
+      name: Reference Cycle ID
+      description: Optional cycle ID to base this profile on.
+      required: false
+      selector:
+        text:
+
+delete_profile:
+  name: Delete Profile
+  description: Delete a profile and optionally unlabel cycles using it.
+  fields:
+    device_id:
+      name: Device
+      description: The washing machine device.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+    profile_name:
+      name: Profile Name
+      description: The profile to delete.
+      required: true
+      selector:
+        text:
+    unlabel_cycles:
+      name: Unlabel Cycles
+      description: Remove profile label from cycles using this profile.
+      required: false
+      default: true
+      selector:
+        boolean:
+
+auto_label_cycles:
+  name: Auto-Label Old Cycles
+  description: Retroactively label unlabeled cycles using profile matching.
+  fields:
+    device_id:
+      name: Device
+      description: The washing machine device.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+    confidence_threshold:
+      name: Confidence Threshold
+      description: Minimum match confidence (0.50-0.95) to apply labels.
+      required: false
+      default: 0.70
+      selector:
+        number:
+          min: 0.50
+          max: 0.95
+          step: 0.05
+  name: Export Config
+  description: Export this washer's profiles and cycles to a JSON file (per device).
+  fields:
+    device_id:
+      name: Device
+      description: The washing machine device to export.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+    path:
+      name: Path
+      description: Optional absolute file path to write (defaults to /config/ha_washdata_export_<entry>.json).
+      required: false
+      selector:
+        text:
+
+import_config:
+  name: Import Config
+  description: Import profiles and cycles for this washer from a JSON export file.
+  fields:
+    device_id:
+      name: Device
+      description: The washing machine device to import into.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+    path:
+      name: Path
+      description: Absolute path to the export JSON file to import.
       required: true
       selector:
         text:

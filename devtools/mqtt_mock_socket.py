@@ -12,6 +12,7 @@ Usage
 - In HA, enable MQTT autodiscovery. Entities appear as `sensor.mock_washer_power` and `switch.mock_washer_power`.
 - Toggle the switch ON (or publish `ON`) to start the default cycle. Publish `LONG`, `MEDIUM`, `SHORT` to pick cycle type (~2:39, ~1:30, ~0:45 wall-time).
 - Publish `LONG_DROPOUT`, `MEDIUM_GLITCH`, `SHORT_STUCK` for fault scenarios.
+- For continuous test data generation while away, use: `--continuous --interval 110 --cycle-sequence LONG,MEDIUM,SHORT`
 - OFF aborts and returns to 0 W.
 
 Failure modes:
@@ -36,6 +37,7 @@ import ssl
 import threading
 import time
 from typing import List, Tuple
+import logging
 
 import paho.mqtt.client as mqtt
 
@@ -110,6 +112,10 @@ PHASESETS: dict[str, List[Tuple[int, float]]] = {
 }
 
 
+# Set up module logger; configured in main()
+logger = logging.getLogger(__name__)
+
+
 def publish_discovery(client: mqtt.Client, retain: bool = True) -> None:
     """Publish HA autodiscovery configs."""
     device = {
@@ -166,7 +172,7 @@ def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter
     total_base = sum(d for d, _ in base_phases)
     total_var = sum(d for d, _ in phases)
     variance_pct = ((total_var - total_base) / total_base) * 100 if total_base > 0 else 0
-    print(f"[VARIANCE] Applied {variance_pct:+.1f}% duration variance (factor: {variance_factor:.2f}x)")
+    logger.info(f"[VARIANCE] Applied {variance_pct:+.1f}% duration variance (factor: {variance_factor:.2f}x)")
     
     phase_idx = 0
     total_phases = len(phases)
@@ -181,16 +187,16 @@ def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter
         
         # Simulate dropout: go offline mid-cycle (around 60% through)
         if is_dropout and phase_idx == int(total_phases * 0.6):
-            print(f"[DROPOUT] Going offline for {int(sample_real * 3)} seconds...")
+            logger.warning(f"[DROPOUT] Going offline for {int(sample_real * 3)} seconds...")
             client.publish(AVAIL_TOPIC, "offline", retain=True)
             time.sleep((sample_real * 3) / speedup)
             client.publish(AVAIL_TOPIC, "online", retain=True)
-            print("[DROPOUT] Reconnected, resuming cycle")
+            logger.info("[DROPOUT] Reconnected, resuming cycle")
             continue
         
         # Simulate stuck phase: loop forever on this phase (until user stops)
         if is_stuck and phase_idx == int(total_phases * 0.5):
-            print(f"[STUCK] Phase {phase_idx} stuck, publishing {power}W repeatedly...")
+            logger.warning(f"[STUCK] Phase {phase_idx} stuck, publishing {power}W repeatedly...")
             stuck_time = 0
             max_stuck = 5  # Loop for 5 iterations then move on
             for _ in range(max_stuck):
@@ -203,7 +209,7 @@ def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter
                     client.publish(SENSOR_STATE_TOPIC, f"{max(0.0, power + noise):.1f}", retain=False)
                     time.sleep(sleep_wall)
                 stuck_time += 1
-            print(f"[STUCK] Unstuck after {stuck_time} loops, continuing")
+            logger.info(f"[STUCK] Unstuck after {stuck_time} loops, continuing")
             continue
         
         # Normal phase with optional glitches
@@ -217,10 +223,10 @@ def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter
                 glitch_type = random.choice(["dip", "spike"])
                 if glitch_type == "dip":
                     client.publish(SENSOR_STATE_TOPIC, "0.0", retain=False)
-                    print(f"[GLITCH] Power dip at phase {phase_idx}")
+                    logger.info(f"[GLITCH] Power dip at phase {phase_idx}")
                 else:
                     client.publish(SENSOR_STATE_TOPIC, f"{power * 1.3:.1f}", retain=False)
-                    print(f"[GLITCH] Power spike at phase {phase_idx}")
+                    logger.info(f"[GLITCH] Power spike at phase {phase_idx}")
                 time.sleep(sleep_wall * 0.5)
             
             noise = random.uniform(-jitter, jitter) if jitter > 0 else 0.0
@@ -229,12 +235,12 @@ def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter
     
     # For incomplete cycles, stop publishing and leave sensor hanging
     if is_incomplete:
-        print("[INCOMPLETE] Cycle incomplete - freezing at current state instead of finishing")
+        logger.warning("[INCOMPLETE] Cycle incomplete - freezing at current state instead of finishing")
         return
     
     # Finish with 0 power
     client.publish(SENSOR_STATE_TOPIC, "0", retain=False)
-    print("[CYCLE] Finished normally")
+    logger.info("[CYCLE] Finished normally")
 
 
 def main() -> None:
@@ -266,6 +272,9 @@ Fault injection (publish to switch):
     parser.add_argument("--target_sleep", type=float, default=0.5, help="Target wall-clock sleep per sample in seconds when --wall is set")
     parser.add_argument("--jitter", type=float, default=15.0, help="Random watt jitter per sample (±W)")
     parser.add_argument("--default", choices=list(PHASESETS.keys()), default="LONG", help="Default cycle type when command is ON")
+    parser.add_argument("--continuous", action="store_true", help="Continuously run cycles at specified interval instead of waiting for commands")
+    parser.add_argument("--interval", type=int, default=110, help="Minutes between cycle starts in continuous mode (default: 110)")
+    parser.add_argument("--cycle-sequence", default="LONG,MEDIUM,SHORT", help="Comma-separated list of cycle types to cycle through (default: LONG,MEDIUM,SHORT)")
     args = parser.parse_args()
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
@@ -296,11 +305,11 @@ Fault injection (publish to switch):
             cycle_type = args.default
             with running_lock:
                 if running["flag"]:
-                    print("Cycle already running, ignoring")
+                    logger.info("Cycle already running, ignoring")
                     return
                 running["flag"] = True
             _client.publish(STATE_TOPIC, cycle_type, retain=True)
-            print(f"Starting cycle: {cycle_type}")
+            logger.info(f"Starting cycle: {cycle_type}")
             threading.Thread(
                 target=run_cycle_thread,
                 args=(_client, cycle_type),
@@ -312,16 +321,16 @@ Fault injection (publish to switch):
                 running["flag"] = False
             _client.publish(STATE_TOPIC, "OFF", retain=True)
             _client.publish(SENSOR_STATE_TOPIC, "0", retain=False)
-            print("Cycle stopped")
+            logger.info("Cycle stopped")
         elif cycle_type:
             # Direct cycle type command (e.g., LONG, LONG_DROPOUT)
             with running_lock:
                 if running["flag"]:
-                    print("Cycle already running, ignoring")
+                    logger.info("Cycle already running, ignoring")
                     return
                 running["flag"] = True
             _client.publish(STATE_TOPIC, cycle_type, retain=True)
-            print(f"Starting cycle: {cycle_type}")
+            logger.info(f"Starting cycle: {cycle_type}")
             threading.Thread(
                 target=run_cycle_thread,
                 args=(_client, cycle_type),
@@ -383,30 +392,70 @@ Fault injection (publish to switch):
     client.publish(STATE_TOPIC, "OFF", retain=True)
     client.publish(SENSOR_STATE_TOPIC, "0", retain=False)
 
-    print("\n" + "="*70)
-    print("MQTT Mock Washer Socket - Ready for Testing")
-    print("="*70)
-    print(f"Connected to MQTT: {args.host}:{args.port}")
+    logger.info("\n" + "="*70)
+    logger.info("MQTT Mock Washer Socket - Ready for Testing")
+    logger.info("="*70)
+    logger.info(f"Connected to MQTT: {args.host}:{args.port}")
     if args.wall:
         # Show the effective timing for the default cycle (actual used per-cycle at start)
         eff_sample, eff_speed = compute_timing_for_cycle(args.default)
-        print(f"Walltime override: {args.wall} min (target ~{args.target_sleep}s/publish)")
-        print(f"Effective (for {args.default}): speedup ~{eff_speed:.2f}x, sample ~{eff_sample}s")
-    print(f"Configured (raw args): Speedup: {args.speedup}x, Jitter: ±{args.jitter}W, Sample: {args.sample}s\n")
-    print("NORMAL CYCLES (toggle switch or publish to command topic):")
-    print("  ON or LONG        - Full 2:39 cycle")
-    print("  MEDIUM            - Mid-length 1:30 cycle")
-    print("  SHORT             - Quick 0:45 cycle\n")
-    print("FAULT SCENARIOS (append mode to cycle type):")
-    print("  LONG_DROPOUT      - Sensor offline mid-cycle (tests watchdog timeout)")
-    print("  MEDIUM_GLITCH     - Power spikes/dips (tests smoothing)")
-    print("  SHORT_STUCK       - Phase stuck in loop (tests forced end)")
-    print("  LONG_INCOMPLETE   - Never finishes (tests stale detection)\n")
-    print("EXAMPLES:")
-    print(f"  mosquitto_pub -t {COMMAND_TOPIC} -m 'LONG'")
-    print(f"  mosquitto_pub -t {COMMAND_TOPIC} -m 'MEDIUM_GLITCH'")
-    print(f"  mosquitto_pub -t {COMMAND_TOPIC} -m 'OFF'")
-    print("="*70 + "\n")
+    logger.info(f"Walltime override: {args.wall} min (target ~{args.target_sleep}s/publish)")
+    logger.info(f"Effective (for {args.default}): speedup ~{eff_speed:.2f}x, sample ~{eff_sample}s")
+    logger.info(f"Configured (raw args): Speedup: {args.speedup}x, Jitter: ±{args.jitter}W, Sample: {args.sample}s\n")
+    logger.info("NORMAL CYCLES (toggle switch or publish to command topic):")
+    logger.info("  ON or LONG        - Full 2:39 cycle")
+    logger.info("  MEDIUM            - Mid-length 1:30 cycle")
+    logger.info("  SHORT             - Quick 0:45 cycle\n")
+    logger.info("FAULT SCENARIOS (append mode to cycle type):")
+    logger.info("  LONG_DROPOUT      - Sensor offline mid-cycle (tests watchdog timeout)")
+    logger.info("  MEDIUM_GLITCH     - Power spikes/dips (tests smoothing)")
+    logger.info("  SHORT_STUCK       - Phase stuck in loop (tests forced end)")
+    logger.info("  LONG_INCOMPLETE   - Never finishes (tests stale detection)\n")
+    logger.info("EXAMPLES:")
+    logger.info(f"  mosquitto_pub -t {COMMAND_TOPIC} -m 'LONG'")
+    logger.info(f"  mosquitto_pub -t {COMMAND_TOPIC} -m 'MEDIUM_GLITCH'")
+    logger.info(f"  mosquitto_pub -t {COMMAND_TOPIC} -m 'OFF'")
+    logger.info("="*70 + "\n")
+    
+    # Handle continuous mode
+    if args.continuous:
+        cycles = [c.strip() for c in args.cycle_sequence.split(",")]
+        cycle_idx = 0
+        interval_seconds = args.interval * 60
+        
+        def run_continuous_cycle_thread():
+            nonlocal cycle_idx
+            while True:
+                try:
+                    cycle_type = cycles[cycle_idx % len(cycles)]
+                    logger.info(f"[CONTINUOUS] Starting cycle {cycle_idx + 1}: {cycle_type}")
+                    with running_lock:
+                        if running["flag"]:
+                            logger.warning("[CONTINUOUS] Cycle already running, skipping")
+                            time.sleep(interval_seconds)
+                            continue
+                        running["flag"] = True
+                    
+                    client.publish(STATE_TOPIC, cycle_type, retain=True)
+                    sample_real_eff, speedup_eff = compute_timing_for_cycle(cycle_type)
+                    simulate_cycle(client, sample_real=sample_real_eff, speedup=speedup_eff, jitter=args.jitter, stop_event=stop_event, phase_key=cycle_type)
+                    
+                    with running_lock:
+                        running["flag"] = False
+                    client.publish(STATE_TOPIC, "OFF", retain=True)
+                    cycle_idx += 1
+                    
+                    logger.info(f"[CONTINUOUS] Cycle complete. Waiting {args.interval} minutes until next cycle...")
+                    time.sleep(interval_seconds)
+                except Exception as e:
+                    logger.error(f"[CONTINUOUS] Error in cycle loop: {e}")
+                    with running_lock:
+                        running["flag"] = False
+                    time.sleep(10)  # Brief delay before retry
+        
+        continuous_thread = threading.Thread(target=run_continuous_cycle_thread, daemon=True)
+        continuous_thread.start()
+    
     try:
         while True:
             time.sleep(1)
@@ -420,4 +469,6 @@ Fault injection (publish to switch):
 
 
 if __name__ == "__main__":
+    # Configure root logging with timestamps
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     main()

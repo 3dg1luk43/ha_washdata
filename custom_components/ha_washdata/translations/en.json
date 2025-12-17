@@ -24,24 +24,105 @@
         "menu_options": {
           "settings": "Settings",
           "manage_profiles": "Manage Profiles",
-          "post_process": "Post-Process History",
-          "migrate_data": "Migrate Data Format",
-          "wipe_history": "Wipe History (Testing)"
+          "diagnostics": "Diagnostics & Maintenance"
         }
       },
       "settings": {
+        "title": "Settings",
+        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.",
         "data": {
           "min_power": "Minimum Power (W)",
           "off_delay": "Cycle End Delay (seconds)",
+          "progress_reset_delay": "Progress Reset Delay (seconds)",
+          "no_update_active_timeout": "No-Update Timeout While Active (seconds)",
+          "auto_label_confidence": "Auto-Label Confidence (0-1)",
+          "learning_confidence": "Feedback Request Confidence (0-1)",
+          "duration_tolerance": "Duration Tolerance (0-0.5)",
+          "profile_match_interval": "Profile Match Interval (seconds)",
           "notify_service": "Notification Service (e.g. notify.mobile_app)",
-          "notify_events": "Events to Notify"
+          "notify_events": "Events to Notify",
+          "smoothing_window": "Smoothing Window (samples)",
+          "profile_duration_tolerance": "Profile Match Duration Tolerance (0-0.5)",
+          "auto_merge_lookback_hours": "Auto-Merge Lookback Window (hours)",
+          "auto_merge_gap_seconds": "Auto-Merge Max Gap (seconds)",
+          "interrupted_min_seconds": "Interrupted: Minimum Runtime (seconds)",
+          "abrupt_drop_watts": "Interrupted: Abrupt Drop Absolute (W)",
+          "abrupt_drop_ratio": "Interrupted: Abrupt Drop Ratio (0-1)",
+          "abrupt_high_load_factor": "Interrupted: High-Load Factor"
+        },
+        "data_description": {
+          "min_power": "Power threshold (in watts) to consider the washer running. Default: 2W.",
+          "off_delay": "Seconds the smoothed power must stay below the threshold to mark completion. Default: 120s.",
+          "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 300s.",
+          "no_update_active_timeout": "For publish-on-change sensors: only force-end an ACTIVE cycle if no updates arrive for this many seconds. Low-power completion still uses the Off Delay.",
+          "auto_label_confidence": "Automatically label cycles at or above this confidence on completion (0.0–1.0).",
+          "learning_confidence": "Minimum confidence to request user verification via an event (0.0–1.0).",
+          "duration_tolerance": "Tolerance for time-remaining estimates during a run (0.0–0.5 corresponds to 0–50%).",
+          "profile_match_interval": "How often (in seconds) to attempt profile matching during a cycle. Lower values provide faster detection but use more CPU. Default: 300s (5 minutes).",
+          "notify_service": "Home Assistant notify service to use (optional).",
+          "notify_events": "Which events to send notifications for.",
+          "smoothing_window": "Number of recent power readings used for moving-average smoothing.",
+          "profile_duration_tolerance": "Tolerance used by profile matching for total duration variance (0.0–0.5). Default behavior: ±25%.",
+          "auto_merge_lookback_hours": "After a cycle, scan this many hours back to merge fragmented runs into a single cycle.",
+          "auto_merge_gap_seconds": "Maximum gap between fragments to merge during post-processing.",
+          "interrupted_min_seconds": "Runs shorter than this may be classified as 'interrupted'.",
+          "abrupt_drop_watts": "Absolute power drop (W) considered an abrupt cliff.",
+          "abrupt_drop_ratio": "Relative drop ratio (0–1). Example: 0.6 means a 60% drop is abrupt.",
+          "abrupt_high_load_factor": "Factor above baseline considered 'high load' before an abrupt drop (used with abrupt detection)."
         }
       },
+      "diagnostics": {
+        "title": "Diagnostics & Maintenance",
+        "description": "Run maintenance actions like merging fragmented cycles or migrating stored data."
+      },
       "manage_profiles": {
-        "title": "Manage Cycles",
-        "description": "Choose an action to perform on your saved cycles.",
+        "title": "Manage Profiles & Cycles",
+        "description": "Manage wash profiles and cycle labels",
         "data": {
           "action": "Action"
+        }
+      },
+      "create_profile": {
+        "title": "Create New Profile",
+        "description": "Profile name examples: 'Delicates', 'Heavy Duty', 'Quick Wash'",
+        "data": {
+          "profile_name": "Profile Name",
+          "reference_cycle": "Reference Cycle (optional)"
+        }
+      },
+      "edit_profile": {
+        "title": "Edit Profile",
+        "description": "Select a profile to rename",
+        "data": {
+          "profile": "Profile"
+        }
+      },
+      "rename_profile": {
+        "title": "Rename Profile",
+        "description": "Current profile: {current_name}",
+        "data": {
+          "new_name": "New Profile Name"
+        }
+      },
+      "delete_profile_select": {
+        "title": "Delete Profile",
+        "description": "Select a profile to delete",
+        "data": {
+          "profile": "Profile"
+        }
+      },
+      "delete_profile_confirm": {
+        "title": "Confirm Delete Profile",
+        "description": "⚠️ This will permanently delete profile: {profile_name}",
+        "data": {
+          "unlabel_cycles": "Remove label from cycles using this profile"
+        }
+      },
+      "auto_label_cycles": {
+        "title": "Auto-Label Old Cycles",
+        "description": "{info}",
+        "data": {
+          "confidence_threshold": "Minimum Confidence (0.50-0.95)"
         }
       },
       "select_cycle_to_label": {
@@ -59,8 +140,11 @@
         }
       },
       "label_cycle": {
+        "title": "Label Cycle",
+        "description": "{cycle_info}",
         "data": {
-          "profile_name": "Profile Name"
+          "profile_name": "Profile",
+          "new_profile_name": "New Profile Name (if creating)"
         }
       },
       "post_process": {
@@ -77,7 +161,32 @@
       "wipe_history": {
         "title": "Wipe History (Testing Only)",
         "description": "⚠️ This will permanently delete ALL stored cycles and profiles for this device. This cannot be undone!"
+      },
+      "export_import": {
+        "title": "Export/Import JSON",
+        "description": "Copy/paste cycles, profiles, AND settings for this device. Export below or paste JSON to import.",
+        "data": {
+          "mode": "Action",
+          "json_payload": "Complete Configuration JSON"
+        },
+        "data_description": {
+          "mode": "Choose Export to copy current data and settings, or Import to paste exported data from another HA WashData device.",
+          "json_payload": "For Export: copy this JSON (includes cycles, profiles, and all fine-tuned settings). For Import: paste JSON exported from HA WashData."
+        }
       }
+    },
+    "error": {
+      "import_failed": "Import failed. Please paste a valid HA WashData export JSON.",
+      "empty_name": "Profile name cannot be empty",
+      "profile_exists": "A profile with this name already exists",
+      "rename_failed": "Failed to rename profile. Profile may not exist or new name is already taken.",
+      "assignment_failed": "Failed to assign profile to cycle"
+    },
+    "abort": {
+      "no_cycles_found": "No cycles found",
+      "no_profiles_found": "No profiles found. Create a profile first.",
+      "no_profiles_for_matching": "No profiles available for matching. Create profiles first.",
+      "no_unlabeled_cycles": "All cycles are already labeled"
     }
   }
 }

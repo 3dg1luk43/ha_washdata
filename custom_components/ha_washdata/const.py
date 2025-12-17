@@ -9,6 +9,23 @@ CONF_MIN_POWER = "min_power"
 CONF_OFF_DELAY = "off_delay"
 CONF_NOTIFY_SERVICE = "notify_service"
 CONF_NOTIFY_EVENTS = "notify_events"
+CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
+CONF_SMOOTHING_WINDOW = "smoothing_window"
+CONF_PROFILE_DURATION_TOLERANCE = "profile_duration_tolerance"
+CONF_AUTO_MERGE_LOOKBACK_HOURS = "auto_merge_lookback_hours"
+CONF_AUTO_MERGE_GAP_SECONDS = "auto_merge_gap_seconds"
+CONF_INTERRUPTED_MIN_SECONDS = "interrupted_min_seconds"
+CONF_ABRUPT_DROP_WATTS = "abrupt_drop_watts"
+CONF_ABRUPT_DROP_RATIO = "abrupt_drop_ratio"
+CONF_ABRUPT_HIGH_LOAD_FACTOR = "abrupt_high_load_factor"
+CONF_PROGRESS_RESET_DELAY = "progress_reset_delay"
+CONF_LEARNING_CONFIDENCE = "learning_confidence"
+CONF_DURATION_TOLERANCE = "duration_tolerance"
+CONF_AUTO_LABEL_CONFIDENCE = "auto_label_confidence"
+CONF_AUTO_MAINTENANCE = "auto_maintenance"
+CONF_PROFILE_MATCH_INTERVAL = "profile_match_interval"
+CONF_PROFILE_MATCH_MIN_DURATION_RATIO = "profile_match_min_duration_ratio"
+CONF_PROFILE_MATCH_MAX_DURATION_RATIO = "profile_match_max_duration_ratio"
 
 NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
@@ -17,6 +34,23 @@ NOTIFY_EVENT_FINISH = "cycle_finish"
 DEFAULT_MIN_POWER = 2.0  # Watts
 DEFAULT_OFF_DELAY = 120  # Seconds (2 minutes, like proven automation)
 DEFAULT_NAME = "Washing Machine"
+DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 300  # Seconds without updates while active before forced stop (publish-on-change sockets)
+DEFAULT_SMOOTHING_WINDOW = 2
+DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
+DEFAULT_AUTO_MERGE_LOOKBACK_HOURS = 3
+DEFAULT_AUTO_MERGE_GAP_SECONDS = 600  # Seconds (10 minutes, merge nearby fragments)
+DEFAULT_INTERRUPTED_MIN_SECONDS = 150
+DEFAULT_ABRUPT_DROP_WATTS = 500.0
+DEFAULT_ABRUPT_DROP_RATIO = 0.6
+DEFAULT_ABRUPT_HIGH_LOAD_FACTOR = 5.0
+DEFAULT_PROGRESS_RESET_DELAY = 150  # Seconds (~2.5 minutes unload window)
+DEFAULT_LEARNING_CONFIDENCE = 0.5  # Minimum confidence to request user verification
+DEFAULT_DURATION_TOLERANCE = 0.10  # Allow ±10% duration variance before flagging
+DEFAULT_AUTO_LABEL_CONFIDENCE = 0.95  # High confidence auto-label threshold
+DEFAULT_AUTO_MAINTENANCE = True  # Enable nightly cleanup by default
+DEFAULT_PROFILE_MATCH_INTERVAL = 300  # Seconds between profile matching attempts (5 minutes)
+DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.30  # Minimum duration ratio (30% of profile)
+DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.50  # Maximum duration ratio (150% of profile)
 
 # States
 STATE_OFF = "off"
@@ -26,9 +60,9 @@ STATE_RINSE = "rinse"
 STATE_UNKNOWN = "unknown"
 
 # Cycle Status (how the cycle ended)
-CYCLE_STATUS_COMPLETED = "completed"
-CYCLE_STATUS_INTERRUPTED = "interrupted"  # User manually stopped
-CYCLE_STATUS_FORCE_STOPPED = "force_stopped"  # Watchdog/timeout forced end
+CYCLE_STATUS_COMPLETED = "completed"  # Natural completion (power dropped)
+CYCLE_STATUS_INTERRUPTED = "interrupted"  # Abnormal/short run or abrupt power cliff (likely user/power abort)
+CYCLE_STATUS_FORCE_STOPPED = "force_stopped"  # Watchdog forced end (sensor offline but power was already low) - treated as successful
 CYCLE_STATUS_RESUMED = "resumed"  # Cycle was restored from storage after restart
 
 # Storage
@@ -40,7 +74,8 @@ EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"
 EVENT_CYCLE_ENDED = "ha_washdata_cycle_ended"
 
 # Learning & Feedback
-LEARNING_CONFIDENCE_THRESHOLD = 0.5  # Minimum confidence to request user verification
-LEARNING_DURATION_MATCH_TOLERANCE = 0.10  # Allow ±10% duration variance before flagging
+# (Deprecated constants, kept for backward compat in code paths)
+LEARNING_CONFIDENCE_THRESHOLD = DEFAULT_LEARNING_CONFIDENCE
+LEARNING_DURATION_MATCH_TOLERANCE = DEFAULT_DURATION_TOLERANCE
 FEEDBACK_REQUEST_EVENT = "ha_washdata_feedback_requested"  # Event when user feedback is needed
 SERVICE_SUBMIT_FEEDBACK = "ha_washdata.submit_cycle_feedback"  # Service to submit feedback

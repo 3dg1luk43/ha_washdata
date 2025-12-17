@@ -34,6 +34,7 @@ class LearningManager:
         confidence: float,
         estimated_duration: Optional[float],
         actual_duration: float,
+        duration_tolerance: float = 0.10,
     ) -> None:
         """
         Request user verification for a detected cycle.
@@ -45,9 +46,10 @@ class LearningManager:
             (actual_duration / estimated_duration * 100) if estimated_duration else 0
         )
 
+        tolerance_pct = duration_tolerance * 100
         is_close_match = (
             estimated_duration
-            and abs(duration_match_pct - 100) <= 10
+            and abs(duration_match_pct - 100) <= tolerance_pct
         )
 
         feedback_req = {
@@ -69,7 +71,7 @@ class LearningManager:
             f"Feedback requested for cycle {cycle_id}: "
             f"profile='{detected_profile}' (conf={confidence:.2f}), "
             f"est={int(estimated_duration/60)}min, actual={int(actual_duration/60)}min "
-            f"({duration_match_pct:.0f}%) - is_close={is_close_match}"
+            f"({duration_match_pct:.0f}%) - is_close={is_close_match} (tolerance=±{tolerance_pct:.0f}%)"
         )
 
     def submit_cycle_feedback(
@@ -112,26 +114,28 @@ class LearningManager:
         self._feedback_history[cycle_id] = feedback_record
 
         if user_confirmed:
-            # Reinforce the matched profile - it was correct
+            # User confirmed the detected profile - auto-label the cycle
+            profile_name = pending["detected_profile"]
+            self._auto_label_cycle(cycle_id, profile_name)
+            
             _LOGGER.info(
-                f"User confirmed cycle {cycle_id}: profile='{pending['detected_profile']}' "
-                f"duration={int(pending['actual_duration']/60)}min"
+                f"User confirmed cycle {cycle_id}: profile='{profile_name}' "
+                f"duration={int(pending['actual_duration']/60)}min - auto-labeled"
             )
-            # Could update profile's avg_duration or confidence weight here
         else:
-            # User provided correction - learn from it
+            # User provided correction - learn from it and auto-label with correct profile
             _LOGGER.info(
                 f"User corrected cycle {cycle_id}: "
                 f"detected='{pending['detected_profile']}' -> correct='{corrected_profile}', "
                 f"corrected_duration={int(corrected_duration/60) if corrected_duration else 'N/A'}min"
             )
 
-            # If user picked a different profile, we can penalize the incorrect match
-            # and reinforce the correct one
+            # Apply correction learning and auto-label with corrected profile
             if corrected_profile != pending["detected_profile"]:
                 self._apply_correction_learning(
                     cycle_id, corrected_profile, corrected_duration
                 )
+                self._auto_label_cycle(cycle_id, corrected_profile)
 
         # Remove from pending
         del self._pending_feedback[cycle_id]
@@ -172,6 +176,48 @@ class LearningManager:
 
         # Schedule async save
         # (This will be called from manager which has access to hass)
+
+    def _auto_label_cycle(self, cycle_id: str, profile_name: str) -> None:
+        """Auto-label a cycle with a profile name."""
+        cycles = self.profile_store._data.get("past_cycles", [])
+        cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+        
+        if not cycle:
+            _LOGGER.warning(f"Cycle {cycle_id} not found for auto-labeling")
+            return
+        
+        cycle["profile"] = profile_name
+        cycle["auto_labeled"] = True
+        _LOGGER.debug(f"Auto-labeled cycle {cycle_id} with profile '{profile_name}'")
+
+    def auto_label_high_confidence(
+        self,
+        cycle_id: str,
+        profile_name: str,
+        confidence: float,
+        confidence_threshold: float = 0.95,
+    ) -> bool:
+        """
+        Auto-label a cycle if confidence is very high.
+        
+        Args:
+            cycle_id: The cycle ID
+            profile_name: The detected profile name
+            confidence: Confidence score (0-1)
+            confidence_threshold: Threshold for auto-labeling (default 0.95)
+            
+        Returns:
+            True if auto-labeled, False otherwise
+        """
+        if confidence < confidence_threshold:
+            return False
+        
+        self._auto_label_cycle(cycle_id, profile_name)
+        _LOGGER.info(
+            f"Auto-labeled cycle {cycle_id} with very high confidence: "
+            f"profile='{profile_name}' (confidence={confidence:.3f})"
+        )
+        return True
 
     def get_pending_feedback(self) -> dict[str, dict[str, Any]]:
         """Return pending feedback requests (for UI/service discovery)."""

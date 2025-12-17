@@ -1,13 +1,16 @@
 # HA WashData Implementation Guide
 
-**Updated:** December 17, 2025
+**Updated:** December 17, 2025 - Final (All features complete)
 
 ## Overview
 
-This document covers the complete implementation of three major features:
+This document covers the complete implementation of all major features:
 1. Variable cycle duration support (±15%)
 2. Smart progress management (100% on complete, 0% after unload)
 3. Self-learning feedback system
+4. Export/Import with full settings transfer (NEW Dec 17)
+5. Auto-maintenance watchdog with switch control (NEW Dec 17)
+6. Improved stale cycle detection with power awareness (NEW Dec 17)
 
 ---
 
@@ -50,6 +53,24 @@ duration_ratio = actual_duration / expected_duration
 python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 # Watch for: [VARIANCE] Applied ±X.X% duration variance
 ```
+
+---
+
+### 1b. Cycle Status Classification (✓/⚠/✗)
+
+**Why:** Distinguish natural completions from abnormal endings and restarts.
+
+**Statuses:**
+- ✓ `completed` — Natural finish after `off_delay` in low-power wait.
+- ✓ `force_stopped` — Watchdog finalized while already in low-power wait; treated as success.
+- ✗ `interrupted` — Abnormal early end: very short run or abrupt power cliff that never recovers.
+- ⚠ `resumed` — Active cycle restored after HA restart.
+
+**Logic:**
+- Detector tracks low-power window and elapsed time; `force_end()` maps to `completed` when low-power wait ≥ `off_delay`, else `force_stopped` and `_should_mark_interrupted` can reclassify short/abrupt runs.
+
+**UI & Scoring:**
+- ✓ cases are considered successful; ✗ is flagged as abnormal; ⚠ retains reduced confidence.
 
 ---
 
@@ -208,6 +229,141 @@ manager.learning_manager.get_learning_stats()
 #   "pending": 0
 # }
 ```
+
+### 4. Export/Import with Full Settings Transfer (NEW Dec 17)
+
+**Problem:** Users needed to manually reconfigure all settings when setting up multiple devices or migrating to new instances.
+
+**Solution:**
+- Export all cycles, profiles, feedback history, AND all fine-tuned settings as JSON
+- Import via UI (copy/paste, no filesystem needed) or file-based service
+- Automatic orphaned profile cleanup during import
+- Per-device isolation maintained via entry_id
+
+**Files Modified:**
+- `profile_store.py` - `export_data(entry_data, entry_options)`, `async_import_data(payload)` now handle config
+- `config_flow.py` - New `async_step_export_import()` with JSON textarea
+- `__init__.py` - Services updated to pass entry.data/options to export/import
+- `strings.json` & `translations/en.json` - New UI labels and descriptions
+
+**What's exported:**
+```python
+{
+  "version": STORAGE_VERSION,
+  "entry_id": "unique_id",
+  "exported_at": "ISO timestamp",
+  "data": {
+    "profiles": {...},
+    "past_cycles": [...],
+    "feedback_history": [...]
+  },
+  "entry_data": {
+    # power_sensor, name (device-specific - NOT imported)
+  },
+  "entry_options": {
+    # ALL fine-tuned settings: min_power, off_delay, learning_confidence, etc.
+  }
+}
+```
+
+**UI Access:**
+- Options → Diagnostics → Export/Import JSON
+- Select "Export only" to copy JSON
+- Select "Import from JSON" to paste exported data
+- All settings automatically applied on import
+
+**Service Usage:**
+```yaml
+service: ha_washdata.export_config
+data:
+  device_id: "washer_device_id"
+  path: "/config/ha_washdata_export.json"
+
+service: ha_washdata.import_config
+data:
+  device_id: "washer_device_id"
+  path: "/config/ha_washdata_export.json"
+```
+
+### 5. Auto-Maintenance Watchdog (NEW Dec 17)
+
+**Problem:** Deleted cycles left orphaned profile labels; fragmented runs cluttered history.
+
+**Solution:**
+- Nightly cleanup at midnight (configurable via switch)
+- Removes profiles referencing deleted cycles
+- Merges fragmented cycles (last 24h, max 30min gaps)
+- Logs maintenance statistics
+- User can toggle on/off via `switch.<name>_auto_maintenance`
+
+**Files Created:**
+- `switch.py` - New AutoMaintenanceSwitch entity (mdi:broom icon)
+
+**Files Modified:**
+- `profile_store.py`:
+  - `cleanup_orphaned_profiles()` - Remove profiles with dead cycle references
+  - `async_run_maintenance(lookback_hours, gap_seconds)` - Full maintenance run
+- `manager.py`:
+  - `_setup_maintenance_scheduler()` - Schedule midnight task
+  - `_remove_maintenance_scheduler` - Cancel scheduler
+  - Enhanced `async_shutdown()` to clean up scheduler
+- `const.py` - Added `CONF_AUTO_MAINTENANCE`, `DEFAULT_AUTO_MAINTENANCE=True`
+- `__init__.py` - Registered Switch platform
+
+**Maintenance Workflow:**
+```
+Daily at 00:00
+    ↓
+ProfileStore.async_run_maintenance()
+    ├─ 1. cleanup_orphaned_profiles()
+    │  └─ Remove profiles referencing non-existent cycles
+    ├─ 2. merge_cycles(lookback_hours=24, gap_seconds=1800)
+    │  └─ Merge fragmented runs from past 24h (≤30min gaps)
+    └─ 3. Save and log stats
+```
+
+**Switch Entity:**
+- `switch.<name>_auto_maintenance` (default: ON)
+- Toggle to enable/disable nightly cleanup
+- When toggled, scheduler is re-setup accordingly
+- Toggling OFF cancels scheduled cleanup
+
+### 6. Improved Stale Cycle Detection (NEW Dec 17)
+
+**Problem:** After HA restart or code update, phantom "restored" cycles appeared at 0W power, confusing users.
+
+**Solution:**
+- Check both current power state AND saved cycle age on startup
+- Only restore "running" state if BOTH conditions met:
+  - Current power ≥ min_power threshold AND
+  - Last save within 10 minutes
+- If power is 0W at startup, immediately clear any stale active cycle
+
+**Files Modified:**
+- `manager.py` - Enhanced `async_setup()` restoration logic
+
+**Startup Logic:**
+```
+HA Restart
+    ↓
+Get saved active_snapshot from ProfileStore
+    ↓
+Check current power state from sensor
+    ├─ If power < min_power
+    │  └─ CLEAR stale cycle (definitely not running)
+    └─ If power >= min_power
+        ├─ Check last_active_save timestamp
+        ├─ If saved < 10 minutes ago
+        │  └─ RESTORE snapshot (genuine interrupted cycle)
+        └─ If saved >= 10 minutes ago
+           └─ CLEAR stale cycle (too old from restart/update)
+```
+
+**Benefits:**
+- Most reliable detection method (power state is ground truth)
+- 10-minute age threshold prevents false restores
+- Graceful error handling (clears to be safe)
+- Clear logging for troubleshooting
 
 ---
 
@@ -438,6 +594,24 @@ Configure via Home Assistant UI:
 | `notification_service` | entity_id | None | Service for notifications |
 | `notify_cycle_start` | boolean | false | Notify when cycle starts |
 | `notify_cycle_finish` | boolean | false | Notify when cycle finishes |
+
+### Advanced Options
+
+| Option | Default | Notes |
+|--------|---------|-------|
+| `smoothing_window` | 5 | Moving-average window for power smoothing |
+| `no_update_active_timeout` | e.g., 600s | For publish-on-change sockets; only force-end an active cycle after this inactivity window |
+| `profile_duration_tolerance` | ±25% | Duration tolerance used by `ProfileStore.match_profile()` |
+| `auto_merge_lookback_hours` | 3 | Post-process merging window after cycle end |
+| `auto_merge_gap_seconds` | 1800 | Max gap to merge fragmented runs |
+| `interrupted_min_seconds` | 150 | Minimum runtime below which a run may be flagged as interrupted |
+| `abrupt_drop_watts` / `abrupt_drop_ratio` | impl. defaults | Heuristics for abrupt power cliff detection |
+
+### Watchdog & Publish-on-Change Devices
+
+Some smart plugs publish every ~60s and pause when values are steady. The manager’s watchdog handles this by:
+- Completing cycles normally if already in low-power wait for ≥ `off_delay`.
+- Avoiding premature force-end while active unless no updates exceed `no_update_active_timeout`.
 
 ### Service Calls
 

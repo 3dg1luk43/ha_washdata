@@ -1,3 +1,5 @@
+Note: The integration is now feature-complete. For current behavior, options, and testing, see README.md and IMPLEMENTATION.md. The prompt below remains as the original specification for reference.
+
 Here’s a consolidated starting prompt you can give to an agentic AI.
 
 ---
