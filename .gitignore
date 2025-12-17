@@ -2,3 +2,4 @@ deploy_to_ha.sh
 backups
 devtools/__pycache__
 mock_data
+custom_components/ha_washdata/__pycache__

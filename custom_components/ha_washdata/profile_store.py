@@ -175,11 +175,13 @@ class ProfileStore:
                 continue
 
             # Check duration mismatch - reject if too different from profile's expected duration
+            # Allow ±25% variance to account for load-dependent cycle duration variation
+            # (real washers vary by 10-20% depending on clothes load, water temp, soil level, etc.)
             profile_duration = profile.get("avg_duration", sample_cycle.get("duration", 0))
             if profile_duration > 0:
                 duration_ratio = current_duration / profile_duration
-                # Reject if current is < 50% or > 150% of profile duration
-                if duration_ratio < 0.5 or duration_ratio > 1.5:
+                # Allow 75% to 125% of profile duration (increased from 50-150%)
+                if duration_ratio < 0.75 or duration_ratio > 1.25:
                     continue
 
             # Calculate similarity

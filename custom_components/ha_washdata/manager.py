@@ -22,12 +22,16 @@ from .const import (
     NOTIFY_EVENT_FINISH,
     EVENT_CYCLE_STARTED,
     EVENT_CYCLE_ENDED,
+    LEARNING_CONFIDENCE_THRESHOLD,
+    FEEDBACK_REQUEST_EVENT,
+    SERVICE_SUBMIT_FEEDBACK,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     STATE_RUNNING,
     STATE_OFF,
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
+from .learning import LearningManager
 from .profile_store import ProfileStore
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,6 +51,7 @@ class WashDataManager:
         
         # Components
         self.profile_store = ProfileStore(hass, self.entry_id)
+        self.learning_manager = LearningManager(hass, self.entry_id, self.profile_store)
         
         # Priority: Options > Data > Default
         min_power = config_entry.options.get(CONF_MIN_POWER, config_entry.data.get(CONF_MIN_POWER, DEFAULT_MIN_POWER))
@@ -71,10 +76,13 @@ class WashDataManager:
         self._current_program = "off"
         self._time_remaining: float | None = None
         self._cycle_progress: float = 0.0
+        self._cycle_completed_time: datetime | None = None  # Track when cycle finished
+        self._progress_reset_delay: int = 300  # Reset progress 5 minutes after cycle ends (if not restarted)
         self._last_reading_time: datetime | None = None
         self._current_power: float = 0.0
         self._last_estimate_time: datetime | None = None
         self._matched_profile_duration: float | None = None
+        self._last_match_confidence: float = 0.0  # Store confidence for feedback
 
     async def async_setup(self) -> None:
         """Set up the manager."""
@@ -125,6 +133,8 @@ class WashDataManager:
             self._remove_listener()
         if self._remove_watchdog:
             self._remove_watchdog()
+        if hasattr(self, "_remove_progress_reset_timer") and self._remove_progress_reset_timer:
+            self._remove_progress_reset_timer()
             
         # Try to save state one last time?
         if self.detector.state == "running":
@@ -191,6 +201,43 @@ class WashDataManager:
             self._remove_watchdog()
             self._remove_watchdog = None
 
+    def _start_progress_reset_timer(self) -> None:
+        """Start timer to reset progress to 0% after idle period (user unload time)."""
+        # Use watchdog mechanism but with longer interval for progress reset
+        if not hasattr(self, "_remove_progress_reset_timer"):
+            self._remove_progress_reset_timer = None
+        
+        if self._remove_progress_reset_timer:
+            return  # Already running
+        
+        _LOGGER.debug(f"Starting progress reset timer (will reset after {self._progress_reset_delay}s)")
+        self._remove_progress_reset_timer = async_track_time_interval(
+            self.hass, self._check_progress_reset, timedelta(seconds=10)  # Check every 10s
+        )
+
+    def _stop_progress_reset_timer(self) -> None:
+        """Stop the progress reset timer."""
+        if hasattr(self, "_remove_progress_reset_timer") and self._remove_progress_reset_timer:
+            _LOGGER.debug("Stopping progress reset timer")
+            self._remove_progress_reset_timer()
+            self._remove_progress_reset_timer = None
+
+    async def _check_progress_reset(self, now: datetime) -> None:
+        """Check if progress should be reset (user unload timeout)."""
+        if not self._cycle_completed_time or self.detector.state == STATE_RUNNING:
+            # Cycle is running or not completed, don't reset
+            return
+        
+        time_since_complete = (now - self._cycle_completed_time).total_seconds()
+        
+        if time_since_complete > self._progress_reset_delay:
+            # User has had enough time to unload, reset to 0%
+            _LOGGER.debug(f"Progress reset: cycle idle for {time_since_complete:.0f}s (threshold: {self._progress_reset_delay}s)")
+            self._cycle_progress = 0.0
+            self._cycle_completed_time = None
+            self._stop_progress_reset_timer()
+            self._notify_update()
+
     async def _watchdog_check_stuck_cycle(self, now: datetime) -> None:
         """Watchdog: check if cycle is stuck (no updates for too long)."""
         if self.detector.state != STATE_RUNNING:
@@ -218,6 +265,11 @@ class WashDataManager:
         """Handle state change from detector."""
         _LOGGER.debug(f"Washer state changed: {old_state} -> {new_state}")
         if new_state == "running":
+            # If a cycle finishes and a new one starts within the reset window,
+            # treat it as continuation or quick restart (don't reset progress yet)
+            self._cycle_completed_time = None
+            self._stop_progress_reset_timer()
+            
             self._current_program = "detecting..."
             self._time_remaining = None
             self._cycle_progress = 0
@@ -265,6 +317,15 @@ class WashDataManager:
         self._time_remaining = None
         self._matched_profile_duration = None
         self._last_estimate_time = None
+        
+        # Set progress to 100% to indicate completion, then schedule reset after idle period
+        self._cycle_progress = 100.0
+        self._cycle_completed_time = dt_util.now()
+        self._start_progress_reset_timer()
+        
+        # Request user feedback if we had a confident match
+        self._maybe_request_feedback(cycle_data)
+        
         self._notify_update()
 
     def _send_notification(self, message: str) -> None:
@@ -381,6 +442,7 @@ class WashDataManager:
             if not self._matched_profile_duration or self._current_program == "detecting...":
                 # First match or no previous match
                 self._current_program = profile_name
+                self._last_match_confidence = confidence  # Store for later feedback
                 profile = self.profile_store._data["profiles"].get(profile_name, {})
                 avg_duration = float(profile.get("avg_duration", 0.0))
                 self._matched_profile_duration = avg_duration if avg_duration > 0 else None
@@ -453,3 +515,41 @@ class WashDataManager:
                 await self.profile_store.async_save()
         except Exception as e:
             _LOGGER.error(f"Auto-merge failed: {e}")
+
+    def _maybe_request_feedback(self, cycle_data: dict) -> None:
+        """Request user feedback if we made a confident match."""
+        if not self._matched_profile_duration or not self._current_program or self._current_program in ("off", "detecting..."):
+            # No match was made, don't request feedback
+            return
+
+        # Get the cycle ID from the cycle_data
+        cycle_id = cycle_data.get("id")
+        if not cycle_id:
+            _LOGGER.warning("Cycle data missing ID, cannot request feedback")
+            return
+
+        # Use stored confidence from matching
+        confidence = self._last_match_confidence
+        actual_duration = cycle_data.get("duration", 0)
+
+        # Request feedback via learning manager
+        self.learning_manager.request_cycle_verification(
+            cycle_id=cycle_id,
+            detected_profile=self._current_program,
+            confidence=confidence,
+            estimated_duration=self._matched_profile_duration,
+            actual_duration=actual_duration,
+        )
+
+        # Emit event so UI/automations can react
+        self.hass.bus.async_fire(
+            FEEDBACK_REQUEST_EVENT,
+            {
+                "entry_id": self.entry_id,
+                "cycle_id": cycle_id,
+                "detected_profile": self._current_program,
+                "confidence": confidence,
+                "estimated_duration": int(self._matched_profile_duration / 60),
+                "actual_duration": int(actual_duration / 60),
+            },
+        )

@@ -147,12 +147,26 @@ def publish_discovery(client: mqtt.Client, retain: bool = True) -> None:
 
 
 def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter: float, stop_event: threading.Event, phase_key: str) -> None:
-    """Run a compressed washer cycle, emitting power readings."""
-    phases = PHASESETS.get(phase_key.replace("_DROPOUT", "").replace("_GLITCH", "").replace("_STUCK", "").replace("_INCOMPLETE", ""), PHASESETS["LONG"])
+    """Run a compressed washer cycle, emitting power readings.
+    
+    Adds realistic variance to cycle duration (±15%) to simulate real washing machines
+    where actual duration depends on load size, water temperature, soil level, etc.
+    """
+    base_phases = PHASESETS.get(phase_key.replace("_DROPOUT", "").replace("_GLITCH", "").replace("_STUCK", "").replace("_INCOMPLETE", ""), PHASESETS["LONG"])
     is_dropout = "_DROPOUT" in phase_key
     is_glitch = "_GLITCH" in phase_key
     is_stuck = "_STUCK" in phase_key
     is_incomplete = "_INCOMPLETE" in phase_key
+    
+    # Apply ±15% random variance to cycle duration to simulate real behavior
+    variance_factor = random.uniform(0.85, 1.15)
+    phases = [(int(duration * variance_factor), power) for duration, power in base_phases]
+    
+    # Log variance info
+    total_base = sum(d for d, _ in base_phases)
+    total_var = sum(d for d, _ in phases)
+    variance_pct = ((total_var - total_base) / total_base) * 100 if total_base > 0 else 0
+    print(f"[VARIANCE] Applied {variance_pct:+.1f}% duration variance (factor: {variance_factor:.2f}x)")
     
     phase_idx = 0
     total_phases = len(phases)

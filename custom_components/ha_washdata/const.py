@@ -38,3 +38,9 @@ STORAGE_KEY = "ha_washdata"
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"
 EVENT_CYCLE_ENDED = "ha_washdata_cycle_ended"
+
+# Learning & Feedback
+LEARNING_CONFIDENCE_THRESHOLD = 0.5  # Minimum confidence to request user verification
+LEARNING_DURATION_MATCH_TOLERANCE = 0.10  # Allow ±10% duration variance before flagging
+FEEDBACK_REQUEST_EVENT = "ha_washdata_feedback_requested"  # Event when user feedback is needed
+SERVICE_SUBMIT_FEEDBACK = "ha_washdata.submit_cycle_feedback"  # Service to submit feedback

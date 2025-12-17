@@ -7,7 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
+from .const import DOMAIN, SERVICE_SUBMIT_FEEDBACK
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +48,37 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await manager.profile_store.create_profile(profile_name, cycle_id)
             
         hass.services.async_register(DOMAIN, "label_cycle", handle_label_cycle)
+
+    # Register feedback service
+    if not hass.services.has_service(DOMAIN, SERVICE_SUBMIT_FEEDBACK.split(".")[-1]):
+        async def handle_submit_feedback(call):
+            entry_id = call.data.get("entry_id")
+            cycle_id = call.data.get("cycle_id")
+            user_confirmed = call.data.get("user_confirmed", False)
+            corrected_profile = call.data.get("corrected_profile")
+            corrected_duration = call.data.get("corrected_duration")  # in seconds
+            notes = call.data.get("notes", "")
+            
+            if entry_id not in hass.data[DOMAIN]:
+                raise ValueError("Integration not loaded for this entry")
+                
+            manager = hass.data[DOMAIN][entry_id]
+            success = manager.learning_manager.submit_cycle_feedback(
+                cycle_id=cycle_id,
+                user_confirmed=user_confirmed,
+                corrected_profile=corrected_profile,
+                corrected_duration=corrected_duration,
+                notes=notes,
+            )
+            
+            if success:
+                # Save updated profile data
+                await manager.profile_store.async_save()
+                _LOGGER.info(f"Cycle feedback submitted for {cycle_id}")
+            else:
+                _LOGGER.warning(f"Failed to submit feedback for cycle {cycle_id}")
+            
+        hass.services.async_register(DOMAIN, SERVICE_SUBMIT_FEEDBACK.split(".")[-1], handle_submit_feedback)
 
     return True
 

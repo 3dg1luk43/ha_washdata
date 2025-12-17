@@ -2,13 +2,16 @@
 
 A Home Assistant custom component to monitor washing machines via smart sockets, learn power profiles, and estimate completion time.
 
-## Features
+## ✨ Features
 
 - **Cycle Detection**: Automatically detects when the washer starts and finishes based on power draw.
 - **Smart Profiling**: Learns from past cycles to identify programs (e.g., "Cotton 60°C").
 - **Time Estimation**: Estimates remaining time based on recognized profiles.
 - **Local Only**: No cloud dependency, no external services. All data stays in your Home Assistant.
 - **Notifications**: Configurable alerts for cycle start and finish.
+- **Self-Learning**: Collects user feedback to improve profile detection accuracy.
+- **Realistic Variance**: Handles natural cycle duration variations (±15%).
+- **Progress Tracking**: Clear cycle progress indicator with automatic reset after unload.
 
 ## Installation
 
@@ -35,9 +38,10 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 ## How it Works
 
 1. **Monitoring**: The integration actively monitors the configured power sensor.
-2. **Learning**: When a cycle finishes, it records the duration and power signatures.
-3. **Matching**: When a new cycle starts, it compares the live power draw to stored profiles to guess the program and estimate the end time.
-4. **Labeling**: (Future feature) You will be able to name past cycles to train the system.
+2. **Detection**: Cycle starts when smoothed power ≥ min_power threshold.
+3. **Matching**: Every 5 minutes, compares live power trace to profiles (±25% tolerance).
+4. **Learning**: User provides feedback when cycles complete, system learns from corrections.
+5. **Progress**: Tracks completion (0-100%), resets after 5 minutes idle.
 
 ## Entities
 
@@ -45,7 +49,51 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - `sensor.washer_state`: Current state (idle, running, off).
 - `sensor.washer_program`: Detected program name.
 - `sensor.time_remaining`: Estimated minutes remaining.
-- `sensor.cycle_progress`: Percentage complete.
+- `sensor.cycle_progress`: Percentage complete (0-100%).
+- `sensor.current_power`: Current power consumption (watts).
+
+## Services
+
+**`ha_washdata.submit_cycle_feedback`** - Provide feedback on detected cycles
+
+```yaml
+service: ha_washdata.submit_cycle_feedback
+data:
+  entry_id: "integration_id"
+  cycle_id: "cycle_id"
+  user_confirmed: true            # or false for correction
+  corrected_profile: null         # Only if false above
+  corrected_duration: null        # Only if false above (seconds)
+  notes: "Optional feedback"
+```
+
+## Events
+
+- `ha_washdata_cycle_started` - Cycle began
+- `ha_washdata_cycle_ended` - Cycle completed (includes duration, energy, program)
+- `ha_washdata_feedback_requested` - System requests user verification (includes confidence, durations)
+
+## 📖 Documentation
+
+📗 **[IMPLEMENTATION.md](IMPLEMENTATION.md)** - Architecture, features, APIs, and configuration
+- Complete feature documentation
+- Architecture diagrams  
+- Class & API reference
+- Event flows
+- Deployment notes
+
+🧪 **[TESTING.md](TESTING.md)** - Testing procedures and mock socket guide
+- Quick test setup
+- Test cases for all features
+- Mock socket reference
+- Debugging tips
+- Test checklist
+
+🤖 **[.github/copilot-instructions.md](.github/copilot-instructions.md)** - AI reference for future development
+- Project summary
+- Module descriptions
+- Implementation details
+- Future opportunities
 
 ## License
 
