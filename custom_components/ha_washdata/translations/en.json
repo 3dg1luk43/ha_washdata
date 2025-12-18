@@ -23,13 +23,21 @@
       "init": {
         "menu_options": {
           "settings": "Settings",
+          "apply_suggestions": "Copy Suggested Values → Settings",
           "manage_profiles": "Manage Profiles",
           "diagnostics": "Diagnostics & Maintenance"
         }
       },
+      "apply_suggestions": {
+        "title": "Copy Suggested Values",
+        "description": "This will copy the current suggested values into your saved Settings. This is a one-time action and does not enable auto-overwrites.\n\nSuggested values to copy:\n{suggested}",
+        "data": {
+          "confirm": "Confirm copy"
+        }
+      },
       "settings": {
         "title": "Settings",
-        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.",
+        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.\n\nSuggested (from learning; not applied automatically):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
         "data": {
           "min_power": "Minimum Power (W)",
           "off_delay": "Cycle End Delay (seconds)",
@@ -48,7 +56,12 @@
           "interrupted_min_seconds": "Interrupted: Minimum Runtime (seconds)",
           "abrupt_drop_watts": "Interrupted: Abrupt Drop Absolute (W)",
           "abrupt_drop_ratio": "Interrupted: Abrupt Drop Ratio (0-1)",
-          "abrupt_high_load_factor": "Interrupted: High-Load Factor"
+          "abrupt_high_load_factor": "Interrupted: High-Load Factor",
+          "max_past_cycles": "Retention: Max Saved Cycles",
+          "max_full_traces_per_profile": "Retention: Max Full Traces per Profile",
+          "max_full_traces_unlabeled": "Retention: Max Full Traces Unlabeled",
+          "watchdog_interval": "Watchdog Interval (seconds)",
+          "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold"
         },
         "data_description": {
           "min_power": "Power threshold (in watts) to consider the washer running. Default: 2W.",
@@ -68,7 +81,12 @@
           "interrupted_min_seconds": "Runs shorter than this may be classified as 'interrupted'.",
           "abrupt_drop_watts": "Absolute power drop (W) considered an abrupt cliff.",
           "abrupt_drop_ratio": "Relative drop ratio (0–1). Example: 0.6 means a 60% drop is abrupt.",
-          "abrupt_high_load_factor": "Factor above baseline considered 'high load' before an abrupt drop (used with abrupt detection)."
+          "abrupt_high_load_factor": "Factor above baseline considered 'high load' before an abrupt drop (used with abrupt detection).",
+          "max_past_cycles": "Total number of cycles to retain (oldest removed). Default: 200.",
+          "max_full_traces_per_profile": "Number of recent labeled cycles to keep with full power traces per profile. Older traces are summarized via envelopes. Default: 20.",
+          "max_full_traces_unlabeled": "Number of recent unlabeled cycles to keep with full power traces to support auto-labeling. Default: 20.",
+          "watchdog_interval": "Seconds between watchdog checks while running. Lower for faster stuck-cycle handling; higher to reduce overhead. Default: 5s.",
+          "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3."
         }
       },
       "diagnostics": {
@@ -77,7 +95,7 @@
       },
       "manage_profiles": {
         "title": "Manage Profiles & Cycles",
-        "description": "Manage wash profiles and cycle labels",
+        "description": "Recent cycles:\n{recent_cycles}",
         "data": {
           "action": "Action"
         }
@@ -186,7 +204,8 @@
       "no_cycles_found": "No cycles found",
       "no_profiles_found": "No profiles found. Create a profile first.",
       "no_profiles_for_matching": "No profiles available for matching. Create profiles first.",
-      "no_unlabeled_cycles": "All cycles are already labeled"
+      "no_unlabeled_cycles": "All cycles are already labeled",
+      "no_suggestions": "No suggested values available yet. Run a few cycles and try again."
     }
   }
 }

@@ -21,11 +21,22 @@ class LearningManager:
         self.entry_id = entry_id
         self.profile_store = profile_store
 
-        # Feedback history: track user confirmations and corrections
-        # Format: {cycle_id: {"timestamp": iso, "profile_name": str, "user_confirmed": bool, 
-        #                    "actual_duration": seconds (if corrected), "feedback": str}}
-        self._feedback_history: dict[str, dict[str, Any]] = {}
-        self._pending_feedback: dict[str, dict[str, Any]] = {}  # Cycles awaiting user input
+        # Feedback history: track user confirmations and corrections.
+        # Persist these into ProfileStore so restarts don't lose learning context.
+        raw_history = getattr(self.profile_store, "_data", {}).get("feedback_history")
+        raw_pending = getattr(self.profile_store, "_data", {}).get("pending_feedback")
+
+        self._feedback_history: dict[str, dict[str, Any]] = (
+            dict(raw_history) if isinstance(raw_history, dict) else {}
+        )
+        self._pending_feedback: dict[str, dict[str, Any]] = (
+            dict(raw_pending) if isinstance(raw_pending, dict) else {}
+        )
+
+        # Ensure backing store keys exist
+        if isinstance(getattr(self.profile_store, "_data", None), dict):
+            self.profile_store._data.setdefault("feedback_history", self._feedback_history)
+            self.profile_store._data.setdefault("pending_feedback", self._pending_feedback)
 
     def request_cycle_verification(
         self,
@@ -66,6 +77,12 @@ class LearningManager:
         }
 
         self._pending_feedback[cycle_id] = feedback_req
+
+        # Persist pending feedback so UI/automations can survive restart
+        if isinstance(getattr(self.profile_store, "_data", None), dict):
+            self.profile_store._data.setdefault("pending_feedback", {})
+            if isinstance(self.profile_store._data["pending_feedback"], dict):
+                self.profile_store._data["pending_feedback"][cycle_id] = feedback_req
 
         _LOGGER.info(
             f"Feedback requested for cycle {cycle_id}: "
@@ -113,6 +130,12 @@ class LearningManager:
 
         self._feedback_history[cycle_id] = feedback_record
 
+        # Persist feedback record
+        if isinstance(getattr(self.profile_store, "_data", None), dict):
+            self.profile_store._data.setdefault("feedback_history", {})
+            if isinstance(self.profile_store._data["feedback_history"], dict):
+                self.profile_store._data["feedback_history"][cycle_id] = feedback_record
+
         if user_confirmed:
             # User confirmed the detected profile - auto-label the cycle
             profile_name = pending["detected_profile"]
@@ -139,6 +162,10 @@ class LearningManager:
 
         # Remove from pending
         del self._pending_feedback[cycle_id]
+        if isinstance(getattr(self.profile_store, "_data", None), dict):
+            pending = self.profile_store._data.get("pending_feedback")
+            if isinstance(pending, dict) and cycle_id in pending:
+                del pending[cycle_id]
         return True
 
     def _apply_correction_learning(
@@ -157,7 +184,7 @@ class LearningManager:
             return
 
         # Update the cycle's profile tag
-        cycle["profile"] = corrected_profile
+        cycle["profile_name"] = corrected_profile
         cycle["feedback_corrected"] = True
 
         # Optionally update profile's avg_duration if user provided correction
@@ -186,7 +213,7 @@ class LearningManager:
             _LOGGER.warning(f"Cycle {cycle_id} not found for auto-labeling")
             return
         
-        cycle["profile"] = profile_name
+        cycle["profile_name"] = profile_name
         cycle["auto_labeled"] = True
         _LOGGER.debug(f"Auto-labeled cycle {cycle_id} with profile '{profile_name}'")
 
