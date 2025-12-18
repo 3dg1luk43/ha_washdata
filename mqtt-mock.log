@@ -1,183 +1,2005 @@
 nohup: ignoring input
-2025-12-17 21:07:30,097 INFO 
+2025-12-17 23:41:10,219 INFO 
 ======================================================================
-2025-12-17 21:07:30,097 INFO MQTT Mock Washer Socket - Ready for Testing
-2025-12-17 21:07:30,098 INFO ======================================================================
-2025-12-17 21:07:30,098 INFO Connected to MQTT: 192.168.0.247:1883
-2025-12-17 21:07:30,098 INFO Walltime override: 15.0 min (target ~0.5s/publish)
-2025-12-17 21:07:30,098 INFO Effective (for LONG): speedup ~6.13x, sample ~3s
-2025-12-17 21:07:30,098 INFO Configured (raw args): Speedup: 720.0x, Jitter: ±2.0W, Sample: 60s
+2025-12-17 23:41:10,224 INFO MQTT Mock Washer Socket - Ready for Testing
+2025-12-17 23:41:10,227 INFO ======================================================================
+2025-12-17 23:41:10,228 INFO Connected to MQTT: 192.168.0.247:1883
+2025-12-17 23:41:10,228 INFO Walltime override: 15.0 min (target ~0.5s/publish)
+2025-12-17 23:41:10,228 INFO Effective (for LONG): speedup ~6.13x, sample ~3s
+2025-12-17 23:41:10,228 INFO 
+NORMAL CYCLES (toggle switch or publish to command topic):
+2025-12-17 23:41:10,229 INFO   ON or LONG        - Full 2:39 cycle
+2025-12-17 23:41:10,229 INFO   MEDIUM            - Mid-length 1:30 cycle
+2025-12-17 23:41:10,229 INFO   SHORT             - Quick 0:45 cycle
 
-2025-12-17 21:07:30,099 INFO NORMAL CYCLES (toggle switch or publish to command topic):
-2025-12-17 21:07:30,099 INFO   ON or LONG        - Full 2:39 cycle
-2025-12-17 21:07:30,099 INFO   MEDIUM            - Mid-length 1:30 cycle
-2025-12-17 21:07:30,099 INFO   SHORT             - Quick 0:45 cycle
+2025-12-17 23:41:10,229 INFO FAULT SCENARIOS (append mode to cycle type):
+2025-12-17 23:41:10,229 INFO   LONG_DROPOUT      - Sensor offline mid-cycle (tests watchdog timeout)
+2025-12-17 23:41:10,234 INFO   MEDIUM_GLITCH     - Power spikes/dips (tests smoothing)
+2025-12-17 23:41:10,234 INFO   SHORT_STUCK       - Phase stuck in loop (tests forced end)
+2025-12-17 23:41:10,234 INFO   LONG_INCOMPLETE   - Never finishes (tests stale detection)
 
-2025-12-17 21:07:30,099 INFO FAULT SCENARIOS (append mode to cycle type):
-2025-12-17 21:07:30,099 INFO   LONG_DROPOUT      - Sensor offline mid-cycle (tests watchdog timeout)
-2025-12-17 21:07:30,099 INFO   MEDIUM_GLITCH     - Power spikes/dips (tests smoothing)
-2025-12-17 21:07:30,099 INFO   SHORT_STUCK       - Phase stuck in loop (tests forced end)
-2025-12-17 21:07:30,100 INFO   LONG_INCOMPLETE   - Never finishes (tests stale detection)
+2025-12-17 23:41:10,234 INFO EXAMPLES:
+2025-12-17 23:41:10,234 INFO   mosquitto_pub -t homeassistant/switch/mock_washer_power/set -m 'LONG'
+2025-12-17 23:41:10,234 INFO   mosquitto_pub -t homeassistant/switch/mock_washer_power/set -m 'MEDIUM_GLITCH'
+2025-12-17 23:41:10,235 INFO   mosquitto_pub -t homeassistant/switch/mock_washer_power/set -m 'OFF'
+2025-12-17 23:41:10,235 INFO ======================================================================
 
-2025-12-17 21:07:30,100 INFO EXAMPLES:
-2025-12-17 21:07:30,100 INFO   mosquitto_pub -t homeassistant/switch/mock_washer_power/set -m 'LONG'
-2025-12-17 21:07:30,100 INFO   mosquitto_pub -t homeassistant/switch/mock_washer_power/set -m 'MEDIUM_GLITCH'
-2025-12-17 21:07:30,100 INFO   mosquitto_pub -t homeassistant/switch/mock_washer_power/set -m 'OFF'
-2025-12-17 21:07:30,100 INFO ======================================================================
-
-2025-12-17 21:07:30,101 INFO [CONTINUOUS] Starting cycle 1: LONG
-2025-12-17 21:07:30,102 INFO [VARIANCE] Applied -14.9% duration variance (factor: 0.85x)
-2025-12-17 21:07:57,520 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:08:39,875 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:08:47,956 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:09:07,301 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:09:29,092 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:10:00,194 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:10:27,382 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:10:28,608 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:11:37,404 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:11:45,484 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:11:51,120 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:12:15,357 INFO [GLITCH] Power dip at phase 3
-2025-12-17 21:12:36,657 INFO [GLITCH] Power dip at phase 3
-2025-12-17 21:12:49,142 INFO [GLITCH] Power dip at phase 3
-2025-12-17 21:13:36,885 INFO [GLITCH] Power dip at phase 4
-2025-12-17 21:15:02,815 INFO [GLITCH] Power spike at phase 5
-2025-12-17 21:15:06,489 INFO [GLITCH] Power dip at phase 5
-2025-12-17 21:15:08,693 INFO [GLITCH] Power dip at phase 5
-2025-12-17 21:15:48,613 INFO [GLITCH] Power dip at phase 6
-2025-12-17 21:15:52,776 INFO [GLITCH] Power spike at phase 6
-2025-12-17 21:16:07,228 INFO [GLITCH] Power spike at phase 6
-2025-12-17 21:18:35,547 INFO [GLITCH] Power dip at phase 8
-2025-12-17 21:19:39,480 INFO [GLITCH] Power dip at phase 9
-2025-12-17 21:19:55,399 INFO [GLITCH] Power dip at phase 9
-2025-12-17 21:19:57,604 INFO [GLITCH] Power dip at phase 9
-2025-12-17 21:20:14,011 INFO [GLITCH] Power dip at phase 10
-2025-12-17 21:20:22,586 INFO [GLITCH] Power spike at phase 10
-2025-12-17 21:20:23,812 INFO [CYCLE] Finished normally
-2025-12-17 21:20:23,813 INFO [CONTINUOUS] Cycle complete. Waiting 10 minutes until next cycle...
-2025-12-17 21:30:23,816 INFO [CONTINUOUS] Starting cycle 2: MEDIUM
-2025-12-17 21:30:23,817 INFO [VARIANCE] Applied -1.4% duration variance (factor: 0.99x)
-2025-12-17 21:30:45,110 INFO [GLITCH] Power dip at phase 1
-2025-12-17 21:30:53,407 INFO [GLITCH] Power dip at phase 1
-2025-12-17 21:31:23,304 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:31:29,721 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:31:45,841 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:31:55,075 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:32:25,914 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:32:31,079 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:32:35,930 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:32:43,295 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:33:01,297 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:33:01,767 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:33:21,958 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:34:05,310 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:34:07,035 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:34:49,144 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:35:26,873 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:35:59,282 INFO [GLITCH] Power dip at phase 3
-2025-12-17 21:36:08,527 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:36:29,657 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:37:07,081 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:37:13,185 INFO [GLITCH] Power dip at phase 3
-2025-12-17 21:37:20,856 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:37:56,699 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:37:58,108 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:38:00,769 INFO [GLITCH] Power dip at phase 3
-2025-12-17 21:38:06,567 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:38:33,022 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:38:44,447 INFO [GLITCH] Power dip at phase 3
-2025-12-17 21:38:51,489 INFO [GLITCH] Power dip at phase 4
-2025-12-17 21:38:56,028 INFO [GLITCH] Power dip at phase 4
-2025-12-17 21:39:03,071 INFO [GLITCH] Power dip at phase 4
-2025-12-17 21:39:06,672 INFO [GLITCH] Power spike at phase 4
-2025-12-17 21:39:13,719 INFO [GLITCH] Power dip at phase 4
-2025-12-17 21:39:29,858 INFO [GLITCH] Power dip at phase 4
-2025-12-17 21:40:17,628 INFO [GLITCH] Power spike at phase 5
-2025-12-17 21:40:58,858 INFO [GLITCH] Power spike at phase 5
-2025-12-17 21:41:01,207 INFO [GLITCH] Power spike at phase 5
-2025-12-17 21:42:03,981 INFO [GLITCH] Power dip at phase 5
-2025-12-17 21:42:47,025 INFO [GLITCH] Power dip at phase 6
-2025-12-17 21:42:50,625 INFO [GLITCH] Power dip at phase 6
-2025-12-17 21:43:28,345 INFO [GLITCH] Power dip at phase 6
-2025-12-17 21:43:30,076 INFO [GLITCH] Power spike at phase 6
-2025-12-17 21:43:47,761 INFO [GLITCH] Power spike at phase 7
-2025-12-17 21:44:01,690 INFO [GLITCH] Power spike at phase 7
-2025-12-17 21:44:04,978 INFO [GLITCH] Power dip at phase 7
-2025-12-17 21:44:17,656 INFO [GLITCH] Power spike at phase 7
-2025-12-17 21:44:50,368 INFO [GLITCH] Power spike at phase 7
-2025-12-17 21:44:51,151 INFO [GLITCH] Power spike at phase 7
-2025-12-17 21:45:20,731 INFO [CYCLE] Finished normally
-2025-12-17 21:45:20,731 INFO [CONTINUOUS] Cycle complete. Waiting 10 minutes until next cycle...
-2025-12-17 21:55:20,732 INFO [CONTINUOUS] Starting cycle 3: SHORT
-2025-12-17 21:55:20,732 INFO [VARIANCE] Applied +5.8% duration variance (factor: 1.06x)
-2025-12-17 21:55:45,840 INFO [GLITCH] Power spike at phase 1
-2025-12-17 21:56:49,142 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:57:39,606 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:58:04,471 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:58:29,333 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:58:39,426 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:59:07,746 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:59:15,376 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:59:20,548 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:59:46,888 INFO [GLITCH] Power spike at phase 2
-2025-12-17 22:00:37,448 INFO [GLITCH] Power dip at phase 2
-2025-12-17 22:00:56,409 INFO [GLITCH] Power dip at phase 2
-2025-12-17 22:01:05,520 INFO [GLITCH] Power dip at phase 2
-2025-12-17 22:01:14,627 INFO [GLITCH] Power spike at phase 2
-2025-12-17 22:01:19,810 INFO [GLITCH] Power dip at phase 2
-2025-12-17 22:01:42,216 INFO [GLITCH] Power spike at phase 3
-2025-12-17 22:02:01,173 INFO [GLITCH] Power spike at phase 3
-2025-12-17 22:02:06,343 INFO [GLITCH] Power spike at phase 3
-2025-12-17 22:02:08,560 INFO [GLITCH] Power dip at phase 3
-2025-12-17 22:03:08,867 INFO [GLITCH] Power spike at phase 3
-2025-12-17 22:03:09,606 INFO [GLITCH] Power spike at phase 3
-2025-12-17 22:03:33,484 INFO [GLITCH] Power dip at phase 3
-2025-12-17 22:03:36,685 INFO [GLITCH] Power spike at phase 3
-2025-12-17 22:04:37,980 INFO [GLITCH] Power spike at phase 3
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 2025-12-17 21:34:10,386 INFO [CONTINUOUS] Starting cycle 4: LONG
-2025-12-17 21:34:10,386 INFO [VARIANCE] Applied +9.0% duration variance (factor: 1.09x)
-2025-12-17 21:35:04,247 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:35:58,380 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:36:00,095 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:36:15,522 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:36:36,826 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:36:58,619 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:37:38,048 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:37:59,348 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:38:07,438 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:38:10,133 INFO [GLITCH] Power spike at phase 2
-2025-12-17 21:38:32,902 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:38:44,410 INFO [GLITCH] Power dip at phase 2
-2025-12-17 21:40:13,300 INFO [GLITCH] Power dip at phase 3
-2025-12-17 21:40:40,966 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:41:29,220 INFO [GLITCH] Power dip at phase 3
-2025-12-17 21:41:31,913 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:41:43,420 INFO [GLITCH] Power spike at phase 3
-2025-12-17 21:42:13,547 INFO [GLITCH] Power dip at phase 4
-2025-12-17 21:42:21,138 INFO [GLITCH] Power dip at phase 4
-2025-12-17 21:42:24,322 INFO [GLITCH] Power spike at phase 4
-2025-12-17 21:43:03,250 INFO [GLITCH] Power spike at phase 5
-2025-12-17 21:44:42,399 INFO [GLITCH] Power spike at phase 6
-2025-12-17 21:44:50,480 INFO [GLITCH] Power dip at phase 6
-2025-12-17 21:45:46,059 INFO [GLITCH] Power dip at phase 6
-2025-12-17 21:45:47,284 INFO [GLITCH] Power spike at phase 6
-2025-12-17 21:46:04,178 INFO [GLITCH] Power spike at phase 7
-2025-12-17 21:46:10,789 INFO [GLITCH] Power dip at phase 7
-2025-12-17 21:46:35,030 INFO [GLITCH] Power dip at phase 7
-2025-12-17 21:46:46,048 INFO [GLITCH] Power spike at phase 7
-2025-12-17 21:47:08,327 INFO [GLITCH] Power dip at phase 8
-2025-12-17 21:47:17,875 INFO [GLITCH] Power dip at phase 8
-2025-12-17 21:47:19,590 INFO [GLITCH] Power spike at phase 8
-2025-12-17 21:47:20,816 INFO [GLITCH] Power spike at phase 8
-2025-12-17 21:47:22,531 INFO [GLITCH] Power dip at phase 8
-2025-12-17 21:47:36,975 INFO [GLITCH] Power dip at phase 8
-2025-12-17 21:48:19,326 INFO [GLITCH] Power spike at phase 8
-2025-12-17 21:49:05,602 INFO [GLITCH] Power dip at phase 9
-2025-12-17 21:49:45,076 INFO [GLITCH] Power dip at phase 9
-2025-12-17 21:49:56,583 INFO [GLITCH] Power dip at phase 9
-2025-12-17 21:50:02,215 INFO [GLITCH] Power spike at phase 9
-2025-12-17 21:50:31,840 INFO [GLITCH] Power dip at phase 10
-2025-12-17 21:50:42,368 INFO [GLITCH] Power dip at phase 10
-2025-12-17 21:50:45,061 INFO [CYCLE] Finished normally
-2025-12-17 21:50:45,062 INFO [CONTINUOUS] Cycle complete. Waiting 35 minutes until next cycle...
+2025-12-17 23:41:10,241 INFO [BATCH] Starting cycle 1/∞: LONG
+2025-12-17 23:41:10,242 INFO [VARIANCE] Applied +3.4% duration variance (factor: 1.03x)
+2025-12-17 23:41:12,204 INFO [GLITCH] Power spike at phase 1
+2025-12-17 23:42:36,667 INFO [GLITCH] Power dip at phase 2
+2025-12-17 23:42:38,381 INFO [GLITCH] Power spike at phase 2
+2025-12-17 23:42:40,585 INFO [GLITCH] Power dip at phase 2
+2025-12-17 23:43:23,917 INFO [GLITCH] Power dip at phase 2
+2025-12-17 23:44:16,557 INFO [GLITCH] Power spike at phase 2
+2025-12-17 23:44:23,168 INFO [GLITCH] Power spike at phase 2
+2025-12-17 23:44:50,342 INFO [GLITCH] Power dip at phase 2
+2025-12-17 23:45:11,153 INFO [GLITCH] Power dip at phase 2
+2025-12-17 23:45:13,846 INFO [GLITCH] Power spike at phase 2
+2025-12-17 23:45:31,228 INFO [GLITCH] Power spike at phase 2
+2025-12-17 23:45:33,922 INFO [GLITCH] Power dip at phase 2
+2025-12-17 23:46:10,400 INFO [GLITCH] Power dip at phase 3
+2025-12-17 23:46:26,313 INFO [GLITCH] Power spike at phase 3
+2025-12-17 23:47:17,477 INFO [GLITCH] Power spike at phase 3
+2025-12-17 23:47:20,171 INFO [GLITCH] Power spike at phase 3
+2025-12-17 23:47:21,885 INFO [GLITCH] Power dip at phase 3
+2025-12-17 23:48:11,091 INFO [GLITCH] Power spike at phase 3
+2025-12-17 23:49:20,862 INFO [GLITCH] Power spike at phase 5
+2025-12-17 23:49:28,452 INFO [GLITCH] Power spike at phase 5
+2025-12-17 23:49:32,614 INFO [GLITCH] Power dip at phase 5
+2025-12-17 23:50:02,236 INFO [GLITCH] Power dip at phase 5
+2025-12-17 23:51:41,381 INFO [GLITCH] Power dip at phase 6
+2025-12-17 23:51:52,889 INFO [GLITCH] Power dip at phase 6
+2025-12-17 23:52:02,437 INFO [GLITCH] Power dip at phase 6
+2025-12-17 23:52:09,537 INFO [GLITCH] Power dip at phase 6
+2025-12-17 23:53:28,610 INFO [GLITCH] Power spike at phase 8
+2025-12-17 23:53:32,283 INFO [GLITCH] Power dip at phase 8
+2025-12-17 23:54:24,427 INFO [GLITCH] Power spike at phase 8
+2025-12-17 23:54:59,924 INFO [GLITCH] Power dip at phase 8
+2025-12-17 23:55:26,118 INFO [GLITCH] Power spike at phase 9
+2025-12-17 23:56:11,407 INFO [GLITCH] Power dip at phase 9
+2025-12-17 23:56:50,330 INFO [CYCLE] Finished normally
+2025-12-17 23:56:50,330 INFO [BATCH] Cycle 1/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 00:06:50,331 INFO [BATCH] Starting cycle 2/∞: MEDIUM
+2025-12-18 00:06:50,331 INFO [VARIANCE] Applied +13.4% duration variance (factor: 1.14x)
+2025-12-18 00:07:05,042 INFO [GLITCH] Power spike at phase 1
+2025-12-18 00:07:07,077 INFO [GLITCH] Power dip at phase 1
+2025-12-18 00:07:10,678 INFO [GLITCH] Power dip at phase 1
+2025-12-18 00:07:28,988 INFO [GLITCH] Power spike at phase 1
+2025-12-18 00:08:25,484 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:08:26,580 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:09:25,894 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:09:54,534 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:09:58,133 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:09:59,542 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:10:00,639 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:10:11,125 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:10:14,725 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:10:26,149 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:10:29,749 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:10:57,764 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:11:05,745 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:11:25,306 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:12:12,412 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:12:37,296 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:13:04,370 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:13:09,848 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:13:14,699 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:13:25,499 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:13:35,045 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:13:52,103 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:13:55,704 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:13:57,739 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:14:15,423 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:14:23,404 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:14:38,899 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:14:43,438 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:14:46,725 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:14:53,767 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:14:58,619 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:15:05,350 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:15:07,385 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:15:17,559 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:15:24,602 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:15:43,539 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:15:49,329 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:16:20,159 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:17:07,265 INFO [GLITCH] Power spike at phase 4
+2025-12-18 00:17:10,240 INFO [GLITCH] Power spike at phase 4
+2025-12-18 00:17:38,253 INFO [GLITCH] Power dip at phase 4
+2025-12-18 00:18:35,382 INFO [GLITCH] Power dip at phase 5
+2025-12-18 00:18:45,554 INFO [GLITCH] Power dip at phase 5
+2025-12-18 00:18:57,606 INFO [GLITCH] Power dip at phase 5
+2025-12-18 00:18:59,956 INFO [GLITCH] Power spike at phase 5
+2025-12-18 00:19:01,992 INFO [GLITCH] Power dip at phase 5
+2025-12-18 00:19:16,860 INFO [GLITCH] Power dip at phase 5
+2025-12-18 00:19:18,582 INFO [GLITCH] Power dip at phase 5
+2025-12-18 00:20:16,334 INFO [GLITCH] Power spike at phase 5
+2025-12-18 00:20:20,873 INFO [GLITCH] Power dip at phase 5
+2025-12-18 00:20:28,229 INFO [GLITCH] Power spike at phase 6
+2025-12-18 00:20:40,594 INFO [GLITCH] Power dip at phase 6
+2025-12-18 00:20:45,759 INFO [GLITCH] Power dip at phase 6
+2025-12-18 00:20:58,436 INFO [GLITCH] Power dip at phase 6
+2025-12-18 00:21:07,984 INFO [GLITCH] Power dip at phase 6
+2025-12-18 00:21:15,654 INFO [GLITCH] Power dip at phase 6
+2025-12-18 00:22:05,262 INFO [GLITCH] Power dip at phase 6
+2025-12-18 00:22:05,732 INFO [GLITCH] Power spike at phase 6
+2025-12-18 00:22:56,599 INFO [GLITCH] Power spike at phase 7
+2025-12-18 00:23:51,216 INFO [GLITCH] Power spike at phase 7
+2025-12-18 00:24:02,640 INFO [CYCLE] Finished normally
+2025-12-18 00:24:02,640 INFO [BATCH] Cycle 2/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 00:34:02,641 INFO [BATCH] Starting cycle 3/∞: SHORT
+2025-12-18 00:34:02,642 INFO [VARIANCE] Applied -12.5% duration variance (factor: 0.88x)
+2025-12-18 00:34:02,642 INFO [GLITCH] Power dip at phase 1
+2025-12-18 00:34:06,335 INFO [GLITCH] Power spike at phase 1
+2025-12-18 00:34:58,764 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:35:06,887 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:35:09,595 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:35:44,794 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:36:34,760 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:37:23,250 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:37:46,635 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:38:08,052 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:38:09,283 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:38:14,945 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:38:44,237 INFO [GLITCH] Power dip at phase 2
+2025-12-18 00:39:20,911 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:39:35,434 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:40:01,280 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:40:04,974 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:40:10,144 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:41:53,277 INFO [GLITCH] Power dip at phase 3
+2025-12-18 00:41:55,986 INFO [GLITCH] Power spike at phase 3
+2025-12-18 00:42:06,079 INFO [GLITCH] Power spike at phase 4
+2025-12-18 00:42:24,049 INFO [GLITCH] Power spike at phase 4
+2025-12-18 00:44:14,569 INFO [GLITCH] Power spike at phase 5
+2025-12-18 00:45:01,089 INFO [GLITCH] Power spike at phase 5
+2025-12-18 00:45:17,088 INFO [GLITCH] Power spike at phase 6
+2025-12-18 00:45:39,980 INFO [GLITCH] Power dip at phase 6
+2025-12-18 00:46:07,794 INFO [GLITCH] Power spike at phase 6
+2025-12-18 00:47:17,453 INFO [CYCLE] Finished normally
+2025-12-18 00:47:17,453 INFO [BATCH] Cycle 3/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 00:57:17,454 INFO [BATCH] Starting cycle 4/∞: LONG
+2025-12-18 00:57:17,454 INFO [VARIANCE] Applied -11.2% duration variance (factor: 0.89x)
+2025-12-18 00:58:08,866 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:58:29,674 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:58:32,367 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:58:51,217 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:59:06,151 INFO [GLITCH] Power spike at phase 2
+2025-12-18 00:59:45,566 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:00:30,866 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:00:54,123 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:01:02,691 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:01:04,406 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:01:12,975 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:01:39,660 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:02:16,136 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:02:25,195 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:02:33,274 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:02:37,436 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:02:52,859 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:03:12,688 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:03:28,601 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:03:37,169 INFO [GLITCH] Power dip at phase 4
+2025-12-18 01:03:45,248 INFO [GLITCH] Power dip at phase 4
+2025-12-18 01:05:21,468 INFO [GLITCH] Power spike at phase 5
+2025-12-18 01:05:22,692 INFO [GLITCH] Power spike at phase 6
+2025-12-18 01:05:35,667 INFO [GLITCH] Power spike at phase 6
+2025-12-18 01:05:36,892 INFO [GLITCH] Power dip at phase 6
+2025-12-18 01:05:43,012 INFO [GLITCH] Power spike at phase 6
+2025-12-18 01:05:51,091 INFO [GLITCH] Power dip at phase 6
+2025-12-18 01:07:32,198 INFO [GLITCH] Power dip at phase 7
+2025-12-18 01:07:43,215 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:08:16,753 INFO [GLITCH] Power spike at phase 8
+2025-12-18 01:08:31,687 INFO [GLITCH] Power dip at phase 8
+2025-12-18 01:08:55,924 INFO [GLITCH] Power spike at phase 8
+2025-12-18 01:09:19,672 INFO [GLITCH] Power dip at phase 8
+2025-12-18 01:09:46,356 INFO [GLITCH] Power dip at phase 9
+2025-12-18 01:10:27,728 INFO [GLITCH] Power dip at phase 10
+2025-12-18 01:10:49,027 INFO [CYCLE] Finished normally
+2025-12-18 01:10:49,027 INFO [BATCH] Cycle 4/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 01:20:49,028 INFO [BATCH] Starting cycle 5/∞: MEDIUM
+2025-12-18 01:20:49,029 INFO [VARIANCE] Applied +1.4% duration variance (factor: 1.02x)
+2025-12-18 01:21:27,214 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:21:34,257 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:22:11,348 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:22:55,636 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:23:02,680 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:23:28,503 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:23:31,790 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:23:42,276 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:24:02,150 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:24:11,072 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:24:11,855 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:24:37,052 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:24:48,476 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:24:58,335 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:25:00,370 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:25:03,030 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:25:05,380 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:25:25,256 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:26:39,591 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:26:41,314 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:27:04,632 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:27:10,422 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:27:12,458 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:27:29,203 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:27:38,438 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:27:51,115 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:28:01,287 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:28:28,987 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:28:48,236 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:29:09,989 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:29:19,849 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:30:05,077 INFO [GLITCH] Power dip at phase 4
+2025-12-18 01:30:09,617 INFO [GLITCH] Power dip at phase 4
+2025-12-18 01:30:30,431 INFO [GLITCH] Power dip at phase 4
+2025-12-18 01:30:54,376 INFO [GLITCH] Power spike at phase 5
+2025-12-18 01:30:58,914 INFO [GLITCH] Power dip at phase 5
+2025-12-18 01:31:01,888 INFO [GLITCH] Power spike at phase 5
+2025-12-18 01:31:14,255 INFO [GLITCH] Power dip at phase 5
+2025-12-18 01:31:59,797 INFO [GLITCH] Power spike at phase 5
+2025-12-18 01:32:32,820 INFO [GLITCH] Power spike at phase 5
+2025-12-18 01:32:45,184 INFO [GLITCH] Power spike at phase 5
+2025-12-18 01:33:10,692 INFO [GLITCH] Power spike at phase 6
+2025-12-18 01:33:29,941 INFO [GLITCH] Power dip at phase 6
+2025-12-18 01:33:42,304 INFO [GLITCH] Power dip at phase 6
+2025-12-18 01:33:48,721 INFO [GLITCH] Power dip at phase 6
+2025-12-18 01:33:50,443 INFO [GLITCH] Power dip at phase 6
+2025-12-18 01:33:50,913 INFO [GLITCH] Power spike at phase 6
+2025-12-18 01:34:04,841 INFO [GLITCH] Power spike at phase 6
+2025-12-18 01:34:10,319 INFO [GLITCH] Power dip at phase 6
+2025-12-18 01:34:16,423 INFO [GLITCH] Power spike at phase 6
+2025-12-18 01:34:36,611 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:34:44,280 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:34:58,834 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:34:59,617 INFO [GLITCH] Power dip at phase 7
+2025-12-18 01:35:17,616 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:35:34,673 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:35:37,647 INFO [GLITCH] Power dip at phase 7
+2025-12-18 01:35:41,561 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:35:48,603 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:35:57,211 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:36:05,818 INFO [GLITCH] Power dip at phase 7
+2025-12-18 01:36:10,983 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:36:13,018 INFO [CYCLE] Finished normally
+2025-12-18 01:36:13,018 INFO [BATCH] Cycle 5/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 01:46:13,019 INFO [BATCH] Starting cycle 6/∞: SHORT
+2025-12-18 01:46:13,019 INFO [VARIANCE] Applied -11.2% duration variance (factor: 0.89x)
+2025-12-18 01:46:27,788 INFO [GLITCH] Power dip at phase 1
+2025-12-18 01:46:29,019 INFO [GLITCH] Power spike at phase 1
+2025-12-18 01:47:03,725 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:47:17,756 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:48:26,430 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:48:45,383 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:49:00,398 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:49:08,029 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:49:19,598 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:49:44,951 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:49:58,982 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:50:49,440 INFO [GLITCH] Power dip at phase 2
+2025-12-18 01:51:01,009 INFO [GLITCH] Power spike at phase 2
+2025-12-18 01:51:18,977 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:51:32,022 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:51:35,715 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:51:49,253 INFO [GLITCH] Power spike at phase 3
+2025-12-18 01:53:01,377 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:53:20,330 INFO [GLITCH] Power dip at phase 3
+2025-12-18 01:54:38,848 INFO [GLITCH] Power spike at phase 4
+2025-12-18 01:54:45,986 INFO [GLITCH] Power dip at phase 4
+2025-12-18 01:54:55,095 INFO [GLITCH] Power dip at phase 4
+2025-12-18 01:55:26,356 INFO [GLITCH] Power dip at phase 4
+2025-12-18 01:55:44,324 INFO [GLITCH] Power spike at phase 4
+2025-12-18 01:55:55,401 INFO [GLITCH] Power spike at phase 4
+2025-12-18 01:56:27,645 INFO [GLITCH] Power spike at phase 5
+2025-12-18 01:56:55,951 INFO [GLITCH] Power dip at phase 5
+2025-12-18 01:57:00,136 INFO [GLITCH] Power spike at phase 5
+2025-12-18 01:57:24,505 INFO [GLITCH] Power spike at phase 5
+2025-12-18 01:58:26,286 INFO [GLITCH] Power spike at phase 6
+2025-12-18 01:58:53,610 INFO [GLITCH] Power spike at phase 7
+2025-12-18 01:59:40,624 INFO [CYCLE] Finished normally
+2025-12-18 01:59:40,625 INFO [BATCH] Cycle 6/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 02:09:40,625 INFO [BATCH] Starting cycle 7/∞: LONG
+2025-12-18 02:09:40,626 INFO [VARIANCE] Applied +8.1% duration variance (factor: 1.08x)
+2025-12-18 02:10:01,190 INFO [GLITCH] Power spike at phase 1
+2025-12-18 02:10:04,373 INFO [GLITCH] Power dip at phase 1
+2025-12-18 02:10:05,597 INFO [GLITCH] Power dip at phase 1
+2025-12-18 02:10:26,405 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:10:27,140 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:11:27,120 INFO [GLITCH] Power spike at phase 2
+2025-12-18 02:11:46,463 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:12:13,147 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:12:30,042 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:12:46,445 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:13:17,047 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:13:20,720 INFO [GLITCH] Power spike at phase 2
+2025-12-18 02:13:47,404 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:14:31,714 INFO [GLITCH] Power spike at phase 2
+2025-12-18 02:14:48,607 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:14:53,749 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:15:38,549 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:16:03,276 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:16:11,845 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:16:43,915 INFO [GLITCH] Power spike at phase 3
+2025-12-18 02:17:16,475 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:17:40,711 INFO [GLITCH] Power spike at phase 4
+2025-12-18 02:17:45,363 INFO [GLITCH] Power dip at phase 4
+2025-12-18 02:18:29,184 INFO [GLITCH] Power dip at phase 5
+2025-12-18 02:19:42,382 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:20:09,067 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:20:16,168 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:20:28,654 INFO [GLITCH] Power dip at phase 6
+2025-12-18 02:20:44,566 INFO [GLITCH] Power dip at phase 6
+2025-12-18 02:21:58,744 INFO [GLITCH] Power dip at phase 7
+2025-12-18 02:22:25,917 INFO [GLITCH] Power spike at phase 7
+2025-12-18 02:22:28,611 INFO [GLITCH] Power spike at phase 7
+2025-12-18 02:22:30,327 INFO [GLITCH] Power dip at phase 7
+2025-12-18 02:23:15,616 INFO [GLITCH] Power spike at phase 8
+2025-12-18 02:23:18,799 INFO [GLITCH] Power dip at phase 8
+2025-12-18 02:23:29,815 INFO [GLITCH] Power spike at phase 8
+2025-12-18 02:23:42,301 INFO [GLITCH] Power spike at phase 8
+2025-12-18 02:23:44,994 INFO [GLITCH] Power spike at phase 8
+2025-12-18 02:24:02,376 INFO [GLITCH] Power spike at phase 8
+2025-12-18 02:24:09,965 INFO [GLITCH] Power dip at phase 8
+2025-12-18 02:24:25,389 INFO [GLITCH] Power dip at phase 9
+2025-12-18 02:24:34,937 INFO [GLITCH] Power spike at phase 9
+2025-12-18 02:26:07,229 INFO [CYCLE] Finished normally
+2025-12-18 02:26:07,230 INFO [BATCH] Cycle 7/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 02:36:07,230 INFO [BATCH] Starting cycle 8/∞: MEDIUM
+2025-12-18 02:36:07,231 INFO [VARIANCE] Applied +13.0% duration variance (factor: 1.13x)
+2025-12-18 02:36:32,275 INFO [GLITCH] Power spike at phase 1
+2025-12-18 02:36:37,753 INFO [GLITCH] Power spike at phase 1
+2025-12-18 02:36:43,856 INFO [GLITCH] Power spike at phase 1
+2025-12-18 02:37:32,215 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:37:51,464 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:38:34,813 INFO [GLITCH] Power spike at phase 2
+2025-12-18 02:38:44,674 INFO [GLITCH] Power spike at phase 2
+2025-12-18 02:38:56,724 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:39:33,187 INFO [GLITCH] Power spike at phase 2
+2025-12-18 02:39:44,298 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:39:46,647 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:40:02,140 INFO [GLITCH] Power spike at phase 2
+2025-12-18 02:41:05,206 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:41:10,058 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:42:04,986 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:42:06,082 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:42:07,178 INFO [GLITCH] Power dip at phase 2
+2025-12-18 02:42:47,712 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:42:59,762 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:43:00,232 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:43:22,925 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:43:48,121 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:43:56,102 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:44:17,542 INFO [GLITCH] Power spike at phase 3
+2025-12-18 02:44:26,150 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:44:27,559 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:44:30,220 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:44:40,080 INFO [GLITCH] Power spike at phase 3
+2025-12-18 02:44:49,313 INFO [GLITCH] Power spike at phase 3
+2025-12-18 02:45:00,424 INFO [GLITCH] Power spike at phase 3
+2025-12-18 02:45:02,459 INFO [GLITCH] Power dip at phase 3
+2025-12-18 02:45:17,014 INFO [GLITCH] Power spike at phase 3
+2025-12-18 02:46:06,624 INFO [GLITCH] Power dip at phase 4
+2025-12-18 02:46:57,487 INFO [GLITCH] Power dip at phase 4
+2025-12-18 02:47:07,034 INFO [GLITCH] Power dip at phase 4
+2025-12-18 02:47:08,756 INFO [GLITCH] Power dip at phase 4
+2025-12-18 02:47:16,424 INFO [GLITCH] Power dip at phase 5
+2025-12-18 02:47:47,881 INFO [GLITCH] Power spike at phase 5
+2025-12-18 02:48:41,558 INFO [GLITCH] Power dip at phase 5
+2025-12-18 02:49:22,715 INFO [GLITCH] Power spike at phase 5
+2025-12-18 02:49:31,010 INFO [GLITCH] Power dip at phase 5
+2025-12-18 02:49:39,306 INFO [GLITCH] Power spike at phase 5
+2025-12-18 02:50:03,564 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:50:32,519 INFO [GLITCH] Power dip at phase 6
+2025-12-18 02:50:41,752 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:51:01,001 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:51:04,600 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:51:08,513 INFO [GLITCH] Power dip at phase 6
+2025-12-18 02:51:09,296 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:51:13,522 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:51:26,198 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:51:26,981 INFO [GLITCH] Power spike at phase 6
+2025-12-18 02:51:30,267 INFO [GLITCH] Power spike at phase 7
+2025-12-18 02:51:33,868 INFO [GLITCH] Power dip at phase 7
+2025-12-18 02:51:54,681 INFO [GLITCH] Power spike at phase 7
+2025-12-18 02:51:58,594 INFO [GLITCH] Power spike at phase 7
+2025-12-18 02:52:01,880 INFO [GLITCH] Power spike at phase 7
+2025-12-18 02:52:03,602 INFO [GLITCH] Power dip at phase 7
+2025-12-18 02:52:56,968 INFO [GLITCH] Power spike at phase 7
+2025-12-18 02:53:15,279 INFO [CYCLE] Finished normally
+2025-12-18 02:53:15,279 INFO [BATCH] Cycle 8/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 03:03:15,279 INFO [BATCH] Starting cycle 9/∞: SHORT
+2025-12-18 03:03:15,280 INFO [VARIANCE] Applied -5.5% duration variance (factor: 0.95x)
+2025-12-18 03:03:23,650 INFO [GLITCH] Power dip at phase 1
+2025-12-18 03:03:55,404 INFO [GLITCH] Power spike at phase 1
+2025-12-18 03:04:00,587 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:05:48,669 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:06:26,840 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:06:43,333 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:06:45,057 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:09:32,224 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:09:34,440 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:09:37,640 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:10:27,620 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:10:39,191 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:10:43,870 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:11:20,065 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:11:20,804 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:11:26,467 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:11:33,114 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:11:38,285 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:11:52,316 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:12:22,598 INFO [GLITCH] Power spike at phase 4
+2025-12-18 03:12:56,324 INFO [GLITCH] Power spike at phase 4
+2025-12-18 03:13:09,864 INFO [GLITCH] Power spike at phase 4
+2025-12-18 03:13:28,339 INFO [GLITCH] Power spike at phase 4
+2025-12-18 03:13:42,865 INFO [GLITCH] Power spike at phase 4
+2025-12-18 03:13:43,605 INFO [GLITCH] Power dip at phase 4
+2025-12-18 03:15:01,149 INFO [GLITCH] Power spike at phase 5
+2025-12-18 03:15:22,572 INFO [GLITCH] Power spike at phase 6
+2025-12-18 03:15:52,360 INFO [GLITCH] Power dip at phase 6
+2025-12-18 03:16:21,655 INFO [GLITCH] Power dip at phase 6
+2025-12-18 03:16:23,379 INFO [GLITCH] Power dip at phase 6
+2025-12-18 03:16:44,798 INFO [GLITCH] Power spike at phase 7
+2025-12-18 03:16:50,954 INFO [GLITCH] Power dip at phase 7
+2025-12-18 03:16:53,170 INFO [GLITCH] Power spike at phase 7
+2025-12-18 03:16:56,370 INFO [GLITCH] Power dip at phase 7
+2025-12-18 03:16:58,095 INFO [GLITCH] Power spike at phase 7
+2025-12-18 03:17:12,619 INFO [GLITCH] Power spike at phase 7
+2025-12-18 03:17:35,514 INFO [CYCLE] Finished normally
+2025-12-18 03:17:35,514 INFO [BATCH] Cycle 9/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 03:27:35,514 INFO [BATCH] Starting cycle 10/∞: LONG
+2025-12-18 03:27:35,515 INFO [VARIANCE] Applied -9.7% duration variance (factor: 0.90x)
+2025-12-18 03:27:47,760 INFO [GLITCH] Power dip at phase 1
+2025-12-18 03:28:04,167 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:29:00,737 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:29:21,057 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:29:23,261 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:29:40,154 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:30:27,964 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:32:11,058 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:32:15,710 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:33:03,965 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:33:14,004 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:34:11,048 INFO [GLITCH] Power spike at phase 4
+2025-12-18 03:34:13,747 INFO [GLITCH] Power spike at phase 4
+2025-12-18 03:34:36,517 INFO [GLITCH] Power dip at phase 4
+2025-12-18 03:35:05,652 INFO [GLITCH] Power dip at phase 5
+2025-12-18 03:35:30,380 INFO [GLITCH] Power spike at phase 5
+2025-12-18 03:35:36,501 INFO [GLITCH] Power dip at phase 5
+2025-12-18 03:35:47,519 INFO [GLITCH] Power spike at phase 6
+2025-12-18 03:36:22,046 INFO [GLITCH] Power dip at phase 6
+2025-12-18 03:37:04,407 INFO [GLITCH] Power dip at phase 6
+2025-12-18 03:37:49,702 INFO [GLITCH] Power dip at phase 7
+2025-12-18 03:38:09,061 INFO [GLITCH] Power spike at phase 7
+2025-12-18 03:38:25,465 INFO [GLITCH] Power dip at phase 8
+2025-12-18 03:39:01,943 INFO [GLITCH] Power spike at phase 8
+2025-12-18 03:39:19,813 INFO [GLITCH] Power dip at phase 8
+2025-12-18 03:40:57,030 INFO [GLITCH] Power spike at phase 10
+2025-12-18 03:41:17,352 INFO [CYCLE] Finished normally
+2025-12-18 03:41:17,352 INFO [BATCH] Cycle 10/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 03:51:17,353 INFO [BATCH] Starting cycle 11/∞: MEDIUM
+2025-12-18 03:51:17,353 INFO [VARIANCE] Applied +11.0% duration variance (factor: 1.11x)
+2025-12-18 03:51:18,293 INFO [GLITCH] Power dip at phase 1
+2025-12-18 03:51:22,519 INFO [GLITCH] Power dip at phase 1
+2025-12-18 03:51:30,188 INFO [GLITCH] Power dip at phase 1
+2025-12-18 03:51:51,003 INFO [GLITCH] Power dip at phase 1
+2025-12-18 03:52:19,016 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:53:45,559 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:54:51,445 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:54:58,800 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:55:19,930 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:55:21,026 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:55:39,964 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:55:45,129 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:55:48,729 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:56:04,851 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:56:08,138 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:56:25,823 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:56:27,545 INFO [GLITCH] Power dip at phase 2
+2025-12-18 03:56:32,084 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:56:46,326 INFO [GLITCH] Power spike at phase 2
+2025-12-18 03:57:38,753 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:57:50,177 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:58:05,670 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:58:13,965 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:58:24,450 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:58:46,205 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:58:47,301 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:59:10,306 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:59:11,402 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:59:19,070 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:59:42,703 INFO [GLITCH] Power spike at phase 3
+2025-12-18 03:59:43,799 INFO [GLITCH] Power dip at phase 3
+2025-12-18 03:59:48,337 INFO [GLITCH] Power dip at phase 3
+2025-12-18 04:00:00,388 INFO [GLITCH] Power dip at phase 3
+2025-12-18 04:00:19,019 INFO [GLITCH] Power spike at phase 3
+2025-12-18 04:00:53,919 INFO [GLITCH] Power dip at phase 4
+2025-12-18 04:00:58,458 INFO [GLITCH] Power spike at phase 4
+2025-12-18 04:01:13,951 INFO [GLITCH] Power dip at phase 4
+2025-12-18 04:01:30,071 INFO [GLITCH] Power spike at phase 4
+2025-12-18 04:01:50,260 INFO [GLITCH] Power spike at phase 4
+2025-12-18 04:01:56,677 INFO [GLITCH] Power dip at phase 4
+2025-12-18 04:02:19,369 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:02:22,656 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:03:01,624 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:03:07,414 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:03:11,015 INFO [GLITCH] Power dip at phase 5
+2025-12-18 04:03:34,333 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:03:36,994 INFO [GLITCH] Power dip at phase 5
+2025-12-18 04:03:39,342 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:04:14,866 INFO [GLITCH] Power dip at phase 5
+2025-12-18 04:04:45,697 INFO [GLITCH] Power dip at phase 6
+2025-12-18 04:05:04,320 INFO [GLITCH] Power dip at phase 6
+2025-12-18 04:05:28,892 INFO [GLITCH] Power spike at phase 6
+2025-12-18 04:05:35,311 INFO [GLITCH] Power dip at phase 6
+2025-12-18 04:05:47,362 INFO [GLITCH] Power spike at phase 6
+2025-12-18 04:06:22,263 INFO [GLITCH] Power dip at phase 7
+2025-12-18 04:06:32,436 INFO [GLITCH] Power spike at phase 7
+2025-12-18 04:06:59,822 INFO [GLITCH] Power dip at phase 7
+2025-12-18 04:07:17,194 INFO [GLITCH] Power dip at phase 7
+2025-12-18 04:07:37,069 INFO [GLITCH] Power spike at phase 7
+2025-12-18 04:07:47,555 INFO [GLITCH] Power spike at phase 7
+2025-12-18 04:07:48,651 INFO [GLITCH] Power dip at phase 7
+2025-12-18 04:08:07,274 INFO [CYCLE] Finished normally
+2025-12-18 04:08:07,275 INFO [BATCH] Cycle 11/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 04:18:07,279 INFO [BATCH] Starting cycle 12/∞: SHORT
+2025-12-18 04:18:07,280 INFO [VARIANCE] Applied +13.6% duration variance (factor: 1.14x)
+2025-12-18 04:18:08,265 INFO [GLITCH] Power dip at phase 1
+2025-12-18 04:18:23,280 INFO [GLITCH] Power spike at phase 1
+2025-12-18 04:18:49,619 INFO [GLITCH] Power dip at phase 1
+2025-12-18 04:18:58,727 INFO [GLITCH] Power dip at phase 2
+2025-12-18 04:19:03,897 INFO [GLITCH] Power spike at phase 2
+2025-12-18 04:19:05,621 INFO [GLITCH] Power dip at phase 2
+2025-12-18 04:19:25,561 INFO [GLITCH] Power dip at phase 2
+2025-12-18 04:20:09,131 INFO [GLITCH] Power spike at phase 2
+2025-12-18 04:20:16,761 INFO [GLITCH] Power dip at phase 2
+2025-12-18 04:21:20,020 INFO [GLITCH] Power spike at phase 2
+2025-12-18 04:21:27,159 INFO [GLITCH] Power spike at phase 2
+2025-12-18 04:22:15,157 INFO [GLITCH] Power dip at phase 2
+2025-12-18 04:22:36,079 INFO [GLITCH] Power spike at phase 2
+2025-12-18 04:22:55,033 INFO [GLITCH] Power spike at phase 2
+2025-12-18 04:23:04,141 INFO [GLITCH] Power dip at phase 2
+2025-12-18 04:23:30,479 INFO [GLITCH] Power spike at phase 2
+2025-12-18 04:24:36,693 INFO [GLITCH] Power dip at phase 2
+2025-12-18 04:24:45,801 INFO [GLITCH] Power dip at phase 3
+2025-12-18 04:25:19,031 INFO [GLITCH] Power dip at phase 3
+2025-12-18 04:25:22,724 INFO [GLITCH] Power dip at phase 3
+2025-12-18 04:25:50,046 INFO [GLITCH] Power spike at phase 3
+2025-12-18 04:27:48,438 INFO [GLITCH] Power dip at phase 3
+2025-12-18 04:28:31,021 INFO [GLITCH] Power dip at phase 3
+2025-12-18 04:28:49,974 INFO [GLITCH] Power dip at phase 4
+2025-12-18 04:29:06,465 INFO [GLITCH] Power dip at phase 4
+2025-12-18 04:29:26,403 INFO [GLITCH] Power spike at phase 4
+2025-12-18 04:29:48,310 INFO [GLITCH] Power dip at phase 4
+2025-12-18 04:30:43,199 INFO [GLITCH] Power spike at phase 4
+2025-12-18 04:31:08,060 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:31:27,013 INFO [GLITCH] Power dip at phase 5
+2025-12-18 04:31:57,289 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:32:11,813 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:32:15,505 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:32:28,059 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:32:29,782 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:33:14,827 INFO [GLITCH] Power spike at phase 6
+2025-12-18 04:33:54,457 INFO [GLITCH] Power spike at phase 6
+2025-12-18 04:34:39,500 INFO [GLITCH] Power spike at phase 7
+2025-12-18 04:34:48,608 INFO [GLITCH] Power dip at phase 7
+2025-12-18 04:34:57,224 INFO [GLITCH] Power dip at phase 7
+2025-12-18 04:35:20,115 INFO [CYCLE] Finished normally
+2025-12-18 04:35:20,116 INFO [BATCH] Cycle 12/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 04:45:20,116 INFO [BATCH] Starting cycle 13/∞: LONG
+2025-12-18 04:45:20,117 INFO [VARIANCE] Applied -8.8% duration variance (factor: 0.91x)
+2025-12-18 04:45:30,888 INFO [GLITCH] Power dip at phase 1
+2025-12-18 04:46:24,013 INFO [GLITCH] Power dip at phase 2
+2025-12-18 04:47:00,980 INFO [GLITCH] Power spike at phase 2
+2025-12-18 04:47:31,091 INFO [GLITCH] Power dip at phase 2
+2025-12-18 04:49:24,438 INFO [GLITCH] Power spike at phase 2
+2025-12-18 04:49:27,621 INFO [GLITCH] Power dip at phase 2
+2025-12-18 04:50:51,102 INFO [GLITCH] Power spike at phase 3
+2025-12-18 04:51:12,401 INFO [GLITCH] Power spike at phase 3
+2025-12-18 04:51:39,575 INFO [GLITCH] Power dip at phase 3
+2025-12-18 04:51:45,696 INFO [GLITCH] Power dip at phase 3
+2025-12-18 04:52:21,682 INFO [GLITCH] Power spike at phase 4
+2025-12-18 04:52:22,906 INFO [GLITCH] Power spike at phase 4
+2025-12-18 04:52:35,881 INFO [GLITCH] Power dip at phase 5
+2025-12-18 04:52:41,022 INFO [GLITCH] Power dip at phase 5
+2025-12-18 04:52:46,653 INFO [GLITCH] Power dip at phase 5
+2025-12-18 04:52:53,263 INFO [GLITCH] Power dip at phase 5
+2025-12-18 04:53:23,866 INFO [GLITCH] Power spike at phase 5
+2025-12-18 04:53:44,185 INFO [GLITCH] Power dip at phase 6
+2025-12-18 04:53:48,837 INFO [GLITCH] Power spike at phase 6
+2025-12-18 04:53:58,875 INFO [GLITCH] Power dip at phase 6
+2025-12-18 04:54:44,164 INFO [GLITCH] Power dip at phase 6
+2025-12-18 04:54:46,368 INFO [GLITCH] Power dip at phase 6
+2025-12-18 04:54:48,082 INFO [GLITCH] Power spike at phase 6
+2025-12-18 04:55:01,057 INFO [GLITCH] Power dip at phase 6
+2025-12-18 04:55:26,762 INFO [GLITCH] Power dip at phase 7
+2025-12-18 04:55:31,414 INFO [GLITCH] Power dip at phase 7
+2025-12-18 04:55:38,025 INFO [GLITCH] Power spike at phase 7
+2025-12-18 04:55:41,697 INFO [GLITCH] Power dip at phase 7
+2025-12-18 04:55:47,818 INFO [GLITCH] Power dip at phase 7
+2025-12-18 04:55:50,512 INFO [GLITCH] Power spike at phase 7
+2025-12-18 04:57:06,161 INFO [GLITCH] Power dip at phase 8
+2025-12-18 04:57:09,344 INFO [GLITCH] Power dip at phase 8
+2025-12-18 04:57:49,738 INFO [GLITCH] Power spike at phase 9
+2025-12-18 04:58:15,933 INFO [GLITCH] Power dip at phase 9
+2025-12-18 04:58:44,577 INFO [GLITCH] Power dip at phase 10
+2025-12-18 04:59:00,000 INFO [GLITCH] Power dip at phase 10
+2025-12-18 04:59:11,995 INFO [CYCLE] Finished normally
+2025-12-18 04:59:11,996 INFO [BATCH] Cycle 13/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 05:09:12,000 INFO [BATCH] Starting cycle 14/∞: MEDIUM
+2025-12-18 05:09:12,001 INFO [VARIANCE] Applied +4.6% duration variance (factor: 1.05x)
+2025-12-18 05:09:12,002 INFO [GLITCH] Power spike at phase 1
+2025-12-18 05:09:23,113 INFO [GLITCH] Power dip at phase 1
+2025-12-18 05:10:36,508 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:10:56,071 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:11:10,313 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:11:29,562 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:11:35,666 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:11:36,449 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:11:54,133 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:11:56,481 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:12:00,707 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:12:14,322 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:12:29,190 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:12:54,387 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:13:03,620 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:13:04,090 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:13:12,072 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:13:25,376 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:13:26,784 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:14:01,371 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:14:15,925 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:14:25,784 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:14:34,080 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:14:37,054 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:15:06,005 INFO [GLITCH] Power spike at phase 3
+2025-12-18 05:15:07,414 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:15:30,105 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:15:36,835 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:15:41,061 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:16:17,526 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:16:45,539 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:16:50,391 INFO [GLITCH] Power spike at phase 3
+2025-12-18 05:17:02,443 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:18:30,551 INFO [GLITCH] Power spike at phase 4
+2025-12-18 05:18:43,227 INFO [GLITCH] Power spike at phase 4
+2025-12-18 05:18:47,139 INFO [GLITCH] Power dip at phase 4
+2025-12-18 05:18:52,303 INFO [GLITCH] Power dip at phase 4
+2025-12-18 05:18:56,842 INFO [GLITCH] Power dip at phase 4
+2025-12-18 05:19:29,237 INFO [GLITCH] Power dip at phase 5
+2025-12-18 05:19:29,707 INFO [GLITCH] Power dip at phase 5
+2025-12-18 05:19:38,314 INFO [GLITCH] Power spike at phase 5
+2025-12-18 05:20:10,710 INFO [GLITCH] Power spike at phase 5
+2025-12-18 05:20:24,639 INFO [GLITCH] Power spike at phase 5
+2025-12-18 05:20:58,597 INFO [GLITCH] Power dip at phase 5
+2025-12-18 05:21:06,265 INFO [GLITCH] Power dip at phase 5
+2025-12-18 05:21:06,735 INFO [GLITCH] Power dip at phase 5
+2025-12-18 05:21:20,977 INFO [GLITCH] Power spike at phase 5
+2025-12-18 05:21:31,463 INFO [GLITCH] Power dip at phase 5
+2025-12-18 05:21:35,688 INFO [GLITCH] Power dip at phase 5
+2025-12-18 05:22:03,389 INFO [GLITCH] Power spike at phase 6
+2025-12-18 05:22:04,486 INFO [GLITCH] Power spike at phase 6
+2025-12-18 05:23:02,232 INFO [GLITCH] Power dip at phase 6
+2025-12-18 05:23:16,476 INFO [GLITCH] Power spike at phase 6
+2025-12-18 05:23:18,823 INFO [GLITCH] Power spike at phase 6
+2025-12-18 05:23:20,859 INFO [GLITCH] Power dip at phase 6
+2025-12-18 05:24:23,614 INFO [GLITCH] Power spike at phase 7
+2025-12-18 05:24:34,414 INFO [GLITCH] Power dip at phase 7
+2025-12-18 05:24:40,831 INFO [GLITCH] Power dip at phase 7
+2025-12-18 05:25:04,162 INFO [CYCLE] Finished normally
+2025-12-18 05:25:04,162 INFO [BATCH] Cycle 14/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 05:35:04,163 INFO [BATCH] Starting cycle 15/∞: SHORT
+2025-12-18 05:35:04,163 INFO [VARIANCE] Applied -15.0% duration variance (factor: 0.85x)
+2025-12-18 05:35:46,994 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:35:53,640 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:35:56,840 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:36:17,763 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:36:45,578 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:37:28,660 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:37:53,029 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:38:26,258 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:38:39,304 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:39:33,209 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:39:40,348 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:39:48,964 INFO [GLITCH] Power dip at phase 2
+2025-12-18 05:39:51,183 INFO [GLITCH] Power spike at phase 2
+2025-12-18 05:39:55,860 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:40:55,672 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:40:57,395 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:40:58,134 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:41:23,487 INFO [GLITCH] Power spike at phase 3
+2025-12-18 05:42:10,500 INFO [GLITCH] Power dip at phase 3
+2025-12-18 05:42:22,069 INFO [GLITCH] Power spike at phase 3
+2025-12-18 05:44:25,877 INFO [GLITCH] Power dip at phase 4
+2025-12-18 05:44:36,461 INFO [GLITCH] Power dip at phase 5
+2025-12-18 05:45:09,199 INFO [GLITCH] Power spike at phase 5
+2025-12-18 05:45:47,351 INFO [GLITCH] Power spike at phase 5
+2025-12-18 05:46:05,812 INFO [GLITCH] Power dip at phase 6
+2025-12-18 05:46:07,043 INFO [GLITCH] Power dip at phase 6
+2025-12-18 05:46:18,120 INFO [GLITCH] Power spike at phase 6
+2025-12-18 05:46:27,720 INFO [GLITCH] Power dip at phase 6
+2025-12-18 05:46:34,859 INFO [GLITCH] Power dip at phase 6
+2025-12-18 05:46:41,505 INFO [GLITCH] Power spike at phase 6
+2025-12-18 05:47:38,855 INFO [GLITCH] Power spike at phase 7
+2025-12-18 05:47:52,886 INFO [GLITCH] Power spike at phase 7
+2025-12-18 05:47:57,563 INFO [CYCLE] Finished normally
+2025-12-18 05:47:57,563 INFO [BATCH] Cycle 15/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 05:57:57,563 INFO [BATCH] Starting cycle 16/∞: LONG
+2025-12-18 05:57:57,564 INFO [VARIANCE] Applied +2.0% duration variance (factor: 1.02x)
+2025-12-18 05:58:14,700 INFO [GLITCH] Power dip at phase 1
+2025-12-18 05:58:46,770 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:00:40,630 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:00:44,302 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:00:52,871 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:01:03,887 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:01:21,758 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:01:23,472 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:01:27,145 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:01:55,298 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:02:12,190 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:02:28,593 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:02:31,286 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:02:53,075 INFO [GLITCH] Power dip at phase 3
+2025-12-18 06:03:06,539 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:03:48,401 INFO [GLITCH] Power dip at phase 3
+2025-12-18 06:04:49,359 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:05:11,638 INFO [GLITCH] Power spike at phase 4
+2025-12-18 06:05:23,144 INFO [GLITCH] Power dip at phase 4
+2025-12-18 06:05:44,932 INFO [GLITCH] Power dip at phase 4
+2025-12-18 06:05:46,647 INFO [GLITCH] Power dip at phase 4
+2025-12-18 06:06:09,903 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:06:43,932 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:07:16,492 INFO [GLITCH] Power spike at phase 6
+2025-12-18 06:08:01,781 INFO [GLITCH] Power dip at phase 6
+2025-12-18 06:08:05,454 INFO [GLITCH] Power spike at phase 6
+2025-12-18 06:08:15,981 INFO [GLITCH] Power spike at phase 6
+2025-12-18 06:08:16,716 INFO [GLITCH] Power dip at phase 6
+2025-12-18 06:08:46,826 INFO [GLITCH] Power spike at phase 6
+2025-12-18 06:09:18,895 INFO [GLITCH] Power dip at phase 7
+2025-12-18 06:09:22,568 INFO [GLITCH] Power spike at phase 7
+2025-12-18 06:09:24,772 INFO [GLITCH] Power dip at phase 7
+2025-12-18 06:09:32,361 INFO [GLITCH] Power spike at phase 7
+2025-12-18 06:09:40,930 INFO [GLITCH] Power spike at phase 7
+2025-12-18 06:09:46,071 INFO [GLITCH] Power spike at phase 7
+2025-12-18 06:10:30,381 INFO [GLITCH] Power dip at phase 8
+2025-12-18 06:10:59,023 INFO [GLITCH] Power spike at phase 8
+2025-12-18 06:11:25,706 INFO [GLITCH] Power dip at phase 8
+2025-12-18 06:11:46,026 INFO [GLITCH] Power spike at phase 9
+2025-12-18 06:12:10,263 INFO [GLITCH] Power spike at phase 9
+2025-12-18 06:12:55,552 INFO [GLITCH] Power spike at phase 9
+2025-12-18 06:13:01,183 INFO [GLITCH] Power dip at phase 10
+2025-12-18 06:13:26,888 INFO [CYCLE] Finished normally
+2025-12-18 06:13:26,888 INFO [BATCH] Cycle 16/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 06:23:26,889 INFO [BATCH] Starting cycle 17/∞: MEDIUM
+2025-12-18 06:23:26,890 INFO [VARIANCE] Applied -12.0% duration variance (factor: 0.88x)
+2025-12-18 06:24:26,048 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:24:30,587 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:25:05,172 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:26:16,065 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:26:20,603 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:26:29,212 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:26:42,514 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:26:46,740 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:26:51,592 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:26:53,001 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:26:57,853 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:27:15,225 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:27:18,199 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:27:29,624 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:27:47,309 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:27:57,483 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:28:26,436 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:28:59,144 INFO [GLITCH] Power dip at phase 3
+2025-12-18 06:29:37,800 INFO [GLITCH] Power dip at phase 3
+2025-12-18 06:30:29,289 INFO [GLITCH] Power dip at phase 3
+2025-12-18 06:30:42,591 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:30:48,382 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:30:51,669 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:31:06,535 INFO [GLITCH] Power dip at phase 4
+2025-12-18 06:31:09,510 INFO [GLITCH] Power spike at phase 4
+2025-12-18 06:31:10,293 INFO [GLITCH] Power spike at phase 4
+2025-12-18 06:31:21,717 INFO [GLITCH] Power spike at phase 4
+2025-12-18 06:31:25,943 INFO [GLITCH] Power spike at phase 4
+2025-12-18 06:31:45,819 INFO [GLITCH] Power dip at phase 4
+2025-12-18 06:31:58,808 INFO [GLITCH] Power spike at phase 4
+2025-12-18 06:32:07,729 INFO [GLITCH] Power dip at phase 5
+2025-12-18 06:32:11,328 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:32:18,998 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:32:26,980 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:33:00,938 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:33:10,172 INFO [GLITCH] Power dip at phase 5
+2025-12-18 06:33:22,537 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:33:26,764 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:33:39,128 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:33:43,042 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:33:48,519 INFO [GLITCH] Power dip at phase 5
+2025-12-18 06:33:48,989 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:34:12,307 INFO [GLITCH] Power dip at phase 6
+2025-12-18 06:35:36,657 INFO [GLITCH] Power spike at phase 7
+2025-12-18 06:35:40,569 INFO [GLITCH] Power spike at phase 7
+2025-12-18 06:35:41,039 INFO [GLITCH] Power spike at phase 7
+2025-12-18 06:35:50,586 INFO [GLITCH] Power dip at phase 7
+2025-12-18 06:35:58,883 INFO [GLITCH] Power dip at phase 7
+2025-12-18 06:36:31,592 INFO [GLITCH] Power spike at phase 7
+2025-12-18 06:36:48,024 INFO [CYCLE] Finished normally
+2025-12-18 06:36:48,025 INFO [BATCH] Cycle 17/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 06:46:48,025 INFO [BATCH] Starting cycle 18/∞: SHORT
+2025-12-18 06:46:48,026 INFO [VARIANCE] Applied -1.6% duration variance (factor: 0.99x)
+2025-12-18 06:47:08,703 INFO [GLITCH] Power dip at phase 1
+2025-12-18 06:47:11,903 INFO [GLITCH] Power dip at phase 1
+2025-12-18 06:47:40,212 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:48:00,149 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:48:31,902 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:48:54,302 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:48:58,980 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:49:01,195 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:49:12,766 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:50:39,656 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:50:46,794 INFO [GLITCH] Power dip at phase 2
+2025-12-18 06:51:05,748 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:51:35,040 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:52:20,578 INFO [GLITCH] Power spike at phase 2
+2025-12-18 06:53:43,037 INFO [GLITCH] Power dip at phase 3
+2025-12-18 06:54:06,913 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:54:20,944 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:54:23,652 INFO [GLITCH] Power dip at phase 3
+2025-12-18 06:54:26,360 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:55:02,051 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:55:29,865 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:55:42,911 INFO [GLITCH] Power spike at phase 3
+2025-12-18 06:56:02,356 INFO [GLITCH] Power spike at phase 4
+2025-12-18 06:57:25,800 INFO [GLITCH] Power dip at phase 4
+2025-12-18 06:57:27,524 INFO [GLITCH] Power spike at phase 4
+2025-12-18 06:57:28,263 INFO [GLITCH] Power spike at phase 4
+2025-12-18 06:57:34,909 INFO [GLITCH] Power dip at phase 4
+2025-12-18 06:58:00,754 INFO [GLITCH] Power dip at phase 5
+2025-12-18 06:58:01,493 INFO [GLITCH] Power dip at phase 5
+2025-12-18 06:58:04,201 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:58:14,786 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:58:15,525 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:58:27,094 INFO [GLITCH] Power spike at phase 5
+2025-12-18 06:58:51,462 INFO [GLITCH] Power dip at phase 5
+2025-12-18 07:00:03,091 INFO [GLITCH] Power dip at phase 6
+2025-12-18 07:01:01,922 INFO [GLITCH] Power spike at phase 7
+2025-12-18 07:01:08,568 INFO [GLITCH] Power dip at phase 7
+2025-12-18 07:01:43,275 INFO [CYCLE] Finished normally
+2025-12-18 07:01:43,275 INFO [BATCH] Cycle 18/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 07:11:43,276 INFO [BATCH] Starting cycle 19/∞: LONG
+2025-12-18 07:11:43,277 INFO [VARIANCE] Applied -12.7% duration variance (factor: 0.87x)
+2025-12-18 07:12:08,247 INFO [GLITCH] Power spike at phase 1
+2025-12-18 07:13:31,726 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:14:02,818 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:15:09,161 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:15:11,854 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:15:14,547 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:15:51,028 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:16:04,003 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:16:07,676 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:16:54,434 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:17:04,472 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:17:19,406 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:17:43,152 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:18:29,421 INFO [GLITCH] Power spike at phase 4
+2025-12-18 07:18:59,533 INFO [GLITCH] Power dip at phase 5
+2025-12-18 07:19:25,237 INFO [GLITCH] Power spike at phase 5
+2025-12-18 07:19:38,702 INFO [GLITCH] Power dip at phase 6
+2025-12-18 07:20:13,220 INFO [GLITCH] Power spike at phase 6
+2025-12-18 07:20:45,291 INFO [GLITCH] Power dip at phase 6
+2025-12-18 07:21:00,715 INFO [GLITCH] Power dip at phase 6
+2025-12-18 07:21:36,212 INFO [GLITCH] Power spike at phase 7
+2025-12-18 07:22:32,763 INFO [GLITCH] Power spike at phase 8
+2025-12-18 07:22:36,925 INFO [GLITCH] Power dip at phase 8
+2025-12-18 07:24:01,384 INFO [GLITCH] Power dip at phase 9
+2025-12-18 07:24:20,726 INFO [GLITCH] Power dip at phase 9
+2025-12-18 07:24:50,347 INFO [GLITCH] Power spike at phase 10
+2025-12-18 07:24:51,082 INFO [GLITCH] Power spike at phase 10
+2025-12-18 07:24:57,693 INFO [CYCLE] Finished normally
+2025-12-18 07:24:57,694 INFO [BATCH] Cycle 19/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 07:34:57,694 INFO [BATCH] Starting cycle 20/∞: MEDIUM
+2025-12-18 07:34:57,695 INFO [VARIANCE] Applied +7.8% duration variance (factor: 1.08x)
+2025-12-18 07:35:34,630 INFO [GLITCH] Power spike at phase 1
+2025-12-18 07:35:49,812 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:36:05,618 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:36:53,665 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:37:05,089 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:37:14,010 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:37:27,625 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:37:52,823 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:38:56,205 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:38:57,927 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:39:02,778 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:39:09,508 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:39:16,239 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:39:32,984 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:39:58,494 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:40:01,781 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:40:18,839 INFO [GLITCH] Power dip at phase 2
+2025-12-18 07:40:28,386 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:40:37,620 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:40:39,029 INFO [GLITCH] Power spike at phase 2
+2025-12-18 07:40:51,080 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:41:52,271 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:41:59,628 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:42:01,349 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:42:04,949 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:42:28,896 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:42:30,305 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:42:32,027 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:42:35,314 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:42:37,661 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:43:02,544 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:43:10,214 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:43:15,065 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:43:32,438 INFO [GLITCH] Power dip at phase 3
+2025-12-18 07:44:06,711 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:44:07,807 INFO [GLITCH] Power spike at phase 3
+2025-12-18 07:44:38,952 INFO [GLITCH] Power dip at phase 4
+2025-12-18 07:44:44,743 INFO [GLITCH] Power spike at phase 4
+2025-12-18 07:45:01,494 INFO [GLITCH] Power spike at phase 4
+2025-12-18 07:45:16,049 INFO [GLITCH] Power spike at phase 4
+2025-12-18 07:45:23,405 INFO [GLITCH] Power dip at phase 4
+2025-12-18 07:45:28,569 INFO [GLITCH] Power dip at phase 4
+2025-12-18 07:45:32,170 INFO [GLITCH] Power dip at phase 5
+2025-12-18 07:46:17,398 INFO [GLITCH] Power spike at phase 5
+2025-12-18 07:46:26,006 INFO [GLITCH] Power dip at phase 5
+2025-12-18 07:46:31,483 INFO [GLITCH] Power dip at phase 5
+2025-12-18 07:46:57,307 INFO [GLITCH] Power spike at phase 5
+2025-12-18 07:47:09,043 INFO [GLITCH] Power dip at phase 5
+2025-12-18 07:47:41,440 INFO [GLITCH] Power dip at phase 5
+2025-12-18 07:47:43,162 INFO [GLITCH] Power spike at phase 5
+2025-12-18 07:47:59,282 INFO [GLITCH] Power spike at phase 6
+2025-12-18 07:48:02,568 INFO [GLITCH] Power dip at phase 6
+2025-12-18 07:48:04,290 INFO [GLITCH] Power dip at phase 6
+2025-12-18 07:48:17,592 INFO [GLITCH] Power spike at phase 6
+2025-12-18 07:48:55,935 INFO [GLITCH] Power spike at phase 6
+2025-12-18 07:49:04,543 INFO [GLITCH] Power dip at phase 6
+2025-12-18 07:49:14,714 INFO [GLITCH] Power dip at phase 6
+2025-12-18 07:49:15,498 INFO [GLITCH] Power spike at phase 6
+2025-12-18 07:49:19,411 INFO [GLITCH] Power spike at phase 6
+2025-12-18 07:49:22,699 INFO [GLITCH] Power spike at phase 6
+2025-12-18 07:49:55,094 INFO [GLITCH] Power dip at phase 7
+2025-12-18 07:49:55,878 INFO [GLITCH] Power spike at phase 7
+2025-12-18 07:49:56,661 INFO [GLITCH] Power dip at phase 7
+2025-12-18 07:49:57,756 INFO [GLITCH] Power dip at phase 7
+2025-12-18 07:50:16,386 INFO [GLITCH] Power spike at phase 7
+2025-12-18 07:50:23,742 INFO [GLITCH] Power spike at phase 7
+2025-12-18 07:50:26,089 INFO [GLITCH] Power dip at phase 7
+2025-12-18 07:50:27,498 INFO [GLITCH] Power spike at phase 7
+2025-12-18 07:50:38,609 INFO [GLITCH] Power dip at phase 7
+2025-12-18 07:51:09,127 INFO [GLITCH] Power spike at phase 7
+2025-12-18 07:51:20,552 INFO [CYCLE] Finished normally
+2025-12-18 07:51:20,552 INFO [BATCH] Cycle 20/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 08:01:20,552 INFO [BATCH] Starting cycle 21/∞: SHORT
+2025-12-18 08:01:20,558 INFO [VARIANCE] Applied -5.6% duration variance (factor: 0.95x)
+2025-12-18 08:01:41,235 INFO [GLITCH] Power dip at phase 1
+2025-12-18 08:02:16,928 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:02:26,529 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:02:33,176 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:02:38,346 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:02:44,992 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:02:47,208 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:03:13,545 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:03:15,761 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:03:36,683 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:03:53,668 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:04:52,496 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:04:58,158 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:04:58,897 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:05:13,420 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:05:29,912 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:05:44,927 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:06:01,911 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:06:09,050 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:06:23,081 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:06:32,681 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:07:02,956 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:07:28,309 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:07:45,786 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:08:30,339 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:09:17,351 INFO [GLITCH] Power dip at phase 3
+2025-12-18 08:09:54,027 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:10:18,888 INFO [GLITCH] Power dip at phase 4
+2025-12-18 08:13:07,008 INFO [GLITCH] Power spike at phase 5
+2025-12-18 08:14:42,268 INFO [GLITCH] Power spike at phase 6
+2025-12-18 08:14:43,992 INFO [GLITCH] Power dip at phase 7
+2025-12-18 08:15:19,191 INFO [GLITCH] Power spike at phase 7
+2025-12-18 08:15:38,144 INFO [GLITCH] Power spike at phase 7
+2025-12-18 08:15:39,375 INFO [CYCLE] Finished normally
+2025-12-18 08:15:39,376 INFO [BATCH] Cycle 21/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 08:25:39,376 INFO [BATCH] Starting cycle 22/∞: LONG
+2025-12-18 08:25:39,377 INFO [VARIANCE] Applied +12.1% duration variance (factor: 1.12x)
+2025-12-18 08:25:55,045 INFO [GLITCH] Power dip at phase 1
+2025-12-18 08:26:05,572 INFO [GLITCH] Power spike at phase 1
+2025-12-18 08:26:15,609 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:26:55,514 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:27:24,647 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:27:27,341 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:27:33,951 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:27:36,155 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:28:35,643 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:28:55,473 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:29:07,472 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:31:19,422 INFO [GLITCH] Power dip at phase 3
+2025-12-18 08:31:22,116 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:31:55,166 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:32:13,527 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:32:23,564 INFO [GLITCH] Power dip at phase 3
+2025-12-18 08:32:42,415 INFO [GLITCH] Power dip at phase 3
+2025-12-18 08:32:44,129 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:33:45,575 INFO [GLITCH] Power spike at phase 4
+2025-12-18 08:34:42,127 INFO [GLITCH] Power dip at phase 5
+2025-12-18 08:34:57,551 INFO [GLITCH] Power spike at phase 5
+2025-12-18 08:35:13,953 INFO [GLITCH] Power spike at phase 5
+2025-12-18 08:35:43,087 INFO [GLITCH] Power dip at phase 5
+2025-12-18 08:36:13,688 INFO [GLITCH] Power dip at phase 6
+2025-12-18 08:36:38,414 INFO [GLITCH] Power dip at phase 6
+2025-12-18 08:36:54,816 INFO [GLITCH] Power spike at phase 6
+2025-12-18 08:37:18,563 INFO [GLITCH] Power dip at phase 6
+2025-12-18 08:37:20,277 INFO [GLITCH] Power spike at phase 6
+2025-12-18 08:37:31,784 INFO [GLITCH] Power dip at phase 6
+2025-12-18 08:37:51,125 INFO [GLITCH] Power spike at phase 7
+2025-12-18 08:39:02,363 INFO [GLITCH] Power dip at phase 8
+2025-12-18 08:39:08,973 INFO [GLITCH] Power dip at phase 8
+2025-12-18 08:39:12,646 INFO [GLITCH] Power dip at phase 8
+2025-12-18 08:39:53,039 INFO [GLITCH] Power dip at phase 8
+2025-12-18 08:41:09,173 INFO [GLITCH] Power dip at phase 9
+2025-12-18 08:41:16,273 INFO [GLITCH] Power spike at phase 9
+2025-12-18 08:41:22,883 INFO [GLITCH] Power dip at phase 9
+2025-12-18 08:42:05,725 INFO [GLITCH] Power spike at phase 9
+2025-12-18 08:42:07,929 INFO [GLITCH] Power spike at phase 10
+2025-12-18 08:42:40,000 INFO [CYCLE] Finished normally
+2025-12-18 08:42:40,000 INFO [BATCH] Cycle 22/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 08:52:40,001 INFO [BATCH] Starting cycle 23/∞: MEDIUM
+2025-12-18 08:52:40,001 INFO [VARIANCE] Applied -5.9% duration variance (factor: 0.94x)
+2025-12-18 08:53:00,033 INFO [GLITCH] Power spike at phase 1
+2025-12-18 08:53:26,482 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:53:36,967 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:53:37,750 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:53:39,159 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:53:39,629 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:54:48,021 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:54:58,506 INFO [GLITCH] Power spike at phase 2
+2025-12-18 08:55:16,190 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:55:52,027 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:56:09,712 INFO [GLITCH] Power dip at phase 2
+2025-12-18 08:58:31,659 INFO [GLITCH] Power dip at phase 3
+2025-12-18 08:58:44,335 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:59:26,748 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:59:32,852 INFO [GLITCH] Power spike at phase 3
+2025-12-18 08:59:43,650 INFO [GLITCH] Power spike at phase 3
+2025-12-18 09:00:24,812 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:00:26,534 INFO [GLITCH] Power spike at phase 3
+2025-12-18 09:00:42,966 INFO [GLITCH] Power dip at phase 4
+2025-12-18 09:00:46,253 INFO [GLITCH] Power spike at phase 4
+2025-12-18 09:01:28,037 INFO [GLITCH] Power spike at phase 4
+2025-12-18 09:01:46,660 INFO [GLITCH] Power dip at phase 4
+2025-12-18 09:02:04,658 INFO [GLITCH] Power spike at phase 5
+2025-12-18 09:02:20,150 INFO [GLITCH] Power dip at phase 5
+2025-12-18 09:02:31,263 INFO [GLITCH] Power dip at phase 5
+2025-12-18 09:02:33,924 INFO [GLITCH] Power spike at phase 5
+2025-12-18 09:02:38,463 INFO [GLITCH] Power dip at phase 5
+2025-12-18 09:02:47,384 INFO [GLITCH] Power dip at phase 5
+2025-12-18 09:02:48,793 INFO [GLITCH] Power spike at phase 5
+2025-12-18 09:02:49,889 INFO [GLITCH] Power dip at phase 5
+2025-12-18 09:03:20,092 INFO [GLITCH] Power dip at phase 5
+2025-12-18 09:03:30,579 INFO [GLITCH] Power spike at phase 5
+2025-12-18 09:04:15,806 INFO [GLITCH] Power spike at phase 6
+2025-12-18 09:04:19,406 INFO [GLITCH] Power spike at phase 6
+2025-12-18 09:05:41,566 INFO [GLITCH] Power spike at phase 7
+2025-12-18 09:05:52,678 INFO [GLITCH] Power dip at phase 7
+2025-12-18 09:06:04,414 INFO [GLITCH] Power spike at phase 7
+2025-12-18 09:06:14,899 INFO [GLITCH] Power spike at phase 7
+2025-12-18 09:06:31,019 INFO [GLITCH] Power spike at phase 7
+2025-12-18 09:06:54,337 INFO [CYCLE] Finished normally
+2025-12-18 09:06:54,337 INFO [BATCH] Cycle 23/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 09:16:54,337 INFO [BATCH] Starting cycle 24/∞: SHORT
+2025-12-18 09:16:54,338 INFO [VARIANCE] Applied -6.4% duration variance (factor: 0.94x)
+2025-12-18 09:16:58,277 INFO [GLITCH] Power dip at phase 1
+2025-12-18 09:17:13,292 INFO [GLITCH] Power dip at phase 1
+2025-12-18 09:17:27,815 INFO [GLITCH] Power dip at phase 1
+2025-12-18 09:17:30,523 INFO [GLITCH] Power spike at phase 1
+2025-12-18 09:19:21,040 INFO [GLITCH] Power spike at phase 2
+2025-12-18 09:19:27,687 INFO [GLITCH] Power dip at phase 2
+2025-12-18 09:19:46,641 INFO [GLITCH] Power spike at phase 2
+2025-12-18 09:20:03,134 INFO [GLITCH] Power spike at phase 2
+2025-12-18 09:20:20,117 INFO [GLITCH] Power dip at phase 2
+2025-12-18 09:21:02,211 INFO [GLITCH] Power dip at phase 2
+2025-12-18 09:21:41,840 INFO [GLITCH] Power spike at phase 2
+2025-12-18 09:23:10,205 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:23:14,391 INFO [GLITCH] Power spike at phase 3
+2025-12-18 09:23:55,005 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:23:57,713 INFO [GLITCH] Power spike at phase 3
+2025-12-18 09:24:10,267 INFO [GLITCH] Power spike at phase 3
+2025-12-18 09:24:36,111 INFO [GLITCH] Power spike at phase 3
+2025-12-18 09:24:39,311 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:25:10,080 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:25:29,527 INFO [GLITCH] Power spike at phase 3
+2025-12-18 09:26:39,185 INFO [GLITCH] Power dip at phase 4
+2025-12-18 09:26:48,785 INFO [GLITCH] Power spike at phase 4
+2025-12-18 09:26:53,955 INFO [GLITCH] Power dip at phase 4
+2025-12-18 09:27:06,509 INFO [GLITCH] Power spike at phase 4
+2025-12-18 09:28:39,304 INFO [GLITCH] Power spike at phase 5
+2025-12-18 09:29:18,933 INFO [GLITCH] Power spike at phase 6
+2025-12-18 09:29:27,548 INFO [GLITCH] Power spike at phase 6
+2025-12-18 09:29:47,979 INFO [GLITCH] Power spike at phase 6
+2025-12-18 09:30:23,178 INFO [GLITCH] Power spike at phase 7
+2025-12-18 09:30:27,363 INFO [GLITCH] Power dip at phase 7
+2025-12-18 09:30:28,101 INFO [GLITCH] Power spike at phase 7
+2025-12-18 09:31:04,777 INFO [CYCLE] Finished normally
+2025-12-18 09:31:04,778 INFO [BATCH] Cycle 24/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 09:41:04,778 INFO [BATCH] Starting cycle 25/∞: LONG
+2025-12-18 09:41:04,779 INFO [VARIANCE] Applied +12.0% duration variance (factor: 1.12x)
+2025-12-18 09:41:53,743 INFO [GLITCH] Power dip at phase 2
+2025-12-18 09:42:08,676 INFO [GLITCH] Power dip at phase 2
+2025-12-18 09:42:23,120 INFO [GLITCH] Power dip at phase 2
+2025-12-18 09:42:28,262 INFO [GLITCH] Power dip at phase 2
+2025-12-18 09:44:02,512 INFO [GLITCH] Power spike at phase 2
+2025-12-18 09:45:33,824 INFO [GLITCH] Power dip at phase 2
+2025-12-18 09:45:53,654 INFO [GLITCH] Power dip at phase 2
+2025-12-18 09:46:00,264 INFO [GLITCH] Power spike at phase 2
+2025-12-18 09:46:05,406 INFO [GLITCH] Power spike at phase 2
+2025-12-18 09:46:57,061 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:47:01,223 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:47:06,364 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:47:22,277 INFO [GLITCH] Power spike at phase 3
+2025-12-18 09:47:36,721 INFO [GLITCH] Power spike at phase 3
+2025-12-18 09:48:12,708 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:48:14,422 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:48:25,929 INFO [GLITCH] Power spike at phase 3
+2025-12-18 09:48:39,883 INFO [GLITCH] Power dip at phase 3
+2025-12-18 09:49:15,380 INFO [GLITCH] Power spike at phase 4
+2025-12-18 09:49:35,697 INFO [GLITCH] Power spike at phase 4
+2025-12-18 09:49:56,999 INFO [GLITCH] Power spike at phase 5
+2025-12-18 09:50:31,531 INFO [GLITCH] Power spike at phase 5
+2025-12-18 09:50:34,715 INFO [GLITCH] Power spike at phase 5
+2025-12-18 09:50:47,201 INFO [GLITCH] Power dip at phase 5
+2025-12-18 09:51:54,539 INFO [GLITCH] Power dip at phase 6
+2025-12-18 09:52:03,599 INFO [GLITCH] Power dip at phase 6
+2025-12-18 09:52:42,041 INFO [GLITCH] Power dip at phase 6
+2025-12-18 09:52:46,203 INFO [GLITCH] Power spike at phase 6
+2025-12-18 09:52:54,283 INFO [GLITCH] Power dip at phase 6
+2025-12-18 09:53:06,771 INFO [GLITCH] Power dip at phase 7
+2025-12-18 09:53:43,250 INFO [GLITCH] Power spike at phase 7
+2025-12-18 09:53:54,269 INFO [GLITCH] Power spike at phase 7
+2025-12-18 09:54:25,367 INFO [GLITCH] Power dip at phase 8
+2025-12-18 09:55:02,834 INFO [GLITCH] Power spike at phase 8
+2025-12-18 09:55:10,914 INFO [GLITCH] Power spike at phase 8
+2025-12-18 09:55:13,119 INFO [GLITCH] Power dip at phase 8
+2025-12-18 09:55:25,116 INFO [GLITCH] Power spike at phase 8
+2025-12-18 09:56:18,734 INFO [GLITCH] Power spike at phase 9
+2025-12-18 09:56:31,709 INFO [GLITCH] Power spike at phase 9
+2025-12-18 09:56:57,428 INFO [GLITCH] Power dip at phase 9
+2025-12-18 09:57:19,217 INFO [GLITCH] Power spike at phase 9
+2025-12-18 09:58:02,069 INFO [GLITCH] Power dip at phase 10
+2025-12-18 09:58:05,252 INFO [CYCLE] Finished normally
+2025-12-18 09:58:05,253 INFO [BATCH] Cycle 25/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 10:08:05,253 INFO [BATCH] Starting cycle 26/∞: MEDIUM
+2025-12-18 10:08:05,261 INFO [VARIANCE] Applied -11.9% duration variance (factor: 0.88x)
+2025-12-18 10:08:09,335 INFO [GLITCH] Power dip at phase 1
+2025-12-18 10:08:32,030 INFO [GLITCH] Power spike at phase 1
+2025-12-18 10:08:41,267 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:08:42,990 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:08:51,603 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:09:07,415 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:09:11,018 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:10:08,482 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:10:34,317 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:10:43,863 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:11:11,567 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:11:18,298 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:11:19,081 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:11:25,812 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:11:42,873 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:11:56,809 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:12:08,550 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:12:12,150 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:12:34,846 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:13:04,125 INFO [GLITCH] Power spike at phase 3
+2025-12-18 10:13:13,988 INFO [GLITCH] Power spike at phase 3
+2025-12-18 10:13:31,673 INFO [GLITCH] Power spike at phase 3
+2025-12-18 10:13:36,213 INFO [GLITCH] Power spike at phase 3
+2025-12-18 10:13:49,205 INFO [GLITCH] Power dip at phase 3
+2025-12-18 10:14:11,280 INFO [GLITCH] Power spike at phase 3
+2025-12-18 10:14:14,254 INFO [GLITCH] Power dip at phase 3
+2025-12-18 10:14:41,962 INFO [GLITCH] Power spike at phase 3
+2025-12-18 10:15:02,473 INFO [GLITCH] Power dip at phase 3
+2025-12-18 10:15:08,897 INFO [GLITCH] Power dip at phase 3
+2025-12-18 10:15:12,812 INFO [GLITCH] Power dip at phase 3
+2025-12-18 10:15:41,145 INFO [GLITCH] Power spike at phase 4
+2025-12-18 10:15:44,745 INFO [GLITCH] Power dip at phase 4
+2025-12-18 10:15:53,983 INFO [GLITCH] Power dip at phase 4
+2025-12-18 10:16:12,939 INFO [GLITCH] Power dip at phase 4
+2025-12-18 10:16:21,555 INFO [GLITCH] Power dip at phase 4
+2025-12-18 10:16:43,624 INFO [GLITCH] Power dip at phase 5
+2025-12-18 10:17:31,689 INFO [GLITCH] Power spike at phase 5
+2025-12-18 10:17:32,785 INFO [GLITCH] Power dip at phase 5
+2025-12-18 10:17:33,881 INFO [GLITCH] Power spike at phase 5
+2025-12-18 10:17:55,024 INFO [GLITCH] Power dip at phase 5
+2025-12-18 10:18:00,816 INFO [GLITCH] Power spike at phase 5
+2025-12-18 10:18:02,542 INFO [GLITCH] Power dip at phase 5
+2025-12-18 10:18:04,892 INFO [GLITCH] Power dip at phase 5
+2025-12-18 10:18:10,059 INFO [GLITCH] Power spike at phase 5
+2025-12-18 10:18:33,695 INFO [GLITCH] Power dip at phase 5
+2025-12-18 10:18:37,921 INFO [GLITCH] Power dip at phase 5
+2025-12-18 10:19:04,370 INFO [GLITCH] Power dip at phase 6
+2025-12-18 10:19:08,911 INFO [GLITCH] Power dip at phase 6
+2025-12-18 10:19:17,209 INFO [GLITCH] Power dip at phase 6
+2025-12-18 10:19:17,679 INFO [GLITCH] Power dip at phase 6
+2025-12-18 10:19:35,994 INFO [GLITCH] Power dip at phase 6
+2025-12-18 10:19:47,115 INFO [GLITCH] Power dip at phase 6
+2025-12-18 10:19:55,410 INFO [GLITCH] Power spike at phase 6
+2025-12-18 10:20:10,915 INFO [GLITCH] Power dip at phase 7
+2025-12-18 10:20:14,516 INFO [GLITCH] Power dip at phase 7
+2025-12-18 10:20:25,315 INFO [GLITCH] Power dip at phase 7
+2025-12-18 10:20:48,013 INFO [GLITCH] Power spike at phase 7
+2025-12-18 10:20:59,754 INFO [GLITCH] Power dip at phase 7
+2025-12-18 10:21:17,132 INFO [GLITCH] Power dip at phase 7
+2025-12-18 10:21:22,610 INFO [GLITCH] Power spike at phase 7
+2025-12-18 10:21:28,713 INFO [CYCLE] Finished normally
+2025-12-18 10:21:28,714 INFO [BATCH] Cycle 26/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 10:31:28,718 INFO [BATCH] Starting cycle 27/∞: SHORT
+2025-12-18 10:31:28,724 INFO [VARIANCE] Applied +4.6% duration variance (factor: 1.05x)
+2025-12-18 10:31:46,939 INFO [GLITCH] Power spike at phase 1
+2025-12-18 10:32:26,572 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:32:42,574 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:33:14,337 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:33:51,015 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:34:16,865 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:34:25,481 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:34:38,035 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:35:13,243 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:35:15,952 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:35:16,691 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:35:22,354 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:35:37,862 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:35:39,586 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:36:13,807 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:37:05,752 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:38:23,782 INFO [GLITCH] Power spike at phase 3
+2025-12-18 10:38:49,625 INFO [GLITCH] Power dip at phase 3
+2025-12-18 10:39:09,565 INFO [GLITCH] Power spike at phase 3
+2025-12-18 10:39:19,657 INFO [GLITCH] Power spike at phase 3
+2025-12-18 10:39:42,551 INFO [GLITCH] Power dip at phase 3
+2025-12-18 10:40:40,898 INFO [GLITCH] Power dip at phase 3
+2025-12-18 10:40:55,420 INFO [GLITCH] Power dip at phase 3
+2025-12-18 10:42:25,763 INFO [GLITCH] Power spike at phase 4
+2025-12-18 10:42:28,473 INFO [GLITCH] Power dip at phase 4
+2025-12-18 10:42:55,311 INFO [GLITCH] Power dip at phase 4
+2025-12-18 10:44:00,539 INFO [GLITCH] Power dip at phase 5
+2025-12-18 10:44:05,216 INFO [GLITCH] Power spike at phase 5
+2025-12-18 10:44:37,953 INFO [GLITCH] Power spike at phase 5
+2025-12-18 10:44:52,476 INFO [GLITCH] Power dip at phase 6
+2025-12-18 10:45:17,830 INFO [GLITCH] Power spike at phase 6
+2025-12-18 10:45:38,752 INFO [GLITCH] Power spike at phase 6
+2025-12-18 10:45:39,983 INFO [GLITCH] Power spike at phase 6
+2025-12-18 10:46:11,243 INFO [GLITCH] Power dip at phase 6
+2025-12-18 10:46:17,397 INFO [GLITCH] Power spike at phase 6
+2025-12-18 10:46:48,657 INFO [GLITCH] Power spike at phase 7
+2025-12-18 10:46:54,812 INFO [GLITCH] Power dip at phase 7
+2025-12-18 10:47:04,904 INFO [GLITCH] Power dip at phase 7
+2025-12-18 10:47:20,411 INFO [CYCLE] Finished normally
+2025-12-18 10:47:20,411 INFO [BATCH] Cycle 27/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 10:57:20,417 INFO [BATCH] Starting cycle 28/∞: LONG
+2025-12-18 10:57:20,419 INFO [VARIANCE] Applied -5.2% duration variance (factor: 0.95x)
+2025-12-18 10:57:29,722 INFO [GLITCH] Power dip at phase 1
+2025-12-18 10:57:44,655 INFO [GLITCH] Power spike at phase 1
+2025-12-18 10:58:14,276 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:58:15,990 INFO [GLITCH] Power dip at phase 2
+2025-12-18 10:58:22,601 INFO [GLITCH] Power spike at phase 2
+2025-12-18 10:59:14,745 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:00:08,849 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:00:13,501 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:01:46,770 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:01:47,505 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:02:06,844 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:02:47,728 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:02:48,952 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:03:22,492 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:03:36,448 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:03:39,631 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:03:43,793 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:03:48,935 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:04:09,254 INFO [GLITCH] Power spike at phase 4
+2025-12-18 11:04:11,947 INFO [GLITCH] Power spike at phase 4
+2025-12-18 11:04:16,599 INFO [GLITCH] Power spike at phase 4
+2025-12-18 11:04:24,678 INFO [GLITCH] Power spike at phase 4
+2025-12-18 11:04:47,445 INFO [GLITCH] Power dip at phase 4
+2025-12-18 11:05:16,086 INFO [GLITCH] Power dip at phase 5
+2025-12-18 11:06:15,084 INFO [GLITCH] Power spike at phase 6
+2025-12-18 11:06:32,466 INFO [GLITCH] Power spike at phase 6
+2025-12-18 11:06:40,546 INFO [GLITCH] Power spike at phase 6
+2025-12-18 11:08:02,067 INFO [GLITCH] Power dip at phase 7
+2025-12-18 11:08:41,970 INFO [GLITCH] Power spike at phase 8
+2025-12-18 11:08:51,518 INFO [GLITCH] Power spike at phase 8
+2025-12-18 11:09:22,117 INFO [GLITCH] Power dip at phase 8
+2025-12-18 11:09:27,259 INFO [GLITCH] Power spike at phase 8
+2025-12-18 11:09:34,359 INFO [GLITCH] Power dip at phase 8
+2025-12-18 11:09:39,011 INFO [GLITCH] Power dip at phase 8
+2025-12-18 11:10:02,757 INFO [GLITCH] Power spike at phase 8
+2025-12-18 11:10:26,504 INFO [GLITCH] Power spike at phase 9
+2025-12-18 11:10:41,927 INFO [GLITCH] Power dip at phase 9
+2025-12-18 11:10:50,986 INFO [GLITCH] Power spike at phase 9
+2025-12-18 11:11:45,578 INFO [CYCLE] Finished normally
+2025-12-18 11:11:45,579 INFO [BATCH] Cycle 28/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 11:21:45,579 INFO [BATCH] Starting cycle 29/∞: MEDIUM
+2025-12-18 11:21:45,580 INFO [VARIANCE] Applied -14.9% duration variance (factor: 0.85x)
+2025-12-18 11:22:15,625 INFO [GLITCH] Power spike at phase 1
+2025-12-18 11:22:22,981 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:22:32,527 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:22:43,951 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:22:47,239 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:22:53,656 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:22:54,752 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:23:19,320 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:23:30,119 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:23:58,756 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:23:59,226 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:24:07,834 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:24:37,726 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:24:42,578 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:24:44,613 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:24:47,899 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:24:55,881 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:24:59,168 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:25:05,897 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:25:17,009 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:25:17,479 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:25:19,514 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:26:18,198 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:26:36,824 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:26:42,928 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:27:25,652 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:27:36,138 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:27:55,699 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:28:09,314 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:28:10,097 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:28:17,141 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:28:19,176 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:28:21,211 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:28:24,811 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:28:40,617 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:28:45,155 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:28:46,251 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:29:33,982 INFO [GLITCH] Power spike at phase 4
+2025-12-18 11:29:36,642 INFO [GLITCH] Power dip at phase 4
+2025-12-18 11:30:28,754 INFO [GLITCH] Power spike at phase 5
+2025-12-18 11:31:06,784 INFO [GLITCH] Power dip at phase 5
+2025-12-18 11:31:38,240 INFO [GLITCH] Power dip at phase 5
+2025-12-18 11:31:39,962 INFO [GLITCH] Power spike at phase 5
+2025-12-18 11:31:50,135 INFO [GLITCH] Power dip at phase 5
+2025-12-18 11:32:06,566 INFO [GLITCH] Power spike at phase 6
+2025-12-18 11:32:14,548 INFO [GLITCH] Power dip at phase 6
+2025-12-18 11:32:41,935 INFO [GLITCH] Power spike at phase 6
+2025-12-18 11:32:46,473 INFO [GLITCH] Power spike at phase 6
+2025-12-18 11:32:51,324 INFO [GLITCH] Power dip at phase 6
+2025-12-18 11:33:01,184 INFO [GLITCH] Power dip at phase 6
+2025-12-18 11:34:23,029 INFO [GLITCH] Power spike at phase 7
+2025-12-18 11:34:41,028 INFO [CYCLE] Finished normally
+2025-12-18 11:34:41,028 INFO [BATCH] Cycle 29/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 11:44:41,028 INFO [BATCH] Starting cycle 30/∞: SHORT
+2025-12-18 11:44:41,029 INFO [VARIANCE] Applied +12.5% duration variance (factor: 1.13x)
+2025-12-18 11:44:48,905 INFO [GLITCH] Power dip at phase 1
+2025-12-18 11:45:24,596 INFO [GLITCH] Power dip at phase 1
+2025-12-18 11:46:40,654 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:46:51,238 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:47:54,989 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:48:21,818 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:48:42,743 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:48:57,270 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:48:59,993 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:49:15,014 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:49:30,524 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:50:08,687 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:50:12,381 INFO [GLITCH] Power spike at phase 2
+2025-12-18 11:51:02,353 INFO [GLITCH] Power dip at phase 2
+2025-12-18 11:51:13,923 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:52:42,785 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:53:43,088 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:53:57,119 INFO [GLITCH] Power spike at phase 3
+2025-12-18 11:54:05,734 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:54:25,672 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:54:39,703 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:55:00,625 INFO [GLITCH] Power dip at phase 3
+2025-12-18 11:55:47,149 INFO [GLITCH] Power dip at phase 4
+2025-12-18 11:55:57,734 INFO [GLITCH] Power spike at phase 4
+2025-12-18 11:56:11,764 INFO [GLITCH] Power dip at phase 4
+2025-12-18 11:57:02,715 INFO [GLITCH] Power dip at phase 4
+2025-12-18 11:57:03,454 INFO [GLITCH] Power dip at phase 4
+2025-12-18 11:57:16,500 INFO [GLITCH] Power spike at phase 5
+2025-12-18 11:57:25,115 INFO [GLITCH] Power spike at phase 5
+2025-12-18 11:57:42,100 INFO [GLITCH] Power spike at phase 5
+2025-12-18 11:57:49,731 INFO [GLITCH] Power dip at phase 5
+2025-12-18 11:58:25,914 INFO [GLITCH] Power spike at phase 5
+2025-12-18 11:58:49,297 INFO [GLITCH] Power dip at phase 5
+2025-12-18 11:59:05,299 INFO [GLITCH] Power dip at phase 6
+2025-12-18 11:59:59,696 INFO [GLITCH] Power dip at phase 6
+2025-12-18 12:00:21,606 INFO [GLITCH] Power spike at phase 6
+2025-12-18 12:00:29,238 INFO [GLITCH] Power dip at phase 6
+2025-12-18 12:00:36,869 INFO [GLITCH] Power spike at phase 6
+2025-12-18 12:00:58,296 INFO [GLITCH] Power dip at phase 7
+2025-12-18 12:01:28,079 INFO [GLITCH] Power spike at phase 7
+2025-12-18 12:01:44,081 INFO [GLITCH] Power dip at phase 7
+2025-12-18 12:01:44,820 INFO [CYCLE] Finished normally
+2025-12-18 12:01:44,820 INFO [BATCH] Cycle 30/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 12:11:44,821 INFO [BATCH] Starting cycle 31/∞: LONG
+2025-12-18 12:11:44,822 INFO [VARIANCE] Applied -3.1% duration variance (factor: 0.97x)
+2025-12-18 12:12:16,649 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:12:17,384 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:13:34,985 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:13:37,189 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:13:48,695 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:14:19,789 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:15:06,550 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:15:31,276 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:15:41,314 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:15:42,049 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:16:13,140 INFO [GLITCH] Power spike at phase 3
+2025-12-18 12:16:16,813 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:16:25,871 INFO [GLITCH] Power spike at phase 3
+2025-12-18 12:17:10,668 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:17:48,124 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:18:06,484 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:18:13,584 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:18:25,580 INFO [GLITCH] Power spike at phase 3
+2025-12-18 12:18:33,170 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:19:00,833 INFO [GLITCH] Power spike at phase 4
+2025-12-18 12:19:05,974 INFO [GLITCH] Power dip at phase 4
+2025-12-18 12:19:34,620 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:19:41,230 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:20:12,322 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:21:06,916 INFO [GLITCH] Power spike at phase 6
+2025-12-18 12:21:43,391 INFO [GLITCH] Power spike at phase 6
+2025-12-18 12:21:46,575 INFO [GLITCH] Power dip at phase 6
+2025-12-18 12:21:50,247 INFO [GLITCH] Power spike at phase 6
+2025-12-18 12:23:51,915 INFO [GLITCH] Power spike at phase 8
+2025-12-18 12:23:53,140 INFO [GLITCH] Power dip at phase 8
+2025-12-18 12:26:26,144 INFO [CYCLE] Finished normally
+2025-12-18 12:26:26,144 INFO [BATCH] Cycle 31/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 12:36:26,146 INFO [BATCH] Starting cycle 32/∞: MEDIUM
+2025-12-18 12:36:26,147 INFO [VARIANCE] Applied +11.0% duration variance (factor: 1.11x)
+2025-12-18 12:36:35,850 INFO [GLITCH] Power spike at phase 1
+2025-12-18 12:36:37,885 INFO [GLITCH] Power dip at phase 1
+2025-12-18 12:36:54,318 INFO [GLITCH] Power spike at phase 1
+2025-12-18 12:37:12,627 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:37:33,754 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:37:40,484 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:38:15,069 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:38:21,798 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:38:35,415 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:38:39,642 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:39:07,968 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:39:32,539 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:39:36,453 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:39:48,505 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:39:55,234 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:40:11,668 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:40:30,291 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:41:18,651 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:41:46,664 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:41:52,454 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:42:01,375 INFO [GLITCH] Power dip at phase 2
+2025-12-18 12:42:11,547 INFO [GLITCH] Power spike at phase 2
+2025-12-18 12:43:05,227 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:43:05,697 INFO [GLITCH] Power spike at phase 3
+2025-12-18 12:43:06,480 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:43:14,461 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:43:47,485 INFO [GLITCH] Power spike at phase 3
+2025-12-18 12:44:14,559 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:44:31,930 INFO [GLITCH] Power spike at phase 3
+2025-12-18 12:44:40,851 INFO [GLITCH] Power spike at phase 3
+2025-12-18 12:44:55,718 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:45:07,144 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:45:08,553 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:45:15,285 INFO [GLITCH] Power spike at phase 3
+2025-12-18 12:45:21,389 INFO [GLITCH] Power dip at phase 3
+2025-12-18 12:45:58,479 INFO [GLITCH] Power dip at phase 4
+2025-12-18 12:46:20,545 INFO [GLITCH] Power spike at phase 4
+2025-12-18 12:46:22,893 INFO [GLITCH] Power dip at phase 4
+2025-12-18 12:47:17,823 INFO [GLITCH] Power dip at phase 4
+2025-12-18 12:47:23,614 INFO [GLITCH] Power spike at phase 5
+2025-12-18 12:47:24,710 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:47:25,806 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:47:29,092 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:47:36,761 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:47:42,553 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:47:52,099 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:47:53,510 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:48:14,949 INFO [GLITCH] Power spike at phase 5
+2025-12-18 12:48:16,671 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:49:01,901 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:49:09,884 INFO [GLITCH] Power spike at phase 5
+2025-12-18 12:49:20,995 INFO [GLITCH] Power spike at phase 5
+2025-12-18 12:49:31,171 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:49:31,954 INFO [GLITCH] Power dip at phase 5
+2025-12-18 12:49:50,266 INFO [GLITCH] Power dip at phase 6
+2025-12-18 12:50:19,844 INFO [GLITCH] Power spike at phase 6
+2025-12-18 12:50:20,627 INFO [GLITCH] Power dip at phase 6
+2025-12-18 12:51:29,018 INFO [GLITCH] Power spike at phase 6
+2025-12-18 12:51:37,312 INFO [GLITCH] Power spike at phase 7
+2025-12-18 12:51:39,659 INFO [GLITCH] Power dip at phase 7
+2025-12-18 12:51:41,382 INFO [GLITCH] Power spike at phase 7
+2025-12-18 12:52:05,325 INFO [GLITCH] Power spike at phase 7
+2025-12-18 12:53:13,716 INFO [GLITCH] Power spike at phase 7
+2025-12-18 12:53:16,377 INFO [CYCLE] Finished normally
+2025-12-18 12:53:16,378 INFO [BATCH] Cycle 32/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 13:03:16,378 INFO [BATCH] Starting cycle 33/∞: SHORT
+2025-12-18 13:03:16,379 INFO [VARIANCE] Applied +3.9% duration variance (factor: 1.04x)
+2025-12-18 13:03:20,810 INFO [GLITCH] Power dip at phase 1
+2025-12-18 13:03:49,117 INFO [GLITCH] Power spike at phase 1
+2025-12-18 13:03:53,794 INFO [GLITCH] Power dip at phase 1
+2025-12-18 13:03:58,471 INFO [GLITCH] Power dip at phase 1
+2025-12-18 13:04:41,054 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:04:47,208 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:04:53,855 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:05:13,305 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:06:08,195 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:07:05,559 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:07:30,912 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:07:35,590 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:08:10,296 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:08:48,940 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:08:59,032 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:09:04,203 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:10:42,416 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:11:17,615 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:11:21,308 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:11:28,447 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:12:07,091 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:12:22,598 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:12:30,229 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:12:36,876 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:12:39,584 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:12:58,539 INFO [GLITCH] Power spike at phase 4
+2025-12-18 13:13:42,106 INFO [GLITCH] Power spike at phase 4
+2025-12-18 13:13:47,768 INFO [GLITCH] Power dip at phase 4
+2025-12-18 13:14:27,891 INFO [GLITCH] Power spike at phase 4
+2025-12-18 13:14:46,844 INFO [GLITCH] Power dip at phase 4
+2025-12-18 13:14:52,013 INFO [GLITCH] Power spike at phase 4
+2025-12-18 13:15:07,043 INFO [GLITCH] Power dip at phase 5
+2025-12-18 13:15:09,260 INFO [GLITCH] Power spike at phase 5
+2025-12-18 13:15:10,496 INFO [GLITCH] Power spike at phase 5
+2025-12-18 13:15:16,157 INFO [GLITCH] Power dip at phase 5
+2025-12-18 13:15:19,358 INFO [GLITCH] Power spike at phase 5
+2025-12-18 13:17:16,768 INFO [GLITCH] Power spike at phase 6
+2025-12-18 13:17:29,813 INFO [GLITCH] Power spike at phase 6
+2025-12-18 13:17:41,383 INFO [GLITCH] Power spike at phase 6
+2025-12-18 13:18:31,841 INFO [GLITCH] Power spike at phase 7
+2025-12-18 13:18:58,671 INFO [GLITCH] Power spike at phase 7
+2025-12-18 13:19:02,364 INFO [CYCLE] Finished normally
+2025-12-18 13:19:02,365 INFO [BATCH] Cycle 33/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 13:29:02,365 INFO [BATCH] Starting cycle 34/∞: LONG
+2025-12-18 13:29:02,366 INFO [VARIANCE] Applied -9.2% duration variance (factor: 0.91x)
+2025-12-18 13:29:15,586 INFO [GLITCH] Power dip at phase 1
+2025-12-18 13:29:54,042 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:30:14,367 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:30:31,750 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:31:06,269 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:31:52,049 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:31:54,744 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:31:57,926 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:32:13,351 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:32:18,985 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:32:33,429 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:33:05,011 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:33:19,457 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:33:25,578 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:33:44,918 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:33:46,632 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:33:50,795 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:33:54,957 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:34:07,932 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:34:08,668 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:34:19,194 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:34:37,554 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:34:42,697 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:34:46,369 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:34:59,345 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:35:12,810 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:35:33,619 INFO [GLITCH] Power spike at phase 4
+2025-12-18 13:36:43,389 INFO [GLITCH] Power dip at phase 5
+2025-12-18 13:36:59,792 INFO [GLITCH] Power spike at phase 5
+2025-12-18 13:37:15,704 INFO [GLITCH] Power dip at phase 5
+2025-12-18 13:37:24,762 INFO [GLITCH] Power spike at phase 6
+2025-12-18 13:37:48,998 INFO [GLITCH] Power dip at phase 6
+2025-12-18 13:38:23,517 INFO [GLITCH] Power dip at phase 6
+2025-12-18 13:38:30,617 INFO [GLITCH] Power spike at phase 6
+2025-12-18 13:38:31,842 INFO [GLITCH] Power spike at phase 6
+2025-12-18 13:39:02,441 INFO [GLITCH] Power spike at phase 7
+2025-12-18 13:39:18,843 INFO [GLITCH] Power spike at phase 7
+2025-12-18 13:40:16,376 INFO [GLITCH] Power spike at phase 8
+2025-12-18 13:40:25,436 INFO [GLITCH] Power dip at phase 8
+2025-12-18 13:41:20,029 INFO [GLITCH] Power dip at phase 8
+2025-12-18 13:41:23,213 INFO [GLITCH] Power spike at phase 9
+2025-12-18 13:42:03,116 INFO [GLITCH] Power spike at phase 9
+2025-12-18 13:42:10,706 INFO [GLITCH] Power dip at phase 9
+2025-12-18 13:42:18,786 INFO [GLITCH] Power dip at phase 9
+2025-12-18 13:42:37,636 INFO [GLITCH] Power spike at phase 10
+2025-12-18 13:42:53,059 INFO [CYCLE] Finished normally
+2025-12-18 13:42:53,060 INFO [BATCH] Cycle 34/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 13:52:53,060 INFO [BATCH] Starting cycle 35/∞: MEDIUM
+2025-12-18 13:52:53,061 INFO [VARIANCE] Applied -5.4% duration variance (factor: 0.95x)
+2025-12-18 13:53:09,030 INFO [GLITCH] Power dip at phase 1
+2025-12-18 13:53:37,669 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:53:46,591 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:53:56,764 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:54:05,374 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:55:00,934 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:56:01,504 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:57:14,286 INFO [GLITCH] Power spike at phase 2
+2025-12-18 13:57:19,452 INFO [GLITCH] Power dip at phase 2
+2025-12-18 13:58:33,158 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:58:33,628 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:58:45,365 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:58:49,590 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:59:06,022 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:59:33,721 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:59:36,695 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:59:44,676 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:59:46,085 INFO [GLITCH] Power spike at phase 3
+2025-12-18 13:59:52,198 INFO [GLITCH] Power dip at phase 3
+2025-12-18 13:59:57,675 INFO [GLITCH] Power spike at phase 3
+2025-12-18 14:00:21,940 INFO [GLITCH] Power spike at phase 3
+2025-12-18 14:00:57,777 INFO [GLITCH] Power spike at phase 4
+2025-12-18 14:01:12,647 INFO [GLITCH] Power dip at phase 4
+2025-12-18 14:01:16,248 INFO [GLITCH] Power spike at phase 4
+2025-12-18 14:01:32,680 INFO [GLITCH] Power spike at phase 4
+2025-12-18 14:01:44,104 INFO [GLITCH] Power dip at phase 4
+2025-12-18 14:02:06,482 INFO [GLITCH] Power spike at phase 4
+2025-12-18 14:02:11,334 INFO [GLITCH] Power dip at phase 5
+2025-12-18 14:03:09,091 INFO [GLITCH] Power dip at phase 5
+2025-12-18 14:03:19,889 INFO [GLITCH] Power spike at phase 5
+2025-12-18 14:03:29,436 INFO [GLITCH] Power spike at phase 5
+2025-12-18 14:03:31,471 INFO [GLITCH] Power dip at phase 5
+2025-12-18 14:03:38,513 INFO [GLITCH] Power dip at phase 5
+2025-12-18 14:04:13,101 INFO [GLITCH] Power spike at phase 5
+2025-12-18 14:05:14,289 INFO [GLITCH] Power spike at phase 6
+2025-12-18 14:05:18,202 INFO [GLITCH] Power dip at phase 6
+2025-12-18 14:05:41,209 INFO [GLITCH] Power spike at phase 6
+2025-12-18 14:06:16,736 INFO [GLITCH] Power dip at phase 7
+2025-12-18 14:06:48,816 INFO [GLITCH] Power dip at phase 7
+2025-12-18 14:07:09,004 INFO [GLITCH] Power dip at phase 7
+2025-12-18 14:07:12,291 INFO [CYCLE] Finished normally
+2025-12-18 14:07:12,291 INFO [BATCH] Cycle 35/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 14:17:12,292 INFO [BATCH] Starting cycle 36/∞: SHORT
+2025-12-18 14:17:12,293 INFO [VARIANCE] Applied +6.8% duration variance (factor: 1.07x)
+2025-12-18 14:18:16,352 INFO [GLITCH] Power dip at phase 2
+2025-12-18 14:18:27,433 INFO [GLITCH] Power spike at phase 2
+2025-12-18 14:19:25,835 INFO [GLITCH] Power spike at phase 2
+2025-12-18 14:19:44,316 INFO [GLITCH] Power spike at phase 2
+2025-12-18 14:19:58,355 INFO [GLITCH] Power spike at phase 2
+2025-12-18 14:21:54,434 INFO [GLITCH] Power spike at phase 2
+2025-12-18 14:22:26,229 INFO [GLITCH] Power dip at phase 2
+2025-12-18 14:22:48,641 INFO [GLITCH] Power spike at phase 2
+2025-12-18 14:22:50,369 INFO [GLITCH] Power dip at phase 2
+2025-12-18 14:23:27,086 INFO [GLITCH] Power spike at phase 3
+2025-12-18 14:23:59,346 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:24:22,263 INFO [GLITCH] Power spike at phase 3
+2025-12-18 14:24:25,464 INFO [GLITCH] Power spike at phase 3
+2025-12-18 14:24:26,229 INFO [GLITCH] Power spike at phase 3
+2025-12-18 14:24:30,414 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:24:40,515 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:26:15,376 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:27:49,711 INFO [GLITCH] Power spike at phase 4
+2025-12-18 14:27:57,375 INFO [GLITCH] Power dip at phase 4
+2025-12-18 14:28:02,545 INFO [GLITCH] Power spike at phase 4
+2025-12-18 14:28:54,023 INFO [GLITCH] Power dip at phase 4
+2025-12-18 14:29:12,494 INFO [GLITCH] Power spike at phase 5
+2025-12-18 14:29:28,021 INFO [GLITCH] Power spike at phase 5
+2025-12-18 14:29:28,760 INFO [GLITCH] Power dip at phase 5
+2025-12-18 14:29:36,405 INFO [GLITCH] Power dip at phase 5
+2025-12-18 14:29:37,146 INFO [GLITCH] Power spike at phase 5
+2025-12-18 14:29:47,244 INFO [GLITCH] Power spike at phase 5
+2025-12-18 14:30:58,450 INFO [GLITCH] Power dip at phase 6
+2025-12-18 14:30:59,681 INFO [GLITCH] Power dip at phase 6
+2025-12-18 14:31:44,741 INFO [GLITCH] Power spike at phase 6
+2025-12-18 14:32:04,690 INFO [GLITCH] Power spike at phase 6
+2025-12-18 14:32:24,632 INFO [GLITCH] Power spike at phase 7
+2025-12-18 14:33:07,724 INFO [GLITCH] Power dip at phase 7
+2025-12-18 14:33:18,317 INFO [GLITCH] Power spike at phase 7
+2025-12-18 14:33:23,992 INFO [CYCLE] Finished normally
+2025-12-18 14:33:23,995 INFO [BATCH] Cycle 36/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 14:43:23,998 INFO [BATCH] Starting cycle 37/∞: LONG
+2025-12-18 14:43:24,000 INFO [VARIANCE] Applied -8.3% duration variance (factor: 0.92x)
+2025-12-18 14:43:50,439 INFO [GLITCH] Power spike at phase 1
+2025-12-18 14:44:09,288 INFO [GLITCH] Power dip at phase 2
+2025-12-18 14:44:58,985 INFO [GLITCH] Power dip at phase 2
+2025-12-18 14:45:57,005 INFO [GLITCH] Power dip at phase 2
+2025-12-18 14:46:07,043 INFO [GLITCH] Power dip at phase 2
+2025-12-18 14:46:11,206 INFO [GLITCH] Power spike at phase 2
+2025-12-18 14:46:22,715 INFO [GLITCH] Power spike at phase 2
+2025-12-18 14:46:26,877 INFO [GLITCH] Power dip at phase 2
+2025-12-18 14:46:28,591 INFO [GLITCH] Power spike at phase 2
+2025-12-18 14:46:30,305 INFO [GLITCH] Power dip at phase 2
+2025-12-18 14:46:38,384 INFO [GLITCH] Power spike at phase 2
+2025-12-18 14:47:39,348 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:48:24,147 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:48:33,204 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:48:38,836 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:48:47,404 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:49:22,905 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:49:31,474 INFO [GLITCH] Power spike at phase 3
+2025-12-18 14:49:37,594 INFO [GLITCH] Power dip at phase 3
+2025-12-18 14:49:57,427 INFO [GLITCH] Power spike at phase 4
+2025-12-18 14:50:48,106 INFO [GLITCH] Power dip at phase 5
+2025-12-18 14:50:59,123 INFO [GLITCH] Power spike at phase 5
+2025-12-18 14:51:34,620 INFO [GLITCH] Power dip at phase 5
+2025-12-18 14:51:55,922 INFO [GLITCH] Power dip at phase 6
+2025-12-18 14:52:13,319 INFO [GLITCH] Power spike at phase 6
+2025-12-18 14:52:16,992 INFO [GLITCH] Power spike at phase 6
+2025-12-18 14:52:18,706 INFO [GLITCH] Power dip at phase 6
+2025-12-18 14:52:26,785 INFO [GLITCH] Power spike at phase 6
+2025-12-18 14:52:28,010 INFO [GLITCH] Power spike at phase 6
+2025-12-18 14:53:14,278 INFO [GLITCH] Power dip at phase 6
+2025-12-18 14:53:21,378 INFO [GLITCH] Power spike at phase 7
+2025-12-18 14:53:23,581 INFO [GLITCH] Power spike at phase 7
+2025-12-18 14:53:57,120 INFO [GLITCH] Power spike at phase 7
+2025-12-18 14:53:59,324 INFO [GLITCH] Power dip at phase 7
+2025-12-18 14:54:00,059 INFO [GLITCH] Power spike at phase 7
+2025-12-18 14:54:18,421 INFO [GLITCH] Power dip at phase 7
+2025-12-18 14:54:26,011 INFO [GLITCH] Power spike at phase 8
+2025-12-18 14:54:44,371 INFO [GLITCH] Power dip at phase 8
+2025-12-18 14:54:57,836 INFO [GLITCH] Power dip at phase 8
+2025-12-18 14:55:03,466 INFO [GLITCH] Power spike at phase 8
+2025-12-18 14:55:55,120 INFO [GLITCH] Power dip at phase 9
+2025-12-18 14:56:32,086 INFO [GLITCH] Power spike at phase 9
+2025-12-18 14:56:46,040 INFO [GLITCH] Power dip at phase 9
+2025-12-18 14:56:48,734 INFO [GLITCH] Power spike at phase 9
+2025-12-18 14:57:22,761 INFO [CYCLE] Finished normally
+2025-12-18 14:57:22,762 INFO [BATCH] Cycle 37/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 15:07:22,763 INFO [BATCH] Starting cycle 38/∞: MEDIUM
+2025-12-18 15:07:22,763 INFO [VARIANCE] Applied -7.3% duration variance (factor: 0.93x)
+2025-12-18 15:07:34,344 INFO [GLITCH] Power spike at phase 1
+2025-12-18 15:07:36,066 INFO [GLITCH] Power dip at phase 1
+2025-12-18 15:08:30,369 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:08:31,778 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:08:39,134 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:08:45,550 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:08:51,027 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:08:55,253 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:09:06,051 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:09:16,223 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:09:39,540 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:09:43,453 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:10:35,583 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:10:46,382 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:10:49,982 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:10:54,833 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:11:15,648 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:11:21,125 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:11:24,726 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:11:46,479 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:12:09,485 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:12:17,779 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:12:19,502 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:12:25,918 INFO [GLITCH] Power dip at phase 3
+2025-12-18 15:12:38,907 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:12:52,209 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:12:53,931 INFO [GLITCH] Power dip at phase 3
+2025-12-18 15:13:00,035 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:13:03,009 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:13:09,114 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:13:10,523 INFO [GLITCH] Power dip at phase 3
+2025-12-18 15:13:46,671 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:13:55,904 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:14:17,970 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:16:45,930 INFO [GLITCH] Power spike at phase 5
+2025-12-18 15:16:46,715 INFO [GLITCH] Power spike at phase 5
+2025-12-18 15:16:55,641 INFO [GLITCH] Power dip at phase 5
+2025-12-18 15:17:04,874 INFO [GLITCH] Power spike at phase 5
+2025-12-18 15:17:07,848 INFO [GLITCH] Power spike at phase 5
+2025-12-18 15:17:15,520 INFO [GLITCH] Power spike at phase 5
+2025-12-18 15:17:20,060 INFO [GLITCH] Power dip at phase 5
+2025-12-18 15:17:24,597 INFO [GLITCH] Power spike at phase 5
+2025-12-18 15:17:48,231 INFO [GLITCH] Power dip at phase 5
+2025-12-18 15:17:53,083 INFO [GLITCH] Power dip at phase 5
+2025-12-18 15:18:07,963 INFO [GLITCH] Power dip at phase 5
+2025-12-18 15:18:12,816 INFO [GLITCH] Power spike at phase 5
+2025-12-18 15:18:22,054 INFO [GLITCH] Power dip at phase 5
+2025-12-18 15:18:28,470 INFO [GLITCH] Power dip at phase 5
+2025-12-18 15:18:47,719 INFO [GLITCH] Power spike at phase 6
+2025-12-18 15:19:01,965 INFO [GLITCH] Power spike at phase 6
+2025-12-18 15:19:15,587 INFO [GLITCH] Power spike at phase 6
+2025-12-18 15:19:25,134 INFO [GLITCH] Power spike at phase 6
+2025-12-18 15:19:57,530 INFO [GLITCH] Power dip at phase 6
+2025-12-18 15:20:17,412 INFO [GLITCH] Power spike at phase 7
+2025-12-18 15:20:33,531 INFO [GLITCH] Power dip at phase 7
+2025-12-18 15:21:26,917 INFO [CYCLE] Finished normally
+2025-12-18 15:21:26,918 INFO [BATCH] Cycle 38/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 15:31:26,918 INFO [BATCH] Starting cycle 39/∞: SHORT
+2025-12-18 15:31:26,919 INFO [VARIANCE] Applied +3.4% duration variance (factor: 1.04x)
+2025-12-18 15:31:33,325 INFO [GLITCH] Power spike at phase 1
+2025-12-18 15:31:48,832 INFO [GLITCH] Power spike at phase 1
+2025-12-18 15:31:59,416 INFO [GLITCH] Power dip at phase 1
+2025-12-18 15:32:13,446 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:32:27,968 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:32:49,383 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:33:05,383 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:33:22,859 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:33:27,044 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:33:28,767 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:33:41,813 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:34:49,501 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:36:13,933 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:36:16,149 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:36:31,164 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:36:34,364 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:36:50,363 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:37:23,103 INFO [GLITCH] Power dip at phase 3
+2025-12-18 15:37:26,303 INFO [GLITCH] Power dip at phase 3
+2025-12-18 15:37:28,519 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:37:34,180 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:37:41,319 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:38:31,285 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:38:43,346 INFO [GLITCH] Power dip at phase 3
+2025-12-18 15:38:54,916 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:39:08,945 INFO [GLITCH] Power spike at phase 3
+2025-12-18 15:39:13,130 INFO [GLITCH] Power dip at phase 3
+2025-12-18 15:39:53,252 INFO [GLITCH] Power dip at phase 3
+2025-12-18 15:40:45,689 INFO [GLITCH] Power dip at phase 3
+2025-12-18 15:41:23,840 INFO [GLITCH] Power spike at phase 4
+2025-12-18 15:42:28,578 INFO [GLITCH] Power spike at phase 4
+2025-12-18 15:43:01,815 INFO [GLITCH] Power dip at phase 4
+2025-12-18 15:43:06,000 INFO [GLITCH] Power spike at phase 5
+2025-12-18 15:43:52,027 INFO [GLITCH] Power dip at phase 5
+2025-12-18 15:44:24,274 INFO [GLITCH] Power dip at phase 5
+2025-12-18 15:45:50,667 INFO [GLITCH] Power dip at phase 6
+2025-12-18 15:45:56,330 INFO [GLITCH] Power dip at phase 6
+2025-12-18 15:46:02,487 INFO [GLITCH] Power spike at phase 6
+2025-12-18 15:47:08,210 INFO [CYCLE] Finished normally
+2025-12-18 15:47:08,211 INFO [BATCH] Cycle 39/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 15:57:08,211 INFO [BATCH] Starting cycle 40/∞: LONG
+2025-12-18 15:57:08,212 INFO [VARIANCE] Applied -6.6% duration variance (factor: 0.94x)
+2025-12-18 15:58:03,540 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:58:17,008 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:58:49,079 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:58:49,816 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:58:57,895 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:59:02,547 INFO [GLITCH] Power spike at phase 2
+2025-12-18 15:59:50,773 INFO [GLITCH] Power dip at phase 2
+2025-12-18 15:59:57,383 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:00:05,463 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:00:11,094 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:00:42,185 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:01:23,069 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:02:02,490 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:02:57,588 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:03:00,283 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:03:08,362 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:03:28,682 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:03:51,453 INFO [GLITCH] Power spike at phase 4
+2025-12-18 16:04:06,422 INFO [GLITCH] Power spike at phase 4
+2025-12-18 16:04:28,710 INFO [GLITCH] Power dip at phase 4
+2025-12-18 16:05:31,145 INFO [GLITCH] Power dip at phase 5
+2025-12-18 16:05:51,953 INFO [GLITCH] Power dip at phase 6
+2025-12-18 16:06:07,376 INFO [GLITCH] Power spike at phase 6
+2025-12-18 16:06:54,149 INFO [GLITCH] Power spike at phase 6
+2025-12-18 16:07:02,720 INFO [GLITCH] Power spike at phase 6
+2025-12-18 16:07:04,924 INFO [GLITCH] Power dip at phase 6
+2025-12-18 16:07:48,746 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:07:59,272 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:08:15,184 INFO [GLITCH] Power spike at phase 8
+2025-12-18 16:08:16,898 INFO [GLITCH] Power dip at phase 8
+2025-12-18 16:08:41,141 INFO [GLITCH] Power dip at phase 8
+2025-12-18 16:08:47,262 INFO [GLITCH] Power dip at phase 8
+2025-12-18 16:08:59,748 INFO [GLITCH] Power dip at phase 8
+2025-12-18 16:09:52,384 INFO [GLITCH] Power spike at phase 9
+2025-12-18 16:10:01,932 INFO [GLITCH] Power spike at phase 9
+2025-12-18 16:10:35,472 INFO [GLITCH] Power dip at phase 9
+2025-12-18 16:11:02,155 INFO [GLITCH] Power spike at phase 10
+2025-12-18 16:11:20,516 INFO [CYCLE] Finished normally
+2025-12-18 16:11:20,516 INFO [BATCH] Cycle 40/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 16:21:20,517 INFO [BATCH] Starting cycle 41/∞: MEDIUM
+2025-12-18 16:21:20,518 INFO [VARIANCE] Applied -3.1% duration variance (factor: 0.97x)
+2025-12-18 16:22:06,533 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:22:20,147 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:22:23,434 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:22:31,417 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:22:33,452 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:22:52,076 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:22:52,552 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:23:19,946 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:23:32,934 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:23:43,422 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:23:52,655 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:23:56,568 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:23:57,664 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:24:16,918 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:24:32,104 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:24:35,704 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:24:39,303 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:24:44,781 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:24:58,710 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:25:51,139 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:26:05,386 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:26:18,064 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:26:21,352 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:26:40,912 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:26:46,394 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:26:49,058 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:26:50,780 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:27:13,789 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:28:04,340 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:28:06,063 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:28:30,009 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:28:41,746 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:28:50,982 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:29:07,101 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:29:15,083 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:30:12,205 INFO [GLITCH] Power dip at phase 4
+2025-12-18 16:30:12,988 INFO [GLITCH] Power dip at phase 4
+2025-12-18 16:30:13,459 INFO [GLITCH] Power spike at phase 4
+2025-12-18 16:30:17,691 INFO [GLITCH] Power dip at phase 4
+2025-12-18 16:30:21,291 INFO [GLITCH] Power dip at phase 4
+2025-12-18 16:30:36,487 INFO [GLITCH] Power dip at phase 4
+2025-12-18 16:30:44,155 INFO [GLITCH] Power dip at phase 4
+2025-12-18 16:31:02,782 INFO [GLITCH] Power dip at phase 5
+2025-12-18 16:31:10,767 INFO [GLITCH] Power spike at phase 5
+2025-12-18 16:31:23,130 INFO [GLITCH] Power spike at phase 5
+2025-12-18 16:31:31,425 INFO [GLITCH] Power dip at phase 5
+2025-12-18 16:31:33,147 INFO [GLITCH] Power spike at phase 5
+2025-12-18 16:31:59,913 INFO [GLITCH] Power spike at phase 5
+2025-12-18 16:32:05,396 INFO [GLITCH] Power spike at phase 5
+2025-12-18 16:32:10,563 INFO [GLITCH] Power dip at phase 5
+2025-12-18 16:32:16,041 INFO [GLITCH] Power dip at phase 5
+2025-12-18 16:32:24,649 INFO [GLITCH] Power spike at phase 5
+2025-12-18 16:32:26,057 INFO [GLITCH] Power dip at phase 5
+2025-12-18 16:32:52,502 INFO [GLITCH] Power spike at phase 5
+2025-12-18 16:33:12,694 INFO [GLITCH] Power dip at phase 6
+2025-12-18 16:33:20,363 INFO [GLITCH] Power dip at phase 6
+2025-12-18 16:33:31,477 INFO [GLITCH] Power spike at phase 6
+2025-12-18 16:33:33,827 INFO [GLITCH] Power spike at phase 6
+2025-12-18 16:33:49,634 INFO [GLITCH] Power dip at phase 6
+2025-12-18 16:33:57,927 INFO [GLITCH] Power spike at phase 6
+2025-12-18 16:34:40,351 INFO [GLITCH] Power spike at phase 7
+2025-12-18 16:34:46,767 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:34:52,871 INFO [GLITCH] Power spike at phase 7
+2025-12-18 16:34:58,662 INFO [GLITCH] Power spike at phase 7
+2025-12-18 16:35:09,778 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:35:43,429 INFO [GLITCH] Power spike at phase 7
+2025-12-18 16:35:58,921 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:36:00,956 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:36:05,185 INFO [CYCLE] Finished normally
+2025-12-18 16:36:05,187 INFO [BATCH] Cycle 41/∞ complete. Waiting 10.0 minutes until next cycle...
+2025-12-18 16:46:05,188 INFO [BATCH] Starting cycle 42/∞: SHORT
+2025-12-18 16:46:05,189 INFO [VARIANCE] Applied -11.4% duration variance (factor: 0.89x)
+2025-12-18 16:46:22,419 INFO [GLITCH] Power spike at phase 1
+2025-12-18 16:46:34,973 INFO [GLITCH] Power dip at phase 1
+2025-12-18 16:46:51,466 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:47:05,991 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:47:28,392 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:47:30,115 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:47:30,854 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:48:45,929 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:49:10,305 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:50:00,275 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:50:16,276 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:50:20,461 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:50:21,692 INFO [GLITCH] Power dip at phase 2
+2025-12-18 16:50:38,675 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:50:40,893 INFO [GLITCH] Power spike at phase 2
+2025-12-18 16:51:37,262 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:52:23,793 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:52:31,424 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:52:35,120 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:52:40,290 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:52:45,459 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:53:10,818 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:53:42,572 INFO [GLITCH] Power dip at phase 3
+2025-12-18 16:53:58,576 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:54:13,591 INFO [GLITCH] Power spike at phase 3
+2025-12-18 16:54:35,993 INFO [GLITCH] Power spike at phase 4
+2025-12-18 16:55:17,099 INFO [GLITCH] Power spike at phase 4
+2025-12-18 16:56:42,027 INFO [GLITCH] Power dip at phase 5
+2025-12-18 16:57:43,813 INFO [GLITCH] Power dip at phase 6
+2025-12-18 16:57:44,552 INFO [GLITCH] Power dip at phase 6
+2025-12-18 16:57:50,215 INFO [GLITCH] Power spike at phase 6
+2025-12-18 16:58:31,814 INFO [GLITCH] Power dip at phase 6
+2025-12-18 16:58:34,523 INFO [GLITCH] Power dip at phase 6
+2025-12-18 16:58:47,076 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:59:04,553 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:59:16,128 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:59:21,790 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:59:26,467 INFO [GLITCH] Power dip at phase 7
+2025-12-18 16:59:33,113 INFO [CYCLE] Finished normally
+2025-12-18 16:59:33,113 INFO [BATCH] Cycle 42/∞ complete. Waiting 10.0 minutes until next cycle...

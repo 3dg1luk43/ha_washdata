@@ -38,6 +38,11 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+    CONF_MAX_PAST_CYCLES,
+    CONF_MAX_FULL_TRACES_PER_PROFILE,
+    CONF_MAX_FULL_TRACES_UNLABELED,
+    CONF_WATCHDOG_INTERVAL,
+    CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     EVENT_CYCLE_STARTED,
@@ -63,6 +68,11 @@ from .const import (
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    DEFAULT_MAX_PAST_CYCLES,
+    DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
+    DEFAULT_MAX_FULL_TRACES_UNLABELED,
+    DEFAULT_WATCHDOG_INTERVAL,
+    DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     STATE_RUNNING,
     STATE_OFF,
 )
@@ -136,7 +146,8 @@ class WashDataManager:
         
         self._remove_listener = None
         self._remove_watchdog = None
-        self._watchdog_interval = 5  # Check every 5 seconds when running
+        self._watchdog_interval = int(config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL))
+        self._noise_events_threshold = int(config_entry.options.get(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD))
         self._current_program = "off"
         self._time_remaining: float | None = None
         self._cycle_progress: float = 0.0
@@ -147,6 +158,13 @@ class WashDataManager:
         self._last_estimate_time: datetime | None = None
         self._matched_profile_duration: float | None = None
         self._last_match_confidence: float = 0.0  # Store confidence for feedback
+        # Sample interval tracking (seconds) for adaptive timing
+        self._sample_intervals: list[float] = []
+        self._sample_interval_stats: dict[str, float | int | None] = {
+            "median": None,
+            "p95": None,
+            "count": 0,
+        }
         # Profile matching duration tolerance (0.25 = ±25%)
         self._profile_duration_tolerance: float = float(
             config_entry.options.get("profile_duration_tolerance", 0.25)
@@ -159,6 +177,8 @@ class WashDataManager:
             config_entry.options.get("auto_merge_gap_seconds", 1800)
         )
         self._remove_maintenance_scheduler = None
+        self._profile_sample_repair_stats: dict[str, int] | None = None
+        self._last_suggestion_update: datetime | None = None
 
     async def async_setup(self) -> None:
         """Set up the manager."""
@@ -166,8 +186,26 @@ class WashDataManager:
         # Apply configurable duration tolerance to profile store
         try:
             self.profile_store._duration_tolerance = self._profile_duration_tolerance
+            # Apply retention caps from options
+            self.profile_store._max_past_cycles = int(self.config_entry.options.get(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES))
+            self.profile_store._max_full_traces_per_profile = int(self.config_entry.options.get(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE))
+            self.profile_store._max_full_traces_unlabeled = int(self.config_entry.options.get(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED))
         except Exception:
             pass
+
+        # Repair broken sample_cycle_id references (can happen after aggressive retention)
+        try:
+            stats = self.profile_store.repair_profile_samples()
+            self._profile_sample_repair_stats = stats
+            if stats.get("profiles_repaired", 0) or stats.get("cycles_labeled_as_sample", 0):
+                _LOGGER.warning(
+                    "Repaired profile sample references for %s: %s",
+                    self.entry_id,
+                    stats,
+                )
+                await self.profile_store.async_save()
+        except Exception:
+            _LOGGER.exception("Failed repairing profile sample references for %s", self.entry_id)
         
         # Subscribe to power sensor updates
         self._remove_listener = async_track_state_change_event(
@@ -192,6 +230,8 @@ class WashDataManager:
         This includes min_power, off_delay, smoothing_window, and all abrupt drop parameters.
         """
         _LOGGER.info("Reloading configuration for %s", self.entry_id)
+        # Replace reference so future reads use the latest options
+        self.config_entry = config_entry
         
         # Update detector config in-place (for running cycle to use new settings immediately)
         old_min_power = self.detector._config.min_power
@@ -432,6 +472,8 @@ class WashDataManager:
         if self._last_reading_time and (now - self._last_reading_time).total_seconds() < 2.0:
             return
             
+        # Track observed sample interval for adaptive timing
+        self._record_sample_interval(now)
         self._last_reading_time = now
         self._current_power = power
         self.detector.process_reading(power, now)
@@ -458,8 +500,14 @@ class WashDataManager:
             _LOGGER.debug("No past cycles to match against")
             return
         
-        # Get the most recent cycle
-        latest_cycle = past_cycles[0]  # Cycles are sorted newest first
+        # Get the most recent cycle (sort by start_time descending to be safe)
+        try:
+            latest_cycle = max(
+                past_cycles,
+                key=lambda c: c.get("start_time", ""),
+            )
+        except Exception:
+            latest_cycle = past_cycles[-1]
         cycle_id = latest_cycle.get("id")
         duration = latest_cycle.get("duration", 0)
         power_data = latest_cycle.get("power_data", [])
@@ -515,9 +563,14 @@ class WashDataManager:
         if self._remove_watchdog:
             return  # Already running
         
-        _LOGGER.debug(f"Starting watchdog timer (interval: {self._watchdog_interval}s)")
+        interval = self._get_effective_watchdog_interval()
+        _LOGGER.debug(
+            "Starting watchdog timer (configured=%ss, effective=%.1fs)",
+            self._watchdog_interval,
+            interval,
+        )
         self._remove_watchdog = async_track_time_interval(
-            self.hass, self._watchdog_check_stuck_cycle, timedelta(seconds=self._watchdog_interval)
+            self.hass, self._watchdog_check_stuck_cycle, timedelta(seconds=interval)
         )
 
     def _stop_watchdog(self) -> None:
@@ -658,6 +711,22 @@ class WashDataManager:
              # Let's save it but marked as potential noise? 
              # For now save as normal.
         
+        # If we had a runtime match, attach the profile name for persistence
+        if (
+            self._current_program
+            and self._current_program not in ("off", "detecting...", "restored...")
+            and self._current_program in self.profile_store._data.get("profiles", {})
+        ):
+            cycle_data["profile_name"] = self._current_program
+
+        # Precompute a stable cycle ID so feedback/auto-label can reference it immediately
+        try:
+            import hashlib
+            unique_str = f"{cycle_data['start_time']}_{cycle_data['duration']}"
+            cycle_data["id"] = hashlib.sha256(unique_str.encode()).hexdigest()[:12]
+        except Exception:  # noqa: BLE001
+            pass
+
         self.hass.async_create_task(self.profile_store.async_save_cycle(cycle_data))
         self.hass.async_create_task(self.profile_store.async_clear_active_cycle())
         
@@ -687,6 +756,403 @@ class WashDataManager:
         
         self._notify_update()
 
+    def _record_sample_interval(self, now: datetime) -> None:
+        """Record the interval between power updates for adaptive timing."""
+        if self._last_reading_time:
+            delta = (now - self._last_reading_time).total_seconds()
+            if delta > 0.1:  # ignore ultra-small jitter
+                self._sample_intervals.append(delta)
+                # keep a reasonable window
+                if len(self._sample_intervals) > 200:
+                    self._sample_intervals = self._sample_intervals[-200:]
+                self._compute_sample_interval_stats()
+
+    def _compute_sample_interval_stats(self) -> None:
+        """Compute median and p95 sample intervals for diagnostics and adaptation."""
+        import numpy as np
+
+        arr = np.array(self._sample_intervals)
+        if arr.size == 0:
+            self._sample_interval_stats = {"median": None, "p95": None, "count": 0}
+            return
+
+        median = float(np.median(arr))
+        p95 = float(np.percentile(arr, 95))
+        self._sample_interval_stats = {
+            "median": median,
+            "p95": p95,
+            "count": int(arr.size),
+        }
+
+        # Update suggested settings based on observed sensor cadence (no auto-overrides)
+        try:
+            self._update_sampling_suggestions(median=median, p95=p95, count=int(arr.size))
+        except Exception:
+            _LOGGER.exception("Failed to update sampling-based suggestions")
+
+    def _set_suggestion(self, key: str, value: float | int, reason: str) -> bool:
+        """Persist a suggested setting value without changing HA options."""
+        current = self.profile_store.get_suggestions().get(key, {})
+        current_value = current.get("value") if isinstance(current, dict) else None
+        # Avoid churn: only update if materially different
+        if isinstance(current_value, (int, float)) and abs(float(current_value) - float(value)) < 0.01:
+            return False
+        self.profile_store.set_suggestion(key, value, reason=reason)
+        self.hass.async_create_task(self.profile_store.async_save())
+        return True
+
+    def _update_sampling_suggestions(self, median: float, p95: float, count: int) -> None:
+        """Suggest timing-related options based on sensor update cadence.
+
+        Goal: keep detection responsive while avoiding false watchdog triggers for slow or
+        publish-on-change sensors.
+        """
+        if count < 20:
+            return
+
+        now = dt_util.now()
+        if self._last_suggestion_update and (now - self._last_suggestion_update).total_seconds() < 1800:
+            return
+
+        # Suggest watchdog interval ~ p95 cadence (checking faster doesn't help much)
+        suggested_watchdog = int(max(1, round(p95)))
+        suggested_watchdog = min(suggested_watchdog, int(max(1, self._config.off_delay / 2)))
+        self._set_suggestion(
+            CONF_WATCHDOG_INTERVAL,
+            suggested_watchdog,
+            reason=f"Based on observed update cadence (p95={p95:.1f}s).",
+        )
+
+        # Suggest match interval to require ~10 samples between matches
+        suggested_match = int(max(10, round(median * 10)))
+        self._set_suggestion(
+            CONF_PROFILE_MATCH_INTERVAL,
+            suggested_match,
+            reason=f"Based on observed update cadence (median={median:.1f}s).",
+        )
+
+        # Suggest no-update timeout to reduce false force-ends on slow sensors
+        # Keep it at least one off_delay, and ~4x p95 cadence.
+        suggested_no_update = int(max(self._config.off_delay, round(p95 * 4)))
+        self._set_suggestion(
+            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+            suggested_no_update,
+            reason=f"Based on observed update cadence (p95={p95:.1f}s) and off_delay={self._config.off_delay}s.",
+        )
+
+        # Suggest duration tolerances based on observed cycle duration variance
+        try:
+            var_p95 = self._compute_duration_variance_p95()
+            if var_p95 is not None:
+                suggested_tol = float(min(0.5, max(0.05, round(var_p95 + 0.05, 2))))
+                self._set_suggestion(
+                    CONF_DURATION_TOLERANCE,
+                    suggested_tol,
+                    reason=f"Based on recent labeled cycles vs profile avg_duration (p95 variance={var_p95:.2f}).",
+                )
+                self._set_suggestion(
+                    CONF_PROFILE_DURATION_TOLERANCE,
+                    suggested_tol,
+                    reason=f"Based on recent labeled cycles vs profile avg_duration (p95 variance={var_p95:.2f}).",
+                )
+        except Exception:
+            _LOGGER.exception("Failed to compute duration-variance suggestions")
+
+        # Suggest off_delay based on sensor cadence (ensure enough below-threshold samples)
+        try:
+            # Ensure at least ~4 p95 intervals (and at least default), cap at 10 minutes
+            suggested_off_delay = int(min(600, max(60, round(max(DEFAULT_OFF_DELAY, p95 * 4)))))
+            self._set_suggestion(
+                CONF_OFF_DELAY,
+                suggested_off_delay,
+                reason=f"Based on observed update cadence (p95={p95:.1f}s).",
+            )
+        except Exception:
+            _LOGGER.exception("Failed to compute off_delay suggestion")
+
+        # Suggest profile match min/max duration ratios based on observed labeled duration ratios
+        try:
+            bounds = self._compute_duration_ratio_bounds()
+            if bounds is not None:
+                min_ratio, max_ratio, sample_count = bounds
+                self._set_suggestion(
+                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                    float(round(min_ratio, 2)),
+                    reason=f"Based on labeled cycles vs profile avg_duration (n={sample_count}).",
+                )
+                self._set_suggestion(
+                    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+                    float(round(max_ratio, 2)),
+                    reason=f"Based on labeled cycles vs profile avg_duration (n={sample_count}).",
+                )
+        except Exception:
+            _LOGGER.exception("Failed to compute match duration ratio suggestions")
+
+        # Suggest auto-merge gap based on observed fragmentation gaps
+        try:
+            gap = self._compute_fragmentation_gap_suggestion_seconds()
+            if gap is not None:
+                suggested_gap, sample_count = gap
+                self._set_suggestion(
+                    CONF_AUTO_MERGE_GAP_SECONDS,
+                    int(suggested_gap),
+                    reason=f"Based on observed fragmented runs (n={sample_count}).",
+                )
+        except Exception:
+            _LOGGER.exception("Failed to compute auto-merge gap suggestion")
+
+        # Suggest auto-label confidence based on persisted feedback confirmation/correction rates
+        try:
+            suggested = self._compute_auto_label_confidence_suggestion()
+            if suggested is not None:
+                value, stats = suggested
+                self._set_suggestion(
+                    CONF_AUTO_LABEL_CONFIDENCE,
+                    float(round(value, 2)),
+                    reason=stats,
+                )
+        except Exception:
+            _LOGGER.exception("Failed to compute auto-label confidence suggestion")
+
+        self._last_suggestion_update = now
+
+    def _compute_duration_ratio_bounds(self) -> tuple[float, float, int] | None:
+        """Compute suggested min/max duration ratios from labeled cycles.
+
+        Uses ratio = duration / profile.avg_duration for labeled, non-interrupted cycles.
+        Returns (min_ratio, max_ratio, sample_count) or None.
+        """
+        profiles = self.profile_store._data.get("profiles") or {}
+        cycles = self.profile_store._data.get("past_cycles") or []
+
+        if not isinstance(profiles, dict) or not isinstance(cycles, list):
+            return None
+
+        ratios: list[float] = []
+        for c in cycles[-140:]:
+            try:
+                profile_name = c.get("profile_name")
+                if not profile_name:
+                    continue
+                if c.get("status") == "interrupted":
+                    continue
+                profile = profiles.get(profile_name)
+                if not isinstance(profile, dict):
+                    continue
+                avg = float(profile.get("avg_duration") or 0)
+                dur = float(c.get("duration") or 0)
+                if avg <= 1.0 or dur <= 1.0:
+                    continue
+                ratios.append(dur / avg)
+            except Exception:
+                continue
+
+        if len(ratios) < 10:
+            return None
+
+        arr = np.array(ratios, dtype=float)
+        p05 = float(np.percentile(arr, 5))
+        p95 = float(np.percentile(arr, 95))
+
+        # Add a small margin so bounds are not too tight.
+        min_ratio = max(0.10, min(1.00, p05 - 0.05))
+        max_ratio = max(1.00, min(3.00, p95 + 0.05))
+
+        # Ensure sane ordering
+        if max_ratio <= min_ratio:
+            max_ratio = min(3.00, min_ratio + 0.25)
+
+        return (min_ratio, max_ratio, len(ratios))
+
+    def _compute_fragmentation_gap_suggestion_seconds(self) -> tuple[int, int] | None:
+        """Suggest auto-merge gap threshold from observed likely-fragmentation gaps.
+
+        Heuristic: look for consecutive cycles with a small time gap where the first looks
+        abnormal/short and the next completes normally. Returns (suggested_gap_seconds, n).
+        """
+        cycles = self.profile_store._data.get("past_cycles") or []
+        if not isinstance(cycles, list) or len(cycles) < 3:
+            return None
+
+        # Sort by start time
+        try:
+            ordered = sorted(cycles, key=lambda c: c.get("start_time", ""))
+        except Exception:
+            ordered = list(cycles)
+
+        gaps: list[float] = []
+        short_threshold = float(getattr(self._config, "interrupted_min_seconds", 150)) * 2.0
+
+        for prev, nxt in zip(ordered, ordered[1:]):
+            try:
+                prev_end = dt_util.parse_datetime(prev.get("end_time"))
+                nxt_start = dt_util.parse_datetime(nxt.get("start_time"))
+                if not prev_end or not nxt_start:
+                    continue
+                gap_s = (nxt_start - prev_end).total_seconds()
+                if gap_s <= 0:
+                    continue
+                if gap_s > 3600:
+                    continue
+
+                prev_status = prev.get("status")
+                nxt_status = nxt.get("status")
+                prev_dur = float(prev.get("duration") or 0)
+
+                prev_profile = prev.get("profile_name")
+                nxt_profile = nxt.get("profile_name")
+                same_or_unknown = (
+                    (prev_profile and nxt_profile and prev_profile == nxt_profile)
+                    or (not prev_profile)
+                    or (not nxt_profile)
+                )
+                if not same_or_unknown:
+                    continue
+
+                prev_looks_fragmented = (
+                    prev_status in ("interrupted", "force_stopped")
+                    or (prev_dur > 0 and prev_dur < short_threshold)
+                )
+                nxt_looks_complete = nxt_status in ("completed", "force_stopped")
+                if not (prev_looks_fragmented and nxt_looks_complete):
+                    continue
+
+                gaps.append(gap_s)
+            except Exception:
+                continue
+
+        if len(gaps) < 3:
+            return None
+
+        arr = np.array(gaps, dtype=float)
+        p95 = float(np.percentile(arr, 95))
+        # Add a 60s cushion, cap to 2 hours (schema max allows 7200)
+        suggested = int(min(7200, max(60, round(p95 + 60))))
+        return (suggested, len(gaps))
+
+    def _compute_auto_label_confidence_suggestion(self) -> tuple[float, str] | None:
+        """Suggest auto-label confidence threshold based on feedback correction rates."""
+        history = self.profile_store._data.get("feedback_history") or {}
+        if not isinstance(history, dict) or len(history) < 10:
+            return None
+
+        records: list[tuple[float, bool]] = []
+        for rec in history.values():
+            if not isinstance(rec, dict):
+                continue
+            try:
+                conf = float(rec.get("original_confidence"))
+                confirmed = bool(rec.get("user_confirmed"))
+            except Exception:
+                continue
+            if conf <= 0 or conf > 1.0:
+                continue
+            records.append((conf, confirmed))
+
+        if len(records) < 10:
+            return None
+
+        # Find the lowest threshold where correction rate is acceptably low.
+        target_correction = 0.05
+        min_samples = 5
+
+        best: float | None = None
+        best_stats: str | None = None
+
+        for t in np.arange(0.70, 0.991, 0.01):
+            subset = [(c, ok) for (c, ok) in records if c >= float(t)]
+            if len(subset) < min_samples:
+                continue
+            corrections = sum(1 for _, ok in subset if not ok)
+            rate = corrections / len(subset)
+            if rate <= target_correction:
+                best = float(t)
+                best_stats = (
+                    f"Based on feedback: correction_rate={rate:.0%} at conf≥{t:.2f} (n={len(subset)})."
+                )
+                break
+
+        if best is None:
+            # Fallback: keep it conservative. If corrections are common, stay near default.
+            best = float(DEFAULT_AUTO_LABEL_CONFIDENCE)
+            total = len(records)
+            corrections = sum(1 for _, ok in records if not ok)
+            best_stats = (
+                f"Based on feedback: overall correction_rate={corrections/total:.0%} (n={total}); keeping conservative default."
+            )
+
+        best = min(0.99, max(0.70, best))
+        return (best, best_stats or "Based on feedback history.")
+
+    def _compute_duration_variance_p95(self) -> float | None:
+        """Compute p95 relative duration variance for labeled cycles.
+
+        Uses current profile avg_duration as the reference. Returns None if insufficient data.
+        """
+        profiles = self.profile_store._data.get("profiles") or {}
+        cycles = self.profile_store._data.get("past_cycles") or []
+
+        errors: list[float] = []
+        for c in cycles[-80:]:
+            profile_name = c.get("profile_name")
+            if not profile_name:
+                continue
+            profile = profiles.get(profile_name) if isinstance(profiles, dict) else None
+            if not isinstance(profile, dict):
+                continue
+            avg = profile.get("avg_duration")
+            dur = c.get("duration")
+            try:
+                avg_f = float(avg)
+                dur_f = float(dur)
+            except Exception:
+                continue
+            if avg_f <= 1.0 or dur_f <= 1.0:
+                continue
+            errors.append(abs(dur_f - avg_f) / avg_f)
+
+        if len(errors) < 5:
+            return None
+        arr = np.array(errors, dtype=float)
+        return float(np.percentile(arr, 95))
+
+    def _get_observed_sample_interval(self, default: float = 5.0) -> float:
+        """Return median observed sample interval, or a default if unknown."""
+        stats = self._sample_interval_stats
+        if stats.get("median"):
+            return max(0.5, float(stats["median"]))
+        return default
+
+    def _get_effective_match_interval(self) -> float:
+        """Clamp match interval based on observed sample interval (seconds)."""
+        observed = self._get_observed_sample_interval(default=self._profile_match_interval)
+        floor = observed * 10  # require roughly 10 samples between heavy matches
+        effective = max(self._profile_match_interval, floor)
+        # Don't let it explode; cap to 2x configured interval
+        return min(effective, self._profile_match_interval * 2)
+
+    def _get_effective_watchdog_interval(self) -> float:
+        """Clamp watchdog interval so it respects slow sensors but stays responsive."""
+        observed = self._get_observed_sample_interval(default=self._watchdog_interval)
+        # Never shorter than configured, never shorter than observed cadence
+        base = max(self._watchdog_interval, observed)
+        # Avoid checking slower than half the off_delay to still conclude cycles
+        upper = max(1.0, self._config.off_delay / 2)
+        return min(base, upper)
+
+    @property
+    def sample_interval_stats(self) -> dict[str, float | int | None]:
+        return dict(self._sample_interval_stats)
+
+    @property
+    def profile_sample_repair_stats(self) -> dict[str, int] | None:
+        return self._profile_sample_repair_stats
+
+    @property
+    def suggestions(self) -> dict[str, Any]:
+        """Suggested settings computed by learning/heuristics (never auto-applied)."""
+        return self.profile_store.get_suggestions()
+
     def _send_notification(self, message: str) -> None:
         """Send a notification via configured service."""
         notify_service = self.config_entry.options.get(CONF_NOTIFY_SERVICE)
@@ -715,11 +1181,11 @@ class WashDataManager:
         self._noise_max_powers = getattr(self, "_noise_max_powers", [])
         self._noise_max_powers.append(max_power)
         
-        # If > 3 events in 24h, trigger tune
-        if len(self._noise_events) >= 3:
-             self._tune_threshold()
+        # If noise events exceed threshold in 24h, trigger tune
+        if len(self._noise_events) >= self._noise_events_threshold:
+             self.hass.async_create_task(self._tune_threshold())
 
-    def _tune_threshold(self) -> None:
+    async def _tune_threshold(self) -> None:
         """Increase the minimum power threshold."""
         current_min = self.detector._config.min_power
         
@@ -738,19 +1204,26 @@ class WashDataManager:
             self._noise_max_powers = []
             return
 
-        _LOGGER.info(f"Auto-Tuning: Increasing min_power from {current_min}W to {new_min}W due to noise.")
+        _LOGGER.info(
+            "Auto-Tune suggestion: min_power from %.1fW -> %.1fW due to noise",
+            current_min,
+            new_min,
+        )
         
-        # Update config entry options
-        new_options = dict(self.config_entry.options)
-        new_options[CONF_MIN_POWER] = new_min
-        
-        self.hass.config_entries.async_update_entry(self.config_entry, options=new_options)
+        # Store a suggestion (do not mutate user-set options)
+        self.profile_store.set_suggestion(
+            CONF_MIN_POWER,
+            float(new_min),
+            f"Auto-tune: {len(self._noise_events)} ghost cycles detected in 24h",
+        )
+        await self.profile_store.async_save()
         
         # Notify user
         notify_service = self.config_entry.options.get(CONF_NOTIFY_SERVICE)
         message = (
             f"Washing Machine '{self.config_entry.title}' detected ghost cycles. "
-            f"Power threshold auto-adjusted from {current_min:.1f}W to {new_min:.1f}W."
+            f"Suggested min_power change: {current_min:.1f}W → {new_min:.1f}W "
+            f"(not applied automatically)."
         )
         
         if notify_service:
@@ -777,7 +1250,8 @@ class WashDataManager:
         now = dt_util.now()
 
         # Throttle heavy matching to configured interval (default: 5 minutes)
-        if self._last_estimate_time and (now - self._last_estimate_time).total_seconds() < self._profile_match_interval:
+        effective_match_interval = self._get_effective_match_interval()
+        if self._last_estimate_time and (now - self._last_estimate_time).total_seconds() < effective_match_interval:
             # Still update remaining/progress if we already have a match
             self._update_remaining_only()
             return
@@ -1072,13 +1546,20 @@ class WashDataManager:
 
         # Auto-label if very high confidence (configurable)
         if confidence >= self._auto_label_confidence:
-            self.learning_manager.auto_label_high_confidence(
+            labeled = self.learning_manager.auto_label_high_confidence(
                 cycle_id=cycle_id,
                 profile_name=self._current_program,
                 confidence=confidence,
                 confidence_threshold=self._auto_label_confidence,
             )
-            _LOGGER.debug(f"Auto-labeled high-confidence cycle {cycle_id}")
+            if labeled:
+                # Persist label and rebuild envelope for the profile
+                self.hass.async_create_task(self.profile_store.async_save())
+                try:
+                    self.profile_store.rebuild_envelope(self._current_program)
+                except Exception:
+                    pass
+                _LOGGER.debug(f"Auto-labeled high-confidence cycle {cycle_id}")
             return
 
         # Skip low-confidence matches below learning threshold
@@ -1099,6 +1580,9 @@ class WashDataManager:
             actual_duration=actual_duration,
             duration_tolerance=self._duration_tolerance,
         )
+
+        # Persist pending feedback request so it survives restart
+        self.hass.async_create_task(self.profile_store.async_save())
 
         # Emit event so UI/automations can react
         self.hass.bus.async_fire(

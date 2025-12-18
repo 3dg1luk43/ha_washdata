@@ -27,6 +27,9 @@ async def async_get_config_entry_diagnostics(
             "current_program": manager.current_program,
             "time_remaining": manager.time_remaining,
             "cycle_progress": manager.cycle_progress,
+            "sample_interval_stats": manager.sample_interval_stats,
+            "profile_sample_repair_stats": manager.profile_sample_repair_stats,
+            "suggestions": manager.profile_store.get_suggestions(),
         },
         "store_data": store_data
     }

@@ -12,7 +12,14 @@ import numpy as np
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
-from .const import DOMAIN, STORAGE_KEY, STORAGE_VERSION
+from .const import (
+    DOMAIN,
+    STORAGE_KEY,
+    STORAGE_VERSION,
+    DEFAULT_MAX_PAST_CYCLES,
+    DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
+    DEFAULT_MAX_FULL_TRACES_UNLABELED,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,19 +38,120 @@ class ProfileStore:
         self.entry_id = entry_id
         self._min_duration_ratio = min_duration_ratio
         self._max_duration_ratio = max_duration_ratio
+        # Retention policy: cap total cycles and number of full-resolution traces per profile
+        self._max_past_cycles = DEFAULT_MAX_PAST_CYCLES
+        self._max_full_traces_per_profile = DEFAULT_MAX_FULL_TRACES_PER_PROFILE
+        self._max_full_traces_unlabeled = DEFAULT_MAX_FULL_TRACES_UNLABELED
         # Separate store for each entry to avoid giant files
         self._store = Store(hass, STORAGE_VERSION, f"{STORAGE_KEY}.{entry_id}")
         self._data: dict[str, Any] = {
             "profiles": {},
             "past_cycles": [],
             "envelopes": {},  # Cached statistical envelopes per profile
+            "auto_adjustments": [],  # Log of automatic setting changes
+            "suggestions": {},  # Suggested settings (do NOT change user options)
+            "feedback_history": {},  # Persisted user feedback (cycle_id -> record)
+            "pending_feedback": {},  # Persisted pending feedback requests
         }
+
+    def set_suggestion(self, key: str, value: Any, reason: str | None = None) -> None:
+        """Store a suggested setting value without changing config entry options."""
+        suggestions: dict[str, Any] = self._data.setdefault("suggestions", {})
+        suggestions[key] = {
+            "value": value,
+            "reason": reason,
+            "updated": datetime.now().isoformat(),
+        }
+
+    def get_suggestions(self) -> dict[str, Any]:
+        """Return current suggestion map."""
+        raw = self._data.get("suggestions") or {}
+        if isinstance(raw, dict):
+            return dict(raw)
+        return {}
 
     async def async_load(self) -> None:
         """Load data from storage."""
         data = await self._store.async_load()
         if data:
             self._data = data
+
+    def repair_profile_samples(self) -> dict[str, int]:
+        """Repair profile sample references after retention or migrations.
+
+        Ensures each profile's sample_cycle_id points to an existing cycle that still
+        has full-resolution power_data. If missing, picks the newest available cycle
+        with power_data and assigns it as the sample (and labels that cycle to the
+        profile if it was unlabeled).
+
+        Returns stats dict.
+        """
+        stats = {
+            "profiles_checked": 0,
+            "profiles_repaired": 0,
+            "cycles_labeled_as_sample": 0,
+        }
+
+        profiles: dict[str, dict[str, Any]] = self._data.get("profiles", {}) or {}
+        cycles: list[dict[str, Any]] = self._data.get("past_cycles", []) or []
+        if not profiles or not cycles:
+            return stats
+
+        by_id: dict[str, dict[str, Any]] = {c["id"]: c for c in cycles if c.get("id")}
+
+        def newest_unlabeled_with_power_data() -> dict[str, Any] | None:
+            candidates: list[dict[str, Any]] = [
+                c for c in cycles if c.get("power_data") and not c.get("profile_name")
+            ]
+            if not candidates:
+                return None
+            try:
+                return max(candidates, key=lambda c: c.get("start_time", ""))
+            except Exception:
+                return candidates[-1]
+
+        for profile_name, profile in profiles.items():
+            stats["profiles_checked"] += 1
+            sample_id = profile.get("sample_cycle_id")
+            sample = by_id.get(sample_id) if sample_id else None
+
+            # Sample is valid only if it exists and still has power_data
+            if sample and sample.get("power_data"):
+                continue
+
+            # Prefer newest already-labeled cycle for this profile that still has power_data
+            labeled_candidates = [
+                c for c in cycles
+                if c.get("profile_name") == profile_name and c.get("power_data")
+            ]
+            if labeled_candidates:
+                try:
+                    chosen = max(labeled_candidates, key=lambda c: c.get("start_time", ""))
+                except Exception:
+                    chosen = labeled_candidates[-1]
+            else:
+                # Fallback: pick newest UNLABELED cycle with power_data
+                chosen = newest_unlabeled_with_power_data()
+
+            if not chosen:
+                continue
+
+            profile["sample_cycle_id"] = chosen.get("id")
+            if chosen.get("duration"):
+                profile["avg_duration"] = chosen["duration"]
+
+            # If chosen cycle is unlabeled, label it to this profile to bootstrap matching
+            if not chosen.get("profile_name"):
+                chosen["profile_name"] = profile_name
+                stats["cycles_labeled_as_sample"] += 1
+
+            stats["profiles_repaired"] += 1
+            try:
+                self.rebuild_envelope(profile_name)
+            except Exception:
+                pass
+
+        return stats
 
     async def async_save(self) -> None:
         """Save data to storage."""
@@ -87,7 +195,9 @@ class ProfileStore:
         unique_str = f"{cycle_data['start_time']}_{cycle_data['duration']}"
         cycle_data["id"] = hashlib.sha256(unique_str.encode()).hexdigest()[:12]
         
-        cycle_data["profile"] = None  # Initially unknown
+        # Preserve profile_name if already set by manager; default to None otherwise
+        if "profile_name" not in cycle_data:
+            cycle_data["profile_name"] = None  # Initially unknown
         
         # Store power data at native sampling resolution
         # Format: [seconds_offset, power] preserves actual sample rate from device
@@ -130,9 +240,81 @@ class ProfileStore:
             )
 
         self._data["past_cycles"].append(cycle_data)
-        # Keep last 50 cycles
-        if len(self._data["past_cycles"]) > 50:
-             self._data["past_cycles"].pop(0)
+        # Apply retention after adding
+        self._enforce_retention()
+
+    def _enforce_retention(self) -> None:
+        """Apply retention policy:
+        - Keep at most _max_past_cycles cycles (oldest removed)
+        - For each profile, keep only the last N cycles with full power_data; strip older power_data
+        - Keep a reasonable number of unlabeled full traces to allow auto-labeling
+        - Update envelopes for affected profiles
+        """
+        cycles = self._data.get("past_cycles", [])
+        if not cycles:
+            return
+
+        # 1) Cap total cycles
+        if len(cycles) > self._max_past_cycles:
+            # Sort by start_time and drop oldest beyond cap
+            try:
+                cycles.sort(key=lambda c: c.get("start_time", ""))
+            except Exception:
+                pass
+            drop_count = len(cycles) - self._max_past_cycles
+            to_drop = cycles[:drop_count]
+            # Maintain profile sample references when dropping
+            sample_refs = {name: p.get("sample_cycle_id") for name, p in self._data.get("profiles", {}).items()}
+            for cy in to_drop:
+                cy_id = cy.get("id")
+                # If a profile sample points here, try to move to most recent cycle of that profile
+                for name, ref_id in list(sample_refs.items()):
+                    if ref_id == cy_id:
+                        # find newest cycle for that profile
+                        newest = next((c for c in reversed(cycles) if c.get("profile_name") == name), None)
+                        if newest:
+                            self._data["profiles"][name]["sample_cycle_id"] = newest.get("id")
+                        else:
+                            # No replacement available
+                            self._data["profiles"][name].pop("sample_cycle_id", None)
+            # Actually drop
+            del cycles[:drop_count]
+
+        # 2) Strip older full traces per profile
+        by_profile: dict[Any, list[dict]] = {}
+        for cy in cycles:
+            key = cy.get("profile_name")  # None for unlabeled
+            by_profile.setdefault(key, []).append(cy)
+
+        affected_profiles: set[str] = set()
+        for key, group in by_profile.items():
+            # newest first based on start_time
+            try:
+                group.sort(key=lambda c: c.get("start_time", ""))
+            except Exception:
+                pass
+            # determine cap
+            cap = self._max_full_traces_unlabeled if key in (None, "",) else self._max_full_traces_per_profile
+            # count existing full traces
+            full_indices = [i for i, c in enumerate(group) if c.get("power_data")]
+            if len(full_indices) > cap:
+                # preserve last 'cap' full traces (newest at end after sort), strip older ones
+                keep_set = set(full_indices[-cap:])
+                for i, c in enumerate(group):
+                    if i in keep_set:
+                        continue
+                    if c.get("power_data"):
+                        c.pop("power_data", None)
+                        c.pop("sampling_interval", None)
+                        if key:
+                            affected_profiles.add(key)
+
+        # 3) Rebuild envelopes for affected profiles
+        for p in affected_profiles:
+            try:
+                self.rebuild_envelope(p)
+            except Exception as e:
+                _LOGGER.debug(f"Envelope rebuild skipped for '{p}' during retention: {e}")
 
     def delete_cycle(self, cycle_id: str) -> bool:
         """Delete a cycle by ID. Returns True if deleted, False if not found.
@@ -295,11 +477,6 @@ class ProfileStore:
             f"normalized_to={num_points} time-aligned points"
         )
         
-        _LOGGER.debug(
-            f"Built envelope for '{profile_name}': {len(resampled)} cycles, "
-            f"length={target_length}, avg_power={np.mean(envelope['avg']):.1f}W"
-        )
-        
         return True
 
     def get_envelope(self, profile_name: str) -> dict | None:
@@ -430,9 +607,9 @@ class ProfileStore:
         if not cycle:
              raise ValueError("Cycle not found")
         
-        cycle["profile"] = name
+        cycle["profile_name"] = name
         
-        self._data["profiles"][name] = {
+        self._data.setdefault("profiles", {})[name] = {
             "avg_duration": cycle["duration"],
             "sample_cycle_id": source_cycle_id
         }
@@ -445,7 +622,7 @@ class ProfileStore:
         profiles = []
         for name, data in self._data.get("profiles", {}).items():
             # Count cycles using this profile
-            cycle_count = sum(1 for c in self._data.get("past_cycles", []) if c.get("profile") == name)
+            cycle_count = sum(1 for c in self._data.get("past_cycles", []) if c.get("profile_name") == name)
             profiles.append({
                 "name": name,
                 "avg_duration": data.get("avg_duration", 0),
@@ -488,8 +665,8 @@ class ProfileStore:
         # Update all cycles
         count = 0
         for cycle in self._data.get("past_cycles", []):
-            if cycle.get("profile") == old_name:
-                cycle["profile"] = new_name
+            if cycle.get("profile_name") == old_name:
+                cycle["profile_name"] = new_name
                 count += 1
         
         await self.async_save()
@@ -510,9 +687,9 @@ class ProfileStore:
         # Handle cycles
         count = 0
         for cycle in self._data.get("past_cycles", []):
-            if cycle.get("profile") == name:
+            if cycle.get("profile_name") == name:
                 if unlabel_cycles:
-                    cycle["profile"] = None
+                    cycle["profile_name"] = None
                 count += 1
         
         await self.async_save()
@@ -548,6 +725,8 @@ class ProfileStore:
             self.rebuild_envelope(old_profile)  # Old profile lost a cycle
         if profile_name:
             self.rebuild_envelope(profile_name)  # New profile gained a cycle
+            # Apply retention after labeling, in case profile now exceeds cap
+            self._enforce_retention()
         
         await self.async_save()
         _LOGGER.info(f"Assigned profile '{profile_name}' to cycle {cycle_id}")
@@ -557,7 +736,7 @@ class ProfileStore:
         Returns stats: {labeled: int, skipped: int, total: int}"""
         stats = {"labeled": 0, "skipped": 0, "total": 0}
         
-        unlabeled = [c for c in self._data.get("past_cycles", []) if not c.get("profile")]
+        unlabeled = [c for c in self._data.get("past_cycles", []) if not c.get("profile_name")]
         stats["total"] = len(unlabeled)
         
         for cycle in unlabeled:
@@ -571,7 +750,7 @@ class ProfileStore:
             matched_profile, confidence = self.match_profile(power_data, cycle["duration"])
             
             if matched_profile and confidence >= confidence_threshold:
-                cycle["profile"] = matched_profile
+                cycle["profile_name"] = matched_profile
                 stats["labeled"] += 1
                 _LOGGER.info(f"Auto-labeled cycle {cycle['id']} as '{matched_profile}' (confidence: {confidence:.2f})")
             else:
@@ -745,8 +924,8 @@ class ProfileStore:
                 
                 # PRESERVE PROFILE
                 # If c1 is unlabeled but c2 has a label, take c2's label
-                if not c1.get("profile") and c2.get("profile"):
-                    c1["profile"] = c2["profile"]
+                if not c1.get("profile_name") and c2.get("profile_name"):
+                    c1["profile_name"] = c2["profile_name"]
                 
                 # Track old IDs for profile update
                 old_c1_id = c1["id"]
@@ -761,7 +940,7 @@ class ProfileStore:
                 # If any profile pointed to old_c1_id or old_c2_id, update to new_id
                 for p_name, p_data in self._data["profiles"].items():
                     if p_data.get("sample_cycle_id") in (old_c1_id, old_c2_id):
-                        if c1.get("profile") == p_name:
+                        if c1.get("profile_name") == p_name:
                              # Only update if this cycle is actually the one named p_name?
                              # Or just update generically?
                              # If we merged them, this new cycle is the best representative now.
@@ -777,6 +956,21 @@ class ProfileStore:
                 i += 1
                 
         return merged_count
+
+    def log_adjustment(self, setting_name: str, old_value: Any, new_value: Any, reason: str) -> None:
+        """Log an automatic setting adjustment (auto-tune, auto-label changes)."""
+        adjustment = {
+            "timestamp": datetime.now().isoformat(),
+            "setting": setting_name,
+            "old_value": old_value,
+            "new_value": new_value,
+            "reason": reason,
+        }
+        self._data.setdefault("auto_adjustments", []).append(adjustment)
+        # Keep last 50 adjustments
+        if len(self._data["auto_adjustments"]) > 50:
+            self._data["auto_adjustments"] = self._data["auto_adjustments"][-50:]
+        _LOGGER.info(f"Auto-adjustment: {setting_name} changed from {old_value} to {new_value} ({reason})")
 
     def export_data(self, entry_data: dict = None, entry_options: dict = None) -> dict[str, Any]:
         """Return a serializable snapshot of the store for backup/export.

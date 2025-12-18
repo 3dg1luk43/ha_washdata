@@ -152,6 +152,71 @@ def publish_discovery(client: mqtt.Client, retain: bool = True) -> None:
     client.publish(AVAIL_TOPIC, "online", retain=True)
 
 
+def generate_cycle_data(sample_real: int, speedup: float, jitter: float, phase_key: str) -> dict:
+    """Generate cycle power data and return as dict without publishing."""
+    base_phases = PHASESETS.get(phase_key.replace("_DROPOUT", "").replace("_GLITCH", "").replace("_STUCK", "").replace("_INCOMPLETE", ""), PHASESETS["LONG"])
+    is_dropout = "_DROPOUT" in phase_key
+    is_glitch = "_GLITCH" in phase_key
+    is_stuck = "_STUCK" in phase_key
+    is_incomplete = "_INCOMPLETE" in phase_key
+    
+    # Apply ±15% random variance to cycle duration
+    variance_factor = random.uniform(0.85, 1.15)
+    phases = [(int(duration * variance_factor), power) for duration, power in base_phases]
+    
+    # Log variance info
+    total_base = sum(d for d, _ in base_phases)
+    total_var = sum(d for d, _ in phases)
+    variance_pct = ((total_var - total_base) / total_base) * 100 if total_base > 0 else 0
+    logger.info(f"[GENERATE] {phase_key}: {variance_pct:+.1f}% duration variance (factor: {variance_factor:.2f}x), {total_var}s total")
+    
+    power_readings = []
+    phase_idx = 0
+    total_phases = len(phases)
+    
+    for duration_real, power in phases:
+        phase_idx += 1
+        steps = max(1, math.ceil(duration_real / sample_real))
+        
+        # Simulate dropout: skip readings mid-cycle
+        if is_dropout and phase_idx == int(total_phases * 0.6):
+            logger.info(f"[GENERATE] Dropout at phase {phase_idx}")
+            continue
+        
+        # Simulate stuck phase: repeat this power level
+        if is_stuck and phase_idx == int(total_phases * 0.5):
+            logger.info(f"[GENERATE] Stuck at phase {phase_idx}")
+            max_stuck = 5
+            for _ in range(max_stuck * min(3, steps)):
+                noise = random.uniform(-jitter, jitter) if jitter > 0 else 0.0
+                power_readings.append(max(0.0, power + noise))
+            continue
+        
+        # Normal phase with optional glitches
+        for step in range(steps):
+            glitch_chance = 0.15 if is_glitch else 0.02
+            if random.random() < glitch_chance:
+                glitch_type = random.choice(["dip", "spike"])
+                if glitch_type == "dip":
+                    power_readings.append(0.0)
+                else:
+                    power_readings.append(power * 1.3)
+            
+            noise = random.uniform(-jitter, jitter) if jitter > 0 else 0.0
+            power_readings.append(max(0.0, power + noise))
+    
+    if not is_incomplete:
+        power_readings.append(0.0)  # Finish with 0 power
+    
+    return {
+        "phase_key": phase_key,
+        "duration_seconds": sum(d for d, _ in phases),
+        "variance_pct": variance_pct,
+        "power_readings": power_readings,
+        "sample_interval": sample_real / speedup
+    }
+
+
 def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter: float, stop_event: threading.Event, phase_key: str) -> None:
     """Run a compressed washer cycle, emitting power readings.
     
@@ -245,18 +310,21 @@ def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="MQTT mock washer socket with fault injection",
+        description="MQTT mock washer socket with fault injection or file output",
         epilog="""
-Examples:
+Examples (MQTT simulation):
   python mqtt_mock_socket.py --speedup 720                    # LONG cycle (normal)
   python mqtt_mock_socket.py --speedup 720 --default MEDIUM   # MEDIUM cycle (normal)
-  python mqtt_mock_socket.py --speedup 720 --default SHORT    # SHORT cycle (normal)
   
-Fault injection (publish to switch):
-  LONG_DROPOUT   - Sensor goes offline mid-cycle (tests watchdog)
-  MEDIUM_GLITCH  - Random power dips/spikes (tests smoothing)
-  SHORT_STUCK    - Phase gets stuck (tests forced end)
-  LONG_INCOMPLETE - Cycle never finishes (tests stale detection)
+Batch generation for analysis (MQTT):
+  python mqtt_mock_socket.py --num-cycles 100 --quick --cycle-sequence LONG,MEDIUM,SHORT
+    # Generates 100 cycles back-to-back
+  
+File output (no MQTT needed):
+  python mqtt_mock_socket.py --output-dir ./cycles --num-cycles 50 --cycle-sequence LONG
+    # Generates 50 LONG cycles as JSON files in ./cycles/
+  python mqtt_mock_socket.py --output-dir ./cycles --num-cycles 200 --cycle-sequence LONG,MEDIUM,SHORT
+    # Generates 200 mixed cycles
         """
     )
     parser.add_argument("--host", default=MQTT_HOST)
@@ -271,11 +339,136 @@ Fault injection (publish to switch):
     parser.add_argument("--sample", type=int, default=60, help="Virtual sampling period in real seconds (auto-adjusted when --wall is set)")
     parser.add_argument("--target_sleep", type=float, default=0.5, help="Target wall-clock sleep per sample in seconds when --wall is set")
     parser.add_argument("--jitter", type=float, default=15.0, help="Random watt jitter per sample (±W)")
+    parser.add_argument("--output-dir", type=str, default=None, help="If set, generate cycles as JSON files in this directory instead of MQTT simulation")
     parser.add_argument("--default", choices=list(PHASESETS.keys()), default="LONG", help="Default cycle type when command is ON")
     parser.add_argument("--continuous", action="store_true", help="Continuously run cycles at specified interval instead of waiting for commands")
+    parser.add_argument("--num-cycles", type=int, default=None, help="Number of cycles to generate (exits after completion). Use with --continuous for batch generation.")
     parser.add_argument("--interval", type=int, default=110, help="Minutes between cycle starts in continuous mode (default: 110)")
+    parser.add_argument("--quick", action="store_true", help="Run cycles back-to-back with minimal delay (sets interval to 0.5 minutes)")
     parser.add_argument("--cycle-sequence", default="LONG,MEDIUM,SHORT", help="Comma-separated list of cycle types to cycle through (default: LONG,MEDIUM,SHORT)")
     args = parser.parse_args()
+
+    # FILE OUTPUT MODE (no MQTT needed)
+    if args.output_dir:
+        import os
+        from datetime import datetime, timedelta
+        import hashlib
+        
+        os.makedirs(args.output_dir, exist_ok=True)
+        
+        cycles = [c.strip() for c in args.cycle_sequence.split(",")]
+        max_cycles = args.num_cycles if args.num_cycles else 1
+        
+        logger.info("\n" + "="*70)
+        logger.info("CYCLE RECORDING GENERATOR - Single File Mode")
+        logger.info("="*70)
+        logger.info(f"Output directory: {args.output_dir}")
+        logger.info(f"Total cycles: {max_cycles}")
+        logger.info(f"Cycle sequence: {args.cycle_sequence}")
+        if args.wall:
+            logger.info(f"Wall-clock duration: {args.wall} minutes per cycle")
+        else:
+            logger.info(f"Speedup: {args.speedup}x, Sample interval: {args.sample}s")
+        logger.info("")
+        
+        def base_from_cycle_type(cycle_type: str) -> str:
+            for base in PHASESETS.keys():
+                if cycle_type.startswith(base):
+                    return base
+            return "LONG"
+        
+        def total_cycle_seconds(base_type: str) -> int:
+            return sum(int(d) for d, _ in PHASESETS.get(base_type, PHASESETS["LONG"]))
+        
+        def compute_timing_for_cycle(cycle_type: str) -> tuple[int, float]:
+            base = base_from_cycle_type(cycle_type)
+            total_real = total_cycle_seconds(base)
+            if args.wall and args.wall > 0:
+                desired_wall_seconds = int(args.wall * 60)
+                speedup = max(1.0, total_real / desired_wall_seconds)
+                sample_real = max(1, int(speedup * max(0.1, args.target_sleep)))
+                return sample_real, speedup
+            return int(args.sample), float(args.speedup)
+        
+        # Generate all cycles
+        past_cycles = []
+        start_time = datetime.now() - timedelta(days=max_cycles)  # Start in the past
+        cycle_durations = []
+        
+        for cycle_idx in range(max_cycles):
+            cycle_type = cycles[cycle_idx % len(cycles)]
+            sample_real, speedup = compute_timing_for_cycle(cycle_type)
+            
+            cycle_data = generate_cycle_data(sample_real, speedup, args.jitter, cycle_type)
+            power_readings = cycle_data["power_readings"]
+            duration_seconds = len(power_readings) * cycle_data["sample_interval"]
+            cycle_durations.append(duration_seconds)
+            
+            # Create cycle record matching WashData format
+            cycle_start = start_time + timedelta(hours=6)  # 6 hours between cycles
+            cycle_end = cycle_start + timedelta(seconds=duration_seconds)
+            
+            # Generate compressed power data: [offset_seconds, power]
+            compressed_power = [
+                [int(i * cycle_data["sample_interval"]), round(pw, 1)]
+                for i, pw in enumerate(power_readings)
+            ]
+            
+            # Generate ID (12-char hex hash)
+            cycle_id = hashlib.md5(f"{cycle_start}{cycle_type}".encode()).hexdigest()[:12]
+            
+            cycle_record = {
+                "start_time": cycle_start.isoformat(),
+                "end_time": cycle_end.isoformat(),
+                "duration": round(duration_seconds, 2),
+                "max_power": round(max(power_readings), 1),
+                "status": "completed",
+                "power_data": compressed_power,
+                "id": cycle_id,
+                "profile": None,
+                "sampling_interval": round(cycle_data["sample_interval"], 3),
+                "profile_name": None
+            }
+            
+            past_cycles.append(cycle_record)
+            
+            if (cycle_idx + 1) % 10 == 0 or cycle_idx + 1 == max_cycles:
+                logger.info(f"Generated {cycle_idx + 1}/{max_cycles} cycles")
+        
+        # Create output structure matching HA storage format EXACTLY
+        # This can be imported directly into HA storage
+        output_data = {
+            "version": 1,
+            "minor_version": 1,
+            "key": f"ha_washdata.generated_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            "data": {
+                "profiles": {},
+                "past_cycles": past_cycles,
+                "last_active_save": datetime.now().isoformat(),
+                "envelopes": {},
+                "active_cycle": None,
+                "feedback_history": []
+            }
+        }
+        
+        # Write to single file
+        output_file = os.path.join(args.output_dir, "washer_cycles.json")
+        with open(output_file, 'w') as f:
+            json.dump(output_data, f, indent=2)
+        
+        logger.info(f"\n✓ Successfully generated {len(past_cycles)} cycles")
+        logger.info(f"✓ Saved to: {output_file}\n")
+        
+        avg_duration = sum(cycle_durations) / len(cycle_durations)
+        total_hours = sum(cycle_durations) / 3600
+        
+        logger.info(f"Cycle duration statistics:")
+        logger.info(f"  Average: {avg_duration:.0f}s ({avg_duration/60:.1f} minutes)")
+        logger.info(f"  Min: {min(cycle_durations):.0f}s ({min(cycle_durations)/60:.1f} minutes)")
+        logger.info(f"  Max: {max(cycle_durations):.0f}s ({max(cycle_durations)/60:.1f} minutes)")
+        logger.info(f"  Total data: {total_hours:.1f} hours")
+        logger.info("="*70 + "\n")
+        return
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     stop_event = threading.Event()
@@ -399,10 +592,17 @@ Fault injection (publish to switch):
     if args.wall:
         # Show the effective timing for the default cycle (actual used per-cycle at start)
         eff_sample, eff_speed = compute_timing_for_cycle(args.default)
-    logger.info(f"Walltime override: {args.wall} min (target ~{args.target_sleep}s/publish)")
-    logger.info(f"Effective (for {args.default}): speedup ~{eff_speed:.2f}x, sample ~{eff_sample}s")
-    logger.info(f"Configured (raw args): Speedup: {args.speedup}x, Jitter: ±{args.jitter}W, Sample: {args.sample}s\n")
-    logger.info("NORMAL CYCLES (toggle switch or publish to command topic):")
+        logger.info(f"Walltime override: {args.wall} min (target ~{args.target_sleep}s/publish)")
+        logger.info(f"Effective (for {args.default}): speedup ~{eff_speed:.2f}x, sample ~{eff_sample}s")
+    else:
+        logger.info(f"Configured: Speedup: {args.speedup}x, Sample: {args.sample}s, Jitter: ±{args.jitter}W")
+    
+    if args.num_cycles:
+        logger.info(f"BATCH MODE: Generating {args.num_cycles} cycles")
+        logger.info(f"Cycle sequence: {args.cycle_sequence}")
+        logger.info(f"Interval: {args.interval if not args.quick else 0.5} minutes between cycles")
+    
+    logger.info("\nNORMAL CYCLES (toggle switch or publish to command topic):")
     logger.info("  ON or LONG        - Full 2:39 cycle")
     logger.info("  MEDIUM            - Mid-length 1:30 cycle")
     logger.info("  SHORT             - Quick 0:45 cycle\n")
@@ -418,17 +618,18 @@ Fault injection (publish to switch):
     logger.info("="*70 + "\n")
     
     # Handle continuous mode
-    if args.continuous:
+    if args.continuous or args.num_cycles:
         cycles = [c.strip() for c in args.cycle_sequence.split(",")]
         cycle_idx = 0
-        interval_seconds = args.interval * 60
+        interval_seconds = (0.5 * 60) if args.quick else (args.interval * 60)
+        max_cycles = args.num_cycles if args.num_cycles else float('inf')
         
         def run_continuous_cycle_thread():
             nonlocal cycle_idx
-            while True:
+            while cycle_idx < max_cycles:
                 try:
                     cycle_type = cycles[cycle_idx % len(cycles)]
-                    logger.info(f"[CONTINUOUS] Starting cycle {cycle_idx + 1}: {cycle_type}")
+                    logger.info(f"[BATCH] Starting cycle {cycle_idx + 1}/{max_cycles if max_cycles != float('inf') else '∞'}: {cycle_type}")
                     with running_lock:
                         if running["flag"]:
                             logger.warning("[CONTINUOUS] Cycle already running, skipping")
@@ -445,13 +646,27 @@ Fault injection (publish to switch):
                     client.publish(STATE_TOPIC, "OFF", retain=True)
                     cycle_idx += 1
                     
-                    logger.info(f"[CONTINUOUS] Cycle complete. Waiting {args.interval} minutes until next cycle...")
+                    if cycle_idx >= max_cycles:
+                        logger.info(f"[BATCH] Completed all {max_cycles} cycles. Exiting.")
+                        break
+                    
+                    wait_min = interval_seconds / 60
+                    logger.info(f"[BATCH] Cycle {cycle_idx}/{max_cycles if max_cycles != float('inf') else '∞'} complete. Waiting {wait_min:.1f} minutes until next cycle...")
                     time.sleep(interval_seconds)
                 except Exception as e:
                     logger.error(f"[CONTINUOUS] Error in cycle loop: {e}")
                     with running_lock:
                         running["flag"] = False
+                    cycle_idx += 1  # Count failed cycles to prevent infinite loop
+                    if cycle_idx >= max_cycles:
+                        break
                     time.sleep(10)  # Brief delay before retry
+            
+            # Exit after completing all cycles
+            if max_cycles != float('inf'):
+                logger.info(f"[BATCH] All {max_cycles} cycles completed. Shutting down...")
+                import os
+                os._exit(0)
         
         continuous_thread = threading.Thread(target=run_continuous_cycle_thread, daemon=True)
         continuous_thread.start()

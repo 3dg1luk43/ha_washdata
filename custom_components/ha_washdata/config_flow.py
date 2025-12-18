@@ -37,6 +37,12 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+    CONF_AUTO_MAINTENANCE,
+    CONF_MAX_PAST_CYCLES,
+    CONF_MAX_FULL_TRACES_PER_PROFILE,
+    CONF_MAX_FULL_TRACES_UNLABELED,
+    CONF_WATCHDOG_INTERVAL,
+    CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     DEFAULT_NAME,
@@ -58,7 +64,12 @@ from .const import (
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-    DOMAIN,
+    DEFAULT_AUTO_MAINTENANCE,
+    DEFAULT_MAX_PAST_CYCLES,
+    DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
+    DEFAULT_MAX_FULL_TRACES_UNLABELED,
+    DEFAULT_WATCHDOG_INTERVAL,
+    DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -108,6 +119,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         options.setdefault(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL)
         options.setdefault(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
         options.setdefault(CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)
+        # New retention and watchdog defaults
+        options.setdefault(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES)
+        options.setdefault(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE)
+        options.setdefault(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED)
+        options.setdefault(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
+        options.setdefault(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD)
 
         # Bump version and save
         self.hass.config_entries.async_update_entry(
@@ -153,7 +170,88 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Manage the options."""
         return self.async_show_menu(
             step_id="init",
-            menu_options=["settings", "manage_profiles", "diagnostics"]
+            menu_options=["settings", "apply_suggestions", "manage_profiles", "diagnostics"]
+        )
+
+    async def async_step_apply_suggestions(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Copy suggested values into user options (explicit action only)."""
+        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        suggestions = manager.suggestions if manager else {}
+
+        keys_to_apply = [
+            CONF_MIN_POWER,
+            CONF_OFF_DELAY,
+            CONF_WATCHDOG_INTERVAL,
+            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+            CONF_PROFILE_MATCH_INTERVAL,
+            CONF_AUTO_LABEL_CONFIDENCE,
+            CONF_DURATION_TOLERANCE,
+            CONF_PROFILE_DURATION_TOLERANCE,
+            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+            CONF_AUTO_MERGE_GAP_SECONDS,
+        ]
+
+        applicable: list[tuple[str, Any]] = []
+        for key in keys_to_apply:
+            entry = suggestions.get(key) if isinstance(suggestions, dict) else None
+            if isinstance(entry, dict) and "value" in entry:
+                applicable.append((key, entry.get("value")))
+
+        if not applicable:
+            return self.async_abort(reason="no_suggestions")
+
+        def _coerce_value(key: str, value: Any) -> Any:
+            if key in (
+                CONF_OFF_DELAY,
+                CONF_WATCHDOG_INTERVAL,
+                CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                CONF_PROFILE_MATCH_INTERVAL,
+                CONF_AUTO_MERGE_GAP_SECONDS,
+            ):
+                try:
+                    return int(float(value))
+                except Exception:
+                    return value
+            if key in (
+                CONF_MIN_POWER,
+                CONF_AUTO_LABEL_CONFIDENCE,
+                CONF_DURATION_TOLERANCE,
+                CONF_PROFILE_DURATION_TOLERANCE,
+                CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+            ):
+                try:
+                    return float(value)
+                except Exception:
+                    return value
+            return value
+
+        suggested_lines: list[str] = []
+        for key, value in applicable:
+            suggested_lines.append(f"- {key}: {_coerce_value(key, value)}")
+        suggested_text = "\n".join(suggested_lines)
+
+        if user_input is not None:
+            if not user_input.get("confirm", False):
+                return self.async_create_entry(title="", data=dict(self._config_entry.options))
+
+            new_options = dict(self._config_entry.options)
+            for key, value in applicable:
+                new_options[key] = _coerce_value(key, value)
+
+            return self.async_create_entry(title="", data=new_options)
+
+        return self.async_show_form(
+            step_id="apply_suggestions",
+            data_schema=vol.Schema({
+                vol.Required("confirm", default=False): bool,
+            }),
+            description_placeholders={
+                "suggested": suggested_text,
+            },
         )
 
     async def async_step_settings(
@@ -180,6 +278,33 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if current_notify and current_notify not in notify_services:
             notify_services.append(current_notify)
 
+        # Load suggestion placeholders (suggestions are informational only)
+        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        suggestions = manager.suggestions if manager else {}
+
+        def _fmt_suggested(key: str) -> str:
+            val = (suggestions.get(key) or {}).get("value") if isinstance(suggestions, dict) else None
+            if val is None:
+                return "—"
+            try:
+                # Keep ints neat; keep floats readable
+                return str(int(val)) if float(val).is_integer() else f"{float(val):.2f}"
+            except Exception:
+                return str(val)
+
+        reason_lines: list[str] = []
+        for key in [
+            CONF_MIN_POWER,
+            CONF_WATCHDOG_INTERVAL,
+            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+            CONF_PROFILE_MATCH_INTERVAL,
+            CONF_DURATION_TOLERANCE,
+            CONF_PROFILE_DURATION_TOLERANCE,
+        ]:
+            entry = suggestions.get(key) if isinstance(suggestions, dict) else None
+            if isinstance(entry, dict) and entry.get("reason"):
+                reason_lines.append(f"- {key}: {entry['reason']}")
+        suggested_reason = "\n".join(reason_lines) if reason_lines else ""
         return self.async_show_form(
             step_id="settings",
             data_schema=vol.Schema(
@@ -284,6 +409,26 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         )
                     ),
                     vol.Optional(
+                        CONF_MAX_PAST_CYCLES,
+                        default=self._config_entry.options.get(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES),
+                    ): vol.Coerce(int),
+                    vol.Optional(
+                        CONF_MAX_FULL_TRACES_PER_PROFILE,
+                        default=self._config_entry.options.get(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE),
+                    ): vol.Coerce(int),
+                    vol.Optional(
+                        CONF_MAX_FULL_TRACES_UNLABELED,
+                        default=self._config_entry.options.get(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED),
+                    ): vol.Coerce(int),
+                    vol.Optional(
+                        CONF_WATCHDOG_INTERVAL,
+                        default=self._config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL),
+                    ): vol.Coerce(int),
+                    vol.Optional(
+                        CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
+                        default=self._config_entry.options.get(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD),
+                    ): vol.Coerce(int),
+                    vol.Optional(
                         CONF_SMOOTHING_WINDOW,
                         default=self._config_entry.options.get(
                             CONF_SMOOTHING_WINDOW,
@@ -341,6 +486,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ): vol.All(vol.Coerce(float), vol.Range(min=1.0, max=20.0)),
                 }
             ),
+            description_placeholders={
+                "suggested_min_power": _fmt_suggested(CONF_MIN_POWER),
+                "suggested_off_delay": _fmt_suggested(CONF_OFF_DELAY),
+                "suggested_watchdog_interval": _fmt_suggested(CONF_WATCHDOG_INTERVAL),
+                "suggested_no_update_active_timeout": _fmt_suggested(CONF_NO_UPDATE_ACTIVE_TIMEOUT),
+                "suggested_profile_match_interval": _fmt_suggested(CONF_PROFILE_MATCH_INTERVAL),
+                "suggested_auto_label_confidence": _fmt_suggested(CONF_AUTO_LABEL_CONFIDENCE),
+                "suggested_duration_tolerance": _fmt_suggested(CONF_DURATION_TOLERANCE),
+                "suggested_profile_duration_tolerance": _fmt_suggested(CONF_PROFILE_DURATION_TOLERANCE),
+                "suggested_profile_match_min_duration_ratio": _fmt_suggested(CONF_PROFILE_MATCH_MIN_DURATION_RATIO),
+                "suggested_profile_match_max_duration_ratio": _fmt_suggested(CONF_PROFILE_MATCH_MAX_DURATION_RATIO),
+                "suggested_auto_merge_gap_seconds": _fmt_suggested(CONF_AUTO_MERGE_GAP_SECONDS),
+                "suggested_reason": suggested_reason,
+            },
         )
 
     async def async_step_diagnostics(
@@ -387,6 +546,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             mode = user_input.get("mode", "export")
             payload_str = user_input.get("json_payload", "")
 
+            # Always preserve existing options unless we explicitly update them
+            options_to_return = dict(self._config_entry.options)
+
             if mode == "import":
                 try:
                     payload = json.loads(payload_str)
@@ -415,6 +577,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             options=new_options,
                         )
                         _LOGGER.info("Applied imported settings to config entry")
+
+                        # Return the merged options so the options flow itself doesn't revert them
+                        options_to_return = dict(new_options)
                         
                 except Exception:  # noqa: BLE001
                     errors["base"] = "import_failed"
@@ -437,7 +602,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         errors=errors,
                     )
 
-            return self.async_create_entry(title="", data={})
+            return self.async_create_entry(title="", data=options_to_return)
 
         return self.async_show_form(
             step_id="export_import",
@@ -460,6 +625,21 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Main menu for profile and cycle management."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        
+        # Build a quick reference list of recent cycles
+        recent_cycles = store._data.get("past_cycles", [])[-5:]
+        recent_lines = []
+        for c in reversed(recent_cycles):
+            start = c["start_time"].split(".")[0].replace("T", " ")
+            duration_min = int(c["duration"] / 60)
+            prof = c.get("profile_name") or "Unlabeled"
+            status = c.get("status", "completed")
+            status_icon = "✓" if status in ("completed", "force_stopped") else "⚠" if status == "resumed" else "✗"
+            recent_lines.append(f"{status_icon} {start} - {duration_min}m - {prof}")
+        recent_text = "\n".join(recent_lines) if recent_lines else "No cycles recorded yet."
+        
         if user_input is not None:
             action = user_input["action"]
             if action == "create_profile":
@@ -486,7 +666,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     "auto_label": "🤖 Auto-Label Old Cycles",
                     "delete_cycle": "❌ Delete a Cycle",
                 })
-            })
+            }),
+            description_placeholders={"recent_cycles": recent_text}
         )
 
     async def async_step_create_profile(
@@ -508,7 +689,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         name, 
                         reference_cycle if reference_cycle != "none" else None
                     )
-                    return self.async_create_entry(title="", data={})
+                    return self.async_create_entry(title="", data=dict(self._config_entry.options))
                 except ValueError as e:
                     errors["base"] = "profile_exists"
         
@@ -521,7 +702,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         for c in reversed(cycles):
             start = c["start_time"].split(".")[0].replace("T", " ")
             duration_min = int(c['duration']/60)
-            prof = c.get("profile") or "Unlabeled"
+            prof = c.get("profile_name") or "Unlabeled"
             label = f"{start} - {duration_min}m - {prof}"
             cycle_options.append(selector.SelectOptionDict(value=c["id"], label=label))
         
@@ -592,7 +773,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
                 try:
                     count = await manager.profile_store.rename_profile(self._selected_profile, new_name)
-                    return self.async_create_entry(title="", data={})
+                    return self.async_create_entry(title="", data=dict(self._config_entry.options))
                 except ValueError as e:
                     errors["base"] = "rename_failed"
         
@@ -650,7 +831,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             unlabel = user_input["unlabel_cycles"]
             manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
             count = await manager.profile_store.delete_profile(self._selected_profile, unlabel)
-            return self.async_create_entry(title="", data={})
+            return self.async_create_entry(title="", data=dict(self._config_entry.options))
         
         return self.async_show_form(
             step_id="delete_profile_confirm",
@@ -676,7 +857,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_abort(reason="no_profiles_for_matching")
         
         # Count unlabeled cycles
-        unlabeled_count = sum(1 for c in store._data.get("past_cycles", []) if not c.get("profile"))
+        unlabeled_count = sum(1 for c in store._data.get("past_cycles", []) if not c.get("profile_name"))
         if unlabeled_count == 0:
             return self.async_abort(reason="no_unlabeled_cycles")
         
@@ -685,7 +866,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             stats = await store.auto_label_unlabeled_cycles(threshold)
             return self.async_create_entry(
                 title="",
-                data={},
+                data=dict(self._config_entry.options),
             )
         
         return self.async_show_form(
@@ -720,7 +901,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         for c in reversed(cycles):
             start = c["start_time"].split(".")[0].replace("T", " ")
             duration_min = int(c['duration']/60)
-            prof = c.get("profile") or "Unlabeled"
+            prof = c.get("profile_name") or "Unlabeled"
             status = c.get("status", "completed")
             # ✓ = completed/force_stopped (natural end), ⚠ = resumed, ✗ = interrupted (user stopped)
             status_icon = "✓" if status in ("completed", "force_stopped") else "⚠" if status == "resumed" else "✗"
@@ -761,7 +942,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         for c in reversed(cycles):
             start = c["start_time"].split(".")[0].replace("T", " ")
             duration_min = int(c['duration']/60)
-            prof = c.get("profile") or "Unlabeled"
+            prof = c.get("profile_name") or "Unlabeled"
             status = c.get("status", "completed")
             # ✓ = completed/force_stopped (natural end), ⚠ = resumed, ✗ = interrupted (user stopped)
             status_icon = "✓" if status in ("completed", "force_stopped") else "⚠" if status == "resumed" else "✗"
@@ -775,7 +956,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             cycle_id = user_input["cycle_id"]
             manager.profile_store.delete_cycle(cycle_id)
             await manager.profile_store.async_save()
-            return self.async_create_entry(title="", data={})
+            return self.async_create_entry(title="", data=dict(self._config_entry.options))
 
         return self.async_show_form(
             step_id="select_cycle_to_delete",
@@ -810,18 +991,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     try:
                         # Create profile from this cycle
                         await store.create_profile(new_name, self._selected_cycle_id)
-                        return self.async_create_entry(title="", data={})
+                        return self.async_create_entry(title="", data=dict(self._config_entry.options))
                     except ValueError:
                         errors["base"] = "profile_exists"
             elif profile_choice == "__remove_label__":
                 # Remove label from cycle
                 await store.assign_profile_to_cycle(self._selected_cycle_id, None)
-                return self.async_create_entry(title="", data={})
+                return self.async_create_entry(title="", data=dict(self._config_entry.options))
             else:
                 # Assign existing profile
                 try:
                     await store.assign_profile_to_cycle(self._selected_cycle_id, profile_choice)
-                    return self.async_create_entry(title="", data={})
+                    return self.async_create_entry(title="", data=dict(self._config_entry.options))
                 except ValueError as e:
                     errors["base"] = "assignment_failed"
         
@@ -886,7 +1067,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                  
              return self.async_create_entry(
                  title="",
-                 data={},
+                 data=dict(self._config_entry.options),
                  description_placeholders={"count": str(count)}
              )
 
@@ -915,7 +1096,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
              
              return self.async_create_entry(
                  title="",
-                 data={},
+                 data=dict(self._config_entry.options),
                  description_placeholders={"count": str(count)}
              )
 
@@ -939,7 +1120,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
              
              return self.async_create_entry(
                  title="",
-                 data={},
+                 data=dict(self._config_entry.options),
                  description_placeholders={"info": "History cleared"}
              )
 

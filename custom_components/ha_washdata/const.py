@@ -26,6 +26,11 @@ CONF_AUTO_MAINTENANCE = "auto_maintenance"
 CONF_PROFILE_MATCH_INTERVAL = "profile_match_interval"
 CONF_PROFILE_MATCH_MIN_DURATION_RATIO = "profile_match_min_duration_ratio"
 CONF_PROFILE_MATCH_MAX_DURATION_RATIO = "profile_match_max_duration_ratio"
+CONF_MAX_PAST_CYCLES = "max_past_cycles"
+CONF_MAX_FULL_TRACES_PER_PROFILE = "max_full_traces_per_profile"
+CONF_MAX_FULL_TRACES_UNLABELED = "max_full_traces_unlabeled"
+CONF_WATCHDOG_INTERVAL = "watchdog_interval"
+CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"
 
 NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
@@ -51,6 +56,11 @@ DEFAULT_AUTO_MAINTENANCE = True  # Enable nightly cleanup by default
 DEFAULT_PROFILE_MATCH_INTERVAL = 300  # Seconds between profile matching attempts (5 minutes)
 DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.30  # Minimum duration ratio (30% of profile)
 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.50  # Maximum duration ratio (150% of profile)
+DEFAULT_MAX_PAST_CYCLES = 200
+DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
+DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
+DEFAULT_WATCHDOG_INTERVAL = 5  # Seconds between watchdog checks
+DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Noise events in 24h to trigger auto-tune
 
 # States
 STATE_OFF = "off"
