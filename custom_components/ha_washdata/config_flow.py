@@ -172,6 +172,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Initialize options flow."""
         self._config_entry = config_entry
         self._selected_cycle_id: str | None = None
+        self._suggested_values: dict[str, Any] | None = None
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -226,6 +227,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         applied_count += 1
                 
                 if applied_count > 0:
+                    # Store suggested values to repopulate form
+                    self._suggested_values = updated_input
                     # Show form again with updated values instead of saving immediately
                     return await self.async_step_settings(user_input=None)
 
@@ -277,40 +280,37 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if isinstance(entry, dict) and entry.get("reason"):
                 reason_lines.append(f"- {key}: {entry['reason']}")
         suggested_reason = "\n".join(reason_lines) if reason_lines else ""
+
+        # Helper to get current value (from suggestions or config)
+        def get_val(key, default):
+            if self._suggested_values and key in self._suggested_values:
+                return self._suggested_values[key]
+            return self._config_entry.options.get(key, self._config_entry.data.get(key, default))
+
         return self.async_show_form(
             step_id="settings",
             data_schema=vol.Schema(
                 {
+                    vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
+
                     # --- Detection Settings ---
                     vol.Optional(
                         CONF_MIN_POWER,
-                        default=self._config_entry.options.get(
-                            CONF_MIN_POWER,
-                            self._config_entry.data.get(CONF_MIN_POWER, DEFAULT_MIN_POWER),
-                        ),
+                        default=get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER),
                     ): vol.Coerce(float),
                     vol.Optional(
                         CONF_OFF_DELAY,
-                        default=self._config_entry.options.get(
-                            CONF_OFF_DELAY,
-                            self._config_entry.data.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY),
-                        ),
+                        default=get_val(CONF_OFF_DELAY, DEFAULT_OFF_DELAY),
                     ): vol.Coerce(int),
                     vol.Optional(
                         CONF_INTERRUPTED_MIN_SECONDS,
-                        default=self._config_entry.options.get(
-                            CONF_INTERRUPTED_MIN_SECONDS,
-                            DEFAULT_INTERRUPTED_MIN_SECONDS,
-                        ),
+                        default=get_val(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0, max=900, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_COMPLETION_MIN_SECONDS,
-                        default=self._config_entry.options.get(
-                            CONF_COMPLETION_MIN_SECONDS,
-                            DEFAULT_COMPLETION_MIN_SECONDS,
-                        ),
+                        default=get_val(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0, max=3600, mode=selector.NumberSelectorMode.BOX)
                     ),
@@ -318,10 +318,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     # --- Notification Settings ---
                     vol.Optional(
                         CONF_NOTIFY_SERVICE,
-                        default=self._config_entry.options.get(
-                            CONF_NOTIFY_SERVICE,
-                            self._config_entry.data.get(CONF_NOTIFY_SERVICE, ""),
-                        ),
+                        default=get_val(CONF_NOTIFY_SERVICE, ""),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=notify_services,
@@ -331,10 +328,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Optional(
                         CONF_NOTIFY_EVENTS,
-                        default=list(self._config_entry.options.get(
-                            CONF_NOTIFY_EVENTS,
-                            self._config_entry.data.get(CONF_NOTIFY_EVENTS, []),
-                        )),
+                        default=list(get_val(CONF_NOTIFY_EVENTS, [])),
                     ): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
@@ -347,10 +341,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                     vol.Optional(
                         CONF_NOTIFY_BEFORE_END_MINUTES,
-                        default=self._config_entry.options.get(
-                            CONF_NOTIFY_BEFORE_END_MINUTES,
-                            DEFAULT_NOTIFY_BEFORE_END_MINUTES,
-                        ),
+                        default=get_val(CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0, max=60, mode=selector.NumberSelectorMode.BOX)
                     ),
@@ -358,62 +349,41 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     # --- Learning & Profiles ---
                     vol.Optional(
                         CONF_LEARNING_CONFIDENCE,
-                        default=self._config_entry.options.get(
-                            CONF_LEARNING_CONFIDENCE,
-                            DEFAULT_LEARNING_CONFIDENCE,
-                        ),
+                        default=get_val(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_AUTO_LABEL_CONFIDENCE,
-                        default=self._config_entry.options.get(
-                            CONF_AUTO_LABEL_CONFIDENCE,
-                            DEFAULT_AUTO_LABEL_CONFIDENCE,
-                        ),
+                        default=get_val(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_PROFILE_MATCH_INTERVAL,
-                        default=self._config_entry.options.get(
-                            CONF_PROFILE_MATCH_INTERVAL,
-                            DEFAULT_PROFILE_MATCH_INTERVAL,
-                        ),
+                        default=get_val(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL),
                     ): vol.Coerce(int),
                     vol.Optional(
                         CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                        default=self._config_entry.options.get(
-                            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                            DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-                        ),
+                        default=get_val(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0.1, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                        default=self._config_entry.options.get(
-                            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                            DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-                        ),
+                        default=get_val(CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=1.0, max=3.0, step=0.1, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_DURATION_TOLERANCE,
-                        default=self._config_entry.options.get(
-                            CONF_DURATION_TOLERANCE,
-                            DEFAULT_DURATION_TOLERANCE,
-                        ),
+                        default=get_val(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0.0, max=0.5, step=0.01, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_PROFILE_DURATION_TOLERANCE,
-                        default=self._config_entry.options.get(
-                            CONF_PROFILE_DURATION_TOLERANCE,
-                            DEFAULT_PROFILE_DURATION_TOLERANCE,
-                        ),
+                        default=get_val(CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0.0, max=0.5, step=0.01, mode=selector.NumberSelectorMode.BOX)
                     ),
@@ -421,85 +391,60 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     # --- Advanced & Thresholds ---
                     vol.Optional(
                         CONF_WATCHDOG_INTERVAL,
-                        default=self._config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL),
+                        default=get_val(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL),
                     ): vol.Coerce(int),
                     vol.Optional(
                         CONF_SMOOTHING_WINDOW,
-                        default=self._config_entry.options.get(
-                            CONF_SMOOTHING_WINDOW,
-                            DEFAULT_SMOOTHING_WINDOW,
-                        ),
+                        default=get_val(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=1, max=20, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_ABRUPT_DROP_WATTS,
-                        default=self._config_entry.options.get(
-                            CONF_ABRUPT_DROP_WATTS,
-                            DEFAULT_ABRUPT_DROP_WATTS,
-                        ),
+                        default=get_val(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0.0, max=5000.0, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_ABRUPT_DROP_RATIO,
-                        default=self._config_entry.options.get(
-                            CONF_ABRUPT_DROP_RATIO,
-                            DEFAULT_ABRUPT_DROP_RATIO,
-                        ),
+                        default=get_val(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_ABRUPT_HIGH_LOAD_FACTOR,
-                        default=self._config_entry.options.get(
-                            CONF_ABRUPT_HIGH_LOAD_FACTOR,
-                            DEFAULT_ABRUPT_HIGH_LOAD_FACTOR,
-                        ),
+                        default=get_val(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=1.0, max=20.0, step=0.1, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-                        default=self._config_entry.options.get(
-                            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-                            DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
-                        ),
+                        default=get_val(CONF_NO_UPDATE_ACTIVE_TIMEOUT, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT),
                     ): vol.Coerce(int),
                     vol.Optional(
                         CONF_PROGRESS_RESET_DELAY,
-                        default=self._config_entry.options.get(
-                            CONF_PROGRESS_RESET_DELAY,
-                            DEFAULT_PROGRESS_RESET_DELAY,
-                        ),
+                        default=get_val(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY),
                     ): vol.Coerce(int),
                     vol.Optional(
                         CONF_AUTO_MAINTENANCE,
-                        default=self._config_entry.options.get(CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE),
+                        default=get_val(CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE),
                     ): bool,
                     vol.Optional(
                         CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
-                        default=self._config_entry.options.get(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD),
+                        default=get_val(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD),
                     ): vol.Coerce(int),
                     vol.Optional(
                         CONF_AUTO_MERGE_LOOKBACK_HOURS,
-                        default=self._config_entry.options.get(
-                            CONF_AUTO_MERGE_LOOKBACK_HOURS,
-                            DEFAULT_AUTO_MERGE_LOOKBACK_HOURS,
-                        ),
+                        default=get_val(CONF_AUTO_MERGE_LOOKBACK_HOURS, DEFAULT_AUTO_MERGE_LOOKBACK_HOURS),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0, max=168, mode=selector.NumberSelectorMode.BOX)
                     ),
                     vol.Optional(
                         CONF_AUTO_MERGE_GAP_SECONDS,
-                        default=self._config_entry.options.get(
-                            CONF_AUTO_MERGE_GAP_SECONDS,
-                            DEFAULT_AUTO_MERGE_GAP_SECONDS,
-                        ),
+                        default=get_val(CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=60, max=7200, mode=selector.NumberSelectorMode.BOX)
                     ),
-                    vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
                 }
             ),
             description_placeholders={

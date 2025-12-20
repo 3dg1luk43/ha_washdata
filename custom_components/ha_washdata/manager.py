@@ -1372,13 +1372,21 @@ class WashDataManager:
                     self._current_program
                 )
                 if phase_progress is not None:
-                    self._cycle_progress = phase_progress
                     # Adjust time remaining based on phase progress
                     remaining = (self._matched_profile_duration * (1.0 - phase_progress / 100.0))
                     self._time_remaining = max(0.0, remaining)
+                    
+                    # Recalculate progress to be consistent with elapsed + remaining
+                    # This ensures progress doesn't jump wildly if we are running slower/faster than average
+                    total_predicted = duration_so_far + self._time_remaining
+                    if total_predicted > 0:
+                        self._cycle_progress = max(0.0, min(99.0, (duration_so_far / total_predicted) * 100.0))
+                    else:
+                        self._cycle_progress = 0.0
+
                     _LOGGER.debug(
-                        f"Phase-aware estimate: progress={phase_progress:.1f}%, "
-                        f"remaining={int(remaining/60)}min (vs linear {int((self._matched_profile_duration - duration_so_far)/60)}min)"
+                        f"Phase-aware estimate: phase={phase_progress:.1f}%, "
+                        f"remaining={int(remaining/60)}min, progress={self._cycle_progress:.1f}%"
                     )
                     return
             
@@ -1510,6 +1518,15 @@ class WashDataManager:
                     0.3 * mae_normalized +              # Amplitude matching
                     0.3 * bounds_score                  # Within expected range
                 )
+                
+                # Penalize matches that are far from current elapsed time (assume linear progress is roughly correct)
+                # This prevents wild jumps in time remaining when patterns repeat
+                time_diff = abs(time_window_start - current_duration)
+                # Max penalty at 30% duration diff
+                time_penalty = min(1.0, time_diff / (target_duration * 0.3)) 
+                
+                # Apply time penalty (reduce score by up to 40%)
+                score = score * (1.0 - 0.4 * time_penalty)
                 
                 if score > best_score:
                     best_score = score

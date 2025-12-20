@@ -8,3 +8,4 @@ mqtt-mock.log
 cycle_data/washer_cycles.json
 mqtt-mock.log*
 tests/__pycache__
+ha_washdata.code-workspace
