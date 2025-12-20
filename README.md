@@ -35,8 +35,9 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 
 1. After adding the integration, click **Configure** on the integration entry.
 2. **Settings**: Centralized page for all tunables (Min Power, Off Delay, Smoothing, etc.). Use **numerical text boxes** for precise control.
-3. **💡 Apply Suggestions**: Check this box in Settings to immediately refresh the form with recommended values based on your machine's history.
-4. **Manage Data & Profiles**: Access tools to rename profiles, label past cycles, or auto-label historical data.
+3. **💡 Apply Suggestions**: Check this box at the top of Settings to refresh the form with recommended values from your machine's history; review then submit to save.
+4. **Progress Estimation**: Remaining time is anchored to the matched profile’s average duration; progress is derived from `elapsed / (elapsed + remaining)` to avoid jumpy percentages.
+5. **Manage Data & Profiles**: Access tools to rename profiles, label past cycles, or auto-label historical data.
 
 ## How it Works
 
@@ -98,11 +99,22 @@ data:
 ## Advanced Options
 
 Access via **Configure → Settings**:
-- **Smoothing Window**: Number of readings for moving average (default: 5).
-- **Ghost Cycle Threshold**: `completion_min_seconds` (default: 600s).
-- **Lookback window**: Hours to look back for auto-merging fragmented cycles.
-- **Duration Tolerance**: Flexibility in matching durations (default: ±25%).
-- **Pre-completion Notification**: Minutes before end to trigger an alert.
+- **`smoothing_window`**: Size of the moving average used to stabilize power readings; higher values smooth more but respond slower.
+- **`completion_min_seconds`**: Minimum runtime required before a drop is considered a valid cycle completion (filters short, noisy spikes).
+- **`auto_merge_lookback_hours`**: Hours to search for fragmented runs and merge them post-completion.
+- **`auto_merge_gap_seconds`**: Max gap between fragments to consider them a single cycle.
+- **`duration_tolerance` / `profile_duration_tolerance`**: Allowed variance versus a profile’s average duration for matching and learning (e.g., ±25%).
+- **`profile_match_interval`**: Seconds between heavy NumPy shape-matching passes (estimation uses lighter updates in between).
+- **`profile_match_min_duration_ratio` / `profile_match_max_duration_ratio`**: Bounds for acceptable duration ratios (cycle duration ÷ profile average) to prevent mismatches.
+- **`no_update_active_timeout`**: If no sensor updates arrive for this long during a run, the watchdog will force-complete or flush the buffer depending on state.
+- **`watchdog_interval`**: How often the watchdog checks for stuck/idle conditions; clamped by sensor cadence and `off_delay`.
+- **`abrupt_drop_watts` / `abrupt_drop_ratio` / `abrupt_high_load_factor`**: Thresholds to classify abrupt endings and high-load segments for better state transitions.
+- **`progress_reset_delay`**: After completion, delay before progress automatically resets to 0% (default ~5 minutes).
+- **`notify_before_end_minutes`**: Send a pre-completion alert when remaining time drops under this value (0 disables).
+- **`auto_maintenance`**: Enable nightly maintenance to repair samples, merge fragments, and keep storage healthy.
+- **`auto_tune_noise_events_threshold`**: Number of ghost cycles (short, low-power runs) in 24h before suggesting a higher `min_power`.
+- **Retention caps**: `max_past_cycles`, `max_full_traces_per_profile`, `max_full_traces_unlabeled` control history size and storage footprint.
+- **Apply Suggestions (UI)**: One-click to refresh the Settings form with recommended values derived from your machine’s observed cadence and history; review then submit to save.
 
 ## 📖 Documentation
 
