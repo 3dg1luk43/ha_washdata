@@ -1,3 +1,9 @@
+![Installs](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=Installations&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.ha_washdata.total)
+![Latest](https://img.shields.io/github/v/release/3dg1luk43/ha_washdata)
+![Hassfest](https://img.shields.io/github/actions/workflow/status/3dg1luk43/ha_washdata/hassfest.yml?label=hassfest)
+![HACS](https://img.shields.io/github/actions/workflow/status/3dg1luk43/ha_washdata/validate.yaml?label=HACS)
+[![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://ko-fi.com/3dg1luk43)
+
 # HA WashData Integration
 
 A Home Assistant custom component to monitor washing machines via smart sockets, learn power profiles, and estimate completion time using shape-correlation matching.
