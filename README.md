@@ -17,10 +17,13 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Auto-Maintenance**: Nightly cleanup - removes orphaned profiles, merges fragmented cycles.
 - **Export/Import**: Full configuration backup/restore with all settings and profiles via JSON.
 
-## Installation
+## Installation (via HACS)
 
-1. Copy the `custom_components/ha_washdata` directory to your Home Assistant's `custom_components` folder.
-2. Restart Home Assistant.
+1. In Home Assistant, open **HACS → Settings → Custom repositories**.
+2. Add `https://github.com/3dg1luk43/ha_washdata` as a **Integration** repository.
+3. Back in HACS, search for **HA WashData**, install, and **Restart Home Assistant**.
+
+Manual fallback (if not using HACS): copy `custom_components/ha_washdata` into your HA `custom_components` folder and restart.
 
 ## Configuration
 
