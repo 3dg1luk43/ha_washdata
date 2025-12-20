@@ -1,12 +1,12 @@
 {
   "domain": "ha_washdata",
   "name": "Home Assistant WashData",
-  "codeowners": [],
+  "codeowners": ["@3dg1luk43"],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/3dg1luk43/ha_washdata",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/3dg1luk43/ha_washdata/issues",
   "requirements": ["numpy"],
-  "version": "1.0.1"
+  "version": "0.1.0"
 }
