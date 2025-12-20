@@ -92,6 +92,8 @@ auto_label_cycles:
           min: 0.50
           max: 0.95
           step: 0.05
+
+export_config:
   name: Export Config
   description: Export this washer's profiles and cycles to a JSON file (per device).
   fields:

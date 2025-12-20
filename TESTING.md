@@ -1,6 +1,6 @@
 # HA WashData Testing Guide
 
-**Updated:** December 17, 2025
+**Updated:** December 20, 2025
 
 ## Table of Contents
 
@@ -51,11 +51,12 @@ Verify that the system correctly handles realistic cycle time variance.
 
 ### Test Setup
 
-1. **Start mock socket with variance enabled:**
+1. **Start mock socket with specific variability:**
 
 ```bash
 cd /root/ha_washdata
-python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
+# Force 5% variability for testing
+python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG --variability 0.05
 ```
 
 2. **Expected output:**
@@ -122,9 +123,10 @@ grep -n "variance_factor" devtools/mqtt_mock_socket.py
 **Problem:** Cycles not matching despite variance
 
 ```yaml
-# Variance is handled in two places:
-# 1. Mock socket: ±15% to simulated cycle durations
-# 2. Profile matching: ±25% tolerance for duration matching
+# Variance is handled in several places:
+# 1. Mock socket: --variability (default 0.15)
+# 2. Profile matching: ±25% duration tolerance
+# 3. Shape Matching: NumPy correlation score (must be > learning_confidence)
 
 # Check profile matching tolerance (±25%):
 grep -n "0.75\|1.25" custom_components/ha_washdata/profile_store.py
@@ -527,6 +529,7 @@ python3 mqtt_mock_socket.py \
   --speedup 720          # Time compression (default: 720)
   --sample 60            # Sampling period in seconds (default: 60)
   --jitter 15            # Power noise ±W (default: 15)
+  --variability 0.15      # Cycle duration variance percentage (default: 0.15)
   --default LONG         # Default cycle (default: LONG)
 ```
 

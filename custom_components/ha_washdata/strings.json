@@ -23,8 +23,7 @@
       "init": {
         "menu_options": {
           "settings": "Settings",
-          "apply_suggestions": "Copy Suggested Values → Settings",
-          "manage_profiles": "Manage Profiles",
+          "manage_data": "Manage Data & Profiles",
           "diagnostics": "Diagnostics & Maintenance"
         }
       },
@@ -63,6 +62,8 @@
           "max_full_traces_per_profile": "Retention: Max Full Traces per Profile",
           "max_full_traces_unlabeled": "Retention: Max Full Traces Unlabeled",
           "watchdog_interval": "Watchdog Interval (seconds)",
+          "completion_min_seconds": "Completion Minimum Runtime (seconds)",
+          "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold"
         },
         "data_description": {
@@ -90,6 +91,8 @@
           "max_full_traces_per_profile": "Number of recent labeled cycles to keep with full power traces per profile. Older traces are summarized via envelopes. Default: 20.",
           "max_full_traces_unlabeled": "Number of recent unlabeled cycles to keep with full power traces to support auto-labeling. Default: 20.",
           "watchdog_interval": "Seconds between watchdog checks while running. Lower for faster stuck-cycle handling; higher to reduce overhead. Default: 5s.",
+          "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
+          "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
           "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3."
         }
       },
@@ -97,8 +100,8 @@
         "title": "Diagnostics & Maintenance",
         "description": "Run maintenance actions like merging fragmented cycles or migrating stored data."
       },
-      "manage_profiles": {
-        "title": "Manage Profiles & Cycles",
+      "manage_data": {
+        "title": "Manage Data & Profiles",
         "description": "Recent cycles:\n{recent_cycles}",
         "data": {
           "action": "Action"
@@ -210,6 +213,16 @@
       "no_profiles_for_matching": "No profiles available for matching. Create profiles first.",
       "no_unlabeled_cycles": "All cycles are already labeled",
       "no_suggestions": "No suggested values available yet. Run a few cycles and try again."
+    }
+  },
+  "entity": {
+    "select": {
+      "program_select": {
+        "name": "Cycle Program",
+        "state": {
+          "Auto-Detect": "Auto-Detect"
+        }
+      }
     }
   }
 }

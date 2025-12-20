@@ -26,6 +26,7 @@ from .const import (
     CONF_PROFILE_DURATION_TOLERANCE,
     CONF_AUTO_MERGE_LOOKBACK_HOURS,
     CONF_AUTO_MERGE_GAP_SECONDS,
+    CONF_APPLY_SUGGESTIONS,
     CONF_INTERRUPTED_MIN_SECONDS,
     CONF_ABRUPT_DROP_WATTS,
     CONF_ABRUPT_DROP_RATIO,
@@ -42,7 +43,10 @@ from .const import (
     CONF_MAX_FULL_TRACES_PER_PROFILE,
     CONF_MAX_FULL_TRACES_UNLABELED,
     CONF_WATCHDOG_INTERVAL,
+    CONF_WATCHDOG_INTERVAL,
     CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
+    CONF_COMPLETION_MIN_SECONDS,
+    CONF_NOTIFY_BEFORE_END_MINUTES,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     DEFAULT_NAME,
@@ -70,6 +74,8 @@ from .const import (
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_WATCHDOG_INTERVAL,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
+    DEFAULT_COMPLETION_MIN_SECONDS,
+    DEFAULT_NOTIFY_BEFORE_END_MINUTES,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -124,7 +130,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         options.setdefault(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE)
         options.setdefault(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED)
         options.setdefault(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
+        options.setdefault(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
         options.setdefault(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD)
+        options.setdefault(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS)
+        options.setdefault(CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES)
 
         # Bump version and save
         self.hass.config_entries.async_update_entry(
@@ -170,97 +179,60 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Manage the options."""
         return self.async_show_menu(
             step_id="init",
-            menu_options=["settings", "apply_suggestions", "manage_profiles", "diagnostics"]
+            menu_options=["settings", "manage_data", "diagnostics"]
         )
 
-    async def async_step_apply_suggestions(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
-        """Copy suggested values into user options (explicit action only)."""
-        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
-        suggestions = manager.suggestions if manager else {}
-
-        keys_to_apply = [
-            CONF_MIN_POWER,
-            CONF_OFF_DELAY,
-            CONF_WATCHDOG_INTERVAL,
-            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-            CONF_PROFILE_MATCH_INTERVAL,
-            CONF_AUTO_LABEL_CONFIDENCE,
-            CONF_DURATION_TOLERANCE,
-            CONF_PROFILE_DURATION_TOLERANCE,
-            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-            CONF_AUTO_MERGE_GAP_SECONDS,
-        ]
-
-        applicable: list[tuple[str, Any]] = []
-        for key in keys_to_apply:
-            entry = suggestions.get(key) if isinstance(suggestions, dict) else None
-            if isinstance(entry, dict) and "value" in entry:
-                applicable.append((key, entry.get("value")))
-
-        if not applicable:
-            return self.async_abort(reason="no_suggestions")
-
-        def _coerce_value(key: str, value: Any) -> Any:
-            if key in (
-                CONF_OFF_DELAY,
-                CONF_WATCHDOG_INTERVAL,
-                CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-                CONF_PROFILE_MATCH_INTERVAL,
-                CONF_AUTO_MERGE_GAP_SECONDS,
-            ):
-                try:
-                    return int(float(value))
-                except Exception:
-                    return value
-            if key in (
-                CONF_MIN_POWER,
-                CONF_AUTO_LABEL_CONFIDENCE,
-                CONF_DURATION_TOLERANCE,
-                CONF_PROFILE_DURATION_TOLERANCE,
-                CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-            ):
-                try:
-                    return float(value)
-                except Exception:
-                    return value
-            return value
-
-        suggested_lines: list[str] = []
-        for key, value in applicable:
-            suggested_lines.append(f"- {key}: {_coerce_value(key, value)}")
-        suggested_text = "\n".join(suggested_lines)
-
-        if user_input is not None:
-            if not user_input.get("confirm", False):
-                return self.async_create_entry(title="", data=dict(self._config_entry.options))
-
-            new_options = dict(self._config_entry.options)
-            for key, value in applicable:
-                new_options[key] = _coerce_value(key, value)
-
-            return self.async_create_entry(title="", data=new_options)
-
-        return self.async_show_form(
-            step_id="apply_suggestions",
-            data_schema=vol.Schema({
-                vol.Required("confirm", default=False): bool,
-            }),
-            description_placeholders={
-                "suggested": suggested_text,
-            },
-        )
 
     async def async_step_settings(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage configuration settings."""
+        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        suggestions = manager.suggestions if manager else {}
+
         if user_input is not None:
+            # If "Apply Suggestions" checkbox was checked, merge suggested values into the input
+            if user_input.get(CONF_APPLY_SUGGESTIONS):
+                keys_to_apply = [
+                    CONF_MIN_POWER,
+                    CONF_OFF_DELAY,
+                    CONF_WATCHDOG_INTERVAL,
+                    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                    CONF_PROFILE_MATCH_INTERVAL,
+                    CONF_AUTO_LABEL_CONFIDENCE,
+                    CONF_DURATION_TOLERANCE,
+                    CONF_PROFILE_DURATION_TOLERANCE,
+                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+                    CONF_AUTO_MERGE_GAP_SECONDS,
+                ]
+                
+                # Create a copy of current options/input to work with
+                updated_input = {**user_input}
+                # Uncheck it so it doesn't stay checked in the next form render
+                updated_input[CONF_APPLY_SUGGESTIONS] = False
+                
+                applied_count = 0
+                for key in keys_to_apply:
+                    entry = suggestions.get(key) if isinstance(suggestions, dict) else None
+                    if isinstance(entry, dict) and "value" in entry:
+                        val = entry.get("value")
+                        # Coerce types
+                        if key in (CONF_OFF_DELAY, CONF_WATCHDOG_INTERVAL, CONF_NO_UPDATE_ACTIVE_TIMEOUT, 
+                                   CONF_PROFILE_MATCH_INTERVAL, CONF_AUTO_MERGE_GAP_SECONDS):
+                            updated_input[key] = int(float(val))
+                        else:
+                            updated_input[key] = float(val)
+                        applied_count += 1
+                
+                if applied_count > 0:
+                    # Show form again with updated values instead of saving immediately
+                    return await self.async_step_settings(user_input=None)
+
             # Merge with existing options to preserve settings not shown in this form
             merged_options = {**self._config_entry.options, **user_input}
+            # Remove the apply_suggestions flag before saving
+            merged_options.pop(CONF_APPLY_SUGGESTIONS, None)
             return self.async_create_entry(title="", data=merged_options)
 
         # Populate notify services
@@ -309,6 +281,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="settings",
             data_schema=vol.Schema(
                 {
+                    # --- Detection Settings ---
                     vol.Optional(
                         CONF_MIN_POWER,
                         default=self._config_entry.options.get(
@@ -324,61 +297,25 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         ),
                     ): vol.Coerce(int),
                     vol.Optional(
-                        CONF_PROGRESS_RESET_DELAY,
+                        CONF_INTERRUPTED_MIN_SECONDS,
                         default=self._config_entry.options.get(
-                            CONF_PROGRESS_RESET_DELAY,
-                            DEFAULT_PROGRESS_RESET_DELAY,
+                            CONF_INTERRUPTED_MIN_SECONDS,
+                            DEFAULT_INTERRUPTED_MIN_SECONDS,
                         ),
-                    ): vol.Coerce(int),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0, max=900, mode=selector.NumberSelectorMode.BOX)
+                    ),
                     vol.Optional(
-                        CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                        CONF_COMPLETION_MIN_SECONDS,
                         default=self._config_entry.options.get(
-                            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-                            DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
+                            CONF_COMPLETION_MIN_SECONDS,
+                            DEFAULT_COMPLETION_MIN_SECONDS,
                         ),
-                    ): vol.Coerce(int),
-                    vol.Optional(
-                        CONF_AUTO_LABEL_CONFIDENCE,
-                        default=self._config_entry.options.get(
-                            CONF_AUTO_LABEL_CONFIDENCE,
-                            DEFAULT_AUTO_LABEL_CONFIDENCE,
-                        ),
-                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
-                    vol.Optional(
-                        CONF_LEARNING_CONFIDENCE,
-                        default=self._config_entry.options.get(
-                            CONF_LEARNING_CONFIDENCE,
-                            DEFAULT_LEARNING_CONFIDENCE,
-                        ),
-                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
-                    vol.Optional(
-                        CONF_DURATION_TOLERANCE,
-                        default=self._config_entry.options.get(
-                            CONF_DURATION_TOLERANCE,
-                            DEFAULT_DURATION_TOLERANCE,
-                        ),
-                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=0.5)),
-                    vol.Optional(
-                        CONF_PROFILE_MATCH_INTERVAL,
-                        default=self._config_entry.options.get(
-                            CONF_PROFILE_MATCH_INTERVAL,
-                            DEFAULT_PROFILE_MATCH_INTERVAL,
-                        ),
-                    ): vol.Coerce(int),
-                    vol.Optional(
-                        CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                        default=self._config_entry.options.get(
-                            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                            DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-                        ),
-                    ): vol.All(vol.Coerce(float), vol.Range(min=0.1, max=1.0)),
-                    vol.Optional(
-                        CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                        default=self._config_entry.options.get(
-                            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                            DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-                        ),
-                    ): vol.All(vol.Coerce(float), vol.Range(min=1.0, max=3.0)),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0, max=3600, mode=selector.NumberSelectorMode.BOX)
+                    ),
+
+                    # --- Notification Settings ---
                     vol.Optional(
                         CONF_NOTIFY_SERVICE,
                         default=self._config_entry.options.get(
@@ -409,24 +346,82 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         )
                     ),
                     vol.Optional(
-                        CONF_MAX_PAST_CYCLES,
-                        default=self._config_entry.options.get(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES),
+                        CONF_NOTIFY_BEFORE_END_MINUTES,
+                        default=self._config_entry.options.get(
+                            CONF_NOTIFY_BEFORE_END_MINUTES,
+                            DEFAULT_NOTIFY_BEFORE_END_MINUTES,
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0, max=60, mode=selector.NumberSelectorMode.BOX)
+                    ),
+
+                    # --- Learning & Profiles ---
+                    vol.Optional(
+                        CONF_LEARNING_CONFIDENCE,
+                        default=self._config_entry.options.get(
+                            CONF_LEARNING_CONFIDENCE,
+                            DEFAULT_LEARNING_CONFIDENCE,
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
+                    ),
+                    vol.Optional(
+                        CONF_AUTO_LABEL_CONFIDENCE,
+                        default=self._config_entry.options.get(
+                            CONF_AUTO_LABEL_CONFIDENCE,
+                            DEFAULT_AUTO_LABEL_CONFIDENCE,
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
+                    ),
+                    vol.Optional(
+                        CONF_PROFILE_MATCH_INTERVAL,
+                        default=self._config_entry.options.get(
+                            CONF_PROFILE_MATCH_INTERVAL,
+                            DEFAULT_PROFILE_MATCH_INTERVAL,
+                        ),
                     ): vol.Coerce(int),
                     vol.Optional(
-                        CONF_MAX_FULL_TRACES_PER_PROFILE,
-                        default=self._config_entry.options.get(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE),
-                    ): vol.Coerce(int),
+                        CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                        default=self._config_entry.options.get(
+                            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                            DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0.1, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX)
+                    ),
                     vol.Optional(
-                        CONF_MAX_FULL_TRACES_UNLABELED,
-                        default=self._config_entry.options.get(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED),
-                    ): vol.Coerce(int),
+                        CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+                        default=self._config_entry.options.get(
+                            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+                            DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=1.0, max=3.0, step=0.1, mode=selector.NumberSelectorMode.BOX)
+                    ),
+                    vol.Optional(
+                        CONF_DURATION_TOLERANCE,
+                        default=self._config_entry.options.get(
+                            CONF_DURATION_TOLERANCE,
+                            DEFAULT_DURATION_TOLERANCE,
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0.0, max=0.5, step=0.01, mode=selector.NumberSelectorMode.BOX)
+                    ),
+                    vol.Optional(
+                        CONF_PROFILE_DURATION_TOLERANCE,
+                        default=self._config_entry.options.get(
+                            CONF_PROFILE_DURATION_TOLERANCE,
+                            DEFAULT_PROFILE_DURATION_TOLERANCE,
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0.0, max=0.5, step=0.01, mode=selector.NumberSelectorMode.BOX)
+                    ),
+
+                    # --- Advanced & Thresholds ---
                     vol.Optional(
                         CONF_WATCHDOG_INTERVAL,
                         default=self._config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL),
-                    ): vol.Coerce(int),
-                    vol.Optional(
-                        CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
-                        default=self._config_entry.options.get(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD),
                     ): vol.Coerce(int),
                     vol.Optional(
                         CONF_SMOOTHING_WINDOW,
@@ -434,56 +429,77 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             CONF_SMOOTHING_WINDOW,
                             DEFAULT_SMOOTHING_WINDOW,
                         ),
-                    ): vol.All(vol.Coerce(int), vol.Range(min=1, max=20)),
-                    vol.Optional(
-                        CONF_PROFILE_DURATION_TOLERANCE,
-                        default=self._config_entry.options.get(
-                            CONF_PROFILE_DURATION_TOLERANCE,
-                            DEFAULT_PROFILE_DURATION_TOLERANCE,
-                        ),
-                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=0.5)),
-                    vol.Optional(
-                        CONF_AUTO_MERGE_LOOKBACK_HOURS,
-                        default=self._config_entry.options.get(
-                            CONF_AUTO_MERGE_LOOKBACK_HOURS,
-                            DEFAULT_AUTO_MERGE_LOOKBACK_HOURS,
-                        ),
-                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=168)),
-                    vol.Optional(
-                        CONF_AUTO_MERGE_GAP_SECONDS,
-                        default=self._config_entry.options.get(
-                            CONF_AUTO_MERGE_GAP_SECONDS,
-                            DEFAULT_AUTO_MERGE_GAP_SECONDS,
-                        ),
-                    ): vol.All(vol.Coerce(int), vol.Range(min=60, max=7200)),
-                    vol.Optional(
-                        CONF_INTERRUPTED_MIN_SECONDS,
-                        default=self._config_entry.options.get(
-                            CONF_INTERRUPTED_MIN_SECONDS,
-                            DEFAULT_INTERRUPTED_MIN_SECONDS,
-                        ),
-                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=900)),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=1, max=20, mode=selector.NumberSelectorMode.BOX)
+                    ),
                     vol.Optional(
                         CONF_ABRUPT_DROP_WATTS,
                         default=self._config_entry.options.get(
                             CONF_ABRUPT_DROP_WATTS,
                             DEFAULT_ABRUPT_DROP_WATTS,
                         ),
-                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=5000.0)),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0.0, max=5000.0, mode=selector.NumberSelectorMode.BOX)
+                    ),
                     vol.Optional(
                         CONF_ABRUPT_DROP_RATIO,
                         default=self._config_entry.options.get(
                             CONF_ABRUPT_DROP_RATIO,
                             DEFAULT_ABRUPT_DROP_RATIO,
                         ),
-                    ): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
+                    ),
                     vol.Optional(
                         CONF_ABRUPT_HIGH_LOAD_FACTOR,
                         default=self._config_entry.options.get(
                             CONF_ABRUPT_HIGH_LOAD_FACTOR,
                             DEFAULT_ABRUPT_HIGH_LOAD_FACTOR,
                         ),
-                    ): vol.All(vol.Coerce(float), vol.Range(min=1.0, max=20.0)),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=1.0, max=20.0, step=0.1, mode=selector.NumberSelectorMode.BOX)
+                    ),
+                    vol.Optional(
+                        CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                        default=self._config_entry.options.get(
+                            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                            DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
+                        ),
+                    ): vol.Coerce(int),
+                    vol.Optional(
+                        CONF_PROGRESS_RESET_DELAY,
+                        default=self._config_entry.options.get(
+                            CONF_PROGRESS_RESET_DELAY,
+                            DEFAULT_PROGRESS_RESET_DELAY,
+                        ),
+                    ): vol.Coerce(int),
+                    vol.Optional(
+                        CONF_AUTO_MAINTENANCE,
+                        default=self._config_entry.options.get(CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE),
+                    ): bool,
+                    vol.Optional(
+                        CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
+                        default=self._config_entry.options.get(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD),
+                    ): vol.Coerce(int),
+                    vol.Optional(
+                        CONF_AUTO_MERGE_LOOKBACK_HOURS,
+                        default=self._config_entry.options.get(
+                            CONF_AUTO_MERGE_LOOKBACK_HOURS,
+                            DEFAULT_AUTO_MERGE_LOOKBACK_HOURS,
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0, max=168, mode=selector.NumberSelectorMode.BOX)
+                    ),
+                    vol.Optional(
+                        CONF_AUTO_MERGE_GAP_SECONDS,
+                        default=self._config_entry.options.get(
+                            CONF_AUTO_MERGE_GAP_SECONDS,
+                            DEFAULT_AUTO_MERGE_GAP_SECONDS,
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=60, max=7200, mode=selector.NumberSelectorMode.BOX)
+                    ),
+                    vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
                 }
             ),
             description_placeholders={
@@ -621,10 +637,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             }),
         )
 
-    async def async_step_manage_profiles(
+    async def async_step_manage_data(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Main menu for profile and cycle management."""
+        """Main menu for profile, cycle, and suggestions management."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
         
@@ -656,7 +672,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 return await self.async_step_select_cycle_to_delete()
 
         return self.async_show_form(
-            step_id="manage_profiles",
+            step_id="manage_data",
             data_schema=vol.Schema({
                 vol.Required("action"): vol.In({
                     "create_profile": "➕ Create New Profile",
@@ -689,6 +705,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         name, 
                         reference_cycle if reference_cycle != "none" else None
                     )
+                    manager._notify_update()
                     return self.async_create_entry(title="", data=dict(self._config_entry.options))
                 except ValueError as e:
                     errors["base"] = "profile_exists"
@@ -771,8 +788,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 errors["new_name"] = "empty_name"
             else:
                 manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+                
+                # If name didn't change, just return to entry creation (preserving options)
+                if new_name == self._selected_profile:
+                    return self.async_create_entry(title="", data=dict(self._config_entry.options))
+                    
                 try:
                     count = await manager.profile_store.rename_profile(self._selected_profile, new_name)
+                    manager._notify_update()
                     return self.async_create_entry(title="", data=dict(self._config_entry.options))
                 except ValueError as e:
                     errors["base"] = "rename_failed"
@@ -831,6 +854,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             unlabel = user_input["unlabel_cycles"]
             manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
             count = await manager.profile_store.delete_profile(self._selected_profile, unlabel)
+            manager._notify_update()
             return self.async_create_entry(title="", data=dict(self._config_entry.options))
         
         return self.async_show_form(
@@ -864,6 +888,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             threshold = user_input["confidence_threshold"]
             stats = await store.auto_label_unlabeled_cycles(threshold)
+            manager._notify_update()
             return self.async_create_entry(
                 title="",
                 data=dict(self._config_entry.options),
@@ -877,7 +902,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         min=0.50,
                         max=0.95,
                         step=0.05,
-                        mode=selector.NumberSelectorMode.SLIDER
+                        mode=selector.NumberSelectorMode.BOX
                     )
                 )
             }),
@@ -956,6 +981,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             cycle_id = user_input["cycle_id"]
             manager.profile_store.delete_cycle(cycle_id)
             await manager.profile_store.async_save()
+            manager._notify_update()
             return self.async_create_entry(title="", data=dict(self._config_entry.options))
 
         return self.async_show_form(
@@ -991,17 +1017,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     try:
                         # Create profile from this cycle
                         await store.create_profile(new_name, self._selected_cycle_id)
+                        manager._notify_update()
                         return self.async_create_entry(title="", data=dict(self._config_entry.options))
                     except ValueError:
                         errors["base"] = "profile_exists"
             elif profile_choice == "__remove_label__":
                 # Remove label from cycle
                 await store.assign_profile_to_cycle(self._selected_cycle_id, None)
+                manager._notify_update()
                 return self.async_create_entry(title="", data=dict(self._config_entry.options))
             else:
                 # Assign existing profile
                 try:
                     await store.assign_profile_to_cycle(self._selected_cycle_id, profile_choice)
+                    manager._notify_update()
                     return self.async_create_entry(title="", data=dict(self._config_entry.options))
                 except ValueError as e:
                     errors["base"] = "assignment_failed"
@@ -1117,6 +1146,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
              manager.profile_store._data["past_cycles"] = []
              manager.profile_store._data["profiles"] = {}
              await manager.profile_store.async_save()
+             manager._notify_update()
              
              return self.async_create_entry(
                  title="",

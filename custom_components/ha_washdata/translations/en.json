@@ -23,8 +23,7 @@
       "init": {
         "menu_options": {
           "settings": "Settings",
-          "apply_suggestions": "Copy Suggested Values → Settings",
-          "manage_profiles": "Manage Profiles",
+          "manage_data": "Manage Data & Profiles",
           "diagnostics": "Diagnostics & Maintenance"
         }
       },
@@ -47,6 +46,8 @@
           "learning_confidence": "Feedback Request Confidence (0-1)",
           "duration_tolerance": "Duration Tolerance (0-0.5)",
           "profile_match_interval": "Profile Match Interval (seconds)",
+          "profile_match_min_duration_ratio": "Profile Match Min Duration Ratio (0.1-1.0)",
+          "profile_match_max_duration_ratio": "Profile Match Max Duration Ratio (1.0-3.0)",
           "notify_service": "Notification Service (e.g. notify.mobile_app)",
           "notify_events": "Events to Notify",
           "smoothing_window": "Smoothing Window (samples)",
@@ -61,6 +62,8 @@
           "max_full_traces_per_profile": "Retention: Max Full Traces per Profile",
           "max_full_traces_unlabeled": "Retention: Max Full Traces Unlabeled",
           "watchdog_interval": "Watchdog Interval (seconds)",
+          "completion_min_seconds": "Completion Minimum Runtime (seconds)",
+          "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold"
         },
         "data_description": {
@@ -72,6 +75,8 @@
           "learning_confidence": "Minimum confidence to request user verification via an event (0.0–1.0).",
           "duration_tolerance": "Tolerance for time-remaining estimates during a run (0.0–0.5 corresponds to 0–50%).",
           "profile_match_interval": "How often (in seconds) to attempt profile matching during a cycle. Lower values provide faster detection but use more CPU. Default: 300s (5 minutes).",
+          "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.50 (50%).",
+          "profile_match_max_duration_ratio": "Maximum duration ratio for profile matching. Running cycle must not exceed this multiple of profile duration. Higher = more lenient. Default: 1.50 (150%).",
           "notify_service": "Home Assistant notify service to use (optional).",
           "notify_events": "Which events to send notifications for.",
           "smoothing_window": "Number of recent power readings used for moving-average smoothing.",
@@ -86,6 +91,8 @@
           "max_full_traces_per_profile": "Number of recent labeled cycles to keep with full power traces per profile. Older traces are summarized via envelopes. Default: 20.",
           "max_full_traces_unlabeled": "Number of recent unlabeled cycles to keep with full power traces to support auto-labeling. Default: 20.",
           "watchdog_interval": "Seconds between watchdog checks while running. Lower for faster stuck-cycle handling; higher to reduce overhead. Default: 5s.",
+          "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
+          "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
           "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3."
         }
       },
@@ -93,8 +100,8 @@
         "title": "Diagnostics & Maintenance",
         "description": "Run maintenance actions like merging fragmented cycles or migrating stored data."
       },
-      "manage_profiles": {
-        "title": "Manage Profiles & Cycles",
+      "manage_data": {
+        "title": "Manage Data & Profiles",
         "description": "Recent cycles:\n{recent_cycles}",
         "data": {
           "action": "Action"
@@ -206,6 +213,16 @@
       "no_profiles_for_matching": "No profiles available for matching. Create profiles first.",
       "no_unlabeled_cycles": "All cycles are already labeled",
       "no_suggestions": "No suggested values available yet. Run a few cycles and try again."
+    }
+  },
+  "entity": {
+    "select": {
+      "program_select": {
+        "name": "Cycle Program",
+        "state": {
+          "Auto-Detect": "Auto-Detect"
+        }
+      }
     }
   }
 }

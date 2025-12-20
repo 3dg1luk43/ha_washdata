@@ -43,6 +43,9 @@ from .const import (
     CONF_MAX_FULL_TRACES_UNLABELED,
     CONF_WATCHDOG_INTERVAL,
     CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
+    CONF_COMPLETION_MIN_SECONDS,
+    CONF_NOTIFY_BEFORE_END_MINUTES,
+    SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     EVENT_CYCLE_STARTED,
@@ -60,6 +63,8 @@ from .const import (
     DEFAULT_ABRUPT_DROP_WATTS,
     DEFAULT_ABRUPT_DROP_RATIO,
     DEFAULT_ABRUPT_HIGH_LOAD_FACTOR,
+    DEFAULT_COMPLETION_MIN_SECONDS,
+    DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_LEARNING_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
@@ -81,8 +86,6 @@ from .learning import LearningManager
 from .profile_store import ProfileStore
 
 _LOGGER = logging.getLogger(__name__)
-
-SIGNAL_WASHER_UPDATE = "ha_washdata_update_{}"
 
 class WashDataManager:
     """Manages a single washing machine instance."""
@@ -117,7 +120,9 @@ class WashDataManager:
         self._learning_confidence = config_entry.options.get(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE)
         self._duration_tolerance = config_entry.options.get(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE)
         self._auto_label_confidence = config_entry.options.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE)
+        self._auto_label_confidence = config_entry.options.get(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE)
         self._profile_match_interval = int(config_entry.options.get(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL))
+        self._notify_before_end_minutes = int(config_entry.options.get(CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES))
         
         # Advanced options
         smoothing_window = int(config_entry.options.get("smoothing_window", 5))
@@ -125,6 +130,7 @@ class WashDataManager:
         abrupt_drop_watts = float(config_entry.options.get("abrupt_drop_watts", 500.0))
         abrupt_drop_ratio = float(config_entry.options.get("abrupt_drop_ratio", 0.6))
         abrupt_high_load_factor = float(config_entry.options.get("abrupt_high_load_factor", 5.0))
+        completion_min_seconds = int(config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS))
 
         _LOGGER.info(f"Manager init: min_power={min_power}W, off_delay={off_delay}s (from options={CONF_MIN_POWER in config_entry.options}, defaults={DEFAULT_MIN_POWER}W, {DEFAULT_OFF_DELAY}s)")
         
@@ -136,6 +142,7 @@ class WashDataManager:
             abrupt_drop_watts=abrupt_drop_watts,
             abrupt_drop_ratio=abrupt_drop_ratio,
             abrupt_high_load_factor=abrupt_high_load_factor,
+            completion_min_seconds=completion_min_seconds,
         )
         self._config = config
         self.detector = CycleDetector(
@@ -178,7 +185,12 @@ class WashDataManager:
         )
         self._remove_maintenance_scheduler = None
         self._profile_sample_repair_stats: dict[str, int] | None = None
+        self._remove_maintenance_scheduler = None
+        self._profile_sample_repair_stats: dict[str, int] | None = None
         self._last_suggestion_update: datetime | None = None
+        
+        self._manual_program_active: bool = False
+        self._notified_pre_completion: bool = False
 
     async def async_setup(self) -> None:
         """Set up the manager."""
@@ -264,6 +276,9 @@ class WashDataManager:
         new_abrupt_high_load = float(
             config_entry.options.get(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR)
         )
+        new_completion_min = int(
+            config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS)
+        )
         
         # Apply all detector config updates
         self.detector._config.min_power = new_min_power
@@ -273,6 +288,7 @@ class WashDataManager:
         self.detector._config.abrupt_drop_watts = new_abrupt_drop_watts
         self.detector._config.abrupt_drop_ratio = new_abrupt_drop_ratio
         self.detector._config.abrupt_high_load_factor = new_abrupt_high_load
+        self.detector._config.completion_min_seconds = new_completion_min
         
         if (old_min_power != new_min_power or old_off_delay != new_off_delay or
             old_smoothing != new_smoothing or old_interrupted_min != new_interrupted_min or
@@ -330,6 +346,7 @@ class WashDataManager:
         # Update notification settings
         self._notify_service = config_entry.options.get(CONF_NOTIFY_SERVICE)
         self._notify_events = config_entry.options.get(CONF_NOTIFY_EVENTS, [])
+        self._notify_before_end_minutes = int(config_entry.options.get(CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES))
         
         _LOGGER.info("Configuration reloaded successfully")
         
@@ -678,6 +695,8 @@ class WashDataManager:
             self._stop_progress_reset_timer()
             
             self._current_program = "detecting..."
+            self._manual_program_active = False
+            self._notified_pre_completion = False
             self._time_remaining = None
             self._cycle_progress = 0
             self._matched_profile_duration = None
@@ -741,7 +760,10 @@ class WashDataManager:
              self._send_notification(f"{self.config_entry.title} finished. Duration: {int(duration/60)}m.")
         
         # Clear all state and timers - zero everything out
+        # Clear all state and timers - zero everything out
         self._current_program = "off"
+        self._manual_program_active = False
+        self._notified_pre_completion = False
         self._time_remaining = None
         self._matched_profile_duration = None
         self._last_estimate_time = None
@@ -1256,6 +1278,15 @@ class WashDataManager:
             self._update_remaining_only()
             return
 
+        # SKIP matching if manual program is active
+        if self._manual_program_active:
+             self._last_estimate_time = now  # touch timestamp to throttle estimates loop
+             self._update_remaining_only()
+             # Also check notifications in loop
+             self._check_pre_completion_notification()
+             self._notify_update()
+             return
+
         trace = self.detector.get_power_trace()
         if len(trace) < 3:
             return
@@ -1290,10 +1321,34 @@ class WashDataManager:
             # No match yet and still searching
             self._current_program = "detecting..."
         # else: keep existing match even if current attempt failed (prevents "unknown" flip-flop)
+        
+        # If manual program is active, we skip the matching logic update to _current_program
+        # But we DO want to process the phase estimation below using the manually set program.
+        # The logic above only updates _current_program if we are searching ("detecting...").
+        # If manual mode is on, _current_program is already set and locked.
 
         self._last_estimate_time = now
         self._update_remaining_only()
+        
+        # Check for pre-completion notification
+        self._check_pre_completion_notification()
+
         self._notify_update()
+
+    def _check_pre_completion_notification(self) -> None:
+        """Check and send pre-completion notification."""
+        if (
+            self._notify_before_end_minutes > 0
+            and not self._notified_pre_completion
+            and self._time_remaining is not None
+            and self._time_remaining <= (self._notify_before_end_minutes * 60)
+            and self._cycle_progress < 100
+        ):
+            # Send notification!
+            self._notified_pre_completion = True
+            msg = f"{self.config_entry.title}: Less than {self._notify_before_end_minutes} minutes remaining."
+            self._send_notification(msg)
+            _LOGGER.info(f"Sent pre-completion notification: {msg}")
 
     def _update_remaining_only(self) -> None:
         """Recompute remaining/progress using phase-aware estimation."""
@@ -1517,6 +1572,50 @@ class WashDataManager:
     @property
     def samples_recorded(self):
         return len(self.detector._power_readings)
+
+    @property
+    def manual_program_active(self) -> bool:
+        return getattr(self, "_manual_program_active", False)
+
+    def set_manual_program(self, profile_name: str) -> None:
+        """Manually set the current program."""
+        if self.detector.state != "running":
+            # Can we set it before start? Maybe, but usually makes sense during run
+            # For now allow it only during run or just label it? 
+            # Let's allow setting it, it will be "detecting..." initially but we force it.
+            pass
+        
+        if profile_name not in self.profile_store._data.get("profiles", {}):
+            _LOGGER.warning(f"Cannot set manual program: '{profile_name}' not found")
+            return
+            
+        self._current_program = profile_name
+        self._manual_program_active = True
+        
+        # Update expected duration immediately
+        profile = self.profile_store._data["profiles"][profile_name]
+        avg = float(profile.get("avg_duration", 0))
+        self._matched_profile_duration = avg if avg > 0 else None
+        
+        # Force estimate update
+        self._update_remaining_only()
+        self._notify_update()
+        _LOGGER.info(f"Manual program set to '{profile_name}'")
+
+    def clear_manual_program(self) -> None:
+        """Clear manual program override."""
+        if not self._manual_program_active:
+            return
+        
+        self._manual_program_active = False
+        # If running, revert to detecting so auto-detection can resume?
+        if self.detector.state == "running":
+            self._current_program = "detecting..."
+            self._matched_profile_duration = None
+            self._update_estimates()  # Trigger immediate re-detection attempt
+        
+        self._notify_update()
+        _LOGGER.info("Manual program cleared, reverting to auto-detection")
 
     async def _auto_merge_recent_cycles(self) -> None:
         """Automatically merge fragmented cycles from the last 3 hours."""

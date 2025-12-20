@@ -28,7 +28,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SWITCH]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SWITCH, Platform.SELECT]
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate config entry to the latest version while preserving settings."""
@@ -144,6 +144,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             else:
                 await manager.profile_store.assign_profile_to_cycle(cycle_id, None)
             
+            manager._notify_update()
+            
         hass.services.async_register(DOMAIN, "label_cycle", handle_label_cycle)
 
     # Register create_profile service
@@ -164,6 +166,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 
             manager = hass.data[DOMAIN][entry_id]
             await manager.profile_store.create_profile_standalone(profile_name, reference_cycle_id)
+            manager._notify_update()
             
         hass.services.async_register(DOMAIN, "create_profile", handle_create_profile)
 
@@ -185,6 +188,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 
             manager = hass.data[DOMAIN][entry_id]
             await manager.profile_store.delete_profile(profile_name, unlabel_cycles)
+            manager._notify_update()
             
         hass.services.async_register(DOMAIN, "delete_profile", handle_delete_profile)
 
@@ -205,6 +209,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 
             manager = hass.data[DOMAIN][entry_id]
             stats = await manager.profile_store.auto_label_unlabeled_cycles(confidence_threshold)
+            manager._notify_update()
             
             _LOGGER.info(f"Auto-label complete: {stats['labeled']} labeled, {stats['skipped']} skipped")
             
