@@ -21,7 +21,10 @@ class CycleDetectorConfig:
     interrupted_min_seconds: int = 150
     abrupt_drop_watts: float = 500.0
     abrupt_drop_ratio: float = 0.6
+    abrupt_drop_watts: float = 500.0
+    abrupt_drop_ratio: float = 0.6
     abrupt_high_load_factor: float = 5.0
+    completion_min_seconds: int = 600
 
 
 class CycleDetector:
@@ -217,6 +220,11 @@ class CycleDetector:
         if duration < float(self._config.interrupted_min_seconds):
             return True
 
+        # Treat runs shorter than the "completion minimum" as interrupted too
+        # This catches "4 minute" cycles that finished naturally but are too short to be real
+        if duration < float(self._config.completion_min_seconds):
+            return True
+
         # If we saw an abrupt power cliff from a high load, flag as interrupted
         # Use <= to catch cycles right at the boundary
         if self._abrupt_drop and duration <= (float(self._config.interrupted_min_seconds) + 90.0):
@@ -228,6 +236,9 @@ class CycleDetector:
         """Return human-readable reason why cycle was marked as interrupted."""
         if duration < float(self._config.interrupted_min_seconds):
             return f"too short ({int(duration)}s < {self._config.interrupted_min_seconds}s min)"
+        
+        if duration < float(self._config.completion_min_seconds):
+            return f"too short for completion ({int(duration)}s < {self._config.completion_min_seconds}s)"
         
         if self._abrupt_drop:
             return f"abrupt power drop detected (duration={int(duration)}s, threshold={self._config.interrupted_min_seconds + 90}s)"

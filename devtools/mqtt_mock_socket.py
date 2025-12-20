@@ -152,7 +152,7 @@ def publish_discovery(client: mqtt.Client, retain: bool = True) -> None:
     client.publish(AVAIL_TOPIC, "online", retain=True)
 
 
-def generate_cycle_data(sample_real: int, speedup: float, jitter: float, phase_key: str) -> dict:
+def generate_cycle_data(sample_real: int, speedup: float, jitter: float, phase_key: str, variability: float = 0.15) -> dict:
     """Generate cycle power data and return as dict without publishing."""
     base_phases = PHASESETS.get(phase_key.replace("_DROPOUT", "").replace("_GLITCH", "").replace("_STUCK", "").replace("_INCOMPLETE", ""), PHASESETS["LONG"])
     is_dropout = "_DROPOUT" in phase_key
@@ -160,8 +160,8 @@ def generate_cycle_data(sample_real: int, speedup: float, jitter: float, phase_k
     is_stuck = "_STUCK" in phase_key
     is_incomplete = "_INCOMPLETE" in phase_key
     
-    # Apply ±15% random variance to cycle duration
-    variance_factor = random.uniform(0.85, 1.15)
+    # Apply random variance to cycle duration
+    variance_factor = random.uniform(1.0 - variability, 1.0 + variability)
     phases = [(int(duration * variance_factor), power) for duration, power in base_phases]
     
     # Log variance info
@@ -217,10 +217,10 @@ def generate_cycle_data(sample_real: int, speedup: float, jitter: float, phase_k
     }
 
 
-def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter: float, stop_event: threading.Event, phase_key: str) -> None:
+def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter: float, stop_event: threading.Event, phase_key: str, variability: float = 0.15) -> None:
     """Run a compressed washer cycle, emitting power readings.
     
-    Adds realistic variance to cycle duration (±15%) to simulate real washing machines
+    Adds random variance to cycle duration to simulate real washing machines
     where actual duration depends on load size, water temperature, soil level, etc.
     """
     base_phases = PHASESETS.get(phase_key.replace("_DROPOUT", "").replace("_GLITCH", "").replace("_STUCK", "").replace("_INCOMPLETE", ""), PHASESETS["LONG"])
@@ -229,8 +229,8 @@ def simulate_cycle(client: mqtt.Client, sample_real: int, speedup: float, jitter
     is_stuck = "_STUCK" in phase_key
     is_incomplete = "_INCOMPLETE" in phase_key
     
-    # Apply ±15% random variance to cycle duration to simulate real behavior
-    variance_factor = random.uniform(0.85, 1.15)
+    # Apply random variance to cycle duration to simulate real behavior
+    variance_factor = random.uniform(1.0 - variability, 1.0 + variability)
     phases = [(int(duration * variance_factor), power) for duration, power in base_phases]
     
     # Log variance info
@@ -346,6 +346,7 @@ File output (no MQTT needed):
     parser.add_argument("--interval", type=int, default=110, help="Minutes between cycle starts in continuous mode (default: 110)")
     parser.add_argument("--quick", action="store_true", help="Run cycles back-to-back with minimal delay (sets interval to 0.5 minutes)")
     parser.add_argument("--cycle-sequence", default="LONG,MEDIUM,SHORT", help="Comma-separated list of cycle types to cycle through (default: LONG,MEDIUM,SHORT)")
+    parser.add_argument("--variability", type=float, default=0.15, help="Random variance factor for cycle duration (e.g., 0.1 means ±10%%). Use 0 for exact durations.")
     args = parser.parse_args()
 
     # FILE OUTPUT MODE (no MQTT needed)
@@ -399,7 +400,7 @@ File output (no MQTT needed):
             cycle_type = cycles[cycle_idx % len(cycles)]
             sample_real, speedup = compute_timing_for_cycle(cycle_type)
             
-            cycle_data = generate_cycle_data(sample_real, speedup, args.jitter, cycle_type)
+            cycle_data = generate_cycle_data(sample_real, speedup, args.jitter, cycle_type, args.variability)
             power_readings = cycle_data["power_readings"]
             duration_seconds = len(power_readings) * cycle_data["sample_interval"]
             cycle_durations.append(duration_seconds)
@@ -556,7 +557,7 @@ File output (no MQTT needed):
     def run_cycle_thread(mclient: mqtt.Client, cycle_type: str):
         stop_event.clear()
         sample_real_eff, speedup_eff = compute_timing_for_cycle(cycle_type)
-        simulate_cycle(mclient, sample_real=sample_real_eff, speedup=speedup_eff, jitter=args.jitter, stop_event=stop_event, phase_key=cycle_type)
+        simulate_cycle(mclient, sample_real=sample_real_eff, speedup=speedup_eff, jitter=args.jitter, stop_event=stop_event, phase_key=cycle_type, variability=args.variability)
         with running_lock:
             running["flag"] = False
         mclient.publish(STATE_TOPIC, "OFF", retain=True)
@@ -595,7 +596,7 @@ File output (no MQTT needed):
         logger.info(f"Walltime override: {args.wall} min (target ~{args.target_sleep}s/publish)")
         logger.info(f"Effective (for {args.default}): speedup ~{eff_speed:.2f}x, sample ~{eff_sample}s")
     else:
-        logger.info(f"Configured: Speedup: {args.speedup}x, Sample: {args.sample}s, Jitter: ±{args.jitter}W")
+        logger.info(f"Configured: Speedup: {args.speedup}x, Sample: {args.sample}s, Jitter: ±{args.jitter}W, Variability: ±{args.variability*100:.1f}%")
     
     if args.num_cycles:
         logger.info(f"BATCH MODE: Generating {args.num_cycles} cycles")
@@ -639,7 +640,7 @@ File output (no MQTT needed):
                     
                     client.publish(STATE_TOPIC, cycle_type, retain=True)
                     sample_real_eff, speedup_eff = compute_timing_for_cycle(cycle_type)
-                    simulate_cycle(client, sample_real=sample_real_eff, speedup=speedup_eff, jitter=args.jitter, stop_event=stop_event, phase_key=cycle_type)
+                    simulate_cycle(client, sample_real=sample_real_eff, speedup=speedup_eff, jitter=args.jitter, stop_event=stop_event, phase_key=cycle_type, variability=args.variability)
                     
                     with running_lock:
                         running["flag"] = False

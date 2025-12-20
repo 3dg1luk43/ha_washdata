@@ -31,6 +31,9 @@ CONF_MAX_FULL_TRACES_PER_PROFILE = "max_full_traces_per_profile"
 CONF_MAX_FULL_TRACES_UNLABELED = "max_full_traces_unlabeled"
 CONF_WATCHDOG_INTERVAL = "watchdog_interval"
 CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"
+CONF_COMPLETION_MIN_SECONDS = "completion_min_seconds"
+CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
+CONF_APPLY_SUGGESTIONS = "apply_suggestions"
 
 NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
@@ -53,6 +56,8 @@ DEFAULT_LEARNING_CONFIDENCE = 0.5  # Minimum confidence to request user verifica
 DEFAULT_DURATION_TOLERANCE = 0.10  # Allow ±10% duration variance before flagging
 DEFAULT_AUTO_LABEL_CONFIDENCE = 0.95  # High confidence auto-label threshold
 DEFAULT_AUTO_MAINTENANCE = True  # Enable nightly cleanup by default
+DEFAULT_COMPLETION_MIN_SECONDS = 600  # 10 minutes
+DEFAULT_NOTIFY_BEFORE_END_MINUTES = 0  # Disabled
 DEFAULT_PROFILE_MATCH_INTERVAL = 300  # Seconds between profile matching attempts (5 minutes)
 DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.30  # Minimum duration ratio (30% of profile)
 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.50  # Maximum duration ratio (150% of profile)
@@ -82,6 +87,9 @@ STORAGE_KEY = "ha_washdata"
 # Notification events
 EVENT_CYCLE_STARTED = "ha_washdata_cycle_started"
 EVENT_CYCLE_ENDED = "ha_washdata_cycle_ended"
+
+# Signals
+SIGNAL_WASHER_UPDATE = "ha_washdata_update_{}"
 
 # Learning & Feedback
 # (Deprecated constants, kept for backward compat in code paths)

@@ -300,9 +300,21 @@ class ProfileStore:
             if len(full_indices) > cap:
                 # preserve last 'cap' full traces (newest at end after sort), strip older ones
                 keep_set = set(full_indices[-cap:])
+                
+                # Get sample cycle ID for this profile
+                sample_id = None
+                if key and key in self._data.get("profiles", {}):
+                    sample_id = self._data["profiles"][key].get("sample_cycle_id")
+
                 for i, c in enumerate(group):
                     if i in keep_set:
                         continue
+                    
+                    # EXEMPTION: Never strip power data from the profile's sample cycle!
+                    if sample_id and c.get("id") == sample_id:
+                        continue
+
+
                     if c.get("power_data"):
                         c.pop("power_data", None)
                         c.pop("sampling_interval", None)
@@ -443,6 +455,22 @@ class ProfileStore:
         # Create uniform time grid from 0 to target_duration
         num_points = max(50, int(target_duration / np.median(sampling_rates)))  # ~50-300 points
         time_grid = np.linspace(0, target_duration, num_points)
+        
+        # Calculate duration stats (min/max/avg)
+        durations = [len(offsets) * (sampling_rates[i] if i < len(sampling_rates) else avg_sample_rate) 
+                     for i, (offsets, _) in enumerate(normalized_curves)]
+        # Better: use the actual max offset from each curve as duration
+        durations = [offsets[-1] for offsets, _ in normalized_curves]
+        
+        min_duration = float(np.min(durations))
+        max_duration = float(np.max(durations))
+        
+        # Update profile stats in storage
+        if profile_name in self._data.get("profiles", {}):
+            self._data["profiles"][profile_name]["min_duration"] = min_duration
+            self._data["profiles"][profile_name]["max_duration"] = max_duration
+            # avg_duration is usually updated elsewhere but let's ensure it's consistent
+            # self._data["profiles"][profile_name]["avg_duration"] = float(np.mean(durations))
         
         resampled = []
         for offsets, values in normalized_curves:
@@ -626,6 +654,8 @@ class ProfileStore:
             profiles.append({
                 "name": name,
                 "avg_duration": data.get("avg_duration", 0),
+                "min_duration": data.get("min_duration", 0),
+                "max_duration": data.get("max_duration", 0),
                 "sample_cycle_id": data.get("sample_cycle_id"),
                 "cycle_count": cycle_count,
             })
@@ -656,12 +686,18 @@ class ProfileStore:
         Returns number of cycles updated."""
         if old_name not in self._data.get("profiles", {}):
             raise ValueError(f"Profile '{old_name}' not found")
+        if new_name == old_name:
+            return 0
         if new_name in self._data.get("profiles", {}):
             raise ValueError(f"Profile '{new_name}' already exists")
         
         # Rename in profiles dict
         self._data["profiles"][new_name] = self._data["profiles"].pop(old_name)
         
+        # Rename corresponding envelope if it exists
+        if "envelopes" in self._data and old_name in self._data["envelopes"]:
+            self._data["envelopes"][new_name] = self._data["envelopes"].pop(old_name)
+
         # Update all cycles
         count = 0
         for cycle in self._data.get("past_cycles", []):

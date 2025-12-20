@@ -1,6 +1,6 @@
 # HA WashData Implementation Guide
 
-**Updated:** December 17, 2025 - Final (All features complete)
+**Updated:** December 20, 2025 - Final Refinements (UI & Profile Logic)
 
 ## Overview
 
@@ -8,9 +8,11 @@ This document covers the complete implementation of all major features:
 1. Variable cycle duration support (±15%)
 2. Smart progress management (100% on complete, 0% after unload)
 3. Self-learning feedback system
-4. Export/Import with full settings transfer (NEW Dec 17)
-5. Auto-maintenance watchdog with switch control (NEW Dec 17)
-6. Improved stale cycle detection with power awareness (NEW Dec 17)
+4. Export/Import with full settings transfer
+5. Auto-maintenance watchdog with switch control
+6. Improved stale cycle detection with power awareness
+7. NumPy-powered Shape Correlation Matching (NEW Dec 20)
+8. Ghost Cycle Prevention & Pre-completion Notifications (NEW Dec 20)
 
 ---
 
@@ -37,15 +39,15 @@ This document covers the complete implementation of all major features:
 - Better real-world detection accuracy, fewer false negatives
 
 **Files Modified:**
-- `devtools/mqtt_mock_socket.py` - Added variance simulation
-- `custom_components/ha_washdata/profile_store.py` - Updated duration tolerance
+- `devtools/mqtt_mock_socket.py` - Added `--variability` argument for realistic duration variance.
+- `custom_components/ha_washdata/profile_store.py` - Updated duration tolerance and matching logic.
 
-**How It Works:**
+**How It Works (Duration Filter):**
 ```python
-# Profile matching logic
+# Profile matching logic (Initial Filter)
 duration_ratio = actual_duration / expected_duration
-# Accepts if: 0.75 <= duration_ratio <= 1.25 (±25%)
-# Rejects if: <0.75 or >1.25
+# Accepts if within range (default: 0.75 - 1.25)
+# This prevents comparing apples to oranges (e.g. 30min vs 2h cycles)
 ```
 
 **Testing:**
@@ -407,49 +409,23 @@ Check current power state from sensor
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Data Flow During Cycle
-
-```
-Power Reading (MQTT)
-    ↓
-Manager._async_power_changed()
-    ↓
-CycleDetector.process_reading()
-    ├─ Update smoothed power (last 5 readings)
-    ├─ Check OFF→RUNNING threshold
-    └─ Check RUNNING→OFF threshold
-    ↓
-Manager._on_state_change()
-    ├─ Emit EVENT_CYCLE_STARTED
-    ├─ Reset progress to 0%
-    └─ Start watchdog timer
-    ↓
-[Every 2 seconds]
-    └─ Update entities via dispatcher
-    ↓
-[Every 5 minutes - if RUNNING]
-    └─ Manager._update_estimates()
-        ├─ ProfileStore.match_profile()
-        ├─ Set program name
-        ├─ Calculate time remaining
-        └─ Update confidence score
-    ↓
-Off Detection (smoothed power < threshold for off_delay seconds)
-    ↓
-Manager._on_cycle_end()
-    ├─ Progress → 100%
-    ├─ Start 5-min reset timer
-    ├─ Manager._maybe_request_feedback()
-    │  ├─ Check if confidence > threshold
-    │  ├─ Emit EVENT_FEEDBACK_REQUESTED
-    │  └─ Learning.request_cycle_verification()
-    ├─ ProfileStore.merge_cycles()
-    └─ Emit EVENT_CYCLE_ENDED
-    ↓
-[After 5 minutes idle OR new cycle]
+### [After 5 minutes idle OR new cycle]
     ├─ If new cycle: Cancel reset
     └─ If idle 5min: Progress → 0%
 ```
+
+### Profile Matching Architecture (NumPy)
+
+Matches are performed using three weighted metrics to ensure robustness against noise and sampling gaps:
+
+1. **Mean Absolute Error (40%)**: Compares the average wattage difference (normalized to 50W penalty).
+2. **Correlation Coefficient (40%)**: Measures how closely the *shape* (slopes, plateaus) matches the profile. Clamped to 0.0-1.0.
+3. **Peak Power Similarity (20%)**: Ensures the heating elements and motor surges reach expected levels.
+
+**Final Score Calculation:**
+`Score = (0.4 * MAE_Score) + (0.4 * Correlation_Score) + (0.2 * Peak_Score)`
+
+Matches are accepted if the final score exceeds the `learning_confidence` threshold (default: 0.75).
 
 ---
 
@@ -599,13 +575,15 @@ Configure via Home Assistant UI:
 
 | Option | Default | Notes |
 |--------|---------|-------|
-| `smoothing_window` | 5 | Moving-average window for power smoothing |
-| `no_update_active_timeout` | e.g., 600s | For publish-on-change sockets; only force-end an active cycle after this inactivity window |
-| `profile_duration_tolerance` | ±25% | Duration tolerance used by `ProfileStore.match_profile()` |
-| `auto_merge_lookback_hours` | 3 | Post-process merging window after cycle end |
-| `auto_merge_gap_seconds` | 1800 | Max gap to merge fragmented runs |
-| `interrupted_min_seconds` | 150 | Minimum runtime below which a run may be flagged as interrupted |
-| `abrupt_drop_watts` / `abrupt_drop_ratio` | impl. defaults | Heuristics for abrupt power cliff detection |
+| `smoothing_window` | 5 | Moving-average window for power smoothing. |
+| `completion_min_seconds` | 600 | **Ghost Cycle Prevention**: Minimum active time required to record a cycle. |
+| `notify_before_end_minutes` | 0 | **Pre-completion Notification**: Minutes before finish to trigger alert. |
+| `no_update_active_timeout` | e.g., 600s | For publish-on-change sockets; only force-end an active cycle after this inactivity window. |
+| `profile_duration_tolerance` | ±25% | Duration tolerance used by `ProfileStore.match_profile()`. |
+| `auto_merge_lookback_hours` | 3 | Post-process merging window after cycle end. |
+| `auto_merge_gap_seconds` | 1800 | Max gap to merge fragmented runs. |
+| `interrupted_min_seconds` | 150 | Minimum runtime below which a run may be flagged as interrupted. |
+| `abrupt_drop_watts` / `abrupt_drop_ratio` | impl. defaults | Heuristics for abrupt power cliff detection. |
 
 ### Watchdog & Publish-on-Change Devices
 
