@@ -14,7 +14,7 @@ from .manager import WashDataManager
 
 _LOGGER = logging.getLogger(__name__)
 
-OPTION_AUTO = "Auto-Detect"
+OPTION_AUTO = "auto_detect"
 
 async def async_setup_entry(
     hass: HomeAssistant,

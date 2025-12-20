@@ -220,7 +220,7 @@
       "program_select": {
         "name": "Cycle Program",
         "state": {
-          "Auto-Detect": "Auto-Detect"
+          "auto_detect": "Auto-Detect"
         }
       }
     }
