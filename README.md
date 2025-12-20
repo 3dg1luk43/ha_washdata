@@ -65,6 +65,57 @@ Manual fallback (if not using HACS): copy `custom_components/ha_washdata` into y
 - ✗ **interrupted**: Abnormal endings (e.g., abrupt power drop without completion window).
 - ⚠ **resumed**: Active cycle restored after a Home Assistant restart.
 
+## Screenshots
+
+<details>
+  <summary><b>Controls</b></summary>
+
+  ![Controls](img/integration-controls.png)
+
+  **Controls** exposes runtime toggles and quick actions:
+  - **Auto Maintenance** switch to enable/disable nightly cleanup.
+  - **Cycle Program** selector for manual override when Auto-Detect is uncertain.
+</details>
+
+<details>
+  <summary><b>Sensors card</b></summary>
+
+  ![Sensors](img/integration-sensors.png)
+
+  **Sensors** shows the live state the integration publishes:
+  - Current power (W), detected/selected program, progress (%), running flag, state, and estimated time remaining.
+</details>
+
+<details>
+  <summary><b>Settings</b></summary>
+
+  ![Settings](img/integration-settings.png)
+
+  **Settings** is the main tuning surface:
+  - Suggested values derived from learning (not applied automatically).
+  - **apply_suggestions** populates the form with recommended parameters.
+  - Thresholds/timers, notification service selection, and notification toggles.
+</details>
+
+<details>
+  <summary><b>Manage Data &amp; Profiles</b></summary>
+
+  ![Manage Data & Profiles](img/integration-profiles.png)
+
+  **Manage Data & Profiles** is the operational UI for history and labeling:
+  - Recent cycles with duration and label.
+  - Create/edit/delete profiles, label a cycle, auto-label old cycles, delete a cycle.
+</details>
+
+<details>
+  <summary><b>Diagnostics &amp; Maintenance</b></summary>
+
+  ![Diagnostics & Maintenance](img/integration-diagnostics.png)
+
+  **Diagnostics & Maintenance** provides one-shot maintenance operations:
+  - Merge fragmented cycles, migrate/compress stored data, wipe device data, export/import JSON.
+</details>
+
 ## Entities
 
 - **`binary_sensor.<name>_running`**: ON when washer is running.
