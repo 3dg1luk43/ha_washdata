@@ -1,6 +1,6 @@
 # HA WashData Implementation Guide
 
-**Updated:** December 20, 2025 - Final Refinements (UI & Profile Logic)
+Note: Despite the name, HA WashData also works well for other appliances (e.g., dryers and dishwashers) as long as the power-draw cycle is reasonably predictable.
 
 ## Overview
 

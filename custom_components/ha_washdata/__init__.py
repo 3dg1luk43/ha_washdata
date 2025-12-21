@@ -252,7 +252,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register feedback service
     if not hass.services.has_service(DOMAIN, SERVICE_SUBMIT_FEEDBACK.split(".")[-1]):
         async def handle_submit_feedback(call: ServiceCall) -> None:
-            entry_id = _require_str(call.data.get("entry_id"), "entry_id")
+            entry_id_raw = call.data.get("entry_id")
+            device_id_raw = call.data.get("device_id")
+
+            entry_id: str | None = entry_id_raw if isinstance(entry_id_raw, str) and entry_id_raw else None
+            if entry_id is None:
+                # Prefer device_id for user-facing workflows.
+                device_id = _require_str(device_id_raw, "device_id")
+                registry = dr.async_get(hass)
+                device = registry.async_get(device_id)
+                if not device:
+                    raise ValueError("Device not found")
+                entry_id = next(iter(device.config_entries), None)
+                if not entry_id:
+                    raise ValueError("No config entry found for device")
+
+            if not entry_id:
+                raise ValueError("entry_id or device_id is required")
+
             cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
             user_confirmed = call.data.get("user_confirmed", False)
             corrected_profile = call.data.get("corrected_profile")

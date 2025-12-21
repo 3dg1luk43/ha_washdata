@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import inspect
 from datetime import datetime, timedelta
 from typing import Any, cast
 
@@ -105,7 +106,9 @@ def _pn_create(
         pn = getattr(cast(Any, components), "persistent_notification", None)
         if pn is None:
             return
-        pn.async_create(message, title=title, notification_id=notification_id)
+        result = pn.async_create(message, title=title, notification_id=notification_id)
+        if inspect.iscoroutine(result):
+            hass.async_create_task(result)
     except Exception:
         return
 
@@ -1779,7 +1782,8 @@ class WashDataManager:
                 f"Confidence: {confidence:.2f}\n"
                 f"Cycle ID: {cycle_id}\n\n"
                 f"Confirm/correct using service `{DOMAIN}.submit_cycle_feedback` with:\n"
-                f"- entry_id: {self.entry_id}\n"
+                f"- device_id: <this device> (recommended)\n"
+                f"  or entry_id: {self.entry_id}\n"
                 f"- cycle_id: {cycle_id}\n"
                 f"- user_confirmed: true\n"
                 f"Optionally set `corrected_profile` (profile name) or `corrected_duration` (seconds)."

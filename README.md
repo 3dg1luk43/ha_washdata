@@ -8,6 +8,8 @@
 
 A Home Assistant custom component to monitor washing machines via smart sockets, learn power profiles, and estimate completion time using shape-correlation matching.
 
+Although designed for washing machines, it also works well for dryers and dishwashers that have reasonably predictable power-draw cycles.
+
 ## ✨ Features
 
 - **Cycle Detection**: Automatically detects when the washer starts and finishes based on power draw.

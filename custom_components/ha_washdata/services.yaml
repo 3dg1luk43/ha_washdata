@@ -128,3 +128,57 @@ import_config:
       required: true
       selector:
         text:
+
+submit_cycle_feedback:
+  name: Submit Cycle Feedback
+  description: >
+    Confirm or correct an auto-detected program after a completed cycle.
+    Provide either `entry_id` (advanced) or `device_id` (recommended).
+  fields:
+    device_id:
+      name: Device
+      description: The HA WashData device (recommended instead of entry_id).
+      required: false
+      selector:
+        device:
+          integration: ha_washdata
+    entry_id:
+      name: Entry ID
+      description: The config entry id for the device (alternative to device_id).
+      required: false
+      selector:
+        text:
+    cycle_id:
+      name: Cycle ID
+      description: The cycle id shown in the feedback notification / logs.
+      required: true
+      selector:
+        text:
+    user_confirmed:
+      name: Confirm Detected Program
+      description: Set true if the detected program is correct.
+      required: true
+      selector:
+        boolean:
+    corrected_profile:
+      name: Corrected Profile
+      description: If not confirmed, provide the correct profile/program name.
+      required: false
+      selector:
+        text:
+    corrected_duration:
+      name: Corrected Duration (seconds)
+      description: Optional corrected duration in seconds.
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 86400
+          step: 1
+          mode: box
+    notes:
+      name: Notes
+      description: Optional notes about this cycle.
+      required: false
+      selector:
+        text:

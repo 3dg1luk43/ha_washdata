@@ -1,7 +1,7 @@
 # HA WashData – AI Working Notes (Updated Dec 20, 2025)
 
 ## Status: ✅ COMPLETE - Refined & Polished
-- Purpose: Home Assistant custom integration that watches a smart plug's power to detect washer cycles, store traces, and expose HA entities.
+- Purpose: Home Assistant custom integration that watches a smart plug's power to detect appliance cycles (washers; also suitable for dryers/dishwashers with predictable cycles), store traces, and expose HA entities.
 - Recent Phase: UI Refinement, NumPy-powered matching, and reactive synchronization.
 
 ## Recent Updates (Dec 20, 2025)
