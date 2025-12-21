@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta
+from typing import Any, cast
 
 import numpy as np
 
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, State, callback
 from homeassistant.helpers.event import async_track_state_change_event, async_track_time_interval
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
 from homeassistant.util import dt as dt_util
@@ -51,7 +52,6 @@ from .const import (
     EVENT_CYCLE_STARTED,
     EVENT_CYCLE_ENDED,
     FEEDBACK_REQUEST_EVENT,
-    SERVICE_SUBMIT_FEEDBACK,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -87,10 +87,32 @@ from .profile_store import ProfileStore
 
 _LOGGER = logging.getLogger(__name__)
 
+
+def _pn_create(
+    hass: HomeAssistant,
+    message: str,
+    *,
+    title: str | None = None,
+    notification_id: str | None = None,
+) -> None:
+    """Best-effort persistent notification creation.
+
+    Tests stub out the entire `homeassistant` module, so we can't import
+    `homeassistant.components.persistent_notification` here.
+    """
+    try:
+        components = getattr(cast(Any, hass), "components", None)
+        pn = getattr(cast(Any, components), "persistent_notification", None)
+        if pn is None:
+            return
+        pn.async_create(message, title=title, notification_id=notification_id)
+    except Exception:
+        return
+
 class WashDataManager:
     """Manages a single washing machine instance."""
 
-    def __init__(self, hass: HomeAssistant, config_entry) -> None:
+    def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         """Initialize the manager."""
         self.hass = hass
         self.config_entry = config_entry
@@ -197,11 +219,12 @@ class WashDataManager:
         await self.profile_store.async_load()
         # Apply configurable duration tolerance to profile store
         try:
-            self.profile_store._duration_tolerance = self._profile_duration_tolerance
-            # Apply retention caps from options
-            self.profile_store._max_past_cycles = int(self.config_entry.options.get(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES))
-            self.profile_store._max_full_traces_per_profile = int(self.config_entry.options.get(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE))
-            self.profile_store._max_full_traces_unlabeled = int(self.config_entry.options.get(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED))
+            self.profile_store.set_duration_tolerance(self._profile_duration_tolerance)
+            self.profile_store.set_retention_limits(
+                max_past_cycles=int(self.config_entry.options.get(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES)),
+                max_full_traces_per_profile=int(self.config_entry.options.get(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE)),
+                max_full_traces_unlabeled=int(self.config_entry.options.get(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED)),
+            )
         except Exception:
             pass
 
@@ -246,13 +269,13 @@ class WashDataManager:
         self.config_entry = config_entry
         
         # Update detector config in-place (for running cycle to use new settings immediately)
-        old_min_power = self.detector._config.min_power
-        old_off_delay = self.detector._config.off_delay
-        old_smoothing = self.detector._config.smoothing_window
-        old_interrupted_min = self.detector._config.interrupted_min_seconds
-        old_abrupt_drop_watts = self.detector._config.abrupt_drop_watts
-        old_abrupt_drop_ratio = self.detector._config.abrupt_drop_ratio
-        old_abrupt_high_load = self.detector._config.abrupt_high_load_factor
+        old_min_power = self.detector.config.min_power
+        old_off_delay = self.detector.config.off_delay
+        old_smoothing = self.detector.config.smoothing_window
+        old_interrupted_min = self.detector.config.interrupted_min_seconds
+        old_abrupt_drop_watts = self.detector.config.abrupt_drop_watts
+        old_abrupt_drop_ratio = self.detector.config.abrupt_drop_ratio
+        old_abrupt_high_load = self.detector.config.abrupt_high_load_factor
         
         # Get new values from config
         new_min_power = float(
@@ -281,14 +304,14 @@ class WashDataManager:
         )
         
         # Apply all detector config updates
-        self.detector._config.min_power = new_min_power
-        self.detector._config.off_delay = new_off_delay
-        self.detector._config.smoothing_window = new_smoothing
-        self.detector._config.interrupted_min_seconds = new_interrupted_min
-        self.detector._config.abrupt_drop_watts = new_abrupt_drop_watts
-        self.detector._config.abrupt_drop_ratio = new_abrupt_drop_ratio
-        self.detector._config.abrupt_high_load_factor = new_abrupt_high_load
-        self.detector._config.completion_min_seconds = new_completion_min
+        self.detector.config.min_power = new_min_power
+        self.detector.config.off_delay = new_off_delay
+        self.detector.config.smoothing_window = new_smoothing
+        self.detector.config.interrupted_min_seconds = new_interrupted_min
+        self.detector.config.abrupt_drop_watts = new_abrupt_drop_watts
+        self.detector.config.abrupt_drop_ratio = new_abrupt_drop_ratio
+        self.detector.config.abrupt_high_load_factor = new_abrupt_high_load
+        self.detector.config.completion_min_seconds = new_completion_min
         
         if (old_min_power != new_min_power or old_off_delay != new_off_delay or
             old_smoothing != new_smoothing or old_interrupted_min != new_interrupted_min or
@@ -305,8 +328,7 @@ class WashDataManager:
             )
         
         # Update profile matching parameters
-        old_min_ratio = self.profile_store._min_duration_ratio
-        old_max_ratio = self.profile_store._max_duration_ratio
+        old_min_ratio, old_max_ratio = self.profile_store.get_duration_ratio_limits()
         
         new_min_ratio = float(
             config_entry.options.get(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
@@ -316,8 +338,7 @@ class WashDataManager:
         )
         
         if old_min_ratio != new_min_ratio or old_max_ratio != new_max_ratio:
-            self.profile_store._min_duration_ratio = new_min_ratio
-            self.profile_store._max_duration_ratio = new_max_ratio
+            self.profile_store.set_duration_ratio_limits(min_ratio=new_min_ratio, max_ratio=new_max_ratio)
             _LOGGER.info(
                 "Updated duration ratios: min %.2f→%.2f, max %.2f→%.2f",
                 old_min_ratio, new_min_ratio, old_max_ratio, new_max_ratio
@@ -376,9 +397,8 @@ class WashDataManager:
                 # Check if the saved state is recent (within last 30 minutes)
                 # If older, it's likely stale from a code update or restart
                 try:
-                    last_save_str = self.profile_store._data.get("last_active_save")
-                    if last_save_str:
-                        last_save = datetime.fromisoformat(last_save_str)
+                    last_save = self.profile_store.get_last_active_save()
+                    if last_save:
                         time_since_save = (datetime.now() - last_save).total_seconds()
                         # Only restore if saved within last 10 minutes
                         if time_since_save < 600:
@@ -438,8 +458,7 @@ class WashDataManager:
         next_midnight = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
         
         # Schedule first run at midnight
-        @callback
-        async def run_maintenance(_now=None):
+        async def run_maintenance(_now: datetime | None = None) -> None:
             """Run maintenance task."""
             _LOGGER.info("Running scheduled maintenance")
             try:
@@ -459,8 +478,8 @@ class WashDataManager:
         _LOGGER.info(f"Scheduled maintenance at {next_midnight}")
         
         # Also schedule daily repeat after first run
-        async def maintenance_wrapper(_now):
-            await run_maintenance()
+        async def maintenance_wrapper(_now: datetime) -> None:
+            await run_maintenance(_now)
             # Reschedule for next day
             next_run = dt_util.now() + timedelta(days=1)
             next_run = next_run.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -473,9 +492,10 @@ class WashDataManager:
         )
 
     @callback
-    def _async_power_changed(self, event) -> None:
+    def _async_power_changed(self, event: Any) -> None:
         """Handle power sensor state change."""
-        new_state = event.data.get("new_state")
+        event_data = cast(dict[str, Any], getattr(event, "data", {}))
+        new_state = cast(State | None, event_data.get("new_state"))
         if new_state is None or new_state.state in (STATE_UNKNOWN, STATE_UNAVAILABLE):
             return
         
@@ -512,7 +532,7 @@ class WashDataManager:
     def _run_final_profile_match(self) -> None:
         """Run one final profile match after cycle completion if no profile was detected."""
         # Check if we have a completed cycle in storage
-        past_cycles = self.profile_store._data.get("past_cycles", [])
+        past_cycles = self.profile_store.get_past_cycles()
         if not past_cycles:
             _LOGGER.debug("No past cycles to match against")
             return
@@ -534,7 +554,10 @@ class WashDataManager:
             return
         
         # Convert compressed data to time-series format for matching
-        start_time = dt_util.parse_datetime(latest_cycle.get("start_time"))
+        start_time_raw = latest_cycle.get("start_time")
+        if not isinstance(start_time_raw, str):
+            return
+        start_time = dt_util.parse_datetime(start_time_raw)
         if not start_time:
             return
         
@@ -713,7 +736,7 @@ class WashDataManager:
             
         self._notify_update()
 
-    def _on_cycle_end(self, cycle_data: dict) -> None:
+    def _on_cycle_end(self, cycle_data: dict[str, Any]) -> None:
         """Handle cycle end - clear all active timers and state."""
         duration = cycle_data["duration"]
         max_power = cycle_data.get("max_power", 0)
@@ -734,19 +757,31 @@ class WashDataManager:
         if (
             self._current_program
             and self._current_program not in ("off", "detecting...", "restored...")
-            and self._current_program in self.profile_store._data.get("profiles", {})
+            and self._current_program in self.profile_store.get_profiles()
         ):
             cycle_data["profile_name"] = self._current_program
 
-        # Precompute a stable cycle ID so feedback/auto-label can reference it immediately
+        # Add cycle to store immediately so it has an ID and can be referenced by
+        # feedback/auto-label logic synchronously.
         try:
-            import hashlib
-            unique_str = f"{cycle_data['start_time']}_{cycle_data['duration']}"
-            cycle_data["id"] = hashlib.sha256(unique_str.encode()).hexdigest()[:12]
+            self.profile_store.add_cycle(cycle_data)
+            profile_name = cycle_data.get("profile_name")
+            if profile_name:
+                self.profile_store.rebuild_envelope(profile_name)
+            self.hass.async_create_task(self.profile_store.async_save())
         except Exception:  # noqa: BLE001
-            pass
+            _LOGGER.exception("Failed to add/save cycle")
 
-        self.hass.async_create_task(self.profile_store.async_save_cycle(cycle_data))
+        # Ensure cycle has a stable ID even if store add failed (or did not mutate).
+        if not cycle_data.get("id"):
+            try:
+                import hashlib
+
+                unique_str = f"{cycle_data['start_time']}_{cycle_data['duration']}"
+                cycle_data["id"] = hashlib.sha256(unique_str.encode()).hexdigest()[:12]
+            except Exception:  # noqa: BLE001
+                pass
+
         self.hass.async_create_task(self.profile_store.async_clear_active_cycle())
         
         # Auto post-process: merge fragmented cycles from last 3 hours
@@ -759,7 +794,10 @@ class WashDataManager:
         if NOTIFY_EVENT_FINISH in events:
              self._send_notification(f"{self.config_entry.title} finished. Duration: {int(duration/60)}m.")
         
-        # Clear all state and timers - zero everything out
+        # Request user feedback if we had a confident match.
+        # IMPORTANT: this must happen before we clear match state.
+        self._maybe_request_feedback(cycle_data)
+
         # Clear all state and timers - zero everything out
         self._current_program = "off"
         self._manual_program_active = False
@@ -769,12 +807,9 @@ class WashDataManager:
         self._last_estimate_time = None
         self._cycle_progress = 100.0  # 100% = cycle complete
         self._cycle_completed_time = dt_util.now()
-        
+
         # Start progress reset timer to go back to 0% after user unload window
         self._start_progress_reset_timer()
-        
-        # Request user feedback if we had a confident match
-        self._maybe_request_feedback(cycle_data)
         
         self._notify_update()
 
@@ -814,8 +849,9 @@ class WashDataManager:
 
     def _set_suggestion(self, key: str, value: float | int, reason: str) -> bool:
         """Persist a suggested setting value without changing HA options."""
-        current = self.profile_store.get_suggestions().get(key, {})
-        current_value = current.get("value") if isinstance(current, dict) else None
+        current_raw = self.profile_store.get_suggestions().get(key)
+        current: dict[str, Any] = cast(dict[str, Any], current_raw) if isinstance(current_raw, dict) else {}
+        current_value = current.get("value")
         # Avoid churn: only update if materially different
         if isinstance(current_value, (int, float)) and abs(float(current_value) - float(value)) < 0.01:
             return False
@@ -944,11 +980,8 @@ class WashDataManager:
         Uses ratio = duration / profile.avg_duration for labeled, non-interrupted cycles.
         Returns (min_ratio, max_ratio, sample_count) or None.
         """
-        profiles = self.profile_store._data.get("profiles") or {}
-        cycles = self.profile_store._data.get("past_cycles") or []
-
-        if not isinstance(profiles, dict) or not isinstance(cycles, list):
-            return None
+        profiles = self.profile_store.get_profiles()
+        cycles = self.profile_store.get_past_cycles()
 
         ratios: list[float] = []
         for c in cycles[-140:]:
@@ -958,7 +991,7 @@ class WashDataManager:
                     continue
                 if c.get("status") == "interrupted":
                     continue
-                profile = profiles.get(profile_name)
+                profile = profiles.get(str(profile_name))
                 if not isinstance(profile, dict):
                     continue
                 avg = float(profile.get("avg_duration") or 0)
@@ -992,13 +1025,13 @@ class WashDataManager:
         Heuristic: look for consecutive cycles with a small time gap where the first looks
         abnormal/short and the next completes normally. Returns (suggested_gap_seconds, n).
         """
-        cycles = self.profile_store._data.get("past_cycles") or []
-        if not isinstance(cycles, list) or len(cycles) < 3:
+        cycles = self.profile_store.get_past_cycles()
+        if len(cycles) < 3:
             return None
 
         # Sort by start time
         try:
-            ordered = sorted(cycles, key=lambda c: c.get("start_time", ""))
+            ordered = sorted(cycles, key=lambda c: str(c.get("start_time", "")))
         except Exception:
             ordered = list(cycles)
 
@@ -1007,8 +1040,12 @@ class WashDataManager:
 
         for prev, nxt in zip(ordered, ordered[1:]):
             try:
-                prev_end = dt_util.parse_datetime(prev.get("end_time"))
-                nxt_start = dt_util.parse_datetime(nxt.get("start_time"))
+                prev_end_raw = prev.get("end_time")
+                nxt_start_raw = nxt.get("start_time")
+                if not isinstance(prev_end_raw, str) or not isinstance(nxt_start_raw, str):
+                    continue
+                prev_end = dt_util.parse_datetime(prev_end_raw)
+                nxt_start = dt_util.parse_datetime(nxt_start_raw)
                 if not prev_end or not nxt_start:
                     continue
                 gap_s = (nxt_start - prev_end).total_seconds()
@@ -1054,17 +1091,16 @@ class WashDataManager:
 
     def _compute_auto_label_confidence_suggestion(self) -> tuple[float, str] | None:
         """Suggest auto-label confidence threshold based on feedback correction rates."""
-        history = self.profile_store._data.get("feedback_history") or {}
-        if not isinstance(history, dict) or len(history) < 10:
+        history = self.profile_store.get_feedback_history()
+        if len(history) < 10:
             return None
 
         records: list[tuple[float, bool]] = []
         for rec in history.values():
-            if not isinstance(rec, dict):
-                continue
             try:
-                conf = float(rec.get("original_confidence"))
-                confirmed = bool(rec.get("user_confirmed"))
+                conf_raw = rec.get("original_confidence")
+                conf = float(conf_raw) if conf_raw is not None else 0.0
+                confirmed = bool(rec.get("user_confirmed") is True)
             except Exception:
                 continue
             if conf <= 0 or conf > 1.0:
@@ -1111,19 +1147,21 @@ class WashDataManager:
 
         Uses current profile avg_duration as the reference. Returns None if insufficient data.
         """
-        profiles = self.profile_store._data.get("profiles") or {}
-        cycles = self.profile_store._data.get("past_cycles") or []
+        profiles = self.profile_store.get_profiles()
+        cycles = self.profile_store.get_past_cycles()
 
         errors: list[float] = []
         for c in cycles[-80:]:
             profile_name = c.get("profile_name")
             if not profile_name:
                 continue
-            profile = profiles.get(profile_name) if isinstance(profiles, dict) else None
+            profile = profiles.get(str(profile_name))
             if not isinstance(profile, dict):
                 continue
             avg = profile.get("avg_duration")
             dur = c.get("duration")
+            if avg is None or dur is None:
+                continue
             try:
                 avg_f = float(avg)
                 dur_f = float(dur)
@@ -1141,8 +1179,9 @@ class WashDataManager:
     def _get_observed_sample_interval(self, default: float = 5.0) -> float:
         """Return median observed sample interval, or a default if unknown."""
         stats = self._sample_interval_stats
-        if stats.get("median"):
-            return max(0.5, float(stats["median"]))
+        median = stats.get("median")
+        if isinstance(median, (int, float)):
+            return max(0.5, float(median))
         return default
 
     def _get_effective_match_interval(self) -> float:
@@ -1188,9 +1227,7 @@ class WashDataManager:
             # User only selects events if they want them.
             # But if no service is selected, where do they go?
             # Let's assume persistent for now if they enabled the event but no service.
-            self.hass.components.persistent_notification.async_create(
-                message, title=f"HA WashData: {self.config_entry.title}"
-            )
+            _pn_create(self.hass, message, title=f"HA WashData: {self.config_entry.title}")
 
     def _handle_noise_cycle(self, max_power: float) -> None:
         """Handle a detected noise cycle."""
@@ -1209,7 +1246,7 @@ class WashDataManager:
 
     async def _tune_threshold(self) -> None:
         """Increase the minimum power threshold."""
-        current_min = self.detector._config.min_power
+        current_min = self.detector.config.min_power
         
         # Calculate new suggested threshold
         # Max of observed noise * 1.2 safety factor
@@ -1255,10 +1292,7 @@ class WashDataManager:
                 self.hass.services.async_call(domain, service, {"message": message})
             )
         else:
-            self.hass.components.persistent_notification.async_create(
-                message,
-                title="HA WashData Auto-Tune"
-            )
+            _pn_create(self.hass, message, title="HA WashData Auto-Tune")
         
         # Reset trackers
         self._noise_events = []
@@ -1312,7 +1346,7 @@ class WashDataManager:
                 # First match or no previous match
                 self._current_program = profile_name
                 self._last_match_confidence = confidence  # Store for later feedback
-                profile = self.profile_store._data["profiles"].get(profile_name, {})
+                profile = self.profile_store.get_profiles().get(profile_name, {})
                 avg_duration = float(profile.get("avg_duration", 0.0))
                 self._matched_profile_duration = avg_duration if avg_duration > 0 else None
                 _LOGGER.info(f"Matched profile '{profile_name}' with expected duration {avg_duration:.0f}s ({int(avg_duration/60)}min)")
@@ -1455,7 +1489,6 @@ class WashDataManager:
         
         # Get current window (last N seconds of data)
         window_mask = current_offsets >= window_start_time
-        current_window_offsets = current_offsets[window_mask]
         current_window_values = current_values[window_mask]
         
         if len(current_window_values) < 3:
@@ -1465,11 +1498,11 @@ class WashDataManager:
         best_progress = None
         best_score = -1.0
         in_bounds = False
+        best_time_window_start: float | None = None
         
         # Search through envelope TIME grid for best matching position
         for i in range(len(time_grid) - 1):
             time_window_start = time_grid[i]
-            time_window_end = time_grid[min(i + 1, len(time_grid) - 1)]
             
             # Get envelope values for this time window
             envelope_window_start = i
@@ -1532,6 +1565,7 @@ class WashDataManager:
                     best_score = score
                     best_progress = (time_window_start / target_duration) * 100.0
                     in_bounds = within_bounds
+                    best_time_window_start = float(time_window_start)
             except:
                 continue
         
@@ -1547,16 +1581,17 @@ class WashDataManager:
         avg_sample_rates = envelope.get("sampling_rates", [1.0])
         avg_sample_rate = np.median(avg_sample_rates) if avg_sample_rates else 1.0
         
+        tws = best_time_window_start if best_time_window_start is not None else float(current_duration)
         if not in_bounds:
             _LOGGER.debug(
                 f"Phase detection: progress={best_progress:.1f}%, "
-                f"score={best_score:.3f}, time={time_window_start:.0f}/{target_duration:.0f}s "
+                f"score={best_score:.3f}, time={tws:.0f}/{target_duration:.0f}s "
                 f"[OUT OF BOUNDS, {cycle_count} cycles, avg_sample_rate={avg_sample_rate:.1f}s]"
             )
         else:
             _LOGGER.debug(
                 f"Phase detection: progress={best_progress:.1f}%, "
-                f"score={best_score:.3f}, time={time_window_start:.0f}/{target_duration:.0f}s "
+                f"score={best_score:.3f}, time={tws:.0f}/{target_duration:.0f}s "
                 f"[IN BOUNDS, {cycle_count} cycles, avg_sample_rate={avg_sample_rate:.1f}s]"
             )
         
@@ -1588,7 +1623,7 @@ class WashDataManager:
 
     @property
     def samples_recorded(self):
-        return len(self.detector._power_readings)
+        return len(self.detector.get_power_trace())
 
     @property
     def manual_program_active(self) -> bool:
@@ -1602,7 +1637,19 @@ class WashDataManager:
             # Let's allow setting it, it will be "detecting..." initially but we force it.
             pass
         
-        if profile_name not in self.profile_store._data.get("profiles", {}):
+        profiles_raw: Any = None
+        try:
+            profiles_raw = self.profile_store.get_profiles()
+        except Exception:
+            profiles_raw = None
+
+        if isinstance(profiles_raw, dict):
+            profiles: dict[str, Any] = cast(dict[str, Any], profiles_raw)
+        else:
+            profiles_fallback = getattr(self.profile_store, "_data", {}).get("profiles", {})
+            profiles = cast(dict[str, Any], profiles_fallback) if isinstance(profiles_fallback, dict) else {}
+
+        if profile_name not in profiles:
             _LOGGER.warning(f"Cannot set manual program: '{profile_name}' not found")
             return
             
@@ -1610,8 +1657,17 @@ class WashDataManager:
         self._manual_program_active = True
         
         # Update expected duration immediately
-        profile = self.profile_store._data["profiles"][profile_name]
-        avg = float(profile.get("avg_duration", 0))
+        profile = profiles.get(profile_name)
+        if not isinstance(profile, dict):
+            _LOGGER.warning(f"Cannot set manual program: '{profile_name}' profile is invalid")
+            return
+
+        profile_dict = cast(dict[str, Any], profile)
+        avg_raw = profile_dict.get("avg_duration")
+        try:
+            avg = float(avg_raw) if avg_raw is not None else 0.0
+        except (TypeError, ValueError):
+            avg = 0.0
         self._matched_profile_duration = avg if avg > 0 else None
         
         # Force estimate update
@@ -1644,7 +1700,7 @@ class WashDataManager:
         except Exception as e:
             _LOGGER.error(f"Auto-merge failed: {e}")
 
-    def _maybe_request_feedback(self, cycle_data: dict) -> None:
+    def _maybe_request_feedback(self, cycle_data: dict[str, Any]) -> None:
         """Request user feedback if we made a confident match, or auto-label if very high confidence."""
         if not self._matched_profile_duration or not self._current_program or self._current_program in ("off", "detecting..."):
             # No match was made, don't request feedback
@@ -1712,3 +1768,22 @@ class WashDataManager:
                 "actual_duration": int(actual_duration / 60),
             },
         )
+
+        # Also create a user-visible prompt. Without this, feedback requests are easy
+        # to miss unless the user has automations listening for the event.
+        try:
+            notification_id = f"ha_washdata_feedback_{self.entry_id}_{cycle_id}"
+            title = f"HA WashData: Verify cycle ({self.config_entry.title})"
+            message = (
+                f"Detected program: {self._current_program}\n"
+                f"Confidence: {confidence:.2f}\n"
+                f"Cycle ID: {cycle_id}\n\n"
+                f"Confirm/correct using service `{DOMAIN}.submit_cycle_feedback` with:\n"
+                f"- entry_id: {self.entry_id}\n"
+                f"- cycle_id: {cycle_id}\n"
+                f"- user_confirmed: true\n"
+                f"Optionally set `corrected_profile` (profile name) or `corrected_duration` (seconds)."
+            )
+            _pn_create(self.hass, message, title=title, notification_id=notification_id)
+        except Exception:  # noqa: BLE001
+            _LOGGER.exception("Failed to create feedback notification")

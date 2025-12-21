@@ -1,19 +1,16 @@
 """Profile storage and matching logic for HA WashData."""
 from __future__ import annotations
 
-import json
 import logging
-import os
 import hashlib
 from datetime import datetime
-from typing import Any
+from typing import Any, TypeAlias, cast
 import numpy as np
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
 from .const import (
-    DOMAIN,
     STORAGE_KEY,
     STORAGE_VERSION,
     DEFAULT_MAX_PAST_CYCLES,
@@ -22,6 +19,9 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+JSONDict: TypeAlias = dict[str, Any]
+CycleDict: TypeAlias = dict[str, Any]
 
 class ProfileStore:
     """Manages storage of washer profiles and past cycles."""
@@ -38,13 +38,15 @@ class ProfileStore:
         self.entry_id = entry_id
         self._min_duration_ratio = min_duration_ratio
         self._max_duration_ratio = max_duration_ratio
+        # Profile duration tolerance (set by manager; reserved for duration-based heuristics)
+        self._duration_tolerance: float = 0.25
         # Retention policy: cap total cycles and number of full-resolution traces per profile
         self._max_past_cycles = DEFAULT_MAX_PAST_CYCLES
         self._max_full_traces_per_profile = DEFAULT_MAX_FULL_TRACES_PER_PROFILE
         self._max_full_traces_unlabeled = DEFAULT_MAX_FULL_TRACES_UNLABELED
         # Separate store for each entry to avoid giant files
-        self._store = Store(hass, STORAGE_VERSION, f"{STORAGE_KEY}.{entry_id}")
-        self._data: dict[str, Any] = {
+        self._store: Store[JSONDict] = Store(hass, STORAGE_VERSION, f"{STORAGE_KEY}.{entry_id}")
+        self._data: JSONDict = {
             "profiles": {},
             "past_cycles": [],
             "envelopes": {},  # Cached statistical envelopes per profile
@@ -56,7 +58,7 @@ class ProfileStore:
 
     def set_suggestion(self, key: str, value: Any, reason: str | None = None) -> None:
         """Store a suggested setting value without changing config entry options."""
-        suggestions: dict[str, Any] = self._data.setdefault("suggestions", {})
+        suggestions: JSONDict = self._data.setdefault("suggestions", {})
         suggestions[key] = {
             "value": value,
             "reason": reason,
@@ -65,10 +67,73 @@ class ProfileStore:
 
     def get_suggestions(self) -> dict[str, Any]:
         """Return current suggestion map."""
-        raw = self._data.get("suggestions") or {}
+        raw = self._data.get("suggestions")
         if isinstance(raw, dict):
-            return dict(raw)
+            suggestions = cast(JSONDict, raw)
+            return suggestions.copy()
         return {}
+
+    def get_feedback_history(self) -> dict[str, dict[str, Any]]:
+        """Return mutable feedback history mapping (cycle_id -> record)."""
+        raw = self._data.setdefault("feedback_history", {})
+        if isinstance(raw, dict):
+            return cast(dict[str, dict[str, Any]], raw)
+        return {}
+
+    def get_pending_feedback(self) -> dict[str, dict[str, Any]]:
+        """Return mutable pending feedback mapping (cycle_id -> request)."""
+        raw = self._data.setdefault("pending_feedback", {})
+        if isinstance(raw, dict):
+            return cast(dict[str, dict[str, Any]], raw)
+        return {}
+
+    def get_profiles(self) -> dict[str, JSONDict]:
+        """Return mutable profiles mapping (profile_name -> profile data)."""
+        raw = self._data.setdefault("profiles", {})
+        if isinstance(raw, dict):
+            return cast(dict[str, JSONDict], raw)
+        return {}
+
+    def get_past_cycles(self) -> list[CycleDict]:
+        """Return mutable list of stored cycles."""
+        raw = self._data.setdefault("past_cycles", [])
+        if isinstance(raw, list):
+            return cast(list[CycleDict], raw)
+        return []
+
+    def set_duration_tolerance(self, tolerance: float) -> None:
+        """Set the profile duration tolerance used by matching heuristics."""
+        try:
+            self._duration_tolerance = float(tolerance)
+        except (TypeError, ValueError):
+            return
+
+    def set_retention_limits(
+        self,
+        *,
+        max_past_cycles: int,
+        max_full_traces_per_profile: int,
+        max_full_traces_unlabeled: int,
+    ) -> None:
+        """Set retention caps for stored cycles and full-resolution traces."""
+        try:
+            self._max_past_cycles = int(max_past_cycles)
+            self._max_full_traces_per_profile = int(max_full_traces_per_profile)
+            self._max_full_traces_unlabeled = int(max_full_traces_unlabeled)
+        except (TypeError, ValueError):
+            return
+
+    def get_duration_ratio_limits(self) -> tuple[float, float]:
+        """Return (min_duration_ratio, max_duration_ratio) used for duration matching."""
+        return (float(self._min_duration_ratio), float(self._max_duration_ratio))
+
+    def set_duration_ratio_limits(self, *, min_ratio: float, max_ratio: float) -> None:
+        """Update duration ratio bounds used for duration matching."""
+        try:
+            self._min_duration_ratio = float(min_ratio)
+            self._max_duration_ratio = float(max_ratio)
+        except (TypeError, ValueError):
+            return
 
     async def async_load(self) -> None:
         """Load data from storage."""
@@ -157,7 +222,7 @@ class ProfileStore:
         """Save data to storage."""
         await self._store.async_save(self._data)
 
-    async def async_save_active_cycle(self, detector_snapshot: dict) -> None:
+    async def async_save_active_cycle(self, detector_snapshot: JSONDict) -> None:
         """Save the active cycle state separately (or in main data)."""
         # We can store it in the main store, but we need to ensure we don't wear out flash
         # if this is called often.
@@ -168,9 +233,22 @@ class ProfileStore:
         self._data["last_active_save"] = datetime.now().isoformat()
         await self._store.async_save(self._data)
         
-    def get_active_cycle(self) -> dict | None:
+    def get_active_cycle(self) -> JSONDict | None:
         """Get the saved active cycle."""
-        return self._data.get("active_cycle")
+        raw = self._data.get("active_cycle")
+        if isinstance(raw, dict):
+            return cast(JSONDict, raw)
+        return None
+
+    def get_last_active_save(self) -> datetime | None:
+        """Return the last time the active cycle snapshot was persisted."""
+        raw = self._data.get("last_active_save")
+        if not isinstance(raw, str) or not raw:
+            return None
+        try:
+            return datetime.fromisoformat(raw)
+        except ValueError:
+            return None
     
     def clear_active_cycle(self) -> None:
         """Clear active cycle data."""
@@ -189,7 +267,7 @@ class ProfileStore:
             del self._data["active_cycle"]
             await self._store.async_save(self._data)
 
-    def add_cycle(self, cycle_data: dict[str, Any]) -> None:
+    def add_cycle(self, cycle_data: CycleDict) -> None:
         """Add a completed cycle to history."""
         # Generate SHA256 ID
         unique_str = f"{cycle_data['start_time']}_{cycle_data['duration']}"
@@ -202,23 +280,38 @@ class ProfileStore:
         # Store power data at native sampling resolution
         # Format: [seconds_offset, power] preserves actual sample rate from device
         # (e.g., 3s intervals from test socket, 60s intervals from real socket)
-        raw_data = cycle_data.get("power_data", [])
+        raw_data: list[Any] = cycle_data.get("power_data", []) or []
         _LOGGER.debug(f"add_cycle: raw_data has {len(raw_data)} points")
         
         if raw_data:
             start_ts = datetime.fromisoformat(cycle_data["start_time"]).timestamp()
-            stored = []
-            offsets = []
-            
-            # Helper to parse time
-            def get_ts(item):
-                if isinstance(item[0], str):
-                    return datetime.fromisoformat(item[0]).timestamp()
-                return float(item[0])
+            stored: list[list[float]] = []
+            offsets: list[float] = []
 
             for point in raw_data:
-                t_val = get_ts(point)
-                p_val = point[1]
+                if not isinstance(point, (list, tuple)):
+                    continue
+                point_any = cast(list[Any] | tuple[Any, ...], point)
+                try:
+                    ts_raw = point_any[0]
+                    p_raw = point_any[1]
+                except IndexError:
+                    continue
+
+                if isinstance(ts_raw, str):
+                    try:
+                        t_val = datetime.fromisoformat(ts_raw).timestamp()
+                    except ValueError:
+                        continue
+                elif isinstance(ts_raw, (int, float)):
+                    t_val = float(ts_raw)
+                else:
+                    continue
+
+                try:
+                    p_val = float(p_raw)
+                except (TypeError, ValueError):
+                    continue
                 
                 # Store as [offset_seconds, power] for consistency
                 offset = round(t_val - start_ts, 1)
@@ -250,15 +343,19 @@ class ProfileStore:
         - Keep a reasonable number of unlabeled full traces to allow auto-labeling
         - Update envelopes for affected profiles
         """
-        cycles = self._data.get("past_cycles", [])
+        raw_cycles = self._data.get("past_cycles", [])
+        cycles: list[CycleDict] = cast(list[CycleDict], raw_cycles) if isinstance(raw_cycles, list) else []
         if not cycles:
             return
+
+        def _start_time(cycle: CycleDict) -> str:
+            return str(cycle.get("start_time", ""))
 
         # 1) Cap total cycles
         if len(cycles) > self._max_past_cycles:
             # Sort by start_time and drop oldest beyond cap
             try:
-                cycles.sort(key=lambda c: c.get("start_time", ""))
+                cycles.sort(key=_start_time)
             except Exception:
                 pass
             drop_count = len(cycles) - self._max_past_cycles
@@ -281,16 +378,17 @@ class ProfileStore:
             del cycles[:drop_count]
 
         # 2) Strip older full traces per profile
-        by_profile: dict[Any, list[dict]] = {}
+        by_profile: dict[str | None, list[CycleDict]] = {}
         for cy in cycles:
-            key = cy.get("profile_name")  # None for unlabeled
+            key_any = cy.get("profile_name")  # None for unlabeled
+            key: str | None = key_any if isinstance(key_any, str) and key_any else None
             by_profile.setdefault(key, []).append(cy)
 
         affected_profiles: set[str] = set()
         for key, group in by_profile.items():
             # newest first based on start_time
             try:
-                group.sort(key=lambda c: c.get("start_time", ""))
+                group.sort(key=_start_time)
             except Exception:
                 pass
             # determine cap
@@ -302,7 +400,7 @@ class ProfileStore:
                 keep_set = set(full_indices[-cap:])
                 
                 # Get sample cycle ID for this profile
-                sample_id = None
+                sample_id: str | None = None
                 if key and key in self._data.get("profiles", {}):
                     sample_id = self._data["profiles"][key].get("sample_cycle_id")
 
@@ -419,17 +517,34 @@ class ProfileStore:
             return False
         
         # Extract and normalize all power curves
-        normalized_curves = []
-        sampling_rates = []
+        normalized_curves: list[tuple[np.ndarray, np.ndarray]] = []
+        sampling_rates: list[float] = []
         
         for cycle in labeled_cycles:
-            power_data = cycle.get("power_data", [])
-            if not power_data or len(power_data) < 3:
+            power_data_raw = cycle.get("power_data", [])
+            if not isinstance(power_data_raw, list):
+                continue
+
+            power_data_items: list[Any] = cast(list[Any], power_data_raw)
+            if len(power_data_items) < 3:
                 continue
             
             # Extract power values from [offset, power] pairs
-            offsets = np.array([o for o, _ in power_data])
-            values = np.array([p for _, p in power_data])
+            pairs: list[tuple[float, float]] = []
+            for item in power_data_items:
+                if not isinstance(item, (list, tuple)):
+                    continue
+                try:
+                    a, b = cast(tuple[Any, Any], item)
+                except (TypeError, ValueError):
+                    continue
+                if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+                    pairs.append((float(a), float(b)))
+            if len(pairs) < 3:
+                continue
+
+            offsets = np.array([o for o, _ in pairs], dtype=float)
+            values = np.array([p for _, p in pairs], dtype=float)
             
             if len(values) >= 3:
                 # Use TIME as x-axis, not sample index
@@ -448,19 +563,17 @@ class ProfileStore:
             return False
         
         # Find common time range (0 to max_time_duration)
-        max_times = [offsets[-1] for offsets, _ in normalized_curves]
-        target_duration = np.median(max_times)  # Use median duration
+        max_times: list[float] = [float(offsets[-1]) for offsets, _ in normalized_curves]
+        target_duration = float(np.median(max_times))  # Use median duration
         
         # Resample all curves to same TIME axis
         # Create uniform time grid from 0 to target_duration
-        num_points = max(50, int(target_duration / np.median(sampling_rates)))  # ~50-300 points
-        time_grid = np.linspace(0, target_duration, num_points)
-        
-        # Calculate duration stats (min/max/avg)
-        durations = [len(offsets) * (sampling_rates[i] if i < len(sampling_rates) else avg_sample_rate) 
-                     for i, (offsets, _) in enumerate(normalized_curves)]
-        # Better: use the actual max offset from each curve as duration
-        durations = [offsets[-1] for offsets, _ in normalized_curves]
+        avg_sample_rate = float(np.median(sampling_rates)) if sampling_rates else 1.0
+        num_points = max(50, int(target_duration / avg_sample_rate))  # ~50-300 points
+        time_grid = np.linspace(0.0, target_duration, num_points)
+
+        # Use the actual max offset from each curve as duration
+        durations: list[float] = [float(offsets[-1]) for offsets, _ in normalized_curves]
         
         min_duration = float(np.min(durations))
         max_duration = float(np.max(durations))
@@ -472,7 +585,7 @@ class ProfileStore:
             # avg_duration is usually updated elsewhere but let's ensure it's consistent
             # self._data["profiles"][profile_name]["avg_duration"] = float(np.mean(durations))
         
-        resampled = []
+        resampled: list[np.ndarray] = []
         for offsets, values in normalized_curves:
             # Interpolate this cycle to the common time grid
             curve_resampled = np.interp(time_grid, offsets, values)
@@ -481,7 +594,7 @@ class ProfileStore:
         # Stack into 2D array and calculate statistics
         curves_array = np.array(resampled)
         
-        envelope = {
+        envelope: JSONDict = {
             "min": np.min(curves_array, axis=0).tolist(),
             "max": np.max(curves_array, axis=0).tolist(),
             "avg": np.mean(curves_array, axis=0).tolist(),
@@ -498,7 +611,6 @@ class ProfileStore:
             self._data["envelopes"] = {}
         self._data["envelopes"][profile_name] = envelope
         
-        avg_sample_rate = np.median(sampling_rates) if sampling_rates else 1.0
         _LOGGER.debug(
             f"Rebuilt envelope for '{profile_name}': {len(resampled)} cycles, "
             f"duration={target_duration:.0f}s, avg_sample_rate={avg_sample_rate:.1f}s, "
@@ -507,9 +619,14 @@ class ProfileStore:
         
         return True
 
-    def get_envelope(self, profile_name: str) -> dict | None:
+    def get_envelope(self, profile_name: str) -> JSONDict | None:
         """Get cached envelope for a profile, or None if not available."""
-        return self._data.get("envelopes", {}).get(profile_name)
+        envelopes = self._data.get("envelopes", {})
+        if isinstance(envelopes, dict):
+            envelopes_map = cast(dict[str, Any], envelopes)
+            env = envelopes_map.get(profile_name)
+            return cast(JSONDict, env) if isinstance(env, dict) else None
+        return None
 
     def match_profile(self, current_power_data: list[tuple[str, float]], current_duration: float) -> tuple[str | None, float]:
         """
@@ -647,27 +764,30 @@ class ProfileStore:
 
     def list_profiles(self) -> list[dict[str, Any]]:
         """List all profiles with metadata."""
-        profiles = []
-        for name, data in self._data.get("profiles", {}).items():
+        profiles: list[JSONDict] = []
+        raw_profiles = self._data.get("profiles", {})
+        profiles_map = cast(dict[str, Any], raw_profiles) if isinstance(raw_profiles, dict) else {}
+        for name, data in profiles_map.items():
+            profile_meta = cast(JSONDict, data) if isinstance(data, dict) else {}
             # Count cycles using this profile
             cycle_count = sum(1 for c in self._data.get("past_cycles", []) if c.get("profile_name") == name)
             profiles.append({
                 "name": name,
-                "avg_duration": data.get("avg_duration", 0),
-                "min_duration": data.get("min_duration", 0),
-                "max_duration": data.get("max_duration", 0),
-                "sample_cycle_id": data.get("sample_cycle_id"),
+                "avg_duration": profile_meta.get("avg_duration", 0),
+                "min_duration": profile_meta.get("min_duration", 0),
+                "max_duration": profile_meta.get("max_duration", 0),
+                "sample_cycle_id": profile_meta.get("sample_cycle_id"),
                 "cycle_count": cycle_count,
             })
-        return sorted(profiles, key=lambda p: p["name"])
+        return sorted(profiles, key=lambda p: str(p.get("name", "")))
 
-    async def create_profile_standalone(self, name: str, reference_cycle_id: str = None) -> None:
+    async def create_profile_standalone(self, name: str, reference_cycle_id: str | None = None) -> None:
         """Create a profile without immediately labeling a cycle.
         If reference_cycle_id is provided, use that cycle's characteristics."""
         if name in self._data.get("profiles", {}):
             raise ValueError(f"Profile '{name}' already exists")
         
-        profile_data = {}
+        profile_data: JSONDict = {}
         if reference_cycle_id:
             cycle = next((c for c in self._data["past_cycles"] if c["id"] == reference_cycle_id), None)
             if cycle:
@@ -733,7 +853,7 @@ class ProfileStore:
         _LOGGER.info(f"Deleted profile '{name}', {action} {count} cycles")
         return count
 
-    async def assign_profile_to_cycle(self, cycle_id: str, profile_name: str) -> None:
+    async def assign_profile_to_cycle(self, cycle_id: str, profile_name: str | None) -> None:
         """Assign an existing profile to a cycle. Rebuilds envelope."""
         old_profile = None
         cycle = next((c for c in self._data["past_cycles"] if c["id"] == cycle_id), None)
@@ -798,20 +918,27 @@ class ProfileStore:
         _LOGGER.info(f"Auto-labeling complete: {stats['labeled']} labeled, {stats['skipped']} skipped")
         return stats
 
-    def _decompress_power_data(self, cycle: dict) -> list[tuple[str, float]]:
+    def _decompress_power_data(self, cycle: CycleDict) -> list[tuple[str, float]]:
         """Decompress cycle power data for matching."""
-        compressed = cycle.get("power_data", [])
-        if not compressed:
+        compressed_raw = cycle.get("power_data", [])
+        if not isinstance(compressed_raw, list) or not compressed_raw:
             return []
+
+        compressed: list[Any] = cast(list[Any], compressed_raw)
         
         start_time = datetime.fromisoformat(cycle["start_time"])
-        result = []
+        result: list[tuple[str, float]] = []
         
         for item in compressed:
-            if isinstance(item, (list, tuple)) and len(item) == 2:
-                offset_seconds, power = item
-                timestamp = (start_time.timestamp() + offset_seconds)
-                result.append((datetime.fromtimestamp(timestamp).isoformat(), power))
+            if not isinstance(item, (list, tuple)):
+                continue
+            try:
+                offset_seconds, power = cast(tuple[Any, Any], item)
+            except (TypeError, ValueError):
+                continue
+            if isinstance(offset_seconds, (int, float)) and isinstance(power, (int, float)):
+                timestamp = start_time.timestamp() + float(offset_seconds)
+                result.append((datetime.fromtimestamp(timestamp).isoformat(), float(power)))
         
         return result
 
@@ -832,11 +959,12 @@ class ProfileStore:
         Ensures all cycles use [offset_seconds, power] format.
         Returns number of cycles migrated.
         """
-        cycles = self._data.get("past_cycles", [])
+        raw_cycles = self._data.get("past_cycles", [])
+        cycles: list[CycleDict] = cast(list[CycleDict], raw_cycles) if isinstance(raw_cycles, list) else []
         migrated = 0
         
         for cycle in cycles:
-            raw_data = cycle.get("power_data", [])
+            raw_data: list[Any] = cycle.get("power_data", []) or []
             if not raw_data:
                 continue
             
@@ -849,7 +977,7 @@ class ProfileStore:
             # Old format: ISO timestamp strings. Convert to compressed offsets.
             try:
                 start_ts = datetime.fromisoformat(cycle["start_time"]).timestamp()
-                compressed = []
+                compressed: list[list[float]] = []
                 
                 last_saved_p = -999.0
                 last_saved_t = -999.0
@@ -861,7 +989,7 @@ class ProfileStore:
                     else:
                         t_val = float(point[0])
                     
-                    p_val = point[1]
+                    p_val = float(point[1])
                     offset = round(t_val - start_ts, 1)
                     
                     # Save first and last
@@ -894,12 +1022,12 @@ class ProfileStore:
         # Use timezone-aware now to match stored timestamps
         from homeassistant.util import dt as dt_util
         limit = dt_util.now().timestamp() - (hours * 3600)
-        cycles = self._data["past_cycles"]
+        cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
         if not cycles:
             return 0
         
         # Sort by start time just in case
-        cycles.sort(key=lambda x: x["start_time"])
+        cycles.sort(key=lambda c: str(c.get("start_time", "")))
         
         merged_count = 0
         i = 0
@@ -995,7 +1123,7 @@ class ProfileStore:
 
     def log_adjustment(self, setting_name: str, old_value: Any, new_value: Any, reason: str) -> None:
         """Log an automatic setting adjustment (auto-tune, auto-label changes)."""
-        adjustment = {
+        adjustment: JSONDict = {
             "timestamp": datetime.now().isoformat(),
             "setting": setting_name,
             "old_value": old_value,
@@ -1008,7 +1136,7 @@ class ProfileStore:
             self._data["auto_adjustments"] = self._data["auto_adjustments"][-50:]
         _LOGGER.info(f"Auto-adjustment: {setting_name} changed from {old_value} to {new_value} ({reason})")
 
-    def export_data(self, entry_data: dict = None, entry_options: dict = None) -> dict[str, Any]:
+    def export_data(self, entry_data: JSONDict | None = None, entry_options: JSONDict | None = None) -> JSONDict:
         """Return a serializable snapshot of the store for backup/export.
         Includes config entry data/options so users can transfer fine-tuned settings."""
         return {
@@ -1020,25 +1148,26 @@ class ProfileStore:
             "entry_options": entry_options or {},
         }
 
-    async def async_import_data(self, payload: dict[str, Any]) -> dict[str, dict]:
+    async def async_import_data(self, payload: JSONDict) -> dict[str, JSONDict]:
         """Load store data from an export payload and persist it.
         Returns dict with 'entry_data' and 'entry_options' keys for updating the config entry."""
-        if not isinstance(payload, dict):
-            raise ValueError("Invalid export payload (not a dict)")
-
         data = payload.get("data")
         if not isinstance(data, dict):
             raise ValueError("Invalid export payload (missing data)")
 
-        # Basic shape repair to avoid key errors
-        data.setdefault("profiles", {})
-        data.setdefault("past_cycles", [])
+        data_dict = cast(JSONDict, data)
 
-        self._data = data
+        # Basic shape repair to avoid key errors
+        data_dict.setdefault("profiles", {})
+        data_dict.setdefault("past_cycles", [])
+
+        self._data = data_dict
         await self.async_save()
         
         # Return config data/options for caller to apply
+        entry_data = payload.get("entry_data", {})
+        entry_options = payload.get("entry_options", {})
         return {
-            "entry_data": payload.get("entry_data", {}),
-            "entry_options": payload.get("entry_options", {}),
+            "entry_data": cast(JSONDict, entry_data) if isinstance(entry_data, dict) else {},
+            "entry_options": cast(JSONDict, entry_options) if isinstance(entry_options, dict) else {},
         }

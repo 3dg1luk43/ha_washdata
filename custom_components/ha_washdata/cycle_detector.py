@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Callable
+from typing import Any, Callable, cast
 
 from homeassistant.util import dt as dt_util
 
-from .const import STATE_OFF, STATE_RUNNING, STATE_IDLE
+from .const import STATE_OFF, STATE_RUNNING
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,8 +19,6 @@ class CycleDetectorConfig:
     off_delay: int
     smoothing_window: int = 5
     interrupted_min_seconds: int = 150
-    abrupt_drop_watts: float = 500.0
-    abrupt_drop_ratio: float = 0.6
     abrupt_drop_watts: float = 500.0
     abrupt_drop_ratio: float = 0.6
     abrupt_high_load_factor: float = 5.0
@@ -34,7 +32,7 @@ class CycleDetector:
         self,
         config: CycleDetectorConfig,
         on_state_change: Callable[[str, str], None],
-        on_cycle_end: Callable[[dict], None],
+        on_cycle_end: Callable[[dict[str, Any]], None],
     ) -> None:
         """Initialize the cycle detector."""
         self._config = config
@@ -56,6 +54,11 @@ class CycleDetector:
     def state(self) -> str:
         """Return current state."""
         return self._state
+
+    @property
+    def config(self) -> CycleDetectorConfig:
+        """Return current configuration."""
+        return self._config
 
     def process_reading(self, power: float, timestamp: datetime) -> None:
         """Process a new power reading."""
@@ -177,7 +180,7 @@ class CycleDetector:
             _LOGGER.info(f"Cycle marked as interrupted: {reason}")
             status = "interrupted"
         
-        cycle_data = {
+        cycle_data: dict[str, Any] = {
             "start_time": self._current_cycle_start.isoformat(),
             "end_time": self._last_active_time.isoformat(),
             "duration": duration,
@@ -264,7 +267,7 @@ class CycleDetector:
         if not self._low_power_start:
             return 0.0
         return (now - self._low_power_start).total_seconds()
-    def get_state_snapshot(self) -> dict:
+    def get_state_snapshot(self) -> dict[str, Any]:
         """Return a snapshot of current state."""
         return {
             "state": self._state,
@@ -276,7 +279,7 @@ class CycleDetector:
             "ma_buffer": getattr(self, "_ma_buffer", []),
         }
 
-    def restore_state_snapshot(self, snapshot: dict) -> None:
+    def restore_state_snapshot(self, snapshot: dict[str, Any]) -> None:
         """Restore state from snapshot."""
         try:
             self._state = snapshot.get("state", STATE_OFF)
@@ -309,11 +312,23 @@ class CycleDetector:
             
             readings = snapshot.get("power_readings", [])
             self._power_readings = []
-            for t, p in readings:
-                parsed = dt_util.parse_datetime(t)
-                if parsed:
-                    # Ensure timezone-aware
-                    self._power_readings.append((dt_util.as_local(parsed), p))
+            if isinstance(readings, list):
+                for item in cast(list[Any], readings):
+                    if not isinstance(item, (list, tuple)):
+                        continue
+                    try:
+                        t, p = cast(tuple[Any, Any], item)
+                    except (TypeError, ValueError):
+                        continue
+                    if not isinstance(t, str):
+                        continue
+                    parsed = dt_util.parse_datetime(t)
+                    if parsed:
+                        # Ensure timezone-aware
+                        try:
+                            self._power_readings.append((dt_util.as_local(parsed), float(p)))
+                        except (TypeError, ValueError):
+                            continue
             
             # Restore buffer if present, else rebuild from last few readings? 
             # Or just start empty? If we start empty, average is 0 -> isActive False.

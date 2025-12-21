@@ -9,10 +9,8 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
-from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
-import homeassistant.helpers.config_validation as cv
 
 from .const import (
     DOMAIN,
@@ -42,7 +40,6 @@ from .const import (
     CONF_MAX_PAST_CYCLES,
     CONF_MAX_FULL_TRACES_PER_PROFILE,
     CONF_MAX_FULL_TRACES_UNLABELED,
-    CONF_WATCHDOG_INTERVAL,
     CONF_WATCHDOG_INTERVAL,
     CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     CONF_COMPLETION_MIN_SECONDS,
@@ -129,7 +126,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         options.setdefault(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES)
         options.setdefault(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE)
         options.setdefault(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED)
-        options.setdefault(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
         options.setdefault(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
         options.setdefault(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD)
         options.setdefault(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS)

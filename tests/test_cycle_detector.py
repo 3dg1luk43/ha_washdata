@@ -1,6 +1,6 @@
 """Unit tests for CycleDetector."""
 from datetime import datetime, timedelta
-from unittest.mock import Mock, call
+from unittest.mock import Mock
 import pytest
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
 from custom_components.ha_washdata.const import STATE_OFF, STATE_RUNNING

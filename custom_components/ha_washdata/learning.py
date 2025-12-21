@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
+if TYPE_CHECKING:
+    from .profile_store import ProfileStore
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -15,7 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 class LearningManager:
     """Manages cycle learning, user feedback, and auto-tuning."""
 
-    def __init__(self, hass: HomeAssistant, entry_id: str, profile_store) -> None:
+    def __init__(self, hass: HomeAssistant, entry_id: str, profile_store: "ProfileStore") -> None:
         """Initialize the learning manager."""
         self.hass = hass
         self.entry_id = entry_id
@@ -23,20 +25,9 @@ class LearningManager:
 
         # Feedback history: track user confirmations and corrections.
         # Persist these into ProfileStore so restarts don't lose learning context.
-        raw_history = getattr(self.profile_store, "_data", {}).get("feedback_history")
-        raw_pending = getattr(self.profile_store, "_data", {}).get("pending_feedback")
-
-        self._feedback_history: dict[str, dict[str, Any]] = (
-            dict(raw_history) if isinstance(raw_history, dict) else {}
-        )
-        self._pending_feedback: dict[str, dict[str, Any]] = (
-            dict(raw_pending) if isinstance(raw_pending, dict) else {}
-        )
-
-        # Ensure backing store keys exist
-        if isinstance(getattr(self.profile_store, "_data", None), dict):
-            self.profile_store._data.setdefault("feedback_history", self._feedback_history)
-            self.profile_store._data.setdefault("pending_feedback", self._pending_feedback)
+        # Mutable mappings persisted by ProfileStore
+        self._feedback_history = self.profile_store.get_feedback_history()
+        self._pending_feedback = self.profile_store.get_pending_feedback()
 
     def request_cycle_verification(
         self,
@@ -63,7 +54,7 @@ class LearningManager:
             and abs(duration_match_pct - 100) <= tolerance_pct
         )
 
-        feedback_req = {
+        feedback_req: dict[str, Any] = {
             "cycle_id": cycle_id,
             "detected_profile": detected_profile,
             "confidence": confidence,
@@ -79,15 +70,13 @@ class LearningManager:
         self._pending_feedback[cycle_id] = feedback_req
 
         # Persist pending feedback so UI/automations can survive restart
-        if isinstance(getattr(self.profile_store, "_data", None), dict):
-            self.profile_store._data.setdefault("pending_feedback", {})
-            if isinstance(self.profile_store._data["pending_feedback"], dict):
-                self.profile_store._data["pending_feedback"][cycle_id] = feedback_req
+        self.profile_store.get_pending_feedback()[cycle_id] = feedback_req
 
+        est_min = int(estimated_duration / 60) if estimated_duration else 0
         _LOGGER.info(
             f"Feedback requested for cycle {cycle_id}: "
             f"profile='{detected_profile}' (conf={confidence:.2f}), "
-            f"est={int(estimated_duration/60)}min, actual={int(actual_duration/60)}min "
+            f"est={est_min}min, actual={int(actual_duration/60)}min "
             f"({duration_match_pct:.0f}%) - is_close={is_close_match} (tolerance=±{tolerance_pct:.0f}%)"
         )
 
@@ -117,7 +106,7 @@ class LearningManager:
             _LOGGER.warning(f"No pending feedback request for cycle {cycle_id}")
             return False
 
-        feedback_record = {
+        feedback_record: dict[str, Any] = {
             "cycle_id": cycle_id,
             "original_detected_profile": pending["detected_profile"],
             "original_confidence": pending["confidence"],
@@ -131,15 +120,13 @@ class LearningManager:
         self._feedback_history[cycle_id] = feedback_record
 
         # Persist feedback record
-        if isinstance(getattr(self.profile_store, "_data", None), dict):
-            self.profile_store._data.setdefault("feedback_history", {})
-            if isinstance(self.profile_store._data["feedback_history"], dict):
-                self.profile_store._data["feedback_history"][cycle_id] = feedback_record
+        self.profile_store.get_feedback_history()[cycle_id] = feedback_record
 
         if user_confirmed:
             # User confirmed the detected profile - auto-label the cycle
-            profile_name = pending["detected_profile"]
-            self._auto_label_cycle(cycle_id, profile_name)
+            profile_name = pending.get("detected_profile")
+            if isinstance(profile_name, str) and profile_name:
+                self._auto_label_cycle(cycle_id, profile_name)
             
             _LOGGER.info(
                 f"User confirmed cycle {cycle_id}: profile='{profile_name}' "
@@ -154,18 +141,15 @@ class LearningManager:
             )
 
             # Apply correction learning and auto-label with corrected profile
-            if corrected_profile != pending["detected_profile"]:
-                self._apply_correction_learning(
-                    cycle_id, corrected_profile, corrected_duration
-                )
+            if isinstance(corrected_profile, str) and corrected_profile and corrected_profile != pending.get("detected_profile"):
+                self._apply_correction_learning(cycle_id, corrected_profile, corrected_duration)
                 self._auto_label_cycle(cycle_id, corrected_profile)
 
         # Remove from pending
         del self._pending_feedback[cycle_id]
-        if isinstance(getattr(self.profile_store, "_data", None), dict):
-            pending = self.profile_store._data.get("pending_feedback")
-            if isinstance(pending, dict) and cycle_id in pending:
-                del pending[cycle_id]
+        pending_map = self.profile_store.get_pending_feedback()
+        if cycle_id in pending_map:
+            del pending_map[cycle_id]
         return True
 
     def _apply_correction_learning(
@@ -176,7 +160,7 @@ class LearningManager:
     ) -> None:
         """Apply learning from user correction."""
         # Fetch the cycle from storage
-        cycles = self.profile_store._data.get("past_cycles", [])
+        cycles = self.profile_store.get_past_cycles()
         cycle = next((c for c in cycles if c["id"] == cycle_id), None)
 
         if not cycle:
@@ -189,7 +173,7 @@ class LearningManager:
 
         # Optionally update profile's avg_duration if user provided correction
         if corrected_duration:
-            profile = self.profile_store._data.get("profiles", {}).get(corrected_profile)
+            profile = self.profile_store.get_profiles().get(corrected_profile)
             if profile:
                 # Calculate weighted average: 80% old, 20% new (conservative learning)
                 old_avg = profile.get("avg_duration", corrected_duration)
@@ -206,7 +190,7 @@ class LearningManager:
 
     def _auto_label_cycle(self, cycle_id: str, profile_name: str) -> None:
         """Auto-label a cycle with a profile name."""
-        cycles = self.profile_store._data.get("past_cycles", [])
+        cycles = self.profile_store.get_past_cycles()
         cycle = next((c for c in cycles if c["id"] == cycle_id), None)
         
         if not cycle:
