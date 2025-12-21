@@ -5,7 +5,6 @@ from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceEntry
 
 from .const import DOMAIN
 from .manager import WashDataManager

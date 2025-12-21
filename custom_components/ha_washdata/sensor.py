@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, STATE_RUNNING, SIGNAL_WASHER_UPDATE
+from .const import DOMAIN, SIGNAL_WASHER_UPDATE
 from .manager import WashDataManager
 
 async def async_setup_entry(

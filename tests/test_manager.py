@@ -1,6 +1,8 @@
 """Unit tests for WashDataManager."""
+from __future__ import annotations
+
 import pytest
-import asyncio
+from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
@@ -8,15 +10,20 @@ from custom_components.ha_washdata.const import (
 )
 
 @pytest.fixture
-def mock_hass():
+def mock_hass() -> Any:
     hass = MagicMock()
     hass.data = {}
     hass.services.async_call = AsyncMock()
+    hass.bus.async_fire = MagicMock()
+    # Prevent 'coroutine was never awaited' warnings when code schedules tasks.
+    hass.async_create_task = MagicMock(
+        side_effect=lambda coro: getattr(coro, "close", lambda: None)()  # type: ignore[misc]
+    )
     hass.components.persistent_notification.async_create = MagicMock()
     return hass
 
 @pytest.fixture
-def mock_entry():
+def mock_entry() -> Any:
     entry = MagicMock()
     entry.entry_id = "test_entry"
     entry.title = "Test Washer"
@@ -29,7 +36,7 @@ def mock_entry():
     return entry
 
 @pytest.fixture
-def manager(mock_hass, mock_entry):
+def manager(mock_hass: Any, mock_entry: Any) -> WashDataManager:
     # Patch ProfileStore and CycleDetector to avoid disk/logic issues
     with patch("custom_components.ha_washdata.manager.ProfileStore"), \
          patch("custom_components.ha_washdata.manager.CycleDetector"):
@@ -38,13 +45,13 @@ def manager(mock_hass, mock_entry):
         mgr.profile_store._data = {"profiles": {"Heavy Duty": {"avg_duration": 3600}}}
         return mgr
 
-def test_init(manager, mock_entry):
+def test_init(manager: WashDataManager, mock_entry: Any) -> None:
     """Test initialization."""
     assert manager.entry_id == "test_entry"
     assert manager._config.completion_min_seconds == 600
     assert manager._notify_before_end_minutes == 5
 
-def test_set_manual_program(manager):
+def test_set_manual_program(manager: WashDataManager) -> None:
     """Test setting manual program."""
     # Mock profile data
     manager.profile_store._data["profiles"] = {
@@ -57,7 +64,7 @@ def test_set_manual_program(manager):
     assert manager.manual_program_active is True
     assert manager._matched_profile_duration == 3600
 
-def test_set_manual_program_invalid(manager):
+def test_set_manual_program_invalid(manager: WashDataManager) -> None:
     """Test setting invalid manual program."""
     manager.profile_store._data["profiles"] = {}
     manager.set_manual_program("Ghost")
@@ -66,7 +73,7 @@ def test_set_manual_program_invalid(manager):
     assert manager.current_program == "off"
     assert manager.manual_program_active is False
 
-def test_check_pre_completion_notification(manager, mock_hass):
+def test_check_pre_completion_notification(manager: WashDataManager, mock_hass: Any) -> None:
     """Test the pre-completion notification trigger."""
     manager._time_remaining = 240 # 4 minutes remaining
     manager._notify_before_end_minutes = 5
@@ -81,7 +88,7 @@ def test_check_pre_completion_notification(manager, mock_hass):
     args = mock_hass.components.persistent_notification.async_create.call_args[0]
     assert "5 minutes remaining" in args[0]
 
-def test_check_pre_completion_notification_already_sent(manager, mock_hass):
+def test_check_pre_completion_notification_already_sent(manager: WashDataManager, mock_hass: Any) -> None:
     """Test it doesn't send twice."""
     manager._time_remaining = 240
     manager._notify_before_end_minutes = 5
@@ -92,9 +99,100 @@ def test_check_pre_completion_notification_already_sent(manager, mock_hass):
     # Still 1 from previous turn if it was persistent, but here we expect no NEW call
     assert mock_hass.components.persistent_notification.async_create.call_count == 0
 
-def test_check_pre_completion_disabled(manager, mock_hass):
+def test_check_pre_completion_disabled(manager: WashDataManager, mock_hass: Any) -> None:
     """Test disabled notification."""
     manager._notify_before_end_minutes = 0
     manager._time_remaining = 60
     manager._check_pre_completion_notification()
+    assert mock_hass.components.persistent_notification.async_create.call_count == 0
+
+
+def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: Any) -> None:
+    """Cycle end should request feedback (event + persistent notification) before state is cleared."""
+    # Arrange: pretend we had a confident match
+    manager.profile_store._data["profiles"] = {"Heavy Duty": {"avg_duration": 3600}}
+    manager._current_program = "Heavy Duty"
+    manager._matched_profile_duration = 3600
+    manager._last_match_confidence = 0.80
+    manager._learning_confidence = 0.70
+    manager._auto_label_confidence = 0.95
+
+    cycle_data = {
+        "start_time": "2025-12-21T10:00:00",
+        "end_time": "2025-12-21T11:00:00",
+        "duration": 3600,
+        "max_power": 500,
+        "power_data": [[0.0, 5.0], [60.0, 200.0], [120.0, 50.0]],
+        "status": "completed",
+    }
+
+    # Act
+    manager._on_cycle_end(dict(cycle_data))
+
+    # Assert: feedback event fired and notification created
+    fired_events = [c[0][0] for c in mock_hass.bus.async_fire.call_args_list]
+    assert "ha_washdata_feedback_requested" in fired_events
+    assert mock_hass.components.persistent_notification.async_create.call_count >= 1
+
+
+def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, mock_hass: Any) -> None:
+    """High-confidence matches should auto-label and not request user feedback."""
+    manager.profile_store._data["profiles"] = {"Heavy Duty": {"avg_duration": 3600}}
+    manager._current_program = "Heavy Duty"
+    manager._matched_profile_duration = 3600
+    manager._last_match_confidence = 0.98
+    manager._learning_confidence = 0.70
+    manager._auto_label_confidence = 0.95
+
+    manager.learning_manager.auto_label_high_confidence = MagicMock(return_value=True)
+    manager.learning_manager.request_cycle_verification = MagicMock()
+
+    cycle_data = {
+        "start_time": "2025-12-21T10:00:00",
+        "end_time": "2025-12-21T11:00:00",
+        "duration": 3600,
+        "max_power": 500,
+        "power_data": [[0.0, 5.0], [60.0, 200.0], [120.0, 50.0]],
+        "status": "completed",
+    }
+
+    manager._on_cycle_end(dict(cycle_data))
+
+    manager.learning_manager.auto_label_high_confidence.assert_called_once()
+    manager.learning_manager.request_cycle_verification.assert_not_called()
+
+    fired_events = [c[0][0] for c in mock_hass.bus.async_fire.call_args_list]
+    assert "ha_washdata_feedback_requested" not in fired_events
+    # No feedback prompt should be created in auto-label path.
+    assert mock_hass.components.persistent_notification.async_create.call_count == 0
+
+
+def test_cycle_end_skips_feedback_low_confidence(manager: WashDataManager, mock_hass: Any) -> None:
+    """Low-confidence matches should neither auto-label nor request user feedback."""
+    manager.profile_store._data["profiles"] = {"Heavy Duty": {"avg_duration": 3600}}
+    manager._current_program = "Heavy Duty"
+    manager._matched_profile_duration = 3600
+    manager._last_match_confidence = 0.40
+    manager._learning_confidence = 0.70
+    manager._auto_label_confidence = 0.95
+
+    manager.learning_manager.auto_label_high_confidence = MagicMock(return_value=False)
+    manager.learning_manager.request_cycle_verification = MagicMock()
+
+    cycle_data = {
+        "start_time": "2025-12-21T10:00:00",
+        "end_time": "2025-12-21T11:00:00",
+        "duration": 3600,
+        "max_power": 500,
+        "power_data": [[0.0, 5.0], [60.0, 200.0], [120.0, 50.0]],
+        "status": "completed",
+    }
+
+    manager._on_cycle_end(dict(cycle_data))
+
+    manager.learning_manager.auto_label_high_confidence.assert_not_called()
+    manager.learning_manager.request_cycle_verification.assert_not_called()
+
+    fired_events = [c[0][0] for c in mock_hass.bus.async_fire.call_args_list]
+    assert "ha_washdata_feedback_requested" not in fired_events
     assert mock_hass.components.persistent_notification.async_create.call_count == 0
