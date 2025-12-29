@@ -213,61 +213,26 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_settings(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Manage configuration settings."""
+        """Manage configuration settings (Basic Step)."""
         manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
-        suggestions = manager.suggestions if manager else {}
+        
+        # Initialize or clear stored basic options
+        if not hasattr(self, "_basic_options"):
+            self._basic_options = {}
 
         if user_input is not None:
-            # Check for "Show Advanced" toggle
-            old_advanced = self._suggested_values.get(CONF_SHOW_ADVANCED, False) if self._suggested_values is not None else self._config_entry.options.get(CONF_SHOW_ADVANCED, False)
-            if user_input.get(CONF_SHOW_ADVANCED, False) != old_advanced:
-                self._suggested_values = user_input
-                return await self.async_step_settings(user_input=None)
+             # Check if user wants to edit advanced settings
+            if user_input.get(CONF_SHOW_ADVANCED):
+                # Store basic input to merge later
+                self._basic_options = user_input
+                # Remove the navigation flag from data storage
+                self._basic_options.pop(CONF_SHOW_ADVANCED, None)
+                return await self.async_step_advanced_settings()
 
-            # If "Apply Suggestions" checkbox was checked, merge suggested values into the input
-            if user_input.get(CONF_APPLY_SUGGESTIONS):
-                keys_to_apply = [
-                    CONF_MIN_POWER,
-                    CONF_OFF_DELAY,
-                    CONF_WATCHDOG_INTERVAL,
-                    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-                    CONF_PROFILE_MATCH_INTERVAL,
-                    CONF_AUTO_LABEL_CONFIDENCE,
-                    CONF_DURATION_TOLERANCE,
-                    CONF_PROFILE_DURATION_TOLERANCE,
-                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                    CONF_AUTO_MERGE_GAP_SECONDS,
-                ]
-                
-                # Create a copy of current options/input to work with
-                updated_input = {**user_input}
-                # Uncheck it so it doesn't stay checked in the next form render
-                updated_input[CONF_APPLY_SUGGESTIONS] = False
-                
-                applied_count = 0
-                for key in keys_to_apply:
-                    entry = suggestions.get(key) if isinstance(suggestions, dict) else None
-                    if isinstance(entry, dict) and "value" in entry:
-                        val = entry.get("value")
-                        # Coerce types
-                        if key in (CONF_OFF_DELAY, CONF_WATCHDOG_INTERVAL, CONF_NO_UPDATE_ACTIVE_TIMEOUT, 
-                                   CONF_PROFILE_MATCH_INTERVAL, CONF_AUTO_MERGE_GAP_SECONDS):
-                            updated_input[key] = int(float(val))
-                        else:
-                            updated_input[key] = float(val)
-                        applied_count += 1
-                
-                if applied_count > 0:
-                    # Store suggested values to repopulate form
-                    self._suggested_values = updated_input
-                    # Show form again with updated values instead of saving immediately
-                    return await self.async_step_settings(user_input=None)
-
+            # Save Basic Settings Only
             # Merge with existing options to preserve settings not shown in this form
+            user_input.pop(CONF_SHOW_ADVANCED, None)
             merged_options = {**self._config_entry.options, **user_input}
-            # Remove the apply_suggestions flag before saving
-            merged_options.pop(CONF_APPLY_SUGGESTIONS, None)
             return self.async_create_entry(title="", data=merged_options)
 
         # Populate notify services
@@ -290,41 +255,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self._config_entry.data.get(CONF_POWER_SENSOR, "")
         )
 
-        # Load suggestion placeholders (suggestions are informational only)
-        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
-        suggestions = manager.suggestions if manager else {}
-
-        def _fmt_suggested(key: str) -> str:
-            val = (suggestions.get(key) or {}).get("value") if isinstance(suggestions, dict) else None
-            if val is None:
-                return "—"
-            try:
-                # Keep ints neat; keep floats readable
-                return str(int(val)) if float(val).is_integer() else f"{float(val):.2f}"
-            except Exception:
-                return str(val)
-
-        reason_lines: list[str] = []
-        for key in [
-            CONF_MIN_POWER,
-            CONF_WATCHDOG_INTERVAL,
-            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-            CONF_PROFILE_MATCH_INTERVAL,
-            CONF_DURATION_TOLERANCE,
-            CONF_PROFILE_DURATION_TOLERANCE,
-        ]:
-            entry = suggestions.get(key) if isinstance(suggestions, dict) else None
-            if isinstance(entry, dict) and entry.get("reason"):
-                reason_lines.append(f"- {key}: {entry['reason']}")
-        suggested_reason = "\n".join(reason_lines) if reason_lines else ""
-
-        # Helper to get current value (from suggestions or config)
         def get_val(key, default):
-            if self._suggested_values and key in self._suggested_values:
-                return self._suggested_values[key]
             return self._config_entry.options.get(key, self._config_entry.data.get(key, default))
-
-        show_advanced = user_input.get(CONF_SHOW_ADVANCED, get_val(CONF_SHOW_ADVANCED, False)) if user_input else get_val(CONF_SHOW_ADVANCED, False)
 
         # Base schema with essential options
         schema = {
@@ -388,152 +320,244 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 selector.NumberSelectorConfig(min=0, max=60, mode=selector.NumberSelectorMode.BOX)
             ),
 
-            vol.Optional(CONF_SHOW_ADVANCED, default=show_advanced): bool,
+            vol.Optional(CONF_SHOW_ADVANCED, default=False): bool,
         }
-
-        # Advanced options
-        if show_advanced:
-            schema.update({
-                vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
-
-                # --- Detection Settings ---
-                vol.Optional(
-                    CONF_START_DURATION_THRESHOLD,
-                    default=get_val(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0.0, max=60.0, step=0.5, unit_of_measurement="s", mode=selector.NumberSelectorMode.BOX)
-                ),
-               
-                vol.Optional(
-                    CONF_INTERRUPTED_MIN_SECONDS,
-                    default=get_val(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0, max=900, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_COMPLETION_MIN_SECONDS,
-                    default=get_val(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0, max=3600, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_RUNNING_DEAD_ZONE,
-                    default=get_val(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0, max=600, step=10, unit_of_measurement="s", mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_END_REPEAT_COUNT,
-                    default=get_val(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=1, max=10, mode=selector.NumberSelectorMode.BOX)
-                ),
-
-                # --- Learning & Profiles ---
-                vol.Optional(
-                    CONF_LEARNING_CONFIDENCE,
-                    default=get_val(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_AUTO_LABEL_CONFIDENCE,
-                    default=get_val(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_PROFILE_MATCH_INTERVAL,
-                    default=get_val(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL),
-                ): vol.Coerce(int),
-                vol.Optional(
-                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                    default=get_val(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0.1, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                    default=get_val(CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=1.0, max=3.0, step=0.1, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_DURATION_TOLERANCE,
-                    default=get_val(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0.0, max=0.5, step=0.01, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_PROFILE_DURATION_TOLERANCE,
-                    default=get_val(CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0.0, max=0.5, step=0.01, mode=selector.NumberSelectorMode.BOX)
-                ),
-
-                # --- Advanced & Thresholds ---
-                vol.Optional(
-                    CONF_WATCHDOG_INTERVAL,
-                    default=get_val(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL),
-                ): vol.Coerce(int),
-                vol.Optional(
-                    CONF_SMOOTHING_WINDOW,
-                    default=get_val(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=1, max=20, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_ABRUPT_DROP_WATTS,
-                    default=get_val(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0.0, max=5000.0, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_ABRUPT_DROP_RATIO,
-                    default=get_val(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_ABRUPT_HIGH_LOAD_FACTOR,
-                    default=get_val(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=1.0, max=20.0, step=0.1, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-                    default=get_val(CONF_NO_UPDATE_ACTIVE_TIMEOUT, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT),
-                ): vol.Coerce(int),
-                vol.Optional(
-                    CONF_PROGRESS_RESET_DELAY,
-                    default=get_val(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY),
-                ): vol.Coerce(int),
-                vol.Optional(
-                    CONF_AUTO_MAINTENANCE,
-                    default=get_val(CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE),
-                ): bool,
-                vol.Optional(
-                    CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
-                    default=get_val(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD),
-                ): vol.Coerce(int),
-                vol.Optional(
-                    CONF_AUTO_MERGE_LOOKBACK_HOURS,
-                    default=get_val(CONF_AUTO_MERGE_LOOKBACK_HOURS, DEFAULT_AUTO_MERGE_LOOKBACK_HOURS),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=0, max=168, mode=selector.NumberSelectorMode.BOX)
-                ),
-                vol.Optional(
-                    CONF_AUTO_MERGE_GAP_SECONDS,
-                    default=get_val(CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(min=60, max=7200, mode=selector.NumberSelectorMode.BOX)
-                ),
-            })
-
+            
         return self.async_show_form(
             step_id="settings",
             data_schema=vol.Schema(schema),
             description_placeholders={
+                "error": "",
+            },
+        )
+
+    async def async_step_advanced_settings(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage advanced configuration settings (Step 2)."""
+        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        suggestions = manager.suggestions if manager else {}
+
+        if user_input is not None:
+             # If "Apply Suggestions" checkbox was checked, merge suggested values into the input
+            if user_input.get(CONF_APPLY_SUGGESTIONS):
+                keys_to_apply = [
+                    CONF_MIN_POWER,
+                    CONF_OFF_DELAY,
+                    CONF_WATCHDOG_INTERVAL,
+                    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                    CONF_PROFILE_MATCH_INTERVAL,
+                    CONF_AUTO_LABEL_CONFIDENCE,
+                    CONF_DURATION_TOLERANCE,
+                    CONF_PROFILE_DURATION_TOLERANCE,
+                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+                    CONF_AUTO_MERGE_GAP_SECONDS,
+                ]
+                
+                # Create a copy of current options/input to work with
+                updated_input = {**user_input}
+                # Uncheck it so it doesn't stay checked via recursion (Use recursion only for apply suggestion visual confirmation if needed, but here we can just save)
+                # Actually, standard behavior for 'Apply Suggestions' is usually to populate the form and let user review. 
+                # But to keep it simple as requested ("moved to advanced options"), we can just apply and save?
+                # The user probably expects to SEE the values. 
+                # For a wizard, we can reload this step with values filled.
+                
+                updated_input[CONF_APPLY_SUGGESTIONS] = False
+                
+                applied_count = 0
+                for key in keys_to_apply:
+                    entry = suggestions.get(key) if isinstance(suggestions, dict) else None
+                    if isinstance(entry, dict) and "value" in entry:
+                        val = entry.get("value")
+                        if key in (CONF_OFF_DELAY, CONF_WATCHDOG_INTERVAL, CONF_NO_UPDATE_ACTIVE_TIMEOUT, 
+                                   CONF_PROFILE_MATCH_INTERVAL, CONF_AUTO_MERGE_GAP_SECONDS):
+                            updated_input[key] = int(float(val))
+                        else:
+                            updated_input[key] = float(val)
+                        applied_count += 1
+                
+                if applied_count > 0:
+                    self._suggested_values = updated_input
+                    return await self.async_step_advanced_settings(user_input=None)
+
+            # Final Save
+            final_options = {**self._config_entry.options, **self._basic_options, **user_input}
+            final_options.pop(CONF_APPLY_SUGGESTIONS, None)
+            return self.async_create_entry(title="", data=final_options)
+
+        # Helper to get current value
+        def get_val(key, default):
+            # Prioritize suggested values (if "Apply Suggestions" triggered a reload)
+            if self._suggested_values and key in self._suggested_values:
+                return self._suggested_values[key]
+            # Fallback to basic options (if coming from basic step)
+            if key in self._basic_options:
+                return self._basic_options[key]
+            # Fallback to config options
+            return self._config_entry.options.get(key, self._config_entry.data.get(key, default))
+        
+        # Format suggestions for description
+        def _fmt_suggested(key: str) -> str:
+            val = (suggestions.get(key) or {}).get("value") if isinstance(suggestions, dict) else None
+            if val is None:
+                return "—"
+            try:
+                return str(int(val)) if float(val).is_integer() else f"{float(val):.2f}"
+            except Exception:
+                return str(val)
+
+        reason_lines: list[str] = []
+        for key in [
+            CONF_MIN_POWER,
+            CONF_WATCHDOG_INTERVAL,
+            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+            CONF_PROFILE_MATCH_INTERVAL,
+            CONF_DURATION_TOLERANCE,
+            CONF_PROFILE_DURATION_TOLERANCE,
+        ]:
+            entry = suggestions.get(key) if isinstance(suggestions, dict) else None
+            if isinstance(entry, dict) and entry.get("reason"):
+                reason_lines.append(f"- {key}: {entry['reason']}")
+        suggested_reason = "\n".join(reason_lines) if reason_lines else ""
+
+        schema = {
+             vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
+
+             # --- Detection Settings ---
+            vol.Optional(
+                CONF_START_DURATION_THRESHOLD,
+                default=get_val(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0.0, max=60.0, step=0.5, unit_of_measurement="s", mode=selector.NumberSelectorMode.BOX)
+            ),
+           
+            vol.Optional(
+                CONF_INTERRUPTED_MIN_SECONDS,
+                default=get_val(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0, max=900, mode=selector.NumberSelectorMode.BOX)
+            ),
+            vol.Optional(
+                CONF_COMPLETION_MIN_SECONDS,
+                default=get_val(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0, max=3600, mode=selector.NumberSelectorMode.BOX)
+            ),
+            vol.Optional(
+                CONF_RUNNING_DEAD_ZONE,
+                default=get_val(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0, max=600, step=10, unit_of_measurement="s", mode=selector.NumberSelectorMode.BOX)
+            ),
+            vol.Optional(
+                CONF_END_REPEAT_COUNT,
+                default=get_val(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=1, max=10, mode=selector.NumberSelectorMode.BOX)
+            ),
+
+            # --- Learning & Profiles ---
+            vol.Optional(
+                CONF_LEARNING_CONFIDENCE,
+                default=get_val(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
+            ),
+            vol.Optional(
+                CONF_AUTO_LABEL_CONFIDENCE,
+                default=get_val(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX)
+            ),
+            vol.Optional(
+                CONF_PROFILE_MATCH_INTERVAL,
+                default=get_val(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL),
+            ): vol.Coerce(int),
+            vol.Optional(
+                CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                default=get_val(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0.1, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX)
+            ),
+            vol.Optional(
+                CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+                default=get_val(CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=1.0, max=3.0, step=0.1, mode=selector.NumberSelectorMode.BOX)
+            ),
+            vol.Optional(
+                CONF_DURATION_TOLERANCE,
+                default=get_val(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0.0, max=0.5, step=0.01, mode=selector.NumberSelectorMode.BOX)
+            ),
+            vol.Optional(
+                CONF_SMOOTHING_WINDOW,
+                default=get_val(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW),
+            ): vol.Coerce(int),
+            vol.Optional(
+                CONF_PROFILE_DURATION_TOLERANCE,
+                default=get_val(CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0.0, max=0.5, step=0.01, mode=selector.NumberSelectorMode.BOX)
+            ),
+            vol.Optional(
+                CONF_AUTO_MERGE_LOOKBACK_HOURS,
+                default=get_val(CONF_AUTO_MERGE_LOOKBACK_HOURS, DEFAULT_AUTO_MERGE_LOOKBACK_HOURS),
+            ): vol.Coerce(int),
+            vol.Optional(
+                CONF_AUTO_MERGE_GAP_SECONDS,
+                default=get_val(CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS),
+            ): vol.Coerce(int),
+
+            vol.Optional(
+                CONF_ABRUPT_DROP_WATTS,
+                default=get_val(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS),
+            ): vol.Coerce(float),
+            vol.Optional(
+                CONF_ABRUPT_DROP_RATIO,
+                default=get_val(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO),
+            ): vol.Coerce(float),
+            vol.Optional(
+                CONF_ABRUPT_HIGH_LOAD_FACTOR,
+                default=get_val(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR),
+            ): vol.Coerce(float),
+
+            vol.Optional(
+                CONF_MAX_PAST_CYCLES,
+                default=get_val(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES),
+            ): vol.Coerce(int),
+            vol.Optional(
+                CONF_MAX_FULL_TRACES_PER_PROFILE,
+                default=get_val(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE),
+            ): vol.Coerce(int),
+            vol.Optional(
+                CONF_MAX_FULL_TRACES_UNLABELED,
+                default=get_val(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED),
+            ): vol.Coerce(int),
+            vol.Optional(
+                CONF_WATCHDOG_INTERVAL,
+                default=get_val(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL),
+            ): vol.Coerce(int),
+            vol.Optional(
+                CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
+                default=get_val(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD),
+            ): vol.Coerce(int),
+            vol.Optional(
+                CONF_PROGRESS_RESET_DELAY,
+                default=get_val(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY),
+            ): vol.Coerce(int),
+            
+            vol.Optional(CONF_AUTO_MAINTENANCE, default=get_val(CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE)): bool,
+        }
+
+        return self.async_show_form(
+            step_id="advanced_settings",
+            data_schema=vol.Schema(schema),
+            description_placeholders={
+                "error": "",
+                "suggested": suggested_reason or "No suggestions available yet.",
                 "suggested_min_power": _fmt_suggested(CONF_MIN_POWER),
                 "suggested_off_delay": _fmt_suggested(CONF_OFF_DELAY),
                 "suggested_watchdog_interval": _fmt_suggested(CONF_WATCHDOG_INTERVAL),
