@@ -174,8 +174,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors: dict[str, str] = {}
         if user_input is not None:
-             # Ensure defaults for hidden options
-            user_input[CONF_START_DURATION_THRESHOLD] = DEFAULT_START_DURATION_THRESHOLD
             return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
 
         return self.async_show_form(
