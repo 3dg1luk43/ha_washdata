@@ -1451,6 +1451,7 @@ class WashDataManager:
         if self.detector.state != "running":
             self._time_remaining = None
             self._cycle_progress = 0.0
+            self._smoothed_progress = 0.0
             return
 
         duration_so_far = self.detector.get_elapsed_seconds()
@@ -1460,7 +1461,7 @@ class WashDataManager:
             trace = self.detector.get_power_trace()
             current_power_data = [(t.isoformat(), p) for t, p in trace]
             
-            # Try phase-aware estimation if we have enough data
+            # --- PHASE-AWARE ESTIMATION ---
             if len(trace) >= 10 and self._current_program != "detecting...":
                 phase_progress = self._estimate_phase_progress(
                     current_power_data, 
@@ -1468,33 +1469,62 @@ class WashDataManager:
                     self._current_program
                 )
                 if phase_progress is not None:
-                    # Adjust time remaining based on phase progress
-                    remaining = (self._matched_profile_duration * (1.0 - phase_progress / 100.0))
+                    # Smoothing: Exponential Moving Average
+                    # If this is the first reliable estimate, snap to it.
+                    # Otherwise, blend 20% new, 80% old.
+                    current_smoothed = getattr(self, "_smoothed_progress", None)
+                    if current_smoothed is None:
+                         self._smoothed_progress = phase_progress
+                    else:
+                         # Monotonicity check: don't let it jump BACKWARD significantly
+                         # unless the profile changed (handled elsewhere).
+                         # Allow small fluctuations, but prevent large drops.
+                         if phase_progress < current_smoothed - 5.0:
+                             # Abnormal drop - ignore it or damp heavily?
+                             # Maybe we entered a low-power phase that looks like "start"?
+                             # Let's damp it heavily (keep mostly old value).
+                             self._smoothed_progress = (current_smoothed * 0.95) + (phase_progress * 0.05)
+                         else:
+                             # Normal update
+                             self._smoothed_progress = (current_smoothed * 0.8) + (phase_progress * 0.2)
+                    
+                    # Ensure we don't exceed 99% until actually finished
+                    self._smoothed_progress = min(99.0, self._smoothed_progress)
+
+                    # Update User-Facing Progress from Smoothed Value
+                    self._cycle_progress = self._smoothed_progress
+
+                    # Back-calculate "Time Remaining" from the smoothed progress
+                    # exact_remaining = duration * (1 - progress)
+                    # This prevents "progress says 90% but time says 20 mins" mismatch
+                    remaining = (self._matched_profile_duration * (1.0 - (self._cycle_progress / 100.0)))
                     self._time_remaining = max(0.0, remaining)
                     
-                    # Recalculate progress to be consistent with elapsed + remaining
-                    # This ensures progress doesn't jump wildly if we are running slower/faster than average
-                    total_predicted = duration_so_far + self._time_remaining
-                    if total_predicted > 0:
-                        self._cycle_progress = max(0.0, min(99.0, (duration_so_far / total_predicted) * 100.0))
-                    else:
-                        self._cycle_progress = 0.0
-
                     _LOGGER.debug(
-                        f"Phase-aware estimate: phase={phase_progress:.1f}%, "
-                        f"remaining={int(remaining/60)}min, progress={self._cycle_progress:.1f}%"
+                        f"Phase-aware estimate: raw={phase_progress:.1f}%, smoothed={self._cycle_progress:.1f}%, "
+                        f"remaining={int(remaining/60)}min"
                     )
                     return
             
-            # Fallback to linear estimation if phase analysis unavailable
+            # --- LINEAR FALLBACK (if phase analysis unavailable) ---
             remaining = max(self._matched_profile_duration - duration_so_far, 0.0)
-            self._time_remaining = remaining
             progress = (duration_so_far / self._matched_profile_duration) * 100.0
-            self._cycle_progress = max(0.0, min(progress, 100.0))
-            _LOGGER.debug(f"Linear estimate: remaining={int(remaining/60)}min, progress={progress:.1f}%")
+            
+            # Blend linear estimate into smoothed tracker too, to prevent jumps if we lose phase lock
+            current_smoothed = getattr(self, "_smoothed_progress", 0.0)
+            if current_smoothed > 0:
+                 # Blend gently
+                 self._smoothed_progress = (current_smoothed * 0.9) + (progress * 0.1)
+            else:
+                 self._smoothed_progress = progress
+
+            self._time_remaining = remaining
+            self._cycle_progress = max(0.0, min(self._smoothed_progress, 100.0))
+            _LOGGER.debug(f"Linear estimate: remaining={int(remaining/60)}min, progress={self._cycle_progress:.1f}%")
         else:
             self._time_remaining = None
             self._cycle_progress = 0.0
+            self._smoothed_progress = 0.0
             _LOGGER.debug(f"No profile matched yet, elapsed={int(duration_so_far/60)}min")
 
     def _estimate_phase_progress(

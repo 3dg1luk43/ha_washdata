@@ -5,7 +5,7 @@ mock_data
 custom_components/ha_washdata/__pycache__
 
 mqtt-mock.log
-cycle_data/washer_cycles.json
+cycle_data/*
 mqtt-mock.log*
 tests/__pycache__
 ha_washdata.code-workspace
