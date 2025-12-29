@@ -302,8 +302,7 @@ class WashDataManager:
                     self.power_sensor_entity_id,
                     new_sensor
                 )
-                # Restore the original sensor in config to prevent UI confusion
-                # Note: We cannot modify config_entry.options directly, but we log the issue
+                # Skip sensor change but continue with other config updates
                 return
             
             _LOGGER.info(f"Power sensor changed: {self.power_sensor_entity_id} -> {new_sensor}")
