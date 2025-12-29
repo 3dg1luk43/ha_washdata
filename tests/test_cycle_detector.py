@@ -235,4 +235,58 @@ def test_force_end(detector_config, mock_callbacks):
     #   status = "interrupted"
     
     # 300 < 600. So it should be reclassified as interrupted.
-    assert cycle_data["status"] == "interrupted" 
+    assert cycle_data["status"] == "interrupted"
+
+def test_end_repeat_count_accumulates_across_periods(mock_callbacks):
+    """Test that end_condition_count accumulates across low-power periods.
+    
+    When end_repeat_count > 1, the counter should persist across resets of
+    low_power_start. This allows the detector to require multiple periods
+    of low power (each >= off_delay) before ending the cycle.
+    """
+    config = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=60,
+        interrupted_min_seconds=150,
+        completion_min_seconds=600,
+        end_repeat_count=2,  # Require 2 periods of low power
+        start_duration_threshold=0.0,  # Disable start debounce
+    )
+    
+    detector = CycleDetector(
+        config=config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+    
+    # Start cycle
+    detector.process_reading(100.0, dt(0))
+    assert detector.state == STATE_RUNNING
+    
+    # Run for 15 mins (enough to exceed completion_min_seconds of 600)
+    for t in range(10, 900, 10):
+        detector.process_reading(100.0, dt(t))
+    
+    # Enter first low-power period at t=900
+    detector.process_reading(1.0, dt(900))
+    assert detector.is_waiting_low_power()
+    
+    # Wait past first off_delay (60s) -> counter should increment to 1
+    detector.process_reading(1.0, dt(961))
+    # Cycle should NOT end yet (need 2 periods)
+    assert detector.state == STATE_RUNNING
+    mock_callbacks["on_cycle_end"].assert_not_called()
+    
+    # low_power_start should now be reset, but counter should persist
+    # Next reading at t=962 should start a new low-power period
+    detector.process_reading(1.0, dt(962))
+    
+    # Wait past second off_delay -> counter should increment to 2
+    detector.process_reading(1.0, dt(1023))  # 962 + 61 = 1023
+    
+    # Now cycle should end
+    assert detector.state == STATE_OFF
+    mock_callbacks["on_cycle_end"].assert_called_once()
+    
+    cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
+    assert cycle_data["status"] == "completed" 
