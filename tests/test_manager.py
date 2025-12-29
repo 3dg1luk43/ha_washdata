@@ -207,7 +207,7 @@ async def test_async_reload_config_blocks_sensor_change_during_active_cycle(
     # Setup: simulate an active cycle
     manager.detector.state = STATE_RUNNING
     original_sensor = manager.power_sensor_entity_id
-    
+
     # Create a new config entry with a different power sensor
     new_entry = MagicMock()
     new_entry.entry_id = "test_entry"
