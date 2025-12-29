@@ -310,7 +310,11 @@ class WashDataManager:
                     power = float(state.state)
                     self.detector.process_reading(power, dt_util.now())
                 except ValueError:
-                    pass
+                    _LOGGER.debug(
+                        "Initial power value for %s after config reload is not numeric: %r",
+                        self.power_sensor_entity_id,
+                        state.state,
+                    )
 
         # Update device type
         self.device_type = config_entry.options.get(CONF_DEVICE_TYPE, config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
