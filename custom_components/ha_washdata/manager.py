@@ -296,6 +296,17 @@ class WashDataManager:
         # Check if power sensor changed
         new_sensor = config_entry.options.get(CONF_POWER_SENSOR, config_entry.data.get(CONF_POWER_SENSOR))
         if new_sensor and new_sensor != self.power_sensor_entity_id:
+            # Block sensor changes when a cycle is active to prevent inconsistent state
+            if self.detector.state == STATE_RUNNING:
+                _LOGGER.warning(
+                    "Cannot change power sensor from %s to %s while a cycle is active. "
+                    "Please wait for the current cycle to complete before changing the power sensor.",
+                    self.power_sensor_entity_id,
+                    new_sensor
+                )
+                # Skip sensor change but continue with other config updates
+                return
+            
             _LOGGER.info(f"Power sensor changed: {self.power_sensor_entity_id} -> {new_sensor}")
             self.power_sensor_entity_id = new_sensor
             # Remove old listener
