@@ -87,6 +87,7 @@ from .const import (
     DEFAULT_START_DURATION_THRESHOLD,
     DEFAULT_RUNNING_DEAD_ZONE,
     DEFAULT_END_REPEAT_COUNT,
+    DEVICE_SMOOTHING_THRESHOLDS,
     STATE_RUNNING,
     STATE_OFF,
 )
@@ -1483,11 +1484,17 @@ class WashDataManager:
                          # Monotonicity check: don't let it jump BACKWARD significantly
                          # unless the profile changed (handled elsewhere).
                          # Allow small fluctuations, but prevent large drops.
-                         if phase_progress < self._smoothed_progress - 5.0:
+                         # Use device-type-specific threshold to handle different cycle characteristics.
+                         smoothing_threshold = DEVICE_SMOOTHING_THRESHOLDS.get(self.device_type, 5.0)
+                         if phase_progress < current_smoothed - smoothing_threshold:
                              # Abnormal drop - ignore it or damp heavily?
                              # Maybe we entered a low-power phase that looks like "start"?
                              # Let's damp it heavily (keep mostly old value).
-                             self._smoothed_progress = (self._smoothed_progress * 0.95) + (phase_progress * 0.05)
+                             self._smoothed_progress = (current_smoothed * 0.95) + (phase_progress * 0.05)
+                             _LOGGER.debug(
+                                 f"Progress drop detected ({phase_progress:.1f}% < {current_smoothed:.1f}% - {smoothing_threshold:.1f}%), "
+                                 f"applying heavy damping for {self.device_type}"
+                             )
                          else:
                              # Normal update
                              self._smoothed_progress = (self._smoothed_progress * 0.8) + (phase_progress * 0.2)
