@@ -272,7 +272,7 @@ class WashDataCardEditor extends HTMLElement {
         { name: "entity", selector: { entity: { domain: "sensor" } } },
         { name: "icon", selector: { icon: {} } },
         { name: "active_color", selector: { color_rgb: {} } },
-        { name: "program_entity", selector: { entity: { domain: ["sensor", "input_select", "input_text"] } } },
+        { name: "program_entity", selector: { entity: { domain: ["sensor", "select", "input_select", "input_text"] } } },
         { name: "pct_entity", selector: { entity: { domain: "sensor" } } },
         { name: "time_entity", selector: { entity: { domain: "sensor" } } },
         {
