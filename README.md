@@ -8,13 +8,17 @@
 
 A Home Assistant custom component to monitor washing machines via smart sockets, learn power profiles, and estimate completion time using shape-correlation matching.
 
-Although designed for washing machines, it also works well for dryers and dishwashers that have reasonably predictable power-draw cycles.
+Although designed for washing machines, it also works well for dryers, dishwashers, and coffee machines that have reasonably predictable power-draw cycles.
 
 ## ✨ Features
 
-- **Cycle Detection**: Automatically detects when the washer starts and finishes based on power draw.
-- **NumPy Profiling**: Learns from past cycles to identify programs (e.g., "Cotton 60°C") using advanced NumPy-powered shape correlation (not just duration).
+- **Multi-Device Support**: Track Washing Machines, Dryers, Dishwashers, or Coffee Machines with device-type tagging.
+- **Cycle Detection**: Automatically detects when the appliance starts and finishes based on power draw.
+- **Power Spike Filtering**: Ignores brief boot spikes (e.g., 60W for 2s) to prevent false cycle starts.
+- **NumPy Profiling**: Learns from past cycles to identify programs (e.g., "Cotton 60°C") using advanced NumPy-powered shape correlation.
 - **Time Estimation**: Estimates remaining time based on recognized profiles.
+- **Changeable Power Sensor**: Switch the monitored smart plug anytime without losing historical data.
+- **Minimal Status Card**: Optional custom Lovelace card with minimal footprint showing state, program, and progress.
 - **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
 - **Ghost Cycle Prevention**: Minimum runtime threshold avoids recording brief power spikes as completed cycles.
 - **Local Only**: No cloud dependency, no external services. All data stays in your Home Assistant.
@@ -38,9 +42,25 @@ Manual fallback (if not using HACS): copy `custom_components/ha_washdata` into y
 1. Go to **Settings > Devices & Services**.
 2. Click **Add Integration** and search for **HA WashData**.
 3. Follow the configuration flow:
-   - Select the **Power Sensor** of your smart plug.
+   - Give your appliance a **Name**.
+   - Select the **Device Type** (Washing Machine, Dryer, Dishwasher, or Coffee Machine).
+   - Select the **Power Sensor** entity from your smart plug.
    - Set the **Minimum Power** threshold (default 2W).
-   - Give your washer a name.
+
+### Lovelace Status Card
+
+After installation, you can add a minimal status card to your dashboard:
+
+1. Edit your dashboard → Add Card → Manual.
+2. Enter:
+   ```yaml
+   type: custom:ha-washdata-card
+   entity: sensor.washing_machine
+   title: "My Washer"
+   ```
+3. The card shows: Status icon, running state, current program, progress bar, and time remaining.
+
+*The card is served from `/ha_washdata/card.js`. If it doesn't appear, clear your browser cache or restart HA.*
 
 ### UI & Parameter Tuning
 

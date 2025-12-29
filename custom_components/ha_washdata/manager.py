@@ -47,6 +47,10 @@ from .const import (
     CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_NOTIFY_BEFORE_END_MINUTES,
+    CONF_DEVICE_TYPE,
+    CONF_START_DURATION_THRESHOLD,
+    CONF_RUNNING_DEAD_ZONE,
+    CONF_END_REPEAT_COUNT,
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
@@ -79,6 +83,10 @@ from .const import (
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_WATCHDOG_INTERVAL,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
+    DEFAULT_DEVICE_TYPE,
+    DEFAULT_START_DURATION_THRESHOLD,
+    DEFAULT_RUNNING_DEAD_ZONE,
+    DEFAULT_END_REPEAT_COUNT,
     STATE_RUNNING,
     STATE_OFF,
 )
@@ -121,7 +129,13 @@ class WashDataManager:
         self.config_entry = config_entry
         self.entry_id = config_entry.entry_id
         
-        self.power_sensor_entity_id = config_entry.data[CONF_POWER_SENSOR]
+        # Prioritize options -> data for power sensor (allows changing it)
+        self.power_sensor_entity_id = config_entry.options.get(
+            CONF_POWER_SENSOR, config_entry.data.get(CONF_POWER_SENSOR)
+        )
+        self.device_type = config_entry.options.get(
+            CONF_DEVICE_TYPE, config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+        )
         
         # Components
         self.profile_store = ProfileStore(
@@ -156,8 +170,11 @@ class WashDataManager:
         abrupt_drop_ratio = float(config_entry.options.get("abrupt_drop_ratio", 0.6))
         abrupt_high_load_factor = float(config_entry.options.get("abrupt_high_load_factor", 5.0))
         completion_min_seconds = int(config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS))
+        start_duration_threshold = float(config_entry.options.get(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD))
+        running_dead_zone = int(config_entry.options.get(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE))
+        end_repeat_count = int(config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT))
 
-        _LOGGER.info(f"Manager init: min_power={min_power}W, off_delay={off_delay}s (from options={CONF_MIN_POWER in config_entry.options}, defaults={DEFAULT_MIN_POWER}W, {DEFAULT_OFF_DELAY}s)")
+        _LOGGER.info(f"Manager init: min_power={min_power}W, off_delay={off_delay}s, type={self.device_type}")
         
         config = CycleDetectorConfig(
             min_power=float(min_power),
@@ -168,6 +185,9 @@ class WashDataManager:
             abrupt_drop_ratio=abrupt_drop_ratio,
             abrupt_high_load_factor=abrupt_high_load_factor,
             completion_min_seconds=completion_min_seconds,
+            start_duration_threshold=start_duration_threshold,
+            running_dead_zone=running_dead_zone,
+            end_repeat_count=end_repeat_count,
         )
         self._config = config
         self.detector = CycleDetector(
@@ -264,14 +284,38 @@ class WashDataManager:
         """
         Reload configuration options without interrupting running cycle detection.
         
-        Updates detector config in-place so running cycles immediately use new settings.
-        This includes min_power, off_delay, smoothing_window, and all abrupt drop parameters.
+        Updates detector config in-place.
+        Handles Power Sensor entity change by reconnecting listener.
         """
         _LOGGER.info("Reloading configuration for %s", self.entry_id)
-        # Replace reference so future reads use the latest options
+        # Replace reference
         self.config_entry = config_entry
         
-        # Update detector config in-place (for running cycle to use new settings immediately)
+        # Check if power sensor changed
+        new_sensor = config_entry.options.get(CONF_POWER_SENSOR, config_entry.data.get(CONF_POWER_SENSOR))
+        if new_sensor and new_sensor != self.power_sensor_entity_id:
+            _LOGGER.info(f"Power sensor changed: {self.power_sensor_entity_id} -> {new_sensor}")
+            self.power_sensor_entity_id = new_sensor
+            # Remove old listener
+            if self._remove_listener:
+                self._remove_listener()
+            # Attach new listener
+            self._remove_listener = async_track_state_change_event(
+                self.hass, [self.power_sensor_entity_id], self._async_power_changed
+            )
+            # Force update from new sensor
+            state = self.hass.states.get(self.power_sensor_entity_id)
+            if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
+                try:
+                    power = float(state.state)
+                    self.detector.process_reading(power, dt_util.now())
+                except ValueError:
+                    pass
+
+        # Update device type
+        self.device_type = config_entry.options.get(CONF_DEVICE_TYPE, config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
+        
+        # Update detector config in-place
         old_min_power = self.detector.config.min_power
         old_off_delay = self.detector.config.off_delay
         old_smoothing = self.detector.config.smoothing_window
@@ -305,6 +349,15 @@ class WashDataManager:
         new_completion_min = int(
             config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS)
         )
+        new_start_threshold = float(
+            config_entry.options.get(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD)
+        )
+        new_running_dead_zone = int(
+            config_entry.options.get(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE)
+        )
+        new_end_repeat_count = int(
+            config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
+        )
         
         # Apply all detector config updates
         self.detector.config.min_power = new_min_power
@@ -315,6 +368,9 @@ class WashDataManager:
         self.detector.config.abrupt_drop_ratio = new_abrupt_drop_ratio
         self.detector.config.abrupt_high_load_factor = new_abrupt_high_load
         self.detector.config.completion_min_seconds = new_completion_min
+        self.detector.config.start_duration_threshold = new_start_threshold
+        self.detector.config.running_dead_zone = new_running_dead_zone
+        self.detector.config.end_repeat_count = new_end_repeat_count
         
         if (old_min_power != new_min_power or old_off_delay != new_off_delay or
             old_smoothing != new_smoothing or old_interrupted_min != new_interrupted_min or
@@ -796,6 +852,9 @@ class WashDataManager:
         events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
         if NOTIFY_EVENT_FINISH in events:
              self._send_notification(f"{self.config_entry.title} finished. Duration: {int(duration/60)}m.")
+
+        # Inject device type into cycle data
+        cycle_data["device_type"] = self.device_type
         
         # Request user feedback if we had a confident match.
         # IMPORTANT: this must happen before we clear match state.

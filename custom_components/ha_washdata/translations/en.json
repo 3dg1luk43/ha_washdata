@@ -3,9 +3,16 @@
     "step": {
       "user": {
         "data": {
-          "power_sensor": "Power Sensor",
-          "min_power": "Minimum Power (W)",
-          "name": "Name"
+          "name": "Device Name",
+          "device_type": "Device Type",
+          "power_sensor": "Power Sensor Entity",
+          "min_power": "Minimum Power Threshold (W)"
+        },
+        "data_description": {
+          "name": "A friendly name for this device (e.g., 'Washing Machine', 'Dishwasher').",
+          "device_type": "What type of appliance is this? Helps tailor detection and labeling.",
+          "power_sensor": "The sensor entity that reports real-time power consumption (in watts) from your smart plug.",
+          "min_power": "Power readings above this threshold (in watts) indicate the appliance is running. Start with 2W for most devices."
         }
       }
     },
@@ -38,10 +45,14 @@
         "title": "Settings",
         "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.\n\nSuggested (from learning; not applied automatically):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
         "data": {
-          "min_power": "Minimum Power (W)",
-          "off_delay": "Cycle End Delay (seconds)",
+          "apply_suggestions": "Apply Suggested Values",
+          "device_type": "Device Type",
+          "power_sensor": "Power Sensor Entity",
+          "min_power": "Minimum Power Threshold (W)",
+          "start_duration_threshold": "Start Debounce Duration (s)",
+          "off_delay": "Cycle End Delay (s)",
           "progress_reset_delay": "Progress Reset Delay (seconds)",
-          "no_update_active_timeout": "No-Update Timeout While Active (seconds)",
+          "no_update_active_timeout": "No-Update Timeout (s)",
           "auto_label_confidence": "Auto-Label Confidence (0-1)",
           "learning_confidence": "Feedback Request Confidence (0-1)",
           "duration_tolerance": "Duration Tolerance (0-0.5)",
@@ -64,10 +75,17 @@
           "watchdog_interval": "Watchdog Interval (seconds)",
           "completion_min_seconds": "Completion Minimum Runtime (seconds)",
           "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
-          "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold"
+          "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
+          "running_dead_zone": "Running Dead Zone (seconds)",
+          "end_repeat_count": "End Repeat Count",
+          "auto_maintenance": "Enable Auto-Maintenance"
         },
         "data_description": {
-          "min_power": "Power threshold (in watts) to consider the washer running. Default: 2W.",
+          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.",
+          "device_type": "Select the type of appliance (Washing Machine, Dryer, Dishwasher, Coffee Machine). This tag is stored with each cycle for better organization.",
+          "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data—useful if you replace a smart plug.",
+          "min_power": "Power threshold (watts) above which the appliance is considered running. Default: 2W.",
+          "start_duration_threshold": "Ignore brief power spikes shorter than this duration (seconds). Filters out boot spikes (e.g., 60W for 2s) before real cycle starts. Default: 5s.",
           "off_delay": "Seconds the smoothed power must stay below the threshold to mark completion. Default: 120s.",
           "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 300s.",
           "no_update_active_timeout": "For publish-on-change sensors: only force-end an ACTIVE cycle if no updates arrive for this many seconds. Low-power completion still uses the Off Delay.",
@@ -93,7 +111,10 @@
           "watchdog_interval": "Seconds between watchdog checks while running. Lower for faster stuck-cycle handling; higher to reduce overhead. Default: 5s.",
           "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
           "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
-          "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3."
+          "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3.",
+          "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
+          "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
+          "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy."
         }
       },
       "diagnostics": {
@@ -174,9 +195,12 @@
       },
       "post_process": {
         "title": "Post-Process Cycle History",
-        "description": "Merge fragmented cycles (junk data) into single entries.",
+        "description": "Merge fragmented cycles (junk data) within a time window. Enter number of hours to look back.\n{info}",
         "data": {
-          "time_range": "Time Window"
+          "time_range": "Lookback Window (hours)"
+        },
+        "data_description": {
+          "time_range": "Number of hours to scan for fragmented cycles to merge. Use 999999 to process all historical data."
         }
       },
       "migrate_data": {

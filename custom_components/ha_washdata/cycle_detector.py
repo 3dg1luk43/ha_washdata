@@ -23,6 +23,9 @@ class CycleDetectorConfig:
     abrupt_drop_ratio: float = 0.6
     abrupt_high_load_factor: float = 5.0
     completion_min_seconds: int = 600
+    start_duration_threshold: float = 5.0
+    running_dead_zone: int = 0  # Seconds after start to ignore power dips
+    end_repeat_count: int = 1  # Number of times end condition must be met consecutively
 
 
 class CycleDetector:
@@ -49,6 +52,8 @@ class CycleDetector:
         self._cycle_status: str | None = None  # Track how cycle ended
         self._last_power: float | None = None  # Track previous raw power reading
         self._abrupt_drop: bool = False  # Flag abrupt drop events
+        self._potential_start_time: datetime | None = None  # For start debounce
+        self._end_condition_count: int = 0  # Track consecutive end conditions met
 
     @property
     def state(self) -> str:
@@ -89,13 +94,21 @@ class CycleDetector:
 
         if self._state == STATE_OFF:
             if is_active_for_start:
-                self._transition_to(STATE_RUNNING, timestamp)
-                self._current_cycle_start = timestamp
-                self._power_readings = [(timestamp, power)]
-                self._last_active_time = timestamp
-                self._cycle_max_power = power
-                self._abrupt_drop = False
-                self._last_power = power
+                if not self._potential_start_time:
+                    self._potential_start_time = timestamp
+                
+                elapsed = (timestamp - self._potential_start_time).total_seconds()
+                if elapsed >= self._config.start_duration_threshold:
+                    self._transition_to(STATE_RUNNING, timestamp)
+                    self._current_cycle_start = timestamp
+                    self._power_readings = [(timestamp, power)]
+                    self._last_active_time = timestamp
+                    self._cycle_max_power = power
+                    self._abrupt_drop = False
+                    self._last_power = power
+                    self._potential_start_time = None
+            else:
+                self._potential_start_time = None
 
         elif self._state == STATE_RUNNING:
             self._power_readings.append((timestamp, power))
@@ -110,10 +123,15 @@ class CycleDetector:
                 self._finish_cycle(timestamp, status="force_stopped")
                 return
             
+            # Check if we're in the dead zone period (ignore power dips during startup)
+            cycle_elapsed = (timestamp - self._current_cycle_start).total_seconds() if self._current_cycle_start else 0
+            in_dead_zone = cycle_elapsed < self._config.running_dead_zone
+            
             if is_active_for_end:
                  self._last_active_time = timestamp
                  self._low_power_start = None  # Reset low-power timer
-            else:
+                 self._end_condition_count = 0  # Reset end condition counter when power goes back up
+            elif not in_dead_zone:  # Only check end conditions if NOT in dead zone
                  # Track when low power started
                  if not self._low_power_start:
                      self._low_power_start = timestamp
@@ -135,11 +153,22 @@ class CycleDetector:
                  
                  # Check if we should conclude the cycle
                  low_duration = (timestamp - self._low_power_start).total_seconds()
-                 _LOGGER.debug(f"Low power: duration={low_duration:.1f}s, off_delay={self._config.off_delay}s, will_end={low_duration >= self._config.off_delay}")
+                 _LOGGER.debug(f"Low power: duration={low_duration:.1f}s, off_delay={self._config.off_delay}s, end_count={self._end_condition_count}/{self._config.end_repeat_count}")
                  if low_duration >= self._config.off_delay:
-                     # Power has been low for the configured delay - cycle is done NATURALLY
-                     _LOGGER.info(f"Ending cycle: power below {self._config.min_power}W for {low_duration:.0f}s (threshold: {self._config.off_delay}s)")
-                     self._finish_cycle(timestamp, status="completed")
+                     # End condition met once
+                     self._end_condition_count += 1
+                     if self._end_condition_count >= self._config.end_repeat_count:
+                         # Power has been low for the configured delay enough times - cycle is done NATURALLY
+                         _LOGGER.info(f"Ending cycle: power below {self._config.min_power}W for {low_duration:.0f}s (threshold: {self._config.off_delay}s), end count: {self._end_condition_count}")
+                         self._finish_cycle(timestamp, status="completed")
+                     else:
+                         # Need more consecutive end conditions, reset the low-power timer
+                         _LOGGER.debug(f"End condition met {self._end_condition_count}/{self._config.end_repeat_count} times, waiting for next")
+                         self._low_power_start = None
+            else:
+                 # In dead zone - log but don't start end detection
+                 if not is_active_for_end:
+                     _LOGGER.debug(f"Low power during dead zone ({cycle_elapsed:.0f}s < {self._config.running_dead_zone}s), ignoring")
 
             # Update last power for next iteration
             self._last_power = power
@@ -277,6 +306,7 @@ class CycleDetector:
             "cycle_max_power": self._cycle_max_power,
             "power_readings": [(t.isoformat(), p) for t, p in self._power_readings],
             "ma_buffer": getattr(self, "_ma_buffer", []),
+            "end_condition_count": self._end_condition_count,
         }
 
     def restore_state_snapshot(self, snapshot: dict[str, Any]) -> None:
@@ -336,6 +366,9 @@ class CycleDetector:
             # But if actual power is low/fluctuating...
             # Best to restore.
             self._ma_buffer = snapshot.get("ma_buffer", [])
+            
+            # Restore end condition counter
+            self._end_condition_count = snapshot.get("end_condition_count", 0)
             
             _LOGGER.info(f"Restored CycleDetector state: {self._state}, {len(self._power_readings)} readings")
             

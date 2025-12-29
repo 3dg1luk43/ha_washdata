@@ -11,6 +11,8 @@ CONF_NOTIFY_SERVICE = "notify_service"
 CONF_NOTIFY_EVENTS = "notify_events"
 CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
 CONF_SMOOTHING_WINDOW = "smoothing_window"
+CONF_START_DURATION_THRESHOLD = "start_duration_threshold"  # Debounce for start detection
+CONF_DEVICE_TYPE = "device_type"
 CONF_PROFILE_DURATION_TOLERANCE = "profile_duration_tolerance"
 CONF_AUTO_MERGE_LOOKBACK_HOURS = "auto_merge_lookback_hours"
 CONF_AUTO_MERGE_GAP_SECONDS = "auto_merge_gap_seconds"
@@ -34,6 +36,8 @@ CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"
 CONF_COMPLETION_MIN_SECONDS = "completion_min_seconds"
 CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
 CONF_APPLY_SUGGESTIONS = "apply_suggestions"
+CONF_RUNNING_DEAD_ZONE = "running_dead_zone"  # Seconds after start to ignore power dips
+CONF_END_REPEAT_COUNT = "end_repeat_count"  # Number of times end condition must be met
 
 NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
@@ -44,6 +48,8 @@ DEFAULT_OFF_DELAY = 120  # Seconds (2 minutes, like proven automation)
 DEFAULT_NAME = "Washing Machine"
 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 300  # Seconds without updates while active before forced stop (publish-on-change sockets)
 DEFAULT_SMOOTHING_WINDOW = 2
+DEFAULT_START_DURATION_THRESHOLD = 5.0  # Seconds (debounce)
+DEFAULT_DEVICE_TYPE = "washing_machine"
 DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
 DEFAULT_AUTO_MERGE_LOOKBACK_HOURS = 3
 DEFAULT_AUTO_MERGE_GAP_SECONDS = 600  # Seconds (10 minutes, merge nearby fragments)
@@ -66,6 +72,8 @@ DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
 DEFAULT_WATCHDOG_INTERVAL = 5  # Seconds between watchdog checks
 DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Noise events in 24h to trigger auto-tune
+DEFAULT_RUNNING_DEAD_ZONE = 0  # Disabled by default, typical: 60-300s
+DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 
 # States
 STATE_OFF = "off"
@@ -77,8 +85,21 @@ STATE_UNKNOWN = "unknown"
 # Cycle Status (how the cycle ended)
 CYCLE_STATUS_COMPLETED = "completed"  # Natural completion (power dropped)
 CYCLE_STATUS_INTERRUPTED = "interrupted"  # Abnormal/short run or abrupt power cliff (likely user/power abort)
-CYCLE_STATUS_FORCE_STOPPED = "force_stopped"  # Watchdog forced end (sensor offline but power was already low) - treated as successful
+CYCLE_STATUS_FORCE_STOPPED = "force_stopped"  # Watchdog forced end (sensor offline)
 CYCLE_STATUS_RESUMED = "resumed"  # Cycle was restored from storage after restart
+
+# Device Types
+DEVICE_TYPE_WASHING_MACHINE = "washing_machine"
+DEVICE_TYPE_DRYER = "dryer"
+DEVICE_TYPE_DISHWASHER = "dishwasher"
+DEVICE_TYPE_COFFEE_MACHINE = "coffee_machine"
+
+DEVICE_TYPES = {
+    DEVICE_TYPE_WASHING_MACHINE: "Washing Machine",
+    DEVICE_TYPE_DRYER: "Dryer",
+    DEVICE_TYPE_DISHWASHER: "Dishwasher",
+    DEVICE_TYPE_COFFEE_MACHINE: "Coffee Machine",
+}
 
 # Storage
 STORAGE_VERSION = 1

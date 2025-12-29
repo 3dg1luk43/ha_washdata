@@ -21,6 +21,8 @@ from .const import (
     CONF_NOTIFY_EVENTS,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_SMOOTHING_WINDOW,
+    CONF_START_DURATION_THRESHOLD,
+    CONF_DEVICE_TYPE,
     CONF_PROFILE_DURATION_TOLERANCE,
     CONF_AUTO_MERGE_LOOKBACK_HOURS,
     CONF_AUTO_MERGE_GAP_SECONDS,
@@ -44,6 +46,8 @@ from .const import (
     CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_NOTIFY_BEFORE_END_MINUTES,
+    CONF_RUNNING_DEAD_ZONE,
+    CONF_END_REPEAT_COUNT,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     DEFAULT_NAME,
@@ -51,7 +55,10 @@ from .const import (
     DEFAULT_OFF_DELAY,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_SMOOTHING_WINDOW,
+    DEFAULT_START_DURATION_THRESHOLD,
+    DEFAULT_DEVICE_TYPE,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
+    DEVICE_TYPES,
     DEFAULT_AUTO_MERGE_LOOKBACK_HOURS,
     DEFAULT_AUTO_MERGE_GAP_SECONDS,
     DEFAULT_INTERRUPTED_MIN_SECONDS,
@@ -73,6 +80,8 @@ from .const import (
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_COMPLETION_MIN_SECONDS,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
+    DEFAULT_RUNNING_DEAD_ZONE,
+    DEFAULT_END_REPEAT_COUNT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,6 +89,15 @@ _LOGGER = logging.getLogger(__name__)
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME, default=DEFAULT_NAME): str,
+        vol.Required(CONF_DEVICE_TYPE, default=DEFAULT_DEVICE_TYPE): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=[
+                    selector.SelectOptionDict(value=k, label=v)
+                    for k, v in DEVICE_TYPES.items()
+                ],
+                mode=selector.SelectSelectorMode.DROPDOWN,
+            )
+        ),
         vol.Required(CONF_POWER_SENSOR): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="sensor"),
         ),
@@ -109,6 +127,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         options.setdefault(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE)
         options.setdefault(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE)
         options.setdefault(CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE)
+        
+        # New Feature Defaults (Migration)
+        options.setdefault(CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
+        options.setdefault(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD)
+
         # Seed detector settings if missing
         options.setdefault(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
         options.setdefault(CONF_NO_UPDATE_ACTIVE_TIMEOUT, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
@@ -130,6 +153,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         options.setdefault(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD)
         options.setdefault(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS)
         options.setdefault(CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES)
+        # New dead zone and end repeat count defaults
+        options.setdefault(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE)
+        options.setdefault(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
 
         # Bump version and save
         self.hass.config_entries.async_update_entry(
@@ -147,6 +173,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors: dict[str, str] = {}
         if user_input is not None:
+             # Ensure defaults for hidden options
+            user_input[CONF_START_DURATION_THRESHOLD] = DEFAULT_START_DURATION_THRESHOLD
             return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
 
         return self.async_show_form(
@@ -249,6 +277,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if current_notify and current_notify not in notify_services:
             notify_services.append(current_notify)
 
+        current_sensor = self._config_entry.options.get(
+            CONF_POWER_SENSOR,
+            self._config_entry.data.get(CONF_POWER_SENSOR, "")
+        )
+
         # Load suggestion placeholders (suggestions are informational only)
         manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
         suggestions = manager.suggestions if manager else {}
@@ -287,6 +320,26 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="settings",
             data_schema=vol.Schema(
                 {
+                    # --- Device Configuration (Top Priority) ---
+                    vol.Required(
+                        CONF_DEVICE_TYPE,
+                        default=get_val(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
+                    ): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                selector.SelectOptionDict(value=k, label=v)
+                                for k, v in DEVICE_TYPES.items()
+                            ],
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    ),
+                    vol.Optional(
+                        CONF_POWER_SENSOR,
+                        default=current_sensor,
+                    ): selector.EntitySelector(
+                        selector.EntitySelectorConfig(domain="sensor")
+                    ),
+
                     vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
 
                     # --- Detection Settings ---
@@ -294,6 +347,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_MIN_POWER,
                         default=get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER),
                     ): vol.Coerce(float),
+                    vol.Optional(
+                        CONF_START_DURATION_THRESHOLD,
+                        default=get_val(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0.0, max=60.0, step=0.5, unit_of_measurement="s", mode=selector.NumberSelectorMode.BOX)
+                    ),
                     vol.Optional(
                         CONF_OFF_DELAY,
                         default=get_val(CONF_OFF_DELAY, DEFAULT_OFF_DELAY),
@@ -309,6 +368,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         default=get_val(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS),
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0, max=3600, mode=selector.NumberSelectorMode.BOX)
+                    ),
+                    vol.Optional(
+                        CONF_RUNNING_DEAD_ZONE,
+                        default=get_val(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0, max=600, step=10, unit_of_measurement="s", mode=selector.NumberSelectorMode.BOX)
+                    ),
+                    vol.Optional(
+                        CONF_END_REPEAT_COUNT,
+                        default=get_val(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=1, max=10, mode=selector.NumberSelectorMode.BOX)
                     ),
 
                     # --- Notification Settings ---
@@ -1025,7 +1096,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
              choice = user_input["time_range"]
              manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
              
-             if choice == "all":
+             if choice >= 999999:
                  # Merge all cycles (no time limit)
                  count = manager.profile_store.merge_cycles(hours=999999)
              else:
@@ -1044,14 +1115,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="post_process",
             data_schema=vol.Schema({
-                vol.Required("time_range", default="24"): vol.In({
-                    "12": "Last 12 Hours",
-                    "24": "Last 24 Hours",
-                    "48": "Last 48 Hours",
-                    "168": "Last 7 Days",
-                    "all": "All Data"
-                })
-            })
+                vol.Required("time_range", default=24): selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=1, max=9999, unit_of_measurement="h", mode=selector.NumberSelectorMode.BOX)
+                )
+            }),
+            description_placeholders={"info": "Enter number of past hours to process (or use 999999 for all)"}
         )
 
     async def async_step_migrate_data(
