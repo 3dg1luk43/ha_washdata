@@ -60,7 +60,7 @@ After installation, you can add a minimal status card to your dashboard:
    ```
 3. The card shows: Status icon, running state, current program, progress bar, and time remaining.
 
-*The card is served from `/ha_washdata/card.js`. If it doesn't appear, clear your browser cache or restart HA.*
+*The card is served from `/ha_washdata/ha-washdata-card.js`. If it doesn't appear, clear your browser cache or restart HA.*
 
 ### UI & Parameter Tuning
 
