@@ -213,8 +213,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage configuration settings (Basic Step)."""
-        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
-        
         # Initialize or clear stored basic options
         if not hasattr(self, "_basic_options"):
             self._basic_options = {}
