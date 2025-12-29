@@ -163,6 +163,9 @@ class CycleDetector:
                          self._finish_cycle(timestamp, status="completed")
                      else:
                          # Need more consecutive end conditions, reset the low-power timer
+                         # Note: Counter is NOT reset here - it persists across low-power periods
+                         # to accumulate toward the end_repeat_count threshold. This allows
+                         # detection of N periods of low power, each lasting >= off_delay.
                          _LOGGER.debug(f"End condition met {self._end_condition_count}/{self._config.end_repeat_count} times, waiting for next")
                          self._low_power_start = None
             else:
