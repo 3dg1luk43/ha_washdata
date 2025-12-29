@@ -103,6 +103,15 @@ DEVICE_TYPES = {
     DEVICE_TYPE_COFFEE_MACHINE: "Coffee Machine",
 }
 
+# Device-specific progress smoothing thresholds (percentage points)
+# These control how much backward progress is allowed before heavy damping kicks in
+DEVICE_SMOOTHING_THRESHOLDS = {
+    DEVICE_TYPE_WASHING_MACHINE: 5.0,  # Can have repeating phases (rinse cycles)
+    DEVICE_TYPE_DRYER: 3.0,            # More linear, less phase repetition
+    DEVICE_TYPE_DISHWASHER: 5.0,       # Similar to washing machine with distinct phases
+    DEVICE_TYPE_COFFEE_MACHINE: 2.0,   # Short cycles, rapid transitions, less tolerance
+}
+
 # Storage
 STORAGE_VERSION = 1
 STORAGE_KEY = "ha_washdata"
