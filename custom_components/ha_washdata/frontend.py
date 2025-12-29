@@ -27,8 +27,13 @@ def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> None
 
             hass.async_create_task(_safe_register())
             return
-    except Exception:
-        pass
+    except Exception as exc:
+        _LOGGER.debug(
+            "Async static path registration not available; falling back to sync registration for %s -> %s (%s)",
+            url_path,
+            path,
+            exc,
+        )
 
     # Fallback for older HA
     try:
