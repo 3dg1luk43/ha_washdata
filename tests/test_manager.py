@@ -6,7 +6,8 @@ from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
-    CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_NOTIFY_BEFORE_END_MINUTES
+    CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_NOTIFY_BEFORE_END_MINUTES,
+    CONF_POWER_SENSOR, STATE_RUNNING, STATE_OFF
 )
 
 @pytest.fixture
@@ -196,3 +197,79 @@ def test_cycle_end_skips_feedback_low_confidence(manager: WashDataManager, mock_
     fired_events = [c[0][0] for c in mock_hass.bus.async_fire.call_args_list]
     assert "ha_washdata_feedback_requested" not in fired_events
     assert mock_hass.components.persistent_notification.async_create.call_count == 0
+
+
+@pytest.mark.asyncio
+async def test_async_reload_config_blocks_sensor_change_during_active_cycle(
+    manager: WashDataManager, mock_entry: Any, mock_hass: Any
+) -> None:
+    """Test that power sensor changes are blocked when a cycle is active."""
+    # Setup: simulate an active cycle
+    manager.detector.state = STATE_RUNNING
+    original_sensor = manager.power_sensor_entity_id
+    
+    # Create a new config entry with a different power sensor
+    new_entry = MagicMock()
+    new_entry.entry_id = "test_entry"
+    new_entry.options = {
+        CONF_POWER_SENSOR: "sensor.new_power",
+        CONF_MIN_POWER: 2.0,
+        CONF_COMPLETION_MIN_SECONDS: 600,
+        CONF_NOTIFY_BEFORE_END_MINUTES: 5,
+    }
+    new_entry.data = {}
+    
+    # Act: try to reload config with new sensor while cycle is active
+    await manager.async_reload_config(new_entry)
+    
+    # Assert: power sensor should NOT have changed
+    assert manager.power_sensor_entity_id == original_sensor
+    assert manager.power_sensor_entity_id != "sensor.new_power"
+
+
+@pytest.mark.asyncio
+async def test_async_reload_config_allows_sensor_change_when_idle(
+    mock_hass: Any, mock_entry: Any
+) -> None:
+    """Test that power sensor changes are allowed when no cycle is active."""
+    # Setup: create manager with patched dependencies
+    with patch("custom_components.ha_washdata.manager.ProfileStore"), \
+         patch("custom_components.ha_washdata.manager.CycleDetector"), \
+         patch("custom_components.ha_washdata.manager.async_track_state_change_event") as mock_track:
+        mgr = WashDataManager(mock_hass, mock_entry)
+        mgr.profile_store.get_suggestions = MagicMock(return_value={})
+        mgr.profile_store.get_duration_ratio_limits = MagicMock(return_value=(0.7, 1.3))
+        mgr.profile_store.set_duration_ratio_limits = MagicMock()
+        mgr.profile_store.get_active_cycle = MagicMock(return_value=None)
+        mgr.profile_store.async_clear_active_cycle = AsyncMock()
+        mgr._setup_maintenance_scheduler = AsyncMock()
+        
+        # Simulate idle state
+        mgr.detector.state = STATE_OFF
+        original_sensor = mgr.power_sensor_entity_id
+        
+        # Mock the hass.states.get to return a valid state
+        mock_state = MagicMock()
+        mock_state.state = "10.5"
+        mock_hass.states.get = MagicMock(return_value=mock_state)
+        
+        # Create a new config entry with a different power sensor
+        new_entry = MagicMock()
+        new_entry.entry_id = "test_entry"
+        new_entry.options = {
+            CONF_POWER_SENSOR: "sensor.new_power",
+            CONF_MIN_POWER: 2.0,
+            CONF_COMPLETION_MIN_SECONDS: 600,
+            CONF_NOTIFY_BEFORE_END_MINUTES: 5,
+        }
+        new_entry.data = {}
+        
+        # Act: reload config with new sensor while idle
+        await mgr.async_reload_config(new_entry)
+        
+        # Assert: power sensor should have changed
+        assert mgr.power_sensor_entity_id == "sensor.new_power"
+        assert mgr.power_sensor_entity_id != original_sensor
+        # Verify new listener was attached
+        mock_track.assert_called()
+
