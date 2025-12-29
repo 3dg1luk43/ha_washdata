@@ -43,7 +43,7 @@
       },
       "settings": {
         "title": "Settings",
-        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.\n\nSuggested (from learning; not applied automatically):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
+        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.",
         "data": {
           "apply_suggestions": "Apply Suggested Values",
           "device_type": "Device Type",
@@ -78,10 +78,11 @@
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
           "running_dead_zone": "Running Dead Zone (seconds)",
           "end_repeat_count": "End Repeat Count",
-          "auto_maintenance": "Enable Auto-Maintenance"
+          "auto_maintenance": "Enable Auto-Maintenance",
+          "show_advanced": "Show Advanced Settings"
         },
         "data_description": {
-          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.",
+          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
           "device_type": "Select the type of appliance (Washing Machine, Dryer, Dishwasher, Coffee Machine). This tag is stored with each cycle for better organization.",
           "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data—useful if you replace a smart plug.",
           "min_power": "Power threshold (watts) above which the appliance is considered running. Default: 2W.",

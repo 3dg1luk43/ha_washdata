@@ -38,6 +38,8 @@ CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
 CONF_APPLY_SUGGESTIONS = "apply_suggestions"
 CONF_RUNNING_DEAD_ZONE = "running_dead_zone"  # Seconds after start to ignore power dips
 CONF_END_REPEAT_COUNT = "end_repeat_count"  # Number of times end condition must be met
+CONF_SHOW_ADVANCED = "show_advanced"  # Toggle advanced settings
+
 
 NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
