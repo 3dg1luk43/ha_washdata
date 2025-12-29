@@ -204,6 +204,7 @@ class WashDataManager:
         self._current_program = "off"
         self._time_remaining: float | None = None
         self._cycle_progress: float = 0.0
+        self._smoothed_progress: float = 0.0  # Smoothed progress tracking for EMA
         self._cycle_completed_time: datetime | None = None  # Track when cycle finished
         self._progress_reset_delay: int = int(progress_reset_delay)  # Reset progress after idle
         self._last_reading_time: datetime | None = None
@@ -1477,8 +1478,7 @@ class WashDataManager:
                     # Smoothing: Exponential Moving Average
                     # If this is the first reliable estimate, snap to it.
                     # Otherwise, blend 20% new, 80% old.
-                    current_smoothed = getattr(self, "_smoothed_progress", None)
-                    if current_smoothed is None:
+                    if self._smoothed_progress == 0.0:
                          self._smoothed_progress = phase_progress
                     else:
                          # Monotonicity check: don't let it jump BACKWARD significantly
@@ -1497,7 +1497,7 @@ class WashDataManager:
                              )
                          else:
                              # Normal update
-                             self._smoothed_progress = (current_smoothed * 0.8) + (phase_progress * 0.2)
+                             self._smoothed_progress = (self._smoothed_progress * 0.8) + (phase_progress * 0.2)
                     
                     # Ensure we don't exceed 99% until actually finished
                     self._smoothed_progress = min(99.0, self._smoothed_progress)
@@ -1522,10 +1522,9 @@ class WashDataManager:
             progress = (duration_so_far / self._matched_profile_duration) * 100.0
             
             # Blend linear estimate into smoothed tracker too, to prevent jumps if we lose phase lock
-            current_smoothed = getattr(self, "_smoothed_progress", 0.0)
-            if current_smoothed > 0:
+            if self._smoothed_progress > 0:
                  # Blend gently
-                 self._smoothed_progress = (current_smoothed * 0.9) + (progress * 0.1)
+                 self._smoothed_progress = (self._smoothed_progress * 0.9) + (progress * 0.1)
             else:
                  self._smoothed_progress = progress
 
