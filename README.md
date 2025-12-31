@@ -26,6 +26,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Changeable Power Sensor**: Switch plugs without losing history.
 - **Minimal Status Card**: Optional custom Lovelace card.
 - **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
+- **Manual Profile Creation**: Create profiles even without historical cycles by specifying a baseline duration (e.g., "Eco Mode - 3h").
 - **Ghost Cycle Prevention**: Minimum runtime threshold avoids recording brief power spikes as completed cycles.
 - **Local Only**: No cloud dependency, no external services. All data stays in your Home Assistant.
 - **Notifications**: Integrated alerts for cycle start, finish, and **pre-completion** (e.g., 5 mins before finish).
@@ -52,6 +53,7 @@ Manual fallback (if not using HACS): copy `custom_components/ha_washdata` into y
    - Select the **Device Type** (Washing Machine, Dryer, Dishwasher, or Coffee Machine).
    - Select the **Power Sensor** entity from your smart plug.
    - Set the **Minimum Power** threshold (default 2W).
+   - **Step 2 (Optional)**: You will be asked if you want to create your **First Profile** immediately (e.g., "Cotton"). This helps the system provide time estimates right away.
    - *Note: Device Type automatically sets optimal defaults (e.g., 60s completion threshold for Coffee Machines).*
 
 ### Lovelace Status Card

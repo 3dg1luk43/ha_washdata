@@ -13,6 +13,16 @@
           "device_type": "What type of appliance is this? Helps tailor detection and labeling.",
           "power_sensor": "The sensor entity that reports real-time power consumption (in watts) from your smart plug.",
           "min_power": "Power readings above this threshold (in watts) indicate the appliance is running. Start with 2W for most devices."
+        },
+         "title": "WashData Setup",
+        "description": "Configure your washing machine or other appliance.\n\nPower sensor is required.\n\n**Next, you will be asked if you want to create your first profile.**"
+      },
+      "first_profile": {
+        "title": "Create First Profile",
+        "description": "A **Cycle** is a complete run of your appliance (e.g., a load of laundry). A **Profile** groups these cycles by type (e.g., 'Cotton', 'Quick Wash'). Creating a profile now helps the integration estimate duration immediately.\n\nYou can manually select this profile in the device controls if it's not detected automatically.\n\n**Leave 'Profile Name' empty to skip this step.**",
+        "data": {
+          "profile_name": "Profile Name (Optional)",
+          "manual_duration": "Estimated Duration (minutes)"
         }
       }
     },
@@ -193,12 +203,14 @@
       },
       "create_profile": {
         "title": "Create New Profile",
-        "description": "Profile name examples: 'Delicates', 'Heavy Duty', 'Quick Wash'",
+        "description": "Create a new profile manually or from a past cycle.\n\nProfile name examples: 'Delicates', 'Heavy Duty', 'Quick Wash'",
         "data": {
           "profile_name": "Profile Name",
-          "reference_cycle": "Reference Cycle (optional)"
+          "reference_cycle": "Reference Cycle (optional)",
+          "manual_duration": "Manual Duration (minutes)"
         }
       },
+
       "edit_profile": {
         "title": "Edit Profile",
         "description": "Select a profile to rename",

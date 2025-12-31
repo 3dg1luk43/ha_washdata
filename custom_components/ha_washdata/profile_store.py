@@ -426,12 +426,13 @@ class ProfileStore:
             except Exception as e:
                 _LOGGER.debug(f"Envelope rebuild skipped for '{p}' during retention: {e}")
 
-    def delete_cycle(self, cycle_id: str) -> bool:
+    async def delete_cycle(self, cycle_id: str) -> bool:
         """Delete a cycle by ID. Returns True if deleted, False if not found.
         Also removes any profiles that reference this cycle."""
         cycles = self._data["past_cycles"]
         for i, cycle in enumerate(cycles):
             if cycle.get("id") == cycle_id:
+                profile_name = cycle.get("profile_name")
                 cycles.pop(i)
                 # Clean up any profiles referencing this cycle
                 orphaned_profiles = [
@@ -441,6 +442,13 @@ class ProfileStore:
                 for name in orphaned_profiles:
                     del self._data["profiles"][name]
                     _LOGGER.info(f"Removed orphaned profile '{name}' (referenced deleted cycle {cycle_id})")
+                
+                # If cycle was labeled (and profile not orphaned/deleted), rebuild statistics
+                if profile_name and profile_name not in orphaned_profiles and profile_name in self._data["profiles"]:
+                    self.rebuild_envelope(profile_name)
+                    _LOGGER.info(f"Rebuilt statistics for '{profile_name}' after cycle deletion")
+
+                await self.async_save()
                 _LOGGER.info(f"Deleted cycle {cycle_id}")
                 return True
         _LOGGER.warning(f"Cycle {cycle_id} not found for deletion")
@@ -788,9 +796,10 @@ class ProfileStore:
             })
         return sorted(profiles, key=lambda p: str(p.get("name", "")))
 
-    async def create_profile_standalone(self, name: str, reference_cycle_id: str | None = None) -> None:
+    async def create_profile_standalone(self, name: str, reference_cycle_id: str | None = None, avg_duration: float | None = None) -> None:
         """Create a profile without immediately labeling a cycle.
-        If reference_cycle_id is provided, use that cycle's characteristics."""
+        If reference_cycle_id is provided, use that cycle's characteristics.
+        If avg_duration is provided (and no reference cycle), use it as baseline."""
         if name in self._data.get("profiles", {}):
             raise ValueError(f"Profile '{name}' already exists")
         
@@ -802,6 +811,10 @@ class ProfileStore:
                     "avg_duration": cycle["duration"],
                     "sample_cycle_id": reference_cycle_id
                 }
+        elif avg_duration is not None and avg_duration > 0:
+            profile_data = {
+                "avg_duration": float(avg_duration),
+            }
         
         # Create profile with minimal data (will be updated when cycles are labeled)
         self._data.setdefault("profiles", {})[name] = profile_data
