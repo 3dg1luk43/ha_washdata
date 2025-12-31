@@ -183,7 +183,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         # Validate input
-        errors = {}
         try:
             # Basic validation
             if user_input[CONF_MIN_POWER] <= 0:
@@ -205,7 +204,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Step to optionally create the first profile."""
-        errors = {}
         
         if user_input is not None:
             # Check if user wants to create a profile (if name is provided)
@@ -242,10 +240,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
     @staticmethod
     def async_get_options_flow(
-        config_entries: config_entries.ConfigEntry,
+        config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Create the options flow."""
-        return OptionsFlowHandler(config_entries)
+        return OptionsFlowHandler(config_entry)
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
@@ -1101,7 +1099,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         if user_input is not None:
             cycle_id = user_input["cycle_id"]
-            title = self.config_entry.title
             await manager.profile_store.delete_cycle(cycle_id)
             # await manager.profile_store.async_save() # Handled inside delete_cycle now
             manager._notify_update()
