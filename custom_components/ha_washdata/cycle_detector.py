@@ -211,7 +211,7 @@ class CycleDetector:
                 if low_duration >= effective_off_delay:
                     # Check Profile Match extension logic (only if not already predictive ended)
                     extended = False
-                    if not predictive_end and matched_profile_name and matched_expected_duration > 0:
+                    if not predictive_end and matched_profile_name and matched_confidence >= 0.70 and matched_expected_duration > 0:
                         pct_complete = (cycle_elapsed / matched_expected_duration)
                         should_extend = pct_complete < 0.95 or (matched_phase_name is not None)
                         
