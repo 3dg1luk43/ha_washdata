@@ -22,6 +22,8 @@ class WashDataCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
+    this._rendered = false;
+    this._handleClick = this._handleClick.bind(this);
   }
 
   setConfig(config) {
@@ -41,103 +43,109 @@ class WashDataCard extends HTMLElement {
     return 1;
   }
 
+  _handleClick() {
+    const entityId = this._cfg.entity;
+    const event = new CustomEvent("hass-more-info", {
+      detail: { entityId },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
+  }
+
   _render() {
     if (!this.shadowRoot) return;
 
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-          height: 100%;
-        }
-        ha-card {
-          padding: 0;
-          background: var(--ha-card-background, var(--card-background-color, white));
-          border-radius: var(--ha-card-border-radius, 12px);
-          box-shadow: var(--ha-card-box-shadow, none);
-          overflow: hidden;
-          cursor: pointer;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          box-sizing: border-box;
-          border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color, var(--divider-color));
-        }
-        .tile {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          padding: 0 12px;
-          gap: 12px;
-          width: 100%;
-          height: 100%;
-          min-height: 56px; /* standard tile height */
-          max-height: 56px;
-          box-sizing: border-box;
-        }
-        .icon-container {
-          width: 40px;
-          height: 40px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--tile-icon-bg, rgba(128, 128, 128, 0.1));
-          color: var(--tile-icon-color, var(--primary-text-color));
-          flex-shrink: 0;
-          transition: background-color 0.3s, color 0.3s;
-        }
-        ha-icon {
-          --mdc-icon-size: 24px;
-        }
-        .info {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          overflow: hidden;
-          flex: 1;
-        }
-        .primary {
-          font-weight: 500;
-          font-size: 14px;
-          color: var(--primary-text-color);
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          line-height: 1.2;
-        }
-        .secondary {
-          font-size: 12px;
-          color: var(--secondary-text-color);
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          line-height: 1.2;
-          margin-top: 2px;
-        }
-      </style>
-      <ha-card id="card">
-        <div class="tile">
-          <div class="icon-container" id="icon-container">
-            <ha-icon id="icon"></ha-icon>
+    // Only create the DOM once to avoid memory leaks from duplicate event listeners
+    if (!this._rendered) {
+      this.shadowRoot.innerHTML = `
+        <style>
+          :host {
+            display: block;
+            height: 100%;
+          }
+          ha-card {
+            padding: 0;
+            background: var(--ha-card-background, var(--card-background-color, white));
+            border-radius: var(--ha-card-border-radius, 12px);
+            box-shadow: var(--ha-card-box-shadow, none);
+            overflow: hidden;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+            border: var(--ha-card-border-width, 1px) solid var(--ha-card-border-color, var(--divider-color));
+          }
+          .tile {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0 12px;
+            gap: 12px;
+            width: 100%;
+            height: 100%;
+            min-height: 56px; /* standard tile height */
+            max-height: 56px;
+            box-sizing: border-box;
+          }
+          .icon-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--tile-icon-bg, rgba(128, 128, 128, 0.1));
+            color: var(--tile-icon-color, var(--primary-text-color));
+            flex-shrink: 0;
+            transition: background-color 0.3s, color 0.3s;
+          }
+          ha-icon {
+            --mdc-icon-size: 24px;
+          }
+          .info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+            flex: 1;
+          }
+          .primary {
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--primary-text-color);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            line-height: 1.2;
+          }
+          .secondary {
+            font-size: 12px;
+            color: var(--secondary-text-color);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            line-height: 1.2;
+            margin-top: 2px;
+          }
+        </style>
+        <ha-card id="card">
+          <div class="tile">
+            <div class="icon-container" id="icon-container">
+              <ha-icon id="icon"></ha-icon>
+            </div>
+            <div class="info">
+              <div class="primary" id="title"></div>
+              <div class="secondary" id="state"></div>
+            </div>
           </div>
-          <div class="info">
-            <div class="primary" id="title"></div>
-            <div class="secondary" id="state"></div>
-          </div>
-        </div>
-      </ha-card>
-    `;
+        </ha-card>
+      `;
 
-    this.shadowRoot.getElementById("card").addEventListener("click", () => {
-      const entityId = this._cfg.entity;
-      const event = new CustomEvent("hass-more-info", {
-        detail: { entityId },
-        bubbles: true,
-        composed: true,
-      });
-      this.dispatchEvent(event);
-    });
+      this.shadowRoot.getElementById("card").addEventListener("click", this._handleClick);
+      this._rendered = true;
+    }
 
     this._update();
   }
