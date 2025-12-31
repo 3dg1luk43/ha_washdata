@@ -16,8 +16,6 @@ async def test_manual_duration_creation(mock_hass: HomeAssistant):
     store.async_save = noop_save
     
     # Create profile with manual duration
-    
-    # Create profile with manual duration
     await store.create_profile_standalone(
         name="Manual 30m",
         avg_duration=1800.0  # 30 minutes in seconds

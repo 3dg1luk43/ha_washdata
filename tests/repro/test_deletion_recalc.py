@@ -2,7 +2,6 @@ import pytest
 from unittest.mock import MagicMock
 from homeassistant.core import HomeAssistant
 from custom_components.ha_washdata.profile_store import ProfileStore
-import numpy as np
 
 @pytest.mark.asyncio
 async def test_deletion_recalculates_stats(mock_hass: HomeAssistant):
