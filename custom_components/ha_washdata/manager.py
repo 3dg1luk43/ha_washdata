@@ -1946,6 +1946,10 @@ class WashDataManager:
             self._current_program = "detecting..."
             self._matched_profile_duration = None
             self._update_estimates()  # Trigger immediate re-detection attempt
+        else:
+            # If not running, clear the forced program
+            self._current_program = None
+            self._matched_profile_duration = None
         
         self._notify_update()
         _LOGGER.info("Manual program cleared, reverting to auto-detection")

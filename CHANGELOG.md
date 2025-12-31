@@ -5,6 +5,19 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2024-12-31
+
+### Added
+- **Manual Duration for Profiles**: Users can now specify a manual "Baseline Duration" when creating profiles, useful for setting up profiles without historical data (e.g., "Eco Mode - 180 mins").
+- **Onboarding First Profile Step**: New users are now prompted to optionally create their first profile immediately after setting up the device, streamlining the initial experience.
+- **Automatic Recalculation**: Deleting a cycle now automatically triggers a recalculation of the associated profile's statistical envelope, ensuring accurate estimates even after cleaning up bad data.
+
+### Fixed
+- **Translations**: Fixed missing text labels in the "Create Profile" modal and Onboarding flow.
+- **Configuration Flow**: Resolved `AttributeError: _get_schema` in the initial setup step.
+- **Mocking Issues**: Improved test verification process for Config Flow.
+- **Manual Override**: Fixed issue where unselecting a manual profile while idle would not clear the program sensor.
+
 ## [0.3.0] - 2024-12-31
 
 This release marks a significant milestone for HA WashData, introducing intelligent profile-based cycle detection, a dedicated dashboard card, a completely rewritten configuration experience, and major improvements to cycle detection and time estimation.
@@ -20,7 +33,7 @@ This release marks a significant milestone for HA WashData, introducing intellig
 - **Shadow DOM Implementation**: Isolated styling to prevent conflicts with other Home Assistant components
 
 #### Intelligent Profile Matching System
-Revolutionary new cycle detection capabilities powered by NumPy:
+New cycle detection capabilities powered by NumPy:
 - **Profile-Based Detection**: Learns appliance cycle patterns and uses shape correlation matching (MAE, correlation, peak similarity) to identify cycles in real-time
 - **Predictive Cycle Ending**: Short-circuits the `off_delay` wait when a cycle matches with high confidence (>90%) and is >98% complete, reducing unnecessary wait times by up to 30 seconds
 - **Confidence Boosting**: Adds a 20% score boost to profile matches with exceptionally high shape correlation (>0.85)
@@ -32,7 +45,6 @@ Revolutionary new cycle detection capabilities powered by NumPy:
 #### Program Selection Entity
 - New `select.<name>_program_select` entity for manual program overrides and system teaching
 - Allows users to manually select the active program, helping the system learn and improve detection accuracy
-- Integrates seamlessly with the custom dashboard card
 
 #### Enhanced Configuration Wizard
 The configuration flow has been rebuilt from the ground up to be friendlier and more organized:
@@ -77,13 +89,12 @@ New logic to handle tricky appliances and prevent false detections:
   - `--variability Y`: Adds realistic duration variance (default 0.15) for shape matching validation
   - `--fault [DROPOUT|GLITCH|STUCK|INCOMPLETE]`: Injects anomalies for resilience testing
 - **Secrets Template**: Added `devtools/secrets.py.template` for easier development setup
-- **VS Code Settings**: Added `.vscode/settings.json` for consistent development environment
 
 #### Documentation & Assets
 - **Enhanced README**: Completely rewritten with detailed configuration options, examples, and troubleshooting
 - **Updated IMPLEMENTATION.md**: Reflects new architecture with NumPy-powered matching and profile persistence
 - **Improved TESTING.md**: Enhanced verification guide with new test scenarios
-- **Screenshot Assets**: Added professional screenshots in `img/` directory:
+- **Screenshot Assets**: Added screenshots in `img/` directory:
   - `integration-controls.png`
   - `integration-diagnostics.png`
   - `integration-profiles.png`
@@ -126,11 +137,6 @@ New logic to handle tricky appliances and prevent false detections:
 ### Removed
 
 - **Deprecated Auto-Maintenance Switch**: Removed standalone `auto_maintenance` switch entity (now a backend setting)
-- **Legacy Scripts**: Removed obsolete development scripts:
-  - `deploy_to_ha.sh`
-  - `push_test_data.py`
-  - `run_tests.sh`
-- **Mock Data**: Removed outdated `mock_data/washdata.dump` and `mqtt-mock.log`
 
 ### Fixed
 
