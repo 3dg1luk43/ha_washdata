@@ -20,6 +20,7 @@ def detector_config():
         abrupt_drop_watts=500.0,
         abrupt_drop_ratio=0.5,
         abrupt_high_load_factor=1.2,
+        start_duration_threshold=0.0,
     )
 
 @pytest.fixture
@@ -235,4 +236,119 @@ def test_force_end(detector_config, mock_callbacks):
     #   status = "interrupted"
     
     # 300 < 600. So it should be reclassified as interrupted.
-    assert cycle_data["status"] == "interrupted" 
+    assert cycle_data["status"] == "interrupted"
+
+def test_end_repeat_count_accumulates_across_periods(mock_callbacks):
+    """Test that end_condition_count accumulates across low-power periods.
+    
+    When end_repeat_count > 1, the counter should persist across resets of
+    low_power_start. This allows the detector to require multiple periods
+    of low power (each >= off_delay) before ending the cycle.
+    """
+    config = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=60,
+        interrupted_min_seconds=150,
+        completion_min_seconds=600,
+        end_repeat_count=2,  # Require 2 periods of low power
+        start_duration_threshold=0.0,  # Disable start debounce
+    )
+    
+    detector = CycleDetector(
+        config=config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+    
+    # Start cycle
+    detector.process_reading(100.0, dt(0))
+    assert detector.state == STATE_RUNNING
+    
+    # Run for 15 mins (enough to exceed completion_min_seconds of 600)
+    for t in range(10, 900, 10):
+        detector.process_reading(100.0, dt(t))
+    
+    # Enter first low-power period at t=900
+    detector.process_reading(1.0, dt(900))
+    assert detector.is_waiting_low_power()
+    
+    # Wait past first off_delay (60s) -> counter should increment to 1
+    detector.process_reading(1.0, dt(961))
+    # Cycle should NOT end yet (need 2 periods)
+    assert detector.state == STATE_RUNNING
+    mock_callbacks["on_cycle_end"].assert_not_called()
+    
+    # low_power_start should now be reset, but counter should persist
+    # Next reading at t=962 should start a new low-power period
+    detector.process_reading(1.0, dt(962))
+    
+    # Wait past second off_delay -> counter should increment to 2
+    detector.process_reading(1.0, dt(1023))  # 962 + 61 = 1023
+    
+    # Now cycle should end
+    assert detector.state == STATE_OFF
+    mock_callbacks["on_cycle_end"].assert_called_once()
+    
+    cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
+    assert cycle_data["status"] == "completed"
+
+def test_profile_match_extends_cycle(detector_config, mock_callbacks):
+    """Test that a matched profile extends the cycle during low power."""
+    # Mock profile matcher
+    # Returns (name, confidence, expected_duration, phase_name)
+    # Expected duration 20 mins (1200s).
+    expected = 1200.0
+    def matcher_side_effect(readings):
+         start = readings[0][0]
+         end = readings[-1][0]
+         dur = (end - start).total_seconds()
+         # Return Drying if < 130% (1560s)
+         phase = "Drying" if dur < (expected * 1.3) else None
+         return ("TestProfile", 0.9, expected, phase)
+         
+    mock_matcher = Mock(side_effect=matcher_side_effect)
+    
+    detector = CycleDetector(
+        config=detector_config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+        profile_matcher=mock_matcher,
+    )
+    
+    # Start and run for 5 mins (300s)
+    detector.process_reading(100.0, dt(0))
+    detector.process_reading(100.0, dt(300))
+    
+    # Low power start at 301s
+    detector.process_reading(0.0, dt(301))
+    
+    # Wait off_delay (60s) -> 361s
+    # Should trigger match check.
+    # Current duration ~6 mins. Expected 20 mins. Progress 30%.
+    # Should EXTEND.
+    detector.process_reading(0.0, dt(362))
+    
+    # Verify match called
+    mock_matcher.assert_called()
+    
+    # Should still be running
+    assert detector.state == STATE_RUNNING
+    assert "Running (Drying)" in detector.sub_state
+    
+    # Low power again for another 60s -> 422s
+    # Should extend again
+    detector.process_reading(0.0, dt(422))
+    assert detector.state == STATE_RUNNING
+    
+    # Now jump to 1300s (108%). "Drying" should still keep it alive.
+    detector.process_reading(0.0, dt(1300))
+    assert detector.state == STATE_RUNNING
+    assert "Running (Drying)" in detector.sub_state
+    
+    # Now jump to 1600s (133%). "Drying" should stop.
+    # pct_complete > 0.95 and no phase name -> End.
+    detector.process_reading(0.0, dt(1600))
+    
+    assert detector.state == STATE_OFF
+    mock_callbacks["on_cycle_end"].assert_called_once()
+ 

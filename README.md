@@ -8,13 +8,23 @@
 
 A Home Assistant custom component to monitor washing machines via smart sockets, learn power profiles, and estimate completion time using shape-correlation matching.
 
-Although designed for washing machines, it also works well for dryers and dishwashers that have reasonably predictable power-draw cycles.
+
+> [!CAUTION]  
+> **ELECTRICAL SAFETY WARNING**: Using smart plugs such as Shelly or Sonoff with high-amperage appliances (washing machines, dryers, dishwriters) carries significant risk.  
+> 
+> *   **Fire Hazard**: Cheap or low-rated smart plugs may overheat, melt, or catch fire under sustained high loads (heating/drying phases).  
+> *   **Rating Check**: Ensure your smart plug is rated for the **maximum peak power** of your appliance (often >2500W). Standard 10A plugs may fail; 16A+ or hardwired modules are recommended.  
+> *   **Use at Your Own Risk**: The authors of this integration are not responsible for any electrical damage or fires caused by improper hardware usage. inspect your hardware regularly.
 
 ## ✨ Features
 
-- **Cycle Detection**: Automatically detects when the washer starts and finishes based on power draw.
-- **NumPy Profiling**: Learns from past cycles to identify programs (e.g., "Cotton 60°C") using advanced NumPy-powered shape correlation (not just duration).
-- **Time Estimation**: Estimates remaining time based on recognized profiles.
+- **Multi-Device Support**: Track Washing Machines, Dryers, Dishwashers, or Coffee Machines with device-type tagging.
+- **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic to finish faster when confidence is high.
+- **Power Spike Filtering**: Ignores brief boot spikes to prevent false starts.
+- **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles by their unique power curve signature.
+- **Smart Time Estimation**: "Phase-aware" prediction detects variance (e.g., heating) and locks the countdown to prevent erratic jumps.
+- **Changeable Power Sensor**: Switch plugs without losing history.
+- **Minimal Status Card**: Optional custom Lovelace card.
 - **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
 - **Ghost Cycle Prevention**: Minimum runtime threshold avoids recording brief power spikes as completed cycles.
 - **Local Only**: No cloud dependency, no external services. All data stays in your Home Assistant.
@@ -38,9 +48,27 @@ Manual fallback (if not using HACS): copy `custom_components/ha_washdata` into y
 1. Go to **Settings > Devices & Services**.
 2. Click **Add Integration** and search for **HA WashData**.
 3. Follow the configuration flow:
-   - Select the **Power Sensor** of your smart plug.
+   - Give your appliance a **Name**.
+   - Select the **Device Type** (Washing Machine, Dryer, Dishwasher, or Coffee Machine).
+   - Select the **Power Sensor** entity from your smart plug.
    - Set the **Minimum Power** threshold (default 2W).
-   - Give your washer a name.
+   - *Note: Device Type automatically sets optimal defaults (e.g., 60s completion threshold for Coffee Machines).*
+
+### Lovelace Status Card
+
+
+After installation, you can add a minimal status card to your dashboard:
+
+1. Edit your dashboard → Add Card → Manual.
+2. Enter:
+   ```yaml
+   type: custom:ha-washdata-card
+   entity: sensor.washing_machine
+   title: "My Washer"
+   ```
+3. The card shows: Status icon, running state, current program, progress bar, and time remaining.
+
+*The card is served from `/ha_washdata/ha-washdata-card.js`. If it doesn't appear, clear your browser cache or restart HA.*
 
 ### UI & Parameter Tuning
 

@@ -670,8 +670,10 @@ class ProfileStore:
             profile_duration = profile.get("avg_duration", sample_cycle.get("duration", 0))
             if profile_duration > 0:
                 duration_ratio = current_duration / profile_duration
-                if duration_ratio < self._min_duration_ratio or duration_ratio > self._max_duration_ratio:
-                    _LOGGER.debug(f"Profile {name}: duration mismatch (current={current_duration:.0f}s, expected={profile_duration:.0f}s, ratio={duration_ratio:.2f}, range={self._min_duration_ratio:.2f}-{self._max_duration_ratio:.2f})")
+                # Only check upper bound for running cycles to allow early detection.
+                # The minimum length requirement is handled in _calculate_similarity (approx 7%).
+                if duration_ratio > self._max_duration_ratio:
+                    _LOGGER.debug(f"Profile {name}: duration mismatch (current={current_duration:.0f}s, expected={profile_duration:.0f}s, ratio={duration_ratio:.2f}, max={self._max_duration_ratio:.2f})")
                     continue
 
             # Calculate similarity
@@ -698,8 +700,8 @@ class ProfileStore:
         len_cur = len(current)
         len_sam = len(sample)
         
-        # Need at least 10% of profile to make reasonable comparison
-        if len_cur < max(3, len_sam * 0.1):
+        # Need at least 7% of profile to make reasonable comparison (lowered from 10% for earlier detection)
+        if len_cur < max(3, len_sam * 0.07):
             return 0.0
         
         # Compare prefix of current cycle to same-length prefix of sample
@@ -737,6 +739,11 @@ class ProfileStore:
             corr_score = max(0.0, correlation)  # Clamp negative to 0
             
             final_score = 0.4 * mae_score + 0.4 * corr_score + 0.2 * peak_score
+            
+            # Boost score if correlation is very high (strong shape match)
+            if correlation > 0.85:
+                final_score *= 1.2
+                final_score = min(1.0, final_score) # Cap at 1.0
             
             _LOGGER.debug(f"Similarity calc: mae={mae:.1f}W, corr={correlation:.3f}, peak_diff={peak_diff:.1f}W, final={final_score:.3f}")
             

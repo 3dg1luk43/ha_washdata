@@ -63,11 +63,15 @@ from .const import (
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_COMPLETION_MIN_SECONDS,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
+    DEFAULT_DEVICE_TYPE,
+    DEFAULT_START_DURATION_THRESHOLD,
+    CONF_DEVICE_TYPE,
+    CONF_START_DURATION_THRESHOLD,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SWITCH, Platform.SELECT]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SELECT]
 
 
 def _require_str(value: Any, name: str) -> str:
@@ -103,6 +107,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS)
     options.setdefault(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO)
     options.setdefault(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR)
+    
+    # New Feature Defaults (Version 3)
+    options.setdefault(CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
+    options.setdefault(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD)
 
     # Matching + retention + watchdog defaults
     options.setdefault(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL)
@@ -134,6 +142,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         return True
     
     hass.data.setdefault(DOMAIN, {})
+    
+    # Migration: Remove old auto_maintenance switch entity (now in settings)
+    from homeassistant.helpers import entity_registry as er
+    ent_reg = er.async_get(hass)
+    old_switch_id = f"{entry.entry_id}_auto_maintenance"
+    old_entity = ent_reg.async_get_entity_id("switch", DOMAIN, old_switch_id)
+    if old_entity:
+        _LOGGER.info("Removing deprecated auto_maintenance switch entity: %s", old_entity)
+        ent_reg.async_remove(old_entity)
     
     from .manager import WashDataManager
     manager = WashDataManager(hass, entry)
@@ -248,6 +265,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.info(f"Auto-label complete: {stats['labeled']} labeled, {stats['skipped']} skipped")
             
         hass.services.async_register(DOMAIN, "auto_label_cycles", handle_auto_label_cycles)
+
+    # Register custom card via frontend.py (only once, not per entry)
+    if not hass.data.get(f"{DOMAIN}_card_registered"):
+        from .frontend import WashDataCardRegistration
+        card_reg = WashDataCardRegistration(hass)
+        await card_reg.async_register()
+        hass.data[f"{DOMAIN}_card_registered"] = True
 
     # Register feedback service
     if not hass.services.has_service(DOMAIN, SERVICE_SUBMIT_FEEDBACK.split(".")[-1]):

@@ -4,6 +4,12 @@
 - Purpose: Home Assistant custom integration that watches a smart plug's power to detect appliance cycles (washers; also suitable for dryers/dishwashers with predictable cycles), store traces, and expose HA entities.
 - Recent Phase: UI Refinement, NumPy-powered matching, and reactive synchronization.
 
+## Recent Updates (Dec 30, 2025)
+- ✅ **Predictive End Detection**: Short-circuits the `off_delay` wait if a cycle matches with high confidence (>90%) and is >98% complete.
+- ✅ **Confidence Boosting**: Adds a 20% score boost to profile matches if the shape correlation is exceptionally high (>0.85).
+- ✅ **Smart Time Prediction**: Detects high-variance phases (e.g. heating) and "locks" the time estimate to prevent erratic jumps.
+- ✅ **Data-Driven Tests**: New test suite `tests/test_real_data.py` replays real-world CSV/JSON cycle data.
+
 ## Recent Updates (Dec 20, 2025)
 - ✅ **NumPy Shape-Correlation Matching**: Replaced simple duration matching with a weighted similarity score (MAE 40%, Correlation 40%, Peak Similarity 20%).
 - ✅ **Program Selection Entity**: Added `select.<name>_program_select` for manual overrides and easier system teaching.
@@ -25,8 +31,8 @@
 
 ## Core Logic & Guardians
 
-- **Cycle Detection**: OFF→RUNNING when smoothed power >= `min_power`. Finishes after `off_delay` seconds. Throttled to ≥2.5s spacing.
-- **Smart Matching**: Uses NumPy correlation instead of just duration. Score must exceed `learning_confidence` for auto-labeling. Matches running cycles after 30% duration.
+- **Cycle Detection**: OFF→RUNNING when smoothed power >= `min_power`. Finishes after `off_delay` seconds OR **Predictive End** (30s delay if >98% complete).
+- **Smart Matching**: Uses NumPy correlation instead of just duration. weighted score (MAE+Corr+Peak). Boosts score if correlation > 0.85. Matches running cycles after 30% duration.
 - **Cycle Status**:
   - ✓ **"completed"** - High-confidence natural drop (duration > `completion_min_seconds`).
   - ✓ **"force_stopped"** - Watchdog completion (sensor offline but power was low).
