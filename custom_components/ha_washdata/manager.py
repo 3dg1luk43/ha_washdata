@@ -230,7 +230,7 @@ class WashDataManager:
                     
                     if is_dishwasher and confidence >= 0.70 and pct_complete >= 0.70 and pct_complete <= 1.20:
                         # Dishwashers typically have a long drying phase at the end
-                         phase_name = "Drying"
+                        phase_name = "Drying"
                     
                     # TODO: Add logic for Washing Machine "Rinse/Spin" based on power shape?
             
@@ -344,7 +344,12 @@ class WashDataManager:
         if new_sensor and new_sensor != self.power_sensor_entity_id:
             # Block sensor changes when a cycle is active to prevent inconsistent state
             d_state = self.detector.state
-            _LOGGER.warning(f"DEBUG: Reloading config. detector.state={d_state!r} (type={type(d_state)}), RUNNING={STATE_RUNNING!r}")
+            _LOGGER.debug(
+                "Reloading config: detector.state=%r (type=%s), RUNNING=%r",
+                d_state,
+                type(d_state),
+                STATE_RUNNING,
+            )
             if d_state == STATE_RUNNING:
                 _LOGGER.warning(
                     "Cannot change power sensor from %s to %s while a cycle is active. "
@@ -927,7 +932,7 @@ class WashDataManager:
         event_cycle_data["device_type"] = self.device_type
         # Add program if missing or generic
         if "profile_name" not in event_cycle_data and self._current_program:
-             event_cycle_data["profile_name"] = self._current_program
+            event_cycle_data["profile_name"] = self._current_program
 
         self.hass.bus.async_fire(
             EVENT_CYCLE_ENDED, 
@@ -945,11 +950,8 @@ class WashDataManager:
         # Send notification if enabled
         events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
         if NOTIFY_EVENT_FINISH in events:
-             self._send_notification(f"{self.config_entry.title} finished. Duration: {int(duration/60)}m.")
+            self._send_notification(f"{self.config_entry.title} finished. Duration: {int(duration/60)}m.")
 
-        # Inject device type into cycle data
-        cycle_data["device_type"] = self.device_type
-        
         # Request user feedback if we had a confident match.
         # IMPORTANT: this must happen before we clear match state.
         self._maybe_request_feedback(cycle_data)
@@ -1697,7 +1699,6 @@ class WashDataManager:
         if len(current_window_values) < 3:
             _LOGGER.debug("Insufficient data in current window for phase estimation")
             return None
-       
         
         best_progress = None
         best_score = -1.0
@@ -2022,7 +2023,7 @@ class WashDataManager:
                 "estimated_duration": int(self._matched_profile_duration / 60),
                 "actual_duration": int(actual_duration / 60),
             },
-        ) 
+        )
 
         # Also create a user-visible prompt. Without this, feedback requests are easy
         # to miss unless the user has automations listening for the event.

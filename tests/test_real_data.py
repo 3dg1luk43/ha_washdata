@@ -4,10 +4,10 @@ import csv
 import json
 import os
 from datetime import datetime, timezone, timedelta
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
-from custom_components.ha_washdata.const import STATE_RUNNING, STATE_OFF
+from custom_components.ha_washdata.const import STATE_RUNNING
 
 # Path to the data directory (relative to this test file)
 DATA_DIR = os.path.join(os.path.dirname(__file__), "../cycle_data")
