@@ -535,7 +535,11 @@ class WashDataManager:
                         if time_since_save < 600:
                             self.detector.restore_state_snapshot(active_snapshot)
                             if self.detector.state == "running":
-                                self._current_program = "restored..."
+                                if self.detector.matched_profile:
+                                    self._current_program = self.detector.matched_profile
+                                    _LOGGER.info(f"Restored interrupted washer cycle with profile: {self._current_program}")
+                                else:
+                                    self._current_program = "detecting..."
                                 self._start_watchdog()  # Resume watchdog for restored cycle
                                 _LOGGER.info("Restored interrupted washer cycle.")
                         else:

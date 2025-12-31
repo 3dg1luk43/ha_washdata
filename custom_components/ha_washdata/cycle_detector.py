@@ -58,6 +58,7 @@ class CycleDetector:
         self._potential_start_time: datetime | None = None  # For start debounce
         self._end_condition_count: int = 0  # Track consecutive end conditions met
         self._extension_count: int = 0 # Track how many times we extended due to profile match
+        self._matched_profile: str | None = None # Persist the detected profile name
 
     @property
     def state(self) -> str:
@@ -73,6 +74,16 @@ class CycleDetector:
     def config(self) -> CycleDetectorConfig:
         """Return current configuration."""
         return self._config
+
+    @property
+    def matched_profile(self) -> str | None:
+        """Return the confirmed matched profile name if any."""
+        return self._matched_profile
+
+    @property
+    def matched_profile(self) -> str | None:
+        """Return the confirmed matched profile name if any."""
+        return self._matched_profile
 
     def process_reading(self, power: float, timestamp: datetime) -> None:
         """Process a new power reading."""
@@ -118,6 +129,7 @@ class CycleDetector:
                     self._potential_start_time = None
                     self._sub_state = "Starting"
                     self._extension_count = 0
+                    self._matched_profile = None
             else:
                 self._potential_start_time = None
 
@@ -205,6 +217,10 @@ class CycleDetector:
                                 f"Threshold shortened to {effective_off_delay}s."
                             )
                             predictive_end = True
+                
+                # Persist matched profile if confident, so we can restore it on restart
+                if matched_profile_name and matched_confidence >= 0.70:
+                    self._matched_profile = matched_profile_name
 
                 _LOGGER.debug(f"Low power: duration={low_duration:.1f}s, threshold={effective_off_delay}s, end_count={self._end_condition_count}/{self._config.end_repeat_count}")
                 
@@ -406,7 +422,9 @@ class CycleDetector:
             "power_readings": [(t.isoformat(), p) for t, p in self._power_readings],
             "ma_buffer": getattr(self, "_ma_buffer", []),
             "end_condition_count": self._end_condition_count,
+            "end_condition_count": self._end_condition_count,
             "extension_count": self._extension_count,
+            "matched_profile": self._matched_profile,
         }
 
     def restore_state_snapshot(self, snapshot: dict[str, Any]) -> None:
@@ -461,12 +479,10 @@ class CycleDetector:
                         except (TypeError, ValueError):
                             continue
             
-            # Restore buffer if present, else rebuild from last few readings? 
-            # Or just start empty? If we start empty, average is 0 -> isActive False.
-            # If actual power is high, next reading will fix it.
-            # But if actual power is low/fluctuating...
-            # Best to restore.
+
             self._ma_buffer = snapshot.get("ma_buffer", [])
+            
+            self._matched_profile = snapshot.get("matched_profile")
             
             # Restore end condition counter
             self._end_condition_count = snapshot.get("end_condition_count", 0)
