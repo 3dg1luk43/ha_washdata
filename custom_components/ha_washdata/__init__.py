@@ -157,6 +157,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = manager
     
     await manager.async_setup()
+    
+    # Check for initial profile from onboarding
+    if "initial_profile" in entry.data:
+        init_prof = entry.data["initial_profile"]
+        name = init_prof.get("name")
+        duration = init_prof.get("avg_duration")
+        if name:
+            try:
+                # Create the profile immediately
+                await manager.profile_store.create_profile_standalone(name, avg_duration=duration)
+                _LOGGER.info(f"Created initial profile '{name}' from onboarding")
+                
+                # Clean up config entry (remove initial_profile to avoid re-creation or cruft)
+                new_data = {k: v for k, v in entry.data.items() if k != "initial_profile"}
+                hass.config_entries.async_update_entry(entry, data=new_data)
+                
+            except Exception as e:
+                _LOGGER.error(f"Failed to create initial profile: {e}")
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
