@@ -1,0 +1,34 @@
+name: Documentation Improvement
+description: Suggest a change to the documentation
+title: "[DOCS] "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our docs!
+
+  - type: input
+    id: page
+    attributes:
+      label: Page / Section
+      description: Which page or section of the documentation needs improvement?
+      placeholder: "README.md -> Configuration"
+    validations:
+      required: true
+
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong / missing?
+      description: Description of the inaccuracy or missing information.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Change
+      description: If possible, propose the new text or clear structure for the change.
+    validations:
+      required: false
