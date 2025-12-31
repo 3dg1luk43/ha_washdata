@@ -14,7 +14,7 @@
           "power_sensor": "The sensor entity that reports real-time power consumption (in watts) from your smart plug.",
           "min_power": "Power readings above this threshold (in watts) indicate the appliance is running. Start with 2W for most devices."
         },
-         "title": "WashData Setup",
+        "title": "WashData Setup",
         "description": "Configure your washing machine or other appliance.\n\nPower sensor is required.\n\n**Next, you will be asked if you want to create your first profile.**"
       },
       "first_profile": {
