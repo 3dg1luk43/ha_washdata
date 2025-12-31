@@ -168,24 +168,84 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         _LOGGER.info("Migrated HA WashData entry to version %s", self.VERSION)
         return True
 
+    def _get_schema(self, user_input: dict[str, Any] | None = None) -> vol.Schema:
+        """Get the configuration schema."""
+        return STEP_USER_DATA_SCHEMA
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
+        if user_input is None:
+            return self.async_show_form(
+                step_id="user", data_schema=self._get_schema(), errors=errors
+            )
+
+        # Validate input
+        errors = {}
+        try:
+            # Basic validation
+            if user_input[CONF_MIN_POWER] <= 0:
+                errors[CONF_MIN_POWER] = "invalid_power"
+        except Exception:
+            _LOGGER.exception("Unexpected exception")
+            errors["base"] = "unknown"
+
+        if errors:
+            return self.async_show_form(
+                step_id="user", data_schema=self._get_schema(user_input), errors=errors
+            )
+
+        # Store user input and proceed to profile creation
+        self._user_input = user_input
+        return await self.async_step_first_profile()
+
+    async def async_step_first_profile(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Step to optionally create the first profile."""
+        errors = {}
+        
         if user_input is not None:
-            return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
+            # Check if user wants to create a profile (if name is provided)
+            profile_name = user_input.get("profile_name", "").strip()
+            
+            # Combine initial setup data with profile data if present
+            data = dict(self._user_input)
+            
+            if profile_name:
+                duration_mins = user_input.get("manual_duration")
+                duration_sec = (duration_mins * 60.0) if duration_mins else None
+                
+                # Pass as special key to be handled in async_setup_entry
+                data["initial_profile"] = {
+                    "name": profile_name,
+                    "avg_duration": duration_sec
+                }
+
+            return self.async_create_entry(title=data[CONF_NAME], data=data)
+
+        # Schema for first profile
+        schema = vol.Schema({
+            vol.Optional("profile_name"): str,
+            vol.Optional("manual_duration", default=120): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0, max=480, unit_of_measurement="min", mode=selector.NumberSelectorMode.BOX
+                )
+            )
+        })
 
         return self.async_show_form(
-            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+            step_id="first_profile",
+            data_schema=schema
         )
-
     @staticmethod
     def async_get_options_flow(
-        config_entry: config_entries.ConfigEntry,
+        config_entries: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Create the options flow."""
-        return OptionsFlowHandler(config_entry)
+        return OptionsFlowHandler(config_entries)
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
@@ -751,10 +811,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 errors["profile_name"] = "empty_name"
             else:
                 manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+                manual_duration_mins = user_input.get("manual_duration")
+                avg_duration = None
+                if manual_duration_mins and float(manual_duration_mins) > 0:
+                    avg_duration = float(manual_duration_mins) * 60.0
+
                 try:
                     await manager.profile_store.create_profile_standalone(
                         name, 
-                        reference_cycle if reference_cycle != "none" else None
+                        reference_cycle if reference_cycle != "none" else None,
+                        avg_duration=avg_duration
                     )
                     manager._notify_update()
                     return self.async_create_entry(title="", data=dict(self._config_entry.options))
@@ -783,12 +849,17 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         options=cycle_options,
                         mode=selector.SelectSelectorMode.DROPDOWN
                     )
+                ),
+                vol.Optional("manual_duration"): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0, 
+                        max=480, 
+                        mode=selector.NumberSelectorMode.BOX,
+                        unit_of_measurement="min"
+                    )
                 )
             }),
-            errors=errors,
-            description_placeholders={
-                "info": "Profile name examples: 'Delicates', 'Heavy Duty', 'Quick Wash'"
-            }
+            errors=errors
         )
 
     async def async_step_edit_profile(
@@ -1030,8 +1101,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         if user_input is not None:
             cycle_id = user_input["cycle_id"]
-            manager.profile_store.delete_cycle(cycle_id)
-            await manager.profile_store.async_save()
+            title = self.config_entry.title
+            await manager.profile_store.delete_cycle(cycle_id)
+            # await manager.profile_store.async_save() # Handled inside delete_cycle now
             manager._notify_update()
             return self.async_create_entry(title="", data=dict(self._config_entry.options))
 

@@ -11,6 +11,5 @@ ha_washdata.code-workspace
 devtools/secrets.py
 .gitignore
 cycle_data
-release_notes.md
 custom_components/ha_washdata/test_data
 tests/repro/__pycache__
