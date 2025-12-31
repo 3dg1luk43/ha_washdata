@@ -36,13 +36,16 @@ class CycleDetector:
         config: CycleDetectorConfig,
         on_state_change: Callable[[str, str], None],
         on_cycle_end: Callable[[dict[str, Any]], None],
+        profile_matcher: Callable[[list[tuple[datetime, float]]], tuple[str | None, float, float, str | None]] | None = None,
     ) -> None:
         """Initialize the cycle detector."""
         self._config = config
         self._on_state_change = on_state_change
         self._on_cycle_end = on_cycle_end
+        self._profile_matcher = profile_matcher
 
         self._state = STATE_OFF
+        self._sub_state: str | None = None  # Additional status info (e.g. "Running (Eco Wash)")
         self._power_readings: list[tuple[datetime, float]] = []
         self._current_cycle_start: datetime | None = None
         self._last_active_time: datetime | None = None
@@ -54,11 +57,17 @@ class CycleDetector:
         self._abrupt_drop: bool = False  # Flag abrupt drop events
         self._potential_start_time: datetime | None = None  # For start debounce
         self._end_condition_count: int = 0  # Track consecutive end conditions met
+        self._extension_count: int = 0 # Track how many times we extended due to profile match
 
     @property
     def state(self) -> str:
         """Return current state."""
         return self._state
+
+    @property
+    def sub_state(self) -> str | None:
+        """Return current sub-state (phase info)."""
+        return self._sub_state
 
     @property
     def config(self) -> CycleDetectorConfig:
@@ -107,6 +116,8 @@ class CycleDetector:
                     self._abrupt_drop = False
                     self._last_power = power
                     self._potential_start_time = None
+                    self._sub_state = "Starting"
+                    self._extension_count = 0
             else:
                 self._potential_start_time = None
 
@@ -131,10 +142,19 @@ class CycleDetector:
                  self._last_active_time = timestamp
                  self._low_power_start = None  # Reset low-power timer
                  self._end_condition_count = 0  # Reset end condition counter when power goes back up
+                 # Reset extension count if we recover power
+                 if self._extension_count > 0:
+                     self._extension_count = 0
+                 
+                 # Basic running state, update later if we match profile
+                 if self._sub_state and "detecting" not in self._sub_state.lower():
+                     self._sub_state = "Running"
+
             elif not in_dead_zone:  # Only check end conditions if NOT in dead zone
                  # Track when low power started
                  if not self._low_power_start:
                      self._low_power_start = timestamp
+                     self._sub_state = "Low Power"
                      _LOGGER.debug(f"Low power detected (raw power < {self._config.min_power}W), starting completion timer")
                      # If we had a steep drop from a high load, flag as abrupt
                      if prev_power is not None:
@@ -153,25 +173,85 @@ class CycleDetector:
                  
                  # Check if we should conclude the cycle
                  low_duration = (timestamp - self._low_power_start).total_seconds()
-                 _LOGGER.debug(f"Low power: duration={low_duration:.1f}s, off_delay={self._config.off_delay}s, end_count={self._end_condition_count}/{self._config.end_repeat_count}")
-                 if low_duration >= self._config.off_delay:
-                     # End condition met once
-                     self._end_condition_count += 1
-                     if self._end_condition_count >= self._config.end_repeat_count:
-                         # Power has been low for the configured delay enough times - cycle is done NATURALLY
-                         _LOGGER.info(f"Ending cycle: power below {self._config.min_power}W for {low_duration:.0f}s (threshold: {self._config.off_delay}s), end count: {self._end_condition_count}")
-                         self._finish_cycle(timestamp, status="completed")
-                     else:
-                         # Need more consecutive end conditions, reset the low-power timer
-                         # Note: Counter is NOT reset here - it persists across low-power periods
-                         # to accumulate toward the end_repeat_count threshold. This allows
-                         # detection of N periods of low power, each lasting >= off_delay.
-                         _LOGGER.debug(f"End condition met {self._end_condition_count}/{self._config.end_repeat_count} times, waiting for next")
-                         self._low_power_start = None
+                 
+                 # Determine effective off_delay (standard vs predictive shortened)
+                 effective_off_delay = self._config.off_delay
+                 predictive_end = False
+                 
+                 # Check predictive end to potentially shorten the delay
+                 if self._profile_matcher:
+                     profile_name, confidence, expected_duration, phase_name = self._profile_matcher(self._power_readings)
+                     if profile_name and confidence >= 0.90 and expected_duration > 0 and phase_name is None:
+                         pct = cycle_elapsed / expected_duration
+                         # If > 98% complete, we trust the profile heavily
+                         if pct >= 0.98:
+                              # Shorten delay to 30s or half of configured delay
+                              effective_off_delay = min(30.0, self._config.off_delay / 2.0)
+                              if low_duration >= effective_off_delay:
+                                  _LOGGER.info(f"Predictive End: Profile '{profile_name}' matched (conf={confidence:.2f}), progress={pct*100:.1f}%. Threshold shortened to {effective_off_delay}s.")
+                                  predictive_end = True
+
+                 _LOGGER.debug(f"Low power: duration={low_duration:.1f}s, threshold={effective_off_delay}s, end_count={self._end_condition_count}/{self._config.end_repeat_count}")
+                 
+                 if low_duration >= effective_off_delay:
+                      # Check Profile Match extension logic (only if not already predictive ended)
+                      extended = False
+                      if not predictive_end and self._profile_matcher:
+                          # Use current accumulated buffer for matching (re-fetch to be safe/consistent)
+                          profile_name, confidence, expected_duration, phase_name = self._profile_matcher(self._power_readings)
+                          
+                          if profile_name and confidence >= 0.70 and expected_duration > 0:
+                              pct_complete = (cycle_elapsed / expected_duration)
+                              should_extend = pct_complete < 0.95 or (phase_name is not None)
+                              
+                              if should_extend:
+                                  _LOGGER.info(
+                                      f"Profile match '{profile_name}' (conf={confidence:.2f}): "
+                                      f"elapsed {cycle_elapsed:.0f}s < expected {expected_duration:.0f}s ({pct_complete*100:.0f}%). "
+                                      f"Phase='{phase_name}'. Extending cycle (ignoring low power)."
+                                  )
+                                  if phase_name:
+                                       self._sub_state = f"Running ({phase_name})"
+                                  else:
+                                       self._sub_state = f"Running ({profile_name} - {int(pct_complete*100)}%)"
+                                       
+                                  self._low_power_start = timestamp # Reset low power timer
+                                  self._extension_count += 1
+                                  extended = True
+                      
+                      if not extended:
+                          # SIMPLIFIED REPEAT CHECK LOGIC
+                          check_passes = False
+                          
+                          if predictive_end:
+                              check_passes = True
+                          else:
+                              # If this is the FIRST time we hit the limit, increment and schedule next check
+                              if self._end_condition_count == 0:
+                                  self._end_condition_count = 1
+                                  self._verification_next_check = timestamp.timestamp() + 15.0  # Check again in 15s
+                                  _LOGGER.debug(f"End condition met 1/{self._config.end_repeat_count}, verifying... (next check in 15s)")
+                              else:
+                                  # We are in verification mode
+                                  now_ts = timestamp.timestamp()
+                                  if now_ts >= getattr(self, "_verification_next_check", 0):
+                                      self._end_condition_count += 1
+                                      self._verification_next_check = now_ts + 15.0
+                                      _LOGGER.debug(f"End condition met {self._end_condition_count}/{self._config.end_repeat_count}, verifying...")
+                              
+                              if self._end_condition_count >= self._config.end_repeat_count:
+                                  check_passes = True
+                          
+                          if check_passes:
+                              # Cycle is done NATURALLY
+                              _LOGGER.info(f"Ending cycle: power below {self._config.min_power}W for {low_duration:.0f}s (threshold: {effective_off_delay:.0f}s), end count: {self._end_condition_count}")
+                              self._finish_cycle(timestamp, status="completed")
+                          else:
+                              pass
             else:
-                 # In dead zone - log but don't start end detection
-                 if not is_active_for_end:
-                     _LOGGER.debug(f"Low power during dead zone ({cycle_elapsed:.0f}s < {self._config.running_dead_zone}s), ignoring")
+                # In dead zone - log but don't start end detection
+                if not is_active_for_end:
+                    _LOGGER.debug(f"Low power during dead zone ({cycle_elapsed:.0f}s < {self._config.running_dead_zone}s), ignoring")
 
             # Update last power for next iteration
             self._last_power = power
@@ -180,6 +260,8 @@ class CycleDetector:
         """Transition to a new state."""
         old_state = self._state
         self._state = new_state
+        if new_state == STATE_OFF:
+            self._sub_state = None
         _LOGGER.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)
 
@@ -231,6 +313,8 @@ class CycleDetector:
         self._ma_buffer = []
         self._last_power = None
         self._abrupt_drop = False
+        self._extension_count = 0
+        self._sub_state = None
 
     def force_end(self, timestamp: datetime) -> None:
         """Force-finish the current cycle (used by watchdog when sensor stops sending data)."""
@@ -303,6 +387,7 @@ class CycleDetector:
         """Return a snapshot of current state."""
         return {
             "state": self._state,
+            "sub_state": self._sub_state,
             "current_cycle_start": self._current_cycle_start.isoformat() if self._current_cycle_start else None,
             "last_active_time": self._last_active_time.isoformat() if self._last_active_time else None,
             "low_power_start": self._low_power_start.isoformat() if self._low_power_start else None,
@@ -310,12 +395,14 @@ class CycleDetector:
             "power_readings": [(t.isoformat(), p) for t, p in self._power_readings],
             "ma_buffer": getattr(self, "_ma_buffer", []),
             "end_condition_count": self._end_condition_count,
+            "extension_count": self._extension_count,
         }
 
     def restore_state_snapshot(self, snapshot: dict[str, Any]) -> None:
         """Restore state from snapshot."""
         try:
             self._state = snapshot.get("state", STATE_OFF)
+            self._sub_state = snapshot.get("sub_state")
             
             start = snapshot.get("current_cycle_start")
             if start:
@@ -372,6 +459,7 @@ class CycleDetector:
             
             # Restore end condition counter
             self._end_condition_count = snapshot.get("end_condition_count", 0)
+            self._extension_count = snapshot.get("extension_count", 0)
             
             _LOGGER.info(f"Restored CycleDetector state: {self._state}, {len(self._power_readings)} readings")
             

@@ -10,9 +10,8 @@ This document covers the complete implementation of all major features:
 3. Self-learning feedback system
 4. Export/Import with full settings transfer
 5. Auto-maintenance watchdog with switch control
-6. Improved stale cycle detection with power awareness
-7. NumPy-powered Shape Correlation Matching (NEW Dec 20)
-8. Ghost Cycle Prevention & Pre-completion Notifications (NEW Dec 20)
+7. Improved Stale Cycle Detection
+8. Reliability Features
 
 ---
 
@@ -232,7 +231,7 @@ manager.learning_manager.get_learning_stats()
 # }
 ```
 
-### 4. Export/Import with Full Settings Transfer (NEW Dec 17)
+### 4. Export/Import with Full Settings Transfer
 
 **Problem:** Users needed to manually reconfigure all settings when setting up multiple devices or migrating to new instances.
 
@@ -287,7 +286,7 @@ data:
   path: "/config/ha_washdata_export.json"
 ```
 
-### 5. Auto-Maintenance Watchdog (NEW Dec 17)
+### 5. Auto-Maintenance Watchdog
 
 **Problem:** Deleted cycles left orphaned profile labels; fragmented runs cluttered history.
 
@@ -330,7 +329,7 @@ ProfileStore.async_run_maintenance()
 - When toggled, scheduler is re-setup accordingly
 - Toggling OFF cancels scheduled cleanup
 
-### 6. Improved Stale Cycle Detection (NEW Dec 17)
+### 6. Improved Stale Cycle Detection
 
 **Problem:** After HA restart or code update, phantom "restored" cycles appeared at 0W power, confusing users.
 
@@ -366,6 +365,30 @@ Check current power state from sensor
 - 10-minute age threshold prevents false restores
 - Graceful error handling (clears to be safe)
 - Clear logging for troubleshooting
+
+### 7. Reliability Features
+
+**Goal:** Improve precision for similar cycles and reduce "stuck" time estimates.
+
+#### A. Confidence Boosting (Shape Matching)
+**Problem:** Cycles with identical duration but different phases (e.g. Eco vs Intensive) were hard to distinguish.
+**Solution:** If `numpy.corrcoef` > 0.85 (very strong shape match), the profile match score is heavily boosted (x1.2), allowing strict shape matching to override minor power amplitude differences.
+
+#### B. Predictive End Detection
+**Problem:** Users waited 10+ minutes for "OFF" notification even if the cycle was obviously done.
+**Solution:**
+- If profile match confidence > 90%
+- AND cycle progress > 98%
+- Then `off_delay` requirement drops to just **30 seconds**.
+- **Result:** Faster notifications for known cycles.
+
+#### C. Smart Time Prediction (Variance Locking)
+**Problem:** Time remaining jumped erratically during variable phases (e.g. heating water).
+**Solution:**
+- System calculates standard deviation (variance) of the matched profile window.
+- If variance is high (>50W std dev): Time estimate updates are **damped** (locked).
+- If variance is low: Time estimate updates normally.
+- **Result:** Smooth countdown that "pauses" during heating/waiting instead of jumping up and down.
 
 ---
 

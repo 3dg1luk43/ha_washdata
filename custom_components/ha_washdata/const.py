@@ -67,7 +67,7 @@ DEFAULT_AUTO_MAINTENANCE = True  # Enable nightly cleanup by default
 DEFAULT_COMPLETION_MIN_SECONDS = 600  # 10 minutes
 DEFAULT_NOTIFY_BEFORE_END_MINUTES = 0  # Disabled
 DEFAULT_PROFILE_MATCH_INTERVAL = 300  # Seconds between profile matching attempts (5 minutes)
-DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.30  # Minimum duration ratio (30% of profile)
+DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.07  # Minimum duration ratio (7% of profile)
 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.50  # Maximum duration ratio (150% of profile)
 DEFAULT_MAX_PAST_CYCLES = 200
 DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
@@ -112,6 +112,17 @@ DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_COFFEE_MACHINE: 2.0,   # Short cycles, rapid transitions, less tolerance
 }
 
+CONF_VERIFICATION_POLL_INTERVAL = "verification_poll_interval"  # Internal setting
+DEFAULT_VERIFICATION_POLL_INTERVAL = 15  # Seconds (rapid checks after delay)
+
+# Device specific completion thresholds (min run time to be considered a valid "completed" cycle)
+DEVICE_COMPLETION_THRESHOLDS = {
+    DEVICE_TYPE_WASHING_MACHINE: 600,  # 10 min
+    DEVICE_TYPE_DRYER: 600,            # 10 min
+    DEVICE_TYPE_DISHWASHER: 900,       # 15 min
+    DEVICE_TYPE_COFFEE_MACHINE: 60,    # 1 min (detects rapid espresso shots/cleaning)
+}
+
 # Storage
 STORAGE_VERSION = 1
 STORAGE_KEY = "ha_washdata"
@@ -128,4 +139,5 @@ SIGNAL_WASHER_UPDATE = "ha_washdata_update_{}"
 LEARNING_CONFIDENCE_THRESHOLD = DEFAULT_LEARNING_CONFIDENCE
 LEARNING_DURATION_MATCH_TOLERANCE = DEFAULT_DURATION_TOLERANCE
 FEEDBACK_REQUEST_EVENT = "ha_washdata_feedback_requested"  # Event when user feedback is needed
+EVENT_STATE_UPDATE = "ha_washdata_state_update"  # Periodic/state-change update event
 SERVICE_SUBMIT_FEEDBACK = "ha_washdata.submit_cycle_feedback"  # Service to submit feedback

@@ -5,9 +5,12 @@ mock_data
 custom_components/ha_washdata/__pycache__
 
 mqtt-mock.log
-cycle_data/*
 mqtt-mock.log*
 tests/__pycache__
 ha_washdata.code-workspace
 devtools/secrets.py
 .gitignore
+cycle_data
+release_notes.md
+custom_components/ha_washdata/test_data
+tests/repro/__pycache__

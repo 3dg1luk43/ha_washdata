@@ -56,6 +56,7 @@ from .const import (
     NOTIFY_EVENT_FINISH,
     EVENT_CYCLE_STARTED,
     EVENT_CYCLE_ENDED,
+    EVENT_STATE_UPDATE,
     FEEDBACK_REQUEST_EVENT,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
@@ -88,6 +89,7 @@ from .const import (
     DEFAULT_RUNNING_DEAD_ZONE,
     DEFAULT_END_REPEAT_COUNT,
     DEVICE_SMOOTHING_THRESHOLDS,
+    DEVICE_COMPLETION_THRESHOLDS,
     STATE_RUNNING,
     STATE_OFF,
 )
@@ -170,7 +172,11 @@ class WashDataManager:
         abrupt_drop_watts = float(config_entry.options.get("abrupt_drop_watts", 500.0))
         abrupt_drop_ratio = float(config_entry.options.get("abrupt_drop_ratio", 0.6))
         abrupt_high_load_factor = float(config_entry.options.get("abrupt_high_load_factor", 5.0))
-        completion_min_seconds = int(config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS))
+        
+        # Get device specific default for completion threshold
+        device_default_completion = DEVICE_COMPLETION_THRESHOLDS.get(self.device_type, DEFAULT_COMPLETION_MIN_SECONDS)
+        completion_min_seconds = int(config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, device_default_completion))
+
         start_duration_threshold = float(config_entry.options.get(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD))
         running_dead_zone = int(config_entry.options.get(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE))
         end_repeat_count = int(config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT))
@@ -191,10 +197,50 @@ class WashDataManager:
             end_repeat_count=end_repeat_count,
         )
         self._config = config
+        
+        # Define match callback wrapper for CycleDetector to use during low-power logic
+        def profile_matcher_wrapper(readings: list[tuple[datetime, float]]) -> tuple[str | None, float, float, str | None]:
+            if not readings:
+                return (None, 0.0, 0.0, None)
+            
+            # Format readings for match_profile (which expects [(iso_str, power)])
+            formatted = [(t.isoformat(), p) for t, p in readings]
+            
+            # Current duration
+            start = readings[0][0]
+            end = readings[-1][0]
+            current_duration = (end - start).total_seconds()
+            
+            # Use profile store to find best match
+            match_name, confidence = self.profile_store.match_profile(formatted, current_duration)
+            
+            expected_duration = 0.0
+            phase_name: str | None = None
+            
+            if match_name:
+                prof = self.profile_store.get_profiles().get(match_name)
+                if isinstance(prof, dict):
+                    expected_duration = float(prof.get("avg_duration", 0.0))
+                    
+                    # --- DEVICE SPECIFIC PHASE NAMING ---
+                    # Logic: If we are confident in the match, and we are in a low-power state (implied by this being called),
+                    # and we are near the end of the expected duration, infer "Drying" for Dishwashers.
+                    is_dishwasher = self.device_type == "dishwasher"
+                    pct_complete = (current_duration / expected_duration) if expected_duration > 0 else 0
+                    
+                    if is_dishwasher and confidence >= 0.70 and pct_complete >= 0.70 and pct_complete <= 1.20:
+                        # Dishwashers typically have a long drying phase at the end
+                         phase_name = "Drying"
+                    
+                    # TODO: Add logic for Washing Machine "Rinse/Spin" based on power shape?
+            
+            return (match_name, confidence, expected_duration, phase_name)
+
         self.detector = CycleDetector(
             config,
             self._on_state_change,
-            self._on_cycle_end
+            self._on_cycle_end,
+            profile_matcher=profile_matcher_wrapper,
         )
         
         self._remove_listener = None
@@ -297,7 +343,9 @@ class WashDataManager:
         new_sensor = config_entry.options.get(CONF_POWER_SENSOR, config_entry.data.get(CONF_POWER_SENSOR))
         if new_sensor and new_sensor != self.power_sensor_entity_id:
             # Block sensor changes when a cycle is active to prevent inconsistent state
-            if self.detector.state == STATE_RUNNING:
+            d_state = self.detector.state
+            _LOGGER.warning(f"DEBUG: Reloading config. detector.state={d_state!r} (type={type(d_state)}), RUNNING={STATE_RUNNING!r}")
+            if d_state == STATE_RUNNING:
                 _LOGGER.warning(
                     "Cannot change power sensor from %s to %s while a cycle is active. "
                     "Please wait for the current cycle to complete before changing the power sensor.",
@@ -363,8 +411,10 @@ class WashDataManager:
         new_abrupt_high_load = float(
             config_entry.options.get(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR)
         )
+        # Device default
+        dev_def = DEVICE_COMPLETION_THRESHOLDS.get(self.device_type, DEFAULT_COMPLETION_MIN_SECONDS)
         new_completion_min = int(
-            config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS)
+            config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, dev_def)
         )
         new_start_threshold = float(
             config_entry.options.get(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD)
@@ -801,7 +851,16 @@ class WashDataManager:
             self._matched_profile_duration = None
             self._last_estimate_time = None
             self._start_watchdog()  # Start watchdog when cycle starts
-            self.hass.bus.async_fire(EVENT_CYCLE_STARTED, {"entry_id": self.entry_id, "device_name": self.config_entry.title})
+            self.hass.bus.async_fire(
+                EVENT_CYCLE_STARTED, 
+                {
+                    "entry_id": self.entry_id, 
+                    "device_name": self.config_entry.title,
+                    "device_type": self.device_type,
+                    "program": self._current_program,
+                    "start_time": dt_util.now().isoformat(),
+                }
+            )
             
             # Send notification if enabled
             events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
@@ -863,7 +922,25 @@ class WashDataManager:
         # Auto post-process: merge fragmented cycles from last 3 hours
         self.hass.async_create_task(self._auto_merge_recent_cycles())
         
-        self.hass.bus.async_fire(EVENT_CYCLE_ENDED, {"entry_id": self.entry_id, "device_name": self.config_entry.title, "cycle_data": cycle_data})
+        # Prepare cycle data for event (enrich if needed)
+        event_cycle_data = dict(cycle_data)
+        event_cycle_data["device_type"] = self.device_type
+        # Add program if missing or generic
+        if "profile_name" not in event_cycle_data and self._current_program:
+             event_cycle_data["profile_name"] = self._current_program
+
+        self.hass.bus.async_fire(
+            EVENT_CYCLE_ENDED, 
+            {
+                "entry_id": self.entry_id, 
+                "device_name": self.config_entry.title, 
+                "cycle_data": event_cycle_data,
+                "program": event_cycle_data.get("profile_name", "unknown"),
+                "duration": duration,
+                "start_time": event_cycle_data.get("start_time"),
+                "end_time": dt_util.now().isoformat(),
+            }
+        )
         
         # Send notification if enabled
         events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
@@ -1480,18 +1557,31 @@ class WashDataManager:
             
             # --- PHASE-AWARE ESTIMATION ---
             if len(trace) >= 10 and self._current_program != "detecting...":
-                phase_progress = self._estimate_phase_progress(
+                phase_result = self._estimate_phase_progress(
                     current_power_data, 
                     duration_so_far,
                     self._current_program
                 )
-                if phase_progress is not None:
+                if phase_result is not None:
+                    phase_progress, phase_variance = phase_result
+                    
                     # Smoothing: Exponential Moving Average
                     # If this is the first reliable estimate, snap to it.
                     # Otherwise, blend 20% new, 80% old.
                     if self._smoothed_progress == 0.0:
                          self._smoothed_progress = phase_progress
                     else:
+                         current_smoothed = self._smoothed_progress
+                         # Smart Time Prediction (Variance-Based Locking)
+                         # If variance is high (e.g. > 50W std dev), this phase is unpredictable. DAMP HEAVILY.
+                         # If variance is low (< 10W), trust the estimate more.
+                         alpha = 0.2  # Default
+                         if phase_variance > 100.0:
+                             alpha = 0.05  # Very slow updates (mostly locked)
+                             _LOGGER.debug(f"High variance phase (std={phase_variance:.1f}W), locking time estimate (alpha=0.05)")
+                         elif phase_variance > 50.0:
+                             alpha = 0.1
+                         
                          # Monotonicity check: don't let it jump BACKWARD significantly
                          # unless the profile changed (handled elsewhere).
                          # Allow small fluctuations, but prevent large drops.
@@ -1507,8 +1597,8 @@ class WashDataManager:
                                  f"applying heavy damping for {self.device_type}"
                              )
                          else:
-                             # Normal update
-                             self._smoothed_progress = (self._smoothed_progress * 0.8) + (phase_progress * 0.2)
+                             # Normal estimate update with dynamic alpha
+                             self._smoothed_progress = (self._smoothed_progress * (1.0 - alpha)) + (phase_progress * alpha)
                     
                     # Ensure we don't exceed 99% until actually finished
                     self._smoothed_progress = min(99.0, self._smoothed_progress)
@@ -1607,6 +1697,7 @@ class WashDataManager:
         if len(current_window_values) < 3:
             _LOGGER.debug("Insufficient data in current window for phase estimation")
             return None
+       
         
         best_progress = None
         best_score = -1.0
@@ -1686,6 +1777,20 @@ class WashDataManager:
             _LOGGER.debug(f"Phase detection failed: best_score={best_score:.3f}")
             return None
         
+        # Calculate variance for the best window (Smart Time Prediction)
+        # Low variance = high confidence in timing. High variance = low confidence.
+        best_variance = 0.0
+        if best_time_window_start is not None:
+             # Find index in time_grid again (approx)
+             # Optimization: store best_index in loop?
+             # Just map time back to index
+             idx_start = int((best_time_window_start / target_duration) * len(time_grid))
+             idx_end = min(idx_start + len(current_window_values), len(envelope_arrays["std"]))
+             if idx_end > idx_start:
+                 window_std = envelope_arrays["std"][idx_start:idx_end]
+                 if len(window_std) > 0:
+                     best_variance = float(np.mean(window_std))
+
         # Cap progress at 99% until actual completion
         best_progress = max(0.0, min(best_progress, 99.0))
         
@@ -1698,25 +1803,62 @@ class WashDataManager:
         if not in_bounds:
             _LOGGER.debug(
                 f"Phase detection: progress={best_progress:.1f}%, "
-                f"score={best_score:.3f}, time={tws:.0f}/{target_duration:.0f}s "
+                f"score={best_score:.3f}, var={best_variance:.1f}W, time={tws:.0f}/{target_duration:.0f}s "
                 f"[OUT OF BOUNDS, {cycle_count} cycles, avg_sample_rate={avg_sample_rate:.1f}s]"
             )
         else:
             _LOGGER.debug(
                 f"Phase detection: progress={best_progress:.1f}%, "
-                f"score={best_score:.3f}, time={tws:.0f}/{target_duration:.0f}s "
+                f"score={best_score:.3f}, var={best_variance:.1f}W, time={tws:.0f}/{target_duration:.0f}s "
                 f"[IN BOUNDS, {cycle_count} cycles, avg_sample_rate={avg_sample_rate:.1f}s]"
             )
-        
-        return best_progress
+            
+        return (best_progress, best_variance)
 
     def _notify_update(self) -> None:
         """Notify entities of update."""
         async_dispatcher_send(self.hass, SIGNAL_WASHER_UPDATE.format(self.entry_id))
+        self._fire_state_update_event()
+
+    def _fire_state_update_event(self) -> None:
+        """Fire periodic state update event (throttled)."""
+        now = dt_util.now()
+        
+        # Determine throttle interval based on state
+        # In active cycle: 60s
+        # In idle/off: 300s (5 min)
+        throttle = 60 if self.detector.state == "running" else 300
+        
+        last = getattr(self, "_last_state_event_time", None)
+        if last and (now - last).total_seconds() < throttle:
+            # Skip if recently fired
+            return
+
+        self._last_state_event_time = now
+        
+        payload = {
+            "entry_id": self.entry_id,
+            "device_name": self.config_entry.title,
+            "state": self.detector.state,
+            "sub_state": self.detector.sub_state,
+            "program": self._current_program,
+            "progress": self._cycle_progress,
+            "time_remaining": self._time_remaining,
+            "power": self._current_power,
+            "device_type": self.device_type,
+            "last_updated": now.isoformat(),
+        }
+        
+        self.hass.bus.async_fire(EVENT_STATE_UPDATE, payload)
 
     @property
     def check_state(self):
         return self.detector.state
+
+    @property
+    def sub_state(self) -> str | None:
+        """Return more granular state info (e.g. current phase)."""
+        return self.detector.sub_state
     
     @property
     def current_program(self):
@@ -1880,7 +2022,7 @@ class WashDataManager:
                 "estimated_duration": int(self._matched_profile_duration / 60),
                 "actual_duration": int(actual_duration / 60),
             },
-        )
+        ) 
 
         # Also create a user-visible prompt. Without this, feedback requests are easy
         # to miss unless the user has automations listening for the event.

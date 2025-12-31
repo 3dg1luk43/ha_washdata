@@ -12,6 +12,7 @@ Note: Despite the name, HA WashData also works well for other appliances (e.g., 
 - [Test 3: Learning Feedback System](#test-3-learning-feedback-system)
 - [Test 4: Cycle Status Classification](#test-4-cycle-status-classification)
 - [Test 5: Publish-on-Change Sockets](#test-5-publish-on-change-sockets)
+- [Test 6: Data-Driven Verification (Real Data)](#test-6-data-driven-verification-real-data)
 - [Mock Socket Reference](#mock-socket-reference)
 - [Debugging](#debugging)
 
@@ -500,6 +501,35 @@ sensor.washdata_learning_stats:
   Expected behavior:
   - Active but no updates < timeout → no force-end.
   - Low-power wait ≥ off_delay without updates → natural completion (✓).
+
+  ---
+
+  ## Test 6: Data-Driven Verification (Real Data)
+
+  ### Goal
+  Verify the integration robustness against real-world data anomalies (sampling gaps, noise) using recorded traces from actual appliances.
+
+  ### How to Run
+  The repository includes a dedicated test suite `tests/test_real_data.py` that replays CSV/JSON data files through the `CycleDetector` state machine.
+
+  ```bash
+  # Run the data-driven test suite
+  pytest tests/test_real_data.py -v
+  ```
+
+  ### Data Sources
+  - `cycle_data/dishwasher-power.csv` (Dishwasher drying phase logic)
+  - `cycle_data/real-washing-machine.json` (Real washing machine trace)
+  - `cycle_data/test-mock-socket.json` (High-frequency mock data)
+
+  ### What it Verifies
+  1. **Phase Detection**: Correctly identifies "Drying" phases even with 0W power gaps.
+  2. **Cycle Consistency**: Ensures varying sampling rates don't cause fragmented cycles.
+  3. **High-Frequency Stability**: Verifies 2s sampling rate doesn't overwhelm the detector.
+
+  To add your own data, export a cycle JSON and add a new test case in `tests/test_real_data.py`.
+
+  ---
 
 ## Mock Socket Reference
 

@@ -79,7 +79,8 @@ class WasherStateSensor(WasherBaseSensor):
     def extra_state_attributes(self):
         return {
             "samples_recorded": self._manager.samples_recorded,
-            "current_program_guess": self._manager.current_program
+            "current_program_guess": self._manager.current_program,
+            "sub_state": self._manager.sub_state,
         }
 
 

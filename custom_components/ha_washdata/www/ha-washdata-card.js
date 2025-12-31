@@ -8,7 +8,10 @@ class WashDataCard extends HTMLElement {
       title: "Washing Machine",
       icon: "mdi:washing-machine",
       display_mode: "time",
-      active_color: [33, 150, 243]
+      active_color: [33, 150, 243],
+      show_state: true,
+      show_program: true,
+      show_details: true
     };
   }
 
@@ -188,46 +191,67 @@ class WashDataCard extends HTMLElement {
     titleEl.textContent = title;
 
     const attr = stateObj.attributes;
+    const parts = [];
 
-    // Program
-    let program = "";
-    if (this._cfg.program_entity) {
-      const progState = this._hass.states[this._cfg.program_entity];
-      if (progState) program = progState.state;
-    } else if (attr.program) {
-      program = attr.program;
+    // 1. State / Sub-State
+    // Default show_state to true if undefined
+    if (this._cfg.show_state !== false) {
+      if (state.toLowerCase() === 'running') {
+        const subState = attr.sub_state;
+        if (subState) {
+          // If sub_state is "Running (Rinsing)", extract "Rinsing"
+          const match = subState.match(/Running \((.*)\)/);
+          if (match && match[1]) {
+            parts.push(match[1]);
+          } else {
+            parts.push(subState);
+          }
+        }
+        // If no sub_state (or just "Running"), we show NOTHING (redundant)
+      } else {
+        // Not running (e.g. Off, Completed, etc) - show standard state
+        parts.push(state.charAt(0).toUpperCase() + state.slice(1));
+      }
     }
 
-    // Time
-    let remaining = "";
-    if (this._cfg.time_entity) {
-      remaining = this._hass.states[this._cfg.time_entity]?.state;
-    } else if (attr.time_remaining) {
-      remaining = attr.time_remaining;
+    // 2. Program
+    if (this._cfg.show_program !== false) {
+      let program = "";
+      if (this._cfg.program_entity) {
+        const progState = this._hass.states[this._cfg.program_entity];
+        if (progState) program = progState.state;
+      } else if (attr.program) {
+        program = attr.program;
+      }
+      if (program && !["unknown", "none", "off", "unavailable"].includes(program.toLowerCase())) {
+        parts.push(program);
+      }
     }
 
-    // Pct
-    let pct = "";
-    if (this._cfg.pct_entity) {
-      pct = this._hass.states[this._cfg.pct_entity]?.state;
-    } else if (attr.cycle_progress) {
-      pct = attr.cycle_progress;
+    // 3. Details (Time / Pct)
+    if (this._cfg.show_details !== false) {
+      let remaining = "";
+      if (this._cfg.time_entity) {
+        remaining = this._hass.states[this._cfg.time_entity]?.state;
+      } else if (attr.time_remaining) {
+        remaining = attr.time_remaining;
+      }
+
+      let pct = "";
+      if (this._cfg.pct_entity) {
+        pct = this._hass.states[this._cfg.pct_entity]?.state;
+      } else if (attr.cycle_progress) {
+        pct = attr.cycle_progress;
+      }
+
+      if (this._cfg.display_mode === 'percentage' && pct) {
+        parts.push(`${Math.round(pct)}%`);
+      } else if (remaining) {
+        parts.push(remaining);
+      }
     }
 
-    const stateLabel = state.charAt(0).toUpperCase() + state.slice(1);
-    const parts = [stateLabel];
-
-    if (program && !["unknown", "none", "off", "unavailable"].includes(program.toLowerCase())) {
-      parts.push(program);
-    }
-
-    if (this._cfg.display_mode === 'percentage' && pct) {
-      parts.push(`${Math.round(pct)}%`);
-    } else if (remaining) {
-      parts.push(remaining);
-    }
-
-    stateEl.textContent = parts.join(" • ");
+    stateEl.textContent = parts.length > 0 ? parts.join(" • ") : "";
   }
 }
 
@@ -272,9 +296,9 @@ class WashDataCardEditor extends HTMLElement {
         { name: "entity", selector: { entity: { domain: "sensor" } } },
         { name: "icon", selector: { icon: {} } },
         { name: "active_color", selector: { color_rgb: {} } },
-        { name: "program_entity", selector: { entity: { domain: ["sensor", "select", "input_select", "input_text"] } } },
-        { name: "pct_entity", selector: { entity: { domain: "sensor" } } },
-        { name: "time_entity", selector: { entity: { domain: "sensor" } } },
+        { name: "show_state", selector: { boolean: {} } },
+        { name: "show_program", selector: { boolean: {} } },
+        { name: "show_details", selector: { boolean: {} } },
         {
           name: "display_mode",
           selector: {
@@ -286,7 +310,10 @@ class WashDataCardEditor extends HTMLElement {
               mode: "dropdown"
             }
           }
-        }
+        },
+        { name: "program_entity", selector: { entity: { domain: ["sensor", "select", "input_select", "input_text"] } } },
+        { name: "pct_entity", selector: { entity: { domain: "sensor" } } },
+        { name: "time_entity", selector: { entity: { domain: "sensor" } } },
       ];
 
       this._form.computeLabel = (schema) => {
@@ -295,9 +322,12 @@ class WashDataCardEditor extends HTMLElement {
           entity: "Status Entity (Main)",
           icon: "Icon",
           active_color: "Icon Color (Active)",
-          program_entity: "Program Entity (Optional)",
-          pct_entity: "Percentage Entity (Optional)",
-          time_entity: "Time Remaining Entity (Optional)",
+          show_state: "Show State / Phase",
+          show_program: "Show Program",
+          show_details: "Show Rate (Time/%)",
+          program_entity: "Program Entity (Override)",
+          pct_entity: "Percentage Entity (Override)",
+          time_entity: "Time Entity (Override)",
           display_mode: "Detail Display Mode"
         };
         return labels[schema.name] || schema.name;

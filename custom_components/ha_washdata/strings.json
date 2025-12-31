@@ -172,7 +172,7 @@
           "max_past_cycles": "Total number of cycles to retain (oldest removed). Default: 200.",
           "max_full_traces_per_profile": "Number of recent labeled cycles to keep with full power traces per profile. Older traces are summarized via envelopes. Default: 20.",
           "max_full_traces_unlabeled": "Number of recent unlabeled cycles to keep with full power traces to support auto-labeling. Default: 20.",
-          "watchdog_interval": "Seconds between watchdog checks while running. Lower for faster stuck-cycle handling; higher to reduce overhead. Default: 5s.",
+          "watchdog_interval": "Seconds between watchdog checks while running. Default: 5s. WARNING: Ensure this is HIGHER than your sensor's update interval to avoid false stops (e.g., if sensor updates every 60s, use 65s+).",
           "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
           "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3.",
           "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
