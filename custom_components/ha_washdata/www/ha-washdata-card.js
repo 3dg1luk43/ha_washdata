@@ -255,7 +255,12 @@ class WashDataCard extends HTMLElement {
       if (this._cfg.display_mode === 'percentage' && pct) {
         parts.push(`${Math.round(pct)}%`);
       } else if (remaining) {
-        parts.push(remaining);
+        // Append 'min' if it is a number (WashData attribute is raw minutes)
+        if (!isNaN(remaining)) {
+          parts.push(`${remaining} min`);
+        } else {
+          parts.push(remaining);
+        }
       }
     }
 

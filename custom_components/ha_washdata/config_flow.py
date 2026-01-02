@@ -264,7 +264,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Manage the options."""
         return self.async_show_menu(
             step_id="init",
-            menu_options=["settings", "manage_data", "diagnostics"]
+            menu_options=["settings", "manage_cycles", "manage_profiles", "diagnostics"]
         )
 
 
@@ -641,8 +641,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Diagnostics submenu for maintenance actions."""
         if user_input is not None:
             choice = user_input["action"]
-            if choice == "post_process":
-                return await self.async_step_post_process()
             if choice == "migrate_data":
                 return await self.async_step_migrate_data()
             if choice == "wipe_history":
@@ -654,7 +652,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="diagnostics",
             data_schema=vol.Schema({
                 vol.Required("action"): vol.In({
-                    "post_process": "Merge fragmented cycles (configure lookback/gap in Settings)",
                     "migrate_data": "Migrate/compress stored data to latest format",
                     "wipe_history": "Wipe ALL data for this device (irreversible)",
                     "export_import": "Export/Import JSON with settings (copy/paste)"
@@ -754,15 +751,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             }),
         )
 
-    async def async_step_manage_data(
+    async def async_step_manage_cycles(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Main menu for profile, cycle, and suggestions management."""
+        """Manage cycles submenu."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
         
-        # Build a quick reference list of recent cycles
-        recent_cycles = store._data.get("past_cycles", [])[-5:]
+        # Build recent cycles list
+        recent_cycles = store._data.get("past_cycles", [])[-8:]
         recent_lines = []
         for c in reversed(recent_cycles):
             start = c["start_time"].split(".")[0].replace("T", " ")
@@ -772,7 +769,47 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             status_icon = "✓" if status in ("completed", "force_stopped") else "⚠" if status == "resumed" else "✗"
             recent_lines.append(f"{status_icon} {start} - {duration_min}m - {prof}")
         recent_text = "\n".join(recent_lines) if recent_lines else "No cycles recorded yet."
+
+        if user_input is not None:
+            action = user_input["action"]
+            if action == "label_cycle":
+                return await self.async_step_select_cycle_to_label()
+            elif action == "auto_label":
+                return await self.async_step_auto_label_cycles()
+            elif action == "delete_cycle":
+                return await self.async_step_select_cycle_to_delete()
+            elif action == "post_process":
+                return await self.async_step_post_process()
+
+        return self.async_show_form(
+            step_id="manage_cycles",
+            data_schema=vol.Schema({
+                vol.Required("action"): vol.In({
+                    "label_cycle": "🏷️ Label a Cycle",
+                    "auto_label": "🤖 Auto-Label History",
+                    "delete_cycle": "❌ Delete a Cycle",
+                    "post_process": "🧹 Post-Process / Merge",
+                })
+            }),
+            description_placeholders={"recent_cycles": recent_text}
+        )
+
+    async def async_step_manage_profiles(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage profiles submenu."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        profiles = store.list_profiles()
         
+        # Build profile summary
+        summary_lines = []
+        for p in profiles:
+            count = p["cycle_count"]
+            avg = int(p["avg_duration"]/60) if p["avg_duration"] else 0
+            summary_lines.append(f"- **{p['name']}**: {count} cycles, {avg}m avg")
+        summary_text = "\n".join(summary_lines) if summary_lines else "No profiles created yet."
+
         if user_input is not None:
             action = user_input["action"]
             if action == "create_profile":
@@ -781,26 +818,64 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 return await self.async_step_edit_profile()
             elif action == "delete_profile":
                 return await self.async_step_delete_profile_select()
-            elif action == "label_cycle":
-                return await self.async_step_select_cycle_to_label()
-            elif action == "auto_label":
-                return await self.async_step_auto_label_cycles()
-            elif action == "delete_cycle":
-                return await self.async_step_select_cycle_to_delete()
+            elif action == "profile_stats":
+                return await self.async_step_profile_stats()
 
         return self.async_show_form(
-            step_id="manage_data",
+            step_id="manage_profiles",
             data_schema=vol.Schema({
                 vol.Required("action"): vol.In({
                     "create_profile": "➕ Create New Profile",
                     "edit_profile": "✏️ Edit/Rename Profile",
                     "delete_profile": "🗑️ Delete Profile",
-                    "label_cycle": "🏷️ Label a Cycle",
-                    "auto_label": "🤖 Auto-Label Old Cycles",
-                    "delete_cycle": "❌ Delete a Cycle",
+                    "profile_stats": "📊 Profile Statistics",
                 })
             }),
-            description_placeholders={"recent_cycles": recent_text}
+            description_placeholders={"profile_summary": summary_text}
+        )
+
+    async def async_step_profile_stats(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Show detailed profile statistics."""
+        if user_input is not None:
+             # Back to manage profiles
+             return await self.async_step_manage_profiles()
+
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        profiles = store.list_profiles()
+        
+        # Build Markdown Table
+        headers = ["Name", "Count", "Avg(m)", "Min(m)", "Max(m)", "Last Run"]
+        rows = []
+        
+        # Get all cycles to find last run
+        cycles = store._data.get("past_cycles", [])
+        
+        for p in profiles:
+            name = p["name"]
+            count = p["cycle_count"]
+            avg = int(p["avg_duration"]/60) if p["avg_duration"] else 0
+            mn = int(p["min_duration"]/60) if p.get("min_duration") else 0
+            mx = int(p["max_duration"]/60) if p.get("max_duration") else 0
+            
+            # Find last run
+            last_run = "-"
+            p_cycles = [c for c in cycles if c.get("profile_name") == name]
+            if p_cycles:
+                last_c = max(p_cycles, key=lambda x: x["start_time"])
+                dt = last_c["start_time"].split("T")[0]
+                last_run = dt
+            
+            rows.append(f"| {name} | {count} | {avg} | {mn} | {mx} | {last_run} |")
+            
+        table = f"| {' | '.join(headers)} |\n| {' | '.join(['---']*len(headers))} |\n" + "\n".join(rows)
+
+        return self.async_show_form(
+            step_id="profile_stats",
+            data_schema=vol.Schema({}),
+            description_placeholders={"stats_table": table}
         )
 
     async def async_step_create_profile(
@@ -906,23 +981,32 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_rename_profile(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Rename the selected profile."""
+        """Edit profile settings (Name and Duration)."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         errors = {}
+        
+        # Get current profile data
+        profiles = manager.profile_store.list_profiles()
+        current_data = next((p for p in profiles if p["name"] == self._selected_profile), None)
+        current_duration_mins = int(current_data["avg_duration"] / 60) if current_data and current_data["avg_duration"] else 0
         
         if user_input is not None:
             new_name = user_input["new_name"].strip()
+            manual_duration_mins = user_input.get("manual_duration")
             
             if not new_name:
                 errors["new_name"] = "empty_name"
             else:
-                manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
-                
-                # If name didn't change, just return to entry creation (preserving options)
-                if new_name == self._selected_profile:
-                    return self.async_create_entry(title="", data=dict(self._config_entry.options))
-                    
+                avg_duration = None
+                if manual_duration_mins is not None and manual_duration_mins > 0:
+                    avg_duration = float(manual_duration_mins) * 60.0
+
                 try:
-                    count = await manager.profile_store.rename_profile(self._selected_profile, new_name)
+                    await manager.profile_store.update_profile(
+                        self._selected_profile, 
+                        new_name,
+                        avg_duration=avg_duration
+                    )
                     manager._notify_update()
                     return self.async_create_entry(title="", data=dict(self._config_entry.options))
                 except ValueError as e:
@@ -931,7 +1015,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="rename_profile",
             data_schema=vol.Schema({
-                vol.Required("new_name", default=self._selected_profile): str
+                vol.Required("new_name", default=self._selected_profile): str,
+                vol.Optional("manual_duration", default=current_duration_mins): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0, max=480, unit_of_measurement="min", mode=selector.NumberSelectorMode.BOX
+                    )
+                )
             }),
             errors=errors,
             description_placeholders={
@@ -1212,15 +1301,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
              choice = user_input["time_range"]
              manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
              
-             if choice >= 999999:
-                 # Merge all cycles (no time limit)
-                 count = manager.profile_store.merge_cycles(hours=999999)
-             else:
-                 hours = int(choice)
-                 count = manager.profile_store.merge_cycles(hours=hours)
+             gap_seconds = self.config_entry.options.get(
+                 CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS
+             )
              
-             if count > 0:
-                 await manager.profile_store.async_save()
+             hours = 999999 if choice >= 999999 else int(choice)
+             
+             # Use async_run_maintenance to ensure envelopes are rebuilt after merging
+             stats = await manager.profile_store.async_run_maintenance(
+                 lookback_hours=hours, 
+                 gap_seconds=gap_seconds
+             )
+             count = stats.get("merged_cycles", 0)
                  
              return self.async_create_entry(
                  title="",
