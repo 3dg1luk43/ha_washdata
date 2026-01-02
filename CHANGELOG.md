@@ -8,17 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.2] - 2026-01-02
 
 ### Added
+- **Manual Control**: "Force End Cycle" button to manually terminate stuck cycles (treats as "Completed" and saves data).
+- **Reliability**: "Cycle Resurrection" logic to restore active cycle state after Home Assistant restarts.
+- **Reliability**: "Smart Resume" estimation to provide progress updates during "detecting..." phase based on historical averages.
 - **Smart Cycle Extension**: New feature to prevent premature cycle termination during long low-power phases (e.g., dishwasher drying).
-  - Uses historical profile data to enforce a minimum cycle duration (default 95% of average).
-  - Configurable via "Smart Extension Threshold" in Advanced Settings.
-- **Dynamic Configuration UI**: 
-  - Switched numerical inputs to text boxes for better precision.
-  - Added strict upper/lower bounds checks for safer configuration.
+- **Statistics**: Energy (kWh) estimates added to Profile Statistics table.
+- **UI**: Added legends to profile graphs and scaled them up by 50% for better readability.
+- **Config Flow**: Split "Manage Data" into "Manage Cycles" and "Manage Profiles" menus for better usability.
+- **Config Flow**: Added ability to manually edit profile "Average Duration" for tuning Smart Extension.
 
 ### Fixed
-- **JSON Serialization Error**: Fixed a bug where `samples_recorded` caused API errors due to being a bounded method instead of a property.
-- **Translation Keys**: Corrected missing labels for "Smart Extension Threshold" and other advanced settings in the configuration flow.
-- **Config Flow UX**: Improved layout and step organization for advanced settings.
+- **Icons**: Fixed missing icon for "Cycle Program" select entity (now dynamically adapts to device type).
+- **Frontend**: Added missing "min" unit to "Time Remaining" display on card.
+- **Logic**: Improved filtering of "Ghost Cycles" (extremely short noise events).
+- **Bug**: Fixed JSON serialization error preventing status updates in some cases.
+- **Bug**: Ensure stats are immediately rebuilt after merging cycles.
+- **Translation Keys**: Corrected missing labels for "Smart Extension Threshold" and other advanced settings.
 
 ## [0.3.1] - 2024-12-31
 

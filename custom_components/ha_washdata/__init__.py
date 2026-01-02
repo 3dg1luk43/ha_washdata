@@ -71,7 +71,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SELECT]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SELECT, Platform.BUTTON]
 
 
 def _require_str(value: Any, name: str) -> str:

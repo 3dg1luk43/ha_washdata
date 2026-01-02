@@ -240,7 +240,9 @@ async def test_async_reload_config_allows_sensor_change_when_idle(
         mgr.profile_store.get_suggestions = MagicMock(return_value={})
         mgr.profile_store.get_duration_ratio_limits = MagicMock(return_value=(0.7, 1.3))
         mgr.profile_store.set_duration_ratio_limits = MagicMock()
-        mgr.profile_store.get_active_cycle = MagicMock(return_value=None)
+        mgr.profile_store.get_active_cycle = MagicMock(return_value={"manual_program": False})
+        mgr.profile_store.get_past_cycles = MagicMock(return_value=[])
+        mgr.profile_store.get_last_active_save = MagicMock(return_value=None)
         mgr.profile_store.async_clear_active_cycle = AsyncMock()
         mgr._setup_maintenance_scheduler = AsyncMock()
         

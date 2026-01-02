@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import time
 from typing import Any
 
 import voluptuous as vol
@@ -837,28 +839,47 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_profile_stats(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Show detailed profile statistics."""
+        """Show detailed profile statistics with graphs."""
         if user_input is not None:
              # Back to manage profiles
              return await self.async_step_manage_profiles()
 
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
-        profiles = store.list_profiles()
         
-        # Build Markdown Table
-        headers = ["Name", "Count", "Avg(m)", "Min(m)", "Max(m)", "Last Run"]
-        rows = []
+        # Ensure stats directory exists
+        stats_dir = self.hass.config.path("www", "ha_washdata", "profiles")
+        await self.hass.async_add_executor_job(
+            lambda: os.makedirs(stats_dir, exist_ok=True)
+        )
+        
+        from homeassistant.util import slugify
+        
+        profiles = store.list_profiles()
+        sections = []
+        ts = int(time.time())
         
         # Get all cycles to find last run
         cycles = store._data.get("past_cycles", [])
         
         for p in profiles:
             name = p["name"]
+            
+            # FORCE REFRESH: Rebuild envelope to ensure data is fresh
+            # This calculates energy, consistency, etc.
+            store.rebuild_envelope(name)
+            
+            safe_name = slugify(name)
             count = p["cycle_count"]
             avg = int(p["avg_duration"]/60) if p["avg_duration"] else 0
             mn = int(p["min_duration"]/60) if p.get("min_duration") else 0
             mx = int(p["max_duration"]/60) if p.get("max_duration") else 0
+            
+            # Get envelope for advanced stats
+            envelope = store.get_envelope(name)
+            kwh = f"{envelope.get('avg_energy', 0):.2f}" if envelope else "-"
+            std_dev = envelope.get('duration_std_dev', 0) if envelope else 0
+            consistency = f"±{int(std_dev/60)}m" if std_dev > 0 else "-"
             
             # Find last run
             last_run = "-"
@@ -868,14 +889,35 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 dt = last_c["start_time"].split("T")[0]
                 last_run = dt
             
-            rows.append(f"| {name} | {count} | {avg} | {mn} | {mx} | {last_run} |")
+            # Generate and Write SVG
+            svg_content = store.generate_profile_svg(name)
+            graph_markdown = ""
+            if svg_content:
+                file_path = f"{stats_dir}/profile_{safe_name}.svg"
+                def write_svg():
+                    with open(file_path, "w") as f:
+                        f.write(svg_content)
+                await self.hass.async_add_executor_job(write_svg)
+                graph_markdown = f"![{name}](/local/ha_washdata/profiles/profile_{safe_name}.svg?v={ts})"
+
+            # Build Per-Profile Section
+            # Headers: Count | Avg | Min | Max | Energy | Consistency | Last Run
+            table_header = "| Count | Avg | Min | Max | Energy | Consist. | Last Run |"
+            table_sep = "| --- | --- | --- | --- | --- | --- | --- |"
+            table_row = f"| {count} | {avg}m | {mn}m | {mx}m | {kwh} kWh | {consistency} | {last_run} |"
             
-        table = f"| {' | '.join(headers)} |\n| {' | '.join(['---']*len(headers))} |\n" + "\n".join(rows)
+            legend = "> **Graph Legend**: The blue band represents the minimum and maximum power draw range observed. The line shows the average power curve."
+            
+            section = f"## {name}\n{table_header}\n{table_sep}\n{table_row}\n\n{graph_markdown}\n\n{legend}"
+            sections.append(section)
+            
+        content = "\n\n---\n\n".join(sections) if sections else "No profiles found."
 
         return self.async_show_form(
             step_id="profile_stats",
             data_schema=vol.Schema({}),
-            description_placeholders={"stats_table": table}
+            # Key 'stats_table' must match the key in translations/strings (description)
+            description_placeholders={"stats_table": content}
         )
 
     async def async_step_create_profile(

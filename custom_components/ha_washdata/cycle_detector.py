@@ -61,6 +61,25 @@ class CycleDetector:
         self._dynamic_min_duration: float | None = None  # Smart Cycle Extension: min duration to enforce
         self._matched_profile: str | None = None # Persist the detected profile name
 
+    def reset(self) -> None:
+        """Force reset the detector state to OFF."""
+        self._state = STATE_OFF
+        self._sub_state = None
+        self._power_readings = []
+        self._current_cycle_start = None
+        self._last_active_time = None
+        self._low_power_start = None
+        self._cycle_max_power = 0.0
+        self._ma_buffer = []
+        self._cycle_status = None
+        self._last_power = None
+        self._potential_start_time = None
+        self._end_condition_count = 0
+        self._extension_count = 0
+        self._dynamic_min_duration = None
+        self._matched_profile = None
+        self._on_state_change(self._state, "Force Stopped")
+
     @property
     def state(self) -> str:
         """Return current state."""
@@ -376,6 +395,14 @@ class CycleDetector:
         # Not in low-power state or haven't waited long enough - this is a forced stop
         _LOGGER.warning(f"Watchdog: force-stopping cycle (no data received)")
         self._finish_cycle(timestamp, status="force_stopped")
+
+    def user_stop(self) -> None:
+        """Manually stop the cycle (user request), treating it as a natural completion."""
+        if self._state != STATE_RUNNING:
+            return
+        # We treat this as "completed" so it goes through standard saving/filtering logic
+        _LOGGER.info("User requested manual stop - finishing cycle")
+        self._finish_cycle(dt_util.now(), status="completed")
 
     def _should_mark_interrupted(self, duration: float) -> bool:
         """Return True if the cycle looks abnormal/aborted."""
