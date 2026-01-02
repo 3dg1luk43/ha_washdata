@@ -381,7 +381,7 @@ class WashDataManager:
                     self._manual_program_active = active_snapshot_to_restore.get("manual_program", False)
                     
                     # If we restored into a low-power state, ensure we don't immediately quit.
-                    # For now we just log this; the CycleDetector's off_delay will handle actual shutdown.
+                    # For now we just log this; the cycle detector's off_delay will handle actual shutdown.
                     if power_is_valid and current_power < self._config.min_power:
                         _LOGGER.debug(
                             "Restored active cycle in low-power state (power=%.2fW < min_power=%.2fW); "
