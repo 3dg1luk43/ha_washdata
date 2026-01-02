@@ -5,6 +5,21 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-01-02
+
+### Added
+- **Smart Cycle Extension**: New feature to prevent premature cycle termination during long low-power phases (e.g., dishwasher drying).
+  - Uses historical profile data to enforce a minimum cycle duration (default 95% of average).
+  - Configurable via "Smart Extension Threshold" in Advanced Settings.
+- **Dynamic Configuration UI**: 
+  - Switched numerical inputs to text boxes for better precision.
+  - Added strict upper/lower bounds checks for safer configuration.
+
+### Fixed
+- **JSON Serialization Error**: Fixed a bug where `samples_recorded` caused API errors due to being a bounded method instead of a property.
+- **Translation Keys**: Corrected missing labels for "Smart Extension Threshold" and other advanced settings in the configuration flow.
+- **Config Flow UX**: Improved layout and step organization for advanced settings.
+
 ## [0.3.1] - 2024-12-31
 
 ### Added

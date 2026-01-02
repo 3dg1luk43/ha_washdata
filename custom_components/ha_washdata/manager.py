@@ -51,6 +51,7 @@ from .const import (
     CONF_START_DURATION_THRESHOLD,
     CONF_RUNNING_DEAD_ZONE,
     CONF_END_REPEAT_COUNT,
+    CONF_SMART_EXTENSION_THRESHOLD,
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
@@ -88,6 +89,7 @@ from .const import (
     DEFAULT_START_DURATION_THRESHOLD,
     DEFAULT_RUNNING_DEAD_ZONE,
     DEFAULT_END_REPEAT_COUNT,
+    DEFAULT_SMART_EXTENSION_THRESHOLD,
     DEVICE_SMOOTHING_THRESHOLDS,
     DEVICE_COMPLETION_THRESHOLDS,
     STATE_RUNNING,
@@ -253,6 +255,7 @@ class WashDataManager:
         self._smoothed_progress: float = 0.0  # Smoothed progress tracking for EMA
         self._cycle_completed_time: datetime | None = None  # Track when cycle finished
         self._progress_reset_delay: int = int(progress_reset_delay)  # Reset progress after idle
+        self._smart_extension_threshold: float = float(config_entry.options.get(CONF_SMART_EXTENSION_THRESHOLD, DEFAULT_SMART_EXTENSION_THRESHOLD))
         self._last_reading_time: datetime | None = None
         self._current_power: float = 0.0
         self._last_estimate_time: datetime | None = None
@@ -430,6 +433,9 @@ class WashDataManager:
         new_end_repeat_count = int(
             config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
         )
+        self._smart_extension_threshold = float(
+            config_entry.options.get(CONF_SMART_EXTENSION_THRESHOLD, DEFAULT_SMART_EXTENSION_THRESHOLD)
+        )
         
         # Apply all detector config updates
         self.detector.config.min_power = new_min_power
@@ -457,6 +463,10 @@ class WashDataManager:
                 old_abrupt_drop_watts, new_abrupt_drop_watts, old_abrupt_drop_ratio, new_abrupt_drop_ratio,
                 old_abrupt_high_load, new_abrupt_high_load
             )
+            
+        # If running and we have a current program, re-apply smart extension with new threshold
+        if self.detector.state == "running" and self._current_program and self._current_program != "detecting...":
+             self._apply_smart_extension(self._current_program)
         
         # Update profile matching parameters
         old_min_ratio, old_max_ratio = self.profile_store.get_duration_ratio_limits()
@@ -1512,16 +1522,14 @@ class WashDataManager:
                 avg_duration = float(profile.get("avg_duration", 0.0))
                 self._matched_profile_duration = avg_duration if avg_duration > 0 else None
                 _LOGGER.info(f"Matched profile '{profile_name}' with expected duration {avg_duration:.0f}s ({int(avg_duration/60)}min)")
+                
+                # Apply smart cycle extension
+                self._apply_smart_extension(profile_name)
             # If we already have a match, keep it (don't thrash between profiles)
         elif not self._matched_profile_duration:
             # No match yet and still searching
             self._current_program = "detecting..."
         # else: keep existing match even if current attempt failed (prevents "unknown" flip-flop)
-        
-        # If manual program is active, we skip the matching logic update to _current_program
-        # But we DO want to process the phase estimation below using the manually set program.
-        # The logic above only updates _current_program if we are searching ("detecting...").
-        # If manual mode is on, _current_program is already set and locked.
 
         self._last_estimate_time = now
         self._update_remaining_only()
@@ -1881,6 +1889,27 @@ class WashDataManager:
     def current_power(self):
         return self._current_power
 
+    def _apply_smart_extension(self, profile_name: str) -> None:
+        """Apply Smart Cycle Extension logic based on profile duration."""
+        if self._smart_extension_threshold <= 0:
+            return
+
+        try:
+            profiles = self.profile_store.get_profiles()
+            profile = profiles.get(profile_name)
+            if not profile:
+                return
+                
+            avg_duration = float(profile.get("avg_duration", 0.0))
+            if avg_duration <= 0:
+                return
+                
+            target_duration = avg_duration * self._smart_extension_threshold
+            # Enforce minimum duration on detector
+            self.detector.set_min_duration(target_duration)
+        except Exception as e:
+            _LOGGER.warning(f"Failed to apply smart extension for {profile_name}: {e}")
+
     @property
     def samples_recorded(self):
         return len(self.detector.get_power_trace())
@@ -1892,9 +1921,6 @@ class WashDataManager:
     def set_manual_program(self, profile_name: str) -> None:
         """Manually set the current program."""
         if self.detector.state != "running":
-            # Can we set it before start? Maybe, but usually makes sense during run
-            # For now allow it only during run or just label it? 
-            # Let's allow setting it, it will be "detecting..." initially but we force it.
             pass
         
         profiles_raw: Any = None
@@ -1929,6 +1955,9 @@ class WashDataManager:
         except (TypeError, ValueError):
             avg = 0.0
         self._matched_profile_duration = avg if avg > 0 else None
+        
+        # Apply smart cycle extension
+        self._apply_smart_extension(profile_name)
         
         # Force estimate update
         self._update_remaining_only()

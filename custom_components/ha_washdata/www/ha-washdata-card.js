@@ -4,7 +4,7 @@ const EDITOR_TAG = "ha-washdata-card-editor";
 class WashDataCard extends HTMLElement {
   static getStubConfig() {
     return {
-      entity: "sensor.washing_machine",
+      entity: "sensor.washing_machine_state",
       title: "Washing Machine",
       icon: "mdi:washing-machine",
       display_mode: "time",

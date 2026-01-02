@@ -10,6 +10,6 @@ tests/__pycache__
 ha_washdata.code-workspace
 devtools/secrets.py
 .gitignore
-cycle_data
 custom_components/ha_washdata/test_data
 tests/repro/__pycache__
+cycle_data

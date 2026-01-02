@@ -8,7 +8,6 @@
 
 A Home Assistant custom component to monitor washing machines via smart sockets, learn power profiles, and estimate completion time using shape-correlation matching.
 
-
 > [!CAUTION]  
 > **ELECTRICAL SAFETY WARNING**: Using smart plugs such as Shelly or Sonoff with high-amperage appliances (washing machines, dryers, dishwriters) carries significant risk.  
 > 
@@ -21,7 +20,8 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Multi-Device Support**: Track Washing Machines, Dryers, Dishwashers, or Coffee Machines with device-type tagging.
 - **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic to finish faster when confidence is high.
 - **Power Spike Filtering**: Ignores brief boot spikes to prevent false starts.
-- **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles by their unique power curve signature.
+- **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles.
+- **Manual Training**: You define your profiles (e.g., "Cotton", "Quick") once; the system learns to recognize them thereafter. Integration **does not** auto-create profiles.
 - **Smart Time Estimation**: "Phase-aware" prediction detects variance (e.g., heating) and locks the countdown to prevent erratic jumps.
 - **Changeable Power Sensor**: Switch plugs without losing history.
 - **Minimal Status Card**: Optional custom Lovelace card.
@@ -36,7 +36,13 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Auto-Maintenance**: Nightly cleanup - removes orphaned profiles, merges fragmented cycles.
 - **Export/Import**: Full configuration backup/restore with all settings and profiles via JSON.
 
-## Installation (via HACS)
+---
+
+## 📘 Basic User Guide
+
+Designed for new users to get up and running quickly.
+
+## 1. Installation (via HACS)
 
 1. In Home Assistant, open **HACS → Settings → Custom repositories**.
 2. Add `https://github.com/3dg1luk43/ha_washdata` as a **Integration** repository.
@@ -44,41 +50,38 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 
 Manual fallback (if not using HACS): copy `custom_components/ha_washdata` into your HA `custom_components` folder and restart.
 
-## Configuration
+### 2. Initial Setup
 
 1. Go to **Settings > Devices & Services**.
 2. Click **Add Integration** and search for **HA WashData**.
-3. Follow the configuration flow:
-   - Give your appliance a **Name**.
-   - Select the **Device Type** (Washing Machine, Dryer, Dishwasher, or Coffee Machine).
-   - Select the **Power Sensor** entity from your smart plug.
+3. Follow the wizard:
+   - **Name**: Name your appliance (e.g., "Washing Machine").
+   - **Device Type**: Select the type (Washer, Dryer, etc.) - this sets optimal defaults.
+   - **Power Sensor**: Choose the smart plug entity monitoring the power (Watts).
    - Set the **Minimum Power** threshold (default 2W).
-   - **Step 2 (Optional)**: You will be asked if you want to create your **First Profile** immediately (e.g., "Cotton"). This helps the system provide time estimates right away.
-   - *Note: Device Type automatically sets optimal defaults (e.g., 60s completion threshold for Coffee Machines).*
+   - **Step 2 (Optional)**: You will be asked if you want to create your **First Profile** immediately (e.g., "Cotton").
+     - *Tip*: If you create this profile, you can **manually select it** via the card controls while a cycle is running. This forces the system to use that profile's duration for accurate **time remaining** and **progress %** estimates immediately, even before the system learns to recognize it automatically.
 
-### Lovelace Status Card
+### 3. Add the Status Card
 
+To see the beautiful status card on your dashboard:
+1. Edit your Dashboard (Top right menu -> **Edit Dashboard**).
+2. Add Card
+3. Search for **WashData Tile Card** (or just "Wash") and select it.
+4. The visual editor will appear. Select entities for your target device.
+5. Click **Save**.
 
-After installation, you can add a minimal status card to your dashboard:
+### 4. Teach the Integration (Crucial Step!)
 
-1. Edit your dashboard → Add Card → Manual.
-2. Enter:
-   ```yaml
-   type: custom:ha-washdata-card
-   entity: sensor.washing_machine
-   title: "My Washer"
-   ```
-3. The card shows: Status icon, running state, current program, progress bar, and time remaining.
+**Important**: The integration **does not** automatically create profiles. You must teach it! It will not detect your programs "magically" until you define them.
 
-*The card is served from `/ha_washdata/ha-washdata-card.js`. If it doesn't appear, clear your browser cache or restart HA.*
+1. **Run a Cycle**: Use your appliance as normal. The integration will record it as an "Unknown" cycle and show "detecting...".
+2. **Create a Profile**: After the cycle finishes, go to **Manage Data & Profiles**.
+3. **Label the Cycle**: Select the recent cycle, click **Create Profile** (e.g., name it "Cotton 60"), and save.
 
-### UI & Parameter Tuning
+**Now** the integration knows what "Cotton 60" looks like. The next time you run this program, it will be detected automatically and you will get accurate time estimates. Repeat this for each of your common programs.
 
-1. After adding the integration, click **Configure** on the integration entry.
-2. **Settings**: Centralized page for all tunables (Min Power, Off Delay, Smoothing, etc.). Use **numerical text boxes** for precise control.
-3. **💡 Apply Suggestions**: Check this box at the top of Settings to refresh the form with recommended values from your machine's history; review then submit to save.
-4. **Progress Estimation**: Remaining time is anchored to the matched profile’s average duration; progress is derived from `elapsed / (elapsed + remaining)` to avoid jumpy percentages.
-5. **Manage Data & Profiles**: Access tools to rename profiles, label past cycles, or auto-label historical data.
+---
 
 ## How it Works
 
@@ -217,3 +220,4 @@ Access via **Configure → Settings**:
 ## License
 
 Non-commercial use only. See LICENSE file.
+

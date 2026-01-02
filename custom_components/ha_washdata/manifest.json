@@ -9,5 +9,5 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/3dg1luk43/ha_washdata/issues",
   "requirements": ["numpy"],
-  "version": "0.3.1"
+  "version": "0.3.2"
 }

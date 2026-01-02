@@ -49,6 +49,7 @@ from .const import (
     CONF_NOTIFY_BEFORE_END_MINUTES,
     CONF_RUNNING_DEAD_ZONE,
     CONF_END_REPEAT_COUNT,
+    CONF_SMART_EXTENSION_THRESHOLD,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     DEFAULT_NAME,
@@ -83,6 +84,7 @@ from .const import (
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_RUNNING_DEAD_ZONE,
     DEFAULT_END_REPEAT_COUNT,
+    DEFAULT_SMART_EXTENSION_THRESHOLD,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -157,6 +159,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # New dead zone and end repeat count defaults
         options.setdefault(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE)
         options.setdefault(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
+        options.setdefault(CONF_SMART_EXTENSION_THRESHOLD, DEFAULT_SMART_EXTENSION_THRESHOLD)
 
         # Bump version and save
         self.hass.config_entries.async_update_entry(
@@ -509,7 +512,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(min=1, max=10, mode=selector.NumberSelectorMode.BOX)
             ),
-
+            vol.Optional(
+                CONF_SMART_EXTENSION_THRESHOLD,
+                default=get_val(CONF_SMART_EXTENSION_THRESHOLD, DEFAULT_SMART_EXTENSION_THRESHOLD),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX)
+            ),
             # --- Learning & Profiles ---
             vol.Optional(
                 CONF_LEARNING_CONFIDENCE,

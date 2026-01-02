@@ -58,6 +58,7 @@ class CycleDetector:
         self._potential_start_time: datetime | None = None  # For start debounce
         self._end_condition_count: int = 0  # Track consecutive end conditions met
         self._extension_count: int = 0 # Track how many times we extended due to profile match
+        self._dynamic_min_duration: float | None = None  # Smart Cycle Extension: min duration to enforce
         self._matched_profile: str | None = None # Persist the detected profile name
 
     @property
@@ -75,10 +76,13 @@ class CycleDetector:
         """Return current configuration."""
         return self._config
 
-    @property
-    def matched_profile(self) -> str | None:
-        """Return the confirmed matched profile name if any."""
-        return self._matched_profile
+    def set_min_duration(self, seconds: float | None) -> None:
+        """Set a dynamic minimum duration for the current cycle (Smart Cycle Extension)."""
+        self._dynamic_min_duration = seconds
+        if seconds:
+            _LOGGER.info(f"Smart Cycle Extension: Enforcing minimum duration of {int(seconds)}s")
+        else:
+            _LOGGER.debug("Smart Cycle Extension: clear minimum duration")
 
     @property
     def matched_profile(self) -> str | None:
@@ -130,6 +134,7 @@ class CycleDetector:
                     self._sub_state = "Starting"
                     self._extension_count = 0
                     self._matched_profile = None
+                    self._dynamic_min_duration = None # Clear any previous dynamic min duration
             else:
                 self._potential_start_time = None
 
@@ -150,17 +155,27 @@ class CycleDetector:
             cycle_elapsed = (timestamp - self._current_cycle_start).total_seconds() if self._current_cycle_start else 0
             in_dead_zone = cycle_elapsed < self._config.running_dead_zone
             
-            if is_active_for_end:
-                self._last_active_time = timestamp
-                self._low_power_start = None  # Reset low-power timer
-                self._end_condition_count = 0  # Reset end condition counter when power goes back up
-                # Reset extension count if we recover power
-                if self._extension_count > 0:
-                    self._extension_count = 0
-                
-                # Basic running state, update later if we match profile
-                if self._sub_state and "detecting" not in self._sub_state.lower():
-                    self._sub_state = "Running"
+            # Check if we should extend the cycle due to dynamic min duration (Smart Cycle Extension)
+            force_extension = False
+            if self._dynamic_min_duration and cycle_elapsed < self._dynamic_min_duration:
+                force_extension = True
+            
+            if is_active_for_end or force_extension:
+                 if force_extension and not is_active_for_end:
+                     # Only log periodically to avoid spam
+                     if int(cycle_elapsed) % 60 == 0:
+                         _LOGGER.debug(f"Smart Cycle Extension active: power low but elapsed {int(cycle_elapsed)}s < min {int(self._dynamic_min_duration)}s")
+                 
+                 self._last_active_time = timestamp
+                 self._low_power_start = None  # Reset low-power timer
+                 self._end_condition_count = 0  # Reset end condition counter when power goes back up (or forced extended)
+                 # Reset extension count if we recover power
+                 if self._extension_count > 0:
+                     self._extension_count = 0
+                 
+                 # Basic running state, update later if we match profile
+                 if self._sub_state and "detecting" not in self._sub_state.lower():
+                     self._sub_state = "Running"
 
             elif not in_dead_zone:  # Only check end conditions if NOT in dead zone
                 # Track when low power started
@@ -289,6 +304,7 @@ class CycleDetector:
         self._state = new_state
         if new_state == STATE_OFF:
             self._sub_state = None
+            self._dynamic_min_duration = None # Clear dynamic min duration on cycle end
         _LOGGER.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)
 
@@ -342,6 +358,7 @@ class CycleDetector:
         self._abrupt_drop = False
         self._extension_count = 0
         self._sub_state = None
+        self._dynamic_min_duration = None
 
     def force_end(self, timestamp: datetime) -> None:
         """Force-finish the current cycle (used by watchdog when sensor stops sending data)."""
@@ -422,8 +439,8 @@ class CycleDetector:
             "power_readings": [(t.isoformat(), p) for t, p in self._power_readings],
             "ma_buffer": getattr(self, "_ma_buffer", []),
             "end_condition_count": self._end_condition_count,
-            "end_condition_count": self._end_condition_count,
             "extension_count": self._extension_count,
+            "dynamic_min_duration": self._dynamic_min_duration,
             "matched_profile": self._matched_profile,
         }
 
@@ -487,6 +504,9 @@ class CycleDetector:
             # Restore end condition counter
             self._end_condition_count = snapshot.get("end_condition_count", 0)
             self._extension_count = snapshot.get("extension_count", 0)
+            
+            # Restore dynamic min duration
+            self._dynamic_min_duration = snapshot.get("dynamic_min_duration")
             
             _LOGGER.info(f"Restored CycleDetector state: {self._state}, {len(self._power_readings)} readings")
             
