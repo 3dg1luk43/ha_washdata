@@ -1,4 +1,5 @@
 #!/bin/bash
+# If you encounter "Permission denied", run: chmod +x run_tests.sh
 set -e
 
 # Define path to venv python

@@ -73,6 +73,7 @@ class CycleDetector:
         self._ma_buffer = []
         self._cycle_status = None
         self._last_power = None
+        self._abrupt_drop = False
         self._potential_start_time = None
         self._end_condition_count = 0
         self._extension_count = 0

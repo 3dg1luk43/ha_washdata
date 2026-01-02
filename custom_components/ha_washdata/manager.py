@@ -301,7 +301,13 @@ class WashDataManager:
                 current_power = float(state.state)
                 power_is_valid = True
             except (ValueError, TypeError):
-                pass
+                # Power sensor state is not numeric during restoration; treat as 0W
+                _LOGGER.debug(
+                    "Power sensor %s state %r is not numeric during restoration; "
+                    "treating as 0W and not restoring by power",
+                    self.power_sensor_entity_id,
+                    getattr(state, "state", None),
+                )
         
         should_restore = False
         active_snapshot_to_restore = active_snapshot
@@ -374,9 +380,15 @@ class WashDataManager:
                     # Restore manual program flag if present
                     self._manual_program_active = active_snapshot_to_restore.get("manual_program", False)
                     
-                    # If we restored into a low-power state, ensure we don't immediately quit
+                    # If we restored into a low-power state, ensure we don't immediately quit.
+                    # For now we just log this; the cycle detector's off_delay will handle actual shutdown.
                     if power_is_valid and current_power < self._config.min_power:
-                            pass
+                        _LOGGER.debug(
+                            "Restored active cycle in low-power state (power=%.2fW < min_power=%.2fW); "
+                            "waiting for detector off_delay before marking as finished",
+                            current_power,
+                            self._config.min_power,
+                        )
                             
                     if self.detector.matched_profile:
                         self._current_program = self.detector.matched_profile
@@ -818,16 +830,6 @@ class WashDataManager:
             _LOGGER.info(
                 f"No confident match in final attempt (best: {profile_name}, conf={confidence:.3f})"
             )
-
-    def _check_state_save(self, now: datetime) -> None:
-        """Periodically save active state."""
-        last_save = getattr(self, "_last_state_save", None)
-        if not last_save or (now - last_save).total_seconds() > 60:
-             # Fire and forget save task
-             self.hass.async_create_task(
-                 self.profile_store.async_save_active_cycle(self.detector.get_state_snapshot())
-             )
-             self._last_state_save = now
 
     def _start_watchdog(self) -> None:
         """Start the watchdog timer when a cycle begins."""
