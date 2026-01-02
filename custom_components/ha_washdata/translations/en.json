@@ -40,7 +40,8 @@
       "init": {
         "menu_options": {
           "settings": "Settings",
-          "manage_data": "Manage Data & Profiles",
+          "manage_cycles": "Manage Cycles",
+          "manage_profiles": "Manage Profiles",
           "diagnostics": "Diagnostics & Maintenance"
         }
       },
@@ -196,12 +197,23 @@
         "title": "Diagnostics & Maintenance",
         "description": "Run maintenance actions like merging fragmented cycles or migrating stored data."
       },
-      "manage_data": {
-        "title": "Manage Data & Profiles",
+      "manage_cycles": {
+        "title": "Manage Cycles",
         "description": "Recent cycles:\n{recent_cycles}",
         "data": {
           "action": "Action"
         }
+      },
+      "manage_profiles": {
+        "title": "Manage Profiles",
+        "description": "Profile Summary:\n{profile_summary}",
+        "data": {
+          "action": "Action"
+        }
+      },
+      "profile_stats": {
+        "title": "Profile Statistics",
+        "description": "{stats_table}"
       },
       "create_profile": {
         "title": "Create New Profile",
@@ -221,10 +233,11 @@
         }
       },
       "rename_profile": {
-        "title": "Rename Profile",
+        "title": "Edit Profile Details",
         "description": "Current profile: {current_name}",
         "data": {
-          "new_name": "New Profile Name"
+          "new_name": "Profile Name",
+          "manual_duration": "Manual Duration (minutes)"
         }
       },
       "delete_profile_select": {

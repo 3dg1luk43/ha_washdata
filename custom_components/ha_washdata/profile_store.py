@@ -821,32 +821,49 @@ class ProfileStore:
         await self.async_save()
         _LOGGER.info(f"Created standalone profile '{name}'")
 
-    async def rename_profile(self, old_name: str, new_name: str) -> int:
-        """Rename a profile and update all cycles using it.
-        Returns number of cycles updated."""
-        if old_name not in self._data.get("profiles", {}):
+    async def update_profile(self, old_name: str, new_name: str, avg_duration: float | None = None) -> int:
+        """Update a profile's name and/or average duration.
+        Returns number of cycles updated (if renamed)."""
+        profiles = self._data.get("profiles", {})
+        if old_name not in profiles:
             raise ValueError(f"Profile '{old_name}' not found")
-        if new_name == old_name:
-            return 0
-        if new_name in self._data.get("profiles", {}):
-            raise ValueError(f"Profile '{new_name}' already exists")
+            
+        # Handle Rename
+        renamed = False
+        if new_name != old_name:
+            if new_name in profiles:
+                raise ValueError(f"Profile '{new_name}' already exists")
+            
+            # Rename in profiles dict
+            profiles[new_name] = profiles.pop(old_name)
+            
+            # Rename in envelopes
+            if "envelopes" in self._data and old_name in self._data["envelopes"]:
+                self._data["envelopes"][new_name] = self._data["envelopes"].pop(old_name)
+            
+            renamed = True
         
-        # Rename in profiles dict
-        self._data["profiles"][new_name] = self._data["profiles"].pop(old_name)
+        target_name = new_name if renamed else old_name
         
-        # Rename corresponding envelope if it exists
-        if "envelopes" in self._data and old_name in self._data["envelopes"]:
-            self._data["envelopes"][new_name] = self._data["envelopes"].pop(old_name)
+        # Handle Duration Update
+        if avg_duration is not None and avg_duration > 0:
+            profiles[target_name]["avg_duration"] = float(avg_duration)
+            # If there's an envelope, we ideally update its target_duration too, 
+            # but envelope is usually rebuilt from data. 
+            # However, for manual profiles, envelope might be empty or theoretical.
+            # Let's log it.
+            _LOGGER.info(f"Updated baseline duration for '{target_name}' to {avg_duration}s")
 
-        # Update all cycles
+        # Update cycles if renamed
         count = 0
-        for cycle in self._data.get("past_cycles", []):
-            if cycle.get("profile_name") == old_name:
-                cycle["profile_name"] = new_name
-                count += 1
-        
+        if renamed:
+            for cycle in self._data.get("past_cycles", []):
+                if cycle.get("profile_name") == old_name:
+                    cycle["profile_name"] = new_name
+                    count += 1
+            _LOGGER.info(f"Renamed profile '{old_name}' to '{new_name}', updated {count} cycles")
+
         await self.async_save()
-        _LOGGER.info(f"Renamed profile '{old_name}' to '{new_name}', updated {count} cycles")
         return count
 
     async def delete_profile(self, name: str, unlabel_cycles: bool = True) -> int:
