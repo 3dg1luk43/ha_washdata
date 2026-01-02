@@ -611,8 +611,6 @@ class ProfileStore:
             "cycle_count": len(resampled),
             "target_duration": float(target_duration),
             "sampling_rates": list(sampling_rates),
-            "target_duration": float(target_duration),
-            "sampling_rates": list(sampling_rates),
             "updated_at": datetime.now().isoformat(),
         }
 
@@ -652,8 +650,6 @@ class ProfileStore:
             f"normalized_to={num_points} time-aligned points"
         )
         
-        return True
-
         return True
 
     def generate_profile_svg(self, profile_name: str) -> str | None:
