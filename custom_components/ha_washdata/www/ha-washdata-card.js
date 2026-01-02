@@ -4,7 +4,7 @@ const EDITOR_TAG = "ha-washdata-card-editor";
 class WashDataCard extends HTMLElement {
   static getStubConfig() {
     return {
-      entity: "sensor.washing_machine",
+      entity: "sensor.washing_machine_state",
       title: "Washing Machine",
       icon: "mdi:washing-machine",
       display_mode: "time",
@@ -255,7 +255,12 @@ class WashDataCard extends HTMLElement {
       if (this._cfg.display_mode === 'percentage' && pct) {
         parts.push(`${Math.round(pct)}%`);
       } else if (remaining) {
-        parts.push(remaining);
+        // Append 'min' if it is a number (WashData attribute is raw minutes)
+        if (!isNaN(remaining)) {
+          parts.push(`${remaining} min`);
+        } else {
+          parts.push(remaining);
+        }
       }
     }
 

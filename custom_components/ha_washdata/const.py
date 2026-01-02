@@ -38,6 +38,7 @@ CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
 CONF_APPLY_SUGGESTIONS = "apply_suggestions"
 CONF_RUNNING_DEAD_ZONE = "running_dead_zone"  # Seconds after start to ignore power dips
 CONF_END_REPEAT_COUNT = "end_repeat_count"  # Number of times end condition must be met
+CONF_SMART_EXTENSION_THRESHOLD = "smart_extension_threshold"  # Ratio of profile avg duration to extend cycle (0-1)
 CONF_SHOW_ADVANCED = "show_advanced"  # Toggle advanced settings
 
 
@@ -74,6 +75,7 @@ DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
 DEFAULT_WATCHDOG_INTERVAL = 5  # Seconds between watchdog checks
 DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Noise events in 24h to trigger auto-tune
+DEFAULT_SMART_EXTENSION_THRESHOLD = 0.95  # 95% of average duration required
 DEFAULT_RUNNING_DEAD_ZONE = 0  # Disabled by default, typical: 60-300s
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 

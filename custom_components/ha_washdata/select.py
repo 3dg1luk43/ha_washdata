@@ -31,7 +31,7 @@ class WashDataProgramSelect(SelectEntity):
     """Select entity to manually choose the running program."""
 
     _attr_has_entity_name = True
-    _attr_icon = "mdi:washing-machine-select"
+
     _attr_translation_key = "program_select"
 
     def __init__(self, manager: WashDataManager, config_entry: ConfigEntry) -> None:
@@ -45,6 +45,18 @@ class WashDataProgramSelect(SelectEntity):
             "name": config_entry.title,
             "manufacturer": "HA WashData",
         }
+        
+        # Determine icon based on device type
+        dtype = getattr(manager, "device_type", "washing_machine")
+        if dtype == "dryer":
+            self._attr_icon = "mdi:tumble-dryer"
+        elif dtype == "dishwasher":
+            self._attr_icon = "mdi:dishwasher"
+        elif dtype == "coffee_machine":
+            self._attr_icon = "mdi:coffee"
+        else:
+            self._attr_icon = "mdi:washing-machine" # Default and washing_machine
+            
         self._update_options()
 
     @callback

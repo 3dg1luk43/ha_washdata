@@ -108,6 +108,24 @@ class WashDataCardRegistration:
         _register_static_path(self.hass, INTEGRATION_URL, str(src))
 
         # Try auto-registration of the lovelace resource
+        # If lovelace is not yet loaded, wait for it
+        if not self.hass.data.get("lovelace"):
+            _LOGGER.debug("Lovelace not loaded yet; waiting for component loaded event")
+            from homeassistant.const import EVENT_COMPONENT_LOADED
+            from homeassistant.core import Event
+
+            async def _on_lovelace_loaded(event: Event) -> None:
+                if event.data.get("component") == "lovelace":
+                    _LOGGER.debug("Lovelace component loaded; retrying resource registration")
+                    try:
+                        await _init_resource(self.hass, INTEGRATION_URL, _VERSION)
+                    except Exception:
+                        _LOGGER.debug("Delayed auto-registration of lovelace resource failed for %s", INTEGRATION_URL)
+
+            self.hass.bus.async_listen(EVENT_COMPONENT_LOADED, _on_lovelace_loaded)
+            return
+
+        # Lovelace is already loaded
         try:
             await _init_resource(self.hass, INTEGRATION_URL, _VERSION)
             _LOGGER.debug("Auto-registered lovelace resource for %s", INTEGRATION_URL)

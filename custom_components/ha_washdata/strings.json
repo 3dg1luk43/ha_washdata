@@ -40,7 +40,8 @@
       "init": {
         "menu_options": {
           "settings": "Settings",
-          "manage_data": "Manage Data & Profiles",
+          "manage_cycles": "Manage Cycles",
+          "manage_profiles": "Manage Profiles",
           "diagnostics": "Diagnostics & Maintenance"
         }
       },
@@ -134,6 +135,7 @@
         "data": {
           "apply_suggestions": "Apply Suggested Values",
           "start_duration_threshold": "Start Debounce Duration (s)",
+          "off_delay": "Cycle End Delay (s)",
           "progress_reset_delay": "Progress Reset Delay (seconds)",
           "no_update_active_timeout": "No-Update Timeout (s)",
           "auto_label_confidence": "Auto-Label Confidence (0-1)",
@@ -155,14 +157,17 @@
           "max_full_traces_unlabeled": "Retention: Max Full Traces Unlabeled",
           "watchdog_interval": "Watchdog Interval (seconds)",
           "completion_min_seconds": "Completion Minimum Runtime (seconds)",
+          "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
           "running_dead_zone": "Running Dead Zone (seconds)",
           "end_repeat_count": "End Repeat Count",
-          "auto_maintenance": "Enable Auto-Maintenance"
+          "auto_maintenance": "Enable Auto-Maintenance",
+          "smart_extension_threshold": "Smart Extension Threshold"
         },
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
           "start_duration_threshold": "Ignore brief power spikes shorter than this duration (seconds). Filters out boot spikes (e.g., 60W for 2s) before real cycle starts. Default: 5s.",
+          "off_delay": "Seconds the smoothed power must stay below the threshold to mark completion. Default: 120s.",
           "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 300s.",
           "no_update_active_timeout": "For publish-on-change sensors: only force-end an ACTIVE cycle if no updates arrive for this many seconds. Low-power completion still uses the Off Delay.",
           "auto_label_confidence": "Automatically label cycles at or above this confidence on completion (0.0–1.0).",
@@ -184,22 +189,35 @@
           "max_full_traces_unlabeled": "Number of recent unlabeled cycles to keep with full power traces to support auto-labeling. Default: 20.",
           "watchdog_interval": "Seconds between watchdog checks while running. Default: 5s. WARNING: Ensure this is HIGHER than your sensor's update interval to avoid false stops (e.g., if sensor updates every 60s, use 65s+).",
           "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
+          "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
           "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3.",
           "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
           "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
-          "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy."
+          "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy.",
+          "smart_extension_threshold": "If a profile is identified, keep the cycle running until this ratio of the average duration is reached, even if power drops (e.g. drying phase). Set to 0 to disable. Default: 0.95 (95%)."
         }
       },
       "diagnostics": {
         "title": "Diagnostics & Maintenance",
         "description": "Run maintenance actions like merging fragmented cycles or migrating stored data."
       },
-      "manage_data": {
-        "title": "Manage Data & Profiles",
+      "manage_cycles": {
+        "title": "Manage Cycles",
         "description": "Recent cycles:\n{recent_cycles}",
         "data": {
           "action": "Action"
         }
+      },
+      "manage_profiles": {
+        "title": "Manage Profiles",
+        "description": "Profile Summary:\n{profile_summary}",
+        "data": {
+          "action": "Action"
+        }
+      },
+      "profile_stats": {
+        "title": "Profile Statistics",
+        "description": "{stats_table}"
       },
       "create_profile": {
         "title": "Create New Profile",
@@ -219,10 +237,11 @@
         }
       },
       "rename_profile": {
-        "title": "Rename Profile",
+        "title": "Edit Profile Details",
         "description": "Current profile: {current_name}",
         "data": {
-          "new_name": "New Profile Name"
+          "new_name": "Profile Name",
+          "manual_duration": "Manual Duration (minutes)"
         }
       },
       "delete_profile_select": {

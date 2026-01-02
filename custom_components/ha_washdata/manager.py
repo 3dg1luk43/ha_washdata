@@ -51,6 +51,7 @@ from .const import (
     CONF_START_DURATION_THRESHOLD,
     CONF_RUNNING_DEAD_ZONE,
     CONF_END_REPEAT_COUNT,
+    CONF_SMART_EXTENSION_THRESHOLD,
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
@@ -88,6 +89,7 @@ from .const import (
     DEFAULT_START_DURATION_THRESHOLD,
     DEFAULT_RUNNING_DEAD_ZONE,
     DEFAULT_END_REPEAT_COUNT,
+    DEFAULT_SMART_EXTENSION_THRESHOLD,
     DEVICE_SMOOTHING_THRESHOLDS,
     DEVICE_COMPLETION_THRESHOLDS,
     STATE_RUNNING,
@@ -253,6 +255,7 @@ class WashDataManager:
         self._smoothed_progress: float = 0.0  # Smoothed progress tracking for EMA
         self._cycle_completed_time: datetime | None = None  # Track when cycle finished
         self._progress_reset_delay: int = int(progress_reset_delay)  # Reset progress after idle
+        self._smart_extension_threshold: float = float(config_entry.options.get(CONF_SMART_EXTENSION_THRESHOLD, DEFAULT_SMART_EXTENSION_THRESHOLD))
         self._last_reading_time: datetime | None = None
         self._current_power: float = 0.0
         self._last_estimate_time: datetime | None = None
@@ -284,6 +287,126 @@ class WashDataManager:
         
         self._manual_program_active: bool = False
         self._notified_pre_completion: bool = False
+    async def _attempt_state_restoration(self) -> None:
+        """Attempt to restore active cycle state from storage."""
+        active_snapshot = self.profile_store.get_active_cycle()
+        
+        # Check current power state first
+        state = self.hass.states.get(self.power_sensor_entity_id)
+        current_power = 0.0
+        power_is_valid = False
+        
+        if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
+            try:
+                current_power = float(state.state)
+                power_is_valid = True
+            except (ValueError, TypeError):
+                # Power sensor state is not numeric during restoration; treat as 0W
+                _LOGGER.debug(
+                    "Power sensor %s state %r is not numeric during restoration; "
+                    "treating as 0W and not restoring by power",
+                    self.power_sensor_entity_id,
+                    getattr(state, "state", None),
+                )
+        
+        should_restore = False
+        active_snapshot_to_restore = active_snapshot
+        
+        # Helper to check if a snapshot is viable
+        def is_viable_restore(last_save_time: datetime) -> bool:
+            age = (datetime.now() - last_save_time).total_seconds()
+            # Unconditional restore window (30 mins)
+            if age < 1800:
+                return True
+            # Extended window if power is confirmed HIGH (60 mins)
+            if age < 3600 and power_is_valid and current_power >= self._config.min_power:
+                return True
+            return False
+
+        last_save = self.profile_store.get_last_active_save()
+        
+        if active_snapshot and last_save and is_viable_restore(last_save):
+            should_restore = True
+            _LOGGER.info(f"Found recently saved active cycle (age={(datetime.now()-last_save).total_seconds():.0f}s), restoring...")
+            # If standard restore, we mark it as Restored to potentially guard against strict extension logic
+            # unless the user wants to enforce it.
+            active_snapshot_to_restore["sub_state"] = active_snapshot_to_restore.get("sub_state") or "Restored"
+            # NOTE: We disable dynamic min duration enforcement on recovery since we might have missed data
+            active_snapshot_to_restore["dynamic_min_duration"] = None
+
+        # FALLBACK: Resurrection Logic
+        if not should_restore:
+            past_cycles = self.profile_store.get_past_cycles()
+            if past_cycles:
+                last_cycle = past_cycles[-1]
+                last_end_str = last_cycle.get("end_time")
+                if last_end_str:
+                    last_end = dt_util.parse_datetime(last_end_str)
+                    if last_end:
+                        gap = (dt_util.now() - last_end).total_seconds()
+                        is_recent = gap < 1200 # 20 mins
+                        status = last_cycle.get("status")
+                        
+                        if is_recent and status != "completed":
+                            _LOGGER.info(f"Found recent interrupted cycle in history (id={last_cycle['id']}, gap={gap:.0f}s). Resurrecting...")
+                            try:
+                                power_data = self.profile_store._decompress_power_data(last_cycle)
+                                if power_data:
+                                    active_snapshot_to_restore = {
+                                        # Reconstruct basic running state
+                                        "state": "running",
+                                        "sub_state": "Resurrected",
+                                        "current_cycle_start": last_cycle["start_time"],
+                                        "last_active_time": last_cycle["end_time"],
+                                        "low_power_start": None,
+                                        "cycle_max_power": max([p for _, p in power_data]) if power_data else 0,
+                                        "power_readings": power_data,
+                                        "ma_buffer": [p for _, p in power_data[-10:]] if power_data else [],
+                                        "end_condition_count": 0,
+                                        "extension_count": 0,
+                                        "dynamic_min_duration": None,
+                                        "matched_profile": last_cycle.get("profile_name"),
+                                    }
+                                    should_restore = True
+                                    past_cycles.pop()
+                                    await self.profile_store.async_save()
+                            except Exception as e:
+                                _LOGGER.error(f"Failed to resurrect cycle: {e}")
+
+        if should_restore and active_snapshot_to_restore:
+            try:
+                self.detector.restore_state_snapshot(active_snapshot_to_restore)
+                if self.detector.state == "running":
+                    # Restore manual program flag if present
+                    self._manual_program_active = active_snapshot_to_restore.get("manual_program", False)
+                    
+                    # If we restored into a low-power state, ensure we don't immediately quit.
+                    # For now we just log this; the cycle detector's off_delay will handle actual shutdown.
+                    if power_is_valid and current_power < self._config.min_power:
+                        _LOGGER.debug(
+                            "Restored active cycle in low-power state (power=%.2fW < min_power=%.2fW); "
+                            "waiting for detector off_delay before marking as finished",
+                            current_power,
+                            self._config.min_power,
+                        )
+                            
+                    if self.detector.matched_profile:
+                        self._current_program = self.detector.matched_profile
+                        _LOGGER.info(f"Restored/Resurrected washer cycle with profile: {self._current_program}")
+                    else:
+                        self._current_program = "detecting..."
+                    self._start_watchdog()
+                else:
+                    await self.profile_store.async_clear_active_cycle()
+            except Exception as err:
+                _LOGGER.warning(f"Failed to restore active cycle: {err}, clearing")
+                await self.profile_store.async_clear_active_cycle()
+        else:
+             if last_save:
+                 age = (datetime.now() - last_save).total_seconds()
+                 _LOGGER.info(f"Active cycle too stale (age={age:.0f}s), clearing")
+             await self.profile_store.async_clear_active_cycle()
+
 
     async def async_setup(self) -> None:
         """Set up the manager."""
@@ -312,6 +435,9 @@ class WashDataManager:
                 await self.profile_store.async_save()
         except Exception:
             _LOGGER.exception("Failed repairing profile sample references for %s", self.entry_id)
+        
+        # Attempt to restore state (BEFORE starting listener)
+        await self._attempt_state_restoration()
         
         # Subscribe to power sensor updates
         self._remove_listener = async_track_state_change_event(
@@ -430,6 +556,9 @@ class WashDataManager:
         new_end_repeat_count = int(
             config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
         )
+        self._smart_extension_threshold = float(
+            config_entry.options.get(CONF_SMART_EXTENSION_THRESHOLD, DEFAULT_SMART_EXTENSION_THRESHOLD)
+        )
         
         # Apply all detector config updates
         self.detector.config.min_power = new_min_power
@@ -457,6 +586,10 @@ class WashDataManager:
                 old_abrupt_drop_watts, new_abrupt_drop_watts, old_abrupt_drop_ratio, new_abrupt_drop_ratio,
                 old_abrupt_high_load, new_abrupt_high_load
             )
+            
+        # If running and we have a current program, re-apply smart extension with new threshold
+        if self.detector.state == "running" and self._current_program and self._current_program != "detecting...":
+             self._apply_smart_extension(self._current_program)
         
         # Update profile matching parameters
         old_min_ratio, old_max_ratio = self.profile_store.get_duration_ratio_limits()
@@ -509,48 +642,7 @@ class WashDataManager:
         await self._setup_maintenance_scheduler()
         
         # RESTORE STATE (only if recent enough, otherwise treat as stale)
-        active_snapshot = self.profile_store.get_active_cycle()
-        if active_snapshot:
-            # Check current power state first - if it's off/low, the cycle is definitely not running
-            state = self.hass.states.get(self.power_sensor_entity_id)
-            current_power = 0.0
-            if state and state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE):
-                try:
-                    current_power = float(state.state)
-                except (ValueError, TypeError):
-                    pass
-            
-            # If current power is below threshold, don't restore running state
-            if current_power < self._config.min_power:
-                _LOGGER.info(f"Current power {current_power}W is below threshold, clearing stale active cycle")
-                await self.profile_store.async_clear_active_cycle()
-            else:
-                # Check if the saved state is recent (within last 30 minutes)
-                # If older, it's likely stale from a code update or restart
-                try:
-                    last_save = self.profile_store.get_last_active_save()
-                    if last_save:
-                        time_since_save = (datetime.now() - last_save).total_seconds()
-                        # Only restore if saved within last 10 minutes
-                        if time_since_save < 600:
-                            self.detector.restore_state_snapshot(active_snapshot)
-                            if self.detector.state == "running":
-                                if self.detector.matched_profile:
-                                    self._current_program = self.detector.matched_profile
-                                    _LOGGER.info(f"Restored interrupted washer cycle with profile: {self._current_program}")
-                                else:
-                                    self._current_program = "detecting..."
-                                self._start_watchdog()  # Resume watchdog for restored cycle
-                                _LOGGER.info("Restored interrupted washer cycle.")
-                        else:
-                            _LOGGER.info(f"Active cycle too stale ({time_since_save}s old), clearing")
-                            await self.profile_store.async_clear_active_cycle()
-                    else:
-                        # No timestamp, clear it to be safe
-                        await self.profile_store.async_clear_active_cycle()
-                except Exception as err:
-                    _LOGGER.warning(f"Failed to restore active cycle: {err}, clearing")
-                    await self.profile_store.async_clear_active_cycle()
+        await self._attempt_state_restoration()
         
         _LOGGER.info("Configuration reloaded successfully")
 
@@ -567,7 +659,9 @@ class WashDataManager:
             
         # Try to save state one last time?
         if self.detector.state == "running":
-             await self.profile_store.async_save_active_cycle(self.detector.get_state_snapshot())
+             snapshot = self.detector.get_state_snapshot()
+             snapshot["manual_program"] = self._manual_program_active
+             await self.profile_store.async_save_active_cycle(snapshot)
 
         self._last_reading_time = None
 
@@ -664,6 +758,20 @@ class WashDataManager:
              
         self._notify_update()
 
+    def _check_state_save(self, now: datetime) -> None:
+        """Periodically save active state."""
+        last_save = getattr(self, "_last_state_save", None)
+        if not last_save or (now - last_save).total_seconds() > 60:
+             # Fire and forget save task
+             # Inject manual program flag into snapshot before saving
+             snapshot = self.detector.get_state_snapshot()
+             snapshot["manual_program"] = self._manual_program_active
+             
+             self.hass.async_create_task(
+                 self.profile_store.async_save_active_cycle(snapshot)
+             )
+             self._last_state_save = now
+
     def _run_final_profile_match(self) -> None:
         """Run one final profile match after cycle completion if no profile was detected."""
         # Check if we have a completed cycle in storage
@@ -722,16 +830,6 @@ class WashDataManager:
             _LOGGER.info(
                 f"No confident match in final attempt (best: {profile_name}, conf={confidence:.3f})"
             )
-
-    def _check_state_save(self, now: datetime) -> None:
-        """Periodically save active state."""
-        last_save = getattr(self, "_last_state_save", None)
-        if not last_save or (now - last_save).total_seconds() > 60:
-             # Fire and forget save task
-             self.hass.async_create_task(
-                 self.profile_store.async_save_active_cycle(self.detector.get_state_snapshot())
-             )
-             self._last_state_save = now
 
     def _start_watchdog(self) -> None:
         """Start the watchdog timer when a cycle begins."""
@@ -1512,16 +1610,14 @@ class WashDataManager:
                 avg_duration = float(profile.get("avg_duration", 0.0))
                 self._matched_profile_duration = avg_duration if avg_duration > 0 else None
                 _LOGGER.info(f"Matched profile '{profile_name}' with expected duration {avg_duration:.0f}s ({int(avg_duration/60)}min)")
+                
+                # Apply smart cycle extension
+                self._apply_smart_extension(profile_name)
             # If we already have a match, keep it (don't thrash between profiles)
         elif not self._matched_profile_duration:
             # No match yet and still searching
             self._current_program = "detecting..."
         # else: keep existing match even if current attempt failed (prevents "unknown" flip-flop)
-        
-        # If manual program is active, we skip the matching logic update to _current_program
-        # But we DO want to process the phase estimation below using the manually set program.
-        # The logic above only updates _current_program if we are searching ("detecting...").
-        # If manual mode is on, _current_program is already set and locked.
 
         self._last_estimate_time = now
         self._update_remaining_only()
@@ -1639,10 +1735,19 @@ class WashDataManager:
             self._cycle_progress = max(0.0, min(self._smoothed_progress, 100.0))
             _LOGGER.debug(f"Linear estimate: remaining={int(remaining/60)}min, progress={self._cycle_progress:.1f}%")
         else:
-            self._time_remaining = None
-            self._cycle_progress = 0.0
-            self._smoothed_progress = 0.0
-            _LOGGER.debug(f"No profile matched yet, elapsed={int(duration_so_far/60)}min")
+            # Smart Resume: If detecting, check if we might be near the end of a known cycle
+            hist_remaining, hist_progress = self._estimate_progress_from_history(duration_so_far)
+            
+            if hist_remaining is not None and hist_progress is not None:
+                self._time_remaining = hist_remaining
+                self._cycle_progress = hist_progress
+                self._smoothed_progress = hist_progress
+                _LOGGER.debug(f"Smart Resume estimate: remaining={int(hist_remaining/60)}min, progress={hist_progress:.1f}%")
+            else:
+                self._time_remaining = None
+                self._cycle_progress = 0.0
+                self._smoothed_progress = 0.0
+                _LOGGER.debug(f"No profile matched yet, elapsed={int(duration_so_far/60)}min")
 
     def _estimate_phase_progress(
         self, 
@@ -1703,6 +1808,44 @@ class WashDataManager:
         if len(current_window_values) < 3:
             _LOGGER.debug("Insufficient data in current window for phase estimation")
             return None
+        
+    def _estimate_progress_from_history(self, current_duration: float) -> tuple[float | None, float | None]:
+        """
+        Estimate progress for 'detecting...' cycles by comparing current duration to historic averages.
+        Returns (remaining_seconds, progress_percentage).
+        """
+        try:
+            profiles = self.profile_store.get_profiles()
+            candidates = []
+            
+            for name, data in profiles.items():
+                avg = float(data.get("avg_duration", 0))
+                if avg <= 10:  # Ignore garbage
+                    continue
+                
+                # Check if we are "near the end" or at least significantly into this cycle type
+                # Range: 70% to 120% of average duration
+                ratio = current_duration / avg
+                if 0.7 <= ratio <= 1.2:
+                    candidates.append((name, avg, ratio))
+            
+            if not candidates:
+                return None, None
+                
+            # If multiple candidates, pick the one where we are closest to completion (ratio close to 1.0)
+            # biased slightly towards keeping it running (ratio < 1.0)?
+            # actually, closely matching magnitude is best.
+            best = min(candidates, key=lambda x: abs(1.0 - x[2]))
+            name, avg, ratio = best
+            
+            remaining = max(0.0, avg - current_duration)
+            progress = min(99.0, (current_duration / avg) * 100.0)
+            
+            return remaining, progress
+            
+        except Exception as e:
+            _LOGGER.debug(f"Smart resume estimation failed: {e}")
+            return None, None
         
         best_progress = None
         best_score = -1.0
@@ -1881,6 +2024,33 @@ class WashDataManager:
     def current_power(self):
         return self._current_power
 
+    def _apply_smart_extension(self, profile_name: str) -> None:
+        """Apply Smart Cycle Extension logic based on profile duration."""
+        if self._smart_extension_threshold <= 0:
+            return
+            
+        # If the cycle was Resurrected or Restored, we treat it as fragile and avoid enforcing strict duration
+        # because we might have missed data gaps or end conditions.
+        if self.detector.sub_state in ("Resurrected", "Restored"):
+            _LOGGER.debug("Skipping Smart Extension enforcement for %s cycle", self.detector.sub_state)
+            return
+
+        try:
+            profiles = self.profile_store.get_profiles()
+            profile = profiles.get(profile_name)
+            if not profile:
+                return
+                
+            avg_duration = float(profile.get("avg_duration", 0.0))
+            if avg_duration <= 0:
+                return
+                
+            target_duration = avg_duration * self._smart_extension_threshold
+            # Enforce minimum duration on detector
+            self.detector.set_min_duration(target_duration)
+        except Exception as e:
+            _LOGGER.warning(f"Failed to apply smart extension for {profile_name}: {e}")
+
     @property
     def samples_recorded(self):
         return len(self.detector.get_power_trace())
@@ -1892,9 +2062,6 @@ class WashDataManager:
     def set_manual_program(self, profile_name: str) -> None:
         """Manually set the current program."""
         if self.detector.state != "running":
-            # Can we set it before start? Maybe, but usually makes sense during run
-            # For now allow it only during run or just label it? 
-            # Let's allow setting it, it will be "detecting..." initially but we force it.
             pass
         
         profiles_raw: Any = None
@@ -1918,22 +2085,37 @@ class WashDataManager:
         
         # Update expected duration immediately
         profile = profiles.get(profile_name)
-        if not isinstance(profile, dict):
-            _LOGGER.warning(f"Cannot set manual program: '{profile_name}' profile is invalid")
-            return
+        if profile:
+             avg = float(profile.get("avg_duration", 0.0))
+             if avg > 0:
+                 self._matched_profile_duration = avg
+                 _LOGGER.info(f"Manual program set to {profile_name}, duration={avg:.0f}s")
+                 
+                 # Apply smart extension if running
+                 if self.detector.state == "running":
+                     self._apply_smart_extension(profile_name)
+                     self._update_estimates()
+                     self._fire_state_update_event()
 
-        profile_dict = cast(dict[str, Any], profile)
-        avg_raw = profile_dict.get("avg_duration")
-        try:
-            avg = float(avg_raw) if avg_raw is not None else 0.0
-        except (TypeError, ValueError):
-            avg = 0.0
-        self._matched_profile_duration = avg if avg > 0 else None
+    async def async_terminate_cycle(self) -> None:
+        """Force terminate the current cycle via user request."""
+        _LOGGER.warning("Force terminating cycle by user request")
         
-        # Force estimate update
-        self._update_remaining_only()
-        self._notify_update()
-        _LOGGER.info(f"Manual program set to '{profile_name}'")
+        # Trigger natural cycle end via detector
+        # This will call _on_cycle_end callback, which handles:
+        # - Saving to profile store
+        # - Clearing active cycle persistence
+        # - Post-processing/Merging
+        # - Notifications
+        self.detector.user_stop()
+        
+        # We DO NOT clear manager state manually here (e.g. self._current_program)
+        # because we want the UI to show the "Clean" state with the just-finished program info.
+        # The standard reset timers in _on_cycle_end / _async_power_changed will handle cleanup after delay.
+        
+        # Force a state update to reflect the change immediately
+        self._fire_state_update_event()
+
 
     def clear_manual_program(self) -> None:
         """Clear manual program override."""

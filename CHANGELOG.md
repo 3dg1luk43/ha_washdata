@@ -5,6 +5,26 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-01-02
+
+### Added
+- **Manual Control**: "Force End Cycle" button to manually terminate stuck cycles (treats as "Completed" and saves data).
+- **Reliability**: "Cycle Resurrection" logic to restore active cycle state after Home Assistant restarts.
+- **Reliability**: "Smart Resume" estimation to provide progress updates during "detecting..." phase based on historical averages.
+- **Smart Cycle Extension**: New feature to prevent premature cycle termination during long low-power phases (e.g., dishwasher drying).
+- **Statistics**: Energy (kWh) estimates added to Profile Statistics table.
+- **UI**: Added legends to profile graphs and scaled them up by 50% for better readability.
+- **Config Flow**: Split "Manage Data" into "Manage Cycles" and "Manage Profiles" menus for better usability.
+- **Config Flow**: Added ability to manually edit profile "Average Duration" for tuning Smart Extension.
+
+### Fixed
+- **Icons**: Fixed missing icon for "Cycle Program" select entity (now dynamically adapts to device type).
+- **Frontend**: Added missing "min" unit to "Time Remaining" display on card.
+- **Logic**: Improved filtering of "Ghost Cycles" (extremely short noise events).
+- **Bug**: Fixed JSON serialization error preventing status updates in some cases.
+- **Bug**: Ensure stats are immediately rebuilt after merging cycles.
+- **Translation Keys**: Corrected missing labels for "Smart Extension Threshold" and other advanced settings.
+
 ## [0.3.1] - 2024-12-31
 
 ### Added

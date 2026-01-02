@@ -613,6 +613,31 @@ class ProfileStore:
             "sampling_rates": list(sampling_rates),
             "updated_at": datetime.now().isoformat(),
         }
+
+        # Calculate Energy and Consistency Metrics
+        try:
+            # Duration Consistency
+            duration_std_dev = float(np.std(durations)) if durations else 0.0
+            envelope["duration_std_dev"] = duration_std_dev
+
+            # Energy (kWh)
+            energy_values = []
+            max_powers = []
+            for offsets, values in normalized_curves:
+                # Integrate Power(W) over Time(s) = Joules
+                joules = np.trapz(values, offsets)
+                kwh = joules / 3600000.0
+                energy_values.append(kwh)
+                max_powers.append(np.max(values) if len(values) > 0 else 0)
+            
+            envelope["avg_energy"] = float(np.mean(energy_values)) if energy_values else 0.0
+            envelope["energy_std_dev"] = float(np.std(energy_values)) if energy_values else 0.0
+            envelope["avg_peak_power"] = float(np.mean(max_powers)) if max_powers else 0.0
+
+        except Exception as e:
+            _LOGGER.warning(f"Failed to calculate advanced stats for {profile_name}: {e}")
+            envelope["avg_energy"] = 0.0
+            envelope["duration_std_dev"] = 0.0
         
         # Cache in storage
         if "envelopes" not in self._data:
@@ -626,6 +651,79 @@ class ProfileStore:
         )
         
         return True
+
+    def generate_profile_svg(self, profile_name: str) -> str | None:
+        """Generate an SVG string for the profile's power envelope."""
+        envelope = self.get_envelope(profile_name)
+        if not envelope or not envelope.get("time_grid"):
+            return None
+
+        try:
+            time_grid = envelope["time_grid"]
+            avg_curve = envelope["avg"]
+            min_curve = envelope["min"]
+            max_curve = envelope["max"]
+            
+            # Canvas configuration (Scaled up 50% for High DPI)
+            width, height = 1200, 450
+            padding_x, padding_y = 60, 45
+            graph_w = width - 2 * padding_x
+            graph_h = height - 2 * padding_y
+
+            max_time = time_grid[-1]
+            # Add 5% headroom for power
+            max_power = max(max(max_curve), 10.0) * 1.05
+
+            def to_x(t: float) -> float:
+                return padding_x + (t / max_time) * graph_w
+
+            def to_y(p: float) -> float:
+                return height - padding_y - (p / max_power) * graph_h
+
+            # Generate polygon points for min/max band
+            # Top edge (max) forward, Bottom edge (min) backward
+            points_max = []
+            points_min = []
+            points_avg = []
+
+            for i, t in enumerate(time_grid):
+                x = to_x(t)
+                points_max.append(f"{x},{to_y(max_curve[i])}")
+                points_min.append(f"{x},{to_y(min_curve[i])}")
+                points_avg.append(f"{x},{to_y(avg_curve[i])}")
+
+            # Band path: Max curve -> Reverse Min curve -> Close
+            band_path = " ".join(points_max + list(reversed(points_min)))
+            avg_path = " ".join(points_avg)
+
+            # Metadata text
+            avg_energy = envelope.get("avg_energy", 0)
+            avg_duration = envelope.get("target_duration", 0) / 60.0
+            title = f"{profile_name} ({avg_duration:.0f} min, ~{avg_energy:.2f} kWh)"
+
+            svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" style="background-color: #1c1c1c; font-family: sans-serif;">
+            <!-- Grid & Axes -->
+            <rect x="0" y="0" width="{width}" height="{height}" fill="#1c1c1c" />
+            <line x1="{padding_x}" y1="{height-padding_y}" x2="{width-padding_x}" y2="{height-padding_y}" stroke="#444" stroke-width="3" />
+            <line x1="{padding_x}" y1="{padding_y}" x2="{padding_x}" y2="{height-padding_y}" stroke="#444" stroke-width="3" />
+            
+            <!-- Axis Labels -->
+            <text x="{padding_x}" y="{padding_y-15}" fill="#aaa" font-size="18">{int(max_power)}W</text>
+            <text x="{width-padding_x}" y="{height-10}" fill="#aaa" font-size="18" text-anchor="middle">{int(max_time/60)}m</text>
+            <text x="{width/2}" y="{padding_y-15}" fill="#fff" font-size="24" text-anchor="middle" font-weight="bold">{title}</text>
+
+            <!-- Envelope Band (Min/Max) -->
+            <polygon points="{band_path}" fill="#3498db" fill-opacity="0.3" stroke="none" />
+            
+            <!-- Average Line -->
+            <polyline points="{avg_path}" fill="none" stroke="#3498db" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>'''
+            
+            return svg
+
+        except Exception as e:
+            _LOGGER.error(f"Error generating SVG for {profile_name}: {e}")
+            return None
 
     def get_envelope(self, profile_name: str) -> JSONDict | None:
         """Get cached envelope for a profile, or None if not available."""
@@ -821,32 +919,49 @@ class ProfileStore:
         await self.async_save()
         _LOGGER.info(f"Created standalone profile '{name}'")
 
-    async def rename_profile(self, old_name: str, new_name: str) -> int:
-        """Rename a profile and update all cycles using it.
-        Returns number of cycles updated."""
-        if old_name not in self._data.get("profiles", {}):
+    async def update_profile(self, old_name: str, new_name: str, avg_duration: float | None = None) -> int:
+        """Update a profile's name and/or average duration.
+        Returns number of cycles updated (if renamed)."""
+        profiles = self._data.get("profiles", {})
+        if old_name not in profiles:
             raise ValueError(f"Profile '{old_name}' not found")
-        if new_name == old_name:
-            return 0
-        if new_name in self._data.get("profiles", {}):
-            raise ValueError(f"Profile '{new_name}' already exists")
+            
+        # Handle Rename
+        renamed = False
+        if new_name != old_name:
+            if new_name in profiles:
+                raise ValueError(f"Profile '{new_name}' already exists")
+            
+            # Rename in profiles dict
+            profiles[new_name] = profiles.pop(old_name)
+            
+            # Rename in envelopes
+            if "envelopes" in self._data and old_name in self._data["envelopes"]:
+                self._data["envelopes"][new_name] = self._data["envelopes"].pop(old_name)
+            
+            renamed = True
         
-        # Rename in profiles dict
-        self._data["profiles"][new_name] = self._data["profiles"].pop(old_name)
+        target_name = new_name if renamed else old_name
         
-        # Rename corresponding envelope if it exists
-        if "envelopes" in self._data and old_name in self._data["envelopes"]:
-            self._data["envelopes"][new_name] = self._data["envelopes"].pop(old_name)
+        # Handle Duration Update
+        if avg_duration is not None and avg_duration > 0:
+            profiles[target_name]["avg_duration"] = float(avg_duration)
+            # If there's an envelope, we ideally update its target_duration too, 
+            # but envelope is usually rebuilt from data. 
+            # However, for manual profiles, envelope might be empty or theoretical.
+            # Let's log it.
+            _LOGGER.info(f"Updated baseline duration for '{target_name}' to {avg_duration}s")
 
-        # Update all cycles
+        # Update cycles if renamed
         count = 0
-        for cycle in self._data.get("past_cycles", []):
-            if cycle.get("profile_name") == old_name:
-                cycle["profile_name"] = new_name
-                count += 1
-        
+        if renamed:
+            for cycle in self._data.get("past_cycles", []):
+                if cycle.get("profile_name") == old_name:
+                    cycle["profile_name"] = new_name
+                    count += 1
+            _LOGGER.info(f"Renamed profile '{old_name}' to '{new_name}', updated {count} cycles")
+
         await self.async_save()
-        _LOGGER.info(f"Renamed profile '{old_name}' to '{new_name}', updated {count} cycles")
         return count
 
     async def delete_profile(self, name: str, unlabel_cycles: bool = True) -> int:
