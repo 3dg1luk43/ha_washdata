@@ -308,7 +308,6 @@ class WashDataManager:
                     self.power_sensor_entity_id,
                     getattr(state, "state", None),
                 )
-                pass
         
         should_restore = False
         active_snapshot_to_restore = active_snapshot
