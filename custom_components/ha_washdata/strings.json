@@ -167,6 +167,9 @@
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
           "running_dead_zone": "Running Dead Zone (seconds)",
           "end_repeat_count": "End Repeat Count",
+          "min_off_gap": "Gap Between Cycles (s)",
+          "start_energy_threshold": "Start Energy Gate (Wh)",
+          "end_energy_threshold": "End Energy Gate (Wh)",
           "auto_maintenance": "Enable Auto-Maintenance"
         },
         "data_description": {
