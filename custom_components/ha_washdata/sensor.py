@@ -9,6 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, SIGNAL_WASHER_UPDATE
 from .manager import WashDataManager
+from homeassistant.util import dt as dt_util
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -24,6 +25,8 @@ async def async_setup_entry(
         WasherTimeRemainingSensor(manager, entry),
         WasherProgressSensor(manager, entry),
         WasherPowerSensor(manager, entry),
+        WasherElapsedTimeSensor(manager, entry),
+        WasherDebugSensor(manager, entry),
     ]
     
     async_add_entities(entities)
@@ -153,3 +156,55 @@ class WasherPowerSensor(WasherBaseSensor):
     @property
     def native_value(self):
         return self._manager.current_power
+
+
+class WasherElapsedTimeSensor(WasherBaseSensor):
+    def __init__(self, manager, entry):
+        self.entity_description = SensorEntityDescription(
+            key="elapsed_time",
+            name="Elapsed Time",
+            native_unit_of_measurement="s",
+            device_class="duration",
+            icon="mdi:timer-outline"
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self):
+        if self._manager.check_state == "off":
+            return 0
+        start = self._manager.cycle_start_time
+        if start:
+            delta = dt_util.now() - start
+            return int(delta.total_seconds())
+        return 0
+
+
+class WasherDebugSensor(WasherBaseSensor):
+    def __init__(self, manager, entry):
+        self.entity_description = SensorEntityDescription(
+            key="debug_info",
+            name="Debug Info",
+            icon="mdi:bug",
+            entity_registry_enabled_default=False, # Hidden by default
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self):
+        return self._manager.check_state
+
+    @property
+    def extra_state_attributes(self):
+        detector = self._manager.detector
+        stats = self._manager.sample_interval_stats
+        return {
+            "sub_state": detector.sub_state,
+            "match_confidence": getattr(self._manager, "_last_match_confidence", 0.0),
+            "cycle_id": getattr(detector, "_current_cycle_start", None),
+            "samples": detector.samples_recorded,
+            "energy_accum": getattr(detector, "_energy_since_idle_wh", 0.0),
+            "time_below": getattr(detector, "_time_below_threshold", 0.0),
+            "sampling_p95": stats.get("p95"),
+            "noise_events": len(getattr(self._manager, "_noise_events", [])),
+        }

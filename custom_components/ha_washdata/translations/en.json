@@ -61,6 +61,8 @@
           "power_sensor": "Power Sensor Entity",
           "min_power": "Minimum Power Threshold (W)",
           "start_duration_threshold": "Start Debounce Duration (s)",
+          "start_threshold_w": "Start Threshold (W) - Hysteresis High",
+          "stop_threshold_w": "Stop Threshold (W) - Hysteresis Low",
           "off_delay": "Cycle End Delay (s)",
           "progress_reset_delay": "Progress Reset Delay (seconds)",
           "no_update_active_timeout": "No-Update Timeout (s)",
@@ -89,6 +91,9 @@
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
           "running_dead_zone": "Running Dead Zone (seconds)",
           "end_repeat_count": "End Repeat Count",
+          "min_off_gap": "Gap Between Cycles (s)",
+          "start_energy_threshold": "Start Energy Gate (Wh)",
+          "end_energy_threshold": "End Energy Gate (Wh)",
           "auto_maintenance": "Enable Auto-Maintenance",
           "show_advanced": "Edit Advanced Settings (Next Step)"
         },
@@ -98,6 +103,8 @@
           "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data—useful if you replace a smart plug.",
           "min_power": "Power threshold (watts) above which the appliance is considered running. Default: 2W.",
           "start_duration_threshold": "Ignore brief power spikes shorter than this duration (seconds). Filters out boot spikes (e.g., 60W for 2s) before real cycle starts. Default: 5s.",
+          "start_threshold_w": "Power must rise ABOVE this value to transition from OFF/IDLE to STARTING. Default: min_power + small buffer.",
+          "stop_threshold_w": "Power must fall BELOW this value to be considered 'low' (e.g. for Paused/Ending). Default: min_power - small buffer.",
           "off_delay": "Seconds the smoothed power must stay below the threshold to mark completion. Default: 120s.",
           "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 300s.",
           "no_update_active_timeout": "For publish-on-change sensors: only force-end an ACTIVE cycle if no updates arrive for this many seconds. Low-power completion still uses the Off Delay.",
@@ -107,8 +114,6 @@
           "profile_match_interval": "How often (in seconds) to attempt profile matching during a cycle. Lower values provide faster detection but use more CPU. Default: 300s (5 minutes).",
           "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.50 (50%).",
           "profile_match_max_duration_ratio": "Maximum duration ratio for profile matching. Running cycle must not exceed this multiple of profile duration. Higher = more lenient. Default: 1.50 (150%).",
-          "notify_service": "Home Assistant notify service to use (optional).",
-          "notify_events": "Which events to send notifications for.",
           "smoothing_window": "Number of recent power readings used for moving-average smoothing.",
           "profile_duration_tolerance": "Tolerance used by profile matching for total duration variance (0.0–0.5). Default behavior: ±25%.",
           "auto_merge_lookback_hours": "After a cycle, scan this many hours back to merge fragmented runs into a single cycle.",
@@ -120,12 +125,15 @@
           "max_past_cycles": "Total number of cycles to retain (oldest removed). Default: 200.",
           "max_full_traces_per_profile": "Number of recent labeled cycles to keep with full power traces per profile. Older traces are summarized via envelopes. Default: 20.",
           "max_full_traces_unlabeled": "Number of recent unlabeled cycles to keep with full power traces to support auto-labeling. Default: 20.",
-          "watchdog_interval": "Seconds between watchdog checks while running. Lower for faster stuck-cycle handling; higher to reduce overhead. Default: 5s.",
+          "watchdog_interval": "Seconds between watchdog checks while running. Default: 5s. WARNING: Ensure this is HIGHER than your sensor's update interval to avoid false stops (e.g., if sensor updates every 60s, use 65s+).",
           "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
           "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
           "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3.",
           "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
           "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
+          "min_off_gap": "Minimum time (seconds) power must be OFF between two runs for them to be considered separate cycles. If shorter, they are merged. Default: 60s.",
+          "start_energy_threshold": "Cycle must accumulate at least this much energy (Wh) during the START phase to be confirmed. Default: 0.005 Wh.",
+          "end_energy_threshold": "Cycle ends only if energy in the last Off-Delay window is below this value (Wh). Prevents false ends if power fluctuates near zero. Default: 0.05 Wh.",
           "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy."
         }
       },
@@ -156,11 +164,16 @@
           "max_full_traces_unlabeled": "Retention: Max Full Traces Unlabeled",
           "watchdog_interval": "Watchdog Interval (seconds)",
           "completion_min_seconds": "Completion Minimum Runtime (seconds)",
+          "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
           "running_dead_zone": "Running Dead Zone (seconds)",
           "end_repeat_count": "End Repeat Count",
-          "auto_maintenance": "Enable Auto-Maintenance",
-          "smart_extension_threshold": "Smart Extension Threshold"
+          "min_off_gap": "Gap Between Cycles (s)",
+          "start_energy_threshold": "Start Energy Gate (Wh)",
+          "end_energy_threshold": "End Energy Gate (Wh)",
+          "start_threshold_w": "Start Threshold (W) - Hysteresis High",
+          "stop_threshold_w": "Stop Threshold (W) - Hysteresis Low",
+          "auto_maintenance": "Enable Auto-Maintenance"
         },
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
@@ -186,11 +199,16 @@
           "max_full_traces_unlabeled": "Number of recent unlabeled cycles to keep with full power traces to support auto-labeling. Default: 20.",
           "watchdog_interval": "Seconds between watchdog checks while running. Default: 5s. WARNING: Ensure this is HIGHER than your sensor's update interval to avoid false stops (e.g., if sensor updates every 60s, use 65s+).",
           "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
+          "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
           "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3.",
           "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
           "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
-          "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy.",
-          "smart_extension_threshold": "If a profile is identified, keep the cycle running until this ratio of the average duration is reached, even if power drops (e.g. drying phase). Set to 0 to disable. Default: 0.95 (95%)."
+          "min_off_gap": "Minimum time (seconds) power must be OFF between two runs for them to be considered separate cycles. If shorter, they are merged. Default: 60s.",
+          "start_energy_threshold": "Cycle must accumulate at least this much energy (Wh) during the START phase to be confirmed. Default: 0.005 Wh.",
+          "end_energy_threshold": "Cycle ends only if energy in the last Off-Delay window is below this value (Wh). Prevents false ends if power fluctuates near zero. Default: 0.05 Wh.",
+          "start_threshold_w": "Power must rise ABOVE this value to transition from OFF/IDLE to STARTING. Default: min_power + small buffer.",
+          "stop_threshold_w": "Power must fall BELOW this value to be considered 'low' (e.g. for Paused/Ending). Default: min_power - small buffer.",
+          "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy."
         }
       },
       "diagnostics": {
@@ -224,7 +242,6 @@
           "manual_duration": "Manual Duration (minutes)"
         }
       },
-
       "edit_profile": {
         "title": "Edit Profile",
         "description": "Select a profile to rename",
@@ -288,9 +305,6 @@
         "description": "Merge fragmented cycles (junk data) within a time window. Enter number of hours to look back.\n{info}",
         "data": {
           "time_range": "Lookback Window (hours)"
-        },
-        "data_description": {
-          "time_range": "Number of hours to scan for fragmented cycles to merge. Use 999999 to process all historical data."
         }
       },
       "migrate_data": {

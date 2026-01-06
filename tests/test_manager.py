@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 from typing import Any
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock, AsyncMock, patch, PropertyMock
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_NOTIFY_BEFORE_END_MINUTES,
@@ -275,3 +275,17 @@ async def test_async_reload_config_allows_sensor_change_when_idle(
         # Verify new listener was attached
         mock_track.assert_called()
 
+
+def test_cycle_start_time_exposed(manager: WashDataManager) -> None:
+    """Test that cycle_start_time is correctly exposed from detector."""
+    # Since detector is mocked in the manager fixture, we can just set the property on the mock
+    import datetime
+    now = datetime.datetime(2025, 1, 1, 12, 0, 0)
+    
+    # Configure the mock to return a value for the property
+    type(manager.detector).current_cycle_start = PropertyMock(return_value=now)
+    assert manager.cycle_start_time == now
+    
+    # Test when None
+    type(manager.detector).current_cycle_start = PropertyMock(return_value=None)
+    assert manager.cycle_start_time is None

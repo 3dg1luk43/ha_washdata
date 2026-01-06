@@ -38,8 +38,13 @@ CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
 CONF_APPLY_SUGGESTIONS = "apply_suggestions"
 CONF_RUNNING_DEAD_ZONE = "running_dead_zone"  # Seconds after start to ignore power dips
 CONF_END_REPEAT_COUNT = "end_repeat_count"  # Number of times end condition must be met
-CONF_SMART_EXTENSION_THRESHOLD = "smart_extension_threshold"  # Ratio of profile avg duration to extend cycle (0-1)
 CONF_SHOW_ADVANCED = "show_advanced"  # Toggle advanced settings
+CONF_MIN_OFF_GAP = "min_off_gap"  # Minimum gap to separate cycles (seconds)
+CONF_START_ENERGY_THRESHOLD = "start_energy_threshold"  # Wh required to confirm start
+CONF_END_ENERGY_THRESHOLD = "end_energy_threshold"  # Wh allowed during end candidates
+CONF_START_THRESHOLD_W = "start_threshold_w"  # Custom power threshold for STARTING
+CONF_STOP_THRESHOLD_W = "stop_threshold_w"    # Custom power threshold for ENDING (hysteresis)
+
 
 
 NOTIFY_EVENT_START = "cycle_start"
@@ -75,14 +80,16 @@ DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
 DEFAULT_WATCHDOG_INTERVAL = 5  # Seconds between watchdog checks
 DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Noise events in 24h to trigger auto-tune
-DEFAULT_SMART_EXTENSION_THRESHOLD = 0.95  # 95% of average duration required
 DEFAULT_RUNNING_DEAD_ZONE = 0  # Disabled by default, typical: 60-300s
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 
 # States
 STATE_OFF = "off"
 STATE_IDLE = "idle"
+STATE_STARTING = "starting"
 STATE_RUNNING = "running"
+STATE_PAUSED = "paused"
+STATE_ENDING = "ending"
 STATE_RINSE = "rinse"
 STATE_UNKNOWN = "unknown"
 
@@ -125,8 +132,34 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_COFFEE_MACHINE: 60,    # 1 min (detects rapid espresso shots/cleaning)
 }
 
+# Default min_off_gap by device type (seconds)
+# If gap between cycles is larger than this, force new cycle.
+# If smaller, and we deemed previous as 'ended' but technically could be same,
+# we might want to handle that (though strict state machine usually suffices if tuned well).
+# Default min_off_gap by device type (seconds)
+# Default min_off_gap by device type (seconds)
+DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
+    DEVICE_TYPE_WASHING_MACHINE: 480,  # 8 min (Soak handling)
+    DEVICE_TYPE_DRYER: 300,            # 5 min (Cool down gaps?)
+    DEVICE_TYPE_DISHWASHER: 600,       # 10 min (Drying pauses)
+    DEVICE_TYPE_COFFEE_MACHINE: 30,    # 30s (Rapid shots)
+}
+DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
+
+# Default start energy threshold by device type (Wh)
+# Filter noise spikes (1000W * 0.01s = 0.002Wh).
+# Must be significant enough to imply mechanical work.
+DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
+    DEVICE_TYPE_WASHING_MACHINE: 0.2,   # ~50W for 15s or 200W for 3s
+    DEVICE_TYPE_DRYER: 0.5,             # Heater kicks in hard
+    DEVICE_TYPE_DISHWASHER: 0.2,        # Pump/Heater
+    DEVICE_TYPE_COFFEE_MACHINE: 0.05,   # Short heater burst
+}
+DEFAULT_START_ENERGY_THRESHOLD = 0.2 # Fallback
+DEFAULT_END_ENERGY_THRESHOLD = 0.05 # 50 Wh threshold? No, 0.05 Wh is 50 mWh. 
+
 # Storage
-STORAGE_VERSION = 1
+STORAGE_VERSION = 2
 STORAGE_KEY = "ha_washdata"
 
 # Notification events
@@ -138,8 +171,7 @@ SIGNAL_WASHER_UPDATE = "ha_washdata_update_{}"
 
 # Learning & Feedback
 # (Deprecated constants, kept for backward compat in code paths)
-LEARNING_CONFIDENCE_THRESHOLD = DEFAULT_LEARNING_CONFIDENCE
-LEARNING_DURATION_MATCH_TOLERANCE = DEFAULT_DURATION_TOLERANCE
+
 FEEDBACK_REQUEST_EVENT = "ha_washdata_feedback_requested"  # Event when user feedback is needed
 EVENT_STATE_UPDATE = "ha_washdata_state_update"  # Periodic/state-change update event
 SERVICE_SUBMIT_FEEDBACK = "ha_washdata.submit_cycle_feedback"  # Service to submit feedback

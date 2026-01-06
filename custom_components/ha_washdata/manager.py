@@ -51,7 +51,12 @@ from .const import (
     CONF_START_DURATION_THRESHOLD,
     CONF_RUNNING_DEAD_ZONE,
     CONF_END_REPEAT_COUNT,
-    CONF_SMART_EXTENSION_THRESHOLD,
+    CONF_MIN_OFF_GAP,
+    CONF_START_ENERGY_THRESHOLD,
+    CONF_START_ENERGY_THRESHOLD,
+    CONF_END_ENERGY_THRESHOLD,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
@@ -89,11 +94,17 @@ from .const import (
     DEFAULT_START_DURATION_THRESHOLD,
     DEFAULT_RUNNING_DEAD_ZONE,
     DEFAULT_END_REPEAT_COUNT,
-    DEFAULT_SMART_EXTENSION_THRESHOLD,
+    DEFAULT_MIN_OFF_GAP,
+    DEFAULT_MIN_OFF_GAP_BY_DEVICE,
+    DEFAULT_START_ENERGY_THRESHOLD,
+    DEFAULT_END_ENERGY_THRESHOLD,
     DEVICE_SMOOTHING_THRESHOLDS,
     DEVICE_COMPLETION_THRESHOLDS,
     STATE_RUNNING,
     STATE_OFF,
+    STATE_STARTING,
+    STATE_PAUSED,
+    STATE_ENDING,
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
@@ -197,6 +208,11 @@ class WashDataManager:
             start_duration_threshold=start_duration_threshold,
             running_dead_zone=running_dead_zone,
             end_repeat_count=end_repeat_count,
+            min_off_gap=int(config_entry.options.get(CONF_MIN_OFF_GAP, DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(self.device_type, DEFAULT_MIN_OFF_GAP))),
+            start_energy_threshold=float(config_entry.options.get(CONF_START_ENERGY_THRESHOLD, 0.0)),
+            end_energy_threshold=float(config_entry.options.get(CONF_END_ENERGY_THRESHOLD, 0.0)),
+            start_threshold_w=float(config_entry.options.get(CONF_START_THRESHOLD_W, float(min_power) + max(1.0, 0.1 * float(min_power)))),
+            stop_threshold_w=float(config_entry.options.get(CONF_STOP_THRESHOLD_W, max(0.0, float(min_power) - max(0.5, 0.1 * float(min_power))))),
         )
         self._config = config
         
@@ -214,10 +230,12 @@ class WashDataManager:
             current_duration = (end - start).total_seconds()
             
             # Use profile store to find best match
-            match_name, confidence = self.profile_store.match_profile(formatted, current_duration)
+            result = self.profile_store.match_profile(formatted, current_duration)
             
-            expected_duration = 0.0
-            phase_name: str | None = None
+            match_name = result.best_profile
+            confidence = result.confidence
+            expected_duration = result.expected_duration
+            phase_name = result.matched_phase
             
             if match_name:
                 prof = self.profile_store.get_profiles().get(match_name)
@@ -255,10 +273,10 @@ class WashDataManager:
         self._smoothed_progress: float = 0.0  # Smoothed progress tracking for EMA
         self._cycle_completed_time: datetime | None = None  # Track when cycle finished
         self._progress_reset_delay: int = int(progress_reset_delay)  # Reset progress after idle
-        self._smart_extension_threshold: float = float(config_entry.options.get(CONF_SMART_EXTENSION_THRESHOLD, DEFAULT_SMART_EXTENSION_THRESHOLD))
         self._last_reading_time: datetime | None = None
         self._current_power: float = 0.0
         self._last_estimate_time: datetime | None = None
+        self._last_match_ambiguous: bool = False
         self._matched_profile_duration: float | None = None
         self._last_match_confidence: float = 0.0  # Store confidence for feedback
         # Sample interval tracking (seconds) for adaptive timing
@@ -521,44 +539,22 @@ class WashDataManager:
         old_abrupt_high_load = self.detector.config.abrupt_high_load_factor
         
         # Get new values from config
-        new_min_power = float(
-            config_entry.options.get(CONF_MIN_POWER, DEFAULT_MIN_POWER)
-        )
-        new_off_delay = int(
-            config_entry.options.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY)
-        )
-        new_smoothing = int(
-            config_entry.options.get(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
-        )
-        new_interrupted_min = int(
-            config_entry.options.get(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS)
-        )
-        new_abrupt_drop_watts = float(
-            config_entry.options.get(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS)
-        )
-        new_abrupt_drop_ratio = float(
-            config_entry.options.get(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO)
-        )
-        new_abrupt_high_load = float(
-            config_entry.options.get(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR)
-        )
+        new_min_power = float(config_entry.options.get(CONF_MIN_POWER, DEFAULT_MIN_POWER))
+        new_off_delay = int(config_entry.options.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY))
+        new_smoothing = int(config_entry.options.get(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW))
+        new_interrupted_min = int(config_entry.options.get(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS))
+        new_abrupt_drop_watts = float(config_entry.options.get(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS))
+        new_abrupt_drop_ratio = float(config_entry.options.get(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO))
+        new_abrupt_high_load = float(config_entry.options.get(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR))
+        
         # Device default
         dev_def = DEVICE_COMPLETION_THRESHOLDS.get(self.device_type, DEFAULT_COMPLETION_MIN_SECONDS)
-        new_completion_min = int(
-            config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, dev_def)
-        )
-        new_start_threshold = float(
-            config_entry.options.get(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD)
-        )
-        new_running_dead_zone = int(
-            config_entry.options.get(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE)
-        )
-        new_end_repeat_count = int(
-            config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
-        )
-        self._smart_extension_threshold = float(
-            config_entry.options.get(CONF_SMART_EXTENSION_THRESHOLD, DEFAULT_SMART_EXTENSION_THRESHOLD)
-        )
+        new_completion_min = int(config_entry.options.get(CONF_COMPLETION_MIN_SECONDS, dev_def))
+        
+        new_start_threshold = float(config_entry.options.get(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD))
+        new_running_dead_zone = int(config_entry.options.get(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE))
+        new_end_repeat_count = int(config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT))
+        
         
         # Apply all detector config updates
         self.detector.config.min_power = new_min_power
@@ -587,9 +583,6 @@ class WashDataManager:
                 old_abrupt_high_load, new_abrupt_high_load
             )
             
-        # If running and we have a current program, re-apply smart extension with new threshold
-        if self.detector.state == "running" and self._current_program and self._current_program != "detecting...":
-             self._apply_smart_extension(self._current_program)
         
         # Update profile matching parameters
         old_min_ratio, old_max_ratio = self.profile_store.get_duration_ratio_limits()
@@ -744,8 +737,8 @@ class WashDataManager:
         self._current_power = power
         self.detector.process_reading(power, now)
         
-        # If running, try to match profile and update estimates
-        if self.detector.state == "running":
+        # If running (or paused/ending), try to match profile and update estimates
+        if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING, STATE_STARTING):
             self._update_estimates()
             # Periodically save state (e.g. every minute?)
             # Doing it every reading (2s) is too much for flash storage.
@@ -814,10 +807,12 @@ class WashDataManager:
             f"{len(time_series)} samples, {duration:.0f}s duration"
         )
         
-        profile_name, confidence = self.profile_store.match_profile(
+        result = self.profile_store.match_profile(
             time_series,
             duration,
         )
+        profile_name = result.best_profile
+        confidence = result.confidence
         
         if profile_name and confidence >= 0.15:
             _LOGGER.info(
@@ -1593,26 +1588,30 @@ class WashDataManager:
             len(trace), duration_so_far
         )
 
-        profile_name, confidence = self.profile_store.match_profile(
+        result = self.profile_store.match_profile(
             current_power_data,
             duration_so_far,
         )
+        
+        profile_name = result.best_profile
+        confidence = result.confidence
+        matched_duration = result.expected_duration
+        matched_phase = result.matched_phase
 
         _LOGGER.info(f"Profile match attempt: name={profile_name}, confidence={confidence:.3f}, duration={duration_so_far:.0f}s, samples={len(trace)}")
+        
+        self._last_match_ambiguous = result.is_ambiguous
 
-        if profile_name and confidence >= 0.15:  # Lowered threshold from 0.2 to 0.15
+        if profile_name and confidence >= 0.15 and not result.is_ambiguous:  # Lowered threshold from 0.2 to 0.15
             # Match found - update or keep existing match
             if not self._matched_profile_duration or self._current_program == "detecting...":
                 # First match or no previous match
                 self._current_program = profile_name
                 self._last_match_confidence = confidence  # Store for later feedback
-                profile = self.profile_store.get_profiles().get(profile_name, {})
-                avg_duration = float(profile.get("avg_duration", 0.0))
+                # Use returned duration (which comes from profile metadata)
+                avg_duration = float(matched_duration)
                 self._matched_profile_duration = avg_duration if avg_duration > 0 else None
                 _LOGGER.info(f"Matched profile '{profile_name}' with expected duration {avg_duration:.0f}s ({int(avg_duration/60)}min)")
-                
-                # Apply smart cycle extension
-                self._apply_smart_extension(profile_name)
             # If we already have a match, keep it (don't thrash between profiles)
         elif not self._matched_profile_duration:
             # No match yet and still searching
@@ -1635,6 +1634,7 @@ class WashDataManager:
             and self._time_remaining is not None
             and self._time_remaining <= (self._notify_before_end_minutes * 60)
             and self._cycle_progress < 100
+            and not self._last_match_ambiguous
         ):
             # Send notification!
             self._notified_pre_completion = True
@@ -2024,32 +2024,11 @@ class WashDataManager:
     def current_power(self):
         return self._current_power
 
-    def _apply_smart_extension(self, profile_name: str) -> None:
-        """Apply Smart Cycle Extension logic based on profile duration."""
-        if self._smart_extension_threshold <= 0:
-            return
-            
-        # If the cycle was Resurrected or Restored, we treat it as fragile and avoid enforcing strict duration
-        # because we might have missed data gaps or end conditions.
-        if self.detector.sub_state in ("Resurrected", "Restored"):
-            _LOGGER.debug("Skipping Smart Extension enforcement for %s cycle", self.detector.sub_state)
-            return
+    @property
+    def cycle_start_time(self) -> datetime | None:
+        """Return the start time of the current cycle."""
+        return self.detector.current_cycle_start
 
-        try:
-            profiles = self.profile_store.get_profiles()
-            profile = profiles.get(profile_name)
-            if not profile:
-                return
-                
-            avg_duration = float(profile.get("avg_duration", 0.0))
-            if avg_duration <= 0:
-                return
-                
-            target_duration = avg_duration * self._smart_extension_threshold
-            # Enforce minimum duration on detector
-            self.detector.set_min_duration(target_duration)
-        except Exception as e:
-            _LOGGER.warning(f"Failed to apply smart extension for {profile_name}: {e}")
 
     @property
     def samples_recorded(self):
@@ -2091,9 +2070,8 @@ class WashDataManager:
                  self._matched_profile_duration = avg
                  _LOGGER.info(f"Manual program set to {profile_name}, duration={avg:.0f}s")
                  
-                 # Apply smart extension if running
+                 # Update estimates if running
                  if self.detector.state == "running":
-                     self._apply_smart_extension(profile_name)
                      self._update_estimates()
                      self._fire_state_update_event()
 

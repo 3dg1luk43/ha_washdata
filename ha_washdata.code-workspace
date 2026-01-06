@@ -1,10 +1,10 @@
 {
 	"folders": [
 		{
-			"path": "/root/ha_washdata"
+			"path": "."
 		},
 		{
-			"path": "/root/ha_config"
+			"path": "../ha_config"
 		}
 	],
 	"settings": {}
