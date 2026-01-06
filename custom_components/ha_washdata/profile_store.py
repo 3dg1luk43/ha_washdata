@@ -37,6 +37,73 @@ class MatchResult:
     is_ambiguous: bool
     ambiguity_margin: float
 
+def decompress_power_data(cycle: CycleDict) -> list[tuple[str, float]]:
+    """Decompress cycle power data for matching (Module-level helper)."""
+    compressed_raw = cycle.get("power_data", [])
+    if not isinstance(compressed_raw, list) or not compressed_raw:
+        return []
+
+    compressed: list[Any] = cast(list[Any], compressed_raw)
+    
+    # Handle missing start_time gracefully?
+    if "start_time" not in cycle:
+        return []
+
+    try:
+        start_time = datetime.fromisoformat(cycle["start_time"])
+    except ValueError:
+        return []
+
+    result: list[tuple[str, float]] = []
+    
+    for item in compressed:
+        if not isinstance(item, (list, tuple)):
+            continue
+        try:
+            offset_seconds, power = cast(tuple[Any, Any], item)
+        except (TypeError, ValueError):
+            continue
+        if isinstance(offset_seconds, (int, float)) and isinstance(power, (int, float)):
+            timestamp = start_time.timestamp() + float(offset_seconds)
+            result.append((datetime.fromtimestamp(timestamp).isoformat(), float(power)))
+    
+    return result
+
+class WashDataStore(Store[JSONDict]):
+    """Store implementation with migration support."""
+
+    async def _async_migrate_func(self, old_version: int, new_version: int, data: JSONDict) -> JSONDict:
+        """Migrate data to the new version."""
+        if old_version < 2:
+            _LOGGER.info(f"Migrating storage from v{old_version} to v2")
+            # Logic moved from ProfileStore._migrate_v1_to_v2
+            cycles = data.get("past_cycles", [])
+            migrated_cycles = 0
+            for cycle in cycles:
+                if "signature" not in cycle and cycle.get("power_data"):
+                    try:
+                        # Decompress using helper
+                        tuples = decompress_power_data(cycle)
+                        if tuples and len(tuples) > 10:
+                            # Convert to relative time arrays for signature computation
+                            start = datetime.fromisoformat(cycle["start_time"]).timestamp()
+                            ts_arr = []
+                            p_arr = []
+                            for t_str, p in tuples:
+                                 t = datetime.fromisoformat(t_str).timestamp()
+                                 ts_arr.append(t - start)
+                                 p_arr.append(p)
+                            
+                            sig = compute_signature(np.array(ts_arr), np.array(p_arr))
+                            cycle["signature"] = dataclasses.asdict(sig)
+                            migrated_cycles += 1
+                    except Exception as e:
+                         _LOGGER.warning(f"Failed to migrate signature for cycle {cycle.get('id')}: {e}")
+            
+            _LOGGER.info(f"Migration v1->v2: Computed signatures for {migrated_cycles} cycles")
+        
+        return data
+
 class ProfileStore:
     """Manages storage of washer profiles and past cycles."""
 
@@ -59,7 +126,8 @@ class ProfileStore:
         self._max_full_traces_per_profile = DEFAULT_MAX_FULL_TRACES_PER_PROFILE
         self._max_full_traces_unlabeled = DEFAULT_MAX_FULL_TRACES_UNLABELED
         # Separate store for each entry to avoid giant files
-        self._store: Store[JSONDict] = Store(hass, STORAGE_VERSION, f"{STORAGE_KEY}.{entry_id}")
+        # Use WashDataStore to handle migration
+        self._store: Store[JSONDict] = WashDataStore(hass, STORAGE_VERSION, f"{STORAGE_KEY}.{entry_id}")
         self._data: JSONDict = {
             "profiles": {},
             "past_cycles": [],
@@ -151,70 +219,13 @@ class ProfileStore:
 
     async def async_load(self) -> None:
         """Load data from storage with migration."""
+        # WashDataStore handles migration internally via _async_migrate_func
         data = await self._store.async_load()
         if data:
-            # Check version
-            store_version = data.get("version", 1)
-            
-            # v1 -> v2 Migration
-            if store_version < 2:
-                _LOGGER.info(f"Migrating storage from v{store_version} to v2")
-                data = await self.hass.async_add_executor_job(self._migrate_v1_to_v2, data)
-                data["version"] = 2
-                # Persist immediately after migration
-                await self._store.async_save(data)
-                
             self._data = data
 
-    def _migrate_v1_to_v2(self, data: JSONDict) -> JSONDict:
-        """Migrate storage data to v2 schema (signatures and compressed power data)."""
-        profiles = data.get("profiles", {})
-        cycles = data.get("past_cycles", [])
-        
-        # 1. Backfill signatures for all past cycles
-        migrated_cycles = 0
-        for cycle in cycles:
-            if "signature" not in cycle and cycle.get("power_data"):
-                # Reconstruct power
-                if "sampling_interval" not in cycle:
-                     # Old format, need helper or guess. Add_cycle handles it, but here we process raw.
-                     pass 
-                
-                # Decompress
-                power_tuples = self._decompress_power_from_raw(cycle)
-                if power_tuples and len(power_tuples) > 5:
-                     ts = np.array([float(pt[2]) for pt in power_tuples]) # need relative time 0..dur?
-                     # decompress returns abs time strings usually
-                     # Let's use simpler logic. decompress returns list[tuple[str, float]]
-                     pass
+    # _migrate_v1_to_v2 and _decompress_power_from_raw removed; logic moved to WashDataStore
 
-                # Actually, reuse self._decompress_power_data(cycle) requires 'self' which is fine
-                # But it returns list[tuple[str, float]], I need arrays for features.
-                
-                # Simplified: skip calculation if complex/slow inside executor job?
-                # User constraint: "compute missing metadata from existing traces if possible"
-                # Doing it here is safest.
-                
-                try:
-                    tuples = self._decompress_power_data(cycle)
-                    if tuples and len(tuples) > 10:
-                        # Convert to relative time arrays
-                        start = datetime.fromisoformat(cycle["start_time"]).timestamp()
-                        ts_arr = []
-                        p_arr = []
-                        for t_str, p in tuples:
-                             t = datetime.fromisoformat(t_str).timestamp()
-                             ts_arr.append(t - start)
-                             p_arr.append(p)
-                        
-                        sig = compute_signature(np.array(ts_arr), np.array(p_arr))
-                        cycle["signature"] = dataclasses.asdict(sig)
-                        migrated_cycles += 1
-                except Exception as e:
-                    _LOGGER.warning(f"Failed to migrate signature for cycle {cycle.get('id')}: {e}")
-
-        _LOGGER.info(f"Migration v1->v2: Computed signatures for {migrated_cycles} cycles")
-        return data
 
     def _decompress_power_from_raw(self, cycle: CycleDict) -> list[tuple[float, float, float]] | None:
         # Helper not needed if we use _decompress_power_data
@@ -1317,28 +1328,8 @@ class ProfileStore:
         return stats
 
     def _decompress_power_data(self, cycle: CycleDict) -> list[tuple[str, float]]:
-        """Decompress cycle power data for matching."""
-        compressed_raw = cycle.get("power_data", [])
-        if not isinstance(compressed_raw, list) or not compressed_raw:
-            return []
-
-        compressed: list[Any] = cast(list[Any], compressed_raw)
-        
-        start_time = datetime.fromisoformat(cycle["start_time"])
-        result: list[tuple[str, float]] = []
-        
-        for item in compressed:
-            if not isinstance(item, (list, tuple)):
-                continue
-            try:
-                offset_seconds, power = cast(tuple[Any, Any], item)
-            except (TypeError, ValueError):
-                continue
-            if isinstance(offset_seconds, (int, float)) and isinstance(power, (int, float)):
-                timestamp = start_time.timestamp() + float(offset_seconds)
-                result.append((datetime.fromtimestamp(timestamp).isoformat(), float(power)))
-        
-        return result
+        """Decompress cycle power data for matching (wrapper)."""
+        return decompress_power_data(cycle)
 
     async def async_save_cycle(self, cycle_data: dict[str, Any]) -> None:
         """Add and save a cycle. Rebuilds envelope if cycle is labeled."""

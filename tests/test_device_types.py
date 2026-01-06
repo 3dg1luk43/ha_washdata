@@ -6,7 +6,7 @@ from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDet
 from custom_components.ha_washdata.const import (
     DEVICE_TYPE_DRYER, DEVICE_TYPE_COFFEE_MACHINE,
     STATE_RUNNING, STATE_OFF, STATE_PAUSED,
-    DEFAULT_OFF_DELAY, DEFAULT_START_ENERGY_THRESHOLDS,
+    DEFAULT_OFF_DELAY, DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
     DEVICE_COMPLETION_THRESHOLDS
 )
 
@@ -19,7 +19,7 @@ def flush_buffer(detector, start_t_offset):
 
 def test_dryer_thresholds():
     # Verify defaults
-    start_thresh = DEFAULT_START_ENERGY_THRESHOLDS[DEVICE_TYPE_DRYER] # 0.5
+    start_thresh = DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE[DEVICE_TYPE_DRYER] # 0.5
     completion_min = DEVICE_COMPLETION_THRESHOLDS[DEVICE_TYPE_DRYER] # 600
     
     config = CycleDetectorConfig(
@@ -64,7 +64,7 @@ def test_dryer_thresholds():
 
 def test_coffee_thresholds():
     # Verify defaults
-    start_thresh = DEFAULT_START_ENERGY_THRESHOLDS[DEVICE_TYPE_COFFEE_MACHINE] # 0.05
+    start_thresh = DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE[DEVICE_TYPE_COFFEE_MACHINE] # 0.05
     completion_min = DEVICE_COMPLETION_THRESHOLDS[DEVICE_TYPE_COFFEE_MACHINE] # 60
     
     config = CycleDetectorConfig(
