@@ -28,6 +28,8 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
 - **Manual Profile Creation**: Create profiles even without historical cycles by specifying a baseline duration (e.g., "Eco Mode - 3h").
 - **Ghost Cycle Prevention**: Minimum runtime threshold avoids recording brief power spikes as completed cycles.
+- **Robust vNext State Machine**: Advanced filtering with `start_energy` and `end_energy` gates prevents false starts/ends.
+- **Multi-Stage Matching Pipeline**: Uses Fast Reject -> Core Similarity -> DTW-Lite tie-breaking for superior accuracy.
 - **Local Only**: No cloud dependency, no external services. All data stays in your Home Assistant.
 - **Notifications**: Integrated alerts for cycle start, finish, and **pre-completion** (e.g., 5 mins before finish).
 - **Self-Learning**: Gradually adjusts expected durations based on your confirmed historical data.
@@ -160,7 +162,9 @@ To see the beautiful status card on your dashboard:
 - **`sensor.<name>_time_remaining`**: Estimated minutes remaining.
 - **`sensor.<name>_cycle_progress`**: 0-100% completion (reaches 100% on finish).
 - **`sensor.<name>_current_power`**: Real-time power draw in watts.
+- **`sensor.<name>_current_power`**: Real-time power draw in watts.
 - **`switch.<name>_auto_maintenance`**: Enable/disable nightly cleanup (default: ON).
+- **`sensor.<name>_debug_state`** (Disabled by default): Internal state (sub_state, confidence, matched_duration) for advanced debugging.
 
 ## Services
 
@@ -208,6 +212,9 @@ Access via **Configure → Settings**:
 - **`notify_before_end_minutes`**: Send a pre-completion alert when remaining time drops under this value (0 disables).
 - **`auto_maintenance`**: Enable nightly maintenance to repair samples, merge fragments, and keep storage healthy.
 - **`auto_tune_noise_events_threshold`**: Number of ghost cycles (short, low-power runs) in 24h before suggesting a higher `min_power`.
+- **`min_off_gap`**: Minimum OFF time between cycles to prevent fragmentation (default: 60s).
+- **`start_energy_threshold`**: Energy (Wh) required to confirm cycle start.
+- **`end_energy_threshold`**: Max energy (Wh) allowed during off-delay to confirm end.
 - **Retention caps**: `max_past_cycles`, `max_full_traces_per_profile`, `max_full_traces_unlabeled` control history size and storage footprint.
 - **Apply Suggestions (UI)**: One-click to refresh the Settings form with recommended values derived from your machine’s observed cadence and history; review then submit to save.
 

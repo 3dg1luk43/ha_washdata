@@ -19,6 +19,8 @@ from .const import (
     CONF_POWER_SENSOR,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_EVENTS,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -51,7 +53,9 @@ from .const import (
     CONF_NOTIFY_BEFORE_END_MINUTES,
     CONF_RUNNING_DEAD_ZONE,
     CONF_END_REPEAT_COUNT,
-    CONF_SMART_EXTENSION_THRESHOLD,
+    CONF_MIN_OFF_GAP,
+    CONF_START_ENERGY_THRESHOLD,
+    CONF_END_ENERGY_THRESHOLD,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     DEFAULT_NAME,
@@ -86,7 +90,12 @@ from .const import (
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_RUNNING_DEAD_ZONE,
     DEFAULT_END_REPEAT_COUNT,
-    DEFAULT_SMART_EXTENSION_THRESHOLD,
+    DEFAULT_MIN_OFF_GAP,
+    DEFAULT_START_ENERGY_THRESHOLD,
+    DEFAULT_END_ENERGY_THRESHOLD,
+    DEFAULT_MIN_OFF_GAP_BY_DEVICE,
+    DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
+    DEVICE_COMPLETION_THRESHOLDS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -115,63 +124,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 3
 
-    async def async_migrate_entry(self, config_entry: config_entries.ConfigEntry) -> bool:
-        """Migrate old entry to the latest version while preserving user settings."""
-        data = {**config_entry.data}
-        options = {**config_entry.options}
-
-        # Ensure min_power/off_delay from data are preserved into options if missing
-        if CONF_MIN_POWER not in options and CONF_MIN_POWER in data:
-            options[CONF_MIN_POWER] = data[CONF_MIN_POWER]
-        if CONF_OFF_DELAY not in options and CONF_OFF_DELAY in data:
-            options[CONF_OFF_DELAY] = data[CONF_OFF_DELAY]
-
-        # Seed new configurable values with defaults if missing
-        options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
-        options.setdefault(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE)
-        options.setdefault(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE)
-        options.setdefault(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE)
-        options.setdefault(CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE)
-        
-        # New Feature Defaults (Migration)
-        options.setdefault(CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
-        options.setdefault(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD)
-
-        # Seed detector settings if missing
-        options.setdefault(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
-        options.setdefault(CONF_NO_UPDATE_ACTIVE_TIMEOUT, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
-        options.setdefault(CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE)
-        options.setdefault(CONF_AUTO_MERGE_LOOKBACK_HOURS, DEFAULT_AUTO_MERGE_LOOKBACK_HOURS)
-        options.setdefault(CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS)
-        options.setdefault(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS)
-        options.setdefault(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS)
-        options.setdefault(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO)
-        options.setdefault(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR)
-        options.setdefault(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL)
-        options.setdefault(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
-        options.setdefault(CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)
-        # New retention and watchdog defaults
-        options.setdefault(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES)
-        options.setdefault(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE)
-        options.setdefault(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED)
-        options.setdefault(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
-        options.setdefault(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD)
-        options.setdefault(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS)
-        options.setdefault(CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES)
-        # New dead zone and end repeat count defaults
-        options.setdefault(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE)
-        options.setdefault(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
-        options.setdefault(CONF_SMART_EXTENSION_THRESHOLD, DEFAULT_SMART_EXTENSION_THRESHOLD)
-
-        # Bump version and save
-        self.hass.config_entries.async_update_entry(
-            config_entry,
-            data=data,
-            options=options,
-            version=self.VERSION,
-        )
-        _LOGGER.info("Migrated HA WashData entry to version %s", self.VERSION)
-        return True
 
     def _get_schema(self, user_input: dict[str, Any] | None = None) -> vol.Schema:
         """Get the configuration schema."""
@@ -479,6 +431,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 reason_lines.append(f"- {key}: {entry['reason']}")
         suggested_reason = "\n".join(reason_lines) if reason_lines else ""
 
+        # Resolve Device Type for Defaults
+        current_device_type = self._config_entry.options.get(
+            CONF_DEVICE_TYPE,
+            self._config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+        )
+        if CONF_DEVICE_TYPE in self._basic_options:
+            current_device_type = self._basic_options[CONF_DEVICE_TYPE]
+
+        # Calculate Defaults
+        default_min_off_gap = DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(current_device_type, DEFAULT_MIN_OFF_GAP)
+        default_start_energy = DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE.get(current_device_type, DEFAULT_START_ENERGY_THRESHOLD)
+        default_completion_min = DEVICE_COMPLETION_THRESHOLDS.get(current_device_type, DEFAULT_COMPLETION_MIN_SECONDS)
+
         schema = {
              vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
 
@@ -489,6 +454,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(min=0.0, max=60.0, step=0.5, unit_of_measurement="s", mode=selector.NumberSelectorMode.BOX)
             ),
+            vol.Optional(
+                CONF_START_ENERGY_THRESHOLD,
+                default=get_val(CONF_START_ENERGY_THRESHOLD, default_start_energy),
+            ): vol.Coerce(float),
            
             vol.Optional(
                 CONF_INTERRUPTED_MIN_SECONDS,
@@ -498,10 +467,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             vol.Optional(
                 CONF_COMPLETION_MIN_SECONDS,
-                default=get_val(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS),
+                default=get_val(CONF_COMPLETION_MIN_SECONDS, default_completion_min),
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(min=0, max=3600, mode=selector.NumberSelectorMode.BOX)
             ),
+            vol.Optional(
+                CONF_END_ENERGY_THRESHOLD,
+                default=get_val(CONF_END_ENERGY_THRESHOLD, DEFAULT_END_ENERGY_THRESHOLD),
+            ): vol.Coerce(float),
             vol.Optional(
                 CONF_RUNNING_DEAD_ZONE,
                 default=get_val(CONF_RUNNING_DEAD_ZONE, DEFAULT_RUNNING_DEAD_ZONE),
@@ -515,11 +488,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 selector.NumberSelectorConfig(min=1, max=10, mode=selector.NumberSelectorMode.BOX)
             ),
             vol.Optional(
-                CONF_SMART_EXTENSION_THRESHOLD,
-                default=get_val(CONF_SMART_EXTENSION_THRESHOLD, DEFAULT_SMART_EXTENSION_THRESHOLD),
+                CONF_MIN_OFF_GAP,
+                default=get_val(CONF_MIN_OFF_GAP, default_min_off_gap),
             ): selector.NumberSelector(
-                selector.NumberSelectorConfig(min=0.0, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX)
+                selector.NumberSelectorConfig(min=0, max=600, mode=selector.NumberSelectorMode.BOX)
             ),
+            vol.Optional(
+                CONF_START_THRESHOLD_W,
+                default=get_val(CONF_START_THRESHOLD_W, get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER) + max(1.0, 0.1 * get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER))),
+            ): vol.Coerce(float),
+            vol.Optional(
+                CONF_STOP_THRESHOLD_W,
+                default=get_val(CONF_STOP_THRESHOLD_W, max(0.0, get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER) - max(0.5, 0.1 * get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER)))),
+            ): vol.Coerce(float),
             # --- Learning & Profiles ---
             vol.Optional(
                 CONF_LEARNING_CONFIDENCE,

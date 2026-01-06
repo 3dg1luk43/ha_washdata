@@ -128,8 +128,8 @@ def test_match_profile(store):
     # Setup - use dense data compatible with current_data
     # Need to use ABSOLUTE timestamps relative to start_time
     start_dt = datetime(2023, 1, 1, 10, 0, 0)
-    # Ramp signal: 0, 10, 20... 100
-    dense_power = [[(start_dt + timedelta(seconds=i)).isoformat(), float(i*10)] for i in range(11)]
+    # Ramp signal for 100s
+    dense_power = [[(start_dt + timedelta(seconds=i)).isoformat(), float(i)] for i in range(101)]
     
     store.add_cycle({
         "start_time": start_dt.isoformat(),
@@ -143,18 +143,22 @@ def test_match_profile(store):
         await store.create_profile("RampProfile", cycle_id)
     asyncio.run(run_setup())
     
-    # Test Match: Exact match sequence (first 10 seconds)
-    current_data = [(str(i), float(i*10)) for i in range(11)] 
-    current_duration = 10.0 # Match short duration
+    # Test Match: Exact match sequence (first 100 seconds)
+    current_data = [( (start_dt + timedelta(seconds=i)).isoformat(), float(i) ) for i in range(101)]
+    current_duration = 100.0 # Match longer duration
     
-    match, score = store.match_profile(current_data, current_duration)
+    result = store.match_profile(current_data, current_duration)
     
-    assert match == "RampProfile"
-    assert score > 0.9 # Should be very high
+    assert result.best_profile == "RampProfile"
+    assert result.confidence > 0.9 # Should be very high
     
     # Test Mismatch
-    current_data_bad = [(str(i), 1000.0) for i in range(11)]
-    match_bad, score_bad = store.match_profile(current_data_bad, current_duration)
+    # Use isoformat strings even for mismatch test to avoid preprocessing errors
+    current_data_bad = [( (start_dt + timedelta(seconds=i)).isoformat(), 1000.0 ) for i in range(101)]
+    result_bad = store.match_profile(current_data_bad, current_duration)
+    
+    match_bad = result_bad.best_profile
+    score_bad = result_bad.confidence
     
     if match_bad == "Constant100":
         assert score_bad < 0.5

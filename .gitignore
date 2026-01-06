@@ -12,4 +12,8 @@ devtools/secrets.py
 .gitignore
 custom_components/ha_washdata/test_data
 tests/repro/__pycache__
+tests/fix_notes3.md
+tests/vNext_plan.md
+tests/fix_notes.md
+tests/fix_note2.md
 cycle_data

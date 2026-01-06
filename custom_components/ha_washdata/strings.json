@@ -89,6 +89,9 @@
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
           "running_dead_zone": "Running Dead Zone (seconds)",
           "end_repeat_count": "End Repeat Count",
+          "min_off_gap": "Gap Between Cycles (s)",
+          "start_energy_threshold": "Start Energy Gate (Wh)",
+          "end_energy_threshold": "End Energy Gate (Wh)",
           "auto_maintenance": "Enable Auto-Maintenance",
           "show_advanced": "Edit Advanced Settings (Next Step)"
         },
@@ -126,6 +129,9 @@
           "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3.",
           "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
           "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
+          "min_off_gap": "Minimum time (seconds) power must be OFF between two runs for them to be considered separate cycles. If shorter, they are merged. Default: 60s.",
+          "start_energy_threshold": "Cycle must accumulate at least this much energy (Wh) during the START phase to be confirmed. Default: 0.005 Wh.",
+          "end_energy_threshold": "Cycle ends only if energy in the last Off-Delay window is below this value (Wh). Prevents false ends if power fluctuates near zero. Default: 0.05 Wh.",
           "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy."
         }
       },
@@ -161,8 +167,7 @@
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
           "running_dead_zone": "Running Dead Zone (seconds)",
           "end_repeat_count": "End Repeat Count",
-          "auto_maintenance": "Enable Auto-Maintenance",
-          "smart_extension_threshold": "Smart Extension Threshold"
+          "auto_maintenance": "Enable Auto-Maintenance"
         },
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
@@ -193,8 +198,10 @@
           "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3.",
           "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
           "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
-          "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy.",
-          "smart_extension_threshold": "If a profile is identified, keep the cycle running until this ratio of the average duration is reached, even if power drops (e.g. drying phase). Set to 0 to disable. Default: 0.95 (95%)."
+          "min_off_gap": "Minimum time (seconds) power must be OFF between two runs for them to be considered separate cycles. If shorter, they are merged. Default: 60s.",
+          "start_energy_threshold": "Cycle must accumulate at least this much energy (Wh) during the START phase to be confirmed. Default: 0.005 Wh.",
+          "end_energy_threshold": "Cycle ends only if energy in the last Off-Delay window is below this value (Wh). Prevents false ends if power fluctuates near zero. Default: 0.05 Wh.",
+          "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy."
         }
       },
       "diagnostics": {

@@ -6,6 +6,9 @@ import hashlib
 from datetime import datetime
 from typing import Any, TypeAlias, cast
 import numpy as np
+import dataclasses
+from .features import compute_signature, CycleSignature
+from .signal_processing import resample_uniform, resample_adaptive, Segment
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
@@ -22,6 +25,17 @@ _LOGGER = logging.getLogger(__name__)
 
 JSONDict: TypeAlias = dict[str, Any]
 CycleDict: TypeAlias = dict[str, Any]
+
+@dataclasses.dataclass
+class MatchResult:
+    """Result of a profile matching attempt."""
+    best_profile: str | None
+    confidence: float
+    expected_duration: float
+    matched_phase: str | None
+    candidates: list[dict[str, Any]]
+    is_ambiguous: bool
+    ambiguity_margin: float
 
 class ProfileStore:
     """Manages storage of washer profiles and past cycles."""
@@ -136,10 +150,75 @@ class ProfileStore:
             return
 
     async def async_load(self) -> None:
-        """Load data from storage."""
+        """Load data from storage with migration."""
         data = await self._store.async_load()
         if data:
+            # Check version
+            store_version = data.get("version", 1)
+            
+            # v1 -> v2 Migration
+            if store_version < 2:
+                _LOGGER.info(f"Migrating storage from v{store_version} to v2")
+                data = await self.hass.async_add_executor_job(self._migrate_v1_to_v2, data)
+                data["version"] = 2
+                # Persist immediately after migration
+                await self._store.async_save(data)
+                
             self._data = data
+
+    def _migrate_v1_to_v2(self, data: JSONDict) -> JSONDict:
+        """Migrate storage data to v2 schema (signatures and compressed power data)."""
+        profiles = data.get("profiles", {})
+        cycles = data.get("past_cycles", [])
+        
+        # 1. Backfill signatures for all past cycles
+        migrated_cycles = 0
+        for cycle in cycles:
+            if "signature" not in cycle and cycle.get("power_data"):
+                # Reconstruct power
+                if "sampling_interval" not in cycle:
+                     # Old format, need helper or guess. Add_cycle handles it, but here we process raw.
+                     pass 
+                
+                # Decompress
+                power_tuples = self._decompress_power_from_raw(cycle)
+                if power_tuples and len(power_tuples) > 5:
+                     ts = np.array([float(pt[2]) for pt in power_tuples]) # need relative time 0..dur?
+                     # decompress returns abs time strings usually
+                     # Let's use simpler logic. decompress returns list[tuple[str, float]]
+                     pass
+
+                # Actually, reuse self._decompress_power_data(cycle) requires 'self' which is fine
+                # But it returns list[tuple[str, float]], I need arrays for features.
+                
+                # Simplified: skip calculation if complex/slow inside executor job?
+                # User constraint: "compute missing metadata from existing traces if possible"
+                # Doing it here is safest.
+                
+                try:
+                    tuples = self._decompress_power_data(cycle)
+                    if tuples and len(tuples) > 10:
+                        # Convert to relative time arrays
+                        start = datetime.fromisoformat(cycle["start_time"]).timestamp()
+                        ts_arr = []
+                        p_arr = []
+                        for t_str, p in tuples:
+                             t = datetime.fromisoformat(t_str).timestamp()
+                             ts_arr.append(t - start)
+                             p_arr.append(p)
+                        
+                        sig = compute_signature(np.array(ts_arr), np.array(p_arr))
+                        cycle["signature"] = dataclasses.asdict(sig)
+                        migrated_cycles += 1
+                except Exception as e:
+                    _LOGGER.warning(f"Failed to migrate signature for cycle {cycle.get('id')}: {e}")
+
+        _LOGGER.info(f"Migration v1->v2: Computed signatures for {migrated_cycles} cycles")
+        return data
+
+    def _decompress_power_from_raw(self, cycle: CycleDict) -> list[tuple[float, float, float]] | None:
+        # Helper not needed if we use _decompress_power_data
+        pass
 
     def repair_profile_samples(self) -> dict[str, int]:
         """Repair profile sample references after retention or migrations.
@@ -327,6 +406,15 @@ class ProfileStore:
             
             cycle_data["power_data"] = stored
             cycle_data["sampling_interval"] = round(sampling_interval, 1)
+            
+            # Helper to get arrays for signature
+            ts_arr = np.array(offsets)
+            p_arr = np.array([p for _, p in stored])
+            
+            # Compute and store signature
+            if len(ts_arr) > 1:
+                sig = compute_signature(ts_arr, p_arr)
+                cycle_data["signature"] = dataclasses.asdict(sig)
             
             _LOGGER.debug(
                 f"add_cycle: stored {len(stored)} samples at {sampling_interval:.1f}s intervals"
@@ -602,6 +690,28 @@ class ProfileStore:
         # Stack into 2D array and calculate statistics
         curves_array = np.array(resampled)
         
+        # Calculate Signature Stats (from signatures of contributing cycles)
+        sig_distribution = {}
+        contributing_sigs = [
+            c.get("signature") for c in labeled_cycles 
+            if c.get("signature")
+        ]
+        
+        if contributing_sigs:
+            # Aggregate keys
+            keys = contributing_sigs[0].keys()
+            for k in keys:
+                vals = [s[k] for s in contributing_sigs if k in s]
+                if vals:
+                    sig_distribution[k] = {
+                        "min": float(np.min(vals)),
+                        "max": float(np.max(vals)),
+                        "avg": float(np.mean(vals)),
+                        "std": float(np.std(vals)),
+                        "med": float(np.median(vals)) # Medoid approx?
+                    }
+        
+        
         envelope: JSONDict = {
             "min": np.min(curves_array, axis=0).tolist(),
             "max": np.max(curves_array, axis=0).tolist(),
@@ -643,6 +753,9 @@ class ProfileStore:
         if "envelopes" not in self._data:
             self._data["envelopes"] = {}
         self._data["envelopes"][profile_name] = envelope
+        if sig_distribution:
+             self._data["envelopes"][profile_name]["signature_stats"] = sig_distribution
+
         
         _LOGGER.debug(
             f"Rebuilt envelope for '{profile_name}': {len(resampled)} cycles, "
@@ -734,130 +847,280 @@ class ProfileStore:
             return cast(JSONDict, env) if isinstance(env, dict) else None
         return None
 
-    def match_profile(self, current_power_data: list[tuple[str, float]], current_duration: float) -> tuple[str | None, float]:
+    def match_profile(
+        self, 
+        current_power_data: list[tuple[str, float]], 
+        current_duration: float
+    ) -> MatchResult:
         """
-        Attempt to match current running cycle to a known profile using NumPy.
-        Returns (profile_name, confidence).
-        Prefers complete cycles over interrupted ones.
+        Attempt to match current running cycle to a known profile.
+        Returns MatchResult object.
         
-        Note: Both current and stored sample cycles are full-resolution uncompressed,
-        ensuring fair apples-to-apples comparison.
+        Pipeline:
+        1. Fast Reject (Duration/Energy)
+        2. Core Similarity (MAE, Correlation, Peak) on uniform grid
+        3. DTW-lite (Tie-breaking or Confirmation)
         """
         if not current_power_data or len(current_power_data) < 10:
-            return (None, 0.0)
+            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+            
+        # 1. Pre-process Current Data
+        try:
+            # We assume current_power_data is sorted by time
+            # Parse first/last to get relative time
+            start_ts = datetime.fromisoformat(current_power_data[0][0]).timestamp()
+            timestamps = []
+            power_values = []
+            
+            for t_str, p in current_power_data:
+                ts = datetime.fromisoformat(t_str).timestamp()
+                timestamps.append(ts - start_ts)
+                power_values.append(p)
+                
+            ts_arr = np.array(timestamps)
+            p_arr = np.array(power_values)
+            
+            # Resample to uniform grid ADJUSTED to sensor cadence
+            # default min_dt=5.0, gap=300? 
+            # Use somewhat large gap to bridge occasional misses
+            segments, used_dt = resample_adaptive(
+                ts_arr, 
+                p_arr, 
+                min_dt=5.0, 
+                max_dt=60.0, 
+                gap_s=300.0
+            ) 
+            
+            if not segments:
+                return (None, 0.0, 0.0, None)
+                
+            # Use the longest segment for matching
+            current_seg = max(segments, key=lambda s: len(s.power))
+            
+            # If segment is too short, abort
+            if len(current_seg.power) < 12: # < 1 min
+                return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
-        best_match = None
-        best_score = 0.0
+        except Exception as e:
+            _LOGGER.warning(f"Match preprocessing failed: {e}")
+            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
-        # Extract just the power values from the current cycle
-        current_values = np.array([p for _, p in current_power_data])
+        candidates = []
         
         for name, profile in self._data["profiles"].items():
-            # Get the sample cycle data
             sample_id = profile.get("sample_cycle_id")
             sample_cycle = next((c for c in self._data["past_cycles"] if c["id"] == sample_id), None)
             
             if not sample_cycle:
                 continue
-            
-            # Extract power values from [offset, power] pairs (full resolution)
-            sample_data = sample_cycle["power_data"]
-            if not sample_data:
-                continue
-            
-            sample_values = np.array([p for _, p in sample_data])
-            
-            if len(sample_values) == 0:
-                continue
 
-            # Check duration mismatch for running cycles
-            # For running cycles, we need more lenient matching since we don't know final duration
-            # Use configurable duration range (default: 50%-150% of profile duration)
+            # --- STAGE 1: Fast Reject ---
+            
+            # Duration Check
             profile_duration = profile.get("avg_duration", sample_cycle.get("duration", 0))
             if profile_duration > 0:
                 duration_ratio = current_duration / profile_duration
-                # Only check upper bound for running cycles to allow early detection.
-                # The minimum length requirement is handled in _calculate_similarity (approx 7%).
-                if duration_ratio > self._max_duration_ratio:
-                    _LOGGER.debug(f"Profile {name}: duration mismatch (current={current_duration:.0f}s, expected={profile_duration:.0f}s, ratio={duration_ratio:.2f}, max={self._max_duration_ratio:.2f})")
-                    continue
+                # Allow wide range for running cycles (e.g. 7% to 150%)
+                if duration_ratio < self._min_duration_ratio or duration_ratio > self._max_duration_ratio:
+                     if duration_ratio > 0.05:
+                        _LOGGER.debug(f"Reject {name}: duration ratio {duration_ratio:.2f}")
+                     continue
 
-            # Calculate similarity
-            score = self._calculate_similarity(current_values, sample_values)
-            _LOGGER.debug(f"Profile {name}: similarity={score:.3f} (samples: current={len(current_values)}, sample={len(sample_values)})")
+            # Load Sample Data (Lazy)
+            sample_data = sample_cycle.get("power_data")
+            if not sample_data:
+                continue
+                
+            # Extract sample values (assuming sample is typically good quality)
+            # Need to resample sample too!
+            if len(sample_data) > 0 and isinstance(sample_data[0], list):
+                 # [offset, power]
+                 s_ts = np.array([x[0] for x in sample_data])
+                 s_p = np.array([x[1] for x in sample_data])
+            else:
+                 continue
+                 
+            # Resample sample to matched grid (used_dt)
+            # This ensures we compare same resolution
+            s_segments = resample_uniform(s_ts, s_p, dt_s=used_dt, gap_s=300.0)
+            if not s_segments:
+                continue
+            sample_seg = max(s_segments, key=lambda s: len(s.power))
             
-            # Apply status penalty: prefer complete cycles
-            status = sample_cycle.get("status", "completed")
-            if status in ("completed", "force_stopped"):
-                score *= 1.0  # No penalty (both are natural completions)
-            elif status == "resumed":
-                score *= 0.85  # 15% penalty for resumed
-            elif status == "interrupted":
-                score *= 0.7  # 30% penalty for interrupted (user stopped)
+            # --- STAGE 2: Core Similarity ---
             
-            if score > best_score:
-                best_score = score
-                best_match = name
+            score, metrics = self._calculate_similarity_robust(current_seg.power, sample_seg.power)
+            
+            if score > 0.4: # Only consider plausible matches
+                candidates.append({
+                    "name": name,
+                    "score": score,
+                    "metrics": metrics,
+                    "profile_duration": profile_duration,
+                    "current": current_seg.power,
+                    "sample": sample_seg.power
+                })
 
-        return (best_match, best_score)
+        # Sort by score
+        candidates.sort(key=lambda x: x["score"], reverse=True)
+        
+        if not candidates:
+            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+            
+        best = candidates[0]
+        best_name = best["name"]
+        best_score = best["score"]
+        is_ambiguous = False
+        margin = 1.0
+        
+        # --- STAGE 3: DTW Tie-Break (Ambiguity Check) ---
+        # If top 2 are close (margin < 0.1), use DTW on them
+        
+        if len(candidates) > 1:
+            second = candidates[1]
+            margin = best_score - second["score"]
+            
+            if margin < 0.15 and best_score > 0.6:
+                # Ambiguous! Run DTW-lite on top candidate(s)
+                is_ambiguous = True
+                _LOGGER.info(f"Ambiguity detected ({best_name}={best_score:.2f} vs {second['name']}={second['score']:.2f}). Running DTW...")
+                
+                for cand in candidates[:2]:
+                    # Normalize arrays first? Power is already W.
+                    # DTW distance depends on magnitude.
+                    dtw_dist = self._compute_dtw_lite(cand["current"], cand["sample"], band_width_ratio=0.1)
+                    # Normalize distance by length
+                    norm_dist = dtw_dist / len(cand["current"])
+                    # Map distance to score penalty
+                    dtw_score = 1.0 / (1.0 + norm_dist / 50.0)
+                    
+                    # Update score: blend Core and DTW
+                    cand["original_score"] = cand["score"]
+                    cand["score"] = 0.5 * cand["score"] + 0.5 * dtw_score
+                    cand["dtw_dist"] = norm_dist
+                    
+                # Re-sort
+                candidates.sort(key=lambda x: x["score"], reverse=True)
+                best = candidates[0]
+                best_name = best["name"]
+                best_score = best["score"]
+                _LOGGER.info(f"Post-DTW: {best_name} ({best_score:.2f}), {candidates[1]['name']} ({candidates[1]['score']:.2f})")
+                
+                # Re-calculate margin after DTW
+                if len(candidates) > 1:
+                     margin = best_score - candidates[1]["score"]
+                     # If margin still small, flag remains ambiguous?
+                     # Plan says: "Ambiguity explicit"
+                     if margin < 0.05:
+                         is_ambiguous = True
+                     else:
+                         is_ambiguous = False
 
-    def _calculate_similarity(self, current: np.ndarray, sample: np.ndarray) -> float:
-        """Calculate similarity score (0-1) between two power curves."""
+        return MatchResult(
+            best_profile=best_name,
+            confidence=best_score,
+            expected_duration=best["profile_duration"],
+            matched_phase=None,
+            candidates=candidates,
+            is_ambiguous=is_ambiguous,
+            ambiguity_margin=margin
+        )
+
+
+    def _calculate_similarity_robust(self, current: np.ndarray, sample: np.ndarray) -> tuple[float, dict]:
+        """Core similarity with robust scaling."""
         len_cur = len(current)
         len_sam = len(sample)
         
-        # Need at least 7% of profile to make reasonable comparison (lowered from 10% for earlier detection)
-        if len_cur < max(3, len_sam * 0.07):
-            return 0.0
-        
-        # Compare prefix of current cycle to same-length prefix of sample
+        # Crop sample to matched length
         if len_cur > len_sam:
-            # Current is longer than sample - compare against full sample
-            compare_sample = sample
-            compare_current = current[:len_sam]
+             # Current longer than sample? Should have been rejected or sample is short.
+             # Match against full sample
+             comp_cur = current[:len_sam]
+             comp_sam = sample
         else:
-            # Current is shorter - compare against prefix of sample
-            compare_sample = sample[:len_cur]
-            compare_current = current
+             # Current shorter
+             comp_cur = current
+             comp_sam = sample[:len_cur]
+             
+        if len(comp_cur) < 5:
+            return 0.0, {}
+
+        # 1. MAE (Mean Absolute Error)
+        diff = np.abs(comp_cur - comp_sam)
+        mae = np.mean(diff)
         
-        # Calculate normalized similarity using multiple metrics
-        try:
-            # 1. Mean absolute error (MAE) in watts
-            mae = np.mean(np.abs(compare_current - compare_sample))
+        # 2. Correlation
+        if np.std(comp_cur) > 1e-3 and np.std(comp_sam) > 1e-3:
+             corr = np.corrcoef(comp_cur, comp_sam)[0, 1]
+        else:
+             corr = 0.0
+             
+        # 3. Peak Match
+        peak_cur = np.max(comp_cur)
+        peak_sam = np.max(comp_sam)
+        peak_diff = abs(peak_cur - peak_sam)
+        
+        # Scoring
+        mae_score = 1.0 / (1.0 + mae / 50.0) # 50W characteristic scale
+        corr_score = max(0.0, corr)
+        peak_score = 1.0 / (1.0 + peak_diff / 100.0)
+        
+        # Weighted Sum
+        final = 0.4 * mae_score + 0.4 * corr_score + 0.2 * peak_score
+        
+        # Boost for strong correlation
+        if corr > 0.9:
+            final = min(1.0, final * 1.1)
             
-            # 2. Correlation coefficient (shape similarity, -1 to 1)
-            if len(compare_current) > 1 and np.std(compare_current) > 0 and np.std(compare_sample) > 0:
-                correlation = np.corrcoef(compare_current, compare_sample)[0, 1]
-            else:
-                correlation = 0.0
+        return float(final), {"mae": mae, "corr": corr, "peak_diff": peak_diff}
+
+    def _compute_dtw_lite(self, x: np.ndarray, y: np.ndarray, band_width_ratio: float = 0.1) -> float:
+        """
+        Compute DTW distance with Sakoe-Chiba band constraint.
+        Numpy implementation. O(N*W).
+        
+        Args:
+            x, y: Input arrays (1D power values)
+            band_width_ratio: constraint window as fraction of length (e.g. 0.1 = 10%)
+        """
+        n, m = len(x), len(y)
+        if n == 0 or m == 0:
+            return float('inf')
             
-            # 3. Peak power similarity
-            peak_cur = np.max(compare_current) if len(compare_current) > 0 else 0
-            peak_sam = np.max(compare_sample) if len(compare_sample) > 0 else 0
-            peak_diff = abs(peak_cur - peak_sam)
-            peak_score = 1.0 / (1.0 + peak_diff / 100.0)  # Normalize by 100W
-            
-            # Combine scores (weighted):
-            # - MAE score: 40% weight (lower error = better)
-            # - Correlation: 40% weight (shape similarity)
-            # - Peak similarity: 20% weight
-            mae_score = 1.0 / (1.0 + mae / 50.0)  # 50W is "acceptable" error
-            corr_score = max(0.0, correlation)  # Clamp negative to 0
-            
-            final_score = 0.4 * mae_score + 0.4 * corr_score + 0.2 * peak_score
-            
-            # Boost score if correlation is very high (strong shape match)
-            if correlation > 0.85:
-                final_score *= 1.2
-                final_score = min(1.0, final_score) # Cap at 1.0
-            
-            _LOGGER.debug(f"Similarity calc: mae={mae:.1f}W, corr={correlation:.3f}, peak_diff={peak_diff:.1f}W, final={final_score:.3f}")
-            
-            return float(final_score)
-            
-        except Exception as e:
-            _LOGGER.warning(f"Similarity calculation failed: {e}")
-            return 0.0
+        # Band width
+        w = max(1, int(min(n, m) * band_width_ratio))
+        
+        # Cost matrix: use 2 rows to save memory?
+        # Standard DP: D[i, j] = dist(i, j) + min(D[i-1, j], D[i, j-1], D[i-1, j-1])
+        # We can implement full matrix since N is small (5s grid -> 1h = 720 points).
+        # 720x720 = 500k floats = 4MB. Fine.
+        
+        dtw = np.full((n + 1, m + 1), float('inf'))
+        dtw[0, 0] = 0
+        
+        # Vectorized implementation of band constraint is hard in pure numpy without loop.
+        # But we can limit the loop range.
+        
+        # Euclidean distance sq or abs? ABS is more robust for power.
+        
+        for i in range(1, n + 1):
+             center = i * (m / n)
+             start_j = max(1, int(center - w))
+             end_j = min(m, int(center + w) + 1)
+             
+             for j in range(start_j, end_j + 1):
+                 cost = abs(x[i-1] - y[j-1])
+                 dtw[i, j] = cost + min(dtw[i-1, j], dtw[i, j-1], dtw[i-1, j-1])
+                 
+        # Normalization: Return average distance per step
+        # Path length is roughly max(n, m) to n+m.
+        # Standard: divide by (n + m).
+        return dtw[n, m] / (n + m)
+
+    def _calculate_similarity(self, current: np.ndarray, sample: np.ndarray) -> float:
+         score, _ = self._calculate_similarity_robust(current, sample)
+         return score
 
     async def create_profile(self, name: str, source_cycle_id: str) -> None:
         """Create a new profile from a past cycle."""
@@ -1038,12 +1301,12 @@ class ProfileStore:
                 continue
             
             # Try to match
-            matched_profile, confidence = self.match_profile(power_data, cycle["duration"])
+            result = self.match_profile(power_data, cycle["duration"])
             
-            if matched_profile and confidence >= confidence_threshold:
-                cycle["profile_name"] = matched_profile
+            if result.best_profile and result.confidence >= confidence_threshold:
+                cycle["profile_name"] = result.best_profile
                 stats["labeled"] += 1
-                _LOGGER.info(f"Auto-labeled cycle {cycle['id']} as '{matched_profile}' (confidence: {confidence:.2f})")
+                _LOGGER.info(f"Auto-labeled cycle {cycle['id']} as '{result.best_profile}' (confidence: {result.confidence:.2f})")
             else:
                 stats["skipped"] += 1
         

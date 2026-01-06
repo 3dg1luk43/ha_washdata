@@ -17,6 +17,9 @@ from .const import (
     SERVICE_SUBMIT_FEEDBACK,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
+    CONF_DEVICE_TYPE,
+    CONF_POWER_SENSOR,
+    CONF_NOTIFY_SERVICE,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -82,6 +85,10 @@ def _require_str(value: Any, name: str) -> str:
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate config entry to the latest version while preserving settings."""
     version = entry.version or 1
+    minor_version = entry.minor_version or 1
+
+    if version == 3 and minor_version >= 2:
+        return True
 
     data: dict[str, Any] = dict(entry.data)
     options: dict[str, Any] = dict(entry.options)
@@ -91,6 +98,12 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         options[CONF_MIN_POWER] = data[CONF_MIN_POWER]
     if CONF_OFF_DELAY not in options and CONF_OFF_DELAY in data:
         options[CONF_OFF_DELAY] = data[CONF_OFF_DELAY]
+    if CONF_DEVICE_TYPE not in options and CONF_DEVICE_TYPE in data:
+        options[CONF_DEVICE_TYPE] = data[CONF_DEVICE_TYPE]
+    if CONF_POWER_SENSOR not in options and CONF_POWER_SENSOR in data:
+        options[CONF_POWER_SENSOR] = data[CONF_POWER_SENSOR]
+    if CONF_NOTIFY_SERVICE not in options and CONF_NOTIFY_SERVICE in data:
+        options[CONF_NOTIFY_SERVICE] = data[CONF_NOTIFY_SERVICE]
 
     options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
     options.setdefault(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE)
@@ -124,14 +137,24 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS)
     options.setdefault(CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES)
 
+    
+    # Remove migrated keys from data (cleanup)
+    keys_to_remove = [
+        CONF_MIN_POWER, CONF_OFF_DELAY, CONF_DEVICE_TYPE, CONF_POWER_SENSOR, CONF_NOTIFY_SERVICE,
+        # Add other keys that were previously in data but now in options
+    ]
+    for k in keys_to_remove:
+        data.pop(k, None)
+
     # Update entry with new version
     hass.config_entries.async_update_entry(
         entry,
         data=data,
         options=options,
         version=3,
+        minor_version=2,
     )
-    _LOGGER.info("Migrated HA WashData entry from version %s to 3", version)
+    _LOGGER.info("Migrated HA WashData entry from version %s.%s to 3.2", version, minor_version)
     return True
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
