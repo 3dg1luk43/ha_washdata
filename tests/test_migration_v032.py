@@ -5,16 +5,29 @@ import json
 import os
 from unittest.mock import MagicMock, patch
 
-# Ensure mocks are loaded before importing custom_components
-import tests.mock_imports
-from homeassistant.util import dt as dt_util
+# Ensure mocks are loaded if Home Assistant is not available
+try:
+    import homeassistant.util.dt as dt_util
+except ImportError:
+    import tests.mock_imports
+    from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata.const import STORAGE_KEY, STORAGE_VERSION
 from custom_components.ha_washdata.profile_store import WashDataStore, ProfileStore
 
+
 @pytest.mark.asyncio
-async def test_migration_v1_to_v2_logic(mock_hass):
+async def test_migration_v1_to_v2_logic(mock_hass, tmp_path):
     """Test that loading v1 data triggers migration to v2 and computes signatures."""
+    
+    # 0. Configure mock_hass for real Store usage
+    # Override path to use tmp_path
+    mock_hass.config.path = lambda *args: str(tmp_path / "/".join(args))
+    
+    # Configure async_add_executor_job to run immediately
+    async def mock_exec_job(target, *args, **kwargs):
+        return target(*args, **kwargs)
+    mock_hass.async_add_executor_job = MagicMock(side_effect=mock_exec_job)
     
     # 1. Setup: Create a fake storage file with v1 data (no signatures)
     entry_id = "test_entry_v032"
@@ -47,7 +60,7 @@ async def test_migration_v1_to_v2_logic(mock_hass):
                     "start_time": "2023-01-02T12:00:00+00:00",
                     "end_time": "2023-01-02T12:05:00+00:00",
                     "duration": 300.0,
-                    "power_data": [], 
+                    "power_data": [],
                     # Should handle gracefully
                 }
             ],
@@ -59,12 +72,6 @@ async def test_migration_v1_to_v2_logic(mock_hass):
         }
     }
 
-    # Mock the Store to read our v1 data
-    # We can't easily adhere to the 'private' _load method of generic Store, 
-    # so we'll write a real file to the temp directory used by hass fixture if possible,
-    # OR we can mock the `load` result.
-    # Writing a file is more robust for checking the full stack including version check.
-    
     # Helper to write json to the storage path
     def write_storage(data):
         path = mock_hass.config.path(".storage", store_key)
@@ -75,7 +82,6 @@ async def test_migration_v1_to_v2_logic(mock_hass):
     write_storage(v1_data)
 
     # 2. Execution: Load the ProfileStore
-    # This initializes WashDataStore which inherits from Store
     store = ProfileStore(mock_hass, entry_id)
     await store.async_load()
 
@@ -93,13 +99,6 @@ async def test_migration_v1_to_v2_logic(mock_hass):
     assert "signature" not in c2, "Cycle with no power data should not have signature"
     
     # 4. Assertion: Check Persisted Data (Version Update)
-    # We need to force a save to see if the version updates on disk
-    # The migration logic in WashDataStore returns the migrated data to the caller,
-    # but the caller (Store.async_load) doesn't automatically save it back to disk 
-    # UNLESS we explicitly save. However, typically Manager calls save periodically.
-    # Let's verify `store._data` has the updates.
-    
-    # Simulate a save to verify the file version updates
     await store.async_save()
     
     # Read the file back directly
