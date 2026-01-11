@@ -1,6 +1,6 @@
-
+"""Global pytest fixtures."""
+from unittest.mock import MagicMock
 import pytest
-from unittest.mock import MagicMock, AsyncMock
 
 @pytest.fixture
 def mock_hass():

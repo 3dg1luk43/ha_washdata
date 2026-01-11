@@ -1399,7 +1399,7 @@ class WashDataManager:
         self.hass.async_create_task(self.profile_store.async_clear_active_cycle())
 
         # Auto post-process: merge fragmented cycles from last 3 hours
-        self.hass.async_create_task(self._auto_merge_recent_cycles())
+        self.hass.async_create_task(self._run_post_cycle_processing())
 
         # Prepare cycle data for event (enrich if needed)
         # IMPORTANT: Exclude large fields to prevent exceeding HA's 32KB event data limit
@@ -2056,8 +2056,8 @@ class WashDataManager:
         switch_reason = ""
         # Case 1: First Match
         if (
-            profile_name 
-            and confidence >= 0.15 
+            profile_name
+            and confidence >= 0.15
             and not result.is_ambiguous
             and (not self._matched_profile_duration or self._current_program == "detecting...")
         ):
@@ -2065,7 +2065,11 @@ class WashDataManager:
             switch_reason = "initial_match"
 
         # Case 2: Switching to Better Match
-        elif profile_name and self._current_program != profile_name and self._current_program != "detecting...":
+        elif (
+            profile_name
+            and self._current_program != profile_name
+            and self._current_program != "detecting..."
+        ):
             # Check current score
             current_score = 0.0
             # Find score of currently active profile in this round's candidates
@@ -2073,16 +2077,20 @@ class WashDataManager:
                 if c.get("name") == self._current_program:
                     current_score = c.get("score", 0.0)
                     break
-            
+
             # High Confidence Override
             if confidence > 0.8 and (confidence - current_score) > 0.15:
                 should_switch = True
-                switch_reason = f"high_confidence_override ({confidence:.3f} vs {current_score:.3f})"
+                switch_reason = (
+                    f"high_confidence_override ({confidence:.3f} vs {current_score:.3f})"
+                )
             
             # Trend Based Switch
             elif confidence > current_score and self._analyze_trend(profile_name):
-                 should_switch = True
-                 switch_reason = f"positive_trend ({confidence:.3f} > {current_score:.3f})"
+                should_switch = True
+                switch_reason = (
+                    f"positive_trend ({confidence:.3f} > {current_score:.3f})"
+                )
 
         if should_switch:
             self._current_program = profile_name
@@ -2211,8 +2219,6 @@ class WashDataManager:
                             self.device_type, 5.0
                         )
                         if phase_progress < current_smoothed - smoothing_threshold:
-                            # Abnormal drop - ignore it or damp heavily?
-                            # Maybe we entered a low-power phase that looks like "start"?
                             # Let's damp it heavily (keep mostly old value).
                             self._smoothed_progress = (current_smoothed * 0.95) + (
                                 phase_progress * 0.05
@@ -2646,18 +2652,26 @@ class WashDataManager:
         self._notify_update()
         _LOGGER.info("Manual program cleared, reverting to auto-detection")
 
-    async def _auto_merge_recent_cycles(self) -> None:
-        """Automatically merge fragmented cycles from the last 3 hours."""
+    async def _run_post_cycle_processing(self) -> None:
+        """Run post-cycle processing (merge fragments, split anomalies)."""
         try:
-            count = self.profile_store.merge_cycles(
-                hours=self._auto_merge_lookback_hours,
-                gap_threshold=self._auto_merge_gap_seconds,
+            # User Feedback: Use 5 hour lookback and configured gap settings
+            stats = await self.profile_store.async_run_maintenance(
+                lookback_hours=5,
+                gap_seconds=self._auto_merge_gap_seconds,
             )
-            if count > 0:
-                _LOGGER.info("Auto-merged %s fragmented cycle(s)", count)
-                await self.profile_store.async_save()
+
+            # Log significant actions
+            merged = stats.get("merged_cycles", 0)
+            split = stats.get("split_cycles", 0)
+            if merged > 0 or split > 0:
+                _LOGGER.info(
+                    "Post-cycle processing: Merged %s, Split %s cycle(s)", merged, split
+                )
+
+            # Note: async_run_maintenance saves automatically if changes occur
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.error("Auto-merge failed: %s", e)
+            _LOGGER.error("Post-cycle processing failed: %s", e)
 
     def _maybe_request_feedback(self, cycle_data: dict[str, Any]) -> None:
         """Request feedback if confident, or auto-label if very high confidence."""

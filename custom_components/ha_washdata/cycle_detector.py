@@ -42,8 +42,6 @@ class CycleDetectorConfig:
     end_energy_threshold: float = 0.05  # 50 Wh threshold for "still active"
     running_dead_zone: int = 0
     end_repeat_count: int = 1
-    # New params
-    # New params
     min_off_gap: int = 60
     start_threshold_w: float = 2.0
     stop_threshold_w: float = 2.0
@@ -131,7 +129,7 @@ class CycleDetector:
     @property
     def _dynamic_end_threshold(self) -> float:
         """Calculate dynamic end candidate threshold."""
-        # Default 30s or 3 * p95 + buffer?
+        # Default 30s or 3 * p95 + buffer
         # Let's ensure it's strictly greater than pause threshold to define state progression
         base = max(30.0, 3.0 * self._p95_dt)
         # Ensure at least 15s gap from pause?
@@ -193,17 +191,12 @@ class CycleDetector:
                 if is_mismatch and self._matched_profile:
                     # Confident non-match - revert to detecting if previously matched
                     self._matched_profile = None
-                    # We keep sub_state as is? Or reset? Usually keep phase just drop name
-                    # Actually if unmatch, maybe we don't trust phase either.
-                    # For now just drop profile name.
-                    # For now just drop profile name.
                     
                 elif match_name:
                     self._matched_profile = match_name
                     # Sub-state can be set from phase_name if available
                     if phase_name:
                         self._sub_state = phase_name
-                    # Update expected duration if confidence is high?
                     # Wrapper provides it
                     self._expected_duration = expected_duration
 
@@ -259,7 +252,6 @@ class CycleDetector:
             dt = (timestamp - self._last_process_time).total_seconds()
 
         # Sanity check for negative dt
-        # Sanity check for negative dt
         if dt < 0:
             self._last_process_time = timestamp
             return
@@ -267,15 +259,10 @@ class CycleDetector:
         self._update_cadence(dt)
         self._last_process_time = timestamp
 
-        # 0. Raw Data Collection
-        # We only store data when we are potentially in a cycle (not OFF)
-        # OR if we are transitioning from OFF->STARTING
-
         # 1. Smoothing (Legacy buffer for debug/display, logic uses raw + time accumulators)
         self._ma_buffer.append(power)
         if len(self._ma_buffer) > self._config.smoothing_window:
             self._ma_buffer.pop(0)
-        # avg_power = ... (unused)
 
         # 2. Accumulators Update
         # Hysteresis Logic
@@ -320,22 +307,6 @@ class CycleDetector:
             self._power_readings.append((timestamp, power))
             self._cycle_max_power = max(self._cycle_max_power, power)
 
-            # Gating: Must confirm it's not a spike
-            # Criteria: Time > Start_Duration AND Energy > Start_Energy
-            # Or just Time if Energy threshold is 0
-
-
-            # Check accumulated time in HIGH state
-            # Since we reset _time_above_threshold on LOW, this ensures continuity
-            # Actually, STARTING state should tolerate *small* gaps?
-            # If strictly requiring continuous high, spikes might fail.
-            # But "Starting" usually implies ramping up.
-
-            # Let's use _time_above_threshold which resets on ANY low sample.
-            # If user wants robustness, smoothing handles the 'low' samples
-            # or we allow accum_below < allowed_gap.
-
-            # For now, strict:
             if self._time_above_threshold >= self._config.start_duration_threshold:
                 if self._energy_since_idle_wh >= self._config.start_energy_threshold:
                     self._transition_to(STATE_RUNNING, timestamp)
@@ -352,11 +323,6 @@ class CycleDetector:
         elif self._state == STATE_RUNNING:
             self._power_readings.append((timestamp, power))
             self._cycle_max_power = max(self._cycle_max_power, power)
-
-            # Transition to PAUSED if low for some time
-            # Note: "PAUSED" here effectively replaces the old "Start of Off Delay"
-            # We treat RUNNING as "Active Power Phase"
-            # We treat PAUSED as "Low Power / Soak / Pause Phase"
 
             # Use dynamic threshold
             thresh = self._dynamic_pause_threshold
@@ -384,24 +350,6 @@ class CycleDetector:
                 # Periodic profile matching during pause
                 self._try_profile_match(timestamp)
 
-                # Check for ENDING candidate
-                # We move to ENDING if we've been paused for significant time
-                # OR if we just want to start the "End Verification" logic.
-
-                # In this design, ENDING is the "Off Delay" countdown.
-                # So PAUSED -> ENDING transition happens when?
-                # Maybe PAUSED is "Low power but unsure", ENDING is "Low power and likely ending"?
-
-                # Simplification: PAUSED acts as the waiting room.
-                # If time_below_threshold > T_end_candidate?
-
-                # Let's say T_end_candidate is small (e.g. 60s).
-                # But wait, CycleDetectorConfig.off_delay is usually 120s.
-
-                # Let's align with plan:
-                # RUNNING <-> PAUSED
-                # RUNNING/PAUSED -> ENDING when below_time >= T_end_candidate
-
                 thresh = self._dynamic_end_threshold
                 if self._time_below_threshold >= thresh:
                     self._transition_to(STATE_ENDING, timestamp)
@@ -416,18 +364,12 @@ class CycleDetector:
                 # Periodic profile matching during ending
                 self._try_profile_match(timestamp)
 
-                # Check for Cycle End
-                # We stay in ENDING until time_below > effective_off_delay AND energy condition met
-
                 # Rule: To separate cycles, we must wait at least min_off_gap.
                 effective_off_delay = max(
                     self._config.off_delay, self._config.min_off_gap
                 )
 
                 if self._time_below_threshold >= effective_off_delay:
-                    # CONFIRMED END
-                    # Check Energy Gate for the last 'off_delay' period?
-                    # Use 'recent window' for robustness
 
                     recent_window = [
                         r
@@ -446,12 +388,7 @@ class CycleDetector:
                     if recent_e <= self.config.end_energy_threshold:
                         self._finish_cycle(timestamp, status="completed")
                     else:
-                        # Energy still high, maybe just a long pause?
-                        # Or we should wait longer?
-                        # If we exceeded max time?
-                        # For now, just stay in ENDING but reset timer? No.
-                        # We stay in ENDING. state machine does not transition.
-                        # But time_below keeps increasing.
+
                         _LOGGER.debug(
                             "Cycle ending prevented by energy gate: %.4fWh > %.4fWh",
                             recent_e,

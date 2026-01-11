@@ -162,7 +162,6 @@ To see the beautiful status card on your dashboard:
 - **`sensor.<name>_time_remaining`**: Estimated minutes remaining.
 - **`sensor.<name>_cycle_progress`**: 0-100% completion (reaches 100% on finish).
 - **`sensor.<name>_current_power`**: Real-time power draw in watts.
-- **`sensor.<name>_current_power`**: Real-time power draw in watts.
 - **`switch.<name>_auto_maintenance`**: Enable/disable nightly cleanup (default: ON).
 - **`sensor.<name>_debug_state`** (Disabled by default): Internal state (sub_state, confidence, matched_duration) for advanced debugging.
 

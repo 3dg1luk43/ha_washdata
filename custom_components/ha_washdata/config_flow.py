@@ -393,16 +393,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     CONF_AUTO_MERGE_GAP_SECONDS,
                 ]
 
-                # Create a copy of current options/input to work with
                 updated_input = {**user_input}
-                # Uncheck it so it doesn't stay checked via recursion
-                # (Use recursion only for apply suggestion visual confirmation if needed,
-                # but here we can just save)
-                # Actually, standard behavior for 'Apply Suggestions' is usually to
-                # populate the form and let user review.
-                # But to keep it simple as requested("moved to advanced options"),
-                # we can just apply and save? The user probably expects to SEE the values.
-                # For a wizard, we can reload this step with values filled.
 
                 updated_input[CONF_APPLY_SUGGESTIONS] = False
 

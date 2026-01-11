@@ -54,7 +54,53 @@ mock_ha_const.CONF_NAME = "name"
 mock_ha_const.EVENT_HOMEASSISTANT_START = "homeassistant_start"
 mock_ha_const.EVENT_HOMEASSISTANT_STOP = "homeassistant_stop"
 
-mock_storage.Store = MagicMock()
+
+class FakeStore:
+    def __class_getitem__(cls, item):
+        return cls
+
+    def __init__(self, hass, version, key, private=False):
+        self.hass = hass
+        self.version = version
+        self.key = key
+        self.path = hass.config.path(".storage", key) if hasattr(hass, "config") else f".storage/{key}"
+
+    async def async_load(self):
+        import json
+        import os
+        if not os.path.exists(self.path):
+            return None
+        with open(self.path, "r") as f:
+            data = json.load(f)
+        
+        # Check version and migrate if needed
+        # Note: Real Store handles minor versions too, simplifying here for v1->v2
+        stored_version = data.get("version", 1)
+        if stored_version < self.version and hasattr(self, "_async_migrate_func"):
+            # Call the migration logic defined in subclass
+            migrated_data = await self._async_migrate_func(
+                stored_version, 
+                data.get("minor_version", 1), 
+                data.get("data", data)
+            )
+            return migrated_data
+            
+        # If wrapped standard structure
+        if "data" in data and "version" in data:
+            return data["data"]
+        return data
+
+    async def async_save(self, data):
+        import json
+        import os
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        # Wrap data like real store
+        payload = {"version": self.version, "key": self.key, "data": data}
+        with open(self.path, "w") as f:
+            json.dump(payload, f, indent=2)
+
+mock_storage.Store = FakeStore
+
 
 # 6. Inject into sys.modules
 sys.modules["homeassistant"] = mock_ha
