@@ -38,7 +38,8 @@ async def test_migration_v1_to_v3(mock_hass, mock_config_entry):
     """Test migration from version 1 to 3 moves data to options."""
     
     # Run migration
-    mock_hass.config_entries.async_update_entry = AsyncMock()
+    mock_hass.config_entries = MagicMock()
+    mock_hass.config_entries.async_update_entry = MagicMock()
     
     result = await async_migrate_entry(mock_hass, mock_config_entry)
     

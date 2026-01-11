@@ -1,4 +1,5 @@
 """Button platform for HA WashData."""
+
 from __future__ import annotations
 
 import logging
@@ -12,6 +13,7 @@ from .manager import WashDataManager
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -19,8 +21,9 @@ async def async_setup_entry(
 ) -> None:
     """Set up the WashData button."""
     manager: WashDataManager = hass.data[DOMAIN][entry.entry_id]
-    
+
     async_add_entities([WashDataTerminateButton(manager, entry)])
+
 
 class WashDataTerminateButton(ButtonEntity):
     """Button to force terminate the current cycle."""
@@ -39,6 +42,10 @@ class WashDataTerminateButton(ButtonEntity):
             "name": entry.title,
             "manufacturer": "HA WashData",
         }
+
+    def press(self) -> None:
+        """Handle the button press."""
+        raise NotImplementedError()
 
     async def async_press(self) -> None:
         """Handle the button press."""

@@ -17,6 +17,13 @@ def load_csv_data(filename, filter_date=None):
     path = os.path.join(DATA_DIR, filename)
     readings = []
     
+    # Fallback: search in subdirectories if not found in root
+    if not os.path.exists(path):
+        for root, _, files in os.walk(DATA_DIR):
+            if filename in files:
+                path = os.path.join(root, filename)
+                break
+    
     with open(path, "r") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -45,6 +52,17 @@ def load_csv_data(filename, filter_date=None):
 def load_json_cycle(filename, index=-1):
     """Loads power data from a past cycle in the JSON dump."""
     path = os.path.join(DATA_DIR, filename)
+    
+    # Fallback: search in subdirectories if not found
+    if not os.path.exists(path):
+        for root, _, files in os.walk(DATA_DIR):
+            if filename in files:
+                path = os.path.join(root, filename)
+                break
+
+        if not os.path.exists(path):
+            pytest.skip(f"Test data file {filename} not found")
+
     with open(path, "r") as f:
         data = json.load(f)
     

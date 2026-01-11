@@ -1,15 +1,18 @@
 """Sensors for HA WashData."""
+
 from __future__ import annotations
 
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.const import EntityCategory
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
-from .const import DOMAIN, SIGNAL_WASHER_UPDATE
-from .manager import WashDataManager
 from homeassistant.util import dt as dt_util
+
+from .const import DOMAIN, SIGNAL_WASHER_UPDATE, CONF_EXPOSE_DEBUG_ENTITIES
+from .manager import WashDataManager
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -18,7 +21,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensors."""
     manager: WashDataManager = hass.data[DOMAIN][entry.entry_id]
-    
+
     entities = [
         WasherStateSensor(manager, entry),
         WasherProgramSensor(manager, entry),
@@ -28,7 +31,17 @@ async def async_setup_entry(
         WasherElapsedTimeSensor(manager, entry),
         WasherDebugSensor(manager, entry),
     ]
-    
+
+    # Add debug entities if enabled
+    if entry.options.get(CONF_EXPOSE_DEBUG_ENTITIES):
+        entities.extend(
+            [
+                WasherMatchConfidenceSensor(manager, entry),
+                WasherTopCandidatesSensor(manager, entry),
+                WasherPhaseSensor(manager, entry),
+            ]
+        )
+
     async_add_entities(entities)
 
 
@@ -64,16 +77,16 @@ class WasherBaseSensor(SensorEntity):
         self.async_write_ha_state()
 
 
-
 class WasherStateSensor(WasherBaseSensor):
+    """Sensor for the washing machine state."""
+
     def __init__(self, manager, entry):
+        """Initialize the state sensor."""
         self.entity_description = SensorEntityDescription(
-            key="washer_state",
-            name="State",
-            icon="mdi:washing-machine"
+            key="washer_state", name="State", icon="mdi:washing-machine"
         )
         super().__init__(manager, entry)
-    
+
     @property
     def native_value(self):
         return self._manager.check_state
@@ -88,11 +101,12 @@ class WasherStateSensor(WasherBaseSensor):
 
 
 class WasherProgramSensor(WasherBaseSensor):
+    """Sensor for the current program."""
+
     def __init__(self, manager, entry):
+        """Initialize the program sensor."""
         self.entity_description = SensorEntityDescription(
-            key="washer_program",
-            name="Program",
-            icon="mdi:file-document-outline"
+            key="washer_program", name="Program", icon="mdi:file-document-outline"
         )
         super().__init__(manager, entry)
 
@@ -102,12 +116,15 @@ class WasherProgramSensor(WasherBaseSensor):
 
 
 class WasherTimeRemainingSensor(WasherBaseSensor):
+    """Sensor for estimated time remaining."""
+
     def __init__(self, manager, entry):
+        """Initialize the time remaining sensor."""
         self.entity_description = SensorEntityDescription(
             key="time_remaining",
             name="Time Remaining",
             # native_unit_of_measurement="min",  # Removed static unit
-            icon="mdi:timer-sand"
+            icon="mdi:timer-sand",
         )
         super().__init__(manager, entry)
 
@@ -126,16 +143,19 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
             return int(self._manager.time_remaining / 60)
         return None
 
+
 class WasherProgressSensor(WasherBaseSensor):
+    """Sensor for cycle progress percentage."""
+
     def __init__(self, manager, entry):
+        """Initialize the progress sensor."""
         self.entity_description = SensorEntityDescription(
             key="cycle_progress",
             name="Progress",
             native_unit_of_measurement="%",
-            icon="mdi:progress-clock"
+            icon="mdi:progress-clock",
         )
         super().__init__(manager, entry)
-
 
     @property
     def native_value(self):
@@ -143,13 +163,16 @@ class WasherProgressSensor(WasherBaseSensor):
 
 
 class WasherPowerSensor(WasherBaseSensor):
+    """Sensor for current power usage."""
+
     def __init__(self, manager, entry):
+        """Initialize the power sensor."""
         self.entity_description = SensorEntityDescription(
             key="current_power",
             name="Current Power",
             native_unit_of_measurement="W",
             device_class="power",
-            icon="mdi:flash"
+            icon="mdi:flash",
         )
         super().__init__(manager, entry)
 
@@ -159,13 +182,16 @@ class WasherPowerSensor(WasherBaseSensor):
 
 
 class WasherElapsedTimeSensor(WasherBaseSensor):
+    """Sensor for elapsed cycle time."""
+
     def __init__(self, manager, entry):
+        """Initialize the elapsed time sensor."""
         self.entity_description = SensorEntityDescription(
             key="elapsed_time",
             name="Elapsed Time",
             native_unit_of_measurement="s",
             device_class="duration",
-            icon="mdi:timer-outline"
+            icon="mdi:timer-outline",
         )
         super().__init__(manager, entry)
 
@@ -181,12 +207,16 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
 
 
 class WasherDebugSensor(WasherBaseSensor):
+    """Sensor for internal debug information."""
+
     def __init__(self, manager, entry):
+        """Initialize the debug sensor."""
         self.entity_description = SensorEntityDescription(
             key="debug_info",
             name="Debug Info",
             icon="mdi:bug",
-            entity_registry_enabled_default=False, # Hidden by default
+            entity_registry_enabled_default=False,  # Hidden by default
+            entity_category=EntityCategory.DIAGNOSTIC,
         )
         super().__init__(manager, entry)
 
@@ -196,8 +226,10 @@ class WasherDebugSensor(WasherBaseSensor):
 
     @property
     def extra_state_attributes(self):
+        """Return various internal states for debugging."""
         detector = self._manager.detector
         stats = self._manager.sample_interval_stats
+        # pylint: disable=protected-access
         return {
             "sub_state": detector.sub_state,
             "match_confidence": getattr(self._manager, "_last_match_confidence", 0.0),
@@ -207,4 +239,68 @@ class WasherDebugSensor(WasherBaseSensor):
             "time_below": getattr(detector, "_time_below_threshold", 0.0),
             "sampling_p95": stats.get("p95"),
             "noise_events": len(getattr(self._manager, "_noise_events", [])),
+            "top_candidates": self._manager.top_candidates,
+            "last_match_details": self._manager.last_match_details,
         }
+
+
+class WasherMatchConfidenceSensor(WasherBaseSensor):
+    """Sensor for profile match confidence."""
+
+    def __init__(self, manager, entry):
+        self.entity_description = SensorEntityDescription(
+            key="match_confidence",
+            name="Match Confidence",
+            icon="mdi:chart-bar",
+            state_class="measurement",
+            native_unit_of_measurement="%",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self):
+        conf = getattr(self._manager, "_last_match_confidence", 0.0)
+        return int(conf * 100)
+
+
+class WasherTopCandidatesSensor(WasherBaseSensor):
+    """Sensor showing top matching candidates."""
+
+    def __init__(self, manager, entry):
+        self.entity_description = SensorEntityDescription(
+            key="top_candidates",
+            name="Top Candidates",
+            icon="mdi:format-list-numbered",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self):
+        candidates = self._manager.top_candidates
+        if not candidates:
+            return "None"
+        # Return simplified string: "Name (Score), Name (Score)"
+        return ", ".join([f"{c['name']} ({c['score']:.2f})" for c in candidates[:3]])
+
+    @property
+    def extra_state_attributes(self):
+        return {"candidates": self._manager.top_candidates}
+
+
+class WasherPhaseSensor(WasherBaseSensor):
+    """Sensor for current wash phase."""
+
+    def __init__(self, manager, entry):
+        self.entity_description = SensorEntityDescription(
+            key="wash_phase",
+            name="Phase",
+            icon="mdi:washing-machine-alert",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self):
+        return self._manager.phase_description

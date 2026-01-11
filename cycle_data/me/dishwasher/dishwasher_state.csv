@@ -1,0 +1,10 @@
+entity_id,state,last_changed
+binary_sensor.dishwasher_running,off,2025-12-30T23:00:00.000Z
+binary_sensor.dishwasher_running,on,2025-12-31T19:31:35.643Z
+binary_sensor.dishwasher_running,off,2025-12-31T19:35:43.231Z
+binary_sensor.dishwasher_running,on,2025-12-31T20:44:00.748Z
+binary_sensor.dishwasher_running,off,2025-12-31T22:54:00.863Z
+binary_sensor.dishwasher_running,on,2025-12-31T22:55:22.909Z
+binary_sensor.dishwasher_running,off,2025-12-31T22:57:53.688Z
+binary_sensor.dishwasher_running,on,2025-12-31T23:11:27.930Z
+binary_sensor.dishwasher_running,off,2025-12-31T23:13:58.689Z

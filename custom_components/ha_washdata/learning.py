@@ -1,11 +1,13 @@
 """Learning and self-tuning logic for HA WashData."""
+
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+
 from typing import Any, Optional, TYPE_CHECKING
 
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 
 if TYPE_CHECKING:
     from .profile_store import ProfileStore
@@ -17,7 +19,9 @@ _LOGGER = logging.getLogger(__name__)
 class LearningManager:
     """Manages cycle learning, user feedback, and auto-tuning."""
 
-    def __init__(self, hass: HomeAssistant, entry_id: str, profile_store: "ProfileStore") -> None:
+    def __init__(
+        self, hass: HomeAssistant, entry_id: str, profile_store: "ProfileStore"
+    ) -> None:
         """Initialize the learning manager."""
         self.hass = hass
         self.entry_id = entry_id
@@ -40,7 +44,7 @@ class LearningManager:
     ) -> None:
         """
         Request user verification for a detected cycle.
-        
+
         Called when cycle finishes and we made a confident match.
         Stores pending feedback request for UI to pick up.
         """
@@ -50,8 +54,7 @@ class LearningManager:
 
         tolerance_pct = duration_tolerance * 100
         is_close_match = (
-            estimated_duration
-            and abs(duration_match_pct - 100) <= tolerance_pct
+            estimated_duration and abs(duration_match_pct - 100) <= tolerance_pct
         )
 
         feedback_req: dict[str, Any] = {
@@ -62,7 +65,7 @@ class LearningManager:
             "actual_duration": actual_duration,
             "duration_match_pct": duration_match_pct,
             "is_close_match": is_close_match,
-            "created_at": datetime.now().isoformat(),
+            "created_at": dt_util.now().isoformat(),
             "user_response": None,
             "expires_at": None,
         }
@@ -74,10 +77,16 @@ class LearningManager:
 
         est_min = int(estimated_duration / 60) if estimated_duration else 0
         _LOGGER.info(
-            f"Feedback requested for cycle {cycle_id}: "
-            f"profile='{detected_profile}' (conf={confidence:.2f}), "
-            f"est={est_min}min, actual={int(actual_duration/60)}min "
-            f"({duration_match_pct:.0f}%) - is_close={is_close_match} (tolerance=±{tolerance_pct:.0f}%)"
+            "Feedback requested for cycle %s: profile='%s' (conf=%.2f), "
+            "est=%smin, actual=%smin (%.0f%%) - is_close=%s (tolerance=±%.0f%%)",
+            cycle_id,
+            detected_profile,
+            confidence,
+            est_min,
+            int(actual_duration / 60),
+            duration_match_pct,
+            is_close_match,
+            tolerance_pct,
         )
 
     def submit_cycle_feedback(
@@ -90,20 +99,20 @@ class LearningManager:
     ) -> bool:
         """
         Submit user feedback for a cycle.
-        
+
         Args:
             cycle_id: The cycle ID
             user_confirmed: True if user confirmed the detected profile was correct
             corrected_profile: If user disagrees, the correct profile name
             corrected_duration: If user disagrees on time, the actual duration in seconds
             notes: Optional user notes
-            
+
         Returns:
             True if feedback was processed, False if cycle not found
         """
         pending = self._pending_feedback.get(cycle_id)
         if not pending:
-            _LOGGER.warning(f"No pending feedback request for cycle {cycle_id}")
+            _LOGGER.warning("No pending feedback request for cycle %s", cycle_id)
             return False
 
         feedback_record: dict[str, Any] = {
@@ -114,7 +123,7 @@ class LearningManager:
             "corrected_profile": corrected_profile,
             "corrected_duration": corrected_duration,
             "notes": notes,
-            "submitted_at": datetime.now().isoformat(),
+            "submitted_at": dt_util.now().isoformat(),
         }
 
         self._feedback_history[cycle_id] = feedback_record
@@ -127,22 +136,35 @@ class LearningManager:
             profile_name = pending.get("detected_profile")
             if isinstance(profile_name, str) and profile_name:
                 self._auto_label_cycle(cycle_id, profile_name)
-            
+
             _LOGGER.info(
-                f"User confirmed cycle {cycle_id}: profile='{profile_name}' "
-                f"duration={int(pending['actual_duration']/60)}min - auto-labeled"
+                "User confirmed cycle %s: profile='%s' duration=%smin - auto-labeled",
+                cycle_id,
+                profile_name,
+                int(pending["actual_duration"] / 60),
             )
         else:
             # User provided correction - learn from it and auto-label with correct profile
+            corr_mins = (
+                int(corrected_duration / 60) if corrected_duration else "N/A"
+            )
             _LOGGER.info(
-                f"User corrected cycle {cycle_id}: "
-                f"detected='{pending['detected_profile']}' -> correct='{corrected_profile}', "
-                f"corrected_duration={int(corrected_duration/60) if corrected_duration else 'N/A'}min"
+                "User corrected cycle %s: detected='%s' -> correct='%s', corrected_duration=%smin",
+                cycle_id,
+                pending["detected_profile"],
+                corrected_profile,
+                corr_mins,
             )
 
             # Apply correction learning and auto-label with corrected profile
-            if isinstance(corrected_profile, str) and corrected_profile and corrected_profile != pending.get("detected_profile"):
-                self._apply_correction_learning(cycle_id, corrected_profile, corrected_duration)
+            if (
+                isinstance(corrected_profile, str)
+                and corrected_profile
+                and corrected_profile != pending.get("detected_profile")
+            ):
+                self._apply_correction_learning(
+                    cycle_id, corrected_profile, corrected_duration
+                )
                 self._auto_label_cycle(cycle_id, corrected_profile)
 
         # Remove from pending
@@ -164,7 +186,7 @@ class LearningManager:
         cycle = next((c for c in cycles if c["id"] == cycle_id), None)
 
         if not cycle:
-            _LOGGER.warning(f"Cycle {cycle_id} not found in storage")
+            _LOGGER.warning("Cycle %s not found in storage", cycle_id)
             return
 
         # Update the cycle's profile tag
@@ -177,12 +199,12 @@ class LearningManager:
             if profile:
                 # Calculate weighted average: 80% old, 20% new (conservative learning)
                 old_avg = profile.get("avg_duration", corrected_duration)
-                profile["avg_duration"] = (
-                    old_avg * 0.8 + corrected_duration * 0.2
-                )
+                profile["avg_duration"] = old_avg * 0.8 + corrected_duration * 0.2
                 _LOGGER.debug(
-                    f"Updated profile '{corrected_profile}' avg_duration: "
-                    f"{old_avg:.0f}s -> {profile['avg_duration']:.0f}s"
+                    "Updated profile '%s' avg_duration: %.0fs -> %.0fs",
+                    corrected_profile,
+                    old_avg,
+                    profile["avg_duration"],
                 )
 
         # Schedule async save
@@ -192,14 +214,14 @@ class LearningManager:
         """Auto-label a cycle with a profile name."""
         cycles = self.profile_store.get_past_cycles()
         cycle = next((c for c in cycles if c["id"] == cycle_id), None)
-        
+
         if not cycle:
-            _LOGGER.warning(f"Cycle {cycle_id} not found for auto-labeling")
+            _LOGGER.warning("Cycle %s not found for auto-labeling", cycle_id)
             return
-        
+
         cycle["profile_name"] = profile_name
         cycle["auto_labeled"] = True
-        _LOGGER.debug(f"Auto-labeled cycle {cycle_id} with profile '{profile_name}'")
+        _LOGGER.debug("Auto-labeled cycle %s with profile '%s'", cycle_id, profile_name)
 
     def auto_label_high_confidence(
         self,
@@ -210,23 +232,25 @@ class LearningManager:
     ) -> bool:
         """
         Auto-label a cycle if confidence is very high.
-        
+
         Args:
             cycle_id: The cycle ID
             profile_name: The detected profile name
             confidence: Confidence score (0-1)
             confidence_threshold: Threshold for auto-labeling (default 0.95)
-            
+
         Returns:
             True if auto-labeled, False otherwise
         """
         if confidence < confidence_threshold:
             return False
-        
+
         self._auto_label_cycle(cycle_id, profile_name)
         _LOGGER.info(
-            f"Auto-labeled cycle {cycle_id} with very high confidence: "
-            f"profile='{profile_name}' (confidence={confidence:.3f})"
+            "Auto-labeled cycle %s with very high confidence: profile='%s' (confidence=%.3f)",
+            cycle_id,
+            profile_name,
+            confidence,
         )
         return True
 
@@ -238,17 +262,14 @@ class LearningManager:
         """Return recent feedback history."""
         items = list(self._feedback_history.values())
         # Sort by submitted_at descending
-        items.sort(
-            key=lambda x: x.get("submitted_at", ""), reverse=True
-        )
+        items.sort(key=lambda x: x.get("submitted_at", ""), reverse=True)
         return items[:limit]
 
     def get_learning_stats(self) -> dict[str, Any]:
         """Return learning statistics."""
         total_feedback = len(self._feedback_history)
         confirmed = sum(
-            1 for f in self._feedback_history.values()
-            if f.get("user_confirmed", False)
+            1 for f in self._feedback_history.values() if f.get("user_confirmed", False)
         )
         corrections = total_feedback - confirmed
 

@@ -1,19 +1,21 @@
 import pytest
-from unittest.mock import MagicMock
+import pytest
+from unittest.mock import MagicMock, AsyncMock, patch
 from homeassistant.core import HomeAssistant
 from custom_components.ha_washdata.profile_store import ProfileStore
 
 @pytest.mark.asyncio
-async def test_manual_duration_creation(mock_hass: HomeAssistant):
+@patch("custom_components.ha_washdata.profile_store.WashDataStore")
+async def test_manual_duration_creation(mock_store_cls, mock_hass: HomeAssistant):
     """Test creating a profile with manual duration."""
-    store = ProfileStore(mock_hass, MagicMock(), "test_entry")
+    store = ProfileStore(mock_hass, "test_entry")
     # Mock internal data structure
     store._data = {"profiles": {}, "past_cycles": []}
     
     # Mock async_save on the instance to bypass storage
-    store.async_save = MagicMock(side_effect=lambda: None)
-    async def noop_save(): return
-    store.async_save = noop_save
+    # Mock async_save on the instance to bypass storage
+    store.async_save = AsyncMock(return_value=None)
+    store._store.async_save = AsyncMock(return_value=None)
     
     # Create profile with manual duration
     await store.create_profile_standalone(
