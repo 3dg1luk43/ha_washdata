@@ -1,6 +1,7 @@
 import pytest
 import asyncio
-from unittest.mock import MagicMock, AsyncMock
+import asyncio
+from unittest.mock import MagicMock, AsyncMock, patch
 from custom_components.ha_washdata.profile_store import ProfileStore
 
 @pytest.fixture
@@ -12,12 +13,13 @@ def mock_hass():
 @pytest.fixture
 def store(mock_hass):
     # Initialize store with mocks
-    # Set lenient ratios for testing early matches
-    ps = ProfileStore(mock_hass, "test_entry_id", min_duration_ratio=0.0, max_duration_ratio=2.0)
-    # Mock internal store load to return empty or default data
-    ps._store.async_load = AsyncMock(return_value=None)
-    ps._store.async_save = AsyncMock()
-    return ps
+    with patch("custom_components.ha_washdata.profile_store.WashDataStore") as mock_store_cls:
+        # Set lenient ratios for testing early matches
+        ps = ProfileStore(mock_hass, "test_entry_id", min_duration_ratio=0.0, max_duration_ratio=2.0)
+        # Mock internal store load to return empty or default data
+        ps._store.async_load = AsyncMock(return_value=None)
+        ps._store.async_save = AsyncMock()
+        yield ps
 
 def test_add_cycle(store):
     """Test adding a cycle."""
@@ -36,7 +38,8 @@ def test_add_cycle(store):
     assert "id" in saved
     assert saved["profile_name"] is None
 
-def test_create_profile(store):
+@pytest.mark.asyncio
+async def test_create_profile(store):
     """Test creating a profile from a cycle."""
     # Add a cycle first
     store.add_cycle({
@@ -47,10 +50,7 @@ def test_create_profile(store):
     })
     cycle_id = store._data["past_cycles"][0]["id"]
     
-    async def run_test():
-        await store.create_profile("Heavy Duty", cycle_id)
-    
-    asyncio.run(run_test())
+    await store.create_profile("Heavy Duty", cycle_id)
     
     assert "Heavy Duty" in store._data["profiles"]
     profile = store._data["profiles"]["Heavy Duty"]
@@ -123,7 +123,8 @@ def test_rebuild_envelope_updates_stats(store):
     env = store._data["envelopes"]["TestProf"]
     assert env["cycle_count"] == 3
 
-def test_match_profile(store):
+@pytest.mark.asyncio
+async def test_match_profile(store):
     """Test simple profile matching."""
     # Setup - use dense data compatible with current_data
     # Need to use ABSOLUTE timestamps relative to start_time
@@ -139,9 +140,7 @@ def test_match_profile(store):
     })
     cycle_id = store._data["past_cycles"][0]["id"]
     
-    async def run_setup():
-        await store.create_profile("RampProfile", cycle_id)
-    asyncio.run(run_setup())
+    await store.create_profile("RampProfile", cycle_id)
     
     # Test Match: Exact match sequence (first 100 seconds)
     current_data = [( (start_dt + timedelta(seconds=i)).isoformat(), float(i) ) for i in range(101)]

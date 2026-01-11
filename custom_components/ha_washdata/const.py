@@ -11,7 +11,9 @@ CONF_NOTIFY_SERVICE = "notify_service"
 CONF_NOTIFY_EVENTS = "notify_events"
 CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
 CONF_SMOOTHING_WINDOW = "smoothing_window"
-CONF_START_DURATION_THRESHOLD = "start_duration_threshold"  # Debounce for start detection
+CONF_START_DURATION_THRESHOLD = (
+    "start_duration_threshold"  # Debounce for start detection
+)
 CONF_DEVICE_TYPE = "device_type"
 CONF_PROFILE_DURATION_TOLERANCE = "profile_duration_tolerance"
 CONF_AUTO_MERGE_LOOKBACK_HOURS = "auto_merge_lookback_hours"
@@ -43,8 +45,13 @@ CONF_MIN_OFF_GAP = "min_off_gap"  # Minimum gap to separate cycles (seconds)
 CONF_START_ENERGY_THRESHOLD = "start_energy_threshold"  # Wh required to confirm start
 CONF_END_ENERGY_THRESHOLD = "end_energy_threshold"  # Wh allowed during end candidates
 CONF_START_THRESHOLD_W = "start_threshold_w"  # Custom power threshold for STARTING
-CONF_STOP_THRESHOLD_W = "stop_threshold_w"    # Custom power threshold for ENDING (hysteresis)
-
+CONF_STOP_THRESHOLD_W = (
+    "stop_threshold_w"  # Custom power threshold for ENDING (hysteresis)
+)
+CONF_EXPOSE_DEBUG_ENTITIES = "expose_debug_entities"  # Expose detailed debug sensors
+CONF_SAVE_DEBUG_TRACES = (
+    "save_debug_traces"  # Improve historical cycle data with rich debug info
+)
 
 
 NOTIFY_EVENT_START = "cycle_start"
@@ -54,7 +61,8 @@ NOTIFY_EVENT_FINISH = "cycle_finish"
 DEFAULT_MIN_POWER = 2.0  # Watts
 DEFAULT_OFF_DELAY = 120  # Seconds (2 minutes, like proven automation)
 DEFAULT_NAME = "Washing Machine"
-DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 300  # Seconds without updates while active before forced stop (publish-on-change sockets)
+# Seconds without updates while active before forced stop (publish-on-change sockets)
+DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 300
 DEFAULT_SMOOTHING_WINDOW = 2
 DEFAULT_START_DURATION_THRESHOLD = 5.0  # Seconds (debounce)
 DEFAULT_DEVICE_TYPE = "washing_machine"
@@ -72,9 +80,15 @@ DEFAULT_AUTO_LABEL_CONFIDENCE = 0.95  # High confidence auto-label threshold
 DEFAULT_AUTO_MAINTENANCE = True  # Enable nightly cleanup by default
 DEFAULT_COMPLETION_MIN_SECONDS = 600  # 10 minutes
 DEFAULT_NOTIFY_BEFORE_END_MINUTES = 0  # Disabled
-DEFAULT_PROFILE_MATCH_INTERVAL = 300  # Seconds between profile matching attempts (5 minutes)
-DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.07  # Minimum duration ratio (7% of profile)
-DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.50  # Maximum duration ratio (150% of profile)
+DEFAULT_PROFILE_MATCH_INTERVAL = (
+    300  # Seconds between profile matching attempts (5 minutes)
+)
+DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = (
+    0.07  # Minimum duration ratio (7% of profile)
+)
+DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = (
+    1.50  # Maximum duration ratio (150% of profile)
+)
 DEFAULT_MAX_PAST_CYCLES = 200
 DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
@@ -82,6 +96,13 @@ DEFAULT_WATCHDOG_INTERVAL = 5  # Seconds between watchdog checks
 DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Noise events in 24h to trigger auto-tune
 DEFAULT_RUNNING_DEAD_ZONE = 0  # Disabled by default, typical: 60-300s
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
+
+# Profile Matching Thresholds
+CONF_PROFILE_MATCH_THRESHOLD = "profile_match_threshold"
+CONF_PROFILE_UNMATCH_THRESHOLD = "profile_unmatch_threshold"
+
+DEFAULT_PROFILE_MATCH_THRESHOLD = 0.4
+DEFAULT_PROFILE_UNMATCH_THRESHOLD = 0.35
 
 # States
 STATE_OFF = "off"
@@ -95,7 +116,9 @@ STATE_UNKNOWN = "unknown"
 
 # Cycle Status (how the cycle ended)
 CYCLE_STATUS_COMPLETED = "completed"  # Natural completion (power dropped)
-CYCLE_STATUS_INTERRUPTED = "interrupted"  # Abnormal/short run or abrupt power cliff (likely user/power abort)
+CYCLE_STATUS_INTERRUPTED = (
+    "interrupted"  # Abnormal/short run or abrupt power cliff (likely user/power abort)
+)
 CYCLE_STATUS_FORCE_STOPPED = "force_stopped"  # Watchdog forced end (sensor offline)
 CYCLE_STATUS_RESUMED = "resumed"  # Cycle was restored from storage after restart
 
@@ -116,9 +139,9 @@ DEVICE_TYPES = {
 # These control how much backward progress is allowed before heavy damping kicks in
 DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_WASHING_MACHINE: 5.0,  # Can have repeating phases (rinse cycles)
-    DEVICE_TYPE_DRYER: 3.0,            # More linear, less phase repetition
-    DEVICE_TYPE_DISHWASHER: 5.0,       # Similar to washing machine with distinct phases
-    DEVICE_TYPE_COFFEE_MACHINE: 2.0,   # Short cycles, rapid transitions, less tolerance
+    DEVICE_TYPE_DRYER: 3.0,  # More linear, less phase repetition
+    DEVICE_TYPE_DISHWASHER: 5.0,  # Similar to washing machine with distinct phases
+    DEVICE_TYPE_COFFEE_MACHINE: 2.0,  # Short cycles, rapid transitions, less tolerance
 }
 
 CONF_VERIFICATION_POLL_INTERVAL = "verification_poll_interval"  # Internal setting
@@ -127,9 +150,9 @@ DEFAULT_VERIFICATION_POLL_INTERVAL = 15  # Seconds (rapid checks after delay)
 # Device specific completion thresholds (min run time to be considered a valid "completed" cycle)
 DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_WASHING_MACHINE: 600,  # 10 min
-    DEVICE_TYPE_DRYER: 600,            # 10 min
-    DEVICE_TYPE_DISHWASHER: 900,       # 15 min
-    DEVICE_TYPE_COFFEE_MACHINE: 60,    # 1 min (detects rapid espresso shots/cleaning)
+    DEVICE_TYPE_DRYER: 600,  # 10 min
+    DEVICE_TYPE_DISHWASHER: 900,  # 15 min
+    DEVICE_TYPE_COFFEE_MACHINE: 60,  # 1 min (detects rapid espresso shots/cleaning)
 }
 
 # Default min_off_gap by device type (seconds)
@@ -140,9 +163,9 @@ DEVICE_COMPLETION_THRESHOLDS = {
 # Default min_off_gap by device type (seconds)
 DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_WASHING_MACHINE: 480,  # 8 min (Soak handling)
-    DEVICE_TYPE_DRYER: 300,            # 5 min (Cool down gaps?)
-    DEVICE_TYPE_DISHWASHER: 600,       # 10 min (Drying pauses)
-    DEVICE_TYPE_COFFEE_MACHINE: 30,    # 30s (Rapid shots)
+    DEVICE_TYPE_DRYER: 300,  # 5 min (Cool down gaps?)
+    DEVICE_TYPE_DISHWASHER: 600,  # 10 min (Drying pauses)
+    DEVICE_TYPE_COFFEE_MACHINE: 30,  # 30s (Rapid shots)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
 
@@ -150,13 +173,13 @@ DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
 # Filter noise spikes (1000W * 0.01s = 0.002Wh).
 # Must be significant enough to imply mechanical work.
 DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
-    DEVICE_TYPE_WASHING_MACHINE: 0.2,   # ~50W for 15s or 200W for 3s
-    DEVICE_TYPE_DRYER: 0.5,             # Heater kicks in hard
-    DEVICE_TYPE_DISHWASHER: 0.2,        # Pump/Heater
-    DEVICE_TYPE_COFFEE_MACHINE: 0.05,   # Short heater burst
+    DEVICE_TYPE_WASHING_MACHINE: 0.2,  # ~50W for 15s or 200W for 3s
+    DEVICE_TYPE_DRYER: 0.5,  # Heater kicks in hard
+    DEVICE_TYPE_DISHWASHER: 0.2,  # Pump/Heater
+    DEVICE_TYPE_COFFEE_MACHINE: 0.05,  # Short heater burst
 }
-DEFAULT_START_ENERGY_THRESHOLD = 0.2 # Fallback
-DEFAULT_END_ENERGY_THRESHOLD = 0.05 # 50 Wh threshold? No, 0.05 Wh is 50 mWh. 
+DEFAULT_START_ENERGY_THRESHOLD = 0.2  # Fallback
+DEFAULT_END_ENERGY_THRESHOLD = 0.05  # 50 Wh threshold? No, 0.05 Wh is 50 mWh.
 
 # Storage
 STORAGE_VERSION = 2
@@ -172,6 +195,6 @@ SIGNAL_WASHER_UPDATE = "ha_washdata_update_{}"
 # Learning & Feedback
 # (Deprecated constants, kept for backward compat in code paths)
 
-FEEDBACK_REQUEST_EVENT = "ha_washdata_feedback_requested"  # Event when user feedback is needed
-EVENT_STATE_UPDATE = "ha_washdata_state_update"  # Periodic/state-change update event
-SERVICE_SUBMIT_FEEDBACK = "ha_washdata.submit_cycle_feedback"  # Service to submit feedback
+SERVICE_SUBMIT_FEEDBACK = (
+    "ha_washdata.submit_cycle_feedback"  # Service to submit feedback
+)

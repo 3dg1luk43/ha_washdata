@@ -1,12 +1,13 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from homeassistant.core import HomeAssistant
 from custom_components.ha_washdata.profile_store import ProfileStore
 
 @pytest.mark.asyncio
-async def test_deletion_recalculates_stats(mock_hass: HomeAssistant):
+@patch("custom_components.ha_washdata.profile_store.WashDataStore")
+async def test_deletion_recalculates_stats(mock_store_cls, mock_hass: HomeAssistant):
     """Test that deleting a cycle triggers envelope recalculation."""
-    store = ProfileStore(mock_hass, MagicMock(), "test_entry")
+    store = ProfileStore(mock_hass, "test_entry")
     store._data = {
         "profiles": {"Test Profile": {"sample_cycle_id": "c1"}},
         "past_cycles": [],

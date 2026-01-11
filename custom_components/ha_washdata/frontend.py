@@ -1,7 +1,9 @@
 """Frontend card registration for HA WashData."""
+
 import logging
 from pathlib import Path
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, Event
+from homeassistant.const import EVENT_COMPONENT_LOADED
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -14,22 +16,30 @@ _VERSION = "1"
 def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> None:
     """Register a static path with the HA HTTP component, compatible with multiple HA versions."""
     try:
+        # pylint: disable=import-outside-toplevel
         from homeassistant.components.http import StaticPathConfig
 
         if hasattr(hass.http, "async_register_static_paths"):
+
             async def _safe_register():
                 try:
                     await hass.http.async_register_static_paths(
                         [StaticPathConfig(url_path, path, True)]
                     )
-                except Exception as exc:
-                    _LOGGER.debug("Failed to async register static path %s -> %s: %s", url_path, path, exc)
+                except Exception as exc:  # pylint: disable=broad-exception-caught
+                    _LOGGER.debug(
+                        "Failed to async register static path %s -> %s: %s",
+                        url_path,
+                        path,
+                        exc,
+                    )
 
             hass.async_create_task(_safe_register())
             return
-    except Exception as exc:
+    except Exception as exc:  # pylint: disable=broad-exception-caught
         _LOGGER.debug(
-            "Async static path registration not available; falling back to sync registration for %s -> %s (%s)",
+            "Async static path registration not available; falling back to "
+            "sync registration for %s -> %s (%s)",
             url_path,
             path,
             exc,
@@ -38,17 +48,22 @@ def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> None
     # Fallback for older HA
     try:
         hass.http.register_static_path(url_path, path, cache_headers=True)
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Failed to register static path %s -> %s", url_path, path)
 
 
 async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
     """Safely add or update a Lovelace resource for the given URL."""
     try:
+        # pylint: disable=import-outside-toplevel
         from homeassistant.components.frontend import add_extra_js_url
-        from homeassistant.components.lovelace.resources import ResourceStorageCollection
-    except Exception:
-        _LOGGER.debug("Lovelace resource helpers unavailable; skipping auto resource init")
+        from homeassistant.components.lovelace.resources import (
+            ResourceStorageCollection,
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        _LOGGER.debug(
+            "Lovelace resource helpers unavailable; skipping auto resource init"
+        )
         return False
 
     lovelace = hass.data.get("lovelace")
@@ -73,7 +88,9 @@ async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
 
         _LOGGER.debug("Update lovelace resource to: %s", url2)
         if isinstance(resources, ResourceStorageCollection):
-            await resources.async_update_item(item["id"], {"res_type": "module", "url": url2})
+            await resources.async_update_item(
+                item["id"], {"res_type": "module", "url": url2}
+            )
         else:
             item["url"] = url2
 
@@ -111,16 +128,20 @@ class WashDataCardRegistration:
         # If lovelace is not yet loaded, wait for it
         if not self.hass.data.get("lovelace"):
             _LOGGER.debug("Lovelace not loaded yet; waiting for component loaded event")
-            from homeassistant.const import EVENT_COMPONENT_LOADED
-            from homeassistant.core import Event
+
 
             async def _on_lovelace_loaded(event: Event) -> None:
                 if event.data.get("component") == "lovelace":
-                    _LOGGER.debug("Lovelace component loaded; retrying resource registration")
+                    _LOGGER.debug(
+                        "Lovelace component loaded; retrying resource registration"
+                    )
                     try:
                         await _init_resource(self.hass, INTEGRATION_URL, _VERSION)
-                    except Exception:
-                        _LOGGER.debug("Delayed auto-registration of lovelace resource failed for %s", INTEGRATION_URL)
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        _LOGGER.debug(
+                            "Delayed auto-registration of lovelace resource failed for %s",
+                            INTEGRATION_URL,
+                        )
 
             self.hass.bus.async_listen(EVENT_COMPONENT_LOADED, _on_lovelace_loaded)
             return
@@ -129,5 +150,7 @@ class WashDataCardRegistration:
         try:
             await _init_resource(self.hass, INTEGRATION_URL, _VERSION)
             _LOGGER.debug("Auto-registered lovelace resource for %s", INTEGRATION_URL)
-        except Exception:
-            _LOGGER.debug("Auto-registration of lovelace resource failed for %s", INTEGRATION_URL)
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug(
+                "Auto-registration of lovelace resource failed for %s", INTEGRATION_URL
+            )

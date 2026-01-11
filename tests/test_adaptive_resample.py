@@ -8,8 +8,8 @@ def test_adaptive_resample_regular():
     ts = np.arange(0, 100, 10.0)
     p = np.full_like(ts, 100.0)
     
-    # Should respect min_dt=5, max_dt=30 -> median is 10. Should pick 10.
-    segments, used_dt = resample_adaptive(ts, p, min_dt=5.0, max_dt=30.0)
+    # Should respect min_dt=5. median is 10. Should pick 10.
+    segments, used_dt = resample_adaptive(ts, p, min_dt=5.0)
     
     assert used_dt == 10.0
     assert len(segments) == 1
@@ -22,7 +22,7 @@ def test_adaptive_resample_high_frequency():
     p = np.full_like(ts, 100.0)
     
     # clamed to min_dt=5
-    segments, used_dt = resample_adaptive(ts, p, min_dt=5.0, max_dt=30.0)
+    segments, used_dt = resample_adaptive(ts, p, min_dt=5.0)
     
     assert used_dt == 5.0
     # 0, 5. (10 is exclusive in arange usually, or inclusive? implementation detail)
@@ -84,5 +84,5 @@ def test_resample_adaptive_logic_check():
     ts = np.arange(0, 300, 60.0)
     p = np.full_like(ts, 100.0)
     
-    segments, used_dt = resample_adaptive(ts, p, min_dt=5.0, max_dt=30.0)
+    segments, used_dt = resample_adaptive(ts, p, min_dt=5.0)
     assert used_dt >= 60.0 # Should not be 30

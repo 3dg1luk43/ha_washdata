@@ -4,6 +4,8 @@ from __future__ import annotations
 import pytest
 from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch, PropertyMock
+from datetime import timedelta
+from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_NOTIFY_BEFORE_END_MINUTES,
@@ -131,8 +133,7 @@ def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: Any) -
     manager._on_cycle_end(dict(cycle_data))
 
     # Assert: feedback event fired and notification created
-    fired_events = [c[0][0] for c in mock_hass.bus.async_fire.call_args_list]
-    assert "ha_washdata_feedback_requested" in fired_events
+    # Assert: feedback notification created (event removed)
     assert mock_hass.components.persistent_notification.async_create.call_count >= 1
 
 
@@ -162,8 +163,7 @@ def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, mock_ha
     manager.learning_manager.auto_label_high_confidence.assert_called_once()
     manager.learning_manager.request_cycle_verification.assert_not_called()
 
-    fired_events = [c[0][0] for c in mock_hass.bus.async_fire.call_args_list]
-    assert "ha_washdata_feedback_requested" not in fired_events
+    # assert "ha_washdata_feedback_requested" not in fired_events
     # No feedback prompt should be created in auto-label path.
     assert mock_hass.components.persistent_notification.async_create.call_count == 0
 
@@ -194,8 +194,7 @@ def test_cycle_end_skips_feedback_low_confidence(manager: WashDataManager, mock_
     manager.learning_manager.auto_label_high_confidence.assert_not_called()
     manager.learning_manager.request_cycle_verification.assert_not_called()
 
-    fired_events = [c[0][0] for c in mock_hass.bus.async_fire.call_args_list]
-    assert "ha_washdata_feedback_requested" not in fired_events
+    # assert "ha_washdata_feedback_requested" not in fired_events
     assert mock_hass.components.persistent_notification.async_create.call_count == 0
 
 
@@ -289,3 +288,80 @@ def test_cycle_start_time_exposed(manager: WashDataManager) -> None:
     # Test when None
     type(manager.detector).current_cycle_start = PropertyMock(return_value=None)
     assert manager.cycle_start_time is None
+
+@pytest.mark.asyncio
+async def test_restore_active_cycle_paused(manager: WashDataManager) -> None:
+    """Test restoring a cycle that was in PAUSED state."""
+    # Setup mocks
+    manager.profile_store.async_clear_active_cycle = AsyncMock()
+    
+    # When restore is called, update the mock state to 'paused'
+    def restore_side_effect(snapshot: dict) -> None:
+        type(manager.detector).state = PropertyMock(return_value=snapshot["state"])
+        type(manager.detector).matched_profile = PropertyMock(return_value=snapshot.get("matched_profile"))
+    
+    manager.detector.restore_state_snapshot.side_effect = restore_side_effect
+    # Initial state
+    type(manager.detector).state = PropertyMock(return_value="off")
+    type(manager.detector).matched_profile = PropertyMock(return_value=None)
+
+    # Setup snapshot with 'paused' state
+    now = dt_util.now()
+    snapshot = {
+        "state": "paused",
+        "sub_state": "Pausing",
+        "current_cycle_start": (now - timedelta(minutes=30)).isoformat(),
+        "accumulated_energy_wh": 0.5,
+        "matched_profile": "Heavy Duty",
+        "manual_program": True,
+    }
+    
+    manager.profile_store.get_active_cycle = MagicMock(return_value=snapshot)
+    manager.profile_store.get_last_active_save = MagicMock(return_value=now - timedelta(minutes=5))
+    
+    # Act
+    await manager._attempt_state_restoration()
+    
+    # Assert
+    assert manager.detector.state == "paused"
+    assert manager.current_program == "Heavy Duty"
+    assert manager.manual_program_active is True
+    # Should start watchdog
+    assert manager._remove_watchdog is not None
+
+@pytest.mark.asyncio
+async def test_restore_active_cycle_ending(manager: WashDataManager) -> None:
+    """Test restoring a cycle that was in ENDING state."""
+    # Setup mocks
+    manager.profile_store.async_clear_active_cycle = AsyncMock()
+    
+    def restore_side_effect(snapshot: dict) -> None:
+        type(manager.detector).state = PropertyMock(return_value=snapshot["state"])
+        type(manager.detector).matched_profile = PropertyMock(return_value=snapshot.get("matched_profile"))
+    
+    manager.detector.restore_state_snapshot.side_effect = restore_side_effect
+    type(manager.detector).state = PropertyMock(return_value="off")
+    type(manager.detector).matched_profile = PropertyMock(return_value=None)
+
+    # Setup snapshot with 'ending' state
+    now = dt_util.now()
+    snapshot = {
+        "state": "ending",
+        "sub_state": "Spinning Down",
+        "current_cycle_start": (now - timedelta(minutes=60)).isoformat(),
+        "accumulated_energy_wh": 1.2,
+        "matched_profile": "Normal",
+    }
+    
+    manager.profile_store.get_active_cycle = MagicMock(return_value=snapshot)
+    manager.profile_store.get_last_active_save = MagicMock(return_value=now - timedelta(minutes=2))
+    
+    # Act
+    await manager._attempt_state_restoration()
+    
+    # Assert
+    assert manager.detector.state == "ending"
+    assert manager.current_program == "Normal"
+    # Should start watchdog
+    assert manager._remove_watchdog is not None
+
