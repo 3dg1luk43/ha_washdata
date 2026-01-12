@@ -329,7 +329,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         async def handle_auto_label_cycles(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
-            confidence_threshold = call.data.get("confidence_threshold", 0.70)
+            confidence_threshold = call.data.get("confidence_threshold", 0.75)
 
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)

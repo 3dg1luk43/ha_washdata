@@ -47,6 +47,33 @@ class MatchResult:
     is_confident_mismatch: bool = False
     mismatch_reason: str | None = None
 
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary with JSON-serializable types, excluding heavy arrays."""
+        def _convert(obj: Any) -> Any:
+            if isinstance(obj, (np.integer, np.floating)):
+                return float(obj) if isinstance(obj, np.floating) else int(obj)
+            if isinstance(obj, np.ndarray):
+                # Fallback for unexpected arrays: just describe shape
+                return f"<array shape={obj.shape}>"
+            if isinstance(obj, dict):
+                # Exclude huge raw data arrays from cycle candidates
+                return {
+                    k: _convert(v)
+                    for k, v in obj.items()
+                    if k not in ("current", "sample")
+                }
+            if isinstance(obj, list):
+                return [_convert(v) for v in obj]
+            if dataclasses.is_dataclass(obj):
+                return text_type_safe_asdict(obj)
+            return obj
+
+        def text_type_safe_asdict(d_obj: Any) -> dict[str, Any]:
+             return {f.name: _convert(getattr(d_obj, f.name)) for f in dataclasses.fields(d_obj)}
+
+        return text_type_safe_asdict(self)
+
+
 
 def decompress_power_data(cycle: CycleDict) -> list[tuple[str, float]]:
     """Decompress cycle power data for matching (Module-level helper)."""
@@ -672,6 +699,8 @@ class ProfileStore:
 
                 await self.async_save()
                 _LOGGER.info("Deleted cycle %s", cycle_id)
+                # Trigger smart processing after delete
+                await self.async_smart_process_history()
                 return True
         _LOGGER.warning("Cycle %s not found for deletion", cycle_id)
         return False
@@ -695,10 +724,12 @@ class ProfileStore:
         return len(orphaned)
 
     async def async_run_maintenance(
-        self, lookback_hours: int = 24, gap_seconds: int = 1800
+        self, lookback_hours: int = 24, gap_seconds: int = 3600
     ) -> dict[str, int]:
-        """Run full maintenance: cleanup orphans, merge fragments, trim old cycles, rebuild envelopes.
-        Returns stats dict with counts of actions taken."""
+        """Run full maintenance: cleanup orphans, merge fragments, trim old cycles.
+        
+        Also rebuilds envelopes. Returns stats dict with counts of actions taken.
+        """
         stats = {
             "orphaned_profiles": 0,
             "merged_cycles": 0,
@@ -709,43 +740,20 @@ class ProfileStore:
         # 1. Clean up orphaned profiles
         stats["orphaned_profiles"] = self.cleanup_orphaned_profiles()
 
-        # 2. Merge fragmented cycles (recent history)
-        stats["merged_cycles"] = self.merge_cycles(
-            hours=lookback_hours, gap_threshold=gap_seconds
+        # 2. Auto-Label missed cycles (retroactive matching)
+        # Use overwrite=False to respect existing manual/confident labels
+        label_stats = await self.auto_label_cycles(confidence_threshold=0.75, overwrite=False)
+        stats["labeled_cycles"] = label_stats.get("labeled", 0)
+
+        # 2. Smart Process History (Merge/Split/Rebuild)
+        proc_stats = await self.async_smart_process_history(
+            hours=lookback_hours, gap_seconds=gap_seconds
         )
+        stats["merged_cycles"] = proc_stats.get("merged", 0)
+        stats["split_cycles"] = proc_stats.get("split", 0)
+        stats["rebuilt_envelopes"] = len(self._data.get("profiles", {})) # Approximation of rebuilt count
 
-        # 2b. Split falsely merged cycles (Auto-Split Check)
-        # Check cycles within the timeframe for gaps > gap_threshold that aren't justified by profile
-        stats["split_cycles"] = 0
-        current_ts = dt_util.now().timestamp()
-
-        # Identify candidates first to avoid issues with list modification during iteration
-        cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
-        candidate_ids = []
-        for c in cycles:
-            try:
-                # Handle ISO timestamps
-                end_ts = datetime.fromisoformat(c["end_time"]).timestamp()
-                if (current_ts - end_ts) <= (lookback_hours * 3600):
-                    candidate_ids.append(c["id"])
-            except (ValueError, TypeError):
-                continue
-
-        # Reprocess candidates
-        for cid in candidate_ids:
-            # Check if cycle still exists (might have been affected by previous ops? Unlikely but safe)
-            # Re-fetch is inside reprocess method anyway.
-            new_ids = await self.reprocess_cycle_for_gaps(cid, min_gap_s=gap_seconds)
-            if len(new_ids) > 1:
-                stats["split_cycles"] += 1
-                # Correct stats: if we un-merged it (or split it), effectively net merge count changes?
-                stats["merged_cycles"] -= 1
-                # Actually, let's just track splits separately.
-
-        # 3. Rebuild all envelopes (they may be stale after merges/deletions)
-        stats["rebuilt_envelopes"] = self.rebuild_all_envelopes()
-
-        # 4. Save if any changes made
+        # 4. Save if any changes made (smart process saves internally if needed, but explicit save safe)
         if any(stats.values()):
             await self.async_save()
             _LOGGER.info("Maintenance completed: %s", stats)
@@ -842,6 +850,9 @@ class ProfileStore:
             for c in self._data["past_cycles"]
             if c.get("profile_name") == profile_name
             and c.get("status") in ("completed", "force_stopped")
+            # Filter out noise/debounce (< 60s) to preventing poisoning
+            # We trust the user if they manually forced it, but general rule applies.
+            and c.get("duration", 0) > 60
         ]
 
         if not labeled_cycles or len(labeled_cycles) < 1:
@@ -1227,11 +1238,17 @@ class ProfileStore:
                 continue
             sample_seg = max(s_segments, key=lambda s: len(s.power))
 
-            # --- STAGE 2: Core Similarity ---
-
-            score, metrics = self._calculate_similarity_robust(
-                current_seg.power, sample_seg.power
+            # --- STAGE 2: Core Similarity (Iterative Alignment) ---
+            # Replaced single-pass robust calc with coarse-to-fine search
+            score, metrics, best_offset = self._find_best_alignment(
+                current_seg.power, sample_seg.power, used_dt
             )
+            
+            # Log significant shifts
+            if abs(best_offset) > 1:
+                _LOGGER.debug(
+                    "Profile %s aligned with offset %d (score improved)", name, best_offset
+                )
 
             _LOGGER.debug(
                 "Profile %s: score=%.3f, mae=%.1f, corr=%.3f",
@@ -1388,40 +1405,167 @@ class ProfileStore:
             mismatch_reason=mismatch_reason,
         )
 
+    def _find_best_alignment(
+        self, current: np.ndarray, sample: np.ndarray, used_dt: float
+    ) -> tuple[float, dict, int]:
+        """
+        Perform iterative coarse-to-fine alignment search.
+        Returns: (best_score, best_metrics, best_offset_index)
+        """
+        # Coarse Scan: [-60s, -30s, 0s, +30s, +60s]
+        # Assuming index map is 1-to-1 with 'used_dt' (e.g. 5s or 10s steps?).
+        # ProfileStore uses `used_dt` (typically 5s or dynamic).
+        # We perform shifting by array slicing.
+
+        len_cur = len(current)
+        len_sam = len(sample)
+        
+        # We need a shared length for comparison.
+        # Logic: We slide 'sample' over 'current' (or vice versa).
+        # Simpler: We crop to the OVERLAP.
+        
+        def get_score_at_offset(offset: int) -> tuple[float, dict]:
+            """
+            Offset > 0: Shift Sample RIGHT (Sample starts later)
+                        Compare current[offset:] with sample[:-offset]
+            Offset < 0: Shift Sample LEFT (Sample starts earlier)
+                        Compare current[:offset] with sample[-offset:]
+            """
+            if offset == 0:
+                c = current
+                s = sample
+            elif offset > 0:
+                # Sample shifted right relative to current
+                # current: |...[........]
+                # sample:      [........]...|
+                # Compare overlap
+                if offset >= len_cur:
+                    return 0.0, {}
+                
+                # We align start of sample with index 'offset' of current
+                # intersection length = min(len_cur - offset, len_sam)
+                length = min(len_cur - offset, len_sam)
+                
+                # Minimum Overlap Constraint
+                if length < len_sam * self._min_duration_ratio:
+                    return 0.0, {}
+                     
+                c = current[offset : offset + length]
+                s = sample[:length]
+            else:
+                # offset < 0
+                # Sample shifted left
+                # current:      [........]...|
+                # sample:  |...[........]
+                abs_off = abs(offset)
+                if abs_off >= len_cur or abs_off >= len_sam:
+                    return 0.0, {}
+                
+                # Align start of current with index 'abs_off' of sample
+                length = min(len_cur, len_sam - abs_off)
+                
+                # Minimum Overlap Constraint
+                if length < len_sam * self._min_duration_ratio:
+                    return 0.0, {}
+
+                c = current[:length]
+                s = sample[abs_off : abs_off + length]
+
+            return self._calculate_similarity_robust(c, s)
+
+        if used_dt <= 0:
+            used_dt = 5.0
+            
+        # Hierarchical Search (Coarse -> Fine)
+        # Goal: Find alignment within ±30 minutes (1800s)
+        
+        # Pass 1: Global Coarse Scan
+        # Window: ±30 minutes
+        # Step: 60 seconds
+        coarse_window_s = 1800.0
+        coarse_step_s = 60.0
+        
+        coarse_radius_idx = int(coarse_window_s / used_dt)
+        step_idx = max(1, int(coarse_step_s / used_dt))
+        
+        # Scan points: 0, ±step, ±2*step ... until radius
+        # We use a set to track visited offsets to avoid re-calculating in Fine pass
+        visited_offsets = set()
+        
+        best_score = -1.0
+        best_metrics = {}
+        best_offset = 0
+        
+        # Generate coarse offsets
+        coarse_offsets = [0]
+        curr = step_idx
+        while curr <= coarse_radius_idx:
+            coarse_offsets.append(curr)
+            coarse_offsets.append(-curr)
+            curr += step_idx
+            
+        for off in coarse_offsets:
+            visited_offsets.add(off)
+            s, m = get_score_at_offset(off)
+            if s > best_score:
+                best_score = s
+                best_metrics = m
+                best_offset = off
+                
+        # Pass 2: Local Fine Scan
+        # Window: ±2 minutes (120s) around best_offset
+        # Step: 1 index (used_dt)
+        fine_window_s = 120.0
+        fine_radius_idx = int(fine_window_s / used_dt)
+        
+        start_fine = best_offset - fine_radius_idx
+        end_fine = best_offset + fine_radius_idx
+        
+        # Clamp to meaningful bounds if desired, but array slicing handles out-of-bounds gracefully (returns empty)
+        # We just need to ensure loop is correct
+        
+        for off in range(start_fine, end_fine + 1):
+            if off in visited_offsets:
+                continue
+            visited_offsets.add(off)
+            
+            s, m = get_score_at_offset(off)
+            if s > best_score:
+                best_score = s
+                best_metrics = m
+                best_offset = off
+                
+        return best_score, best_metrics, best_offset
+
     def _calculate_similarity_robust(
         self, current: np.ndarray, sample: np.ndarray
     ) -> tuple[float, dict]:
         """Core similarity with robust scaling."""
         len_cur = len(current)
         len_sam = len(sample)
-
-        # Crop sample to matched length
-        if len_cur > len_sam:
-            # Current longer than sample? Should have been rejected or sample is short.
-            # Match against full sample
-            comp_cur = current[:len_sam]
-            comp_sam = sample
-        else:
-            # Current shorter
-            comp_cur = current
-            comp_sam = sample[:len_cur]
-
-        if len(comp_cur) < 5:
+        
+        # Ensure minimal overlap
+        if len_cur < 5 or len_sam < 5:
             return 0.0, {}
+            
+        # Truncate to min length
+        n = min(len_cur, len_sam)
+        c = current[:n]
+        s = sample[:n]
 
         # 1. MAE (Mean Absolute Error)
-        diff = np.abs(comp_cur - comp_sam)
+        diff = np.abs(c - s)
         mae = np.mean(diff)
 
         # 2. Correlation
-        if np.std(comp_cur) > 1e-3 and np.std(comp_sam) > 1e-3:
-            corr = np.corrcoef(comp_cur, comp_sam)[0, 1]
+        if np.std(c) > 1e-3 and np.std(s) > 1e-3:
+            corr = np.corrcoef(c, s)[0, 1]
         else:
             corr = 0.0
 
         # 3. Peak Match
-        peak_cur = np.max(comp_cur)
-        peak_sam = np.max(comp_sam)
+        peak_cur = np.max(c)
+        peak_sam = np.max(s)
         peak_diff = abs(peak_cur - peak_sam)
 
         # Scoring
@@ -1691,20 +1835,33 @@ class ProfileStore:
 
         await self.async_save()
         _LOGGER.info("Assigned profile '%s' to cycle %s", profile_name, cycle_id)
+        # Trigger smart processing to potentially merge now-labeled cycle
+        await self.async_smart_process_history()
 
-    async def auto_label_unlabeled_cycles(
-        self, confidence_threshold: float = 0.7
+    async def auto_label_cycles(
+        self, confidence_threshold: float = 0.75, overwrite: bool = False
     ) -> dict[str, int]:
-        """Retroactively auto-label unlabeled cycles using profile matching.
-        Returns stats: {labeled: int, skipped: int, total: int}"""
-        stats = {"labeled": 0, "skipped": 0, "total": 0}
+        """Auto-label cycles retroactively using profile matching.
+        
+        Args:
+            confidence_threshold: Min confidence to apply a label.
+            overwrite: If True, re-evaluates already labeled cycles.
+            
+        Returns stats: {labeled: int, relabeled: int, skipped: int, total: int}
+        """
+        stats = {"labeled": 0, "relabeled": 0, "skipped": 0, "total": 0}
 
-        unlabeled = [
-            c for c in self._data.get("past_cycles", []) if not c.get("profile_name")
-        ]
-        stats["total"] = len(unlabeled)
+        cycles = self._data.get("past_cycles", [])
 
-        for cycle in unlabeled:
+        # Filter down if not overwriting
+        if not overwrite:
+            target_cycles = [c for c in cycles if not c.get("profile_name")]
+        else:
+            target_cycles = cycles
+
+        stats["total"] = len(target_cycles)
+
+        for cycle in target_cycles:
             # Reconstruct power data for matching
             power_data = self._decompress_power_data(cycle)
             if not power_data or len(power_data) < 10:
@@ -1715,23 +1872,41 @@ class ProfileStore:
             result = self.match_profile(power_data, cycle["duration"])
 
             if result.best_profile and result.confidence >= confidence_threshold:
-                cycle["profile_name"] = result.best_profile
-                stats["labeled"] += 1
-                _LOGGER.info(
-                    "Auto-labeled cycle %s as '%s' (confidence: %.2f)",
-                    cycle["id"],
-                    result.best_profile,
-                    result.confidence,
-                )
+                current_label = cycle.get("profile_name")
+
+                # If overwriting, check if new match is different and better/valid
+                if current_label:
+                    if current_label != result.best_profile:
+                        cycle["profile_name"] = result.best_profile
+                        stats["relabeled"] += 1
+                        _LOGGER.info(
+                            "Relabeled cycle %s: '%s' -> '%s' (confidence: %.2f)",
+                            cycle["id"],
+                            current_label,
+                            result.best_profile,
+                            result.confidence,
+                        )
+                else:
+                    cycle["profile_name"] = result.best_profile
+                    stats["labeled"] += 1
+                    _LOGGER.info(
+                        "Auto-labeled cycle %s as '%s' (confidence: %.2f)",
+                        cycle["id"],
+                        result.best_profile,
+                        result.confidence,
+                    )
             else:
                 stats["skipped"] += 1
 
-        if stats["labeled"] > 0:
+        if stats["labeled"] > 0 or stats["relabeled"] > 0:
             await self.async_save()
+            # Trigger smart processing after bulk labeling
+            await self.async_smart_process_history()
 
         _LOGGER.info(
-            "Auto-labeling complete: %s labeled, %s skipped",
+            "Auto-labeling complete: %s labeled, %s relabeled, %s skipped",
             stats["labeled"],
+            stats["relabeled"],
             stats["skipped"],
         )
         return stats
@@ -1750,6 +1925,8 @@ class ProfileStore:
             self.rebuild_envelope(profile_name)
 
         await self.async_save()
+        # Trigger smart processing on new cycle
+        await self.async_smart_process_history()
 
     async def async_migrate_cycles_to_compressed(self) -> int:
         """
@@ -1817,19 +1994,18 @@ class ProfileStore:
 
         return migrated
 
-    def merge_cycles(self, hours: int = 24, gap_threshold: int = 1800) -> int:
+    async def async_merge_cycles_smart(self, hours: int = 24, gap_threshold: int = 3600) -> int:
         """
-        Merge fragmented cycles within the last X hours.
-        gap_threshold: max seconds between cycles to consider them one (default 30m).
+        Smartly merge fragmented cycles using profile matching validation.
+        gap_threshold: max seconds between cycles to consider merging.
         Returns number of merges performed.
         """
-        # Use timezone-aware now to match stored timestamps
         limit = dt_util.now().timestamp() - (hours * 3600)
         cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
         if not cycles:
             return 0
 
-        # Sort by start time just in case
+        # Sort by start time
         cycles.sort(key=lambda c: str(c.get("start_time", "")))
 
         merged_count = 0
@@ -1839,16 +2015,20 @@ class ProfileStore:
             c2 = cycles[i + 1]
 
             # Parse times
+            # Parse times
             try:
-                # Isoformat handles T separator? My code produces it.
-                t1_end = datetime.fromisoformat(c1["end_time"]).timestamp()
-                t2_start = datetime.fromisoformat(c2["start_time"]).timestamp()
-            except ValueError:
+                t1_end_dt = dt_util.parse_datetime(c1["end_time"])
+                t2_start_dt = dt_util.parse_datetime(c2["start_time"])
+                if not t1_end_dt or not t2_start_dt:
+                    i += 1
+                    continue
+                t1_end = t1_end_dt.timestamp()
+                t2_start = t2_start_dt.timestamp()
+            except (ValueError, TypeError):
                 i += 1
                 continue
 
-            # Check time window (only touch if at least one is in range)
-            # If both are old, skip
+            # Skip if both are too old
             if (
                 t1_end < limit
                 and datetime.fromisoformat(c2["end_time"]).timestamp() < limit
@@ -1857,95 +2037,164 @@ class ProfileStore:
                 continue
 
             gap = t2_start - t1_end
+            if gap < 0 or gap > gap_threshold:
+                i += 1
+                continue
 
-            if 0 <= gap <= gap_threshold:
-                # MERGE c2 into c1
-                _LOGGER.info("Merging cycle %s into %s (Gap: %ss)", c2["id"], c1["id"], gap)
+            # --- SMART MERGE VALIDATION ---
+            # 1. Evaluate individual cycles
+            # 2. Evaluate merged candidate
+            # 3. Compare scores
 
-                # Update c1 duration and end time
-                t2_end = datetime.fromisoformat(c2["end_time"]).timestamp()
-                t1_start = datetime.fromisoformat(c1["start_time"]).timestamp()
+            # Helper to get score
+            def get_score(cycle_data: CycleDict) -> float:
+                p_data = self._decompress_power_data(cycle_data)
+                if not p_data:
+                    return 0.0
+                res = self.match_profile(p_data, cycle_data["duration"])
+                return res.confidence
 
+            score1 = get_score(c1)
+            score2 = get_score(c2)
+
+            # Construct Candidate (Simulation)
+            # We strictly emulate the data merge without mutating c1 yet
+            c1_start_dt = dt_util.parse_datetime(c1["start_time"])
+            if not c1_start_dt:
+                i += 1
+                continue
+
+            c1_power = decompress_power_data(c1)  # [(iso, p), ...]
+            c2_power = decompress_power_data(c2)
+
+            # Merge power data (list of tuples)
+            merged_power = list(c1_power)
+            # c2 explicitly shifted?
+            # decompress_power_data returns absolute ISO timestamps.
+            # So just appending is fine if they are sorted?
+            # Yes, match_profile converts them to relative.
+            merged_power.extend(c2_power)
+
+            # Recalculate duration
+            c2_end_dt = dt_util.parse_datetime(c2["end_time"])
+            if not c2_end_dt:
+                i += 1
+                continue
+            new_dur = (c2_end_dt - c1_start_dt).total_seconds()
+
+            # Score candidate
+            res_merged = self.match_profile(merged_power, new_dur)
+            score_merged = res_merged.confidence
+            best_candidate_profile = res_merged.best_profile
+
+            # --- DECISION LOGIC ---
+            should_merge = False
+
+            # Rule 1: Merging creates a significantly better match than the parts
+            # e.g. Part A (0.3), Part B (0.3) -> Merged (0.8)
+            current_max = max(score1, score2)
+            if score_merged >= self._match_threshold and score_merged > (
+                current_max + 0.1
+            ):
+                should_merge = True
+                _LOGGER.info(
+                    "Smart Merge: %s & %s -> Better Match (%.2f vs %.2f/%.2f)",
+                    c1["id"],
+                    c2["id"],
+                    score_merged,
+                    score1,
+                    score2,
+                )
+
+            # Rule 2: Rescue "Noise" / Debounce
+            # If C1 is tiny/noise and C2 is good (or vice versa), and merging kept the score high.
+            # "Noise" definition: < 2 mins OR score very low
+            is_c1_noise = c1["duration"] < 120 or score1 < self._unmatch_threshold
+            if is_c1_noise and score_merged >= self._match_threshold:
+                # Ensure we didn't degrade the good cycle significantly
+                if score_merged >= (score2 - 0.05):
+                    should_merge = True
+                    _LOGGER.info(
+                        "Smart Merge: Rescuing fragment %s into %s (Score %.2f)",
+                        c1["id"],
+                        c2["id"],
+                        score_merged,
+                    )
+
+            # Anti-Rule: Distinct Profiles
+            # If both match DIFFERENT profiles with high confidence, DO NOT MERGE unless gap is tiny (< 60s)?
+            # Actually, score comparison handles this. If both match diff profiles, merged score will likely be low
+            # (unless it matches a third "super profile").
+
+            if should_merge:
+                # EXECUTE MERGE (Ported form old logic)
                 c1["end_time"] = c2["end_time"]
-                c1["duration"] = t2_end - t1_start
+                c1["duration"] = new_dur
 
-                # Merge power data
-                # Since stored data is now relative offsets [offset, power]
-                # We need to shift c2's offsets by the time difference (gap + c1_duration_before_merge?)
-                # Actually, c2 offsets are relative to c2 start.
-                # New offsets must be relative to c1 start.
-                shift = t2_start - t1_start
+                # Merge compressed data
+                # We need to do this carefully on local compressed data
+                # We already calculated shift relative to c1 start above:
+                # Let's use the explicit logic from old method but simpler
 
-                # Check format of c2/c1. If old format (string timestamps), we can't easily math it here without parsing.
-                # Assuming new format if we are here (or we should check).
-                # To be safe, let's try to detect.
+                c2_raw = c2.get("power_data", [])
+                shift_seconds = (
+                    t2_start - dt_util.parse_datetime(c1["start_time"]).timestamp()
+                )
 
-                c2_data = c2["power_data"]
-                if c2_data and isinstance(c2_data[0][0], (int, float)):
-                    # Shift it
-                    shifted_c2 = [[round(x[0] + shift, 1), x[1]] for x in c2_data]
-                    c1["power_data"].extend(shifted_c2)
-                else:
-                    # fallback for old data (ISO strings) - just append, though it will be messy
-                    c1["power_data"].extend(c2_data)
+                shifted_c2 = []
+                for item in c2_raw:
+                    # item is [offset, power]
+                    if isinstance(item, (list, tuple)) and len(item) == 2:
+                        shifted_c2.append(
+                            [
+                                round(float(item[0]) + shift_seconds, 1),
+                                float(item[1]),
+                            ]
+                        )
 
-                # If c2 had a max power higher, take it
+                c1.setdefault("power_data", []).extend(shifted_c2)
+
                 c1["max_power"] = max(c1.get("max_power", 0), c2.get("max_power", 0))
 
-                # PRESERVE PROFILE
-                # If c1 is unlabeled but c2 has a label, take c2's label
-                if not c1.get("profile_name") and c2.get("profile_name"):
-                    c1["profile_name"] = c2["profile_name"]
+                # Inherit profile if C1 didn't have one but we found a better one
+                if best_candidate_profile:
+                    c1["profile_name"] = best_candidate_profile
+                elif c2.get("profile_name") and not c1.get("profile_name"):
+                    c1["profile_name"] = c2.get("profile_name")
 
-                # Track old IDs for profile update
+                # Update References
+                new_id = hashlib.sha256(
+                    f"{c1['start_time']}_{c1['duration']}".encode()
+                ).hexdigest()[:12]
                 old_c1_id = c1["id"]
                 old_c2_id = c2["id"]
-
-                # Regenerate ID
-                unique_str = f"{c1['start_time']}_{c1['duration']}"
-                new_id = hashlib.sha256(unique_str.encode()).hexdigest()[:12]
                 c1["id"] = new_id
 
-                # UPDATE PROFILE REFERENCES
-                # If any profile pointed to old_c1_id or old_c2_id, update to new_id
-                for p_name, p_data in self._data["profiles"].items():
+                # Update profile samples
+                for _, p_data in self._data["profiles"].items():
                     if p_data.get("sample_cycle_id") in (old_c1_id, old_c2_id):
-                        if c1.get("profile_name") == p_name:
-                            # Only update if this cycle is actually the one named p_name?
-                            # Or just update generically?
-                            # If we merged them, this new cycle is the best representative now.
-                            p_data["sample_cycle_id"] = new_id
-                            # Also update avg duration? Maybe later.
+                        p_data["sample_cycle_id"] = new_id
 
                 # Remove c2
                 cycles.pop(i + 1)
-
                 merged_count += 1
-                # Do NOT increment i, so we can check if the NEW c1 merges with c3
+                # Don't increment i
             else:
                 i += 1
 
         return merged_count
 
-    async def reprocess_cycle_for_gaps(
-        self, cycle_id: str, min_gap_s: int, idle_power: float = 2.0
+    async def async_split_cycles_smart(
+        self, cycle_id: str, min_gap_s: int = 900, idle_power: float = 2.0
     ) -> list[str]:
         """
-        Scan a cycle for significant idle gaps and split it into multiple cycles if found.
-
-        Args:
-           cycle_id: ID of cycle to scan
-           min_gap_s: Minimum duration of idle time (gap) to count as a separator.
-           idle_power: Power (W) below which is considered 'idle' (typically min_power).
-
-        Returns:
-            List of new cycle IDs generated (or just [original_id] if no split occurred).
+        Scan a cycle for significant idle gaps and split if parts match better than whole.
+        Returns list of resulting cycle IDs.
         """
         cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
         idx = next((i for i, c in enumerate(cycles) if c.get("id") == cycle_id), -1)
 
         if idx == -1:
-            _LOGGER.warning("Cycle %s not found for gap check", cycle_id)
             return []
 
         cycle = cycles[idx]
@@ -1953,28 +2202,29 @@ class ProfileStore:
 
         if not power_data or len(power_data) < 2:
             return [cycle_id]
+        
+        # 1. Evaluate Original
+        p_data_tuples = self._decompress_power_data(cycle)
+        if not p_data_tuples:
+            return [cycle_id]
 
-        # 1. Identify Split Points
-        # A split point is valid if we see a contiguous block of "idle" (low power) > min_gap_s
-        # BUT: power_data is compressed. It usually records changes.
-        # If we have [t1, 0.0], [t2, 200.0] and (t2-t1) > min_gap, implies logic was idle (or recording 0).
-        # We need to iterate the time series.
+        res_orig = self.match_profile(p_data_tuples, cycle["duration"])
+        score_orig = res_orig.confidence
+        
+        # If original is a strong match, we trust it (Dishwasher drying pause etc)
+        # UNLESS the gap is massive (e.g. > 2 hours), but let's trust profile logic mostly.
+        if score_orig >= 0.8: # Strong match
+            _LOGGER.debug("Skipping split for %s: Strong match %.2f to %s", cycle_id, score_orig, res_orig.best_profile)
+            return [cycle_id]
 
-        splits: list[tuple[float, float]] = []  # List of (gap_start_t, gap_end_t)
-
-        # We need to check gaps between reported point timestamps.
-        # But also check values. "Idle" means power <= idle_power.
-        # Format is [[offset, power], ...]
-
-        # Let's convert to simple time/power list
+        # 2. Identify Potential Split Points (Gaps)
         points = []
         for p in power_data:
             points.append((float(p[0]), float(p[1])))
 
-        # Detect gaps
+        splits: list[tuple[float, float]] = []
         last_t = points[0][0]
         last_p = points[0][1]
-
         current_idle_start: float | None = None
 
         if last_p <= idle_power:
@@ -1982,182 +2232,228 @@ class ProfileStore:
 
         for i in range(1, len(points)):
             t, p = points[i]
-
-            # Duration of the previous segment (last_t to t) held value `last_p`
-            # If last_p was idle, then this duration contributes to idle gap
             if last_p <= idle_power:
                 if current_idle_start is None:
-                    current_idle_start = last_t  # Should have been set but just in case
-
-                # Check if this idle run is broken by current point p being active?
-                # No, we're checking if the gap *ended* at `t` (because p might be high)
-                # Or just continues.
-
-                # If p > idle_power, the idle block definitively ends at `t`
+                    current_idle_start = last_t
                 if p > idle_power:
                     duration = t - current_idle_start
                     if duration >= min_gap_s:
                         splits.append((current_idle_start, t))
                     current_idle_start = None
             else:
-                # Previous point was Active.
-                # If current point is Idle, this *starts* a potential idle block
                 if p <= idle_power:
                     current_idle_start = t
-
             last_t = t
             last_p = p
 
-        # Check trailing idle? usually irrelevant as cycle ends anyway, but if we want to trim tail...
-        # The user wants "separate into 10", meaning internal gaps.
-
         if not splits:
-            _LOGGER.debug("No gaps > %ss found in cycle %s", min_gap_s, cycle_id)
             return [cycle_id]
-
-        # SAFETY CHECK: Profile Envelope Consistency
-        # The user may have a valid cycle with long pauses (e.g. drying).
-        # If the cycle fits the profile's expected duration, assume the gaps are valid.
-
-        profile_name = cycle.get("profile_name")
-        if profile_name and profile_name in self._data.get("profiles", {}):
-            profile = self._data["profiles"][profile_name]
-            avg_dur = profile.get("avg_duration")
-
-            if avg_dur and avg_dur > 0:
-                cycle_dur = cycle.get("duration", 0)
-                # If cycle is within legitimate range of profile (e.g. up to 1.5x)
-                # Then we should be very hesitant to split it based on gaps alone.
-                # However, if it's 2x or 3x duration, it's likely a merge.
-
-                ratio = cycle_dur / avg_dur
-
-                # Using a generous upper bound because "Drying" might be variable.
-                # If ratio is < 2.0, likely legitimate single cycle.
-                # If ratio is > 2.0, likely 2 merged cycles.
-
-                if ratio < 1.8:  # Tolerance
-                    _LOGGER.info(
-                        "Skipping split for cycle %s: Gaps found, but duration (%ss) "
-                        "is consistent with profile '%s' (avg %.1fs, ratio %.2f). "
-                        "Assuming valid internal pauses.",
-                        cycle_id,
-                        cycle_dur,
-                        profile_name,
-                        avg_dur,
-                        ratio,
-                    )
-                    return [cycle_id]
-
-        _LOGGER.info("Found %s gaps in cycle %s. Splitting...", len(splits), cycle_id)
-
-        # Build segment ranges from gaps (N gaps = N+1 segments)
+            
+        # 3. Simulate Splits and Score Parts
+        # We need to test if splitting improves the situation.
+        # Simple heuristic: Split at the LARGEST gap first? Or all gaps?
+        # Let's assume splitting all gaps for now, effectively reducing to "Island detection"
+        # Validate if ANY of the resulting islands is a valid profile match.
+        
         cycle_start_iso = cycle["start_time"]
-        start_dt_base = datetime.fromisoformat(cycle_start_iso)
-
+        start_dt_base = dt_util.parse_datetime(cycle_start_iso)
+        if not start_dt_base:
+            return [cycle_id]
         seg_ranges: list[tuple[float, float]] = []
         prev_end = 0.0
         for gap_start, gap_end in splits:
             if gap_start > prev_end:
-                seg_ranges.append((prev_end, gap_start))
+                # Check if segment is long enough to bother (e.g. > 2 mins)
+                if (gap_start - prev_end) > 120:
+                    seg_ranges.append((prev_end, gap_start))
             prev_end = gap_end
-
-        # Add tail segment (from last gap end to cycle end)
+        
         total_dur = cycle.get("duration", points[-1][0])
-        if total_dur > prev_end:
+        if (total_dur - prev_end) > 120:
             seg_ranges.append((prev_end, total_dur))
+            
+        if len(seg_ranges) < 2:
+            # Only 1 substantial segment found? Maybe tail was trimmed.
+            # If effectively only 1 part, treat as "trimming" the cycle.
+            # Trimming logic: if score improves?
+            # For now, let's focus on Splitting (1 -> 2+).
+            return [cycle_id]
 
-        # Now create new cycles for each range
-        new_ids = []
-        original_profile = cycle.get("profile_name")
-
-        # Remove original cycle and create new ones for each segment
-        cycles.pop(idx)
-
-        for _, (seg_start, seg_end) in enumerate(seg_ranges):
-            # Extract data points in range [seg_start, seg_end]
-            # Inherit power state from the last point before seg_start
-            seg_points: list[list[float]] = []
-
-            # Find power state at segment start
+        # Check scores of proposed parts
+        valid_part_found = False
+        parts_data = [] # List of (segment_points_tuples, duration)
+        
+        start_ts = start_dt_base.timestamp()
+        
+        for seg_start, seg_end in seg_ranges:
+            # Extract points and shift to relative
+            seg_points = []
+            # Find state val
             state_val = 0.0
             for t, p in points:
                 if t <= seg_start:
                     state_val = p
                 else:
                     break
+            seg_points.append((datetime.fromtimestamp(start_ts + seg_start).isoformat(), state_val)) # Point 0
 
-            # Start with inherited power state at t=0 (relative time)
-            seg_points.append([0.0, state_val])
-
-            # Add points within segment, shifted to relative time
             for t, p in points:
                 if t > seg_start and t <= seg_end:
-                    seg_points.append([round(t - seg_start, 1), p])
+                    seg_points.append((datetime.fromtimestamp(start_ts + t).isoformat(), p))
 
-            # Skip tiny fragments
             seg_dur = seg_end - seg_start
-            if seg_dur < 1.0:
-                continue
+            if len(seg_points) < 5: continue
 
-            # Calculate absolute timestamps for new cycle
+            # Score it
+            res_part = self.match_profile(seg_points, seg_dur)
+            if res_part.confidence >= self._match_threshold:
+                valid_part_found = True
+
+            parts_data.append(res_part.confidence)
+        
+        # DECISION:
+        # If the original score was low (< threshold) AND at least one part matches well
+        # OR original was "okay" (0.5) but distinct parts match "excellent" (0.9)
+        # We split.
+
+        should_split = False
+        if score_orig < self._match_threshold and valid_part_found:
+            should_split = True
+            _LOGGER.info(
+                "Smart Split: Splitting %s (Score %.2f) -> Found valid part(s) %s",
+                cycle_id,
+                score_orig,
+                parts_data,
+            )
+        elif score_orig < 0.7:
+            # Even if score was decent, if parts are remarkably better...
+            if any(s > (score_orig + 0.2) for s in parts_data):
+                should_split = True
+                _LOGGER.info(
+                    "Smart Split: Splitting %s (Score %.2f) -> Parts are much better %s",
+                    cycle_id,
+                    score_orig,
+                    parts_data,
+                )
+
+        if not should_split:
+            return [cycle_id]
+
+        # EXECUTE SPLIT (Ported from old logic)
+        cycles.pop(idx)
+        new_ids = []
+        original_profile = cycle.get("profile_name")
+
+        for i, (seg_start, seg_end) in enumerate(seg_ranges):
+            # Re-extract and format for adding
+            # ... (Same extract logic as before but simpler construction)
+            # Need normalized compressed list [offset, power] for add_cycle
+
+            seg_compressed = []
+            # determine start state
+            state_val = 0.0
+            for t, p in points:
+                if t <= seg_start:
+                    state_val = p
+                else:
+                    break
+            seg_compressed.append([0.0, state_val])
+
+            for t, p in points:
+                if t > seg_start and t <= seg_end:
+                    seg_compressed.append([round(t - seg_start, 1), p])
+
+            seg_dur = seg_end - seg_start
+
             new_cycle_start = start_dt_base + timedelta(seconds=seg_start)
             new_cycle_end = new_cycle_start + timedelta(seconds=seg_dur)
             new_cycle_start_ts = new_cycle_start.timestamp()
 
-            # Convert relative offsets to absolute timestamps for add_cycle
-            seg_points_absolute = [
-                [round(new_cycle_start_ts + offset, 1), power]
-                for offset, power in seg_points
-            ]
+            # Convert to absolute for add_cycle
+            p_data_abs = []
+            for off, val in seg_compressed:
+                p_data_abs.append([round(new_cycle_start_ts + off, 1), val])
 
             new_cycle = {
                 "start_time": new_cycle_start.isoformat(),
                 "end_time": new_cycle_end.isoformat(),
                 "duration": round(seg_dur, 1),
                 "status": "completed",
-                "power_data": seg_points_absolute,
-                "profile_name": original_profile,
+                "power_data": p_data_abs,
+                "profile_name": None # Reset profile, let auto-labeler fix it
             }
 
-            # Add using internal logic (generates ID, signature, etc.)
             self.add_cycle(new_cycle)
             new_ids.append(new_cycle["id"])
-
-        _LOGGER.info(
-            "Split cycle %s into %s new cycles: %s", cycle_id, len(new_ids), new_ids
-        )
-
-        # Cleanup orphaned profile refs if original cycle was a sample
-        # (add_cycle handles retention, but deletion of original was manual pop)
-        # We need to check if any profile referenced the OLD ID and update it to the best NEW ID (probably longest?)
-
-        # Since we popped, 'cycle' dict is gone from past_cycles but still in memory
+             
+        # Cleanup orphaned profile refs (Original logic)
         original_sample_id = cycle.get("id")
-
-        # Find best candidate (longest)
         best_replacement_id = None
         longest_dur = 0
-        new_cycles_objs = [c for c in cycles if c["id"] in new_ids]
-
+        new_cycles_objs = [c for c in cycles if c["id"] in new_ids] # Need to fetch fresh
+        
         for c in new_cycles_objs:
             d = c.get("duration", 0)
             if d > longest_dur:
                 longest_dur = d
                 best_replacement_id = c["id"]
 
-        if best_replacement_id:
-            for p_name, p_data in self._data.get("profiles", {}).items():
-                if p_data.get("sample_cycle_id") == original_sample_id:
-                    p_data["sample_cycle_id"] = best_replacement_id
-                    _LOGGER.info(
-                        "Updated profile '%s' sample ref to %s", p_name, best_replacement_id
-                    )
-                    self.rebuild_envelope(p_name)
+        if best_replacement_id and original_profile:
+            # Only update the profile that relied on this cycle
+            p_data = self._data["profiles"].get(original_profile)
+            if p_data and p_data.get("sample_cycle_id") == original_sample_id:
+                p_data["sample_cycle_id"] = best_replacement_id
+                self.rebuild_envelope(original_profile)
 
         await self.async_save()
         return new_ids
 
+    async def async_smart_process_history(
+        self, hours: int = 24, gap_seconds: int = 3600
+    ) -> dict[str, int]:
+        """
+        Orchestrate smart history processing: Merge fragments, Split joins, Rebuild envelopes.
+        Should be called after major history changes (cycle end, delete, label).
+        """
+        stats = {"merged": 0, "split": 0}
+
+        # 1. Smart Merge (Combine fragments)
+        stats["merged"] = await self.async_merge_cycles_smart(
+            hours=hours, gap_threshold=gap_seconds
+        )
+
+        # 2. Smart Split (Separate joined cycles)
+        # Scan recent cycles
+        limit = dt_util.now().timestamp() - (hours * 3600)
+        cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
+
+        # Snapshot IDs to avoid modification issues
+        candidates = []
+        for c in cycles:
+            try:
+                end_dt = dt_util.parse_datetime(str(c.get("end_time")))
+                if end_dt and end_dt.timestamp() > limit:
+                    candidates.append(c["id"])
+            except (ValueError, TypeError):
+                continue
+
+        for cid in candidates:
+            # Check if cycle still exists
+            if not any(c["id"] == cid for c in cycles):
+                continue
+
+            new_ids = await self.async_split_cycles_smart(cid, min_gap_s=900)
+            if len(new_ids) > 1:
+                stats["split"] += 1
+
+        # 3. Use the cleaner data to rebuild envelopes
+        self.rebuild_all_envelopes()
+
+        if stats["merged"] > 0 or stats["split"] > 0:
+            await self.async_save()
+            _LOGGER.info("Smart Process History: Merged %s, Split %s", stats["merged"], stats["split"])
+
+        return stats
     def log_adjustment(
         self, setting_name: str, old_value: Any, new_value: Any, reason: str
     ) -> None:

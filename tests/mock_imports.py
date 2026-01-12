@@ -12,6 +12,14 @@ def create_package_mock(name):
 # 2. Create base package
 mock_ha = create_package_mock("homeassistant")
 mock_ha_core = create_package_mock("homeassistant.core")
+
+# Define transparent callback decorator
+def callback_impl(func):
+    return func
+mock_ha_core.callback = callback_impl
+mock_ha_core.HomeAssistant = MagicMock
+mock_ha_core.State = MagicMock
+
 mock_ha_config = create_package_mock("homeassistant.config_entries")
 mock_ha_helpers = create_package_mock("homeassistant.helpers")
 mock_ha_const = create_package_mock("homeassistant.const")

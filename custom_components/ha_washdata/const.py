@@ -11,6 +11,7 @@ CONF_NOTIFY_SERVICE = "notify_service"
 CONF_NOTIFY_EVENTS = "notify_events"
 CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
 CONF_SMOOTHING_WINDOW = "smoothing_window"
+CONF_SAMPLING_INTERVAL = "sampling_interval"
 CONF_START_DURATION_THRESHOLD = (
     "start_duration_threshold"  # Debounce for start detection
 )
@@ -62,8 +63,9 @@ DEFAULT_MIN_POWER = 2.0  # Watts
 DEFAULT_OFF_DELAY = 120  # Seconds (2 minutes, like proven automation)
 DEFAULT_NAME = "Washing Machine"
 # Seconds without updates while active before forced stop (publish-on-change sockets)
-DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 300
+DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 300  # 5 minutes
 DEFAULT_SMOOTHING_WINDOW = 2
+DEFAULT_SAMPLING_INTERVAL = 2.0  # Seconds
 DEFAULT_START_DURATION_THRESHOLD = 5.0  # Seconds (debounce)
 DEFAULT_DEVICE_TYPE = "washing_machine"
 DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25

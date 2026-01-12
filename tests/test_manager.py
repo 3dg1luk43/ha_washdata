@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import pytest
+from tests import mock_imports
 from typing import Any
 from unittest.mock import MagicMock, AsyncMock, patch, PropertyMock
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
@@ -23,6 +24,8 @@ def mock_hass() -> Any:
         side_effect=lambda coro: getattr(coro, "close", lambda: None)()  # type: ignore[misc]
     )
     hass.components.persistent_notification.async_create = MagicMock()
+    # Mock config entries lookups
+    hass.config_entries.async_get_entry = MagicMock()
     return hass
 
 @pytest.fixture
@@ -40,6 +43,12 @@ def mock_entry() -> Any:
 
 @pytest.fixture
 def manager(mock_hass: Any, mock_entry: Any) -> WashDataManager:
+    # Setup mock_hass to return our mock_entry
+    mock_hass.config_entries.async_get_entry.return_value = mock_entry
+    
+    # Ensure dt_util.now returns real datetimes for comparisons
+    dt_util.now.side_effect = lambda: datetime.now(timezone.utc)
+
     # Patch ProfileStore and CycleDetector to avoid disk/logic issues
     with patch("custom_components.ha_washdata.manager.ProfileStore"), \
          patch("custom_components.ha_washdata.manager.CycleDetector"):
@@ -134,7 +143,16 @@ def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: Any) -
 
     # Assert: feedback event fired and notification created
     # Assert: feedback notification created (event removed)
-    assert mock_hass.components.persistent_notification.async_create.call_count >= 1
+    # Assert: feedback event fired and notification created
+    # Check that service call was made
+    mock_hass.services.async_call.assert_called()
+    # verify one of the calls was for persistent_notification.create
+    found = False
+    for call in mock_hass.services.async_call.call_args_list:
+        if call.args[0] == "persistent_notification" and call.args[1] == "create":
+            found = True
+            break
+    assert found
 
 
 def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, mock_hass: Any) -> None:
@@ -364,4 +382,44 @@ async def test_restore_active_cycle_ending(manager: WashDataManager) -> None:
     assert manager.current_program == "Normal"
     # Should start watchdog
     assert manager._remove_watchdog is not None
+
+def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, mock_hass: Any) -> None:
+    """Test that _on_cycle_end attempts to auto-label an unmatched cycle."""
+    manager._auto_label_confidence = 0.8
+    
+    # Mock profile store behavior
+    from custom_components.ha_washdata.profile_store import MatchResult
+    match_result = MatchResult(
+        best_profile="DerivedProfile",
+        confidence=0.9,
+        expected_duration=3600.0,
+        matched_phase=None,
+        candidates=[],
+        is_ambiguous=False, 
+        ambiguity_margin=0.0
+    )
+    manager.profile_store.match_profile = MagicMock(return_value=match_result)
+    manager.profile_store.add_cycle = MagicMock()
+    manager.profile_store.async_save = AsyncMock()
+    manager.profile_store.rebuild_envelope = MagicMock()
+    manager.profile_store.async_clear_active_cycle = AsyncMock()
+    # Mock _run_post_cycle_processing to avoid errors
+    manager._run_post_cycle_processing = AsyncMock()
+
+    cycle_data = {
+        "start_time": "2025-01-01T12:00:00",
+        "duration": 3600,
+        "power_data": [("2025-01-01T12:00:00", 1.0)], # minimal data
+        "profile_name": None # Initially None
+    }
+    
+    manager._on_cycle_end(cycle_data)
+    
+    # Verify match_profile was called
+    manager.profile_store.match_profile.assert_called_once()
+    
+    # Verify cycle_data was updated BEFORE add_cycle
+    args = manager.profile_store.add_cycle.call_args[0]
+    added_cycle = args[0]
+    assert added_cycle["profile_name"] == "DerivedProfile"
 

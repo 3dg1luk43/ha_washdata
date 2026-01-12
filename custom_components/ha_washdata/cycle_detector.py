@@ -44,7 +44,9 @@ class CycleDetectorConfig:
     end_repeat_count: int = 1
     min_off_gap: int = 60
     start_threshold_w: float = 2.0
+    start_threshold_w: float = 2.0
     stop_threshold_w: float = 2.0
+    min_duration_ratio: float = 0.8  # Default deferred finish ratio
 
 
 @dataclass
@@ -243,6 +245,11 @@ class CycleDetector:
         """Return the start timestamp of the current cycle."""
         return self._current_cycle_start
 
+    @property
+    def samples_recorded(self) -> int:
+        """Return the number of power samples recorded in current cycle."""
+        return len(self._power_readings)
+
     def process_reading(self, power: float, timestamp: datetime) -> None:
         """Process a new power reading using robust dt-aware logic."""
 
@@ -377,6 +384,13 @@ class CycleDetector:
                         if (timestamp - r[0]).total_seconds() <= self._config.off_delay
                     ]
                     if not recent_window:
+                        # Defer finish?
+                        start_time = self._current_cycle_start or timestamp
+                        current_duration = (timestamp - start_time).total_seconds()
+                        
+                        if self._should_defer_finish(current_duration):
+                            return
+                        
                         self._finish_cycle(timestamp, status="completed")
                         return
 
@@ -386,6 +400,13 @@ class CycleDetector:
                     recent_e = integrate_wh(recent_ts, recent_p)
 
                     if recent_e <= self.config.end_energy_threshold:
+                        # Defer finish?
+                        start_time = self._current_cycle_start or timestamp
+                        current_duration = (timestamp - start_time).total_seconds()
+                        
+                        if self._should_defer_finish(current_duration):
+                            return
+
                         self._finish_cycle(timestamp, status="completed")
                     else:
 
@@ -411,6 +432,24 @@ class CycleDetector:
 
         _LOGGER.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)
+
+    def _should_defer_finish(self, duration: float) -> bool:
+        """Check if we should defer termination based on expected duration."""
+        if not self._matched_profile or self._expected_duration <= 0:
+            return False
+
+        # If matched profile, enforce min duration ratio
+        ratio = self._config.min_duration_ratio
+        if duration < (self._expected_duration * ratio):
+            _LOGGER.debug(
+                "Deferring cycle finish: duration %.0fs < %.0f%% of expected %.0fs (profile: %s)",
+                duration,
+                ratio * 100,
+                self._expected_duration,
+                self._matched_profile,
+            )
+            return True
+        return False
 
     def _finish_cycle(self, timestamp: datetime, status: str = "completed") -> None:
         """Finalize cycle."""

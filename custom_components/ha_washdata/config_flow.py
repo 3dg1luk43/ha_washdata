@@ -24,6 +24,7 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
+    CONF_SAMPLING_INTERVAL,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_EVENTS,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -104,6 +105,7 @@ from .const import (
     CONF_PROFILE_UNMATCH_THRESHOLD,
     DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEFAULT_PROFILE_UNMATCH_THRESHOLD,
+    DEFAULT_SAMPLING_INTERVAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -384,6 +386,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     CONF_OFF_DELAY,
                     CONF_WATCHDOG_INTERVAL,
                     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                    CONF_SAMPLING_INTERVAL,
                     CONF_PROFILE_MATCH_INTERVAL,
                     CONF_AUTO_LABEL_CONFIDENCE,
                     CONF_DURATION_TOLERANCE,
@@ -461,6 +464,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             CONF_MIN_POWER,
             CONF_WATCHDOG_INTERVAL,
             CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+            CONF_SAMPLING_INTERVAL,
             CONF_PROFILE_MATCH_INTERVAL,
             CONF_DURATION_TOLERANCE,
             CONF_PROFILE_DURATION_TOLERANCE,
@@ -581,6 +585,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                 ),
             ): vol.Coerce(float),
+             vol.Optional(
+                CONF_SAMPLING_INTERVAL,
+                default=get_val(CONF_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=1.0,
+                    max=60.0,
+                    step=0.5,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
             # --- Learning & Profiles ---
             vol.Optional(
                 CONF_LEARNING_CONFIDENCE,
@@ -754,6 +770,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "suggested_watchdog_interval": _fmt_suggested(CONF_WATCHDOG_INTERVAL),
                 "suggested_no_update_active_timeout": _fmt_suggested(
                     CONF_NO_UPDATE_ACTIVE_TIMEOUT
+                ),
+                "suggested_sampling_interval": _fmt_suggested(
+                    CONF_SAMPLING_INTERVAL
                 ),
                 "suggested_profile_match_interval": _fmt_suggested(
                     CONF_PROFILE_MATCH_INTERVAL
@@ -1410,7 +1429,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_auto_label_cycles(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Auto-label unlabeled cycles retroactively."""
+        """Auto-label all cycles retroactively."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
 
@@ -1419,16 +1438,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if not profiles:
             return self.async_abort(reason="no_profiles_for_matching")
 
-        # Count unlabeled cycles
-        unlabeled_count = sum(
-            1 for c in store.get_past_cycles() if not c.get("profile_name")
-        )
-        if unlabeled_count == 0:
-            return self.async_abort(reason="no_unlabeled_cycles")
+        total_count = len(store.get_past_cycles())
+        
+        if total_count == 0:
+            return self.async_abort(reason="no_cycles_found")
 
         if user_input is not None:
             threshold = user_input["confidence_threshold"]
-            await store.auto_label_unlabeled_cycles(threshold)
+            # Always pass overwrite=True as per user request to relabel everything
+            await store.auto_label_cycles(threshold, overwrite=True)
             manager.notify_update()
             return self.async_create_entry(
                 title="",
@@ -1440,7 +1458,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        "confidence_threshold", default=0.70
+                        "confidence_threshold", default=0.75
                     ): selector.NumberSelector(
                         selector.NumberSelectorConfig(
                             min=0.50,
@@ -1453,7 +1471,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             description_placeholders={
                 "info": (
-                    f"Found {unlabeled_count} unlabeled cycles. "
+                    f"Found {total_count} total cycles. "
                     f"Profiles: {', '.join(p['name'] for p in profiles)}"
                 )
             },
