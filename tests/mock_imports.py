@@ -28,6 +28,14 @@ mock_ha_components = create_package_mock("homeassistant.components")
 
 # 3. Create modules/submodules
 mock_dt = MagicMock()
+from datetime import datetime
+def _parse_effect(dt_str):
+    if not dt_str: return None
+    return datetime.fromisoformat(str(dt_str))
+mock_dt.parse_datetime.side_effect = _parse_effect
+mock_dt.utc_from_timestamp.side_effect = lambda ts: datetime.fromtimestamp(ts)
+mock_dt.now.return_value = datetime.now()
+
 mock_storage = MagicMock()
 mock_event = MagicMock()
 mock_dispatcher = MagicMock()
@@ -109,6 +117,40 @@ class FakeStore:
 
 mock_storage.Store = FakeStore
 
+# Defines a proper base class so subclasses don't inherit MagicMock behavior
+class MockOptionsFlow:
+    def __init__(self, config_entry):
+        self._config_entry = config_entry
+        self.hass = None
+
+    @property
+    def config_entry(self):
+        return self._config_entry
+
+    def async_show_form(self, step_id, data_schema=None, description_placeholders=None):
+        return {
+            "type": "form",
+            "step_id": step_id,
+            "data_schema": data_schema,
+            "description_placeholders": description_placeholders or {},
+            "errors": {}
+        }
+
+    def async_create_entry(self, title, data):
+        return {
+            "type": "create_entry",
+            "title": title,
+            "data": data
+        }
+
+    def async_abort(self, reason):
+        return {
+            "type": "abort",
+            "reason": reason
+        }
+
+mock_ha_config.OptionsFlow = MockOptionsFlow
+
 
 # 6. Inject into sys.modules
 sys.modules["homeassistant"] = mock_ha
@@ -123,3 +165,13 @@ sys.modules["homeassistant.util"] = mock_ha_util
 sys.modules["homeassistant.util.dt"] = mock_dt
 sys.modules["homeassistant.components"] = mock_ha_components
 sys.modules["homeassistant.components.persistent_notification"] = MagicMock()
+
+# 7. Add data_entry_flow
+mock_data_entry_flow = create_package_mock("homeassistant.data_entry_flow")
+class MockFlowResultType:
+    FORM = "form"
+    CREATE_ENTRY = "create_entry"
+    ABORT = "abort"
+mock_data_entry_flow.FlowResultType = MockFlowResultType
+sys.modules["homeassistant.data_entry_flow"] = mock_data_entry_flow
+mock_ha.data_entry_flow = mock_data_entry_flow

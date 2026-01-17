@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 _LOGGER = logging.getLogger(__name__)
 
 @pytest.mark.asyncio
-async def test_reprocess_user_data():
+async def test_reprocess_user_data(mock_hass):
     """Load user data dumps and verify reprocessing rebuilds envelopes correctly."""
     
     base_path = "/root/ha_washdata/cycle_data"
@@ -59,8 +59,8 @@ async def test_reprocess_user_data():
              _LOGGER.warning(f"Skipping {dump_file}: No 'store_data' or 'past_cycles' found")
              continue
         
-        # Mock HASS and Store
-        hass = MagicMock()
+        # Use fixture
+        hass = mock_hass
         
         # We need a proper store that returns our data
         with patch("custom_components.ha_washdata.profile_store.WashDataStore") as MockStore:

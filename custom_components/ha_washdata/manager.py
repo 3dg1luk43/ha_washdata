@@ -66,6 +66,7 @@ from .const import (
     CONF_STOP_THRESHOLD_W,
     CONF_SAMPLING_INTERVAL,
     CONF_SAVE_DEBUG_TRACES,
+    CONF_DTW_BANDWIDTH,
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
@@ -98,6 +99,7 @@ from .const import (
     DEFAULT_MAX_PAST_CYCLES,
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
+    DEFAULT_DTW_BANDWIDTH,
     DEFAULT_WATCHDOG_INTERVAL,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
@@ -117,6 +119,7 @@ from .const import (
 from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
 from .profile_store import ProfileStore, MatchResult, decompress_power_data
+from .recorder import CycleRecorder
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -183,6 +186,7 @@ class WashDataManager:
         unmatch_threshold = config_entry.options.get(
             CONF_PROFILE_UNMATCH_THRESHOLD, DEFAULT_PROFILE_UNMATCH_THRESHOLD
         )
+        self._unmatch_threshold = unmatch_threshold
 
         self.profile_store = ProfileStore(
             hass,
@@ -199,7 +203,11 @@ class WashDataManager:
             match_threshold=match_threshold,
             unmatch_threshold=unmatch_threshold,
         )
+        self.profile_store.dtw_bandwidth = float(
+            config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
+        )
         self.learning_manager = LearningManager(hass, self.entry_id, self.profile_store)
+        self.recorder = CycleRecorder(hass, self.entry_id)
 
         # Priority: Options > Data > Default
         min_power = config_entry.options.get(
@@ -319,16 +327,21 @@ class WashDataManager:
             min_duration_ratio=float(
                 config_entry.options.get("min_duration_ratio", 0.8)
             ),
+            match_interval=int(
+                config_entry.options.get(
+                    CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
+                )
+            ),
         )
         self._config = config
 
 
         def profile_matcher_wrapper(
             readings: list[tuple[datetime, float]],
-        ) -> tuple[str | None, float, float, str | None, bool]:
+        ) -> tuple[str | None, float, float, str | None, bool] | None:
             """Wraps profile store matching logic with detector callback signature.
 
-            Returns: (match_name, confidence, expected_duration, phase_name, is_mismatch)
+            Returns: None (async offload)
             """
             # Manual program override
             if self._manual_program_active and self._current_program:
@@ -338,102 +351,12 @@ class WashDataManager:
             if not readings:
                 return (None, 0.0, 0.0, None, False)
 
-            # Format readings for match_profile (which expects [(iso_str, power)])
-            formatted = [(t.isoformat(), p) for t, p in readings]
-
-            # Current duration
-            start = readings[0][0]
-            end = readings[-1][0]
-            current_duration = (end - start).total_seconds()
-
-            # Use profile store to find best match
-            result = self.profile_store.match_profile(formatted, current_duration)
-
-            # Store full result for debug/entities
-            self._last_match_result = result
-
-            match_name = result.best_profile
-            confidence = result.confidence
-            expected_duration = result.expected_duration
-            phase_name = result.matched_phase
-
-            if match_name:
-                prof = self.profile_store.get_profiles().get(match_name)
-                if isinstance(prof, dict):
-                    expected_duration = float(prof.get("avg_duration", 0.0))
-
-                    # --- DEVICE SPECIFIC PHASE NAMING ---
-                    # Logic: If we are confident in the match, and we are in a low-power
-                    # state (implied by this being called), and we are near the end of
-                    # the expected duration, infer "Drying" for Dishwashers.
-                    is_dishwasher = self.device_type == "dishwasher"
-                    pct_complete = (
-                        (current_duration / expected_duration)
-                        if expected_duration > 0
-                        else 0
-                    )
-
-                    if (
-                        is_dishwasher
-                        and confidence >= 0.70
-                        and pct_complete >= 0.70
-                        and pct_complete <= 1.20
-                    ):
-                        # Dishwashers typically have a long drying phase at the end
-                        phase_name = "Drying"
-
-                    # --- WASHING MACHINE RINSE/SPIN DETECTION ---
-                    is_washing_machine = self.device_type == "washing_machine"
-                    if (
-                        is_washing_machine
-                        and confidence >= 0.65
-                        and pct_complete >= 0.50
-                        and pct_complete <= 1.20
-                    ):
-                        # Analyze recent power readings to determine phase
-                        # Spinning: high power with relatively stable high values
-                        # Rinsing: lower power, intermittent fills/drains
-                        recent_window_s = 120  # Look at last 2 minutes
-                        recent_readings = [
-                            p for t, p in readings
-                            if (end - t).total_seconds() <= recent_window_s
-                        ]
-                        if len(recent_readings) >= 5:
-                            recent_arr = np.array(recent_readings)
-                            avg_power = float(np.mean(recent_arr))
-                            power_std = float(np.std(recent_arr))
-                            max_recent = float(np.max(recent_arr))
-
-                            # Heuristics:
-                            # Spin cycle: High sustained power (motor running fast)
-                            # Typically 200-500W+ with moderate variance
-                            # Rinse: Lower power, water pump + intermittent motor
-                            # Typically <150W average with low variance
-
-                            if avg_power > 150 and max_recent > 200:
-                                # High power phase - likely spinning
-                                if power_std < avg_power * 0.5:
-                                    phase_name = "Spinning"
-                                else:
-                                    # High variance + high power = Spin with imbalance
-                                    phase_name = "Spinning"
-                            elif avg_power < 100 and pct_complete >= 0.80:
-                                # Low power near end - likely final drain
-                                phase_name = "Draining"
-                            elif pct_complete >= 0.50 and pct_complete < 0.80:
-                                # Mid-to-late cycle with moderate power
-                                phase_name = "Rinsing"
-                            else:
-                                # Generic late-cycle phase
-                                phase_name = "Rinse/Spin"
-
-            return (
-                match_name,
-                confidence,
-                expected_duration,
-                phase_name,
-                result.is_confident_mismatch,
-            )
+            # Snapshot readings for thread safety
+            readings_copy = list(readings)
+            
+            # Offload to async task
+            self.hass.async_create_task(self._async_run_matching_task(readings_copy))
+            return None
 
         self.detector = CycleDetector(
             config,
@@ -493,6 +416,99 @@ class WashDataManager:
         self._last_match_result: Any = None  # Stores full MatchResult object
         self._score_history: dict[str, list[float]] = {}  # Tracks recent scores for trend analysis
 
+    async def _async_run_matching_task(
+        self, readings: list[tuple[datetime, float]]
+    ) -> None:
+        """Run profile matching in executor and update detector."""
+        try:
+            if not readings:
+                return
+
+            # Format in main thread
+            formatted = [(t.isoformat(), p) for t, p in readings]
+            
+            start = readings[0][0]
+            end = readings[-1][0]
+            current_duration = (end - start).total_seconds()
+
+            # Offload heavy match (blocks for ~400ms)
+            result = await self.hass.async_add_executor_job(
+                self.profile_store.match_profile, formatted, current_duration
+            )
+
+            # Post-Process in main thread
+            self._last_match_result = result
+            
+            match_name = result.best_profile
+            confidence = result.confidence
+            expected_duration = result.expected_duration
+            phase_name = result.matched_phase
+
+            if match_name:
+                prof = self.profile_store.get_profiles().get(match_name)
+                if isinstance(prof, dict):
+                    expected_duration = float(prof.get("avg_duration", 0.0))
+                    
+                    # --- DEVICE SPECIFIC PHASE NAMING (Heuristics) ---
+                    is_dishwasher = self.device_type == "dishwasher"
+                    pct_complete = (
+                        (current_duration / expected_duration)
+                        if expected_duration > 0
+                        else 0
+                    )
+
+                    if (
+                        is_dishwasher
+                        and confidence >= 0.70
+                        and pct_complete >= 0.70
+                        and pct_complete <= 1.20
+                    ):
+                        phase_name = "Drying"
+
+                    # --- WASHING MACHINE RINSE/SPIN DETECTION ---
+                    is_washing_machine = self.device_type == "washing_machine"
+                    if (
+                        is_washing_machine
+                        and confidence >= 0.65
+                        and pct_complete >= 0.50
+                        and pct_complete <= 1.20
+                    ):
+                        recent_window_s = 120
+                        recent_readings = [
+                            p for t, p in readings
+                            if (end - t).total_seconds() <= recent_window_s
+                        ]
+                        if len(recent_readings) >= 5:
+                            recent_arr = np.array(recent_readings)
+                            avg_power = float(np.mean(recent_arr))
+                            power_std = float(np.std(recent_arr))
+                            max_recent = float(np.max(recent_arr))
+
+                            if avg_power > 150 and max_recent > 200:
+                                if power_std < avg_power * 0.5:
+                                    phase_name = "Spinning"
+                                else:
+                                    phase_name = "Spinning"
+                            elif avg_power < 100 and pct_complete >= 0.80:
+                                phase_name = "Draining"
+                            elif pct_complete >= 0.50 and pct_complete < 0.80:
+                                phase_name = "Rinsing"
+                            else:
+                                phase_name = "Rinse/Spin"
+
+            # Update Detector
+            final_result = (
+                match_name,
+                confidence,
+                expected_duration,
+                phase_name,
+                result.is_confident_mismatch,
+            )
+            self.detector.update_match(final_result)
+
+        except Exception as e: # pylint: disable=broad-exception-caught
+             _LOGGER.error("Async profile matching task failed: %s", e)
+
     @property
     def top_candidates(self) -> list[dict[str, Any]]:
         """Return the list of top candidates from the last match."""
@@ -503,10 +519,16 @@ class WashDataManager:
     @property
     def phase_description(self) -> str:
         """Return a description of the current phase."""
-        # Use last match phase if available
         if self._last_match_result and self._last_match_result.matched_phase:
             return self._last_match_result.matched_phase
         return self.detector.state
+
+    @property
+    def match_ambiguity(self) -> bool:
+        """Return True if the last match was ambiguous."""
+        if self._last_match_result and hasattr(self._last_match_result, "is_ambiguous"):
+            return self._last_match_result.is_ambiguous
+        return False
 
     # Note: last_match_details property is defined later in the class
     # It returns MatchResult from _last_match_result
@@ -704,7 +726,7 @@ class WashDataManager:
 
         # Repair broken sample_cycle_id references (can happen after aggressive retention)
         try:
-            stats = self.profile_store.repair_profile_samples()
+            stats = await self.profile_store.async_repair_profile_samples()
             self._profile_sample_repair_stats = stats
             if stats.get("profiles_repaired", 0) or stats.get(
                 "cycles_labeled_as_sample", 0
@@ -720,13 +742,16 @@ class WashDataManager:
                 "Failed repairing profile sample references for %s", self.entry_id
             )
 
-        # Attempt to restore state (BEFORE starting listener)
-        await self._attempt_state_restoration()
-
         # Subscribe to power sensor updates
         self._remove_listener = async_track_state_change_event(
             self.hass, [self.power_sensor_entity_id], self._async_power_changed
         )
+
+        # Attempt to restore state (BEFORE starting listener)
+        await self._attempt_state_restoration()
+        
+        # Load recorder state
+        await self.recorder.async_load()
 
         # Force initial update from current state (in case it's already stable)
         state = self.hass.states.get(self.power_sensor_entity_id)
@@ -737,6 +762,10 @@ class WashDataManager:
                 self.detector.process_reading(power, now)
             except (ValueError, TypeError):
                 pass
+        
+        # Trigger migration/compression of old cycle format
+        # This is safe to run repeatedly (it skips already compressed cycles)
+        await self.profile_store.async_migrate_cycles_to_compressed()
 
     async def async_reload_config(self, config_entry: ConfigEntry) -> None:
         """
@@ -830,6 +859,14 @@ class WashDataManager:
         )
         new_abrupt_drop_ratio = float(
             config_entry.options.get(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO)
+        )
+        self.detector.config.match_interval = int(
+            config_entry.options.get(
+                CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
+            )
+        )
+        self.profile_store.dtw_bandwidth = float(
+            config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
         )
         new_abrupt_high_load = float(
             config_entry.options.get(
@@ -1094,6 +1131,14 @@ class WashDataManager:
         except ValueError:
             return
 
+        # RECORD MODE INTERCEPTION
+        if self.recorder.is_recording:
+             self.recorder.process_reading(power)
+             self._current_power = power
+             self._last_reading_time = dt_util.now()
+             self._notify_update()
+             return
+
         now = dt_util.now()
 
         # Throttle updates to avoid CPU overload on noisy sensors
@@ -1139,7 +1184,7 @@ class WashDataManager:
             )
             self._last_state_save = now
 
-    def _run_final_match_from_cycle_data(self, cycle_data: dict[str, Any]) -> None:
+    async def _run_final_match_from_cycle_data(self, cycle_data: dict[str, Any]) -> None:
         """Run final profile match using the cycle's power data before it's saved.
 
         This is called from _on_cycle_end when _current_program is still 'detecting...'
@@ -1160,7 +1205,7 @@ class WashDataManager:
             duration,
         )
 
-        result = self.profile_store.match_profile(power_data, duration)
+        result = await self.profile_store.async_match_profile(power_data, duration)
         profile_name = result.best_profile
         confidence = result.confidence
 
@@ -1372,9 +1417,15 @@ class WashDataManager:
             # Let's save it but marked as potential noise?
             # For now save as normal.
 
+        # Schedule heavy post-processing asynchronously
+        self.hass.async_create_task(self._async_process_cycle_end(cycle_data))
+
+    async def _async_process_cycle_end(self, cycle_data: dict[str, Any]) -> None:
+        """Process cycle completion asynchronously (heavy tasks)."""
+
         # FINAL PROFILE MATCH: If still detecting, try one last match with complete cycle data
         if self._current_program in ("detecting...", "restored..."):
-            self._run_final_match_from_cycle_data(cycle_data)
+            await self._run_final_match_from_cycle_data(cycle_data)
 
         # If we had a runtime match, attach the profile name for persistence
         if (
@@ -1385,45 +1436,37 @@ class WashDataManager:
             cycle_data["profile_name"] = self._current_program
 
         # Attach extensive debug data if available (and configured)
-        # Note: ProfileStore.add_cycle will strip it if save_debug_traces is False
         if self._last_match_result:
-            # Check if the result is relevant to this cycle?
-            # It should be the last match attempt for this cycle
-            debug_data = {
+            cycle_data["debug_data"] = {
                 "ranking": getattr(self._last_match_result, "ranking", []),
                 "details": getattr(self._last_match_result, "debug_details", {}),
                 "ambiguous": getattr(self._last_match_result, "is_ambiguous", False),
             }
-            cycle_data["debug_data"] = debug_data
 
-        # Add cycle to store immediately so it has an ID and can be referenced by
-        # feedback/auto-label logic synchronously.
-        try:
-            # Post-Cycle Auto-Labeling (if not already matched)
-            if not cycle_data.get("profile_name") and self._auto_label_confidence > 0:
-                # Need to decompress manually since it's not in store yet or just use the trace
-                # Cycle data power_data is list of (iso_str, val)
-                # match_profile expects [(iso_str, val)] or [(datetime, val)] depending on implementation
-                # ProfileStore.match_profile handles conversion but let's be safe
-                # We can call match_profile directly with the raw data
-                res = self.profile_store.match_profile(
-                    cycle_data["power_data"], cycle_data["duration"]
+        # Post-Cycle Auto-Labeling (if not already matched)
+        # Offload this match too if needed
+        if not cycle_data.get("profile_name") and self._auto_label_confidence > 0:
+            res = await self.profile_store.async_match_profile(
+                cycle_data["power_data"], cycle_data["duration"]
+            )
+            if res.best_profile and res.confidence >= self._auto_label_confidence:
+                cycle_data["profile_name"] = res.best_profile
+                _LOGGER.info(
+                    "Post-cycle auto-labeled as '%s' (confidence: %.2f)",
+                    res.best_profile,
+                    res.confidence,
                 )
-                if res.best_profile and res.confidence >= self._auto_label_confidence:
-                    cycle_data["profile_name"] = res.best_profile
-                    _LOGGER.info(
-                        "Post-cycle auto-labeled as '%s' (confidence: %.2f)",
-                        res.best_profile,
-                        res.confidence,
-                    )
 
-            self.profile_store.add_cycle(cycle_data)
+        # Add cycle to store immediately (still sync but offloadable parts optimized internally if possible)
+        # Note: add_cycle is mostly safe (signature calc is O(N) but fast enough for single cycle).
+        # We could offload signature calc to analysis logic if really needed, but let's stick to match profile optimization first.
+        try:
+            await self.profile_store.async_add_cycle(cycle_data)
             profile_name = cycle_data.get("profile_name")
             if profile_name:
-                self.profile_store.rebuild_envelope(profile_name)
-            self.hass.async_create_task(self.profile_store.async_save())
-        except Exception:  # noqa: BLE001
-            _LOGGER.exception("Failed to add/save cycle")
+                await self.profile_store.async_rebuild_envelope(profile_name)
+        except Exception as e: # pylint: disable=broad-exception-caught
+            _LOGGER.error("Failed to add cycle to store: %s", e)
 
         # Ensure cycle has a stable ID even if store add failed (or did not mutate).
         if not cycle_data.get("id"):
@@ -1456,7 +1499,7 @@ class WashDataManager:
                 "device_name": self.config_entry.title,
                 "cycle_data": event_cycle_data,
                 "program": event_cycle_data.get("profile_name", "unknown"),
-                "duration": duration,
+                "duration": event_cycle_data.get("duration"),
                 "start_time": event_cycle_data.get("start_time"),
                 "end_time": dt_util.now().isoformat(),
             },
@@ -1709,6 +1752,21 @@ class WashDataManager:
                 switch_reason = (
                     f"positive_trend ({confidence:.3f} > {current_score:.3f})"
                 )
+
+        # Case 3: Unmatching (confidence drop)
+        elif (
+            self._current_program not in ("detecting...", "off", "starting", "unknown")
+            and profile_name == self._current_program
+            and confidence < self._unmatch_threshold
+        ):
+            self._current_program = "detecting..."
+            self._matched_profile_duration = None
+            _LOGGER.info(
+                "Unmatched profile '%s' (confidence %.3f < threshold %.3f). Reverting to detection.",
+                profile_name,
+                confidence,
+                self._unmatch_threshold,
+            )
 
         if should_switch:
             self._current_program = profile_name
@@ -2141,11 +2199,15 @@ class WashDataManager:
     @property
     def check_state(self):
         """Return current detector state."""
+        if self.recorder.is_recording:
+            return STATE_RUNNING
         return self.detector.state
 
     @property
     def sub_state(self) -> str | None:
         """Return more granular state info (e.g. current phase)."""
+        if self.recorder.is_recording:
+            return "Recording"
         return self.detector.sub_state
 
     @property
@@ -2256,6 +2318,33 @@ class WashDataManager:
         # _async_power_changed will handle cleanup after delay.
 
         # Force a state update to reflect the change immediately
+
+    async def async_start_recording(self) -> None:
+        """Start manual recording of a cycle."""
+        if self.recorder.is_recording:
+             _LOGGER.warning("Already recording")
+             return
+
+        # Ensure we are in a clean state (stop any running cycle first?)
+        # If running, user should probably stop it? Or force stop?
+        # Plan said "unregulated", so we just start recording. 
+        # But if cycle_detector thinks it's running, we should probably "pause" it or just override state.
+        # My override in checks_state handles UI.
+        # But should we clear current program?
+        if self.detector.state != "off":
+             _LOGGER.info("Forcing detector reset before recording")
+             self.detector.reset()
+             
+        await self.recorder.start_recording()
+        self._notify_update()
+
+    async def async_stop_recording(self) -> None:
+        """Stop manual recording."""
+        if not self.recorder.is_recording:
+             return
+
+        await self.recorder.stop_recording()
+        self._notify_update()
 
     def clear_manual_program(self) -> None:
         """Clear manual program override."""

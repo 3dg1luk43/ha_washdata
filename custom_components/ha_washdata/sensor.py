@@ -304,3 +304,6 @@ class WasherPhaseSensor(WasherBaseSensor):
     @property
     def native_value(self):
         return self._manager.phase_description
+
+
+

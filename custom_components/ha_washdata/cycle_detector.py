@@ -44,9 +44,9 @@ class CycleDetectorConfig:
     end_repeat_count: int = 1
     min_off_gap: int = 60
     start_threshold_w: float = 2.0
-    start_threshold_w: float = 2.0
     stop_threshold_w: float = 2.0
     min_duration_ratio: float = 0.8  # Default deferred finish ratio
+    match_interval: int = 300  # Default profile match interval
 
 
 @dataclass
@@ -117,9 +117,7 @@ class CycleDetector:
 
         # Profile Matching Tracker
         self._last_match_time: datetime | None = None
-        self._last_state_change: datetime | None = None
         self._expected_duration: float = 0.0
-        self._match_interval_s: float = 60.0  # Default match interval
 
     @property
     def _dynamic_pause_threshold(self) -> float:
@@ -166,7 +164,7 @@ class CycleDetector:
         # Rate limiting
         if not force and self._last_match_time:
             elapsed = (timestamp - self._last_match_time).total_seconds()
-            if elapsed < self._match_interval_s:
+            if elapsed < self._config.match_interval:
                 return
 
         self._last_match_time = timestamp
@@ -174,36 +172,56 @@ class CycleDetector:
         # Call the matcher
         try:
             result = self._profile_matcher(self._power_readings)
-            # Unpack 5 elements (or 4 for backward compatibility if needed, but wrapper is updated)
+            # If synchronous result returned, process it.
+            # If None returned (async offload), the matcher is responsible for calling update_match later.
             if result:
-                # wrapper returns (name, confidence, duration, phase, is_mismatch)
-                if len(result) >= 5:
-                    (
-                        match_name,
-                        _,
-                        expected_duration,
-                        phase_name,
-                        is_mismatch,
-                    ) = result[:5]
-                else:
-                    # Fallback for old signature
-                    (match_name, _, expected_duration, phase_name) = result[:4]
-                    is_mismatch = False
-
-                if is_mismatch and self._matched_profile:
-                    # Confident non-match - revert to detecting if previously matched
-                    self._matched_profile = None
-                    
-                elif match_name:
-                    self._matched_profile = match_name
-                    # Sub-state can be set from phase_name if available
-                    if phase_name:
-                        self._sub_state = phase_name
-                    # Wrapper provides it
-                    self._expected_duration = expected_duration
+                self.update_match(result)
 
         except Exception as e:  # pylint: disable=broad-exception-caught
             _LOGGER.debug("Profile match failed: %s", e)
+
+    def update_match(self, result: tuple | Any) -> None:
+        """Process a match result (synchronously).
+        
+        Can be called by the matcher callback directly or asynchronously.
+        """
+        # Unpack 5 elements (or 4 for backward compatibility if needed, but wrapper is updated)
+        # wrapper returns (name, confidence, duration, phase, is_mismatch)
+        # Or MatchResult object if refactored, but currently wrapper returns tuple.
+        
+        is_mismatch = False
+        match_name = None
+        phase_name = None
+        
+        if isinstance(result, (list, tuple)):
+            if len(result) >= 5:
+                (
+                    match_name,
+                    _,
+                    expected_duration,
+                    phase_name,
+                    is_mismatch,
+                ) = result[:5]
+            else:
+                # Fallback for old signature
+                (match_name, _, expected_duration, phase_name) = result[:4]
+                is_mismatch = False
+        else:
+             # Assume MatchResult object or similar (future proofing)
+             # But for now wrapper returns tuple
+             return
+
+        if is_mismatch and self._matched_profile:
+            # Confident non-match - revert to detecting if previously matched
+            self._matched_profile = None
+            
+        elif match_name:
+            self._matched_profile = match_name
+            # Sub-state can be set from phase_name if available
+            if phase_name:
+                self._sub_state = phase_name
+            # Wrapper provides it
+            self._expected_duration = expected_duration
 
     def reset(self) -> None:
         """Force reset the detector state to OFF."""

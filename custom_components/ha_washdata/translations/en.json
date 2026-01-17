@@ -42,6 +42,7 @@
           "settings": "Settings",
           "manage_cycles": "Manage Cycles",
           "manage_profiles": "Manage Profiles",
+          "record_cycle": "Record Cycle (Manual)",
           "diagnostics": "Diagnostics & Maintenance"
         }
       },
@@ -59,7 +60,8 @@
           "apply_suggestions": "Apply Suggested Values",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor Entity",
-          "min_power": "Minimum Power Threshold (W)",
+          "start_threshold_w": "Start Threshold (W)",
+          "stop_threshold_w": "Stop Threshold (W)",
           "off_delay": "Cycle End Delay (s)",
           "notify_service": "Notification Service (e.g. notify.mobile_app)",
           "notify_events": "Events to Notify",
@@ -70,8 +72,9 @@
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
           "device_type": "Select the type of appliance (Washing Machine, Dryer, Dishwasher, Coffee Machine). This tag is stored with each cycle for better organization.",
           "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data—useful if you replace a smart plug.",
-          "min_power": "Power threshold (watts) above which the appliance is considered running. Default: 2W.",
-          "off_delay": "Seconds the smoothed power must stay below the threshold to mark completion. Default: 120s.",
+          "start_threshold_w": "Power must rise ABOVE this threshold to START a cycle. Set higher than your standby power. Default: 3W.",
+          "stop_threshold_w": "Power must fall BELOW this threshold to END a cycle. Set just above zero to avoid noise triggering false ends. Default: 1.5W.",
+          "off_delay": "Seconds the smoothed power must stay below the stop threshold to mark completion. Default: 120s.",
           "notify_service": "Home Assistant notify service to use (optional).",
           "notify_events": "Which events to send notifications for.",
           "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0."
@@ -133,6 +136,8 @@
           "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.50 (50%).",
           "profile_match_max_duration_ratio": "Maximum duration ratio for profile matching. Running cycle must not exceed this multiple of profile duration. Higher = more lenient. Default: 1.50 (150%).",
           "smoothing_window": "Number of recent power readings used for moving-average smoothing.",
+          "profile_match_threshold": "Minimum DTW similarity score (0.0–1.0) required to consider a profile as a match. Higher = stricter matching, fewer false positives. Default: 0.4.",
+          "profile_unmatch_threshold": "DTW similarity score (0.0–1.0) below which a previously matched profile is rejected. Should be lower than match threshold to prevent flickering. Default: 0.35.",
           "profile_duration_tolerance": "Tolerance used by profile matching for total duration variance (0.0–0.5). Default behavior: ±25%.",
           "auto_merge_lookback_hours": "After a cycle, scan this many hours back to merge fragmented runs into a single cycle.",
           "auto_merge_gap_seconds": "Maximum gap between fragments to merge during post-processing.",
@@ -264,6 +269,20 @@
           "gap_seconds": "Threshold to decide split vs merge. Gaps SHORTER than this are merged. Gaps LONGER than this are split. Lower this to force a split on a cycle that was merged incorrectly."
         }
       },
+      "cleanup_profile": {
+        "title": "Clean Up History - Select Profile",
+        "description": "Select a profile to visualize. This will generate a graph showing all past cycles for this profile to help identify outliers.",
+        "data": {
+          "profile": "Profile"
+        }
+      },
+      "cleanup_select": {
+        "title": "Clean Up History - Graph & Delete",
+        "description": "![Graph]({graph_url})\n\n**Visualizing {profile_name}**\n\nThe graph shows individual cycles as colored lines. Identify outliers (lines far from the group) and matching their color in the list below to delete them.\n\n**Select cycles to PERMANENTLY delete:**",
+        "data": {
+          "cycles_to_delete": "Cycles to Delete (check matching colors)"
+        }
+      },
       "migrate_data": {
         "title": "Migrate Data Format",
         "description": "Re-compress all saved cycle data to ensure it's in the latest format. This is safe and can be run multiple times."
@@ -286,6 +305,24 @@
         "data_description": {
           "mode": "Choose Export to copy current data and settings, or Import to paste exported data from another HA WashData device.",
           "json_payload": "For Export: copy this JSON (includes cycles, profiles, and all fine-tuned settings). For Import: paste JSON exported from HA WashData."
+        }
+      },
+      "record_cycle": {
+        "title": "Record Cycle",
+        "description": "Manually record a cycle to create a clean profile without interference.\n\nStatus: **{status}**\nDuration: {duration}s\nSamples: {samples}",
+        "data": {
+          "action": "Action",
+          "refresh_status": "Refresh Status"
+        }
+      },
+      "record_process": {
+        "title": "Process Recording",
+        "description": "![Graph]({graph_url})\n\n**Graph shows raw recording.** Blue = Keep, Red = Proposed Trim.\n*Graph is static and does not update with form changes.*\n\nRecording stopped. Trims are aligned to the detected sampling rate (~{sampling_rate}s).\n\nRaw Duration: {duration}s\nSamples: {samples}",
+        "data": {
+          "head_trim": "Trim Start (seconds)",
+          "tail_trim": "Trim End (seconds)",
+          "save_mode": "Save Destination",
+          "profile_name": "Profile Name"
         }
       }
     },

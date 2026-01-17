@@ -5,6 +5,51 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-01-12
+
+**Major Architectural Rewrite ("vNext")**
+
+This release marks a complete re-engineering of the HA WashData core, transitioning from simple heuristics to a rigorous signal processing pipeline and robust state machine. While the version number is minor, this is effectively a new engine under the hood.
+
+### 🏗️ Core Architecture: Signal Processing & State Machine
+- **New Signal Processing Engine** (`signal_processing.py`):
+  - **Dt-Aware Integration**: Replaced simple averaging with trapezoidal Riemann sum integration (`integrate_wh`) that respects variable sampling intervals.
+  - **Robust Smoothing**: Implemented `robust_smooth`, a hybrid algorithm combining a Median Filter (spike rejection) with a Time-Aware Exponential Moving Average (EMA) for clean trend detection.
+  - **Adaptive Resampling**: New primitives (`resample_adaptive`, `resample_uniform`) handle irregular sensor updates and enforce strict gap handling (no interpolation across large gaps).
+  - **Idle Baseline Learning**: Automatically learns the device's "true zero" using Median Absolute Deviation (MAD), removing the need for manual calibration.
+
+- **Finite State Machine (FSM)**:
+  - Replaced binary ON/OFF logic with a formal FSM: `OFF` → `STARTING` → `RUNNING` ↔ `PAUSED` → `ENDING` → `OFF`.
+  - **Dt-Aware Gating**: Start/End detection now uses accumulated time/energy gates (e.g., "energy since idle > X Wh") rather than sample counts, making it immune to sensor update frequency.
+  - **Smart Pausing**: Distinguishes between "End of Cycle" and "Mid-Cycle Pause" using dynamic thresholds derived from the sensor's sampling cadence (`_p95_dt`).
+
+### 💾 Storage v2 & Migration
+- **Profile Store v2** (`profile_store.py`):
+  - **New Schema**: Introduced a versioned storage schema (v2) optimized for performance.
+  - **Trace Compression**: Historical power traces are now compressed using relative time deltas, significantly reducing disk usage.
+  - **Robust Migration**: Included a designated `WashDataStore` engine that automatically upgrades v1 data to v2 without data loss, preserving user labels and corrections.
+
+### ✨ functionality & Features
+- **Configurable Sampling Interval**: New "Sampling Interval" setting allows users to throttle high-frequency sensors (e.g., 1s updates) to reduce CPU load.
+- **Precision Configuration**: Configuration flow now uses **Text Box** inputs for all numeric thresholds, offering precise control over parameters like `start_energy_threshold` (Wh) and `drop_ratio`.
+- **Smart Resume**: "Resurrection" logic restores the exact cycle state (including sub-state) after a Home Assistant restart.
+- **Auto-Labeling**: Increased default confidence threshold to **0.75** (from 0.70) to leverage the improved accuracy of the new engine.
+
+### 🛠️ Technical Improvements
+- **Timezone Robustness**: Complete refactor to use timezone-aware datetimes (`dt_util.now()`) exclusively, permanently fixing "offset-naive/offset-aware" comparison errors.
+- **Strict Typing**: Codebase now strictly adheres to type hinting, with extensive use of `TypeAlias` and `dataclass` for internal structures.
+- **Performance**: Optimized `last_match_details` sensor attribute to exclude large raw data arrays, preventing Home Assistant state update bloat.
+- **Serialization**: Fixed `MatchResult` JSON serialization issues that were blocking sensor updates.
+
+### 🐛 Bug Fixes
+- **Ghost Cycles**: New `completion_min_seconds` logic filters out short "noise" events that previously registered as cycles.
+- **Start/End Flutter**: Start debounce and End repeat counts are now configurable and backed by robust accumulators, eliminating false starts/ends.
+- **Crash Fixes**: Resolved `UnboundLocalError` and specific edge-case crashes in `profile_store.py` during migration.
+
+### ⚠️ Deprecations
+- **Legacy Logic**: Removed "consecutive samples" based detection in favor of time-aware accumulators.
+- **Sliders**: Removed slider inputs in config flow in favor of precise text inputs.
+
 ## [0.3.2] - 2026-01-02
 
 ### Added

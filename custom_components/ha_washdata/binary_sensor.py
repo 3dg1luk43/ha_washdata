@@ -87,9 +87,7 @@ class WasherAmbiguitySensor(WasherRunningBinarySensor):
     @property
     def is_on(self) -> bool:
         """Return true if match is ambiguous."""
-        return getattr(
-            self._manager, "_last_match_ambiguous", False
-        )  # pylint: disable=protected-access
+        return self._manager.match_ambiguity
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
