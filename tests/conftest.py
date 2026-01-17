@@ -12,6 +12,10 @@ def mock_hass():
     hass.async_create_task = MagicMock(
         side_effect=lambda coro: getattr(coro, "close", lambda: None)()
     )
+    async def _async_executor_mock(target, *args):
+        return target(*args)
+
+    hass.async_add_executor_job = MagicMock(side_effect=_async_executor_mock)
     hass.config.path = lambda *args: "/mock/path/" + "/".join(args)
     return hass
 

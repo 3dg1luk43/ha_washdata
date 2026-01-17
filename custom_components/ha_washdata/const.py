@@ -19,10 +19,7 @@ CONF_DEVICE_TYPE = "device_type"
 CONF_PROFILE_DURATION_TOLERANCE = "profile_duration_tolerance"
 CONF_AUTO_MERGE_LOOKBACK_HOURS = "auto_merge_lookback_hours"
 CONF_AUTO_MERGE_GAP_SECONDS = "auto_merge_gap_seconds"
-CONF_INTERRUPTED_MIN_SECONDS = "interrupted_min_seconds"
-CONF_ABRUPT_DROP_WATTS = "abrupt_drop_watts"
-CONF_ABRUPT_DROP_RATIO = "abrupt_drop_ratio"
-CONF_ABRUPT_HIGH_LOAD_FACTOR = "abrupt_high_load_factor"
+CONF_INTERRUPTED_MIN_SECONDS = "interrupted_min_seconds"  # Internal use only
 CONF_PROGRESS_RESET_DELAY = "progress_reset_delay"
 CONF_LEARNING_CONFIDENCE = "learning_confidence"
 CONF_DURATION_TOLERANCE = "duration_tolerance"
@@ -34,8 +31,7 @@ CONF_PROFILE_MATCH_MAX_DURATION_RATIO = "profile_match_max_duration_ratio"
 CONF_MAX_PAST_CYCLES = "max_past_cycles"
 CONF_MAX_FULL_TRACES_PER_PROFILE = "max_full_traces_per_profile"
 CONF_MAX_FULL_TRACES_UNLABELED = "max_full_traces_unlabeled"
-CONF_WATCHDOG_INTERVAL = "watchdog_interval"
-CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"
+CONF_WATCHDOG_INTERVAL = "watchdog_interval"  # Derived from sampling_interval
 CONF_COMPLETION_MIN_SECONDS = "completion_min_seconds"
 CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
 CONF_APPLY_SUGGESTIONS = "apply_suggestions"
@@ -53,6 +49,11 @@ CONF_EXPOSE_DEBUG_ENTITIES = "expose_debug_entities"  # Expose detailed debug se
 CONF_SAVE_DEBUG_TRACES = (
     "save_debug_traces"  # Improve historical cycle data with rich debug info
 )
+# Deprecated - kept for backward compatibility with existing configs
+CONF_ABRUPT_DROP_WATTS = "abrupt_drop_watts"  # Deprecated
+CONF_ABRUPT_DROP_RATIO = "abrupt_drop_ratio"  # Deprecated
+CONF_ABRUPT_HIGH_LOAD_FACTOR = "abrupt_high_load_factor"  # Deprecated
+CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"  # Deprecated
 
 
 NOTIFY_EVENT_START = "cycle_start"
@@ -70,15 +71,12 @@ DEFAULT_START_DURATION_THRESHOLD = 5.0  # Seconds (debounce)
 DEFAULT_DEVICE_TYPE = "washing_machine"
 DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
 DEFAULT_AUTO_MERGE_LOOKBACK_HOURS = 3
-DEFAULT_AUTO_MERGE_GAP_SECONDS = 300  # Seconds (5 minutes, merge nearby fragments)
-DEFAULT_INTERRUPTED_MIN_SECONDS = 150
-DEFAULT_ABRUPT_DROP_WATTS = 500.0
-DEFAULT_ABRUPT_DROP_RATIO = 0.6
-DEFAULT_ABRUPT_HIGH_LOAD_FACTOR = 5.0
+DEFAULT_AUTO_MERGE_GAP_SECONDS = 250  # Seconds (merge nearby fragments)
+DEFAULT_INTERRUPTED_MIN_SECONDS = 150  # Internal use only, not exposed
 DEFAULT_PROGRESS_RESET_DELAY = 150  # Seconds (~2.5 minutes unload window)
-DEFAULT_LEARNING_CONFIDENCE = 0.5  # Minimum confidence to request user verification
+DEFAULT_LEARNING_CONFIDENCE = 0.6  # Minimum confidence to request user verification
 DEFAULT_DURATION_TOLERANCE = 0.10  # Allow ±10% duration variance before flagging
-DEFAULT_AUTO_LABEL_CONFIDENCE = 0.95  # High confidence auto-label threshold
+DEFAULT_AUTO_LABEL_CONFIDENCE = 0.9  # High confidence auto-label threshold
 DEFAULT_AUTO_MAINTENANCE = True  # Enable nightly cleanup by default
 DEFAULT_COMPLETION_MIN_SECONDS = 600  # 10 minutes
 DEFAULT_NOTIFY_BEFORE_END_MINUTES = 0  # Disabled
@@ -86,18 +84,23 @@ DEFAULT_PROFILE_MATCH_INTERVAL = (
     300  # Seconds between profile matching attempts (5 minutes)
 )
 DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = (
-    0.07  # Minimum duration ratio (7% of profile)
+    0.1  # Minimum duration ratio (10% of profile) - hidden default
 )
 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = (
-    1.50  # Maximum duration ratio (150% of profile)
+    1.3  # Maximum duration ratio (130% of profile) - hidden default
 )
 DEFAULT_MAX_PAST_CYCLES = 200
 DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
-DEFAULT_WATCHDOG_INTERVAL = 5  # Seconds between watchdog checks
-DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Noise events in 24h to trigger auto-tune
-DEFAULT_RUNNING_DEAD_ZONE = 0  # Disabled by default, typical: 60-300s
+DEFAULT_WATCHDOG_INTERVAL = 5  # Derived: 2 * sampling_interval + 1
+DEFAULT_RUNNING_DEAD_ZONE = 3  # Seconds after start to ignore power dips
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
+
+# Deprecated defaults - kept for backward compatibility with existing configs
+DEFAULT_ABRUPT_DROP_WATTS = 500.0  # Deprecated
+DEFAULT_ABRUPT_DROP_RATIO = 0.6  # Deprecated
+DEFAULT_ABRUPT_HIGH_LOAD_FACTOR = 5.0  # Deprecated
+DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Deprecated
 
 # Profile Matching Thresholds
 CONF_PROFILE_MATCH_THRESHOLD = "profile_match_threshold"
@@ -105,6 +108,9 @@ CONF_PROFILE_UNMATCH_THRESHOLD = "profile_unmatch_threshold"
 
 DEFAULT_PROFILE_MATCH_THRESHOLD = 0.4
 DEFAULT_PROFILE_UNMATCH_THRESHOLD = 0.35
+
+CONF_DTW_BANDWIDTH = "dtw_bandwidth"
+DEFAULT_DTW_BANDWIDTH = 0.20  # 20% Sakoe-Chiba constraint
 
 # States
 STATE_OFF = "off"
@@ -200,3 +206,9 @@ SIGNAL_WASHER_UPDATE = "ha_washdata_update_{}"
 SERVICE_SUBMIT_FEEDBACK = (
     "ha_washdata.submit_cycle_feedback"  # Service to submit feedback
 )
+
+# Recorder
+STATE_RECORDING = "recording"
+CONF_RECORD_MODE = "record_mode"
+SERVICE_RECORD_START = "record_start"
+SERVICE_RECORD_STOP = "record_stop"

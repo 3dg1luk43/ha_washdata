@@ -1,13 +1,36 @@
 import pytest
 import asyncio
-import asyncio
+import inspect
 from unittest.mock import MagicMock, AsyncMock, patch
 from custom_components.ha_washdata.profile_store import ProfileStore
 
 @pytest.fixture
 def mock_hass():
     hass = MagicMock()
-    # Mock services if needed
+    # Mock executor job to return result immediately (simulated async)
+    async def mock_executor_job(func, *args, **kwargs):
+        if inspect.iscoroutinefunction(func):
+            return await func(*args, **kwargs)
+        return func(*args, **kwargs)
+        
+    hass.async_add_executor_job = AsyncMock(side_effect=mock_executor_job)
+    
+    # Mock async_create_task to await immediately
+    def mock_create_task(coro, *args):
+        # We can't await here easily in sync mock, but we can schedule it?
+        # Better: return a task that is already done?
+        # But we want the side effects of 'coro' to run (like updating _data)
+        # So we should run it.
+        # Since this is a mock used in async test, we can try to await it if the test driver supports it?
+        # Actually simplest: mock implementation returns a Task that we await?
+        # No, async_create_task returns a Task, caller doesn't await it.
+        # But for test purposes, we want the logic to RUN.
+        # So we wrap it in a future or just run it.
+        # Issue: we can't 'await' inside a sync side_effect without being async.
+        # BUT Mock can be async if side_effect is async?
+        return asyncio.create_task(coro)
+
+    hass.async_create_task = mock_create_task
     return hass
 
 @pytest.fixture
@@ -21,7 +44,8 @@ def store(mock_hass):
         ps._store.async_save = AsyncMock()
         yield ps
 
-def test_add_cycle(store):
+@pytest.mark.asyncio
+async def test_add_cycle(store):
     """Test adding a cycle."""
     cycle_data = {
         "start_time": "2023-01-01T12:00:00",
@@ -30,7 +54,7 @@ def test_add_cycle(store):
         "power_data": [["2023-01-01T12:00:00", 100.0], ["2023-01-01T13:00:00", 100.0]]
     }
     
-    store.add_cycle(cycle_data)
+    await store.async_add_cycle(cycle_data)
     
     assert len(store._data["past_cycles"]) == 1
     saved = store._data["past_cycles"][0]
@@ -42,7 +66,7 @@ def test_add_cycle(store):
 async def test_create_profile(store):
     """Test creating a profile from a cycle."""
     # Add a cycle first
-    store.add_cycle({
+    await store.async_add_cycle({
         "start_time": "2023-01-01T12:00:00",
         "duration": 3600,
         "status": "completed",
@@ -60,7 +84,8 @@ async def test_create_profile(store):
     # Check that cycle was labeled
     assert store._data["past_cycles"][0]["profile_name"] == "Heavy Duty"
 
-def test_retention_policy(store):
+@pytest.mark.asyncio
+async def test_retention_policy(store):
     """Test that old cycles are dropped."""
     # Set small cap for testing
     store._max_past_cycles = 5
@@ -68,7 +93,7 @@ def test_retention_policy(store):
     # Add 10 cycles
     for i in range(10):
         t_str = dt_str(i*60)
-        store.add_cycle({
+        await store.async_add_cycle({
             "start_time": t_str, # Increasing time
             "duration": 100,
             "status": "completed",
@@ -89,7 +114,8 @@ from datetime import datetime, timedelta
 def dt_str(offset_seconds: int) -> str:
     return (datetime(2023, 1, 1, 12, 0, 0) + timedelta(seconds=offset_seconds)).isoformat()
 
-def test_rebuild_envelope_updates_stats(store):
+@pytest.mark.asyncio
+async def test_rebuild_envelope_updates_stats(store):
     """Test that rebuilding envelope updates min/max duration."""
     # Create profile
     store._data["profiles"]["TestProf"] = {"sample_cycle_id": "dummy"}
@@ -102,7 +128,7 @@ def test_rebuild_envelope_updates_stats(store):
         t_mid = (start_t + timedelta(seconds=d/2)).isoformat()
         t_end = (start_t + timedelta(seconds=d)).isoformat()
         
-        store.add_cycle({
+        await store.async_add_cycle({
             "start_time": t_start, 
             "duration": d,
             "status": "completed",
@@ -112,7 +138,7 @@ def test_rebuild_envelope_updates_stats(store):
         })
         
     # Trigger rebuild
-    store.rebuild_envelope("TestProf")
+    await store.async_rebuild_envelope("TestProf")
     
     profile = store._data["profiles"]["TestProf"]
     assert profile["min_duration"] == 3000
@@ -132,7 +158,7 @@ async def test_match_profile(store):
     # Ramp signal for 100s
     dense_power = [[(start_dt + timedelta(seconds=i)).isoformat(), float(i)] for i in range(101)]
     
-    store.add_cycle({
+    await store.async_add_cycle({
         "start_time": start_dt.isoformat(),
         "duration": 100,
         "status": "completed",
@@ -161,3 +187,32 @@ async def test_match_profile(store):
     
     if match_bad == "Constant100":
         assert score_bad < 0.5
+
+@pytest.mark.asyncio
+async def test_delete_cycle_rebuilds_envelope(store):
+    """Test deleting a cycle triggers envelope rebuild."""
+    # Create profile
+    store._data["profiles"]["TestProf"] = {"sample_cycle_id": "dummy"}
+    
+    # Add a labeled cycle
+    start_t = datetime(2023, 1, 1, 12, 0, 0).isoformat()
+    await store.async_add_cycle({
+        "start_time": start_t,
+        "duration": 3600,
+        "status": "completed",
+        "profile_name": "TestProf",
+        "power_data": [[start_t, 10.0]]
+    })
+    cycle_id = store._data["past_cycles"][0]["id"]
+    
+    # Spy on async_rebuild_envelope
+    with patch.object(store, 'async_rebuild_envelope', wraps=store.async_rebuild_envelope) as mock_rebuild:
+        # Delete cycle
+        result = await store.delete_cycle(cycle_id)
+        
+        assert result is True
+        assert len(store._data["past_cycles"]) == 0
+        
+        # Verify rebuild was AWAITED (called)
+        mock_rebuild.assert_called_with("TestProf")
+

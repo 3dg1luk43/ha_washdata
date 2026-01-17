@@ -14,3 +14,7 @@ custom_components/ha_washdata/test_data
 tests/repro/__pycache__
 simulator.log
 .dev_notes
+devtools/priv_secrets.py
+devtools/mock_socket.db
+server.log
+devtools/mock_socket_config.json

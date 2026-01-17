@@ -559,6 +559,39 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.services.async_register(DOMAIN, "import_config", handle_import_config)
 
+    # Register recorder services
+    if not hass.services.has_service(DOMAIN, "record_start"):
+        async def handle_record_start(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                 raise ValueError("Device not found")
+            entry_id = next(iter(device.config_entries), None)
+            if not entry_id or entry_id not in hass.data[DOMAIN]:
+                 raise ValueError("Integration not loaded")
+            
+            manager = hass.data[DOMAIN][entry_id]
+            await manager.async_start_recording()
+
+        hass.services.async_register(DOMAIN, "record_start", handle_record_start)
+
+    if not hass.services.has_service(DOMAIN, "record_stop"):
+        async def handle_record_stop(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                 raise ValueError("Device not found")
+            entry_id = next(iter(device.config_entries), None)
+            if not entry_id or entry_id not in hass.data[DOMAIN]:
+                 raise ValueError("Integration not loaded")
+            
+            manager = hass.data[DOMAIN][entry_id]
+            await manager.async_stop_recording()
+
+        hass.services.async_register(DOMAIN, "record_stop", handle_record_stop)
+
     return True
 
 

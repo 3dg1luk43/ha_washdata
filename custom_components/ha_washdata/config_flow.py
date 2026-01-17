@@ -16,6 +16,7 @@ from homeassistant.const import CONF_NAME
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 from homeassistant.util import slugify
+from homeassistant.util import dt as dt_util
 
 from .const import (
     DOMAIN,
@@ -37,9 +38,6 @@ from .const import (
     CONF_APPLY_SUGGESTIONS,
     CONF_SHOW_ADVANCED,
     CONF_INTERRUPTED_MIN_SECONDS,
-    CONF_ABRUPT_DROP_WATTS,
-    CONF_ABRUPT_DROP_RATIO,
-    CONF_ABRUPT_HIGH_LOAD_FACTOR,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -54,7 +52,6 @@ from .const import (
     CONF_MAX_FULL_TRACES_PER_PROFILE,
     CONF_MAX_FULL_TRACES_UNLABELED,
     CONF_WATCHDOG_INTERVAL,
-    CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_NOTIFY_BEFORE_END_MINUTES,
     CONF_RUNNING_DEAD_ZONE,
@@ -75,9 +72,6 @@ from .const import (
     DEFAULT_AUTO_MERGE_LOOKBACK_HOURS,
     DEFAULT_AUTO_MERGE_GAP_SECONDS,
     DEFAULT_INTERRUPTED_MIN_SECONDS,
-    DEFAULT_ABRUPT_DROP_WATTS,
-    DEFAULT_ABRUPT_DROP_RATIO,
-    DEFAULT_ABRUPT_HIGH_LOAD_FACTOR,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_LEARNING_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
@@ -90,7 +84,6 @@ from .const import (
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_WATCHDOG_INTERVAL,
-    DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_COMPLETION_MIN_SECONDS,
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_RUNNING_DEAD_ZONE,
@@ -245,6 +238,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "settings",
                 "manage_cycles",
                 "manage_profiles",
+                "record_cycle",
                 "diagnostics",
             ],
         )
@@ -269,7 +263,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # Save Basic Settings Only
             # Merge with existing options to preserve settings not shown in this form
             user_input.pop(CONF_SHOW_ADVANCED, None)
-            merged_options = {**self._config_entry.options, **user_input}
+            merged_options = {**self.config_entry.options, **user_input}
             return self.async_create_entry(title="", data=merged_options)
 
         # Populate notify services
@@ -280,19 +274,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         notify_services.sort()
 
         # Ensure current value is in the list (so it doesn't vanish)
-        current_notify = self._config_entry.options.get(
-            CONF_NOTIFY_SERVICE, self._config_entry.data.get(CONF_NOTIFY_SERVICE, "")
+        current_notify = self.config_entry.options.get(
+            CONF_NOTIFY_SERVICE, self.config_entry.data.get(CONF_NOTIFY_SERVICE, "")
         )
         if current_notify and current_notify not in notify_services:
             notify_services.append(current_notify)
 
-        current_sensor = self._config_entry.options.get(
-            CONF_POWER_SENSOR, self._config_entry.data.get(CONF_POWER_SENSOR, "")
+        current_sensor = self.config_entry.options.get(
+            CONF_POWER_SENSOR, self.config_entry.data.get(CONF_POWER_SENSOR, "")
         )
 
         def get_val(key, default):
-            return self._config_entry.options.get(
-                key, self._config_entry.data.get(key, default)
+            return self.config_entry.options.get(
+                key, self.config_entry.data.get(key, default)
             )
 
         # Base schema with essential options
@@ -314,10 +308,31 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_POWER_SENSOR,
                 default=current_sensor,
             ): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
+            # --- Power Thresholds (Hysteresis) ---
             vol.Optional(
-                CONF_MIN_POWER,
-                default=get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER),
-            ): vol.Coerce(float),
+                CONF_START_THRESHOLD_W,
+                default=get_val(CONF_START_THRESHOLD_W, DEFAULT_MIN_POWER + 1.0),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.0,
+                    max=100.0,
+                    step=0.5,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_STOP_THRESHOLD_W,
+                default=get_val(CONF_STOP_THRESHOLD_W, max(0.0, DEFAULT_MIN_POWER - 0.5)),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.0,
+                    max=100.0,
+                    step=0.5,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
             vol.Optional(
                 CONF_OFF_DELAY,
                 default=get_val(CONF_OFF_DELAY, DEFAULT_OFF_DELAY),
@@ -375,7 +390,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage advanced configuration settings (Step 2)."""
-        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         suggestions = manager.suggestions if manager else {}
 
         if user_input is not None:
@@ -425,7 +440,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
             # Final Save
             final_options = {
-                **self._config_entry.options,
+                **self.config_entry.options,
                 **self._basic_options,
                 **user_input,
             }
@@ -441,8 +456,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if key in self._basic_options:
                 return self._basic_options[key]
             # Fallback to config options
-            return self._config_entry.options.get(
-                key, self._config_entry.data.get(key, default)
+            return self.config_entry.options.get(
+                key, self.config_entry.data.get(key, default)
             )
 
         # Format suggestions for description
@@ -475,9 +490,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         suggested_reason = "\n".join(reason_lines) if reason_lines else ""
 
         # Resolve Device Type for Defaults
-        current_device_type = self._config_entry.options.get(
+        current_device_type = self.config_entry.options.get(
             CONF_DEVICE_TYPE,
-            self._config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
+            self.config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
         )
         if CONF_DEVICE_TYPE in self._basic_options:
             current_device_type = self._basic_options[CONF_DEVICE_TYPE]
@@ -514,16 +529,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_START_ENERGY_THRESHOLD,
                 default=get_val(CONF_START_ENERGY_THRESHOLD, default_start_energy),
             ): vol.Coerce(float),
-            vol.Optional(
-                CONF_INTERRUPTED_MIN_SECONDS,
-                default=get_val(
-                    CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS
-                ),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0, max=900, mode=selector.NumberSelectorMode.BOX
-                )
-            ),
+
             vol.Optional(
                 CONF_COMPLETION_MIN_SECONDS,
                 default=get_val(CONF_COMPLETION_MIN_SECONDS, default_completion_min),
@@ -558,33 +564,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     min=1, max=10, mode=selector.NumberSelectorMode.BOX
                 )
             ),
-            vol.Optional(
-                CONF_MIN_OFF_GAP,
-                default=get_val(CONF_MIN_OFF_GAP, default_min_off_gap),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0, max=600, mode=selector.NumberSelectorMode.BOX
-                )
-            ),
-            vol.Optional(
-                CONF_START_THRESHOLD_W,
-                default=get_val(
-                    CONF_START_THRESHOLD_W,
-                    get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER)
-                    + max(1.0, 0.1 * get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER)),
-                ),
-            ): vol.Coerce(float),
-            vol.Optional(
-                CONF_STOP_THRESHOLD_W,
-                default=get_val(
-                    CONF_STOP_THRESHOLD_W,
-                    max(
-                        0.0,
-                        get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER)
-                        - max(0.5, 0.1 * get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER)),
-                    ),
-                ),
-            ): vol.Coerce(float),
+
              vol.Optional(
                 CONF_SAMPLING_INTERVAL,
                 default=get_val(CONF_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL),
@@ -598,52 +578,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 )
             ),
             # --- Learning & Profiles ---
-            vol.Optional(
-                CONF_LEARNING_CONFIDENCE,
-                default=get_val(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX
-                )
-            ),
-            vol.Optional(
-                CONF_AUTO_LABEL_CONFIDENCE,
-                default=get_val(
-                    CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE
-                ),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0.0, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX
-                )
-            ),
+
             vol.Optional(
                 CONF_PROFILE_MATCH_INTERVAL,
                 default=get_val(
                     CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
                 ),
             ): vol.Coerce(int),
-            vol.Optional(
-                CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                default=get_val(
-                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-                ),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0.1, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX
-                )
-            ),
-            vol.Optional(
-                CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                default=get_val(
-                    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-                ),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=1.0, max=3.0, step=0.1, mode=selector.NumberSelectorMode.BOX
-                )
-            ),
+
             vol.Optional(
                 CONF_PROFILE_MATCH_THRESHOLD,
                 default=get_val(
@@ -698,48 +640,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS
                 ),
             ): vol.Coerce(int),
-            vol.Optional(
-                CONF_ABRUPT_DROP_WATTS,
-                default=get_val(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS),
-            ): vol.Coerce(float),
-            vol.Optional(
-                CONF_ABRUPT_DROP_RATIO,
-                default=get_val(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO),
-            ): vol.Coerce(float),
-            vol.Optional(
-                CONF_ABRUPT_HIGH_LOAD_FACTOR,
-                default=get_val(
-                    CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR
-                ),
-            ): vol.Coerce(float),
-            vol.Optional(
-                CONF_MAX_PAST_CYCLES,
-                default=get_val(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES),
-            ): vol.Coerce(int),
-            vol.Optional(
-                CONF_MAX_FULL_TRACES_PER_PROFILE,
-                default=get_val(
-                    CONF_MAX_FULL_TRACES_PER_PROFILE,
-                    DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
-                ),
-            ): vol.Coerce(int),
-            vol.Optional(
-                CONF_MAX_FULL_TRACES_UNLABELED,
-                default=get_val(
-                    CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED
-                ),
-            ): vol.Coerce(int),
+
             vol.Optional(
                 CONF_WATCHDOG_INTERVAL,
                 default=get_val(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL),
             ): vol.Coerce(int),
-            vol.Optional(
-                CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
-                default=get_val(
-                    CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
-                    DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
-                ),
-            ): vol.Coerce(int),
+
             vol.Optional(
                 CONF_PROGRESS_RESET_DELAY,
                 default=get_val(
@@ -905,7 +811,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             payload_str = user_input.get("json_payload", "")
 
             # Always preserve existing options unless we explicitly update them
-            options_to_return = dict(self._config_entry.options)
+            options_to_return = dict(self.config_entry.options)
 
             if mode == "import":
                 try:
@@ -1081,6 +987,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 return await self.async_step_delete_profile_select()
             elif action == "profile_stats":
                 return await self.async_step_profile_stats()
+            elif action == "cleanup_profile":
+                return await self.async_step_cleanup_profile()
 
         return self.async_show_form(
             step_id="manage_profiles",
@@ -1092,11 +1000,181 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             "edit_profile": "✏️ Edit/Rename Profile",
                             "delete_profile": "🗑️ Delete Profile",
                             "profile_stats": "📊 Profile Statistics",
+                            "cleanup_profile": "🧹 Clean Up History - Graph & Delete",
                         }
                     )
                 }
             ),
             description_placeholders={"profile_summary": summary_text},
+        )
+
+    async def async_step_cleanup_profile(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Select a profile to clean up (via graph)."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        profiles = store.list_profiles()
+
+        if not profiles:
+            return self.async_abort(reason="no_profiles_found")
+
+        if user_input is not None:
+            self._selected_profile = user_input["profile"]
+            return await self.async_step_cleanup_select()
+
+        # Build profile options
+        options = []
+        for p in profiles:
+            count = p["cycle_count"]
+            duration_min = int(p["avg_duration"] / 60) if p["avg_duration"] else 0
+            label = f"{p['name']} ({count} cycles, ~{duration_min}m avg)"
+            options.append(selector.SelectOptionDict(value=p["name"], label=label))
+
+        return self.async_show_form(
+            step_id="cleanup_profile",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("profile"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=options, mode=selector.SelectSelectorMode.DROPDOWN
+                        )
+                    )
+                }
+            ),
+        )
+
+    async def async_step_cleanup_select(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Show graph and select cycles to delete."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+
+        if user_input is not None:
+            # Delete selected cycles
+            cycles_to_delete = user_input.get("cycles_to_delete", [])
+            count = 0
+            for cycle_id in cycles_to_delete:
+                await store.delete_cycle(cycle_id)
+                count += 1
+
+            manager.notify_update()
+            # Return to manage profiles
+            return self.async_create_entry(
+                title="",
+                data=dict(self.config_entry.options),
+                description_placeholders={
+                    "info": f"Deleted {count} cycles from {self._selected_profile}."
+                },
+            )
+
+        # Generate SVG
+        ts = int(time.time())
+        stats_dir = self.hass.config.path("www", "ha_washdata", "profiles")
+        await self.hass.async_add_executor_job(
+            lambda: os.makedirs(stats_dir, exist_ok=True)
+        )
+
+        safe_name = slugify(self._selected_profile)
+        # Generate SVG with ALL cycles for this profile (outliers included)
+        # Returns (svg_string, cycle_metadata_map) where metadata contains colors
+        # Run in executor to avoid blocking loop
+        svg_content, cycle_colors = await self.hass.async_add_executor_job(
+            store.generate_profile_spaghetti_svg, self._selected_profile
+        )
+
+        if not svg_content:
+            return self.async_abort(
+                reason="no_cycles_found",
+                description_placeholders={"info": "Not enough data to generate graph."},
+            )
+
+        file_path = f"{stats_dir}/cleanup_{safe_name}.svg"
+
+        def write_svg(path=file_path, content=svg_content):
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+
+        await self.hass.async_add_executor_job(write_svg)
+        graph_url = f"/local/ha_washdata/profiles/cleanup_{safe_name}.svg?v={ts}"
+
+        # Get cycles for selection
+        # We need to list ALL cycles for this profile
+        all_cycles = store.get_past_cycles()
+        profile_cycles = [
+            c for c in all_cycles if c.get("profile_name") == self._selected_profile
+        ]
+
+        #Sort by start time descending
+        profile_cycles.sort(key=lambda x: x["start_time"], reverse=True)
+
+        # Map hex colors to emojis for easier identification
+        hex_to_emoji = {
+            "#e6194b": "🔴", # Red
+            "#3cb44b": "🟢", # Green
+            "#ffe119": "🟡", # Yellow
+            "#4363d8": "🔵", # Blue
+            "#f58231": "🟠", # Orange
+            "#911eb4": "🟣", # Purple
+            "#42d4f4": "🔵", # Cyan
+            "#f032e6": "🟣", # Magenta
+            "#bfef45": "🟢", # Lime
+            "#fabed4": "🌸", # Pink
+            "#469990": "teal", # Teal
+            "#dcbeff": "🟣", # Lavender
+            "#9A6324": "🟤", # Brown
+            "#fffac8": "⚪", # Beige
+            "#800000": "🔴", # Maroon
+            "#aaffc3": "🟢", # Mint
+            "#808000": "🟤", # Olive
+            "#ffd8b1": "🟠", # Apricot
+            "#000075": "🔵", # Navy
+            "#a9a9a9": "⚪", # Grey
+        }
+
+        options = []
+        for c in profile_cycles:
+            start = c["start_time"].split(".")[0].replace("T", " ")
+            duration_min = int(c["duration"] / 60)
+            status = c.get("status", "completed")
+            
+            # Status icon
+            status_icon = (
+                "✓"
+                if status in ("completed", "force_stopped")
+                else "⚠" if status == "resumed" else "✗"
+            )
+            
+            # Graph Color
+            color_hex = cycle_colors.get(c["id"])
+            color_emoji = hex_to_emoji.get(color_hex, "⚫") if color_hex else ""
+            
+            # Add energy if available to help identify
+            energy = ""
+            if "total_energy_kwh" in c:
+                energy = f" | {c['total_energy_kwh']:.3f} kWh"
+
+            label = f"{color_emoji} {status_icon} {start} - {duration_min}m{energy}"
+            options.append(selector.SelectOptionDict(value=c["id"], label=label))
+
+        return self.async_show_form(
+            step_id="cleanup_select",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional("cycles_to_delete"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=options,
+                            mode=selector.SelectSelectorMode.LIST,
+                            multiple=True,
+                        )
+                    )
+                }
+            ),
+            description_placeholders={
+                "graph_url": graph_url,
+                "profile_name": self._selected_profile,
+            },
         )
 
     async def async_step_profile_stats(
@@ -1128,7 +1206,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
             # FORCE REFRESH: Rebuild envelope to ensure data is fresh
             # This calculates energy, consistency, etc.
-            store.rebuild_envelope(name)
+            await store.async_rebuild_envelope(name)
 
             safe_name = slugify(name)
             count = p["cycle_count"]
@@ -1151,7 +1229,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 last_run = dt
 
             # Generate and Write SVG
-            svg_content = store.generate_profile_svg(name)
+            # Offload to executor to prevent blocking
+            svg_content = await self.hass.async_add_executor_job(
+                store.generate_profile_svg, name
+            )
             graph_markdown = ""
             if svg_content:
                 file_path = f"{stats_dir}/profile_{safe_name}.svg"
@@ -1221,7 +1302,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     )
                     manager.notify_update()
                     return self.async_create_entry(
-                        title="", data=dict(self._config_entry.options)
+                        title="", data=dict(self.config_entry.options)
                     )
                 except ValueError:
                     errors["base"] = "profile_exists"
@@ -1338,7 +1419,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     )
                     manager.notify_update()
                     return self.async_create_entry(
-                        title="", data=dict(self._config_entry.options)
+                        title="", data=dict(self.config_entry.options)
                     )
                 except ValueError:
                     errors["base"] = "rename_failed"
@@ -1412,7 +1493,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             )
             manager.notify_update()
             return self.async_create_entry(
-                title="", data=dict(self._config_entry.options)
+                title="", data=dict(self.config_entry.options)
             )
 
         return self.async_show_form(
@@ -1450,7 +1531,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             manager.notify_update()
             return self.async_create_entry(
                 title="",
-                data=dict(self._config_entry.options),
+                data=dict(self.config_entry.options),
             )
 
         return self.async_show_form(
@@ -1558,7 +1639,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # await manager.profile_store.async_save() # Handled inside delete_cycle now
             manager.notify_update()
             return self.async_create_entry(
-                title="", data=dict(self._config_entry.options)
+                title="", data=dict(self.config_entry.options)
             )
 
         return self.async_show_form(
@@ -1599,7 +1680,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         await store.create_profile(new_name, self._selected_cycle_id)
                         manager.notify_update()
                         return self.async_create_entry(
-                            title="", data=dict(self._config_entry.options)
+                            title="", data=dict(self.config_entry.options)
                         )
                     except ValueError:
                         errors["base"] = "profile_exists"
@@ -1608,7 +1689,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 await store.assign_profile_to_cycle(self._selected_cycle_id, None)
                 manager.notify_update()
                 return self.async_create_entry(
-                    title="", data=dict(self._config_entry.options)
+                    title="", data=dict(self.config_entry.options)
                 )
             else:
                 # Assign existing profile
@@ -1618,7 +1699,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     )
                     manager.notify_update()
                     return self.async_create_entry(
-                        title="", data=dict(self._config_entry.options)
+                        title="", data=dict(self.config_entry.options)
                     )
                 except ValueError:
                     errors["base"] = "assignment_failed"
@@ -1697,7 +1778,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
             return self.async_create_entry(
                 title="",
-                data=dict(self._config_entry.options),
+                data=dict(self.config_entry.options),
                 description_placeholders={"count": msg},
             )
 
@@ -1750,7 +1831,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
             return self.async_create_entry(
                 title="",
-                data=dict(self._config_entry.options),
+                data=dict(self.config_entry.options),
                 description_placeholders={"count": str(count)},
             )
 
@@ -1778,7 +1859,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
             return self.async_create_entry(
                 title="",
-                data=dict(self._config_entry.options),
+                data=dict(self.config_entry.options),
                 description_placeholders={"info": "History cleared"},
             )
 
@@ -1791,4 +1872,245 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     "this device. This cannot be undone!"
                 )
             },
+        )
+
+    async def async_step_record_cycle(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle Record Mode menu."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        
+        # Determine available actions based on state
+        is_recording = manager.recorder.is_recording
+        has_last_run = manager.recorder.last_run is not None
+
+        if user_input is not None:
+            action = user_input["action"]
+            if action == "start_recording":
+                return await self.async_step_record_start()
+            if action == "stop_recording":
+                return await self.async_step_record_stop()
+            if action == "process_recording":
+                return await self.async_step_record_process()
+            if action == "discard_recording":
+                await manager.recorder.clear_last_run()
+                return await self.async_step_record_cycle()
+            if action == "refresh_status":
+                return await self.async_step_record_cycle()
+
+        options = {}
+        if is_recording:
+            options["refresh_status"] = "Refresh Status"
+            options["stop_recording"] = "Stop Recording (Save & Process)"
+            status = "ACTIVE"
+            duration = int(manager.recorder.current_duration)
+            samples = len(getattr(manager.recorder, "_buffer", []))
+        else:
+            options["start_recording"] = "Start New Recording"
+            status = "STOPPED"
+            duration = 0
+            samples = 0
+            
+            if has_last_run:
+                options["process_recording"] = "Process Last Recording (Trim & Save)"
+                options["discard_recording"] = "Discard Last Recording"
+                
+                last_run = manager.recorder.last_run
+                samples = len(last_run.get("data", []))
+                try:
+                    start = dt_util.parse_datetime(last_run["start_time"])
+                    end = dt_util.parse_datetime(last_run["end_time"])
+                    duration = int((end - start).total_seconds())
+                    status = "READY TO PROCESS"
+                except Exception:
+                    pass
+
+        return self.async_show_form(
+            step_id="record_cycle",
+            data_schema=vol.Schema({vol.Required("action"): vol.In(options)}),
+            description_placeholders={
+                "status": status,
+                "duration": str(duration),
+                "samples": str(samples)
+            },
+        )
+
+    async def async_step_record_start(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Start a recording."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        await manager.async_start_recording()
+        return await self.async_step_record_cycle()
+
+    async def async_step_record_stop(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Stop a recording."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        await manager.async_stop_recording()
+        # Automatically go to process step? Or back to menu?
+        # User might want to immediately process.
+        return await self.async_step_record_process()
+
+    async def async_step_record_process(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Process (Trim & Save) the recorded cycle."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        last_run = manager.recorder.last_run
+
+        if not last_run:
+            return self.async_abort(reason="no_recording_found")
+
+        data = last_run.get("data", [])
+        
+        if user_input is not None:
+             save_mode = user_input["save_mode"]
+             
+             if save_mode == "discard":
+                 await manager.recorder.clear_last_run()
+                 return self.async_create_entry(title="", data={})
+                 
+             head_trim = user_input["head_trim"]
+             tail_trim = user_input["tail_trim"]
+             profile_name = user_input["profile_name"].strip()
+
+             # APPLY TRIMS
+             # Convert data to timestamps
+             parsed = []
+             for t_str, p in data:
+                 t = dt_util.parse_datetime(t_str).timestamp()
+                 parsed.append((t, p))
+             
+             if not parsed:
+                 return self.async_abort(reason="empty_recording")
+
+             start_ts = parsed[0][0]
+             end_ts = parsed[-1][0]
+             
+             # Calculate cut points
+             keep_start = start_ts + head_trim
+             keep_end = end_ts - tail_trim
+             
+             trimmed_data = []
+             for t, p in parsed:
+                 if t >= keep_start and t <= keep_end:
+                     t_iso = dt_util.utc_from_timestamp(t).isoformat()
+                     trimmed_data.append((t_iso, p))
+             
+             duration = max(0.0, (keep_end - keep_start))
+             
+             cycle_data = {
+                 "id": f"rec_{int(time.time())}",
+                 "start_time": dt_util.utc_from_timestamp(keep_start).isoformat(),
+                 "end_time": dt_util.utc_from_timestamp(keep_end).isoformat(),
+                 "duration": duration,
+                 "profile_name": profile_name,
+                 "power_data": trimmed_data,
+                 "status": "completed",
+                 "meta": {"source": "recorder", "original_samples": len(data)}
+             }
+             
+             if save_mode == "new_profile":
+                  await manager.profile_store.create_profile_standalone(profile_name)
+                  await manager.profile_store.async_add_cycle(cycle_data)
+                  await manager.profile_store.async_rebuild_envelope(profile_name)
+             else:
+                  # Add to existing
+                  await manager.profile_store.async_add_cycle(cycle_data)
+                  await manager.profile_store.async_rebuild_envelope(profile_name)
+             
+             await manager.profile_store.async_save()
+             await manager.recorder.clear_last_run()
+             
+             return self.async_create_entry(title="", data={})
+
+        # Calculate suggestions
+        rec_start_str = manager.recorder.last_run.get("start_time")
+        rec_end_str = manager.recorder.last_run.get("end_time")
+        
+        rec_start = dt_util.parse_datetime(rec_start_str) if rec_start_str else None
+        rec_end = dt_util.parse_datetime(rec_end_str) if rec_end_str else None
+        
+        head_suggest, tail_suggest, sampling_rate = manager.recorder.get_trim_suggestions(
+             data, recording_start=rec_start, recording_end=rec_end
+        )
+        
+        # Generate Preview Graph
+        ts = int(time.time())
+        stats_dir = self.hass.config.path("www", "ha_washdata", "preview")
+        await self.hass.async_add_executor_job(
+            lambda: os.makedirs(stats_dir, exist_ok=True)
+        )
+        
+        svg_content = await self.hass.async_add_executor_job(
+             manager.profile_store.generate_preview_svg, 
+             data, 
+             head_suggest, 
+             tail_suggest
+        )
+        
+        graph_url = ""
+        if svg_content:
+             fname = f"preview_{ts}.svg"
+             path = f"{stats_dir}/{fname}"
+             
+             def write_svg():
+                 with open(path, "w", encoding="utf-8") as f:
+                     f.write(svg_content)
+                     
+             await self.hass.async_add_executor_job(write_svg)
+             graph_url = f"/local/ha_washdata/preview/{fname}?v={ts}"
+
+        # Profile options
+        profiles = list(manager.profile_store.get_profiles().keys())
+        profiles.sort()
+        
+        schema = {
+            vol.Required("head_trim", default=head_suggest): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0, max=300, step=0.1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s")
+            ),
+            vol.Required("tail_trim", default=tail_suggest): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0, max=300, step=0.1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s")
+            ),
+            vol.Required("save_mode", default="existing_profile"): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                     options=[
+                         {"value": "new_profile", "label": "Create New Profile"},
+                         {"value": "existing_profile", "label": "Add to Existing Profile"},
+                         {"value": "discard", "label": "Discard Recording"},
+                     ],
+                     mode=selector.SelectSelectorMode.LIST
+                )
+            ),
+            # Profile name optional if discarding? No dynamic update, so required logic applies.
+            # We can't easily make it conditional. User has to pick something or we allow empty?
+            # If user picks "Create New", they need a name. "Existing", they pick one.
+            # "Discard", name is ignored.
+            # Providing a text input that doubles as selector is tricky.
+            # We used SelectSelector with custom_value=True.
+            vol.Required("profile_name"): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                     options=profiles,
+                     mode=selector.SelectSelectorMode.DROPDOWN,
+                     custom_value=True
+                )
+            )
+        }
+        
+        # Calculate duration for display
+        duration_val = 0.0
+        if rec_start and rec_end:
+             duration_val = (rec_end - rec_start).total_seconds()
+        
+        return self.async_show_form(
+             step_id="record_process",
+             data_schema=vol.Schema(schema),
+             description_placeholders={
+                 "samples": str(len(data)),
+                 "duration": f"{duration_val:.1f}", 
+                 "graph_url": graph_url,
+                 "sampling_rate": str(sampling_rate)
+             }
         )

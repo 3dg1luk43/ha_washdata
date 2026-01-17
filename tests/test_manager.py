@@ -119,7 +119,8 @@ def test_check_pre_completion_disabled(manager: WashDataManager, mock_hass: Any)
     assert mock_hass.components.persistent_notification.async_create.call_count == 0
 
 
-def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: Any) -> None:
+@pytest.mark.asyncio
+async def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: Any) -> None:
     """Cycle end should request feedback (event + persistent notification) before state is cleared."""
     # Arrange: pretend we had a confident match
     manager.profile_store._data["profiles"] = {"Heavy Duty": {"avg_duration": 3600}}
@@ -128,6 +129,21 @@ def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: Any) -
     manager._last_match_confidence = 0.80
     manager._learning_confidence = 0.70
     manager._auto_label_confidence = 0.95
+
+    # Mock async methods called in _async_process_cycle_end
+    # Create a mock MatchResult
+    mock_res = MagicMock()
+    mock_res.best_profile = "Heavy Duty"
+    mock_res.confidence = 0.80
+    mock_res.ranking = []
+    mock_res.debug_details = {}
+    mock_res.is_ambiguous = False
+    
+    manager.profile_store.async_match_profile = AsyncMock(return_value=mock_res)
+    manager.profile_store.async_add_cycle = AsyncMock()
+    manager.profile_store.async_rebuild_envelope = AsyncMock()
+    manager.profile_store.async_clear_active_cycle = AsyncMock()
+    manager._run_post_cycle_processing = AsyncMock()
 
     cycle_data = {
         "start_time": "2025-12-21T10:00:00",
@@ -138,11 +154,9 @@ def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: Any) -
         "status": "completed",
     }
 
-    # Act
-    manager._on_cycle_end(dict(cycle_data))
+    # Act: call async method directly
+    await manager._async_process_cycle_end(dict(cycle_data))
 
-    # Assert: feedback event fired and notification created
-    # Assert: feedback notification created (event removed)
     # Assert: feedback event fired and notification created
     # Check that service call was made
     mock_hass.services.async_call.assert_called()
@@ -155,7 +169,9 @@ def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: Any) -
     assert found
 
 
-def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, mock_hass: Any) -> None:
+
+@pytest.mark.asyncio
+async def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, mock_hass: Any) -> None:
     """High-confidence matches should auto-label and not request user feedback."""
     manager.profile_store._data["profiles"] = {"Heavy Duty": {"avg_duration": 3600}}
     manager._current_program = "Heavy Duty"
@@ -167,6 +183,17 @@ def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, mock_ha
     manager.learning_manager.auto_label_high_confidence = MagicMock(return_value=True)
     manager.learning_manager.request_cycle_verification = MagicMock()
 
+    # Mocks
+    mock_res = MagicMock()
+    mock_res.best_profile = "Heavy Duty"
+    mock_res.confidence = 0.98
+    
+    manager.profile_store.async_match_profile = AsyncMock(return_value=mock_res)
+    manager.profile_store.async_add_cycle = AsyncMock()
+    manager.profile_store.async_rebuild_envelope = AsyncMock()
+    manager.profile_store.async_clear_active_cycle = AsyncMock()
+    manager._run_post_cycle_processing = AsyncMock()
+
     cycle_data = {
         "start_time": "2025-12-21T10:00:00",
         "end_time": "2025-12-21T11:00:00",
@@ -176,7 +203,7 @@ def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, mock_ha
         "status": "completed",
     }
 
-    manager._on_cycle_end(dict(cycle_data))
+    await manager._async_process_cycle_end(dict(cycle_data))
 
     manager.learning_manager.auto_label_high_confidence.assert_called_once()
     manager.learning_manager.request_cycle_verification.assert_not_called()
@@ -383,7 +410,8 @@ async def test_restore_active_cycle_ending(manager: WashDataManager) -> None:
     # Should start watchdog
     assert manager._remove_watchdog is not None
 
-def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, mock_hass: Any) -> None:
+@pytest.mark.asyncio
+async def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, mock_hass: Any) -> None:
     """Test that _on_cycle_end attempts to auto-label an unmatched cycle."""
     manager._auto_label_confidence = 0.8
     
@@ -398,10 +426,11 @@ def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, mock_ha
         is_ambiguous=False, 
         ambiguity_margin=0.0
     )
-    manager.profile_store.match_profile = MagicMock(return_value=match_result)
-    manager.profile_store.add_cycle = MagicMock()
+    # Use AsyncMock for async_match_profile
+    manager.profile_store.async_match_profile = AsyncMock(return_value=match_result)
+    manager.profile_store.async_add_cycle = AsyncMock()
     manager.profile_store.async_save = AsyncMock()
-    manager.profile_store.rebuild_envelope = MagicMock()
+    manager.profile_store.async_rebuild_envelope = AsyncMock()
     manager.profile_store.async_clear_active_cycle = AsyncMock()
     # Mock _run_post_cycle_processing to avoid errors
     manager._run_post_cycle_processing = AsyncMock()
@@ -413,13 +442,13 @@ def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, mock_ha
         "profile_name": None # Initially None
     }
     
-    manager._on_cycle_end(cycle_data)
+    await manager._async_process_cycle_end(cycle_data)
     
-    # Verify match_profile was called
-    manager.profile_store.match_profile.assert_called_once()
+    # Verify async_match_profile was called
+    manager.profile_store.async_match_profile.assert_called_once()
     
     # Verify cycle_data was updated BEFORE add_cycle
-    args = manager.profile_store.add_cycle.call_args[0]
+    args = manager.profile_store.async_add_cycle.call_args[0]
     added_cycle = args[0]
     assert added_cycle["profile_name"] == "DerivedProfile"
 
