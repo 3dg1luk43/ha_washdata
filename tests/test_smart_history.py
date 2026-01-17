@@ -28,10 +28,9 @@ async def test_smart_merge_logic(mock_hass):
              "avg_duration": 3600,
              "sample_cycle_id": "sample1"
         }
-        # Mock match_profile to return high score for ~60m cycle
-        orig_match = store.match_profile
+        # Mock async_match_profile to return high score for ~60m cycle
         
-        def mock_match(readings, duration):
+        async def mock_match(readings, duration):
             matched_phase = "Run"
             is_confident_mismatch = False
             expected_duration = 3600
@@ -61,7 +60,7 @@ async def test_smart_merge_logic(mock_hass):
                 ambiguity_margin=0.0
             )
             
-        store.match_profile = mock_match
+        store.async_match_profile = mock_match
         
         # Scenario 1: Split Cycle (Fragment 2m + Main 58m) -> Merge
         # now is currently mock_dt.now()
@@ -144,6 +143,7 @@ async def test_smart_split_logic(mock_hass):
                 ambiguity_margin=0.0
             )
             
+        # Split uses synchronous wrapper - renamed from _match_profile_sync
         store.match_profile = mock_match
         
         # Scenario: Merged Blob (Wash + gap + Rinse) = 2400s + gap

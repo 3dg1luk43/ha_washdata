@@ -173,7 +173,8 @@ class CycleDetector:
         try:
             result = self._profile_matcher(self._power_readings)
             # If synchronous result returned, process it.
-            # If None returned (async offload), the matcher is responsible for calling update_match later.
+            # If None returned (async offload), the matcher is responsible for
+            # calling update_match later.
             if result:
                 self.update_match(result)
 
@@ -189,7 +190,7 @@ class CycleDetector:
         # wrapper returns (name, confidence, duration, phase, is_mismatch)
         # Or MatchResult object if refactored, but currently wrapper returns tuple.
         
-        is_mismatch = False
+        is_match_mismatch = False
         match_name = None
         phase_name = None
         
@@ -200,18 +201,18 @@ class CycleDetector:
                     _,
                     expected_duration,
                     phase_name,
-                    is_mismatch,
+                    is_match_mismatch,
                 ) = result[:5]
             else:
                 # Fallback for old signature
                 (match_name, _, expected_duration, phase_name) = result[:4]
-                is_mismatch = False
+                is_match_mismatch = False
         else:
-             # Assume MatchResult object or similar (future proofing)
-             # But for now wrapper returns tuple
-             return
+            # Assume MatchResult object or similar (future proofing)
+            # But for now wrapper returns tuple
+            return
 
-        if is_mismatch and self._matched_profile:
+        if is_match_mismatch and self._matched_profile:
             # Confident non-match - revert to detecting if previously matched
             self._matched_profile = None
             
@@ -574,24 +575,46 @@ class CycleDetector:
             self._matched_profile = snapshot.get("matched_profile")
 
             start = snapshot.get("current_cycle_start")
+            self._current_cycle_start = None
             if start:
                 try:
-                    self._current_cycle_start = dt_util.parse_datetime(start)
+                    dt_start = dt_util.parse_datetime(start)
+                    if dt_start and dt_start.tzinfo is None:
+                        # Fix Naive Timestamp (Legacy Data)
+                        dt_start = dt_start.replace(tzinfo=dt_util.now().tzinfo)
+                        _LOGGER.warning("Restored Naive start_time, assuming local: %s", dt_start)
+                    self._current_cycle_start = dt_start
                 except Exception:  # pylint: disable=broad-exception-caught
-                    self._current_cycle_start = None
+                    _LOGGER.warning("Failed to parse start time: %s", start)
 
             readings = snapshot.get("power_readings", [])
             self._power_readings = []
+
+            # Detect naive readings once
+            has_naive_readings = False
+
             for r in readings:
                 if isinstance(r, (list, tuple)) and len(r) == 2:
                     t = dt_util.parse_datetime(r[0])
                     if t:
+                        if t.tzinfo is None:
+                            t = t.replace(tzinfo=dt_util.now().tzinfo)
+                            has_naive_readings = True
                         self._power_readings.append((t, float(r[1])))
+
+            if has_naive_readings:
+                _LOGGER.warning(
+                    "Restored %d power readings with Naive timestamps (fixed to local)",
+                    len(self._power_readings),
+                )
 
             # Restore last active
             last_active = snapshot.get("last_active_time")
             if last_active:
-                self._last_active_time = dt_util.parse_datetime(last_active)
+                dt_last = dt_util.parse_datetime(last_active)
+                if dt_last and dt_last.tzinfo is None:
+                    dt_last = dt_last.replace(tzinfo=dt_util.now().tzinfo)
+                self._last_active_time = dt_last
             else:
                 self._last_active_time = self._current_cycle_start
 

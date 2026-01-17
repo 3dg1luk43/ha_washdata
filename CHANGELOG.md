@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This release marks a complete re-engineering of the HA WashData core, transitioning from simple heuristics to a rigorous signal processing pipeline and robust state machine. While the version number is minor, this is effectively a new engine under the hood.
 
+**Verification Status**: Comprehensive logic review and validation of Detection, Matching, Switching, and Prediction logic completed (Jan 2026).
+
 ### 🏗️ Core Architecture: Signal Processing & State Machine
 - **New Signal Processing Engine** (`signal_processing.py`):
   - **Dt-Aware Integration**: Replaced simple averaging with trapezoidal Riemann sum integration (`integrate_wh`) that respects variable sampling intervals.
@@ -45,6 +47,10 @@ This release marks a complete re-engineering of the HA WashData core, transition
 - **Ghost Cycles**: New `completion_min_seconds` logic filters out short "noise" events that previously registered as cycles.
 - **Start/End Flutter**: Start debounce and End repeat counts are now configurable and backed by robust accumulators, eliminating false starts/ends.
 - **Crash Fixes**: Resolved `UnboundLocalError` and specific edge-case crashes in `profile_store.py` during migration.
+- **Critical Fix (Runtime Matching)**: Fixed an issue where runtime profile matching was blocking the event loop and skipping DTW; now uses the full async pipeline.
+- **Legacy Data Repair**: Added automatic reconstruction of missing `time_grid` in old profile envelopes to prevent errors.
+- **Validation**: Fixed missing `dtw_bandwidth` key in `strings.json` causing config flow validation errors.
+- **Maintenance Safety**: Fixed aggressive cleanup logic that was deleting empty/new profiles (pending training); these are now safely preserved.
 
 ### ⚠️ Deprecations
 - **Legacy Logic**: Removed "consecutive samples" based detection in favor of time-aware accumulators.

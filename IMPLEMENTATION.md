@@ -17,12 +17,155 @@ This document covers the complete implementation of all major features:
 
 ## Table of Contents
 
-- [Features Implemented](#features-implemented)
-- [Architecture](#architecture)
+- [Flows & Processes](#flows--processes)
+- [Key Features](#features-implemented)
 - [Key Classes & APIs](#key-classes--apis)
 - [Event Flow](#event-flow)
 - [Configuration](#configuration)
 - [Deployment Notes](#deployment-notes)
+
+---
+
+## Flows & Processes
+
+### 1. User Journey Flow
+This high-level flow describes how a user interacts with the integration, from initial setup to daily use and feedback.
+
+```mermaid
+graph TD
+    A[Install Integration] --> B[Configure Settings]
+    B --> C{Action?}
+    
+    C -- "Create Profile" --> D["Create Empty Profile"]
+    C -- "Record Cycle" --> E["Manual Rec. Start"]
+    C -- "Normal Use (Recording mode: OFF)" -->  F["Run Appliance"]
+    
+    D -- "Recording mode: OFF" -->  F
+    
+    E --> G[Run Cycle]
+    G -- "Recording mode: ON" --> F
+    F -- "Recording mode: ON" -->  H["Manual Rec. Stop"]
+    H --> I[Save as Past Cycle]
+    I --> J[Create Profile from Cycle]
+
+    
+    F -- "Recording mode: OFF" -->  K[Detection Logic]
+    
+    subgraph Detection
+    K -- "Match Found" --> L[Monitor Progress]
+    K -- "No Match" --> M["Track as 'Unknown'"]
+    end
+    
+    L --> N[Cycle Complete]
+    M --> N
+    
+    N --> O[Update Stats & Envelopes]
+    O --> P{Check Confidence}
+    
+    P -- "High (>0.75)" --> Q[Auto-Label Cycle]
+    P -- "Medium (0.15-0.75)" --> R[Request Feedback]
+    P -- "Low (<0.15)" --> S[Log to History]
+    
+    R --> T["User Confirms/Corrects"]
+    T --> U["System Learns"]
+```
+
+### 2. Event Processing Pipeline
+How raw power sensor data is processed into cycle states.
+ 
+ ```mermaid
+ sequenceDiagram
+     participant Sensor as Power Sensor
+     participant Manager as WashDataManager
+     participant Detector as CycleDetector
+     participant Matcher as ProfileStore (Async)
+     
+     Sensor->>Manager: State Change (Power W)
+     Manager->>Detector: process_reading(time, watts)
+     
+     rect rgb(20, 20, 20)
+     Note over Detector: State Machine Logic
+     Detector->>Detector: Check Gates (Start/End Energy)
+     Detector->>Detector: Update State (OFF/RUNNING)
+     end
+     
+     Detector-->>Manager: State Changed (e.g. STARTING -> RUNNING)
+     
+     loop Every 5 Minutes
+         Manager->>Matcher: async_match_profile(current_data)
+         Matcher->>Matcher: 3-Stage Pipeline (NumPy/DTW)
+         Matcher-->>Manager: MatchResult (Best Profile, Confidence)
+         Manager->>Manager: Update Estimations
+     end
+ ```
+ 
+ ### 3. Cycle Detection State Machine
+ The core finite state machine logic governing cycle lifecycle.
+ 
+ ```mermaid
+ stateDiagram-v2
+     [*] --> OFF
+     
+     OFF --> STARTING: Power > Threshold
+     STARTING --> RUNNING: Energy > Start_Threshold
+     STARTING --> OFF: Power < Threshold (Spike)
+     
+     RUNNING --> PAUSED: Power < Threshold
+     PAUSED --> RUNNING: Power > Threshold
+     
+     PAUSED --> ENDING: Time > Off_Delay
+     RUNNING --> ENDING: Time > Off_Delay (rare)
+     
+     ENDING --> OFF: Energy < End_Threshold
+     ENDING --> PAUSED: Energy > End_Threshold (False End)
+     
+     OFF --> [*]
+ ```
+ 
+ ### 4. Matching Pipeline (3-Stage)
+ The logic used to identify which profile matches the current cycle.
+ 
+ ```mermaid
+ graph TD
+     A[Raw Power Data] --> B["Resampling (10s intervals)"]
+     B --> C{"Stage 1: Fast Reject"}
+     C -- "Duration Ratio < 0.75 or > 1.25" --> D[Discard]
+     C -- "Pass" --> E["Stage 2: Core Similarity"]
+     
+     E --> F["Calculate MAE, Correlation, Peak"]
+     F --> G{"Ambiguous Result?"}
+     
+     G -- "No (Clear Winner)" --> H[Select Top Candidate]
+     G -- "Yes (Close Scores)" --> I["Stage 3: DTW Refinement"]
+     
+     I --> J[Run Dynamic Time Warping]
+     J --> H
+     
+     H --> K{"Confidence > Threshold?"}
+     K -- Yes --> L[Match Confirmed]
+     K -- No --> M["Unknown / Detecting..."]
+ ```
+
+### 5. Learning Mechanism (Feedback Loop)
+How the system adapts to user corrections.
+
+```mermaid
+graph LR
+    A[Cycle Complete] --> B{Confidence Level}
+    
+    B -- "High (>= 0.75)" --> C[Auto-Label Cycle]
+    C --> D[Rebuild Envelope]
+    
+    B -- "Moderate (0.15 - 0.75)" --> E[Emit Feedback Request]
+    E --> F[User Notification]
+    F --> G{User Action?}
+    
+    G -- Confirm --> H[Boost Confidence]
+    G -- Correct --> I[Update Profile Stats]
+    
+    B -- "Low (< 0.15)" --> J["Log to History (No Action)"]
+```
+
 
 ---
 
@@ -360,70 +503,12 @@ ProfileStore.async_run_maintenance()
 - System calculates standard deviation (variance) of the matched profile window.
 - If variance is high (>50W std dev): Time estimate updates are **damped** (locked).
 - If variance is low: Time estimate updates normally.
-- **Result:** Smooth countdown that "pauses" during heating/waiting instead of jumping up and down.
+- **Switching Logic**: System switches profile mid-cycle if:
+    - New match confidence > Existing score + 0.15 (Strong override)
+    - New match shows positive trend (>70% increasing scores)
+ 
 
----
-
-## Architecture
-
-### Component Diagram
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Home Assistant Integration                │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │            WashDataManager (manager.py)               │  │
-│  │ • Power sensor updates                                │  │
-│  │ • Cycle detection & state management                 │  │
-│  │ • Progress tracking & idle-based reset               │  │
-│  │ • Feedback requests                                   │  │
-│  │ • Events & notifications                              │  │
-│  └──────────────────────────────────────────────────────┘  │
-│           ↓                              ↓                   │
-│  ┌──────────────────┐        ┌──────────────────────────┐  │
-│  │ CycleDetector    │        │  LearningManager (NEW)   │  │
-│  │                  │        │                          │  │
-│  │ • State machine  │        │ • Feedback tracking      │  │
-│  │ • Power trace    │        │ • Profile learning       │  │
-│  │ • Off detection  │        │ • Correction history     │  │
-│  └──────────────────┘        └──────────────────────────┘  │
-│           ↓                              ↓                   │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │         ProfileStore (profile_store.py)              │  │
-│  │                                                        │  │
-│  │ • Cycle compression & storage (±25% tolerance)      │  │
-│  │ • Profile matching with variance support            │  │
-│  │ • Feedback history                                   │  │
-│  │ • Duration learning                                  │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                           ↓                                   │
-│                    HA Storage (Store)                        │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Profile Matching Architecture (vNext Multi-Stage Pipeline)
-
-Matches are performed using a robust multi-stage pipeline to ensure accuracy and efficiency:
-
-1. **Data Resampling**: Raw power data is resampled to uniform 10s intervals using area-preserving integration.
-2. **Stage 1: Fast Reject**:
-   - Candidates are filtered based on duration ratio (0.5x - 1.5x).
-   - Energy delta check (if energy difference > 50%, reject).
-3. **Stage 2: Core Similarity**:
-   - **MAE (Mean Absolute Error)**: Compares average wattage logic.
-   - **Correlation**: Shape matching using Pearson correlation.
-   - **Peak Power**: Compares max power amplitude.
-   - Robust Similarity Score = Weighted average of these metrics.
-4. **Stage 3: DTW-Lite (Tie-Breaker)**:
-   - If top candidates are close in score, Dynamic Time Warping (DTW) with Sakoe-Chiba band constraint is applied for definitive matching.
-   - This handles phase shifts (e.g., delayed spin cycle) better than simple correlation.
-
-**Final Selection:**
-The best candidate is selected if its confidence > threshold (default 0.15).
-
+ 
 ---
 
 ## Key Classes & APIs
@@ -452,7 +537,7 @@ manager._last_match_confidence  # Last profile match score
 manager._cycle_completed_time  # When cycle finished (ISO)
 ```
 
-### LearningManager (learning.py - NEW)
+### LearningManager (learning.py)
 
 **Handles user feedback and profile learning.**
 
@@ -471,7 +556,7 @@ manager._cycle_completed_time  # When cycle finished (ISO)
 
 | Method | Purpose |
 |--------|---------|
-| `match_profile(power_data, duration)` | Match cycle to profile (confidence 0-1) |
+| `async_match_profile(power_data, duration)` | Match cycle to profile (confidence 0-1) |
 | `create_profile(name, cycle_id)` | Create new profile from cycle |
 | `async_save_cycle(cycle_data)` | Compress and save cycle |
 | `merge_cycles(hours, gap_threshold)` | Auto-merge fragmented cycles |

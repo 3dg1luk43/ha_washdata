@@ -456,11 +456,11 @@ class LearningManager:
 
         # Reuse existing internal logic
         self._auto_label_cycle(cycle_id, profile_name)
-        
+
         # Verify it was labeled (cycle found)
         cycles = self.profile_store.get_past_cycles()
         cycle = next((c for c in cycles if c["id"] == cycle_id), None)
-        
+
         return bool(cycle and cycle.get("auto_labeled"))
 
     def submit_cycle_feedback(
@@ -504,7 +504,7 @@ class LearningManager:
         del self._pending_feedback[cycle_id]
         if cycle_id in self.profile_store.get_pending_feedback():
             del self.profile_store.get_pending_feedback()[cycle_id]
-        
+
         return True
 
     def _auto_label_cycle(self, cycle_id: str, profile_name: str) -> None:

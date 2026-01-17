@@ -118,7 +118,7 @@ from .const import (
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
-from .profile_store import ProfileStore, MatchResult, decompress_power_data
+from .profile_store import ProfileStore, decompress_power_data
 from .recorder import CycleRecorder
 
 _LOGGER = logging.getLogger(__name__)
@@ -176,7 +176,9 @@ class WashDataManager:
         self._last_match_result = None
         self._last_phase_estimate_time = None
         self._sample_intervals = []
+        self._sample_intervals = []
         self._sample_interval_stats = {}
+        self._matching_task = None
 
         # Components
         # Components
@@ -353,7 +355,7 @@ class WashDataManager:
 
             # Snapshot readings for thread safety
             readings_copy = list(readings)
-            
+
             # Offload to async task
             self.hass.async_create_task(self._async_run_matching_task(readings_copy))
             return None
@@ -426,7 +428,7 @@ class WashDataManager:
 
             # Format in main thread
             formatted = [(t.isoformat(), p) for t, p in readings]
-            
+
             start = readings[0][0]
             end = readings[-1][0]
             current_duration = (end - start).total_seconds()
@@ -438,7 +440,7 @@ class WashDataManager:
 
             # Post-Process in main thread
             self._last_match_result = result
-            
+
             match_name = result.best_profile
             confidence = result.confidence
             expected_duration = result.expected_duration
@@ -448,7 +450,7 @@ class WashDataManager:
                 prof = self.profile_store.get_profiles().get(match_name)
                 if isinstance(prof, dict):
                     expected_duration = float(prof.get("avg_duration", 0.0))
-                    
+
                     # --- DEVICE SPECIFIC PHASE NAMING (Heuristics) ---
                     is_dishwasher = self.device_type == "dishwasher"
                     pct_complete = (
@@ -506,8 +508,8 @@ class WashDataManager:
             )
             self.detector.update_match(final_result)
 
-        except Exception as e: # pylint: disable=broad-exception-caught
-             _LOGGER.error("Async profile matching task failed: %s", e)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            _LOGGER.error("Async profile matching task failed: %s", e)
 
     @property
     def top_candidates(self) -> list[dict[str, Any]]:
@@ -587,10 +589,12 @@ class WashDataManager:
         if active_snapshot and last_save and is_viable_restore(last_save):
             should_restore = True
             age = (dt_util.now() - last_save).total_seconds()
+            age = (dt_util.now() - last_save).total_seconds()
             _LOGGER.info(
-                "Found recently saved active cycle (age=%.0fs), restoring...", age
+                "Found recently saved active cycle (last_save=%s, age=%.0fs), restoring...",
+                last_save,
+                age
             )
-            # If standard restore, we mark it as Restored to potentially guard against
             # strict extension logic unless the user wants to enforce it.
             active_snapshot_to_restore["sub_state"] = (
                 active_snapshot_to_restore.get("sub_state") or "Restored"
@@ -749,7 +753,7 @@ class WashDataManager:
 
         # Attempt to restore state (BEFORE starting listener)
         await self._attempt_state_restoration()
-        
+
         # Load recorder state
         await self.recorder.async_load()
 
@@ -762,7 +766,7 @@ class WashDataManager:
                 self.detector.process_reading(power, now)
             except (ValueError, TypeError):
                 pass
-        
+
         # Trigger migration/compression of old cycle format
         # This is safe to run repeatedly (it skips already compressed cycles)
         await self.profile_store.async_migrate_cycles_to_compressed()
@@ -1133,11 +1137,11 @@ class WashDataManager:
 
         # RECORD MODE INTERCEPTION
         if self.recorder.is_recording:
-             self.recorder.process_reading(power)
-             self._current_power = power
-             self._last_reading_time = dt_util.now()
-             self._notify_update()
-             return
+            self.recorder.process_reading(power)
+            self._current_power = power
+            self._last_reading_time = dt_util.now()
+            self._notify_update()
+            return
 
         now = dt_util.now()
 
@@ -1457,9 +1461,12 @@ class WashDataManager:
                     res.confidence,
                 )
 
-        # Add cycle to store immediately (still sync but offloadable parts optimized internally if possible)
-        # Note: add_cycle is mostly safe (signature calc is O(N) but fast enough for single cycle).
-        # We could offload signature calc to analysis logic if really needed, but let's stick to match profile optimization first.
+        # Add cycle to store immediately (still sync but offloadable parts optimized
+        # internally if possible)
+        # Note: add_cycle is mostly safe (signature calc is O(N) but fast enough for
+        # single cycle).
+        # We could offload signature calc to analysis logic if really needed, but let's
+        # stick to match profile optimization first.
         try:
             await self.profile_store.async_add_cycle(cycle_data)
             profile_name = cycle_data.get("profile_name")
@@ -1509,7 +1516,8 @@ class WashDataManager:
         events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
         if NOTIFY_EVENT_FINISH in events:
             self._send_notification(
-                f"{self.config_entry.title} finished. Duration: {int(duration / 60)}m."
+                f"{self.config_entry.title} finished. Duration: "
+                f"{int(cycle_data['duration'] / 60)}m."
             )
 
         # Request user feedback if we had a confident match.
@@ -1668,12 +1676,27 @@ class WashDataManager:
             self._notify_update()
             return
 
+        # Prevent concurrent matching tasks
+        if self._matching_task and not self._matching_task.done():
+            return
+
         trace = self.detector.get_power_trace()
         if len(trace) < 3:
             return
 
         duration_so_far = self.detector.get_elapsed_seconds()
-        current_power_data = [(t.isoformat(), p) for t, p in trace]
+
+        # Offload matching to async task (non-blocking + includes DTW)
+        self._matching_task = self.hass.async_create_task(
+            self._async_run_matching(trace, duration_so_far)
+        )
+
+    async def _async_run_matching(
+        self, trace: list[tuple[datetime, float]], duration_so_far: float
+    ) -> None:
+        """Run profile matching asynchronously."""
+        # Convert to list for matching (async_match_profile handles datetimes)
+        # We pass the trace directly.
 
         _LOGGER.debug(
             "Profile matching using complete cycle data: %d samples spanning %.0fs",
@@ -1681,10 +1704,14 @@ class WashDataManager:
             duration_so_far,
         )
 
-        result = self.profile_store.match_profile(
-            current_power_data,
-            duration_so_far,
-        )
+        try:
+            result = await self.profile_store.async_match_profile(
+                 trace,  # type: ignore[arg-type] # Handled by robust typing in async_match_profile
+                 duration_so_far
+            )
+        except Exception as e: # pylint: disable=broad-exception-caught
+            _LOGGER.error("Async profile matching failed: %s", e)
+            return
 
         profile_name = result.best_profile
         confidence = result.confidence
@@ -1698,6 +1725,7 @@ class WashDataManager:
             len(trace),
         )
 
+        self._last_match_result = result
         self._last_match_ambiguous = result.is_ambiguous
 
         # Update score history
@@ -1745,7 +1773,7 @@ class WashDataManager:
                 switch_reason = (
                     f"high_confidence_override ({confidence:.3f} vs {current_score:.3f})"
                 )
-            
+
             # Trend Based Switch
             elif confidence > current_score and self._analyze_trend(profile_name):
                 should_switch = True
@@ -1762,7 +1790,8 @@ class WashDataManager:
             self._current_program = "detecting..."
             self._matched_profile_duration = None
             _LOGGER.info(
-                "Unmatched profile '%s' (confidence %.3f < threshold %.3f). Reverting to detection.",
+                "Unmatched profile '%s' (confidence %.3f < threshold %.3f). "
+                "Reverting to detection.",
                 profile_name,
                 confidence,
                 self._unmatch_threshold,
@@ -1784,7 +1813,7 @@ class WashDataManager:
             # No match yet and still searching
             self._current_program = "detecting..."
 
-        self._last_estimate_time = now
+        self._last_estimate_time = dt_util.now()
         self._update_remaining_only()
 
         # Check for pre-completion notification
@@ -1854,7 +1883,8 @@ class WashDataManager:
         if self._matched_profile_duration and self._matched_profile_duration > 0:
             # Get current power trace for phase analysis
             trace = self.detector.get_power_trace()
-            # current_power_data = [(t.isoformat(), p) for t, p in trace] # DEPRECATED: avoid O(N) conversion
+            # current_power_data = [(t.isoformat(), p) for t, p in trace]
+            # DEPRECATED: avoid O(N) conversion
 
             # --- PHASE-AWARE ESTIMATION ---
             if len(trace) >= 10 and self._current_program != "detecting...":
@@ -2002,8 +2032,18 @@ class WashDataManager:
             return None
 
         if len(time_grid) == 0 or target_duration <= 0:
-            _LOGGER.debug("Envelope missing time grid, cannot estimate phase")
-            return None
+            if target_duration > 0 and len(envelope_arrays["avg"]) > 0:
+                # Reconstruct time_grid if missing (Legacy envelope support)
+                count = len(envelope_arrays["avg"])
+                time_grid = np.linspace(0, target_duration, count)
+                _LOGGER.debug(
+                    "Reconstructed missing time_grid for %s (n=%d)",
+                    profile_name,
+                    count,
+                )
+            else:
+                _LOGGER.debug("Envelope missing time grid/duration, cannot estimate phase")
+                return None
 
         # Extract power values and offsets from current cycle
         # We handle both datetime objects (raw trace) and ISO strings (legacy/converted)
@@ -2318,30 +2358,31 @@ class WashDataManager:
         # _async_power_changed will handle cleanup after delay.
 
         # Force a state update to reflect the change immediately
+        self._notify_update()
 
     async def async_start_recording(self) -> None:
         """Start manual recording of a cycle."""
         if self.recorder.is_recording:
-             _LOGGER.warning("Already recording")
-             return
+            _LOGGER.warning("Already recording")
+            return
 
         # Ensure we are in a clean state (stop any running cycle first?)
         # If running, user should probably stop it? Or force stop?
-        # Plan said "unregulated", so we just start recording. 
-        # But if cycle_detector thinks it's running, we should probably "pause" it or just override state.
-        # My override in checks_state handles UI.
+        # Plan said "unregulated", so we just start recording.
+        # But if cycle_detector thinks it's running, we should probably "pause" it
+        # or just override state. My override in checks_state handles UI.
         # But should we clear current program?
         if self.detector.state != "off":
-             _LOGGER.info("Forcing detector reset before recording")
-             self.detector.reset()
-             
+            _LOGGER.info("Forcing detector reset before recording")
+            self.detector.reset()
+
         await self.recorder.start_recording()
         self._notify_update()
 
     async def async_stop_recording(self) -> None:
         """Stop manual recording."""
         if not self.recorder.is_recording:
-             return
+            return
 
         await self.recorder.stop_recording()
         self._notify_update()
@@ -2385,5 +2426,3 @@ class WashDataManager:
             # Note: async_run_maintenance saves automatically if changes occur
         except Exception as e:  # pylint: disable=broad-exception-caught
             _LOGGER.error("Post-cycle processing failed: %s", e)
-
-
