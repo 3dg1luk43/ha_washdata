@@ -21,6 +21,7 @@ description: HA WashData development workflow - project scope, architecture, and
 - **ONLY NumPy allowed** - No SciPy, scikit-learn, or other ML libraries
 - Must be in `manifest.json` requirements field
 - No external API calls - 100% local
+- **Async I/O Mandatory**: All heavy matching (DTW, NumPy) MUST run in executor (`await hass.async_add_executor_job`). NEVER block the event loop.
 
 ### 2. dt-Aware Computations
 - All time/energy calculations MUST use timestamps (not sample counts)

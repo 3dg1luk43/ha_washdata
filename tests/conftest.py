@@ -1,4 +1,4 @@
-
+"""Pytest fixtures for ha_washdata tests."""
 import pytest
 from unittest.mock import MagicMock
 # Ensure mocks are loaded before anything else

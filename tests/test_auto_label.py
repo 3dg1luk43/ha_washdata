@@ -29,7 +29,7 @@ async def test_auto_label_cycles_basic(store):
     ]
     
     # Mock match_profile
-    with patch.object(store, "match_profile") as mock_match, \
+    with patch.object(store, "async_match_profile") as mock_match, \
          patch.object(store, "_decompress_power_data") as mock_decomp:
         
         # Fake power data to pass length check
@@ -68,7 +68,7 @@ async def test_auto_label_cycles_overwrite(store):
         {"id": "c1", "profile_name": "WrongProfile", "duration": 3600, "power_data": []},
     ]
     
-    with patch.object(store, "match_profile") as mock_match, \
+    with patch.object(store, "async_match_profile") as mock_match, \
          patch.object(store, "_decompress_power_data") as mock_decomp:
         
         mock_decomp.return_value = [("t", 1.0)] * 20

@@ -566,11 +566,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)
             if not device:
-                 raise ValueError("Device not found")
+                raise ValueError("Device not found")
             entry_id = next(iter(device.config_entries), None)
             if not entry_id or entry_id not in hass.data[DOMAIN]:
-                 raise ValueError("Integration not loaded")
-            
+                raise ValueError("Integration not loaded")
+
             manager = hass.data[DOMAIN][entry_id]
             await manager.async_start_recording()
 
@@ -582,11 +582,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)
             if not device:
-                 raise ValueError("Device not found")
+                raise ValueError("Device not found")
             entry_id = next(iter(device.config_entries), None)
             if not entry_id or entry_id not in hass.data[DOMAIN]:
-                 raise ValueError("Integration not loaded")
-            
+                raise ValueError("Integration not loaded")
+
             manager = hass.data[DOMAIN][entry_id]
             await manager.async_stop_recording()
 

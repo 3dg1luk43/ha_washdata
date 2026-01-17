@@ -35,7 +35,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Self-Learning**: Gradually adjusts expected durations based on your confirmed historical data.
 - **Realistic Variance**: Handles natural cycle duration variations with configurable tolerance.
 - **Progress Tracking**: Clear cycle progress indicator with automatic reset after unload.
-- **Auto-Maintenance**: Nightly cleanup - removes orphaned profiles, merges fragmented cycles.
+- **Auto-Maintenance**: Nightly cleanup - removes broken profiles, merges fragmented cycles (**Empty/New profiles are safely preserved**).
 - **Export/Import**: Full configuration backup/restore with all settings and profiles via JSON.
 
 ---

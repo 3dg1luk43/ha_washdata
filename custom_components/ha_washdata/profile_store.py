@@ -64,13 +64,13 @@ def _generate_generic_svg(
     # Determine bounds
     all_x = [p[0] for c in curves for p in c.points]
     all_y = [p[1] for c in curves for p in c.points]
-    
+
     if not all_x:
         return ""
 
     max_x = max_x_override if max_x_override is not None else max(all_x)
     max_y = max_y_override if max_y_override is not None else max(all_y, default=1.0)
-    
+
     # Headroom
     max_y = max(max_y, 10.0) * 1.05
     max_x = max(max_x, 1.0) # Ensure no div by zero
@@ -86,17 +86,17 @@ def _generate_generic_svg(
     for c in curves:
         if not c.points:
             continue
-            
+
         pts = []
         # Optimization: verify step size if huge data
         for x_val, y_val in c.points:
             pts.append(f"{to_x(x_val):.1f},{to_y(y_val):.1f}")
-        
+
         path_d = " ".join(pts)
         style = f'stroke="{c.color}" stroke-width="{c.stroke_width}" stroke-opacity="{c.opacity}" fill="none"'
         if c.dasharray:
             style += f' stroke-dasharray="{c.dasharray}"'
-            
+
         paths.append(f'<polyline points="{path_d}" {style} />')
 
     # Build Markers
@@ -133,7 +133,7 @@ def _generate_generic_svg(
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
         'style="background-color: #1c1c1c; font-family: sans-serif;">'
     )
-    
+
     return header + grid + "".join(paths) + "".join(marker_svgs) + "</svg>"
 
 
@@ -329,7 +329,7 @@ class ProfileStore:
         self._unmatch_threshold = unmatch_threshold
         self.dtw_bandwidth: float = DEFAULT_DTW_BANDWIDTH
         self._save_debug_traces = save_debug_traces
-        
+
         # Cache for resampled sample segments: key=(cycle_id, dt)
         self._cached_sample_segments: dict[tuple[str, float], Segment] = {}
         # Profile duration tolerance (set by manager; reserved for duration-based heuristics)
@@ -681,7 +681,7 @@ class ProfileStore:
                 # Use async rebuild task
                 self.hass.async_create_task(self.async_rebuild_envelope(p))
             except Exception as e: # pylint: disable=broad-exception-caught
-                 _LOGGER.warning("Failed to schedule envelope rebuild for %s: %s", p, e)
+                _LOGGER.warning("Failed to schedule envelope rebuild for %s: %s", p, e)
 
     def _enforce_retention_data(self) -> set[str]:
         """Internal retention logic (data operations only).
@@ -707,7 +707,7 @@ class ProfileStore:
                 pass
             drop_count = len(cycles) - self._max_past_cycles
             to_drop = cycles[:drop_count]
-            
+
             # Maintain profile sample references when dropping
             sample_refs = {
                 name: p.get("sample_cycle_id")
@@ -718,7 +718,7 @@ class ProfileStore:
                 p_name = cy.get("profile_name")
                 if p_name:
                     affected_profiles.add(p_name)
-                    
+
                 cy_id = cy.get("id")
                 # If a profile sample points here, try to move to most recent cycle of that profile
                 for name, ref_id in list(sample_refs.items()):
@@ -789,7 +789,7 @@ class ProfileStore:
                         c.pop("sampling_interval", None)
                         if key:
                             affected_profiles.add(key)
-        
+
         return affected_profiles
 
 
@@ -798,11 +798,13 @@ class ProfileStore:
         """Remove profiles that reference non-existent cycles.
         Returns number of profiles removed."""
         cycle_ids = {c["id"] for c in self._data.get("past_cycles", [])}
-        orphaned = [
-            name
-            for name, profile in self._data["profiles"].items()
-            if profile.get("sample_cycle_id") not in cycle_ids
-        ]
+        orphaned = []
+        for name, profile in self._data["profiles"].items():
+            ref = profile.get("sample_cycle_id")
+            # Only delete if it references a non-existent cycle ID (Broken Link)
+            # Creating a profile without a sample (None) is allowed (Pending State)
+            if ref and ref not in cycle_ids:
+                orphaned.append(name)
 
         for name in orphaned:
             del self._data["profiles"][name]
@@ -816,7 +818,7 @@ class ProfileStore:
         self, lookback_hours: int = 24, gap_seconds: int = 3600
     ) -> dict[str, int]:
         """Run full maintenance: cleanup orphans, merge fragments, trim old cycles.
-        
+
         Also rebuilds envelopes. Returns stats dict with counts of actions taken.
         """
         stats = {
@@ -854,9 +856,9 @@ class ProfileStore:
         cycles = self._data.get("past_cycles", [])
         if not cycles:
             return 0
-            
+
         processed_count = 0
-        
+
         # 1. Update Signatures
         for cycle in cycles:
             if cycle.get("power_data"):
@@ -867,19 +869,19 @@ class ProfileStore:
                         ts_arr = []
                         p_arr = []
                         for t_str, p in tuples:
-                             t = datetime.fromisoformat(t_str).timestamp()
-                             ts_arr.append(t - start_ts)
-                             p_arr.append(p)
-                             
+                            t = datetime.fromisoformat(t_str).timestamp()
+                            ts_arr.append(t - start_ts)
+                            p_arr.append(p)
+
                         sig = compute_signature(np.array(ts_arr), np.array(p_arr))
                         cycle["signature"] = dataclasses.asdict(sig)
                         processed_count += 1
                 except Exception as e: # pylint: disable=broad-exception-caught
-                     _LOGGER.warning("Failed to reprocess signature: %s", e)
-                     
+                    _LOGGER.warning("Failed to reprocess signature: %s", e)
+
         # 2. Rebuild Envelopes
 
-        
+
         return processed_count
 
     async def async_reprocess_all_data(self) -> int:
@@ -893,22 +895,17 @@ class ProfileStore:
         Returns total number of cycles processed.
         """
         _LOGGER.info("Starting reprocessing (offloaded)...")
-        
+
         # Offload heavy synchronous work
         processed_count = await self.hass.async_add_executor_job(
             self._reprocess_all_data_sync
         )
-        
+
         # 2. Rebuild Envelopes (Using new async infrastructure)
         await self.async_rebuild_all_envelopes()
-        
-        await self.async_save()
-        
-        return processed_count
 
-        # 3. Save changes
         await self.async_save()
-        _LOGGER.info("Reprocessing complete. Updated %s cycles.", processed_count)
+
         return processed_count
 
     async def get_storage_stats(self) -> dict[str, Any]:
@@ -946,16 +943,16 @@ class ProfileStore:
              if profile_name in self._data.get("envelopes", {}):
                  del self._data["envelopes"][profile_name]
              return False
-             
+
         # Extract raw data
         raw_cycles_data = []
         durations = []
-        
+
         for cycle in labeled_cycles:
             power_data_raw = cycle.get("power_data", [])
             if not isinstance(power_data_raw, list) or len(power_data_raw) < 3:
                 continue
-                
+
             # Parse pairs
             pairs = []
             for item in power_data_raw:
@@ -964,16 +961,16 @@ class ProfileStore:
                          pairs.append((float(item[0]), float(item[1])))
                      except (ValueError, TypeError):
                          continue
-            
+
             if len(pairs) < 3:
                 continue
-                
+
             offsets = [p[0] for p in pairs]
             values = [p[1] for p in pairs]
-            
+
             raw_cycles_data.append((offsets, values))
             durations.append(offsets[-1])
-            
+
         if not raw_cycles_data:
              if profile_name in self._data.get("envelopes", {}):
                  del self._data["envelopes"][profile_name]
@@ -992,19 +989,19 @@ class ProfileStore:
             raw_cycles_data,
             self.dtw_bandwidth
         )
-        
+
         if not result:
              if profile_name in self._data.get("envelopes", {}):
                  del self._data["envelopes"][profile_name]
              return False
-             
+
         time_grid, min_curve, max_curve, avg_curve, std_curve = result
 
         # 3. Update Storage
         # Convert to list of points [[x, y], ...]
         def to_points(y_vals: list[float]) -> list[list[float]]:
              return [[round(t, 1), round(y, 1)] for t, y in zip(time_grid, y_vals)]
-             
+
         envelope_data = {
             "time_grid": time_grid, # Add missing time grid used by manager
             "min": to_points(min_curve),
@@ -1014,11 +1011,11 @@ class ProfileStore:
             "cycle_count": len(raw_cycles_data),
             "updated": dt_util.now().isoformat(),
         }
-        
+
         if "envelopes" not in self._data:
             self._data["envelopes"] = {}
         self._data["envelopes"][profile_name] = envelope_data
-        
+
         return True
 
 
@@ -1032,9 +1029,11 @@ class ProfileStore:
 
         try:
             time_grid = envelope["time_grid"]
-            avg_curve = envelope["avg"]
-            min_curve = envelope["min"]
-            max_curve = envelope["max"]
+            # Envelope curves are stored as list of [t, y] points.
+            # Extract Y values for SVG generation logic.
+            avg_curve = [p[1] for p in envelope["avg"]]
+            min_curve = [p[1] for p in envelope["min"]]
+            max_curve = [p[1] for p in envelope["max"]]
 
             # Canvas configuration (Scaled up 50% for High DPI)
             width, height = 1200, 450
@@ -1133,7 +1132,7 @@ class ProfileStore:
         for i, cycle in enumerate(labeled_cycles):
             power_data_raw = cycle.get("power_data", [])
             cid = cycle["id"]
-            
+
             # Decompress
             pairs: list[tuple[float, float]] = []
             if isinstance(power_data_raw, list):
@@ -1143,7 +1142,7 @@ class ProfileStore:
                             pairs.append((float(item[0]), float(item[1])))
                         except (ValueError, TypeError):
                             continue
-            
+
             if len(pairs) < 3:
                 continue
 
@@ -1156,11 +1155,11 @@ class ProfileStore:
             # Assign color
             color = palette[i % len(palette)]
             cycle_metadata[cid] = color
-            
+
             # Subsample for rendering performance
             step = max(1, len(pairs) // 500)
             subsampled_points = [(offsets[j], values[j]) for j in range(0, len(pairs), step)]
-            
+
             svg_curves.append(SVGCurve(
                 points=subsampled_points,
                 color=color,
@@ -1177,7 +1176,7 @@ class ProfileStore:
             width=1000,
             height=400
         )
-        
+
         return svg_content, cycle_metadata
 
     def generate_preview_svg(
@@ -1204,13 +1203,13 @@ class ProfileStore:
             return ""
 
         total_duration = points[-1][0]
-        
+
         keep_start = head_trim
         keep_end = max(keep_start, total_duration - tail_trim)
 
         # Prepare curves
         curves: list[SVGCurve] = []
-        
+
         # 1. Background (All Red)
         curves.append(SVGCurve(
             points=points,
@@ -1218,7 +1217,7 @@ class ProfileStore:
             opacity=0.5,
             stroke_width=2
         ))
-        
+
         # 2. Keep (Blue)
         keep_points = [pt for pt in points if keep_start <= pt[0] <= keep_end]
         if keep_points:
@@ -1228,7 +1227,7 @@ class ProfileStore:
                 opacity=1.0,
                 stroke_width=2
             ))
-            
+
         # Markers
         markers = [
             {"x": keep_start, "label": "Trim Start", "color": "#e6194b"},
@@ -1282,9 +1281,9 @@ class ProfileStore:
             s_segments = resample_uniform(s_ts, s_p, dt_s=dt, gap_s=300.0)
             if not s_segments:
                 return None
-            
+
             sample_seg = max(s_segments, key=lambda s: len(s.power))
-            
+
             # Store
             self._cached_sample_segments[key] = sample_seg
             return sample_seg
@@ -1299,7 +1298,7 @@ class ProfileStore:
     ) -> MatchResult:
         """Run profile matching asynchronously in executor."""
         # 1. Prepare data in main thread (Access ProfileStore state safely)
-        
+
         # Convert to list of floats for current power (uniform resampling)
         if not current_power_data:
              return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
@@ -1313,9 +1312,9 @@ class ProfileStore:
              else:
                  t_start = datetime.fromisoformat(cast(str, current_power_data[0][0])).timestamp()
                  ts_arr = np.array([(datetime.fromisoformat(cast(str, x[0])).timestamp() - t_start) for x in current_power_data])
-             
+
              p_arr = np.array([float(x[1]) for x in current_power_data])
-             
+
              # Resample current
              segments, used_dt = resample_adaptive(ts_arr, p_arr, min_dt=5.0, gap_s=300.0)
              if not segments:
@@ -1323,9 +1322,9 @@ class ProfileStore:
              current_seg = max(segments, key=lambda s: len(s.power))
              if len(current_seg.power) < 12:
                  return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
-                 
+
              current_power_list = current_seg.power.tolist()
-             
+
              # Prepare Snapshots
              snapshots = []
              for name, profile in self._data["profiles"].items():
@@ -1333,7 +1332,7 @@ class ProfileStore:
                  sample_cycle = next((c for c in self._data["past_cycles"] if c["id"] == sample_id), None)
                  if not sample_cycle:
                      continue
-                 
+
                  # Prepare sample segment (using cache)
                  sample_seg = self._get_cached_sample_segment(sample_cycle, used_dt)
                  if sample_seg:
@@ -1343,13 +1342,13 @@ class ProfileStore:
                          "sample_power": sample_seg.power.tolist(),
                          "sample_dt": used_dt
                      })
-                     
+
              config = {
                  "min_duration_ratio": self._min_duration_ratio,
                  "max_duration_ratio": self._max_duration_ratio,
                  "dtw_bandwidth": self.dtw_bandwidth
              }
-             
+
         except Exception as e:
             _LOGGER.error("Preparation for async match failed: %s", e)
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
@@ -1362,21 +1361,21 @@ class ProfileStore:
             snapshots,
             config
         )
-        
+
         # 3. Process Result (Main Thread)
         if not candidates:
              return MatchResult(None, 0.0, 0.0, None, [], False, 0.0, [], {}, is_confident_mismatch=True, mismatch_reason="all_rejected")
-             
+
         best = candidates[0]
-        
+
         # Reconstruct MatchResult
         # Need to handle margin/ambiguity
         margin = 1.0
         if len(candidates) > 1:
             margin = best["score"] - candidates[1]["score"]
-            
+
         is_ambiguous = margin < 0.05
-        
+
         # Phase Detection (Sync on main thread, fast enough? Phase check is O(N) but simple bounds check)
         # We can run check_phase_match logic here or defer it.
         # Let's run it here since we have the data.
@@ -1385,7 +1384,7 @@ class ProfileStore:
         if best["score"] > 0.6: # Threshold
              # We need logic from check_phase_match but customized
              matched_phase = self.check_phase_match(best["name"], current_duration)
-             
+
         return MatchResult(
             best["name"],
             best["score"],
@@ -1398,399 +1397,89 @@ class ProfileStore:
         )
 
     def match_profile(
-        self, current_power_data: list[tuple[str, float]], current_duration: float
+        self, power_data: list[tuple[str, float]], duration: float
     ) -> MatchResult:
-        """
-        Attempt to match current running cycle to a known profile.
-        Pipeline:
-        1. Fast Reject (Duration/Energy)
-        2. Core Similarity (MAE, Correlation, Peak) on uniform grid
-        3. DTW-lite (Tie-breaking or Confirmation)
-        """
-        if not current_power_data or len(current_power_data) < 10:
-            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+        """Synchronous wrapper for matching (for use in executor tasks)."""
+        # Convert to list for worker
+        p_list = [p[1] for p in power_data]
 
-        # 1. Pre-process Current Data
-        try:
-            # We assume current_power_data is sorted by time
-            # Parse first/last to get relative time
-            start_ts = datetime.fromisoformat(current_power_data[0][0]).timestamp()
-            timestamps = []
-            power_values = []
-
-            for t_str, p in current_power_data:
-                ts = datetime.fromisoformat(t_str).timestamp()
-                timestamps.append(ts - start_ts)
-                power_values.append(p)
-
-            ts_arr = np.array(timestamps)
-            p_arr = np.array(power_values)
-
-            # Resample to uniform grid ADJUSTED to sensor cadence
-            # default min_dt=5.0, gap=300?
-            # Use somewhat large gap to bridge occasional misses
-            segments, used_dt = resample_adaptive(
-                ts_arr, p_arr, min_dt=5.0, gap_s=300.0
-            )
-
-            if not segments:
-                return (None, 0.0, 0.0, None)
-
-            # Use the longest segment for matching
-            current_seg = max(segments, key=lambda s: len(s.power))
-
-            # If segment is too short, abort
-            if len(current_seg.power) < 12:  # < 1 min
-                return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
-
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.warning("Match preprocessing failed: %s", e)
-            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
-
-        candidates = []
-
-        _LOGGER.debug(
-            "Profile matching checking %s profiles: %s",
-            len(self._data.get("profiles", {})),
-            list(self._data.get("profiles", {}).keys()),
-        )
-
+        # Prepare snapshots safely
+        snapshots = []
+        # Accessing self._data in thread is generally safe for reads if not modifying
         for name, profile in self._data["profiles"].items():
             sample_id = profile.get("sample_cycle_id")
-            sample_cycle = next(
-                (c for c in self._data["past_cycles"] if c["id"] == sample_id), None
-            )
-
+            sample_cycle = next((c for c in self._data["past_cycles"] if c["id"] == sample_id), None)
             if not sample_cycle:
-                _LOGGER.debug(
-                    "Skip %s: sample cycle %s not found in storage", name, sample_id
-                )
                 continue
 
-            # --- STAGE 1: Fast Reject ---
+            # Decompress sample data
+            sample_p_data = self._decompress_power_data(sample_cycle)
+            if not sample_p_data:
+                continue
 
-            # Duration Check
-            profile_duration = profile.get(
-                "avg_duration", sample_cycle.get("duration", 0)
-            )
-            if profile_duration > 0:
-                duration_ratio = current_duration / profile_duration
-                # Allow wide range for running cycles (e.g. 7% to 150%)
-                if (
-                    duration_ratio < self._min_duration_ratio
-                    or duration_ratio > self._max_duration_ratio
-                ):
-                    _LOGGER.debug(
-                        "Reject %s: duration ratio %.2f (need %.2f-%.2f)",
-                        name,
-                        duration_ratio,
-                        self._min_duration_ratio,
-                        self._max_duration_ratio,
-                    )
-                    continue
+            snapshots.append({
+                "name": name,
+                "avg_duration": profile.get("avg_duration", sample_cycle.get("duration", 0)),
+                "sample_power": [x[1] for x in sample_p_data],
+            })
 
-            # Load Sample Data (Cached)
-            sample_seg = self._get_cached_sample_segment(sample_cycle, used_dt)
-            if not sample_seg:
-                 _LOGGER.debug("Skip %s: failed to get/resample sample data", name)
-                 continue
+        config = {
+             "min_duration_ratio": self._min_duration_ratio,
+             "max_duration_ratio": self._max_duration_ratio,
+             "dtw_bandwidth": self.dtw_bandwidth
+        }
 
-            # --- STAGE 2: Core Similarity (Iterative Alignment) ---
-            # Use analysis module (centralized logic)
-            score, metrics, best_offset = analysis.find_best_alignment(
-                current_seg.power, sample_seg.power, used_dt
-            )
-            
-            # Log significant shifts
-            if abs(best_offset) > 1:
-                _LOGGER.debug(
-                    "Profile %s aligned with offset %d (score improved)", name, best_offset
-                )
-
-            _LOGGER.debug(
-                "Profile %s: score=%.3f, mae=%.1f, corr=%.3f",
-                name,
-                score,
-                metrics.get("mae", 0),
-                metrics.get("corr", 0),
-            )
-
-            if score > 0.1:  # Relaxed to allow tracking of weak matches/unmatches
-                # Ensure JSON serializable types
-                safe_metrics = {k: float(v) for k, v in metrics.items()}
-                candidates.append(
-                    {
-                        "name": name,
-                        "score": float(score),
-                        "metrics": safe_metrics,
-                        "profile_duration": profile_duration,
-                        "current": current_seg.power,
-                        "sample": sample_seg.power,
-                    }
-                )
-            else:
-                _LOGGER.debug("Reject %s: score %.3f < 0.1 threshold", name, score)
-
-        # Sort by score
-        candidates.sort(key=lambda x: x["score"], reverse=True)
-
-        if not candidates:
-            # All rejected by fast reject
-            return MatchResult(
-                None,
-                0.0,
-                0.0,
-                None,
-                [],
-                False,
-                0.0,
-                [],
-                {},
-                is_confident_mismatch=True,
-                mismatch_reason="all_rejected",
-            )
-
-        # Use configured threshold
-        current_best = candidates[0]
-        # Start assuming best match is valid, refine below
-        best = current_best
-        best_name = best["name"]
-        best_score = best["score"]
-        is_ambiguous = False
-        margin = 1.0
-
-
-        # Calculate margin for ambiguity based on (Stage 2) scores
-        if len(candidates) > 1:
-            margin = candidates[0]["score"] - candidates[1]["score"]
-            is_ambiguous = margin < 0.05
-        else:
-            is_ambiguous = False
-
-
-        # Compile debug details for top candidate
-        debug_details = {}
-        if best:
-            debug_details = {
-                "final_score": best["score"],
-                "metrics": best.get("metrics", {}),
-                "dtw_dist": best.get("dtw_dist"),
-                "original_score": best.get("original_score"),
-                "duration_ratio": (
-                    best.get("profile_duration", 0) / current_duration
-                    if current_duration > 0
-                    else 0
-                ),
-            }
-
-        # Build clean ranking list for storage/display
-        ranking = []
-        for c in candidates:  # Candidates are already sorted
-            entry = {
-                "name": c["name"],
-                "score": round(c["score"], 3),
-            }
-            if "dtw_dist" in c:
-                entry["dtw"] = round(c["dtw_dist"], 3)
-            ranking.append(entry)
-
-        # Check for confident mismatch at the end (after DTW potential updates)
-        is_confident_mismatch = False
-        mismatch_reason = None
-        if best_score < self._unmatch_threshold:
-            is_confident_mismatch = True
-            mismatch_reason = f"low_confidence_{best_score:.2f}"
-
-        return MatchResult(
-            best_profile=best_name,
-            confidence=best_score,
-            expected_duration=best.get("profile_duration", 0.0),
-            matched_phase=None,
-            candidates=candidates,
-            is_ambiguous=is_ambiguous,
-            ambiguity_margin=margin,
-            ranking=ranking,
-            debug_details=debug_details,
-            is_confident_mismatch=is_confident_mismatch,
-            mismatch_reason=mismatch_reason,
+        candidates = analysis.compute_matches_worker(
+            p_list, duration, snapshots, config
         )
 
-    def _find_best_alignment(
-        self, current: np.ndarray, sample: np.ndarray, used_dt: float
-    ) -> tuple[float, dict, int]:
+        if not candidates:
+             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+
+        best = candidates[0]
+
+        # Calculate ambiguity
+        margin = 1.0
+        if len(candidates) > 1:
+            margin = best["score"] - candidates[1]["score"]
+
+        is_ambiguous = margin < 0.05
+
+        return MatchResult(
+            best["name"],
+            best["score"],
+            best["profile_duration"],
+            None,
+            candidates,
+            is_ambiguous,
+            margin,
+        )
+
+
+    # match_profile (sync) removed in favor of async_match_profile
+
+    def check_phase_match(self, profile_name: str, duration: float) -> str | None:
         """
-        Perform iterative coarse-to-fine alignment search.
-        Returns: (best_score, best_metrics, best_offset_index)
+        Check if the current duration aligns with a known phase in the profile.
+        Returns the phase name (e.g., 'Rinse', 'Spin') or None.
         """
-        # Coarse Scan: [-60s, -30s, 0s, +30s, +60s]
-        # Assuming index map is 1-to-1 with 'used_dt' (e.g. 5s or 10s steps?).
-        # ProfileStore uses `used_dt` (typically 5s or dynamic).
-        # We perform shifting by array slicing.
+        profile = self._data["profiles"].get(profile_name)
+        if not profile:
+            return None
 
-        len_cur = len(current)
-        len_sam = len(sample)
-        
-        # We need a shared length for comparison.
-        # Logic: We slide 'sample' over 'current' (or vice versa).
-        # Simpler: We crop to the OVERLAP.
-        
-        def get_score_at_offset(offset: int) -> tuple[float, dict]:
-            """
-            Offset > 0: Shift Sample RIGHT (Sample starts later)
-                        Compare current[offset:] with sample[:-offset]
-            Offset < 0: Shift Sample LEFT (Sample starts earlier)
-                        Compare current[:offset] with sample[-offset:]
-            """
-            if offset == 0:
-                c = current
-                s = sample
-            elif offset > 0:
-                # Sample shifted right relative to current
-                # current: |...[........]
-                # sample:      [........]...|
-                # Compare overlap
-                if offset >= len_cur:
-                    return 0.0, {}
-                
-                # We align start of sample with index 'offset' of current
-                # intersection length = min(len_cur - offset, len_sam)
-                length = min(len_cur - offset, len_sam)
-                
-                # Minimum Overlap Constraint
-                if length < len_sam * self._min_duration_ratio:
-                    return 0.0, {}
-                     
-                c = current[offset : offset + length]
-                s = sample[:length]
-            else:
-                # offset < 0
-                # Sample shifted left
-                # current:      [........]...|
-                # sample:  |...[........]
-                abs_off = abs(offset)
-                if abs_off >= len_cur or abs_off >= len_sam:
-                    return 0.0, {}
-                
-                # Align start of current with index 'abs_off' of sample
-                length = min(len_cur, len_sam - abs_off)
-                
-                # Minimum Overlap Constraint
-                if length < len_sam * self._min_duration_ratio:
-                    return 0.0, {}
+        phases = profile.get("phases", [])
+        if not phases:
+             return None
 
-                c = current[:length]
-                s = sample[abs_off : abs_off + length]
+        for phase in phases:
+             p_start = phase.get("start", 0)
+             p_end = phase.get("end", 0)
+             if p_start <= duration <= p_end:
+                 return str(phase.get("name", "Unknown"))
 
-            return self._calculate_similarity_robust(c, s)
+        return None
 
-        if used_dt <= 0:
-            used_dt = 5.0
-            
-        # Hierarchical Search (Coarse -> Fine)
-        # Goal: Find alignment within ±30 minutes (1800s)
-        
-        # Pass 1: Global Coarse Scan
-        # Window: ±30 minutes
-        # Step: 60 seconds
-        coarse_window_s = 1800.0
-        coarse_step_s = 60.0
-        
-        coarse_radius_idx = int(coarse_window_s / used_dt)
-        step_idx = max(1, int(coarse_step_s / used_dt))
-        
-        # Scan points: 0, ±step, ±2*step ... until radius
-        # We use a set to track visited offsets to avoid re-calculating in Fine pass
-        visited_offsets = set()
-        
-        best_score = -1.0
-        best_metrics = {}
-        best_offset = 0
-        
-        # Generate coarse offsets
-        coarse_offsets = [0]
-        curr = step_idx
-        while curr <= coarse_radius_idx:
-            coarse_offsets.append(curr)
-            coarse_offsets.append(-curr)
-            curr += step_idx
-            
-        for off in coarse_offsets:
-            visited_offsets.add(off)
-            s, m = get_score_at_offset(off)
-            if s > best_score:
-                best_score = s
-                best_metrics = m
-                best_offset = off
-                
-        # Pass 2: Local Fine Scan
-        # Window: ±2 minutes (120s) around best_offset
-        # Step: 1 index (used_dt)
-        fine_window_s = 120.0
-        fine_radius_idx = int(fine_window_s / used_dt)
-        
-        start_fine = best_offset - fine_radius_idx
-        end_fine = best_offset + fine_radius_idx
-        
-        # Clamp to meaningful bounds if desired, but array slicing handles out-of-bounds gracefully (returns empty)
-        # We just need to ensure loop is correct
-        
-        for off in range(start_fine, end_fine + 1):
-            if off in visited_offsets:
-                continue
-            visited_offsets.add(off)
-            
-            s, m = get_score_at_offset(off)
-            if s > best_score:
-                best_score = s
-                best_metrics = m
-                best_offset = off
-                
-        return best_score, best_metrics, best_offset
 
-    def _calculate_similarity_robust(
-        self, current: np.ndarray, sample: np.ndarray
-    ) -> tuple[float, dict]:
-        """Core similarity with robust scaling."""
-        len_cur = len(current)
-        len_sam = len(sample)
-        
-        # Ensure minimal overlap
-        if len_cur < 5 or len_sam < 5:
-            return 0.0, {}
-            
-        # Truncate to min length
-        n = min(len_cur, len_sam)
-        c = current[:n]
-        s = sample[:n]
-
-        # 1. MAE (Mean Absolute Error)
-        diff = np.abs(c - s)
-        mae = np.mean(diff)
-
-        # 2. Correlation
-        if np.std(c) > 1e-3 and np.std(s) > 1e-3:
-            corr = np.corrcoef(c, s)[0, 1]
-        else:
-            corr = 0.0
-
-        # 3. Peak Match
-        peak_cur = np.max(c)
-        peak_sam = np.max(s)
-        peak_diff = abs(peak_cur - peak_sam)
-
-        # Scoring
-        mae_score = 1.0 / (1.0 + mae / 50.0)  # 50W characteristic scale
-        corr_score = max(0.0, corr)
-        peak_score = 1.0 / (1.0 + peak_diff / 100.0)
-
-        # Weighted Sum
-        final = 0.4 * mae_score + 0.4 * corr_score + 0.2 * peak_score
-
-        # Boost for strong correlation
-        if corr > 0.9:
-            final = min(1.0, final * 1.1)
-
-        return float(final), {"mae": mae, "corr": corr, "peak_diff": peak_diff}
 
     async def create_profile(self, name: str, source_cycle_id: str) -> None:
         """Create a new profile from a past cycle."""
@@ -2004,11 +1693,11 @@ class ProfileStore:
         self, confidence_threshold: float = 0.75, overwrite: bool = False
     ) -> dict[str, int]:
         """Auto-label cycles retroactively using profile matching.
-        
+
         Args:
             confidence_threshold: Min confidence to apply a label.
             overwrite: If True, re-evaluates already labeled cycles.
-            
+
         Returns stats: {labeled: int, relabeled: int, skipped: int, total: int}
         """
         stats = {"labeled": 0, "relabeled": 0, "skipped": 0, "total": 0}
@@ -2031,7 +1720,7 @@ class ProfileStore:
                 continue
 
             # Try to match
-            result = self.match_profile(power_data, cycle["duration"])
+            result = await self.async_match_profile(power_data, cycle["duration"])
 
             if result.best_profile and result.confidence >= confidence_threshold:
                 current_label = cycle.get("profile_name")
@@ -2209,15 +1898,19 @@ class ProfileStore:
             # 3. Compare scores
 
             # Helper to get score
-            def get_score(cycle_data: CycleDict) -> float:
+
+
+            # We need to await signatures in async method now?
+            # But we are inside a loop... making get_score async is better.
+            async def get_score_async(cycle_data: CycleDict) -> float:
                 p_data = self._decompress_power_data(cycle_data)
                 if not p_data:
                     return 0.0
-                res = self.match_profile(p_data, cycle_data["duration"])
+                res = await self.async_match_profile(p_data, cycle_data["duration"])
                 return res.confidence
 
-            score1 = get_score(c1)
-            score2 = get_score(c2)
+            score1 = await get_score_async(c1)
+            score2 = await get_score_async(c2)
 
             # Construct Candidate (Simulation)
             # We strictly emulate the data merge without mutating c1 yet
@@ -2245,7 +1938,7 @@ class ProfileStore:
             new_dur = (c2_end_dt - c1_start_dt).total_seconds()
 
             # Score candidate
-            res_merged = self.match_profile(merged_power, new_dur)
+            res_merged = await self.async_match_profile(merged_power, new_dur)
             score_merged = res_merged.confidence
             best_candidate_profile = res_merged.best_profile
 
@@ -2357,12 +2050,12 @@ class ProfileStore:
         self._data["past_cycles"] = [
             c for c in self._data["past_cycles"] if c["id"] != cycle_id
         ]
-        
+
         # If it was a sample cycle, clear that ref
         for p_name, p_data in self._data["profiles"].items():
             if p_data.get("sample_cycle_id") == cycle_id:
                 p_data["sample_cycle_id"] = None
-                
+
         # Rebuild envelopes? Only if labeled.
         # Ideally we know the profile name.
         p_name = cycle.get("profile_name")
@@ -2371,89 +2064,10 @@ class ProfileStore:
 
         if save:
             await self.async_save()
-            
+
         return True
 
-    def _split_cycles_smart_sync(
-        self, cycle_id: str, min_gap_s: int, idle_power: float
-    ) -> list[str]:
-        """Synchronous implementation of split logic (run in executor)."""
-        cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
-        idx = next((i for i, c in enumerate(cycles) if c.get("id") == cycle_id), -1)
 
-        if idx == -1:
-            return []
-
-        cycle = cycles[idx]
-        power_data = cycle.get("power_data", [])
-
-        if not power_data or len(power_data) < 2:
-            return [cycle_id]
-        
-        # 1. Evaluate Original
-        p_data_tuples = self._decompress_power_data(cycle)
-        if not p_data_tuples:
-            return [cycle_id]
-
-        res_orig = self.match_profile(p_data_tuples, cycle["duration"])
-        score_orig = res_orig.confidence
-        
-        if score_orig >= 0.8: # Strong match
-            return [cycle_id]
-
-        # 2. Identify Potential Split Points (Gaps) (Simplified for brevity but functionally same)
-        points = [(float(p[0]), float(p[1])) for p in power_data]
-        splits: list[tuple[float, float]] = []
-        last_t = points[0][0]
-        last_p = points[0][1]
-        current_idle_start: float | None = None
-
-        if last_p <= idle_power:
-            current_idle_start = last_t
-
-        for i in range(1, len(points)):
-            t, p = points[i]
-            if last_p <= idle_power:
-                if current_idle_start is None:
-                    current_idle_start = last_t
-                if p > idle_power:
-                    duration = t - current_idle_start
-                    if duration >= min_gap_s:
-                        splits.append((current_idle_start, t))
-                    current_idle_start = None
-            else:
-                if p <= idle_power:
-                    current_idle_start = t
-            last_t = t
-            last_p = p
-
-        if not splits:
-            return [cycle_id]
-            
-        # 3. Execution (Simulated output list)
-        # For simplicity in this offloading: If we find valid splits, we might need to 
-        # actually mutate the cycles list locally here.
-        # But this method runs in executor, and self._data is shared state. 
-        # Since it's Python dicts/lists, it's NOT thread-safe for concurrent writes.
-        # However, HA guarantees single-threaded event loop, so if we block other operations
-        # via locks or just trust that no one else mutates past_cycles while this runs...
-        # "past_cycles" is usually only mutated by cycle_detector end or maintenance.
-        # It should be reasonably safe if we are quick or if we are the only maintenance task.
-        
-        # NOTE: Full implementation of splitting logic is complex to copy-paste.
-        # I will assume for this fix that returning [cycle_id] (no split) is safer if too complex,
-        # BUT user complained about split/merge breaking HA.
-        # So I MUST offload it.
-        
-        # ... (Assuming full split logic here would take too much space, 
-        # but I replaced the whole method, so I must provide full implementation or it breaks)
-        # Since I can't see the full original method in my last view (it was truncated), 
-        # I should be careful. 
-        
-        # Actually, let's just wrap the *existing* logic if possible?
-        # No, I have to replace the method def. I need the full logic.
-        # I'll cancel this replacement and VIEW the full method first.
-        return [cycle_id] # Placeholder to abort edit
 
     def _analyze_split_sync(
         self, cycle: CycleDict, min_gap_s: int, idle_power: float
@@ -2462,7 +2076,7 @@ class ProfileStore:
         power_data = cycle.get("power_data", [])
         if not power_data or len(power_data) < 2:
             return None
-        
+
         # 1. Evaluate Original
         p_data_tuples = self._decompress_power_data(cycle)
         if not p_data_tuples:
@@ -2470,7 +2084,7 @@ class ProfileStore:
 
         res_orig = self.match_profile(p_data_tuples, cycle["duration"])
         score_orig = res_orig.confidence
-        
+
         if score_orig >= 0.8:
             return None
 
@@ -2502,14 +2116,14 @@ class ProfileStore:
 
         if not splits:
             return None
-            
+
         # 3. Score Parts
         cycle_start_iso = cycle["start_time"]
         start_dt_base = dt_util.parse_datetime(cycle_start_iso)
         if not start_dt_base:
             return None
         start_ts = start_dt_base.timestamp()
-            
+
         seg_ranges: list[tuple[float, float]] = []
         prev_end = 0.0
         for gap_start, gap_end in splits:
@@ -2517,17 +2131,17 @@ class ProfileStore:
                 if (gap_start - prev_end) > 120:
                     seg_ranges.append((prev_end, gap_start))
             prev_end = gap_end
-            
+
         total_dur = cycle.get("duration", points[-1][0])
         if (total_dur - prev_end) > 120:
             seg_ranges.append((prev_end, total_dur))
-            
+
         if len(seg_ranges) < 2:
             return None
 
         valid_part_found = False
-        parts_data = [] 
-        
+        parts_data = []
+
         for seg_start, seg_end in seg_ranges:
             seg_points = []
             state_val = 0.0
@@ -2549,7 +2163,7 @@ class ProfileStore:
             if res_part.confidence >= self._match_threshold:
                 valid_part_found = True
             parts_data.append(res_part.confidence)
-            
+
         # 4. Decision
         should_split = False
         if score_orig < self._match_threshold and valid_part_found:
@@ -2565,7 +2179,7 @@ class ProfileStore:
                     "Smart Split Check: %s (Score %.2f) -> Better parts %s",
                     cycle["id"], score_orig, parts_data
                 )
-                
+
         return seg_ranges if should_split else None
 
     async def async_split_cycles_smart(
@@ -2579,15 +2193,15 @@ class ProfileStore:
             return []
 
         cycle = cycles[idx]
-        
+
         # Offload analysis
         seg_ranges = await self.hass.async_add_executor_job(
             self._analyze_split_sync, cycle, min_gap_s, idle_power
         )
-        
+
         if not seg_ranges:
              return [cycle_id]
-             
+
         # Apply Split (Main Thread)
         cycles.pop(idx)
         new_ids = []
@@ -2597,33 +2211,52 @@ class ProfileStore:
              # Should not happen as analyze checked it, but safety
              _LOGGER.warning("Failed to parse start time during split apply for %s", cycle_id)
              return [cycle_id]
-             
+
         start_dt_base: datetime = start_dt_base_parsed
-        power_data = cycle.get("power_data", [])
-        points = [(float(p[0]), float(p[1])) for p in power_data]
-        
+        start_ts = start_dt_base.timestamp()
+
+        # Use decompress_power_data which handles all format variations
+        p_data_tuples = self._decompress_power_data(cycle)
+
+        if not p_data_tuples:
+             _LOGGER.warning("Failed to decompress data during split for %s", cycle_id)
+             return [cycle_id]
+
+        # Convert to relative relative seconds for array logic?
+        # decompress_power_data returns list[tuple[str, float]] (ISO strings)
+        # We need relative seconds for the `seg_ranges` which are inputs in seconds.
+
+        points = []
+        for t_str, val in p_data_tuples:
+             dt_p = dt_util.parse_datetime(t_str)
+             if dt_p:
+                 rel = dt_p.timestamp() - start_ts
+                 points.append((rel, float(val)))
+
         for seg_start, seg_end in seg_ranges:
             # Construct new cycle logic
             seg_dur = seg_end - seg_start
             new_cycle_start = start_dt_base + timedelta(seconds=seg_start)
             new_cycle_start_ts = new_cycle_start.timestamp()
-            
-            # Extract points 
+
+            # Extract points
             p_data_abs = []
             state_val = 0.0
             for t, p in points:
-                if t <= seg_start: state_val = p
-                else: break
+                if t <= seg_start:
+                    state_val = p
+                else:
+                    break
             p_data_abs.append([round(new_cycle_start_ts, 1), state_val])
-            
+
             for t, p in points:
-                if t > seg_start and t <= seg_end:
+                if seg_start < t <= seg_end:
                     if start_dt_base:
                        p_data_abs.append([round(start_dt_base.timestamp() + t, 1), p])
-                    
+
             new_cycle = {
-               "start_time": new_cycle_start.isoformat(),
-               "end_time": (new_cycle_start + timedelta(seconds=seg_dur)).isoformat(),
+                "start_time": new_cycle_start.isoformat(),
+                "end_time": (new_cycle_start + timedelta(seconds=seg_dur)).isoformat(),
                "duration": round(seg_dur, 1),
                "status": "completed",
                "power_data": p_data_abs,
@@ -2631,25 +2264,25 @@ class ProfileStore:
             }
             self.add_cycle(new_cycle)
             new_ids.append(new_cycle["id"])
-             
+
         # Fix profile refs (same as original logic)
         original_sample_id = cycle.get("id")
         best_replacement_id = None
         longest_dur = 0
         new_cycles_objs = [c for c in cycles if c["id"] in new_ids]
-        
+
         for c in new_cycles_objs:
              d = c.get("duration", 0)
              if d > longest_dur:
                  longest_dur = d
                  best_replacement_id = c["id"]
-                 
+
         if best_replacement_id and original_profile:
-             p_data = self._data["profiles"].get(original_profile)
-             if p_data and p_data.get("sample_cycle_id") == original_sample_id:
-                  p_data["sample_cycle_id"] = best_replacement_id
-                  await self.async_rebuild_envelope(original_profile)
-                  
+            p_data = self._data["profiles"].get(original_profile)
+            if p_data and p_data.get("sample_cycle_id") == original_sample_id:
+                p_data["sample_cycle_id"] = best_replacement_id
+                await self.async_rebuild_envelope(original_profile)
+
         await self.async_save()
         return new_ids
 
@@ -2696,7 +2329,11 @@ class ProfileStore:
 
         if stats["merged"] > 0 or stats["split"] > 0:
             await self.async_save()
-            _LOGGER.info("Smart Process History: Merged %s, Split %s", stats["merged"], stats["split"])
+            _LOGGER.info(
+                "Smart Process History: Merged %s, Split %s",
+                stats["merged"],
+                stats["split"],
+            )
 
         return stats
     def log_adjustment(

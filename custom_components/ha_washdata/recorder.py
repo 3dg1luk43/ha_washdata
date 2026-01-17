@@ -149,18 +149,18 @@ class CycleRecorder:
             self.hass.add_job(self._async_save)
 
     def get_trim_suggestions(
-        self, 
+        self,
         data: list[tuple[str, float]],
         recording_start: datetime | None = None,
         recording_end: datetime | None = None,
     ) -> tuple[float, float, float]:
         """Analyze data to propose trims.
-        
+
         Args:
             data: List of (iso_timestamp, power)
             recording_start: Actual start time of recording (for head trim relative to start)
             recording_end: Actual end time of recording (for tail trim relative to end)
-            
+
         Returns: (head_trim_seconds, tail_trim_seconds, average_noise_power)
         """
         if not data:
@@ -176,40 +176,40 @@ class CycleRecorder:
             t = dt_util.parse_datetime(t_str)
             if t:
                 parsed.append((t.timestamp(), p))
-        
+
         if not parsed:
             return 0.0, 0.0, 0.0
-            
+
         data_start_ts = parsed[0][0]
         data_end_ts = parsed[-1][0]
-        
+
         # Use provided bounds or fallback to data bounds
         rec_start_ts = recording_start.timestamp() if recording_start else data_start_ts
         rec_end_ts = recording_end.timestamp() if recording_end else data_end_ts
-        
+
         # Ensure bounds cover data
         rec_start_ts = min(rec_start_ts, data_start_ts)
         rec_end_ts = max(rec_end_ts, data_end_ts)
-        
-        threshold = 2.0 # W
-        
+
+        threshold = 2.0  # W
+
         first_active_idx = -1
         last_active_idx = -1
-        
+
         for i, (_, p) in enumerate(parsed):
             if p > threshold:
                 if first_active_idx == -1:
                     first_active_idx = i
                 last_active_idx = i
-                
+
         if first_active_idx == -1:
             # No activity found
             total_dur = rec_end_ts - rec_start_ts
             return 0.0, round(total_dur, 1), 0.0
-            
+
         head_ts = parsed[first_active_idx][0]
         tail_ts = parsed[last_active_idx][0]
-        
+
         if len(parsed) > 1:
             dts = [t - s for (t, _), (s, _) in zip(parsed[1:], parsed[:-1])]
             # Median calculation without numpy
@@ -217,21 +217,21 @@ class CycleRecorder:
             mid = len(dts) // 2
             avg_dt = dts[mid]
             if avg_dt <= 0:
-                avg_dt = 1.0 # Fallback
+                avg_dt = 1.0  # Fallback
         else:
             avg_dt = 1.0
-            
+
         # 1. Head Trim
         # Time from recording start to first active sample
         raw_head_trim = max(0.0, head_ts - rec_start_ts)
-        
+
         # Align to sampling rate (floor to keep buffer)
         # Example: raw=19s, dt=10s -> trim 10s. Buffer=9s.
         # Example: raw=21s, dt=10s -> trim 20s. Buffer=1s.
         # To ensure we don't cut active sample if jitter:
         # We start at rec_start_ts. We want start_time + trim <= head_ts
         # floor ensures this.
-        
+
         steps_head = int(raw_head_trim / avg_dt)
         # Additional safety: if step matches exactly, step back one?
         # User said "trim a bit too much".
@@ -241,14 +241,14 @@ class CycleRecorder:
         # User: "triming time should be always a multiplier of sampling rate detected"
         # If I do floor, it is a multiplier.
         # Let's just do floor.
-        
+
         # However, if using the "floor" logic makes it 0, that's fine.
         head_trim = steps_head * avg_dt
-        
+
         # 2. Tail Trim
         # Time from last active sample to recording end
         raw_tail_trim = max(0.0, rec_end_ts - tail_ts)
         steps_tail = int(raw_tail_trim / avg_dt)
         tail_trim = steps_tail * avg_dt
-        
+
         return round(head_trim, 1), round(tail_trim, 1), round(avg_dt, 1)
