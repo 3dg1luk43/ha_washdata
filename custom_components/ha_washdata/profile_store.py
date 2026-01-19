@@ -118,8 +118,7 @@ def _generate_generic_svg(
                         f'fill="{color}" font-size="12" text-anchor="middle">{label}</text>'
                     )
 
-    # Grid & Axes
-    # Simple grid: border + mid lines?
+    # Grid & Axes (border + mid lines)
     grid = f"""
     <rect x="0" y="0" width="{width}" height="{height}" fill="#1c1c1c" />
     <line x1="{padding_x}" y1="{height - padding_y}" x2="{width - padding_x}" y2="{height - padding_y}" stroke="#444" stroke-width="2" />
@@ -190,7 +189,7 @@ def decompress_power_data(cycle: CycleDict) -> list[tuple[str, float]]:
 
     compressed: list[Any] = cast(list[Any], compressed_raw)
 
-    # Handle missing start_time gracefully?
+    # Handle missing start_time gracefully
     if "start_time" not in cycle:
         return []
 
@@ -532,12 +531,7 @@ class ProfileStore:
         await self._store.async_save(self._data)
 
     async def async_save_active_cycle(self, detector_snapshot: JSONDict) -> None:
-        """Save the active cycle state separately (or in main data)."""
-        # We can store it in the main store, but we need to ensure we don't wear out flash
-        # if this is called often.
-        # Home Assistant's Store helper writes atomically.
-        # Let's put it in _data but only save if significant change?
-        # Actually Manager throttles this call.
+        """Save the active cycle state to storage (throttled by Manager)."""
         self._data["active_cycle"] = detector_snapshot
         self._data["last_active_save"] = dt_util.now().isoformat()
         await self._store.async_save(self._data)
@@ -559,18 +553,6 @@ class ProfileStore:
         except ValueError:
             return None
 
-    def clear_active_cycle(self) -> None:
-        """Clear active cycle data."""
-        if "active_cycle" in self._data:
-            del self._data["active_cycle"]
-            # We don't necessarily need to save immediately, can wait for next save
-            # But safer to save.
-            # to be safe let's just schedule a save task in manager?
-            # Or just save here.
-            # Since this happens once per cycle end, it's fine.
-            # We must be async though.
-            raise NotImplementedError("Use async_clear_active_cycle")
-
     async def async_clear_active_cycle(self) -> None:
         """Clear the active cycle snapshot from storage."""
         if "active_cycle" in self._data:
@@ -578,9 +560,8 @@ class ProfileStore:
             await self._store.async_save(self._data)
 
     def add_cycle(self, cycle_data: CycleDict) -> None:
-        """Add a completed cycle to history (Sync wrapper)."""
+        """Add a completed cycle to history (sync wrapper, schedules async tasks)."""
         self._add_cycle_data(cycle_data)
-        # Schedule retention/rebuild asynchronously to avoid blocking
         self.hass.async_create_task(self.async_enforce_retention())
 
     async def async_add_cycle(self, cycle_data: CycleDict) -> None:
@@ -940,9 +921,9 @@ class ProfileStore:
         ]
 
         if not labeled_cycles:
-             if profile_name in self._data.get("envelopes", {}):
-                 del self._data["envelopes"][profile_name]
-             return False
+            if profile_name in self._data.get("envelopes", {}):
+                del self._data["envelopes"][profile_name]
+            return False
 
         # Extract raw data
         raw_cycles_data = []
@@ -956,11 +937,11 @@ class ProfileStore:
             # Parse pairs
             pairs = []
             for item in power_data_raw:
-                 if isinstance(item, (list, tuple)) and len(item) >= 2:
-                     try:
-                         pairs.append((float(item[0]), float(item[1])))
-                     except (ValueError, TypeError):
-                         continue
+                if isinstance(item, (list, tuple)) and len(item) >= 2:
+                    try:
+                        pairs.append((float(item[0]), float(item[1])))
+                    except (ValueError, TypeError):
+                        continue
 
             if len(pairs) < 3:
                 continue
@@ -972,16 +953,18 @@ class ProfileStore:
             durations.append(offsets[-1])
 
         if not raw_cycles_data:
-             if profile_name in self._data.get("envelopes", {}):
-                 del self._data["envelopes"][profile_name]
-             return False
+            if profile_name in self._data.get("envelopes", {}):
+                del self._data["envelopes"][profile_name]
+            return False
 
         # Update profile stats in storage (Fast O(N))
         if durations and profile_name in self._data.get("profiles", {}):
             min_duration = float(np.min(durations))
             max_duration = float(np.max(durations))
+            avg_duration = float(np.mean(durations))
             self._data["profiles"][profile_name]["min_duration"] = min_duration
             self._data["profiles"][profile_name]["max_duration"] = max_duration
+            self._data["profiles"][profile_name]["avg_duration"] = avg_duration
 
         # 2. Run Heavy Computation in Executor
         result = await self.hass.async_add_executor_job(
@@ -991,19 +974,20 @@ class ProfileStore:
         )
 
         if not result:
-             if profile_name in self._data.get("envelopes", {}):
-                 del self._data["envelopes"][profile_name]
-             return False
+            if profile_name in self._data.get("envelopes", {}):
+                del self._data["envelopes"][profile_name]
+            return False
 
-        time_grid, min_curve, max_curve, avg_curve, std_curve = result
+        time_grid, min_curve, max_curve, avg_curve, std_curve, target_duration = result
 
         # 3. Update Storage
         # Convert to list of points [[x, y], ...]
         def to_points(y_vals: list[float]) -> list[list[float]]:
-             return [[round(t, 1), round(y, 1)] for t, y in zip(time_grid, y_vals)]
+            return [[round(t, 1), round(y, 1)] for t, y in zip(time_grid, y_vals)]
 
         envelope_data = {
-            "time_grid": time_grid, # Add missing time grid used by manager
+            "time_grid": time_grid,  # Time grid used by manager for phase estimation
+            "target_duration": target_duration,  # Target duration for phase estimation
             "min": to_points(min_curve),
             "max": to_points(max_curve),
             "avg": to_points(avg_curve),
@@ -1301,53 +1285,85 @@ class ProfileStore:
 
         # Convert to list of floats for current power (uniform resampling)
         if not current_power_data:
-             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
         # Pre-process current data
         try:
-             # Normalize input format
-             if isinstance(current_power_data[0][0], datetime):
-                 t_start = cast(datetime, current_power_data[0][0]).timestamp()
-                 ts_arr = np.array([(cast(datetime, x[0]).timestamp() - t_start) for x in current_power_data])
-             else:
-                 t_start = datetime.fromisoformat(cast(str, current_power_data[0][0])).timestamp()
-                 ts_arr = np.array([(datetime.fromisoformat(cast(str, x[0])).timestamp() - t_start) for x in current_power_data])
+            # Normalize input format
+            if isinstance(current_power_data[0][0], datetime):
+                t_start = cast(datetime, current_power_data[0][0]).timestamp()
+                ts_arr = np.array([(cast(datetime, x[0]).timestamp() - t_start) for x in current_power_data])
+            else:
+                t_start = datetime.fromisoformat(cast(str, current_power_data[0][0])).timestamp()
+                ts_arr = np.array([(datetime.fromisoformat(cast(str, x[0])).timestamp() - t_start) for x in current_power_data])
 
-             p_arr = np.array([float(x[1]) for x in current_power_data])
+            p_arr = np.array([float(x[1]) for x in current_power_data])
 
-             # Resample current
-             segments, used_dt = resample_adaptive(ts_arr, p_arr, min_dt=5.0, gap_s=300.0)
-             if not segments:
-                 return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
-             current_seg = max(segments, key=lambda s: len(s.power))
-             if len(current_seg.power) < 12:
-                 return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+            # Resample current
+            segments, used_dt = resample_adaptive(ts_arr, p_arr, min_dt=5.0, gap_s=300.0)
+            if not segments:
+                return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+            current_seg = max(segments, key=lambda s: len(s.power))
+            if len(current_seg.power) < 12:
+                return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
-             current_power_list = current_seg.power.tolist()
+            current_power_list = current_seg.power.tolist()
 
-             # Prepare Snapshots
-             snapshots = []
-             for name, profile in self._data["profiles"].items():
-                 sample_id = profile.get("sample_cycle_id")
-                 sample_cycle = next((c for c in self._data["past_cycles"] if c["id"] == sample_id), None)
-                 if not sample_cycle:
-                     continue
+            # Prepare Snapshots
+            snapshots = []
+            skipped_profiles = []
+            for name, profile in self._data["profiles"].items():
+                # Try sample_cycle_id first, fall back to any labeled cycle
+                sample_id = profile.get("sample_cycle_id")
+                sample_cycle = None
+                if sample_id:
+                    sample_cycle = next(
+                        (c for c in self._data["past_cycles"] if c["id"] == sample_id),
+                        None
+                    )
+                # Fallback: find ANY completed cycle labeled with this profile
+                if not sample_cycle:
+                    sample_cycle = next(
+                        (c for c in self._data["past_cycles"]
+                          if c.get("profile_name") == name
+                          and c.get("status") in ("completed", "force_stopped")
+                          and c.get("power_data")),
+                        None
+                    )
+                if not sample_cycle:
+                    skipped_profiles.append(
+                        f"{name}: no sample cycle (sample_id={sample_id})"
+                    )
+                    continue
 
-                 # Prepare sample segment (using cache)
-                 sample_seg = self._get_cached_sample_segment(sample_cycle, used_dt)
-                 if sample_seg:
-                     snapshots.append({
-                         "name": name,
-                         "avg_duration": profile.get("avg_duration", sample_cycle.get("duration", 0)),
-                         "sample_power": sample_seg.power.tolist(),
-                         "sample_dt": used_dt
-                     })
+                # Prepare sample segment (using cache)
+                sample_seg = self._get_cached_sample_segment(sample_cycle, used_dt)
+                if not sample_seg:
+                    skipped_profiles.append(
+                        f"{name}: failed to resample cycle {sample_cycle.get('id')}"
+                    )
+                    continue
+                snapshots.append({
+                    "name": name,
+                    "avg_duration": profile.get(
+                        "avg_duration", sample_cycle.get("duration", 0)
+                    ),
+                    "sample_power": sample_seg.power.tolist(),
+                    "sample_dt": used_dt
+                })
 
-             config = {
-                 "min_duration_ratio": self._min_duration_ratio,
-                 "max_duration_ratio": self._max_duration_ratio,
-                 "dtw_bandwidth": self.dtw_bandwidth
-             }
+            if skipped_profiles:
+                _LOGGER.debug(
+                    "Profile matching skipped %d profiles: %s",
+                    len(skipped_profiles),
+                    "; ".join(skipped_profiles)
+                )
+
+            config = {
+                "min_duration_ratio": self._min_duration_ratio,
+                "max_duration_ratio": self._max_duration_ratio,
+                "dtw_bandwidth": self.dtw_bandwidth
+            }
 
         except Exception as e:
             _LOGGER.error("Preparation for async match failed: %s", e)
@@ -1364,7 +1380,17 @@ class ProfileStore:
 
         # 3. Process Result (Main Thread)
         if not candidates:
-             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0, [], {}, is_confident_mismatch=True, mismatch_reason="all_rejected")
+            profiles_count = len(self._data.get("profiles", {}))
+            snapshots_count = len(snapshots) if 'snapshots' in dir() else 0
+            _LOGGER.debug(
+                "No profile match candidates: profiles=%d, snapshots=%d, "
+                "duration=%.0fs. Possible reasons: duration ratio filter, "
+                "no labeled cycles, or no profiles defined.",
+                profiles_count,
+                snapshots_count,
+                current_duration
+            )
+            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0, [], {}, is_confident_mismatch=True, mismatch_reason="all_rejected")
 
         best = candidates[0]
 
@@ -1382,8 +1408,8 @@ class ProfileStore:
         # But check_phase_match uses wrappers.
         matched_phase = None
         if best["score"] > 0.6: # Threshold
-             # We need logic from check_phase_match but customized
-             matched_phase = self.check_phase_match(best["name"], current_duration)
+            # We need logic from check_phase_match but customized
+            matched_phase = self.check_phase_match(best["name"], current_duration)
 
         return MatchResult(
             best["name"],
@@ -1424,9 +1450,9 @@ class ProfileStore:
             })
 
         config = {
-             "min_duration_ratio": self._min_duration_ratio,
-             "max_duration_ratio": self._max_duration_ratio,
-             "dtw_bandwidth": self.dtw_bandwidth
+            "min_duration_ratio": self._min_duration_ratio,
+            "max_duration_ratio": self._max_duration_ratio,
+            "dtw_bandwidth": self.dtw_bandwidth
         }
 
         candidates = analysis.compute_matches_worker(
@@ -1434,7 +1460,7 @@ class ProfileStore:
         )
 
         if not candidates:
-             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
+            return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
         best = candidates[0]
 
@@ -1469,13 +1495,13 @@ class ProfileStore:
 
         phases = profile.get("phases", [])
         if not phases:
-             return None
+            return None
 
         for phase in phases:
-             p_start = phase.get("start", 0)
-             p_end = phase.get("end", 0)
-             if p_start <= duration <= p_end:
-                 return str(phase.get("name", "Unknown"))
+            p_start = phase.get("start", 0)
+            p_end = phase.get("end", 0)
+            if p_start <= duration <= p_end:
+                return str(phase.get("name", "Unknown"))
 
         return None
 
@@ -1675,7 +1701,6 @@ class ProfileStore:
                 profile["sample_cycle_id"] = cycle_id
                 profile["avg_duration"] = cycle["duration"]
 
-        # Rebuild envelopes for affected profiles
         # Rebuild envelopes for affected profiles
         if old_profile and old_profile != profile_name:
             await self.async_rebuild_envelope(old_profile)  # Old profile lost a cycle
@@ -2200,7 +2225,7 @@ class ProfileStore:
         )
 
         if not seg_ranges:
-             return [cycle_id]
+            return [cycle_id]
 
         # Apply Split (Main Thread)
         cycles.pop(idx)
@@ -2208,9 +2233,9 @@ class ProfileStore:
         original_profile = cycle.get("profile_name")
         start_dt_base_parsed = dt_util.parse_datetime(cycle["start_time"])
         if not start_dt_base_parsed:
-             # Should not happen as analyze checked it, but safety
-             _LOGGER.warning("Failed to parse start time during split apply for %s", cycle_id)
-             return [cycle_id]
+            # Should not happen as analyze checked it, but safety
+            _LOGGER.warning("Failed to parse start time during split apply for %s", cycle_id)
+            return [cycle_id]
 
         start_dt_base: datetime = start_dt_base_parsed
         start_ts = start_dt_base.timestamp()
@@ -2219,19 +2244,19 @@ class ProfileStore:
         p_data_tuples = self._decompress_power_data(cycle)
 
         if not p_data_tuples:
-             _LOGGER.warning("Failed to decompress data during split for %s", cycle_id)
-             return [cycle_id]
+            _LOGGER.warning("Failed to decompress data during split for %s", cycle_id)
+            return [cycle_id]
 
-        # Convert to relative relative seconds for array logic?
+        # Convert to relative seconds for array logic
         # decompress_power_data returns list[tuple[str, float]] (ISO strings)
         # We need relative seconds for the `seg_ranges` which are inputs in seconds.
 
         points = []
         for t_str, val in p_data_tuples:
-             dt_p = dt_util.parse_datetime(t_str)
-             if dt_p:
-                 rel = dt_p.timestamp() - start_ts
-                 points.append((rel, float(val)))
+            dt_p = dt_util.parse_datetime(t_str)
+            if dt_p:
+                rel = dt_p.timestamp() - start_ts
+                points.append((rel, float(val)))
 
         for seg_start, seg_end in seg_ranges:
             # Construct new cycle logic
@@ -2252,7 +2277,7 @@ class ProfileStore:
             for t, p in points:
                 if seg_start < t <= seg_end:
                     if start_dt_base:
-                       p_data_abs.append([round(start_dt_base.timestamp() + t, 1), p])
+                        p_data_abs.append([round(start_dt_base.timestamp() + t, 1), p])
 
             new_cycle = {
                 "start_time": new_cycle_start.isoformat(),
@@ -2272,10 +2297,10 @@ class ProfileStore:
         new_cycles_objs = [c for c in cycles if c["id"] in new_ids]
 
         for c in new_cycles_objs:
-             d = c.get("duration", 0)
-             if d > longest_dur:
-                 longest_dur = d
-                 best_replacement_id = c["id"]
+            d = c.get("duration", 0)
+            if d > longest_dur:
+                longest_dur = d
+                best_replacement_id = c["id"]
 
         if best_replacement_id and original_profile:
             p_data = self._data["profiles"].get(original_profile)

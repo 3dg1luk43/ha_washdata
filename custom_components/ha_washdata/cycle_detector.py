@@ -132,7 +132,7 @@ class CycleDetector:
         # Default 30s or 3 * p95 + buffer
         # Let's ensure it's strictly greater than pause threshold to define state progression
         base = max(30.0, 3.0 * self._p95_dt)
-        # Ensure at least 15s gap from pause?
+        # Ensure end threshold is at least 15s greater than pause threshold
         return max(base, self._dynamic_pause_threshold + 15.0)
 
     def _update_cadence(self, dt: float) -> None:
@@ -338,7 +338,7 @@ class CycleDetector:
                     self._transition_to(STATE_RUNNING, timestamp)
 
             # Abort if power drops below threshold before confirmation
-            if not is_high and self._time_below_threshold > 1.0:  # 1s grace?
+            if not is_high and self._time_below_threshold > 1.0:  # 1s grace period
                 # False start
                 _LOGGER.debug(
                     "False start detected: power dropped after %.2fs",
@@ -403,7 +403,7 @@ class CycleDetector:
                         if (timestamp - r[0]).total_seconds() <= self._config.off_delay
                     ]
                     if not recent_window:
-                        # Defer finish?
+                        # Check deferred finish for matched profiles
                         start_time = self._current_cycle_start or timestamp
                         current_duration = (timestamp - start_time).total_seconds()
                         
@@ -419,7 +419,7 @@ class CycleDetector:
                     recent_e = integrate_wh(recent_ts, recent_p)
 
                     if recent_e <= self.config.end_energy_threshold:
-                        # Defer finish?
+                        # Check deferred finish for matched profiles
                         start_time = self._current_cycle_start or timestamp
                         current_duration = (timestamp - start_time).total_seconds()
                         
@@ -445,7 +445,7 @@ class CycleDetector:
         self._state_enter_time = timestamp
         self._sub_state = new_state.capitalize()  # Default substate
 
-        # Reset specific accumulators on transitions?
+        # Reset energy accumulator on transition to OFF
         if new_state == STATE_OFF:
             self._energy_since_idle_wh = 0.0
 

@@ -18,3 +18,4 @@ devtools/priv_secrets.py
 devtools/mock_socket.db
 server.log
 devtools/mock_socket_config.json
+devtools/uploaded_cycles

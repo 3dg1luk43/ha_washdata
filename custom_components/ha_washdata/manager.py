@@ -1059,7 +1059,7 @@ class WashDataManager:
         if self._remove_maintenance_scheduler:
             self._remove_maintenance_scheduler()
 
-        # Try to save state one last time?
+        # Save active state before shutdown
         if self.detector.state == "running":
             snapshot = self.detector.get_state_snapshot()
             snapshot["manual_program"] = self._manual_program_active
@@ -1166,9 +1166,7 @@ class WashDataManager:
             STATE_STARTING,
         ):
             self._update_estimates()
-            # Periodically save state (e.g. every minute?)
-            # Doing it every reading (2s) is too much for flash storage.
-            # Let's do it if 60s has passed since last save?
+            # Periodically save state every 60s to avoid flash wear
             # We need a tracker.
             self._check_state_save(now)
 
@@ -1413,13 +1411,24 @@ class WashDataManager:
         self._stop_watchdog()  # Stop active cycle watchdog
         self._stop_progress_reset_timer()  # Cancel any pending progress reset
 
-        # Auto-Tune: Check for ghost cycles (short duration, lowish power)
-        # Definition of noise: duration < 120s
-        if duration < 120:
+        # Auto-Tune: Check for ghost cycles (short duration AND low energy)
+        # Ghost = duration < 60s AND total energy < 0.05 Wh (avoids killing pump-out spikes)
+        power_data = cycle_data.get("power_data", [])
+        cycle_energy_wh = 0.0
+        if power_data and len(power_data) >= 2:
+            try:
+                ts = np.array([float(p[0]) if isinstance(p[0], (int, float)) else 0 for p in power_data])
+                ps = np.array([float(p[1]) for p in power_data])
+                # Simple trapezoidal integration
+                dt_h = np.diff(ts) / 3600.0 if ts[0] > 1e9 else np.diff(ts) / 3600.0  # seconds -> hours
+                avg_p = (ps[:-1] + ps[1:]) / 2
+                cycle_energy_wh = float(np.sum(avg_p * np.abs(dt_h)))
+            except Exception:
+                cycle_energy_wh = 0.0
+
+        # Ghost cycle: short AND low energy (real cycles have energy even if short)
+        if duration < 60 and cycle_energy_wh < 0.05:
             self._handle_noise_cycle(max_power)
-            # We still save it as a cycle for history, or maybe we shouldn't?
-            # Let's save it but marked as potential noise?
-            # For now save as normal.
 
         # Schedule heavy post-processing asynchronously
         self.hass.async_create_task(self._async_process_cycle_end(cycle_data))
@@ -2018,16 +2027,32 @@ class WashDataManager:
             return None
 
         # Convert cached lists back to numpy arrays
+        # Envelope curves are stored as [[t, y], ...] points, extract Y values only
         try:
+            env_min = envelope.get("min", [])
+            env_max = envelope.get("max", [])
+            env_avg = envelope.get("avg", [])
+            env_std = envelope.get("std", [])
+
+            # Handle both formats: [[t, y], ...] (new) or [y, ...] (legacy)
+            def extract_y_values(data: list) -> np.ndarray:
+                if not data:
+                    return np.array([])
+                if isinstance(data[0], (list, tuple)) and len(data[0]) >= 2:
+                    # New format: [[t, y], ...]
+                    return np.array([float(pt[1]) for pt in data])
+                # Legacy format: [y, ...]
+                return np.array(data)
+
             envelope_arrays = {
-                "min": np.array(envelope["min"]),
-                "max": np.array(envelope["max"]),
-                "avg": np.array(envelope["avg"]),
-                "std": np.array(envelope["std"]),
+                "min": extract_y_values(env_min),
+                "max": extract_y_values(env_max),
+                "avg": extract_y_values(env_avg),
+                "std": extract_y_values(env_std),
             }
             time_grid = np.array(envelope.get("time_grid", []))
             target_duration = envelope.get("target_duration", 0)
-        except (KeyError, ValueError) as e:
+        except (KeyError, ValueError, TypeError, IndexError) as e:
             _LOGGER.warning("Invalid envelope format for %s: %s", profile_name, e)
             return None
 

@@ -652,11 +652,12 @@ def main_page():
                         n = len(manager.templates)
                         templates_label.set_text(f"✓ {n} templates loaded")
 
-                    def handle_upload(e: events.UploadEvent):
+                    async def handle_upload(e: events.UploadEventArguments):
                         try:
-                            fpath = os.path.join(UPLOAD_DIR, e.name)
+                            fpath = os.path.join(UPLOAD_DIR, e.file.name)
+                            content = await e.file.read()
                             with open(fpath, 'wb') as f:
-                                f.write(e.content.read())
+                                f.write(content)
                             
                             n = manager.load_templates(fpath)
                             templates_label.set_text(f"✓ {n} templates loaded")
@@ -1034,9 +1035,18 @@ def main_page():
                     if len(power_history) > 500:
                         power_history.pop(0)
                     
-                    chart.options['xAxis']['data'] = [x[0] for x in power_history]
-                    chart.options['series'][0]['data'] = [x[1] for x in power_history]
-                    chart.update()
+                    # Update chart data without resetting zoom/pan state
+                    # Use run_chart_method to call setOption with only the data changes
+                    new_x_data = [x[0] for x in power_history]
+                    new_y_data = [x[1] for x in power_history]
+                    chart.run_chart_method(
+                        'setOption',
+                        {
+                            'xAxis': {'data': new_x_data},
+                            'series': [{'data': new_y_data}]
+                        },
+                        False  # notMerge=False (merge mode, preserves existing options like dataZoom)
+                    )
                 else:
                     time_lbl.set_text("00:00")
                 

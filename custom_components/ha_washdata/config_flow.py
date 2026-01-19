@@ -67,10 +67,8 @@ from .const import (
     DEFAULT_AUTO_MERGE_GAP_SECONDS,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_DURATION_TOLERANCE,
-    DEFAULT_AUTO_LABEL_CONFIDENCE,
+    DEFAULT_AUTO_LABEL_CONFIDENCE,  # Used in suggestions formatting
     DEFAULT_PROFILE_MATCH_INTERVAL,
-    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_AUTO_MAINTENANCE,
     DEFAULT_WATCHDOG_INTERVAL,
     DEFAULT_COMPLETION_MIN_SECONDS,
@@ -80,6 +78,7 @@ from .const import (
     DEFAULT_START_ENERGY_THRESHOLD,
     DEFAULT_END_ENERGY_THRESHOLD,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
+    DEFAULT_MIN_OFF_GAP,
     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
     DEVICE_COMPLETION_THRESHOLDS,
     CONF_PROFILE_MATCH_THRESHOLD,
@@ -485,8 +484,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if CONF_DEVICE_TYPE in self._basic_options:
             current_device_type = self._basic_options[CONF_DEVICE_TYPE]
 
-        # Calculate Defaults
-        default_min_off_gap = DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(
+        # Device-specific defaults
+        _default_min_off_gap = DEFAULT_MIN_OFF_GAP_BY_DEVICE.get(
             current_device_type, DEFAULT_MIN_OFF_GAP
         )
         default_start_energy = DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE.get(
@@ -1126,18 +1125,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             start = c["start_time"].split(".")[0].replace("T", " ")
             duration_min = int(c["duration"] / 60)
             status = c.get("status", "completed")
-            
+
             # Status icon
             status_icon = (
                 "✓"
                 if status in ("completed", "force_stopped")
                 else "⚠" if status == "resumed" else "✗"
             )
-            
+
             # Graph Color
             color_hex = cycle_colors.get(c["id"])
             color_emoji = hex_to_emoji.get(color_hex, "⚫") if color_hex else ""
-            
+
             # Add energy if available to help identify
             energy = ""
             if "total_energy_kwh" in c:
@@ -1508,7 +1507,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_abort(reason="no_profiles_for_matching")
 
         total_count = len(store.get_past_cycles())
-        
+
         if total_count == 0:
             return self.async_abort(reason="no_cycles_found")
 
@@ -1867,7 +1866,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Handle Record Mode menu."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
-        
+
         # Determine available actions based on state
         is_recording = manager.recorder.is_recording
         has_last_run = manager.recorder.last_run is not None
@@ -1898,11 +1897,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             status = "STOPPED"
             duration = 0
             samples = 0
-            
+
             if has_last_run:
                 options["process_recording"] = "Process Last Recording (Trim & Save)"
                 options["discard_recording"] = "Discard Last Recording"
-                
+
                 last_run = manager.recorder.last_run
                 samples = len(last_run.get("data", []))
                 try:
@@ -1952,109 +1951,109 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_abort(reason="no_recording_found")
 
         data = last_run.get("data", [])
-        
+
         if user_input is not None:
-             save_mode = user_input["save_mode"]
-             
-             if save_mode == "discard":
-                 await manager.recorder.clear_last_run()
-                 return self.async_create_entry(title="", data={})
-                 
-             head_trim = user_input["head_trim"]
-             tail_trim = user_input["tail_trim"]
-             profile_name = user_input["profile_name"].strip()
+            save_mode = user_input["save_mode"]
 
-             # APPLY TRIMS
-             # Convert data to timestamps
-             parsed = []
-             for t_str, p in data:
-                 t = dt_util.parse_datetime(t_str).timestamp()
-                 parsed.append((t, p))
-             
-             if not parsed:
-                 return self.async_abort(reason="empty_recording")
+            if save_mode == "discard":
+                await manager.recorder.clear_last_run()
+                return self.async_create_entry(title="", data={})
 
-             start_ts = parsed[0][0]
-             end_ts = parsed[-1][0]
-             
-             # Calculate cut points
-             keep_start = start_ts + head_trim
-             keep_end = end_ts - tail_trim
-             
-             trimmed_data = []
-             for t, p in parsed:
-                 if t >= keep_start and t <= keep_end:
-                     t_iso = dt_util.utc_from_timestamp(t).isoformat()
-                     trimmed_data.append((t_iso, p))
-             
-             duration = max(0.0, (keep_end - keep_start))
-             
-             cycle_data = {
-                 "id": f"rec_{int(time.time())}",
-                 "start_time": dt_util.utc_from_timestamp(keep_start).isoformat(),
-                 "end_time": dt_util.utc_from_timestamp(keep_end).isoformat(),
-                 "duration": duration,
-                 "profile_name": profile_name,
-                 "power_data": trimmed_data,
-                 "status": "completed",
-                 "meta": {"source": "recorder", "original_samples": len(data)}
-             }
-             
-             if save_mode == "new_profile":
-                  await manager.profile_store.create_profile_standalone(profile_name)
-                  await manager.profile_store.async_add_cycle(cycle_data)
-                  await manager.profile_store.async_rebuild_envelope(profile_name)
-             else:
-                  # Add to existing
-                  await manager.profile_store.async_add_cycle(cycle_data)
-                  await manager.profile_store.async_rebuild_envelope(profile_name)
-             
-             await manager.profile_store.async_save()
-             await manager.recorder.clear_last_run()
-             
-             return self.async_create_entry(title="", data={})
+            head_trim = user_input["head_trim"]
+            tail_trim = user_input["tail_trim"]
+            profile_name = user_input["profile_name"].strip()
+
+            # APPLY TRIMS
+            # Convert data to timestamps
+            parsed = []
+            for t_str, p in data:
+                t = dt_util.parse_datetime(t_str).timestamp()
+                parsed.append((t, p))
+
+            if not parsed:
+                return self.async_abort(reason="empty_recording")
+
+            start_ts = parsed[0][0]
+            end_ts = parsed[-1][0]
+
+            # Calculate cut points
+            keep_start = start_ts + head_trim
+            keep_end = end_ts - tail_trim
+
+            trimmed_data = []
+            for t, p in parsed:
+                if t >= keep_start and t <= keep_end:
+                    t_iso = dt_util.utc_from_timestamp(t).isoformat()
+                    trimmed_data.append((t_iso, p))
+
+            duration = max(0.0, (keep_end - keep_start))
+
+            cycle_data = {
+                "id": f"rec_{int(time.time())}",
+                "start_time": dt_util.utc_from_timestamp(keep_start).isoformat(),
+                "end_time": dt_util.utc_from_timestamp(keep_end).isoformat(),
+                "duration": duration,
+                "profile_name": profile_name,
+                "power_data": trimmed_data,
+                "status": "completed",
+                "meta": {"source": "recorder", "original_samples": len(data)}
+            }
+
+            if save_mode == "new_profile":
+                await manager.profile_store.create_profile_standalone(profile_name)
+                await manager.profile_store.async_add_cycle(cycle_data)
+                await manager.profile_store.async_rebuild_envelope(profile_name)
+            else:
+                # Add to existing
+                await manager.profile_store.async_add_cycle(cycle_data)
+                await manager.profile_store.async_rebuild_envelope(profile_name)
+
+            await manager.profile_store.async_save()
+            await manager.recorder.clear_last_run()
+
+            return self.async_create_entry(title="", data={})
 
         # Calculate suggestions
         rec_start_str = manager.recorder.last_run.get("start_time")
         rec_end_str = manager.recorder.last_run.get("end_time")
-        
+
         rec_start = dt_util.parse_datetime(rec_start_str) if rec_start_str else None
         rec_end = dt_util.parse_datetime(rec_end_str) if rec_end_str else None
-        
+
         head_suggest, tail_suggest, sampling_rate = manager.recorder.get_trim_suggestions(
-             data, recording_start=rec_start, recording_end=rec_end
+            data, recording_start=rec_start, recording_end=rec_end
         )
-        
+
         # Generate Preview Graph
         ts = int(time.time())
         stats_dir = self.hass.config.path("www", "ha_washdata", "preview")
         await self.hass.async_add_executor_job(
             lambda: os.makedirs(stats_dir, exist_ok=True)
         )
-        
+
         svg_content = await self.hass.async_add_executor_job(
-             manager.profile_store.generate_preview_svg, 
-             data, 
-             head_suggest, 
-             tail_suggest
+            manager.profile_store.generate_preview_svg,
+            data,
+            head_suggest,
+            tail_suggest
         )
-        
+
         graph_url = ""
         if svg_content:
-             fname = f"preview_{ts}.svg"
-             path = f"{stats_dir}/{fname}"
-             
-             def write_svg():
-                 with open(path, "w", encoding="utf-8") as f:
-                     f.write(svg_content)
-                     
-             await self.hass.async_add_executor_job(write_svg)
-             graph_url = f"/local/ha_washdata/preview/{fname}?v={ts}"
+            fname = f"preview_{ts}.svg"
+            path = f"{stats_dir}/{fname}"
+
+            def write_svg():
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(svg_content)
+
+            await self.hass.async_add_executor_job(write_svg)
+            graph_url = f"/local/ha_washdata/preview/{fname}?v={ts}"
 
         # Profile options
         profiles = list(manager.profile_store.get_profiles().keys())
         profiles.sort()
-        
+
         schema = {
             vol.Required("head_trim", default=head_suggest): selector.NumberSelector(
                 selector.NumberSelectorConfig(min=0, max=300, step=0.1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s")
@@ -2064,12 +2063,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             vol.Required("save_mode", default="existing_profile"): selector.SelectSelector(
                 selector.SelectSelectorConfig(
-                     options=[
+                    options=[
                          {"value": "new_profile", "label": "Create New Profile"},
                          {"value": "existing_profile", "label": "Add to Existing Profile"},
                          {"value": "discard", "label": "Discard Recording"},
-                     ],
-                     mode=selector.SelectSelectorMode.LIST
+                    ],
+                    mode=selector.SelectSelectorMode.LIST
                 )
             ),
             # Profile name optional if discarding? No dynamic update, so required logic applies.
@@ -2080,24 +2079,24 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # We used SelectSelector with custom_value=True.
             vol.Required("profile_name"): selector.SelectSelector(
                 selector.SelectSelectorConfig(
-                     options=profiles,
-                     mode=selector.SelectSelectorMode.DROPDOWN,
-                     custom_value=True
+                    options=profiles,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                    custom_value=True
                 )
             )
         }
-        
+
         # Calculate duration for display
         duration_val = 0.0
         if rec_start and rec_end:
-             duration_val = (rec_end - rec_start).total_seconds()
-        
+            duration_val = (rec_end - rec_start).total_seconds()
+
         return self.async_show_form(
-             step_id="record_process",
-             data_schema=vol.Schema(schema),
-             description_placeholders={
-                 "samples": str(len(data)),
-                 "duration": f"{duration_val:.1f}", 
+            step_id="record_process",
+            data_schema=vol.Schema(schema),
+            description_placeholders={
+                "samples": str(len(data)),
+                 "duration": f"{duration_val:.1f}",
                  "graph_url": graph_url,
                  "sampling_rate": str(sampling_rate)
              }

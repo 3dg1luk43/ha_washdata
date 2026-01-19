@@ -49,11 +49,11 @@ CONF_EXPOSE_DEBUG_ENTITIES = "expose_debug_entities"  # Expose detailed debug se
 CONF_SAVE_DEBUG_TRACES = (
     "save_debug_traces"  # Improve historical cycle data with rich debug info
 )
-# Deprecated - kept for backward compatibility with existing configs
-CONF_ABRUPT_DROP_WATTS = "abrupt_drop_watts"  # Deprecated
-CONF_ABRUPT_DROP_RATIO = "abrupt_drop_ratio"  # Deprecated
-CONF_ABRUPT_HIGH_LOAD_FACTOR = "abrupt_high_load_factor"  # Deprecated
-CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"  # Deprecated
+# Cycle interruption detection settings (not exposed in UI, but used internally)
+CONF_ABRUPT_DROP_WATTS = "abrupt_drop_watts"  # Power cliff threshold for interrupted status
+CONF_ABRUPT_DROP_RATIO = "abrupt_drop_ratio"  # Relative drop ratio for interrupted status
+CONF_ABRUPT_HIGH_LOAD_FACTOR = "abrupt_high_load_factor"  # High load factor threshold
+CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"  # Noise events before auto-tune
 
 
 NOTIFY_EVENT_START = "cycle_start"
@@ -96,11 +96,11 @@ DEFAULT_WATCHDOG_INTERVAL = 5  # Derived: 2 * sampling_interval + 1
 DEFAULT_RUNNING_DEAD_ZONE = 3  # Seconds after start to ignore power dips
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 
-# Deprecated defaults - kept for backward compatibility with existing configs
-DEFAULT_ABRUPT_DROP_WATTS = 500.0  # Deprecated
-DEFAULT_ABRUPT_DROP_RATIO = 0.6  # Deprecated
-DEFAULT_ABRUPT_HIGH_LOAD_FACTOR = 5.0  # Deprecated
-DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Deprecated
+# Cycle interruption detection defaults (internal)
+DEFAULT_ABRUPT_DROP_WATTS = 500.0  # Power cliff detection threshold (W)
+DEFAULT_ABRUPT_DROP_RATIO = 0.6  # 60% drop considered abrupt
+DEFAULT_ABRUPT_HIGH_LOAD_FACTOR = 5.0  # High load factor threshold
+DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = 3  # Ghost cycles before threshold adjustment
 
 # Profile Matching Thresholds
 CONF_PROFILE_MATCH_THRESHOLD = "profile_match_threshold"
@@ -201,7 +201,6 @@ EVENT_CYCLE_ENDED = "ha_washdata_cycle_ended"
 SIGNAL_WASHER_UPDATE = "ha_washdata_update_{}"
 
 # Learning & Feedback
-# (Deprecated constants, kept for backward compat in code paths)
 
 SERVICE_SUBMIT_FEEDBACK = (
     "ha_washdata.submit_cycle_feedback"  # Service to submit feedback

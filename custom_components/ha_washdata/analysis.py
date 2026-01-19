@@ -296,14 +296,14 @@ def compute_dtw_path(
 def compute_envelope_worker(
     raw_cycles_data: list[tuple[list[float], list[float]]],
     dtw_bandwidth: float
-) -> tuple[list[float], list[float], list[float], list[float], list[float]] | None:
+) -> tuple[list[float], list[float], list[float], list[float], list[float], float] | None:
     """
     Compute statistical envelope.
     Args:
         raw_cycles_data: list of (offsets, power_values) tuples.
         dtw_bandwidth: ratio.
     Returns:
-        (time_grid, min_curve, max_curve, avg_curve, std_curve) (lists) or None.
+        (time_grid, min_curve, max_curve, avg_curve, std_curve, target_duration) or None.
     """
     if not raw_cycles_data:
         return None
@@ -412,5 +412,6 @@ def compute_envelope_worker(
         min_curve.tolist(),
         max_curve.tolist(),
         avg_curve.tolist(),
-        std_curve.tolist()
+        std_curve.tolist(),
+        float(target_duration)
     )

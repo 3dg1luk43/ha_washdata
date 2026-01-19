@@ -169,7 +169,7 @@ def resample_uniform(
             continue
 
         # Define uniform grid for this chunk
-        # Start at the actual first timestamp, aligned to grid if needed?
+        # Define uniform grid for this chunk (start at first timestamp)
         # Simple approach: start at t[0], go to t[-1] stepping by dt_s
 
         grid_start = chunk_ts[0]

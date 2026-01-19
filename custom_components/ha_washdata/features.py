@@ -87,7 +87,7 @@ def detect_events(
 
         # Criteria: Significant rate AND significant magnitude
         # We want to ignore small jitter even if rate is high (dt small)
-        if mag > min_event_watts and abs(r) > noise_allowance:  # Threshold W/s?
+        if mag > min_event_watts and abs(r) > noise_allowance:  # Rate threshold W/s
             # Basic check: if dt is tiny (1s) and power jump is 50W, rate is 50 W/s.
             # If dt is 10s and power jump is 50W, rate is 5 W/s.
             # Real heater on: 2000W in ~2s => 1000 W/s.
@@ -134,11 +134,11 @@ def segment_phases(timestamps: np.ndarray, power: np.ndarray) -> list[CyclePhase
     labels = []
     for p in power:
         if p >= thresh_high:
-            labels.append("HEATER")  # Or HIGH
+            labels.append("HEATER")
         elif p >= thresh_med:
-            labels.append("MOTOR")  # Or MED
+            labels.append("MOTOR")
         else:
-            labels.append("IDLE")  # Or LOW
+            labels.append("IDLE")
 
     # Merge consecutive
     phases = []
@@ -212,7 +212,7 @@ def compute_signature(
     if len(high_indices) > 0:
         time_to_first_high = timestamps[high_indices[0]] - timestamps[0]
     else:
-        time_to_first_high = duration  # Or -1?
+        time_to_first_high = duration  # No high phase detected
 
     # High Phase Ratio
     high_mask = power > thresh_high

@@ -122,9 +122,7 @@ class CycleRecorder:
             return
 
         _LOGGER.info("Starting new cycle recording")
-        # Clear previous run if starting new one? Or keep until explicit clear?
-        # Keep it until UI clears it or overwritten?
-        # Let's keep it safe.
+        # Previous recordings are kept until explicitly cleared or overwritten
         
         self._is_recording = True
         self._start_time = dt_util.now()
@@ -140,8 +138,7 @@ class CycleRecorder:
         # Append to buffer
         self._buffer.append((now.isoformat(), float(power)))
 
-        # Periodic save (every minute or 100 samples?)
-        # For now, let's rely on HA's shutdown logic or occasional saves?
+        # Periodic save every 60s to ensure data persistence
         # Better safe than sorry: save if last save was > 1 minute ago
         if self._last_save and (now - self._last_save).total_seconds() > 60:
             self.hass.add_job(self._async_save)
@@ -164,7 +161,7 @@ class CycleRecorder:
         Returns: (head_trim_seconds, tail_trim_seconds, average_noise_power)
         """
         if not data:
-            # If no data but we have times, trim everything?
+            # No data found - return full recording duration as trim
             if recording_start and recording_end:
                 dur = (recording_end - recording_start).total_seconds()
                 return 0.0, dur, 0.0
@@ -233,14 +230,7 @@ class CycleRecorder:
         # floor ensures this.
 
         steps_head = int(raw_head_trim / avg_dt)
-        # Additional safety: if step matches exactly, step back one?
-        # User said "trim a bit too much".
-        # If I trim exactly raw_head_trim, I hit head_ts directly.
-        # If I floor, I back off by 0..dt.
-        # Let's subtract 1 step if > 0 to be very safe?
-        # User: "triming time should be always a multiplier of sampling rate detected"
-        # If I do floor, it is a multiplier.
-        # Let's just do floor.
+        # Align trim to sampling rate (floor to keep buffer before active sample)
 
         # However, if using the "floor" logic makes it 0, that's fine.
         head_trim = steps_head * avg_dt
