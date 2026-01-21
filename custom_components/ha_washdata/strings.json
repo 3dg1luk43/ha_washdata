@@ -281,6 +281,37 @@
           "cycles_to_delete": "Cycles to Delete (check matching colors)"
         }
       },
+      "interactive_editor": {
+        "title": "Merge/Split Interactive Editor",
+        "description": "Select a manual action to perform on your cycle history.",
+        "data": {
+          "editor_action": "Action"
+        }
+      },
+      "editor_select": {
+        "title": "Select Cycles",
+        "description": "Select the cycle(s) to process.\n\n{info_text}",
+        "data": {
+          "selected_cycles": "Cycles"
+        }
+      },
+      "editor_configure": {
+        "title": "Configure & Apply",
+        "description": "{preview_md}",
+        "data": {
+          "confirm_action": "Action",
+          "merged_profile": "Resulting Profile",
+          "new_profile_name": "New Profile Name",
+          "confirm_commit": "Yes, I confirm this action"
+        }
+      },
+      "editor_split_params": {
+        "title": "Split Configuration",
+        "description": "Adjust the sensitivity for splitting this cycle. Any idle gap longer than this will cause a split.",
+        "data": {
+          "min_gap_seconds": "Split Gap Threshold (seconds)"
+        }
+      },
       "migrate_data": {
         "title": "Migrate Data Format",
         "description": "Re-compress all saved cycle data to ensure it's in the latest format. This is safe and can be run multiple times."

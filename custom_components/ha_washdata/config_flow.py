@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import time
+import base64
 from typing import Any
 
 import voluptuous as vol
@@ -87,6 +88,7 @@ from .const import (
     DEFAULT_PROFILE_UNMATCH_THRESHOLD,
     DEFAULT_SAMPLING_INTERVAL,
 )
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -690,9 +692,233 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             },
         )
 
-    async def async_step_diagnostics(
+
+
+
+    # --- Interactive Editor Steps ---
+
+    async def async_step_interactive_editor(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
+        """Step 1: Select Action (Merge or Split)."""
+        if user_input is not None:
+            self._editor_action = user_input["action"]
+            return await self.async_step_editor_select()
+
+        return self.async_show_form(
+            step_id="interactive_editor",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("action"): vol.In(
+                        {
+                            "split": "✂️ Split a Cycle (Find gaps)",
+                            "merge": "🔗 Merge Cycles (Join fragments)",
+                        }
+                    )
+                }
+            ),
+        )
+
+    async def async_step_editor_select(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Step 2: Select Cycles."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        
+        errors = {}
+
+        if user_input is not None:
+            selected = user_input.get("selected_cycles", [])
+            self._editor_selected_ids = selected
+            
+            # Validation
+            if self._editor_action == "split":
+                if len(selected) != 1:
+                    errors["base"] = "select_exactly_one"
+                else:
+                    return await self.async_step_editor_split_params()
+            
+            elif self._editor_action == "merge":
+                if len(selected) < 2:
+                    errors["base"] = "select_at_least_two"
+                else:
+                    return await self.async_step_editor_configure()
+
+        # Build options (Recent 50 cycles)
+        cycles = store.get_past_cycles()[-50:]
+        cycles.sort(key=lambda x: x["start_time"], reverse=True)
+        
+        options = []
+        for c in cycles:
+            start = c["start_time"].split(".")[0].replace("T", " ")
+            duration_min = int(c["duration"] / 60)
+            prof = c.get("profile_name") or "Unlabeled"
+            label = f"{start} - {duration_min}m - {prof}"
+            options.append(selector.SelectOptionDict(value=c["id"], label=label))
+
+        return self.async_show_form(
+            step_id="editor_select",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("selected_cycles"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                             options=options,
+                             mode=selector.SelectSelectorMode.LIST,
+                             multiple=True
+                        )
+                    )
+                }
+            ),
+            errors=errors,
+            description_placeholders={
+                "info_text": "Select 1 cycle to split, or 2+ cycles to merge."
+            }
+        )
+
+    async def async_step_editor_split_params(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Step 2.5: Configure split parameter."""
+        if user_input is not None:
+             self._editor_split_gap = int(user_input["min_gap_seconds"])
+             return await self.async_step_editor_configure()
+
+        return self.async_show_form(
+            step_id="editor_split_params",
+            data_schema=vol.Schema({
+                vol.Required("min_gap_seconds", default=900): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=60, max=3600, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s"
+                    )
+                )
+            })
+        )
+
+    async def async_step_editor_configure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Step 3: Configure and Preview."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+
+        if user_input is not None:
+            # Execute
+            if self._editor_action == "split":
+                # User selected action "apply"
+                if user_input.get("confirm_commit"):
+                    # We need the segments config. 
+                    # For simplicity, we auto-apply the analysis results for now,
+                    # as complex per-segment assignment in one form is hard in HA config flow.
+                    # We'll rely on auto-labeling or user can label later.
+                    
+                    # Re-run analysis to get segments
+                    cycle = next((c for c in store.get_past_cycles() if c["id"] in self._editor_selected_ids), None)
+                    if cycle:
+                        segments = await self.hass.async_add_executor_job(
+                            store._analyze_split_sync, cycle, self._editor_split_gap, 2.0
+                        )
+                        if segments:
+                            await store.apply_split_interactive(cycle["id"], segments)
+                            # Maintenance: Reprocess envelopes
+                            await store.async_rebuild_all_envelopes()
+                    
+                    return self.async_create_entry(title="", data={})
+
+            elif self._editor_action == "merge":
+                if user_input.get("confirm_commit"):
+                    target_profile = user_input.get("merged_profile")
+                    
+                    if target_profile == "create_new":
+                        new_name = user_input.get("new_profile_name", "").strip()
+                        if new_name:
+                            # Create profile
+                            try:
+                                await store.create_profile_standalone(new_name)
+                                target_profile = new_name
+                            except ValueError:
+                                # Profile exists or other error, fallback to unlabel/existing behavior
+                                pass
+                    
+                    if target_profile in ("none", "create_new"): target_profile = None
+                    
+                    await store.apply_merge_interactive(self._editor_selected_ids, target_profile)
+                    # Maintenance: Reprocess envelopes
+                    await store.async_rebuild_all_envelopes()
+                    return self.async_create_entry(title="", data={})
+
+        # Generate Preview
+        preview_md = ""
+        schema = {}
+
+        if self._editor_action == "split":
+            cid = self._editor_selected_ids[0]
+            cycle = next((c for c in store.get_past_cycles() if c["id"] == cid), None)
+            if not cycle:
+                return self.async_abort(reason="cycle_not_found")
+            
+            # Run Analysis
+            segments = await self.hass.async_add_executor_job(
+                store._analyze_split_sync, cycle, self._editor_split_gap, 2.0
+            ) # Split params
+            
+            if not segments:
+                return self.async_abort(reason="no_split_segments_found")
+
+            # Generate SVG
+            svg = store.generate_interactive_split_svg(cycle["id"], segments)
+            b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+            
+            preview_md = f"""
+### Split Preview
+Found {len(segments)} segments.
+![Preview](data:image/svg+xml;base64,{b64})
+
+Click Confirm to split this cycle into {len(segments)} separate cycles.
+"""
+            schema = {vol.Required("confirm_commit"): bool}
+
+        elif self._editor_action == "merge":
+            # Get cycles
+            cycles_to_merge = [c for c in store.get_past_cycles() if c["id"] in self._editor_selected_ids]
+            cycles_to_merge.sort(key=lambda x: x["start_time"])
+            
+            # Generate SVG
+            svg = store.generate_interactive_merge_svg([c["id"] for c in cycles_to_merge])
+            b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+
+            # Profile Selector
+            profiles = store.list_profiles()
+            prof_options = [
+                selector.SelectOptionDict(value="create_new", label="➕ Create New Profile..."),
+                selector.SelectOptionDict(value="none", label="(Unlabeled)")
+            ]
+            for p in profiles:
+                prof_options.append(selector.SelectOptionDict(value=p["name"], label=p["name"]))
+            
+            # Guess best profile?
+            default_prof = cycles_to_merge[0].get("profile_name") or "none"
+
+            preview_md = f"""
+### Merge Preview
+Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
+![Preview](data:image/svg+xml;base64,{b64})
+"""
+            schema = {
+                vol.Optional("merged_profile", default=default_prof): selector.SelectSelector(
+                    selector.SelectSelectorConfig(options=prof_options, mode=selector.SelectSelectorMode.DROPDOWN)
+                ),
+                vol.Optional("new_profile_name"): str,
+                vol.Required("confirm_commit"): bool
+            }
+        
+        return self.async_show_form(
+            step_id="editor_configure",
+            data_schema=vol.Schema(schema),
+            description_placeholders={"preview_md": preview_md}
+        )
+
+
         """Diagnostics submenu for maintenance actions."""
         if user_input is not None:
             choice = user_input["action"]
@@ -920,14 +1146,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         if user_input is not None:
             action = user_input["action"]
-            if action == "label_cycle":
-                return await self.async_step_select_cycle_to_label()
-            elif action == "auto_label":
+            if action == "auto_label_cycles":
                 return await self.async_step_auto_label_cycles()
-            elif action == "delete_cycle":
+            elif action == "select_cycle_to_label":
+                return await self.async_step_select_cycle_to_label()
+            elif action == "select_cycle_to_delete":
                 return await self.async_step_select_cycle_to_delete()
-            elif action == "post_process":
-                return await self.async_step_post_process()
+            elif action == "interactive_editor":
+                # Initialize state
+                self._editor_action = None
+                self._editor_selected_ids = []
+                self._editor_split_gap = 900
+                return await self.async_step_interactive_editor()
 
         return self.async_show_form(
             step_id="manage_cycles",
@@ -935,15 +1165,61 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required("action"): vol.In(
                         {
-                            "label_cycle": "🏷️ Label a Cycle",
-                            "auto_label": "🤖 Auto-Label History",
-                            "delete_cycle": "❌ Delete a Cycle",
-                            "post_process": "🧹 Process History (Merge/Split)",
+                            "auto_label_cycles": "🤖 Auto-Label Old Cycles",
+                            "select_cycle_to_label": "🏷️ Label Specific Cycle",
+                            "select_cycle_to_delete": "🗑️ Delete Cycle",
+                            "interactive_editor": "✂️ Merge/Split Interactive Editor",
                         }
                     )
                 }
             ),
             description_placeholders={"recent_cycles": recent_text},
+        )
+
+    async def async_step_diagnostics(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Diagnostics and maintenance menu."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+
+        if user_input is not None:
+            action = user_input["action"]
+            if action == "reprocess_history":
+                return await self.async_step_reprocess_history()
+            elif action == "migrate_data":
+                return await self.async_step_migrate_data()
+            elif action == "wipe_history":
+                return await self.async_step_wipe_history()
+            elif action == "export_import":
+                return await self.async_step_export_import()
+            elif action == "clear_debug_data":
+                return await self.async_step_clear_debug_data()
+
+        # Build Stats
+        cycles = manager.profile_store.get_past_cycles()
+        count = len(cycles)
+
+        # Estimate size
+        try:
+             # Basic serialization check
+             size_bytes = len(json.dumps(manager.profile_store._data, default=str))
+             size_mb = size_bytes / (1024 * 1024)
+             stats_str = f"Total Cycles: {count}\nEst. Data Size: {size_mb:.2f} MB"
+        except Exception:
+             stats_str = f"Total Cycles: {count}\nSize: Unknown"
+
+        return self.async_show_form(
+            step_id="diagnostics",
+            data_schema=vol.Schema({
+                vol.Required("action"): vol.In({
+                    "reprocess_history": "Reprocess History (Rebuild Envelopes)",
+                    "migrate_data": "Migrate Data Format (Compress)",
+                    "clear_debug_data": "Clear Debug Data",
+                    "export_import": "Export/Import JSON",
+                    "wipe_history": "⚠️ Wipe History (Reset All)"
+                })
+            }),
+            description_placeholders={"storage_stats": stats_str}
         )
 
     async def async_step_manage_profiles(

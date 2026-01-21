@@ -117,11 +117,10 @@
           "min_off_gap": "Gap Between Cycles (s)",
           "start_energy_threshold": "Start Energy Gate (Wh)",
           "end_energy_threshold": "End Energy Gate (Wh)",
-          "start_threshold_w": "Start Threshold (W) - Hysteresis High",
-          "stop_threshold_w": "Stop Threshold (W) - Hysteresis Low",
           "auto_maintenance": "Enable Auto-Maintenance",
           "expose_debug_entities": "Expose Debug Entities",
-          "save_debug_traces": "Save Debug Traces"
+          "save_debug_traces": "Save Debug Traces",
+          "dtw_bandwidth": "DTW Bandwidth"
         },
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
@@ -157,11 +156,10 @@
           "min_off_gap": "Minimum time (seconds) power must be OFF between two runs for them to be considered separate cycles. If shorter, they are merged. Default: 60s.",
           "start_energy_threshold": "Cycle must accumulate at least this much energy (Wh) during the START phase to be confirmed. Default: 0.005 Wh.",
           "end_energy_threshold": "Cycle ends only if energy in the last Off-Delay window is below this value (Wh). Prevents false ends if power fluctuates near zero. Default: 0.05 Wh.",
-          "start_threshold_w": "Power must rise ABOVE this value to transition from OFF/IDLE to STARTING. Default: min_power + small buffer.",
-          "stop_threshold_w": "Power must fall BELOW this value to be considered 'low' (e.g. for Paused/Ending). Default: min_power - small buffer.",
           "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy.",
           "expose_debug_entities": "Show advanced sensors (Confidence, Phase, Ambiguity) for debugging.",
-          "save_debug_traces": "Store detailed ranking and power trace data in history (Increases storage usage)."
+          "save_debug_traces": "Store detailed ranking and power trace data in history (Increases storage usage).",
+          "dtw_bandwidth": "Maximum allowed time warping (stretching) as a ratio of cycle duration. Higher values allow matching highly variable cycles (e.g., sensor-delayed phases) but increase CPU cost. Default: 0.20 (20%)."
         }
       },
       "diagnostics": {
@@ -281,6 +279,37 @@
         "description": "![Graph]({graph_url})\n\n**Visualizing {profile_name}**\n\nThe graph shows individual cycles as colored lines. Identify outliers (lines far from the group) and matching their color in the list below to delete them.\n\n**Select cycles to PERMANENTLY delete:**",
         "data": {
           "cycles_to_delete": "Cycles to Delete (check matching colors)"
+        }
+      },
+      "interactive_editor": {
+        "title": "Merge/Split Interactive Editor",
+        "description": "Select a manual action to perform on your cycle history.",
+        "data": {
+          "editor_action": "Action"
+        }
+      },
+      "editor_select": {
+        "title": "Select Cycles",
+        "description": "Select the cycle(s) to process.\n\n{info_text}",
+        "data": {
+          "selected_cycles": "Cycles"
+        }
+      },
+      "editor_configure": {
+        "title": "Configure & Apply",
+        "description": "{preview_md}",
+        "data": {
+          "confirm_action": "Action",
+          "merged_profile": "Resulting Profile",
+          "new_profile_name": "New Profile Name",
+          "confirm_commit": "Yes, I confirm this action"
+        }
+      },
+      "editor_split_params": {
+        "title": "Split Configuration",
+        "description": "Adjust the sensitivity for splitting this cycle. Any idle gap longer than this will cause a split.",
+        "data": {
+          "min_gap_seconds": "Split Gap Threshold (seconds)"
         }
       },
       "migrate_data": {

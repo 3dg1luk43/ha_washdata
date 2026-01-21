@@ -16,6 +16,26 @@ _LOGGER = logging.getLogger(__name__)
 STORAGE_KEY_RECORDER = f"{STORAGE_KEY}.recorder"
 
 
+
+class RecorderStore(Store):
+    """Store for recorder data with migration support."""
+
+    async def _async_migrate_func(
+        self,
+        old_major_version: int,
+        old_minor_version: int,
+        old_data: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Migrate data to the new version."""
+        _LOGGER.info(
+            "Migrating recorder storage from v%s to v%s",
+            old_major_version,
+            STORAGE_VERSION,
+        )
+        # Recorder data schema hasn't changed, simple pass-through is safe
+        return old_data
+
+
 class CycleRecorder:
     """Records raw power data without interference from detection logic."""
 
@@ -23,7 +43,7 @@ class CycleRecorder:
         """Initialize the recorder."""
         self.hass = hass
         self.entry_id = entry_id
-        self._store = Store(hass, STORAGE_VERSION, f"{STORAGE_KEY_RECORDER}.{entry_id}")
+        self._store = RecorderStore(hass, STORAGE_VERSION, f"{STORAGE_KEY_RECORDER}.{entry_id}")
         
         # State
         self._is_recording = False
