@@ -190,7 +190,7 @@ DEFAULT_START_ENERGY_THRESHOLD = 0.2  # Fallback
 DEFAULT_END_ENERGY_THRESHOLD = 0.05  # 50 Wh threshold? No, 0.05 Wh is 50 mWh.
 
 # Storage
-STORAGE_VERSION = 2
+STORAGE_VERSION = 3
 STORAGE_KEY = "ha_washdata"
 
 # Notification events
