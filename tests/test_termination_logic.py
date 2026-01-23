@@ -134,8 +134,9 @@ def test_manual_program_override_termination(base_config, mock_callbacks):
     # Should be alive
     assert detector.state != STATE_OFF
     
-    # Warp to expected duration end
-    detector.process_reading(0.0, dt(3700))
+    # Warp to expected duration end + tolerance (3600 * 1.25 = 4500)
+    # So we need to go beyond 4500 to ensure it finishes
+    detector.process_reading(0.0, dt(5000))
     
     # Should be OFF
     assert detector.state == STATE_OFF

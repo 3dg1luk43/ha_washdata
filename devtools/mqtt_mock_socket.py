@@ -344,6 +344,8 @@ class MockWasherManager:
         self.templates: list[dict] = []
         self._seq_idx = 0
         self.current_readings_buffer = []
+        self.current_profile_name = None
+        self.current_total_duration = 0.0
 
     def save_config(self):
         data = {
@@ -464,6 +466,8 @@ class MockWasherManager:
         self.is_running = False
         self.is_paused = False
         self.current_power = 0.0
+        self.current_profile_name = None
+        self.current_total_duration = 0.0
         self.client.publish(STATE_TOPIC, "OFF")
         self.client.publish(SENSOR_STATE_TOPIC, "0")
         logger.info("Cycle Stopped.")
@@ -502,6 +506,8 @@ class MockWasherManager:
             step = max(1, int(self.state["update_interval"]))
             
             total_duration = len(readings) * sleep_time / step
+            self.current_profile_name = profile_name
+            self.current_total_duration = total_duration
             logger.info("Playing %d samples (~%.1fs wall time, profile: %s)", len(readings), total_duration, profile_name)
             
             start_ts = time.time()
@@ -696,7 +702,12 @@ def main_page():
                 with ui.row().classes('w-full items-center justify-between'):
                     with ui.column():
                         power_lbl = ui.label("0.0 W").classes('text-6xl font-mono text-blue-500 font-bold')
-                        time_lbl = ui.label("00:00").classes('text-2xl font-mono text-gray-500')
+                        with ui.row().classes('items-baseline gap-2'):
+                            time_lbl = ui.label("00:00").classes('text-2xl font-mono text-gray-500')
+                            remaining_lbl = ui.label("").classes('text-xl font-mono text-gray-400')
+                        with ui.column().classes('gap-0'):
+                            start_lbl = ui.label("Start: --:--:--").classes('text-xs text-gray-500')
+                            cycle_name_lbl = ui.label("Cycle: --").classes('text-xs font-bold text-gray-600')
                     
                     with ui.column().classes('items-center gap-2'):
                         status_chip = ui.chip("STOPPED").classes('bg-red-500 text-white text-lg')
@@ -1030,6 +1041,17 @@ def main_page():
                     mins, secs = divmod(int(elapsed), 60)
                     time_lbl.set_text(f"{mins:02d}:{secs:02d}")
                     
+                    if manager.current_total_duration:
+                        rem = max(0, manager.current_total_duration - elapsed)
+                        rm, rs = divmod(int(rem), 60)
+                        remaining_lbl.set_text(f"(-{rm:02d}:{rs:02d})")
+                    
+                    st = datetime.fromtimestamp(manager.start_time).strftime("%H:%M:%S")
+                    start_lbl.set_text(f"Start: {st}")
+                    
+                    if manager.current_profile_name:
+                        cycle_name_lbl.set_text(f"Cycle: {manager.current_profile_name}")
+                    
                     now_str = datetime.now().strftime("%H:%M:%S")
                     power_history.append((now_str, p))
                     if len(power_history) > 500:
@@ -1049,6 +1071,9 @@ def main_page():
                     )
                 else:
                     time_lbl.set_text("00:00")
+                    remaining_lbl.set_text("")
+                    start_lbl.set_text("Start: --:--:--")
+                    cycle_name_lbl.set_text("Cycle: --")
                 
                 if ui_state['last_history_version'] != manager.history_version:
                     refresh_history()

@@ -18,6 +18,7 @@ from .const import (
     STATE_ENDING,
     STATE_UNKNOWN,
     DEVICE_TYPE_WASHING_MACHINE,
+    DEFAULT_MAX_DEFERRAL_SECONDS,
 )
 from .signal_processing import integrate_wh
 
@@ -47,6 +48,7 @@ class CycleDetectorConfig:
     stop_threshold_w: float = 2.0
     min_duration_ratio: float = 0.8  # Default deferred finish ratio
     match_interval: int = 300  # Default profile match interval
+    profile_duration_tolerance: float = 0.25  # Default tolerance (±25%)
 
 
 @dataclass
@@ -269,6 +271,11 @@ class CycleDetector:
         """Return the number of power samples recorded in current cycle."""
         return len(self._power_readings)
 
+    @property
+    def expected_duration_seconds(self) -> float:
+        """Return the expected duration of the current cycle in seconds."""
+        return self._expected_duration
+
     def process_reading(self, power: float, timestamp: datetime) -> None:
         """Process a new power reading using robust dt-aware logic."""
 
@@ -452,13 +459,38 @@ class CycleDetector:
         _LOGGER.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)
 
+    def should_defer_for_profile(self) -> bool:
+        """Check if we should defer termination for profile matching (public)."""
+        start_time = self._current_cycle_start
+        if not self._matched_profile or self._expected_duration <= 0 or not start_time:
+            return False
+
+        current_duration = (dt_util.now() - start_time).total_seconds()
+        return self._should_defer_finish(current_duration)
+
     def _should_defer_finish(self, duration: float) -> bool:
         """Check if we should defer termination based on expected duration."""
         if not self._matched_profile or self._expected_duration <= 0:
             return False
 
+        # Safety: Don't defer forever
+        if duration > (self._expected_duration + DEFAULT_MAX_DEFERRAL_SECONDS):
+            _LOGGER.warning(
+                "Deferral limit exceeded (%.0fs > expected %.0f + %s), allowing finish",
+                duration,
+                self._expected_duration,
+                DEFAULT_MAX_DEFERRAL_SECONDS,
+            )
+            return False
+
         # If matched profile, enforce min duration ratio
         ratio = self._config.min_duration_ratio
+        
+        # Also use profile tolerance to handle variable cycle lengths (e.g. long drying)
+        # Allow deferral up to Expected * (1 + tolerance)
+        upper_threshold = self._expected_duration * (1.0 + self._config.profile_duration_tolerance)
+        
+        # Primary check: Is duration significantly below expectation?
         if duration < (self._expected_duration * ratio):
             _LOGGER.debug(
                 "Deferring cycle finish: duration %.0fs < %.0f%% of expected %.0fs (profile: %s)",
@@ -468,6 +500,12 @@ class CycleDetector:
                 self._matched_profile,
             )
             return True
+            
+        # Secondary check: If within valid completion window (ratio to tolerance), allow finish.
+        if duration <= upper_threshold:
+             return False
+             
+        # Tertiary check: If duration exceeded max tolerance, allow finish (failsafe).
         return False
 
     def _finish_cycle(self, timestamp: datetime, status: str = "completed") -> None:
@@ -537,6 +575,7 @@ class CycleDetector:
             "last_active_time": (
                 self._last_active_time.isoformat() if self._last_active_time else None
             ),
+            "expected_duration": self._expected_duration,
             "matched_profile": self._matched_profile,
         }
 
@@ -573,6 +612,7 @@ class CycleDetector:
             self._time_below_threshold = snapshot.get("time_below", 0.0)
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
             self._matched_profile = snapshot.get("matched_profile")
+            self._expected_duration = snapshot.get("expected_duration", 0.0)
 
             start = snapshot.get("current_cycle_start")
             self._current_cycle_start = None

@@ -415,3 +415,56 @@ def compute_envelope_worker(
         std_curve.tolist(),
         float(target_duration)
     )
+
+def verify_profile_alignment_worker(
+    current_power: list[float],
+    envelope_avg_curve: list[float],
+    envelope_time_grid: list[float],
+    dtw_bandwidth: float
+) -> tuple[float, float, float]:
+    """
+    Verify alignment of current trace against profile envelope.
+    Returns: (mapped_envelope_time, mapped_envelope_power, overlap_score)
+    """
+    if not current_power or not envelope_avg_curve:
+        return 0.0, 9999.0, 0.0
+
+    curr = np.array(current_power)
+    ref = np.array(envelope_avg_curve)
+
+    # 1. Coarse Alignment
+    score, _, offset = find_best_alignment(curr, ref, 1.0)
+    
+    # 2. Extract aligned segments
+    # Determine the mapping window.
+    
+    start_ref = max(0, offset)
+    end_ref = min(len(ref), offset + len(curr) + 50) 
+    
+    if end_ref <= start_ref:
+       return 0.0, 9999.0, 0.0
+       
+    ref_seg = ref[start_ref:end_ref]
+    curr_seg = curr 
+    
+    if offset < 0:
+        curr_seg = curr[-offset:]
+        
+    path = compute_dtw_path(curr_seg, ref_seg, band_width_ratio=dtw_bandwidth)
+    
+    if not path:
+        # Fallback to linear mapping based on offset
+        mapped_idx = min(len(ref)-1, offset + len(curr) - 1)
+        mapped_idx = max(0, mapped_idx)
+    else:
+        # Map the final point of the current trace to the reference index
+        last_pair = path[-1]
+        ref_seg_idx = last_pair[1]
+        mapped_idx = start_ref + ref_seg_idx
+        
+    mapped_idx = min(mapped_idx, len(envelope_time_grid)-1)
+    
+    mapped_time = float(envelope_time_grid[mapped_idx])
+    mapped_power = float(ref[mapped_idx])
+    
+    return mapped_time, mapped_power, float(score)

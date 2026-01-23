@@ -98,6 +98,16 @@ from .const import (
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_MAX_PAST_CYCLES,
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
+    CONF_NOTIFY_TITLE,
+    CONF_NOTIFY_ICON,
+    CONF_NOTIFY_START_MESSAGE,
+    CONF_NOTIFY_FINISH_MESSAGE,
+    CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
+    DEFAULT_NOTIFY_TITLE,
+    DEFAULT_NOTIFY_START_MESSAGE,
+    DEFAULT_NOTIFY_FINISH_MESSAGE,
+    DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
     DEFAULT_WATCHDOG_INTERVAL,
@@ -497,6 +507,37 @@ class WashDataManager:
                                 phase_name = "Rinsing"
                             else:
                                 phase_name = "Rinse/Spin"
+
+            # Priority 1: Envelope Verification for Mismatches logic
+            # If we have a confident mismatch (or just no match) BUT we were tracking a profile,
+            # check if the envelope explains the current behavior (e.g. expected 0W pause).
+            current_matched = self.detector.matched_profile
+
+            # Condition: Result says mismatch/none AND we have a profile
+            if (not match_name or result.is_confident_mismatch) and current_matched:
+                # Check envelope alignment
+                _LOGGER.debug(
+                    "Checking envelope alignment for %s during potential mismatch...",
+                    current_matched
+                )
+                is_confirmed, mapped_time, mapped_p = (
+                    await self.profile_store.async_verify_alignment(
+                        current_matched, formatted, current_duration
+                    )
+                )
+
+                if is_confirmed:
+                    _LOGGER.info(
+                        "Envelope verified expected low power phase for %s "
+                        "(Map: %.0fs -> %.0fs, Exp: %.1fW). Overriding mismatch.",
+                        current_matched, current_duration, mapped_time, mapped_p
+                    )
+
+                    # Override mismatch result
+                    match_name = current_matched
+                    confidence = 1.0
+                    phase_name = "Drying" if phase_name is None else phase_name
+                    result.is_confident_mismatch = False
 
             # Update Detector
             final_result = (
@@ -1026,6 +1067,11 @@ class WashDataManager:
         # Trigger entity updates to reflect any changes
         async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
 
+        if self.detector:
+            self.detector._config.profile_duration_tolerance = (
+                self._profile_duration_tolerance
+            )
+
         # Schedule midnight maintenance if enabled
         await self._setup_maintenance_scheduler()
 
@@ -1093,10 +1139,7 @@ class WashDataManager:
             """Run maintenance task."""
             _LOGGER.info("Running scheduled maintenance")
             try:
-                stats = await self.profile_store.async_run_maintenance(
-                    lookback_hours=self._auto_merge_lookback_hours,
-                    gap_seconds=self._auto_merge_gap_seconds,
-                )
+                stats = await self.profile_store.async_run_maintenance()
                 _LOGGER.info("Maintenance completed: %s", stats)
             except Exception as err:
                 _LOGGER.error("Maintenance failed: %s", err, exc_info=True)
@@ -1329,26 +1372,96 @@ class WashDataManager:
 
             # Case 1.5: No updates for > off_delay seconds → inject 0W reading to flush buffer
             # This handles publish-on-change sensors that stop sending 0W updates
+            # CRITICAL: Do NOT do this if power is high (constant load on smart socket),
+            # wait for the longer no_update_active_timeout instead.
             if (
                 time_since_update > self._config.off_delay
                 and not self.detector.is_waiting_low_power()
             ):
-                _LOGGER.info(
-                    "Watchdog: no updates for %.0fs (> off_delay %.0fs), "
-                    "injecting 0W to flush smoothing buffer",
-                    time_since_update,
-                    self._config.off_delay,
-                )
-                self._current_power = 0.0
-                self.detector.process_reading(0.0, now)
-                self._last_reading_time = now
-                # Don't return - let normal cycle end logic handle it
-                self._notify_update()
-                return
+                # Only inject 0W if we were already low power (or unknown/0)
+                # If we are effectively RUNNING (high power), allow silence up to the active timeout
+                if self._current_power < self.detector.config.min_power:
+                    _LOGGER.info(
+                        "Watchdog: no updates for %.0fs (> off_delay %.0fs) and low power, "
+                        "injecting 0W to flush smoothing buffer",
+                        time_since_update,
+                        self._config.off_delay,
+                    )
+                    self._current_power = 0.0
+                    self.detector.process_reading(0.0, now)
+                    self._last_reading_time = now
+                    # Don't return - let normal cycle end logic handle it
+                    self._notify_update()
+                    return
+                else:
+                    _LOGGER.debug(
+                        "Watchdog: no updates for %.0fs (> off_delay) but power is High (%.1fW). "
+                        "Deferring 0W injection until active timeout.",
+                        time_since_update,
+                        self._current_power
+                    )
 
             # Case 2: Not in low power; if no updates for a long time,
             # sensor likely offline → force stop
             if time_since_update > self._no_update_active_timeout:
+                
+                # --- CHANGE START: Smart Socket Compatibility ---
+                # Some smart sockets don't send updates if power is constant (e.g. heater on 2000W).
+                # If we are effectively "running" (high power) and within reasonable safety limits,
+                # we should NOT force stop. Instead, we assume the machine is still running and
+                # inject a "refresh" reading to satisfy the watchdog and the cycle detector.
+
+                # Safety Limit: Expected Duration + 2 Hours (or 4h absolute fallback)
+                expected = getattr(self.detector, "expected_duration_seconds", 0)
+                elapsed = self.detector.get_elapsed_seconds()
+                
+                # Check 1: Is Power High? (Above min_power)
+                # We use self._current_power which tracks the last known state
+                if self._current_power >= self.detector.config.min_power:
+                    
+                    # Check 2: Within Safety Limit?
+                    safety_cushion = 7200 # 2 hours
+                    limit = (expected + safety_cushion) if expected > 0 else 14400 # 4h default
+                    
+                    _LOGGER.warning("DEBUG: WATCHDOG CHECK - Elapsed: %s, Limit: %s, Power: %s, Expected: %s", elapsed, limit, self._current_power, expected)
+
+                    if elapsed < limit:
+                         # ALIVE! It's not dead, it's just boring (constant power).
+                         # Inject a refresh reading of the SAME power to keep things moving.
+                        _LOGGER.info(
+                            "Watchdog: no updates for %.0fs (active timeout %.0fs) but "
+                            "power is high (%.1fW). Assuming constant load. "
+                            "Injecting refresh reading at %.0fs elapsed (limit %.0fs).",
+                            time_since_update,
+                            self._no_update_active_timeout,
+                            self._current_power,
+                            elapsed,
+                            limit,
+                        )
+                        # Inject SAME power to indicate continuity
+                        self.detector.process_reading(self._current_power, now)
+                        self._last_reading_time = now # Reset watchdog timer
+                        self._notify_update()
+                        return
+                    else:
+                        _LOGGER.warning(
+                             "Watchdog: constant high power for too long! "
+                             "Elapsed %.0fs exceeded safety limit %.0fs. Force stopping.",
+                             elapsed,
+                             limit
+                        )
+
+                # --- CHANGE END ---
+
+                # Check if matched profile expects longer cycle (drying phase handling)
+                if self.detector.should_defer_for_profile():
+                    _LOGGER.debug(
+                        "Watchdog: deferring force-stop, profile expects %.0fs (current %.0fs)",
+                        getattr(self.detector, "_expected_duration", 0),
+                        self.detector.get_elapsed_seconds(),
+                    )
+                    return  # Don't terminate yet
+
                 _LOGGER.warning(
                     "Watchdog: no power updates for %.0fs while active "
                     "(timeout %.0fs), force-stopping",
@@ -1396,7 +1509,9 @@ class WashDataManager:
             # Send notification if enabled
             events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
             if NOTIFY_EVENT_START in events:
-                self._send_notification(f"{self.config_entry.title} started.")
+                msg_template = self.config_entry.options.get(CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE)
+                msg = msg_template.format(device=self.config_entry.title)
+                self._send_notification(msg)
         elif new_state == STATE_OFF and old_state == STATE_RUNNING:
             self._stop_watchdog()  # Stop watchdog when cycle ends
 
@@ -1524,10 +1639,15 @@ class WashDataManager:
         # Send notification if enabled
         events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
         if NOTIFY_EVENT_FINISH in events:
-            self._send_notification(
-                f"{self.config_entry.title} finished. Duration: "
-                f"{int(cycle_data['duration'] / 60)}m."
+            msg_template = self.config_entry.options.get(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE)
+            duration_min = int(cycle_data['duration'] / 60)
+            program_name = event_cycle_data.get("profile_name", "unknown")
+            msg = msg_template.format(
+                device=self.config_entry.title,
+                duration=duration_min,
+                program=program_name
             )
+            self._send_notification(msg)
 
         # Request user feedback if we had a confident match.
         # AND perform learning analysis on the completed cycle.
@@ -1564,21 +1684,39 @@ class WashDataManager:
         """Suggested settings computed by learning/heuristics (never auto-applied)."""
         return self.profile_store.get_suggestions()
 
-    def _send_notification(self, message: str) -> None:
+    def _send_notification(self, message: str, title: str | None = None, icon: str | None = None) -> None:
         """Send a notification via configured service."""
         notify_service = self.config_entry.options.get(CONF_NOTIFY_SERVICE)
+        
+        # Use customized title if not provided explicitly
+        if not title:
+             title_template = self.config_entry.options.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE)
+             title = title_template.format(device=self.config_entry.title)
+
+        # Use customized icon if configured
+        if not icon:
+             icon = self.config_entry.options.get(CONF_NOTIFY_ICON)
+
+        data = {}
+        if icon:
+            data["icon"] = icon
+
         if notify_service:
             domain, service = (
                 notify_service.split(".", 1)
                 if "." in notify_service
                 else ("notify", notify_service)
             )
+            service_data = {"message": message, "title": title}
+            if data:
+                service_data["data"] = data
+
             self.hass.async_create_task(
-                self.hass.services.async_call(domain, service, {"message": message})
+                self.hass.services.async_call(domain, service, service_data)
             )
         else:
             _pn_create(
-                self.hass, message, title=f"HA WashData: {self.config_entry.title}"
+                self.hass, message, title=title
             )
 
     def _handle_noise_cycle(self, max_power: float) -> None:
@@ -1863,9 +2001,16 @@ class WashDataManager:
         ):
             # Send notification!
             self._notified_pre_completion = True
-            msg = (
-                f"{self.config_entry.title}: Less than "
-                f"{self._notify_before_end_minutes} minutes remaining."
+            # Send notification!
+            self._notified_pre_completion = True
+            
+            msg_template = self.config_entry.options.get(CONF_NOTIFY_PRE_COMPLETE_MESSAGE, DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE)
+            # Safe default if rounding goes weird equivalent to int()
+            minutes_left = int(self._time_remaining / 60) + 1 
+            
+            msg = msg_template.format(
+                device=self.config_entry.title,
+                minutes=minutes_left
             )
             self._send_notification(msg)
             _LOGGER.info("Sent pre-completion notification: %s", msg)
@@ -2435,10 +2580,7 @@ class WashDataManager:
         """Run post-cycle processing (merge fragments, split anomalies)."""
         try:
             # User Feedback: Use 5 hour lookback and configured gap settings
-            stats = await self.profile_store.async_run_maintenance(
-                lookback_hours=5,
-                gap_seconds=self._auto_merge_gap_seconds,
-            )
+            stats = await self.profile_store.async_run_maintenance()
 
             # Log significant actions
             merged = stats.get("merged_cycles", 0)

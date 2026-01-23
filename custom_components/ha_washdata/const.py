@@ -59,6 +59,17 @@ CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"  # No
 NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
 
+CONF_NOTIFY_TITLE = "notify_title"
+CONF_NOTIFY_ICON = "notify_icon"
+CONF_NOTIFY_START_MESSAGE = "notify_start_message"
+CONF_NOTIFY_FINISH_MESSAGE = "notify_finish_message"
+CONF_NOTIFY_PRE_COMPLETE_MESSAGE = "notify_pre_complete_message"
+
+DEFAULT_NOTIFY_TITLE = "HA WashData: {device}"
+DEFAULT_NOTIFY_START_MESSAGE = "{device} started."
+DEFAULT_NOTIFY_FINISH_MESSAGE = "{device} finished. Duration: {duration}m."
+DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE = "{device}: Less than {minutes} minutes remaining."
+
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts
 DEFAULT_OFF_DELAY = 120  # Seconds (2 minutes, like proven automation)
@@ -143,6 +154,11 @@ DEVICE_TYPES = {
     DEVICE_TYPE_COFFEE_MACHINE: "Coffee Machine",
 }
 
+# Device Type Defaults
+DEFAULT_OFF_DELAY_DISHWASHER = 1800  # 30 min
+DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_DISHWASHER = 3600  # 1 hour
+DEFAULT_MAX_DEFERRAL_SECONDS = 7200  # 2 hours max safe deferral
+
 # Device-specific progress smoothing thresholds (percentage points)
 # These control how much backward progress is allowed before heavy damping kicks in
 DEVICE_SMOOTHING_THRESHOLDS = {
@@ -172,7 +188,7 @@ DEVICE_COMPLETION_THRESHOLDS = {
 DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_WASHING_MACHINE: 480,  # 8 min (Soak handling)
     DEVICE_TYPE_DRYER: 300,  # 5 min (Cool down gaps?)
-    DEVICE_TYPE_DISHWASHER: 600,  # 10 min (Drying pauses)
+    DEVICE_TYPE_DISHWASHER: 2000,  # 33 min (Drying pauses)
     DEVICE_TYPE_COFFEE_MACHINE: 30,  # 30s (Rapid shots)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
