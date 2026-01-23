@@ -302,7 +302,17 @@
           "confirm_action": "Action",
           "merged_profile": "Resulting Profile",
           "new_profile_name": "New Profile Name",
-          "confirm_commit": "Yes, I confirm this action"
+          "confirm_commit": "Yes, I confirm this action",
+          "segment_0_profile": "Segment 1 Profile",
+          "segment_1_profile": "Segment 2 Profile",
+          "segment_2_profile": "Segment 3 Profile",
+          "segment_3_profile": "Segment 4 Profile",
+          "segment_4_profile": "Segment 5 Profile",
+          "segment_5_profile": "Segment 6 Profile",
+          "segment_6_profile": "Segment 7 Profile",
+          "segment_7_profile": "Segment 8 Profile",
+          "segment_8_profile": "Segment 9 Profile",
+          "segment_9_profile": "Segment 10 Profile"
         }
       },
       "editor_split_params": {

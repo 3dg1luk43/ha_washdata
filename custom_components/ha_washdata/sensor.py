@@ -153,6 +153,7 @@ class WasherProgressSensor(WasherBaseSensor):
             key="cycle_progress",
             name="Progress",
             native_unit_of_measurement="%",
+            suggested_display_precision=1,
             icon="mdi:progress-clock",
         )
         super().__init__(manager, entry)

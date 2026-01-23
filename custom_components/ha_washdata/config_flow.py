@@ -59,6 +59,7 @@ from .const import (
     DEFAULT_NAME,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
+    DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_SMOOTHING_WINDOW,
     DEFAULT_START_DURATION_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
@@ -68,7 +69,7 @@ from .const import (
     DEFAULT_AUTO_MERGE_GAP_SECONDS,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_DURATION_TOLERANCE,
-    DEFAULT_AUTO_LABEL_CONFIDENCE,  # Used in suggestions formatting
+    DEFAULT_DURATION_TOLERANCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_AUTO_MAINTENANCE,
     DEFAULT_WATCHDOG_INTERVAL,
@@ -81,12 +82,23 @@ from .const import (
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
+    DEFAULT_OFF_DELAY_DISHWASHER,
+    DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_DISHWASHER,
     DEVICE_COMPLETION_THRESHOLDS,
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PROFILE_UNMATCH_THRESHOLD,
     DEFAULT_PROFILE_MATCH_THRESHOLD,
     DEFAULT_PROFILE_UNMATCH_THRESHOLD,
     DEFAULT_SAMPLING_INTERVAL,
+    CONF_NOTIFY_TITLE,
+    CONF_NOTIFY_ICON,
+    CONF_NOTIFY_START_MESSAGE,
+    CONF_NOTIFY_FINISH_MESSAGE,
+    CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
+    DEFAULT_NOTIFY_TITLE,
+    DEFAULT_NOTIFY_START_MESSAGE,
+    DEFAULT_NOTIFY_FINISH_MESSAGE,
+    DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
 )
 
 
@@ -215,7 +227,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._selected_cycle_id: str | None = None
         self._selected_profile: str | None = None
         self._suggested_values: dict[str, Any] | None = None
+        self._suggested_values: dict[str, Any] | None = None
         self._basic_options: dict[str, Any] = {}
+        self._editor_action: str | None = None
+        self._editor_selected_ids: list[str] = []
+        self._editor_split_gap: int = 900
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None  # pylint: disable=unused-argument
@@ -278,6 +294,17 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 key, self.config_entry.data.get(key, default)
             )
 
+        # Resolve Device Type for Defaults
+        current_device_type = self.config_entry.options.get(
+            CONF_DEVICE_TYPE,
+            self.config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
+        )
+
+        # Specialized defaults for Dishwasher drying phase
+        default_off_delay = DEFAULT_OFF_DELAY
+        if current_device_type == "dishwasher":
+            default_off_delay = DEFAULT_OFF_DELAY_DISHWASHER
+
         # Base schema with essential options
         schema = {
             # --- Device Configuration (Top Priority) ---
@@ -324,7 +351,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             vol.Optional(
                 CONF_OFF_DELAY,
-                default=get_val(CONF_OFF_DELAY, DEFAULT_OFF_DELAY),
+                default=get_val(CONF_OFF_DELAY, default_off_delay),
             ): vol.Coerce(int),
             # --- Notification Settings ---
             vol.Optional(
@@ -364,6 +391,27 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     min=0, max=60, mode=selector.NumberSelectorMode.BOX
                 )
             ),
+             vol.Optional(
+                 CONF_NOTIFY_TITLE,
+                 default=get_val(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE),
+             ): selector.TextSelector(),
+             vol.Optional(
+                 CONF_NOTIFY_ICON,
+                 default=get_val(CONF_NOTIFY_ICON, ""),
+             ): selector.IconSelector(),
+             vol.Optional(
+                 CONF_NOTIFY_START_MESSAGE,
+                 default=get_val(CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE),
+             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+             vol.Optional(
+                 CONF_NOTIFY_FINISH_MESSAGE,
+                 default=get_val(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE),
+             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+             vol.Optional(
+                 CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
+                 default=get_val(CONF_NOTIFY_PRE_COMPLETE_MESSAGE, DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE),
+             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+
             vol.Optional(CONF_SHOW_ADVANCED, default=False): bool,
         }
 
@@ -496,6 +544,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         default_completion_min = DEVICE_COMPLETION_THRESHOLDS.get(
             current_device_type, DEFAULT_COMPLETION_MIN_SECONDS
         )
+
+        # Specialized defaults for Dishwasher drying phase
+        if current_device_type == "dishwasher":
+            default_no_update_timeout = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_DISHWASHER
 
         schema = {
             vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
@@ -633,6 +685,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_WATCHDOG_INTERVAL,
                 default=get_val(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL),
+            ): vol.Coerce(int),
+
+            vol.Optional(
+                 CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                 default=get_val(CONF_NO_UPDATE_ACTIVE_TIMEOUT, default_no_update_timeout),
             ): vol.Coerce(int),
 
             vol.Optional(
@@ -815,13 +872,22 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     # Re-run analysis to get segments
                     cycle = next((c for c in store.get_past_cycles() if c["id"] in self._editor_selected_ids), None)
                     if cycle:
+
                         segments = await self.hass.async_add_executor_job(
-                            store._analyze_split_sync, cycle, self._editor_split_gap, 2.0
+                            store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
                         )
                         if segments:
-                            await store.apply_split_interactive(cycle["id"], segments)
-                            # Maintenance: Reprocess envelopes
-                            await store.async_rebuild_all_envelopes()
+                            # Apply with profiles from user input
+                            final_segments = []
+                            for i, seg in enumerate(segments):
+                                start_t, end_t = seg
+                                prof = user_input.get(f"segment_{i}_profile")
+                                if prof == "none": prof = None
+                                final_segments.append({"start": start_t, "end": end_t, "profile": prof})
+
+                            await store.apply_split_interactive(cycle["id"], final_segments)
+                            # Maintenance: Reprocess envelopes in background to avoid blocking UI
+                            self.hass.async_create_task(store.async_rebuild_all_envelopes())
                     
                     return self.async_create_entry(title="", data={})
 
@@ -843,8 +909,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     if target_profile in ("none", "create_new"): target_profile = None
                     
                     await store.apply_merge_interactive(self._editor_selected_ids, target_profile)
-                    # Maintenance: Reprocess envelopes
-                    await store.async_rebuild_all_envelopes()
+                    # Maintenance: Reprocess envelopes in background
+                    self.hass.async_create_task(store.async_rebuild_all_envelopes())
                     return self.async_create_entry(title="", data={})
 
         # Generate Preview
@@ -858,8 +924,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 return self.async_abort(reason="cycle_not_found")
             
             # Run Analysis
+
             segments = await self.hass.async_add_executor_job(
-                store._analyze_split_sync, cycle, self._editor_split_gap, 2.0
+                store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
             ) # Split params
             
             if not segments:
@@ -877,6 +944,19 @@ Found {len(segments)} segments.
 Click Confirm to split this cycle into {len(segments)} separate cycles.
 """
             schema = {vol.Required("confirm_commit"): bool}
+            
+            # Add profile pickers for each segment
+            profiles = store.list_profiles()
+            prof_options = [selector.SelectOptionDict(value="none", label="(Unlabeled)")]
+            for p in profiles:
+                prof_options.append(selector.SelectOptionDict(value=p["name"], label=p["name"]))
+
+            for i, seg in enumerate(segments):
+                # seg_dur = int(seg[1] - seg[0])
+                # label = f"New Cycle {i+1} ({seg_dur}s)" # Unused currently
+                schema[vol.Optional(f"segment_{i}_profile", default="none")] = selector.SelectSelector(
+                    selector.SelectSelectorConfig(options=prof_options, mode=selector.SelectSelectorMode.DROPDOWN, custom_value=False)
+                )
 
         elif self._editor_action == "merge":
             # Get cycles
@@ -919,6 +999,10 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         )
 
 
+
+    async def async_step_diagnostics(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Diagnostics submenu for maintenance actions."""
         if user_input is not None:
             choice = user_input["action"]
@@ -1176,51 +1260,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             description_placeholders={"recent_cycles": recent_text},
         )
 
-    async def async_step_diagnostics(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
-        """Diagnostics and maintenance menu."""
-        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
 
-        if user_input is not None:
-            action = user_input["action"]
-            if action == "reprocess_history":
-                return await self.async_step_reprocess_history()
-            elif action == "migrate_data":
-                return await self.async_step_migrate_data()
-            elif action == "wipe_history":
-                return await self.async_step_wipe_history()
-            elif action == "export_import":
-                return await self.async_step_export_import()
-            elif action == "clear_debug_data":
-                return await self.async_step_clear_debug_data()
-
-        # Build Stats
-        cycles = manager.profile_store.get_past_cycles()
-        count = len(cycles)
-
-        # Estimate size
-        try:
-             # Basic serialization check
-             size_bytes = len(json.dumps(manager.profile_store._data, default=str))
-             size_mb = size_bytes / (1024 * 1024)
-             stats_str = f"Total Cycles: {count}\nEst. Data Size: {size_mb:.2f} MB"
-        except Exception:
-             stats_str = f"Total Cycles: {count}\nSize: Unknown"
-
-        return self.async_show_form(
-            step_id="diagnostics",
-            data_schema=vol.Schema({
-                vol.Required("action"): vol.In({
-                    "reprocess_history": "Reprocess History (Rebuild Envelopes)",
-                    "migrate_data": "Migrate Data Format (Compress)",
-                    "clear_debug_data": "Clear Debug Data",
-                    "export_import": "Export/Import JSON",
-                    "wipe_history": "⚠️ Wipe History (Reset All)"
-                })
-            }),
-            description_placeholders={"storage_stats": stats_str}
-        )
 
     async def async_step_manage_profiles(
         self, user_input: dict[str, Any] | None = None
@@ -2185,7 +2225,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                     end = dt_util.parse_datetime(last_run["end_time"])
                     duration = int((end - start).total_seconds())
                     status = "READY TO PROCESS"
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     pass
 
         return self.async_show_form(
@@ -2199,7 +2239,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         )
 
     async def async_step_record_start(
-        self, user_input: dict[str, Any] | None = None
+        self, _user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Start a recording."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
@@ -2207,7 +2247,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         return await self.async_step_record_cycle()
 
     async def async_step_record_stop(
-        self, user_input: dict[str, Any] | None = None
+        self, _user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Stop a recording."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
@@ -2332,10 +2372,10 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
 
         schema = {
             vol.Required("head_trim", default=head_suggest): selector.NumberSelector(
-                selector.NumberSelectorConfig(min=0, max=300, step=0.1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s")
+                selector.NumberSelectorConfig(min=0, max=300000, step=0.1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s")
             ),
             vol.Required("tail_trim", default=tail_suggest): selector.NumberSelector(
-                selector.NumberSelectorConfig(min=0, max=300, step=0.1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s")
+                selector.NumberSelectorConfig(min=0, max=300000, step=0.1, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s")
             ),
             vol.Required("save_mode", default="existing_profile"): selector.SelectSelector(
                 selector.SelectSelectorConfig(

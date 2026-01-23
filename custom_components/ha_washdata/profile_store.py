@@ -7,8 +7,8 @@ import hashlib
 import logging
 import os
 from datetime import datetime, timedelta
-from typing import Any, TypeAlias, cast, TypedDict, Literal
-import uuid
+from typing import Any, TypeAlias, cast
+import json
 
 import numpy as np
 
@@ -802,9 +802,7 @@ class ProfileStore:
 
         return len(orphaned)
 
-    async def async_run_maintenance(
-        self, lookback_hours: int = 24, gap_seconds: int = 3600
-    ) -> dict[str, int]:
+    async def async_run_maintenance(self) -> dict[str, int]:
         """Run full maintenance: cleanup orphans, merge fragments, trim old cycles.
 
         Also rebuilds envelopes. Returns stats dict with counts of actions taken.
@@ -825,9 +823,7 @@ class ProfileStore:
         stats["labeled_cycles"] = label_stats.get("labeled", 0)
 
         # 2. Smart Process History (Merge/Split/Rebuild)
-        proc_stats = await self.async_smart_process_history(
-            hours=lookback_hours, gap_seconds=gap_seconds
-        )
+        proc_stats = await self.async_smart_process_history()
         stats["merged_cycles"] = proc_stats.get("merged", 0)
         stats["split_cycles"] = proc_stats.get("split", 0)
         stats["rebuilt_envelopes"] = len(self._data.get("profiles", {})) # Approximation of rebuilt count
@@ -1404,7 +1400,7 @@ class ProfileStore:
                 "dtw_bandwidth": self.dtw_bandwidth
             }
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             _LOGGER.error("Preparation for async match failed: %s", e)
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
@@ -1519,6 +1515,49 @@ class ProfileStore:
             is_ambiguous,
             margin,
         )
+
+    async def async_verify_alignment(
+        self, profile_name: str, current_power_data: list[tuple[str, float]], current_duration: float
+    ) -> tuple[bool, float, float]:
+        """
+        Verify if the current power trace aligns with an expected low-power region in the envelope.
+        Returns: (is_confirmed_low_power, mapped_envelope_time, mapped_envelope_power)
+        """
+        envelope = self.get_envelope(profile_name)
+        if not envelope or not envelope.get("avg") or not current_power_data:
+            return False, 0.0, 9999.0
+
+        # Extract envelope curves
+        # "avg" is list of [t, p]
+        env_avg = envelope["avg"]
+        env_time = [p[0] for p in env_avg]
+        env_power = [p[1] for p in env_avg]
+        
+        # Prepare current power (floats)
+        try:
+             # Normalize input format
+            if isinstance(current_power_data[0][0], datetime):
+                # Should not happen if passed from detector readings directly but handled
+                current_power_list = [float(x[1]) for x in current_power_data]
+            else:
+                current_power_list = [float(x[1]) for x in current_power_data]
+        except Exception:
+            return False, 0.0, 9999.0
+
+        # Offload to worker
+        mapped_time, mapped_power, score = await self.hass.async_add_executor_job(
+            analysis.verify_profile_alignment_worker,
+            current_power_list,
+            env_power,
+            env_time,
+            self.dtw_bandwidth
+        )
+        
+        # Verify if mapped power and alignment score indicate an expected low-power region.
+        # Thresholds: Expected power < 15W, Alignment score > 0.4
+        is_confirmed = (mapped_power < 15.0) and (score > 0.4)
+        
+        return is_confirmed, mapped_time, mapped_power
 
 
     # match_profile (sync) removed in favor of async_match_profile
@@ -1925,7 +1964,7 @@ class ProfileStore:
 
         # Offload analysis
         seg_ranges = await self.hass.async_add_executor_job(
-            self._analyze_split_sync, cycle, min_gap_s, idle_power
+            self.analyze_split_sync, cycle, min_gap_s, idle_power
         )
 
         if not seg_ranges:
@@ -2016,7 +2055,7 @@ class ProfileStore:
         return new_ids
 
     async def async_smart_process_history(
-        self, hours: int = 24, gap_seconds: int = 3600
+        self
     ) -> dict[str, int]:
         # Orchestrate smart history processing: Cleanup, Retention.
         # Split/Merge is now manual via Interactive Editor.
@@ -2036,7 +2075,7 @@ class ProfileStore:
 
         return stats
 
-        return stats
+
 
     def log_adjustment(
         self, setting_name: str, old_value: Any, new_value: Any, reason: str
@@ -2058,6 +2097,9 @@ class ProfileStore:
         _LOGGER.info(
             "Auto-adjustment: %s changed from %s to %s (%s)",
             setting_name,
+            old_value,
+            new_value,
+            reason,
         )
 
     def export_data(
@@ -2086,8 +2128,6 @@ class ProfileStore:
                 "past_cycles": payload.get("past_cycles", []),
                 "envelopes": payload.get("envelopes", {}),
             }
-            entry_data = payload.get("entry_data", {})
-            entry_options = payload.get("entry_options", {})
             _LOGGER.info(
                 "Importing v1 format: %s cycles", len(data_dict.get("past_cycles", []))
             )
@@ -2099,8 +2139,6 @@ class ProfileStore:
                     "Invalid export payload (missing or invalid 'data' key)"
                 )
             data_dict = cast(JSONDict, data)
-            entry_data = payload.get("entry_data", {})
-            entry_options = payload.get("entry_options", {})
             _LOGGER.info(
                 "Importing v2 format: %s cycles", len(data_dict.get("past_cycles", []))
             )
@@ -2114,122 +2152,7 @@ class ProfileStore:
 
         self._data = data_dict
         await self.async_save()
-    async def async_apply_proposal(self, proposal_id: str) -> bool:
-        # Apply a pending proposal (split or merge).
-        proposal = self.proposals.get(proposal_id)
-        if not proposal:
-            return False
 
-        success = False
-        try:
-            if proposal["type"] == "split":
-                success = await self._apply_split_proposal(proposal)
-            elif proposal["type"] == "merge":
-                success = await self._apply_merge_proposal(proposal)
-            
-            if success:
-                self.proposals.pop(proposal_id, None)
-                await self.async_save()
-        except Exception as e:
-            _LOGGER.exception("Failed to apply proposal %s: %s", proposal_id, e)
-            return False
-
-        return success
-
-    async def async_discard_proposal(self, proposal_id: str) -> bool:
-        # Discard a pending proposal.
-        if proposal_id in self.proposals:
-            del self.proposals[proposal_id]
-            await self.async_save()
-            return True
-        return False
-
-    async def _apply_split_proposal(self, proposal: Proposal) -> bool:
-        # Internal: Apply a split proposal.
-        cycle_id = proposal["data"]["cycle_id"]
-        seg_ranges = proposal["data"]["seg_ranges"]  # list[tuple[float, float]]
-
-        # Retrieve cycle
-        cycles = self.get_past_cycles()
-        idx = next((i for i, c in enumerate(cycles) if c.get("id") == cycle_id), -1)
-        if idx == -1:
-            _LOGGER.warning("Cycle %s not found for split proposal", cycle_id)
-            return False
-        
-        cycle = cycles[idx]
-        
-        # Decompress data once
-        p_data_tuples = self._decompress_power_data(cycle)
-        if not p_data_tuples:
-             return False
-
-        start_dt_base = dt_util.parse_datetime(cycle["start_time"])
-        if not start_dt_base:
-            return False
-        start_ts = start_dt_base.timestamp()
-
-        # Convert tuples to relative points
-        points = []
-        for t_str, val in p_data_tuples:
-            dt_p = dt_util.parse_datetime(t_str)
-            if dt_p:
-                rel = dt_p.timestamp() - start_ts
-                points.append((rel, float(val)))
-
-        new_ids = []
-        
-        # Create new cycles
-        for seg_start, seg_end in seg_ranges:
-            seg_dur = seg_end - seg_start
-            new_cycle_start = start_dt_base + timedelta(seconds=seg_start)
-            new_cycle_start_ts = new_cycle_start.timestamp()
-
-            p_data_abs = []
-            state_val = 0.0
-            
-            # Find initial state
-            for t, p in points:
-                if t <= seg_start:
-                    state_val = p
-                else:
-                    break
-            p_data_abs.append([round(new_cycle_start_ts, 1), state_val])
-
-            # Add points within range
-            for t, p in points:
-                if seg_start < t <= seg_end:
-                    p_data_abs.append([round(start_dt_base.timestamp() + t, 1), p])
-
-            new_cycle = {
-                "start_time": new_cycle_start.isoformat(),
-                "end_time": (new_cycle_start + timedelta(seconds=seg_dur)).isoformat(),
-                "duration": round(seg_dur, 1),
-                "status": "completed",
-                "power_data": p_data_abs,
-                "profile_name": None
-            }
-            # Use sync add_cycle which handles ID generation
-            self._add_cycle_data(new_cycle) 
-            new_ids.append(new_cycle["id"])
-
-        # Remove original cycle
-        cycles.pop(idx)
-
-        # Fix profile refs 
-        # (Simplified: if original was sample, try to assign sample to one of new ones? 
-        #  Or just let user re-label. For now, matching old logic best effort)
-        old_id = cycle.get("id")
-        for p_data in self.get_profiles().values():
-            if p_data.get("sample_cycle_id") == old_id:
-                # Just pick the first new one or specific logic? 
-                # Old logic picked longest or nothing. Let's pick first for now or leave None.
-                # Actually, leaving it None (broken ref) allows 'cleanup_orphaned' to warn/fix, 
-                # but better to re-assign if possible.
-                if new_ids:
-                    p_data["sample_cycle_id"] = new_ids[0]
-
-        _LOGGER.info("Applied Split Proposal %s: %s -> %s", proposal["id"], cycle_id, new_ids)
-        return True
 
     async def delete_cycle(self, cycle_id: str) -> bool:
         """Delete a cycle by ID."""
@@ -2239,14 +2162,14 @@ class ProfileStore:
         
         if len(self._data["past_cycles"]) < initial_len:
             # Check profile references
-            for p_name, p_data in self.get_profiles().items():
+            for _p_name, p_data in self.get_profiles().items():
                 if p_data.get("sample_cycle_id") == cycle_id:
                     p_data["sample_cycle_id"] = None
             await self.async_save()
             return True
         return False
 
-    def _analyze_split_sync(
+    def analyze_split_sync(
         self, cycle: CycleDict, min_gap_s: int = 900, idle_power: float = 2.0
     ) -> list[tuple[float, float]]:
         """Analyze cycle for potential splits (sync for executor)."""
@@ -2261,7 +2184,7 @@ class ProfileStore:
         for t_str, val in p_data:
             dt_p = dt_util.parse_datetime(t_str)
             if dt_p:
-               points.append((dt_p.timestamp() - start_ts, float(val)))
+                points.append((dt_p.timestamp() - start_ts, float(val)))
                
         if not points:
             return []
@@ -2270,7 +2193,7 @@ class ProfileStore:
         seg_start = 0.0
         
         for i in range(1, len(points)):
-            t, p = points[i]
+            t, _ = points[i]
             prev_t, prev_p = points[i-1]
             
             # Detect idle gap
@@ -2284,7 +2207,7 @@ class ProfileStore:
         # Last segment
         last_t = points[-1][0]
         if (last_t - seg_start) > 60:
-             valid_segments.append((seg_start, last_t))
+            valid_segments.append((seg_start, last_t))
              
         if len(valid_segments) < 2:
             return []
@@ -2417,7 +2340,7 @@ class ProfileStore:
         target_cycles = [c for c in cycles if c.get("id") in cycle_ids]
         
         if len(target_cycles) != len(cycle_ids):
-             return None
+            return None
 
         # Sort by time
         target_cycles.sort(key=lambda c: str(c.get("start_time", "")))
@@ -2428,14 +2351,16 @@ class ProfileStore:
         
         # Base setup
         c1_start_dt = dt_util.parse_datetime(c1["start_time"])
-        if not c1_start_dt: return None
+        if not c1_start_dt:
+            return None
 
         # Helper to get parsed points from a cycle
         def get_points(cy: CycleDict) -> list[tuple[float, float, float]]:
             # content: [(timestamp, offset, power)]
             raw = self._decompress_power_data(cy)
             res = []
-            if not raw: return []
+            if not raw:
+                return []
             base_t = dt_util.parse_datetime(cy["start_time"]).timestamp()
             for t_str, val in raw:
                 dt_pt = dt_util.parse_datetime(t_str)
@@ -2450,7 +2375,7 @@ class ProfileStore:
         # Add C1 points
         c1_pts = get_points(c1)
         for t_abs, _, p in c1_pts:
-             merged_points_abs.append([t_abs, p])
+            merged_points_abs.append([t_abs, p])
         
         last_t_abs = c1_pts[-1][0] if c1_pts else c1_start_dt.timestamp()
 
@@ -2459,10 +2384,12 @@ class ProfileStore:
         
         for next_c in target_cycles[1:]:
             c_start_dt = dt_util.parse_datetime(next_c["start_time"])
-            if not c_start_dt: continue
+            if not c_start_dt:
+                continue
             
             c_pts = get_points(next_c)
-            if not c_pts: continue
+            if not c_pts:
+                continue
             
             current_start_ts = c_pts[0][0]
             
@@ -2470,18 +2397,18 @@ class ProfileStore:
             gap = current_start_ts - last_t_abs
             # If gap > 1s, inject 0W points to ensure graph drops to 0
             if gap > 1.0:
-                 merged_points_abs.append([last_t_abs + 0.1, 0.0])
-                 merged_points_abs.append([current_start_ts - 0.1, 0.0])
+                merged_points_abs.append([last_t_abs + 0.1, 0.0])
+                merged_points_abs.append([current_start_ts - 0.1, 0.0])
             
             # Append points
             for t_abs, _, p in c_pts:
-                 merged_points_abs.append([t_abs, p])
-                 last_t_abs = t_abs
+                merged_points_abs.append([t_abs, p])
+                last_t_abs = t_abs
             
             max_power = max(max_power, next_c.get("max_power", 0))
 
         # Update C1 metadata
-        final_end_dt = datetime.fromtimestamp(last_t_abs)
+        final_end_dt = dt_util.utc_from_timestamp(last_t_abs)
         new_dur = (final_end_dt - c1_start_dt).total_seconds()
         
         c1["end_time"] = final_end_dt.isoformat()
@@ -2494,8 +2421,8 @@ class ProfileStore:
         c1_start_ts = c1_start_dt.timestamp()
         
         for t_abs, p in merged_points_abs:
-             offset = round(t_abs - c1_start_ts, 1)
-             new_power_data.append([offset, float(p)])
+            offset = round(t_abs - c1_start_ts, 1)
+            new_power_data.append([offset, float(p)])
         
         c1["power_data"] = new_power_data
         
@@ -2517,13 +2444,13 @@ class ProfileStore:
         
         # Update signature
         try:
-             ts_arr = np.array([pt[0] for pt in new_power_data])
-             p_arr = np.array([pt[1] for pt in new_power_data])
-             if len(ts_arr) > 1:
-                 sig = compute_signature(ts_arr, p_arr)
-                 c1["signature"] = dataclasses.asdict(sig)
-        except Exception as e:
-             _LOGGER.warning("Failed to update signature for merged cycle %s: %s", new_id, e)
+            ts_arr = np.array([pt[0] for pt in new_power_data])
+            p_arr = np.array([pt[1] for pt in new_power_data])
+            if len(ts_arr) > 1:
+                sig = compute_signature(ts_arr, p_arr)
+                c1["signature"] = dataclasses.asdict(sig)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            _LOGGER.warning("Failed to update signature for merged cycle %s: %s", new_id, e)
 
         await self.async_save()
         _LOGGER.info("Interactive Merge Applied: %s -> %s", cycle_ids, new_id)
@@ -2534,17 +2461,19 @@ class ProfileStore:
     ) -> str:
         """Generate SVG for split preview."""
         cycle = next((c for c in self.get_past_cycles() if c["id"] == cycle_id), None)
-        if not cycle: return ""
+        if not cycle:
+            return ""
 
         p_data = self._decompress_power_data(cycle)
-        if not p_data: return ""
+        if not p_data:
+            return ""
         
         start_ts = dt_util.parse_datetime(cycle["start_time"]).timestamp()
         points = []
         for t_str, val in p_data:
-             t = dt_util.parse_datetime(t_str)
-             if t:
-                 points.append((t.timestamp() - start_ts, float(val)))
+            t = dt_util.parse_datetime(t_str)
+            if t:
+                points.append((t.timestamp() - start_ts, float(val)))
         
         curves = [SVGCurve(points=points, color="#9E9E9E", opacity=0.5)] # Base ghost
         markers = []
@@ -2552,11 +2481,11 @@ class ProfileStore:
         # Highlight Segments
         colors = ["#2196F3", "#4CAF50", "#FF9800", "#9C27B0"]
         for i, (seg_start, seg_end) in enumerate(segments):
-             seg_pts = [(t, p) for t, p in points if seg_start <= t <= seg_end]
-             if seg_pts:
-                 color = colors[i % len(colors)]
-                 curves.append(SVGCurve(points=seg_pts, color=color, stroke_width=2))
-                 markers.append({"x": seg_start, "label": f"S{i+1}", "color": color})
+            seg_pts = [(t, p) for t, p in points if seg_start <= t <= seg_end]
+            if seg_pts:
+                color = colors[i % len(colors)]
+                curves.append(SVGCurve(points=seg_pts, color=color, stroke_width=2))
+                markers.append({"x": seg_start, "label": f"S{i+1}", "color": color})
         
         return _generate_generic_svg(f"Split Preview: {cycle.get('profile_name') or 'Unlabeled'}", curves, width, height, markers=markers)
 
@@ -2567,7 +2496,8 @@ class ProfileStore:
         cycles = [c for c in self.get_past_cycles() if c["id"] in cycle_ids]
         cycles.sort(key=lambda c: str(c.get("start_time", "")))
         
-        if not cycles: return ""
+        if not cycles:
+            return ""
         
         first_start = dt_util.parse_datetime(cycles[0]["start_time"]).timestamp()
         curves = []
@@ -2575,17 +2505,18 @@ class ProfileStore:
         colors = ["#2196F3", "#FF9800", "#4CAF50", "#9C27B0"]
         
         for i, c in enumerate(cycles):
-             p_data = self._decompress_power_data(c)
-             if not p_data: continue
-             points = []
-             for t_str, val in p_data:
-                 t = dt_util.parse_datetime(t_str)
-                 if t:
-                     rel_t = t.timestamp() - first_start
-                     points.append((rel_t, float(val)))
-             
-             if points:
-                 curves.append(SVGCurve(points=points, color=colors[i % len(colors)], stroke_width=2))
+            p_data = self._decompress_power_data(c)
+            if not p_data:
+                continue
+            points = []
+            for t_str, val in p_data:
+                t = dt_util.parse_datetime(t_str)
+                if t:
+                    rel_t = t.timestamp() - first_start
+                    points.append((rel_t, float(val)))
+            
+            if points:
+                curves.append(SVGCurve(points=points, color=colors[i % len(colors)], stroke_width=2))
 
         return _generate_generic_svg("Merge Preview", curves, width, height)
 
