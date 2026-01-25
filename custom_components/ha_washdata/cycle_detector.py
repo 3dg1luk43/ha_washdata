@@ -106,6 +106,7 @@ class CycleDetector:
         # New State Machine trackers
         self._state_enter_time: datetime | None = None
         self._matched_profile: str | None = None
+        self._verified_pause: bool = False
 
         self._abrupt_drop: bool = False
         self._last_power: float | None = None
@@ -225,6 +226,10 @@ class CycleDetector:
                 self._sub_state = phase_name
             # Wrapper provides it
             self._expected_duration = expected_duration
+
+    def set_verified_pause(self, verified: bool) -> None:
+        """Set or clear the verified pause flag."""
+        self._verified_pause = verified
 
     def reset(self) -> None:
         """Force reset the detector state to OFF."""
@@ -413,10 +418,10 @@ class CycleDetector:
                         # Check deferred finish for matched profiles
                         start_time = self._current_cycle_start or timestamp
                         current_duration = (timestamp - start_time).total_seconds()
-                        
+
                         if self._should_defer_finish(current_duration):
                             return
-                        
+
                         self._finish_cycle(timestamp, status="completed")
                         return
 
@@ -470,6 +475,11 @@ class CycleDetector:
 
     def _should_defer_finish(self, duration: float) -> bool:
         """Check if we should defer termination based on expected duration."""
+        # Check explicit verified pause override from manager
+        if getattr(self, "_verified_pause", False):
+            _LOGGER.debug("Deferring cycle finish: Verified pause active")
+            return True
+
         if not self._matched_profile or self._expected_duration <= 0:
             return False
 
@@ -503,7 +513,7 @@ class CycleDetector:
             
         # Secondary check: If within valid completion window (ratio to tolerance), allow finish.
         if duration <= upper_threshold:
-             return False
+            return False
              
         # Tertiary check: If duration exceeded max tolerance, allow finish (failsafe).
         return False

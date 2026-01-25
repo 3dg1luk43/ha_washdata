@@ -512,6 +512,7 @@ class WashDataManager:
             # If we have a confident mismatch (or just no match) BUT we were tracking a profile,
             # check if the envelope explains the current behavior (e.g. expected 0W pause).
             current_matched = self.detector.matched_profile
+            verified_pause = False
 
             # Condition: Result says mismatch/none AND we have a profile
             if (not match_name or result.is_confident_mismatch) and current_matched:
@@ -522,7 +523,7 @@ class WashDataManager:
                 )
                 is_confirmed, mapped_time, mapped_p = (
                     await self.profile_store.async_verify_alignment(
-                        current_matched, formatted, current_duration
+                        current_matched, formatted
                     )
                 )
 
@@ -538,8 +539,10 @@ class WashDataManager:
                     confidence = 1.0
                     phase_name = "Drying" if phase_name is None else phase_name
                     result.is_confident_mismatch = False
+                    verified_pause = True
 
             # Update Detector
+            self.detector.set_verified_pause(verified_pause)
             final_result = (
                 match_name,
                 confidence,

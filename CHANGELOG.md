@@ -5,13 +5,15 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.3] - 2026-01-12
+## [0.4.0] - 2026-01-12
+
 
 **Major Architectural Rewrite ("vNext")**
 
 This release marks a complete re-engineering of the HA WashData core, transitioning from simple heuristics to a rigorous signal processing pipeline and robust state machine. While the version number is minor, this is effectively a new engine under the hood.
 
 **Verification Status**: Comprehensive logic review and validation of Detection, Matching, Switching, and Prediction logic completed (Jan 2026).
+
 
 ### 🏗️ Core Architecture: Signal Processing & State Machine
 - **New Signal Processing Engine** (`signal_processing.py`):
@@ -36,6 +38,8 @@ This release marks a complete re-engineering of the HA WashData core, transition
 - **Precision Configuration**: Configuration flow now uses **Text Box** inputs for all numeric thresholds, offering precise control over parameters like `start_energy_threshold` (Wh) and `drop_ratio`.
 - **Smart Resume**: "Resurrection" logic restores the exact cycle state (including sub-state) after a Home Assistant restart.
 - **Auto-Labeling**: Increased default confidence threshold to **0.75** (from 0.70) to leverage the improved accuracy of the new engine.
+- **Diagnostic Sensors**: Added dynamic diagnostic sensors for each profile (e.g., `sensor.washdata_..._profile_cotton_count`) showing the total cycle count properly.
+- **Statistics**: Added "Total Energy" column to the Profile Statistics table, showing the cumulative energy consumed for each profile.
 
 ### 🛠️ Technical Improvements
 - **Timezone Robustness**: Complete refactor to use timezone-aware datetimes (`dt_util.now()`) exclusively, permanently fixing "offset-naive/offset-aware" comparison errors.
@@ -46,6 +50,11 @@ This release marks a complete re-engineering of the HA WashData core, transition
 ### 🐛 Bug Fixes
 - **Ghost Cycles**: New `completion_min_seconds` logic filters out short "noise" events that previously registered as cycles.
 - **Start/End Flutter**: Start debounce and End repeat counts are now configurable and backed by robust accumulators, eliminating false starts/ends.
+- **Premature Termination**: Implemented "Verified Pause" logic to prevent dishwasher cycles from ending during long drying phases if the profile envelope matches.
+- **Cycle Detector**: Adjusted duration validation logic to strict 90%-125% window for completion.
+- **Translations**: Fixed "intl string context variable not provided" errors in logs by properly passing placeholders to translation engine.
+- **Debug Sensors**: Fixed "Top Candidates" sensor showing "None" due to missing data propagation.
+- **Code Quality**: Addressed various linting issues (indentation, whitespace, unused arguments).
 - **Crash Fixes**: Resolved `UnboundLocalError` and specific edge-case crashes in `profile_store.py` during migration.
 - **Critical Fix (Runtime Matching)**: Fixed an issue where runtime profile matching was blocking the event loop and skipping DTW; now uses the full async pipeline.
 - **Legacy Data Repair**: Added automatic reconstruction of missing `time_grid` in old profile envelopes to prevent errors.

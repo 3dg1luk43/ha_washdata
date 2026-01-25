@@ -95,7 +95,7 @@ DEFAULT_PROFILE_MATCH_INTERVAL = (
     300  # Seconds between profile matching attempts (5 minutes)
 )
 DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = (
-    0.1  # Minimum duration ratio (10% of profile) - hidden default
+    0.07  # Minimum duration ratio (10% of profile) - hidden default
 )
 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = (
     1.3  # Maximum duration ratio (130% of profile) - hidden default

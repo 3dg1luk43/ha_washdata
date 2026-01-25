@@ -390,6 +390,12 @@ class ProfileStore:
             return cast(dict[str, dict[str, Any]], raw)
         return {}
 
+    def get_profile(self, name: str) -> JSONDict | None:
+        """Return a single profile by name with calculated stats (via list_profiles)."""
+        # Reuse list_profiles logic to ensure consistency and avoid duplication
+        all_profiles = self.list_profiles()
+        return next((p for p in all_profiles if p["name"] == name), None)
+
     def get_profiles(self) -> dict[str, JSONDict]:
         """Return mutable profiles mapping (profile_name -> profile data)."""
         raw = self._data.setdefault("profiles", {})
@@ -904,8 +910,8 @@ class ProfileStore:
             if hasattr(self._store, "path") and os.path.exists(self._store.path):
                 file_size_kb = os.path.getsize(self._store.path) / 1024
             else:
-                 # Fallback: estimate
-                 file_size_kb = len(json.dumps(self._data, default=str)) / 1024
+                # Fallback: estimate
+                file_size_kb = len(json.dumps(self._data, default=str)) / 1024
         except Exception:  # pylint: disable=broad-exception-caught
             pass
 
@@ -1020,6 +1026,28 @@ class ProfileStore:
         def to_points(y_vals: list[float]) -> list[list[float]]:
             return [[round(t, 1), round(y, 1)] for t, y in zip(time_grid, y_vals)]
 
+        # Calculate scalar stats
+        duration_std_dev = float(np.std(durations)) if durations else 0.0
+        
+        # Calculate Energy from Average Curve (Trapezoidal Integration)
+        avg_energy = 0.0
+        if len(time_grid) > 1:
+            # P(W) * dt(h) = Wh
+            # avg_curve is in Watts, time_grid is in Seconds
+            dt_h = np.diff(time_grid) / 3600.0
+            avg_p = (np.array(avg_curve[:-1]) + np.array(avg_curve[1:])) / 2.0
+            avg_energy = float(np.sum(avg_p * dt_h)) / 1000.0 # Convert to kWh for display? No, config flow expects kWh?
+            # Config flow line 1552: f"{envelope.get('avg_energy', 0):.2f}"
+            # If line 1552 says "kwh", then we should store as kWh or Wh?
+            # Config flow label says "Energy ... kWh" in table row (line 1587).
+            # Let's check config flow usage again.
+            # line 1552: kwh = f"{envelope.get('avg_energy', 0):.2f}"
+            # line 1587: ... | {kwh} kWh | ...
+            # So if we store 1.5, it displays "1.50 kWh".
+            # My calculation above gives Wh. So divide by 1000.
+            # avg_energy is already in kWh from line above.
+            pass
+
         envelope_data = {
             "time_grid": time_grid,  # Time grid used by manager for phase estimation
             "target_duration": target_duration,  # Target duration for phase estimation
@@ -1028,6 +1056,8 @@ class ProfileStore:
             "avg": to_points(avg_curve),
             "std": to_points(std_curve),
             "cycle_count": len(raw_cycles_data),
+            "avg_energy": avg_energy,
+            "duration_std_dev": duration_std_dev,
             "updated": dt_util.now().isoformat(),
         }
 
@@ -1514,10 +1544,11 @@ class ProfileStore:
             candidates,
             is_ambiguous,
             margin,
+            ranking=candidates,
         )
 
     async def async_verify_alignment(
-        self, profile_name: str, current_power_data: list[tuple[str, float]], current_duration: float
+        self, profile_name: str, current_power_data: list[tuple[str, float]]
     ) -> tuple[bool, float, float]:
         """
         Verify if the current power trace aligns with an expected low-power region in the envelope.
@@ -1541,7 +1572,7 @@ class ProfileStore:
                 current_power_list = [float(x[1]) for x in current_power_data]
             else:
                 current_power_list = [float(x[1]) for x in current_power_data]
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             return False, 0.0, 9999.0
 
         # Offload to worker
@@ -1612,12 +1643,23 @@ class ProfileStore:
         )
         for name, data in profiles_map.items():
             profile_meta = cast(JSONDict, data) if isinstance(data, dict) else {}
-            # Count cycles using this profile
-            cycle_count = sum(
-                1
-                for c in self._data.get("past_cycles", [])
+            
+            # Calculate count and last_run
+            p_cycles = [
+                c for c in self._data.get("past_cycles", []) 
                 if c.get("profile_name") == name
-            )
+            ]
+            cycle_count = len(p_cycles)
+            
+            last_run = None
+            if p_cycles:
+                last_c = max(p_cycles, key=lambda x: x.get("start_time", ""))
+                last_run = last_c.get("start_time")
+
+            # Fetch envelope stats
+            envelope = self.get_envelope(name)
+            avg_energy = envelope.get("avg_energy") if envelope else None
+
             profiles.append(
                 {
                     "name": name,
@@ -1626,6 +1668,8 @@ class ProfileStore:
                     "max_duration": profile_meta.get("max_duration", 0),
                     "sample_cycle_id": profile_meta.get("sample_cycle_id"),
                     "cycle_count": cycle_count,
+                    "last_run": last_run,
+                    "avg_energy": avg_energy,
                 }
             )
         return sorted(profiles, key=lambda p: str(p.get("name", "")))

@@ -154,7 +154,7 @@ def compute_matches_worker(
     """Worker function to compute matches against snapshots."""
     candidates = []
 
-    min_duration_ratio = config.get("min_duration_ratio", 0.1)
+    min_duration_ratio = config.get("min_duration_ratio", 0.07)
     max_duration_ratio = config.get("max_duration_ratio", 1.3)
     dtw_bandwidth = config.get("dtw_bandwidth", 0.1)
 

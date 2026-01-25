@@ -81,6 +81,7 @@ from .const import (
     DEFAULT_END_ENERGY_THRESHOLD,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     DEFAULT_MIN_OFF_GAP,
+    CONF_MIN_OFF_GAP,
     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
     DEFAULT_OFF_DELAY_DISHWASHER,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_DISHWASHER,
@@ -324,31 +325,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_POWER_SENSOR,
                 default=current_sensor,
             ): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
-            # --- Power Thresholds (Hysteresis) ---
+            # --- Power Thresholds ---
             vol.Optional(
-                CONF_START_THRESHOLD_W,
-                default=get_val(CONF_START_THRESHOLD_W, DEFAULT_MIN_POWER + 1.0),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0.0,
-                    max=100.0,
-                    step=0.5,
-                    unit_of_measurement="W",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Optional(
-                CONF_STOP_THRESHOLD_W,
-                default=get_val(CONF_STOP_THRESHOLD_W, max(0.0, DEFAULT_MIN_POWER - 0.5)),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0.0,
-                    max=100.0,
-                    step=0.5,
-                    unit_of_measurement="W",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
+                CONF_MIN_POWER,
+                default=get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER),
+            ): vol.Coerce(float),
+
             vol.Optional(
                 CONF_OFF_DELAY,
                 default=get_val(CONF_OFF_DELAY, default_off_delay),
@@ -420,6 +402,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(schema),
             description_placeholders={
                 "error": "",
+                "device": "{device}",
+                "duration": "{duration}",
+                "program": "{program}",
+                "minutes": "{minutes}",
             },
         )
 
@@ -444,8 +430,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     CONF_DURATION_TOLERANCE,
                     CONF_PROFILE_DURATION_TOLERANCE,
                     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
                     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
                     CONF_AUTO_MERGE_GAP_SECONDS,
+                    CONF_MIN_OFF_GAP,
                 ]
 
                 updated_input = {**user_input}
@@ -464,7 +452,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             CONF_WATCHDOG_INTERVAL,
                             CONF_NO_UPDATE_ACTIVE_TIMEOUT,
                             CONF_PROFILE_MATCH_INTERVAL,
+                            CONF_PROFILE_MATCH_INTERVAL,
                             CONF_AUTO_MERGE_GAP_SECONDS,
+                            CONF_MIN_OFF_GAP,
                         ):
                             updated_input[key] = int(float(val))
                         else:
@@ -579,6 +569,37 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     min=0, max=3600, mode=selector.NumberSelectorMode.BOX
                 )
             ),
+            # --- Advanced Power Thresholds ---
+            vol.Optional(
+                CONF_START_THRESHOLD_W,
+                default=get_val(
+                    CONF_START_THRESHOLD_W,
+                    float(get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER)) + 1.0,
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.0,
+                    max=100.0,
+                    step=0.5,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_STOP_THRESHOLD_W,
+                default=get_val(
+                    CONF_STOP_THRESHOLD_W,
+                    max(0.0, float(get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER)) - 0.5),
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.0,
+                    max=100.0,
+                    step=0.5,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
             vol.Optional(
                 CONF_END_ENERGY_THRESHOLD,
                 default=get_val(
@@ -605,6 +626,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     min=1, max=10, mode=selector.NumberSelectorMode.BOX
                 )
             ),
+            vol.Optional(
+                CONF_MIN_OFF_GAP,
+                default=get_val(CONF_MIN_OFF_GAP, _default_min_off_gap),
+            ): vol.Coerce(int),
 
              vol.Optional(
                 CONF_SAMPLING_INTERVAL,
@@ -746,6 +771,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     CONF_AUTO_MERGE_GAP_SECONDS
                 ),
                 "suggested_reason": suggested_reason,
+                # Placeholders for keys in data_description
+                "device": "{device}",
+                "duration": "{duration}",
+                "program": "{program}",
+                "minutes": "{minutes}",
             },
         )
 
@@ -1519,7 +1549,14 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
 
             # Get envelope for advanced stats
             envelope = store.get_envelope(name)
+            # Retrieve scalar stats
             kwh = f"{envelope.get('avg_energy', 0):.2f}" if envelope else "-"
+            # Calculate Total Energy (Avg * Count)
+            total_kwh = "-"
+            if envelope and envelope.get('avg_energy') is not None:
+                 t_kwh = envelope.get('avg_energy', 0) * count
+                 total_kwh = f"{t_kwh:.2f}"
+            
             std_dev = envelope.get("duration_std_dev", 0) if envelope else 0
             consistency = f"±{int(std_dev / 60)}m" if std_dev > 0 else "-"
 
@@ -1551,10 +1588,11 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
 
             # Build Per-Profile Section
             # Headers: Count | Avg | Min | Max | Energy | Consistency | Last Run
-            table_header = "| Count | Avg | Min | Max | Energy | Consist. | Last Run |"
-            table_sep = "| --- | --- | --- | --- | --- | --- | --- |"
+            # New: Energy (Avg) | Energy (Total)
+            table_header = "| Count | Avg | Min | Max | Energy (Avg) | Energy (Total) | Consist. | Last Run |"
+            table_sep = "| --- | --- | --- | --- | --- | --- | --- | --- |"
             table_row = (
-                f"| {count} | {avg}m | {mn}m | {mx}m | {kwh} kWh "
+                f"| {count} | {avg}m | {mn}m | {mx}m | {kwh} kWh | {total_kwh} kWh "
                 f"| {consistency} | {last_run} |"
             )
 
