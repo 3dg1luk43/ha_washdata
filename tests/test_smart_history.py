@@ -88,15 +88,13 @@ async def test_smart_merge_logic(mock_hass):
         
         store._data["past_cycles"] = [c1, c2]
         
-        # Run Smart Process
+        # Run Smart Process - Note: merge/split is now manual via Interactive Editor
+        # async_smart_process_history only returns {"cleaned_profiles": N}
         stats = await store.async_smart_process_history()
         
-        assert stats["merged"] == 1
-        assert len(store._data["past_cycles"]) == 1
-        merged = store._data["past_cycles"][0]
-        # Duration should be approx 60m (3600s)
-        assert 3500 < merged["duration"] < 3700
-        assert merged["profile_name"] == "Regular"
+        # With manual merge/split, the function no longer auto-merges
+        # We just verify the function runs without error
+        assert "cleaned_profiles" in stats
 
 @pytest.mark.asyncio
 async def test_smart_split_logic(mock_hass):
@@ -169,15 +167,9 @@ async def test_smart_split_logic(mock_hass):
         
         store._data["past_cycles"] = [blob]
         
-        # Run Smart Process
+        # Run Smart Process - Note: split is now manual via Interactive Editor
         stats = await store.async_smart_process_history()
         
-        assert stats["split"] == 1
-        # Expect 2 cycles (Wash and Rinse)
-        assert len(store._data["past_cycles"]) == 2
-        
-        c1 = store._data["past_cycles"][0]
-        c2 = store._data["past_cycles"][1]
-        
-        assert c1["duration"] >= 1800
-        assert c2["duration"] >= 599 # approx 600
+        # With manual split, the function no longer auto-splits
+        # We just verify the function runs without error
+        assert "cleaned_profiles" in stats

@@ -61,6 +61,43 @@ class CycleDetectorState:
     # Add other fields as needed
 
 
+def trim_zero_readings(
+    readings: list[tuple[datetime, float]],
+    threshold: float = 0.5
+) -> list[tuple[datetime, float]]:
+    """Trim continuous zero/near-zero readings from start and end of cycle.
+    
+    Args:
+        readings: List of (timestamp, power) tuples
+        threshold: Power values below this are considered "zero"
+        
+    Returns:
+        Trimmed list with leading/trailing zeros removed
+    """
+    if not readings:
+        return readings
+    
+    # Find first non-zero reading
+    start_idx = 0
+    for i, (_, power) in enumerate(readings):
+        if power > threshold:
+            start_idx = i
+            break
+    else:
+        # All readings are zero - keep at least one
+        return readings[:1] if readings else []
+    
+    # Find last non-zero reading
+    end_idx = len(readings) - 1
+    for i in range(len(readings) - 1, -1, -1):
+        if readings[i][1] > threshold:
+            end_idx = i
+            break
+    
+    # Return trimmed slice (inclusive of end)
+    return readings[start_idx:end_idx + 1]
+
+
 class CycleDetector:
     """Detects washing machine cycles based on power usage.
 
@@ -402,18 +439,40 @@ class CycleDetector:
                 # Periodic profile matching during ending
                 self._try_profile_match(timestamp)
 
+                # --- SMART TERMINATION CHECK ---
+                # If we have a confident profile match and duration meets expectations,
+                # we terminate early (after short debounce), ignoring long arbitrary timeouts.
+                if self._matched_profile:
+                    start_time = self._current_cycle_start or timestamp
+                    current_duration = (timestamp - start_time).total_seconds()
+                    
+                    # If not marked for deferral (meaning duration is sufficient)
+                    if not self._should_defer_finish(current_duration):
+                        # Use a short confirmation window (e.g. 120s) instead of long off_delay
+                        # This allows cycles to end naturally when "Done" according to profile.
+                        smart_debounce = 120.0 
+                        if self._time_below_threshold >= smart_debounce:
+                             _LOGGER.info(
+                                 "Smart Termination: Profile '%s' match confirmed (duration %.0fs), ending early.",
+                                 self._matched_profile, current_duration
+                             )
+                             self._finish_cycle(timestamp, status="completed")
+                             return
+
+                # --- FALLBACK TIMEOUT CHECK ---
                 # Rule: To separate cycles, we must wait at least min_off_gap.
                 effective_off_delay = max(
                     self._config.off_delay, self._config.min_off_gap
                 )
 
                 if self._time_below_threshold >= effective_off_delay:
-
+                    
                     recent_window = [
                         r
                         for r in self._power_readings
                         if (timestamp - r[0]).total_seconds() <= self._config.off_delay
                     ]
+                    
                     if not recent_window:
                         # Check deferred finish for matched profiles
                         start_time = self._current_cycle_start or timestamp
@@ -431,13 +490,12 @@ class CycleDetector:
                     recent_e = integrate_wh(recent_ts, recent_p)
 
                     if recent_e <= self.config.end_energy_threshold:
-                        # Check deferred finish for matched profiles
                         start_time = self._current_cycle_start or timestamp
                         current_duration = (timestamp - start_time).total_seconds()
                         
                         if self._should_defer_finish(current_duration):
-                            return
-
+                             return
+                             
                         self._finish_cycle(timestamp, status="completed")
                     else:
 
@@ -539,13 +597,19 @@ class CycleDetector:
         ):
             status = "interrupted"
 
+        # Trim leading/trailing zero readings for cleaner data
+        trimmed_readings = trim_zero_readings(
+            self._power_readings, 
+            threshold=self._config.stop_threshold_w
+        )
+        
         cycle_data = {
             "start_time": self._current_cycle_start.isoformat(),
             "end_time": end_time.isoformat(),
             "duration": duration,
             "max_power": self._cycle_max_power,
             "status": status,
-            "power_data": [(t.isoformat(), p) for t, p in self._power_readings],
+            "power_data": [(t.isoformat(), p) for t, p in trimmed_readings],
         }
 
         _LOGGER.info("Cycle Finished: %s, %.1f min", status, duration / 60)

@@ -35,18 +35,12 @@ def manager(mock_hass, mock_config_entry):
 
 @pytest.mark.asyncio
 async def test_run_post_cycle_processing_calls_maintenance(manager):
-    """Test that _run_post_cycle_processing calls async_run_maintenance with correct params."""
-    
-    # Configure manager with specific gap setting
-    manager._auto_merge_gap_seconds = 120
+    """Test that _run_post_cycle_processing calls async_run_maintenance."""
     
     await manager._run_post_cycle_processing()
     
-    # Verify call arguments: 5 hours lookback, 120s gap
-    manager.profile_store.async_run_maintenance.assert_called_once_with(
-        lookback_hours=5,
-        gap_seconds=120
-    )
+    # Verify maintenance was called (no params in current API)
+    manager.profile_store.async_run_maintenance.assert_called_once_with()
 
 @pytest.mark.asyncio
 async def test_run_post_cycle_processing_logs_activity(manager):

@@ -54,6 +54,8 @@ from .const import (
     CONF_END_REPEAT_COUNT,
     CONF_START_ENERGY_THRESHOLD,
     CONF_END_ENERGY_THRESHOLD,
+    CONF_EXTERNAL_END_TRIGGER_ENABLED,
+    CONF_EXTERNAL_END_TRIGGER,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     DEFAULT_NAME,
@@ -734,6 +736,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_SAVE_DEBUG_TRACES, default=get_val(CONF_SAVE_DEBUG_TRACES, False)
             ): bool,
+            # --- External Cycle End Trigger ---
+            vol.Optional(
+                CONF_EXTERNAL_END_TRIGGER_ENABLED,
+                default=get_val(CONF_EXTERNAL_END_TRIGGER_ENABLED, False),
+            ): bool,
+            vol.Optional(
+                CONF_EXTERNAL_END_TRIGGER,
+                default=get_val(CONF_EXTERNAL_END_TRIGGER, ""),
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="binary_sensor",
+                    multiple=False,
+                )
+            ),
         }
 
         return self.async_show_form(

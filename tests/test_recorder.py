@@ -59,8 +59,8 @@ async def test_start_stop_recording(mock_hass):
 @pytest.mark.asyncio
 async def test_persistence_loading(mock_hass):
     """Test loading state from storage."""
-    # Ensure Store exists to be patched
-    with patch("custom_components.ha_washdata.recorder.Store") as mock_store_cls:
+    # Patch RecorderStore (not Store) since CycleRecorder uses RecorderStore
+    with patch("custom_components.ha_washdata.recorder.RecorderStore") as mock_store_cls:
         mock_store_instance = mock_store_cls.return_value
         
         mock_data = {
@@ -76,7 +76,8 @@ async def test_persistence_loading(mock_hass):
             recorder = CycleRecorder(mock_hass, "test_entry")
             await recorder.async_load()
             
-            assert recorder.is_recording
+            # Note: is_recording flag is restored from storage
+            assert recorder._is_recording == True
             assert recorder.last_run == {"some": "data"}
 
 @pytest.mark.asyncio

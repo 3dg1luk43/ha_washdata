@@ -10,6 +10,7 @@ from custom_components.ha_washdata.const import STORAGE_VERSION
 
 _LOGGER = logging.getLogger(__name__)
 
+@pytest.mark.skip(reason="Proposal flow API has been deprecated - split/merge is now manual via Interactive Editor")
 @pytest.mark.asyncio
 async def test_proposal_flow():
     """Test the full proposal flow: scan, store, apply, discard."""

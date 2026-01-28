@@ -30,6 +30,7 @@ from .const import (
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_EVENTS,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+    CONF_LOW_POWER_NO_UPDATE_TIMEOUT, # Import new constant
     CONF_SMOOTHING_WINDOW,
     CONF_PROFILE_DURATION_TOLERANCE,
     CONF_AUTO_MERGE_LOOKBACK_HOURS,
@@ -67,6 +68,8 @@ from .const import (
     CONF_SAMPLING_INTERVAL,
     CONF_SAVE_DEBUG_TRACES,
     CONF_DTW_BANDWIDTH,
+    CONF_EXTERNAL_END_TRIGGER_ENABLED,
+    CONF_EXTERNAL_END_TRIGGER,
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
@@ -177,20 +180,27 @@ class WashDataManager:
         )
 
         # Initialize attributes to satisfy pylint
-        self._notify_service = None
-        self._notify_events = {}
-        self._last_state_save = 0.0
-        self._remove_progress_reset_timer = None
+        self._off_delay = float(DEFAULT_OFF_DELAY)
+        self._no_update_active_timeout = float(DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
+        self._low_power_no_update_timeout = 3600.0 # Default 1h
+        self._notify_before_end_minutes = float(DEFAULT_NOTIFY_BEFORE_END_MINUTES)
+        self._notify_service = ""
+        self._notify_events = []
+
+        # State
+        self._current_power = 0.0
+        self._last_reading_time: datetime | None = None
+        self._last_real_reading_time: datetime | None = None # Track last real sensor update
         self._noise_events = []
         self._noise_max_powers = []
         self._last_match_result = None
         self._last_phase_estimate_time = None
         self._sample_intervals = []
-        self._sample_intervals = []
         self._sample_interval_stats = {}
         self._matching_task = None
+        self._last_state_save = 0.0
+        self._remove_progress_reset_timer = None
 
-        # Components
         # Components
         match_threshold = config_entry.options.get(
             CONF_PROFILE_MATCH_THRESHOLD, DEFAULT_PROFILE_MATCH_THRESHOLD
@@ -231,12 +241,16 @@ class WashDataManager:
         progress_reset_delay = config_entry.options.get(
             CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY
         )
-        self._no_update_active_timeout = int(
+        self._no_update_active_timeout = float(
             config_entry.options.get(
                 CONF_NO_UPDATE_ACTIVE_TIMEOUT,
                 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
             )
         )
+        self._low_power_no_update_timeout = float(
+            config_entry.options.get(CONF_LOW_POWER_NO_UPDATE_TIMEOUT, 3600.0)
+        )
+        self._off_delay = float(config_entry.options.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY))
         self._learning_confidence = config_entry.options.get(
             CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE
         )
@@ -337,7 +351,9 @@ class WashDataManager:
                 )
             ),
             min_duration_ratio=float(
-                config_entry.options.get("min_duration_ratio", 0.8)
+                config_entry.options.get(
+                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO, 0.8
+                )
             ),
             match_interval=int(
                 config_entry.options.get(
@@ -378,6 +394,7 @@ class WashDataManager:
         )
 
         self._remove_listener = None
+        self._remove_external_trigger_listener = None  # External cycle end trigger
         self._remove_watchdog = None
         self._watchdog_interval = int(
             config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
@@ -512,7 +529,13 @@ class WashDataManager:
             # If we have a confident mismatch (or just no match) BUT we were tracking a profile,
             # check if the envelope explains the current behavior (e.g. expected 0W pause).
             current_matched = self.detector.matched_profile
-            verified_pause = False
+            
+            # CRITICAL: Preserve existing pause lock by default
+            # Only clear it if we have explicit evidence we're NOT in a valid pause
+            verified_pause = getattr(self.detector, "_verified_pause", False)
+            
+            # Check current power level from recent readings
+            current_power = readings[-1][1] if readings else 0.0
 
             # Condition: Result says mismatch/none AND we have a profile
             if (not match_name or result.is_confident_mismatch) and current_matched:
@@ -539,7 +562,53 @@ class WashDataManager:
                     confidence = 1.0
                     phase_name = "Drying" if phase_name is None else phase_name
                     result.is_confident_mismatch = False
+                    
+                    # SMART TERMINATION LOGIC:
+                    # If we are effectively at the end of the profile (>95% complete),
+                    # we should NOT enforce a pause. This allows the cycle detector
+                    # to terminate naturally if power remains low.
+                    # If there is a final power spike (pump out), the detector will
+                    # see high power and keep the cycle alive regardless.
                     verified_pause = True
+                    
+                    try:
+                        profile = self.profile_store.get_profile(current_matched)
+                        if profile:
+                            avg_dur = profile.get("avg_duration", 0)
+                            if avg_dur > 0:
+                                progress = mapped_time / avg_dur
+                                if progress > 0.95:
+                                    verified_pause = False
+                                    _LOGGER.info(
+                                        "Smart Termination: Profile %s is %.1f%% complete (mapped). "
+                                        "Releasing pause lock to allow natural cycle end.",
+                                        current_matched, progress * 100
+                                    )
+                                else:
+                                    _LOGGER.debug(
+                                        "Smart Termination: Profile %s is %.1f%% complete. "
+                                        "maintaining pause lock.",
+                                        current_matched, progress * 100
+                                    )
+                    except Exception:  # pylint: disable=broad-exception-caught
+                        pass
+                else:
+                    # Envelope verification explicitly failed - clear pause lock
+                    _LOGGER.debug(
+                        "Envelope verification failed for %s. Clearing pause lock.",
+                        current_matched
+                    )
+                    verified_pause = False
+            
+            # Also clear pause lock if power is high (not in a pause anymore)
+            # This handles the case where profile match returns during active phase
+            if current_power > self.detector.config.stop_threshold_w * 10:
+                if verified_pause:
+                    _LOGGER.debug(
+                        "Power is high (%.1fW), clearing verified pause lock",
+                        current_power
+                    )
+                    verified_pause = False
 
             # Update Detector
             self.detector.set_verified_pause(verified_pause)
@@ -814,6 +883,9 @@ class WashDataManager:
         # Trigger migration/compression of old cycle format
         # This is safe to run repeatedly (it skips already compressed cycles)
         await self.profile_store.async_migrate_cycles_to_compressed()
+
+        # Subscribe to external cycle end trigger (if enabled)
+        await self._setup_external_end_trigger()
 
     async def async_reload_config(self, config_entry: ConfigEntry) -> None:
         """
@@ -1098,6 +1170,8 @@ class WashDataManager:
         """Shutdown."""
         if self._remove_listener:
             self._remove_listener()
+        if self._remove_external_trigger_listener:
+            self._remove_external_trigger_listener()
         if self._remove_watchdog:
             self._remove_watchdog()
         if (
@@ -1115,6 +1189,59 @@ class WashDataManager:
             await self.profile_store.async_save_active_cycle(snapshot)
 
         self._last_reading_time = None
+
+    async def _setup_external_end_trigger(self) -> None:
+        """Set up listener for external cycle end trigger binary sensor."""
+        # Remove existing listener if any
+        if self._remove_external_trigger_listener:
+            self._remove_external_trigger_listener()
+            self._remove_external_trigger_listener = None
+
+        # Check if enabled
+        enabled = self.config_entry.options.get(
+            CONF_EXTERNAL_END_TRIGGER_ENABLED, False
+        )
+        if not enabled:
+            _LOGGER.debug("External cycle end trigger is disabled")
+            return
+
+        # Get entity ID
+        entity_id = self.config_entry.options.get(CONF_EXTERNAL_END_TRIGGER, "")
+        if not entity_id:
+            _LOGGER.debug("External cycle end trigger: no entity configured")
+            return
+
+        _LOGGER.info(
+            "Setting up external cycle end trigger: %s", entity_id
+        )
+
+        # Subscribe to state changes
+        self._remove_external_trigger_listener = async_track_state_change_event(
+            self.hass, [entity_id], self._handle_external_trigger_change
+        )
+
+    @callback
+    def _handle_external_trigger_change(self, event: Event) -> None:
+        """Handle external trigger sensor state change."""
+        new_state = event.data.get("new_state")
+        old_state = event.data.get("old_state")
+
+        if new_state is None:
+            return
+
+        # Only trigger on transition to "on"
+        new_value = new_state.state
+        old_value = old_state.state if old_state else None
+
+        if new_value == "on" and old_value != "on":
+            _LOGGER.info(
+                "External cycle end trigger activated by %s",
+                event.data.get("entity_id")
+            )
+            # End cycle with "completed" status (not interrupted)
+            if self.detector.state != STATE_OFF:
+                self.detector.user_stop()
+                _LOGGER.info("Cycle completed via external trigger")
 
     async def _setup_maintenance_scheduler(self) -> None:
         """Set up daily maintenance task at midnight."""
@@ -1201,6 +1328,7 @@ class WashDataManager:
         # Track observed power readings for learning
         self.learning_manager.process_power_reading(power, now, self._last_reading_time)
         self._last_reading_time = now
+        self._last_real_reading_time = now # Track real update
         self._current_power = power
         self.detector.process_reading(power, now)
 
@@ -1352,20 +1480,27 @@ class WashDataManager:
         if self.detector.state != STATE_RUNNING:
             return
 
-        # Handle publish-on-change sockets: only force-complete quickly if
-        # we're already in low-power waiting; otherwise wait for a longer
-        # active-timeout before force-stopping.
-        if self._last_reading_time:
-            time_since_update = (now - self._last_reading_time).total_seconds()
+        if not self._last_reading_time:
+             return
 
-            # Case 1: In low-power waiting and exceeded off_delay → complete naturally via force_end
-            if (
-                self.detector.is_waiting_low_power()
-                and self.detector.low_power_elapsed(now) >= self._config.off_delay
-            ):
-                _LOGGER.info(
-                    "Watchdog: finalizing cycle after low-power wait (no update for %.0fs)",
-                    time_since_update,
+        time_since_any_update = (now - self._last_reading_time).total_seconds()
+        
+        # Calculate time since REAL update (if available, else fallback to any update)
+        last_real = self._last_real_reading_time or self._last_reading_time
+        time_since_real_update = (now - last_real).total_seconds()
+
+        # --- LOW POWER HANDLING ---
+        # If we are in a low power state (waiting for off_delay or drying profile),
+        # we treat silence leniently. We inject keepalives until the stricter
+        # low_power_no_update_timeout is reached.
+        if self.detector.is_waiting_low_power():
+            
+            # 1. Staleness Check
+            if time_since_real_update > self._low_power_no_update_timeout:
+                _LOGGER.warning(
+                    "Watchdog: Force-ending cycle. Low-power state stale for %.0fs (> %.0fs).",
+                    time_since_real_update,
+                    self._low_power_no_update_timeout
                 )
                 self.detector.force_end(now)
                 self._last_reading_time = now
@@ -1373,112 +1508,69 @@ class WashDataManager:
                 self._notify_update()
                 return
 
-            # Case 1.5: No updates for > off_delay seconds → inject 0W reading to flush buffer
-            # This handles publish-on-change sensors that stop sending 0W updates
-            # CRITICAL: Do NOT do this if power is high (constant load on smart socket),
-            # wait for the longer no_update_active_timeout instead.
-            if (
-                time_since_update > self._config.off_delay
-                and not self.detector.is_waiting_low_power()
-            ):
-                # Only inject 0W if we were already low power (or unknown/0)
-                # If we are effectively RUNNING (high power), allow silence up to the active timeout
-                if self._current_power < self.detector.config.min_power:
-                    _LOGGER.info(
-                        "Watchdog: no updates for %.0fs (> off_delay %.0fs) and low power, "
-                        "injecting 0W to flush smoothing buffer",
-                        time_since_update,
-                        self._config.off_delay,
-                    )
-                    self._current_power = 0.0
-                    self.detector.process_reading(0.0, now)
-                    self._last_reading_time = now
-                    # Don't return - let normal cycle end logic handle it
-                    self._notify_update()
-                    return
-                else:
-                    _LOGGER.debug(
-                        "Watchdog: no updates for %.0fs (> off_delay) but power is High (%.1fW). "
-                        "Deferring 0W injection until active timeout.",
-                        time_since_update,
-                        self._current_power
-                    )
-
-            # Case 2: Not in low power; if no updates for a long time,
-            # sensor likely offline → force stop
-            if time_since_update > self._no_update_active_timeout:
-                
-                # --- CHANGE START: Smart Socket Compatibility ---
-                # Some smart sockets don't send updates if power is constant (e.g. heater on 2000W).
-                # If we are effectively "running" (high power) and within reasonable safety limits,
-                # we should NOT force stop. Instead, we assume the machine is still running and
-                # inject a "refresh" reading to satisfy the watchdog and the cycle detector.
-
-                # Safety Limit: Expected Duration + 2 Hours (or 4h absolute fallback)
-                expected = getattr(self.detector, "expected_duration_seconds", 0)
-                elapsed = self.detector.get_elapsed_seconds()
-                
-                # Check 1: Is Power High? (Above min_power)
-                # We use self._current_power which tracks the last known state
-                if self._current_power >= self.detector.config.min_power:
-                    
-                    # Check 2: Within Safety Limit?
-                    safety_cushion = 7200 # 2 hours
-                    limit = (expected + safety_cushion) if expected > 0 else 14400 # 4h default
-                    
-                    _LOGGER.warning("DEBUG: WATCHDOG CHECK - Elapsed: %s, Limit: %s, Power: %s, Expected: %s", elapsed, limit, self._current_power, expected)
-
-                    if elapsed < limit:
-                         # ALIVE! It's not dead, it's just boring (constant power).
-                         # Inject a refresh reading of the SAME power to keep things moving.
-                        _LOGGER.info(
-                            "Watchdog: no updates for %.0fs (active timeout %.0fs) but "
-                            "power is high (%.1fW). Assuming constant load. "
-                            "Injecting refresh reading at %.0fs elapsed (limit %.0fs).",
-                            time_since_update,
-                            self._no_update_active_timeout,
-                            self._current_power,
-                            elapsed,
-                            limit,
-                        )
-                        # Inject SAME power to indicate continuity
-                        self.detector.process_reading(self._current_power, now)
-                        self._last_reading_time = now # Reset watchdog timer
-                        self._notify_update()
-                        return
-                    else:
-                        _LOGGER.warning(
-                             "Watchdog: constant high power for too long! "
-                             "Elapsed %.0fs exceeded safety limit %.0fs. Force stopping.",
-                             elapsed,
-                             limit
-                        )
-
-                # --- CHANGE END ---
-
-                # Check if matched profile expects longer cycle (drying phase handling)
-                if self.detector.should_defer_for_profile():
-                    _LOGGER.debug(
-                        "Watchdog: deferring force-stop, profile expects %.0fs (current %.0fs)",
-                        getattr(self.detector, "_expected_duration", 0),
-                        self.detector.get_elapsed_seconds(),
-                    )
-                    return  # Don't terminate yet
-
-                _LOGGER.warning(
-                    "Watchdog: no power updates for %.0fs while active "
-                    "(timeout %.0fs), force-stopping",
-                    time_since_update,
-                    self._no_update_active_timeout,
+            # 2. Injection Check (Keepalive)
+            # If silence > _config.off_delay, inject 0W to keep detector clock moving
+            # so it can evaluate profile logic (smart termination) or just mark time passing.
+            if time_since_any_update > self._config.off_delay:
+                _LOGGER.debug(
+                    "Watchdog: Low power silence (%.0fs). Injecting 0W keepalive.",
+                    time_since_any_update
                 )
-                self.detector.force_end(now)
-                self._last_reading_time = now
+                # Ensure we handle the injection cleanly
+                # Do NOT update _last_real_reading_time here
+                self.detector.process_reading(0.0, now)
+                self._last_reading_time = now # Resets 'any' timer so we don't spam
                 self._current_power = 0.0
                 self._notify_update()
-                if self.detector.state == STATE_RUNNING:
-                    _LOGGER.error(
-                        "Watchdog: cycle still running after forced end, will retry next check"
+                return
+                
+            return
+
+        # Fallback for old "Case 1.5" logic (Low Power but NOT is_waiting_low_power)
+        # Check this BEFORE High Power timeout to prevent trapping "Not Yet Waiting" states
+        if (
+            time_since_any_update > self._config.off_delay 
+            and self._current_power < self.detector.config.min_power
+        ):
+            # Treating as start of low power wait
+            _LOGGER.debug("Watchdog: Silence at low power (%.0fs). Injecting 0W.", time_since_any_update)
+            self.detector.process_reading(0.0, now)
+            self._last_reading_time = now
+            self._current_power = 0.0
+            self._notify_update()
+            return
+
+        # --- HIGH POWER HANDLING (Normal) ---
+        # If power is high, we expect frequent updates.
+        
+        if time_since_any_update > self._no_update_active_timeout:
+            
+            # Check if high power (running)
+            if self._current_power >= self.detector.config.min_power:
+                # Allow extended silence if within reasonable cycle bounds
+                expected = getattr(self.detector, "expected_duration_seconds", 0)
+                elapsed = self.detector.get_elapsed_seconds()
+                limit = (expected + 7200) if expected > 0 else 14400 # 4h default
+                
+                if elapsed < limit:
+                    _LOGGER.info(
+                        "Watchdog: High power (%.1fW) stale (%.0fs). Injecting refresh.",
+                        self._current_power, time_since_any_update
                     )
+                    self.detector.process_reading(self._current_power, now)
+                    self._last_reading_time = now
+                    self._notify_update()
+                    return
+
+            # If we get here, it's truly stuck/offline
+            _LOGGER.warning(
+                "Watchdog: Force-ending cycle. Active state stale for %.0fs (> timeout).",
+                time_since_any_update
+            )
+            self.detector.force_end(now)
+            self._notify_update()
+            return
+
 
     def _on_state_change(self, old_state: str, new_state: str) -> None:
         """Handle state change from detector."""
@@ -1693,12 +1785,12 @@ class WashDataManager:
         
         # Use customized title if not provided explicitly
         if not title:
-             title_template = self.config_entry.options.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE)
-             title = title_template.format(device=self.config_entry.title)
+            title_template = self.config_entry.options.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE)
+            title = title_template.format(device=self.config_entry.title)
 
         # Use customized icon if configured
         if not icon:
-             icon = self.config_entry.options.get(CONF_NOTIFY_ICON)
+            icon = self.config_entry.options.get(CONF_NOTIFY_ICON)
 
         data = {}
         if icon:

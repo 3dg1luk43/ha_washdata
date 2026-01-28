@@ -10,6 +10,7 @@ CONF_OFF_DELAY = "off_delay"
 CONF_NOTIFY_SERVICE = "notify_service"
 CONF_NOTIFY_EVENTS = "notify_events"
 CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
+CONF_LOW_POWER_NO_UPDATE_TIMEOUT = "low_power_no_update_timeout"
 CONF_SMOOTHING_WINDOW = "smoothing_window"
 CONF_SAMPLING_INTERVAL = "sampling_interval"
 CONF_START_DURATION_THRESHOLD = (
@@ -54,6 +55,8 @@ CONF_ABRUPT_DROP_WATTS = "abrupt_drop_watts"  # Power cliff threshold for interr
 CONF_ABRUPT_DROP_RATIO = "abrupt_drop_ratio"  # Relative drop ratio for interrupted status
 CONF_ABRUPT_HIGH_LOAD_FACTOR = "abrupt_high_load_factor"  # High load factor threshold
 CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD = "auto_tune_noise_events_threshold"  # Noise events before auto-tune
+CONF_EXTERNAL_END_TRIGGER_ENABLED = "external_end_trigger_enabled"  # Enable external cycle end trigger
+CONF_EXTERNAL_END_TRIGGER = "external_end_trigger"  # Binary sensor entity for external cycle end
 
 
 NOTIFY_EVENT_START = "cycle_start"
@@ -144,12 +147,14 @@ CYCLE_STATUS_RESUMED = "resumed"  # Cycle was restored from storage after restar
 # Device Types
 DEVICE_TYPE_WASHING_MACHINE = "washing_machine"
 DEVICE_TYPE_DRYER = "dryer"
+DEVICE_TYPE_WASHER_DRYER = "washer_dryer"
 DEVICE_TYPE_DISHWASHER = "dishwasher"
 DEVICE_TYPE_COFFEE_MACHINE = "coffee_machine"
 
 DEVICE_TYPES = {
     DEVICE_TYPE_WASHING_MACHINE: "Washing Machine",
     DEVICE_TYPE_DRYER: "Dryer",
+    DEVICE_TYPE_WASHER_DRYER: "Washer-Dryer Combo",
     DEVICE_TYPE_DISHWASHER: "Dishwasher",
     DEVICE_TYPE_COFFEE_MACHINE: "Coffee Machine",
 }
@@ -164,6 +169,7 @@ DEFAULT_MAX_DEFERRAL_SECONDS = 7200  # 2 hours max safe deferral
 DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_WASHING_MACHINE: 5.0,  # Can have repeating phases (rinse cycles)
     DEVICE_TYPE_DRYER: 3.0,  # More linear, less phase repetition
+    DEVICE_TYPE_WASHER_DRYER: 5.0,  # Combined washer+dryer, use washer defaults
     DEVICE_TYPE_DISHWASHER: 5.0,  # Similar to washing machine with distinct phases
     DEVICE_TYPE_COFFEE_MACHINE: 2.0,  # Short cycles, rapid transitions, less tolerance
 }
@@ -175,6 +181,7 @@ DEFAULT_VERIFICATION_POLL_INTERVAL = 15  # Seconds (rapid checks after delay)
 DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_WASHING_MACHINE: 600,  # 10 min
     DEVICE_TYPE_DRYER: 600,  # 10 min
+    DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (same as washer)
     DEVICE_TYPE_DISHWASHER: 900,  # 15 min
     DEVICE_TYPE_COFFEE_MACHINE: 60,  # 1 min (detects rapid espresso shots/cleaning)
 }
@@ -188,6 +195,7 @@ DEVICE_COMPLETION_THRESHOLDS = {
 DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_WASHING_MACHINE: 480,  # 8 min (Soak handling)
     DEVICE_TYPE_DRYER: 300,  # 5 min (Cool down gaps?)
+    DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (longer for combined cycles)
     DEVICE_TYPE_DISHWASHER: 2000,  # 33 min (Drying pauses)
     DEVICE_TYPE_COFFEE_MACHINE: 30,  # 30s (Rapid shots)
 }
@@ -199,6 +207,7 @@ DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
 DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_WASHING_MACHINE: 0.2,  # ~50W for 15s or 200W for 3s
     DEVICE_TYPE_DRYER: 0.5,  # Heater kicks in hard
+    DEVICE_TYPE_WASHER_DRYER: 0.3,  # Mix of washer and dryer
     DEVICE_TYPE_DISHWASHER: 0.2,  # Pump/Heater
     DEVICE_TYPE_COFFEE_MACHINE: 0.05,  # Short heater burst
 }

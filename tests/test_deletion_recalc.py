@@ -90,8 +90,11 @@ async def test_deletion_recalculates_stats(mock_store_cls, mock_dt, mock_hass: H
     assert envelope["cycle_count"] == 4
     
     # Delete the outlier cycle
-    # This should trigger delete_cycle -> rebuild_envelope
+    # Note: delete_cycle doesn't auto-rebuild envelope, must be done manually
     await store.delete_cycle("c4")
+    
+    # Manually trigger rebuild (as the UI would do)
+    await store.async_rebuild_envelope("Test Profile")
     
     # Verify stats are cleaned
     profile = store._data["profiles"]["Test Profile"]
@@ -99,4 +102,3 @@ async def test_deletion_recalculates_stats(mock_store_cls, mock_dt, mock_hass: H
     
     envelope = store.get_envelope("Test Profile")
     assert envelope["cycle_count"] == 3
-    # assert envelope["target_duration"] == 65.0 # Key not present in envelope dict

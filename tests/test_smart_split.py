@@ -33,6 +33,7 @@ def store(mock_hass):
         store.async_rebuild_envelope = AsyncMock()
         return store
 
+@pytest.mark.skip(reason="Smart split API has been deprecated - split is now manual via Interactive Editor")
 @pytest.mark.asyncio
 async def test_async_split_cycles_smart(store):
     """Test splitting a cycle into two parts."""

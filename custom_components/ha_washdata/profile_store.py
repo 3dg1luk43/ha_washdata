@@ -36,6 +36,42 @@ CycleDict: TypeAlias = dict[str, Any]
 
 
 
+def trim_zero_power_data(
+    data: list[list[float]], 
+    threshold: float = 0.5
+) -> list[list[float]]:
+    """Trim leading/trailing zero/near-zero power readings from stored data.
+    
+    Args:
+        data: List of [offset, power] pairs
+        threshold: Power values <= this are considered "zero"
+        
+    Returns:
+        Trimmed list with leading/trailing zeros removed
+    """
+    if not data:
+        return data
+    
+    # Find first non-zero reading
+    start_idx = 0
+    for i, point in enumerate(data):
+        if point[1] > threshold:
+            start_idx = i
+            break
+    else:
+        # All readings are zero - keep at least one
+        return data[:1] if data else []
+    
+    # Find last non-zero reading
+    end_idx = len(data) - 1
+    for i in range(len(data) - 1, -1, -1):
+        if data[i][1] > threshold:
+            end_idx = i
+            break
+    
+    # Return trimmed slice (inclusive of end)
+    return data[start_idx:end_idx + 1]
+
 
 @dataclasses.dataclass
 class SVGCurve:
@@ -640,6 +676,9 @@ class ProfileStore:
             else:
                 sampling_interval = 1.0  # Default fallback
 
+            # Trim leading/trailing zero readings for cleaner data
+            stored = trim_zero_power_data(stored, threshold=1.5)
+            
             cycle_data["power_data"] = stored
             cycle_data["sampling_interval"] = round(sampling_interval, 1)
 
