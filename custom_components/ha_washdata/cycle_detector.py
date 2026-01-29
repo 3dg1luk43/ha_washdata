@@ -127,6 +127,7 @@ class CycleDetector:
         # State
         self._state = STATE_OFF
         self._sub_state: str | None = None
+        self._ignore_power_until_idle: bool = False
 
         # Data
         self._power_readings: list[tuple[datetime, float]] = []  # (time, raw_power)
@@ -147,6 +148,7 @@ class CycleDetector:
 
         self._abrupt_drop: bool = False
         self._last_power: float | None = None
+        self._time_in_state: float = 0.0
 
         # Smoothing buffer
         self._ma_buffer: list[float] = []
@@ -158,6 +160,8 @@ class CycleDetector:
         # Profile Matching Tracker
         self._last_match_time: datetime | None = None
         self._expected_duration: float = 0.0
+        self._last_match_confidence: float = 0.0
+        self._end_spike_seen: bool = False
 
     @property
     def _dynamic_pause_threshold(self) -> float:
@@ -238,15 +242,18 @@ class CycleDetector:
             if len(result) >= 5:
                 (
                     match_name,
-                    _,
+                    confidence,
                     expected_duration,
                     phase_name,
                     is_match_mismatch,
                 ) = result[:5]
             else:
                 # Fallback for old signature
-                (match_name, _, expected_duration, phase_name) = result[:4]
+                (match_name, confidence, expected_duration, phase_name) = result[:4]
                 is_match_mismatch = False
+            
+            # Store confidence for Smart Termination checks
+            self._last_match_confidence = confidence or 0.0
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -281,8 +288,8 @@ class CycleDetector:
         self._time_below_threshold = 0.0
         self._last_match_time = None
         self._matched_profile = None
-        self._on_state_change(self._state, "Force Stopped")
-
+        self._ignore_power_until_idle = False # Reset lockout
+    
     @property
     def state(self) -> str:
         """Return current state."""
@@ -320,6 +327,16 @@ class CycleDetector:
 
     def process_reading(self, power: float, timestamp: datetime) -> None:
         """Process a new power reading using robust dt-aware logic."""
+
+        # Manual Stop Lockout:
+        # If user forced a stop, ignore high power readings until machine goes idle.
+        if self._ignore_power_until_idle:
+            if power < self._config.start_threshold_w:
+                self._ignore_power_until_idle = False
+                _LOGGER.debug("Power dropped below start threshold. Manual stop lockout cleared.")
+            else:
+                # Still high after manual stop - ignore reading
+                return
 
         # Calculate dt
         dt = 0.0
@@ -363,6 +380,8 @@ class CycleDetector:
         else:
             self._time_below_threshold += dt
             self._time_above_threshold = 0.0
+        
+        self._time_in_state += dt
 
         self._last_power = power
 
@@ -433,6 +452,9 @@ class CycleDetector:
             self._power_readings.append((timestamp, power))
 
             if is_high:
+                # End spike detected! Mark it before resuming
+                self._end_spike_seen = True
+                _LOGGER.debug("End spike detected (power high in ENDING state)")
                 # Resume -> RUNNING
                 self._transition_to(STATE_RUNNING, timestamp)
             else:
@@ -441,23 +463,50 @@ class CycleDetector:
 
                 # --- SMART TERMINATION CHECK ---
                 # If we have a confident profile match and duration meets expectations,
-                # we terminate early (after short debounce), ignoring long arbitrary timeouts.
+                # we terminate early (after appropriate debounce), ignoring long arbitrary timeouts.
                 if self._matched_profile:
                     start_time = self._current_cycle_start or timestamp
                     current_duration = (timestamp - start_time).total_seconds()
                     
-                    # If not marked for deferral (meaning duration is sufficient)
-                    if not self._should_defer_finish(current_duration):
-                        # Use a short confirmation window (e.g. 120s) instead of long off_delay
-                        # This allows cycles to end naturally when "Done" according to profile.
-                        smart_debounce = 120.0 
-                        if self._time_below_threshold >= smart_debounce:
-                             _LOGGER.info(
-                                 "Smart Termination: Profile '%s' match confirmed (duration %.0fs), ending early.",
-                                 self._matched_profile, current_duration
-                             )
-                             self._finish_cycle(timestamp, status="completed")
-                             return
+                    # --- ROBUSTNESS UPGRADE ---
+                    # 1. Require higher duration ratio for Smart path
+                    # 2. Require debounce to be measured FROM entry into ENDING state
+                    
+                    if self._config.device_type == "dishwasher":
+                        smart_ratio = 0.99 # Very conservative for dishwashers to catch end spikes
+                    else:
+                        smart_ratio = 0.98
+                        
+                    is_confident_match = getattr(self, "_last_match_confidence", 0.0) >= 0.55
+
+                    if current_duration >= (self._expected_duration * smart_ratio) and is_confident_match:
+                        # Dynamic confirmation window
+                        if self._config.device_type == "dishwasher":
+                            smart_debounce = max(300.0, self._config.off_delay * 0.25)
+                        else:
+                            smart_debounce = 120.0 
+
+                        if self._time_in_state >= smart_debounce:
+                            # --- END SPIKE WAIT PERIOD (Dishwashers) ---
+                            # If we are a dishwasher and haven't seen a high-power spike since entering ENDING,
+                            # wait up to 5 extra minutes past expected_duration for the end spike.
+                            end_spike_wait = 300.0  # 5 minutes
+                            end_spike_seen = getattr(self, "_end_spike_seen", False)
+                            past_wait_period = current_duration >= (self._expected_duration + end_spike_wait)
+
+                            if self._config.device_type == "dishwasher" and not end_spike_seen and not past_wait_period:
+                                _LOGGER.debug(
+                                    "Waiting for end spike (duration %.0fs, expected %.0fs + %.0fs wait)",
+                                    current_duration, self._expected_duration, end_spike_wait
+                                )
+                                return  # Don't finish yet, wait for spike or timeout
+                            
+                            _LOGGER.info(
+                                "Smart Termination: Profile '%s' match confirmed (duration %.0fs, conf %.2f, spike_seen=%s), ending.",
+                                self._matched_profile, current_duration, getattr(self, "_last_match_confidence", 0.0), end_spike_seen
+                            )
+                            self._finish_cycle(timestamp, status="completed", termination_reason="smart")
+                            return
 
                 # --- FALLBACK TIMEOUT CHECK ---
                 # Rule: To separate cycles, we must wait at least min_off_gap.
@@ -513,11 +562,16 @@ class CycleDetector:
         old_state = self._state
         self._state = new_state
         self._state_enter_time = timestamp
+        self._time_in_state = 0.0
         self._sub_state = new_state.capitalize()  # Default substate
 
         # Reset energy accumulator on transition to OFF
         if new_state == STATE_OFF:
             self._energy_since_idle_wh = 0.0
+
+        # Reset end spike tracker when entering ENDING state
+        if new_state == STATE_ENDING:
+            self._end_spike_seen = False
 
         _LOGGER.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)
@@ -576,7 +630,7 @@ class CycleDetector:
         # Tertiary check: If duration exceeded max tolerance, allow finish (failsafe).
         return False
 
-    def _finish_cycle(self, timestamp: datetime, status: str = "completed") -> None:
+    def _finish_cycle(self, timestamp: datetime, status: str = "completed", termination_reason: str = "timeout") -> None:
         """Finalize cycle."""
 
         # Capture data before reset
@@ -609,6 +663,7 @@ class CycleDetector:
             "duration": duration,
             "max_power": self._cycle_max_power,
             "status": status,
+            "termination_reason": termination_reason,
             "power_data": [(t.isoformat(), p) for t, p in trimmed_readings],
         }
 
@@ -620,12 +675,15 @@ class CycleDetector:
     def force_end(self, timestamp: datetime) -> None:
         """Force the cycle to end immediately."""
         if self._state != STATE_OFF:
-            self._finish_cycle(timestamp, status="force_stopped")
+            self._finish_cycle(timestamp, status="force_stopped", termination_reason="force_stopped")
 
     def user_stop(self) -> None:
         """Handle user-initiated stop."""
         if self._state != STATE_OFF:
             self._finish_cycle(dt_util.now(), status="completed")
+            # Prevent immediate restart if power is still high
+            self._ignore_power_until_idle = True
+
 
     def get_power_trace(self) -> list[tuple[datetime, float]]:
         """Return the current power trace."""

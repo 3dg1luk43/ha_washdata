@@ -54,6 +54,10 @@ def mock_hass():
     # Mock states
     hass.states.get = MagicMock(return_value=None)
     
+    # Mock config_entries to return proper entry with options
+    mock_config_entries = MagicMock()
+    hass.config_entries = mock_config_entries
+    
     return hass
 
 @pytest.fixture
@@ -140,6 +144,9 @@ async def test_smart_termination_with_manager(mock_hass, mock_entry):
     # Better approach: Construct manager normally, but patch the Store's persistence
     with patch("custom_components.ha_washdata.profile_store.WashDataStore.async_load", return_value=store_data), \
          patch("custom_components.ha_washdata.profile_store.WashDataStore.async_save"):
+        
+        # Wire up config_entries to return mock_entry for learning manager
+        mock_hass.config_entries.async_get_entry = MagicMock(return_value=mock_entry)
         
         manager = WashDataManager(mock_hass, mock_entry)
         # Inject data directly to be sure (async_load usually called in setup)
