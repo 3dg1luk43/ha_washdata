@@ -338,13 +338,9 @@
           "min_gap_seconds": "Split Gap Threshold (seconds)"
         }
       },
-      "migrate_data": {
-        "title": "Migrate Data Format",
-        "description": "Re-compress all saved cycle data to ensure it's in the latest format. This is safe and can be run multiple times."
-      },
       "reprocess_history": {
-        "title": "Reprocess History",
-        "description": "Rebuild all statistical models (envelopes) and re-calculate cycle signatures from raw stored data. Useful after updates or to fix stats.\n\n**This operation is non-destructive to raw data.**"
+        "title": "Maintenance: Reprocess & Optimize Data",
+        "description": "Performs deep cleaning of historical data:\n1. Trims zero-power readings (silence).\n2. Fixes cycle timing/duration.\n3. Recalculates all statistical models (envelopes).\n\n**Run this to fix data issues or apply new algorithms.**"
       },
       "wipe_history": {
         "title": "Wipe History (Testing Only)",

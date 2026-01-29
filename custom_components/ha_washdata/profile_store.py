@@ -206,7 +206,7 @@ class MatchResult:
                 return {
                     k: _convert(v)
                     for k, v in obj.items()
-                    if k not in ("current", "sample")
+                    if k not in ("current", "sample", "metrics", "warping_path")
                 }
             if isinstance(obj, list):
                 return [_convert(v) for v in obj]
@@ -254,6 +254,70 @@ def decompress_power_data(cycle: CycleDict) -> list[tuple[str, float]]:
     return result
 
 
+def compress_power_data(cycle: CycleDict) -> list[Any] | None:
+    """Compress cycle power data to [offset, power] format (Module-level helper).
+    
+    Returns the compressed list structure or None if compression failed/not needed.
+    """
+    raw_data = cycle.get("power_data")
+    if not isinstance(raw_data, list) or not raw_data:
+        return None
+
+    # Check if already compressed (first element is number or mixed format)
+    first = raw_data[0]
+    if isinstance(first, (int, float)):
+        # Already flat list (very old format?) or specific compression
+        return None 
+    if isinstance(first, (list, tuple)) and len(first) == 2 and isinstance(first[0], (int, float)):
+        # Already compressed [offset, power]
+        return None
+
+    # Proceed with compression from [iso_string, power]
+    if "start_time" not in cycle:
+        return None
+
+    try:
+        start_ts = datetime.fromisoformat(cycle["start_time"]).timestamp()
+        compressed: list[list[float]] = []
+        
+        last_saved_p = -999.0
+        last_saved_t = -999.0
+        
+        for i, entry in enumerate(raw_data):
+            if isinstance(entry, (list, tuple)) and len(entry) == 2:
+                t_str, p_val_raw = entry
+                try:
+                    # Handle both ISO string and potential timestamp float
+                    if isinstance(t_str, str):
+                        t = datetime.fromisoformat(t_str).timestamp()
+                    else:
+                        t = float(t_str)
+                    
+                    p_val = float(p_val_raw)
+                    offset = round(t - start_ts, 1)
+                    if offset < 0:
+                        offset = 0.0
+                        
+                    # Save first and last
+                    is_endpoint = i == 0 or i == len(raw_data) - 1
+
+                    # Downsample: change > 1W or gap > 60s
+                    if (
+                        is_endpoint
+                        or abs(p_val - last_saved_p) > 1.0
+                        or (offset - last_saved_t) > 60
+                    ):
+                        compressed.append([offset, round(p_val, 1)])
+                        last_saved_p = p_val
+                        last_saved_t = offset
+                        
+                except (ValueError, TypeError):
+                    continue
+        return compressed
+    except Exception:
+        return None
+
+
 class WashDataStore(Store[JSONDict]):
     """Store implementation with migration support."""
 
@@ -296,6 +360,50 @@ class WashDataStore(Store[JSONDict]):
 
             _LOGGER.info(
                 "Migration v1->v2: Computed signatures for %s cycles", migrated_cycles
+            )
+
+        if old_major_version < 3:
+            _LOGGER.info("Migrating storage from v%s to v3", old_major_version)
+            cycles = old_data.get("past_cycles", [])
+            profiles = old_data.get("profiles", {})
+            migrated_count = 0
+            
+            # 1. Compress Power Data & Ensure Status
+            for cycle in cycles:
+                # Ensure status
+                if "status" not in cycle:
+                    cycle["status"] = "completed"
+                
+                # Compress power data if needed
+                # (Check if it looks like old list of lists/tuples)
+                if cycle.get("power_data") and isinstance(cycle["power_data"], list):
+                    first_elem = cycle["power_data"][0] if cycle["power_data"] else None
+                    # If it's a list/tuple [offset, power], it's uncompressed (v2)
+                    # If it's [start_ts, power, dt, encoding], it's compressed (v3)
+                    if isinstance(first_elem, (list, tuple)) and len(first_elem) == 2:
+                        try:
+                            # Use helper to compress in-place (returns compressed dict structure, we need to adapt)
+                            # Actually, compress_power_data returns the list of points. 
+                            # We need to manually apply compression logic here or use a helper that MUTATES the cycle.
+                            # The helper `compress_power_data` takes a cycle dict and returns the compressed list structure.
+                            # Let's verify what compress_power_data does.
+                            # It takes (cycle_data: dict) -> list[Any] (the compressed structure)
+                            compressed = compress_power_data(cycle)
+                            if compressed:
+                                cycle["power_data"] = compressed
+                                migrated_count += 1
+                        except Exception as e:
+                             _LOGGER.warning(
+                                "Failed to compress data for cycle %s: %s", cycle.get("id"), e
+                            )
+
+            # 2. Ensure Device Type in Profiles
+            for profile in profiles.values():
+                if "device_type" not in profile:
+                    profile["device_type"] = "washing_machine"
+
+            _LOGGER.info(
+                "Migration v2->v3: Compressed data for %s cycles", migrated_count
             )
 
         return old_data
@@ -677,17 +785,28 @@ class ProfileStore:
                 sampling_interval = 1.0  # Default fallback
 
             # Trim leading/trailing zero readings for cleaner data
-            stored = trim_zero_power_data(stored, threshold=1.5)
+            # SKIP for completed cycles to preserve end spike data
+            if cycle_data.get("status") == "completed":
+                # Only trim leading zeros for completed cycles, keep trailing data
+                start_idx = 0
+                for i, point in enumerate(stored):
+                    if point[1] > 1.5:
+                        start_idx = i
+                        break
+                stored = stored[start_idx:]
+                _LOGGER.debug("add_cycle: Skipping trailing trim for completed cycle")
+            else:
+                stored = trim_zero_power_data(stored, threshold=1.5)
             
             cycle_data["power_data"] = stored
             cycle_data["sampling_interval"] = round(sampling_interval, 1)
 
-            # Helper to get arrays for signature
-            ts_arr = np.array(offsets)
+            # Helper to get arrays for signature (use stored data for consistency)
+            ts_arr = np.array([t for t, _ in stored])
             p_arr = np.array([p for _, p in stored])
 
             # Compute and store signature
-            if len(ts_arr) > 1:
+            if len(ts_arr) > 1 and len(ts_arr) == len(p_arr):
                 sig = compute_signature(ts_arr, p_arr)
                 cycle_data["signature"] = dataclasses.asdict(sig)
 
@@ -888,8 +1007,52 @@ class ProfileStore:
 
         processed_count = 0
 
-        # 1. Update Signatures
+        # 1. Update Signatures & Optimize Data
         for cycle in cycles:
+            # Data Optimization: Trim leading/trailing zeros (0W)
+            # Only apply to compressed data to avoid breaking legacy format
+            p_data = cycle.get("power_data")
+            if (
+                p_data 
+                and isinstance(p_data, list) 
+                and p_data 
+                and isinstance(p_data[0], (list, tuple)) 
+                and len(p_data[0]) == 2 
+                and isinstance(p_data[0][0], (int, float))
+            ):
+                # Apply trim helper
+                original_len = len(p_data)
+                trimmed = trim_zero_power_data(p_data, threshold=1.0) # Conservative 1W threshold
+
+                if trimmed and len(trimmed) < original_len:
+                    # Data was trimmed - check for start time shift
+                    first_offset = trimmed[0][0]
+                    
+                    if first_offset > 0:
+                        # Leading zeros removed - Must shift start_time forward
+                        try:
+                            start_dt = datetime.fromisoformat(cycle["start_time"])
+                            new_start = start_dt + timedelta(seconds=first_offset)
+                            cycle["start_time"] = new_start.isoformat()
+                            
+                            # Re-normalize offsets to 0
+                            shifted_data = []
+                            for row in trimmed:
+                                # row is [offset, power]
+                                shifted_data.append([round(row[0] - first_offset, 1), row[1]])
+                            cycle["power_data"] = shifted_data
+                            processed_count += 1
+                        except (ValueError, TypeError) as e:
+                            _LOGGER.warning("Failed to shift start_time for trimmed cycle: %s", e)
+                    else:
+                        # Only trailing trimmed or no shift needed
+                        cycle["power_data"] = trimmed
+                        processed_count += 1
+                    
+                    # Update duration to match new data length
+                    if cycle.get("power_data"):
+                         cycle["duration"] = cycle["power_data"][-1][0]
+
             if cycle.get("power_data"):
                 try:
                     tuples = decompress_power_data(cycle)
@@ -978,34 +1141,10 @@ class ProfileStore:
 
 
 
-    async def async_rebuild_all_envelopes(self) -> int:
-        """Rebuild envelopes for all profiles. Returns count of envelopes rebuilt."""
-        count = 0
-        for profile_name in list(self._data["profiles"].keys()):
-            if await self.async_rebuild_envelope(profile_name):
-                count += 1
-        return count
-
-    async def async_rebuild_envelope(self, profile_name: str) -> bool:
-        """
-        Build/rebuild statistical envelope for a profile asynchronously.
-        Offloads heavy DTW/normalization to executor.
-        """
-        # 1. Gather Data (Main Thread)
-        labeled_cycles = [
-            c
-            for c in self._data["past_cycles"]
-            if c.get("profile_name") == profile_name
-            and c.get("status") in ("completed", "force_stopped")
-            and c.get("duration", 0) > 60
-        ]
-
-        if not labeled_cycles:
-            if profile_name in self._data.get("envelopes", {}):
-                del self._data["envelopes"][profile_name]
-            return False
-
-        # Extract raw data
+    def _rebuild_envelope_sync(
+        self, labeled_cycles: list[CycleDict]
+    ) -> tuple[Any, list[float]] | None:
+        """Sync worker to parse data and build envelope (run in executor)."""
         raw_cycles_data = []
         durations = []
 
@@ -1033,11 +1172,60 @@ class ProfileStore:
             durations.append(offsets[-1])
 
         if not raw_cycles_data:
+            return None
+
+        # Run Heavy Computation
+        result = analysis.compute_envelope_worker(
+            raw_cycles_data,
+            self.dtw_bandwidth
+        )
+        
+        if not result:
+            return None
+            
+        return result, durations
+
+    async def async_rebuild_all_envelopes(self) -> int:
+        """Rebuild envelopes for all profiles. Returns count of envelopes rebuilt."""
+        count = 0
+        for profile_name in list(self._data["profiles"].keys()):
+            if await self.async_rebuild_envelope(profile_name):
+                count += 1
+        return count
+
+    async def async_rebuild_envelope(self, profile_name: str) -> bool:
+        """
+        Build/rebuild statistical envelope for a profile asynchronously.
+        Offloads heavy DTW/normalization to executor.
+        """
+        # 1. Gather Data (Main Thread)
+        labeled_cycles = [
+            c
+            for c in self._data["past_cycles"]
+            if c.get("profile_name") == profile_name
+            and c.get("status") in ("completed", "force_stopped")
+            and c.get("duration", 0) > 60
+        ]
+
+        if not labeled_cycles:
             if profile_name in self._data.get("envelopes", {}):
                 del self._data["envelopes"][profile_name]
             return False
 
-        # Update profile stats in storage (Fast O(N))
+        # 2. Run Heavy Computation in Executor (Parsing + DTW)
+        result_pkg = await self.hass.async_add_executor_job(
+            self._rebuild_envelope_sync,
+            labeled_cycles
+        )
+
+        if not result_pkg:
+            if profile_name in self._data.get("envelopes", {}):
+                del self._data["envelopes"][profile_name]
+            return False
+
+        result, durations = result_pkg
+
+        # Update profile stats in storage (Fast metadata update)
         if durations and profile_name in self._data.get("profiles", {}):
             min_duration = float(np.min(durations))
             max_duration = float(np.max(durations))
@@ -1045,13 +1233,6 @@ class ProfileStore:
             self._data["profiles"][profile_name]["min_duration"] = min_duration
             self._data["profiles"][profile_name]["max_duration"] = max_duration
             self._data["profiles"][profile_name]["avg_duration"] = avg_duration
-
-        # 2. Run Heavy Computation in Executor
-        result = await self.hass.async_add_executor_job(
-            analysis.compute_envelope_worker,
-            raw_cycles_data,
-            self.dtw_bandwidth
-        )
 
         if not result:
             if profile_name in self._data.get("envelopes", {}):
@@ -1094,7 +1275,7 @@ class ProfileStore:
             "max": to_points(max_curve),
             "avg": to_points(avg_curve),
             "std": to_points(std_curve),
-            "cycle_count": len(raw_cycles_data),
+            "cycle_count": len(durations),
             "avg_energy": avg_energy,
             "duration_std_dev": duration_std_dev,
             "updated": dt_util.now().isoformat(),
@@ -1990,37 +2171,10 @@ class ProfileStore:
 
             # Old format: ISO timestamp strings. Convert to compressed offsets.
             try:
-                start_ts = datetime.fromisoformat(cycle["start_time"]).timestamp()
-                compressed: list[list[float]] = []
-
-                last_saved_p = -999.0
-                last_saved_t = -999.0
-
-                for i, point in enumerate(raw_data):
-                    # Parse timestamp
-                    if isinstance(point[0], str):
-                        t_val = datetime.fromisoformat(point[0]).timestamp()
-                    else:
-                        t_val = float(point[0])
-
-                    p_val = float(point[1])
-                    offset = round(t_val - start_ts, 1)
-
-                    # Save first and last
-                    is_endpoint = i == 0 or i == len(raw_data) - 1
-
-                    # Downsample: change > 1W or gap > 60s
-                    if (
-                        is_endpoint
-                        or abs(p_val - last_saved_p) > 1.0
-                        or (offset - last_saved_t) > 60
-                    ):
-                        compressed.append([offset, round(p_val, 1)])
-                        last_saved_p = p_val
-                        last_saved_t = offset
-
-                cycle["power_data"] = compressed
-                migrated += 1
+                compressed = compress_power_data(cycle)
+                if compressed:
+                    cycle["power_data"] = compressed
+                    migrated += 1
             except Exception as e:  # pylint: disable=broad-exception-caught
                 _LOGGER.warning("Failed to migrate cycle %s: %s", cycle.get("id"), e)
                 continue
@@ -2132,7 +2286,9 @@ class ProfileStore:
             p_data = self._data["profiles"].get(original_profile)
             if p_data and p_data.get("sample_cycle_id") == original_sample_id:
                 p_data["sample_cycle_id"] = best_replacement_id
-                await self.async_rebuild_envelope(original_profile)
+            
+            # Rebuild envelope because dataset changed
+            await self.async_rebuild_envelope(original_profile)
 
         await self.async_save()
         return new_ids
@@ -2241,6 +2397,11 @@ class ProfileStore:
         """Delete a cycle by ID."""
         cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
         initial_len = len(cycles)
+        cycle_to_delete = next((c for c in cycles if c.get("id") == cycle_id), None)
+        if not cycle_to_delete:
+            return False
+            
+        profile_name = cycle_to_delete.get("profile_name")
         self._data["past_cycles"] = [c for c in cycles if c.get("id") != cycle_id]
         
         if len(self._data["past_cycles"]) < initial_len:
@@ -2248,6 +2409,11 @@ class ProfileStore:
             for _p_name, p_data in self.get_profiles().items():
                 if p_data.get("sample_cycle_id") == cycle_id:
                     p_data["sample_cycle_id"] = None
+            
+            # Rebuild envelope if cycle belonged to a profile
+            if profile_name:
+                await self.async_rebuild_envelope(profile_name)
+
             await self.async_save()
             return True
         return False
@@ -2403,7 +2569,9 @@ class ProfileStore:
             p_data = self._data["profiles"].get(original_profile)
             if p_data and p_data.get("sample_cycle_id") == original_sample_id:
                 p_data["sample_cycle_id"] = best_replacement_id
-                await self.async_rebuild_envelope(original_profile)
+            
+            # Rebuild envelope because dataset changed
+            await self.async_rebuild_envelope(original_profile)
 
         await self.async_save()
         _LOGGER.info("Interactive Split Applied to %s -> %s", cycle_id, new_ids)
@@ -2427,6 +2595,14 @@ class ProfileStore:
 
         # Sort by time
         target_cycles.sort(key=lambda c: str(c.get("start_time", "")))
+        
+        # Collect affected profiles for envelope rebuild
+        affected_profiles = set()
+        for c in target_cycles:
+            if c.get("profile_name"):
+                affected_profiles.add(c["profile_name"])
+        if target_profile:
+            affected_profiles.add(target_profile)
         
         # We modify the first cycle (c1) to become the merged one
         c1 = target_cycles[0]
@@ -2537,6 +2713,11 @@ class ProfileStore:
 
         await self.async_save()
         _LOGGER.info("Interactive Merge Applied: %s -> %s", cycle_ids, new_id)
+        
+        # Rebuild envelopes for all affected profiles
+        for p_name in affected_profiles:
+            await self.async_rebuild_envelope(p_name)
+            
         return new_id
 
     def generate_interactive_split_svg(

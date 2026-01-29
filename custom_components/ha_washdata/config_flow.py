@@ -271,7 +271,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # Save Basic Settings Only
             # Merge with existing options to preserve settings not shown in this form
             user_input.pop(CONF_SHOW_ADVANCED, None)
-            merged_options = {**self.config_entry.options, **user_input}
+            # Safe merge: Start with data (legacy), override with options, then user input
+            # This prevents losing settings if options was empty (legacy migration)
+            merged_options = {
+                **self.config_entry.data,
+                **self.config_entry.options,
+                **user_input,
+            }
             return self.async_create_entry(title="", data=merged_options)
 
         # Populate notify services
@@ -469,6 +475,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
             # Final Save
             final_options = {
+                **self.config_entry.data,
                 **self.config_entry.options,
                 **self._basic_options,
                 **user_input,
@@ -540,6 +547,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         # Specialized defaults for Dishwasher drying phase
         if current_device_type == "dishwasher":
             default_no_update_timeout = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_DISHWASHER
+        else:
+            default_no_update_timeout = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT
 
         schema = {
             vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
@@ -1052,8 +1061,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         """Diagnostics submenu for maintenance actions."""
         if user_input is not None:
             choice = user_input["action"]
-            if choice == "migrate_data":
-                return await self.async_step_migrate_data()
+
             if choice == "reprocess_history":
                 return await self.async_step_reprocess_history()
             if choice == "wipe_history":
@@ -1083,8 +1091,8 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                 {
                     vol.Required("action"): vol.In(
                         {
-                            "migrate_data": "Migrate/compress stored data to latest format",
-                            "reprocess_history": "Reprocess History (Rebuild models from raw data)",
+
+                            "reprocess_history": "Maintenance: Reprocess & Optimize Data",
                             "clear_debug_data": "Clear Debug Data (Free up space)",
                             "wipe_history": "Wipe ALL data for this device (irreversible)",
                             "export_import": "Export/Import JSON with settings (copy/paste)",
@@ -2176,32 +2184,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             },
         )
 
-    async def async_step_migrate_data(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
-        """Migrate/compress all cycle data to the latest format."""
-        if user_input is not None:
-            manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
 
-            # Run migration
-            count = await manager.profile_store.async_migrate_cycles_to_compressed()
-
-            return self.async_create_entry(
-                title="",
-                data=dict(self.config_entry.options),
-                description_placeholders={"count": str(count)},
-            )
-
-        return self.async_show_form(
-            step_id="migrate_data",
-            data_schema=vol.Schema({}),
-            description_placeholders={
-                "info": (
-                    "This will re-compress all saved cycle data to ensure it's in the "
-                    "latest format. This is safe and can be run multiple times."
-                )
-            },
-        )
 
     async def async_step_wipe_history(
         self, user_input: dict[str, Any] | None = None

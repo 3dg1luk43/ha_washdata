@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch, PropertyMock
+from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import datetime, timedelta, timezone
 from homeassistant.util import dt as dt_util
 
@@ -52,9 +52,15 @@ def manager(mock_hass, mock_entry):
         mgr.profile_store.async_match_profile = AsyncMock()
         mgr.detector.state = STATE_RUNNING
         mgr.detector.get_elapsed_seconds.return_value = 600.0
-        mgr.detector.get_power_trace.return_value = [] # Filled in tests
+        mgr.detector.get_power_trace.return_value = []
         
         yield mgr
+
+def _make_readings(duration_seconds: int = 600) -> list[tuple[datetime, float]]:
+    """Create mock readings spanning duration_seconds."""
+    now = datetime.now(timezone.utc)
+    start = now - timedelta(seconds=duration_seconds)
+    return [(start + timedelta(seconds=i*60), 100.0) for i in range(duration_seconds // 60 + 1)]
 
 @pytest.mark.asyncio
 async def test_initial_match_switching(manager):
@@ -75,9 +81,9 @@ async def test_initial_match_switching(manager):
     )
     manager.profile_store.async_match_profile.return_value = mock_res
     
-    # Act
-    # We call _async_run_matching directly to test logic
-    await manager._async_run_matching(trace=[], duration_so_far=600)
+    # Act - call new internal API
+    readings = _make_readings(600)
+    await manager._async_do_perform_matching(readings)
     
     # Assert
     assert manager._current_program == "Cotton 40"
@@ -92,7 +98,6 @@ async def test_strong_override_switching(manager):
     manager._matched_profile_duration = 3600.0
     
     # Mock result where "Cotton 60" is much better
-    # Current score needs to be mocked in candidates
     mock_res = MatchResult(
         best_profile="Cotton 60",
         confidence=0.95,
@@ -108,7 +113,8 @@ async def test_strong_override_switching(manager):
     manager.profile_store.async_match_profile.return_value = mock_res
     
     # Act
-    await manager._async_run_matching(trace=[], duration_so_far=1000)
+    readings = _make_readings(1000)
+    await manager._async_do_perform_matching(readings)
     
     # Assert
     assert manager._current_program == "Cotton 60"
@@ -119,10 +125,9 @@ async def test_no_switch_weak_improvement(manager):
     """Test NOT switching if improvement is marginal."""
     # Setup: Currently matched to "Synthetic"
     manager._current_program = "Synthetic"
-    manager._matched_profile_duration = 3600.0 # Critical: Must be set!
+    manager._matched_profile_duration = 3600.0
     
     # Mock result where "Cotton 60" is only slightly better
-    # Threshold is 0.15 diff
     mock_res = MatchResult(
         best_profile="Cotton 60",
         confidence=0.75,
@@ -130,7 +135,7 @@ async def test_no_switch_weak_improvement(manager):
         matched_phase=None,
         candidates=[
             {"name": "Cotton 60", "score": 0.75},
-            {"name": "Synthetic", "score": 0.70}, # Diff 0.05
+            {"name": "Synthetic", "score": 0.70},
         ],
         is_ambiguous=False,
         ambiguity_margin=0.05
@@ -138,7 +143,8 @@ async def test_no_switch_weak_improvement(manager):
     manager.profile_store.async_match_profile.return_value = mock_res
     
     # Act
-    await manager._async_run_matching(trace=[], duration_so_far=1000)
+    readings = _make_readings(1000)
+    await manager._async_do_perform_matching(readings)
     
     # Assert: Should stay Synthetic
     assert manager._current_program == "Synthetic"
@@ -148,15 +154,13 @@ async def test_unmatching_logic(manager):
     """Test reverting to detection if confidence drops."""
     # Setup: Matched "Cotton 40"
     manager._current_program = "Cotton 40"
-    manager._matched_profile_duration = 5400.0 # Critical: Must be set!
+    manager._matched_profile_duration = 5400.0
     manager._unmatch_threshold = 0.4
     
-    # Mock very bad match result (e.g. cycle deviated)
-    # BEWARE: logic uses profile_name from Result.
-    # If Result.best_profile is "Cotton 40", it checks that.
+    # Mock very bad match result
     mock_res = MatchResult(
         best_profile="Cotton 40",
-        confidence=0.30, # Below 0.4
+        confidence=0.30,  # Below 0.4
         expected_duration=5400.0,
         matched_phase=None,
         candidates=[{"name": "Cotton 40", "score": 0.30}],
@@ -166,7 +170,8 @@ async def test_unmatching_logic(manager):
     manager.profile_store.async_match_profile.return_value = mock_res
     
     # Act
-    await manager._async_run_matching(trace=[], duration_so_far=2000)
+    readings = _make_readings(2000)
+    await manager._async_do_perform_matching(readings)
     
     # Assert
     assert manager._current_program == "detecting..."
@@ -177,22 +182,16 @@ def test_variance_locking_prediction(manager):
     # Setup
     manager._current_program = "TestProfile"
     manager._matched_profile_duration = 3600.0
-    manager._smoothed_progress = 50.0 # Starts at 50%
+    manager._smoothed_progress = 50.0
     
-    # Mock _estimate_phase_progress returning high variance
-    # Phase says 80%, Variance 200 (heating) -> Alpha 0.05
-    # Should perform damped update
-    
-    # We need to mock _estimate_phase_progress since it's internal
     with patch.object(manager, '_estimate_phase_progress', return_value=(80.0, 200.0)):
         dt_util.now = MagicMock(return_value=datetime.now(timezone.utc))
-        manager.detector.get_power_trace.return_value = [1]*10 # Dummy trace > 10
+        manager.detector.get_power_trace.return_value = [1]*10
         manager.detector.get_elapsed_seconds.return_value = 1800
         
         manager._update_remaining_only()
         
-        # Expected: Old(50) * 0.95 + New(80) * 0.05 = 47.5 + 4 = 51.5
-        # Much less than 80
+        # Expected: Old(50) * 0.95 + New(80) * 0.05 = 51.5
         assert 51.0 < manager._cycle_progress < 52.0
         
 def test_normal_prediction_low_variance(manager):
@@ -202,9 +201,6 @@ def test_normal_prediction_low_variance(manager):
     manager._matched_profile_duration = 3600.0
     manager._smoothed_progress = 50.0
     
-    # Mock _estimate_phase_progress returning low variance
-    # Phase says 55%, Variance 5.0 -> Alpha 0.2
-    
     with patch.object(manager, '_estimate_phase_progress', return_value=(55.0, 5.0)):
         dt_util.now = MagicMock(return_value=datetime.now(timezone.utc))
         manager.detector.get_power_trace.return_value = [1]*10
@@ -212,6 +208,6 @@ def test_normal_prediction_low_variance(manager):
         
         manager._update_remaining_only()
         
-        # Expected: Old(50) * 0.8 + New(55) * 0.2 = 40 + 11 = 51.0
+        # Expected: Old(50) * 0.8 + New(55) * 0.2 = 51.0
         assert 50.9 < manager._cycle_progress < 51.1
 

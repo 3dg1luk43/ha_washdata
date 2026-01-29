@@ -96,6 +96,10 @@ def mock_hass():
     hass.async_add_executor_job = AsyncMock(side_effect=_async_executor_mock)
     hass.config.path = lambda *args: "/mock/path/" + "/".join(args)
     hass.states.get = MagicMock(return_value=None)
+    
+    # Mock config_entries
+    hass.config_entries = MagicMock()
+    
     return hass
 
 @pytest.fixture
@@ -167,6 +171,9 @@ async def test_stress_smart_termination(mock_hass, mock_entry):
         # 2. Setup Manager
         with patch("custom_components.ha_washdata.profile_store.WashDataStore.async_load", return_value=store_data), \
              patch("custom_components.ha_washdata.profile_store.WashDataStore.async_save"):
+            
+            # Wire up config_entries to return mock_entry for learning manager
+            mock_hass.config_entries.async_get_entry = MagicMock(return_value=mock_entry)
             
             manager = WashDataManager(mock_hass, mock_entry)
             manager.profile_store._data = store_data

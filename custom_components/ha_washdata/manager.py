@@ -13,13 +13,13 @@ from typing import Any, cast
 import numpy as np
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, State, callback
+from homeassistant.core import Event, HomeAssistant, State, callback
 from homeassistant.helpers.event import (
     async_track_state_change_event,
     async_track_time_interval,
 )
 from homeassistant.helpers.dispatcher import async_dispatcher_send
-from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
+from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.util import dt as dt_util
 import homeassistant.helpers.event as evt
 
@@ -128,6 +128,8 @@ from .const import (
     STATE_STARTING,
     STATE_PAUSED,
     STATE_ENDING,
+    STATE_IDLE,
+    STATE_UNKNOWN,
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
@@ -199,6 +201,7 @@ class WashDataManager:
         self._sample_interval_stats = {}
         self._matching_task = None
         self._last_state_save = 0.0
+        self._last_cycle_end_time: datetime | None = None
         self._remove_progress_reset_timer = None
 
         # Components
@@ -379,11 +382,10 @@ class WashDataManager:
             if not readings:
                 return (None, 0.0, 0.0, None, False)
 
-            # Snapshot readings for thread safety
-            readings_copy = list(readings)
-
-            # Offload to async task
-            self.hass.async_create_task(self._async_run_matching_task(readings_copy))
+            # Snapshotted for thread safety indirectly by task logic
+            # We don't need a wrapper task if we unify with _update_estimates matching
+            # but for now let's keep the detector callback as a trigger
+            self.hass.async_create_task(self._async_perform_combined_matching(readings))
             return None
 
         self.detector = CycleDetector(
@@ -421,9 +423,8 @@ class WashDataManager:
         self._last_estimate_time: datetime | None = None
         self._last_match_ambiguous: bool = False
         self._matched_profile_duration: float | None = None
-        self._last_match_confidence: float = 0.0  # Store confidence for feedback
+        self._last_match_confidence: float = 0.0
         # Sample interval tracking (seconds) for adaptive timing
-
         # Profile matching duration tolerance (0.25 = ±25%)
         self._profile_duration_tolerance: float = float(
             config_entry.options.get("profile_duration_tolerance", 0.25)
@@ -445,191 +446,209 @@ class WashDataManager:
         self._last_match_result: Any = None  # Stores full MatchResult object
         self._score_history: dict[str, list[float]] = {}  # Tracks recent scores for trend analysis
 
-    async def _async_run_matching_task(
+    async def _async_perform_combined_matching(
         self, readings: list[tuple[datetime, float]]
     ) -> None:
-        """Run profile matching in executor and update detector."""
+        """PRIMARY matching task: Updates both Manager and Detector using best method."""
+        # Prevent concurrent matching tasks
+        if getattr(self, "_matching_task", None) and not self._matching_task.done():
+            return
+
         try:
             if not readings:
                 return
 
-            # Format in main thread
-            formatted = [(t.isoformat(), p) for t, p in readings]
+            self._matching_task = self.hass.async_create_task(self._async_do_perform_matching(readings))
+        except Exception as e:
+            _LOGGER.error("Perform combined matching trigger failed: %s", e)
 
-            start = readings[0][0]
-            end = readings[-1][0]
-            current_duration = (end - start).total_seconds()
+    async def _async_do_perform_matching(self, readings: list[tuple[datetime, float]]) -> None:
+        """Inner task to handle actual matching logic."""
+        try:
+            end_time = readings[-1][0]
+            start_time = readings[0][0]
+            current_duration = (end_time - start_time).total_seconds()
 
-            # Offload heavy match (blocks for ~400ms)
-            result = await self.hass.async_add_executor_job(
-                self.profile_store.match_profile, formatted, current_duration
+            # 1. RUN BETTER ASYNC MATCHING
+            result = await self.profile_store.async_match_profile(
+                 readings, 
+                 current_duration
             )
 
-            # Post-Process in main thread
+            # 2. UPDATE MANAGER STATE (Estimates, Program Name, etc.)
             self._last_match_result = result
-
-            match_name = result.best_profile
+            self._last_match_ambiguous = result.is_ambiguous
+            
+            profile_name = result.best_profile
             confidence = result.confidence
-            expected_duration = result.expected_duration
+            matched_duration = result.expected_duration
             phase_name = result.matched_phase
+            
+            # --- Switching Logic (from old _async_run_matching) ---
+            should_switch = False
+            switch_reason = ""
 
-            if match_name:
-                prof = self.profile_store.get_profiles().get(match_name)
-                if isinstance(prof, dict):
-                    expected_duration = float(prof.get("avg_duration", 0.0))
+            if (
+                profile_name
+                and confidence >= 0.15
+                and not result.is_ambiguous
+                and (not self._matched_profile_duration or self._current_program == "detecting...")
+            ):
+                should_switch = True
+                switch_reason = "initial_match"
+            elif (
+                profile_name
+                and self._current_program != profile_name
+                and self._current_program != "detecting..."
+            ):
+                current_score = 0.0
+                for c in result.candidates:
+                    if c.get("name") == self._current_program:
+                        current_score = c.get("score", 0.0)
+                        break
+                if confidence > 0.8 and (confidence - current_score) > 0.15:
+                    should_switch = True
+                    switch_reason = f"high_confidence_override ({confidence:.3f} vs {current_score:.3f})"
+                elif confidence > current_score and self._analyze_trend(profile_name):
+                    should_switch = True
+                    switch_reason = f"positive_trend ({confidence:.3f} > {current_score:.3f})"
 
-                    # --- DEVICE SPECIFIC PHASE NAMING (Heuristics) ---
-                    is_dishwasher = self.device_type == "dishwasher"
-                    pct_complete = (
-                        (current_duration / expected_duration)
-                        if expected_duration > 0
-                        else 0
-                    )
+            # Case 3: Unmatching (confidence drop)
+            elif (
+                self._current_program not in ("detecting...", "off", "starting", "unknown")
+                and profile_name == self._current_program
+                and confidence < self._unmatch_threshold
+            ):
+                self._current_program = "detecting..."
+                self._matched_profile_duration = None
+                _LOGGER.info(
+                    "Unmatched profile '%s' (confidence %.3f < threshold %.3f). "
+                    "Reverting to detection.",
+                    profile_name,
+                    confidence,
+                    self._unmatch_threshold,
+                )
 
-                    if (
-                        is_dishwasher
-                        and confidence >= 0.70
-                        and pct_complete >= 0.70
-                        and pct_complete <= 1.20
-                    ):
-                        phase_name = "Drying"
+            if should_switch:
+                self._current_program = profile_name
+                self._last_match_confidence = confidence
+                avg_duration = float(matched_duration)
+                self._matched_profile_duration = avg_duration if avg_duration > 0 else None
+                _LOGGER.info(
+                     "Switching to profile '%s' (reason: %s). Expected duration: %.0fs (%smin)",
+                     profile_name, switch_reason, avg_duration, int(avg_duration / 60),
+                )
+            elif profile_name == self._current_program:
+                # Same program, but update confidence for sensors
+                self._last_match_confidence = confidence
+            elif not self._matched_profile_duration:
+                self._current_program = "detecting..."
 
-                    # --- WASHING MACHINE RINSE/SPIN DETECTION ---
-                    is_washing_machine = self.device_type == "washing_machine"
-                    if (
-                        is_washing_machine
-                        and confidence >= 0.65
-                        and pct_complete >= 0.50
-                        and pct_complete <= 1.20
-                    ):
-                        recent_window_s = 120
-                        recent_readings = [
-                            p for t, p in readings
-                            if (end - t).total_seconds() <= recent_window_s
-                        ]
-                        if len(recent_readings) >= 5:
-                            recent_arr = np.array(recent_readings)
-                            avg_power = float(np.mean(recent_arr))
-                            power_std = float(np.std(recent_arr))
-                            max_recent = float(np.max(recent_arr))
+            self._last_estimate_time = dt_util.now()
+            # Note: _update_remaining_only() and notify move to end of flow
 
-                            if avg_power > 150 and max_recent > 200:
-                                if power_std < avg_power * 0.5:
-                                    phase_name = "Spinning"
-                                else:
-                                    phase_name = "Spinning"
-                            elif avg_power < 100 and pct_complete >= 0.80:
-                                phase_name = "Draining"
-                            elif pct_complete >= 0.50 and pct_complete < 0.80:
-                                phase_name = "Rinsing"
-                            else:
-                                phase_name = "Rinse/Spin"
-
-            # Priority 1: Envelope Verification for Mismatches logic
-            # If we have a confident mismatch (or just no match) BUT we were tracking a profile,
-            # check if the envelope explains the current behavior (e.g. expected 0W pause).
+            # 3. UPDATE DETECTOR (Envelopes, Deferral, State Transitions)
             current_matched = self.detector.matched_profile
-            
-            # CRITICAL: Preserve existing pause lock by default
-            # Only clear it if we have explicit evidence we're NOT in a valid pause
             verified_pause = getattr(self.detector, "_verified_pause", False)
-            
-            # Check current power level from recent readings
             current_power = readings[-1][1] if readings else 0.0
 
-            # Condition: Result says mismatch/none AND we have a profile
-            if (not match_name or result.is_confident_mismatch) and current_matched:
-                # Check envelope alignment
-                _LOGGER.debug(
-                    "Checking envelope alignment for %s during potential mismatch...",
-                    current_matched
-                )
+            # --- Envelope Verification for Mismatches ---
+            if (not profile_name or result.is_confident_mismatch) and current_matched:
+                formatted = [(t.isoformat(), p) for t, p in readings]
                 is_confirmed, mapped_time, mapped_p = (
-                    await self.profile_store.async_verify_alignment(
-                        current_matched, formatted
-                    )
+                    await self.profile_store.async_verify_alignment(current_matched, formatted)
                 )
-
                 if is_confirmed:
                     _LOGGER.info(
-                        "Envelope verified expected low power phase for %s "
-                        "(Map: %.0fs -> %.0fs, Exp: %.1fW). Overriding mismatch.",
-                        current_matched, current_duration, mapped_time, mapped_p
+                        "Envelope verified expected low power phase for %s. Overriding mismatch.",
+                        current_matched
                     )
-
-                    # Override mismatch result
-                    match_name = current_matched
+                    profile_name = current_matched
                     confidence = 1.0
-                    phase_name = "Drying" if phase_name is None else phase_name
-                    result.is_confident_mismatch = False
-                    
-                    # SMART TERMINATION LOGIC:
-                    # If we are effectively at the end of the profile (>95% complete),
-                    # we should NOT enforce a pause. This allows the cycle detector
-                    # to terminate naturally if power remains low.
-                    # If there is a final power spike (pump out), the detector will
-                    # see high power and keep the cycle alive regardless.
                     verified_pause = True
-                    
+                    # Smart Termination within Envelope block
                     try:
                         profile = self.profile_store.get_profile(current_matched)
                         if profile:
                             avg_dur = profile.get("avg_duration", 0)
-                            if avg_dur > 0:
-                                progress = mapped_time / avg_dur
-                                if progress > 0.95:
-                                    verified_pause = False
-                                    _LOGGER.info(
-                                        "Smart Termination: Profile %s is %.1f%% complete (mapped). "
-                                        "Releasing pause lock to allow natural cycle end.",
-                                        current_matched, progress * 100
-                                    )
-                                else:
-                                    _LOGGER.debug(
-                                        "Smart Termination: Profile %s is %.1f%% complete. "
-                                        "maintaining pause lock.",
-                                        current_matched, progress * 100
-                                    )
-                    except Exception:  # pylint: disable=broad-exception-caught
-                        pass
+                            if avg_dur > 0 and (mapped_time / avg_dur) > 0.95:
+                                verified_pause = False
+                                _LOGGER.info("Smart Termination: Near end of profile. Releasing pause lock.")
+                    except Exception: pass
                 else:
-                    # Envelope verification explicitly failed - clear pause lock
-                    _LOGGER.debug(
-                        "Envelope verification failed for %s. Clearing pause lock.",
-                        current_matched
-                    )
                     verified_pause = False
-            
-            # Also clear pause lock if power is high (not in a pause anymore)
-            # This handles the case where profile match returns during active phase
+
+            # --- High Power Clear ---
             if current_power > self.detector.config.stop_threshold_w * 10:
-                if verified_pause:
-                    _LOGGER.debug(
-                        "Power is high (%.1fW), clearing verified pause lock",
-                        current_power
-                    )
-                    verified_pause = False
+                verified_pause = False
 
-            # Update Detector
+            # --- Consistency Override ---
+            # If envelope verified or mismatched, ensure manager program matches
+            if profile_name != self._current_program and (verified_pause or result.is_confident_mismatch):
+                 if profile_name:
+                     self._current_program = profile_name
+                     self._last_match_confidence = confidence
+                     # Try to fetch duration if we switched back to matched
+                     try:
+                         prof = self.profile_store.get_profile(profile_name)
+                         if prof:
+                             self._matched_profile_duration = float(prof.get("avg_duration", 0))
+                     except Exception: pass
+                 else:
+                     self._current_program = "detecting..."
+                     self._matched_profile_duration = None
+
+            # --- HEURISTICS (Descriptive Phases) ---
+            if not phase_name:
+                if self.device_type == "dishwasher" and self.detector.is_waiting_low_power():
+                    phase_name = "Drying"
+                elif self.device_type == "washing_machine" and current_power > 200:
+                    phase_name = "Spinning"
+                elif self.device_type == "washing_machine" and self.detector.is_waiting_low_power():
+                    phase_name = "Rinsing/Soaking"
+
+            # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
-            final_result = (
-                match_name,
-                confidence,
-                expected_duration,
-                phase_name,
-                result.is_confident_mismatch,
+            self.detector.update_match(
+                (profile_name, confidence, matched_duration, phase_name, result.is_confident_mismatch)
             )
-            self.detector.update_match(final_result)
 
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.error("Async profile matching task failed: %s", e)
+            # --- LOGGING (Unified) ---
+            _LOGGER.info(
+                "Profile match attempt: name=%s, confidence=%.3f, duration=%.0fs, samples=%d",
+                profile_name, confidence, current_duration, len(readings),
+            )
+
+            self._update_remaining_only()
+            self._check_pre_completion_notification()
+            self._notify_update()
+
+        except Exception as e:
+            _LOGGER.error("Perform combined matching failed: %s", e)
 
     @property
     def top_candidates(self) -> list[dict[str, Any]]:
-        """Return the list of top candidates from the last match."""
-        if self._last_match_result and hasattr(self._last_match_result, "ranking"):
-            return self._last_match_result.ranking
-        return []
+        """Return a lightweight list of top candidates from the last match."""
+        if not self._last_match_result:
+            return []
+            
+        # Get raw list from ranking (best) or candidates
+        raw_list = []
+        if hasattr(self._last_match_result, "ranking") and self._last_match_result.ranking:
+            raw_list = self._last_match_result.ranking
+        elif hasattr(self._last_match_result, "candidates"):
+            raw_list = self._last_match_result.candidates
+            
+        # SANITIZE: Remove heavy power arrays before sending to Home Assistant attributes
+        sanitized = []
+        for cand in raw_list[:5]:
+            sanitized.append({
+                "name": cand.get("name"),
+                "score": round(float(cand.get("score", 0.0)), 3),
+                "profile_duration": cand.get("profile_duration"),
+                # Explicitly exclude "current" and "sample" keys which are big lists
+            })
+        return sanitized
 
     @property
     def phase_description(self) -> str:
@@ -1137,15 +1156,16 @@ class WashDataManager:
             )
         )
 
+        # Re-subscribe to external cycle end trigger
+        await self._setup_external_end_trigger()
+
         _LOGGER.info("Configuration reloaded successfully")
 
         # Trigger entity updates to reflect any changes
         async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
 
         if self.detector:
-            self.detector._config.profile_duration_tolerance = (
-                self._profile_duration_tolerance
-            )
+            self.detector.config.profile_duration_tolerance = self._profile_duration_tolerance
 
         # Schedule midnight maintenance if enabled
         await self._setup_maintenance_scheduler()
@@ -1477,30 +1497,63 @@ class WashDataManager:
 
     async def _watchdog_check_stuck_cycle(self, now: datetime) -> None:
         """Watchdog: check if cycle is stuck (no updates for too long)."""
-        if self.detector.state != STATE_RUNNING:
+        if self.detector.state not in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
             return
 
         if not self._last_reading_time:
-             return
+            return
 
         time_since_any_update = (now - self._last_reading_time).total_seconds()
         
         # Calculate time since REAL update (if available, else fallback to any update)
         last_real = self._last_real_reading_time or self._last_reading_time
+
         time_since_real_update = (now - last_real).total_seconds()
+
+        # 0. GHOST CYCLE SUPPRESSOR
+        # If we are "detecting" for more than 10 minutes and haven't seen an update for 5 minutes, 
+        # it's likely a pump-out spike or an accidental start (ghost cycle).
+        # We end it aggressively ONLY if it started shortly after another cycle ended (Suspicious Window).
+        cycle_start = self.detector.current_cycle_start
+        is_suspicious = False
+        if cycle_start and self._last_cycle_end_time:
+             # If started within 20 minutes of previous cycle finish
+             if (cycle_start - self._last_cycle_end_time).total_seconds() < 1200:
+                 is_suspicious = True
+
+        elapsed = self.detector.get_elapsed_seconds()
+        if (
+            self._current_program == "detecting..."
+            and is_suspicious
+            and elapsed > 600  # 10 minutes
+            and time_since_real_update > 300  # 5 minutes of silence
+        ):
+            _LOGGER.warning(
+                "Watchdog: Ghost cycle suppressed (within suspicious window). Detecting for %.0fs with %.0fs silence.",
+                elapsed, time_since_real_update
+            )
+            self.detector.force_end(now)
+            self._notify_update()
+            return
 
         # --- LOW POWER HANDLING ---
         # If we are in a low power state (waiting for off_delay or drying profile),
         # we treat silence leniently. We inject keepalives until the stricter
         # low_power_no_update_timeout is reached.
+        
+        # Dishwashers can have very long silent drying phases (up to 2h)
+        effective_low_power_timeout = self._low_power_no_update_timeout
+        if self.device_type == "dishwasher" and self._current_program not in ("detecting...", "off"):
+             effective_low_power_timeout = max(7200.0, effective_low_power_timeout)
+             
         if self.detector.is_waiting_low_power():
             
             # 1. Staleness Check
-            if time_since_real_update > self._low_power_no_update_timeout:
+            if time_since_real_update > effective_low_power_timeout:
                 _LOGGER.warning(
                     "Watchdog: Force-ending cycle. Low-power state stale for %.0fs (> %.0fs).",
                     time_since_real_update,
-                    self._low_power_no_update_timeout
+                    effective_low_power_timeout
                 )
                 self.detector.force_end(now)
                 self._last_reading_time = now
@@ -1575,21 +1628,26 @@ class WashDataManager:
     def _on_state_change(self, old_state: str, new_state: str) -> None:
         """Handle state change from detector."""
         _LOGGER.debug("Washer state changed: %s -> %s", old_state, new_state)
-        if new_state == "running":
-            # If a cycle finishes and a new one starts within the reset window,
-            # treat it as continuation or quick restart (don't reset progress yet)
-            self._cycle_completed_time = None
-            self._stop_progress_reset_timer()
-
-            self._current_program = "detecting..."
-            self._manual_program_active = False
-            self._notified_pre_completion = False
-            self._time_remaining = None
-            self._cycle_progress = 0
-            self._matched_profile_duration = None
-            self._last_estimate_time = None
-            self._score_history = {}  # Reset score history on new cycle
-            self._start_watchdog()  # Start watchdog when cycle starts
+        if new_state == STATE_RUNNING:
+            # Only reset estimates if we are truly starting a NEW cycle (from off or starting)
+            # If we transition from PAUSED or ENDING, it's a resume - keep estimates!
+            if old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN):
+                self._cycle_completed_time = None
+                self._stop_progress_reset_timer()
+                
+                self._current_program = "detecting..."
+                self._manual_program_active = False
+                self._notified_pre_completion = False
+                self._time_remaining = None
+                self._cycle_progress = 0
+                self._matched_profile_duration = None
+                self._last_estimate_time = None
+                self._score_history = {}  # Reset score history on new cycle
+                self._start_watchdog()  # Start watchdog when cycle starts
+            else:
+                _LOGGER.debug("Cycle resumed from %s, preserving estimates", old_state)
+                # Ensure watchdog is running
+                self._start_watchdog()
             self.hass.bus.async_fire(
                 EVENT_CYCLE_STARTED,
                 {
@@ -1620,6 +1678,7 @@ class WashDataManager:
         # IMMEDIATELY stop all active timers when cycle determined to have ended
         self._stop_watchdog()  # Stop active cycle watchdog
         self._stop_progress_reset_timer()  # Cancel any pending progress reset
+        self._last_cycle_end_time = dt_util.now()
 
         # Auto-Tune: Check for ghost cycles (short duration AND low energy)
         # Ghost = duration < 60s AND total energy < 0.05 Wh (avoids killing pump-out spikes)
@@ -1893,7 +1952,12 @@ class WashDataManager:
 
     def _update_estimates(self) -> None:
         """Update time remaining and profile estimates."""
-        if self.detector.state != "running":
+        if self.detector.state in (STATE_OFF, STATE_UNKNOWN, STATE_IDLE, STATE_STARTING):
+            self._current_program = "off"
+            self._time_remaining = None
+            self._cycle_progress = 0.0
+            self._last_match_result = None
+            self._notify_update()
             return
 
         now = dt_util.now()
@@ -1918,150 +1982,14 @@ class WashDataManager:
             self._notify_update()
             return
 
-        # Prevent concurrent matching tasks
-        if self._matching_task and not self._matching_task.done():
-            return
-
-        trace = self.detector.get_power_trace()
-        if len(trace) < 3:
-            return
-
-        duration_so_far = self.detector.get_elapsed_seconds()
-
-        # Offload matching to async task (non-blocking + includes DTW)
-        self._matching_task = self.hass.async_create_task(
-            self._async_run_matching(trace, duration_so_far)
-        )
-
-    async def _async_run_matching(
-        self, trace: list[tuple[datetime, float]], duration_so_far: float
-    ) -> None:
-        """Run profile matching asynchronously."""
-        # Convert to list for matching (async_match_profile handles datetimes)
-        # We pass the trace directly.
-
-        _LOGGER.debug(
-            "Profile matching using complete cycle data: %d samples spanning %.0fs",
-            len(trace),
-            duration_so_far,
-        )
-
-        try:
-            result = await self.profile_store.async_match_profile(
-                 trace,  # type: ignore[arg-type] # Handled by robust typing in async_match_profile
-                 duration_so_far
-            )
-        except Exception as e: # pylint: disable=broad-exception-caught
-            _LOGGER.error("Async profile matching failed: %s", e)
-            return
-
-        profile_name = result.best_profile
-        confidence = result.confidence
-        matched_duration = result.expected_duration
-
-        _LOGGER.info(
-            "Profile match attempt: name=%s, confidence=%.3f, duration=%.0fs, samples=%s",
-            profile_name,
-            confidence,
-            duration_so_far,
-            len(trace),
-        )
-
-        self._last_match_result = result
-        self._last_match_ambiguous = result.is_ambiguous
-
-        # Update score history
-        for cand in result.candidates:
-            c_name = cand.get("name")
-            c_score = cand.get("score")
-            if c_name and c_score is not None:
-                if c_name not in self._score_history:
-                    self._score_history[c_name] = []
-                self._score_history[c_name].append(c_score)
-                # Keep last 20 samples
-                if len(self._score_history[c_name]) > 20:
-                    self._score_history[c_name].pop(0)
-
-        # START SWITCHING LOGIC
-        should_switch = False
-        switch_reason = ""
-        # Case 1: First Match
-        if (
-            profile_name
-            and confidence >= 0.15
-            and not result.is_ambiguous
-            and (not self._matched_profile_duration or self._current_program == "detecting...")
-        ):
-            should_switch = True
-            switch_reason = "initial_match"
-
-        # Case 2: Switching to Better Match
-        elif (
-            profile_name
-            and self._current_program != profile_name
-            and self._current_program != "detecting..."
-        ):
-            # Check current score
-            current_score = 0.0
-            # Find score of currently active profile in this round's candidates
-            for c in result.candidates:
-                if c.get("name") == self._current_program:
-                    current_score = c.get("score", 0.0)
-                    break
-
-            # High Confidence Override
-            if confidence > 0.8 and (confidence - current_score) > 0.15:
-                should_switch = True
-                switch_reason = (
-                    f"high_confidence_override ({confidence:.3f} vs {current_score:.3f})"
-                )
-
-            # Trend Based Switch
-            elif confidence > current_score and self._analyze_trend(profile_name):
-                should_switch = True
-                switch_reason = (
-                    f"positive_trend ({confidence:.3f} > {current_score:.3f})"
-                )
-
-        # Case 3: Unmatching (confidence drop)
-        elif (
-            self._current_program not in ("detecting...", "off", "starting", "unknown")
-            and profile_name == self._current_program
-            and confidence < self._unmatch_threshold
-        ):
-            self._current_program = "detecting..."
-            self._matched_profile_duration = None
-            _LOGGER.info(
-                "Unmatched profile '%s' (confidence %.3f < threshold %.3f). "
-                "Reverting to detection.",
-                profile_name,
-                confidence,
-                self._unmatch_threshold,
-            )
-
-        if should_switch:
-            self._current_program = profile_name
-            self._last_match_confidence = confidence
-            avg_duration = float(matched_duration)
-            self._matched_profile_duration = avg_duration if avg_duration > 0 else None
-            _LOGGER.info(
-                 "Switching to profile '%s' (reason: %s). Expected duration: %.0fs (%smin)",
-                 profile_name,
-                 switch_reason,
-                 avg_duration,
-                 int(avg_duration / 60),
-            )
-        elif not self._matched_profile_duration:
-            # No match yet and still searching
-            self._current_program = "detecting..."
-
-        self._last_estimate_time = dt_util.now()
+        # No matching task trigger here anymore! 
+        # The detector callback handles it.
+        # Just update progress/remaining based on existing match.
         self._update_remaining_only()
-
-        # Check for pre-completion notification
         self._check_pre_completion_notification()
-
         self._notify_update()
+
+    # _async_run_matching removed in favor of _async_perform_combined_matching
 
     def _analyze_trend(self, profile_name: str) -> bool:
         """Analyze score history to detect positive trend.
@@ -2112,13 +2040,13 @@ class WashDataManager:
 
     def _update_remaining_only(self) -> None:
         """Recompute remaining/progress using phase-aware estimation."""
-        if self.detector.state != "running":
+        # Throttle updates and only clear on truly dead states
+        if self.detector.state in (STATE_OFF, STATE_UNKNOWN, STATE_IDLE):
             self._time_remaining = None
             self._cycle_progress = 0.0
             self._smoothed_progress = 0.0
             return
 
-        # Throttle partial updates to avoid CPU/math overload on every reading
         now = dt_util.now()
         if (
             self._last_phase_estimate_time
