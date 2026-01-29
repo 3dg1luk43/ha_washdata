@@ -507,6 +507,16 @@ ProfileStore.async_run_maintenance()
     - New match confidence > Existing score + 0.15 (Strong override)
     - New match shows positive trend (>70% increasing scores)
  
+#### C. Smart Termination & End Spike Logic
+**Problem:** Dishwashers often have a long silent drying phase followed by a brief, high-power pump-out spike. Smart termination would sometimes cut the cycle off early (during drying), missing the final spike and causing the spike to trigger a new "ghost" cycle.
+
+**Solution:**
+- **Conservative Ratio**: Dishwashers require **99%** of expected duration before Smart Termination is even considered (vs 98% for others).
+- **End Spike Wait Period**: Even if the duration is met, the system scans the "Ending" state for a high-power spike.
+- If no spike is found, it **waits up to 5 extra minutes** past the expected duration to catch it.
+- **Ghost Cycle Suppression**: A "Suspicious Window" (20 mins) protects legitimate short cycles. Aggressive ghost cycle termination (10 min timeout) only applies if a cycle starts within 20 mins of the previous one ending.
+- **Tail Preservation**: The profile store now explicitly preserves trailing silence/spikes for natural completions, preventing the "profile shrinking" feedback loop where frequent early terminations made the learned profile shorter and shorter.
+ 
 
  
 ---

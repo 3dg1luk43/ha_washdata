@@ -42,15 +42,23 @@ This release marks a complete re-engineering of the HA WashData core, transition
 - **Statistics**: Added "Total Energy" column to the Profile Statistics table, showing the cumulative energy consumed for each profile.
 
 ### 🛠️ Technical Improvements
+- **Logging**: Added more granular `termination_reason` logging (e.g., `smart`, `timeout`, `force_stopped`) to `cycle_detector` and `profile_store`.
 - **Timezone Robustness**: Complete refactor to use timezone-aware datetimes (`dt_util.now()`) exclusively, permanently fixing "offset-naive/offset-aware" comparison errors.
 - **Strict Typing**: Codebase now strictly adheres to type hinting, with extensive use of `TypeAlias` and `dataclass` for internal structures.
 - **Performance**: Optimized `last_match_details` sensor attribute to exclude large raw data arrays, preventing Home Assistant state update bloat.
 - **Serialization**: Fixed `MatchResult` JSON serialization issues that were blocking sensor updates.
 
 ### 🐛 Bug Fixes
-- **Ghost Cycles**: New `completion_min_seconds` logic filters out short "noise" events that previously registered as cycles.
+- **Premature Termination & Dishwasher Logic**: Major robustness improvements for dishwashers.
+  - Implemented "Verified Pause" logic to prevent early termination during long drying phases.
+  - Added "End Spike Wait Period": Dishwashers now wait up to 5 extra minutes after expected duration to capture final pump-out spikes.
+  - Increased Smart Termination duration ratio to **0.99** for dishwashers to be more conservative.
+- **Ghost Cycles**: Enhanced filtering of short "noise" events.
+  - Implemented `completion_min_seconds` logic to ignore brief spikes.
+  - Refined "Ghost Cycle Suppressor" with a **20-min "Suspicious Window"** to only suppress short cycles if they occur shortly after a previous cycle, preventing false positives on legitimate quick consecutive runs.
+- **Profile Learning**: Fixed a feedback loop where trimming silent tails caused profiles to shrink over time.
+  - Now preserves the trailing silence (and end spikes) for all natural cycle completions, ensuring the full duration is learned.
 - **Start/End Flutter**: Start debounce and End repeat counts are now configurable and backed by robust accumulators, eliminating false starts/ends.
-- **Premature Termination**: Implemented "Verified Pause" logic to prevent dishwasher cycles from ending during long drying phases if the profile envelope matches.
 - **Cycle Detector**: Adjusted duration validation logic to strict 90%-125% window for completion.
 - **Translations**: Fixed "intl string context variable not provided" errors in logs by properly passing placeholders to translation engine.
 - **Debug Sensors**: Fixed "Top Candidates" sensor showing "None" due to missing data propagation.
@@ -60,6 +68,7 @@ This release marks a complete re-engineering of the HA WashData core, transition
 - **Legacy Data Repair**: Added automatic reconstruction of missing `time_grid` in old profile envelopes to prevent errors.
 - **Validation**: Fixed missing `dtw_bandwidth` key in `strings.json` causing config flow validation errors.
 - **Maintenance Safety**: Fixed aggressive cleanup logic that was deleting empty/new profiles (pending training); these are now safely preserved.
+- **Test Suite**: Fixed verification tests for Smart Termination and Profile Store matching.
 
 ### ⚠️ Deprecations
 - **Legacy Logic**: Removed "consecutive samples" based detection in favor of time-aware accumulators.

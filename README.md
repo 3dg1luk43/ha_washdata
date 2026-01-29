@@ -18,7 +18,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 ## ✨ Features
 
 - **Multi-Device Support**: Track Washing Machines, Dryers, Dishwashers, or Coffee Machines with device-type tagging.
-- **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic to finish faster when confidence is high.
+- **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic. Includes **End Spike Protection** for dishwashers to capture final pump-outs.
 - **Power Spike Filtering**: Ignores brief boot spikes to prevent false starts.
 - **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles.
 - **Manual Training**: You define your profiles (e.g., "Cotton", "Quick") once; the system learns to recognize them thereafter. Integration **does not** auto-create profiles.
@@ -27,7 +27,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Minimal Status Card**: Optional custom Lovelace card.
 - **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
 - **Manual Profile Creation**: Create profiles even without historical cycles by specifying a baseline duration (e.g., "Eco Mode - 3h").
-- **Ghost Cycle Prevention**: Minimum runtime threshold avoids recording brief power spikes as completed cycles.
+- **Ghost Cycle Suppression**: Intelligent filtering with **"Suspicious Window"** (20 mins) prevents end-spikes from triggering duplicate cycles while preserving refined short runs.
 - **Robust vNext State Machine**: Advanced filtering with `start_energy` and `end_energy` gates prevents false starts/ends.
 - **Multi-Stage Matching Pipeline**: Uses Fast Reject -> Core Similarity -> DTW-Lite tie-breaking for superior accuracy.
 - **Local Only**: No cloud dependency, no external services. All data stays in your Home Assistant.
