@@ -8,7 +8,8 @@ from typing import Any, Optional, TYPE_CHECKING
 
 import numpy as np
 from homeassistant.core import HomeAssistant
-from homeassistant.util import dt as dt_util
+from homeassistant.helpers import storage, start, translation
+import homeassistant.util.dt as dt_util
 
 from .const import (
     CONF_WATCHDOG_INTERVAL,
@@ -89,10 +90,6 @@ class LearningManager:
         self.hass = hass
         self.entry_id = entry_id
         self.profile_store = profile_store
-
-        # Feedback history
-        self._feedback_history = self.profile_store.get_feedback_history()
-        self._pending_feedback = self.profile_store.get_pending_feedback()
 
         # Operational Stats
         self._sample_interval_model = StatisticalModel(max_samples=200)
@@ -358,44 +355,90 @@ class LearningManager:
         self.hass.async_create_task(self.profile_store.async_save())
 
         # Create user-visible notification
-        self._send_feedback_notification(
-            entry.title, cycle_id, detected_profile, confidence
+        self.hass.async_create_task(
+            self._async_send_feedback_notification(
+                entry.title, cycle_data, detected_profile, confidence
+            )
         )
 
-    def _send_feedback_notification(
-        self, device_title: str, cycle_id: str, profile: str, confidence: float
+    async def _async_send_feedback_notification(
+        self, device_title: str, cycle_data: dict[str, Any], profile: str, confidence: float
     ) -> None:
-        """Send a persistent notification for feedback."""
+        """Send a persistent notification for feedback (Async with translation)."""
         try:
+            cycle_id = cycle_data.get("id", "unknown")
+            start_ts = cycle_data.get("start_time")
+            end_ts = dt_util.now() # Approximate, or pass actual end time
+            
+            # Format times
+            t_str = ""
+            if start_ts:
+                try:
+                    s_dt = datetime.fromisoformat(str(start_ts)) if isinstance(start_ts, str) else start_ts
+                    s_local = dt_util.as_local(s_dt)
+                    e_local = dt_util.as_local(end_ts)
+                    t_str = f"{s_local.strftime('%H:%M')} - {e_local.strftime('%H:%M')}"
+                except Exception:
+                    t_str = "Just now"
+
             notification_id = f"ha_washdata_feedback_{self.entry_id}_{cycle_id}"
-            title = f"HA WashData: Verify cycle ({device_title})"
-            message = (
-                f"Detected program: {profile}\n"
-                f"Confidence: {confidence:.2f}\n"
-                f"Cycle ID: {cycle_id}\n\n"
-                f"Confirm/correct using service `{DOMAIN}.submit_cycle_feedback` with:\n"
-                f"- device_id: <this device> (recommended)\n"
-                f"  or entry_id: {self.entry_id}\n"
-                f"- cycle_id: {cycle_id}\n"
-                f"- user_confirmed: true\n"
-                f"Optionally set `corrected_profile` (profile name) "
-                f"or `corrected_duration` (seconds)."
+            
+            # Load translations
+            # We must load specific category 'notification' if we put it there
+            translations = await translation.async_get_translations(
+                self.hass, self.hass.config.language, "notification", {DOMAIN}
+            )
+            
+            # Default templates
+            default_title = "WashData: Verify Cycle ({device})"
+            default_msg = (
+                 "**Device**: {device}\n"
+                 "**Program**: {program} ({confidence}% confidence)\n"
+                 "**Time**: {time}\n\n"
+                 "WashData needs your help to verify this detected cycle.\n\n"
+                 "Please go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
+            )
+            
+            title_template = translations.get(
+                f"component.{DOMAIN}.notification.feedback_request.title", default_title
+            )
+            msg_template = translations.get(
+                f"component.{DOMAIN}.notification.feedback_request.message", default_msg
+            )
+            
+            # Confidence as percentage
+            conf_pct = int(confidence * 100)
+            
+            title = title_template.format(device=device_title)
+            message = msg_template.format(
+                device=device_title,
+                program=profile,
+                confidence=conf_pct,
+                time=t_str
             )
             
             # Use standard service call
-            self.hass.async_create_task(
-                self.hass.services.async_call(
-                    "persistent_notification",
-                    "create",
-                    {
-                        "message": message,
-                        "title": title,
-                        "notification_id": notification_id,
-                    },
-                )
+            await self.hass.services.async_call(
+                "persistent_notification",
+                "create",
+                {
+                    "message": message,
+                    "title": title,
+                    "notification_id": notification_id,
+                },
             )
         except Exception:  # pylint: disable=broad-exception-caught
             _LOGGER.exception("Failed to create feedback notification")
+
+    def _send_feedback_notification(
+        self, device_title: str, cycle_data: dict[str, Any], profile: str, confidence: float
+    ) -> None:
+        """Deprecated sync wrapper."""
+        self.hass.async_create_task(
+            self._async_send_feedback_notification(
+                device_title, cycle_data, profile, confidence
+            )
+        )
 
     def request_cycle_verification(
         self,
@@ -428,8 +471,8 @@ class LearningManager:
             "expires_at": None,
         }
 
-        self._pending_feedback[cycle_id] = feedback_req
         self.profile_store.get_pending_feedback()[cycle_id] = feedback_req
+        self.profile_store.add_pending_feedback(cycle_id, feedback_req)
         
         est_min = int(estimated_duration / 60) if estimated_duration else 0
         _LOGGER.info(
@@ -463,16 +506,17 @@ class LearningManager:
 
         return bool(cycle and cycle.get("auto_labeled"))
 
-    def submit_cycle_feedback(
+    async def async_submit_cycle_feedback(
         self,
         cycle_id: str,
         user_confirmed: bool,
         corrected_profile: Optional[str] = None,
         corrected_duration: Optional[float] = None,
         notes: str = "",
+        dismiss: bool = False,
     ) -> bool:
         """Submit user feedback for a cycle."""
-        pending = self._pending_feedback.get(cycle_id)
+        pending = self.profile_store.get_pending_feedback().get(cycle_id)
         if not pending:
             return False
 
@@ -487,32 +531,43 @@ class LearningManager:
             "submitted_at": dt_util.now().isoformat(),
         }
 
-        self._feedback_history[cycle_id] = feedback_record
         self.profile_store.get_feedback_history()[cycle_id] = feedback_record
-
-        if user_confirmed:
+        
+        if dismiss:
+             # Just dismiss, no action
+             pass
+        elif user_confirmed:
             profile_name = pending.get("detected_profile")
             if isinstance(profile_name, str) and profile_name:
                 self._auto_label_cycle(cycle_id, profile_name)
         else:
             if isinstance(corrected_profile, str) and corrected_profile:
+                # corrected_duration is in minutes from UI, convert to seconds
+                duration_sec = corrected_duration * 60.0 if corrected_duration else None
+                
                 self._apply_correction_learning(
-                    cycle_id, corrected_profile, corrected_duration
+                    cycle_id, corrected_profile, duration_sec
                 )
-                self._auto_label_cycle(cycle_id, corrected_profile)
+                self._auto_label_cycle(cycle_id, corrected_profile, duration_sec)
 
-        del self._pending_feedback[cycle_id]
+        # Remove from pending (add_pending_feedback was wrapper, remove is direct)
         if cycle_id in self.profile_store.get_pending_feedback():
             del self.profile_store.get_pending_feedback()[cycle_id]
+        
+        # self.profile_store.remove_pending_feedback(cycle_id) # Redundant if we delete directly above
+
+        await self.profile_store.async_save()
 
         return True
 
-    def _auto_label_cycle(self, cycle_id: str, profile_name: str) -> None:
+    def _auto_label_cycle(self, cycle_id: str, profile_name: str, manual_duration: float | None = None) -> None:
         cycles = self.profile_store.get_past_cycles()
         cycle = next((c for c in cycles if c["id"] == cycle_id), None)
         if cycle:
             cycle["profile_name"] = profile_name
             cycle["auto_labeled"] = True
+            if manual_duration:
+                cycle["manual_duration"] = manual_duration
 
     def _apply_correction_learning(
         self,
@@ -530,11 +585,11 @@ class LearningManager:
 
     def get_pending_feedback(self) -> dict[str, dict[str, Any]]:
         """Return pending feedback requests."""
-        return dict(self._pending_feedback)
+        return dict(self.profile_store.get_pending_feedback())
 
     def get_feedback_history(self, limit: int = 20) -> list[dict[str, Any]]:
         """Return submitted feedback history."""
-        items = list(self._feedback_history.values())
+        items = list(self.profile_store.get_feedback_history().values())
         items.sort(key=lambda x: x.get("submitted_at", ""), reverse=True)
         return items[:limit]
 

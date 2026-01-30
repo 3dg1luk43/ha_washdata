@@ -39,6 +39,7 @@
     "step": {
       "init": {
         "menu_options": {
+          "learning_feedbacks": "Review Learning Feedbacks",
           "settings": "Settings",
           "manage_cycles": "Manage Cycles",
           "manage_profiles": "Manage Profiles",
@@ -354,8 +355,8 @@
           "json_payload": "Complete Configuration JSON"
         },
         "data_description": {
-          "mode": "Choose Export to copy current data and settings, or Import to paste exported data from another HA WashData device.",
-          "json_payload": "For Export: copy this JSON (includes cycles, profiles, and all fine-tuned settings). For Import: paste JSON exported from HA WashData."
+          "mode": "Choose Export to copy current data and settings, or Import to paste exported data from another WashData device.",
+          "json_payload": "For Export: copy this JSON (includes cycles, profiles, and all fine-tuned settings). For Import: paste JSON exported from WashData."
         }
       },
       "record_cycle": {
@@ -374,6 +375,27 @@
           "tail_trim": "Trim End (seconds)",
           "save_mode": "Save Destination",
           "profile_name": "Profile Name"
+        }
+      },
+      "learning_feedbacks": {
+        "title": "Learning Feedbacks",
+        "description": "Select a cycle review request to process.",
+        "data": {
+          "selected_feedback": "Select Cycle to Review"
+        }
+      },
+      "learning_feedbacks_empty": {
+        "title": "Learning Feedbacks",
+        "description": "No pending feedback requests found."
+      },
+      "resolve_feedback": {
+        "title": "Resolve Feedback",
+        "description": "**Detected Program**: {profile}\n**Confidence**: {confidence}%\n**Estimated**: {est}m, **Actual**: {act}m",
+        "data": {
+          "confirm": "Yes, the detection is correct",
+          "corrected_profile": "Correct Program",
+          "corrected_duration": "Correct Duration (minutes)",
+          "dismiss": "Dismiss notification (remove logic) - No machine learning update"
         }
       }
     },
@@ -403,6 +425,12 @@
           "auto_detect": "Auto-Detect"
         }
       }
+    }
+  },
+  "notification": {
+    "feedback_request": {
+      "title": "WashData: Verify Cycle ({device})",
+      "message": "**Device**: {device}\n**Program**: {program} ({confidence}% confidence)\n**Time**: {time}\n\nWashData needs your help to verify this detected cycle.\n\nPlease go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
     }
   }
 }

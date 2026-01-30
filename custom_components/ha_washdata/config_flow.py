@@ -240,15 +240,29 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None  # pylint: disable=unused-argument
     ) -> FlowResult:
         """Manage the options."""
+        # Check for pending feedbacks to show count
+        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        pending_count = len(manager.profile_store.get_pending_feedback())
+        
+        feedback_label = "Review Learning Feedbacks"
+        if pending_count > 0:
+            feedback_label = f"({pending_count}) Review Learning Feedbacks"
+
+        menu_options = {
+            "learning_feedbacks": feedback_label,
+            "settings": "Settings",
+            "manage_cycles": "Manage Cycles",
+            "manage_profiles": "Manage Profiles",
+            "record_cycle": "Record Cycle (Manual)",
+            "diagnostics": "Diagnostics & Maintenance",
+        }
+        
+        # If no pending, we can move it down or keep it. User requested moving it up.
+        # It is already at the top in this dict.
+
         return self.async_show_menu(
             step_id="init",
-            menu_options=[
-                "settings",
-                "manage_cycles",
-                "manage_profiles",
-                "record_cycle",
-                "diagnostics",
-            ],
+            menu_options=menu_options,
         )
 
     async def async_step_settings(
@@ -1597,8 +1611,8 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             # Calculate Total Energy (Avg * Count)
             total_kwh = "-"
             if envelope and envelope.get('avg_energy') is not None:
-                 t_kwh = envelope.get('avg_energy', 0) * count
-                 total_kwh = f"{t_kwh:.2f}"
+                t_kwh = envelope.get('avg_energy', 0) * count
+                total_kwh = f"{t_kwh:.2f}"
             
             std_dev = envelope.get("duration_std_dev", 0) if envelope else 0
             consistency = f"±{int(std_dev / 60)}m" if std_dev > 0 else "-"
@@ -2473,3 +2487,140 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                  "sampling_rate": str(sampling_rate)
              }
         )
+
+    async def async_step_learning_feedbacks(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Step: List pending learning feedbacks."""
+        if user_input is not None:
+             cycle_id = user_input.get("selected_feedback")
+             if cycle_id:
+                 self._selected_cycle_id = cycle_id
+                 return await self.async_step_resolve_feedback()
+
+        # Access profile_store from manager
+        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        profile_store = manager.profile_store
+        pending = profile_store.get_pending_feedback()
+
+        if not pending:
+            return self.async_show_form(
+                step_id="learning_feedbacks_empty",
+                data_schema=vol.Schema({}),
+                last_step=False,
+            )
+
+        options = []
+        # Sort by creation time (newest first)
+        sorted_pending = sorted(
+            pending.values(), 
+            key=lambda x: x.get("created_at", ""), 
+            reverse=True
+        )
+
+        for item in sorted_pending:
+            cid = item.get("cycle_id", "unknown")
+            prof = item.get("detected_profile", "Unknown")
+            conf = item.get("confidence", 0.0)
+            created_raw = item.get("created_at", "")
+            
+            # Formt timestamp: 2023-10-27T10:00... -> 27 Oct 10:00
+            t_str = str(created_raw)
+            if created_raw:
+                try:
+                    # Parse using HA util to be safe with timezones
+                    dt = dt_util.parse_datetime(str(created_raw))
+                    if dt:
+                        local_dt = dt_util.as_local(dt)
+                        # "27 Oct 10:00" - Short and readable
+                        t_str = local_dt.strftime("%d %b %H:%M")
+                except Exception:
+                    pass
+
+            # Format label
+            label = f"{prof} ({int(conf*100)}%) - {t_str}"
+            options.append(selector.SelectOptionDict(value=cid, label=label))
+
+        return self.async_show_form(
+            step_id="learning_feedbacks",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("selected_feedback"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=options,
+                            mode=selector.SelectSelectorMode.LIST,
+                        )
+                    )
+                }
+            ),
+        )
+
+    async def async_step_resolve_feedback(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Step: Resolve a specific feedback request."""
+        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        profile_store = manager.profile_store
+        pending = profile_store.get_pending_feedback()
+        
+        cycle_id = self._selected_cycle_id
+        if not cycle_id or cycle_id not in pending:
+            return self.async_abort(reason="feedback_not_found")
+
+        item = pending[cycle_id]
+
+        if user_input is not None:
+            # Process submission
+            confirmed = user_input.get("confirm", True)
+            new_profile = user_input.get("corrected_profile")
+            new_duration = user_input.get("corrected_duration")
+            
+            # Call learning manager
+            if hasattr(manager, "learning_manager"):
+                await manager.learning_manager.async_submit_cycle_feedback(
+                   cycle_id=cycle_id,
+                   user_confirmed=confirmed,
+                   corrected_profile=new_profile if not confirmed else None,
+                   corrected_duration=new_duration if not confirmed else None,
+                   dismiss=user_input.get("dismiss", False),
+                )
+            
+            # Return to main menu
+            return await self.async_step_init()
+
+        # Prepare form
+        detected_profile = item.get("detected_profile", "Unknown")
+        confidence = item.get("confidence", 0.0)
+        est = item.get("estimated_duration", 0)
+        act = item.get("actual_duration", 0)
+        
+        profiles = list(profile_store.get_profiles().keys())
+        profiles.sort()
+        
+        return self.async_show_form(
+            step_id="resolve_feedback",
+            description_placeholders={
+                "profile": detected_profile,
+                "confidence": str(int(confidence * 100)),
+                "est": str(int(est / 60)),
+                "act": str(int(act / 60)),
+            },
+            data_schema=vol.Schema(
+                {
+                    vol.Required("confirm", default=True): bool,
+                    vol.Optional("corrected_profile", default=detected_profile): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=profiles,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    ),
+                    vol.Optional("corrected_duration", default=int(act/60)): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=0, max=600, unit_of_measurement="min", mode=selector.NumberSelectorMode.BOX
+                        )
+                    ),
+                    vol.Optional("dismiss"): bool,
+                }
+            ),
+        )
+

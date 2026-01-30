@@ -534,6 +534,19 @@ class ProfileStore:
             return cast(dict[str, dict[str, Any]], raw)
         return {}
 
+    def add_pending_feedback(self, cycle_id: str, request_data: dict[str, Any]) -> None:
+        """Add a pending feedback request (sync wrapper, does not save immediately)."""
+        feedbacks = self.get_pending_feedback()
+        feedbacks[cycle_id] = request_data
+        # Caller must ensure save is called eventually
+
+    def remove_pending_feedback(self, cycle_id: str) -> None:
+        """Remove a pending feedback request."""
+        feedbacks = self.get_pending_feedback()
+        if cycle_id in feedbacks:
+            del feedbacks[cycle_id]
+
+
     def get_profile(self, name: str) -> JSONDict | None:
         """Return a single profile by name with calculated stats (via list_profiles)."""
         # Reuse list_profiles logic to ensure consistency and avoid duplication
@@ -1169,7 +1182,13 @@ class ProfileStore:
             values = [p[1] for p in pairs]
 
             raw_cycles_data.append((offsets, values))
-            durations.append(offsets[-1])
+            
+            # Use manual duration if available (e.g. from feedback correction)
+            man_dur = cycle.get("manual_duration")
+            if man_dur:
+                durations.append(float(man_dur))
+            else:
+                durations.append(offsets[-1])
 
         if not raw_cycles_data:
             return None
