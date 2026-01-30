@@ -98,6 +98,7 @@ from .const import (
     DEFAULT_AUTO_MAINTENANCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_MAX_PAST_CYCLES,
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
@@ -355,7 +356,10 @@ class WashDataManager:
             ),
             min_duration_ratio=float(
                 config_entry.options.get(
-                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO, 0.8
+                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER
+                    if self.device_type == "dishwasher"
+                    else DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
                 )
             ),
             match_interval=int(

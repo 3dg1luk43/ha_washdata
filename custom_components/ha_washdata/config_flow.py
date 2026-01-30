@@ -547,8 +547,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         # Specialized defaults for Dishwasher drying phase
         if current_device_type == "dishwasher":
             default_no_update_timeout = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_DISHWASHER
+            default_min_duration_ratio = (
+                DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER
+            )
         else:
             default_no_update_timeout = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT
+            default_min_duration_ratio = DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
 
         schema = {
             vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
@@ -608,6 +612,21 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     max=100.0,
                     step=0.5,
                     unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            # --- Deferral Logic ---
+            vol.Optional(
+                CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                default=get_val(
+                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                    default_min_duration_ratio,
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.5,
+                    max=1.0,
+                    step=0.01,
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),

@@ -97,9 +97,8 @@ DEFAULT_NOTIFY_BEFORE_END_MINUTES = 0  # Disabled
 DEFAULT_PROFILE_MATCH_INTERVAL = (
     300  # Seconds between profile matching attempts (5 minutes)
 )
-DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = (
-    0.07  # Minimum duration ratio (10% of profile) - hidden default
-)
+DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.90  # Default 90%
+DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER = 0.96  # Stricter for dishwashers
 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = (
     1.3  # Maximum duration ratio (130% of profile) - hidden default
 )

@@ -15,7 +15,7 @@ This release marks a complete re-engineering of the HA WashData core, transition
 **Verification Status**: Comprehensive logic review and validation of Detection, Matching, Switching, and Prediction logic completed (Jan 2026).
 
 
-### 🏗️ Core Architecture: Signal Processing & State Machine
+### Core Architecture: Signal Processing & State Machine
 - **New Signal Processing Engine** (`signal_processing.py`):
   - **Dt-Aware Integration**: Replaced simple averaging with trapezoidal Riemann sum integration (`integrate_wh`) that respects variable sampling intervals.
   - **Robust Smoothing**: Implemented `robust_smooth`, a hybrid algorithm combining a Median Filter (spike rejection) with a Time-Aware Exponential Moving Average (EMA) for clean trend detection.
@@ -27,7 +27,7 @@ This release marks a complete re-engineering of the HA WashData core, transition
   - **Dt-Aware Gating**: Start/End detection now uses accumulated time/energy gates (e.g., "energy since idle > X Wh") rather than sample counts, making it immune to sensor update frequency.
   - **Smart Pausing**: Distinguishes between "End of Cycle" and "Mid-Cycle Pause" using dynamic thresholds derived from the sensor's sampling cadence (`_p95_dt`).
 
-### 💾 Storage v2 & Migration
+### Storage v2 & Migration
 - **Profile Store v2** (`profile_store.py`):
   - **New Schema**: Introduced a versioned storage schema (v2) optimized for performance.
   - **Trace Compression**: Historical power traces are now compressed using relative time deltas, significantly reducing disk usage.
