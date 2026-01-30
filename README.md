@@ -167,6 +167,13 @@ To see the beautiful status card on your dashboard:
 
 ## Services
 
+### Learning & Feedback
+
+The integration now features an interactive **Learning Feedback** system.
+- When a cycle is detected with moderate confidence, "WashData" may ask for verification.
+- A notification will guide you to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks**.
+- There, you can **Confirm**, **Correct**, or **Dismiss** the detection. Corrected data is used to retrain the specific profile's duration model.
+
 ### Profile & Cycle Management
 
 **`ha_washdata.label_cycle`**: Assign a profile to a historical cycle.

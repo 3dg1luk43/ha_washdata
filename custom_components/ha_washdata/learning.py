@@ -383,8 +383,8 @@ class LearningManager:
 
             notification_id = f"ha_washdata_feedback_{self.entry_id}_{cycle_id}"
             
-            # Load translations
-            # We must load specific category 'notification' if we put it there
+            # Load translations (from en.json / localization files)
+            # We use "notification" category which we manually put in en.json (not strings.json)
             translations = await translation.async_get_translations(
                 self.hass, self.hass.config.language, "notification", {DOMAIN}
             )
@@ -423,7 +423,6 @@ class LearningManager:
                 "create",
                 {
                     "message": message,
-                    "title": title,
                     "notification_id": notification_id,
                 },
             )

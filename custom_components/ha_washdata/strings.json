@@ -426,11 +426,5 @@
         }
       }
     }
-  },
-  "notification": {
-    "feedback_request": {
-      "title": "WashData: Verify Cycle ({device})",
-      "message": "**Device**: {device}\n**Program**: {program} ({confidence}% confidence)\n**Time**: {time}\n\nWashData needs your help to verify this detected cycle.\n\nPlease go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
-    }
   }
 }
