@@ -384,9 +384,9 @@ class LearningManager:
             notification_id = f"ha_washdata_feedback_{self.entry_id}_{cycle_id}"
             
             # Load translations (from en.json / localization files)
-            # We use "notification" category which we manually put in en.json (not strings.json)
+            # We use "options" category to access the error keys where we stored these strings
             translations = await translation.async_get_translations(
-                self.hass, self.hass.config.language, "notification", {DOMAIN}
+                self.hass, self.hass.config.language, "options", {DOMAIN}
             )
             
             # Default templates
@@ -400,10 +400,10 @@ class LearningManager:
             )
             
             title_template = translations.get(
-                f"component.{DOMAIN}.notification.feedback_request.title", default_title
+                f"component.{DOMAIN}.options.error.feedback_notification_title", default_title
             )
             msg_template = translations.get(
-                f"component.{DOMAIN}.notification.feedback_request.message", default_msg
+                f"component.{DOMAIN}.options.error.feedback_notification_message", default_msg
             )
             
             # Confidence as percentage
@@ -423,6 +423,7 @@ class LearningManager:
                 "create",
                 {
                     "message": message,
+                    "title": title,
                     "notification_id": notification_id,
                 },
             )

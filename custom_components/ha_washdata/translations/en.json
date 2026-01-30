@@ -405,10 +405,11 @@
     },
     "error": {
       "import_failed": "Import failed. Please paste a valid HA WashData export JSON.",
-      "empty_name": "Profile name cannot be empty",
       "profile_exists": "A profile with this name already exists",
       "rename_failed": "Failed to rename profile. Profile may not exist or new name is already taken.",
-      "assignment_failed": "Failed to assign profile to cycle"
+      "assignment_failed": "Failed to assign profile to cycle",
+      "feedback_notification_title": "WashData: Verify Cycle ({device})",
+      "feedback_notification_message": "**Device**: {device}\n**Program**: {program} ({confidence}% confidence)\n**Time**: {time}\n\nWashData needs your help to verify this detected cycle.\n\nPlease go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
     },
     "abort": {
       "no_cycles_found": "No cycles found",
@@ -429,12 +430,6 @@
           "auto_detect": "Auto-Detect"
         }
       }
-    }
-  },
-  "notification": {
-    "feedback_request": {
-      "title": "WashData: Verify Cycle ({device})",
-      "message": "**Device**: {device}\n**Program**: {program} ({confidence}% confidence)\n**Time**: {time}\n\nWashData needs your help to verify this detected cycle.\n\nPlease go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
     }
   }
 }
