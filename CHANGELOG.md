@@ -18,6 +18,17 @@ This release marks a complete re-engineering of the HA WashData core, transition
 
 Thank you to everyone who has been patient during development and to all contributors who provided invaluable feedback, bug reports, and feature suggestions. This release wouldn't be possible without you!
 
+> [!IMPORTANT]
+> **Fresh Start Recommended**
+> 
+> This release includes significant changes to how cycles are detected and profiles are matched. The new engine depends on **clean, accurate data** to work properly.
+> 
+> If you're unsure whether your previously recorded cycles were captured correctly (e.g., cycles that ended prematurely, incorrectly merged fragments, or noisy data from before tuning your thresholds), we recommend:
+> 1. **Delete your existing cycle history** via Configure → Manage Cycles → Delete All
+> 2. **Use the new "Record Cycle" feature** to capture fresh, clean training data for each program you use
+> 
+> This ensures the best possible matching accuracy with the new architecture.
+
 
 ### Core Architecture: Signal Processing & State Machine
 - **New Signal Processing Engine** (`signal_processing.py`):
