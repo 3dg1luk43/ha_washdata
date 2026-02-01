@@ -6,6 +6,7 @@ import dataclasses
 import hashlib
 import logging
 import os
+import re
 from datetime import datetime, timedelta
 from typing import Any, TypeAlias, cast
 import json
@@ -32,6 +33,14 @@ _LOGGER = logging.getLogger(__name__)
 
 JSONDict: TypeAlias = dict[str, Any]
 CycleDict: TypeAlias = dict[str, Any]
+
+
+def profile_sort_key(name: str) -> tuple[int, int, str]:
+    """Sort key for profile names: numeric-prefixed first (by number), then alphabetically."""
+    match = re.match(r'^(\d+)', str(name))
+    if match:
+        return (0, int(match.group(1)), name)
+    return (1, 0, str(name))
 
 
 
@@ -1911,7 +1920,7 @@ class ProfileStore:
                     "avg_energy": avg_energy,
                 }
             )
-        return sorted(profiles, key=lambda p: str(p.get("name", "")))
+        return sorted(profiles, key=lambda p: profile_sort_key(p.get("name", "")))
 
     async def create_profile_standalone(
         self,

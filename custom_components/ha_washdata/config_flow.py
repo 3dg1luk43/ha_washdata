@@ -101,6 +101,7 @@ from .const import (
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER,
 )
+from .profile_store import profile_sort_key
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -2407,7 +2408,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
 
         # Profile options
         profiles = list(manager.profile_store.get_profiles().keys())
-        profiles.sort()
+        profiles.sort(key=profile_sort_key)
 
         schema = {
             vol.Required("head_trim", default=head_suggest): selector.NumberSelector(
@@ -2591,7 +2592,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         act = item.get("actual_duration", 0)
         
         profiles = list(profile_store.get_profiles().keys())
-        profiles.sort()
+        profiles.sort(key=profile_sort_key)
         
         # Action options
         action_options = [
