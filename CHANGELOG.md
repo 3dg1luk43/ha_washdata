@@ -7,12 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.0] - 2026-01-12
 
-
 **Major Architectural Rewrite ("vNext")**
 
 This release marks a complete re-engineering of the HA WashData core, transitioning from simple heuristics to a rigorous signal processing pipeline and robust state machine. While the version number is minor, this is effectively a new engine under the hood.
 
-**Verification Status**: Comprehensive logic review and validation of Detection, Matching, Switching, and Prediction logic completed (Jan 2026).
+🎉 **Milestones Reached!**
+- HA WashData is now available in the **HACS Default Repository**!
+- Passed **1,000 active installations** across the community.
+- Reached **500+ stars** on GitHub.
+
+Thank you to everyone who has been patient during development and to all contributors who provided invaluable feedback, bug reports, and feature suggestions. This release wouldn't be possible without you!
 
 
 ### Core Architecture: Signal Processing & State Machine
@@ -40,6 +44,8 @@ This release marks a complete re-engineering of the HA WashData core, transition
 - **Auto-Labeling**: Increased default confidence threshold to **0.75** (from 0.70) to leverage the improved accuracy of the new engine.
 - **Diagnostic Sensors**: Added dynamic diagnostic sensors for each profile (e.g., `sensor.washdata_..._profile_cotton_count`) showing the total cycle count properly.
 - **Statistics**: Added "Total Energy" column to the Profile Statistics table, showing the cumulative energy consumed for each profile.
+- **Low-Rate Polling Support**: Optimized default settings for devices with 30-60s update intervals (e.g., Shelly Cloud, Tuya), including a 30s watchdog and 180s off-delay.
+- **User Experience**: moved "Review Learned Feedbacks" to the main menu (bottom) for easier access, and removed confusing options.
 
 ### 🛠️ Technical Improvements
 - **Logging**: Added more granular `termination_reason` logging (e.g., `smart`, `timeout`, `force_stopped`) to `cycle_detector` and `profile_store`.
@@ -52,12 +58,11 @@ This release marks a complete re-engineering of the HA WashData core, transition
 - **Premature Termination & Dishwasher Logic**: Major robustness improvements for dishwashers.
   - Implemented "Verified Pause" logic to prevent early termination during long drying phases.
   - Added "End Spike Wait Period": Dishwashers now wait up to 5 extra minutes after expected duration to capture final pump-out spikes.
-  - Increased Smart Termination duration ratio to **0.99** for dishwashers to be more conservative.
-- **Ghost Cycles**: Enhanced filtering of short "noise" events.
+  - Increased Smart Termination duration ratio to **0.99** (from 96%) to ensure strictly conservative termination for dishwashers.
+- **Ghost Cycles**: Enhanced filtering and elimination of false detection.
+  - **Persistent Suppression**: The "Suspicious Window" (20 min) now persists across restarts (restoring `last_cycle_end`), preventing end-spikes from triggering ghosts after reboots.
+  - **Tail Preservation**: Disabled "zero trimming" for confirmed completed cycles, preventing the "profile shrinking" feedback loop where tails were lost.
   - Implemented `completion_min_seconds` logic to ignore brief spikes.
-  - Refined "Ghost Cycle Suppressor" with a **20-min "Suspicious Window"** to only suppress short cycles if they occur shortly after a previous cycle, preventing false positives on legitimate quick consecutive runs.
-- **Profile Learning**: Fixed a feedback loop where trimming silent tails caused profiles to shrink over time.
-  - Now preserves the trailing silence (and end spikes) for all natural cycle completions, ensuring the full duration is learned.
 - **Start/End Flutter**: Start debounce and End repeat counts are now configurable and backed by robust accumulators, eliminating false starts/ends.
 - **Cycle Detector**: Adjusted duration validation logic to strict 90%-125% window for completion.
 - **Translations**: Fixed "intl string context variable not provided" errors in logs by properly passing placeholders to translation engine.
@@ -69,6 +74,16 @@ This release marks a complete re-engineering of the HA WashData core, transition
 - **Validation**: Fixed missing `dtw_bandwidth` key in `strings.json` causing config flow validation errors.
 - **Maintenance Safety**: Fixed aggressive cleanup logic that was deleting empty/new profiles (pending training); these are now safely preserved.
 - **Test Suite**: Fixed verification tests for Smart Termination and Profile Store matching.
+
+### 📚 Documentation
+- **Visual Settings Guide**: Expanded `SETTINGS_VISUALIZED.md` with comprehensive documentation for 20+ parameters, organized into logical sections (Signal Conditioning, Detection, Matching, Integrity, Interruption, Learning, Notifications).
+- **Complete Parameter Coverage**: All advanced settings now documented with explanations, including `sampling_interval`, `watchdog_interval`, `profile_match_threshold`, `duration_tolerance`, `learning_confidence`, `auto_label_confidence`, and `abrupt_drop_ratio`.
+
+### 🧹 Cleanup & Removals
+- **Removed `auto_merge_gap_seconds`**: This setting was never used in the actual merge logic; removed from code, config flow, and translations.
+- **Removed `auto_merge_lookback_hours`**: Similar unused legacy setting removed from codebase and UI.
+- **Fixed Unused Imports**: Cleaned up unused `DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO` and duplicate import warnings.
+- **Fixed F-String Warning**: Removed empty f-string in config_flow post-process step.
 
 ### ⚠️ Deprecations
 - **Legacy Logic**: Removed "consecutive samples" based detection in favor of time-aware accumulators.

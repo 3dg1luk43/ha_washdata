@@ -515,6 +515,7 @@ ProfileStore.async_run_maintenance()
 - **End Spike Wait Period**: Even if the duration is met, the system scans the "Ending" state for a high-power spike.
 - If no spike is found, it **waits up to 5 extra minutes** past the expected duration to catch it.
 - **Ghost Cycle Suppression**: A "Suspicious Window" (20 mins) protects legitimate short cycles. Aggressive ghost cycle termination (10 min timeout) only applies if a cycle starts within 20 mins of the previous one ending.
+- **Persistence**: This 20-minute window logic persists across Home Assistant restarts by restoring `_last_cycle_end_time` from the persistent `profile_store`, ensuring protection isn't lost after a reboot.
 - **Tail Preservation**: The profile store now explicitly preserves trailing silence/spikes for natural completions, preventing the "profile shrinking" feedback loop where frequent early terminations made the learned profile shorter and shorter.
  
 

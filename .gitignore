@@ -17,3 +17,4 @@ server.log
 devtools/mock_socket_config.json
 devtools/uploaded_cycles
 cycle_data
+devtools/generate_docs_graphs.py
