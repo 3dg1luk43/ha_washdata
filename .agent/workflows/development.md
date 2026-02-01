@@ -9,7 +9,8 @@ description: HA WashData development workflow - project scope, architecture, and
 **Purpose**: Home Assistant custom integration monitoring washing machines, dryers, dishwashers, and coffee machines via smart sockets (power readings). Uses NumPy-powered shape correlation matching to detect cycle programs and estimate completion times.
 
 **Repository**: `/root/ha_washdata`
-**Version**: 0.3.2 (as of Jan 2026)
+**Version**: 0.4.0 (as of Feb 2026)
+**Status**: Available in HACS Default Repository, 1000+ installations, 500+ GitHub stars
 
 ---
 
@@ -56,11 +57,12 @@ description: HA WashData development workflow - project scope, architecture, and
 │                    Home Assistant Integration                │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌──────────────────────────────────────────────────────┐   │
-│  │            WashDataManager (manager.py ~104KB)       │   │
+│  │            WashDataManager (manager.py ~110KB)       │   │
 │  │ • Power sensor event handling                        │   │
 │  │ • Progress tracking & idle-based reset               │   │
 │  │ • Feedback requests & notifications                  │   │
 │  │ • Watchdog timer for stuck cycles                    │   │
+│  │ • External end trigger support                       │   │
 │  └──────────────────────────────────────────────────────┘   │
 │           ↓                              ↓                   │
 │  ┌──────────────────┐        ┌──────────────────────────┐   │
@@ -74,13 +76,13 @@ description: HA WashData development workflow - project scope, architecture, and
 │  └──────────────────┘        └──────────────────────────┘   │
 │           ↓                              ↓                   │
 │  ┌──────────────────────────────────────────────────────┐   │
-│  │         ProfileStore (profile_store.py ~88KB)        │   │
+│  │         ProfileStore (profile_store.py ~108KB)       │   │
 │  │                                                        │   │
 │  │ • Multi-stage matching pipeline:                      │   │
 │  │   Stage 1: Fast Reject (duration/energy/signature)   │   │
 │  │   Stage 2: Core Similarity (MAE+Correlation+Peak)    │   │
 │  │   Stage 3: DTW-Lite tie-break (Sakoe-Chiba band)     │   │
-│  │ • Cycle compression & storage                         │   │
+│  │ • Cycle compression & storage (v2 schema)            │   │
 │  │ • Profile CRUD operations                             │   │
 │  └──────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
@@ -92,14 +94,16 @@ description: HA WashData development workflow - project scope, architecture, and
 
 | File | Purpose | Size |
 |------|---------|------|
-| `manager.py` | Main orchestrator, power event handling, progress tracking | ~104KB |
-| `profile_store.py` | Storage, compression, NumPy matching pipeline | ~88KB |
-| `config_flow.py` | Configuration wizard, options flow, all UI steps | ~65KB |
-| `cycle_detector.py` | State machine (OFF→STARTING→RUNNING↔PAUSED→ENDING→OFF) | ~20KB |
-| `const.py` | All constants, config keys, defaults | ~8KB |
-| `learning.py` | User feedback processing, profile duration learning | ~10KB |
+| `manager.py` | Main orchestrator, power event handling, progress tracking | ~110KB |
+| `profile_store.py` | Storage v2, compression, NumPy matching pipeline | ~108KB |
+| `config_flow.py` | Configuration wizard, options flow, all UI steps | ~105KB |
+| `cycle_detector.py` | State machine (OFF→STARTING→RUNNING↔PAUSED→ENDING→OFF) | ~36KB |
+| `learning.py` | User feedback processing, profile duration learning | ~23KB |
+| `__init__.py` | Entry point, setup, migration logic | ~25KB |
+| `sensor.py` | All sensor entity definitions | ~15KB |
+| `analysis.py` | Feature extraction and analysis utilities | ~15KB |
+| `const.py` | All constants, config keys, defaults | ~10KB |
 | `signal_processing.py` | dt-aware integration, resampling, smoothing | ~8KB |
-| `features.py` | Phase/event extraction for matching | ~7KB |
 
 ---
 
@@ -116,6 +120,8 @@ OFF → STARTING → RUNNING ↔ PAUSED → ENDING → OFF
 - `end_energy_threshold`: Max Wh during off_delay to confirm end
 - `off_delay`: Seconds below threshold before completing
 - `min_off_gap`: Minimum OFF time before new cycle can start
+- `running_dead_zone`: Ignore power dips in first N seconds after start
+- `end_repeat_count`: Consecutive low readings before ending
 
 ### Status Classification
 - ✓ `completed`: Natural finish after off_delay
@@ -128,7 +134,7 @@ OFF → STARTING → RUNNING ↔ PAUSED → ENDING → OFF
 ## Profile Matching Pipeline
 
 ### Stage 1: Fast Reject
-- Duration ratio filter (0.75x - 1.25x)
+- Duration ratio filter (configurable min/max ratios)
 - Energy delta check (>50% = reject)
 - Signature mismatch (event density, time-to-first-high)
 
@@ -142,6 +148,12 @@ OFF → STARTING → RUNNING ↔ PAUSED → ENDING → OFF
 - Sakoe-Chiba band constraint (O(T*band) complexity)
 - Only runs when margin < ambiguity threshold
 - Normalized series (z-score) before comparison
+
+### Key Matching Parameters
+- `profile_match_threshold`: Minimum score to accept match (default: 0.4)
+- `profile_unmatch_threshold`: Score below which to reject mid-cycle (default: 0.35)
+- `profile_duration_tolerance`: Duration band for matching (default: 0.25 = ±25%)
+- `profile_match_interval`: Seconds between match attempts (default: 300)
 
 ---
 
@@ -185,29 +197,24 @@ Before any PR:
 6. [ ] Event data < 32KB (exclude power_data from events)
 7. [ ] Migration is idempotent if schema changed
 8. [ ] Deprecated code removed (not kept alongside new)
+9. [ ] All removed settings also removed from localization files
 
 ---
 
-## Known Issues / Technical Debt
+## Removed/Deprecated Settings (Do Not Use)
 
-See `.dev_notes/` for detailed tracking:
-- `fix_notes.md`: Core architecture checklist
-- `fix_note2.md`: vNext compliance status
-- `fix_notes3.md`: Outstanding bugs and cleanup items
-- `vNext_plan.md`: Full implementation specification
-
-### Priority Items
-1. Remove deprecated Smart Extension logic
-2. Remove deprecated constants from `const.py`
-3. Ensure per-device defaults don't leak dicts into Options schema
-4. Gate predictive end when ambiguous match
+These settings have been removed from the codebase and should NOT be re-added:
+- `auto_merge_gap_seconds` - Never used in actual logic
+- `auto_merge_lookback_hours` - Never used in actual logic
+- Legacy slider-based inputs (replaced with text boxes)
+- Sample-count based detection (replaced with dt-aware accumulators)
 
 ---
 
 ## Documentation References
 
-- `README.md`: User guide, installation, basic usage
+- `README.md`: User guide, installation, basic usage, screenshots
+- `SETTINGS_VISUALIZED.md`: Visual explainers for all 20+ parameters
 - `IMPLEMENTATION.md`: Architecture, features, key classes
 - `TESTING.md`: Mock socket guide, test procedures, debugging
-- `CHANGELOG.md`: Release history
-- `.github/copilot-instructions.md`: AI assistant quick reference
+- `CHANGELOG.md`: Release history (current: 0.4.0)

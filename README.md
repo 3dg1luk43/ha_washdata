@@ -125,6 +125,43 @@ If "Auto-Detect" isn't working perfectly, use **Advanced Settings** to tune the 
 - 📗 **[IMPLEMENTATION.md](IMPLEMENTATION.md)** - Deep dive into NumPy matching, State Machine logic, and Learning algorithms.
 - 🧪 **[TESTING.md](TESTING.md)** - How to test with the virtual socket.
 
+<details>
+<summary>📸 <b>Screenshots</b> (Click to expand)</summary>
+
+#### Devices Overview
+All your WashData-monitored appliances appear as devices with sensors and controls.
+![Devices](doc/images/devices.png)
+
+#### Main Menu
+The central hub for managing your appliance - access all features from here.
+![Main Menu](doc/images/main_menu.png)
+
+#### Basic Settings
+Configure power sensor, device type, off delay, and notification preferences.
+![Settings](doc/images/settings.png)
+
+#### Advanced Settings
+Fine-tune detection thresholds, matching parameters, and timeout values for your specific appliance.
+![Advanced Settings](doc/images/advanced_settings.png)
+
+#### Manage Profiles
+View, create, edit, or delete learned power profiles for different wash programs.
+![Manage Profiles](doc/images/manage_profiles.png)
+
+#### Manage Cycles
+Browse cycle history, label unknown cycles, merge fragments, or delete bad data.
+![Manage Cycles](doc/images/manage_cycles.png)
+
+#### Review Feedback
+Confirm or correct the system's profile matches to improve learning accuracy.
+![Review Feedback](doc/images/review_feedback.png)
+
+#### Diagnostics & Maintenance
+Run database cleanup, repair corrupted data, and export/import configurations.
+![Diagnostics & Maintenance](doc/images/diagnostics_maintenance.png)
+
+</details>
+
 ### Entities Provided
 - **`sensor.<name>_state`**: Current Status (Idle, Running, Detecting...).
 - **`sensor.<name>_program`**: Best-matched Profile Name.
