@@ -18,8 +18,8 @@ CONF_START_DURATION_THRESHOLD = (
 )
 CONF_DEVICE_TYPE = "device_type"
 CONF_PROFILE_DURATION_TOLERANCE = "profile_duration_tolerance"
-CONF_AUTO_MERGE_LOOKBACK_HOURS = "auto_merge_lookback_hours"
-CONF_AUTO_MERGE_GAP_SECONDS = "auto_merge_gap_seconds"
+
+
 CONF_INTERRUPTED_MIN_SECONDS = "interrupted_min_seconds"  # Internal use only
 CONF_PROGRESS_RESET_DELAY = "progress_reset_delay"
 CONF_LEARNING_CONFIDENCE = "learning_confidence"
@@ -75,17 +75,16 @@ DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE = "{device}: Less than {minutes} minutes rem
 
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts
-DEFAULT_OFF_DELAY = 120  # Seconds (2 minutes, like proven automation)
+DEFAULT_OFF_DELAY = 180  # Seconds (3 minutes, safer for 60s polling)
 DEFAULT_NAME = "Washing Machine"
 # Seconds without updates while active before forced stop (publish-on-change sockets)
-DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 300  # 5 minutes
+DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 600  # 10 minutes
 DEFAULT_SMOOTHING_WINDOW = 2
-DEFAULT_SAMPLING_INTERVAL = 2.0  # Seconds
+DEFAULT_SAMPLING_INTERVAL = 30.0  # Seconds
 DEFAULT_START_DURATION_THRESHOLD = 5.0  # Seconds (debounce)
 DEFAULT_DEVICE_TYPE = "washing_machine"
 DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
-DEFAULT_AUTO_MERGE_LOOKBACK_HOURS = 3
-DEFAULT_AUTO_MERGE_GAP_SECONDS = 250  # Seconds (merge nearby fragments)
+
 DEFAULT_INTERRUPTED_MIN_SECONDS = 150  # Internal use only, not exposed
 DEFAULT_PROGRESS_RESET_DELAY = 150  # Seconds (~2.5 minutes unload window)
 DEFAULT_LEARNING_CONFIDENCE = 0.6  # Minimum confidence to request user verification
@@ -97,15 +96,15 @@ DEFAULT_NOTIFY_BEFORE_END_MINUTES = 0  # Disabled
 DEFAULT_PROFILE_MATCH_INTERVAL = (
     300  # Seconds between profile matching attempts (5 minutes)
 )
-DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.90  # Default 90%
-DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER = 0.96  # Stricter for dishwashers
+DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.10  # Allow match after 20% of expected duration
+DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER = 0.10  # Same for dishwashers (termination has separate logic)
 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = (
     1.3  # Maximum duration ratio (130% of profile) - hidden default
 )
 DEFAULT_MAX_PAST_CYCLES = 200
 DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
-DEFAULT_WATCHDOG_INTERVAL = 5  # Derived: 2 * sampling_interval + 1
+DEFAULT_WATCHDOG_INTERVAL = 30  # Derived: 2 * sampling_interval + 1
 DEFAULT_RUNNING_DEAD_ZONE = 3  # Seconds after start to ignore power dips
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
 

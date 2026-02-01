@@ -470,11 +470,44 @@ class CycleDetector:
             self._power_readings.append((timestamp, power))
 
             if is_high:
-                # End spike detected! Mark it before resuming
+                # End spike detected! Mark it
                 self._end_spike_seen = True
                 _LOGGER.debug("End spike detected (power high in ENDING state)")
-                # Resume -> RUNNING
-                self._transition_to(STATE_RUNNING, timestamp)
+                
+                # Check if we're past expected duration - if so, DON'T resume to RUNNING
+                # This prevents the cycle from bouncing forever on pump-out spikes
+                start_time = self._current_cycle_start or timestamp
+                current_duration = (timestamp - start_time).total_seconds()
+                
+                # Sanity check: if expected_duration is unreasonable (>6 hours), use fallback
+                max_reasonable = 21600.0  # 6 hours
+                effective_expected = self._expected_duration
+                
+                if effective_expected <= 0 or effective_expected > max_reasonable:
+                    # Fallback: use current duration + buffer if we've run > 3 hours
+                    # (Assumes any cycle over 3 hours running is near completion when in ENDING)
+                    if current_duration > 10800:  # 3 hours
+                        effective_expected = current_duration * 0.99  # Always past threshold
+                        _LOGGER.debug(
+                            "End spike check using fallback: expected_duration=%ds is unreasonable, "
+                            "using current_duration=%ds as reference",
+                            int(self._expected_duration), int(current_duration)
+                        )
+                
+                past_expected = (
+                    effective_expected > 0 
+                    and current_duration >= (effective_expected * 0.98)
+                )
+                
+                if past_expected:
+                    _LOGGER.debug(
+                        "End spike ignored for state transition (past expected duration %.0fs/%.0fs)",
+                        current_duration, effective_expected
+                    )
+                    # Stay in ENDING, the spike is recorded but doesn't resume cycle
+                else:
+                    # Resume -> RUNNING (spike is genuine mid-cycle activity)
+                    self._transition_to(STATE_RUNNING, timestamp)
             else:
                 # Periodic profile matching during ending
                 self._try_profile_match(timestamp)

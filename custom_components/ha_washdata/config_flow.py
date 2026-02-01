@@ -34,8 +34,6 @@ from .const import (
     CONF_START_DURATION_THRESHOLD,
     CONF_DEVICE_TYPE,
     CONF_PROFILE_DURATION_TOLERANCE,
-    CONF_AUTO_MERGE_LOOKBACK_HOURS,
-    CONF_AUTO_MERGE_GAP_SECONDS,
     CONF_APPLY_SUGGESTIONS,
     CONF_SHOW_ADVANCED,
     CONF_PROGRESS_RESET_DELAY,
@@ -67,10 +65,7 @@ from .const import (
     DEFAULT_DEVICE_TYPE,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEVICE_TYPES,
-    DEFAULT_AUTO_MERGE_LOOKBACK_HOURS,
-    DEFAULT_AUTO_MERGE_GAP_SECONDS,
     DEFAULT_PROGRESS_RESET_DELAY,
-    DEFAULT_DURATION_TOLERANCE,
     DEFAULT_DURATION_TOLERANCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_AUTO_MAINTENANCE,
@@ -102,6 +97,9 @@ from .const import (
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER,
 )
 
 
@@ -249,16 +247,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             feedback_label = f"({pending_count}) Review Learning Feedbacks"
 
         menu_options = {
-            "learning_feedbacks": feedback_label,
             "settings": "Settings",
             "manage_cycles": "Manage Cycles",
             "manage_profiles": "Manage Profiles",
             "record_cycle": "Record Cycle (Manual)",
+            "learning_feedbacks": feedback_label,
             "diagnostics": "Diagnostics & Maintenance",
         }
         
-        # If no pending, we can move it down or keep it. User requested moving it up.
-        # It is already at the top in this dict.
+        # User requested feedback review to be near the bottom (above diagnostics)
 
         return self.async_show_menu(
             step_id="init",
@@ -452,9 +449,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     CONF_DURATION_TOLERANCE,
                     CONF_PROFILE_DURATION_TOLERANCE,
                     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
                     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                    CONF_AUTO_MERGE_GAP_SECONDS,
                     CONF_MIN_OFF_GAP,
                 ]
 
@@ -474,8 +469,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             CONF_WATCHDOG_INTERVAL,
                             CONF_NO_UPDATE_ACTIVE_TIMEOUT,
                             CONF_PROFILE_MATCH_INTERVAL,
-                            CONF_PROFILE_MATCH_INTERVAL,
-                            CONF_AUTO_MERGE_GAP_SECONDS,
+
                             CONF_MIN_OFF_GAP,
                         ):
                             updated_input[key] = int(float(val))
@@ -638,7 +632,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 ),
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
-                    min=0.5,
+                    min=0.1,
                     max=1.0,
                     step=0.01,
                     mode=selector.NumberSelectorMode.BOX,
@@ -738,18 +732,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     min=0.0, max=0.5, step=0.01, mode=selector.NumberSelectorMode.BOX
                 )
             ),
-            vol.Optional(
-                CONF_AUTO_MERGE_LOOKBACK_HOURS,
-                default=get_val(
-                    CONF_AUTO_MERGE_LOOKBACK_HOURS, DEFAULT_AUTO_MERGE_LOOKBACK_HOURS
-                ),
-            ): vol.Coerce(int),
-            vol.Optional(
-                CONF_AUTO_MERGE_GAP_SECONDS,
-                default=get_val(
-                    CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS
-                ),
-            ): vol.Coerce(int),
+
+
 
             vol.Optional(
                 CONF_WATCHDOG_INTERVAL,
@@ -825,9 +809,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "suggested_profile_match_max_duration_ratio": _fmt_suggested(
                     CONF_PROFILE_MATCH_MAX_DURATION_RATIO
                 ),
-                "suggested_auto_merge_gap_seconds": _fmt_suggested(
-                    CONF_AUTO_MERGE_GAP_SECONDS
-                ),
+
                 "suggested_reason": suggested_reason,
                 # Placeholders for keys in data_description
                 "device": "{device}",
@@ -2180,9 +2162,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                 description_placeholders={"count": msg},
             )
 
-        current_gap = self.config_entry.options.get(
-            CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS
-        )
+
 
         return self.async_show_form(
             step_id="post_process",
@@ -2196,23 +2176,12 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                             mode=selector.NumberSelectorMode.BOX,
                         )
                     ),
-                    vol.Required(
-                        "gap_seconds", default=current_gap
-                    ): selector.NumberSelector(
-                        selector.NumberSelectorConfig(
-                            min=10,
-                            max=3600,
-                            unit_of_measurement="s",
-                            mode=selector.NumberSelectorMode.BOX,
-                        )
-                    ),
+
                 }
             ),
             description_placeholders={
                 "info": (
                     f"Enter number of past hours to process (or use 999999 for all).\n\n"
-                    f"Current Gap Threshold: {current_gap}s. "
-                    "Lower this value to split incorrectly merged cycles."
                 )
             },
         )
@@ -2555,6 +2524,12 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             ),
         )
 
+    async def async_step_learning_feedbacks_empty(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Step: Handle empty feedback list (go back)."""
+        return await self.async_step_init()
+
     async def async_step_resolve_feedback(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -2570,20 +2545,41 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         item = pending[cycle_id]
 
         if user_input is not None:
-            # Process submission
-            confirmed = user_input.get("confirm", True)
-            new_profile = user_input.get("corrected_profile")
-            new_duration = user_input.get("corrected_duration")
+            # Process submission based on action
+            action = user_input.get("action", "confirm")
             
-            # Call learning manager
-            if hasattr(manager, "learning_manager"):
-                await manager.learning_manager.async_submit_cycle_feedback(
-                   cycle_id=cycle_id,
-                   user_confirmed=confirmed,
-                   corrected_profile=new_profile if not confirmed else None,
-                   corrected_duration=new_duration if not confirmed else None,
-                   dismiss=user_input.get("dismiss", False),
-                )
+            if action == "confirm":
+                # User confirms the detection was correct
+                if hasattr(manager, "learning_manager"):
+                    await manager.learning_manager.async_submit_cycle_feedback(
+                       cycle_id=cycle_id,
+                       user_confirmed=True,
+                       corrected_profile=None,
+                       corrected_duration=None,
+                       dismiss=False,
+                    )
+            elif action == "correct":
+                # User wants to correct the profile/duration
+                new_profile = user_input.get("corrected_profile")
+                new_duration = user_input.get("corrected_duration")
+                if hasattr(manager, "learning_manager"):
+                    await manager.learning_manager.async_submit_cycle_feedback(
+                       cycle_id=cycle_id,
+                       user_confirmed=False,
+                       corrected_profile=new_profile,
+                       corrected_duration=int(new_duration * 60) if new_duration else None,
+                       dismiss=False,
+                    )
+            elif action == "dismiss":
+                # User wants to dismiss/ignore this feedback request
+                if hasattr(manager, "learning_manager"):
+                    await manager.learning_manager.async_submit_cycle_feedback(
+                       cycle_id=cycle_id,
+                       user_confirmed=False,
+                       corrected_profile=None,
+                       corrected_duration=None,
+                       dismiss=True,
+                    )
             
             # Return to main menu
             return await self.async_step_init()
@@ -2597,6 +2593,13 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         profiles = list(profile_store.get_profiles().keys())
         profiles.sort()
         
+        # Action options
+        action_options = [
+            selector.SelectOptionDict(value="confirm", label="✓ Confirm (detection was correct)"),
+            selector.SelectOptionDict(value="correct", label="✎ Correct (change profile/duration)"),
+            selector.SelectOptionDict(value="dismiss", label="✕ Dismiss (ignore this feedback)"),
+        ]
+        
         return self.async_show_form(
             step_id="resolve_feedback",
             description_placeholders={
@@ -2607,7 +2610,12 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             },
             data_schema=vol.Schema(
                 {
-                    vol.Required("confirm", default=True): bool,
+                    vol.Required("action", default="confirm"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=action_options,
+                            mode=selector.SelectSelectorMode.LIST,
+                        )
+                    ),
                     vol.Optional("corrected_profile", default=detected_profile): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=profiles,
@@ -2619,7 +2627,6 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                             min=0, max=600, unit_of_measurement="min", mode=selector.NumberSelectorMode.BOX
                         )
                     ),
-                    vol.Optional("dismiss"): bool,
                 }
             ),
         )

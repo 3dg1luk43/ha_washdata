@@ -74,7 +74,7 @@
           "show_advanced": "Edit Advanced Settings (Next Step)"
         },
         "data_description": {
-          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
+          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "Select the type of appliance (Washing Machine, Dryer, Dishwasher, Coffee Machine). This tag is stored with each cycle for better organization.",
           "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data—useful if you replace a smart plug.",
           "min_power": "Power readings above this threshold (in watts) indicate the appliance is running. Start with 2W for most devices.",
@@ -111,8 +111,8 @@
           "profile_match_threshold": "Profile Match Threshold",
           "profile_unmatch_threshold": "Profile Unmatch Threshold",
           "profile_duration_tolerance": "Profile Match Duration Tolerance (0-0.5)",
-          "auto_merge_lookback_hours": "Auto-Merge Lookback Window (hours)",
-          "auto_merge_gap_seconds": "Auto-Merge Max Gap (seconds)",
+
+
           "interrupted_min_seconds": "Interrupted: Minimum Runtime (seconds)",
           "abrupt_drop_watts": "Interrupted: Abrupt Drop Absolute (W)",
           "abrupt_drop_ratio": "Interrupted: Abrupt Drop Ratio (0-1)",
@@ -136,7 +136,7 @@
           "external_end_trigger": "External Cycle End Sensor"
         },
         "data_description": {
-          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
+          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "Power must rise ABOVE this threshold to START a cycle. Set higher than your standby power. Default: min_power + 1 W.",
           "stop_threshold_w": "Power must fall BELOW this threshold to END a cycle. Set just above zero to avoid noise triggering false ends. Default: 0.6 * min_power.",
           "min_off_gap": "If a cycle starts within this many seconds of the previous one ending, they will be MERGED into a single cycle.",
@@ -154,8 +154,8 @@
           "profile_match_threshold": "Minimum DTW similarity score (0.0–1.0) required to consider a profile as a match. Higher = stricter matching, fewer false positives. Default: 0.4.",
           "profile_unmatch_threshold": "DTW similarity score (0.0–1.0) below which a previously matched profile is rejected. Should be lower than match threshold to prevent flickering. Default: 0.35.",
           "profile_duration_tolerance": "Tolerance used by profile matching for total duration variance (0.0–0.5). Default behavior: ±25%.",
-          "auto_merge_lookback_hours": "After a cycle, scan this many hours back to merge fragmented runs into a single cycle.",
-          "auto_merge_gap_seconds": "Maximum gap between fragments to merge during post-processing.",
+
+
           "interrupted_min_seconds": "Runs shorter than this may be classified as 'interrupted'.",
           "abrupt_drop_watts": "Absolute power drop (W) considered an abrupt cliff.",
           "abrupt_drop_ratio": "Relative drop ratio (0–1). Example: 0.6 means a 60% drop is abrupt.",
@@ -339,13 +339,9 @@
           "min_gap_seconds": "Split Gap Threshold (seconds)"
         }
       },
-      "migrate_data": {
-        "title": "Migrate Data Format",
-        "description": "Re-compress all saved cycle data to ensure it's in the latest format. This is safe and can be run multiple times."
-      },
       "reprocess_history": {
-        "title": "Reprocess History",
-        "description": "Rebuild all statistical models (envelopes) and re-calculate cycle signatures from raw stored data. Useful after updates or to fix stats.\n\n**This operation is non-destructive to raw data.**"
+        "title": "Maintenance: Reprocess & Optimize Data",
+        "description": "Performs deep cleaning of historical data:\n1. Trims zero-power readings (silence).\n2. Fixes cycle timing/duration.\n3. Recalculates all statistical models (envelopes).\n\n**Run this to fix data issues or apply new algorithms.**"
       },
       "wipe_history": {
         "title": "Wipe History (Testing Only)",
@@ -396,10 +392,9 @@
         "title": "Resolve Feedback",
         "description": "**Detected Program**: {profile}\n**Confidence**: {confidence}%\n**Estimated**: {est}m, **Actual**: {act}m",
         "data": {
-          "confirm": "Yes, the detection is correct",
-          "corrected_profile": "Correct Program",
-          "corrected_duration": "Correct Duration (minutes)",
-          "dismiss": "Dismiss notification (remove logic) - No machine learning update"
+          "action": "What would you like to do?",
+          "corrected_profile": "Correct Program (if correcting)",
+          "corrected_duration": "Correct Duration in minutes (if correcting)"
         }
       }
     },

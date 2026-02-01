@@ -33,8 +33,6 @@ from .const import (
     CONF_LOW_POWER_NO_UPDATE_TIMEOUT, # Import new constant
     CONF_SMOOTHING_WINDOW,
     CONF_PROFILE_DURATION_TOLERANCE,
-    CONF_AUTO_MERGE_LOOKBACK_HOURS,
-    CONF_AUTO_MERGE_GAP_SECONDS,
     CONF_INTERRUPTED_MIN_SECONDS,
     CONF_ABRUPT_DROP_WATTS,
     CONF_ABRUPT_DROP_RATIO,
@@ -80,8 +78,6 @@ from .const import (
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_SMOOTHING_WINDOW,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
-    DEFAULT_AUTO_MERGE_LOOKBACK_HOURS,
-    DEFAULT_AUTO_MERGE_GAP_SECONDS,
     DEFAULT_INTERRUPTED_MIN_SECONDS,
     DEFAULT_ABRUPT_DROP_WATTS,
     DEFAULT_ABRUPT_DROP_RATIO,
@@ -433,13 +429,8 @@ class WashDataManager:
         self._profile_duration_tolerance: float = float(
             config_entry.options.get("profile_duration_tolerance", 0.25)
         )
-        # Auto-merge controls
-        self._auto_merge_lookback_hours: int = int(
-            config_entry.options.get("auto_merge_lookback_hours", 3)
-        )
-        self._auto_merge_gap_seconds: int = int(
-            config_entry.options.get("auto_merge_gap_seconds", 1800)
-        )
+
+
         self._remove_maintenance_scheduler = None
         self._profile_sample_repair_stats: dict[str, int] | None = None
 
@@ -454,12 +445,19 @@ class WashDataManager:
         self, readings: list[tuple[datetime, float]]
     ) -> None:
         """PRIMARY matching task: Updates both Manager and Detector using best method."""
+        _LOGGER.debug(
+            "Matching trigger: readings=%d, task_exists=%s",
+            len(readings) if readings else 0,
+            getattr(self, "_matching_task", None) is not None
+        )
         # Prevent concurrent matching tasks
         if getattr(self, "_matching_task", None) and not self._matching_task.done():
+            _LOGGER.debug("Matching skipped: previous task still running")
             return
 
         try:
             if not readings:
+                _LOGGER.debug("Matching skipped: no readings")
                 return
 
             self._matching_task = self.hass.async_create_task(self._async_do_perform_matching(readings))
@@ -628,7 +626,7 @@ class WashDataManager:
             self._notify_update()
 
         except Exception as e:
-            _LOGGER.error("Perform combined matching failed: %s", e)
+            _LOGGER.error("Perform combined matching failed: %s", e, exc_info=True)
 
     @property
     def top_candidates(self) -> list[dict[str, Any]]:
@@ -890,6 +888,21 @@ class WashDataManager:
         # Attempt to restore state (BEFORE starting listener)
         await self._attempt_state_restoration()
 
+        # Restore last cycle end time to ensure ghost cycle suppression works after restart
+        try:
+            cycles = self.profile_store.get_past_cycles()
+            if cycles:
+                # Find last completed cycle with a valid end time
+                for cycle in reversed(cycles):
+                    if cycle.get("end_time") and cycle.get("status") == "completed":
+                        ts = dt_util.parse_datetime(cycle["end_time"])
+                        if ts:
+                            self._last_cycle_end_time = ts
+                            _LOGGER.debug("Restored last cycle end time: %s", ts)
+                            break
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Failed to restore last cycle end time")
+
         # Load recorder state
         await self.recorder.async_load()
 
@@ -1140,16 +1153,7 @@ class WashDataManager:
                 CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE
             )
         )
-        self._auto_merge_lookback_hours = int(
-            config_entry.options.get(
-                CONF_AUTO_MERGE_LOOKBACK_HOURS, DEFAULT_AUTO_MERGE_LOOKBACK_HOURS
-            )
-        )
-        self._auto_merge_gap_seconds = int(
-            config_entry.options.get(
-                CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS
-            )
-        )
+
 
         # Update notification settings
         self._notify_service = config_entry.options.get(CONF_NOTIFY_SERVICE)
