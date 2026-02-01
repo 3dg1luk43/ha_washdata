@@ -39,9 +39,11 @@
     "step": {
       "init": {
         "menu_options": {
+          "learning_feedbacks": "Review Learning Feedbacks",
           "settings": "Settings",
           "manage_cycles": "Manage Cycles",
           "manage_profiles": "Manage Profiles",
+          "record_cycle": "Record Cycle (Manual)",
           "diagnostics": "Diagnostics & Maintenance"
         }
       },
@@ -59,74 +61,32 @@
           "apply_suggestions": "Apply Suggested Values",
           "device_type": "Device Type",
           "power_sensor": "Power Sensor Entity",
-          "min_power": "Minimum Power Threshold (W)",
-          "start_duration_threshold": "Start Debounce Duration (s)",
+          "min_power": "Minimum Power (W)",
           "off_delay": "Cycle End Delay (s)",
-          "progress_reset_delay": "Progress Reset Delay (seconds)",
-          "no_update_active_timeout": "No-Update Timeout (s)",
-          "auto_label_confidence": "Auto-Label Confidence (0-1)",
-          "learning_confidence": "Feedback Request Confidence (0-1)",
-          "duration_tolerance": "Duration Tolerance (0-0.5)",
-          "profile_match_interval": "Profile Match Interval (seconds)",
-          "profile_match_min_duration_ratio": "Profile Match Min Duration Ratio (0.1-1.0)",
-          "profile_match_max_duration_ratio": "Profile Match Max Duration Ratio (1.0-3.0)",
           "notify_service": "Notification Service (e.g. notify.mobile_app)",
           "notify_events": "Events to Notify",
-          "smoothing_window": "Smoothing Window (samples)",
-          "profile_duration_tolerance": "Profile Match Duration Tolerance (0-0.5)",
-          "auto_merge_lookback_hours": "Auto-Merge Lookback Window (hours)",
-          "auto_merge_gap_seconds": "Auto-Merge Max Gap (seconds)",
-          "interrupted_min_seconds": "Interrupted: Minimum Runtime (seconds)",
-          "abrupt_drop_watts": "Interrupted: Abrupt Drop Absolute (W)",
-          "abrupt_drop_ratio": "Interrupted: Abrupt Drop Ratio (0-1)",
-          "abrupt_high_load_factor": "Interrupted: High-Load Factor",
-          "max_past_cycles": "Retention: Max Saved Cycles",
-          "max_full_traces_per_profile": "Retention: Max Full Traces per Profile",
-          "max_full_traces_unlabeled": "Retention: Max Full Traces Unlabeled",
-          "watchdog_interval": "Watchdog Interval (seconds)",
-          "completion_min_seconds": "Completion Minimum Runtime (seconds)",
           "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
-          "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
-          "running_dead_zone": "Running Dead Zone (seconds)",
-          "end_repeat_count": "End Repeat Count",
-          "auto_maintenance": "Enable Auto-Maintenance",
+          "notify_title": "Notification Title",
+          "notify_icon": "Notification Icon",
+          "notify_start_message": "Start Message Format",
+          "notify_finish_message": "Finish Message Format",
+          "notify_pre_complete_message": "Pre-Completion Message Format",
           "show_advanced": "Edit Advanced Settings (Next Step)"
         },
         "data_description": {
-          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
+          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "Select the type of appliance (Washing Machine, Dryer, Dishwasher, Coffee Machine). This tag is stored with each cycle for better organization.",
           "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data—useful if you replace a smart plug.",
-          "min_power": "Power threshold (watts) above which the appliance is considered running. Default: 2W.",
-          "start_duration_threshold": "Ignore brief power spikes shorter than this duration (seconds). Filters out boot spikes (e.g., 60W for 2s) before real cycle starts. Default: 5s.",
-          "off_delay": "Seconds the smoothed power must stay below the threshold to mark completion. Default: 120s.",
-          "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 300s.",
-          "no_update_active_timeout": "For publish-on-change sensors: only force-end an ACTIVE cycle if no updates arrive for this many seconds. Low-power completion still uses the Off Delay.",
-          "auto_label_confidence": "Automatically label cycles at or above this confidence on completion (0.0–1.0).",
-          "learning_confidence": "Minimum confidence to request user verification via an event (0.0–1.0).",
-          "duration_tolerance": "Tolerance for time-remaining estimates during a run (0.0–0.5 corresponds to 0–50%).",
-          "profile_match_interval": "How often (in seconds) to attempt profile matching during a cycle. Lower values provide faster detection but use more CPU. Default: 300s (5 minutes).",
-          "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.50 (50%).",
-          "profile_match_max_duration_ratio": "Maximum duration ratio for profile matching. Running cycle must not exceed this multiple of profile duration. Higher = more lenient. Default: 1.50 (150%).",
+          "min_power": "Power readings above this threshold (in watts) indicate the appliance is running. Start with 2W for most devices.",
+          "off_delay": "Seconds the smoothed power must stay below the stop threshold to mark completion. Default: 120s.",
           "notify_service": "Home Assistant notify service to use (optional).",
           "notify_events": "Which events to send notifications for.",
-          "smoothing_window": "Number of recent power readings used for moving-average smoothing.",
-          "profile_duration_tolerance": "Tolerance used by profile matching for total duration variance (0.0–0.5). Default behavior: ±25%.",
-          "auto_merge_lookback_hours": "After a cycle, scan this many hours back to merge fragmented runs into a single cycle.",
-          "auto_merge_gap_seconds": "Maximum gap between fragments to merge during post-processing.",
-          "interrupted_min_seconds": "Runs shorter than this may be classified as 'interrupted'.",
-          "abrupt_drop_watts": "Absolute power drop (W) considered an abrupt cliff.",
-          "abrupt_drop_ratio": "Relative drop ratio (0–1). Example: 0.6 means a 60% drop is abrupt.",
-          "abrupt_high_load_factor": "Factor above baseline considered 'high load' before an abrupt drop (used with abrupt detection).",
-          "max_past_cycles": "Total number of cycles to retain (oldest removed). Default: 200.",
-          "max_full_traces_per_profile": "Number of recent labeled cycles to keep with full power traces per profile. Older traces are summarized via envelopes. Default: 20.",
-          "max_full_traces_unlabeled": "Number of recent unlabeled cycles to keep with full power traces to support auto-labeling. Default: 20.",
-          "watchdog_interval": "Seconds between watchdog checks while running. Lower for faster stuck-cycle handling; higher to reduce overhead. Default: 5s.",
-          "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
           "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
-          "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3.",
-          "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
-          "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
-          "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy."
+          "notify_title": "Custom title for notifications. Supports {device} placeholder.",
+          "notify_icon": "Icon to use for notifications (e.g. mdi:washing-machine). Leave empty to use default.",
+          "notify_start_message": "Message sent when a cycle starts. Supports {device} placeholder.",
+          "notify_finish_message": "Message sent when a cycle finishes. Supports {device}, {duration}, {program} placeholders.",
+          "notify_pre_complete_message": "Message sent before completion. Supports {device}, {minutes} placeholders."
         }
       },
       "advanced_settings": {
@@ -134,10 +94,13 @@
         "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.",
         "data": {
           "apply_suggestions": "Apply Suggested Values",
+          "start_threshold_w": "Start Threshold (W)",
+          "stop_threshold_w": "Stop Threshold (W)",
+          "min_off_gap": "Min Gap Between Cycles (s)",
           "start_duration_threshold": "Start Debounce Duration (s)",
-          "off_delay": "Cycle End Delay (s)",
           "progress_reset_delay": "Progress Reset Delay (seconds)",
           "no_update_active_timeout": "No-Update Timeout (s)",
+          "sampling_interval": "Sampling Interval (s)",
           "auto_label_confidence": "Auto-Label Confidence (0-1)",
           "learning_confidence": "Feedback Request Confidence (0-1)",
           "duration_tolerance": "Duration Tolerance (0-0.5)",
@@ -145,9 +108,11 @@
           "profile_match_min_duration_ratio": "Profile Match Min Duration Ratio (0.1-1.0)",
           "profile_match_max_duration_ratio": "Profile Match Max Duration Ratio (1.0-3.0)",
           "smoothing_window": "Smoothing Window (samples)",
+          "profile_match_threshold": "Profile Match Threshold",
+          "profile_unmatch_threshold": "Profile Unmatch Threshold",
           "profile_duration_tolerance": "Profile Match Duration Tolerance (0-0.5)",
-          "auto_merge_lookback_hours": "Auto-Merge Lookback Window (hours)",
-          "auto_merge_gap_seconds": "Auto-Merge Max Gap (seconds)",
+
+
           "interrupted_min_seconds": "Interrupted: Minimum Runtime (seconds)",
           "abrupt_drop_watts": "Interrupted: Abrupt Drop Absolute (W)",
           "abrupt_drop_ratio": "Interrupted: Abrupt Drop Ratio (0-1)",
@@ -161,15 +126,24 @@
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
           "running_dead_zone": "Running Dead Zone (seconds)",
           "end_repeat_count": "End Repeat Count",
+          "start_energy_threshold": "Start Energy Gate (Wh)",
+          "end_energy_threshold": "End Energy Gate (Wh)",
           "auto_maintenance": "Enable Auto-Maintenance",
-          "smart_extension_threshold": "Smart Extension Threshold"
+          "expose_debug_entities": "Expose Debug Entities",
+          "save_debug_traces": "Save Debug Traces",
+          "dtw_bandwidth": "DTW Bandwidth",
+          "external_end_trigger_enabled": "Enable External Cycle End Trigger",
+          "external_end_trigger": "External Cycle End Sensor"
         },
         "data_description": {
-          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- auto_merge_gap_seconds: {suggested_auto_merge_gap_seconds} s\n{suggested_reason}",
+          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "start_threshold_w": "Power must rise ABOVE this threshold to START a cycle. Set higher than your standby power. Default: min_power + 1 W.",
+          "stop_threshold_w": "Power must fall BELOW this threshold to END a cycle. Set just above zero to avoid noise triggering false ends. Default: 0.6 * min_power.",
+          "min_off_gap": "If a cycle starts within this many seconds of the previous one ending, they will be MERGED into a single cycle.",
           "start_duration_threshold": "Ignore brief power spikes shorter than this duration (seconds). Filters out boot spikes (e.g., 60W for 2s) before real cycle starts. Default: 5s.",
-          "off_delay": "Seconds the smoothed power must stay below the threshold to mark completion. Default: 120s.",
           "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 300s.",
           "no_update_active_timeout": "For publish-on-change sensors: only force-end an ACTIVE cycle if no updates arrive for this many seconds. Low-power completion still uses the Off Delay.",
+          "sampling_interval": "Minimum sampling interval in seconds. Updates faster than this rate will be ignored. Default: 2.0s.",
           "auto_label_confidence": "Automatically label cycles at or above this confidence on completion (0.0–1.0).",
           "learning_confidence": "Minimum confidence to request user verification via an event (0.0–1.0).",
           "duration_tolerance": "Tolerance for time-remaining estimates during a run (0.0–0.5 corresponds to 0–50%).",
@@ -177,9 +151,11 @@
           "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.50 (50%).",
           "profile_match_max_duration_ratio": "Maximum duration ratio for profile matching. Running cycle must not exceed this multiple of profile duration. Higher = more lenient. Default: 1.50 (150%).",
           "smoothing_window": "Number of recent power readings used for moving-average smoothing.",
+          "profile_match_threshold": "Minimum DTW similarity score (0.0–1.0) required to consider a profile as a match. Higher = stricter matching, fewer false positives. Default: 0.4.",
+          "profile_unmatch_threshold": "DTW similarity score (0.0–1.0) below which a previously matched profile is rejected. Should be lower than match threshold to prevent flickering. Default: 0.35.",
           "profile_duration_tolerance": "Tolerance used by profile matching for total duration variance (0.0–0.5). Default behavior: ±25%.",
-          "auto_merge_lookback_hours": "After a cycle, scan this many hours back to merge fragmented runs into a single cycle.",
-          "auto_merge_gap_seconds": "Maximum gap between fragments to merge during post-processing.",
+
+
           "interrupted_min_seconds": "Runs shorter than this may be classified as 'interrupted'.",
           "abrupt_drop_watts": "Absolute power drop (W) considered an abrupt cliff.",
           "abrupt_drop_ratio": "Relative drop ratio (0–1). Example: 0.6 means a 60% drop is abrupt.",
@@ -193,13 +169,23 @@
           "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3.",
           "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
           "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
+          "start_energy_threshold": "Cycle must accumulate at least this much energy (Wh) during the START phase to be confirmed. Default: 0.005 Wh.",
+          "end_energy_threshold": "Cycle ends only if energy in the last Off-Delay window is below this value (Wh). Prevents false ends if power fluctuates near zero. Default: 0.05 Wh.",
           "auto_maintenance": "Enable nightly maintenance to repair samples, merge fragmented cycles, and keep storage healthy.",
-          "smart_extension_threshold": "If a profile is identified, keep the cycle running until this ratio of the average duration is reached, even if power drops (e.g. drying phase). Set to 0 to disable. Default: 0.95 (95%)."
+          "expose_debug_entities": "Show advanced sensors (Confidence, Phase, Ambiguity) for debugging.",
+          "save_debug_traces": "Store detailed ranking and power trace data in history (Increases storage usage).",
+          "dtw_bandwidth": "Maximum allowed time warping (stretching) as a ratio of cycle duration. Higher values allow matching highly variable cycles (e.g., sensor-delayed phases) but increase CPU cost. Default: 0.20 (20%).",
+          "external_end_trigger_enabled": "Enable monitoring of an external binary sensor to trigger cycle completion. When enabled, the sensor turning 'on' will immediately complete the current cycle.",
+          "external_end_trigger": "Select a binary sensor entity. When this sensor turns 'on', the current cycle will end with status 'completed' (not 'interrupted')."
         }
       },
       "diagnostics": {
         "title": "Diagnostics & Maintenance",
-        "description": "Run maintenance actions like merging fragmented cycles or migrating stored data."
+        "description": "Run maintenance actions like merging fragmented cycles or migrating stored data.\n\n{storage_stats}"
+      },
+      "clear_debug_data": {
+        "title": "Clear Debug Data",
+        "description": "Are you sure you want to delete all stored debug traces? This will free up space but remove detailed ranking info from past cycles."
       },
       "manage_cycles": {
         "title": "Manage Cycles",
@@ -228,7 +214,6 @@
           "manual_duration": "Manual Duration (minutes)"
         }
       },
-
       "edit_profile": {
         "title": "Edit Profile",
         "description": "Select a profile to rename",
@@ -288,18 +273,75 @@
         }
       },
       "post_process": {
-        "title": "Post-Process Cycle History",
-        "description": "Merge fragmented cycles (junk data) within a time window. Enter number of hours to look back.\n{info}",
+        "title": "Process History (Merge/Split)",
+        "description": "Clean up cycle history by merging fragmented runs and splitting incorrectly merged cycles within a time window. Enter number of hours to look back.\n{info}",
         "data": {
-          "time_range": "Lookback Window (hours)"
+          "time_range": "Lookback Window (hours)",
+          "gap_seconds": "Merge/Split Gap (seconds)"
         },
         "data_description": {
-          "time_range": "Number of hours to scan for fragmented cycles to merge. Use 999999 to process all historical data."
+          "time_range": "Number of hours to scan for fragmented cycles to merge. Use 999999 to process all historical data.\n{info}",
+          "gap_seconds": "Threshold to decide split vs merge. Gaps SHORTER than this are merged. Gaps LONGER than this are split. Lower this to force a split on a cycle that was merged incorrectly."
         }
       },
-      "migrate_data": {
-        "title": "Migrate Data Format",
-        "description": "Re-compress all saved cycle data to ensure it's in the latest format. This is safe and can be run multiple times."
+      "cleanup_profile": {
+        "title": "Clean Up History - Select Profile",
+        "description": "Select a profile to visualize. This will generate a graph showing all past cycles for this profile to help identify outliers.",
+        "data": {
+          "profile": "Profile"
+        }
+      },
+      "cleanup_select": {
+        "title": "Clean Up History - Graph & Delete",
+        "description": "![Graph]({graph_url})\n\n**Visualizing {profile_name}**\n\nThe graph shows individual cycles as colored lines. Identify outliers (lines far from the group) and matching their color in the list below to delete them.\n\n**Select cycles to PERMANENTLY delete:**",
+        "data": {
+          "cycles_to_delete": "Cycles to Delete (check matching colors)"
+        }
+      },
+      "interactive_editor": {
+        "title": "Merge/Split Interactive Editor",
+        "description": "Select a manual action to perform on your cycle history.",
+        "data": {
+          "editor_action": "Action"
+        }
+      },
+      "editor_select": {
+        "title": "Select Cycles",
+        "description": "Select the cycle(s) to process.\n\n{info_text}",
+        "data": {
+          "selected_cycles": "Cycles"
+        }
+      },
+      "editor_configure": {
+        "title": "Configure & Apply",
+        "description": "{preview_md}",
+        "data": {
+          "confirm_action": "Action",
+          "merged_profile": "Resulting Profile",
+          "new_profile_name": "New Profile Name",
+          "confirm_commit": "Yes, I confirm this action",
+          "segment_0_profile": "Segment 1 Profile",
+          "segment_1_profile": "Segment 2 Profile",
+          "segment_2_profile": "Segment 3 Profile",
+          "segment_3_profile": "Segment 4 Profile",
+          "segment_4_profile": "Segment 5 Profile",
+          "segment_5_profile": "Segment 6 Profile",
+          "segment_6_profile": "Segment 7 Profile",
+          "segment_7_profile": "Segment 8 Profile",
+          "segment_8_profile": "Segment 9 Profile",
+          "segment_9_profile": "Segment 10 Profile"
+        }
+      },
+      "editor_split_params": {
+        "title": "Split Configuration",
+        "description": "Adjust the sensitivity for splitting this cycle. Any idle gap longer than this will cause a split.",
+        "data": {
+          "min_gap_seconds": "Split Gap Threshold (seconds)"
+        }
+      },
+      "reprocess_history": {
+        "title": "Maintenance: Reprocess & Optimize Data",
+        "description": "Performs deep cleaning of historical data:\n1. Trims zero-power readings (silence).\n2. Fixes cycle timing/duration.\n3. Recalculates all statistical models (envelopes).\n\n**Run this to fix data issues or apply new algorithms.**"
       },
       "wipe_history": {
         "title": "Wipe History (Testing Only)",
@@ -313,24 +355,66 @@
           "json_payload": "Complete Configuration JSON"
         },
         "data_description": {
-          "mode": "Choose Export to copy current data and settings, or Import to paste exported data from another HA WashData device.",
-          "json_payload": "For Export: copy this JSON (includes cycles, profiles, and all fine-tuned settings). For Import: paste JSON exported from HA WashData."
+          "mode": "Choose Export to copy current data and settings, or Import to paste exported data from another WashData device.",
+          "json_payload": "For Export: copy this JSON (includes cycles, profiles, and all fine-tuned settings). For Import: paste JSON exported from WashData."
+        }
+      },
+      "record_cycle": {
+        "title": "Record Cycle",
+        "description": "Manually record a cycle to create a clean profile without interference.\n\nStatus: **{status}**\nDuration: {duration}s\nSamples: {samples}",
+        "data": {
+          "action": "Action",
+          "refresh_status": "Refresh Status"
+        }
+      },
+      "record_process": {
+        "title": "Process Recording",
+        "description": "![Graph]({graph_url})\n\n**Graph shows raw recording.** Blue = Keep, Red = Proposed Trim.\n*Graph is static and does not update with form changes.*\n\nRecording stopped. Trims are aligned to the detected sampling rate (~{sampling_rate}s).\n\nRaw Duration: {duration}s\nSamples: {samples}",
+        "data": {
+          "head_trim": "Trim Start (seconds)",
+          "tail_trim": "Trim End (seconds)",
+          "save_mode": "Save Destination",
+          "profile_name": "Profile Name"
+        }
+      },
+      "learning_feedbacks": {
+        "title": "Learning Feedbacks",
+        "description": "Select a cycle review request to process.",
+        "data": {
+          "selected_feedback": "Select Cycle to Review"
+        }
+      },
+      "learning_feedbacks_empty": {
+        "title": "Learning Feedbacks",
+        "description": "No pending feedback requests found."
+      },
+      "resolve_feedback": {
+        "title": "Resolve Feedback",
+        "description": "**Detected Program**: {profile}\n**Confidence**: {confidence}%\n**Estimated**: {est}m, **Actual**: {act}m",
+        "data": {
+          "action": "What would you like to do?",
+          "corrected_profile": "Correct Program (if correcting)",
+          "corrected_duration": "Correct Duration in minutes (if correcting)"
         }
       }
     },
     "error": {
       "import_failed": "Import failed. Please paste a valid HA WashData export JSON.",
-      "empty_name": "Profile name cannot be empty",
       "profile_exists": "A profile with this name already exists",
       "rename_failed": "Failed to rename profile. Profile may not exist or new name is already taken.",
-      "assignment_failed": "Failed to assign profile to cycle"
+      "assignment_failed": "Failed to assign profile to cycle",
+      "feedback_notification_title": "WashData: Verify Cycle ({device})",
+      "feedback_notification_message": "**Device**: {device}\n**Program**: {program} ({confidence}% confidence)\n**Time**: {time}\n\nWashData needs your help to verify this detected cycle.\n\nPlease go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
     },
     "abort": {
       "no_cycles_found": "No cycles found",
       "no_profiles_found": "No profiles found. Create a profile first.",
       "no_profiles_for_matching": "No profiles available for matching. Create profiles first.",
       "no_unlabeled_cycles": "All cycles are already labeled",
-      "no_suggestions": "No suggested values available yet. Run a few cycles and try again."
+      "no_suggestions": "No suggested values available yet. Run a few cycles and try again.",
+      "no_predictions": "No predictions",
+      "reprocess_success": "Successfully reprocessed {count} cycles.",
+      "debug_data_cleared": "Successfully cleared debug data from {count} cycles."
     }
   },
   "entity": {

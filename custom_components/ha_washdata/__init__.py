@@ -1,4 +1,5 @@
 """The HA WashData integration."""
+
 from __future__ import annotations
 
 import json
@@ -17,6 +18,9 @@ from .const import (
     SERVICE_SUBMIT_FEEDBACK,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
+    CONF_DEVICE_TYPE,
+    CONF_POWER_SENSOR,
+    CONF_NOTIFY_SERVICE,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -29,16 +33,12 @@ from .const import (
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_SMOOTHING_WINDOW,
     CONF_PROFILE_DURATION_TOLERANCE,
-    CONF_AUTO_MERGE_LOOKBACK_HOURS,
-    CONF_AUTO_MERGE_GAP_SECONDS,
     CONF_INTERRUPTED_MIN_SECONDS,
     CONF_ABRUPT_DROP_WATTS,
     CONF_ABRUPT_DROP_RATIO,
     CONF_ABRUPT_HIGH_LOAD_FACTOR,
     DEFAULT_SMOOTHING_WINDOW,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
-    DEFAULT_AUTO_MERGE_LOOKBACK_HOURS,
-    DEFAULT_AUTO_MERGE_GAP_SECONDS,
     DEFAULT_INTERRUPTED_MIN_SECONDS,
     DEFAULT_ABRUPT_DROP_WATTS,
     DEFAULT_ABRUPT_DROP_RATIO,
@@ -65,13 +65,17 @@ from .const import (
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_START_DURATION_THRESHOLD,
-    CONF_DEVICE_TYPE,
     CONF_START_DURATION_THRESHOLD,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SELECT, Platform.BUTTON]
+PLATFORMS: list[Platform] = [
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+    Platform.SELECT,
+    Platform.BUTTON,
+]
 
 
 def _require_str(value: Any, name: str) -> str:
@@ -79,9 +83,14 @@ def _require_str(value: Any, name: str) -> str:
         raise ValueError(f"{name} is required")
     return value
 
+
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate config entry to the latest version while preserving settings."""
     version = entry.version or 1
+    minor_version = entry.minor_version or 1
+
+    if version == 3 and minor_version >= 2:
+        return True
 
     data: dict[str, Any] = dict(entry.data)
     options: dict[str, Any] = dict(entry.options)
@@ -91,73 +100,110 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         options[CONF_MIN_POWER] = data[CONF_MIN_POWER]
     if CONF_OFF_DELAY not in options and CONF_OFF_DELAY in data:
         options[CONF_OFF_DELAY] = data[CONF_OFF_DELAY]
+    if CONF_DEVICE_TYPE not in options and CONF_DEVICE_TYPE in data:
+        options[CONF_DEVICE_TYPE] = data[CONF_DEVICE_TYPE]
+    if CONF_POWER_SENSOR not in options and CONF_POWER_SENSOR in data:
+        options[CONF_POWER_SENSOR] = data[CONF_POWER_SENSOR]
+    if CONF_NOTIFY_SERVICE not in options and CONF_NOTIFY_SERVICE in data:
+        options[CONF_NOTIFY_SERVICE] = data[CONF_NOTIFY_SERVICE]
 
     options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
     options.setdefault(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE)
     options.setdefault(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE)
     options.setdefault(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE)
-    # New: active no-update timeout for publish-on-change sockets
     options.setdefault(CONF_NO_UPDATE_ACTIVE_TIMEOUT, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
-    # Advanced defaults for configurability
     options.setdefault(CONF_SMOOTHING_WINDOW, DEFAULT_SMOOTHING_WINDOW)
-    options.setdefault(CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE)
-    options.setdefault(CONF_AUTO_MERGE_LOOKBACK_HOURS, DEFAULT_AUTO_MERGE_LOOKBACK_HOURS)
-    options.setdefault(CONF_AUTO_MERGE_GAP_SECONDS, DEFAULT_AUTO_MERGE_GAP_SECONDS)
+    options.setdefault(
+        CONF_PROFILE_DURATION_TOLERANCE, DEFAULT_PROFILE_DURATION_TOLERANCE
+    )
     options.setdefault(CONF_INTERRUPTED_MIN_SECONDS, DEFAULT_INTERRUPTED_MIN_SECONDS)
     options.setdefault(CONF_ABRUPT_DROP_WATTS, DEFAULT_ABRUPT_DROP_WATTS)
     options.setdefault(CONF_ABRUPT_DROP_RATIO, DEFAULT_ABRUPT_DROP_RATIO)
     options.setdefault(CONF_ABRUPT_HIGH_LOAD_FACTOR, DEFAULT_ABRUPT_HIGH_LOAD_FACTOR)
-    
-    # New Feature Defaults (Version 3)
-    options.setdefault(CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE))
+
+    options.setdefault(
+        CONF_DEVICE_TYPE, data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE)
+    )
     options.setdefault(CONF_START_DURATION_THRESHOLD, DEFAULT_START_DURATION_THRESHOLD)
 
-    # Matching + retention + watchdog defaults
     options.setdefault(CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL)
-    options.setdefault(CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO)
-    options.setdefault(CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO)
+    options.setdefault(
+        CONF_PROFILE_MATCH_MIN_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
+    )
+    options.setdefault(
+        CONF_PROFILE_MATCH_MAX_DURATION_RATIO, DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO
+    )
     options.setdefault(CONF_MAX_PAST_CYCLES, DEFAULT_MAX_PAST_CYCLES)
-    options.setdefault(CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE)
-    options.setdefault(CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED)
+    options.setdefault(
+        CONF_MAX_FULL_TRACES_PER_PROFILE, DEFAULT_MAX_FULL_TRACES_PER_PROFILE
+    )
+    options.setdefault(
+        CONF_MAX_FULL_TRACES_UNLABELED, DEFAULT_MAX_FULL_TRACES_UNLABELED
+    )
     options.setdefault(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
-    options.setdefault(CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD)
+    options.setdefault(
+        CONF_AUTO_TUNE_NOISE_EVENTS_THRESHOLD, DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD
+    )
     options.setdefault(CONF_COMPLETION_MIN_SECONDS, DEFAULT_COMPLETION_MIN_SECONDS)
-    options.setdefault(CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES)
+    options.setdefault(
+        CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
+    )
 
-    # Update entry with new version
+    keys_to_remove = [
+        CONF_MIN_POWER,
+        CONF_OFF_DELAY,
+        CONF_DEVICE_TYPE,
+        CONF_POWER_SENSOR,
+        CONF_NOTIFY_SERVICE,
+    ]
+    for k in keys_to_remove:
+        data.pop(k, None)
+
     hass.config_entries.async_update_entry(
         entry,
         data=data,
         options=options,
         version=3,
+        minor_version=2,
     )
-    _LOGGER.info("Migrated HA WashData entry from version %s to 3", version)
+    _LOGGER.info(
+        "Migrated HA WashData entry from version %s.%s to 3.2", version, minor_version
+    )
     return True
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up HA WashData from a config entry."""
     # Guard against duplicate setup during hot-reload
     if entry.entry_id in hass.data.get(DOMAIN, {}):
-        _LOGGER.warning("Entry %s already set up, skipping duplicate setup", entry.entry_id)
+        _LOGGER.warning(
+            "Entry %s already set up, skipping duplicate setup", entry.entry_id
+        )
         return True
-    
+
     hass.data.setdefault(DOMAIN, {})
-    
+
     # Migration: Remove old auto_maintenance switch entity (now in settings)
+    # pylint: disable=import-outside-toplevel
     from homeassistant.helpers import entity_registry as er
+
     ent_reg = er.async_get(hass)
     old_switch_id = f"{entry.entry_id}_auto_maintenance"
     old_entity = ent_reg.async_get_entity_id("switch", DOMAIN, old_switch_id)
     if old_entity:
-        _LOGGER.info("Removing deprecated auto_maintenance switch entity: %s", old_entity)
+        _LOGGER.info(
+            "Removing deprecated auto_maintenance switch entity: %s", old_entity
+        )
         ent_reg.async_remove(old_entity)
-    
+
+    # pylint: disable=import-outside-toplevel
     from .manager import WashDataManager
+
     manager = WashDataManager(hass, entry)
     hass.data[DOMAIN][entry.entry_id] = manager
-    
+
     await manager.async_setup()
-    
+
     # Check for initial profile from onboarding
     if "initial_profile" in entry.data:
         init_prof = entry.data["initial_profile"]
@@ -166,138 +212,165 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if name:
             try:
                 # Create the profile immediately
-                await manager.profile_store.create_profile_standalone(name, avg_duration=duration)
-                _LOGGER.info(f"Created initial profile '{name}' from onboarding")
-                
+                await manager.profile_store.create_profile_standalone(
+                    name, avg_duration=duration
+                )
+                _LOGGER.info("Created initial profile '%s' from onboarding", name)
+
                 # Clean up config entry (remove initial_profile to avoid re-creation or cruft)
-                new_data = {k: v for k, v in entry.data.items() if k != "initial_profile"}
+                new_data = {
+                    k: v for k, v in entry.data.items() if k != "initial_profile"
+                }
                 hass.config_entries.async_update_entry(entry, data=new_data)
-                
-            except Exception as e:
-                _LOGGER.error(f"Failed to create initial profile: {e}")
+
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                _LOGGER.error("Failed to create initial profile: %s", e)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
-    
+
     # Register service if not already
     if not hass.services.has_service(DOMAIN, "label_cycle"):
+
         async def handle_label_cycle(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
             cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
             profile_name = call.data.get("profile_name", "").strip()
-            
+
             # Find the config entry for this device
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)
             if not device:
                 raise ValueError("Device not found")
-                
+
             entry_id = next(iter(device.config_entries), None)
             if not entry_id:
                 raise ValueError("No config entry found for device")
             if entry_id not in hass.data[DOMAIN]:
                 raise ValueError("Integration not loaded for this device")
-                
+
             manager = hass.data[DOMAIN][entry_id]
-            
+
             # Assign existing profile or remove label
             if profile_name:
-                await manager.profile_store.assign_profile_to_cycle(cycle_id, profile_name)
+                await manager.profile_store.assign_profile_to_cycle(
+                    cycle_id, profile_name
+                )
             else:
                 await manager.profile_store.assign_profile_to_cycle(cycle_id, None)
-            
-            manager._notify_update()
-            
+
+            manager.notify_update()
+
         hass.services.async_register(DOMAIN, "label_cycle", handle_label_cycle)
 
     # Register create_profile service
     if not hass.services.has_service(DOMAIN, "create_profile"):
+
         async def handle_create_profile(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
             profile_name = _require_str(call.data.get("profile_name"), "profile_name")
             reference_cycle_id = call.data.get("reference_cycle_id")
-            
+
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)
             if not device:
                 raise ValueError("Device not found")
-                
+
             entry_id = next(iter(device.config_entries), None)
             if not entry_id:
                 raise ValueError("No config entry found for device")
             if entry_id not in hass.data[DOMAIN]:
                 raise ValueError("Integration not loaded for this device")
-                
+
             manager = hass.data[DOMAIN][entry_id]
-            await manager.profile_store.create_profile_standalone(profile_name, reference_cycle_id)
-            manager._notify_update()
-            
+            await manager.profile_store.create_profile_standalone(
+                profile_name, reference_cycle_id
+            )
+            manager.notify_update()
+
         hass.services.async_register(DOMAIN, "create_profile", handle_create_profile)
 
     # Register delete_profile service
     if not hass.services.has_service(DOMAIN, "delete_profile"):
+
         async def handle_delete_profile(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
             profile_name = _require_str(call.data.get("profile_name"), "profile_name")
             unlabel_cycles = call.data.get("unlabel_cycles", True)
-            
+
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)
             if not device:
                 raise ValueError("Device not found")
-                
+
             entry_id = next(iter(device.config_entries), None)
             if not entry_id:
                 raise ValueError("No config entry found for device")
             if entry_id not in hass.data[DOMAIN]:
                 raise ValueError("Integration not loaded for this device")
-                
+
             manager = hass.data[DOMAIN][entry_id]
             await manager.profile_store.delete_profile(profile_name, unlabel_cycles)
-            manager._notify_update()
-            
+            manager.notify_update()
+
         hass.services.async_register(DOMAIN, "delete_profile", handle_delete_profile)
 
     # Register auto_label_cycles service
     if not hass.services.has_service(DOMAIN, "auto_label_cycles"):
+
         async def handle_auto_label_cycles(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
-            confidence_threshold = call.data.get("confidence_threshold", 0.70)
-            
+            confidence_threshold = call.data.get("confidence_threshold", 0.75)
+
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)
             if not device:
                 raise ValueError("Device not found")
-                
+
             entry_id = next(iter(device.config_entries), None)
             if not entry_id:
                 raise ValueError("No config entry found for device")
             if entry_id not in hass.data[DOMAIN]:
                 raise ValueError("Integration not loaded for this device")
-                
+
             manager = hass.data[DOMAIN][entry_id]
-            stats = await manager.profile_store.auto_label_unlabeled_cycles(confidence_threshold)
-            manager._notify_update()
-            
-            _LOGGER.info(f"Auto-label complete: {stats['labeled']} labeled, {stats['skipped']} skipped")
-            
-        hass.services.async_register(DOMAIN, "auto_label_cycles", handle_auto_label_cycles)
+            stats = await manager.profile_store.auto_label_unlabeled_cycles(
+                confidence_threshold
+            )
+            manager.notify_update()
+
+            _LOGGER.info(
+                "Auto-label complete: %s labeled, %s skipped",
+                stats["labeled"],
+                stats["skipped"],
+            )
+
+        hass.services.async_register(
+            DOMAIN, "auto_label_cycles", handle_auto_label_cycles
+        )
 
     # Register custom card via frontend.py (only once, not per entry)
     if not hass.data.get(f"{DOMAIN}_card_registered"):
+        # pylint: disable=import-outside-toplevel
         from .frontend import WashDataCardRegistration
+
         card_reg = WashDataCardRegistration(hass)
         await card_reg.async_register()
         hass.data[f"{DOMAIN}_card_registered"] = True
 
     # Register feedback service
-    if not hass.services.has_service(DOMAIN, SERVICE_SUBMIT_FEEDBACK.split(".")[-1]):
+    if not hass.services.has_service(
+        DOMAIN, SERVICE_SUBMIT_FEEDBACK.rsplit(".", maxsplit=1)[-1]
+    ):
+
         async def handle_submit_feedback(call: ServiceCall) -> None:
             entry_id_raw = call.data.get("entry_id")
             device_id_raw = call.data.get("device_id")
 
-            entry_id: str | None = entry_id_raw if isinstance(entry_id_raw, str) and entry_id_raw else None
+            entry_id: str | None = (
+                entry_id_raw if isinstance(entry_id_raw, str) and entry_id_raw else None
+            )
             if entry_id is None:
                 # Prefer device_id for user-facing workflows.
                 device_id = _require_str(device_id_raw, "device_id")
@@ -317,10 +390,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             corrected_profile = call.data.get("corrected_profile")
             corrected_duration = call.data.get("corrected_duration")  # in seconds
             notes = call.data.get("notes", "")
-            
+
             if entry_id not in hass.data[DOMAIN]:
                 raise ValueError("Integration not loaded for this entry")
-                
+
             manager = hass.data[DOMAIN][entry_id]
             success = manager.learning_manager.submit_cycle_feedback(
                 cycle_id=cycle_id,
@@ -329,7 +402,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 corrected_duration=corrected_duration,
                 notes=notes,
             )
-            
+
             if success:
                 # Save updated profile data
                 await manager.profile_store.async_save()
@@ -340,7 +413,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                         manager.profile_store.rebuild_envelope(corrected_profile)
                     else:
                         # Rebuild for the detected profile if present on the cycle.
-                        cycles = manager.profile_store._data.get("past_cycles", [])
+                        cycles = manager.profile_store.get_past_cycles()
                         cycle = next(
                             (
                                 cd
@@ -354,24 +427,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                         profile_name = cycle.get("profile_name") if cycle else None
                         if isinstance(profile_name, str) and profile_name:
                             manager.profile_store.rebuild_envelope(profile_name)
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     _LOGGER.exception("Failed to rebuild envelope after feedback")
 
                 # Best-effort dismiss the feedback notification if it exists.
                 try:
                     notification_id = f"ha_washdata_feedback_{entry_id}_{cycle_id}"
                     persistent_notification.async_dismiss(hass, notification_id)
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     pass
 
-                _LOGGER.info(f"Cycle feedback submitted for {cycle_id}")
+                _LOGGER.info("Cycle feedback submitted for %s", cycle_id)
             else:
-                _LOGGER.warning(f"Failed to submit feedback for cycle {cycle_id}")
-            
-        hass.services.async_register(DOMAIN, SERVICE_SUBMIT_FEEDBACK.split(".")[-1], handle_submit_feedback)
+                _LOGGER.warning("Failed to submit feedback for cycle %s", cycle_id)
+
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SUBMIT_FEEDBACK.rsplit(".", maxsplit=1)[-1],
+            handle_submit_feedback,
+        )
 
     # Export store to file (per entry/device)
     if not hass.services.has_service(DOMAIN, "export_config"):
+
         async def handle_export_config(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
             file_path = call.data.get("path")
@@ -396,17 +474,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 entry_options=dict(entry.options),
             )
 
-            target = Path(file_path) if file_path else Path(hass.config.path(f"ha_washdata_export_{entry_id}.json"))
+            target = (
+                Path(file_path)
+                if file_path
+                else Path(hass.config.path(f"ha_washdata_export_{entry_id}.json"))
+            )
             target = target.resolve()
 
             # Write export
-            target.write_text(json.dumps(payload, indent=2))
+            target.write_text(json.dumps(payload, indent=2), encoding="utf-8")
             _LOGGER.info("Exported ha_washdata entry %s to %s", entry_id, target)
 
         hass.services.async_register(DOMAIN, "export_config", handle_export_config)
 
     # Import store from file into the target entry/device
     if not hass.services.has_service(DOMAIN, "import_config"):
+
         async def handle_import_config(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
             file_path = call.data.get("path")
@@ -435,40 +518,74 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 raise ValueError(f"File not found: {source}")
 
             try:
-                payload = json.loads(source.read_text())
+                payload = json.loads(source.read_text(encoding="utf-8"))
             except Exception as err:  # noqa: BLE001
                 raise ValueError(f"Failed to read import file: {err}") from err
 
             config_updates = await manager.profile_store.async_import_data(payload)
-            
+
             # Apply imported settings to config entry if present
             entry_data = config_updates.get("entry_data", {})
             entry_options = config_updates.get("entry_options", {})
-            
+
             if entry_data or entry_options:
                 new_data: dict[str, Any] = dict(entry.data)
                 new_options: dict[str, Any] = dict(entry.options)
-                
+
                 # Only update min_power/off_delay from data (don't overwrite power_sensor/name)
                 for key in [CONF_MIN_POWER, CONF_OFF_DELAY]:
                     if key in entry_data:
                         new_data[key] = entry_data[key]
-                
+
                 # Update all options from import
                 new_options.update(entry_options)
-                
+
                 hass.config_entries.async_update_entry(
                     entry,
                     data=new_data,
                     options=new_options,
                 )
                 _LOGGER.info("Applied imported settings to config entry %s", entry_id)
-                
+
             _LOGGER.info("Imported ha_washdata entry %s from %s", entry_id, source)
 
         hass.services.async_register(DOMAIN, "import_config", handle_import_config)
 
+    # Register recorder services
+    if not hass.services.has_service(DOMAIN, "record_start"):
+        async def handle_record_start(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ValueError("Device not found")
+            entry_id = next(iter(device.config_entries), None)
+            if not entry_id or entry_id not in hass.data[DOMAIN]:
+                raise ValueError("Integration not loaded")
+
+            manager = hass.data[DOMAIN][entry_id]
+            await manager.async_start_recording()
+
+        hass.services.async_register(DOMAIN, "record_start", handle_record_start)
+
+    if not hass.services.has_service(DOMAIN, "record_stop"):
+        async def handle_record_stop(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ValueError("Device not found")
+            entry_id = next(iter(device.config_entries), None)
+            if not entry_id or entry_id not in hass.data[DOMAIN]:
+                raise ValueError("Integration not loaded")
+
+            manager = hass.data[DOMAIN][entry_id]
+            await manager.async_stop_recording()
+
+        hass.services.async_register(DOMAIN, "record_stop", handle_record_stop)
+
     return True
+
 
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload config entry - update settings without interrupting running cycles."""
@@ -480,6 +597,7 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
         # Full reload if manager not found
         await async_unload_entry(hass, entry)
         await async_setup_entry(hass, entry)
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""

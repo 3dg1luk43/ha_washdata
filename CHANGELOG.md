@@ -5,6 +5,101 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-01-12
+
+**Major Architectural Rewrite ("vNext")**
+
+This release marks a complete re-engineering of the HA WashData core, transitioning from simple heuristics to a rigorous signal processing pipeline and robust state machine. While the version number is minor, this is effectively a new engine under the hood.
+
+🎉 **Milestones Reached!**
+- HA WashData is now available in the **HACS Default Repository**!
+- Passed **1,000 active installations** across the community.
+- Reached **500+ stars** on GitHub.
+
+Thank you to everyone who has been patient during development and to all contributors who provided invaluable feedback, bug reports, and feature suggestions. This release wouldn't be possible without you!
+
+> [!IMPORTANT]
+> **Fresh Start Recommended**
+> 
+> This release includes significant changes to how cycles are detected and profiles are matched. The new engine depends on **clean, accurate data** to work properly.
+> 
+> If you're unsure whether your previously recorded cycles were captured correctly (e.g., cycles that ended prematurely, incorrectly merged fragments, or noisy data from before tuning your thresholds), we recommend:
+> 1. **Delete your existing cycle history** via Configure → Manage Cycles → Delete All
+> 2. **Use the new "Record Cycle" feature** to capture fresh, clean training data for each program you use
+> 
+> This ensures the best possible matching accuracy with the new architecture.
+
+
+### Core Architecture: Signal Processing & State Machine
+- **New Signal Processing Engine** (`signal_processing.py`):
+  - **Dt-Aware Integration**: Replaced simple averaging with trapezoidal Riemann sum integration (`integrate_wh`) that respects variable sampling intervals.
+  - **Robust Smoothing**: Implemented `robust_smooth`, a hybrid algorithm combining a Median Filter (spike rejection) with a Time-Aware Exponential Moving Average (EMA) for clean trend detection.
+  - **Adaptive Resampling**: New primitives (`resample_adaptive`, `resample_uniform`) handle irregular sensor updates and enforce strict gap handling (no interpolation across large gaps).
+  - **Idle Baseline Learning**: Automatically learns the device's "true zero" using Median Absolute Deviation (MAD), removing the need for manual calibration.
+
+- **Finite State Machine (FSM)**:
+  - Replaced binary ON/OFF logic with a formal FSM: `OFF` → `STARTING` → `RUNNING` ↔ `PAUSED` → `ENDING` → `OFF`.
+  - **Dt-Aware Gating**: Start/End detection now uses accumulated time/energy gates (e.g., "energy since idle > X Wh") rather than sample counts, making it immune to sensor update frequency.
+  - **Smart Pausing**: Distinguishes between "End of Cycle" and "Mid-Cycle Pause" using dynamic thresholds derived from the sensor's sampling cadence (`_p95_dt`).
+
+### Storage v2 & Migration
+- **Profile Store v2** (`profile_store.py`):
+  - **New Schema**: Introduced a versioned storage schema (v2) optimized for performance.
+  - **Trace Compression**: Historical power traces are now compressed using relative time deltas, significantly reducing disk usage.
+  - **Robust Migration**: Included a designated `WashDataStore` engine that automatically upgrades v1 data to v2 without data loss, preserving user labels and corrections.
+
+### ✨ functionality & Features
+- **Configurable Sampling Interval**: New "Sampling Interval" setting allows users to throttle high-frequency sensors (e.g., 1s updates) to reduce CPU load.
+- **Precision Configuration**: Configuration flow now uses **Text Box** inputs for all numeric thresholds, offering precise control over parameters like `start_energy_threshold` (Wh) and `drop_ratio`.
+- **Smart Resume**: "Resurrection" logic restores the exact cycle state (including sub-state) after a Home Assistant restart.
+- **Auto-Labeling**: Increased default confidence threshold to **0.75** (from 0.70) to leverage the improved accuracy of the new engine.
+- **Diagnostic Sensors**: Added dynamic diagnostic sensors for each profile (e.g., `sensor.washdata_..._profile_cotton_count`) showing the total cycle count properly.
+- **Statistics**: Added "Total Energy" column to the Profile Statistics table, showing the cumulative energy consumed for each profile.
+- **Low-Rate Polling Support**: Optimized default settings for devices with 30-60s update intervals (e.g., Shelly Cloud, Tuya), including a 30s watchdog and 180s off-delay.
+- **User Experience**: moved "Review Learned Feedbacks" to the main menu (bottom) for easier access, and removed confusing options.
+
+### 🛠️ Technical Improvements
+- **Logging**: Added more granular `termination_reason` logging (e.g., `smart`, `timeout`, `force_stopped`) to `cycle_detector` and `profile_store`.
+- **Timezone Robustness**: Complete refactor to use timezone-aware datetimes (`dt_util.now()`) exclusively, permanently fixing "offset-naive/offset-aware" comparison errors.
+- **Strict Typing**: Codebase now strictly adheres to type hinting, with extensive use of `TypeAlias` and `dataclass` for internal structures.
+- **Performance**: Optimized `last_match_details` sensor attribute to exclude large raw data arrays, preventing Home Assistant state update bloat.
+- **Serialization**: Fixed `MatchResult` JSON serialization issues that were blocking sensor updates.
+
+### 🐛 Bug Fixes
+- **Premature Termination & Dishwasher Logic**: Major robustness improvements for dishwashers.
+  - Implemented "Verified Pause" logic to prevent early termination during long drying phases.
+  - Added "End Spike Wait Period": Dishwashers now wait up to 5 extra minutes after expected duration to capture final pump-out spikes.
+  - Increased Smart Termination duration ratio to **0.99** (from 96%) to ensure strictly conservative termination for dishwashers.
+- **Ghost Cycles**: Enhanced filtering and elimination of false detection.
+  - **Persistent Suppression**: The "Suspicious Window" (20 min) now persists across restarts (restoring `last_cycle_end`), preventing end-spikes from triggering ghosts after reboots.
+  - **Tail Preservation**: Disabled "zero trimming" for confirmed completed cycles, preventing the "profile shrinking" feedback loop where tails were lost.
+  - Implemented `completion_min_seconds` logic to ignore brief spikes.
+- **Start/End Flutter**: Start debounce and End repeat counts are now configurable and backed by robust accumulators, eliminating false starts/ends.
+- **Cycle Detector**: Adjusted duration validation logic to strict 90%-125% window for completion.
+- **Translations**: Fixed "intl string context variable not provided" errors in logs by properly passing placeholders to translation engine.
+- **Debug Sensors**: Fixed "Top Candidates" sensor showing "None" due to missing data propagation.
+- **Code Quality**: Addressed various linting issues (indentation, whitespace, unused arguments).
+- **Crash Fixes**: Resolved `UnboundLocalError` and specific edge-case crashes in `profile_store.py` during migration.
+- **Critical Fix (Runtime Matching)**: Fixed an issue where runtime profile matching was blocking the event loop and skipping DTW; now uses the full async pipeline.
+- **Legacy Data Repair**: Added automatic reconstruction of missing `time_grid` in old profile envelopes to prevent errors.
+- **Validation**: Fixed missing `dtw_bandwidth` key in `strings.json` causing config flow validation errors.
+- **Maintenance Safety**: Fixed aggressive cleanup logic that was deleting empty/new profiles (pending training); these are now safely preserved.
+- **Test Suite**: Fixed verification tests for Smart Termination and Profile Store matching.
+
+### 📚 Documentation
+- **Visual Settings Guide**: Expanded `SETTINGS_VISUALIZED.md` with comprehensive documentation for 20+ parameters, organized into logical sections (Signal Conditioning, Detection, Matching, Integrity, Interruption, Learning, Notifications).
+- **Complete Parameter Coverage**: All advanced settings now documented with explanations, including `sampling_interval`, `watchdog_interval`, `profile_match_threshold`, `duration_tolerance`, `learning_confidence`, `auto_label_confidence`, and `abrupt_drop_ratio`.
+
+### 🧹 Cleanup & Removals
+- **Removed `auto_merge_gap_seconds`**: This setting was never used in the actual merge logic; removed from code, config flow, and translations.
+- **Removed `auto_merge_lookback_hours`**: Similar unused legacy setting removed from codebase and UI.
+- **Fixed Unused Imports**: Cleaned up unused `DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO` and duplicate import warnings.
+- **Fixed F-String Warning**: Removed empty f-string in config_flow post-process step.
+
+### ⚠️ Deprecations
+- **Legacy Logic**: Removed "consecutive samples" based detection in favor of time-aware accumulators.
+- **Sliders**: Removed slider inputs in config flow in favor of precise text inputs.
+
 ## [0.3.2] - 2026-01-02
 
 ### Added

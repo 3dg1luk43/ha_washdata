@@ -182,3 +182,27 @@ submit_cycle_feedback:
       required: false
       selector:
         text:
+
+record_start:
+  name: Record Cycle Start
+  description: Start manually recording a clean cycle (bypasses all matching logic).
+  fields:
+    device_id:
+      name: Device
+      description: The washing machine device to record.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+
+record_stop:
+  name: Record Cycle Stop
+  description: Stop manual recording.
+  fields:
+    device_id:
+      name: Device
+      description: The washing machine device to stop recording.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata

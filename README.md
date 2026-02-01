@@ -21,7 +21,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 ## ✨ Features
 
 - **Multi-Device Support**: Track Washing Machines, Dryers, Dishwashers, or Coffee Machines with device-type tagging.
-- **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic to finish faster when confidence is high.
+- **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic. Includes **End Spike Protection** for dishwashers to capture final pump-outs.
 - **Power Spike Filtering**: Ignores brief boot spikes to prevent false starts.
 - **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles.
 - **Manual Training**: You define your profiles (e.g., "Cotton", "Quick") once; the system learns to recognize them thereafter. Integration **does not** auto-create profiles.
@@ -30,13 +30,15 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Minimal Status Card**: Optional custom Lovelace card.
 - **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
 - **Manual Profile Creation**: Create profiles even without historical cycles by specifying a baseline duration (e.g., "Eco Mode - 3h").
-- **Ghost Cycle Prevention**: Minimum runtime threshold avoids recording brief power spikes as completed cycles.
+- **Ghost Cycle Suppression**: Intelligent filtering with **"Suspicious Window"** (20 mins) prevents end-spikes from triggering duplicate cycles. **Now Persistent**: Remembers cycle history across HA restarts to prevent ghost detections after reboots.
+- **Robust vNext State Machine**: Advanced filtering with `start_energy` and `end_energy` gates prevents false starts/ends.
+- **Multi-Stage Matching Pipeline**: Uses Fast Reject -> Core Similarity -> DTW-Lite tie-breaking for superior accuracy.
 - **Local Only**: No cloud dependency, no external services. All data stays in your Home Assistant.
 - **Notifications**: Integrated alerts for cycle start, finish, and **pre-completion** (e.g., 5 mins before finish).
 - **Self-Learning**: Gradually adjusts expected durations based on your confirmed historical data.
 - **Realistic Variance**: Handles natural cycle duration variations with configurable tolerance.
 - **Progress Tracking**: Clear cycle progress indicator with automatic reset after unload.
-- **Auto-Maintenance**: Nightly cleanup - removes orphaned profiles, merges fragmented cycles.
+- **Auto-Maintenance**: Nightly cleanup - removes broken profiles, merges fragmented cycles (**Empty/New profiles are safely preserved**).
 - **Export/Import**: Full configuration backup/restore with all settings and profiles via JSON.
 
 ---
@@ -45,182 +47,145 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 
 Designed for new users to get up and running quickly.
 
-## 1. Installation (via HACS)
+## 1. Installation
 
-1. In Home Assistant, open **HACS → Settings → Custom repositories**.
-2. Add `https://github.com/3dg1luk43/ha_washdata` as a **Integration** repository.
-3. Back in HACS, search for **HA WashData**, install, and **Restart Home Assistant**.
+### Option A: HACS (Recommended)
+This integration is a default repository in HACS.
 
-Manual fallback (if not using HACS): copy `custom_components/ha_washdata` into your HA `custom_components` folder and restart.
+1. Click the button below to open the repository in HACS:
+   [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=3dg1luk43&repository=ha_washdata&category=integration)
+2. Click **Download**.
+3. Restart Home Assistant.
 
-### 2. Initial Setup
+*Alternatively, open HACS > Integrations > Explore & Download Repositories > Search for "WashData".*
 
-1. Go to **Settings > Devices & Services**.
-2. Click **Add Integration** and search for **HA WashData**.
-3. Follow the wizard:
-   - **Name**: Name your appliance (e.g., "Washing Machine").
-   - **Device Type**: Select the type (Washer, Dryer, etc.) - this sets optimal defaults.
-   - **Power Sensor**: Choose the smart plug entity monitoring the power (Watts).
-   - Set the **Minimum Power** threshold (default 2W).
-   - **Step 2 (Optional)**: You will be asked if you want to create your **First Profile** immediately (e.g., "Cotton").
-     - *Tip*: If you create this profile, you can **manually select it** via the card controls while a cycle is running. This forces the system to use that profile's duration for accurate **time remaining** and **progress %** estimates immediately, even before the system learns to recognize it automatically.
+### Option B: Manual Installation
+1. Download the `custom_components/ha_washdata` folder from the [latest release](https://github.com/3dg1luk43/ha_washdata/releases).
+2. Copy it to your Home Assistant `custom_components` directory.
+3. Restart Home Assistant.
 
-### 3. Add the Status Card
-
-To see the beautiful status card on your dashboard:
-1. Edit your Dashboard (Top right menu -> **Edit Dashboard**).
-2. Add Card
-3. Search for **WashData Tile Card** (or just "Wash") and select it.
-4. The visual editor will appear. Select entities for your target device.
-5. Click **Save**.
-
-### 4. Teach the Integration (Crucial Step!)
-
-**Important**: The integration **does not** automatically create profiles. You must teach it! It will not detect your programs "magically" until you define them.
-
-1. **Run a Cycle**: Use your appliance as normal. The integration will record it as an "Unknown" cycle and show "detecting...".
-2. **Create a Profile**: After the cycle finishes, go to **Manage Data & Profiles**.
-3. **Label the Cycle**: Select the recent cycle, click **Create Profile** (e.g., name it "Cotton 60"), and save.
-
-**Now** the integration knows what "Cotton 60" looks like. The next time you run this program, it will be detected automatically and you will get accurate time estimates. Repeat this for each of your common programs.
 
 ---
 
-## How it Works
+## ⚡ Getting Started (The "Happy Path")
 
-1. **Monitoring**: The integration actively monitors the configured power sensor.
-2. **Detection**: Cycle starts when smoothed power ≥ `min_power` threshold and stays active for at least `completion_min_seconds`.
-3. **Matching**: Periodically compares the live power trace's shape against stored profiles using NumPy correlation scoring (0-1).
-4. **Learning**: When you confirm or correct a program, the system adjust the profile's expected duration (80% weight to history, 20% to new data).
-5. **Progress**: Tracks completion (0-100%), resets to 0% after a configurable idle time (default 5 mins).
-6. **Maintenance**: Nightly cleanup at midnight removes orphaned profiles and merges fragmented cycles.
-7. **Stale Detection**: On HA restart, only restores "running" state if power is actually detected AND the cycle was updated recently.
+Follow these steps to get accurate results quickly.
 
-### Cycle Status Semantics
+### 1. Initial Setup
+1. Go to **Settings > Devices & Services** > **Add Integration** > **WashData**.
+2. **Name**: Name your appliance (e.g., "Washing Machine").
+3. **Device Type**: Select the type (Washer, Dryer, etc.) - this sets smart defaults for the internal logic.
+4. **Power Sensor**: Select your smart plug's power entity (Watts). *Note: The system is now optimized for polling intervals of 30-60 seconds (defaults adjusted automatically).*
+5. **Initial Profile (Optional)**: If you know your standard program (e.g. "Cotton"), create it now.
 
-- ✓ **completed**: Natural finish; power dropped and stayed below threshold for `off_delay`.
-- ✓ **force_stopped**: Handled by watchdog (e.g., publish-on-change timeout); treated as success.
-- ✗ **interrupted**: Abnormal endings (e.g., abrupt power drop without completion window).
-- ⚠ **resumed**: Active cycle restored after a Home Assistant restart.
+### 2. The Golden Rule: "Teach" the Integration
+WashData **does not** come with pre-built profiles because every machine model is different. You must teach it what your cycles look like.
 
-## Screenshots
+#### Option A: Manual "Record Mode" (Recommended)
+This gives you the cleanest data.
+1. Open the **Dashbord Card**.
+2. Select **Record Cycle (Manual)** from the program list.
+3. Start your machine.
+4. When finished, go to **Manage Data & Profiles**, find the recording, and create a profile.
+
+#### Option B: The Natural Way
+If you prefer to just use it and label later:
+1. **Run a Cycle**: Use your machine as normal. WashData will track it as an "Unknown" cycle.
+2. **Label It**: After the cycle finishes:
+   - Go to **Manage Data & Profiles** (via the Configure button or the Tile Card).
+   - Find the recent "Unknown" cycle.
+   - Click **Create Profile**, name it (e.g., "Cotton 40"), and Save.
+3. **Repeat**: Do this for your 2-3 most common programs.
+
+### 3. Verification & Learning
+Once profiles are created, WashData starts **matching** new cycles automatically.
+- **Feedback**: If a match is found but confidence is moderate, you may get a "Verify Cycle" notification.
+- **Refinement**: Go to **Configure > Learning Feedbacks** to Confirm or Correct the detection.
+- **Self-Improving**: Confirming a cycle helps the system refine its duration models.
+
+---
+
+## 🔧 Troubleshooting & Tuning
+
+If "Auto-Detect" isn't working perfectly, use **Advanced Settings** to tune the logic for your specific machine.
+
+> 📊 **[Click here for a Visual Guide to these settings](SETTINGS_VISUALIZED.md)** - Graphs explaining what the numbers actually do.
+
+| Problem | Likely Cause | Solution |
+| :--- | :--- | :--- |
+| **Cycle Starts Too Early** | Smart plug reports brief power spikes during boot/standby. | **Increase `Start Energy Threshold`** (e.g., to `2 Wh`). This forces the machine to consume actual energy before stating "Running". |
+| **Cycle Ends Too Early** | Machine pauses (soaking) or has long low-power intervals. | **Increase `Off Delay`**. Give it more time (e.g. 5 mins) to wait before deciding the cycle is truly finished. |
+| **False "Ghost" Cycles** | High-power usage at the very end (e.g. anti-crease or pump-out) triggers a new start. | **Increase `Minimum Off Gap`** (e.g. to `120s`). Forces a mandatory cooldown period between cycles. |
+| **"Unknown" Matches** | Your profiles are too strict or variance is high. | **Increase `Duration Tolerance`** (e.g. `0.25`). Allows ±25% duration difference when matching. |
+| **Notifications Too Late** | You want to know *before* it finishes. | **Set `Notify Before End Minutes`** (e.g. `5`). Get an alert 5 minutes before the estimated finish time. |
+
+> **Pro Tip**: Use the **Apply Suggestions** button in Settings. It analyzes your history and calculates the perfect text-book values for your specific machine.
+
+---
+
+## 📊 Documentation & References
+
+- 📗 **[IMPLEMENTATION.md](IMPLEMENTATION.md)** - Deep dive into NumPy matching, State Machine logic, and Learning algorithms.
+- 🧪 **[TESTING.md](TESTING.md)** - How to test with the virtual socket.
 
 <details>
-  <summary><b>Controls</b></summary>
+<summary>📸 <b>Screenshots</b> (Click to expand)</summary>
 
-  ![Controls](img/integration-controls.png)
+#### Devices Overview
+All your WashData-monitored appliances appear as devices with sensors and controls.
+![Devices](doc/images/devices.png)
 
-  **Controls** exposes runtime toggles and quick actions:
-  - **Auto Maintenance** switch to enable/disable nightly cleanup.
-  - **Cycle Program** selector for manual override when Auto-Detect is uncertain.
+#### Main Menu
+The central hub for managing your appliance - access all features from here.
+![Main Menu](doc/images/main_menu.png)
+
+#### Basic Settings
+Configure power sensor, device type, off delay, and notification preferences.
+![Settings](doc/images/settings.png)
+
+#### Advanced Settings
+Fine-tune detection thresholds, matching parameters, and timeout values for your specific appliance.
+![Advanced Settings](doc/images/advanced_settings.png)
+
+#### Manage Profiles
+View, create, edit, or delete learned power profiles for different wash programs.
+![Manage Profiles](doc/images/manage_profiles.png)
+
+#### Manage Cycles
+Browse cycle history, label unknown cycles, merge fragments, or delete bad data.
+![Manage Cycles](doc/images/manage_cycles.png)
+
+#### Review Feedback
+Confirm or correct the system's profile matches to improve learning accuracy.
+![Review Feedback](doc/images/review_feedback.png)
+
+#### Diagnostics & Maintenance
+Run database cleanup, repair corrupted data, and export/import configurations.
+![Diagnostics & Maintenance](doc/images/diagnostics_maintenance.png)
+
 </details>
 
-<details>
-  <summary><b>Sensors card</b></summary>
+### Entities Provided
+- **`sensor.<name>_state`**: Current Status (Idle, Running, Detecting...).
+- **`sensor.<name>_program`**: Best-matched Profile Name.
+- **`sensor.<name>_time_remaining`**: Smart countdown (locks during high variance phases).
+- **`sensor.<name>_cycle_progress`**: 0-100% (Resets to 0% after unload timeout).
+- **`binary_sensor.<name>_running`**: Simple On/Off state.
+- **`switch.<name>_auto_maintenance`**: toggle nightly database cleanup.
 
-  ![Sensors](img/integration-sensors.png)
+### Services
+Most management is now done via the **Interactive UI** (Configure > Manage Data), but services are available for automation:
+- `ha_washdata.export_config`: Full JSON backup/restore.
+- **`ha_washdata.import_config`**: Import a JSON backup, restoring all custom thresholds and profiles.
 
-  **Sensors** shows the live state the integration publishes:
-  - Current power (W), detected/selected program, progress (%), running flag, state, and estimated time remaining.
-</details>
-
-<details>
-  <summary><b>Settings</b></summary>
-
-  ![Settings](img/integration-settings.png)
-
-  **Settings** is the main tuning surface:
-  - Suggested values derived from learning (not applied automatically).
-  - **apply_suggestions** populates the form with recommended parameters.
-  - Thresholds/timers, notification service selection, and notification toggles.
-</details>
-
-<details>
-  <summary><b>Manage Data &amp; Profiles</b></summary>
-
-  ![Manage Data & Profiles](img/integration-profiles.png)
-
-  **Manage Data & Profiles** is the operational UI for history and labeling:
-  - Recent cycles with duration and label.
-  - Create/edit/delete profiles, label a cycle, auto-label old cycles, delete a cycle.
-</details>
-
-<details>
-  <summary><b>Diagnostics &amp; Maintenance</b></summary>
-
-  ![Diagnostics & Maintenance](img/integration-diagnostics.png)
-
-  **Diagnostics & Maintenance** provides one-shot maintenance operations:
-  - Merge fragmented cycles, migrate/compress stored data, wipe device data, export/import JSON.
-</details>
-
-## Entities
-
-- **`binary_sensor.<name>_running`**: ON when washer is running.
-- **`sensor.<name>_state`**: current state (Idle, Running, Off, detecting...).
-- **`sensor.<name>_program`**: Detected program name based on profile match.
-- **`select.<name>_program_select`**: Manual program selector. Setting this overrides detection and helps the system learn.
-- **`sensor.<name>_time_remaining`**: Estimated minutes remaining.
-- **`sensor.<name>_cycle_progress`**: 0-100% completion (reaches 100% on finish).
-- **`sensor.<name>_current_power`**: Real-time power draw in watts.
-- **`switch.<name>_auto_maintenance`**: Enable/disable nightly cleanup (default: ON).
-
-## Services
-
-### Profile & Cycle Management
-
-**`ha_washdata.label_cycle`**: Assign a profile to a historical cycle.
+**`ha_washdata.record_start` / `record_stop`**:
+Manually start/stop a recording. Useful for automations (e.g. triggering from a physical button or separate sensor).
 ```yaml
-service: ha_washdata.label_cycle
+service: ha_washdata.record_start
 data:
   device_id: "washer_device_id"
-  cycle_id: "cycle_abc123"
-  profile_name: "Cotton 60°C"
 ```
-
-**`ha_washdata.create_profile`**: Create a new profile from a specific cycle.
-**`ha_washdata.delete_profile`**: Delete a profile and optionally unlabel its cycles.
-**`ha_washdata.auto_label_cycles`**: Retroactively label unlabeled history using matching.
-
-### Configuration Backup
-
-**`ha_washdata.export_config`**: Export profiles, cycles, and all settings to a JSON file.
-```yaml
-service: ha_washdata.export_config
-data:
-  device_id: "washer_device_id"
-  path: "/config/washer_backup.json"
-```
-
-**`ha_washdata.import_config`**: Import a JSON backup, restoring all custom thresholds and profiles.
-
-## Advanced Options
-
-Access via **Configure → Settings**:
-- **`smoothing_window`**: Size of the moving average used to stabilize power readings; higher values smooth more but respond slower.
-- **`completion_min_seconds`**: Minimum runtime required before a drop is considered a valid cycle completion (filters short, noisy spikes).
-- **`auto_merge_lookback_hours`**: Hours to search for fragmented runs and merge them post-completion.
-- **`auto_merge_gap_seconds`**: Max gap between fragments to consider them a single cycle.
-- **`duration_tolerance` / `profile_duration_tolerance`**: Allowed variance versus a profile’s average duration for matching and learning (e.g., ±25%).
-- **`profile_match_interval`**: Seconds between heavy NumPy shape-matching passes (estimation uses lighter updates in between).
-- **`profile_match_min_duration_ratio` / `profile_match_max_duration_ratio`**: Bounds for acceptable duration ratios (cycle duration ÷ profile average) to prevent mismatches.
-- **`no_update_active_timeout`**: If no sensor updates arrive for this long during a run, the watchdog will force-complete or flush the buffer depending on state.
-- **`watchdog_interval`**: How often the watchdog checks for stuck/idle conditions; clamped by sensor cadence and `off_delay`.
-- **`abrupt_drop_watts` / `abrupt_drop_ratio` / `abrupt_high_load_factor`**: Thresholds to classify abrupt endings and high-load segments for better state transitions.
-- **`progress_reset_delay`**: After completion, delay before progress automatically resets to 0% (default ~5 minutes).
-- **`notify_before_end_minutes`**: Send a pre-completion alert when remaining time drops under this value (0 disables).
-- **`auto_maintenance`**: Enable nightly maintenance to repair samples, merge fragments, and keep storage healthy.
-- **`auto_tune_noise_events_threshold`**: Number of ghost cycles (short, low-power runs) in 24h before suggesting a higher `min_power`.
-- **Retention caps**: `max_past_cycles`, `max_full_traces_per_profile`, `max_full_traces_unlabeled` control history size and storage footprint.
-- **Apply Suggestions (UI)**: One-click to refresh the Settings form with recommended values derived from your machine’s observed cadence and history; review then submit to save.
-
-## 📖 Documentation
-
-📗 **[IMPLEMENTATION.md](IMPLEMENTATION.md)** - Architecture, NumPy matching details, and state machine.
-🧪 **[TESTING.md](TESTING.md)** - Mock socket guide and test procedures.
-🤖 **[.github/copilot-instructions.md](.github/copilot-instructions.md)** - AI development reference.
+- `ha_washdata.label_cycle`: Assign profile to history programmatically.
 
 ## License
-
-Non-commercial use only. See LICENSE file.
-
+Non-commercial use only. See [LICENSE](LICENSE) file.

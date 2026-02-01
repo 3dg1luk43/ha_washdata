@@ -1,62 +1,130 @@
-# HA WashData – AI Working Notes (Updated Dec 20, 2025)
+# HA WashData – AI Development Instructions
+# Updated: January 8, 2026
 
-## Status: ✅ COMPLETE - Refined & Polished
-- Purpose: Home Assistant custom integration that watches a smart plug's power to detect appliance cycles (washers; also suitable for dryers/dishwashers with predictable cycles), store traces, and expose HA entities.
-- Recent Phase: UI Refinement, NumPy-powered matching, and reactive synchronization.
+## Project Summary
 
-## Recent Updates (Dec 30, 2025)
-- ✅ **Predictive End Detection**: Short-circuits the `off_delay` wait if a cycle matches with high confidence (>90%) and is >98% complete.
-- ✅ **Confidence Boosting**: Adds a 20% score boost to profile matches if the shape correlation is exceptionally high (>0.85).
-- ✅ **Smart Time Prediction**: Detects high-variance phases (e.g. heating) and "locks" the time estimate to prevent erratic jumps.
-- ✅ **Data-Driven Tests**: New test suite `tests/test_real_data.py` replays real-world CSV/JSON cycle data.
+**HA WashData** is a Home Assistant custom integration that monitors washing machines, dryers, dishwashers, and coffee machines via smart socket power readings. It uses NumPy-powered shape correlation matching to detect cycle programs and estimate completion times.
 
-## Recent Updates (Dec 20, 2025)
-- ✅ **NumPy Shape-Correlation Matching**: Replaced simple duration matching with a weighted similarity score (MAE 40%, Correlation 40%, Peak Similarity 20%).
-- ✅ **Program Selection Entity**: Added `select.<name>_program_select` for manual overrides and easier system teaching.
-- ✅ **Ghost Cycle Prevention**: Added `completion_min_seconds` to filter out short "noise" cycles from being recorded as completed.
-- ✅ **Pre-completion Notifications**: Configurable alerts (`notify_before_end_minutes`) before estimated cycle end.
-- ✅ **Integrated Parameter Suggestions**: "Apply Suggestions" is now a reactive checkbox within the main Settings page.
-- ✅ **Reactive Synchronization**: All profile/cycle modifications (create/delete/rename/label) trigger `manager._notify_update()` to keep the `select` entity in sync.
-- ✅ **Precision UI**: Replaced sliders with precise text-based box inputs for all configuration parameters.
-- ✅ **Enhanced Mocking**: Added `--variability` to `mqtt_mock_socket.py` for realistic duration variance testing.
-
-## Key modules: 
-- `cycle_detector.py` (state machine)
-- `manager.py` (HA wiring, events, notifications, progress, sync)
-- `profile_store.py` (storage, compression, **NumPy-powered matching**)
-- `select.py` (NEW: Manual program selection entity)
-- `learning.py` (user feedback & learning system)
-- `config_flow.py` (Consolidated settings UI, integrated suggestions)
-- `services.yaml` (Fixed syntax, added `export_config` key)
-
-## Core Logic & Guardians
-
-- **Cycle Detection**: OFF→RUNNING when smoothed power >= `min_power`. Finishes after `off_delay` seconds OR **Predictive End** (30s delay if >98% complete).
-- **Smart Matching**: Uses NumPy correlation instead of just duration. weighted score (MAE+Corr+Peak). Boosts score if correlation > 0.85. Matches running cycles after 30% duration.
-- **Cycle Status**:
-  - ✓ **"completed"** - High-confidence natural drop (duration > `completion_min_seconds`).
-  - ✓ **"force_stopped"** - Watchdog completion (sensor offline but power was low).
-  - ✗ **"interrupted"** - Very short runs or abrupt power cliffs.
-  - ⚠ **"resumed"** - Restored after HA restart.
-- **Progress Management**: 0-100% during cycle. Reaches 100% at end. Resets to 0% after `progress_reset_delay` (idle window).
-- **Reactive Sync**: Always call `manager._notify_update()` in `__init__.py` service handlers and `config_flow.py` steps after profile changes. This notifies the `select` entity.
-- **Persistence**: `ha_washdata.<entry_id>` store. Cycles compressed to `[offset, power]`. Last 50 cycles retained.
-
-- **Mock Tooling**: `devtools/mqtt_mock_socket.py`
-  - `--speedup X`: Compresses time.
-  - `--variability Y`: Adds realistic duration variance (default 0.15).
-  - `--fault [DROPOUT|GLITCH|STUCK|INCOMPLETE]`: Injects anomalies.
-
-- **Guardrails**:
-  - Keep logic in `custom_components/ha_washdata`.
-  - Minimal deps (`numpy` allowed).
-  - No external calls.
-  - Storage backward compatibility.
-
-## Testing & Verification
-- Unit tests: `pytest tests/test_profile_store.py`, `pytest tests/test_manager.py`.
-- Integration test: Use mock script with variability to verify shape matching.
-- Verification Guide: See `TESTING.md`.
+**Repository**: `/root/ha_washdata`
+**Current Version**: 0.3.2
 
 ---
-*This file is primarily for AI assistants to understand the current architecture and latest changes.*
+
+## Critical Guardrails (Non-Negotiable)
+
+### 1. Dependencies
+- **ONLY NumPy allowed** - No SciPy, scikit-learn, or other ML libraries
+- No external API calls - All processing must be local
+- Verify `manifest.json` requirements if adding dependencies
+
+### 2. Datetime Handling
+- **ALWAYS use `dt_util.now()`** for timezone-aware datetimes
+- All time/energy calculations MUST be dt-aware (use timestamps, not sample counts)
+- Energy integration: `Σ P * dt` with explicit gap handling
+
+### 3. UI Localization
+- **NO inline strings in Python code** for UI text
+- All labels/descriptions in `strings.json` and `translations/en.json`
+- Translation keys format: `step_name.data.field_name` or `step_name.description`
+
+### 4. Home Assistant Patterns
+- Use `async_update_entry` for config entry modifications
+- Implement `async_migrate_entry` in `__init__.py` for migrations
+- Store tunables in `entry.options`, identity keys in `entry.data`
+- Debug entities gated behind `expose_debug_entities` option
+
+### 5. Event Data Limits
+- **32KB limit** on Home Assistant event data
+- ALWAYS exclude `power_data`, `debug_data`, `power_trace` from fired events
+
+### 6. Migration Safety
+- Config entry versioning: VERSION/MINOR_VERSION
+- Migration must be **deterministic and idempotent**
+- NEVER drop user data - preserve cycles, labels, corrections
+- Add migration tests with old-schema fixtures
+
+---
+
+## Architecture Quick Reference
+
+```
+WashDataManager (manager.py)
+    ├── CycleDetector (cycle_detector.py)
+    │   └── State machine: OFF→STARTING→RUNNING↔PAUSED→ENDING→OFF
+    ├── ProfileStore (profile_store.py)
+    │   └── Multi-stage matching: Fast Reject → Core Similarity → DTW-Lite
+    └── LearningManager (learning.py)
+        └── User feedback processing (80/20 weighting)
+```
+
+### Key Files
+| File | Responsibility |
+|------|----------------|
+| `manager.py` (~104KB) | Main orchestrator, power events, progress tracking |
+| `profile_store.py` (~88KB) | Storage, compression, NumPy matching |
+| `config_flow.py` (~65KB) | Config wizard, options flow |
+| `cycle_detector.py` (~20KB) | State machine logic |
+| `const.py` (~8KB) | Constants, config keys, defaults |
+| `learning.py` (~10KB) | Feedback/learning system |
+
+---
+
+## Matching Pipeline
+
+**Stage 1 - Fast Reject:**
+- Duration ratio (0.75x - 1.25x)
+- Energy delta check (>50% = reject)
+
+**Stage 2 - Core Similarity (weighted score):**
+- MAE (40%) + Correlation (40%) + Peak Power (20%)
+- Confidence boost (+20%) if correlation > 0.85
+
+**Stage 3 - DTW-Lite (tie-breaker only):**
+- Sakoe-Chiba band constraint
+- Only when margin < ambiguity threshold
+
+---
+
+## Development Workflow
+
+### Before Any Change
+```bash
+# Syntax check
+python3 -m py_compile custom_components/ha_washdata/*.py
+
+# Run tests
+pytest tests/ -v
+```
+
+### Testing with Mock Socket
+```bash
+python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG --variability 0.15
+```
+
+### Deployment
+Copy `custom_components/ha_washdata/` to HA, restart.
+
+---
+
+## Known Technical Debt
+
+Priority items (see `.dev_notes/` for details):
+1. Remove deprecated Smart Extension logic
+2. Remove deprecated constants from `const.py`
+3. Per-device defaults: don't leak dicts into Options schema
+4. Gate predictive end when match is ambiguous
+
+---
+
+## Documentation
+
+- `README.md`: User guide, installation
+- `IMPLEMENTATION.md`: Architecture details
+- `TESTING.md`: Test procedures, mock socket guide
+- `CHANGELOG.md`: Release history
+- `.dev_notes/`: Development notes and fix tracking
+- `.agent/workflows/development.md`: Full development workflow
+
+---
+
+*This file provides context for AI development assistants working on HA WashData.*

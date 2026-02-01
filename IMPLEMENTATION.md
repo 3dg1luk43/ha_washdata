@@ -10,19 +10,162 @@ This document covers the complete implementation of all major features:
 3. Self-learning feedback system
 4. Export/Import with full settings transfer
 5. Auto-maintenance watchdog with switch control
-7. Improved Stale Cycle Detection
-8. Reliability Features
+6. Robust Cycle State Machine (vNext)
+7. Reliability Features
 
 ---
 
 ## Table of Contents
 
-- [Features Implemented](#features-implemented)
-- [Architecture](#architecture)
+- [Flows & Processes](#flows--processes)
+- [Key Features](#features-implemented)
 - [Key Classes & APIs](#key-classes--apis)
 - [Event Flow](#event-flow)
 - [Configuration](#configuration)
 - [Deployment Notes](#deployment-notes)
+
+---
+
+## Flows & Processes
+
+### 1. User Journey Flow
+This high-level flow describes how a user interacts with the integration, from initial setup to daily use and feedback.
+
+```mermaid
+graph TD
+    A[Install Integration] --> B[Configure Settings]
+    B --> C{Action?}
+    
+    C -- "Create Profile" --> D["Create Empty Profile"]
+    C -- "Record Cycle" --> E["Manual Rec. Start"]
+    C -- "Normal Use (Recording mode: OFF)" -->  F["Run Appliance"]
+    
+    D -- "Recording mode: OFF" -->  F
+    
+    E --> G[Run Cycle]
+    G -- "Recording mode: ON" --> F
+    F -- "Recording mode: ON" -->  H["Manual Rec. Stop"]
+    H --> I[Save as Past Cycle]
+    I --> J[Create Profile from Cycle]
+
+    
+    F -- "Recording mode: OFF" -->  K[Detection Logic]
+    
+    subgraph Detection
+    K -- "Match Found" --> L[Monitor Progress]
+    K -- "No Match" --> M["Track as 'Unknown'"]
+    end
+    
+    L --> N[Cycle Complete]
+    M --> N
+    
+    N --> O[Update Stats & Envelopes]
+    O --> P{Check Confidence}
+    
+    P -- "High (>0.75)" --> Q[Auto-Label Cycle]
+    P -- "Medium (0.15-0.75)" --> R[Request Feedback]
+    P -- "Low (<0.15)" --> S[Log to History]
+    
+    R --> T["User Confirms/Corrects"]
+    T --> U["System Learns"]
+```
+
+### 2. Event Processing Pipeline
+How raw power sensor data is processed into cycle states.
+ 
+ ```mermaid
+ sequenceDiagram
+     participant Sensor as Power Sensor
+     participant Manager as WashDataManager
+     participant Detector as CycleDetector
+     participant Matcher as ProfileStore (Async)
+     
+     Sensor->>Manager: State Change (Power W)
+     Manager->>Detector: process_reading(time, watts)
+     
+     rect rgb(20, 20, 20)
+     Note over Detector: State Machine Logic
+     Detector->>Detector: Check Gates (Start/End Energy)
+     Detector->>Detector: Update State (OFF/RUNNING)
+     end
+     
+     Detector-->>Manager: State Changed (e.g. STARTING -> RUNNING)
+     
+     loop Every 5 Minutes
+         Manager->>Matcher: async_match_profile(current_data)
+         Matcher->>Matcher: 3-Stage Pipeline (NumPy/DTW)
+         Matcher-->>Manager: MatchResult (Best Profile, Confidence)
+         Manager->>Manager: Update Estimations
+     end
+ ```
+ 
+ ### 3. Cycle Detection State Machine
+ The core finite state machine logic governing cycle lifecycle.
+ 
+ ```mermaid
+ stateDiagram-v2
+     [*] --> OFF
+     
+     OFF --> STARTING: Power > Threshold
+     STARTING --> RUNNING: Energy > Start_Threshold
+     STARTING --> OFF: Power < Threshold (Spike)
+     
+     RUNNING --> PAUSED: Power < Threshold
+     PAUSED --> RUNNING: Power > Threshold
+     
+     PAUSED --> ENDING: Time > Off_Delay
+     RUNNING --> ENDING: Time > Off_Delay (rare)
+     
+     ENDING --> OFF: Energy < End_Threshold
+     ENDING --> PAUSED: Energy > End_Threshold (False End)
+     
+     OFF --> [*]
+ ```
+ 
+ ### 4. Matching Pipeline (3-Stage)
+ The logic used to identify which profile matches the current cycle.
+ 
+ ```mermaid
+ graph TD
+     A[Raw Power Data] --> B["Resampling (10s intervals)"]
+     B --> C{"Stage 1: Fast Reject"}
+     C -- "Duration Ratio < 0.75 or > 1.25" --> D[Discard]
+     C -- "Pass" --> E["Stage 2: Core Similarity"]
+     
+     E --> F["Calculate MAE, Correlation, Peak"]
+     F --> G{"Ambiguous Result?"}
+     
+     G -- "No (Clear Winner)" --> H[Select Top Candidate]
+     G -- "Yes (Close Scores)" --> I["Stage 3: DTW Refinement"]
+     
+     I --> J[Run Dynamic Time Warping]
+     J --> H
+     
+     H --> K{"Confidence > Threshold?"}
+     K -- Yes --> L[Match Confirmed]
+     K -- No --> M["Unknown / Detecting..."]
+ ```
+
+### 5. Learning Mechanism (Feedback Loop)
+How the system adapts to user corrections.
+
+```mermaid
+graph LR
+    A[Cycle Complete] --> B{Confidence Level}
+    
+    B -- "High (>= 0.75)" --> C[Auto-Label Cycle]
+    C --> D[Rebuild Envelope]
+    
+    B -- "Moderate (0.15 - 0.75)" --> E[Emit Feedback Request]
+    E --> F[User Notification]
+    F --> G{User Action?}
+    
+    G -- Confirm --> H[Boost Confidence]
+    G -- Correct --> I[Update Profile Stats]
+    
+    B -- "Low (< 0.15)" --> J["Log to History (No Action)"]
+```
+
 
 ---
 
@@ -329,42 +472,22 @@ ProfileStore.async_run_maintenance()
 - When toggled, scheduler is re-setup accordingly
 - Toggling OFF cancels scheduled cleanup
 
-### 6. Improved Stale Cycle Detection
+### 6. Robust Cycle State Machine (vNext)
 
-**Problem:** After HA restart or code update, phantom "restored" cycles appeared at 0W power, confusing users.
+**Problem:** Simple ON/OFF logic failed with pauses, soaking, or "Anti-Crease" modes.
 
 **Solution:**
-- Check both current power state AND saved cycle age on startup
-- Only restore "running" state if BOTH conditions met:
-  - Current power ≥ min_power threshold AND
-  - Last save within 10 minutes
-- If power is 0W at startup, immediately clear any stale active cycle
-
-**Files Modified:**
-- `manager.py` - Enhanced `async_setup()` restoration logic
-
-**Startup Logic:**
-```
-HA Restart
-    ↓
-Get saved active_snapshot from ProfileStore
-    ↓
-Check current power state from sensor
-    ├─ If power < min_power
-    │  └─ CLEAR stale cycle (definitely not running)
-    └─ If power >= min_power
-        ├─ Check last_active_save timestamp
-        ├─ If saved < 10 minutes ago
-        │  └─ RESTORE snapshot (genuine interrupted cycle)
-        └─ If saved >= 10 minutes ago
-           └─ CLEAR stale cycle (too old from restart/update)
-```
+- Implemented a formal State Machine: `OFF` -> `STARTING` -> `RUNNING` <-> `PAUSED` -> `ENDING` -> `OFF`.
+- **OFF**: Monitoring for `min_power`.
+- **STARTING**: Debounce phase. Requires `start_duration_threshold` AND `start_energy_threshold` (e.g. 5Wh) to confirm.
+- **RUNNING**: Main active state.
+- **PAUSED**: Entered if power drops low but not long enough to end. Allows for soaking or door opening.
+- **ENDING**: Candidates for completion. Must satisfy `off_delay` AND `end_energy_threshold` (e.g. < 50Wh in last window) to finish.
 
 **Benefits:**
-- Most reliable detection method (power state is ground truth)
-- 10-minute age threshold prevents false restores
-- Graceful error handling (clears to be safe)
-- Clear logging for troubleshooting
+- Eliminates false starts from brief spikes.
+- Prevents false endings during long pauses if energy was high recently.
+- Handles "Anti-Crease" (periodic tumbles) gracefully via `PAUSED`/`ENDING` transitions.
 
 ### 7. Reliability Features
 
@@ -374,82 +497,29 @@ Check current power state from sensor
 **Problem:** Cycles with identical duration but different phases (e.g. Eco vs Intensive) were hard to distinguish.
 **Solution:** If `numpy.corrcoef` > 0.85 (very strong shape match), the profile match score is heavily boosted (x1.2), allowing strict shape matching to override minor power amplitude differences.
 
-#### B. Predictive End Detection
-**Problem:** Users waited 10+ minutes for "OFF" notification even if the cycle was obviously done.
-**Solution:**
-- If profile match confidence > 90%
-- AND cycle progress > 98%
-- Then `off_delay` requirement drops to just **30 seconds**.
-- **Result:** Faster notifications for known cycles.
-
-#### C. Smart Time Prediction (Variance Locking)
+#### B. Smart Time Prediction (Variance Locking)
 **Problem:** Time remaining jumped erratically during variable phases (e.g. heating water).
 **Solution:**
 - System calculates standard deviation (variance) of the matched profile window.
 - If variance is high (>50W std dev): Time estimate updates are **damped** (locked).
 - If variance is low: Time estimate updates normally.
-- **Result:** Smooth countdown that "pauses" during heating/waiting instead of jumping up and down.
+- **Switching Logic**: System switches profile mid-cycle if:
+    - New match confidence > Existing score + 0.15 (Strong override)
+    - New match shows positive trend (>70% increasing scores)
+ 
+#### C. Smart Termination & End Spike Logic
+**Problem:** Dishwashers often have a long silent drying phase followed by a brief, high-power pump-out spike. Smart termination would sometimes cut the cycle off early (during drying), missing the final spike and causing the spike to trigger a new "ghost" cycle.
 
----
+**Solution:**
+- **Conservative Ratio**: Dishwashers require **99%** of expected duration before Smart Termination is even considered (vs 98% for others).
+- **End Spike Wait Period**: Even if the duration is met, the system scans the "Ending" state for a high-power spike.
+- If no spike is found, it **waits up to 5 extra minutes** past the expected duration to catch it.
+- **Ghost Cycle Suppression**: A "Suspicious Window" (20 mins) protects legitimate short cycles. Aggressive ghost cycle termination (10 min timeout) only applies if a cycle starts within 20 mins of the previous one ending.
+- **Persistence**: This 20-minute window logic persists across Home Assistant restarts by restoring `_last_cycle_end_time` from the persistent `profile_store`, ensuring protection isn't lost after a reboot.
+- **Tail Preservation**: The profile store now explicitly preserves trailing silence/spikes for natural completions, preventing the "profile shrinking" feedback loop where frequent early terminations made the learned profile shorter and shorter.
+ 
 
-## Architecture
-
-### Component Diagram
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Home Assistant Integration                │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │            WashDataManager (manager.py)               │  │
-│  │ • Power sensor updates                                │  │
-│  │ • Cycle detection & state management                 │  │
-│  │ • Progress tracking & idle-based reset               │  │
-│  │ • Feedback requests                                   │  │
-│  │ • Events & notifications                              │  │
-│  └──────────────────────────────────────────────────────┘  │
-│           ↓                              ↓                   │
-│  ┌──────────────────┐        ┌──────────────────────────┐  │
-│  │ CycleDetector    │        │  LearningManager (NEW)   │  │
-│  │                  │        │                          │  │
-│  │ • State machine  │        │ • Feedback tracking      │  │
-│  │ • Power trace    │        │ • Profile learning       │  │
-│  │ • Off detection  │        │ • Correction history     │  │
-│  └──────────────────┘        └──────────────────────────┘  │
-│           ↓                              ↓                   │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │         ProfileStore (profile_store.py)              │  │
-│  │                                                        │  │
-│  │ • Cycle compression & storage (±25% tolerance)      │  │
-│  │ • Profile matching with variance support            │  │
-│  │ • Feedback history                                   │  │
-│  │ • Duration learning                                  │  │
-│  └──────────────────────────────────────────────────────┘  │
-│                           ↓                                   │
-│                    HA Storage (Store)                        │
-│                                                               │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### [After 5 minutes idle OR new cycle]
-    ├─ If new cycle: Cancel reset
-    └─ If idle 5min: Progress → 0%
-```
-
-### Profile Matching Architecture (NumPy)
-
-Matches are performed using three weighted metrics to ensure robustness against noise and sampling gaps:
-
-1. **Mean Absolute Error (40%)**: Compares the average wattage difference (normalized to 50W penalty).
-2. **Correlation Coefficient (40%)**: Measures how closely the *shape* (slopes, plateaus) matches the profile. Clamped to 0.0-1.0.
-3. **Peak Power Similarity (20%)**: Ensures the heating elements and motor surges reach expected levels.
-
-**Final Score Calculation:**
-`Score = (0.4 * MAE_Score) + (0.4 * Correlation_Score) + (0.2 * Peak_Score)`
-
-Matches are accepted if the final score exceeds the `learning_confidence` threshold (default: 0.75).
-
+ 
 ---
 
 ## Key Classes & APIs
@@ -467,8 +537,8 @@ Matches are accepted if the final score exceeds the `learning_confidence` thresh
 | `_on_state_change(old, new)` | Handle detector state transitions |
 | `_on_cycle_end(cycle_data)` | Finalize cycle, request feedback |
 | `_start_progress_reset_timer()` | Begin 5-min reset countdown |
-| `_check_progress_reset()` | Execute reset if idle passed |
-| `_stop_progress_reset_timer()` | Cancel reset on new cycle |
+| `_check_progress_reset()` | Async callback checking if idle threshold passed |
+| `_stop_progress_reset_timer()` | Cancel reset if new cycle starts |
 | `_maybe_request_feedback()` | Emit feedback request if confident |
 
 **Properties:**
@@ -478,7 +548,7 @@ manager._last_match_confidence  # Last profile match score
 manager._cycle_completed_time  # When cycle finished (ISO)
 ```
 
-### LearningManager (learning.py - NEW)
+### LearningManager (learning.py)
 
 **Handles user feedback and profile learning.**
 
@@ -491,42 +561,13 @@ manager._cycle_completed_time  # When cycle finished (ISO)
 | `get_feedback_history(limit=10)` | Return recent feedback |
 | `get_learning_stats()` | Return learning metrics |
 
-**Data Structures:**
-
-```python
-pending_feedback = {
-    "cycle_id_1": {
-        "cycle_id": str,
-        "detected_profile": str,
-        "confidence": float,
-        "estimated_duration": float,
-        "actual_duration": float,
-        "is_close_match": bool,
-        "created_at": str,
-    }
-}
-
-feedback_history = [
-    {
-        "cycle_id": str,
-        "original_detected_profile": str,
-        "original_confidence": float,
-        "user_confirmed": bool,
-        "corrected_profile": str or None,
-        "corrected_duration": float or None,
-        "notes": str,
-        "submitted_at": str,
-    }
-]
-```
-
 ### ProfileStore (profile_store.py)
 
 **Manages cycle storage, compression, and profile matching.**
 
 | Method | Purpose |
 |--------|---------|
-| `match_profile(power_data, duration)` | Match cycle to profile (confidence 0-1) |
+| `async_match_profile(power_data, duration)` | Match cycle to profile (confidence 0-1) |
 | `create_profile(name, cycle_id)` | Create new profile from cycle |
 | `async_save_cycle(cycle_data)` | Compress and save cycle |
 | `merge_cycles(hours, gap_threshold)` | Auto-merge fragmented cycles |
@@ -535,192 +576,3 @@ feedback_history = [
 - Tolerance: ±25% (was ±50%)
 - Rejects: duration_ratio < 0.75 or > 1.25
 - Accounts for realistic variance
-
----
-
-## Event Flow
-
-### Cycle Completion to Feedback
-
-```
-Cycle Completes
-    ↓
-Manager._on_cycle_end()
-    ├─ Progress = 100%
-    ├─ Start 5-min reset timer
-    └─ _maybe_request_feedback()
-        └─ If confidence > threshold:
-            ├─ Emit EVENT_FEEDBACK_REQUESTED
-            ├─ LearningManager.request_cycle_verification()
-            └─ Add to pending_feedback
-    ↓
-[Home Assistant Automation]
-    └─ Listens for EVENT_FEEDBACK_REQUESTED
-        ├─ Show notification
-        └─ Open UI for user input
-    ↓
-User Confirms or Corrects
-    ↓
-Service Call: ha_washdata.submit_cycle_feedback
-    ↓
-LearningManager.submit_cycle_feedback()
-    ├─ If confirmed: Reinforce profile
-    ├─ If corrected: Apply learning
-    │  └─ Update profile avg_duration (80%/20%)
-    ├─ Store feedback record
-    └─ Mark cycle with feedback_corrected=true
-    ↓
-ProfileStore.async_save()
-    ├─ Update profile
-    └─ Update cycle record
-    ↓
-Future Cycles Use Updated Profiles
-    └─ Better detection accuracy
-```
-
----
-
-## Configuration
-
-### Options Menu
-
-Configure via Home Assistant UI:
-
-| Option | Type | Default | Purpose |
-|--------|------|---------|---------|
-| `min_power` | watts | 2W | Threshold to detect cycle start |
-| `off_delay` | seconds | 120s | Time to confirm cycle end |
-| `notification_service` | entity_id | None | Service for notifications |
-| `notify_cycle_start` | boolean | false | Notify when cycle starts |
-| `notify_cycle_finish` | boolean | false | Notify when cycle finishes |
-
-### Advanced Options
-
-| Option | Default | Notes |
-|--------|---------|-------|
-| `smoothing_window` | 5 | Moving-average window for power smoothing. |
-| `completion_min_seconds` | 600 | **Ghost Cycle Prevention**: Minimum active time required to record a cycle. |
-| `notify_before_end_minutes` | 0 | **Pre-completion Notification**: Minutes before finish to trigger alert. |
-| `no_update_active_timeout` | e.g., 600s | For publish-on-change sockets; only force-end an active cycle after this inactivity window. |
-| `profile_duration_tolerance` | ±25% | Duration tolerance used by `ProfileStore.match_profile()`. |
-| `auto_merge_lookback_hours` | 3 | Post-process merging window after cycle end. |
-| `auto_merge_gap_seconds` | 1800 | Max gap to merge fragmented runs. |
-| `interrupted_min_seconds` | 150 | Minimum runtime below which a run may be flagged as interrupted. |
-| `abrupt_drop_watts` / `abrupt_drop_ratio` | impl. defaults | Heuristics for abrupt power cliff detection. |
-
-### Watchdog & Publish-on-Change Devices
-
-Some smart plugs publish every ~60s and pause when values are steady. The manager’s watchdog handles this by:
-- Completing cycles normally if already in low-power wait for ≥ `off_delay`.
-- Avoiding premature force-end while active unless no updates exceed `no_update_active_timeout`.
-
-### Service Calls
-
-**Submit Cycle Feedback:**
-
-```yaml
-service: ha_washdata.submit_cycle_feedback
-data:
-  entry_id: "xyz"              # Integration entry ID
-  cycle_id: "abc123"           # Cycle to provide feedback on
-  user_confirmed: true         # true=confirmed, false=correction
-  corrected_profile: null      # Only if false above
-  corrected_duration: null     # Only if false above (seconds)
-  notes: "Optional notes"      # Optional feedback notes
-```
-
-### Events
-
-**Feedback Request Event:**
-
-```yaml
-ha_washdata_feedback_requested:
-  cycle_id: str
-  detected_profile: str
-  confidence: float
-  estimated_duration: float    # minutes
-  actual_duration: float       # minutes
-  is_close_match: bool
-  created_at: str
-```
-
-**Cycle Events:**
-- `ha_washdata_cycle_started` - Cycle began
-- `ha_washdata_cycle_ended` - Cycle completed
-
----
-
-## Deployment Notes
-
-### Backward Compatibility
-
-✅ All changes are backward compatible:
-- Existing profiles continue working
-- Existing stored cycles remain valid
-- New features add to existing data structures
-- Storage format compatible with previous versions
-
-### Dependencies
-
-No new dependencies added:
-- NumPy already required (for profile matching)
-- All Python stdlib used for new code
-- Learning system pure Python
-
-### Performance
-
-- **Progress reset:** Async, doesn't block
-- **Profile matching:** Throttled to 5-min intervals
-- **Learning:** On-demand, minimal overhead
-- **Storage:** Efficient compression maintained
-
-### Error Handling
-
-- Missing cycle data → Skips feedback request
-- Invalid corrections → Logs warning, uses old value
-- Storage errors → Persists error, continues
-- Service errors → Logged, doesn't crash
-
----
-
-## Testing
-
-All code has been:
-- ✓ Syntax checked (Python 3.9+)
-- ✓ Type annotated (IDE support)
-- ✓ Well documented (docstrings + comments)
-- ✓ Integrated properly (event flow tested)
-
-### Quick Test
-
-```bash
-# Test variance
-python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
-
-# Monitor in Home Assistant:
-# - sensor.washer_progress (0-100%)
-# - Event: ha_washdata_feedback_requested
-# - Service: submit_cycle_feedback
-```
-
-See **TESTING.md** for comprehensive test procedures.
-
----
-
-## Next Steps
-
-1. **Deploy:** Copy files to Home Assistant integration
-2. **Test:** Follow test procedures in TESTING.md
-3. **Monitor:** Check logs for feedback requests
-4. **Collect Feedback:** Use submit_cycle_feedback service
-5. **Iterate:** Refine based on real-world usage
-
----
-
-## Support
-
-- **Architecture questions?** See this document
-- **Testing procedures?** See TESTING.md
-- **API details?** Check code docstrings
-- **Debugging?** Enable debug logging: `logger: custom_components.ha_washdata: debug`
-
