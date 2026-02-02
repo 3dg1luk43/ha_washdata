@@ -12,6 +12,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
 from .const import DOMAIN, SIGNAL_WASHER_UPDATE
 from .manager import WashDataManager
+from .profile_store import profile_sort_key
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ class WashDataProgramSelect(SelectEntity):
         """Update the list of available options from profiles."""
         profiles = self._manager.profile_store.list_profiles()
         # Sort profiles by name
-        profile_names = sorted([p["name"] for p in profiles])
+        profile_names = sorted([p["name"] for p in profiles], key=profile_sort_key)
         self._attr_options = [OPTION_AUTO] + profile_names
 
     async def async_added_to_hass(self) -> None:
