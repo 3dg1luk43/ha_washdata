@@ -37,10 +37,10 @@ CycleDict: TypeAlias = dict[str, Any]
 
 def profile_sort_key(name: str) -> tuple[int, int, str]:
     """Sort key for profile names: numeric-prefixed first (by number), then alphabetically."""
-    match = re.match(r'^(\d+)', str(name))
+    match = re.match(r'^(\d+)', name)
     if match:
         return (0, int(match.group(1)), name)
-    return (1, 0, str(name))
+    return (1, 0, name)
 
 
 
