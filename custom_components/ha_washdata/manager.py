@@ -76,6 +76,7 @@ from .const import (
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
+    DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
     DEFAULT_SMOOTHING_WINDOW,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEFAULT_INTERRUPTED_MIN_SECONDS,
@@ -94,7 +95,7 @@ from .const import (
     DEFAULT_AUTO_MAINTENANCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_MAX_PAST_CYCLES,
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
@@ -353,9 +354,9 @@ class WashDataManager:
             min_duration_ratio=float(
                 config_entry.options.get(
                     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER
-                    if self.device_type == "dishwasher"
-                    else DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
+                    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
+                        self.device_type, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
+                    ),
                 )
             ),
             match_interval=int(
@@ -557,7 +558,7 @@ class WashDataManager:
             # --- Envelope Verification for Mismatches ---
             if (not profile_name or result.is_confident_mismatch) and current_matched:
                 formatted = [(t.isoformat(), p) for t, p in readings]
-                is_confirmed, mapped_time, mapped_p = (
+                is_confirmed, mapped_time, _ = (
                     await self.profile_store.async_verify_alignment(current_matched, formatted)
                 )
                 if is_confirmed:
@@ -576,7 +577,8 @@ class WashDataManager:
                             if avg_dur > 0 and (mapped_time / avg_dur) > 0.95:
                                 verified_pause = False
                                 _LOGGER.info("Smart Termination: Near end of profile. Releasing pause lock.")
-                    except Exception: pass
+                    except Exception:
+                        pass
                 else:
                     verified_pause = False
 
@@ -587,18 +589,19 @@ class WashDataManager:
             # --- Consistency Override ---
             # If envelope verified or mismatched, ensure manager program matches
             if profile_name != self._current_program and (verified_pause or result.is_confident_mismatch):
-                 if profile_name:
-                     self._current_program = profile_name
-                     self._last_match_confidence = confidence
-                     # Try to fetch duration if we switched back to matched
-                     try:
-                         prof = self.profile_store.get_profile(profile_name)
-                         if prof:
-                             self._matched_profile_duration = float(prof.get("avg_duration", 0))
-                     except Exception: pass
-                 else:
-                     self._current_program = "detecting..."
-                     self._matched_profile_duration = None
+                if profile_name:
+                    self._current_program = profile_name
+                    self._last_match_confidence = confidence
+                    # Try to fetch duration if we switched back to matched
+                    try:
+                        prof = self.profile_store.get_profile(profile_name)
+                        if prof:
+                            self._matched_profile_duration = float(prof.get("avg_duration", 0))
+                    except Exception:
+                        pass
+                else:
+                    self._current_program = "detecting..."
+                    self._matched_profile_duration = None
 
             # --- HEURISTICS (Descriptive Phases) ---
             if not phase_name:
@@ -1347,8 +1350,14 @@ class WashDataManager:
         now = dt_util.now()
 
         # Throttle updates to avoid CPU overload on noisy sensors
+        # BUT always allow updates if power is significantly low (e.g. 0W) 
+        # to ensure cycle end events are not missed.
+        # FIX: Explicitly include 0W check (<= 0.1) as min_power might be user-configured to 0
+        is_low_power = power < self.detector.config.min_power or power <= 0.1
+        
         if (
-            self._last_reading_time
+            not is_low_power
+            and self._last_reading_time
             and (now - self._last_reading_time).total_seconds() < self._sampling_interval
         ):
             return
@@ -1525,9 +1534,9 @@ class WashDataManager:
         cycle_start = self.detector.current_cycle_start
         is_suspicious = False
         if cycle_start and self._last_cycle_end_time:
-             # If started within 20 minutes of previous cycle finish
-             if (cycle_start - self._last_cycle_end_time).total_seconds() < 1200:
-                 is_suspicious = True
+            # If started within 3 minutes of previous cycle finish (prevent back-to-back ghosting)
+            if (cycle_start - self._last_cycle_end_time).total_seconds() < 180:
+                is_suspicious = True
 
         elapsed = self.detector.get_elapsed_seconds()
         if (
@@ -1550,9 +1559,14 @@ class WashDataManager:
         # low_power_no_update_timeout is reached.
         
         # Dishwashers can have very long silent drying phases (up to 2h)
+        # We use the device-specific timeout as the floor for this effective timeout
+        low_power_floor = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE.get(
+            self.device_type, 0
+        )
         effective_low_power_timeout = self._low_power_no_update_timeout
-        if self.device_type == "dishwasher" and self._current_program not in ("detecting...", "off"):
-             effective_low_power_timeout = max(7200.0, effective_low_power_timeout)
+        if self._current_program not in ("detecting...", "off"):
+            effective_low_power_timeout = max(low_power_floor, effective_low_power_timeout)
+
              
         if self.detector.is_waiting_low_power():
             

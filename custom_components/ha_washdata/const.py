@@ -96,8 +96,7 @@ DEFAULT_NOTIFY_BEFORE_END_MINUTES = 0  # Disabled
 DEFAULT_PROFILE_MATCH_INTERVAL = (
     300  # Seconds between profile matching attempts (5 minutes)
 )
-DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.10  # Allow match after 20% of expected duration
-DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER = 0.10  # Same for dishwashers (termination has separate logic)
+DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.10  # Allow match after 10% of expected duration
 DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = (
     1.3  # Maximum duration ratio (130% of profile) - hidden default
 )
@@ -131,6 +130,9 @@ STATE_STARTING = "starting"
 STATE_RUNNING = "running"
 STATE_PAUSED = "paused"
 STATE_ENDING = "ending"
+STATE_FINISHED = "finished"
+STATE_INTERRUPTED = "interrupted"
+STATE_FORCE_STOPPED = "force_stopped"
 STATE_RINSE = "rinse"
 STATE_UNKNOWN = "unknown"
 
@@ -158,9 +160,18 @@ DEVICE_TYPES = {
 }
 
 # Device Type Defaults
-DEFAULT_OFF_DELAY_DISHWASHER = 1800  # 30 min
-DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_DISHWASHER = 3600  # 1 hour
+# Device Type Defaults (Maps)
+
+DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE = {
+    DEVICE_TYPE_DISHWASHER: 7200,  # 2 hours (Drying can be long)
+}
+
 DEFAULT_MAX_DEFERRAL_SECONDS = 7200  # 2 hours max safe deferral
+
+DEFAULT_OFF_DELAY_BY_DEVICE = {
+    DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
+    DEVICE_TYPE_COFFEE_MACHINE: 300,  # 5 min (Warming/Pause handling)
+}
 
 # Device-specific progress smoothing thresholds (percentage points)
 # These control how much backward progress is allowed before heavy damping kicks in
@@ -181,7 +192,7 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_DRYER: 600,  # 10 min
     DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (same as washer)
     DEVICE_TYPE_DISHWASHER: 900,  # 15 min
-    DEVICE_TYPE_COFFEE_MACHINE: 60,  # 1 min (detects rapid espresso shots/cleaning)
+    DEVICE_TYPE_COFFEE_MACHINE: 60,  # 1 min (Filter coffee cycle)
 }
 
 # Default min_off_gap by device type (seconds)
@@ -195,7 +206,7 @@ DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_DRYER: 300,  # 5 min (Cool down gaps?)
     DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (longer for combined cycles)
     DEVICE_TYPE_DISHWASHER: 2000,  # 33 min (Drying pauses)
-    DEVICE_TYPE_COFFEE_MACHINE: 30,  # 30s (Rapid shots)
+    DEVICE_TYPE_COFFEE_MACHINE: 120,  # 2 min (Session grouping)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
 
@@ -209,8 +220,15 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 0.2,  # Pump/Heater
     DEVICE_TYPE_COFFEE_MACHINE: 0.05,  # Short heater burst
 }
-DEFAULT_START_ENERGY_THRESHOLD = 0.2  # Fallback
-DEFAULT_END_ENERGY_THRESHOLD = 0.05  # 50 Wh threshold? No, 0.05 Wh is 50 mWh.
+# Default sampling interval by device type
+DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
+    DEVICE_TYPE_COFFEE_MACHINE: 10.0,  # 10s is sufficient for brew cycles
+}
+
+# Default profile match min duration ratio by device type
+DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE = {
+    DEVICE_TYPE_DISHWASHER: 0.10,
+}
 
 # Storage
 STORAGE_VERSION = 3
