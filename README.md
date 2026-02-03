@@ -1,6 +1,3 @@
-> [!WARNING]  
-> **2026/01/29 - CURRENTLY NOT ACCEPTING PRs OR NEW ISSUES**: I'm currently refactoring entire logic of the integration. Your PRs will be rejected. Look into existing Issues and comment on the issue if its applicable, dont create new duplicate Issues.
-
 ![Installs](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=Installations&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.ha_washdata.total)
 ![Latest](https://img.shields.io/github/v/release/3dg1luk43/ha_washdata)
 ![Hassfest](https://img.shields.io/github/actions/workflow/status/3dg1luk43/ha_washdata/hassfest.yml?label=hassfest)
