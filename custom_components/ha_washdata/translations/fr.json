@@ -98,7 +98,7 @@
           "stop_threshold_w": "Seuil d'arrêt (W)",
           "min_off_gap": "Écart minimum entre les cycles (s)",
           "start_duration_threshold": "Durée anti-rebond au démarrage (s)",
-          "progress_reset_delay": "Délai de réinitialisation de la progression (secondes)"
+          "progress_reset_delay": "Délai de réinitialisation de la progression (secondes)",
           "no_update_active_timeout": "Délai d'absence de mise à jour (s)",
           "sampling_interval": "Intervalle d'échantillonnage (s)",
           "auto_label_confidence": "Confiance d'étiquetage automatique (0-1)",
