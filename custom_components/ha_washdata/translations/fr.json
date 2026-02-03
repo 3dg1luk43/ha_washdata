@@ -386,7 +386,7 @@
       },
       "resolve_feedback": {
         "title": "Résoudre le retour",
-        "description": "**Programme détecté** : {profile}\n**Confiance** : {confidence}%\n**Estimé** : {est} min, **Réel** : {act} min",
+        "description": "**Programme détecté** : {profile}\n**Confiance** : {confidence}%\n**Estimé** : {est} minutes, **Réel** : {act} minutes",
         "data": {
           "action": "Que souhaitez-vous faire ?",
           "corrected_profile": "Programme corrigé (si correction)",
