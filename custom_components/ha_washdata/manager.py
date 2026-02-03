@@ -577,7 +577,8 @@ class WashDataManager:
                             if avg_dur > 0 and (mapped_time / avg_dur) > 0.95:
                                 verified_pause = False
                                 _LOGGER.info("Smart Termination: Near end of profile. Releasing pause lock.")
-                    except Exception:
+                    except Exception as e:
+                        _LOGGER.debug("Smart Termination alignment verification failed: %s", e)
                         pass
                 else:
                     verified_pause = False
