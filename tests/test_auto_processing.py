@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import MagicMock, patch, AsyncMock
 from datetime import datetime, timedelta
 from custom_components.ha_washdata.manager import WashDataManager
-from custom_components.ha_washdata.const import DOMAIN, DEFAULT_AUTO_MERGE_GAP_SECONDS
+from custom_components.ha_washdata.const import DOMAIN
 
 # Import mocks from local helper
 # Imports handled by conftest and standard library

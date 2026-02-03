@@ -62,6 +62,8 @@ from .const import (
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_SMOOTHING_WINDOW,
     DEFAULT_START_DURATION_THRESHOLD,
+    DEFAULT_START_ENERGY_THRESHOLD,
+    DEFAULT_END_ENERGY_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEVICE_TYPES,
@@ -74,14 +76,10 @@ from .const import (
     DEFAULT_NOTIFY_BEFORE_END_MINUTES,
     DEFAULT_RUNNING_DEAD_ZONE,
     DEFAULT_END_REPEAT_COUNT,
-    DEFAULT_START_ENERGY_THRESHOLD,
-    DEFAULT_END_ENERGY_THRESHOLD,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     DEFAULT_MIN_OFF_GAP,
     CONF_MIN_OFF_GAP,
     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
-    DEFAULT_OFF_DELAY_DISHWASHER,
-    DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_DISHWASHER,
     DEVICE_COMPLETION_THRESHOLDS,
     CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PROFILE_UNMATCH_THRESHOLD,
@@ -98,8 +96,10 @@ from .const import (
     DEFAULT_NOTIFY_FINISH_MESSAGE,
     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
-    DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
-    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER,
+    DEFAULT_OFF_DELAY_BY_DEVICE,
+    DEFAULT_SAMPLING_INTERVAL_BY_DEVICE,
+    DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
+    DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE,
 )
 from .profile_store import profile_sort_key
 
@@ -321,10 +321,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
         )
 
-        # Specialized defaults for Dishwasher drying phase
-        default_off_delay = DEFAULT_OFF_DELAY
-        if current_device_type == "dishwasher":
-            default_off_delay = DEFAULT_OFF_DELAY_DISHWASHER
+        # Specialized defaults for Device Type
+        default_off_delay = DEFAULT_OFF_DELAY_BY_DEVICE.get(
+            current_device_type, DEFAULT_OFF_DELAY
+        )
 
         # Base schema with essential options
         schema = {
@@ -482,6 +482,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     self._suggested_values = updated_input
                     return await self.async_step_advanced_settings(user_input=None)
 
+            # Ensure clearing CONF_EXTERNAL_END_TRIGGER translates to None/Empty
+            # Handle missing key, empty list [], empty string "", or None
+            _trigger_val = user_input.get(CONF_EXTERNAL_END_TRIGGER)
+            if not _trigger_val:
+                user_input[CONF_EXTERNAL_END_TRIGGER] = None
+
             # Final Save
             final_options = {
                 **self.config_entry.data,
@@ -552,16 +558,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         default_completion_min = DEVICE_COMPLETION_THRESHOLDS.get(
             current_device_type, DEFAULT_COMPLETION_MIN_SECONDS
         )
+        
+        default_sampling = DEFAULT_SAMPLING_INTERVAL_BY_DEVICE.get(
+            current_device_type, DEFAULT_SAMPLING_INTERVAL
+        )
 
-        # Specialized defaults for Dishwasher drying phase
-        if current_device_type == "dishwasher":
-            default_no_update_timeout = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_DISHWASHER
-            default_min_duration_ratio = (
-                DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_DISHWASHER
-            )
-        else:
-            default_no_update_timeout = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT
-            default_min_duration_ratio = DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
+        # Specialized defaults for Device Type
+        default_no_update_timeout = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE.get(
+            current_device_type, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT
+        )
+        
+        default_min_duration_ratio = DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
+            current_device_type, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
+        )
 
         schema = {
             vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
@@ -642,7 +651,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_END_ENERGY_THRESHOLD,
                 default=get_val(
-                    CONF_END_ENERGY_THRESHOLD, DEFAULT_END_ENERGY_THRESHOLD
+                CONF_END_ENERGY_THRESHOLD, DEFAULT_END_ENERGY_THRESHOLD
                 ),
             ): vol.Coerce(float),
             vol.Optional(
@@ -672,7 +681,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
              vol.Optional(
                 CONF_SAMPLING_INTERVAL,
-                default=get_val(CONF_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL),
+                default=get_val(CONF_SAMPLING_INTERVAL, default_sampling),
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=1.0,
@@ -770,7 +779,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): bool,
             vol.Optional(
                 CONF_EXTERNAL_END_TRIGGER,
-                default=get_val(CONF_EXTERNAL_END_TRIGGER, ""),
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain="binary_sensor",
@@ -779,9 +787,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
         }
 
+        data_schema = vol.Schema(schema)
+        data_schema = self.add_suggested_values_to_schema(
+            data_schema,
+            {CONF_EXTERNAL_END_TRIGGER: get_val(CONF_EXTERNAL_END_TRIGGER, None)},
+        )
+
         return self.async_show_form(
             step_id="advanced_settings",
-            data_schema=vol.Schema(schema),
+            data_schema=data_schema,
             description_placeholders={
                 "error": "",
                 "suggested": suggested_reason or "No suggestions available yet.",
@@ -879,7 +893,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         
         options = []
         for c in cycles:
-            start = c["start_time"].split(".")[0].replace("T", " ")
+            dt = dt_util.parse_datetime(c["start_time"])
+            start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
             duration_min = int(c["duration"] / 60)
             prof = c.get("profile_name") or "Unlabeled"
             label = f"{start} - {duration_min}m - {prof}"
@@ -909,8 +924,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Step 2.5: Configure split parameter."""
         if user_input is not None:
-             self._editor_split_gap = int(user_input["min_gap_seconds"])
-             return await self.async_step_editor_configure()
+            self._editor_split_gap = int(user_input["min_gap_seconds"])
+            return await self.async_step_editor_configure()
 
         return self.async_show_form(
             step_id="editor_split_params",
@@ -1284,7 +1299,8 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         recent_cycles = store.get_past_cycles()[-8:]
         recent_lines = []
         for c in reversed(recent_cycles):
-            start = c["start_time"].split(".")[0].replace("T", " ")
+            dt = dt_util.parse_datetime(c["start_time"])
+            start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
             duration_min = int(c["duration"] / 60)
             prof = c.get("profile_name") or "Unlabeled"
             status = c.get("status", "completed")
@@ -1508,7 +1524,8 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
 
         options = []
         for c in profile_cycles:
-            start = c["start_time"].split(".")[0].replace("T", " ")
+            dt = dt_util.parse_datetime(c["start_time"])
+            start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
             duration_min = int(c["duration"] / 60)
             status = c.get("status", "completed")
 
@@ -1697,7 +1714,8 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             selector.SelectOptionDict(value="none", label="(No reference cycle)")
         ]
         for c in reversed(cycles):
-            start = c["start_time"].split(".")[0].replace("T", " ")
+            dt = dt_util.parse_datetime(c["start_time"])
+            start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
             duration_min = int(c["duration"] / 60)
             prof = c.get("profile_name") or "Unlabeled"
             label = f"{start} - {duration_min}m - {prof}"
@@ -1952,7 +1970,8 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         # Build readable options with status
         options = []
         for c in reversed(cycles):
-            start = c["start_time"].split(".")[0].replace("T", " ")
+            dt = dt_util.parse_datetime(c["start_time"])
+            start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
             duration_min = int(c["duration"] / 60)
             prof = c.get("profile_name") or "Unlabeled"
             status = c.get("status", "completed")
@@ -1998,7 +2017,8 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         # Build readable options with status
         options = []
         for c in reversed(cycles):
-            start = c["start_time"].split(".")[0].replace("T", " ")
+            dt = dt_util.parse_datetime(c["start_time"])
+            start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
             duration_min = int(c["duration"] / 60)
             prof = c.get("profile_name") or "Unlabeled"
             status = c.get("status", "completed")
@@ -2112,7 +2132,8 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         )
         cycle_info = ""
         if cycle:
-            start = cycle["start_time"].split(".")[0].replace("T", " ")
+            dt = dt_util.parse_datetime(cycle["start_time"])
+            start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else cycle["start_time"]
             duration_min = int(cycle["duration"] / 60)
             current_label = cycle.get("profile") or "Unlabeled"
             cycle_info = f"Cycle: {start}, {duration_min}m, Current: {current_label}"
@@ -2182,7 +2203,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             ),
             description_placeholders={
                 "info": (
-                    f"Enter number of past hours to process (or use 999999 for all).\n\n"
+                    "Enter number of past hours to process (or use 999999 for all).\n\n"
                 )
             },
         )
@@ -2463,10 +2484,10 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
     ) -> FlowResult:
         """Step: List pending learning feedbacks."""
         if user_input is not None:
-             cycle_id = user_input.get("selected_feedback")
-             if cycle_id:
-                 self._selected_cycle_id = cycle_id
-                 return await self.async_step_resolve_feedback()
+            cycle_id = user_input.get("selected_feedback")
+            if cycle_id:
+                self._selected_cycle_id = cycle_id
+                return await self.async_step_resolve_feedback()
 
         # Access profile_store from manager
         manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
@@ -2504,7 +2525,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                         local_dt = dt_util.as_local(dt)
                         # "27 Oct 10:00" - Short and readable
                         t_str = local_dt.strftime("%d %b %H:%M")
-                except Exception:
+                except Exception:  # pylint: disable=broad-exception-caught
                     pass
 
             # Format label
@@ -2526,7 +2547,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         )
 
     async def async_step_learning_feedbacks_empty(
-        self, user_input: dict[str, Any] | None = None
+        self, _user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Step: Handle empty feedback list (go back)."""
         return await self.async_step_init()
