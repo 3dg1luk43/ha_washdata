@@ -598,7 +598,8 @@ class WashDataManager:
                         prof = self.profile_store.get_profile(profile_name)
                         if prof:
                             self._matched_profile_duration = float(prof.get("avg_duration", 0))
-                    except Exception:
+                    except Exception as e:
+                        _LOGGER.debug("Failed to fetch profile duration on switch: %s", e)
                         pass
                 else:
                     self._current_program = "detecting..."
