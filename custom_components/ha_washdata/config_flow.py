@@ -62,6 +62,8 @@ from .const import (
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT,
     DEFAULT_SMOOTHING_WINDOW,
     DEFAULT_START_DURATION_THRESHOLD,
+    DEFAULT_START_ENERGY_THRESHOLD,
+    DEFAULT_END_ENERGY_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEVICE_TYPES,
@@ -551,7 +553,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             current_device_type, DEFAULT_MIN_OFF_GAP
         )
         default_start_energy = DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE.get(
-            current_device_type, 0.2
+            current_device_type, DEFAULT_START_ENERGY_THRESHOLD
         )
         default_completion_min = DEVICE_COMPLETION_THRESHOLDS.get(
             current_device_type, DEFAULT_COMPLETION_MIN_SECONDS
@@ -649,7 +651,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_END_ENERGY_THRESHOLD,
                 default=get_val(
-                    CONF_END_ENERGY_THRESHOLD, 0.05
+                CONF_END_ENERGY_THRESHOLD, DEFAULT_END_ENERGY_THRESHOLD
                 ),
             ): vol.Coerce(float),
             vol.Optional(

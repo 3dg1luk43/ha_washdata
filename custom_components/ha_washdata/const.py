@@ -82,6 +82,8 @@ DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT = 600  # 10 minutes
 DEFAULT_SMOOTHING_WINDOW = 2
 DEFAULT_SAMPLING_INTERVAL = 30.0  # Seconds
 DEFAULT_START_DURATION_THRESHOLD = 5.0  # Seconds (debounce)
+DEFAULT_START_ENERGY_THRESHOLD = 0.2  # Wh - Require some energy accumulation before starting
+DEFAULT_END_ENERGY_THRESHOLD = 0.05  # Wh - Require effectively zero energy to end
 DEFAULT_DEVICE_TYPE = "washing_machine"
 DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
 
