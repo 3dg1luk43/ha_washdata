@@ -5,6 +5,28 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-02-03
+
+### ✨ Features
+- **Persistent Terminal States**:
+  - Implemented proper `finished`, `interrupted`, and `force_stopped` states that persist for 30 minutes after cycle completion.
+  - Improves visibility of cycle outcomes in the UI (users can now see "Finished" instead of just "Off").
+  - Auto-resets to `off` after 30 minutes, or immediately if a new cycle starts.
+- **Coffee Machine Defaults**: Added dedicated defaults for coffee machines (faster sampling, shorter timeouts) to improve detection out-of-the-box.
+- **French Translation**: Added full French localization (thanks to @MaximeNagel).
+
+### 🛠️ Improvements
+- **Profile Sorting**: Improved sorting for profile lists (natural sort), ensuring correct numeric order (e.g. `1, 2, 10` instead of `1, 10, 2`).
+- **Refactored Device Defaults**: Consolidated and cleaned up device-specific default settings logic.
+- **Test Suite**: Enhanced test coverage for cycle state transitions and manager notifications.
+
+### 🐛 Bug Fixes
+- **Stuck Power Value**: Fixed issue where the power entity would get stuck at the last non-zero value after a cycle ended.
+- **Timezone Display**: Fixed issue where timestamps in specific UI menus were shown in GMT instead of local time.
+- **Advanced Settings Error**: Fixed a crash that prevented advanced settings from being saved in the configuration flow.
+- **State Logic**: Fixed assertions and logic validation for terminal states.
+- **Notification Tests**: Fixed test environment formatting for notification services.
+
 ## [0.4.0] - 2026-01-12
 
 **Major Architectural Rewrite ("vNext")**

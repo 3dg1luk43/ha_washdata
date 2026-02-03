@@ -16,6 +16,9 @@ from .const import (
     STATE_RUNNING,
     STATE_PAUSED,
     STATE_ENDING,
+    STATE_FINISHED,
+    STATE_INTERRUPTED,
+    STATE_FORCE_STOPPED,
     STATE_UNKNOWN,
     DEVICE_TYPE_WASHING_MACHINE,
     DEFAULT_MAX_DEFERRAL_SECONDS,
@@ -108,7 +111,7 @@ def trim_zero_readings(
         elif not found_end and not trim_start:
              # Trimming end but not start, and all zeros?
              # Keep first point
-             end_idx = 0
+            end_idx = 0
 
     # Return trimmed slice (inclusive of end)
     return readings[start_idx : end_idx + 1]
@@ -291,9 +294,9 @@ class CycleDetector:
         """Set or clear the verified pause flag."""
         self._verified_pause = verified
 
-    def reset(self) -> None:
-        """Force reset the detector state to OFF."""
-        self._transition_to(STATE_OFF, dt_util.now())
+    def reset(self, target_state: str = STATE_OFF) -> None:
+        """Force reset the detector state to target state."""
+        self._transition_to(target_state, dt_util.now())
         self._power_readings = []
         self._current_cycle_start = None
         self._last_active_time = None
@@ -405,7 +408,7 @@ class CycleDetector:
 
         # 3. State Machine
 
-        if self._state == STATE_OFF:
+        if self._state in (STATE_OFF, STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED):
             if is_high:
                 # Transition to STARTING
                 self._transition_to(STATE_STARTING, timestamp)
@@ -414,6 +417,10 @@ class CycleDetector:
                 self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
                 self._cycle_max_power = power
                 self._abrupt_drop = False
+            elif self._state != STATE_OFF:
+                # Auto-expire terminal states after 30 minutes
+                if self._state_enter_time and (timestamp - self._state_enter_time).total_seconds() > 1800:
+                    self._transition_to(STATE_OFF, timestamp)
 
         elif self._state == STATE_STARTING:
             self._power_readings.append((timestamp, power))
@@ -531,7 +538,7 @@ class CycleDetector:
                         smart_ratio = 0.98
 
                     is_confident_match = (
-                        getattr(self, "_last_match_confidence", 0.0) >= 0.55
+                        getattr(self, "_last_match_confidence", 0.0) >= 0.4
                     )
 
                     if (
@@ -560,7 +567,8 @@ class CycleDetector:
                                 and not past_wait_period
                             ):
                                 _LOGGER.debug(
-                                    "Waiting for end spike (duration %.0fs, expected %.0fs + %.0fs wait)",
+                                    "Waiting for end spike (duration %.0fs, expected %.0fs + "
+                                    "%.0fs wait)",
                                     current_duration,
                                     self._expected_duration,
                                     end_spike_wait,
@@ -568,7 +576,8 @@ class CycleDetector:
                                 return  # Don't finish yet, wait for spike or timeout
 
                             _LOGGER.info(
-                                "Smart Termination: Profile '%s' match confirmed (duration %.0fs, conf %.2f, spike_seen=%s), ending.",
+                                "Smart Termination: Profile '%s' match confirmed (duration %.0fs, "
+                                "conf %.2f, spike_seen=%s), ending.",
                                 self._matched_profile,
                                 current_duration,
                                 getattr(self, "_last_match_confidence", 0.0),
@@ -766,7 +775,14 @@ class CycleDetector:
 
         _LOGGER.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)
-        self.reset()
+        
+        target = STATE_FINISHED
+        if status == "interrupted":
+            target = STATE_INTERRUPTED
+        elif status == "force_stopped":
+            target = STATE_FORCE_STOPPED
+            
+        self.reset(target_state=target)
 
     # Stub methods for compatibility or simpler logic
     def force_end(self, timestamp: datetime) -> None:
@@ -778,6 +794,7 @@ class CycleDetector:
                 termination_reason="force_stopped",
                 keep_tail=False,  # Force stop usually implies snap back to reality
             )
+            self._ignore_power_until_idle = False
 
     def user_stop(self) -> None:
         """Handle user-initiated stop."""
@@ -816,6 +833,9 @@ class CycleDetector:
             ),
             "expected_duration": self._expected_duration,
             "matched_profile": self._matched_profile,
+            "state_enter_time": (
+                self._state_enter_time.isoformat() if self._state_enter_time else None
+            ),
         }
 
     def get_elapsed_seconds(self) -> float:
@@ -852,6 +872,14 @@ class CycleDetector:
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
             self._matched_profile = snapshot.get("matched_profile")
             self._expected_duration = snapshot.get("expected_duration", 0.0)
+
+            # Restore state enter time
+            enter_time = snapshot.get("state_enter_time")
+            if enter_time:
+                try:
+                    self._state_enter_time = dt_util.parse_datetime(enter_time)
+                except Exception: # pylint: disable=broad-exception-caught
+                     _LOGGER.warning("Failed to parse state enter time")
 
             start = snapshot.get("current_cycle_start")
             self._current_cycle_start = None

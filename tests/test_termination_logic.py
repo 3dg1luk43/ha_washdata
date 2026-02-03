@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import Mock, MagicMock
 from datetime import datetime, timedelta
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
-from custom_components.ha_washdata.const import STATE_OFF, STATE_RUNNING, STATE_ENDING, STATE_PAUSED
+from custom_components.ha_washdata.const import STATE_OFF, STATE_RUNNING, STATE_ENDING, STATE_PAUSED, STATE_FINISHED
 
 # Helper to create datetime sequence
 def dt(offset_seconds: int) -> datetime:
@@ -139,7 +139,7 @@ def test_manual_program_override_termination(base_config, mock_callbacks):
     detector.process_reading(0.0, dt(5000))
     
     # Should be OFF
-    assert detector.state == STATE_OFF
+    assert detector.state == STATE_FINISHED
 
 def test_fix_duration_keeps_alive(base_config, mock_callbacks):
     """

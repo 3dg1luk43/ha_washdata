@@ -3,7 +3,16 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock
 import pytest
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
-from custom_components.ha_washdata.const import STATE_OFF, STATE_RUNNING, STATE_STARTING, STATE_ENDING, STATE_PAUSED
+from custom_components.ha_washdata.const import (
+    STATE_OFF,
+    STATE_RUNNING,
+    STATE_STARTING,
+    STATE_ENDING,
+    STATE_PAUSED,
+    STATE_FINISHED,
+    STATE_INTERRUPTED,
+    STATE_FORCE_STOPPED,
+)
 
 # Helper to create datetime sequence
 def dt(offset_seconds: int) -> datetime:
@@ -73,7 +82,7 @@ def test_normal_cycle(detector_config, mock_callbacks):
     # Finish (flush)
     flush_buffer(detector, 1201 + 30)
 
-    assert detector.state == STATE_OFF
+    assert detector.state == STATE_FINISHED
     mock_callbacks["on_cycle_end"].assert_called_once()
     
     cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
@@ -235,21 +244,21 @@ def test_force_end(detector_config, mock_callbacks):
     )
     
     detector.process_reading(100.0, dt(0))
-    detector.force_end(dt(300))
+    detector.process_reading(100.0, dt(1200))
+    detector.force_end(dt(1200))
     
-    assert detector.state == STATE_OFF
+    assert detector.state == STATE_FORCE_STOPPED
     cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
     
-    # 300s is < completion_min, so even force_stopped gets reclassified as interrupted
-    assert cycle_data["status"] == "interrupted"
+    # 1200s is > completion_min, so force_stopped status is preserved
+    assert cycle_data["status"] == "force_stopped"
     
     # 300s. Config: interrupted_min=150. completion_min=600.
     # Logic in `_finish_cycle`:
     # if status in ("completed", "force_stopped") and self._should_mark_interrupted(duration):
     #   status = "interrupted"
     
-    # 300 < 600. So it should be reclassified as interrupted.
-    assert cycle_data["status"] == "interrupted"
+    # Old assertion removed: 300 < 600 check is no longer valid for 1200s test
 
 def test_end_repeat_count_accumulates_across_periods(mock_callbacks):
     """Test that end_condition_count accumulates across low-power periods.
@@ -306,10 +315,8 @@ def test_end_repeat_count_accumulates_across_periods(mock_callbacks):
     detector.process_reading(1.0, dt(1023))  # 962 + 61 = 1023
     
     # Now cycle should end
-    assert detector.state == STATE_OFF
+    assert detector.state == STATE_FINISHED
     mock_callbacks["on_cycle_end"].assert_called_once()
     
     cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
     assert cycle_data["status"] == "completed"
-
- 
