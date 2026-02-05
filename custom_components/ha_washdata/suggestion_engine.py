@@ -26,6 +26,7 @@ from .const import (
     CONF_MIN_OFF_GAP,
     CONF_RUNNING_DEAD_ZONE,
 )
+from .cycle_detector import CycleDetector, CycleDetectorConfig
 
 if TYPE_CHECKING:
     from .profile_store import ProfileStore
@@ -127,8 +128,74 @@ class SuggestionEngine:
 
     def run_simulation(self, cycle_data: dict[str, Any]) -> dict[str, Any]:
         """Replay a cycle with varied parameters to find optimal settings."""
-        # This will be implemented in Phase 3
-        return {}
+        power_data = cycle_data.get("power_data", [])
+        if not power_data or len(power_data) < 10:
+            return {}
+
+        # Convert [(iso_str, power), ...] back to [(datetime, power), ...]
+        try:
+            readings = []
+            for ts_str, power in power_data:
+                ts = dt_util.parse_datetime(ts_str)
+                if ts:
+                    readings.append((ts, power))
+        except Exception as e:
+            _LOGGER.error("Failed to parse power data for simulation: %s", e)
+            return {}
+
+        if not readings:
+            return {}
+
+        # 1. Base suggestions from actual trace data (Offline Heuristics)
+        # Note: We reuse logic from parameter_optimizer.py but simplified for runtime
+        powers = np.array([p[1] for p in readings])
+        active_powers = powers[powers > 0.5]
+        
+        if len(active_powers) < 5:
+            return {}
+
+        min_active = np.min(active_powers)
+        
+        suggested_stop = round(min_active * 0.8, 2)
+        suggested_start = round(min_active * 1.2, 2)
+        
+        # Energy suggestions
+        # Simplified: Use 0.05Wh as default end gate
+        suggested_end_energy = 0.05
+        
+        # Timing suggestions (Aggressive as per user feedback)
+        # We can't really do gap analysis on a single cycle, 
+        # but we can look for early dips for dead zone.
+        dead_zone = 0
+        for i, (ts, p) in enumerate(readings):
+            elapsed = (ts - readings[0][0]).total_seconds()
+            if elapsed > 300:
+                break
+            if p < 5.0 and elapsed > 5.0:
+                dead_zone = int(elapsed)
+        
+        suggested_dead_zone = min(300, dead_zone) if dead_zone > 0 else 60
+
+        new_suggestions = {
+            CONF_STOP_THRESHOLD_W: {
+                "value": suggested_stop,
+                "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle."
+            },
+            CONF_START_THRESHOLD_W: {
+                "value": suggested_start,
+                "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle."
+            },
+            CONF_END_ENERGY_THRESHOLD: {
+                "value": suggested_end_energy,
+                "reason": "Default recommended baseline for end-of-cycle noise gate."
+            },
+            CONF_RUNNING_DEAD_ZONE: {
+                "value": suggested_dead_zone,
+                "reason": f"Based on early power dip detected at {suggested_dead_zone}s."
+            }
+        }
+
+        return new_suggestions
 
     def apply_suggestions(self, suggestions: dict[str, Any]) -> None:
         """Persist suggestions to the profile store."""
