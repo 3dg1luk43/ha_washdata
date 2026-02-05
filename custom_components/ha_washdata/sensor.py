@@ -31,6 +31,7 @@ async def async_setup_entry(
         WasherPowerSensor(manager, entry),
         WasherElapsedTimeSensor(manager, entry),
         WasherDebugSensor(manager, entry),
+        WasherSuggestionsSensor(manager, entry),
     ]
 
     # Add debug entities if enabled
@@ -441,4 +442,28 @@ class WasherProfileSensorManager:
                     else:
                         # Fallback for non-registered entities
                         await sensor.async_remove()
+
+
+class WasherSuggestionsSensor(WasherBaseSensor):
+    """Sensor for learned settings suggestions."""
+
+    def __init__(self, manager, entry):
+        self.entity_description = SensorEntityDescription(
+            key="suggestions",
+            name="Suggested Settings",
+            icon="mdi:lightbulb-on-outline",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self):
+        suggestions = self._manager.suggestions
+        if not suggestions:
+            return "No suggestions"
+        return f"{len(suggestions)} pending"
+
+    @property
+    def extra_state_attributes(self):
+        return {"suggestions": self._manager.suggestions}
 
