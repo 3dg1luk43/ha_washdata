@@ -19,12 +19,12 @@ Based on the benchmarking analysis of 192 recorded cycles and raw traces, the fo
     - *Goal:* Prevent cycle termination during very low-power pauses that still consume some energy.
 
 ## 3. Timing Parameters
-- **Min Off Gap (`min_off_gap`)**: **480s (8 minutes)**
-    - *Logic:* 80% of the 5th percentile of gaps between consecutive cycles.
-    - *Goal:* Prevent cycle fragmentation while allowing for back-to-back loads.
-- **Running Dead Zone (`running_dead_zone`)**: **260s (4.3 minutes)**
-    - *Logic:* 95th percentile of time-to-first-dip seen in diverse appliances.
-    - *Goal:* Suppress "Detecting..." phase instability immediately after start.
+- **Min Off Gap (`min_off_gap`)**: **120s (2 minutes)**
+    - *Logic:* 50% of the 2nd percentile of gaps, capped at 300s max for the suggestion.
+    - *Goal:* Aim for the lowest reasonable value to allow rapid back-to-back restarts without fragmentation.
+- **Running Dead Zone (`running_dead_zone`)**: **120s (2 minutes)**
+    - *Logic:* 75th percentile of time-to-first-dip, capped at 300s.
+    - *Goal:* Aim for lowest reasonable value to suppress early instability while minimizing time spent in "Detecting..." phase.
 
 ## 4. Scoring Logic (Validation)
 The optimization suite uses a weighted scoring function:

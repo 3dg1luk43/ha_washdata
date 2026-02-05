@@ -358,17 +358,12 @@ class ParameterOptimizer:
             except Exception:
                 continue
         
-        # If we see very short gaps (e.g. 1 min), it suggests that maybe they should have been merged
-        # OR that the machine allows rapid restarts.
-        # Ideally, min_off_gap should be smaller than the smallest VALID gap.
-        # But if we assume the user manually restarted, any gap is valid?
-        # Actually, "min_off_gap" prevents a new cycle from starting too soon.
-        # We want it to be small enough to allow back-to-back, but large enough to ignore noise.
-        # Let's say: 5th percentile of gaps, capped at say 60s minimum.
+        # Aim for the lowest reasonable gap to allow back-to-back restarts.
+        # We'll use the 2nd percentile with a 50% multiplier, capped at 300s max for the suggestion.
         suggested_gap = 60
         if gaps:
-            p05_gap = np.percentile(gaps, 5)
-            suggested_gap = max(30, int(p05_gap * 0.8))
+            p02_gap = np.percentile(gaps, 2)
+            suggested_gap = max(60, min(300, int(p02_gap * 0.5)))
 
         # 2. Running Dead Zone
         # Find earliest "dip" below a threshold (e.g. 5W)
@@ -383,8 +378,10 @@ class ParameterOptimizer:
         
         suggested_dead_zone = 0
         if dead_zone_needs:
-            # Cover 95% of early dips
-            suggested_dead_zone = int(np.percentile(dead_zone_needs, 95))
+            # Aim for lowest reasonable: use 75th percentile instead of 95th to cover most but keep it tight
+            suggested_dead_zone = int(np.percentile(dead_zone_needs, 75))
+            # Cap at 300s to ensure we don't stay in "detecting" for too long if not needed
+            suggested_dead_zone = min(300, suggested_dead_zone)
 
         return {
             "suggested_min_off_gap": suggested_gap,
