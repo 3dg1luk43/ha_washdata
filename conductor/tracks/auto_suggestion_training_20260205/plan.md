@@ -32,9 +32,9 @@
     - [x] Implement a mechanism to store "learned state" so learning persists across restarts. (Already implemented in ProfileStore `suggestions` dict)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: On-Device Simulation Engine (Runtime)' (Protocol in workflow.md)
 
-## Phase 4: UI & Integration Finalization
+## Phase 4: UI & Integration Finalization [checkpoint: 8f6869e]
 - [x] Task: Expose Suggestions to UI c415d35
     - [x] Update sensors to reflect new dynamic suggestions.
-- [ ] Task: Validation & Tuning
-    - [ ] Run end-to-end tests with simulated cycles to verify suggestions update correctly.
+- [x] Task: Validation & Tuning 07383d0
+    - [x] Run end-to-end tests with simulated cycles to verify suggestions update correctly.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: UI & Integration Finalization' (Protocol in workflow.md)
