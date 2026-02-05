@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+from datetime import datetime, timedelta
 from tests.benchmarks.parameter_optimizer import ParameterOptimizer
 
 def test_analyze_power_thresholds():
@@ -131,6 +132,65 @@ def test_data_loader_config_entry(tmp_path):
     loader = DataLoader([str(data_dir)])
     cycles = loader.load_data()
     assert len(cycles) == 2
+
+def test_scorer():
+    from tests.benchmarks.parameter_optimizer import Scorer
+    scorer = Scorer()
+    
+    actual = [{
+        "start_time": "2026-02-05T10:00:00",
+        "end_time": "2026-02-05T11:00:00"
+    }]
+    # Perfect match
+    detected = [{
+        "start_time": "2026-02-05T10:00:00",
+        "end_time": "2026-02-05T11:00:00"
+    }]
+    report = scorer.score(actual, detected, [])
+    assert report["total"] == 1.0
+    
+    # Instability penalty
+    state_changes = [
+        (datetime.now(), "running", "paused"),
+        (datetime.now(), "paused", "running")
+    ]
+    report = scorer.score(actual, detected, state_changes)
+    assert report["total"] == 0.9 # 10% penalty
+    
+    # Missed cycle
+    report = scorer.score(actual, [], [])
+    assert report["total"] == 0.0
+
+def test_cycle_simulator():
+    from tests.benchmarks.parameter_optimizer import CycleSimulator
+    from custom_components.ha_washdata.cycle_detector import CycleDetectorConfig
+    from homeassistant.util import dt as dt_util
+    
+    config = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=30,
+        start_threshold_w=10.0,
+        stop_threshold_w=5.0,
+        start_duration_threshold=1.0,
+        completion_min_seconds=5
+    )
+    simulator = CycleSimulator(config)
+    
+    now = dt_util.now()
+    readings = []
+    # Idle
+    for i in range(5):
+        readings.append((now + timedelta(seconds=i), 0.0))
+    # Start
+    for i in range(5, 15):
+        readings.append((now + timedelta(seconds=i), 100.0))
+    # End
+    for i in range(15, 100):
+        readings.append((now + timedelta(seconds=i), 0.0))
+    
+    cycles = simulator.run(readings)
+    assert len(cycles) == 1
+    assert any(c[2] == "starting" for c in simulator.state_changes)
 
 def test_run_sweep():
     cycle = {
