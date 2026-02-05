@@ -75,8 +75,8 @@ def test_analyze_timing_parameters():
     optimizer = ParameterOptimizer([cycle1, cycle2])
     timing = optimizer.analyze_timing_parameters()
     
-    # 600s * 0.8 = 480s
-    assert timing["suggested_min_off_gap"] == 480
+    # 600s * 0.5 = 300s -> capped at 300s
+    assert timing["suggested_min_off_gap"] == 300
     
     # Running dead zone: early dip
     cycle3 = {
