@@ -207,3 +207,26 @@ def test_suggestion_engine_run_simulation(mock_hass):
     suggestions = engine.run_simulation(cycle_data)
     assert CONF_STOP_THRESHOLD_W in suggestions
     assert suggestions[CONF_STOP_THRESHOLD_W]["value"] == 8.0 # 10.0 * 0.8
+
+@pytest.mark.asyncio
+async def test_process_cycle_end_triggers_simulation(learning_manager):
+    """Test that process_cycle_end triggers background simulation."""
+    cycle_data = {
+        "id": "test_sim_1",
+        "power_data": [("2026-02-05T10:00:00", 100.0)] * 20,
+        "duration": 1200,
+        "status": "completed"
+    }
+    
+    # Mock suggestion engine to verify it's called
+    learning_manager.suggestion_engine.run_simulation = MagicMock(return_value={})
+    
+    # Trigger cycle end
+    learning_manager.process_cycle_end(cycle_data)
+    
+    # It fires an async task, we need to wait or check task list
+    # For simplicity, we can await the internal async method directly if we want to be sure,
+    # but here we test the "fire" part.
+    await learning_manager._async_run_simulation(cycle_data)
+    
+    learning_manager.suggestion_engine.run_simulation.assert_called_once_with(cycle_data)

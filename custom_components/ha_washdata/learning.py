@@ -122,13 +122,29 @@ class LearningManager:
         predicted_duration: float | None = None,
     ) -> None:
         """Analyze completed cycle for learning."""
-        # Check if we should request feedback
+        # 1. Trigger background simulation to find optimal parameters for this cycle
+        if cycle_data.get("power_data"):
+            # Offload to executor since simulation can be heavy
+            self.hass.async_create_task(self._async_run_simulation(cycle_data))
+
+        # 2. Check if we should request feedback
         self._maybe_request_feedback(
             cycle_data, detected_profile, confidence, predicted_duration
         )
         
-        # Update model-based suggestions (durations etc)
+        # 3. Update model-based suggestions (durations etc)
         self._update_model_suggestions(dt_util.now())
+
+    async def _async_run_simulation(self, cycle_data: dict[str, Any]) -> None:
+        """Run simulation asynchronously."""
+        try:
+            # Simulation runner derives optimal thresholds
+            new_suggestions = self.suggestion_engine.run_simulation(cycle_data)
+            if new_suggestions:
+                self.suggestion_engine.apply_suggestions(new_suggestions)
+                _LOGGER.debug("Post-cycle simulation completed with suggestions: %s", new_suggestions.keys())
+        except Exception as e:
+            _LOGGER.error("Background simulation failed: %s", e)
 
     def _update_operational_suggestions(self, now: datetime) -> None:
         """Generate suggestions for operational parameters (intervals, timeouts)."""
