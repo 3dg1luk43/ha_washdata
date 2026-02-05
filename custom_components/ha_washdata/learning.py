@@ -139,7 +139,10 @@ class LearningManager:
         """Run simulation asynchronously."""
         try:
             # Simulation runner derives optimal thresholds
-            new_suggestions = self.suggestion_engine.run_simulation(cycle_data)
+            # Offload to executor since simulation can be heavy (CPU bound)
+            new_suggestions = await self.hass.async_add_executor_job(
+                self.suggestion_engine.run_simulation, cycle_data
+            )
             if new_suggestions:
                 self.suggestion_engine.apply_suggestions(new_suggestions)
                 _LOGGER.debug("Post-cycle simulation completed with suggestions: %s", new_suggestions.keys())
