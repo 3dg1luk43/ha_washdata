@@ -21,15 +21,15 @@
     - [x] Ensure existing tests pass after refactoring.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Refactoring & Logic Modularization' (Protocol in workflow.md) 7f95aff
 
-## Phase 3: On-Device Simulation Engine (Runtime)
+## Phase 3: On-Device Simulation Engine (Runtime) [checkpoint: 026c224]
 - [x] Task: Implement Simulation Runner 373a00f
     - [x] Add `run_simulation(cycle_data)` method to `SuggestionEngine`.
     - [x] Implement the logic to "replay" the cycle with varied parameters (based on Phase 1 rules).
 - [x] Task: Integrate Background Trigger 0a183db
     - [x] Modify `manager.py` to trigger `SuggestionEngine.run_simulation` after a cycle is saved.
     - [x] Ensure this runs asynchronously/non-blocking.
-- [ ] Task: Cumulative Learning Storage
-    - [ ] Implement a mechanism to store "learned state" so learning persists across restarts.
+- [x] Task: Cumulative Learning Storage
+    - [x] Implement a mechanism to store "learned state" so learning persists across restarts. (Already implemented in ProfileStore `suggestions` dict)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: On-Device Simulation Engine (Runtime)' (Protocol in workflow.md)
 
 ## Phase 4: UI & Integration Finalization
