@@ -120,7 +120,8 @@ async def test_stress_smart_termination(mock_hass, mock_entry, data_file):
     ITERATIONS = 2 # Reduced for speed as requested
     
     dump = load_json_data(data_file)
-    store_data = dump["data"]["store_data"]
+    # Support both full dump and nested store_data formats
+    store_data = dump.get("data", {}).get("store_data", dump.get("data", {}))
     past_cycles = store_data.get("past_cycles", [])
     
     # Template Cycle - pick one that has enough data
