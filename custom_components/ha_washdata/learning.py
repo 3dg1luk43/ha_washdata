@@ -27,6 +27,7 @@ from .const import (
     DEFAULT_DURATION_TOLERANCE,
     DOMAIN,
 )
+from .suggestion_engine import SuggestionEngine
 
 if TYPE_CHECKING:
     from .profile_store import ProfileStore
@@ -90,6 +91,7 @@ class LearningManager:
         self.hass = hass
         self.entry_id = entry_id
         self.profile_store = profile_store
+        self.suggestion_engine = SuggestionEngine(hass, entry_id, profile_store)
 
         # Operational Stats
         self._sample_interval_model = StatisticalModel(max_samples=200)
@@ -139,124 +141,14 @@ class LearningManager:
         if p95 is None or median is None:
             return
 
-        if p95 is None or median is None:
-            return
-        # Ensure we have defaults available if needed - mostly we just check diffs
-        
-        # 1. Watchdog Interval
-        # OLD: max(1, round(p95)) -> Too strict (e.g. 3s)
-        # NEW: max(30, p95 * 10) -> Robust against network blips
-        # Rationale: Watchdog kills the cycle. We rarely need it < 30s.
-        suggested_watchdog = int(max(30, p95 * 10))
-        self._set_suggestion(
-            CONF_WATCHDOG_INTERVAL,
-            suggested_watchdog,
-            f"Based on observed update cadence (p95={p95:.1f}s) * 10 (min 30s buffer)."
-        )
-
-        # 2. No Update Timeout
-        # OLD: max(off_delay, p95 * 4) -> Too strict
-        # NEW: max(60, off_delay * 2, p95 * 20) -> Very robust
-        # Rationale: This is "sensor dead" check. Give it plenty of time.
-        # off_delay = getattr(self.profile_store, "_off_delay", DEFAULT_OFF_DELAY)
-        
-        suggested_timeout = int(max(60, p95 * 20))
-        self._set_suggestion(
-            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-            suggested_timeout,
-            f"Based on observed update cadence (p95={p95:.1f}s) * 20 (min 60s)."
-        )
-
-        # 3. Off Delay
-        # OLD: max(60, p95 * 4) -> OK, but could be smarter.
-        # If we have erratic updates, off_delay needs to be higher to bridge gaps.
-        suggested_off_delay = int(max(60, p95 * 5))
-        self._set_suggestion(
-            CONF_OFF_DELAY,
-            suggested_off_delay,
-            f"Based on observed update cadence (p95={p95:.1f}s) * 5 (min 60s)."
-        )
-
-        # 4. Profile Match Interval
-        # OLD: max(10, median * 10) -> Reasonable.
-        # Keep consistent: ~10 samples per match attempt.
-        suggested_match = int(max(10, median * 10))
-        self._set_suggestion(
-            CONF_PROFILE_MATCH_INTERVAL,
-            suggested_match,
-            f"Based on observed update cadence (median={median:.1f}s) * 10."
-        )
-
+        suggestions = self.suggestion_engine.generate_operational_suggestions(p95, median)
+        self.suggestion_engine.apply_suggestions(suggestions)
         self._last_suggestion_update = now
 
     def _update_model_suggestions(self, now: datetime) -> None:
         """Generate suggestions for model parameters (tolerances, ratios)."""
-        # (This logic essentially migrates from manager._compute_duration_variance_p95 etc)
-        # Re-implemented to be robust.
-        if now:  # Use argument to quiet linter (and potentially use for expiry logic)
-            pass
-
-        # 1. Duration Tolerance
-        # Filter cycles to clean ones (no interrupts, labeled)
-        cycles = self.profile_store.get_past_cycles()[-100:]
-        profiles = self.profile_store.get_profiles()
-        
-        ratios = []
-        for c in cycles:
-            if not c.get("profile_name") or c.get("status") == "interrupted":
-                continue
-            prof = profiles.get(c["profile_name"])
-            if not prof:
-                continue
-            avg = prof.get("avg_duration", 0)
-            dur = c.get("duration", 0)
-            if avg > 60 and dur > 60:
-                ratios.append(dur / avg)
-
-        if len(ratios) >= 10:
-            arr = np.array(ratios)
-            # Deviation from 1.0
-            deviations = np.abs(arr - 1.0)
-            p95_dev = float(np.percentile(deviations, 95))
-            
-            # Suggest tolerance: cover p95 deviation + small buffer (0.05)
-            # Bound between 0.10 and 0.50
-            suggested_tol = min(0.50, max(0.10, round(p95_dev + 0.05, 2)))
-            
-            self._set_suggestion(
-                CONF_DURATION_TOLERANCE,
-                suggested_tol,
-                f"Based on duration variance of {len(ratios)} recent labeled cycles "
-                f"(p95 dev={p95_dev:.2f}).",
-            )
-            self._set_suggestion(
-                CONF_PROFILE_DURATION_TOLERANCE,
-                suggested_tol,
-                f"Based on duration variance of {len(ratios)} recent labeled cycles "
-                f"(p95 dev={p95_dev:.2f}).",
-            )
-
-            # 2. Match Duration Ratios (Min/Max)
-            # Use raw ratios to find bounds
-            p05_ratio = float(np.percentile(arr, 5))
-            p95_ratio = float(np.percentile(arr, 95))
-            
-            # Min: slightly below p05, capped at 0.1
-            min_r = max(0.1, round(p05_ratio - 0.1, 2))
-            # Max: slightly above p95, capped at 3.0
-            max_r = min(3.0, round(p95_ratio + 0.1, 2))
-            
-            if min_r < max_r - 0.2: # Ensure gap
-                self._set_suggestion(
-                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                    min_r,
-                    f"Based on labeled cycle durations (p05={p05_ratio:.2f})."
-                )
-                self._set_suggestion(
-                    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                    max_r,
-                    f"Based on labeled cycle durations (p95={p95_ratio:.2f})."
-                )
+        suggestions = self.suggestion_engine.generate_model_suggestions()
+        self.suggestion_engine.apply_suggestions(suggestions)
 
     def _set_suggestion(self, key: str, value: Any, reason: str) -> None:
         """Persist a suggested setting."""
