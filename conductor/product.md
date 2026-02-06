@@ -10,11 +10,13 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 ## Core Value Proposition
 - **High Precision:** Provide highly accurate cycle completion time estimates using power profile matching.
 - **Robust Detection:** Offer a robust framework for detecting and labeling various appliance cycles.
+- **On-Device Training:** Automatically optimizes detection parameters by simulating past cycles against learned heuristics.
 
 ## Key Features
 - **Shape-Correlation Matching:** Uses advanced algorithms to identify cycles based on power consumption patterns.
 - **Predictive End Logic:** "Phase-aware" prediction detects variance and locks the countdown to prevent erratic jumps.
 - **Smart Time Estimation:** Estimates completion time based on recognized profiles and current progress.
+- **Dynamic Auto-Suggestion:** Provides optimized parameter suggestions (thresholds, delays) tailored to specific appliance behavior through background simulations.
 
 ## Development Focus
 - **Core Logic Refactoring:** Refactoring the entire logic of the integration for improved reliability and performance.
