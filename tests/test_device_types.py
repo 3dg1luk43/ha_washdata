@@ -1,7 +1,7 @@
 
 import pytest
 from unittest.mock import Mock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
 from custom_components.ha_washdata.const import (
     DEVICE_TYPE_DRYER, DEVICE_TYPE_COFFEE_MACHINE,
@@ -11,7 +11,7 @@ from custom_components.ha_washdata.const import (
 )
 
 def dt(seconds):
-    return datetime(2023, 1, 1, 10, 0, 0) + timedelta(seconds=seconds)
+    return datetime(2023, 1, 1, 10, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=seconds)
 
 def flush_buffer(detector, start_t_offset):
     for i in range(1, 81):

@@ -1,8 +1,11 @@
 """Pytest fixtures for ha_washdata tests."""
 import pytest
 from unittest.mock import MagicMock
+
+pytest_plugins = ["pytest_homeassistant_custom_component"]
+
 # Ensure mocks are loaded before anything else
-import tests.mock_imports  # pylint: disable=unused-import
+# import tests.mock_imports  # pylint: disable=unused-import
 
 @pytest.fixture
 def mock_hass():

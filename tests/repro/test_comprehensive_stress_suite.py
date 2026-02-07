@@ -53,26 +53,6 @@ class PacketDropper:
 
 # --- FIXTURES ---
 
-class MockHass:
-    def __init__(self):
-        self.data = {}
-        self.services = MagicMock()
-        self.services.async_call = AsyncMock()
-        self.bus = MagicMock()
-        self.bus.async_fire = MagicMock()
-        self.states = MagicMock()
-        self.states.get = MagicMock(return_value=None)
-        
-    def async_create_task(self, coro):
-        return asyncio.create_task(coro)
-        
-    async def async_add_executor_job(self, target, *args):
-        return target(*args)
-
-@pytest.fixture
-def stress_test_hass():
-    return MockHass()
-
 def create_mock_entry(device_type="dishwasher", options_override=None):
     options = {
         "device_type": device_type,
@@ -122,7 +102,7 @@ WASHING_MACHINE_TEMPLATE = {
 
 
 @pytest.mark.asyncio
-async def test_stress_dishwasher_zombie(stress_test_hass):
+async def test_stress_dishwasher_zombie(hass):
     # Configuration
     NUM_CYCLES = 200
     DROP_RATE = 0.15 
@@ -132,9 +112,12 @@ async def test_stress_dishwasher_zombie(stress_test_hass):
     # HARDEN EXECUTOR
     async def _executor(target, *args):
         return target(*args)
-    stress_test_hass.async_add_executor_job = _executor
+    hass.async_add_executor_job = _executor
+    
+    with patch("homeassistant.core.ServiceRegistry.async_call", new_callable=AsyncMock), \
+         patch("homeassistant.core.EventBus.async_fire"):
 
-    mock_entry = create_mock_entry("dishwasher", {
+        mock_entry = create_mock_entry("dishwasher", {
          "off_delay": 120, # 2m wait
          "low_power_no_update_timeout": 3600, # 1h
          "profile_match_min_duration_ratio": 0.95, # Stricter to survive gap
@@ -164,11 +147,12 @@ async def test_stress_dishwasher_zombie(stress_test_hass):
         mock_store_instance.async_save = AsyncMock()
         mock_store_instance.async_clear_active_cycle = AsyncMock()
         mock_store_instance.async_add_cycle = AsyncMock()
+        mock_store_instance.async_rebuild_envelope = AsyncMock()
          
         # Run Iterations
         for i in range(NUM_CYCLES):
             # Setup fresh manager for each cycle
-            manager = WashDataManager(stress_test_hass, mock_entry)
+            manager = WashDataManager(hass, mock_entry)
             
             # Setup Profile Store Mock to return "65 full"
             manager.profile_store = MockStore.return_value
@@ -191,13 +175,6 @@ async def test_stress_dishwasher_zombie(stress_test_hass):
             # Generate Data
             warp = random.uniform(1.0 - WARP_LIMIT, 1.0 + WARP_LIMIT)
             variant_data = synthesizer.generate_variant(warp, JITTER)
-            
-            # Locate the "Spike" in this variant (last significant value > 10W)
-            # Original spike is at index -2 (second to last)
-            # But due to packet loss, we might miss it in simulation if we are unlucky?
-            # We should ensure the spike is NOT dropped by the dropper to be fair, 
-            # OR we accept that if spike is dropped, it might fail (which is real life).
-            # For this test, let's force the spike to be delivered.
             
             sim_time = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
             start_time = sim_time
@@ -277,7 +254,7 @@ async def test_stress_dishwasher_zombie(stress_test_hass):
         assert success_count == NUM_CYCLES, f"Dishwasher Stress Test Failed! {len(failures)} failures."
 
 @pytest.mark.asyncio
-async def test_stress_washing_machine_regression(stress_test_hass):
+async def test_stress_washing_machine_regression(hass):
     """
     Synthesize 50 cycles of the Washing Machine 'Normal' profile.
     Verify:
@@ -285,9 +262,16 @@ async def test_stress_washing_machine_regression(stress_test_hass):
     2. No 'Zombie' detection extension keeps it alive unnecessarily.
     """
     NUM_CYCLES = 200
-    # Washing machine is noisy/vibrating, maybe more jitter?
     
-    mock_entry = create_mock_entry("washing_machine", {
+    # HARDEN EXECUTOR
+    async def _executor(target, *args):
+        return target(*args)
+    hass.async_add_executor_job = _executor
+    
+    with patch("homeassistant.core.ServiceRegistry.async_call", new_callable=AsyncMock), \
+         patch("homeassistant.core.EventBus.async_fire"):
+
+        mock_entry = create_mock_entry("washing_machine", {
         "device_type": "washing_machine",
         "min_power": 2.0,
         "completion_min_seconds": 300 # 5m logic
@@ -301,11 +285,21 @@ async def test_stress_washing_machine_regression(stress_test_hass):
     
     print(f"\n[stress_washing_machine] Starting {NUM_CYCLES} iterations...")
     
-    with patch("custom_components.ha_washdata.manager.ProfileStore") as MockStore, \
+    with patch("custom_components.ha_washdata.manager.ProfileStore", autospec=True) as MockStore, \
          patch("custom_components.ha_washdata.cycle_detector.CycleDetector._try_profile_match"):
+         
+        mock_store_instance = MockStore.return_value
+        mock_store_instance.async_match_profile = AsyncMock(return_value=MagicMock(best_profile="1:37 bavlna", confidence=1.0))
+        mock_store_instance.async_sample_profile = AsyncMock()
+        mock_store_instance.async_save = AsyncMock()
+        mock_store_instance.async_clear_active_cycle = AsyncMock()
+        mock_store_instance.async_add_cycle = AsyncMock()
+        mock_store_instance.async_rebuild_envelope = AsyncMock()
+        mock_store_instance.get_profiles.return_value = {"1:37 bavlna": {}}
+
         for i in range(NUM_CYCLES):
-            manager = WashDataManager(stress_test_hass, mock_entry)
-            manager.profile_store = MockStore.return_value
+            manager = WashDataManager(hass, mock_entry)
+            manager.profile_store = mock_store_instance
             manager.profile_store.get_profile.return_value = {"avg_duration": 5900}
             
             # Simulate matching '1:37 bavlna'

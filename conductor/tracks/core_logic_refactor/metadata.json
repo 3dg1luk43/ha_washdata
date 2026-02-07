@@ -1,8 +1,0 @@
-{
-  "track_id": "core_logic_refactor",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-04T12:00:00Z",
-  "updated_at": "2026-02-04T12:00:00Z",
-  "description": "Implement advanced state machine with start_energy and end_energy gates, and optimize the multi-stage matching pipeline."
-}

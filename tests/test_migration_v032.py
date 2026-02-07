@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 try:
     import homeassistant.util.dt as dt_util
 except ImportError:
-    import tests.mock_imports
+    # import tests.mock_imports
     from homeassistant.util import dt as dt_util
 
 from custom_components.ha_washdata.const import STORAGE_KEY, STORAGE_VERSION
