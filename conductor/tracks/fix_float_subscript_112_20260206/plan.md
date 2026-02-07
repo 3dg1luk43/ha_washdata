@@ -1,10 +1,10 @@
 # Implementation Plan: Fix 'float' object is not subscriptable #112
 
-## Phase 1: Investigation & Reproduction (Red Phase)
+## Phase 1: Investigation & Reproduction (Red Phase) [checkpoint: 8b3e7bd]
 - [x] Task: Analyze `profile_store.py` and `manager.py` to trace the origin of `env_avg`.
 - [x] Task: Create a reproduction test file `tests/repro/test_issue_112.py` that simulates malformed `env_avg` data.
 - [x] Task: Verify that the new test fails with `TypeError: 'float' object is not subscriptable`.
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Investigation & Reproduction' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Investigation & Reproduction' (Protocol in workflow.md)
 
 ## Phase 2: Implementation (Green Phase)
 - [ ] Task: Implement defensive checks in `custom_components/ha_washdata/profile_store.py` within `async_verify_alignment`.
