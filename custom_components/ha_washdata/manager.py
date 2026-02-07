@@ -558,9 +558,18 @@ class WashDataManager:
             # --- Envelope Verification for Mismatches ---
             if (not profile_name or result.is_confident_mismatch) and current_matched:
                 formatted = [(t.isoformat(), p) for t, p in readings]
-                is_confirmed, mapped_time, _ = (
-                    await self.profile_store.async_verify_alignment(current_matched, formatted)
-                )
+                try:
+                    is_confirmed, mapped_time, _ = (
+                        await self.profile_store.async_verify_alignment(current_matched, formatted)
+                    )
+                except Exception as e: # pylint: disable=broad-exception-caught
+                    _LOGGER.error(
+                        "Alignment verification crashed for profile %s: %s",
+                        current_matched, e, exc_info=True
+                    )
+                    is_confirmed = False
+                    mapped_time = 0.0
+
                 if is_confirmed:
                     _LOGGER.info(
                         "Envelope verified expected low power phase for %s. Overriding mismatch.",

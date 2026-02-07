@@ -57,15 +57,14 @@ async def test_verify_alignment_with_legacy_envelope(store):
         ("2026-02-06T12:02:00", 4.0),
     ]
     
-    # This should trigger the TypeError: 'float' object is not subscriptable
-    # in profile_store.py at: env_time = [p[0] for p in env_avg]
-    try:
-        await store.async_verify_alignment(profile_name, current_power_data)
-    except TypeError as e:
-        assert "'float' object is not subscriptable" in str(e)
-        return
-
-    pytest.fail("Should have raised TypeError: 'float' object is not subscriptable")
+    # This should NO LONGER trigger the TypeError
+    is_confirmed, mapped_time, mapped_power = await store.async_verify_alignment(profile_name, current_power_data)
+    
+    # We don't necessarily care if it's confirmed (alignment logic depends on worker)
+    # but it should NOT crash.
+    assert isinstance(is_confirmed, bool)
+    assert isinstance(mapped_time, (int, float))
+    assert isinstance(mapped_power, (int, float))
 
 @pytest.mark.asyncio
 async def test_verify_alignment_with_malformed_envelope(store):
@@ -91,10 +90,9 @@ async def test_verify_alignment_with_malformed_envelope(store):
         ("2026-02-06T12:01:00", 14.0),
     ]
     
-    try:
-        await store.async_verify_alignment(profile_name, current_power_data)
-    except TypeError as e:
-        assert "object is not subscriptable" in str(e)
-        return
+    # This should NO LONGER trigger the TypeError
+    is_confirmed, mapped_time, mapped_power = await store.async_verify_alignment(profile_name, current_power_data)
+    
+    # It should fail gracefully (return False) because of malformed data
+    assert is_confirmed is False
 
-    pytest.fail("Should have raised TypeError")

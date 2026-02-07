@@ -1807,10 +1807,36 @@ class ProfileStore:
             return False, 0.0, 9999.0
 
         # Extract envelope curves
-        # "avg" is list of [t, p]
-        env_avg = envelope["avg"]
-        env_time = [p[0] for p in env_avg]
-        env_power = [p[1] for p in env_avg]
+        # "avg" can be list of [t, p] (new) or [p, ...] (legacy)
+        env_avg_raw = envelope.get("avg", [])
+        if not env_avg_raw:
+            return False, 0.0, 9999.0
+
+        try:
+            # Handle both formats: [[t, y], ...] (new) or [y, ...] (legacy)
+            if isinstance(env_avg_raw[0], (list, tuple)) and len(env_avg_raw[0]) >= 2:
+                # New format: [[t, y], ...]
+                env_time = [float(p[0]) for p in env_avg_raw]
+                env_power = [float(p[1]) for p in env_avg_raw]
+            else:
+                # Legacy format: [y, ...]
+                env_power = [float(p) for p in env_avg_raw]
+                # Reconstruct time grid from envelope if available, or assume 60s intervals
+                env_time = envelope.get("time_grid")
+                if not env_time or len(env_time) != len(env_power):
+                    target_dur = envelope.get("target_duration", 0)
+                    if target_dur > 0:
+                        env_time = np.linspace(0, target_dur, len(env_power)).tolist()
+                    else:
+                        env_time = [float(i * 60) for i in range(len(env_power))]
+        except (TypeError, ValueError, IndexError) as e:
+            _LOGGER.error(
+                "Malformed envelope 'avg' data for %s. Type: %s, Length: %d, Error: %s",
+                profile_name, type(env_avg_raw[0]), len(env_avg_raw), e
+            )
+            return False, 0.0, 9999.0
+
+        env_avg = env_avg_raw # For backward compatibility if needed elsewhere
         
         # Prepare current power (floats)
         try:
