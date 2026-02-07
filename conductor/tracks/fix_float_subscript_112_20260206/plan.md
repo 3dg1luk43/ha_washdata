@@ -12,8 +12,8 @@
 - [x] Task: Verify the reproduction test now passes (Green Phase).
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Implementation' (Protocol in workflow.md)
 
-## Phase 3: Verification & Quality Assurance
+## Phase 3: Verification & Quality Assurance [checkpoint: 7624698]
 - [x] Task: Run full test suite to ensure no regressions in matching logic.
 - [x] Task: Verify code coverage for the new checks in `profile_store.py` (>80%).
 - [x] Task: Perform a final code audit against project style guides.
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Verification & Quality Assurance' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Verification & Quality Assurance' (Protocol in workflow.md)
