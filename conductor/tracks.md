@@ -6,7 +6,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-- [~] **Track: [BUG] Error on float not being subscriptable #112**
+- [x] **Track: [BUG] Error on float not being subscriptable #112**
 *Link: [./tracks/fix_float_subscript_112_20260206/](./tracks/fix_float_subscript_112_20260206/)*
 
 - [ ] **Track: [BUG] Finished state is not removed**
