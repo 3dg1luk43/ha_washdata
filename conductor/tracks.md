@@ -6,9 +6,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-- [x] **Track: [BUG] Error on float not being subscriptable #112**
-*Link: [./tracks/fix_float_subscript_112_20260206/](./tracks/fix_float_subscript_112_20260206/)*
-
 - [ ] **Track: [BUG] Finished state is not removed**
 *Link: [./tracks/fix_finished_state_expiry_20260206/](./tracks/fix_finished_state_expiry_20260206/)*
 
@@ -27,6 +24,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 ## Archived Tracks
+
+- [x] **Track: [BUG] Error on float not being subscriptable #112**
+  *Link: [./conductor/archive/fix_float_subscript_112_20260206/](./conductor/archive/fix_float_subscript_112_20260206/)*
 
 - [x] **Track: Comprehensive Test Suite Expansion**
   *Link: [./conductor/archive/test_expansion_20260204/](./conductor/archive/test_expansion_20260204/)*
