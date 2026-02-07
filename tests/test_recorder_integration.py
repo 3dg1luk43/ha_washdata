@@ -17,6 +17,7 @@ async def test_record_flow_menu(mock_hass, mock_config_entry):
     manager.async_start_recording = AsyncMock()
     
     mock_hass.data[DOMAIN] = {mock_config_entry.entry_id: manager}
+    mock_hass.config_entries.async_get_known_entry.return_value = mock_config_entry
     
     # Init options flow
     # We need to test OptionsFlowHandler directly or via hass.config_entries.options.async_init
@@ -25,6 +26,7 @@ async def test_record_flow_menu(mock_hass, mock_config_entry):
     from custom_components.ha_washdata.config_flow import OptionsFlowHandler
     flow = OptionsFlowHandler(mock_config_entry)
     flow.hass = mock_hass
+    flow.handler = mock_config_entry.entry_id
     
     # Step: record_cycle (Initial menu check)
     result = await flow.async_step_record_cycle()
@@ -70,10 +72,12 @@ async def test_record_flow_stop_process(mock_hass, mock_config_entry):
     manager.profile_store.generate_preview_svg = MagicMock(return_value="<svg></svg>")
     
     mock_hass.data[DOMAIN] = {mock_config_entry.entry_id: manager}
+    mock_hass.config_entries.async_get_known_entry.return_value = mock_config_entry
     
     from custom_components.ha_washdata.config_flow import OptionsFlowHandler
     flow = OptionsFlowHandler(mock_config_entry)
     flow.hass = mock_hass
+    flow.handler = mock_config_entry.entry_id
     
     # 1. Stop Recording
     result = await flow.async_step_record_cycle(user_input={"action": "stop_recording"})

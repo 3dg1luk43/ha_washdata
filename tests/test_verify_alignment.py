@@ -75,12 +75,12 @@ async def test_envelope_alignment_with_user_data(store, data_file):
         pytest.skip(f"Insufficient data in {data_file}")
 
     # Check if any are already labeled
-    profile_name = next((c["profile"] for c in past_cycles if c.get("profile") in profiles), None)
+    profile_name = next((c.get("profile_name") for c in past_cycles if c.get("profile_name") in profiles), None)
     
     if not profile_name:
         # Manually assign the first profile to the first cycle for testing purposes
         profile_name = list(profiles.keys())[0]
-        past_cycles[0]["profile"] = profile_name
+        past_cycles[0]["profile_name"] = profile_name
         print(f"DEBUG: Manually assigned {profile_name} to first cycle in {data_file}")
     
     # Run Rebuild Envelope
