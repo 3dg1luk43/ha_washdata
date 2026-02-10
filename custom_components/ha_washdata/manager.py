@@ -200,7 +200,7 @@ class WashDataManager:
         self._matching_task = None
         self._last_state_save = 0.0
         self._last_cycle_end_time: datetime | None = None
-        self._remove_progress_reset_timer = None
+        self._remove_state_expiry_timer = None
 
         # Components
         match_threshold = config_entry.options.get(
@@ -1217,10 +1217,10 @@ class WashDataManager:
         if self._remove_watchdog:
             self._remove_watchdog()
         if (
-            hasattr(self, "_remove_progress_reset_timer")
-            and self._remove_progress_reset_timer
+            hasattr(self, "_remove_state_expiry_timer")
+            and self._remove_state_expiry_timer
         ):
-            self._remove_progress_reset_timer()
+            self._remove_state_expiry_timer()
         if self._remove_maintenance_scheduler:
             self._remove_maintenance_scheduler()
 
@@ -1474,37 +1474,36 @@ class WashDataManager:
             self._remove_watchdog()
             self._remove_watchdog = None
 
-    def _start_progress_reset_timer(self) -> None:
-        """Start timer to reset progress to 0% after idle period (user unload time)."""
-        # Use watchdog mechanism but with longer interval for progress reset
-        if not hasattr(self, "_remove_progress_reset_timer"):
-            self._remove_progress_reset_timer = None
+    def _start_state_expiry_timer(self) -> None:
+        """Start timer to reset state to OFF and progress to 0% after idle period."""
+        if not hasattr(self, "_remove_state_expiry_timer"):
+            self._remove_state_expiry_timer = None
 
-        if self._remove_progress_reset_timer:
+        if self._remove_state_expiry_timer:
             return  # Already running
 
         _LOGGER.debug(
-                "Starting progress reset timer (will reset after %ss)",
-                self._progress_reset_delay,
-            )
-        self._remove_progress_reset_timer = async_track_time_interval(
+            "Starting state expiry timer (will reset after %ss)",
+            self._progress_reset_delay,
+        )
+        self._remove_state_expiry_timer = async_track_time_interval(
             self.hass,
-            self._check_progress_reset,
-            timedelta(seconds=10),  # Check every 10s
+            self._handle_state_expiry,
+            timedelta(seconds=60),  # Check every minute
         )
 
-    def _stop_progress_reset_timer(self) -> None:
-        """Stop the progress reset timer."""
+    def _stop_state_expiry_timer(self) -> None:
+        """Stop the state expiry timer."""
         if (
-            hasattr(self, "_remove_progress_reset_timer")
-            and self._remove_progress_reset_timer
+            hasattr(self, "_remove_state_expiry_timer")
+            and self._remove_state_expiry_timer
         ):
-            _LOGGER.debug("Stopping progress reset timer")
-            self._remove_progress_reset_timer()
-            self._remove_progress_reset_timer = None
+            _LOGGER.debug("Stopping state expiry timer")
+            self._remove_state_expiry_timer()
+            self._remove_state_expiry_timer = None
 
-    async def _check_progress_reset(self, now: datetime) -> None:
-        """Check if progress should be reset (user unload timeout)."""
+    async def _handle_state_expiry(self, now: datetime) -> None:
+        """Check if state and progress should be reset (auto-expiration)."""
         if not self._cycle_completed_time or self.detector.state == STATE_RUNNING:
             # Cycle is running or not completed, don't reset
             return
@@ -1512,15 +1511,16 @@ class WashDataManager:
         time_since_complete = (now - self._cycle_completed_time).total_seconds()
 
         if time_since_complete > self._progress_reset_delay:
-            # User has had enough time to unload, reset to 0%
+            # Auto-expire the "Finished" (or other terminal) state
             _LOGGER.debug(
-                "Progress reset: cycle idle for %.0fs (threshold: %ss)",
+                "State expiry: cycle idle for %.0fs (threshold: %ss). Resetting to OFF.",
                 time_since_complete,
                 self._progress_reset_delay,
             )
             self._cycle_progress = 0.0
             self._cycle_completed_time = None
-            self._stop_progress_reset_timer()
+            self.detector.reset(STATE_OFF)
+            self._stop_state_expiry_timer()
             self._notify_update()
 
     async def _watchdog_check_stuck_cycle(self, now: datetime) -> None:
@@ -1666,7 +1666,7 @@ class WashDataManager:
             # If we transition from PAUSED or ENDING, it's a resume - keep estimates!
             if old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN):
                 self._cycle_completed_time = None
-                self._stop_progress_reset_timer()
+                self._stop_state_expiry_timer()
                 
                 self._current_program = "detecting..."
                 self._manual_program_active = False
@@ -1710,7 +1710,7 @@ class WashDataManager:
 
         # IMMEDIATELY stop all active timers when cycle determined to have ended
         self._stop_watchdog()  # Stop active cycle watchdog
-        self._stop_progress_reset_timer()  # Cancel any pending progress reset
+        self._stop_state_expiry_timer()  # Cancel any pending progress reset
         self._last_cycle_end_time = dt_util.now()
 
         # Auto-Tune: Check for ghost cycles (short duration AND low energy)
@@ -1857,7 +1857,7 @@ class WashDataManager:
         self._cycle_completed_time = dt_util.now()
 
         # Start progress reset timer to go back to 0% after user unload window
-        self._start_progress_reset_timer()
+        self._start_state_expiry_timer()
 
         self._notify_update()
 

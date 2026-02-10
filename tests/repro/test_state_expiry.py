@@ -9,7 +9,8 @@ from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS,
-    STATE_FINISHED, STATE_OFF, CONF_PROGRESS_RESET_DELAY
+    STATE_FINISHED, STATE_OFF, CONF_PROGRESS_RESET_DELAY,
+    STATE_RUNNING
 )
 
 @pytest.fixture
