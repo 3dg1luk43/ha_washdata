@@ -16,6 +16,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Shape-Correlation Matching:** Uses advanced algorithms to identify cycles based on power consumption patterns.
 - **Predictive End Logic:** "Phase-aware" prediction detects variance and locks the countdown to prevent erratic jumps.
 - **Smart Time Estimation:** Estimates completion time based on recognized profiles and current progress.
+- **Watchdog-Assisted Reliability:** Prevents premature termination during long pauses and enforces a "zombie killer" limit to ensure the power sensor reliably returns to 0W.
 - **Dynamic Auto-Suggestion:** Provides optimized parameter suggestions (thresholds, delays) tailored to specific appliance behavior through background simulations.
 
 ## Development Focus
