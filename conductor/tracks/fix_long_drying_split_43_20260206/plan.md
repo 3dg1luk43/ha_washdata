@@ -14,8 +14,8 @@
 - [x] Task: Verify the reproduction test now passes (Green Phase). ed2b5f6
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Implementation' (Protocol in workflow.md)
 
-## Phase 3: Documentation & QA
+## Phase 3: Documentation & QA [checkpoint: 25c27d7]
 - [x] Task: Update `IMPLEMENTATION.md` with details on handling multi-hour passive drying.
 - [x] Task: Add an entry to `CHANGELOG.md` about improved dishwasher support and long pause handling.
 - [x] Task: Run full test suite to ensure no regressions in shorter cycle detection.
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Documentation & QA' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Documentation & QA' (Protocol in workflow.md)
