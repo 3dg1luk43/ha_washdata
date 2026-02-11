@@ -808,17 +808,17 @@ class ProfileStore:
 
             # Trim leading/trailing zero readings for cleaner data
             # SKIP for completed cycles to preserve end spike data
-            if cycle_data.get("status") == "completed":
+            if cycle_data.get("status") in ("completed", "force_stopped"):
                 # Only trim leading zeros for completed cycles, keep trailing data
                 start_idx = 0
                 for i, point in enumerate(stored):
-                    if point[1] > 1.5:
+                    if point[1] > 1.0:
                         start_idx = i
                         break
                 stored = stored[start_idx:]
                 _LOGGER.debug("add_cycle: Skipping trailing trim for completed cycle")
             else:
-                stored = trim_zero_power_data(stored, threshold=1.5)
+                stored = trim_zero_power_data(stored, threshold=1.0)
             
             cycle_data["power_data"] = stored
             cycle_data["sampling_interval"] = round(sampling_interval, 1)
@@ -1044,7 +1044,19 @@ class ProfileStore:
             ):
                 # Apply trim helper
                 original_len = len(p_data)
-                trimmed = trim_zero_power_data(p_data, threshold=1.0) # Conservative 1W threshold
+                
+                # Logic: For completed cycles, only trim leading zeros. 
+                # For others, trim both ends.
+                if cycle.get("status") in ("completed", "force_stopped"):
+                    # Only trim leading
+                    start_idx = 0
+                    for i, point in enumerate(p_data):
+                        if point[1] > 1.0: # Match threshold below
+                            start_idx = i
+                            break
+                    trimmed = p_data[start_idx:]
+                else:
+                    trimmed = trim_zero_power_data(p_data, threshold=1.0) # Conservative 1W threshold
 
                 if trimmed and len(trimmed) < original_len:
                     # Data was trimmed - check for start time shift
@@ -1575,7 +1587,7 @@ class ProfileStore:
             else:
                 return None
 
-            s_segments = resample_uniform(s_ts, s_p, dt_s=dt, gap_s=300.0)
+            s_segments = resample_uniform(s_ts, s_p, dt_s=dt, gap_s=21600.0)
             if not s_segments:
                 return None
 
@@ -1613,7 +1625,7 @@ class ProfileStore:
             p_arr = np.array([float(x[1]) for x in current_power_data])
 
             # Resample current
-            segments, used_dt = resample_adaptive(ts_arr, p_arr, min_dt=5.0, gap_s=300.0)
+            segments, used_dt = resample_adaptive(ts_arr, p_arr, min_dt=5.0, gap_s=21600.0)
             if not segments:
                 return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
             current_seg = max(segments, key=lambda s: len(s.power))

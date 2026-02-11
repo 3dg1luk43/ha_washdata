@@ -5,9 +5,19 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.2] - 2026-02-10
+## [0.4.2] - 2026-02-11
 
 ### ✨ Features
+- **Electric Vehicle (EV) Support**:
+  - Added new "Electric Vehicle" device type with optimized defaults.
+  - New icons and phase heuristics ("Charging", "Maintenance").
+- **Divergence Detection**:
+  - Improved matching logic to detect when a cycle starts diverging from its matched profile.
+  - Automatically reverts to "Detecting..." if confidence drops significantly below the cycle's peak (default 40% drop).
+- **Card Animation**:
+  - Added native spinning animation to the dashboard card icon when the appliance is running.
+- **Configurable Stability Thresholds**:
+  - Added `DEFAULT_MATCH_REVERT_RATIO` and `DEFAULT_DEFER_FINISH_CONFIDENCE` to `const.py` for easier fine-tuning.
 - **Profile-Aware Watchdog**:
   - The watchdog now uses "look-ahead" logic from the matched profile to prevent premature cycle termination during long legitimate pauses (e.g., dishwasher drying).
   - Automatically extends silence timeouts if the cycle is within its expected profile duration.
@@ -15,8 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Implemented a hard "Zombie Killer" limit that force-ends cycles exceeding 200% of their expected profile duration (min 2 hours).
 - **Stuck Power Prevention**:
   - Automatically resets the power sensor to 0W when a cycle is forced to end by the watchdog or manual stop, fixing issues where the entity remained at a high value.
-- **Zero-Latency 0W Processing**:
-  - Power updates at or below 0.1W now bypass all debouncing and smoothing filters, ensuring immediate cycle-end detection.
+- **Zero-Latency Low-Power Processing**:
+  - Power updates below `min_power` now bypass all debouncing, smoothing, and sampling interval filters, ensuring immediate cycle-end detection.
 - **Program Detection Stability**:
   - Implemented temporal persistence for profile matching: requires 3 consecutive consistent matches before switching from "detecting..." to a profile, or before unmatching a profile.
   - Added a minimum confidence gap for mid-cycle profile switching to prevent "flapping" between similar programs.
@@ -25,10 +35,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Designed specifically to support full progress bars in `timer-bar-card`.
   - Dynamically updates as estimates are refined.
 
+### 🛠️ Improvements
+- **Manual Recording Robustness**:
+  - Increased gap threshold to 6 hours to support very long Eco cycles with multi-hour silent phases.
+  - Unified automatic trimming threshold to 1.0W across the integration.
+- **Clean Card UI**:
+  - Removed redundant "off" label from completion details when the appliance is inactive.
+- **Zigbee2MQTT Guidance**:
+  - Added optimized configuration tips for Z2M smart plug users in README.
+- **Profile Sorting**: Improved sorting for profile lists (natural sort), ensuring correct numeric order.
+
 ### 🐛 Bug Fixes
+- **Profile Shrinking**:
+  - Fixed an issue where maintenance tasks would aggressively trim trailing silence from completed cycles, causing profiles to shorten over time.
+- **Termination Hangs**:
+  - Restricted "Deferred Finish" logic to require high confidence (> 0.55) or a verified pause, preventing cycles from hanging on mismatched long profiles.
 - **Long Drying Phase Support**:
   - Fixed an issue where dishwashers with multi-hour silent drying phases were being split into multiple cycles by the watchdog.
-  - The watchdog now recognizes a "Verified Pause" from the profile envelope and extends the silence timeout to 2.5 hours, matching the maximum safe deferral limit.
+  - Recognizes "Verified Pause" from profile envelope to extend silence timeouts.
+- **Test Stability**:
+  - Resolved several `TypeError` issues in the test suite and improved mocking reliability for sensors and configs.
+- **Stuck Power Value**: Fixed issue where the power entity would get stuck at the last non-zero value after a cycle ended.
+- **Timezone Display**: Fixed issue where timestamps in specific UI menus were shown in GMT instead of local time.
+- **Advanced Settings Error**: Fixed a crash that prevented advanced settings from being saved in the configuration flow.
+- **State Logic**: Fixed assertions and logic validation for terminal states.
+- **Notification Tests**: Fixed test environment formatting for notification services.
 
 ## [0.4.1] - 2026-02-03
 

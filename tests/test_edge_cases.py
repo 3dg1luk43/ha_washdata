@@ -68,6 +68,7 @@ def test_long_drying_phase_robustness(detector):
     # Configure detector with a matched profile expectation (normally done via callback)
     detector._matched_profile = "Dishwasher Eco"
     detector._expected_duration = 7200.0 # 2h
+    detector._last_match_confidence = 0.8 # New requirement for deferral
     
     synth = CycleSynthesizer()
     synth.add_phase(2000.0, 1800.0) # 30 min wash

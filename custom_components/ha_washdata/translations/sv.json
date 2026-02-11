@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Markera denna ruta för att kopiera värden föreslagna av inlärningsalgoritmen till formuläret. Granska innan du sparar.\n\nFöreslaget (från inlärning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Välj apparattyp (Tvättmaskin, Torktumlare, Diskmaskin, Kaffemaskin). Denna etikett sparas med varje cykel för bättre organisation.",
+          "device_type": "Välj typ av apparat (tvättmaskin, torktumlare, diskmaskin, kaffemaskin, EV). Denna tagg lagras med varje cykel för bättre organisation.",
           "power_sensor": "Sensorentiteten som rapporterar realtidseffekt (i watt). Du kan ändra den när som helst utan att förlora historiska data — användbart vid byte av smart uttag.",
           "min_power": "Effektvärden över denna tröskel (i watt) indikerar att apparaten körs. Börja med 2W för de flesta enheter.",
           "off_delay": "Sekunder som den utjämnade effekten måste stanna under stopptröskel för att markera slutförande. Standard: 120s.",

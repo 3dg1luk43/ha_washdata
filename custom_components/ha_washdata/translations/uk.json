@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Позначте це поле, щоб скопіювати значення, запропоновані алгоритмом навчання, у форму. Перевірте перед збереженням.\n\nЗапропоновано (з навчання):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Виберіть тип пристрою (Пральна машина, Сушильна машина, Посудомийна машина, Кавоварка). Ця мітка зберігається з кожним циклом для кращої організації.",
+          "device_type": "Виберіть тип приладу (пральна машина, сушильна машина, посудомийна машина, кавова машина, EV). Цей тег зберігається з кожним циклом для кращої організації.",
           "power_sensor": "Сутність датчика, що повідомляє потужність у реальному часі (у ватах). Ви можете змінити його будь-коли без втрати історичних даних — зручно при заміні розумної розетки.",
           "min_power": "Значення потужності вище цього порогу (у ватах) вказують на роботу пристрою. Почніть з 2Вт для більшості пристроїв.",
           "off_delay": "Секунди, протягом яких згладжена потужність повинна залишатися нижче порогу зупинки для позначення завершення. За замовчуванням: 120с.",

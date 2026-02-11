@@ -129,6 +129,15 @@ class WashDataCard extends HTMLElement {
             line-height: 1.2;
             margin-top: 2px;
           }
+          
+          /* Animation */
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          .spinning {
+            animation: spin 2s linear infinite;
+          }
         </style>
         <ha-card id="card">
           <div class="tile">
@@ -196,6 +205,11 @@ class WashDataCard extends HTMLElement {
     }
 
     iconEl.setAttribute("icon", icon);
+    if (state.toLowerCase() === 'running') {
+      iconEl.classList.add("spinning");
+    } else {
+      iconEl.classList.remove("spinning");
+    }
     titleEl.textContent = title;
 
     const attr = stateObj.attributes;
@@ -237,7 +251,7 @@ class WashDataCard extends HTMLElement {
     }
 
     // 3. Details (Time / Pct)
-    if (this._cfg.show_details !== false) {
+    if (this._cfg.show_details !== false && !isInactive) {
       let remaining = "";
       if (this._cfg.time_entity) {
         remaining = this._hass.states[this._cfg.time_entity]?.state;

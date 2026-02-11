@@ -90,9 +90,23 @@ class WasherStateSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
         """Initialize the state sensor."""
         self.entity_description = SensorEntityDescription(
-            key="washer_state", name="State", icon="mdi:washing-machine"
+            key="washer_state", name="State"
         )
         super().__init__(manager, entry)
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon."""
+        dtype = self._manager.device_type
+        if dtype == "dryer":
+            return "mdi:tumble-dryer"
+        if dtype == "dishwasher":
+            return "mdi:dishwasher"
+        if dtype == "ev":
+            return "mdi:car-electric"
+        if dtype == "coffee_machine":
+            return "mdi:coffee-maker"
+        return "mdi:washing-machine"
 
     @property
     def native_value(self):

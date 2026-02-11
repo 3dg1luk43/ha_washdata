@@ -155,10 +155,14 @@ async def test_repro_switch_flapping(manager, mock_hass):
         ambiguity_margin=0.01
     )
     
-    # Simulate 5x Profile B slightly higher
-    manager.profile_store.async_match_profile.side_effect = [match_b_slightly_higher] * 5
+    # Simulate 5x Profile B slightly higher, increasing score to satisfy trend
+    match_b_1 = MatchResult("Profile B", 0.51, 3600, "Running", [{"name": "Profile A", "score": 0.49}, {"name": "Profile B", "score": 0.51}], False, 0.02)
+    match_b_2 = MatchResult("Profile B", 0.52, 3600, "Running", [{"name": "Profile A", "score": 0.49}, {"name": "Profile B", "score": 0.52}], False, 0.03)
+    match_b_3 = MatchResult("Profile B", 0.53, 3600, "Running", [{"name": "Profile A", "score": 0.49}, {"name": "Profile B", "score": 0.53}], False, 0.04)
     
-    # Attempt 1: Should NOT switch to B even if persistent because gap (0.01) < 0.05
+    manager.profile_store.async_match_profile.side_effect = [match_b_1, match_b_2, match_b_3]
+    
+    # Attempt 1: Should NOT switch to B even if persistent because gap (0.01..0.04) < 0.05
     # First we need to make B persistent (needs 3 matches)
     await manager._async_do_perform_matching(manager.detector.get_power_trace()) # 1/3
     await manager._async_do_perform_matching(manager.detector.get_power_trace()) # 2/3

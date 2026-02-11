@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Vink dit vakje aan om door het leeralgoritme voorgestelde waarden naar het formulier te kopiëren. Controleer voor het opslaan.\n\nVoorgesteld (van leren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Selecteer het apparaattype (Wasmachine, Droger, Vaatwasser, Koffiezetapparaat). Dit label wordt bij elke cyclus opgeslagen voor betere organisatie.",
+          "device_type": "Selecteer het type apparaat (wasmachine, droger, vaatwasser, koffiezetapparaat, EV). Deze tag wordt bij elke cyclus opgeslagen voor een betere organisatie.",
           "power_sensor": "De sensorentiteit die realtime vermogen meldt (in watt). U kunt deze op elk moment wijzigen zonder historische gegevens te verliezen — handig bij vervanging van een slimme stekker.",
           "min_power": "Vermogenswaarden boven deze drempel (in watt) geven aan dat het apparaat draait. Begin met 2W voor de meeste apparaten.",
           "off_delay": "Seconden dat het afgevlakte vermogen onder de stopdrempel moet blijven om voltooiing te markeren. Standaard: 120s.",

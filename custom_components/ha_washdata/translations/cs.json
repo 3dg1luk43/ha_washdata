@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Zaškrtněte toto pole pro zkopírování hodnot navržených algoritmem učení do formuláře. Před uložením zkontrolujte.\n\nNavržené (z učení):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Vyberte typ spotřebiče (Pračka, Sušička, Myčka nádobí, Kávovar). Tento štítek se ukládá s každým cyklem pro lepší organizaci.",
+          "device_type": "Vyberte typ spotřebiče (Pračka, Sušička, Myčka, Kávovar, EV). Tato značka se ukládá s každým cyklem pro lepší organizaci.",
           "power_sensor": "Entita senzoru hlásící příkon v reálném čase (ve wattech). Můžete ji kdykoliv změnit bez ztráty historických dat — užitečné při výměně chytré zásuvky.",
           "min_power": "Hodnoty příkonu nad tímto prahem (ve wattech) označují, že spotřebič běží. Začněte s 2W pro většinu zařízení.",
           "off_delay": "Sekundy, po které musí vyhlazený příkon zůstat pod prahem zastavení, aby se označilo dokončení. Výchozí: 120s.",

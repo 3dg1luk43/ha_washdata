@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Marker dette felt for at kopiere værdier foreslået af læringsalgoritmen til formularen. Gennemgå før du gemmer.\n\nForeslået (fra læring):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Vælg apparattype (Vaskemaskine, Tørretumbler, Opvaskemaskine, Kaffemaskine). Denne etiket gemmes med hver cyklus for bedre organisering.",
+          "device_type": "Vælg type apparat (vaskemaskine, tørretumbler, opvaskemaskine, kaffemaskine, EV). Dette tag gemmes med hver cyklus for bedre organisering.",
           "power_sensor": "Sensorenheden, der rapporterer effekt i realtid (i watt). Du kan ændre den når som helst uden at miste historiske data — nyttigt ved udskiftning af smart stikkontakt.",
           "min_power": "Effektværdier over denne grænse (i watt) indikerer, at apparatet kører. Start med 2W for de fleste enheder.",
           "off_delay": "Sekunder den udjævnede effekt skal forblive under stopgrænsen for at markere færdiggørelse. Standard: 120s.",

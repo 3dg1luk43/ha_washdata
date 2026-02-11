@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Označite to polje, da kopirate vrednosti, ki jih predlaga algoritem učenja, v obrazec. Preglejte pred shranjevanjem.\n\nPredlagano (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Izberite vrsto aparata (Pralni stroj, Sušilni stroj, Pomivalni stroj, Aparat za kavo). Ta oznaka se shrani z vsakim ciklom za boljšo organizacijo.",
+          "device_type": "Izberite vrsto aparata (Pralni stroj, Sušilni stroj, Pomivalni stroj, Kavni avtomat, EV). Ta oznaka je shranjena z vsakim ciklom za boljšo organizacijo.",
           "power_sensor": "Entiteta senzorja, ki sporoča moč v realnem času (v vatih). To lahko kadar koli spremenite, ne da bi izgubili zgodovinske podatke — uporabno pri zamenjavi pametne vtičnice.",
           "min_power": "Vrednosti moči nad tem pragom (v vatih) kažejo, da aparat deluje. Začnite z 2 W za večino naprav.",
           "off_delay": "Sekunde, ko mora zglajena moč ostati pod pragom zaustavitve, da se označi zaključek. Privzeto: 120 s.",

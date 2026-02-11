@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Pažymėkite šį langelį, kad nukopijuotumėte mokymosi algoritmo siūlomas reikšmes į formą. Peržiūrėkite prieš išsaugant.\n\nSiūloma (iš mokymosi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Pasirinkite prietaiso tipą (Skalbimo mašina, Džiovyklė, Indaplovė, Kavos aparatas). Ši etiketė išsaugoma su kiekvienu ciklu geresniam organizavimui.",
+          "device_type": "Pasirinkite prietaiso tipą (skalbimo mašina, džiovintuvas, indaplovė, kavos aparatas, elektromobilis). Ši žyma saugoma su kiekvienu ciklu, kad būtų geriau organizuota.",
           "power_sensor": "Jutiklio esybė, pranešanti apie realaus laiko galią (vatais). Galite ją pakeisti bet kuriuo metu neprarasdami istorinių duomenų — naudinga keičiant išmanųjį kištuką.",
           "min_power": "Galios reikšmės virš šios ribos (vatais) rodo, kad prietaisas veikia. Pradėkite nuo 2W daugumai prietaisų.",
           "off_delay": "Sekundės, kurias išlyginta galia turi likti žemiau sustabdymo ribos, kad pažymėtų užbaigimą. Numatytoji: 120s.",
