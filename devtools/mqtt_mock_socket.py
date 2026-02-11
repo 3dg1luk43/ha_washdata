@@ -270,22 +270,31 @@ class CycleLoader:
         return random.choice(valid)
 
 class CycleSynthesizer:
-    def __init__(self, jitter_w: float = 0.0, variability: float = 0.0):
+    def __init__(self, jitter_w: float = 0.0, variability: float = 0.0, amplitude_scaling: float = 0.0, early_low_prob: float = 0.0):
         self.jitter_w = jitter_w
         self.variability = variability
+        self.amplitude_scaling = amplitude_scaling
+        self.early_low_prob = early_low_prob
 
     def synthesize(self, template: dict) -> list[float]:
         source_data = template.get("power_data", [])
         if not source_data:
             return []
+        
+        # Apply global amplitude scaling for this run
+        amp_factor = 1.0
+        if self.amplitude_scaling > 0:
+            amp_factor = random.uniform(1.0 - self.amplitude_scaling, 1.0 + self.amplitude_scaling)
+
         max_time = int(source_data[-1][0])
         dense = [0.0] * (max_time + 1)
         curr_p, idx = 0.0, 0
         for t in range(max_time + 1):
             while idx < len(source_data) and source_data[idx][0] <= t:
-                curr_p = float(source_data[idx][1])
+                curr_p = float(source_data[idx][1]) * amp_factor
                 idx += 1
             dense[t] = curr_p
+        
         num_seg = 5
         seg_len = max(1, len(dense) // num_seg)
         warped = []
@@ -298,8 +307,18 @@ class CycleSynthesizer:
                 rel = s / steps
                 src_i = s_idx + int(rel * (e_idx - s_idx))
                 warped.append(dense[min(src_i, len(dense) - 1)])
+        
         if num_seg * seg_len < len(dense):
             warped.extend(dense[num_seg * seg_len:])
+        
+        # Apply early low value if triggered
+        if self.early_low_prob > 0 and random.random() < self.early_low_prob:
+            # Drop to zero in the last 2-5% of the cycle
+            drop_ratio = random.uniform(0.02, 0.05)
+            drop_idx = int(len(warped) * (1.0 - drop_ratio))
+            for j in range(drop_idx, len(warped)):
+                warped[j] = 0.0
+
         return [max(0.0, p + random.normalvariate(0, self.jitter_w) if self.jitter_w > 0 else p) for p in warped]
 
 # --- Manager ---
@@ -324,6 +343,10 @@ class MockWasherManager:
             "speedup": 720.0,
             "jitter": 5.0,
             "variability": 0.2,
+            "amplitude_scaling": 0.1,
+            "early_low_prob": 0.2,
+            "timing_jitter_prob": 0.1,
+            "timing_jitter_amount": 0.5,
             "cycle_source_file": "",
             "continuous_mode": False,
             "continuous_interval_min": 2,
@@ -490,7 +513,12 @@ class MockWasherManager:
             profile_name = template.get("profile_name", "unknown")
             logger.info("Synthesizing cycle from: %s", profile_name)
             
-            syn = CycleSynthesizer(jitter_w=self.state["jitter"], variability=self.state["variability"])
+            syn = CycleSynthesizer(
+                jitter_w=self.state["jitter"], 
+                variability=self.state["variability"],
+                amplitude_scaling=self.state.get("amplitude_scaling", 0.0),
+                early_low_prob=self.state.get("early_low_prob", 0.0)
+            )
             readings = syn.synthesize(template)
             
             if not readings:
@@ -502,8 +530,10 @@ class MockWasherManager:
             start_wall_time = self.start_time
             cycle_status = "Completed"
             
-            sleep_time = max(0.01, float(self.state["update_interval"]) / max(1.0, self.state["speedup"]))
-            step = max(1, int(self.state["update_interval"]))
+            base_update_interval = float(self.state["update_interval"])
+            speedup = max(1.0, self.state["speedup"])
+            sleep_time = max(0.01, base_update_interval / speedup)
+            step = max(1, int(base_update_interval))
             
             total_duration = len(readings) * sleep_time / step
             self.current_profile_name = profile_name
@@ -533,7 +563,13 @@ class MockWasherManager:
                 if self.state["debug_mode"]:
                     logger.debug("PUB: %s -> %.1f W", SENSOR_STATE_TOPIC, p)
                 
-                target = start_ts + ((i / step + 1) * sleep_time)
+                # Calculate next sleep with potential timing jitter
+                jitter_off = 0.0
+                if self.state.get("timing_jitter_prob", 0) > 0 and random.random() < self.state["timing_jitter_prob"]:
+                    jitter_max = self.state.get("timing_jitter_amount", 0.5) / speedup
+                    jitter_off = random.uniform(-jitter_max, jitter_max)
+
+                target = start_ts + ((i / step + 1) * sleep_time) + jitter_off
                 rem = target - time.time()
                 if rem > 0:
                     time.sleep(rem)
@@ -635,6 +671,22 @@ def main_page():
                     with ui.row().classes('items-center w-full'):
                         ui.number("Variability", min=0, max=1, step=0.1).bind_value(manager.state, 'variability').on('blur', manager.save_config).classes('flex-grow')
                         ui.icon('info', color='grey').tooltip('Randomly stretches/compresses cycle segments (0-1).')
+
+                    with ui.row().classes('items-center w-full'):
+                        ui.number("Amp. Scaling", min=0, max=1, step=0.05).bind_value(manager.state, 'amplitude_scaling').on('blur', manager.save_config).classes('flex-grow')
+                        ui.icon('info', color='grey').tooltip('Randomly scales power amplitude (0-1).')
+
+                    with ui.row().classes('items-center w-full'):
+                        ui.number("Early Low Prob.", min=0, max=1, step=0.05).bind_value(manager.state, 'early_low_prob').on('blur', manager.save_config).classes('flex-grow')
+                        ui.icon('info', color='grey').tooltip('Probability of reporting low power sooner at cycle end.')
+
+                    with ui.row().classes('items-center w-full'):
+                        ui.number("Timing Jitter Prob.", min=0, max=1, step=0.05).bind_value(manager.state, 'timing_jitter_prob').on('blur', manager.save_config).classes('flex-grow')
+                        ui.icon('info', color='grey').tooltip('Probability of timing irregularities in reporting.')
+
+                    with ui.row().classes('items-center w-full'):
+                        ui.number("Timing Jitter (s)", min=0, step=0.1).bind_value(manager.state, 'timing_jitter_amount').on('blur', manager.save_config).classes('flex-grow')
+                        ui.icon('info', color='grey').tooltip('Max timing deviation in seconds.')
 
                     with ui.row().classes('items-center w-full'):
                         ui.number("Update Interval (s)", min=0.1, step=0.1).bind_value(manager.state, 'update_interval').on('blur', manager.save_config).classes('flex-grow')
