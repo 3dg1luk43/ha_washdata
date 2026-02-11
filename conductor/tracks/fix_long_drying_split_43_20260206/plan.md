@@ -7,12 +7,12 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Investigation & Verification' (Protocol in workflow.md)
 
 ## Phase 2: Implementation (Green Phase)
-- [ ] Task: Increase `DEFAULT_MAX_DEFERRAL_SECONDS` if necessary (e.g., to 4 or 6 hours) or make it dynamic based on profile duration.
-- [ ] Task: Update `_watchdog_check_stuck_cycle` in `manager.py` to extend `effective_low_power_timeout` if `verified_pause` is active.
-- [ ] Task: Improve `async_verify_alignment` in `profile_store.py` to be more robust for long 0W segments.
-- [ ] Task: Adjust `_should_defer_finish` in `cycle_detector.py` to handle cases where `verified_pause` is the primary reason for keeping the cycle alive.
-- [ ] Task: Verify the reproduction test now passes (Green Phase).
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Implementation' (Protocol in workflow.md)
+- [x] Task: Increase `DEFAULT_MAX_DEFERRAL_SECONDS` if necessary (e.g., to 4 or 6 hours) or make it dynamic based on profile duration.
+- [x] Task: Update `_watchdog_check_stuck_cycle` in `manager.py` to extend `effective_low_power_timeout` if `verified_pause` is active.
+- [x] Task: Improve `async_verify_alignment` in `profile_store.py` to be more robust for long 0W segments. (Verified 15W threshold is sufficient)
+- [x] Task: Adjust `_should_defer_finish` in `cycle_detector.py` to handle cases where `verified_pause` is the primary reason for keeping the cycle alive. (Verified verified_pause already acts as override)
+- [x] Task: Verify the reproduction test now passes (Green Phase).
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Documentation & QA
 - [ ] Task: Update `IMPLEMENTATION.md` with details on handling multi-hour passive drying.
