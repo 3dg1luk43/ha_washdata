@@ -6,7 +6,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-- [~] **Track: [BUG] program keep switching to detecting...**
+- [x] **Track: [BUG] program keep switching to detecting...**
 *Link: [./tracks/fix_match_flapping_20260206/](./tracks/fix_match_flapping_20260206/)*
 
 - [ ] **Track: [BUG] wash data power doesnt match smart plug power #43**
