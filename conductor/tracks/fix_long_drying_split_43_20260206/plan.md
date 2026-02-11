@@ -6,13 +6,13 @@
 - [x] Task: Verify that the test fails (cycle splits or finishes too early). d9c23f5
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Investigation & Verification' (Protocol in workflow.md)
 
-## Phase 2: Implementation (Green Phase)
-- [x] Task: Increase `DEFAULT_MAX_DEFERRAL_SECONDS` if necessary (e.g., to 4 or 6 hours) or make it dynamic based on profile duration.
-- [x] Task: Update `_watchdog_check_stuck_cycle` in `manager.py` to extend `effective_low_power_timeout` if `verified_pause` is active.
+## Phase 2: Implementation (Green Phase) [checkpoint: cd13728]
+- [x] Task: Increase `DEFAULT_MAX_DEFERRAL_SECONDS` if necessary (e.g., to 4 or 6 hours) or make it dynamic based on profile duration. ed2b5f6
+- [x] Task: Update `_watchdog_check_stuck_cycle` in `manager.py` to extend `effective_low_power_timeout` if `verified_pause` is active. ed2b5f6
 - [x] Task: Improve `async_verify_alignment` in `profile_store.py` to be more robust for long 0W segments. (Verified 15W threshold is sufficient)
 - [x] Task: Adjust `_should_defer_finish` in `cycle_detector.py` to handle cases where `verified_pause` is the primary reason for keeping the cycle alive. (Verified verified_pause already acts as override)
-- [x] Task: Verify the reproduction test now passes (Green Phase).
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Implementation' (Protocol in workflow.md)
+- [x] Task: Verify the reproduction test now passes (Green Phase). ed2b5f6
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Documentation & QA
 - [ ] Task: Update `IMPLEMENTATION.md` with details on handling multi-hour passive drying.
