@@ -370,6 +370,7 @@ class MockWasherManager:
         self.current_readings_buffer = []
         self.current_profile_name = None
         self.current_total_duration = 0.0
+        self._next_template_id = None
 
     def save_config(self):
         data = {
@@ -433,6 +434,14 @@ class MockWasherManager:
                 logger.warning("No templates loaded! Upload a cycle dump first.")
                 return None
         
+        # Priority 1: Manual Override
+        if self._next_template_id:
+            template = next((t for t in self.templates if t.get("id") == self._next_template_id), None)
+            self._next_template_id = None # Clear after picking
+            if template:
+                return template
+
+        # Priority 2: Sequence
         seq = [s.strip() for s in self.state["cycle_sequence"].split(",") if s.strip()]
         target = seq[self._seq_idx % len(seq)] if seq else None
         self._seq_idx += 1
@@ -627,24 +636,61 @@ def parse_args():
 def main_page():
     # Header log
     with ui.expansion("Logs", icon="list", value=True).classes('w-full bg-slate-100 mb-2'):
-        log_box = ui.log(max_lines=500).classes('w-full h-48 bg-slate-900 text-green-400 font-mono text-xs p-2 rounded')
+        with ui.scroll_area().classes('w-full h-48 bg-slate-900 text-green-400 font-mono text-xs p-2 rounded') as log_scroll:
+            log_box = ui.column().classes('w-full gap-0')
         
         recent_logs = manager.db.get_recent_logs()
         for msg in recent_logs:
-            log_box.push(msg)
+            with log_box:
+                ui.label(msg).classes('m-0 leading-tight')
             
+        async def push_log(msg):
+            # Check if we are at bottom before adding
+            # JS to check if scroll is at bottom: scrollHeight - scrollTop <= clientHeight + 10
+            is_at_bottom = await ui.run_javascript(f'''
+                const el = document.getElementById("{log_scroll.id}");
+                const scrollEl = el.querySelector(".scroll");
+                return (scrollEl.scrollHeight - scrollEl.scrollTop <= scrollEl.clientHeight + 20);
+            ''', timeout=1.0)
+            
+            with log_box:
+                ui.label(msg).classes('m-0 leading-tight')
+            
+            if is_at_bottom:
+                log_scroll.scroll_to(percent=1.0)
+
         class PageLogHandler(logging.Handler):
             def __init__(self):
                 super().__init__()
                 self.setFormatter(logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S'))
             def emit(self, record):
                 try:
-                    log_box.push(self.format(record))
+                    msg = self.format(record)
+                    ui.run_javascript(f'window.app.push_log("{msg}")') # Need a global way to trigger
                 except:
                     pass
         
-        h = PageLogHandler()
-        logger.addHandler(h)
+        # Actually, NiceGUI provides a better way to handle async updates from threads
+        # but let's use a simpler approach for now: update_ui will check for new logs
+        
+        last_log_count = [len(recent_logs)] # Use list for closure mutability
+        async def check_logs():
+            all_logs = manager.db.get_recent_logs(500)
+            if len(all_logs) > last_log_count[0]:
+                is_at_bottom = await ui.run_javascript(f'''
+                    const el = document.getElementById("c{log_scroll.id}");
+                    if (!el) return true;
+                    return (el.scrollHeight - el.scrollTop <= el.clientHeight + 50);
+                ''', timeout=1.0)
+
+                new_logs = all_logs[last_log_count[0]:]
+                with log_box:
+                    for msg in new_logs:
+                        ui.label(msg).classes('m-0 leading-tight')
+                
+                if is_at_bottom:
+                    log_scroll.scroll_to(percent=1.0)
+                last_log_count[0] = len(all_logs)
 
     with ui.row().classes('w-full items-start no-wrap gap-4'):
         # Left Column: Configuration
@@ -729,6 +775,44 @@ def main_page():
                     
                     # Hidden input to show current path if user wants to see it
                     ui.input("Current File").bind_value(manager.state, "cycle_source_file").props('readonly').classes('w-full opacity-50 text-xs')
+
+            with ui.card().classes('w-full p-2'):
+                with ui.expansion("Imported Cycle Registry", icon="analytics", value=False).classes('w-full') as registry_exp:
+                    registry_container = ui.column().classes('w-full gap-1')
+                    
+                    def refresh_registry():
+                        registry_container.clear()
+                        with registry_container:
+                            if not manager.templates:
+                                ui.label("No templates loaded").classes('text-xs italic text-gray-500')
+                                return
+                            
+                            # Next Up Info
+                            seq = [s.strip() for s in manager.state["cycle_sequence"].split(",") if s.strip()]
+                            target_next = seq[manager._seq_idx % len(seq)] if seq else None
+                            
+                            for t in manager.templates:
+                                tid = t.get("id", "unknown")
+                                name = t.get("profile_name", "unknown")
+                                dur = int(t.get("duration", 0) / 60)
+                                peak = int(t.get("max_power", 0))
+                                
+                                is_next_up = manager._next_template_id == tid or (not manager._next_template_id and name == target_next)
+                                
+                                with ui.card().classes('w-full p-2 bg-slate-50' + (' border-2 border-green-400' if is_next_up else '')):
+                                    with ui.row().classes('w-full items-center justify-between'):
+                                        with ui.column().classes('gap-0'):
+                                            ui.label(name).classes('font-bold text-sm')
+                                            ui.label(f"{dur}m | {peak}W").classes('text-xs text-gray-500')
+                                        
+                                        def set_next(target_id=tid):
+                                            manager._next_template_id = target_id
+                                            ui.notify(f"Next cycle set to: {name}")
+                                            refresh_registry()
+                                            
+                                        ui.button(icon='play_arrow', on_click=lambda _, tid=tid: set_next(tid)).props('flat dense round color=green').tooltip("Play Next")
+
+                    registry_exp.on('show', refresh_registry)
 
             with ui.card().classes('w-full p-2'):
                 with ui.expansion("Continuous Mode", icon="playlist_play").classes('w-full'):
@@ -1003,7 +1087,8 @@ def main_page():
                                 }).classes('w-full h-40')
 
 
-            def update_ui():
+            async def update_ui():
+                await check_logs()
                 if manager.is_running:
                     if manager.is_paused:
                         status_chip.text = "PAUSED"
