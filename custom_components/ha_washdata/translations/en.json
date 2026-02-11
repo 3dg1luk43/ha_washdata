@@ -51,7 +51,7 @@
         "title": "Copy Suggested Values",
         "description": "This will copy the current suggested values into your saved Settings. This is a one-time action and does not enable auto-overwrites.\n\nSuggested values to copy:\n{suggested}",
         "data": {
-          "confirm": "Confirm copy"
+          "confirm": "Confirm copy action"
         }
       },
       "settings": {

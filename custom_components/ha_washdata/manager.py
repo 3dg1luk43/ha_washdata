@@ -9,7 +9,6 @@ import hashlib
 import inspect
 from datetime import datetime, timedelta
 from typing import Any, cast
-from unittest.mock import MagicMock
 import numpy as np
 
 from homeassistant.config_entries import ConfigEntry
@@ -705,8 +704,6 @@ class WashDataManager:
 
             # --- High Power Clear ---
             stop_threshold = getattr(self.detector.config, "stop_threshold_w", 5.0)
-            if isinstance(stop_threshold, MagicMock):
-                stop_threshold = 5.0
                 
             if current_power > stop_threshold * 10:
                 verified_pause = False
