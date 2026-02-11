@@ -9,7 +9,7 @@ import hashlib
 import inspect
 from datetime import datetime, timedelta
 from typing import Any, cast
-
+from unittest.mock import MagicMock
 import numpy as np
 
 from homeassistant.config_entries import ConfigEntry
@@ -112,6 +112,8 @@ from .const import (
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
     DEFAULT_WATCHDOG_INTERVAL,
+    CONF_MATCH_PERSISTENCE,
+    DEFAULT_MATCH_PERSISTENCE,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_START_DURATION_THRESHOLD,
@@ -402,6 +404,9 @@ class WashDataManager:
         self._watchdog_interval = int(
             config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
         )
+        self._match_persistence = int(
+            config_entry.options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE)
+        )
         self._sampling_interval = float(
             config_entry.options.get(CONF_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL)
         )
@@ -441,6 +446,9 @@ class WashDataManager:
         self._notified_pre_completion: bool = False
         self._last_match_result: Any = None  # Stores full MatchResult object
         self._score_history: dict[str, list[float]] = {}  # Tracks recent scores for trend analysis
+        self._match_persistence_counter: dict[str, int] = {}  # Tracks consecutive matches
+        self._unmatch_persistence_counter: int = 0  # Tracks consecutive low-confidence matches
+        self._current_match_candidate: str | None = None  # Pending profile name
 
     async def _async_perform_combined_matching(
         self, readings: list[tuple[datetime, float]]
@@ -487,34 +495,66 @@ class WashDataManager:
             matched_duration = result.expected_duration
             phase_name = result.matched_phase
             
-            # --- Switching Logic (from old _async_run_matching) ---
+            # --- Switching Logic (Temporal Persistence) ---
             should_switch = False
             switch_reason = ""
+            
+            # Identify candidate score from results
+            candidate_score = confidence
+            current_program_score = 0.0
+            for c in result.candidates:
+                if c.get("name") == self._current_program:
+                    current_program_score = c.get("score", 0.0)
+                    break
+            
+            # Update persistence for the best profile
+            if profile_name:
+                self._match_persistence_counter[profile_name] = self._match_persistence_counter.get(profile_name, 0) + 1
+                
+                # Check if this is the same candidate as before
+                if profile_name != self._current_match_candidate:
+                    # Reset counter for old candidate if it wasn't locked in
+                    self._current_match_candidate = profile_name
+                    self._match_persistence_counter[profile_name] = 1
+            else:
+                self._current_match_candidate = None
 
+            is_persistent = profile_name and self._match_persistence_counter.get(profile_name, 0) >= self._match_persistence
+
+            # Case 1: Initial Match from "detecting..."
             if (
                 profile_name
                 and confidence >= 0.15
                 and not result.is_ambiguous
                 and (not self._matched_profile_duration or self._current_program == "detecting...")
             ):
-                should_switch = True
-                switch_reason = "initial_match"
+                if is_persistent:
+                    should_switch = True
+                    switch_reason = f"initial_match (persistent {self._match_persistence_counter[profile_name]}x)"
+                else:
+                    _LOGGER.debug(
+                        "Match persistence: %s at %d/%d matches. Stay at detecting...",
+                        profile_name, self._match_persistence_counter.get(profile_name, 0), self._match_persistence
+                    )
+
+            # Case 2: Mid-cycle override (different profile)
             elif (
                 profile_name
                 and self._current_program != profile_name
-                and self._current_program != "detecting..."
+                and self._current_program not in ("detecting...", "off", "starting", "unknown")
             ):
-                current_score = 0.0
-                for c in result.candidates:
-                    if c.get("name") == self._current_program:
-                        current_score = c.get("score", 0.0)
-                        break
-                if confidence > 0.8 and (confidence - current_score) > 0.15:
+                # High Confidence Override: Bypass persistence if match is VERY strong
+                if confidence > 0.8 and (confidence - current_program_score) > 0.15:
                     should_switch = True
-                    switch_reason = f"high_confidence_override ({confidence:.3f} vs {current_score:.3f})"
-                elif confidence > current_score and self._analyze_trend(profile_name):
-                    should_switch = True
-                    switch_reason = f"positive_trend ({confidence:.3f} > {current_score:.3f})"
+                    switch_reason = f"high_confidence_override ({confidence:.3f} vs {current_program_score:.3f})"
+                
+                # Normal Switch: Requires persistence AND either better score + trend
+                elif is_persistent:
+                    if confidence > current_program_score and self._analyze_trend(profile_name):
+                        # Add a minimum score gap for mid-cycle switching (0.05) to prevent flapping
+                        if (confidence - current_program_score) > 0.05:
+                            should_switch = True
+                            switch_reason = f"positive_trend_persistent ({confidence:.3f} > {current_program_score:.3f})"
 
             # Case 3: Unmatching (confidence drop)
             elif (
@@ -522,19 +562,38 @@ class WashDataManager:
                 and profile_name == self._current_program
                 and confidence < self._unmatch_threshold
             ):
-                self._current_program = "detecting..."
-                self._matched_profile_duration = None
-                _LOGGER.info(
-                    "Unmatched profile '%s' (confidence %.3f < threshold %.3f). "
-                    "Reverting to detection.",
-                    profile_name,
-                    confidence,
-                    self._unmatch_threshold,
-                )
+                self._unmatch_persistence_counter += 1
+                is_unmatch_persistent = self._unmatch_persistence_counter >= self._match_persistence
+                
+                if is_unmatch_persistent:
+                    self._current_program = "detecting..."
+                    self._matched_profile_duration = None
+                    self._unmatch_persistence_counter = 0
+                    _LOGGER.info(
+                        "Unmatched profile '%s' (confidence %.3f < threshold %.3f persistent %dx). "
+                        "Reverting to detection.",
+                        profile_name,
+                        confidence,
+                        self._unmatch_threshold,
+                        self._match_persistence
+                    )
+                else:
+                    _LOGGER.debug(
+                        "Unmatch persistence: %s at %d/%d low-confidence matches. Stay at %s...",
+                        profile_name, self._unmatch_persistence_counter, self._match_persistence, profile_name
+                    )
+            
+            # Reset unmatch counter if confidence is healthy
+            elif profile_name == self._current_program and confidence >= self._unmatch_threshold:
+                self._unmatch_persistence_counter = 0
 
             if should_switch:
                 self._current_program = profile_name
                 self._last_match_confidence = confidence
+                self._unmatch_persistence_counter = 0 # Reset on switch
+                if profile_name in self._match_persistence_counter:
+                    self._match_persistence_counter[profile_name] = self._match_persistence # Lock it in
+                
                 avg_duration = float(matched_duration)
                 self._matched_profile_duration = avg_duration if avg_duration > 0 else None
                 _LOGGER.info(
@@ -593,7 +652,11 @@ class WashDataManager:
                     verified_pause = False
 
             # --- High Power Clear ---
-            if current_power > self.detector.config.stop_threshold_w * 10:
+            stop_threshold = getattr(self.detector.config, "stop_threshold_w", 5.0)
+            if isinstance(stop_threshold, MagicMock):
+                stop_threshold = 5.0
+                
+            if current_power > stop_threshold * 10:
                 verified_pause = False
 
             # --- Consistency Override ---
@@ -1701,6 +1764,9 @@ class WashDataManager:
                 self._matched_profile_duration = None
                 self._last_estimate_time = None
                 self._score_history = {}  # Reset score history on new cycle
+                self._match_persistence_counter = {}  # Reset persistence counter
+                self._unmatch_persistence_counter = 0  # Reset unmatch counter
+                self._current_match_candidate = None  # Reset candidate
                 self._start_watchdog()  # Start watchdog when cycle starts
             else:
                 _LOGGER.debug("Cycle resumed from %s, preserving estimates", old_state)

@@ -67,8 +67,8 @@ def manager(mock_hass, mock_entry):
 @pytest.mark.asyncio
 async def test_repro_match_flapping(manager, mock_hass):
     """
-    Reproduction: When confidence scores fluctuate around the threshold,
-    the program name 'flaps' between the profile and 'detecting...'.
+    Verified fix: When confidence scores fluctuate around the threshold,
+    the program name STAYS at the profile instead of 'flapping'.
     """
     # 1. Setup: Cycle starts and enters RUNNING state
     now = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
@@ -78,13 +78,7 @@ async def test_repro_match_flapping(manager, mock_hass):
         (now, 105.0)
     ]
     
-    # Mock ProfileStore.async_match_profile
-    # We will simulate 3 calls:
-    # 1. Score 0.20 -> Matches "Profile A"
-    # 2. Score 0.05 -> Drops to "detecting..." (Unmatch)
-    # 3. Score 0.20 -> Matches "Profile A" again
-    
-    match_1 = MatchResult(
+    match_high = MatchResult(
         best_profile="Profile A",
         confidence=0.20,
         expected_duration=3600,
@@ -94,7 +88,7 @@ async def test_repro_match_flapping(manager, mock_hass):
         ambiguity_margin=0.5
     )
     
-    match_2 = MatchResult(
+    match_low = MatchResult(
         best_profile="Profile A",
         confidence=0.05,
         expected_duration=3600,
@@ -104,77 +98,90 @@ async def test_repro_match_flapping(manager, mock_hass):
         ambiguity_margin=0.5
     )
     
-    manager.profile_store.async_match_profile.side_effect = [match_1, match_2, match_1]
+    # 3x high to lock in, 1x low (should stay), 1x high
+    manager.profile_store.async_match_profile.side_effect = [
+        match_high, match_high, match_high, match_low, match_high
+    ]
     
-    # --- Attempt 1: Score 0.20 ---
+    # --- Match 1/3 ---
+    await manager._async_do_perform_matching(manager.detector.get_power_trace())
+    assert manager._current_program == "detecting..."
+    
+    # --- Match 2/3 ---
+    await manager._async_do_perform_matching(manager.detector.get_power_trace())
+    assert manager._current_program == "detecting..."
+    
+    # --- Match 3/3 (SWITCH!) ---
     await manager._async_do_perform_matching(manager.detector.get_power_trace())
     assert manager._current_program == "Profile A"
     
-    # --- Attempt 2: Score 0.05 (FLAP!) ---
-    # Confidence drops below CONF_PROFILE_UNMATCH_THRESHOLD (0.10)
+    # --- Match 4 (Low Score - SHOULD STAY!) ---
+    # With persistence fix, it should NOT drop to detecting immediately.
     await manager._async_do_perform_matching(manager.detector.get_power_trace())
+    assert manager._current_program == "Profile A" # Bug fix verified here
     
-    # ISSUE: It flaps to "detecting..." immediately.
-    assert manager._current_program == "detecting..." # This confirms the bug/current behavior
-    
-    # --- Attempt 3: Score 0.20 (FLAP!) ---
+    # --- Match 5 (High Score again) ---
     await manager._async_do_perform_matching(manager.detector.get_power_trace())
     assert manager._current_program == "Profile A"
 
 @pytest.mark.asyncio
 async def test_repro_switch_flapping(manager, mock_hass):
     """
-    Reproduction: Flapping between two similar profiles.
+    Verified fix: Flapping between two similar profiles is prevented by persistence and score gap.
     """
     # 1. Setup
     now = datetime(2025, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
     manager.detector.state = STATE_RUNNING
     manager.detector.get_power_trace.return_value = [(now, 100.0)]
+    
+    # Initial lock-in for Profile A
     manager._current_program = "Profile A"
     manager._matched_profile_duration = 3600
+    manager._match_persistence_counter["Profile A"] = 3
     
     # Mock score history for Profile B to pass _analyze_trend
     manager._score_history["Profile B"] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
     
-    # Simulate:
-    # 1. Profile B score slightly higher -> Switches to Profile B
-    # 2. Profile A score slightly higher -> Switches back to Profile A
-    
-    match_b_winner = MatchResult(
+    match_b_slightly_higher = MatchResult(
         best_profile="Profile B",
         confidence=0.50,
         expected_duration=3600,
         matched_phase="Running",
         candidates=[
-            {"name": "Profile A", "score": 0.45},
+            {"name": "Profile A", "score": 0.49},
             {"name": "Profile B", "score": 0.50}
         ],
         is_ambiguous=False,
-        ambiguity_margin=0.05
+        ambiguity_margin=0.01
     )
     
-    match_a_winner = MatchResult(
-        best_profile="Profile A",
-        confidence=0.50,
+    # Simulate 5x Profile B slightly higher
+    manager.profile_store.async_match_profile.side_effect = [match_b_slightly_higher] * 5
+    
+    # Attempt 1: Should NOT switch to B even if persistent because gap (0.01) < 0.05
+    # First we need to make B persistent (needs 3 matches)
+    await manager._async_do_perform_matching(manager.detector.get_power_trace()) # 1/3
+    await manager._async_do_perform_matching(manager.detector.get_power_trace()) # 2/3
+    await manager._async_do_perform_matching(manager.detector.get_power_trace()) # 3/3 (Persistent)
+    
+    # Even after 3 matches, it shouldn't switch because gap is too small
+    assert manager._current_program == "Profile A"
+    
+    # Now simulate a SIGNIFICANT gap (0.10)
+    match_b_much_higher = MatchResult(
+        best_profile="Profile B",
+        confidence=0.60,
         expected_duration=3600,
         matched_phase="Running",
         candidates=[
-            {"name": "Profile A", "score": 0.50},
-            {"name": "Profile B", "score": 0.45}
+            {"name": "Profile A", "score": 0.49},
+            {"name": "Profile B", "score": 0.60}
         ],
         is_ambiguous=False,
-        ambiguity_margin=0.05
+        ambiguity_margin=0.11
     )
+    manager.profile_store.async_match_profile.side_effect = [match_b_much_higher]
     
-    manager.profile_store.async_match_profile.side_effect = [match_b_winner, match_a_winner]
-    
-    # --- Attempt 1: Switch to B ---
+    # Now it should switch to B
     await manager._async_do_perform_matching(manager.detector.get_power_trace())
     assert manager._current_program == "Profile B"
-    
-    # --- Attempt 2: Switch back to A (FLAP!) ---
-    # Mock Profile A trend
-    manager._score_history["Profile A"] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
-    
-    await manager._async_do_perform_matching(manager.detector.get_power_trace())
-    assert manager._current_program == "Profile A"

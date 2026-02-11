@@ -81,9 +81,13 @@ async def test_initial_match_switching(manager):
     )
     manager.profile_store.async_match_profile.return_value = mock_res
     
-    # Act - call new internal API
+    # Act - call new internal API 3 times for persistence
     readings = _make_readings(600)
-    await manager._async_do_perform_matching(readings)
+    await manager._async_do_perform_matching(readings) # 1/3
+    assert manager._current_program == "detecting..."
+    await manager._async_do_perform_matching(readings) # 2/3
+    assert manager._current_program == "detecting..."
+    await manager._async_do_perform_matching(readings) # 3/3
     
     # Assert
     assert manager._current_program == "Cotton 40"
@@ -169,9 +173,13 @@ async def test_unmatching_logic(manager):
     )
     manager.profile_store.async_match_profile.return_value = mock_res
     
-    # Act
+    # Act - call 3 times for persistence
     readings = _make_readings(2000)
-    await manager._async_do_perform_matching(readings)
+    await manager._async_do_perform_matching(readings) # 1/3
+    assert manager._current_program == "Cotton 40"
+    await manager._async_do_perform_matching(readings) # 2/3
+    assert manager._current_program == "Cotton 40"
+    await manager._async_do_perform_matching(readings) # 3/3
     
     # Assert
     assert manager._current_program == "detecting..."

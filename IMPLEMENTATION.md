@@ -503,9 +503,10 @@ ProfileStore.async_run_maintenance()
 - System calculates standard deviation (variance) of the matched profile window.
 - If variance is high (>50W std dev): Time estimate updates are **damped** (locked).
 - If variance is low: Time estimate updates normally.
-- **Switching Logic**: System switches profile mid-cycle if:
-    - New match confidence > Existing score + 0.15 (Strong override)
-    - New match shows positive trend (>70% increasing scores)
+- **Switching Logic (Match Persistence)**: To prevent "flapping" between profiles or between a profile and "detecting...", the system enforces temporal persistence:
+    - **Initial Match**: Requires 3 consecutive matching attempts before switching from "detecting..." to a specific profile.
+    - **Unmatching**: Requires 3 consecutive attempts with confidence below the `unmatch_threshold` before reverting to "detecting...".
+    - **Mid-Cycle Override**: Requires 3 consecutive attempts AND a minimum confidence gap of **0.15** (High Confidence) or **0.05** (Positive Trend) to switch between different profiles.
  
 #### C. Smart Termination & End Spike Logic
 **Problem:** Dishwashers often have a long silent drying phase followed by a brief, high-power pump-out spike. Smart termination would sometimes cut the cycle off early (during drying), missing the final spike and causing the spike to trigger a new "ghost" cycle.

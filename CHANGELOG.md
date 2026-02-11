@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automatically resets the power sensor to 0W when a cycle is forced to end by the watchdog or manual stop, fixing issues where the entity remained at a high value.
 - **Zero-Latency 0W Processing**:
   - Power updates at or below 0.1W now bypass all debouncing and smoothing filters, ensuring immediate cycle-end detection.
+- **Program Detection Stability**:
+  - Implemented temporal persistence for profile matching: requires 3 consecutive consistent matches before switching from "detecting..." to a profile, or before unmatching a profile.
+  - Added a minimum confidence gap for mid-cycle profile switching to prevent "flapping" between similar programs.
 
 ## [0.4.1] - 2026-02-03
 
