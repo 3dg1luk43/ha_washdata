@@ -13,6 +13,7 @@ import copy
 from collections import deque
 import sqlite3
 import base64
+import math
 
 from nicegui import ui, events
 
@@ -792,8 +793,9 @@ def main_page():
                     lbl_start = ui.label()
                     lbl_end = ui.label()
                     lbl_dur = ui.label()
-                    lbl_max = ui.label()
+                    lbl_peak = ui.label()
                     lbl_avg = ui.label()
+                    lbl_var = ui.label()
                     lbl_energy = ui.label()
 
                     with stats_container:
@@ -807,8 +809,14 @@ def main_page():
                             ui.label("Duration").classes('font-bold text-gray-400')
                             lbl_dur.classes('text-lg font-bold')
                         with ui.column().classes('gap-0'):
+                            ui.label("Peak Power").classes('font-bold text-gray-400')
+                            lbl_peak.classes('font-bold')
+                        with ui.column().classes('gap-0'):
                             ui.label("Avg Power").classes('font-bold text-gray-400')
                             lbl_avg.classes('font-bold')
+                        with ui.column().classes('gap-0'):
+                            ui.label("Std Dev").classes('font-bold text-gray-400')
+                            lbl_var.classes('font-bold')
                         with ui.column().classes('gap-0'):
                             ui.label("Energy").classes('font-bold text-gray-400')
                             lbl_energy.classes('font-bold')
@@ -854,54 +862,34 @@ def main_page():
             chart.on('brushSelected', js_handler)
 
             async def update_stats_js():
-                logger.info("Polling debug data...")
                 try:
                     # Read the variable
                     result = await ui.run_javascript(f"return {debug_var};", timeout=2.0)
-                    logger.info(f"Poll Debug Result: {result}")
                     
                     if not result or result == 'NO_EVENT_YET':
-                        stats_container.classes(add='hidden')
-                        instr_label.text = f"Status: {result}"
-                        instr_label.classes(remove='hidden')
                         return
                         
                     params = json.loads(result)
+                    areas = []
                     
-                    # Try to extract areas
-                    # Structure usually: { brushId: "...", areas: [ { coordRange: [...] } ], ... }
-                    # Or for batch: { batch: [ { selected: [ { dataIndex: [...] } ] } ] } ? 
-                    # No, usually brush component event has 'areas'.
-                    
-                    areas = params.get('areas', [])
-                    if isinstance(params, list): # rare but possible?
-                        pass 
-                        
-                    # If batch mode (brushSelected sometimes returns batch)
-                    if 'batch' in params:
-                        # params.batch[0].areas
-                        if len(params['batch']) > 0:
-                            areas = params['batch'][0].get('areas', [])
+                    if 'areas' in params:
+                        areas = params['areas']
+                    elif 'batch' in params and len(params['batch']) > 0:
+                        areas = params['batch'][0].get('areas', [])
                             
                     if not areas:
-                        instr_label.text = "Event received but no areas found."
-                        instr_label.classes(remove='hidden')
                         return
 
                     coord_range = areas[0].get('coordRange')
-                    if not coord_range:
-                         instr_label.text = "Area found but no coordRange."
-                         instr_label.classes(remove='hidden')
+                    if not coord_range or len(coord_range) < 2:
                          return
                          
                     # --- SUCCESS PATH ---
-                    # Logic is the same
                     start_idx = int(max(0, round(coord_range[0])))
                     end_idx = int(min(len(power_history) - 1, round(coord_range[1])))
 
                     selection = power_history[start_idx:end_idx+1]
                     if not selection: 
-                        ui.notify("Empty selection range")
                         return
 
                     t_start_str = selection[0][0]
@@ -916,8 +904,10 @@ def main_page():
                         duration = (t_end - t_start).total_seconds()
                     except ValueError:
                         try:
-                            t_start = datetime.strptime(t_start_str, fmt_short)
-                            t_end = datetime.strptime(t_end_str, fmt_short)
+                            # Use current date if short format
+                            today = datetime.now().date()
+                            t_start = datetime.combine(today, datetime.strptime(t_start_str, fmt_short).time())
+                            t_end = datetime.combine(today, datetime.strptime(t_end_str, fmt_short).time())
                             duration = (t_end - t_start).total_seconds()
                         except Exception:
                             duration = 0
@@ -925,79 +915,27 @@ def main_page():
                     powers = [p[1] for p in selection]
                     if not powers: return
                         
-                    max_p = max(powers)
+                    peak_p = max(powers)
                     avg_p = sum(powers) / len(powers)
                     energy_wh = avg_p * (duration / 3600.0)
+                    
+                    variance = sum((p - avg_p)**2 for p in powers) / len(powers)
+                    std_dev = math.sqrt(variance)
 
                     # Update UI
-                    lbl_start.text = f"{t_start_str}"
-                    lbl_end.text = f"{t_end_str}"
+                    lbl_start.text = t_start_str
+                    lbl_end.text = t_end_str
                     lbl_dur.text = f"{duration:.1f}s"
-                    lbl_max.text = f"{max_p:.1f} W"
+                    lbl_peak.text = f"{peak_p:.1f} W"
                     lbl_avg.text = f"{avg_p:.1f} W"
+                    lbl_var.text = f"{std_dev:.2f} W"
                     lbl_energy.text = f"{energy_wh:.4f} Wh"
                     
                     instr_label.classes(add='hidden')
                     stats_container.classes(remove='hidden')
                     
-                    ui.notify(f"Updated: {duration:.1f}s")
-                    
                 except Exception as ex:
-                    logger.error(f"Poll Error: {ex}")
-                    ui.notify(f"Poll Error: {ex}", color='negative')
-                    if not coord_range or len(coord_range) < 2:
-                        return
-                        
-                    # Logic is the same
-                    start_idx = int(max(0, round(coord_range[0])))
-                    end_idx = int(min(len(power_history) - 1, round(coord_range[1])))
-
-                    selection = power_history[start_idx:end_idx+1]
-                    if not selection: 
-                        ui.notify("Empty selection range")
-                        return
-
-                    t_start_str = selection[0][0]
-                    t_end_str = selection[-1][0]
-                    
-                    # Parse timestamps
-                    fmt = "%Y-%m-%d %H:%M:%S"
-                    fmt_short = "%H:%M:%S"
-                    try:
-                        t_start = datetime.strptime(t_start_str, fmt)
-                        t_end = datetime.strptime(t_end_str, fmt)
-                        duration = (t_end - t_start).total_seconds()
-                    except ValueError:
-                        try:
-                            t_start = datetime.strptime(t_start_str, fmt_short)
-                            t_end = datetime.strptime(t_end_str, fmt_short)
-                            duration = (t_end - t_start).total_seconds()
-                        except Exception:
-                            duration = 0
-
-                    powers = [p[1] for p in selection]
-                    if not powers: return
-                        
-                    max_p = max(powers)
-                    avg_p = sum(powers) / len(powers)
-                    energy_wh = avg_p * (duration / 3600.0)
-
-                    # Update UI
-                    lbl_start.text = f"{t_start_str}"
-                    lbl_end.text = f"{t_end_str}"
-                    lbl_dur.text = f"{duration:.1f}s"
-                    lbl_max.text = f"{max_p:.1f} W"
-                    lbl_avg.text = f"{avg_p:.1f} W"
-                    lbl_energy.text = f"{energy_wh:.4f} Wh"
-                    
-                    instr_label.classes(add='hidden')
-                    stats_container.classes(remove='hidden')
-                    
-                    ui.notify(f"Updated: {duration:.1f}s")
-                    
-                except Exception as ex:
-                    logger.error(f"Pull JS Error: {ex}")
-                    ui.notify(f"Update Error: {ex}", color='negative')
+                    logger.error(f"Measure Update Error: {ex}")
 
             # Add Refresh Button to the Card Header
             with measure_row:
