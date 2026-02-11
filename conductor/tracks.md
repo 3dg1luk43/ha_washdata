@@ -6,9 +6,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ## Active Tracks
 
-- [x] **Track: [BUG] Power entity stuck at last non-zero value after cycle ends #101**
-*Link: [./tracks/fix_power_stuck_zombie_101_20260206/](./tracks/fix_power_stuck_zombie_101_20260206/)*
-
 - [ ] **Track: [BUG] program keep switching to detecting...**
 *Link: [./tracks/fix_match_flapping_20260206/](./tracks/fix_match_flapping_20260206/)*
 
@@ -21,6 +18,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 ## Archived Tracks
+
+- [x] **Track: [BUG] Power entity stuck at last non-zero value after cycle ends #101**
+*Link: [./archive/fix_power_stuck_zombie_101_20260206/](./archive/fix_power_stuck_zombie_101_20260206/)*
 
 - [x] **Track: [BUG] Finished state is not removed**
 *Link: [./conductor/archive/fix_finished_state_expiry_20260206/](./conductor/archive/fix_finished_state_expiry_20260206/)*

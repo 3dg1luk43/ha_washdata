@@ -1,0 +1,8 @@
+{
+  "track_id": "fix_power_stuck_zombie_101_20260206",
+  "type": "bug",
+  "status": "new",
+  "created_at": "2026-02-06T12:00:00Z",
+  "updated_at": "2026-02-06T12:00:00Z",
+  "description": "[BUG] Power entity stuck at last non-zero value after cycle ends #101"
+}
