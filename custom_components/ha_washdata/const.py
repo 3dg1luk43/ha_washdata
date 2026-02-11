@@ -33,6 +33,7 @@ CONF_MAX_PAST_CYCLES = "max_past_cycles"
 CONF_MAX_FULL_TRACES_PER_PROFILE = "max_full_traces_per_profile"
 CONF_MAX_FULL_TRACES_UNLABELED = "max_full_traces_unlabeled"
 CONF_WATCHDOG_INTERVAL = "watchdog_interval"  # Derived from sampling_interval
+CONF_MATCH_PERSISTENCE = "match_persistence"
 CONF_COMPLETION_MIN_SECONDS = "completion_min_seconds"
 CONF_NOTIFY_BEFORE_END_MINUTES = "notify_before_end_minutes"
 CONF_APPLY_SUGGESTIONS = "apply_suggestions"
@@ -88,7 +89,8 @@ DEFAULT_DEVICE_TYPE = "washing_machine"
 DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
 
 DEFAULT_INTERRUPTED_MIN_SECONDS = 150  # Internal use only, not exposed
-DEFAULT_PROGRESS_RESET_DELAY = 150  # Seconds (~2.5 minutes unload window)
+
+DEFAULT_PROGRESS_RESET_DELAY = 1800  # Seconds (30 minutes state expiry/unload window)
 DEFAULT_LEARNING_CONFIDENCE = 0.6  # Minimum confidence to request user verification
 DEFAULT_DURATION_TOLERANCE = 0.10  # Allow ±10% duration variance before flagging
 DEFAULT_AUTO_LABEL_CONFIDENCE = 0.9  # High confidence auto-label threshold
@@ -106,8 +108,13 @@ DEFAULT_MAX_PAST_CYCLES = 200
 DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
 DEFAULT_WATCHDOG_INTERVAL = 30  # Derived: 2 * sampling_interval + 1
+DEFAULT_MATCH_PERSISTENCE = 3
 DEFAULT_RUNNING_DEAD_ZONE = 3  # Seconds after start to ignore power dips
 DEFAULT_END_REPEAT_COUNT = 1  # 1 = current behavior (no repeat required)
+
+# Matching & Termination Stability
+DEFAULT_MATCH_REVERT_RATIO = 0.4  # Drop from peak score to revert to detecting
+DEFAULT_DEFER_FINISH_CONFIDENCE = 0.55  # Minimum confidence to defer cycle finish
 
 # Cycle interruption detection defaults (internal)
 DEFAULT_ABRUPT_DROP_WATTS = 500.0  # Power cliff detection threshold (W)
@@ -152,6 +159,7 @@ DEVICE_TYPE_DRYER = "dryer"
 DEVICE_TYPE_WASHER_DRYER = "washer_dryer"
 DEVICE_TYPE_DISHWASHER = "dishwasher"
 DEVICE_TYPE_COFFEE_MACHINE = "coffee_machine"
+DEVICE_TYPE_EV = "ev"
 
 DEVICE_TYPES = {
     DEVICE_TYPE_WASHING_MACHINE: "Washing Machine",
@@ -159,6 +167,7 @@ DEVICE_TYPES = {
     DEVICE_TYPE_WASHER_DRYER: "Washer-Dryer Combo",
     DEVICE_TYPE_DISHWASHER: "Dishwasher",
     DEVICE_TYPE_COFFEE_MACHINE: "Coffee Machine",
+    DEVICE_TYPE_EV: "Electric Vehicle",
 }
 
 # Device Type Defaults
@@ -195,6 +204,7 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (same as washer)
     DEVICE_TYPE_DISHWASHER: 900,  # 15 min
     DEVICE_TYPE_COFFEE_MACHINE: 60,  # 1 min (Filter coffee cycle)
+    DEVICE_TYPE_EV: 600,  # 10 min
 }
 
 # Default min_off_gap by device type (seconds)
@@ -209,6 +219,7 @@ DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_WASHER_DRYER: 600,  # 10 min (longer for combined cycles)
     DEVICE_TYPE_DISHWASHER: 2000,  # 33 min (Drying pauses)
     DEVICE_TYPE_COFFEE_MACHINE: 120,  # 2 min (Session grouping)
+    DEVICE_TYPE_EV: 900,  # 15 min (Brief unplug/replug)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
 
@@ -221,6 +232,7 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_WASHER_DRYER: 0.3,  # Mix of washer and dryer
     DEVICE_TYPE_DISHWASHER: 0.2,  # Pump/Heater
     DEVICE_TYPE_COFFEE_MACHINE: 0.05,  # Short heater burst
+    DEVICE_TYPE_EV: 0.5,  # High power charging
 }
 # Default sampling interval by device type
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {

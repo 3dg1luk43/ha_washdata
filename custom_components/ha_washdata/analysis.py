@@ -117,7 +117,7 @@ def compute_dtw_lite(
 ) -> float:
     """
     Compute DTW distance with Sakoe-Chiba band constraint.
-    Numpy implementation. O(N*W).
+    Optimized 1D DP implementation. O(N*W).
     """
     n, m = len(x), len(y)
     if n == 0 or m == 0:
@@ -126,24 +126,53 @@ def compute_dtw_lite(
     # Band width
     w = max(1, int(min(n, m) * band_width_ratio))
 
-    dtw_matrix = np.full((n + 1, m + 1), float("inf"))
-    dtw_matrix[0, 0] = 0
+    # Use two rows to save memory and improve cache locality
+    prev_row = np.full(m + 1, float("inf"))
+    curr_row = np.full(m + 1, float("inf"))
+    prev_row[0] = 0
 
     for i in range(1, n + 1):
-        center = i * (m / n)
-        start_j = max(1, int(center - w))
-        end_j = min(m, int(center + w) + 1)
+        center = int(i * (m / n))
+        start_j = max(1, center - w)
+        end_j = min(m, center + w + 1)
 
+        curr_row.fill(float("inf"))
+        
+        # Pre-calculate costs for the current window to reduce Python overhead
+        # x is 0-indexed, so x[i-1]
+        val_x = x[i - 1]
+        
         for j in range(start_j, end_j + 1):
-            cost = abs(float(x[i - 1] - y[j - 1]))
+            cost = abs(float(val_x - y[j - 1]))
+            
             # Standard DTW recursion
-            dtw_matrix[i, j] = cost + min(
-                dtw_matrix[i - 1, j],    # insertion
-                dtw_matrix[i, j - 1],    # deletion
-                dtw_matrix[i - 1, j - 1] # match
-            )
+            # curr_row[j] = cost + min(insertion, deletion, match)
+            # insertion: prev_row[j]
+            # deletion: curr_row[j-1]
+            # match: prev_row[j-1]
+            
+            # Use a slightly faster min implementation if possible
+            m1 = prev_row[j]
+            m2 = curr_row[j - 1]
+            m3 = prev_row[j - 1]
+            
+            if m1 < m2:
+                if m1 < m3:
+                    best_prev = m1
+                else:
+                    best_prev = m3
+            else:
+                if m2 < m3:
+                    best_prev = m2
+                else:
+                    best_prev = m3
+                    
+            curr_row[j] = cost + best_prev
+            
+        # Swap rows
+        prev_row[:] = curr_row[:]
 
-    return float(dtw_matrix[n, m])
+    return float(prev_row[m])
 
 def compute_matches_worker(
     current_power: list[float],

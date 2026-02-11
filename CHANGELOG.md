@@ -5,6 +5,64 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-02-11
+
+### ✨ Features
+- **Advanced Parameter Auto-Suggestion**:
+  - New `SuggestionEngine` that analyzes your appliance's actual power traces to recommend optimal settings.
+  - Automatically suggests values for `start_threshold_w`, `off_delay`, `watchdog_interval`, and more based on observed behavior.
+  - Periodic background optimization to keep settings tuned as your appliance ages or use patterns change.
+- **Electric Vehicle (EV) Support**:
+  - Added new "Electric Vehicle" device type with optimized defaults.
+  - New icons and phase heuristics ("Charging", "Maintenance").
+- **Divergence Detection**:
+  - Improved matching logic to detect when a cycle starts diverging from its matched profile.
+  - Automatically reverts to "Detecting..." if confidence drops significantly below the cycle's peak (default 40% drop).
+- **Card Animation**:
+  - Added native spinning animation to the dashboard card icon when the appliance is running.
+- **Configurable Stability Thresholds**:
+  - Added `DEFAULT_MATCH_REVERT_RATIO` and `DEFAULT_DEFER_FINISH_CONFIDENCE` to `const.py` for easier fine-tuning.
+- **Profile-Aware Watchdog**:
+  - The watchdog now uses "look-ahead" logic from the matched profile to prevent premature cycle termination during long legitimate pauses (e.g., dishwasher drying).
+  - Automatically extends silence timeouts if the cycle is within its expected profile duration.
+- **Zombie Protection**:
+  - Implemented a hard "Zombie Killer" limit that force-ends cycles exceeding 200% of their expected profile duration (min 2 hours).
+- **Stuck Power Prevention**:
+  - Automatically resets the power sensor to 0W when a cycle is forced to end by the watchdog or manual stop, fixing issues where the entity remained at a high value.
+- **Zero-Latency Low-Power Processing**:
+  - Power updates below `min_power` now bypass all debouncing, smoothing, and sampling interval filters, ensuring immediate cycle-end detection.
+- **Program Detection Stability**:
+  - Implemented temporal persistence for profile matching: requires 3 consecutive consistent matches before switching from "detecting..." to a profile, or before unmatching a profile.
+  - Added a minimum confidence gap for mid-cycle profile switching to prevent "flapping" between similar programs.
+- **Total Duration Sensor**:
+  - New `total_duration` sensor providing the predicted total cycle time (Elapsed + Remaining).
+  - Designed specifically to support full progress bars in `timer-bar-card`.
+  - Dynamically updates as estimates are refined.
+
+### 🛠️ Improvements
+- **Manual Recording Robustness**:
+  - Increased gap threshold to 6 hours to support very long Eco cycles with multi-hour silent phases.
+  - Unified automatic trimming threshold to 1.0W across the integration.
+- **Clean Card UI**:
+  - Removed redundant "off" label from completion details when the appliance is inactive.
+- **Zigbee2MQTT Guidance**:
+  - Added optimized configuration tips for Z2M smart plug users in README.
+
+### 🐛 Bug Fixes
+- **Profile Alignment Error (#112)**:
+  - Fixed a critical `TypeError: 'float' object is not subscriptable` in the profile matching pipeline.
+- **Terminal State Persistence**:
+  - Fixed a bug where `finished` and `interrupted` states were not resetting to `off` after the intended 30-minute timeout.
+- **Profile Shrinking**:
+  - Fixed an issue where maintenance tasks would aggressively trim trailing silence from completed cycles, causing profiles to shorten over time.
+- **Termination Hangs**:
+  - Restricted "Deferred Finish" logic to require high confidence (> 0.55) or a verified pause, preventing cycles from hanging on mismatched long profiles.
+- **Long Drying Phase Support**:
+  - Fixed an issue where dishwashers with multi-hour silent drying phases were being split into multiple cycles by the watchdog.
+  - Recognizes "Verified Pause" from profile envelope to extend silence timeouts.
+- **Test Stability**:
+  - Resolved several `TypeError` issues in the test suite and improved mocking reliability for sensors and configs.
+
 ## [0.4.1] - 2026-02-03
 
 ### ✨ Features

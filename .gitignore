@@ -16,5 +16,16 @@ devtools/mock_socket.db
 server.log
 devtools/mock_socket_config.json
 devtools/uploaded_cycles
-cycle_data
 devtools/generate_docs_graphs.py
+.gemini/
+gha-creds-*.json
+.agent/
+conductor/
+cycle_data/
+.github/commands/
+.issues/
+tests/utils/__pycache__/
+tests/repro/data_files.txt
+tests/benchmarks/__pycache__/
+.coverage
+.venv_translation/

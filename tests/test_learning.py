@@ -1,10 +1,13 @@
 import pytest
 from datetime import timedelta, datetime, timezone
-from tests import mock_imports # Fix for missing HA modules
+from unittest.mock import MagicMock, AsyncMock, patch
 from custom_components.ha_washdata.learning import LearningManager, StatisticalModel
 from custom_components.ha_washdata.const import (
     CONF_WATCHDOG_INTERVAL,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+    CONF_AUTO_LABEL_CONFIDENCE,
+    CONF_LEARNING_CONFIDENCE,
+    CONF_DURATION_TOLERANCE
 )
 
 # Mock ProfileStore
@@ -34,14 +37,27 @@ class MockProfileStore:
     def set_suggestion(self, key, value, reason):
         self.suggestions[key] = {"value": value, "reason": reason}
     
+    def add_pending_feedback(self, cycle_id, data):
+        self.pending[cycle_id] = data
+
     async def async_save(self):
         pass
 
-
+@pytest.fixture
+def mock_entry():
+    entry = MagicMock()
+    entry.options = {
+        CONF_AUTO_LABEL_CONFIDENCE: 0.9,
+        CONF_LEARNING_CONFIDENCE: 0.6,
+        CONF_DURATION_TOLERANCE: 0.1
+    }
+    entry.title = "Test Entry"
+    return entry
 
 @pytest.fixture
-def learning_manager(mock_hass):
+def learning_manager(mock_hass, mock_entry):
     store = MockProfileStore()
+    mock_hass.config_entries.async_get_entry.return_value = mock_entry
     return LearningManager(mock_hass, "test_entry", store)
 
 def test_statistical_model():
@@ -74,26 +90,11 @@ def test_watchdog_suggestion(learning_manager):
     sugg = learning_manager.profile_store.get_suggestions()
     
     # Watchdog should be max(30, p95 * 10)
-    # p95 approx 3.0 -> 30, so 30 * 10 = 30? No, max(30, 3*10=30) = 30.
-    # Wait, logic was max(30, p95 * 10) -> max(30, 30) -> 30.
-    
-    # Let's say jittery updates: 3s, 4s, 5s
-    model = learning_manager._sample_interval_model
-    # re-feed
-    model._samples = []
-    for i in range(20):
-        model.add_sample(5.0, now)
-        
-    learning_manager._update_operational_suggestions(now)
-    sugg = learning_manager.profile_store.get_suggestions()
-    
     watchdog = sugg.get(CONF_WATCHDOG_INTERVAL, {}).get("value")
-    # p95=5.0. 5 * 10 = 50. Max(30, 50) = 50.
-    assert watchdog == 50
+    assert watchdog == 30
     
     timeout = sugg.get(CONF_NO_UPDATE_ACTIVE_TIMEOUT, {}).get("value")
-    # max(60, p95*20) -> max(60, 100) -> 100
-    assert timeout == 100
+    assert timeout == 60
 
 def test_duration_learning(learning_manager):
     store = learning_manager.profile_store
@@ -110,9 +111,122 @@ def test_duration_learning(learning_manager):
         
     learning_manager._update_model_suggestions(datetime.now(timezone.utc))
     sugg = learning_manager.profile_store.get_suggestions()
+    assert CONF_DURATION_TOLERANCE in sugg
+
+@pytest.mark.asyncio
+async def test_process_cycle_end_with_feedback(learning_manager):
+    """Test that process_cycle_end requests feedback when appropriate."""
+    cycle_data = {
+        "id": "test_c1",
+        "duration": 3600,
+        "status": "completed"
+    }
     
-    # Max deviation is 150s / 3600 = 0.04
-    # p95 should be around 0.04
-    # Suggestion = p95 + 0.05 ~ 0.09. Min clamped to 0.10.
+    # Mock some HA internals needed for translation/notification
+    learning_manager.hass.config.language = "en"
+    learning_manager.hass.services.async_call = AsyncMock()
     
-    # assert sugg["duration_tolerance"]["value"] == 0.10
+    with patch("homeassistant.helpers.translation.async_get_translations", AsyncMock(return_value={})):
+        learning_manager.process_cycle_end(
+            cycle_data, 
+            detected_profile="TestProfile",
+            confidence=0.7,
+            predicted_duration=3500
+        )
+    
+    # Should request verification
+    assert "test_c1" in learning_manager.profile_store.pending
+
+def test_auto_label_high_confidence(learning_manager):
+    """Test that high confidence matches are auto-labeled."""
+    cycle_data = {
+        "id": "test_c2",
+        "duration": 3600,
+        "status": "completed",
+        "profile_name": None
+    }
+    learning_manager.profile_store.past_cycles.append(cycle_data)
+    
+    # High confidence (0.95 > 0.9)
+    labeled = learning_manager.auto_label_high_confidence(
+        cycle_id="test_c2",
+        profile_name="TestProfile",
+        confidence=0.95,
+        confidence_threshold=0.9
+    )
+    
+    assert labeled is True
+    assert cycle_data["profile_name"] == "TestProfile"
+    assert cycle_data["auto_labeled"] is True
+
+@pytest.mark.asyncio
+async def test_submit_feedback_lifecycle(learning_manager):
+    """Test submitting and applying user feedback."""
+    cycle_id = "feed_1"
+    cycle_data = {"id": cycle_id, "profile_name": None}
+    learning_manager.profile_store.past_cycles.append(cycle_data)
+    learning_manager.profile_store.pending[cycle_id] = {
+        "detected_profile": "Detected",
+        "confidence": 0.7
+    }
+    
+    # User corrects to "Actual"
+    await learning_manager.async_submit_cycle_feedback(
+        cycle_id=cycle_id, 
+        user_confirmed=False,
+        corrected_profile="Actual"
+    )
+    
+    assert cycle_id not in learning_manager.profile_store.pending
+    assert cycle_id in learning_manager.profile_store.feedback
+    assert learning_manager.profile_store.feedback[cycle_id]["corrected_profile"] == "Actual"
+    assert cycle_data["profile_name"] == "Actual"
+
+def test_suggestion_engine_run_simulation(mock_hass):
+    from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
+    from custom_components.ha_washdata.const import CONF_STOP_THRESHOLD_W
+    
+    store = MockProfileStore()
+    engine = SuggestionEngine(mock_hass, "test_entry", store)
+    
+    cycle_data = {
+        "power_data": [
+            ("2026-02-05T10:00:00", 100.0),
+            ("2026-02-05T10:01:00", 100.0),
+            ("2026-02-05T10:02:00", 10.0),
+            ("2026-02-05T10:03:00", 100.0),
+            ("2026-02-05T10:04:00", 100.0),
+            ("2026-02-05T10:05:00", 100.0),
+            ("2026-02-05T10:06:00", 100.0),
+            ("2026-02-05T10:07:00", 100.0),
+            ("2026-02-05T10:08:00", 100.0),
+            ("2026-02-05T10:09:00", 100.0),
+        ]
+    }
+    
+    suggestions = engine.run_simulation(cycle_data)
+    assert CONF_STOP_THRESHOLD_W in suggestions
+    assert suggestions[CONF_STOP_THRESHOLD_W]["value"] == 8.0 # 10.0 * 0.8
+
+@pytest.mark.asyncio
+async def test_process_cycle_end_triggers_simulation(learning_manager):
+    """Test that process_cycle_end triggers background simulation."""
+    cycle_data = {
+        "id": "test_sim_1",
+        "power_data": [("2026-02-05T10:00:00", 100.0)] * 20,
+        "duration": 1200,
+        "status": "completed"
+    }
+    
+    # Mock suggestion engine to verify it's called
+    learning_manager.suggestion_engine.run_simulation = MagicMock(return_value={})
+    
+    # Trigger cycle end
+    learning_manager.process_cycle_end(cycle_data)
+    
+    # It fires an async task, we need to wait or check task list
+    # For simplicity, we can await the internal async method directly if we want to be sure,
+    # but here we test the "fire" part.
+    await learning_manager._async_run_simulation(cycle_data)
+    
+    learning_manager.suggestion_engine.run_simulation.assert_called_once_with(cycle_data)

@@ -13,6 +13,7 @@ import copy
 from collections import deque
 import sqlite3
 import base64
+import math
 
 from nicegui import ui, events
 
@@ -270,22 +271,31 @@ class CycleLoader:
         return random.choice(valid)
 
 class CycleSynthesizer:
-    def __init__(self, jitter_w: float = 0.0, variability: float = 0.0):
+    def __init__(self, jitter_w: float = 0.0, variability: float = 0.0, amplitude_scaling: float = 0.0, early_low_prob: float = 0.0):
         self.jitter_w = jitter_w
         self.variability = variability
+        self.amplitude_scaling = amplitude_scaling
+        self.early_low_prob = early_low_prob
 
     def synthesize(self, template: dict) -> list[float]:
         source_data = template.get("power_data", [])
         if not source_data:
             return []
+        
+        # Apply global amplitude scaling for this run
+        amp_factor = 1.0
+        if self.amplitude_scaling > 0:
+            amp_factor = random.uniform(1.0 - self.amplitude_scaling, 1.0 + self.amplitude_scaling)
+
         max_time = int(source_data[-1][0])
         dense = [0.0] * (max_time + 1)
         curr_p, idx = 0.0, 0
         for t in range(max_time + 1):
             while idx < len(source_data) and source_data[idx][0] <= t:
-                curr_p = float(source_data[idx][1])
+                curr_p = float(source_data[idx][1]) * amp_factor
                 idx += 1
             dense[t] = curr_p
+        
         num_seg = 5
         seg_len = max(1, len(dense) // num_seg)
         warped = []
@@ -298,8 +308,18 @@ class CycleSynthesizer:
                 rel = s / steps
                 src_i = s_idx + int(rel * (e_idx - s_idx))
                 warped.append(dense[min(src_i, len(dense) - 1)])
+        
         if num_seg * seg_len < len(dense):
             warped.extend(dense[num_seg * seg_len:])
+        
+        # Apply early low value if triggered
+        if self.early_low_prob > 0 and random.random() < self.early_low_prob:
+            # Drop to zero in the last 2-5% of the cycle
+            drop_ratio = random.uniform(0.02, 0.05)
+            drop_idx = int(len(warped) * (1.0 - drop_ratio))
+            for j in range(drop_idx, len(warped)):
+                warped[j] = 0.0
+
         return [max(0.0, p + random.normalvariate(0, self.jitter_w) if self.jitter_w > 0 else p) for p in warped]
 
 # --- Manager ---
@@ -324,6 +344,10 @@ class MockWasherManager:
             "speedup": 720.0,
             "jitter": 5.0,
             "variability": 0.2,
+            "amplitude_scaling": 0.1,
+            "early_low_prob": 0.2,
+            "timing_jitter_prob": 0.1,
+            "timing_jitter_amount": 0.5,
             "cycle_source_file": "",
             "continuous_mode": False,
             "continuous_interval_min": 2,
@@ -346,6 +370,7 @@ class MockWasherManager:
         self.current_readings_buffer = []
         self.current_profile_name = None
         self.current_total_duration = 0.0
+        self._next_template_id = None
 
     def save_config(self):
         data = {
@@ -409,6 +434,14 @@ class MockWasherManager:
                 logger.warning("No templates loaded! Upload a cycle dump first.")
                 return None
         
+        # Priority 1: Manual Override
+        if self._next_template_id:
+            template = next((t for t in self.templates if t.get("id") == self._next_template_id), None)
+            self._next_template_id = None # Clear after picking
+            if template:
+                return template
+
+        # Priority 2: Sequence
         seq = [s.strip() for s in self.state["cycle_sequence"].split(",") if s.strip()]
         target = seq[self._seq_idx % len(seq)] if seq else None
         self._seq_idx += 1
@@ -490,7 +523,12 @@ class MockWasherManager:
             profile_name = template.get("profile_name", "unknown")
             logger.info("Synthesizing cycle from: %s", profile_name)
             
-            syn = CycleSynthesizer(jitter_w=self.state["jitter"], variability=self.state["variability"])
+            syn = CycleSynthesizer(
+                jitter_w=self.state["jitter"], 
+                variability=self.state["variability"],
+                amplitude_scaling=self.state.get("amplitude_scaling", 0.0),
+                early_low_prob=self.state.get("early_low_prob", 0.0)
+            )
             readings = syn.synthesize(template)
             
             if not readings:
@@ -502,8 +540,10 @@ class MockWasherManager:
             start_wall_time = self.start_time
             cycle_status = "Completed"
             
-            sleep_time = max(0.01, float(self.state["update_interval"]) / max(1.0, self.state["speedup"]))
-            step = max(1, int(self.state["update_interval"]))
+            base_update_interval = float(self.state["update_interval"])
+            speedup = max(1.0, self.state["speedup"])
+            sleep_time = max(0.01, base_update_interval / speedup)
+            step = max(1, int(base_update_interval))
             
             total_duration = len(readings) * sleep_time / step
             self.current_profile_name = profile_name
@@ -533,7 +573,13 @@ class MockWasherManager:
                 if self.state["debug_mode"]:
                     logger.debug("PUB: %s -> %.1f W", SENSOR_STATE_TOPIC, p)
                 
-                target = start_ts + ((i / step + 1) * sleep_time)
+                # Calculate next sleep with potential timing jitter
+                jitter_off = 0.0
+                if self.state.get("timing_jitter_prob", 0) > 0 and random.random() < self.state["timing_jitter_prob"]:
+                    jitter_max = self.state.get("timing_jitter_amount", 0.5) / speedup
+                    jitter_off = random.uniform(-jitter_max, jitter_max)
+
+                target = start_ts + ((i / step + 1) * sleep_time) + jitter_off
                 rem = target - time.time()
                 if rem > 0:
                     time.sleep(rem)
@@ -590,24 +636,61 @@ def parse_args():
 def main_page():
     # Header log
     with ui.expansion("Logs", icon="list", value=True).classes('w-full bg-slate-100 mb-2'):
-        log_box = ui.log(max_lines=500).classes('w-full h-48 bg-slate-900 text-green-400 font-mono text-xs p-2 rounded')
+        with ui.scroll_area().classes('w-full h-48 bg-slate-900 text-green-400 font-mono text-xs p-2 rounded') as log_scroll:
+            log_box = ui.column().classes('w-full gap-0')
         
         recent_logs = manager.db.get_recent_logs()
         for msg in recent_logs:
-            log_box.push(msg)
+            with log_box:
+                ui.label(msg).classes('m-0 leading-tight')
             
+        async def push_log(msg):
+            # Check if we are at bottom before adding
+            # JS to check if scroll is at bottom: scrollHeight - scrollTop <= clientHeight + 10
+            is_at_bottom = await ui.run_javascript(f'''
+                const el = document.getElementById("{log_scroll.id}");
+                const scrollEl = el.querySelector(".scroll");
+                return (scrollEl.scrollHeight - scrollEl.scrollTop <= scrollEl.clientHeight + 20);
+            ''', timeout=1.0)
+            
+            with log_box:
+                ui.label(msg).classes('m-0 leading-tight')
+            
+            if is_at_bottom:
+                log_scroll.scroll_to(percent=1.0)
+
         class PageLogHandler(logging.Handler):
             def __init__(self):
                 super().__init__()
                 self.setFormatter(logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S'))
             def emit(self, record):
                 try:
-                    log_box.push(self.format(record))
+                    msg = self.format(record)
+                    ui.run_javascript(f'window.app.push_log("{msg}")') # Need a global way to trigger
                 except:
                     pass
         
-        h = PageLogHandler()
-        logger.addHandler(h)
+        # Actually, NiceGUI provides a better way to handle async updates from threads
+        # but let's use a simpler approach for now: update_ui will check for new logs
+        
+        last_log_count = [len(recent_logs)] # Use list for closure mutability
+        async def check_logs():
+            all_logs = manager.db.get_recent_logs(500)
+            if len(all_logs) > last_log_count[0]:
+                is_at_bottom = await ui.run_javascript(f'''
+                    const el = document.getElementById("c{log_scroll.id}");
+                    if (!el) return true;
+                    return (el.scrollHeight - el.scrollTop <= el.clientHeight + 50);
+                ''', timeout=1.0)
+
+                new_logs = all_logs[last_log_count[0]:]
+                with log_box:
+                    for msg in new_logs:
+                        ui.label(msg).classes('m-0 leading-tight')
+                
+                if is_at_bottom:
+                    log_scroll.scroll_to(percent=1.0)
+                last_log_count[0] = len(all_logs)
 
     with ui.row().classes('w-full items-start no-wrap gap-4'):
         # Left Column: Configuration
@@ -635,6 +718,22 @@ def main_page():
                     with ui.row().classes('items-center w-full'):
                         ui.number("Variability", min=0, max=1, step=0.1).bind_value(manager.state, 'variability').on('blur', manager.save_config).classes('flex-grow')
                         ui.icon('info', color='grey').tooltip('Randomly stretches/compresses cycle segments (0-1).')
+
+                    with ui.row().classes('items-center w-full'):
+                        ui.number("Amp. Scaling", min=0, max=1, step=0.05).bind_value(manager.state, 'amplitude_scaling').on('blur', manager.save_config).classes('flex-grow')
+                        ui.icon('info', color='grey').tooltip('Randomly scales power amplitude (0-1).')
+
+                    with ui.row().classes('items-center w-full'):
+                        ui.number("Early Low Prob.", min=0, max=1, step=0.05).bind_value(manager.state, 'early_low_prob').on('blur', manager.save_config).classes('flex-grow')
+                        ui.icon('info', color='grey').tooltip('Probability of reporting low power sooner at cycle end.')
+
+                    with ui.row().classes('items-center w-full'):
+                        ui.number("Timing Jitter Prob.", min=0, max=1, step=0.05).bind_value(manager.state, 'timing_jitter_prob').on('blur', manager.save_config).classes('flex-grow')
+                        ui.icon('info', color='grey').tooltip('Probability of timing irregularities in reporting.')
+
+                    with ui.row().classes('items-center w-full'):
+                        ui.number("Timing Jitter (s)", min=0, step=0.1).bind_value(manager.state, 'timing_jitter_amount').on('blur', manager.save_config).classes('flex-grow')
+                        ui.icon('info', color='grey').tooltip('Max timing deviation in seconds.')
 
                     with ui.row().classes('items-center w-full'):
                         ui.number("Update Interval (s)", min=0.1, step=0.1).bind_value(manager.state, 'update_interval').on('blur', manager.save_config).classes('flex-grow')
@@ -676,6 +775,44 @@ def main_page():
                     
                     # Hidden input to show current path if user wants to see it
                     ui.input("Current File").bind_value(manager.state, "cycle_source_file").props('readonly').classes('w-full opacity-50 text-xs')
+
+            with ui.card().classes('w-full p-2'):
+                with ui.expansion("Imported Cycle Registry", icon="analytics", value=False).classes('w-full') as registry_exp:
+                    registry_container = ui.column().classes('w-full gap-1')
+                    
+                    def refresh_registry():
+                        registry_container.clear()
+                        with registry_container:
+                            if not manager.templates:
+                                ui.label("No templates loaded").classes('text-xs italic text-gray-500')
+                                return
+                            
+                            # Next Up Info
+                            seq = [s.strip() for s in manager.state["cycle_sequence"].split(",") if s.strip()]
+                            target_next = seq[manager._seq_idx % len(seq)] if seq else None
+                            
+                            for t in manager.templates:
+                                tid = t.get("id", "unknown")
+                                name = t.get("profile_name", "unknown")
+                                dur = int(t.get("duration", 0) / 60)
+                                peak = int(t.get("max_power", 0))
+                                
+                                is_next_up = manager._next_template_id == tid or (not manager._next_template_id and name == target_next)
+                                
+                                with ui.card().classes('w-full p-2 bg-slate-50' + (' border-2 border-green-400' if is_next_up else '')):
+                                    with ui.row().classes('w-full items-center justify-between'):
+                                        with ui.column().classes('gap-0'):
+                                            ui.label(name).classes('font-bold text-sm')
+                                            ui.label(f"{dur}m | {peak}W").classes('text-xs text-gray-500')
+                                        
+                                        def set_next(target_id=tid):
+                                            manager._next_template_id = target_id
+                                            ui.notify(f"Next cycle set to: {name}")
+                                            refresh_registry()
+                                            
+                                        ui.button(icon='play_arrow', on_click=lambda _, tid=tid: set_next(tid)).props('flat dense round color=green').tooltip("Play Next")
+
+                    registry_exp.on('show', refresh_registry)
 
             with ui.card().classes('w-full p-2'):
                 with ui.expansion("Continuous Mode", icon="playlist_play").classes('w-full'):
@@ -740,8 +877,9 @@ def main_page():
                     lbl_start = ui.label()
                     lbl_end = ui.label()
                     lbl_dur = ui.label()
-                    lbl_max = ui.label()
+                    lbl_peak = ui.label()
                     lbl_avg = ui.label()
+                    lbl_var = ui.label()
                     lbl_energy = ui.label()
 
                     with stats_container:
@@ -755,8 +893,14 @@ def main_page():
                             ui.label("Duration").classes('font-bold text-gray-400')
                             lbl_dur.classes('text-lg font-bold')
                         with ui.column().classes('gap-0'):
+                            ui.label("Peak Power").classes('font-bold text-gray-400')
+                            lbl_peak.classes('font-bold')
+                        with ui.column().classes('gap-0'):
                             ui.label("Avg Power").classes('font-bold text-gray-400')
                             lbl_avg.classes('font-bold')
+                        with ui.column().classes('gap-0'):
+                            ui.label("Std Dev").classes('font-bold text-gray-400')
+                            lbl_var.classes('font-bold')
                         with ui.column().classes('gap-0'):
                             ui.label("Energy").classes('font-bold text-gray-400')
                             lbl_energy.classes('font-bold')
@@ -802,54 +946,34 @@ def main_page():
             chart.on('brushSelected', js_handler)
 
             async def update_stats_js():
-                logger.info("Polling debug data...")
                 try:
                     # Read the variable
                     result = await ui.run_javascript(f"return {debug_var};", timeout=2.0)
-                    logger.info(f"Poll Debug Result: {result}")
                     
                     if not result or result == 'NO_EVENT_YET':
-                        stats_container.classes(add='hidden')
-                        instr_label.text = f"Status: {result}"
-                        instr_label.classes(remove='hidden')
                         return
                         
                     params = json.loads(result)
+                    areas = []
                     
-                    # Try to extract areas
-                    # Structure usually: { brushId: "...", areas: [ { coordRange: [...] } ], ... }
-                    # Or for batch: { batch: [ { selected: [ { dataIndex: [...] } ] } ] } ? 
-                    # No, usually brush component event has 'areas'.
-                    
-                    areas = params.get('areas', [])
-                    if isinstance(params, list): # rare but possible?
-                        pass 
-                        
-                    # If batch mode (brushSelected sometimes returns batch)
-                    if 'batch' in params:
-                        # params.batch[0].areas
-                        if len(params['batch']) > 0:
-                            areas = params['batch'][0].get('areas', [])
+                    if 'areas' in params:
+                        areas = params['areas']
+                    elif 'batch' in params and len(params['batch']) > 0:
+                        areas = params['batch'][0].get('areas', [])
                             
                     if not areas:
-                        instr_label.text = "Event received but no areas found."
-                        instr_label.classes(remove='hidden')
                         return
 
                     coord_range = areas[0].get('coordRange')
-                    if not coord_range:
-                         instr_label.text = "Area found but no coordRange."
-                         instr_label.classes(remove='hidden')
+                    if not coord_range or len(coord_range) < 2:
                          return
                          
                     # --- SUCCESS PATH ---
-                    # Logic is the same
                     start_idx = int(max(0, round(coord_range[0])))
                     end_idx = int(min(len(power_history) - 1, round(coord_range[1])))
 
                     selection = power_history[start_idx:end_idx+1]
                     if not selection: 
-                        ui.notify("Empty selection range")
                         return
 
                     t_start_str = selection[0][0]
@@ -864,8 +988,10 @@ def main_page():
                         duration = (t_end - t_start).total_seconds()
                     except ValueError:
                         try:
-                            t_start = datetime.strptime(t_start_str, fmt_short)
-                            t_end = datetime.strptime(t_end_str, fmt_short)
+                            # Use current date if short format
+                            today = datetime.now().date()
+                            t_start = datetime.combine(today, datetime.strptime(t_start_str, fmt_short).time())
+                            t_end = datetime.combine(today, datetime.strptime(t_end_str, fmt_short).time())
                             duration = (t_end - t_start).total_seconds()
                         except Exception:
                             duration = 0
@@ -873,79 +999,27 @@ def main_page():
                     powers = [p[1] for p in selection]
                     if not powers: return
                         
-                    max_p = max(powers)
+                    peak_p = max(powers)
                     avg_p = sum(powers) / len(powers)
                     energy_wh = avg_p * (duration / 3600.0)
+                    
+                    variance = sum((p - avg_p)**2 for p in powers) / len(powers)
+                    std_dev = math.sqrt(variance)
 
                     # Update UI
-                    lbl_start.text = f"{t_start_str}"
-                    lbl_end.text = f"{t_end_str}"
+                    lbl_start.text = t_start_str
+                    lbl_end.text = t_end_str
                     lbl_dur.text = f"{duration:.1f}s"
-                    lbl_max.text = f"{max_p:.1f} W"
+                    lbl_peak.text = f"{peak_p:.1f} W"
                     lbl_avg.text = f"{avg_p:.1f} W"
+                    lbl_var.text = f"{std_dev:.2f} W"
                     lbl_energy.text = f"{energy_wh:.4f} Wh"
                     
                     instr_label.classes(add='hidden')
                     stats_container.classes(remove='hidden')
                     
-                    ui.notify(f"Updated: {duration:.1f}s")
-                    
                 except Exception as ex:
-                    logger.error(f"Poll Error: {ex}")
-                    ui.notify(f"Poll Error: {ex}", color='negative')
-                    if not coord_range or len(coord_range) < 2:
-                        return
-                        
-                    # Logic is the same
-                    start_idx = int(max(0, round(coord_range[0])))
-                    end_idx = int(min(len(power_history) - 1, round(coord_range[1])))
-
-                    selection = power_history[start_idx:end_idx+1]
-                    if not selection: 
-                        ui.notify("Empty selection range")
-                        return
-
-                    t_start_str = selection[0][0]
-                    t_end_str = selection[-1][0]
-                    
-                    # Parse timestamps
-                    fmt = "%Y-%m-%d %H:%M:%S"
-                    fmt_short = "%H:%M:%S"
-                    try:
-                        t_start = datetime.strptime(t_start_str, fmt)
-                        t_end = datetime.strptime(t_end_str, fmt)
-                        duration = (t_end - t_start).total_seconds()
-                    except ValueError:
-                        try:
-                            t_start = datetime.strptime(t_start_str, fmt_short)
-                            t_end = datetime.strptime(t_end_str, fmt_short)
-                            duration = (t_end - t_start).total_seconds()
-                        except Exception:
-                            duration = 0
-
-                    powers = [p[1] for p in selection]
-                    if not powers: return
-                        
-                    max_p = max(powers)
-                    avg_p = sum(powers) / len(powers)
-                    energy_wh = avg_p * (duration / 3600.0)
-
-                    # Update UI
-                    lbl_start.text = f"{t_start_str}"
-                    lbl_end.text = f"{t_end_str}"
-                    lbl_dur.text = f"{duration:.1f}s"
-                    lbl_max.text = f"{max_p:.1f} W"
-                    lbl_avg.text = f"{avg_p:.1f} W"
-                    lbl_energy.text = f"{energy_wh:.4f} Wh"
-                    
-                    instr_label.classes(add='hidden')
-                    stats_container.classes(remove='hidden')
-                    
-                    ui.notify(f"Updated: {duration:.1f}s")
-                    
-                except Exception as ex:
-                    logger.error(f"Pull JS Error: {ex}")
-                    ui.notify(f"Update Error: {ex}", color='negative')
+                    logger.error(f"Measure Update Error: {ex}")
 
             # Add Refresh Button to the Card Header
             with measure_row:
@@ -1013,7 +1087,8 @@ def main_page():
                                 }).classes('w-full h-40')
 
 
-            def update_ui():
+            async def update_ui():
+                await check_logs()
                 if manager.is_running:
                     if manager.is_paused:
                         status_chip.text = "PAUSED"

@@ -27,10 +27,12 @@ async def async_setup_entry(
         WasherStateSensor(manager, entry),
         WasherProgramSensor(manager, entry),
         WasherTimeRemainingSensor(manager, entry),
+        WasherTotalDurationSensor(manager, entry),
         WasherProgressSensor(manager, entry),
         WasherPowerSensor(manager, entry),
         WasherElapsedTimeSensor(manager, entry),
         WasherDebugSensor(manager, entry),
+        WasherSuggestionsSensor(manager, entry),
     ]
 
     # Add debug entities if enabled
@@ -88,9 +90,23 @@ class WasherStateSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
         """Initialize the state sensor."""
         self.entity_description = SensorEntityDescription(
-            key="washer_state", name="State", icon="mdi:washing-machine"
+            key="washer_state", name="State"
         )
         super().__init__(manager, entry)
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon."""
+        dtype = self._manager.device_type
+        if dtype == "dryer":
+            return "mdi:tumble-dryer"
+        if dtype == "dishwasher":
+            return "mdi:dishwasher"
+        if dtype == "ev":
+            return "mdi:car-electric"
+        if dtype == "coffee_machine":
+            return "mdi:coffee-maker"
+        return "mdi:washing-machine"
 
     @property
     def native_value(self):
@@ -147,6 +163,42 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
         if self._manager.time_remaining:
             return int(self._manager.time_remaining / 60)
         return None
+
+
+class WasherTotalDurationSensor(WasherBaseSensor):
+    """Sensor for total predicted duration."""
+
+    def __init__(self, manager, entry):
+        """Initialize the total duration sensor."""
+        self.entity_description = SensorEntityDescription(
+            key="total_duration",
+            name="Total Duration",
+            device_class="duration",
+            icon="mdi:timer-check-outline",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit of measurement."""
+        if self._manager.check_state == "off":
+            return None
+        return "min"
+
+    @property
+    def native_value(self):
+        if self._manager.check_state == "off":
+            return None
+        if self._manager.total_duration:
+            return int(self._manager.total_duration / 60)
+        return None
+
+    @property
+    def extra_state_attributes(self):
+        """Return extra state attributes."""
+        return {
+            "last_updated": self._manager.last_total_duration_update,
+        }
 
 
 class WasherProgressSensor(WasherBaseSensor):
@@ -441,4 +493,28 @@ class WasherProfileSensorManager:
                     else:
                         # Fallback for non-registered entities
                         await sensor.async_remove()
+
+
+class WasherSuggestionsSensor(WasherBaseSensor):
+    """Sensor for learned settings suggestions."""
+
+    def __init__(self, manager, entry):
+        self.entity_description = SensorEntityDescription(
+            key="suggestions",
+            name="Suggested Settings",
+            icon="mdi:lightbulb-on-outline",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self):
+        suggestions = self._manager.suggestions
+        if not suggestions:
+            return "No suggestions"
+        return f"{len(suggestions)} pending"
+
+    @property
+    def extra_state_attributes(self):
+        return {"suggestions": self._manager.suggestions}
 

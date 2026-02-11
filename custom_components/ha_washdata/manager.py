@@ -9,7 +9,6 @@ import hashlib
 import inspect
 from datetime import datetime, timedelta
 from typing import Any, cast
-
 import numpy as np
 
 from homeassistant.config_entries import ConfigEntry
@@ -112,6 +111,9 @@ from .const import (
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
     DEFAULT_WATCHDOG_INTERVAL,
+    CONF_MATCH_PERSISTENCE,
+    DEFAULT_MATCH_PERSISTENCE,
+    DEFAULT_MATCH_REVERT_RATIO,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_START_DURATION_THRESHOLD,
@@ -119,6 +121,7 @@ from .const import (
     DEFAULT_END_REPEAT_COUNT,
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
+    DEFAULT_MAX_DEFERRAL_SECONDS,
     DEVICE_SMOOTHING_THRESHOLDS,
     DEVICE_COMPLETION_THRESHOLDS,
     STATE_RUNNING,
@@ -200,7 +203,7 @@ class WashDataManager:
         self._matching_task = None
         self._last_state_save = 0.0
         self._last_cycle_end_time: datetime | None = None
-        self._remove_progress_reset_timer = None
+        self._remove_state_expiry_timer = None
 
         # Components
         match_threshold = config_entry.options.get(
@@ -402,6 +405,9 @@ class WashDataManager:
         self._watchdog_interval = int(
             config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
         )
+        self._match_persistence = int(
+            config_entry.options.get(CONF_MATCH_PERSISTENCE, DEFAULT_MATCH_PERSISTENCE)
+        )
         self._sampling_interval = float(
             config_entry.options.get(CONF_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL)
         )
@@ -413,6 +419,8 @@ class WashDataManager:
         )
         self._current_program = "off"
         self._time_remaining: float | None = None
+        self._total_duration: float | None = None
+        self._last_total_duration_update: datetime | None = None
         self._cycle_progress: float = 0.0
         self._smoothed_progress: float = 0.0  # Smoothed progress tracking for EMA
         self._cycle_completed_time: datetime | None = None  # Track when cycle finished
@@ -441,6 +449,9 @@ class WashDataManager:
         self._notified_pre_completion: bool = False
         self._last_match_result: Any = None  # Stores full MatchResult object
         self._score_history: dict[str, list[float]] = {}  # Tracks recent scores for trend analysis
+        self._match_persistence_counter: dict[str, int] = {}  # Tracks consecutive matches
+        self._unmatch_persistence_counter: int = 0  # Tracks consecutive low-confidence matches
+        self._current_match_candidate: str | None = None  # Pending profile name
 
     async def _async_perform_combined_matching(
         self, readings: list[tuple[datetime, float]]
@@ -487,34 +498,92 @@ class WashDataManager:
             matched_duration = result.expected_duration
             phase_name = result.matched_phase
             
-            # --- Switching Logic (from old _async_run_matching) ---
+            # --- Switching Logic (Temporal Persistence) ---
             should_switch = False
             switch_reason = ""
+            
+            # Identify candidate score from results
+            candidate_score = confidence
+            current_program_score = 0.0
+            for c in result.candidates:
+                if c.get("name") == self._current_program:
+                    current_program_score = c.get("score", 0.0)
+                    break
+            
+            # CASE: Divergence Detection (Score Drop)
+            # If current matched program has a significant drop from its own peak score,
+            # we should consider unmatching it even if it's still the "best" candidate.
+            if (
+                self._current_program not in ("detecting...", "off", "starting", "unknown")
+                and profile_name == self._current_program
+            ):
+                history = self._score_history.get(self._current_program, [])
+                if len(history) > 3:
+                    peak_score = max(history)
+                    # If score drops by more than 40% from peak AND is below threshold, unmatch.
+                    # This catches divergence faster than waiting for fixed unmatch_threshold.
+                    if confidence < peak_score * (1.0 - DEFAULT_MATCH_REVERT_RATIO):
+                        self._unmatch_persistence_counter += 1
+                        if self._unmatch_persistence_counter >= self._match_persistence:
+                            self._current_program = "detecting..."
+                            self._matched_profile_duration = None
+                            self._unmatch_persistence_counter = 0
+                            _LOGGER.info(
+                                "Divergence detected for profile '%s' (confidence %.3f < 60%% of peak %.3f). "
+                                "Reverting to detection.",
+                                profile_name, confidence, peak_score
+                            )
+                            # Reset profile_name so Case 3 doesn't re-trigger
+                            profile_name = "detecting..."
+                    
+            # Update persistence for the best profile
+            if profile_name and profile_name != "detecting...":
+                self._match_persistence_counter[profile_name] = self._match_persistence_counter.get(profile_name, 0) + 1
+                
+                # Check if this is the same candidate as before
+                if profile_name != self._current_match_candidate:
+                    # Reset counter for old candidate if it wasn't locked in
+                    self._current_match_candidate = profile_name
+                    self._match_persistence_counter[profile_name] = 1
+            else:
+                self._current_match_candidate = None
 
+            is_persistent = profile_name and self._match_persistence_counter.get(profile_name, 0) >= self._match_persistence
+
+            # Case 1: Initial Match from "detecting..."
             if (
                 profile_name
                 and confidence >= 0.15
                 and not result.is_ambiguous
                 and (not self._matched_profile_duration or self._current_program == "detecting...")
             ):
-                should_switch = True
-                switch_reason = "initial_match"
+                if is_persistent:
+                    should_switch = True
+                    switch_reason = f"initial_match (persistent {self._match_persistence_counter[profile_name]}x)"
+                else:
+                    _LOGGER.debug(
+                        "Match persistence: %s at %d/%d matches. Stay at detecting...",
+                        profile_name, self._match_persistence_counter.get(profile_name, 0), self._match_persistence
+                    )
+
+            # Case 2: Mid-cycle override (different profile)
             elif (
                 profile_name
                 and self._current_program != profile_name
-                and self._current_program != "detecting..."
+                and self._current_program not in ("detecting...", "off", "starting", "unknown")
             ):
-                current_score = 0.0
-                for c in result.candidates:
-                    if c.get("name") == self._current_program:
-                        current_score = c.get("score", 0.0)
-                        break
-                if confidence > 0.8 and (confidence - current_score) > 0.15:
+                # High Confidence Override: Bypass persistence if match is VERY strong
+                if confidence > 0.8 and (confidence - current_program_score) > 0.15:
                     should_switch = True
-                    switch_reason = f"high_confidence_override ({confidence:.3f} vs {current_score:.3f})"
-                elif confidence > current_score and self._analyze_trend(profile_name):
-                    should_switch = True
-                    switch_reason = f"positive_trend ({confidence:.3f} > {current_score:.3f})"
+                    switch_reason = f"high_confidence_override ({confidence:.3f} vs {current_program_score:.3f})"
+                
+                # Normal Switch: Requires persistence AND either better score + trend
+                elif is_persistent:
+                    if confidence > current_program_score and self._analyze_trend(profile_name):
+                        # Add a minimum score gap for mid-cycle switching (0.05) to prevent flapping
+                        if (confidence - current_program_score) > 0.05:
+                            should_switch = True
+                            switch_reason = f"positive_trend_persistent ({confidence:.3f} > {current_program_score:.3f})"
 
             # Case 3: Unmatching (confidence drop)
             elif (
@@ -522,19 +591,43 @@ class WashDataManager:
                 and profile_name == self._current_program
                 and confidence < self._unmatch_threshold
             ):
-                self._current_program = "detecting..."
-                self._matched_profile_duration = None
-                _LOGGER.info(
-                    "Unmatched profile '%s' (confidence %.3f < threshold %.3f). "
-                    "Reverting to detection.",
-                    profile_name,
-                    confidence,
-                    self._unmatch_threshold,
-                )
+                self._unmatch_persistence_counter += 1
+                is_unmatch_persistent = self._unmatch_persistence_counter >= self._match_persistence
+                
+                if is_unmatch_persistent:
+                    self._current_program = "detecting..."
+                    self._matched_profile_duration = None
+                    self._unmatch_persistence_counter = 0
+                    _LOGGER.info(
+                        "Unmatched profile '%s' (confidence %.3f < threshold %.3f persistent %dx). "
+                        "Reverting to detection.",
+                        profile_name,
+                        confidence,
+                        self._unmatch_threshold,
+                        self._match_persistence
+                    )
+                else:
+                    _LOGGER.debug(
+                        "Unmatch persistence: %s at %d/%d low-confidence matches. Stay at %s...",
+                        profile_name, self._unmatch_persistence_counter, self._match_persistence, profile_name
+                    )
+            
+            # Reset unmatch counter if confidence is healthy 
+            # AND we didn't just detect a divergence
+            elif (
+                profile_name == self._current_program 
+                and confidence >= self._unmatch_threshold
+                and not (len(self._score_history.get(self._current_program, [])) > 3 and confidence < max(self._score_history[self._current_program]) * (1.0 - DEFAULT_MATCH_REVERT_RATIO))
+            ):
+                self._unmatch_persistence_counter = 0
 
             if should_switch:
                 self._current_program = profile_name
                 self._last_match_confidence = confidence
+                self._unmatch_persistence_counter = 0 # Reset on switch
+                if profile_name in self._match_persistence_counter:
+                    self._match_persistence_counter[profile_name] = self._match_persistence # Lock it in
+                
                 avg_duration = float(matched_duration)
                 self._matched_profile_duration = avg_duration if avg_duration > 0 else None
                 _LOGGER.info(
@@ -548,6 +641,16 @@ class WashDataManager:
                 self._current_program = "detecting..."
 
             self._last_estimate_time = dt_util.now()
+            
+            # Update score history for all candidates to track trends
+            for cand in result.candidates:
+                cname = cand.get("name")
+                if cname:
+                    history = self._score_history.setdefault(cname, [])
+                    history.append(float(cand.get("score", 0.0)))
+                    if len(history) > 20:
+                        history.pop(0)
+
             # Note: _update_remaining_only() and notify move to end of flow
 
             # 3. UPDATE DETECTOR (Envelopes, Deferral, State Transitions)
@@ -555,19 +658,30 @@ class WashDataManager:
             verified_pause = getattr(self.detector, "_verified_pause", False)
             current_power = readings[-1][1] if readings else 0.0
 
-            # --- Envelope Verification for Mismatches ---
-            if (not profile_name or result.is_confident_mismatch) and current_matched:
+            # --- Envelope Verification for Mismatches & Pauses ---
+            # ALWAYS check alignment if we have a match and power is low, 
+            # to confirm if this is a legitimate pause or a mismatch.
+            stop_thresh = float(self.detector.config.stop_threshold_w)
+            if current_matched and current_power < stop_thresh:
                 formatted = [(t.isoformat(), p) for t, p in readings]
-                is_confirmed, mapped_time, _ = (
-                    await self.profile_store.async_verify_alignment(current_matched, formatted)
-                )
-                if is_confirmed:
-                    _LOGGER.info(
-                        "Envelope verified expected low power phase for %s. Overriding mismatch.",
-                        current_matched
+                try:
+                    is_confirmed, mapped_time, _ = (
+                        await self.profile_store.async_verify_alignment(current_matched, formatted)
                     )
-                    profile_name = current_matched
-                    confidence = 1.0
+                except Exception as e: # pylint: disable=broad-exception-caught
+                    _LOGGER.error(
+                        "Alignment verification crashed for profile %s: %s",
+                        current_matched, e, exc_info=True
+                    )
+                    is_confirmed = False
+                    mapped_time = 0.0
+
+                if is_confirmed:
+                    if not verified_pause:
+                        _LOGGER.info(
+                            "Envelope verified expected low power phase for %s. Enabling verified pause.",
+                            current_matched
+                        )
                     verified_pause = True
                     # Smart Termination within Envelope block
                     try:
@@ -581,10 +695,17 @@ class WashDataManager:
                         _LOGGER.debug("Smart Termination alignment verification failed: %s", e)
                         pass
                 else:
+                    if verified_pause:
+                        _LOGGER.info(
+                            "Envelope indicates UNEXPECTED low power for %s. Disabling verified pause.",
+                            current_matched
+                        )
                     verified_pause = False
 
             # --- High Power Clear ---
-            if current_power > self.detector.config.stop_threshold_w * 10:
+            stop_threshold = getattr(self.detector.config, "stop_threshold_w", 5.0)
+                
+            if current_power > stop_threshold * 10:
                 verified_pause = False
 
             # --- Consistency Override ---
@@ -613,6 +734,11 @@ class WashDataManager:
                     phase_name = "Spinning"
                 elif self.device_type == "washing_machine" and self.detector.is_waiting_low_power():
                     phase_name = "Rinsing/Soaking"
+                elif self.device_type == "ev":
+                    if current_power > 100:
+                        phase_name = "Charging"
+                    elif self.detector.is_waiting_low_power():
+                        phase_name = "Maintenance"
 
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
@@ -1208,10 +1334,10 @@ class WashDataManager:
         if self._remove_watchdog:
             self._remove_watchdog()
         if (
-            hasattr(self, "_remove_progress_reset_timer")
-            and self._remove_progress_reset_timer
+            hasattr(self, "_remove_state_expiry_timer")
+            and self._remove_state_expiry_timer
         ):
-            self._remove_progress_reset_timer()
+            self._remove_state_expiry_timer()
         if self._remove_maintenance_scheduler:
             self._remove_maintenance_scheduler()
 
@@ -1352,10 +1478,9 @@ class WashDataManager:
         now = dt_util.now()
 
         # Throttle updates to avoid CPU overload on noisy sensors
-        # BUT always allow updates if power is significantly low (e.g. 0W) 
-        # to ensure cycle end events are not missed.
-        # FIX: Explicitly include 0W check (<= 0.1) as min_power might be user-configured to 0
-        is_low_power = power < self.detector.config.min_power or power <= 0.1
+        # BUT always allow updates if power is below min_power (critical end-of-cycle signal).
+        min_p = float(self.detector.config.min_power)
+        is_low_power = power < min_p
         
         if (
             not is_low_power
@@ -1465,37 +1590,36 @@ class WashDataManager:
             self._remove_watchdog()
             self._remove_watchdog = None
 
-    def _start_progress_reset_timer(self) -> None:
-        """Start timer to reset progress to 0% after idle period (user unload time)."""
-        # Use watchdog mechanism but with longer interval for progress reset
-        if not hasattr(self, "_remove_progress_reset_timer"):
-            self._remove_progress_reset_timer = None
+    def _start_state_expiry_timer(self) -> None:
+        """Start timer to reset state to OFF and progress to 0% after idle period."""
+        if not hasattr(self, "_remove_state_expiry_timer"):
+            self._remove_state_expiry_timer = None
 
-        if self._remove_progress_reset_timer:
+        if self._remove_state_expiry_timer:
             return  # Already running
 
         _LOGGER.debug(
-                "Starting progress reset timer (will reset after %ss)",
-                self._progress_reset_delay,
-            )
-        self._remove_progress_reset_timer = async_track_time_interval(
+            "Starting state expiry timer (will reset after %ss)",
+            self._progress_reset_delay,
+        )
+        self._remove_state_expiry_timer = async_track_time_interval(
             self.hass,
-            self._check_progress_reset,
-            timedelta(seconds=10),  # Check every 10s
+            self._handle_state_expiry,
+            timedelta(seconds=60),  # Check every minute
         )
 
-    def _stop_progress_reset_timer(self) -> None:
-        """Stop the progress reset timer."""
+    def _stop_state_expiry_timer(self) -> None:
+        """Stop the state expiry timer."""
         if (
-            hasattr(self, "_remove_progress_reset_timer")
-            and self._remove_progress_reset_timer
+            hasattr(self, "_remove_state_expiry_timer")
+            and self._remove_state_expiry_timer
         ):
-            _LOGGER.debug("Stopping progress reset timer")
-            self._remove_progress_reset_timer()
-            self._remove_progress_reset_timer = None
+            _LOGGER.debug("Stopping state expiry timer")
+            self._remove_state_expiry_timer()
+            self._remove_state_expiry_timer = None
 
-    async def _check_progress_reset(self, now: datetime) -> None:
-        """Check if progress should be reset (user unload timeout)."""
+    async def _handle_state_expiry(self, now: datetime) -> None:
+        """Check if state and progress should be reset (auto-expiration)."""
         if not self._cycle_completed_time or self.detector.state == STATE_RUNNING:
             # Cycle is running or not completed, don't reset
             return
@@ -1503,15 +1627,16 @@ class WashDataManager:
         time_since_complete = (now - self._cycle_completed_time).total_seconds()
 
         if time_since_complete > self._progress_reset_delay:
-            # User has had enough time to unload, reset to 0%
+            # Auto-expire the "Finished" (or other terminal) state
             _LOGGER.debug(
-                "Progress reset: cycle idle for %.0fs (threshold: %ss)",
+                "State expiry: cycle idle for %.0fs (threshold: %ss). Resetting to OFF.",
                 time_since_complete,
                 self._progress_reset_delay,
             )
             self._cycle_progress = 0.0
             self._cycle_completed_time = None
-            self._stop_progress_reset_timer()
+            self.detector.reset(STATE_OFF)
+            self._stop_state_expiry_timer()
             self._notify_update()
 
     async def _watchdog_check_stuck_cycle(self, now: datetime) -> None:
@@ -1526,10 +1651,25 @@ class WashDataManager:
         
         # Calculate time since REAL update (if available, else fallback to any update)
         last_real = self._last_real_reading_time or self._last_reading_time
-
         time_since_real_update = (now - last_real).total_seconds()
+        
+        elapsed = self.detector.get_elapsed_seconds()
+        expected = getattr(self.detector, "expected_duration_seconds", 0)
 
-        # 0. GHOST CYCLE SUPPRESSOR
+        # 0. ZOMBIE KILLER (Hard Limit)
+        # If cycle has run significantly longer than expected (200%), kill it.
+        # Only applies if we have a profile match.
+        if expected > 0 and elapsed > (expected * 2.0) and elapsed > 7200:
+            _LOGGER.warning(
+                "Watchdog: Zombie cycle detected (%.0fs > 200%% of expected %.0fs). Force-ending.",
+                elapsed, expected
+            )
+            self.detector.force_end(now)
+            self._current_power = 0.0  # Force 0W
+            self._notify_update()
+            return
+
+        # 1. GHOST CYCLE SUPPRESSOR
         # If we are "detecting" for more than 10 minutes and haven't seen an update for 5 minutes, 
         # it's likely a pump-out spike or an accidental start (ghost cycle).
         # We end it aggressively ONLY if it started shortly after another cycle ended (Suspicious Window).
@@ -1540,7 +1680,6 @@ class WashDataManager:
             if (cycle_start - self._last_cycle_end_time).total_seconds() < 180:
                 is_suspicious = True
 
-        elapsed = self.detector.get_elapsed_seconds()
         if (
             self._current_program == "detecting..."
             and is_suspicious
@@ -1552,6 +1691,7 @@ class WashDataManager:
                 elapsed, time_since_real_update
             )
             self.detector.force_end(now)
+            self._current_power = 0.0
             self._notify_update()
             return
 
@@ -1569,10 +1709,32 @@ class WashDataManager:
         if self._current_program not in ("detecting...", "off"):
             effective_low_power_timeout = max(low_power_floor, effective_low_power_timeout)
 
+        # Profile-Aware Extension:
+        # If we have a matched profile, ensure we don't kill during the expected duration.
+        if expected > 0 and elapsed < expected:
+            # Extend timeout to cover the remaining expected duration + buffer
+            remaining = expected - elapsed
+            # Allow silence up to remaining + 1800s (30m buffer for drying/pause)
+            extended_timeout = remaining + 1800
+            if extended_timeout > effective_low_power_timeout:
+                effective_low_power_timeout = extended_timeout
+
+        # Verified Pause Extension:
+        # If the manager/store has confirmed this is a legitimate pause (e.g. Drying),
+        # allow even more leniency up to the global deferral limit.
+        if getattr(self.detector, "_verified_pause", False):
+            # Allow silence up to DEFAULT_MAX_DEFERRAL_SECONDS (default 2h) + buffer
+            pause_limit = DEFAULT_MAX_DEFERRAL_SECONDS + 1800
+            if pause_limit > effective_low_power_timeout:
+                effective_low_power_timeout = pause_limit
+                _LOGGER.debug(
+                    "Watchdog: Extending timeout to %.0fs due to verified pause",
+                    effective_low_power_timeout
+                )
              
         if self.detector.is_waiting_low_power():
             
-            # 1. Staleness Check
+            # 2. Staleness Check
             if time_since_real_update > effective_low_power_timeout:
                 _LOGGER.warning(
                     "Watchdog: Force-ending cycle. Low-power state stale for %.0fs (> %.0fs).",
@@ -1585,7 +1747,7 @@ class WashDataManager:
                 self._notify_update()
                 return
 
-            # 2. Injection Check (Keepalive)
+            # 3. Injection Check (Keepalive)
             # If silence > _config.off_delay, inject 0W to keep detector clock moving
             # so it can evaluate profile logic (smart termination) or just mark time passing.
             if time_since_any_update > self._config.off_delay:
@@ -1645,6 +1807,7 @@ class WashDataManager:
                 time_since_any_update
             )
             self.detector.force_end(now)
+            self._current_power = 0.0  # FIX: Reset current power
             self._notify_update()
             return
 
@@ -1657,16 +1820,20 @@ class WashDataManager:
             # If we transition from PAUSED or ENDING, it's a resume - keep estimates!
             if old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN):
                 self._cycle_completed_time = None
-                self._stop_progress_reset_timer()
+                self._stop_state_expiry_timer()
                 
                 self._current_program = "detecting..."
                 self._manual_program_active = False
                 self._notified_pre_completion = False
                 self._time_remaining = None
+                self._total_duration = None
                 self._cycle_progress = 0
                 self._matched_profile_duration = None
                 self._last_estimate_time = None
                 self._score_history = {}  # Reset score history on new cycle
+                self._match_persistence_counter = {}  # Reset persistence counter
+                self._unmatch_persistence_counter = 0  # Reset unmatch counter
+                self._current_match_candidate = None  # Reset candidate
                 self._start_watchdog()  # Start watchdog when cycle starts
             else:
                 _LOGGER.debug("Cycle resumed from %s, preserving estimates", old_state)
@@ -1701,7 +1868,7 @@ class WashDataManager:
 
         # IMMEDIATELY stop all active timers when cycle determined to have ended
         self._stop_watchdog()  # Stop active cycle watchdog
-        self._stop_progress_reset_timer()  # Cancel any pending progress reset
+        self._stop_state_expiry_timer()  # Cancel any pending progress reset
         self._last_cycle_end_time = dt_util.now()
 
         # Auto-Tune: Check for ghost cycles (short duration AND low energy)
@@ -1848,7 +2015,7 @@ class WashDataManager:
         self._cycle_completed_time = dt_util.now()
 
         # Start progress reset timer to go back to 0% after user unload window
-        self._start_progress_reset_timer()
+        self._start_state_expiry_timer()
 
         self._notify_update()
 
@@ -1979,6 +2146,7 @@ class WashDataManager:
         if self.detector.state in (STATE_OFF, STATE_UNKNOWN, STATE_IDLE, STATE_STARTING):
             self._current_program = "off"
             self._time_remaining = None
+            self._total_duration = None
             self._cycle_progress = 0.0
             self._last_match_result = None
             self._notify_update()
@@ -2067,6 +2235,7 @@ class WashDataManager:
         # Throttle updates and only clear on truly dead states
         if self.detector.state in (STATE_OFF, STATE_UNKNOWN, STATE_IDLE):
             self._time_remaining = None
+            self._total_duration = None
             self._cycle_progress = 0.0
             self._smoothed_progress = 0.0
             return
@@ -2079,7 +2248,7 @@ class WashDataManager:
             return
         self._last_phase_estimate_time = now
 
-        duration_so_far = self.detector.get_elapsed_seconds()
+        duration_so_far = float(self.detector.get_elapsed_seconds())
 
         if self._matched_profile_duration and self._matched_profile_duration > 0:
             # Get current power trace for phase analysis
@@ -2157,6 +2326,8 @@ class WashDataManager:
                         1.0 - (self._cycle_progress / 100.0)
                     )
                     self._time_remaining = max(0.0, remaining)
+                    self._total_duration = duration_so_far + remaining
+                    self._last_total_duration_update = now
 
                     _LOGGER.debug(
                         "Phase-aware estimate: raw=%.1f%%, smoothed=%.1f%%, remaining=%smin",
@@ -2167,8 +2338,9 @@ class WashDataManager:
                     return
 
             # --- LINEAR FALLBACK (if phase analysis unavailable) ---
-            remaining = max(self._matched_profile_duration - duration_so_far, 0.0)
-            progress = (duration_so_far / self._matched_profile_duration) * 100.0
+            matched_dur = float(self._matched_profile_duration)
+            remaining = max(matched_dur - duration_so_far, 0.0)
+            progress = (duration_so_far / matched_dur) * 100.0
 
             # Blend linear estimate into smoothed tracker too, to prevent
             # jumps if we lose phase lock
@@ -2181,6 +2353,8 @@ class WashDataManager:
                 self._smoothed_progress = progress
 
             self._time_remaining = remaining
+            self._total_duration = duration_so_far + remaining
+            self._last_total_duration_update = now
             self._cycle_progress = max(0.0, min(self._smoothed_progress, 100.0))
             _LOGGER.debug(
                 "Linear estimate: remaining=%smin, progress=%.1f%%",
@@ -2191,6 +2365,7 @@ class WashDataManager:
             # No profile matched - don't provide misleading time estimates
             # Just show that we're detecting (no Smart Resume based on history)
             self._time_remaining = None
+            self._total_duration = None
             self._cycle_progress = 0.0
             self._smoothed_progress = 0.0
             _LOGGER.debug(
@@ -2476,6 +2651,16 @@ class WashDataManager:
     def time_remaining(self):
         """Return estimated time remaining in seconds."""
         return self._time_remaining
+
+    @property
+    def total_duration(self) -> float | None:
+        """Return total predicted duration in seconds."""
+        return self._total_duration
+
+    @property
+    def last_total_duration_update(self) -> datetime | None:
+        """Return when total duration was last refined."""
+        return self._last_total_duration_update
 
     @property
     def cycle_progress(self):

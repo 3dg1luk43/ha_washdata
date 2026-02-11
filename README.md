@@ -17,7 +17,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 
 ## ✨ Features
 
-- **Multi-Device Support**: Track Washing Machines, Dryers, Dishwashers, or Coffee Machines with device-type tagging.
+- **Multi-Device Support**: Track Washing Machines, Dryers, Dishwashers, Coffee Machines, or Electric Vehicles (EV) with device-type tagging.
 - **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic. Includes **End Spike Protection** for dishwashers to capture final pump-outs.
 - **Power Spike Filtering**: Ignores brief boot spikes to prevent false starts.
 - **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles.
@@ -75,6 +75,12 @@ Follow these steps to get accurate results quickly.
 4. **Power Sensor**: Select your smart plug's power entity (Watts). *Note: The system is now optimized for polling intervals of 30-60 seconds (defaults adjusted automatically).*
 5. **Initial Profile (Optional)**: If you know your standard program (e.g. "Cotton"), create it now.
 
+#### 💡 Tips for Zigbee2MQTT (Z2M) users
+If you are using Zigbee2MQTT with smart plugs, ensure your device reporting is responsive enough for accurate matching:
+- **Reporting Intervals**: Decrease the reporting intervals in Z2M (e.g., Min: 1s-10s, Max: 1200s).
+- **Power Threshold**: Decrease the minimum updating threshold (e.g., from 5W to 1W or 2W) to ensure small power changes are captured promptly.
+- *Note*: These changes may slightly increase Zigbee network traffic.
+
 ### 2. The Golden Rule: "Teach" the Integration
 WashData **does not** come with pre-built profiles because every machine model is different. You must teach it what your cycles look like.
 
@@ -115,6 +121,7 @@ If "Auto-Detect" isn't working perfectly, use **Advanced Settings** to tune the 
 | **False "Ghost" Cycles** | High-power usage at the very end (e.g. anti-crease or pump-out) triggers a new start. | **Increase `Minimum Off Gap`** (e.g. to `120s`). Forces a mandatory cooldown period between cycles. |
 | **"Unknown" Matches** | Your profiles are too strict or variance is high. | **Increase `Duration Tolerance`** (e.g. `0.25`). Allows ±25% duration difference when matching. |
 | **Notifications Too Late** | You want to know *before* it finishes. | **Set `Notify Before End Minutes`** (e.g. `5`). Get an alert 5 minutes before the estimated finish time. |
+| **Persistent 'Running' State** | Integration stays locked to a long profile after a short cycle diverged. | **Adjust Matching Stability Thresholds** in `const.py`. Divergence detection now automatically reverts to "Detecting..." if confidence drops below 60% of the peak score. |
 
 > **Pro Tip**: Use the **Apply Suggestions** button in Settings. It analyzes your history and calculates the perfect text-book values for your specific machine.
 
@@ -166,6 +173,7 @@ Run database cleanup, repair corrupted data, and export/import configurations.
 - **`sensor.<name>_state`**: Current Status (Idle, Running, Detecting...).
 - **`sensor.<name>_program`**: Best-matched Profile Name.
 - **`sensor.<name>_time_remaining`**: Smart countdown (locks during high variance phases).
+- **`sensor.<name>_total_duration`**: Total predicted duration (Elapsed + Remaining). Ideal for `timer-bar-card`.
 - **`sensor.<name>_cycle_progress`**: 0-100% (Resets to 0% after unload timeout).
 - **`binary_sensor.<name>_running`**: Simple On/Off state.
 - **`switch.<name>_auto_maintenance`**: toggle nightly database cleanup.
@@ -183,6 +191,9 @@ data:
   device_id: "washer_device_id"
 ```
 - `ha_washdata.label_cycle`: Assign profile to history programmatically.
+
+### Supported Languages
+🇬🇧 English • 🇨🇿 Čeština • 🇩🇰 Dansk • 🇩🇪 Deutsch • 🇬🇷 Ελληνικά • 🇪🇸 Español • 🇪🇪 Eesti • 🇫🇮 Suomi • 🇫🇷 Français • 🇭🇷 Hrvatski • 🇭🇺 Magyar • 🇮🇹 Italiano • 🇯🇵 日本語 • 🇱🇹 Lietuvių • 🇱🇻 Latviešu • 🇳🇴 Norsk • 🇳🇱 Nederlands • 🇧🇪 Nederlands (BE) • 🇵🇱 Polski • 🇵🇹 Português • 🇷🇴 Română • 🇸🇰 Slovenčina • 🇸🇮 Slovenščina • 🇷🇸 Srpski • 🇸🇪 Svenska • 🇺🇦 Українська • 🇨🇳 简体中文
 
 ## License
 Non-commercial use only. See [LICENSE](LICENSE) file.

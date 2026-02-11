@@ -1,5 +1,5 @@
 """Unit tests for CycleDetector."""
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock
 import pytest
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
@@ -16,7 +16,7 @@ from custom_components.ha_washdata.const import (
 
 # Helper to create datetime sequence
 def dt(offset_seconds: int) -> datetime:
-    return datetime(2023, 1, 1, 12, 0, 0) + timedelta(seconds=offset_seconds)
+    return datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=offset_seconds)
 
 @pytest.fixture
 def detector_config():

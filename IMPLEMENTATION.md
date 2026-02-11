@@ -249,9 +249,9 @@ Start 5-min idle timer
 |-----------|---------|
 | `_cycle_completed_time` | Tracks when cycle finished (ISO timestamp) |
 | `_progress_reset_delay` | Configurable idle time (default: 300s/5min) |
-| `_start_progress_reset_timer()` | Begin countdown after cycle end |
-| `_check_progress_reset()` | Async callback checking if idle threshold passed |
-| `_stop_progress_reset_timer()` | Cancel reset if new cycle starts |
+| `_start_state_expiry_timer()` | Begin countdown after cycle end |
+| `_handle_state_expiry()` | Async callback checking if idle threshold passed |
+| `_stop_state_expiry_timer()` | Cancel reset if new cycle starts |
 
 **Entity Updates:**
 ```yaml
@@ -503,9 +503,11 @@ ProfileStore.async_run_maintenance()
 - System calculates standard deviation (variance) of the matched profile window.
 - If variance is high (>50W std dev): Time estimate updates are **damped** (locked).
 - If variance is low: Time estimate updates normally.
-- **Switching Logic**: System switches profile mid-cycle if:
-    - New match confidence > Existing score + 0.15 (Strong override)
-    - New match shows positive trend (>70% increasing scores)
+- **Switching Logic (Match Persistence)**: To prevent "flapping" between profiles or between a profile and "detecting...", the system enforces temporal persistence:
+    - **Initial Match**: Requires 3 consecutive matching attempts before switching from "detecting..." to a specific profile.
+    - **Unmatching**: Requires 3 consecutive attempts with confidence below the `unmatch_threshold` before reverting to "detecting...".
+    - **Mid-Cycle Override**: Requires 3 consecutive attempts AND a minimum confidence gap of **0.15** (High Confidence) or **0.05** (Positive Trend) to switch between different profiles.
+- **Divergence Detection**: Implemented a "Score-Drop" check to handle cycles that start similar but diverge later. If the current matching confidence falls below a configured ratio (default 40% drop) of the peak score recorded for that cycle, the manager automatically reverts to "Detecting...". This prevents the integration from staying locked to an incorrect long profile when a shorter one ends.
  
 #### C. Smart Termination & End Spike Logic
 **Problem:** Dishwashers often have a long silent drying phase followed by a brief, high-power pump-out spike. Smart termination would sometimes cut the cycle off early (during drying), missing the final spike and causing the spike to trigger a new "ghost" cycle.
@@ -517,10 +519,37 @@ ProfileStore.async_run_maintenance()
 - **Ghost Cycle Suppression**: A "Suspicious Window" (20 mins) protects legitimate short cycles. Aggressive ghost cycle termination (10 min timeout) only applies if a cycle starts within 20 mins of the previous one ending.
 - **Persistence**: This 20-minute window logic persists across Home Assistant restarts by restoring `_last_cycle_end_time` from the persistent `profile_store`, ensuring protection isn't lost after a reboot.
 - **Tail Preservation**: The profile store now explicitly preserves trailing silence/spikes for natural completions, preventing the "profile shrinking" feedback loop where frequent early terminations made the learned profile shorter and shorter.
+- **Strict Deferral**: To prevent termination hangs on mismatched profiles, the "Deferred Finish" logic now requires either a `verified_pause` (confirmed by profile envelope alignment) or high match confidence (default > 0.55).
  
+#### D. Zombie Protection & Stuck Power Prevention
+**Problem:** Power sensors could become "stuck" at non-zero values if a smart plug failed to push the final 0W update. Conversely, long pauses in dishwashers (e.g. drying) could trigger a watchdog kill, prematurely ending a legitimate cycle.
 
- 
----
+**Solution:**
+- **Profile-Aware Watchdog**: The watchdog now checks the `expected_duration` from the matched profile. If the cycle is currently within its expected runtime (even if silent for > 60 mins), the watchdog automatically extends the timeout.
+- **Verified Pause Support**: For devices like dishwashers with multi-hour silent drying phases, the watchdog detects a `verified_pause` (via profile alignment). When active, the timeout is extended to **DEFAULT_MAX_DEFERRAL_SECONDS** (2 hours) plus a 30-minute buffer, ensuring the cycle is not killed even if it exceeds its original expected duration during the pause.
+- **Zombie Killer (Hard Limit)**: To prevent runaway "ghost" cycles, a hard termination limit is enforced at **200%** of the expected profile duration (minimum 2 hours).
+- **Stuck Power Reset**: When the watchdog or detector forces a cycle to end (due to timeout or manual stop), the `current_power` state is explicitly reset to **0.0W**, ensuring Home Assistant entities reflect reality even if the hardware sensor fails to report the final drop.
+- **Low-Power Bypass**: Power readings below `min_power` now bypass all debouncing, smoothing, and throttling filters in `manager.py`, ensuring the "cycle end" signal is processed with zero latency.
+
+**Watchdog Logic Flow:**
+```mermaid
+graph TD
+    A[Watchdog Check] --> B{Cycle Active?}
+    B -- No --> C[Exit]
+    B -- Yes --> D{Silence Duration?}
+    D -- > Timeout --> E{Verified Pause?}
+    E -- Yes --> G[Extend to Deferral Limit + 30m]
+    E -- No --> F{Profile Matched?}
+    F -- Yes --> H{Elapsed < Expected?}
+    H -- Yes --> I[Extend to Expected + 30m]
+    H -- No --> J{Elapsed > 200%?}
+    J -- Yes --> K[Force End + Reset Power to 0W]
+    J -- No --> L[Inject Refresh]
+    F -- No --> M{Silence > 10m?}
+    M -- Yes --> K
+    M -- No --> L
+```
+
 
 ## Key Classes & APIs
 
@@ -536,9 +565,10 @@ ProfileStore.async_run_maintenance()
 | `_update_estimates()` | Match profiles, set entities (every 5 min) |
 | `_on_state_change(old, new)` | Handle detector state transitions |
 | `_on_cycle_end(cycle_data)` | Finalize cycle, request feedback |
-| `_start_progress_reset_timer()` | Begin 5-min reset countdown |
-| `_check_progress_reset()` | Async callback checking if idle threshold passed |
-| `_stop_progress_reset_timer()` | Cancel reset if new cycle starts |
+| `_start_state_expiry_timer()` | Begin 5-min reset countdown |
+| `_handle_state_expiry()` | Async callback checking if idle threshold passed |
+| `_watchdog_check_stuck_cycle()` | Profile-aware watchdog (Zombie protection) |
+| `_stop_state_expiry_timer()` | Cancel reset if new cycle starts |
 | `_maybe_request_feedback()` | Emit feedback request if confident |
 
 **Properties:**
@@ -576,3 +606,24 @@ manager._cycle_completed_time  # When cycle finished (ISO)
 - Tolerance: ±25% (was ±50%)
 - Rejects: duration_ratio < 0.75 or > 1.25
 - Accounts for realistic variance
+
+## Recent Test Expansion Findings (2026-02-04)
+
+During the expansion of the test suite (Phase 4), several minor issues and areas for improvement were identified:
+
+1.  **ProfileStore.async_import_data Return Value**: The method signature indicates -> dict[str, Any], but the implementation currently returns None. Tests have been adjusted to ignore the return value for now.
+2.  **CycleDetector Minimum Samples for Matching**: The matching logic requires at least 12 samples after resampling. Highly irregular data with large gaps (e.g., 250s) can lead to failed matches if the total cycle duration is short, even if the "shape" is recognizable.
+3.  **Timezone Sensitivity in decompress_power_data**: The isoformat() conversion in decompress_power_data uses datetime.fromtimestamp(ts) which defaults to local time. This can cause mismatches in tests comparing against UTC strings. Using dt_util.utc_from_timestamp or always using aware datetimes is recommended.
+4.  **ProfileStore.delete_cycle is Async**: Some older test code or assumptions might treat it as sync. It MUST be awaited as it triggers async_rebuild_envelope and async_save.
+
+---
+
+### 8. Device Type Specifics
+
+The integration includes specialized handling for different appliance types to account for their unique power profiles:
+
+- **Washing Machine**: Standard defaults; handles repeating wash/rinse phases.
+- **Dryer**: More linear power curve; shorter pauses.
+- **Dishwasher**: Multi-hour silent drying phases; end pump-out spikes; requires multi-hour watchdog extensions and conservative smart termination.
+- **Electric Vehicle (EV)**: High-power charging cycles; supports "Charging" and "Maintenance" phase heuristics; 15-minute off-gap to handle brief charger disconnections.
+- **Coffee Machine**: Very short cycles; rapid sampling requirements.
