@@ -7,10 +7,10 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md) [x]
 
 ## Phase 2: Measure Feature Fixes
-- [ ] Task: Investigate and fix the empty measurement overlay bug when highlighting. `[ ]`
-- [ ] Task: Implement the enhanced data calculations (Peak, Avg, Duration, Wh, Variance, Timestamps). `[ ]`
-- [ ] Task: Update the UI to display the new measurement fields. `[ ]`
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) `[ ]`
+- [x] Task: Investigate and fix the empty measurement overlay bug when highlighting. `[ ]`
+- [x] Task: Implement the enhanced data calculations (Peak, Avg, Duration, Wh, Variance, Timestamps). [x]
+- [x] Task: Update the UI to display the new measurement fields. `[ ]`
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) [x]
 
 ## Phase 3: UI/UX Improvements (Log & Queue)
 - [ ] Task: Implement the smart sticky auto-scroll logic for the log view. `[ ]`
