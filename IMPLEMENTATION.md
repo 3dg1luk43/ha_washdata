@@ -249,9 +249,9 @@ Start 5-min idle timer
 |-----------|---------|
 | `_cycle_completed_time` | Tracks when cycle finished (ISO timestamp) |
 | `_progress_reset_delay` | Configurable idle time (default: 300s/5min) |
-| `_start_progress_reset_timer()` | Begin countdown after cycle end |
-| `_check_progress_reset()` | Async callback checking if idle threshold passed |
-| `_stop_progress_reset_timer()` | Cancel reset if new cycle starts |
+| `_start_state_expiry_timer()` | Begin countdown after cycle end |
+| `_handle_state_expiry()` | Async callback checking if idle threshold passed |
+| `_stop_state_expiry_timer()` | Cancel reset if new cycle starts |
 
 **Entity Updates:**
 ```yaml
@@ -518,9 +518,32 @@ ProfileStore.async_run_maintenance()
 - **Persistence**: This 20-minute window logic persists across Home Assistant restarts by restoring `_last_cycle_end_time` from the persistent `profile_store`, ensuring protection isn't lost after a reboot.
 - **Tail Preservation**: The profile store now explicitly preserves trailing silence/spikes for natural completions, preventing the "profile shrinking" feedback loop where frequent early terminations made the learned profile shorter and shorter.
  
+#### D. Zombie Protection & Stuck Power Prevention
+**Problem:** Power sensors could become "stuck" at non-zero values if a smart plug failed to push the final 0W update. Conversely, long pauses in dishwashers (e.g. drying) could trigger a watchdog kill, prematurely ending a legitimate cycle.
 
- 
----
+**Solution:**
+- **Profile-Aware Watchdog**: The watchdog now checks the `expected_duration` from the matched profile. If the cycle is currently within its expected runtime (even if silent for > 60 mins), the watchdog automatically extends the timeout, preventing "premature kill" during long pauses.
+- **Zombie Killer (Hard Limit)**: To prevent runaway "ghost" cycles, a hard termination limit is enforced at **200%** of the expected profile duration (minimum 2 hours).
+- **Stuck Power Reset**: When the watchdog or detector forces a cycle to end (due to timeout or manual stop), the `current_power` state is explicitly reset to **0.0W**, ensuring Home Assistant entities reflect reality even if the hardware sensor fails to report the final drop.
+- **0W Debounce Bypass**: 0W readings (or readings below `min_power`) now bypass all debouncing and smoothing filters in `manager.py`, ensuring the "cycle end" signal is processed with zero latency.
+
+**Watchdog Logic Flow:**
+```mermaid
+graph TD
+    A[Watchdog Check] --> B{Cycle Active?}
+    B -- No --> C[Exit]
+    B -- Yes --> D{Silence Duration?}
+    D -- > Timeout --> E{Profile Matched?}
+    E -- Yes --> F{Elapsed < Expected?}
+    F -- Yes --> G[Extend Timeout]
+    F -- No --> H{Elapsed > 200%?}
+    H -- Yes --> I[Force End + Reset Power to 0W]
+    H -- No --> J[Inject Refresh]
+    E -- No --> K{Silence > 10m?}
+    K -- Yes --> I
+    K -- No --> J
+```
+
 
 ## Key Classes & APIs
 
@@ -536,9 +559,10 @@ ProfileStore.async_run_maintenance()
 | `_update_estimates()` | Match profiles, set entities (every 5 min) |
 | `_on_state_change(old, new)` | Handle detector state transitions |
 | `_on_cycle_end(cycle_data)` | Finalize cycle, request feedback |
-| `_start_progress_reset_timer()` | Begin 5-min reset countdown |
-| `_check_progress_reset()` | Async callback checking if idle threshold passed |
-| `_stop_progress_reset_timer()` | Cancel reset if new cycle starts |
+| `_start_state_expiry_timer()` | Begin 5-min reset countdown |
+| `_handle_state_expiry()` | Async callback checking if idle threshold passed |
+| `_watchdog_check_stuck_cycle()` | Profile-aware watchdog (Zombie protection) |
+| `_stop_state_expiry_timer()` | Cancel reset if new cycle starts |
 | `_maybe_request_feedback()` | Emit feedback request if confident |
 
 **Properties:**

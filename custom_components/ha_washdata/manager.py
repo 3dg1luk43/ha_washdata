@@ -1535,10 +1535,25 @@ class WashDataManager:
         
         # Calculate time since REAL update (if available, else fallback to any update)
         last_real = self._last_real_reading_time or self._last_reading_time
-
         time_since_real_update = (now - last_real).total_seconds()
+        
+        elapsed = self.detector.get_elapsed_seconds()
+        expected = getattr(self.detector, "expected_duration_seconds", 0)
 
-        # 0. GHOST CYCLE SUPPRESSOR
+        # 0. ZOMBIE KILLER (Hard Limit)
+        # If cycle has run significantly longer than expected (200%), kill it.
+        # Only applies if we have a profile match.
+        if expected > 0 and elapsed > (expected * 2.0) and elapsed > 7200:
+            _LOGGER.warning(
+                "Watchdog: Zombie cycle detected (%.0fs > 200%% of expected %.0fs). Force-ending.",
+                elapsed, expected
+            )
+            self.detector.force_end(now)
+            self._current_power = 0.0  # Force 0W
+            self._notify_update()
+            return
+
+        # 1. GHOST CYCLE SUPPRESSOR
         # If we are "detecting" for more than 10 minutes and haven't seen an update for 5 minutes, 
         # it's likely a pump-out spike or an accidental start (ghost cycle).
         # We end it aggressively ONLY if it started shortly after another cycle ended (Suspicious Window).
@@ -1549,7 +1564,6 @@ class WashDataManager:
             if (cycle_start - self._last_cycle_end_time).total_seconds() < 180:
                 is_suspicious = True
 
-        elapsed = self.detector.get_elapsed_seconds()
         if (
             self._current_program == "detecting..."
             and is_suspicious
@@ -1561,6 +1575,7 @@ class WashDataManager:
                 elapsed, time_since_real_update
             )
             self.detector.force_end(now)
+            self._current_power = 0.0
             self._notify_update()
             return
 
@@ -1578,10 +1593,19 @@ class WashDataManager:
         if self._current_program not in ("detecting...", "off"):
             effective_low_power_timeout = max(low_power_floor, effective_low_power_timeout)
 
+        # Profile-Aware Extension:
+        # If we have a matched profile, ensure we don't kill during the expected duration.
+        if expected > 0 and elapsed < expected:
+            # Extend timeout to cover the remaining expected duration + buffer
+            remaining = expected - elapsed
+            # Allow silence up to remaining + 30 mins (buffer for drying/pause)
+            extended_timeout = remaining + 1800
+            if extended_timeout > effective_low_power_timeout:
+                effective_low_power_timeout = extended_timeout
              
         if self.detector.is_waiting_low_power():
             
-            # 1. Staleness Check
+            # 2. Staleness Check
             if time_since_real_update > effective_low_power_timeout:
                 _LOGGER.warning(
                     "Watchdog: Force-ending cycle. Low-power state stale for %.0fs (> %.0fs).",
@@ -1594,7 +1618,7 @@ class WashDataManager:
                 self._notify_update()
                 return
 
-            # 2. Injection Check (Keepalive)
+            # 3. Injection Check (Keepalive)
             # If silence > _config.off_delay, inject 0W to keep detector clock moving
             # so it can evaluate profile logic (smart termination) or just mark time passing.
             if time_since_any_update > self._config.off_delay:
@@ -1654,6 +1678,7 @@ class WashDataManager:
                 time_since_any_update
             )
             self.detector.force_end(now)
+            self._current_power = 0.0  # FIX: Reset current power
             self._notify_update()
             return
 
