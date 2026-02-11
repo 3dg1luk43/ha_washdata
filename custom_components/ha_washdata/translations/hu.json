@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Jelölje be ezt a mezőt a tanulási algoritmus által javasolt értékek másolásához az űrlapba. Mentés előtt ellenőrizze.\n\nJavasolt (tanulásból):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Válassza ki a készülék típusát (Mosógép, Szárító, Mosogatógép, Kávéfőző). Ez a címke minden ciklussal együtt kerül mentésre a jobb szervezés érdekében.",
+          "device_type": "Válassza ki a készülék típusát (mosógép, szárítógép, mosogatógép, kávéfőző, elektromos). Ezt a címkét a rendszer minden ciklusban tárolja a jobb szervezés érdekében.",
           "power_sensor": "Az érzékelő entitás, amely valós idejű teljesítményt jelent (wattban). Bármikor módosíthatja az előzményadatok elvesztése nélkül — hasznos okos dugalj cserénél.",
           "min_power": "Az e küszöb feletti teljesítményértékek (wattban) jelzik, hogy a készülék működik. Kezdje 2W-tal a legtöbb eszköznél.",
           "off_delay": "Másodpercek, ameddig a simított teljesítménynek a leállítási küszöb alatt kell maradnia a befejezés jelzéséhez. Alapértelmezett: 120s.",

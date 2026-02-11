@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Bifați această casetă pentru a copia valorile sugerate de algoritmul de învățare în formular. Verificați înainte de a salva.\n\nSugerat (din învățare):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Alegeți tipul aparatului (Mașină de spălat, Uscător, Mașină de spălat vase, Cafetieră). Această etichetă este salvată cu fiecare ciclu pentru o mai bună organizare.",
+          "device_type": "Selectați tipul de aparat (Mașină de spălat, Uscător, Mașină de spălat vase, Aparat de cafea, EV). Această etichetă este stocată cu fiecare ciclu pentru o mai bună organizare.",
           "power_sensor": "Entitatea senzorului care raportează puterea în timp real (în wați). O puteți schimba oricând fără a pierde datele istorice — util la schimbarea prizei inteligente.",
           "min_power": "Valorile puterii peste acest prag (în wați) indică faptul că aparatul funcționează. Începeți cu 2W pentru majoritatea dispozitivelor.",
           "off_delay": "Secunde în care puterea netezită trebuie să rămână sub pragul de oprire pentru a marca finalizarea. Implicit: 120s.",

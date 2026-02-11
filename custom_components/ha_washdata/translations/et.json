@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Märkige see ruut, et kopeerida õppealgoritmi soovitatud väärtused vormi. Enne salvestamist vaadake üle.\n\nSoovitatud (õppimisest):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Valige seadme tüüp (Pesumasin, Kuivati, Nõudepesumasin, Kohvimasin). See silt salvestatakse iga tsükliga parema organiseerimise jaoks.",
+          "device_type": "Valige seadme tüüp (pesumasin, kuivati, nõudepesumasin, kohvimasin, EV). See silt salvestatakse paremaks korraldamiseks iga tsükliga.",
           "power_sensor": "Anduri olem, mis raporteerib reaalajas võimsust (vattides). Saate seda igal ajal muuta ilma ajaloolisi andmeid kaotamata — kasulik nutipistiku vahetamisel.",
           "min_power": "Võimsuse väärtused üle selle läve (vattides) näitavad, et seade töötab. Alustage enamiku seadmete puhul 2W-ga.",
           "off_delay": "Sekundid, mille jooksul silutud võimsus peab jääma peatusläve alla, et märkida lõpetamine. Vaikimisi: 120s.",

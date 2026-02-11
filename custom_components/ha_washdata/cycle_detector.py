@@ -22,6 +22,7 @@ from .const import (
     STATE_UNKNOWN,
     DEVICE_TYPE_WASHING_MACHINE,
     DEFAULT_MAX_DEFERRAL_SECONDS,
+    DEFAULT_DEFER_FINISH_CONFIDENCE,
 )
 from .signal_processing import integrate_wh
 
@@ -690,6 +691,18 @@ class CycleDetector:
         # If matched profile, enforce min duration ratio
         ratio = self._config.min_duration_ratio
 
+        # --- STRICTER DEFERRAL ---
+        # If we are NOT in a verified pause, but power has been low for a long time (ENDING state),
+        # we only defer if we are VERY confident this profile is correct.
+        # This prevents hanging on too-long profiles that matched early but are now diverging.
+        if self._last_match_confidence < DEFAULT_DEFER_FINISH_CONFIDENCE:
+            _LOGGER.debug(
+                "Not deferring finish: confidence %.2f too low for unverified pause (profile: %s)",
+                self._last_match_confidence,
+                self._matched_profile,
+            )
+            return False
+
         # Also use profile tolerance to handle variable cycle lengths (e.g. long drying)
         # Allow deferral up to Expected * (1 + tolerance)
         upper_threshold = self._expected_duration * (
@@ -699,11 +712,12 @@ class CycleDetector:
         # Primary check: Is duration significantly below expectation?
         if duration < (self._expected_duration * ratio):
             _LOGGER.debug(
-                "Deferring cycle finish: duration %.0fs < %.0f%% of expected %.0fs (profile: %s)",
+                "Deferring cycle finish: duration %.0fs < %.0f%% of expected %.0fs (profile: %s, confidence %.2f)",
                 duration,
                 ratio * 100,
                 self._expected_duration,
                 self._matched_profile,
+                self._last_match_confidence,
             )
             return True
 

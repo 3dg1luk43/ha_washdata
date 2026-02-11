@@ -208,7 +208,7 @@ class CycleRecorder:
         rec_start_ts = min(rec_start_ts, data_start_ts)
         rec_end_ts = max(rec_end_ts, data_end_ts)
 
-        threshold = 2.0  # W
+        threshold = 1.0  # W
 
         first_active_idx = -1
         last_active_idx = -1

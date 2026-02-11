@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Atzīmējiet šo lodziņu, lai kopētu mācīšanās algoritma ieteiktās vērtības formā. Pārbaudiet pirms saglabāšanas.\n\nIeteiktais (no mācīšanās):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Izvēlieties ierīces tipu (Veļas mašīna, Žāvētājs, Trauku mašīna, Kafijas automāts). Šis marķējums tiek saglabāts ar katru ciklu labākai organizācijai.",
+          "device_type": "Izvēlieties ierīces veidu (veļas mašīna, žāvētājs, trauku mazgājamā mašīna, kafijas automāts, EV). Šis tags tiek saglabāts kopā ar katru ciklu, lai nodrošinātu labāku organizēšanu.",
           "power_sensor": "Sensora entītija, kas ziņo par reāllaika jaudu (vatos). Jūs to varat mainīt jebkurā laikā, nezaudējot vēsturiskos datus — noderīgi, mainot viedo kontaktligzdu.",
           "min_power": "Jaudas vērtības virs šī sliekšņa (vatos) norāda, ka ierīce darbojas. Sāciet ar 2W lielākajai daļai ierīču.",
           "off_delay": "Sekundes, cik ilgi izlīdzinātajai jaudai jāpaliek zem apturēšanas sliekšņa, lai atzīmētu pabeigšanu. Noklusējums: 120s.",

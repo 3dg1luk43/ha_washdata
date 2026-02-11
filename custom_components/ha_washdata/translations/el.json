@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Επιλέξτε αυτό το πλαίσιο για να αντιγράψετε τις τιμές που προτείνει ο αλγόριθμος εκμάθησης στη φόρμα. Ελέγξτε πριν την αποθήκευση.\n\nΠροτεινόμενα (από εκμάθηση):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Επιλέξτε τον τύπο συσκευής (Πλυντήριο Ρούχων, Στεγνωτήριο, Πλυντήριο Πιάτων, Καφετιέρα). Αυτή η ετικέτα αποθηκεύεται με κάθε κύκλο για καλύτερη οργάνωση.",
+          "device_type": "Επιλέξτε τον τύπο της συσκευής (πλυντήριο ρούχων, στεγνωτήριο, πλυντήριο πιάτων, καφετιέρα, EV). Αυτή η ετικέτα αποθηκεύεται με κάθε κύκλο για καλύτερη οργάνωση.",
           "power_sensor": "Η οντότητα αισθητήρα που αναφέρει την ισχύ σε πραγματικό χρόνο (σε Watt). Μπορείτε να το αλλάξετε ανά πάσα στιγμή χωρίς να χάσετε ιστορικά δεδομένα — χρήσιμο κατά την αλλαγή έξυπνης πρίζας.",
           "min_power": "Τιμές ισχύος πάνω από αυτό το όριο (σε Watt) δείχνουν ότι η συσκευή λειτουργεί. Ξεκινήστε με 2W για τις περισσότερες συσκευές.",
           "off_delay": "Δευτερόλεπτα που η εξομαλυμένη ισχύς πρέπει να παραμείνει κάτω από το όριο διακοπής για να σημειωθεί ολοκλήρωση. Προεπιλογή: 120s.",

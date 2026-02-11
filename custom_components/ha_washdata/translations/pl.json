@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Zaznacz to pole, aby skopiować wartości sugerowane przez algorytm uczenia do formularza. Sprawdź przed zapisaniem.\n\nSugerowane (z uczenia):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Wybierz typ urządzenia (Pralka, Suszarka, Zmywarka, Ekspres do kawy). Ta etykieta jest zapisywana z każdym cyklem dla lepszej organizacji.",
+          "device_type": "Wybierz typ urządzenia (pralka, suszarka, zmywarka, ekspres do kawy, EV). Ten znacznik jest zapisywany przy każdym cyklu dla lepszej organizacji.",
           "power_sensor": "Encja czujnika raportująca moc w czasie rzeczywistym (w watach). Możesz ją zmienić w dowolnym momencie bez utraty danych historycznych — przydatne przy wymianie inteligentnego gniazdka.",
           "min_power": "Odczyty mocy powyżej tego progu (w watach) wskazują, że urządzenie pracuje. Zacznij od 2W dla większości urządzeń.",
           "off_delay": "Sekundy, przez które wygładzona moc musi pozostać poniżej progu zatrzymania, aby oznaczyć zakończenie. Domyślnie: 120s.",

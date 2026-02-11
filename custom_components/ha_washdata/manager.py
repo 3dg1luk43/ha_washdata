@@ -114,6 +114,7 @@ from .const import (
     DEFAULT_WATCHDOG_INTERVAL,
     CONF_MATCH_PERSISTENCE,
     DEFAULT_MATCH_PERSISTENCE,
+    DEFAULT_MATCH_REVERT_RATIO,
     DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_START_DURATION_THRESHOLD,
@@ -510,8 +511,34 @@ class WashDataManager:
                     current_program_score = c.get("score", 0.0)
                     break
             
+            # CASE: Divergence Detection (Score Drop)
+            # If current matched program has a significant drop from its own peak score,
+            # we should consider unmatching it even if it's still the "best" candidate.
+            if (
+                self._current_program not in ("detecting...", "off", "starting", "unknown")
+                and profile_name == self._current_program
+            ):
+                history = self._score_history.get(self._current_program, [])
+                if len(history) > 3:
+                    peak_score = max(history)
+                    # If score drops by more than 40% from peak AND is below threshold, unmatch.
+                    # This catches divergence faster than waiting for fixed unmatch_threshold.
+                    if confidence < peak_score * (1.0 - DEFAULT_MATCH_REVERT_RATIO):
+                        self._unmatch_persistence_counter += 1
+                        if self._unmatch_persistence_counter >= self._match_persistence:
+                            self._current_program = "detecting..."
+                            self._matched_profile_duration = None
+                            self._unmatch_persistence_counter = 0
+                            _LOGGER.info(
+                                "Divergence detected for profile '%s' (confidence %.3f < 60%% of peak %.3f). "
+                                "Reverting to detection.",
+                                profile_name, confidence, peak_score
+                            )
+                            # Reset profile_name so Case 3 doesn't re-trigger
+                            profile_name = "detecting..."
+                    
             # Update persistence for the best profile
-            if profile_name:
+            if profile_name and profile_name != "detecting...":
                 self._match_persistence_counter[profile_name] = self._match_persistence_counter.get(profile_name, 0) + 1
                 
                 # Check if this is the same candidate as before
@@ -586,8 +613,13 @@ class WashDataManager:
                         profile_name, self._unmatch_persistence_counter, self._match_persistence, profile_name
                     )
             
-            # Reset unmatch counter if confidence is healthy
-            elif profile_name == self._current_program and confidence >= self._unmatch_threshold:
+            # Reset unmatch counter if confidence is healthy 
+            # AND we didn't just detect a divergence
+            elif (
+                profile_name == self._current_program 
+                and confidence >= self._unmatch_threshold
+                and not (len(self._score_history.get(self._current_program, [])) > 3 and confidence < max(self._score_history[self._current_program]) * (1.0 - DEFAULT_MATCH_REVERT_RATIO))
+            ):
                 self._unmatch_persistence_counter = 0
 
             if should_switch:
@@ -610,6 +642,16 @@ class WashDataManager:
                 self._current_program = "detecting..."
 
             self._last_estimate_time = dt_util.now()
+            
+            # Update score history for all candidates to track trends
+            for cand in result.candidates:
+                cname = cand.get("name")
+                if cname:
+                    history = self._score_history.setdefault(cname, [])
+                    history.append(float(cand.get("score", 0.0)))
+                    if len(history) > 20:
+                        history.pop(0)
+
             # Note: _update_remaining_only() and notify move to end of flow
 
             # 3. UPDATE DETECTOR (Envelopes, Deferral, State Transitions)
@@ -617,8 +659,11 @@ class WashDataManager:
             verified_pause = getattr(self.detector, "_verified_pause", False)
             current_power = readings[-1][1] if readings else 0.0
 
-            # --- Envelope Verification for Mismatches ---
-            if (not profile_name or result.is_confident_mismatch) and current_matched:
+            # --- Envelope Verification for Mismatches & Pauses ---
+            # ALWAYS check alignment if we have a match and power is low, 
+            # to confirm if this is a legitimate pause or a mismatch.
+            stop_thresh = float(self.detector.config.stop_threshold_w)
+            if current_matched and current_power < stop_thresh:
                 formatted = [(t.isoformat(), p) for t, p in readings]
                 try:
                     is_confirmed, mapped_time, _ = (
@@ -633,12 +678,11 @@ class WashDataManager:
                     mapped_time = 0.0
 
                 if is_confirmed:
-                    _LOGGER.info(
-                        "Envelope verified expected low power phase for %s. Overriding mismatch.",
-                        current_matched
-                    )
-                    profile_name = current_matched
-                    confidence = 1.0
+                    if not verified_pause:
+                        _LOGGER.info(
+                            "Envelope verified expected low power phase for %s. Enabling verified pause.",
+                            current_matched
+                        )
                     verified_pause = True
                     # Smart Termination within Envelope block
                     try:
@@ -652,6 +696,11 @@ class WashDataManager:
                         _LOGGER.debug("Smart Termination alignment verification failed: %s", e)
                         pass
                 else:
+                    if verified_pause:
+                        _LOGGER.info(
+                            "Envelope indicates UNEXPECTED low power for %s. Disabling verified pause.",
+                            current_matched
+                        )
                     verified_pause = False
 
             # --- High Power Clear ---
@@ -688,6 +737,11 @@ class WashDataManager:
                     phase_name = "Spinning"
                 elif self.device_type == "washing_machine" and self.detector.is_waiting_low_power():
                     phase_name = "Rinsing/Soaking"
+                elif self.device_type == "ev":
+                    if current_power > 100:
+                        phase_name = "Charging"
+                    elif self.detector.is_waiting_low_power():
+                        phase_name = "Maintenance"
 
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
@@ -1427,10 +1481,9 @@ class WashDataManager:
         now = dt_util.now()
 
         # Throttle updates to avoid CPU overload on noisy sensors
-        # BUT always allow updates if power is significantly low (e.g. 0W) 
-        # to ensure cycle end events are not missed.
-        # FIX: Explicitly include 0W check (<= 0.1) as min_power might be user-configured to 0
-        is_low_power = power < self.detector.config.min_power or power <= 0.1
+        # BUT always allow updates if power is below min_power (critical end-of-cycle signal).
+        min_p = float(self.detector.config.min_power)
+        is_low_power = power < min_p
         
         if (
             not is_low_power
@@ -2198,7 +2251,7 @@ class WashDataManager:
             return
         self._last_phase_estimate_time = now
 
-        duration_so_far = self.detector.get_elapsed_seconds()
+        duration_so_far = float(self.detector.get_elapsed_seconds())
 
         if self._matched_profile_duration and self._matched_profile_duration > 0:
             # Get current power trace for phase analysis
@@ -2288,8 +2341,9 @@ class WashDataManager:
                     return
 
             # --- LINEAR FALLBACK (if phase analysis unavailable) ---
-            remaining = max(self._matched_profile_duration - duration_so_far, 0.0)
-            progress = (duration_so_far / self._matched_profile_duration) * 100.0
+            matched_dur = float(self._matched_profile_duration)
+            remaining = max(matched_dur - duration_so_far, 0.0)
+            progress = (duration_so_far / matched_dur) * 100.0
 
             # Blend linear estimate into smoothed tracker too, to prevent
             # jumps if we lose phase lock

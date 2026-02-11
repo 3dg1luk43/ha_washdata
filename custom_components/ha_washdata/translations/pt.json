@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Selecione o tipo de eletrodoméstico (Máquina de lavar, Secador, Máquina de lavar louça, Máquina de café). Esta etiqueta é guardada com cada ciclo para melhor organização.",
+          "device_type": "Selecione o tipo de aparelho (Máquina de lavar, Secadora, Máquina de lavar louça, Máquina de café, EV). Esta tag é armazenada a cada ciclo para melhor organização.",
           "power_sensor": "A entidade do sensor que reporta potência em tempo real (em watts). Pode alterá-la a qualquer momento sem perder dados históricos.",
           "min_power": "Leituras de potência acima deste limiar (em watts) indicam que o eletrodoméstico está em funcionamento. Comece com 2W para a maioria dos dispositivos.",
           "off_delay": "Segundos que a potência suavizada deve permanecer abaixo do limiar de paragem para marcar a conclusão. Predefinido: 120s.",

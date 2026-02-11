@@ -75,7 +75,7 @@
         },
         "data_description": {
           "apply_suggestions": "Označite ovo polje da kopirate vrednosti koje predlaže algoritam učenja u formu. Pregledajte pre čuvanja.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "device_type": "Izaberite tip uređaja (Veš mašina, Sušilica, Mašina za suđe, Aparat za kafu). Ova oznaka se čuva sa svakim ciklusom radi bolje organizacije.",
+          "device_type": "Изаберите тип уређаја (Машина за веш, Машина за сушење, Машина за прање судова, Машина за кафу, ЕВ). Ова ознака се чува уз сваки циклус ради боље организације.",
           "power_sensor": "Entitet senzora koji izveštava o snazi u realnom vremenu (u vatima). Možete ga promeniti bilo kada bez gubitka istorijskih podataka — korisno pri promeni pametne utičnice.",
           "min_power": "Vrednosti snage iznad ovog praga (u vatima) ukazuju da uređaj radi. Počnite sa 2W za većinu uređaja.",
           "off_delay": "Sekunde tokom kojih izglađena snaga mora ostati ispod praga zaustavljanja da bi se označio završetak. Podrazumevano: 120s.",

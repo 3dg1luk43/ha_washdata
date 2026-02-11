@@ -28,3 +28,4 @@ tests/utils/__pycache__
 tests/repro/data_files.txt
 tests/benchmarks/__pycache__
 .coverage
+.venv_translation
