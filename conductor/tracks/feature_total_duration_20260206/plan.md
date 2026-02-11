@@ -1,0 +1,20 @@
+# Implementation Plan: Expose total program duration for timer-bar-card #113
+
+## Phase 1: Investigation & Verification (Red Phase)
+- [x] Task: Analyze `sensor.py` and `manager.py` to identify the best integration point for the new total duration sensor. 643b882
+- [x] Task: Create a test file `tests/test_total_duration_sensor.py` that checks for the existence and initial state (Unknown) of the new sensor. 643b882
+- [x] Task: Verify that the sensor is currently missing/not registered. 643b882
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Investigation & Verification' (Protocol in workflow.md)
+
+## Phase 2: Implementation (Green Phase)
+- [ ] Task: Add `_total_duration` and `_last_total_duration_update` logic to `WashDataManager` in `manager.py`.
+- [ ] Task: Implement `WasherTotalDurationSensor` in `sensor.py` with `device_class: duration` and `unit_of_measurement: min`.
+- [ ] Task: Ensure `manager.py` updates the total duration whenever a confident match is made or estimates are refined.
+- [ ] Task: Verify the reproduction test now passes (Green Phase).
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Implementation' (Protocol in workflow.md)
+
+## Phase 3: Documentation & QA
+- [ ] Task: Update `README.md` and `IMPLEMENTATION.md` to document the new sensor and its purpose for `timer-bar-card`.
+- [ ] Task: Add an entry to `CHANGELOG.md` for the new feature.
+- [ ] Task: Run the full test suite to ensure no regressions in sensor registration or manager logic.
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Documentation & QA' (Protocol in workflow.md)
