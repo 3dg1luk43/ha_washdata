@@ -1,6 +1,6 @@
 # Implementation Plan: Expose total program duration for timer-bar-card #113
 
-## Phase 1: Investigation & Verification (Red Phase)
+## Phase 1: Investigation & Verification (Red Phase) [checkpoint: f2c85fc]
 - [x] Task: Analyze `sensor.py` and `manager.py` to identify the best integration point for the new total duration sensor. 643b882
 - [x] Task: Create a test file `tests/test_total_duration_sensor.py` that checks for the existence and initial state (Unknown) of the new sensor. 643b882
 - [x] Task: Verify that the sensor is currently missing/not registered. 643b882
