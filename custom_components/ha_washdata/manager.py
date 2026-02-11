@@ -121,6 +121,7 @@ from .const import (
     DEFAULT_END_REPEAT_COUNT,
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
+    DEFAULT_MAX_DEFERRAL_SECONDS,
     DEVICE_SMOOTHING_THRESHOLDS,
     DEVICE_COMPLETION_THRESHOLDS,
     STATE_RUNNING,
@@ -1661,10 +1662,23 @@ class WashDataManager:
         if expected > 0 and elapsed < expected:
             # Extend timeout to cover the remaining expected duration + buffer
             remaining = expected - elapsed
-            # Allow silence up to remaining + 30 mins (buffer for drying/pause)
+            # Allow silence up to remaining + 1800s (30m buffer for drying/pause)
             extended_timeout = remaining + 1800
             if extended_timeout > effective_low_power_timeout:
                 effective_low_power_timeout = extended_timeout
+
+        # Verified Pause Extension:
+        # If the manager/store has confirmed this is a legitimate pause (e.g. Drying),
+        # allow even more leniency up to the global deferral limit.
+        if getattr(self.detector, "_verified_pause", False):
+            # Allow silence up to DEFAULT_MAX_DEFERRAL_SECONDS (default 2h) + buffer
+            pause_limit = DEFAULT_MAX_DEFERRAL_SECONDS + 1800
+            if pause_limit > effective_low_power_timeout:
+                effective_low_power_timeout = pause_limit
+                _LOGGER.debug(
+                    "Watchdog: Extending timeout to %.0fs due to verified pause",
+                    effective_low_power_timeout
+                )
              
         if self.detector.is_waiting_low_power():
             
