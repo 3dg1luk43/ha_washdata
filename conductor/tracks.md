@@ -9,7 +9,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: [BUG] program keep switching to detecting...**
 *Link: [./tracks/fix_match_flapping_20260206/](./tracks/fix_match_flapping_20260206/)*
 
-- [~] **Track: [BUG] wash data power doesnt match smart plug power #43**
+- [x] **Track: [BUG] wash data power doesnt match smart plug power #43**
 *Link: [./tracks/fix_long_drying_split_43_20260206/](./tracks/fix_long_drying_split_43_20260206/)*
 
 - [ ] **Track: [FR] Expose total program duration for full timer-bar-card support**
