@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.2] - 2026-02-11
 
 ### ✨ Features
+- **Advanced Parameter Auto-Suggestion**:
+  - New `SuggestionEngine` that analyzes your appliance's actual power traces to recommend optimal settings.
+  - Automatically suggests values for `start_threshold_w`, `off_delay`, `watchdog_interval`, and more based on observed behavior.
+  - Periodic background optimization to keep settings tuned as your appliance ages or use patterns change.
 - **Electric Vehicle (EV) Support**:
   - Added new "Electric Vehicle" device type with optimized defaults.
   - New icons and phase heuristics ("Charging", "Maintenance").
@@ -43,9 +47,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed redundant "off" label from completion details when the appliance is inactive.
 - **Zigbee2MQTT Guidance**:
   - Added optimized configuration tips for Z2M smart plug users in README.
-- **Profile Sorting**: Improved sorting for profile lists (natural sort), ensuring correct numeric order.
 
 ### 🐛 Bug Fixes
+- **Profile Alignment Error (#112)**:
+  - Fixed a critical `TypeError: 'float' object is not subscriptable` in the profile matching pipeline.
+- **Terminal State Persistence**:
+  - Fixed a bug where `finished` and `interrupted` states were not resetting to `off` after the intended 30-minute timeout.
 - **Profile Shrinking**:
   - Fixed an issue where maintenance tasks would aggressively trim trailing silence from completed cycles, causing profiles to shorten over time.
 - **Termination Hangs**:
@@ -55,11 +62,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Recognizes "Verified Pause" from profile envelope to extend silence timeouts.
 - **Test Stability**:
   - Resolved several `TypeError` issues in the test suite and improved mocking reliability for sensors and configs.
-- **Stuck Power Value**: Fixed issue where the power entity would get stuck at the last non-zero value after a cycle ended.
-- **Timezone Display**: Fixed issue where timestamps in specific UI menus were shown in GMT instead of local time.
-- **Advanced Settings Error**: Fixed a crash that prevented advanced settings from being saved in the configuration flow.
-- **State Logic**: Fixed assertions and logic validation for terminal states.
-- **Notification Tests**: Fixed test environment formatting for notification services.
 
 ## [0.4.1] - 2026-02-03
 
