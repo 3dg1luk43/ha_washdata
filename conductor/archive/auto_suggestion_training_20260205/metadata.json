@@ -1,8 +1,0 @@
-{
-  "track_id": "auto_suggestion_training_20260205",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-05T10:00:00Z",
-  "updated_at": "2026-02-05T10:00:00Z",
-  "description": "Improve learning and auto-suggestion by utilizing data learned from tests to better generate auto-suggestions for advanced users, adhering to main goal - detecting reliably and fast."
-}

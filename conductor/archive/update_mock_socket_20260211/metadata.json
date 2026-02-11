@@ -1,8 +1,0 @@
-{
-  "track_id": "update_mock_socket_20260211",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-11T15:00:00Z",
-  "updated_at": "2026-02-11T15:00:00Z",
-  "description": "Update mqtt_mock_socket for enhanced realism (random scaling, timing artifacts), fix measure feature overlay, implement smart log scrolling, and add imported cycle data registry/queue view."
-}
