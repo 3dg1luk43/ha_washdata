@@ -1,6 +1,6 @@
 # Implementation Plan: Fix 'program keeps switching to detecting' #111
 
-## Phase 1: Investigation & Verification (Red Phase)
+## Phase 1: Investigation & Verification (Red Phase) [checkpoint: 1442609]
 - [x] Task: Analyze current `_analyze_trend` implementation and switching logic in `manager.py`.
 - [x] Task: Create a reproduction test `tests/repro/test_match_flapping.py` that simulates fluctuating confidence scores around the threshold.
 - [x] Task: Verify that the test fails (displays "detecting..." or switches profiles prematurely).
