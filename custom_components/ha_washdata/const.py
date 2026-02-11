@@ -88,6 +88,7 @@ DEFAULT_DEVICE_TYPE = "washing_machine"
 DEFAULT_PROFILE_DURATION_TOLERANCE = 0.25
 
 DEFAULT_INTERRUPTED_MIN_SECONDS = 150  # Internal use only, not exposed
+
 DEFAULT_PROGRESS_RESET_DELAY = 1800  # Seconds (30 minutes state expiry/unload window)
 DEFAULT_LEARNING_CONFIDENCE = 0.6  # Minimum confidence to request user verification
 DEFAULT_DURATION_TOLERANCE = 0.10  # Allow ±10% duration variance before flagging

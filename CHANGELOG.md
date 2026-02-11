@@ -5,6 +5,19 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-02-10
+
+### ✨ Features
+- **Profile-Aware Watchdog**:
+  - The watchdog now uses "look-ahead" logic from the matched profile to prevent premature cycle termination during long legitimate pauses (e.g., dishwasher drying).
+  - Automatically extends silence timeouts if the cycle is within its expected profile duration.
+- **Zombie Protection**:
+  - Implemented a hard "Zombie Killer" limit that force-ends cycles exceeding 200% of their expected profile duration (min 2 hours).
+- **Stuck Power Prevention**:
+  - Automatically resets the power sensor to 0W when a cycle is forced to end by the watchdog or manual stop, fixing issues where the entity remained at a high value.
+- **Zero-Latency 0W Processing**:
+  - Power updates at or below 0.1W now bypass all debouncing and smoothing filters, ensuring immediate cycle-end detection.
+
 ## [0.4.1] - 2026-02-03
 
 ### ✨ Features
