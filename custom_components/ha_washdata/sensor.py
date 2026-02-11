@@ -27,6 +27,7 @@ async def async_setup_entry(
         WasherStateSensor(manager, entry),
         WasherProgramSensor(manager, entry),
         WasherTimeRemainingSensor(manager, entry),
+        WasherTotalDurationSensor(manager, entry),
         WasherProgressSensor(manager, entry),
         WasherPowerSensor(manager, entry),
         WasherElapsedTimeSensor(manager, entry),
@@ -148,6 +149,42 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
         if self._manager.time_remaining:
             return int(self._manager.time_remaining / 60)
         return None
+
+
+class WasherTotalDurationSensor(WasherBaseSensor):
+    """Sensor for total predicted duration."""
+
+    def __init__(self, manager, entry):
+        """Initialize the total duration sensor."""
+        self.entity_description = SensorEntityDescription(
+            key="total_duration",
+            name="Total Duration",
+            device_class="duration",
+            icon="mdi:timer-check-outline",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit of measurement."""
+        if self._manager.check_state == "off":
+            return None
+        return "min"
+
+    @property
+    def native_value(self):
+        if self._manager.check_state == "off":
+            return None
+        if self._manager.total_duration:
+            return int(self._manager.total_duration / 60)
+        return None
+
+    @property
+    def extra_state_attributes(self):
+        """Return extra state attributes."""
+        return {
+            "last_updated": self._manager.last_total_duration_update,
+        }
 
 
 class WasherProgressSensor(WasherBaseSensor):
