@@ -13,10 +13,10 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md) [x]
 
 ## Phase 3: UI/UX Improvements (Log & Queue)
-- [ ] Task: Implement the smart sticky auto-scroll logic for the log view. `[ ]`
-- [ ] Task: Design and implement the "Imported Cycle Source Data" view (List, Registry). `[ ]`
-- [ ] Task: Implement the queue management logic (Next Up, Timeline, Selection/Skip). `[ ]`
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md) `[ ]`
+- [x] Task: Implement the smart sticky auto-scroll logic for the log view. `[ ]`
+- [x] Task: Design and implement the "Imported Cycle Source Data" view (List, Registry). [x]
+- [x] Task: Implement the queue management logic (Next Up, Timeline, Selection/Skip). [x]
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md) [x]
 
 ## Phase 4: Verification & Polishing
 - [ ] Task: Run integration tests to ensure existing features remain intact. `[ ]`
