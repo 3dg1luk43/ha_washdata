@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Program Detection Stability**:
   - Implemented temporal persistence for profile matching: requires 3 consecutive consistent matches before switching from "detecting..." to a profile, or before unmatching a profile.
   - Added a minimum confidence gap for mid-cycle profile switching to prevent "flapping" between similar programs.
+- **Total Duration Sensor**:
+  - New `total_duration` sensor providing the predicted total cycle time (Elapsed + Remaining).
+  - Designed specifically to support full progress bars in `timer-bar-card`.
+  - Dynamically updates as estimates are refined.
 
 ### 🐛 Bug Fixes
 - **Long Drying Phase Support**:

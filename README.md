@@ -169,6 +169,7 @@ Run database cleanup, repair corrupted data, and export/import configurations.
 - **`sensor.<name>_state`**: Current Status (Idle, Running, Detecting...).
 - **`sensor.<name>_program`**: Best-matched Profile Name.
 - **`sensor.<name>_time_remaining`**: Smart countdown (locks during high variance phases).
+- **`sensor.<name>_total_duration`**: Total predicted duration (Elapsed + Remaining). Ideal for `timer-bar-card`.
 - **`sensor.<name>_cycle_progress`**: 0-100% (Resets to 0% after unload timeout).
 - **`binary_sensor.<name>_running`**: Simple On/Off state.
 - **`switch.<name>_auto_maintenance`**: toggle nightly database cleanup.
