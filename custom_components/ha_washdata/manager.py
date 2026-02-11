@@ -419,6 +419,8 @@ class WashDataManager:
         )
         self._current_program = "off"
         self._time_remaining: float | None = None
+        self._total_duration: float | None = None
+        self._last_total_duration_update: datetime | None = None
         self._cycle_progress: float = 0.0
         self._smoothed_progress: float = 0.0  # Smoothed progress tracking for EMA
         self._cycle_completed_time: datetime | None = None  # Track when cycle finished
@@ -1774,6 +1776,7 @@ class WashDataManager:
                 self._manual_program_active = False
                 self._notified_pre_completion = False
                 self._time_remaining = None
+                self._total_duration = None
                 self._cycle_progress = 0
                 self._matched_profile_duration = None
                 self._last_estimate_time = None
@@ -2093,6 +2096,7 @@ class WashDataManager:
         if self.detector.state in (STATE_OFF, STATE_UNKNOWN, STATE_IDLE, STATE_STARTING):
             self._current_program = "off"
             self._time_remaining = None
+            self._total_duration = None
             self._cycle_progress = 0.0
             self._last_match_result = None
             self._notify_update()
@@ -2181,6 +2185,7 @@ class WashDataManager:
         # Throttle updates and only clear on truly dead states
         if self.detector.state in (STATE_OFF, STATE_UNKNOWN, STATE_IDLE):
             self._time_remaining = None
+            self._total_duration = None
             self._cycle_progress = 0.0
             self._smoothed_progress = 0.0
             return
@@ -2271,6 +2276,8 @@ class WashDataManager:
                         1.0 - (self._cycle_progress / 100.0)
                     )
                     self._time_remaining = max(0.0, remaining)
+                    self._total_duration = duration_so_far + remaining
+                    self._last_total_duration_update = now
 
                     _LOGGER.debug(
                         "Phase-aware estimate: raw=%.1f%%, smoothed=%.1f%%, remaining=%smin",
@@ -2295,6 +2302,8 @@ class WashDataManager:
                 self._smoothed_progress = progress
 
             self._time_remaining = remaining
+            self._total_duration = duration_so_far + remaining
+            self._last_total_duration_update = now
             self._cycle_progress = max(0.0, min(self._smoothed_progress, 100.0))
             _LOGGER.debug(
                 "Linear estimate: remaining=%smin, progress=%.1f%%",
@@ -2305,6 +2314,7 @@ class WashDataManager:
             # No profile matched - don't provide misleading time estimates
             # Just show that we're detecting (no Smart Resume based on history)
             self._time_remaining = None
+            self._total_duration = None
             self._cycle_progress = 0.0
             self._smoothed_progress = 0.0
             _LOGGER.debug(
@@ -2590,6 +2600,16 @@ class WashDataManager:
     def time_remaining(self):
         """Return estimated time remaining in seconds."""
         return self._time_remaining
+
+    @property
+    def total_duration(self) -> float | None:
+        """Return total predicted duration in seconds."""
+        return self._total_duration
+
+    @property
+    def last_total_duration_update(self) -> datetime | None:
+        """Return when total duration was last refined."""
+        return self._last_total_duration_update
 
     @property
     def cycle_progress(self):
