@@ -1,6 +1,6 @@
 # Implementation Plan - Update mqtt_mock_socket for Enhanced Realism and UI Features
 
-## Phase 1: Core Logic Enhancements (Data Realism)
+## Phase 1: Core Logic Enhancements (Data Realism) [checkpoint: 909d00c]
 - [x] Task: Implement random amplitude and duration scaling logic. `[ ]`
 - [x] Task: Add simulation for early low-value arrival at cycle ends. `[ ]`
 - [x] Task: Implement jitter and non-compliant polling rate reporting. `[ ]`
