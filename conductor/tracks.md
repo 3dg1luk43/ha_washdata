@@ -9,7 +9,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: [BUG] program keep switching to detecting...**
 *Link: [./tracks/fix_match_flapping_20260206/](./tracks/fix_match_flapping_20260206/)*
 
-- [ ] **Track: [FR] Expose total program duration for full timer-bar-card support**
+- [~] **Track: [FR] Expose total program duration for full timer-bar-card support**
 *Link: [./tracks/feature_total_duration_20260206/](./tracks/feature_total_duration_20260206/)*
 
 ---
