@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Implemented temporal persistence for profile matching: requires 3 consecutive consistent matches before switching from "detecting..." to a profile, or before unmatching a profile.
   - Added a minimum confidence gap for mid-cycle profile switching to prevent "flapping" between similar programs.
 
+### 🐛 Bug Fixes
+- **Long Drying Phase Support**:
+  - Fixed an issue where dishwashers with multi-hour silent drying phases were being split into multiple cycles by the watchdog.
+  - The watchdog now recognizes a "Verified Pause" from the profile envelope and extends the silence timeout to 2.5 hours, matching the maximum safe deferral limit.
+
 ## [0.4.1] - 2026-02-03
 
 ### ✨ Features

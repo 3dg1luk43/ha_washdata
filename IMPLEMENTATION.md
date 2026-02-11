@@ -523,7 +523,8 @@ ProfileStore.async_run_maintenance()
 **Problem:** Power sensors could become "stuck" at non-zero values if a smart plug failed to push the final 0W update. Conversely, long pauses in dishwashers (e.g. drying) could trigger a watchdog kill, prematurely ending a legitimate cycle.
 
 **Solution:**
-- **Profile-Aware Watchdog**: The watchdog now checks the `expected_duration` from the matched profile. If the cycle is currently within its expected runtime (even if silent for > 60 mins), the watchdog automatically extends the timeout, preventing "premature kill" during long pauses.
+- **Profile-Aware Watchdog**: The watchdog now checks the `expected_duration` from the matched profile. If the cycle is currently within its expected runtime (even if silent for > 60 mins), the watchdog automatically extends the timeout.
+- **Verified Pause Support**: For devices like dishwashers with multi-hour silent drying phases, the watchdog detects a `verified_pause` (via profile alignment). When active, the timeout is extended to **DEFAULT_MAX_DEFERRAL_SECONDS** (2 hours) plus a 30-minute buffer, ensuring the cycle is not killed even if it exceeds its original expected duration during the pause.
 - **Zombie Killer (Hard Limit)**: To prevent runaway "ghost" cycles, a hard termination limit is enforced at **200%** of the expected profile duration (minimum 2 hours).
 - **Stuck Power Reset**: When the watchdog or detector forces a cycle to end (due to timeout or manual stop), the `current_power` state is explicitly reset to **0.0W**, ensuring Home Assistant entities reflect reality even if the hardware sensor fails to report the final drop.
 - **0W Debounce Bypass**: 0W readings (or readings below `min_power`) now bypass all debouncing and smoothing filters in `manager.py`, ensuring the "cycle end" signal is processed with zero latency.
@@ -534,15 +535,17 @@ graph TD
     A[Watchdog Check] --> B{Cycle Active?}
     B -- No --> C[Exit]
     B -- Yes --> D{Silence Duration?}
-    D -- > Timeout --> E{Profile Matched?}
-    E -- Yes --> F{Elapsed < Expected?}
-    F -- Yes --> G[Extend Timeout]
-    F -- No --> H{Elapsed > 200%?}
-    H -- Yes --> I[Force End + Reset Power to 0W]
-    H -- No --> J[Inject Refresh]
-    E -- No --> K{Silence > 10m?}
-    K -- Yes --> I
-    K -- No --> J
+    D -- > Timeout --> E{Verified Pause?}
+    E -- Yes --> G[Extend to Deferral Limit + 30m]
+    E -- No --> F{Profile Matched?}
+    F -- Yes --> H{Elapsed < Expected?}
+    H -- Yes --> I[Extend to Expected + 30m]
+    H -- No --> J{Elapsed > 200%?}
+    J -- Yes --> K[Force End + Reset Power to 0W]
+    J -- No --> L[Inject Refresh]
+    F -- No --> M{Silence > 10m?}
+    M -- Yes --> K
+    M -- No --> L
 ```
 
 
