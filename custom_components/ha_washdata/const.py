@@ -266,3 +266,7 @@ STATE_RECORDING = "recording"
 CONF_RECORD_MODE = "record_mode"
 SERVICE_RECORD_START = "record_start"
 SERVICE_RECORD_STOP = "record_stop"
+
+# Thresholds for trim suggestions
+SHORT_SILENCE_THRESHOLD_S = 600  # 10 minutes
+TRIM_BUFFER_S = 60.0  # 1 minute buffer
