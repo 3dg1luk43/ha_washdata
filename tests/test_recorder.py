@@ -108,7 +108,19 @@ async def test_trim_suggestions(mock_hass):
             data.append((t.isoformat(), 0.0))
             
         head, tail, score = recorder.get_trim_suggestions(data)
-        
-        assert 9.0 <= head <= 11.0
-        assert 9.0 <= tail <= 11.0
 
+        assert 9.0 <= head <= 11.0
+        # New behavior: tail silence < 10 mins suggests 0.0 trim
+        assert tail == 0.0
+
+        # Case 2: Very long tail silence (> 10 mins)
+        long_data = list(data)
+        last_t = dt_base + timedelta(seconds=29)
+        for i in range(1, 900): # 15 mins more silence
+            t = last_t + timedelta(seconds=i)
+            long_data.append((t.isoformat(), 0.0))
+            
+        head2, tail2, score2 = recorder.get_trim_suggestions(long_data)
+        # 15 mins (900s) + original 10s = 910s. 
+        # Suggested trim should be 910s - 60s (buffer) = 850s
+        assert 840.0 <= tail2 <= 860.0

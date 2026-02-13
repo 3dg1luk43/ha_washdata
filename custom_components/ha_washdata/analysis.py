@@ -340,12 +340,21 @@ def compute_envelope_worker(
     sampling_rates: list[float] = []
 
     # 1. Pre-process input
-    for offsets_list, values_list in raw_cycles_data:
+    for curve in raw_cycles_data:
+        offsets_list = curve[0]
+        values_list = curve[1]
+        
         if len(offsets_list) < 3 or len(values_list) < 3:
             continue
+            
         offsets = np.array(offsets_list)
         values = np.array(values_list)
-        normalized_curves.append((offsets, values))
+        
+        # Use provided duration or fallback to last offset
+        dur = float(curve[2]) if len(curve) > 2 else float(offsets[-1])
+        
+        normalized_curves.append((offsets, values, dur))
+        
         if len(offsets) > 1:
             intervals = np.diff(offsets)
             sr = float(np.median(intervals[intervals > 0]))
@@ -354,7 +363,10 @@ def compute_envelope_worker(
         return None
 
     # 2. Reference Selection (Median Duration)
-    max_times = [float(off[-1]) for off, _ in normalized_curves]
+    # Input is now (offsets, values, duration)
+    normalized_curves_with_dur = normalized_curves
+    
+    max_times = [float(dur) for _, _, dur in normalized_curves_with_dur]
     median_dur = float(np.median(max_times))
     ref_idx = int(np.argmin([abs(t - median_dur) for t in max_times]))
 
@@ -365,17 +377,17 @@ def compute_envelope_worker(
     num_points = max(50, int(target_duration / align_dt))
     time_grid = np.linspace(0.0, target_duration, num_points)
 
-    ref_offsets, ref_values = normalized_curves[ref_idx]
+    ref_offsets, ref_values, _ = normalized_curves_with_dur[ref_idx]
     ref_array = np.interp(time_grid, ref_offsets, ref_values)
 
     # 3. Resample & DTW
     resampled: list[np.ndarray] = []
 
-    for i, (offsets, values) in enumerate(normalized_curves):
+    for i, (offsets, values, dur) in enumerate(normalized_curves_with_dur):
         if i == ref_idx:
             resampled.append(ref_array)
             continue
-        this_dur = offsets[-1]
+        this_dur = dur
         this_num_points = max(10, int(this_dur / align_dt))
         this_grid = np.linspace(0.0, this_dur, this_num_points)
         this_array = np.interp(this_grid, offsets, values)

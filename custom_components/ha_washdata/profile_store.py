@@ -1084,8 +1084,21 @@ class ProfileStore:
                         processed_count += 1
                     
                     # Update duration to match new data length
+                    # If we only trimmed the head, the new duration is old_duration - first_offset
+                    # This preserves trailing silence.
                     if cycle.get("power_data"):
-                         cycle["duration"] = cycle["power_data"][-1][0]
+                         old_dur = cycle.get("duration", 0)
+                         # If we shifted (first_offset > 0), new duration is old_dur - first_offset
+                         # Otherwise if we only trimmed tail, we might want to snap, 
+                         # but for completed cycles we don't trim tail in this loop.
+                         if first_offset > 0:
+                             cycle["duration"] = max(0.0, old_dur - first_offset)
+                         else:
+                             # Only trailing was trimmed (not expected for completed cycles here)
+                             # or no trim happened. 
+                             # If trailing was trimmed, we SHOULD snap.
+                             if len(trimmed) < original_len:
+                                 cycle["duration"] = cycle["power_data"][-1][0]
 
             if cycle.get("power_data"):
                 try:
@@ -1202,14 +1215,18 @@ class ProfileStore:
             offsets = [p[0] for p in pairs]
             values = [p[1] for p in pairs]
 
-            raw_cycles_data.append((offsets, values))
+            stored_dur = cycle.get("duration", 0)
+            authoritative_dur = float(max(offsets[-1], stored_dur))
             
             # Use manual duration if available (e.g. from feedback correction)
             man_dur = cycle.get("manual_duration")
             if man_dur:
-                durations.append(float(man_dur))
+                final_dur = float(man_dur)
             else:
-                durations.append(offsets[-1])
+                final_dur = authoritative_dur
+            
+            raw_cycles_data.append((offsets, values, final_dur))
+            durations.append(final_dur)
 
         if not raw_cycles_data:
             return None
