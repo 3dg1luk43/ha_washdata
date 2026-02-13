@@ -257,8 +257,17 @@ class CycleRecorder:
 
         # 2. Tail Trim
         # Time from last active sample to recording end
+        # For manual recordings, we want to be conservative because of drying phases.
         raw_tail_trim = max(0.0, rec_end_ts - tail_ts)
-        steps_tail = int(raw_tail_trim / avg_dt)
-        tail_trim = steps_tail * avg_dt
+        
+        # If tail silence is less than 10 minutes, suggest 0 trim to be safe.
+        # Dishwashers often have 5-10 min silent periods that are NOT the end.
+        if raw_tail_trim < 600: 
+            tail_trim = 0.0
+        else:
+            # If it's very long, suggest trimming but keep a 1-minute buffer
+            tail_trim = max(0.0, raw_tail_trim - 60.0)
+            steps_tail = int(tail_trim / avg_dt)
+            tail_trim = steps_tail * avg_dt
 
         return round(head_trim, 1), round(tail_trim, 1), round(avg_dt, 1)

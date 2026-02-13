@@ -5,6 +5,15 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2.1] - 2026-02-13
+
+### 🐛 Fixed
+- **Manual Recording Trimming**: Fixed a bug where manual recordings (e.g., Dishwashers in Eco mode) were internally shortened by incorrectly snapping the cycle duration to the last recorded power reading, losing trailing silence like drying phases.
+- **Profile Statistics Accuracy**: Corrected profile duration calculations to use the authoritative cycle duration instead of data-offset bounds. This fixes incorrect remaining-time predictions and profile "shrinkage" over time.
+- **Aggressive Tail Trimming**: Modified recorder suggestions to be less aggressive. Suggested tail trims are now `0.0` for silence periods under 10 minutes, protecting legitimate silent phases in appliances.
+- **Data Optimization Logic**: Fixed maintenance logic that was incorrectly snapping durations to the last power reading during start-time shift corrections.
+- **Envelope Reconstruction**: Updated the statistical engine to correctly respect explicit cycle durations even when power sensor updates are sparse or missing at the end of a run.
+
 ## [0.4.2] - 2026-02-11
 
 ### ✨ Features

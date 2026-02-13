@@ -2340,18 +2340,31 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             tail_trim = user_input["tail_trim"]
             profile_name = user_input["profile_name"].strip()
 
+            # GET ACTUAL RECORDING BOUNDS
+            rec_start_str = manager.recorder.last_run.get("start_time")
+            rec_end_str = manager.recorder.last_run.get("end_time")
+
             # APPLY TRIMS
             # Convert data to timestamps
             parsed = []
             for t_str, p in data:
-                t = dt_util.parse_datetime(t_str).timestamp()
-                parsed.append((t, p))
+                t = dt_util.parse_datetime(t_str)
+                if t:
+                    parsed.append((t.timestamp(), p))
 
-            if not parsed:
+            if not parsed and not rec_start_str:
                 return self.async_abort(reason="empty_recording")
 
-            start_ts = parsed[0][0]
-            end_ts = parsed[-1][0]
+            # Use recording bounds if available, fallback to data bounds
+            data_start_ts = parsed[0][0] if parsed else 0
+            data_end_ts = parsed[-1][0] if parsed else 0
+            
+            start_ts = dt_util.parse_datetime(rec_start_str).timestamp() if rec_start_str else data_start_ts
+            end_ts = dt_util.parse_datetime(rec_end_str).timestamp() if rec_end_str else data_end_ts
+            
+            # Ensure bounds cover data
+            start_ts = min(start_ts, data_start_ts) if parsed else start_ts
+            end_ts = max(end_ts, data_end_ts) if parsed else end_ts
 
             # Calculate cut points
             keep_start = start_ts + head_trim

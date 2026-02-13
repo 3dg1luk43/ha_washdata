@@ -777,6 +777,14 @@ class CycleDetector:
             trim_end=not keep_tail,
         )
 
+        # Ensure power_data covers the full duration until end_time
+        # (especially important for manual recordings or drying phases with no sensor updates)
+        final_readings = list(trimmed_readings)
+        if final_readings:
+            last_t, last_p = final_readings[-1]
+            if last_t < end_time:
+                final_readings.append((end_time, last_p))
+
         cycle_data = {
             "start_time": self._current_cycle_start.isoformat(),
             "end_time": end_time.isoformat(),
@@ -784,7 +792,7 @@ class CycleDetector:
             "max_power": self._cycle_max_power,
             "status": status,
             "termination_reason": termination_reason,
-            "power_data": [(t.isoformat(), p) for t, p in trimmed_readings],
+            "power_data": [(t.isoformat(), p) for t, p in final_readings],
         }
 
         _LOGGER.info("Cycle Finished: %s, %.1f min", status, duration / 60)
