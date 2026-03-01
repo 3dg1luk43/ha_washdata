@@ -103,7 +103,9 @@ def translate_batch(texts, target_lang):
 def main():
     # Read command line arguments
     argparser = argparse.ArgumentParser()
-    argparser.add_argument("translations_dir")
+    argparser.add_argument(
+        "translations_dir", help="The directory containing the translation files."
+    )
 
     args = argparser.parse_args()
 
