@@ -1,3 +1,4 @@
+import argparse
 import json
 import subprocess
 import time
@@ -5,9 +6,6 @@ from pathlib import Path
 from deep_translator import GoogleTranslator
 
 # No API KEY needed for deep-translator (Google v2 wrapper)
-
-TRANSLATIONS_DIR = Path("custom_components/ha_washdata/translations")
-EN_FILE = TRANSLATIONS_DIR / "en.json"
 
 
 def load_json(path):
@@ -103,18 +101,27 @@ def translate_batch(texts, target_lang):
 
 
 def main():
-    if not EN_FILE.exists():
-        print(f"Error: {EN_FILE} not found.")
+    # Read command line arguments
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("translations_dir")
+
+    args = argparser.parse_args()
+
+    translations_dir = Path(args.translations_dir)
+    en_file = translations_dir / "en.json"
+
+    if not en_file.exists():
+        print(f"Error: {en_file} not found.")
         return
 
-    print(f"Processing translations in {TRANSLATIONS_DIR}")
+    print(f"Processing translations in {translations_dir}")
 
     # 1. Identify changed keys in en.json
-    changed_keys_in_en, en_flat = get_git_diff_keys(str(EN_FILE))
+    changed_keys_in_en, en_flat = get_git_diff_keys(str(en_file))
     print(f"Found {len(changed_keys_in_en)} changed/added keys in en.json")
 
     # 2. Iterate over all other json files
-    for file in TRANSLATIONS_DIR.glob("*.json"):
+    for file in translations_dir.glob("*.json"):
         if file.name == "en.json":
             continue
 
