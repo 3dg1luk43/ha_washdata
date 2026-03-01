@@ -7,6 +7,77 @@ from deep_translator import GoogleTranslator
 
 # No API KEY needed for deep-translator (Google v2 wrapper)
 
+# List of supported languages by Home Assistant
+# Taken from https://developers.home-assistant.io/docs/voice/intent-recognition/supported-languages/
+HA_LANGUAGES = [
+    "af",
+    "ar",
+    "bg",
+    "bn",
+    "ca",
+    "cs",
+    "cy",
+    "da",
+    "de",
+    "de-CH",
+    "el",
+    "en",
+    "es",
+    "et",
+    "eu",
+    "fa",
+    "fi",
+    "fr",
+    "ga",
+    "gl",
+    "gu",
+    "he",
+    "hi",
+    "hr",
+    "hu",
+    "hy",
+    "id",
+    "is",
+    "it",
+    "ja",
+    "ka",
+    "kn",
+    "ko",
+    "kw",
+    "lb",
+    "lt",
+    "lv",
+    "ml",
+    "mn",
+    "mr",
+    "ms",
+    "nb",
+    "ne",
+    "nl",
+    "pa",
+    "pl",
+    "pt",
+    "pt-BR",
+    "ro",
+    "ru",
+    "sk",
+    "sl",
+    "sr",
+    "sr-Latn",
+    "sv",
+    "sw",
+    "ta",
+    "te",
+    "th",
+    "tr",
+    "uk",
+    "ur",
+    "vi",
+    "zh-CN",
+    "zh-HK",
+    "zh-TW",
+]
+
 
 def load_json(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -28,6 +99,7 @@ def flatten_dict(d, parent_key='', sep='.'):
         else:
             items.append((new_key, v))
     return dict(items)
+
 
 def unflatten_dict(d, sep='.'):
     result = {}
@@ -106,6 +178,17 @@ def main():
     argparser.add_argument(
         "translations_dir", help="The directory containing the translation files."
     )
+    argparser.add_argument(
+        nargs="*",
+        dest="languages",
+        help="List of space-separated languages to translate to.",
+    )
+    argparser.add_argument(
+        "--all",
+        dest="all_languages",
+        action="store_true",
+        help="Generate translations for all by Home Assistant supported languages.",
+    )
 
     args = argparser.parse_args()
 
@@ -116,18 +199,44 @@ def main():
         print(f"Error: {en_file} not found.")
         return
 
-    print(f"Processing translations in {translations_dir}")
+    if args.all_languages:
+        # Generate translations for all by Home Assistant supported languages.
+        languages = HA_LANGUAGES
+    elif len(args.languages) > 0:
+        # Generate translations for the languages given as arguments and supported by Home Assistant.
+        # Compare the languages case insensitive to the list of languages supported by Home Assistant and use the propperly cased language from this list.
+        languages = [
+            language
+            for language in HA_LANGUAGES
+            if language.lower() in (l.lower() for l in args.languages)
+        ]
+    else:
+        # Take the languages from the already generated language files.
+        # Iterate over all json files and take file stem.
+        languages = []
+        for file in translations_dir.glob("*.json"):
+            languages.append(file.stem)
+
+    # Remove duplicate languages, if any, and sort alphabetically.
+    languages = sorted(list(set(languages)))
+
+    # Remove the English language as this is the source language.
+    if "en" in languages:
+        languages.remove("en")
+
+    if len(languages) == 0:
+        return 1
+
+    print(f"Processing translations for {', '.join(languages)} in {translations_dir}")
 
     # 1. Identify changed keys in en.json
     changed_keys_in_en, en_flat = get_git_diff_keys(str(en_file))
     print(f"Found {len(changed_keys_in_en)} changed/added keys in en.json")
 
     # 2. Iterate over all other json files
-    for file in translations_dir.glob("*.json"):
-        if file.name == "en.json":
-            continue
+    for lang_code in languages:
+        file = translations_dir / f"{lang_code}.json"
 
-        lang_code = file.stem
         # Map HA language codes to Google Translate codes if necessary
         # deep-translator uses ISO 639-1 mostly.
         # Common mappings:
@@ -143,8 +252,13 @@ def main():
 
         print(f"Processing {lang_code} (API: {target_lang_api})...")
 
+        new_file = False
         try:
             target_data = load_json(file)
+        except FileNotFoundError:
+            # Language file does not exist yet, nothing to worry about.
+            new_file = True
+            target_data = {}
         except Exception:
             print(f"Error decoding {file}, starting fresh.")
             target_data = {}
@@ -199,7 +313,10 @@ def main():
                 # Only save if loop finished normally
                 final_data = unflatten_dict(target_flat)
                 save_json(file, final_data)
-                print(f"  Updated {file}")
+                if new_file:
+                    print(f"  Created {file}")
+                else:
+                    print(f"  Updated {file}")
         else:
             # Only removals happened, save it
             final_data = unflatten_dict(target_flat)
