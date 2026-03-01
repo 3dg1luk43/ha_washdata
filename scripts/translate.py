@@ -83,7 +83,7 @@ LANG_API_MAP = {
     "he": "iw",  # Hebrew
     "kw": None,  # Cornish, not supported by Google Translate
     "nb": "no",  # Norwegian Bokmål
-    "pt-BR": "pt",  # Brazilian Portugese
+    "pt-BR": "pt",  # Brazilian Portuguese
     "sr": None,  # Serbian in Cyrillic, not supported by Google Translate
     "sr-Latn": "sr",  # Serbian in Latin
     "zh-HK": "zh-CN",  # Hong Kong Chinese
