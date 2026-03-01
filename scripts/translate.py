@@ -79,10 +79,14 @@ HA_LANGUAGES = [
 ]
 
 LANG_API_MAP = {
-    "zh-Hans": "zh-CN",
-    "zh-Hant": "zh-TW",
+    "de-CH": "de",  # Swiss German
+    "he": "iw",  # Hebrew
+    "kw": None,  # Cornish, not supported by Google Translate
     "nb": "no",  # Norwegian Bokmål
-    "nl-BE": "nl",
+    "pt-BR": "pt",  # Brazilian Portugese
+    "sr": None,  # Serbian in Cyrillic, not supported by Google Translate
+    "sr-Latn": "sr",  # Serbian in Latin
+    "zh-HK": "zh-CN",  # Hong Kong Chinese
 }
 
 
@@ -250,6 +254,10 @@ def main():
         target_lang_api = lang_code
         if lang_code in LANG_API_MAP:
             target_lang_api = LANG_API_MAP[lang_code]
+
+        if not target_lang_api:
+            print(f"{lang_code} not supported")
+            continue
 
         print(f"Processing {lang_code} (API: {target_lang_api})...")
 
