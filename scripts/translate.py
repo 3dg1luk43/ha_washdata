@@ -200,6 +200,12 @@ def main():
         action="store_true",
         help="Generate translations for all by Home Assistant supported languages.",
     )
+    argparser.add_argument(
+        "--retranslate",
+        dest="retranslate",
+        action="store_true",
+        help="Retranslate already translated keys.",
+    )
 
     args = argparser.parse_args()
 
@@ -240,6 +246,8 @@ def main():
 
     print(f"Processing translations for {', '.join(languages)} in {translations_dir}")
 
+    retranslate = args.retranslate
+
     # 1. Identify changed keys in en.json
     changed_keys_in_en, en_flat = get_git_diff_keys(str(en_file))
     print(f"Found {len(changed_keys_in_en)} changed/added keys in en.json")
@@ -261,18 +269,18 @@ def main():
 
         print(f"Processing {lang_code} (API: {target_lang_api})...")
 
-        new_file = False
-        try:
-            target_data = load_json(file)
-        except FileNotFoundError:
-            # Language file does not exist yet, nothing to worry about.
-            new_file = True
-            target_data = {}
-        except Exception:
-            print(f"Error decoding {file}, starting fresh.")
-            target_data = {}
-
-        target_flat = flatten_dict(target_data)
+        new_file = retranslate
+        target_data = {}
+        target_flat = {}
+        if not retranslate:
+            try:
+                target_data = load_json(file)
+                target_flat = flatten_dict(target_data)
+            except FileNotFoundError:
+                # Language file does not exist yet, nothing to worry about.
+                new_file = True
+            except Exception:
+                print(f"Error decoding {file}, starting fresh.")
 
         keys_to_translate = []
         original_texts_to_translate = []
