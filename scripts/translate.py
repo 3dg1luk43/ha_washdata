@@ -78,6 +78,13 @@ HA_LANGUAGES = [
     "zh-TW",
 ]
 
+LANG_API_MAP = {
+    "zh-Hans": "zh-CN",
+    "zh-Hant": "zh-TW",
+    "nb": "no",  # Norwegian Bokmål
+    "nl-BE": "nl",
+}
+
 
 def load_json(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -241,14 +248,8 @@ def main():
         # deep-translator uses ISO 639-1 mostly.
         # Common mappings:
         target_lang_api = lang_code
-        if lang_code == "zh-Hans":
-            target_lang_api = "zh-CN"
-        elif lang_code == "zh-Hant":
-            target_lang_api = "zh-TW"
-        elif lang_code == "nb": # Norwegian Bokmål
-            target_lang_api = "no"
-        elif lang_code == "nl-BE":
-            target_lang_api = "nl"
+        if lang_code in LANG_API_MAP:
+            target_lang_api = LANG_API_MAP[lang_code]
 
         print(f"Processing {lang_code} (API: {target_lang_api})...")
 
