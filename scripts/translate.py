@@ -192,7 +192,7 @@ def main():
     argparser.add_argument(
         nargs="*",
         dest="languages",
-        help="List of space-separated languages to translate to.",
+        help="Space-separated list of languages to translate to.",
     )
     argparser.add_argument(
         "--all",
