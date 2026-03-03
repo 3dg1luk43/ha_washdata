@@ -4,6 +4,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+
 from deep_translator import GoogleTranslator
 
 # No API KEY needed for deep-translator (Google v2 wrapper)
@@ -191,8 +192,8 @@ def main():
         "translations_dir", help="The directory containing the translation files."
     )
     argparser.add_argument(
+        "languages",
         nargs="*",
-        dest="languages",
         help="Space-separated list of languages to translate to.",
     )
     argparser.add_argument(
