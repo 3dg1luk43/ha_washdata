@@ -224,10 +224,11 @@ def main():
     elif len(args.languages) > 0:
         # Generate translations for the languages given as arguments and supported by Home Assistant.
         # Compare the languages case insensitive to the list of languages supported by Home Assistant and use the propperly cased language from this list.
+        lc_languages = {l.lower() for l in args.languages}
         languages = [
             language
             for language in HA_LANGUAGES
-            if language.lower() in (l.lower() for l in args.languages)
+            if language.lower() in lc_languages
         ]
     else:
         # Take the languages from the already generated language files.
