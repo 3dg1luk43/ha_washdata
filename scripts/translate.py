@@ -1,6 +1,7 @@
 import argparse
 import json
 import re
+import requests
 import subprocess
 import sys
 import time
@@ -11,85 +12,22 @@ from deep_translator import GoogleTranslator
 # No API KEY needed for deep-translator (Google v2 wrapper)
 
 # List of supported languages by Home Assistant
-# Taken from https://developers.home-assistant.io/docs/voice/intent-recognition/supported-languages/
-HA_LANGUAGES = [
-    "af",
-    "ar",
-    "bg",
-    "bn",
-    "ca",
-    "cs",
-    "cy",
-    "da",
-    "de",
-    "de-CH",
-    "el",
-    "en",
-    "es",
-    "et",
-    "eu",
-    "fa",
-    "fi",
-    "fr",
-    "ga",
-    "gl",
-    "gu",
-    "he",
-    "hi",
-    "hr",
-    "hu",
-    "hy",
-    "id",
-    "is",
-    "it",
-    "ja",
-    "ka",
-    "kn",
-    "ko",
-    "kw",
-    "lb",
-    "lt",
-    "lv",
-    "ml",
-    "mn",
-    "mr",
-    "ms",
-    "nb",
-    "ne",
-    "nl",
-    "pa",
-    "pl",
-    "pt",
-    "pt-BR",
-    "ro",
-    "ru",
-    "sk",
-    "sl",
-    "sr",
-    "sr-Latn",
-    "sv",
-    "sw",
-    "ta",
-    "te",
-    "th",
-    "tr",
-    "uk",
-    "ur",
-    "vi",
-    "zh-CN",
-    "zh-HK",
-    "zh-TW",
-]
+LANGUAGES_URL = "https://raw.githubusercontent.com/home-assistant/frontend/dev/src/translations/translationMetadata.json"
 
 LANG_API_MAP = {
-    "de-CH": "de",  # Swiss German
+    "en-GB": None,  # British English
+    "es-419": "es",  # Latin American Spanish
+    "gsw": "de",  # Swiss German
     "he": "iw",  # Hebrew
-    "kw": None,  # Cornish, not supported by Google Translate
+    # "kw": None,  # Cornish, not supported by Google Translate
     "nb": "no",  # Norwegian Bokmål
+    "nn": None,  # Norwegian Nynorsk
     "pt-BR": "pt",  # Brazilian Portuguese
     "sr": None,  # Serbian in Cyrillic, not supported by Google Translate
     "sr-Latn": "sr",  # Serbian in Latin
-    "zh-HK": "zh-CN",  # Hong Kong Chinese
+    # "zh-HK": "zh-CN",  # Hong Kong Chinese
+    "zh-Hans": "zh-CN",  # Simplified Chinese
+    "zh-Hant": "zh-TW",  # Traditional Chinese 
 }
 
 ARGUMENTS_REGEX = re.compile("{.*?}")
@@ -221,16 +159,20 @@ def main():
         print(f"Error: {en_file} not found.")
         return 1
 
+    response = requests.get(LANGUAGES_URL)
+    ha_languages = json.loads(response.content)
+    ha_languages = set(ha_languages.keys())
+
     if args.all_languages:
         # Generate translations for all by Home Assistant supported languages.
-        languages = HA_LANGUAGES
+        languages = ha_languages
     elif len(args.languages) > 0:
         # Generate translations for the languages given as arguments and supported by Home Assistant.
         # Compare the languages case insensitive to the list of languages supported by Home Assistant and use the propperly cased language from this list.
         lc_languages = {l.lower() for l in args.languages}
         languages = [
             language
-            for language in HA_LANGUAGES
+            for language in ha_languages
             if language.lower() in lc_languages
         ]
     else:
