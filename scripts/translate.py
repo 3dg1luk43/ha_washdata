@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -90,6 +91,8 @@ LANG_API_MAP = {
     "sr-Latn": "sr",  # Serbian in Latin
     "zh-HK": "zh-CN",  # Hong Kong Chinese
 }
+
+ARGUMENTS_REGEX = re.compile("{.*?}")
 
 
 def load_json(path):
@@ -319,7 +322,12 @@ def main():
                     print(f"    Translation failed for batch. Skipping update for {lang_code}.")
                     break
 
-                for k, t_text in zip(batch_keys, translated_texts):
+                for k, b_text, t_text in zip(batch_keys, batch_texts, translated_texts):
+                    b_matches = ARGUMENTS_REGEX.findall(b_text)
+                    t_matches = ARGUMENTS_REGEX.findall(t_text)
+                    for index, match in enumerate(t_matches):
+                        if b_matches[index] != match:
+                            t_text = t_text.replace(match, b_matches[index])
                     target_flat[k] = t_text
 
                 # Rate limiting logic for free API
@@ -339,6 +347,7 @@ def main():
             print(f"  Updated {file}")
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
