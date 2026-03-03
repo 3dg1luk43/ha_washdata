@@ -214,7 +214,7 @@ def main():
 
     if not en_file.exists():
         print(f"Error: {en_file} not found.")
-        return
+        return 1
 
     if args.all_languages:
         # Generate translations for all by Home Assistant supported languages.
@@ -239,7 +239,7 @@ def main():
         languages.remove("en")
 
     if len(languages) == 0:
-        return 1
+        return 2
 
     print(f"Processing translations for {', '.join(languages)} in {translations_dir}")
 
@@ -337,6 +337,7 @@ def main():
             save_json(file, final_data)
             print(f"  Updated {file}")
 
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
