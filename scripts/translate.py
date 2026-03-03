@@ -229,10 +229,7 @@ def main():
         ]
     else:
         # Take the languages from the already generated language files.
-        # Iterate over all json files and take file stem.
-        languages = []
-        for file in translations_dir.glob("*.json"):
-            languages.append(file.stem)
+        languages = [file.stem for file in translations_dir.glob("*.json")]
 
     # Remove duplicate languages, if any, and sort alphabetically.
     languages = sorted(list(set(languages)))
