@@ -259,9 +259,7 @@ def main():
         # Map HA language codes to Google Translate codes if necessary
         # deep-translator uses ISO 639-1 mostly.
         # Common mappings:
-        target_lang_api = lang_code
-        if lang_code in LANG_API_MAP:
-            target_lang_api = LANG_API_MAP[lang_code]
+        target_lang_api = LANG_API_MAP.get(lang_code, lang_code)
 
         if not target_lang_api:
             print(f"{lang_code} not supported")
