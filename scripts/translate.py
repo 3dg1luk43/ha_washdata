@@ -1,13 +1,36 @@
+import argparse
 import json
+import re
+import requests
 import subprocess
+import sys
 import time
 from pathlib import Path
+
 from deep_translator import GoogleTranslator
 
 # No API KEY needed for deep-translator (Google v2 wrapper)
 
-TRANSLATIONS_DIR = Path("custom_components/ha_washdata/translations")
-EN_FILE = TRANSLATIONS_DIR / "en.json"
+# List of supported languages by Home Assistant
+LANGUAGES_URL = "https://raw.githubusercontent.com/home-assistant/frontend/dev/src/translations/translationMetadata.json"
+
+LANG_API_MAP = {
+    "en-GB": None,  # British English
+    "es-419": "es",  # Latin American Spanish
+    "gsw": "de",  # Swiss German
+    "he": "iw",  # Hebrew
+    # "kw": None,  # Cornish, not supported by Google Translate
+    "nb": "no",  # Norwegian Bokmål
+    "nn": None,  # Norwegian Nynorsk
+    "pt-BR": "pt",  # Brazilian Portuguese
+    "sr": None,  # Serbian in Cyrillic, not supported by Google Translate
+    "sr-Latn": "sr",  # Serbian in Latin
+    # "zh-HK": "zh-CN",  # Hong Kong Chinese
+    "zh-Hans": "zh-CN",  # Simplified Chinese
+    "zh-Hant": "zh-TW",  # Traditional Chinese 
+}
+
+ARGUMENTS_REGEX = re.compile("{.*?}")
 
 
 def load_json(path):
@@ -30,6 +53,7 @@ def flatten_dict(d, parent_key='', sep='.'):
         else:
             items.append((new_key, v))
     return dict(items)
+
 
 def unflatten_dict(d, sep='.'):
     result = {}
@@ -103,44 +127,103 @@ def translate_batch(texts, target_lang):
 
 
 def main():
-    if not EN_FILE.exists():
-        print(f"Error: {EN_FILE} not found.")
-        return
+    # Read command line arguments
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        "translations_dir", help="The directory containing the translation files."
+    )
+    argparser.add_argument(
+        "languages",
+        nargs="*",
+        help="Space-separated list of languages to translate to.",
+    )
+    argparser.add_argument(
+        "--all",
+        dest="all_languages",
+        action="store_true",
+        help="Generate translations for all by Home Assistant supported languages.",
+    )
+    argparser.add_argument(
+        "--retranslate",
+        dest="retranslate",
+        action="store_true",
+        help="Retranslate already translated keys.",
+    )
 
-    print(f"Processing translations in {TRANSLATIONS_DIR}")
+    args = argparser.parse_args()
+
+    translations_dir = Path(args.translations_dir)
+    en_file = translations_dir / "en.json"
+
+    if not en_file.exists():
+        print(f"Error: {en_file} not found.")
+        return 1
+
+    response = requests.get(LANGUAGES_URL)
+    ha_languages = json.loads(response.content)
+    ha_languages = set(ha_languages.keys())
+
+    if args.all_languages:
+        # Generate translations for all by Home Assistant supported languages.
+        languages = ha_languages
+    elif len(args.languages) > 0:
+        # Generate translations for the languages given as arguments and supported by Home Assistant.
+        # Compare the languages case insensitive to the list of languages supported by Home Assistant and use the propperly cased language from this list.
+        lc_languages = {l.lower() for l in args.languages}
+        languages = [
+            language
+            for language in ha_languages
+            if language.lower() in lc_languages
+        ]
+    else:
+        # Take the languages from the already generated language files.
+        languages = [file.stem for file in translations_dir.glob("*.json")]
+
+    # Remove duplicate languages, if any, and sort alphabetically.
+    languages = sorted(list(set(languages)))
+
+    # Remove the English language as this is the source language.
+    if "en" in languages:
+        languages.remove("en")
+
+    if len(languages) == 0:
+        return 2
+
+    print(f"Processing translations for {', '.join(languages)} in {translations_dir}")
+
+    retranslate = args.retranslate
 
     # 1. Identify changed keys in en.json
-    changed_keys_in_en, en_flat = get_git_diff_keys(str(EN_FILE))
+    changed_keys_in_en, en_flat = get_git_diff_keys(str(en_file))
     print(f"Found {len(changed_keys_in_en)} changed/added keys in en.json")
 
     # 2. Iterate over all other json files
-    for file in TRANSLATIONS_DIR.glob("*.json"):
-        if file.name == "en.json":
-            continue
+    for lang_code in languages:
+        file = translations_dir / f"{lang_code}.json"
 
-        lang_code = file.stem
         # Map HA language codes to Google Translate codes if necessary
         # deep-translator uses ISO 639-1 mostly.
         # Common mappings:
-        target_lang_api = lang_code
-        if lang_code == "zh-Hans":
-            target_lang_api = "zh-CN"
-        elif lang_code == "zh-Hant":
-            target_lang_api = "zh-TW"
-        elif lang_code == "nb": # Norwegian Bokmål
-            target_lang_api = "no"
-        elif lang_code == "nl-BE":
-            target_lang_api = "nl"
+        target_lang_api = LANG_API_MAP.get(lang_code, lang_code)
+
+        if not target_lang_api:
+            print(f"{lang_code} not supported")
+            continue
 
         print(f"Processing {lang_code} (API: {target_lang_api})...")
 
-        try:
-            target_data = load_json(file)
-        except Exception:
-            print(f"Error decoding {file}, starting fresh.")
-            target_data = {}
-
-        target_flat = flatten_dict(target_data)
+        new_file = retranslate
+        target_data = {}
+        target_flat = {}
+        if not retranslate:
+            try:
+                target_data = load_json(file)
+                target_flat = flatten_dict(target_data)
+            except FileNotFoundError:
+                # Language file does not exist yet, nothing to worry about.
+                new_file = True
+            except Exception:
+                print(f"Error decoding {file}, starting fresh.")
 
         keys_to_translate = []
         original_texts_to_translate = []
@@ -181,7 +264,12 @@ def main():
                     print(f"    Translation failed for batch. Skipping update for {lang_code}.")
                     break
 
-                for k, t_text in zip(batch_keys, translated_texts):
+                for k, b_text, t_text in zip(batch_keys, batch_texts, translated_texts):
+                    b_matches = ARGUMENTS_REGEX.findall(b_text)
+                    t_matches = ARGUMENTS_REGEX.findall(t_text)
+                    for index, match in enumerate(t_matches):
+                        if b_matches[index] != match:
+                            t_text = t_text.replace(match, b_matches[index])
                     target_flat[k] = t_text
 
                 # Rate limiting logic for free API
@@ -190,13 +278,18 @@ def main():
                 # Only save if loop finished normally
                 final_data = unflatten_dict(target_flat)
                 save_json(file, final_data)
-                print(f"  Updated {file}")
+                if new_file:
+                    print(f"  Created {file}")
+                else:
+                    print(f"  Updated {file}")
         else:
             # Only removals happened, save it
             final_data = unflatten_dict(target_flat)
             save_json(file, final_data)
             print(f"  Updated {file}")
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
