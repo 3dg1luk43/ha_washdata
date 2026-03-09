@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Wasprogram",
-    "program_placeholder": "Kies Program",
-    "duration": "Duur",
-    "minutes": "min",
-    "time_remaining": "Tyd wat oorbly",
-    "no_prediction": "Geen voorspelling",
-    "cycle_in_progress": "Siklus aan die gang",
-    "status": "Status",
-    "progress": "Vordering",
-    "select_program": "Kies 'n program om besonderhede te sien",
-    "title": "Titel",
-    "status_entity": "Status Entiteit",
-    "icon": "Ikoon",
-    "active_color": "Aktiewe ikoonkleur",
-    "show_state": "Wys Staat",
-    "show_program": "Wys Program",
-    "show_details": "Wys besonderhede",
-    "spin_icon": "Draai-ikoon (Terwyl hardloop)",
-    "program_entity": "Program Entiteit",
-    "pct_entity": "Vorderingsentiteit (opsioneel)",
-    "time_entity": "Tydsentiteit (opsioneel)",
-    "display_mode": "Vertoonmodus",
-    "show_time_remaining": "Wys oorblywende tyd",
-    "show_percentage": "Wys persentasie",
-    "entity_not_found": "Entiteit nie gevind nie"
   }
 }

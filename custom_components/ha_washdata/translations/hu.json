@@ -526,32 +526,5 @@
         "name": "Javasolt beállítások"
       }
     }
-  },
-  "card": {
-    "washer_program": "Mosó program",
-    "program_placeholder": "Válassza a Program lehetőséget",
-    "duration": "Időtartam",
-    "minutes": "min",
-    "time_remaining": "Hátralévő idő",
-    "no_prediction": "Nincs előrejelzés",
-    "cycle_in_progress": "Ciklus folyamatban",
-    "status": "Állapot",
-    "progress": "Előrehalad",
-    "select_program": "Válasszon ki egy programot a részletek megtekintéséhez",
-    "title": "Cím",
-    "status_entity": "Állapot entitás",
-    "icon": "Ikon",
-    "active_color": "Aktív Ikon színe",
-    "show_state": "Állapot megjelenítése",
-    "show_program": "Program megjelenítése",
-    "show_details": "Részletek megjelenítése",
-    "spin_icon": "Pörgő ikon (futás közben)",
-    "program_entity": "Program entitás",
-    "pct_entity": "Haladási entitás (opcionális)",
-    "time_entity": "Idő entitás (opcionális)",
-    "display_mode": "Kijelző mód",
-    "show_time_remaining": "Mutasd a hátralévő időt",
-    "show_percentage": "Százalék megjelenítése",
-    "entity_not_found": "Az entitás nem található"
   }
 }

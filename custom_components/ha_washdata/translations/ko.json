@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "세탁기 프로그램",
-    "program_placeholder": "프로그램 선택",
-    "duration": "지속",
-    "minutes": "분",
-    "time_remaining": "남은 시간",
-    "no_prediction": "예측 없음",
-    "cycle_in_progress": "사이클 진행 중",
-    "status": "상태",
-    "progress": "진전",
-    "select_program": "세부정보를 보려면 프로그램을 선택하세요.",
-    "title": "제목",
-    "status_entity": "상태 엔터티",
-    "icon": "상",
-    "active_color": "활성 아이콘 색상",
-    "show_state": "상태 표시",
-    "show_program": "쇼 프로그램",
-    "show_details": "세부정보 표시",
-    "spin_icon": "회전 아이콘(실행 중)",
-    "program_entity": "프로그램 엔터티",
-    "pct_entity": "진행 엔터티(선택 사항)",
-    "time_entity": "시간 엔터티(선택 사항)",
-    "display_mode": "디스플레이 모드",
-    "show_time_remaining": "남은 시간 표시",
-    "show_percentage": "백분율 표시",
-    "entity_not_found": "엔터티를 찾을 수 없습니다."
   }
 }

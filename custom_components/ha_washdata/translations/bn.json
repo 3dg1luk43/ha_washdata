@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "ওয়াশার প্রোগ্রাম",
-    "program_placeholder": "প্রোগ্রাম নির্বাচন করুন",
-    "duration": "সময়কাল",
-    "minutes": "মিনিট",
-    "time_remaining": "বাকি সময়",
-    "no_prediction": "কোন ভবিষ্যদ্বাণী নেই",
-    "cycle_in_progress": "সাইকেল চলছে",
-    "status": "স্ট্যাটাস",
-    "progress": "অগ্রগতি",
-    "select_program": "বিস্তারিত দেখতে একটি প্রোগ্রাম নির্বাচন করুন",
-    "title": "শিরোনাম",
-    "status_entity": "স্থিতি সত্তা",
-    "icon": "আইকন",
-    "active_color": "সক্রিয় আইকন রঙ",
-    "show_state": "রাজ্য দেখান",
-    "show_program": "প্রোগ্রাম দেখান",
-    "show_details": "বিস্তারিত দেখান",
-    "spin_icon": "স্পিনিং আইকন (চালানোর সময়)",
-    "program_entity": "প্রোগ্রাম সত্তা",
-    "pct_entity": "অগ্রগতি সত্তা (ঐচ্ছিক)",
-    "time_entity": "সময়ের সত্তা (ঐচ্ছিক)",
-    "display_mode": "প্রদর্শন মোড",
-    "show_time_remaining": "অবশিষ্ট সময় দেখান",
-    "show_percentage": "শতাংশ দেখান",
-    "entity_not_found": "সত্তা খুঁজে পাওয়া যায়নি"
   }
 }

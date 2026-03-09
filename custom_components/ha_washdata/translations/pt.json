@@ -526,32 +526,5 @@
         "name": "Configurações sugeridas"
       }
     }
-  },
-  "card": {
-    "washer_program": "Programa de lavadora",
-    "program_placeholder": "Selecione o programa",
-    "duration": "Duração",
-    "minutes": "min",
-    "time_remaining": "Tempo restante",
-    "no_prediction": "Sem previsão",
-    "cycle_in_progress": "Ciclo em andamento",
-    "status": "Status",
-    "progress": "Progresso",
-    "select_program": "Selecione um programa para ver detalhes",
-    "title": "Título",
-    "status_entity": "Entidade de status",
-    "icon": "Ícone",
-    "active_color": "Cor do ícone ativo",
-    "show_state": "Mostrar estado",
-    "show_program": "Mostrar programa",
-    "show_details": "Mostrar detalhes",
-    "spin_icon": "Ícone giratório (durante a execução)",
-    "program_entity": "Entidade do Programa",
-    "pct_entity": "Entidade de progresso (opcional)",
-    "time_entity": "Entidade de tempo (opcional)",
-    "display_mode": "Modo de exibição",
-    "show_time_remaining": "Mostrar tempo restante",
-    "show_percentage": "Mostrar porcentagem",
-    "entity_not_found": "Entidade não encontrada"
   }
 }

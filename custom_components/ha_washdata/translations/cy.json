@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Rhaglen Wasier",
-    "program_placeholder": "Dewiswch Rhaglen",
-    "duration": "Hyd",
-    "minutes": "min",
-    "time_remaining": "Amser yn weddill",
-    "no_prediction": "Dim Rhagfynegiad",
-    "cycle_in_progress": "Cylch ar y gweill",
-    "status": "Statws",
-    "progress": "Cynnydd",
-    "select_program": "Dewiswch raglen i weld y manylion",
-    "title": "Teitl",
-    "status_entity": "Endid Statws",
-    "icon": "Eicon",
-    "active_color": "Lliw Eicon Actif",
-    "show_state": "Dangos Cyflwr",
-    "show_program": "Rhaglen Sioe",
-    "show_details": "Dangos Manylion",
-    "spin_icon": "Eicon Troelli (Wrth redeg)",
-    "program_entity": "Endid Rhaglen",
-    "pct_entity": "Endid Cynnydd (Dewisol)",
-    "time_entity": "Endid Amser (Dewisol)",
-    "display_mode": "Modd Arddangos",
-    "show_time_remaining": "Dangos Amser ar ôl",
-    "show_percentage": "Dangos Canran",
-    "entity_not_found": "Endid heb ei ganfod"
   }
 }

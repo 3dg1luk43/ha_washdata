@@ -5,15 +5,18 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.3] - 2026-03-08
+## [0.4.3] - 2026-03-09
 
 ### ✨ Features
 - **New Device Types**: Added full support for **Air Fryer** (#133) and **Heat Pump** (#134), with optimized defaults and custom icons (`mdi:pot-steam`, `mdi:heat-pump`).
+- **Anti-Wrinkle Mode**: Added a dedicated anti-wrinkle state for dryers and washer-dryer combos, including state transitions and shielding (#68).
 - **Slovak Localization**: Full support for Slovak language in the integration, diagnostics, and frontend card (#156).
 - **Card Customization**: Added new dashboard card settings including specialized toggles for `Spinning Icon`, `Show State`, `Show Program`, and `Show Details`.
 - **Automated Translation Sync**: Enhanced `translate.py` to automatically update the frontend card's `TRANSLATIONS` object from language files, providing out-of-the-box localization for all 27+ supported languages.
 - **Inverted External Trigger**: Added a new setting to invert the logic of the external cycle end trigger. Users can now choose to complete a cycle when an external binary sensor turns OFF instead of ON.
 - **Randomized Cache Buster**: The dashboard card now uses a timestamp-based cache buster that refreshes every time the integration is loaded, ensuring immediate updates without browser cache clearance.
+- **Action-Based Notifications**: Added notification actions with priority dispatch and fallback routing (actions → notify service → persistent notification).
+- **Presence-Gated Notifications**: Optional home/away gating to defer notifications until a tracked person is home.
 
 ### 🛠️ Improvements
 - **Unified Time Handling**: Refactored the core engine to use a single canonical offset-based time format for storage. Includes automatic migration of legacy data to prevent corruption and fixes "offset-naive/offset-aware" comparison bugs (#144).
@@ -23,12 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Sub-State Extraction**: The dashboard card now intelligently extracts and displays the specific phase from the state (e.g., showing "Rinsing" instead of "Running (Rinsing)") for a cleaner UI experience.
 - **History Timeline Restoration**: Restored categorical history diagrams for State and Program sensors by implementing the `enum` device class (#157).
 - **Localized Menus**: Updated configuration flow to use `SelectSelector`, enabling natively localized menu options across all supported languages.
+- **Notification Event Toggle**: Added `notify_fire_events` option to control emission of cycle start/end events.
+- **Migration Normalization**: Added migration helper defaults for new notification options to ensure deterministic upgrades.
 - **Ultra-Long Cycle Support**: Significantly improved handling for modern high-efficiency dishwashers with cycles exceeding 230 minutes.
   - Increased `DEFAULT_MAX_DEFERRAL_SECONDS` to 4 hours to prevent long silent Eco drying phases from being cut off.
   - Extended dishwasher-specific `NO_UPDATE_ACTIVE_TIMEOUT` to 4 hours.
   - Increased the default dishwasher `MIN_OFF_GAP` to 1 hour to prevent fragmentation when no profile is matched.
 - **Robust Zombie Killer**: Refined the "Zombie Killer" hard-limit to be more lenient, now triggering at 300% of expected duration (previously 200%) and requiring at least 4 hours of runtime. This prevents premature termination of long-running appliances while still protecting against runaway ghost cycles.
 - **Device-Aware Suggestions**: The `SuggestionEngine` is now aware of the configured device type and uses device-specific safety floors for `off_delay` recommendations, preventing it from suggesting dangerously short timeouts for dishwashers.
+- **Translation Tool Docs**: Added documentation for the Home Assistant integration translation helper script.
 
 ### 🐛 Bug Fixes
 - **Manual Recording Revert (#151)**: Fixed an issue where manual recordings could unexpectedly revert configuration changes.

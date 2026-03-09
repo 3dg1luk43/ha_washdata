@@ -526,32 +526,5 @@
         "name": "Paramètres suggérés"
       }
     }
-  },
-  "card": {
-    "washer_program": "Programme de laveuse",
-    "program_placeholder": "Sélectionnez le programme",
-    "duration": "Durée",
-    "minutes": "min",
-    "time_remaining": "Temps restant",
-    "no_prediction": "Aucune prédiction",
-    "cycle_in_progress": "Cycle en cours",
-    "status": "Statut",
-    "progress": "Progrès",
-    "select_program": "Sélectionnez un programme pour voir les détails",
-    "title": "Titre",
-    "status_entity": "Entité de statut",
-    "icon": "Icône",
-    "active_color": "Couleur de l'icône active",
-    "show_state": "Afficher l'état",
-    "show_program": "Programme du spectacle",
-    "show_details": "Afficher les détails",
-    "spin_icon": "Icône de rotation (pendant l'exécution)",
-    "program_entity": "Entité du programme",
-    "pct_entity": "Entité de progression (facultatif)",
-    "time_entity": "Entité temporelle (facultatif)",
-    "display_mode": "Mode d'affichage",
-    "show_time_remaining": "Afficher le temps restant",
-    "show_percentage": "Afficher le pourcentage",
-    "entity_not_found": "Entité introuvable"
   }
 }

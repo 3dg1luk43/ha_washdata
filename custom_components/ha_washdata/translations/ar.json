@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "برنامج الغساله",
-    "program_placeholder": "حدد البرنامج",
-    "duration": "مدة",
-    "minutes": "دقيقة",
-    "time_remaining": "الوقت المتبقي",
-    "no_prediction": "لا التنبؤ",
-    "cycle_in_progress": "الدورة قيد التقدم",
-    "status": "حالة",
-    "progress": "تقدم",
-    "select_program": "حدد برنامجًا لمعرفة التفاصيل",
-    "title": "عنوان",
-    "status_entity": "كيان الحالة",
-    "icon": "رمز",
-    "active_color": "لون الرمز النشط",
-    "show_state": "عرض الدولة",
-    "show_program": "عرض البرنامج",
-    "show_details": "إظهار التفاصيل",
-    "spin_icon": "أيقونة الدوران (أثناء التشغيل)",
-    "program_entity": "كيان البرنامج",
-    "pct_entity": "كيان التقدم (اختياري)",
-    "time_entity": "الكيان الزمني (اختياري)",
-    "display_mode": "وضع العرض",
-    "show_time_remaining": "عرض الوقت المتبقي",
-    "show_percentage": "إظهار النسبة المئوية",
-    "entity_not_found": "لم يتم العثور على الكيان"
   }
 }

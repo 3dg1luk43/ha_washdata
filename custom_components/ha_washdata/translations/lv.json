@@ -526,32 +526,5 @@
         "name": "Ieteiktie iestatījumi"
       }
     }
-  },
-  "card": {
-    "washer_program": "Mazgāšanas programma",
-    "program_placeholder": "Atlasiet Programma",
-    "duration": "Ilgums",
-    "minutes": "min",
-    "time_remaining": "Atlikušais laiks",
-    "no_prediction": "Nav prognožu",
-    "cycle_in_progress": "Notiek cikls",
-    "status": "Statuss",
-    "progress": "Progress",
-    "select_program": "Izvēlieties programmu, lai skatītu detalizētu informāciju",
-    "title": "Nosaukums",
-    "status_entity": "Statusa entītija",
-    "icon": "Ikona",
-    "active_color": "Aktīvās ikonas krāsa",
-    "show_state": "Rādīt stāvokli",
-    "show_program": "Rādīt programmu",
-    "show_details": "Rādīt detaļas",
-    "spin_icon": "Griešanās ikona (skrienot)",
-    "program_entity": "Programmas entītija",
-    "pct_entity": "Progresa entītija (neobligāti)",
-    "time_entity": "Laika entītija (neobligāti)",
-    "display_mode": "Displeja režīms",
-    "show_time_remaining": "Rādīt atlikušo laiku",
-    "show_percentage": "Rādīt procentus",
-    "entity_not_found": "Entītija nav atrasta"
   }
 }

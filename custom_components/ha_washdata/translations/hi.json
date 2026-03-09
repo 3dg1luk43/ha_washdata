@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "वॉशर कार्यक्रम",
-    "program_placeholder": "प्रोग्राम चुनें",
-    "duration": "अवधि",
-    "minutes": "मिन",
-    "time_remaining": "शेष समय",
-    "no_prediction": "कोई भविष्यवाणी नहीं",
-    "cycle_in_progress": "चक्र चल रहा है",
-    "status": "स्थिति",
-    "progress": "प्रगति",
-    "select_program": "विवरण देखने के लिए किसी प्रोग्राम का चयन करें",
-    "title": "शीर्षक",
-    "status_entity": "स्थिति इकाई",
-    "icon": "आइकन",
-    "active_color": "सक्रिय चिह्न रंग",
-    "show_state": "राज्य दिखाएँ",
-    "show_program": "कार्यक्रम दिखाएँ",
-    "show_details": "प्रदर्शन का विवरण",
-    "spin_icon": "घूमता हुआ चिह्न (दौड़ते समय)",
-    "program_entity": "कार्यक्रम इकाई",
-    "pct_entity": "प्रगति इकाई (वैकल्पिक)",
-    "time_entity": "समय इकाई (वैकल्पिक)",
-    "display_mode": "प्रदर्शन मोड",
-    "show_time_remaining": "शेष समय दिखाएँ",
-    "show_percentage": "प्रतिशत दिखाएँ",
-    "entity_not_found": "इकाई नहीं मिली"
   }
 }

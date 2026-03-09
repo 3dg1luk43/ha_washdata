@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "برنامه شستشو",
-    "program_placeholder": "برنامه را انتخاب کنید",
-    "duration": "مدت زمان",
-    "minutes": "دقیقه",
-    "time_remaining": "زمان باقی مانده",
-    "no_prediction": "بدون پیش بینی",
-    "cycle_in_progress": "چرخه در حال انجام است",
-    "status": "وضعیت",
-    "progress": "پیشرفت",
-    "select_program": "یک برنامه را برای دیدن جزئیات انتخاب کنید",
-    "title": "عنوان",
-    "status_entity": "موجودیت وضعیت",
-    "icon": "نماد",
-    "active_color": "رنگ نماد فعال",
-    "show_state": "نمایش وضعیت",
-    "show_program": "نمایش برنامه",
-    "show_details": "نمایش جزئیات",
-    "spin_icon": "نماد چرخان (هنگام اجرا)",
-    "program_entity": "موجودیت برنامه",
-    "pct_entity": "موجودیت پیشرفت (اختیاری)",
-    "time_entity": "موجودیت زمان (اختیاری)",
-    "display_mode": "حالت نمایش",
-    "show_time_remaining": "نمایش زمان باقی مانده",
-    "show_percentage": "نمایش درصد",
-    "entity_not_found": "موجودیت یافت نشد"
   }
 }

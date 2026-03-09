@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Programa de rentadora",
-    "program_placeholder": "Seleccioneu Programa",
-    "duration": "Durada",
-    "minutes": "min",
-    "time_remaining": "Temps restant",
-    "no_prediction": "Sense predicció",
-    "cycle_in_progress": "Cicle en curs",
-    "status": "Estat",
-    "progress": "Progrés",
-    "select_program": "Seleccioneu un programa per veure'n els detalls",
-    "title": "Títol",
-    "status_entity": "Entitat d'estat",
-    "icon": "Icona",
-    "active_color": "Color de la icona activa",
-    "show_state": "Mostra l'estat",
-    "show_program": "Programa Mostra",
-    "show_details": "Mostra els detalls",
-    "spin_icon": "Icona de gir (mentre corre)",
-    "program_entity": "Entitat del programa",
-    "pct_entity": "Entitat de progrés (opcional)",
-    "time_entity": "Entitat temporal (opcional)",
-    "display_mode": "Mode de visualització",
-    "show_time_remaining": "Mostra el temps restant",
-    "show_percentage": "Mostra el percentatge",
-    "entity_not_found": "No s'ha trobat l'entitat"
   }
 }

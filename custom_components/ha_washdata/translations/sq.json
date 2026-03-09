@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Programi i larës",
-    "program_placeholder": "Zgjidhni Programin",
-    "duration": "Kohëzgjatja",
-    "minutes": "min",
-    "time_remaining": "Koha e mbetur",
-    "no_prediction": "Asnjë Parashikim",
-    "cycle_in_progress": "Cikli në vazhdim",
-    "status": "Statusi",
-    "progress": "Përparim",
-    "select_program": "Zgjidhni një program për të parë detajet",
-    "title": "Titulli",
-    "status_entity": "Entiteti i statusit",
-    "icon": "Ikona",
-    "active_color": "Ngjyra e ikonës aktive",
-    "show_state": "Trego shtetin",
-    "show_program": "Shfaq programin",
-    "show_details": "Shfaq Detajet",
-    "spin_icon": "Ikona rrotulluese (Gjatë funksionimit)",
-    "program_entity": "Subjekti i programit",
-    "pct_entity": "Entiteti i progresit (opsionale)",
-    "time_entity": "Entiteti i kohës (opsionale)",
-    "display_mode": "Modaliteti i shfaqjes",
-    "show_time_remaining": "Shfaq kohën e mbetur",
-    "show_percentage": "Shfaq përqindjen",
-    "entity_not_found": "Subjekti nuk u gjet"
   }
 }

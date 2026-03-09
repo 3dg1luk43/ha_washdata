@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Waschprogramm",
-    "program_placeholder": "Wählen Sie Programm",
-    "duration": "Dauer",
-    "minutes": "min",
-    "time_remaining": "Verbleibende Zeit",
-    "no_prediction": "Keine Vorhersage",
-    "cycle_in_progress": "Zyklus läuft",
-    "status": "Status",
-    "progress": "Fortschritt",
-    "select_program": "Wählen Sie ein Programm aus, um Details anzuzeigen",
-    "title": "Titel",
-    "status_entity": "Status-Entität",
-    "icon": "Symbol",
-    "active_color": "Aktive Symbolfarbe",
-    "show_state": "Status anzeigen",
-    "show_program": "Programm anzeigen",
-    "show_details": "Details anzeigen",
-    "spin_icon": "Spinning-Symbol (während des Laufens)",
-    "program_entity": "Programmeinheit",
-    "pct_entity": "Fortschrittsentität (optional)",
-    "time_entity": "Zeiteinheit (optional)",
-    "display_mode": "Anzeigemodus",
-    "show_time_remaining": "Verbleibende Zeit anzeigen",
-    "show_percentage": "Prozentsatz anzeigen",
-    "entity_not_found": "Entität nicht gefunden"
   }
 }

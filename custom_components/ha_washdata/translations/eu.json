@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Garbigailuen programa",
-    "program_placeholder": "Hautatu Programa",
-    "duration": "Iraupena",
-    "minutes": "min",
-    "time_remaining": "Gelditzen den denbora",
-    "no_prediction": "Iragarpenik ez",
-    "cycle_in_progress": "Zikloa martxan",
-    "status": "Egoera",
-    "progress": "Aurrerapena",
-    "select_program": "Hautatu programa bat xehetasunak ikusteko",
-    "title": "Izenburua",
-    "status_entity": "Egoera Entitatea",
-    "icon": "Ikonoa",
-    "active_color": "Ikono aktiboaren kolorea",
-    "show_state": "Erakutsi egoera",
-    "show_program": "Erakutsi programa",
-    "show_details": "Erakutsi xehetasunak",
-    "spin_icon": "Biratzen ari den ikonoa (exekutatzen ari zaren bitartean)",
-    "program_entity": "Programa Entitatea",
-    "pct_entity": "Aurrerapen-entitatea (aukerakoa)",
-    "time_entity": "Denbora-entitatea (aukerakoa)",
-    "display_mode": "Bistaratzeko modua",
-    "show_time_remaining": "Erakutsi falta den denbora",
-    "show_percentage": "Erakutsi ehunekoa",
-    "entity_not_found": "Ez da aurkitu entitatea"
   }
 }

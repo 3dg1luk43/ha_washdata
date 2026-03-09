@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Program za pranje",
-    "program_placeholder": "Odaberite Program",
-    "duration": "Trajanje",
-    "minutes": "min",
-    "time_remaining": "Preostalo vrijeme",
-    "no_prediction": "Nema predviđanja",
-    "cycle_in_progress": "Ciklus je u toku",
-    "status": "Status",
-    "progress": "Napredak",
-    "select_program": "Odaberite program da vidite detalje",
-    "title": "Naslov",
-    "status_entity": "Status Entiteta",
-    "icon": "Ikona",
-    "active_color": "Aktivna boja ikone",
-    "show_state": "Prikaži državu",
-    "show_program": "Show Program",
-    "show_details": "Prikaži detalje",
-    "spin_icon": "Ikona za okretanje (dok trčanje)",
-    "program_entity": "Programski entitet",
-    "pct_entity": "Entitet napretka (opciono)",
-    "time_entity": "Vremenski entitet (opcionalno)",
-    "display_mode": "Način prikaza",
-    "show_time_remaining": "Prikaži preostalo vrijeme",
-    "show_percentage": "Prikaži procenat",
-    "entity_not_found": "Entitet nije pronađen"
   }
 }

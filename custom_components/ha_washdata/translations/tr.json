@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Yıkama Programı",
-    "program_placeholder": "Program Seç",
-    "duration": "Süre",
-    "minutes": "dk.",
-    "time_remaining": "Kalan Süre",
-    "no_prediction": "Tahmin Yok",
-    "cycle_in_progress": "Döngü devam ediyor",
-    "status": "Durum",
-    "progress": "İlerlemek",
-    "select_program": "Ayrıntıları görmek için bir program seçin",
-    "title": "Başlık",
-    "status_entity": "Durum Varlığı",
-    "icon": "Simge",
-    "active_color": "Etkin Simge Rengi",
-    "show_state": "Durumu Göster",
-    "show_program": "Programı Göster",
-    "show_details": "Ayrıntıları Göster",
-    "spin_icon": "Dönen Simge (Koşarken)",
-    "program_entity": "Program Varlığı",
-    "pct_entity": "İlerleme Varlığı (İsteğe bağlı)",
-    "time_entity": "Zaman Varlığı (İsteğe bağlı)",
-    "display_mode": "Ekran Modu",
-    "show_time_remaining": "Kalan Süreyi Göster",
-    "show_percentage": "Yüzdeyi Göster",
-    "entity_not_found": "Varlık bulunamadı"
   }
 }

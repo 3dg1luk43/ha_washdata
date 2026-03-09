@@ -526,32 +526,5 @@
         "name": "Voorgestelde instellingen"
       }
     }
-  },
-  "card": {
-    "washer_program": "Wasprogramma",
-    "program_placeholder": "Selecteer Programma",
-    "duration": "Duur",
-    "minutes": "min",
-    "time_remaining": "Resterende tijd",
-    "no_prediction": "Geen voorspelling",
-    "cycle_in_progress": "Cyclus in uitvoering",
-    "status": "Status",
-    "progress": "Voortgang",
-    "select_program": "Selecteer een programma om details te bekijken",
-    "title": "Titel",
-    "status_entity": "Statusentiteit",
-    "icon": "Icon",
-    "active_color": "Actieve pictogramkleur",
-    "show_state": "Toon staat",
-    "show_program": "Programma tonen",
-    "show_details": "Details tonen",
-    "spin_icon": "Draaiend pictogram (tijdens hardlopen)",
-    "program_entity": "Programma-entiteit",
-    "pct_entity": "Voortgangsentiteit (optioneel)",
-    "time_entity": "Tijdsentiteit (optioneel)",
-    "display_mode": "Weergavemodus",
-    "show_time_remaining": "Resterende tijd weergeven",
-    "show_percentage": "Percentage weergeven",
-    "entity_not_found": "Entiteit niet gevonden"
   }
 }

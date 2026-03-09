@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "వాషర్ ప్రోగ్రామ్",
-    "program_placeholder": "ప్రోగ్రామ్‌ని ఎంచుకోండి",
-    "duration": "వ్యవధి",
-    "minutes": "నిమి",
-    "time_remaining": "సమయం మిగిలి ఉంది",
-    "no_prediction": "అంచనా లేదు",
-    "cycle_in_progress": "చక్రం పురోగతిలో ఉంది",
-    "status": "స్థితి",
-    "progress": "పురోగతి",
-    "select_program": "వివరాలను చూడటానికి ప్రోగ్రామ్‌ను ఎంచుకోండి",
-    "title": "శీర్షిక",
-    "status_entity": "స్టేటస్ ఎంటిటీ",
-    "icon": "చిహ్నం",
-    "active_color": "సక్రియ చిహ్నం రంగు",
-    "show_state": "రాష్ట్రాన్ని చూపించు",
-    "show_program": "కార్యక్రమం చూపించు",
-    "show_details": "వివరాలను చూపించు",
-    "spin_icon": "స్పిన్నింగ్ ఐకాన్ (నడుస్తున్నప్పుడు)",
-    "program_entity": "ప్రోగ్రామ్ ఎంటిటీ",
-    "pct_entity": "ప్రోగ్రెస్ ఎంటిటీ (ఐచ్ఛికం)",
-    "time_entity": "టైమ్ ఎంటిటీ (ఐచ్ఛికం)",
-    "display_mode": "ప్రదర్శన మోడ్",
-    "show_time_remaining": "మిగిలిన సమయాన్ని చూపించు",
-    "show_percentage": "శాతాన్ని చూపించు",
-    "entity_not_found": "ఎంటిటీ కనుగొనబడలేదు"
   }
 }

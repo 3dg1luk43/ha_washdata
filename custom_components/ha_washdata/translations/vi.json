@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Chương trình máy giặt",
-    "program_placeholder": "Chọn chương trình",
-    "duration": "Khoảng thời gian",
-    "minutes": "phút",
-    "time_remaining": "Thời gian còn lại",
-    "no_prediction": "Không có dự đoán",
-    "cycle_in_progress": "Đang tiến hành chu kỳ",
-    "status": "Trạng thái",
-    "progress": "Tiến triển",
-    "select_program": "Chọn chương trình để xem chi tiết",
-    "title": "Tiêu đề",
-    "status_entity": "Thực thể trạng thái",
-    "icon": "Biểu tượng",
-    "active_color": "Màu biểu tượng hoạt động",
-    "show_state": "Hiển thị trạng thái",
-    "show_program": "Hiển thị chương trình",
-    "show_details": "Hiển thị chi tiết",
-    "spin_icon": "Biểu tượng quay (Trong khi chạy)",
-    "program_entity": "Thực thể chương trình",
-    "pct_entity": "Thực thể tiến độ (Tùy chọn)",
-    "time_entity": "Thực thể thời gian (Tùy chọn)",
-    "display_mode": "Chế độ hiển thị",
-    "show_time_remaining": "Hiển thị thời gian còn lại",
-    "show_percentage": "Hiển thị phần trăm",
-    "entity_not_found": "Không tìm thấy thực thể"
   }
 }

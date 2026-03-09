@@ -526,32 +526,5 @@
         "name": "Ehdotetut asetukset"
       }
     }
-  },
-  "card": {
-    "washer_program": "Pesuohjelma",
-    "program_placeholder": "Valitse Ohjelma",
-    "duration": "Kesto",
-    "minutes": "min",
-    "time_remaining": "Aikaa jäljellä",
-    "no_prediction": "Ei ennustetta",
-    "cycle_in_progress": "Kierto käynnissä",
-    "status": "Status",
-    "progress": "Edistyminen",
-    "select_program": "Valitse ohjelma nähdäksesi tiedot",
-    "title": "Otsikko",
-    "status_entity": "Status Entity",
-    "icon": "Kuvake",
-    "active_color": "Aktiivinen kuvakkeen väri",
-    "show_state": "Näytä tila",
-    "show_program": "Näytä ohjelma",
-    "show_details": "Näytä tiedot",
-    "spin_icon": "Pyörivä kuvake (juoksessa)",
-    "program_entity": "Ohjelmakokonaisuus",
-    "pct_entity": "Etenemiskokonaisuus (valinnainen)",
-    "time_entity": "Aikakokonaisuus (valinnainen)",
-    "display_mode": "Näyttötila",
-    "show_time_remaining": "Näytä jäljellä oleva aika",
-    "show_percentage": "Näytä prosenttiosuus",
-    "entity_not_found": "Kokonaisuutta ei löydy"
   }
 }
