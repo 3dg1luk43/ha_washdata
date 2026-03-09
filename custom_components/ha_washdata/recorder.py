@@ -21,7 +21,6 @@ _LOGGER = logging.getLogger(__name__)
 STORAGE_KEY_RECORDER = f"{STORAGE_KEY}.recorder"
 
 
-
 class RecorderStore(Store):
     """Store for recorder data with migration support."""
 
