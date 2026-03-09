@@ -526,32 +526,5 @@
         "name": "建议设置"
       }
     }
-  },
-  "card": {
-    "washer_program": "清洗程序",
-    "program_placeholder": "选择节目",
-    "duration": "期间",
-    "minutes": "分钟",
-    "time_remaining": "剩余时间",
-    "no_prediction": "没有预测",
-    "cycle_in_progress": "循环正在进行中",
-    "status": "地位",
-    "progress": "进步",
-    "select_program": "选择一个程序以查看详细信息",
-    "title": "标题",
-    "status_entity": "状态实体",
-    "icon": "图标",
-    "active_color": "活动图标颜色",
-    "show_state": "显示状态",
-    "show_program": "演出节目",
-    "show_details": "显示详情",
-    "spin_icon": "旋转图标（运行时）",
-    "program_entity": "程序实体",
-    "pct_entity": "进度实体（可选）",
-    "time_entity": "时间实体（可选）",
-    "display_mode": "显示模式",
-    "show_time_remaining": "显示剩余时间",
-    "show_percentage": "显示百分比",
-    "entity_not_found": "未找到实体"
   }
 }

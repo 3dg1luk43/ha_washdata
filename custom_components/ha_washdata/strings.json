@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Washer Program",
-    "program_placeholder": "Select Program",
-    "duration": "Duration",
-    "minutes": "min",
-    "time_remaining": "Time Remaining",
-    "no_prediction": "No Prediction",
-    "cycle_in_progress": "Cycle in progress",
-    "status": "Status",
-    "progress": "Progress",
-    "select_program": "Select a program to see details",
-    "title": "Title",
-    "status_entity": "Status Entity",
-    "icon": "Icon",
-    "active_color": "Active Icon Color",
-    "show_state": "Show State",
-    "show_program": "Show Program",
-    "show_details": "Show Details",
-    "spin_icon": "Spinning Icon (While running)",
-    "program_entity": "Program Entity",
-    "pct_entity": "Progress Entity (Optional)",
-    "time_entity": "Time Entity (Optional)",
-    "display_mode": "Display Mode",
-    "show_time_remaining": "Show Time Remaining",
-    "show_percentage": "Show Percentage",
-    "entity_not_found": "Entity not found"
   }
 }

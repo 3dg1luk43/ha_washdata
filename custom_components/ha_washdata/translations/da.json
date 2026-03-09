@@ -496,7 +496,7 @@
         "name": "Program"
       },
       "time_remaining": {
-        "name": "Tid tilbage"
+        "name": "Resterende tid"
       },
       "total_duration": {
         "name": "Samlet varighed"
@@ -526,32 +526,5 @@
         "name": "Foreslåede indstillinger"
       }
     }
-  },
-  "card": {
-    "washer_program": "Vaskeprogram",
-    "program_placeholder": "Vælg Program",
-    "duration": "Varighed",
-    "minutes": "min",
-    "time_remaining": "Tid tilbage",
-    "no_prediction": "Ingen forudsigelse",
-    "cycle_in_progress": "Cyklus i gang",
-    "status": "Status",
-    "progress": "Fremskridt",
-    "select_program": "Vælg et program for at se detaljer",
-    "title": "Titel",
-    "status_entity": "Statusenhed",
-    "icon": "Ikon",
-    "active_color": "Aktiv ikon farve",
-    "show_state": "Vis tilstand",
-    "show_program": "Vis program",
-    "show_details": "Vis detaljer",
-    "spin_icon": "Spinning-ikon (mens du løber)",
-    "program_entity": "Programenhed",
-    "pct_entity": "Fremskridtsenhed (valgfrit)",
-    "time_entity": "Tidsenhed (valgfrit)",
-    "display_mode": "Visningstilstand",
-    "show_time_remaining": "Vis resterende tid",
-    "show_percentage": "Vis procent",
-    "entity_not_found": "Enheden blev ikke fundet"
   }
 }

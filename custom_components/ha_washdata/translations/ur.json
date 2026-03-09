@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "واشر پروگرام",
-    "program_placeholder": "پروگرام منتخب کریں۔",
-    "duration": "دورانیہ",
-    "minutes": "منٹ",
-    "time_remaining": "باقی وقت",
-    "no_prediction": "کوئی پیشین گوئی نہیں۔",
-    "cycle_in_progress": "سائیکل جاری ہے۔",
-    "status": "حیثیت",
-    "progress": "پیش رفت",
-    "select_program": "تفصیلات دیکھنے کے لیے ایک پروگرام منتخب کریں۔",
-    "title": "عنوان",
-    "status_entity": "اسٹیٹس ہستی",
-    "icon": "آئیکن",
-    "active_color": "ایکٹو آئیکن کا رنگ",
-    "show_state": "ریاست دکھائیں۔",
-    "show_program": "پروگرام دکھائیں۔",
-    "show_details": "تفصیلات دکھائیں۔",
-    "spin_icon": "گھومنے کا آئیکن (چلتے وقت)",
-    "program_entity": "پروگرام ہستی",
-    "pct_entity": "پیش رفت ہستی (اختیاری)",
-    "time_entity": "وقت کی ہستی (اختیاری)",
-    "display_mode": "ڈسپلے موڈ",
-    "show_time_remaining": "باقی وقت دکھائیں۔",
-    "show_percentage": "فیصد دکھائیں۔",
-    "entity_not_found": "ہستی نہیں ملی"
   }
 }

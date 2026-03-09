@@ -526,32 +526,5 @@
         "name": "Foreslåtte innstillinger"
       }
     }
-  },
-  "card": {
-    "washer_program": "Vaskeprogram",
-    "program_placeholder": "Velg Program",
-    "duration": "Varighet",
-    "minutes": "min",
-    "time_remaining": "Gjenstående tid",
-    "no_prediction": "Ingen prediksjon",
-    "cycle_in_progress": "Syklus pågår",
-    "status": "Status",
-    "progress": "Framgang",
-    "select_program": "Velg et program for å se detaljer",
-    "title": "Tittel",
-    "status_entity": "Status Entitet",
-    "icon": "Ikon",
-    "active_color": "Aktiv ikonfarge",
-    "show_state": "Vis tilstand",
-    "show_program": "Vis program",
-    "show_details": "Vis detaljer",
-    "spin_icon": "Spinning-ikon (mens du løper)",
-    "program_entity": "Program Entitet",
-    "pct_entity": "Fremdriftsenhet (valgfritt)",
-    "time_entity": "Tidsenhet (valgfritt)",
-    "display_mode": "Visningsmodus",
-    "show_time_remaining": "Vis gjenværende tid",
-    "show_percentage": "Vis prosentandel",
-    "entity_not_found": "Enheten ble ikke funnet"
   }
 }

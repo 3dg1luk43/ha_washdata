@@ -526,32 +526,5 @@
         "name": "Пропоновані налаштування"
       }
     }
-  },
-  "card": {
-    "washer_program": "Програма прання",
-    "program_placeholder": "Виберіть програму",
-    "duration": "Тривалість",
-    "minutes": "хв",
-    "time_remaining": "Час, що залишився",
-    "no_prediction": "Без передбачення",
-    "cycle_in_progress": "Цикл триває",
-    "status": "Статус",
-    "progress": "Прогрес",
-    "select_program": "Виберіть програму, щоб переглянути деталі",
-    "title": "Назва",
-    "status_entity": "Status Entity",
-    "icon": "значок",
-    "active_color": "Активний колір значка",
-    "show_state": "Показати стан",
-    "show_program": "Шоу програма",
-    "show_details": "Показати деталі",
-    "spin_icon": "Піктограма обертання (під час бігу)",
-    "program_entity": "Сутність програми",
-    "pct_entity": "Сутність прогресу (необов'язково)",
-    "time_entity": "Сутність часу (необов'язково)",
-    "display_mode": "Режим відображення",
-    "show_time_remaining": "Показати час, що залишився",
-    "show_percentage": "Показати відсоток",
-    "entity_not_found": "Об'єкт не знайдено"
   }
 }

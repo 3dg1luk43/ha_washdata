@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "სარეცხი პროგრამა",
-    "program_placeholder": "აირჩიეთ პროგრამა",
-    "duration": "ხანგრძლივობა",
-    "minutes": "წთ",
-    "time_remaining": "დარჩენილი დრო",
-    "no_prediction": "არანაირი პროგნოზი",
-    "cycle_in_progress": "ციკლი მიმდინარეობს",
-    "status": "სტატუსი",
-    "progress": "პროგრესი",
-    "select_program": "აირჩიეთ პროგრამა დეტალების სანახავად",
-    "title": "სათაური",
-    "status_entity": "სტატუსის ერთეული",
-    "icon": "ხატულა",
-    "active_color": "აქტიური ხატის ფერი",
-    "show_state": "სახელმწიფოს ჩვენება",
-    "show_program": "პროგრამის ჩვენება",
-    "show_details": "დეტალების ჩვენება",
-    "spin_icon": "დაწნული ხატულა (გაშვებისას)",
-    "program_entity": "პროგრამის სუბიექტი",
-    "pct_entity": "პროგრესული ერთეული (არასავალდებულო)",
-    "time_entity": "დროის ერთეული (არასავალდებულო)",
-    "display_mode": "ჩვენების რეჟიმი",
-    "show_time_remaining": "დარჩენილი დროის ჩვენება",
-    "show_percentage": "პროცენტის ჩვენება",
-    "entity_not_found": "ერთეული ვერ მოიძებნა"
   }
 }

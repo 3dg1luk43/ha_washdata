@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Wäschprogramm",
-    "program_placeholder": "Wielt Programm",
-    "duration": "Dauer",
-    "minutes": "min",
-    "time_remaining": "Zäit Rescht",
-    "no_prediction": "Keng Prognose",
-    "cycle_in_progress": "Zyklus amgaang",
-    "status": "Status",
-    "progress": "Fortschrëtt",
-    "select_program": "Wielt e Programm fir Detailer ze gesinn",
-    "title": "Titel",
-    "status_entity": "Status Entitéit",
-    "icon": "Ikon",
-    "active_color": "Aktiv Ikon Faarf",
-    "show_state": "Staat weisen",
-    "show_program": "Show Programm",
-    "show_details": "Show Detailer",
-    "spin_icon": "Spinning Ikon (Wärend Lafen)",
-    "program_entity": "Programm Entitéit",
-    "pct_entity": "Progress Entity (fakultativ)",
-    "time_entity": "Zäit Entitéit (optional)",
-    "display_mode": "Display Modus",
-    "show_time_remaining": "Show Rescht Zäit",
-    "show_percentage": "Show Prozentsaz",
-    "entity_not_found": "Entitéit net fonnt"
   }
 }

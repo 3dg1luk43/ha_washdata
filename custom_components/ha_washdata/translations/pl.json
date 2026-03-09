@@ -526,32 +526,5 @@
         "name": "Sugerowane ustawienia"
       }
     }
-  },
-  "card": {
-    "washer_program": "Program prania",
-    "program_placeholder": "Wybierz Program",
-    "duration": "Czas trwania",
-    "minutes": "min",
-    "time_remaining": "Pozostały czas",
-    "no_prediction": "Brak przewidywania",
-    "cycle_in_progress": "Cykl w toku",
-    "status": "Status",
-    "progress": "Postęp",
-    "select_program": "Wybierz program, aby zobaczyć szczegóły",
-    "title": "Tytuł",
-    "status_entity": "Jednostka statusowa",
-    "icon": "Ikona",
-    "active_color": "Aktywny kolor ikony",
-    "show_state": "Pokaż stan",
-    "show_program": "Pokaż program",
-    "show_details": "Pokaż szczegóły",
-    "spin_icon": "Ikona obracania się (podczas biegu)",
-    "program_entity": "Jednostka programu",
-    "pct_entity": "Jednostka postępu (opcjonalnie)",
-    "time_entity": "Jednostka czasu (opcjonalnie)",
-    "display_mode": "Tryb wyświetlania",
-    "show_time_remaining": "Pokaż pozostały czas",
-    "show_percentage": "Pokaż procent",
-    "entity_not_found": "Nie znaleziono elementu"
   }
 }

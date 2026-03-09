@@ -526,32 +526,5 @@
         "name": "推奨される設定"
       }
     }
-  },
-  "card": {
-    "washer_program": "ウォッシャープログラム",
-    "program_placeholder": "プログラムの選択",
-    "duration": "間隔",
-    "minutes": "分",
-    "time_remaining": "残り時間",
-    "no_prediction": "予測なし",
-    "cycle_in_progress": "進行中のサイクル",
-    "status": "状態",
-    "progress": "進捗",
-    "select_program": "プログラムを選択して詳細を表示します",
-    "title": "タイトル",
-    "status_entity": "ステータスエンティティ",
-    "icon": "アイコン",
-    "active_color": "アクティブなアイコンの色",
-    "show_state": "状態を表示",
-    "show_program": "ショープログラム",
-    "show_details": "詳細を表示",
-    "spin_icon": "回転アイコン（走行中）",
-    "program_entity": "プログラムエンティティ",
-    "pct_entity": "進行状況エンティティ (オプション)",
-    "time_entity": "時間エンティティ (オプション)",
-    "display_mode": "表示モード",
-    "show_time_remaining": "残りの上映時間",
-    "show_percentage": "パーセンテージを表示",
-    "entity_not_found": "エンティティが見つかりません"
   }
 }

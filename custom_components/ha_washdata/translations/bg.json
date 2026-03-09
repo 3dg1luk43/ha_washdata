@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Програма за пране",
-    "program_placeholder": "Изберете Програма",
-    "duration": "Продължителност",
-    "minutes": "мин",
-    "time_remaining": "Оставащо време",
-    "no_prediction": "Няма прогноза",
-    "cycle_in_progress": "Цикълът е в ход",
-    "status": "Статус",
-    "progress": "Напредък",
-    "select_program": "Изберете програма, за да видите подробности",
-    "title": "Заглавие",
-    "status_entity": "Състояние на обекта",
-    "icon": "Икона",
-    "active_color": "Цвят на активната икона",
-    "show_state": "Показване на състояние",
-    "show_program": "Шоу програма",
-    "show_details": "Показване на подробности",
-    "spin_icon": "Въртяща се икона (докато работи)",
-    "program_entity": "Програмен субект",
-    "pct_entity": "Обект на напредъка (по избор)",
-    "time_entity": "Времеви обект (по избор)",
-    "display_mode": "Режим на показване",
-    "show_time_remaining": "Показване на оставащото време",
-    "show_percentage": "Показване на процента",
-    "entity_not_found": "Обектът не е намерен"
   }
 }

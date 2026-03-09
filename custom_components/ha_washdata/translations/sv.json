@@ -526,32 +526,5 @@
         "name": "Föreslagna inställningar"
       }
     }
-  },
-  "card": {
-    "washer_program": "Tvättprogram",
-    "program_placeholder": "Välj Program",
-    "duration": "Varaktighet",
-    "minutes": "min",
-    "time_remaining": "Återstående tid",
-    "no_prediction": "Ingen förutsägelse",
-    "cycle_in_progress": "Cykel pågår",
-    "status": "Status",
-    "progress": "Framsteg",
-    "select_program": "Välj ett program för att se detaljer",
-    "title": "Titel",
-    "status_entity": "Status Entitet",
-    "icon": "Ikon",
-    "active_color": "Aktiv ikonfärg",
-    "show_state": "Visa tillstånd",
-    "show_program": "Visa program",
-    "show_details": "Visa detaljer",
-    "spin_icon": "Spinning-ikon (medan du springer)",
-    "program_entity": "Program Entitet",
-    "pct_entity": "Progress Entity (valfritt)",
-    "time_entity": "Tidsenhet (valfritt)",
-    "display_mode": "Visningsläge",
-    "show_time_remaining": "Visa återstående tid",
-    "show_percentage": "Visa procent",
-    "entity_not_found": "Enheten hittades inte"
   }
 }

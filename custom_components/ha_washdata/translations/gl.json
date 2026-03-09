@@ -1,0 +1,530 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configuración de WashData",
+        "description": "Configura a túa lavadora ou outro aparello.\n\nRequírese un sensor de potencia.\n\n**A continuación, preguntarache se queres crear o teu primeiro perfil.**",
+        "data": {
+          "name": "Nome do dispositivo",
+          "device_type": "Tipo de dispositivo",
+          "power_sensor": "Sensor de potencia",
+          "min_power": "Limiar de potencia mínima (W)"
+        },
+        "data_description": {
+          "name": "Un nome sinxelo para este dispositivo (por exemplo, 'Lavadora', 'Lavalouzas').",
+          "device_type": "Que tipo de electrodoméstico é este? Axuda a personalizar a detección e a etiquetaxe.",
+          "power_sensor": "A entidade sensora que informa o consumo de enerxía en tempo real (en vatios) do teu enchufe intelixente.",
+          "min_power": "As lecturas de potencia por riba deste limiar (en vatios) indican que o aparello está funcionando. Comeza con 2 W para a maioría dos dispositivos."
+        }
+      },
+      "first_profile": {
+        "title": "Crear o primeiro perfil",
+        "description": "Un **ciclo** é unha execución completa do teu aparello (por exemplo, unha carga de roupa). Un **Perfil** agrupa estes ciclos por tipo (por exemplo, \"Algodón\", \"Lavado rápido\"). A creación dun perfil agora axuda a estimar a duración da integración inmediatamente.\n\nPodes seleccionar este perfil manualmente nos controis do dispositivo se non se detecta automaticamente.\n\n**Deixe \"Nome do perfil\" en branco para omitir este paso.**",
+        "data": {
+          "profile_name": "Nome do perfil (opcional)",
+          "manual_duration": "Duración estimada (minutos)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Produciuse un erro ao conectar",
+      "invalid_auth": "Autenticación non válida",
+      "unknown": "Erro inesperado"
+    },
+    "abort": {
+      "already_configured": "O dispositivo xa está configurado"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "menu_options": {
+          "learning_feedbacks": "Revisar comentarios de aprendizaxe",
+          "settings": "Configuración",
+          "manage_cycles": "Xestionar Ciclos",
+          "manage_profiles": "Xestionar perfís",
+          "record_cycle": "Ciclo de gravación (manual)",
+          "diagnostics": "Diagnóstico e Mantemento"
+        }
+      },
+      "apply_suggestions": {
+        "title": "Copiar valores suxeridos",
+        "description": "Isto copiará os valores suxeridos actuais na túa configuración gardada. Esta é unha acción única e non activa as sobreescrituras automáticas.\n\nValores suxeridos para copiar:\n{suggested}",
+        "data": {
+          "confirm": "Confirme a acción de copiar"
+        }
+      },
+      "settings": {
+        "title": "Configuración",
+        "description": "Axusta os limiares de detección, a aprendizaxe e o comportamento avanzado. Os valores predeterminados funcionan ben para a maioría das configuracións.",
+        "data": {
+          "apply_suggestions": "Aplicar os valores suxeridos",
+          "device_type": "Tipo de dispositivo",
+          "power_sensor": "Entidade sensor de potencia",
+          "min_power": "Potencia mínima (W)",
+          "off_delay": "Retraso de fin de ciclo (s)",
+          "notify_service": "Servizo de notificacións (por exemplo, notify.mobile_app)",
+          "notify_actions": "Accións de notificación",
+          "notify_people": "Persoas a notificar",
+          "notify_only_when_home": "Notificar só cando estea na casa",
+          "notify_fire_events": "Eventos de automatización de incendios",
+          "notify_events": "Eventos a notificar",
+          "notify_before_end_minutes": "Notificación previa á finalización (minutos antes do final)",
+          "notify_title": "Título da notificación",
+          "notify_icon": "Icona de notificación",
+          "notify_start_message": "Iniciar o formato da mensaxe",
+          "notify_finish_message": "Finalizar o formato da mensaxe",
+          "notify_pre_complete_message": "Formato de mensaxe precompletado",
+          "show_advanced": "Editar configuración avanzada (paso seguinte)"
+        },
+        "data_description": {
+          "apply_suggestions": "Marque esta caixa para copiar os valores suxeridos polo algoritmo de aprendizaxe no formulario. Revisa antes de gardar.\n\nSuxerido (de aprendizaxe):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "device_type": "Seleccione o tipo de electrodoméstico (lavadora, secadora, lavalouzas, cafetera, EV). Esta etiqueta gárdase con cada ciclo para unha mellor organización.",
+          "power_sensor": "A entidade sensora que informa da potencia en tempo real (en vatios). Podes cambiar isto en calquera momento sen perder os datos históricos; é útil se substitúes un enchufe intelixente.",
+          "min_power": "As lecturas de potencia por riba deste limiar (en vatios) indican que o aparello está funcionando. Comeza con 2 W para a maioría dos dispositivos.",
+          "off_delay": "Segundos, a potencia suavizada debe permanecer por debaixo do limiar de parada para marcar a finalización. Predeterminado: 120 s.",
+          "notify_service": "Servizo de notificación de Home Assistant para usar (opcional).",
+          "notify_actions": "Secuencia de acción opcional do Home Assistant para executar as notificacións (scripts, notificación, TTS, etc.). Se se establece, as accións execútanse antes do servizo de notificación alternativa.",
+          "notify_people": "Entidades de persoas para usar para a porta de acceso doméstico/ausente. Cando se activa, as notificacións aprázanse ata que alguén estea na casa.",
+          "notify_only_when_home": "Se está activado, atrasa as notificacións ata que polo menos unha persoa seleccionada estea na casa.",
+          "notify_fire_events": "Se está activado, activa os eventos do Home Assistant para o inicio e o final do ciclo (ha_washdata_cycle_started/ended) para impulsar as automatizacións.",
+          "notify_events": "Para que eventos enviar notificacións.",
+          "notify_before_end_minutes": "Minutos antes do final estimado do ciclo para activar unha notificación. Establécese en 0 para desactivar. Por defecto: 0.",
+          "notify_title": "Título personalizado para notificacións. Admite o marcador de posición {device}.",
+          "notify_icon": "Icona para usar para notificacións (por exemplo, mdi:washing-machine). Deixa en branco para usar o predeterminado.",
+          "notify_start_message": "Mensaxe enviada cando comeza un ciclo. Admite o marcador de posición {device}.",
+          "notify_finish_message": "Mensaxe enviada cando remata un ciclo. Admite os marcadores de posición {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite {device}, {minutes} marcadores de posición."
+        }
+      },
+      "advanced_settings": {
+        "title": "Configuración avanzada",
+        "description": "Axusta os limiares de detección, a aprendizaxe e o comportamento avanzado. Os valores predeterminados funcionan ben para a maioría das configuracións.",
+        "data": {
+          "apply_suggestions": "Aplicar os valores suxeridos",
+          "start_threshold_w": "Limiar de inicio (W)",
+          "stop_threshold_w": "Limiar de parada (W)",
+          "min_off_gap": "Distancia mínima entre ciclos (s)",
+          "start_duration_threshold": "Duración do inicio do rebote (s)",
+          "progress_reset_delay": "Demora de restablecemento do progreso (segundos)",
+          "no_update_active_timeout": "Tempo de espera sen actualización (s)",
+          "sampling_interval": "Intervalo (s) de mostraxe",
+          "auto_label_confidence": "Etiqueta automática de confianza (0-1)",
+          "learning_confidence": "Confianza da solicitude de comentarios (0-1)",
+          "duration_tolerance": "Tolerancia de duración (0-0,5)",
+          "profile_match_interval": "Intervalo de coincidencia de perfil (segundos)",
+          "profile_match_min_duration_ratio": "Relación de duración mínima de coincidencia de perfil (0,1-1,0)",
+          "profile_match_max_duration_ratio": "Relación de duración máxima de coincidencia de perfil (1,0-3,0)",
+          "smoothing_window": "Fiestra de suavización (mostras)",
+          "profile_match_threshold": "Limiar de coincidencia de perfil",
+          "profile_unmatch_threshold": "Limiar de non coincidencia do perfil",
+          "profile_duration_tolerance": "Tolerancia de duración da coincidencia do perfil (0-0,5)",
+          "interrupted_min_seconds": "Interrumpido: tempo de execución mínimo (segundos)",
+          "abrupt_drop_watts": "Interrumpido: caída abrupta absoluta (W)",
+          "abrupt_drop_ratio": "Interrumpido: relación de caída brusca (0-1)",
+          "abrupt_high_load_factor": "Interrumpido: factor de alta carga",
+          "max_past_cycles": "Retención: ciclos máximos gardados",
+          "max_full_traces_per_profile": "Retención: Rastros completos máximos por perfil",
+          "max_full_traces_unlabeled": "Retención: Rastros completos máximos sen etiquetar",
+          "watchdog_interval": "Intervalo de control (segundos)",
+          "completion_min_seconds": "Tempo de execución mínimo de finalización (segundos)",
+          "notify_before_end_minutes": "Notificación previa á finalización (minutos antes do final)",
+          "auto_tune_noise_events_threshold": "Sintonización automática: limiar de eventos de ruído",
+          "running_dead_zone": "Running Dead Zone (segundos)",
+          "end_repeat_count": "Finalizar o reconto de repeticións",
+          "start_energy_threshold": "Iniciar Energy Gate (Wh)",
+          "end_energy_threshold": "End Energy Gate (Wh)",
+          "auto_maintenance": "Activa o mantemento automático",
+          "expose_debug_entities": "Expoñer entidades de depuración",
+          "save_debug_traces": "Gardar trazos de depuración",
+          "anti_wrinkle_enabled": "Protector antiengurras (só secador)",
+          "anti_wrinkle_max_power": "Potencia máxima antiengurras (W)",
+          "anti_wrinkle_max_duration": "Duración máxima antiengurras (s)",
+          "anti_wrinkle_exit_power": "Potencia de saída antiengurras (W)",
+          "dtw_bandwidth": "Ancho de banda DTW",
+          "external_end_trigger_enabled": "Activar o disparador de fin de ciclo externo",
+          "external_end_trigger": "Sensor externo de fin de ciclo",
+          "external_end_trigger_inverted": "Inverter lóxica de disparo (disparador activado)"
+        },
+        "data_description": {
+          "apply_suggestions": "Marque esta caixa para copiar os valores suxeridos polo algoritmo de aprendizaxe no formulario. Revisa antes de gardar.\n\nSuxerido (de aprendizaxe):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "start_threshold_w": "A potencia debe subir por riba deste limiar para INICIAR un ciclo. Establece unha potencia superior á túa en espera. Valor predeterminado: min_power + 1 W.",
+          "stop_threshold_w": "A potencia debe caer POR BAIXO deste limiar para FINALIZAR un ciclo. Establece un pouco por riba de cero para evitar que o ruído desencadee falsos extremos. Valor predeterminado: 0,6 * min_power.",
+          "min_off_gap": "Se un ciclo comeza dentro destes segundos desde que remate o anterior, uniranse nun único ciclo.",
+          "start_duration_threshold": "Ignora os picos de potencia breves máis curtos que esta duración (segundos). Filtra os picos de arranque (por exemplo, 60 W durante 2 s) antes de que comece o ciclo real. Predeterminado: 5 s.",
+          "progress_reset_delay": "Despois de completar un ciclo (100 %), agarde estes segundos de inactividade antes de restablecer o progreso ao 0 %. Predeterminado: 300 s.",
+          "no_update_active_timeout": "Para sensores de publicación ao cambio: só forza a finalizar un ciclo ACTIVO se non chegan actualizacións durante tantos segundos. A finalización de baixa potencia aínda usa o retardo de apagado.",
+          "sampling_interval": "Intervalo mínimo de mostraxe en segundos. Ignoraranse as actualizacións máis rápidas que esta taxa. Predeterminado: 2,0 s.",
+          "auto_label_confidence": "Etiqueta automaticamente os ciclos igual ou superior a esta confianza ao finalizar (0,0-1,0).",
+          "learning_confidence": "Confianza mínima para solicitar a verificación do usuario mediante un evento (0,0–1,0).",
+          "duration_tolerance": "Tolerancia para as estimacións do tempo restante durante unha carreira (0,0-0,5 corresponde ao 0-50%).",
+          "profile_match_interval": "Con que frecuencia (en segundos) tentar a coincidencia de perfil durante un ciclo. Os valores máis baixos proporcionan unha detección máis rápida pero usan máis CPU. Predeterminado: 300 s (5 minutos).",
+          "profile_match_min_duration_ratio": "Relación de duración mínima para a correspondencia do perfil. O ciclo de execución debe ser polo menos esta fracción da duración do perfil para que coincida. Inferior = coincidencia anterior. Por defecto: 0,50 (50%).",
+          "profile_match_max_duration_ratio": "Relación de duración máxima para a correspondencia de perfil. O ciclo de execución non debe exceder este múltiplo da duración do perfil. Máis alto = máis indulgente. Por defecto: 1,50 (150%).",
+          "smoothing_window": "Número de lecturas recentes de potencia utilizadas para a suavización da media móbil.",
+          "profile_match_threshold": "Puntuación mínima de semellanza DTW (0,0–1,0) necesaria para considerar un perfil como coincidencia. Maior = coincidencia máis estrita, menos falsos positivos. Por defecto: 0.4.",
+          "profile_unmatch_threshold": "Puntuación de semellanza DTW (0,0–1,0) por debaixo da cal se rexeita un perfil previamente coincidente. Debe ser inferior ao limiar de coincidencia para evitar o parpadeo. Por defecto: 0,35.",
+          "profile_duration_tolerance": "Tolerancia utilizada pola coincidencia de perfil para a variación da duración total (0,0–0,5). Comportamento por defecto: ±25%.",
+          "interrupted_min_seconds": "As carreiras máis curtas que esta poden clasificarse como \"interrompidas\".",
+          "abrupt_drop_watts": "A caída de potencia absoluta (W) considerada un acantilado abrupto.",
+          "abrupt_drop_ratio": "Ratio de caída relativa (0–1). Exemplo: 0,6 significa que unha caída do 60 % é brusca.",
+          "abrupt_high_load_factor": "Factor por encima da liña de base considerado \"carga alta\" antes dunha caída brusca (usado con detección brusca).",
+          "max_past_cycles": "Número total de ciclos a conservar (eliminouse o máis antigo). Predeterminado: 200.",
+          "max_full_traces_per_profile": "Número de ciclos etiquetados recentes para manter con trazos de potencia completa por perfil. Os rastros máis antigos resúmense mediante sobres. Por defecto: 20.",
+          "max_full_traces_unlabeled": "Número de ciclos recentes sen etiquetar a manter con trazos de potencia completa para admitir a etiquetaxe automática. Por defecto: 20.",
+          "watchdog_interval": "Segundos entre comprobacións de control durante a execución. Predeterminado: 5 s. ADVERTENCIA: Asegúrate de que este é MAIOR que o intervalo de actualización do teu sensor para evitar falsas paradas (por exemplo, se o sensor se actualiza cada 60 segundos, utiliza 65 segundos ou máis).",
+          "completion_min_seconds": "Os ciclos máis curtos que este marcaranse como \"interrompidos\" aínda que rematen de forma natural. Predeterminado: 600 s.",
+          "notify_before_end_minutes": "Minutos antes do final estimado do ciclo para activar unha notificación. Establécese en 0 para desactivar. Por defecto: 0.",
+          "auto_tune_noise_events_threshold": "Número de ciclos de \"ruído\" curtos ou de baixa potencia en 24 h necesarios para axustar automaticamente a min_power. Por defecto: 3.",
+          "running_dead_zone": "Despois de comezar o ciclo, ignore as caídas de enerxía durante estes segundos para evitar a detección de final falso durante a fase de arranque inicial. Establécese en 0 para desactivar. Predeterminado: 0s.",
+          "end_repeat_count": "Número de veces que se debe cumprir consecutivamente a condición de final (potencia por debaixo do limiar para off_delay) antes de finalizar o ciclo. Os valores máis altos evitan finalidades falsas durante as pausas. Por defecto: 1.",
+          "start_energy_threshold": "O ciclo debe acumular polo menos esta enerxía (Wh) durante a fase de INICIO para ser confirmado. Predeterminado: 0,005 Wh.",
+          "end_energy_threshold": "O ciclo remata só se a enerxía na última xanela de retardo de apagado está por debaixo deste valor (Wh). Evita falsos extremos se a potencia fluctúa preto de cero. Predeterminado: 0,05 Wh.",
+          "auto_maintenance": "Activar o mantemento automático (reparar mostras, combinar fragmentos).",
+          "expose_debug_entities": "Mostra sensores avanzados (confianza, fase, ambigüidade) para a depuración.",
+          "save_debug_traces": "Almacena datos detallados de clasificación e rastrexo de enerxía no historial (Aumenta o uso de almacenamento).",
+          "anti_wrinkle_enabled": "Ignora as rotacións curtas de tambor de baixa potencia despois de que remate un ciclo para evitar ciclos fantasma (só para secadora/lavadora e secadora).",
+          "anti_wrinkle_max_power": "As explosións a esta potencia ou por debaixo trátanse como rotacións antiengurras en lugar de novos ciclos. Só se aplica cando o protector antiengurras está activado.",
+          "anti_wrinkle_max_duration": "Lonxitude máxima de explosión para tratar como rotación antiengurras. Só se aplica cando o protector antiengurras está activado.",
+          "anti_wrinkle_exit_power": "Se a potencia cae por debaixo deste nivel, saia inmediatamente da función antiengurras (desactivada). Só se aplica cando o protector antiengurras está activado.",
+          "dtw_bandwidth": "Tempo máximo permitido deformación (estiramento) como relación coa duración do ciclo. Os valores máis altos permiten combinar ciclos moi variables pero aumentan o custo da CPU. Por defecto: 0,20 (20%).",
+          "external_end_trigger_enabled": "Activa a monitorización dun sensor binario externo para activar a finalización do ciclo.",
+          "external_end_trigger": "Seleccione unha entidade de sensor binario. Cando este sensor se activa, o ciclo actual finalizará co estado \"completado\".",
+          "external_end_trigger_inverted": "De forma predeterminada, o gatillo dispara cando o sensor se acende. Marca esta caixa para disparar cando o sensor se apague."
+        }
+      },
+      "diagnostics": {
+        "title": "Diagnóstico e Mantemento",
+        "description": "Executa accións de mantemento como fusionar ciclos fragmentados ou migrar datos almacenados.\n\n{storage_stats}"
+      },
+      "clear_debug_data": {
+        "title": "Borrar datos de depuración",
+        "description": "Estás seguro de que queres eliminar todos os rastros de depuración almacenados? Isto liberará espazo pero eliminará a información detallada da clasificación dos ciclos anteriores."
+      },
+      "manage_cycles": {
+        "title": "Xestionar Ciclos",
+        "description": "Últimos ciclos:\n{recent_cycles}",
+        "data": {
+          "action": {
+            "name": "Acción",
+            "options": {
+              "auto_label_cycles": "🤖 Etiqueta automática de ciclos antigos",
+              "select_cycle_to_label": "🏷️ Etiqueta Ciclo Específico",
+              "select_cycle_to_label_multi": "🏷️ Etiquetar Ciclos Múltiples",
+              "select_cycle_to_delete": "🗑️ Eliminar ciclo",
+              "interactive_editor": "✂️ Combinar/Dividir Editor interactivo"
+            }
+          }
+        }
+      },
+      "manage_profiles": {
+        "title": "Xestionar perfís",
+        "description": "Resumo do perfil:\n{profile_summary}",
+        "data": {
+          "action": {
+            "name": "Acción",
+            "options": {
+              "create_profile": "➕ Crear novo perfil",
+              "edit_profile": "✏️ Editar/Renomear o perfil",
+              "delete_profile": "🗑️ Eliminar perfil",
+              "profile_stats": "📊 Estatísticas do perfil",
+              "cleanup_profile": "🧹 Limpar o historial: gráficos e borrar"
+            }
+          }
+        }
+      },
+      "profile_stats": {
+        "title": "Estatísticas do perfil",
+        "description": "{stats_table}"
+      },
+      "create_profile": {
+        "title": "Crear novo perfil",
+        "description": "Crea un novo perfil manualmente ou a partir dun ciclo anterior.\n\nExemplos de nomes de perfil: 'Delicados', 'Resistente', 'Lavado rápido'",
+        "data": {
+          "profile_name": "Nome do perfil",
+          "reference_cycle": "Ciclo de referencia (opcional)",
+          "manual_duration": "Duración manual (minutos)"
+        }
+      },
+      "edit_profile": {
+        "title": "Editar perfil",
+        "description": "Seleccione un perfil para renomear",
+        "data": {
+          "profile": "Perfil"
+        }
+      },
+      "rename_profile": {
+        "title": "Editar detalles do perfil",
+        "description": "Perfil actual: {current_name}",
+        "data": {
+          "new_name": "Nome do perfil",
+          "manual_duration": "Duración manual (minutos)"
+        }
+      },
+      "delete_profile_select": {
+        "title": "Eliminar perfil",
+        "description": "Seleccione un perfil para eliminar",
+        "data": {
+          "profile": "Perfil"
+        }
+      },
+      "delete_profile_confirm": {
+        "title": "Confirma Eliminar perfil",
+        "description": "⚠️ Isto eliminará permanentemente o perfil: {profile_name}",
+        "data": {
+          "unlabel_cycles": "Elimina a etiqueta dos ciclos usando este perfil"
+        }
+      },
+      "auto_label_cycles": {
+        "title": "Etiqueta automática de ciclos antigos",
+        "description": "{info}",
+        "data": {
+          "confidence_threshold": "Confianza mínima (0,50-0,95)"
+        }
+      },
+      "select_cycle_to_label": {
+        "title": "Seleccione Ciclo para etiquetar",
+        "description": "✓ = completado, ⚠ = retomado, ✗ = interrompido",
+        "data": {
+          "cycle_id": "Ciclo"
+        }
+      },
+      "select_cycle_to_delete": {
+        "title": "Eliminar ciclo",
+        "description": "⚠️ Isto eliminará permanentemente o ciclo seleccionado",
+        "data": {
+          "cycle_id": "Ciclo para eliminar"
+        }
+      },
+      "label_cycle": {
+        "title": "Ciclo de etiquetas",
+        "description": "{cycle_info}",
+        "data": {
+          "profile_name": "Perfil",
+          "new_profile_name": "Novo nome de perfil (se se está a crear)"
+        }
+      },
+      "post_process": {
+        "title": "Historial do proceso (fusionar/dividir)",
+        "description": "Limpa o historial de ciclos fusionando execucións fragmentadas e dividindo ciclos combinados incorrectamente nunha xanela de tempo. Introduce o número de horas para mirar atrás.\n{info}",
+        "data": {
+          "time_range": "Ventá retrospectiva (horas)",
+          "gap_seconds": "Combinar/Dividir intervalo (segundos)"
+        },
+        "data_description": {
+          "time_range": "Número de horas para buscar ciclos fragmentados para combinar. Use 999999 para procesar todos os datos históricos.\n{info}",
+          "gap_seconds": "Limiar para decidir división vs fusión. Os espazos máis curtos que este únense. Os espazos máis longos que este están divididos. Baixa isto para forzar unha división nun ciclo que se fusionou incorrectamente."
+        }
+      },
+      "cleanup_profile": {
+        "title": "Limpar o historial: seleccione o perfil",
+        "description": "Seleccione un perfil para visualizar. Isto xerará un gráfico que mostra todos os ciclos pasados ​​deste perfil para axudar a identificar os valores atípicos.",
+        "data": {
+          "profile": "Perfil"
+        }
+      },
+      "cleanup_select": {
+        "title": "Limpar o historial - Gráfica e elimina",
+        "description": "![Gráfico]({graph_url})\n\n**Visualización de {profile_name}**\n\nO gráfico mostra os ciclos individuais como liñas de cores. Identifica os valores atípicos (liñas afastadas do grupo) e fai coincidir a súa cor na lista de abaixo para eliminalos.\n\n**Selecciona ciclos para eliminar PERMANENTE:**",
+        "data": {
+          "cycles_to_delete": "Ciclos para eliminar (comproba as cores coincidentes)"
+        }
+      },
+      "interactive_editor": {
+        "title": "Combinar/Dividir Editor interactivo",
+        "description": "Seleccione unha acción manual para realizar no seu historial de ciclos.",
+        "data": {
+          "editor_action": {
+            "name": "Acción",
+            "options": {
+              "split": "✂️ Dividir un ciclo (Buscar lagoas)",
+              "merge": "🔗 Combinar ciclos (unir fragmentos)",
+              "delete": "🗑️ Eliminar ciclo(s)"
+            }
+          }
+        }
+      },
+      "editor_select": {
+        "title": "Seleccione Ciclos",
+        "description": "Seleccione o(s) ciclo(s) a procesar.\n\n{info_text}",
+        "data": {
+          "selected_cycles": "Ciclos"
+        }
+      },
+      "editor_configure": {
+        "title": "Configurar e aplicar",
+        "description": "{preview_md}",
+        "data": {
+          "confirm_action": "Acción",
+          "merged_profile": "Perfil resultante",
+          "new_profile_name": "Novo nome de perfil",
+          "confirm_commit": "Si, confirmo esta acción",
+          "segment_0_profile": "Perfil do segmento 1",
+          "segment_1_profile": "Perfil do segmento 2",
+          "segment_2_profile": "Perfil do segmento 3",
+          "segment_3_profile": "Perfil do segmento 4",
+          "segment_4_profile": "Perfil do segmento 5",
+          "segment_5_profile": "Perfil do segmento 6",
+          "segment_6_profile": "Perfil do segmento 7",
+          "segment_7_profile": "Perfil do segmento 8",
+          "segment_8_profile": "Perfil do segmento 9",
+          "segment_9_profile": "Perfil do segmento 10"
+        }
+      },
+      "editor_split_params": {
+        "title": "Configuración dividida",
+        "description": "Axuste a sensibilidade para dividir este ciclo. Calquera espazo inactivo máis longo que este provocará unha división.",
+        "data": {
+          "min_gap_seconds": "Limiar de separación (segundos)"
+        }
+      },
+      "reprocess_history": {
+        "title": "Mantemento: reprocesamento e optimización de datos",
+        "description": "Realiza unha limpeza profunda de datos históricos:\n1. Recorta as lecturas de potencia cero (silencio).\n2. Corrixe o tempo/duración do ciclo.\n3. Recalcula todos os modelos estatísticos (sobres).\n\n**Executa isto para solucionar problemas de datos ou aplicar novos algoritmos.**"
+      },
+      "wipe_history": {
+        "title": "Borrar o historial (só probas)",
+        "description": "⚠️ Isto eliminará permanentemente TODOS os ciclos e perfís almacenados para este dispositivo. Isto non se pode desfacer!"
+      },
+      "export_import": {
+        "title": "Exportar/Importar JSON",
+        "description": "Copiar/pegar ciclos, perfís e configuracións para este dispositivo. Exporta a continuación ou pega JSON para importar.",
+        "data": {
+          "mode": {
+            "name": "Acción",
+            "options": {
+              "export": "📤 Exportar todos os datos",
+              "import": "📥 Importar/Combinar datos"
+            }
+          },
+          "json_payload": "Configuración completa JSON"
+        },
+        "data_description": {
+          "mode": "Escolla Exportar para copiar os datos e a configuración actuais ou Importar para pegar os datos exportados desde outro dispositivo WashData.",
+          "json_payload": "Para exportar: copia este JSON (inclúe ciclos, perfís e todas as configuracións afinadas). Para importar: pegue JSON exportado desde WashData."
+        }
+      },
+      "record_cycle": {
+        "title": "Ciclo de rexistro",
+        "description": "Grava manualmente un ciclo para crear un perfil limpo sen interferencias.\n\nEstado: **{status}**\nDuración: {duration} s\nMostras: {samples}",
+        "data": {
+          "action": {
+            "name": "Acción",
+            "options": {
+              "start_recording": "⏺ Comeza unha nova gravación",
+              "stop_recording": "⏹ Deter a gravación (gardar e procesar)",
+              "refresh_status": "🔄 Estado de actualización",
+              "process_recording": "⚙️ Procesar a última gravación (recortar e gardar)",
+              "discard_recording": "🗑️ Descartar a última gravación",
+              "cancel": "✖ Cancelar"
+            }
+          }
+        }
+      },
+      "record_process": {
+        "title": "Gravación do proceso",
+        "description": "![Gráfico]({graph_url})\n\n**O gráfico mostra a gravación en bruto.** Azul = Manter, Vermello = Recorte proposto.\n*O gráfico é estático e non se actualiza cos cambios no formulario.*\n\nDetívose a gravación. Os recortes están aliñados coa frecuencia de mostraxe detectada (~{sampling_rate}s).\n\nDuración bruta: {duration} s\nMostras: {samples}",
+        "data": {
+          "head_trim": "Inicio de recorte (segundos)",
+          "tail_trim": "Fin de recorte (segundos)",
+          "save_mode": "Gardar destino",
+          "profile_name": "Nome do perfil"
+        }
+      },
+      "learning_feedbacks": {
+        "title": "Comentarios de aprendizaxe",
+        "description": "Selecciona unha solicitude de revisión de ciclo para procesar.",
+        "data": {
+          "selected_feedback": "Seleccione Ciclo para revisar"
+        }
+      },
+      "learning_feedbacks_empty": {
+        "title": "Comentarios de aprendizaxe",
+        "description": "Non se atoparon solicitudes de comentarios pendentes."
+      },
+      "resolve_feedback": {
+        "title": "Resolver comentarios",
+        "description": "**Programa detectado**: {profile}\n**Confianza**: {confidence} %\n**Estimado**: {est}m, **Real**: {act}m",
+        "data": {
+          "action": {
+            "name": "Que che gustaría facer?",
+            "options": {
+              "confirm": "✅ Confirmar - Detección correcta",
+              "correct": "✏️ Correcto - Escolla Programa/Duración",
+              "ignore": "✖ Ignorar - Ciclo falso positivo/ruidoso",
+              "delete": "🗑️ Eliminar - Eliminar do historial"
+            }
+          },
+          "corrected_profile": "Programa correcto (se está corrixindo)",
+          "corrected_duration": "Duración correcta en minutos (se se corrixe)"
+        }
+      }
+    },
+    "error": {
+      "import_failed": "Produciuse un erro na importación. Pega un JSON de exportación HA WashData válido.",
+      "profile_exists": "Xa existe un perfil con este nome",
+      "rename_failed": "Produciuse un erro ao cambiar o nome do perfil. É posible que o perfil non exista ou que xa se tome un novo nome.",
+      "assignment_failed": "Produciuse un erro ao asignar o perfil ao ciclo",
+      "feedback_notification_title": "WashData: verificar o ciclo ({device})",
+      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence} % de confianza)\n**Hora**: {time}\n\nWashData precisa da túa axuda para verificar este ciclo detectado.\n\nVaia a **Configuración > Dispositivos e servizos > WashData > Configurar > Comentarios de aprendizaxe** para confirmar ou corrixir este resultado."
+    },
+    "abort": {
+      "no_cycles_found": "Non se atoparon ciclos",
+      "no_profiles_found": "Non se atoparon perfís. Crea primeiro un perfil.",
+      "no_profiles_for_matching": "Non hai perfís dispoñibles para coincidir. Crea primeiro perfís.",
+      "no_unlabeled_cycles": "Todos os ciclos xa están etiquetados",
+      "no_suggestions": "Aínda non hai valores suxeridos dispoñibles. Executa algúns ciclos e téntao de novo.",
+      "no_predictions": "Sen previsións",
+      "reprocess_success": "Reprocesáronse correctamente {count} ciclos.",
+      "debug_data_cleared": "Borráronse correctamente os datos de depuración de {count} ciclos."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "washer_state": {
+        "name": "Estado"
+      },
+      "washer_program": {
+        "name": "Programa"
+      },
+      "time_remaining": {
+        "name": "Tempo Restante"
+      },
+      "total_duration": {
+        "name": "Duración total"
+      },
+      "cycle_progress": {
+        "name": "Progreso"
+      },
+      "current_power": {
+        "name": "Potencia actual"
+      },
+      "elapsed_time": {
+        "name": "Tempo transcorrido"
+      },
+      "debug_info": {
+        "name": "Información de depuración"
+      },
+      "match_confidence": {
+        "name": "Confianza do partido"
+      },
+      "top_candidates": {
+        "name": "Principais candidatos"
+      },
+      "wash_phase": {
+        "name": "Fase"
+      },
+      "suggestions": {
+        "name": "Configuración suxerida"
+      }
+    },
+    "select": {
+      "program_select": {
+        "name": "Programa Ciclo",
+        "state": {
+          "auto_detect": "Detección automática"
+        }
+      }
+    }
+  }
+}

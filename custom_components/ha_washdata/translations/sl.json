@@ -526,32 +526,5 @@
         "name": "Predlagane nastavitve"
       }
     }
-  },
-  "card": {
-    "washer_program": "Program za pranje",
-    "program_placeholder": "Izberite Program",
-    "duration": "Trajanje",
-    "minutes": "min",
-    "time_remaining": "Preostali čas",
-    "no_prediction": "Brez napovedi",
-    "cycle_in_progress": "Cikel v teku",
-    "status": "Stanje",
-    "progress": "Napredek",
-    "select_program": "Za ogled podrobnosti izberite program",
-    "title": "Naslov",
-    "status_entity": "Statusna entiteta",
-    "icon": "Ikona",
-    "active_color": "Barva aktivne ikone",
-    "show_state": "Prikaži stanje",
-    "show_program": "Show Program",
-    "show_details": "Pokaži podrobnosti",
-    "spin_icon": "Vrteča se ikona (med tekom)",
-    "program_entity": "Programska entiteta",
-    "pct_entity": "Entiteta napredka (neobvezno)",
-    "time_entity": "Časovna entiteta (neobvezno)",
-    "display_mode": "Način prikaza",
-    "show_time_remaining": "Prikaži preostali čas",
-    "show_percentage": "Pokaži odstotek",
-    "entity_not_found": "Entiteta ni najdena"
   }
 }

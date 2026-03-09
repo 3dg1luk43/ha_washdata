@@ -2,7 +2,6 @@ import argparse
 import json
 import re
 import requests
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -66,14 +65,36 @@ def unflatten_dict(d, sep='.'):
     return result
 
 
+def extract_card_translations(card_js_path):
+    pattern = re.compile(r"const TRANSLATIONS = (\{.*?\});", re.DOTALL)
+    with open(card_js_path, "r", encoding="utf-8") as f:
+        js_content = f.read()
+
+    match = pattern.search(js_content)
+    if not match:
+        return None
+
+    try:
+        return json.loads(match.group(1))
+    except json.JSONDecodeError:
+        return None
+
+
+def fetch_ha_languages():
+    response = requests.get(LANGUAGES_URL, timeout=20)
+    response.raise_for_status()
+    payload = response.json()
+    return set(payload.keys())
+
+
 def get_git_diff_keys(file_path):
     """
-    Returns a set of keys that have changed in the given file compared to HEAD~1.
+    Returns a set of keys that have changed in the given file compared to HEAD.
     This includes added and modified keys.
     """
     try:
         # Get the previous version of the file content
-        cmd = ["git", "show", f"HEAD~1:{file_path}"]
+        cmd = ["git", "show", f"HEAD:{file_path}"]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         prev_content = json.loads(result.stdout)
 
@@ -154,8 +175,22 @@ def main():
         dest="card_js",
         help="Path to the frontend card JS file to update translations in.",
     )
+    argparser.add_argument(
+        "--remove-only",
+        dest="remove_only",
+        action="store_true",
+        help="Only remove keys not present in en.json (no translation).",
+    )
+    argparser.add_argument(
+        "--sync-changed-en",
+        dest="sync_changed_en",
+        action="store_true",
+        help="Also retranslate keys changed in en.json compared to HEAD.",
+    )
 
     args = argparser.parse_args()
+    if args.remove_only:
+        print("Remove-only mode enabled: skipping translation updates.")
 
     translations_dir = Path(args.translations_dir)
     en_file = translations_dir / "en.json"
@@ -171,24 +206,25 @@ def main():
         print(f"Error: {en_file} not found.")
         return 1
 
-    response = requests.get(LANGUAGES_URL)
-    ha_languages = json.loads(response.content)
-    ha_languages = set(ha_languages.keys())
-
     if args.all_languages:
-        # Generate translations for all by Home Assistant supported languages.
-        languages = ha_languages
+        # Generate translations for all Home Assistant supported languages.
+        try:
+            languages = fetch_ha_languages()
+            print("Language source: Home Assistant metadata (remote).")
+        except Exception as err:
+            print(
+                "Warning: Could not fetch Home Assistant language metadata "
+                f"({err}). Falling back to local translation files."
+            )
+            languages = {file.stem for file in translations_dir.glob("*.json")}
     elif len(args.languages) > 0:
-        # Generate translations for the languages given as arguments and supported by Home Assistant.
-        lc_languages = {l.lower() for l in args.languages}
-        languages = [
-            language
-            for language in ha_languages
-            if language.lower() in lc_languages
-        ]
+        # Use exactly the user-provided list for deterministic runs.
+        languages = set(args.languages)
+        print("Language source: explicit CLI arguments.")
     else:
         # Take the languages from the already generated language files.
-        languages = [file.stem for file in translations_dir.glob("*.json")]
+        languages = {file.stem for file in translations_dir.glob("*.json")}
+        print("Language source: existing local translation files.")
 
     # Remove duplicate languages, if any, and sort alphabetically.
     languages = sorted(list(set(languages)))
@@ -208,9 +244,16 @@ def main():
     # 1. Identify changed keys in en.json
     # We always load en_flat as the source of truth
     en_content = load_json(en_file)
+    en_content.pop("card", None)
     en_flat = flatten_dict(en_content)
-    changed_keys_in_en, _ = get_git_diff_keys(str(en_file))
-    print(f"Found {len(changed_keys_in_en)} changed/added keys in en.json via git diff")
+    changed_keys_in_en = set()
+    if args.sync_changed_en:
+        changed_keys_in_en, _ = get_git_diff_keys(str(en_file))
+        print(
+            f"Found {len(changed_keys_in_en)} changed/added keys in en.json via git diff"
+        )
+    else:
+        print("Changed-English sync disabled: translating missing keys only.")
 
     # 2. Iterate over all other json files
     for lang_code in languages:
@@ -225,9 +268,13 @@ def main():
 
         new_file = retranslate
         target_flat = {}
+        removed_card_section = False
         if not retranslate and file.exists():
             try:
                 target_data = load_json(file)
+                if "card" in target_data:
+                    removed_card_section = True
+                    target_data.pop("card", None)
                 target_flat = flatten_dict(target_data)
             except Exception:
                 print(f"Error decoding {file}, starting fresh.")
@@ -238,11 +285,12 @@ def main():
         keys_to_translate = []
         original_texts_to_translate = []
 
-        for k, en_text in en_flat.items():
-            # Translate if key is missing OR if it was changed in en.json OR if we are retranslating
-            if k not in target_flat or k in changed_keys_in_en or retranslate:
-                keys_to_translate.append(k)
-                original_texts_to_translate.append(en_text)
+        if not args.remove_only:
+            for k, en_text in en_flat.items():
+                # Default: only missing keys. Optional: include changed English keys.
+                if k not in target_flat or k in changed_keys_in_en or retranslate:
+                    keys_to_translate.append(k)
+                    original_texts_to_translate.append(en_text)
 
         keys_to_remove = [k for k in target_flat if k not in en_flat]
         if keys_to_remove:
@@ -250,7 +298,13 @@ def main():
             for k in keys_to_remove:
                 del target_flat[k]
 
-        if not keys_to_translate and not keys_to_remove:
+        if args.remove_only:
+            keys_to_translate = []
+
+        if removed_card_section:
+            print("  Removing deprecated card section.")
+
+        if not keys_to_translate and not keys_to_remove and not removed_card_section:
             print(f"  No changes needed for {lang_code}.")
             continue
 
@@ -292,7 +346,16 @@ def main():
         card_js_path = Path(args.card_js)
         if card_js_path.exists():
             print(f"Updating frontend translations in {card_js_path}...")
-            en_card = en_content.get("card", {})
+            frontend_translations = extract_card_translations(card_js_path)
+            if not frontend_translations:
+                print(f"Warning: Could not parse card translations in {card_js_path}")
+                frontend_translations = {}
+
+            en_card = frontend_translations.get("en", {})
+            if not en_card:
+                print("Warning: No English card translations found; skipping card update.")
+                return 0
+
             frontend_translations = {"en": en_card}
             
             # Use all languages that have a json file, or just all if --all was used
@@ -316,6 +379,9 @@ def main():
                                 lang_card[k] = v
                     except Exception as e:
                         print(f"Warning: Could not read {lang_file}: {e}")
+                elif lang_code in frontend_translations:
+                    for k, v in frontend_translations[lang_code].items():
+                        lang_card[k] = v
                 
                 frontend_translations[lang_code] = lang_card
             

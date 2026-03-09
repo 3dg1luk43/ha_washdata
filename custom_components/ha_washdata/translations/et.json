@@ -526,32 +526,5 @@
         "name": "Soovitatud seaded"
       }
     }
-  },
-  "card": {
-    "washer_program": "Pesumasina programm",
-    "program_placeholder": "Valige Programm",
-    "duration": "Kestus",
-    "minutes": "min",
-    "time_remaining": "Järelejäänud aeg",
-    "no_prediction": "Ei mingit ennustust",
-    "cycle_in_progress": "Tsükkel on pooleli",
-    "status": "Olek",
-    "progress": "Edusammud",
-    "select_program": "Üksikasjade vaatamiseks valige programm",
-    "title": "Pealkiri",
-    "status_entity": "Olek Entity",
-    "icon": "Ikoon",
-    "active_color": "Aktiivne ikooni värv",
-    "show_state": "Näita olekut",
-    "show_program": "Näita programmi",
-    "show_details": "Näita üksikasju",
-    "spin_icon": "Pöörlev ikoon (jooksmise ajal)",
-    "program_entity": "Programmi üksus",
-    "pct_entity": "Edenemisüksus (valikuline)",
-    "time_entity": "Ajaüksus (valikuline)",
-    "display_mode": "Kuvamisrežiim",
-    "show_time_remaining": "Näita järelejäänud aega",
-    "show_percentage": "Näita protsenti",
-    "entity_not_found": "Üksust ei leitud"
   }
 }

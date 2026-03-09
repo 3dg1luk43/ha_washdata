@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Program Mesin Cuci",
-    "program_placeholder": "Pilih Program",
-    "duration": "Lamanya",
-    "minutes": "menit",
-    "time_remaining": "Sisa Waktu",
-    "no_prediction": "Tidak Ada Prediksi",
-    "cycle_in_progress": "Siklus sedang berlangsung",
-    "status": "Status",
-    "progress": "Kemajuan",
-    "select_program": "Pilih program untuk melihat detailnya",
-    "title": "Judul",
-    "status_entity": "Entitas Status",
-    "icon": "Ikon",
-    "active_color": "Warna Ikon Aktif",
-    "show_state": "Tampilkan Negara",
-    "show_program": "Tampilkan Program",
-    "show_details": "Tampilkan Detail",
-    "spin_icon": "Ikon Berputar (Saat berlari)",
-    "program_entity": "Entitas Program",
-    "pct_entity": "Entitas Kemajuan (Opsional)",
-    "time_entity": "Entitas Waktu (Opsional)",
-    "display_mode": "Modus Tampilan",
-    "show_time_remaining": "Tampilkan Sisa Waktu",
-    "show_percentage": "Tampilkan Persentase",
-    "entity_not_found": "Entitas tidak ditemukan"
   }
 }

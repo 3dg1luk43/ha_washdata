@@ -1,0 +1,530 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "הגדרת WashData",
+        "description": "הגדר את מכונת הכביסה או מכשיר אחר.\n\nנדרש חיישן כוח.\n\n**לאחר מכן, תישאל אם ברצונך ליצור את הפרופיל הראשון שלך.**",
+        "data": {
+          "name": "שם המכשיר",
+          "device_type": "סוג מכשיר",
+          "power_sensor": "חיישן כוח",
+          "min_power": "סף הספק מינימלי (W)"
+        },
+        "data_description": {
+          "name": "שם ידידותי למכשיר זה (למשל, 'מכונת כביסה', 'מדיח כלים').",
+          "device_type": "איזה סוג של מכשיר זה? עוזר להתאים את הזיהוי והתיוג.",
+          "power_sensor": "ישות החיישן שמדווחת על צריכת חשמל בזמן אמת (בוואט) מהתקע החכם שלך.",
+          "min_power": "קריאות הספק מעל סף זה (בוואט) מצביעות על כך שהמכשיר פועל. התחל עם 2W עבור רוב המכשירים."
+        }
+      },
+      "first_profile": {
+        "title": "צור פרופיל ראשון",
+        "description": "**מחזור** הוא הפעלה שלמה של המכשיר שלך (למשל, עומס של כביסה). **פרופיל** מקבץ את המחזורים הללו לפי סוג (למשל, 'כותנה', 'כביסה מהירה'). יצירת פרופיל עוזרת כעת לאמוד את משך האינטגרציה באופן מיידי.\n\nאתה יכול לבחור פרופיל זה באופן ידני בפקדי המכשיר אם הוא לא מזוהה אוטומטית.\n\n**השאר את 'שם פרופיל' ריק כדי לדלג על שלב זה.**",
+        "data": {
+          "profile_name": "שם פרופיל (אופציונלי)",
+          "manual_duration": "משך זמן משוער (דקות)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "החיבור נכשל",
+      "invalid_auth": "אימות לא חוקי",
+      "unknown": "שגיאה לא צפויה"
+    },
+    "abort": {
+      "already_configured": "המכשיר כבר מוגדר"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "menu_options": {
+          "learning_feedbacks": "עיין במשובי למידה",
+          "settings": "הגדרות",
+          "manage_cycles": "נהל מחזורים",
+          "manage_profiles": "נהל פרופילים",
+          "record_cycle": "מחזור הקלטות (ידני)",
+          "diagnostics": "אבחון ותחזוקה"
+        }
+      },
+      "apply_suggestions": {
+        "title": "העתק ערכים מוצעים",
+        "description": "פעולה זו תעתיק את הערכים המוצעים הנוכחיים להגדרות השמורות שלך. זוהי פעולה חד פעמית ואינה מאפשרת החלפה אוטומטית.\n\nערכים מוצעים להעתקה:\n{suggested}",
+        "data": {
+          "confirm": "אשר את פעולת ההעתקה"
+        }
+      },
+      "settings": {
+        "title": "הגדרות",
+        "description": "כוונון ספי זיהוי, למידה והתנהגות מתקדמת. ברירת המחדל עובדת היטב עבור רוב ההגדרות.",
+        "data": {
+          "apply_suggestions": "החל ערכים מוצעים",
+          "device_type": "סוג מכשיר",
+          "power_sensor": "ישות חיישן כוח",
+          "min_power": "הספק מינימלי (W)",
+          "off_delay": "עיכוב סיום מחזור (ים)",
+          "notify_service": "שירות התראות (למשל notify.mobile_app)",
+          "notify_actions": "פעולות הודעה",
+          "notify_people": "אנשים להודיע",
+          "notify_only_when_home": "הודע רק כאשר אתה בבית",
+          "notify_fire_events": "אירועי אוטומציה אש",
+          "notify_events": "אירועים להודיע",
+          "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
+          "notify_title": "כותרת ההודעה",
+          "notify_icon": "סמל הודעה",
+          "notify_start_message": "התחל פורמט הודעה",
+          "notify_finish_message": "סיים את פורמט ההודעה",
+          "notify_pre_complete_message": "פורמט הודעת טרום השלמה",
+          "show_advanced": "ערוך הגדרות מתקדמות (השלב ​​הבא)"
+        },
+        "data_description": {
+          "apply_suggestions": "סמן תיבה זו כדי להעתיק ערכים שהוצעו על ידי אלגוריתם הלמידה לטופס. בדוק לפני השמירה.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "device_type": "בחר את סוג המכשיר (מכונת כביסה, מייבש, מדיח כלים, מכונת קפה, EV). תג זה מאוחסן עם כל מחזור לארגון טוב יותר.",
+          "power_sensor": "ישות החיישן מדווחת על הספק בזמן אמת (בוואט). אתה יכול לשנות זאת בכל עת מבלי לאבד נתונים היסטוריים - שימושי אם אתה מחליף תקע חכם.",
+          "min_power": "קריאות הספק מעל סף זה (בוואט) מצביעות על כך שהמכשיר פועל. התחל עם 2W עבור רוב המכשירים.",
+          "off_delay": "שניות הכוח המוחלק חייב להישאר מתחת לסף העצירה כדי לסמן את ההשלמה. ברירת מחדל: 120 שניות.",
+          "notify_service": "Home Assistant מודיע לשירות לשימוש (אופציונלי).",
+          "notify_actions": "רצף פעולה אופציונלי של Home Assistant להפעלת התראות (סקריפטים, התראה, TTS וכו'). אם הוגדר, הפעולות פועלות לפני שירות התראה חוזר.",
+          "notify_people": "ישויות אנשים לשימוש עבור שער בית/חוץ. כאשר מופעלת, ההתראות נדחות עד שמישהו יהיה בבית.",
+          "notify_only_when_home": "אם מופעל, דחה הודעות עד שלפחות אדם נבחר אחד יהיה בבית.",
+          "notify_fire_events": "אם מופעל, הפעל אירועי Home Assistant עבור התחלה וסיום של מחזור (ha_washdata_cycle_started/ended) כדי להניע אוטומציות.",
+          "notify_events": "עבור אילו אירועים לשלוח הודעות.",
+          "notify_before_end_minutes": "דקות לפני סיום המחזור המשוער כדי להפעיל הודעה. הגדר ל-0 כדי להשבית. ברירת מחדל: 0.",
+          "notify_title": "כותרת מותאמת אישית עבור התראות. תומך במציין מיקום של {device}.",
+          "notify_icon": "סמל לשימוש עבור התראות (למשל mdi:washing-machine). השאר ריק כדי להשתמש בברירת המחדל.",
+          "notify_start_message": "הודעה נשלחת כאשר מחזור מתחיל. תומך במציין מיקום של {device}.",
+          "notify_finish_message": "הודעה נשלחה כאשר מחזור מסתיים. תומך במצייני מיקום של {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "הודעה נשלחה לפני ההשלמה. תומך במצייני מיקום של {device}, {minutes}."
+        }
+      },
+      "advanced_settings": {
+        "title": "הגדרות מתקדמות",
+        "description": "כוונון ספי זיהוי, למידה והתנהגות מתקדמת. ברירת המחדל עובדת היטב עבור רוב ההגדרות.",
+        "data": {
+          "apply_suggestions": "החל ערכים מוצעים",
+          "start_threshold_w": "סף התחלה (W)",
+          "stop_threshold_w": "סף עצירה (W)",
+          "min_off_gap": "פער מינימלי בין מחזורים (ים)",
+          "start_duration_threshold": "משך התחלת יציאה מדף כניסה (ים)",
+          "progress_reset_delay": "עיכוב איפוס התקדמות (שניות)",
+          "no_update_active_timeout": "זמן קצוב ללא עדכון (ים)",
+          "sampling_interval": "מרווח דגימה (ים)",
+          "auto_label_confidence": "ביטחון תווית אוטומטי (0-1)",
+          "learning_confidence": "בטחון בקשת משוב (0-1)",
+          "duration_tolerance": "סובלנות משך זמן (0-0.5)",
+          "profile_match_interval": "מרווח התאמה לפרופיל (שניות)",
+          "profile_match_min_duration_ratio": "יחס משך זמן מינימלי של התאמה לפרופיל (0.1-1.0)",
+          "profile_match_max_duration_ratio": "יחס משך מקסימלי של התאמת פרופיל (1.0-3.0)",
+          "smoothing_window": "החלקת חלון (דוגמאות)",
+          "profile_match_threshold": "סף התאמה לפרופיל",
+          "profile_unmatch_threshold": "פרופיל לא תואם סף",
+          "profile_duration_tolerance": "סובלנות משך התאמה לפרופיל (0-0.5)",
+          "interrupted_min_seconds": "מופסק: זמן ריצה מינימלי (שניות)",
+          "abrupt_drop_watts": "הפרעה: ירידה פתאומית מוחלטת (W)",
+          "abrupt_drop_ratio": "הפרעה: יחס ירידה פתאומית (0-1)",
+          "abrupt_high_load_factor": "מופרע: גורם עומס גבוה",
+          "max_past_cycles": "שימור: מקסימום מחזורים שמורים",
+          "max_full_traces_per_profile": "שימור: מקסימום מעקבים מלאים לכל פרופיל",
+          "max_full_traces_unlabeled": "שימור: מקסימום עקבות מלאים ללא תווית",
+          "watchdog_interval": "מרווח כלב שמירה (שניות)",
+          "completion_min_seconds": "זמן ריצה מינימלי (שניות)",
+          "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
+          "auto_tune_noise_events_threshold": "כוונון אוטומטי: סף אירועי רעש",
+          "running_dead_zone": "ריצה אזור מת (שניות)",
+          "end_repeat_count": "סיום ספירת חזרות",
+          "start_energy_threshold": "התחל שער אנרגיה (Wh)",
+          "end_energy_threshold": "End Energy Gate (Wh)",
+          "auto_maintenance": "הפעל תחזוקה אוטומטית",
+          "expose_debug_entities": "חשוף ישויות ניפוי באגים",
+          "save_debug_traces": "שמור עקבות ניפוי באגים",
+          "anti_wrinkle_enabled": "מגן נגד קמטים (מייבש בלבד)",
+          "anti_wrinkle_max_power": "כוח מרבי נגד קמטים (W)",
+          "anti_wrinkle_max_duration": "משך מקסימום נגד קמטים (ים)",
+          "anti_wrinkle_exit_power": "כוח יציאה נגד קמטים (W)",
+          "dtw_bandwidth": "רוחב פס DTW",
+          "external_end_trigger_enabled": "אפשר את טריגר סיום מחזור חיצוני",
+          "external_end_trigger": "חיישן סיום מחזור חיצוני",
+          "external_end_trigger_inverted": "היפוך היגיון טריגר (טריגר מופעל כבוי)"
+        },
+        "data_description": {
+          "apply_suggestions": "סמן תיבה זו כדי להעתיק ערכים שהוצעו על ידי אלגוריתם הלמידה לטופס. בדוק לפני השמירה.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "start_threshold_w": "הכוח חייב לעלות מעל הסף הזה כדי להתחיל מחזור. הגדר גבוה יותר מעוצמת המתנה שלך. ברירת מחדל: min_power + 1 W.",
+          "stop_threshold_w": "הכוח חייב לרדת מתחת לסף הזה כדי לסיים מחזור. הגדר מעט מעל אפס כדי למנוע רעש המעורר קצוות כוזבים. ברירת מחדל: 0.6 * min_power.",
+          "min_off_gap": "אם מחזור מתחיל בתוך שניות רבות כל כך מהסיום הקודם, הם ימוזגו למחזור בודד.",
+          "start_duration_threshold": "התעלם משיאי כוח קצרים קצרים ממשך זה (שניות). מסנן קוצים לאתחול (למשל, 60W למשך 2 שניות) לפני שהמחזור האמיתי מתחיל. ברירת מחדל: 5 שניות.",
+          "progress_reset_delay": "לאחר סיום מחזור (100%), המתן שניות רבות של סרק לפני איפוס ההתקדמות ל-0%. ברירת מחדל: 300s.",
+          "no_update_active_timeout": "עבור חיישני פרסום בשינוי: רק בכוח לסיים מחזור ACTIVE אם לא מגיעים עדכונים למשך שניות רבות כל כך. השלמת הספק נמוך עדיין משתמשת בהשהיית הכיבוי.",
+          "sampling_interval": "מרווח דגימה מינימלי בשניות. עדכונים מהירים מקצב זה יתעלמו. ברירת מחדל: 2.0 שניות.",
+          "auto_label_confidence": "תווית אוטומטית מחזורים ברמת הביטחון הזה או מעליו בסיומם (0.0-1.0).",
+          "learning_confidence": "ביטחון מינימלי לבקשת אימות משתמש באמצעות אירוע (0.0–1.0).",
+          "duration_tolerance": "סובלנות להערכות שנותרו בזמן ריצה (0.0-0.5 תואם 0-50%).",
+          "profile_match_interval": "באיזו תדירות (בשניות) לנסות התאמת פרופיל במהלך מחזור. ערכים נמוכים יותר מספקים זיהוי מהיר יותר אך משתמשים במעבד רב יותר. ברירת מחדל: 300 שניות (5 דקות).",
+          "profile_match_min_duration_ratio": "יחס משך מינימלי עבור התאמת פרופיל. מחזור הריצה חייב להיות לפחות חלק זה ממשך הפרופיל כדי להתאים. תחתון = התאמה מוקדמת יותר. ברירת מחדל: 0.50 (50%).",
+          "profile_match_max_duration_ratio": "יחס משך מקסימלי עבור התאמת פרופיל. מחזור הריצה לא יעלה על מכפיל זה של משך הפרופיל. גבוה יותר = מקל יותר. ברירת מחדל: 1.50 (150%).",
+          "smoothing_window": "מספר קריאות החשמל האחרונות ששימשו להחלקה של ממוצע נע.",
+          "profile_match_threshold": "ציון דמיון מינימלי ב-DTW (0.0–1.0) נדרש כדי להתייחס לפרופיל כהתאמה. גבוה יותר = התאמה קפדנית יותר, פחות תוצאות חיוביות שגויות. ברירת מחדל: 0.4.",
+          "profile_unmatch_threshold": "ציון דמיון DTW (0.0–1.0) שמתחתיו נדחה פרופיל תואם בעבר. צריך להיות נמוך מסף ההתאמה כדי למנוע הבהוב. ברירת מחדל: 0.35.",
+          "profile_duration_tolerance": "סובלנות בשימוש על ידי התאמת פרופיל עבור שונות משך הכולל (0.0-0.5). התנהגות ברירת מחדל: ±25%.",
+          "interrupted_min_seconds": "ריצות קצרות מזה עשויות להיות מסווגות כ'מופרעות'.",
+          "abrupt_drop_watts": "ירידת כוח מוחלטת (W) נחשבת לצוק פתאומי.",
+          "abrupt_drop_ratio": "יחס ירידה יחסי (0-1). דוגמה: 0.6 אומר שירידה של 60% היא פתאומית.",
+          "abrupt_high_load_factor": "גורם מעל קו הבסיס נחשב ל'עומס גבוה' לפני ירידה פתאומית (בשימוש עם זיהוי פתאומי).",
+          "max_past_cycles": "המספר הכולל של מחזורים לשמירה (הישן ביותר הוסר). ברירת מחדל: 200.",
+          "max_full_traces_per_profile": "מספר המחזורים שסומנו לאחרונה כדי לשמור עם עקבות עוצמה מלאה לכל פרופיל. עקבות ישנות יותר מסוכמות באמצעות מעטפות. ברירת מחדל: 20.",
+          "max_full_traces_unlabeled": "מספר המחזורים האחרונים ללא תווית שיש לשמור עם עקבות עוצמה מלאה כדי לתמוך בתיוג אוטומטי. ברירת מחדל: 20.",
+          "watchdog_interval": "שניות בין בדיקות כלב שמירה בזמן ריצה. ברירת מחדל: 5 שניות. אזהרה: ודא שזה גבוה יותר ממרווח העדכון של החיישן שלך כדי למנוע עצירות שווא (לדוגמה, אם החיישן מתעדכן כל 60 שניות, השתמש ב-65 שניות+).",
+          "completion_min_seconds": "מחזורים קצרים מזה יסומנו כ'מופסקים' גם אם הם מסתיימים באופן טבעי. ברירת מחדל: 600.",
+          "notify_before_end_minutes": "דקות לפני סיום המחזור המשוער כדי להפעיל הודעה. הגדר ל-0 כדי להשבית. ברירת מחדל: 0.",
+          "auto_tune_noise_events_threshold": "מספר מחזורי 'רעש' קצרים/נמוכים בתוך 24 שעות הדרושים להתאמה אוטומטית של min_power. ברירת מחדל: 3.",
+          "running_dead_zone": "לאחר התחלת המחזור, התעלם מירידה בכוח למשך שניות רבות כל כך כדי למנוע זיהוי קצה כוזב במהלך שלב הספין-אפ הראשוני. הגדר ל-0 כדי להשבית. ברירת מחדל: 0s.",
+          "end_repeat_count": "מספר הפעמים שתנאי הסיום (הספק מתחת לסף עבור off_delay) חייבים להתקיים ברציפות לפני סיום המחזור. ערכים גבוהים יותר מונעים קצוות כוזבים במהלך הפסקות. ברירת מחדל: 1.",
+          "start_energy_threshold": "המחזור חייב לצבור לפחות כמות כזו של אנרגיה (Wh) במהלך שלב ההתחלה כדי לאשר. ברירת מחדל: 0.005 וואט.",
+          "end_energy_threshold": "המחזור מסתיים רק אם האנרגיה בחלון ההשהיה האחרון מתחת לערך זה (Wh). מונע קצוות כוזבים אם הספק משתנה קרוב לאפס. ברירת מחדל: 0.05 וואט.",
+          "auto_maintenance": "אפשר תחזוקה אוטומטית (תיקון דוגמאות, מיזוג קטעים).",
+          "expose_debug_entities": "הצג חיישנים מתקדמים (ביטחון, שלב, עמימות) לניפוי באגים.",
+          "save_debug_traces": "אחסן נתוני דירוג ומעקב כוח מפורטים בהיסטוריה (מגדיל את השימוש באחסון).",
+          "anti_wrinkle_enabled": "התעלם מסיבובי תוף קצרים בעוצמה נמוכה לאחר סיום מחזור כדי למנוע מחזורי רפאים (מייבש/מייבש כביסה בלבד).",
+          "anti_wrinkle_max_power": "התפרצויות בעוצמה זו או מתחתיה מטופלות כסיבובים נגד קמטים במקום מחזורים חדשים. חל רק כאשר מגן נגד קמטים מופעל.",
+          "anti_wrinkle_max_duration": "אורך התפרצות מרבי לטיפול כסיבוב נגד קמטים. חל רק כאשר מגן נגד קמטים מופעל.",
+          "anti_wrinkle_exit_power": "אם הכוח יורד מתחת לרמה זו, צא מיד נגד קמטים (true off). חל רק כאשר מגן נגד קמטים מופעל.",
+          "dtw_bandwidth": "עיוות זמן מקסימלי (מתיחה) מותר כיחס של משך המחזור. ערכים גבוהים יותר מאפשרים התאמה של מחזורים משתנים מאוד אך מגדילים את עלות המעבד. ברירת מחדל: 0.20 (20%).",
+          "external_end_trigger_enabled": "אפשר ניטור של חיישן בינארי חיצוני כדי להפעיל השלמת מחזור.",
+          "external_end_trigger": "בחר ישות חיישן בינארי. כאשר חיישן זה מופעל, המחזור הנוכחי יסתיים במצב 'הושלם'.",
+          "external_end_trigger_inverted": "כברירת מחדל, ההדק מופעל כאשר החיישן מופעל. סמן את התיבה הזו כדי להפעיל כאשר החיישן נכבה במקום זאת."
+        }
+      },
+      "diagnostics": {
+        "title": "אבחון ותחזוקה",
+        "description": "הפעל פעולות תחזוקה כמו מיזוג מחזורים מפוצלים או העברת נתונים מאוחסנים.\n\n{storage_stats}"
+      },
+      "clear_debug_data": {
+        "title": "נקה נתוני ניפוי באגים",
+        "description": "האם אתה בטוח שברצונך למחוק את כל עקבות ניפוי באגים המאוחסנים? זה יפנה מקום אך יסיר מידע דירוג מפורט ממחזורים קודמים."
+      },
+      "manage_cycles": {
+        "title": "נהל מחזורים",
+        "description": "מחזורים אחרונים:\n{recent_cycles}",
+        "data": {
+          "action": {
+            "name": "פְּעוּלָה",
+            "options": {
+              "auto_label_cycles": "🤖 תיוג אוטומטי למחזורים ישנים",
+              "select_cycle_to_label": "🏷️ מחזור ספציפי של תווית",
+              "select_cycle_to_label_multi": "🏷️ תווית מחזורים מרובים",
+              "select_cycle_to_delete": "🗑️ מחק מחזור",
+              "interactive_editor": "✂️ מיזוג/פיצול עורך אינטראקטיבי"
+            }
+          }
+        }
+      },
+      "manage_profiles": {
+        "title": "נהל פרופילים",
+        "description": "סיכום פרופיל:\n{profile_summary}",
+        "data": {
+          "action": {
+            "name": "פְּעוּלָה",
+            "options": {
+              "create_profile": "➕ צור פרופיל חדש",
+              "edit_profile": "✏️ ערוך/שנה שם פרופיל",
+              "delete_profile": "🗑️ מחק פרופיל",
+              "profile_stats": "📊 סטטיסטיקות פרופיל",
+              "cleanup_profile": "🧹 ניקוי היסטוריה - גרף ומחק"
+            }
+          }
+        }
+      },
+      "profile_stats": {
+        "title": "סטטיסטיקת פרופיל",
+        "description": "{stats_table}"
+      },
+      "create_profile": {
+        "title": "צור פרופיל חדש",
+        "description": "צור פרופיל חדש באופן ידני או ממחזור עבר.\n\nדוגמאות לשמות פרופיל: 'מעדנים', 'חובה כבדה', 'כביסה מהירה'",
+        "data": {
+          "profile_name": "שם פרופיל",
+          "reference_cycle": "מחזור התייחסות (אופציונלי)",
+          "manual_duration": "משך ידני (דקות)"
+        }
+      },
+      "edit_profile": {
+        "title": "ערוך פרופיל",
+        "description": "בחר פרופיל לשינוי שם",
+        "data": {
+          "profile": "פּרוֹפִיל"
+        }
+      },
+      "rename_profile": {
+        "title": "ערוך את פרטי הפרופיל",
+        "description": "פרופיל נוכחי: {current_name}",
+        "data": {
+          "new_name": "שם פרופיל",
+          "manual_duration": "משך ידני (דקות)"
+        }
+      },
+      "delete_profile_select": {
+        "title": "מחק פרופיל",
+        "description": "בחר פרופיל למחיקה",
+        "data": {
+          "profile": "פּרוֹפִיל"
+        }
+      },
+      "delete_profile_confirm": {
+        "title": "אשר את מחיקת הפרופיל",
+        "description": "⚠️ פעולה זו תמחק לצמיתות את הפרופיל: {profile_name}",
+        "data": {
+          "unlabel_cycles": "הסר תווית ממחזורים באמצעות פרופיל זה"
+        }
+      },
+      "auto_label_cycles": {
+        "title": "תיוג אוטומטי של מחזורים ישנים",
+        "description": "{info}",
+        "data": {
+          "confidence_threshold": "ביטחון מינימלי (0.50-0.95)"
+        }
+      },
+      "select_cycle_to_label": {
+        "title": "בחר מחזור לתווית",
+        "description": "✓ = הושלם, ⚠ = התחדש, ✗ = הופסק",
+        "data": {
+          "cycle_id": "מַחזוֹר"
+        }
+      },
+      "select_cycle_to_delete": {
+        "title": "מחק מחזור",
+        "description": "⚠️ פעולה זו תמחק לצמיתות את המחזור שנבחר",
+        "data": {
+          "cycle_id": "בצע מחזור למחיקה"
+        }
+      },
+      "label_cycle": {
+        "title": "מחזור התוויות",
+        "description": "{cycle_info}",
+        "data": {
+          "profile_name": "פּרוֹפִיל",
+          "new_profile_name": "שם פרופיל חדש (אם יוצר)"
+        }
+      },
+      "post_process": {
+        "title": "היסטוריית תהליכים (מיזוג/פיצול)",
+        "description": "נקה היסטוריית מחזוריות על ידי מיזוג ריצות מקוטעות ופיצול מחזורים ממוזגים שגויים בתוך חלון זמן. הזן מספר שעות כדי להסתכל אחורה.\n{info}",
+        "data": {
+          "time_range": "חלון מבט לאחור (שעות)",
+          "gap_seconds": "מיזוג/פיצול פער (שניות)"
+        },
+        "data_description": {
+          "time_range": "מספר השעות לסריקה לאיתור מחזורים מקוטעים למיזוג. השתמש ב-999999 כדי לעבד את כל הנתונים ההיסטוריים.\n{info}",
+          "gap_seconds": "סף להחליט על פיצול מול מיזוג. פערים קצרים מזה מתמזגים. פערים ארוכים מזה מפוצלים. הורד את זה כדי לכפות פיצול במחזור שאוחד בצורה שגויה."
+        }
+      },
+      "cleanup_profile": {
+        "title": "ניקוי היסטוריית - בחר פרופיל",
+        "description": "בחר פרופיל להצגה. פעולה זו תיצור גרף המציג את כל המחזורים הקודמים עבור פרופיל זה כדי לסייע בזיהוי חריגים.",
+        "data": {
+          "profile": "פּרוֹפִיל"
+        }
+      },
+      "cleanup_select": {
+        "title": "נקה היסטוריה - גרף ומחק",
+        "description": "![גרף]({graph_url})\n\n**מציג את {profile_name}**\n\nהגרף מציג מחזורים בודדים כקווים צבעוניים. זהה חריגים (קווים רחוקים מהקבוצה) והתאמת צבעם ברשימה למטה כדי למחוק אותם.\n\n**בחר מחזורים למחיקה לצמיתות:**",
+        "data": {
+          "cycles_to_delete": "מחזורים למחיקה (בדוק צבעים תואמים)"
+        }
+      },
+      "interactive_editor": {
+        "title": "מיזוג/פיצול עורך אינטראקטיבי",
+        "description": "בחר פעולה ידנית לביצוע בהיסטוריית המחזור שלך.",
+        "data": {
+          "editor_action": {
+            "name": "פְּעוּלָה",
+            "options": {
+              "split": "✂️ פיצול מחזור (מצא פערים)",
+              "merge": "🔗 מיזוג מחזורים (הצטרפות לשברים)",
+              "delete": "🗑️ מחיקת מחזורים"
+            }
+          }
+        }
+      },
+      "editor_select": {
+        "title": "בחר מחזורים",
+        "description": "בחר את המחזור/ים לעיבוד.\n\n{info_text}",
+        "data": {
+          "selected_cycles": "מחזורים"
+        }
+      },
+      "editor_configure": {
+        "title": "הגדר והחל",
+        "description": "{preview_md}",
+        "data": {
+          "confirm_action": "פְּעוּלָה",
+          "merged_profile": "הפרופיל המתקבל",
+          "new_profile_name": "שם פרופיל חדש",
+          "confirm_commit": "כן, אני מאשר את הפעולה הזו",
+          "segment_0_profile": "פרופיל פלח 1",
+          "segment_1_profile": "פרופיל פלח 2",
+          "segment_2_profile": "פרופיל פלח 3",
+          "segment_3_profile": "פרופיל פלח 4",
+          "segment_4_profile": "פרופיל פלח 5",
+          "segment_5_profile": "פרופיל פלח 6",
+          "segment_6_profile": "פרופיל פלח 7",
+          "segment_7_profile": "פרופיל פלח 8",
+          "segment_8_profile": "פרופיל פלח 9",
+          "segment_9_profile": "פרופיל פלח 10"
+        }
+      },
+      "editor_split_params": {
+        "title": "פיצול תצורה",
+        "description": "התאם את הרגישות לפיצול מחזור זה. כל מרווח סרק ארוך מזה יגרום לפיצול.",
+        "data": {
+          "min_gap_seconds": "סף פיצול פער (שניות)"
+        }
+      },
+      "reprocess_history": {
+        "title": "תחזוקה: עיבוד ואופטימיזציה של נתונים",
+        "description": "מבצע ניקוי עמוק של נתונים היסטוריים:\n1. קיצוץ קריאות אפס הספק (שקט).\n2. מתקן תזמון/משך מחזור.\n3. מחשב מחדש את כל המודלים הסטטיסטיים (מעטפות).\n\n**הפעל את זה כדי לתקן בעיות נתונים או להחיל אלגוריתמים חדשים.**"
+      },
+      "wipe_history": {
+        "title": "מחק היסטוריה (בדיקות בלבד)",
+        "description": "⚠️ פעולה זו תמחק לצמיתות את כל המחזורים והפרופילים המאוחסנים עבור המכשיר הזה. אי אפשר לבטל את זה!"
+      },
+      "export_import": {
+        "title": "ייצוא/ייבוא ​​JSON",
+        "description": "העתק/הדבק מחזורים, פרופילים והגדרות עבור מכשיר זה. ייצא למטה או הדבק JSON כדי לייבא.",
+        "data": {
+          "mode": {
+            "name": "פְּעוּלָה",
+            "options": {
+              "export": "📤 ייצוא כל הנתונים",
+              "import": "📥 ייבוא/מיזוג נתונים"
+            }
+          },
+          "json_payload": "השלם תצורה JSON"
+        },
+        "data_description": {
+          "mode": "בחר ייצוא כדי להעתיק נתונים והגדרות נוכחיות, או ייבא כדי להדביק נתונים מיוצאים מהתקן WashData אחר.",
+          "json_payload": "לייצוא: העתק את ה-JSON הזה (כולל מחזורים, פרופילים וכל ההגדרות המכוונות). לייבוא: הדבק JSON שיוצא מ-WashData."
+        }
+      },
+      "record_cycle": {
+        "title": "מחזור הקלטות",
+        "description": "הקלט באופן ידני מחזור כדי ליצור פרופיל נקי ללא הפרעות.\n\nסטטוס: **{status}**\nמשך: {duration} שניות\nדוגמאות: {samples}",
+        "data": {
+          "action": {
+            "name": "פְּעוּלָה",
+            "options": {
+              "start_recording": "⏺ התחל הקלטה חדשה",
+              "stop_recording": "⏹ הפסק את ההקלטה (שמירה ועיבוד)",
+              "refresh_status": "🔄 סטטוס רענון",
+              "process_recording": "⚙️ עיבוד הקלטה אחרונה (חתוך ושמירה)",
+              "discard_recording": "🗑️ בטל את ההקלטה האחרונה",
+              "cancel": "✖ בטל"
+            }
+          }
+        }
+      },
+      "record_process": {
+        "title": "תהליך הקלטת",
+        "description": "![גרף]({graph_url})\n\n**הגרף מציג הקלטה גולמית.** כחול = שמור, אדום = חיתוך מוצע.\n*הגרף סטטי ואינו מתעדכן עם שינויים בטפסים.*\n\nההקלטה הופסקה. הגזרות מיושרות לקצב הדגימה שזוהה (~{sampling_rate} שניות).\n\nמשך גולמי: {duration} שניות\nדוגמאות: {samples}",
+        "data": {
+          "head_trim": "התחלה של חיתוך (שניות)",
+          "tail_trim": "קצץ סוף (שניות)",
+          "save_mode": "שמור יעד",
+          "profile_name": "שם פרופיל"
+        }
+      },
+      "learning_feedbacks": {
+        "title": "משוב למידה",
+        "description": "בחר בקשת סקירת מחזור לעיבוד.",
+        "data": {
+          "selected_feedback": "בחר מחזור לסקירה"
+        }
+      },
+      "learning_feedbacks_empty": {
+        "title": "משוב למידה",
+        "description": "לא נמצאו בקשות משוב ממתינות."
+      },
+      "resolve_feedback": {
+        "title": "פתרון משוב",
+        "description": "**תוכנית שזוהתה**: {profile}\n**ביטחון**: {confidence}%\n**מוערך**: {est} מ', ** בפועל**: {act} מ'",
+        "data": {
+          "action": {
+            "name": "מה היית רוצה לעשות?",
+            "options": {
+              "confirm": "✅ אישור - זיהוי נכון",
+              "correct": "✏️ נכון - בחר תוכנית/משך",
+              "ignore": "✖ התעלם - מחזור חיובי/רועש כוזב",
+              "delete": "🗑️ מחק - הסר מההיסטוריה"
+            }
+          },
+          "corrected_profile": "תוכנית נכונה (אם מתקן)",
+          "corrected_duration": "משך נכון בדקות (אם מתקן)"
+        }
+      }
+    },
+    "error": {
+      "import_failed": "הייבוא ​​נכשל. אנא הדבק JSON ייצוא HA WashData חוקי.",
+      "profile_exists": "פרופיל בשם זה כבר קיים",
+      "rename_failed": "שינוי שם הפרופיל נכשל. ייתכן שהפרופיל אינו קיים או ששם חדש כבר נלקח.",
+      "assignment_failed": "הקצאת הפרופיל למחזור נכשלה",
+      "feedback_notification_title": "WashData: Verify Cycle ({device})",
+      "feedback_notification_message": "**מכשיר**: {device}\n**תוכנית**: {program} ({confidence}% ביטחון)\n**זמן**: {time}\n\nWashData זקוק לעזרתכם כדי לאמת את המחזור שזוהה.\n\nאנא עבור אל **הגדרות > מכשירים ושירותים > WashData > קבע תצורה > משוב למידה** כדי לאשר או לתקן תוצאה זו."
+    },
+    "abort": {
+      "no_cycles_found": "לא נמצאו מחזורים",
+      "no_profiles_found": "לא נמצאו פרופילים. תחילה צור פרופיל.",
+      "no_profiles_for_matching": "אין פרופילים זמינים להתאמה. תחילה צור פרופילים.",
+      "no_unlabeled_cycles": "כל המחזורים כבר מסומנים",
+      "no_suggestions": "אין עדיין ערכים מוצעים זמינים. הפעל כמה מחזורים ונסה שוב.",
+      "no_predictions": "אין תחזיות",
+      "reprocess_success": "{count} מחזורים עיבדו מחדש בהצלחה.",
+      "debug_data_cleared": "ניקה בהצלחה נתוני ניפוי באגים מ-{count} מחזורים."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "washer_state": {
+        "name": "מְדִינָה"
+      },
+      "washer_program": {
+        "name": "תָכְנִית"
+      },
+      "time_remaining": {
+        "name": "זמן שנותר"
+      },
+      "total_duration": {
+        "name": "משך זמן כולל"
+      },
+      "cycle_progress": {
+        "name": "הִתקַדְמוּת"
+      },
+      "current_power": {
+        "name": "כוח נוכחי"
+      },
+      "elapsed_time": {
+        "name": "זמן שחלף"
+      },
+      "debug_info": {
+        "name": "מידע על ניפוי באגים"
+      },
+      "match_confidence": {
+        "name": "Match Confidence"
+      },
+      "top_candidates": {
+        "name": "מועמדים מובילים"
+      },
+      "wash_phase": {
+        "name": "שָׁלָב"
+      },
+      "suggestions": {
+        "name": "הגדרות מוצעות"
+      }
+    },
+    "select": {
+      "program_select": {
+        "name": "תוכנית מחזור",
+        "state": {
+          "auto_detect": "זיהוי אוטומטי"
+        }
+      }
+    }
+  }
+}

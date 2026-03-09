@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Programo de Lavujo",
-    "program_placeholder": "Elektu Programon",
-    "duration": "Daŭro",
-    "minutes": "min",
-    "time_remaining": "Tempo Restanta",
-    "no_prediction": "Neniu Antaŭdiro",
-    "cycle_in_progress": "Ciklo en progreso",
-    "status": "Statuso",
-    "progress": "Progreso",
-    "select_program": "Elektu programon por vidi detalojn",
-    "title": "Titolo",
-    "status_entity": "Statusa Ento",
-    "icon": "Ikono",
-    "active_color": "Aktiva Ikono Koloro",
-    "show_state": "Montru Ŝtaton",
-    "show_program": "Montru Programon",
-    "show_details": "Montru Detalojn",
-    "spin_icon": "Turniĝanta Ikono (Dum kurado)",
-    "program_entity": "Programa Ento",
-    "pct_entity": "Progresa Ento (Laŭvola)",
-    "time_entity": "Tempo-Entaĵo (Laŭvola)",
-    "display_mode": "Montra Reĝimo",
-    "show_time_remaining": "Montru Restantan Tempon",
-    "show_percentage": "Montru Procenton",
-    "entity_not_found": "Ento ne trovita"
   }
 }

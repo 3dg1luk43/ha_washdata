@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Washer Program",
-    "program_placeholder": "Selektearje Programma",
-    "duration": "Doer",
-    "minutes": "min",
-    "time_remaining": "Tiid oerbleaun",
-    "no_prediction": "Gjin foarsizzing",
-    "cycle_in_progress": "Cycle yn útfiering",
-    "status": "Status",
-    "progress": "Foarútgong",
-    "select_program": "Selektearje in programma om details te sjen",
-    "title": "Titel",
-    "status_entity": "Status Entity",
-    "icon": "Ikoan",
-    "active_color": "Aktive ikoankleur",
-    "show_state": "State sjen litte",
-    "show_program": "Programma sjen litte",
-    "show_details": "Show Details",
-    "spin_icon": "Spinnend ikoan (by it rinnen)",
-    "program_entity": "Program Entity",
-    "pct_entity": "Progress Entity (opsjoneel)",
-    "time_entity": "Tiid entiteit (opsjoneel)",
-    "display_mode": "Display Mode",
-    "show_time_remaining": "Lit de oerbleaune tiid sjen",
-    "show_percentage": "Persintaazje sjen litte",
-    "entity_not_found": "Entiteit net fûn"
   }
 }

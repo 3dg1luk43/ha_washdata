@@ -526,32 +526,5 @@
         "name": "Setări sugerate"
       }
     }
-  },
-  "card": {
-    "washer_program": "Program de spălat",
-    "program_placeholder": "Selectați Program",
-    "duration": "Durată",
-    "minutes": "min",
-    "time_remaining": "Timpul rămas",
-    "no_prediction": "Fără predicție",
-    "cycle_in_progress": "Ciclu în curs",
-    "status": "Stare",
-    "progress": "Progres",
-    "select_program": "Selectați un program pentru a vedea detalii",
-    "title": "Titlu",
-    "status_entity": "Entitate de stare",
-    "icon": "Pictogramă",
-    "active_color": "Culoarea pictogramei active",
-    "show_state": "Arată stare",
-    "show_program": "Arată programul",
-    "show_details": "Afișați detalii",
-    "spin_icon": "Pictogramă care se învârte (în timpul alergării)",
-    "program_entity": "Entitatea de program",
-    "pct_entity": "Entitate de progres (opțional)",
-    "time_entity": "Entitate oră (Opțional)",
-    "display_mode": "Modul de afișare",
-    "show_time_remaining": "Arată timpul rămas",
-    "show_percentage": "Arată procentul",
-    "entity_not_found": "Entitatea nu a fost găsită"
   }
 }

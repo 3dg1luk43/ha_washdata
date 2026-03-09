@@ -71,7 +71,11 @@
           "notify_start_message": "Pradžios pranešimo formatas",
           "notify_finish_message": "Pabaigos pranešimo formatas",
           "notify_pre_complete_message": "Išankstinio užbaigimo pranešimo formatas",
-          "show_advanced": "Redaguoti išplėstinius nustatymus (Kitas žingsnis)"
+          "show_advanced": "Redaguoti išplėstinius nustatymus (Kitas žingsnis)",
+          "notify_actions": "Pranešimų veiksmai",
+          "notify_people": "Žmonės, kuriems reikia pranešti",
+          "notify_only_when_home": "Pranešti tik kai būsite namuose",
+          "notify_fire_events": "Priešgaisrinės automatikos renginiai"
         },
         "data_description": {
           "apply_suggestions": "Pažymėkite šį langelį, kad nukopijuotumėte mokymosi algoritmo siūlomas reikšmes į formą. Peržiūrėkite prieš išsaugant.\n\nSiūloma (iš mokymosi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Piktograma pranešimams (pvz., mdi:washing-machine). Palikite tuščią numatytajai.",
           "notify_start_message": "Pranešimas siunčiamas pradėjus ciklą. Palaiko vietos žymeklį {device}.",
           "notify_finish_message": "Pranešimas siunčiamas pasibaigus ciklui. Palaiko vietos žymeklius {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Pranešimas siunčiamas prieš užbaigimą. Palaiko vietos žymeklius {device}, {minutes}."
+          "notify_pre_complete_message": "Pranešimas siunčiamas prieš užbaigimą. Palaiko vietos žymeklius {device}, {minutes}.",
+          "notify_actions": "Pasirenkama namų asistento veiksmų seka, skirta pranešimams (scenarijai, pranešimas, TTS ir kt.). Jei nustatyta, veiksmai atliekami prieš atsarginio pranešimo paslaugą.",
+          "notify_people": "Žmonių subjektai, naudojami namų / išvykimų vartams. Kai įjungta, pranešimai atidedami, kol kas nors bus namuose.",
+          "notify_only_when_home": "Jei įjungta, atidėkite pranešimus, kol bent vienas pasirinktas asmuo bus namuose.",
+          "notify_fire_events": "Jei įjungta, suaktyvinkite „Home Assistant“ ciklo pradžios ir pabaigos įvykius (ha_washdata_cycle_started/ended), kad padidintumėte automatizavimą."
         }
       },
       "advanced_settings": {
@@ -132,7 +140,11 @@
           "dtw_bandwidth": "DTW juostos plotis",
           "external_end_trigger_enabled": "Įjungti išorinį ciklo pabaigos trigerį",
           "external_end_trigger": "Išorinis ciklo pabaigos jutiklis",
-          "external_end_trigger_inverted": "Invert Trigger Logic (paleidiklis įjungtas)"
+          "external_end_trigger_inverted": "Invert Trigger Logic (paleidiklis įjungtas)",
+          "anti_wrinkle_enabled": "Apsauginis skydas nuo raukšlių (tik džiovintuvas)",
+          "anti_wrinkle_max_power": "Maksimali galia nuo raukšlių (W)",
+          "anti_wrinkle_max_duration": "Maksimali antiraukšlių trukmė (s)",
+          "anti_wrinkle_exit_power": "Apsaugos nuo raukšlių išėjimo galia (W)"
         },
         "data_description": {
           "apply_suggestions": "Pažymėkite šį langelį, kad nukopijuotumėte mokymosi algoritmo siūlomas reikšmes į formą. Peržiūrėkite prieš išsaugant.\n\nSiūloma (iš mokymosi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -174,7 +186,11 @@
           "dtw_bandwidth": "Didžiausias leistinas laiko deformavimas (tempimas) kaip ciklo trukmės santykis. Didesnės vertės leidžia suderinti labai kintančius ciklus, tačiau padidina procesoriaus sąnaudas. Numatytasis: 0,20 (20 %).",
           "external_end_trigger_enabled": "Įgalinkite išorinio dvejetainio jutiklio stebėjimą, kad suaktyvintumėte ciklo pabaigą.",
           "external_end_trigger": "Pasirinkite dvejetainį jutiklio objektą. Kai šis jutiklis suveikia, dabartinis ciklas baigsis būsena „baigta“.",
-          "external_end_trigger_inverted": "Pagal numatytuosius nustatymus paleidiklis suveikia, kai jutiklis įsijungia. Pažymėkite šį langelį, kad įsijungtumėte, kai jutiklis išsijungs."
+          "external_end_trigger_inverted": "Pagal numatytuosius nustatymus paleidiklis suveikia, kai jutiklis įsijungia. Pažymėkite šį langelį, kad įsijungtumėte, kai jutiklis išsijungs.",
+          "anti_wrinkle_enabled": "Nepaisykite trumpų mažos galios būgno sukimų pasibaigus ciklui, kad išvengtumėte šešėlių ciklų (tik džiovykla / skalbimo mašina-džiovintuvas).",
+          "anti_wrinkle_max_power": "Šios ar mažesnės galios sprogimai traktuojami kaip priešraukšliniai sukimai, o ne nauji ciklai. Taikoma tik tada, kai įjungtas Anti-Wrinkle Shield.",
+          "anti_wrinkle_max_duration": "Maksimalus sprogimo ilgis traktuojamas kaip sukimasis nuo raukšlių. Taikoma tik tada, kai įjungtas Anti-Wrinkle Shield.",
+          "anti_wrinkle_exit_power": "Jei galia nukrenta žemiau šio lygio, nedelsdami išjunkite nuo raukšlių (tiesa išjungta). Taikoma tik tada, kai įjungtas Anti-Wrinkle Shield."
         }
       },
       "diagnostics": {
@@ -510,32 +526,5 @@
         "name": "Siūlomi nustatymai"
       }
     }
-  },
-  "card": {
-    "washer_program": "Skalbimo programa",
-    "program_placeholder": "Pasirinkite Programa",
-    "duration": "Trukmė",
-    "minutes": "min",
-    "time_remaining": "Likęs laikas",
-    "no_prediction": "Jokios prognozės",
-    "cycle_in_progress": "Vyksta ciklas",
-    "status": "Būsena",
-    "progress": "Pažanga",
-    "select_program": "Norėdami pamatyti išsamią informaciją, pasirinkite programą",
-    "title": "Pavadinimas",
-    "status_entity": "Būsenos subjektas",
-    "icon": "Piktograma",
-    "active_color": "Aktyvios piktogramos spalva",
-    "show_state": "Rodyti būseną",
-    "show_program": "Rodyti programą",
-    "show_details": "Rodyti išsamią informaciją",
-    "spin_icon": "Sukimo piktograma (bėgant)",
-    "program_entity": "Programos subjektas",
-    "pct_entity": "Pažangos objektas (nebūtina)",
-    "time_entity": "Laiko objektas (neprivaloma)",
-    "display_mode": "Ekrano režimas",
-    "show_time_remaining": "Rodyti likusį laiką",
-    "show_percentage": "Rodyti procentą",
-    "entity_not_found": "Subjektas nerastas"
   }
 }

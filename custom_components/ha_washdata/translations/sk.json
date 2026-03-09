@@ -526,32 +526,5 @@
         }
       }
     }
-  },
-  "card": {
-    "washer_program": "Program práčky",
-    "program_placeholder": "Vyberte položku Program",
-    "duration": "Trvanie",
-    "minutes": "min",
-    "time_remaining": "Zostávajúci čas",
-    "no_prediction": "Žiadna predpoveď",
-    "cycle_in_progress": "Prebiehajúci cyklus",
-    "status": "Stav",
-    "progress": "Pokrok",
-    "select_program": "Ak chcete zobraziť podrobnosti, vyberte program",
-    "title": "Názov",
-    "status_entity": "Stavová entita",
-    "icon": "Ikona",
-    "active_color": "Farba aktívnej ikony",
-    "show_state": "Zobraziť stav",
-    "show_program": "Zobraziť program",
-    "show_details": "Zobraziť podrobnosti",
-    "spin_icon": "Ikona otáčania (pri behu)",
-    "program_entity": "Programová entita",
-    "pct_entity": "Entita pokroku (voliteľné)",
-    "time_entity": "Časová entita (voliteľné)",
-    "display_mode": "Režim zobrazenia",
-    "show_time_remaining": "Zobraziť zostávajúci čas",
-    "show_percentage": "Zobraziť percento",
-    "entity_not_found": "Entita sa nenašla"
   }
 }
