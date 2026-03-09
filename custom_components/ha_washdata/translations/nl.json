@@ -71,7 +71,11 @@
           "notify_start_message": "Startberichtformaat",
           "notify_finish_message": "Eindberichtformaat",
           "notify_pre_complete_message": "Voorvoltooiingsberichtformaat",
-          "show_advanced": "Geavanceerde instellingen bewerken (Volgende stap)"
+          "show_advanced": "Geavanceerde instellingen bewerken (Volgende stap)",
+          "notify_actions": "Meldingsacties",
+          "notify_people": "Mensen om op de hoogte te stellen",
+          "notify_only_when_home": "Alleen op de hoogte stellen als u thuis bent",
+          "notify_fire_events": "Brandautomatiseringsevenementen"
         },
         "data_description": {
           "apply_suggestions": "Vink dit vakje aan om door het leeralgoritme voorgestelde waarden naar het formulier te kopiëren. Controleer voor het opslaan.\n\nVoorgesteld (van leren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Pictogram voor meldingen (bijv. mdi:washing-machine). Laat leeg voor standaard.",
           "notify_start_message": "Bericht verzonden wanneer een cyclus start. Ondersteunt de plaatshouder {device}.",
           "notify_finish_message": "Bericht verzonden wanneer een cyclus eindigt. Ondersteunt de plaatshouders {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Bericht verzonden voor voltooiing. Ondersteunt de plaatshouders {device}, {minutes}."
+          "notify_pre_complete_message": "Bericht verzonden voor voltooiing. Ondersteunt de plaatshouders {device}, {minutes}.",
+          "notify_actions": "Optionele Home Assistant-actiereeks voor meldingen (scripts, meldingen, TTS, enz.). Indien ingesteld, worden acties uitgevoerd voordat de fallback-waarschuwingsservice wordt verzonden.",
+          "notify_people": "Personentiteiten die kunnen worden gebruikt voor thuis-/afwezigheidspoorten. Indien ingeschakeld, worden meldingen uitgesteld totdat er iemand thuis is.",
+          "notify_only_when_home": "Indien ingeschakeld, stelt u meldingen uit totdat ten minste één geselecteerde persoon thuis is.",
+          "notify_fire_events": "Indien ingeschakeld, activeert u Home Assistant-gebeurtenissen voor het begin en einde van de cyclus (ha_washdata_cycle_started/ended) om automatiseringen aan te sturen."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Debug-traces opslaan",
           "dtw_bandwidth": "DTW-bandbreedte",
           "external_end_trigger_enabled": "Externe cycluseinde-trigger inschakelen",
-          "external_end_trigger": "Externe cycluseinde-sensor"
+          "external_end_trigger": "Externe cycluseinde-sensor",
+          "external_end_trigger_inverted": "Triggerlogica omkeren (Trigger aan UIT)",
+          "anti_wrinkle_enabled": "Antirimpelschild (alleen droger)",
+          "anti_wrinkle_max_power": "Anti-rimpel Max. vermogen (W)",
+          "anti_wrinkle_max_duration": "Anti-rimpel maximale duur (s)",
+          "anti_wrinkle_exit_power": "Antirimpeluitgangsvermogen (W)"
         },
         "data_description": {
           "apply_suggestions": "Vink dit vakje aan om door het leeralgoritme voorgestelde waarden naar het formulier te kopiëren. Controleer voor het opslaan.\n\nVoorgesteld (van leren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Aantal keren dat de eindeconditie (vermogen onder drempel gedurende off_delay) achtereenvolgens moet worden bereikt voordat de cyclus wordt beëindigd. Hogere waarden voorkomen valse beëindigingen tijdens pauzes. Standaard: 1.",
           "start_energy_threshold": "De cyclus moet minstens deze hoeveelheid energie (Wh) verzamelen tijdens de STARTFASE om bevestigd te worden. Standaard: 0.005 Wh.",
           "end_energy_threshold": "De cyclus eindigt alleen als de energie in het laatste Off-Delay-venster onder deze waarde (Wh) ligt. Voorkomt valse beëindigingen als het vermogen rond nul fluctueert. Standaard: 0.05 Wh.",
-          "auto_maintenance": "Nachtelijk onderhoud inschakelen om monsters te herstellen, gefragmenteerde cycli samen te voegen en de opslag gezond te houden.",
+          "auto_maintenance": "Schakel automatisch onderhoud in (repareer monsters, voeg fragmenten samen).",
           "expose_debug_entities": "Geavanceerde sensoren tonen (Vertrouwen, Fase, Ambiguïteit) voor debugging.",
           "save_debug_traces": "Gedetailleerde rangschikkings- en vermogenstracegegevens opslaan in geschiedenis (Verhoogt opslaggebruik).",
-          "dtw_bandwidth": "Maximaal toegestane tijdvervorming (stretching) als verhouding van de cyclusduur. Hogere waarden staan het matchen van sterk variabele cycli toe maar verhogen CPU-kosten. Standaard: 0.20 (20%).",
-          "external_end_trigger_enabled": "Monitoring van een externe binaire sensor inschakelen om cyclusvoltooiing te activeren. Indien ingeschakeld, zal het inschakelen van de sensor de huidige cyclus onmiddellijk voltooien.",
-          "external_end_trigger": "Selecteer een binaire sensorentiteit. Wanneer deze sensor inschakelt, eindigt de huidige cyclus met status 'voltooid' (niet 'onderbroken')."
+          "dtw_bandwidth": "Maximaal toegestane tijdvervorming (uitrekken) als verhouding van de cyclusduur. Hogere waarden maken het matchen van zeer variabele cycli mogelijk, maar verhogen de CPU-kosten. Standaard: 0,20 (20%).",
+          "external_end_trigger_enabled": "Schakel de bewaking van een externe binaire sensor in om de voltooiing van de cyclus te activeren.",
+          "external_end_trigger": "Selecteer een binaire sensorentiteit. Wanneer deze sensor activeert, eindigt de huidige cyclus met de status 'voltooid'.",
+          "external_end_trigger_inverted": "Standaard wordt de trigger geactiveerd wanneer de sensor wordt ingeschakeld. Vink dit vakje aan om te activeren wanneer de sensor UIT wordt gezet.",
+          "anti_wrinkle_enabled": "Negeer korte trommelrotaties met laag vermogen nadat een cyclus is afgelopen om spookcycli te voorkomen (alleen droger/was-droogcombinatie).",
+          "anti_wrinkle_max_power": "Uitbarstingen op of onder dit vermogen worden behandeld als antirimpelrotaties in plaats van nieuwe cycli. Geldt alleen als Antirimpelschild is ingeschakeld.",
+          "anti_wrinkle_max_duration": "Maximale barstlengte om te behandelen als antirimpelrotatie. Geldt alleen als Antirimpelschild is ingeschakeld.",
+          "anti_wrinkle_exit_power": "Als het vermogen onder dit niveau zakt, schakel dan onmiddellijk de anti-rimpelfunctie uit (true off). Geldt alleen als Antirimpelschild is ingeschakeld."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Cycli beheren",
         "description": "Recente cycli:\n{recent_cycles}",
         "data": {
-          "action": "Actie"
+          "action": {
+            "name": "Actie",
+            "options": {
+              "auto_label_cycles": "🤖 Oude cycli automatisch labelen",
+              "select_cycle_to_label": "🏷️ Labelspecifieke cyclus",
+              "select_cycle_to_label_multi": "🏷️ Label meerdere cycli",
+              "select_cycle_to_delete": "🗑️ Cyclus verwijderen",
+              "interactive_editor": "✂️ Interactieve editor samenvoegen/splitsen"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Profielen beheren",
         "description": "Profieloverzicht:\n{profile_summary}",
         "data": {
-          "action": "Actie"
+          "action": {
+            "name": "Actie",
+            "options": {
+              "create_profile": "➕ Nieuw profiel maken",
+              "edit_profile": "✏️ Profiel bewerken/hernoemen",
+              "delete_profile": "🗑️ Profiel verwijderen",
+              "profile_stats": "📊 Profielstatistieken",
+              "cleanup_profile": "🧹 Geschiedenis opschonen - Grafiek en verwijderen"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Interactieve samenvoeg/splits-editor",
         "description": "Selecteer een handmatige actie voor uw cyclusgeschiedenis.",
         "data": {
-          "editor_action": "Actie"
+          "editor_action": {
+            "name": "Actie",
+            "options": {
+              "split": "✂️ Een cyclus splitsen (hiaten zoeken)",
+              "merge": "🔗 Cycli samenvoegen (fragmenten samenvoegen)",
+              "delete": "🗑️ Cyclus(s) verwijderen"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "JSON exporteren/importeren",
         "description": "Kopieer/plak cycli, profielen EN instellingen voor dit apparaat. Exporteer hieronder of plak JSON om te importeren.",
         "data": {
-          "mode": "Actie",
-          "json_payload": "Volledige configuratie-JSON"
+          "json_payload": "Volledige configuratie-JSON",
+          "mode": {
+            "name": "Actie",
+            "options": {
+              "export": "📤 Exporteer alle gegevens",
+              "import": "📥 Gegevens importeren/samenvoegen"
+            }
+          }
         },
         "data_description": {
           "mode": "Kies Exporteren om huidige gegevens en instellingen te kopiëren, of Importeren om geëxporteerde gegevens van een ander WashData-apparaat te plakken.",
@@ -359,8 +408,17 @@
         "title": "Cyclus opnemen",
         "description": "Neem handmatig een cyclus op om een schoon profiel te maken zonder interferentie.\n\nStatus: **{status}**\nDuur: {duration}s\nMonsters: {samples}",
         "data": {
-          "action": "Actie",
-          "refresh_status": "Status vernieuwen"
+          "action": {
+            "name": "Actie",
+            "options": {
+              "start_recording": "⏺ Start nieuwe opname",
+              "stop_recording": "⏹ Opname stoppen (opslaan en verwerken)",
+              "refresh_status": "🔄 Status vernieuwen",
+              "process_recording": "⚙️ Laatste opname verwerken (bijsnijden en opslaan)",
+              "discard_recording": "🗑️ Laatste opname weggooien",
+              "cancel": "✖ Annuleren"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Feedback oplossen",
         "description": "**Gedetecteerd programma**: {profile}\n**Vertrouwen**: {confidence}%\n**Geschat**: {est}m, **Werkelijk**: {act}m",
         "data": {
-          "action": "Wat wilt u doen?",
           "corrected_profile": "Correct programma (bij correctie)",
-          "corrected_duration": "Correcte duur in minuten (bij correctie)"
+          "corrected_duration": "Correcte duur in minuten (bij correctie)",
+          "action": {
+            "name": "Wat zou je graag willen doen?",
+            "options": {
+              "confirm": "✅ Bevestigen - Correcte detectie",
+              "correct": "✏️ Correct - Kies Programma/Duur",
+              "ignore": "✖ Negeren - Vals positieve/luidruchtige cyclus",
+              "delete": "🗑️ Verwijderen - Verwijderen uit geschiedenis"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Automatisch detecteren"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Staat"
+      },
+      "washer_program": {
+        "name": "Programma"
+      },
+      "time_remaining": {
+        "name": "Resterende tijd"
+      },
+      "total_duration": {
+        "name": "Totale duur"
+      },
+      "cycle_progress": {
+        "name": "Voortgang"
+      },
+      "current_power": {
+        "name": "Huidig ​​vermogen"
+      },
+      "elapsed_time": {
+        "name": "Verstreken tijd"
+      },
+      "debug_info": {
+        "name": "Foutopsporingsinformatie"
+      },
+      "match_confidence": {
+        "name": "Match vertrouwen"
+      },
+      "top_candidates": {
+        "name": "Topkandidaten"
+      },
+      "wash_phase": {
+        "name": "Fase"
+      },
+      "suggestions": {
+        "name": "Voorgestelde instellingen"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Wasprogramma",
+    "program_placeholder": "Selecteer Programma",
+    "duration": "Duur",
+    "minutes": "min",
+    "time_remaining": "Resterende tijd",
+    "no_prediction": "Geen voorspelling",
+    "cycle_in_progress": "Cyclus in uitvoering",
+    "status": "Status",
+    "progress": "Voortgang",
+    "select_program": "Selecteer een programma om details te bekijken",
+    "title": "Titel",
+    "status_entity": "Statusentiteit",
+    "icon": "Icon",
+    "active_color": "Actieve pictogramkleur",
+    "show_state": "Toon staat",
+    "show_program": "Programma tonen",
+    "show_details": "Details tonen",
+    "spin_icon": "Draaiend pictogram (tijdens hardlopen)",
+    "program_entity": "Programma-entiteit",
+    "pct_entity": "Voortgangsentiteit (optioneel)",
+    "time_entity": "Tijdsentiteit (optioneel)",
+    "display_mode": "Weergavemodus",
+    "show_time_remaining": "Resterende tijd weergeven",
+    "show_percentage": "Percentage weergeven",
+    "entity_not_found": "Entiteit niet gevonden"
   }
 }

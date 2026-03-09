@@ -71,7 +71,11 @@
           "notify_start_message": "Formát zprávy při spuštění",
           "notify_finish_message": "Formát zprávy při dokončení",
           "notify_pre_complete_message": "Formát zprávy před dokončením",
-          "show_advanced": "Upravit pokročilá nastavení (Další krok)"
+          "show_advanced": "Upravit pokročilá nastavení (Další krok)",
+          "notify_actions": "Akce oznámení",
+          "notify_people": "Lidé, které je třeba informovat",
+          "notify_only_when_home": "Upozornit pouze na domovské stránce",
+          "notify_fire_events": "Události požární automatizace"
         },
         "data_description": {
           "apply_suggestions": "Zaškrtněte toto pole pro zkopírování hodnot navržených algoritmem učení do formuláře. Před uložením zkontrolujte.\n\nNavržené (z učení):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Ikona pro oznámení (např. mdi:washing-machine). Ponechte prázdné pro výchozí.",
           "notify_start_message": "Zpráva odeslaná při spuštění cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Zpráva odeslaná při dokončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Zpráva odeslaná před dokončením. Podporuje zástupné symboly {device}, {minutes}."
+          "notify_pre_complete_message": "Zpráva odeslaná před dokončením. Podporuje zástupné symboly {device}, {minutes}.",
+          "notify_actions": "Volitelná sekvence akcí Home Assistant, která se spustí pro oznámení (skripty, oznámení, TTS atd.). Je-li nastaveno, akce se spouštějí před službou nouzového upozornění.",
+          "notify_people": "Osoby entity, které se mají použít pro vkládání domů/odchodů. Když je tato možnost povolena, oznámení se odkládají, dokud nebude někdo doma.",
+          "notify_only_when_home": "Pokud je tato možnost povolena, odloží oznámení, dokud alespoň jedna vybraná osoba nebude doma.",
+          "notify_fire_events": "Pokud je povoleno, spouštět události Home Assistant pro začátek a konec cyklu (ha_washdata_cycle_started/ended) pro řízení automatizace."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Ukládat ladicí trasy",
           "dtw_bandwidth": "Šířka pásma DTW",
           "external_end_trigger_enabled": "Povolit externí spouštěč konce cyklu",
-          "external_end_trigger": "Externí senzor konce cyklu"
+          "external_end_trigger": "Externí senzor konce cyklu",
+          "external_end_trigger_inverted": "Invertovat logiku spouštěče (spouštěč je vypnutý)",
+          "anti_wrinkle_enabled": "Ochranný štít proti vráskám (pouze sušička)",
+          "anti_wrinkle_max_power": "Maximální výkon proti vráskám (W)",
+          "anti_wrinkle_max_duration": "Maximální trvání proti vráskám (s)",
+          "anti_wrinkle_exit_power": "Výstupní výkon proti vráskám (W)"
         },
         "data_description": {
           "apply_suggestions": "Zaškrtněte toto pole pro zkopírování hodnot navržených algoritmem učení do formuláře. Před uložením zkontrolujte.\n\nNavržené (z učení):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Počet, kolikrát musí být podmínka konce (příkon pod prahem po off_delay) splněna po sobě před ukončením cyklu. Vyšší hodnoty zabraňují falešným koncům během pauz. Výchozí: 1.",
           "start_energy_threshold": "Cyklus musí nastřádat alespoň tuto energii (Wh) během fáze SPUŠTĚNÍ, aby byl potvrzen. Výchozí: 0.005 Wh.",
           "end_energy_threshold": "Cyklus skončí pouze pokud je energie v posledním okně Off-Delay pod touto hodnotou (Wh). Zabraňuje falešným koncům, pokud příkon kolísá kolem nuly. Výchozí: 0.05 Wh.",
-          "auto_maintenance": "Povolit noční údržbu pro opravu vzorků, sloučení fragmentovaných cyklů a udržení zdravého úložiště.",
+          "auto_maintenance": "Povolit automatickou údržbu (opravit vzorky, sloučit fragmenty).",
           "expose_debug_entities": "Zobrazit pokročilé senzory (Spolehlivost, Fáze, Nejednoznačnost) pro ladění.",
           "save_debug_traces": "Ukládat podrobné údaje o hodnocení a trasách příkonu v historii (Zvyšuje využití úložiště).",
-          "dtw_bandwidth": "Maximální povolené časové zkreslení (roztažení) jako poměr doby trvání cyklu. Vyšší hodnoty umožňují shodu vysoce variabilních cyklů, ale zvyšují náklady na CPU. Výchozí: 0.20 (20%).",
-          "external_end_trigger_enabled": "Povolit monitorování externího binárního senzoru pro spuštění dokončení cyklu. Když je povoleno, zapnutí senzoru okamžitě dokončí aktuální cyklus.",
-          "external_end_trigger": "Vyberte entitu binárního senzoru. Když se tento senzor zapne, aktuální cyklus skončí se stavem 'dokončeno' (ne 'přerušeno')."
+          "dtw_bandwidth": "Maximální povolené časové zborcení (roztažení) jako poměr trvání cyklu. Vyšší hodnoty umožňují přizpůsobení vysoce variabilních cyklů, ale zvyšují náklady na CPU. Výchozí: 0,20 (20 %).",
+          "external_end_trigger_enabled": "Povolit monitorování externího binárního senzoru pro spuštění dokončení cyklu.",
+          "external_end_trigger": "Vyberte entitu binárního senzoru. Když se tento senzor spustí, aktuální cyklus skončí se stavem „dokončeno“.",
+          "external_end_trigger_inverted": "Ve výchozím nastavení se spoušť spustí, když se senzor zapne. Zaškrtněte toto políčko, chcete-li místo toho aktivovat, když se senzor vypne.",
+          "anti_wrinkle_enabled": "Ignorujte krátké otáčky bubnu s nízkou spotřebou energie po skončení cyklu, abyste předešli cyklům „duchů“ (pouze sušička/pračka-sušička).",
+          "anti_wrinkle_max_power": "Shluky s tímto výkonem nebo pod ním jsou považovány za rotace proti vráskám namísto nových cyklů. Platí pouze v případě, že je aktivován štít proti vráskám.",
+          "anti_wrinkle_max_duration": "Maximální délka dávky, kterou lze považovat za rotaci proti vráskám. Platí pouze v případě, že je aktivován štít proti vráskám.",
+          "anti_wrinkle_exit_power": "Pokud výkon klesne pod tuto úroveň, okamžitě ukončete ochranu proti vráskám (true off). Platí pouze v případě, že je aktivován štít proti vráskám."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Správa cyklů",
         "description": "Nedávné cykly:\n{recent_cycles}",
         "data": {
-          "action": "Akce"
+          "action": {
+            "name": "Akce",
+            "options": {
+              "auto_label_cycles": "🤖 Automatické označování starých cyklů",
+              "select_cycle_to_label": "🏷️ Specifický cyklus štítku",
+              "select_cycle_to_label_multi": "🏷️ Označte více cyklů",
+              "select_cycle_to_delete": "🗑️ Smazat cyklus",
+              "interactive_editor": "✂️ Interaktivní editor sloučení/rozdělení"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Správa profilů",
         "description": "Přehled profilů:\n{profile_summary}",
         "data": {
-          "action": "Akce"
+          "action": {
+            "name": "Akce",
+            "options": {
+              "create_profile": "➕ Vytvořit nový profil",
+              "edit_profile": "✏️ Upravit/Přejmenovat profil",
+              "delete_profile": "🗑️ Smazat profil",
+              "profile_stats": "📊 Statistiky profilu",
+              "cleanup_profile": "🧹 Historie vyčištění – graf a smazání"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Interaktivní editor sloučení/rozdělení",
         "description": "Vyberte ruční akci pro váš historii cyklů.",
         "data": {
-          "editor_action": "Akce"
+          "editor_action": {
+            "name": "Akce",
+            "options": {
+              "split": "✂️ Rozdělit cyklus (najít mezery)",
+              "merge": "🔗 Sloučit cykly (spojit fragmenty)",
+              "delete": "🗑️ Smazat cykly"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Export/Import JSON",
         "description": "Kopírujte/vložte cykly, profily A nastavení pro toto zařízení. Exportujte níže nebo vložte JSON pro import.",
         "data": {
-          "mode": "Akce",
-          "json_payload": "Kompletní konfigurační JSON"
+          "json_payload": "Kompletní konfigurační JSON",
+          "mode": {
+            "name": "Akce",
+            "options": {
+              "export": "📤 Exportujte všechna data",
+              "import": "📥 Import/sloučení dat"
+            }
+          }
         },
         "data_description": {
           "mode": "Zvolte Export pro kopírování aktuálních dat a nastavení, nebo Import pro vložení exportovaných dat z jiného zařízení WashData.",
@@ -359,8 +408,17 @@
         "title": "Zaznamenat cyklus",
         "description": "Ručně zaznamenejte cyklus pro vytvoření čistého profilu bez rušení.\n\nStav: **{status}**\nDoba trvání: {duration}s\nVzorky: {samples}",
         "data": {
-          "action": "Akce",
-          "refresh_status": "Obnovit stav"
+          "action": {
+            "name": "Akce",
+            "options": {
+              "start_recording": "⏺ Spusťte nový záznam",
+              "stop_recording": "⏹ Zastavit záznam (Uložit a zpracovat)",
+              "refresh_status": "🔄 Stav obnovení",
+              "process_recording": "⚙️ Zpracovat poslední záznam (oříznout a uložit)",
+              "discard_recording": "🗑️ Zahodit poslední nahrávku",
+              "cancel": "✖ Zrušit"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Vyřešit zpětnou vazbu",
         "description": "**Detekovaný program**: {profile}\n**Spolehlivost**: {confidence}%\n**Odhadovaný**: {est}m, **Skutečný**: {act}m",
         "data": {
-          "action": "Co chcete udělat?",
           "corrected_profile": "Správný program (při opravě)",
-          "corrected_duration": "Správná doba trvání v minutách (při opravě)"
+          "corrected_duration": "Správná doba trvání v minutách (při opravě)",
+          "action": {
+            "name": "co bys chtěl dělat?",
+            "options": {
+              "confirm": "✅ Potvrdit – správná detekce",
+              "correct": "✏️ Správně – zvolte Program/Trvání",
+              "ignore": "✖ Ignorovat – cyklus falešně pozitivní/hlučný",
+              "delete": "🗑️ Smazat – odebrat z historie"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Automatická detekce"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Stát"
+      },
+      "washer_program": {
+        "name": "Naprogramovat"
+      },
+      "time_remaining": {
+        "name": "Zbývající čas"
+      },
+      "total_duration": {
+        "name": "Celková doba trvání"
+      },
+      "cycle_progress": {
+        "name": "Pokrok"
+      },
+      "current_power": {
+        "name": "Aktuální výkon"
+      },
+      "elapsed_time": {
+        "name": "Uplynulý čas"
+      },
+      "debug_info": {
+        "name": "Informace o ladění"
+      },
+      "match_confidence": {
+        "name": "Sebevědomí zápasu"
+      },
+      "top_candidates": {
+        "name": "Nejlepší kandidáti"
+      },
+      "wash_phase": {
+        "name": "Fáze"
+      },
+      "suggestions": {
+        "name": "Doporučená nastavení"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Program pračky",
+    "program_placeholder": "Vyberte Program",
+    "duration": "Trvání",
+    "minutes": "min",
+    "time_remaining": "Zbývající čas",
+    "no_prediction": "Žádná předpověď",
+    "cycle_in_progress": "Cyklus probíhá",
+    "status": "Postavení",
+    "progress": "Pokrok",
+    "select_program": "Chcete-li zobrazit podrobnosti, vyberte program",
+    "title": "Titul",
+    "status_entity": "Stavová entita",
+    "icon": "Ikona",
+    "active_color": "Barva aktivní ikony",
+    "show_state": "Zobrazit stav",
+    "show_program": "Zobrazit program",
+    "show_details": "Zobrazit podrobnosti",
+    "spin_icon": "Ikona rotace (při běhu)",
+    "program_entity": "Entita programu",
+    "pct_entity": "Entita průběhu (volitelné)",
+    "time_entity": "Časová entita (volitelné)",
+    "display_mode": "Režim zobrazení",
+    "show_time_remaining": "Zobrazit zbývající čas",
+    "show_percentage": "Zobrazit procento",
+    "entity_not_found": "Entita nenalezena"
   }
 }

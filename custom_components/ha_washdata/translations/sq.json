@@ -1,0 +1,557 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfigurimi i të dhënave të larjes",
+        "description": "Konfiguro makinën larëse ose pajisje tjetër.\n\nKërkohet sensori i fuqisë.\n\n**Më pas, do të pyeteni nëse dëshironi të krijoni profilin tuaj të parë.**",
+        "data": {
+          "name": "Emri i pajisjes",
+          "device_type": "Lloji i pajisjes",
+          "power_sensor": "Sensori i fuqisë",
+          "min_power": "Pragu minimal i fuqisë (W)"
+        },
+        "data_description": {
+          "name": "Një emër miqësor për këtë pajisje (p.sh., \"Lavatriçe\", \"Pjatalarëse\").",
+          "device_type": "Çfarë lloj pajisjeje është kjo? Ndihmon në përshtatjen e zbulimit dhe etiketimit.",
+          "power_sensor": "Njësia e sensorit që raporton konsumin e energjisë në kohë reale (në vat) nga spina juaj inteligjente.",
+          "min_power": "Leximet e fuqisë mbi këtë prag (në vat) tregojnë se pajisja është në punë. Filloni me 2W për shumicën e pajisjeve."
+        }
+      },
+      "first_profile": {
+        "title": "Krijo profilin e parë",
+        "description": "Një **Cikl** është një funksion i plotë i pajisjes suaj (p.sh., një ngarkesë rrobash). Një **Profil** i grupon këto cikle sipas llojit (p.sh. \"Pambuk\", \"Larje e shpejtë\"). Krijimi i një profili tani ndihmon në vlerësimin e kohëzgjatjes së integrimit menjëherë.\n\nMund ta zgjidhni manualisht këtë profil në kontrollet e pajisjes nëse nuk zbulohet automatikisht.\n\n**Lëreni 'Emri i profilit' bosh për të kapërcyer këtë hap.**",
+        "data": {
+          "profile_name": "Emri i profilit (opsionale)",
+          "manual_duration": "Kohëzgjatja e parashikuar (minuta)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Lidhja dështoi",
+      "invalid_auth": "Vërtetim i pavlefshëm",
+      "unknown": "Gabim i papritur"
+    },
+    "abort": {
+      "already_configured": "Pajisja është konfiguruar tashmë"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "menu_options": {
+          "learning_feedbacks": "Rishikoni reagimet e të mësuarit",
+          "settings": "Cilësimet",
+          "manage_cycles": "Menaxhoni ciklet",
+          "manage_profiles": "Menaxho profilet",
+          "record_cycle": "Cikli i regjistrimit (manual)",
+          "diagnostics": "Diagnostikimi dhe mirëmbajtja"
+        }
+      },
+      "apply_suggestions": {
+        "title": "Kopjo vlerat e sugjeruara",
+        "description": "Kjo do të kopjojë vlerat aktuale të sugjeruara në cilësimet tuaja të ruajtura. Ky është një veprim një herë dhe nuk mundëson mbishkrime automatike.\n\nVlerat e sugjeruara për të kopjuar:\n{suggested}",
+        "data": {
+          "confirm": "Konfirmo veprimin e kopjimit"
+        }
+      },
+      "settings": {
+        "title": "Cilësimet",
+        "description": "Rregulloni pragjet e zbulimit, të mësuarit dhe sjelljen e avancuar. Parazgjedhjet funksionojnë mirë për shumicën e konfigurimeve.",
+        "data": {
+          "apply_suggestions": "Aplikoni vlerat e sugjeruara",
+          "device_type": "Lloji i pajisjes",
+          "power_sensor": "Njësia e sensorit të energjisë",
+          "min_power": "Fuqia minimale (W)",
+          "off_delay": "Vonesa (t) e përfundimit të ciklit",
+          "notify_service": "Shërbimi i Njoftimeve (p.sh. notify.mobile_app)",
+          "notify_actions": "Veprimet e njoftimit",
+          "notify_people": "Njerëz për të njoftuar",
+          "notify_only_when_home": "Njoftoni vetëm kur jeni në shtëpi",
+          "notify_fire_events": "Ngjarjet e Automatizimit të Zjarrit",
+          "notify_events": "Ngjarjet për të njoftuar",
+          "notify_before_end_minutes": "Njoftim para-përfundimi (minuta para përfundimit)",
+          "notify_title": "Titulli i njoftimit",
+          "notify_icon": "Ikona e njoftimit",
+          "notify_start_message": "Filloni formatin e mesazhit",
+          "notify_finish_message": "Formati i Përfundimit të Mesazhit",
+          "notify_pre_complete_message": "Formati i mesazhit të para-përfundimit",
+          "show_advanced": "Redakto cilësimet e avancuara (Hapi tjetër)"
+        },
+        "data_description": {
+          "apply_suggestions": "Zgjidhni këtë kuti për të kopjuar vlerat e sugjeruara nga algoritmi i mësimit në formë. Rishikoni përpara se të ruani.\n\nSugjeruar (nga të mësuarit):\n- min_fuqia: {suggested_min_power} W\n- off_vone: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_besimi: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- raporti_profili_match_min_duration: {suggested_profile_match_min_duration_ratio}\n- raporti_profili_match_max_duration_raporti: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "device_type": "Zgjidhni llojin e pajisjes (makinë larëse, tharëse, pjatalarëse, makinë kafeje, EV). Ky etiketë ruhet me çdo cikël për organizim më të mirë.",
+          "power_sensor": "Njësia e sensorit që raporton fuqinë në kohë reale (në vat). Mund ta ndryshoni këtë në çdo kohë pa humbur të dhënat historike—e dobishme nëse zëvendësoni një prizë inteligjente.",
+          "min_power": "Leximet e fuqisë mbi këtë prag (në vat) tregojnë se pajisja është në punë. Filloni me 2W për shumicën e pajisjeve.",
+          "off_delay": "Sekonda fuqia e zbutur duhet të qëndrojë nën pragun e ndalimit për të shënuar përfundimin. Parazgjedhja: 120 sekonda.",
+          "notify_service": "Shërbimi i njoftimit të Home Assistant për t'u përdorur (opsionale).",
+          "notify_actions": "Sekuenca opsionale e veprimeve të \"Asistentit në shtëpi\" për të ekzekutuar njoftimet (skriptet, njoftimet, TTS, etj.). Nëse caktohet, veprimet ekzekutohen përpara shërbimit të njoftimit të sërishëm.",
+          "notify_people": "Subjektet e njerëzve për t'u përdorur për hyrje në shtëpi/larg. Kur aktivizohet, njoftimet shtyhen derisa dikush të jetë në shtëpi.",
+          "notify_only_when_home": "Nëse aktivizohet, vononi njoftimet derisa të paktën një person i zgjedhur të jetë në shtëpi.",
+          "notify_fire_events": "Nëse aktivizohet, aktivizoni ngjarjet e Home Assistant për fillimin dhe përfundimin e ciklit (ha_washdata_cycle_started/ended) për të drejtuar automatizimet.",
+          "notify_events": "Për cilat ngjarje të dërgohen njoftime.",
+          "notify_before_end_minutes": "Minuta para përfundimit të parashikuar të ciklit për të aktivizuar një njoftim. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0.",
+          "notify_title": "Titulli i personalizuar për njoftimet. Mbështet mbajtësin e vendndodhjes {device}.",
+          "notify_icon": "Ikona për t'u përdorur për njoftime (p.sh. mdi: lavatriçe). Lëreni bosh për të përdorur parazgjedhjen.",
+          "notify_start_message": "Mesazhi dërgohet kur fillon një cikël. Mbështet mbajtësin e vendndodhjes {device}.",
+          "notify_finish_message": "Mesazhi dërgohet kur përfundon një cikël. Mbështet {device}, {duration}, {program} placeholders.",
+          "notify_pre_complete_message": "Mesazhi u dërgua para përfundimit. Mbështet {device}, {minutes} vendmbajtës."
+        }
+      },
+      "advanced_settings": {
+        "title": "Cilësimet e avancuara",
+        "description": "Rregulloni pragjet e zbulimit, të mësuarit dhe sjelljen e avancuar. Parazgjedhjet funksionojnë mirë për shumicën e konfigurimeve.",
+        "data": {
+          "apply_suggestions": "Aplikoni vlerat e sugjeruara",
+          "start_threshold_w": "Pragu i fillimit (W)",
+          "stop_threshold_w": "Pragu i ndalimit (W)",
+          "min_off_gap": "Hendeku minimal ndërmjet cikleve (s)",
+          "start_duration_threshold": "Fillo kohëzgjatjen e debounce (s)",
+          "progress_reset_delay": "Vonesa e rivendosjes së progresit (sekonda)",
+          "no_update_active_timeout": "Koha e fundit (at) pa përditësime",
+          "sampling_interval": "Intervali (et) e kampionimit",
+          "auto_label_confidence": "Vetë-etiketimi i vetëbesimit (0-1)",
+          "learning_confidence": "Kërkesa për komente të besimit (0-1)",
+          "duration_tolerance": "Toleranca e kohëzgjatjes (0-0,5)",
+          "profile_match_interval": "Intervali i përputhjes së profilit (sekonda)",
+          "profile_match_min_duration_ratio": "Raporti minimal i kohëzgjatjes së përputhjes së profilit (0,1-1,0)",
+          "profile_match_max_duration_ratio": "Raporti i kohëzgjatjes maksimale të përputhjes së profilit (1,0-3,0)",
+          "smoothing_window": "Dritare zbutëse (mostra)",
+          "profile_match_threshold": "Pragu i përputhjes së profilit",
+          "profile_unmatch_threshold": "Pragu i mospërputhjes së profilit",
+          "profile_duration_tolerance": "Toleranca e kohëzgjatjes së ndeshjes së profilit (0-0,5)",
+          "interrupted_min_seconds": "Ndërprerë: Kohëzgjatja minimale (sekonda)",
+          "abrupt_drop_watts": "Ndërprerë: Rënie e papritur Absolute (W)",
+          "abrupt_drop_ratio": "Ndërprerë: Raporti i rënies së menjëhershme (0-1)",
+          "abrupt_high_load_factor": "Ndërprerë: Faktori i ngarkesës së lartë",
+          "max_past_cycles": "Ruajtja: Ciklet maksimale të ruajtura",
+          "max_full_traces_per_profile": "Mbajtja: Gjurmët maksimale të plota për profil",
+          "max_full_traces_unlabeled": "Mbajtja: Gjurmët maksimale të plota të paetiketuara",
+          "watchdog_interval": "Intervali Watchdog (sekonda)",
+          "completion_min_seconds": "Koha minimale e përfundimit (sekonda)",
+          "notify_before_end_minutes": "Njoftim para-përfundimi (minuta para përfundimit)",
+          "auto_tune_noise_events_threshold": "Përshtatja automatike: Pragu i ngjarjeve të zhurmës",
+          "running_dead_zone": "Running Dead Zone (sekonda)",
+          "end_repeat_count": "Fundi i numërimit të përsëritjeve",
+          "start_energy_threshold": "Fillimi i portës së energjisë (Wh)",
+          "end_energy_threshold": "Porta e Energjisë së Fundit (Wh)",
+          "auto_maintenance": "Aktivizo mirëmbajtjen automatike",
+          "expose_debug_entities": "Ekspozoni entitetet e korrigjimit",
+          "save_debug_traces": "Ruaj gjurmët e korrigjimit",
+          "anti_wrinkle_enabled": "Mburojë kundër rrudhave (vetëm tharëse)",
+          "anti_wrinkle_max_power": "Fuqia maksimale kundër rrudhave (W)",
+          "anti_wrinkle_max_duration": "Kohëzgjatja maksimale kundër rrudhave",
+          "anti_wrinkle_exit_power": "Fuqia e daljes kundër rrudhave (W)",
+          "dtw_bandwidth": "Gjerësia e brezit DTW",
+          "external_end_trigger_enabled": "Aktivizo aktivizimin e përfundimit të ciklit të jashtëm",
+          "external_end_trigger": "Sensori i përfundimit të ciklit të jashtëm",
+          "external_end_trigger_inverted": "Përmbysja e logjikës së këmbëzës (aktivizimi është OFF)"
+        },
+        "data_description": {
+          "apply_suggestions": "Zgjidhni këtë kuti për të kopjuar vlerat e sugjeruara nga algoritmi i mësimit në formë. Rishikoni përpara se të ruani.\n\nSugjeruar (nga të mësuarit):\n- min_fuqia: {suggested_min_power} W\n- off_vone: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_besimi: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- raporti_profili_match_min_duration: {suggested_profile_match_min_duration_ratio}\n- raporti_profili_match_max_duration_raporti: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "start_threshold_w": "Fuqia duhet të rritet MBI këtë prag për të filluar një cikël. Vendoseni më lart se fuqia juaj e gatishmërisë. Parazgjedhja: min_fuqi + 1 W.",
+          "stop_threshold_w": "Fuqia duhet të bjerë poshtë këtij pragu për të përfunduar një cikël. Vendoseni pak mbi zero për të shmangur zhurmën që shkakton skajet e rreme. Parazgjedhja: 0,6 * min_fuqi.",
+          "min_off_gap": "Nëse një cikël fillon brenda kaq shumë sekondash nga mbarimi i atij të mëparshëm, ato do të shkrihen në një cikël të vetëm.",
+          "start_duration_threshold": "Injoroni pikat e shkurtra të fuqisë më të shkurtra se kjo kohëzgjatje (sekonda). Filtron majat e nisjes (p.sh., 60 W për 2 sekonda) përpara fillimit të ciklit real. Parazgjedhja: 5 sekonda.",
+          "progress_reset_delay": "Pasi të përfundojë një cikël (100%), prisni kaq shumë sekonda papune përpara se të rivendosni progresin në 0%. Parazgjedhja: 300s.",
+          "no_update_active_timeout": "Për sensorët publikim-në-ndryshim: mbyllni me forcë një cikël AKTIV vetëm nëse nuk vijnë përditësime për kaq shumë sekonda. Përfundimi me energji të ulët ende përdor vonesën e çaktivizimit.",
+          "sampling_interval": "Intervali minimal i marrjes së mostrave në sekonda. Përditësimet më të shpejta se kjo normë do të shpërfillen. Parazgjedhja: 2.0 s.",
+          "auto_label_confidence": "Etiketoni automatikisht ciklet në ose mbi këtë konfidencë pas përfundimit (0,0–1,0).",
+          "learning_confidence": "Besueshmëri minimale për të kërkuar verifikimin e përdoruesit nëpërmjet një ngjarjeje (0.0–1.0).",
+          "duration_tolerance": "Toleranca për vlerësimet e kohës së mbetur gjatë një vrapimi (0,0-0,5 korrespondon me 0-50%).",
+          "profile_match_interval": "Sa shpesh (në sekonda) të provoni përputhjen e profilit gjatë një cikli. Vlerat më të ulëta ofrojnë zbulim më të shpejtë, por përdorin më shumë CPU. Parazgjedhja: 300 sekonda (5 minuta).",
+          "profile_match_min_duration_ratio": "Raporti minimal i kohëzgjatjes për përputhjen e profilit. Cikli i drejtimit duhet të jetë së paku kjo pjesë e kohëzgjatjes së profilit që të përputhet. Më e ulët = përputhje më e hershme. E paracaktuar: 0,50 (50%).",
+          "profile_match_max_duration_ratio": "Raporti i kohëzgjatjes maksimale për përputhjen e profilit. Cikli i drejtimit nuk duhet të kalojë këtë shumëfish të kohëzgjatjes së profilit. Më e lartë = më e butë. E paracaktuar: 1,50 (150%).",
+          "smoothing_window": "Numri i leximeve të fundit të fuqisë të përdorura për zbutjen mesatare lëvizëse.",
+          "profile_match_threshold": "Rezultati minimal i ngjashmërisë DTW (0,0–1,0) kërkohet për të konsideruar një profil si një përputhje. Më e lartë = përputhje më e rreptë, më pak pozitive false. Parazgjedhja: 0.4.",
+          "profile_unmatch_threshold": "Rezultati i ngjashmërisë DTW (0,0–1,0) nën të cilin një profil i përputhur më parë refuzohet. Duhet të jetë më e ulët se pragu i ndeshjes për të parandaluar dridhjet. Parazgjedhja: 0,35.",
+          "profile_duration_tolerance": "Toleranca e përdorur nga përputhja e profilit për variancën totale të kohëzgjatjes (0,0–0,5). Sjellja e parazgjedhur: ±25%.",
+          "interrupted_min_seconds": "Vrapimet më të shkurtra se kjo mund të klasifikohen si 'të ndërprera'.",
+          "abrupt_drop_watts": "Rënia absolute e fuqisë (W) konsiderohet si një shkëmb i papritur.",
+          "abrupt_drop_ratio": "Raporti relativ i rënies (0–1). Shembull: 0.6 do të thotë që një rënie prej 60% është e papritur.",
+          "abrupt_high_load_factor": "Faktori mbi bazën konsiderohet 'ngarkesë e lartë' përpara një rënie të menjëhershme (përdoret me zbulimin e papritur).",
+          "max_past_cycles": "Numri total i cikleve për t'u mbajtur (më i vjetri i hequr). Parazgjedhja: 200.",
+          "max_full_traces_per_profile": "Numri i cikleve të fundit të etiketuara për t'u mbajtur me gjurmë të fuqisë së plotë për profil. Gjurmët e vjetra përmblidhen nëpërmjet zarfeve. Parazgjedhja: 20.",
+          "max_full_traces_unlabeled": "Numri i cikleve të fundit të paetiketuara për të mbajtur gjurmët e fuqisë së plotë për të mbështetur etiketimin automatik. Parazgjedhja: 20.",
+          "watchdog_interval": "Sekonda midis kontrolleve të rojes gjatë vrapimit. Parazgjedhja: 5 sekonda. PARALAJMËRIM: Sigurohuni që kjo të jetë MË LARTË se intervali i përditësimit të sensorit tuaj për të shmangur ndalesat e rreme (p.sh., nëse sensori përditësohet çdo 60 sekonda, përdorni 65s+).",
+          "completion_min_seconds": "Ciklet më të shkurtra se kjo do të shënohen si 'të ndërprera' edhe nëse përfundojnë natyrshëm. Parazgjedhja: 600s.",
+          "notify_before_end_minutes": "Minuta para përfundimit të parashikuar të ciklit për të aktivizuar një njoftim. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0.",
+          "auto_tune_noise_events_threshold": "Numri i cikleve të \"zhurmës\" të shkurtër/me fuqi të ulët brenda 24 orëve të nevojshme për të rregulluar automatikisht min_fuqinë. Parazgjedhja: 3.",
+          "running_dead_zone": "Pas fillimit të ciklit, injoroni uljet e energjisë për kaq shumë sekonda për të parandaluar zbulimin e rremë të përfundimit gjatë fazës fillestare të rrotullimit. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0s.",
+          "end_repeat_count": "Numri i herëve që kushti i fundit (energjia nën pragun për vonesë_off) duhet të plotësohet në mënyrë të njëpasnjëshme përpara përfundimit të ciklit. Vlerat më të larta parandalojnë përfundimet e rreme gjatë pauzave. Parazgjedhja: 1.",
+          "start_energy_threshold": "Cikli duhet të grumbullojë të paktën kaq shumë energji (Wh) gjatë fazës START për t'u konfirmuar. Parazgjedhja: 0,005 Wh.",
+          "end_energy_threshold": "Cikli përfundon vetëm nëse energjia në dritaren e fundit Off-Delay është nën këtë vlerë (Wh). Parandalon skajet e rreme nëse fuqia luhatet afër zeros. Parazgjedhja: 0,05 Wh.",
+          "auto_maintenance": "Aktivizo mirëmbajtjen automatike (riparimi i mostrave, bashkimi i fragmenteve).",
+          "expose_debug_entities": "Shfaq sensorë të avancuar (Besimi, Faza, Ambiguiteti) për korrigjimin e gabimeve.",
+          "save_debug_traces": "Ruani të dhënat e detajuara të renditjes dhe gjurmës së fuqisë në histori (Rrit përdorimin e ruajtjes).",
+          "anti_wrinkle_enabled": "Injoroni rrotullimet e shkurtra të kazanit me fuqi të ulët pas përfundimit të një cikli për të parandaluar ciklet fantazmë (vetëm tharëse/larëse-tharëse).",
+          "anti_wrinkle_max_power": "Shpërthimet në ose nën këtë fuqi trajtohen si rrotullime kundër rrudhave në vend të cikleve të reja. Zbatohet vetëm kur është aktivizuar Mburoja kundër rrudhave.",
+          "anti_wrinkle_max_duration": "Gjatësia maksimale e plasjes për t'u trajtuar si rrotullim kundër rrudhave. Zbatohet vetëm kur është aktivizuar Mburoja kundër rrudhave.",
+          "anti_wrinkle_exit_power": "Nëse fuqia bie nën këtë nivel, dilni menjëherë kundër rrudhave (e vërtetë jashtë). Zbatohet vetëm kur është aktivizuar Mburoja kundër rrudhave.",
+          "dtw_bandwidth": "Koha maksimale e lejuar e shtrembërimit (shtrirjes) si raport i kohëzgjatjes së ciklit. Vlerat më të larta lejojnë përputhjen e cikleve shumë të ndryshueshme, por rrisin koston e CPU-së. Parazgjedhja: 0.20 (20%).",
+          "external_end_trigger_enabled": "Aktivizo monitorimin e një sensori binar të jashtëm për të shkaktuar përfundimin e ciklit.",
+          "external_end_trigger": "Zgjidhni një entitet sensor binar. Kur ky sensor aktivizohet, cikli aktual do të përfundojë me statusin \"e përfunduar\".",
+          "external_end_trigger_inverted": "Si parazgjedhje, këmbëza ndizet kur sensori ndizet. Zgjidhni këtë kuti për të ndezur kur sensori fiket në vend të kësaj."
+        }
+      },
+      "diagnostics": {
+        "title": "Diagnostikimi dhe mirëmbajtja",
+        "description": "Kryeni veprime të mirëmbajtjes si bashkimi i cikleve të fragmentuara ose migrimi i të dhënave të ruajtura.\n\n{storage_stats}"
+      },
+      "clear_debug_data": {
+        "title": "Pastro të dhënat e korrigjimit",
+        "description": "Jeni i sigurt që dëshironi të fshini të gjitha gjurmët e ruajtura të korrigjimit? Kjo do të lirojë hapësirë, por do të heqë informacionin e detajuar të renditjes nga ciklet e kaluara."
+      },
+      "manage_cycles": {
+        "title": "Menaxhoni ciklet",
+        "description": "Ciklet e fundit:\n{recent_cycles}",
+        "data": {
+          "action": {
+            "name": "Veprimi",
+            "options": {
+              "auto_label_cycles": "🤖 Etiketoni automatikisht ciklet e vjetra",
+              "select_cycle_to_label": "🏷️ Cikli specifik i etiketës",
+              "select_cycle_to_label_multi": "🏷️ Etiketoni cikle të shumëfishta",
+              "select_cycle_to_delete": "🗑️ Fshi ciklin",
+              "interactive_editor": "✂️ Bashkoni/Ndajeni redaktuesin interaktiv"
+            }
+          }
+        }
+      },
+      "manage_profiles": {
+        "title": "Menaxho profilet",
+        "description": "Përmbledhje e profilit:\n{profile_summary}",
+        "data": {
+          "action": {
+            "name": "Veprimi",
+            "options": {
+              "create_profile": "➕ Krijo një profil të ri",
+              "edit_profile": "✏️ Ndrysho/Riemërto profilin",
+              "delete_profile": "🗑️ Fshi profilin",
+              "profile_stats": "📊 Statistikat e profilit",
+              "cleanup_profile": "🧹 Pastroni historinë - grafikoni dhe fshini"
+            }
+          }
+        }
+      },
+      "profile_stats": {
+        "title": "Statistikat e profilit",
+        "description": "{stats_table}"
+      },
+      "create_profile": {
+        "title": "Krijo një profil të ri",
+        "description": "Krijo një profil të ri me dorë ose nga një cikël i kaluar.\n\nShembuj të emrit të profilit: 'Delicates', 'Heavy Duty', 'Quick Wash'",
+        "data": {
+          "profile_name": "Emri i profilit",
+          "reference_cycle": "Cikli i referencës (opsionale)",
+          "manual_duration": "Kohëzgjatja manuale (minuta)"
+        }
+      },
+      "edit_profile": {
+        "title": "Redakto profilin",
+        "description": "Zgjidhni një profil për ta riemërtuar",
+        "data": {
+          "profile": "Profili"
+        }
+      },
+      "rename_profile": {
+        "title": "Redakto detajet e profilit",
+        "description": "Profili aktual: {current_name}",
+        "data": {
+          "new_name": "Emri i profilit",
+          "manual_duration": "Kohëzgjatja manuale (minuta)"
+        }
+      },
+      "delete_profile_select": {
+        "title": "Fshi profilin",
+        "description": "Zgjidhni një profil për të fshirë",
+        "data": {
+          "profile": "Profili"
+        }
+      },
+      "delete_profile_confirm": {
+        "title": "Konfirmo fshirjen e profilit",
+        "description": "⚠️ Kjo do të fshijë përgjithmonë profilin: {profile_name}",
+        "data": {
+          "unlabel_cycles": "Hiq etiketën nga ciklet duke përdorur këtë profil"
+        }
+      },
+      "auto_label_cycles": {
+        "title": "Etiketimi automatik i cikleve të vjetra",
+        "description": "{info}",
+        "data": {
+          "confidence_threshold": "Besimi minimal (0,50-0,95)"
+        }
+      },
+      "select_cycle_to_label": {
+        "title": "Zgjidhni Cikli për të etiketuar",
+        "description": "✓ = përfunduar, ⚠ = rifilluar, ✗ = ndërprerë",
+        "data": {
+          "cycle_id": "Cikli"
+        }
+      },
+      "select_cycle_to_delete": {
+        "title": "Fshi ciklin",
+        "description": "⚠️ Kjo do të fshijë përgjithmonë ciklin e zgjedhur",
+        "data": {
+          "cycle_id": "Cikli për të fshirë"
+        }
+      },
+      "label_cycle": {
+        "title": "Cikli i etiketës",
+        "description": "{cycle_info}",
+        "data": {
+          "profile_name": "Profili",
+          "new_profile_name": "Emri i profilit të ri (nëse krijohet)"
+        }
+      },
+      "post_process": {
+        "title": "Historia e procesit (Shkrirje/Ndarje)",
+        "description": "Pastroni historinë e ciklit duke bashkuar ekzekutimet e fragmentuara dhe duke ndarë ciklet e bashkuara gabimisht brenda një dritareje kohore. Fut numrin e orëve për të parë prapa.\n{info}",
+        "data": {
+          "time_range": "Dritarja e rishikimit (orë)",
+          "gap_seconds": "Bashkimi/Ndarja e hendekut (sekonda)"
+        },
+        "data_description": {
+          "time_range": "Numri i orëve për të skanuar për cikle të fragmentuara për t'u bashkuar. Përdorni 999999 për të përpunuar të gjitha të dhënat historike.\n{info}",
+          "gap_seconds": "Pragu për të vendosur ndarjen kundër bashkimit. Boshllëqet MË SHKURTËR se kjo janë shkrirë. Boshllëqet më të gjata se kjo janë të ndara. Uleni këtë për të detyruar një ndarje në një cikël që është bashkuar gabimisht."
+        }
+      },
+      "cleanup_profile": {
+        "title": "Pastrimi i historisë - Zgjidhni profilin",
+        "description": "Zgjidhni një profil për të vizualizuar. Kjo do të gjenerojë një grafik që tregon të gjitha ciklet e kaluara për këtë profil për të ndihmuar në identifikimin e vlerave të jashtme.",
+        "data": {
+          "profile": "Profili"
+        }
+      },
+      "cleanup_select": {
+        "title": "Pastroni historinë - grafikoni dhe fshini",
+        "description": "![Grafiku]({graph_url})\n\n**Vizualizimi i {profile_name}**\n\nGrafiku tregon ciklet individuale si vija me ngjyra. Identifikoni pikat e jashtme (vijat larg grupit) dhe përputhjen e ngjyrës së tyre në listën e mëposhtme për t'i fshirë ato.\n\n**Zgjidhni ciklet për t'i fshirë përgjithmonë:**",
+        "data": {
+          "cycles_to_delete": "Ciklet për fshirje (kontrollo ngjyrat që përputhen)"
+        }
+      },
+      "interactive_editor": {
+        "title": "Bashkoni/Ndajeni redaktuesin interaktiv",
+        "description": "Zgjidhni një veprim manual për të kryer në historikun tuaj të ciklit.",
+        "data": {
+          "editor_action": {
+            "name": "Veprimi",
+            "options": {
+              "split": "✂️ Ndani një cikël (Gjeni boshllëqet)",
+              "merge": "🔗 Ciklet e bashkimit (bashkoni fragmentet)",
+              "delete": "🗑️ Fshi ciklin(et)"
+            }
+          }
+        }
+      },
+      "editor_select": {
+        "title": "Zgjidhni Ciklet",
+        "description": "Zgjidhni ciklin(et) që do të përpunoni.\n\n{info_text}",
+        "data": {
+          "selected_cycles": "Ciklet"
+        }
+      },
+      "editor_configure": {
+        "title": "Konfiguro & Apliko",
+        "description": "{preview_md}",
+        "data": {
+          "confirm_action": "Veprimi",
+          "merged_profile": "Profili që rezulton",
+          "new_profile_name": "Emri i profilit të ri",
+          "confirm_commit": "Po, e konfirmoj këtë veprim",
+          "segment_0_profile": "Profili i Segmentit 1",
+          "segment_1_profile": "Profili i Segmentit 2",
+          "segment_2_profile": "Profili i Segmentit 3",
+          "segment_3_profile": "Profili i Segmentit 4",
+          "segment_4_profile": "Profili i Segmentit 5",
+          "segment_5_profile": "Profili i Segmentit 6",
+          "segment_6_profile": "Profili i Segmentit 7",
+          "segment_7_profile": "Profili i Segmentit 8",
+          "segment_8_profile": "Profili i Segmentit 9",
+          "segment_9_profile": "Profili i Segmentit 10"
+        }
+      },
+      "editor_split_params": {
+        "title": "Konfigurimi i ndarjes",
+        "description": "Rregulloni ndjeshmërinë për ndarjen e këtij cikli. Çdo boshllëk më i gjatë se kjo do të shkaktojë një ndarje.",
+        "data": {
+          "min_gap_seconds": "Pragu i ndarjes së hendekut (sekonda)"
+        }
+      },
+      "reprocess_history": {
+        "title": "Mirëmbajtja: Ripërpunoni dhe optimizoni të dhënat",
+        "description": "Kryen pastrim të thellë të të dhënave historike:\n1. Shkurt leximet me fuqi zero (heshtje).\n2. Rregullon kohën/kohëzgjatjen e ciklit.\n3. Rillogarit të gjitha modelet statistikore (zarfet).\n\n**Ekzekutoni këtë për të rregulluar problemet e të dhënave ose për të aplikuar algoritme të reja.**"
+      },
+      "wipe_history": {
+        "title": "Fshi historikun (vetëm për testim)",
+        "description": "⚠️ Kjo do të fshijë përgjithmonë TË GJITHA ciklet dhe profilet e ruajtura për këtë pajisje. Kjo nuk mund të zhbëhet!"
+      },
+      "export_import": {
+        "title": "Eksporto/Importo JSON",
+        "description": "Kopjo/ngjit ciklet, profilet dhe cilësimet DHE për këtë pajisje. Eksporto më poshtë ose ngjit JSON për të importuar.",
+        "data": {
+          "mode": {
+            "name": "Veprimi",
+            "options": {
+              "export": "📤 Eksporto të gjitha të dhënat",
+              "import": "📥 Importo/Shkrija e të dhënave"
+            }
+          },
+          "json_payload": "Konfigurimi i plotë JSON"
+        },
+        "data_description": {
+          "mode": "Zgjidhni Export për të kopjuar të dhënat dhe cilësimet aktuale, ose Import për të ngjitur të dhënat e eksportuara nga një pajisje tjetër WashData.",
+          "json_payload": "Për eksport: kopjoni këtë JSON (përfshin ciklet, profilet dhe të gjitha cilësimet e rregulluara mirë). Për import: ngjitni JSON të eksportuar nga WashData."
+        }
+      },
+      "record_cycle": {
+        "title": "Cikli i regjistrimit",
+        "description": "Regjistroni manualisht një cikël për të krijuar një profil të pastër pa ndërhyrje.\n\nStatusi: **{status}**\nKohëzgjatja: {duration}s\nMostrat: {samples}",
+        "data": {
+          "action": {
+            "name": "Veprimi",
+            "options": {
+              "start_recording": "⏺ Filloni regjistrimin e ri",
+              "stop_recording": "⏹ Ndalo regjistrimin (Ruaj dhe përpuno)",
+              "refresh_status": "🔄 Statusi i rifreskimit",
+              "process_recording": "⚙️ Përpunoni regjistrimin e fundit (Shkurtoni dhe ruajeni)",
+              "discard_recording": "🗑️ Hiq regjistrimin e fundit",
+              "cancel": "✖ Anulo"
+            }
+          }
+        }
+      },
+      "record_process": {
+        "title": "Procesi i regjistrimit",
+        "description": "![Grafiku]({graph_url})\n\n**Grafiku tregon regjistrimin e papërpunuar.** Blu = Mbaj, e kuqe = Prerje e propozuar.\n*Grafiku është statik dhe nuk përditësohet me ndryshimet e formës.*\n\nRegjistrimi u ndal. Shkurtimet përafrohen me shpejtësinë e zbuluar të kampionimit (~{sampling_rate}s).\n\nKohëzgjatja e papërpunuar: {duration}s\nMostrat: {samples}",
+        "data": {
+          "head_trim": "Fillimi i shkurtimit (sekonda)",
+          "tail_trim": "Shkurtimi i fundit (sekonda)",
+          "save_mode": "Ruaj destinacionin",
+          "profile_name": "Emri i profilit"
+        }
+      },
+      "learning_feedbacks": {
+        "title": "Reagimet e të mësuarit",
+        "description": "Zgjidhni një kërkesë për rishikim të ciklit për ta përpunuar.",
+        "data": {
+          "selected_feedback": "Zgjidhni Cikli për të rishikuar"
+        }
+      },
+      "learning_feedbacks_empty": {
+        "title": "Reagimet e të mësuarit",
+        "description": "Nuk u gjet asnjë kërkesë për komente në pritje."
+      },
+      "resolve_feedback": {
+        "title": "Zgjidhja e komenteve",
+        "description": "**Programi i zbuluar**: {profile}\n**Besimi**: {confidence}%\n**Vlerësuar**: {est}m, **Aktuale**: {act}m",
+        "data": {
+          "action": {
+            "name": "Çfarë do të dëshironit të bënit?",
+            "options": {
+              "confirm": "✅ Konfirmo - Zbulim i saktë",
+              "correct": "✏️ E saktë - Zgjidhni programin/kohëzgjatjen",
+              "ignore": "✖ Injoroni - Cikli i rremë pozitiv/zhurmë",
+              "delete": "🗑️ Fshi - Hiqe nga historia"
+            }
+          },
+          "corrected_profile": "Programi i saktë (nëse korrigjohet)",
+          "corrected_duration": "Kohëzgjatja e saktë në minuta (nëse korrigjohet)"
+        }
+      }
+    },
+    "error": {
+      "import_failed": "Importi dështoi. Ju lutemi ngjisni një JSON të vlefshëm të eksportit të HA WashData.",
+      "profile_exists": "Një profil me këtë emër ekziston tashmë",
+      "rename_failed": "Riemërtimi i profilit dështoi. Profili mund të mos ekzistojë ose një emër i ri është marrë tashmë.",
+      "assignment_failed": "Caktimi i profilit për cikël dështoi",
+      "feedback_notification_title": "Të dhënat e larjes: Verifiko ciklin ({device})",
+      "feedback_notification_message": "**Pajisja**: {device}\n**Programi**: {program} ({confidence}% besim)\n**Koha **: {time}\n\nWashData ka nevojë për ndihmën tuaj për të verifikuar këtë cikël të zbuluar.\n\nJu lutemi, shkoni te **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Mësimi Feedbacks** për të konfirmuar ose korrigjuar këtë rezultat."
+    },
+    "abort": {
+      "no_cycles_found": "Nuk u gjetën cikle",
+      "no_profiles_found": "Nuk u gjet asnjë profil. Krijo një profil fillimisht.",
+      "no_profiles_for_matching": "Nuk ka profile të disponueshme për përputhje. Fillimisht krijoni profile.",
+      "no_unlabeled_cycles": "Të gjitha ciklet tashmë janë etiketuar",
+      "no_suggestions": "Nuk ka ende vlera të sugjeruara. Kryeni disa cikle dhe provoni përsëri.",
+      "no_predictions": "Asnjë parashikim",
+      "reprocess_success": "{count} cikle u ripërpunuan me sukses.",
+      "debug_data_cleared": "Të dhënat e korrigjimit u pastruan me sukses nga {count} cikle."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "washer_state": {
+        "name": "Shtetit"
+      },
+      "washer_program": {
+        "name": "Programi"
+      },
+      "time_remaining": {
+        "name": "Koha e mbetur"
+      },
+      "total_duration": {
+        "name": "Kohëzgjatja totale"
+      },
+      "cycle_progress": {
+        "name": "Përparim"
+      },
+      "current_power": {
+        "name": "Fuqia aktuale"
+      },
+      "elapsed_time": {
+        "name": "Koha e kaluar"
+      },
+      "debug_info": {
+        "name": "Informacioni i korrigjimit"
+      },
+      "match_confidence": {
+        "name": "Ndeshja e besimit"
+      },
+      "top_candidates": {
+        "name": "Kandidatët kryesorë"
+      },
+      "wash_phase": {
+        "name": "Faza"
+      },
+      "suggestions": {
+        "name": "Cilësimet e sugjeruara"
+      }
+    },
+    "select": {
+      "program_select": {
+        "name": "Programi i ciklit",
+        "state": {
+          "auto_detect": "Zbulimi automatik"
+        }
+      }
+    }
+  },
+  "card": {
+    "washer_program": "Programi i larës",
+    "program_placeholder": "Zgjidhni Programin",
+    "duration": "Kohëzgjatja",
+    "minutes": "min",
+    "time_remaining": "Koha e mbetur",
+    "no_prediction": "Asnjë Parashikim",
+    "cycle_in_progress": "Cikli në vazhdim",
+    "status": "Statusi",
+    "progress": "Përparim",
+    "select_program": "Zgjidhni një program për të parë detajet",
+    "title": "Titulli",
+    "status_entity": "Entiteti i statusit",
+    "icon": "Ikona",
+    "active_color": "Ngjyra e ikonës aktive",
+    "show_state": "Trego shtetin",
+    "show_program": "Shfaq programin",
+    "show_details": "Shfaq Detajet",
+    "spin_icon": "Ikona rrotulluese (Gjatë funksionimit)",
+    "program_entity": "Subjekti i programit",
+    "pct_entity": "Entiteti i progresit (opsionale)",
+    "time_entity": "Entiteti i kohës (opsionale)",
+    "display_mode": "Modaliteti i shfaqjes",
+    "show_time_remaining": "Shfaq kohën e mbetur",
+    "show_percentage": "Shfaq përqindjen",
+    "entity_not_found": "Subjekti nuk u gjet"
+  }
+}

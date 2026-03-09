@@ -71,7 +71,11 @@
           "notify_start_message": "Startmeddelandeformat",
           "notify_finish_message": "Slutmeddelandeformat",
           "notify_pre_complete_message": "Förfärdigmeddelandeformat",
-          "show_advanced": "Redigera avancerade inställningar (Nästa steg)"
+          "show_advanced": "Redigera avancerade inställningar (Nästa steg)",
+          "notify_actions": "Aviseringsåtgärder",
+          "notify_people": "Människor att meddela",
+          "notify_only_when_home": "Meddela endast när du är hemma",
+          "notify_fire_events": "Brandautomationshändelser"
         },
         "data_description": {
           "apply_suggestions": "Markera denna ruta för att kopiera värden föreslagna av inlärningsalgoritmen till formuläret. Granska innan du sparar.\n\nFöreslaget (från inlärning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Ikon för aviseringar (t.ex. mdi:washing-machine). Lämna tomt för standard.",
           "notify_start_message": "Meddelande som skickas när en cykel startar. Stöder platshållaren {device}.",
           "notify_finish_message": "Meddelande som skickas när en cykel slutar. Stöder platshållarna {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Meddelande som skickas före slutförande. Stöder platshållarna {device}, {minutes}."
+          "notify_pre_complete_message": "Meddelande som skickas före slutförande. Stöder platshållarna {device}, {minutes}.",
+          "notify_actions": "Valfri Home Assistant-åtgärdssekvens att köra för aviseringar (skript, avisering, TTS, etc.). Om inställt körs åtgärder innan reservaviseringstjänst.",
+          "notify_people": "Människor enheter att använda för hem/borta gating. När det är aktiverat skjuts aviseringar upp tills någon är hemma.",
+          "notify_only_when_home": "Om aktiverat, fördröja aviseringar tills minst en vald person är hemma.",
+          "notify_fire_events": "Om aktiverat, aktivera Home Assistant-händelser för cykelstart och -slut (ha_washdata_cycle_started/ended) för att driva automatiseringar."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Spara felsökningsspår",
           "dtw_bandwidth": "DTW-bandbredd",
           "external_end_trigger_enabled": "Aktivera extern cykelslutstriger",
-          "external_end_trigger": "Extern cykelslutssensor"
+          "external_end_trigger": "Extern cykelslutssensor",
+          "external_end_trigger_inverted": "Invertera triggerlogik (trigger på AV)",
+          "anti_wrinkle_enabled": "Anti-rynkskydd (endast torktumlare)",
+          "anti_wrinkle_max_power": "Anti-Wrinkle Max Power (W)",
+          "anti_wrinkle_max_duration": "Maximal varaktighet mot rynkor (s)",
+          "anti_wrinkle_exit_power": "Anti-Wrinkle Exit Power (W)"
         },
         "data_description": {
           "apply_suggestions": "Markera denna ruta för att kopiera värden föreslagna av inlärningsalgoritmen till formuläret. Granska innan du sparar.\n\nFöreslaget (från inlärning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Antal gånger slutvillkoret (effekt under tröskeln under off_delay) måste uppfyllas i rad innan cykeln avslutas. Högre värden förhindrar falska avslut under pauser. Standard: 1.",
           "start_energy_threshold": "Cykeln måste ackumulera minst denna mängd energi (Wh) under STARTFASEN för att bekräftas. Standard: 0.005 Wh.",
           "end_energy_threshold": "Cykeln avslutas bara om energin i det sista Off-Delay-fönstret är under detta värde (Wh). Förhindrar falska avslut om effekten fluktuerar nära noll. Standard: 0.05 Wh.",
-          "auto_maintenance": "Aktivera nattligt underhåll för att reparera sampel, sammanfoga fragmenterade cykler och hålla lagringen frisk.",
+          "auto_maintenance": "Aktivera automatiskt underhåll (reparera prover, slå samman fragment).",
           "expose_debug_entities": "Visa avancerade sensorer (Konfidens, Fas, Tvetydighet) för felsökning.",
           "save_debug_traces": "Lagra detaljerade ranknings- och effektspårdata i historiken (Ökar lagringsanvändning).",
-          "dtw_bandwidth": "Maximal tillåten tidsförvrängning (stretching) som andel av cykelns varaktighet. Högre värden tillåter matchning av mycket variabla cykler men ökar CPU-kostnaden. Standard: 0.20 (20%).",
-          "external_end_trigger_enabled": "Aktivera övervakning av en extern binär sensor för att utlösa cykelslutförande. Vid aktivering avslutar sensorns tändning omedelbart den aktuella cykeln.",
-          "external_end_trigger": "Välj en binär sensorentitet. När denna sensor tänds avslutas den aktuella cykeln med status 'slutförd' (inte 'avbruten')."
+          "dtw_bandwidth": "Maximalt tillåten tidsförskjutning (sträckning) som ett förhållande mellan cykelns varaktighet. Högre värden tillåter matchning av mycket varierande cykler men ökar CPU-kostnaden. Standard: 0,20 (20%).",
+          "external_end_trigger_enabled": "Aktivera övervakning av en extern binär sensor för att utlösa cykelavslutning.",
+          "external_end_trigger": "Välj en binär sensorenhet. När denna sensor utlöses kommer den aktuella cykeln att avslutas med status \"avslutad\".",
+          "external_end_trigger_inverted": "Som standard utlöses avtryckaren när sensorn slås PÅ. Markera den här rutan för att avfyras när sensorn stängs AV istället.",
+          "anti_wrinkle_enabled": "Ignorera korta trumrotationer med låg effekt efter att en cykel har avslutats för att förhindra spökcykler (endast torktumlare/tvättmaskin-torktumlare).",
+          "anti_wrinkle_max_power": "Bursts vid eller under denna effekt behandlas som anti-rynkrotationer istället för nya cykler. Gäller endast när Anti-Wrinkle Shield är aktiverat.",
+          "anti_wrinkle_max_duration": "Maximal spränglängd att behandla som anti-rynkrotation. Gäller endast när Anti-Wrinkle Shield är aktiverat.",
+          "anti_wrinkle_exit_power": "Om strömmen sjunker under denna nivå, avsluta anti-rynk omedelbart (true off). Gäller endast när Anti-Wrinkle Shield är aktiverat."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Hantera cykler",
         "description": "Senaste cykler:\n{recent_cycles}",
         "data": {
-          "action": "Åtgärd"
+          "action": {
+            "name": "Handling",
+            "options": {
+              "auto_label_cycles": "🤖 Automärk gamla cykler",
+              "select_cycle_to_label": "🏷️ Etikettspecifik cykel",
+              "select_cycle_to_label_multi": "🏷️ Märk flera cykler",
+              "select_cycle_to_delete": "🗑️ Ta bort cykel",
+              "interactive_editor": "✂️ Sammanfoga/Dela interaktiv redigerare"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Hantera profiler",
         "description": "Profilsammanfattning:\n{profile_summary}",
         "data": {
-          "action": "Åtgärd"
+          "action": {
+            "name": "Handling",
+            "options": {
+              "create_profile": "➕ Skapa ny profil",
+              "edit_profile": "✏️ Redigera/byt namn på profil",
+              "delete_profile": "🗑️ Ta bort profil",
+              "profile_stats": "📊 Profilstatistik",
+              "cleanup_profile": "🧹 Rensa upp historik - graf och radera"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Interaktiv sammanfognings/delningsredigerare",
         "description": "Välj en manuell åtgärd för din cykelhistorik.",
         "data": {
-          "editor_action": "Åtgärd"
+          "editor_action": {
+            "name": "Handling",
+            "options": {
+              "split": "✂️ Dela en cykel (Hitta luckor)",
+              "merge": "🔗 Sammanfoga cykler (Sammanfoga fragment)",
+              "delete": "🗑️ Ta bort cykel(er)"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Exportera/Importera JSON",
         "description": "Kopiera/klistra in cykler, profiler OCH inställningar för denna enhet. Exportera nedan eller klistra in JSON för import.",
         "data": {
-          "mode": "Åtgärd",
-          "json_payload": "Fullständig konfigurations-JSON"
+          "json_payload": "Fullständig konfigurations-JSON",
+          "mode": {
+            "name": "Handling",
+            "options": {
+              "export": "📤 Exportera all data",
+              "import": "📥 Importera/slå samman data"
+            }
+          }
         },
         "data_description": {
           "mode": "Välj Exportera för att kopiera aktuella data och inställningar, eller Importera för att klistra in data exporterade från en annan WashData-enhet.",
@@ -359,8 +408,17 @@
         "title": "Spela in cykel",
         "description": "Spela in en cykel manuellt för att skapa en ren profil utan störningar.\n\nStatus: **{status}**\nVaraktighet: {duration}s\nSampel: {samples}",
         "data": {
-          "action": "Åtgärd",
-          "refresh_status": "Uppdatera status"
+          "action": {
+            "name": "Handling",
+            "options": {
+              "start_recording": "⏺ Starta ny inspelning",
+              "stop_recording": "⏹ Stoppa inspelning (spara och bearbeta)",
+              "refresh_status": "🔄 Uppdatera status",
+              "process_recording": "⚙️ Bearbeta senaste inspelning (Trim & Save)",
+              "discard_recording": "🗑️ Kasta senaste inspelningen",
+              "cancel": "✖ Avbryt"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Lös feedback",
         "description": "**Detekterat program**: {profile}\n**Konfidens**: {confidence}%\n**Uppskattat**: {est}m, **Faktiskt**: {act}m",
         "data": {
-          "action": "Vad vill du göra?",
           "corrected_profile": "Korrekt program (om du korrigerar)",
-          "corrected_duration": "Korrekt varaktighet i minuter (om du korrigerar)"
+          "corrected_duration": "Korrekt varaktighet i minuter (om du korrigerar)",
+          "action": {
+            "name": "Vad skulle du vilja göra?",
+            "options": {
+              "confirm": "✅ Bekräfta - Korrekt upptäckt",
+              "correct": "✏️ Rätt - Välj Program/Längd",
+              "ignore": "✖ Ignorera - Falskt positiv/bullrig cykel",
+              "delete": "🗑️ Ta bort - Ta bort från historiken"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Automatisk detektering"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Ange"
+      },
+      "washer_program": {
+        "name": "Programmera"
+      },
+      "time_remaining": {
+        "name": "Återstående tid"
+      },
+      "total_duration": {
+        "name": "Total varaktighet"
+      },
+      "cycle_progress": {
+        "name": "Framsteg"
+      },
+      "current_power": {
+        "name": "Aktuell effekt"
+      },
+      "elapsed_time": {
+        "name": "Förfluten tid"
+      },
+      "debug_info": {
+        "name": "Felsökningsinformation"
+      },
+      "match_confidence": {
+        "name": "Match självförtroende"
+      },
+      "top_candidates": {
+        "name": "Toppkandidater"
+      },
+      "wash_phase": {
+        "name": "Fas"
+      },
+      "suggestions": {
+        "name": "Föreslagna inställningar"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Tvättprogram",
+    "program_placeholder": "Välj Program",
+    "duration": "Varaktighet",
+    "minutes": "min",
+    "time_remaining": "Återstående tid",
+    "no_prediction": "Ingen förutsägelse",
+    "cycle_in_progress": "Cykel pågår",
+    "status": "Status",
+    "progress": "Framsteg",
+    "select_program": "Välj ett program för att se detaljer",
+    "title": "Titel",
+    "status_entity": "Status Entitet",
+    "icon": "Ikon",
+    "active_color": "Aktiv ikonfärg",
+    "show_state": "Visa tillstånd",
+    "show_program": "Visa program",
+    "show_details": "Visa detaljer",
+    "spin_icon": "Spinning-ikon (medan du springer)",
+    "program_entity": "Program Entitet",
+    "pct_entity": "Progress Entity (valfritt)",
+    "time_entity": "Tidsenhet (valfritt)",
+    "display_mode": "Visningsläge",
+    "show_time_remaining": "Visa återstående tid",
+    "show_percentage": "Visa procent",
+    "entity_not_found": "Enheten hittades inte"
   }
 }

@@ -71,7 +71,11 @@
           "notify_start_message": "Format for startbesked",
           "notify_finish_message": "Format for slutbesked",
           "notify_pre_complete_message": "Format for besked før færdiggørelse",
-          "show_advanced": "Rediger avancerede indstillinger (Næste trin)"
+          "show_advanced": "Rediger avancerede indstillinger (Næste trin)",
+          "notify_actions": "Notifikationshandlinger",
+          "notify_people": "Folk, der skal underrettes",
+          "notify_only_when_home": "Giv kun besked når du er hjemme",
+          "notify_fire_events": "Brandautomatiseringsbegivenheder"
         },
         "data_description": {
           "apply_suggestions": "Marker dette felt for at kopiere værdier foreslået af læringsalgoritmen til formularen. Gennemgå før du gemmer.\n\nForeslået (fra læring):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Ikon for notifikationer (f.eks. mdi:washing-machine). Lad være tom for standard.",
           "notify_start_message": "Besked sendt når en cyklus starter. Understøtter pladsholderen {device}.",
           "notify_finish_message": "Besked sendt når en cyklus slutter. Understøtter pladsholderne {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Besked sendt før færdiggørelse. Understøtter pladsholderne {device}, {minutes}."
+          "notify_pre_complete_message": "Besked sendt før færdiggørelse. Understøtter pladsholderne {device}, {minutes}.",
+          "notify_actions": "Valgfri Home Assistant-handlingssekvens til at køre for notifikationer (scripts, notify, TTS osv.). Hvis det er angivet, kører handlinger før reserveunderretningstjenesten.",
+          "notify_people": "Personenheder til brug for hjemme-/udebaneporte. Når det er aktiveret, udskydes underretninger, indtil nogen er hjemme.",
+          "notify_only_when_home": "Hvis det er aktiveret, skal du udskyde underretninger, indtil mindst én valgt person er hjemme.",
+          "notify_fire_events": "Hvis det er aktiveret, skal du udløse Home Assistant-hændelser for cyklusstart og -slut (ha_washdata_cycle_started/ended) for at drive automatiseringer."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Gem fejlfindingsspor",
           "dtw_bandwidth": "DTW båndbredde",
           "external_end_trigger_enabled": "Aktiver ekstern cyklusslut-udløser",
-          "external_end_trigger": "Ekstern cyklusslut-sensor"
+          "external_end_trigger": "Ekstern cyklusslut-sensor",
+          "external_end_trigger_inverted": "Inverter triggerlogik (trigger til FRA)",
+          "anti_wrinkle_enabled": "Anti-rynkeskjold (kun tørretumbler)",
+          "anti_wrinkle_max_power": "Anti-rynke maksimal effekt (W)",
+          "anti_wrinkle_max_duration": "Anti-rynke maks. varighed (r)",
+          "anti_wrinkle_exit_power": "Anti-Rynke Exit Power (W)"
         },
         "data_description": {
           "apply_suggestions": "Marker dette felt for at kopiere værdier foreslået af læringsalgoritmen til formularen. Gennemgå før du gemmer.\n\nForeslået (fra læring):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Hvor mange gange slutbetingelsen (effekt under grænse i off_delay) skal opfyldes i træk før cyklus afsluttes. Højere værdier forhindrer falske afslutninger under pauser. Standard: 1.",
           "start_energy_threshold": "Cyklussen skal akkumulere mindst denne mængde energi (Wh) under STARTFASEN for at blive bekræftet. Standard: 0.005 Wh.",
           "end_energy_threshold": "Cyklussen slutter kun hvis energien i det sidste Off-Delay vindue er under denne værdi (Wh). Forhindrer falske afslutninger hvis effekt svinger nær nul. Standard: 0.05 Wh.",
-          "auto_maintenance": "Aktiver natlig vedligeholdelse for at reparere prøver, flette fragmenterede cyklusser og holde lageret sundt.",
+          "auto_maintenance": "Aktiver automatisk vedligeholdelse (reparer prøver, flet fragmenter).",
           "expose_debug_entities": "Vis avancerede sensorer (Tillid, Fase, Tvetydighed) til fejlfinding.",
           "save_debug_traces": "Gem detaljerede rangerings- og effektsporsdata i historikken (Øger lagerforbrug).",
-          "dtw_bandwidth": "Maksimal tilladt tidsforvrængning (strækning) som andel af cyklusvarighed. Højere værdier tillader matchning af meget variable cyklusser men øger CPU-omkostninger. Standard: 0.20 (20%).",
-          "external_end_trigger_enabled": "Aktiver overvågning af en ekstern binær sensor for at udløse cyklusfærdiggørelse. Når aktiveret, vil sensorens tilkobling øjeblikkeligt afslutte den aktuelle cyklus.",
-          "external_end_trigger": "Vælg en binær sensorenhed. Når denne sensor tænder, slutter den aktuelle cyklus med status 'færdig' (ikke 'afbrudt')."
+          "dtw_bandwidth": "Maksimal tilladt tidsforskydning (strækning) som et forhold mellem cyklusvarighed. Højere værdier tillader matchende meget variable cyklusser, men øger CPU-omkostningerne. Standard: 0,20 (20%).",
+          "external_end_trigger_enabled": "Aktiver overvågning af en ekstern binær sensor for at udløse cyklusafslutning.",
+          "external_end_trigger": "Vælg en binær sensorentitet. Når denne sensor udløses, vil den aktuelle cyklus afsluttes med status 'fuldført'.",
+          "external_end_trigger_inverted": "Som standard udløses udløseren, når sensoren tændes. Marker dette felt for at udløses, når sensoren i stedet slukker.",
+          "anti_wrinkle_enabled": "Ignorer korte tromlerotationer med lav effekt efter en cyklus er afsluttet for at forhindre spøgelsescyklusser (kun tørretumbler/vaskemaskine).",
+          "anti_wrinkle_max_power": "Udbrud ved eller under denne effekt behandles som anti-rynke rotationer i stedet for nye cyklusser. Gælder kun, når Anti-Wrinkle Shield er aktiveret.",
+          "anti_wrinkle_max_duration": "Maksimal sprænglængde at behandle som anti-rynke rotation. Gælder kun, når Anti-Wrinkle Shield er aktiveret.",
+          "anti_wrinkle_exit_power": "Hvis strømmen falder til under dette niveau, afslutte anti-rynke øjeblikkeligt (true off). Gælder kun, når Anti-Wrinkle Shield er aktiveret."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Administrer cyklusser",
         "description": "Seneste cyklusser:\n{recent_cycles}",
         "data": {
-          "action": "Handling"
+          "action": {
+            "name": "Handling",
+            "options": {
+              "auto_label_cycles": "🤖 Auto-mærke gamle cykler",
+              "select_cycle_to_label": "🏷️ Etiketspecifik cyklus",
+              "select_cycle_to_label_multi": "🏷️ Mærk flere cyklusser",
+              "select_cycle_to_delete": "🗑️ Slet cyklus",
+              "interactive_editor": "✂️ Flet/opdel interaktiv editor"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Administrer profiler",
         "description": "Profiloversigt:\n{profile_summary}",
         "data": {
-          "action": "Handling"
+          "action": {
+            "name": "Handling",
+            "options": {
+              "create_profile": "➕ Opret ny profil",
+              "edit_profile": "✏️ Rediger/Omdøb profil",
+              "delete_profile": "🗑️ Slet profil",
+              "profile_stats": "📊 Profilstatistik",
+              "cleanup_profile": "🧹 Ryd op i historie - graf og slet"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Interaktiv Flette/Opdele Editor",
         "description": "Vælg en manuel handling for din cyklushistorik.",
         "data": {
-          "editor_action": "Handling"
+          "editor_action": {
+            "name": "Handling",
+            "options": {
+              "split": "✂️ Del en cyklus (Find huller)",
+              "merge": "🔗 Sammenflet cyklusser (sammenføj fragmenter)",
+              "delete": "🗑️ Slet cyklus(er)"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Eksporter/Importer JSON",
         "description": "Kopier/indsæt cyklusser, profiler OG indstillinger for denne enhed. Eksporter nedenfor eller indsæt JSON for import.",
         "data": {
-          "mode": "Handling",
-          "json_payload": "Fuld konfigurations-JSON"
+          "json_payload": "Fuld konfigurations-JSON",
+          "mode": {
+            "name": "Handling",
+            "options": {
+              "export": "📤 Eksporter alle data",
+              "import": "📥 Importer/flet data"
+            }
+          }
         },
         "data_description": {
           "mode": "Vælg Eksporter for at kopiere aktuelle data og indstillinger, eller Importer for at indsætte data eksporteret fra en anden WashData-enhed.",
@@ -359,8 +408,17 @@
         "title": "Optag cyklus",
         "description": "Optag en cyklus manuelt for at oprette en ren profil uden interferens.\n\nStatus: **{status}**\nVarighed: {duration}s\nPrøver: {samples}",
         "data": {
-          "action": "Handling",
-          "refresh_status": "Opdater status"
+          "action": {
+            "name": "Handling",
+            "options": {
+              "start_recording": "⏺ Start ny optagelse",
+              "stop_recording": "⏹ Stop optagelse (Gem og bearbejd)",
+              "refresh_status": "🔄 Opdater status",
+              "process_recording": "⚙️ Behandle sidste optagelse (Trim & Gem)",
+              "discard_recording": "🗑️ Kassér sidste optagelse",
+              "cancel": "✖ Annuller"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Løs feedback",
         "description": "**Detekteret program**: {profile}\n**Tillid**: {confidence}%\n**Estimeret**: {est}m, **Faktisk**: {act}m",
         "data": {
-          "action": "Hvad vil du gøre?",
           "corrected_profile": "Korrekt program (hvis du retter)",
-          "corrected_duration": "Korrekt varighed i minutter (hvis du retter)"
+          "corrected_duration": "Korrekt varighed i minutter (hvis du retter)",
+          "action": {
+            "name": "Hvad vil du gerne lave?",
+            "options": {
+              "confirm": "✅ Bekræft - Korrekt registrering",
+              "correct": "✏️ Korrekt - Vælg program/varighed",
+              "ignore": "✖ Ignorer - Falsk positiv/støjende cyklus",
+              "delete": "🗑️ Slet - Fjern fra historikken"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Automatisk detektering"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Tilstand"
+      },
+      "washer_program": {
+        "name": "Program"
+      },
+      "time_remaining": {
+        "name": "Tid tilbage"
+      },
+      "total_duration": {
+        "name": "Samlet varighed"
+      },
+      "cycle_progress": {
+        "name": "Fremskridt"
+      },
+      "current_power": {
+        "name": "Nuværende strøm"
+      },
+      "elapsed_time": {
+        "name": "Forløbet tid"
+      },
+      "debug_info": {
+        "name": "Debug info"
+      },
+      "match_confidence": {
+        "name": "Match selvtillid"
+      },
+      "top_candidates": {
+        "name": "Topkandidater"
+      },
+      "wash_phase": {
+        "name": "Fase"
+      },
+      "suggestions": {
+        "name": "Foreslåede indstillinger"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Vaskeprogram",
+    "program_placeholder": "Vælg Program",
+    "duration": "Varighed",
+    "minutes": "min",
+    "time_remaining": "Tid tilbage",
+    "no_prediction": "Ingen forudsigelse",
+    "cycle_in_progress": "Cyklus i gang",
+    "status": "Status",
+    "progress": "Fremskridt",
+    "select_program": "Vælg et program for at se detaljer",
+    "title": "Titel",
+    "status_entity": "Statusenhed",
+    "icon": "Ikon",
+    "active_color": "Aktiv ikon farve",
+    "show_state": "Vis tilstand",
+    "show_program": "Vis program",
+    "show_details": "Vis detaljer",
+    "spin_icon": "Spinning-ikon (mens du løber)",
+    "program_entity": "Programenhed",
+    "pct_entity": "Fremskridtsenhed (valgfrit)",
+    "time_entity": "Tidsenhed (valgfrit)",
+    "display_mode": "Visningstilstand",
+    "show_time_remaining": "Vis resterende tid",
+    "show_percentage": "Vis procent",
+    "entity_not_found": "Enheden blev ikke fundet"
   }
 }

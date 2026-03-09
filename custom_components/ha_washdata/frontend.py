@@ -1,6 +1,8 @@
 """Frontend card registration for HA WashData."""
 
 import logging
+import json
+import time
 from pathlib import Path
 from homeassistant.core import HomeAssistant, Event
 from homeassistant.const import EVENT_COMPONENT_LOADED
@@ -10,7 +12,11 @@ _LOGGER = logging.getLogger(__name__)
 LOCAL_SUBDIR = "ha_washdata"
 CARD_NAME = "ha-washdata-card.js"
 INTEGRATION_URL = f"/{LOCAL_SUBDIR}/{CARD_NAME}"
-_VERSION = "1"
+
+
+def get_cache_buster() -> str:
+    """Generate a unique cache buster based on current time."""
+    return str(int(time.time()))
 
 
 def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> None:
@@ -123,6 +129,8 @@ class WashDataCardRegistration:
             return
 
         _register_static_path(self.hass, INTEGRATION_URL, str(src))
+        
+        version = get_cache_buster()
 
         # Try auto-registration of the lovelace resource
         # If lovelace is not yet loaded, wait for it
@@ -136,7 +144,7 @@ class WashDataCardRegistration:
                         "Lovelace component loaded; retrying resource registration"
                     )
                     try:
-                        await _init_resource(self.hass, INTEGRATION_URL, _VERSION)
+                        await _init_resource(self.hass, INTEGRATION_URL, version)
                     except Exception:  # pylint: disable=broad-exception-caught
                         _LOGGER.debug(
                             "Delayed auto-registration of lovelace resource failed for %s",
@@ -148,7 +156,7 @@ class WashDataCardRegistration:
 
         # Lovelace is already loaded
         try:
-            await _init_resource(self.hass, INTEGRATION_URL, _VERSION)
+            await _init_resource(self.hass, INTEGRATION_URL, version)
             _LOGGER.debug("Auto-registered lovelace resource for %s", INTEGRATION_URL)
         except Exception:  # pylint: disable=broad-exception-caught
             _LOGGER.debug(

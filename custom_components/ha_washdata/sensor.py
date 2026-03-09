@@ -11,7 +11,23 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util, slugify
 
-from .const import DOMAIN, SIGNAL_WASHER_UPDATE, CONF_EXPOSE_DEBUG_ENTITIES
+from .const import (
+    DOMAIN,
+    SIGNAL_WASHER_UPDATE,
+    CONF_EXPOSE_DEBUG_ENTITIES,
+    STATE_OFF,
+    STATE_IDLE,
+    STATE_STARTING,
+    STATE_RUNNING,
+    STATE_PAUSED,
+    STATE_ENDING,
+    STATE_FINISHED,
+    STATE_ANTI_WRINKLE,
+    STATE_INTERRUPTED,
+    STATE_FORCE_STOPPED,
+    STATE_RINSE,
+    STATE_UNKNOWN,
+)
 from .manager import WashDataManager
 
 
@@ -90,7 +106,23 @@ class WasherStateSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
         """Initialize the state sensor."""
         self.entity_description = SensorEntityDescription(
-            key="washer_state", name="State"
+            key="washer_state",
+            translation_key="washer_state",
+            device_class="enum",
+            options=[
+                STATE_OFF,
+                STATE_IDLE,
+                STATE_STARTING,
+                STATE_RUNNING,
+                STATE_PAUSED,
+                STATE_ENDING,
+                STATE_FINISHED,
+                STATE_ANTI_WRINKLE,
+                STATE_INTERRUPTED,
+                STATE_FORCE_STOPPED,
+                STATE_RINSE,
+                STATE_UNKNOWN,
+            ],
         )
         super().__init__(manager, entry)
 
@@ -104,8 +136,12 @@ class WasherStateSensor(WasherBaseSensor):
             return "mdi:dishwasher"
         if dtype == "ev":
             return "mdi:car-electric"
-        if dtype == "coffee_machine":
+        elif dtype == "coffee_machine":
             return "mdi:coffee-maker"
+        elif dtype == "air_fryer":
+            return "mdi:pot-steam"
+        elif dtype == "heat_pump":
+            return "mdi:heat-pump"
         return "mdi:washing-machine"
 
     @property
@@ -127,9 +163,27 @@ class WasherProgramSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
         """Initialize the program sensor."""
         self.entity_description = SensorEntityDescription(
-            key="washer_program", name="Program", icon="mdi:file-document-outline"
+            key="washer_program",
+            translation_key="washer_program",
+            icon="mdi:file-document-outline",
+            device_class="enum",
         )
         super().__init__(manager, entry)
+
+    @property
+    def options(self) -> list[str] | None:
+        """Return a list of possible options."""
+        profiles = self._manager.profile_store.list_profiles()
+        # Include current program if not in profiles (e.g. unknown or special states)
+        options = [p["name"] for p in profiles]
+        curr = self._manager.current_program
+        if curr and curr not in options:
+            options.append(curr)
+        if "None" not in options:
+            options.append("None")
+        if "unknown" not in options:
+            options.append("unknown")
+        return options
 
     @property
     def native_value(self):
@@ -143,8 +197,7 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
         """Initialize the time remaining sensor."""
         self.entity_description = SensorEntityDescription(
             key="time_remaining",
-            name="Time Remaining",
-            # native_unit_of_measurement="min",  # Removed static unit
+            translation_key="time_remaining",
             icon="mdi:timer-sand",
         )
         super().__init__(manager, entry)
@@ -152,13 +205,13 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
     @property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit of measurement."""
-        if self._manager.check_state == "off":
+        if self._manager.check_state in (STATE_OFF, STATE_ANTI_WRINKLE):
             return None
         return "min"
 
     @property
     def native_value(self):
-        if self._manager.check_state == "off":
+        if self._manager.check_state in (STATE_OFF, STATE_ANTI_WRINKLE):
             return "off"
         if self._manager.time_remaining:
             return int(self._manager.time_remaining / 60)
@@ -172,7 +225,7 @@ class WasherTotalDurationSensor(WasherBaseSensor):
         """Initialize the total duration sensor."""
         self.entity_description = SensorEntityDescription(
             key="total_duration",
-            name="Total Duration",
+            translation_key="total_duration",
             device_class="duration",
             icon="mdi:timer-check-outline",
         )
@@ -208,7 +261,7 @@ class WasherProgressSensor(WasherBaseSensor):
         """Initialize the progress sensor."""
         self.entity_description = SensorEntityDescription(
             key="cycle_progress",
-            name="Progress",
+            translation_key="cycle_progress",
             native_unit_of_measurement="%",
             suggested_display_precision=1,
             icon="mdi:progress-clock",
@@ -227,7 +280,7 @@ class WasherPowerSensor(WasherBaseSensor):
         """Initialize the power sensor."""
         self.entity_description = SensorEntityDescription(
             key="current_power",
-            name="Current Power",
+            translation_key="current_power",
             native_unit_of_measurement="W",
             device_class="power",
             icon="mdi:flash",
@@ -246,7 +299,7 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
         """Initialize the elapsed time sensor."""
         self.entity_description = SensorEntityDescription(
             key="elapsed_time",
-            name="Elapsed Time",
+            translation_key="elapsed_time",
             native_unit_of_measurement="s",
             device_class="duration",
             icon="mdi:timer-outline",
@@ -271,7 +324,7 @@ class WasherDebugSensor(WasherBaseSensor):
         """Initialize the debug sensor."""
         self.entity_description = SensorEntityDescription(
             key="debug_info",
-            name="Debug Info",
+            translation_key="debug_info",
             icon="mdi:bug",
             entity_registry_enabled_default=False,  # Hidden by default
             entity_category=EntityCategory.DIAGNOSTIC,
@@ -308,7 +361,7 @@ class WasherMatchConfidenceSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
         self.entity_description = SensorEntityDescription(
             key="match_confidence",
-            name="Match Confidence",
+            translation_key="match_confidence",
             icon="mdi:chart-bar",
             state_class="measurement",
             native_unit_of_measurement="%",
@@ -328,7 +381,7 @@ class WasherTopCandidatesSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
         self.entity_description = SensorEntityDescription(
             key="top_candidates",
-            name="Top Candidates",
+            translation_key="top_candidates",
             icon="mdi:format-list-numbered",
             entity_category=EntityCategory.DIAGNOSTIC,
         )
@@ -353,7 +406,7 @@ class WasherPhaseSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
         self.entity_description = SensorEntityDescription(
             key="wash_phase",
-            name="Phase",
+            translation_key="wash_phase",
             icon="mdi:washing-machine-alert",
             entity_category=EntityCategory.DIAGNOSTIC,
         )
@@ -501,7 +554,7 @@ class WasherSuggestionsSensor(WasherBaseSensor):
     def __init__(self, manager, entry):
         self.entity_description = SensorEntityDescription(
             key="suggestions",
-            name="Suggested Settings",
+            translation_key="suggestions",
             icon="mdi:lightbulb-on-outline",
             entity_category=EntityCategory.DIAGNOSTIC,
         )

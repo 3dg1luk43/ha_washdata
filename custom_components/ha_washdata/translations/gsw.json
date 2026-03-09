@@ -1,0 +1,557 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "WashData-Setup",
+        "description": "Konfigurieren Sie Ihre Waschmaschine oder ein anderes Gerät.\n\nLeistungssensor ist erforderlich.\n\n**Als nächstes werden Sie gefragt, ob Sie Ihr erstes Profil erstellen möchten.**",
+        "data": {
+          "name": "Gerätename",
+          "device_type": "Gerätetyp",
+          "power_sensor": "Leistungssensor",
+          "min_power": "Mindestleistungsschwelle (W)"
+        },
+        "data_description": {
+          "name": "Ein benutzerfreundlicher Name für dieses Gerät (z. B. „Waschmaschine“, „Geschirrspüler“).",
+          "device_type": "Was für ein Gerät ist das? Hilft bei der individuellen Erkennung und Kennzeichnung.",
+          "power_sensor": "Die Sensoreinheit, die den Stromverbrauch (in Watt) Ihres Smart Plugs in Echtzeit meldet.",
+          "min_power": "Leistungswerte über diesem Schwellenwert (in Watt) zeigen an, dass das Gerät läuft. Beginnen Sie bei den meisten Geräten mit 2 W."
+        }
+      },
+      "first_profile": {
+        "title": "Erstellen Sie das erste Profil",
+        "description": "Ein **Zyklus** ist ein vollständiger Durchlauf Ihres Geräts (z. B. eine Ladung Wäsche). Ein **Profil** gruppiert diese Programme nach Typ (z. B. „Baumwolle“, „Schnellwäsche“). Wenn Sie jetzt ein Profil erstellen, kann die Integrationsdauer sofort geschätzt werden.\n\nSie können dieses Profil in der Gerätesteuerung manuell auswählen, wenn es nicht automatisch erkannt wird.\n\n**Lassen Sie „Profilname“ leer, um diesen Schritt zu überspringen.**",
+        "data": {
+          "profile_name": "Profilname (optional)",
+          "manual_duration": "Geschätzte Dauer (Minuten)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung konnte nicht hergestellt werden",
+      "invalid_auth": "Ungültige Authentifizierung",
+      "unknown": "Unerwarteter Fehler"
+    },
+    "abort": {
+      "already_configured": "Gerät ist bereits konfiguriert"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "menu_options": {
+          "learning_feedbacks": "Überprüfen Sie die Lernrückmeldungen",
+          "settings": "Einstellungen",
+          "manage_cycles": "Zyklen verwalten",
+          "manage_profiles": "Profile verwalten",
+          "record_cycle": "Aufnahmezyklus (manuell)",
+          "diagnostics": "Diagnose und Wartung"
+        }
+      },
+      "apply_suggestions": {
+        "title": "Vorgeschlagene Werte kopieren",
+        "description": "Dadurch werden die aktuellen Vorschlagswerte in Ihre gespeicherten Einstellungen kopiert. Dies ist eine einmalige Aktion und ermöglicht keine automatischen Überschreibungen.\n\nVorgeschlagene Werte zum Kopieren:\n{suggested}",
+        "data": {
+          "confirm": "Bestätigen Sie den Kopiervorgang"
+        }
+      },
+      "settings": {
+        "title": "Einstellungen",
+        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.",
+        "data": {
+          "apply_suggestions": "Vorgeschlagene Werte anwenden",
+          "device_type": "Gerätetyp",
+          "power_sensor": "Leistungssensoreinheit",
+          "min_power": "Mindestleistung (W)",
+          "off_delay": "Zyklusendeverzögerung (en)",
+          "notify_service": "Benachrichtigungsdienst (z. B. notify.mobile_app)",
+          "notify_actions": "Benachrichtigungsaktionen",
+          "notify_people": "Zu benachrichtigende Personen",
+          "notify_only_when_home": "Nur benachrichtigen, wenn Sie zu Hause sind",
+          "notify_fire_events": "Veranstaltungen zur Brandautomatisierung",
+          "notify_events": "Zu benachrichtigende Ereignisse",
+          "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
+          "notify_title": "Titel der Benachrichtigung",
+          "notify_icon": "Benachrichtigungssymbol",
+          "notify_start_message": "Starten Sie das Nachrichtenformat",
+          "notify_finish_message": "Beenden Sie das Nachrichtenformat",
+          "notify_pre_complete_message": "Nachrichtenformat vor Abschluss",
+          "show_advanced": "Erweiterte Einstellungen bearbeiten (nächster Schritt)"
+        },
+        "data_description": {
+          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n-profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Dauer_Toleranz: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "device_type": "Wählen Sie den Gerätetyp (Waschmaschine, Trockner, Geschirrspüler, Kaffeemaschine, Elektroauto). Dieses Tag wird zur besseren Organisation bei jedem Zyklus gespeichert.",
+          "power_sensor": "Die Sensoreinheit meldet die Leistung in Echtzeit (in Watt). Sie können dies jederzeit ändern, ohne historische Daten zu verlieren – nützlich, wenn Sie einen Smart Plug austauschen.",
+          "min_power": "Leistungswerte über diesem Schwellenwert (in Watt) zeigen an, dass das Gerät läuft. Beginnen Sie bei den meisten Geräten mit 2 W.",
+          "off_delay": "Sekunden lang muss die geglättete Leistung unter dem Stoppschwellenwert bleiben, um den Abschluss zu markieren. Standard: 120s.",
+          "notify_service": "Zu verwendender Home Assistant-Benachrichtigungsdienst (optional).",
+          "notify_actions": "Optionale Home Assistant-Aktionssequenz zur Ausführung für Benachrichtigungen (Skripte, Benachrichtigung, TTS usw.). Wenn festgelegt, werden Aktionen vor dem Fallback-Benachrichtigungsdienst ausgeführt.",
+          "notify_people": "Personenentitäten, die für das Heim-/Auswärts-Gating verwendet werden sollen. Wenn diese Option aktiviert ist, werden Benachrichtigungen verschoben, bis jemand zu Hause ist.",
+          "notify_only_when_home": "Wenn diese Option aktiviert ist, werden Benachrichtigungen verzögert, bis mindestens eine ausgewählte Person zu Hause ist.",
+          "notify_fire_events": "Wenn aktiviert, werden Home Assistant-Ereignisse für Zyklusstart und -ende (ha_washdata_cycle_started/ended) ausgelöst, um Automatisierungen voranzutreiben.",
+          "notify_events": "Für welche Ereignisse sollen Benachrichtigungen gesendet werden?",
+          "notify_before_end_minutes": "Minuten vor dem voraussichtlichen Ende des Zyklus, um eine Benachrichtigung auszulösen. Zum Deaktivieren auf 0 setzen. Standard: 0.",
+          "notify_title": "Benutzerdefinierter Titel für Benachrichtigungen. Unterstützt den Platzhalter {device}.",
+          "notify_icon": "Symbol zur Verwendung für Benachrichtigungen (z. B. mdi:washing-machine). Lassen Sie das Feld leer, um die Standardeinstellung zu verwenden.",
+          "notify_start_message": "Nachricht wird gesendet, wenn ein Zyklus beginnt. Unterstützt den Platzhalter {device}.",
+          "notify_finish_message": "Nachricht wird gesendet, wenn ein Zyklus beendet ist. Unterstützt die Platzhalter {device}, {duration} und {program}.",
+          "notify_pre_complete_message": "Nachricht vor Abschluss gesendet. Unterstützt die Platzhalter {device} und {minutes}."
+        }
+      },
+      "advanced_settings": {
+        "title": "Erweiterte Einstellungen",
+        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.",
+        "data": {
+          "apply_suggestions": "Vorgeschlagene Werte anwenden",
+          "start_threshold_w": "Startschwelle (W)",
+          "stop_threshold_w": "Stoppschwelle (W)",
+          "min_off_gap": "Min. Abstand zwischen Zyklen (s)",
+          "start_duration_threshold": "Start-Entprellungsdauer (s)",
+          "progress_reset_delay": "Verzögerung beim Zurücksetzen des Fortschritts (Sekunden)",
+          "no_update_active_timeout": "Zeitüberschreitung bei fehlender Aktualisierung (s)",
+          "sampling_interval": "Abtastintervall (e)",
+          "auto_label_confidence": "Auto-Label-Konfidenz (0-1)",
+          "learning_confidence": "Vertrauen der Feedback-Anfrage (0-1)",
+          "duration_tolerance": "Dauertoleranz (0–0,5)",
+          "profile_match_interval": "Profil-Match-Intervall (Sekunden)",
+          "profile_match_min_duration_ratio": "Verhältnis der Mindestdauer der Profilübereinstimmung (0,1–1,0)",
+          "profile_match_max_duration_ratio": "Verhältnis der maximalen Profilübereinstimmungsdauer (1,0–3,0)",
+          "smoothing_window": "Glättungsfenster (Beispiele)",
+          "profile_match_threshold": "Schwellenwert für Profilübereinstimmung",
+          "profile_unmatch_threshold": "Schwellenwert für nicht übereinstimmendes Profil",
+          "profile_duration_tolerance": "Toleranz der Profilübereinstimmungsdauer (0–0,5)",
+          "interrupted_min_seconds": "Unterbrochen: Mindestlaufzeit (Sekunden)",
+          "abrupt_drop_watts": "Unterbrochen: Abrupter Abfall Absolut (W)",
+          "abrupt_drop_ratio": "Unterbrochen: Abruptes Drop-Verhältnis (0-1)",
+          "abrupt_high_load_factor": "Unterbrochen: Hoher Belastungsfaktor",
+          "max_past_cycles": "Aufbewahrung: Max. gespeicherte Zyklen",
+          "max_full_traces_per_profile": "Aufbewahrung: Max. vollständige Traces pro Profil",
+          "max_full_traces_unlabeled": "Aufbewahrung: Max. vollständige Spuren ohne Beschriftung",
+          "watchdog_interval": "Watchdog-Intervall (Sekunden)",
+          "completion_min_seconds": "Mindestlaufzeit für den Abschluss (Sekunden)",
+          "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
+          "auto_tune_noise_events_threshold": "Auto-Tune: Schwellenwert für Geräuschereignisse",
+          "running_dead_zone": "Running Dead Zone (Sekunden)",
+          "end_repeat_count": "Anzahl der Wiederholungen beenden",
+          "start_energy_threshold": "Startenergietor (Wh)",
+          "end_energy_threshold": "Endenergietor (Wh)",
+          "auto_maintenance": "Aktivieren Sie die automatische Wartung",
+          "expose_debug_entities": "Debug-Entitäten verfügbar machen",
+          "save_debug_traces": "Speichern Sie Debug-Traces",
+          "anti_wrinkle_enabled": "Anti-Falten-Schutz (nur Trockner)",
+          "anti_wrinkle_max_power": "Anti-Falten-Maximalleistung (W)",
+          "anti_wrinkle_max_duration": "Maximale Anti-Falten-Dauer (s)",
+          "anti_wrinkle_exit_power": "Anti-Falten-Ausgangsleistung (W)",
+          "dtw_bandwidth": "DTW-Bandbreite",
+          "external_end_trigger_enabled": "Aktivieren Sie den externen Zyklusende-Trigger",
+          "external_end_trigger": "Externer Zyklusendesensor",
+          "external_end_trigger_inverted": "Triggerlogik umkehren (Trigger auf AUS)"
+        },
+        "data_description": {
+          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n-profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Dauer_Toleranz: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "start_threshold_w": "Die Leistung muss ÜBER diesen Schwellenwert ansteigen, um einen Zyklus zu starten. Höher einstellen als Ihre Standby-Leistung. Standard: min_power + 1 W.",
+          "stop_threshold_w": "Die Leistung muss UNTER diesen Schwellenwert fallen, um einen Zyklus zu BEENDEN. Stellen Sie den Wert knapp über Null ein, um zu vermeiden, dass Rauschen falsche Enden auslöst. Standard: 0,6 * min_power.",
+          "min_off_gap": "Wenn ein Zyklus innerhalb dieser Anzahl von Sekunden nach dem Ende des vorherigen beginnt, werden sie zu einem einzigen Zyklus zusammengeführt.",
+          "start_duration_threshold": "Ignorieren Sie kurze Leistungsspitzen, die kürzer als diese Dauer (Sekunden) sind. Filtert Startspitzen (z. B. 60 W für 2 Sekunden) heraus, bevor der eigentliche Zyklus beginnt. Standard: 5s.",
+          "progress_reset_delay": "Nachdem ein Zyklus abgeschlossen ist (100 %), warten Sie so viele Sekunden im Leerlauf, bevor Sie den Fortschritt auf 0 % zurücksetzen. Standard: 300s.",
+          "no_update_active_timeout": "Für Publish-on-Change-Sensoren: Erzwingen Sie das Beenden eines ACTIVE-Zyklus nur, wenn für diese viele Sekunden keine Aktualisierungen eintreffen. Beim Abschluss mit geringem Stromverbrauch wird weiterhin die Ausschaltverzögerung verwendet.",
+          "sampling_interval": "Mindestabtastintervall in Sekunden. Aktualisierungen, die schneller als diese Rate sind, werden ignoriert. Standard: 2,0 s.",
+          "auto_label_confidence": "Beschriften Sie Zyklen mit oder über diesem Konfidenzniveau nach Abschluss automatisch (0,0–1,0).",
+          "learning_confidence": "Mindestkonfidenz für die Anforderung einer Benutzerverifizierung über ein Ereignis (0,0–1,0).",
+          "duration_tolerance": "Toleranz für Schätzungen der verbleibenden Zeit während eines Laufs (0,0–0,5 entspricht 0–50 %).",
+          "profile_match_interval": "Wie oft (in Sekunden) der Profilabgleich während eines Zyklus versucht werden soll. Niedrigere Werte ermöglichen eine schnellere Erkennung, beanspruchen jedoch mehr CPU. Standard: 300s (5 Minuten).",
+          "profile_match_min_duration_ratio": "Mindestdauerverhältnis für den Profilabgleich. Damit der Laufzyklus übereinstimmt, muss er mindestens diesen Bruchteil der Profildauer betragen. Niedriger = frühere Übereinstimmung. Standard: 0,50 (50 %).",
+          "profile_match_max_duration_ratio": "Maximales Dauerverhältnis für den Profilabgleich. Der Laufzyklus darf dieses Vielfache der Profildauer nicht überschreiten. Höher = milder. Standard: 1,50 (150 %).",
+          "smoothing_window": "Anzahl der letzten Leistungsmesswerte, die für die Glättung des gleitenden Durchschnitts verwendet werden.",
+          "profile_match_threshold": "Mindest-DTW-Ähnlichkeitswert (0,0–1,0), der erforderlich ist, um ein Profil als Übereinstimmung zu betrachten. Höher = strengere Übereinstimmung, weniger Fehlalarme. Standard: 0,4.",
+          "profile_unmatch_threshold": "DTW-Ähnlichkeitswert (0,0–1,0), unterhalb dessen ein zuvor übereinstimmendes Profil abgelehnt wird. Sollte niedriger als der Übereinstimmungsschwellenwert sein, um ein Flackern zu verhindern. Standard: 0,35.",
+          "profile_duration_tolerance": "Vom Profilabgleich verwendete Toleranz für die Gesamtdauervarianz (0,0–0,5). Standardverhalten: ±25 %.",
+          "interrupted_min_seconds": "Längere Läufe können als „unterbrochen“ eingestuft werden.",
+          "abrupt_drop_watts": "Der absolute Leistungsabfall (W) gilt als abrupter Anstieg.",
+          "abrupt_drop_ratio": "Relatives Drop-Verhältnis (0–1). Beispiel: 0,6 bedeutet, dass ein Abfall um 60 % abrupt erfolgt.",
+          "abrupt_high_load_factor": "Faktor über dem Ausgangswert gilt als „hohe Belastung“ vor einem abrupten Abfall (wird bei abrupter Erkennung verwendet).",
+          "max_past_cycles": "Gesamtzahl der beizubehaltenden Zyklen (älteste entfernt). Standard: 200.",
+          "max_full_traces_per_profile": "Anzahl der letzten beschrifteten Zyklen, die mit vollen Leistungsspuren pro Profil beibehalten werden sollen. Ältere Spuren werden über Umschläge zusammengefasst. Standard: 20.",
+          "max_full_traces_unlabeled": "Anzahl der letzten unbeschrifteten Zyklen, die mit vollständigen Leistungsverfolgungen beibehalten werden sollen, um die automatische Beschriftung zu unterstützen. Standard: 20.",
+          "watchdog_interval": "Sekunden zwischen Watchdog-Prüfungen während der Ausführung. Standard: 5s. WARNUNG: Stellen Sie sicher, dass dieser Wert HÖHER ist als das Aktualisierungsintervall Ihres Sensors, um falsche Stopps zu vermeiden (z. B. wenn der Sensor alle 60 Sekunden aktualisiert wird, verwenden Sie 65 Sekunden+).",
+          "completion_min_seconds": "Zyklen, die kürzer sind, werden als „unterbrochen“ markiert, auch wenn sie natürlich enden. Standard: 600s.",
+          "notify_before_end_minutes": "Minuten vor dem voraussichtlichen Ende des Zyklus, um eine Benachrichtigung auszulösen. Zum Deaktivieren auf 0 setzen. Standard: 0.",
+          "auto_tune_noise_events_threshold": "Anzahl der kurzen/Low-Power-„Rauschen“-Zyklen innerhalb von 24 Stunden, die zur automatischen Anpassung von min_power erforderlich sind. Standard: 3.",
+          "running_dead_zone": "Ignorieren Sie nach dem Start des Zyklus Stromeinbrüche für diese Anzahl von Sekunden, um eine falsche Enderkennung während der anfänglichen Hochlaufphase zu verhindern. Zum Deaktivieren auf 0 setzen. Standard: 0s.",
+          "end_repeat_count": "Gibt an, wie oft die Endbedingung (Leistung unter dem Schwellenwert für Ausschaltverzögerung) nacheinander erfüllt sein muss, bevor der Zyklus beendet wird. Höhere Werte verhindern falsches Ende während Pausen. Standard: 1.",
+          "start_energy_threshold": "Um bestätigt zu werden, muss der Zyklus während der START-Phase mindestens so viel Energie (Wh) akkumulieren. Standard: 0,005 Wh.",
+          "end_energy_threshold": "Der Zyklus endet nur, wenn die Energie im letzten Ausschaltverzögerungsfenster unter diesem Wert (Wh) liegt. Verhindert falsche Enden, wenn die Leistung nahe Null schwankt. Standard: 0,05 Wh.",
+          "auto_maintenance": "Aktivieren Sie die automatische Wartung (Beispiele reparieren, Fragmente zusammenführen).",
+          "expose_debug_entities": "Zeigen Sie erweiterte Sensoren (Konfidenz, Phase, Mehrdeutigkeit) zum Debuggen an.",
+          "save_debug_traces": "Speichern Sie detaillierte Ranking- und Stromverfolgungsdaten im Verlauf (erhöht die Speichernutzung).",
+          "anti_wrinkle_enabled": "Ignorieren Sie kurze Trommelumdrehungen mit geringer Leistung nach Programmende, um Geisterzyklen zu vermeiden (nur Trockner/Waschtrockner).",
+          "anti_wrinkle_max_power": "Ausbrüche bei oder unter dieser Leistung werden als Anti-Falten-Rotationen und nicht als neue Zyklen behandelt. Gilt nur, wenn Anti-Falten-Schutz aktiviert ist.",
+          "anti_wrinkle_max_duration": "Maximale Burst-Länge zur Behandlung als Anti-Falten-Rotation. Gilt nur, wenn Anti-Falten-Schutz aktiviert ist.",
+          "anti_wrinkle_exit_power": "Wenn die Leistung unter diesen Wert fällt, beenden Sie die Anti-Falten-Funktion sofort (echt aus). Gilt nur, wenn Anti-Falten-Schutz aktiviert ist.",
+          "dtw_bandwidth": "Maximal zulässige Zeitverzerrung (Streckung) im Verhältnis zur Zyklusdauer. Höhere Werte ermöglichen die Anpassung stark variabler Zyklen, erhöhen jedoch die CPU-Kosten. Standard: 0,20 (20 %).",
+          "external_end_trigger_enabled": "Aktivieren Sie die Überwachung eines externen Binärsensors, um den Abschluss des Zyklus auszulösen.",
+          "external_end_trigger": "Wählen Sie eine binäre Sensoreinheit aus. Wenn dieser Sensor auslöst, endet der aktuelle Zyklus mit dem Status „abgeschlossen“.",
+          "external_end_trigger_inverted": "Standardmäßig wird der Auslöser ausgelöst, wenn der Sensor eingeschaltet wird. Aktivieren Sie dieses Kontrollkästchen, um stattdessen auszulösen, wenn der Sensor ausgeschaltet wird."
+        }
+      },
+      "diagnostics": {
+        "title": "Diagnose und Wartung",
+        "description": "Führen Sie Wartungsaktionen durch, z. B. das Zusammenführen fragmentierter Zyklen oder das Migrieren gespeicherter Daten.\n\n{storage_stats}"
+      },
+      "clear_debug_data": {
+        "title": "Debug-Daten löschen",
+        "description": "Sind Sie sicher, dass Sie alle gespeicherten Debug-Traces löschen möchten? Dadurch wird Speicherplatz frei, aber detaillierte Ranking-Informationen aus vergangenen Zyklen werden entfernt."
+      },
+      "manage_cycles": {
+        "title": "Zyklen verwalten",
+        "description": "Letzte Zyklen:\n{recent_cycles}",
+        "data": {
+          "action": {
+            "name": "Aktion",
+            "options": {
+              "auto_label_cycles": "🤖 Alte Zyklen automatisch kennzeichnen",
+              "select_cycle_to_label": "🏷️ Beschriften Sie den spezifischen Zyklus",
+              "select_cycle_to_label_multi": "🏷️ Beschriften Sie mehrere Zyklen",
+              "select_cycle_to_delete": "🗑️ Zyklus löschen",
+              "interactive_editor": "✂️ Interaktiven Editor zusammenführen/aufteilen"
+            }
+          }
+        }
+      },
+      "manage_profiles": {
+        "title": "Profile verwalten",
+        "description": "Profilzusammenfassung:\n{profile_summary}",
+        "data": {
+          "action": {
+            "name": "Aktion",
+            "options": {
+              "create_profile": "➕ Neues Profil erstellen",
+              "edit_profile": "✏️ Profil bearbeiten/umbenennen",
+              "delete_profile": "🗑️ Profil löschen",
+              "profile_stats": "📊 Profilstatistik",
+              "cleanup_profile": "🧹 Verlauf bereinigen – grafisch darstellen und löschen"
+            }
+          }
+        }
+      },
+      "profile_stats": {
+        "title": "Profilstatistik",
+        "description": "{stats_table}"
+      },
+      "create_profile": {
+        "title": "Neues Profil erstellen",
+        "description": "Erstellen Sie manuell oder aus einem vergangenen Zyklus ein neues Profil.\n\nBeispiele für Profilnamen: „Feinwäsche“, „Heavy Duty“, „Schnellwäsche“",
+        "data": {
+          "profile_name": "Profilname",
+          "reference_cycle": "Referenzzyklus (optional)",
+          "manual_duration": "Manuelle Dauer (Minuten)"
+        }
+      },
+      "edit_profile": {
+        "title": "Profil bearbeiten",
+        "description": "Wählen Sie ein Profil zum Umbenennen aus",
+        "data": {
+          "profile": "Profil"
+        }
+      },
+      "rename_profile": {
+        "title": "Profildetails bearbeiten",
+        "description": "Aktuelles Profil: {current_name}",
+        "data": {
+          "new_name": "Profilname",
+          "manual_duration": "Manuelle Dauer (Minuten)"
+        }
+      },
+      "delete_profile_select": {
+        "title": "Profil löschen",
+        "description": "Wählen Sie ein Profil zum Löschen aus",
+        "data": {
+          "profile": "Profil"
+        }
+      },
+      "delete_profile_confirm": {
+        "title": "Bestätigen Sie „Profil löschen“.",
+        "description": "⚠️ Dadurch wird das Profil: {profile_name} dauerhaft gelöscht",
+        "data": {
+          "unlabel_cycles": "Entfernen Sie mit diesem Profil Etiketten von Zyklen"
+        }
+      },
+      "auto_label_cycles": {
+        "title": "Alte Zyklen automatisch kennzeichnen",
+        "description": "{info}",
+        "data": {
+          "confidence_threshold": "Minimales Vertrauen (0,50–0,95)"
+        }
+      },
+      "select_cycle_to_label": {
+        "title": "Wählen Sie „Zum Etikett wechseln“ aus",
+        "description": "✓ = abgeschlossen, ⚠ = fortgesetzt, ✗ = unterbrochen",
+        "data": {
+          "cycle_id": "Zyklus"
+        }
+      },
+      "select_cycle_to_delete": {
+        "title": "Zyklus löschen",
+        "description": "⚠️ Dadurch wird der ausgewählte Zyklus dauerhaft gelöscht",
+        "data": {
+          "cycle_id": "Zum Löschen wechseln"
+        }
+      },
+      "label_cycle": {
+        "title": "Etikettenzyklus",
+        "description": "{cycle_info}",
+        "data": {
+          "profile_name": "Profil",
+          "new_profile_name": "Neuer Profilname (falls erstellt)"
+        }
+      },
+      "post_process": {
+        "title": "Prozessverlauf (Zusammenführen/Aufteilen)",
+        "description": "Bereinigen Sie den Zyklusverlauf, indem Sie fragmentierte Läufe zusammenführen und falsch zusammengeführte Zyklen innerhalb eines Zeitfensters aufteilen. Geben Sie die Anzahl der Stunden ein, in denen Sie zurückblicken möchten.\n{info}",
+        "data": {
+          "time_range": "Lookback-Fenster (Stunden)",
+          "gap_seconds": "Zusammenführungs-/Aufteilungslücke (Sekunden)"
+        },
+        "data_description": {
+          "time_range": "Anzahl der Stunden, die nach fragmentierten Zyklen zum Zusammenführen gescannt werden sollen. Verwenden Sie 999999, um alle historischen Daten zu verarbeiten.\n{info}",
+          "gap_seconds": "Schwellenwert für die Entscheidung über Aufteilung oder Zusammenführung. Lücken, die kürzer sind, werden zusammengeführt. Längere Lücken werden geteilt. Verringern Sie diesen Wert, um eine Teilung eines Zyklus zu erzwingen, der falsch zusammengeführt wurde."
+        }
+      },
+      "cleanup_profile": {
+        "title": "Verlauf bereinigen – Profil auswählen",
+        "description": "Wählen Sie ein Profil zur Visualisierung aus. Dadurch wird ein Diagramm erstellt, das alle vergangenen Zyklen für dieses Profil zeigt, um Ausreißer zu identifizieren.",
+        "data": {
+          "profile": "Profil"
+        }
+      },
+      "cleanup_select": {
+        "title": "Verlauf bereinigen – grafisch darstellen und löschen",
+        "description": "![Grafik]({graph_url})\n\n**Visualisierung von {profile_name}**\n\nDie Grafik zeigt einzelne Zyklen als farbige Linien. Identifizieren Sie Ausreißer (Linien, die weit von der Gruppe entfernt sind) und gleichen Sie ihre Farbe in der Liste unten ab, um sie zu löschen.\n\n**Zyklen auswählen, die DAUERHAFT gelöscht werden sollen:**",
+        "data": {
+          "cycles_to_delete": "Zu löschende Zyklen (passende Farben prüfen)"
+        }
+      },
+      "interactive_editor": {
+        "title": "Interaktiver Editor zum Zusammenführen/Teilen",
+        "description": "Wählen Sie eine manuelle Aktion aus, die Sie an Ihrem Zyklusverlauf durchführen möchten.",
+        "data": {
+          "editor_action": {
+            "name": "Aktion",
+            "options": {
+              "split": "✂️ Teilen Sie einen Zyklus auf (Lücken finden)",
+              "merge": "🔗 Zyklen zusammenführen (Fragmente verbinden)",
+              "delete": "🗑️ Zyklus(e) löschen"
+            }
+          }
+        }
+      },
+      "editor_select": {
+        "title": "Wählen Sie Zyklen",
+        "description": "Wählen Sie die zu verarbeitenden Zyklen aus.\n\n{info_text}",
+        "data": {
+          "selected_cycles": "Zyklen"
+        }
+      },
+      "editor_configure": {
+        "title": "Konfigurieren und anwenden",
+        "description": "{preview_md}",
+        "data": {
+          "confirm_action": "Aktion",
+          "merged_profile": "Resultierendes Profil",
+          "new_profile_name": "Neuer Profilname",
+          "confirm_commit": "Ja, ich bestätige diese Aktion",
+          "segment_0_profile": "Segment 1-Profil",
+          "segment_1_profile": "Segment 2-Profil",
+          "segment_2_profile": "Segment 3-Profil",
+          "segment_3_profile": "Segment 4-Profil",
+          "segment_4_profile": "Segment 5-Profil",
+          "segment_5_profile": "Segment 6-Profil",
+          "segment_6_profile": "Segment 7-Profil",
+          "segment_7_profile": "Segment 8-Profil",
+          "segment_8_profile": "Segment 9-Profil",
+          "segment_9_profile": "Segment 10-Profil"
+        }
+      },
+      "editor_split_params": {
+        "title": "Split-Konfiguration",
+        "description": "Passen Sie die Empfindlichkeit für die Aufteilung dieses Zyklus an. Jede längere Leerlauflücke führt zu einer Spaltung.",
+        "data": {
+          "min_gap_seconds": "Split-Gap-Schwellenwert (Sekunden)"
+        }
+      },
+      "reprocess_history": {
+        "title": "Wartung: Daten erneut verarbeiten und optimieren",
+        "description": "Führt eine gründliche Bereinigung historischer Daten durch:\n1. Reduziert Nullleistungswerte (Stille).\n2. Korrigiert Zykluszeitpunkt/-dauer.\n3. Berechnet alle statistischen Modelle (Hüllkurven) neu.\n\n**Führen Sie dies aus, um Datenprobleme zu beheben oder neue Algorithmen anzuwenden.**"
+      },
+      "wipe_history": {
+        "title": "Verlauf löschen (nur zum Testen)",
+        "description": "⚠️ Dadurch werden ALLE gespeicherten Zyklen und Profile für dieses Gerät dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden!"
+      },
+      "export_import": {
+        "title": "JSON exportieren/importieren",
+        "description": "Kopieren/Einfügen von Zyklen, Profilen und Einstellungen für dieses Gerät. Exportieren Sie unten oder fügen Sie JSON zum Importieren ein.",
+        "data": {
+          "mode": {
+            "name": "Aktion",
+            "options": {
+              "export": "📤 Alle Daten exportieren",
+              "import": "📥 Daten importieren/zusammenführen"
+            }
+          },
+          "json_payload": "Komplette Konfiguration JSON"
+        },
+        "data_description": {
+          "mode": "Wählen Sie „Exportieren“, um aktuelle Daten und Einstellungen zu kopieren, oder „Importieren“, um exportierte Daten von einem anderen WashData-Gerät einzufügen.",
+          "json_payload": "Für den Export: Kopieren Sie diesen JSON (einschließlich Zyklen, Profilen und allen fein abgestimmten Einstellungen). Für den Import: JSON einfügen, das aus WashData exportiert wurde."
+        }
+      },
+      "record_cycle": {
+        "title": "Aufnahmezyklus",
+        "description": "Zeichnen Sie einen Zyklus manuell auf, um ein sauberes Profil ohne Störungen zu erstellen.\n\nStatus: **{status}**\nDauer: {duration}s\nBeispiele: {samples}",
+        "data": {
+          "action": {
+            "name": "Aktion",
+            "options": {
+              "start_recording": "⏺ Neue Aufnahme starten",
+              "stop_recording": "⏹ Aufnahme stoppen (Speichern und verarbeiten)",
+              "refresh_status": "🔄 Status aktualisieren",
+              "process_recording": "⚙️ Letzte Aufnahme verarbeiten (Zuschneiden und Speichern)",
+              "discard_recording": "🗑️ Letzte Aufnahme verwerfen",
+              "cancel": "✖ Abbrechen"
+            }
+          }
+        }
+      },
+      "record_process": {
+        "title": "Prozessaufzeichnung",
+        "description": "![Grafik]({graph_url})\n\n**Das Diagramm zeigt die Rohaufzeichnung.** Blau = Behalten, Rot = Vorgeschlagener Zuschnitt.\n*Das Diagramm ist statisch und wird bei Formularänderungen nicht aktualisiert.*\n\nDie Aufnahme wurde gestoppt. Zuschnitte werden an der erkannten Abtastrate (~{sampling_rate}s) ausgerichtet.\n\nRohdauer: {duration}s\nBeispiele: {samples}",
+        "data": {
+          "head_trim": "Trimmstart (Sekunden)",
+          "tail_trim": "Trimmende (Sekunden)",
+          "save_mode": "Ziel speichern",
+          "profile_name": "Profilname"
+        }
+      },
+      "learning_feedbacks": {
+        "title": "Rückmeldungen lernen",
+        "description": "Wählen Sie eine Anfrage zur Zyklusüberprüfung zur Bearbeitung aus.",
+        "data": {
+          "selected_feedback": "Wählen Sie „Zyklus zur Überprüfung“ aus"
+        }
+      },
+      "learning_feedbacks_empty": {
+        "title": "Rückmeldungen lernen",
+        "description": "Es wurden keine ausstehenden Feedbackanfragen gefunden."
+      },
+      "resolve_feedback": {
+        "title": "Feedback auflösen",
+        "description": "**Erkanntes Programm**: {profile}\n**Konfidenz**: {confidence}%\n**Geschätzt**: {est}m, **Ist**: {act}m",
+        "data": {
+          "action": {
+            "name": "Was möchten Sie tun?",
+            "options": {
+              "confirm": "✅ Bestätigen – korrekte Erkennung",
+              "correct": "✏️ Richtig – Programm/Dauer wählen",
+              "ignore": "✖ Ignorieren – falsch positiver/verrauschter Zyklus",
+              "delete": "🗑️ Löschen – Aus dem Verlauf entfernen"
+            }
+          },
+          "corrected_profile": "Richtiges Programm (bei Korrektur)",
+          "corrected_duration": "Korrekte Dauer in Minuten (bei Korrektur)"
+        }
+      }
+    },
+    "error": {
+      "import_failed": "Der Import ist fehlgeschlagen. Bitte fügen Sie einen gültigen HA WashData-Export-JSON ein.",
+      "profile_exists": "Ein Profil mit diesem Namen existiert bereits",
+      "rename_failed": "Profil konnte nicht umbenannt werden. Das Profil existiert möglicherweise nicht oder der neue Name ist bereits vergeben.",
+      "assignment_failed": "Profil konnte dem Zyklus nicht zugewiesen werden",
+      "feedback_notification_title": "WashData: Zyklus überprüfen ({device})",
+      "feedback_notification_message": "**Gerät**: {device}\n**Programm**: {program} ({confidence}% Konfidenz)\n**Zeit**: {time}\n\nWashData benötigt Ihre Hilfe, um diesen erkannten Zyklus zu überprüfen.\n\nBitte gehen Sie zu **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Lern-Feedbacks**, um dieses Ergebnis zu bestätigen oder zu korrigieren."
+    },
+    "abort": {
+      "no_cycles_found": "Keine Zyklen gefunden",
+      "no_profiles_found": "Keine Profile gefunden. Erstellen Sie zunächst ein Profil.",
+      "no_profiles_for_matching": "Keine Profile zum Abgleich verfügbar. Erstellen Sie zunächst Profile.",
+      "no_unlabeled_cycles": "Alle Zyklen sind bereits beschriftet",
+      "no_suggestions": "Noch keine Wertevorschläge verfügbar. Führen Sie einige Zyklen durch und versuchen Sie es erneut.",
+      "no_predictions": "Keine Vorhersagen",
+      "reprocess_success": "{count} Zyklen erfolgreich erneut verarbeitet.",
+      "debug_data_cleared": "Debug-Daten aus {count} Zyklen erfolgreich gelöscht."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "washer_state": {
+        "name": "Zustand"
+      },
+      "washer_program": {
+        "name": "Programm"
+      },
+      "time_remaining": {
+        "name": "Verbleibende Zeit"
+      },
+      "total_duration": {
+        "name": "Gesamtdauer"
+      },
+      "cycle_progress": {
+        "name": "Fortschritt"
+      },
+      "current_power": {
+        "name": "Aktuelle Leistung"
+      },
+      "elapsed_time": {
+        "name": "Verstrichene Zeit"
+      },
+      "debug_info": {
+        "name": "Debug-Info"
+      },
+      "match_confidence": {
+        "name": "Match-Vertrauen"
+      },
+      "top_candidates": {
+        "name": "Top-Kandidaten"
+      },
+      "wash_phase": {
+        "name": "Phase"
+      },
+      "suggestions": {
+        "name": "Empfohlene Einstellungen"
+      }
+    },
+    "select": {
+      "program_select": {
+        "name": "Zyklusprogramm",
+        "state": {
+          "auto_detect": "Automatische Erkennung"
+        }
+      }
+    }
+  },
+  "card": {
+    "washer_program": "Waschprogramm",
+    "program_placeholder": "Wählen Sie Programm",
+    "duration": "Dauer",
+    "minutes": "min",
+    "time_remaining": "Verbleibende Zeit",
+    "no_prediction": "Keine Vorhersage",
+    "cycle_in_progress": "Zyklus läuft",
+    "status": "Status",
+    "progress": "Fortschritt",
+    "select_program": "Wählen Sie ein Programm aus, um Details anzuzeigen",
+    "title": "Titel",
+    "status_entity": "Status-Entität",
+    "icon": "Symbol",
+    "active_color": "Aktive Symbolfarbe",
+    "show_state": "Status anzeigen",
+    "show_program": "Programm anzeigen",
+    "show_details": "Details anzeigen",
+    "spin_icon": "Spinning-Symbol (während des Laufens)",
+    "program_entity": "Programmeinheit",
+    "pct_entity": "Fortschrittsentität (optional)",
+    "time_entity": "Zeiteinheit (optional)",
+    "display_mode": "Anzeigemodus",
+    "show_time_remaining": "Verbleibende Zeit anzeigen",
+    "show_percentage": "Prozentsatz anzeigen",
+    "entity_not_found": "Entität nicht gefunden"
+  }
+}

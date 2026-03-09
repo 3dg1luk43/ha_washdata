@@ -71,7 +71,11 @@
           "notify_start_message": "Startmeldingsformat",
           "notify_finish_message": "Sluttmeldingsformat",
           "notify_pre_complete_message": "Forhåndsfullføringsmeldingsformat",
-          "show_advanced": "Rediger avanserte innstillinger (Neste steg)"
+          "show_advanced": "Rediger avanserte innstillinger (Neste steg)",
+          "notify_actions": "Varslingshandlinger",
+          "notify_people": "Folk å varsle",
+          "notify_only_when_home": "Gi beskjed når du er hjemme",
+          "notify_fire_events": "Brannautomatiseringshendelser"
         },
         "data_description": {
           "apply_suggestions": "Kryss av denne boksen for å kopiere verdier foreslått av læringsalgoritmen til skjemaet. Gjennomgå før lagring.\n\nForeslått (fra læring):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Ikon for varsler (f.eks. mdi:washing-machine). La stå tomt for standard.",
           "notify_start_message": "Melding sendt når en syklus starter. Støtter plassholder {device}.",
           "notify_finish_message": "Melding sendt når en syklus avsluttes. Støtter plassholderne {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Melding sendt før fullføring. Støtter plassholderne {device}, {minutes}."
+          "notify_pre_complete_message": "Melding sendt før fullføring. Støtter plassholderne {device}, {minutes}.",
+          "notify_actions": "Valgfri Home Assistant-handlingssekvens for å kjøre for varsler (skript, varsling, TTS, etc.). Hvis angitt, kjøres handlinger før reservevarslingstjenesten.",
+          "notify_people": "Personenheter som skal brukes til hjemme-/borteporter. Når aktivert, blir varslinger utsatt til noen er hjemme.",
+          "notify_only_when_home": "Hvis aktivert, utsett varsler til minst én valgt person er hjemme.",
+          "notify_fire_events": "Hvis aktivert, utløs Home Assistant-hendelser for syklusstart og -slutt (ha_washdata_cycle_started/ended) for å drive automatisering."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Lagre feilsøkingsspor",
           "dtw_bandwidth": "DTW-båndbredde",
           "external_end_trigger_enabled": "Aktiver ekstern syklusslutt-trigger",
-          "external_end_trigger": "Ekstern syklusslutt-sensor"
+          "external_end_trigger": "Ekstern syklusslutt-sensor",
+          "external_end_trigger_inverted": "Inverter triggerlogikk (trigger på AV)",
+          "anti_wrinkle_enabled": "Anti-rynkeskjold (kun tørketrommel)",
+          "anti_wrinkle_max_power": "Anti-rynke maksimal effekt (W)",
+          "anti_wrinkle_max_duration": "Maksimal varighet mot rynker (r)",
+          "anti_wrinkle_exit_power": "Anti-rynke utgangseffekt (W)"
         },
         "data_description": {
           "apply_suggestions": "Kryss av denne boksen for å kopiere verdier foreslått av læringsalgoritmen til skjemaet. Gjennomgå før lagring.\n\nForeslått (fra læring):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Antall ganger sluttbetingelsen (effekt under terskel i off_delay) må oppfylles i rad før syklusen avsluttes. Høyere verdier forhindrer falske avslutninger under pauser. Standard: 1.",
           "start_energy_threshold": "Syklusen må akkumulere minst denne mengden energi (Wh) under STARTFASEN for å bli bekreftet. Standard: 0.005 Wh.",
           "end_energy_threshold": "Syklusen avsluttes bare hvis energien i det siste Off-Delay-vinduet er under denne verdien (Wh). Forhindrer falske avslutninger hvis effekten svinger nær null. Standard: 0.05 Wh.",
-          "auto_maintenance": "Aktiver nattlig vedlikehold for å reparere sampler, slå sammen fragmenterte sykluser og holde lagringen sunn.",
+          "auto_maintenance": "Aktiver automatisk vedlikehold (reparere prøver, slå sammen fragmenter).",
           "expose_debug_entities": "Vis avanserte sensorer (Konfidens, Fase, Tvetydighet) for feilsøking.",
           "save_debug_traces": "Lagre detaljerte rangerings- og effektspordata i historikken (Øker lagringsbruk).",
-          "dtw_bandwidth": "Maksimal tillatt tidsforvrengning (strekking) som andel av syklusens varighet. Høyere verdier tillater matching av svært variable sykluser men øker CPU-kostnad. Standard: 0.20 (20%).",
-          "external_end_trigger_enabled": "Aktiver overvåking av en ekstern binær sensor for å utløse syklusfullføring. Når aktivert, vil sensorens innkobling umiddelbart fullføre gjeldende syklus.",
-          "external_end_trigger": "Velg en binær sensorenhet. Når denne sensoren slår seg på, avsluttes gjeldende syklus med status 'fullført' (ikke 'avbrutt')."
+          "dtw_bandwidth": "Maksimal tillatt tidsforvrengning (strekk) som et forhold mellom syklusvarighet. Høyere verdier tillater matching av svært variable sykluser, men øker CPU-kostnadene. Standard: 0,20 (20 %).",
+          "external_end_trigger_enabled": "Aktiver overvåking av en ekstern binær sensor for å utløse syklusfullføring.",
+          "external_end_trigger": "Velg en binær sensorenhet. Når denne sensoren utløses, vil gjeldende syklus avsluttes med status \"fullført\".",
+          "external_end_trigger_inverted": "Som standard utløses utløseren når sensoren slås PÅ. Kryss av i denne boksen for å utløses når sensoren slås AV i stedet.",
+          "anti_wrinkle_enabled": "Ignorer korte trommelrotasjoner med lav effekt etter at en syklus er ferdig for å forhindre spøkelsessykluser (bare tørketrommel/vaskemaskin-tørketrommel).",
+          "anti_wrinkle_max_power": "Utbrudd ved eller under denne kraften behandles som anti-rynke rotasjoner i stedet for nye sykluser. Gjelder bare når Anti-Wrinkle Shield er aktivert.",
+          "anti_wrinkle_max_duration": "Maksimal sprengningslengde å behandle som anti-rynke rotasjon. Gjelder bare når Anti-Wrinkle Shield er aktivert.",
+          "anti_wrinkle_exit_power": "Hvis strømmen faller under dette nivået, gå ut av anti-rynke umiddelbart (true off). Gjelder bare når Anti-Wrinkle Shield er aktivert."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Administrer sykluser",
         "description": "Nylige sykluser:\n{recent_cycles}",
         "data": {
-          "action": "Handling"
+          "action": {
+            "name": "Handling",
+            "options": {
+              "auto_label_cycles": "🤖 Automerk gamle sykluser",
+              "select_cycle_to_label": "🏷️ Merkespesifikk syklus",
+              "select_cycle_to_label_multi": "🏷️ Merk flere sykluser",
+              "select_cycle_to_delete": "🗑️ Slett syklus",
+              "interactive_editor": "✂️ Slå sammen/del opp interaktiv redaktør"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Administrer profiler",
         "description": "Profiloversikt:\n{profile_summary}",
         "data": {
-          "action": "Handling"
+          "action": {
+            "name": "Handling",
+            "options": {
+              "create_profile": "➕ Opprett ny profil",
+              "edit_profile": "✏️ Rediger/gi nytt navn til profil",
+              "delete_profile": "🗑️ Slett profil",
+              "profile_stats": "📊 Profilstatistikk",
+              "cleanup_profile": "🧹 Rydd opp historikk - graf og slett"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Interaktiv sammenslåing/delings-editor",
         "description": "Velg en manuell handling for syklushistorikken din.",
         "data": {
-          "editor_action": "Handling"
+          "editor_action": {
+            "name": "Handling",
+            "options": {
+              "split": "✂️ Del en syklus (finn hull)",
+              "merge": "🔗 Slå sammen sykluser (Sett sammen fragmenter)",
+              "delete": "🗑️ Slett syklus(er)"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Eksporter/Importer JSON",
         "description": "Kopier/lim inn sykluser, profiler OG innstillinger for denne enheten. Eksporter nedenfor eller lim inn JSON for import.",
         "data": {
-          "mode": "Handling",
-          "json_payload": "Fullstendig konfigurasjons-JSON"
+          "json_payload": "Fullstendig konfigurasjons-JSON",
+          "mode": {
+            "name": "Handling",
+            "options": {
+              "export": "📤 Eksporter alle data",
+              "import": "📥 Importer/slå sammen data"
+            }
+          }
         },
         "data_description": {
           "mode": "Velg Eksporter for å kopiere gjeldende data og innstillinger, eller Importer for å lime inn data eksportert fra en annen WashData-enhet.",
@@ -359,8 +408,17 @@
         "title": "Ta opp syklus",
         "description": "Ta opp en syklus manuelt for å opprette en ren profil uten forstyrrelser.\n\nStatus: **{status}**\nVarighet: {duration}s\nSampler: {samples}",
         "data": {
-          "action": "Handling",
-          "refresh_status": "Oppdater status"
+          "action": {
+            "name": "Handling",
+            "options": {
+              "start_recording": "⏺ Start nytt opptak",
+              "stop_recording": "⏹ Stopp opptak (lagre og behandle)",
+              "refresh_status": "🔄 Oppdater status",
+              "process_recording": "⚙️ Behandle siste opptak (trim og lagre)",
+              "discard_recording": "🗑️ Forkast siste opptak",
+              "cancel": "✖ Avbryt"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Løs tilbakemelding",
         "description": "**Detektert program**: {profile}\n**Konfidens**: {confidence}%\n**Estimert**: {est}m, **Faktisk**: {act}m",
         "data": {
-          "action": "Hva vil du gjøre?",
           "corrected_profile": "Korrekt program (hvis du korrigerer)",
-          "corrected_duration": "Korrekt varighet i minutter (hvis du korrigerer)"
+          "corrected_duration": "Korrekt varighet i minutter (hvis du korrigerer)",
+          "action": {
+            "name": "Hva vil du gjøre?",
+            "options": {
+              "confirm": "✅ Bekreft - Riktig deteksjon",
+              "correct": "✏️ Riktig - Velg program/varighet",
+              "ignore": "✖ Ignorer - falsk positiv/støyende syklus",
+              "delete": "🗑️ Slett - Fjern fra loggen"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Automatisk deteksjon"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Tilstand"
+      },
+      "washer_program": {
+        "name": "Program"
+      },
+      "time_remaining": {
+        "name": "Gjenstående tid"
+      },
+      "total_duration": {
+        "name": "Total varighet"
+      },
+      "cycle_progress": {
+        "name": "Framgang"
+      },
+      "current_power": {
+        "name": "Nåværende strøm"
+      },
+      "elapsed_time": {
+        "name": "Forløpt tid"
+      },
+      "debug_info": {
+        "name": "Feilsøkingsinformasjon"
+      },
+      "match_confidence": {
+        "name": "Match selvtillit"
+      },
+      "top_candidates": {
+        "name": "Toppkandidater"
+      },
+      "wash_phase": {
+        "name": "Fase"
+      },
+      "suggestions": {
+        "name": "Foreslåtte innstillinger"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Vaskeprogram",
+    "program_placeholder": "Velg Program",
+    "duration": "Varighet",
+    "minutes": "min",
+    "time_remaining": "Gjenstående tid",
+    "no_prediction": "Ingen prediksjon",
+    "cycle_in_progress": "Syklus pågår",
+    "status": "Status",
+    "progress": "Framgang",
+    "select_program": "Velg et program for å se detaljer",
+    "title": "Tittel",
+    "status_entity": "Status Entitet",
+    "icon": "Ikon",
+    "active_color": "Aktiv ikonfarge",
+    "show_state": "Vis tilstand",
+    "show_program": "Vis program",
+    "show_details": "Vis detaljer",
+    "spin_icon": "Spinning-ikon (mens du løper)",
+    "program_entity": "Program Entitet",
+    "pct_entity": "Fremdriftsenhet (valgfritt)",
+    "time_entity": "Tidsenhet (valgfritt)",
+    "display_mode": "Visningsmodus",
+    "show_time_remaining": "Vis gjenværende tid",
+    "show_percentage": "Vis prosentandel",
+    "entity_not_found": "Enheten ble ikke funnet"
   }
 }

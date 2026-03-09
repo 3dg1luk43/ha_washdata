@@ -85,13 +85,20 @@ class LearningManager:
     """Manages cycle learning, user feedback, and auto-tuning."""
 
     def __init__(
-        self, hass: HomeAssistant, entry_id: str, profile_store: "ProfileStore"
+        self,
+        hass: HomeAssistant,
+        entry_id: str,
+        profile_store: "ProfileStore",
+        device_type: str | None = None,
     ) -> None:
         """Initialize the learning manager."""
         self.hass = hass
         self.entry_id = entry_id
         self.profile_store = profile_store
-        self.suggestion_engine = SuggestionEngine(hass, entry_id, profile_store)
+        self.device_type = device_type
+        self.suggestion_engine = SuggestionEngine(
+            hass, entry_id, profile_store, device_type
+        )
 
         # Operational Stats
         self._sample_interval_model = StatisticalModel(max_samples=200)
@@ -232,12 +239,11 @@ class LearningManager:
                 confidence_threshold=auto_label_conf,
             )
             if labeled:
-                # Persist label and rebuild envelope for the profile
+                # Persist label and rebuild envelope for the profile (issue #131)
                 self.hass.async_create_task(self.profile_store.async_save())
-                try:
-                    self.profile_store.rebuild_envelope(detected_profile)
-                except Exception:  # pylint: disable=broad-exception-caught
-                    pass
+                self.hass.async_create_task(
+                    self._async_rebuild_profile_envelope(detected_profile)
+                )
                 _LOGGER.debug("Auto-labeled high-confidence cycle %s", cycle_id)
             return
 
@@ -444,6 +450,9 @@ class LearningManager:
 
         self.profile_store.get_feedback_history()[cycle_id] = feedback_record
         
+        # Track which profiles need envelope rebuild (issue #131)
+        profiles_to_rebuild: set[str] = set()
+        
         if dismiss:
              # Just dismiss, no action
              pass
@@ -451,15 +460,17 @@ class LearningManager:
             profile_name = pending.get("detected_profile")
             if isinstance(profile_name, str) and profile_name:
                 self._auto_label_cycle(cycle_id, profile_name)
+                profiles_to_rebuild.add(profile_name)
         else:
             if isinstance(corrected_profile, str) and corrected_profile:
-                # corrected_duration is in minutes from UI, convert to seconds
-                duration_sec = corrected_duration * 60.0 if corrected_duration else None
+                # corrected_duration is already in seconds from config_flow
+                duration_sec = float(corrected_duration) if corrected_duration else None
                 
                 self._apply_correction_learning(
                     cycle_id, corrected_profile, duration_sec
                 )
                 self._auto_label_cycle(cycle_id, corrected_profile, duration_sec)
+                profiles_to_rebuild.add(corrected_profile)
 
         # Remove from pending (add_pending_feedback was wrapper, remove is direct)
         if cycle_id in self.profile_store.get_pending_feedback():
@@ -468,6 +479,13 @@ class LearningManager:
         # self.profile_store.remove_pending_feedback(cycle_id) # Redundant if we delete directly above
 
         await self.profile_store.async_save()
+        
+        # Rebuild envelopes for all modified profiles to recalculate min/max/avg (issue #131)
+        for profile_name in profiles_to_rebuild:
+            try:
+                await self.profile_store.async_rebuild_envelope(profile_name)
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                _LOGGER.error("Failed to rebuild envelope for profile '%s': %s", profile_name, e)
 
         return True
 
@@ -486,13 +504,25 @@ class LearningManager:
         corrected_profile: str,
         corrected_duration: Optional[float] = None,
     ) -> None:
-        self._auto_label_cycle(cycle_id, corrected_profile)
-        # Update profile avg duration with simple EMA
-        if corrected_duration:
-            profile = self.profile_store.get_profiles().get(corrected_profile)
-            if profile:
-                old = profile.get("avg_duration", corrected_duration)
-                profile["avg_duration"] = old * 0.8 + corrected_duration * 0.2
+        """Apply user correction to a cycle (fix for issue #131).
+        
+        Note: We do not update avg_duration here with EMA. Instead, the envelope
+        rebuild in async_submit_cycle_feedback() will recalculate all statistics
+        (min/max/avg) from labeled cycles, ensuring accuracy.
+        """
+        self._auto_label_cycle(cycle_id, corrected_profile, corrected_duration)
+        # Profile stats will be recalculated when envelope is rebuilt
+
+    async def _async_rebuild_profile_envelope(self, profile_name: str) -> None:
+        """Async helper to rebuild a profile's envelope (issue #131 fix).
+        
+        This wraps async_rebuild_envelope with error handling for safe task scheduling.
+        """
+        try:
+            await self.profile_store.async_rebuild_envelope(profile_name)
+            _LOGGER.debug("Rebuilt envelope for profile '%s'", profile_name)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            _LOGGER.error("Failed to rebuild envelope for profile '%s': %s", profile_name, e)
 
     def get_pending_feedback(self) -> dict[str, dict[str, Any]]:
         """Return pending feedback requests."""

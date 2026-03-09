@@ -131,7 +131,8 @@
           "save_debug_traces": "Saugoti derinimo pėdsakus",
           "dtw_bandwidth": "DTW juostos plotis",
           "external_end_trigger_enabled": "Įjungti išorinį ciklo pabaigos trigerį",
-          "external_end_trigger": "Išorinis ciklo pabaigos jutiklis"
+          "external_end_trigger": "Išorinis ciklo pabaigos jutiklis",
+          "external_end_trigger_inverted": "Invert Trigger Logic (paleidiklis įjungtas)"
         },
         "data_description": {
           "apply_suggestions": "Pažymėkite šį langelį, kad nukopijuotumėte mokymosi algoritmo siūlomas reikšmes į formą. Peržiūrėkite prieš išsaugant.\n\nSiūloma (iš mokymosi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +168,13 @@
           "end_repeat_count": "Kiek kartų pabaigos sąlyga (galia žemiau ribos per off_delay) turi būti įvykdyta iš eilės prieš ciklo baigimą. Didesnės reikšmės apsaugo nuo klaidingų baigimų pauzių metu. Numatytoji: 1.",
           "start_energy_threshold": "Ciklas turi sukaupti bent šį energijos kiekį (Wh) PRADŽIOS FAZĖJE patvirtinimui. Numatytoji: 0.005 Wh.",
           "end_energy_threshold": "Ciklas baigiasi tik jei energija paskutiniame Off-Delay lange yra žemiau šios reikšmės (Wh). Apsaugo nuo klaidingų baigimų, jei galia svyruoja apie nulį. Numatytoji: 0.05 Wh.",
-          "auto_maintenance": "Įjungti naktinę priežiūrą mėginių taisymui, suskaidytų ciklų sujungimui ir saugyklos palaikymui sveikoje būsenoje.",
+          "auto_maintenance": "Įgalinti automatinę priežiūrą (remontuoti pavyzdžius, sujungti fragmentus).",
           "expose_debug_entities": "Rodyti išplėstinius jutiklius (Tikimybė, Fazė, Dviprasmiškumas) derinimui.",
           "save_debug_traces": "Saugoti detalius reitingavimo ir galios pėdsakų duomenis istorijoje (Padidina saugyklos naudojimą).",
-          "dtw_bandwidth": "Maksimalus leistinas laiko iškraipymas (ištempimas) kaip ciklo trukmės dalis. Didesnės reikšmės leidžia atitikti labai kintančius ciklus, bet padidina procesoriaus sąnaudas. Numatytoji: 0.20 (20%).",
-          "external_end_trigger_enabled": "Įjungti išorinio dvejetainio jutiklio stebėjimą ciklo užbaigimo suaktyvinimui. Įjungus, jutiklio suaktyvinimas nedelsiant užbaigs esamą ciklą.",
-          "external_end_trigger": "Pasirinkite dvejetainio jutiklio esybę. Kai šis jutiklis įsijungia, esamas ciklas baigiasi su būsena 'užbaigtas' (ne 'nutrauktas')."
+          "dtw_bandwidth": "Didžiausias leistinas laiko deformavimas (tempimas) kaip ciklo trukmės santykis. Didesnės vertės leidžia suderinti labai kintančius ciklus, tačiau padidina procesoriaus sąnaudas. Numatytasis: 0,20 (20 %).",
+          "external_end_trigger_enabled": "Įgalinkite išorinio dvejetainio jutiklio stebėjimą, kad suaktyvintumėte ciklo pabaigą.",
+          "external_end_trigger": "Pasirinkite dvejetainį jutiklio objektą. Kai šis jutiklis suveikia, dabartinis ciklas baigsis būsena „baigta“.",
+          "external_end_trigger_inverted": "Pagal numatytuosius nustatymus paleidiklis suveikia, kai jutiklis įsijungia. Pažymėkite šį langelį, kad įsijungtumėte, kai jutiklis išsijungs."
         }
       },
       "diagnostics": {
@@ -187,14 +189,32 @@
         "title": "Valdyti ciklus",
         "description": "Naujausi ciklai:\n{recent_cycles}",
         "data": {
-          "action": "Veiksmas"
+          "action": {
+            "name": "Veiksmas",
+            "options": {
+              "auto_label_cycles": "🤖 Automatiškai pažymėkite senus ciklus",
+              "select_cycle_to_label": "🏷️ Specifinis etiketės ciklas",
+              "select_cycle_to_label_multi": "🏷️ Pažymėkite kelis ciklus",
+              "select_cycle_to_delete": "🗑️ Ištrinkite ciklą",
+              "interactive_editor": "✂️ Sujungti / išskaidyti interaktyvų redaktorių"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Valdyti profilius",
         "description": "Profilių suvestinė:\n{profile_summary}",
         "data": {
-          "action": "Veiksmas"
+          "action": {
+            "name": "Veiksmas",
+            "options": {
+              "create_profile": "➕ Sukurti naują profilį",
+              "edit_profile": "✏️ Redaguoti / pervardyti profilį",
+              "delete_profile": "🗑️ Ištrinti profilį",
+              "profile_stats": "📊 Profilio statistika",
+              "cleanup_profile": "🧹 Istorijos išvalymas – diagrama ir ištrynimas"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +318,14 @@
         "title": "Interaktyvus sujungimo/padalijimo redaktorius",
         "description": "Pasirinkite rankinį veiksmą jūsų ciklų istorijai.",
         "data": {
-          "editor_action": "Veiksmas"
+          "editor_action": {
+            "name": "Veiksmas",
+            "options": {
+              "split": "✂️ Padalinkite ciklą (raskite spragas)",
+              "merge": "🔗 Sujungti ciklus (prijungti fragmentus)",
+              "delete": "🗑️ Ištrinti ciklą (-us)"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +374,14 @@
         "title": "Eksportuoti/Importuoti JSON",
         "description": "Kopijuokite/įklijuokite ciklus, profilius IR nustatymus šiam įrenginiui. Eksportuokite žemiau arba įklijuokite JSON importavimui.",
         "data": {
-          "mode": "Veiksmas",
-          "json_payload": "Pilna konfigūracijos JSON"
+          "json_payload": "Pilna konfigūracijos JSON",
+          "mode": {
+            "name": "Veiksmas",
+            "options": {
+              "export": "📤 Eksportuoti visus duomenis",
+              "import": "📥 Importuoti / sujungti duomenis"
+            }
+          }
         },
         "data_description": {
           "mode": "Pasirinkite Eksportuoti dabartiniams duomenims ir nustatymams kopijuoti, arba Importuoti iš kito WashData įrenginio eksportuotiems duomenims įklijuoti.",
@@ -359,8 +392,17 @@
         "title": "Įrašyti ciklą",
         "description": "Įrašykite ciklą rankiniu būdu, kad sukurtumėte švarų profilį be trikdžių.\n\nBūsena: **{status}**\nTrukmė: {duration}s\nMėginiai: {samples}",
         "data": {
-          "action": "Veiksmas",
-          "refresh_status": "Atnaujinti būseną"
+          "action": {
+            "name": "Veiksmas",
+            "options": {
+              "start_recording": "⏺ Pradėti naują įrašymą",
+              "stop_recording": "⏹ Sustabdyti įrašymą (išsaugoti ir apdoroti)",
+              "refresh_status": "🔄 Atnaujinti būseną",
+              "process_recording": "⚙️ Apdoroti paskutinį įrašą (apkarpyti ir išsaugoti)",
+              "discard_recording": "🗑️ Išmesti paskutinį įrašą",
+              "cancel": "✖ Atšaukti"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +430,17 @@
         "title": "Išspręsti atsiliepimą",
         "description": "**Aptikta programa**: {profile}\n**Tikimybė**: {confidence}%\n**Numatyta**: {est}min, **Faktinė**: {act}min",
         "data": {
-          "action": "Ką norėtumėte daryti?",
           "corrected_profile": "Teisinga programa (jei taisote)",
-          "corrected_duration": "Teisinga trukmė minutėmis (jei taisote)"
+          "corrected_duration": "Teisinga trukmė minutėmis (jei taisote)",
+          "action": {
+            "name": "Ką norėtum veikti?",
+            "options": {
+              "confirm": "✅ Patvirtinti – teisingas aptikimas",
+              "correct": "✏️ Teisingai – pasirinkite programą / trukmę",
+              "ignore": "✖ Ignoruoti – klaidingas teigiamas / triukšmingas ciklas",
+              "delete": "🗑️ Ištrinti – pašalinti iš istorijos"
+            }
+          }
         }
       }
     },
@@ -421,6 +471,71 @@
           "auto_detect": "Automatinis aptikimas"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "valstybė"
+      },
+      "washer_program": {
+        "name": "Programa"
+      },
+      "time_remaining": {
+        "name": "Likęs laikas"
+      },
+      "total_duration": {
+        "name": "Bendra trukmė"
+      },
+      "cycle_progress": {
+        "name": "Pažanga"
+      },
+      "current_power": {
+        "name": "Dabartinė galia"
+      },
+      "elapsed_time": {
+        "name": "Praėjęs laikas"
+      },
+      "debug_info": {
+        "name": "Derinimo informacija"
+      },
+      "match_confidence": {
+        "name": "Rungtynių pasitikėjimas"
+      },
+      "top_candidates": {
+        "name": "Geriausi kandidatai"
+      },
+      "wash_phase": {
+        "name": "Fazė"
+      },
+      "suggestions": {
+        "name": "Siūlomi nustatymai"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Skalbimo programa",
+    "program_placeholder": "Pasirinkite Programa",
+    "duration": "Trukmė",
+    "minutes": "min",
+    "time_remaining": "Likęs laikas",
+    "no_prediction": "Jokios prognozės",
+    "cycle_in_progress": "Vyksta ciklas",
+    "status": "Būsena",
+    "progress": "Pažanga",
+    "select_program": "Norėdami pamatyti išsamią informaciją, pasirinkite programą",
+    "title": "Pavadinimas",
+    "status_entity": "Būsenos subjektas",
+    "icon": "Piktograma",
+    "active_color": "Aktyvios piktogramos spalva",
+    "show_state": "Rodyti būseną",
+    "show_program": "Rodyti programą",
+    "show_details": "Rodyti išsamią informaciją",
+    "spin_icon": "Sukimo piktograma (bėgant)",
+    "program_entity": "Programos subjektas",
+    "pct_entity": "Pažangos objektas (nebūtina)",
+    "time_entity": "Laiko objektas (neprivaloma)",
+    "display_mode": "Ekrano režimas",
+    "show_time_remaining": "Rodyti likusį laiką",
+    "show_percentage": "Rodyti procentą",
+    "entity_not_found": "Subjektas nerastas"
   }
 }

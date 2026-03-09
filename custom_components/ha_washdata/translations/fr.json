@@ -71,7 +71,11 @@
           "notify_start_message": "Format du message de début",
           "notify_finish_message": "Format du message de fin",
           "notify_pre_complete_message": "Format du message avant fin",
-          "show_advanced": "Modifier les paramètres avancés (étape suivante)"
+          "show_advanced": "Modifier les paramètres avancés (étape suivante)",
+          "notify_actions": "Actions de notification",
+          "notify_people": "Personnes à avertir",
+          "notify_only_when_home": "Notifier uniquement à la maison",
+          "notify_fire_events": "Événements d'automatisation des incendies"
         },
         "data_description": {
           "apply_suggestions": "Cochez cette case pour copier dans le formulaire les valeurs suggérées par l'algorithme d'apprentissage. Vérifiez avant d'enregistrer.\n\nSuggestions (de l'apprentissage) :\n- min_power : {suggested_min_power} W\n- off_delay : {suggested_off_delay} s\n- watchdog_interval : {suggested_watchdog_interval} s\n- no_update_active_timeout : {suggested_no_update_active_timeout} s\n- profile_match_interval : {suggested_profile_match_interval} s\n- auto_label_confidence : {suggested_auto_label_confidence}\n- duration_tolerance : {suggested_duration_tolerance}\n- profile_duration_tolerance : {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio : {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio : {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Icône à utiliser pour les notifications (ex. mdi:washing-machine). Laissez vide pour utiliser la valeur par défaut.",
           "notify_start_message": "Message envoyé au démarrage d'un cycle. Prend en charge le paramètre {device}.",
           "notify_finish_message": "Message envoyé à la fin d'un cycle. Prend en charge les paramètres {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Message envoyé avant la fin. Prend en charge les paramètres {device}, {minutes}."
+          "notify_pre_complete_message": "Message envoyé avant la fin. Prend en charge les paramètres {device}, {minutes}.",
+          "notify_actions": "Séquence d'actions facultative de Home Assistant à exécuter pour les notifications (scripts, notification, TTS, etc.). Si cette option est définie, les actions sont exécutées avant le service de notification de secours.",
+          "notify_people": "Entités de personnes à utiliser pour le contrôle domicile/extérieur. Lorsqu'elles sont activées, les notifications sont différées jusqu'à ce que quelqu'un soit à la maison.",
+          "notify_only_when_home": "Si cette option est activée, retardez les notifications jusqu'à ce qu'au moins une personne sélectionnée soit à la maison.",
+          "notify_fire_events": "Si activé, déclenchez les événements Home Assistant pour le début et la fin du cycle (ha_washdata_cycle_started/ended) pour piloter les automatisations."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Enregistrer les traces de débogage",
           "dtw_bandwidth": "Largeur de bande DTW",
           "external_end_trigger_enabled": "Activer le déclencheur externe de fin de cycle",
-          "external_end_trigger": "Capteur externe de fin de cycle"
+          "external_end_trigger": "Capteur externe de fin de cycle",
+          "external_end_trigger_inverted": "Inverser la logique de déclenchement (déclenchement sur OFF)",
+          "anti_wrinkle_enabled": "Bouclier anti-rides (sèche-linge uniquement)",
+          "anti_wrinkle_max_power": "Puissance maximale anti-rides (W)",
+          "anti_wrinkle_max_duration": "Durée Max Anti-Rides (s)",
+          "anti_wrinkle_exit_power": "Puissance de sortie anti-rides (W)"
         },
         "data_description": {
           "apply_suggestions": "Cochez cette case pour copier dans le formulaire les valeurs suggérées par l'algorithme d'apprentissage. Vérifiez avant d'enregistrer.\n\nSuggestions (de l'apprentissage) :\n- min_power : {suggested_min_power} W\n- off_delay : {suggested_off_delay} s\n- watchdog_interval : {suggested_watchdog_interval} s\n- no_update_active_timeout : {suggested_no_update_active_timeout} s\n- profile_match_interval : {suggested_profile_match_interval} s\n- auto_label_confidence : {suggested_auto_label_confidence}\n- duration_tolerance : {suggested_duration_tolerance}\n- profile_duration_tolerance : {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio : {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio : {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Nombre de fois où la condition de fin (puissance sous le seuil pendant off_delay) doit être satisfaite consécutivement avant de terminer le cycle. Des valeurs plus élevées évitent les fins erronées pendant les pauses. Par défaut : 1.",
           "start_energy_threshold": "Le cycle doit accumuler au moins cette énergie (Wh) pendant la phase de DÉMARRAGE pour être confirmé. Par défaut : 0,005 Wh.",
           "end_energy_threshold": "Le cycle se termine seulement si l'énergie dans la dernière fenêtre Off-Delay est inférieure à cette valeur (Wh). Empêche les fins erronées si la puissance fluctue près de zéro. Par défaut : 0,05 Wh.",
-          "auto_maintenance": "Activer la maintenance nocturne pour réparer les échantillons, fusionner les cycles fragmentés et garder un stockage sain.",
+          "auto_maintenance": "Activer la maintenance automatique (réparer les échantillons, fusionner les fragments).",
           "expose_debug_entities": "Afficher les capteurs avancés (Confiance, Phase, Ambiguïté) pour le débogage.",
           "save_debug_traces": "Stocker des données détaillées de classement et de traces de puissance dans l'historique (augmente l'utilisation du stockage).",
-          "dtw_bandwidth": "Étirement temporel maximal autorisé (warping) comme ratio de la durée du cycle. Des valeurs plus élevées permettent de faire correspondre des cycles très variables (ex. phases retardées par le capteur) mais augmentent le coût CPU. Par défaut : 0,20 (20 %).",
-          "external_end_trigger_enabled": "Activer la surveillance d'un capteur binaire externe pour déclencher la fin de cycle. Lorsqu'il est activé, le passage du capteur à 'on' termine immédiatement le cycle en cours.",
-          "external_end_trigger": "Sélectionnez une entité de capteur binaire. Lorsque ce capteur passe à 'on', le cycle en cours se termine avec le statut 'terminé' (pas 'interrompu')."
+          "dtw_bandwidth": "Déformation (étirement) du temps maximum autorisé en tant que rapport à la durée du cycle. Des valeurs plus élevées permettent de faire correspondre des cycles très variables mais augmentent le coût du processeur. Par défaut : 0,20 (20 %).",
+          "external_end_trigger_enabled": "Activer la surveillance d’un capteur binaire externe pour déclencher l’achèvement du cycle.",
+          "external_end_trigger": "Sélectionnez une entité de capteur binaire. Lorsque ce capteur se déclenche, le cycle en cours se terminera avec l'état « terminé ».",
+          "external_end_trigger_inverted": "Par défaut, le déclencheur se déclenche lorsque le capteur s'allume. Cochez cette case pour qu'elle se déclenche lorsque le capteur s'éteint à la place.",
+          "anti_wrinkle_enabled": "Ignorez les courtes rotations du tambour à faible puissance après la fin d'un cycle pour éviter les cycles fantômes (sécheuse/laveuse-sécheuse uniquement).",
+          "anti_wrinkle_max_power": "Les rafales égales ou inférieures à cette puissance sont traitées comme des rotations antirides au lieu de nouveaux cycles. S'applique uniquement lorsque le bouclier anti-rides est activé.",
+          "anti_wrinkle_max_duration": "Longueur maximale de rafale à traiter comme rotation anti-rides. S'applique uniquement lorsque le bouclier anti-rides est activé.",
+          "anti_wrinkle_exit_power": "Si la puissance descend en dessous de ce niveau, quittez immédiatement l'anti-rides (true off). S'applique uniquement lorsque le bouclier anti-rides est activé."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Gérer les cycles",
         "description": "Cycles récents :\n{recent_cycles}",
         "data": {
-          "action": "Action"
+          "action": {
+            "name": "Action",
+            "options": {
+              "auto_label_cycles": "🤖 Étiquetage automatique des anciens cycles",
+              "select_cycle_to_label": "🏷️ Cycle spécifique à l'étiquette",
+              "select_cycle_to_label_multi": "🏷️ Étiquetez plusieurs cycles",
+              "select_cycle_to_delete": "🗑️ Supprimer le cycle",
+              "interactive_editor": "✂️ Fusionner/diviser l'éditeur interactif"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Gérer les profils",
         "description": "Résumé du profil :\n{profile_summary}",
         "data": {
-          "action": "Action"
+          "action": {
+            "name": "Action",
+            "options": {
+              "create_profile": "➕ Créer un nouveau profil",
+              "edit_profile": "✏️ Modifier/Renommer le profil",
+              "delete_profile": "🗑️ Supprimer le profil",
+              "profile_stats": "📊 Statistiques de profil",
+              "cleanup_profile": "🧹 Nettoyer l'historique - Graphiquer et supprimer"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Éditeur interactif Fusion/Scission",
         "description": "Sélectionnez une action manuelle à effectuer sur votre historique de cycles.",
         "data": {
-          "editor_action": "Action"
+          "editor_action": {
+            "name": "Action",
+            "options": {
+              "split": "✂️ Diviser un cycle (Trouver des lacunes)",
+              "merge": "🔗 Fusionner les cycles (Joindre des fragments)",
+              "delete": "🗑️ Supprimer le(s) cycle(s)"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Exporter/Importer JSON",
         "description": "Copiez/collez les cycles, profils ET paramètres de cet appareil. Exportez ci-dessous ou collez le JSON pour importer.",
         "data": {
-          "mode": "Action",
-          "json_payload": "JSON complet de configuration"
+          "json_payload": "JSON complet de configuration",
+          "mode": {
+            "name": "Action",
+            "options": {
+              "export": "📤 Exporter toutes les données",
+              "import": "📥 Importer/Fusionner des données"
+            }
+          }
         },
         "data_description": {
           "mode": "Choisissez Exporter pour copier les données et paramètres actuels, ou Importer pour coller des données exportées d'un autre appareil WashData.",
@@ -359,8 +408,17 @@
         "title": "Enregistrer un cycle",
         "description": "Enregistrez manuellement un cycle pour créer un profil propre sans interférences.\n\nStatut : **{status}**\nDurée : {duration}s\nÉchantillons : {samples}",
         "data": {
-          "action": "Action",
-          "refresh_status": "Rafraîchir le statut"
+          "action": {
+            "name": "Action",
+            "options": {
+              "start_recording": "⏺ Démarrer un nouvel enregistrement",
+              "stop_recording": "⏹ Arrêter l'enregistrement (Enregistrer et traiter)",
+              "refresh_status": "🔄 Actualiser le statut",
+              "process_recording": "⚙️ Traiter le dernier enregistrement (couper et enregistrer)",
+              "discard_recording": "🗑️ Supprimer le dernier enregistrement",
+              "cancel": "✖ Annuler"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Résoudre le retour",
         "description": "**Programme détecté** : {profile}\n**Confiance** : {confidence}%\n**Estimé** : {est} minutes, **Réel** : {act} minutes",
         "data": {
-          "action": "Que souhaitez-vous faire ?",
           "corrected_profile": "Programme corrigé (si correction)",
-          "corrected_duration": "Durée corrigée en minutes (si correction)"
+          "corrected_duration": "Durée corrigée en minutes (si correction)",
+          "action": {
+            "name": "Qu'aimeriez-vous faire ?",
+            "options": {
+              "confirm": "✅ Confirmer - Détection correcte",
+              "correct": "✏️ Correct - Choisissez Programme/Durée",
+              "ignore": "✖ Ignorer - Cycle faux positif/bruyant",
+              "delete": "🗑️ Supprimer - Supprimer de l'historique"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Détection automatique"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "État"
+      },
+      "washer_program": {
+        "name": "Programme"
+      },
+      "time_remaining": {
+        "name": "Temps restant"
+      },
+      "total_duration": {
+        "name": "Durée totale"
+      },
+      "cycle_progress": {
+        "name": "Progrès"
+      },
+      "current_power": {
+        "name": "Puissance actuelle"
+      },
+      "elapsed_time": {
+        "name": "Temps écoulé"
+      },
+      "debug_info": {
+        "name": "Informations de débogage"
+      },
+      "match_confidence": {
+        "name": "Faites correspondre la confiance"
+      },
+      "top_candidates": {
+        "name": "Meilleurs candidats"
+      },
+      "wash_phase": {
+        "name": "Phase"
+      },
+      "suggestions": {
+        "name": "Paramètres suggérés"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Programme de laveuse",
+    "program_placeholder": "Sélectionnez le programme",
+    "duration": "Durée",
+    "minutes": "min",
+    "time_remaining": "Temps restant",
+    "no_prediction": "Aucune prédiction",
+    "cycle_in_progress": "Cycle en cours",
+    "status": "Statut",
+    "progress": "Progrès",
+    "select_program": "Sélectionnez un programme pour voir les détails",
+    "title": "Titre",
+    "status_entity": "Entité de statut",
+    "icon": "Icône",
+    "active_color": "Couleur de l'icône active",
+    "show_state": "Afficher l'état",
+    "show_program": "Programme du spectacle",
+    "show_details": "Afficher les détails",
+    "spin_icon": "Icône de rotation (pendant l'exécution)",
+    "program_entity": "Entité du programme",
+    "pct_entity": "Entité de progression (facultatif)",
+    "time_entity": "Entité temporelle (facultatif)",
+    "display_mode": "Mode d'affichage",
+    "show_time_remaining": "Afficher le temps restant",
+    "show_percentage": "Afficher le pourcentage",
+    "entity_not_found": "Entité introuvable"
   }
 }

@@ -71,7 +71,11 @@
           "notify_start_message": "Format sporočila ob začetku",
           "notify_finish_message": "Format sporočila ob koncu",
           "notify_pre_complete_message": "Format sporočila pred dokončanjem",
-          "show_advanced": "Uredi napredne nastavitve (Naslednji korak)"
+          "show_advanced": "Uredi napredne nastavitve (Naslednji korak)",
+          "notify_actions": "Dejanja obveščanja",
+          "notify_people": "Ljudje za obveščanje",
+          "notify_only_when_home": "Obvesti samo, ko sem doma",
+          "notify_fire_events": "Dogodki za avtomatizacijo požara"
         },
         "data_description": {
           "apply_suggestions": "Označite to polje, da kopirate vrednosti, ki jih predlaga algoritem učenja, v obrazec. Preglejte pred shranjevanjem.\n\nPredlagano (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Ikona za obvestila (npr. mdi:washing-machine). Pustite prazno za privzeto.",
           "notify_start_message": "Sporočilo poslano ob začetku cikla. Podpira ogrado {device}.",
           "notify_finish_message": "Sporočilo poslano ob koncu cikla. Podpira ograde {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Sporočilo poslano pred dokončanjem. Podpira ograde {device}, {minutes}."
+          "notify_pre_complete_message": "Sporočilo poslano pred dokončanjem. Podpira ograde {device}, {minutes}.",
+          "notify_actions": "Izbirno zaporedje dejanj domačega pomočnika za zagon za obvestila (skripti, obvestila, TTS itd.). Če je nastavljeno, se dejanja izvajajo pred nadomestno storitvijo obveščanja.",
+          "notify_people": "Osebne entitete, ki se uporabljajo za prehode doma/na poti. Ko je omogočeno, so obvestila odložena, dokler nekdo ni doma.",
+          "notify_only_when_home": "Če je omogočeno, odloži obvestila, dokler vsaj ena izbrana oseba ni doma.",
+          "notify_fire_events": "Če je omogočeno, sproži dogodke Home Assistant za začetek in konec cikla (ha_washdata_cycle_started/ended) za poganjanje avtomatizacije."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Shrani sledi za razhroščevanje",
           "dtw_bandwidth": "DTW pasovna širina",
           "external_end_trigger_enabled": "Omogoči zunanji sprožilec konca cikla",
-          "external_end_trigger": "Zunanji senzor konca cikla"
+          "external_end_trigger": "Zunanji senzor konca cikla",
+          "external_end_trigger_inverted": "Obrni prožilno logiko (sprožilec je izklopljen)",
+          "anti_wrinkle_enabled": "Ščit proti gubam (samo za sušilni stroj)",
+          "anti_wrinkle_max_power": "Največja moč proti gubam (W)",
+          "anti_wrinkle_max_duration": "Največje trajanje proti gubam (s)",
+          "anti_wrinkle_exit_power": "Izhodna moč proti gubam (W)"
         },
         "data_description": {
           "apply_suggestions": "Označite to polje, da kopirate vrednosti, ki jih predlaga algoritem učenja, v obrazec. Preglejte pred shranjevanjem.\n\nPredlagano (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Kolikokrat se mora pogoj konca (moč pod pragom v off_delay) zaporedoma izpolniti, preden se cikel konča. Višje vrednosti preprečujejo lažne konce med premori. Privzeto: 1.",
           "start_energy_threshold": "Cikel mora zbrati vsaj to količino energije (Wh) med FAZO ZAGONA za potrditev. Privzeto: 0.005 Wh.",
           "end_energy_threshold": "Cikel se konča le, če je energija v zadnjem oknu Off-Delay pod to vrednostjo (Wh). Preprečuje lažne konce, če moč niha blizu ničle. Privzeto: 0.05 Wh.",
-          "auto_maintenance": "Omogoči nočno vzdrževanje za popravilo vzorcev, združevanje fragmentiranih ciklov in vzdrževanje zdravega pomnilnika.",
+          "auto_maintenance": "Omogoči samodejno vzdrževanje (popravi vzorce, spoji fragmente).",
           "expose_debug_entities": "Prikaži napredne senzorje (Zaupanje, Faza, Dvoumno) za razhroščevanje.",
           "save_debug_traces": "Shrani podrobne podatke o razvrščanju in sledi moči v zgodovino (Poveča porabo pomnilnika).",
-          "dtw_bandwidth": "Največje dovoljeno časovno izkrivljanje (raztezanje) kot delež trajanja cikla. Višje vrednosti omogočajo ujemanje zelo spremenljivih ciklov, vendar povečajo stroške procesorja. Privzeto: 0.20 (20%).",
-          "external_end_trigger_enabled": "Omogoči spremljanje zunanjega binarnega senzorja za sprožitev dokončanja cikla. Ko je omogočeno, vklop senzorja takoj konča trenutni cikel.",
-          "external_end_trigger": "Izberite entiteto binarnega senzorja. Ko se ta senzor vklopi, se trenutni cikel konča s statusom 'dokončano' (ne 'prekinjeno')."
+          "dtw_bandwidth": "Največja dovoljena časovna deformacija (raztezanje) kot razmerje med trajanjem cikla. Višje vrednosti omogočajo ujemanje zelo spremenljivih ciklov, vendar povečajo stroške procesorja. Privzeto: 0,20 (20 %).",
+          "external_end_trigger_enabled": "Omogoči nadzor zunanjega binarnega senzorja za sprožitev zaključka cikla.",
+          "external_end_trigger": "Izberite entiteto binarnega senzorja. Ko se ta senzor sproži, se trenutni cikel konča s statusom »zaključeno«.",
+          "external_end_trigger_inverted": "Privzeto se sprožilec sproži, ko se senzor vklopi. Označite to polje, če želite, da se sproži, ko se senzor namesto tega izklopi.",
+          "anti_wrinkle_enabled": "Prezrite kratka vrtenja bobna z nizko močjo po koncu cikla, da preprečite dvosmerne cikle (samo sušilni/pralno-sušilni stroj).",
+          "anti_wrinkle_max_power": "Izbruhi pri tej moči ali pod njo se obravnavajo kot rotacije proti gubam namesto kot novi cikli. Velja le, če je omogočen ščit proti gubam.",
+          "anti_wrinkle_max_duration": "Največja razpočna dolžina, ki se obravnava kot rotacija proti gubam. Velja le, če je omogočen ščit proti gubam.",
+          "anti_wrinkle_exit_power": "Če moč pade pod to raven, takoj zapustite funkcijo proti gubam (true off). Velja le, če je omogočen ščit proti gubam."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Upravljaj cikle",
         "description": "Nedavni cikli:\n{recent_cycles}",
         "data": {
-          "action": "Dejanje"
+          "action": {
+            "name": "Akcija",
+            "options": {
+              "auto_label_cycles": "🤖 Samodejno označi stare cikle",
+              "select_cycle_to_label": "🏷️ Poseben cikel oznake",
+              "select_cycle_to_label_multi": "🏷️ Označite več ciklov",
+              "select_cycle_to_delete": "🗑️ Izbriši cikel",
+              "interactive_editor": "✂️ Interaktivni urejevalnik za spajanje/razdelitev"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Upravljaj profile",
         "description": "Povzetek profilov:\n{profile_summary}",
         "data": {
-          "action": "Dejanje"
+          "action": {
+            "name": "Akcija",
+            "options": {
+              "create_profile": "➕ Ustvari nov profil",
+              "edit_profile": "✏️ Uredi/preimenuj profil",
+              "delete_profile": "🗑️ Izbriši profil",
+              "profile_stats": "📊 Statistika profila",
+              "cleanup_profile": "🧹 Čiščenje zgodovine - grafikon in brisanje"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Interaktivni urejevalnik Združi/Razdeli",
         "description": "Izberite ročno dejanje za vašo zgodovino ciklov.",
         "data": {
-          "editor_action": "Dejanje"
+          "editor_action": {
+            "name": "Akcija",
+            "options": {
+              "split": "✂️ Razdelite cikel (poiščite vrzeli)",
+              "merge": "🔗 Združi cikle (združi fragmente)",
+              "delete": "🗑️ Brisanje ciklov"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Izvozi/Uvozi JSON",
         "description": "Kopiraj/prilepi cikle, profile IN nastavitve za to napravo. Izvozite spodaj ali prilepite JSON za uvoz.",
         "data": {
-          "mode": "Dejanje",
-          "json_payload": "Celoten konfiguracijski JSON"
+          "json_payload": "Celoten konfiguracijski JSON",
+          "mode": {
+            "name": "Akcija",
+            "options": {
+              "export": "📤 Izvozi vse podatke",
+              "import": "📥 Uvozi/združi podatke"
+            }
+          }
         },
         "data_description": {
           "mode": "Izberite Izvozi za kopiranje trenutnih podatkov in nastavitev, ali Uvozi za lepljenje podatkov, izvoženih iz druge naprave WashData.",
@@ -359,8 +408,17 @@
         "title": "Posnemi cikel",
         "description": "Posnemite cikel ročno, da ustvarite čist profil brez motenj.\n\nStatus: **{status}**\nTrajanje: {duration}s\nVzorci: {samples}",
         "data": {
-          "action": "Dejanje",
-          "refresh_status": "Osveži status"
+          "action": {
+            "name": "Akcija",
+            "options": {
+              "start_recording": "⏺ Začni novo snemanje",
+              "stop_recording": "⏹ Ustavi snemanje (Shrani in obdelaj)",
+              "refresh_status": "🔄 Osveži stanje",
+              "process_recording": "⚙️ Obdelaj zadnji posnetek (obreži in shrani)",
+              "discard_recording": "🗑️ Zavrzi zadnji posnetek",
+              "cancel": "✖ Prekliči"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Reši povratne informacije",
         "description": "**Zaznan program**: {profile}\n**Zaupanje**: {confidence}%\n**Ocenjeno**: {est}min, **Dejansko**: {act}min",
         "data": {
-          "action": "Kaj želite storiti?",
           "corrected_profile": "Pravilen program (če popravljate)",
-          "corrected_duration": "Pravilno trajanje v minutah (če popravljate)"
+          "corrected_duration": "Pravilno trajanje v minutah (če popravljate)",
+          "action": {
+            "name": "Kaj bi rad počel?",
+            "options": {
+              "confirm": "✅ Potrdi - pravilno zaznavanje",
+              "correct": "✏️ Pravilno - izberite program/trajanje",
+              "ignore": "✖ Prezri - lažno pozitiven/šumni cikel",
+              "delete": "🗑️ Izbriši - Odstrani iz zgodovine"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Samodejno zaznavanje"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Država"
+      },
+      "washer_program": {
+        "name": "Program"
+      },
+      "time_remaining": {
+        "name": "Preostali čas"
+      },
+      "total_duration": {
+        "name": "Skupno trajanje"
+      },
+      "cycle_progress": {
+        "name": "Napredek"
+      },
+      "current_power": {
+        "name": "Trenutna moč"
+      },
+      "elapsed_time": {
+        "name": "Pretečeni čas"
+      },
+      "debug_info": {
+        "name": "Informacije o odpravljanju napak"
+      },
+      "match_confidence": {
+        "name": "Ujemanje zaupanja"
+      },
+      "top_candidates": {
+        "name": "Najboljši kandidati"
+      },
+      "wash_phase": {
+        "name": "Faza"
+      },
+      "suggestions": {
+        "name": "Predlagane nastavitve"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Program za pranje",
+    "program_placeholder": "Izberite Program",
+    "duration": "Trajanje",
+    "minutes": "min",
+    "time_remaining": "Preostali čas",
+    "no_prediction": "Brez napovedi",
+    "cycle_in_progress": "Cikel v teku",
+    "status": "Stanje",
+    "progress": "Napredek",
+    "select_program": "Za ogled podrobnosti izberite program",
+    "title": "Naslov",
+    "status_entity": "Statusna entiteta",
+    "icon": "Ikona",
+    "active_color": "Barva aktivne ikone",
+    "show_state": "Prikaži stanje",
+    "show_program": "Show Program",
+    "show_details": "Pokaži podrobnosti",
+    "spin_icon": "Vrteča se ikona (med tekom)",
+    "program_entity": "Programska entiteta",
+    "pct_entity": "Entiteta napredka (neobvezno)",
+    "time_entity": "Časovna entiteta (neobvezno)",
+    "display_mode": "Način prikaza",
+    "show_time_remaining": "Prikaži preostali čas",
+    "show_percentage": "Pokaži odstotek",
+    "entity_not_found": "Entiteta ni najdena"
   }
 }

@@ -71,7 +71,11 @@
           "notify_start_message": "Формат повідомлення про початок",
           "notify_finish_message": "Формат повідомлення про завершення",
           "notify_pre_complete_message": "Формат попереднього повідомлення про завершення",
-          "show_advanced": "Редагувати розширені налаштування (Наступний крок)"
+          "show_advanced": "Редагувати розширені налаштування (Наступний крок)",
+          "notify_actions": "Дії сповіщень",
+          "notify_people": "Люди, яких потрібно сповістити",
+          "notify_only_when_home": "Сповіщати, лише коли вдома",
+          "notify_fire_events": "Події пожежної автоматики"
         },
         "data_description": {
           "apply_suggestions": "Позначте це поле, щоб скопіювати значення, запропоновані алгоритмом навчання, у форму. Перевірте перед збереженням.\n\nЗапропоновано (з навчання):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Значок для сповіщень (напр., mdi:washing-machine). Залиште порожнім для стандартного.",
           "notify_start_message": "Повідомлення, що надсилається при запуску циклу. Підтримує заповнювач {device}.",
           "notify_finish_message": "Повідомлення, що надсилається при завершенні циклу. Підтримує заповнювачі {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Повідомлення, що надсилається перед завершенням. Підтримує заповнювачі {device}, {minutes}."
+          "notify_pre_complete_message": "Повідомлення, що надсилається перед завершенням. Підтримує заповнювачі {device}, {minutes}.",
+          "notify_actions": "Додаткова послідовність дій Home Assistant для сповіщень (сценарії, повідомлення, TTS тощо). Якщо встановлено, дії виконуються до служби сповіщення про резервне сповіщення.",
+          "notify_people": "Об’єкти людей, які можна використовувати для шлюзування вдома/вдома. Якщо ввімкнено, сповіщення відкладено, доки хтось не буде вдома.",
+          "notify_only_when_home": "Якщо ввімкнено, відкладати сповіщення, поки принаймні одна вибрана особа не буде вдома.",
+          "notify_fire_events": "Якщо ввімкнено, запускати події Home Assistant для початку та кінця циклу (ha_washdata_cycle_started/ended) для автоматизації."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Зберігати сліди налагодження",
           "dtw_bandwidth": "Ширина смуги DTW",
           "external_end_trigger_enabled": "Увімкнути зовнішній тригер завершення циклу",
-          "external_end_trigger": "Зовнішній датчик завершення циклу"
+          "external_end_trigger": "Зовнішній датчик завершення циклу",
+          "external_end_trigger_inverted": "Інвертувати логіку тригера (тригер увімкнено ВИМК.)",
+          "anti_wrinkle_enabled": "Щит проти зморшок (тільки для сушарки)",
+          "anti_wrinkle_max_power": "Максимальна потужність проти зморшок (Вт)",
+          "anti_wrinkle_max_duration": "Максимальна тривалість проти зморшок (с)",
+          "anti_wrinkle_exit_power": "Вихідна потужність проти зморшок (Вт)"
         },
         "data_description": {
           "apply_suggestions": "Позначте це поле, щоб скопіювати значення, запропоновані алгоритмом навчання, у форму. Перевірте перед збереженням.\n\nЗапропоновано (з навчання):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Скільки разів умова завершення (потужність нижче порогу протягом off_delay) повинна бути виконана поспіль перед завершенням циклу. Більші значення запобігають хибним завершенням під час пауз. За замовчуванням: 1.",
           "start_energy_threshold": "Цикл повинен накопичити принаймні цю кількість енергії (Вт·год) під час ФАЗИ ЗАПУСКУ для підтвердження. За замовчуванням: 0.005 Вт·год.",
           "end_energy_threshold": "Цикл завершується лише якщо енергія в останньому вікні Off-Delay нижче цього значення (Вт·год). Запобігає хибним завершенням, якщо потужність коливається біля нуля. За замовчуванням: 0.05 Вт·год.",
-          "auto_maintenance": "Увімкнути нічне обслуговування для відновлення зразків, об'єднання фрагментованих циклів та підтримки сховища у здоровому стані.",
+          "auto_maintenance": "Увімкнути автоматичне обслуговування (відновлення зразків, об’єднання фрагментів).",
           "expose_debug_entities": "Показати розширені датчики (Довіра, Фаза, Неоднозначність) для налагодження.",
           "save_debug_traces": "Зберігати детальні дані ранжування та слідів потужності в історії (Збільшує використання сховища).",
-          "dtw_bandwidth": "Максимальне допустиме часове спотворення (розтягування) як частка тривалості циклу. Більші значення дозволяють відповідність дуже мінливих циклів, але збільшують витрати процесора. За замовчуванням: 0.20 (20%).",
-          "external_end_trigger_enabled": "Увімкнути моніторинг зовнішнього бінарного датчика для активації завершення циклу. При увімкненні ввімкнення датчика негайно завершить поточний цикл.",
-          "external_end_trigger": "Виберіть сутність бінарного датчика. Коли цей датчик вмикається, поточний цикл завершується зі статусом 'завершено' (не 'перервано')."
+          "dtw_bandwidth": "Максимально допустиме викривлення (розтягування) часу як відношення до тривалості циклу. Більш високі значення дозволяють узгоджувати дуже різноманітні цикли, але збільшують вартість ЦП. За замовчуванням: 0,20 (20%).",
+          "external_end_trigger_enabled": "Увімкніть моніторинг зовнішнього бінарного датчика, щоб ініціювати завершення циклу.",
+          "external_end_trigger": "Виберіть бінарний датчик. Коли цей датчик спрацьовує, поточний цикл закінчується зі статусом «завершено».",
+          "external_end_trigger_inverted": "За замовчуванням тригер спрацьовує, коли датчик вмикається. Установіть цей прапорець, щоб спрацьовувати, коли датчик замість цього вимикається.",
+          "anti_wrinkle_enabled": "Ігноруйте короткі малопотужні оберти барабана після завершення циклу, щоб запобігти повторним циклам (тільки для сушильної/прально-сушильної машин).",
+          "anti_wrinkle_max_power": "Сплески на рівні або нижче цієї потужності розглядаються як обертання проти зморшок замість нових циклів. Застосовується, лише коли ввімкнено Anti-Wrinkle Shield.",
+          "anti_wrinkle_max_duration": "Максимальна довжина вибуху для обертання проти зморшок. Застосовується, лише коли ввімкнено Anti-Wrinkle Shield.",
+          "anti_wrinkle_exit_power": "Якщо потужність падає нижче цього рівня, негайно вимкніть функцію захисту від зморшок (істинно вимкнено). Застосовується, лише коли ввімкнено Anti-Wrinkle Shield."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Керувати циклами",
         "description": "Останні цикли:\n{recent_cycles}",
         "data": {
-          "action": "Дія"
+          "action": {
+            "name": "Дія",
+            "options": {
+              "auto_label_cycles": "🤖 Автоматичне позначення старих циклів",
+              "select_cycle_to_label": "🏷️ Спеціальний цикл етикетки",
+              "select_cycle_to_label_multi": "🏷️ Позначте кілька циклів",
+              "select_cycle_to_delete": "🗑️ Видалити цикл",
+              "interactive_editor": "✂️ Інтерактивний редактор об’єднання/розділу"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Керувати профілями",
         "description": "Підсумок профілів:\n{profile_summary}",
         "data": {
-          "action": "Дія"
+          "action": {
+            "name": "Дія",
+            "options": {
+              "create_profile": "➕ Створити новий профіль",
+              "edit_profile": "✏️ Редагувати/перейменувати профіль",
+              "delete_profile": "🗑️ Видалити профіль",
+              "profile_stats": "📊 Статистика профілю",
+              "cleanup_profile": "🧹 Очищення історії - графік і видалення"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Інтерактивний редактор об'єднання/розділення",
         "description": "Виберіть ручну дію для вашої історії циклів.",
         "data": {
-          "editor_action": "Дія"
+          "editor_action": {
+            "name": "Дія",
+            "options": {
+              "split": "✂️ Розділіть цикл (знайдіть прогалини)",
+              "merge": "🔗 Цикли злиття (з’єднання фрагментів)",
+              "delete": "🗑️ Видалити цикл(и)"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Експорт/Імпорт JSON",
         "description": "Скопіюйте/вставте цикли, профілі ТА налаштування для цього пристрою. Експортуйте нижче або вставте JSON для імпорту.",
         "data": {
-          "mode": "Дія",
-          "json_payload": "Повна конфігурація JSON"
+          "json_payload": "Повна конфігурація JSON",
+          "mode": {
+            "name": "Дія",
+            "options": {
+              "export": "📤 Експортуйте всі дані",
+              "import": "📥 Імпорт/об’єднання даних"
+            }
+          }
         },
         "data_description": {
           "mode": "Виберіть Експорт для копіювання поточних даних та налаштувань, або Імпорт для вставки даних, експортованих з іншого пристрою WashData.",
@@ -359,8 +408,17 @@
         "title": "Записати цикл",
         "description": "Запишіть цикл вручну для створення чистого профілю без перешкод.\n\nСтатус: **{status}**\nТривалість: {duration}с\nЗразки: {samples}",
         "data": {
-          "action": "Дія",
-          "refresh_status": "Оновити статус"
+          "action": {
+            "name": "Дія",
+            "options": {
+              "start_recording": "⏺ Почніть новий запис",
+              "stop_recording": "⏹ Зупинити запис (зберегти та обробити)",
+              "refresh_status": "🔄 Оновити статус",
+              "process_recording": "⚙️ Обробити останній запис (обрізати та зберегти)",
+              "discard_recording": "🗑️ Видалити останній запис",
+              "cancel": "✖ Скасувати"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Вирішити відгук",
         "description": "**Виявлена програма**: {profile}\n**Довіра**: {confidence}%\n**Оцінено**: {est}хв, **Фактично**: {act}хв",
         "data": {
-          "action": "Що ви хочете зробити?",
           "corrected_profile": "Правильна програма (якщо виправляєте)",
-          "corrected_duration": "Правильна тривалість у хвилинах (якщо виправляєте)"
+          "corrected_duration": "Правильна тривалість у хвилинах (якщо виправляєте)",
+          "action": {
+            "name": "Що б ти хотіла зробити?",
+            "options": {
+              "confirm": "✅ Підтвердити - Правильне виявлення",
+              "correct": "✏️ Правильно - виберіть програму/тривалість",
+              "ignore": "✖ Ігнорувати - помилковий позитивний/шумовий цикл",
+              "delete": "🗑️ Видалити - видалити з історії"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Автоматичне виявлення"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Держава"
+      },
+      "washer_program": {
+        "name": "програма"
+      },
+      "time_remaining": {
+        "name": "Час, що залишився"
+      },
+      "total_duration": {
+        "name": "Загальна тривалість"
+      },
+      "cycle_progress": {
+        "name": "Прогрес"
+      },
+      "current_power": {
+        "name": "Поточна потужність"
+      },
+      "elapsed_time": {
+        "name": "Час, що минув"
+      },
+      "debug_info": {
+        "name": "Інформація про налагодження"
+      },
+      "match_confidence": {
+        "name": "Впевненість матчу"
+      },
+      "top_candidates": {
+        "name": "Кращі кандидати"
+      },
+      "wash_phase": {
+        "name": "Фаза"
+      },
+      "suggestions": {
+        "name": "Пропоновані налаштування"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Програма прання",
+    "program_placeholder": "Виберіть програму",
+    "duration": "Тривалість",
+    "minutes": "хв",
+    "time_remaining": "Час, що залишився",
+    "no_prediction": "Без передбачення",
+    "cycle_in_progress": "Цикл триває",
+    "status": "Статус",
+    "progress": "Прогрес",
+    "select_program": "Виберіть програму, щоб переглянути деталі",
+    "title": "Назва",
+    "status_entity": "Status Entity",
+    "icon": "значок",
+    "active_color": "Активний колір значка",
+    "show_state": "Показати стан",
+    "show_program": "Шоу програма",
+    "show_details": "Показати деталі",
+    "spin_icon": "Піктограма обертання (під час бігу)",
+    "program_entity": "Сутність програми",
+    "pct_entity": "Сутність прогресу (необов'язково)",
+    "time_entity": "Сутність часу (необов'язково)",
+    "display_mode": "Режим відображення",
+    "show_time_remaining": "Показати час, що залишився",
+    "show_percentage": "Показати відсоток",
+    "entity_not_found": "Об'єкт не знайдено"
   }
 }

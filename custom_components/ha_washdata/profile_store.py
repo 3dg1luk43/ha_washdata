@@ -28,6 +28,11 @@ from .const import (
 from .features import compute_signature
 from .signal_processing import resample_uniform, resample_adaptive, Segment
 from . import analysis
+from .time_utils import (
+    migrate_power_data_to_offsets,
+    power_data_to_offsets,
+    power_data_offsets_to_datetimes,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -230,37 +235,20 @@ class MatchResult:
 
 
 
-def decompress_power_data(cycle: CycleDict) -> list[tuple[str, float]]:
-    """Decompress cycle power data for matching (Module-level helper)."""
-    compressed_raw = cycle.get("power_data", [])
-    if not isinstance(compressed_raw, list) or not compressed_raw:
+def decompress_power_data(cycle: CycleDict) -> list[tuple[float, float]]:
+    """Return power data as ``[(offset_seconds, power), ...]`` for a cycle.
+
+    Handles both the current canonical ``[offset_float, power]`` format and the
+    legacy ``(iso_str, power)`` format transparently.  Returns an empty list if
+    data is missing or malformed.
+    """
+    raw = cycle.get("power_data", [])
+    if not isinstance(raw, list) or not raw:
         return []
 
-    compressed: list[Any] = cast(list[Any], compressed_raw)
-
-    # Handle missing start_time gracefully
-    if "start_time" not in cycle:
-        return []
-
-    try:
-        start_time = datetime.fromisoformat(cycle["start_time"])
-    except ValueError:
-        return []
-
-    result: list[tuple[str, float]] = []
-
-    for item in compressed:
-        if not isinstance(item, (list, tuple)):
-            continue
-        try:
-            offset_seconds, power = cast(tuple[Any, Any], item)
-        except (TypeError, ValueError):
-            continue
-        if isinstance(offset_seconds, (int, float)) and isinstance(power, (int, float)):
-            timestamp = start_time.timestamp() + float(offset_seconds)
-            result.append((datetime.fromtimestamp(timestamp).isoformat(), float(power)))
-
-    return result
+    start_time_iso: str | None = cycle.get("start_time")
+    offsets = power_data_to_offsets(raw, start_time_iso)
+    return [(float(o), float(p)) for o, p in offsets]
 
 
 def compress_power_data(cycle: CycleDict) -> list[Any] | None:
@@ -345,21 +333,12 @@ class WashDataStore(Store[JSONDict]):
             for cycle in cycles:
                 if "signature" not in cycle and cycle.get("power_data"):
                     try:
-                        # Decompress using helper
+                        # decompress_power_data now returns [(offset_seconds, power), ...]
                         tuples = decompress_power_data(cycle)
                         if tuples and len(tuples) > 10:
-                            # Convert to relative time arrays for signature computation
-                            start = datetime.fromisoformat(
-                                cycle["start_time"]
-                            ).timestamp()
-                            ts_arr = []
-                            p_arr = []
-                            for t_str, p in tuples:
-                                t = datetime.fromisoformat(t_str).timestamp()
-                                ts_arr.append(t - start)
-                                p_arr.append(p)
-
-                            sig = compute_signature(np.array(ts_arr), np.array(p_arr))
+                            ts_arr = np.array([t for t, _ in tuples])
+                            p_arr = np.array([p for _, p in tuples])
+                            sig = compute_signature(ts_arr, p_arr)
                             cycle["signature"] = dataclasses.asdict(sig)
                             migrated_cycles += 1
                     except Exception as e:  # pylint: disable=broad-exception-caught
@@ -377,34 +356,21 @@ class WashDataStore(Store[JSONDict]):
             profiles = old_data.get("profiles", {})
             migrated_count = 0
             
-            # 1. Compress Power Data & Ensure Status
+            # 1. Migrate Power Data to canonical offset format & ensure status
             for cycle in cycles:
-                # Ensure status
                 if "status" not in cycle:
                     cycle["status"] = "completed"
-                
-                # Compress power data if needed
-                # (Check if it looks like old list of lists/tuples)
+
                 if cycle.get("power_data") and isinstance(cycle["power_data"], list):
-                    first_elem = cycle["power_data"][0] if cycle["power_data"] else None
-                    # If it's a list/tuple [offset, power], it's uncompressed (v2)
-                    # If it's [start_ts, power, dt, encoding], it's compressed (v3)
-                    if isinstance(first_elem, (list, tuple)) and len(first_elem) == 2:
-                        try:
-                            # Use helper to compress in-place (returns compressed dict structure, we need to adapt)
-                            # Actually, compress_power_data returns the list of points. 
-                            # We need to manually apply compression logic here or use a helper that MUTATES the cycle.
-                            # The helper `compress_power_data` takes a cycle dict and returns the compressed list structure.
-                            # Let's verify what compress_power_data does.
-                            # It takes (cycle_data: dict) -> list[Any] (the compressed structure)
-                            compressed = compress_power_data(cycle)
-                            if compressed:
-                                cycle["power_data"] = compressed
-                                migrated_count += 1
-                        except Exception as e:
-                             _LOGGER.warning(
-                                "Failed to compress data for cycle %s: %s", cycle.get("id"), e
-                            )
+                    try:
+                        if migrate_power_data_to_offsets(cycle):
+                            migrated_count += 1
+                    except Exception as e:
+                        _LOGGER.warning(
+                            "Failed to migrate power data for cycle %s: %s",
+                            cycle.get("id"),
+                            e,
+                        )
 
             # 2. Ensure Device Type in Profiles
             for profile in profiles.values():
@@ -412,7 +378,7 @@ class WashDataStore(Store[JSONDict]):
                     profile["device_type"] = "washing_machine"
 
             _LOGGER.info(
-                "Migration v2->v3: Compressed data for %s cycles", migrated_count
+                "Migration v2->v3: Migrated power data for %s cycles", migrated_count
             )
 
         return old_data
@@ -1825,7 +1791,7 @@ class ProfileStore:
         )
 
     async def async_verify_alignment(
-        self, profile_name: str, current_power_data: list[tuple[str, float]]
+        self, profile_name: str, current_power_data: list[list[float]] | list[tuple]
     ) -> tuple[bool, float, float]:
         """
         Verify if the current power trace aligns with an expected low-power region in the envelope.
@@ -1867,14 +1833,8 @@ class ProfileStore:
 
         env_avg = env_avg_raw # For backward compatibility if needed elsewhere
         
-        # Prepare current power (floats)
         try:
-             # Normalize input format
-            if isinstance(current_power_data[0][0], datetime):
-                # Should not happen if passed from detector readings directly but handled
-                current_power_list = [float(x[1]) for x in current_power_data]
-            else:
-                current_power_list = [float(x[1]) for x in current_power_data]
+            current_power_list = [float(x[1]) for x in current_power_data]
         except Exception:  # pylint: disable=broad-exception-caught
             return False, 0.0, 9999.0
 
@@ -2051,15 +2011,31 @@ class ProfileStore:
                 avg_duration,
             )
 
-        # Update cycles if renamed
+        # Update cycles and feedback if renamed
         count = 0
         if renamed:
+            # 1. Update past cycles
             for cycle in self._data.get("past_cycles", []):
                 if cycle.get("profile_name") == old_name:
                     cycle["profile_name"] = new_name
                     count += 1
+
+            # 2. Update pending feedback
+            pending = self.get_pending_feedback()
+            for req in pending.values():
+                if req.get("detected_profile") == old_name:
+                    req["detected_profile"] = new_name
+
+            # 3. Update feedback history
+            history = self.get_feedback_history()
+            for record in history.values():
+                if record.get("original_detected_profile") == old_name:
+                    record["original_detected_profile"] = new_name
+                if record.get("corrected_profile") == old_name:
+                    record["corrected_profile"] = new_name
+
             _LOGGER.info(
-                "Renamed profile '%s' to '%s', updated %s cycles",
+                "Renamed profile '%s' to '%s', updated %s cycles and associated feedback",
                 old_name,
                 new_name,
                 count,
@@ -2474,6 +2450,11 @@ class ProfileStore:
 
         self._data = data_dict
         await self.async_save()
+
+        return {
+            "entry_data": payload.get("entry_data", {}),
+            "entry_options": payload.get("entry_options", {}),
+        }
 
 
     async def delete_cycle(self, cycle_id: str) -> bool:

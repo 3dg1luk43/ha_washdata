@@ -28,6 +28,10 @@ from .const import (
     CONF_STOP_THRESHOLD_W,
     CONF_SAMPLING_INTERVAL,
     CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_PEOPLE,
+    CONF_NOTIFY_ONLY_WHEN_HOME,
+    CONF_NOTIFY_FIRE_EVENTS,
     CONF_NOTIFY_EVENTS,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_SMOOTHING_WINDOW,
@@ -54,6 +58,11 @@ from .const import (
     CONF_END_ENERGY_THRESHOLD,
     CONF_EXTERNAL_END_TRIGGER_ENABLED,
     CONF_EXTERNAL_END_TRIGGER,
+    CONF_EXTERNAL_END_TRIGGER_INVERTED,
+    CONF_ANTI_WRINKLE_ENABLED,
+    CONF_ANTI_WRINKLE_MAX_POWER,
+    CONF_ANTI_WRINKLE_MAX_DURATION,
+    CONF_ANTI_WRINKLE_EXIT_POWER,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     DEFAULT_NAME,
@@ -95,11 +104,17 @@ from .const import (
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+    DEFAULT_NOTIFY_ONLY_WHEN_HOME,
+    DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_OFF_DELAY_BY_DEVICE,
     DEFAULT_SAMPLING_INTERVAL_BY_DEVICE,
     DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE,
+    DEFAULT_ANTI_WRINKLE_ENABLED,
+    DEFAULT_ANTI_WRINKLE_MAX_POWER,
+    DEFAULT_ANTI_WRINKLE_MAX_DURATION,
+    DEFAULT_ANTI_WRINKLE_EXIT_POWER,
 )
 from .profile_store import profile_sort_key
 
@@ -356,6 +371,24 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 default=get_val(CONF_OFF_DELAY, default_off_delay),
             ): vol.Coerce(int),
             # --- Notification Settings ---
+            vol.Optional(
+                CONF_NOTIFY_ACTIONS,
+                default=get_val(CONF_NOTIFY_ACTIONS, []),
+            ): selector.ActionSelector(),
+            vol.Optional(
+                CONF_NOTIFY_PEOPLE,
+                default=list(get_val(CONF_NOTIFY_PEOPLE, [])),
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="person", multiple=True)
+            ),
+            vol.Optional(
+                CONF_NOTIFY_ONLY_WHEN_HOME,
+                default=get_val(CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME),
+            ): bool,
+            vol.Optional(
+                CONF_NOTIFY_FIRE_EVENTS,
+                default=get_val(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS),
+            ): bool,
             vol.Optional(
                 CONF_NOTIFY_SERVICE,
                 default=get_val(CONF_NOTIFY_SERVICE, ""),
@@ -772,6 +805,55 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_SAVE_DEBUG_TRACES, default=get_val(CONF_SAVE_DEBUG_TRACES, False)
             ): bool,
+            # --- Anti-Wrinkle (Dryer) ---
+            vol.Optional(
+                CONF_ANTI_WRINKLE_ENABLED,
+                default=get_val(
+                    CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED
+                ),
+            ): bool,
+            vol.Optional(
+                CONF_ANTI_WRINKLE_MAX_POWER,
+                default=get_val(
+                    CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=10.0,
+                    max=2000.0,
+                    step=10.0,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_ANTI_WRINKLE_MAX_DURATION,
+                default=get_val(
+                    CONF_ANTI_WRINKLE_MAX_DURATION, DEFAULT_ANTI_WRINKLE_MAX_DURATION
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5.0,
+                    max=600.0,
+                    step=1.0,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_ANTI_WRINKLE_EXIT_POWER,
+                default=get_val(
+                    CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.0,
+                    max=10.0,
+                    step=0.1,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
             # --- External Cycle End Trigger ---
             vol.Optional(
                 CONF_EXTERNAL_END_TRIGGER_ENABLED,
@@ -785,6 +867,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     multiple=False,
                 )
             ),
+            vol.Optional(
+                CONF_EXTERNAL_END_TRIGGER_INVERTED,
+                default=get_val(CONF_EXTERNAL_END_TRIGGER_INVERTED, False),
+            ): bool,
         }
 
         data_schema = vol.Schema(schema)
@@ -844,18 +930,22 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Step 1: Select Action (Merge or Split)."""
         if user_input is not None:
-            self._editor_action = user_input["action"]
+            self._editor_action = user_input["editor_action"]
             return await self.async_step_editor_select()
 
         return self.async_show_form(
             step_id="interactive_editor",
             data_schema=vol.Schema(
                 {
-                    vol.Required("action"): vol.In(
-                        {
-                            "split": "✂️ Split a Cycle (Find gaps)",
-                            "merge": "🔗 Merge Cycles (Join fragments)",
-                        }
+                    vol.Required("editor_action"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                "split",
+                                "merge",
+                                "delete",
+                            ],
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
                     )
                 }
             ),
@@ -895,7 +985,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         for c in cycles:
             dt = dt_util.parse_datetime(c["start_time"])
             start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
-            duration_min = int(c["duration"] / 60)
+            duration_min = int(c.get("manual_duration", c["duration"]) / 60)
             prof = c.get("profile_name") or "Unlabeled"
             label = f"{start} - {duration_min}m - {prof}"
             options.append(selector.SelectOptionDict(value=c["id"], label=label))
@@ -975,7 +1065,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             # Maintenance: Reprocess envelopes in background to avoid blocking UI
                             self.hass.async_create_task(store.async_rebuild_all_envelopes())
                     
-                    return self.async_create_entry(title="", data={})
+                    return self.async_create_entry(title="", data=dict(self.config_entry.options))
 
             elif self._editor_action == "merge":
                 if user_input.get("confirm_commit"):
@@ -997,7 +1087,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     await store.apply_merge_interactive(self._editor_selected_ids, target_profile)
                     # Maintenance: Reprocess envelopes in background
                     self.hass.async_create_task(store.async_rebuild_all_envelopes())
-                    return self.async_create_entry(title="", data={})
+                    return self.async_create_entry(title="", data=dict(self.config_entry.options))
 
         # Generate Preview
         preview_md = ""
@@ -1270,13 +1360,10 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                     vol.Required("mode", default="export"): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
-                                selector.SelectOptionDict(
-                                    value="export", label="Export only"
-                                ),
-                                selector.SelectOptionDict(
-                                    value="import", label="Import from JSON"
-                                ),
-                            ]
+                                "export",
+                                "import",
+                            ],
+                            mode=selector.SelectSelectorMode.DROPDOWN,
                         )
                     ),
                     vol.Optional(
@@ -1301,7 +1388,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         for c in reversed(recent_cycles):
             dt = dt_util.parse_datetime(c["start_time"])
             start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
-            duration_min = int(c["duration"] / 60)
+            duration_min = int(c.get("manual_duration", c["duration"]) / 60)
             prof = c.get("profile_name") or "Unlabeled"
             status = c.get("status", "completed")
             status_icon = (
@@ -1333,13 +1420,17 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             step_id="manage_cycles",
             data_schema=vol.Schema(
                 {
-                    vol.Required("action"): vol.In(
-                        {
-                            "auto_label_cycles": "🤖 Auto-Label Old Cycles",
-                            "select_cycle_to_label": "🏷️ Label Specific Cycle",
-                            "select_cycle_to_delete": "🗑️ Delete Cycle",
-                            "interactive_editor": "✂️ Merge/Split Interactive Editor",
-                        }
+                    vol.Required("action"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                "auto_label_cycles",
+                                "select_cycle_to_label",
+                                "select_cycle_to_label_multi",
+                                "select_cycle_to_delete",
+                                "interactive_editor",
+                            ],
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
                     )
                 }
             ),
@@ -1383,14 +1474,17 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             step_id="manage_profiles",
             data_schema=vol.Schema(
                 {
-                    vol.Required("action"): vol.In(
-                        {
-                            "create_profile": "➕ Create New Profile",
-                            "edit_profile": "✏️ Edit/Rename Profile",
-                            "delete_profile": "🗑️ Delete Profile",
-                            "profile_stats": "📊 Profile Statistics",
-                            "cleanup_profile": "🧹 Clean Up History - Graph & Delete",
-                        }
+                    vol.Required("action"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                "create_profile",
+                                "edit_profile",
+                                "delete_profile",
+                                "profile_stats",
+                                "cleanup_profile",
+                            ],
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
                     )
                 }
             ),
@@ -1526,7 +1620,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         for c in profile_cycles:
             dt = dt_util.parse_datetime(c["start_time"])
             start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
-            duration_min = int(c["duration"] / 60)
+            duration_min = int(c.get("manual_duration", c["duration"]) / 60)
             status = c.get("status", "completed")
 
             # Status icon
@@ -1716,7 +1810,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         for c in reversed(cycles):
             dt = dt_util.parse_datetime(c["start_time"])
             start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
-            duration_min = int(c["duration"] / 60)
+            duration_min = int(c.get("manual_duration", c["duration"]) / 60)
             prof = c.get("profile_name") or "Unlabeled"
             label = f"{start} - {duration_min}m - {prof}"
             cycle_options.append(selector.SelectOptionDict(value=c["id"], label=label))
@@ -1972,7 +2066,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         for c in reversed(cycles):
             dt = dt_util.parse_datetime(c["start_time"])
             start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
-            duration_min = int(c["duration"] / 60)
+            duration_min = int(c.get("manual_duration", c["duration"]) / 60)
             prof = c.get("profile_name") or "Unlabeled"
             status = c.get("status", "completed")
             # ✓ = completed/force_stopped (natural end), ⚠ = resumed, ✗ = interrupted (user stopped)
@@ -2019,7 +2113,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         for c in reversed(cycles):
             dt = dt_util.parse_datetime(c["start_time"])
             start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
-            duration_min = int(c["duration"] / 60)
+            duration_min = int(c.get("manual_duration", c["duration"]) / 60)
             prof = c.get("profile_name") or "Unlabeled"
             status = c.get("status", "completed")
             # ✓ = completed/force_stopped (natural end), ⚠ = resumed, ✗ = interrupted (user stopped)
@@ -2291,11 +2385,20 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
 
         return self.async_show_form(
             step_id="record_cycle",
-            data_schema=vol.Schema({vol.Required("action"): vol.In(options)}),
+            data_schema=vol.Schema(
+                {
+                    vol.Required("action"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=list(options.keys()),
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    )
+                }
+            ),
             description_placeholders={
                 "status": status,
                 "duration": str(duration),
-                "samples": str(samples)
+                "samples": str(samples),
             },
         )
 
@@ -2334,7 +2437,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
 
             if save_mode == "discard":
                 await manager.recorder.clear_last_run()
-                return self.async_create_entry(title="", data={})
+                return self.async_create_entry(title="", data=dict(self.config_entry.options))
 
             head_trim = user_input["head_trim"]
             tail_trim = user_input["tail_trim"]
@@ -2401,7 +2504,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             await manager.profile_store.async_save()
             await manager.recorder.clear_last_run()
 
-            return self.async_create_entry(title="", data={})
+            return self.async_create_entry(title="", data=dict(self.config_entry.options))
 
         # Calculate suggestions
         rec_start_str = manager.recorder.last_run.get("start_time")
@@ -2605,7 +2708,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                        corrected_duration=int(new_duration * 60) if new_duration else None,
                        dismiss=False,
                     )
-            elif action == "dismiss":
+            elif action == "ignore":
                 # User wants to dismiss/ignore this feedback request
                 if hasattr(manager, "learning_manager"):
                     await manager.learning_manager.async_submit_cycle_feedback(
@@ -2615,6 +2718,9 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                        corrected_duration=None,
                        dismiss=True,
                     )
+            elif action == "delete":
+                # User wants to delete the cycle
+                await manager.profile_store.delete_cycle(cycle_id)
             
             # Return to main menu
             return await self.async_step_init()
@@ -2628,13 +2734,6 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         profiles = list(profile_store.get_profiles().keys())
         profiles.sort(key=profile_sort_key)
         
-        # Action options
-        action_options = [
-            selector.SelectOptionDict(value="confirm", label="✓ Confirm (detection was correct)"),
-            selector.SelectOptionDict(value="correct", label="✎ Correct (change profile/duration)"),
-            selector.SelectOptionDict(value="dismiss", label="✕ Dismiss (ignore this feedback)"),
-        ]
-        
         return self.async_show_form(
             step_id="resolve_feedback",
             description_placeholders={
@@ -2647,7 +2746,12 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                 {
                     vol.Required("action", default="confirm"): selector.SelectSelector(
                         selector.SelectSelectorConfig(
-                            options=action_options,
+                            options=[
+                                "confirm",
+                                "correct",
+                                "ignore",
+                                "delete",
+                            ],
                             mode=selector.SelectSelectorMode.LIST,
                         )
                     ),

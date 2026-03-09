@@ -59,6 +59,10 @@ class WashDataProgramSelect(SelectEntity):
             self._attr_icon = "mdi:car-electric"
         elif dtype == "coffee_machine":
             self._attr_icon = "mdi:coffee"
+        elif dtype == "air_fryer":
+            self._attr_icon = "mdi:pot-steam"
+        elif dtype == "heat_pump":
+            self._attr_icon = "mdi:heat-pump"
         else:
             self._attr_icon = "mdi:washing-machine"  # Default and washing_machine
 

@@ -71,7 +71,11 @@
           "notify_start_message": "Format mesaj de început",
           "notify_finish_message": "Format mesaj de final",
           "notify_pre_complete_message": "Format mesaj pre-finalizare",
-          "show_advanced": "Editați setările avansate (Pasul următor)"
+          "show_advanced": "Editați setările avansate (Pasul următor)",
+          "notify_actions": "Acțiuni de notificare",
+          "notify_people": "Oameni de notificat",
+          "notify_only_when_home": "Notificați numai când sunt acasă",
+          "notify_fire_events": "Evenimente de automatizare a incendiilor"
         },
         "data_description": {
           "apply_suggestions": "Bifați această casetă pentru a copia valorile sugerate de algoritmul de învățare în formular. Verificați înainte de a salva.\n\nSugerat (din învățare):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Pictogramă pentru notificări (ex. mdi:washing-machine). Lăsați gol pentru implicit.",
           "notify_start_message": "Mesaj trimis când începe un ciclu. Suportă substituentul {device}.",
           "notify_finish_message": "Mesaj trimis când se termină un ciclu. Suportă substituenții {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Mesaj trimis înainte de finalizare. Suportă substituenții {device}, {minutes}."
+          "notify_pre_complete_message": "Mesaj trimis înainte de finalizare. Suportă substituenții {device}, {minutes}.",
+          "notify_actions": "Secvență de acțiuni opțională Home Assistant care se rulează pentru notificări (scripturi, notificări, TTS etc.). Dacă este setat, acțiunile rulează înainte de serviciul de notificare alternativă.",
+          "notify_people": "Oameni entități pe care să le folosești pentru porțile de acasă/deplasare. Când este activat, notificările sunt amânate până când cineva este acasă.",
+          "notify_only_when_home": "Dacă este activat, amânați notificările până când cel puțin o persoană selectată este acasă.",
+          "notify_fire_events": "Dacă este activat, declanșați evenimente Home Assistant pentru începerea și sfârșitul ciclului (ha_washdata_cycle_started/ended) pentru a conduce automatizările."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Salvați urme de depanare",
           "dtw_bandwidth": "Lățime de bandă DTW",
           "external_end_trigger_enabled": "Activați declanșatorul extern de final ciclu",
-          "external_end_trigger": "Senzor extern de final ciclu"
+          "external_end_trigger": "Senzor extern de final ciclu",
+          "external_end_trigger_inverted": "Inversează logica declanșării (declanșatorul este dezactivat)",
+          "anti_wrinkle_enabled": "Scut antirid (numai uscător)",
+          "anti_wrinkle_max_power": "Putere maximă antirid (W)",
+          "anti_wrinkle_max_duration": "Durata maximă antirid (e)",
+          "anti_wrinkle_exit_power": "Puterea de ieșire antirid (W)"
         },
         "data_description": {
           "apply_suggestions": "Bifați această casetă pentru a copia valorile sugerate de algoritmul de învățare în formular. Verificați înainte de a salva.\n\nSugerat (din învățare):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "De câte ori condiția de final (putere sub prag în off_delay) trebuie îndeplinită consecutiv înainte de terminarea ciclului. Valorile mai mari previn terminarea falsă în timpul pauzelor. Implicit: 1.",
           "start_energy_threshold": "Ciclul trebuie să acumuleze cel puțin această cantitate de energie (Wh) în timpul FAZEI DE PORNIRE pentru a fi confirmat. Implicit: 0.005 Wh.",
           "end_energy_threshold": "Ciclul se termină numai dacă energia în ultima fereastră Off-Delay este sub această valoare (Wh). Previne terminarea falsă dacă puterea fluctuează aproape de zero. Implicit: 0.05 Wh.",
-          "auto_maintenance": "Activați întreținerea nocturnă pentru a repara eșantioanele, a combina ciclurile fragmentate și a menține stocarea în stare bună.",
+          "auto_maintenance": "Activați întreținerea automată (reparare mostre, îmbinare fragmente).",
           "expose_debug_entities": "Afișați senzori avansați (Încredere, Fază, Ambiguitate) pentru depanare.",
           "save_debug_traces": "Salvați date detaliate de clasificare și urme de putere în istoric (Crește utilizarea stocării).",
-          "dtw_bandwidth": "Deformarea temporală maximă permisă (întindere) ca fracțiune din durata ciclului. Valori mai mari permit potrivirea ciclurilor foarte variabile, dar cresc costurile CPU. Implicit: 0.20 (20%).",
-          "external_end_trigger_enabled": "Activați monitorizarea unui senzor binar extern pentru a declanșa finalizarea ciclului. Când este activat, pornirea senzorului va termina imediat ciclul curent.",
-          "external_end_trigger": "Selectați o entitate senzor binar. Când acest senzor pornește, ciclul curent se termină cu starea 'finalizat' (nu 'întrerupt')."
+          "dtw_bandwidth": "Timpul maxim permis de deformare (întindere) ca raport al duratei ciclului. Valorile mai mari permit potrivirea ciclurilor foarte variabile, dar cresc costul CPU. Implicit: 0,20 (20%).",
+          "external_end_trigger_enabled": "Activați monitorizarea unui senzor binar extern pentru a declanșa finalizarea ciclului.",
+          "external_end_trigger": "Selectați o entitate senzor binar. Când acest senzor se declanșează, ciclul curent se va încheia cu starea „finalizat”.",
+          "external_end_trigger_inverted": "În mod implicit, declanșatorul se declanșează atunci când senzorul pornește. Bifați această casetă pentru a se declanșa atunci când senzorul se OPRITE.",
+          "anti_wrinkle_enabled": "Ignorați rotațiile scurte ale tamburului de putere redusă după încheierea unui ciclu pentru a preveni ciclurile fantomă (numai pentru uscător/mașină de spălat cu uscător).",
+          "anti_wrinkle_max_power": "Exploziile la sau sub această putere sunt tratate ca rotații antirid în loc de noi cicluri. Se aplică numai atunci când Anti-Wrinkle Shield este activat.",
+          "anti_wrinkle_max_duration": "Lungimea maximă a exploziei pentru a fi tratată ca rotație antirid. Se aplică numai atunci când Anti-Wrinkle Shield este activat.",
+          "anti_wrinkle_exit_power": "Dacă puterea scade sub acest nivel, părăsiți imediat antirid (dezactivat adevărat). Se aplică numai atunci când Anti-Wrinkle Shield este activat."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Gestionați cicluri",
         "description": "Cicluri recente:\n{recent_cycles}",
         "data": {
-          "action": "Acțiune"
+          "action": {
+            "name": "Acţiune",
+            "options": {
+              "auto_label_cycles": "🤖 Etichetare automată a ciclurilor vechi",
+              "select_cycle_to_label": "🏷️ Ciclul specific de etichetă",
+              "select_cycle_to_label_multi": "🏷️ Etichetați mai multe cicluri",
+              "select_cycle_to_delete": "🗑️ Ștergeți ciclul",
+              "interactive_editor": "✂️ Merge/Split Interactive Editor"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Gestionați profiluri",
         "description": "Rezumat profiluri:\n{profile_summary}",
         "data": {
-          "action": "Acțiune"
+          "action": {
+            "name": "Acţiune",
+            "options": {
+              "create_profile": "➕ Creați un profil nou",
+              "edit_profile": "✏️ Editați/Redenumiți profilul",
+              "delete_profile": "🗑️ Șterge profilul",
+              "profile_stats": "📊 Statistici de profil",
+              "cleanup_profile": "🧹 Curățați istoricul - Grafic și șterge"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Editor interactiv Combinare/Divizare",
         "description": "Selectați o acțiune manuală pentru istoricul ciclurilor.",
         "data": {
-          "editor_action": "Acțiune"
+          "editor_action": {
+            "name": "Acţiune",
+            "options": {
+              "split": "✂️ Împărțiți un ciclu (Găsiți lacune)",
+              "merge": "🔗 Cicluri de îmbinare (Alăturați fragmente)",
+              "delete": "🗑️ Ștergeți ciclul(e)"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Export/Import JSON",
         "description": "Copiați/lipiți cicluri, profiluri ȘI setări pentru acest dispozitiv. Exportați mai jos sau lipiți JSON pentru import.",
         "data": {
-          "mode": "Acțiune",
-          "json_payload": "JSON configurație completă"
+          "json_payload": "JSON configurație completă",
+          "mode": {
+            "name": "Acţiune",
+            "options": {
+              "export": "📤 Exportați toate datele",
+              "import": "📥 Import/Imbinare date"
+            }
+          }
         },
         "data_description": {
           "mode": "Selectați Export pentru a copia datele și setările curente, sau Import pentru a lipi date exportate de pe un alt dispozitiv WashData.",
@@ -359,8 +408,17 @@
         "title": "Înregistrați ciclu",
         "description": "Înregistrați un ciclu manual pentru a crea un profil curat fără interferențe.\n\nStare: **{status}**\nDurată: {duration}s\nEșantioane: {samples}",
         "data": {
-          "action": "Acțiune",
-          "refresh_status": "Reîmprospătați starea"
+          "action": {
+            "name": "Acţiune",
+            "options": {
+              "start_recording": "⏺ Începeți o nouă înregistrare",
+              "stop_recording": "⏹ Opriți înregistrarea (Salvare și procesare)",
+              "refresh_status": "🔄 Starea de reîmprospătare",
+              "process_recording": "⚙️ Procesați ultima înregistrare (Trim și Salvați)",
+              "discard_recording": "🗑️ Aruncă ultima înregistrare",
+              "cancel": "✖ Anulează"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Rezolvați feedback",
         "description": "**Program detectat**: {profile}\n**Încredere**: {confidence}%\n**Estimat**: {est}min, **Real**: {act}min",
         "data": {
-          "action": "Ce doriți să faceți?",
           "corrected_profile": "Program corect (dacă corectați)",
-          "corrected_duration": "Durată corectă în minute (dacă corectați)"
+          "corrected_duration": "Durată corectă în minute (dacă corectați)",
+          "action": {
+            "name": "Ce ai vrea sa faci?",
+            "options": {
+              "confirm": "✅ Confirmare - Detectare corectă",
+              "correct": "✏️ Corect - Alegeți Program/Durată",
+              "ignore": "✖ Ignorare - Ciclu fals pozitiv/zgomotos",
+              "delete": "🗑️ Șterge - Eliminați din istoric"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Detectare automată"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Stat"
+      },
+      "washer_program": {
+        "name": "Program"
+      },
+      "time_remaining": {
+        "name": "Timpul rămas"
+      },
+      "total_duration": {
+        "name": "Durata totală"
+      },
+      "cycle_progress": {
+        "name": "Progres"
+      },
+      "current_power": {
+        "name": "Puterea curentă"
+      },
+      "elapsed_time": {
+        "name": "Timp scurs"
+      },
+      "debug_info": {
+        "name": "Informații de depanare"
+      },
+      "match_confidence": {
+        "name": "Încrederea în meci"
+      },
+      "top_candidates": {
+        "name": "Candidați de top"
+      },
+      "wash_phase": {
+        "name": "Fază"
+      },
+      "suggestions": {
+        "name": "Setări sugerate"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Program de spălat",
+    "program_placeholder": "Selectați Program",
+    "duration": "Durată",
+    "minutes": "min",
+    "time_remaining": "Timpul rămas",
+    "no_prediction": "Fără predicție",
+    "cycle_in_progress": "Ciclu în curs",
+    "status": "Stare",
+    "progress": "Progres",
+    "select_program": "Selectați un program pentru a vedea detalii",
+    "title": "Titlu",
+    "status_entity": "Entitate de stare",
+    "icon": "Pictogramă",
+    "active_color": "Culoarea pictogramei active",
+    "show_state": "Arată stare",
+    "show_program": "Arată programul",
+    "show_details": "Afișați detalii",
+    "spin_icon": "Pictogramă care se învârte (în timpul alergării)",
+    "program_entity": "Entitatea de program",
+    "pct_entity": "Entitate de progres (opțional)",
+    "time_entity": "Entitate oră (Opțional)",
+    "display_mode": "Modul de afișare",
+    "show_time_remaining": "Arată timpul rămas",
+    "show_percentage": "Arată procentul",
+    "entity_not_found": "Entitatea nu a fost găsită"
   }
 }

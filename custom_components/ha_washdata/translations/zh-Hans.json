@@ -71,7 +71,11 @@
           "notify_start_message": "开始消息格式",
           "notify_finish_message": "结束消息格式",
           "notify_pre_complete_message": "预完成消息格式",
-          "show_advanced": "编辑高级设置（下一步）"
+          "show_advanced": "编辑高级设置（下一步）",
+          "notify_actions": "通知操作",
+          "notify_people": "需要通知的人",
+          "notify_only_when_home": "仅在回家时通知",
+          "notify_fire_events": "消防自动化事件"
         },
         "data_description": {
           "apply_suggestions": "选中此框以将学习算法建议的值复制到表单中。保存前请检查。\n\n建议值（来自学习）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "用于通知的图标（例如 mdi:washing-machine）。留空以使用默认值。",
           "notify_start_message": "周期开始时发送的消息。支持 {device} 占位符。",
           "notify_finish_message": "周期结束时发送的消息。支持 {device}, {duration}, {program} 占位符。",
-          "notify_pre_complete_message": "完成前发送的消息。支持 {device}, {minutes} 占位符。"
+          "notify_pre_complete_message": "完成前发送的消息。支持 {device}, {minutes} 占位符。",
+          "notify_actions": "用于运行通知的可选 Home Assistant 操作序列（脚本、通知、TTS 等）。如果设置，操作将在回退通知服务之前运行。",
+          "notify_people": "用于主/客门控的人员实体。启用后，通知将推迟到有人在家时才发送。",
+          "notify_only_when_home": "如果启用，则延迟通知，直到至少一个选定的人在家。",
+          "notify_fire_events": "如果启用，则触发循环开始和结束 (ha_washdata_cycle_started/ending) 的 Home Assistant 事件以驱动自动化。"
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "保存调试轨迹",
           "dtw_bandwidth": "DTW 带宽",
           "external_end_trigger_enabled": "启用外部周期结束触发器",
-          "external_end_trigger": "外部周期结束传感器"
+          "external_end_trigger": "外部周期结束传感器",
+          "external_end_trigger_inverted": "反转触发逻辑（触发关闭）",
+          "anti_wrinkle_enabled": "抗皱护罩（仅限烘干机）",
+          "anti_wrinkle_max_power": "抗皱最大功率(W)",
+          "anti_wrinkle_max_duration": "抗皱最大持续时间（秒）",
+          "anti_wrinkle_exit_power": "抗皱退出功率（W）"
         },
         "data_description": {
           "apply_suggestions": "选中此框以将学习算法建议的值复制到表单中。保存前请检查。\n\n建议值（来自学习）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "在该周期结束之前，必须连续满足多少次结束条件（off_delay 内功率低于阈值）。较高的值可防止暂停期间的错误结束。默认值：1。",
           "start_energy_threshold": "周期必须在启动阶段积累至少这么多能量 (Wh) 才能被确认。默认值：0.005 Wh。",
           "end_energy_threshold": "仅当最后一个 Off-Delay 窗口中的能量低于此值 (Wh) 时，周期才结束。如果功率在零附近波动，则防止错误结束。默认值：0.05 Wh。",
-          "auto_maintenance": "启用夜间维护以修复样本、合并碎片周期并保持存储健康。",
+          "auto_maintenance": "启用自动维护（修复样本、合并片段）。",
           "expose_debug_entities": "显示用于调试的高级传感器（置信度，相位，模糊度）。",
           "save_debug_traces": "在历史记录中存储详细的排名和功率跟踪数据（增加存储使用量）。",
-          "dtw_bandwidth": "作为周期持续时间比率的最大允许时间扭曲（拉伸）。较高的值允许匹配高度可变的周期（例如，传感器延迟阶段），但会增加 CPU 成本。默认值：0.20 (20%)。",
-          "external_end_trigger_enabled": "启用监视外部二进制传感器以触发周期完成。启用后，传感器变为“on”将立即完成当前周期。",
-          "external_end_trigger": "选择一个二进制传感器实体。当此传感器变为“on”时，当前周期将以状态“已完成”（而非“已中断”）结束。"
+          "dtw_bandwidth": "最大允许时间扭曲（拉伸）与周期持续时间的比率。较高的值允许匹配高度可变的周期，但会增加 CPU 成本。默认值：0.20 (20%)。",
+          "external_end_trigger_enabled": "启用对外部二进制传感器的监控以触发循环完成。",
+          "external_end_trigger": "选择二进制传感器实体。当该传感器触发时，当前周期将以“已完成”状态结束。",
+          "external_end_trigger_inverted": "默认情况下，当传感器打开时触发器会触发。选中此框以在传感器关闭时触发。",
+          "anti_wrinkle_enabled": "循环结束后忽略短暂的低功率滚筒旋转，以防止幽灵循环（仅限烘干机/洗衣烘干机）。",
+          "anti_wrinkle_max_power": "等于或低于该功率的爆发被视为抗皱旋转而不是新的循环。仅在启用抗皱护罩时适用。",
+          "anti_wrinkle_max_duration": "视为抗皱旋转的最大爆破长度。仅在启用抗皱护罩时适用。",
+          "anti_wrinkle_exit_power": "如果功率低于此水平，请立即退出抗皱（真正关闭）。仅在启用抗皱护罩时适用。"
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "管理周期",
         "description": "最近的周期：\n{recent_cycles}",
         "data": {
-          "action": "操作"
+          "action": {
+            "name": "行动",
+            "options": {
+              "auto_label_cycles": "🤖 自动标记旧自行车",
+              "select_cycle_to_label": "🏷️标签特定周期",
+              "select_cycle_to_label_multi": "🏷️ 标记多个周期",
+              "select_cycle_to_delete": "🗑️删除循环",
+              "interactive_editor": "✂️ 合并/拆分交互式编辑器"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "管理配置文件",
         "description": "配置文件摘要：\n{profile_summary}",
         "data": {
-          "action": "操作"
+          "action": {
+            "name": "行动",
+            "options": {
+              "create_profile": "➕ 创建新配置文件",
+              "edit_profile": "✏️ 编辑/重命名个人资料",
+              "delete_profile": "🗑️删除个人资料",
+              "profile_stats": "📊 个人资料统计",
+              "cleanup_profile": "🧹 清理历史记录 - 图表和删除"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "合并/拆分交互式编辑器",
         "description": "选择要对周期历史记录执行的手动操作。",
         "data": {
-          "editor_action": "操作"
+          "editor_action": {
+            "name": "行动",
+            "options": {
+              "split": "✂️ 分割一个周期（寻找间隙）",
+              "merge": "🔗 合并循环（连接片段）",
+              "delete": "🗑️ 删除周期"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "导出/导入 JSON",
         "description": "复制/粘贴此设备的周期、配置文件和设置。在下面导出或粘贴 JSON 以导入。",
         "data": {
-          "mode": "操作",
-          "json_payload": "完整配置 JSON"
+          "json_payload": "完整配置 JSON",
+          "mode": {
+            "name": "行动",
+            "options": {
+              "export": "📤导出所有数据",
+              "import": "📥 导入/合并数据"
+            }
+          }
         },
         "data_description": {
           "mode": "选择导出以复制当前数据和设置，或选择导入以粘贴从另一台 WashData 设备导出的数据。",
@@ -359,8 +408,17 @@
         "title": "记录周期",
         "description": "手动记录周期以创建一个干净的配置文件且不受干扰。\n\n状态：**{status}**\n持续时间：{duration}s\n样本：{samples}",
         "data": {
-          "action": "操作",
-          "refresh_status": "刷新状态"
+          "action": {
+            "name": "行动",
+            "options": {
+              "start_recording": "⏺ 开始新录音",
+              "stop_recording": "⏹ 停止录制（保存并处理）",
+              "refresh_status": "🔄 刷新状态",
+              "process_recording": "⚙️ 处理最后的录音（修剪和保存）",
+              "discard_recording": "🗑️ 放弃最后的录音",
+              "cancel": "✖ 取消"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "解决反馈",
         "description": "**检测到的程序**：{profile}\n**置信度**：{confidence}%\n**预计**：{est}m，**实际**：{act}m",
         "data": {
-          "action": "您想做什么？",
           "corrected_profile": "更正程序（如果正在更正）",
-          "corrected_duration": "更正持续时间（分钟）（如果正在更正）"
+          "corrected_duration": "更正持续时间（分钟）（如果正在更正）",
+          "action": {
+            "name": "你想做什么？",
+            "options": {
+              "confirm": "✅ 确认-检测正确",
+              "correct": "✏️正确 - 选择项目/持续时间",
+              "ignore": "✖ 忽略 - 误报/噪声循环",
+              "delete": "🗑️ 删除 - 从历史记录中删除"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "自动检测"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "状态"
+      },
+      "washer_program": {
+        "name": "程序"
+      },
+      "time_remaining": {
+        "name": "剩余时间"
+      },
+      "total_duration": {
+        "name": "总持续时间"
+      },
+      "cycle_progress": {
+        "name": "进步"
+      },
+      "current_power": {
+        "name": "当前功率"
+      },
+      "elapsed_time": {
+        "name": "经过时间"
+      },
+      "debug_info": {
+        "name": "调试信息"
+      },
+      "match_confidence": {
+        "name": "比赛信心"
+      },
+      "top_candidates": {
+        "name": "最佳候选人"
+      },
+      "wash_phase": {
+        "name": "阶段"
+      },
+      "suggestions": {
+        "name": "建议设置"
+      }
     }
+  },
+  "card": {
+    "washer_program": "清洗程序",
+    "program_placeholder": "选择节目",
+    "duration": "期间",
+    "minutes": "分钟",
+    "time_remaining": "剩余时间",
+    "no_prediction": "没有预测",
+    "cycle_in_progress": "循环正在进行中",
+    "status": "地位",
+    "progress": "进步",
+    "select_program": "选择一个程序以查看详细信息",
+    "title": "标题",
+    "status_entity": "状态实体",
+    "icon": "图标",
+    "active_color": "活动图标颜色",
+    "show_state": "显示状态",
+    "show_program": "演出节目",
+    "show_details": "显示详情",
+    "spin_icon": "旋转图标（运行时）",
+    "program_entity": "程序实体",
+    "pct_entity": "进度实体（可选）",
+    "time_entity": "时间实体（可选）",
+    "display_mode": "显示模式",
+    "show_time_remaining": "显示剩余时间",
+    "show_percentage": "显示百分比",
+    "entity_not_found": "未找到实体"
   }
 }

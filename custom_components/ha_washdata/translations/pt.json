@@ -71,7 +71,11 @@
           "notify_start_message": "Formato da mensagem de início",
           "notify_finish_message": "Formato da mensagem de conclusão",
           "notify_pre_complete_message": "Formato da mensagem de pré-conclusão",
-          "show_advanced": "Editar definições avançadas (Próximo passo)"
+          "show_advanced": "Editar definições avançadas (Próximo passo)",
+          "notify_actions": "Ações de notificação",
+          "notify_people": "Pessoas para notificar",
+          "notify_only_when_home": "Notificar apenas quando estiver em casa",
+          "notify_fire_events": "Eventos de automação de incêndio"
         },
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Ícone a usar para notificações (ex.: mdi:washing-machine). Deixe vazio para usar o predefinido.",
           "notify_start_message": "Mensagem enviada quando um ciclo inicia. Suporta o marcador {device}.",
           "notify_finish_message": "Mensagem enviada quando um ciclo termina. Suporta os marcadores {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Mensagem enviada antes da conclusão. Suporta os marcadores {device}, {minutes}."
+          "notify_pre_complete_message": "Mensagem enviada antes da conclusão. Suporta os marcadores {device}, {minutes}.",
+          "notify_actions": "Sequência de ação opcional do Home Assistant para executar notificações (scripts, notificação, TTS, etc.). Se definido, as ações serão executadas antes do serviço de notificação de fallback.",
+          "notify_people": "Entidades de pessoas a serem usadas para controle de casa/fora. Quando ativado, as notificações são adiadas até que alguém esteja em casa.",
+          "notify_only_when_home": "Se ativado, atrase as notificações até que pelo menos uma pessoa selecionada esteja em casa.",
+          "notify_fire_events": "Se ativado, dispara eventos do Home Assistant para início e fim do ciclo (ha_washdata_cycle_started/ended) para acionar automações."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Guardar traces de depuração",
           "dtw_bandwidth": "Largura de banda DTW",
           "external_end_trigger_enabled": "Ativar trigger externo de fim de ciclo",
-          "external_end_trigger": "Sensor externo de fim de ciclo"
+          "external_end_trigger": "Sensor externo de fim de ciclo",
+          "external_end_trigger_inverted": "Inverter lógica de disparo (gatilho desligado)",
+          "anti_wrinkle_enabled": "Escudo antirrugas (somente secador)",
+          "anti_wrinkle_max_power": "Potência Máxima Antirrugas (W)",
+          "anti_wrinkle_max_duration": "Duração(ões) máxima(s) antirrugas",
+          "anti_wrinkle_exit_power": "Potência de saída antirrugas (W)"
         },
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Número de vezes que a condição de fim deve ser cumprida consecutivamente. Predefinido: 1.",
           "start_energy_threshold": "O ciclo deve acumular pelo menos esta energia (Wh) durante a fase de INÍCIO. Predefinido: 0.005 Wh.",
           "end_energy_threshold": "O ciclo termina apenas se a energia na última janela de Off-Delay estiver abaixo deste valor (Wh). Predefinido: 0.05 Wh.",
-          "auto_maintenance": "Ativar manutenção noturna para reparar amostras, fundir ciclos fragmentados e manter o armazenamento saudável.",
+          "auto_maintenance": "Habilite a manutenção automática (reparar amostras, mesclar fragmentos).",
           "expose_debug_entities": "Mostrar sensores avançados (Confiança, Fase, Ambiguidade) para depuração.",
           "save_debug_traces": "Armazenar dados detalhados de classificação e trace de potência no histórico (Aumenta o uso de armazenamento).",
-          "dtw_bandwidth": "Deformação temporal máxima permitida como rácio da duração do ciclo. Predefinido: 0.20 (20%).",
-          "external_end_trigger_enabled": "Ativar monitorização de um sensor binário externo para acionar a conclusão do ciclo.",
-          "external_end_trigger": "Selecione uma entidade de sensor binário. Quando ativado, o ciclo terminará com estado 'concluído'."
+          "dtw_bandwidth": "Tempo máximo permitido de distorção (alongamento) como proporção da duração do ciclo. Valores mais altos permitem combinar ciclos altamente variáveis, mas aumentam o custo da CPU. Padrão: 0,20 (20%).",
+          "external_end_trigger_enabled": "Habilite o monitoramento de um sensor binário externo para acionar a conclusão do ciclo.",
+          "external_end_trigger": "Selecione uma entidade de sensor binário. Quando este sensor for acionado, o ciclo atual terminará com o status ‘concluído’.",
+          "external_end_trigger_inverted": "Por padrão, o gatilho é acionado quando o sensor é LIGADO. Marque esta caixa para disparar quando o sensor for desligado.",
+          "anti_wrinkle_enabled": "Ignore as rotações curtas do tambor de baixa potência após o término de um ciclo para evitar ciclos fantasmas (somente secadora/lavadora-secadora).",
+          "anti_wrinkle_max_power": "Explosões com esta potência ou abaixo dela são tratadas como rotações anti-rugas em vez de novos ciclos. Aplica-se apenas quando o Escudo Antirrugas está ativado.",
+          "anti_wrinkle_max_duration": "Comprimento máximo do burst para tratar como rotação anti-rugas. Aplica-se apenas quando o Escudo Antirrugas está ativado.",
+          "anti_wrinkle_exit_power": "Se a energia cair abaixo deste nível, saia do antirrugas imediatamente (verdadeiro desativado). Aplica-se apenas quando o Escudo Antirrugas está ativado."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Gerir ciclos",
         "description": "Ciclos recentes:\n{recent_cycles}",
         "data": {
-          "action": "Ação"
+          "action": {
+            "name": "Ação",
+            "options": {
+              "auto_label_cycles": "🤖 Rotular automaticamente ciclos antigos",
+              "select_cycle_to_label": "🏷️ Ciclo específico do rótulo",
+              "select_cycle_to_label_multi": "🏷️ Rotule vários ciclos",
+              "select_cycle_to_delete": "🗑️ Excluir ciclo",
+              "interactive_editor": "✂️ Editor interativo de mesclar/dividir"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Gerir perfis",
         "description": "Resumo de perfis:\n{profile_summary}",
         "data": {
-          "action": "Ação"
+          "action": {
+            "name": "Ação",
+            "options": {
+              "create_profile": "➕ Criar novo perfil",
+              "edit_profile": "✏️ Editar/renomear perfil",
+              "delete_profile": "🗑️ Excluir perfil",
+              "profile_stats": "📊 Estatísticas do perfil",
+              "cleanup_profile": "🧹 Limpar histórico - gráfico e exclusão"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Editor interativo de fusão/divisão",
         "description": "Selecione uma ação manual para o seu histórico de ciclos.",
         "data": {
-          "editor_action": "Ação"
+          "editor_action": {
+            "name": "Ação",
+            "options": {
+              "split": "✂️ Divida um ciclo (encontre lacunas)",
+              "merge": "🔗 Mesclar ciclos (juntar fragmentos)",
+              "delete": "🗑️ Excluir ciclo(s)"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Exportar/Importar JSON",
         "description": "Copie/cole ciclos, perfis E definições para este dispositivo.",
         "data": {
-          "mode": "Ação",
-          "json_payload": "JSON de configuração completa"
+          "json_payload": "JSON de configuração completa",
+          "mode": {
+            "name": "Ação",
+            "options": {
+              "export": "📤 Exportar todos os dados",
+              "import": "📥 Importar/mesclar dados"
+            }
+          }
         },
         "data_description": {
           "mode": "Escolha Exportar para copiar dados atuais, ou Importar para colar dados de outro dispositivo WashData.",
@@ -359,8 +408,17 @@
         "title": "Gravar ciclo",
         "description": "Grave manualmente um ciclo para criar um perfil limpo sem interferências.\n\nEstado: **{status}**\nDuração: {duration}s\nAmostras: {samples}",
         "data": {
-          "action": "Ação",
-          "refresh_status": "Atualizar estado"
+          "action": {
+            "name": "Ação",
+            "options": {
+              "start_recording": "⏺ Iniciar nova gravação",
+              "stop_recording": "⏹ Parar gravação (salvar e processar)",
+              "refresh_status": "🔄 Atualizar status",
+              "process_recording": "⚙️ Processar a última gravação (cortar e salvar)",
+              "discard_recording": "🗑️ Descartar a última gravação",
+              "cancel": "✖ Cancelar"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Resolver feedback",
         "description": "**Programa detetado**: {profile}\n**Confiança**: {confidence}%\n**Estimado**: {est}m, **Real**: {act}m",
         "data": {
-          "action": "O que gostaria de fazer?",
           "corrected_profile": "Programa correto (se corrigir)",
-          "corrected_duration": "Duração correta em minutos (se corrigir)"
+          "corrected_duration": "Duração correta em minutos (se corrigir)",
+          "action": {
+            "name": "O que você gostaria de fazer?",
+            "options": {
+              "confirm": "✅ Confirmar - Detecção correta",
+              "correct": "✏️ Correto - Escolha Programa/Duração",
+              "ignore": "✖ Ignorar - Ciclo Falso Positivo/Barulhento",
+              "delete": "🗑️ Excluir - Remover do histórico"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Auto-detetar"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Estado"
+      },
+      "washer_program": {
+        "name": "Programa"
+      },
+      "time_remaining": {
+        "name": "Tempo restante"
+      },
+      "total_duration": {
+        "name": "Duração total"
+      },
+      "cycle_progress": {
+        "name": "Progresso"
+      },
+      "current_power": {
+        "name": "Potência Atual"
+      },
+      "elapsed_time": {
+        "name": "Tempo decorrido"
+      },
+      "debug_info": {
+        "name": "Informações de depuração"
+      },
+      "match_confidence": {
+        "name": "Confiança na partida"
+      },
+      "top_candidates": {
+        "name": "Principais candidatos"
+      },
+      "wash_phase": {
+        "name": "Fase"
+      },
+      "suggestions": {
+        "name": "Configurações sugeridas"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Programa de lavadora",
+    "program_placeholder": "Selecione o programa",
+    "duration": "Duração",
+    "minutes": "min",
+    "time_remaining": "Tempo restante",
+    "no_prediction": "Sem previsão",
+    "cycle_in_progress": "Ciclo em andamento",
+    "status": "Status",
+    "progress": "Progresso",
+    "select_program": "Selecione um programa para ver detalhes",
+    "title": "Título",
+    "status_entity": "Entidade de status",
+    "icon": "Ícone",
+    "active_color": "Cor do ícone ativo",
+    "show_state": "Mostrar estado",
+    "show_program": "Mostrar programa",
+    "show_details": "Mostrar detalhes",
+    "spin_icon": "Ícone giratório (durante a execução)",
+    "program_entity": "Entidade do Programa",
+    "pct_entity": "Entidade de progresso (opcional)",
+    "time_entity": "Entidade de tempo (opcional)",
+    "display_mode": "Modo de exibição",
+    "show_time_remaining": "Mostrar tempo restante",
+    "show_percentage": "Mostrar porcentagem",
+    "entity_not_found": "Entidade não encontrada"
   }
 }

@@ -71,7 +71,11 @@
           "notify_start_message": "開始メッセージの形式",
           "notify_finish_message": "終了メッセージの形式",
           "notify_pre_complete_message": "完了前メッセージの形式",
-          "show_advanced": "詳細設定を編集（次のステップ）"
+          "show_advanced": "詳細設定を編集（次のステップ）",
+          "notify_actions": "通知アクション",
+          "notify_people": "通知する人",
+          "notify_only_when_home": "在宅時のみ通知",
+          "notify_fire_events": "消防自動化イベント"
         },
         "data_description": {
           "apply_suggestions": "このボックスをチェックすると、学習アルゴリズムによって提案された値がフォームにコピーされます。保存前に確認してください。\n\n推奨（学習から）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "通知に使用するアイコン（例：mdi:washing-machine）。デフォルトを使用するには空のままにしてください。",
           "notify_start_message": "サイクル開始時に送信されるメッセージ。{device} プレースホルダーをサポートします。",
           "notify_finish_message": "サイクル終了時に送信されるメッセージ。{device}, {duration}, {program} プレースホルダーをサポートします。",
-          "notify_pre_complete_message": "完了前に送信されるメッセージ。{device}, {minutes} プレースホルダーをサポートします。"
+          "notify_pre_complete_message": "完了前に送信されるメッセージ。{device}, {minutes} プレースホルダーをサポートします。",
+          "notify_actions": "通知のために実行するオプションのホーム アシスタント アクション シーケンス (スクリプト、通知、TTS など)。設定されている場合、アクションはフォールバック通知サービスの前に実行されます。",
+          "notify_people": "ホーム/アウェイ ゲートに使用する人物エンティティ。有効にすると、誰かが帰宅するまで通知が延期されます。",
+          "notify_only_when_home": "有効にすると、選択した少なくとも 1 人が帰宅するまで通知が遅延します。",
+          "notify_fire_events": "有効にすると、サイクルの開始と終了のホーム アシスタント イベント (ha_washdata_cycle_started/ended) を起動して自動化を推進します。"
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "デバッグトレースを保存",
           "dtw_bandwidth": "DTW 帯域幅",
           "external_end_trigger_enabled": "外部サイクル終了トリガーを有効化",
-          "external_end_trigger": "外部サイクル終了センサー"
+          "external_end_trigger": "外部サイクル終了センサー",
+          "external_end_trigger_inverted": "トリガーロジックを反転 (トリガーオンオフ)",
+          "anti_wrinkle_enabled": "シワ防止シールド（乾燥機のみ）",
+          "anti_wrinkle_max_power": "しわ防止最大出力 (W)",
+          "anti_wrinkle_max_duration": "シワ防止最大持続時間 (秒)",
+          "anti_wrinkle_exit_power": "しわ防止出力 (W)"
         },
         "data_description": {
           "apply_suggestions": "このボックスをチェックすると、学習アルゴリズムによって提案された値がフォームにコピーされます。保存前に確認してください。\n\n推奨（学習から）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "サイクルを終了する前に、終了条件（off_delay 内で電力がしきい値を下回る）を連続して満たす必要がある回数。高い値は、一時停止中の誤った終了を防ぎます。デフォルト：1。",
           "start_energy_threshold": "サイクルは、確認されるために開始フェーズ中に少なくともこれだけのエネルギー (Wh) を蓄積する必要があります。デフォルト：0.005 Wh。",
           "end_energy_threshold": "サイクルは、最後の Off-Delay ウィンドウのエネルギーがこの値 (Wh) を下回った場合にのみ終了します。電力がゼロ付近で変動する場合の誤った終了を防ぎます。デフォルト：0.05 Wh。",
-          "auto_maintenance": "夜間メンテナンスを有効にして、サンプルを修復し、断片化したサイクルをマージし、ストレージを健全に保ちます。",
+          "auto_maintenance": "自動メンテナンスを有効にします (サンプルの修復、フラグメントのマージ)。",
           "expose_debug_entities": "デバッグ用の高度なセンサー（信頼度、フェーズ、あいまいさ）を表示します。",
           "save_debug_traces": "履歴に詳細なランキングと電力トレースデータを保存します（ストレージ使用量が増加します）。",
-          "dtw_bandwidth": "サイクル期間の比率としての最大許容時間ワーピング（ストレッチ）。値が高いほど、変動の激しいサイクル（センサー遅延フェーズなど）に一致させることができますが、CPUコストが増加します。デフォルト：0.20 (20%)。",
-          "external_end_trigger_enabled": "外部バイナリセンサーの監視を有効にして、サイクル完了をトリガーします。有効にすると、センサーが「オン」になるとすぐに現在のサイクルが完了します。",
-          "external_end_trigger": "バイナリセンサーエンティティを選択します。このセンサーが「オン」になると、現在のサイクルはステータス「完了」（「中断」ではない）で終了します。"
+          "dtw_bandwidth": "サイクル期間の比率としての最大許容タイムワーピング (ストレッチ)。値を大きくすると、変動性の高いサイクルに一致させることができますが、CPU コストが増加します。デフォルト: 0.20 (20%)。",
+          "external_end_trigger_enabled": "外部バイナリセンサーの監視を有効にして、サイクル完了をトリガーします。",
+          "external_end_trigger": "バイナリ センサー エンティティを選択します。このセンサーがトリガーされると、現在のサイクルはステータス「完了」で終了します。",
+          "external_end_trigger_inverted": "デフォルトでは、センサーがオンになるとトリガーが作動します。このボックスをチェックすると、センサーがオフになったときに起動します。",
+          "anti_wrinkle_enabled": "ゴーストサイクルを防ぐため、サイクル終了後の低出力ドラムの短い回転を無視します (乾燥機/洗濯乾燥機のみ)。",
+          "anti_wrinkle_max_power": "このパワー以下のバーストは、新しいサイクルではなく、しわ防止ローテーションとして扱われます。アンチリンクル シールドが有効な場合にのみ適用されます。",
+          "anti_wrinkle_max_duration": "しわ防止回転として扱う最大バースト長。アンチリンクル シールドが有効な場合にのみ適用されます。",
+          "anti_wrinkle_exit_power": "電力がこのレベルを下回った場合は、しわ防止機能をすぐに終了します (真のオフ)。アンチリンクル シールドが有効な場合にのみ適用されます。"
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "サイクル管理",
         "description": "最近のサイクル：\n{recent_cycles}",
         "data": {
-          "action": "アクション"
+          "action": {
+            "name": "アクション",
+            "options": {
+              "auto_label_cycles": "🤖 古いサイクルに自動ラベル付け",
+              "select_cycle_to_label": "🏷️ ラベル固有のサイクル",
+              "select_cycle_to_label_multi": "🏷️ 複数のサイクルにラベルを付ける",
+              "select_cycle_to_delete": "🗑️ サイクルを削除",
+              "interactive_editor": "✂️ インタラクティブエディターのマージ/分割"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "プロファイル管理",
         "description": "プロファイル概要：\n{profile_summary}",
         "data": {
-          "action": "アクション"
+          "action": {
+            "name": "アクション",
+            "options": {
+              "create_profile": "➕ 新しいプロファイルを作成",
+              "edit_profile": "✏️ プロフィールの編集/名前変更",
+              "delete_profile": "🗑️ プロフィールを削除",
+              "profile_stats": "📊 プロフィール統計",
+              "cleanup_profile": "🧹 履歴のクリーンアップ - グラフ化して削除"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "マージ/分割インタラクティブエディタ",
         "description": "サイクル履歴に対して実行する手動アクションを選択します。",
         "data": {
-          "editor_action": "アクション"
+          "editor_action": {
+            "name": "アクション",
+            "options": {
+              "split": "✂️ サイクルを分割する (ギャップを見つける)",
+              "merge": "🔗 サイクルのマージ (フラグメントの結合)",
+              "delete": "🗑️ サイクルを削除"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "JSON のエクスポート/インポート",
         "description": "このデバイスのサイクル、プロファイル、および設定をコピー/貼り付けします。以下にエクスポートするか、JSONを貼り付けてインポートします。",
         "data": {
-          "mode": "アクション",
-          "json_payload": "完全な設定 JSON"
+          "json_payload": "完全な設定 JSON",
+          "mode": {
+            "name": "アクション",
+            "options": {
+              "export": "📤 すべてのデータをエクスポート",
+              "import": "📥 データのインポート/マージ"
+            }
+          }
         },
         "data_description": {
           "mode": "現在のデータと設定をコピーするには「エクスポート」を選択し、別の WashData デバイスからエクスポートされたデータを貼り付けるには「インポート」を選択します。",
@@ -359,8 +408,17 @@
         "title": "サイクルを記録",
         "description": "手動でサイクルを記録して、干渉のないクリーンなプロファイルを作成します。\n\nステータス：**{status}**\n期間：{duration}s\nサンプル：{samples}",
         "data": {
-          "action": "アクション",
-          "refresh_status": "ステータスを更新"
+          "action": {
+            "name": "アクション",
+            "options": {
+              "start_recording": "⏺ 新しい録音を開始する",
+              "stop_recording": "⏹ 記録の停止 (保存して処理)",
+              "refresh_status": "🔄ステータスを更新",
+              "process_recording": "⚙️ 最後の録音を処理 (トリミングして保存)",
+              "discard_recording": "🗑️ 最後の録音を破棄",
+              "cancel": "✖ キャンセル"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "フィードバックを解決",
         "description": "**検出されたプログラム**: {profile}\n**信頼度**: {confidence}%\n**推定**: {est}分, **実際**: {act}分",
         "data": {
-          "action": "何をしたいですか？",
           "corrected_profile": "正しいプログラム（修正する場合）",
-          "corrected_duration": "正しい期間（分）（修正する場合）"
+          "corrected_duration": "正しい期間（分）（修正する場合）",
+          "action": {
+            "name": "何をしたいですか?",
+            "options": {
+              "confirm": "✅ 確認 - 正しい検出",
+              "correct": "✏️ 正解 - プログラム/期間を選択してください",
+              "ignore": "✖ 無視 - 誤検知/ノイズの多いサイクル",
+              "delete": "🗑️ 削除 - 履歴から削除"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "自動検出"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "州"
+      },
+      "washer_program": {
+        "name": "プログラム"
+      },
+      "time_remaining": {
+        "name": "残り時間"
+      },
+      "total_duration": {
+        "name": "合計所要時間"
+      },
+      "cycle_progress": {
+        "name": "進捗"
+      },
+      "current_power": {
+        "name": "現在の電力"
+      },
+      "elapsed_time": {
+        "name": "経過時間"
+      },
+      "debug_info": {
+        "name": "デバッグ情報"
+      },
+      "match_confidence": {
+        "name": "一致の信頼度"
+      },
+      "top_candidates": {
+        "name": "上位候補者"
+      },
+      "wash_phase": {
+        "name": "段階"
+      },
+      "suggestions": {
+        "name": "推奨される設定"
+      }
     }
+  },
+  "card": {
+    "washer_program": "ウォッシャープログラム",
+    "program_placeholder": "プログラムの選択",
+    "duration": "間隔",
+    "minutes": "分",
+    "time_remaining": "残り時間",
+    "no_prediction": "予測なし",
+    "cycle_in_progress": "進行中のサイクル",
+    "status": "状態",
+    "progress": "進捗",
+    "select_program": "プログラムを選択して詳細を表示します",
+    "title": "タイトル",
+    "status_entity": "ステータスエンティティ",
+    "icon": "アイコン",
+    "active_color": "アクティブなアイコンの色",
+    "show_state": "状態を表示",
+    "show_program": "ショープログラム",
+    "show_details": "詳細を表示",
+    "spin_icon": "回転アイコン（走行中）",
+    "program_entity": "プログラムエンティティ",
+    "pct_entity": "進行状況エンティティ (オプション)",
+    "time_entity": "時間エンティティ (オプション)",
+    "display_mode": "表示モード",
+    "show_time_remaining": "残りの上映時間",
+    "show_percentage": "パーセンテージを表示",
+    "entity_not_found": "エンティティが見つかりません"
   }
 }

@@ -71,7 +71,11 @@
           "notify_start_message": "Μορφή μηνύματος έναρξης",
           "notify_finish_message": "Μορφή μηνύματος τερματισμού",
           "notify_pre_complete_message": "Μορφή μηνύματος προ-ολοκλήρωσης",
-          "show_advanced": "Επεξεργασία σύνθετων ρυθμίσεων (Επόμενο βήμα)"
+          "show_advanced": "Επεξεργασία σύνθετων ρυθμίσεων (Επόμενο βήμα)",
+          "notify_actions": "Ενέργειες ειδοποίησης",
+          "notify_people": "Άτομα προς ειδοποίηση",
+          "notify_only_when_home": "Ειδοποίηση μόνο όταν σπίτι",
+          "notify_fire_events": "Εκδηλώσεις αυτοματισμού πυρκαγιάς"
         },
         "data_description": {
           "apply_suggestions": "Επιλέξτε αυτό το πλαίσιο για να αντιγράψετε τις τιμές που προτείνει ο αλγόριθμος εκμάθησης στη φόρμα. Ελέγξτε πριν την αποθήκευση.\n\nΠροτεινόμενα (από εκμάθηση):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Εικονίδιο για ειδοποιήσεις (π.χ. mdi:washing-machine). Αφήστε κενό για προεπιλογή.",
           "notify_start_message": "Μήνυμα που αποστέλλεται όταν ξεκινά ένας κύκλος. Υποστηρίζει το σύμβολο κράτησης θέσης {device}.",
           "notify_finish_message": "Μήνυμα που αποστέλλεται όταν τελειώνει ένας κύκλος. Υποστηρίζει τα σύμβολα κράτησης θέσης {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Μήνυμα που αποστέλλεται πριν την ολοκλήρωση. Υποστηρίζει τα σύμβολα κράτησης θέσης {device}, {minutes}."
+          "notify_pre_complete_message": "Μήνυμα που αποστέλλεται πριν την ολοκλήρωση. Υποστηρίζει τα σύμβολα κράτησης θέσης {device}, {minutes}.",
+          "notify_actions": "Προαιρετική ακολουθία ενεργειών Home Assistant για εκτέλεση ειδοποιήσεων (σενάρια, ειδοποίηση, TTS, κ.λπ.). Εάν οριστεί, οι ενέργειες εκτελούνται πριν από την υπηρεσία εναλλακτικής ειδοποίησης.",
+          "notify_people": "Ανθρώπινες οντότητες προς χρήση για οικιακή/εκτός πύλης. Όταν είναι ενεργοποιημένη, οι ειδοποιήσεις αναβάλλονται μέχρι να επιστρέψει κάποιος στο σπίτι.",
+          "notify_only_when_home": "Εάν είναι ενεργοποιημένο, καθυστερήστε τις ειδοποιήσεις έως ότου τουλάχιστον ένα επιλεγμένο άτομο είναι στο σπίτι.",
+          "notify_fire_events": "Εάν είναι ενεργοποιημένο, ενεργοποιήστε τα συμβάντα του Home Assistant για την έναρξη και τη λήξη του κύκλου (ha_washdata_cycle_started/ended) για να οδηγείτε αυτοματισμούς."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Αποθήκευση ιχνών αποσφαλμάτωσης",
           "dtw_bandwidth": "Εύρος ζώνης DTW",
           "external_end_trigger_enabled": "Ενεργοποίηση εξωτερικού σκανδαλισμού τερματισμού κύκλου",
-          "external_end_trigger": "Εξωτερικός αισθητήρας τερματισμού κύκλου"
+          "external_end_trigger": "Εξωτερικός αισθητήρας τερματισμού κύκλου",
+          "external_end_trigger_inverted": "Invert Trigger Logic (Off on OFF)",
+          "anti_wrinkle_enabled": "Αντιρυτιδική ασπίδα (μόνο στεγνωτήριο)",
+          "anti_wrinkle_max_power": "Αντιρυτιδική μέγιστη ισχύς (W)",
+          "anti_wrinkle_max_duration": "Αντιρυτιδική μέγιστη διάρκεια (ες)",
+          "anti_wrinkle_exit_power": "Αντιρυτιδική ισχύς εξόδου (W)"
         },
         "data_description": {
           "apply_suggestions": "Επιλέξτε αυτό το πλαίσιο για να αντιγράψετε τις τιμές που προτείνει ο αλγόριθμος εκμάθησης στη φόρμα. Ελέγξτε πριν την αποθήκευση.\n\nΠροτεινόμενα (από εκμάθηση):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Πόσες φορές η συνθήκη τερματισμού (ισχύς κάτω από το όριο στο off_delay) πρέπει να ικανοποιηθεί διαδοχικά πριν τερματιστεί ο κύκλος. Υψηλότερες τιμές αποτρέπουν λανθασμένους τερματισμούς κατά τη διάρκεια παύσεων. Προεπιλογή: 1.",
           "start_energy_threshold": "Ο κύκλος πρέπει να συσσωρεύσει τουλάχιστον αυτή την ποσότητα ενέργειας (Wh) κατά τη ΦΑΣΗ ΕΚΚΙΝΗΣΗΣ για επιβεβαίωση. Προεπιλογή: 0.005 Wh.",
           "end_energy_threshold": "Ο κύκλος τερματίζεται μόνο εάν η ενέργεια στο τελευταίο παράθυρο Off-Delay είναι κάτω από αυτή την τιμή (Wh). Αποτρέπει λανθασμένους τερματισμούς εάν η ισχύς κυμαίνεται κοντά στο μηδέν. Προεπιλογή: 0.05 Wh.",
-          "auto_maintenance": "Ενεργοποίηση νυχτερινής συντήρησης για επιδιόρθωση δειγμάτων, συγχώνευση κατακερματισμένων κύκλων και διατήρηση του χώρου αποθήκευσης σε καλή κατάσταση.",
+          "auto_maintenance": "Ενεργοποίηση αυτόματης συντήρησης (επισκευή δειγμάτων, συγχώνευση θραυσμάτων).",
           "expose_debug_entities": "Εμφάνιση προηγμένων αισθητήρων (Εμπιστοσύνη, Φάση, Ασάφεια) για αποσφαλμάτωση.",
           "save_debug_traces": "Αποθήκευση λεπτομερών δεδομένων κατάταξης και ιχνών ισχύος στο ιστορικό (Αυξάνει τη χρήση αποθήκευσης).",
-          "dtw_bandwidth": "Μέγιστη επιτρεπόμενη χρονική στρέβλωση (τέντωμα) ως κλάσμα της διάρκειας του κύκλου. Υψηλότερες τιμές επιτρέπουν την αντιστοίχιση πολύ μεταβλητών κύκλων αλλά αυξάνουν το κόστος CPU. Προεπιλογή: 0.20 (20%).",
-          "external_end_trigger_enabled": "Ενεργοποίηση παρακολούθησης ενός εξωτερικού δυαδικού αισθητήρα για ενεργοποίηση τερματισμού κύκλου. Όταν ενεργοποιηθεί, η ενεργοποίηση του αισθητήρα θα τερματίσει αμέσως τον τρέχοντα κύκλο.",
-          "external_end_trigger": "Επιλέξτε μια οντότητα δυαδικού αισθητήρα. Όταν αυτός ο αισθητήρας ενεργοποιηθεί, ο τρέχων κύκλος τελειώνει με κατάσταση 'ολοκληρώθηκε' (όχι 'διακόπηκε')."
+          "dtw_bandwidth": "Μέγιστο επιτρεπόμενο χρονικό στρέβλωση (έκταση) ως αναλογία διάρκειας κύκλου. Οι υψηλότερες τιμές επιτρέπουν την αντιστοίχιση πολύ μεταβλητών κύκλων, αλλά αυξάνουν το κόστος της CPU. Προεπιλογή: 0,20 (20%).",
+          "external_end_trigger_enabled": "Ενεργοποιήστε την παρακολούθηση ενός εξωτερικού δυαδικού αισθητήρα για να ενεργοποιήσετε την ολοκλήρωση του κύκλου.",
+          "external_end_trigger": "Επιλέξτε μια δυαδική οντότητα αισθητήρα. Όταν ενεργοποιηθεί αυτός ο αισθητήρας, ο τρέχων κύκλος θα τελειώσει με την κατάσταση «ολοκληρώθηκε».",
+          "external_end_trigger_inverted": "Από προεπιλογή, η σκανδάλη ενεργοποιείται όταν ο αισθητήρας ενεργοποιείται. Επιλέξτε αυτό το πλαίσιο για να ενεργοποιηθεί όταν ο αισθητήρας απενεργοποιηθεί.",
+          "anti_wrinkle_enabled": "Αγνοήστε τις σύντομες περιστροφές του τυμπάνου χαμηλής κατανάλωσης μετά το τέλος ενός κύκλου για να αποτρέψετε τους κύκλους φαντασμάτων (μόνο στεγνωτήριο/πλυντήριο-στεγνωτήριο).",
+          "anti_wrinkle_max_power": "Οι εκρήξεις σε ή κάτω από αυτήν την ισχύ αντιμετωπίζονται ως αντιρυτιδικές περιστροφές αντί για νέους κύκλους. Ισχύει μόνο όταν είναι ενεργοποιημένο το Anti-Wrinkle Shield.",
+          "anti_wrinkle_max_duration": "Μέγιστο μήκος έκρηξης για αντιρυτιδική περιστροφή. Ισχύει μόνο όταν είναι ενεργοποιημένο το Anti-Wrinkle Shield.",
+          "anti_wrinkle_exit_power": "Εάν η ισχύς πέσει κάτω από αυτό το επίπεδο, βγείτε αμέσως από το αντιρυτιδικό (true off). Ισχύει μόνο όταν είναι ενεργοποιημένο το Anti-Wrinkle Shield."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Διαχείριση κύκλων",
         "description": "Πρόσφατοι κύκλοι:\n{recent_cycles}",
         "data": {
-          "action": "Ενέργεια"
+          "action": {
+            "name": "Δράση",
+            "options": {
+              "auto_label_cycles": "🤖 Αυτόματη επισήμανση παλιών κύκλων",
+              "select_cycle_to_label": "🏷️ Συγκεκριμένος κύκλος ετικέτας",
+              "select_cycle_to_label_multi": "🏷️ Επισήμανση πολλαπλών κύκλων",
+              "select_cycle_to_delete": "🗑️ Διαγραφή κύκλου",
+              "interactive_editor": "✂️ Συγχώνευση/Διαίρεση Διαδραστικού Επεξεργαστή"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Διαχείριση προφίλ",
         "description": "Σύνοψη προφίλ:\n{profile_summary}",
         "data": {
-          "action": "Ενέργεια"
+          "action": {
+            "name": "Δράση",
+            "options": {
+              "create_profile": "➕ Δημιουργία νέου προφίλ",
+              "edit_profile": "✏️ Επεξεργασία/Μετονομασία προφίλ",
+              "delete_profile": "🗑️ Διαγραφή προφίλ",
+              "profile_stats": "📊 Στατιστικά προφίλ",
+              "cleanup_profile": "🧹 Εκκαθάριση ιστορικού - Γράφημα και διαγραφή"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Διαδραστικός επεξεργαστής Συγχώνευσης/Διαίρεσης",
         "description": "Επιλέξτε μια χειροκίνητη ενέργεια για το ιστορικό κύκλων σας.",
         "data": {
-          "editor_action": "Ενέργεια"
+          "editor_action": {
+            "name": "Δράση",
+            "options": {
+              "split": "✂️ Χωρίστε έναν κύκλο (Βρείτε κενά)",
+              "merge": "🔗 Κύκλοι συγχώνευσης (Σύνδεση θραυσμάτων)",
+              "delete": "🗑️ Διαγραφή κύκλου(ων)"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Εξαγωγή/Εισαγωγή JSON",
         "description": "Αντιγραφή/επικόλληση κύκλων, προφίλ ΚΑΙ ρυθμίσεων για αυτή τη συσκευή. Εξάγετε παρακάτω ή επικολλήστε JSON για εισαγωγή.",
         "data": {
-          "mode": "Ενέργεια",
-          "json_payload": "Πλήρες JSON διαμόρφωσης"
+          "json_payload": "Πλήρες JSON διαμόρφωσης",
+          "mode": {
+            "name": "Δράση",
+            "options": {
+              "export": "📤 Εξαγωγή όλων των δεδομένων",
+              "import": "📥 Εισαγωγή/Συγχώνευση δεδομένων"
+            }
+          }
         },
         "data_description": {
           "mode": "Επιλέξτε Εξαγωγή για αντιγραφή τρεχόντων δεδομένων και ρυθμίσεων, ή Εισαγωγή για επικόλληση δεδομένων που εξήχθησαν από άλλη συσκευή WashData.",
@@ -359,8 +408,17 @@
         "title": "Εγγραφή κύκλου",
         "description": "Εγγράψτε έναν κύκλο χειροκίνητα για να δημιουργήσετε ένα καθαρό προφίλ χωρίς παρεμβολές.\n\nΚατάσταση: **{status}**\nΔιάρκεια: {duration}s\nΔείγματα: {samples}",
         "data": {
-          "action": "Ενέργεια",
-          "refresh_status": "Ανανέωση κατάστασης"
+          "action": {
+            "name": "Δράση",
+            "options": {
+              "start_recording": "⏺ Έναρξη νέας εγγραφής",
+              "stop_recording": "⏹ Διακοπή εγγραφής (Αποθήκευση & Επεξεργασία)",
+              "refresh_status": "🔄 Κατάσταση ανανέωσης",
+              "process_recording": "⚙️ Επεξεργασία τελευταίας εγγραφής (Περικοπή και αποθήκευση)",
+              "discard_recording": "🗑️ Απορρίψτε την τελευταία εγγραφή",
+              "cancel": "✖ Ακύρωση"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Επίλυση σχολίων",
         "description": "**Ανιχνευμένο πρόγραμμα**: {profile}\n**Εμπιστοσύνη**: {confidence}%\n**Εκτιμώμενο**: {est}min, **Πραγματικό**: {act}min",
         "data": {
-          "action": "Τι θέλετε να κάνετε;",
           "corrected_profile": "Σωστό πρόγραμμα (εάν διορθώνετε)",
-          "corrected_duration": "Σωστή διάρκεια σε λεπτά (εάν διορθώνετε)"
+          "corrected_duration": "Σωστή διάρκεια σε λεπτά (εάν διορθώνετε)",
+          "action": {
+            "name": "Τι θα ήθελες να κάνεις;",
+            "options": {
+              "confirm": "✅ Επιβεβαίωση - Σωστή ανίχνευση",
+              "correct": "✏️ Σωστό - Επιλέξτε Πρόγραμμα/Διάρκεια",
+              "ignore": "✖ Παράβλεψη - Ψευδής θετικός/Θορυβώδης κύκλος",
+              "delete": "🗑️ Διαγραφή - Κατάργηση από το ιστορικό"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Αυτόματη ανίχνευση"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Κατάσταση"
+      },
+      "washer_program": {
+        "name": "Πρόγραμμα"
+      },
+      "time_remaining": {
+        "name": "Χρόνος που απομένει"
+      },
+      "total_duration": {
+        "name": "Συνολική Διάρκεια"
+      },
+      "cycle_progress": {
+        "name": "Πρόοδος"
+      },
+      "current_power": {
+        "name": "Τρέχουσα ισχύς"
+      },
+      "elapsed_time": {
+        "name": "Χρόνος που πέρασε"
+      },
+      "debug_info": {
+        "name": "Πληροφορίες εντοπισμού σφαλμάτων"
+      },
+      "match_confidence": {
+        "name": "Ταίριασμα αυτοπεποίθησης"
+      },
+      "top_candidates": {
+        "name": "Κορυφαίοι υποψήφιοι"
+      },
+      "wash_phase": {
+        "name": "Φάση"
+      },
+      "suggestions": {
+        "name": "Προτεινόμενες ρυθμίσεις"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Πρόγραμμα πλύσης",
+    "program_placeholder": "Επιλέξτε Πρόγραμμα",
+    "duration": "Διάρκεια",
+    "minutes": "ελάχ",
+    "time_remaining": "Χρόνος που απομένει",
+    "no_prediction": "Καμία Πρόβλεψη",
+    "cycle_in_progress": "Κύκλος σε εξέλιξη",
+    "status": "Κατάσταση",
+    "progress": "Πρόοδος",
+    "select_program": "Επιλέξτε ένα πρόγραμμα για να δείτε λεπτομέρειες",
+    "title": "Τίτλος",
+    "status_entity": "Οντότητα κατάστασης",
+    "icon": "Εικόνισμα",
+    "active_color": "Χρώμα ενεργού εικονιδίου",
+    "show_state": "Εμφάνιση κατάστασης",
+    "show_program": "Εμφάνιση προγράμματος",
+    "show_details": "Εμφάνιση λεπτομερειών",
+    "spin_icon": "Περιστρεφόμενο εικονίδιο (Κατά την εκτέλεση)",
+    "program_entity": "Οντότητα προγράμματος",
+    "pct_entity": "Οντότητα προόδου (Προαιρετικό)",
+    "time_entity": "Οντότητα ώρας (Προαιρετικό)",
+    "display_mode": "Λειτουργία εμφάνισης",
+    "show_time_remaining": "Εμφάνιση χρόνου που απομένει",
+    "show_percentage": "Εμφάνιση ποσοστού",
+    "entity_not_found": "Η οντότητα δεν βρέθηκε"
   }
 }

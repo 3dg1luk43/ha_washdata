@@ -25,8 +25,11 @@ from .const import (
     CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_OFF_GAP,
     CONF_RUNNING_DEAD_ZONE,
+    DEFAULT_OFF_DELAY_BY_DEVICE,
+    DEFAULT_OFF_DELAY,
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
+from .time_utils import power_data_to_offsets
 
 if TYPE_CHECKING:
     from .profile_store import ProfileStore
@@ -37,12 +40,17 @@ class SuggestionEngine:
     """Refined engine for generating data-driven parameter suggestions."""
 
     def __init__(
-        self, hass: HomeAssistant, entry_id: str, profile_store: "ProfileStore"
+        self,
+        hass: HomeAssistant,
+        entry_id: str,
+        profile_store: "ProfileStore",
+        device_type: str | None = None,
     ) -> None:
         """Initialize the suggestion engine."""
         self.hass = hass
         self.entry_id = entry_id
         self.profile_store = profile_store
+        self.device_type = device_type
 
     def generate_operational_suggestions(self, p95_dt: float, median_dt: float) -> dict[str, Any]:
         """Generate suggestions for operational parameters based on cadence."""
@@ -63,10 +71,17 @@ class SuggestionEngine:
         }
 
         # 3. Off Delay
-        suggested_off_delay = int(max(60, p95_dt * 5))
+        # Use device-specific default as floor to prevent splitting cycles with long pauses
+        device_floor = DEFAULT_OFF_DELAY_BY_DEVICE.get(self.device_type, DEFAULT_OFF_DELAY)
+        suggested_off_delay = int(max(device_floor, p95_dt * 5))
+        
+        reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
+        if suggested_off_delay == device_floor:
+            reason_off = f"Used device-specific safe minimum for {self.device_type} ({device_floor}s)."
+            
         suggestions[CONF_OFF_DELAY] = {
             "value": suggested_off_delay,
-            "reason": f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5 (min 60s)."
+            "reason": reason_off
         }
 
         # 4. Profile Match Interval
@@ -132,16 +147,14 @@ class SuggestionEngine:
         if not power_data or len(power_data) < 10:
             return {}
 
-        # Convert [(iso_str, power), ...] back to [(datetime, power), ...]
+        # Normalise power_data to [[offset_sec, power], ...] regardless of source format.
         try:
-            readings = []
-            for ts_str, power in power_data:
-                ts = dt_util.parse_datetime(ts_str)
-                if ts:
-                    readings.append((ts, power))
+            readings_list = power_data_to_offsets(power_data)
         except Exception as e:
             _LOGGER.error("Failed to parse power data for simulation: %s", e)
             return {}
+
+        readings: list[tuple[float, float]] = [(o, p) for o, p in readings_list]
 
         if not readings:
             return {}
@@ -167,8 +180,8 @@ class SuggestionEngine:
         # We can't really do gap analysis on a single cycle, 
         # but we can look for early dips for dead zone.
         dead_zone = 0
-        for i, (ts, p) in enumerate(readings):
-            elapsed = (ts - readings[0][0]).total_seconds()
+        for ts_offset, p in readings:
+            elapsed = ts_offset - readings[0][0]
             if elapsed > 300:
                 break
             if p < 5.0 and elapsed > 5.0:

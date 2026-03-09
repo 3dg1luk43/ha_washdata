@@ -18,15 +18,20 @@ from homeassistant.helpers.event import (
     async_track_time_interval,
 )
 from homeassistant.helpers.dispatcher import async_dispatcher_send
-from homeassistant.const import STATE_UNAVAILABLE
+from homeassistant.const import STATE_UNAVAILABLE, STATE_HOME
 from homeassistant.util import dt as dt_util
 import homeassistant.helpers.event as evt
+from homeassistant.helpers import script as script_helper
 
 from .const import (
     CONF_POWER_SENSOR,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_PEOPLE,
+    CONF_NOTIFY_ONLY_WHEN_HOME,
+    CONF_NOTIFY_FIRE_EVENTS,
     CONF_NOTIFY_EVENTS,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_LOW_POWER_NO_UPDATE_TIMEOUT, # Import new constant
@@ -67,6 +72,11 @@ from .const import (
     CONF_DTW_BANDWIDTH,
     CONF_EXTERNAL_END_TRIGGER_ENABLED,
     CONF_EXTERNAL_END_TRIGGER,
+    CONF_EXTERNAL_END_TRIGGER_INVERTED,
+    CONF_ANTI_WRINKLE_ENABLED,
+    CONF_ANTI_WRINKLE_MAX_POWER,
+    CONF_ANTI_WRINKLE_MAX_DURATION,
+    CONF_ANTI_WRINKLE_EXIT_POWER,
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
@@ -95,6 +105,10 @@ from .const import (
     DEFAULT_PROFILE_MATCH_INTERVAL,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE,
+    DEFAULT_ANTI_WRINKLE_ENABLED,
+    DEFAULT_ANTI_WRINKLE_MAX_POWER,
+    DEFAULT_ANTI_WRINKLE_MAX_DURATION,
+    DEFAULT_ANTI_WRINKLE_EXIT_POWER,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_MAX_PAST_CYCLES,
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
@@ -107,6 +121,8 @@ from .const import (
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+    DEFAULT_NOTIFY_ONLY_WHEN_HOME,
+    DEFAULT_NOTIFY_FIRE_EVENTS,
 
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
@@ -122,6 +138,8 @@ from .const import (
     DEFAULT_MIN_OFF_GAP,
     DEFAULT_MIN_OFF_GAP_BY_DEVICE,
     DEFAULT_MAX_DEFERRAL_SECONDS,
+    DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
+    DEFAULT_END_ENERGY_THRESHOLD,
     DEVICE_SMOOTHING_THRESHOLDS,
     DEVICE_COMPLETION_THRESHOLDS,
     STATE_RUNNING,
@@ -129,6 +147,7 @@ from .const import (
     STATE_STARTING,
     STATE_PAUSED,
     STATE_ENDING,
+    STATE_ANTI_WRINKLE,
     STATE_IDLE,
     STATE_UNKNOWN,
 )
@@ -136,6 +155,7 @@ from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
 from .profile_store import ProfileStore, decompress_power_data
 from .recorder import CycleRecorder
+from .time_utils import power_data_to_offsets
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -189,6 +209,12 @@ class WashDataManager:
         self._notify_before_end_minutes = float(DEFAULT_NOTIFY_BEFORE_END_MINUTES)
         self._notify_service = ""
         self._notify_events = []
+        self._notify_actions = []
+        self._notify_people = []
+        self._notify_only_when_home = DEFAULT_NOTIFY_ONLY_WHEN_HOME
+        self._notify_fire_events = DEFAULT_NOTIFY_FIRE_EVENTS
+        self._pending_notifications = []
+        self._remove_notify_people_listener = None
 
         # State
         self._current_power = 0.0
@@ -232,7 +258,9 @@ class WashDataManager:
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
         )
-        self.learning_manager = LearningManager(hass, self.entry_id, self.profile_store)
+        self.learning_manager = LearningManager(
+            hass, self.entry_id, self.profile_store, self.device_type
+        )
         self.recorder = CycleRecorder(hass, self.entry_id)
 
         # Priority: Options > Data > Default
@@ -274,6 +302,20 @@ class WashDataManager:
             config_entry.options.get(
                 CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
             )
+        )
+        self._notify_service = config_entry.options.get(CONF_NOTIFY_SERVICE)
+        self._notify_events = config_entry.options.get(CONF_NOTIFY_EVENTS, [])
+        self._notify_actions = config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or []
+        self._notify_people = list(
+            config_entry.options.get(CONF_NOTIFY_PEOPLE, []) or []
+        )
+        self._notify_only_when_home = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME
+            )
+        )
+        self._notify_fire_events = bool(
+            config_entry.options.get(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
         )
 
         # Advanced options
@@ -337,10 +379,13 @@ class WashDataManager:
                 )
             ),
             start_energy_threshold=float(
-                config_entry.options.get(CONF_START_ENERGY_THRESHOLD, 0.0)
+                config_entry.options.get(
+                    CONF_START_ENERGY_THRESHOLD, 
+                    DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE.get(self.device_type, 0.2)
+                )
             ),
             end_energy_threshold=float(
-                config_entry.options.get(CONF_END_ENERGY_THRESHOLD, 0.0)
+                config_entry.options.get(CONF_END_ENERGY_THRESHOLD, DEFAULT_END_ENERGY_THRESHOLD)
             ),
             start_threshold_w=float(
                 config_entry.options.get(
@@ -365,6 +410,26 @@ class WashDataManager:
             match_interval=int(
                 config_entry.options.get(
                     CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
+                )
+            ),
+            anti_wrinkle_enabled=bool(
+                config_entry.options.get(
+                    CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED
+                )
+            ),
+            anti_wrinkle_max_power=float(
+                config_entry.options.get(
+                    CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER
+                )
+            ),
+            anti_wrinkle_max_duration=float(
+                config_entry.options.get(
+                    CONF_ANTI_WRINKLE_MAX_DURATION, DEFAULT_ANTI_WRINKLE_MAX_DURATION
+                )
+            ),
+            anti_wrinkle_exit_power=float(
+                config_entry.options.get(
+                    CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
                 )
             ),
         )
@@ -554,7 +619,7 @@ class WashDataManager:
             if (
                 profile_name
                 and confidence >= 0.15
-                and not result.is_ambiguous
+                and (not result.is_ambiguous or is_persistent)
                 and (not self._matched_profile_duration or self._current_program == "detecting...")
             ):
                 if is_persistent:
@@ -663,7 +728,7 @@ class WashDataManager:
             # to confirm if this is a legitimate pause or a mismatch.
             stop_thresh = float(self.detector.config.stop_threshold_w)
             if current_matched and current_power < stop_thresh:
-                formatted = [(t.isoformat(), p) for t, p in readings]
+                formatted = power_data_to_offsets(readings)
                 try:
                     is_confirmed, mapped_time, _ = (
                         await self.profile_store.async_verify_alignment(current_matched, formatted)
@@ -754,6 +819,35 @@ class WashDataManager:
 
             self._update_remaining_only()
             self._check_pre_completion_notification()
+
+            # --- START NOTIFICATION LOGIC ---
+            # Send the start notification only after we confidently know the program
+            if (
+                not getattr(self, "_notified_start", False)
+                and self._current_program not in ("detecting...", "off", "starting", "unknown")
+            ):
+                events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
+                if NOTIFY_EVENT_START in events:
+                    msg_template = self.config_entry.options.get(
+                        CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE
+                    )
+                    # Use fallback formatting in case user has custom template without {program}
+                    try:
+                        msg = msg_template.format(
+                            device=self.config_entry.title,
+                            program=self._current_program
+                        )
+                    except KeyError:
+                        msg = msg_template.format(device=self.config_entry.title)
+                    
+                    self._dispatch_notification(
+                        msg,
+                        event_type=NOTIFY_EVENT_START,
+                        extra_vars={"program": self._current_program},
+                    )
+                    self._notified_start = True
+                    _LOGGER.info("Sent start notification for program '%s'", self._current_program)
+
             self._notify_update()
 
         except Exception as e:
@@ -1054,6 +1148,9 @@ class WashDataManager:
         # Subscribe to external cycle end trigger (if enabled)
         await self._setup_external_end_trigger()
 
+        # Subscribe to person presence changes for notification gating
+        await self._setup_notify_people_listener()
+
     async def async_reload_config(self, config_entry: ConfigEntry) -> None:
         """
         Reload configuration options without interrupting running cycle detection.
@@ -1195,6 +1292,37 @@ class WashDataManager:
             )
         )
 
+        new_start_energy = float(
+            config_entry.options.get(
+                CONF_START_ENERGY_THRESHOLD, 
+                DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE.get(self.device_type, 0.2)
+            )
+        )
+        new_end_energy = float(
+            config_entry.options.get(CONF_END_ENERGY_THRESHOLD, DEFAULT_END_ENERGY_THRESHOLD)
+        )
+
+        new_anti_wrinkle_enabled = bool(
+            config_entry.options.get(
+                CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED
+            )
+        )
+        new_anti_wrinkle_max_power = float(
+            config_entry.options.get(
+                CONF_ANTI_WRINKLE_MAX_POWER, DEFAULT_ANTI_WRINKLE_MAX_POWER
+            )
+        )
+        new_anti_wrinkle_max_duration = float(
+            config_entry.options.get(
+                CONF_ANTI_WRINKLE_MAX_DURATION, DEFAULT_ANTI_WRINKLE_MAX_DURATION
+            )
+        )
+        new_anti_wrinkle_exit_power = float(
+            config_entry.options.get(
+                CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
+            )
+        )
+
         # Apply all detector config updates
         self.detector.config.min_power = new_min_power
         self.detector.config.off_delay = new_off_delay
@@ -1209,6 +1337,12 @@ class WashDataManager:
         self.detector.config.end_repeat_count = new_end_repeat_count
         self.detector.config.start_threshold_w = new_start_threshold_w
         self.detector.config.stop_threshold_w = new_stop_threshold_w
+        self.detector.config.start_energy_threshold = new_start_energy
+        self.detector.config.end_energy_threshold = new_end_energy
+        self.detector.config.anti_wrinkle_enabled = new_anti_wrinkle_enabled
+        self.detector.config.anti_wrinkle_max_power = new_anti_wrinkle_max_power
+        self.detector.config.anti_wrinkle_max_duration = new_anti_wrinkle_max_duration
+        self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
 
         if (
             old_min_power != new_min_power
@@ -1289,6 +1423,18 @@ class WashDataManager:
         # Update notification settings
         self._notify_service = config_entry.options.get(CONF_NOTIFY_SERVICE)
         self._notify_events = config_entry.options.get(CONF_NOTIFY_EVENTS, [])
+        self._notify_actions = config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or []
+        self._notify_people = list(
+            config_entry.options.get(CONF_NOTIFY_PEOPLE, []) or []
+        )
+        self._notify_only_when_home = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME
+            )
+        )
+        self._notify_fire_events = bool(
+            config_entry.options.get(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
+        )
         self._notify_before_end_minutes = int(
             config_entry.options.get(
                 CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
@@ -1297,6 +1443,9 @@ class WashDataManager:
 
         # Re-subscribe to external cycle end trigger
         await self._setup_external_end_trigger()
+
+        # Re-subscribe to person presence changes for notification gating
+        await self._setup_notify_people_listener()
 
         _LOGGER.info("Configuration reloaded successfully")
 
@@ -1331,6 +1480,8 @@ class WashDataManager:
             self._remove_listener()
         if self._remove_external_trigger_listener:
             self._remove_external_trigger_listener()
+        if self._remove_notify_people_listener:
+            self._remove_notify_people_listener()
         if self._remove_watchdog:
             self._remove_watchdog()
         if (
@@ -1379,6 +1530,17 @@ class WashDataManager:
             self.hass, [entity_id], self._handle_external_trigger_change
         )
 
+    async def _setup_notify_people_listener(self) -> None:
+        """Set up listener for person presence changes used by notification gating."""
+        if self._remove_notify_people_listener:
+            self._remove_notify_people_listener()
+            self._remove_notify_people_listener = None
+
+        if self._notify_only_when_home and self._notify_people:
+            self._remove_notify_people_listener = async_track_state_change_event(
+                self.hass, self._notify_people, self._handle_notify_person_change
+            )
+
     @callback
     def _handle_external_trigger_change(self, event: Event) -> None:
         """Handle external trigger sensor state change."""
@@ -1388,17 +1550,35 @@ class WashDataManager:
         if new_state is None:
             return
 
-        # Only trigger on transition to "on"
+        inverted = self.config_entry.options.get(
+            CONF_EXTERNAL_END_TRIGGER_INVERTED, False
+        )
+        
         new_value = new_state.state
         old_value = old_state.state if old_state else None
 
-        if new_value == "on" and old_value != "on":
+        # Determine if triggered based on inversion setting
+        triggered = False
+        if not inverted:
+            # Normal: Trigger on transition to "on"
+            if new_value == "on" and old_value != "on":
+                triggered = True
+        else:
+            # Inverted: Trigger on transition to "off"
+            if new_value == "off" and old_value != "off":
+                triggered = True
+
+        if triggered:
             _LOGGER.info(
-                "External cycle end trigger activated by %s",
-                event.data.get("entity_id")
+                "External cycle end trigger activated by %s (inverted=%s)",
+                event.data.get("entity_id"),
+                inverted
             )
             # End cycle with "completed" status (not interrupted)
-            if self.detector.state != STATE_OFF:
+            if self.detector.state == STATE_ANTI_WRINKLE:
+                self.detector.reset(STATE_OFF)
+                _LOGGER.info("Anti-wrinkle exited via external trigger")
+            elif self.detector.state != STATE_OFF:
                 self.detector.user_stop()
                 _LOGGER.info("Cycle completed via external trigger")
 
@@ -1620,7 +1800,11 @@ class WashDataManager:
 
     async def _handle_state_expiry(self, now: datetime) -> None:
         """Check if state and progress should be reset (auto-expiration)."""
-        if not self._cycle_completed_time or self.detector.state == STATE_RUNNING:
+        if (
+            not self._cycle_completed_time
+            or self.detector.state == STATE_RUNNING
+            or self.detector.state == STATE_ANTI_WRINKLE
+        ):
             # Cycle is running or not completed, don't reset
             return
 
@@ -1657,11 +1841,11 @@ class WashDataManager:
         expected = getattr(self.detector, "expected_duration_seconds", 0)
 
         # 0. ZOMBIE KILLER (Hard Limit)
-        # If cycle has run significantly longer than expected (200%), kill it.
+        # If cycle has run significantly longer than expected (300%), kill it.
         # Only applies if we have a profile match.
-        if expected > 0 and elapsed > (expected * 2.0) and elapsed > 7200:
+        if expected > 0 and elapsed > (expected * 3.0) and elapsed > 14400:
             _LOGGER.warning(
-                "Watchdog: Zombie cycle detected (%.0fs > 200%% of expected %.0fs). Force-ending.",
+                "Watchdog: Zombie cycle detected (%.0fs > 300%% of expected %.0fs). Force-ending.",
                 elapsed, expected
             )
             self.detector.force_end(now)
@@ -1789,7 +1973,7 @@ class WashDataManager:
                 # Allow extended silence if within reasonable cycle bounds
                 expected = getattr(self.detector, "expected_duration_seconds", 0)
                 elapsed = self.detector.get_elapsed_seconds()
-                limit = (expected + 7200) if expected > 0 else 14400 # 4h default
+                limit = (expected + 14400) if expected > 0 else 14400 # 4h default
                 
                 if elapsed < limit:
                     _LOGGER.info(
@@ -1834,28 +2018,25 @@ class WashDataManager:
                 self._match_persistence_counter = {}  # Reset persistence counter
                 self._unmatch_persistence_counter = 0  # Reset unmatch counter
                 self._current_match_candidate = None  # Reset candidate
+                self._notified_start = False # Reset start notification state
                 self._start_watchdog()  # Start watchdog when cycle starts
             else:
                 _LOGGER.debug("Cycle resumed from %s, preserving estimates", old_state)
                 # Ensure watchdog is running
                 self._start_watchdog()
-            self.hass.bus.async_fire(
-                EVENT_CYCLE_STARTED,
-                {
-                    "entry_id": self.entry_id,
-                    "device_name": self.config_entry.title,
-                    "device_type": self.device_type,
-                    "program": self._current_program,
-                    "start_time": dt_util.now().isoformat(),
-                },
-            )
+            if self._notify_fire_events:
+                self.hass.bus.async_fire(
+                    EVENT_CYCLE_STARTED,
+                    {
+                        "entry_id": self.entry_id,
+                        "device_name": self.config_entry.title,
+                        "device_type": self.device_type,
+                        "program": self._current_program,
+                        "start_time": dt_util.now().isoformat(),
+                    },
+                )
 
-            # Send notification if enabled
-            events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
-            if NOTIFY_EVENT_START in events:
-                msg_template = self.config_entry.options.get(CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE)
-                msg = msg_template.format(device=self.config_entry.title)
-                self._send_notification(msg)
+            # Send notification if enabled (Moved to _async_do_perform_matching)
         elif new_state == STATE_OFF and old_state == STATE_RUNNING:
             self._stop_watchdog()  # Stop watchdog when cycle ends
 
@@ -1968,18 +2149,19 @@ class WashDataManager:
         if "profile_name" not in event_cycle_data and self._current_program:
             event_cycle_data["profile_name"] = self._current_program
 
-        self.hass.bus.async_fire(
-            EVENT_CYCLE_ENDED,
-            {
-                "entry_id": self.entry_id,
-                "device_name": self.config_entry.title,
-                "cycle_data": event_cycle_data,
-                "program": event_cycle_data.get("profile_name", "unknown"),
-                "duration": event_cycle_data.get("duration"),
-                "start_time": event_cycle_data.get("start_time"),
-                "end_time": dt_util.now().isoformat(),
-            },
-        )
+        if self._notify_fire_events:
+            self.hass.bus.async_fire(
+                EVENT_CYCLE_ENDED,
+                {
+                    "entry_id": self.entry_id,
+                    "device_name": self.config_entry.title,
+                    "cycle_data": event_cycle_data,
+                    "program": event_cycle_data.get("profile_name", "unknown"),
+                    "duration": event_cycle_data.get("duration"),
+                    "start_time": event_cycle_data.get("start_time"),
+                    "end_time": dt_util.now().isoformat(),
+                },
+            )
 
         # Send notification if enabled
         events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
@@ -1992,7 +2174,15 @@ class WashDataManager:
                 duration=duration_min,
                 program=program_name
             )
-            self._send_notification(msg)
+            self._dispatch_notification(
+                msg,
+                event_type=NOTIFY_EVENT_FINISH,
+                extra_vars={
+                    "duration_minutes": duration_min,
+                    "duration_seconds": cycle_data["duration"],
+                    "program": program_name,
+                },
+            )
 
         # Request user feedback if we had a confident match.
         # AND perform learning analysis on the completed cycle.
@@ -2030,17 +2220,76 @@ class WashDataManager:
         return self.profile_store.get_suggestions()
 
     def _send_notification(self, message: str, title: str | None = None, icon: str | None = None) -> None:
-        """Send a notification via configured service."""
-        notify_service = self.config_entry.options.get(CONF_NOTIFY_SERVICE)
-        
-        # Use customized title if not provided explicitly
+        """Dispatch notification through actions or notify service."""
+        self._dispatch_notification(message, title=title, icon=icon)
+
+    def _dispatch_notification(
+        self,
+        message: str,
+        *,
+        title: str | None = None,
+        icon: str | None = None,
+        event_type: str | None = None,
+        person_entity_id: str | None = None,
+        person_name: str | None = None,
+        extra_vars: dict[str, Any] | None = None,
+        allow_deferral: bool = True,
+    ) -> None:
+        """Route notification via actions or notify service with optional gating."""
         if not title:
             title_template = self.config_entry.options.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE)
             title = title_template.format(device=self.config_entry.title)
 
-        # Use customized icon if configured
         if not icon:
             icon = self.config_entry.options.get(CONF_NOTIFY_ICON)
+
+        if person_entity_id is None and self._notify_people:
+            for candidate in self._notify_people:
+                state = self.hass.states.get(candidate)
+                if state and state.state == STATE_HOME:
+                    person_entity_id = candidate
+                    person_name = state.name or state.attributes.get(
+                        "friendly_name", candidate
+                    )
+                    break
+
+        variables = {
+            "device": self.config_entry.title,
+            "program": self._current_program,
+            "message": message,
+            "title": title,
+            "icon": icon,
+            "event_type": event_type,
+            "person_entity_id": person_entity_id,
+            "person_name": person_name,
+        }
+        if extra_vars:
+            variables.update(extra_vars)
+
+        if allow_deferral and self._notify_only_when_home and self._notify_people:
+            if not self._is_any_notify_person_home():
+                self._pending_notifications.append(
+                    {
+                        "message": message,
+                        "title": title,
+                        "icon": icon,
+                        "event_type": event_type,
+                        "extra_vars": extra_vars,
+                    }
+                )
+                return
+
+        if self._notify_actions:
+            if self._run_notification_actions(variables):
+                return
+
+        self._send_notification_service(message, title=title, icon=icon)
+
+    def _send_notification_service(
+        self, message: str, title: str | None = None, icon: str | None = None
+    ) -> None:
+        """Send a notification via configured notify service or persistent notification."""
+        notify_service = self.config_entry.options.get(CONF_NOTIFY_SERVICE)
 
         data = {}
         if icon:
@@ -2059,9 +2308,64 @@ class WashDataManager:
             self.hass.async_create_task(
                 self.hass.services.async_call(domain, service, service_data)
             )
-        else:
-            _pn_create(
-                self.hass, message, title=title
+            return
+
+        _pn_create(self.hass, message, title=title)
+
+    def _run_notification_actions(self, variables: dict[str, Any]) -> bool:
+        """Run configured notification actions."""
+        actions = self._notify_actions
+        if not actions:
+            return False
+
+        try:
+            script = script_helper.Script(
+                self.hass,
+                actions,
+                name=f"{self.config_entry.title} notification",
+                domain=DOMAIN,
+                logger=_LOGGER,
+            )
+            self.hass.async_create_task(script.async_run(variables=variables))
+            return True
+        except Exception as err:
+            _LOGGER.warning("Failed to run notification actions: %s", err)
+            return False
+
+    def _is_any_notify_person_home(self) -> bool:
+        """Return True when any configured person is home."""
+        for person_entity_id in self._notify_people:
+            state = self.hass.states.get(person_entity_id)
+            if state and state.state == STATE_HOME:
+                return True
+        return False
+
+    @callback
+    def _handle_notify_person_change(self, event: Event) -> None:
+        """Handle person state changes to release pending notifications."""
+        new_state = event.data.get("new_state")
+        if not new_state or new_state.state != STATE_HOME:
+            return
+
+        if not self._pending_notifications:
+            return
+
+        person_entity_id = new_state.entity_id
+        person_name = new_state.name or new_state.attributes.get(
+            "friendly_name", person_entity_id
+        )
+        pending = list(self._pending_notifications)
+        self._pending_notifications = []
+        for entry in pending:
+            self._dispatch_notification(
+                entry["message"],
+                title=entry.get("title"),
+                icon=entry.get("icon"),
+                event_type=entry.get("event_type"),
+                person_entity_id=person_entity_id,
+                person_name=person_name,
+                extra_vars=entry.get("extra_vars"),
+                allow_deferral=False,
             )
 
     def _handle_noise_cycle(self, max_power: float) -> None:
@@ -2143,7 +2447,13 @@ class WashDataManager:
 
     def _update_estimates(self) -> None:
         """Update time remaining and profile estimates."""
-        if self.detector.state in (STATE_OFF, STATE_UNKNOWN, STATE_IDLE, STATE_STARTING):
+        if self.detector.state in (
+            STATE_OFF,
+            STATE_UNKNOWN,
+            STATE_IDLE,
+            STATE_STARTING,
+            STATE_ANTI_WRINKLE,
+        ):
             self._current_program = "off"
             self._time_remaining = None
             self._total_duration = None
@@ -2227,7 +2537,11 @@ class WashDataManager:
                 device=self.config_entry.title,
                 minutes=minutes_left
             )
-            self._send_notification(msg)
+            self._dispatch_notification(
+                msg,
+                event_type="pre_complete",
+                extra_vars={"minutes_left": minutes_left, "minutes": minutes_left},
+            )
             _LOGGER.info("Sent pre-completion notification: %s", msg)
 
     def _update_remaining_only(self) -> None:
@@ -2437,31 +2751,10 @@ class WashDataManager:
                 _LOGGER.debug("Envelope missing time grid/duration, cannot estimate phase")
                 return None
 
-        # Extract power values and offsets from current cycle
-        # We handle both datetime objects (raw trace) and ISO strings (legacy/converted)
-        start_ts: float = 0.0
-        if current_power_data:
-            first_t = current_power_data[0][0]
-            if isinstance(first_t, datetime):
-                start_ts = first_t.timestamp()
-            elif isinstance(first_t, str):
-                start_ts = datetime.fromisoformat(first_t).timestamp()
-
-        current_offsets = np.array(
-            [
-                (
-                    (t.timestamp() - start_ts)
-                    if isinstance(t, datetime)
-                    else (
-                        float(t)
-                        if isinstance(t, (int, float))
-                        else (datetime.fromisoformat(t).timestamp() - start_ts)
-                    )
-                )
-                for t, _ in current_power_data
-            ]
-        )
-        current_values = np.array([p for _, p in current_power_data])
+        # Extract power offsets from current cycle (any format → [offset, power])
+        current_offsets_list = power_data_to_offsets(current_power_data)
+        current_offsets = np.array([o for o, _ in current_offsets_list])
+        current_values = np.array([p for _, p in current_offsets_list])
 
         # Use sliding window on TIME, not sample count
         # Look at last ~1 minute of data or 25% of expected duration, whichever is smaller

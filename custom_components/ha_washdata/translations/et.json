@@ -71,7 +71,11 @@
           "notify_start_message": "Algussõnumi vorming",
           "notify_finish_message": "Lõpusõnumi vorming",
           "notify_pre_complete_message": "Eelvalmimise sõnumi vorming",
-          "show_advanced": "Redigeeri edasijõudnud seadeid (Järgmine samm)"
+          "show_advanced": "Redigeeri edasijõudnud seadeid (Järgmine samm)",
+          "notify_actions": "Teavitustoimingud",
+          "notify_people": "Inimesed, keda teavitada",
+          "notify_only_when_home": "Teavita ainult kodus",
+          "notify_fire_events": "Tulekahju automatiseerimise sündmused"
         },
         "data_description": {
           "apply_suggestions": "Märkige see ruut, et kopeerida õppealgoritmi soovitatud väärtused vormi. Enne salvestamist vaadake üle.\n\nSoovitatud (õppimisest):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -86,7 +90,11 @@
           "notify_icon": "Ikoon teavitustele (nt mdi:washing-machine). Jätke tühjaks vaikimisi jaoks.",
           "notify_start_message": "Sõnum, mis saadetakse tsükli alguses. Toetab kohahoidjat {device}.",
           "notify_finish_message": "Sõnum, mis saadetakse tsükli lõppedes. Toetab kohahoidjaid {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Sõnum, mis saadetakse enne lõpetamist. Toetab kohahoidjaid {device}, {minutes}."
+          "notify_pre_complete_message": "Sõnum, mis saadetakse enne lõpetamist. Toetab kohahoidjaid {device}, {minutes}.",
+          "notify_actions": "Valikuline koduabilise toimingujada märguannete jaoks (skriptid, teavitus, TTS jne). Kui see on määratud, käitatakse toimingud enne varuteatiste teenust.",
+          "notify_people": "Inimesed üksused, mida kasutada kodus/võõrsil väravaks. Kui see on lubatud, lükatakse märguanded edasi, kuni keegi on kodus.",
+          "notify_only_when_home": "Kui see on lubatud, viivitage märguanded, kuni vähemalt üks valitud inimene on kodus.",
+          "notify_fire_events": "Kui see on lubatud, käivitage koduabilise sündmused tsükli alguse ja lõpu jaoks (ha_washdata_cycle_started/ended), et juhtida automatiseerimist."
         }
       },
       "advanced_settings": {
@@ -131,7 +139,12 @@
           "save_debug_traces": "Salvesta silumise jäljed",
           "dtw_bandwidth": "DTW ribalaius",
           "external_end_trigger_enabled": "Luba väline tsükli lõpu päästik",
-          "external_end_trigger": "Väline tsükli lõpu andur"
+          "external_end_trigger": "Väline tsükli lõpu andur",
+          "external_end_trigger_inverted": "Invert Trigger Logic (päästik on VÄLJAS)",
+          "anti_wrinkle_enabled": "Kortsudevastane kaitse (ainult kuivati)",
+          "anti_wrinkle_max_power": "Kortsudevastane maksimaalne võimsus (W)",
+          "anti_wrinkle_max_duration": "Kortsudevastane maksimaalne kestus (s)",
+          "anti_wrinkle_exit_power": "Kortsudevastane väljumisvõimsus (W)"
         },
         "data_description": {
           "apply_suggestions": "Märkige see ruut, et kopeerida õppealgoritmi soovitatud väärtused vormi. Enne salvestamist vaadake üle.\n\nSoovitatud (õppimisest):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
@@ -167,12 +180,17 @@
           "end_repeat_count": "Mitu korda peab lõpuingimus (võimsus läve all off_delay jooksul) olema täidetud järjest enne tsükli lõpetamist. Kõrgemad väärtused hoiavad ära valed lõpetamised pauside ajal. Vaikimisi: 1.",
           "start_energy_threshold": "Tsükkel peab koguma vähemalt selle energiakoguse (Wh) ALGUSFAASIS kinnitamiseks. Vaikimisi: 0.005 Wh.",
           "end_energy_threshold": "Tsükkel lõpeb ainult siis, kui energia viimases Off-Delay aknas on alla selle väärtuse (Wh). Hoiab ära valed lõpetamised, kui võimsus kõigub nulli lähedal. Vaikimisi: 0.05 Wh.",
-          "auto_maintenance": "Luba öine hooldus näidiste parandamiseks, killustunud tsüklite ühendamiseks ja salvestusruumi tervena hoidmiseks.",
+          "auto_maintenance": "Automaathoolduse lubamine (proovide parandamine, fragmentide liitmine).",
           "expose_debug_entities": "Kuva edasijõudnud andurid (Usaldus, Faas, Ebaselgus) silumiseks.",
           "save_debug_traces": "Salvesta üksikasjalikud reastamise ja võimsusjälje andmed ajalukku (Suurendab salvestusruumi kasutust).",
-          "dtw_bandwidth": "Maksimaalne lubatud ajaline moonutus (venitamine) tsükli kestuse suhtena. Kõrgemad väärtused võimaldavad väga varieeruvate tsüklite sobitamist, kuid suurendavad protsessori kulu. Vaikimisi: 0.20 (20%).",
-          "external_end_trigger_enabled": "Luba välise binaarse anduri jälgimine tsükli lõpetamise käivitamiseks. Lubamise korral lõpetab anduri sisselülitamine kohe praeguse tsükli.",
-          "external_end_trigger": "Valige binaarse anduri olem. Kui see andur lülitub sisse, lõpeb praegune tsükkel olekuga 'lõpetatud' (mitte 'katkestatud')."
+          "dtw_bandwidth": "Maksimaalne lubatud ajakõverdus (venitus) tsükli kestuse suhtena. Kõrgemad väärtused võimaldavad sobitada väga muutuvaid tsükleid, kuid suurendavad protsessori maksumust. Vaikimisi: 0,20 (20%).",
+          "external_end_trigger_enabled": "Lubage välise binaaranduri jälgimine, et käivitada tsükli lõpetamine.",
+          "external_end_trigger": "Valige binaarne anduri olem. Kui see andur käivitub, lõpeb praegune tsükkel olekuga \"lõpetatud\".",
+          "external_end_trigger_inverted": "Vaikimisi käivitub päästik, kui andur lülitub SISSE. Märkige see ruut, kui soovite selle asemel käivituda, kui andur lülitub VÄLJA.",
+          "anti_wrinkle_enabled": "Ignoreerige lühikesi väikese võimsusega trumli pöörlemisi pärast tsükli lõppu, et vältida kummitustsükliid (ainult kuivati/pesumasin-kuivati).",
+          "anti_wrinkle_max_power": "Selle võimsusega või sellest madalamal olevaid purskeid käsitletakse uute tsüklite asemel kortsudevastaste pöördetena. Kehtib ainult siis, kui kortsudevastane kaitse on sisse lülitatud.",
+          "anti_wrinkle_max_duration": "Maksimaalne katkestuspikkus, mida käsitleda kortsudevastase pöörlemisena. Kehtib ainult siis, kui kortsudevastane kaitse on sisse lülitatud.",
+          "anti_wrinkle_exit_power": "Kui võimsus langeb alla selle taseme, väljuge kohe kortsudevastasest funktsioonist (true off). Kehtib ainult siis, kui kortsudevastane kaitse on sisse lülitatud."
         }
       },
       "diagnostics": {
@@ -187,14 +205,32 @@
         "title": "Halda tsükleid",
         "description": "Hiljutised tsüklid:\n{recent_cycles}",
         "data": {
-          "action": "Toiming"
+          "action": {
+            "name": "Tegevus",
+            "options": {
+              "auto_label_cycles": "🤖 Vanade tsiklite automaatne sildistamine",
+              "select_cycle_to_label": "🏷️ Sildi spetsiifiline tsükkel",
+              "select_cycle_to_label_multi": "🏷️ Märgistage mitu tsüklit",
+              "select_cycle_to_delete": "🗑️ Kustuta tsükkel",
+              "interactive_editor": "✂️ Interaktiivse redaktori liitmine/tükeldamine"
+            }
+          }
         }
       },
       "manage_profiles": {
         "title": "Halda profiile",
         "description": "Profiilide kokkuvõte:\n{profile_summary}",
         "data": {
-          "action": "Toiming"
+          "action": {
+            "name": "Tegevus",
+            "options": {
+              "create_profile": "➕ Looge uus profiil",
+              "edit_profile": "✏️ Muutke/nimetage ümber profiili",
+              "delete_profile": "🗑️ Kustuta profiil",
+              "profile_stats": "📊 Profiili statistika",
+              "cleanup_profile": "🧹 Ajaloo puhastamine – graafik ja kustutamine"
+            }
+          }
         }
       },
       "profile_stats": {
@@ -298,7 +334,14 @@
         "title": "Interaktiivne ühendamise/jagamise redaktor",
         "description": "Valige käsitsi toiming oma tsüklite ajaloo jaoks.",
         "data": {
-          "editor_action": "Toiming"
+          "editor_action": {
+            "name": "Tegevus",
+            "options": {
+              "split": "✂️ Tükelda tsükkel (leidke lünki)",
+              "merge": "🔗 Ühendage tsüklid (ühendage fragmente)",
+              "delete": "🗑️ Kustuta tsükkel(id)"
+            }
+          }
         }
       },
       "editor_select": {
@@ -347,8 +390,14 @@
         "title": "Ekspordi/Impordi JSON",
         "description": "Kopeerige/kleepige tsüklid, profiilid JA seaded selle seadme jaoks. Eksportige allpool või kleepige JSON importimiseks.",
         "data": {
-          "mode": "Toiming",
-          "json_payload": "Täielik konfiguratsiooni JSON"
+          "json_payload": "Täielik konfiguratsiooni JSON",
+          "mode": {
+            "name": "Tegevus",
+            "options": {
+              "export": "📤 Ekspordi kõik andmed",
+              "import": "📥 Andmete importimine/ühendamine"
+            }
+          }
         },
         "data_description": {
           "mode": "Valige Eksport praeguste andmete ja seadete kopeerimiseks, või Import teisest WashData seadmest eksporditud andmete kleepimiseks.",
@@ -359,8 +408,17 @@
         "title": "Salvesta tsükkel",
         "description": "Salvestage tsükkel käsitsi, et luua puhas profiil ilma häireteta.\n\nOlek: **{status}**\nKestus: {duration}s\nNäidised: {samples}",
         "data": {
-          "action": "Toiming",
-          "refresh_status": "Värskenda olekut"
+          "action": {
+            "name": "Tegevus",
+            "options": {
+              "start_recording": "⏺ Alustage uut salvestamist",
+              "stop_recording": "⏹ Peata salvestamine (salvesta ja töötle)",
+              "refresh_status": "🔄 Värskenda olekut",
+              "process_recording": "⚙️ Töötle viimane salvestus (kärbi ja salvesta)",
+              "discard_recording": "🗑️ Loobu viimane salvestis",
+              "cancel": "✖ Tühista"
+            }
+          }
         }
       },
       "record_process": {
@@ -388,9 +446,17 @@
         "title": "Lahenda tagasiside",
         "description": "**Tuvastatud programm**: {profile}\n**Usaldus**: {confidence}%\n**Hinnanguline**: {est}min, **Tegelik**: {act}min",
         "data": {
-          "action": "Mida soovite teha?",
           "corrected_profile": "Õige programm (kui parandate)",
-          "corrected_duration": "Õige kestus minutites (kui parandate)"
+          "corrected_duration": "Õige kestus minutites (kui parandate)",
+          "action": {
+            "name": "Mida sa teha tahaksid?",
+            "options": {
+              "confirm": "✅ Kinnita – õige tuvastamine",
+              "correct": "✏️ Õige – valige programm/kestus",
+              "ignore": "✖ Ignoreeri – valepositiivne/mürarikas tsükkel",
+              "delete": "🗑️ Kustuta – eemalda ajaloost"
+            }
+          }
         }
       }
     },
@@ -421,6 +487,71 @@
           "auto_detect": "Automaatne tuvastamine"
         }
       }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "osariik"
+      },
+      "washer_program": {
+        "name": "Programm"
+      },
+      "time_remaining": {
+        "name": "Järelejäänud aeg"
+      },
+      "total_duration": {
+        "name": "Kogukestus"
+      },
+      "cycle_progress": {
+        "name": "Edusammud"
+      },
+      "current_power": {
+        "name": "Praegune võimsus"
+      },
+      "elapsed_time": {
+        "name": "Kulunud aeg"
+      },
+      "debug_info": {
+        "name": "Silumisinfo"
+      },
+      "match_confidence": {
+        "name": "Matši enesekindlus"
+      },
+      "top_candidates": {
+        "name": "Parimad kandidaadid"
+      },
+      "wash_phase": {
+        "name": "Faas"
+      },
+      "suggestions": {
+        "name": "Soovitatud seaded"
+      }
     }
+  },
+  "card": {
+    "washer_program": "Pesumasina programm",
+    "program_placeholder": "Valige Programm",
+    "duration": "Kestus",
+    "minutes": "min",
+    "time_remaining": "Järelejäänud aeg",
+    "no_prediction": "Ei mingit ennustust",
+    "cycle_in_progress": "Tsükkel on pooleli",
+    "status": "Olek",
+    "progress": "Edusammud",
+    "select_program": "Üksikasjade vaatamiseks valige programm",
+    "title": "Pealkiri",
+    "status_entity": "Olek Entity",
+    "icon": "Ikoon",
+    "active_color": "Aktiivne ikooni värv",
+    "show_state": "Näita olekut",
+    "show_program": "Näita programmi",
+    "show_details": "Näita üksikasju",
+    "spin_icon": "Pöörlev ikoon (jooksmise ajal)",
+    "program_entity": "Programmi üksus",
+    "pct_entity": "Edenemisüksus (valikuline)",
+    "time_entity": "Ajaüksus (valikuline)",
+    "display_mode": "Kuvamisrežiim",
+    "show_time_remaining": "Näita järelejäänud aega",
+    "show_percentage": "Näita protsenti",
+    "entity_not_found": "Üksust ei leitud"
   }
 }

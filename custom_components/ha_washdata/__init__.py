@@ -21,6 +21,12 @@ from .const import (
     CONF_DEVICE_TYPE,
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_PEOPLE,
+    CONF_NOTIFY_ONLY_WHEN_HOME,
+    CONF_NOTIFY_FIRE_EVENTS,
+    DEFAULT_NOTIFY_ONLY_WHEN_HOME,
+    DEFAULT_NOTIFY_FIRE_EVENTS,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -148,6 +154,12 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(
         CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
     )
+
+    # Normalize notification options (added in 0.3.2)
+    options.setdefault(CONF_NOTIFY_ACTIONS, [])
+    options.setdefault(CONF_NOTIFY_PEOPLE, [])
+    options.setdefault(CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME)
+    options.setdefault(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
 
     keys_to_remove = [
         CONF_MIN_POWER,
@@ -350,14 +362,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             DOMAIN, "auto_label_cycles", handle_auto_label_cycles
         )
 
-    # Register custom card via frontend.py (only once, not per entry)
-    if not hass.data.get(f"{DOMAIN}_card_registered"):
-        # pylint: disable=import-outside-toplevel
-        from .frontend import WashDataCardRegistration
+    # Register custom card via frontend.py
+    # pylint: disable=import-outside-toplevel
+    from .frontend import WashDataCardRegistration
 
-        card_reg = WashDataCardRegistration(hass)
-        await card_reg.async_register()
-        hass.data[f"{DOMAIN}_card_registered"] = True
+    card_reg = WashDataCardRegistration(hass)
+    await card_reg.async_register()
 
     # Register feedback service
     if not hass.services.has_service(

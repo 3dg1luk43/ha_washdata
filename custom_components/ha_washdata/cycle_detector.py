@@ -17,10 +17,13 @@ from .const import (
     STATE_PAUSED,
     STATE_ENDING,
     STATE_FINISHED,
+    STATE_ANTI_WRINKLE,
     STATE_INTERRUPTED,
     STATE_FORCE_STOPPED,
     STATE_UNKNOWN,
     DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_WASHER_DRYER,
     DEFAULT_MAX_DEFERRAL_SECONDS,
     DEFAULT_DEFER_FINISH_CONFIDENCE,
 )
@@ -53,6 +56,10 @@ class CycleDetectorConfig:
     min_duration_ratio: float = 0.8  # Default deferred finish ratio
     match_interval: int = 300  # Default profile match interval
     profile_duration_tolerance: float = 0.25  # Default tolerance (±25%)
+    anti_wrinkle_enabled: bool = False
+    anti_wrinkle_max_power: float = 400.0
+    anti_wrinkle_max_duration: float = 60.0
+    anti_wrinkle_exit_power: float = 0.8
 
 
 @dataclass
@@ -183,6 +190,11 @@ class CycleDetector:
         self._last_match_confidence: float = 0.0
         self._end_spike_seen: bool = False
 
+        # Anti-wrinkle tracking (dryers only)
+        self._anti_wrinkle_candidate_start: datetime | None = None
+        self._anti_wrinkle_candidate_peak: float = 0.0
+        self._anti_wrinkle_idle_time: float = 0.0  # Track time spent below exit_power while in ANTI_WRINKLE
+
     @property
     def _dynamic_pause_threshold(self) -> float:
         """Calculate dynamic pause threshold based on sampling cadence."""
@@ -305,10 +317,17 @@ class CycleDetector:
         self._ma_buffer = []
         self._energy_since_idle_wh = 0.0
         self._time_above_threshold = 0.0
-        self._time_below_threshold = 0.0
+        # Only reset time_below_threshold if not transitioning to ANTI_WRINKLE
+        # (ANTI_WRINKLE needs to track idle time to determine true-off)
+        if target_state != STATE_ANTI_WRINKLE:
+            self._time_below_threshold = 0.0
         self._last_match_time = None
         self._matched_profile = None
         self._ignore_power_until_idle = False  # Reset lockout
+        self._anti_wrinkle_candidate_start = None
+        self._anti_wrinkle_candidate_peak = 0.0
+        # Reset idle time tracker for anti-wrinkle
+        self._anti_wrinkle_idle_time = 0.0
 
     @property
     def state(self) -> str:
@@ -407,9 +426,76 @@ class CycleDetector:
 
         self._last_power = power
 
+        anti_wrinkle_active = (
+            self._config.anti_wrinkle_enabled
+            and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
+        )
+
         # 3. State Machine
 
-        if self._state in (STATE_OFF, STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED):
+        if self._state in (
+            STATE_OFF,
+            STATE_FINISHED,
+            STATE_INTERRUPTED,
+            STATE_FORCE_STOPPED,
+            STATE_ANTI_WRINKLE,
+        ):
+            if anti_wrinkle_active and is_high:
+                if self._anti_wrinkle_candidate_start is None:
+                    self._anti_wrinkle_candidate_start = timestamp
+                    self._anti_wrinkle_candidate_peak = power
+                else:
+                    self._anti_wrinkle_candidate_peak = max(
+                        self._anti_wrinkle_candidate_peak, power
+                    )
+
+                candidate_duration = (
+                    timestamp - self._anti_wrinkle_candidate_start
+                ).total_seconds()
+                exceeds = (
+                    self._anti_wrinkle_candidate_peak
+                    > self._config.anti_wrinkle_max_power
+                    or power > self._config.anti_wrinkle_max_power
+                    or candidate_duration > self._config.anti_wrinkle_max_duration
+                )
+
+                if exceeds:
+                    self._anti_wrinkle_candidate_start = None
+                    self._anti_wrinkle_candidate_peak = 0.0
+                    self._transition_to(STATE_STARTING, timestamp)
+                    self._current_cycle_start = timestamp
+                    self._power_readings = [(timestamp, power)]
+                    self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
+                    self._cycle_max_power = power
+                    self._abrupt_drop = False
+                else:
+                    if self._state != STATE_ANTI_WRINKLE:
+                        self._transition_to(STATE_ANTI_WRINKLE, timestamp)
+                return
+
+            self._anti_wrinkle_candidate_start = None
+            self._anti_wrinkle_candidate_peak = 0.0
+
+            if self._state == STATE_ANTI_WRINKLE:
+                # Track time in idle (below exit_power threshold)
+                if power < self._config.anti_wrinkle_exit_power:
+                    self._anti_wrinkle_idle_time += dt
+                else:
+                    # Reset idle timer when power rises (burst detected)
+                    self._anti_wrinkle_idle_time = 0.0
+                
+                # Exit conditions:
+                # Only exit on:
+                # 1. Safety timeout (2 hours in anti-wrinkle), OR
+                # 2. External trigger (user_stop, external triggers handled by manager)
+                if (
+                    self._state_enter_time
+                    and (timestamp - self._state_enter_time).total_seconds() > 7200
+                ):
+                    # Safety timeout: 2 hours in anti-wrinkle
+                    self._transition_to(STATE_OFF, timestamp)
+                return
+
             if is_high:
                 # Transition to STARTING
                 self._transition_to(STATE_STARTING, timestamp)
@@ -420,7 +506,10 @@ class CycleDetector:
                 self._abrupt_drop = False
             elif self._state != STATE_OFF:
                 # Auto-expire terminal states after 30 minutes
-                if self._state_enter_time and (timestamp - self._state_enter_time).total_seconds() > 1800:
+                if (
+                    self._state_enter_time
+                    and (timestamp - self._state_enter_time).total_seconds() > 1800
+                ):
                     self._transition_to(STATE_OFF, timestamp)
 
         elif self._state == STATE_STARTING:
@@ -651,10 +740,20 @@ class CycleDetector:
         # Reset energy accumulator on transition to OFF
         if new_state == STATE_OFF:
             self._energy_since_idle_wh = 0.0
+            # Also reset idle time tracker when leaving ANTI_WRINKLE
+            self._anti_wrinkle_idle_time = 0.0
 
         # Reset end spike tracker when entering ENDING state
         if new_state == STATE_ENDING:
             self._end_spike_seen = False
+        elif new_state == STATE_ANTI_WRINKLE:
+            self._anti_wrinkle_candidate_start = None
+            self._anti_wrinkle_candidate_peak = 0.0
+            self._anti_wrinkle_idle_time = 0.0  # Reset idle time when entering ANTI_WRINKLE
+            self._sub_state = "Anti-Wrinkle"
+        elif new_state == STATE_STARTING:
+            # Reset idle time if exiting ANTI_WRINKLE to STARTING (high-power burst resumed)
+            self._anti_wrinkle_idle_time = 0.0
 
         _LOGGER.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)
@@ -785,6 +884,7 @@ class CycleDetector:
             if last_t < end_time:
                 final_readings.append((end_time, last_p))
 
+        start_ts = self._current_cycle_start.timestamp()
         cycle_data = {
             "start_time": self._current_cycle_start.isoformat(),
             "end_time": end_time.isoformat(),
@@ -792,7 +892,7 @@ class CycleDetector:
             "max_power": self._cycle_max_power,
             "status": status,
             "termination_reason": termination_reason,
-            "power_data": [(t.isoformat(), p) for t, p in final_readings],
+            "power_data": [[round(t.timestamp() - start_ts, 1), p] for t, p in final_readings],
         }
 
         _LOGGER.info("Cycle Finished: %s, %.1f min", status, duration / 60)
@@ -803,6 +903,12 @@ class CycleDetector:
             target = STATE_INTERRUPTED
         elif status == "force_stopped":
             target = STATE_FORCE_STOPPED
+        elif (
+            status == "completed"
+            and self._config.anti_wrinkle_enabled
+            and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
+        ):
+            target = STATE_ANTI_WRINKLE
             
         self.reset(target_state=target)
 
