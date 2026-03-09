@@ -44,7 +44,8 @@
           "manage_cycles": "Gerenciar ciclos",
           "manage_profiles": "Gerenciar perfis",
           "record_cycle": "Ciclo de Gravação (Manual)",
-          "diagnostics": "Diagnóstico e Manutenção"
+          "diagnostics": "Diagnóstico e Manutenção",
+          "manage_phase_catalog": "Gerenciar Catálogo de Fases"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Editar/renomear perfil",
               "delete_profile": "🗑️ Excluir perfil",
               "profile_stats": "📊 Estatísticas do perfil",
-              "cleanup_profile": "🧹 Limpar histórico - gráfico e exclusão"
+              "cleanup_profile": "🧹 Limpar histórico - gráfico e exclusão",
+              "assign_phases": "🧩 Atribuir intervalos de fase"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Programa correto (se estiver corrigindo)",
           "corrected_duration": "Duração correta em minutos (se estiver corrigindo)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Gerenciar Catálogo de Fases",
+        "description": "Fases atuais para este tipo de dispositivo:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Ação",
+            "options": {
+              "create_custom_phase": "➕ Criar fase personalizada",
+              "edit_custom_phase": "✏️ Editar fase personalizada",
+              "delete_custom_phase": "🗑️ Excluir fase personalizada"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Criar fase personalizada",
+        "description": "Crie um nome de fase personalizado e uma descrição para este tipo de dispositivo.",
+        "data": {
+          "phase_name": "Nome da Fase",
+          "phase_description": "Descrição da Fase"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Editar fase personalizada",
+        "description": "Selecione uma fase personalizada para editar.",
+        "data": {
+          "phase_name": "Fase Personalizada"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Editar fase personalizada",
+        "description": "Fase de edição: {phase_name}",
+        "data": {
+          "phase_name": "Nome da Fase",
+          "phase_description": "Descrição da Fase"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Excluir fase personalizada",
+        "description": "Selecione uma fase personalizada para excluir. Quaisquer intervalos atribuídos usando esta fase serão removidos.",
+        "data": {
+          "phase_name": "Fase Personalizada"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Atribuir intervalos de fase",
+        "description": "Perfil: **{profile_name}**\nModo: **{assign_mode}**\nDica de ciclo: {cycle_hint}\n\nIntervalos atuais:\n{current_ranges}\n\nOs rótulos de fase são para exibição e organização. A detecção usa padrões de potência, não nomes de fases.",
+        "data": {
+          "profile": "Perfil",
+          "assign_mode": "Modo de Atribuição",
+          "source_cycle": "Ciclo de origem (necessário para o modo carimbo de data/hora)",
+          "phase_1": "Fase 1",
+          "start_min_1": "Iniciar Minuto 1",
+          "end_min_1": "Fim do Minuto 1",
+          "start_ts_1": "Carimbo de data e hora inicial 1",
+          "end_ts_1": "Carimbo de data e hora final 1",
+          "phase_2": "Fase 2",
+          "start_min_2": "Início Minuto 2",
+          "end_min_2": "Fim do Minuto 2",
+          "start_ts_2": "Carimbo de data e hora inicial 2",
+          "end_ts_2": "Carimbo de data e hora final 2",
+          "phase_3": "Fase 3",
+          "start_min_3": "Início Minuto 3",
+          "end_min_3": "Fim do minuto 3",
+          "start_ts_3": "Carimbo de data e hora inicial 3",
+          "end_ts_3": "Carimbo de data e hora final 3",
+          "phase_4": "Fase 4",
+          "start_min_4": "Início Minuto 4",
+          "end_min_4": "Fim do minuto 4",
+          "start_ts_4": "Carimbo de data e hora inicial 4",
+          "end_ts_4": "Carimbo de data e hora final 4",
+          "phase_5": "Fase 5",
+          "start_min_5": "Início Minuto 5",
+          "end_min_5": "Fim do minuto 5",
+          "start_ts_5": "Carimbo de data e hora inicial 5",
+          "end_ts_5": "Carimbo de data e hora final 5",
+          "phase_6": "Fase 6",
+          "start_min_6": "Início Minuto 6",
+          "end_min_6": "Fim do minuto 6",
+          "start_ts_6": "Carimbo de data e hora inicial 6",
+          "end_ts_6": "Carimbo de data e hora final 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Atribuir intervalos de fase",
+        "description": "Selecione um perfil para configurar intervalos de fase.",
+        "data": {
+          "profile": "Perfil",
+          "assign_mode": {
+            "name": "Modo de Atribuição",
+            "options": {
+              "offset_mode": "Deslocamentos de minutos",
+              "timestamp_mode": "Carimbos de data e hora"
+            }
+          },
+          "source_cycle": "Ciclo de origem (para modo carimbo de data/hora)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Falha ao renomear perfil. O perfil pode não existir ou o novo nome já está em uso.",
       "assignment_failed": "Falha ao atribuir perfil ao ciclo",
       "feedback_notification_title": "WashData: Verificar Ciclo ({device})",
-      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Hora**: {time}\n\nWashData precisa da sua ajuda para verificar este ciclo detectado.\n\nVá para **Configurações > Dispositivos e serviços > WashData > Configurar > Feedbacks de aprendizagem** para confirmar ou corrigir este resultado."
+      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Hora**: {time}\n\nWashData precisa da sua ajuda para verificar este ciclo detectado.\n\nVá para **Configurações > Dispositivos e serviços > WashData > Configurar > Feedbacks de aprendizagem** para confirmar ou corrigir este resultado.",
+      "duplicate_phase": "Já existe uma fase com este nome.",
+      "phase_not_found": "A fase selecionada não foi encontrada.",
+      "invalid_phase_name": "O nome da fase não pode ficar vazio.",
+      "phase_name_too_long": "O nome da fase é muito longo.",
+      "invalid_phase_range": "O intervalo de fase é inválido. O fim deve ser maior que o início.",
+      "invalid_phase_timestamp": "O carimbo de data/hora é inválido. Use o formato AAAA-MM-DD HH:MM ou HH:MM.",
+      "overlapping_phase_ranges": "As faixas de fase se sobrepõem. Ajuste os intervalos e tente novamente.",
+      "incomplete_phase_row": "Cada linha de fase deve incluir uma fase mais valores completos de início/fim para o modo selecionado.",
+      "timestamp_mode_cycle_required": "Selecione um ciclo de origem ao usar o modo carimbo de data/hora."
     },
     "abort": {
       "no_cycles_found": "Nenhum ciclo encontrado",
@@ -476,7 +585,8 @@
       "no_suggestions": "Ainda não há valores sugeridos disponíveis. Execute alguns ciclos e tente novamente.",
       "no_predictions": "Sem previsões",
       "reprocess_success": "{count} ciclos reprocessados ​​com sucesso.",
-      "debug_data_cleared": "Dados de depuração de {count} ciclos limpos com sucesso."
+      "debug_data_cleared": "Dados de depuração de {count} ciclos limpos com sucesso.",
+      "no_custom_phases": "Nenhuma fase personalizada encontrada para este tipo de dispositivo."
     }
   },
   "entity": {

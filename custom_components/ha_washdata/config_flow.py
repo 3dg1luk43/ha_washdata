@@ -117,6 +117,7 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
 )
 from .profile_store import profile_sort_key
+from .phase_assignment import parse_phase_timestamp
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -249,6 +250,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._editor_action: str | None = None
         self._editor_selected_ids: list[str] = []
         self._editor_split_gap: int = 900
+        self._selected_phase_name: str | None = None
+        self._phase_assign_profile: str | None = None
+        self._phase_assign_mode: str = "offset_mode"
+        self._phase_assign_cycle_id: str | None = None
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None  # pylint: disable=unused-argument
@@ -257,7 +262,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         # Check for pending feedbacks to show count
         manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
         pending_count = len(manager.profile_store.get_pending_feedback())
-        
+
         feedback_label = "Review Learning Feedbacks"
         if pending_count > 0:
             feedback_label = f"({pending_count}) Review Learning Feedbacks"
@@ -266,11 +271,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             "settings": "Settings",
             "manage_cycles": "Manage Cycles",
             "manage_profiles": "Manage Profiles",
+            "manage_phase_catalog": "Manage Phase Catalog",
             "record_cycle": "Record Cycle (Manual)",
             "learning_feedbacks": feedback_label,
             "diagnostics": "Diagnostics & Maintenance",
         }
-        
+
         # User requested feedback review to be near the bottom (above diagnostics)
 
         return self.async_show_menu(
@@ -591,7 +597,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         default_completion_min = DEVICE_COMPLETION_THRESHOLDS.get(
             current_device_type, DEFAULT_COMPLETION_MIN_SECONDS
         )
-        
+
         default_sampling = DEFAULT_SAMPLING_INTERVAL_BY_DEVICE.get(
             current_device_type, DEFAULT_SAMPLING_INTERVAL
         )
@@ -600,7 +606,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         default_no_update_timeout = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE.get(
             current_device_type, DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT
         )
-        
+
         default_min_duration_ratio = DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE.get(
             current_device_type, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
         )
@@ -957,20 +963,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Step 2: Select Cycles."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
-        
+
         errors = {}
 
         if user_input is not None:
             selected = user_input.get("selected_cycles", [])
             self._editor_selected_ids = selected
-            
+
             # Validation
             if self._editor_action == "split":
                 if len(selected) != 1:
                     errors["base"] = "select_exactly_one"
                 else:
                     return await self.async_step_editor_split_params()
-            
+
             elif self._editor_action == "merge":
                 if len(selected) < 2:
                     errors["base"] = "select_at_least_two"
@@ -980,7 +986,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         # Build options (Recent 50 cycles)
         cycles = store.get_past_cycles()[-50:]
         cycles.sort(key=lambda x: x["start_time"], reverse=True)
-        
+
         options = []
         for c in cycles:
             dt = dt_util.parse_datetime(c["start_time"])
@@ -1040,11 +1046,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if self._editor_action == "split":
                 # User selected action "apply"
                 if user_input.get("confirm_commit"):
-                    # We need the segments config. 
+                    # We need the segments config.
                     # For simplicity, we auto-apply the analysis results for now,
                     # as complex per-segment assignment in one form is hard in HA config flow.
                     # We'll rely on auto-labeling or user can label later.
-                    
+
                     # Re-run analysis to get segments
                     cycle = next((c for c in store.get_past_cycles() if c["id"] in self._editor_selected_ids), None)
                     if cycle:
@@ -1058,19 +1064,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             for i, seg in enumerate(segments):
                                 start_t, end_t = seg
                                 prof = user_input.get(f"segment_{i}_profile")
-                                if prof == "none": prof = None
+                                if prof == "none":
+                                    prof = None
                                 final_segments.append({"start": start_t, "end": end_t, "profile": prof})
 
                             await store.apply_split_interactive(cycle["id"], final_segments)
                             # Maintenance: Reprocess envelopes in background to avoid blocking UI
                             self.hass.async_create_task(store.async_rebuild_all_envelopes())
-                    
+
                     return self.async_create_entry(title="", data=dict(self.config_entry.options))
 
             elif self._editor_action == "merge":
                 if user_input.get("confirm_commit"):
                     target_profile = user_input.get("merged_profile")
-                    
+
                     if target_profile == "create_new":
                         new_name = user_input.get("new_profile_name", "").strip()
                         if new_name:
@@ -1081,9 +1088,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             except ValueError:
                                 # Profile exists or other error, fallback to unlabel/existing behavior
                                 pass
-                    
-                    if target_profile in ("none", "create_new"): target_profile = None
-                    
+
+                    if target_profile in ("none", "create_new"):
+                        target_profile = None
+
                     await store.apply_merge_interactive(self._editor_selected_ids, target_profile)
                     # Maintenance: Reprocess envelopes in background
                     self.hass.async_create_task(store.async_rebuild_all_envelopes())
@@ -1098,20 +1106,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             cycle = next((c for c in store.get_past_cycles() if c["id"] == cid), None)
             if not cycle:
                 return self.async_abort(reason="cycle_not_found")
-            
+
             # Run Analysis
 
             segments = await self.hass.async_add_executor_job(
                 store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
             ) # Split params
-            
+
             if not segments:
                 return self.async_abort(reason="no_split_segments_found")
 
             # Generate SVG
             svg = store.generate_interactive_split_svg(cycle["id"], segments)
             b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
-            
+
             preview_md = f"""
 ### Split Preview
 Found {len(segments)} segments.
@@ -1120,7 +1128,7 @@ Found {len(segments)} segments.
 Click Confirm to split this cycle into {len(segments)} separate cycles.
 """
             schema = {vol.Required("confirm_commit"): bool}
-            
+
             # Add profile pickers for each segment
             profiles = store.list_profiles()
             prof_options = [selector.SelectOptionDict(value="none", label="(Unlabeled)")]
@@ -1138,7 +1146,7 @@ Click Confirm to split this cycle into {len(segments)} separate cycles.
             # Get cycles
             cycles_to_merge = [c for c in store.get_past_cycles() if c["id"] in self._editor_selected_ids]
             cycles_to_merge.sort(key=lambda x: x["start_time"])
-            
+
             # Generate SVG
             svg = store.generate_interactive_merge_svg([c["id"] for c in cycles_to_merge])
             b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
@@ -1151,7 +1159,7 @@ Click Confirm to split this cycle into {len(segments)} separate cycles.
             ]
             for p in profiles:
                 prof_options.append(selector.SelectOptionDict(value=p["name"], label=p["name"]))
-            
+
             # Guess best profile?
             default_prof = cycles_to_merge[0].get("profile_name") or "none"
 
@@ -1167,7 +1175,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                 vol.Optional("new_profile_name"): str,
                 vol.Required("confirm_commit"): bool
             }
-        
+
         return self.async_show_form(
             step_id="editor_configure",
             data_schema=vol.Schema(schema),
@@ -1405,11 +1413,11 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             action = user_input["action"]
             if action == "auto_label_cycles":
                 return await self.async_step_auto_label_cycles()
-            elif action == "select_cycle_to_label":
+            if action == "select_cycle_to_label":
                 return await self.async_step_select_cycle_to_label()
-            elif action == "select_cycle_to_delete":
+            if action == "select_cycle_to_delete":
                 return await self.async_step_select_cycle_to_delete()
-            elif action == "interactive_editor":
+            if action == "interactive_editor":
                 # Initialize state
                 self._editor_action = None
                 self._editor_selected_ids = []
@@ -1461,14 +1469,16 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             action = user_input["action"]
             if action == "create_profile":
                 return await self.async_step_create_profile()
-            elif action == "edit_profile":
+            if action == "edit_profile":
                 return await self.async_step_edit_profile()
-            elif action == "delete_profile":
+            if action == "delete_profile":
                 return await self.async_step_delete_profile_select()
-            elif action == "profile_stats":
+            if action == "profile_stats":
                 return await self.async_step_profile_stats()
-            elif action == "cleanup_profile":
+            if action == "cleanup_profile":
                 return await self.async_step_cleanup_profile()
+            if action == "assign_phases":
+                return await self.async_step_assign_profile_phases_select()
 
         return self.async_show_form(
             step_id="manage_profiles",
@@ -1482,6 +1492,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                                 "delete_profile",
                                 "profile_stats",
                                 "cleanup_profile",
+                                "assign_phases",
                             ],
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         )
@@ -1489,6 +1500,485 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                 }
             ),
             description_placeholders={"profile_summary": summary_text},
+        )
+
+    async def async_step_manage_phase_catalog(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage phase catalog for this device type."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        device_type = manager.device_type
+
+        phases = store.list_phase_catalog(device_type)
+        summary_lines = []
+        for phase in phases:
+            icon = "🔒" if phase.get("is_default") else "✏"
+            desc = str(phase.get("description", "")).strip()
+            short = desc if len(desc) <= 80 else f"{desc[:77]}..."
+            summary_lines.append(f"{icon} **{phase.get('name', '')}** - {short}")
+        summary = "\n".join(summary_lines) if summary_lines else "No phases available."
+
+        if user_input is not None:
+            action = user_input["action"]
+            if action == "create_custom_phase":
+                return await self.async_step_phase_catalog_create()
+            if action == "edit_custom_phase":
+                return await self.async_step_phase_catalog_edit_select()
+            if action == "delete_custom_phase":
+                return await self.async_step_phase_catalog_delete()
+
+        return self.async_show_form(
+            step_id="manage_phase_catalog",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("action"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                "create_custom_phase",
+                                "edit_custom_phase",
+                                "delete_custom_phase",
+                            ],
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    )
+                }
+            ),
+            description_placeholders={"phase_summary": summary},
+        )
+
+    async def async_step_phase_catalog_create(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Create custom phase for current device type."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            try:
+                await store.async_create_custom_phase(
+                    manager.device_type,
+                    user_input["phase_name"],
+                    user_input.get("phase_description", ""),
+                )
+                manager.notify_update()
+                return await self.async_step_manage_phase_catalog()
+            except ValueError as err:
+                errors["base"] = str(err)
+
+        return self.async_show_form(
+            step_id="phase_catalog_create",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("phase_name"): str,
+                    vol.Optional("phase_description", default=""): selector.TextSelector(
+                        selector.TextSelectorConfig(multiline=True)
+                    ),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_phase_catalog_edit_select(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Select custom phase to edit."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        custom_phases = store.list_custom_phases(manager.device_type)
+        if not custom_phases:
+            return self.async_abort(reason="no_custom_phases")
+
+        if user_input is not None:
+            self._selected_phase_name = user_input["phase_name"]
+            return await self.async_step_phase_catalog_edit()
+
+        options = [
+            selector.SelectOptionDict(
+                value=p["name"],
+                label=f"{p['name']} - {str(p.get('description', ''))[:60]}",
+            )
+            for p in custom_phases
+        ]
+        return self.async_show_form(
+            step_id="phase_catalog_edit_select",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("phase_name"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=options,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    )
+                }
+            ),
+        )
+
+    async def async_step_phase_catalog_edit(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Edit selected custom phase."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        if not self._selected_phase_name:
+            return await self.async_step_phase_catalog_edit_select()
+
+        custom_phases = store.list_custom_phases(manager.device_type)
+        selected = next(
+            (p for p in custom_phases if p["name"] == self._selected_phase_name), None
+        )
+        if not selected:
+            return await self.async_step_phase_catalog_edit_select()
+
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            try:
+                await store.async_update_custom_phase(
+                    manager.device_type,
+                    self._selected_phase_name,
+                    user_input["phase_name"],
+                    user_input.get("phase_description", ""),
+                )
+                manager.notify_update()
+                return await self.async_step_manage_phase_catalog()
+            except ValueError as err:
+                errors["base"] = str(err)
+
+        return self.async_show_form(
+            step_id="phase_catalog_edit",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("phase_name", default=selected["name"]): str,
+                    vol.Optional(
+                        "phase_description",
+                        default=selected.get("description", ""),
+                    ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+                }
+            ),
+            errors=errors,
+            description_placeholders={"phase_name": self._selected_phase_name},
+        )
+
+    async def async_step_phase_catalog_delete(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Delete custom phase."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        custom_phases = store.list_custom_phases(manager.device_type)
+        if not custom_phases:
+            return self.async_abort(reason="no_custom_phases")
+
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            phase_name = user_input["phase_name"]
+            try:
+                removed = await store.async_delete_custom_phase(manager.device_type, phase_name)
+                manager.notify_update()
+                _LOGGER.info(
+                    "Deleted custom phase '%s' and removed %s phase assignments",
+                    phase_name,
+                    removed,
+                )
+                return await self.async_step_manage_phase_catalog()
+            except ValueError as err:
+                errors["base"] = str(err)
+
+        options = []
+        for p in custom_phases:
+            usage = store.count_phase_usage(p["name"])
+            label = f"{p['name']} ({usage} assignments)"
+            options.append(selector.SelectOptionDict(value=p["name"], label=label))
+
+        return self.async_show_form(
+            step_id="phase_catalog_delete",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("phase_name"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=options,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    )
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_assign_profile_phases_select(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Select profile before assigning phase ranges."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        profiles = store.list_profiles()
+        if not profiles:
+            return self.async_abort(reason="no_profiles_found")
+
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            self._phase_assign_profile = user_input["profile"]
+            self._phase_assign_mode = user_input.get("assign_mode", "offset_mode")
+            self._phase_assign_cycle_id = user_input.get("source_cycle")
+
+            if self._phase_assign_mode == "timestamp_mode" and not self._phase_assign_cycle_id:
+                errors["base"] = "timestamp_mode_cycle_required"
+            else:
+                return await self.async_step_assign_profile_phases()
+
+        profile_options = [
+            selector.SelectOptionDict(value=p["name"], label=p["name"])
+            for p in profiles
+        ]
+
+        cycle_options: list[selector.SelectOptionDict] = []
+        selected_profile = user_input.get("profile") if user_input else None
+        if selected_profile:
+            profile_cycles = [
+                c for c in store.get_past_cycles() if c.get("profile_name") == selected_profile
+            ]
+        else:
+            profile_cycles = []
+
+        for c in sorted(profile_cycles, key=lambda x: x.get("start_time", ""), reverse=True)[:25]:
+            dt = dt_util.parse_datetime(c.get("start_time", ""))
+            start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c.get("start_time", "")
+            duration_min = int(float(c.get("duration", 0.0)) / 60)
+            cycle_options.append(
+                selector.SelectOptionDict(
+                    value=c.get("id", ""),
+                    label=f"{start} ({duration_min} min)",
+                )
+            )
+
+        return self.async_show_form(
+            step_id="assign_profile_phases_select",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("profile"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=profile_options,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    ),
+                    vol.Required("assign_mode", default="offset_mode"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                selector.SelectOptionDict(value="offset_mode", label="Minute Offsets"),
+                                selector.SelectOptionDict(value="timestamp_mode", label="Timestamps"),
+                            ],
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    ),
+                    vol.Optional("source_cycle"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=cycle_options,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    ),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_assign_profile_phases(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Assign profile phase ranges using catalog names."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+
+        profile_name = self._phase_assign_profile
+        if not profile_name:
+            return await self.async_step_assign_profile_phases_select()
+
+        mode = self._phase_assign_mode
+        selected_cycle = None
+        cycle_start_dt = None
+        if mode == "timestamp_mode":
+            selected_cycle = next(
+                (c for c in store.get_past_cycles() if c.get("id") == self._phase_assign_cycle_id),
+                None,
+            )
+            if not selected_cycle:
+                return await self.async_step_assign_profile_phases_select(
+                    {"profile": profile_name, "assign_mode": mode}
+                )
+            cycle_start_dt = dt_util.parse_datetime(selected_cycle.get("start_time", ""))
+            if cycle_start_dt is None:
+                return await self.async_step_assign_profile_phases_select(
+                    {"profile": profile_name, "assign_mode": mode}
+                )
+
+        catalog = store.list_phase_catalog(manager.device_type)
+        phase_options = [
+            selector.SelectOptionDict(
+                value=p["name"],
+                label=f"{p['name']} - {str(p.get('description', ''))[:52]}",
+            )
+            for p in catalog
+        ]
+
+        existing = store.get_profile_phase_ranges_for_device(
+            profile_name,
+            manager.device_type,
+        )
+        defaults: dict[str, Any] = {}
+        for idx in range(1, 7):
+            if idx <= len(existing):
+                row = existing[idx - 1]
+                defaults[f"phase_{idx}"] = row.get("name")
+                defaults[f"start_min_{idx}"] = int(float(row.get("start", 0.0)) / 60)
+                defaults[f"end_min_{idx}"] = int(float(row.get("end", 0.0)) / 60)
+                if mode == "timestamp_mode" and cycle_start_dt is not None:
+                    start_dt = dt_util.as_local(
+                        dt_util.utc_from_timestamp(cycle_start_dt.timestamp() + float(row.get("start", 0.0)))
+                    )
+                    end_dt = dt_util.as_local(
+                        dt_util.utc_from_timestamp(cycle_start_dt.timestamp() + float(row.get("end", 0.0)))
+                    )
+                    defaults[f"start_ts_{idx}"] = start_dt.strftime("%Y-%m-%d %H:%M")
+                    defaults[f"end_ts_{idx}"] = end_dt.strftime("%Y-%m-%d %H:%M")
+
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            ranges = []
+            for idx in range(1, 7):
+                phase_name = user_input.get(f"phase_{idx}")
+                start_min = user_input.get(f"start_min_{idx}")
+                end_min = user_input.get(f"end_min_{idx}")
+                start_ts_text = user_input.get(f"start_ts_{idx}")
+                end_ts_text = user_input.get(f"end_ts_{idx}")
+
+                has_any = (
+                    phase_name is not None
+                    or start_min is not None
+                    or end_min is not None
+                    or (isinstance(start_ts_text, str) and start_ts_text.strip())
+                    or (isinstance(end_ts_text, str) and end_ts_text.strip())
+                )
+                if not has_any:
+                    continue
+                if phase_name is None:
+                    errors["base"] = "incomplete_phase_row"
+                    break
+
+                if mode == "offset_mode":
+                    if start_min is None or end_min is None:
+                        errors["base"] = "incomplete_phase_row"
+                        break
+                    start_sec = float(start_min) * 60.0
+                    end_sec = float(end_min) * 60.0
+                else:
+                    if cycle_start_dt is None or not isinstance(start_ts_text, str) or not isinstance(end_ts_text, str):
+                        errors["base"] = "incomplete_phase_row"
+                        break
+
+                    start_dt = parse_phase_timestamp(start_ts_text, cycle_start_dt)
+                    end_dt = parse_phase_timestamp(end_ts_text, cycle_start_dt)
+                    if start_dt is None or end_dt is None:
+                        errors["base"] = "invalid_phase_timestamp"
+                        break
+
+                    start_sec = float(start_dt.timestamp() - cycle_start_dt.timestamp())
+                    end_sec = float(end_dt.timestamp() - cycle_start_dt.timestamp())
+
+                if end_sec <= start_sec:
+                    errors["base"] = "invalid_phase_range"
+                    break
+
+                ranges.append({"name": phase_name, "start": start_sec, "end": end_sec})
+
+            if not errors:
+                try:
+                    await store.async_set_profile_phase_ranges(profile_name, ranges)
+                    manager.notify_update()
+                    self._phase_assign_profile = None
+                    self._phase_assign_mode = "offset_mode"
+                    self._phase_assign_cycle_id = None
+                    return await self.async_step_manage_profiles()
+                except ValueError as err:
+                    errors["base"] = str(err)
+
+        schema_dict: dict[Any, Any] = {}
+        for idx in range(1, 7):
+            phase_key = f"phase_{idx}"
+            start_key = f"start_min_{idx}"
+            end_key = f"end_min_{idx}"
+
+            phase_field = (
+                vol.Optional(phase_key, default=defaults[phase_key])
+                if phase_key in defaults
+                else vol.Optional(phase_key)
+            )
+            start_field = (
+                vol.Optional(start_key, default=defaults[start_key])
+                if start_key in defaults
+                else vol.Optional(start_key)
+            )
+            end_field = (
+                vol.Optional(end_key, default=defaults[end_key])
+                if end_key in defaults
+                else vol.Optional(end_key)
+            )
+
+            schema_dict[phase_field] = selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=phase_options,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                )
+            )
+            if mode == "offset_mode":
+                schema_dict[start_field] = selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=0, max=1440, step=1, mode=selector.NumberSelectorMode.BOX)
+                )
+                schema_dict[end_field] = selector.NumberSelector(
+                    selector.NumberSelectorConfig(min=0, max=1440, step=1, mode=selector.NumberSelectorMode.BOX)
+                )
+            else:
+                start_ts_key = f"start_ts_{idx}"
+                end_ts_key = f"end_ts_{idx}"
+                start_ts_field = (
+                    vol.Optional(start_ts_key, default=defaults[start_ts_key])
+                    if start_ts_key in defaults
+                    else vol.Optional(start_ts_key)
+                )
+                end_ts_field = (
+                    vol.Optional(end_ts_key, default=defaults[end_ts_key])
+                    if end_ts_key in defaults
+                    else vol.Optional(end_ts_key)
+                )
+                schema_dict[start_ts_field] = selector.TextSelector(
+                    selector.TextSelectorConfig(multiline=False)
+                )
+                schema_dict[end_ts_field] = selector.TextSelector(
+                    selector.TextSelectorConfig(multiline=False)
+                )
+
+        summary = "\n".join(
+            [
+                f"- {r['name']}: {int(r['start']/60)}-{int(r['end']/60)} min"
+                for r in existing
+            ]
+        )
+        if not summary:
+            summary = "No ranges assigned yet."
+
+        cycle_hint = ""
+        if mode == "timestamp_mode" and selected_cycle is not None:
+            cycle_hint = str(selected_cycle.get("start_time", ""))
+
+        return self.async_show_form(
+            step_id="assign_profile_phases",
+            data_schema=vol.Schema(schema_dict),
+            errors=errors,
+            description_placeholders={
+                "profile_name": profile_name,
+                "current_ranges": summary,
+                "assign_mode": mode,
+                "cycle_hint": cycle_hint,
+            },
         )
 
     async def async_step_cleanup_profile(
@@ -1707,7 +2197,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             if envelope and envelope.get('avg_energy') is not None:
                 t_kwh = envelope.get('avg_energy', 0) * count
                 total_kwh = f"{t_kwh:.2f}"
-            
+
             std_dev = envelope.get("duration_std_dev", 0) if envelope else 0
             consistency = f"±{int(std_dev / 60)}m" if std_dev > 0 else "-"
 
@@ -2461,10 +2951,10 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             # Use recording bounds if available, fallback to data bounds
             data_start_ts = parsed[0][0] if parsed else 0
             data_end_ts = parsed[-1][0] if parsed else 0
-            
+
             start_ts = dt_util.parse_datetime(rec_start_str).timestamp() if rec_start_str else data_start_ts
             end_ts = dt_util.parse_datetime(rec_end_str).timestamp() if rec_end_str else data_end_ts
-            
+
             # Ensure bounds cover data
             start_ts = min(start_ts, data_start_ts) if parsed else start_ts
             end_ts = max(end_ts, data_end_ts) if parsed else end_ts
@@ -2620,8 +3110,8 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         options = []
         # Sort by creation time (newest first)
         sorted_pending = sorted(
-            pending.values(), 
-            key=lambda x: x.get("created_at", ""), 
+            pending.values(),
+            key=lambda x: x.get("created_at", ""),
             reverse=True
         )
 
@@ -2630,7 +3120,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             prof = item.get("detected_profile", "Unknown")
             conf = item.get("confidence", 0.0)
             created_raw = item.get("created_at", "")
-            
+
             # Formt timestamp: 2023-10-27T10:00... -> 27 Oct 10:00
             t_str = str(created_raw)
             if created_raw:
@@ -2675,7 +3165,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
         profile_store = manager.profile_store
         pending = profile_store.get_pending_feedback()
-        
+
         cycle_id = self._selected_cycle_id
         if not cycle_id or cycle_id not in pending:
             return self.async_abort(reason="feedback_not_found")
@@ -2685,7 +3175,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         if user_input is not None:
             # Process submission based on action
             action = user_input.get("action", "confirm")
-            
+
             if action == "confirm":
                 # User confirms the detection was correct
                 if hasattr(manager, "learning_manager"):
@@ -2721,7 +3211,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             elif action == "delete":
                 # User wants to delete the cycle
                 await manager.profile_store.delete_cycle(cycle_id)
-            
+
             # Return to main menu
             return await self.async_step_init()
 
@@ -2730,10 +3220,10 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         confidence = item.get("confidence", 0.0)
         est = item.get("estimated_duration", 0)
         act = item.get("actual_duration", 0)
-        
+
         profiles = list(profile_store.get_profiles().keys())
         profiles.sort(key=profile_sort_key)
-        
+
         return self.async_show_form(
             step_id="resolve_feedback",
             description_placeholders={
@@ -2769,4 +3259,3 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                 }
             ),
         )
-

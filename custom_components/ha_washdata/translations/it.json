@@ -44,7 +44,8 @@
           "manage_cycles": "Gestisci Cicli",
           "manage_profiles": "Gestisci Profili",
           "record_cycle": "Registra Ciclo (Manuale)",
-          "diagnostics": "Diagnostica e Manutenzione"
+          "diagnostics": "Diagnostica e Manutenzione",
+          "manage_phase_catalog": "Gestire il catalogo delle fasi"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Modifica/rinomina profilo",
               "delete_profile": "🗑️ Elimina profilo",
               "profile_stats": "📊 Statistiche del profilo",
-              "cleanup_profile": "🧹 Pulisci cronologia: grafico ed elimina"
+              "cleanup_profile": "🧹 Pulisci cronologia: grafico ed elimina",
+              "assign_phases": "🧩 Assegna intervalli di fase"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Gestire il catalogo delle fasi",
+        "description": "Fasi attuali per questo tipo di dispositivo:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Azione",
+            "options": {
+              "create_custom_phase": "➕ Crea fase personalizzata",
+              "edit_custom_phase": "✏️ Modifica fase personalizzata",
+              "delete_custom_phase": "🗑️ Elimina fase personalizzata"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Crea fase personalizzata",
+        "description": "Crea un nome di fase e una descrizione personalizzati per questo tipo di dispositivo.",
+        "data": {
+          "phase_name": "Nome della fase",
+          "phase_description": "Descrizione della fase"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Modifica fase personalizzata",
+        "description": "Seleziona una fase personalizzata da modificare.",
+        "data": {
+          "phase_name": "Fase personalizzata"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Modifica fase personalizzata",
+        "description": "Fase di modifica: {phase_name}",
+        "data": {
+          "phase_name": "Nome della fase",
+          "phase_description": "Descrizione della fase"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Elimina fase personalizzata",
+        "description": "Seleziona una fase personalizzata da eliminare. Eventuali intervalli assegnati utilizzando questa fase verranno rimossi.",
+        "data": {
+          "phase_name": "Fase personalizzata"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Assegna intervalli di fase",
+        "description": "Profilo: **{profile_name}**\nModalità: **{assign_mode}**\nSuggerimento sul ciclo: {cycle_hint}\n\nGamme attuali:\n{current_ranges}\n\nLe etichette di fase servono per la visualizzazione e l'organizzazione. Il rilevamento utilizza modelli di potenza, non nomi di fase.",
+        "data": {
+          "profile": "Profilo",
+          "assign_mode": "Modalità di assegnazione",
+          "source_cycle": "Ciclo sorgente (richiesto per la modalità timestamp)",
+          "phase_1": "Fase 1",
+          "start_min_1": "Inizio minuto 1",
+          "end_min_1": "Fine minuto 1",
+          "start_ts_1": "Inizio timestamp 1",
+          "end_ts_1": "Data e ora di fine 1",
+          "phase_2": "Fase 2",
+          "start_min_2": "Inizio minuto 2",
+          "end_min_2": "Fine minuto 2",
+          "start_ts_2": "Avvia timestamp 2",
+          "end_ts_2": "Data e ora di fine 2",
+          "phase_3": "Fase 3",
+          "start_min_3": "Inizio minuto 3",
+          "end_min_3": "Fine minuto 3",
+          "start_ts_3": "Avvia timestamp 3",
+          "end_ts_3": "Data e ora di fine 3",
+          "phase_4": "Fase 4",
+          "start_min_4": "Inizio minuto 4",
+          "end_min_4": "Fine minuto 4",
+          "start_ts_4": "Avvia timestamp 4",
+          "end_ts_4": "Data e ora di fine 4",
+          "phase_5": "Fase 5",
+          "start_min_5": "Inizio minuto 5",
+          "end_min_5": "Fine minuto 5",
+          "start_ts_5": "Orario di avvio 5",
+          "end_ts_5": "Data e ora di fine 5",
+          "phase_6": "Fase 6",
+          "start_min_6": "Inizio minuto 6",
+          "end_min_6": "Fine minuto 6",
+          "start_ts_6": "Avvia timestamp 6",
+          "end_ts_6": "Data e ora di fine 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Assegna intervalli di fase",
+        "description": "Seleziona un profilo per configurare gli intervalli di fase.",
+        "data": {
+          "profile": "Profilo",
+          "assign_mode": {
+            "name": "Modalità di assegnazione",
+            "options": {
+              "offset_mode": "Scostamenti dei minuti",
+              "timestamp_mode": "Timestamp"
+            }
+          },
+          "source_cycle": "Ciclo sorgente (per la modalità timestamp)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Impossibile rinominare il profilo. Il profilo potrebbe non esistere o il nuovo nome è già in uso.",
       "assignment_failed": "Impossibile assegnare il profilo al ciclo",
       "feedback_notification_title": "WashData: Verifica Ciclo ({device})",
-      "feedback_notification_message": "**Dispositivo**: {device}\n**Programma**: {program} ({confidence}% confidenza)\n**Ora**: {time}\n\nWashData ha bisogno del tuo aiuto per verificare questo ciclo rilevato.\n\nVai su **Impostazioni > Dispositivi e Servizi > WashData > Configura > Feedback di Apprendimento** per confermare o correggere questo risultato."
+      "feedback_notification_message": "**Dispositivo**: {device}\n**Programma**: {program} ({confidence}% confidenza)\n**Ora**: {time}\n\nWashData ha bisogno del tuo aiuto per verificare questo ciclo rilevato.\n\nVai su **Impostazioni > Dispositivi e Servizi > WashData > Configura > Feedback di Apprendimento** per confermare o correggere questo risultato.",
+      "duplicate_phase": "Esiste già una fase con questo nome.",
+      "phase_not_found": "La fase selezionata non è stata trovata.",
+      "invalid_phase_name": "Il nome della fase non può essere vuoto.",
+      "phase_name_too_long": "Il nome della fase è troppo lungo.",
+      "invalid_phase_range": "L'intervallo di fasi non è valido. La fine deve essere maggiore dell'inizio.",
+      "invalid_phase_timestamp": "Il timestamp non è valido. Utilizza il formato AAAA-MM-GG HH:MM o HH:MM.",
+      "overlapping_phase_ranges": "Gli intervalli di fase si sovrappongono. Regola gli intervalli e riprova.",
+      "incomplete_phase_row": "Ciascuna riga di fase deve includere una fase più valori di inizio/fine completi per la modalità selezionata.",
+      "timestamp_mode_cycle_required": "Selezionare un ciclo sorgente quando si utilizza la modalità timestamp."
     },
     "abort": {
       "no_cycles_found": "Nessun ciclo trovato",
@@ -476,7 +585,8 @@
       "no_suggestions": "Nessun valore suggerito ancora disponibile. Esegui alcuni cicli e riprova.",
       "no_predictions": "Nessuna previsione",
       "reprocess_success": "Rielaborati con successo {count} cicli.",
-      "debug_data_cleared": "Cancellati con successo i dati di debug da {count} cicli."
+      "debug_data_cleared": "Cancellati con successo i dati di debug da {count} cicli.",
+      "no_custom_phases": "Nessuna fase personalizzata trovata per questo tipo di dispositivo."
     }
   },
   "entity": {

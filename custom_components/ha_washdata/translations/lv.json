@@ -44,7 +44,8 @@
           "manage_cycles": "Pārvaldīt ciklus",
           "manage_profiles": "Pārvaldīt profilus",
           "record_cycle": "Ierakstīt ciklu (Manuāli)",
-          "diagnostics": "Diagnostika un apkope"
+          "diagnostics": "Diagnostika un apkope",
+          "manage_phase_catalog": "Pārvaldīt fāzes katalogu"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Rediģēt/pārdēvēt profilu",
               "delete_profile": "🗑️ Dzēst profilu",
               "profile_stats": "📊 Profila statistika",
-              "cleanup_profile": "🧹 Vēstures tīrīšana — diagramma un dzēšana"
+              "cleanup_profile": "🧹 Vēstures tīrīšana — diagramma un dzēšana",
+              "assign_phases": "🧩 Piešķiriet fāžu diapazonus"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Pārvaldīt fāzes katalogu",
+        "description": "Pašreizējās fāzes šim ierīces tipam:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Darbība",
+            "options": {
+              "create_custom_phase": "➕ Izveidojiet pielāgotu fāzi",
+              "edit_custom_phase": "✏️ Rediģēt pielāgoto fāzi",
+              "delete_custom_phase": "🗑️ Dzēst pielāgoto fāzi"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Izveidojiet pielāgotu fāzi",
+        "description": "Šim ierīces veidam izveidojiet pielāgotu fāzes nosaukumu un aprakstu.",
+        "data": {
+          "phase_name": "Fāzes nosaukums",
+          "phase_description": "Fāzes apraksts"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Rediģēt pielāgoto fāzi",
+        "description": "Atlasiet pielāgotu fāzi rediģēšanai.",
+        "data": {
+          "phase_name": "Pielāgota fāze"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Rediģēt pielāgoto fāzi",
+        "description": "Rediģēšanas posms: {phase_name}",
+        "data": {
+          "phase_name": "Fāzes nosaukums",
+          "phase_description": "Fāzes apraksts"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Dzēst pielāgoto fāzi",
+        "description": "Atlasiet pielāgotu fāzi, ko dzēst. Visi piešķirtie diapazoni, kas izmanto šo fāzi, tiks noņemti.",
+        "data": {
+          "phase_name": "Pielāgota fāze"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Piešķiriet fāzes diapazonus",
+        "description": "Profils: **{profile_name}**\nRežīms: **{assign_mode}**\nCikla padoms: {cycle_hint}\n\nPašreizējie diapazoni:\n{current_ranges}\n\nFāzes etiķetes ir paredzētas parādīšanai un organizēšanai. Noteikšanā tiek izmantoti jaudas modeļi, nevis fāžu nosaukumi.",
+        "data": {
+          "profile": "Profils",
+          "assign_mode": "Piešķiršanas režīms",
+          "source_cycle": "Avota cikls (nepieciešams laikspiedola režīmam)",
+          "phase_1": "1. fāze",
+          "start_min_1": "Sākuma minūte 1",
+          "end_min_1": "Beigu minūte 1",
+          "start_ts_1": "Sākuma laikspiedols 1",
+          "end_ts_1": "Beigu laikspiedols 1",
+          "phase_2": "2. fāze",
+          "start_min_2": "2. sākuma minūte",
+          "end_min_2": "Beigu minūte 2",
+          "start_ts_2": "Sākuma laikspiedols 2",
+          "end_ts_2": "Beigu laikspiedols 2",
+          "phase_3": "3. fāze",
+          "start_min_3": "3. sākuma minūte",
+          "end_min_3": "Beigu minūte 3",
+          "start_ts_3": "Sākuma laikspiedols 3",
+          "end_ts_3": "Beigu laikspiedols 3",
+          "phase_4": "4. fāze",
+          "start_min_4": "4. sākuma minūte",
+          "end_min_4": "Beigu minūte 4",
+          "start_ts_4": "Sākuma laikspiedols 4",
+          "end_ts_4": "Beigu laikspiedols 4",
+          "phase_5": "5. fāze",
+          "start_min_5": "Sākuma minūte 5",
+          "end_min_5": "Beigu minūte 5",
+          "start_ts_5": "Sākuma laikspiedols 5",
+          "end_ts_5": "Beigu laikspiedols 5",
+          "phase_6": "6. fāze",
+          "start_min_6": "Sākuma minūte 6",
+          "end_min_6": "Beigu minūte 6",
+          "start_ts_6": "Sākuma laikspiedols 6",
+          "end_ts_6": "Beigu laikspiedols 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Piešķiriet fāzes diapazonus",
+        "description": "Izvēlieties profilu, lai konfigurētu fāzes diapazonus.",
+        "data": {
+          "profile": "Profils",
+          "assign_mode": {
+            "name": "Piešķiršanas režīms",
+            "options": {
+              "offset_mode": "Minūtes nobīdes",
+              "timestamp_mode": "Laika zīmogi"
+            }
+          },
+          "source_cycle": "Avota cikls (laikspiedola režīmam)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Profila pārdēvēšana neizdevās. Profils, iespējams, nepastāv vai jaunais nosaukums jau ir aizņemts.",
       "assignment_failed": "Profila piešķiršana ciklam neizdevās",
       "feedback_notification_title": "WashData: Verificēt ciklu ({device})",
-      "feedback_notification_message": "**Ierīce**: {device}\n**Programma**: {program} ({confidence}% ticamība)\n**Laiks**: {time}\n\nWashData nepieciešama jūsu palīdzība šī noteiktā cikla verificēšanai.\n\nDodieties uz **Iestatījumi > Ierīces un pakalpojumi > WashData > Konfigurēt > Mācīšanās atsauksmes**, lai apstiprinātu vai labotu šo rezultātu."
+      "feedback_notification_message": "**Ierīce**: {device}\n**Programma**: {program} ({confidence}% ticamība)\n**Laiks**: {time}\n\nWashData nepieciešama jūsu palīdzība šī noteiktā cikla verificēšanai.\n\nDodieties uz **Iestatījumi > Ierīces un pakalpojumi > WashData > Konfigurēt > Mācīšanās atsauksmes**, lai apstiprinātu vai labotu šo rezultātu.",
+      "duplicate_phase": "Fāze ar šādu nosaukumu jau pastāv.",
+      "phase_not_found": "Atlasītā fāze netika atrasta.",
+      "invalid_phase_name": "Fāzes nosaukuma lauks nedrīkst būt tukšs.",
+      "phase_name_too_long": "Fāzes nosaukums ir pārāk garš.",
+      "invalid_phase_range": "Fāzes diapazons nav derīgs. Beigas ir lielākas par sākumu.",
+      "invalid_phase_timestamp": "Laikspiedols nav derīgs. Izmantojiet formātu GGGG-MM-DD HH:MM vai HH:MM.",
+      "overlapping_phase_ranges": "Fāžu diapazoni pārklājas. Pielāgojiet diapazonus un mēģiniet vēlreiz.",
+      "incomplete_phase_row": "Katrā fāzes rindā ir jāiekļauj fāze un visas atlasītā režīma sākuma/beigu vērtības.",
+      "timestamp_mode_cycle_required": "Lūdzu, atlasiet avota ciklu, izmantojot laikspiedola režīmu."
     },
     "abort": {
       "no_cycles_found": "Cikli nav atrasti",
@@ -476,7 +585,8 @@
       "no_suggestions": "Ieteiktās vērtības vēl nav pieejamas. Izpildiet dažus ciklus un mēģiniet vēlreiz.",
       "no_predictions": "Nav prognožu",
       "reprocess_success": "Veiksmīgi pārapstrādāti {count} cikli.",
-      "debug_data_cleared": "Atkļūdošanas dati veiksmīgi dzēsti no {count} cikliem."
+      "debug_data_cleared": "Atkļūdošanas dati veiksmīgi dzēsti no {count} cikliem.",
+      "no_custom_phases": "Šim ierīces veidam nav atrasta neviena pielāgota fāze."
     }
   },
   "entity": {

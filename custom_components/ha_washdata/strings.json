@@ -43,6 +43,7 @@
           "settings": "Settings",
           "manage_cycles": "Manage Cycles",
           "manage_profiles": "Manage Profiles",
+          "manage_phase_catalog": "Manage Phase Catalog",
           "record_cycle": "Record Cycle (Manual)",
           "diagnostics": "Diagnostics & Maintenance"
         }
@@ -228,9 +229,108 @@
               "edit_profile": "\u270f\ufe0f Edit/Rename Profile",
               "delete_profile": "\ud83d\uddd1\ufe0f Delete Profile",
               "profile_stats": "\ud83d\udcca Profile Statistics",
-              "cleanup_profile": "\ud83e\uddf9 Clean Up History - Graph & Delete"
+              "cleanup_profile": "\ud83e\uddf9 Clean Up History - Graph & Delete",
+              "assign_phases": "\ud83e\udde9 Assign Phase Ranges"
             }
           }
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "Manage Phase Catalog",
+        "description": "Current phases for this device type:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Action",
+            "options": {
+              "create_custom_phase": "\u2795 Create Custom Phase",
+              "edit_custom_phase": "\u270f\ufe0f Edit Custom Phase",
+              "delete_custom_phase": "\ud83d\uddd1\ufe0f Delete Custom Phase"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Create Custom Phase",
+        "description": "Create a custom phase name and description for this device type.",
+        "data": {
+          "phase_name": "Phase Name",
+          "phase_description": "Phase Description"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Edit Custom Phase",
+        "description": "Select a custom phase to edit.",
+        "data": {
+          "phase_name": "Custom Phase"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Edit Custom Phase",
+        "description": "Editing phase: {phase_name}",
+        "data": {
+          "phase_name": "Phase Name",
+          "phase_description": "Phase Description"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Delete Custom Phase",
+        "description": "Select a custom phase to delete. Any assigned ranges using this phase will be removed.",
+        "data": {
+          "phase_name": "Custom Phase"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Assign Phase Ranges",
+        "description": "Profile: **{profile_name}**\nMode: **{assign_mode}**\nCycle hint: {cycle_hint}\n\nCurrent ranges:\n{current_ranges}\n\nPhase labels are for display and organization. Detection uses power patterns, not phase names.",
+        "data": {
+          "profile": "Profile",
+          "assign_mode": "Assignment Mode",
+          "source_cycle": "Source Cycle (required for timestamp mode)",
+          "phase_1": "Phase 1",
+          "start_min_1": "Start Minute 1",
+          "end_min_1": "End Minute 1",
+          "start_ts_1": "Start Timestamp 1",
+          "end_ts_1": "End Timestamp 1",
+          "phase_2": "Phase 2",
+          "start_min_2": "Start Minute 2",
+          "end_min_2": "End Minute 2",
+          "start_ts_2": "Start Timestamp 2",
+          "end_ts_2": "End Timestamp 2",
+          "phase_3": "Phase 3",
+          "start_min_3": "Start Minute 3",
+          "end_min_3": "End Minute 3",
+          "start_ts_3": "Start Timestamp 3",
+          "end_ts_3": "End Timestamp 3",
+          "phase_4": "Phase 4",
+          "start_min_4": "Start Minute 4",
+          "end_min_4": "End Minute 4",
+          "start_ts_4": "Start Timestamp 4",
+          "end_ts_4": "End Timestamp 4",
+          "phase_5": "Phase 5",
+          "start_min_5": "Start Minute 5",
+          "end_min_5": "End Minute 5",
+          "start_ts_5": "Start Timestamp 5",
+          "end_ts_5": "End Timestamp 5",
+          "phase_6": "Phase 6",
+          "start_min_6": "Start Minute 6",
+          "end_min_6": "End Minute 6",
+          "start_ts_6": "Start Timestamp 6",
+          "end_ts_6": "End Timestamp 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Assign Phase Ranges",
+        "description": "Select a profile to configure phase ranges.",
+        "data": {
+          "profile": "Profile",
+          "assign_mode": {
+            "name": "Assignment Mode",
+            "options": {
+              "offset_mode": "Minute Offsets",
+              "timestamp_mode": "Timestamps"
+            }
+          },
+          "source_cycle": "Source Cycle (for timestamp mode)"
         }
       },
       "profile_stats": {
@@ -465,6 +565,15 @@
       "profile_exists": "A profile with this name already exists",
       "rename_failed": "Failed to rename profile. Profile may not exist or new name is already taken.",
       "assignment_failed": "Failed to assign profile to cycle",
+      "duplicate_phase": "A phase with this name already exists.",
+      "phase_not_found": "Selected phase was not found.",
+      "invalid_phase_name": "Phase name cannot be empty.",
+      "phase_name_too_long": "Phase name is too long.",
+      "invalid_phase_range": "Phase range is invalid. End must be greater than start.",
+      "invalid_phase_timestamp": "Timestamp is invalid. Use YYYY-MM-DD HH:MM or HH:MM format.",
+      "overlapping_phase_ranges": "Phase ranges overlap. Adjust the ranges and try again.",
+      "incomplete_phase_row": "Each phase row must include a phase plus complete start/end values for the selected mode.",
+      "timestamp_mode_cycle_required": "Please select a source cycle when using timestamp mode.",
       "feedback_notification_title": "WashData: Verify Cycle ({device})",
       "feedback_notification_message": "**Device**: {device}\n**Program**: {program} ({confidence}% confidence)\n**Time**: {time}\n\nWashData needs your help to verify this detected cycle.\n\nPlease go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
     },
@@ -475,6 +584,7 @@
       "no_unlabeled_cycles": "All cycles are already labeled",
       "no_suggestions": "No suggested values available yet. Run a few cycles and try again.",
       "no_predictions": "No predictions",
+      "no_custom_phases": "No custom phases found for this device type.",
       "reprocess_success": "Successfully reprocessed {count} cycles.",
       "debug_data_cleared": "Successfully cleared debug data from {count} cycles."
     }

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -136,11 +138,11 @@ class WasherStateSensor(WasherBaseSensor):
             return "mdi:dishwasher"
         if dtype == "ev":
             return "mdi:car-electric"
-        elif dtype == "coffee_machine":
+        if dtype == "coffee_machine":
             return "mdi:coffee-maker"
-        elif dtype == "air_fryer":
+        if dtype == "air_fryer":
             return "mdi:pot-steam"
-        elif dtype == "heat_pump":
+        if dtype == "heat_pump":
             return "mdi:heat-pump"
         return "mdi:washing-machine"
 
@@ -188,6 +190,32 @@ class WasherProgramSensor(WasherBaseSensor):
     @property
     def native_value(self):
         return self._manager.current_program
+
+    @property
+    def extra_state_attributes(self):
+        profile_name = self._manager.current_program
+        if not profile_name or profile_name in ("off", "detecting...", "starting", "unknown"):
+            return None
+
+        catalog = self._manager.profile_store.list_phase_catalog(self._manager.device_type)
+        assigned = self._manager.profile_store.get_profile_phase_ranges_for_device(
+            profile_name,
+            self._manager.device_type,
+        )
+        catalog_view = [
+            {
+                "name": p.get("name"),
+                "description": p.get("description", ""),
+                "is_default": bool(p.get("is_default", False)),
+            }
+            for p in catalog
+        ]
+
+        return {
+            "active_phase": self._manager.phase_description,
+            "phase_catalog": catalog_view,
+            "phase_ranges": assigned,
+        }
 
 
 class WasherTimeRemainingSensor(WasherBaseSensor):
@@ -428,7 +456,7 @@ class WasherProfileCountSensor(WasherBaseSensor):
         self._safe_name = slugify(profile_name)
         # We store initial count, but update callback will refresh it
         self._count = count
-        
+
         self.entity_description = SensorEntityDescription(
             key=f"profile_count_{self._safe_name}",
             name=f"Profile: {profile_name} Count",
@@ -461,11 +489,11 @@ class WasherProfileCountSensor(WasherBaseSensor):
         profile = self._manager.profile_store.get_profile(self._profile_name)
         if not profile:
             return None
-            
+
         avg_energy = profile.get("avg_energy")
         count = profile.get("cycle_count", 0)
         total_energy = (avg_energy * count) if avg_energy is not None else None
-        
+
         # Helper to format duration
         def _to_min(sec: float) -> int:
             return int(sec / 60) if sec else 0
@@ -494,7 +522,7 @@ class WasherProfileSensorManager:
         self._entry = entry
         self._async_add_entities = async_add_entities
         self._sensors: dict[str, WasherProfileCountSensor] = {}
-        
+
         # Determine the signal string. It must match SIGNAL_WASHER_UPDATE from const.py
         # which is "washdata_update_{}"
         self._signal = SIGNAL_WASHER_UPDATE.format(entry.entry_id)
@@ -534,7 +562,7 @@ class WasherProfileSensorManager:
 
         # Remove old (if profile deleted)
         removed_names = existing_names - current_names
-        
+
         if removed_names:
             ent_reg = entity_registry.async_get(self._manager.hass)
             for name in removed_names:
@@ -570,4 +598,3 @@ class WasherSuggestionsSensor(WasherBaseSensor):
     @property
     def extra_state_attributes(self):
         return {"suggestions": self._manager.suggestions}
-

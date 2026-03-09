@@ -44,7 +44,8 @@
           "manage_cycles": "Gestionar cicles",
           "manage_profiles": "Gestionar perfils",
           "record_cycle": "Cicle de gravació (manual)",
-          "diagnostics": "Diagnòstic i Manteniment"
+          "diagnostics": "Diagnòstic i Manteniment",
+          "manage_phase_catalog": "Gestionar el catàleg de fases"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Edita/canvia el nom del perfil",
               "delete_profile": "🗑️ Suprimeix el perfil",
               "profile_stats": "📊 Estadístiques de perfil",
-              "cleanup_profile": "🧹 Neteja l'historial: gràfic i suprimir"
+              "cleanup_profile": "🧹 Neteja l'historial: gràfic i suprimir",
+              "assign_phases": "🧩 Assigna intervals de fase"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Programa correcte (si es corregeix)",
           "corrected_duration": "Durada correcta en minuts (si es corregeix)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Gestionar el catàleg de fases",
+        "description": "Fases actuals per a aquest tipus de dispositiu:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Acció",
+            "options": {
+              "create_custom_phase": "➕ Crea una fase personalitzada",
+              "edit_custom_phase": "✏️ Edita la fase personalitzada",
+              "delete_custom_phase": "🗑️ Suprimeix la Fase Personalitzada"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Crea una fase personalitzada",
+        "description": "Creeu un nom de fase personalitzat i una descripció per a aquest tipus de dispositiu.",
+        "data": {
+          "phase_name": "Nom de la fase",
+          "phase_description": "Descripció de la fase"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Edita la fase personalitzada",
+        "description": "Seleccioneu una fase personalitzada per editar.",
+        "data": {
+          "phase_name": "Fase personalitzada"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Edita la fase personalitzada",
+        "description": "Fase d'edició: {phase_name}",
+        "data": {
+          "phase_name": "Nom de la fase",
+          "phase_description": "Descripció de la fase"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Suprimeix la fase personalitzada",
+        "description": "Seleccioneu una fase personalitzada per suprimir. Tots els intervals assignats que utilitzin aquesta fase s'eliminaran.",
+        "data": {
+          "phase_name": "Fase personalitzada"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Assignar intervals de fase",
+        "description": "Perfil: **{profile_name}**\nMode: **{assign_mode}**\nSuggeriment de cicle: {cycle_hint}\n\nIntervals actuals:\n{current_ranges}\n\nLes etiquetes de fase són per a la visualització i l'organització. La detecció utilitza patrons de potència, no noms de fase.",
+        "data": {
+          "profile": "Perfil",
+          "assign_mode": "Mode d'assignació",
+          "source_cycle": "Cicle d'origen (necessari per al mode de marca de temps)",
+          "phase_1": "Fase 1",
+          "start_min_1": "Minut d'inici 1",
+          "end_min_1": "Final del minut 1",
+          "start_ts_1": "Marca de temps d'inici 1",
+          "end_ts_1": "Marca de temps de finalització 1",
+          "phase_2": "Fase 2",
+          "start_min_2": "Minut d'inici 2",
+          "end_min_2": "Final del minut 2",
+          "start_ts_2": "Marca de temps d'inici 2",
+          "end_ts_2": "Marca de temps de finalització 2",
+          "phase_3": "Fase 3",
+          "start_min_3": "Inicia el minut 3",
+          "end_min_3": "Final del minut 3",
+          "start_ts_3": "Marca de temps d'inici 3",
+          "end_ts_3": "Marca de temps de finalització 3",
+          "phase_4": "Fase 4",
+          "start_min_4": "Minut d'inici 4",
+          "end_min_4": "Final del minut 4",
+          "start_ts_4": "Marca de temps d'inici 4",
+          "end_ts_4": "Marca de temps de finalització 4",
+          "phase_5": "Fase 5",
+          "start_min_5": "Inici minut 5",
+          "end_min_5": "Final del minut 5",
+          "start_ts_5": "Marca de temps d'inici 5",
+          "end_ts_5": "Marca de temps de finalització 5",
+          "phase_6": "Fase 6",
+          "start_min_6": "Minut d'inici 6",
+          "end_min_6": "Final del minut 6",
+          "start_ts_6": "Marca de temps d'inici 6",
+          "end_ts_6": "Marca de temps de finalització 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Assignar intervals de fase",
+        "description": "Seleccioneu un perfil per configurar els intervals de fase.",
+        "data": {
+          "profile": "Perfil",
+          "assign_mode": {
+            "name": "Mode d'assignació",
+            "options": {
+              "offset_mode": "Desplaçaments de minuts",
+              "timestamp_mode": "Segells de temps"
+            }
+          },
+          "source_cycle": "Cicle d'origen (per al mode de marca de temps)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "No s'ha pogut canviar el nom del perfil. És possible que el perfil no existeixi o que ja s'ha pres un nom nou.",
       "assignment_failed": "No s'ha pogut assignar el perfil al cicle",
       "feedback_notification_title": "WashData: verifica el cicle ({device})",
-      "feedback_notification_message": "**Dispositiu**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Hora**: {time}\n\nWashData necessita la teva ajuda per verificar aquest cicle detectat.\n\nAneu a **Configuració > Dispositius i serveis > WashData > Configura > Comentaris d'aprenentatge** per confirmar o corregir aquest resultat."
+      "feedback_notification_message": "**Dispositiu**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Hora**: {time}\n\nWashData necessita la teva ajuda per verificar aquest cicle detectat.\n\nAneu a **Configuració > Dispositius i serveis > WashData > Configura > Comentaris d'aprenentatge** per confirmar o corregir aquest resultat.",
+      "duplicate_phase": "Ja existeix una fase amb aquest nom.",
+      "phase_not_found": "No s'ha trobat la fase seleccionada.",
+      "invalid_phase_name": "El nom de la fase no pot estar buit.",
+      "phase_name_too_long": "El nom de la fase és massa llarg.",
+      "invalid_phase_range": "L'interval de fases no és vàlid. El final ha de ser més gran que l'inici.",
+      "invalid_phase_timestamp": "La marca de temps no és vàlida. Utilitzeu el format AAAA-MM-DD HH:MM o HH:MM.",
+      "overlapping_phase_ranges": "Els intervals de fase es superposen. Ajusteu els intervals i torneu-ho a provar.",
+      "incomplete_phase_row": "Cada fila de fase ha d'incloure una fase més els valors d'inici i finalització complets per al mode seleccionat.",
+      "timestamp_mode_cycle_required": "Seleccioneu un cicle d'origen quan utilitzeu el mode de marca de temps."
     },
     "abort": {
       "no_cycles_found": "No s'han trobat cicles",
@@ -476,7 +585,8 @@
       "no_suggestions": "Encara no hi ha valors suggerits disponibles. Executeu uns quants cicles i torneu-ho a provar.",
       "no_predictions": "Sense prediccions",
       "reprocess_success": "S'han reprocessat correctament {count} cicles.",
-      "debug_data_cleared": "S'han esborrat correctament les dades de depuració de {count} cicles."
+      "debug_data_cleared": "S'han esborrat correctament les dades de depuració de {count} cicles.",
+      "no_custom_phases": "No s'han trobat fases personalitzades per a aquest tipus de dispositiu."
     }
   },
   "entity": {

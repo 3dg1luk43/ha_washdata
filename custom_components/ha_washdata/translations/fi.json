@@ -44,7 +44,8 @@
           "manage_cycles": "Hallitse syklejä",
           "manage_profiles": "Hallitse profiileja",
           "record_cycle": "Tallenna sykli (Manuaalinen)",
-          "diagnostics": "Diagnostiikka ja huolto"
+          "diagnostics": "Diagnostiikka ja huolto",
+          "manage_phase_catalog": "Hallitse vaiheluetteloa"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Muokkaa/nimeä profiilia uudelleen",
               "delete_profile": "🗑️Poista profiili",
               "profile_stats": "📊 Profiilitilastot",
-              "cleanup_profile": "🧹 Puhdista historia - piirrä ja poista"
+              "cleanup_profile": "🧹 Puhdista historia - piirrä ja poista",
+              "assign_phases": "🧩 Määritä vaihealueet"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Hallitse vaiheluetteloa",
+        "description": "Tämän laitetyypin nykyiset vaiheet:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Toiminta",
+            "options": {
+              "create_custom_phase": "➕ Luo mukautettu vaihe",
+              "edit_custom_phase": "✏️ Muokkaa mukautettua vaihetta",
+              "delete_custom_phase": "🗑️ Poista mukautettu vaihe"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Luo mukautettu vaihe",
+        "description": "Luo mukautettu vaiheen nimi ja kuvaus tälle laitetyypille.",
+        "data": {
+          "phase_name": "Vaiheen nimi",
+          "phase_description": "Vaiheen kuvaus"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Muokkaa mukautettua vaihetta",
+        "description": "Valitse muokattava vaihe.",
+        "data": {
+          "phase_name": "Mukautettu vaihe"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Muokkaa mukautettua vaihetta",
+        "description": "Muokkausvaihe: {phase_name}",
+        "data": {
+          "phase_name": "Vaiheen nimi",
+          "phase_description": "Vaiheen kuvaus"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Poista mukautettu vaihe",
+        "description": "Valitse poistettava mukautettu vaihe. Kaikki tätä vaihetta käyttävät määritetyt alueet poistetaan.",
+        "data": {
+          "phase_name": "Mukautettu vaihe"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Määritä vaihealueet",
+        "description": "Profiili: **{profile_name}**\nTila: **{assign_mode}**\nKierrosvinkki: {cycle_hint}\n\nNykyiset alueet:\n{current_ranges}\n\nVaihetarrat ovat näyttöä ja järjestämistä varten. Tunnistus käyttää tehokuvioita, ei vaiheiden nimiä.",
+        "data": {
+          "profile": "Profiili",
+          "assign_mode": "Tehtävätila",
+          "source_cycle": "Lähdejakso (pakollinen aikaleimatilassa)",
+          "phase_1": "Vaihe 1",
+          "start_min_1": "Aloitus minuutti 1",
+          "end_min_1": "Päättymisminuutti 1",
+          "start_ts_1": "Aloitusaikaleima 1",
+          "end_ts_1": "Päättymisaikaleima 1",
+          "phase_2": "Vaihe 2",
+          "start_min_2": "Aloitus minuutti 2",
+          "end_min_2": "Päättymisminuutti 2",
+          "start_ts_2": "Aloitusaikaleima 2",
+          "end_ts_2": "Päättymisaikaleima 2",
+          "phase_3": "Vaihe 3",
+          "start_min_3": "Aloitus minuutti 3",
+          "end_min_3": "Päättymisminuutti 3",
+          "start_ts_3": "Aloitusaikaleima 3",
+          "end_ts_3": "Päättymisaikaleima 3",
+          "phase_4": "Vaihe 4",
+          "start_min_4": "Aloitus minuutti 4",
+          "end_min_4": "Päättymisminuutti 4",
+          "start_ts_4": "Aloitusaikaleima 4",
+          "end_ts_4": "Päättymisaikaleima 4",
+          "phase_5": "Vaihe 5",
+          "start_min_5": "Aloitus minuutti 5",
+          "end_min_5": "Päättymisminuutti 5",
+          "start_ts_5": "Aloitusaikaleima 5",
+          "end_ts_5": "Päättymisaikaleima 5",
+          "phase_6": "Vaihe 6",
+          "start_min_6": "Aloitus minuutti 6",
+          "end_min_6": "Päättymisminuutti 6",
+          "start_ts_6": "Aloitusaikaleima 6",
+          "end_ts_6": "Päättymisaikaleima 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Määritä vaihealueet",
+        "description": "Valitse profiili määrittääksesi vaihealueet.",
+        "data": {
+          "profile": "Profiili",
+          "assign_mode": {
+            "name": "Tehtävätila",
+            "options": {
+              "offset_mode": "Minuuttipoikkeamat",
+              "timestamp_mode": "Aikaleimat"
+            }
+          },
+          "source_cycle": "Lähdejakso (aikaleimatilaa varten)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Profiilin uudelleennimeäminen epäonnistui. Profiilia ei ehkä ole tai uusi nimi on jo käytössä.",
       "assignment_failed": "Profiilin määrittäminen syklille epäonnistui",
       "feedback_notification_title": "WashData: Vahvista sykli ({device})",
-      "feedback_notification_message": "**Laite**: {device}\n**Ohjelma**: {program} ({confidence}% luottamus)\n**Aika**: {time}\n\nWashData tarvitsee apuasi tämän tunnistetun syklin vahvistamisessa.\n\nSiirry kohtaan **Asetukset > Laitteet ja palvelut > WashData > Määritä > Oppimispalautteet** vahvistaaksesi tai korjataksesi tämän tuloksen."
+      "feedback_notification_message": "**Laite**: {device}\n**Ohjelma**: {program} ({confidence}% luottamus)\n**Aika**: {time}\n\nWashData tarvitsee apuasi tämän tunnistetun syklin vahvistamisessa.\n\nSiirry kohtaan **Asetukset > Laitteet ja palvelut > WashData > Määritä > Oppimispalautteet** vahvistaaksesi tai korjataksesi tämän tuloksen.",
+      "duplicate_phase": "Tämän niminen vaihe on jo olemassa.",
+      "phase_not_found": "Valittua vaihetta ei löytynyt.",
+      "invalid_phase_name": "Vaiheen nimi ei voi olla tyhjä.",
+      "phase_name_too_long": "Vaiheen nimi on liian pitkä.",
+      "invalid_phase_range": "Vaihealue on virheellinen. Lopun on oltava suurempi kuin alku.",
+      "invalid_phase_timestamp": "Aikaleima on virheellinen. Käytä VVVV-KK-PP HH:MM- tai HH:MM-muotoa.",
+      "overlapping_phase_ranges": "Vaihealueet menevät päällekkäin. Säädä alueita ja yritä uudelleen.",
+      "incomplete_phase_row": "Jokaisella vaiherivillä on oltava vaihe sekä valitun tilan täydelliset aloitus-/loppuarvot.",
+      "timestamp_mode_cycle_required": "Valitse lähdejakso, kun käytät aikaleimatilaa."
     },
     "abort": {
       "no_cycles_found": "Syklejä ei löytynyt",
@@ -476,7 +585,8 @@
       "no_suggestions": "Ehdotettuja arvoja ei ole vielä saatavilla. Suorita muutama sykli ja yritä uudelleen.",
       "no_predictions": "Ei ennusteita",
       "reprocess_success": "Onnistuneesti uudelleenkäsitelty {count} sykliä.",
-      "debug_data_cleared": "Virheenkorjaustiedot onnistuneesti tyhjennetty {count} syklistä."
+      "debug_data_cleared": "Virheenkorjaustiedot onnistuneesti tyhjennetty {count} syklistä.",
+      "no_custom_phases": "Tälle laitetyypille ei löytynyt mukautettuja vaiheita."
     }
   },
   "entity": {

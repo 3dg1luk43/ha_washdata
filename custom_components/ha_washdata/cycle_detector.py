@@ -483,7 +483,7 @@ class CycleDetector:
                 else:
                     # Reset idle timer when power rises (burst detected)
                     self._anti_wrinkle_idle_time = 0.0
-                
+
                 # Exit conditions:
                 # Only exit on:
                 # 1. Safety timeout (2 hours in anti-wrinkle), OR
@@ -570,16 +570,16 @@ class CycleDetector:
                 # End spike detected! Mark it
                 self._end_spike_seen = True
                 _LOGGER.debug("End spike detected (power high in ENDING state)")
-                
+
                 # Check if we're past expected duration - if so, DON'T resume to RUNNING
                 # This prevents the cycle from bouncing forever on pump-out spikes
                 start_time = self._current_cycle_start or timestamp
                 current_duration = (timestamp - start_time).total_seconds()
-                
+
                 # Sanity check: if expected_duration is unreasonable (>6 hours), use fallback
                 max_reasonable = 21600.0  # 6 hours
                 effective_expected = self._expected_duration
-                
+
                 if effective_expected <= 0 or effective_expected > max_reasonable:
                     # Fallback: use current duration + buffer if we've run > 3 hours
                     # (Assumes any cycle over 3 hours running is near completion when in ENDING)
@@ -590,12 +590,12 @@ class CycleDetector:
                             "using current_duration=%ds as reference",
                             int(self._expected_duration), int(current_duration)
                         )
-                
+
                 past_expected = (
-                    effective_expected > 0 
+                    effective_expected > 0
                     and current_duration >= (effective_expected * 0.98)
                 )
-                
+
                 if past_expected:
                     _LOGGER.debug(
                         "End spike ignored for state transition (past expected duration %.0fs/%.0fs)",
@@ -897,7 +897,7 @@ class CycleDetector:
 
         _LOGGER.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)
-        
+
         target = STATE_FINISHED
         if status == "interrupted":
             target = STATE_INTERRUPTED
@@ -909,7 +909,7 @@ class CycleDetector:
             and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
         ):
             target = STATE_ANTI_WRINKLE
-            
+
         self.reset(target_state=target)
 
     # Stub methods for compatibility or simpler logic
@@ -1007,7 +1007,7 @@ class CycleDetector:
                 try:
                     self._state_enter_time = dt_util.parse_datetime(enter_time)
                 except Exception: # pylint: disable=broad-exception-caught
-                     _LOGGER.warning("Failed to parse state enter time")
+                    _LOGGER.warning("Failed to parse state enter time")
 
             start = snapshot.get("current_cycle_start")
             self._current_cycle_start = None

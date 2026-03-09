@@ -137,25 +137,25 @@ def compute_dtw_lite(
         end_j = min(m, center + w + 1)
 
         curr_row.fill(float("inf"))
-        
+
         # Pre-calculate costs for the current window to reduce Python overhead
         # x is 0-indexed, so x[i-1]
         val_x = x[i - 1]
-        
+
         for j in range(start_j, end_j + 1):
             cost = abs(float(val_x - y[j - 1]))
-            
+
             # Standard DTW recursion
             # curr_row[j] = cost + min(insertion, deletion, match)
             # insertion: prev_row[j]
             # deletion: curr_row[j-1]
             # match: prev_row[j-1]
-            
+
             # Use a slightly faster min implementation if possible
             m1 = prev_row[j]
             m2 = curr_row[j - 1]
             m3 = prev_row[j - 1]
-            
+
             if m1 < m2:
                 if m1 < m3:
                     best_prev = m1
@@ -166,9 +166,9 @@ def compute_dtw_lite(
                     best_prev = m2
                 else:
                     best_prev = m3
-                    
+
             curr_row[j] = cost + best_prev
-            
+
         # Swap rows
         prev_row[:] = curr_row[:]
 
@@ -343,18 +343,18 @@ def compute_envelope_worker(
     for curve in raw_cycles_data:
         offsets_list = curve[0]
         values_list = curve[1]
-        
+
         if len(offsets_list) < 3 or len(values_list) < 3:
             continue
-            
+
         offsets = np.array(offsets_list)
         values = np.array(values_list)
-        
+
         # Use provided duration or fallback to last offset
         dur = float(curve[2]) if len(curve) > 2 else float(offsets[-1])
-        
+
         normalized_curves.append((offsets, values, dur))
-        
+
         if len(offsets) > 1:
             intervals = np.diff(offsets)
             sr = float(np.median(intervals[intervals > 0]))
@@ -365,7 +365,7 @@ def compute_envelope_worker(
     # 2. Reference Selection (Median Duration)
     # Input is now (offsets, values, duration)
     normalized_curves_with_dur = normalized_curves
-    
+
     max_times = [float(dur) for _, _, dur in normalized_curves_with_dur]
     median_dur = float(np.median(max_times))
     ref_idx = int(np.argmin([abs(t - median_dur) for t in max_times]))
@@ -475,24 +475,24 @@ def verify_profile_alignment_worker(
 
     # 1. Coarse Alignment
     score, _, offset = find_best_alignment(curr, ref, 1.0)
-    
+
     # 2. Extract aligned segments
     # Determine the mapping window.
-    
+
     start_ref = max(0, offset)
-    end_ref = min(len(ref), offset + len(curr) + 50) 
-    
+    end_ref = min(len(ref), offset + len(curr) + 50)
+
     if end_ref <= start_ref:
-       return 0.0, 9999.0, 0.0
-       
+        return 0.0, 9999.0, 0.0
+
     ref_seg = ref[start_ref:end_ref]
-    curr_seg = curr 
-    
+    curr_seg = curr
+
     if offset < 0:
         curr_seg = curr[-offset:]
-        
+
     path = compute_dtw_path(curr_seg, ref_seg, band_width_ratio=dtw_bandwidth)
-    
+
     if not path:
         # Fallback to linear mapping based on offset
         mapped_idx = min(len(ref)-1, offset + len(curr) - 1)
@@ -502,10 +502,10 @@ def verify_profile_alignment_worker(
         last_pair = path[-1]
         ref_seg_idx = last_pair[1]
         mapped_idx = start_ref + ref_seg_idx
-        
+
     mapped_idx = min(mapped_idx, len(envelope_time_grid)-1)
-    
+
     mapped_time = float(envelope_time_grid[mapped_idx])
     mapped_power = float(ref[mapped_idx])
-    
+
     return mapped_time, mapped_power, float(score)

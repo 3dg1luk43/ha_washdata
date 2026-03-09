@@ -44,7 +44,8 @@
           "manage_cycles": "چرخه ها را مدیریت کنید",
           "manage_profiles": "مدیریت پروفایل ها",
           "record_cycle": "چرخه ضبط (دستی)",
-          "diagnostics": "تشخیص و نگهداری"
+          "diagnostics": "تشخیص و نگهداری",
+          "manage_phase_catalog": "مدیریت کاتالوگ فاز"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ ویرایش/تغییر نام نمایه",
               "delete_profile": "🗑️ حذف نمایه",
               "profile_stats": "📊 آمار پروفایل",
-              "cleanup_profile": "🧹 پاک کردن تاریخچه - نمودار و حذف"
+              "cleanup_profile": "🧹 پاک کردن تاریخچه - نمودار و حذف",
+              "assign_phases": "🧩 محدوده های فاز را اختصاص دهید"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "برنامه صحیح (در صورت تصحیح)",
           "corrected_duration": "مدت زمان صحیح بر حسب دقیقه (در صورت تصحیح)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "مدیریت کاتالوگ فاز",
+        "description": "فازهای فعلی برای این نوع دستگاه:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "اقدام",
+            "options": {
+              "create_custom_phase": "➕ فاز سفارشی ایجاد کنید",
+              "edit_custom_phase": "✏️ مرحله سفارشی را ویرایش کنید",
+              "delete_custom_phase": "🗑️ مرحله سفارشی را حذف کنید"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "ایجاد فاز سفارشی",
+        "description": "یک نام فاز و توضیحات سفارشی برای این نوع دستگاه ایجاد کنید.",
+        "data": {
+          "phase_name": "نام فاز",
+          "phase_description": "شرح فاز"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "ویرایش فاز سفارشی",
+        "description": "یک فاز سفارشی را برای ویرایش انتخاب کنید.",
+        "data": {
+          "phase_name": "فاز سفارشی"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "ویرایش فاز سفارشی",
+        "description": "مرحله ویرایش: {phase_name}",
+        "data": {
+          "phase_name": "نام فاز",
+          "phase_description": "شرح فاز"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "حذف فاز سفارشی",
+        "description": "یک فاز سفارشی را برای حذف انتخاب کنید. هر محدوده اختصاص داده شده با استفاده از این فاز حذف خواهد شد.",
+        "data": {
+          "phase_name": "فاز سفارشی"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "محدوده های فاز را تعیین کنید",
+        "description": "نمایه: **{profile_name}**\nحالت: **{assign_mode}**\nراهنمایی چرخه: {cycle_hint}\n\nمحدوده های فعلی:\n{current_ranges}\n\nبرچسب های فاز برای نمایش و سازماندهی هستند. تشخیص از الگوهای قدرت استفاده می کند، نه نام فاز.",
+        "data": {
+          "profile": "نمایه",
+          "assign_mode": "حالت تکلیف",
+          "source_cycle": "چرخه منبع (برای حالت مهر زمانی لازم است)",
+          "phase_1": "فاز 1",
+          "start_min_1": "دقیقه شروع 1",
+          "end_min_1": "دقیقه پایانی 1",
+          "start_ts_1": "شروع مهر زمانی 1",
+          "end_ts_1": "مهر زمانی پایان 1",
+          "phase_2": "فاز 2",
+          "start_min_2": "دقیقه شروع 2",
+          "end_min_2": "پایان دقیقه 2",
+          "start_ts_2": "شروع مهر زمانی 2",
+          "end_ts_2": "پایان مهر زمانی 2",
+          "phase_3": "فاز 3",
+          "start_min_3": "دقیقه شروع 3",
+          "end_min_3": "پایان دقیقه 3",
+          "start_ts_3": "شروع مهر زمانی 3",
+          "end_ts_3": "مهر زمانی پایان 3",
+          "phase_4": "فاز 4",
+          "start_min_4": "دقیقه شروع 4",
+          "end_min_4": "پایان دقیقه 4",
+          "start_ts_4": "شروع مهر زمانی 4",
+          "end_ts_4": "مهر زمانی پایان 4",
+          "phase_5": "فاز 5",
+          "start_min_5": "دقیقه شروع 5",
+          "end_min_5": "پایان دقیقه 5",
+          "start_ts_5": "شروع مهر زمانی 5",
+          "end_ts_5": "مهر زمانی پایان 5",
+          "phase_6": "فاز 6",
+          "start_min_6": "دقیقه شروع 6",
+          "end_min_6": "پایان دقیقه 6",
+          "start_ts_6": "شروع مهر زمانی 6",
+          "end_ts_6": "مهر زمانی پایان 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "محدوده های فاز را تعیین کنید",
+        "description": "یک نمایه را برای پیکربندی محدوده فاز انتخاب کنید.",
+        "data": {
+          "profile": "نمایه",
+          "assign_mode": {
+            "name": "حالت تکلیف",
+            "options": {
+              "offset_mode": "آفست دقیقه",
+              "timestamp_mode": "مهر زمانی"
+            }
+          },
+          "source_cycle": "چرخه منبع (برای حالت مهر زمانی)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "تغییر نام نمایه انجام نشد. ممکن است نمایه وجود نداشته باشد یا نام جدیدی از قبل گرفته شده باشد.",
       "assignment_failed": "تخصیص نمایه به چرخه انجام نشد",
       "feedback_notification_title": "WashData: چرخه تأیید ({device})",
-      "feedback_notification_message": "**دستگاه**: {device}\n**برنامه**: {program} ({confidence}% اطمینان)\n**زمان**: {time}\n\nWashData برای تأیید این چرخه شناسایی شده به کمک شما نیاز دارد.\n\nلطفاً برای تأیید یا تصحیح این نتیجه به **تنظیمات > دستگاه‌ها و خدمات > WashData > پیکربندی > بازخوردهای یادگیری** بروید."
+      "feedback_notification_message": "**دستگاه**: {device}\n**برنامه**: {program} ({confidence}% اطمینان)\n**زمان**: {time}\n\nWashData برای تأیید این چرخه شناسایی شده به کمک شما نیاز دارد.\n\nلطفاً برای تأیید یا تصحیح این نتیجه به **تنظیمات > دستگاه‌ها و خدمات > WashData > پیکربندی > بازخوردهای یادگیری** بروید.",
+      "duplicate_phase": "فازی با این نام از قبل وجود دارد.",
+      "phase_not_found": "فاز انتخابی یافت نشد.",
+      "invalid_phase_name": "نام فاز نمی تواند خالی باشد.",
+      "phase_name_too_long": "نام فاز خیلی طولانی است.",
+      "invalid_phase_range": "محدوده فاز نامعتبر است. پایان باید بزرگتر از شروع باشد.",
+      "invalid_phase_timestamp": "مهر زمانی نامعتبر است. از قالب YYYY-MM-DD HH:MM یا HH:MM استفاده کنید.",
+      "overlapping_phase_ranges": "محدوده فازها همپوشانی دارند. محدوده ها را تنظیم کنید و دوباره امتحان کنید.",
+      "incomplete_phase_row": "هر ردیف فاز باید شامل یک فاز به اضافه مقادیر شروع/پایان کامل برای حالت انتخاب شده باشد.",
+      "timestamp_mode_cycle_required": "لطفاً هنگام استفاده از حالت مهر زمانی، یک چرخه منبع را انتخاب کنید."
     },
     "abort": {
       "no_cycles_found": "هیچ چرخه ای یافت نشد",
@@ -476,7 +585,8 @@
       "no_suggestions": "هنوز مقادیر پیشنهادی موجود نیست. چند چرخه را اجرا کنید و دوباره امتحان کنید.",
       "no_predictions": "بدون پیش بینی",
       "reprocess_success": "{count} چرخه با موفقیت دوباره پردازش شد.",
-      "debug_data_cleared": "داده‌های اشکال‌زدایی از {count} چرخه با موفقیت پاک شد."
+      "debug_data_cleared": "داده‌های اشکال‌زدایی از {count} چرخه با موفقیت پاک شد.",
+      "no_custom_phases": "هیچ فاز سفارشی برای این نوع دستگاه یافت نشد."
     }
   },
   "entity": {

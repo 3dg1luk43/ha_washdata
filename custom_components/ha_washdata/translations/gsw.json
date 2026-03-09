@@ -44,7 +44,8 @@
           "manage_cycles": "Zyklen verwalten",
           "manage_profiles": "Profile verwalten",
           "record_cycle": "Aufnahmezyklus (manuell)",
-          "diagnostics": "Diagnose und Wartung"
+          "diagnostics": "Diagnose und Wartung",
+          "manage_phase_catalog": "Phasenkatalog verwalten"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Profil bearbeiten/umbenennen",
               "delete_profile": "🗑️ Profil löschen",
               "profile_stats": "📊 Profilstatistik",
-              "cleanup_profile": "🧹 Verlauf bereinigen – grafisch darstellen und löschen"
+              "cleanup_profile": "🧹 Verlauf bereinigen – grafisch darstellen und löschen",
+              "assign_phases": "🧩 Phasenbereiche zuweisen"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Richtiges Programm (bei Korrektur)",
           "corrected_duration": "Korrekte Dauer in Minuten (bei Korrektur)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Phasenkatalog verwalten",
+        "description": "Aktuelle Phasen für diesen Gerätetyp:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Aktion",
+            "options": {
+              "create_custom_phase": "➕ Benutzerdefinierte Phase erstellen",
+              "edit_custom_phase": "✏️ Benutzerdefinierte Phase bearbeiten",
+              "delete_custom_phase": "🗑️ Benutzerdefinierte Phase löschen"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Erstellen Sie eine benutzerdefinierte Phase",
+        "description": "Erstellen Sie einen benutzerdefinierten Phasennamen und eine Beschreibung für diesen Gerätetyp.",
+        "data": {
+          "phase_name": "Phasenname",
+          "phase_description": "Phasenbeschreibung"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Benutzerdefinierte Phase bearbeiten",
+        "description": "Wählen Sie eine benutzerdefinierte Phase zum Bearbeiten aus.",
+        "data": {
+          "phase_name": "Benutzerdefinierte Phase"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Benutzerdefinierte Phase bearbeiten",
+        "description": "Bearbeitungsphase: {phase_name}",
+        "data": {
+          "phase_name": "Phasenname",
+          "phase_description": "Phasenbeschreibung"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Benutzerdefinierte Phase löschen",
+        "description": "Wählen Sie eine benutzerdefinierte Phase zum Löschen aus. Alle zugewiesenen Bereiche, die diese Phase verwenden, werden entfernt.",
+        "data": {
+          "phase_name": "Benutzerdefinierte Phase"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Phasenbereiche zuweisen",
+        "description": "Profil: **{profile_name}**\nModus: **{assign_mode}**\nZyklushinweis: {cycle_hint}\n\nAktuelle Bereiche:\n{current_ranges}\n\nPhasenbezeichnungen dienen der Anzeige und Organisation. Bei der Erkennung werden Leistungsmuster und keine Phasennamen verwendet.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Zuweisungsmodus",
+          "source_cycle": "Quellzyklus (erforderlich für den Zeitstempelmodus)",
+          "phase_1": "Phase 1",
+          "start_min_1": "Beginnen Sie mit Minute 1",
+          "end_min_1": "Ende Minute 1",
+          "start_ts_1": "Startzeitstempel 1",
+          "end_ts_1": "Endzeitstempel 1",
+          "phase_2": "Phase 2",
+          "start_min_2": "Beginne Minute 2",
+          "end_min_2": "Ende Minute 2",
+          "start_ts_2": "Zeitstempel 2 starten",
+          "end_ts_2": "Endzeitstempel 2",
+          "phase_3": "Phase 3",
+          "start_min_3": "Beginnen Sie mit Minute 3",
+          "end_min_3": "Ende Minute 3",
+          "start_ts_3": "Startzeitstempel 3",
+          "end_ts_3": "Endzeitstempel 3",
+          "phase_4": "Phase 4",
+          "start_min_4": "Beginnen Sie mit Minute 4",
+          "end_min_4": "Ende Minute 4",
+          "start_ts_4": "Zeitstempel 4 starten",
+          "end_ts_4": "Endzeitstempel 4",
+          "phase_5": "Phase 5",
+          "start_min_5": "Beginnen Sie mit Minute 5",
+          "end_min_5": "Ende Minute 5",
+          "start_ts_5": "Startzeitstempel 5",
+          "end_ts_5": "Endzeitstempel 5",
+          "phase_6": "Phase 6",
+          "start_min_6": "Beginnen Sie mit Minute 6",
+          "end_min_6": "Ende Minute 6",
+          "start_ts_6": "Startzeitstempel 6",
+          "end_ts_6": "Endzeitstempel 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Phasenbereiche zuweisen",
+        "description": "Wählen Sie ein Profil aus, um Phasenbereiche zu konfigurieren.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Zuweisungsmodus",
+            "options": {
+              "offset_mode": "Minutenversätze",
+              "timestamp_mode": "Zeitstempel"
+            }
+          },
+          "source_cycle": "Quellzyklus (für Zeitstempelmodus)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Profil konnte nicht umbenannt werden. Das Profil existiert möglicherweise nicht oder der neue Name ist bereits vergeben.",
       "assignment_failed": "Profil konnte dem Zyklus nicht zugewiesen werden",
       "feedback_notification_title": "WashData: Zyklus überprüfen ({device})",
-      "feedback_notification_message": "**Gerät**: {device}\n**Programm**: {program} ({confidence}% Konfidenz)\n**Zeit**: {time}\n\nWashData benötigt Ihre Hilfe, um diesen erkannten Zyklus zu überprüfen.\n\nBitte gehen Sie zu **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Lern-Feedbacks**, um dieses Ergebnis zu bestätigen oder zu korrigieren."
+      "feedback_notification_message": "**Gerät**: {device}\n**Programm**: {program} ({confidence}% Konfidenz)\n**Zeit**: {time}\n\nWashData benötigt Ihre Hilfe, um diesen erkannten Zyklus zu überprüfen.\n\nBitte gehen Sie zu **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Lern-Feedbacks**, um dieses Ergebnis zu bestätigen oder zu korrigieren.",
+      "duplicate_phase": "Eine Phase mit diesem Namen existiert bereits.",
+      "phase_not_found": "Die ausgewählte Phase wurde nicht gefunden.",
+      "invalid_phase_name": "Der Phasenname darf nicht leer sein.",
+      "phase_name_too_long": "Der Phasenname ist zu lang.",
+      "invalid_phase_range": "Der Phasenbereich ist ungültig. Ende muss größer als Anfang sein.",
+      "invalid_phase_timestamp": "Der Zeitstempel ist ungültig. Verwenden Sie das Format JJJJ-MM-TT HH:MM oder HH:MM.",
+      "overlapping_phase_ranges": "Phasenbereiche überschneiden sich. Passen Sie die Bereiche an und versuchen Sie es erneut.",
+      "incomplete_phase_row": "Jede Phasenzeile muss eine Phase sowie vollständige Start-/Endwerte für den ausgewählten Modus enthalten.",
+      "timestamp_mode_cycle_required": "Bitte wählen Sie einen Quellzyklus aus, wenn Sie den Zeitstempelmodus verwenden."
     },
     "abort": {
       "no_cycles_found": "Keine Zyklen gefunden",
@@ -476,7 +585,8 @@
       "no_suggestions": "Noch keine Wertevorschläge verfügbar. Führen Sie einige Zyklen durch und versuchen Sie es erneut.",
       "no_predictions": "Keine Vorhersagen",
       "reprocess_success": "{count} Zyklen erfolgreich erneut verarbeitet.",
-      "debug_data_cleared": "Debug-Daten aus {count} Zyklen erfolgreich gelöscht."
+      "debug_data_cleared": "Debug-Daten aus {count} Zyklen erfolgreich gelöscht.",
+      "no_custom_phases": "Für diesen Gerätetyp wurden keine benutzerdefinierten Phasen gefunden."
     }
   },
   "entity": {

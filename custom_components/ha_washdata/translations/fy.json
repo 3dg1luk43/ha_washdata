@@ -44,7 +44,8 @@
           "manage_cycles": "Behear Cycles",
           "manage_profiles": "Beheare Profilen",
           "record_cycle": "Record Cycle (Hânlieding)",
-          "diagnostics": "Diagnostyk en ûnderhâld"
+          "diagnostics": "Diagnostyk en ûnderhâld",
+          "manage_phase_catalog": "Fasekatalogus beheare"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Profile bewurkje/omneame",
               "delete_profile": "🗑️ Profile wiskje",
               "profile_stats": "📊 Profile Statistiken",
-              "cleanup_profile": "🧹 Skiednis skjinmeitsje - Grafyk en wiskje"
+              "cleanup_profile": "🧹 Skiednis skjinmeitsje - Grafyk en wiskje",
+              "assign_phases": "🧩 Fasebereiken tawize"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Korrekte programma (as korrigearje)",
           "corrected_duration": "Korrekte doer yn minuten (as korreksje)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Fasekatalogus beheare",
+        "description": "Aktuele fazen foar dit apparaattype:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Aksje",
+            "options": {
+              "create_custom_phase": "➕ Oanpaste faze oanmeitsje",
+              "edit_custom_phase": "✏️ Oanpaste faze bewurkje",
+              "delete_custom_phase": "🗑️ Oanpaste faze wiskje"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Oanpaste faze oanmeitsje",
+        "description": "Meitsje in oanpaste fazenamme en beskriuwing foar dit apparaattype.",
+        "data": {
+          "phase_name": "Fase Namme",
+          "phase_description": "Fase Beskriuwing"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Oanpaste faze bewurkje",
+        "description": "Selektearje in oanpaste faze om te bewurkjen.",
+        "data": {
+          "phase_name": "Oanpaste Fase"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Oanpaste faze bewurkje",
+        "description": "Bewurkje faze: {phase_name}",
+        "data": {
+          "phase_name": "Fase Namme",
+          "phase_description": "Fase Beskriuwing"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Wiskje Oanpaste Fase",
+        "description": "Selektearje in oanpaste faze om te wiskjen. Elke tawiisde berik dy't dizze faze brûke sil wurde fuortsmiten.",
+        "data": {
+          "phase_name": "Oanpaste Fase"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Fasebereiken tawize",
+        "description": "Profyl: **{profile_name}**\nModus: **{assign_mode}**\nCycle hint: {cycle_hint}\n\nAktuele berik:\n{current_ranges}\n\nFase-etiketten binne foar werjefte en organisaasje. Detection brûkt macht patroanen, net faze nammen.",
+        "data": {
+          "profile": "Profyl",
+          "assign_mode": "Opdracht modus",
+          "source_cycle": "Boarnesyklus (fereaske foar tiidstempelmodus)",
+          "phase_1": "Fase 1",
+          "start_min_1": "Startminút 1",
+          "end_min_1": "Einde minút 1",
+          "start_ts_1": "Tiidstempel begjinne 1",
+          "end_ts_1": "Einde tiidstempel 1",
+          "phase_2": "Fase 2",
+          "start_min_2": "Start minút 2",
+          "end_min_2": "Einde minút 2",
+          "start_ts_2": "Tiidstempel 2 begjinne",
+          "end_ts_2": "Einde tiidstempel 2",
+          "phase_3": "Fase 3",
+          "start_min_3": "Start minút 3",
+          "end_min_3": "Einde minút 3",
+          "start_ts_3": "Tiidstempel begjinne 3",
+          "end_ts_3": "Einde tiidstempel 3",
+          "phase_4": "Fase 4",
+          "start_min_4": "Startminút 4",
+          "end_min_4": "Einde minút 4",
+          "start_ts_4": "Tiidstempel begjinne 4",
+          "end_ts_4": "Einde tiidstempel 4",
+          "phase_5": "Fase 5",
+          "start_min_5": "Start minút 5",
+          "end_min_5": "Einde minút 5",
+          "start_ts_5": "Tiidstempel begjinne 5",
+          "end_ts_5": "Einde tiidstempel 5",
+          "phase_6": "Fase 6",
+          "start_min_6": "Start minút 6",
+          "end_min_6": "Einde minút 6",
+          "start_ts_6": "Tiidstempel begjinne 6",
+          "end_ts_6": "Einde tiidstempel 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Fasebereiken tawize",
+        "description": "Selektearje in profyl om fazeberiken te konfigurearjen.",
+        "data": {
+          "profile": "Profyl",
+          "assign_mode": {
+            "name": "Opdracht modus",
+            "options": {
+              "offset_mode": "Minute Offsets",
+              "timestamp_mode": "Tiidstempels"
+            }
+          },
+          "source_cycle": "Boarnesyklus (foar tiidstempelmodus)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Omneame profyl mislearre. It profyl bestiet mooglik net of in nije namme is al nommen.",
       "assignment_failed": "It tawizen fan profyl oan fytsen is net slagge",
       "feedback_notification_title": "WashData: ferifiearje syklus ({device})",
-      "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% fertrouwen)\n**Tiid**: {time}\n\nWashData hat jo help nedich om dizze ûntdekte syklus te ferifiearjen.\n\nGean asjebleaft nei **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Learning Feedbacks** om dit resultaat te befêstigjen of te korrigearjen."
+      "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% fertrouwen)\n**Tiid**: {time}\n\nWashData hat jo help nedich om dizze ûntdekte syklus te ferifiearjen.\n\nGean asjebleaft nei **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Learning Feedbacks** om dit resultaat te befêstigjen of te korrigearjen.",
+      "duplicate_phase": "In faze mei dizze namme bestiet al.",
+      "phase_not_found": "Selekteare faze waard net fûn.",
+      "invalid_phase_name": "Fazenamme kin net leech wêze.",
+      "phase_name_too_long": "Fazenamme is te lang.",
+      "invalid_phase_range": "Faseberik is ûnjildich. Ein moat grutter wêze as begjin.",
+      "invalid_phase_timestamp": "Tiidstempel is ûnjildich. Brûk JJJJ-MM-DD UU:MM of UU:MM opmaak.",
+      "overlapping_phase_ranges": "Faseberiken oerlaapje. Pas de berikken oan en besykje it nochris.",
+      "incomplete_phase_row": "Eltse faze rige moat befetsje in faze plus folsleine start / ein wearden foar de selektearre modus.",
+      "timestamp_mode_cycle_required": "Selektearje asjebleaft in boarnesyklus by it brûken fan tiidstempelmodus."
     },
     "abort": {
       "no_cycles_found": "Gjin cycles fûn",
@@ -476,7 +585,8 @@
       "no_suggestions": "Der binne noch gjin foarstelde wearden beskikber. Rinne in pear syklussen en besykje it nochris.",
       "no_predictions": "Gjin foarsizzings",
       "reprocess_success": "Mei sukses ferwurke {count} syklusen.",
-      "debug_data_cleared": "Debuggegevens fan {count} syklusen mei súkses wiske."
+      "debug_data_cleared": "Debuggegevens fan {count} syklusen mei súkses wiske.",
+      "no_custom_phases": "Gjin oanpaste fazen fûn foar dit apparaattype."
     }
   },
   "entity": {

@@ -44,7 +44,8 @@
           "manage_cycles": "管理周期",
           "manage_profiles": "管理配置文件",
           "record_cycle": "记录周期（手动）",
-          "diagnostics": "诊断与维护"
+          "diagnostics": "诊断与维护",
+          "manage_phase_catalog": "管理阶段目录"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ 编辑/重命名个人资料",
               "delete_profile": "🗑️删除个人资料",
               "profile_stats": "📊 个人资料统计",
-              "cleanup_profile": "🧹 清理历史记录 - 图表和删除"
+              "cleanup_profile": "🧹 清理历史记录 - 图表和删除",
+              "assign_phases": "🧩 分配相位范围"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "管理阶段目录",
+        "description": "此设备类型的当前阶段：\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "行动",
+            "options": {
+              "create_custom_phase": "➕ 创建自定义阶段",
+              "edit_custom_phase": "✏️ 编辑自定义阶段",
+              "delete_custom_phase": "🗑️ 删除自定义阶段"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "创建自定义阶段",
+        "description": "为此设备类型创建自定义阶段名称和描述。",
+        "data": {
+          "phase_name": "阶段名称",
+          "phase_description": "阶段描述"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "编辑自定义阶段",
+        "description": "选择要编辑的自定义阶段。",
+        "data": {
+          "phase_name": "定制阶段"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "编辑自定义阶段",
+        "description": "编辑阶段：{phase_name}",
+        "data": {
+          "phase_name": "阶段名称",
+          "phase_description": "阶段描述"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "删除自定义阶段",
+        "description": "选择要删除的自定义阶段。使用此阶段的任何指定范围都将被删除。",
+        "data": {
+          "phase_name": "定制阶段"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "分配相位范围",
+        "description": "个人资料： **{profile_name}**\n模式：**{assign_mode}**\n循环提示：{cycle_hint}\n\n电流范围：\n{current_ranges}\n\n阶段标签用于显示和组织。检测使用功率模式，而不是相名称。",
+        "data": {
+          "profile": "轮廓",
+          "assign_mode": "分配模式",
+          "source_cycle": "源周期（时间戳模式需要）",
+          "phase_1": "第一阶段",
+          "start_min_1": "开始第 1 分钟",
+          "end_min_1": "结束分钟 1",
+          "start_ts_1": "开始时间戳 1",
+          "end_ts_1": "结束时间戳 1",
+          "phase_2": "第二阶段",
+          "start_min_2": "开始第 2 分钟",
+          "end_min_2": "第 2 分钟结束",
+          "start_ts_2": "开始时间戳 2",
+          "end_ts_2": "结束时间戳 2",
+          "phase_3": "第三阶段",
+          "start_min_3": "开始第 3 分钟",
+          "end_min_3": "第 3 分钟结束",
+          "start_ts_3": "开始时间戳 3",
+          "end_ts_3": "结束时间戳 3",
+          "phase_4": "第四阶段",
+          "start_min_4": "第 4 分钟开始",
+          "end_min_4": "第 4 分钟结束",
+          "start_ts_4": "开始时间戳 4",
+          "end_ts_4": "结束时间戳 4",
+          "phase_5": "第五阶段",
+          "start_min_5": "第 5 分钟开始",
+          "end_min_5": "第 5 分钟结束",
+          "start_ts_5": "开始时间戳 5",
+          "end_ts_5": "结束时间戳 5",
+          "phase_6": "第六阶段",
+          "start_min_6": "第 6 分钟开始",
+          "end_min_6": "第 6 分钟结束",
+          "start_ts_6": "开始时间戳 6",
+          "end_ts_6": "结束时间戳 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "分配相位范围",
+        "description": "选择一个配置文件来配置相位范围。",
+        "data": {
+          "profile": "轮廓",
+          "assign_mode": {
+            "name": "分配模式",
+            "options": {
+              "offset_mode": "分钟偏移",
+              "timestamp_mode": "时间戳"
+            }
+          },
+          "source_cycle": "源周期（对于时间戳模式）"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "重命名配置文件失败。配置文件可能不存在或新名称已被占用。",
       "assignment_failed": "将配置文件分配给周期失败",
       "feedback_notification_title": "WashData: 验证周期 ({device})",
-      "feedback_notification_message": "**设备**：{device}\n**程序**：{program} ({confidence}% 置信度)\n**时间**：{time}\n\nWashData 需要您的帮助来验证此检测到的周期。\n\n请转到 **设置 > 设备与服务 > WashData > 配置 > 学习反馈** 以确认或更正此结果。"
+      "feedback_notification_message": "**设备**：{device}\n**程序**：{program} ({confidence}% 置信度)\n**时间**：{time}\n\nWashData 需要您的帮助来验证此检测到的周期。\n\n请转到 **设置 > 设备与服务 > WashData > 配置 > 学习反馈** 以确认或更正此结果。",
+      "duplicate_phase": "具有此名称的阶段已存在。",
+      "phase_not_found": "未找到所选相。",
+      "invalid_phase_name": "阶段名称不能为空。",
+      "phase_name_too_long": "相名太长。",
+      "invalid_phase_range": "相位范围无效。结束必须大于开始。",
+      "invalid_phase_timestamp": "时间戳无效。使用 YYYY-MM-DD HH:MM 或 HH:MM 格式。",
+      "overlapping_phase_ranges": "相位范围重叠。调整范围并重试。",
+      "incomplete_phase_row": "每个阶段行必须包含一个阶段以及所选模式的完整开始/结束值。",
+      "timestamp_mode_cycle_required": "使用时间戳模式时请选择源周期。"
     },
     "abort": {
       "no_cycles_found": "未找到周期",
@@ -476,7 +585,8 @@
       "no_suggestions": "尚无建议值。运行几个周期后再试。",
       "no_predictions": "无预测",
       "reprocess_success": "成功重新处理 {count} 个周期。",
-      "debug_data_cleared": "成功从 {count} 个周期中清除调试数据。"
+      "debug_data_cleared": "成功从 {count} 个周期中清除调试数据。",
+      "no_custom_phases": "找不到此设备类型的自定义阶段。"
     }
   },
   "entity": {

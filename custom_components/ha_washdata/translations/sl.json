@@ -44,7 +44,8 @@
           "manage_cycles": "Upravljaj cikle",
           "manage_profiles": "Upravljaj profile",
           "record_cycle": "Posnemi cikel (Ročno)",
-          "diagnostics": "Diagnostika in vzdrževanje"
+          "diagnostics": "Diagnostika in vzdrževanje",
+          "manage_phase_catalog": "Upravljanje kataloga faz"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Uredi/preimenuj profil",
               "delete_profile": "🗑️ Izbriši profil",
               "profile_stats": "📊 Statistika profila",
-              "cleanup_profile": "🧹 Čiščenje zgodovine - grafikon in brisanje"
+              "cleanup_profile": "🧹 Čiščenje zgodovine - grafikon in brisanje",
+              "assign_phases": "🧩 Dodeli fazne razpone"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Upravljanje kataloga faz",
+        "description": "Trenutne faze za to vrsto naprave:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Akcija",
+            "options": {
+              "create_custom_phase": "➕ Ustvari fazo po meri",
+              "edit_custom_phase": "✏️ Uredite fazo po meri",
+              "delete_custom_phase": "🗑️ Izbriši fazo po meri"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Ustvari fazo po meri",
+        "description": "Ustvarite ime faze po meri in opis za to vrsto naprave.",
+        "data": {
+          "phase_name": "Ime faze",
+          "phase_description": "Opis faze"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Uredi fazo po meri",
+        "description": "Izberite fazo po meri za urejanje.",
+        "data": {
+          "phase_name": "Faza po meri"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Uredi fazo po meri",
+        "description": "Faza urejanja: {phase_name}",
+        "data": {
+          "phase_name": "Ime faze",
+          "phase_description": "Opis faze"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Izbriši fazo po meri",
+        "description": "Izberite fazo po meri, ki jo želite izbrisati. Vsi dodeljeni obsegi s to fazo bodo odstranjeni.",
+        "data": {
+          "phase_name": "Faza po meri"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Dodelite fazne razpone",
+        "description": "Profil: **{profile_name}**\nNačin: **{assign_mode}**\nNamig za cikel: {cycle_hint}\n\nTrenutni razponi:\n{current_ranges}\n\nOznake faz so za prikaz in organizacijo. Zaznavanje uporablja vzorce moči, ne imen faz.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Način dodelitve",
+          "source_cycle": "Izvorni cikel (potreben za način časovnega žiga)",
+          "phase_1": "1. faza",
+          "start_min_1": "Začetna minuta 1",
+          "end_min_1": "Končna minuta 1",
+          "start_ts_1": "Začetni časovni žig 1",
+          "end_ts_1": "Končni časovni žig 1",
+          "phase_2": "Faza 2",
+          "start_min_2": "Začetna minuta 2",
+          "end_min_2": "Končna minuta 2",
+          "start_ts_2": "Začetek časovnega žiga 2",
+          "end_ts_2": "Končni časovni žig 2",
+          "phase_3": "Faza 3",
+          "start_min_3": "Začetna minuta 3",
+          "end_min_3": "Končna minuta 3",
+          "start_ts_3": "Začetek časovnega žiga 3",
+          "end_ts_3": "Končni časovni žig 3",
+          "phase_4": "Faza 4",
+          "start_min_4": "Začetna minuta 4",
+          "end_min_4": "Končna minuta 4",
+          "start_ts_4": "Začetni časovni žig 4",
+          "end_ts_4": "Končni časovni žig 4",
+          "phase_5": "Faza 5",
+          "start_min_5": "Začetna minuta 5",
+          "end_min_5": "Končna minuta 5",
+          "start_ts_5": "Začetni časovni žig 5",
+          "end_ts_5": "Končni časovni žig 5",
+          "phase_6": "Faza 6",
+          "start_min_6": "Začetna minuta 6",
+          "end_min_6": "Končna minuta 6",
+          "start_ts_6": "Začetek časovnega žiga 6",
+          "end_ts_6": "Končni časovni žig 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Dodelite fazne razpone",
+        "description": "Izberite profil za konfiguracijo faznih razponov.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Način dodelitve",
+            "options": {
+              "offset_mode": "Minutni odmiki",
+              "timestamp_mode": "Časovni žigi"
+            }
+          },
+          "source_cycle": "Izvorni cikel (za način časovnega žiga)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Preimenovanje profila ni uspelo. Profil morda ne obstaja ali pa je novo ime že zasedeno.",
       "assignment_failed": "Dodelitev profila ciklu ni uspela",
       "feedback_notification_title": "WashData: Preveri cikel ({device})",
-      "feedback_notification_message": "**Naprava**: {device}\n**Program**: {program} ({confidence}% zaupanje)\n**Čas**: {time}\n\nWashData potrebuje vašo pomoč pri preverjanju tega zaznanega cikla.\n\nPojdite na **Nastavitve > Naprave in storitve > WashData > Konfiguriraj > Povratne informacije učenja** za potrditev ali popravek tega rezultata."
+      "feedback_notification_message": "**Naprava**: {device}\n**Program**: {program} ({confidence}% zaupanje)\n**Čas**: {time}\n\nWashData potrebuje vašo pomoč pri preverjanju tega zaznanega cikla.\n\nPojdite na **Nastavitve > Naprave in storitve > WashData > Konfiguriraj > Povratne informacije učenja** za potrditev ali popravek tega rezultata.",
+      "duplicate_phase": "Faza s tem imenom že obstaja.",
+      "phase_not_found": "Izbrane faze ni bilo mogoče najti.",
+      "invalid_phase_name": "Ime faze ne sme biti prazno.",
+      "phase_name_too_long": "Ime faze je predolgo.",
+      "invalid_phase_range": "Fazno območje je neveljavno. Konec mora biti večji od začetka.",
+      "invalid_phase_timestamp": "Časovni žig je neveljaven. Uporabite obliko LLLL-MM-DD HH:MM ali HH:MM.",
+      "overlapping_phase_ranges": "Fazna območja se prekrivajo. Prilagodite obsege in poskusite znova.",
+      "incomplete_phase_row": "Vsaka fazna vrstica mora vsebovati fazo in celotne začetne/končne vrednosti za izbrani način.",
+      "timestamp_mode_cycle_required": "Ko uporabljate način časovnega žiga, izberite izvorni cikel."
     },
     "abort": {
       "no_cycles_found": "Ni najdenih ciklov",
@@ -476,7 +585,8 @@
       "no_suggestions": "Še ni na voljo nobenih predlaganih vrednosti. Zaženite nekaj ciklov in poskusite znova.",
       "no_predictions": "Ni napovedi",
       "reprocess_success": "Uspešno ponovno obdelanih {count} ciklov.",
-      "debug_data_cleared": "Podatki za razhroščevanje uspešno počiščeni iz {count} ciklov."
+      "debug_data_cleared": "Podatki za razhroščevanje uspešno počiščeni iz {count} ciklov.",
+      "no_custom_phases": "Za to vrsto naprave ni bilo mogoče najti faz po meri."
     }
   },
   "entity": {

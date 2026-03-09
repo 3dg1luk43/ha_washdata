@@ -44,7 +44,8 @@
           "manage_cycles": "Gérer les cycles",
           "manage_profiles": "Gérer les profils",
           "record_cycle": "Enregistrer un cycle (manuel)",
-          "diagnostics": "Diagnostics et maintenance"
+          "diagnostics": "Diagnostics et maintenance",
+          "manage_phase_catalog": "Gérer le catalogue de phases"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Modifier/Renommer le profil",
               "delete_profile": "🗑️ Supprimer le profil",
               "profile_stats": "📊 Statistiques de profil",
-              "cleanup_profile": "🧹 Nettoyer l'historique - Graphiquer et supprimer"
+              "cleanup_profile": "🧹 Nettoyer l'historique - Graphiquer et supprimer",
+              "assign_phases": "🧩 Attribuer des plages de phases"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Gérer le catalogue de phases",
+        "description": "Phases actuelles pour ce type d'appareil :\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Action",
+            "options": {
+              "create_custom_phase": "➕ Créer une phase personnalisée",
+              "edit_custom_phase": "✏️ Modifier la phase personnalisée",
+              "delete_custom_phase": "🗑️ Supprimer la phase personnalisée"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Créer une phase personnalisée",
+        "description": "Créez un nom de phase personnalisé et une description pour ce type d'appareil.",
+        "data": {
+          "phase_name": "Nom de la phase",
+          "phase_description": "Description des phases"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Modifier une phase personnalisée",
+        "description": "Sélectionnez une phase personnalisée à modifier.",
+        "data": {
+          "phase_name": "Phase personnalisée"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Modifier une phase personnalisée",
+        "description": "Phase d'édition : {phase_name}",
+        "data": {
+          "phase_name": "Nom de la phase",
+          "phase_description": "Description des phases"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Supprimer la phase personnalisée",
+        "description": "Sélectionnez une phase personnalisée à supprimer. Toutes les plages attribuées utilisant cette phase seront supprimées.",
+        "data": {
+          "phase_name": "Phase personnalisée"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Attribuer des plages de phases",
+        "description": "Profil : **{profile_name}**\nMode : **{assign_mode}**\nIndice de cycle : {cycle_hint}\n\nGammes actuelles :\n{current_ranges}\n\nLes étiquettes de phase sont destinées à l’affichage et à l’organisation. La détection utilise des modèles de puissance, pas des noms de phases.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Mode d'affectation",
+          "source_cycle": "Cycle source (obligatoire pour le mode horodatage)",
+          "phase_1": "Phase 1",
+          "start_min_1": "Début de la première minute",
+          "end_min_1": "Fin de la première minute",
+          "start_ts_1": "Horodatage de début 1",
+          "end_ts_1": "Horodatage de fin 1",
+          "phase_2": "Phase 2",
+          "start_min_2": "Début de la minute 2",
+          "end_min_2": "Fin de la minute 2",
+          "start_ts_2": "Horodatage de démarrage 2",
+          "end_ts_2": "Horodatage de fin 2",
+          "phase_3": "Phase 3",
+          "start_min_3": "Début de la minute 3",
+          "end_min_3": "Fin de la minute 3",
+          "start_ts_3": "Horodatage de démarrage 3",
+          "end_ts_3": "Horodatage de fin 3",
+          "phase_4": "Phase 4",
+          "start_min_4": "Début de la minute 4",
+          "end_min_4": "Fin de la minute 4",
+          "start_ts_4": "Horodatage de démarrage 4",
+          "end_ts_4": "Horodatage de fin 4",
+          "phase_5": "Phase 5",
+          "start_min_5": "Début de la minute 5",
+          "end_min_5": "Fin de la minute 5",
+          "start_ts_5": "Horodatage de début 5",
+          "end_ts_5": "Horodatage de fin 5",
+          "phase_6": "Phase 6",
+          "start_min_6": "Début de la minute 6",
+          "end_min_6": "Fin de la minute 6",
+          "start_ts_6": "Horodatage de début 6",
+          "end_ts_6": "Horodatage de fin 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Attribuer des plages de phases",
+        "description": "Sélectionnez un profil pour configurer les plages de phases.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Mode d'affectation",
+            "options": {
+              "offset_mode": "Décalages minutes",
+              "timestamp_mode": "Horodatages"
+            }
+          },
+          "source_cycle": "Cycle source (pour le mode horodatage)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Échec du renommage du profil. Le profil n'existe peut-être pas ou le nouveau nom est déjà pris.",
       "assignment_failed": "Échec de l'attribution du profil au cycle",
       "feedback_notification_title": "WashData : vérifier le cycle ({device})",
-      "feedback_notification_message": "**Appareil** : {device}\n**Programme** : {program} ({confidence}% de confiance)\n**Heure** : {time}\n\nWashData a besoin de votre aide pour vérifier ce cycle détecté.\n\nVeuillez aller dans **Paramètres > Appareils et services > WashData > Configurer > Retours d'apprentissage** pour confirmer ou corriger ce résultat."
+      "feedback_notification_message": "**Appareil** : {device}\n**Programme** : {program} ({confidence}% de confiance)\n**Heure** : {time}\n\nWashData a besoin de votre aide pour vérifier ce cycle détecté.\n\nVeuillez aller dans **Paramètres > Appareils et services > WashData > Configurer > Retours d'apprentissage** pour confirmer ou corriger ce résultat.",
+      "duplicate_phase": "Une phase portant ce nom existe déjà.",
+      "phase_not_found": "La phase sélectionnée n'a pas été trouvée.",
+      "invalid_phase_name": "Le nom de la phase ne peut pas être vide.",
+      "phase_name_too_long": "Le nom de la phase est trop long.",
+      "invalid_phase_range": "La plage de phases n'est pas valide. La fin doit être supérieure au début.",
+      "invalid_phase_timestamp": "L'horodatage n'est pas valide. Utilisez le format AAAA-MM-JJ HH:MM ou HH:MM.",
+      "overlapping_phase_ranges": "Les plages de phases se chevauchent. Ajustez les plages et réessayez.",
+      "incomplete_phase_row": "Chaque ligne de phase doit inclure une phase ainsi que les valeurs complètes de début/fin pour le mode sélectionné.",
+      "timestamp_mode_cycle_required": "Veuillez sélectionner un cycle source lorsque vous utilisez le mode horodatage."
     },
     "abort": {
       "no_cycles_found": "Aucun cycle trouvé",
@@ -476,7 +585,8 @@
       "no_suggestions": "Aucune valeur suggérée disponible pour l'instant. Exécutez quelques cycles et réessayez.",
       "no_predictions": "Aucune prédiction",
       "reprocess_success": "{count} cycles retraités avec succès.",
-      "debug_data_cleared": "Données de débogage supprimées avec succès de {count} cycles."
+      "debug_data_cleared": "Données de débogage supprimées avec succès de {count} cycles.",
+      "no_custom_phases": "Aucune phase personnalisée trouvée pour ce type d'appareil."
     }
   },
   "entity": {

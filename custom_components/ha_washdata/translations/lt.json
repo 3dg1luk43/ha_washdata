@@ -44,7 +44,8 @@
           "manage_cycles": "Valdyti ciklus",
           "manage_profiles": "Valdyti profilius",
           "record_cycle": "Įrašyti ciklą (Rankinis)",
-          "diagnostics": "Diagnostika ir priežiūra"
+          "diagnostics": "Diagnostika ir priežiūra",
+          "manage_phase_catalog": "Tvarkyti fazės katalogą"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Redaguoti / pervardyti profilį",
               "delete_profile": "🗑️ Ištrinti profilį",
               "profile_stats": "📊 Profilio statistika",
-              "cleanup_profile": "🧹 Istorijos išvalymas – diagrama ir ištrynimas"
+              "cleanup_profile": "🧹 Istorijos išvalymas – diagrama ir ištrynimas",
+              "assign_phases": "🧩 Priskirkite fazių diapazonus"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Tvarkyti fazės katalogą",
+        "description": "Dabartinės šio tipo įrenginio fazės:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Veiksmas",
+            "options": {
+              "create_custom_phase": "➕ Sukurkite pasirinktinį etapą",
+              "edit_custom_phase": "✏️ Redaguoti pasirinktinį etapą",
+              "delete_custom_phase": "🗑️ Ištrinkite pasirinktinį etapą"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Sukurkite pasirinktinį etapą",
+        "description": "Sukurkite pasirinktinį šio įrenginio tipo fazės pavadinimą ir aprašą.",
+        "data": {
+          "phase_name": "Fazės pavadinimas",
+          "phase_description": "Fazės aprašymas"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Redaguoti pasirinktinį etapą",
+        "description": "Pasirinkite tinkintą fazę, kurią norite redaguoti.",
+        "data": {
+          "phase_name": "Pasirinktinis etapas"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Redaguoti pasirinktinį etapą",
+        "description": "Redagavimo etapas: {phase_name}",
+        "data": {
+          "phase_name": "Fazės pavadinimas",
+          "phase_description": "Fazės aprašymas"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Ištrinti pasirinktinį etapą",
+        "description": "Pasirinkite pasirinktą fazę, kurią norite ištrinti. Visi priskirti diapazonai naudojant šią fazę bus pašalinti.",
+        "data": {
+          "phase_name": "Pasirinktinis etapas"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Priskirkite fazių diapazonus",
+        "description": "Profilis: **{profile_name}**\nRežimas: **{assign_mode}**\nCiklo užuomina: {cycle_hint}\n\nDabartiniai diapazonai:\n{current_ranges}\n\nFazių etiketės skirtos rodyti ir organizuoti. Aptikimas naudoja galios modelius, o ne fazių pavadinimus.",
+        "data": {
+          "profile": "Profilis",
+          "assign_mode": "Priskyrimo režimas",
+          "source_cycle": "Šaltinio ciklas (reikalingas laiko žymos režimui)",
+          "phase_1": "1 fazė",
+          "start_min_1": "1 pradžios minutė",
+          "end_min_1": "1 pabaigos minutė",
+          "start_ts_1": "1 pradžios laiko žyma",
+          "end_ts_1": "1 pabaigos laiko žyma",
+          "phase_2": "2 fazė",
+          "start_min_2": "2 pradžios minutė",
+          "end_min_2": "2 pabaigos minutė",
+          "start_ts_2": "2 pradžios laiko žyma",
+          "end_ts_2": "2 pabaigos laiko žyma",
+          "phase_3": "3 etapas",
+          "start_min_3": "3 pradžios minutė",
+          "end_min_3": "3 pabaigos minutė",
+          "start_ts_3": "3 pradžios laiko žyma",
+          "end_ts_3": "3 pabaigos laiko žyma",
+          "phase_4": "4 etapas",
+          "start_min_4": "4 pradžios minutė",
+          "end_min_4": "4 pabaigos minutė",
+          "start_ts_4": "4 pradžios laiko žyma",
+          "end_ts_4": "Pabaigos laiko žyma 4",
+          "phase_5": "5 etapas",
+          "start_min_5": "5 pradžios minutė",
+          "end_min_5": "5 pabaigos minutė",
+          "start_ts_5": "Pradžios laiko žyma 5",
+          "end_ts_5": "Pabaigos laiko žyma 5",
+          "phase_6": "6 etapas",
+          "start_min_6": "6 pradžios minutė",
+          "end_min_6": "6 pabaigos minutė",
+          "start_ts_6": "6 pradžios laiko žyma",
+          "end_ts_6": "Pabaigos laiko žyma 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Priskirkite fazių diapazonus",
+        "description": "Pasirinkite profilį, kad sukonfigūruotumėte fazių diapazonus.",
+        "data": {
+          "profile": "Profilis",
+          "assign_mode": {
+            "name": "Priskyrimo režimas",
+            "options": {
+              "offset_mode": "Minučių poslinkiai",
+              "timestamp_mode": "Laiko žymos"
+            }
+          },
+          "source_cycle": "Šaltinio ciklas (laiko žymos režimui)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Profilio pervadinimas nepavyko. Profilis gali neegzistuoti arba naujas pavadinimas jau užimtas.",
       "assignment_failed": "Profilio priskyrimas ciklui nepavyko",
       "feedback_notification_title": "WashData: Patvirtinkite ciklą ({device})",
-      "feedback_notification_message": "**Įrenginys**: {device}\n**Programa**: {program} ({confidence}% tikimybė)\n**Laikas**: {time}\n\nWashData reikia jūsų pagalbos patvirtinant šį aptiktą ciklą.\n\nEikite į **Nustatymai > Įrenginiai ir paslaugos > WashData > Konfigūruoti > Mokymosi atsiliepimai**, kad patvirtintumėte arba pataisytumėte šį rezultatą."
+      "feedback_notification_message": "**Įrenginys**: {device}\n**Programa**: {program} ({confidence}% tikimybė)\n**Laikas**: {time}\n\nWashData reikia jūsų pagalbos patvirtinant šį aptiktą ciklą.\n\nEikite į **Nustatymai > Įrenginiai ir paslaugos > WashData > Konfigūruoti > Mokymosi atsiliepimai**, kad patvirtintumėte arba pataisytumėte šį rezultatą.",
+      "duplicate_phase": "Fazė tokiu pavadinimu jau yra.",
+      "phase_not_found": "Pasirinkta fazė nerasta.",
+      "invalid_phase_name": "Fazės pavadinimo laukas negali būti tuščias.",
+      "phase_name_too_long": "Fazės pavadinimas per ilgas.",
+      "invalid_phase_range": "Fazės diapazonas netinkamas. Pabaiga turi būti didesnė už pradžią.",
+      "invalid_phase_timestamp": "Laiko žyma neteisinga. Naudokite MMMM-MM-DD HH:MM arba HH:MM formatą.",
+      "overlapping_phase_ranges": "Fazių diapazonai sutampa. Sureguliuokite diapazonus ir bandykite dar kartą.",
+      "incomplete_phase_row": "Kiekvienoje fazių eilutėje turi būti fazė ir visos pasirinkto režimo pradžios / pabaigos reikšmės.",
+      "timestamp_mode_cycle_required": "Naudodami laiko žymos režimą pasirinkite šaltinio ciklą."
     },
     "abort": {
       "no_cycles_found": "Ciklų nerasta",
@@ -476,7 +585,8 @@
       "no_suggestions": "Dar nėra siūlomų reikšmių. Paleiskite kelis ciklus ir bandykite dar kartą.",
       "no_predictions": "Nėra prognozių",
       "reprocess_success": "Sėkmingai perapdorota {count} ciklų.",
-      "debug_data_cleared": "Derinimo duomenys sėkmingai išvalyti iš {count} ciklų."
+      "debug_data_cleared": "Derinimo duomenys sėkmingai išvalyti iš {count} ciklų.",
+      "no_custom_phases": "Šiam įrenginio tipui tinkintų fazių nerasta."
     }
   },
   "entity": {

@@ -44,7 +44,8 @@
           "manage_cycles": "Spravovať cykly",
           "manage_profiles": "Spravovať profily",
           "record_cycle": "Cyklus nahrávania (manuálne)",
-          "diagnostics": "Diagnostika a údržba"
+          "diagnostics": "Diagnostika a údržba",
+          "manage_phase_catalog": "Spravovať katalóg fáz"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Upraviť/Premenovať profil",
               "delete_profile": "🗑️ Odstrániť profil",
               "profile_stats": "📊 Štatistika profilu",
-              "cleanup_profile": "🧹 História vyčistenia – graf a vymazanie"
+              "cleanup_profile": "🧹 História vyčistenia – graf a vymazanie",
+              "assign_phases": "🧩 Priraďte fázové rozsahy"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Správny program (ak opravujete)",
           "corrected_duration": "Správne trvanie v minútach (ak opravujete)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Spravovať katalóg fáz",
+        "description": "Aktuálne fázy pre tento typ zariadenia:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Akcia",
+            "options": {
+              "create_custom_phase": "➕ Vytvoriť vlastnú fázu",
+              "edit_custom_phase": "✏️ Upraviť vlastnú fázu",
+              "delete_custom_phase": "🗑️ Odstrániť vlastnú fázu"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Vytvoriť vlastnú fázu",
+        "description": "Vytvorte vlastný názov fázy a popis pre tento typ zariadenia.",
+        "data": {
+          "phase_name": "Názov fázy",
+          "phase_description": "Popis fázy"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Upraviť vlastnú fázu",
+        "description": "Vyberte vlastnú fázu, ktorú chcete upraviť.",
+        "data": {
+          "phase_name": "Vlastná fáza"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Upraviť vlastnú fázu",
+        "description": "Fáza úprav: {phase_name}",
+        "data": {
+          "phase_name": "Názov fázy",
+          "phase_description": "Popis fázy"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Odstrániť vlastnú fázu",
+        "description": "Vyberte vlastnú fázu, ktorú chcete odstrániť. Všetky priradené rozsahy pomocou tejto fázy budú odstránené.",
+        "data": {
+          "phase_name": "Vlastná fáza"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Priraďte fázové rozsahy",
+        "description": "Profil: **{profile_name}**\nRežim: **{assign_mode}**\nTip cyklu: {cycle_hint}\n\nAktuálne rozsahy:\n{current_ranges}\n\nŠtítky fáz slúžia na zobrazenie a usporiadanie. Detekcia používa vzory napájania, nie názvy fáz.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Režim pridelenia",
+          "source_cycle": "Zdrojový cyklus (vyžaduje sa pre režim časovej pečiatky)",
+          "phase_1": "1. fáza",
+          "start_min_1": "Štartová minúta 1",
+          "end_min_1": "Koniec minúty 1",
+          "start_ts_1": "Časová pečiatka začiatku 1",
+          "end_ts_1": "Časová pečiatka ukončenia 1",
+          "phase_2": "2. fáza",
+          "start_min_2": "Začiatok 2. minúty",
+          "end_min_2": "Koniec minúty 2",
+          "start_ts_2": "Časová pečiatka začiatku 2",
+          "end_ts_2": "Časová pečiatka konca 2",
+          "phase_3": "3. fáza",
+          "start_min_3": "Začiatok 3. minúty",
+          "end_min_3": "Koniec minúty 3",
+          "start_ts_3": "Časová pečiatka začiatku 3",
+          "end_ts_3": "Časová pečiatka konca 3",
+          "phase_4": "4. fáza",
+          "start_min_4": "Začiatok minúty 4",
+          "end_min_4": "Koniec minúty 4",
+          "start_ts_4": "Časová pečiatka začiatku 4",
+          "end_ts_4": "Časová pečiatka konca 4",
+          "phase_5": "5. fáza",
+          "start_min_5": "Začiatok 5. minúty",
+          "end_min_5": "Koniec minúty 5",
+          "start_ts_5": "Časová pečiatka začiatku 5",
+          "end_ts_5": "Časová pečiatka konca 5",
+          "phase_6": "6. fáza",
+          "start_min_6": "Začiatok 6. minúty",
+          "end_min_6": "Koniec minúty 6",
+          "start_ts_6": "Časová pečiatka začiatku 6",
+          "end_ts_6": "Časová pečiatka ukončenia 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Priraďte fázové rozsahy",
+        "description": "Vyberte profil na konfiguráciu fázových rozsahov.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Režim pridelenia",
+            "options": {
+              "offset_mode": "Posuny minút",
+              "timestamp_mode": "Časové pečiatky"
+            }
+          },
+          "source_cycle": "Zdrojový cyklus (pre režim časovej pečiatky)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Premenovanie profilu zlyhalo. Profil možno neexistuje alebo je už zadané nové meno.",
       "assignment_failed": "Priradenie profilu k cyklu zlyhalo",
       "feedback_notification_title": "WashData: Overiť cyklus ({device})",
-      "feedback_notification_message": "**Zariadenie**: {device}\n**Program**: {program} (spoľahlivosť {confidence} %)\n**Čas**: {time}\n\nWashData potrebuje vašu pomoc na overenie tohto zisteného cyklu.\n\nAk chcete potvrdiť alebo opraviť tento výsledok, prejdite do časti **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Spätná väzba na vzdelávanie."
+      "feedback_notification_message": "**Zariadenie**: {device}\n**Program**: {program} (spoľahlivosť {confidence} %)\n**Čas**: {time}\n\nWashData potrebuje vašu pomoc na overenie tohto zisteného cyklu.\n\nAk chcete potvrdiť alebo opraviť tento výsledok, prejdite do časti **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Spätná väzba na vzdelávanie.",
+      "duplicate_phase": "Fáza s týmto názvom už existuje.",
+      "phase_not_found": "Vybraná fáza sa nenašla.",
+      "invalid_phase_name": "Názov fázy nemôže byť prázdny.",
+      "phase_name_too_long": "Názov fázy je príliš dlhý.",
+      "invalid_phase_range": "Fázový rozsah je neplatný. Koniec musí byť väčší ako začiatok.",
+      "invalid_phase_timestamp": "Časová pečiatka je neplatná. Použite formát RRRR-MM-DD HH:MM alebo HH:MM.",
+      "overlapping_phase_ranges": "Fázové rozsahy sa prekrývajú. Upravte rozsahy a skúste to znova.",
+      "incomplete_phase_row": "Každý riadok fázy musí obsahovať fázu plus úplné počiatočné/koncové hodnoty pre vybraný režim.",
+      "timestamp_mode_cycle_required": "Pri použití režimu časovej pečiatky vyberte zdrojový cyklus."
     },
     "abort": {
       "no_cycles_found": "Nenašli sa žiadne cykly",
@@ -476,7 +585,8 @@
       "no_suggestions": "Zatiaľ nie sú k dispozícii žiadne navrhované hodnoty. Spustite niekoľko cyklov a skúste to znova.",
       "no_predictions": "Žiadne predpovede",
       "reprocess_success": "Počet úspešne spracovaných cyklov: {count}.",
-      "debug_data_cleared": "Údaje ladenia z {count} cyklov boli úspešne vymazané."
+      "debug_data_cleared": "Údaje ladenia z {count} cyklov boli úspešne vymazané.",
+      "no_custom_phases": "Pre tento typ zariadenia sa nenašli žiadne vlastné fázy."
     }
   },
   "entity": {

@@ -44,7 +44,8 @@
           "manage_cycles": "Upravljaj ciklusima",
           "manage_profiles": "Upravljaj profilima",
           "record_cycle": "Snimi ciklus (Ručno)",
-          "diagnostics": "Dijagnostika i održavanje"
+          "diagnostics": "Dijagnostika i održavanje",
+          "manage_phase_catalog": "Upravljanje katalogom faza"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Uredite/preimenujte profil",
               "delete_profile": "🗑️ Brisanje profila",
               "profile_stats": "📊 Statistika profila",
-              "cleanup_profile": "🧹 Očisti povijest - grafikon i brisanje"
+              "cleanup_profile": "🧹 Očisti povijest - grafikon i brisanje",
+              "assign_phases": "🧩 Dodijelite fazne raspone"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Upravljanje katalogom faza",
+        "description": "Trenutne faze za ovu vrstu uređaja:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Akcijski",
+            "options": {
+              "create_custom_phase": "➕ Stvorite prilagođenu fazu",
+              "edit_custom_phase": "✏️ Uredite prilagođenu fazu",
+              "delete_custom_phase": "🗑️ Izbriši prilagođenu fazu"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Stvorite prilagođenu fazu",
+        "description": "Stvorite prilagođeni naziv faze i opis za ovu vrstu uređaja.",
+        "data": {
+          "phase_name": "Naziv faze",
+          "phase_description": "Opis faze"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Uredi prilagođenu fazu",
+        "description": "Odaberite prilagođenu fazu za uređivanje.",
+        "data": {
+          "phase_name": "Prilagođena faza"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Uredi prilagođenu fazu",
+        "description": "Faza uređivanja: {phase_name}",
+        "data": {
+          "phase_name": "Naziv faze",
+          "phase_description": "Opis faze"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Izbriši prilagođenu fazu",
+        "description": "Odaberite prilagođenu fazu za brisanje. Svi rasponi dodijeljeni pomoću ove faze bit će uklonjeni.",
+        "data": {
+          "phase_name": "Prilagođena faza"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Dodijelite fazne raspone",
+        "description": "Profil: **{profile_name}**\nNačin rada: **{assign_mode}**\nSavjet za ciklus: {cycle_hint}\n\nTrenutni rasponi:\n{current_ranges}\n\nOznake faza služe za prikaz i organizaciju. Detekcija koristi uzorke snage, a ne nazive faza.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Način dodjele",
+          "source_cycle": "Izvorni ciklus (potreban za način rada s vremenskom oznakom)",
+          "phase_1": "faza 1",
+          "start_min_1": "Startna minuta 1",
+          "end_min_1": "Završna minuta 1",
+          "start_ts_1": "Vremenska oznaka početka 1",
+          "end_ts_1": "Vremenska oznaka završetka 1",
+          "phase_2": "Faza 2",
+          "start_min_2": "Startna minuta 2",
+          "end_min_2": "Završna minuta 2",
+          "start_ts_2": "Vremenska oznaka početka 2",
+          "end_ts_2": "Vremenska oznaka završetka 2",
+          "phase_3": "Faza 3",
+          "start_min_3": "Startna minuta 3",
+          "end_min_3": "Završna minuta 3",
+          "start_ts_3": "Vremenska oznaka početka 3",
+          "end_ts_3": "Vremenska oznaka završetka 3",
+          "phase_4": "Faza 4",
+          "start_min_4": "Startna minuta 4",
+          "end_min_4": "Završna minuta 4",
+          "start_ts_4": "Vremenska oznaka početka 4",
+          "end_ts_4": "Vremenska oznaka završetka 4",
+          "phase_5": "Faza 5",
+          "start_min_5": "Startna minuta 5",
+          "end_min_5": "Završna minuta 5",
+          "start_ts_5": "Vremenska oznaka početka 5",
+          "end_ts_5": "Vremenska oznaka završetka 5",
+          "phase_6": "Faza 6",
+          "start_min_6": "Startna minuta 6",
+          "end_min_6": "Završna minuta 6",
+          "start_ts_6": "Vremenska oznaka početka 6",
+          "end_ts_6": "Vremenska oznaka završetka 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Dodijelite fazne raspone",
+        "description": "Odaberite profil za konfiguraciju raspona faza.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Način dodjele",
+            "options": {
+              "offset_mode": "Minutni odmaci",
+              "timestamp_mode": "Vremenske oznake"
+            }
+          },
+          "source_cycle": "Izvorni ciklus (za način rada s vremenskom oznakom)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Preimenovanje profila nije uspjelo. Profil možda ne postoji ili je novo ime već zauzeto.",
       "assignment_failed": "Dodjela profila ciklusu nije uspjela",
       "feedback_notification_title": "WashData: Verificiraj ciklus ({device})",
-      "feedback_notification_message": "**Uređaj**: {device}\n**Program**: {program} ({confidence}% pouzdanje)\n**Vrijeme**: {time}\n\nWashData treba vašu pomoć za verifikaciju ovog detektiranog ciklusa.\n\nIdite na **Postavke > Uređaji i servisi > WashData > Konfiguriraj > Povratne informacije učenja** da potvrdite ili ispravite ovaj rezultat."
+      "feedback_notification_message": "**Uređaj**: {device}\n**Program**: {program} ({confidence}% pouzdanje)\n**Vrijeme**: {time}\n\nWashData treba vašu pomoć za verifikaciju ovog detektiranog ciklusa.\n\nIdite na **Postavke > Uređaji i servisi > WashData > Konfiguriraj > Povratne informacije učenja** da potvrdite ili ispravite ovaj rezultat.",
+      "duplicate_phase": "Faza s ovim nazivom već postoji.",
+      "phase_not_found": "Odabrana faza nije pronađena.",
+      "invalid_phase_name": "Naziv faze ne može biti prazan.",
+      "phase_name_too_long": "Naziv faze je predug.",
+      "invalid_phase_range": "Fazni raspon je nevažeći. Kraj mora biti veći od početka.",
+      "invalid_phase_timestamp": "Vremenska oznaka nije važeća. Koristite format GGGG-MM-DD HH:MM ili HH:MM.",
+      "overlapping_phase_ranges": "Rasponi faza se preklapaju. Podesite raspone i pokušajte ponovno.",
+      "incomplete_phase_row": "Svaki red faze mora sadržavati fazu plus potpune početne/završne vrijednosti za odabrani način.",
+      "timestamp_mode_cycle_required": "Odaberite izvorni ciklus kada koristite način vremenskog označavanja."
     },
     "abort": {
       "no_cycles_found": "Nema pronađenih ciklusa",
@@ -476,7 +585,8 @@
       "no_suggestions": "Još uvijek nema dostupnih predloženih vrijednosti. Pokrenite nekoliko ciklusa i pokušajte ponovo.",
       "no_predictions": "Nema predviđanja",
       "reprocess_success": "Uspješno ponovo obrađeno {count} ciklusa.",
-      "debug_data_cleared": "Podaci za otklanjanje grešaka uspješno obrisani iz {count} ciklusa."
+      "debug_data_cleared": "Podaci za otklanjanje grešaka uspješno obrisani iz {count} ciklusa.",
+      "no_custom_phases": "Nisu pronađene prilagođene faze za ovu vrstu uređaja."
     }
   },
   "entity": {

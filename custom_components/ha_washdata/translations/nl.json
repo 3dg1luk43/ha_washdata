@@ -44,7 +44,8 @@
           "manage_cycles": "Cycli beheren",
           "manage_profiles": "Profielen beheren",
           "record_cycle": "Cyclus opnemen (Handmatig)",
-          "diagnostics": "Diagnostiek & onderhoud"
+          "diagnostics": "Diagnostiek & onderhoud",
+          "manage_phase_catalog": "Beheer fasecatalogus"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Profiel bewerken/hernoemen",
               "delete_profile": "🗑️ Profiel verwijderen",
               "profile_stats": "📊 Profielstatistieken",
-              "cleanup_profile": "🧹 Geschiedenis opschonen - Grafiek en verwijderen"
+              "cleanup_profile": "🧹 Geschiedenis opschonen - Grafiek en verwijderen",
+              "assign_phases": "🧩 Fasebereiken toewijzen"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Beheer fasecatalogus",
+        "description": "Huidige fasen voor dit apparaattype:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Actie",
+            "options": {
+              "create_custom_phase": "➕ Maak een aangepaste fase",
+              "edit_custom_phase": "✏️ Aangepaste fase bewerken",
+              "delete_custom_phase": "🗑️ Aangepaste fase verwijderen"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Aangepaste fase maken",
+        "description": "Maak een aangepaste fasenaam en -beschrijving voor dit apparaattype.",
+        "data": {
+          "phase_name": "Fasenaam",
+          "phase_description": "Fasebeschrijving"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Aangepaste fase bewerken",
+        "description": "Selecteer een aangepaste fase om te bewerken.",
+        "data": {
+          "phase_name": "Aangepaste fase"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Aangepaste fase bewerken",
+        "description": "Bewerkingsfase: {phase_name}",
+        "data": {
+          "phase_name": "Fasenaam",
+          "phase_description": "Fasebeschrijving"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Aangepaste fase verwijderen",
+        "description": "Selecteer een aangepaste fase om te verwijderen. Alle toegewezen bereiken die deze fase gebruiken, worden verwijderd.",
+        "data": {
+          "phase_name": "Aangepaste fase"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Fasebereiken toewijzen",
+        "description": "Profiel: **{profile_name}**\nModus: **{assign_mode}**\nCyclushint: {cycle_hint}\n\nHuidige bereiken:\n{current_ranges}\n\nFaselabels zijn bedoeld voor weergave en organisatie. Detectie maakt gebruik van vermogenspatronen, niet van fasenamen.",
+        "data": {
+          "profile": "Profiel",
+          "assign_mode": "Toewijzingsmodus",
+          "source_cycle": "Broncyclus (vereist voor tijdstempelmodus)",
+          "phase_1": "Fase 1",
+          "start_min_1": "Startminuut 1",
+          "end_min_1": "Eindminuut 1",
+          "start_ts_1": "Begintijdstempel 1",
+          "end_ts_1": "Eindtijdstempel 1",
+          "phase_2": "Fase 2",
+          "start_min_2": "Startminuut 2",
+          "end_min_2": "Eindminuut 2",
+          "start_ts_2": "Begintijdstempel 2",
+          "end_ts_2": "Eindtijdstempel 2",
+          "phase_3": "Fase 3",
+          "start_min_3": "Startminuut 3",
+          "end_min_3": "Eindminuut 3",
+          "start_ts_3": "Begintijdstempel 3",
+          "end_ts_3": "Eindtijdstempel 3",
+          "phase_4": "Fase 4",
+          "start_min_4": "Startminuut 4",
+          "end_min_4": "Eindminuut 4",
+          "start_ts_4": "Begintijdstempel 4",
+          "end_ts_4": "Eindtijdstempel 4",
+          "phase_5": "Fase 5",
+          "start_min_5": "Startminuut 5",
+          "end_min_5": "Eindminuut 5",
+          "start_ts_5": "Begintijdstempel 5",
+          "end_ts_5": "Eindtijdstempel 5",
+          "phase_6": "Fase 6",
+          "start_min_6": "Beginminuut 6",
+          "end_min_6": "Eindminuut 6",
+          "start_ts_6": "Begintijdstempel 6",
+          "end_ts_6": "Eindtijdstempel 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Fasebereiken toewijzen",
+        "description": "Selecteer een profiel om fasebereiken te configureren.",
+        "data": {
+          "profile": "Profiel",
+          "assign_mode": {
+            "name": "Toewijzingsmodus",
+            "options": {
+              "offset_mode": "Minuutcompensaties",
+              "timestamp_mode": "Tijdstempels"
+            }
+          },
+          "source_cycle": "Broncyclus (voor tijdstempelmodus)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Profiel hernoemen mislukt. Profiel bestaat mogelijk niet of de nieuwe naam is al in gebruik.",
       "assignment_failed": "Profiel toewijzen aan cyclus mislukt",
       "feedback_notification_title": "WashData: Cyclus verifiëren ({device})",
-      "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% vertrouwen)\n**Tijd**: {time}\n\nWashData heeft uw hulp nodig om deze gedetecteerde cyclus te verifiëren.\n\nGa naar **Instellingen > Apparaten & services > WashData > Configureren > Leerfeedback** om dit resultaat te bevestigen of te corrigeren."
+      "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% vertrouwen)\n**Tijd**: {time}\n\nWashData heeft uw hulp nodig om deze gedetecteerde cyclus te verifiëren.\n\nGa naar **Instellingen > Apparaten & services > WashData > Configureren > Leerfeedback** om dit resultaat te bevestigen of te corrigeren.",
+      "duplicate_phase": "Er bestaat al een fase met deze naam.",
+      "phase_not_found": "Geselecteerde fase is niet gevonden.",
+      "invalid_phase_name": "Fasenaam mag niet leeg zijn.",
+      "phase_name_too_long": "Fasenaam is te lang.",
+      "invalid_phase_range": "Fasebereik is ongeldig. Het einde moet groter zijn dan het begin.",
+      "invalid_phase_timestamp": "Tijdstempel is ongeldig. Use YYYY-MM-DD HH:MM or HH:MM format.",
+      "overlapping_phase_ranges": "Fasebereiken overlappen elkaar. Pas het bereik aan en probeer het opnieuw.",
+      "incomplete_phase_row": "Elke faserij moet een fase plus volledige start-/eindwaarden voor de geselecteerde modus bevatten.",
+      "timestamp_mode_cycle_required": "Selecteer een broncyclus als u de tijdstempelmodus gebruikt."
     },
     "abort": {
       "no_cycles_found": "Geen cycli gevonden",
@@ -476,7 +585,8 @@
       "no_suggestions": "Nog geen voorgestelde waarden beschikbaar. Voer een paar cycli uit en probeer opnieuw.",
       "no_predictions": "Geen voorspellingen",
       "reprocess_success": "Succesvol {count} cycli opnieuw verwerkt.",
-      "debug_data_cleared": "Debug-gegevens succesvol gewist van {count} cycli."
+      "debug_data_cleared": "Debug-gegevens succesvol gewist van {count} cycli.",
+      "no_custom_phases": "Er zijn geen aangepaste fasen gevonden voor dit apparaattype."
     }
   },
   "entity": {

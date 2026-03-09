@@ -44,7 +44,8 @@
           "manage_cycles": "Halda tsükleid",
           "manage_profiles": "Halda profiile",
           "record_cycle": "Salvesta tsükkel (Käsitsi)",
-          "diagnostics": "Diagnostika ja hooldus"
+          "diagnostics": "Diagnostika ja hooldus",
+          "manage_phase_catalog": "Halda faasikataloogi"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Muutke/nimetage ümber profiili",
               "delete_profile": "🗑️ Kustuta profiil",
               "profile_stats": "📊 Profiili statistika",
-              "cleanup_profile": "🧹 Ajaloo puhastamine – graafik ja kustutamine"
+              "cleanup_profile": "🧹 Ajaloo puhastamine – graafik ja kustutamine",
+              "assign_phases": "🧩 Määrake faasivahemikud"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Halda faasikataloogi",
+        "description": "Selle seadmetüübi praegused faasid:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Tegevus",
+            "options": {
+              "create_custom_phase": "➕ Loo kohandatud faas",
+              "edit_custom_phase": "✏️ Muutke kohandatud faasi",
+              "delete_custom_phase": "🗑️ Kustutage kohandatud faas"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Loo kohandatud faas",
+        "description": "Looge selle seadmetüübi jaoks kohandatud faasinimi ja kirjeldus.",
+        "data": {
+          "phase_name": "Faasi nimi",
+          "phase_description": "Faasi kirjeldus"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Muuda kohandatud faasi",
+        "description": "Valige muutmiseks kohandatud faas.",
+        "data": {
+          "phase_name": "Kohandatud faas"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Muuda kohandatud faasi",
+        "description": "Redigeerimisfaas: {phase_name}",
+        "data": {
+          "phase_name": "Faasi nimi",
+          "phase_description": "Faasi kirjeldus"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Kustuta kohandatud faas",
+        "description": "Valige kustutamiseks kohandatud faas. Kõik seda faasi kasutavad määratud vahemikud eemaldatakse.",
+        "data": {
+          "phase_name": "Kohandatud faas"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Määrake faasivahemikud",
+        "description": "Profiil: **{profile_name}**\nRežiim: **{assign_mode}**\nTsükli vihje: {cycle_hint}\n\nPraegused vahemikud:\n{current_ranges}\n\nFaasisildid on mõeldud kuvamiseks ja korraldamiseks. Tuvastamine kasutab võimsusmustreid, mitte faasinimesid.",
+        "data": {
+          "profile": "Profiil",
+          "assign_mode": "Määramise režiim",
+          "source_cycle": "Allika tsükkel (vajalik ajatemplirežiimi jaoks)",
+          "phase_1": "1. faas",
+          "start_min_1": "1. stardiminut",
+          "end_min_1": "Lõpu minut 1",
+          "start_ts_1": "Alguse ajatempel 1",
+          "end_ts_1": "Lõpu ajatempel 1",
+          "phase_2": "2. faas",
+          "start_min_2": "2. stardiminut",
+          "end_min_2": "Lõpu minut 2",
+          "start_ts_2": "Alguse ajatempel 2",
+          "end_ts_2": "Lõpu ajatempel 2",
+          "phase_3": "3. faas",
+          "start_min_3": "3. stardiminut",
+          "end_min_3": "Lõpu minut 3",
+          "start_ts_3": "Alguse ajatempel 3",
+          "end_ts_3": "Lõpu ajatempel 3",
+          "phase_4": "4. faas",
+          "start_min_4": "4. stardiminut",
+          "end_min_4": "Lõpu minut 4",
+          "start_ts_4": "Alguse ajatempel 4",
+          "end_ts_4": "Lõpu ajatempel 4",
+          "phase_5": "5. faas",
+          "start_min_5": "5. stardiminut",
+          "end_min_5": "Lõpu minut 5",
+          "start_ts_5": "Alguse ajatempel 5",
+          "end_ts_5": "Lõpu ajatempel 5",
+          "phase_6": "6. faas",
+          "start_min_6": "6. stardiminut",
+          "end_min_6": "Lõpu minut 6",
+          "start_ts_6": "Alguse ajatempel 6",
+          "end_ts_6": "Lõpu ajatempel 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Määrake faasivahemikud",
+        "description": "Faasivahemike konfigureerimiseks valige profiil.",
+        "data": {
+          "profile": "Profiil",
+          "assign_mode": {
+            "name": "Määramise režiim",
+            "options": {
+              "offset_mode": "Minutite nihked",
+              "timestamp_mode": "Ajatemplid"
+            }
+          },
+          "source_cycle": "Allika tsükkel (ajatempli režiimi jaoks)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Profiili ümbernimetamine ebaõnnestus. Profiili ei pruugi eksisteerida või uus nimi on juba hõivatud.",
       "assignment_failed": "Profiili määramine tsüklile ebaõnnestus",
       "feedback_notification_title": "WashData: Kinnita tsükkel ({device})",
-      "feedback_notification_message": "**Seade**: {device}\n**Programm**: {program} ({confidence}% usaldus)\n**Aeg**: {time}\n\nWashData vajab teie abi selle tuvastatud tsükli kinnitamiseks.\n\nMinge **Seaded > Seadmed ja teenused > WashData > Seadista > Õppimise tagasisided**, et kinnitada või parandada see tulemus."
+      "feedback_notification_message": "**Seade**: {device}\n**Programm**: {program} ({confidence}% usaldus)\n**Aeg**: {time}\n\nWashData vajab teie abi selle tuvastatud tsükli kinnitamiseks.\n\nMinge **Seaded > Seadmed ja teenused > WashData > Seadista > Õppimise tagasisided**, et kinnitada või parandada see tulemus.",
+      "duplicate_phase": "Selle nimega faas on juba olemas.",
+      "phase_not_found": "Valitud faasi ei leitud.",
+      "invalid_phase_name": "Faasi nimi ei tohi olla tühi.",
+      "phase_name_too_long": "Etapi nimi on liiga pikk.",
+      "invalid_phase_range": "Faasivahemik on kehtetu. Lõpp peab olema suurem kui algus.",
+      "invalid_phase_timestamp": "Ajatempel on kehtetu. Kasutage vormingut AAAA-KK-PP HH:MM või HH:MM.",
+      "overlapping_phase_ranges": "Faasivahemikud kattuvad. Reguleerige vahemikke ja proovige uuesti.",
+      "incomplete_phase_row": "Iga faasirida peab sisaldama valitud režiimi faasi pluss täielikke algus-/lõpuväärtusi.",
+      "timestamp_mode_cycle_required": "Valige ajatemplirežiimi kasutamisel allika tsükkel."
     },
     "abort": {
       "no_cycles_found": "Tsükleid ei leitud",
@@ -476,7 +585,8 @@
       "no_suggestions": "Soovitatud väärtused pole veel saadaval. Käitage mõned tsüklid ja proovige uuesti.",
       "no_predictions": "Prognoosid puuduvad",
       "reprocess_success": "Edukalt töödeldud ümber {count} tsüklit.",
-      "debug_data_cleared": "Silumisandmed edukalt kustutatud {count} tsüklist."
+      "debug_data_cleared": "Silumisandmed edukalt kustutatud {count} tsüklist.",
+      "no_custom_phases": "Selle seadmetüübi jaoks ei leitud kohandatud faase."
     }
   },
   "entity": {
