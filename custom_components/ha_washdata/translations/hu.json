@@ -44,7 +44,8 @@
           "manage_cycles": "Ciklusok kezelése",
           "manage_profiles": "Profilok kezelése",
           "record_cycle": "Ciklus rögzítése (Kézi)",
-          "diagnostics": "Diagnosztika és karbantartás"
+          "diagnostics": "Diagnosztika és karbantartás",
+          "manage_phase_catalog": "Fáziskatalógus kezelése"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Profil szerkesztése/átnevezése",
               "delete_profile": "🗑️ Profil törlése",
               "profile_stats": "📊 Profilstatisztika",
-              "cleanup_profile": "🧹 Előzmények tisztítása - Grafikon és törlés"
+              "cleanup_profile": "🧹 Előzmények tisztítása - Grafikon és törlés",
+              "assign_phases": "🧩 Fázistartományok hozzárendelése"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Fáziskatalógus kezelése",
+        "description": "Jelenlegi fázisok ennél az eszköztípusnál:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Akció",
+            "options": {
+              "create_custom_phase": "➕ Egyéni fázis létrehozása",
+              "edit_custom_phase": "✏️ Egyéni fázis szerkesztése",
+              "delete_custom_phase": "🗑️ Törölje az egyéni fázist"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Egyéni fázis létrehozása",
+        "description": "Hozzon létre egyéni fázisnevet és -leírást ehhez az eszköztípushoz.",
+        "data": {
+          "phase_name": "Fázis neve",
+          "phase_description": "Fázis leírása"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Egyéni fázis szerkesztése",
+        "description": "Válassza ki a szerkeszteni kívánt egyéni fázist.",
+        "data": {
+          "phase_name": "Egyedi fázis"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Egyéni fázis szerkesztése",
+        "description": "Szerkesztési fázis: {phase_name}",
+        "data": {
+          "phase_name": "Fázis neve",
+          "phase_description": "Fázis leírása"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Egyéni fázis törlése",
+        "description": "Válassza ki a törölni kívánt egyéni fázist. Az ezt a fázist használó minden hozzárendelt tartomány el lesz távolítva.",
+        "data": {
+          "phase_name": "Egyedi fázis"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Fázistartományok hozzárendelése",
+        "description": "Profil: **{profile_name}**\nMód: **{assign_mode}**\nCiklus tipp: {cycle_hint}\n\nJelenlegi tartományok:\n{current_ranges}\n\nA fáziscímkék a megjelenítésre és a rendszerezésre szolgálnak. Az észlelés teljesítménymintákat használ, nem fázisneveket.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Hozzárendelési mód",
+          "source_cycle": "Forrásciklus (időbélyeg módhoz szükséges)",
+          "phase_1": "1. fázis",
+          "start_min_1": "Kezdő perc 1",
+          "end_min_1": "1. befejező perc",
+          "start_ts_1": "Indítási időbélyeg 1",
+          "end_ts_1": "Befejezési időbélyeg 1",
+          "phase_2": "2. fázis",
+          "start_min_2": "Kezdő perc 2",
+          "end_min_2": "2. befejező perc",
+          "start_ts_2": "Indítási időbélyeg 2",
+          "end_ts_2": "Befejezési időbélyeg 2",
+          "phase_3": "3. fázis",
+          "start_min_3": "Kezdő perc 3",
+          "end_min_3": "Befejező perc 3",
+          "start_ts_3": "Indítási időbélyeg 3",
+          "end_ts_3": "Befejezési időbélyeg 3",
+          "phase_4": "4. fázis",
+          "start_min_4": "Kezdő perc 4",
+          "end_min_4": "Befejező perc 4",
+          "start_ts_4": "Indítási időbélyeg 4",
+          "end_ts_4": "Befejezési időbélyeg 4",
+          "phase_5": "5. fázis",
+          "start_min_5": "Kezdő perc 5",
+          "end_min_5": "Vége 5. perc",
+          "start_ts_5": "Indítási időbélyeg 5",
+          "end_ts_5": "Befejezési időbélyeg 5",
+          "phase_6": "6. fázis",
+          "start_min_6": "Kezdő perc 6",
+          "end_min_6": "Befejező perc 6",
+          "start_ts_6": "Indítási időbélyeg 6",
+          "end_ts_6": "Befejezési időbélyeg 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Fázistartományok hozzárendelése",
+        "description": "Válasszon egy profilt a fázistartományok konfigurálásához.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Hozzárendelési mód",
+            "options": {
+              "offset_mode": "Perc eltolások",
+              "timestamp_mode": "Időbélyegek"
+            }
+          },
+          "source_cycle": "Forrásciklus (időbélyeg módhoz)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "A profil átnevezése sikertelen. A profil nem létezik vagy az új név már foglalt.",
       "assignment_failed": "A profil hozzárendelése a ciklushoz sikertelen",
       "feedback_notification_title": "WashData: Ciklus ellenőrzése ({device})",
-      "feedback_notification_message": "**Eszköz**: {device}\n**Program**: {program} ({confidence}% megbízhatóság)\n**Idő**: {time}\n\nA WashData segítségét kéri az észlelt ciklus ellenőrzéséhez.\n\nKérjük, lépjen a **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Tanulási visszajelzések** menüpontra az eredmény megerősítéséhez vagy javításához."
+      "feedback_notification_message": "**Eszköz**: {device}\n**Program**: {program} ({confidence}% megbízhatóság)\n**Idő**: {time}\n\nA WashData segítségét kéri az észlelt ciklus ellenőrzéséhez.\n\nKérjük, lépjen a **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Tanulási visszajelzések** menüpontra az eredmény megerősítéséhez vagy javításához.",
+      "duplicate_phase": "Már létezik ilyen nevű fázis.",
+      "phase_not_found": "A kiválasztott fázis nem található.",
+      "invalid_phase_name": "A fázis neve nem lehet üres.",
+      "phase_name_too_long": "A fázis neve túl hosszú.",
+      "invalid_phase_range": "A fázistartomány érvénytelen. A végnek nagyobbnak kell lennie, mint a kezdet.",
+      "invalid_phase_timestamp": "Az időbélyeg érvénytelen. Használja ÉÉÉÉ-HH-NN ÓÓ:PP vagy ÓÓ:PP formátumot.",
+      "overlapping_phase_ranges": "A fázistartományok átfedik egymást. Állítsa be a tartományokat, és próbálja újra.",
+      "incomplete_phase_row": "Minden fázissornak tartalmaznia kell egy fázist, valamint egy teljes kezdő/végi értéket a kiválasztott módhoz.",
+      "timestamp_mode_cycle_required": "Kérjük, válasszon forrásciklust az időbélyeg mód használatakor."
     },
     "abort": {
       "no_cycles_found": "Nem találhatók ciklusok",
@@ -476,7 +585,8 @@
       "no_suggestions": "Még nincsenek javasolt értékek. Futtasson néhány ciklust és próbálja újra.",
       "no_predictions": "Nincsenek előrejelzések",
       "reprocess_success": "Sikeresen újrafeldolgozva {count} ciklus.",
-      "debug_data_cleared": "Hibakeresési adatok sikeresen törölve {count} ciklusból."
+      "debug_data_cleared": "Hibakeresési adatok sikeresen törölve {count} ciklusból.",
+      "no_custom_phases": "Nem található egyéni fázis ehhez az eszköztípushoz."
     }
   },
   "entity": {

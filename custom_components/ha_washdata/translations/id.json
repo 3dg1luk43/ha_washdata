@@ -44,7 +44,8 @@
           "manage_cycles": "Kelola Siklus",
           "manage_profiles": "Kelola Profil",
           "record_cycle": "Siklus Rekam (Manual)",
-          "diagnostics": "Diagnostik & Pemeliharaan"
+          "diagnostics": "Diagnostik & Pemeliharaan",
+          "manage_phase_catalog": "Kelola Katalog Fase"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Edit/Ganti Nama Profil",
               "delete_profile": "🗑️ Hapus Profil",
               "profile_stats": "📊 Statistik Profil",
-              "cleanup_profile": "🧹 Bersihkan Riwayat - Grafik & Hapus"
+              "cleanup_profile": "🧹 Bersihkan Riwayat - Grafik & Hapus",
+              "assign_phases": "🧩 Tetapkan Rentang Fase"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Program yang Benar (jika mengoreksi)",
           "corrected_duration": "Durasi Benar dalam hitungan menit (jika mengoreksi)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Kelola Katalog Fase",
+        "description": "Fase saat ini untuk jenis perangkat ini:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Tindakan",
+            "options": {
+              "create_custom_phase": "➕ Buat Fase Kustom",
+              "edit_custom_phase": "✏️ Edit Fase Kustom",
+              "delete_custom_phase": "🗑️ Hapus Fase Kustom"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Buat Fase Kustom",
+        "description": "Buat nama dan deskripsi fase khusus untuk jenis perangkat ini.",
+        "data": {
+          "phase_name": "Nama Fase",
+          "phase_description": "Deskripsi Fase"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Edit Fase Kustom",
+        "description": "Pilih fase khusus untuk diedit.",
+        "data": {
+          "phase_name": "Fase Kustom"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Edit Fase Kustom",
+        "description": "Tahap pengeditan: {phase_name}",
+        "data": {
+          "phase_name": "Nama Fase",
+          "phase_description": "Deskripsi Fase"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Hapus Fase Kustom",
+        "description": "Pilih fase khusus yang akan dihapus. Rentang apa pun yang ditetapkan menggunakan fase ini akan dihapus.",
+        "data": {
+          "phase_name": "Fase Kustom"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Tetapkan Rentang Fase",
+        "description": "Profil: **{profile_name}**\nModus: **{assign_mode}**\nPetunjuk siklus: {cycle_hint}\n\nRentang saat ini:\n{current_ranges}\n\nLabel fase untuk tampilan dan pengorganisasian. Deteksi menggunakan pola daya, bukan nama fase.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Modus Penugasan",
+          "source_cycle": "Siklus Sumber (diperlukan untuk mode stempel waktu)",
+          "phase_1": "Fase 1",
+          "start_min_1": "Mulai Menit 1",
+          "end_min_1": "Akhir Menit 1",
+          "start_ts_1": "Mulai Stempel Waktu 1",
+          "end_ts_1": "Stempel Waktu Berakhir 1",
+          "phase_2": "Fase 2",
+          "start_min_2": "Mulai Menit 2",
+          "end_min_2": "Akhir Menit 2",
+          "start_ts_2": "Mulai Stempel Waktu 2",
+          "end_ts_2": "Stempel Waktu Berakhir 2",
+          "phase_3": "Fase 3",
+          "start_min_3": "Mulai Menit 3",
+          "end_min_3": "Akhir Menit 3",
+          "start_ts_3": "Mulai Stempel Waktu 3",
+          "end_ts_3": "Stempel Waktu Berakhir 3",
+          "phase_4": "Fase 4",
+          "start_min_4": "Mulai Menit 4",
+          "end_min_4": "Akhir Menit 4",
+          "start_ts_4": "Mulai Stempel Waktu 4",
+          "end_ts_4": "Stempel Waktu Akhir 4",
+          "phase_5": "Fase 5",
+          "start_min_5": "Mulai Menit 5",
+          "end_min_5": "Akhir Menit 5",
+          "start_ts_5": "Mulai Stempel Waktu 5",
+          "end_ts_5": "Stempel Waktu Akhir 5",
+          "phase_6": "Fase 6",
+          "start_min_6": "Mulai Menit 6",
+          "end_min_6": "Akhir Menit 6",
+          "start_ts_6": "Mulai Stempel Waktu 6",
+          "end_ts_6": "Stempel Waktu Berakhir 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Tetapkan Rentang Fase",
+        "description": "Pilih profil untuk mengonfigurasi rentang fase.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Modus Penugasan",
+            "options": {
+              "offset_mode": "Offset Menit",
+              "timestamp_mode": "Stempel waktu"
+            }
+          },
+          "source_cycle": "Siklus Sumber (untuk mode stempel waktu)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Gagal mengganti nama profil. Profil mungkin belum ada atau nama baru sudah dipakai.",
       "assignment_failed": "Gagal menetapkan profil ke siklus",
       "feedback_notification_title": "WashData: Verifikasi Siklus ({device})",
-      "feedback_notification_message": "**Perangkat**: {device}\n**Program**: {program} ({confidence}% keyakinan)\n**Waktu**: {time}\n\nWashData memerlukan bantuan Anda untuk memverifikasi siklus yang terdeteksi ini.\n\nSilakan buka **Pengaturan > Perangkat & Layanan > WashData > Konfigurasi > Masukan Pembelajaran** untuk mengonfirmasi atau memperbaiki hasil ini."
+      "feedback_notification_message": "**Perangkat**: {device}\n**Program**: {program} ({confidence}% keyakinan)\n**Waktu**: {time}\n\nWashData memerlukan bantuan Anda untuk memverifikasi siklus yang terdeteksi ini.\n\nSilakan buka **Pengaturan > Perangkat & Layanan > WashData > Konfigurasi > Masukan Pembelajaran** untuk mengonfirmasi atau memperbaiki hasil ini.",
+      "duplicate_phase": "Fase dengan nama ini sudah ada.",
+      "phase_not_found": "Fase yang dipilih tidak ditemukan.",
+      "invalid_phase_name": "Nama fase tidak boleh kosong.",
+      "phase_name_too_long": "Nama fase terlalu panjang.",
+      "invalid_phase_range": "Rentang fase tidak valid. Akhir harus lebih besar dari awal.",
+      "invalid_phase_timestamp": "Stempel waktu tidak valid. Gunakan format YYYY-MM-DD HH:MM atau HH:MM.",
+      "overlapping_phase_ranges": "Rentang fase tumpang tindih. Sesuaikan rentangnya dan coba lagi.",
+      "incomplete_phase_row": "Setiap baris fase harus menyertakan fase ditambah nilai awal/akhir yang lengkap untuk mode yang dipilih.",
+      "timestamp_mode_cycle_required": "Silakan pilih siklus sumber saat menggunakan mode stempel waktu."
     },
     "abort": {
       "no_cycles_found": "Tidak ada siklus yang ditemukan",
@@ -476,7 +585,8 @@
       "no_suggestions": "Belum ada nilai yang disarankan. Jalankan beberapa siklus dan coba lagi.",
       "no_predictions": "Tidak ada prediksi",
       "reprocess_success": "Berhasil memproses ulang siklus {count}.",
-      "debug_data_cleared": "Berhasil menghapus data debug dari {count} siklus."
+      "debug_data_cleared": "Berhasil menghapus data debug dari {count} siklus.",
+      "no_custom_phases": "Tidak ditemukan fase khusus untuk jenis perangkat ini."
     }
   },
   "entity": {

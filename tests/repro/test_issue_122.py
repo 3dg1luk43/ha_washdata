@@ -15,7 +15,11 @@ def mock_hass():
     async def mock_executor_job(func, *args, **kwargs):
         return func(*args, **kwargs)
     hass.async_add_executor_job = AsyncMock(side_effect=mock_executor_job)
-    hass.async_create_task = MagicMock()
+    # Tests in this module do not await scheduled background tasks.
+    # Close coroutines immediately to avoid runtime warnings.
+    hass.async_create_task = MagicMock(
+        side_effect=lambda coro: getattr(coro, "close", lambda: None)()
+    )
     return hass
 
 @pytest.fixture

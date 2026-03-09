@@ -44,7 +44,8 @@
           "manage_cycles": "Kudeatu Zikloak",
           "manage_profiles": "Kudeatu profilak",
           "record_cycle": "Grabaketa Zikloa (eskuz)",
-          "diagnostics": "Diagnostikoa eta mantentze-lanak"
+          "diagnostics": "Diagnostikoa eta mantentze-lanak",
+          "manage_phase_catalog": "Kudeatu Faseen Katalogoa"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Editatu/Aldatu izena profila",
               "delete_profile": "🗑️ Ezabatu profila",
               "profile_stats": "📊 Profilen Estatistikak",
-              "cleanup_profile": "🧹 Garbitu historia - Grafikoa eta ezabatu"
+              "cleanup_profile": "🧹 Garbitu historia - Grafikoa eta ezabatu",
+              "assign_phases": "🧩 Esleitu fase-barrutiak"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Programa zuzena (zuzentzen bada)",
           "corrected_duration": "Zuzena iraupena minututan (zuzentzen bada)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Kudeatu Faseen Katalogoa",
+        "description": "Gailu mota honen egungo faseak:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Ekintza",
+            "options": {
+              "create_custom_phase": "➕ Sortu Fase pertsonalizatua",
+              "edit_custom_phase": "✏️ Editatu Fase pertsonalizatua",
+              "delete_custom_phase": "🗑️ Ezabatu pertsonalizatutako fasea"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Sortu Fase pertsonalizatua",
+        "description": "Sortu gailu mota honen fase-izen eta deskribapen pertsonalizatu bat.",
+        "data": {
+          "phase_name": "Fasearen izena",
+          "phase_description": "Fasearen Deskribapena"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Editatu Fase pertsonalizatua",
+        "description": "Hautatu editatzeko fase pertsonalizatu bat.",
+        "data": {
+          "phase_name": "Fase pertsonalizatua"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Editatu Fase pertsonalizatua",
+        "description": "Edizio fasea: {phase_name}",
+        "data": {
+          "phase_name": "Fasearen izena",
+          "phase_description": "Fasearen Deskribapena"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Ezabatu Fase pertsonalizatua",
+        "description": "Hautatu ezabatzeko fase pertsonalizatu bat. Fase hau erabiliz esleitutako barrutiak kenduko dira.",
+        "data": {
+          "phase_name": "Fase pertsonalizatua"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Esleitu fase-barrutiak",
+        "description": "Profila: **{profile_name}**\nModua: **{assign_mode}**\nZiklorako aholkua: {cycle_hint}\n\nOraingo barrutiak:\n{current_ranges}\n\nFase-etiketak bistaratzeko eta antolatzeko dira. Detekzioak potentzia-ereduak erabiltzen ditu, ez fase-izenak.",
+        "data": {
+          "profile": "Profila",
+          "assign_mode": "Esleitzeko modua",
+          "source_cycle": "Iturburu-zikloa (beharrezkoa denbora-zigilu moduan)",
+          "phase_1": "1. fasea",
+          "start_min_1": "Hasi 1. minutua",
+          "end_min_1": "Amaierako minutua 1",
+          "start_ts_1": "Hasi ordu-zigilua 1",
+          "end_ts_1": "Amaiera denbora-zigilua 1",
+          "phase_2": "2. fasea",
+          "start_min_2": "Hasi 2. minutua",
+          "end_min_2": "Amaiera 2. minutua",
+          "start_ts_2": "Hasi ordu-zigilua 2",
+          "end_ts_2": "Amaiera denbora-zigilua 2",
+          "phase_3": "3. fasea",
+          "start_min_3": "Hasi 3. minutua",
+          "end_min_3": "Amaiera 3. minutua",
+          "start_ts_3": "Hasi denbora-zigilua 3",
+          "end_ts_3": "Amaiera denbora-zigilua 3",
+          "phase_4": "4. fasea",
+          "start_min_4": "Hasi 4. minutua",
+          "end_min_4": "Amaierako minutua 4",
+          "start_ts_4": "Hasi denbora-zigilua 4",
+          "end_ts_4": "Amaiera denbora-zigilua 4",
+          "phase_5": "5. fasea",
+          "start_min_5": "Hasi 5. minutua",
+          "end_min_5": "Amaiera 5. minutua",
+          "start_ts_5": "Hasi denbora-zigilua 5",
+          "end_ts_5": "Amaiera denbora-zigilua 5",
+          "phase_6": "6. fasea",
+          "start_min_6": "Hasi 6. minutua",
+          "end_min_6": "Amaierako minutua 6",
+          "start_ts_6": "Hasi denbora-zigilua 6",
+          "end_ts_6": "Amaiera denbora-zigilua 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Esleitu fase-barrutiak",
+        "description": "Hautatu profil bat fase-barrutiak konfiguratzeko.",
+        "data": {
+          "profile": "Profila",
+          "assign_mode": {
+            "name": "Esleitzeko modua",
+            "options": {
+              "offset_mode": "Minutuko Desplazamenduak",
+              "timestamp_mode": "Denbora-zigiluak"
+            }
+          },
+          "source_cycle": "Iturburu-zikloa (denbora-zigilu moduan)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Ezin izan da profilaren izena aldatu. Baliteke profila ez egotea edo izen berria dagoeneko hartua izatea.",
       "assignment_failed": "Ezin izan zaio profila esleitu zikloari",
       "feedback_notification_title": "WashData: Egiaztatu Zikloa ({device})",
-      "feedback_notification_message": "**Gailua**: {device}\n**Programa**: {program} (% {confidence} konfiantza)\n**Ordua**: {time}\n\nWashData-k zure laguntza behar du hautemandako ziklo hau egiaztatzeko.\n\nMesedez, joan **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ikaskuntza-iritziak** atalera emaitza hau berresteko edo zuzentzeko."
+      "feedback_notification_message": "**Gailua**: {device}\n**Programa**: {program} (% {confidence} konfiantza)\n**Ordua**: {time}\n\nWashData-k zure laguntza behar du hautemandako ziklo hau egiaztatzeko.\n\nMesedez, joan **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ikaskuntza-iritziak** atalera emaitza hau berresteko edo zuzentzeko.",
+      "duplicate_phase": "Izen hau duen fase bat badago jada.",
+      "phase_not_found": "Hautatutako fasea ez da aurkitu.",
+      "invalid_phase_name": "Fasearen izena ezin da hutsik egon.",
+      "phase_name_too_long": "Fasearen izena luzeegia da.",
+      "invalid_phase_range": "Fase-barrutia baliogabea da. Amaierak hasiera baino handiagoa izan behar du.",
+      "invalid_phase_timestamp": "Denbora-zigilua baliogabea da. Erabili YYYY-MM-DD HH:MM edo HH:MM formatua.",
+      "overlapping_phase_ranges": "Fase barrutiak gainjartzen dira. Doitu barrutiak eta saiatu berriro.",
+      "incomplete_phase_row": "Fase errenkada bakoitzak fase bat gehi hasiera/amaiera balio osoak sartu behar ditu hautatutako modurako.",
+      "timestamp_mode_cycle_required": "Mesedez, hautatu iturburu-ziklo bat denbora-zigilu modua erabiltzean."
     },
     "abort": {
       "no_cycles_found": "Ez da ziklorik aurkitu",
@@ -476,7 +585,8 @@
       "no_suggestions": "Oraindik ez dago iradokitako baliorik eskuragarri. Exekutatu ziklo batzuk eta saiatu berriro.",
       "no_predictions": "Iragarpenik ez",
       "reprocess_success": "Behar bezala birprozesatu dira {count} ziklo.",
-      "debug_data_cleared": "Behar bezala garbitu dira {count} ziklotako arazketa-datuak."
+      "debug_data_cleared": "Behar bezala garbitu dira {count} ziklotako arazketa-datuak.",
+      "no_custom_phases": "Ez da gailu mota honetarako fase pertsonalizaturik aurkitu."
     }
   },
   "entity": {

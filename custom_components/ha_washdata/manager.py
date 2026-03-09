@@ -24,6 +24,7 @@ import homeassistant.helpers.event as evt
 from homeassistant.helpers import script as script_helper
 
 from .const import (
+    DOMAIN,
     CONF_POWER_SENSOR,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
@@ -380,7 +381,7 @@ class WashDataManager:
             ),
             start_energy_threshold=float(
                 config_entry.options.get(
-                    CONF_START_ENERGY_THRESHOLD, 
+                    CONF_START_ENERGY_THRESHOLD,
                     DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE.get(self.device_type, 0.2)
                 )
             ),
@@ -550,31 +551,30 @@ class WashDataManager:
 
             # 1. RUN BETTER ASYNC MATCHING
             result = await self.profile_store.async_match_profile(
-                 readings, 
+                 readings,
                  current_duration
             )
 
             # 2. UPDATE MANAGER STATE (Estimates, Program Name, etc.)
             self._last_match_result = result
             self._last_match_ambiguous = result.is_ambiguous
-            
+
             profile_name = result.best_profile
             confidence = result.confidence
             matched_duration = result.expected_duration
             phase_name = result.matched_phase
-            
+
             # --- Switching Logic (Temporal Persistence) ---
             should_switch = False
             switch_reason = ""
-            
-            # Identify candidate score from results
-            candidate_score = confidence
+
+            # Identify current program score from results
             current_program_score = 0.0
             for c in result.candidates:
                 if c.get("name") == self._current_program:
                     current_program_score = c.get("score", 0.0)
                     break
-            
+
             # CASE: Divergence Detection (Score Drop)
             # If current matched program has a significant drop from its own peak score,
             # we should consider unmatching it even if it's still the "best" candidate.
@@ -600,11 +600,11 @@ class WashDataManager:
                             )
                             # Reset profile_name so Case 3 doesn't re-trigger
                             profile_name = "detecting..."
-                    
+
             # Update persistence for the best profile
             if profile_name and profile_name != "detecting...":
                 self._match_persistence_counter[profile_name] = self._match_persistence_counter.get(profile_name, 0) + 1
-                
+
                 # Check if this is the same candidate as before
                 if profile_name != self._current_match_candidate:
                     # Reset counter for old candidate if it wasn't locked in
@@ -641,7 +641,7 @@ class WashDataManager:
                 if confidence > 0.8 and (confidence - current_program_score) > 0.15:
                     should_switch = True
                     switch_reason = f"high_confidence_override ({confidence:.3f} vs {current_program_score:.3f})"
-                
+
                 # Normal Switch: Requires persistence AND either better score + trend
                 elif is_persistent:
                     if confidence > current_program_score and self._analyze_trend(profile_name):
@@ -658,7 +658,7 @@ class WashDataManager:
             ):
                 self._unmatch_persistence_counter += 1
                 is_unmatch_persistent = self._unmatch_persistence_counter >= self._match_persistence
-                
+
                 if is_unmatch_persistent:
                     self._current_program = "detecting..."
                     self._matched_profile_duration = None
@@ -676,11 +676,11 @@ class WashDataManager:
                         "Unmatch persistence: %s at %d/%d low-confidence matches. Stay at %s...",
                         profile_name, self._unmatch_persistence_counter, self._match_persistence, profile_name
                     )
-            
-            # Reset unmatch counter if confidence is healthy 
+
+            # Reset unmatch counter if confidence is healthy
             # AND we didn't just detect a divergence
             elif (
-                profile_name == self._current_program 
+                profile_name == self._current_program
                 and confidence >= self._unmatch_threshold
                 and not (len(self._score_history.get(self._current_program, [])) > 3 and confidence < max(self._score_history[self._current_program]) * (1.0 - DEFAULT_MATCH_REVERT_RATIO))
             ):
@@ -692,7 +692,7 @@ class WashDataManager:
                 self._unmatch_persistence_counter = 0 # Reset on switch
                 if profile_name in self._match_persistence_counter:
                     self._match_persistence_counter[profile_name] = self._match_persistence # Lock it in
-                
+
                 avg_duration = float(matched_duration)
                 self._matched_profile_duration = avg_duration if avg_duration > 0 else None
                 _LOGGER.info(
@@ -706,7 +706,7 @@ class WashDataManager:
                 self._current_program = "detecting..."
 
             self._last_estimate_time = dt_util.now()
-            
+
             # Update score history for all candidates to track trends
             for cand in result.candidates:
                 cname = cand.get("name")
@@ -724,7 +724,7 @@ class WashDataManager:
             current_power = readings[-1][1] if readings else 0.0
 
             # --- Envelope Verification for Mismatches & Pauses ---
-            # ALWAYS check alignment if we have a match and power is low, 
+            # ALWAYS check alignment if we have a match and power is low,
             # to confirm if this is a legitimate pause or a mismatch.
             stop_thresh = float(self.detector.config.stop_threshold_w)
             if current_matched and current_power < stop_thresh:
@@ -758,7 +758,6 @@ class WashDataManager:
                                 _LOGGER.info("Smart Termination: Near end of profile. Releasing pause lock.")
                     except Exception as e:
                         _LOGGER.debug("Smart Termination alignment verification failed: %s", e)
-                        pass
                 else:
                     if verified_pause:
                         _LOGGER.info(
@@ -769,7 +768,7 @@ class WashDataManager:
 
             # --- High Power Clear ---
             stop_threshold = getattr(self.detector.config, "stop_threshold_w", 5.0)
-                
+
             if current_power > stop_threshold * 10:
                 verified_pause = False
 
@@ -786,7 +785,6 @@ class WashDataManager:
                             self._matched_profile_duration = float(prof.get("avg_duration", 0))
                     except Exception as e:
                         _LOGGER.debug("Failed to fetch profile duration on switch: %s", e)
-                        pass
                 else:
                     self._current_program = "detecting..."
                     self._matched_profile_duration = None
@@ -839,7 +837,7 @@ class WashDataManager:
                         )
                     except KeyError:
                         msg = msg_template.format(device=self.config_entry.title)
-                    
+
                     self._dispatch_notification(
                         msg,
                         event_type=NOTIFY_EVENT_START,
@@ -858,14 +856,14 @@ class WashDataManager:
         """Return a lightweight list of top candidates from the last match."""
         if not self._last_match_result:
             return []
-            
+
         # Get raw list from ranking (best) or candidates
         raw_list = []
         if hasattr(self._last_match_result, "ranking") and self._last_match_result.ranking:
             raw_list = self._last_match_result.ranking
         elif hasattr(self._last_match_result, "candidates"):
             raw_list = self._last_match_result.candidates
-            
+
         # SANITIZE: Remove heavy power arrays before sending to Home Assistant attributes
         sanitized = []
         for cand in raw_list[:5]:
@@ -1294,7 +1292,7 @@ class WashDataManager:
 
         new_start_energy = float(
             config_entry.options.get(
-                CONF_START_ENERGY_THRESHOLD, 
+                CONF_START_ENERGY_THRESHOLD,
                 DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE.get(self.device_type, 0.2)
             )
         )
@@ -1553,7 +1551,7 @@ class WashDataManager:
         inverted = self.config_entry.options.get(
             CONF_EXTERNAL_END_TRIGGER_INVERTED, False
         )
-        
+
         new_value = new_state.state
         old_value = old_state.state if old_state else None
 
@@ -1661,7 +1659,7 @@ class WashDataManager:
         # BUT always allow updates if power is below min_power (critical end-of-cycle signal).
         min_p = float(self.detector.config.min_power)
         is_low_power = power < min_p
-        
+
         if (
             not is_low_power
             and self._last_reading_time
@@ -1832,11 +1830,11 @@ class WashDataManager:
             return
 
         time_since_any_update = (now - self._last_reading_time).total_seconds()
-        
+
         # Calculate time since REAL update (if available, else fallback to any update)
         last_real = self._last_real_reading_time or self._last_reading_time
         time_since_real_update = (now - last_real).total_seconds()
-        
+
         elapsed = self.detector.get_elapsed_seconds()
         expected = getattr(self.detector, "expected_duration_seconds", 0)
 
@@ -1854,7 +1852,7 @@ class WashDataManager:
             return
 
         # 1. GHOST CYCLE SUPPRESSOR
-        # If we are "detecting" for more than 10 minutes and haven't seen an update for 5 minutes, 
+        # If we are "detecting" for more than 10 minutes and haven't seen an update for 5 minutes,
         # it's likely a pump-out spike or an accidental start (ghost cycle).
         # We end it aggressively ONLY if it started shortly after another cycle ended (Suspicious Window).
         cycle_start = self.detector.current_cycle_start
@@ -1883,7 +1881,7 @@ class WashDataManager:
         # If we are in a low power state (waiting for off_delay or drying profile),
         # we treat silence leniently. We inject keepalives until the stricter
         # low_power_no_update_timeout is reached.
-        
+
         # Dishwashers can have very long silent drying phases (up to 2h)
         # We use the device-specific timeout as the floor for this effective timeout
         low_power_floor = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE.get(
@@ -1915,9 +1913,9 @@ class WashDataManager:
                     "Watchdog: Extending timeout to %.0fs due to verified pause",
                     effective_low_power_timeout
                 )
-             
+
         if self.detector.is_waiting_low_power():
-            
+
             # 2. Staleness Check
             if time_since_real_update > effective_low_power_timeout:
                 _LOGGER.warning(
@@ -1946,13 +1944,13 @@ class WashDataManager:
                 self._current_power = 0.0
                 self._notify_update()
                 return
-                
+
             return
 
         # Fallback for old "Case 1.5" logic (Low Power but NOT is_waiting_low_power)
         # Check this BEFORE High Power timeout to prevent trapping "Not Yet Waiting" states
         if (
-            time_since_any_update > self._config.off_delay 
+            time_since_any_update > self._config.off_delay
             and self._current_power < self.detector.config.min_power
         ):
             # Treating as start of low power wait
@@ -1965,16 +1963,16 @@ class WashDataManager:
 
         # --- HIGH POWER HANDLING (Normal) ---
         # If power is high, we expect frequent updates.
-        
+
         if time_since_any_update > self._no_update_active_timeout:
-            
+
             # Check if high power (running)
             if self._current_power >= self.detector.config.min_power:
                 # Allow extended silence if within reasonable cycle bounds
                 expected = getattr(self.detector, "expected_duration_seconds", 0)
                 elapsed = self.detector.get_elapsed_seconds()
                 limit = (expected + 14400) if expected > 0 else 14400 # 4h default
-                
+
                 if elapsed < limit:
                     _LOGGER.info(
                         "Watchdog: High power (%.1fW) stale (%.0fs). Injecting refresh.",
@@ -2005,7 +2003,7 @@ class WashDataManager:
             if old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN):
                 self._cycle_completed_time = None
                 self._stop_state_expiry_timer()
-                
+
                 self._current_program = "detecting..."
                 self._manual_program_active = False
                 self._notified_pre_completion = False
@@ -2326,7 +2324,7 @@ class WashDataManager:
                 domain=DOMAIN,
                 logger=_LOGGER,
             )
-            self.hass.async_create_task(script.async_run(variables=variables))
+            self.hass.async_create_task(script.async_run(variables))
             return True
         except Exception as err:
             _LOGGER.warning("Failed to run notification actions: %s", err)
@@ -2484,7 +2482,7 @@ class WashDataManager:
             self._notify_update()
             return
 
-        # No matching task trigger here anymore! 
+        # No matching task trigger here anymore!
         # The detector callback handles it.
         # Just update progress/remaining based on existing match.
         self._update_remaining_only()
@@ -2528,11 +2526,11 @@ class WashDataManager:
             self._notified_pre_completion = True
             # Send notification!
             self._notified_pre_completion = True
-            
+
             msg_template = self.config_entry.options.get(CONF_NOTIFY_PRE_COMPLETE_MESSAGE, DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE)
             # Safe default if rounding goes weird equivalent to int()
-            minutes_left = int(self._time_remaining / 60) + 1 
-            
+            minutes_left = int(self._time_remaining / 60) + 1
+
             msg = msg_template.format(
                 device=self.config_entry.title,
                 minutes=minutes_left

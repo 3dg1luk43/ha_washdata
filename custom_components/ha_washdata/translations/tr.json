@@ -44,7 +44,8 @@
           "manage_cycles": "Döngüleri Yönet",
           "manage_profiles": "Profilleri Yönet",
           "record_cycle": "Kayıt Döngüsü (Manuel)",
-          "diagnostics": "Teşhis ve Bakım"
+          "diagnostics": "Teşhis ve Bakım",
+          "manage_phase_catalog": "Aşama Kataloğunu Yönet"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Profili Düzenle/Yeniden Adlandır",
               "delete_profile": "🗑️ Profili Sil",
               "profile_stats": "📊 Profil İstatistikleri",
-              "cleanup_profile": "🧹 Geçmişi Temizle - Grafik ve Sil"
+              "cleanup_profile": "🧹 Geçmişi Temizle - Grafik ve Sil",
+              "assign_phases": "🧩 Faz Aralıklarını Atayın"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Doğru Program (düzeltiliyorsa)",
           "corrected_duration": "Dakika cinsinden Doğru Süre (düzeltiliyorsa)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Aşama Kataloğunu Yönet",
+        "description": "Bu cihaz tipi için mevcut aşamalar:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Aksiyon",
+            "options": {
+              "create_custom_phase": "➕ Özel Aşama Oluştur",
+              "edit_custom_phase": "✏️ Özel Aşamayı Düzenle",
+              "delete_custom_phase": "🗑️ Özel Aşamayı Sil"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Özel Aşama Oluştur",
+        "description": "Bu cihaz türü için özel bir aşama adı ve açıklaması oluşturun.",
+        "data": {
+          "phase_name": "Aşama Adı",
+          "phase_description": "Aşama Açıklaması"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Özel Aşamayı Düzenle",
+        "description": "Düzenlemek için özel bir aşama seçin.",
+        "data": {
+          "phase_name": "Özel Aşama"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Özel Aşamayı Düzenle",
+        "description": "Düzenleme aşaması: {phase_name}",
+        "data": {
+          "phase_name": "Aşama Adı",
+          "phase_description": "Aşama Açıklaması"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Özel Aşamayı Sil",
+        "description": "Silinecek özel bir aşama seçin. Bu aşamayı kullanan atanan aralıklar kaldırılacaktır.",
+        "data": {
+          "phase_name": "Özel Aşama"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Faz Aralıklarını Atayın",
+        "description": "Profil: **{profile_name}**\nMod: **{assign_mode}**\nDöngü ipucu: {cycle_hint}\n\nMevcut aralıklar:\n{current_ranges}\n\nFaz etiketleri görüntüleme ve düzenleme amaçlıdır. Algılama, faz adlarını değil, güç modellerini kullanır.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Atama Modu",
+          "source_cycle": "Kaynak Döngüsü (zaman damgası modu için gereklidir)",
+          "phase_1": "Aşama 1",
+          "start_min_1": "Başlangıç ​​Dakikası 1",
+          "end_min_1": "Bitiş Dakikası 1",
+          "start_ts_1": "Zaman Damgası 1'i başlat",
+          "end_ts_1": "Bitiş Zaman Damgası 1",
+          "phase_2": "Aşama 2",
+          "start_min_2": "Başlangıç ​​Dakikası 2",
+          "end_min_2": "Bitiş Dakikası 2",
+          "start_ts_2": "Zaman Damgası 2'yi başlat",
+          "end_ts_2": "Bitiş Zaman Damgası 2",
+          "phase_3": "Aşama 3",
+          "start_min_3": "3. Dakikayı Başlat",
+          "end_min_3": "Bitiş Dakikası 3",
+          "start_ts_3": "Zaman Damgası 3'ü başlat",
+          "end_ts_3": "Bitiş Zaman Damgası 3",
+          "phase_4": "Aşama 4",
+          "start_min_4": "4. Dakikayı Başlat",
+          "end_min_4": "Bitiş Dakikası 4",
+          "start_ts_4": "Zaman Damgası 4'ü başlat",
+          "end_ts_4": "Bitiş Zaman Damgası 4",
+          "phase_5": "Aşama 5",
+          "start_min_5": "5. Dakikayı Başlat",
+          "end_min_5": "Bitiş Dakikası 5",
+          "start_ts_5": "Zaman Damgası 5'i başlat",
+          "end_ts_5": "Bitiş Zaman Damgası 5",
+          "phase_6": "Aşama 6",
+          "start_min_6": "6. Dakikayı Başlat",
+          "end_min_6": "Bitiş Dakikası 6",
+          "start_ts_6": "Zaman Damgası 6'yı Başlat",
+          "end_ts_6": "Bitiş Zaman Damgası 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Faz Aralıklarını Atayın",
+        "description": "Faz aralıklarını yapılandırmak için bir profil seçin.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Atama Modu",
+            "options": {
+              "offset_mode": "Dakika Farkları",
+              "timestamp_mode": "Zaman damgaları"
+            }
+          },
+          "source_cycle": "Kaynak Döngüsü (zaman damgası modu için)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Profil yeniden adlandırılamadı. Profil mevcut olmayabilir veya yeni ad zaten alınmış olabilir.",
       "assignment_failed": "Profil döngüye atanamadı",
       "feedback_notification_title": "WashData: Döngüyü Doğrulayın ({device})",
-      "feedback_notification_message": "**Cihaz**: {device}\n**Program**: {program} (%{confidence} güven)\n**Zaman**: {time}\n\nWashData'nın tespit edilen bu döngüyü doğrulamak için yardımınıza ihtiyacı var.\n\nBu sonucu onaylamak veya düzeltmek için lütfen **Ayarlar > Cihazlar ve Hizmetler > WashData > Yapılandır > Öğrenme Geri Bildirimleri** seçeneğine gidin."
+      "feedback_notification_message": "**Cihaz**: {device}\n**Program**: {program} (%{confidence} güven)\n**Zaman**: {time}\n\nWashData'nın tespit edilen bu döngüyü doğrulamak için yardımınıza ihtiyacı var.\n\nBu sonucu onaylamak veya düzeltmek için lütfen **Ayarlar > Cihazlar ve Hizmetler > WashData > Yapılandır > Öğrenme Geri Bildirimleri** seçeneğine gidin.",
+      "duplicate_phase": "Bu ada sahip bir aşama zaten mevcut.",
+      "phase_not_found": "Seçilen aşama bulunamadı.",
+      "invalid_phase_name": "Aşama adı boş olamaz.",
+      "phase_name_too_long": "Aşama adı çok uzun.",
+      "invalid_phase_range": "Faz aralığı geçersiz. Bitiş, başlangıçtan büyük olmalıdır.",
+      "invalid_phase_timestamp": "Zaman damgası geçersiz. YYYY-AA-GG SS:DD veya SS:DD biçimini kullanın.",
+      "overlapping_phase_ranges": "Faz aralıkları çakışıyor. Aralıkları ayarlayıp tekrar deneyin.",
+      "incomplete_phase_row": "Her aşama satırı, seçilen mod için bir aşama artı tam başlangıç/bitiş değerlerini içermelidir.",
+      "timestamp_mode_cycle_required": "Zaman damgası modunu kullanırken lütfen bir kaynak döngüsü seçin."
     },
     "abort": {
       "no_cycles_found": "Döngü bulunamadı",
@@ -476,7 +585,8 @@
       "no_suggestions": "Henüz önerilen değer yok. Birkaç döngü çalıştırın ve tekrar deneyin.",
       "no_predictions": "Tahmin yok",
       "reprocess_success": "{count} döngü başarıyla yeniden işlendi.",
-      "debug_data_cleared": "{count} döngüdeki hata ayıklama verileri başarıyla temizlendi."
+      "debug_data_cleared": "{count} döngüdeki hata ayıklama verileri başarıyla temizlendi.",
+      "no_custom_phases": "Bu cihaz türü için özel aşama bulunamadı."
     }
   },
   "entity": {

@@ -31,7 +31,10 @@ from . import analysis
 from .time_utils import (
     migrate_power_data_to_offsets,
     power_data_to_offsets,
-    power_data_offsets_to_datetimes,
+)
+from .phase_catalog import (
+    merge_phase_catalog,
+    normalize_phase_name,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -51,21 +54,21 @@ def profile_sort_key(name: str) -> tuple[int, int, str]:
 
 
 def trim_zero_power_data(
-    data: list[list[float]], 
+    data: list[list[float]],
     threshold: float = 0.5
 ) -> list[list[float]]:
     """Trim leading/trailing zero/near-zero power readings from stored data.
-    
+
     Args:
         data: List of [offset, power] pairs
         threshold: Power values <= this are considered "zero"
-        
+
     Returns:
         Trimmed list with leading/trailing zeros removed
     """
     if not data:
         return data
-    
+
     # Find first non-zero reading
     start_idx = 0
     for i, point in enumerate(data):
@@ -75,14 +78,14 @@ def trim_zero_power_data(
     else:
         # All readings are zero - keep at least one
         return data[:1] if data else []
-    
+
     # Find last non-zero reading
     end_idx = len(data) - 1
     for i in range(len(data) - 1, -1, -1):
         if data[i][1] > threshold:
             end_idx = i
             break
-    
+
     # Return trimmed slice (inclusive of end)
     return data[start_idx:end_idx + 1]
 
@@ -253,7 +256,7 @@ def decompress_power_data(cycle: CycleDict) -> list[tuple[float, float]]:
 
 def compress_power_data(cycle: CycleDict) -> list[Any] | None:
     """Compress cycle power data to [offset, power] format (Module-level helper).
-    
+
     Returns the compressed list structure or None if compression failed/not needed.
     """
     raw_data = cycle.get("power_data")
@@ -264,7 +267,7 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
     first = raw_data[0]
     if isinstance(first, (int, float)):
         # Already flat list (very old format?) or specific compression
-        return None 
+        return None
     if isinstance(first, (list, tuple)) and len(first) == 2 and isinstance(first[0], (int, float)):
         # Already compressed [offset, power]
         return None
@@ -276,10 +279,10 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
     try:
         start_ts = datetime.fromisoformat(cycle["start_time"]).timestamp()
         compressed: list[list[float]] = []
-        
+
         last_saved_p = -999.0
         last_saved_t = -999.0
-        
+
         for i, entry in enumerate(raw_data):
             if isinstance(entry, (list, tuple)) and len(entry) == 2:
                 t_str, p_val_raw = entry
@@ -289,12 +292,12 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
                         t = datetime.fromisoformat(t_str).timestamp()
                     else:
                         t = float(t_str)
-                    
+
                     p_val = float(p_val_raw)
                     offset = round(t - start_ts, 1)
                     if offset < 0:
                         offset = 0.0
-                        
+
                     # Save first and last
                     is_endpoint = i == 0 or i == len(raw_data) - 1
 
@@ -307,7 +310,7 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
                         compressed.append([offset, round(p_val, 1)])
                         last_saved_p = p_val
                         last_saved_t = offset
-                        
+
                 except (ValueError, TypeError):
                     continue
         return compressed
@@ -355,7 +358,7 @@ class WashDataStore(Store[JSONDict]):
             cycles = old_data.get("past_cycles", [])
             profiles = old_data.get("profiles", {})
             migrated_count = 0
-            
+
             # 1. Migrate Power Data to canonical offset format & ensure status
             for cycle in cycles:
                 if "status" not in cycle:
@@ -380,6 +383,20 @@ class WashDataStore(Store[JSONDict]):
             _LOGGER.info(
                 "Migration v2->v3: Migrated power data for %s cycles", migrated_count
             )
+
+        if old_major_version < 4:
+            _LOGGER.info("Migrating storage from v%s to v4", old_major_version)
+            profiles = old_data.get("profiles", {})
+            if isinstance(profiles, dict):
+                for profile in profiles.values():
+                    if isinstance(profile, dict):
+                        phases = profile.get("phases")
+                        if not isinstance(phases, list):
+                            profile["phases"] = []
+
+            custom = old_data.get("custom_phases")
+            if not isinstance(custom, dict):
+                old_data["custom_phases"] = {}
 
         return old_data
 
@@ -473,8 +490,9 @@ class ProfileStore:
             "suggestions": {},  # Suggested settings (do NOT change user options)
             "feedback_history": {},  # Persisted user feedback (cycle_id -> record)
             "pending_feedback": {},  # Persisted pending feedback requests
+            "custom_phases": {},  # Device-specific custom phase catalog
         }
-        
+
 
 
 
@@ -542,12 +560,243 @@ class ProfileStore:
             return cast(list[CycleDict], raw)
         return []
 
+    def _get_custom_phase_map(self) -> dict[str, list[dict[str, Any]]]:
+        """Return mutable custom phase map by device type."""
+        raw = self._data.setdefault("custom_phases", {})
+        if isinstance(raw, dict):
+            return cast(dict[str, list[dict[str, Any]]], raw)
+        self._data["custom_phases"] = {}
+        return cast(dict[str, list[dict[str, Any]]], self._data["custom_phases"])
+
+    def list_custom_phases(self, device_type: str) -> list[dict[str, Any]]:
+        """Return custom phases for a device type."""
+        phase_map = self._get_custom_phase_map()
+        phases = phase_map.get(device_type, [])
+        if not isinstance(phases, list):
+            return []
+        return [
+            {
+                "name": str(p.get("name", "")).strip(),
+                "description": str(p.get("description", "")).strip(),
+                "is_default": False,
+            }
+            for p in phases
+            if isinstance(p, dict) and p.get("name")
+        ]
+
+    def list_phase_catalog(self, device_type: str) -> list[dict[str, Any]]:
+        """Return merged default + custom phase catalog for a device type."""
+        return merge_phase_catalog(device_type, self.list_custom_phases(device_type))
+
+    async def async_create_custom_phase(
+        self,
+        device_type: str,
+        phase_name: str,
+        description: str = "",
+    ) -> None:
+        """Create a custom phase in the catalog."""
+        name = normalize_phase_name(phase_name)
+        desc = str(description or "").strip()
+        catalog = self.list_phase_catalog(device_type)
+        if any(str(p.get("name", "")).casefold() == name.casefold() for p in catalog):
+            raise ValueError("duplicate_phase")
+
+        phase_map = self._get_custom_phase_map()
+        phase_map.setdefault(device_type, []).append(
+            {
+                "name": name,
+                "description": desc,
+                "created_at": dt_util.now().isoformat(),
+            }
+        )
+        await self.async_save()
+
+    async def async_update_custom_phase(
+        self,
+        device_type: str,
+        old_name: str,
+        new_name: str,
+        description: str = "",
+    ) -> None:
+        """Update a custom phase and propagate rename to profile assignments."""
+        target_name = normalize_phase_name(new_name)
+        desc = str(description or "").strip()
+        phase_map = self._get_custom_phase_map()
+        phases = phase_map.get(device_type, [])
+        if not isinstance(phases, list):
+            raise ValueError("phase_not_found")
+
+        found = None
+        for item in phases:
+            if str(item.get("name", "")).casefold() == old_name.casefold():
+                found = item
+                break
+        if found is None:
+            raise ValueError("phase_not_found")
+
+        for p in self.list_phase_catalog(device_type):
+            pname = str(p.get("name", ""))
+            if pname.casefold() == target_name.casefold() and pname.casefold() != old_name.casefold():
+                raise ValueError("duplicate_phase")
+
+        found["name"] = target_name
+        found["description"] = desc
+
+        profiles = self.get_profiles()
+        for profile in profiles.values():
+            phases_assigned = profile.get("phases", [])
+            if not isinstance(phases_assigned, list):
+                continue
+            for assigned in phases_assigned:
+                if not isinstance(assigned, dict):
+                    continue
+                if str(assigned.get("name", "")).casefold() == old_name.casefold():
+                    assigned["name"] = target_name
+
+        await self.async_save()
+
+    def count_phase_usage(self, phase_name: str) -> int:
+        """Count how many profile assignments use a phase name."""
+        used = 0
+        for profile in self.get_profiles().values():
+            phases_assigned = profile.get("phases", [])
+            if not isinstance(phases_assigned, list):
+                continue
+            used += sum(
+                1
+                for phase in phases_assigned
+                if isinstance(phase, dict)
+                and str(phase.get("name", "")).casefold() == phase_name.casefold()
+            )
+        return used
+
+    async def async_delete_custom_phase(self, device_type: str, phase_name: str) -> int:
+        """Delete a custom phase and remove matching profile assignments.
+
+        Returns number of removed assignments.
+        """
+        phase_map = self._get_custom_phase_map()
+        phases = phase_map.get(device_type, [])
+        if not isinstance(phases, list):
+            raise ValueError("phase_not_found")
+
+        kept = [
+            p for p in phases if str(p.get("name", "")).casefold() != phase_name.casefold()
+        ]
+        if len(kept) == len(phases):
+            raise ValueError("phase_not_found")
+        phase_map[device_type] = kept
+
+        removed_assignments = 0
+        profiles = self.get_profiles()
+        for profile in profiles.values():
+            assigned = profile.get("phases", [])
+            if not isinstance(assigned, list):
+                continue
+            before = len(assigned)
+            profile["phases"] = [
+                p
+                for p in assigned
+                if not (
+                    isinstance(p, dict)
+                    and str(p.get("name", "")).casefold() == phase_name.casefold()
+                )
+            ]
+            removed_assignments += before - len(profile["phases"])
+
+        await self.async_save()
+        return removed_assignments
+
+    def get_profile_phase_ranges(self, profile_name: str) -> list[dict[str, Any]]:
+        """Return assigned phase ranges for a profile."""
+        profile = self._data.get("profiles", {}).get(profile_name)
+        if not isinstance(profile, dict):
+            return []
+        phases = profile.get("phases", [])
+        if not isinstance(phases, list):
+            return []
+        cleaned: list[dict[str, Any]] = []
+        for phase in phases:
+            if not isinstance(phase, dict):
+                continue
+            try:
+                start = float(phase.get("start", 0.0))
+                end = float(phase.get("end", 0.0))
+            except (TypeError, ValueError):
+                continue
+            if end <= start:
+                continue
+            cleaned.append(
+                {
+                    "name": str(phase.get("name", "")).strip(),
+                    "start": start,
+                    "end": end,
+                    "description": str(phase.get("description", "")).strip(),
+                }
+            )
+        return sorted(cleaned, key=lambda x: (x["start"], x["end"], x["name"]))
+
+    def get_profile_phase_ranges_for_device(
+        self, profile_name: str, device_type: str
+    ) -> list[dict[str, Any]]:
+        """Return assigned ranges enriched with catalog descriptions."""
+        ranges = self.get_profile_phase_ranges(profile_name)
+        catalog = self.list_phase_catalog(device_type)
+        desc_map = {
+            str(p.get("name", "")).casefold(): str(p.get("description", "")).strip()
+            for p in catalog
+        }
+        enriched: list[dict[str, Any]] = []
+        for row in ranges:
+            name = str(row.get("name", "")).strip()
+            enriched.append(
+                {
+                    "name": name,
+                    "start": float(row.get("start", 0.0)),
+                    "end": float(row.get("end", 0.0)),
+                    "description": desc_map.get(name.casefold(), ""),
+                }
+            )
+        return enriched
+
+    async def async_set_profile_phase_ranges(
+        self, profile_name: str, ranges: list[dict[str, Any]]
+    ) -> None:
+        """Replace assigned phase ranges for a profile."""
+        profile = self._data.get("profiles", {}).get(profile_name)
+        if not isinstance(profile, dict):
+            raise ValueError("profile_not_found")
+
+        normalized: list[dict[str, Any]] = []
+        for item in ranges:
+            if not isinstance(item, dict):
+                continue
+            name = normalize_phase_name(str(item.get("name", "")))
+            try:
+                start = float(item.get("start", 0.0))
+                end = float(item.get("end", 0.0))
+            except (TypeError, ValueError):
+                raise ValueError("invalid_phase_range")
+            if end <= start:
+                raise ValueError("invalid_phase_range")
+            normalized.append({"name": name, "start": start, "end": end})
+
+        normalized.sort(key=lambda x: (x["start"], x["end"]))
+        prev_end = None
+        for row in normalized:
+            if prev_end is not None and row["start"] < prev_end:
+                raise ValueError("overlapping_phase_ranges")
+            prev_end = row["end"]
+
+        profile["phases"] = normalized
+        await self.async_save()
+
     def set_duration_tolerance(self, tolerance: float) -> None:
         """Set the profile duration tolerance used by matching heuristics."""
         try:
             self._duration_tolerance = float(tolerance)
         except (TypeError, ValueError):
-            return
+            pass
 
     def set_retention_limits(
         self,
@@ -562,7 +811,7 @@ class ProfileStore:
             self._max_full_traces_per_profile = int(max_full_traces_per_profile)
             self._max_full_traces_unlabeled = int(max_full_traces_unlabeled)
         except (TypeError, ValueError):
-            return
+            pass
 
     def get_duration_ratio_limits(self) -> tuple[float, float]:
         """Return (min_duration_ratio, max_duration_ratio) used for duration matching."""
@@ -574,7 +823,7 @@ class ProfileStore:
             self._min_duration_ratio = float(min_ratio)
             self._max_duration_ratio = float(max_ratio)
         except (TypeError, ValueError):
-            return
+            pass
 
     async def async_load(self) -> None:
         """Load data from storage with migration."""
@@ -785,7 +1034,7 @@ class ProfileStore:
                 _LOGGER.debug("add_cycle: Skipping trailing trim for completed cycle")
             else:
                 stored = trim_zero_power_data(stored, threshold=1.0)
-            
+
             cycle_data["power_data"] = stored
             cycle_data["sampling_interval"] = round(sampling_interval, 1)
 
@@ -1001,17 +1250,17 @@ class ProfileStore:
             # Only apply to compressed data to avoid breaking legacy format
             p_data = cycle.get("power_data")
             if (
-                p_data 
-                and isinstance(p_data, list) 
-                and p_data 
-                and isinstance(p_data[0], (list, tuple)) 
-                and len(p_data[0]) == 2 
+                p_data
+                and isinstance(p_data, list)
+                and p_data
+                and isinstance(p_data[0], (list, tuple))
+                and len(p_data[0]) == 2
                 and isinstance(p_data[0][0], (int, float))
             ):
                 # Apply trim helper
                 original_len = len(p_data)
-                
-                # Logic: For completed cycles, only trim leading zeros. 
+
+                # Logic: For completed cycles, only trim leading zeros.
                 # For others, trim both ends.
                 if cycle.get("status") in ("completed", "force_stopped"):
                     # Only trim leading
@@ -1027,14 +1276,14 @@ class ProfileStore:
                 if trimmed and len(trimmed) < original_len:
                     # Data was trimmed - check for start time shift
                     first_offset = trimmed[0][0]
-                    
+
                     if first_offset > 0:
                         # Leading zeros removed - Must shift start_time forward
                         try:
                             start_dt = datetime.fromisoformat(cycle["start_time"])
                             new_start = start_dt + timedelta(seconds=first_offset)
                             cycle["start_time"] = new_start.isoformat()
-                            
+
                             # Re-normalize offsets to 0
                             shifted_data = []
                             for row in trimmed:
@@ -1048,23 +1297,23 @@ class ProfileStore:
                         # Only trailing trimmed or no shift needed
                         cycle["power_data"] = trimmed
                         processed_count += 1
-                    
+
                     # Update duration to match new data length
                     # If we only trimmed the head, the new duration is old_duration - first_offset
                     # This preserves trailing silence.
                     if cycle.get("power_data"):
-                         old_dur = cycle.get("duration", 0)
-                         # If we shifted (first_offset > 0), new duration is old_dur - first_offset
-                         # Otherwise if we only trimmed tail, we might want to snap, 
-                         # but for completed cycles we don't trim tail in this loop.
-                         if first_offset > 0:
-                             cycle["duration"] = max(0.0, old_dur - first_offset)
-                         else:
-                             # Only trailing was trimmed (not expected for completed cycles here)
-                             # or no trim happened. 
-                             # If trailing was trimmed, we SHOULD snap.
-                             if len(trimmed) < original_len:
-                                 cycle["duration"] = cycle["power_data"][-1][0]
+                        old_dur = cycle.get("duration", 0)
+                        # If we shifted (first_offset > 0), new duration is old_dur - first_offset
+                        # Otherwise if we only trimmed tail, we might want to snap,
+                        # but for completed cycles we don't trim tail in this loop.
+                        if first_offset > 0:
+                            cycle["duration"] = max(0.0, old_dur - first_offset)
+                        else:
+                            # Only trailing was trimmed (not expected for completed cycles here)
+                            # or no trim happened.
+                            # If trailing was trimmed, we SHOULD snap.
+                            if len(trimmed) < original_len:
+                                cycle["duration"] = cycle["power_data"][-1][0]
 
             if cycle.get("power_data"):
                 try:
@@ -1145,11 +1394,11 @@ class ProfileStore:
             if "debug_data" in cycle:
                 del cycle["debug_data"]
                 count += 1
-        
+
         if count > 0:
             await self.async_save()
             _LOGGER.info("Cleared debug data from %s cycles", count)
-            
+
         return count
 
 
@@ -1183,14 +1432,14 @@ class ProfileStore:
 
             stored_dur = cycle.get("duration", 0)
             authoritative_dur = float(max(offsets[-1], stored_dur))
-            
+
             # Use manual duration if available (e.g. from feedback correction)
             man_dur = cycle.get("manual_duration")
             if man_dur:
                 final_dur = float(man_dur)
             else:
                 final_dur = authoritative_dur
-            
+
             raw_cycles_data.append((offsets, values, final_dur))
             durations.append(final_dur)
 
@@ -1202,10 +1451,10 @@ class ProfileStore:
             raw_cycles_data,
             self.dtw_bandwidth
         )
-        
+
         if not result:
             return None
-            
+
         return result, durations
 
     async def async_rebuild_all_envelopes(self) -> int:
@@ -1271,7 +1520,7 @@ class ProfileStore:
 
         # Calculate scalar stats
         duration_std_dev = float(np.std(durations)) if durations else 0.0
-        
+
         # Calculate Energy from Average Curve (Trapezoidal Integration)
         avg_energy = 0.0
         if len(time_grid) > 1:
@@ -1289,7 +1538,6 @@ class ProfileStore:
             # So if we store 1.5, it displays "1.50 kWh".
             # My calculation above gives Wh. So divide by 1000.
             # avg_energy is already in kWh from line above.
-            pass
 
         envelope_data = {
             "time_grid": time_grid,  # Time grid used by manager for phase estimation
@@ -1831,8 +2079,6 @@ class ProfileStore:
             )
             return False, 0.0, 9999.0
 
-        env_avg = env_avg_raw # For backward compatibility if needed elsewhere
-        
         try:
             current_power_list = [float(x[1]) for x in current_power_data]
         except Exception:  # pylint: disable=broad-exception-caught
@@ -1846,11 +2092,11 @@ class ProfileStore:
             env_time,
             self.dtw_bandwidth
         )
-        
+
         # Verify if mapped power and alignment score indicate an expected low-power region.
         # Thresholds: Expected power < 15W, Alignment score > 0.4
         is_confirmed = (mapped_power < 15.0) and (score > 0.4)
-        
+
         return is_confirmed, mapped_time, mapped_power
 
 
@@ -1906,14 +2152,14 @@ class ProfileStore:
         )
         for name, data in profiles_map.items():
             profile_meta = cast(JSONDict, data) if isinstance(data, dict) else {}
-            
+
             # Calculate count and last_run
             p_cycles = [
-                c for c in self._data.get("past_cycles", []) 
+                c for c in self._data.get("past_cycles", [])
                 if c.get("profile_name") == name
             ]
             cycle_count = len(p_cycles)
-            
+
             last_run = None
             if p_cycles:
                 last_c = max(p_cycles, key=lambda x: x.get("start_time", ""))
@@ -1966,6 +2212,7 @@ class ProfileStore:
             }
 
         # Create profile with minimal data (will be updated when cycles are labeled)
+        profile_data.setdefault("phases", [])
         self._data.setdefault("profiles", {})[name] = profile_data
         await self.async_save()
         _LOGGER.info("Created standalone profile '%s'", name)
@@ -2345,7 +2592,7 @@ class ProfileStore:
             p_data = self._data["profiles"].get(original_profile)
             if p_data and p_data.get("sample_cycle_id") == original_sample_id:
                 p_data["sample_cycle_id"] = best_replacement_id
-            
+
             # Rebuild envelope because dataset changed
             await self.async_rebuild_envelope(original_profile)
 
@@ -2464,16 +2711,16 @@ class ProfileStore:
         cycle_to_delete = next((c for c in cycles if c.get("id") == cycle_id), None)
         if not cycle_to_delete:
             return False
-            
+
         profile_name = cycle_to_delete.get("profile_name")
         self._data["past_cycles"] = [c for c in cycles if c.get("id") != cycle_id]
-        
+
         if len(self._data["past_cycles"]) < initial_len:
             # Check profile references
             for _p_name, p_data in self.get_profiles().items():
                 if p_data.get("sample_cycle_id") == cycle_id:
                     p_data["sample_cycle_id"] = None
-            
+
             # Rebuild envelope if cycle belonged to a profile
             if profile_name:
                 await self.async_rebuild_envelope(profile_name)
@@ -2489,26 +2736,26 @@ class ProfileStore:
         p_data = self._decompress_power_data(cycle)
         if not p_data:
             return []
-            
+
         start_ts = dt_util.parse_datetime(cycle["start_time"]).timestamp()
-        
+
         # Parse all points to (rel_t, power)
         points = []
         for t_str, val in p_data:
             dt_p = dt_util.parse_datetime(t_str)
             if dt_p:
                 points.append((dt_p.timestamp() - start_ts, float(val)))
-               
+
         if not points:
             return []
-            
+
         valid_segments = []
         seg_start = 0.0
-        
+
         for i in range(1, len(points)):
             t, _ = points[i]
             prev_t, prev_p = points[i-1]
-            
+
             # Detect idle gap
             gap = t - prev_t
             if prev_p < idle_power and gap > min_gap_s:
@@ -2521,10 +2768,10 @@ class ProfileStore:
         last_t = points[-1][0]
         if (last_t - seg_start) > 60:
             valid_segments.append((seg_start, last_t))
-             
+
         if len(valid_segments) < 2:
             return []
-            
+
         _LOGGER.debug(
             "Analyzed split for %s: found %d segments",
             cycle.get("id"),
@@ -2536,7 +2783,7 @@ class ProfileStore:
         self, cycle_id: str, segments: list[dict[str, Any]]
     ) -> list[str]:
         """Apply a manual split config.
-        
+
         segments format: [{"start": float, "end": float, "profile": str|None}]
         Returns list of new cycle IDs.
         """
@@ -2548,13 +2795,13 @@ class ProfileStore:
 
         cycle = cycles[idx]
         cycles.pop(idx) # Remove original
-        
+
         new_ids = []
         original_profile = cycle.get("profile_name")
         start_dt_base_parsed = dt_util.parse_datetime(cycle["start_time"])
         if not start_dt_base_parsed:
             return []
-            
+
         start_ts = start_dt_base_parsed.timestamp()
 
         # Decompress original data
@@ -2580,14 +2827,14 @@ class ProfileStore:
                 seg_start = float(seg["start"])
                 seg_end = float(seg["end"])
                 seg_profile = seg.get("profile")
-            
+
             seg_dur = seg_end - seg_start
             new_cycle_start = start_dt_base_parsed + timedelta(seconds=seg_start)
             new_cycle_start_ts = new_cycle_start.timestamp()
 
             # Extract points for this segment
             p_data_abs = []
-            
+
             # Find closest state before/at start to ensure continuity?
             # Or just take points strictly inside?
             # Generally better to capture the state at start 0.
@@ -2597,14 +2844,14 @@ class ProfileStore:
                     state_val = p
                 else:
                     break
-            
+
             # Start point (t=0 relative to new cycle)
             p_data_abs.append([round(new_cycle_start_ts, 1), state_val])
 
             for t, p in points:
                 if seg_start < t <= seg_end:
                     p_data_abs.append([round(start_ts + t, 1), p])
-            
+
             # Create Cycle Record
             new_cycle = {
                 "start_time": new_cycle_start.isoformat(),
@@ -2633,7 +2880,7 @@ class ProfileStore:
             p_data = self._data["profiles"].get(original_profile)
             if p_data and p_data.get("sample_cycle_id") == original_sample_id:
                 p_data["sample_cycle_id"] = best_replacement_id
-            
+
             # Rebuild envelope because dataset changed
             await self.async_rebuild_envelope(original_profile)
 
@@ -2645,7 +2892,7 @@ class ProfileStore:
         self, cycle_ids: list[str], target_profile: str | None
     ) -> str | None:
         """Apply a manual merge of multiple cycles with gap filling.
-        
+
         Returns the new merged cycle ID.
         """
         if len(cycle_ids) < 2:
@@ -2653,13 +2900,13 @@ class ProfileStore:
 
         cycles = self.get_past_cycles()
         target_cycles = [c for c in cycles if c.get("id") in cycle_ids]
-        
+
         if len(target_cycles) != len(cycle_ids):
             return None
 
         # Sort by time
         target_cycles.sort(key=lambda c: str(c.get("start_time", "")))
-        
+
         # Collect affected profiles for envelope rebuild
         affected_profiles = set()
         for c in target_cycles:
@@ -2667,11 +2914,11 @@ class ProfileStore:
                 affected_profiles.add(c["profile_name"])
         if target_profile:
             affected_profiles.add(target_profile)
-        
+
         # We modify the first cycle (c1) to become the merged one
         c1 = target_cycles[0]
         ids_to_remove = [c["id"] for c in target_cycles[1:]]
-        
+
         # Base setup
         c1_start_dt = dt_util.parse_datetime(c1["start_time"])
         if not c1_start_dt:
@@ -2694,66 +2941,66 @@ class ProfileStore:
 
         # Start with C1 points
         merged_points_abs: list[list[float]] = [] # [timestamp, power]
-        
+
         # Add C1 points
         c1_pts = get_points(c1)
         for t_abs, _, p in c1_pts:
             merged_points_abs.append([t_abs, p])
-        
+
         last_t_abs = c1_pts[-1][0] if c1_pts else c1_start_dt.timestamp()
 
         # Iterate others
         max_power = c1.get("max_power", 0)
-        
+
         for next_c in target_cycles[1:]:
             c_start_dt = dt_util.parse_datetime(next_c["start_time"])
             if not c_start_dt:
                 continue
-            
+
             c_pts = get_points(next_c)
             if not c_pts:
                 continue
-            
+
             current_start_ts = c_pts[0][0]
-            
+
             # --- GAP FILLING ---
             gap = current_start_ts - last_t_abs
             # If gap > 1s, inject 0W points to ensure graph drops to 0
             if gap > 1.0:
                 merged_points_abs.append([last_t_abs + 0.1, 0.0])
                 merged_points_abs.append([current_start_ts - 0.1, 0.0])
-            
+
             # Append points
             for t_abs, _, p in c_pts:
                 merged_points_abs.append([t_abs, p])
                 last_t_abs = t_abs
-            
+
             max_power = max(max_power, next_c.get("max_power", 0))
 
         # Update C1 metadata
         final_end_dt = dt_util.utc_from_timestamp(last_t_abs)
         new_dur = (final_end_dt - c1_start_dt).total_seconds()
-        
+
         c1["end_time"] = final_end_dt.isoformat()
         c1["duration"] = round(new_dur, 1)
         c1["max_power"] = max_power
         c1["profile_name"] = target_profile
-        
+
         # Generate new compressed power_data [offset, power]
         new_power_data = []
         c1_start_ts = c1_start_dt.timestamp()
-        
+
         for t_abs, p in merged_points_abs:
             offset = round(t_abs - c1_start_ts, 1)
             new_power_data.append([offset, float(p)])
-        
+
         c1["power_data"] = new_power_data
-        
+
         # New Hash ID
         new_id = hashlib.sha256(f"{c1['start_time']}_{c1['duration']}".encode()).hexdigest()[:12]
         old_c1_id = c1["id"]
         c1["id"] = new_id
-        
+
         # Update references in profiles
         all_removed_ids = ids_to_remove + [old_c1_id]
         for p_data in self.get_profiles().values():
@@ -2764,7 +3011,7 @@ class ProfileStore:
         self._data["past_cycles"] = [
             c for c in cycles if c.get("id") not in ids_to_remove
         ]
-        
+
         # Update signature
         try:
             ts_arr = np.array([pt[0] for pt in new_power_data])
@@ -2777,11 +3024,11 @@ class ProfileStore:
 
         await self.async_save()
         _LOGGER.info("Interactive Merge Applied: %s -> %s", cycle_ids, new_id)
-        
+
         # Rebuild envelopes for all affected profiles
         for p_name in affected_profiles:
             await self.async_rebuild_envelope(p_name)
-            
+
         return new_id
 
     def generate_interactive_split_svg(
@@ -2795,14 +3042,14 @@ class ProfileStore:
         p_data = self._decompress_power_data(cycle)
         if not p_data:
             return ""
-        
+
         start_ts = dt_util.parse_datetime(cycle["start_time"]).timestamp()
         points = []
         for t_str, val in p_data:
             t = dt_util.parse_datetime(t_str)
             if t:
                 points.append((t.timestamp() - start_ts, float(val)))
-        
+
         curves = [SVGCurve(points=points, color="#9E9E9E", opacity=0.5)] # Base ghost
         markers = []
 
@@ -2814,7 +3061,7 @@ class ProfileStore:
                 color = colors[i % len(colors)]
                 curves.append(SVGCurve(points=seg_pts, color=color, stroke_width=2))
                 markers.append({"x": seg_start, "label": f"S{i+1}", "color": color})
-        
+
         return _generate_generic_svg(f"Split Preview: {cycle.get('profile_name') or 'Unlabeled'}", curves, width, height, markers=markers)
 
     def generate_interactive_merge_svg(
@@ -2823,15 +3070,15 @@ class ProfileStore:
         """Generate SVG for merge preview."""
         cycles = [c for c in self.get_past_cycles() if c["id"] in cycle_ids]
         cycles.sort(key=lambda c: str(c.get("start_time", "")))
-        
+
         if not cycles:
             return ""
-        
+
         first_start = dt_util.parse_datetime(cycles[0]["start_time"]).timestamp()
         curves = []
-        
+
         colors = ["#2196F3", "#FF9800", "#4CAF50", "#9C27B0"]
-        
+
         for i, c in enumerate(cycles):
             p_data = self._decompress_power_data(c)
             if not p_data:
@@ -2842,10 +3089,8 @@ class ProfileStore:
                 if t:
                     rel_t = t.timestamp() - first_start
                     points.append((rel_t, float(val)))
-            
+
             if points:
                 curves.append(SVGCurve(points=points, color=colors[i % len(colors)], stroke_width=2))
 
         return _generate_generic_svg("Merge Preview", curves, width, height)
-
-

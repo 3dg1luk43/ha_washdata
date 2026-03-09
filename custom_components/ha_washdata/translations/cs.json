@@ -44,7 +44,8 @@
           "manage_cycles": "Správa cyklů",
           "manage_profiles": "Správa profilů",
           "record_cycle": "Zaznamenat cyklus (Ruční)",
-          "diagnostics": "Diagnostika a údržba"
+          "diagnostics": "Diagnostika a údržba",
+          "manage_phase_catalog": "Správa katalogu fází"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Upravit/Přejmenovat profil",
               "delete_profile": "🗑️ Smazat profil",
               "profile_stats": "📊 Statistiky profilu",
-              "cleanup_profile": "🧹 Historie vyčištění – graf a smazání"
+              "cleanup_profile": "🧹 Historie vyčištění – graf a smazání",
+              "assign_phases": "🧩 Přiřaďte fázové rozsahy"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Správa katalogu fází",
+        "description": "Aktuální fáze pro tento typ zařízení:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Akce",
+            "options": {
+              "create_custom_phase": "➕ Vytvořit vlastní fázi",
+              "edit_custom_phase": "✏️ Upravit vlastní fázi",
+              "delete_custom_phase": "🗑️ Smazat vlastní fázi"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Vytvořit vlastní fázi",
+        "description": "Vytvořte vlastní název fáze a popis pro tento typ zařízení.",
+        "data": {
+          "phase_name": "Název fáze",
+          "phase_description": "Popis fáze"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Upravit vlastní fázi",
+        "description": "Vyberte vlastní fázi, kterou chcete upravit.",
+        "data": {
+          "phase_name": "Vlastní fáze"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Upravit vlastní fázi",
+        "description": "Fáze úprav: {phase_name}",
+        "data": {
+          "phase_name": "Název fáze",
+          "phase_description": "Popis fáze"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Smazat vlastní fázi",
+        "description": "Vyberte vlastní fázi, kterou chcete odstranit. Všechny přiřazené rozsahy pomocí této fáze budou odstraněny.",
+        "data": {
+          "phase_name": "Vlastní fáze"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Přiřadit fázové rozsahy",
+        "description": "Profil: **{profile_name}**\nRežim: **{assign_mode}**\nNápověda k cyklu: {cycle_hint}\n\nAktuální rozsahy:\n{current_ranges}\n\nŠtítky fází slouží k zobrazení a uspořádání. Detekce používá vzory napájení, nikoli názvy fází.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Režim přiřazení",
+          "source_cycle": "Zdrojový cyklus (vyžadováno pro režim časového razítka)",
+          "phase_1": "Fáze 1",
+          "start_min_1": "Start minuta 1",
+          "end_min_1": "Závěrečná minuta 1",
+          "start_ts_1": "Časové razítko zahájení 1",
+          "end_ts_1": "Časové razítko konce 1",
+          "phase_2": "Fáze 2",
+          "start_min_2": "Start minuta 2",
+          "end_min_2": "Závěrečná minuta 2",
+          "start_ts_2": "Časové razítko zahájení 2",
+          "end_ts_2": "Časové razítko konce 2",
+          "phase_3": "Fáze 3",
+          "start_min_3": "Začátek minuty 3",
+          "end_min_3": "Závěrečná minuta 3",
+          "start_ts_3": "Časové razítko zahájení 3",
+          "end_ts_3": "Časové razítko konce 3",
+          "phase_4": "Fáze 4",
+          "start_min_4": "Začátek minuty 4",
+          "end_min_4": "Závěrečná minuta 4",
+          "start_ts_4": "Časové razítko zahájení 4",
+          "end_ts_4": "Časové razítko konce 4",
+          "phase_5": "Fáze 5",
+          "start_min_5": "Start minuta 5",
+          "end_min_5": "Závěrečná minuta 5",
+          "start_ts_5": "Časové razítko zahájení 5",
+          "end_ts_5": "Časové razítko konce 5",
+          "phase_6": "Fáze 6",
+          "start_min_6": "Start minuta 6",
+          "end_min_6": "Závěrečná minuta 6",
+          "start_ts_6": "Časové razítko zahájení 6",
+          "end_ts_6": "Časové razítko konce 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Přiřadit fázové rozsahy",
+        "description": "Vyberte profil pro konfiguraci fázových rozsahů.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Režim přiřazení",
+            "options": {
+              "offset_mode": "Posuny minut",
+              "timestamp_mode": "Časová razítka"
+            }
+          },
+          "source_cycle": "Zdrojový cyklus (pro režim časového razítka)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Přejmenování profilu se nezdařilo. Profil nemusí existovat nebo je nový název již obsazen.",
       "assignment_failed": "Přiřazení profilu k cyklu se nezdařilo",
       "feedback_notification_title": "WashData: Ověřit cyklus ({device})",
-      "feedback_notification_message": "**Zařízení**: {device}\n**Program**: {program} ({confidence}% spolehlivost)\n**Čas**: {time}\n\nWashData potřebuje vaši pomoc s ověřením tohoto detekovaného cyklu.\n\nProsím přejděte do **Nastavení > Zařízení a služby > WashData > Konfigurovat > Zpětné vazby učení** pro potvrzení nebo opravu tohoto výsledku."
+      "feedback_notification_message": "**Zařízení**: {device}\n**Program**: {program} ({confidence}% spolehlivost)\n**Čas**: {time}\n\nWashData potřebuje vaši pomoc s ověřením tohoto detekovaného cyklu.\n\nProsím přejděte do **Nastavení > Zařízení a služby > WashData > Konfigurovat > Zpětné vazby učení** pro potvrzení nebo opravu tohoto výsledku.",
+      "duplicate_phase": "Fáze s tímto názvem již existuje.",
+      "phase_not_found": "Vybraná fáze nebyla nalezena.",
+      "invalid_phase_name": "Název fáze nemůže být prázdný.",
+      "phase_name_too_long": "Název fáze je příliš dlouhý.",
+      "invalid_phase_range": "Fázový rozsah je neplatný. Konec musí být větší než začátek.",
+      "invalid_phase_timestamp": "Časové razítko je neplatné. Použijte formát RRRR-MM-DD HH:MM nebo HH:MM.",
+      "overlapping_phase_ranges": "Fázové rozsahy se překrývají. Upravte rozsahy a zkuste to znovu.",
+      "incomplete_phase_row": "Každý řádek fáze musí obsahovat fázi plus úplné počáteční/koncové hodnoty pro vybraný režim.",
+      "timestamp_mode_cycle_required": "Při použití režimu časového razítka vyberte zdrojový cyklus."
     },
     "abort": {
       "no_cycles_found": "Nebyly nalezeny žádné cykly",
@@ -476,7 +585,8 @@
       "no_suggestions": "Zatím nejsou k dispozici žádné navržené hodnoty. Spusťte několik cyklů a zkuste to znovu.",
       "no_predictions": "Žádné předpovědi",
       "reprocess_success": "Úspěšně přepracováno {count} cyklů.",
-      "debug_data_cleared": "Ladicí data úspěšně vymazána z {count} cyklů."
+      "debug_data_cleared": "Ladicí data úspěšně vymazána z {count} cyklů.",
+      "no_custom_phases": "Pro tento typ zařízení nebyly nalezeny žádné vlastní fáze."
     }
   },
   "entity": {

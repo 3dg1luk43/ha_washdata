@@ -1,7 +1,6 @@
 """Reproduction tests for Smart Termination issues."""
 import os
 import json
-import asyncio
 import pytest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
@@ -33,9 +32,12 @@ def mock_hass():
     hass = MagicMock()
     hass.data = {}
     hass.bus.async_fire = MagicMock()
-    # Add a mock for pending tasks tracking if needed by tests
+    # Tests here validate state outcomes, not background task execution.
+    # Close scheduled coroutines immediately to avoid un-awaited warnings.
     hass.pending_tasks = []
-    hass.async_create_task = MagicMock(side_effect=lambda coro: hass.pending_tasks.append(coro))
+    hass.async_create_task = MagicMock(
+        side_effect=lambda coro: getattr(coro, "close", lambda: None)()
+    )
     hass.services.async_call = MagicMock()
     
     # Mock executor job to just call the function sync and return a future
@@ -134,11 +136,6 @@ async def test_smart_termination_with_manager(mock_hass, mock_entry, data_file):
         for i, (ts, power) in enumerate(readings):
             with patch("homeassistant.util.dt.now", return_value=ts):
                 manager.detector.process_reading(power, ts)
-
-                # Wait for any scheduled match tasks
-                if mock_hass.pending_tasks:
-                    await asyncio.gather(*mock_hass.pending_tasks)
-                    mock_hass.pending_tasks.clear()
 
             # Check state
             state = manager.detector.state

@@ -1,7 +1,6 @@
 """Frontend card registration for HA WashData."""
 
 import logging
-import json
 import time
 from pathlib import Path
 from homeassistant.core import HomeAssistant, Event
@@ -129,7 +128,7 @@ class WashDataCardRegistration:
             return
 
         _register_static_path(self.hass, INTEGRATION_URL, str(src))
-        
+
         version = get_cache_buster()
 
         # Try auto-registration of the lovelace resource

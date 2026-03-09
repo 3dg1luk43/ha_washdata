@@ -44,7 +44,8 @@
           "manage_cycles": "Bainistigh Timthriallta",
           "manage_profiles": "Bainistigh Próifílí",
           "record_cycle": "Timthriall Taifead (Lámhleabhar)",
-          "diagnostics": "Diagnóisic & Cothabháil"
+          "diagnostics": "Diagnóisic & Cothabháil",
+          "manage_phase_catalog": "Bainistigh Catalóg Chéim"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Cuir/Athainmnigh Próifíl",
               "delete_profile": "🗑️ Scrios Próifíl",
               "profile_stats": "📊 Staitisticí Próifíl",
-              "cleanup_profile": "🧹 Glanadh Stair - Graf & Scrios"
+              "cleanup_profile": "🧹 Glanadh Stair - Graf & Scrios",
+              "assign_phases": "🧩 Sann Raonta Céime"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Clár Ceart (má tá sé á cheartú)",
           "corrected_duration": "Ceart Fad i nóiméid (má ceartaítear é)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Bainistigh Catalóg Chéim",
+        "description": "Céimeanna reatha don chineál seo gléis:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Gníomh",
+            "options": {
+              "create_custom_phase": "➕ Cruthaigh Céim Chustaim",
+              "edit_custom_phase": "✏️ Cuir Céim an Chustaim in Eagar",
+              "delete_custom_phase": "🗑️ Scrios Céim an Chustaim"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Cruthaigh Céim Chustaim",
+        "description": "Cruthaigh ainm céime saincheaptha agus cur síos don chineál gléis seo.",
+        "data": {
+          "phase_name": "Ainm Chéim",
+          "phase_description": "Cur síos ar Chéim"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Cuir Céim an Chustaim in Eagar",
+        "description": "Roghnaigh céim shaincheaptha le cur in eagar.",
+        "data": {
+          "phase_name": "Céim an Chustaim"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Cuir Céim an Chustaim in Eagar",
+        "description": "Céim eagarthóireachta: {phase_name}",
+        "data": {
+          "phase_name": "Ainm Chéim",
+          "phase_description": "Cur síos ar Chéim"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Scrios Céim an Chustaim",
+        "description": "Roghnaigh céim shaincheaptha le scriosadh. Bainfear aon raonta sannta a úsáideann an chéim seo.",
+        "data": {
+          "phase_name": "Céim an Chustaim"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Sann Raonta Céime",
+        "description": "Próifíl: **{profile_name}**\nMód: **{assign_mode}**\nLeid rothaíochta: {cycle_hint}\n\nRaonta reatha:\n{current_ranges}\n\nTá lipéid chéim le taispeáint agus le heagrú. Úsáideann braite patrúin cumhachta, ní ainmneacha céimeanna.",
+        "data": {
+          "profile": "Próifíl",
+          "assign_mode": "Mód Sannacháin",
+          "source_cycle": "Timthriall Foinse (riachtanach don mhód stampa ama)",
+          "phase_1": "Céim 1",
+          "start_min_1": "Tosaigh Nóiméad 1",
+          "end_min_1": "Nóiméad Deiridh 1",
+          "start_ts_1": "Stampa Ama Tosaigh 1",
+          "end_ts_1": "Stampa Ama Deiridh 1",
+          "phase_2": "Céim 2",
+          "start_min_2": "Nóiméad Tosaigh 2",
+          "end_min_2": "Nóiméad Deiridh 2",
+          "start_ts_2": "Stampa Ama Tosaigh 2",
+          "end_ts_2": "Stampa ama Críochnaithe 2",
+          "phase_3": "Céim 3",
+          "start_min_3": "Tosaigh Nóiméad 3",
+          "end_min_3": "Nóiméad Deiridh 3",
+          "start_ts_3": "Stampa Ama Tosaigh 3",
+          "end_ts_3": "Stampa Ama Deiridh 3",
+          "phase_4": "Céim 4",
+          "start_min_4": "Tosaigh Nóiméad 4",
+          "end_min_4": "Críoch Nóiméad 4",
+          "start_ts_4": "Stampa Ama Tosaigh 4",
+          "end_ts_4": "Stampa ama Críochnaithe 4",
+          "phase_5": "Céim 5",
+          "start_min_5": "Tosaigh Nóiméad 5",
+          "end_min_5": "Críoch Nóiméad 5",
+          "start_ts_5": "Stampa Ama Tosaigh 5",
+          "end_ts_5": "Críoch Stampa Ama 5",
+          "phase_6": "Céim 6",
+          "start_min_6": "Tosaigh Nóiméad 6",
+          "end_min_6": "Críoch Nóiméad 6",
+          "start_ts_6": "Stampa Ama Tosaigh 6",
+          "end_ts_6": "Críoch Stampa Ama 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Sann Raonta Céime",
+        "description": "Roghnaigh próifíl chun raonta na gcéimeanna a chumrú.",
+        "data": {
+          "profile": "Próifíl",
+          "assign_mode": {
+            "name": "Mód Sannacháin",
+            "options": {
+              "offset_mode": "Fritháireamh Nóiméad",
+              "timestamp_mode": "Stampaí ama"
+            }
+          },
+          "source_cycle": "Timthriall Foinse (do mhód an stampa ama)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Theip ar phróifíl a athainmniú. Seans nach bhfuil próifíl ann nó go bhfuil ainm nua glactha cheana féin.",
       "assignment_failed": "Theip ar phróifíl a shannadh don timthriall",
       "feedback_notification_title": "WashData: Fíoraigh an tSraith ({device})",
-      "feedback_notification_message": "**Gléas**: {device}\n**Clár**: {program} ({confidence}% muinín)\n**Am**: {time}\n\nTeastaíonn do chabhair ó WashData chun an timthriall braite seo a fhíorú.\n\nTéigh go **Socruithe > Gléasanna & Seirbhísí > WashData > Cumraigh > Aiseolas Foghlama** chun an toradh seo a dhearbhú nó a cheartú."
+      "feedback_notification_message": "**Gléas**: {device}\n**Clár**: {program} ({confidence}% muinín)\n**Am**: {time}\n\nTeastaíonn do chabhair ó WashData chun an timthriall braite seo a fhíorú.\n\nTéigh go **Socruithe > Gléasanna & Seirbhísí > WashData > Cumraigh > Aiseolas Foghlama** chun an toradh seo a dhearbhú nó a cheartú.",
+      "duplicate_phase": "Tá céim leis an ainm seo ann cheana féin.",
+      "phase_not_found": "Níor aimsíodh an chéim roghnaithe.",
+      "invalid_phase_name": "Ní féidir ainm na céime a bheith folamh.",
+      "phase_name_too_long": "Tá ainm na céime ró-fhada.",
+      "invalid_phase_range": "Tá raon céime neamhbhailí. Ní mór an deireadh a bheith níos mó ná an tús.",
+      "invalid_phase_timestamp": "Tá stampa ama neamhbhailí. Úsáid formáid YYYY-MM-LL HH:MM nó HH:MM.",
+      "overlapping_phase_ranges": "Forluíonn raonta céime. Coigeartaigh na raonta agus bain triail eile as.",
+      "incomplete_phase_row": "Ní mór céim chomh maith le luachanna tosaigh/deiridh iomlána don mhód roghnaithe a bheith i ngach céimshraith.",
+      "timestamp_mode_cycle_required": "Roghnaigh timthriall foinse agus tú ag úsáid mód an stampa ama."
     },
     "abort": {
       "no_cycles_found": "Níor aimsíodh aon timthriallta",
@@ -476,7 +585,8 @@
       "no_suggestions": "Níl aon luachanna molta ar fáil go fóill. Rith cúpla timthriall agus bain triail eile as.",
       "no_predictions": "Gan tuar",
       "reprocess_success": "D'éirigh le hathphróiseáil {count} thimthriall.",
-      "debug_data_cleared": "D'éirigh le glanadh sonraí dífhabhtaithe ó thimthriall {count}."
+      "debug_data_cleared": "D'éirigh le glanadh sonraí dífhabhtaithe ó thimthriall {count}.",
+      "no_custom_phases": "Níor aimsíodh aon chéimeanna saincheaptha don chineál seo gléis."
     }
   },
   "entity": {

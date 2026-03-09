@@ -44,7 +44,8 @@
           "manage_cycles": "주기 관리",
           "manage_profiles": "프로필 관리",
           "record_cycle": "기록주기(수동)",
-          "diagnostics": "진단 및 유지보수"
+          "diagnostics": "진단 및 유지보수",
+          "manage_phase_catalog": "단계 카탈로그 관리"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ 프로필 편집/이름 바꾸기",
               "delete_profile": "🗑️ 프로필 삭제",
               "profile_stats": "📊 프로필 통계",
-              "cleanup_profile": "🧹 기록 정리 - 그래프 및 삭제"
+              "cleanup_profile": "🧹 기록 정리 - 그래프 및 삭제",
+              "assign_phases": "🧩 위상 범위 지정"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "올바른 프로그램(수정하는 경우)",
           "corrected_duration": "수정 기간(분)(수정하는 경우)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "단계 카탈로그 관리",
+        "description": "이 장치 유형의 현재 단계:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "행동",
+            "options": {
+              "create_custom_phase": "➕ 사용자 정의 단계 생성",
+              "edit_custom_phase": "✏️ 사용자 정의 단계 편집",
+              "delete_custom_phase": "🗑️ 사용자 정의 단계 삭제"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "사용자 정의 단계 생성",
+        "description": "이 장치 유형에 대한 사용자 정의 단계 이름과 설명을 만듭니다.",
+        "data": {
+          "phase_name": "단계 이름",
+          "phase_description": "단계 설명"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "사용자 정의 단계 편집",
+        "description": "편집할 사용자 정의 단계를 선택하세요.",
+        "data": {
+          "phase_name": "맞춤형 단계"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "사용자 정의 단계 편집",
+        "description": "편집 단계: {phase_name}",
+        "data": {
+          "phase_name": "단계 이름",
+          "phase_description": "단계 설명"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "사용자 정의 단계 삭제",
+        "description": "삭제할 사용자 정의 단계를 선택하세요. 이 단계를 사용하여 할당된 범위는 모두 제거됩니다.",
+        "data": {
+          "phase_name": "맞춤형 단계"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "위상 범위 할당",
+        "description": "프로필: **{profile_name}**\n모드: **{assign_mode}**\n주기 힌트: {cycle_hint}\n\n현재 범위:\n{current_ranges}\n\n단계 레이블은 표시 및 구성용입니다. 감지에서는 위상 이름이 아닌 전력 패턴을 사용합니다.",
+        "data": {
+          "profile": "윤곽",
+          "assign_mode": "할당 모드",
+          "source_cycle": "소스 사이클(타임스탬프 모드에 필요)",
+          "phase_1": "1단계",
+          "start_min_1": "1분 시작",
+          "end_min_1": "1분 종료",
+          "start_ts_1": "타임스탬프 1 시작",
+          "end_ts_1": "타임스탬프 1 종료",
+          "phase_2": "2단계",
+          "start_min_2": "2분 시작",
+          "end_min_2": "2분 종료",
+          "start_ts_2": "타임스탬프 2 시작",
+          "end_ts_2": "타임스탬프 2 종료",
+          "phase_3": "3단계",
+          "start_min_3": "3분 시작",
+          "end_min_3": "3분 종료",
+          "start_ts_3": "타임스탬프 3 시작",
+          "end_ts_3": "타임스탬프 3 종료",
+          "phase_4": "4단계",
+          "start_min_4": "4분 시작",
+          "end_min_4": "4분 종료",
+          "start_ts_4": "타임스탬프 4 시작",
+          "end_ts_4": "타임스탬프 4 종료",
+          "phase_5": "5단계",
+          "start_min_5": "5분 시작",
+          "end_min_5": "5분 종료",
+          "start_ts_5": "타임스탬프 5 시작",
+          "end_ts_5": "타임스탬프 5 종료",
+          "phase_6": "6단계",
+          "start_min_6": "6분 시작",
+          "end_min_6": "6분 종료",
+          "start_ts_6": "타임스탬프 6 시작",
+          "end_ts_6": "타임스탬프 6 종료"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "위상 범위 할당",
+        "description": "위상 범위를 구성하려면 프로필을 선택하세요.",
+        "data": {
+          "profile": "윤곽",
+          "assign_mode": {
+            "name": "할당 모드",
+            "options": {
+              "offset_mode": "분 오프셋",
+              "timestamp_mode": "타임스탬프"
+            }
+          },
+          "source_cycle": "소스 사이클(타임스탬프 모드용)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "프로필 이름을 바꾸지 못했습니다. 프로필이 존재하지 않거나 새 이름이 이미 사용 중입니다.",
       "assignment_failed": "주기에 프로필을 할당하지 못했습니다.",
       "feedback_notification_title": "WashData: 확인 주기({device})",
-      "feedback_notification_message": "**기기**: {device}\n**프로그램**: {program} ({confidence}% 신뢰도)\n**시간**: {time}\n\nWashData가 감지된 주기를 확인하려면 귀하의 도움이 필요합니다.\n\n이 결과를 확인하거나 수정하려면 **설정 > 장치 및 서비스 > WashData > 구성 > 학습 피드백**으로 이동하세요."
+      "feedback_notification_message": "**기기**: {device}\n**프로그램**: {program} ({confidence}% 신뢰도)\n**시간**: {time}\n\nWashData가 감지된 주기를 확인하려면 귀하의 도움이 필요합니다.\n\n이 결과를 확인하거나 수정하려면 **설정 > 장치 및 서비스 > WashData > 구성 > 학습 피드백**으로 이동하세요.",
+      "duplicate_phase": "이 이름을 가진 단계가 이미 존재합니다.",
+      "phase_not_found": "선택한 단계를 찾을 수 없습니다.",
+      "invalid_phase_name": "단계 이름은 비워둘 수 없습니다.",
+      "phase_name_too_long": "단계 이름이 너무 깁니다.",
+      "invalid_phase_range": "위상 범위가 잘못되었습니다. 끝은 시작보다 커야 합니다.",
+      "invalid_phase_timestamp": "타임스탬프가 잘못되었습니다. YYYY-MM-DD HH:MM 또는 HH:MM 형식을 사용하세요.",
+      "overlapping_phase_ranges": "위상 범위가 겹칩니다. 범위를 조정하고 다시 시도하세요.",
+      "incomplete_phase_row": "각 단계 행에는 단계와 선택한 모드에 대한 전체 시작/종료 값이 포함되어야 합니다.",
+      "timestamp_mode_cycle_required": "타임스탬프 모드를 사용할 때 소스 주기를 선택하세요."
     },
     "abort": {
       "no_cycles_found": "사이클을 찾을 수 없습니다.",
@@ -476,7 +585,8 @@
       "no_suggestions": "아직 제안된 값이 없습니다. 몇 주기를 실행하고 다시 시도하십시오.",
       "no_predictions": "예측 없음",
       "reprocess_success": "{count}주기를 성공적으로 재처리했습니다.",
-      "debug_data_cleared": "{count}주기에서 디버그 데이터를 성공적으로 지웠습니다."
+      "debug_data_cleared": "{count}주기에서 디버그 데이터를 성공적으로 지웠습니다.",
+      "no_custom_phases": "이 장치 유형에 대한 사용자 정의 단계가 없습니다."
     }
   },
   "entity": {

@@ -8,18 +8,11 @@ from typing import Any, Optional, TYPE_CHECKING
 
 import numpy as np
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import storage, start, translation
+from homeassistant.helpers import translation
 import homeassistant.util.dt as dt_util
 
 from .const import (
-    CONF_WATCHDOG_INTERVAL,
-    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-    CONF_OFF_DELAY,
-    CONF_PROFILE_MATCH_INTERVAL,
-    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_DURATION_TOLERANCE,
-    CONF_PROFILE_DURATION_TOLERANCE,
     CONF_LEARNING_CONFIDENCE,
     DEFAULT_LEARNING_CONFIDENCE,
     CONF_AUTO_LABEL_CONFIDENCE,
@@ -38,7 +31,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class StatisticalModel:
     """Helper to track running stats for a metric."""
-    
+
     def __init__(self, max_samples: int = 200) -> None:
         self._samples: list[float] = []
         self._max_samples = max_samples
@@ -57,7 +50,7 @@ class StatisticalModel:
         if not self._samples:
             self._stats = {"median": None, "p95": None, "count": 0}
             return
-        
+
         arr = np.array(self._samples)
         self._stats = {
             "median": float(np.median(arr)),
@@ -138,7 +131,7 @@ class LearningManager:
         self._maybe_request_feedback(
             cycle_data, detected_profile, confidence, predicted_duration
         )
-        
+
         # 3. Update model-based suggestions (durations etc)
         self._update_model_suggestions(dt_util.now())
 
@@ -163,7 +156,7 @@ class LearningManager:
 
         p95 = self._sample_interval_model.p95
         median = self._sample_interval_model.median
-        
+
         if p95 is None or median is None:
             return
 
@@ -219,7 +212,7 @@ class LearningManager:
         entry = self.hass.config_entries.async_get_entry(self.entry_id)
         if not entry:
             return
-        
+
         auto_label_conf = entry.options.get(
             CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE
         )
@@ -286,7 +279,7 @@ class LearningManager:
             cycle_id = cycle_data.get("id", "unknown")
             start_ts = cycle_data.get("start_time")
             end_ts = dt_util.now() # Approximate, or pass actual end time
-            
+
             # Format times
             t_str = ""
             if start_ts:
@@ -299,13 +292,13 @@ class LearningManager:
                     t_str = "Just now"
 
             notification_id = f"ha_washdata_feedback_{self.entry_id}_{cycle_id}"
-            
+
             # Load translations (from en.json / localization files)
             # We use "options" category to access the error keys where we stored these strings
             translations = await translation.async_get_translations(
                 self.hass, self.hass.config.language, "options", {DOMAIN}
             )
-            
+
             # Default templates
             default_title = "WashData: Verify Cycle ({device})"
             default_msg = (
@@ -315,17 +308,17 @@ class LearningManager:
                  "WashData needs your help to verify this detected cycle.\n\n"
                  "Please go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
             )
-            
+
             title_template = translations.get(
                 f"component.{DOMAIN}.options.error.feedback_notification_title", default_title
             )
             msg_template = translations.get(
                 f"component.{DOMAIN}.options.error.feedback_notification_message", default_msg
             )
-            
+
             # Confidence as percentage
             conf_pct = int(confidence * 100)
-            
+
             title = title_template.format(device=device_title)
             message = msg_template.format(
                 device=device_title,
@@ -333,7 +326,7 @@ class LearningManager:
                 confidence=conf_pct,
                 time=t_str
             )
-            
+
             # Use standard service call
             await self.hass.services.async_call(
                 "persistent_notification",
@@ -390,7 +383,7 @@ class LearningManager:
 
         self.profile_store.get_pending_feedback()[cycle_id] = feedback_req
         self.profile_store.add_pending_feedback(cycle_id, feedback_req)
-        
+
         est_min = int(estimated_duration / 60) if estimated_duration else 0
         _LOGGER.info(
             "Feedback requested for cycle %s: profile='%s' (conf=%.2f), "
@@ -449,13 +442,13 @@ class LearningManager:
         }
 
         self.profile_store.get_feedback_history()[cycle_id] = feedback_record
-        
+
         # Track which profiles need envelope rebuild (issue #131)
         profiles_to_rebuild: set[str] = set()
-        
+
         if dismiss:
-             # Just dismiss, no action
-             pass
+            # Just dismiss, no action
+            pass
         elif user_confirmed:
             profile_name = pending.get("detected_profile")
             if isinstance(profile_name, str) and profile_name:
@@ -465,7 +458,7 @@ class LearningManager:
             if isinstance(corrected_profile, str) and corrected_profile:
                 # corrected_duration is already in seconds from config_flow
                 duration_sec = float(corrected_duration) if corrected_duration else None
-                
+
                 self._apply_correction_learning(
                     cycle_id, corrected_profile, duration_sec
                 )
@@ -475,11 +468,11 @@ class LearningManager:
         # Remove from pending (add_pending_feedback was wrapper, remove is direct)
         if cycle_id in self.profile_store.get_pending_feedback():
             del self.profile_store.get_pending_feedback()[cycle_id]
-        
+
         # self.profile_store.remove_pending_feedback(cycle_id) # Redundant if we delete directly above
 
         await self.profile_store.async_save()
-        
+
         # Rebuild envelopes for all modified profiles to recalculate min/max/avg (issue #131)
         for profile_name in profiles_to_rebuild:
             try:
@@ -505,7 +498,7 @@ class LearningManager:
         corrected_duration: Optional[float] = None,
     ) -> None:
         """Apply user correction to a cycle (fix for issue #131).
-        
+
         Note: We do not update avg_duration here with EMA. Instead, the envelope
         rebuild in async_submit_cycle_feedback() will recalculate all statistics
         (min/max/avg) from labeled cycles, ensuring accuracy.
@@ -515,7 +508,7 @@ class LearningManager:
 
     async def _async_rebuild_profile_envelope(self, profile_name: str) -> None:
         """Async helper to rebuild a profile's envelope (issue #131 fix).
-        
+
         This wraps async_rebuild_envelope with error handling for safe task scheduling.
         """
         try:
@@ -533,4 +526,3 @@ class LearningManager:
         items = list(self.profile_store.get_feedback_history().values())
         items.sort(key=lambda x: x.get("submitted_at", ""), reverse=True)
         return items[:limit]
-

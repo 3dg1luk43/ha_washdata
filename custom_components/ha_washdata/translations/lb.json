@@ -44,7 +44,8 @@
           "manage_cycles": "Cycles managen",
           "manage_profiles": "Managen Profiler",
           "record_cycle": "Rekordzyklus (manuell)",
-          "diagnostics": "Diagnostik & Ënnerhalt"
+          "diagnostics": "Diagnostik & Ënnerhalt",
+          "manage_phase_catalog": "Managen Phase Katalog"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Profil änneren / ëmbenennen",
               "delete_profile": "🗑️ Profil läschen",
               "profile_stats": "📊 Profilstatistiken",
-              "cleanup_profile": "🧹 Geschicht botzen - Grafik & Läschen"
+              "cleanup_profile": "🧹 Geschicht botzen - Grafik & Läschen",
+              "assign_phases": "🧩 Phase Ranges zouzeschreiwen"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Korrekt Programm (wann Dir korrigéiert)",
           "corrected_duration": "Korrekt Dauer a Minutten (wann Dir korrigéiert)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Managen Phase Katalog",
+        "description": "Aktuell Phasen fir dësen Apparattyp:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Aktioun",
+            "options": {
+              "create_custom_phase": "➕ Benotzerdefinéiert Phase erstellen",
+              "edit_custom_phase": "✏️ Benotzerdefinéiert Phase änneren",
+              "delete_custom_phase": "🗑️ Benotzerdefinéiert Phase läschen"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Erstellt Benotzerdefinéiert Phase",
+        "description": "Erstellt e personaliséierte Phasenumm a Beschreiwung fir dësen Apparattyp.",
+        "data": {
+          "phase_name": "Phase Numm",
+          "phase_description": "Phase Beschreiwung"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Benotzerdefinéiert Phase änneren",
+        "description": "Wielt eng personaliséiert Phase fir z'änneren.",
+        "data": {
+          "phase_name": "Benotzerdefinéiert Phase"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Benotzerdefinéiert Phase änneren",
+        "description": "Editéierungsphase: {phase_name}",
+        "data": {
+          "phase_name": "Phase Numm",
+          "phase_description": "Phase Beschreiwung"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Benotzerdefinéiert Phase läschen",
+        "description": "Wielt eng personaliséiert Phase fir ze läschen. All zougewisen Beräicher mat dëser Phase ginn geläscht.",
+        "data": {
+          "phase_name": "Benotzerdefinéiert Phase"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Assignéiert Phase Ranges",
+        "description": "Profil: **{profile_name}**\nModus: **{assign_mode}**\nCycle Hiweis: {cycle_hint}\n\nAktuelle Beräicher:\n{current_ranges}\n\nPhase Etiketten si fir Affichage an Organisatioun. Detektioun benotzt Kraaftmuster, net Phasennimm.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Aufgab Modus",
+          "source_cycle": "Source Cycle (obligatoresch fir Zäitstempelmodus)",
+          "phase_1": "Phase 1",
+          "start_min_1": "Startminut 1",
+          "end_min_1": "Enn Minutt 1",
+          "start_ts_1": "Start Zäitstempel 1",
+          "end_ts_1": "Enn Zäitstempel 1",
+          "phase_2": "Phase 2",
+          "start_min_2": "Startminut 2",
+          "end_min_2": "Enn Minutt 2",
+          "start_ts_2": "Start Zäitstempel 2",
+          "end_ts_2": "Enn Zäitstempel 2",
+          "phase_3": "Phase 3",
+          "start_min_3": "Startminut 3",
+          "end_min_3": "Enn Minutt 3",
+          "start_ts_3": "Start Zäitstempel 3",
+          "end_ts_3": "Enn Zäitstempel 3",
+          "phase_4": "Phase 4",
+          "start_min_4": "Startminut 4",
+          "end_min_4": "Enn Minutt 4",
+          "start_ts_4": "Start Zäitstempel 4",
+          "end_ts_4": "Enn Zäitstempel 4",
+          "phase_5": "Phase 5",
+          "start_min_5": "Startminut 5",
+          "end_min_5": "Enn Minutt 5",
+          "start_ts_5": "Start Zäitstempel 5",
+          "end_ts_5": "Enn Zäitstempel 5",
+          "phase_6": "Phase 6",
+          "start_min_6": "Startminut 6",
+          "end_min_6": "Enn Minutt 6",
+          "start_ts_6": "Start Zäitstempel 6",
+          "end_ts_6": "Enn Zäitstempel 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Assignéiert Phase Ranges",
+        "description": "Wielt e Profil fir Phasebereich ze konfiguréieren.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Aufgab Modus",
+            "options": {
+              "offset_mode": "Minutt Offsets",
+              "timestamp_mode": "Zäitstempel"
+            }
+          },
+          "source_cycle": "Source Cycle (fir Zäitstempelmodus)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Ausgefall Profil ëmbenennen. Profil existéiert vläicht net oder en neien Numm ass scho geholl.",
       "assignment_failed": "Ausgefall Profil ze Zyklus zougewisen",
       "feedback_notification_title": "WashData: Zyklus bestätegen ({device})",
-      "feedback_notification_message": "**Apparat**: {device}\n**Programm**: {program} ({confidence}% Vertrauen)\n**Zeit**: {time}\n\nWashData brauch Är Hëllef fir dësen entdeckten Zyklus z'iwwerpréiwen.\n\nGitt w.e.g. op **Astellungen> Apparater & Servicer> WashData> Konfiguréieren> Léierfeedbacks** fir dëst Resultat ze bestätegen oder ze korrigéieren."
+      "feedback_notification_message": "**Apparat**: {device}\n**Programm**: {program} ({confidence}% Vertrauen)\n**Zeit**: {time}\n\nWashData brauch Är Hëllef fir dësen entdeckten Zyklus z'iwwerpréiwen.\n\nGitt w.e.g. op **Astellungen> Apparater & Servicer> WashData> Konfiguréieren> Léierfeedbacks** fir dëst Resultat ze bestätegen oder ze korrigéieren.",
+      "duplicate_phase": "Eng Phase mat dësem Numm gëtt et schonn.",
+      "phase_not_found": "Ausgewielt Phase gouf net fonnt.",
+      "invalid_phase_name": "Phasennumm kann net eidel sinn.",
+      "phase_name_too_long": "Phasennumm ass ze laang.",
+      "invalid_phase_range": "Phasebereich ass ongëlteg. Enn muss méi grouss sinn wéi den Ufank.",
+      "invalid_phase_timestamp": "Zäitstempel ass ongëlteg. Benotzt JJJJ-MM-DD HH:MM oder HH:MM Format.",
+      "overlapping_phase_ranges": "Phasebereich iwwerlappt. Passt d'Gamme un a probéiert nach eng Kéier.",
+      "incomplete_phase_row": "All Phase Zeil muss eng Phas enthalen plus komplett Start- / Ennwäerter fir de gewielte Modus.",
+      "timestamp_mode_cycle_required": "Wielt w.e.g. e Quellzyklus wann Dir Zäitstempelmodus benotzt."
     },
     "abort": {
       "no_cycles_found": "Keng Zyklen fonnt",
@@ -476,7 +585,8 @@
       "no_suggestions": "Et sinn nach keng proposéiert Wäerter verfügbar. Run e puer Zyklen a probéiert nach eng Kéier.",
       "no_predictions": "Keng Prognosen",
       "reprocess_success": "Erfollegräich nei veraarbecht {count} Zyklen.",
-      "debug_data_cleared": "Debugdaten aus {count} Zyklen erfollegräich geläscht."
+      "debug_data_cleared": "Debugdaten aus {count} Zyklen erfollegräich geläscht.",
+      "no_custom_phases": "Keng personaliséiert Phasen fir dësen Apparattyp fonnt."
     }
   },
   "entity": {

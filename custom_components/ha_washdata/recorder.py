@@ -9,7 +9,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
-from .const import STORAGE_VERSION, STORAGE_KEY
+from .const import (
+    STORAGE_VERSION,
+    STORAGE_KEY,
+    SHORT_SILENCE_THRESHOLD_S,
+    TRIM_BUFFER_S,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,7 +49,7 @@ class CycleRecorder:
         self.hass = hass
         self.entry_id = entry_id
         self._store = RecorderStore(hass, STORAGE_VERSION, f"{STORAGE_KEY_RECORDER}.{entry_id}")
-        
+
         # State
         self._is_recording = False
         self._start_time: datetime | None = None
@@ -96,22 +101,22 @@ class CycleRecorder:
 
         _LOGGER.info("Stopping cycle recording. Total samples: %d", len(self._buffer))
         self._is_recording = False
-        
+
         # Create output packet
         result = {
             "start_time": self._start_time.isoformat() if self._start_time else None,
             "end_time": dt_util.now().isoformat(),
             "data": list(self._buffer),  # Copy
         }
-        
+
         # Save as last run (persisted)
         self._last_run = result
-        
+
         # Clear active state
         self._start_time = None
         self._buffer = []
         await self._async_save()
-        
+
         return result
 
     @property
@@ -143,7 +148,7 @@ class CycleRecorder:
 
         _LOGGER.info("Starting new cycle recording")
         # Previous recordings are kept until explicitly cleared or overwritten
-        
+
         self._is_recording = True
         self._start_time = dt_util.now()
         self._buffer = []
@@ -259,14 +264,14 @@ class CycleRecorder:
         # Time from last active sample to recording end
         # For manual recordings, we want to be conservative because of drying phases.
         raw_tail_trim = max(0.0, rec_end_ts - tail_ts)
-        
-        # If tail silence is less than 10 minutes, suggest 0 trim to be safe.
+
+        # If tail silence is less than SHORT_SILENCE_THRESHOLD_S, suggest 0 trim to be safe.
         # Dishwashers often have 5-10 min silent periods that are NOT the end.
-        if raw_tail_trim < 600: 
+        if raw_tail_trim < SHORT_SILENCE_THRESHOLD_S:
             tail_trim = 0.0
         else:
-            # If it's very long, suggest trimming but keep a 1-minute buffer
-            tail_trim = max(0.0, raw_tail_trim - 60.0)
+            # If it's very long, suggest trimming but keep a TRIM_BUFFER_S buffer
+            tail_trim = max(0.0, raw_tail_trim - TRIM_BUFFER_S)
             steps_tail = int(tail_trim / avg_dt)
             tail_trim = steps_tail * avg_dt
 

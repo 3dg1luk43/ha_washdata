@@ -44,7 +44,8 @@
           "manage_cycles": "Quản lý chu kỳ",
           "manage_profiles": "Quản lý hồ sơ",
           "record_cycle": "Chu kỳ ghi (Thủ công)",
-          "diagnostics": "Chẩn đoán & Bảo trì"
+          "diagnostics": "Chẩn đoán & Bảo trì",
+          "manage_phase_catalog": "Quản lý danh mục giai đoạn"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Chỉnh sửa/Đổi tên hồ sơ",
               "delete_profile": "🗑️ Xóa hồ sơ",
               "profile_stats": "📊 Thống kê hồ sơ",
-              "cleanup_profile": "🧹 Dọn dẹp lịch sử - Vẽ đồ thị & Xóa"
+              "cleanup_profile": "🧹 Dọn dẹp lịch sử - Vẽ đồ thị & Xóa",
+              "assign_phases": "🧩 Chỉ định Phạm vi Pha"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Đúng chương trình (nếu sửa)",
           "corrected_duration": "Thời lượng chính xác tính bằng phút (nếu sửa)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Quản lý danh mục giai đoạn",
+        "description": "Các giai đoạn hiện tại của loại thiết bị này:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Hoạt động",
+            "options": {
+              "create_custom_phase": "➕ Tạo giai đoạn tùy chỉnh",
+              "edit_custom_phase": "✏️ Chỉnh sửa giai đoạn tùy chỉnh",
+              "delete_custom_phase": "🗑️ Xóa giai đoạn tùy chỉnh"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Tạo giai đoạn tùy chỉnh",
+        "description": "Tạo tên và mô tả pha tùy chỉnh cho loại thiết bị này.",
+        "data": {
+          "phase_name": "Tên giai đoạn",
+          "phase_description": "Giai đoạn Mô tả"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Chỉnh sửa giai đoạn tùy chỉnh",
+        "description": "Chọn một giai đoạn tùy chỉnh để chỉnh sửa.",
+        "data": {
+          "phase_name": "Giai đoạn tùy chỉnh"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Chỉnh sửa giai đoạn tùy chỉnh",
+        "description": "Giai đoạn chỉnh sửa: {phase_name}",
+        "data": {
+          "phase_name": "Tên giai đoạn",
+          "phase_description": "Giai đoạn Mô tả"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Xóa giai đoạn tùy chỉnh",
+        "description": "Chọn một giai đoạn tùy chỉnh để xóa. Mọi phạm vi được chỉ định sử dụng giai đoạn này sẽ bị xóa.",
+        "data": {
+          "phase_name": "Giai đoạn tùy chỉnh"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Chỉ định phạm vi pha",
+        "description": "Hồ sơ: **{profile_name}**\nChế độ: **{assign_mode}**\nGợi ý chu kỳ: {cycle_hint}\n\nPhạm vi hiện tại:\n{current_ranges}\n\nNhãn pha dùng để hiển thị và tổ chức. Phát hiện sử dụng các mẫu nguồn chứ không phải tên pha.",
+        "data": {
+          "profile": "Hồ sơ",
+          "assign_mode": "Chế độ bài tập",
+          "source_cycle": "Chu kỳ nguồn (bắt buộc đối với chế độ dấu thời gian)",
+          "phase_1": "Giai đoạn 1",
+          "start_min_1": "Bắt đầu phút 1",
+          "end_min_1": "Kết thúc phút 1",
+          "start_ts_1": "Bắt đầu Dấu thời gian 1",
+          "end_ts_1": "Dấu thời gian kết thúc 1",
+          "phase_2": "Giai đoạn 2",
+          "start_min_2": "Bắt đầu phút thứ 2",
+          "end_min_2": "Phút cuối 2",
+          "start_ts_2": "Bắt đầu Dấu thời gian 2",
+          "end_ts_2": "Dấu thời gian kết thúc 2",
+          "phase_3": "Giai đoạn 3",
+          "start_min_3": "Bắt đầu phút thứ 3",
+          "end_min_3": "Phút cuối 3",
+          "start_ts_3": "Bắt đầu Dấu thời gian 3",
+          "end_ts_3": "Dấu thời gian kết thúc 3",
+          "phase_4": "Giai đoạn 4",
+          "start_min_4": "Bắt đầu phút thứ 4",
+          "end_min_4": "Phút cuối 4",
+          "start_ts_4": "Bắt đầu Dấu thời gian 4",
+          "end_ts_4": "Dấu thời gian kết thúc 4",
+          "phase_5": "Giai đoạn 5",
+          "start_min_5": "Bắt đầu phút thứ 5",
+          "end_min_5": "Phút cuối 5",
+          "start_ts_5": "Bắt đầu Dấu thời gian 5",
+          "end_ts_5": "Dấu thời gian kết thúc 5",
+          "phase_6": "Giai đoạn 6",
+          "start_min_6": "Bắt đầu phút thứ 6",
+          "end_min_6": "Phút cuối 6",
+          "start_ts_6": "Bắt đầu Dấu thời gian 6",
+          "end_ts_6": "Dấu thời gian kết thúc 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Chỉ định phạm vi pha",
+        "description": "Chọn một cấu hình để cấu hình phạm vi pha.",
+        "data": {
+          "profile": "Hồ sơ",
+          "assign_mode": {
+            "name": "Chế độ bài tập",
+            "options": {
+              "offset_mode": "Phút bù đắp",
+              "timestamp_mode": "Dấu thời gian"
+            }
+          },
+          "source_cycle": "Chu kỳ nguồn (đối với chế độ dấu thời gian)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Không đổi tên được hồ sơ. Hồ sơ có thể không tồn tại hoặc tên mới đã được sử dụng.",
       "assignment_failed": "Không thể chỉ định hồ sơ cho chu kỳ",
       "feedback_notification_title": "WashData: Chu trình xác minh ({device})",
-      "feedback_notification_message": "**Thiết bị**: {device}\n**Chương trình**: {program} ({confidence}%)\n**Thời gian**: {time}\n\nWashData cần sự trợ giúp của bạn để xác minh chu trình được phát hiện này.\n\nVui lòng truy cập **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Phản hồi tìm hiểu** để xác nhận hoặc sửa kết quả này."
+      "feedback_notification_message": "**Thiết bị**: {device}\n**Chương trình**: {program} ({confidence}%)\n**Thời gian**: {time}\n\nWashData cần sự trợ giúp của bạn để xác minh chu trình được phát hiện này.\n\nVui lòng truy cập **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Phản hồi tìm hiểu** để xác nhận hoặc sửa kết quả này.",
+      "duplicate_phase": "Một giai đoạn có tên này đã tồn tại.",
+      "phase_not_found": "Giai đoạn đã chọn không được tìm thấy.",
+      "invalid_phase_name": "Tên giai đoạn không được để trống.",
+      "phase_name_too_long": "Tên giai đoạn quá dài.",
+      "invalid_phase_range": "Phạm vi pha không hợp lệ. Kết thúc phải lớn hơn bắt đầu.",
+      "invalid_phase_timestamp": "Dấu thời gian không hợp lệ. Sử dụng định dạng YYYY-MM-DD HH:MM hoặc HH:MM.",
+      "overlapping_phase_ranges": "Phạm vi pha chồng chéo. Điều chỉnh phạm vi và thử lại.",
+      "incomplete_phase_row": "Mỗi hàng pha phải bao gồm một pha cộng với các giá trị bắt đầu/kết thúc hoàn chỉnh cho chế độ đã chọn.",
+      "timestamp_mode_cycle_required": "Vui lòng chọn chu kỳ nguồn khi sử dụng chế độ dấu thời gian."
     },
     "abort": {
       "no_cycles_found": "Không tìm thấy chu kỳ nào",
@@ -476,7 +585,8 @@
       "no_suggestions": "Chưa có giá trị đề xuất nào. Chạy một vài chu kỳ và thử lại.",
       "no_predictions": "Không có dự đoán",
       "reprocess_success": "Đã xử lý lại thành công chu kỳ {count}.",
-      "debug_data_cleared": "Đã xóa thành công dữ liệu gỡ lỗi khỏi chu kỳ {count}."
+      "debug_data_cleared": "Đã xóa thành công dữ liệu gỡ lỗi khỏi chu kỳ {count}.",
+      "no_custom_phases": "Không tìm thấy giai đoạn tùy chỉnh nào cho loại thiết bị này."
     }
   },
   "entity": {

@@ -44,7 +44,8 @@
           "manage_cycles": "Menaxhoni ciklet",
           "manage_profiles": "Menaxho profilet",
           "record_cycle": "Cikli i regjistrimit (manual)",
-          "diagnostics": "Diagnostikimi dhe mirëmbajtja"
+          "diagnostics": "Diagnostikimi dhe mirëmbajtja",
+          "manage_phase_catalog": "Menaxho Katalogun Fazor"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Ndrysho/Riemërto profilin",
               "delete_profile": "🗑️ Fshi profilin",
               "profile_stats": "📊 Statistikat e profilit",
-              "cleanup_profile": "🧹 Pastroni historinë - grafikoni dhe fshini"
+              "cleanup_profile": "🧹 Pastroni historinë - grafikoni dhe fshini",
+              "assign_phases": "🧩 Cakto vargjet e fazave"
             }
           }
         }
@@ -458,6 +460,104 @@
           "corrected_profile": "Programi i saktë (nëse korrigjohet)",
           "corrected_duration": "Kohëzgjatja e saktë në minuta (nëse korrigjohet)"
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Menaxho Katalogun Fazor",
+        "description": "Fazat aktuale për këtë lloj pajisjeje:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Veprimi",
+            "options": {
+              "create_custom_phase": "➕ Krijoni fazën e personalizuar",
+              "edit_custom_phase": "✏️ Ndrysho fazën e personalizuar",
+              "delete_custom_phase": "🗑️ Fshi Fazën e personalizuar"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Krijo një fazë të personalizuar",
+        "description": "Krijo një emër faze dhe përshkrim të personalizuar për këtë lloj pajisjeje.",
+        "data": {
+          "phase_name": "Emri i fazës",
+          "phase_description": "Përshkrimi i Fazës"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Redakto fazën e personalizuar",
+        "description": "Zgjidhni një fazë të personalizuar për të modifikuar.",
+        "data": {
+          "phase_name": "Faza e personalizuar"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Redakto fazën e personalizuar",
+        "description": "Faza e redaktimit: {phase_name}",
+        "data": {
+          "phase_name": "Emri i fazës",
+          "phase_description": "Përshkrimi i Fazës"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Fshi Fazën e personalizuar",
+        "description": "Zgjidhni një fazë të personalizuar për ta fshirë. Çdo interval i caktuar duke përdorur këtë fazë do të hiqet.",
+        "data": {
+          "phase_name": "Faza e personalizuar"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Caktoni vargjet e fazave",
+        "description": "Profili: **{profile_name}**\nModaliteti: **{assign_mode}**\nKëshillë për ciklin: {cycle_hint}\n\nGama aktuale:\n{current_ranges}\n\nEtiketat fazore janë për shfaqje dhe organizim. Zbulimi përdor modelet e fuqisë, jo emrat e fazave.",
+        "data": {
+          "profile": "Profili",
+          "assign_mode": "Mënyra e caktimit",
+          "source_cycle": "Cikli i burimit (kërkohet për modalitetin e vulës kohore)",
+          "phase_1": "Faza 1",
+          "start_min_1": "Minuta e fillimit 1",
+          "end_min_1": "Minuta e fundit 1",
+          "start_ts_1": "Vula kohore e nisjes 1",
+          "end_ts_1": "Vula kohore e përfundimit 1",
+          "phase_2": "Faza 2",
+          "start_min_2": "Minuta e fillimit 2",
+          "end_min_2": "Minuta e fundit 2",
+          "start_ts_2": "Fillimi i vulës kohore 2",
+          "end_ts_2": "Vula kohore e përfundimit 2",
+          "phase_3": "Faza 3",
+          "start_min_3": "Minuta e fillimit 3",
+          "end_min_3": "Minuta e fundit 3",
+          "start_ts_3": "Fillimi i vulës kohore 3",
+          "end_ts_3": "Vula kohore e fundit 3",
+          "phase_4": "Faza 4",
+          "start_min_4": "Minuta e fillimit 4",
+          "end_min_4": "Minuta e fundit 4",
+          "start_ts_4": "Vula kohore e nisjes 4",
+          "end_ts_4": "Vula kohore e fundit 4",
+          "phase_5": "Faza 5",
+          "start_min_5": "Minuta e fillimit 5",
+          "end_min_5": "Minuta e Fundit 5",
+          "start_ts_5": "Vula kohore e nisjes 5",
+          "end_ts_5": "Vula kohore e fundit 5",
+          "phase_6": "Faza 6",
+          "start_min_6": "Minuta e fillimit 6",
+          "end_min_6": "Minuta e fundit 6",
+          "start_ts_6": "Vula kohore e nisjes 6",
+          "end_ts_6": "Vula kohore e fundit 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Caktoni vargjet e fazave",
+        "description": "Zgjidhni një profil për të konfiguruar diapazonin e fazave.",
+        "data": {
+          "profile": "Profili",
+          "assign_mode": {
+            "name": "Mënyra e caktimit",
+            "options": {
+              "offset_mode": "Kompensimet e minutave",
+              "timestamp_mode": "Vula kohore"
+            }
+          },
+          "source_cycle": "Cikli i burimit (për modalitetin e vulës kohore)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Riemërtimi i profilit dështoi. Profili mund të mos ekzistojë ose një emër i ri është marrë tashmë.",
       "assignment_failed": "Caktimi i profilit për cikël dështoi",
       "feedback_notification_title": "Të dhënat e larjes: Verifiko ciklin ({device})",
-      "feedback_notification_message": "**Pajisja**: {device}\n**Programi**: {program} ({confidence}% besim)\n**Koha **: {time}\n\nWashData ka nevojë për ndihmën tuaj për të verifikuar këtë cikël të zbuluar.\n\nJu lutemi, shkoni te **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Mësimi Feedbacks** për të konfirmuar ose korrigjuar këtë rezultat."
+      "feedback_notification_message": "**Pajisja**: {device}\n**Programi**: {program} ({confidence}% besim)\n**Koha **: {time}\n\nWashData ka nevojë për ndihmën tuaj për të verifikuar këtë cikël të zbuluar.\n\nJu lutemi, shkoni te **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Mësimi Feedbacks** për të konfirmuar ose korrigjuar këtë rezultat.",
+      "duplicate_phase": "Një fazë me këtë emër ekziston tashmë.",
+      "phase_not_found": "Faza e përzgjedhur nuk u gjet.",
+      "invalid_phase_name": "Emri i fazës nuk mund të jetë bosh.",
+      "phase_name_too_long": "Emri i fazës është shumë i gjatë.",
+      "invalid_phase_range": "Gama e fazave është e pavlefshme. Fundi duhet të jetë më i madh se fillimi.",
+      "invalid_phase_timestamp": "Vula kohore është e pavlefshme. Përdor formatin VVV-MM-DD HH:MM ose HH:MM.",
+      "overlapping_phase_ranges": "Gama e fazave mbivendosen. Rregulloni intervalet dhe provoni përsëri.",
+      "incomplete_phase_row": "Çdo rresht fazor duhet të përfshijë një fazë plus vlerat e plota të fillimit/mbarimit për modalitetin e zgjedhur.",
+      "timestamp_mode_cycle_required": "Ju lutemi zgjidhni një cikël burimi kur përdorni modalitetin e vulës kohore."
     },
     "abort": {
       "no_cycles_found": "Nuk u gjetën cikle",
@@ -476,7 +585,8 @@
       "no_suggestions": "Nuk ka ende vlera të sugjeruara. Kryeni disa cikle dhe provoni përsëri.",
       "no_predictions": "Asnjë parashikim",
       "reprocess_success": "{count} cikle u ripërpunuan me sukses.",
-      "debug_data_cleared": "Të dhënat e korrigjimit u pastruan me sukses nga {count} cikle."
+      "debug_data_cleared": "Të dhënat e korrigjimit u pastruan me sukses nga {count} cikle.",
+      "no_custom_phases": "Nuk u gjetën faza të personalizuara për këtë lloj pajisjeje."
     }
   },
   "entity": {

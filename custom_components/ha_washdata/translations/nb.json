@@ -44,7 +44,8 @@
           "manage_cycles": "Administrer sykluser",
           "manage_profiles": "Administrer profiler",
           "record_cycle": "Ta opp syklus (Manuell)",
-          "diagnostics": "Diagnostikk og vedlikehold"
+          "diagnostics": "Diagnostikk og vedlikehold",
+          "manage_phase_catalog": "Administrer fasekatalog"
         }
       },
       "apply_suggestions": {
@@ -228,7 +229,8 @@
               "edit_profile": "✏️ Rediger/gi nytt navn til profil",
               "delete_profile": "🗑️ Slett profil",
               "profile_stats": "📊 Profilstatistikk",
-              "cleanup_profile": "🧹 Rydd opp historikk - graf og slett"
+              "cleanup_profile": "🧹 Rydd opp historikk - graf og slett",
+              "assign_phases": "🧩 Tildel faseområder"
             }
           }
         }
@@ -458,6 +460,104 @@
             }
           }
         }
+      },
+      "manage_phase_catalog": {
+        "title": "Administrer fasekatalog",
+        "description": "Gjeldende faser for denne enhetstypen:\n{phase_summary}",
+        "data": {
+          "action": {
+            "name": "Handling",
+            "options": {
+              "create_custom_phase": "➕ Opprett egendefinert fase",
+              "edit_custom_phase": "✏️ Rediger tilpasset fase",
+              "delete_custom_phase": "🗑️ Slett egendefinert fase"
+            }
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Opprett egendefinert fase",
+        "description": "Opprett et tilpasset fasenavn og beskrivelse for denne enhetstypen.",
+        "data": {
+          "phase_name": "Fasenavn",
+          "phase_description": "Fasebeskrivelse"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Rediger egendefinert fase",
+        "description": "Velg en egendefinert fase å redigere.",
+        "data": {
+          "phase_name": "Egendefinert fase"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Rediger egendefinert fase",
+        "description": "Redigeringsfase: {phase_name}",
+        "data": {
+          "phase_name": "Fasenavn",
+          "phase_description": "Fasebeskrivelse"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Slett egendefinert fase",
+        "description": "Velg en egendefinert fase for å slette. Eventuelle tildelte områder som bruker denne fasen vil bli fjernet.",
+        "data": {
+          "phase_name": "Egendefinert fase"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Tilordne faseområder",
+        "description": "Profil: **{profile_name}**\nModus: **{assign_mode}**\nSyklushint: {cycle_hint}\n\nGjeldende områder:\n{current_ranges}\n\nFaseetiketter er for visning og organisering. Deteksjon bruker strømmønstre, ikke fasenavn.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Tildelingsmodus",
+          "source_cycle": "Kildesyklus (påkrevd for tidsstempelmodus)",
+          "phase_1": "Fase 1",
+          "start_min_1": "Startminutt 1",
+          "end_min_1": "Sluttminutt 1",
+          "start_ts_1": "Start tidsstempel 1",
+          "end_ts_1": "Slutttidsstempel 1",
+          "phase_2": "Fase 2",
+          "start_min_2": "Startminutt 2",
+          "end_min_2": "Sluttminutt 2",
+          "start_ts_2": "Start tidsstempel 2",
+          "end_ts_2": "Slutttidsstempel 2",
+          "phase_3": "Fase 3",
+          "start_min_3": "Startminutt 3",
+          "end_min_3": "Sluttminutt 3",
+          "start_ts_3": "Start tidsstempel 3",
+          "end_ts_3": "Slutttidsstempel 3",
+          "phase_4": "Fase 4",
+          "start_min_4": "Startminutt 4",
+          "end_min_4": "Sluttminutt 4",
+          "start_ts_4": "Start tidsstempel 4",
+          "end_ts_4": "Slutttidsstempel 4",
+          "phase_5": "Fase 5",
+          "start_min_5": "Startminutt 5",
+          "end_min_5": "Sluttminutt 5",
+          "start_ts_5": "Start tidsstempel 5",
+          "end_ts_5": "Slutttidsstempel 5",
+          "phase_6": "Fase 6",
+          "start_min_6": "Startminutt 6",
+          "end_min_6": "Sluttminutt 6",
+          "start_ts_6": "Start tidsstempel 6",
+          "end_ts_6": "Slutttidsstempel 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Tilordne faseområder",
+        "description": "Velg en profil for å konfigurere faseområder.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": {
+            "name": "Tildelingsmodus",
+            "options": {
+              "offset_mode": "Minutt-forskyvninger",
+              "timestamp_mode": "Tidsstempler"
+            }
+          },
+          "source_cycle": "Kildesyklus (for tidsstempelmodus)"
+        }
       }
     },
     "error": {
@@ -466,7 +566,16 @@
       "rename_failed": "Profilnavnendring mislyktes. Profilen eksisterer kanskje ikke eller det nye navnet er allerede i bruk.",
       "assignment_failed": "Tildeling av profil til syklus mislyktes",
       "feedback_notification_title": "WashData: Verifiser syklus ({device})",
-      "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence}% konfidens)\n**Tid**: {time}\n\nWashData trenger din hjelp til å verifisere denne detekterte syklusen.\n\nGå til **Innstillinger > Enheter og tjenester > WashData > Konfigurer > Læringstilbakemeldinger** for å bekrefte eller korrigere dette resultatet."
+      "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence}% konfidens)\n**Tid**: {time}\n\nWashData trenger din hjelp til å verifisere denne detekterte syklusen.\n\nGå til **Innstillinger > Enheter og tjenester > WashData > Konfigurer > Læringstilbakemeldinger** for å bekrefte eller korrigere dette resultatet.",
+      "duplicate_phase": "En fase med dette navnet eksisterer allerede.",
+      "phase_not_found": "Den valgte fasen ble ikke funnet.",
+      "invalid_phase_name": "Fasenavnet kan ikke være tomt.",
+      "phase_name_too_long": "Fasenavnet er for langt.",
+      "invalid_phase_range": "Faseområdet er ugyldig. Slutten må være større enn starten.",
+      "invalid_phase_timestamp": "Tidsstempelet er ugyldig. Bruk formatet ÅÅÅÅ-MM-DD TT:MM eller TT:MM.",
+      "overlapping_phase_ranges": "Faseområder overlapper hverandre. Juster områdene og prøv igjen.",
+      "incomplete_phase_row": "Hver faserad må inkludere en fase pluss komplette start-/sluttverdier for den valgte modusen.",
+      "timestamp_mode_cycle_required": "Velg en kildesyklus når du bruker tidsstempelmodus."
     },
     "abort": {
       "no_cycles_found": "Ingen sykluser funnet",
@@ -476,7 +585,8 @@
       "no_suggestions": "Ingen foreslåtte verdier tilgjengelige ennå. Kjør noen sykluser og prøv igjen.",
       "no_predictions": "Ingen prediksjoner",
       "reprocess_success": "Vellykket gjenbehandlet {count} sykluser.",
-      "debug_data_cleared": "Feilsøkingsdata vellykket slettet fra {count} sykluser."
+      "debug_data_cleared": "Feilsøkingsdata vellykket slettet fra {count} sykluser.",
+      "no_custom_phases": "Fant ingen egendefinerte faser for denne enhetstypen."
     }
   },
   "entity": {

@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 from typing import Any, TYPE_CHECKING
 
 import numpy as np
 from homeassistant.core import HomeAssistant
-import homeassistant.util.dt as dt_util
 
 from .const import (
     CONF_WATCHDOG_INTERVAL,
@@ -21,14 +19,11 @@ from .const import (
     CONF_PROFILE_DURATION_TOLERANCE,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
-    CONF_START_ENERGY_THRESHOLD,
     CONF_END_ENERGY_THRESHOLD,
-    CONF_MIN_OFF_GAP,
     CONF_RUNNING_DEAD_ZONE,
     DEFAULT_OFF_DELAY_BY_DEVICE,
     DEFAULT_OFF_DELAY,
 )
-from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .time_utils import power_data_to_offsets
 
 if TYPE_CHECKING:
@@ -74,11 +69,11 @@ class SuggestionEngine:
         # Use device-specific default as floor to prevent splitting cycles with long pauses
         device_floor = DEFAULT_OFF_DELAY_BY_DEVICE.get(self.device_type, DEFAULT_OFF_DELAY)
         suggested_off_delay = int(max(device_floor, p95_dt * 5))
-        
+
         reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
         if suggested_off_delay == device_floor:
             reason_off = f"Used device-specific safe minimum for {self.device_type} ({device_floor}s)."
-            
+
         suggestions[CONF_OFF_DELAY] = {
             "value": suggested_off_delay,
             "reason": reason_off
@@ -96,10 +91,10 @@ class SuggestionEngine:
     def generate_model_suggestions(self) -> dict[str, Any]:
         """Generate suggestions for model parameters based on past cycles."""
         suggestions = {}
-        
+
         cycles = self.profile_store.get_past_cycles()[-100:]
         profiles = self.profile_store.get_profiles()
-        
+
         ratios = []
         for c in cycles:
             if not c.get("profile_name") or c.get("status") == "interrupted":
@@ -116,19 +111,19 @@ class SuggestionEngine:
             arr = np.array(ratios)
             deviations = np.abs(arr - 1.0)
             p95_dev = float(np.percentile(deviations, 95))
-            
+
             suggested_tol = min(0.50, max(0.10, round(p95_dev + 0.05, 2)))
             reason_tol = f"Based on duration variance of {len(ratios)} recent labeled cycles (p95 dev={p95_dev:.2f})."
-            
+
             suggestions[CONF_DURATION_TOLERANCE] = {"value": suggested_tol, "reason": reason_tol}
             suggestions[CONF_PROFILE_DURATION_TOLERANCE] = {"value": suggested_tol, "reason": reason_tol}
 
             p05_ratio = float(np.percentile(arr, 5))
             p95_ratio = float(np.percentile(arr, 95))
-            
+
             min_r = max(0.1, round(p05_ratio - 0.1, 2))
             max_r = min(3.0, round(p95_ratio + 0.1, 2))
-            
+
             if min_r < max_r - 0.2:
                 suggestions[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] = {
                     "value": min_r,
@@ -163,21 +158,21 @@ class SuggestionEngine:
         # Note: We reuse logic from parameter_optimizer.py but simplified for runtime
         powers = np.array([p[1] for p in readings])
         active_powers = powers[powers > 0.5]
-        
+
         if len(active_powers) < 5:
             return {}
 
         min_active = np.min(active_powers)
-        
+
         suggested_stop = round(min_active * 0.8, 2)
         suggested_start = round(min_active * 1.2, 2)
-        
+
         # Energy suggestions
         # Simplified: Use 0.05Wh as default end gate
         suggested_end_energy = 0.05
-        
+
         # Timing suggestions (Aggressive as per user feedback)
-        # We can't really do gap analysis on a single cycle, 
+        # We can't really do gap analysis on a single cycle,
         # but we can look for early dips for dead zone.
         dead_zone = 0
         for ts_offset, p in readings:
@@ -186,7 +181,7 @@ class SuggestionEngine:
                 break
             if p < 5.0 and elapsed > 5.0:
                 dead_zone = int(elapsed)
-        
+
         suggested_dead_zone = min(300, dead_zone) if dead_zone > 0 else 60
 
         new_suggestions = {
@@ -214,6 +209,6 @@ class SuggestionEngine:
         """Persist suggestions to the profile store."""
         for key, data in suggestions.items():
             self.profile_store.set_suggestion(key, data["value"], reason=data["reason"])
-        
+
         if self.hass and suggestions:
             self.hass.async_create_task(self.profile_store.async_save())
