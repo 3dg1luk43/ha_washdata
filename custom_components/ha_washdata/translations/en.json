@@ -206,15 +206,15 @@
         "title": "Manage Cycles",
         "description": "Recent cycles:\n{recent_cycles}",
         "data": {
+          "action": "Action"
+        },
+        "options": {
           "action": {
-            "name": "Action",
-            "options": {
-              "auto_label_cycles": "🤖 Auto-Label Old Cycles",
-              "select_cycle_to_label": "🏷️ Label Specific Cycle",
-              "select_cycle_to_label_multi": "🏷️ Label Multiple Cycles",
-              "select_cycle_to_delete": "🗑️ Delete Cycle",
-              "interactive_editor": "✂️ Merge/Split Interactive Editor"
-            }
+            "auto_label_cycles": "🤖 Auto-Label Old Cycles",
+            "select_cycle_to_label": "🏷️ Label Specific Cycle",
+            "select_cycle_to_label_multi": "🏷️ Label Multiple Cycles",
+            "select_cycle_to_delete": "🗑️ Delete Cycle",
+            "interactive_editor": "✂️ Merge/Split Interactive Editor"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Manage Profiles",
         "description": "Profile Summary:\n{profile_summary}",
         "data": {
+          "action": "Action"
+        },
+        "options": {
           "action": {
-            "name": "Action",
-            "options": {
-              "create_profile": "➕ Create New Profile",
-              "edit_profile": "✏️ Edit/Rename Profile",
-              "delete_profile": "🗑️ Delete Profile",
-              "profile_stats": "📊 Profile Statistics",
-              "cleanup_profile": "🧹 Clean Up History - Graph & Delete",
-              "assign_phases": "🧩 Assign Phase Ranges"
-            }
+            "create_profile": "➕ Create New Profile",
+            "edit_profile": "✏️ Edit/Rename Profile",
+            "delete_profile": "🗑️ Delete Profile",
+            "profile_stats": "📊 Profile Statistics",
+            "cleanup_profile": "🧹 Clean Up History - Graph & Delete",
+            "assign_phases": "🧩 Assign Phase Ranges"
           }
         }
       },
@@ -239,13 +239,13 @@
         "title": "Manage Phase Catalog",
         "description": "Current phases for this device type:\n{phase_summary}",
         "data": {
+          "action": "Action"
+        },
+        "options": {
           "action": {
-            "name": "Action",
-            "options": {
-              "create_custom_phase": "➕ Create Custom Phase",
-              "edit_custom_phase": "✏️ Edit Custom Phase",
-              "delete_custom_phase": "🗑️ Delete Custom Phase"
-            }
+            "create_custom_phase": "➕ Create Custom Phase",
+            "edit_custom_phase": "✏️ Edit Custom Phase",
+            "delete_custom_phase": "🗑️ Delete Custom Phase"
           }
         }
       },
@@ -323,14 +323,14 @@
         "description": "Select a profile to configure phase ranges.",
         "data": {
           "profile": "Profile",
-          "assign_mode": {
-            "name": "Assignment Mode",
-            "options": {
-              "offset_mode": "Minute Offsets",
-              "timestamp_mode": "Timestamps"
-            }
-          },
+          "assign_mode": "Assignment Mode",
           "source_cycle": "Source Cycle (for timestamp mode)"
+        },
+        "options": {
+          "assign_mode": {
+            "offset_mode": "Minute Offsets",
+            "timestamp_mode": "Timestamps"
+          }
         }
       },
       "profile_stats": {
@@ -434,13 +434,13 @@
         "title": "Merge/Split Interactive Editor",
         "description": "Select a manual action to perform on your cycle history.",
         "data": {
+          "editor_action": "Action"
+        },
+        "options": {
           "editor_action": {
-            "name": "Action",
-            "options": {
-              "split": "✂️ Split a Cycle (Find gaps)",
-              "merge": "🔗 Merge Cycles (Join fragments)",
-              "delete": "🗑️ Delete Cycle(s)"
-            }
+            "split": "✂️ Split a Cycle (Find gaps)",
+            "merge": "🔗 Merge Cycles (Join fragments)",
+            "delete": "🗑️ Delete Cycle(s)"
           }
         }
       },
@@ -490,14 +490,14 @@
         "title": "Export/Import JSON",
         "description": "Copy/paste cycles, profiles, AND settings for this device. Export below or paste JSON to import.",
         "data": {
-          "mode": {
-            "name": "Action",
-            "options": {
-              "export": "📤 Export All Data",
-              "import": "📥 Import/Merge Data"
-            }
-          },
+          "mode": "Action",
           "json_payload": "Complete Configuration JSON"
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Export All Data",
+            "import": "📥 Import/Merge Data"
+          }
         },
         "data_description": {
           "mode": "Choose Export to copy current data and settings, or Import to paste exported data from another WashData device.",
@@ -508,16 +508,16 @@
         "title": "Record Cycle",
         "description": "Manually record a cycle to create a clean profile without interference.\n\nStatus: **{status}**\nDuration: {duration}s\nSamples: {samples}",
         "data": {
+          "action": "Action"
+        },
+        "options": {
           "action": {
-            "name": "Action",
-            "options": {
-              "start_recording": "⏺ Start New Recording",
-              "stop_recording": "⏹ Stop Recording (Save & Process)",
-              "refresh_status": "🔄 Refresh Status",
-              "process_recording": "⚙️ Process Last Recording (Trim & Save)",
-              "discard_recording": "🗑️ Discard Last Recording",
-              "cancel": "✖ Cancel"
-            }
+            "start_recording": "⏺ Start New Recording",
+            "stop_recording": "⏹ Stop Recording (Save & Process)",
+            "refresh_status": "🔄 Refresh Status",
+            "process_recording": "⚙️ Process Last Recording (Trim & Save)",
+            "discard_recording": "🗑️ Discard Last Recording",
+            "cancel": "✖ Cancel"
           }
         }
       },
@@ -546,17 +546,17 @@
         "title": "Resolve Feedback",
         "description": "**Detected Program**: {profile}\n**Confidence**: {confidence}%\n**Estimated**: {est}m, **Actual**: {act}m",
         "data": {
-          "action": {
-            "name": "What would you like to do?",
-            "options": {
-              "confirm": "✅ Confirm - Correct Detection",
-              "correct": "✏️ Correct - Choose Program/Duration",
-              "ignore": "✖ Ignore - False Positive/Noisy Cycle",
-              "delete": "🗑️ Delete - Remove from History"
-            }
-          },
+          "action": "What would you like to do?",
           "corrected_profile": "Correct Program (if correcting)",
           "corrected_duration": "Correct Duration in minutes (if correcting)"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ Confirm - Correct Detection",
+            "correct": "✏️ Correct - Choose Program/Duration",
+            "ignore": "✖ Ignore - False Positive/Noisy Cycle",
+            "delete": "🗑️ Delete - Remove from History"
+          }
         }
       }
     },
