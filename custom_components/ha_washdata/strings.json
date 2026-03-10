@@ -429,13 +429,6 @@
         "description": "Select a manual action to perform on your cycle history.",
         "data": {
           "editor_action": "Action"
-        },
-        "options": {
-          "editor_action": {
-            "split": "\u2702\ufe0f Split a Cycle (Find gaps)",
-            "merge": "\ud83d\udd17 Merge Cycles (Join fragments)",
-            "delete": "\ud83d\uddd1\ufe0f Delete Cycle(s)"
-          }
         }
       },
       "editor_select": {
