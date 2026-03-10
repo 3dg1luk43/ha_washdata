@@ -487,12 +487,7 @@
           "mode": "Action",
           "json_payload": "Complete Configuration JSON"
         },
-        "options": {
-          "mode": {
-            "export": "📤 Export All Data",
-            "import": "📥 Import/Merge Data"
-          }
-        },
+
         "data_description": {
           "mode": "Choose Export to copy current data and settings, or Import to paste exported data from another WashData device.",
           "json_payload": "For Export: copy this JSON (includes cycles, profiles, and all fine-tuned settings). For Import: paste JSON exported from WashData."
