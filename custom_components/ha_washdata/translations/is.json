@@ -207,15 +207,6 @@
         "description": "Nýlegar lotur:\n{recent_cycles}",
         "data": {
           "action": "Aðgerð"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Sjálfvirk merking á gömlum hringrásum",
-            "select_cycle_to_label": "🏷️ Merkið sérstaka hringrás",
-            "select_cycle_to_label_multi": "🏷️ Merktu margar lotur",
-            "select_cycle_to_delete": "🗑️ Eyða hringrás",
-            "interactive_editor": "✂️ Sameina/skipta gagnvirkum ritstjóra"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Yfirlit yfir prófíl:\n{profile_summary}",
         "data": {
           "action": "Aðgerð"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Búðu til nýjan prófíl",
-            "edit_profile": "✏️ Breyta/endurnefna prófíl",
-            "delete_profile": "🗑️ Eyða prófíl",
-            "profile_stats": "📊 Tölfræði um prófíl",
-            "cleanup_profile": "🧹 Hreinsaðu sögu - línurit og eyða",
-            "assign_phases": "🧩 Úthlutaðu áfangasviðum"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Veldu handvirka aðgerð til að framkvæma á hringrásarsögunni þinni.",
         "data": {
           "editor_action": "Aðgerð"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Skiptu hringrás (finndu eyður)",
-            "merge": "🔗 Sameina hringrás (Tengja saman brot)",
-            "delete": "🗑️ Eyða hringrás(um)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Veldu Flytja út til að afrita núverandi gögn og stillingar, eða Flytja inn til að líma útflutt gögn úr öðru WashData tæki.",
           "json_payload": "Fyrir útflutning: afritaðu þetta JSON (inniheldur lotur, snið og allar fínstilltar stillingar). Fyrir innflutning: límdu JSON flutt út frá WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Flyttu út öll gögn",
-            "import": "📥 Flytja inn / sameina gögn"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Taktu upp lotu handvirkt til að búa til hreint snið án truflana.\n\nStaða: **{status}**\nLengd: {duration}s\nSýnishorn: {samples}",
         "data": {
           "action": "Aðgerð"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Byrjaðu nýja upptöku",
-            "stop_recording": "⏹ Stöðva upptöku (vista og vinna)",
-            "refresh_status": "🔄 Endurnýja stöðu",
-            "process_recording": "⚙️ Vinna við síðustu upptöku (klippa og vista)",
-            "discard_recording": "🗑️ Fleygðu síðustu upptöku",
-            "cancel": "✖ Hætta við"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Rétt forrit (ef leiðrétt er)",
           "corrected_duration": "Rétt lengd í mínútum (ef leiðrétt er)",
           "action": "Hvað myndir þú vilja gera?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Staðfesta - Rétt uppgötvun",
-            "correct": "✏️ Rétt - Veldu dagskrá/tímalengd",
-            "ignore": "✖ Hunsa - rangt jákvætt/hávaðasamt hringrás",
-            "delete": "🗑️ Eyða - Fjarlægja úr sögu"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Núverandi fasar fyrir þessa tegund tækis:\n{phase_summary}",
         "data": {
           "action": "Aðgerð"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Búðu til sérsniðna áfanga",
-            "edit_custom_phase": "✏️ Breyta sérsniðnum áfanga",
-            "delete_custom_phase": "🗑️ Eyða sérsniðnum áfanga"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Prófíll",
           "source_cycle": "Upprunahringur (fyrir tímastimplaham)",
           "assign_mode": "Úthlutunarhamur"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Mínútujöfnun",
-            "timestamp_mode": "Tímastimplar"
-          }
         }
       }
     },

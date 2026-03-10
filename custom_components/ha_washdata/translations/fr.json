@@ -207,15 +207,6 @@
         "description": "Cycles récents :\n{recent_cycles}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Étiquetage automatique des anciens cycles",
-            "select_cycle_to_label": "🏷️ Cycle spécifique à l'étiquette",
-            "select_cycle_to_label_multi": "🏷️ Étiquetez plusieurs cycles",
-            "select_cycle_to_delete": "🗑️ Supprimer le cycle",
-            "interactive_editor": "✂️ Fusionner/diviser l'éditeur interactif"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Résumé du profil :\n{profile_summary}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Créer un nouveau profil",
-            "edit_profile": "✏️ Modifier/Renommer le profil",
-            "delete_profile": "🗑️ Supprimer le profil",
-            "profile_stats": "📊 Statistiques de profil",
-            "cleanup_profile": "🧹 Nettoyer l'historique - Graphiquer et supprimer",
-            "assign_phases": "🧩 Attribuer des plages de phases"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Sélectionnez une action manuelle à effectuer sur votre historique de cycles.",
         "data": {
           "editor_action": "Action"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Diviser un cycle (Trouver des lacunes)",
-            "merge": "🔗 Fusionner les cycles (Joindre des fragments)",
-            "delete": "🗑️ Supprimer le(s) cycle(s)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Choisissez Exporter pour copier les données et paramètres actuels, ou Importer pour coller des données exportées d'un autre appareil WashData.",
           "json_payload": "Pour Exporter : copiez ce JSON (inclut cycles, profils et tous les paramètres affinés). Pour Importer : collez le JSON exporté depuis WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Exporter toutes les données",
-            "import": "📥 Importer/Fusionner des données"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Enregistrez manuellement un cycle pour créer un profil propre sans interférences.\n\nStatut : **{status}**\nDurée : {duration}s\nÉchantillons : {samples}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Démarrer un nouvel enregistrement",
-            "stop_recording": "⏹ Arrêter l'enregistrement (Enregistrer et traiter)",
-            "refresh_status": "🔄 Actualiser le statut",
-            "process_recording": "⚙️ Traiter le dernier enregistrement (couper et enregistrer)",
-            "discard_recording": "🗑️ Supprimer le dernier enregistrement",
-            "cancel": "✖ Annuler"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Programme corrigé (si correction)",
           "corrected_duration": "Durée corrigée en minutes (si correction)",
           "action": "Qu'aimeriez-vous faire ?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Confirmer - Détection correcte",
-            "correct": "✏️ Correct - Choisissez Programme/Durée",
-            "ignore": "✖ Ignorer - Cycle faux positif/bruyant",
-            "delete": "🗑️ Supprimer - Supprimer de l'historique"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Phases actuelles pour ce type d'appareil :\n{phase_summary}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Créer une phase personnalisée",
-            "edit_custom_phase": "✏️ Modifier la phase personnalisée",
-            "delete_custom_phase": "🗑️ Supprimer la phase personnalisée"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "source_cycle": "Cycle source (pour le mode horodatage)",
           "assign_mode": "Mode d'affectation"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Décalages minutes",
-            "timestamp_mode": "Horodatages"
-          }
         }
       }
     },

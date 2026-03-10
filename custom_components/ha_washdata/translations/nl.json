@@ -207,15 +207,6 @@
         "description": "Recente cycli:\n{recent_cycles}",
         "data": {
           "action": "Actie"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Oude cycli automatisch labelen",
-            "select_cycle_to_label": "🏷️ Labelspecifieke cyclus",
-            "select_cycle_to_label_multi": "🏷️ Label meerdere cycli",
-            "select_cycle_to_delete": "🗑️ Cyclus verwijderen",
-            "interactive_editor": "✂️ Interactieve editor samenvoegen/splitsen"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profieloverzicht:\n{profile_summary}",
         "data": {
           "action": "Actie"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Nieuw profiel maken",
-            "edit_profile": "✏️ Profiel bewerken/hernoemen",
-            "delete_profile": "🗑️ Profiel verwijderen",
-            "profile_stats": "📊 Profielstatistieken",
-            "cleanup_profile": "🧹 Geschiedenis opschonen - Grafiek en verwijderen",
-            "assign_phases": "🧩 Fasebereiken toewijzen"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Selecteer een handmatige actie voor uw cyclusgeschiedenis.",
         "data": {
           "editor_action": "Actie"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Een cyclus splitsen (hiaten zoeken)",
-            "merge": "🔗 Cycli samenvoegen (fragmenten samenvoegen)",
-            "delete": "🗑️ Cyclus(s) verwijderen"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Kies Exporteren om huidige gegevens en instellingen te kopiëren, of Importeren om geëxporteerde gegevens van een ander WashData-apparaat te plakken.",
           "json_payload": "Voor Export: kopieer deze JSON (bevat cycli, profielen en alle instellingen). Voor Import: plak JSON geëxporteerd vanuit WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Exporteer alle gegevens",
-            "import": "📥 Gegevens importeren/samenvoegen"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Neem handmatig een cyclus op om een schoon profiel te maken zonder interferentie.\n\nStatus: **{status}**\nDuur: {duration}s\nMonsters: {samples}",
         "data": {
           "action": "Actie"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Start nieuwe opname",
-            "stop_recording": "⏹ Opname stoppen (opslaan en verwerken)",
-            "refresh_status": "🔄 Status vernieuwen",
-            "process_recording": "⚙️ Laatste opname verwerken (bijsnijden en opslaan)",
-            "discard_recording": "🗑️ Laatste opname weggooien",
-            "cancel": "✖ Annuleren"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Correct programma (bij correctie)",
           "corrected_duration": "Correcte duur in minuten (bij correctie)",
           "action": "Wat zou je graag willen doen?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Bevestigen - Correcte detectie",
-            "correct": "✏️ Correct - Kies Programma/Duur",
-            "ignore": "✖ Negeren - Vals positieve/luidruchtige cyclus",
-            "delete": "🗑️ Verwijderen - Verwijderen uit geschiedenis"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Huidige fasen voor dit apparaattype:\n{phase_summary}",
         "data": {
           "action": "Actie"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Maak een aangepaste fase",
-            "edit_custom_phase": "✏️ Aangepaste fase bewerken",
-            "delete_custom_phase": "🗑️ Aangepaste fase verwijderen"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profiel",
           "source_cycle": "Broncyclus (voor tijdstempelmodus)",
           "assign_mode": "Toewijzingsmodus"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minuutcompensaties",
-            "timestamp_mode": "Tijdstempels"
-          }
         }
       }
     },

@@ -207,15 +207,6 @@
         "description": "최근 주기:\n{recent_cycles}",
         "data": {
           "action": "행동"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 기존 자전거에 자동 라벨 지정",
-            "select_cycle_to_label": "🏷️ 라벨별 주기",
-            "select_cycle_to_label_multi": "🏷️ 여러 주기에 라벨 지정",
-            "select_cycle_to_delete": "🗑️ 주기 삭제",
-            "interactive_editor": "✂️ 대화형 편집기 병합/분할"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "프로필 요약:\n{profile_summary}",
         "data": {
           "action": "행동"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ 새 프로필 만들기",
-            "edit_profile": "✏️ 프로필 편집/이름 바꾸기",
-            "delete_profile": "🗑️ 프로필 삭제",
-            "profile_stats": "📊 프로필 통계",
-            "cleanup_profile": "🧹 기록 정리 - 그래프 및 삭제",
-            "assign_phases": "🧩 위상 범위 지정"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "주기 기록에 대해 수행할 수동 작업을 선택합니다.",
         "data": {
           "editor_action": "행동"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ 주기 분할(틈 찾기)",
-            "merge": "🔗 병합 사이클(조각 결합)",
-            "delete": "🗑️ 주기 삭제"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "현재 데이터 및 설정을 복사하려면 내보내기를 선택하고, 다른 WashData 장치에서 내보낸 데이터를 붙여넣으려면 가져오기를 선택하세요.",
           "json_payload": "내보내기의 경우: 이 JSON을 복사합니다(사이클, 프로필 및 모든 미세 조정 설정 포함). 가져오기의 경우: WashData에서 내보낸 JSON을 붙여넣습니다."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 모든 데이터 내보내기",
-            "import": "📥 데이터 가져오기/병합"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "간섭 없이 깔끔한 프로파일을 생성하기 위해 사이클을 수동으로 기록합니다.\n\n상태: **{status}**\n기간: {duration}초\n샘플: {samples}",
         "data": {
           "action": "행동"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ 새로운 녹음 시작",
-            "stop_recording": "⏹ 녹화 중지(저장 및 처리)",
-            "refresh_status": "🔄 새로 고침 상태",
-            "process_recording": "⚙️ 마지막 녹화 처리(트리밍 및 저장)",
-            "discard_recording": "🗑️ 마지막 녹음 취소",
-            "cancel": "✖ 취소"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "올바른 프로그램(수정하는 경우)",
           "corrected_duration": "수정 기간(분)(수정하는 경우)",
           "action": "무엇을 하고 싶나요?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ 확인 - 올바른 감지",
-            "correct": "✏️ 정답 - 프로그램/기간 선택",
-            "ignore": "✖ 무시 - 거짓 긍정/노이즈 주기",
-            "delete": "🗑️ 삭제 - 기록에서 제거"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "이 장치 유형의 현재 단계:\n{phase_summary}",
         "data": {
           "action": "행동"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ 사용자 정의 단계 생성",
-            "edit_custom_phase": "✏️ 사용자 정의 단계 편집",
-            "delete_custom_phase": "🗑️ 사용자 정의 단계 삭제"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "윤곽",
           "source_cycle": "소스 사이클(타임스탬프 모드용)",
           "assign_mode": "할당 모드"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "분 오프셋",
-            "timestamp_mode": "타임스탬프"
-          }
         }
       }
     },

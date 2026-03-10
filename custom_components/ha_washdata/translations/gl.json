@@ -207,15 +207,6 @@
         "description": "Últimos ciclos:\n{recent_cycles}",
         "data": {
           "action": "Acción"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Etiqueta automática de ciclos antigos",
-            "select_cycle_to_label": "🏷️ Etiqueta Ciclo Específico",
-            "select_cycle_to_label_multi": "🏷️ Etiquetar Ciclos Múltiples",
-            "select_cycle_to_delete": "🗑️ Eliminar ciclo",
-            "interactive_editor": "✂️ Combinar/Dividir Editor interactivo"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Resumo do perfil:\n{profile_summary}",
         "data": {
           "action": "Acción"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Crear novo perfil",
-            "edit_profile": "✏️ Editar/Renomear o perfil",
-            "delete_profile": "🗑️ Eliminar perfil",
-            "profile_stats": "📊 Estatísticas do perfil",
-            "cleanup_profile": "🧹 Limpar o historial: gráficos e borrar",
-            "assign_phases": "🧩 Asigna intervalos de fase"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Seleccione unha acción manual para realizar no seu historial de ciclos.",
         "data": {
           "editor_action": "Acción"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Dividir un ciclo (Buscar lagoas)",
-            "merge": "🔗 Combinar ciclos (unir fragmentos)",
-            "delete": "🗑️ Eliminar ciclo(s)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Escolla Exportar para copiar os datos e a configuración actuais ou Importar para pegar os datos exportados desde outro dispositivo WashData.",
           "json_payload": "Para exportar: copia este JSON (inclúe ciclos, perfís e todas as configuracións afinadas). Para importar: pegue JSON exportado desde WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Exportar todos os datos",
-            "import": "📥 Importar/Combinar datos"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Grava manualmente un ciclo para crear un perfil limpo sen interferencias.\n\nEstado: **{status}**\nDuración: {duration} s\nMostras: {samples}",
         "data": {
           "action": "Acción"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Comeza unha nova gravación",
-            "stop_recording": "⏹ Deter a gravación (gardar e procesar)",
-            "refresh_status": "🔄 Estado de actualización",
-            "process_recording": "⚙️ Procesar a última gravación (recortar e gardar)",
-            "discard_recording": "🗑️ Descartar a última gravación",
-            "cancel": "✖ Cancelar"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Programa correcto (se está corrixindo)",
           "corrected_duration": "Duración correcta en minutos (se se corrixe)",
           "action": "Que che gustaría facer?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Confirmar - Detección correcta",
-            "correct": "✏️ Correcto - Escolla Programa/Duración",
-            "ignore": "✖ Ignorar - Ciclo falso positivo/ruidoso",
-            "delete": "🗑️ Eliminar - Eliminar do historial"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Fases actuais para este tipo de dispositivo:\n{phase_summary}",
         "data": {
           "action": "Acción"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Crear fase personalizada",
-            "edit_custom_phase": "✏️ Editar Fase Personalizada",
-            "delete_custom_phase": "🗑️ Eliminar Fase Personalizada"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Perfil",
           "source_cycle": "Ciclo de orixe (para o modo de marca de tempo)",
           "assign_mode": "Modo de asignación"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Compensacións de minutos",
-            "timestamp_mode": "Marcas de tempo"
-          }
         }
       }
     },

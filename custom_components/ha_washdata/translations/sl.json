@@ -207,15 +207,6 @@
         "description": "Nedavni cikli:\n{recent_cycles}",
         "data": {
           "action": "Akcija"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Samodejno označi stare cikle",
-            "select_cycle_to_label": "🏷️ Poseben cikel oznake",
-            "select_cycle_to_label_multi": "🏷️ Označite več ciklov",
-            "select_cycle_to_delete": "🗑️ Izbriši cikel",
-            "interactive_editor": "✂️ Interaktivni urejevalnik za spajanje/razdelitev"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Povzetek profilov:\n{profile_summary}",
         "data": {
           "action": "Akcija"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Ustvari nov profil",
-            "edit_profile": "✏️ Uredi/preimenuj profil",
-            "delete_profile": "🗑️ Izbriši profil",
-            "profile_stats": "📊 Statistika profila",
-            "cleanup_profile": "🧹 Čiščenje zgodovine - grafikon in brisanje",
-            "assign_phases": "🧩 Dodeli fazne razpone"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Izberite ročno dejanje za vašo zgodovino ciklov.",
         "data": {
           "editor_action": "Akcija"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Razdelite cikel (poiščite vrzeli)",
-            "merge": "🔗 Združi cikle (združi fragmente)",
-            "delete": "🗑️ Brisanje ciklov"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Izberite Izvozi za kopiranje trenutnih podatkov in nastavitev, ali Uvozi za lepljenje podatkov, izvoženih iz druge naprave WashData.",
           "json_payload": "Za Izvoz: kopirajte ta JSON (vsebuje cikle, profile in vse nastavitve). Za Uvoz: prilepite JSON, izvožen iz WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Izvozi vse podatke",
-            "import": "📥 Uvozi/združi podatke"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Posnemite cikel ročno, da ustvarite čist profil brez motenj.\n\nStatus: **{status}**\nTrajanje: {duration}s\nVzorci: {samples}",
         "data": {
           "action": "Akcija"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Začni novo snemanje",
-            "stop_recording": "⏹ Ustavi snemanje (Shrani in obdelaj)",
-            "refresh_status": "🔄 Osveži stanje",
-            "process_recording": "⚙️ Obdelaj zadnji posnetek (obreži in shrani)",
-            "discard_recording": "🗑️ Zavrzi zadnji posnetek",
-            "cancel": "✖ Prekliči"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Pravilen program (če popravljate)",
           "corrected_duration": "Pravilno trajanje v minutah (če popravljate)",
           "action": "Kaj bi rad počel?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Potrdi - pravilno zaznavanje",
-            "correct": "✏️ Pravilno - izberite program/trajanje",
-            "ignore": "✖ Prezri - lažno pozitiven/šumni cikel",
-            "delete": "🗑️ Izbriši - Odstrani iz zgodovine"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Trenutne faze za to vrsto naprave:\n{phase_summary}",
         "data": {
           "action": "Akcija"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Ustvari fazo po meri",
-            "edit_custom_phase": "✏️ Uredite fazo po meri",
-            "delete_custom_phase": "🗑️ Izbriši fazo po meri"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "source_cycle": "Izvorni cikel (za način časovnega žiga)",
           "assign_mode": "Način dodelitve"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minutni odmiki",
-            "timestamp_mode": "Časovni žigi"
-          }
         }
       }
     },

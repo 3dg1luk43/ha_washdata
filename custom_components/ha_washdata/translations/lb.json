@@ -207,15 +207,6 @@
         "description": "Rezent Zyklen:\n{recent_cycles}",
         "data": {
           "action": "Aktioun"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Auto-Label Old Cycles",
-            "select_cycle_to_label": "🏷️ Label spezifesch Zyklus",
-            "select_cycle_to_label_multi": "🏷️ Label Multiple Cycles",
-            "select_cycle_to_delete": "🗑️ Zyklus läschen",
-            "interactive_editor": "✂️ Merge / Split Interactive Editor"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profil Zesummefaassung:\n{profile_summary}",
         "data": {
           "action": "Aktioun"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Neie Profil erstellen",
-            "edit_profile": "✏️ Profil änneren / ëmbenennen",
-            "delete_profile": "🗑️ Profil läschen",
-            "profile_stats": "📊 Profilstatistiken",
-            "cleanup_profile": "🧹 Geschicht botzen - Grafik & Läschen",
-            "assign_phases": "🧩 Phase Ranges zouzeschreiwen"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Wielt eng manuell Aktioun fir Är Zyklusgeschicht auszeféieren.",
         "data": {
           "editor_action": "Aktioun"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ e Cycle opdeelen (Lücken fannen)",
-            "merge": "🔗 Merge Cycles (Join Fragmenter)",
-            "delete": "🗑️ Zyklus(en) läschen"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Wielt Export fir aktuell Donnéeën an Astellungen ze kopéieren, oder Import fir exportéiert Daten vun engem aneren WashData Apparat ze pechen.",
           "json_payload": "Fir Export: kopéiert dësen JSON (enthält Zyklen, Profiler an all fein gestëmmt Astellungen). Fir Import: Paste JSON aus WashData exportéiert."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Export All Daten",
-            "import": "📥 Daten importéieren / fusionéieren"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Manuell en Zyklus notéieren fir e proppere Profil ouni Amëschung ze kreéieren.\n\nStatus: **{status}**\nDauer: {duration}s\nEchantillon: {samples}",
         "data": {
           "action": "Aktioun"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Neien Opname starten",
-            "stop_recording": "⏹ Opname stoppen (Späicheren & Prozess)",
-            "refresh_status": "🔄 Status erfrëschen",
-            "process_recording": "⚙️ Prozess lescht Opnam (Trim & Save)",
-            "discard_recording": "🗑️ Läscht Opnahm verwerfen",
-            "cancel": "✖ Ofbriechen"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Korrekt Programm (wann Dir korrigéiert)",
           "corrected_duration": "Korrekt Dauer a Minutten (wann Dir korrigéiert)",
           "action": "Wat géift Dir gären maachen?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Confirméieren - Korrekt Detektioun",
-            "correct": "✏️ Korrekt - Wielt Programm / Dauer",
-            "ignore": "✖ Ignoréieren - Falsch Positiv / Kaméidi Zyklus",
-            "delete": "🗑️ Läschen - Aus der Geschicht ewechhuelen"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Aktuell Phasen fir dësen Apparattyp:\n{phase_summary}",
         "data": {
           "action": "Aktioun"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Benotzerdefinéiert Phase erstellen",
-            "edit_custom_phase": "✏️ Benotzerdefinéiert Phase änneren",
-            "delete_custom_phase": "🗑️ Benotzerdefinéiert Phase läschen"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "source_cycle": "Source Cycle (fir Zäitstempelmodus)",
           "assign_mode": "Aufgab Modus"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minutt Offsets",
-            "timestamp_mode": "Zäitstempel"
-          }
         }
       }
     },

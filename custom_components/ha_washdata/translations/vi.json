@@ -206,33 +206,14 @@
         "title": "Quản lý chu kỳ",
         "description": "Chu kỳ gần đây:\n{recent_cycles}",
         "data": {
-          "action": {
-            "name": "Hoạt động",
-            "options": {
-              "auto_label_cycles": "🤖 Tự động dán nhãn chu kỳ cũ",
-              "select_cycle_to_label": "🏷️ Chu kỳ cụ thể của nhãn",
-              "select_cycle_to_label_multi": "🏷️ Dán nhãn nhiều chu kỳ",
-              "select_cycle_to_delete": "🗑️ Xóa chu kỳ",
-              "interactive_editor": "✂️ Trình chỉnh sửa tương tác hợp nhất/tách"
-            }
-          }
+          "action": "Hoạt động"
         }
       },
       "manage_profiles": {
         "title": "Quản lý hồ sơ",
         "description": "Tóm tắt hồ sơ:\n{profile_summary}",
         "data": {
-          "action": {
-            "name": "Hoạt động",
-            "options": {
-              "create_profile": "➕ Tạo hồ sơ mới",
-              "edit_profile": "✏️ Chỉnh sửa/Đổi tên hồ sơ",
-              "delete_profile": "🗑️ Xóa hồ sơ",
-              "profile_stats": "📊 Thống kê hồ sơ",
-              "cleanup_profile": "🧹 Dọn dẹp lịch sử - Vẽ đồ thị & Xóa",
-              "assign_phases": "🧩 Chỉ định Phạm vi Pha"
-            }
-          }
+          "action": "Hoạt động"
         }
       },
       "profile_stats": {
@@ -336,14 +317,7 @@
         "title": "Trình soạn thảo tương tác hợp nhất/tách",
         "description": "Chọn một hành động thủ công để thực hiện trên lịch sử chu kỳ của bạn.",
         "data": {
-          "editor_action": {
-            "name": "Hoạt động",
-            "options": {
-              "split": "✂️ Chia chu kỳ (Tìm khoảng trống)",
-              "merge": "🔗 Hợp nhất các chu kỳ (Nối các đoạn)",
-              "delete": "🗑️ Xóa (các) chu kỳ"
-            }
-          }
+          "editor_action": "Hoạt động"
         }
       },
       "editor_select": {
@@ -392,14 +366,8 @@
         "title": "Xuất/Nhập JSON",
         "description": "Sao chép/dán chu trình, cấu hình VÀ cài đặt cho thiết bị này. Xuất bên dưới hoặc dán JSON để nhập.",
         "data": {
-          "mode": {
-            "name": "Hoạt động",
-            "options": {
-              "export": "📤 Xuất tất cả dữ liệu",
-              "import": "📥 Nhập/Hợp nhất dữ liệu"
-            }
-          },
-          "json_payload": "JSON cấu hình hoàn chỉnh"
+          "json_payload": "JSON cấu hình hoàn chỉnh",
+          "mode": "Hoạt động"
         },
         "data_description": {
           "mode": "Chọn Xuất để sao chép dữ liệu và cài đặt hiện tại hoặc Nhập để dán dữ liệu đã xuất từ ​​một thiết bị WashData khác.",
@@ -410,17 +378,7 @@
         "title": "Chu kỳ ghi",
         "description": "Ghi lại chu trình theo cách thủ công để tạo hồ sơ rõ ràng mà không bị can thiệp.\n\nTrạng thái: **{status}**\nThời lượng: {duration} giây\nMẫu: {samples}",
         "data": {
-          "action": {
-            "name": "Hoạt động",
-            "options": {
-              "start_recording": "⏺ Bắt đầu ghi mới",
-              "stop_recording": "⏹ Dừng ghi (Lưu & Xử lý)",
-              "refresh_status": "🔄 Trạng thái làm mới",
-              "process_recording": "⚙️ Xử lý bản ghi cuối cùng (Cắt & Lưu)",
-              "discard_recording": "🗑️ Hủy bản ghi cuối cùng",
-              "cancel": "✖ Hủy"
-            }
-          }
+          "action": "Hoạt động"
         }
       },
       "record_process": {
@@ -448,31 +406,16 @@
         "title": "Giải quyết phản hồi",
         "description": "**Chương trình được phát hiện**: {profile}\n**Sự tự tin**: {confidence}%\n**Ước tính**: {est}m, **Thực tế**: {act}m",
         "data": {
-          "action": {
-            "name": "Bạn muốn làm gì?",
-            "options": {
-              "confirm": "✅ Xác nhận - Phát hiện đúng",
-              "correct": "✏️ Đúng - Chọn Chương trình/Thời lượng",
-              "ignore": "✖ Bỏ qua - Chu kỳ dương tính giả/ồn ào",
-              "delete": "🗑️ Xóa - Xóa khỏi Lịch sử"
-            }
-          },
           "corrected_profile": "Đúng chương trình (nếu sửa)",
-          "corrected_duration": "Thời lượng chính xác tính bằng phút (nếu sửa)"
+          "corrected_duration": "Thời lượng chính xác tính bằng phút (nếu sửa)",
+          "action": "Bạn muốn làm gì?"
         }
       },
       "manage_phase_catalog": {
         "title": "Quản lý danh mục giai đoạn",
         "description": "Các giai đoạn hiện tại của loại thiết bị này:\n{phase_summary}",
         "data": {
-          "action": {
-            "name": "Hoạt động",
-            "options": {
-              "create_custom_phase": "➕ Tạo giai đoạn tùy chỉnh",
-              "edit_custom_phase": "✏️ Chỉnh sửa giai đoạn tùy chỉnh",
-              "delete_custom_phase": "🗑️ Xóa giai đoạn tùy chỉnh"
-            }
-          }
+          "action": "Hoạt động"
         }
       },
       "phase_catalog_create": {
@@ -549,14 +492,8 @@
         "description": "Chọn một cấu hình để cấu hình phạm vi pha.",
         "data": {
           "profile": "Hồ sơ",
-          "assign_mode": {
-            "name": "Chế độ bài tập",
-            "options": {
-              "offset_mode": "Phút bù đắp",
-              "timestamp_mode": "Dấu thời gian"
-            }
-          },
-          "source_cycle": "Chu kỳ nguồn (đối với chế độ dấu thời gian)"
+          "source_cycle": "Chu kỳ nguồn (đối với chế độ dấu thời gian)",
+          "assign_mode": "Chế độ bài tập"
         }
       }
     },

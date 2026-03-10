@@ -206,33 +206,14 @@
         "title": "Bainistigh Timthriallta",
         "description": "Timthriallta le déanaí:\n{recent_cycles}",
         "data": {
-          "action": {
-            "name": "Gníomh",
-            "options": {
-              "auto_label_cycles": "🤖 Lipéad Uath-Thimthriallta",
-              "select_cycle_to_label": "🏷️ Timthriall Sonrach Lipéad",
-              "select_cycle_to_label_multi": "🏷️ Cuir Lipéad ar Thimthriallta Iolracha",
-              "select_cycle_to_delete": "🗑️ Scrios an tSraith",
-              "interactive_editor": "✂️ Cumaisc / Scoilt Eagarthóir Idirghníomhach"
-            }
-          }
+          "action": "Gníomh"
         }
       },
       "manage_profiles": {
         "title": "Bainistigh Próifílí",
         "description": "Achoimre Próifíl:\n{profile_summary}",
         "data": {
-          "action": {
-            "name": "Gníomh",
-            "options": {
-              "create_profile": "➕ Cruthaigh Próifíl Nua",
-              "edit_profile": "✏️ Cuir/Athainmnigh Próifíl",
-              "delete_profile": "🗑️ Scrios Próifíl",
-              "profile_stats": "📊 Staitisticí Próifíl",
-              "cleanup_profile": "🧹 Glanadh Stair - Graf & Scrios",
-              "assign_phases": "🧩 Sann Raonta Céime"
-            }
-          }
+          "action": "Gníomh"
         }
       },
       "profile_stats": {
@@ -336,14 +317,7 @@
         "title": "Cumaisc / Scoilt Eagarthóir Idirghníomhach",
         "description": "Roghnaigh gníomh láimhe le déanamh ar stair do thimthriallta.",
         "data": {
-          "editor_action": {
-            "name": "Gníomh",
-            "options": {
-              "split": "✂️ Scoilt Rothaíocht (Faigh bearnaí)",
-              "merge": "🔗 Merge Cycles (Glac isteach i blúirí)",
-              "delete": "🗑️ Scrios Timthriall"
-            }
-          }
+          "editor_action": "Gníomh"
         }
       },
       "editor_select": {
@@ -392,14 +366,8 @@
         "title": "Easpórtáil/Iompórtáil JSON",
         "description": "Cóipeáil/greamaigh timthriallta, próifílí, AGUS socruithe don ghléas seo. Easpórtáil thíos nó greamaigh JSON lena iompórtáil.",
         "data": {
-          "mode": {
-            "name": "Gníomh",
-            "options": {
-              "export": "📤 Easpórtáil na Sonraí go léir",
-              "import": "📥 Iompórtáil/Cumaisc Sonraí"
-            }
-          },
-          "json_payload": "Cumraíocht Críochnaithe JSON"
+          "json_payload": "Cumraíocht Críochnaithe JSON",
+          "mode": "Gníomh"
         },
         "data_description": {
           "mode": "Roghnaigh Easpórtáil chun sonraí agus socruithe reatha a chóipeáil, nó Iompórtáil chun sonraí easpórtáilte a ghreamú ó ghléas WashData eile.",
@@ -410,17 +378,7 @@
         "title": "Timthriall Taifead",
         "description": "Déan timthriall a thaifeadadh de láimh chun próifíl ghlan a chruthú gan cur isteach.\n\nStádas: **{status}**\nFad: {duration}s\nSamplaí: {samples}",
         "data": {
-          "action": {
-            "name": "Gníomh",
-            "options": {
-              "start_recording": "⏺ Tosaigh Taifeadadh Nua",
-              "stop_recording": "⏹ Stop an Taifeadadh (Sábháil & Próiseáil)",
-              "refresh_status": "🔄 Stádas Athnuaigh",
-              "process_recording": "⚙️ Próiseáil an Taifeadadh Deiridh (Baile Átha Troim & Sábháil)",
-              "discard_recording": "🗑️ Caith siar an Taifeadadh Deiridh",
-              "cancel": "✖ Cealaigh"
-            }
-          }
+          "action": "Gníomh"
         }
       },
       "record_process": {
@@ -448,31 +406,16 @@
         "title": "Réitigh Aiseolas",
         "description": "**Clár Braite**: {profile}\n**Muinín**: {confidence}%\n**Meastachán**: {est}m, **Iarbhír**: {act}m",
         "data": {
-          "action": {
-            "name": "Cad ba mhaith leat a dhéanamh?",
-            "options": {
-              "confirm": "✅ Deimhnigh - Brath Ceart",
-              "correct": "✏️ Ceart - Roghnaigh Clár / Fad",
-              "ignore": "✖ Déan Neamhaird - Timthriall Bréagach Dearfach/Torthach",
-              "delete": "🗑️ Scrios - Bain den Stair"
-            }
-          },
           "corrected_profile": "Clár Ceart (má tá sé á cheartú)",
-          "corrected_duration": "Ceart Fad i nóiméid (má ceartaítear é)"
+          "corrected_duration": "Ceart Fad i nóiméid (má ceartaítear é)",
+          "action": "Cad ba mhaith leat a dhéanamh?"
         }
       },
       "manage_phase_catalog": {
         "title": "Bainistigh Catalóg Chéim",
         "description": "Céimeanna reatha don chineál seo gléis:\n{phase_summary}",
         "data": {
-          "action": {
-            "name": "Gníomh",
-            "options": {
-              "create_custom_phase": "➕ Cruthaigh Céim Chustaim",
-              "edit_custom_phase": "✏️ Cuir Céim an Chustaim in Eagar",
-              "delete_custom_phase": "🗑️ Scrios Céim an Chustaim"
-            }
-          }
+          "action": "Gníomh"
         }
       },
       "phase_catalog_create": {
@@ -549,14 +492,8 @@
         "description": "Roghnaigh próifíl chun raonta na gcéimeanna a chumrú.",
         "data": {
           "profile": "Próifíl",
-          "assign_mode": {
-            "name": "Mód Sannacháin",
-            "options": {
-              "offset_mode": "Fritháireamh Nóiméad",
-              "timestamp_mode": "Stampaí ama"
-            }
-          },
-          "source_cycle": "Timthriall Foinse (do mhód an stampa ama)"
+          "source_cycle": "Timthriall Foinse (do mhód an stampa ama)",
+          "assign_mode": "Mód Sannacháin"
         }
       }
     },

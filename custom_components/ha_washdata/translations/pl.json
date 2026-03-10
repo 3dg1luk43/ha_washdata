@@ -207,15 +207,6 @@
         "description": "Ostatnie cykle:\n{recent_cycles}",
         "data": {
           "action": "Działanie"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Automatyczne oznaczanie starych cykli",
-            "select_cycle_to_label": "🏷️ Oznacz konkretny cykl",
-            "select_cycle_to_label_multi": "🏷️ Oznacz wiele cykli etykietami",
-            "select_cycle_to_delete": "🗑️ Usuń cykl",
-            "interactive_editor": "✂️ Scal/podziel interaktywny edytor"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Podsumowanie profili:\n{profile_summary}",
         "data": {
           "action": "Działanie"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Utwórz nowy profil",
-            "edit_profile": "✏️ Edytuj/zmień nazwę profilu",
-            "delete_profile": "🗑️ Usuń profil",
-            "profile_stats": "📊 Statystyki profilu",
-            "cleanup_profile": "🧹 Wyczyść historię - wykreśl i usuń",
-            "assign_phases": "🧩 Przypisz zakresy faz"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Wybierz ręczną akcję do wykonania na historii cykli.",
         "data": {
           "editor_action": "Działanie"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Podziel cykl (znajdź luki)",
-            "merge": "🔗 Połącz cykle (połącz fragmenty)",
-            "delete": "🗑️ Usuń cykle"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Wybierz Eksport, aby skopiować bieżące dane i ustawienia, lub Import, aby wkleić dane eksportowane z innego urządzenia WashData.",
           "json_payload": "Do eksportu: skopiuj ten JSON (zawiera cykle, profile i wszystkie ustawienia). Do importu: wklej JSON wyeksportowany z WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Eksportuj wszystkie dane",
-            "import": "📥 Importuj/scal dane"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Ręcznie nagraj cykl, aby utworzyć czysty profil bez zakłóceń.\n\nStatus: **{status}**\nCzas trwania: {duration}s\nPróbki: {samples}",
         "data": {
           "action": "Działanie"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Rozpocznij nowe nagranie",
-            "stop_recording": "⏹ Zatrzymaj nagrywanie (zapisz i przetwórz)",
-            "refresh_status": "🔄 Odśwież status",
-            "process_recording": "⚙️ Przetwórz ostatnie nagranie (przytnij i zapisz)",
-            "discard_recording": "🗑️ Odrzuć ostatnie nagranie",
-            "cancel": "✖ Anuluj"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Prawidłowy program (jeśli korygujesz)",
           "corrected_duration": "Prawidłowy czas trwania w minutach (jeśli korygujesz)",
           "action": "Co chciałbyś zrobić?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Potwierdź - Prawidłowe wykrywanie",
-            "correct": "✏️ Poprawnie — wybierz program/czas trwania",
-            "ignore": "✖ Ignoruj ​​– cykl fałszywie dodatni/zakłócony",
-            "delete": "🗑️ Usuń - Usuń z historii"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Aktualne fazy dla tego typu urządzenia:\n{phase_summary}",
         "data": {
           "action": "Działanie"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Utwórz fazę niestandardową",
-            "edit_custom_phase": "✏️ Edytuj fazę niestandardową",
-            "delete_custom_phase": "🗑️ Usuń fazę niestandardową"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "assign_mode": "Tryb przydziału",
           "source_cycle": "Cykl źródłowy (dla trybu znacznika czasu)"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minutowe przesunięcia",
-            "timestamp_mode": "Znaczniki czasu"
-          }
         }
       }
     },

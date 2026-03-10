@@ -207,15 +207,6 @@
         "description": "Seneste cyklusser:\n{recent_cycles}",
         "data": {
           "action": "Handling"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Auto-mærke gamle cykler",
-            "select_cycle_to_label": "🏷️ Etiketspecifik cyklus",
-            "select_cycle_to_label_multi": "🏷️ Mærk flere cyklusser",
-            "select_cycle_to_delete": "🗑️ Slet cyklus",
-            "interactive_editor": "✂️ Flet/opdel interaktiv editor"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profiloversigt:\n{profile_summary}",
         "data": {
           "action": "Handling"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Opret ny profil",
-            "edit_profile": "✏️ Rediger/Omdøb profil",
-            "delete_profile": "🗑️ Slet profil",
-            "profile_stats": "📊 Profilstatistik",
-            "cleanup_profile": "🧹 Ryd op i historie - graf og slet",
-            "assign_phases": "🧩 Tildel faseintervaller"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Vælg en manuel handling for din cyklushistorik.",
         "data": {
           "editor_action": "Handling"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Del en cyklus (Find huller)",
-            "merge": "🔗 Sammenflet cyklusser (sammenføj fragmenter)",
-            "delete": "🗑️ Slet cyklus(er)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Vælg Eksporter for at kopiere aktuelle data og indstillinger, eller Importer for at indsætte data eksporteret fra en anden WashData-enhed.",
           "json_payload": "Til Eksport: kopier denne JSON (indeholder cyklusser, profiler og alle indstillinger). Til Import: indsæt JSON eksporteret fra WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Eksporter alle data",
-            "import": "📥 Importer/flet data"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Optag en cyklus manuelt for at oprette en ren profil uden interferens.\n\nStatus: **{status}**\nVarighed: {duration}s\nPrøver: {samples}",
         "data": {
           "action": "Handling"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Start ny optagelse",
-            "stop_recording": "⏹ Stop optagelse (Gem og bearbejd)",
-            "refresh_status": "🔄 Opdater status",
-            "process_recording": "⚙️ Behandle sidste optagelse (Trim & Gem)",
-            "discard_recording": "🗑️ Kassér sidste optagelse",
-            "cancel": "✖ Annuller"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Korrekt program (hvis du retter)",
           "corrected_duration": "Korrekt varighed i minutter (hvis du retter)",
           "action": "Hvad vil du gerne lave?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Bekræft - Korrekt registrering",
-            "correct": "✏️ Korrekt - Vælg program/varighed",
-            "ignore": "✖ Ignorer - Falsk positiv/støjende cyklus",
-            "delete": "🗑️ Slet - Fjern fra historikken"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Aktuelle faser for denne enhedstype:\n{phase_summary}",
         "data": {
           "action": "Handling"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Opret brugerdefineret fase",
-            "edit_custom_phase": "✏️ Rediger tilpasset fase",
-            "delete_custom_phase": "🗑️ Slet tilpasset fase"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "source_cycle": "Kildecyklus (til tidsstempeltilstand)",
           "assign_mode": "Tildelingstilstand"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minutforskydninger",
-            "timestamp_mode": "Tidsstempler"
-          }
         }
       }
     },

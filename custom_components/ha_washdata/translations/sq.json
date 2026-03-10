@@ -207,15 +207,6 @@
         "description": "Ciklet e fundit:\n{recent_cycles}",
         "data": {
           "action": "Veprimi"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Etiketoni automatikisht ciklet e vjetra",
-            "select_cycle_to_label": "🏷️ Cikli specifik i etiketës",
-            "select_cycle_to_label_multi": "🏷️ Etiketoni cikle të shumëfishta",
-            "select_cycle_to_delete": "🗑️ Fshi ciklin",
-            "interactive_editor": "✂️ Bashkoni/Ndajeni redaktuesin interaktiv"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Përmbledhje e profilit:\n{profile_summary}",
         "data": {
           "action": "Veprimi"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Krijo një profil të ri",
-            "edit_profile": "✏️ Ndrysho/Riemërto profilin",
-            "delete_profile": "🗑️ Fshi profilin",
-            "profile_stats": "📊 Statistikat e profilit",
-            "cleanup_profile": "🧹 Pastroni historinë - grafikoni dhe fshini",
-            "assign_phases": "🧩 Cakto vargjet e fazave"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Zgjidhni një veprim manual për të kryer në historikun tuaj të ciklit.",
         "data": {
           "editor_action": "Veprimi"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Ndani një cikël (Gjeni boshllëqet)",
-            "merge": "🔗 Ciklet e bashkimit (bashkoni fragmentet)",
-            "delete": "🗑️ Fshi ciklin(et)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Zgjidhni Export për të kopjuar të dhënat dhe cilësimet aktuale, ose Import për të ngjitur të dhënat e eksportuara nga një pajisje tjetër WashData.",
           "json_payload": "Për eksport: kopjoni këtë JSON (përfshin ciklet, profilet dhe të gjitha cilësimet e rregulluara mirë). Për import: ngjitni JSON të eksportuar nga WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Eksporto të gjitha të dhënat",
-            "import": "📥 Importo/Shkrija e të dhënave"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Regjistroni manualisht një cikël për të krijuar një profil të pastër pa ndërhyrje.\n\nStatusi: **{status}**\nKohëzgjatja: {duration}s\nMostrat: {samples}",
         "data": {
           "action": "Veprimi"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Filloni regjistrimin e ri",
-            "stop_recording": "⏹ Ndalo regjistrimin (Ruaj dhe përpuno)",
-            "refresh_status": "🔄 Statusi i rifreskimit",
-            "process_recording": "⚙️ Përpunoni regjistrimin e fundit (Shkurtoni dhe ruajeni)",
-            "discard_recording": "🗑️ Hiq regjistrimin e fundit",
-            "cancel": "✖ Anulo"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Programi i saktë (nëse korrigjohet)",
           "corrected_duration": "Kohëzgjatja e saktë në minuta (nëse korrigjohet)",
           "action": "Çfarë do të dëshironit të bënit?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Konfirmo - Zbulim i saktë",
-            "correct": "✏️ E saktë - Zgjidhni programin/kohëzgjatjen",
-            "ignore": "✖ Injoroni - Cikli i rremë pozitiv/zhurmë",
-            "delete": "🗑️ Fshi - Hiqe nga historia"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Fazat aktuale për këtë lloj pajisjeje:\n{phase_summary}",
         "data": {
           "action": "Veprimi"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Krijoni fazën e personalizuar",
-            "edit_custom_phase": "✏️ Ndrysho fazën e personalizuar",
-            "delete_custom_phase": "🗑️ Fshi Fazën e personalizuar"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profili",
           "source_cycle": "Cikli i burimit (për modalitetin e vulës kohore)",
           "assign_mode": "Mënyra e caktimit"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Kompensimet e minutave",
-            "timestamp_mode": "Vula kohore"
-          }
         }
       }
     },

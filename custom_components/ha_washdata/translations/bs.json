@@ -207,15 +207,6 @@
         "description": "Nedavni ciklusi:\n{recent_cycles}",
         "data": {
           "action": "Akcija"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Automatsko označavanje starih ciklusa",
-            "select_cycle_to_label": "🏷️ Specifičan ciklus za etiketu",
-            "select_cycle_to_label_multi": "🏷️ Označite više ciklusa",
-            "select_cycle_to_delete": "🗑️ Izbriši ciklus",
-            "interactive_editor": "✂️ Interaktivni uređivač spajanja/razdvajanja"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Sažetak profila:\n{profile_summary}",
         "data": {
           "action": "Akcija"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Kreirajte novi profil",
-            "edit_profile": "✏️ Uredi/Preimenuj profil",
-            "delete_profile": "🗑️ Izbrišite profil",
-            "profile_stats": "📊 Statistika profila",
-            "cleanup_profile": "🧹 Očisti historiju - grafikon i brisanje",
-            "assign_phases": "🧩 Dodijelite raspon faza"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Odaberite ručnu radnju koju ćete izvršiti na historiji vašeg ciklusa.",
         "data": {
           "editor_action": "Akcija"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Podijelite ciklus (Pronađite praznine)",
-            "merge": "🔗 Spajanje ciklusa (Spajanje fragmenata)",
-            "delete": "🗑️ Izbriši ciklus(e)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Odaberite Izvezi da kopirate trenutne podatke i postavke ili Uvezi da zalijepite izvezene podatke s drugog WashData uređaja.",
           "json_payload": "Za izvoz: kopirajte ovaj JSON (uključuje cikluse, profile i sva fino podešena podešavanja). Za uvoz: zalijepite JSON izvezen iz WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Izvezi sve podatke",
-            "import": "📥 Uvoz/spajanje podataka"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Ručno snimite ciklus kako biste kreirali čist profil bez smetnji.\n\nStatus: **{status}**\nTrajanje: {duration}s\nUzorci: {samples}",
         "data": {
           "action": "Akcija"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Započnite novo snimanje",
-            "stop_recording": "⏹ Zaustavi snimanje (Sačuvaj i obradi)",
-            "refresh_status": "🔄 Osvježi status",
-            "process_recording": "⚙️ Obradi posljednju snimku (Trim & Save)",
-            "discard_recording": "🗑️ Odbaci zadnji snimak",
-            "cancel": "✖ Otkaži"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Ispravan program (ako se ispravlja)",
           "corrected_duration": "Ispravno trajanje u minutama (ako se ispravlja)",
           "action": "šta biste željeli raditi?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Potvrdi - ispravna detekcija",
-            "correct": "✏️ Ispravno - Odaberite Program/Trajanje",
-            "ignore": "✖ Zanemari - Lažno pozitivan/bučni ciklus",
-            "delete": "🗑️ Izbriši - Ukloni iz historije"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Trenutne faze za ovaj tip uređaja:\n{phase_summary}",
         "data": {
           "action": "Akcija"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Kreirajte prilagođenu fazu",
-            "edit_custom_phase": "✏️ Uredite prilagođenu fazu",
-            "delete_custom_phase": "🗑️ Izbrišite prilagođenu fazu"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "source_cycle": "Izvorni ciklus (za način rada s vremenskom oznakom)",
           "assign_mode": "Assignment Mode"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minute Offsets",
-            "timestamp_mode": "Vremenske oznake"
-          }
         }
       }
     },

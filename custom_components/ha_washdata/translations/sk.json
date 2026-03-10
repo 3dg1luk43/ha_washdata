@@ -207,15 +207,6 @@
         "description": "Posledné cykly:\n{recent_cycles}",
         "data": {
           "action": "Akcia"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Automatické označovanie starých cyklov",
-            "select_cycle_to_label": "🏷️ Špecifický cyklus štítku",
-            "select_cycle_to_label_multi": "🏷️ Označte viacero cyklov",
-            "select_cycle_to_delete": "🗑️ Odstrániť cyklus",
-            "interactive_editor": "✂️ Interaktívny editor na zlúčenie/rozdelenie"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Zhrnutie profilu:\n{profile_summary}",
         "data": {
           "action": "Akcia"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Vytvoriť nový profil",
-            "edit_profile": "✏️ Upraviť/Premenovať profil",
-            "delete_profile": "🗑️ Odstrániť profil",
-            "profile_stats": "📊 Štatistika profilu",
-            "cleanup_profile": "🧹 História vyčistenia – graf a vymazanie",
-            "assign_phases": "🧩 Priraďte fázové rozsahy"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Vyberte manuálnu akciu, ktorá sa má vykonať s históriou cyklu.",
         "data": {
           "editor_action": "Akcia"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Rozdeľte cyklus (nájdite medzery)",
-            "merge": "🔗 Zlúčiť cykly (spojiť fragmenty)",
-            "delete": "🗑️ Odstrániť cykly"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Zvoľte Export, ak chcete skopírovať aktuálne údaje a nastavenia, alebo Import, ak chcete prilepiť exportované údaje z iného zariadenia WashData.",
           "json_payload": "Pre export: skopírujte tento JSON (zahŕňa cykly, profily a všetky doladené nastavenia). Pre import: prilepte JSON exportovaný z WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Exportujte všetky údaje",
-            "import": "📥 Importovať/zlučovať údaje"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Manuálne zaznamenajte cyklus, aby ste vytvorili čistý profil bez rušenia.\n\nStav: **{status}**\nTrvanie: {duration} s\nVzorky: {samples}",
         "data": {
           "action": "Akcia"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Spustite nové nahrávanie",
-            "stop_recording": "⏹ Zastaviť nahrávanie (Uložiť a spracovať)",
-            "refresh_status": "🔄 Stav obnovenia",
-            "process_recording": "⚙️ Spracovať posledný záznam (Orezať a uložiť)",
-            "discard_recording": "🗑️ Zahodiť poslednú nahrávku",
-            "cancel": "✖ Zrušiť"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Správny program (ak opravujete)",
           "corrected_duration": "Správne trvanie v minútach (ak opravujete)",
           "action": "čo by ste chceli robiť?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Potvrdiť - správna detekcia",
-            "correct": "✏️ Správne - vyberte Program/Trvanie",
-            "ignore": "✖ Ignorovať – falošne pozitívny/hlučný cyklus",
-            "delete": "🗑️ Odstrániť - Odstrániť z histórie"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Aktuálne fázy pre tento typ zariadenia:\n{phase_summary}",
         "data": {
           "action": "Akcia"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Vytvoriť vlastnú fázu",
-            "edit_custom_phase": "✏️ Upraviť vlastnú fázu",
-            "delete_custom_phase": "🗑️ Odstrániť vlastnú fázu"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "source_cycle": "Zdrojový cyklus (pre režim časovej pečiatky)",
           "assign_mode": "Režim pridelenia"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Posuny minút",
-            "timestamp_mode": "Časové pečiatky"
-          }
         }
       }
     },

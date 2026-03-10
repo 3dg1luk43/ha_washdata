@@ -207,15 +207,6 @@
         "description": "Cicluri recente:\n{recent_cycles}",
         "data": {
           "action": "Acţiune"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Etichetare automată a ciclurilor vechi",
-            "select_cycle_to_label": "🏷️ Ciclul specific de etichetă",
-            "select_cycle_to_label_multi": "🏷️ Etichetați mai multe cicluri",
-            "select_cycle_to_delete": "🗑️ Ștergeți ciclul",
-            "interactive_editor": "✂️ Merge/Split Interactive Editor"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Rezumat profiluri:\n{profile_summary}",
         "data": {
           "action": "Acţiune"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Creați un profil nou",
-            "edit_profile": "✏️ Editați/Redenumiți profilul",
-            "delete_profile": "🗑️ Șterge profilul",
-            "profile_stats": "📊 Statistici de profil",
-            "cleanup_profile": "🧹 Curățați istoricul - Grafic și șterge",
-            "assign_phases": "🧩 Atribuiți intervale de fază"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Selectați o acțiune manuală pentru istoricul ciclurilor.",
         "data": {
           "editor_action": "Acţiune"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Împărțiți un ciclu (Găsiți lacune)",
-            "merge": "🔗 Cicluri de îmbinare (Alăturați fragmente)",
-            "delete": "🗑️ Ștergeți ciclul(e)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Selectați Export pentru a copia datele și setările curente, sau Import pentru a lipi date exportate de pe un alt dispozitiv WashData.",
           "json_payload": "Pentru Export: copiați acest JSON (conține cicluri, profiluri și toate setările). Pentru Import: lipiți JSON exportat din WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Exportați toate datele",
-            "import": "📥 Import/Imbinare date"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Înregistrați un ciclu manual pentru a crea un profil curat fără interferențe.\n\nStare: **{status}**\nDurată: {duration}s\nEșantioane: {samples}",
         "data": {
           "action": "Acţiune"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Începeți o nouă înregistrare",
-            "stop_recording": "⏹ Opriți înregistrarea (Salvare și procesare)",
-            "refresh_status": "🔄 Starea de reîmprospătare",
-            "process_recording": "⚙️ Procesați ultima înregistrare (Trim și Salvați)",
-            "discard_recording": "🗑️ Aruncă ultima înregistrare",
-            "cancel": "✖ Anulează"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Program corect (dacă corectați)",
           "corrected_duration": "Durată corectă în minute (dacă corectați)",
           "action": "Ce ai vrea sa faci?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Confirmare - Detectare corectă",
-            "correct": "✏️ Corect - Alegeți Program/Durată",
-            "ignore": "✖ Ignorare - Ciclu fals pozitiv/zgomotos",
-            "delete": "🗑️ Șterge - Eliminați din istoric"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Fazele curente pentru acest tip de dispozitiv:\n{phase_summary}",
         "data": {
           "action": "Acţiune"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Creați o fază personalizată",
-            "edit_custom_phase": "✏️ Editați faza personalizată",
-            "delete_custom_phase": "🗑️ Ștergeți faza personalizată"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "source_cycle": "Ciclul sursă (pentru modul marcaj temporal)",
           "assign_mode": "Modul de atribuire"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Decalaje de minute",
-            "timestamp_mode": "Marcaje temporale"
-          }
         }
       }
     },

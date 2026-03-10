@@ -207,15 +207,6 @@
         "description": "Nesenie cikli:\n{recent_cycles}",
         "data": {
           "action": "Darbība"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Automātiski marķējiet vecos ciklus",
-            "select_cycle_to_label": "🏷️ Etiķetes noteiktais cikls",
-            "select_cycle_to_label_multi": "🏷️ Marķējiet vairākus ciklus",
-            "select_cycle_to_delete": "🗑️ Dzēst ciklu",
-            "interactive_editor": "✂️ Apvienot/sadalīt interaktīvo redaktoru"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profilu kopsavilkums:\n{profile_summary}",
         "data": {
           "action": "Darbība"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Izveidojiet jaunu profilu",
-            "edit_profile": "✏️ Rediģēt/pārdēvēt profilu",
-            "delete_profile": "🗑️ Dzēst profilu",
-            "profile_stats": "📊 Profila statistika",
-            "cleanup_profile": "🧹 Vēstures tīrīšana — diagramma un dzēšana",
-            "assign_phases": "🧩 Piešķiriet fāžu diapazonus"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Izvēlieties manuālu darbību savai ciklu vēsturei.",
         "data": {
           "editor_action": "Darbība"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Sadaliet ciklu (atrodiet nepilnības)",
-            "merge": "🔗 Apvienot ciklus (pievienoties fragmentiem)",
-            "delete": "🗑️ Dzēst ciklu(-us)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Izvēlieties Eksportēt, lai kopētu pašreizējos datus un iestatījumus, vai Importēt, lai ielīmētu no citas WashData ierīces eksportētos datus.",
           "json_payload": "Eksportam: kopējiet šo JSON (satur ciklus, profilus un visus iestatījumus). Importam: ielīmējiet no WashData eksportētu JSON."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Eksportēt visus datus",
-            "import": "📥 Importēt/apvienot datus"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Ierakstiet ciklu manuāli, lai izveidotu tīru profilu bez traucējumiem.\n\nStatuss: **{status}**\nIlgums: {duration}s\nParaugi: {samples}",
         "data": {
           "action": "Darbība"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Sāciet jaunu ierakstīšanu",
-            "stop_recording": "⏹ Apturēt ierakstīšanu (saglabāt un apstrādāt)",
-            "refresh_status": "🔄 Atsvaidzināt statusu",
-            "process_recording": "⚙️ Apstrādāt pēdējo ierakstu (apgriezt un saglabāt)",
-            "discard_recording": "🗑️ Atmest pēdējo ierakstu",
-            "cancel": "✖ Atcelt"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Pareizā programma (ja labojat)",
           "corrected_duration": "Pareizais ilgums minūtēs (ja labojat)",
           "action": "Ko jūs vēlētos darīt?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Apstiprināt — pareiza noteikšana",
-            "correct": "✏️ Pareizi — izvēlieties programmu/ilgumu",
-            "ignore": "✖ Ignorēt — viltus pozitīvs/trokšņains cikls",
-            "delete": "🗑️ Dzēst — noņemt no vēstures"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Pašreizējās fāzes šim ierīces tipam:\n{phase_summary}",
         "data": {
           "action": "Darbība"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Izveidojiet pielāgotu fāzi",
-            "edit_custom_phase": "✏️ Rediģēt pielāgoto fāzi",
-            "delete_custom_phase": "🗑️ Dzēst pielāgoto fāzi"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profils",
           "source_cycle": "Avota cikls (laikspiedola režīmam)",
           "assign_mode": "Piešķiršanas režīms"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minūtes nobīdes",
-            "timestamp_mode": "Laika zīmogi"
-          }
         }
       }
     },

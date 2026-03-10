@@ -207,15 +207,6 @@
         "description": "最近のサイクル：\n{recent_cycles}",
         "data": {
           "action": "アクション"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 古いサイクルに自動ラベル付け",
-            "select_cycle_to_label": "🏷️ ラベル固有のサイクル",
-            "select_cycle_to_label_multi": "🏷️ 複数のサイクルにラベルを付ける",
-            "select_cycle_to_delete": "🗑️ サイクルを削除",
-            "interactive_editor": "✂️ インタラクティブエディターのマージ/分割"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "プロファイル概要：\n{profile_summary}",
         "data": {
           "action": "アクション"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ 新しいプロファイルを作成",
-            "edit_profile": "✏️ プロフィールの編集/名前変更",
-            "delete_profile": "🗑️ プロフィールを削除",
-            "profile_stats": "📊 プロフィール統計",
-            "cleanup_profile": "🧹 履歴のクリーンアップ - グラフ化して削除",
-            "assign_phases": "🧩 位相範囲を割り当てる"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "サイクル履歴に対して実行する手動アクションを選択します。",
         "data": {
           "editor_action": "アクション"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ サイクルを分割する (ギャップを見つける)",
-            "merge": "🔗 サイクルのマージ (フラグメントの結合)",
-            "delete": "🗑️ サイクルを削除"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "現在のデータと設定をコピーするには「エクスポート」を選択し、別の WashData デバイスからエクスポートされたデータを貼り付けるには「インポート」を選択します。",
           "json_payload": "エクスポートの場合：この JSON（サイクル、プロファイル、およびすべての微調整された設定を含む）をコピーします。インポートの場合：WashData からエクスポートされた JSON を貼り付けます。"
-        },
-        "options": {
-          "mode": {
-            "export": "📤 すべてのデータをエクスポート",
-            "import": "📥 データのインポート/マージ"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "手動でサイクルを記録して、干渉のないクリーンなプロファイルを作成します。\n\nステータス：**{status}**\n期間：{duration}s\nサンプル：{samples}",
         "data": {
           "action": "アクション"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ 新しい録音を開始する",
-            "stop_recording": "⏹ 記録の停止 (保存して処理)",
-            "refresh_status": "🔄ステータスを更新",
-            "process_recording": "⚙️ 最後の録音を処理 (トリミングして保存)",
-            "discard_recording": "🗑️ 最後の録音を破棄",
-            "cancel": "✖ キャンセル"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "正しいプログラム（修正する場合）",
           "corrected_duration": "正しい期間（分）（修正する場合）",
           "action": "何をしたいですか?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ 確認 - 正しい検出",
-            "correct": "✏️ 正解 - プログラム/期間を選択してください",
-            "ignore": "✖ 無視 - 誤検知/ノイズの多いサイクル",
-            "delete": "🗑️ 削除 - 履歴から削除"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "このデバイス タイプの現在のフェーズ:\n{phase_summary}",
         "data": {
           "action": "アクション"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ カスタムフェーズの作成",
-            "edit_custom_phase": "✏️ カスタムフェーズを編集",
-            "delete_custom_phase": "🗑️ カスタムフェーズを削除"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "プロフィール",
           "assign_mode": "アサインモード",
           "source_cycle": "ソースサイクル (タイムスタンプモードの場合)"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "分単位のオフセット",
-            "timestamp_mode": "タイムスタンプ"
-          }
         }
       }
     },

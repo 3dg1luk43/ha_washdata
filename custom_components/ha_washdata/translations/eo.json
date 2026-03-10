@@ -207,15 +207,6 @@
         "description": "Lastatempaj cikloj:\n{recent_cycles}",
         "data": {
           "action": "Ago"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Aŭtomate Etikedaj Malnovaj Cikloj",
-            "select_cycle_to_label": "🏷️ Etikedu Specifan Ciklon",
-            "select_cycle_to_label_multi": "🏷️ Etikedu Multoblajn Ciklojn",
-            "select_cycle_to_delete": "🗑️ Forigi Ciklon",
-            "interactive_editor": "✂️ Kunfandi/Disigi Interagan Redaktilon"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profila Resumo:\n{profile_summary}",
         "data": {
           "action": "Ago"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Krei Novan Profilon",
-            "edit_profile": "✏️ Redaktu/Alinomi Profilon",
-            "delete_profile": "🗑️ Forigi Profilon",
-            "profile_stats": "📊 Profilaj Statistikoj",
-            "cleanup_profile": "🧹 Purigu Historion - Grafiku kaj Forigi",
-            "assign_phases": "🧩 Asignu Fazintervalojn"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Elektu manan agon por plenumi en via ciklo-historio.",
         "data": {
           "editor_action": "Ago"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Dividi Ciklon (Trovu mankojn)",
-            "merge": "🔗 Kunfandi Ciklojn (Aliĝi al fragmentoj)",
-            "delete": "🗑️ Forigi ciklo(j)n"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Elektu Eksporti por kopii aktualajn datumojn kaj agordojn, aŭ Importi por alglui eksportitajn datumojn de alia WashData-aparato.",
           "json_payload": "Por Eksporti: kopiu ĉi tiun JSON (inkludas ciklojn, profilojn kaj ĉiujn agorditajn agordojn). Por Importi: algluu JSON eksportitan de WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Eksportu Ĉiuj Datumoj",
-            "import": "📥 Importi/Kunfandi Datumojn"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Mane registri ciklon por krei puran profilon sen interfero.\n\nStatuso: **{status}**\nDaŭro: {duration}s\nSpecimenoj: {samples}",
         "data": {
           "action": "Ago"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Komencu Novan Registradon",
-            "stop_recording": "⏹ Ĉesu Registradon (Konservi kaj Procesi)",
-            "refresh_status": "🔄 Refreŝiga Statuso",
-            "process_recording": "⚙️ Procezi Lastan Registradon (Tordi & Konservi)",
-            "discard_recording": "🗑️ Forĵeti Lastan Registradon",
-            "cancel": "✖ Nuligi"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Ĝusta Programo (se korektante)",
           "corrected_duration": "Ĝusta Daŭro en minutoj (se korektante)",
           "action": "Kion vi ŝatus fari?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Konfirmu - Ĝusta Detektado",
-            "correct": "✏️ Ĝuste - Elektu Programon/Daŭron",
-            "ignore": "✖ Ignori - Falsa Pozitiva/Brua Ciklo",
-            "delete": "🗑️ Forigi - Forigi el Historio"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Nunaj fazoj por ĉi tiu tipo de aparato:\n{phase_summary}",
         "data": {
           "action": "Ago"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Krei Propran Fazon",
-            "edit_custom_phase": "✏️ Redaktu Propran Fazon",
-            "delete_custom_phase": "🗑️ Forigi Propran Fazon"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profilo",
           "source_cycle": "Fonta Ciklo (por tempostampo-reĝimo)",
           "assign_mode": "Asigno-Reĝimo"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minutaj Ofsetoj",
-            "timestamp_mode": "Tempomarkoj"
-          }
         }
       }
     },

@@ -207,15 +207,6 @@
         "description": "Cicles recents:\n{recent_cycles}",
         "data": {
           "action": "Acció"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Etiquetatge automàtic de cicles antics",
-            "select_cycle_to_label": "🏷️ Etiqueta Cicle Específic",
-            "select_cycle_to_label_multi": "🏷️ Etiqueta Múltiples Cicles",
-            "select_cycle_to_delete": "🗑️ Suprimeix el cicle",
-            "interactive_editor": "✂️ Combinar/dividir l'editor interactiu"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Resum del perfil:\n{profile_summary}",
         "data": {
           "action": "Acció"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Crea un perfil nou",
-            "edit_profile": "✏️ Edita/canvia el nom del perfil",
-            "delete_profile": "🗑️ Suprimeix el perfil",
-            "profile_stats": "📊 Estadístiques de perfil",
-            "cleanup_profile": "🧹 Neteja l'historial: gràfic i suprimir",
-            "assign_phases": "🧩 Assigna intervals de fase"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Seleccioneu una acció manual per dur a terme al vostre historial de cicles.",
         "data": {
           "editor_action": "Acció"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Dividir un cicle (Trobar buits)",
-            "merge": "🔗 Cicles de fusió (uneix fragments)",
-            "delete": "🗑️ Suprimeix cicle(s)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Trieu Exporta per copiar les dades i la configuració actuals, o Importa per enganxar les dades exportades des d'un altre dispositiu WashData.",
           "json_payload": "Per a l'exportació: copieu aquest JSON (inclou cicles, perfils i tota la configuració ajustada). Per a la importació: enganxeu JSON exportat des de WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Exporta totes les dades",
-            "import": "📥 Importa/Combina dades"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Enregistreu manualment un cicle per crear un perfil net sense interferències.\n\nEstat: **{status}**\nDurada: {duration} s\nMostres: {samples}",
         "data": {
           "action": "Acció"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Inicia una nova gravació",
-            "stop_recording": "⏹ Atura la gravació (Desa i processa)",
-            "refresh_status": "🔄 Actualitza l'estat",
-            "process_recording": "⚙️ Processa l'últim enregistrament (retalla i desa)",
-            "discard_recording": "🗑️ Descarta l'última gravació",
-            "cancel": "✖ Cancel·lar"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Programa correcte (si es corregeix)",
           "corrected_duration": "Durada correcta en minuts (si es corregeix)",
           "action": "Què t'agradaria fer?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Confirmar - Detecció correcta",
-            "correct": "✏️ Correcte - Trieu Programa/Durada",
-            "ignore": "✖ Ignorar - Cicle fals positiu/sorollós",
-            "delete": "🗑️ Suprimeix - Elimina de l'historial"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Fases actuals per a aquest tipus de dispositiu:\n{phase_summary}",
         "data": {
           "action": "Acció"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Crea una fase personalitzada",
-            "edit_custom_phase": "✏️ Edita la fase personalitzada",
-            "delete_custom_phase": "🗑️ Suprimeix la Fase Personalitzada"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Perfil",
           "source_cycle": "Cicle d'origen (per al mode de marca de temps)",
           "assign_mode": "Mode d'assignació"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Desplaçaments de minuts",
-            "timestamp_mode": "Segells de temps"
-          }
         }
       }
     },

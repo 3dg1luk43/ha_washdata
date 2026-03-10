@@ -207,15 +207,6 @@
         "description": "Legutóbbi ciklusok:\n{recent_cycles}",
         "data": {
           "action": "Akció"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Régi ciklusok automatikus címkézése",
-            "select_cycle_to_label": "🏷️ Címkespecifikus ciklus",
-            "select_cycle_to_label_multi": "🏷️ Több ciklus címkézése",
-            "select_cycle_to_delete": "🗑️ Ciklus törlése",
-            "interactive_editor": "✂️ Interaktív szerkesztő egyesítése/felosztása"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profil összefoglaló:\n{profile_summary}",
         "data": {
           "action": "Akció"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Új profil létrehozása",
-            "edit_profile": "✏️ Profil szerkesztése/átnevezése",
-            "delete_profile": "🗑️ Profil törlése",
-            "profile_stats": "📊 Profilstatisztika",
-            "cleanup_profile": "🧹 Előzmények tisztítása - Grafikon és törlés",
-            "assign_phases": "🧩 Fázistartományok hozzárendelése"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Válasszon kézi műveletet a cikluselőzményekhez.",
         "data": {
           "editor_action": "Akció"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Ossza meg a ciklust (Hézagok keresése)",
-            "merge": "🔗 Ciklusok egyesítése (a töredékek összekapcsolása)",
-            "delete": "🗑️ Ciklus(ok) törlése"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Válassza az Exportálást az aktuális adatok és beállítások másolásához, vagy az Importálást egy másik WashData eszközből exportált adatok beillesztéséhez.",
           "json_payload": "Exportáláshoz: másolja ki ezt a JSON-t (tartalmazza a ciklusokat, profilokat és az összes beállítást). Importáláshoz: illessze be a WashData-ból exportált JSON-t."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Minden adat exportálása",
-            "import": "📥 Adatok importálása/egyesítése"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Rögzítsen manuálisan egy ciklust tiszta profil létrehozásához interferencia nélkül.\n\nÁllapot: **{status}**\nIdőtartam: {duration}s\nMinták: {samples}",
         "data": {
           "action": "Akció"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Új felvétel indítása",
-            "stop_recording": "⏹ Felvétel leállítása (Mentés és feldolgozás)",
-            "refresh_status": "🔄 Állapot frissítése",
-            "process_recording": "⚙️ Utolsó felvétel feldolgozása (kivágás és mentés)",
-            "discard_recording": "🗑️ Az utolsó felvétel elvetése",
-            "cancel": "✖ Mégse"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Helyes program (ha javít)",
           "corrected_duration": "Helyes időtartam percben (ha javít)",
           "action": "mit szeretnél csinálni?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Megerősítés – Helyes észlelés",
-            "correct": "✏️ Helyes – Válassza a Program/Időtartam lehetőséget",
-            "ignore": "✖ Figyelmen kívül hagyás – téves pozitív/zajos ciklus",
-            "delete": "🗑️ Törlés – Eltávolítás az előzményekből"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Jelenlegi fázisok ennél az eszköztípusnál:\n{phase_summary}",
         "data": {
           "action": "Akció"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Egyéni fázis létrehozása",
-            "edit_custom_phase": "✏️ Egyéni fázis szerkesztése",
-            "delete_custom_phase": "🗑️ Törölje az egyéni fázist"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "source_cycle": "Forrásciklus (időbélyeg módhoz)",
           "assign_mode": "Hozzárendelési mód"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Perc eltolások",
-            "timestamp_mode": "Időbélyegek"
-          }
         }
       }
     },

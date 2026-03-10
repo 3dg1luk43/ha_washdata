@@ -207,15 +207,6 @@
         "description": "最近的周期：\n{recent_cycles}",
         "data": {
           "action": "行动"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 自动标记旧自行车",
-            "select_cycle_to_label": "🏷️标签特定周期",
-            "select_cycle_to_label_multi": "🏷️ 标记多个周期",
-            "select_cycle_to_delete": "🗑️删除循环",
-            "interactive_editor": "✂️ 合并/拆分交互式编辑器"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "配置文件摘要：\n{profile_summary}",
         "data": {
           "action": "行动"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ 创建新配置文件",
-            "edit_profile": "✏️ 编辑/重命名个人资料",
-            "delete_profile": "🗑️删除个人资料",
-            "profile_stats": "📊 个人资料统计",
-            "cleanup_profile": "🧹 清理历史记录 - 图表和删除",
-            "assign_phases": "🧩 分配相位范围"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "选择要对周期历史记录执行的手动操作。",
         "data": {
           "editor_action": "行动"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ 分割一个周期（寻找间隙）",
-            "merge": "🔗 合并循环（连接片段）",
-            "delete": "🗑️ 删除周期"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "选择导出以复制当前数据和设置，或选择导入以粘贴从另一台 WashData 设备导出的数据。",
           "json_payload": "对于导出：复制此 JSON（包括周期、配置文件和所有微调设置）。对于导入：粘贴从 WashData 导出的 JSON。"
-        },
-        "options": {
-          "mode": {
-            "export": "📤导出所有数据",
-            "import": "📥 导入/合并数据"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "手动记录周期以创建一个干净的配置文件且不受干扰。\n\n状态：**{status}**\n持续时间：{duration}s\n样本：{samples}",
         "data": {
           "action": "行动"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ 开始新录音",
-            "stop_recording": "⏹ 停止录制（保存并处理）",
-            "refresh_status": "🔄 刷新状态",
-            "process_recording": "⚙️ 处理最后的录音（修剪和保存）",
-            "discard_recording": "🗑️ 放弃最后的录音",
-            "cancel": "✖ 取消"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "更正程序（如果正在更正）",
           "corrected_duration": "更正持续时间（分钟）（如果正在更正）",
           "action": "你想做什么？"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ 确认-检测正确",
-            "correct": "✏️正确 - 选择项目/持续时间",
-            "ignore": "✖ 忽略 - 误报/噪声循环",
-            "delete": "🗑️ 删除 - 从历史记录中删除"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "此设备类型的当前阶段：\n{phase_summary}",
         "data": {
           "action": "行动"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ 创建自定义阶段",
-            "edit_custom_phase": "✏️ 编辑自定义阶段",
-            "delete_custom_phase": "🗑️ 删除自定义阶段"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "轮廓",
           "source_cycle": "源周期（对于时间戳模式）",
           "assign_mode": "分配模式"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "分钟偏移",
-            "timestamp_mode": "时间戳"
-          }
         }
       }
     },

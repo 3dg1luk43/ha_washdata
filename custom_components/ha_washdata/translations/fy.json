@@ -207,15 +207,6 @@
         "description": "Resinte syklusen:\n{recent_cycles}",
         "data": {
           "action": "Aksje"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Auto-label âlde syklusen",
-            "select_cycle_to_label": "🏷️ Label spesifike syklus",
-            "select_cycle_to_label_multi": "🏷️ Label Meardere syklusen",
-            "select_cycle_to_delete": "🗑️ Syklus wiskje",
-            "interactive_editor": "✂️ Ynteraktive bewurker gearfoegje / splitsen"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profile gearfetting:\n{profile_summary}",
         "data": {
           "action": "Aksje"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Nij profyl oanmeitsje",
-            "edit_profile": "✏️ Profile bewurkje/omneame",
-            "delete_profile": "🗑️ Profile wiskje",
-            "profile_stats": "📊 Profile Statistiken",
-            "cleanup_profile": "🧹 Skiednis skjinmeitsje - Grafyk en wiskje",
-            "assign_phases": "🧩 Fasebereiken tawize"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Selektearje in hânmjittige aksje om út te fieren op jo fytsskiednis.",
         "data": {
           "editor_action": "Aksje"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Split in syklus (Fyn gatten)",
-            "merge": "🔗 Syklusen gearfoegje (Join fragminten)",
-            "delete": "🗑️ Syklus(en) wiskje"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Kies Eksportearje om hjoeddeistige gegevens en ynstellings te kopiearjen, of ymportearje om eksportearre gegevens fan in oar WashData-apparaat te plakjen.",
           "json_payload": "Foar Eksportearje: kopiearje dizze JSON (omfettet syklusen, profilen en alle fine-tuned ynstellings). Foar ymportearje: plak JSON eksportearre fan WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Eksportearje alle gegevens",
-            "import": "📥 Gegevens ymportearje / gearfoegje"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Meitsje in syklus manuell op om in skjin profyl te meitsjen sûnder ynterferinsje.\n\nStatus: **{status}**\nDuration: {duration}s\nSamples: {samples}",
         "data": {
           "action": "Aksje"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Begjin nije opname",
-            "stop_recording": "⏹ Opname stopje (opslaan en ferwurkje)",
-            "refresh_status": "🔄 Status ferfarskje",
-            "process_recording": "⚙️ Lêste opname ferwurkje (Trim & Save)",
-            "discard_recording": "🗑️ Lêste opname wegerje",
-            "cancel": "✖ Ofbrekke"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Korrekte programma (as korrigearje)",
           "corrected_duration": "Korrekte doer yn minuten (as korreksje)",
           "action": "Wat wolle jo dwaan?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Befêstigje - Korrekte deteksje",
-            "correct": "✏️ Korrekt - Kies programma / doer",
-            "ignore": "✖ Negearje - False Posityf / Noisy Cycle",
-            "delete": "🗑️ Wiskje - Fuortsmite út histoarje"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Aktuele fazen foar dit apparaattype:\n{phase_summary}",
         "data": {
           "action": "Aksje"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Oanpaste faze oanmeitsje",
-            "edit_custom_phase": "✏️ Oanpaste faze bewurkje",
-            "delete_custom_phase": "🗑️ Oanpaste faze wiskje"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profyl",
           "source_cycle": "Boarnesyklus (foar tiidstempelmodus)",
           "assign_mode": "Opdracht modus"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minute Offsets",
-            "timestamp_mode": "Tiidstempels"
-          }
         }
       }
     },

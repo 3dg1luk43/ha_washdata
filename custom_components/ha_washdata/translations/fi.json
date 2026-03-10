@@ -207,15 +207,6 @@
         "description": "Viimeaikaiset syklit:\n{recent_cycles}",
         "data": {
           "action": "Toiminta"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Merkitse vanhat pyörät automaattisesti",
-            "select_cycle_to_label": "🏷️ Tarrakohtainen sykli",
-            "select_cycle_to_label_multi": "🏷️ Merkitse useita syklejä",
-            "select_cycle_to_delete": "🗑️ Poista sykli",
-            "interactive_editor": "✂️ Yhdistä/jaa interaktiivinen editori"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profiiliyhteenveto:\n{profile_summary}",
         "data": {
           "action": "Toiminta"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Luo uusi profiili",
-            "edit_profile": "✏️ Muokkaa/nimeä profiilia uudelleen",
-            "delete_profile": "🗑️Poista profiili",
-            "profile_stats": "📊 Profiilitilastot",
-            "cleanup_profile": "🧹 Puhdista historia - piirrä ja poista",
-            "assign_phases": "🧩 Määritä vaihealueet"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Valitse manuaalinen toiminto syklihistorianasi.",
         "data": {
           "editor_action": "Toiminta"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Jaa sykli (etsi aukkoja)",
-            "merge": "🔗 Yhdistä syklit (liitä fragmentit)",
-            "delete": "🗑️ Poista jakso(t)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Valitse Vie kopioidaksesi nykyiset tiedot ja asetukset, tai Tuo liittääksesi toisesta WashData-laitteesta viedyt tiedot.",
           "json_payload": "Vientiin: kopioi tämä JSON (sisältää syklit, profiilit ja kaikki asetukset). Tuontiin: liitä WashDatasta viety JSON."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Vie kaikki tiedot",
-            "import": "📥 Tuo / yhdistä tiedot"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Tallenna sykli manuaalisesti luodaksesi puhtaan profiilin ilman häiriöitä.\n\nTila: **{status}**\nKesto: {duration}s\nNäytteet: {samples}",
         "data": {
           "action": "Toiminta"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Aloita uusi tallennus",
-            "stop_recording": "⏹ Lopeta tallennus (tallenna ja käsittele)",
-            "refresh_status": "🔄 Päivitä tila",
-            "process_recording": "⚙️ Käsittele viimeinen tallennus (leikkaa ja tallenna)",
-            "discard_recording": "🗑️ Hylkää viimeinen tallennus",
-            "cancel": "✖ Peruuta"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Oikea ohjelma (jos korjaat)",
           "corrected_duration": "Oikea kesto minuutteina (jos korjaat)",
           "action": "Mitä haluaisit tehdä?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Vahvista - Oikea tunnistus",
-            "correct": "✏️ Oikein - Valitse Ohjelma/kesto",
-            "ignore": "✖ Ohita - Väärä positiivinen/kohinainen sykli",
-            "delete": "🗑️ Poista - Poista historiasta"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Tämän laitetyypin nykyiset vaiheet:\n{phase_summary}",
         "data": {
           "action": "Toiminta"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Luo mukautettu vaihe",
-            "edit_custom_phase": "✏️ Muokkaa mukautettua vaihetta",
-            "delete_custom_phase": "🗑️ Poista mukautettu vaihe"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profiili",
           "source_cycle": "Lähdejakso (aikaleimatilaa varten)",
           "assign_mode": "Tehtävätila"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minuuttipoikkeamat",
-            "timestamp_mode": "Aikaleimat"
-          }
         }
       }
     },

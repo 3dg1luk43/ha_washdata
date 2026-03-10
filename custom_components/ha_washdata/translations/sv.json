@@ -207,15 +207,6 @@
         "description": "Senaste cykler:\n{recent_cycles}",
         "data": {
           "action": "Handling"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Automärk gamla cykler",
-            "select_cycle_to_label": "🏷️ Etikettspecifik cykel",
-            "select_cycle_to_label_multi": "🏷️ Märk flera cykler",
-            "select_cycle_to_delete": "🗑️ Ta bort cykel",
-            "interactive_editor": "✂️ Sammanfoga/Dela interaktiv redigerare"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profilsammanfattning:\n{profile_summary}",
         "data": {
           "action": "Handling"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Skapa ny profil",
-            "edit_profile": "✏️ Redigera/byt namn på profil",
-            "delete_profile": "🗑️ Ta bort profil",
-            "profile_stats": "📊 Profilstatistik",
-            "cleanup_profile": "🧹 Rensa upp historik - graf och radera",
-            "assign_phases": "🧩 Tilldela fasintervall"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Välj en manuell åtgärd för din cykelhistorik.",
         "data": {
           "editor_action": "Handling"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Dela en cykel (Hitta luckor)",
-            "merge": "🔗 Sammanfoga cykler (Sammanfoga fragment)",
-            "delete": "🗑️ Ta bort cykel(er)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Välj Exportera för att kopiera aktuella data och inställningar, eller Importera för att klistra in data exporterade från en annan WashData-enhet.",
           "json_payload": "För Export: kopiera denna JSON (innehåller cykler, profiler och alla inställningar). För Import: klistra in JSON exporterad från WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Exportera all data",
-            "import": "📥 Importera/slå samman data"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Spela in en cykel manuellt för att skapa en ren profil utan störningar.\n\nStatus: **{status}**\nVaraktighet: {duration}s\nSampel: {samples}",
         "data": {
           "action": "Handling"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Starta ny inspelning",
-            "stop_recording": "⏹ Stoppa inspelning (spara och bearbeta)",
-            "refresh_status": "🔄 Uppdatera status",
-            "process_recording": "⚙️ Bearbeta senaste inspelning (Trim & Save)",
-            "discard_recording": "🗑️ Kasta senaste inspelningen",
-            "cancel": "✖ Avbryt"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Korrekt program (om du korrigerar)",
           "corrected_duration": "Korrekt varaktighet i minuter (om du korrigerar)",
           "action": "Vad skulle du vilja göra?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Bekräfta - Korrekt upptäckt",
-            "correct": "✏️ Rätt - Välj Program/Längd",
-            "ignore": "✖ Ignorera - Falskt positiv/bullrig cykel",
-            "delete": "🗑️ Ta bort - Ta bort från historiken"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Aktuella faser för denna enhetstyp:\n{phase_summary}",
         "data": {
           "action": "Handling"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Skapa anpassad fas",
-            "edit_custom_phase": "✏️ Redigera anpassad fas",
-            "delete_custom_phase": "🗑️ Ta bort anpassad fas"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "assign_mode": "Tilldelningsläge",
           "source_cycle": "Källcykel (för tidsstämpelläge)"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minutavvikelser",
-            "timestamp_mode": "Tidsstämplar"
-          }
         }
       }
     },

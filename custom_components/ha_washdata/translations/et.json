@@ -207,15 +207,6 @@
         "description": "Hiljutised tsüklid:\n{recent_cycles}",
         "data": {
           "action": "Tegevus"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Vanade tsiklite automaatne sildistamine",
-            "select_cycle_to_label": "🏷️ Sildi spetsiifiline tsükkel",
-            "select_cycle_to_label_multi": "🏷️ Märgistage mitu tsüklit",
-            "select_cycle_to_delete": "🗑️ Kustuta tsükkel",
-            "interactive_editor": "✂️ Interaktiivse redaktori liitmine/tükeldamine"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profiilide kokkuvõte:\n{profile_summary}",
         "data": {
           "action": "Tegevus"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Looge uus profiil",
-            "edit_profile": "✏️ Muutke/nimetage ümber profiili",
-            "delete_profile": "🗑️ Kustuta profiil",
-            "profile_stats": "📊 Profiili statistika",
-            "cleanup_profile": "🧹 Ajaloo puhastamine – graafik ja kustutamine",
-            "assign_phases": "🧩 Määrake faasivahemikud"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Valige käsitsi toiming oma tsüklite ajaloo jaoks.",
         "data": {
           "editor_action": "Tegevus"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Tükelda tsükkel (leidke lünki)",
-            "merge": "🔗 Ühendage tsüklid (ühendage fragmente)",
-            "delete": "🗑️ Kustuta tsükkel(id)"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Valige Eksport praeguste andmete ja seadete kopeerimiseks, või Import teisest WashData seadmest eksporditud andmete kleepimiseks.",
           "json_payload": "Ekspordiks: kopeerige see JSON (sisaldab tsükleid, profiile ja kõiki seadeid). Impordiks: kleepige WashDatast eksporditud JSON."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Ekspordi kõik andmed",
-            "import": "📥 Andmete importimine/ühendamine"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Salvestage tsükkel käsitsi, et luua puhas profiil ilma häireteta.\n\nOlek: **{status}**\nKestus: {duration}s\nNäidised: {samples}",
         "data": {
           "action": "Tegevus"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Alustage uut salvestamist",
-            "stop_recording": "⏹ Peata salvestamine (salvesta ja töötle)",
-            "refresh_status": "🔄 Värskenda olekut",
-            "process_recording": "⚙️ Töötle viimane salvestus (kärbi ja salvesta)",
-            "discard_recording": "🗑️ Loobu viimane salvestis",
-            "cancel": "✖ Tühista"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Õige programm (kui parandate)",
           "corrected_duration": "Õige kestus minutites (kui parandate)",
           "action": "Mida sa teha tahaksid?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Kinnita – õige tuvastamine",
-            "correct": "✏️ Õige – valige programm/kestus",
-            "ignore": "✖ Ignoreeri – valepositiivne/mürarikas tsükkel",
-            "delete": "🗑️ Kustuta – eemalda ajaloost"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Selle seadmetüübi praegused faasid:\n{phase_summary}",
         "data": {
           "action": "Tegevus"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Loo kohandatud faas",
-            "edit_custom_phase": "✏️ Muutke kohandatud faasi",
-            "delete_custom_phase": "🗑️ Kustutage kohandatud faas"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profiil",
           "source_cycle": "Allika tsükkel (ajatempli režiimi jaoks)",
           "assign_mode": "Määramise režiim"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minutite nihked",
-            "timestamp_mode": "Ajatemplid"
-          }
         }
       }
     },

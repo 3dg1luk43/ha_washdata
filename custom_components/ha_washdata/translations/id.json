@@ -207,15 +207,6 @@
         "description": "Siklus terkini:\n{recent_cycles}",
         "data": {
           "action": "Tindakan"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Beri Label Otomatis pada Siklus Lama",
-            "select_cycle_to_label": "🏷️ Labeli Siklus Tertentu",
-            "select_cycle_to_label_multi": "🏷️ Beri Label Beberapa Siklus",
-            "select_cycle_to_delete": "🗑️ Hapus Siklus",
-            "interactive_editor": "✂️ Gabungkan/Pisahkan Editor Interaktif"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Ringkasan Profil:\n{profile_summary}",
         "data": {
           "action": "Tindakan"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Buat Profil Baru",
-            "edit_profile": "✏️ Edit/Ganti Nama Profil",
-            "delete_profile": "🗑️ Hapus Profil",
-            "profile_stats": "📊 Statistik Profil",
-            "cleanup_profile": "🧹 Bersihkan Riwayat - Grafik & Hapus",
-            "assign_phases": "🧩 Tetapkan Rentang Fase"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Pilih tindakan manual untuk dilakukan pada riwayat siklus Anda.",
         "data": {
           "editor_action": "Tindakan"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Bagi Siklus (Temukan celah)",
-            "merge": "🔗 Gabungkan Siklus (Gabungkan fragmen)",
-            "delete": "🗑️ Hapus Siklus"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Pilih Ekspor untuk menyalin data dan pengaturan saat ini, atau Impor untuk menempelkan data yang diekspor dari perangkat WashData lain.",
           "json_payload": "Untuk Ekspor: salin JSON ini (termasuk siklus, profil, dan semua pengaturan yang telah disesuaikan). Untuk Impor: tempel JSON yang diekspor dari WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Ekspor Semua Data",
-            "import": "📥 Impor/Gabungkan Data"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Rekam siklus secara manual untuk membuat profil bersih tanpa gangguan.\n\nStatus: **{status}**\nDurasi: {duration} dtk\nSampel: {samples}",
         "data": {
           "action": "Tindakan"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Mulai Perekaman Baru",
-            "stop_recording": "⏹ Hentikan Perekaman (Simpan & Proses)",
-            "refresh_status": "🔄 Segarkan Status",
-            "process_recording": "⚙️ Proses Perekaman Terakhir (Potong & Simpan)",
-            "discard_recording": "🗑️ Buang Rekaman Terakhir",
-            "cancel": "✖ Batal"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Program yang Benar (jika mengoreksi)",
           "corrected_duration": "Durasi Benar dalam hitungan menit (jika mengoreksi)",
           "action": "Apa yang ingin kamu lakukan?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Konfirmasi - Deteksi Benar",
-            "correct": "✏️ Benar - Pilih Program/Durasi",
-            "ignore": "✖ Abaikan - Siklus Positif Palsu/Bising",
-            "delete": "🗑️ Hapus - Hapus dari Riwayat"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Fase saat ini untuk jenis perangkat ini:\n{phase_summary}",
         "data": {
           "action": "Tindakan"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Buat Fase Kustom",
-            "edit_custom_phase": "✏️ Edit Fase Kustom",
-            "delete_custom_phase": "🗑️ Hapus Fase Kustom"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "source_cycle": "Siklus Sumber (untuk mode stempel waktu)",
           "assign_mode": "Modus Penugasan"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Offset Menit",
-            "timestamp_mode": "Stempel waktu"
-          }
         }
       }
     },

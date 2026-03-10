@@ -207,15 +207,6 @@
         "description": "Nedávné cykly:\n{recent_cycles}",
         "data": {
           "action": "Akce"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Automatické označování starých cyklů",
-            "select_cycle_to_label": "🏷️ Specifický cyklus štítku",
-            "select_cycle_to_label_multi": "🏷️ Označte více cyklů",
-            "select_cycle_to_delete": "🗑️ Smazat cyklus",
-            "interactive_editor": "✂️ Interaktivní editor sloučení/rozdělení"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Přehled profilů:\n{profile_summary}",
         "data": {
           "action": "Akce"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Vytvořit nový profil",
-            "edit_profile": "✏️ Upravit/Přejmenovat profil",
-            "delete_profile": "🗑️ Smazat profil",
-            "profile_stats": "📊 Statistiky profilu",
-            "cleanup_profile": "🧹 Historie vyčištění – graf a smazání",
-            "assign_phases": "🧩 Přiřaďte fázové rozsahy"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Vyberte ruční akci pro váš historii cyklů.",
         "data": {
           "editor_action": "Akce"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Rozdělit cyklus (najít mezery)",
-            "merge": "🔗 Sloučit cykly (spojit fragmenty)",
-            "delete": "🗑️ Smazat cykly"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Zvolte Export pro kopírování aktuálních dat a nastavení, nebo Import pro vložení exportovaných dat z jiného zařízení WashData.",
           "json_payload": "Pro Export: zkopírujte tento JSON (obsahuje cykly, profily a všechna nastavení). Pro Import: vložte JSON exportovaný z WashData."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Exportujte všechna data",
-            "import": "📥 Import/sloučení dat"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Ručně zaznamenejte cyklus pro vytvoření čistého profilu bez rušení.\n\nStav: **{status}**\nDoba trvání: {duration}s\nVzorky: {samples}",
         "data": {
           "action": "Akce"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Spusťte nový záznam",
-            "stop_recording": "⏹ Zastavit záznam (Uložit a zpracovat)",
-            "refresh_status": "🔄 Stav obnovení",
-            "process_recording": "⚙️ Zpracovat poslední záznam (oříznout a uložit)",
-            "discard_recording": "🗑️ Zahodit poslední nahrávku",
-            "cancel": "✖ Zrušit"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Správný program (při opravě)",
           "corrected_duration": "Správná doba trvání v minutách (při opravě)",
           "action": "co bys chtěl dělat?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Potvrdit – správná detekce",
-            "correct": "✏️ Správně – zvolte Program/Trvání",
-            "ignore": "✖ Ignorovat – cyklus falešně pozitivní/hlučný",
-            "delete": "🗑️ Smazat – odebrat z historie"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Aktuální fáze pro tento typ zařízení:\n{phase_summary}",
         "data": {
           "action": "Akce"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Vytvořit vlastní fázi",
-            "edit_custom_phase": "✏️ Upravit vlastní fázi",
-            "delete_custom_phase": "🗑️ Smazat vlastní fázi"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profil",
           "source_cycle": "Zdrojový cyklus (pro režim časového razítka)",
           "assign_mode": "Režim přiřazení"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Posuny minut",
-            "timestamp_mode": "Časová razítka"
-          }
         }
       }
     },

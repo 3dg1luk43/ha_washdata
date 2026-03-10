@@ -207,15 +207,6 @@
         "description": "Onlangse siklusse:\n{recent_cycles}",
         "data": {
           "action": "Aksie"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Outo-etiketteer ou siklusse",
-            "select_cycle_to_label": "🏷️ Merk spesifieke siklus",
-            "select_cycle_to_label_multi": "🏷️ Merk verskeie siklusse",
-            "select_cycle_to_delete": "🗑️ Vee siklus uit",
-            "interactive_editor": "✂️ Voeg interaktiewe redigeerder saam / verdeel"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profielopsomming:\n{profile_summary}",
         "data": {
           "action": "Aksie"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Skep 'n nuwe profiel",
-            "edit_profile": "✏️ Wysig/hernoem profiel",
-            "delete_profile": "🗑️ Vee profiel uit",
-            "profile_stats": "📊 Profielstatistieke",
-            "cleanup_profile": "🧹 Maak geskiedenis skoon - grafiek en vee uit",
-            "assign_phases": "🧩 Ken fasereekse toe"
-          }
         }
       },
       "profile_stats": {
@@ -337,13 +318,6 @@
         "description": "Kies 'n handmatige aksie om op jou siklusgeskiedenis uit te voer.",
         "data": {
           "editor_action": "Aksie"
-        },
-        "options": {
-          "editor_action": {
-            "split": "✂️ Verdeel 'n siklus (Vind gapings)",
-            "merge": "🔗 Voeg siklusse saam (Sluit fragmente aan)",
-            "delete": "🗑️ Vee siklus(s) uit"
-          }
         }
       },
       "editor_select": {
@@ -398,12 +372,6 @@
         "data_description": {
           "mode": "Kies Uitvoer om huidige data en instellings te kopieer, of Invoer om uitgevoerde data vanaf 'n ander WashData-toestel te plak.",
           "json_payload": "Vir uitvoer: kopieer hierdie JSON (sluit siklusse, profiele en alle verfynde instellings in). Vir invoer: plak JSON wat vanaf WashData uitgevoer is."
-        },
-        "options": {
-          "mode": {
-            "export": "📤 Voer alle data uit",
-            "import": "📥 Voer data in / voeg saam"
-          }
         }
       },
       "record_cycle": {
@@ -411,16 +379,6 @@
         "description": "Teken 'n siklus handmatig op om 'n skoon profiel sonder inmenging te skep.\n\nStatus: **{status}**\nTydsduur: {duration}s\nVoorbeelde: {samples}",
         "data": {
           "action": "Aksie"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Begin nuwe opname",
-            "stop_recording": "⏹ Stop opname (stoor en verwerk)",
-            "refresh_status": "🔄 Verfris status",
-            "process_recording": "⚙️ Verwerk laaste opname (sny en stoor)",
-            "discard_recording": "🗑️ Gooi laaste opname weg",
-            "cancel": "✖ Kanselleer"
-          }
         }
       },
       "record_process": {
@@ -451,14 +409,6 @@
           "corrected_profile": "Korrekte program (indien reggestel)",
           "corrected_duration": "Korrekte duur in minute (indien reggestel)",
           "action": "Wat sou jy graag wou doen?"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Bevestig - Korrekte opsporing",
-            "correct": "✏️ Korrek - Kies program/duur",
-            "ignore": "✖ Ignoreer - Vals Positiewe/Lawaaierige Siklus",
-            "delete": "🗑️ Vee uit - Verwyder uit geskiedenis"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -466,13 +416,6 @@
         "description": "Huidige fases vir hierdie toesteltipe:\n{phase_summary}",
         "data": {
           "action": "Aksie"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Skep pasgemaakte fase",
-            "edit_custom_phase": "✏️ Wysig pasgemaakte fase",
-            "delete_custom_phase": "🗑️ Vee pasgemaakte fase uit"
-          }
         }
       },
       "phase_catalog_create": {
@@ -551,12 +494,6 @@
           "profile": "Profiel",
           "source_cycle": "Bronsiklus (vir tydstempelmodus)",
           "assign_mode": "Opdragmodus"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minute afwykings",
-            "timestamp_mode": "Tydstempels"
-          }
         }
       }
     },

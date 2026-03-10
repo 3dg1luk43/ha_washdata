@@ -206,33 +206,14 @@
         "title": "Döngüleri Yönet",
         "description": "Son döngüler:\n{recent_cycles}",
         "data": {
-          "action": {
-            "name": "Aksiyon",
-            "options": {
-              "auto_label_cycles": "🤖 Eski Döngüleri Otomatik Etiketle",
-              "select_cycle_to_label": "🏷️ Etikete Özel Döngü",
-              "select_cycle_to_label_multi": "🏷️ Birden Fazla Döngüyü Etiketleyin",
-              "select_cycle_to_delete": "🗑️ Döngüyü Sil",
-              "interactive_editor": "✂️ İnteraktif Düzenleyiciyi Birleştir/Böl"
-            }
-          }
+          "action": "Aksiyon"
         }
       },
       "manage_profiles": {
         "title": "Profilleri Yönet",
         "description": "Profil Özeti:\n{profile_summary}",
         "data": {
-          "action": {
-            "name": "Aksiyon",
-            "options": {
-              "create_profile": "➕ Yeni Profil Oluştur",
-              "edit_profile": "✏️ Profili Düzenle/Yeniden Adlandır",
-              "delete_profile": "🗑️ Profili Sil",
-              "profile_stats": "📊 Profil İstatistikleri",
-              "cleanup_profile": "🧹 Geçmişi Temizle - Grafik ve Sil",
-              "assign_phases": "🧩 Faz Aralıklarını Atayın"
-            }
-          }
+          "action": "Aksiyon"
         }
       },
       "profile_stats": {
@@ -336,14 +317,7 @@
         "title": "Birleştir/Böl İnteraktif Düzenleyici",
         "description": "Adet geçmişinizde gerçekleştirilecek manuel işlemi seçin.",
         "data": {
-          "editor_action": {
-            "name": "Aksiyon",
-            "options": {
-              "split": "✂️ Döngüyü Böl (Boşlukları bul)",
-              "merge": "🔗 Döngüleri Birleştir (Parçaları birleştir)",
-              "delete": "🗑️ Döngü(ler)i Sil"
-            }
-          }
+          "editor_action": "Aksiyon"
         }
       },
       "editor_select": {
@@ -392,14 +366,8 @@
         "title": "JSON'u Dışa/İçe Aktarma",
         "description": "Bu cihaz için döngüleri, profilleri VE ayarları kopyalayın/yapıştırın. Aşağıya aktarın veya içe aktarmak için JSON'u yapıştırın.",
         "data": {
-          "mode": {
-            "name": "Aksiyon",
-            "options": {
-              "export": "📤 Tüm Verileri Dışa Aktar",
-              "import": "📥 Verileri İçe Aktar/Birleştir"
-            }
-          },
-          "json_payload": "Yapılandırmayı Tamamla JSON"
+          "json_payload": "Yapılandırmayı Tamamla JSON",
+          "mode": "Aksiyon"
         },
         "data_description": {
           "mode": "Geçerli verileri ve ayarları kopyalamak için Dışa Aktar'ı veya başka bir WashData cihazından dışa aktarılan verileri yapıştırmak için İçe Aktar'ı seçin.",
@@ -410,17 +378,7 @@
         "title": "Kayıt Döngüsü",
         "description": "Müdahale olmadan temiz bir profil oluşturmak için bir döngüyü manuel olarak kaydedin.\n\nDurum: **{status}**\nSüre: {duration} sn\nÖrnekler: {samples}",
         "data": {
-          "action": {
-            "name": "Aksiyon",
-            "options": {
-              "start_recording": "⏺ Yeni Kaydı Başlat",
-              "stop_recording": "⏹ Kaydı Durdur (Kaydet ve İşle)",
-              "refresh_status": "🔄 Durumu Yenile",
-              "process_recording": "⚙️ Son Kaydı İşle (Kırp ve Kaydet)",
-              "discard_recording": "🗑️ Son Kaydı Sil",
-              "cancel": "✖ İptal"
-            }
-          }
+          "action": "Aksiyon"
         }
       },
       "record_process": {
@@ -448,31 +406,16 @@
         "title": "Geri Bildirimi Çözümleyin",
         "description": "**Algılanan Program**: {profile}\n**Güven**: %{confidence}\n**Tahmini**: {est}m, **Gerçek**: {act}m",
         "data": {
-          "action": {
-            "name": "Ne yapmak istersin?",
-            "options": {
-              "confirm": "✅ Onayla - Doğru Tespit",
-              "correct": "✏️ Doğru - Program/Süreyi Seçin",
-              "ignore": "✖ Yoksay - Yanlış Pozitif/Gürültülü Döngü",
-              "delete": "🗑️ Sil - Geçmişten Kaldır"
-            }
-          },
           "corrected_profile": "Doğru Program (düzeltiliyorsa)",
-          "corrected_duration": "Dakika cinsinden Doğru Süre (düzeltiliyorsa)"
+          "corrected_duration": "Dakika cinsinden Doğru Süre (düzeltiliyorsa)",
+          "action": "Ne yapmak istersin?"
         }
       },
       "manage_phase_catalog": {
         "title": "Aşama Kataloğunu Yönet",
         "description": "Bu cihaz tipi için mevcut aşamalar:\n{phase_summary}",
         "data": {
-          "action": {
-            "name": "Aksiyon",
-            "options": {
-              "create_custom_phase": "➕ Özel Aşama Oluştur",
-              "edit_custom_phase": "✏️ Özel Aşamayı Düzenle",
-              "delete_custom_phase": "🗑️ Özel Aşamayı Sil"
-            }
-          }
+          "action": "Aksiyon"
         }
       },
       "phase_catalog_create": {
@@ -549,14 +492,8 @@
         "description": "Faz aralıklarını yapılandırmak için bir profil seçin.",
         "data": {
           "profile": "Profil",
-          "assign_mode": {
-            "name": "Atama Modu",
-            "options": {
-              "offset_mode": "Dakika Farkları",
-              "timestamp_mode": "Zaman damgaları"
-            }
-          },
-          "source_cycle": "Kaynak Döngüsü (zaman damgası modu için)"
+          "source_cycle": "Kaynak Döngüsü (zaman damgası modu için)",
+          "assign_mode": "Atama Modu"
         }
       }
     },

@@ -7,6 +7,7 @@ on:
       - master
     paths:
       - 'custom_components/ha_washdata/translations/en.json'
+      - 'custom_components/ha_washdata/www/ha-washdata-card.js'
   workflow_dispatch:
 
 permissions:
@@ -34,7 +35,7 @@ jobs:
 
       - name: Run Translation Script
         run: |
-          python scripts/translate.py
+          python scripts/translate.py custom_components/ha_washdata/translations --all --card-file custom_components/ha_washdata/www/ha-washdata-card.js
 
       - name: Check for changes
         id: git_diff
@@ -57,9 +58,13 @@ jobs:
           commit-message: "chore: update translations [skip ci]"
           title: "🌐 Update Translations"
           body: |
-            Automated translation updates triggered by changes to `en.json`.
-            
-            This PR updates the translation files for all supported languages using Gemini API.
+            Automated translation updates triggered by changes to canonical English entries.
+
+            This PR updates:
+            - `custom_components/ha_washdata/translations/*.json`
+            - `custom_components/ha_washdata/www/ha-washdata-card.js` (`TRANSLATIONS` object)
+
+            Translation engine: `deep-translator` (GoogleTranslator).
           branch: "chore/auto-translate"
           delete-branch: true
           base: ${{ github.ref_name }}
