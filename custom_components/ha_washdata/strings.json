@@ -207,15 +207,6 @@
         "description": "Recent cycles:\n{recent_cycles}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "\ud83e\udd16 Auto-Label Old Cycles",
-            "select_cycle_to_label": "\ud83c\udff7\ufe0f Label Specific Cycle",
-            "select_cycle_to_label_multi": "\ud83c\udff7\ufe0f Label Multiple Cycles",
-            "select_cycle_to_delete": "\ud83d\uddd1\ufe0f Delete Cycle",
-            "interactive_editor": "\u2702\ufe0f Merge/Split Interactive Editor"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profile Summary:\n{profile_summary}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "create_profile": "\u2795 Create New Profile",
-            "edit_profile": "\u270f\ufe0f Edit/Rename Profile",
-            "delete_profile": "\ud83d\uddd1\ufe0f Delete Profile",
-            "profile_stats": "\ud83d\udcca Profile Statistics",
-            "cleanup_profile": "\ud83e\uddf9 Clean Up History - Graph & Delete",
-            "assign_phases": "\ud83e\udde9 Assign Phase Ranges"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -240,13 +221,6 @@
         "description": "Current phases for this device type:\n{phase_summary}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "\u2795 Create Custom Phase",
-            "edit_custom_phase": "\u270f\ufe0f Edit Custom Phase",
-            "delete_custom_phase": "\ud83d\uddd1\ufe0f Delete Custom Phase"
-          }
         }
       },
       "phase_catalog_create": {
@@ -490,16 +464,6 @@
         "description": "Manually record a cycle to create a clean profile without interference.\n\nStatus: **{status}**\nDuration: {duration}s\nSamples: {samples}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "start_recording": "\u23fa Start New Recording",
-            "stop_recording": "\u23f9 Stop Recording (Save & Process)",
-            "refresh_status": "\ud83d\udd04 Refresh Status",
-            "process_recording": "\u2699\ufe0f Process Last Recording (Trim & Save)",
-            "discard_recording": "\ud83d\uddd1\ufe0f Discard Last Recording",
-            "cancel": "\u2716 Cancel"
-          }
         }
       },
       "record_process": {
@@ -530,14 +494,6 @@
           "action": "What would you like to do?",
           "corrected_profile": "Correct Program (if correcting)",
           "corrected_duration": "Correct Duration in minutes (if correcting)"
-        },
-        "options": {
-          "action": {
-            "confirm": "\u2705 Confirm - Correct Detection",
-            "correct": "\u270f\ufe0f Correct - Choose Program/Duration",
-            "ignore": "\u2716 Ignore - False Positive/Noisy Cycle",
-            "delete": "\ud83d\uddd1\ufe0f Delete - Remove from History"
-          }
         }
       }
     },

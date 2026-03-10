@@ -207,15 +207,6 @@
         "description": "Recent cycles:\n{recent_cycles}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "auto_label_cycles": "🤖 Auto-Label Old Cycles",
-            "select_cycle_to_label": "🏷️ Label Specific Cycle",
-            "select_cycle_to_label_multi": "🏷️ Label Multiple Cycles",
-            "select_cycle_to_delete": "🗑️ Delete Cycle",
-            "interactive_editor": "✂️ Merge/Split Interactive Editor"
-          }
         }
       },
       "manage_profiles": {
@@ -223,16 +214,6 @@
         "description": "Profile Summary:\n{profile_summary}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "create_profile": "➕ Create New Profile",
-            "edit_profile": "✏️ Edit/Rename Profile",
-            "delete_profile": "🗑️ Delete Profile",
-            "profile_stats": "📊 Profile Statistics",
-            "cleanup_profile": "🧹 Clean Up History - Graph & Delete",
-            "assign_phases": "🧩 Assign Phase Ranges"
-          }
         }
       },
       "manage_phase_catalog": {
@@ -240,13 +221,6 @@
         "description": "Current phases for this device type:\n{phase_summary}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "create_custom_phase": "➕ Create Custom Phase",
-            "edit_custom_phase": "✏️ Edit Custom Phase",
-            "delete_custom_phase": "🗑️ Delete Custom Phase"
-          }
         }
       },
       "phase_catalog_create": {
@@ -491,16 +465,6 @@
         "description": "Manually record a cycle to create a clean profile without interference.\n\nStatus: **{status}**\nDuration: {duration}s\nSamples: {samples}",
         "data": {
           "action": "Action"
-        },
-        "options": {
-          "action": {
-            "start_recording": "⏺ Start New Recording",
-            "stop_recording": "⏹ Stop Recording (Save & Process)",
-            "refresh_status": "🔄 Refresh Status",
-            "process_recording": "⚙️ Process Last Recording (Trim & Save)",
-            "discard_recording": "🗑️ Discard Last Recording",
-            "cancel": "✖ Cancel"
-          }
         }
       },
       "record_process": {
@@ -531,14 +495,6 @@
           "action": "What would you like to do?",
           "corrected_profile": "Correct Program (if correcting)",
           "corrected_duration": "Correct Duration in minutes (if correcting)"
-        },
-        "options": {
-          "action": {
-            "confirm": "✅ Confirm - Correct Detection",
-            "correct": "✏️ Correct - Choose Program/Duration",
-            "ignore": "✖ Ignore - False Positive/Noisy Cycle",
-            "delete": "🗑️ Delete - Remove from History"
-          }
         }
       }
     },
