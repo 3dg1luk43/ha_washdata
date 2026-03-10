@@ -325,12 +325,6 @@
           "profile": "Profile",
           "assign_mode": "Assignment Mode",
           "source_cycle": "Source Cycle (for timestamp mode)"
-        },
-        "options": {
-          "assign_mode": {
-            "offset_mode": "Minute Offsets",
-            "timestamp_mode": "Timestamps"
-          }
         }
       },
       "profile_stats": {
