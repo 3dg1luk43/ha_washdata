@@ -2242,11 +2242,17 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             # This calculates energy, consistency, etc.
             await store.async_rebuild_envelope(name)
 
+            # Read profile again after rebuild so table values match refreshed stats.
+            refreshed = store.get_profile(name) or p
+
             safe_name = slugify(name)
-            count = p["cycle_count"]
-            avg = int(p["avg_duration"] / 60) if p["avg_duration"] else 0
-            mn = int(p["min_duration"] / 60) if p.get("min_duration") else 0
-            mx = int(p["max_duration"] / 60) if p.get("max_duration") else 0
+            count = int(refreshed.get("cycle_count", p.get("cycle_count", 0)))
+            avg_raw = float(refreshed.get("avg_duration") or 0)
+            min_raw = float(refreshed.get("min_duration") or 0)
+            max_raw = float(refreshed.get("max_duration") or 0)
+            avg = int(avg_raw / 60) if avg_raw else 0
+            mn = int(min_raw / 60) if min_raw else 0
+            mx = int(max_raw / 60) if max_raw else 0
 
             # Get envelope for advanced stats
             envelope = store.get_envelope(name)

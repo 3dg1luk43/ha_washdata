@@ -7,7 +7,7 @@ from homeassistant.util import dt as dt_util
 
 @pytest.mark.asyncio
 async def test_repro_avg_duration_skew(hass):
-    """Test how a single outlier ruins the average duration and is not fixed."""
+    """Test that a single outlier does not ruin average duration statistics."""
     store = ProfileStore(hass, "test_entry")
     
     # 1. Setup a profile with normal data
@@ -43,25 +43,19 @@ async def test_repro_avg_duration_skew(hass):
         "power_data": [[0.0, 10.0], [90000.0, 5.0], [zombie_duration, 0.0]]
     })
     
-    # Rebuild - currently this will include the outlier
+    # Rebuild with outlier present
     await store.async_rebuild_envelope(profile_name)
     
-    # 5 * 3600 + 180000 = 18000 + 180000 = 198000
-    # 198000 / 6 = 33000s = 550 minutes
     new_avg = store._data["profiles"][profile_name]["avg_duration"]
-    assert new_avg > 3600.0 * 2  # It's more than doubled! (Current buggy behavior)
-    print(f"New skewed average: {new_avg/60:.1f} minutes")
+    # Fixed behavior: robust statistics should keep average near expected profile duration.
+    assert new_avg < 4500.0
 
-    # 3. Learning EMA skew
+    # 3. Learning correction should not update avg via EMA anymore.
     learning = LearningManager(hass, "test_entry", store)
-    # User "corrects" a cycle to 3000 minutes
-    # EMA is: old * 0.8 + new * 0.2
-    # 3600 * 0.8 + 180000 * 0.2 = 2880 + 36000 = 38880 (648 minutes)
     learning._apply_correction_learning("normal_0", profile_name, zombie_duration)
-    
+
     ema_avg = store._data["profiles"][profile_name]["avg_duration"]
-    assert ema_avg > 30000 # Heavily skewed by one feedback!
-    print(f"EMA skewed average: {ema_avg/60:.1f} minutes")
+    assert ema_avg == new_avg
 
 @pytest.mark.asyncio
 async def test_auto_label_no_rebuild_repro(hass):

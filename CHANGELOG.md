@@ -5,12 +5,13 @@ All notable changes to HA WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.3] - 2026-03-09
+## [0.4.3] - 2026-03-10
 
 ### ✨ Features
 - **New Device Types**: Added full support for **Air Fryer** (#133) and **Heat Pump** (#134), with optimized defaults and custom icons (`mdi:pot-steam`, `mdi:heat-pump`).
 - **Anti-Wrinkle Mode**: Added a dedicated anti-wrinkle state for dryers and washer-dryer combos, including state transitions and shielding (#68).
 - **Slovak Localization**: Full support for Slovak language in the integration, diagnostics, and frontend card (#156).
+- **Traditional Chinese Localization**: Added full Traditional Chinese (`zh-Hant`) translations for all configuration and options menus.
 - **Card Customization**: Added new dashboard card settings including specialized toggles for `Spinning Icon`, `Show State`, `Show Program`, and `Show Details`.
 - **Automated Translation Sync**: Enhanced `translate.py` to automatically update the frontend card's `TRANSLATIONS` object from language files, providing out-of-the-box localization for all 27+ supported languages.
 - **Inverted External Trigger**: Added a new setting to invert the logic of the external cycle end trigger. Users can now choose to complete a cycle when an external binary sensor turns OFF instead of ON.
@@ -19,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Presence-Gated Notifications**: Optional home/away gating to defer notifications until a tracked person is home.
 
 ### 🛠️ Improvements
+- **UI Menu Clarity**: All `SelectSelector` dropdowns in the configuration flow now use `SelectOptionDict` with explicit human-readable labels (e.g. "Split a Cycle (Find gaps)", "Export All Data", "Confirm - Correct Detection"). Previously, raw internal values such as `"split"` or `"auto_label_cycles"` were displayed directly in the UI.
+- **Translation Cleanup**: Removed stale action option keys from `strings.json` and `en.json` that were no longer backed by selectors in the config flow (`assign_mode`, export/import mode, cycle history editor actions, and several management menu entries). Reduces translator noise and prevents spurious untranslated keys in other languages.
+- **Phase Catalog Translations**: Extended `manage_phase_catalog` action labels and descriptions to Swedish, Tamil, Telugu, and Simplified Chinese.
 - **Unified Time Handling**: Refactored the core engine to use a single canonical offset-based time format for storage. Includes automatic migration of legacy data to prevent corruption and fixes "offset-naive/offset-aware" comparison bugs (#144).
 - **Profile Rename Cascade**: Renaming a profile now automatically updates all historically recorded cycles and pending feedback requests, maintaining end-to-end data integrity (#154).
 - **Detection Persistence**: Implemented temporal persistence for profile matching. Start notifications now only fire after a match remains stable over several intervals, drastically reducing false or jittery alerts.
@@ -43,6 +47,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Translation Consistency**: Synchronized `en.json` with `strings.json` to ensure a canonical source of truth for translations.
 - **Energy Threshold Defaults**: Fixed a bug where `start_energy_threshold` and `end_energy_threshold` were incorrectly defaulting to 0.0W in the detector configuration, which could lead to premature cycle ends in noisy environments. They now correctly respect device-specific constant defaults.
 - **Config Reload Consistency**: Added missing energy threshold updates to the configuration reload logic, ensuring settings take effect immediately when changed in the UI.
+- **Config Flow Null Option Guard**: Fixed a crash in the options flow where a `SelectSelector` entry with a `None` value would cause a `KeyError` during form processing. Such entries are now silently skipped.
+- **Profile Stats After Deletion**: Fixed `async_rebuild_envelope` incorrectly computing `min_duration` and `max_duration` from the outlier-filtered duration set. `min`/`max` now reflect the true observed range of all cycles; only `avg_duration` uses the IQR-filtered set for robustness. This means deleting an outlier cycle now correctly recalculates the profile's duration range.
+
+### 🧪 Tests
+- **HA Test Harness Adoption**: Replaced `MagicMock`-based hass objects with real `HomeAssistant` instances from `pytest_homeassistant_custom_component` across all new test modules. Only `ProfileStore` and `CycleDetector` are patched as true external I/O boundaries.
+- **Event Payload & Ghost Cycle Tests** (`test_manager_event_payload_and_ghosts.py`): Covers `EVENT_CYCLE_ENDED` payload field exclusion (`power_data`, `debug_data`, `power_trace`) and ghost-cycle energy threshold detection using real HA event bus listeners.
+- **Migration Harness Tests** (`test_migration_harness.py`): Validates `async_migrate_entry` field movement (data → options), idempotency on re-run, and no-op behaviour when already at the latest schema version.
+- **Pre-Completion Notification Tests** (`test_manager_precompletion_harness.py`): Pins the ambiguity gate — notifications are suppressed when `_last_match_ambiguous=True`, sent exactly once when unambiguous, and not re-sent on subsequent calls.
+- **Match Persistence / Transition Tests** (`test_manager_matching_harness.py`): Covers the full persistence-counter state machine inside `_async_do_perform_matching`: single-call accumulation, below-threshold staying at `detecting...`, threshold commit, profile-change counter reset, high-confidence override bypassing persistence, and ambiguous-result gating.
 
 ## [0.4.2.1] - 2026-02-13
 

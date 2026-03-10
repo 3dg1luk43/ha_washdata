@@ -90,6 +90,45 @@ def trim_zero_power_data(
     return data[start_idx:end_idx + 1]
 
 
+def filter_duration_outliers(durations: list[float]) -> list[float]:
+    """Return a robust duration set with extreme outliers removed.
+
+    Uses Tukey IQR fences for normal spread and falls back to a MAD-based
+    filter when IQR collapses (common when most cycles are identical).
+    """
+    if len(durations) < 4:
+        return durations
+
+    arr = np.array(durations, dtype=float)
+
+    q1 = float(np.percentile(arr, 25))
+    q3 = float(np.percentile(arr, 75))
+    iqr = q3 - q1
+
+    if iqr > 0:
+        lower = max(60.0, q1 - 1.5 * iqr)
+        upper = q3 + 1.5 * iqr
+        filtered = arr[(arr >= lower) & (arr <= upper)]
+    else:
+        # Degenerate spread (e.g. many identical durations); keep values
+        # close to median and drop only extreme anomalies.
+        median = float(np.median(arr))
+        abs_dev = np.abs(arr - median)
+        mad = float(np.median(abs_dev))
+        if mad == 0:
+            tol = max(300.0, median * 0.15)
+            filtered = arr[np.abs(arr - median) <= tol]
+        else:
+            robust_z = abs_dev / (1.4826 * mad)
+            filtered = arr[robust_z <= 3.5]
+
+    # Guardrail: do not over-filter sparse datasets.
+    if len(filtered) >= max(3, int(len(arr) * 0.6)):
+        return filtered.astype(float).tolist()
+
+    return durations
+
+
 @dataclasses.dataclass
 class SVGCurve:
     """Definition for a curve in the SVG chart."""
@@ -1499,9 +1538,13 @@ class ProfileStore:
 
         # Update profile stats in storage (Fast metadata update)
         if durations and profile_name in self._data.get("profiles", {}):
-            min_duration = float(np.min(durations))
-            max_duration = float(np.max(durations))
-            avg_duration = float(np.mean(durations))
+            stats_durations = filter_duration_outliers(durations)
+            raw_arr = np.array(durations, dtype=float)
+            # min/max reflect the actual observed range (including outliers)
+            # avg uses the outlier-filtered set for a robust representative value
+            min_duration = float(np.min(raw_arr))
+            max_duration = float(np.max(raw_arr))
+            avg_duration = float(np.mean(stats_durations))
             self._data["profiles"][profile_name]["min_duration"] = min_duration
             self._data["profiles"][profile_name]["max_duration"] = max_duration
             self._data["profiles"][profile_name]["avg_duration"] = avg_duration
