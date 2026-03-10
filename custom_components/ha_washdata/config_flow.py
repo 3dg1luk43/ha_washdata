@@ -1,5 +1,6 @@
 """Config flow for HA WashData integration."""
 # pylint: disable=too-many-lines
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownLambdaType=false, reportOptionalMemberAccess=false, reportOperatorIssue=false, reportReturnType=false, reportIncompatibleMethodOverride=false
 
 from __future__ import annotations
 
@@ -504,6 +505,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     )
                     if isinstance(entry, dict) and "value" in entry:
                         val = entry.get("value")
+                        if val is None:
+                            continue
                         if key in (
                             CONF_OFF_DELAY,
                             CONF_WATCHDOG_INTERVAL,
@@ -946,9 +949,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Required("editor_action"): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
-                                "split",
-                                "merge",
-                                "delete",
+                                selector.SelectOptionDict(
+                                    value="split",
+                                    label="Split a Cycle (Find gaps)",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="merge",
+                                    label="Merge Cycles (Join fragments)",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="delete",
+                                    label="Delete Cycle(s)",
+                                ),
                             ],
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         )
@@ -1127,7 +1139,7 @@ Found {len(segments)} segments.
 
 Click Confirm to split this cycle into {len(segments)} separate cycles.
 """
-            schema = {vol.Required("confirm_commit"): bool}
+            schema: dict[Any, Any] = {vol.Required("confirm_commit"): bool}
 
             # Add profile pickers for each segment
             profiles = store.list_profiles()
@@ -1368,8 +1380,14 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                     vol.Required("mode", default="export"): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
-                                "export",
-                                "import",
+                                selector.SelectOptionDict(
+                                    value="export",
+                                    label="Export All Data",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="import",
+                                    label="Import/Merge Data",
+                                ),
                             ],
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         )
@@ -1431,11 +1449,26 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                     vol.Required("action"): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
-                                "auto_label_cycles",
-                                "select_cycle_to_label",
-                                "select_cycle_to_label_multi",
-                                "select_cycle_to_delete",
-                                "interactive_editor",
+                                selector.SelectOptionDict(
+                                    value="auto_label_cycles",
+                                    label="Auto-Label Old Cycles",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="select_cycle_to_label",
+                                    label="Label Specific Cycle",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="select_cycle_to_label_multi",
+                                    label="Label Multiple Cycles",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="select_cycle_to_delete",
+                                    label="Delete Cycle",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="interactive_editor",
+                                    label="Merge/Split Interactive Editor",
+                                ),
                             ],
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         )
@@ -1487,12 +1520,30 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                     vol.Required("action"): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
-                                "create_profile",
-                                "edit_profile",
-                                "delete_profile",
-                                "profile_stats",
-                                "cleanup_profile",
-                                "assign_phases",
+                                selector.SelectOptionDict(
+                                    value="create_profile",
+                                    label="Create New Profile",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="edit_profile",
+                                    label="Edit/Rename Profile",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="delete_profile",
+                                    label="Delete Profile",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="profile_stats",
+                                    label="Profile Statistics",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="cleanup_profile",
+                                    label="Clean Up History - Graph & Delete",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="assign_phases",
+                                    label="Assign Phase Ranges",
+                                ),
                             ],
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         )
@@ -1535,9 +1586,18 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                     vol.Required("action"): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
-                                "create_custom_phase",
-                                "edit_custom_phase",
-                                "delete_custom_phase",
+                                selector.SelectOptionDict(
+                                    value="create_custom_phase",
+                                    label="Create Custom Phase",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="edit_custom_phase",
+                                    label="Edit Custom Phase",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="delete_custom_phase",
+                                    label="Delete Custom Phase",
+                                ),
                             ],
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         )
@@ -2147,7 +2207,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             ),
             description_placeholders={
                 "graph_url": graph_url,
-                "profile_name": self._selected_profile,
+                "profile_name": self._selected_profile or "",
             },
         )
 
@@ -2425,7 +2485,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                 }
             ),
             errors=errors,
-            description_placeholders={"current_name": self._selected_profile},
+            description_placeholders={"current_name": self._selected_profile or ""},
         )
 
     async def async_step_delete_profile_select(
@@ -2485,7 +2545,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                 {vol.Required("unlabel_cycles", default=True): bool}
             ),
             description_placeholders={
-                "profile_name": self._selected_profile,
+                "profile_name": self._selected_profile or "",
                 "warning": "⚠️ This will permanently delete the profile.",
             },
         )
@@ -2722,7 +2782,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
             current_label = cycle.get("profile") or "Unlabeled"
             cycle_info = f"Cycle: {start}, {duration_min}m, Current: {current_label}"
 
-        schema = {
+        schema: dict[Any, Any] = {
             vol.Required(
                 "profile_name",
                 default="__create_new__" if not profiles else profiles[0]["name"],
@@ -2879,7 +2939,10 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                 {
                     vol.Required("action"): selector.SelectSelector(
                         selector.SelectSelectorConfig(
-                            options=list(options.keys()),
+                            options=[
+                                selector.SelectOptionDict(value=key, label=label)
+                                for key, label in options.items()
+                            ],
                             mode=selector.SelectSelectorMode.DROPDOWN,
                         )
                     )
@@ -3237,10 +3300,22 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                     vol.Required("action", default="confirm"): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=[
-                                "confirm",
-                                "correct",
-                                "ignore",
-                                "delete",
+                                selector.SelectOptionDict(
+                                    value="confirm",
+                                    label="Confirm - Correct Detection",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="correct",
+                                    label="Correct - Choose Program/Duration",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="ignore",
+                                    label="Ignore - False Positive/Noisy Cycle",
+                                ),
+                                selector.SelectOptionDict(
+                                    value="delete",
+                                    label="Delete - Remove from History",
+                                ),
                             ],
                             mode=selector.SelectSelectorMode.LIST,
                         )
