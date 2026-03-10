@@ -44,7 +44,8 @@
           "manage_cycles": "サイクル管理",
           "manage_profiles": "プロファイル管理",
           "record_cycle": "サイクルを記録（手動）",
-          "diagnostics": "診断とメンテナンス"
+          "diagnostics": "診断とメンテナンス",
+          "manage_phase_catalog": "フェーズカタログの管理"
         }
       },
       "apply_suggestions": {
@@ -205,15 +206,15 @@
         "title": "サイクル管理",
         "description": "最近のサイクル：\n{recent_cycles}",
         "data": {
+          "action": "アクション"
+        },
+        "options": {
           "action": {
-            "name": "アクション",
-            "options": {
-              "auto_label_cycles": "🤖 古いサイクルに自動ラベル付け",
-              "select_cycle_to_label": "🏷️ ラベル固有のサイクル",
-              "select_cycle_to_label_multi": "🏷️ 複数のサイクルにラベルを付ける",
-              "select_cycle_to_delete": "🗑️ サイクルを削除",
-              "interactive_editor": "✂️ インタラクティブエディターのマージ/分割"
-            }
+            "auto_label_cycles": "🤖 古いサイクルに自動ラベル付け",
+            "select_cycle_to_label": "🏷️ ラベル固有のサイクル",
+            "select_cycle_to_label_multi": "🏷️ 複数のサイクルにラベルを付ける",
+            "select_cycle_to_delete": "🗑️ サイクルを削除",
+            "interactive_editor": "✂️ インタラクティブエディターのマージ/分割"
           }
         }
       },
@@ -221,15 +222,16 @@
         "title": "プロファイル管理",
         "description": "プロファイル概要：\n{profile_summary}",
         "data": {
+          "action": "アクション"
+        },
+        "options": {
           "action": {
-            "name": "アクション",
-            "options": {
-              "create_profile": "➕ 新しいプロファイルを作成",
-              "edit_profile": "✏️ プロフィールの編集/名前変更",
-              "delete_profile": "🗑️ プロフィールを削除",
-              "profile_stats": "📊 プロフィール統計",
-              "cleanup_profile": "🧹 履歴のクリーンアップ - グラフ化して削除"
-            }
+            "create_profile": "➕ 新しいプロファイルを作成",
+            "edit_profile": "✏️ プロフィールの編集/名前変更",
+            "delete_profile": "🗑️ プロフィールを削除",
+            "profile_stats": "📊 プロフィール統計",
+            "cleanup_profile": "🧹 履歴のクリーンアップ - グラフ化して削除",
+            "assign_phases": "🧩 位相範囲を割り当てる"
           }
         }
       },
@@ -334,13 +336,13 @@
         "title": "マージ/分割インタラクティブエディタ",
         "description": "サイクル履歴に対して実行する手動アクションを選択します。",
         "data": {
+          "editor_action": "アクション"
+        },
+        "options": {
           "editor_action": {
-            "name": "アクション",
-            "options": {
-              "split": "✂️ サイクルを分割する (ギャップを見つける)",
-              "merge": "🔗 サイクルのマージ (フラグメントの結合)",
-              "delete": "🗑️ サイクルを削除"
-            }
+            "split": "✂️ サイクルを分割する (ギャップを見つける)",
+            "merge": "🔗 サイクルのマージ (フラグメントの結合)",
+            "delete": "🗑️ サイクルを削除"
           }
         }
       },
@@ -391,33 +393,33 @@
         "description": "このデバイスのサイクル、プロファイル、および設定をコピー/貼り付けします。以下にエクスポートするか、JSONを貼り付けてインポートします。",
         "data": {
           "json_payload": "完全な設定 JSON",
-          "mode": {
-            "name": "アクション",
-            "options": {
-              "export": "📤 すべてのデータをエクスポート",
-              "import": "📥 データのインポート/マージ"
-            }
-          }
+          "mode": "アクション"
         },
         "data_description": {
           "mode": "現在のデータと設定をコピーするには「エクスポート」を選択し、別の WashData デバイスからエクスポートされたデータを貼り付けるには「インポート」を選択します。",
           "json_payload": "エクスポートの場合：この JSON（サイクル、プロファイル、およびすべての微調整された設定を含む）をコピーします。インポートの場合：WashData からエクスポートされた JSON を貼り付けます。"
+        },
+        "options": {
+          "mode": {
+            "export": "📤 すべてのデータをエクスポート",
+            "import": "📥 データのインポート/マージ"
+          }
         }
       },
       "record_cycle": {
         "title": "サイクルを記録",
         "description": "手動でサイクルを記録して、干渉のないクリーンなプロファイルを作成します。\n\nステータス：**{status}**\n期間：{duration}s\nサンプル：{samples}",
         "data": {
+          "action": "アクション"
+        },
+        "options": {
           "action": {
-            "name": "アクション",
-            "options": {
-              "start_recording": "⏺ 新しい録音を開始する",
-              "stop_recording": "⏹ 記録の停止 (保存して処理)",
-              "refresh_status": "🔄ステータスを更新",
-              "process_recording": "⚙️ 最後の録音を処理 (トリミングして保存)",
-              "discard_recording": "🗑️ 最後の録音を破棄",
-              "cancel": "✖ キャンセル"
-            }
+            "start_recording": "⏺ 新しい録音を開始する",
+            "stop_recording": "⏹ 記録の停止 (保存して処理)",
+            "refresh_status": "🔄ステータスを更新",
+            "process_recording": "⚙️ 最後の録音を処理 (トリミングして保存)",
+            "discard_recording": "🗑️ 最後の録音を破棄",
+            "cancel": "✖ キャンセル"
           }
         }
       },
@@ -448,14 +450,112 @@
         "data": {
           "corrected_profile": "正しいプログラム（修正する場合）",
           "corrected_duration": "正しい期間（分）（修正する場合）",
+          "action": "何をしたいですか?"
+        },
+        "options": {
           "action": {
-            "name": "何をしたいですか?",
-            "options": {
-              "confirm": "✅ 確認 - 正しい検出",
-              "correct": "✏️ 正解 - プログラム/期間を選択してください",
-              "ignore": "✖ 無視 - 誤検知/ノイズの多いサイクル",
-              "delete": "🗑️ 削除 - 履歴から削除"
-            }
+            "confirm": "✅ 確認 - 正しい検出",
+            "correct": "✏️ 正解 - プログラム/期間を選択してください",
+            "ignore": "✖ 無視 - 誤検知/ノイズの多いサイクル",
+            "delete": "🗑️ 削除 - 履歴から削除"
+          }
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "フェーズカタログの管理",
+        "description": "このデバイス タイプの現在のフェーズ:\n{phase_summary}",
+        "data": {
+          "action": "アクション"
+        },
+        "options": {
+          "action": {
+            "create_custom_phase": "➕ カスタムフェーズの作成",
+            "edit_custom_phase": "✏️ カスタムフェーズを編集",
+            "delete_custom_phase": "🗑️ カスタムフェーズを削除"
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "カスタムフェーズの作成",
+        "description": "このデバイス タイプのカスタム フェーズ名と説明を作成します。",
+        "data": {
+          "phase_name": "フェーズ名",
+          "phase_description": "フェーズの説明"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "カスタムフェーズの編集",
+        "description": "編集するカスタム フェーズを選択します。",
+        "data": {
+          "phase_name": "カスタムフェーズ"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "カスタムフェーズの編集",
+        "description": "編集フェーズ: {phase_name}",
+        "data": {
+          "phase_name": "フェーズ名",
+          "phase_description": "フェーズの説明"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "カスタムフェーズの削除",
+        "description": "削除するカスタム フェーズを選択します。このフェーズを使用して割り当てられた範囲はすべて削除されます。",
+        "data": {
+          "phase_name": "カスタムフェーズ"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "位相範囲の割り当て",
+        "description": "プロフィール: **{profile_name}**\nモード: **{assign_mode}**\nサイクルヒント: {cycle_hint}\n\n電流範囲:\n{current_ranges}\n\nフェーズ ラベルは表示と整理用です。検出には、位相名ではなく電力パターンが使用されます。",
+        "data": {
+          "profile": "プロフィール",
+          "assign_mode": "アサインモード",
+          "source_cycle": "ソースサイクル (タイムスタンプモードに必要)",
+          "phase_1": "フェーズ 1",
+          "start_min_1": "開始分 1",
+          "end_min_1": "1分目を終了",
+          "start_ts_1": "開始タイムスタンプ 1",
+          "end_ts_1": "終了タイムスタンプ 1",
+          "phase_2": "フェーズ2",
+          "start_min_2": "開始分 2",
+          "end_min_2": "2分目を終了",
+          "start_ts_2": "開始タイムスタンプ 2",
+          "end_ts_2": "終了タイムスタンプ 2",
+          "phase_3": "フェーズ 3",
+          "start_min_3": "開始3分目",
+          "end_min_3": "3分終了",
+          "start_ts_3": "開始タイムスタンプ 3",
+          "end_ts_3": "終了タイムスタンプ 3",
+          "phase_4": "フェーズ4",
+          "start_min_4": "開始4分目",
+          "end_min_4": "4分終了",
+          "start_ts_4": "開始タイムスタンプ 4",
+          "end_ts_4": "終了タイムスタンプ 4",
+          "phase_5": "フェーズ5",
+          "start_min_5": "開始5分目",
+          "end_min_5": "5分終了",
+          "start_ts_5": "開始タイムスタンプ 5",
+          "end_ts_5": "終了タイムスタンプ 5",
+          "phase_6": "フェーズ6",
+          "start_min_6": "開始6分目",
+          "end_min_6": "6分終了",
+          "start_ts_6": "開始タイムスタンプ 6",
+          "end_ts_6": "終了タイムスタンプ 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "位相範囲の割り当て",
+        "description": "プロファイルを選択して位相範囲を設定します。",
+        "data": {
+          "profile": "プロフィール",
+          "assign_mode": "アサインモード",
+          "source_cycle": "ソースサイクル (タイムスタンプモードの場合)"
+        },
+        "options": {
+          "assign_mode": {
+            "offset_mode": "分単位のオフセット",
+            "timestamp_mode": "タイムスタンプ"
           }
         }
       }
@@ -466,7 +566,16 @@
       "rename_failed": "プロファイルの名前変更に失敗しました。プロファイルが存在しないか、新しい名前が既に使用されています。",
       "assignment_failed": "プロファイルをサイクルに割り当てることができませんでした",
       "feedback_notification_title": "WashData: サイクルを確認 ({device})",
-      "feedback_notification_message": "**デバイス**: {device}\n**プログラム**: {program} ({confidence}% 信頼度)\n**時間**: {time}\n\nWashData は、この検出されたサイクルを確認するためにあなたの助けを必要としています。\n\nこの結果を確認または修正するには、**設定 > デバイスとサービス > WashData > 設定 > 学習フィードバック** にアクセスしてください。"
+      "feedback_notification_message": "**デバイス**: {device}\n**プログラム**: {program} ({confidence}% 信頼度)\n**時間**: {time}\n\nWashData は、この検出されたサイクルを確認するためにあなたの助けを必要としています。\n\nこの結果を確認または修正するには、**設定 > デバイスとサービス > WashData > 設定 > 学習フィードバック** にアクセスしてください。",
+      "duplicate_phase": "この名前のフェーズはすでに存在します。",
+      "phase_not_found": "選択されたフェーズが見つかりませんでした。",
+      "invalid_phase_name": "フェーズ名を空にすることはできません。",
+      "phase_name_too_long": "フェーズ名が長すぎます。",
+      "invalid_phase_range": "位相範囲が無効です。終了は開始より大きくなければなりません。",
+      "invalid_phase_timestamp": "Timestamp is invalid. YYYY-MM-DD HH:MM または HH:MM 形式を使用します。",
+      "overlapping_phase_ranges": "位相範囲が重複します。範囲を調整して再試行してください。",
+      "incomplete_phase_row": "各フェーズ行には、フェーズと、選択したモードの完全な開始/終了値が含まれている必要があります。",
+      "timestamp_mode_cycle_required": "タイムスタンプモードを使用する場合はソースサイクルを選択してください。"
     },
     "abort": {
       "no_cycles_found": "サイクルが見つかりません",
@@ -476,7 +585,8 @@
       "no_suggestions": "推奨値はまだありません。いくつかのサイクルを実行してから再試行してください。",
       "no_predictions": "予測なし",
       "reprocess_success": "{count} サイクルを正常に再処理しました。",
-      "debug_data_cleared": "{count} サイクルからデバッグデータを正常に消去しました。"
+      "debug_data_cleared": "{count} サイクルからデバッグデータを正常に消去しました。",
+      "no_custom_phases": "このデバイス タイプにはカスタム フェーズが見つかりません。"
     }
   },
   "entity": {

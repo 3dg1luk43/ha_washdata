@@ -44,7 +44,8 @@
           "manage_cycles": "Zarządzaj cyklami",
           "manage_profiles": "Zarządzaj profilami",
           "record_cycle": "Nagraj cykl (Ręcznie)",
-          "diagnostics": "Diagnostyka i konserwacja"
+          "diagnostics": "Diagnostyka i konserwacja",
+          "manage_phase_catalog": "Zarządzaj katalogiem faz"
         }
       },
       "apply_suggestions": {
@@ -205,15 +206,15 @@
         "title": "Zarządzaj cyklami",
         "description": "Ostatnie cykle:\n{recent_cycles}",
         "data": {
+          "action": "Działanie"
+        },
+        "options": {
           "action": {
-            "name": "Działanie",
-            "options": {
-              "auto_label_cycles": "🤖 Automatyczne oznaczanie starych cykli",
-              "select_cycle_to_label": "🏷️ Oznacz konkretny cykl",
-              "select_cycle_to_label_multi": "🏷️ Oznacz wiele cykli etykietami",
-              "select_cycle_to_delete": "🗑️ Usuń cykl",
-              "interactive_editor": "✂️ Scal/podziel interaktywny edytor"
-            }
+            "auto_label_cycles": "🤖 Automatyczne oznaczanie starych cykli",
+            "select_cycle_to_label": "🏷️ Oznacz konkretny cykl",
+            "select_cycle_to_label_multi": "🏷️ Oznacz wiele cykli etykietami",
+            "select_cycle_to_delete": "🗑️ Usuń cykl",
+            "interactive_editor": "✂️ Scal/podziel interaktywny edytor"
           }
         }
       },
@@ -221,15 +222,16 @@
         "title": "Zarządzaj profilami",
         "description": "Podsumowanie profili:\n{profile_summary}",
         "data": {
+          "action": "Działanie"
+        },
+        "options": {
           "action": {
-            "name": "Działanie",
-            "options": {
-              "create_profile": "➕ Utwórz nowy profil",
-              "edit_profile": "✏️ Edytuj/zmień nazwę profilu",
-              "delete_profile": "🗑️ Usuń profil",
-              "profile_stats": "📊 Statystyki profilu",
-              "cleanup_profile": "🧹 Wyczyść historię - wykreśl i usuń"
-            }
+            "create_profile": "➕ Utwórz nowy profil",
+            "edit_profile": "✏️ Edytuj/zmień nazwę profilu",
+            "delete_profile": "🗑️ Usuń profil",
+            "profile_stats": "📊 Statystyki profilu",
+            "cleanup_profile": "🧹 Wyczyść historię - wykreśl i usuń",
+            "assign_phases": "🧩 Przypisz zakresy faz"
           }
         }
       },
@@ -334,13 +336,13 @@
         "title": "Interaktywny edytor scalania/podziału",
         "description": "Wybierz ręczną akcję do wykonania na historii cykli.",
         "data": {
+          "editor_action": "Działanie"
+        },
+        "options": {
           "editor_action": {
-            "name": "Działanie",
-            "options": {
-              "split": "✂️ Podziel cykl (znajdź luki)",
-              "merge": "🔗 Połącz cykle (połącz fragmenty)",
-              "delete": "🗑️ Usuń cykle"
-            }
+            "split": "✂️ Podziel cykl (znajdź luki)",
+            "merge": "🔗 Połącz cykle (połącz fragmenty)",
+            "delete": "🗑️ Usuń cykle"
           }
         }
       },
@@ -391,33 +393,33 @@
         "description": "Kopiuj/wklej cykle, profile I ustawienia dla tego urządzenia. Eksportuj poniżej lub wklej JSON do importu.",
         "data": {
           "json_payload": "Kompletny JSON konfiguracji",
-          "mode": {
-            "name": "Działanie",
-            "options": {
-              "export": "📤 Eksportuj wszystkie dane",
-              "import": "📥 Importuj/scal dane"
-            }
-          }
+          "mode": "Działanie"
         },
         "data_description": {
           "mode": "Wybierz Eksport, aby skopiować bieżące dane i ustawienia, lub Import, aby wkleić dane eksportowane z innego urządzenia WashData.",
           "json_payload": "Do eksportu: skopiuj ten JSON (zawiera cykle, profile i wszystkie ustawienia). Do importu: wklej JSON wyeksportowany z WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Eksportuj wszystkie dane",
+            "import": "📥 Importuj/scal dane"
+          }
         }
       },
       "record_cycle": {
         "title": "Nagraj cykl",
         "description": "Ręcznie nagraj cykl, aby utworzyć czysty profil bez zakłóceń.\n\nStatus: **{status}**\nCzas trwania: {duration}s\nPróbki: {samples}",
         "data": {
+          "action": "Działanie"
+        },
+        "options": {
           "action": {
-            "name": "Działanie",
-            "options": {
-              "start_recording": "⏺ Rozpocznij nowe nagranie",
-              "stop_recording": "⏹ Zatrzymaj nagrywanie (zapisz i przetwórz)",
-              "refresh_status": "🔄 Odśwież status",
-              "process_recording": "⚙️ Przetwórz ostatnie nagranie (przytnij i zapisz)",
-              "discard_recording": "🗑️ Odrzuć ostatnie nagranie",
-              "cancel": "✖ Anuluj"
-            }
+            "start_recording": "⏺ Rozpocznij nowe nagranie",
+            "stop_recording": "⏹ Zatrzymaj nagrywanie (zapisz i przetwórz)",
+            "refresh_status": "🔄 Odśwież status",
+            "process_recording": "⚙️ Przetwórz ostatnie nagranie (przytnij i zapisz)",
+            "discard_recording": "🗑️ Odrzuć ostatnie nagranie",
+            "cancel": "✖ Anuluj"
           }
         }
       },
@@ -448,14 +450,112 @@
         "data": {
           "corrected_profile": "Prawidłowy program (jeśli korygujesz)",
           "corrected_duration": "Prawidłowy czas trwania w minutach (jeśli korygujesz)",
+          "action": "Co chciałbyś zrobić?"
+        },
+        "options": {
           "action": {
-            "name": "Co chciałbyś zrobić?",
-            "options": {
-              "confirm": "✅ Potwierdź - Prawidłowe wykrywanie",
-              "correct": "✏️ Poprawnie — wybierz program/czas trwania",
-              "ignore": "✖ Ignoruj ​​– cykl fałszywie dodatni/zakłócony",
-              "delete": "🗑️ Usuń - Usuń z historii"
-            }
+            "confirm": "✅ Potwierdź - Prawidłowe wykrywanie",
+            "correct": "✏️ Poprawnie — wybierz program/czas trwania",
+            "ignore": "✖ Ignoruj ​​– cykl fałszywie dodatni/zakłócony",
+            "delete": "🗑️ Usuń - Usuń z historii"
+          }
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "Zarządzaj katalogiem faz",
+        "description": "Aktualne fazy dla tego typu urządzenia:\n{phase_summary}",
+        "data": {
+          "action": "Działanie"
+        },
+        "options": {
+          "action": {
+            "create_custom_phase": "➕ Utwórz fazę niestandardową",
+            "edit_custom_phase": "✏️ Edytuj fazę niestandardową",
+            "delete_custom_phase": "🗑️ Usuń fazę niestandardową"
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Utwórz fazę niestandardową",
+        "description": "Utwórz niestandardową nazwę fazy i opis dla tego typu urządzenia.",
+        "data": {
+          "phase_name": "Nazwa fazy",
+          "phase_description": "Opis fazy"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Edytuj fazę niestandardową",
+        "description": "Wybierz niestandardową fazę do edycji.",
+        "data": {
+          "phase_name": "Faza niestandardowa"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Edytuj fazę niestandardową",
+        "description": "Faza edycji: {phase_name}",
+        "data": {
+          "phase_name": "Nazwa fazy",
+          "phase_description": "Opis fazy"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Usuń fazę niestandardową",
+        "description": "Wybierz fazę niestandardową do usunięcia. Wszelkie przypisane zakresy korzystające z tej fazy zostaną usunięte.",
+        "data": {
+          "phase_name": "Faza niestandardowa"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Przypisz zakresy faz",
+        "description": "Profil: **{profile_name}**\nTryb: **{assign_mode}**\nWskazówka dotycząca cyklu: {cycle_hint}\n\nAktualne zakresy:\n{current_ranges}\n\nEtykiety faz służą do wyświetlania i organizacji. Wykrywanie wykorzystuje wzorce mocy, a nie nazwy faz.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Tryb przydziału",
+          "source_cycle": "Cykl źródłowy (wymagany w trybie znacznika czasu)",
+          "phase_1": "Faza 1",
+          "start_min_1": "Rozpocznij minutę 1",
+          "end_min_1": "Koniec minuta 1",
+          "start_ts_1": "Rozpocznij znacznik czasu 1",
+          "end_ts_1": "Znacznik czasu zakończenia 1",
+          "phase_2": "Faza 2",
+          "start_min_2": "Rozpocznij minutę 2",
+          "end_min_2": "Minuta zakończenia 2",
+          "start_ts_2": "Rozpocznij znacznik czasu 2",
+          "end_ts_2": "Znacznik czasu zakończenia 2",
+          "phase_3": "Faza 3",
+          "start_min_3": "Rozpocznij minutę 3",
+          "end_min_3": "Koniec minuty 3",
+          "start_ts_3": "Rozpocznij znacznik czasu 3",
+          "end_ts_3": "Znacznik czasu zakończenia 3",
+          "phase_4": "Faza 4",
+          "start_min_4": "Rozpocznij minutę 4",
+          "end_min_4": "Koniec minuty 4",
+          "start_ts_4": "Rozpocznij znacznik czasu 4",
+          "end_ts_4": "Znacznik czasu zakończenia 4",
+          "phase_5": "Faza 5",
+          "start_min_5": "Rozpocznij minutę 5",
+          "end_min_5": "Koniec minuty 5",
+          "start_ts_5": "Rozpocznij znacznik czasu 5",
+          "end_ts_5": "Znacznik czasu zakończenia 5",
+          "phase_6": "Faza 6",
+          "start_min_6": "Rozpocznij minutę 6",
+          "end_min_6": "Koniec minuty 6",
+          "start_ts_6": "Rozpocznij znacznik czasu 6",
+          "end_ts_6": "Znacznik czasu zakończenia 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Przypisz zakresy faz",
+        "description": "Wybierz profil, aby skonfigurować zakresy faz.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Tryb przydziału",
+          "source_cycle": "Cykl źródłowy (dla trybu znacznika czasu)"
+        },
+        "options": {
+          "assign_mode": {
+            "offset_mode": "Minutowe przesunięcia",
+            "timestamp_mode": "Znaczniki czasu"
           }
         }
       }
@@ -466,7 +566,16 @@
       "rename_failed": "Zmiana nazwy profilu nie powiodła się. Profil może nie istnieć lub nowa nazwa jest już zajęta.",
       "assignment_failed": "Przypisanie profilu do cyklu nie powiodło się",
       "feedback_notification_title": "WashData: Zweryfikuj cykl ({device})",
-      "feedback_notification_message": "**Urządzenie**: {device}\n**Program**: {program} ({confidence}% pewności)\n**Czas**: {time}\n\nWashData potrzebuje Twojej pomocy w weryfikacji tego wykrytego cyklu.\n\nPrzejdź do **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Informacje zwrotne uczenia**, aby potwierdzić lub skorygować ten wynik."
+      "feedback_notification_message": "**Urządzenie**: {device}\n**Program**: {program} ({confidence}% pewności)\n**Czas**: {time}\n\nWashData potrzebuje Twojej pomocy w weryfikacji tego wykrytego cyklu.\n\nPrzejdź do **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Informacje zwrotne uczenia**, aby potwierdzić lub skorygować ten wynik.",
+      "duplicate_phase": "Faza o tej nazwie już istnieje.",
+      "phase_not_found": "Nie znaleziono wybranej fazy.",
+      "invalid_phase_name": "Nazwa fazy nie może być pusta.",
+      "phase_name_too_long": "Nazwa fazy jest za długa.",
+      "invalid_phase_range": "Zakres faz jest nieprawidłowy. Koniec musi być większy niż początek.",
+      "invalid_phase_timestamp": "Sygnatura czasowa jest nieprawidłowa. Użyj formatu RRRR-MM-DD GG:MM lub GG:MM.",
+      "overlapping_phase_ranges": "Zakresy faz pokrywają się. Dostosuj zakresy i spróbuj ponownie.",
+      "incomplete_phase_row": "Każdy wiersz fazy musi zawierać fazę oraz pełne wartości początkowe/końcowe dla wybranego trybu.",
+      "timestamp_mode_cycle_required": "Jeśli korzystasz z trybu znacznika czasu, wybierz cykl źródłowy."
     },
     "abort": {
       "no_cycles_found": "Nie znaleziono cykli",
@@ -476,7 +585,8 @@
       "no_suggestions": "Brak dostępnych sugerowanych wartości. Uruchom kilka cykli i spróbuj ponownie.",
       "no_predictions": "Brak prognoz",
       "reprocess_success": "Pomyślnie przetworzono ponownie {count} cykli.",
-      "debug_data_cleared": "Pomyślnie wyczyszczono dane debugowania z {count} cykli."
+      "debug_data_cleared": "Pomyślnie wyczyszczono dane debugowania z {count} cykli.",
+      "no_custom_phases": "Nie znaleziono niestandardowych faz dla tego typu urządzenia."
     }
   },
   "entity": {

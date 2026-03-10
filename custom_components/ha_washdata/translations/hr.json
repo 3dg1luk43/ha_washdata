@@ -206,15 +206,15 @@
         "title": "Upravljaj ciklusima",
         "description": "Nedavni ciklusi:\n{recent_cycles}",
         "data": {
+          "action": "Akcijski"
+        },
+        "options": {
           "action": {
-            "name": "Akcijski",
-            "options": {
-              "auto_label_cycles": "🤖 Automatsko označavanje starih ciklusa",
-              "select_cycle_to_label": "🏷️ Specifični ciklus oznake",
-              "select_cycle_to_label_multi": "🏷️ Označite višestruke cikluse",
-              "select_cycle_to_delete": "🗑️ Izbriši ciklus",
-              "interactive_editor": "✂️ Interaktivni uređivač spajanja/razdvajanja"
-            }
+            "auto_label_cycles": "🤖 Automatsko označavanje starih ciklusa",
+            "select_cycle_to_label": "🏷️ Specifični ciklus oznake",
+            "select_cycle_to_label_multi": "🏷️ Označite višestruke cikluse",
+            "select_cycle_to_delete": "🗑️ Izbriši ciklus",
+            "interactive_editor": "✂️ Interaktivni uređivač spajanja/razdvajanja"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Upravljaj profilima",
         "description": "Sažetak profila:\n{profile_summary}",
         "data": {
+          "action": "Akcijski"
+        },
+        "options": {
           "action": {
-            "name": "Akcijski",
-            "options": {
-              "create_profile": "➕ Stvorite novi profil",
-              "edit_profile": "✏️ Uredite/preimenujte profil",
-              "delete_profile": "🗑️ Brisanje profila",
-              "profile_stats": "📊 Statistika profila",
-              "cleanup_profile": "🧹 Očisti povijest - grafikon i brisanje",
-              "assign_phases": "🧩 Dodijelite fazne raspone"
-            }
+            "create_profile": "➕ Stvorite novi profil",
+            "edit_profile": "✏️ Uredite/preimenujte profil",
+            "delete_profile": "🗑️ Brisanje profila",
+            "profile_stats": "📊 Statistika profila",
+            "cleanup_profile": "🧹 Očisti povijest - grafikon i brisanje",
+            "assign_phases": "🧩 Dodijelite fazne raspone"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Interaktivni urednik Spoji/Podijeli",
         "description": "Odaberite ručnu radnju za vašu povijest ciklusa.",
         "data": {
+          "editor_action": "Akcijski"
+        },
+        "options": {
           "editor_action": {
-            "name": "Akcijski",
-            "options": {
-              "split": "✂️ Podijelite ciklus (pronađite praznine)",
-              "merge": "🔗 Ciklusi spajanja (spajanje fragmenata)",
-              "delete": "🗑️ Izbriši ciklus(e)"
-            }
+            "split": "✂️ Podijelite ciklus (pronađite praznine)",
+            "merge": "🔗 Ciklusi spajanja (spajanje fragmenata)",
+            "delete": "🗑️ Izbriši ciklus(e)"
           }
         }
       },
@@ -393,33 +393,33 @@
         "description": "Kopiraj/zalijepi cikluse, profile I postavke za ovaj uređaj. Izvezite ispod ili zalijepite JSON za uvoz.",
         "data": {
           "json_payload": "Kompletan JSON konfiguracije",
-          "mode": {
-            "name": "Akcijski",
-            "options": {
-              "export": "📤 Izvezi sve podatke",
-              "import": "📥 Uvoz/spoj podataka"
-            }
-          }
+          "mode": "Akcijski"
         },
         "data_description": {
           "mode": "Odaberite Izvezi za kopiranje trenutnih podataka i postavki, ili Uvezi za lijepljenje podataka izvezenih s drugog WashData uređaja.",
           "json_payload": "Za Izvoz: kopirajte ovaj JSON (sadrži cikluse, profile i sve postavke). Za Uvoz: zalijepite JSON izvezen iz WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Izvezi sve podatke",
+            "import": "📥 Uvoz/spoj podataka"
+          }
         }
       },
       "record_cycle": {
         "title": "Snimi ciklus",
         "description": "Snimite ciklus ručno da kreirate čist profil bez smetnji.\n\nStatus: **{status}**\nTrajanje: {duration}s\nUzorci: {samples}",
         "data": {
+          "action": "Akcijski"
+        },
+        "options": {
           "action": {
-            "name": "Akcijski",
-            "options": {
-              "start_recording": "⏺ Započni novo snimanje",
-              "stop_recording": "⏹ Zaustavi snimanje (spremi i obradi)",
-              "refresh_status": "🔄 Osvježi status",
-              "process_recording": "⚙️ Obradi posljednju snimku (izreži i spremi)",
-              "discard_recording": "🗑️ Odbaci posljednju snimku",
-              "cancel": "✖ Odustani"
-            }
+            "start_recording": "⏺ Započni novo snimanje",
+            "stop_recording": "⏹ Zaustavi snimanje (spremi i obradi)",
+            "refresh_status": "🔄 Osvježi status",
+            "process_recording": "⚙️ Obradi posljednju snimku (izreži i spremi)",
+            "discard_recording": "🗑️ Odbaci posljednju snimku",
+            "cancel": "✖ Odustani"
           }
         }
       },
@@ -450,14 +450,14 @@
         "data": {
           "corrected_profile": "Točan program (ako ispravljate)",
           "corrected_duration": "Točno trajanje u minutama (ako ispravljate)",
+          "action": "Što biste htjeli raditi?"
+        },
+        "options": {
           "action": {
-            "name": "Što biste htjeli raditi?",
-            "options": {
-              "confirm": "✅ Potvrdite - Ispravno otkrivanje",
-              "correct": "✏️ Ispravno - Odaberite program/trajanje",
-              "ignore": "✖ Ignoriraj - Lažno pozitivan/bučan ciklus",
-              "delete": "🗑️ Izbriši - Ukloni iz povijesti"
-            }
+            "confirm": "✅ Potvrdite - Ispravno otkrivanje",
+            "correct": "✏️ Ispravno - Odaberite program/trajanje",
+            "ignore": "✖ Ignoriraj - Lažno pozitivan/bučan ciklus",
+            "delete": "🗑️ Izbriši - Ukloni iz povijesti"
           }
         }
       },
@@ -465,13 +465,13 @@
         "title": "Upravljanje katalogom faza",
         "description": "Trenutne faze za ovu vrstu uređaja:\n{phase_summary}",
         "data": {
+          "action": "Akcijski"
+        },
+        "options": {
           "action": {
-            "name": "Akcijski",
-            "options": {
-              "create_custom_phase": "➕ Stvorite prilagođenu fazu",
-              "edit_custom_phase": "✏️ Uredite prilagođenu fazu",
-              "delete_custom_phase": "🗑️ Izbriši prilagođenu fazu"
-            }
+            "create_custom_phase": "➕ Stvorite prilagođenu fazu",
+            "edit_custom_phase": "✏️ Uredite prilagođenu fazu",
+            "delete_custom_phase": "🗑️ Izbriši prilagođenu fazu"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Odaberite profil za konfiguraciju raspona faza.",
         "data": {
           "profile": "Profil",
+          "source_cycle": "Izvorni ciklus (za način rada s vremenskom oznakom)",
+          "assign_mode": "Način dodjele"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Način dodjele",
-            "options": {
-              "offset_mode": "Minutni odmaci",
-              "timestamp_mode": "Vremenske oznake"
-            }
-          },
-          "source_cycle": "Izvorni ciklus (za način rada s vremenskom oznakom)"
+            "offset_mode": "Minutni odmaci",
+            "timestamp_mode": "Vremenske oznake"
+          }
         }
       }
     },

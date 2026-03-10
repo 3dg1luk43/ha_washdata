@@ -206,15 +206,15 @@
         "title": "Rheoli Beiciau",
         "description": "Cylchoedd diweddar:\n{recent_cycles}",
         "data": {
+          "action": "Gweithred"
+        },
+        "options": {
           "action": {
-            "name": "Gweithred",
-            "options": {
-              "auto_label_cycles": "🤖 Labelu Hen Feiciau yn Awtomatig",
-              "select_cycle_to_label": "🏷️ Cylchred Penodol Label",
-              "select_cycle_to_label_multi": "🏷️ Labelu Cylchoedd Lluosog",
-              "select_cycle_to_delete": "🗑️ Dileu Beic",
-              "interactive_editor": "✂️ Uno/Hollti Golygydd Rhyngweithiol"
-            }
+            "auto_label_cycles": "🤖 Labelu Hen Feiciau yn Awtomatig",
+            "select_cycle_to_label": "🏷️ Cylchred Penodol Label",
+            "select_cycle_to_label_multi": "🏷️ Labelu Cylchoedd Lluosog",
+            "select_cycle_to_delete": "🗑️ Dileu Beic",
+            "interactive_editor": "✂️ Uno/Hollti Golygydd Rhyngweithiol"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Rheoli Proffiliau",
         "description": "Crynodeb Proffil:\n{profile_summary}",
         "data": {
+          "action": "Gweithred"
+        },
+        "options": {
           "action": {
-            "name": "Gweithred",
-            "options": {
-              "create_profile": "➕ Creu Proffil Newydd",
-              "edit_profile": "✏️ Golygu/Ailenwi Proffil",
-              "delete_profile": "🗑️ Dileu Proffil",
-              "profile_stats": "📊 Ystadegau Proffil",
-              "cleanup_profile": "🧹 Hanes Glanhau - Graff a Dileu",
-              "assign_phases": "🧩 Neilltuo Ystod Cyfnod"
-            }
+            "create_profile": "➕ Creu Proffil Newydd",
+            "edit_profile": "✏️ Golygu/Ailenwi Proffil",
+            "delete_profile": "🗑️ Dileu Proffil",
+            "profile_stats": "📊 Ystadegau Proffil",
+            "cleanup_profile": "🧹 Hanes Glanhau - Graff a Dileu",
+            "assign_phases": "🧩 Neilltuo Ystod Cyfnod"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Cyfuno/Hollti Golygydd Rhyngweithiol",
         "description": "Dewiswch weithred â llaw i'w chyflawni ar eich hanes beicio.",
         "data": {
+          "editor_action": "Gweithred"
+        },
+        "options": {
           "editor_action": {
-            "name": "Gweithred",
-            "options": {
-              "split": "✂️ Hollti Cylch (Dod o hyd i fylchau)",
-              "merge": "🔗 Merge Cycles (Ymunwch â darnau)",
-              "delete": "🗑️ Dileu Cylch(au)"
-            }
+            "split": "✂️ Hollti Cylch (Dod o hyd i fylchau)",
+            "merge": "🔗 Merge Cycles (Ymunwch â darnau)",
+            "delete": "🗑️ Dileu Cylch(au)"
           }
         }
       },
@@ -392,34 +392,34 @@
         "title": "Allforio/Mewnforio JSON",
         "description": "Copïo/gludo cylchoedd, proffiliau, A gosodiadau ar gyfer y ddyfais hon. Allforio isod neu bastio JSON i fewnforio.",
         "data": {
-          "mode": {
-            "name": "Gweithred",
-            "options": {
-              "export": "📤 Allforio'r Holl Ddata",
-              "import": "📥 Mewnforio/Cyfuno Data"
-            }
-          },
-          "json_payload": "Cyfluniad Cyflawn JSON"
+          "json_payload": "Cyfluniad Cyflawn JSON",
+          "mode": "Gweithred"
         },
         "data_description": {
           "mode": "Dewiswch Allforio i gopïo data a gosodiadau cyfredol, neu Mewnforio i gludo data wedi'i allforio o ddyfais WashData arall.",
           "json_payload": "Ar gyfer Allforio: copïwch y JSON hwn (yn cynnwys cylchoedd, proffiliau, a'r holl leoliadau wedi'u mireinio). Ar gyfer Mewnforio: pastiwch JSON wedi'i allforio o WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Allforio'r Holl Ddata",
+            "import": "📥 Mewnforio/Cyfuno Data"
+          }
         }
       },
       "record_cycle": {
         "title": "Cylch Cofnodi",
         "description": "Cofnodwch gylchred â llaw i greu proffil glân heb ymyrraeth.\n\nStatws: **{status}**\nHyd: {duration}s\nSamplau: {samples}",
         "data": {
+          "action": "Gweithred"
+        },
+        "options": {
           "action": {
-            "name": "Gweithred",
-            "options": {
-              "start_recording": "⏺ Dechrau Recordio Newydd",
-              "stop_recording": "⏹ Stopio Recordio (Cadw a Phrosesu)",
-              "refresh_status": "🔄 Statws Adnewyddu",
-              "process_recording": "⚙️ Prosesu'r Recordiad Diwethaf (Trimio ac Arbed)",
-              "discard_recording": "🗑️ Taflwch y Recordiad Diwethaf",
-              "cancel": "✖ Diddymu"
-            }
+            "start_recording": "⏺ Dechrau Recordio Newydd",
+            "stop_recording": "⏹ Stopio Recordio (Cadw a Phrosesu)",
+            "refresh_status": "🔄 Statws Adnewyddu",
+            "process_recording": "⚙️ Prosesu'r Recordiad Diwethaf (Trimio ac Arbed)",
+            "discard_recording": "🗑️ Taflwch y Recordiad Diwethaf",
+            "cancel": "✖ Diddymu"
           }
         }
       },
@@ -448,30 +448,30 @@
         "title": "Datrys Adborth",
         "description": "**Rhaglen a Ganfuwyd**: {profile}\n**Hyder**: {confidence}%\n**Amcangyfrif**: {est}m, **Gwirioneddol**: {act}m",
         "data": {
-          "action": {
-            "name": "Beth hoffech chi ei wneud?",
-            "options": {
-              "confirm": "✅ Cadarnhau - Canfod Cywir",
-              "correct": "✏️ Cywir - Dewiswch Rhaglen/Hyd",
-              "ignore": "✖ Anwybyddu - Cylchred Anghywir/Swnllyd",
-              "delete": "🗑️ Dileu - Dileu o Hanes"
-            }
-          },
           "corrected_profile": "Rhaglen Gywir (os yn cywiro)",
-          "corrected_duration": "Cywir Hyd mewn munudau (os yn cywiro)"
+          "corrected_duration": "Cywir Hyd mewn munudau (os yn cywiro)",
+          "action": "Beth hoffech chi ei wneud?"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ Cadarnhau - Canfod Cywir",
+            "correct": "✏️ Cywir - Dewiswch Rhaglen/Hyd",
+            "ignore": "✖ Anwybyddu - Cylchred Anghywir/Swnllyd",
+            "delete": "🗑️ Dileu - Dileu o Hanes"
+          }
         }
       },
       "manage_phase_catalog": {
         "title": "Rheoli Catalog Cyfnod",
         "description": "Camau presennol y math hwn o ddyfais:\n{phase_summary}",
         "data": {
+          "action": "Gweithred"
+        },
+        "options": {
           "action": {
-            "name": "Gweithred",
-            "options": {
-              "create_custom_phase": "➕ Creu Cyfnod Personol",
-              "edit_custom_phase": "✏️ Golygu Cyfnod Personol",
-              "delete_custom_phase": "🗑️ Dileu Cyfnod Personol"
-            }
+            "create_custom_phase": "➕ Creu Cyfnod Personol",
+            "edit_custom_phase": "✏️ Golygu Cyfnod Personol",
+            "delete_custom_phase": "🗑️ Dileu Cyfnod Personol"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Dewiswch broffil i ffurfweddu ystodau cyfnodau.",
         "data": {
           "profile": "Proffil",
+          "source_cycle": "Cylchred Ffynhonnell (ar gyfer modd stamp amser)",
+          "assign_mode": "Modd Aseiniad"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Modd Aseiniad",
-            "options": {
-              "offset_mode": "Gwrthbwyso Cofnodion",
-              "timestamp_mode": "Stampiau amser"
-            }
-          },
-          "source_cycle": "Cylchred Ffynhonnell (ar gyfer modd stamp amser)"
+            "offset_mode": "Gwrthbwyso Cofnodion",
+            "timestamp_mode": "Stampiau amser"
+          }
         }
       }
     },

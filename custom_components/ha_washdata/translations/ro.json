@@ -206,15 +206,15 @@
         "title": "Gestionați cicluri",
         "description": "Cicluri recente:\n{recent_cycles}",
         "data": {
+          "action": "Acţiune"
+        },
+        "options": {
           "action": {
-            "name": "Acţiune",
-            "options": {
-              "auto_label_cycles": "🤖 Etichetare automată a ciclurilor vechi",
-              "select_cycle_to_label": "🏷️ Ciclul specific de etichetă",
-              "select_cycle_to_label_multi": "🏷️ Etichetați mai multe cicluri",
-              "select_cycle_to_delete": "🗑️ Ștergeți ciclul",
-              "interactive_editor": "✂️ Merge/Split Interactive Editor"
-            }
+            "auto_label_cycles": "🤖 Etichetare automată a ciclurilor vechi",
+            "select_cycle_to_label": "🏷️ Ciclul specific de etichetă",
+            "select_cycle_to_label_multi": "🏷️ Etichetați mai multe cicluri",
+            "select_cycle_to_delete": "🗑️ Ștergeți ciclul",
+            "interactive_editor": "✂️ Merge/Split Interactive Editor"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Gestionați profiluri",
         "description": "Rezumat profiluri:\n{profile_summary}",
         "data": {
+          "action": "Acţiune"
+        },
+        "options": {
           "action": {
-            "name": "Acţiune",
-            "options": {
-              "create_profile": "➕ Creați un profil nou",
-              "edit_profile": "✏️ Editați/Redenumiți profilul",
-              "delete_profile": "🗑️ Șterge profilul",
-              "profile_stats": "📊 Statistici de profil",
-              "cleanup_profile": "🧹 Curățați istoricul - Grafic și șterge",
-              "assign_phases": "🧩 Atribuiți intervale de fază"
-            }
+            "create_profile": "➕ Creați un profil nou",
+            "edit_profile": "✏️ Editați/Redenumiți profilul",
+            "delete_profile": "🗑️ Șterge profilul",
+            "profile_stats": "📊 Statistici de profil",
+            "cleanup_profile": "🧹 Curățați istoricul - Grafic și șterge",
+            "assign_phases": "🧩 Atribuiți intervale de fază"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Editor interactiv Combinare/Divizare",
         "description": "Selectați o acțiune manuală pentru istoricul ciclurilor.",
         "data": {
+          "editor_action": "Acţiune"
+        },
+        "options": {
           "editor_action": {
-            "name": "Acţiune",
-            "options": {
-              "split": "✂️ Împărțiți un ciclu (Găsiți lacune)",
-              "merge": "🔗 Cicluri de îmbinare (Alăturați fragmente)",
-              "delete": "🗑️ Ștergeți ciclul(e)"
-            }
+            "split": "✂️ Împărțiți un ciclu (Găsiți lacune)",
+            "merge": "🔗 Cicluri de îmbinare (Alăturați fragmente)",
+            "delete": "🗑️ Ștergeți ciclul(e)"
           }
         }
       },
@@ -393,33 +393,33 @@
         "description": "Copiați/lipiți cicluri, profiluri ȘI setări pentru acest dispozitiv. Exportați mai jos sau lipiți JSON pentru import.",
         "data": {
           "json_payload": "JSON configurație completă",
-          "mode": {
-            "name": "Acţiune",
-            "options": {
-              "export": "📤 Exportați toate datele",
-              "import": "📥 Import/Imbinare date"
-            }
-          }
+          "mode": "Acţiune"
         },
         "data_description": {
           "mode": "Selectați Export pentru a copia datele și setările curente, sau Import pentru a lipi date exportate de pe un alt dispozitiv WashData.",
           "json_payload": "Pentru Export: copiați acest JSON (conține cicluri, profiluri și toate setările). Pentru Import: lipiți JSON exportat din WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Exportați toate datele",
+            "import": "📥 Import/Imbinare date"
+          }
         }
       },
       "record_cycle": {
         "title": "Înregistrați ciclu",
         "description": "Înregistrați un ciclu manual pentru a crea un profil curat fără interferențe.\n\nStare: **{status}**\nDurată: {duration}s\nEșantioane: {samples}",
         "data": {
+          "action": "Acţiune"
+        },
+        "options": {
           "action": {
-            "name": "Acţiune",
-            "options": {
-              "start_recording": "⏺ Începeți o nouă înregistrare",
-              "stop_recording": "⏹ Opriți înregistrarea (Salvare și procesare)",
-              "refresh_status": "🔄 Starea de reîmprospătare",
-              "process_recording": "⚙️ Procesați ultima înregistrare (Trim și Salvați)",
-              "discard_recording": "🗑️ Aruncă ultima înregistrare",
-              "cancel": "✖ Anulează"
-            }
+            "start_recording": "⏺ Începeți o nouă înregistrare",
+            "stop_recording": "⏹ Opriți înregistrarea (Salvare și procesare)",
+            "refresh_status": "🔄 Starea de reîmprospătare",
+            "process_recording": "⚙️ Procesați ultima înregistrare (Trim și Salvați)",
+            "discard_recording": "🗑️ Aruncă ultima înregistrare",
+            "cancel": "✖ Anulează"
           }
         }
       },
@@ -450,14 +450,14 @@
         "data": {
           "corrected_profile": "Program corect (dacă corectați)",
           "corrected_duration": "Durată corectă în minute (dacă corectați)",
+          "action": "Ce ai vrea sa faci?"
+        },
+        "options": {
           "action": {
-            "name": "Ce ai vrea sa faci?",
-            "options": {
-              "confirm": "✅ Confirmare - Detectare corectă",
-              "correct": "✏️ Corect - Alegeți Program/Durată",
-              "ignore": "✖ Ignorare - Ciclu fals pozitiv/zgomotos",
-              "delete": "🗑️ Șterge - Eliminați din istoric"
-            }
+            "confirm": "✅ Confirmare - Detectare corectă",
+            "correct": "✏️ Corect - Alegeți Program/Durată",
+            "ignore": "✖ Ignorare - Ciclu fals pozitiv/zgomotos",
+            "delete": "🗑️ Șterge - Eliminați din istoric"
           }
         }
       },
@@ -465,13 +465,13 @@
         "title": "Gestionați catalogul de faze",
         "description": "Fazele curente pentru acest tip de dispozitiv:\n{phase_summary}",
         "data": {
+          "action": "Acţiune"
+        },
+        "options": {
           "action": {
-            "name": "Acţiune",
-            "options": {
-              "create_custom_phase": "➕ Creați o fază personalizată",
-              "edit_custom_phase": "✏️ Editați faza personalizată",
-              "delete_custom_phase": "🗑️ Ștergeți faza personalizată"
-            }
+            "create_custom_phase": "➕ Creați o fază personalizată",
+            "edit_custom_phase": "✏️ Editați faza personalizată",
+            "delete_custom_phase": "🗑️ Ștergeți faza personalizată"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Selectați un profil pentru a configura intervalele de fază.",
         "data": {
           "profile": "Profil",
+          "source_cycle": "Ciclul sursă (pentru modul marcaj temporal)",
+          "assign_mode": "Modul de atribuire"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Modul de atribuire",
-            "options": {
-              "offset_mode": "Decalaje de minute",
-              "timestamp_mode": "Marcaje temporale"
-            }
-          },
-          "source_cycle": "Ciclul sursă (pentru modul marcaj temporal)"
+            "offset_mode": "Decalaje de minute",
+            "timestamp_mode": "Marcaje temporale"
+          }
         }
       }
     },

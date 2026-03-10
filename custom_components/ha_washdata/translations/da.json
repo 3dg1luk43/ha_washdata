@@ -206,15 +206,15 @@
         "title": "Administrer cyklusser",
         "description": "Seneste cyklusser:\n{recent_cycles}",
         "data": {
+          "action": "Handling"
+        },
+        "options": {
           "action": {
-            "name": "Handling",
-            "options": {
-              "auto_label_cycles": "🤖 Auto-mærke gamle cykler",
-              "select_cycle_to_label": "🏷️ Etiketspecifik cyklus",
-              "select_cycle_to_label_multi": "🏷️ Mærk flere cyklusser",
-              "select_cycle_to_delete": "🗑️ Slet cyklus",
-              "interactive_editor": "✂️ Flet/opdel interaktiv editor"
-            }
+            "auto_label_cycles": "🤖 Auto-mærke gamle cykler",
+            "select_cycle_to_label": "🏷️ Etiketspecifik cyklus",
+            "select_cycle_to_label_multi": "🏷️ Mærk flere cyklusser",
+            "select_cycle_to_delete": "🗑️ Slet cyklus",
+            "interactive_editor": "✂️ Flet/opdel interaktiv editor"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Administrer profiler",
         "description": "Profiloversigt:\n{profile_summary}",
         "data": {
+          "action": "Handling"
+        },
+        "options": {
           "action": {
-            "name": "Handling",
-            "options": {
-              "create_profile": "➕ Opret ny profil",
-              "edit_profile": "✏️ Rediger/Omdøb profil",
-              "delete_profile": "🗑️ Slet profil",
-              "profile_stats": "📊 Profilstatistik",
-              "cleanup_profile": "🧹 Ryd op i historie - graf og slet",
-              "assign_phases": "🧩 Tildel faseintervaller"
-            }
+            "create_profile": "➕ Opret ny profil",
+            "edit_profile": "✏️ Rediger/Omdøb profil",
+            "delete_profile": "🗑️ Slet profil",
+            "profile_stats": "📊 Profilstatistik",
+            "cleanup_profile": "🧹 Ryd op i historie - graf og slet",
+            "assign_phases": "🧩 Tildel faseintervaller"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Interaktiv Flette/Opdele Editor",
         "description": "Vælg en manuel handling for din cyklushistorik.",
         "data": {
+          "editor_action": "Handling"
+        },
+        "options": {
           "editor_action": {
-            "name": "Handling",
-            "options": {
-              "split": "✂️ Del en cyklus (Find huller)",
-              "merge": "🔗 Sammenflet cyklusser (sammenføj fragmenter)",
-              "delete": "🗑️ Slet cyklus(er)"
-            }
+            "split": "✂️ Del en cyklus (Find huller)",
+            "merge": "🔗 Sammenflet cyklusser (sammenføj fragmenter)",
+            "delete": "🗑️ Slet cyklus(er)"
           }
         }
       },
@@ -393,33 +393,33 @@
         "description": "Kopier/indsæt cyklusser, profiler OG indstillinger for denne enhed. Eksporter nedenfor eller indsæt JSON for import.",
         "data": {
           "json_payload": "Fuld konfigurations-JSON",
-          "mode": {
-            "name": "Handling",
-            "options": {
-              "export": "📤 Eksporter alle data",
-              "import": "📥 Importer/flet data"
-            }
-          }
+          "mode": "Handling"
         },
         "data_description": {
           "mode": "Vælg Eksporter for at kopiere aktuelle data og indstillinger, eller Importer for at indsætte data eksporteret fra en anden WashData-enhed.",
           "json_payload": "Til Eksport: kopier denne JSON (indeholder cyklusser, profiler og alle indstillinger). Til Import: indsæt JSON eksporteret fra WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Eksporter alle data",
+            "import": "📥 Importer/flet data"
+          }
         }
       },
       "record_cycle": {
         "title": "Optag cyklus",
         "description": "Optag en cyklus manuelt for at oprette en ren profil uden interferens.\n\nStatus: **{status}**\nVarighed: {duration}s\nPrøver: {samples}",
         "data": {
+          "action": "Handling"
+        },
+        "options": {
           "action": {
-            "name": "Handling",
-            "options": {
-              "start_recording": "⏺ Start ny optagelse",
-              "stop_recording": "⏹ Stop optagelse (Gem og bearbejd)",
-              "refresh_status": "🔄 Opdater status",
-              "process_recording": "⚙️ Behandle sidste optagelse (Trim & Gem)",
-              "discard_recording": "🗑️ Kassér sidste optagelse",
-              "cancel": "✖ Annuller"
-            }
+            "start_recording": "⏺ Start ny optagelse",
+            "stop_recording": "⏹ Stop optagelse (Gem og bearbejd)",
+            "refresh_status": "🔄 Opdater status",
+            "process_recording": "⚙️ Behandle sidste optagelse (Trim & Gem)",
+            "discard_recording": "🗑️ Kassér sidste optagelse",
+            "cancel": "✖ Annuller"
           }
         }
       },
@@ -450,14 +450,14 @@
         "data": {
           "corrected_profile": "Korrekt program (hvis du retter)",
           "corrected_duration": "Korrekt varighed i minutter (hvis du retter)",
+          "action": "Hvad vil du gerne lave?"
+        },
+        "options": {
           "action": {
-            "name": "Hvad vil du gerne lave?",
-            "options": {
-              "confirm": "✅ Bekræft - Korrekt registrering",
-              "correct": "✏️ Korrekt - Vælg program/varighed",
-              "ignore": "✖ Ignorer - Falsk positiv/støjende cyklus",
-              "delete": "🗑️ Slet - Fjern fra historikken"
-            }
+            "confirm": "✅ Bekræft - Korrekt registrering",
+            "correct": "✏️ Korrekt - Vælg program/varighed",
+            "ignore": "✖ Ignorer - Falsk positiv/støjende cyklus",
+            "delete": "🗑️ Slet - Fjern fra historikken"
           }
         }
       },
@@ -465,13 +465,13 @@
         "title": "Administrer fasekatalog",
         "description": "Aktuelle faser for denne enhedstype:\n{phase_summary}",
         "data": {
+          "action": "Handling"
+        },
+        "options": {
           "action": {
-            "name": "Handling",
-            "options": {
-              "create_custom_phase": "➕ Opret brugerdefineret fase",
-              "edit_custom_phase": "✏️ Rediger tilpasset fase",
-              "delete_custom_phase": "🗑️ Slet tilpasset fase"
-            }
+            "create_custom_phase": "➕ Opret brugerdefineret fase",
+            "edit_custom_phase": "✏️ Rediger tilpasset fase",
+            "delete_custom_phase": "🗑️ Slet tilpasset fase"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Vælg en profil for at konfigurere faseintervaller.",
         "data": {
           "profile": "Profil",
+          "source_cycle": "Kildecyklus (til tidsstempeltilstand)",
+          "assign_mode": "Tildelingstilstand"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Tildelingstilstand",
-            "options": {
-              "offset_mode": "Minutforskydninger",
-              "timestamp_mode": "Tidsstempler"
-            }
-          },
-          "source_cycle": "Kildecyklus (til tidsstempeltilstand)"
+            "offset_mode": "Minutforskydninger",
+            "timestamp_mode": "Tidsstempler"
+          }
         }
       }
     },

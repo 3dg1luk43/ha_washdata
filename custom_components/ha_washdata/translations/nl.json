@@ -206,15 +206,15 @@
         "title": "Cycli beheren",
         "description": "Recente cycli:\n{recent_cycles}",
         "data": {
+          "action": "Actie"
+        },
+        "options": {
           "action": {
-            "name": "Actie",
-            "options": {
-              "auto_label_cycles": "🤖 Oude cycli automatisch labelen",
-              "select_cycle_to_label": "🏷️ Labelspecifieke cyclus",
-              "select_cycle_to_label_multi": "🏷️ Label meerdere cycli",
-              "select_cycle_to_delete": "🗑️ Cyclus verwijderen",
-              "interactive_editor": "✂️ Interactieve editor samenvoegen/splitsen"
-            }
+            "auto_label_cycles": "🤖 Oude cycli automatisch labelen",
+            "select_cycle_to_label": "🏷️ Labelspecifieke cyclus",
+            "select_cycle_to_label_multi": "🏷️ Label meerdere cycli",
+            "select_cycle_to_delete": "🗑️ Cyclus verwijderen",
+            "interactive_editor": "✂️ Interactieve editor samenvoegen/splitsen"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Profielen beheren",
         "description": "Profieloverzicht:\n{profile_summary}",
         "data": {
+          "action": "Actie"
+        },
+        "options": {
           "action": {
-            "name": "Actie",
-            "options": {
-              "create_profile": "➕ Nieuw profiel maken",
-              "edit_profile": "✏️ Profiel bewerken/hernoemen",
-              "delete_profile": "🗑️ Profiel verwijderen",
-              "profile_stats": "📊 Profielstatistieken",
-              "cleanup_profile": "🧹 Geschiedenis opschonen - Grafiek en verwijderen",
-              "assign_phases": "🧩 Fasebereiken toewijzen"
-            }
+            "create_profile": "➕ Nieuw profiel maken",
+            "edit_profile": "✏️ Profiel bewerken/hernoemen",
+            "delete_profile": "🗑️ Profiel verwijderen",
+            "profile_stats": "📊 Profielstatistieken",
+            "cleanup_profile": "🧹 Geschiedenis opschonen - Grafiek en verwijderen",
+            "assign_phases": "🧩 Fasebereiken toewijzen"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Interactieve samenvoeg/splits-editor",
         "description": "Selecteer een handmatige actie voor uw cyclusgeschiedenis.",
         "data": {
+          "editor_action": "Actie"
+        },
+        "options": {
           "editor_action": {
-            "name": "Actie",
-            "options": {
-              "split": "✂️ Een cyclus splitsen (hiaten zoeken)",
-              "merge": "🔗 Cycli samenvoegen (fragmenten samenvoegen)",
-              "delete": "🗑️ Cyclus(s) verwijderen"
-            }
+            "split": "✂️ Een cyclus splitsen (hiaten zoeken)",
+            "merge": "🔗 Cycli samenvoegen (fragmenten samenvoegen)",
+            "delete": "🗑️ Cyclus(s) verwijderen"
           }
         }
       },
@@ -393,33 +393,33 @@
         "description": "Kopieer/plak cycli, profielen EN instellingen voor dit apparaat. Exporteer hieronder of plak JSON om te importeren.",
         "data": {
           "json_payload": "Volledige configuratie-JSON",
-          "mode": {
-            "name": "Actie",
-            "options": {
-              "export": "📤 Exporteer alle gegevens",
-              "import": "📥 Gegevens importeren/samenvoegen"
-            }
-          }
+          "mode": "Actie"
         },
         "data_description": {
           "mode": "Kies Exporteren om huidige gegevens en instellingen te kopiëren, of Importeren om geëxporteerde gegevens van een ander WashData-apparaat te plakken.",
           "json_payload": "Voor Export: kopieer deze JSON (bevat cycli, profielen en alle instellingen). Voor Import: plak JSON geëxporteerd vanuit WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Exporteer alle gegevens",
+            "import": "📥 Gegevens importeren/samenvoegen"
+          }
         }
       },
       "record_cycle": {
         "title": "Cyclus opnemen",
         "description": "Neem handmatig een cyclus op om een schoon profiel te maken zonder interferentie.\n\nStatus: **{status}**\nDuur: {duration}s\nMonsters: {samples}",
         "data": {
+          "action": "Actie"
+        },
+        "options": {
           "action": {
-            "name": "Actie",
-            "options": {
-              "start_recording": "⏺ Start nieuwe opname",
-              "stop_recording": "⏹ Opname stoppen (opslaan en verwerken)",
-              "refresh_status": "🔄 Status vernieuwen",
-              "process_recording": "⚙️ Laatste opname verwerken (bijsnijden en opslaan)",
-              "discard_recording": "🗑️ Laatste opname weggooien",
-              "cancel": "✖ Annuleren"
-            }
+            "start_recording": "⏺ Start nieuwe opname",
+            "stop_recording": "⏹ Opname stoppen (opslaan en verwerken)",
+            "refresh_status": "🔄 Status vernieuwen",
+            "process_recording": "⚙️ Laatste opname verwerken (bijsnijden en opslaan)",
+            "discard_recording": "🗑️ Laatste opname weggooien",
+            "cancel": "✖ Annuleren"
           }
         }
       },
@@ -450,14 +450,14 @@
         "data": {
           "corrected_profile": "Correct programma (bij correctie)",
           "corrected_duration": "Correcte duur in minuten (bij correctie)",
+          "action": "Wat zou je graag willen doen?"
+        },
+        "options": {
           "action": {
-            "name": "Wat zou je graag willen doen?",
-            "options": {
-              "confirm": "✅ Bevestigen - Correcte detectie",
-              "correct": "✏️ Correct - Kies Programma/Duur",
-              "ignore": "✖ Negeren - Vals positieve/luidruchtige cyclus",
-              "delete": "🗑️ Verwijderen - Verwijderen uit geschiedenis"
-            }
+            "confirm": "✅ Bevestigen - Correcte detectie",
+            "correct": "✏️ Correct - Kies Programma/Duur",
+            "ignore": "✖ Negeren - Vals positieve/luidruchtige cyclus",
+            "delete": "🗑️ Verwijderen - Verwijderen uit geschiedenis"
           }
         }
       },
@@ -465,13 +465,13 @@
         "title": "Beheer fasecatalogus",
         "description": "Huidige fasen voor dit apparaattype:\n{phase_summary}",
         "data": {
+          "action": "Actie"
+        },
+        "options": {
           "action": {
-            "name": "Actie",
-            "options": {
-              "create_custom_phase": "➕ Maak een aangepaste fase",
-              "edit_custom_phase": "✏️ Aangepaste fase bewerken",
-              "delete_custom_phase": "🗑️ Aangepaste fase verwijderen"
-            }
+            "create_custom_phase": "➕ Maak een aangepaste fase",
+            "edit_custom_phase": "✏️ Aangepaste fase bewerken",
+            "delete_custom_phase": "🗑️ Aangepaste fase verwijderen"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Selecteer een profiel om fasebereiken te configureren.",
         "data": {
           "profile": "Profiel",
+          "source_cycle": "Broncyclus (voor tijdstempelmodus)",
+          "assign_mode": "Toewijzingsmodus"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Toewijzingsmodus",
-            "options": {
-              "offset_mode": "Minuutcompensaties",
-              "timestamp_mode": "Tijdstempels"
-            }
-          },
-          "source_cycle": "Broncyclus (voor tijdstempelmodus)"
+            "offset_mode": "Minuutcompensaties",
+            "timestamp_mode": "Tijdstempels"
+          }
         }
       }
     },

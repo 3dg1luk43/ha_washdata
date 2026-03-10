@@ -206,15 +206,15 @@
         "title": "Menaxhoni ciklet",
         "description": "Ciklet e fundit:\n{recent_cycles}",
         "data": {
+          "action": "Veprimi"
+        },
+        "options": {
           "action": {
-            "name": "Veprimi",
-            "options": {
-              "auto_label_cycles": "🤖 Etiketoni automatikisht ciklet e vjetra",
-              "select_cycle_to_label": "🏷️ Cikli specifik i etiketës",
-              "select_cycle_to_label_multi": "🏷️ Etiketoni cikle të shumëfishta",
-              "select_cycle_to_delete": "🗑️ Fshi ciklin",
-              "interactive_editor": "✂️ Bashkoni/Ndajeni redaktuesin interaktiv"
-            }
+            "auto_label_cycles": "🤖 Etiketoni automatikisht ciklet e vjetra",
+            "select_cycle_to_label": "🏷️ Cikli specifik i etiketës",
+            "select_cycle_to_label_multi": "🏷️ Etiketoni cikle të shumëfishta",
+            "select_cycle_to_delete": "🗑️ Fshi ciklin",
+            "interactive_editor": "✂️ Bashkoni/Ndajeni redaktuesin interaktiv"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Menaxho profilet",
         "description": "Përmbledhje e profilit:\n{profile_summary}",
         "data": {
+          "action": "Veprimi"
+        },
+        "options": {
           "action": {
-            "name": "Veprimi",
-            "options": {
-              "create_profile": "➕ Krijo një profil të ri",
-              "edit_profile": "✏️ Ndrysho/Riemërto profilin",
-              "delete_profile": "🗑️ Fshi profilin",
-              "profile_stats": "📊 Statistikat e profilit",
-              "cleanup_profile": "🧹 Pastroni historinë - grafikoni dhe fshini",
-              "assign_phases": "🧩 Cakto vargjet e fazave"
-            }
+            "create_profile": "➕ Krijo një profil të ri",
+            "edit_profile": "✏️ Ndrysho/Riemërto profilin",
+            "delete_profile": "🗑️ Fshi profilin",
+            "profile_stats": "📊 Statistikat e profilit",
+            "cleanup_profile": "🧹 Pastroni historinë - grafikoni dhe fshini",
+            "assign_phases": "🧩 Cakto vargjet e fazave"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Bashkoni/Ndajeni redaktuesin interaktiv",
         "description": "Zgjidhni një veprim manual për të kryer në historikun tuaj të ciklit.",
         "data": {
+          "editor_action": "Veprimi"
+        },
+        "options": {
           "editor_action": {
-            "name": "Veprimi",
-            "options": {
-              "split": "✂️ Ndani një cikël (Gjeni boshllëqet)",
-              "merge": "🔗 Ciklet e bashkimit (bashkoni fragmentet)",
-              "delete": "🗑️ Fshi ciklin(et)"
-            }
+            "split": "✂️ Ndani një cikël (Gjeni boshllëqet)",
+            "merge": "🔗 Ciklet e bashkimit (bashkoni fragmentet)",
+            "delete": "🗑️ Fshi ciklin(et)"
           }
         }
       },
@@ -392,34 +392,34 @@
         "title": "Eksporto/Importo JSON",
         "description": "Kopjo/ngjit ciklet, profilet dhe cilësimet DHE për këtë pajisje. Eksporto më poshtë ose ngjit JSON për të importuar.",
         "data": {
-          "mode": {
-            "name": "Veprimi",
-            "options": {
-              "export": "📤 Eksporto të gjitha të dhënat",
-              "import": "📥 Importo/Shkrija e të dhënave"
-            }
-          },
-          "json_payload": "Konfigurimi i plotë JSON"
+          "json_payload": "Konfigurimi i plotë JSON",
+          "mode": "Veprimi"
         },
         "data_description": {
           "mode": "Zgjidhni Export për të kopjuar të dhënat dhe cilësimet aktuale, ose Import për të ngjitur të dhënat e eksportuara nga një pajisje tjetër WashData.",
           "json_payload": "Për eksport: kopjoni këtë JSON (përfshin ciklet, profilet dhe të gjitha cilësimet e rregulluara mirë). Për import: ngjitni JSON të eksportuar nga WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Eksporto të gjitha të dhënat",
+            "import": "📥 Importo/Shkrija e të dhënave"
+          }
         }
       },
       "record_cycle": {
         "title": "Cikli i regjistrimit",
         "description": "Regjistroni manualisht një cikël për të krijuar një profil të pastër pa ndërhyrje.\n\nStatusi: **{status}**\nKohëzgjatja: {duration}s\nMostrat: {samples}",
         "data": {
+          "action": "Veprimi"
+        },
+        "options": {
           "action": {
-            "name": "Veprimi",
-            "options": {
-              "start_recording": "⏺ Filloni regjistrimin e ri",
-              "stop_recording": "⏹ Ndalo regjistrimin (Ruaj dhe përpuno)",
-              "refresh_status": "🔄 Statusi i rifreskimit",
-              "process_recording": "⚙️ Përpunoni regjistrimin e fundit (Shkurtoni dhe ruajeni)",
-              "discard_recording": "🗑️ Hiq regjistrimin e fundit",
-              "cancel": "✖ Anulo"
-            }
+            "start_recording": "⏺ Filloni regjistrimin e ri",
+            "stop_recording": "⏹ Ndalo regjistrimin (Ruaj dhe përpuno)",
+            "refresh_status": "🔄 Statusi i rifreskimit",
+            "process_recording": "⚙️ Përpunoni regjistrimin e fundit (Shkurtoni dhe ruajeni)",
+            "discard_recording": "🗑️ Hiq regjistrimin e fundit",
+            "cancel": "✖ Anulo"
           }
         }
       },
@@ -448,30 +448,30 @@
         "title": "Zgjidhja e komenteve",
         "description": "**Programi i zbuluar**: {profile}\n**Besimi**: {confidence}%\n**Vlerësuar**: {est}m, **Aktuale**: {act}m",
         "data": {
-          "action": {
-            "name": "Çfarë do të dëshironit të bënit?",
-            "options": {
-              "confirm": "✅ Konfirmo - Zbulim i saktë",
-              "correct": "✏️ E saktë - Zgjidhni programin/kohëzgjatjen",
-              "ignore": "✖ Injoroni - Cikli i rremë pozitiv/zhurmë",
-              "delete": "🗑️ Fshi - Hiqe nga historia"
-            }
-          },
           "corrected_profile": "Programi i saktë (nëse korrigjohet)",
-          "corrected_duration": "Kohëzgjatja e saktë në minuta (nëse korrigjohet)"
+          "corrected_duration": "Kohëzgjatja e saktë në minuta (nëse korrigjohet)",
+          "action": "Çfarë do të dëshironit të bënit?"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ Konfirmo - Zbulim i saktë",
+            "correct": "✏️ E saktë - Zgjidhni programin/kohëzgjatjen",
+            "ignore": "✖ Injoroni - Cikli i rremë pozitiv/zhurmë",
+            "delete": "🗑️ Fshi - Hiqe nga historia"
+          }
         }
       },
       "manage_phase_catalog": {
         "title": "Menaxho Katalogun Fazor",
         "description": "Fazat aktuale për këtë lloj pajisjeje:\n{phase_summary}",
         "data": {
+          "action": "Veprimi"
+        },
+        "options": {
           "action": {
-            "name": "Veprimi",
-            "options": {
-              "create_custom_phase": "➕ Krijoni fazën e personalizuar",
-              "edit_custom_phase": "✏️ Ndrysho fazën e personalizuar",
-              "delete_custom_phase": "🗑️ Fshi Fazën e personalizuar"
-            }
+            "create_custom_phase": "➕ Krijoni fazën e personalizuar",
+            "edit_custom_phase": "✏️ Ndrysho fazën e personalizuar",
+            "delete_custom_phase": "🗑️ Fshi Fazën e personalizuar"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Zgjidhni një profil për të konfiguruar diapazonin e fazave.",
         "data": {
           "profile": "Profili",
+          "source_cycle": "Cikli i burimit (për modalitetin e vulës kohore)",
+          "assign_mode": "Mënyra e caktimit"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Mënyra e caktimit",
-            "options": {
-              "offset_mode": "Kompensimet e minutave",
-              "timestamp_mode": "Vula kohore"
-            }
-          },
-          "source_cycle": "Cikli i burimit (për modalitetin e vulës kohore)"
+            "offset_mode": "Kompensimet e minutave",
+            "timestamp_mode": "Vula kohore"
+          }
         }
       }
     },

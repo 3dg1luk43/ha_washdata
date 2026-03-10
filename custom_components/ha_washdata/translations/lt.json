@@ -206,15 +206,15 @@
         "title": "Valdyti ciklus",
         "description": "Naujausi ciklai:\n{recent_cycles}",
         "data": {
+          "action": "Veiksmas"
+        },
+        "options": {
           "action": {
-            "name": "Veiksmas",
-            "options": {
-              "auto_label_cycles": "🤖 Automatiškai pažymėkite senus ciklus",
-              "select_cycle_to_label": "🏷️ Specifinis etiketės ciklas",
-              "select_cycle_to_label_multi": "🏷️ Pažymėkite kelis ciklus",
-              "select_cycle_to_delete": "🗑️ Ištrinkite ciklą",
-              "interactive_editor": "✂️ Sujungti / išskaidyti interaktyvų redaktorių"
-            }
+            "auto_label_cycles": "🤖 Automatiškai pažymėkite senus ciklus",
+            "select_cycle_to_label": "🏷️ Specifinis etiketės ciklas",
+            "select_cycle_to_label_multi": "🏷️ Pažymėkite kelis ciklus",
+            "select_cycle_to_delete": "🗑️ Ištrinkite ciklą",
+            "interactive_editor": "✂️ Sujungti / išskaidyti interaktyvų redaktorių"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Valdyti profilius",
         "description": "Profilių suvestinė:\n{profile_summary}",
         "data": {
+          "action": "Veiksmas"
+        },
+        "options": {
           "action": {
-            "name": "Veiksmas",
-            "options": {
-              "create_profile": "➕ Sukurti naują profilį",
-              "edit_profile": "✏️ Redaguoti / pervardyti profilį",
-              "delete_profile": "🗑️ Ištrinti profilį",
-              "profile_stats": "📊 Profilio statistika",
-              "cleanup_profile": "🧹 Istorijos išvalymas – diagrama ir ištrynimas",
-              "assign_phases": "🧩 Priskirkite fazių diapazonus"
-            }
+            "create_profile": "➕ Sukurti naują profilį",
+            "edit_profile": "✏️ Redaguoti / pervardyti profilį",
+            "delete_profile": "🗑️ Ištrinti profilį",
+            "profile_stats": "📊 Profilio statistika",
+            "cleanup_profile": "🧹 Istorijos išvalymas – diagrama ir ištrynimas",
+            "assign_phases": "🧩 Priskirkite fazių diapazonus"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Interaktyvus sujungimo/padalijimo redaktorius",
         "description": "Pasirinkite rankinį veiksmą jūsų ciklų istorijai.",
         "data": {
+          "editor_action": "Veiksmas"
+        },
+        "options": {
           "editor_action": {
-            "name": "Veiksmas",
-            "options": {
-              "split": "✂️ Padalinkite ciklą (raskite spragas)",
-              "merge": "🔗 Sujungti ciklus (prijungti fragmentus)",
-              "delete": "🗑️ Ištrinti ciklą (-us)"
-            }
+            "split": "✂️ Padalinkite ciklą (raskite spragas)",
+            "merge": "🔗 Sujungti ciklus (prijungti fragmentus)",
+            "delete": "🗑️ Ištrinti ciklą (-us)"
           }
         }
       },
@@ -393,33 +393,33 @@
         "description": "Kopijuokite/įklijuokite ciklus, profilius IR nustatymus šiam įrenginiui. Eksportuokite žemiau arba įklijuokite JSON importavimui.",
         "data": {
           "json_payload": "Pilna konfigūracijos JSON",
-          "mode": {
-            "name": "Veiksmas",
-            "options": {
-              "export": "📤 Eksportuoti visus duomenis",
-              "import": "📥 Importuoti / sujungti duomenis"
-            }
-          }
+          "mode": "Veiksmas"
         },
         "data_description": {
           "mode": "Pasirinkite Eksportuoti dabartiniams duomenims ir nustatymams kopijuoti, arba Importuoti iš kito WashData įrenginio eksportuotiems duomenims įklijuoti.",
           "json_payload": "Eksportui: kopijuokite šią JSON (apima ciklus, profilius ir visus nustatymus). Importui: įklijuokite iš WashData eksportuotą JSON."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Eksportuoti visus duomenis",
+            "import": "📥 Importuoti / sujungti duomenis"
+          }
         }
       },
       "record_cycle": {
         "title": "Įrašyti ciklą",
         "description": "Įrašykite ciklą rankiniu būdu, kad sukurtumėte švarų profilį be trikdžių.\n\nBūsena: **{status}**\nTrukmė: {duration}s\nMėginiai: {samples}",
         "data": {
+          "action": "Veiksmas"
+        },
+        "options": {
           "action": {
-            "name": "Veiksmas",
-            "options": {
-              "start_recording": "⏺ Pradėti naują įrašymą",
-              "stop_recording": "⏹ Sustabdyti įrašymą (išsaugoti ir apdoroti)",
-              "refresh_status": "🔄 Atnaujinti būseną",
-              "process_recording": "⚙️ Apdoroti paskutinį įrašą (apkarpyti ir išsaugoti)",
-              "discard_recording": "🗑️ Išmesti paskutinį įrašą",
-              "cancel": "✖ Atšaukti"
-            }
+            "start_recording": "⏺ Pradėti naują įrašymą",
+            "stop_recording": "⏹ Sustabdyti įrašymą (išsaugoti ir apdoroti)",
+            "refresh_status": "🔄 Atnaujinti būseną",
+            "process_recording": "⚙️ Apdoroti paskutinį įrašą (apkarpyti ir išsaugoti)",
+            "discard_recording": "🗑️ Išmesti paskutinį įrašą",
+            "cancel": "✖ Atšaukti"
           }
         }
       },
@@ -450,14 +450,14 @@
         "data": {
           "corrected_profile": "Teisinga programa (jei taisote)",
           "corrected_duration": "Teisinga trukmė minutėmis (jei taisote)",
+          "action": "Ką norėtum veikti?"
+        },
+        "options": {
           "action": {
-            "name": "Ką norėtum veikti?",
-            "options": {
-              "confirm": "✅ Patvirtinti – teisingas aptikimas",
-              "correct": "✏️ Teisingai – pasirinkite programą / trukmę",
-              "ignore": "✖ Ignoruoti – klaidingas teigiamas / triukšmingas ciklas",
-              "delete": "🗑️ Ištrinti – pašalinti iš istorijos"
-            }
+            "confirm": "✅ Patvirtinti – teisingas aptikimas",
+            "correct": "✏️ Teisingai – pasirinkite programą / trukmę",
+            "ignore": "✖ Ignoruoti – klaidingas teigiamas / triukšmingas ciklas",
+            "delete": "🗑️ Ištrinti – pašalinti iš istorijos"
           }
         }
       },
@@ -465,13 +465,13 @@
         "title": "Tvarkyti fazės katalogą",
         "description": "Dabartinės šio tipo įrenginio fazės:\n{phase_summary}",
         "data": {
+          "action": "Veiksmas"
+        },
+        "options": {
           "action": {
-            "name": "Veiksmas",
-            "options": {
-              "create_custom_phase": "➕ Sukurkite pasirinktinį etapą",
-              "edit_custom_phase": "✏️ Redaguoti pasirinktinį etapą",
-              "delete_custom_phase": "🗑️ Ištrinkite pasirinktinį etapą"
-            }
+            "create_custom_phase": "➕ Sukurkite pasirinktinį etapą",
+            "edit_custom_phase": "✏️ Redaguoti pasirinktinį etapą",
+            "delete_custom_phase": "🗑️ Ištrinkite pasirinktinį etapą"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Pasirinkite profilį, kad sukonfigūruotumėte fazių diapazonus.",
         "data": {
           "profile": "Profilis",
+          "source_cycle": "Šaltinio ciklas (laiko žymos režimui)",
+          "assign_mode": "Priskyrimo režimas"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Priskyrimo režimas",
-            "options": {
-              "offset_mode": "Minučių poslinkiai",
-              "timestamp_mode": "Laiko žymos"
-            }
-          },
-          "source_cycle": "Šaltinio ciklas (laiko žymos režimui)"
+            "offset_mode": "Minučių poslinkiai",
+            "timestamp_mode": "Laiko žymos"
+          }
         }
       }
     },

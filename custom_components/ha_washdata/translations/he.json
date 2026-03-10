@@ -206,15 +206,15 @@
         "title": "נהל מחזורים",
         "description": "מחזורים אחרונים:\n{recent_cycles}",
         "data": {
+          "action": "פְּעוּלָה"
+        },
+        "options": {
           "action": {
-            "name": "פְּעוּלָה",
-            "options": {
-              "auto_label_cycles": "🤖 תיוג אוטומטי למחזורים ישנים",
-              "select_cycle_to_label": "🏷️ מחזור ספציפי של תווית",
-              "select_cycle_to_label_multi": "🏷️ תווית מחזורים מרובים",
-              "select_cycle_to_delete": "🗑️ מחק מחזור",
-              "interactive_editor": "✂️ מיזוג/פיצול עורך אינטראקטיבי"
-            }
+            "auto_label_cycles": "🤖 תיוג אוטומטי למחזורים ישנים",
+            "select_cycle_to_label": "🏷️ מחזור ספציפי של תווית",
+            "select_cycle_to_label_multi": "🏷️ תווית מחזורים מרובים",
+            "select_cycle_to_delete": "🗑️ מחק מחזור",
+            "interactive_editor": "✂️ מיזוג/פיצול עורך אינטראקטיבי"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "נהל פרופילים",
         "description": "סיכום פרופיל:\n{profile_summary}",
         "data": {
+          "action": "פְּעוּלָה"
+        },
+        "options": {
           "action": {
-            "name": "פְּעוּלָה",
-            "options": {
-              "create_profile": "➕ צור פרופיל חדש",
-              "edit_profile": "✏️ ערוך/שנה שם פרופיל",
-              "delete_profile": "🗑️ מחק פרופיל",
-              "profile_stats": "📊 סטטיסטיקות פרופיל",
-              "cleanup_profile": "🧹 ניקוי היסטוריה - גרף ומחק",
-              "assign_phases": "🧩 הקצה טווחי שלבים"
-            }
+            "create_profile": "➕ צור פרופיל חדש",
+            "edit_profile": "✏️ ערוך/שנה שם פרופיל",
+            "delete_profile": "🗑️ מחק פרופיל",
+            "profile_stats": "📊 סטטיסטיקות פרופיל",
+            "cleanup_profile": "🧹 ניקוי היסטוריה - גרף ומחק",
+            "assign_phases": "🧩 הקצה טווחי שלבים"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "מיזוג/פיצול עורך אינטראקטיבי",
         "description": "בחר פעולה ידנית לביצוע בהיסטוריית המחזור שלך.",
         "data": {
+          "editor_action": "פְּעוּלָה"
+        },
+        "options": {
           "editor_action": {
-            "name": "פְּעוּלָה",
-            "options": {
-              "split": "✂️ פיצול מחזור (מצא פערים)",
-              "merge": "🔗 מיזוג מחזורים (הצטרפות לשברים)",
-              "delete": "🗑️ מחיקת מחזורים"
-            }
+            "split": "✂️ פיצול מחזור (מצא פערים)",
+            "merge": "🔗 מיזוג מחזורים (הצטרפות לשברים)",
+            "delete": "🗑️ מחיקת מחזורים"
           }
         }
       },
@@ -392,34 +392,34 @@
         "title": "ייצוא/ייבוא ​​JSON",
         "description": "העתק/הדבק מחזורים, פרופילים והגדרות עבור מכשיר זה. ייצא למטה או הדבק JSON כדי לייבא.",
         "data": {
-          "mode": {
-            "name": "פְּעוּלָה",
-            "options": {
-              "export": "📤 ייצוא כל הנתונים",
-              "import": "📥 ייבוא/מיזוג נתונים"
-            }
-          },
-          "json_payload": "השלם תצורה JSON"
+          "json_payload": "השלם תצורה JSON",
+          "mode": "פְּעוּלָה"
         },
         "data_description": {
           "mode": "בחר ייצוא כדי להעתיק נתונים והגדרות נוכחיות, או ייבא כדי להדביק נתונים מיוצאים מהתקן WashData אחר.",
           "json_payload": "לייצוא: העתק את ה-JSON הזה (כולל מחזורים, פרופילים וכל ההגדרות המכוונות). לייבוא: הדבק JSON שיוצא מ-WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 ייצוא כל הנתונים",
+            "import": "📥 ייבוא/מיזוג נתונים"
+          }
         }
       },
       "record_cycle": {
         "title": "מחזור הקלטות",
         "description": "הקלט באופן ידני מחזור כדי ליצור פרופיל נקי ללא הפרעות.\n\nסטטוס: **{status}**\nמשך: {duration} שניות\nדוגמאות: {samples}",
         "data": {
+          "action": "פְּעוּלָה"
+        },
+        "options": {
           "action": {
-            "name": "פְּעוּלָה",
-            "options": {
-              "start_recording": "⏺ התחל הקלטה חדשה",
-              "stop_recording": "⏹ הפסק את ההקלטה (שמירה ועיבוד)",
-              "refresh_status": "🔄 סטטוס רענון",
-              "process_recording": "⚙️ עיבוד הקלטה אחרונה (חתוך ושמירה)",
-              "discard_recording": "🗑️ בטל את ההקלטה האחרונה",
-              "cancel": "✖ בטל"
-            }
+            "start_recording": "⏺ התחל הקלטה חדשה",
+            "stop_recording": "⏹ הפסק את ההקלטה (שמירה ועיבוד)",
+            "refresh_status": "🔄 סטטוס רענון",
+            "process_recording": "⚙️ עיבוד הקלטה אחרונה (חתוך ושמירה)",
+            "discard_recording": "🗑️ בטל את ההקלטה האחרונה",
+            "cancel": "✖ בטל"
           }
         }
       },
@@ -448,30 +448,30 @@
         "title": "פתרון משוב",
         "description": "**תוכנית שזוהתה**: {profile}\n**ביטחון**: {confidence}%\n**מוערך**: {est} מ', ** בפועל**: {act} מ'",
         "data": {
-          "action": {
-            "name": "מה היית רוצה לעשות?",
-            "options": {
-              "confirm": "✅ אישור - זיהוי נכון",
-              "correct": "✏️ נכון - בחר תוכנית/משך",
-              "ignore": "✖ התעלם - מחזור חיובי/רועש כוזב",
-              "delete": "🗑️ מחק - הסר מההיסטוריה"
-            }
-          },
           "corrected_profile": "תוכנית נכונה (אם מתקן)",
-          "corrected_duration": "משך נכון בדקות (אם מתקן)"
+          "corrected_duration": "משך נכון בדקות (אם מתקן)",
+          "action": "מה היית רוצה לעשות?"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ אישור - זיהוי נכון",
+            "correct": "✏️ נכון - בחר תוכנית/משך",
+            "ignore": "✖ התעלם - מחזור חיובי/רועש כוזב",
+            "delete": "🗑️ מחק - הסר מההיסטוריה"
+          }
         }
       },
       "manage_phase_catalog": {
         "title": "נהל את קטלוג השלבים",
         "description": "שלבים נוכחיים עבור סוג מכשיר זה:\n{phase_summary}",
         "data": {
+          "action": "פְּעוּלָה"
+        },
+        "options": {
           "action": {
-            "name": "פְּעוּלָה",
-            "options": {
-              "create_custom_phase": "➕ צור שלב מותאם אישית",
-              "edit_custom_phase": "✏️ ערוך שלב מותאם אישית",
-              "delete_custom_phase": "🗑️ מחק את השלב המותאם אישית"
-            }
+            "create_custom_phase": "➕ צור שלב מותאם אישית",
+            "edit_custom_phase": "✏️ ערוך שלב מותאם אישית",
+            "delete_custom_phase": "🗑️ מחק את השלב המותאם אישית"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "בחר פרופיל להגדרת טווחי פאזות.",
         "data": {
           "profile": "פּרוֹפִיל",
+          "source_cycle": "מחזור מקור (למצב חותמת זמן)",
+          "assign_mode": "מצב הקצאה"
+        },
+        "options": {
           "assign_mode": {
-            "name": "מצב הקצאה",
-            "options": {
-              "offset_mode": "קיזוז דקות",
-              "timestamp_mode": "חותמות זמן"
-            }
-          },
-          "source_cycle": "מחזור מקור (למצב חותמת זמן)"
+            "offset_mode": "קיזוז דקות",
+            "timestamp_mode": "חותמות זמן"
+          }
         }
       }
     },

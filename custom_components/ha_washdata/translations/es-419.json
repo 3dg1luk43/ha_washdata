@@ -206,15 +206,15 @@
         "title": "Administrar ciclos",
         "description": "Ciclos recientes:\n{recent_cycles}",
         "data": {
+          "action": "Acción"
+        },
+        "options": {
           "action": {
-            "name": "Acción",
-            "options": {
-              "auto_label_cycles": "🤖 Etiquetar automáticamente ciclos antiguos",
-              "select_cycle_to_label": "🏷️ Etiqueta Ciclo Específico",
-              "select_cycle_to_label_multi": "🏷️ Etiquetar ciclos múltiples",
-              "select_cycle_to_delete": "🗑️ Eliminar ciclo",
-              "interactive_editor": "✂️ Editor interactivo fusionar/dividir"
-            }
+            "auto_label_cycles": "🤖 Etiquetar automáticamente ciclos antiguos",
+            "select_cycle_to_label": "🏷️ Etiqueta Ciclo Específico",
+            "select_cycle_to_label_multi": "🏷️ Etiquetar ciclos múltiples",
+            "select_cycle_to_delete": "🗑️ Eliminar ciclo",
+            "interactive_editor": "✂️ Editor interactivo fusionar/dividir"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Administrar perfiles",
         "description": "Resumen del perfil:\n{profile_summary}",
         "data": {
+          "action": "Acción"
+        },
+        "options": {
           "action": {
-            "name": "Acción",
-            "options": {
-              "create_profile": "➕ Crear nuevo perfil",
-              "edit_profile": "✏️ Editar/Cambiar nombre de perfil",
-              "delete_profile": "🗑️ Eliminar perfil",
-              "profile_stats": "📊 Estadísticas de perfil",
-              "cleanup_profile": "🧹 Limpiar historial: graficar y eliminar",
-              "assign_phases": "🧩 Asignar rangos de fase"
-            }
+            "create_profile": "➕ Crear nuevo perfil",
+            "edit_profile": "✏️ Editar/Cambiar nombre de perfil",
+            "delete_profile": "🗑️ Eliminar perfil",
+            "profile_stats": "📊 Estadísticas de perfil",
+            "cleanup_profile": "🧹 Limpiar historial: graficar y eliminar",
+            "assign_phases": "🧩 Asignar rangos de fase"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Fusionar/Dividir Editor Interactivo",
         "description": "Seleccione una acción manual para realizar en su historial de ciclo.",
         "data": {
+          "editor_action": "Acción"
+        },
+        "options": {
           "editor_action": {
-            "name": "Acción",
-            "options": {
-              "split": "✂️ Dividir un ciclo (encontrar huecos)",
-              "merge": "🔗 Fusionar ciclos (unir fragmentos)",
-              "delete": "🗑️ Eliminar ciclo(s)"
-            }
+            "split": "✂️ Dividir un ciclo (encontrar huecos)",
+            "merge": "🔗 Fusionar ciclos (unir fragmentos)",
+            "delete": "🗑️ Eliminar ciclo(s)"
           }
         }
       },
@@ -392,34 +392,34 @@
         "title": "Exportar/Importar JSON",
         "description": "Copie/pegue ciclos, perfiles y configuraciones para este dispositivo. Exporte a continuación o pegue JSON para importar.",
         "data": {
-          "mode": {
-            "name": "Acción",
-            "options": {
-              "export": "📤 Exportar todos los datos",
-              "import": "📥 Importar/Fusionar datos"
-            }
-          },
-          "json_payload": "Configuración completa JSON"
+          "json_payload": "Configuración completa JSON",
+          "mode": "Acción"
         },
         "data_description": {
           "mode": "Elija Exportar para copiar datos y configuraciones actuales, o Importar para pegar datos exportados desde otro dispositivo WashData.",
           "json_payload": "Para exportar: copie este JSON (incluye ciclos, perfiles y todas las configuraciones ajustadas). Para Importar: pegue JSON exportado desde WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Exportar todos los datos",
+            "import": "📥 Importar/Fusionar datos"
+          }
         }
       },
       "record_cycle": {
         "title": "Ciclo de registro",
         "description": "Registre manualmente un ciclo para crear un perfil limpio sin interferencias.\n\nEstado: **{status}**\nDuración: {duration}s\nMuestras: {samples}",
         "data": {
+          "action": "Acción"
+        },
+        "options": {
           "action": {
-            "name": "Acción",
-            "options": {
-              "start_recording": "⏺ Iniciar nueva grabación",
-              "stop_recording": "⏹ Detener grabación (Guardar y procesar)",
-              "refresh_status": "🔄 Actualizar estado",
-              "process_recording": "⚙️ Procesar la última grabación (recortar y guardar)",
-              "discard_recording": "🗑️ Descartar la última grabación",
-              "cancel": "✖ Cancelar"
-            }
+            "start_recording": "⏺ Iniciar nueva grabación",
+            "stop_recording": "⏹ Detener grabación (Guardar y procesar)",
+            "refresh_status": "🔄 Actualizar estado",
+            "process_recording": "⚙️ Procesar la última grabación (recortar y guardar)",
+            "discard_recording": "🗑️ Descartar la última grabación",
+            "cancel": "✖ Cancelar"
           }
         }
       },
@@ -448,30 +448,30 @@
         "title": "Resolver comentarios",
         "description": "**Programa detectado**: {profile}\n**Confianza**: {confidence}%\n**Estimado**: {est}m, **Real**: {act}m",
         "data": {
-          "action": {
-            "name": "¿Qué te gustaría hacer?",
-            "options": {
-              "confirm": "✅ Confirmar - Detección correcta",
-              "correct": "✏️ Correcto: elija programa/duración",
-              "ignore": "✖ Ignorar: ciclo falso positivo/ruidoso",
-              "delete": "🗑️ Eliminar - Eliminar del historial"
-            }
-          },
           "corrected_profile": "Programa correcto (si se está corrigiendo)",
-          "corrected_duration": "Duración correcta en minutos (si se corrige)"
+          "corrected_duration": "Duración correcta en minutos (si se corrige)",
+          "action": "¿Qué te gustaría hacer?"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ Confirmar - Detección correcta",
+            "correct": "✏️ Correcto: elija programa/duración",
+            "ignore": "✖ Ignorar: ciclo falso positivo/ruidoso",
+            "delete": "🗑️ Eliminar - Eliminar del historial"
+          }
         }
       },
       "manage_phase_catalog": {
         "title": "Administrar catálogo de fases",
         "description": "Fases actuales para este tipo de dispositivo:\n{phase_summary}",
         "data": {
+          "action": "Acción"
+        },
+        "options": {
           "action": {
-            "name": "Acción",
-            "options": {
-              "create_custom_phase": "➕ Crear fase personalizada",
-              "edit_custom_phase": "✏️ Editar fase personalizada",
-              "delete_custom_phase": "🗑️ Eliminar fase personalizada"
-            }
+            "create_custom_phase": "➕ Crear fase personalizada",
+            "edit_custom_phase": "✏️ Editar fase personalizada",
+            "delete_custom_phase": "🗑️ Eliminar fase personalizada"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Seleccione un perfil para configurar rangos de fases.",
         "data": {
           "profile": "Perfil",
+          "source_cycle": "Ciclo de origen (para modo de marca de tiempo)",
+          "assign_mode": "Modo de asignación"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Modo de asignación",
-            "options": {
-              "offset_mode": "Compensaciones de minutos",
-              "timestamp_mode": "Marcas de tiempo"
-            }
-          },
-          "source_cycle": "Ciclo de origen (para modo de marca de tiempo)"
+            "offset_mode": "Compensaciones de minutos",
+            "timestamp_mode": "Marcas de tiempo"
+          }
         }
       }
     },

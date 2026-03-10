@@ -44,7 +44,8 @@
           "manage_cycles": "Hantera cykler",
           "manage_profiles": "Hantera profiler",
           "record_cycle": "Spela in cykel (Manuell)",
-          "diagnostics": "Diagnostik & underhåll"
+          "diagnostics": "Diagnostik & underhåll",
+          "manage_phase_catalog": "Hantera faskatalog"
         }
       },
       "apply_suggestions": {
@@ -205,15 +206,15 @@
         "title": "Hantera cykler",
         "description": "Senaste cykler:\n{recent_cycles}",
         "data": {
+          "action": "Handling"
+        },
+        "options": {
           "action": {
-            "name": "Handling",
-            "options": {
-              "auto_label_cycles": "🤖 Automärk gamla cykler",
-              "select_cycle_to_label": "🏷️ Etikettspecifik cykel",
-              "select_cycle_to_label_multi": "🏷️ Märk flera cykler",
-              "select_cycle_to_delete": "🗑️ Ta bort cykel",
-              "interactive_editor": "✂️ Sammanfoga/Dela interaktiv redigerare"
-            }
+            "auto_label_cycles": "🤖 Automärk gamla cykler",
+            "select_cycle_to_label": "🏷️ Etikettspecifik cykel",
+            "select_cycle_to_label_multi": "🏷️ Märk flera cykler",
+            "select_cycle_to_delete": "🗑️ Ta bort cykel",
+            "interactive_editor": "✂️ Sammanfoga/Dela interaktiv redigerare"
           }
         }
       },
@@ -221,15 +222,16 @@
         "title": "Hantera profiler",
         "description": "Profilsammanfattning:\n{profile_summary}",
         "data": {
+          "action": "Handling"
+        },
+        "options": {
           "action": {
-            "name": "Handling",
-            "options": {
-              "create_profile": "➕ Skapa ny profil",
-              "edit_profile": "✏️ Redigera/byt namn på profil",
-              "delete_profile": "🗑️ Ta bort profil",
-              "profile_stats": "📊 Profilstatistik",
-              "cleanup_profile": "🧹 Rensa upp historik - graf och radera"
-            }
+            "create_profile": "➕ Skapa ny profil",
+            "edit_profile": "✏️ Redigera/byt namn på profil",
+            "delete_profile": "🗑️ Ta bort profil",
+            "profile_stats": "📊 Profilstatistik",
+            "cleanup_profile": "🧹 Rensa upp historik - graf och radera",
+            "assign_phases": "🧩 Tilldela fasintervall"
           }
         }
       },
@@ -334,13 +336,13 @@
         "title": "Interaktiv sammanfognings/delningsredigerare",
         "description": "Välj en manuell åtgärd för din cykelhistorik.",
         "data": {
+          "editor_action": "Handling"
+        },
+        "options": {
           "editor_action": {
-            "name": "Handling",
-            "options": {
-              "split": "✂️ Dela en cykel (Hitta luckor)",
-              "merge": "🔗 Sammanfoga cykler (Sammanfoga fragment)",
-              "delete": "🗑️ Ta bort cykel(er)"
-            }
+            "split": "✂️ Dela en cykel (Hitta luckor)",
+            "merge": "🔗 Sammanfoga cykler (Sammanfoga fragment)",
+            "delete": "🗑️ Ta bort cykel(er)"
           }
         }
       },
@@ -391,33 +393,33 @@
         "description": "Kopiera/klistra in cykler, profiler OCH inställningar för denna enhet. Exportera nedan eller klistra in JSON för import.",
         "data": {
           "json_payload": "Fullständig konfigurations-JSON",
-          "mode": {
-            "name": "Handling",
-            "options": {
-              "export": "📤 Exportera all data",
-              "import": "📥 Importera/slå samman data"
-            }
-          }
+          "mode": "Handling"
         },
         "data_description": {
           "mode": "Välj Exportera för att kopiera aktuella data och inställningar, eller Importera för att klistra in data exporterade från en annan WashData-enhet.",
           "json_payload": "För Export: kopiera denna JSON (innehåller cykler, profiler och alla inställningar). För Import: klistra in JSON exporterad från WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Exportera all data",
+            "import": "📥 Importera/slå samman data"
+          }
         }
       },
       "record_cycle": {
         "title": "Spela in cykel",
         "description": "Spela in en cykel manuellt för att skapa en ren profil utan störningar.\n\nStatus: **{status}**\nVaraktighet: {duration}s\nSampel: {samples}",
         "data": {
+          "action": "Handling"
+        },
+        "options": {
           "action": {
-            "name": "Handling",
-            "options": {
-              "start_recording": "⏺ Starta ny inspelning",
-              "stop_recording": "⏹ Stoppa inspelning (spara och bearbeta)",
-              "refresh_status": "🔄 Uppdatera status",
-              "process_recording": "⚙️ Bearbeta senaste inspelning (Trim & Save)",
-              "discard_recording": "🗑️ Kasta senaste inspelningen",
-              "cancel": "✖ Avbryt"
-            }
+            "start_recording": "⏺ Starta ny inspelning",
+            "stop_recording": "⏹ Stoppa inspelning (spara och bearbeta)",
+            "refresh_status": "🔄 Uppdatera status",
+            "process_recording": "⚙️ Bearbeta senaste inspelning (Trim & Save)",
+            "discard_recording": "🗑️ Kasta senaste inspelningen",
+            "cancel": "✖ Avbryt"
           }
         }
       },
@@ -448,14 +450,112 @@
         "data": {
           "corrected_profile": "Korrekt program (om du korrigerar)",
           "corrected_duration": "Korrekt varaktighet i minuter (om du korrigerar)",
+          "action": "Vad skulle du vilja göra?"
+        },
+        "options": {
           "action": {
-            "name": "Vad skulle du vilja göra?",
-            "options": {
-              "confirm": "✅ Bekräfta - Korrekt upptäckt",
-              "correct": "✏️ Rätt - Välj Program/Längd",
-              "ignore": "✖ Ignorera - Falskt positiv/bullrig cykel",
-              "delete": "🗑️ Ta bort - Ta bort från historiken"
-            }
+            "confirm": "✅ Bekräfta - Korrekt upptäckt",
+            "correct": "✏️ Rätt - Välj Program/Längd",
+            "ignore": "✖ Ignorera - Falskt positiv/bullrig cykel",
+            "delete": "🗑️ Ta bort - Ta bort från historiken"
+          }
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "Hantera faskatalog",
+        "description": "Aktuella faser för denna enhetstyp:\n{phase_summary}",
+        "data": {
+          "action": "Handling"
+        },
+        "options": {
+          "action": {
+            "create_custom_phase": "➕ Skapa anpassad fas",
+            "edit_custom_phase": "✏️ Redigera anpassad fas",
+            "delete_custom_phase": "🗑️ Ta bort anpassad fas"
+          }
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Skapa anpassad fas",
+        "description": "Skapa ett anpassat fasnamn och beskrivning för den här enhetstypen.",
+        "data": {
+          "phase_name": "Fasnamn",
+          "phase_description": "Fasbeskrivning"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Redigera anpassad fas",
+        "description": "Välj en anpassad fas att redigera.",
+        "data": {
+          "phase_name": "Anpassad fas"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Redigera anpassad fas",
+        "description": "Redigeringsfas: {phase_name}",
+        "data": {
+          "phase_name": "Fasnamn",
+          "phase_description": "Fasbeskrivning"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Ta bort anpassad fas",
+        "description": "Välj en anpassad fas att radera. Alla tilldelade intervall som använder denna fas kommer att tas bort.",
+        "data": {
+          "phase_name": "Anpassad fas"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Tilldela fasintervall",
+        "description": "Profil: **{profile_name}**\nLäge: **{assign_mode}**\nCykeltips: {cycle_hint}\n\nAktuella intervall:\n{current_ranges}\n\nFasetiketter är för visning och organisation. Detektion använder effektmönster, inte fasnamn.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Tilldelningsläge",
+          "source_cycle": "Källcykel (krävs för tidsstämpelläge)",
+          "phase_1": "Fas 1",
+          "start_min_1": "Startminut 1",
+          "end_min_1": "Slutminut 1",
+          "start_ts_1": "Starttidsstämpel 1",
+          "end_ts_1": "Sluttidsstämpel 1",
+          "phase_2": "Fas 2",
+          "start_min_2": "Startminut 2",
+          "end_min_2": "Slutminut 2",
+          "start_ts_2": "Starta tidsstämpel 2",
+          "end_ts_2": "Sluttidsstämpel 2",
+          "phase_3": "Fas 3",
+          "start_min_3": "Startminut 3",
+          "end_min_3": "Slutminut 3",
+          "start_ts_3": "Starta tidsstämpel 3",
+          "end_ts_3": "Sluttidsstämpel 3",
+          "phase_4": "Fas 4",
+          "start_min_4": "Startminut 4",
+          "end_min_4": "Slutminut 4",
+          "start_ts_4": "Starta tidsstämpel 4",
+          "end_ts_4": "Sluttidsstämpel 4",
+          "phase_5": "Fas 5",
+          "start_min_5": "Startminut 5",
+          "end_min_5": "Slutminut 5",
+          "start_ts_5": "Starta tidsstämpel 5",
+          "end_ts_5": "Sluttidsstämpel 5",
+          "phase_6": "Fas 6",
+          "start_min_6": "Startminut 6",
+          "end_min_6": "Slutminut 6",
+          "start_ts_6": "Starta tidsstämpel 6",
+          "end_ts_6": "Sluttidsstämpel 6"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Tilldela fasintervall",
+        "description": "Välj en profil för att konfigurera fasintervall.",
+        "data": {
+          "profile": "Profil",
+          "assign_mode": "Tilldelningsläge",
+          "source_cycle": "Källcykel (för tidsstämpelläge)"
+        },
+        "options": {
+          "assign_mode": {
+            "offset_mode": "Minutavvikelser",
+            "timestamp_mode": "Tidsstämplar"
           }
         }
       }
@@ -466,7 +566,16 @@
       "rename_failed": "Namnbyte av profil misslyckades. Profilen kanske inte finns eller det nya namnet är redan upptaget.",
       "assignment_failed": "Tilldelning av profil till cykel misslyckades",
       "feedback_notification_title": "WashData: Verifiera cykel ({device})",
-      "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence}% konfidens)\n**Tid**: {time}\n\nWashData behöver din hjälp att verifiera denna detekterade cykel.\n\nGå till **Inställningar > Enheter & tjänster > WashData > Konfigurera > Inlärningsfeedback** för att bekräfta eller korrigera detta resultat."
+      "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence}% konfidens)\n**Tid**: {time}\n\nWashData behöver din hjälp att verifiera denna detekterade cykel.\n\nGå till **Inställningar > Enheter & tjänster > WashData > Konfigurera > Inlärningsfeedback** för att bekräfta eller korrigera detta resultat.",
+      "duplicate_phase": "En fas med detta namn finns redan.",
+      "phase_not_found": "Den valda fasen hittades inte.",
+      "invalid_phase_name": "Fasnamnet får inte vara tomt.",
+      "phase_name_too_long": "Fasnamnet är för långt.",
+      "invalid_phase_range": "Fasintervallet är ogiltigt. Slutet måste vara större än början.",
+      "invalid_phase_timestamp": "Tidsstämpeln är ogiltig. Använd formatet ÅÅÅÅ-MM-DD TT:MM eller TT:MM.",
+      "overlapping_phase_ranges": "Fasintervall överlappar varandra. Justera intervallen och försök igen.",
+      "incomplete_phase_row": "Varje fasrad måste innehålla en fas plus kompletta start-/slutvärden för det valda läget.",
+      "timestamp_mode_cycle_required": "Välj en källcykel när du använder tidsstämpelläget."
     },
     "abort": {
       "no_cycles_found": "Inga cykler hittades",
@@ -476,7 +585,8 @@
       "no_suggestions": "Inga föreslagna värden tillgängliga ännu. Kör några cykler och försök igen.",
       "no_predictions": "Inga förutsägelser",
       "reprocess_success": "Framgångsrikt ombearbetade {count} cykler.",
-      "debug_data_cleared": "Felsökningsdata rensade från {count} cykler."
+      "debug_data_cleared": "Felsökningsdata rensade från {count} cykler.",
+      "no_custom_phases": "Inga anpassade faser hittades för den här enhetstypen."
     }
   },
   "entity": {
