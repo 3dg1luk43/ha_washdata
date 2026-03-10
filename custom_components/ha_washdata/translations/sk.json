@@ -206,15 +206,15 @@
         "title": "Spravovať cykly",
         "description": "Posledné cykly:\n{recent_cycles}",
         "data": {
+          "action": "Akcia"
+        },
+        "options": {
           "action": {
-            "name": "Akcia",
-            "options": {
-              "auto_label_cycles": "🤖 Automatické označovanie starých cyklov",
-              "select_cycle_to_label": "🏷️ Špecifický cyklus štítku",
-              "select_cycle_to_label_multi": "🏷️ Označte viacero cyklov",
-              "select_cycle_to_delete": "🗑️ Odstrániť cyklus",
-              "interactive_editor": "✂️ Interaktívny editor na zlúčenie/rozdelenie"
-            }
+            "auto_label_cycles": "🤖 Automatické označovanie starých cyklov",
+            "select_cycle_to_label": "🏷️ Špecifický cyklus štítku",
+            "select_cycle_to_label_multi": "🏷️ Označte viacero cyklov",
+            "select_cycle_to_delete": "🗑️ Odstrániť cyklus",
+            "interactive_editor": "✂️ Interaktívny editor na zlúčenie/rozdelenie"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Spravovať profily",
         "description": "Zhrnutie profilu:\n{profile_summary}",
         "data": {
+          "action": "Akcia"
+        },
+        "options": {
           "action": {
-            "name": "Akcia",
-            "options": {
-              "create_profile": "➕ Vytvoriť nový profil",
-              "edit_profile": "✏️ Upraviť/Premenovať profil",
-              "delete_profile": "🗑️ Odstrániť profil",
-              "profile_stats": "📊 Štatistika profilu",
-              "cleanup_profile": "🧹 História vyčistenia – graf a vymazanie",
-              "assign_phases": "🧩 Priraďte fázové rozsahy"
-            }
+            "create_profile": "➕ Vytvoriť nový profil",
+            "edit_profile": "✏️ Upraviť/Premenovať profil",
+            "delete_profile": "🗑️ Odstrániť profil",
+            "profile_stats": "📊 Štatistika profilu",
+            "cleanup_profile": "🧹 História vyčistenia – graf a vymazanie",
+            "assign_phases": "🧩 Priraďte fázové rozsahy"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Interaktívny editor Zlúčiť/Rozdeliť",
         "description": "Vyberte manuálnu akciu, ktorá sa má vykonať s históriou cyklu.",
         "data": {
+          "editor_action": "Akcia"
+        },
+        "options": {
           "editor_action": {
-            "name": "Akcia",
-            "options": {
-              "split": "✂️ Rozdeľte cyklus (nájdite medzery)",
-              "merge": "🔗 Zlúčiť cykly (spojiť fragmenty)",
-              "delete": "🗑️ Odstrániť cykly"
-            }
+            "split": "✂️ Rozdeľte cyklus (nájdite medzery)",
+            "merge": "🔗 Zlúčiť cykly (spojiť fragmenty)",
+            "delete": "🗑️ Odstrániť cykly"
           }
         }
       },
@@ -392,34 +392,34 @@
         "title": "Export/Import JSON",
         "description": "Skopírujte/prilepte cykly, profily A nastavenia pre toto zariadenie. Exportujte nižšie alebo prilepte JSON na import.",
         "data": {
-          "mode": {
-            "name": "Akcia",
-            "options": {
-              "export": "📤 Exportujte všetky údaje",
-              "import": "📥 Importovať/zlučovať údaje"
-            }
-          },
-          "json_payload": "Dokončite konfiguráciu JSON"
+          "json_payload": "Dokončite konfiguráciu JSON",
+          "mode": "Akcia"
         },
         "data_description": {
           "mode": "Zvoľte Export, ak chcete skopírovať aktuálne údaje a nastavenia, alebo Import, ak chcete prilepiť exportované údaje z iného zariadenia WashData.",
           "json_payload": "Pre export: skopírujte tento JSON (zahŕňa cykly, profily a všetky doladené nastavenia). Pre import: prilepte JSON exportovaný z WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Exportujte všetky údaje",
+            "import": "📥 Importovať/zlučovať údaje"
+          }
         }
       },
       "record_cycle": {
         "title": "Záznamový cyklus",
         "description": "Manuálne zaznamenajte cyklus, aby ste vytvorili čistý profil bez rušenia.\n\nStav: **{status}**\nTrvanie: {duration} s\nVzorky: {samples}",
         "data": {
+          "action": "Akcia"
+        },
+        "options": {
           "action": {
-            "name": "Akcia",
-            "options": {
-              "start_recording": "⏺ Spustite nové nahrávanie",
-              "stop_recording": "⏹ Zastaviť nahrávanie (Uložiť a spracovať)",
-              "refresh_status": "🔄 Stav obnovenia",
-              "process_recording": "⚙️ Spracovať posledný záznam (Orezať a uložiť)",
-              "discard_recording": "🗑️ Zahodiť poslednú nahrávku",
-              "cancel": "✖ Zrušiť"
-            }
+            "start_recording": "⏺ Spustite nové nahrávanie",
+            "stop_recording": "⏹ Zastaviť nahrávanie (Uložiť a spracovať)",
+            "refresh_status": "🔄 Stav obnovenia",
+            "process_recording": "⚙️ Spracovať posledný záznam (Orezať a uložiť)",
+            "discard_recording": "🗑️ Zahodiť poslednú nahrávku",
+            "cancel": "✖ Zrušiť"
           }
         }
       },
@@ -448,30 +448,30 @@
         "title": "Vyriešiť spätnú väzbu",
         "description": "**Zistený program**: {profile}\n**Dôvera**: {confidence} %\n**Odhad**: {est}m, **Skutočný**: {act}m",
         "data": {
-          "action": {
-            "name": "čo by ste chceli robiť?",
-            "options": {
-              "confirm": "✅ Potvrdiť - správna detekcia",
-              "correct": "✏️ Správne - vyberte Program/Trvanie",
-              "ignore": "✖ Ignorovať – falošne pozitívny/hlučný cyklus",
-              "delete": "🗑️ Odstrániť - Odstrániť z histórie"
-            }
-          },
           "corrected_profile": "Správny program (ak opravujete)",
-          "corrected_duration": "Správne trvanie v minútach (ak opravujete)"
+          "corrected_duration": "Správne trvanie v minútach (ak opravujete)",
+          "action": "čo by ste chceli robiť?"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ Potvrdiť - správna detekcia",
+            "correct": "✏️ Správne - vyberte Program/Trvanie",
+            "ignore": "✖ Ignorovať – falošne pozitívny/hlučný cyklus",
+            "delete": "🗑️ Odstrániť - Odstrániť z histórie"
+          }
         }
       },
       "manage_phase_catalog": {
         "title": "Spravovať katalóg fáz",
         "description": "Aktuálne fázy pre tento typ zariadenia:\n{phase_summary}",
         "data": {
+          "action": "Akcia"
+        },
+        "options": {
           "action": {
-            "name": "Akcia",
-            "options": {
-              "create_custom_phase": "➕ Vytvoriť vlastnú fázu",
-              "edit_custom_phase": "✏️ Upraviť vlastnú fázu",
-              "delete_custom_phase": "🗑️ Odstrániť vlastnú fázu"
-            }
+            "create_custom_phase": "➕ Vytvoriť vlastnú fázu",
+            "edit_custom_phase": "✏️ Upraviť vlastnú fázu",
+            "delete_custom_phase": "🗑️ Odstrániť vlastnú fázu"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Vyberte profil na konfiguráciu fázových rozsahov.",
         "data": {
           "profile": "Profil",
+          "source_cycle": "Zdrojový cyklus (pre režim časovej pečiatky)",
+          "assign_mode": "Režim pridelenia"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Režim pridelenia",
-            "options": {
-              "offset_mode": "Posuny minút",
-              "timestamp_mode": "Časové pečiatky"
-            }
-          },
-          "source_cycle": "Zdrojový cyklus (pre režim časovej pečiatky)"
+            "offset_mode": "Posuny minút",
+            "timestamp_mode": "Časové pečiatky"
+          }
         }
       }
     },

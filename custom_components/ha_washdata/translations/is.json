@@ -206,15 +206,15 @@
         "title": "Stjórna hringrásum",
         "description": "Nýlegar lotur:\n{recent_cycles}",
         "data": {
+          "action": "Aðgerð"
+        },
+        "options": {
           "action": {
-            "name": "Aðgerð",
-            "options": {
-              "auto_label_cycles": "🤖 Sjálfvirk merking á gömlum hringrásum",
-              "select_cycle_to_label": "🏷️ Merkið sérstaka hringrás",
-              "select_cycle_to_label_multi": "🏷️ Merktu margar lotur",
-              "select_cycle_to_delete": "🗑️ Eyða hringrás",
-              "interactive_editor": "✂️ Sameina/skipta gagnvirkum ritstjóra"
-            }
+            "auto_label_cycles": "🤖 Sjálfvirk merking á gömlum hringrásum",
+            "select_cycle_to_label": "🏷️ Merkið sérstaka hringrás",
+            "select_cycle_to_label_multi": "🏷️ Merktu margar lotur",
+            "select_cycle_to_delete": "🗑️ Eyða hringrás",
+            "interactive_editor": "✂️ Sameina/skipta gagnvirkum ritstjóra"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Stjórna prófílum",
         "description": "Yfirlit yfir prófíl:\n{profile_summary}",
         "data": {
+          "action": "Aðgerð"
+        },
+        "options": {
           "action": {
-            "name": "Aðgerð",
-            "options": {
-              "create_profile": "➕ Búðu til nýjan prófíl",
-              "edit_profile": "✏️ Breyta/endurnefna prófíl",
-              "delete_profile": "🗑️ Eyða prófíl",
-              "profile_stats": "📊 Tölfræði um prófíl",
-              "cleanup_profile": "🧹 Hreinsaðu sögu - línurit og eyða",
-              "assign_phases": "🧩 Úthlutaðu áfangasviðum"
-            }
+            "create_profile": "➕ Búðu til nýjan prófíl",
+            "edit_profile": "✏️ Breyta/endurnefna prófíl",
+            "delete_profile": "🗑️ Eyða prófíl",
+            "profile_stats": "📊 Tölfræði um prófíl",
+            "cleanup_profile": "🧹 Hreinsaðu sögu - línurit og eyða",
+            "assign_phases": "🧩 Úthlutaðu áfangasviðum"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Sameina/skipta gagnvirkum ritstjóra",
         "description": "Veldu handvirka aðgerð til að framkvæma á hringrásarsögunni þinni.",
         "data": {
+          "editor_action": "Aðgerð"
+        },
+        "options": {
           "editor_action": {
-            "name": "Aðgerð",
-            "options": {
-              "split": "✂️ Skiptu hringrás (finndu eyður)",
-              "merge": "🔗 Sameina hringrás (Tengja saman brot)",
-              "delete": "🗑️ Eyða hringrás(um)"
-            }
+            "split": "✂️ Skiptu hringrás (finndu eyður)",
+            "merge": "🔗 Sameina hringrás (Tengja saman brot)",
+            "delete": "🗑️ Eyða hringrás(um)"
           }
         }
       },
@@ -392,34 +392,34 @@
         "title": "Flytja út / flytja inn JSON",
         "description": "Afritaðu/límdu lotur, snið OG stillingar fyrir þetta tæki. Flyttu út fyrir neðan eða límdu JSON til að flytja inn.",
         "data": {
-          "mode": {
-            "name": "Aðgerð",
-            "options": {
-              "export": "📤 Flyttu út öll gögn",
-              "import": "📥 Flytja inn / sameina gögn"
-            }
-          },
-          "json_payload": "Ljúktu stillingum JSON"
+          "json_payload": "Ljúktu stillingum JSON",
+          "mode": "Aðgerð"
         },
         "data_description": {
           "mode": "Veldu Flytja út til að afrita núverandi gögn og stillingar, eða Flytja inn til að líma útflutt gögn úr öðru WashData tæki.",
           "json_payload": "Fyrir útflutning: afritaðu þetta JSON (inniheldur lotur, snið og allar fínstilltar stillingar). Fyrir innflutning: límdu JSON flutt út frá WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Flyttu út öll gögn",
+            "import": "📥 Flytja inn / sameina gögn"
+          }
         }
       },
       "record_cycle": {
         "title": "Record Cycle",
         "description": "Taktu upp lotu handvirkt til að búa til hreint snið án truflana.\n\nStaða: **{status}**\nLengd: {duration}s\nSýnishorn: {samples}",
         "data": {
+          "action": "Aðgerð"
+        },
+        "options": {
           "action": {
-            "name": "Aðgerð",
-            "options": {
-              "start_recording": "⏺ Byrjaðu nýja upptöku",
-              "stop_recording": "⏹ Stöðva upptöku (vista og vinna)",
-              "refresh_status": "🔄 Endurnýja stöðu",
-              "process_recording": "⚙️ Vinna við síðustu upptöku (klippa og vista)",
-              "discard_recording": "🗑️ Fleygðu síðustu upptöku",
-              "cancel": "✖ Hætta við"
-            }
+            "start_recording": "⏺ Byrjaðu nýja upptöku",
+            "stop_recording": "⏹ Stöðva upptöku (vista og vinna)",
+            "refresh_status": "🔄 Endurnýja stöðu",
+            "process_recording": "⚙️ Vinna við síðustu upptöku (klippa og vista)",
+            "discard_recording": "🗑️ Fleygðu síðustu upptöku",
+            "cancel": "✖ Hætta við"
           }
         }
       },
@@ -448,30 +448,30 @@
         "title": "Leysa viðbrögð",
         "description": "**Greint forrit**: {profile}\n**Traust**: {confidence}%\n**Áætlað**: {est}m, **Raunverulegt**: {act}m",
         "data": {
-          "action": {
-            "name": "Hvað myndir þú vilja gera?",
-            "options": {
-              "confirm": "✅ Staðfesta - Rétt uppgötvun",
-              "correct": "✏️ Rétt - Veldu dagskrá/tímalengd",
-              "ignore": "✖ Hunsa - rangt jákvætt/hávaðasamt hringrás",
-              "delete": "🗑️ Eyða - Fjarlægja úr sögu"
-            }
-          },
           "corrected_profile": "Rétt forrit (ef leiðrétt er)",
-          "corrected_duration": "Rétt lengd í mínútum (ef leiðrétt er)"
+          "corrected_duration": "Rétt lengd í mínútum (ef leiðrétt er)",
+          "action": "Hvað myndir þú vilja gera?"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ Staðfesta - Rétt uppgötvun",
+            "correct": "✏️ Rétt - Veldu dagskrá/tímalengd",
+            "ignore": "✖ Hunsa - rangt jákvætt/hávaðasamt hringrás",
+            "delete": "🗑️ Eyða - Fjarlægja úr sögu"
+          }
         }
       },
       "manage_phase_catalog": {
         "title": "Stjórna áfangaskrá",
         "description": "Núverandi fasar fyrir þessa tegund tækis:\n{phase_summary}",
         "data": {
+          "action": "Aðgerð"
+        },
+        "options": {
           "action": {
-            "name": "Aðgerð",
-            "options": {
-              "create_custom_phase": "➕ Búðu til sérsniðna áfanga",
-              "edit_custom_phase": "✏️ Breyta sérsniðnum áfanga",
-              "delete_custom_phase": "🗑️ Eyða sérsniðnum áfanga"
-            }
+            "create_custom_phase": "➕ Búðu til sérsniðna áfanga",
+            "edit_custom_phase": "✏️ Breyta sérsniðnum áfanga",
+            "delete_custom_phase": "🗑️ Eyða sérsniðnum áfanga"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Veldu snið til að stilla áfangasvið.",
         "data": {
           "profile": "Prófíll",
+          "source_cycle": "Upprunahringur (fyrir tímastimplaham)",
+          "assign_mode": "Úthlutunarhamur"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Úthlutunarhamur",
-            "options": {
-              "offset_mode": "Mínútujöfnun",
-              "timestamp_mode": "Tímastimplar"
-            }
-          },
-          "source_cycle": "Upprunahringur (fyrir tímastimplaham)"
+            "offset_mode": "Mínútujöfnun",
+            "timestamp_mode": "Tímastimplar"
+          }
         }
       }
     },

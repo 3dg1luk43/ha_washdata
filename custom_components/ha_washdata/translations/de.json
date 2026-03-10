@@ -206,15 +206,15 @@
         "title": "Zyklen verwalten",
         "description": "Letzte Zyklen:\n{recent_cycles}",
         "data": {
+          "action": "Aktion"
+        },
+        "options": {
           "action": {
-            "name": "Aktion",
-            "options": {
-              "auto_label_cycles": "🤖 Alte Zyklen automatisch kennzeichnen",
-              "select_cycle_to_label": "🏷️ Beschriften Sie den spezifischen Zyklus",
-              "select_cycle_to_label_multi": "🏷️ Beschriften Sie mehrere Zyklen",
-              "select_cycle_to_delete": "🗑️ Zyklus löschen",
-              "interactive_editor": "✂️ Interaktiven Editor zusammenführen/aufteilen"
-            }
+            "auto_label_cycles": "🤖 Alte Zyklen automatisch kennzeichnen",
+            "select_cycle_to_label": "🏷️ Beschriften Sie den spezifischen Zyklus",
+            "select_cycle_to_label_multi": "🏷️ Beschriften Sie mehrere Zyklen",
+            "select_cycle_to_delete": "🗑️ Zyklus löschen",
+            "interactive_editor": "✂️ Interaktiven Editor zusammenführen/aufteilen"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Profile verwalten",
         "description": "Profilzusammenfassung:\n{profile_summary}",
         "data": {
+          "action": "Aktion"
+        },
+        "options": {
           "action": {
-            "name": "Aktion",
-            "options": {
-              "create_profile": "➕ Neues Profil erstellen",
-              "edit_profile": "✏️ Profil bearbeiten/umbenennen",
-              "delete_profile": "🗑️ Profil löschen",
-              "profile_stats": "📊 Profilstatistik",
-              "cleanup_profile": "🧹 Verlauf bereinigen – grafisch darstellen und löschen",
-              "assign_phases": "🧩 Phasenbereiche zuweisen"
-            }
+            "create_profile": "➕ Neues Profil erstellen",
+            "edit_profile": "✏️ Profil bearbeiten/umbenennen",
+            "delete_profile": "🗑️ Profil löschen",
+            "profile_stats": "📊 Profilstatistik",
+            "cleanup_profile": "🧹 Verlauf bereinigen – grafisch darstellen und löschen",
+            "assign_phases": "🧩 Phasenbereiche zuweisen"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Interaktiver Editor zum Zusammenführen/Teilen",
         "description": "Wählen Sie eine manuelle Aktion aus, die Sie an Ihrem Zyklusverlauf durchführen möchten.",
         "data": {
+          "editor_action": "Aktion"
+        },
+        "options": {
           "editor_action": {
-            "name": "Aktion",
-            "options": {
-              "split": "✂️ Teilen Sie einen Zyklus auf (Lücken finden)",
-              "merge": "🔗 Zyklen zusammenführen (Fragmente verbinden)",
-              "delete": "🗑️ Zyklus(e) löschen"
-            }
+            "split": "✂️ Teilen Sie einen Zyklus auf (Lücken finden)",
+            "merge": "🔗 Zyklen zusammenführen (Fragmente verbinden)",
+            "delete": "🗑️ Zyklus(e) löschen"
           }
         }
       },
@@ -392,34 +392,34 @@
         "title": "JSON exportieren/importieren",
         "description": "Kopieren/Einfügen von Zyklen, Profilen und Einstellungen für dieses Gerät. Exportieren Sie unten oder fügen Sie JSON zum Importieren ein.",
         "data": {
-          "mode": {
-            "name": "Aktion",
-            "options": {
-              "export": "📤 Alle Daten exportieren",
-              "import": "📥 Daten importieren/zusammenführen"
-            }
-          },
-          "json_payload": "Komplette Konfiguration JSON"
+          "json_payload": "Komplette Konfiguration JSON",
+          "mode": "Aktion"
         },
         "data_description": {
           "mode": "Wählen Sie „Exportieren“, um aktuelle Daten und Einstellungen zu kopieren, oder „Importieren“, um exportierte Daten von einem anderen WashData-Gerät einzufügen.",
           "json_payload": "Für den Export: Kopieren Sie diesen JSON (einschließlich Zyklen, Profilen und allen fein abgestimmten Einstellungen). Für den Import: JSON einfügen, das aus WashData exportiert wurde."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Alle Daten exportieren",
+            "import": "📥 Daten importieren/zusammenführen"
+          }
         }
       },
       "record_cycle": {
         "title": "Aufnahmezyklus",
         "description": "Zeichnen Sie einen Zyklus manuell auf, um ein sauberes Profil ohne Störungen zu erstellen.\n\nStatus: **{status}**\nDauer: {duration}s\nBeispiele: {samples}",
         "data": {
+          "action": "Aktion"
+        },
+        "options": {
           "action": {
-            "name": "Aktion",
-            "options": {
-              "start_recording": "⏺ Neue Aufnahme starten",
-              "stop_recording": "⏹ Aufnahme stoppen (Speichern und verarbeiten)",
-              "refresh_status": "🔄 Status aktualisieren",
-              "process_recording": "⚙️ Letzte Aufnahme verarbeiten (Zuschneiden und Speichern)",
-              "discard_recording": "🗑️ Letzte Aufnahme verwerfen",
-              "cancel": "✖ Abbrechen"
-            }
+            "start_recording": "⏺ Neue Aufnahme starten",
+            "stop_recording": "⏹ Aufnahme stoppen (Speichern und verarbeiten)",
+            "refresh_status": "🔄 Status aktualisieren",
+            "process_recording": "⚙️ Letzte Aufnahme verarbeiten (Zuschneiden und Speichern)",
+            "discard_recording": "🗑️ Letzte Aufnahme verwerfen",
+            "cancel": "✖ Abbrechen"
           }
         }
       },
@@ -448,30 +448,30 @@
         "title": "Feedback auflösen",
         "description": "**Erkanntes Programm**: {profile}\n**Konfidenz**: {confidence}%\n**Geschätzt**: {est}m, **Ist**: {act}m",
         "data": {
-          "action": {
-            "name": "Was möchten Sie tun?",
-            "options": {
-              "confirm": "✅ Bestätigen – korrekte Erkennung",
-              "correct": "✏️ Richtig – Programm/Dauer wählen",
-              "ignore": "✖ Ignorieren – falsch positiver/verrauschter Zyklus",
-              "delete": "🗑️ Löschen – Aus dem Verlauf entfernen"
-            }
-          },
           "corrected_profile": "Richtiges Programm (bei Korrektur)",
-          "corrected_duration": "Korrekte Dauer in Minuten (bei Korrektur)"
+          "corrected_duration": "Korrekte Dauer in Minuten (bei Korrektur)",
+          "action": "Was möchten Sie tun?"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ Bestätigen – korrekte Erkennung",
+            "correct": "✏️ Richtig – Programm/Dauer wählen",
+            "ignore": "✖ Ignorieren – falsch positiver/verrauschter Zyklus",
+            "delete": "🗑️ Löschen – Aus dem Verlauf entfernen"
+          }
         }
       },
       "manage_phase_catalog": {
         "title": "Phasenkatalog verwalten",
         "description": "Aktuelle Phasen für diesen Gerätetyp:\n{phase_summary}",
         "data": {
+          "action": "Aktion"
+        },
+        "options": {
           "action": {
-            "name": "Aktion",
-            "options": {
-              "create_custom_phase": "➕ Benutzerdefinierte Phase erstellen",
-              "edit_custom_phase": "✏️ Benutzerdefinierte Phase bearbeiten",
-              "delete_custom_phase": "🗑️ Benutzerdefinierte Phase löschen"
-            }
+            "create_custom_phase": "➕ Benutzerdefinierte Phase erstellen",
+            "edit_custom_phase": "✏️ Benutzerdefinierte Phase bearbeiten",
+            "delete_custom_phase": "🗑️ Benutzerdefinierte Phase löschen"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Wählen Sie ein Profil aus, um Phasenbereiche zu konfigurieren.",
         "data": {
           "profile": "Profil",
+          "source_cycle": "Quellzyklus (für Zeitstempelmodus)",
+          "assign_mode": "Zuweisungsmodus"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Zuweisungsmodus",
-            "options": {
-              "offset_mode": "Minutenversätze",
-              "timestamp_mode": "Zeitstempel"
-            }
-          },
-          "source_cycle": "Quellzyklus (für Zeitstempelmodus)"
+            "offset_mode": "Minutenversätze",
+            "timestamp_mode": "Zeitstempel"
+          }
         }
       }
     },

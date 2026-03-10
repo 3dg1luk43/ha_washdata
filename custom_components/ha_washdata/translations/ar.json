@@ -206,15 +206,15 @@
         "title": "إدارة الدورات",
         "description": "الدورات الأخيرة:\n{recent_cycles}",
         "data": {
+          "action": "فعل"
+        },
+        "options": {
           "action": {
-            "name": "فعل",
-            "options": {
-              "auto_label_cycles": "🤖 تسمية تلقائية للدورات القديمة",
-              "select_cycle_to_label": "🏷️ دورة تسمية محددة",
-              "select_cycle_to_label_multi": "🏷️ تسمية دورات متعددة",
-              "select_cycle_to_delete": "🗑️ حذف الدورة",
-              "interactive_editor": "✂️ دمج/تقسيم المحرر التفاعلي"
-            }
+            "auto_label_cycles": "🤖 تسمية تلقائية للدورات القديمة",
+            "select_cycle_to_label": "🏷️ دورة تسمية محددة",
+            "select_cycle_to_label_multi": "🏷️ تسمية دورات متعددة",
+            "select_cycle_to_delete": "🗑️ حذف الدورة",
+            "interactive_editor": "✂️ دمج/تقسيم المحرر التفاعلي"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "إدارة الملفات الشخصية",
         "description": "ملخص الملف الشخصي:\n{profile_summary}",
         "data": {
+          "action": "فعل"
+        },
+        "options": {
           "action": {
-            "name": "فعل",
-            "options": {
-              "create_profile": "➕ إنشاء ملف تعريف جديد",
-              "edit_profile": "✏️ تعديل/إعادة تسمية الملف الشخصي",
-              "delete_profile": "🗑️ حذف الملف الشخصي",
-              "profile_stats": "📊 إحصائيات الملف الشخصي",
-              "cleanup_profile": "🧹 تنظيف السجل - الرسم البياني والحذف",
-              "assign_phases": "🧩 تعيين نطاقات المرحلة"
-            }
+            "create_profile": "➕ إنشاء ملف تعريف جديد",
+            "edit_profile": "✏️ تعديل/إعادة تسمية الملف الشخصي",
+            "delete_profile": "🗑️ حذف الملف الشخصي",
+            "profile_stats": "📊 إحصائيات الملف الشخصي",
+            "cleanup_profile": "🧹 تنظيف السجل - الرسم البياني والحذف",
+            "assign_phases": "🧩 تعيين نطاقات المرحلة"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "دمج/تقسيم المحرر التفاعلي",
         "description": "حدد إجراءً يدويًا لتنفيذه على سجل دورتك.",
         "data": {
+          "editor_action": "فعل"
+        },
+        "options": {
           "editor_action": {
-            "name": "فعل",
-            "options": {
-              "split": "✂️ تقسيم الدورة (البحث عن الثغرات)",
-              "merge": "🔗 دمج الدورات (الانضمام إلى الأجزاء)",
-              "delete": "🗑️ حذف الدورة (الدورات)"
-            }
+            "split": "✂️ تقسيم الدورة (البحث عن الثغرات)",
+            "merge": "🔗 دمج الدورات (الانضمام إلى الأجزاء)",
+            "delete": "🗑️ حذف الدورة (الدورات)"
           }
         }
       },
@@ -392,34 +392,34 @@
         "title": "تصدير/استيراد JSON",
         "description": "نسخ/لصق الدورات والملفات الشخصية والإعدادات لهذا الجهاز. قم بالتصدير أدناه أو لصق JSON للاستيراد.",
         "data": {
-          "mode": {
-            "name": "فعل",
-            "options": {
-              "export": "📤 تصدير جميع البيانات",
-              "import": "📥 استيراد/دمج البيانات"
-            }
-          },
-          "json_payload": "استكمال التكوين JSON"
+          "json_payload": "استكمال التكوين JSON",
+          "mode": "فعل"
         },
         "data_description": {
           "mode": "اختر تصدير لنسخ البيانات والإعدادات الحالية، أو استيراد للصق البيانات المصدرة من جهاز WashData آخر.",
           "json_payload": "للتصدير: انسخ ملف JSON هذا (يتضمن الدورات والملفات الشخصية وجميع الإعدادات المضبوطة بدقة). للاستيراد: الصق JSON الذي تم تصديره من WashData."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 تصدير جميع البيانات",
+            "import": "📥 استيراد/دمج البيانات"
+          }
         }
       },
       "record_cycle": {
         "title": "دورة التسجيل",
         "description": "قم بتسجيل الدورة يدويًا لإنشاء ملف تعريف نظيف دون أي تدخل.\n\nالحالة: **{status}**\nالمدة: {duration}.\nالعينات: {samples}",
         "data": {
+          "action": "فعل"
+        },
+        "options": {
           "action": {
-            "name": "فعل",
-            "options": {
-              "start_recording": "⏺ ابدأ التسجيل الجديد",
-              "stop_recording": "⏹ إيقاف التسجيل (الحفظ والمعالجة)",
-              "refresh_status": "🔄 تحديث الحالة",
-              "process_recording": "⚙️ معالجة التسجيل الأخير (قص وحفظ)",
-              "discard_recording": "🗑️ تجاهل التسجيل الأخير",
-              "cancel": "✖ إلغاء"
-            }
+            "start_recording": "⏺ ابدأ التسجيل الجديد",
+            "stop_recording": "⏹ إيقاف التسجيل (الحفظ والمعالجة)",
+            "refresh_status": "🔄 تحديث الحالة",
+            "process_recording": "⚙️ معالجة التسجيل الأخير (قص وحفظ)",
+            "discard_recording": "🗑️ تجاهل التسجيل الأخير",
+            "cancel": "✖ إلغاء"
           }
         }
       },
@@ -448,30 +448,30 @@
         "title": "حل ردود الفعل",
         "description": "**البرنامج الذي تم اكتشافه**: {profile}\n**الثقة**: {confidence}%\n**المقدر**: {est}m، **الفعلي**: {act}m",
         "data": {
-          "action": {
-            "name": "ماذا تريد أن تفعل؟",
-            "options": {
-              "confirm": "✅ تأكيد - الكشف الصحيح",
-              "correct": "✏️ صحيح - اختر البرنامج/المدة",
-              "ignore": "✖ تجاهل - دورة إيجابية كاذبة/صاخبة",
-              "delete": "🗑️ حذف - إزالة من السجل"
-            }
-          },
           "corrected_profile": "البرنامج الصحيح (في حالة التصحيح)",
-          "corrected_duration": "المدة الصحيحة بالدقائق (في حالة التصحيح)"
+          "corrected_duration": "المدة الصحيحة بالدقائق (في حالة التصحيح)",
+          "action": "ماذا تريد أن تفعل؟"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ تأكيد - الكشف الصحيح",
+            "correct": "✏️ صحيح - اختر البرنامج/المدة",
+            "ignore": "✖ تجاهل - دورة إيجابية كاذبة/صاخبة",
+            "delete": "🗑️ حذف - إزالة من السجل"
+          }
         }
       },
       "manage_phase_catalog": {
         "title": "إدارة كتالوج المرحلة",
         "description": "المراحل الحالية لهذا النوع من الأجهزة:\n{phase_summary}",
         "data": {
+          "action": "فعل"
+        },
+        "options": {
           "action": {
-            "name": "فعل",
-            "options": {
-              "create_custom_phase": "➕ إنشاء مرحلة مخصصة",
-              "edit_custom_phase": "✏️ تحرير المرحلة المخصصة",
-              "delete_custom_phase": "🗑️ حذف المرحلة المخصصة"
-            }
+            "create_custom_phase": "➕ إنشاء مرحلة مخصصة",
+            "edit_custom_phase": "✏️ تحرير المرحلة المخصصة",
+            "delete_custom_phase": "🗑️ حذف المرحلة المخصصة"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "حدد ملف تعريف لتكوين نطاقات المرحلة.",
         "data": {
           "profile": "حساب تعريفي",
+          "source_cycle": "دورة المصدر (لوضع الطابع الزمني)",
+          "assign_mode": "وضع المهمة"
+        },
+        "options": {
           "assign_mode": {
-            "name": "وضع المهمة",
-            "options": {
-              "offset_mode": "إزاحة الدقائق",
-              "timestamp_mode": "الطوابع الزمنية"
-            }
-          },
-          "source_cycle": "دورة المصدر (لوضع الطابع الزمني)"
+            "offset_mode": "إزاحة الدقائق",
+            "timestamp_mode": "الطوابع الزمنية"
+          }
         }
       }
     },

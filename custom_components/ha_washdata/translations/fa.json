@@ -206,15 +206,15 @@
         "title": "چرخه ها را مدیریت کنید",
         "description": "چرخه های اخیر:\n{recent_cycles}",
         "data": {
+          "action": "اقدام"
+        },
+        "options": {
           "action": {
-            "name": "اقدام",
-            "options": {
-              "auto_label_cycles": "🤖 برچسب زدن خودکار چرخه های قدیمی",
-              "select_cycle_to_label": "🏷️ چرخه خاص برچسب",
-              "select_cycle_to_label_multi": "🏷️ چرخه های چندگانه را برچسب بزنید",
-              "select_cycle_to_delete": "🗑️ حذف چرخه",
-              "interactive_editor": "✂️ ویرایشگر تعاملی ادغام/تقسیم"
-            }
+            "auto_label_cycles": "🤖 برچسب زدن خودکار چرخه های قدیمی",
+            "select_cycle_to_label": "🏷️ چرخه خاص برچسب",
+            "select_cycle_to_label_multi": "🏷️ چرخه های چندگانه را برچسب بزنید",
+            "select_cycle_to_delete": "🗑️ حذف چرخه",
+            "interactive_editor": "✂️ ویرایشگر تعاملی ادغام/تقسیم"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "مدیریت پروفایل ها",
         "description": "خلاصه نمایه:\n{profile_summary}",
         "data": {
+          "action": "اقدام"
+        },
+        "options": {
           "action": {
-            "name": "اقدام",
-            "options": {
-              "create_profile": "➕ ایجاد نمایه جدید",
-              "edit_profile": "✏️ ویرایش/تغییر نام نمایه",
-              "delete_profile": "🗑️ حذف نمایه",
-              "profile_stats": "📊 آمار پروفایل",
-              "cleanup_profile": "🧹 پاک کردن تاریخچه - نمودار و حذف",
-              "assign_phases": "🧩 محدوده های فاز را اختصاص دهید"
-            }
+            "create_profile": "➕ ایجاد نمایه جدید",
+            "edit_profile": "✏️ ویرایش/تغییر نام نمایه",
+            "delete_profile": "🗑️ حذف نمایه",
+            "profile_stats": "📊 آمار پروفایل",
+            "cleanup_profile": "🧹 پاک کردن تاریخچه - نمودار و حذف",
+            "assign_phases": "🧩 محدوده های فاز را اختصاص دهید"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "ادغام / تقسیم ویرایشگر تعاملی",
         "description": "یک اقدام دستی را برای انجام در تاریخچه چرخه خود انتخاب کنید.",
         "data": {
+          "editor_action": "اقدام"
+        },
+        "options": {
           "editor_action": {
-            "name": "اقدام",
-            "options": {
-              "split": "✂️ یک چرخه را تقسیم کنید (شکاف‌ها را بیابید)",
-              "merge": "🔗 چرخه های ادغام (پیوستن قطعات)",
-              "delete": "🗑️ حذف چرخه(های)"
-            }
+            "split": "✂️ یک چرخه را تقسیم کنید (شکاف‌ها را بیابید)",
+            "merge": "🔗 چرخه های ادغام (پیوستن قطعات)",
+            "delete": "🗑️ حذف چرخه(های)"
           }
         }
       },
@@ -392,34 +392,34 @@
         "title": "صادرات/وارد کردن JSON",
         "description": "چرخه‌ها، نمایه‌ها، و تنظیمات و کپی/پیست کردن برای این دستگاه. زیر را صادر کنید یا برای وارد کردن JSON جای‌گذاری کنید.",
         "data": {
-          "mode": {
-            "name": "اقدام",
-            "options": {
-              "export": "📤 صادرات همه داده ها",
-              "import": "📥 وارد کردن/ادغام داده ها"
-            }
-          },
-          "json_payload": "پیکربندی کامل JSON"
+          "json_payload": "پیکربندی کامل JSON",
+          "mode": "اقدام"
         },
         "data_description": {
           "mode": "برای کپی کردن داده‌ها و تنظیمات فعلی، صادرات را انتخاب کنید، یا برای جای‌گذاری داده‌های صادر شده از دستگاه WashData دیگری، Import را انتخاب کنید.",
           "json_payload": "برای صادرات: این JSON را کپی کنید (شامل چرخه‌ها، نمایه‌ها و تمام تنظیمات دقیق‌شده). برای واردات: JSON صادر شده از WashData را بچسبانید."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 صادرات همه داده ها",
+            "import": "📥 وارد کردن/ادغام داده ها"
+          }
         }
       },
       "record_cycle": {
         "title": "چرخه ضبط",
         "description": "یک چرخه را به صورت دستی ضبط کنید تا یک نمایه تمیز بدون تداخل ایجاد کنید.\n\nوضعیت: **{status}**\nمدت زمان: {duration}s\nنمونه ها: {samples}",
         "data": {
+          "action": "اقدام"
+        },
+        "options": {
           "action": {
-            "name": "اقدام",
-            "options": {
-              "start_recording": "⏺ شروع ضبط جدید",
-              "stop_recording": "⏹ توقف ضبط (ذخیره و پردازش)",
-              "refresh_status": "🔄 وضعیت تازه سازی",
-              "process_recording": "⚙️ پردازش آخرین ضبط (برش و ذخیره)",
-              "discard_recording": "🗑️ آخرین ضبط را کنار بگذارید",
-              "cancel": "✖ لغو"
-            }
+            "start_recording": "⏺ شروع ضبط جدید",
+            "stop_recording": "⏹ توقف ضبط (ذخیره و پردازش)",
+            "refresh_status": "🔄 وضعیت تازه سازی",
+            "process_recording": "⚙️ پردازش آخرین ضبط (برش و ذخیره)",
+            "discard_recording": "🗑️ آخرین ضبط را کنار بگذارید",
+            "cancel": "✖ لغو"
           }
         }
       },
@@ -448,30 +448,30 @@
         "title": "بازخورد را حل کنید",
         "description": "**برنامه شناسایی شده**: {profile}\n**اطمینان**: {confidence}%\n**تخمینی**: {est}m، **واقعی**: {act}m",
         "data": {
-          "action": {
-            "name": "دوست دارید چه کار کنید؟",
-            "options": {
-              "confirm": "✅ تایید - تشخیص صحیح",
-              "correct": "✏️ صحیح - برنامه/مدت را انتخاب کنید",
-              "ignore": "✖ نادیده گرفتن - چرخه مثبت کاذب/نویز",
-              "delete": "🗑️ حذف - حذف از تاریخچه"
-            }
-          },
           "corrected_profile": "برنامه صحیح (در صورت تصحیح)",
-          "corrected_duration": "مدت زمان صحیح بر حسب دقیقه (در صورت تصحیح)"
+          "corrected_duration": "مدت زمان صحیح بر حسب دقیقه (در صورت تصحیح)",
+          "action": "دوست دارید چه کار کنید؟"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ تایید - تشخیص صحیح",
+            "correct": "✏️ صحیح - برنامه/مدت را انتخاب کنید",
+            "ignore": "✖ نادیده گرفتن - چرخه مثبت کاذب/نویز",
+            "delete": "🗑️ حذف - حذف از تاریخچه"
+          }
         }
       },
       "manage_phase_catalog": {
         "title": "مدیریت کاتالوگ فاز",
         "description": "فازهای فعلی برای این نوع دستگاه:\n{phase_summary}",
         "data": {
+          "action": "اقدام"
+        },
+        "options": {
           "action": {
-            "name": "اقدام",
-            "options": {
-              "create_custom_phase": "➕ فاز سفارشی ایجاد کنید",
-              "edit_custom_phase": "✏️ مرحله سفارشی را ویرایش کنید",
-              "delete_custom_phase": "🗑️ مرحله سفارشی را حذف کنید"
-            }
+            "create_custom_phase": "➕ فاز سفارشی ایجاد کنید",
+            "edit_custom_phase": "✏️ مرحله سفارشی را ویرایش کنید",
+            "delete_custom_phase": "🗑️ مرحله سفارشی را حذف کنید"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "یک نمایه را برای پیکربندی محدوده فاز انتخاب کنید.",
         "data": {
           "profile": "نمایه",
+          "source_cycle": "چرخه منبع (برای حالت مهر زمانی)",
+          "assign_mode": "حالت تکلیف"
+        },
+        "options": {
           "assign_mode": {
-            "name": "حالت تکلیف",
-            "options": {
-              "offset_mode": "آفست دقیقه",
-              "timestamp_mode": "مهر زمانی"
-            }
-          },
-          "source_cycle": "چرخه منبع (برای حالت مهر زمانی)"
+            "offset_mode": "آفست دقیقه",
+            "timestamp_mode": "مهر زمانی"
+          }
         }
       }
     },

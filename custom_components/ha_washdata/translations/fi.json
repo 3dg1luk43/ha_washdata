@@ -206,15 +206,15 @@
         "title": "Hallitse syklejä",
         "description": "Viimeaikaiset syklit:\n{recent_cycles}",
         "data": {
+          "action": "Toiminta"
+        },
+        "options": {
           "action": {
-            "name": "Toiminta",
-            "options": {
-              "auto_label_cycles": "🤖 Merkitse vanhat pyörät automaattisesti",
-              "select_cycle_to_label": "🏷️ Tarrakohtainen sykli",
-              "select_cycle_to_label_multi": "🏷️ Merkitse useita syklejä",
-              "select_cycle_to_delete": "🗑️ Poista sykli",
-              "interactive_editor": "✂️ Yhdistä/jaa interaktiivinen editori"
-            }
+            "auto_label_cycles": "🤖 Merkitse vanhat pyörät automaattisesti",
+            "select_cycle_to_label": "🏷️ Tarrakohtainen sykli",
+            "select_cycle_to_label_multi": "🏷️ Merkitse useita syklejä",
+            "select_cycle_to_delete": "🗑️ Poista sykli",
+            "interactive_editor": "✂️ Yhdistä/jaa interaktiivinen editori"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Hallitse profiileja",
         "description": "Profiiliyhteenveto:\n{profile_summary}",
         "data": {
+          "action": "Toiminta"
+        },
+        "options": {
           "action": {
-            "name": "Toiminta",
-            "options": {
-              "create_profile": "➕ Luo uusi profiili",
-              "edit_profile": "✏️ Muokkaa/nimeä profiilia uudelleen",
-              "delete_profile": "🗑️Poista profiili",
-              "profile_stats": "📊 Profiilitilastot",
-              "cleanup_profile": "🧹 Puhdista historia - piirrä ja poista",
-              "assign_phases": "🧩 Määritä vaihealueet"
-            }
+            "create_profile": "➕ Luo uusi profiili",
+            "edit_profile": "✏️ Muokkaa/nimeä profiilia uudelleen",
+            "delete_profile": "🗑️Poista profiili",
+            "profile_stats": "📊 Profiilitilastot",
+            "cleanup_profile": "🧹 Puhdista historia - piirrä ja poista",
+            "assign_phases": "🧩 Määritä vaihealueet"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Interaktiivinen yhdistämis/jakamiseditori",
         "description": "Valitse manuaalinen toiminto syklihistorianasi.",
         "data": {
+          "editor_action": "Toiminta"
+        },
+        "options": {
           "editor_action": {
-            "name": "Toiminta",
-            "options": {
-              "split": "✂️ Jaa sykli (etsi aukkoja)",
-              "merge": "🔗 Yhdistä syklit (liitä fragmentit)",
-              "delete": "🗑️ Poista jakso(t)"
-            }
+            "split": "✂️ Jaa sykli (etsi aukkoja)",
+            "merge": "🔗 Yhdistä syklit (liitä fragmentit)",
+            "delete": "🗑️ Poista jakso(t)"
           }
         }
       },
@@ -393,33 +393,33 @@
         "description": "Kopioi/liitä syklit, profiilit JA asetukset tälle laitteelle. Vie alla tai liitä JSON tuontia varten.",
         "data": {
           "json_payload": "Täydellinen konfiguraatio-JSON",
-          "mode": {
-            "name": "Toiminta",
-            "options": {
-              "export": "📤 Vie kaikki tiedot",
-              "import": "📥 Tuo / yhdistä tiedot"
-            }
-          }
+          "mode": "Toiminta"
         },
         "data_description": {
           "mode": "Valitse Vie kopioidaksesi nykyiset tiedot ja asetukset, tai Tuo liittääksesi toisesta WashData-laitteesta viedyt tiedot.",
           "json_payload": "Vientiin: kopioi tämä JSON (sisältää syklit, profiilit ja kaikki asetukset). Tuontiin: liitä WashDatasta viety JSON."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Vie kaikki tiedot",
+            "import": "📥 Tuo / yhdistä tiedot"
+          }
         }
       },
       "record_cycle": {
         "title": "Tallenna sykli",
         "description": "Tallenna sykli manuaalisesti luodaksesi puhtaan profiilin ilman häiriöitä.\n\nTila: **{status}**\nKesto: {duration}s\nNäytteet: {samples}",
         "data": {
+          "action": "Toiminta"
+        },
+        "options": {
           "action": {
-            "name": "Toiminta",
-            "options": {
-              "start_recording": "⏺ Aloita uusi tallennus",
-              "stop_recording": "⏹ Lopeta tallennus (tallenna ja käsittele)",
-              "refresh_status": "🔄 Päivitä tila",
-              "process_recording": "⚙️ Käsittele viimeinen tallennus (leikkaa ja tallenna)",
-              "discard_recording": "🗑️ Hylkää viimeinen tallennus",
-              "cancel": "✖ Peruuta"
-            }
+            "start_recording": "⏺ Aloita uusi tallennus",
+            "stop_recording": "⏹ Lopeta tallennus (tallenna ja käsittele)",
+            "refresh_status": "🔄 Päivitä tila",
+            "process_recording": "⚙️ Käsittele viimeinen tallennus (leikkaa ja tallenna)",
+            "discard_recording": "🗑️ Hylkää viimeinen tallennus",
+            "cancel": "✖ Peruuta"
           }
         }
       },
@@ -450,14 +450,14 @@
         "data": {
           "corrected_profile": "Oikea ohjelma (jos korjaat)",
           "corrected_duration": "Oikea kesto minuutteina (jos korjaat)",
+          "action": "Mitä haluaisit tehdä?"
+        },
+        "options": {
           "action": {
-            "name": "Mitä haluaisit tehdä?",
-            "options": {
-              "confirm": "✅ Vahvista - Oikea tunnistus",
-              "correct": "✏️ Oikein - Valitse Ohjelma/kesto",
-              "ignore": "✖ Ohita - Väärä positiivinen/kohinainen sykli",
-              "delete": "🗑️ Poista - Poista historiasta"
-            }
+            "confirm": "✅ Vahvista - Oikea tunnistus",
+            "correct": "✏️ Oikein - Valitse Ohjelma/kesto",
+            "ignore": "✖ Ohita - Väärä positiivinen/kohinainen sykli",
+            "delete": "🗑️ Poista - Poista historiasta"
           }
         }
       },
@@ -465,13 +465,13 @@
         "title": "Hallitse vaiheluetteloa",
         "description": "Tämän laitetyypin nykyiset vaiheet:\n{phase_summary}",
         "data": {
+          "action": "Toiminta"
+        },
+        "options": {
           "action": {
-            "name": "Toiminta",
-            "options": {
-              "create_custom_phase": "➕ Luo mukautettu vaihe",
-              "edit_custom_phase": "✏️ Muokkaa mukautettua vaihetta",
-              "delete_custom_phase": "🗑️ Poista mukautettu vaihe"
-            }
+            "create_custom_phase": "➕ Luo mukautettu vaihe",
+            "edit_custom_phase": "✏️ Muokkaa mukautettua vaihetta",
+            "delete_custom_phase": "🗑️ Poista mukautettu vaihe"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Valitse profiili määrittääksesi vaihealueet.",
         "data": {
           "profile": "Profiili",
+          "source_cycle": "Lähdejakso (aikaleimatilaa varten)",
+          "assign_mode": "Tehtävätila"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Tehtävätila",
-            "options": {
-              "offset_mode": "Minuuttipoikkeamat",
-              "timestamp_mode": "Aikaleimat"
-            }
-          },
-          "source_cycle": "Lähdejakso (aikaleimatilaa varten)"
+            "offset_mode": "Minuuttipoikkeamat",
+            "timestamp_mode": "Aikaleimat"
+          }
         }
       }
     },

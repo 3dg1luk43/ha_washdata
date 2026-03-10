@@ -206,15 +206,15 @@
         "title": "Kudeatu Zikloak",
         "description": "Azken zikloak:\n{recent_cycles}",
         "data": {
+          "action": "Ekintza"
+        },
+        "options": {
           "action": {
-            "name": "Ekintza",
-            "options": {
-              "auto_label_cycles": "🤖 Ziklo Zaharrak Auto-etiketatu",
-              "select_cycle_to_label": "🏷️ Etiketa Ziklo Espezifikoa",
-              "select_cycle_to_label_multi": "🏷️ Etiketatu Ziklo Anitz",
-              "select_cycle_to_delete": "🗑️ Ezabatu Zikloa",
-              "interactive_editor": "✂️ Batu/Zatitu Editore Interaktiboa"
-            }
+            "auto_label_cycles": "🤖 Ziklo Zaharrak Auto-etiketatu",
+            "select_cycle_to_label": "🏷️ Etiketa Ziklo Espezifikoa",
+            "select_cycle_to_label_multi": "🏷️ Etiketatu Ziklo Anitz",
+            "select_cycle_to_delete": "🗑️ Ezabatu Zikloa",
+            "interactive_editor": "✂️ Batu/Zatitu Editore Interaktiboa"
           }
         }
       },
@@ -222,16 +222,16 @@
         "title": "Kudeatu profilak",
         "description": "Profilaren laburpena:\n{profile_summary}",
         "data": {
+          "action": "Ekintza"
+        },
+        "options": {
           "action": {
-            "name": "Ekintza",
-            "options": {
-              "create_profile": "➕ Sortu profil berria",
-              "edit_profile": "✏️ Editatu/Aldatu izena profila",
-              "delete_profile": "🗑️ Ezabatu profila",
-              "profile_stats": "📊 Profilen Estatistikak",
-              "cleanup_profile": "🧹 Garbitu historia - Grafikoa eta ezabatu",
-              "assign_phases": "🧩 Esleitu fase-barrutiak"
-            }
+            "create_profile": "➕ Sortu profil berria",
+            "edit_profile": "✏️ Editatu/Aldatu izena profila",
+            "delete_profile": "🗑️ Ezabatu profila",
+            "profile_stats": "📊 Profilen Estatistikak",
+            "cleanup_profile": "🧹 Garbitu historia - Grafikoa eta ezabatu",
+            "assign_phases": "🧩 Esleitu fase-barrutiak"
           }
         }
       },
@@ -336,13 +336,13 @@
         "title": "Batu/Zatitu Editore Interaktiboa",
         "description": "Hautatu eskuzko ekintza bat zure zikloaren historian egiteko.",
         "data": {
+          "editor_action": "Ekintza"
+        },
+        "options": {
           "editor_action": {
-            "name": "Ekintza",
-            "options": {
-              "split": "✂️ Zatitu Ziklo bat (Aurkitu hutsuneak)",
-              "merge": "🔗 Bateratu Zikloak (Batu zatiak)",
-              "delete": "🗑️ Ezabatu zikloa(k)"
-            }
+            "split": "✂️ Zatitu Ziklo bat (Aurkitu hutsuneak)",
+            "merge": "🔗 Bateratu Zikloak (Batu zatiak)",
+            "delete": "🗑️ Ezabatu zikloa(k)"
           }
         }
       },
@@ -392,34 +392,34 @@
         "title": "Esportatu/Inportatu JSON",
         "description": "Kopiatu/itsatsi gailu honen zikloak, profilak ETA ezarpenak. Esportatu behean edo itsatsi JSON inportatzeko.",
         "data": {
-          "mode": {
-            "name": "Ekintza",
-            "options": {
-              "export": "📤 Esportatu Datu guztiak",
-              "import": "📥 Inportatu/Bateatu datuak"
-            }
-          },
-          "json_payload": "Osatu konfigurazioa JSON"
+          "json_payload": "Osatu konfigurazioa JSON",
+          "mode": "Ekintza"
         },
         "data_description": {
           "mode": "Aukeratu Esportatu uneko datuak eta ezarpenak kopiatzeko, edo Inportatu esportatutako datuak beste WashData gailu batetik itsasteko.",
           "json_payload": "Esportatzeko: kopiatu JSON hau (zikloak, profilak eta doitutako ezarpen guztiak barne). Inportatzeko: itsatsi WashData-tik esportatutako JSON."
+        },
+        "options": {
+          "mode": {
+            "export": "📤 Esportatu Datu guztiak",
+            "import": "📥 Inportatu/Bateatu datuak"
+          }
         }
       },
       "record_cycle": {
         "title": "Erregistro Zikloa",
         "description": "Grabatu eskuz ziklo bat interferentziarik gabe profil garbi bat sortzeko.\n\nEgoera: **{status}**\nIraupena: {duration} s\nLaginak: {samples}",
         "data": {
+          "action": "Ekintza"
+        },
+        "options": {
           "action": {
-            "name": "Ekintza",
-            "options": {
-              "start_recording": "⏺ Hasi Grabaketa Berria",
-              "stop_recording": "⏹ Gelditu grabazioa (Gorde eta prozesatu)",
-              "refresh_status": "🔄 Freskatu egoera",
-              "process_recording": "⚙️ Azken grabaketa prozesatu (moztu eta gorde)",
-              "discard_recording": "🗑️ Baztertu azken grabaketa",
-              "cancel": "✖ Utzi"
-            }
+            "start_recording": "⏺ Hasi Grabaketa Berria",
+            "stop_recording": "⏹ Gelditu grabazioa (Gorde eta prozesatu)",
+            "refresh_status": "🔄 Freskatu egoera",
+            "process_recording": "⚙️ Azken grabaketa prozesatu (moztu eta gorde)",
+            "discard_recording": "🗑️ Baztertu azken grabaketa",
+            "cancel": "✖ Utzi"
           }
         }
       },
@@ -448,30 +448,30 @@
         "title": "Ebatzi Iritzia",
         "description": "**Hautsitako programa**: {profile}\n**Konfiantza**: % {confidence}\n**Guztiztatua**: {est} m, **Egiazkoa**: {act}m",
         "data": {
-          "action": {
-            "name": "Zer egin nahiko zenuke?",
-            "options": {
-              "confirm": "✅ Berretsi - Detekzio zuzena",
-              "correct": "✏️ Zuzena - Aukeratu Programa/Iraupena",
-              "ignore": "✖ Ez ikusi egin - Positibo faltsu/Ziklo zaratatsua",
-              "delete": "🗑️ Ezabatu - Kendu historiatik"
-            }
-          },
           "corrected_profile": "Programa zuzena (zuzentzen bada)",
-          "corrected_duration": "Zuzena iraupena minututan (zuzentzen bada)"
+          "corrected_duration": "Zuzena iraupena minututan (zuzentzen bada)",
+          "action": "Zer egin nahiko zenuke?"
+        },
+        "options": {
+          "action": {
+            "confirm": "✅ Berretsi - Detekzio zuzena",
+            "correct": "✏️ Zuzena - Aukeratu Programa/Iraupena",
+            "ignore": "✖ Ez ikusi egin - Positibo faltsu/Ziklo zaratatsua",
+            "delete": "🗑️ Ezabatu - Kendu historiatik"
+          }
         }
       },
       "manage_phase_catalog": {
         "title": "Kudeatu Faseen Katalogoa",
         "description": "Gailu mota honen egungo faseak:\n{phase_summary}",
         "data": {
+          "action": "Ekintza"
+        },
+        "options": {
           "action": {
-            "name": "Ekintza",
-            "options": {
-              "create_custom_phase": "➕ Sortu Fase pertsonalizatua",
-              "edit_custom_phase": "✏️ Editatu Fase pertsonalizatua",
-              "delete_custom_phase": "🗑️ Ezabatu pertsonalizatutako fasea"
-            }
+            "create_custom_phase": "➕ Sortu Fase pertsonalizatua",
+            "edit_custom_phase": "✏️ Editatu Fase pertsonalizatua",
+            "delete_custom_phase": "🗑️ Ezabatu pertsonalizatutako fasea"
           }
         }
       },
@@ -549,14 +549,14 @@
         "description": "Hautatu profil bat fase-barrutiak konfiguratzeko.",
         "data": {
           "profile": "Profila",
+          "source_cycle": "Iturburu-zikloa (denbora-zigilu moduan)",
+          "assign_mode": "Esleitzeko modua"
+        },
+        "options": {
           "assign_mode": {
-            "name": "Esleitzeko modua",
-            "options": {
-              "offset_mode": "Minutuko Desplazamenduak",
-              "timestamp_mode": "Denbora-zigiluak"
-            }
-          },
-          "source_cycle": "Iturburu-zikloa (denbora-zigilu moduan)"
+            "offset_mode": "Minutuko Desplazamenduak",
+            "timestamp_mode": "Denbora-zigiluak"
+          }
         }
       }
     },
