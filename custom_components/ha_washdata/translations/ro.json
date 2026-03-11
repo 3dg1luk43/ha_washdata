@@ -423,7 +423,8 @@
         "description": "Creați un nume de fază personalizat și o descriere pentru acest tip de dispozitiv.",
         "data": {
           "phase_name": "Numele fazei",
-          "phase_description": "Descrierea fazei"
+          "phase_description": "Descrierea fazei",
+          "target_device_type": "Tipul dispozitivului țintă"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Atribuiți intervale de fază",
         "description": "Profil: **{profile_name}**\nMod: **{assign_mode}**\nSugestie pentru ciclu: {cycle_hint}\n\nDomenii curente:\n{current_ranges}\n\nEtichetele de fază sunt pentru afișare și organizare. Detectarea folosește modele de putere, nu nume de faze.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Modul de atribuire",
-          "source_cycle": "Ciclul sursă (necesar pentru modul marcaj temporal)",
-          "phase_1": "Faza 1",
-          "start_min_1": "Minutul de început 1",
-          "end_min_1": "Sfârșit Minutul 1",
-          "start_ts_1": "Timpul de pornire 1",
-          "end_ts_1": "Timpul de încheiere 1",
-          "phase_2": "Faza 2",
-          "start_min_2": "Minutul de început 2",
-          "end_min_2": "Sfârșit Minutul 2",
-          "start_ts_2": "Timpul de pornire 2",
-          "end_ts_2": "Timpul de sfârșit 2",
-          "phase_3": "Faza 3",
-          "start_min_3": "Minutul de început 3",
-          "end_min_3": "Sfârșit Minutul 3",
-          "start_ts_3": "Timpul de pornire 3",
-          "end_ts_3": "Timpul de sfârșit 3",
-          "phase_4": "Faza 4",
-          "start_min_4": "Minutul de început 4",
-          "end_min_4": "Sfârșit Minutul 4",
-          "start_ts_4": "Timpul de pornire 4",
-          "end_ts_4": "Timp de sfârșit 4",
-          "phase_5": "Faza 5",
-          "start_min_5": "Minutul de început 5",
-          "end_min_5": "Sfârșitul minutei 5",
-          "start_ts_5": "Timpul de pornire 5",
-          "end_ts_5": "Timp de sfârșit 5",
-          "phase_6": "Faza 6",
-          "start_min_6": "Minutul de început 6",
-          "end_min_6": "Sfârșit Minutul 6",
-          "start_ts_6": "Timpul de pornire 6",
-          "end_ts_6": "Timpul de sfârșit 6"
+          "action": "Acţiune"
         }
       },
       "assign_profile_phases_select": {
         "title": "Atribuiți intervale de fază",
         "description": "Selectați un profil pentru a configura intervalele de fază.",
         "data": {
-          "profile": "Profil",
-          "source_cycle": "Ciclul sursă (pentru modul marcaj temporal)",
-          "assign_mode": "Modul de atribuire"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Adăugați intervalul de fază",
+        "description": "Adăugați un interval de fază la schița curentă.",
+        "data": {
+          "phase_name": "Fază",
+          "start_min": "Minutul de început",
+          "end_min": "Minutul de sfârșit"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Editați intervalul de fază",
+        "description": "Selectați un interval de editat.",
+        "data": {
+          "range_index": "Interval de fază"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Editați intervalul de fază",
+        "description": "Actualizați intervalul de fază selectat.",
+        "data": {
+          "phase_name": "Fază",
+          "start_min": "Minutul de început",
+          "end_min": "Minutul de sfârșit"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Ștergeți intervalul de fază",
+        "description": "Selectați un interval de eliminat din schiță.",
+        "data": {
+          "range_index": "Interval de fază"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Marca temporală este nevalidă. Utilizați formatul AAAA-LL-ZZ HH:MM sau HH:MM.",
       "overlapping_phase_ranges": "Intervalele de fază se suprapun. Ajustați intervalele și încercați din nou.",
       "incomplete_phase_row": "Fiecare rând de fază trebuie să includă o fază plus valori complete de început/sfârșit pentru modul selectat.",
-      "timestamp_mode_cycle_required": "Vă rugăm să selectați un ciclu sursă când utilizați modul marcaj temporal."
+      "timestamp_mode_cycle_required": "Vă rugăm să selectați un ciclu sursă când utilizați modul marcaj temporal.",
+      "no_phase_ranges": "Încă nu sunt disponibile intervale de fază pentru acea acțiune."
     },
     "abort": {
       "no_cycles_found": "Nu s-au găsit cicluri",

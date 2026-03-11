@@ -423,7 +423,8 @@
         "description": "Sortu gailu mota honen fase-izen eta deskribapen pertsonalizatu bat.",
         "data": {
           "phase_name": "Fasearen izena",
-          "phase_description": "Fasearen Deskribapena"
+          "phase_description": "Fasearen Deskribapena",
+          "target_device_type": "Helburuko gailu mota"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Esleitu fase-barrutiak",
         "description": "Profila: **{profile_name}**\nModua: **{assign_mode}**\nZiklorako aholkua: {cycle_hint}\n\nOraingo barrutiak:\n{current_ranges}\n\nFase-etiketak bistaratzeko eta antolatzeko dira. Detekzioak potentzia-ereduak erabiltzen ditu, ez fase-izenak.",
         "data": {
-          "profile": "Profila",
-          "assign_mode": "Esleitzeko modua",
-          "source_cycle": "Iturburu-zikloa (beharrezkoa denbora-zigilu moduan)",
-          "phase_1": "1. fasea",
-          "start_min_1": "Hasi 1. minutua",
-          "end_min_1": "Amaierako minutua 1",
-          "start_ts_1": "Hasi ordu-zigilua 1",
-          "end_ts_1": "Amaiera denbora-zigilua 1",
-          "phase_2": "2. fasea",
-          "start_min_2": "Hasi 2. minutua",
-          "end_min_2": "Amaiera 2. minutua",
-          "start_ts_2": "Hasi ordu-zigilua 2",
-          "end_ts_2": "Amaiera denbora-zigilua 2",
-          "phase_3": "3. fasea",
-          "start_min_3": "Hasi 3. minutua",
-          "end_min_3": "Amaiera 3. minutua",
-          "start_ts_3": "Hasi denbora-zigilua 3",
-          "end_ts_3": "Amaiera denbora-zigilua 3",
-          "phase_4": "4. fasea",
-          "start_min_4": "Hasi 4. minutua",
-          "end_min_4": "Amaierako minutua 4",
-          "start_ts_4": "Hasi denbora-zigilua 4",
-          "end_ts_4": "Amaiera denbora-zigilua 4",
-          "phase_5": "5. fasea",
-          "start_min_5": "Hasi 5. minutua",
-          "end_min_5": "Amaiera 5. minutua",
-          "start_ts_5": "Hasi denbora-zigilua 5",
-          "end_ts_5": "Amaiera denbora-zigilua 5",
-          "phase_6": "6. fasea",
-          "start_min_6": "Hasi 6. minutua",
-          "end_min_6": "Amaierako minutua 6",
-          "start_ts_6": "Hasi denbora-zigilua 6",
-          "end_ts_6": "Amaiera denbora-zigilua 6"
+          "action": "Ekintza"
         }
       },
       "assign_profile_phases_select": {
         "title": "Esleitu fase-barrutiak",
         "description": "Hautatu profil bat fase-barrutiak konfiguratzeko.",
         "data": {
-          "profile": "Profila",
-          "source_cycle": "Iturburu-zikloa (denbora-zigilu moduan)",
-          "assign_mode": "Esleitzeko modua"
+          "profile": "Profila"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Gehitu Fase Barrutia",
+        "description": "Gehitu fase-barruti bat uneko zirriborroari.",
+        "data": {
+          "phase_name": "Fasea",
+          "start_min": "Hasierako minutua",
+          "end_min": "Amaiera Minutua"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Editatu fase-barrutia",
+        "description": "Hautatu editatzeko barruti bat.",
+        "data": {
+          "range_index": "Fase barrutia"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Editatu fase-barrutia",
+        "description": "Eguneratu hautatutako fase-barrutia.",
+        "data": {
+          "phase_name": "Fasea",
+          "start_min": "Hasierako minutua",
+          "end_min": "Amaiera Minutua"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Ezabatu fase-barrutia",
+        "description": "Hautatu zirriborrotik kentzeko barrutia.",
+        "data": {
+          "range_index": "Fase barrutia"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Denbora-zigilua baliogabea da. Erabili YYYY-MM-DD HH:MM edo HH:MM formatua.",
       "overlapping_phase_ranges": "Fase barrutiak gainjartzen dira. Doitu barrutiak eta saiatu berriro.",
       "incomplete_phase_row": "Fase errenkada bakoitzak fase bat gehi hasiera/amaiera balio osoak sartu behar ditu hautatutako modurako.",
-      "timestamp_mode_cycle_required": "Mesedez, hautatu iturburu-ziklo bat denbora-zigilu modua erabiltzean."
+      "timestamp_mode_cycle_required": "Mesedez, hautatu iturburu-ziklo bat denbora-zigilu modua erabiltzean.",
+      "no_phase_ranges": "Oraindik ez dago fase-barrutirik erabilgarri ekintza horretarako."
     },
     "abort": {
       "no_cycles_found": "Ez da ziklorik aurkitu",

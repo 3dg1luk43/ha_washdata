@@ -423,7 +423,8 @@
         "description": "Crea un nome di fase e una descrizione personalizzati per questo tipo di dispositivo.",
         "data": {
           "phase_name": "Nome della fase",
-          "phase_description": "Descrizione della fase"
+          "phase_description": "Descrizione della fase",
+          "target_device_type": "Tipo di dispositivo di destinazione"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Assegna intervalli di fase",
         "description": "Profilo: **{profile_name}**\nModalità: **{assign_mode}**\nSuggerimento sul ciclo: {cycle_hint}\n\nGamme attuali:\n{current_ranges}\n\nLe etichette di fase servono per la visualizzazione e l'organizzazione. Il rilevamento utilizza modelli di potenza, non nomi di fase.",
         "data": {
-          "profile": "Profilo",
-          "assign_mode": "Modalità di assegnazione",
-          "source_cycle": "Ciclo sorgente (richiesto per la modalità timestamp)",
-          "phase_1": "Fase 1",
-          "start_min_1": "Inizio minuto 1",
-          "end_min_1": "Fine minuto 1",
-          "start_ts_1": "Inizio timestamp 1",
-          "end_ts_1": "Data e ora di fine 1",
-          "phase_2": "Fase 2",
-          "start_min_2": "Inizio minuto 2",
-          "end_min_2": "Fine minuto 2",
-          "start_ts_2": "Avvia timestamp 2",
-          "end_ts_2": "Data e ora di fine 2",
-          "phase_3": "Fase 3",
-          "start_min_3": "Inizio minuto 3",
-          "end_min_3": "Fine minuto 3",
-          "start_ts_3": "Avvia timestamp 3",
-          "end_ts_3": "Data e ora di fine 3",
-          "phase_4": "Fase 4",
-          "start_min_4": "Inizio minuto 4",
-          "end_min_4": "Fine minuto 4",
-          "start_ts_4": "Avvia timestamp 4",
-          "end_ts_4": "Data e ora di fine 4",
-          "phase_5": "Fase 5",
-          "start_min_5": "Inizio minuto 5",
-          "end_min_5": "Fine minuto 5",
-          "start_ts_5": "Orario di avvio 5",
-          "end_ts_5": "Data e ora di fine 5",
-          "phase_6": "Fase 6",
-          "start_min_6": "Inizio minuto 6",
-          "end_min_6": "Fine minuto 6",
-          "start_ts_6": "Avvia timestamp 6",
-          "end_ts_6": "Data e ora di fine 6"
+          "action": "Azione"
         }
       },
       "assign_profile_phases_select": {
         "title": "Assegna intervalli di fase",
         "description": "Seleziona un profilo per configurare gli intervalli di fase.",
         "data": {
-          "profile": "Profilo",
-          "source_cycle": "Ciclo sorgente (per la modalità timestamp)",
-          "assign_mode": "Modalità di assegnazione"
+          "profile": "Profilo"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Aggiungi intervallo di fasi",
+        "description": "Aggiungi un intervallo di fasi alla bozza corrente.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Minuto di inizio",
+          "end_min": "Minuto finale"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Modifica intervallo di fasi",
+        "description": "Seleziona un intervallo da modificare.",
+        "data": {
+          "range_index": "Intervallo di fase"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Modifica intervallo di fasi",
+        "description": "Aggiorna l'intervallo di fasi selezionato.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Minuto di inizio",
+          "end_min": "Minuto finale"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Elimina intervallo di fasi",
+        "description": "Seleziona un intervallo da rimuovere dalla bozza.",
+        "data": {
+          "range_index": "Intervallo di fase"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Il timestamp non è valido. Utilizza il formato AAAA-MM-GG HH:MM o HH:MM.",
       "overlapping_phase_ranges": "Gli intervalli di fase si sovrappongono. Regola gli intervalli e riprova.",
       "incomplete_phase_row": "Ciascuna riga di fase deve includere una fase più valori di inizio/fine completi per la modalità selezionata.",
-      "timestamp_mode_cycle_required": "Selezionare un ciclo sorgente quando si utilizza la modalità timestamp."
+      "timestamp_mode_cycle_required": "Selezionare un ciclo sorgente quando si utilizza la modalità timestamp.",
+      "no_phase_ranges": "Non sono ancora disponibili intervalli di fase per quell'azione."
     },
     "abort": {
       "no_cycles_found": "Nessun ciclo trovato",

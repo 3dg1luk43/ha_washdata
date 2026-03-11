@@ -423,7 +423,8 @@
         "description": "Luo mukautettu vaiheen nimi ja kuvaus tälle laitetyypille.",
         "data": {
           "phase_name": "Vaiheen nimi",
-          "phase_description": "Vaiheen kuvaus"
+          "phase_description": "Vaiheen kuvaus",
+          "target_device_type": "Kohdelaitetyyppi"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Määritä vaihealueet",
         "description": "Profiili: **{profile_name}**\nTila: **{assign_mode}**\nKierrosvinkki: {cycle_hint}\n\nNykyiset alueet:\n{current_ranges}\n\nVaihetarrat ovat näyttöä ja järjestämistä varten. Tunnistus käyttää tehokuvioita, ei vaiheiden nimiä.",
         "data": {
-          "profile": "Profiili",
-          "assign_mode": "Tehtävätila",
-          "source_cycle": "Lähdejakso (pakollinen aikaleimatilassa)",
-          "phase_1": "Vaihe 1",
-          "start_min_1": "Aloitus minuutti 1",
-          "end_min_1": "Päättymisminuutti 1",
-          "start_ts_1": "Aloitusaikaleima 1",
-          "end_ts_1": "Päättymisaikaleima 1",
-          "phase_2": "Vaihe 2",
-          "start_min_2": "Aloitus minuutti 2",
-          "end_min_2": "Päättymisminuutti 2",
-          "start_ts_2": "Aloitusaikaleima 2",
-          "end_ts_2": "Päättymisaikaleima 2",
-          "phase_3": "Vaihe 3",
-          "start_min_3": "Aloitus minuutti 3",
-          "end_min_3": "Päättymisminuutti 3",
-          "start_ts_3": "Aloitusaikaleima 3",
-          "end_ts_3": "Päättymisaikaleima 3",
-          "phase_4": "Vaihe 4",
-          "start_min_4": "Aloitus minuutti 4",
-          "end_min_4": "Päättymisminuutti 4",
-          "start_ts_4": "Aloitusaikaleima 4",
-          "end_ts_4": "Päättymisaikaleima 4",
-          "phase_5": "Vaihe 5",
-          "start_min_5": "Aloitus minuutti 5",
-          "end_min_5": "Päättymisminuutti 5",
-          "start_ts_5": "Aloitusaikaleima 5",
-          "end_ts_5": "Päättymisaikaleima 5",
-          "phase_6": "Vaihe 6",
-          "start_min_6": "Aloitus minuutti 6",
-          "end_min_6": "Päättymisminuutti 6",
-          "start_ts_6": "Aloitusaikaleima 6",
-          "end_ts_6": "Päättymisaikaleima 6"
+          "action": "Toiminta"
         }
       },
       "assign_profile_phases_select": {
         "title": "Määritä vaihealueet",
         "description": "Valitse profiili määrittääksesi vaihealueet.",
         "data": {
-          "profile": "Profiili",
-          "source_cycle": "Lähdejakso (aikaleimatilaa varten)",
-          "assign_mode": "Tehtävätila"
+          "profile": "Profiili"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Lisää vaihealue",
+        "description": "Lisää yksi vaihealue nykyiseen luonnokseen.",
+        "data": {
+          "phase_name": "Vaihe",
+          "start_min": "Aloitus minuutti",
+          "end_min": "Loppuminuutti"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Muokkaa vaihealuetta",
+        "description": "Valitse muokattava alue.",
+        "data": {
+          "range_index": "Vaihealue"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Muokkaa vaihealuetta",
+        "description": "Päivitä valittu vaihealue.",
+        "data": {
+          "phase_name": "Vaihe",
+          "start_min": "Aloitus minuutti",
+          "end_min": "Loppuminuutti"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Poista vaihealue",
+        "description": "Valitse luonnoksesta poistettava alue.",
+        "data": {
+          "range_index": "Vaihealue"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Aikaleima on virheellinen. Käytä VVVV-KK-PP HH:MM- tai HH:MM-muotoa.",
       "overlapping_phase_ranges": "Vaihealueet menevät päällekkäin. Säädä alueita ja yritä uudelleen.",
       "incomplete_phase_row": "Jokaisella vaiherivillä on oltava vaihe sekä valitun tilan täydelliset aloitus-/loppuarvot.",
-      "timestamp_mode_cycle_required": "Valitse lähdejakso, kun käytät aikaleimatilaa."
+      "timestamp_mode_cycle_required": "Valitse lähdejakso, kun käytät aikaleimatilaa.",
+      "no_phase_ranges": "Vaihealueita ei ole vielä saatavilla tälle toiminnolle."
     },
     "abort": {
       "no_cycles_found": "Syklejä ei löytynyt",

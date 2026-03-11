@@ -423,7 +423,8 @@
         "description": "Vytvořte vlastní název fáze a popis pro tento typ zařízení.",
         "data": {
           "phase_name": "Název fáze",
-          "phase_description": "Popis fáze"
+          "phase_description": "Popis fáze",
+          "target_device_type": "Typ cílového zařízení"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Přiřadit fázové rozsahy",
         "description": "Profil: **{profile_name}**\nRežim: **{assign_mode}**\nNápověda k cyklu: {cycle_hint}\n\nAktuální rozsahy:\n{current_ranges}\n\nŠtítky fází slouží k zobrazení a uspořádání. Detekce používá vzory napájení, nikoli názvy fází.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Režim přiřazení",
-          "source_cycle": "Zdrojový cyklus (vyžadováno pro režim časového razítka)",
-          "phase_1": "Fáze 1",
-          "start_min_1": "Start minuta 1",
-          "end_min_1": "Závěrečná minuta 1",
-          "start_ts_1": "Časové razítko zahájení 1",
-          "end_ts_1": "Časové razítko konce 1",
-          "phase_2": "Fáze 2",
-          "start_min_2": "Start minuta 2",
-          "end_min_2": "Závěrečná minuta 2",
-          "start_ts_2": "Časové razítko zahájení 2",
-          "end_ts_2": "Časové razítko konce 2",
-          "phase_3": "Fáze 3",
-          "start_min_3": "Začátek minuty 3",
-          "end_min_3": "Závěrečná minuta 3",
-          "start_ts_3": "Časové razítko zahájení 3",
-          "end_ts_3": "Časové razítko konce 3",
-          "phase_4": "Fáze 4",
-          "start_min_4": "Začátek minuty 4",
-          "end_min_4": "Závěrečná minuta 4",
-          "start_ts_4": "Časové razítko zahájení 4",
-          "end_ts_4": "Časové razítko konce 4",
-          "phase_5": "Fáze 5",
-          "start_min_5": "Start minuta 5",
-          "end_min_5": "Závěrečná minuta 5",
-          "start_ts_5": "Časové razítko zahájení 5",
-          "end_ts_5": "Časové razítko konce 5",
-          "phase_6": "Fáze 6",
-          "start_min_6": "Start minuta 6",
-          "end_min_6": "Závěrečná minuta 6",
-          "start_ts_6": "Časové razítko zahájení 6",
-          "end_ts_6": "Časové razítko konce 6"
+          "action": "Akce"
         }
       },
       "assign_profile_phases_select": {
         "title": "Přiřadit fázové rozsahy",
         "description": "Vyberte profil pro konfiguraci fázových rozsahů.",
         "data": {
-          "profile": "Profil",
-          "source_cycle": "Zdrojový cyklus (pro režim časového razítka)",
-          "assign_mode": "Režim přiřazení"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Přidat fázový rozsah",
+        "description": "Přidejte jeden fázový rozsah k aktuálnímu návrhu.",
+        "data": {
+          "phase_name": "Fáze",
+          "start_min": "Počáteční minuta",
+          "end_min": "Konec minuty"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Upravit rozsah fází",
+        "description": "Vyberte rozsah, který chcete upravit.",
+        "data": {
+          "range_index": "Fázový rozsah"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Upravit rozsah fází",
+        "description": "Aktualizujte vybraný fázový rozsah.",
+        "data": {
+          "phase_name": "Fáze",
+          "start_min": "Počáteční minuta",
+          "end_min": "Konec minuty"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Smazat fázový rozsah",
+        "description": "Vyberte rozsah, který chcete z konceptu odstranit.",
+        "data": {
+          "range_index": "Fázový rozsah"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Časové razítko je neplatné. Použijte formát RRRR-MM-DD HH:MM nebo HH:MM.",
       "overlapping_phase_ranges": "Fázové rozsahy se překrývají. Upravte rozsahy a zkuste to znovu.",
       "incomplete_phase_row": "Každý řádek fáze musí obsahovat fázi plus úplné počáteční/koncové hodnoty pro vybraný režim.",
-      "timestamp_mode_cycle_required": "Při použití režimu časového razítka vyberte zdrojový cyklus."
+      "timestamp_mode_cycle_required": "Při použití režimu časového razítka vyberte zdrojový cyklus.",
+      "no_phase_ranges": "Pro tuto akci zatím nejsou k dispozici žádné fázové rozsahy."
     },
     "abort": {
       "no_cycles_found": "Nebyly nalezeny žádné cykly",

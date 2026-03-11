@@ -423,7 +423,8 @@
         "description": "צור שם שלב ותיאור מותאם אישית עבור סוג מכשיר זה.",
         "data": {
           "phase_name": "שם השלב",
-          "phase_description": "תיאור השלב"
+          "phase_description": "תיאור השלב",
+          "target_device_type": "סוג מכשיר יעד"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "הקצה טווחי שלבים",
         "description": "פרופיל: **{profile_name}**\nמצב: **{assign_mode}**\nרמז למחזור: {cycle_hint}\n\nטווחים נוכחיים:\n{current_ranges}\n\nתוויות השלב מיועדות לתצוגה ולארגון. איתור משתמש בדפוסי הספק, לא בשמות פאזה.",
         "data": {
-          "profile": "פּרוֹפִיל",
-          "assign_mode": "מצב הקצאה",
-          "source_cycle": "מחזור מקור (נדרש עבור מצב חותמת זמן)",
-          "phase_1": "שלב 1",
-          "start_min_1": "דקת התחלה 1",
-          "end_min_1": "דקת סיום 1",
-          "start_ts_1": "התחל חותמת זמן 1",
-          "end_ts_1": "חותמת זמן סיום 1",
-          "phase_2": "שלב 2",
-          "start_min_2": "דקת התחלה 2",
-          "end_min_2": "דקת סיום 2",
-          "start_ts_2": "התחל חותמת זמן 2",
-          "end_ts_2": "חותמת זמן סיום 2",
-          "phase_3": "שלב 3",
-          "start_min_3": "דקת התחלה 3",
-          "end_min_3": "דקת סיום 3",
-          "start_ts_3": "התחל חותמת זמן 3",
-          "end_ts_3": "חותמת זמן סיום 3",
-          "phase_4": "שלב 4",
-          "start_min_4": "דקת התחלה 4",
-          "end_min_4": "דקת סיום 4",
-          "start_ts_4": "התחל חותמת זמן 4",
-          "end_ts_4": "חותמת זמן סיום 4",
-          "phase_5": "שלב 5",
-          "start_min_5": "דקת התחלה 5",
-          "end_min_5": "דקת סיום 5",
-          "start_ts_5": "התחל חותמת זמן 5",
-          "end_ts_5": "חותמת זמן סיום 5",
-          "phase_6": "שלב 6",
-          "start_min_6": "דקת התחלה 6",
-          "end_min_6": "דקת סיום 6",
-          "start_ts_6": "התחל חותמת זמן 6",
-          "end_ts_6": "חותמת זמן סיום 6"
+          "action": "פְּעוּלָה"
         }
       },
       "assign_profile_phases_select": {
         "title": "הקצה טווחי שלבים",
         "description": "בחר פרופיל להגדרת טווחי פאזות.",
         "data": {
-          "profile": "פּרוֹפִיל",
-          "source_cycle": "מחזור מקור (למצב חותמת זמן)",
-          "assign_mode": "מצב הקצאה"
+          "profile": "פּרוֹפִיל"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "הוסף טווח שלבים",
+        "description": "הוסף טווח שלבים אחד לטיוטה הנוכחית.",
+        "data": {
+          "phase_name": "שָׁלָב",
+          "start_min": "דקת התחלה",
+          "end_min": "דקת סיום"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "ערוך טווח שלבים",
+        "description": "בחר טווח לעריכה.",
+        "data": {
+          "range_index": "טווח שלבים"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "ערוך טווח שלבים",
+        "description": "עדכן את טווח השלבים שנבחר.",
+        "data": {
+          "phase_name": "שָׁלָב",
+          "start_min": "דקת התחלה",
+          "end_min": "דקת סיום"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "מחק טווח שלבים",
+        "description": "בחר טווח להסרה מהטיוטה.",
+        "data": {
+          "range_index": "טווח שלבים"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "חותמת הזמן אינה חוקית. השתמש בפורמט YYYY-MM-DD HH:MM או HH:MM.",
       "overlapping_phase_ranges": "טווחי השלבים חופפים. התאם את הטווחים ונסה שוב.",
       "incomplete_phase_row": "כל שורת שלב חייבת לכלול שלב בתוספת ערכי התחלה/סיום מלאים עבור המצב הנבחר.",
-      "timestamp_mode_cycle_required": "אנא בחר מחזור מקור בעת שימוש במצב חותמת זמן."
+      "timestamp_mode_cycle_required": "אנא בחר מחזור מקור בעת שימוש במצב חותמת זמן.",
+      "no_phase_ranges": "אין עדיין טווחי שלבים זמינים עבור הפעולה הזו."
     },
     "abort": {
       "no_cycles_found": "לא נמצאו מחזורים",

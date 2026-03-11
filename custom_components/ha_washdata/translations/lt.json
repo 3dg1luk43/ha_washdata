@@ -423,7 +423,8 @@
         "description": "Sukurkite pasirinktinį šio įrenginio tipo fazės pavadinimą ir aprašą.",
         "data": {
           "phase_name": "Fazės pavadinimas",
-          "phase_description": "Fazės aprašymas"
+          "phase_description": "Fazės aprašymas",
+          "target_device_type": "Tikslinio įrenginio tipas"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Priskirkite fazių diapazonus",
         "description": "Profilis: **{profile_name}**\nRežimas: **{assign_mode}**\nCiklo užuomina: {cycle_hint}\n\nDabartiniai diapazonai:\n{current_ranges}\n\nFazių etiketės skirtos rodyti ir organizuoti. Aptikimas naudoja galios modelius, o ne fazių pavadinimus.",
         "data": {
-          "profile": "Profilis",
-          "assign_mode": "Priskyrimo režimas",
-          "source_cycle": "Šaltinio ciklas (reikalingas laiko žymos režimui)",
-          "phase_1": "1 fazė",
-          "start_min_1": "1 pradžios minutė",
-          "end_min_1": "1 pabaigos minutė",
-          "start_ts_1": "1 pradžios laiko žyma",
-          "end_ts_1": "1 pabaigos laiko žyma",
-          "phase_2": "2 fazė",
-          "start_min_2": "2 pradžios minutė",
-          "end_min_2": "2 pabaigos minutė",
-          "start_ts_2": "2 pradžios laiko žyma",
-          "end_ts_2": "2 pabaigos laiko žyma",
-          "phase_3": "3 etapas",
-          "start_min_3": "3 pradžios minutė",
-          "end_min_3": "3 pabaigos minutė",
-          "start_ts_3": "3 pradžios laiko žyma",
-          "end_ts_3": "3 pabaigos laiko žyma",
-          "phase_4": "4 etapas",
-          "start_min_4": "4 pradžios minutė",
-          "end_min_4": "4 pabaigos minutė",
-          "start_ts_4": "4 pradžios laiko žyma",
-          "end_ts_4": "Pabaigos laiko žyma 4",
-          "phase_5": "5 etapas",
-          "start_min_5": "5 pradžios minutė",
-          "end_min_5": "5 pabaigos minutė",
-          "start_ts_5": "Pradžios laiko žyma 5",
-          "end_ts_5": "Pabaigos laiko žyma 5",
-          "phase_6": "6 etapas",
-          "start_min_6": "6 pradžios minutė",
-          "end_min_6": "6 pabaigos minutė",
-          "start_ts_6": "6 pradžios laiko žyma",
-          "end_ts_6": "Pabaigos laiko žyma 6"
+          "action": "Veiksmas"
         }
       },
       "assign_profile_phases_select": {
         "title": "Priskirkite fazių diapazonus",
         "description": "Pasirinkite profilį, kad sukonfigūruotumėte fazių diapazonus.",
         "data": {
-          "profile": "Profilis",
-          "source_cycle": "Šaltinio ciklas (laiko žymos režimui)",
-          "assign_mode": "Priskyrimo režimas"
+          "profile": "Profilis"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Pridėti fazių diapazoną",
+        "description": "Pridėkite vieną fazių diapazoną prie esamo juodraščio.",
+        "data": {
+          "phase_name": "Fazė",
+          "start_min": "Pradžios minutė",
+          "end_min": "Pabaigos minutė"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Redaguoti fazių diapazoną",
+        "description": "Pasirinkite norimą redaguoti diapazoną.",
+        "data": {
+          "range_index": "Fazių diapazonas"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Redaguoti fazių diapazoną",
+        "description": "Atnaujinkite pasirinktą fazių diapazoną.",
+        "data": {
+          "phase_name": "Fazė",
+          "start_min": "Pradžios minutė",
+          "end_min": "Pabaigos minutė"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Ištrinti fazių diapazoną",
+        "description": "Pasirinkite diapazoną, kurį norite pašalinti iš juodraščio.",
+        "data": {
+          "range_index": "Fazių diapazonas"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Laiko žyma neteisinga. Naudokite MMMM-MM-DD HH:MM arba HH:MM formatą.",
       "overlapping_phase_ranges": "Fazių diapazonai sutampa. Sureguliuokite diapazonus ir bandykite dar kartą.",
       "incomplete_phase_row": "Kiekvienoje fazių eilutėje turi būti fazė ir visos pasirinkto režimo pradžios / pabaigos reikšmės.",
-      "timestamp_mode_cycle_required": "Naudodami laiko žymos režimą pasirinkite šaltinio ciklą."
+      "timestamp_mode_cycle_required": "Naudodami laiko žymos režimą pasirinkite šaltinio ciklą.",
+      "no_phase_ranges": "Dar nėra šio veiksmo fazių diapazonų."
     },
     "abort": {
       "no_cycles_found": "Ciklų nerasta",

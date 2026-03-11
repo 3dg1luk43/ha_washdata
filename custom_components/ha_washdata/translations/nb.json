@@ -423,7 +423,8 @@
         "description": "Opprett et tilpasset fasenavn og beskrivelse for denne enhetstypen.",
         "data": {
           "phase_name": "Fasenavn",
-          "phase_description": "Fasebeskrivelse"
+          "phase_description": "Fasebeskrivelse",
+          "target_device_type": "Målenhetstype"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Tilordne faseområder",
         "description": "Profil: **{profile_name}**\nModus: **{assign_mode}**\nSyklushint: {cycle_hint}\n\nGjeldende områder:\n{current_ranges}\n\nFaseetiketter er for visning og organisering. Deteksjon bruker strømmønstre, ikke fasenavn.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Tildelingsmodus",
-          "source_cycle": "Kildesyklus (påkrevd for tidsstempelmodus)",
-          "phase_1": "Fase 1",
-          "start_min_1": "Startminutt 1",
-          "end_min_1": "Sluttminutt 1",
-          "start_ts_1": "Start tidsstempel 1",
-          "end_ts_1": "Slutttidsstempel 1",
-          "phase_2": "Fase 2",
-          "start_min_2": "Startminutt 2",
-          "end_min_2": "Sluttminutt 2",
-          "start_ts_2": "Start tidsstempel 2",
-          "end_ts_2": "Slutttidsstempel 2",
-          "phase_3": "Fase 3",
-          "start_min_3": "Startminutt 3",
-          "end_min_3": "Sluttminutt 3",
-          "start_ts_3": "Start tidsstempel 3",
-          "end_ts_3": "Slutttidsstempel 3",
-          "phase_4": "Fase 4",
-          "start_min_4": "Startminutt 4",
-          "end_min_4": "Sluttminutt 4",
-          "start_ts_4": "Start tidsstempel 4",
-          "end_ts_4": "Slutttidsstempel 4",
-          "phase_5": "Fase 5",
-          "start_min_5": "Startminutt 5",
-          "end_min_5": "Sluttminutt 5",
-          "start_ts_5": "Start tidsstempel 5",
-          "end_ts_5": "Slutttidsstempel 5",
-          "phase_6": "Fase 6",
-          "start_min_6": "Startminutt 6",
-          "end_min_6": "Sluttminutt 6",
-          "start_ts_6": "Start tidsstempel 6",
-          "end_ts_6": "Slutttidsstempel 6"
+          "action": "Handling"
         }
       },
       "assign_profile_phases_select": {
         "title": "Tilordne faseområder",
         "description": "Velg en profil for å konfigurere faseområder.",
         "data": {
-          "profile": "Profil",
-          "source_cycle": "Kildesyklus (for tidsstempelmodus)",
-          "assign_mode": "Tildelingsmodus"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Legg til faseområde",
+        "description": "Legg til ett faseområde til gjeldende utkast.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Startminutt",
+          "end_min": "Sluttminutt"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Rediger faseområde",
+        "description": "Velg et område du vil redigere.",
+        "data": {
+          "range_index": "Faseområde"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Rediger faseområde",
+        "description": "Oppdater det valgte faseområdet.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Startminutt",
+          "end_min": "Sluttminutt"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Slett faseområde",
+        "description": "Velg et område du vil fjerne fra utkastet.",
+        "data": {
+          "range_index": "Faseområde"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Tidsstempelet er ugyldig. Bruk formatet ÅÅÅÅ-MM-DD TT:MM eller TT:MM.",
       "overlapping_phase_ranges": "Faseområder overlapper hverandre. Juster områdene og prøv igjen.",
       "incomplete_phase_row": "Hver faserad må inkludere en fase pluss komplette start-/sluttverdier for den valgte modusen.",
-      "timestamp_mode_cycle_required": "Velg en kildesyklus når du bruker tidsstempelmodus."
+      "timestamp_mode_cycle_required": "Velg en kildesyklus når du bruker tidsstempelmodus.",
+      "no_phase_ranges": "Ingen faseområder er tilgjengelige for den handlingen ennå."
     },
     "abort": {
       "no_cycles_found": "Ingen sykluser funnet",

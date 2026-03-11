@@ -423,7 +423,8 @@
         "description": "Kreirajte prilagođeni naziv faze i opis za ovaj tip uređaja.",
         "data": {
           "phase_name": "Naziv faze",
-          "phase_description": "Opis faze"
+          "phase_description": "Opis faze",
+          "target_device_type": "Ciljna vrsta uređaja"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Dodijelite raspon faza",
         "description": "Profil: **{profile_name}**\nNačin rada: **{assign_mode}**\nSavjet za ciklus: {cycle_hint}\n\nTrenutni rasponi:\n{current_ranges}\n\nOznake faza služe za prikaz i organizaciju. Detekcija koristi obrasce napajanja, a ne imena faza.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Assignment Mode",
-          "source_cycle": "Izvorni ciklus (potreban za način rada s vremenskom oznakom)",
-          "phase_1": "Faza 1",
-          "start_min_1": "Početak minute 1",
-          "end_min_1": "Kraj minuta 1",
-          "start_ts_1": "Vremenska oznaka početka 1",
-          "end_ts_1": "Vremenska oznaka završetka 1",
-          "phase_2": "Faza 2",
-          "start_min_2": "Početak minute 2",
-          "end_min_2": "Kraj minuta 2",
-          "start_ts_2": "Vremenska oznaka početka 2",
-          "end_ts_2": "Vremenska oznaka završetka 2",
-          "phase_3": "Faza 3",
-          "start_min_3": "Početak minute 3",
-          "end_min_3": "Kraj minuta 3",
-          "start_ts_3": "Vremenska oznaka početka 3",
-          "end_ts_3": "Vremenska oznaka završetka 3",
-          "phase_4": "Faza 4",
-          "start_min_4": "Početak minute 4",
-          "end_min_4": "Kraj minuta 4",
-          "start_ts_4": "Vremenska oznaka početka 4",
-          "end_ts_4": "Vremenska oznaka završetka 4",
-          "phase_5": "Faza 5",
-          "start_min_5": "Početak minute 5",
-          "end_min_5": "Kraj minuta 5",
-          "start_ts_5": "Vremenska oznaka početka 5",
-          "end_ts_5": "Vremenska oznaka završetka 5",
-          "phase_6": "Faza 6",
-          "start_min_6": "Početak minuta 6",
-          "end_min_6": "Kraj minuta 6",
-          "start_ts_6": "Vremenska oznaka početka 6",
-          "end_ts_6": "Vremenska oznaka završetka 6"
+          "action": "Akcija"
         }
       },
       "assign_profile_phases_select": {
         "title": "Dodijelite raspon faza",
         "description": "Odaberite profil za konfiguriranje faznih raspona.",
         "data": {
-          "profile": "Profil",
-          "source_cycle": "Izvorni ciklus (za način rada s vremenskom oznakom)",
-          "assign_mode": "Assignment Mode"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Dodaj fazni opseg",
+        "description": "Dodajte jedan raspon faza trenutnom nacrtu.",
+        "data": {
+          "phase_name": "Faza",
+          "start_min": "Start Minute",
+          "end_min": "Kraj minuta"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Uredi raspon faza",
+        "description": "Odaberite raspon za uređivanje.",
+        "data": {
+          "range_index": "Phase Range"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Uredi raspon faza",
+        "description": "Ažurirajte odabrani raspon faza.",
+        "data": {
+          "phase_name": "Faza",
+          "start_min": "Start Minute",
+          "end_min": "Kraj minuta"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Izbriši raspon faza",
+        "description": "Odaberite raspon koji želite ukloniti iz nacrta.",
+        "data": {
+          "range_index": "Phase Range"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Vremenska oznaka je nevažeća. Koristite format GGGG-MM-DD ČČ:MM ili ČČ:MM.",
       "overlapping_phase_ranges": "Opsezi faza se preklapaju. Podesite opsege i pokušajte ponovo.",
       "incomplete_phase_row": "Svaki red faza mora uključivati ​​fazu plus kompletne početne/završne vrijednosti za odabrani način rada.",
-      "timestamp_mode_cycle_required": "Molimo odaberite izvorni ciklus kada koristite način vremenske oznake."
+      "timestamp_mode_cycle_required": "Molimo odaberite izvorni ciklus kada koristite način vremenske oznake.",
+      "no_phase_ranges": "Još uvijek nema dostupnih raspona faza za tu radnju."
     },
     "abort": {
       "no_cycles_found": "Nisu pronađeni ciklusi",

@@ -423,7 +423,8 @@
         "description": "Utwórz niestandardową nazwę fazy i opis dla tego typu urządzenia.",
         "data": {
           "phase_name": "Nazwa fazy",
-          "phase_description": "Opis fazy"
+          "phase_description": "Opis fazy",
+          "target_device_type": "Typ urządzenia docelowego"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Przypisz zakresy faz",
         "description": "Profil: **{profile_name}**\nTryb: **{assign_mode}**\nWskazówka dotycząca cyklu: {cycle_hint}\n\nAktualne zakresy:\n{current_ranges}\n\nEtykiety faz służą do wyświetlania i organizacji. Wykrywanie wykorzystuje wzorce mocy, a nie nazwy faz.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Tryb przydziału",
-          "source_cycle": "Cykl źródłowy (wymagany w trybie znacznika czasu)",
-          "phase_1": "Faza 1",
-          "start_min_1": "Rozpocznij minutę 1",
-          "end_min_1": "Koniec minuta 1",
-          "start_ts_1": "Rozpocznij znacznik czasu 1",
-          "end_ts_1": "Znacznik czasu zakończenia 1",
-          "phase_2": "Faza 2",
-          "start_min_2": "Rozpocznij minutę 2",
-          "end_min_2": "Minuta zakończenia 2",
-          "start_ts_2": "Rozpocznij znacznik czasu 2",
-          "end_ts_2": "Znacznik czasu zakończenia 2",
-          "phase_3": "Faza 3",
-          "start_min_3": "Rozpocznij minutę 3",
-          "end_min_3": "Koniec minuty 3",
-          "start_ts_3": "Rozpocznij znacznik czasu 3",
-          "end_ts_3": "Znacznik czasu zakończenia 3",
-          "phase_4": "Faza 4",
-          "start_min_4": "Rozpocznij minutę 4",
-          "end_min_4": "Koniec minuty 4",
-          "start_ts_4": "Rozpocznij znacznik czasu 4",
-          "end_ts_4": "Znacznik czasu zakończenia 4",
-          "phase_5": "Faza 5",
-          "start_min_5": "Rozpocznij minutę 5",
-          "end_min_5": "Koniec minuty 5",
-          "start_ts_5": "Rozpocznij znacznik czasu 5",
-          "end_ts_5": "Znacznik czasu zakończenia 5",
-          "phase_6": "Faza 6",
-          "start_min_6": "Rozpocznij minutę 6",
-          "end_min_6": "Koniec minuty 6",
-          "start_ts_6": "Rozpocznij znacznik czasu 6",
-          "end_ts_6": "Znacznik czasu zakończenia 6"
+          "action": "Działanie"
         }
       },
       "assign_profile_phases_select": {
         "title": "Przypisz zakresy faz",
         "description": "Wybierz profil, aby skonfigurować zakresy faz.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Tryb przydziału",
-          "source_cycle": "Cykl źródłowy (dla trybu znacznika czasu)"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Dodaj zakres faz",
+        "description": "Dodaj jeden zakres faz do bieżącego ciągu.",
+        "data": {
+          "phase_name": "Faza",
+          "start_min": "Minuta rozpoczęcia",
+          "end_min": "Minuta zakończenia"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Edytuj zakres faz",
+        "description": "Wybierz zakres do edycji.",
+        "data": {
+          "range_index": "Zakres faz"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Edytuj zakres faz",
+        "description": "Zaktualizuj wybrany zakres faz.",
+        "data": {
+          "phase_name": "Faza",
+          "start_min": "Minuta rozpoczęcia",
+          "end_min": "Minuta zakończenia"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Usuń zakres faz",
+        "description": "Wybierz zakres, który chcesz usunąć z wersji roboczej.",
+        "data": {
+          "range_index": "Zakres faz"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Sygnatura czasowa jest nieprawidłowa. Użyj formatu RRRR-MM-DD GG:MM lub GG:MM.",
       "overlapping_phase_ranges": "Zakresy faz pokrywają się. Dostosuj zakresy i spróbuj ponownie.",
       "incomplete_phase_row": "Każdy wiersz fazy musi zawierać fazę oraz pełne wartości początkowe/końcowe dla wybranego trybu.",
-      "timestamp_mode_cycle_required": "Jeśli korzystasz z trybu znacznika czasu, wybierz cykl źródłowy."
+      "timestamp_mode_cycle_required": "Jeśli korzystasz z trybu znacznika czasu, wybierz cykl źródłowy.",
+      "no_phase_ranges": "Dla tej akcji nie są jeszcze dostępne żadne zakresy faz."
     },
     "abort": {
       "no_cycles_found": "Nie znaleziono cykli",

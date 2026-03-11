@@ -423,7 +423,8 @@
         "description": "Tạo tên và mô tả pha tùy chỉnh cho loại thiết bị này.",
         "data": {
           "phase_name": "Tên giai đoạn",
-          "phase_description": "Giai đoạn Mô tả"
+          "phase_description": "Giai đoạn Mô tả",
+          "target_device_type": "Loại thiết bị mục tiêu"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Chỉ định phạm vi pha",
         "description": "Hồ sơ: **{profile_name}**\nChế độ: **{assign_mode}**\nGợi ý chu kỳ: {cycle_hint}\n\nPhạm vi hiện tại:\n{current_ranges}\n\nNhãn pha dùng để hiển thị và tổ chức. Phát hiện sử dụng các mẫu nguồn chứ không phải tên pha.",
         "data": {
-          "profile": "Hồ sơ",
-          "assign_mode": "Chế độ bài tập",
-          "source_cycle": "Chu kỳ nguồn (bắt buộc đối với chế độ dấu thời gian)",
-          "phase_1": "Giai đoạn 1",
-          "start_min_1": "Bắt đầu phút 1",
-          "end_min_1": "Kết thúc phút 1",
-          "start_ts_1": "Bắt đầu Dấu thời gian 1",
-          "end_ts_1": "Dấu thời gian kết thúc 1",
-          "phase_2": "Giai đoạn 2",
-          "start_min_2": "Bắt đầu phút thứ 2",
-          "end_min_2": "Phút cuối 2",
-          "start_ts_2": "Bắt đầu Dấu thời gian 2",
-          "end_ts_2": "Dấu thời gian kết thúc 2",
-          "phase_3": "Giai đoạn 3",
-          "start_min_3": "Bắt đầu phút thứ 3",
-          "end_min_3": "Phút cuối 3",
-          "start_ts_3": "Bắt đầu Dấu thời gian 3",
-          "end_ts_3": "Dấu thời gian kết thúc 3",
-          "phase_4": "Giai đoạn 4",
-          "start_min_4": "Bắt đầu phút thứ 4",
-          "end_min_4": "Phút cuối 4",
-          "start_ts_4": "Bắt đầu Dấu thời gian 4",
-          "end_ts_4": "Dấu thời gian kết thúc 4",
-          "phase_5": "Giai đoạn 5",
-          "start_min_5": "Bắt đầu phút thứ 5",
-          "end_min_5": "Phút cuối 5",
-          "start_ts_5": "Bắt đầu Dấu thời gian 5",
-          "end_ts_5": "Dấu thời gian kết thúc 5",
-          "phase_6": "Giai đoạn 6",
-          "start_min_6": "Bắt đầu phút thứ 6",
-          "end_min_6": "Phút cuối 6",
-          "start_ts_6": "Bắt đầu Dấu thời gian 6",
-          "end_ts_6": "Dấu thời gian kết thúc 6"
+          "action": "Hoạt động"
         }
       },
       "assign_profile_phases_select": {
         "title": "Chỉ định phạm vi pha",
         "description": "Chọn một cấu hình để cấu hình phạm vi pha.",
         "data": {
-          "profile": "Hồ sơ",
-          "source_cycle": "Chu kỳ nguồn (đối với chế độ dấu thời gian)",
-          "assign_mode": "Chế độ bài tập"
+          "profile": "Hồ sơ"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Thêm phạm vi pha",
+        "description": "Thêm một phạm vi pha vào dự thảo hiện tại.",
+        "data": {
+          "phase_name": "Giai đoạn",
+          "start_min": "Phút bắt đầu",
+          "end_min": "Phút cuối"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Chỉnh sửa phạm vi pha",
+        "description": "Chọn một phạm vi để chỉnh sửa.",
+        "data": {
+          "range_index": "Phạm vi pha"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Chỉnh sửa phạm vi pha",
+        "description": "Cập nhật phạm vi pha đã chọn.",
+        "data": {
+          "phase_name": "Giai đoạn",
+          "start_min": "Phút bắt đầu",
+          "end_min": "Phút cuối"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Xóa phạm vi pha",
+        "description": "Chọn một phạm vi để loại bỏ khỏi bản nháp.",
+        "data": {
+          "range_index": "Phạm vi pha"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Dấu thời gian không hợp lệ. Sử dụng định dạng YYYY-MM-DD HH:MM hoặc HH:MM.",
       "overlapping_phase_ranges": "Phạm vi pha chồng chéo. Điều chỉnh phạm vi và thử lại.",
       "incomplete_phase_row": "Mỗi hàng pha phải bao gồm một pha cộng với các giá trị bắt đầu/kết thúc hoàn chỉnh cho chế độ đã chọn.",
-      "timestamp_mode_cycle_required": "Vui lòng chọn chu kỳ nguồn khi sử dụng chế độ dấu thời gian."
+      "timestamp_mode_cycle_required": "Vui lòng chọn chu kỳ nguồn khi sử dụng chế độ dấu thời gian.",
+      "no_phase_ranges": "Chưa có phạm vi pha nào cho hành động đó."
     },
     "abort": {
       "no_cycles_found": "Không tìm thấy chu kỳ nào",

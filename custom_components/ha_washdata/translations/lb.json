@@ -423,7 +423,8 @@
         "description": "Erstellt e personaliséierte Phasenumm a Beschreiwung fir dësen Apparattyp.",
         "data": {
           "phase_name": "Phase Numm",
-          "phase_description": "Phase Beschreiwung"
+          "phase_description": "Phase Beschreiwung",
+          "target_device_type": "Zil Gerät Typ"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Assignéiert Phase Ranges",
         "description": "Profil: **{profile_name}**\nModus: **{assign_mode}**\nCycle Hiweis: {cycle_hint}\n\nAktuelle Beräicher:\n{current_ranges}\n\nPhase Etiketten si fir Affichage an Organisatioun. Detektioun benotzt Kraaftmuster, net Phasennimm.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Aufgab Modus",
-          "source_cycle": "Source Cycle (obligatoresch fir Zäitstempelmodus)",
-          "phase_1": "Phase 1",
-          "start_min_1": "Startminut 1",
-          "end_min_1": "Enn Minutt 1",
-          "start_ts_1": "Start Zäitstempel 1",
-          "end_ts_1": "Enn Zäitstempel 1",
-          "phase_2": "Phase 2",
-          "start_min_2": "Startminut 2",
-          "end_min_2": "Enn Minutt 2",
-          "start_ts_2": "Start Zäitstempel 2",
-          "end_ts_2": "Enn Zäitstempel 2",
-          "phase_3": "Phase 3",
-          "start_min_3": "Startminut 3",
-          "end_min_3": "Enn Minutt 3",
-          "start_ts_3": "Start Zäitstempel 3",
-          "end_ts_3": "Enn Zäitstempel 3",
-          "phase_4": "Phase 4",
-          "start_min_4": "Startminut 4",
-          "end_min_4": "Enn Minutt 4",
-          "start_ts_4": "Start Zäitstempel 4",
-          "end_ts_4": "Enn Zäitstempel 4",
-          "phase_5": "Phase 5",
-          "start_min_5": "Startminut 5",
-          "end_min_5": "Enn Minutt 5",
-          "start_ts_5": "Start Zäitstempel 5",
-          "end_ts_5": "Enn Zäitstempel 5",
-          "phase_6": "Phase 6",
-          "start_min_6": "Startminut 6",
-          "end_min_6": "Enn Minutt 6",
-          "start_ts_6": "Start Zäitstempel 6",
-          "end_ts_6": "Enn Zäitstempel 6"
+          "action": "Aktioun"
         }
       },
       "assign_profile_phases_select": {
         "title": "Assignéiert Phase Ranges",
         "description": "Wielt e Profil fir Phasebereich ze konfiguréieren.",
         "data": {
-          "profile": "Profil",
-          "source_cycle": "Source Cycle (fir Zäitstempelmodus)",
-          "assign_mode": "Aufgab Modus"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Füügt Phase Range",
+        "description": "Füügt eng Phasebereich zum aktuellen Entworf.",
+        "data": {
+          "phase_name": "Phase",
+          "start_min": "Start Minutt",
+          "end_min": "Enn Minutt"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Phase Range änneren",
+        "description": "Wielt eng Rei fir z'änneren.",
+        "data": {
+          "range_index": "Phase Range"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Phase Range änneren",
+        "description": "Update de gewielte Phasebereich.",
+        "data": {
+          "phase_name": "Phase",
+          "start_min": "Start Minutt",
+          "end_min": "Enn Minutt"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Läschen Phase Range",
+        "description": "Wielt eng Rei fir aus dem Entworf ze läschen.",
+        "data": {
+          "range_index": "Phase Range"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Zäitstempel ass ongëlteg. Benotzt JJJJ-MM-DD HH:MM oder HH:MM Format.",
       "overlapping_phase_ranges": "Phasebereich iwwerlappt. Passt d'Gamme un a probéiert nach eng Kéier.",
       "incomplete_phase_row": "All Phase Zeil muss eng Phas enthalen plus komplett Start- / Ennwäerter fir de gewielte Modus.",
-      "timestamp_mode_cycle_required": "Wielt w.e.g. e Quellzyklus wann Dir Zäitstempelmodus benotzt."
+      "timestamp_mode_cycle_required": "Wielt w.e.g. e Quellzyklus wann Dir Zäitstempelmodus benotzt.",
+      "no_phase_ranges": "Et sinn nach keng Phasebereich fir dës Aktioun verfügbar."
     },
     "abort": {
       "no_cycles_found": "Keng Zyklen fonnt",

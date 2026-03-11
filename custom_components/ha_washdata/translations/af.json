@@ -423,7 +423,8 @@
         "description": "Skep 'n pasgemaakte fasenaam en beskrywing vir hierdie toesteltipe.",
         "data": {
           "phase_name": "Fase Naam",
-          "phase_description": "Fasebeskrywing"
+          "phase_description": "Fasebeskrywing",
+          "target_device_type": "Tipe teikentoestel"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Ken fasereekse toe",
         "description": "Profiel: **{profile_name}**\nModus: **{assign_mode}**\nSikluswenk: {cycle_hint}\n\nHuidige reekse:\n{current_ranges}\n\nFase-etikette is vir vertoon en organisasie. Opsporing gebruik kragpatrone, nie fasename nie.",
         "data": {
-          "profile": "Profiel",
-          "assign_mode": "Opdragmodus",
-          "source_cycle": "Bronsiklus (vereis vir tydstempelmodus)",
-          "phase_1": "Fase 1",
-          "start_min_1": "Begin minuut 1",
-          "end_min_1": "Eindminuut 1",
-          "start_ts_1": "Begin Tydstempel 1",
-          "end_ts_1": "Einde Tydstempel 1",
-          "phase_2": "Fase 2",
-          "start_min_2": "Begin minuut 2",
-          "end_min_2": "Eindminuut 2",
-          "start_ts_2": "Begin Tydstempel 2",
-          "end_ts_2": "Einde Tydstempel 2",
-          "phase_3": "Fase 3",
-          "start_min_3": "Begin minuut 3",
-          "end_min_3": "Eindminuut 3",
-          "start_ts_3": "Begin Tydstempel 3",
-          "end_ts_3": "Einde Tydstempel 3",
-          "phase_4": "Fase 4",
-          "start_min_4": "Begin minuut 4",
-          "end_min_4": "Eindminuut 4",
-          "start_ts_4": "Begin Tydstempel 4",
-          "end_ts_4": "Einde Tydstempel 4",
-          "phase_5": "Fase 5",
-          "start_min_5": "Begin minuut 5",
-          "end_min_5": "Eindminuut 5",
-          "start_ts_5": "Begin Tydstempel 5",
-          "end_ts_5": "Einde Tydstempel 5",
-          "phase_6": "Fase 6",
-          "start_min_6": "Begin minuut 6",
-          "end_min_6": "Eindminuut 6",
-          "start_ts_6": "Begin Tydstempel 6",
-          "end_ts_6": "Einde Tydstempel 6"
+          "action": "Aksie"
         }
       },
       "assign_profile_phases_select": {
         "title": "Ken fasereekse toe",
         "description": "Kies 'n profiel om fasereekse op te stel.",
         "data": {
-          "profile": "Profiel",
-          "source_cycle": "Bronsiklus (vir tydstempelmodus)",
-          "assign_mode": "Opdragmodus"
+          "profile": "Profiel"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Voeg fasereeks by",
+        "description": "Voeg een fasereeks by die huidige konsep.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Begin minuut",
+          "end_min": "Eindminuut"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Wysig fasereeks",
+        "description": "Kies 'n reeks om te wysig.",
+        "data": {
+          "range_index": "Fasereeks"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Wysig fasereeks",
+        "description": "Dateer die geselekteerde fasereeks op.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Begin minuut",
+          "end_min": "Eindminuut"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Vee fasereeks uit",
+        "description": "Kies 'n reeks om uit die konsep te verwyder.",
+        "data": {
+          "range_index": "Fasereeks"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Tydstempel is ongeldig. Gebruik JJJJ-MM-DD UU:MM of UU:MM-formaat.",
       "overlapping_phase_ranges": "Fasereekse oorvleuel. Pas die reekse aan en probeer weer.",
       "incomplete_phase_row": "Elke fasery moet 'n fase plus volledige begin/eindwaardes vir die geselekteerde modus insluit.",
-      "timestamp_mode_cycle_required": "Kies asseblief 'n bronsiklus wanneer jy tydstempelmodus gebruik."
+      "timestamp_mode_cycle_required": "Kies asseblief 'n bronsiklus wanneer jy tydstempelmodus gebruik.",
+      "no_phase_ranges": "Geen fasereekse is nog vir daardie aksie beskikbaar nie."
     },
     "abort": {
       "no_cycles_found": "Geen siklusse gevind nie",

@@ -423,7 +423,8 @@
         "description": "Creu enw cyfnod wedi'i deilwra a disgrifiad ar gyfer y math hwn o ddyfais.",
         "data": {
           "phase_name": "Enw Cyfnod",
-          "phase_description": "Disgrifiad o'r Cyfnod"
+          "phase_description": "Disgrifiad o'r Cyfnod",
+          "target_device_type": "Math Dyfais Targed"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Neilltuo Ystod Cyfnod",
         "description": "Proffil: **{profile_name}**\nModd: **{assign_mode}**\nAwgrym beicio: {cycle_hint}\n\nYstodau presennol:\n{current_ranges}\n\nMae labeli cyfnod ar gyfer arddangos a threfnu. Mae canfod yn defnyddio patrymau pŵer, nid enwau gweddau.",
         "data": {
-          "profile": "Proffil",
-          "assign_mode": "Modd Aseiniad",
-          "source_cycle": "Cylchred Ffynhonnell (yn ofynnol ar gyfer modd stamp amser)",
-          "phase_1": "Cam 1",
-          "start_min_1": "Dechrau Cofnod 1",
-          "end_min_1": "Diwedd Cofnod 1",
-          "start_ts_1": "Stamp Amser Cychwyn 1",
-          "end_ts_1": "Stamp Amser Diwedd 1",
-          "phase_2": "Cam 2",
-          "start_min_2": "Dechrau Cofnod 2",
-          "end_min_2": "Diwedd Cofnod 2",
-          "start_ts_2": "Stamp Amser Cychwyn 2",
-          "end_ts_2": "Stamp Amser Diwedd 2",
-          "phase_3": "Cam 3",
-          "start_min_3": "Dechrau Cofnod 3",
-          "end_min_3": "Diwedd Cofnod 3",
-          "start_ts_3": "Stamp Amser Cychwyn 3",
-          "end_ts_3": "Stamp Amser Diwedd 3",
-          "phase_4": "Cam 4",
-          "start_min_4": "Dechrau Cofnod 4",
-          "end_min_4": "Diwedd Cofnod 4",
-          "start_ts_4": "Stamp Amser Cychwyn 4",
-          "end_ts_4": "Stamp Amser Diwedd 4",
-          "phase_5": "Cam 5",
-          "start_min_5": "Dechrau Cofnod 5",
-          "end_min_5": "Diwedd Cofnod 5",
-          "start_ts_5": "Stamp Amser Cychwyn 5",
-          "end_ts_5": "Stamp Amser Diwedd 5",
-          "phase_6": "Cam 6",
-          "start_min_6": "Dechrau Cofnod 6",
-          "end_min_6": "Diwedd Cofnod 6",
-          "start_ts_6": "Stamp Amser Cychwyn 6",
-          "end_ts_6": "Stamp Amser Diwedd 6"
+          "action": "Gweithred"
         }
       },
       "assign_profile_phases_select": {
         "title": "Neilltuo Ystod Cyfnod",
         "description": "Dewiswch broffil i ffurfweddu ystodau cyfnodau.",
         "data": {
-          "profile": "Proffil",
-          "source_cycle": "Cylchred Ffynhonnell (ar gyfer modd stamp amser)",
-          "assign_mode": "Modd Aseiniad"
+          "profile": "Proffil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Ychwanegu Ystod Cyfnod",
+        "description": "Ychwanegu ystod un cyfnod i'r drafft cyfredol.",
+        "data": {
+          "phase_name": "Cyfnod",
+          "start_min": "Dechrau Cofnod",
+          "end_min": "Munud Diwedd"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Golygu Ystod Cyfnod",
+        "description": "Dewiswch ystod i'w golygu.",
+        "data": {
+          "range_index": "Ystod Cyfnod"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Golygu Ystod Cyfnod",
+        "description": "Diweddaru'r ystod cyfnod a ddewiswyd.",
+        "data": {
+          "phase_name": "Cyfnod",
+          "start_min": "Dechrau Cofnod",
+          "end_min": "Munud Diwedd"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Dileu Ystod Cyfnod",
+        "description": "Dewiswch ystod i'w thynnu o'r drafft.",
+        "data": {
+          "range_index": "Ystod Cyfnod"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Mae'r stamp amser yn annilys. Defnyddiwch fformat BBBB-MM-DD HH:MM neu HH:MM.",
       "overlapping_phase_ranges": "Mae ystodau cyfnodau yn gorgyffwrdd. Addaswch yr ystodau a cheisiwch eto.",
       "incomplete_phase_row": "Rhaid i bob rhes cam gynnwys cam ynghyd â gwerthoedd cychwyn/diwedd cyflawn ar gyfer y modd a ddewiswyd.",
-      "timestamp_mode_cycle_required": "Dewiswch gylchred ffynhonnell wrth ddefnyddio modd stamp amser."
+      "timestamp_mode_cycle_required": "Dewiswch gylchred ffynhonnell wrth ddefnyddio modd stamp amser.",
+      "no_phase_ranges": "Nid oes unrhyw ystodau cyfnod ar gael ar gyfer y cam gweithredu hwnnw eto."
     },
     "abort": {
       "no_cycles_found": "Heb ganfod cylchoedd",

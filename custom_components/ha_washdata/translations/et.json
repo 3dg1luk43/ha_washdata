@@ -423,7 +423,8 @@
         "description": "Looge selle seadmetüübi jaoks kohandatud faasinimi ja kirjeldus.",
         "data": {
           "phase_name": "Faasi nimi",
-          "phase_description": "Faasi kirjeldus"
+          "phase_description": "Faasi kirjeldus",
+          "target_device_type": "Sihtseadme tüüp"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Määrake faasivahemikud",
         "description": "Profiil: **{profile_name}**\nRežiim: **{assign_mode}**\nTsükli vihje: {cycle_hint}\n\nPraegused vahemikud:\n{current_ranges}\n\nFaasisildid on mõeldud kuvamiseks ja korraldamiseks. Tuvastamine kasutab võimsusmustreid, mitte faasinimesid.",
         "data": {
-          "profile": "Profiil",
-          "assign_mode": "Määramise režiim",
-          "source_cycle": "Allika tsükkel (vajalik ajatemplirežiimi jaoks)",
-          "phase_1": "1. faas",
-          "start_min_1": "1. stardiminut",
-          "end_min_1": "Lõpu minut 1",
-          "start_ts_1": "Alguse ajatempel 1",
-          "end_ts_1": "Lõpu ajatempel 1",
-          "phase_2": "2. faas",
-          "start_min_2": "2. stardiminut",
-          "end_min_2": "Lõpu minut 2",
-          "start_ts_2": "Alguse ajatempel 2",
-          "end_ts_2": "Lõpu ajatempel 2",
-          "phase_3": "3. faas",
-          "start_min_3": "3. stardiminut",
-          "end_min_3": "Lõpu minut 3",
-          "start_ts_3": "Alguse ajatempel 3",
-          "end_ts_3": "Lõpu ajatempel 3",
-          "phase_4": "4. faas",
-          "start_min_4": "4. stardiminut",
-          "end_min_4": "Lõpu minut 4",
-          "start_ts_4": "Alguse ajatempel 4",
-          "end_ts_4": "Lõpu ajatempel 4",
-          "phase_5": "5. faas",
-          "start_min_5": "5. stardiminut",
-          "end_min_5": "Lõpu minut 5",
-          "start_ts_5": "Alguse ajatempel 5",
-          "end_ts_5": "Lõpu ajatempel 5",
-          "phase_6": "6. faas",
-          "start_min_6": "6. stardiminut",
-          "end_min_6": "Lõpu minut 6",
-          "start_ts_6": "Alguse ajatempel 6",
-          "end_ts_6": "Lõpu ajatempel 6"
+          "action": "Tegevus"
         }
       },
       "assign_profile_phases_select": {
         "title": "Määrake faasivahemikud",
         "description": "Faasivahemike konfigureerimiseks valige profiil.",
         "data": {
-          "profile": "Profiil",
-          "source_cycle": "Allika tsükkel (ajatempli režiimi jaoks)",
-          "assign_mode": "Määramise režiim"
+          "profile": "Profiil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Lisa faasivahemik",
+        "description": "Lisage praegusele mustandile üks faasivahemik.",
+        "data": {
+          "phase_name": "Faas",
+          "start_min": "Alguse minut",
+          "end_min": "Lõpu minut"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Redigeeri faasivahemikku",
+        "description": "Valige redigeeritav vahemik.",
+        "data": {
+          "range_index": "Faasi vahemik"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Redigeeri faasivahemikku",
+        "description": "Värskendage valitud faasivahemikku.",
+        "data": {
+          "phase_name": "Faas",
+          "start_min": "Alguse minut",
+          "end_min": "Lõpu minut"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Kustuta faasivahemik",
+        "description": "Valige mustandist eemaldatav vahemik.",
+        "data": {
+          "range_index": "Faasi vahemik"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Ajatempel on kehtetu. Kasutage vormingut AAAA-KK-PP HH:MM või HH:MM.",
       "overlapping_phase_ranges": "Faasivahemikud kattuvad. Reguleerige vahemikke ja proovige uuesti.",
       "incomplete_phase_row": "Iga faasirida peab sisaldama valitud režiimi faasi pluss täielikke algus-/lõpuväärtusi.",
-      "timestamp_mode_cycle_required": "Valige ajatemplirežiimi kasutamisel allika tsükkel."
+      "timestamp_mode_cycle_required": "Valige ajatemplirežiimi kasutamisel allika tsükkel.",
+      "no_phase_ranges": "Selle toimingu jaoks pole veel faasivahemikke saadaval."
     },
     "abort": {
       "no_cycles_found": "Tsükleid ei leitud",

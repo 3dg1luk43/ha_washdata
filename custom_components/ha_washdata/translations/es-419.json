@@ -423,7 +423,8 @@
         "description": "Cree un nombre de fase personalizado y una descripción para este tipo de dispositivo.",
         "data": {
           "phase_name": "Nombre de fase",
-          "phase_description": "Descripción de la fase"
+          "phase_description": "Descripción de la fase",
+          "target_device_type": "Tipo de dispositivo de destino"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Asignar rangos de fase",
         "description": "Perfil: **{profile_name}**\nModo: **{assign_mode}**\nSugerencia de ciclo: {cycle_hint}\n\nRangos actuales:\n{current_ranges}\n\nLas etiquetas de fase son para visualización y organización. La detección utiliza patrones de energía, no nombres de fases.",
         "data": {
-          "profile": "Perfil",
-          "assign_mode": "Modo de asignación",
-          "source_cycle": "Ciclo de origen (requerido para el modo de marca de tiempo)",
-          "phase_1": "Fase 1",
-          "start_min_1": "Minuto de inicio 1",
-          "end_min_1": "Fin del minuto 1",
-          "start_ts_1": "Iniciar marca de tiempo 1",
-          "end_ts_1": "Marca de tiempo final 1",
-          "phase_2": "Fase 2",
-          "start_min_2": "Minuto de inicio 2",
-          "end_min_2": "Fin del minuto 2",
-          "start_ts_2": "Iniciar marca de tiempo 2",
-          "end_ts_2": "Marca de tiempo final 2",
-          "phase_3": "Fase 3",
-          "start_min_3": "Inicio Minuto 3",
-          "end_min_3": "Fin del minuto 3",
-          "start_ts_3": "Iniciar marca de tiempo 3",
-          "end_ts_3": "Marca de tiempo final 3",
-          "phase_4": "Fase 4",
-          "start_min_4": "Inicio Minuto 4",
-          "end_min_4": "Fin del minuto 4",
-          "start_ts_4": "Iniciar marca de tiempo 4",
-          "end_ts_4": "Marca de tiempo final 4",
-          "phase_5": "Fase 5",
-          "start_min_5": "Inicio Minuto 5",
-          "end_min_5": "Fin del minuto 5",
-          "start_ts_5": "Iniciar marca de tiempo 5",
-          "end_ts_5": "Marca de tiempo final 5",
-          "phase_6": "Fase 6",
-          "start_min_6": "Inicio Minuto 6",
-          "end_min_6": "Fin del minuto 6",
-          "start_ts_6": "Iniciar marca de tiempo 6",
-          "end_ts_6": "Marca de tiempo final 6"
+          "action": "Acción"
         }
       },
       "assign_profile_phases_select": {
         "title": "Asignar rangos de fase",
         "description": "Seleccione un perfil para configurar rangos de fases.",
         "data": {
-          "profile": "Perfil",
-          "source_cycle": "Ciclo de origen (para modo de marca de tiempo)",
-          "assign_mode": "Modo de asignación"
+          "profile": "Perfil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Agregar rango de fase",
+        "description": "Agregue un rango de fase al borrador actual.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Minuto de inicio",
+          "end_min": "Minuto final"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Editar rango de fase",
+        "description": "Seleccione un rango para editar.",
+        "data": {
+          "range_index": "Rango de fase"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Editar rango de fase",
+        "description": "Actualiza el rango de fase seleccionado.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Minuto de inicio",
+          "end_min": "Minuto final"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Eliminar rango de fase",
+        "description": "Seleccione un rango para eliminar del borrador.",
+        "data": {
+          "range_index": "Rango de fase"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "La marca de tiempo no es válida. Utilice el formato AAAA-MM-DD HH:MM o HH:MM.",
       "overlapping_phase_ranges": "Los rangos de fase se superponen. Ajuste los rangos y vuelva a intentarlo.",
       "incomplete_phase_row": "Cada fila de fase debe incluir una fase más los valores completos de inicio/fin para el modo seleccionado.",
-      "timestamp_mode_cycle_required": "Seleccione un ciclo de fuente cuando utilice el modo de marca de tiempo."
+      "timestamp_mode_cycle_required": "Seleccione un ciclo de fuente cuando utilice el modo de marca de tiempo.",
+      "no_phase_ranges": "Aún no hay rangos de fase disponibles para esa acción."
     },
     "abort": {
       "no_cycles_found": "No se encontraron ciclos",

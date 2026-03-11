@@ -423,7 +423,8 @@
         "description": "Hozzon létre egyéni fázisnevet és -leírást ehhez az eszköztípushoz.",
         "data": {
           "phase_name": "Fázis neve",
-          "phase_description": "Fázis leírása"
+          "phase_description": "Fázis leírása",
+          "target_device_type": "Céleszköz típusa"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Fázistartományok hozzárendelése",
         "description": "Profil: **{profile_name}**\nMód: **{assign_mode}**\nCiklus tipp: {cycle_hint}\n\nJelenlegi tartományok:\n{current_ranges}\n\nA fáziscímkék a megjelenítésre és a rendszerezésre szolgálnak. Az észlelés teljesítménymintákat használ, nem fázisneveket.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Hozzárendelési mód",
-          "source_cycle": "Forrásciklus (időbélyeg módhoz szükséges)",
-          "phase_1": "1. fázis",
-          "start_min_1": "Kezdő perc 1",
-          "end_min_1": "1. befejező perc",
-          "start_ts_1": "Indítási időbélyeg 1",
-          "end_ts_1": "Befejezési időbélyeg 1",
-          "phase_2": "2. fázis",
-          "start_min_2": "Kezdő perc 2",
-          "end_min_2": "2. befejező perc",
-          "start_ts_2": "Indítási időbélyeg 2",
-          "end_ts_2": "Befejezési időbélyeg 2",
-          "phase_3": "3. fázis",
-          "start_min_3": "Kezdő perc 3",
-          "end_min_3": "Befejező perc 3",
-          "start_ts_3": "Indítási időbélyeg 3",
-          "end_ts_3": "Befejezési időbélyeg 3",
-          "phase_4": "4. fázis",
-          "start_min_4": "Kezdő perc 4",
-          "end_min_4": "Befejező perc 4",
-          "start_ts_4": "Indítási időbélyeg 4",
-          "end_ts_4": "Befejezési időbélyeg 4",
-          "phase_5": "5. fázis",
-          "start_min_5": "Kezdő perc 5",
-          "end_min_5": "Vége 5. perc",
-          "start_ts_5": "Indítási időbélyeg 5",
-          "end_ts_5": "Befejezési időbélyeg 5",
-          "phase_6": "6. fázis",
-          "start_min_6": "Kezdő perc 6",
-          "end_min_6": "Befejező perc 6",
-          "start_ts_6": "Indítási időbélyeg 6",
-          "end_ts_6": "Befejezési időbélyeg 6"
+          "action": "Akció"
         }
       },
       "assign_profile_phases_select": {
         "title": "Fázistartományok hozzárendelése",
         "description": "Válasszon egy profilt a fázistartományok konfigurálásához.",
         "data": {
-          "profile": "Profil",
-          "source_cycle": "Forrásciklus (időbélyeg módhoz)",
-          "assign_mode": "Hozzárendelési mód"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Fázistartomány hozzáadása",
+        "description": "Adjon hozzá egy fázistartományt az aktuális piszkozathoz.",
+        "data": {
+          "phase_name": "Fázis",
+          "start_min": "Kezdő perc",
+          "end_min": "Vég perc"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Fázistartomány szerkesztése",
+        "description": "Válassza ki a szerkeszteni kívánt tartományt.",
+        "data": {
+          "range_index": "Fázis tartomány"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Fázistartomány szerkesztése",
+        "description": "Frissítse a kiválasztott fázistartományt.",
+        "data": {
+          "phase_name": "Fázis",
+          "start_min": "Kezdő perc",
+          "end_min": "Vég perc"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Fázistartomány törlése",
+        "description": "Válassza ki a vázlatból eltávolítani kívánt tartományt.",
+        "data": {
+          "range_index": "Fázis tartomány"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Az időbélyeg érvénytelen. Használja ÉÉÉÉ-HH-NN ÓÓ:PP vagy ÓÓ:PP formátumot.",
       "overlapping_phase_ranges": "A fázistartományok átfedik egymást. Állítsa be a tartományokat, és próbálja újra.",
       "incomplete_phase_row": "Minden fázissornak tartalmaznia kell egy fázist, valamint egy teljes kezdő/végi értéket a kiválasztott módhoz.",
-      "timestamp_mode_cycle_required": "Kérjük, válasszon forrásciklust az időbélyeg mód használatakor."
+      "timestamp_mode_cycle_required": "Kérjük, válasszon forrásciklust az időbélyeg mód használatakor.",
+      "no_phase_ranges": "Ehhez a művelethez még nem állnak rendelkezésre fázistartományok."
     },
     "abort": {
       "no_cycles_found": "Nem találhatók ciklusok",

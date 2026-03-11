@@ -423,7 +423,8 @@
         "description": "Vytvorte vlastný názov fázy a popis pre tento typ zariadenia.",
         "data": {
           "phase_name": "Názov fázy",
-          "phase_description": "Popis fázy"
+          "phase_description": "Popis fázy",
+          "target_device_type": "Cieľový typ zariadenia"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Priraďte fázové rozsahy",
         "description": "Profil: **{profile_name}**\nRežim: **{assign_mode}**\nTip cyklu: {cycle_hint}\n\nAktuálne rozsahy:\n{current_ranges}\n\nŠtítky fáz slúžia na zobrazenie a usporiadanie. Detekcia používa vzory napájania, nie názvy fáz.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Režim pridelenia",
-          "source_cycle": "Zdrojový cyklus (vyžaduje sa pre režim časovej pečiatky)",
-          "phase_1": "1. fáza",
-          "start_min_1": "Štartová minúta 1",
-          "end_min_1": "Koniec minúty 1",
-          "start_ts_1": "Časová pečiatka začiatku 1",
-          "end_ts_1": "Časová pečiatka ukončenia 1",
-          "phase_2": "2. fáza",
-          "start_min_2": "Začiatok 2. minúty",
-          "end_min_2": "Koniec minúty 2",
-          "start_ts_2": "Časová pečiatka začiatku 2",
-          "end_ts_2": "Časová pečiatka konca 2",
-          "phase_3": "3. fáza",
-          "start_min_3": "Začiatok 3. minúty",
-          "end_min_3": "Koniec minúty 3",
-          "start_ts_3": "Časová pečiatka začiatku 3",
-          "end_ts_3": "Časová pečiatka konca 3",
-          "phase_4": "4. fáza",
-          "start_min_4": "Začiatok minúty 4",
-          "end_min_4": "Koniec minúty 4",
-          "start_ts_4": "Časová pečiatka začiatku 4",
-          "end_ts_4": "Časová pečiatka konca 4",
-          "phase_5": "5. fáza",
-          "start_min_5": "Začiatok 5. minúty",
-          "end_min_5": "Koniec minúty 5",
-          "start_ts_5": "Časová pečiatka začiatku 5",
-          "end_ts_5": "Časová pečiatka konca 5",
-          "phase_6": "6. fáza",
-          "start_min_6": "Začiatok 6. minúty",
-          "end_min_6": "Koniec minúty 6",
-          "start_ts_6": "Časová pečiatka začiatku 6",
-          "end_ts_6": "Časová pečiatka ukončenia 6"
+          "action": "Akcia"
         }
       },
       "assign_profile_phases_select": {
         "title": "Priraďte fázové rozsahy",
         "description": "Vyberte profil na konfiguráciu fázových rozsahov.",
         "data": {
-          "profile": "Profil",
-          "source_cycle": "Zdrojový cyklus (pre režim časovej pečiatky)",
-          "assign_mode": "Režim pridelenia"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Pridať fázový rozsah",
+        "description": "Pridajte jeden fázový rozsah k aktuálnemu konceptu.",
+        "data": {
+          "phase_name": "Fáza",
+          "start_min": "Začiatočná minúta",
+          "end_min": "Koniec minúty"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Upraviť fázový rozsah",
+        "description": "Vyberte rozsah, ktorý chcete upraviť.",
+        "data": {
+          "range_index": "Fázový rozsah"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Upraviť fázový rozsah",
+        "description": "Aktualizujte vybraný fázový rozsah.",
+        "data": {
+          "phase_name": "Fáza",
+          "start_min": "Začiatočná minúta",
+          "end_min": "Koniec minúty"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Odstrániť fázový rozsah",
+        "description": "Vyberte rozsah, ktorý chcete odstrániť z konceptu.",
+        "data": {
+          "range_index": "Fázový rozsah"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Časová pečiatka je neplatná. Použite formát RRRR-MM-DD HH:MM alebo HH:MM.",
       "overlapping_phase_ranges": "Fázové rozsahy sa prekrývajú. Upravte rozsahy a skúste to znova.",
       "incomplete_phase_row": "Každý riadok fázy musí obsahovať fázu plus úplné počiatočné/koncové hodnoty pre vybraný režim.",
-      "timestamp_mode_cycle_required": "Pri použití režimu časovej pečiatky vyberte zdrojový cyklus."
+      "timestamp_mode_cycle_required": "Pri použití režimu časovej pečiatky vyberte zdrojový cyklus.",
+      "no_phase_ranges": "Pre túto akciu zatiaľ nie sú dostupné žiadne fázové rozsahy."
     },
     "abort": {
       "no_cycles_found": "Nenašli sa žiadne cykly",

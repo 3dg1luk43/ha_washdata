@@ -228,7 +228,8 @@
         "description": "為此設備類型建立自訂階段名稱和描述。",
         "data": {
           "phase_name": "階段名稱",
-          "phase_description": "階段描述"
+          "phase_description": "階段描述",
+          "target_device_type": "目標設備類型"
         }
       },
       "phase_catalog_edit_select": {
@@ -257,48 +258,14 @@
         "title": "分配相位範圍",
         "description": "个人资料： **{profile_name}**\n模式：**{assign_mode}**\n循环提示：{cycle_hint}\n\n電流範圍：\n{current_ranges}\n\n阶段标签用于显示和组织。檢測使用功率模式，而不是相名稱。",
         "data": {
-          "profile": "輪廓",
-          "assign_mode": "分配模式",
-          "source_cycle": "源週期（時間戳模式需要）",
-          "phase_1": "第一階段",
-          "start_min_1": "開始第 1 分鐘",
-          "end_min_1": "結束分鐘 1",
-          "start_ts_1": "開始時間戳 1",
-          "end_ts_1": "結束時間戳記 1",
-          "phase_2": "第二階段",
-          "start_min_2": "開始第 2 分鐘",
-          "end_min_2": "第 2 分鐘結束",
-          "start_ts_2": "開始時間戳記 2",
-          "end_ts_2": "結束時間戳記 2",
-          "phase_3": "第三階段",
-          "start_min_3": "開始第 3 分鐘",
-          "end_min_3": "第 3 分鐘結束",
-          "start_ts_3": "開始時間戳記 3",
-          "end_ts_3": "結束時間戳記 3",
-          "phase_4": "第四階段",
-          "start_min_4": "第 4 分鐘開始",
-          "end_min_4": "第 4 分鐘結束",
-          "start_ts_4": "開始時間戳記 4",
-          "end_ts_4": "結束時間戳記 4",
-          "phase_5": "第五階段",
-          "start_min_5": "第 5 分鐘開始",
-          "end_min_5": "第 5 分鐘結束",
-          "start_ts_5": "開始時間戳記 5",
-          "end_ts_5": "結束時間戳記 5",
-          "phase_6": "第六階段",
-          "start_min_6": "第 6 分鐘開始",
-          "end_min_6": "第 6 分鐘結束",
-          "start_ts_6": "開始時間戳 6",
-          "end_ts_6": "結束時間戳記 6"
+          "action": "行動"
         }
       },
       "assign_profile_phases_select": {
         "title": "分配相位範圍",
         "description": "選擇一個設定檔來配置相位範圍。",
         "data": {
-          "profile": "輪廓",
-          "assign_mode": "分配模式",
-          "source_cycle": "來源週期（對於時間戳模式）"
+          "profile": "輪廓"
         }
       },
       "profile_stats": {
@@ -495,6 +462,38 @@
           "corrected_profile": "正確的程序（如果更正）",
           "corrected_duration": "正確持續時間（以分鐘為單位）（如果進行更正）"
         }
+      },
+      "assign_profile_phases_add": {
+        "title": "增加相位範圍",
+        "description": "在目前草稿中新增一個階段範圍。",
+        "data": {
+          "phase_name": "階段",
+          "start_min": "開始時間",
+          "end_min": "結束分鐘"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "編輯相位範圍",
+        "description": "選擇要編輯的範圍。",
+        "data": {
+          "range_index": "相位範圍"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "編輯相位範圍",
+        "description": "更新選定的相位範圍。",
+        "data": {
+          "phase_name": "階段",
+          "start_min": "開始時間",
+          "end_min": "結束分鐘"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "刪除相位範圍",
+        "description": "選擇要從草稿中刪除的範圍。",
+        "data": {
+          "range_index": "相位範圍"
+        }
       }
     },
     "error": {
@@ -512,7 +511,8 @@
       "incomplete_phase_row": "每個階段行必須包含一個階段以及所選模式的完整開始/結束值。",
       "timestamp_mode_cycle_required": "使用時間戳模式時請選擇來源週期。",
       "feedback_notification_title": "WashData：驗證週期（{device}）",
-      "feedback_notification_message": "**設備**：{device}\n**Program**: {program} ({confidence}% confidence)\n**時間**：{time}\n\nWashData 需要您的協助來驗證偵測到的此週期。\n\n請前往 **設定 > 裝置與服務 > WashData > 設定 > 學習回饋** 以確認或修正此結果。"
+      "feedback_notification_message": "**設備**：{device}\n**Program**: {program} ({confidence}% confidence)\n**時間**：{time}\n\nWashData 需要您的協助來驗證偵測到的此週期。\n\n請前往 **設定 > 裝置與服務 > WashData > 設定 > 學習回饋** 以確認或修正此結果。",
+      "no_phase_ranges": "尚無可用於該操作的階段範圍。"
     },
     "abort": {
       "no_cycles_found": "沒有找到循環",

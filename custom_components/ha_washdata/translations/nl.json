@@ -423,7 +423,8 @@
         "description": "Maak een aangepaste fasenaam en -beschrijving voor dit apparaattype.",
         "data": {
           "phase_name": "Fasenaam",
-          "phase_description": "Fasebeschrijving"
+          "phase_description": "Fasebeschrijving",
+          "target_device_type": "Doelapparaattype"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Fasebereiken toewijzen",
         "description": "Profiel: **{profile_name}**\nModus: **{assign_mode}**\nCyclushint: {cycle_hint}\n\nHuidige bereiken:\n{current_ranges}\n\nFaselabels zijn bedoeld voor weergave en organisatie. Detectie maakt gebruik van vermogenspatronen, niet van fasenamen.",
         "data": {
-          "profile": "Profiel",
-          "assign_mode": "Toewijzingsmodus",
-          "source_cycle": "Broncyclus (vereist voor tijdstempelmodus)",
-          "phase_1": "Fase 1",
-          "start_min_1": "Startminuut 1",
-          "end_min_1": "Eindminuut 1",
-          "start_ts_1": "Begintijdstempel 1",
-          "end_ts_1": "Eindtijdstempel 1",
-          "phase_2": "Fase 2",
-          "start_min_2": "Startminuut 2",
-          "end_min_2": "Eindminuut 2",
-          "start_ts_2": "Begintijdstempel 2",
-          "end_ts_2": "Eindtijdstempel 2",
-          "phase_3": "Fase 3",
-          "start_min_3": "Startminuut 3",
-          "end_min_3": "Eindminuut 3",
-          "start_ts_3": "Begintijdstempel 3",
-          "end_ts_3": "Eindtijdstempel 3",
-          "phase_4": "Fase 4",
-          "start_min_4": "Startminuut 4",
-          "end_min_4": "Eindminuut 4",
-          "start_ts_4": "Begintijdstempel 4",
-          "end_ts_4": "Eindtijdstempel 4",
-          "phase_5": "Fase 5",
-          "start_min_5": "Startminuut 5",
-          "end_min_5": "Eindminuut 5",
-          "start_ts_5": "Begintijdstempel 5",
-          "end_ts_5": "Eindtijdstempel 5",
-          "phase_6": "Fase 6",
-          "start_min_6": "Beginminuut 6",
-          "end_min_6": "Eindminuut 6",
-          "start_ts_6": "Begintijdstempel 6",
-          "end_ts_6": "Eindtijdstempel 6"
+          "action": "Actie"
         }
       },
       "assign_profile_phases_select": {
         "title": "Fasebereiken toewijzen",
         "description": "Selecteer een profiel om fasebereiken te configureren.",
         "data": {
-          "profile": "Profiel",
-          "source_cycle": "Broncyclus (voor tijdstempelmodus)",
-          "assign_mode": "Toewijzingsmodus"
+          "profile": "Profiel"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Fasebereik toevoegen",
+        "description": "Voeg één fasebereik toe aan het huidige concept.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Startminuut",
+          "end_min": "Einde minuut"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Fasebereik bewerken",
+        "description": "Selecteer een bereik dat u wilt bewerken.",
+        "data": {
+          "range_index": "Fasebereik"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Fasebereik bewerken",
+        "description": "Update het geselecteerde fasebereik.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Startminuut",
+          "end_min": "Einde minuut"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Fasebereik verwijderen",
+        "description": "Selecteer een bereik dat u uit het concept wilt verwijderen.",
+        "data": {
+          "range_index": "Fasebereik"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Tijdstempel is ongeldig. Use YYYY-MM-DD HH:MM or HH:MM format.",
       "overlapping_phase_ranges": "Fasebereiken overlappen elkaar. Pas het bereik aan en probeer het opnieuw.",
       "incomplete_phase_row": "Elke faserij moet een fase plus volledige start-/eindwaarden voor de geselecteerde modus bevatten.",
-      "timestamp_mode_cycle_required": "Selecteer een broncyclus als u de tijdstempelmodus gebruikt."
+      "timestamp_mode_cycle_required": "Selecteer een broncyclus als u de tijdstempelmodus gebruikt.",
+      "no_phase_ranges": "Er zijn nog geen fasebereiken beschikbaar voor die actie."
     },
     "abort": {
       "no_cycles_found": "Geen cycli gevonden",

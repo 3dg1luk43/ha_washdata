@@ -2,6 +2,8 @@
 
 A Python script to automatically translate Home Assistant integration strings and frontend card translations using Google Translate (via `deep-translator`).
 
+The script source now lives in the git submodule at `scripts/ha_integration_translator`.
+
 ## Features
 
 - **Automated Translation**: Uses `deep-translator` (GoogleTranslator) to translate `en.json` to any language supported by Home Assistant.
@@ -27,10 +29,10 @@ pip install requests deep-translator
 
 ## Usage
 
-Run the script from the command line:
+Run the script from the repository root:
 
 ```bash
-python3 translate.py <translations_dir> [languages...] [options]
+python3 scripts/ha_integration_translator/translate.py <translations_dir> [languages...] [options]
 ```
 
 ### Arguments
@@ -55,17 +57,17 @@ Language source behavior:
 
 Translate all missing keys to German and French:
 ```bash
-python3 translate.py ./custom_components/ha_washdata/translations de fr
+python3 scripts/ha_integration_translator/translate.py ./custom_components/ha_washdata/translations de fr
 ```
 
 Update all existing translation files with new keys from `en.json`:
 ```bash
-python3 translate.py ./custom_components/ha_washdata/translations
+python3 scripts/ha_integration_translator/translate.py ./custom_components/ha_washdata/translations
 ```
 
 Update both backend translations and the frontend card:
 ```bash
-python3 translate.py ./custom_components/ha_washdata/translations --card-js ./dist/ha-washdata-card.js
+python3 scripts/ha_integration_translator/translate.py ./custom_components/ha_washdata/translations --card-file ./dist/ha-washdata-card.js
 ```
 
 ## How it Works

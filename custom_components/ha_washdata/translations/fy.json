@@ -423,7 +423,8 @@
         "description": "Meitsje in oanpaste fazenamme en beskriuwing foar dit apparaattype.",
         "data": {
           "phase_name": "Fase Namme",
-          "phase_description": "Fase Beskriuwing"
+          "phase_description": "Fase Beskriuwing",
+          "target_device_type": "Target Device Type"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Fasebereiken tawize",
         "description": "Profyl: **{profile_name}**\nModus: **{assign_mode}**\nCycle hint: {cycle_hint}\n\nAktuele berik:\n{current_ranges}\n\nFase-etiketten binne foar werjefte en organisaasje. Detection brûkt macht patroanen, net faze nammen.",
         "data": {
-          "profile": "Profyl",
-          "assign_mode": "Opdracht modus",
-          "source_cycle": "Boarnesyklus (fereaske foar tiidstempelmodus)",
-          "phase_1": "Fase 1",
-          "start_min_1": "Startminút 1",
-          "end_min_1": "Einde minút 1",
-          "start_ts_1": "Tiidstempel begjinne 1",
-          "end_ts_1": "Einde tiidstempel 1",
-          "phase_2": "Fase 2",
-          "start_min_2": "Start minút 2",
-          "end_min_2": "Einde minút 2",
-          "start_ts_2": "Tiidstempel 2 begjinne",
-          "end_ts_2": "Einde tiidstempel 2",
-          "phase_3": "Fase 3",
-          "start_min_3": "Start minút 3",
-          "end_min_3": "Einde minút 3",
-          "start_ts_3": "Tiidstempel begjinne 3",
-          "end_ts_3": "Einde tiidstempel 3",
-          "phase_4": "Fase 4",
-          "start_min_4": "Startminút 4",
-          "end_min_4": "Einde minút 4",
-          "start_ts_4": "Tiidstempel begjinne 4",
-          "end_ts_4": "Einde tiidstempel 4",
-          "phase_5": "Fase 5",
-          "start_min_5": "Start minút 5",
-          "end_min_5": "Einde minút 5",
-          "start_ts_5": "Tiidstempel begjinne 5",
-          "end_ts_5": "Einde tiidstempel 5",
-          "phase_6": "Fase 6",
-          "start_min_6": "Start minút 6",
-          "end_min_6": "Einde minút 6",
-          "start_ts_6": "Tiidstempel begjinne 6",
-          "end_ts_6": "Einde tiidstempel 6"
+          "action": "Aksje"
         }
       },
       "assign_profile_phases_select": {
         "title": "Fasebereiken tawize",
         "description": "Selektearje in profyl om fazeberiken te konfigurearjen.",
         "data": {
-          "profile": "Profyl",
-          "source_cycle": "Boarnesyklus (foar tiidstempelmodus)",
-          "assign_mode": "Opdracht modus"
+          "profile": "Profyl"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Faseberik tafoegje",
+        "description": "Foegje ien fazeberik ta oan it aktuele ûntwerp.",
+        "data": {
+          "phase_name": "Faze",
+          "start_min": "Start minút",
+          "end_min": "Eind minút"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Faseberik bewurkje",
+        "description": "Selektearje in berik om te bewurkjen.",
+        "data": {
+          "range_index": "Fase Range"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Faseberik bewurkje",
+        "description": "Update it selektearre fazeberik.",
+        "data": {
+          "phase_name": "Faze",
+          "start_min": "Start minút",
+          "end_min": "Eind minút"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Faseberik wiskje",
+        "description": "Selektearje in berik om út it konsept te ferwiderjen.",
+        "data": {
+          "range_index": "Fase Range"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Tiidstempel is ûnjildich. Brûk JJJJ-MM-DD UU:MM of UU:MM opmaak.",
       "overlapping_phase_ranges": "Faseberiken oerlaapje. Pas de berikken oan en besykje it nochris.",
       "incomplete_phase_row": "Eltse faze rige moat befetsje in faze plus folsleine start / ein wearden foar de selektearre modus.",
-      "timestamp_mode_cycle_required": "Selektearje asjebleaft in boarnesyklus by it brûken fan tiidstempelmodus."
+      "timestamp_mode_cycle_required": "Selektearje asjebleaft in boarnesyklus by it brûken fan tiidstempelmodus.",
+      "no_phase_ranges": "Der binne noch gjin fazebereiken beskikber foar dy aksje."
     },
     "abort": {
       "no_cycles_found": "Gjin cycles fûn",

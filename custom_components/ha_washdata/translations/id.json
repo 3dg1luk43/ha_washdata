@@ -423,7 +423,8 @@
         "description": "Buat nama dan deskripsi fase khusus untuk jenis perangkat ini.",
         "data": {
           "phase_name": "Nama Fase",
-          "phase_description": "Deskripsi Fase"
+          "phase_description": "Deskripsi Fase",
+          "target_device_type": "Jenis Perangkat Target"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Tetapkan Rentang Fase",
         "description": "Profil: **{profile_name}**\nModus: **{assign_mode}**\nPetunjuk siklus: {cycle_hint}\n\nRentang saat ini:\n{current_ranges}\n\nLabel fase untuk tampilan dan pengorganisasian. Deteksi menggunakan pola daya, bukan nama fase.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Modus Penugasan",
-          "source_cycle": "Siklus Sumber (diperlukan untuk mode stempel waktu)",
-          "phase_1": "Fase 1",
-          "start_min_1": "Mulai Menit 1",
-          "end_min_1": "Akhir Menit 1",
-          "start_ts_1": "Mulai Stempel Waktu 1",
-          "end_ts_1": "Stempel Waktu Berakhir 1",
-          "phase_2": "Fase 2",
-          "start_min_2": "Mulai Menit 2",
-          "end_min_2": "Akhir Menit 2",
-          "start_ts_2": "Mulai Stempel Waktu 2",
-          "end_ts_2": "Stempel Waktu Berakhir 2",
-          "phase_3": "Fase 3",
-          "start_min_3": "Mulai Menit 3",
-          "end_min_3": "Akhir Menit 3",
-          "start_ts_3": "Mulai Stempel Waktu 3",
-          "end_ts_3": "Stempel Waktu Berakhir 3",
-          "phase_4": "Fase 4",
-          "start_min_4": "Mulai Menit 4",
-          "end_min_4": "Akhir Menit 4",
-          "start_ts_4": "Mulai Stempel Waktu 4",
-          "end_ts_4": "Stempel Waktu Akhir 4",
-          "phase_5": "Fase 5",
-          "start_min_5": "Mulai Menit 5",
-          "end_min_5": "Akhir Menit 5",
-          "start_ts_5": "Mulai Stempel Waktu 5",
-          "end_ts_5": "Stempel Waktu Akhir 5",
-          "phase_6": "Fase 6",
-          "start_min_6": "Mulai Menit 6",
-          "end_min_6": "Akhir Menit 6",
-          "start_ts_6": "Mulai Stempel Waktu 6",
-          "end_ts_6": "Stempel Waktu Berakhir 6"
+          "action": "Tindakan"
         }
       },
       "assign_profile_phases_select": {
         "title": "Tetapkan Rentang Fase",
         "description": "Pilih profil untuk mengonfigurasi rentang fase.",
         "data": {
-          "profile": "Profil",
-          "source_cycle": "Siklus Sumber (untuk mode stempel waktu)",
-          "assign_mode": "Modus Penugasan"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Tambahkan Rentang Fase",
+        "description": "Tambahkan satu rentang fase ke draf saat ini.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Mulai Menit",
+          "end_min": "Menit Akhir"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Edit Rentang Fase",
+        "description": "Pilih rentang yang akan diedit.",
+        "data": {
+          "range_index": "Rentang Fase"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Edit Rentang Fase",
+        "description": "Perbarui rentang fase yang dipilih.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Mulai Menit",
+          "end_min": "Menit Akhir"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Hapus Rentang Fase",
+        "description": "Pilih rentang yang akan dihapus dari draf.",
+        "data": {
+          "range_index": "Rentang Fase"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Stempel waktu tidak valid. Gunakan format YYYY-MM-DD HH:MM atau HH:MM.",
       "overlapping_phase_ranges": "Rentang fase tumpang tindih. Sesuaikan rentangnya dan coba lagi.",
       "incomplete_phase_row": "Setiap baris fase harus menyertakan fase ditambah nilai awal/akhir yang lengkap untuk mode yang dipilih.",
-      "timestamp_mode_cycle_required": "Silakan pilih siklus sumber saat menggunakan mode stempel waktu."
+      "timestamp_mode_cycle_required": "Silakan pilih siklus sumber saat menggunakan mode stempel waktu.",
+      "no_phase_ranges": "Belum ada rentang fase yang tersedia untuk tindakan tersebut."
     },
     "abort": {
       "no_cycles_found": "Tidak ada siklus yang ditemukan",

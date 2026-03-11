@@ -423,7 +423,8 @@
         "description": "Crea un nome de fase personalizado e unha descrición para este tipo de dispositivo.",
         "data": {
           "phase_name": "Nome da fase",
-          "phase_description": "Descrición da fase"
+          "phase_description": "Descrición da fase",
+          "target_device_type": "Tipo de dispositivo de destino"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Asignar intervalos de fase",
         "description": "Perfil: **{profile_name}**\nModo: **{assign_mode}**\nConsello de ciclo: {cycle_hint}\n\nRangos actuais:\n{current_ranges}\n\nAs etiquetas de fase son para exhibición e organización. A detección usa patróns de potencia, non nomes de fase.",
         "data": {
-          "profile": "Perfil",
-          "assign_mode": "Modo de asignación",
-          "source_cycle": "Ciclo de orixe (obrigatorio para o modo de marca de tempo)",
-          "phase_1": "Fase 1",
-          "start_min_1": "Minuto de inicio 1",
-          "end_min_1": "Fin do minuto 1",
-          "start_ts_1": "Marca de tempo de inicio 1",
-          "end_ts_1": "Marca de tempo de finalización 1",
-          "phase_2": "Fase 2",
-          "start_min_2": "Minuto de inicio 2",
-          "end_min_2": "Fin do minuto 2",
-          "start_ts_2": "Marca de tempo de inicio 2",
-          "end_ts_2": "Marca de tempo de fin 2",
-          "phase_3": "Fase 3",
-          "start_min_3": "Minuto de inicio 3",
-          "end_min_3": "Fin do minuto 3",
-          "start_ts_3": "Marca de tempo de inicio 3",
-          "end_ts_3": "Marca de tempo de fin 3",
-          "phase_4": "Fase 4",
-          "start_min_4": "Minuto de inicio 4",
-          "end_min_4": "Finalización do minuto 4",
-          "start_ts_4": "Marca de tempo de inicio 4",
-          "end_ts_4": "Marca de tempo de finalización 4",
-          "phase_5": "Fase 5",
-          "start_min_5": "Minuto de inicio 5",
-          "end_min_5": "Fin do minuto 5",
-          "start_ts_5": "Marca de tempo de inicio 5",
-          "end_ts_5": "Marca de tempo de fin 5",
-          "phase_6": "Fase 6",
-          "start_min_6": "Minuto de inicio 6",
-          "end_min_6": "Finalización do minuto 6",
-          "start_ts_6": "Marca de tempo de inicio 6",
-          "end_ts_6": "Marca de tempo de finalización 6"
+          "action": "Acción"
         }
       },
       "assign_profile_phases_select": {
         "title": "Asignar intervalos de fase",
         "description": "Seleccione un perfil para configurar intervalos de fase.",
         "data": {
-          "profile": "Perfil",
-          "source_cycle": "Ciclo de orixe (para o modo de marca de tempo)",
-          "assign_mode": "Modo de asignación"
+          "profile": "Perfil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Engadir intervalo de fases",
+        "description": "Engade un intervalo de fase ao borrador actual.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Minuto de inicio",
+          "end_min": "Minuto Final"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Editar intervalo de fases",
+        "description": "Seleccione un intervalo para editar.",
+        "data": {
+          "range_index": "Rango de fases"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Editar intervalo de fases",
+        "description": "Actualiza o intervalo de fase seleccionado.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Minuto de inicio",
+          "end_min": "Minuto Final"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Eliminar intervalo de fases",
+        "description": "Selecciona un intervalo para eliminar do borrador.",
+        "data": {
+          "range_index": "Rango de fases"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "A marca de tempo non é válida. Use o formato AAAA-MM-DD HH:MM ou HH:MM.",
       "overlapping_phase_ranges": "Os intervalos de fase se solapan. Axusta os intervalos e téntao de novo.",
       "incomplete_phase_row": "Cada fila de fase debe incluír unha fase máis os valores de inicio/fin completos para o modo seleccionado.",
-      "timestamp_mode_cycle_required": "Seleccione un ciclo de orixe cando use o modo de marca de tempo."
+      "timestamp_mode_cycle_required": "Seleccione un ciclo de orixe cando use o modo de marca de tempo.",
+      "no_phase_ranges": "Aínda non hai intervalos de fase dispoñibles para esa acción."
     },
     "abort": {
       "no_cycles_found": "Non se atoparon ciclos",

@@ -423,7 +423,8 @@
         "description": "Créez un nom de phase personnalisé et une description pour ce type d'appareil.",
         "data": {
           "phase_name": "Nom de la phase",
-          "phase_description": "Description des phases"
+          "phase_description": "Description des phases",
+          "target_device_type": "Type de périphérique cible"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Attribuer des plages de phases",
         "description": "Profil : **{profile_name}**\nMode : **{assign_mode}**\nIndice de cycle : {cycle_hint}\n\nGammes actuelles :\n{current_ranges}\n\nLes étiquettes de phase sont destinées à l’affichage et à l’organisation. La détection utilise des modèles de puissance, pas des noms de phases.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Mode d'affectation",
-          "source_cycle": "Cycle source (obligatoire pour le mode horodatage)",
-          "phase_1": "Phase 1",
-          "start_min_1": "Début de la première minute",
-          "end_min_1": "Fin de la première minute",
-          "start_ts_1": "Horodatage de début 1",
-          "end_ts_1": "Horodatage de fin 1",
-          "phase_2": "Phase 2",
-          "start_min_2": "Début de la minute 2",
-          "end_min_2": "Fin de la minute 2",
-          "start_ts_2": "Horodatage de démarrage 2",
-          "end_ts_2": "Horodatage de fin 2",
-          "phase_3": "Phase 3",
-          "start_min_3": "Début de la minute 3",
-          "end_min_3": "Fin de la minute 3",
-          "start_ts_3": "Horodatage de démarrage 3",
-          "end_ts_3": "Horodatage de fin 3",
-          "phase_4": "Phase 4",
-          "start_min_4": "Début de la minute 4",
-          "end_min_4": "Fin de la minute 4",
-          "start_ts_4": "Horodatage de démarrage 4",
-          "end_ts_4": "Horodatage de fin 4",
-          "phase_5": "Phase 5",
-          "start_min_5": "Début de la minute 5",
-          "end_min_5": "Fin de la minute 5",
-          "start_ts_5": "Horodatage de début 5",
-          "end_ts_5": "Horodatage de fin 5",
-          "phase_6": "Phase 6",
-          "start_min_6": "Début de la minute 6",
-          "end_min_6": "Fin de la minute 6",
-          "start_ts_6": "Horodatage de début 6",
-          "end_ts_6": "Horodatage de fin 6"
+          "action": "Action"
         }
       },
       "assign_profile_phases_select": {
         "title": "Attribuer des plages de phases",
         "description": "Sélectionnez un profil pour configurer les plages de phases.",
         "data": {
-          "profile": "Profil",
-          "source_cycle": "Cycle source (pour le mode horodatage)",
-          "assign_mode": "Mode d'affectation"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Ajouter une plage de phases",
+        "description": "Ajoutez une plage de phases au brouillon actuel.",
+        "data": {
+          "phase_name": "Phase",
+          "start_min": "Minute de début",
+          "end_min": "Minute de fin"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Modifier la plage de phases",
+        "description": "Sélectionnez une plage à modifier.",
+        "data": {
+          "range_index": "Plage de phases"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Modifier la plage de phases",
+        "description": "Mettez à jour la plage de phases sélectionnée.",
+        "data": {
+          "phase_name": "Phase",
+          "start_min": "Minute de début",
+          "end_min": "Minute de fin"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Supprimer la plage de phases",
+        "description": "Sélectionnez une plage à supprimer du brouillon.",
+        "data": {
+          "range_index": "Plage de phases"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "L'horodatage n'est pas valide. Utilisez le format AAAA-MM-JJ HH:MM ou HH:MM.",
       "overlapping_phase_ranges": "Les plages de phases se chevauchent. Ajustez les plages et réessayez.",
       "incomplete_phase_row": "Chaque ligne de phase doit inclure une phase ainsi que les valeurs complètes de début/fin pour le mode sélectionné.",
-      "timestamp_mode_cycle_required": "Veuillez sélectionner un cycle source lorsque vous utilisez le mode horodatage."
+      "timestamp_mode_cycle_required": "Veuillez sélectionner un cycle source lorsque vous utilisez le mode horodatage.",
+      "no_phase_ranges": "Aucune plage de phases n’est encore disponible pour cette action."
     },
     "abort": {
       "no_cycles_found": "Aucun cycle trouvé",

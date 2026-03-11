@@ -423,7 +423,8 @@
         "description": "このデバイス タイプのカスタム フェーズ名と説明を作成します。",
         "data": {
           "phase_name": "フェーズ名",
-          "phase_description": "フェーズの説明"
+          "phase_description": "フェーズの説明",
+          "target_device_type": "ターゲットデバイスの種類"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "位相範囲の割り当て",
         "description": "プロフィール: **{profile_name}**\nモード: **{assign_mode}**\nサイクルヒント: {cycle_hint}\n\n電流範囲:\n{current_ranges}\n\nフェーズ ラベルは表示と整理用です。検出には、位相名ではなく電力パターンが使用されます。",
         "data": {
-          "profile": "プロフィール",
-          "assign_mode": "アサインモード",
-          "source_cycle": "ソースサイクル (タイムスタンプモードに必要)",
-          "phase_1": "フェーズ 1",
-          "start_min_1": "開始分 1",
-          "end_min_1": "1分目を終了",
-          "start_ts_1": "開始タイムスタンプ 1",
-          "end_ts_1": "終了タイムスタンプ 1",
-          "phase_2": "フェーズ2",
-          "start_min_2": "開始分 2",
-          "end_min_2": "2分目を終了",
-          "start_ts_2": "開始タイムスタンプ 2",
-          "end_ts_2": "終了タイムスタンプ 2",
-          "phase_3": "フェーズ 3",
-          "start_min_3": "開始3分目",
-          "end_min_3": "3分終了",
-          "start_ts_3": "開始タイムスタンプ 3",
-          "end_ts_3": "終了タイムスタンプ 3",
-          "phase_4": "フェーズ4",
-          "start_min_4": "開始4分目",
-          "end_min_4": "4分終了",
-          "start_ts_4": "開始タイムスタンプ 4",
-          "end_ts_4": "終了タイムスタンプ 4",
-          "phase_5": "フェーズ5",
-          "start_min_5": "開始5分目",
-          "end_min_5": "5分終了",
-          "start_ts_5": "開始タイムスタンプ 5",
-          "end_ts_5": "終了タイムスタンプ 5",
-          "phase_6": "フェーズ6",
-          "start_min_6": "開始6分目",
-          "end_min_6": "6分終了",
-          "start_ts_6": "開始タイムスタンプ 6",
-          "end_ts_6": "終了タイムスタンプ 6"
+          "action": "アクション"
         }
       },
       "assign_profile_phases_select": {
         "title": "位相範囲の割り当て",
         "description": "プロファイルを選択して位相範囲を設定します。",
         "data": {
-          "profile": "プロフィール",
-          "assign_mode": "アサインモード",
-          "source_cycle": "ソースサイクル (タイムスタンプモードの場合)"
+          "profile": "プロフィール"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "位相範囲の追加",
+        "description": "現在のドラフトに 1 つのフェーズ範囲を追加します。",
+        "data": {
+          "phase_name": "段階",
+          "start_min": "開始分",
+          "end_min": "終了分"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "位相範囲の編集",
+        "description": "編集する範囲を選択します。",
+        "data": {
+          "range_index": "位相範囲"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "位相範囲の編集",
+        "description": "選択した位相範囲を更新します。",
+        "data": {
+          "phase_name": "段階",
+          "start_min": "開始分",
+          "end_min": "終了分"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "位相範囲の削除",
+        "description": "下書きから削除する範囲を選択します。",
+        "data": {
+          "range_index": "位相範囲"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Timestamp is invalid. YYYY-MM-DD HH:MM または HH:MM 形式を使用します。",
       "overlapping_phase_ranges": "位相範囲が重複します。範囲を調整して再試行してください。",
       "incomplete_phase_row": "各フェーズ行には、フェーズと、選択したモードの完全な開始/終了値が含まれている必要があります。",
-      "timestamp_mode_cycle_required": "タイムスタンプモードを使用する場合はソースサイクルを選択してください。"
+      "timestamp_mode_cycle_required": "タイムスタンプモードを使用する場合はソースサイクルを選択してください。",
+      "no_phase_ranges": "そのアクションに使用できるフェーズ範囲はまだありません。"
     },
     "abort": {
       "no_cycles_found": "サイクルが見つかりません",

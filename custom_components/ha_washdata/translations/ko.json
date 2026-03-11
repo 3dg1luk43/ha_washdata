@@ -423,7 +423,8 @@
         "description": "이 장치 유형에 대한 사용자 정의 단계 이름과 설명을 만듭니다.",
         "data": {
           "phase_name": "단계 이름",
-          "phase_description": "단계 설명"
+          "phase_description": "단계 설명",
+          "target_device_type": "대상 장치 유형"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "위상 범위 할당",
         "description": "프로필: **{profile_name}**\n모드: **{assign_mode}**\n주기 힌트: {cycle_hint}\n\n현재 범위:\n{current_ranges}\n\n단계 레이블은 표시 및 구성용입니다. 감지에서는 위상 이름이 아닌 전력 패턴을 사용합니다.",
         "data": {
-          "profile": "윤곽",
-          "assign_mode": "할당 모드",
-          "source_cycle": "소스 사이클(타임스탬프 모드에 필요)",
-          "phase_1": "1단계",
-          "start_min_1": "1분 시작",
-          "end_min_1": "1분 종료",
-          "start_ts_1": "타임스탬프 1 시작",
-          "end_ts_1": "타임스탬프 1 종료",
-          "phase_2": "2단계",
-          "start_min_2": "2분 시작",
-          "end_min_2": "2분 종료",
-          "start_ts_2": "타임스탬프 2 시작",
-          "end_ts_2": "타임스탬프 2 종료",
-          "phase_3": "3단계",
-          "start_min_3": "3분 시작",
-          "end_min_3": "3분 종료",
-          "start_ts_3": "타임스탬프 3 시작",
-          "end_ts_3": "타임스탬프 3 종료",
-          "phase_4": "4단계",
-          "start_min_4": "4분 시작",
-          "end_min_4": "4분 종료",
-          "start_ts_4": "타임스탬프 4 시작",
-          "end_ts_4": "타임스탬프 4 종료",
-          "phase_5": "5단계",
-          "start_min_5": "5분 시작",
-          "end_min_5": "5분 종료",
-          "start_ts_5": "타임스탬프 5 시작",
-          "end_ts_5": "타임스탬프 5 종료",
-          "phase_6": "6단계",
-          "start_min_6": "6분 시작",
-          "end_min_6": "6분 종료",
-          "start_ts_6": "타임스탬프 6 시작",
-          "end_ts_6": "타임스탬프 6 종료"
+          "action": "행동"
         }
       },
       "assign_profile_phases_select": {
         "title": "위상 범위 할당",
         "description": "위상 범위를 구성하려면 프로필을 선택하세요.",
         "data": {
-          "profile": "윤곽",
-          "source_cycle": "소스 사이클(타임스탬프 모드용)",
-          "assign_mode": "할당 모드"
+          "profile": "윤곽"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "위상 범위 추가",
+        "description": "현재 초안에 하나의 위상 범위를 추가합니다.",
+        "data": {
+          "phase_name": "단계",
+          "start_min": "시작 시간(분)",
+          "end_min": "종료 시간(분)"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "위상 범위 편집",
+        "description": "편집할 범위를 선택하세요.",
+        "data": {
+          "range_index": "위상 범위"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "위상 범위 편집",
+        "description": "선택한 위상 범위를 업데이트합니다.",
+        "data": {
+          "phase_name": "단계",
+          "start_min": "시작 시간(분)",
+          "end_min": "종료 시간(분)"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "위상 범위 삭제",
+        "description": "초안에서 제거할 범위를 선택하세요.",
+        "data": {
+          "range_index": "위상 범위"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "타임스탬프가 잘못되었습니다. YYYY-MM-DD HH:MM 또는 HH:MM 형식을 사용하세요.",
       "overlapping_phase_ranges": "위상 범위가 겹칩니다. 범위를 조정하고 다시 시도하세요.",
       "incomplete_phase_row": "각 단계 행에는 단계와 선택한 모드에 대한 전체 시작/종료 값이 포함되어야 합니다.",
-      "timestamp_mode_cycle_required": "타임스탬프 모드를 사용할 때 소스 주기를 선택하세요."
+      "timestamp_mode_cycle_required": "타임스탬프 모드를 사용할 때 소스 주기를 선택하세요.",
+      "no_phase_ranges": "아직 해당 작업에 사용할 수 있는 위상 범위가 없습니다."
     },
     "abort": {
       "no_cycles_found": "사이클을 찾을 수 없습니다.",

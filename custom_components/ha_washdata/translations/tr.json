@@ -423,7 +423,8 @@
         "description": "Bu cihaz türü için özel bir aşama adı ve açıklaması oluşturun.",
         "data": {
           "phase_name": "Aşama Adı",
-          "phase_description": "Aşama Açıklaması"
+          "phase_description": "Aşama Açıklaması",
+          "target_device_type": "Hedef Cihaz Türü"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Faz Aralıklarını Atayın",
         "description": "Profil: **{profile_name}**\nMod: **{assign_mode}**\nDöngü ipucu: {cycle_hint}\n\nMevcut aralıklar:\n{current_ranges}\n\nFaz etiketleri görüntüleme ve düzenleme amaçlıdır. Algılama, faz adlarını değil, güç modellerini kullanır.",
         "data": {
-          "profile": "Profil",
-          "assign_mode": "Atama Modu",
-          "source_cycle": "Kaynak Döngüsü (zaman damgası modu için gereklidir)",
-          "phase_1": "Aşama 1",
-          "start_min_1": "Başlangıç ​​Dakikası 1",
-          "end_min_1": "Bitiş Dakikası 1",
-          "start_ts_1": "Zaman Damgası 1'i başlat",
-          "end_ts_1": "Bitiş Zaman Damgası 1",
-          "phase_2": "Aşama 2",
-          "start_min_2": "Başlangıç ​​Dakikası 2",
-          "end_min_2": "Bitiş Dakikası 2",
-          "start_ts_2": "Zaman Damgası 2'yi başlat",
-          "end_ts_2": "Bitiş Zaman Damgası 2",
-          "phase_3": "Aşama 3",
-          "start_min_3": "3. Dakikayı Başlat",
-          "end_min_3": "Bitiş Dakikası 3",
-          "start_ts_3": "Zaman Damgası 3'ü başlat",
-          "end_ts_3": "Bitiş Zaman Damgası 3",
-          "phase_4": "Aşama 4",
-          "start_min_4": "4. Dakikayı Başlat",
-          "end_min_4": "Bitiş Dakikası 4",
-          "start_ts_4": "Zaman Damgası 4'ü başlat",
-          "end_ts_4": "Bitiş Zaman Damgası 4",
-          "phase_5": "Aşama 5",
-          "start_min_5": "5. Dakikayı Başlat",
-          "end_min_5": "Bitiş Dakikası 5",
-          "start_ts_5": "Zaman Damgası 5'i başlat",
-          "end_ts_5": "Bitiş Zaman Damgası 5",
-          "phase_6": "Aşama 6",
-          "start_min_6": "6. Dakikayı Başlat",
-          "end_min_6": "Bitiş Dakikası 6",
-          "start_ts_6": "Zaman Damgası 6'yı Başlat",
-          "end_ts_6": "Bitiş Zaman Damgası 6"
+          "action": "Aksiyon"
         }
       },
       "assign_profile_phases_select": {
         "title": "Faz Aralıklarını Atayın",
         "description": "Faz aralıklarını yapılandırmak için bir profil seçin.",
         "data": {
-          "profile": "Profil",
-          "source_cycle": "Kaynak Döngüsü (zaman damgası modu için)",
-          "assign_mode": "Atama Modu"
+          "profile": "Profil"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Faz Aralığı Ekle",
+        "description": "Mevcut taslağa bir aşama aralığı ekleyin.",
+        "data": {
+          "phase_name": "Faz",
+          "start_min": "Başlangıç ​​Dakikası",
+          "end_min": "Bitiş Dakikası"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Faz Aralığını Düzenle",
+        "description": "Düzenlemek için bir aralık seçin.",
+        "data": {
+          "range_index": "Faz Aralığı"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Faz Aralığını Düzenle",
+        "description": "Seçilen faz aralığını güncelleyin.",
+        "data": {
+          "phase_name": "Faz",
+          "start_min": "Başlangıç ​​Dakikası",
+          "end_min": "Bitiş Dakikası"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Faz Aralığını Sil",
+        "description": "Taslaktan kaldırılacak bir aralık seçin.",
+        "data": {
+          "range_index": "Faz Aralığı"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Zaman damgası geçersiz. YYYY-AA-GG SS:DD veya SS:DD biçimini kullanın.",
       "overlapping_phase_ranges": "Faz aralıkları çakışıyor. Aralıkları ayarlayıp tekrar deneyin.",
       "incomplete_phase_row": "Her aşama satırı, seçilen mod için bir aşama artı tam başlangıç/bitiş değerlerini içermelidir.",
-      "timestamp_mode_cycle_required": "Zaman damgası modunu kullanırken lütfen bir kaynak döngüsü seçin."
+      "timestamp_mode_cycle_required": "Zaman damgası modunu kullanırken lütfen bir kaynak döngüsü seçin.",
+      "no_phase_ranges": "Bu eylem için henüz herhangi bir faz aralığı mevcut değil."
     },
     "abort": {
       "no_cycles_found": "Döngü bulunamadı",

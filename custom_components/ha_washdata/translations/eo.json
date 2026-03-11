@@ -423,7 +423,8 @@
         "description": "Kreu kutiman fazan nomon kaj priskribon por ĉi tiu tipo de aparato.",
         "data": {
           "phase_name": "Faza Nomo",
-          "phase_description": "Faza Priskribo"
+          "phase_description": "Faza Priskribo",
+          "target_device_type": "Cela Aparato Tipo"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Asignu Fazintervalojn",
         "description": "Profilo: **{profile_name}**\nReĝimo: **{assign_mode}**\nCikla sugesto: {cycle_hint}\n\nNunaj intervaloj:\n{current_ranges}\n\nFazaj etikedoj estas por ekrano kaj organizo. Detekto uzas potencajn ŝablonojn, ne faznomojn.",
         "data": {
-          "profile": "Profilo",
-          "assign_mode": "Asigno-Reĝimo",
-          "source_cycle": "Fonta Ciklo (postulata por tempostampo-reĝimo)",
-          "phase_1": "Fazo 1",
-          "start_min_1": "Komencu Minuton 1",
-          "end_min_1": "Fina Minuto 1",
-          "start_ts_1": "Komencu Tempmarkon 1",
-          "end_ts_1": "Fini Tempmarkon 1",
-          "phase_2": "Fazo 2",
-          "start_min_2": "Komencu Minuton 2",
-          "end_min_2": "Fina Minuto 2",
-          "start_ts_2": "Komencu Tempmarkon 2",
-          "end_ts_2": "Fini Tempmarkon 2",
-          "phase_3": "Fazo 3",
-          "start_min_3": "Komencu Minuton 3",
-          "end_min_3": "Fina Minuto 3",
-          "start_ts_3": "Komencu Tempmarkon 3",
-          "end_ts_3": "Fini Tempmarkon 3",
-          "phase_4": "Fazo 4",
-          "start_min_4": "Komencu Minuton 4",
-          "end_min_4": "Fina Minuto 4",
-          "start_ts_4": "Komencu Tempmarkon 4",
-          "end_ts_4": "Fini Tempmarkon 4",
-          "phase_5": "Fazo 5",
-          "start_min_5": "Komencu Minuton 5",
-          "end_min_5": "Fina Minuto 5",
-          "start_ts_5": "Komencu Tempmarkon 5",
-          "end_ts_5": "Fini Tempmarkon 5",
-          "phase_6": "Fazo 6",
-          "start_min_6": "Komencu Minuton 6",
-          "end_min_6": "Finminuto 6",
-          "start_ts_6": "Komencu Tempmarkon 6",
-          "end_ts_6": "Fini Tempmarkon 6"
+          "action": "Ago"
         }
       },
       "assign_profile_phases_select": {
         "title": "Asignu Fazintervalojn",
         "description": "Elektu profilon por agordi fazintervalojn.",
         "data": {
-          "profile": "Profilo",
-          "source_cycle": "Fonta Ciklo (por tempostampo-reĝimo)",
-          "assign_mode": "Asigno-Reĝimo"
+          "profile": "Profilo"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Aldonu Fazan Gamon",
+        "description": "Aldonu unu fazan gamon al la nuna skizo.",
+        "data": {
+          "phase_name": "Fazo",
+          "start_min": "Komenca Minuto",
+          "end_min": "Fina Minuto"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Redakti Phase Range",
+        "description": "Elektu gamon por redakti.",
+        "data": {
+          "range_index": "Faza Gamo"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Redakti Phase Range",
+        "description": "Ĝisdatigu la elektitan fazan gamon.",
+        "data": {
+          "phase_name": "Fazo",
+          "start_min": "Komenca Minuto",
+          "end_min": "Fina Minuto"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Forigi Fazan Gamon",
+        "description": "Elektu gamon por forigi el la skizo.",
+        "data": {
+          "range_index": "Faza Gamo"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Tempostampo estas nevalida. Uzu la formaton YYYY-MM-DD HH:MM aŭ HH:MM.",
       "overlapping_phase_ranges": "Fazaj intervaloj interkovras. Alĝustigu la intervalojn kaj provu denove.",
       "incomplete_phase_row": "Ĉiu fazvico devas inkludi fazon kaj pliajn kompletajn komencajn/finvalorojn por la elektita reĝimo.",
-      "timestamp_mode_cycle_required": "Bonvolu elekti fontciklon kiam vi uzas tempostampilon."
+      "timestamp_mode_cycle_required": "Bonvolu elekti fontciklon kiam vi uzas tempostampilon.",
+      "no_phase_ranges": "Neniuj fazintervaloj ankoraŭ haveblas por tiu ago."
     },
     "abort": {
       "no_cycles_found": "Neniuj cikloj trovitaj",

@@ -423,7 +423,8 @@
         "description": "Búðu til sérsniðið áfangaheiti og lýsingu fyrir þessa tegund tækis.",
         "data": {
           "phase_name": "Fasa nafn",
-          "phase_description": "Áfangalýsing"
+          "phase_description": "Áfangalýsing",
+          "target_device_type": "Tegund marktækis"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "Úthluta áfangasviðum",
         "description": "Prófíll: **{profile_name}**\nStilling: **{assign_mode}**\nHringrás: {cycle_hint}\n\nNúverandi svið:\n{current_ranges}\n\nFasamerki eru til sýnis og skipulags. Uppgötvun notar kraftmynstur, ekki fasaheiti.",
         "data": {
-          "profile": "Prófíll",
-          "assign_mode": "Úthlutunarhamur",
-          "source_cycle": "Upprunahringur (nauðsynlegt fyrir tímastimplaham)",
-          "phase_1": "Áfangi 1",
-          "start_min_1": "Byrjunarmínúta 1",
-          "end_min_1": "Lokamínúta 1",
-          "start_ts_1": "Byrja tímastimpill 1",
-          "end_ts_1": "Lokatímastimpill 1",
-          "phase_2": "Áfangi 2",
-          "start_min_2": "Byrjunarmínúta 2",
-          "end_min_2": "Lokamínúta 2",
-          "start_ts_2": "Byrja tímastimpill 2",
-          "end_ts_2": "Lokatímastimpill 2",
-          "phase_3": "3. áfangi",
-          "start_min_3": "Byrjunarmínúta 3",
-          "end_min_3": "Lokamínúta 3",
-          "start_ts_3": "Byrja tímastimpill 3",
-          "end_ts_3": "Lokatímastimpill 3",
-          "phase_4": "Áfangi 4",
-          "start_min_4": "Byrjunarmínúta 4",
-          "end_min_4": "Lokamínúta 4",
-          "start_ts_4": "Byrja tímastimpill 4",
-          "end_ts_4": "Lokatímastimpill 4",
-          "phase_5": "Áfangi 5",
-          "start_min_5": "Byrjunarmínúta 5",
-          "end_min_5": "Lokamínúta 5",
-          "start_ts_5": "Byrja tímastimpill 5",
-          "end_ts_5": "Lokatímastimpill 5",
-          "phase_6": "Áfangi 6",
-          "start_min_6": "Byrjunarmínúta 6",
-          "end_min_6": "Lokamínúta 6",
-          "start_ts_6": "Byrja tímastimpill 6",
-          "end_ts_6": "Lokatímastimpill 6"
+          "action": "Aðgerð"
         }
       },
       "assign_profile_phases_select": {
         "title": "Úthluta áfangasviðum",
         "description": "Veldu snið til að stilla áfangasvið.",
         "data": {
-          "profile": "Prófíll",
-          "source_cycle": "Upprunahringur (fyrir tímastimplaham)",
-          "assign_mode": "Úthlutunarhamur"
+          "profile": "Prófíll"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Bæta við áfangasviði",
+        "description": "Bættu einu áfangasviði við núverandi drög.",
+        "data": {
+          "phase_name": "Áfangi",
+          "start_min": "Byrjunarmínúta",
+          "end_min": "Lokamínúta"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Breyta áfangasviði",
+        "description": "Veldu svið til að breyta.",
+        "data": {
+          "range_index": "Fasasvið"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Breyta áfangasviði",
+        "description": "Uppfærðu valið áfangasvið.",
+        "data": {
+          "phase_name": "Áfangi",
+          "start_min": "Byrjunarmínúta",
+          "end_min": "Lokamínúta"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Eyða áfangasviði",
+        "description": "Veldu svið til að fjarlægja úr drögunum.",
+        "data": {
+          "range_index": "Fasasvið"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "Tímastimpill er ógildur. Notaðu ÁÁÁÁ-MM-DD HH:MM eða HH:MM snið.",
       "overlapping_phase_ranges": "Áfangasvið skarast. Stilltu svið og reyndu aftur.",
       "incomplete_phase_row": "Hver áfangalína verður að innihalda áfanga auk heill upphafs/lokagilda fyrir valda stillingu.",
-      "timestamp_mode_cycle_required": "Vinsamlegast veldu upprunalotu þegar þú notar tímastimplaham."
+      "timestamp_mode_cycle_required": "Vinsamlegast veldu upprunalotu þegar þú notar tímastimplaham.",
+      "no_phase_ranges": "Engin áfangasvið eru enn tiltæk fyrir þá aðgerð."
     },
     "abort": {
       "no_cycles_found": "Engar lotur fundust",

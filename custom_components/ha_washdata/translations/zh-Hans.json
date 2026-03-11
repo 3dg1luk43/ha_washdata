@@ -423,7 +423,8 @@
         "description": "为此设备类型创建自定义阶段名称和描述。",
         "data": {
           "phase_name": "阶段名称",
-          "phase_description": "阶段描述"
+          "phase_description": "阶段描述",
+          "target_device_type": "目标设备类型"
         }
       },
       "phase_catalog_edit_select": {
@@ -452,48 +453,46 @@
         "title": "分配相位范围",
         "description": "个人资料： **{profile_name}**\n模式：**{assign_mode}**\n循环提示：{cycle_hint}\n\n电流范围：\n{current_ranges}\n\n阶段标签用于显示和组织。检测使用功率模式，而不是相名称。",
         "data": {
-          "profile": "轮廓",
-          "assign_mode": "分配模式",
-          "source_cycle": "源周期（时间戳模式需要）",
-          "phase_1": "第一阶段",
-          "start_min_1": "开始第 1 分钟",
-          "end_min_1": "结束分钟 1",
-          "start_ts_1": "开始时间戳 1",
-          "end_ts_1": "结束时间戳 1",
-          "phase_2": "第二阶段",
-          "start_min_2": "开始第 2 分钟",
-          "end_min_2": "第 2 分钟结束",
-          "start_ts_2": "开始时间戳 2",
-          "end_ts_2": "结束时间戳 2",
-          "phase_3": "第三阶段",
-          "start_min_3": "开始第 3 分钟",
-          "end_min_3": "第 3 分钟结束",
-          "start_ts_3": "开始时间戳 3",
-          "end_ts_3": "结束时间戳 3",
-          "phase_4": "第四阶段",
-          "start_min_4": "第 4 分钟开始",
-          "end_min_4": "第 4 分钟结束",
-          "start_ts_4": "开始时间戳 4",
-          "end_ts_4": "结束时间戳 4",
-          "phase_5": "第五阶段",
-          "start_min_5": "第 5 分钟开始",
-          "end_min_5": "第 5 分钟结束",
-          "start_ts_5": "开始时间戳 5",
-          "end_ts_5": "结束时间戳 5",
-          "phase_6": "第六阶段",
-          "start_min_6": "第 6 分钟开始",
-          "end_min_6": "第 6 分钟结束",
-          "start_ts_6": "开始时间戳 6",
-          "end_ts_6": "结束时间戳 6"
+          "action": "行动"
         }
       },
       "assign_profile_phases_select": {
         "title": "分配相位范围",
         "description": "选择一个配置文件来配置相位范围。",
         "data": {
-          "profile": "轮廓",
-          "source_cycle": "源周期（对于时间戳模式）",
-          "assign_mode": "分配模式"
+          "profile": "轮廓"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "添加相位范围",
+        "description": "在当前草稿中添加一个阶段范围。",
+        "data": {
+          "phase_name": "阶段",
+          "start_min": "开始时间",
+          "end_min": "结束分钟"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "编辑相位范围",
+        "description": "选择要编辑的范围。",
+        "data": {
+          "range_index": "相位范围"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "编辑相位范围",
+        "description": "更新选定的相位范围。",
+        "data": {
+          "phase_name": "阶段",
+          "start_min": "开始时间",
+          "end_min": "结束分钟"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "删除相位范围",
+        "description": "选择要从草稿中删除的范围。",
+        "data": {
+          "range_index": "相位范围"
         }
       }
     },
@@ -512,7 +511,8 @@
       "invalid_phase_timestamp": "时间戳无效。使用 YYYY-MM-DD HH:MM 或 HH:MM 格式。",
       "overlapping_phase_ranges": "相位范围重叠。调整范围并重试。",
       "incomplete_phase_row": "每个阶段行必须包含一个阶段以及所选模式的完整开始/结束值。",
-      "timestamp_mode_cycle_required": "使用时间戳模式时请选择源周期。"
+      "timestamp_mode_cycle_required": "使用时间戳模式时请选择源周期。",
+      "no_phase_ranges": "尚无可用于该操作的阶段范围。"
     },
     "abort": {
       "no_cycles_found": "未找到周期",
