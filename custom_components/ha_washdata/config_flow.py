@@ -66,6 +66,7 @@ from .const import (
     CONF_ANTI_WRINKLE_EXIT_POWER,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
+    NOTIFY_EVENT_LIVE,
     DEFAULT_NAME,
     DEFAULT_MIN_POWER,
     DEFAULT_OFF_DELAY,
@@ -101,12 +102,16 @@ from .const import (
     CONF_NOTIFY_START_MESSAGE,
     CONF_NOTIFY_FINISH_MESSAGE,
     CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
+    CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
+    CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
     DEFAULT_NOTIFY_ONLY_WHEN_HOME,
     DEFAULT_NOTIFY_FIRE_EVENTS,
+    DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
+    DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_OFF_DELAY_BY_DEVICE,
     DEFAULT_SAMPLING_INTERVAL_BY_DEVICE,
@@ -272,6 +277,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         menu_options = {
             "settings": "Settings",
+            "notifications": "Notifications",
             "manage_cycles": "Manage Cycles",
             "manage_profiles": "Manage Profiles",
             "manage_phase_catalog": "Manage Phase Catalog",
@@ -315,20 +321,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 **user_input,
             }
             return self.async_create_entry(title="", data=merged_options)
-
-        # Populate notify services
-        notify_services = []
-        services = self.hass.services.async_services()
-        for service in services.get("notify", {}):
-            notify_services.append(f"notify.{service}")
-        notify_services.sort()
-
-        # Ensure current value is in the list (so it doesn't vanish)
-        current_notify = self.config_entry.options.get(
-            CONF_NOTIFY_SERVICE, self.config_entry.data.get(CONF_NOTIFY_SERVICE, "")
-        )
-        if current_notify and current_notify not in notify_services:
-            notify_services.append(current_notify)
 
         current_sensor = self.config_entry.options.get(
             CONF_POWER_SENSOR, self.config_entry.data.get(CONF_POWER_SENSOR, "")
@@ -379,7 +371,51 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_OFF_DELAY,
                 default=get_val(CONF_OFF_DELAY, default_off_delay),
             ): vol.Coerce(int),
-            # --- Notification Settings ---
+            vol.Optional(CONF_SHOW_ADVANCED, default=False): bool,
+        }
+
+        return self.async_show_form(
+            step_id="settings",
+            data_schema=vol.Schema(schema),
+            description_placeholders={
+                "error": "",
+                "device": "{device}",
+                "duration": "{duration}",
+                "program": "{program}",
+                "minutes": "{minutes}",
+            },
+        )
+
+    async def async_step_notifications(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage notification settings."""
+        if user_input is not None:
+            merged_options = {
+                **self.config_entry.data,
+                **self.config_entry.options,
+                **user_input,
+            }
+            return self.async_create_entry(title="", data=merged_options)
+
+        notify_services: list[str] = []
+        services = self.hass.services.async_services()
+        for service in services.get("notify", {}):
+            notify_services.append(f"notify.{service}")
+        notify_services.sort()
+
+        current_notify = self.config_entry.options.get(
+            CONF_NOTIFY_SERVICE, self.config_entry.data.get(CONF_NOTIFY_SERVICE, "")
+        )
+        if current_notify and current_notify not in notify_services:
+            notify_services.append(current_notify)
+
+        def get_val(key: str, default: Any) -> Any:
+            return self.config_entry.options.get(
+                key, self.config_entry.data.get(key, default)
+            )
+
+        schema = {
             vol.Optional(
                 CONF_NOTIFY_ACTIONS,
                 default=get_val(CONF_NOTIFY_ACTIONS, []),
@@ -420,6 +456,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         selector.SelectOptionDict(
                             value=NOTIFY_EVENT_FINISH, label="Cycle Finish"
                         ),
+                        selector.SelectOptionDict(
+                            value=NOTIFY_EVENT_LIVE, label="Live Progress"
+                        ),
                     ],
                     multiple=True,
                     mode=selector.SelectSelectorMode.LIST,
@@ -435,35 +474,65 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     min=0, max=60, mode=selector.NumberSelectorMode.BOX
                 )
             ),
-             vol.Optional(
-                 CONF_NOTIFY_TITLE,
-                 default=get_val(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE),
-             ): selector.TextSelector(),
-             vol.Optional(
-                 CONF_NOTIFY_ICON,
-                 default=get_val(CONF_NOTIFY_ICON, ""),
-             ): selector.IconSelector(),
-             vol.Optional(
-                 CONF_NOTIFY_START_MESSAGE,
-                 default=get_val(CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE),
-             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
-             vol.Optional(
-                 CONF_NOTIFY_FINISH_MESSAGE,
-                 default=get_val(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE),
-             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
-             vol.Optional(
-                 CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
-                 default=get_val(CONF_NOTIFY_PRE_COMPLETE_MESSAGE, DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE),
-             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
-
-            vol.Optional(CONF_SHOW_ADVANCED, default=False): bool,
+            vol.Optional(
+                CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
+                default=get_val(
+                    CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
+                    DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=30,
+                    max=1800,
+                    step=30,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+                default=get_val(
+                    CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+                    DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=200,
+                    step=5,
+                    unit_of_measurement="%",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_NOTIFY_TITLE,
+                default=get_val(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE),
+            ): selector.TextSelector(),
+            vol.Optional(
+                CONF_NOTIFY_ICON,
+                default=get_val(CONF_NOTIFY_ICON, ""),
+            ): selector.IconSelector(),
+            vol.Optional(
+                CONF_NOTIFY_START_MESSAGE,
+                default=get_val(CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE),
+            ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+            vol.Optional(
+                CONF_NOTIFY_FINISH_MESSAGE,
+                default=get_val(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE),
+            ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+            vol.Optional(
+                CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
+                default=get_val(
+                    CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
+                    DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+                ),
+            ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
         }
 
         return self.async_show_form(
-            step_id="settings",
+            step_id="notifications",
             data_schema=vol.Schema(schema),
             description_placeholders={
-                "error": "",
                 "device": "{device}",
                 "duration": "{duration}",
                 "program": "{program}",

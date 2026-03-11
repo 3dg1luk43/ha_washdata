@@ -69,7 +69,7 @@ async def test_migration_with_harness_moves_and_preserves_fields(
     hass.config_entries.async_update_entry.assert_called_once()
 
     assert legacy_entry.version == 3
-    assert legacy_entry.minor_version == 2
+    assert legacy_entry.minor_version == 3
 
     assert legacy_entry.options[CONF_MIN_POWER] == 5.0
     assert legacy_entry.options[CONF_OFF_DELAY] == 120
@@ -89,7 +89,7 @@ async def test_migration_with_harness_moves_and_preserves_fields(
 async def test_migration_is_idempotent_after_first_run(
     hass: HomeAssistant, legacy_entry: DummyEntry
 ) -> None:
-    """Once migrated to 3.2, additional migration calls should no-op."""
+    """Once migrated to 3.3, additional migration calls should no-op."""
 
     def _apply_update(entry: DummyEntry, **kwargs: Any) -> None:
         entry.data = kwargs["data"]
@@ -112,8 +112,8 @@ async def test_migration_is_idempotent_after_first_run(
 
 @pytest.mark.asyncio
 async def test_migration_latest_version_is_noop(hass: HomeAssistant) -> None:
-    """Entries already at 3.2 should not trigger updates."""
-    entry = DummyEntry(version=3, minor_version=2, data={}, options={})
+    """Entries already at 3.3 should not trigger updates."""
+    entry = DummyEntry(version=3, minor_version=3, data={}, options={})
     hass.config_entries.async_update_entry = MagicMock()
 
     migrated = await async_migrate_entry(hass, entry)

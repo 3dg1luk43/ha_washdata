@@ -44,6 +44,7 @@ async def async_setup_entry(
     entities = [
         WasherStateSensor(manager, entry),
         WasherProgramSensor(manager, entry),
+        WasherCurrentPhaseSensor(manager, entry),
         WasherTimeRemainingSensor(manager, entry),
         WasherTotalDurationSensor(manager, entry),
         WasherProgressSensor(manager, entry),
@@ -59,11 +60,17 @@ async def async_setup_entry(
             [
                 WasherMatchConfidenceSensor(manager, entry),
                 WasherTopCandidatesSensor(manager, entry),
-                WasherPhaseSensor(manager, entry),
             ]
         )
 
     async_add_entities(entities)
+
+    # Remove legacy diagnostic phase entity from registry if present.
+    ent_reg = entity_registry.async_get(hass)
+    legacy_unique_id = f"{entry.entry_id}_wash_phase"
+    legacy_entity_id = ent_reg.async_get_entity_id("sensor", DOMAIN, legacy_unique_id)
+    if legacy_entity_id:
+        ent_reg.async_remove(legacy_entity_id)
 
     # Initialize dynamic profile sensor manager
     profile_sensor_manager = WasherProfileSensorManager(manager, entry, async_add_entities)
@@ -428,15 +435,14 @@ class WasherTopCandidatesSensor(WasherBaseSensor):
         return {"candidates": self._manager.top_candidates}
 
 
-class WasherPhaseSensor(WasherBaseSensor):
-    """Sensor for current wash phase."""
+class WasherCurrentPhaseSensor(WasherBaseSensor):
+    """Sensor for the current detected phase."""
 
     def __init__(self, manager, entry):
         self.entity_description = SensorEntityDescription(
-            key="wash_phase",
-            translation_key="wash_phase",
-            icon="mdi:washing-machine-alert",
-            entity_category=EntityCategory.DIAGNOSTIC,
+            key="current_phase",
+            translation_key="current_phase",
+            icon="mdi:water-sync",
         )
         super().__init__(manager, entry)
 

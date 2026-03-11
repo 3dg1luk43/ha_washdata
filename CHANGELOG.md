@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Randomized Cache Buster**: The dashboard card now uses a timestamp-based cache buster that refreshes every time the integration is loaded, ensuring immediate updates without browser cache clearance.
 - **Action-Based Notifications**: Added notification actions with priority dispatch and fallback routing (actions → notify service → persistent notification).
 - **Presence-Gated Notifications**: Optional home/away gating to defer notifications until a tracked person is home.
+- **Live Progress Mobile Notifications**: Added in-place companion-app live updates (`cycle_live`) with per-cycle throttling, overrun protection caps, mobile-only payload routing, and automatic clear on cycle completion.
 - **Feedback Review Power Visualization**: Added an inline SVG chart in "Review Learned Feedbacks" that overlays the current cycle trace with learned profile data for faster manual verification.
 - **Multi-Profile Comparison Graph**: Feedback review now renders all candidate profiles in a single combined chart, highlighting the detected profile and showing the actual cycle trace for direct visual comparison.
 - **Top Match Candidates Summary**: Added ranked candidate details (confidence, MAE, correlation, duration ratio) to feedback review to improve correction decisions.
@@ -35,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Localized Menus**: Updated configuration flow to use `SelectSelector`, enabling natively localized menu options across all supported languages.
 - **Notification Event Toggle**: Added `notify_fire_events` option to control emission of cycle start/end events.
 - **Migration Normalization**: Added migration helper defaults for new notification options to ensure deterministic upgrades.
+- **Notification Options UX**: Moved notification settings to a dedicated "Notifications" options step and removed duplicate live-enable controls, using event selection as the single source of truth.
+- **Live Progress Match-Aware Flow**: Live notifications now send a one-time "no profile matched yet" message before detection converges, then switch to periodic progress updates only after a profile duration is available.
 - **Ultra-Long Cycle Support**: Significantly improved handling for modern high-efficiency dishwashers with cycles exceeding 230 minutes.
   - Increased `DEFAULT_MAX_DEFERRAL_SECONDS` to 4 hours to prevent long silent Eco drying phases from being cut off.
   - Extended dishwasher-specific `NO_UPDATE_ACTIVE_TIMEOUT` to 4 hours.
@@ -49,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Device-Type Phase Filtering**: Phase options in the profile assignment flow are now automatically filtered by the currently selected device type, ensuring only relevant phases appear in dropdowns.
 - **Cross-Device Catalog View**: "Manage Phase Catalog" now displays and groups phases for all supported device types in one place, instead of only the current integration device type.
 - **Phase Action Wording Cleanup**: Updated phase management action labels to clearer wording ("Create New Phase", "Edit Phase", "Delete Phase").
+- **Current Phase Sensor Exposure**: Added a standard device sensor for current phase (`sensor.<device>_current_phase`) so active phase is visible in normal entity views without enabling diagnostics.
 - **Phase-Only Offset Input**: Simplified phase assignment to use offset-based time entry (minutes from cycle start) instead of timestamp selection, reducing complexity and user error.
 
 ### 🐛 Bug Fixes
@@ -64,6 +68,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Feedback SVG Legend Clipping**: Fixed a viewBox height mismatch that could render legend content outside the visible area.
 - **Global Phase Duplication in Selectors**: Fixed edit/delete phase dialogs duplicating "All Devices" phases once per device type by introducing scoped deduplication and explicit scope keys.
 - **Phase Scope Resolution in Edit/Delete**: Fixed phase edit/delete operations to resolve against the selected phase scope (`device_type`) so similarly named phases remain deterministic.
+- **Notification Action Script Context**: Fixed Home Assistant script action execution by passing a valid `Context` to `script.async_run`, resolving runtime errors like "Running script requires passing in a context".
+- **Notification Dispatch Ordering**: Fixed a routing regression where configured actions could suppress notify-service delivery; actions and mobile notifications now run together as expected.
+- **Live State Coverage**: Fixed live-progress gating to continue updates during `STATE_ENDING` (not only `RUNNING`/`PAUSED`) until cycle completion.
+- **Legacy Phase Diagnostic Confusion**: Removed stale diagnostic phase entity behavior and added cleanup of the old `wash_phase` registry entry to prevent misleading duplicate/legacy phase sensors.
 
 ### 🧪 Tests
 - **HA Test Harness Adoption**: Replaced `MagicMock`-based hass objects with real `HomeAssistant` instances from `pytest_homeassistant_custom_component` across all new test modules. Only `ProfileStore` and `CycleDetector` are patched as true external I/O boundaries.
@@ -71,6 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Migration Harness Tests** (`test_migration_harness.py`): Validates `async_migrate_entry` field movement (data → options), idempotency on re-run, and no-op behaviour when already at the latest schema version.
 - **Pre-Completion Notification Tests** (`test_manager_precompletion_harness.py`): Pins the ambiguity gate — notifications are suppressed when `_last_match_ambiguous=True`, sent exactly once when unambiguous, and not re-sent on subsequent calls.
 - **Match Persistence / Transition Tests** (`test_manager_matching_harness.py`): Covers the full persistence-counter state machine inside `_async_do_perform_matching`: single-call accumulation, below-threshold staying at `detecting...`, threshold commit, profile-change counter reset, high-confidence override bypassing persistence, and ambiguous-result gating.
+- **Live Notification Harness** (`test_manager_live_notifications.py`): Added focused coverage for mobile-only routing, payload keys, overrun cap enforcement, away-mode deferred live coalescing, clear-on-end behavior, `STATE_ENDING` support, one-time pre-match waiting message, and post-match periodic update activation.
 
 ## [0.4.2.1] - 2026-02-13
 

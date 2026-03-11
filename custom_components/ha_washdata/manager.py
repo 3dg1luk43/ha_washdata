@@ -12,7 +12,7 @@ from typing import Any, cast
 import numpy as np
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import Event, HomeAssistant, State, callback
+from homeassistant.core import Context, Event, HomeAssistant, State, callback
 from homeassistant.helpers.event import (
     async_track_state_change_event,
     async_track_time_interval,
@@ -81,6 +81,7 @@ from .const import (
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
+    NOTIFY_EVENT_LIVE,
     EVENT_CYCLE_STARTED,
     EVENT_CYCLE_ENDED,
     DEFAULT_MIN_POWER,
@@ -118,12 +119,17 @@ from .const import (
     CONF_NOTIFY_START_MESSAGE,
     CONF_NOTIFY_FINISH_MESSAGE,
     CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
+    CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
+    CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+    DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE,
     DEFAULT_NOTIFY_ONLY_WHEN_HOME,
     DEFAULT_NOTIFY_FIRE_EVENTS,
+    DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
+    DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
 
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
@@ -214,8 +220,15 @@ class WashDataManager:
         self._notify_people = []
         self._notify_only_when_home = DEFAULT_NOTIFY_ONLY_WHEN_HOME
         self._notify_fire_events = DEFAULT_NOTIFY_FIRE_EVENTS
+        self._notify_live_interval_seconds = DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
+        self._notify_live_overrun_percent = DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
         self._pending_notifications = []
         self._remove_notify_people_listener = None
+        self._live_notification_sent_count = 0
+        self._live_notification_cap = 0
+        self._last_live_notification_time: datetime | None = None
+        self._live_waiting_notification_sent = False
+        self._live_notification_tag = f"ha_washdata_{self.entry_id}_live"
 
         # State
         self._current_power = 0.0
@@ -317,6 +330,18 @@ class WashDataManager:
         )
         self._notify_fire_events = bool(
             config_entry.options.get(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
+        )
+        self._notify_live_interval_seconds = int(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
+                DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
+            )
+        )
+        self._notify_live_overrun_percent = int(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+                DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+            )
         )
 
         # Advanced options
@@ -446,8 +471,25 @@ class WashDataManager:
             """
             # Manual program override
             if self._manual_program_active and self._current_program:
-                dur = self._matched_profile_duration or 0.0
-                return (self._current_program, 1.0, dur, "Manual", False)
+                elapsed_seconds = 0.0
+                if len(readings) > 1:
+                    elapsed_seconds = max(
+                        0.0,
+                        (readings[-1][0] - readings[0][0]).total_seconds(),
+                    )
+
+                expected_duration = float(self._matched_profile_duration or 0.0)
+                manual_phase = self.profile_store.check_phase_match(
+                    self._current_program,
+                    elapsed_seconds,
+                )
+                return (
+                    self._current_program,
+                    1.0,
+                    expected_duration,
+                    manual_phase or "Manual",
+                    False,
+                )
 
             if not readings:
                 return (None, 0.0, 0.0, None, False)
@@ -846,6 +888,7 @@ class WashDataManager:
                     self._notified_start = True
                     _LOGGER.info("Sent start notification for program '%s'", self._current_program)
 
+            self._check_live_progress_notification()
             self._notify_update()
 
         except Exception as e:
@@ -880,6 +923,8 @@ class WashDataManager:
         """Return a description of the current phase."""
         if self._last_match_result and self._last_match_result.matched_phase:
             return self._last_match_result.matched_phase
+        if self.detector.sub_state:
+            return self.detector.sub_state
         return self.detector.state
 
     @property
@@ -1438,12 +1483,32 @@ class WashDataManager:
                 CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
             )
         )
+        self._notify_live_interval_seconds = int(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
+                DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
+            )
+        )
+        self._notify_live_overrun_percent = int(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+                DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+            )
+        )
 
         # Re-subscribe to external cycle end trigger
         await self._setup_external_end_trigger()
 
         # Re-subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
+
+        # If a cycle is currently active and live notifications are now enabled,
+        # reset counters and fire the first live notification immediately so the
+        # user doesn't have to wait for the next power sensor poll.
+        if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            if NOTIFY_EVENT_LIVE in self._notify_events:
+                self._reset_live_notification_state()
+                self._check_live_progress_notification()
 
         _LOGGER.info("Configuration reloaded successfully")
 
@@ -2017,6 +2082,7 @@ class WashDataManager:
                 self._unmatch_persistence_counter = 0  # Reset unmatch counter
                 self._current_match_candidate = None  # Reset candidate
                 self._notified_start = False # Reset start notification state
+                self._reset_live_notification_state()
                 self._start_watchdog()  # Start watchdog when cycle starts
             else:
                 _LOGGER.debug("Cycle resumed from %s, preserving estimates", old_state)
@@ -2161,6 +2227,8 @@ class WashDataManager:
                 },
             )
 
+        self._clear_live_progress_notification()
+
         # Send notification if enabled
         events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
         if NOTIFY_EVENT_FINISH in events:
@@ -2202,6 +2270,7 @@ class WashDataManager:
         self._last_estimate_time = None
         self._cycle_progress = 100.0  # 100% = cycle complete
         self._cycle_completed_time = dt_util.now()
+        self._reset_live_notification_state()
 
         # Start progress reset timer to go back to 0% after user unload window
         self._start_state_expiry_timer()
@@ -2267,6 +2336,12 @@ class WashDataManager:
 
         if allow_deferral and self._notify_only_when_home and self._notify_people:
             if not self._is_any_notify_person_home():
+                if event_type == NOTIFY_EVENT_LIVE:
+                    self._pending_notifications = [
+                        entry
+                        for entry in self._pending_notifications
+                        if entry.get("event_type") != NOTIFY_EVENT_LIVE
+                    ]
                 self._pending_notifications.append(
                     {
                         "message": message,
@@ -2279,22 +2354,59 @@ class WashDataManager:
                 return
 
         if self._notify_actions:
-            if self._run_notification_actions(variables):
-                return
+            self._run_notification_actions(variables)
 
-        self._send_notification_service(message, title=title, icon=icon)
+        self._send_notification_service(
+            message,
+            title=title,
+            icon=icon,
+            event_type=event_type,
+            extra_vars=extra_vars,
+        )
 
     def _send_notification_service(
-        self, message: str, title: str | None = None, icon: str | None = None
+        self,
+        message: str,
+        title: str | None = None,
+        icon: str | None = None,
+        event_type: str | None = None,
+        extra_vars: dict[str, Any] | None = None,
     ) -> None:
         """Send a notification via configured notify service or persistent notification."""
-        notify_service = self.config_entry.options.get(CONF_NOTIFY_SERVICE)
+        notify_service = self._notify_service or self.config_entry.options.get(
+            CONF_NOTIFY_SERVICE
+        )
 
-        data = {}
+        data: dict[str, Any] = {}
         if icon:
             data["icon"] = icon
 
+        if event_type == NOTIFY_EVENT_LIVE and extra_vars:
+            for key in (
+                "tag",
+                "progress",
+                "progress_max",
+                "live_update",
+                "alert_once",
+                "cycle_seconds",
+                "time_remaining_seconds",
+                "minutes_left",
+                "live_updates_sent",
+                "live_updates_cap",
+            ):
+                if key in extra_vars:
+                    data[key] = extra_vars[key]
+
         if notify_service:
+            if event_type == NOTIFY_EVENT_LIVE and not self._is_mobile_notify_service(
+                notify_service
+            ):
+                _LOGGER.debug(
+                    "Skipping live notification for non-mobile notify service: %s",
+                    notify_service,
+                )
+                return
+
             domain, service = (
                 notify_service.split(".", 1)
                 if "." in notify_service
@@ -2307,6 +2419,9 @@ class WashDataManager:
             self.hass.async_create_task(
                 self.hass.services.async_call(domain, service, service_data)
             )
+            return
+
+        if event_type == NOTIFY_EVENT_LIVE:
             return
 
         _pn_create(self.hass, message, title=title)
@@ -2325,7 +2440,9 @@ class WashDataManager:
                 domain=DOMAIN,
                 logger=_LOGGER,
             )
-            self.hass.async_create_task(script.async_run(variables))
+            self.hass.async_create_task(
+                script.async_run(variables, context=Context())
+            )
             return True
         except Exception as err:
             _LOGGER.warning("Failed to run notification actions: %s", err)
@@ -2472,6 +2589,8 @@ class WashDataManager:
         ):
             # Still update remaining/progress if we already have a match
             self._update_remaining_only()
+            self._check_pre_completion_notification()
+            self._check_live_progress_notification()
             return
 
         # SKIP matching if manual program is active
@@ -2480,6 +2599,7 @@ class WashDataManager:
             self._update_remaining_only()
             # Also check notifications in loop
             self._check_pre_completion_notification()
+            self._check_live_progress_notification()
             self._notify_update()
             return
 
@@ -2488,6 +2608,7 @@ class WashDataManager:
         # Just update progress/remaining based on existing match.
         self._update_remaining_only()
         self._check_pre_completion_notification()
+        self._check_live_progress_notification()
         self._notify_update()
 
     # _async_run_matching removed in favor of _async_perform_combined_matching
@@ -2512,6 +2633,142 @@ class WashDataManager:
 
         # Proportional threshold (7/10 => 0.7)
         return (up_count / total_intervals) >= 0.70
+
+    def _reset_live_notification_state(self) -> None:
+        """Reset per-cycle live notification counters and timers."""
+        self._live_notification_sent_count = 0
+        self._live_notification_cap = 0
+        self._last_live_notification_time = None
+        self._live_waiting_notification_sent = False
+
+    @staticmethod
+    def _is_mobile_notify_service(notify_service: str | None) -> bool:
+        """Return True when configured notify target is a mobile app service."""
+        if not notify_service:
+            return False
+        _, service = (
+            notify_service.split(".", 1)
+            if "." in notify_service
+            else ("notify", notify_service)
+        )
+        return service.startswith("mobile_app")
+
+    def _estimate_live_notification_cap(self) -> int:
+        """Compute hard cap for live updates from estimated cycle duration and overrun margin."""
+        interval = max(30, int(self._notify_live_interval_seconds))
+        estimated_duration = float(
+            self._matched_profile_duration
+            or self._total_duration
+            or max(float(self.detector.get_elapsed_seconds()), float(interval))
+        )
+        estimated_updates = max(1, int(np.ceil(estimated_duration / interval)))
+        overrun_ratio = max(0, float(self._notify_live_overrun_percent)) / 100.0
+        return max(1, int(np.ceil(estimated_updates * (1.0 + overrun_ratio))))
+
+    def _check_live_progress_notification(self) -> None:
+        """Send throttled live progress notifications for compatible mobile targets."""
+        if NOTIFY_EVENT_LIVE not in self._notify_events:
+            return
+        if self.detector.state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
+            return
+
+        has_profile_match = bool(
+            self._matched_profile_duration and self._matched_profile_duration > 0
+        )
+        if not has_profile_match:
+            if self._live_waiting_notification_sent:
+                return
+
+            msg = DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE.format(
+                device=self.config_entry.title
+            )
+            self._dispatch_notification(
+                msg,
+                event_type=NOTIFY_EVENT_LIVE,
+                extra_vars={
+                    "tag": self._live_notification_tag,
+                    "live_update": True,
+                    "alert_once": True,
+                },
+            )
+            self._live_waiting_notification_sent = True
+            return
+
+        interval = max(30, int(self._notify_live_interval_seconds))
+        now = dt_util.now()
+        if self._last_live_notification_time and (
+            now - self._last_live_notification_time
+        ).total_seconds() < interval:
+            return
+
+        cap_candidate = self._estimate_live_notification_cap()
+        if cap_candidate > self._live_notification_cap:
+            self._live_notification_cap = cap_candidate
+        if self._live_notification_sent_count >= self._live_notification_cap:
+            return
+
+        total_seconds = int(
+            max(
+                1,
+                round(
+                    float(
+                        self._total_duration
+                        or self._matched_profile_duration
+                        or self.detector.get_elapsed_seconds()
+                    )
+                ),
+            )
+        )
+        remaining_seconds = int(max(0, round(float(self._time_remaining or 0.0))))
+        elapsed_seconds = max(0, total_seconds - remaining_seconds)
+        minutes_left = int(remaining_seconds / 60) + 1
+
+        msg_template = self.config_entry.options.get(
+            CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
+            DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+        )
+        try:
+            msg = msg_template.format(
+                device=self.config_entry.title,
+                minutes=minutes_left,
+                program=self._current_program,
+            )
+        except KeyError:
+            msg = msg_template.format(device=self.config_entry.title)
+
+        self._dispatch_notification(
+            msg,
+            event_type=NOTIFY_EVENT_LIVE,
+            extra_vars={
+                "tag": self._live_notification_tag,
+                "progress": elapsed_seconds,
+                "progress_max": total_seconds,
+                "live_update": True,
+                "alert_once": True,
+                "cycle_seconds": total_seconds,
+                "time_remaining_seconds": remaining_seconds,
+                "minutes_left": minutes_left,
+                "live_updates_sent": self._live_notification_sent_count + 1,
+                "live_updates_cap": self._live_notification_cap,
+            },
+        )
+        self._live_notification_sent_count += 1
+        self._last_live_notification_time = now
+
+    def _clear_live_progress_notification(self) -> None:
+        """Clear active live progress notification on cycle completion."""
+        if self._live_notification_sent_count <= 0 and not self._live_waiting_notification_sent:
+            return
+
+        self._send_notification_service(
+            "clear_notification",
+            event_type=NOTIFY_EVENT_LIVE,
+            extra_vars={
+                "tag": self._live_notification_tag,
+                "live_update": True,
+                "alert_once": True,
+            },
+        )
 
     def _check_pre_completion_notification(self) -> None:
         """Check and send pre-completion notification."""

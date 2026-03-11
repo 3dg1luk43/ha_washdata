@@ -25,8 +25,12 @@ from .const import (
     CONF_NOTIFY_PEOPLE,
     CONF_NOTIFY_ONLY_WHEN_HOME,
     CONF_NOTIFY_FIRE_EVENTS,
+    CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
+    CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     DEFAULT_NOTIFY_ONLY_WHEN_HOME,
     DEFAULT_NOTIFY_FIRE_EVENTS,
+    DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
+    DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -95,7 +99,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     version = entry.version or 1
     minor_version = entry.minor_version or 1
 
-    if version == 3 and minor_version >= 2:
+    if version == 3 and minor_version >= 3:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -160,6 +164,12 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     options.setdefault(CONF_NOTIFY_PEOPLE, [])
     options.setdefault(CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME)
     options.setdefault(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
+    options.setdefault(
+        CONF_NOTIFY_LIVE_INTERVAL_SECONDS, DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
+    )
+    options.setdefault(
+        CONF_NOTIFY_LIVE_OVERRUN_PERCENT, DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
+    )
 
     keys_to_remove = [
         CONF_MIN_POWER,
@@ -176,10 +186,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data=data,
         options=options,
         version=3,
-        minor_version=2,
+        minor_version=3,
     )
     _LOGGER.info(
-        "Migrated WashData entry from version %s.%s to 3.2", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.3", version, minor_version
     )
     return True
 

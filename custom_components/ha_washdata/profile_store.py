@@ -2554,8 +2554,9 @@ class ProfileStore:
         # Let's run it here since we have the data.
         # But check_phase_match uses wrappers.
         matched_phase = None
-        if best["score"] > 0.6: # Threshold
-            # We need logic from check_phase_match but customized
+        if best.get("name"):
+            # Always resolve phase for the matched profile so phase sensors can
+            # show user-assigned phase names even when confidence is moderate.
             matched_phase = self.check_phase_match(best["name"], current_duration)
 
         return MatchResult(
@@ -2706,11 +2707,23 @@ class ProfileStore:
         if not phases:
             return None
 
-        for phase in phases:
+        phases_sorted = sorted(
+            phases,
+            key=lambda p: float(p.get("start", 0)),
+        )
+
+        for phase in phases_sorted:
             p_start = phase.get("start", 0)
             p_end = phase.get("end", 0)
             if p_start <= duration <= p_end:
                 return str(phase.get("name", "Unknown"))
+
+        # If duration is outside explicit bounds, keep a phase label anyway so
+        # entities avoid falling back to generic running/starting states.
+        if phases_sorted:
+            if duration < float(phases_sorted[0].get("start", 0)):
+                return str(phases_sorted[0].get("name", "Unknown"))
+            return str(phases_sorted[-1].get("name", "Unknown"))
 
         return None
 

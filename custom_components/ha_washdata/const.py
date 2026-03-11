@@ -71,19 +71,25 @@ CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true
 
 NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
+NOTIFY_EVENT_LIVE = "cycle_live"
 
 CONF_NOTIFY_TITLE = "notify_title"
 CONF_NOTIFY_ICON = "notify_icon"
 CONF_NOTIFY_START_MESSAGE = "notify_start_message"
 CONF_NOTIFY_FINISH_MESSAGE = "notify_finish_message"
 CONF_NOTIFY_PRE_COMPLETE_MESSAGE = "notify_pre_complete_message"
+CONF_NOTIFY_LIVE_INTERVAL_SECONDS = "notify_live_interval_seconds"
+CONF_NOTIFY_LIVE_OVERRUN_PERCENT = "notify_live_overrun_percent"
 
 DEFAULT_NOTIFY_TITLE = "WashData: {device}"
 DEFAULT_NOTIFY_START_MESSAGE = "{device} started {program}."
 DEFAULT_NOTIFY_FINISH_MESSAGE = "{device} finished. Duration: {duration}m."
 DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE = "{device}: Less than {minutes} minutes remaining."
+DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE = "{device}: No profile matched yet."
 DEFAULT_NOTIFY_ONLY_WHEN_HOME = False
 DEFAULT_NOTIFY_FIRE_EVENTS = True
+DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS = 300
+DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
 
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts

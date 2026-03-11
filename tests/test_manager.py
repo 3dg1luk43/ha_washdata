@@ -529,10 +529,10 @@ async def test_start_notification_deferred_when_ambiguous(manager: WashDataManag
     assert manager._current_program == "Heavy Duty"
 
 
-def test_notification_actions_prefer_action_over_notify_service(
+def test_notification_actions_run_alongside_notify_service(
     manager: WashDataManager, mock_hass: Any
 ) -> None:
-    """Configured actions should run before notify service fallback."""
+    """Configured actions should run and notify service should still be called."""
     manager.config_entry.options["notify_service"] = "notify.mobile_app_test"
     manager._notify_actions = [{"action": "script.test_notify"}]
     manager._run_notification_actions = MagicMock(return_value=True)
@@ -540,7 +540,7 @@ def test_notification_actions_prefer_action_over_notify_service(
     manager._dispatch_notification("hello")
 
     manager._run_notification_actions.assert_called_once()
-    mock_hass.services.async_call.assert_not_called()
+    mock_hass.services.async_call.assert_called_once()
 
 
 def test_notification_is_deferred_when_no_person_home(
