@@ -251,6 +251,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._editor_selected_ids: list[str] = []
         self._editor_split_gap: int = 900
         self._selected_phase_name: str | None = None
+        self._selected_phase_device_type: str | None = None
         self._phase_assign_profile: str | None = None
         self._phase_assign_mode: str = "offset_mode"
         self._phase_assign_cycle_id: str | None = None
@@ -1557,25 +1558,26 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
     async def async_step_manage_phase_catalog(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Manage phase catalog for this device type."""
+        """Manage phase catalog for all device types."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
-        device_type = manager.device_type
 
-        phases = store.list_phase_catalog(device_type)
+        # Gather phases organized by device type
         summary_lines = []
-        for phase in phases:
-            icon = "🔒" if phase.get("is_default") else "✏"
-            phase_scope = str(phase.get("device_type", "")).strip()
-            if phase.get("is_default"):
-                scope_label = DEVICE_TYPES.get(device_type, device_type)
-            elif phase_scope:
-                scope_label = DEVICE_TYPES.get(phase_scope, phase_scope)
-            else:
-                scope_label = "All Devices"
-            desc = str(phase.get("description", "")).strip()
-            short = desc if len(desc) <= 80 else f"{desc[:77]}..."
-            summary_lines.append(f"{icon} [{scope_label}] **{phase.get('name', '')}** - {short}")
+        for device_type in DEVICE_TYPES.keys():
+            phases = store.list_phase_catalog(device_type)
+            if phases:
+                # Add section header for this device type
+                device_label = DEVICE_TYPES.get(device_type, device_type)
+                summary_lines.append(f"\n**{device_label}**")
+                
+                for phase in phases:
+                    icon = "📌 " if phase.get("is_default") else "✏️ "
+                    desc = str(phase.get("description", "")).strip()
+                    short = desc if len(desc) <= 80 else f"{desc[:77]}..."
+                    phase_type = " (Built-in)" if phase.get("is_default") else ""
+                    summary_lines.append(f"{icon}**{phase.get('name', '')}{phase_type}** - {short}")
+        
         summary = "\n".join(summary_lines) if summary_lines else "No phases available."
 
         if user_input is not None:
@@ -1596,15 +1598,15 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                             options=[
                                 selector.SelectOptionDict(
                                     value="create_custom_phase",
-                                    label="Create Custom Phase",
+                                    label="Create New Phase",
                                 ),
                                 selector.SelectOptionDict(
                                     value="edit_custom_phase",
-                                    label="Edit Custom Phase",
+                                    label="Edit Phase",
                                 ),
                                 selector.SelectOptionDict(
                                     value="delete_custom_phase",
-                                    label="Delete Custom Phase",
+                                    label="Delete Phase",
                                 ),
                             ],
                             mode=selector.SelectSelectorMode.DROPDOWN,
@@ -1673,24 +1675,52 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
     async def async_step_phase_catalog_edit_select(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Select custom phase to edit."""
+        """Select phase to edit from all device types."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
-        custom_phases = store.list_custom_phases(manager.device_type)
-        if not custom_phases:
-            return self.async_abort(reason="no_custom_phases")
+
+        # Gather unique phases from all device types.
+        # Global phases (device_type="") appear in every per-device list,
+        # so we dedupe by (name, device_type).
+        all_phases: list[dict[str, Any]] = []
+        seen: set[tuple[str, str]] = set()
+        for device_type in DEVICE_TYPES.keys():
+            for phase in store.list_phase_catalog(device_type):
+                phase_name = str(phase.get("name", "")).strip()
+                phase_scope = str(phase.get("device_type", "")).strip()
+                dedupe_key = (phase_name.casefold(), phase_scope)
+                if not phase_name or dedupe_key in seen:
+                    continue
+                seen.add(dedupe_key)
+                all_phases.append(phase)
+
+        if not all_phases:
+            return self.async_abort(reason="no_phases_available")
+
+        options: list[selector.SelectOptionDict] = []
+        phase_index: dict[str, tuple[str, str]] = {}
+        for phase in all_phases:
+            phase_name = str(phase.get("name", "")).strip()
+            phase_scope = str(phase.get("device_type", "")).strip()
+            scope_label = DEVICE_TYPES.get(phase_scope, "All Devices") if phase_scope else "All Devices"
+            option_key = f"{phase_scope}::{phase_name}"
+            phase_index[option_key] = (phase_name, phase_scope)
+            options.append(
+                selector.SelectOptionDict(
+                    value=option_key,
+                    label=f"[{scope_label}] {phase_name} - {str(phase.get('description', ''))[:60]}",
+                )
+            )
 
         if user_input is not None:
-            self._selected_phase_name = user_input["phase_name"]
+            selected_key = user_input["phase_name"]
+            selected_meta = phase_index.get(selected_key)
+            if selected_meta is None:
+                return await self.async_step_phase_catalog_edit_select()
+            self._selected_phase_name = selected_meta[0]
+            self._selected_phase_device_type = selected_meta[1]
             return await self.async_step_phase_catalog_edit()
 
-        options = [
-            selector.SelectOptionDict(
-                value=p["name"],
-                label=f"{p['name']} - {str(p.get('description', ''))[:60]}",
-            )
-            for p in custom_phases
-        ]
         return self.async_show_form(
             step_id="phase_catalog_edit_select",
             data_schema=vol.Schema(
@@ -1708,16 +1738,24 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
     async def async_step_phase_catalog_edit(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Edit selected custom phase."""
+        """Edit selected phase from all device types."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
         if not self._selected_phase_name:
             return await self.async_step_phase_catalog_edit_select()
+        if self._selected_phase_device_type is None:
+            return await self.async_step_phase_catalog_edit_select()
 
-        custom_phases = store.list_custom_phases(manager.device_type)
         selected = next(
-            (p for p in custom_phases if p["name"] == self._selected_phase_name), None
+            (
+                p
+                for p in store.list_phase_catalog(self._selected_phase_device_type)
+                if str(p.get("name", "")).strip() == self._selected_phase_name
+                and str(p.get("device_type", "")).strip() == self._selected_phase_device_type
+            ),
+            None,
         )
+
         if not selected:
             return await self.async_step_phase_catalog_edit_select()
 
@@ -1725,7 +1763,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         if user_input is not None:
             try:
                 await store.async_update_custom_phase(
-                    manager.device_type,
+                    self._selected_phase_device_type,
                     self._selected_phase_name,
                     user_input["phase_name"],
                     user_input.get("phase_description", ""),
@@ -1753,33 +1791,55 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
     async def async_step_phase_catalog_delete(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Delete custom phase."""
+        """Delete custom phase from any device type."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
-        custom_phases = store.list_custom_phases(manager.device_type)
-        if not custom_phases:
+
+        # Gather unique custom phases from all device types.
+        # Global phases (device_type="") appear in every per-device list,
+        # so dedupe by (name, device_type).
+        all_custom_phases: dict[str, str] = {}
+        seen: set[tuple[str, str]] = set()
+        for device_type in DEVICE_TYPES.keys():
+            custom_phases = store.list_custom_phases(device_type)
+            for p in custom_phases:
+                phase_name = str(p.get("name", "")).strip()
+                phase_scope = str(p.get("device_type", "")).strip()
+                dedupe_key = (phase_name.casefold(), phase_scope)
+                if not phase_name or dedupe_key in seen:
+                    continue
+                seen.add(dedupe_key)
+                option_key = f"{phase_scope}::{phase_name}"
+                all_custom_phases[option_key] = phase_scope
+
+        if not all_custom_phases:
             return self.async_abort(reason="no_custom_phases")
 
         errors: dict[str, str] = {}
         if user_input is not None:
-            phase_name = user_input["phase_name"]
-            try:
-                removed = await store.async_delete_custom_phase(manager.device_type, phase_name)
-                manager.notify_update()
-                _LOGGER.info(
-                    "Deleted custom phase '%s' and removed %s phase assignments",
-                    phase_name,
-                    removed,
-                )
-                return await self.async_step_manage_phase_catalog()
-            except ValueError as err:
-                errors["base"] = str(err)
+            selected_key = user_input["phase_name"]
+            phase_device_type = all_custom_phases.get(selected_key)
+            if phase_device_type:
+                phase_name = selected_key.split("::", 1)[1]
+                try:
+                    removed = await store.async_delete_custom_phase(phase_device_type, phase_name)
+                    manager.notify_update()
+                    _LOGGER.info(
+                        "Deleted custom phase '%s' and removed %s phase assignments",
+                        phase_name,
+                        removed,
+                    )
+                    return await self.async_step_manage_phase_catalog()
+                except ValueError as err:
+                    errors["base"] = str(err)
 
         options = []
-        for p in custom_phases:
-            usage = store.count_phase_usage(p["name"])
-            label = f"{p['name']} ({usage} assignments)"
-            options.append(selector.SelectOptionDict(value=p["name"], label=label))
+        for option_key, phase_scope in all_custom_phases.items():
+            phase_name = option_key.split("::", 1)[1]
+            scope_label = DEVICE_TYPES.get(phase_scope, "All Devices") if phase_scope else "All Devices"
+            usage = store.count_phase_usage(phase_name)
+            label = f"[{scope_label}] {phase_name} ({usage} assignments)"
+            options.append(selector.SelectOptionDict(value=option_key, label=label))
 
         return self.async_show_form(
             step_id="phase_catalog_delete",
@@ -1932,7 +1992,6 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         parts = [
             f"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}' viewBox='0 0 {width} {height}'>",
             "<rect x='0' y='0' width='100%' height='100%' fill='#1c1c1c'/>",
-            f"<text x='{plot_left}' y='40' font-family='sans-serif' font-size='34' fill='#f9fafb' font-weight='bold'>Phase Preview: {esc(profile_name)}</text>",
             f"<rect x='{plot_left}' y='{plot_top}' width='{plot_width}' height='{plot_height}' fill='#111111' stroke='#444' stroke-width='2' rx='8'/>",
         ]
 
@@ -1976,9 +2035,9 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
         mid_min = int(total_min / 2)
         parts.extend(
             [
-                f"<text x='{plot_left}' y='{marker_y}' font-family='sans-serif' font-size='22' fill='#d1d5db'>0 min</text>",
-                f"<text x='{plot_left + plot_width / 2:.2f}' y='{marker_y}' font-family='sans-serif' font-size='22' fill='#d1d5db' text-anchor='middle'>{mid_min} min</text>",
-                f"<text x='{plot_left + plot_width:.2f}' y='{marker_y}' font-family='sans-serif' font-size='22' fill='#d1d5db' text-anchor='end'>{total_min} min</text>",
+                f"<text x='{plot_left}' y='{marker_y}' font-family='sans-serif' font-size='26' fill='#d1d5db'>0 min</text>",
+                f"<text x='{plot_left + plot_width / 2:.2f}' y='{marker_y}' font-family='sans-serif' font-size='26' fill='#d1d5db' text-anchor='middle'>{mid_min} min</text>",
+                f"<text x='{plot_left + plot_width:.2f}' y='{marker_y}' font-family='sans-serif' font-size='26' fill='#d1d5db' text-anchor='end'>{total_min} min</text>",
             ]
         )
 
@@ -2003,7 +2062,7 @@ Joining {len(cycles_to_merge)} cycles. Gaps will be filled with 0W readings.
                 f"<rect x='{lx}' y='{ly - 14}' width='14' height='14' rx='3' fill='{color}'/>",
             )
             parts.append(
-                f"<text x='{lx + 24}' y='{ly - 2}' font-family='sans-serif' font-size='21' fill='#e5e7eb'>{label}</text>",
+                f"<text x='{lx + 24}' y='{ly - 2}' font-family='sans-serif' font-size='24' fill='#e5e7eb'>{label}</text>",
             )
 
         parts.append("</svg>")

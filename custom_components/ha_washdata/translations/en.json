@@ -256,7 +256,7 @@
       },
       "assign_profile_phases": {
         "title": "Assign Phase Ranges",
-        "description": "Profile: **{profile_name}**\n\nTimeline Graph:\n{timeline_svg}\n\nCurrent ranges:\n{current_ranges}\n\nUse actions below to add, edit, delete, or save ranges.",
+        "description": "Phase preview for profile: **{profile_name}**\n\n{timeline_svg}\n\n**Current ranges:**\n{current_ranges}\n\nUse actions below to add, edit, delete, or save ranges.",
         "data": {
           "action": "Action"
         }

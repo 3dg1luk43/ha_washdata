@@ -81,7 +81,7 @@
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "Select the type of appliance (Washing Machine, Dryer, Dishwasher, Coffee Machine, EV). This tag is stored with each cycle for better organization.",
-          "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data\u2014useful if you replace a smart plug.",
+          "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data—useful if you replace a smart plug.",
           "min_power": "Power readings above this threshold (in watts) indicate the appliance is running. Start with 2W for most devices.",
           "off_delay": "Seconds the smoothed power must stay below the stop threshold to mark completion. Default: 120s.",
           "notify_service": "Home Assistant notify service to use (optional).",
@@ -156,19 +156,19 @@
           "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 300s.",
           "no_update_active_timeout": "For publish-on-change sensors: only force-end an ACTIVE cycle if no updates arrive for this many seconds. Low-power completion still uses the Off Delay.",
           "sampling_interval": "Minimum sampling interval in seconds. Updates faster than this rate will be ignored. Default: 2.0s.",
-          "auto_label_confidence": "Automatically label cycles at or above this confidence on completion (0.0\u20131.0).",
-          "learning_confidence": "Minimum confidence to request user verification via an event (0.0\u20131.0).",
-          "duration_tolerance": "Tolerance for time-remaining estimates during a run (0.0\u20130.5 corresponds to 0\u201350%).",
+          "auto_label_confidence": "Automatically label cycles at or above this confidence on completion (0.0–1.0).",
+          "learning_confidence": "Minimum confidence to request user verification via an event (0.0–1.0).",
+          "duration_tolerance": "Tolerance for time-remaining estimates during a run (0.0–0.5 corresponds to 0–50%).",
           "profile_match_interval": "How often (in seconds) to attempt profile matching during a cycle. Lower values provide faster detection but use more CPU. Default: 300s (5 minutes).",
           "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.50 (50%).",
           "profile_match_max_duration_ratio": "Maximum duration ratio for profile matching. Running cycle must not exceed this multiple of profile duration. Higher = more lenient. Default: 1.50 (150%).",
           "smoothing_window": "Number of recent power readings used for moving-average smoothing.",
-          "profile_match_threshold": "Minimum DTW similarity score (0.0\u20131.0) required to consider a profile as a match. Higher = stricter matching, fewer false positives. Default: 0.4.",
-          "profile_unmatch_threshold": "DTW similarity score (0.0\u20131.0) below which a previously matched profile is rejected. Should be lower than match threshold to prevent flickering. Default: 0.35.",
-          "profile_duration_tolerance": "Tolerance used by profile matching for total duration variance (0.0\u20130.5). Default behavior: \u00b125%.",
+          "profile_match_threshold": "Minimum DTW similarity score (0.0–1.0) required to consider a profile as a match. Higher = stricter matching, fewer false positives. Default: 0.4.",
+          "profile_unmatch_threshold": "DTW similarity score (0.0–1.0) below which a previously matched profile is rejected. Should be lower than match threshold to prevent flickering. Default: 0.35.",
+          "profile_duration_tolerance": "Tolerance used by profile matching for total duration variance (0.0–0.5). Default behavior: ±25%.",
           "interrupted_min_seconds": "Runs shorter than this may be classified as 'interrupted'.",
           "abrupt_drop_watts": "Absolute power drop (W) considered an abrupt cliff.",
-          "abrupt_drop_ratio": "Relative drop ratio (0\u20131). Example: 0.6 means a 60% drop is abrupt.",
+          "abrupt_drop_ratio": "Relative drop ratio (0–1). Example: 0.6 means a 60% drop is abrupt.",
           "abrupt_high_load_factor": "Factor above baseline considered 'high load' before an abrupt drop (used with abrupt detection).",
           "max_past_cycles": "Total number of cycles to retain (oldest removed). Default: 200.",
           "max_full_traces_per_profile": "Number of recent labeled cycles to keep with full power traces per profile. Older traces are summarized via envelopes. Default: 20.",
@@ -256,7 +256,7 @@
       },
       "assign_profile_phases": {
         "title": "Assign Phase Ranges",
-        "description": "Profile: **{profile_name}**\n\nTimeline Graph:\n{timeline_svg}\n\nCurrent ranges:\n{current_ranges}\n\nUse actions below to add, edit, delete, or save ranges.",
+        "description": "Phase preview for profile: **{profile_name}**\n\n{timeline_svg}\n\n**Current ranges:**\n{current_ranges}\n\nUse actions below to add, edit, delete, or save ranges.",
         "data": {
           "action": "Action"
         }
@@ -337,7 +337,7 @@
       },
       "delete_profile_confirm": {
         "title": "Confirm Delete Profile",
-        "description": "\u26a0\ufe0f This will permanently delete profile: {profile_name}",
+        "description": "⚠️ This will permanently delete profile: {profile_name}",
         "data": {
           "unlabel_cycles": "Remove label from cycles using this profile"
         }
@@ -351,14 +351,14 @@
       },
       "select_cycle_to_label": {
         "title": "Select Cycle to Label",
-        "description": "\u2713 = completed, \u26a0 = resumed, \u2717 = interrupted",
+        "description": "✓ = completed, ⚠ = resumed, ✗ = interrupted",
         "data": {
           "cycle_id": "Cycle"
         }
       },
       "select_cycle_to_delete": {
         "title": "Delete Cycle",
-        "description": "\u26a0\ufe0f This will permanently delete the selected cycle",
+        "description": "⚠️ This will permanently delete the selected cycle",
         "data": {
           "cycle_id": "Cycle to Delete"
         }
@@ -444,7 +444,7 @@
       },
       "wipe_history": {
         "title": "Wipe History (Testing Only)",
-        "description": "\u26a0\ufe0f This will permanently delete ALL stored cycles and profiles for this device. This cannot be undone!"
+        "description": "⚠️ This will permanently delete ALL stored cycles and profiles for this device. This cannot be undone!"
       },
       "export_import": {
         "title": "Export/Import JSON",
@@ -453,6 +453,7 @@
           "mode": "Action",
           "json_payload": "Complete Configuration JSON"
         },
+
         "data_description": {
           "mode": "Choose Export to copy current data and settings, or Import to paste exported data from another WashData device.",
           "json_payload": "For Export: copy this JSON (includes cycles, profiles, and all fine-tuned settings). For Import: paste JSON exported from WashData."
