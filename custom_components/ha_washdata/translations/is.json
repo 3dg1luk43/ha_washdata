@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Innflutningur mistókst. Vinsamlegast límdu gilt HA WashData útflutnings-JSON.",
+      "import_failed": "Innflutningur mistókst. Vinsamlegast límdu gilt WashData útflutnings-JSON.",
       "profile_exists": "Prófíll með þessu nafni er þegar til",
       "rename_failed": "Mistókst að endurnefna prófílinn. Hugsanlega er prófíllinn ekki til eða nýtt nafn er þegar tekið.",
       "assignment_failed": "Mistókst að úthluta prófíl til að hringja",

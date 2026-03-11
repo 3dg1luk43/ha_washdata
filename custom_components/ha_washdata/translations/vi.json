@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Nhập không thành công. Vui lòng dán JSON xuất HA WashData hợp lệ.",
+      "import_failed": "Nhập không thành công. Vui lòng dán JSON xuất WashData hợp lệ.",
       "profile_exists": "Hồ sơ có tên này đã tồn tại",
       "rename_failed": "Không đổi tên được hồ sơ. Hồ sơ có thể không tồn tại hoặc tên mới đã được sử dụng.",
       "assignment_failed": "Không thể chỉ định hồ sơ cho chu kỳ",

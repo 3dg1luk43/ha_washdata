@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "הייבוא ​​נכשל. אנא הדבק JSON ייצוא HA WashData חוקי.",
+      "import_failed": "הייבוא ​​נכשל. אנא הדבק JSON ייצוא WashData חוקי.",
       "profile_exists": "פרופיל בשם זה כבר קיים",
       "rename_failed": "שינוי שם הפרופיל נכשל. ייתכן שהפרופיל אינו קיים או ששם חדש כבר נלקח.",
       "assignment_failed": "הקצאת הפרופיל למחזור נכשלה",

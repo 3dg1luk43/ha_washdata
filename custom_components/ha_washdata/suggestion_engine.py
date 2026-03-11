@@ -1,4 +1,4 @@
-"""Suggestion engine for HA WashData."""
+"""Suggestion engine for WashData."""
 
 from __future__ import annotations
 

@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "İçe aktarma başarısız oldu. Lütfen geçerli bir HA WashData dışa aktarma JSON'u yapıştırın.",
+      "import_failed": "İçe aktarma başarısız oldu. Lütfen geçerli bir WashData dışa aktarma JSON'u yapıştırın.",
       "profile_exists": "Bu ada sahip bir profil zaten mevcut",
       "rename_failed": "Profil yeniden adlandırılamadı. Profil mevcut olmayabilir veya yeni ad zaten alınmış olabilir.",
       "assignment_failed": "Profil döngüye atanamadı",

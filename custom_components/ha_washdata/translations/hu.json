@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Az importálás sikertelen. Kérjük, illesszen be érvényes HA WashData export JSON-t.",
+      "import_failed": "Az importálás sikertelen. Kérjük, illesszen be érvényes WashData export JSON-t.",
       "profile_exists": "Már létezik profil ezzel a névvel",
       "rename_failed": "A profil átnevezése sikertelen. A profil nem létezik vagy az új név már foglalt.",
       "assignment_failed": "A profil hozzárendelése a ciklushoz sikertelen",

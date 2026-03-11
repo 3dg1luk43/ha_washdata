@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Ymport mislearre. Plak asjebleaft in jildige HA WashData eksport JSON.",
+      "import_failed": "Ymport mislearre. Plak asjebleaft in jildige WashData eksport JSON.",
       "profile_exists": "In profyl mei dizze namme bestiet al",
       "rename_failed": "Omneame profyl mislearre. It profyl bestiet mooglik net of in nije namme is al nommen.",
       "assignment_failed": "It tawizen fan profyl oan fytsen is net slagge",

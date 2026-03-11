@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Importen misslyckades. Klistra in en giltig HA WashData export-JSON.",
+      "import_failed": "Importen misslyckades. Klistra in en giltig WashData export-JSON.",
       "profile_exists": "En profil med detta namn finns redan",
       "rename_failed": "Namnbyte av profil misslyckades. Profilen kanske inte finns eller det nya namnet är redan upptaget.",
       "assignment_failed": "Tilldelning av profil till cykel misslyckades",

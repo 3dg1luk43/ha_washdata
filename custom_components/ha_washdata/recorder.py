@@ -1,4 +1,4 @@
-"""Recorder for raw cycle data in HA WashData."""
+"""Recorder for raw cycle data in WashData."""
 from __future__ import annotations
 
 import logging

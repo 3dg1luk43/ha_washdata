@@ -1,4 +1,4 @@
-"""Constants for the HA WashData integration."""
+"""Constants for the WashData integration."""
 
 DOMAIN = "ha_washdata"
 
@@ -78,7 +78,7 @@ CONF_NOTIFY_START_MESSAGE = "notify_start_message"
 CONF_NOTIFY_FINISH_MESSAGE = "notify_finish_message"
 CONF_NOTIFY_PRE_COMPLETE_MESSAGE = "notify_pre_complete_message"
 
-DEFAULT_NOTIFY_TITLE = "HA WashData: {device}"
+DEFAULT_NOTIFY_TITLE = "WashData: {device}"
 DEFAULT_NOTIFY_START_MESSAGE = "{device} started {program}."
 DEFAULT_NOTIFY_FINISH_MESSAGE = "{device} finished. Duration: {duration}m."
 DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE = "{device}: Less than {minutes} minutes remaining."
@@ -277,7 +277,7 @@ DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE = {
 }
 
 # Storage
-STORAGE_VERSION = 4
+STORAGE_VERSION = 5
 STORAGE_KEY = "ha_washdata"
 
 # Notification events

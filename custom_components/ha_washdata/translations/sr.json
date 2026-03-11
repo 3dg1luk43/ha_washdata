@@ -395,7 +395,7 @@
       }
     },
     "error": {
-      "import_failed": "Uvoz nije uspeo. Nalepite važeći HA WashData JSON za izvoz.",
+      "import_failed": "Uvoz nije uspeo. Nalepite važeći WashData JSON za izvoz.",
       "profile_exists": "Profil sa ovim imenom već postoji",
       "rename_failed": "Preimenovanje profila nije uspelo. Profil možda ne postoji ili je novo ime već zauzeto.",
       "assignment_failed": "Dodela profila ciklusu nije uspela",

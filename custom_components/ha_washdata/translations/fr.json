@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Échec de l'import. Veuillez coller un JSON d'export HA WashData valide.",
+      "import_failed": "Échec de l'import. Veuillez coller un JSON d'export WashData valide.",
       "profile_exists": "Un profil portant ce nom existe déjà",
       "rename_failed": "Échec du renommage du profil. Le profil n'existe peut-être pas ou le nouveau nom est déjà pris.",
       "assignment_failed": "Échec de l'attribution du profil au cycle",

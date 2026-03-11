@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Invoer het misluk. Plak asseblief 'n geldige HA WashData-uitvoer-JSON.",
+      "import_failed": "Invoer het misluk. Plak asseblief 'n geldige WashData-uitvoer-JSON.",
       "profile_exists": "'n Profiel met hierdie naam bestaan ​​reeds",
       "rename_failed": "Kon nie profiel hernoem nie. Profiel bestaan ​​dalk nie of nuwe naam is reeds geneem.",
       "assignment_failed": "Kon nie profiel aan siklus toewys nie",

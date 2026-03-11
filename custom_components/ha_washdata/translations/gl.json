@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Produciuse un erro na importación. Pega un JSON de exportación HA WashData válido.",
+      "import_failed": "Produciuse un erro na importación. Pega un JSON de exportación WashData válido.",
       "profile_exists": "Xa existe un perfil con este nome",
       "rename_failed": "Produciuse un erro ao cambiar o nome do perfil. É posible que o perfil non exista ou que xa se tome un novo nome.",
       "assignment_failed": "Produciuse un erro ao asignar o perfil ao ciclo",

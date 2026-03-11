@@ -1,4 +1,4 @@
-"""The HA WashData integration."""
+"""The WashData integration."""
 
 from __future__ import annotations
 
@@ -179,13 +179,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         minor_version=2,
     )
     _LOGGER.info(
-        "Migrated HA WashData entry from version %s.%s to 3.2", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.2", version, minor_version
     )
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up HA WashData from a config entry."""
+    """Set up WashData from a config entry."""
     # Guard against duplicate setup during hot-reload
     if entry.entry_id in hass.data.get(DOMAIN, {}):
         _LOGGER.warning(

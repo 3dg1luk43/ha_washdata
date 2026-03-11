@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Methodd y mewnforio. Gludwch allforyn HA WashData dilys JSON.",
+      "import_failed": "Methodd y mewnforio. Gludwch allforyn WashData dilys JSON.",
       "profile_exists": "Mae proffil gyda'r enw hwn eisoes yn bodoli",
       "rename_failed": "Wedi methu ag ailenwi'r proffil. Efallai nad yw'r proffil yn bodoli neu fod enw newydd wedi'i gymryd yn barod.",
       "assignment_failed": "Wedi methu ag aseinio proffil i feicio",

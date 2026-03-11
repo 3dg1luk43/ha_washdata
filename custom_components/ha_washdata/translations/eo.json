@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Importo malsukcesis. Bonvolu alglui validan JSON de eksportado de HA WashData.",
+      "import_failed": "Importo malsukcesis. Bonvolu alglui validan JSON de eksportado de WashData.",
       "profile_exists": "Profilo kun ĉi tiu nomo jam ekzistas",
       "rename_failed": "Malsukcesis renomi profilon. Profilo eble ne ekzistas aŭ nova nomo jam estas prenita.",
       "assignment_failed": "Malsukcesis atribui profilon al biciklo",

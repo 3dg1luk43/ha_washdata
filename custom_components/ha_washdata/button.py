@@ -1,4 +1,4 @@
-"""Button platform for HA WashData."""
+"""Button platform for WashData."""
 
 from __future__ import annotations
 
@@ -40,7 +40,7 @@ class WashDataTerminateButton(ButtonEntity):
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry.entry_id)},
             "name": entry.title,
-            "manufacturer": "HA WashData",
+            "manufacturer": "WashData",
         }
 
     def press(self) -> None:

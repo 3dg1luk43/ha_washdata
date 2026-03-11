@@ -1,4 +1,4 @@
-"""Sensors for HA WashData."""
+"""Sensors for WashData."""
 
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ class WasherBaseSensor(SensorEntity):
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry.entry_id)},
             "name": entry.title,
-            "manufacturer": "HA WashData",
+            "manufacturer": "WashData",
         }
         self._attr_unique_id = f"{entry.entry_id}_{self.entity_description.key}"
 

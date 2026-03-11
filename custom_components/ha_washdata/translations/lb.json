@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Import gescheitert. Paste w.e.g. e gültege HA WashData Export JSON.",
+      "import_failed": "Import gescheitert. Paste w.e.g. e gültege WashData Export JSON.",
       "profile_exists": "E Profil mat dësem Numm gëtt et schonn",
       "rename_failed": "Ausgefall Profil ëmbenennen. Profil existéiert vläicht net oder en neien Numm ass scho geholl.",
       "assignment_failed": "Ausgefall Profil ze Zyklus zougewisen",

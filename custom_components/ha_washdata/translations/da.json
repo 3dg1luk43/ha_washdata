@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Import mislykkedes. Indsæt en gyldig HA WashData eksport-JSON.",
+      "import_failed": "Import mislykkedes. Indsæt en gyldig WashData eksport-JSON.",
       "profile_exists": "En profil med dette navn findes allerede",
       "rename_failed": "Omdøbning af profil mislykkedes. Profilen findes muligvis ikke, eller det nye navn er allerede taget.",
       "assignment_failed": "Tildeling af profil til cyklus mislykkedes",

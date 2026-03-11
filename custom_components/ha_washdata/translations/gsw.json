@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Der Import ist fehlgeschlagen. Bitte fügen Sie einen gültigen HA WashData-Export-JSON ein.",
+      "import_failed": "Der Import ist fehlgeschlagen. Bitte fügen Sie einen gültigen WashData-Export-JSON ein.",
       "profile_exists": "Ein Profil mit diesem Namen existiert bereits",
       "rename_failed": "Profil konnte nicht umbenannt werden. Das Profil existiert möglicherweise nicht oder der neue Name ist bereits vergeben.",
       "assignment_failed": "Profil konnte dem Zyklus nicht zugewiesen werden",

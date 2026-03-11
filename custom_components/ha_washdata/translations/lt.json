@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Importavimas nepavyko. Įklijuokite galiojančią HA WashData eksporto JSON.",
+      "import_failed": "Importavimas nepavyko. Įklijuokite galiojančią WashData eksporto JSON.",
       "profile_exists": "Profilis tokiu pavadinimu jau egzistuoja",
       "rename_failed": "Profilio pervadinimas nepavyko. Profilis gali neegzistuoti arba naujas pavadinimas jau užimtas.",
       "assignment_failed": "Profilio priskyrimas ciklui nepavyko",

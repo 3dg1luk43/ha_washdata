@@ -1,4 +1,4 @@
-"""Frontend card registration for HA WashData."""
+"""Frontend card registration for WashData."""
 
 import logging
 import time

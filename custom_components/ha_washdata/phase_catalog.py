@@ -1,4 +1,4 @@
-"""Phase catalog defaults and helpers for HA WashData."""
+"""Phase catalog defaults and helpers for WashData."""
 
 from __future__ import annotations
 
@@ -303,9 +303,36 @@ def get_default_phase_catalog(device_type: str) -> list[PhaseItem]:
     return deepcopy(DEFAULT_PHASES_BY_DEVICE.get(device_type, []))
 
 
+def get_shared_default_phase_catalog() -> list[PhaseItem]:
+    """Return a shared default catalog deduplicated across all device types."""
+    merged: list[PhaseItem] = []
+    seen: set[str] = set()
+    for device_phases in DEFAULT_PHASES_BY_DEVICE.values():
+        for item in device_phases:
+            name = str(item.get("name", "")).strip()
+            if not name:
+                continue
+            key = name.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(
+                {
+                    "name": name,
+                    "description": str(item.get("description", "")).strip(),
+                    "is_default": True,
+                }
+            )
+    return merged
+
+
 def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None) -> list[PhaseItem]:
-    """Merge defaults with custom phases for UI/selection."""
-    merged = get_default_phase_catalog(device_type)
+    """Merge device defaults with custom phases for UI/selection."""
+    merged = (
+        get_default_phase_catalog(device_type)
+        if device_type in DEFAULT_PHASES_BY_DEVICE
+        else get_shared_default_phase_catalog()
+    )
     custom = custom_phases or []
     for item in custom:
         merged.append(

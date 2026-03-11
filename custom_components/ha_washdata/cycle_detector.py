@@ -1,4 +1,4 @@
-"""Cycle detection logic for HA WashData."""
+"""Cycle detection logic for WashData."""
 
 from __future__ import annotations
 

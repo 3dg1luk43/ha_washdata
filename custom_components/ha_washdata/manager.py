@@ -1,4 +1,4 @@
-"""Manager for HA WashData."""
+"""Manager for WashData."""
 
 # pylint: disable=broad-exception-caught
 
@@ -2190,6 +2190,7 @@ class WashDataManager:
             detected_profile=self._current_program,
             confidence=self._last_match_confidence or 0.0,
             predicted_duration=self._matched_profile_duration,
+            match_result=self._last_match_result,
         )
 
         # Clear all state and timers - zero everything out
@@ -2437,7 +2438,7 @@ class WashDataManager:
                 self.hass.services.async_call(domain, service, {"message": message})
             )
         else:
-            _pn_create(self.hass, message, title="HA WashData Auto-Tune")
+            _pn_create(self.hass, message, title="WashData Auto-Tune")
 
         # Reset trackers
         self._noise_events = []

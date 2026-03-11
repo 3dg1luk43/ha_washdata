@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "가져오기에 실패했습니다. 유효한 HA WashData 내보내기 JSON을 붙여넣으세요.",
+      "import_failed": "가져오기에 실패했습니다. 유효한 WashData 내보내기 JSON을 붙여넣으세요.",
       "profile_exists": "이 이름을 가진 프로필이 이미 존재합니다.",
       "rename_failed": "프로필 이름을 바꾸지 못했습니다. 프로필이 존재하지 않거나 새 이름이 이미 사용 중입니다.",
       "assignment_failed": "주기에 프로필을 할당하지 못했습니다.",

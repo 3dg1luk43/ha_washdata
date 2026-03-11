@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Importi dështoi. Ju lutemi ngjisni një JSON të vlefshëm të eksportit të HA WashData.",
+      "import_failed": "Importi dështoi. Ju lutemi ngjisni një JSON të vlefshëm të eksportit të WashData.",
       "profile_exists": "Një profil me këtë emër ekziston tashmë",
       "rename_failed": "Riemërtimi i profilit dështoi. Profili mund të mos ekzistojë ose një emër i ri është marrë tashmë.",
       "assignment_failed": "Caktimi i profilit për cikël dështoi",

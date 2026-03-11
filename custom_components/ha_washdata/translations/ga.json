@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Theip ar an iompórtáil. Greamaigh easpórtáil bhailí HA WashData JSON.",
+      "import_failed": "Theip ar an iompórtáil. Greamaigh easpórtáil bhailí WashData JSON.",
       "profile_exists": "Tá próifíl leis an ainm seo ann cheana",
       "rename_failed": "Theip ar phróifíl a athainmniú. Seans nach bhfuil próifíl ann nó go bhfuil ainm nua glactha cheana féin.",
       "assignment_failed": "Theip ar phróifíl a shannadh don timthriall",

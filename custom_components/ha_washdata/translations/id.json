@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Impor gagal. Harap tempelkan JSON ekspor HA WashData yang valid.",
+      "import_failed": "Impor gagal. Harap tempelkan JSON ekspor WashData yang valid.",
       "profile_exists": "Profil dengan nama ini sudah ada",
       "rename_failed": "Gagal mengganti nama profil. Profil mungkin belum ada atau nama baru sudah dipakai.",
       "assignment_failed": "Gagal menetapkan profil ke siklus",

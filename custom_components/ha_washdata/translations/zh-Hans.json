@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "导入失败。请粘贴有效的 HA WashData 导出 JSON。",
+      "import_failed": "导入失败。请粘贴有效的 WashData 导出 JSON。",
       "profile_exists": "具有此名称的配置文件已存在",
       "rename_failed": "重命名配置文件失败。配置文件可能不存在或新名称已被占用。",
       "assignment_failed": "将配置文件分配给周期失败",

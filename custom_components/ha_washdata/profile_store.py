@@ -1,4 +1,4 @@
-"""Profile storage and matching logic for HA WashData."""
+"""Profile storage and matching logic for WashData."""
 
 from __future__ import annotations
 
@@ -437,6 +437,59 @@ class WashDataStore(Store[JSONDict]):
             if not isinstance(custom, dict):
                 old_data["custom_phases"] = {}
 
+        if old_major_version < 5:
+            _LOGGER.info("Migrating storage from v%s to v5", old_major_version)
+            custom = old_data.get("custom_phases")
+            if isinstance(custom, list):
+                normalized: list[dict[str, Any]] = []
+                seen: set[str] = set()
+                for item in custom:
+                    if not isinstance(item, dict):
+                        continue
+                    name = str(item.get("name", "")).strip()
+                    if not name:
+                        continue
+                    key = name.casefold()
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    normalized.append(
+                        {
+                            "name": name,
+                            "description": str(item.get("description", "")).strip(),
+                            "device_type": str(item.get("device_type", "")).strip(),
+                            "created_at": item.get("created_at") or dt_util.now().isoformat(),
+                        }
+                    )
+                old_data["custom_phases"] = normalized
+            elif isinstance(custom, dict):
+                normalized = []
+                seen = set()
+                for legacy_device_type, phase_list in custom.items():
+                    if not isinstance(phase_list, list):
+                        continue
+                    for item in phase_list:
+                        if not isinstance(item, dict):
+                            continue
+                        name = str(item.get("name", "")).strip()
+                        if not name:
+                            continue
+                        key = name.casefold()
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        normalized.append(
+                            {
+                                "name": name,
+                                "description": str(item.get("description", "")).strip(),
+                                "device_type": str(legacy_device_type or "").strip(),
+                                "created_at": item.get("created_at") or dt_util.now().isoformat(),
+                            }
+                        )
+                old_data["custom_phases"] = normalized
+            else:
+                old_data["custom_phases"] = []
+
         return old_data
 
     async def get_storage_stats(self) -> dict[str, Any]:
@@ -529,7 +582,7 @@ class ProfileStore:
             "suggestions": {},  # Suggested settings (do NOT change user options)
             "feedback_history": {},  # Persisted user feedback (cycle_id -> record)
             "pending_feedback": {},  # Persisted pending feedback requests
-            "custom_phases": {},  # Device-specific custom phase catalog
+            "custom_phases": [],  # Shared custom phase catalog
         }
 
 
@@ -599,32 +652,66 @@ class ProfileStore:
             return cast(list[CycleDict], raw)
         return []
 
-    def _get_custom_phase_map(self) -> dict[str, list[dict[str, Any]]]:
-        """Return mutable custom phase map by device type."""
-        raw = self._data.setdefault("custom_phases", {})
+    def _get_shared_custom_phases(self) -> list[dict[str, Any]]:
+        """Return mutable shared custom phase list with legacy flattening."""
+        raw = self._data.setdefault("custom_phases", [])
+        if isinstance(raw, list):
+            return cast(list[dict[str, Any]], raw)
+
+        # Legacy format: {device_type: [phase, ...]}. Flatten to shared list.
+        flattened: list[dict[str, Any]] = []
+        seen: set[str] = set()
         if isinstance(raw, dict):
-            return cast(dict[str, list[dict[str, Any]]], raw)
-        self._data["custom_phases"] = {}
-        return cast(dict[str, list[dict[str, Any]]], self._data["custom_phases"])
+            for legacy_device_type, phase_list in raw.items():
+                if not isinstance(phase_list, list):
+                    continue
+                for item in phase_list:
+                    if not isinstance(item, dict):
+                        continue
+                    name = str(item.get("name", "")).strip()
+                    if not name:
+                        continue
+                    key = name.casefold()
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    flattened.append(
+                        {
+                            "name": name,
+                            "description": str(item.get("description", "")).strip(),
+                            "device_type": str(legacy_device_type or "").strip(),
+                            "created_at": item.get("created_at") or dt_util.now().isoformat(),
+                        }
+                    )
+
+        self._data["custom_phases"] = flattened
+        return cast(list[dict[str, Any]], self._data["custom_phases"])
 
     def list_custom_phases(self, device_type: str) -> list[dict[str, Any]]:
-        """Return custom phases for a device type."""
-        phase_map = self._get_custom_phase_map()
-        phases = phase_map.get(device_type, [])
-        if not isinstance(phases, list):
-            return []
+        """Return shared custom phases relevant to the requested device type."""
+
+        def applies_to_device(item_device_type: str, target_device_type: str) -> bool:
+            if not item_device_type:
+                return True
+            return item_device_type == target_device_type
+
+        target = str(device_type or "").strip()
+        phases = self._get_shared_custom_phases()
         return [
             {
                 "name": str(p.get("name", "")).strip(),
                 "description": str(p.get("description", "")).strip(),
+                "device_type": str(p.get("device_type", "")).strip(),
                 "is_default": False,
             }
             for p in phases
-            if isinstance(p, dict) and p.get("name")
+            if isinstance(p, dict)
+            and p.get("name")
+            and applies_to_device(str(p.get("device_type", "")).strip(), target)
         ]
 
     def list_phase_catalog(self, device_type: str) -> list[dict[str, Any]]:
-        """Return merged default + custom phase catalog for a device type."""
+        """Return merged shared default + custom phase catalog."""
         return merge_phase_catalog(device_type, self.list_custom_phases(device_type))
 
     async def async_create_custom_phase(
@@ -633,18 +720,19 @@ class ProfileStore:
         phase_name: str,
         description: str = "",
     ) -> None:
-        """Create a custom phase in the catalog."""
+        """Create a custom phase in the shared catalog."""
+        target_device_type = str(device_type or "").strip()
         name = normalize_phase_name(phase_name)
         desc = str(description or "").strip()
-        catalog = self.list_phase_catalog(device_type)
+        catalog = self.list_phase_catalog(target_device_type)
         if any(str(p.get("name", "")).casefold() == name.casefold() for p in catalog):
             raise ValueError("duplicate_phase")
 
-        phase_map = self._get_custom_phase_map()
-        phase_map.setdefault(device_type, []).append(
+        self._get_shared_custom_phases().append(
             {
                 "name": name,
                 "description": desc,
+                "device_type": target_device_type,
                 "created_at": dt_util.now().isoformat(),
             }
         )
@@ -657,32 +745,42 @@ class ProfileStore:
         new_name: str,
         description: str = "",
     ) -> None:
-        """Update a custom phase and propagate rename to profile assignments."""
+        """Update a shared custom phase and propagate rename to profile assignments."""
         target_name = normalize_phase_name(new_name)
         desc = str(description or "").strip()
-        phase_map = self._get_custom_phase_map()
-        phases = phase_map.get(device_type, [])
-        if not isinstance(phases, list):
-            raise ValueError("phase_not_found")
+        target_device_type = str(device_type or "").strip()
+        phases = self._get_shared_custom_phases()
+
+        def applies_to_target(item_device_type: str, target: str) -> bool:
+            if not item_device_type:
+                return True
+            return item_device_type == target
 
         found = None
         for item in phases:
-            if str(item.get("name", "")).casefold() == old_name.casefold():
-                found = item
-                break
+            if str(item.get("name", "")).casefold() != old_name.casefold():
+                continue
+            if not applies_to_target(str(item.get("device_type", "")).strip(), target_device_type):
+                continue
+            found = item
+            break
         if found is None:
             raise ValueError("phase_not_found")
 
-        for p in self.list_phase_catalog(device_type):
+        for p in self.list_phase_catalog(target_device_type):
             pname = str(p.get("name", ""))
             if pname.casefold() == target_name.casefold() and pname.casefold() != old_name.casefold():
                 raise ValueError("duplicate_phase")
 
         found["name"] = target_name
         found["description"] = desc
+        phase_scope = str(found.get("device_type", "")).strip()
 
         profiles = self.get_profiles()
         for profile in profiles.values():
+            profile_device_type = str(profile.get("device_type", "")).strip()
+            if phase_scope and profile_device_type != phase_scope:
+                continue
             phases_assigned = profile.get("phases", [])
             if not isinstance(phases_assigned, list):
                 continue
@@ -714,21 +812,42 @@ class ProfileStore:
 
         Returns number of removed assignments.
         """
-        phase_map = self._get_custom_phase_map()
-        phases = phase_map.get(device_type, [])
-        if not isinstance(phases, list):
-            raise ValueError("phase_not_found")
+        target_device_type = str(device_type or "").strip()
+        phases = self._get_shared_custom_phases()
 
+        def applies_to_target(item_device_type: str, target: str) -> bool:
+            if not item_device_type:
+                return True
+            return item_device_type == target
+
+        removed_items = [
+            p
+            for p in phases
+            if str(p.get("name", "")).casefold() == phase_name.casefold()
+            and applies_to_target(str(p.get("device_type", "")).strip(), target_device_type)
+        ]
         kept = [
-            p for p in phases if str(p.get("name", "")).casefold() != phase_name.casefold()
+            p
+            for p in phases
+            if not (
+                str(p.get("name", "")).casefold() == phase_name.casefold()
+                and applies_to_target(str(p.get("device_type", "")).strip(), target_device_type)
+            )
         ]
         if len(kept) == len(phases):
             raise ValueError("phase_not_found")
-        phase_map[device_type] = kept
+        self._data["custom_phases"] = kept
+
+        removed_scope = ""
+        if removed_items:
+            removed_scope = str(removed_items[0].get("device_type", "")).strip()
 
         removed_assignments = 0
         profiles = self.get_profiles()
         for profile in profiles.values():
+            profile_device_type = str(profile.get("device_type", "")).strip()
+            if removed_scope and profile_device_type != removed_scope:
+                continue
             assigned = profile.get("phases", [])
             if not isinstance(assigned, list):
                 continue
@@ -870,6 +989,8 @@ class ProfileStore:
         data = await self._store.async_load()
         if data:
             self._data = data
+        # Ensure legacy custom phase formats are normalized in-memory.
+        self._get_shared_custom_phases()
 
     # _migrate_v1_to_v2 and _decompress_power_from_raw removed; logic moved to WashDataStore
 
@@ -1833,6 +1954,416 @@ class ProfileStore:
             env = envelopes_map.get(profile_name)
             return cast(JSONDict, env) if isinstance(env, dict) else None
         return None
+
+    def generate_feedback_comparison_svg(
+        self, profile_name: str, actual_cycle: CycleDict
+    ) -> str | None:
+        """Generate SVG comparing expected profile envelope with actual recorded cycle.
+
+        Displays:
+        - Light blue band: min/max envelope from all labeled cycles
+        - Darker blue line: average expected profile
+        - Orange line: actual recorded power data from the cycle
+
+        Args:
+            profile_name: Name of the detected/expected profile
+            actual_cycle: CycleDict with power_data and duration
+
+        Returns:
+            SVG string or None if data unavailable
+        """
+        try:
+            # Get envelope for the profile
+            envelope = self.get_envelope(profile_name)
+            if not envelope or not envelope.get("time_grid"):
+                return None
+
+            # Get actual power data
+            actual_power_raw = actual_cycle.get("power_data", [])
+            if not actual_power_raw:
+                return None
+
+            # Decompress actual cycle power data
+            actual_pairs: list[tuple[float, float]] = []
+            for item in actual_power_raw:
+                if isinstance(item, (list, tuple)) and len(item) >= 2:
+                    try:
+                        actual_pairs.append((float(item[0]), float(item[1])))
+                    except (ValueError, TypeError):
+                        continue
+
+            if len(actual_pairs) < 3:
+                return None
+
+            # Extract envelope curves (already have [t, y] format)
+            time_grid = envelope["time_grid"]
+            avg_curve = envelope.get("avg", [])
+            min_curve = envelope.get("min", [])
+            max_curve = envelope.get("max", [])
+
+            if not avg_curve or not min_curve or not max_curve:
+                return None
+
+            # Build envelope curves for SVG
+            avg_points = [(p[0], p[1]) for p in avg_curve]
+            min_points = [(p[0], p[1]) for p in min_curve]
+            max_points = [(p[0], p[1]) for p in max_curve]
+
+            # For the expected envelope band, we'll create a special visualization
+            # Canvas configuration (same as profile stats)
+            width, height = 1200, 450
+            padding_x, padding_y = 60, 45
+            graph_w = width - 2 * padding_x
+            graph_h = height - 2 * padding_y
+
+            # Use max time from actual data or envelope, whichever is larger
+            max_time_envelope = time_grid[-1] if time_grid else 1.0
+            max_time_actual = actual_pairs[-1][0] if actual_pairs else 1.0
+            max_time = max(max_time_envelope, max_time_actual)
+
+            # Determine max power for scaling
+            all_power = (
+                [p[1] for p in min_curve] +
+                [p[1] for p in avg_curve] +
+                [p[1] for p in max_curve] +
+                [p[1] for p in actual_pairs]
+            )
+            max_power = max(all_power, default=1.0) * 1.05
+
+            def to_x(t: float) -> float:
+                return padding_x + (t / max_time) * graph_w if max_time > 0 else padding_x
+
+            def to_y(p: float) -> float:
+                return height - padding_y - (p / max_power) * graph_h if max_power > 0 else height - padding_y
+
+            # Build SVG curves
+            svg_curves: list[SVGCurve] = []
+
+            # 1. Envelope band (min/max as polygon fill)
+            envelope_band_points = (
+                max_points +
+                list(reversed(min_points))
+            )
+            svg_curves.append(SVGCurve(
+                points=envelope_band_points,
+                color="#3498db",
+                opacity=0.3,
+                stroke_width=0
+            ))
+
+            # 2. Average curve (darker blue line)
+            svg_curves.append(SVGCurve(
+                points=avg_points,
+                color="#3498db",
+                opacity=1.0,
+                stroke_width=4
+            ))
+
+            # 3. Actual cycle (orange line)
+            svg_curves.append(SVGCurve(
+                points=actual_pairs,
+                color="#f39c12",
+                opacity=0.95,
+                stroke_width=3
+            ))
+
+            # Get profile info for title
+            profile = self.get_profile(profile_name)
+            avg_duration = (
+                profile.get("avg_duration", 0) / 60.0
+                if profile
+                else max_time / 60.0
+            )
+            avg_energy = (
+                profile.get("avg_energy")
+                if profile
+                else envelope.get("avg_energy", 0)
+            )
+
+            title = (
+                f"Power Profile Comparison: {profile_name} "
+                f"({avg_duration:.0f}m, ~{avg_energy:.2f}kWh)"
+            )
+
+            # Create SVG using generic generator
+            svg = _generate_generic_svg(
+                title=title,
+                curves=svg_curves,
+                width=width,
+                height=height,
+                max_x_override=max_time,
+                max_y_override=max_power
+            )
+
+            # Add a single-row legend below the chart
+            if svg:
+                legend_height = 34
+                total_height = height + legend_height
+                svg = svg.replace(
+                    f'viewBox="0 0 {width} {height}"',
+                    f'viewBox="0 0 {width} {total_height}"',
+                    1
+                )
+                ly = height + 22  # Vertical mid-line for all legend items
+                legend = (
+                    f'<!-- Legend (single row) -->\n'
+                    f'<g>\n'
+                    # Item 1: band swatch
+                    f'  <rect x="65" y="{ly - 11}" width="28" height="16" '
+                    f'fill="#3498db" fill-opacity="0.35" stroke="#3498db" stroke-width="1.5" />\n'
+                    f'  <text x="102" y="{ly + 4}" fill="#aaa" font-size="18">'
+                    f'Expected range</text>\n'
+                    # Item 2: avg line
+                    f'  <line x1="390" y1="{ly}" x2="418" y2="{ly}" '
+                    f'stroke="#3498db" stroke-width="4" />\n'
+                    f'  <text x="428" y="{ly + 4}" fill="#aaa" font-size="18">'
+                    f'Average profile</text>\n'
+                    # Item 3: actual line
+                    f'  <line x1="720" y1="{ly}" x2="748" y2="{ly}" '
+                    f'stroke="#f39c12" stroke-width="3" />\n'
+                    f'  <text x="758" y="{ly + 4}" fill="#aaa" font-size="18">'
+                    f'This cycle (actual)</text>\n'
+                    f'</g>\n'
+                )
+                return svg.replace("</svg>", legend + "</svg>", 1)
+
+            return svg
+
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            _LOGGER.error("Error generating feedback comparison SVG: %s", e)
+            return None
+
+    def generate_feedback_multi_profile_svg(
+        self,
+        profile_names: list[str],
+        detected_profile: str,
+        actual_cycle: CycleDict,
+    ) -> str | None:
+        """Generate a single SVG overlaying all profiles' avg curves with the actual cycle.
+
+        The detected profile also shows a min/max envelope band.
+        Each profile gets a distinct colour; the actual cycle is orange.
+        A compact multi-column legend is appended below the chart.
+        """
+        try:
+            # Colours: orange (#f39c12) is reserved for the actual cycle
+            palette = [
+                "#3498db",  # blue   – detected profile (matches envelope tint)
+                "#2ecc71",  # green
+                "#9b59b6",  # purple
+                "#e74c3c",  # red
+                "#1abc9c",  # teal
+                "#f1c40f",  # yellow
+                "#36a2eb",  # sky-blue
+                "#8e44ad",  # dark purple
+                "#16a085",  # dark teal
+                "#c0392b",  # dark red
+            ]
+
+            # Load envelope data for every profile that has one
+            profile_envs: dict[str, JSONDict] = {}
+            for pname in profile_names:
+                env = self.get_envelope(pname)
+                if env and env.get("time_grid") and env.get("avg"):
+                    profile_envs[pname] = env
+
+            if not profile_envs:
+                return None
+
+            # Decompress actual cycle power data
+            actual_pairs: list[tuple[float, float]] = []
+            for item in actual_cycle.get("power_data", []):
+                if isinstance(item, (list, tuple)) and len(item) >= 2:
+                    try:
+                        actual_pairs.append((float(item[0]), float(item[1])))
+                    except (ValueError, TypeError):
+                        continue
+
+            if len(actual_pairs) < 3:
+                return None
+
+            # Global bounds
+            max_time = actual_pairs[-1][0]
+            for env in profile_envs.values():
+                tg = env.get("time_grid", [])
+                if tg:
+                    max_time = max(max_time, tg[-1])
+
+            all_power: list[float] = [p[1] for p in actual_pairs]
+            for env in profile_envs.values():
+                all_power += [p[1] for p in env.get("max", [])]
+                all_power += [p[1] for p in env.get("avg", [])]
+            max_power = max(all_power, default=1.0) * 1.05
+
+            # Canvas
+            width, height = 1200, 450
+            padding_x, padding_y = 60, 45
+            graph_w = width - 2 * padding_x
+            graph_h = height - 2 * padding_y
+
+            def _x(t: float) -> str:
+                return f"{padding_x + (t / max_time) * graph_w:.1f}" if max_time > 0 else str(padding_x)
+
+            def _y(p: float) -> str:
+                return f"{height - padding_y - (p / max_power) * graph_h:.1f}" if max_power > 0 else str(height - padding_y)
+
+            # Assign colours; detected profile always gets palette[0]
+            colors: dict[str, str] = {}
+            color_idx = 1
+            if detected_profile in profile_envs:
+                colors[detected_profile] = palette[0]
+            for pname in profile_names:
+                if pname in profile_envs and pname != detected_profile:
+                    colors[pname] = palette[color_idx % len(palette)]
+                    color_idx += 1
+
+            elems: list[str] = []
+
+            # Background + axes
+            elems.append(
+                f'<rect x="0" y="0" width="{width}" height="{height}" fill="#1c1c1c" />'
+            )
+            elems.append(
+                f'<line x1="{padding_x}" y1="{height - padding_y}" '
+                f'x2="{width - padding_x}" y2="{height - padding_y}" stroke="#444" stroke-width="2" />'
+            )
+            elems.append(
+                f'<line x1="{padding_x}" y1="{padding_y}" '
+                f'x2="{padding_x}" y2="{height - padding_y}" stroke="#444" stroke-width="2" />'
+            )
+            elems.append(
+                f'<text x="{padding_x}" y="{padding_y - 15}" fill="#aaa" font-size="20">{int(max_power)}W</text>'
+            )
+            elems.append(
+                f'<text x="{width - padding_x}" y="{height - 10}" fill="#aaa" font-size="20" '
+                f'text-anchor="middle">{int(max_time / 60)}m</text>'
+            )
+            elems.append(
+                f'<text x="{width / 2:.0f}" y="{padding_y - 15}" fill="#fff" font-size="26" '
+                f'text-anchor="middle" font-weight="bold">Profile Comparison: {detected_profile}</text>'
+            )
+
+            # Detected-profile envelope band (drawn first, behind all lines)
+            if detected_profile in profile_envs:
+                env = profile_envs[detected_profile]
+                max_c = env.get("max", [])
+                min_c = env.get("min", [])
+                if max_c and min_c:
+                    fwd = " ".join(f"{_x(p[0])},{_y(p[1])}" for p in max_c)
+                    rev = " ".join(f"{_x(p[0])},{_y(p[1])}" for p in reversed(min_c))
+                    band_color = colors.get(detected_profile, palette[0])
+                    elems.append(
+                        f'<polygon points="{fwd} {rev}" fill="{band_color}" fill-opacity="0.2" stroke="none" />'
+                    )
+
+            # Average lines for every profile
+            for pname in profile_names:
+                if pname not in profile_envs:
+                    continue
+                avg_c = profile_envs[pname].get("avg", [])
+                if not avg_c:
+                    continue
+                color = colors.get(pname, "#aaa")
+                pts = " ".join(f"{_x(p[0])},{_y(p[1])}" for p in avg_c)
+                sw = 4 if pname == detected_profile else 2
+                elems.append(
+                    f'<polyline points="{pts}" fill="none" stroke="{color}" '
+                    f'stroke-width="{sw}" stroke-linecap="round" stroke-linejoin="round" />'
+                )
+
+            # Actual cycle on top
+            actual_pts = " ".join(f"{_x(p[0])},{_y(p[1])}" for p in actual_pairs)
+            elems.append(
+                f'<polyline points="{actual_pts}" fill="none" stroke="#f39c12" '
+                f'stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />'
+            )
+
+            # Legend (compact multi-column below the chart)
+            legend_items: list[tuple[str, str, int]] = []  # (color, label, stroke_width)
+            for pname in profile_names:
+                if pname not in profile_envs:
+                    continue
+                color = colors.get(pname, "#aaa")
+                label = f"\u2605 {pname}" if pname == detected_profile else pname
+                legend_items.append((color, label, 4 if pname == detected_profile else 2))
+            legend_items.append(("#f39c12", "This cycle (actual)", 3))
+
+            items_per_row = 3
+            col_w = (width - 2 * padding_x) // items_per_row
+            row_h = 34
+            n_rows = (len(legend_items) + items_per_row - 1) // items_per_row
+            legend_h = n_rows * row_h + 22
+            total_height = height + legend_h
+
+            leg_elems: list[str] = []
+            for i, (color, label, sw) in enumerate(legend_items):
+                col = i % items_per_row
+                row = i // items_per_row
+                lx = padding_x + col * col_w
+                ly = height + 26 + row * row_h
+                leg_elems.append(
+                    f'<line x1="{lx}" y1="{ly}" x2="{lx + 32}" y2="{ly}" '
+                    f'stroke="{color}" stroke-width="{sw}" />'
+                )
+                max_chars = 22
+                display = label[:max_chars] + "\u2026" if len(label) > max_chars else label
+                leg_elems.append(
+                    f'<text x="{lx + 42}" y="{ly + 6}" fill="#aaa" font-size="22">{display}</text>'
+                )
+
+            return (
+                f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {total_height}" '
+                'style="background-color: #1c1c1c; font-family: sans-serif;">\n'
+                + "\n".join(elems)
+                + "\n<!-- Legend -->\n"
+                + "\n".join(leg_elems)
+                + "\n</svg>"
+            )
+
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            _LOGGER.error("Error generating multi-profile comparison SVG: %s", e)
+            return None
+
+    def get_match_candidates_summary(
+        self, match_result: MatchResult, limit: int = 3
+    ) -> list[dict[str, Any]]:
+        """Extract top candidates from query result for UI display.
+
+        Args:
+            match_result: MatchResult from profile matching
+            limit: Number of top candidates to return
+
+        Returns:
+            List of dicts with keys: profile_name, confidence_pct, mae, correlation, duration_ratio
+        """
+        candidates = []
+
+        for candidate in match_result.ranking[:limit]:
+            try:
+                confidence_pct = round(candidate.get("score", 0.0) * 100, 1)
+                metrics = candidate.get("metrics", {})
+                mae = round(metrics.get("mae", 0.0), 2)
+                corr = round(metrics.get("corr", 0.0), 3)
+
+                profile_duration = candidate.get("profile_duration", 0.0)
+                actual_duration = match_result.expected_duration
+                duration_ratio = (
+                    round((actual_duration / profile_duration - 1.0) * 100, 1)
+                    if profile_duration > 0
+                    else 0.0
+                )
+
+                candidates.append({
+                    "profile_name": candidate.get("name", "Unknown"),
+                    "confidence_pct": confidence_pct,
+                    "mae": mae,
+                    "correlation": corr,
+                    "duration_ratio": duration_ratio,  # ±% from expected
+                })
+            except (TypeError, ValueError, KeyError):
+                continue
+
+        return candidates
 
     def _get_cached_sample_segment(
         self, sample_cycle: dict[str, Any], dt: float

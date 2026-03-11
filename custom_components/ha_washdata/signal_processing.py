@@ -1,4 +1,4 @@
-"""Signal processing primitives for HA WashData.
+"""Signal processing primitives for WashData.
 
 Constraint: NumPy only.
 Constraint: All computations must be dt-aware (robust to irregular cadence).

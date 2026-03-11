@@ -1,4 +1,4 @@
-"""Learning and self-tuning logic for HA WashData."""
+"""Learning and self-tuning logic for WashData."""
 
 from __future__ import annotations
 
@@ -120,8 +120,17 @@ class LearningManager:
         detected_profile: str | None = None,
         confidence: float = 0.0,
         predicted_duration: float | None = None,
+        match_result: Any | None = None,
     ) -> None:
-        """Analyze completed cycle for learning."""
+        """Analyze completed cycle for learning.
+        
+        Args:
+            cycle_data: Completed cycle data
+            detected_profile: Profile name detected
+            confidence: Match confidence score (0.0-1.0)
+            predicted_duration: Expected duration in seconds
+            match_result: MatchResult from profile_store.async_match_profile() (optional)
+        """
         # 1. Trigger background simulation to find optimal parameters for this cycle
         if cycle_data.get("power_data"):
             # Offload to executor since simulation can be heavy
@@ -129,7 +138,7 @@ class LearningManager:
 
         # 2. Check if we should request feedback
         self._maybe_request_feedback(
-            cycle_data, detected_profile, confidence, predicted_duration
+            cycle_data, detected_profile, confidence, predicted_duration, match_result
         )
 
         # 3. Update model-based suggestions (durations etc)
@@ -192,6 +201,7 @@ class LearningManager:
         detected_profile: str | None,
         confidence: float,
         predicted_duration: float | None,
+        match_result: Any | None = None,
     ) -> None:
         """Check if feedback should be requested for this completed cycle."""
         if (
@@ -259,6 +269,7 @@ class LearningManager:
             estimated_duration=predicted_duration,
             actual_duration=actual_duration,
             duration_tolerance=duration_tol,
+            match_result=match_result,
         )
 
         # Persist pending feedback request so it survives restart
@@ -358,6 +369,7 @@ class LearningManager:
         estimated_duration: Optional[float],
         actual_duration: float,
         duration_tolerance: float = 0.10,
+        match_result: Any | None = None,
     ) -> None:
         """Request user verification for a detected cycle."""
         duration_match_pct = (
@@ -367,6 +379,20 @@ class LearningManager:
         is_close_match = (
             estimated_duration and abs(duration_match_pct - 100) <= tolerance_pct
         )
+
+        # Extract match ranking from MatchResult if available (for UI visualization)
+        ranking_summary = []
+        if match_result and hasattr(match_result, "ranking") and match_result.ranking:
+            for cand in match_result.ranking[:5]:  # Store top 5
+                try:
+                    ranking_summary.append({
+                        "name": cand.get("name", "Unknown"),
+                        "score": float(cand.get("score", 0.0)),
+                        "metrics": cand.get("metrics", {}),
+                        "profile_duration": float(cand.get("profile_duration", 0.0)),
+                    })
+                except (TypeError, ValueError, KeyError):
+                    continue
 
         feedback_req: dict[str, Any] = {
             "cycle_id": cycle_id,
@@ -379,6 +405,7 @@ class LearningManager:
             "created_at": dt_util.now().isoformat(),
             "user_response": None,
             "expires_at": None,
+            "ranking": ranking_summary,  # Top candidates for UI display
         }
 
         self.profile_store.get_pending_feedback()[cycle_id] = feedback_req

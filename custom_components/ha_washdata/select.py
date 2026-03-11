@@ -1,4 +1,4 @@
-"""Select entity for HA WashData."""
+"""Select entity for WashData."""
 
 from __future__ import annotations
 
@@ -46,7 +46,7 @@ class WashDataProgramSelect(SelectEntity):
         self._attr_device_info = {
             "identifiers": {(DOMAIN, config_entry.entry_id)},
             "name": config_entry.title,
-            "manufacturer": "HA WashData",
+            "manufacturer": "WashData",
         }
 
         # Determine icon based on device type

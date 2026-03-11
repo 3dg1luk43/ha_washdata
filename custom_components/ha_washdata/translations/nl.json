@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Import mislukt. Plak een geldige HA WashData export-JSON.",
+      "import_failed": "Import mislukt. Plak een geldige WashData export-JSON.",
       "profile_exists": "Een profiel met deze naam bestaat al",
       "rename_failed": "Profiel hernoemen mislukt. Profiel bestaat mogelijk niet of de nieuwe naam is al in gebruik.",
       "assignment_failed": "Profiel toewijzen aan cyclus mislukt",

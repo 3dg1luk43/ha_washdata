@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Import ebaõnnestus. Kleepige kehtiv HA WashData ekspordi JSON.",
+      "import_failed": "Import ebaõnnestus. Kleepige kehtiv WashData ekspordi JSON.",
       "profile_exists": "Selle nimega profiil on juba olemas",
       "rename_failed": "Profiili ümbernimetamine ebaõnnestus. Profiili ei pruugi eksisteerida või uus nimi on juba hõivatud.",
       "assignment_failed": "Profiili määramine tsüklile ebaõnnestus",

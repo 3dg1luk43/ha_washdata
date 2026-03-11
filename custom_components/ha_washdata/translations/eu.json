@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Ezin izan da inportatu. Mesedez, itsatsi baliozko HA WashData esportazio JSON bat.",
+      "import_failed": "Ezin izan da inportatu. Mesedez, itsatsi baliozko WashData esportazio JSON bat.",
       "profile_exists": "Badago izen hau duen profil bat",
       "rename_failed": "Ezin izan da profilaren izena aldatu. Baliteke profila ez egotea edo izen berria dagoeneko hartua izatea.",
       "assignment_failed": "Ezin izan zaio profila esleitu zikloari",

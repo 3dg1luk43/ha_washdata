@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Import se nezdařil. Vložte prosím platný JSON exportu HA WashData.",
+      "import_failed": "Import se nezdařil. Vložte prosím platný JSON exportu WashData.",
       "profile_exists": "Profil s tímto názvem již existuje",
       "rename_failed": "Přejmenování profilu se nezdařilo. Profil nemusí existovat nebo je nový název již obsazen.",
       "assignment_failed": "Přiřazení profilu k cyklu se nezdařilo",

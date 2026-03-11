@@ -1,4 +1,4 @@
-"""Binary sensor for HA WashData."""
+"""Binary sensor for WashData."""
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ class WasherRunningBinarySensor(BinarySensorEntity):
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry.entry_id)},
             "name": entry.title,
-            "manufacturer": "HA WashData",
+            "manufacturer": "WashData",
         }
 
     @property

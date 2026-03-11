@@ -137,7 +137,7 @@ submit_cycle_feedback:
   fields:
     device_id:
       name: Device
-      description: The HA WashData device (recommended instead of entry_id).
+      description: The WashData device (recommended instead of entry_id).
       required: false
       selector:
         device:

@@ -1,4 +1,4 @@
-"""Unified time/power-data utilities for HA WashData.
+"""Unified time/power-data utilities for WashData.
 
 Canonical storage format for power_data: ``[[offset_seconds, power], ...]``
 where ``offset_seconds`` is a float relative to the cycle's ``start_time``.

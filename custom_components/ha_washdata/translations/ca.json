@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "La importació ha fallat. Enganxeu un JSON d'exportació HA WashData vàlid.",
+      "import_failed": "La importació ha fallat. Enganxeu un JSON d'exportació WashData vàlid.",
       "profile_exists": "Ja existeix un perfil amb aquest nom",
       "rename_failed": "No s'ha pogut canviar el nom del perfil. És possible que el perfil no existeixi o que ja s'ha pres un nom nou.",
       "assignment_failed": "No s'ha pogut assignar el perfil al cicle",

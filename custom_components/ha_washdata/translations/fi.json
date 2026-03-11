@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Tuonti epäonnistui. Liitä kelvollinen HA WashData -vienti-JSON.",
+      "import_failed": "Tuonti epäonnistui. Liitä kelvollinen WashData -vienti-JSON.",
       "profile_exists": "Samanniminen profiili on jo olemassa",
       "rename_failed": "Profiilin uudelleennimeäminen epäonnistui. Profiilia ei ehkä ole tai uusi nimi on jo käytössä.",
       "assignment_failed": "Profiilin määrittäminen syklille epäonnistui",

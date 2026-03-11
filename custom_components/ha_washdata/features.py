@@ -1,4 +1,4 @@
-"""Feature extraction logic for HA WashData.
+"""Feature extraction logic for WashData.
 
 Constraint: NumPy only.
 Constraint: All computations must be dt-aware.

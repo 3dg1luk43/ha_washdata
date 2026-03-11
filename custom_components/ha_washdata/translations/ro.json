@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "Import nereușit. Lipiți un JSON de export HA WashData valid.",
+      "import_failed": "Import nereușit. Lipiți un JSON de export WashData valid.",
       "profile_exists": "Un profil cu acest nume există deja",
       "rename_failed": "Redenumirea profilului a eșuat. Profilul ar putea să nu existe sau noul nume este deja luat.",
       "assignment_failed": "Atribuirea profilului la ciclu a eșuat",

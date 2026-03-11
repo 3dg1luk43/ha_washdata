@@ -498,7 +498,7 @@
       }
     },
     "error": {
-      "import_failed": "導入失敗。請貼上有效的 HA WashData 匯出 JSON。",
+      "import_failed": "導入失敗。請貼上有效的 WashData 匯出 JSON。",
       "profile_exists": "同名的設定檔已存在",
       "rename_failed": "無法重命名設定檔。設定檔可能不存在或新名稱已被使用。",
       "assignment_failed": "無法將設定檔指派給循環",

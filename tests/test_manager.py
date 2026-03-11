@@ -569,7 +569,7 @@ def test_pending_notifications_release_on_person_home(
     manager.config_entry.options["notify_service"] = "notify.mobile_app_test"
     manager._pending_notifications = [{
         "message": "cycle finished",
-        "title": "HA WashData",
+        "title": "WashData",
         "icon": None,
         "event_type": NOTIFY_EVENT_FINISH,
         "extra_vars": {"program": "Cotton"},

@@ -1,4 +1,4 @@
-"""Diagnostics support for HA WashData."""
+"""Diagnostics support for WashData."""
 
 from __future__ import annotations
 
