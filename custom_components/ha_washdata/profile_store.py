@@ -745,7 +745,10 @@ class ProfileStore:
         new_name: str,
         description: str = "",
     ) -> None:
-        """Update a shared custom phase and propagate rename to profile assignments."""
+        """Update a shared custom phase and propagate rename to profile assignments.
+        
+        If the old_name is a default phase, creates a custom override.
+        """
         target_name = normalize_phase_name(new_name)
         desc = str(description or "").strip()
         target_device_type = str(device_type or "").strip()
@@ -756,6 +759,7 @@ class ProfileStore:
                 return True
             return item_device_type == target
 
+        # Look for existing custom phase
         found = None
         for item in phases:
             if str(item.get("name", "")).casefold() != old_name.casefold():
@@ -764,8 +768,21 @@ class ProfileStore:
                 continue
             found = item
             break
+        
+        # If not found, check if it's a default phase that needs an override
         if found is None:
-            raise ValueError("phase_not_found")
+            catalog = self.list_phase_catalog(target_device_type)
+            is_default = any(p["name"].casefold() == old_name.casefold() for p in catalog)
+            if not is_default:
+                raise ValueError("phase_not_found")
+            # Create new custom override for this default phase
+            found = {
+                "name": old_name,
+                "description": "",
+                "device_type": target_device_type,
+                "created_at": dt_util.now().isoformat(),
+            }
+            phases.append(found)
 
         for p in self.list_phase_catalog(target_device_type):
             pname = str(p.get("name", ""))

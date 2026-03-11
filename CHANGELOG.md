@@ -44,6 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Translation Tool Docs**: Added documentation for the Home Assistant integration translation helper script.
 - **Learning Pipeline Context Propagation**: Propagated runtime match ranking through manager/learning flow so feedback requests retain candidate context.
 - **Feedback Chart Readability**: Increased chart and legend typography and spacing to improve readability on Home Assistant dialogs.
+- **Phase Assignment Visualization**: Replaced ASCII timeline with interactive SVG power curve chart showing average cycle profile, colored phase spans, and gating line boundaries for better profile phase visualization.
+- **Phase Catalog Management**: Implemented full create/edit/delete capabilities for custom phases in the phase catalog, allowing users to build device-specific phase vocabularies. **Default phases can also be edited**, with overrides automatically stored in the custom phases list.
+- **Device-Type Phase Filtering**: Phase options in the profile assignment flow are now automatically filtered by the currently selected device type, ensuring only relevant phases appear in dropdowns.
+- **Cross-Device Catalog View**: "Manage Phase Catalog" now displays and groups phases for all supported device types in one place, instead of only the current integration device type.
+- **Phase Action Wording Cleanup**: Updated phase management action labels to clearer wording ("Create New Phase", "Edit Phase", "Delete Phase").
+- **Phase-Only Offset Input**: Simplified phase assignment to use offset-based time entry (minutes from cycle start) instead of timestamp selection, reducing complexity and user error.
 
 ### 🐛 Bug Fixes
 - **Manual Recording Revert (#151)**: Fixed an issue where manual recordings could unexpectedly revert configuration changes.
@@ -56,6 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Profile Stats After Deletion**: Fixed `async_rebuild_envelope` incorrectly computing `min_duration` and `max_duration` from the outlier-filtered duration set. `min`/`max` now reflect the true observed range of all cycles; only `avg_duration` uses the IQR-filtered set for robustness. This means deleting an outlier cycle now correctly recalculates the profile's duration range.
 - **Feedback Translation Placeholder Mismatch**: Fixed options-flow description placeholders (`{comparison_data}`) to prevent missing-value translation errors during feedback review.
 - **Feedback SVG Legend Clipping**: Fixed a viewBox height mismatch that could render legend content outside the visible area.
+- **Global Phase Duplication in Selectors**: Fixed edit/delete phase dialogs duplicating "All Devices" phases once per device type by introducing scoped deduplication and explicit scope keys.
+- **Phase Scope Resolution in Edit/Delete**: Fixed phase edit/delete operations to resolve against the selected phase scope (`device_type`) so similarly named phases remain deterministic.
 
 ### 🧪 Tests
 - **HA Test Harness Adoption**: Replaced `MagicMock`-based hass objects with real `HomeAssistant` instances from `pytest_homeassistant_custom_component` across all new test modules. Only `ProfileStore` and `CycleDetector` are patched as true external I/O boundaries.

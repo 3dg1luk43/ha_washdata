@@ -27,6 +27,8 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Minimal Status Card**: Optional custom Lovelace card.
 - **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
 - **Manual Profile Creation**: Create profiles even without historical cycles by specifying a baseline duration (e.g., "Eco Mode - 3h").
+- **Unified Phase Catalog**: Manage phase vocabulary across all supported device types from one catalog view.
+- **Scoped Phase Assignment**: Phase assignment dialogs show only phases relevant to the configured device type.
 - **Ghost Cycle Suppression**: Intelligent filtering with **"Suspicious Window"** (20 mins) prevents end-spikes from triggering duplicate cycles. **Now Persistent**: Remembers cycle history across HA restarts to prevent ghost detections after reboots.
 - **Robust vNext State Machine**: Advanced filtering with `start_energy` and `end_energy` gates prevents false starts/ends.
 - **Multi-Stage Matching Pipeline**: Uses Fast Reject -> Core Similarity -> DTW-Lite tie-breaking for superior accuracy.
