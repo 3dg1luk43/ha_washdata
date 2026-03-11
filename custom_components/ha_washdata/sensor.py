@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.const import EntityCategory
@@ -41,7 +41,7 @@ async def async_setup_entry(
     """Set up the sensors."""
     manager: WashDataManager = hass.data[DOMAIN][entry.entry_id]
 
-    entities = [
+    entities: list[SensorEntity] = [
         WasherStateSensor(manager, entry),
         WasherProgramSensor(manager, entry),
         WasherCurrentPhaseSensor(manager, entry),
@@ -112,12 +112,12 @@ class WasherBaseSensor(SensorEntity):
 class WasherStateSensor(WasherBaseSensor):
     """Sensor for the washing machine state."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the state sensor."""
         self.entity_description = SensorEntityDescription(
             key="washer_state",
             translation_key="washer_state",
-            device_class="enum",
+            device_class=SensorDeviceClass.ENUM,
             options=[
                 STATE_OFF,
                 STATE_IDLE,
@@ -136,7 +136,7 @@ class WasherStateSensor(WasherBaseSensor):
         super().__init__(manager, entry)
 
     @property
-    def icon(self) -> str | None:
+    def icon(self) -> str | None:  # type: ignore[override]
         """Return the icon."""
         dtype = self._manager.device_type
         if dtype == "dryer":
@@ -154,33 +154,34 @@ class WasherStateSensor(WasherBaseSensor):
         return "mdi:washing-machine"
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         return self._manager.check_state
 
     @property
-    def extra_state_attributes(self):
-        return {
+    def extra_state_attributes(self):  # type: ignore[override]
+        attrs: dict[str, Any] = {
             "samples_recorded": self._manager.samples_recorded,
             "current_program_guess": self._manager.current_program,
             "sub_state": self._manager.sub_state,
         }
+        return attrs
 
 
 class WasherProgramSensor(WasherBaseSensor):
     """Sensor for the current program."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the program sensor."""
         self.entity_description = SensorEntityDescription(
             key="washer_program",
             translation_key="washer_program",
             icon="mdi:file-document-outline",
-            device_class="enum",
+            device_class=SensorDeviceClass.ENUM,
         )
         super().__init__(manager, entry)
 
     @property
-    def options(self) -> list[str] | None:
+    def options(self) -> list[str] | None:  # type: ignore[override]
         """Return a list of possible options."""
         profiles = self._manager.profile_store.list_profiles()
         # Include current program if not in profiles (e.g. unknown or special states)
@@ -195,11 +196,11 @@ class WasherProgramSensor(WasherBaseSensor):
         return options
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         return self._manager.current_program
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self):  # type: ignore[override]
         profile_name = self._manager.current_program
         if not profile_name or profile_name in ("off", "detecting...", "starting", "unknown"):
             return None
@@ -209,7 +210,7 @@ class WasherProgramSensor(WasherBaseSensor):
             profile_name,
             self._manager.device_type,
         )
-        catalog_view = [
+        catalog_view: list[dict[str, Any]] = [
             {
                 "name": p.get("name"),
                 "description": p.get("description", ""),
@@ -218,17 +219,18 @@ class WasherProgramSensor(WasherBaseSensor):
             for p in catalog
         ]
 
-        return {
+        attrs: dict[str, Any] = {
             "active_phase": self._manager.phase_description,
             "phase_catalog": catalog_view,
             "phase_ranges": assigned,
         }
+        return attrs
 
 
 class WasherTimeRemainingSensor(WasherBaseSensor):
     """Sensor for estimated time remaining."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the time remaining sensor."""
         self.entity_description = SensorEntityDescription(
             key="time_remaining",
@@ -238,14 +240,14 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
         super().__init__(manager, entry)
 
     @property
-    def native_unit_of_measurement(self) -> str | None:
+    def native_unit_of_measurement(self) -> str | None:  # type: ignore[override]
         """Return the unit of measurement."""
         if self._manager.check_state in (STATE_OFF, STATE_ANTI_WRINKLE):
             return None
         return "min"
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         if self._manager.check_state in (STATE_OFF, STATE_ANTI_WRINKLE):
             return "off"
         if self._manager.time_remaining:
@@ -256,25 +258,25 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
 class WasherTotalDurationSensor(WasherBaseSensor):
     """Sensor for total predicted duration."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the total duration sensor."""
         self.entity_description = SensorEntityDescription(
             key="total_duration",
             translation_key="total_duration",
-            device_class="duration",
+            device_class=SensorDeviceClass.DURATION,
             icon="mdi:timer-check-outline",
         )
         super().__init__(manager, entry)
 
     @property
-    def native_unit_of_measurement(self) -> str | None:
+    def native_unit_of_measurement(self) -> str | None:  # type: ignore[override]
         """Return the unit of measurement."""
         if self._manager.check_state == "off":
             return None
         return "min"
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         if self._manager.check_state == "off":
             return None
         if self._manager.total_duration:
@@ -282,7 +284,7 @@ class WasherTotalDurationSensor(WasherBaseSensor):
         return None
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self):  # type: ignore[override]
         """Return extra state attributes."""
         return {
             "last_updated": self._manager.last_total_duration_update,
@@ -292,7 +294,7 @@ class WasherTotalDurationSensor(WasherBaseSensor):
 class WasherProgressSensor(WasherBaseSensor):
     """Sensor for cycle progress percentage."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the progress sensor."""
         self.entity_description = SensorEntityDescription(
             key="cycle_progress",
@@ -304,45 +306,45 @@ class WasherProgressSensor(WasherBaseSensor):
         super().__init__(manager, entry)
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         return self._manager.cycle_progress
 
 
 class WasherPowerSensor(WasherBaseSensor):
     """Sensor for current power usage."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the power sensor."""
         self.entity_description = SensorEntityDescription(
             key="current_power",
             translation_key="current_power",
             native_unit_of_measurement="W",
-            device_class="power",
+            device_class=SensorDeviceClass.POWER,
             icon="mdi:flash",
         )
         super().__init__(manager, entry)
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         return self._manager.current_power
 
 
 class WasherElapsedTimeSensor(WasherBaseSensor):
     """Sensor for elapsed cycle time."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the elapsed time sensor."""
         self.entity_description = SensorEntityDescription(
             key="elapsed_time",
             translation_key="elapsed_time",
             native_unit_of_measurement="s",
-            device_class="duration",
+            device_class=SensorDeviceClass.DURATION,
             icon="mdi:timer-outline",
         )
         super().__init__(manager, entry)
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         if self._manager.check_state == "off":
             return 0
         start = self._manager.cycle_start_time
@@ -355,7 +357,7 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
 class WasherDebugSensor(WasherBaseSensor):
     """Sensor for internal debug information."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize the debug sensor."""
         self.entity_description = SensorEntityDescription(
             key="debug_info",
@@ -367,16 +369,16 @@ class WasherDebugSensor(WasherBaseSensor):
         super().__init__(manager, entry)
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         return self._manager.check_state
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self):  # type: ignore[override]
         """Return various internal states for debugging."""
         detector = self._manager.detector
         stats = self._manager.sample_interval_stats
         # pylint: disable=protected-access
-        return {
+        attrs: dict[str, Any] = {
             "sub_state": detector.sub_state,
             "match_confidence": getattr(self._manager, "_last_match_confidence", 0.0),
             "cycle_id": getattr(detector, "_current_cycle_start", None),
@@ -388,12 +390,13 @@ class WasherDebugSensor(WasherBaseSensor):
             "top_candidates": self._manager.top_candidates,
             "last_match_details": self._manager.last_match_details,
         }
+        return attrs
 
 
 class WasherMatchConfidenceSensor(WasherBaseSensor):
     """Sensor for profile match confidence."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         self.entity_description = SensorEntityDescription(
             key="match_confidence",
             translation_key="match_confidence",
@@ -405,7 +408,7 @@ class WasherMatchConfidenceSensor(WasherBaseSensor):
         super().__init__(manager, entry)
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         conf = getattr(self._manager, "_last_match_confidence", 0.0)
         return int(conf * 100)
 
@@ -413,7 +416,7 @@ class WasherMatchConfidenceSensor(WasherBaseSensor):
 class WasherTopCandidatesSensor(WasherBaseSensor):
     """Sensor showing top matching candidates."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         self.entity_description = SensorEntityDescription(
             key="top_candidates",
             translation_key="top_candidates",
@@ -423,7 +426,7 @@ class WasherTopCandidatesSensor(WasherBaseSensor):
         super().__init__(manager, entry)
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         candidates = self._manager.top_candidates
         if not candidates:
             return "None"
@@ -431,14 +434,14 @@ class WasherTopCandidatesSensor(WasherBaseSensor):
         return ", ".join([f"{c['name']} ({c['score']:.2f})" for c in candidates[:3]])
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self):  # type: ignore[override]
         return {"candidates": self._manager.top_candidates}
 
 
 class WasherCurrentPhaseSensor(WasherBaseSensor):
     """Sensor for the current detected phase."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         self.entity_description = SensorEntityDescription(
             key="current_phase",
             translation_key="current_phase",
@@ -447,7 +450,7 @@ class WasherCurrentPhaseSensor(WasherBaseSensor):
         super().__init__(manager, entry)
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         return self._manager.phase_description
 
 
@@ -476,7 +479,7 @@ class WasherProfileCountSensor(WasherBaseSensor):
         self._attr_unique_id = f"{entry.entry_id}_profile_count_{self._safe_name}"
 
     @property
-    def native_value(self) -> int:
+    def native_value(self) -> int:  # type: ignore[override]
         """Return the cycle count."""
         # Fetch fresh count from store if available
         profile = self._manager.profile_store.get_profile(self._profile_name)
@@ -485,12 +488,12 @@ class WasherProfileCountSensor(WasherBaseSensor):
         return 0
 
     @property
-    def available(self) -> bool:
+    def available(self) -> bool:  # type: ignore[override]
         """Return True if profile still exists."""
         return self._manager.profile_store.get_profile(self._profile_name) is not None
 
     @property
-    def extra_state_attributes(self) -> dict[str, Any] | None:
+    def extra_state_attributes(self) -> dict[str, Any] | None:  # type: ignore[override]
         """Return profile statistics."""
         profile = self._manager.profile_store.get_profile(self._profile_name)
         if not profile:
@@ -555,7 +558,7 @@ class WasherProfileSensorManager:
 
         # Add new
         new_names = current_names - existing_names
-        new_entities = []
+        new_entities: list[SensorEntity] = []
         for name in new_names:
             p_data = self._manager.profile_store.get_profile(name)
             count = p_data.get("cycle_count", 0) if p_data else 0
@@ -585,7 +588,7 @@ class WasherProfileSensorManager:
 class WasherSuggestionsSensor(WasherBaseSensor):
     """Sensor for learned settings suggestions."""
 
-    def __init__(self, manager, entry):
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         self.entity_description = SensorEntityDescription(
             key="suggestions",
             translation_key="suggestions",
@@ -595,12 +598,12 @@ class WasherSuggestionsSensor(WasherBaseSensor):
         super().__init__(manager, entry)
 
     @property
-    def native_value(self):
+    def native_value(self):  # type: ignore[override]
         suggestions = self._manager.suggestions
         if not suggestions:
             return "No suggestions"
         return f"{len(suggestions)} pending"
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self):  # type: ignore[override]
         return {"suggestions": self._manager.suggestions}

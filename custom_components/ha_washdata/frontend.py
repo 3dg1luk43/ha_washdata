@@ -3,6 +3,7 @@
 import logging
 import time
 from pathlib import Path
+from typing import Any, TypedDict, cast
 from homeassistant.core import HomeAssistant, Event
 from homeassistant.const import EVENT_COMPONENT_LOADED
 
@@ -11,6 +12,14 @@ _LOGGER = logging.getLogger(__name__)
 LOCAL_SUBDIR = "ha_washdata"
 CARD_NAME = "ha-washdata-card.js"
 INTEGRATION_URL = f"/{LOCAL_SUBDIR}/{CARD_NAME}"
+
+
+class LovelaceResourceItem(TypedDict, total=False):
+    """Known lovelace resource item shape used by this integration."""
+
+    id: str
+    url: str
+    res_type: str
 
 
 def get_cache_buster() -> str:
@@ -52,7 +61,10 @@ def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> None
 
     # Fallback for older HA
     try:
-        hass.http.register_static_path(url_path, path, cache_headers=True)
+        http_obj = cast(Any, hass.http)
+        register_static_path = getattr(http_obj, "register_static_path", None)
+        if callable(register_static_path):
+            register_static_path(url_path, path, cache_headers=True)
     except Exception:  # pylint: disable=broad-exception-caught
         _LOGGER.debug("Failed to register static path %s -> %s", url_path, path)
 
@@ -76,34 +88,41 @@ async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
         _LOGGER.debug("Lovelace storage not available; skipping auto resource init")
         return False
 
-    resources: ResourceStorageCollection = (
+    resources = (
         lovelace.resources if hasattr(lovelace, "resources") else lovelace["resources"]
     )
+    resources_obj = resources
 
-    await resources.async_get_info()
+    await resources_obj.async_get_info()
 
     url2 = f"{url}?v={ver}"
 
-    for item in resources.async_items():
-        if not item.get("url", "").startswith(url):
+    for raw_item in resources_obj.async_items():
+        if not isinstance(raw_item, dict):
             continue
 
-        if item["url"].endswith(ver):
+        item = cast(LovelaceResourceItem, raw_item)
+        item_url = item.get("url")
+        if not isinstance(item_url, str) or not item_url.startswith(url):
+            continue
+
+        if item_url.endswith(ver):
             return False
 
+        item_id = item.get("id")
+        if not isinstance(item_id, str):
+            continue
+
         _LOGGER.debug("Update lovelace resource to: %s", url2)
-        if isinstance(resources, ResourceStorageCollection):
-            await resources.async_update_item(
-                item["id"], {"res_type": "module", "url": url2}
-            )
-        else:
-            item["url"] = url2
+        await resources_obj.async_update_item(
+            item_id, {"res_type": "module", "url": url2}
+        )
 
         return True
 
     if isinstance(resources, ResourceStorageCollection):
         _LOGGER.debug("Add new lovelace resource: %s", url2)
-        await resources.async_create_item({"res_type": "module", "url": url2})
+        await resources_obj.async_create_item({"res_type": "module", "url": url2})
     else:
         _LOGGER.debug("Add extra JS module: %s", url2)
         add_extra_js_url(hass, url2)

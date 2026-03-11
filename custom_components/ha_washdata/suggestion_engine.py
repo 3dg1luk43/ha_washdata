@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING, cast
 
 import numpy as np
 from homeassistant.core import HomeAssistant
@@ -49,7 +49,7 @@ class SuggestionEngine:
 
     def generate_operational_suggestions(self, p95_dt: float, median_dt: float) -> dict[str, Any]:
         """Generate suggestions for operational parameters based on cadence."""
-        suggestions = {}
+        suggestions: dict[str, dict[str, Any]] = {}
 
         # 1. Watchdog Interval
         suggested_watchdog = int(max(30, p95_dt * 10))
@@ -67,7 +67,11 @@ class SuggestionEngine:
 
         # 3. Off Delay
         # Use device-specific default as floor to prevent splitting cycles with long pauses
-        device_floor = DEFAULT_OFF_DELAY_BY_DEVICE.get(self.device_type, DEFAULT_OFF_DELAY)
+        device_floor = (
+            DEFAULT_OFF_DELAY_BY_DEVICE.get(self.device_type, DEFAULT_OFF_DELAY)
+            if self.device_type is not None
+            else DEFAULT_OFF_DELAY
+        )
         suggested_off_delay = int(max(device_floor, p95_dt * 5))
 
         reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
@@ -90,25 +94,26 @@ class SuggestionEngine:
 
     def generate_model_suggestions(self) -> dict[str, Any]:
         """Generate suggestions for model parameters based on past cycles."""
-        suggestions = {}
+        suggestions: dict[str, dict[str, Any]] = {}
 
         cycles = self.profile_store.get_past_cycles()[-100:]
         profiles = self.profile_store.get_profiles()
 
-        ratios = []
+        ratios: list[float] = []
         for c in cycles:
-            if not c.get("profile_name") or c.get("status") == "interrupted":
+            profile_name = c.get("profile_name")
+            if not isinstance(profile_name, str) or c.get("status") == "interrupted":
                 continue
-            prof = profiles.get(c["profile_name"])
+            prof = profiles.get(profile_name)
             if not prof:
                 continue
-            avg = prof.get("avg_duration", 0)
-            dur = c.get("duration", 0)
+            avg = float(prof.get("avg_duration", 0.0) or 0.0)
+            dur = float(c.get("duration", 0.0) or 0.0)
             if avg > 60 and dur > 60:
                 ratios.append(dur / avg)
 
         if len(ratios) >= 10:
-            arr = np.array(ratios)
+            arr: np.ndarray[Any, np.dtype[np.float64]] = np.array(ratios, dtype=float)
             deviations = np.abs(arr - 1.0)
             p95_dev = float(np.percentile(deviations, 95))
 
@@ -138,8 +143,11 @@ class SuggestionEngine:
 
     def run_simulation(self, cycle_data: dict[str, Any]) -> dict[str, Any]:
         """Replay a cycle with varied parameters to find optimal settings."""
-        power_data = cycle_data.get("power_data", [])
-        if not power_data or len(power_data) < 10:
+        power_data_raw: Any = cycle_data.get("power_data", [])
+        if not isinstance(power_data_raw, list):
+            return {}
+        power_data = cast(list[list[float] | tuple[Any, float]], power_data_raw)
+        if len(power_data) < 10:
             return {}
 
         # Normalise power_data to [[offset_sec, power], ...] regardless of source format.
@@ -149,7 +157,9 @@ class SuggestionEngine:
             _LOGGER.error("Failed to parse power data for simulation: %s", e)
             return {}
 
-        readings: list[tuple[float, float]] = [(o, p) for o, p in readings_list]
+        readings: list[tuple[float, float]] = [
+            (float(offset), float(power)) for offset, power in readings_list
+        ]
 
         if not readings:
             return {}
@@ -184,7 +194,7 @@ class SuggestionEngine:
 
         suggested_dead_zone = min(300, dead_zone) if dead_zone > 0 else 60
 
-        new_suggestions = {
+        new_suggestions: dict[str, dict[str, Any]] = {
             CONF_STOP_THRESHOLD_W: {
                 "value": suggested_stop,
                 "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle."

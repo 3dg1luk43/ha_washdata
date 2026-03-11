@@ -1,8 +1,9 @@
 """Tests for anti-wrinkle state handling (issue #68)."""
 
-import pytest
 from datetime import datetime, timezone, timedelta
 from unittest.mock import Mock
+
+import pytest
 
 from custom_components.ha_washdata.cycle_detector import (
     CycleDetector,
@@ -10,11 +11,7 @@ from custom_components.ha_washdata.cycle_detector import (
     STATE_OFF,
     STATE_STARTING,
     STATE_RUNNING,
-    STATE_PAUSED,
-    STATE_ENDING,
     STATE_FINISHED,
-    STATE_INTERRUPTED,
-    STATE_FORCE_STOPPED,
     STATE_ANTI_WRINKLE,
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_WASHER_DRYER,
@@ -22,19 +19,19 @@ from custom_components.ha_washdata.cycle_detector import (
 )
 
 
-def dt(seconds_offset):
+def dt(seconds_offset: float) -> datetime:
     """Create a datetime with given offset from test base time."""
     return datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc) + timedelta(seconds=seconds_offset)
 
 
-def flush_buffer(detector, start_t_offset, num_readings=80):
+def flush_buffer(detector: CycleDetector, start_t_offset: float, num_readings: int = 80) -> None:
     """Flush detector state machine by sending low readings at 1s intervals."""
     for i in range(1, num_readings + 1):
         detector.process_reading(0.0, dt(start_t_offset + i))
 
 
 @pytest.fixture
-def mock_callbacks():
+def mock_callbacks() -> dict[str, Mock]:
     """Create mock callbacks."""
     return {
         "on_state_change": Mock(),
@@ -43,7 +40,7 @@ def mock_callbacks():
 
 
 @pytest.fixture
-def dryer_config_no_anti_wrinkle():
+def dryer_config_no_anti_wrinkle() -> CycleDetectorConfig:
     """Create dryer config without anti-wrinkle."""
     return CycleDetectorConfig(
         min_power=5.0,
@@ -54,7 +51,7 @@ def dryer_config_no_anti_wrinkle():
 
 
 @pytest.fixture
-def dryer_config_with_anti_wrinkle():
+def dryer_config_with_anti_wrinkle() -> CycleDetectorConfig:
     """Create dryer config with anti-wrinkle enabled."""
     return CycleDetectorConfig(
         min_power=5.0,
@@ -67,7 +64,10 @@ def dryer_config_with_anti_wrinkle():
     )
 
 
-def test_anti_wrinkle_disabled_default_finish(dryer_config_no_anti_wrinkle, mock_callbacks):
+def test_anti_wrinkle_disabled_default_finish(
+    dryer_config_no_anti_wrinkle: CycleDetectorConfig,
+    mock_callbacks: dict[str, Mock],
+) -> None:
     """Test that when anti-wrinkle is disabled, cycle finishes to FINISHED (not ANTI_WRINKLE)."""
     detector = CycleDetector(
         config=dryer_config_no_anti_wrinkle,
@@ -96,7 +96,10 @@ def test_anti_wrinkle_disabled_default_finish(dryer_config_no_anti_wrinkle, mock
     mock_callbacks["on_cycle_end"].assert_called_once()
 
 
-def test_anti_wrinkle_cycle_completion_transition(dryer_config_with_anti_wrinkle, mock_callbacks):
+def test_anti_wrinkle_cycle_completion_transition(
+    dryer_config_with_anti_wrinkle: CycleDetectorConfig,
+    mock_callbacks: dict[str, Mock],
+) -> None:
     """Test that completed cycle transitions to ANTI_WRINKLE when enabled for dryers."""
     detector = CycleDetector(
         config=dryer_config_with_anti_wrinkle,
@@ -129,7 +132,10 @@ def test_anti_wrinkle_cycle_completion_transition(dryer_config_with_anti_wrinkle
     assert cycle_data["status"] == "completed"
 
 
-def test_anti_wrinkle_shields_low_power_spike(dryer_config_with_anti_wrinkle, mock_callbacks):
+def test_anti_wrinkle_shields_low_power_spike(
+    dryer_config_with_anti_wrinkle: CycleDetectorConfig,
+    mock_callbacks: dict[str, Mock],
+) -> None:
     """Test that low-power bursts in ANTI_WRINKLE are shielded (no new STARTING)."""
     detector = CycleDetector(
         config=dryer_config_with_anti_wrinkle,
@@ -169,7 +175,10 @@ def test_anti_wrinkle_shields_low_power_spike(dryer_config_with_anti_wrinkle, mo
     mock_callbacks["on_cycle_end"].assert_not_called()
 
 
-def test_anti_wrinkle_exit_via_user_stop(dryer_config_with_anti_wrinkle, mock_callbacks):
+def test_anti_wrinkle_exit_via_user_stop(
+    dryer_config_with_anti_wrinkle: CycleDetectorConfig,
+    mock_callbacks: dict[str, Mock],
+) -> None:
     """Test that ANTI_WRINKLE can be exited via user_stop."""
     detector = CycleDetector(
         config=dryer_config_with_anti_wrinkle,
@@ -201,7 +210,7 @@ def test_anti_wrinkle_exit_via_user_stop(dryer_config_with_anti_wrinkle, mock_ca
     mock_callbacks["on_state_change"].assert_called_with(STATE_ANTI_WRINKLE, STATE_OFF)
 
 
-def test_anti_wrinkle_not_for_washing_machine(mock_callbacks):
+def test_anti_wrinkle_not_for_washing_machine(mock_callbacks: dict[str, Mock]) -> None:
     """Test that anti-wrinkle is NOT enabled for washing machines."""
     config = CycleDetectorConfig(
         min_power=5.0,
@@ -233,7 +242,7 @@ def test_anti_wrinkle_not_for_washing_machine(mock_callbacks):
     assert detector.state == STATE_FINISHED
 
 
-def test_anti_wrinkle_enabled_washer_dryer(mock_callbacks):
+def test_anti_wrinkle_enabled_washer_dryer(mock_callbacks: dict[str, Mock]) -> None:
     """Test that anti-wrinkle works for washer-dryer combos too."""
     config = CycleDetectorConfig(
         min_power=5.0,
@@ -265,7 +274,10 @@ def test_anti_wrinkle_enabled_washer_dryer(mock_callbacks):
     assert detector.state == STATE_ANTI_WRINKLE
 
 
-def test_anti_wrinkle_interrupted_cycle_no_transition(dryer_config_with_anti_wrinkle, mock_callbacks):
+def test_anti_wrinkle_interrupted_cycle_no_transition(
+    dryer_config_with_anti_wrinkle: CycleDetectorConfig,
+    mock_callbacks: dict[str, Mock],
+) -> None:
     """Test that anti-wrinkle still works even for interrupted cycles."""
     detector = CycleDetector(
         config=dryer_config_with_anti_wrinkle,

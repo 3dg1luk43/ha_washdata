@@ -36,3 +36,4 @@ tests/benchmarks/__pycache__/
 .github/ui-ux-pro-max
 .github/workflows copy
 .github/ARCHITECTURE.md
+devtools/.mock_socket.pid
