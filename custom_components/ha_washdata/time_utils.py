@@ -16,14 +16,14 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import homeassistant.util.dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
 
 # Type aliases
-PowerPoint = list[float] | tuple[Any, float]
+PowerPoint = list[Any] | tuple[Any, ...]
 PowerData = list[PowerPoint]
 
 
@@ -37,7 +37,7 @@ def detect_power_data_format(
     if not power_data:
         return "empty"
     first = power_data[0]
-    if not isinstance(first, (list, tuple)) or len(first) < 2:
+    if len(first) < 2:
         return "unknown"
     ts = first[0]
     if isinstance(ts, datetime):
@@ -81,11 +81,14 @@ def power_data_to_offsets(
 
     if fmt == "datetime":
         start_ts: float | None = None
-        result = []
+        result: list[list[float]] = []
         for item in power_data:
             try:
-                ts: datetime = item[0]
+                ts_raw = item[0]
+                if not isinstance(ts_raw, datetime):
+                    continue
                 p = float(item[1])
+                ts = ts_raw
                 if start_ts is None:
                     start_ts = ts.timestamp()
                 result.append([round(ts.timestamp() - start_ts, 1), p])
@@ -104,11 +107,13 @@ def power_data_to_offsets(
             except Exception:  # pylint: disable=broad-exception-caught
                 pass
 
-        result = []
+        result: list[list[float]] = []
         first_ts: float | None = None
         for item in power_data:
             try:
-                ts_raw: str = item[0]
+                ts_raw = item[0]
+                if not isinstance(ts_raw, str):
+                    continue
                 p = float(item[1])
                 parsed_ts = dt_util.parse_datetime(ts_raw)
                 if parsed_ts is None:
@@ -175,8 +180,9 @@ def migrate_power_data_to_offsets(cycle: dict[str, Any]) -> bool:
     raw = cycle.get("power_data")
     if not isinstance(raw, list) or not raw:
         return False
+    raw_power_data = cast(PowerData, raw)
 
-    fmt = detect_power_data_format(raw)
+    fmt = detect_power_data_format(raw_power_data)
     if fmt in ("offset", "empty"):
         return False  # Already canonical
 
@@ -187,7 +193,7 @@ def migrate_power_data_to_offsets(cycle: dict[str, Any]) -> bool:
         return False
 
     start_time_iso: str | None = cycle.get("start_time")
-    converted = power_data_to_offsets(raw, start_time_iso)
+    converted = power_data_to_offsets(raw_power_data, start_time_iso)
     if not converted:
         _LOGGER.warning(
             "migrate_power_data_to_offsets: conversion produced empty result, skipping"

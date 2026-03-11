@@ -53,7 +53,7 @@ class WasherRunningBinarySensor(BinarySensorEntity):
         }
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool:  # type: ignore[override]
         """Return true if the binary sensor is on."""
         return self._manager.check_state == STATE_RUNNING
 
@@ -85,12 +85,12 @@ class WasherAmbiguitySensor(WasherRunningBinarySensor):
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool:  # type: ignore[override]
         """Return true if match is ambiguous."""
         return self._manager.match_ambiguity
 
     @property
-    def extra_state_attributes(self) -> dict[str, Any]:
+    def extra_state_attributes(self) -> dict[str, Any]:  # type: ignore[override]
         """Return ambiguous candidate info."""
         details = self._manager.last_match_details
         return {"margin": getattr(details, "ambiguity_margin", 0.0) if details else 0.0}

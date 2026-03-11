@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any, Callable, cast
 import numpy as np
 
 from homeassistant.util import dt as dt_util
@@ -257,7 +257,7 @@ class CycleDetector:
         except Exception as e:  # pylint: disable=broad-exception-caught
             _LOGGER.debug("Profile match failed: %s", e)
 
-    def update_match(self, result: tuple | Any) -> None:
+    def update_match(self, result: tuple[Any, ...] | list[Any] | Any) -> None:  # type: ignore[misc]
         """Process a match result (synchronously).
 
         Can be called by the matcher callback directly or asynchronously.
@@ -267,22 +267,42 @@ class CycleDetector:
         # Or MatchResult object if refactored, but currently wrapper returns tuple.
 
         is_match_mismatch = False
-        match_name = None
-        phase_name = None
+        match_name: str | None = None
+        phase_name: str | None = None
+        confidence: float = 0.0
+        expected_duration: float = 0.0
 
-        if isinstance(result, (list, tuple)):
-            if len(result) >= 5:
+        if isinstance(result, (list, tuple)):  # type: ignore[misc]
+            result_seq = cast(tuple[Any, ...] | list[Any], result)
+            if len(result_seq) >= 5:
                 (
-                    match_name,
-                    confidence,
-                    expected_duration,
-                    phase_name,
-                    is_match_mismatch,
-                ) = result[:5]
+                    raw_name,
+                    raw_confidence,
+                    raw_expected_duration,
+                    raw_phase_name,
+                    raw_mismatch,
+                ) = result_seq[:5]
+                match_name = str(raw_name) if raw_name is not None else None
+                confidence = float(raw_confidence)
+                expected_duration = float(raw_expected_duration)
+                phase_name = str(raw_phase_name) if raw_phase_name is not None else None
+                is_match_mismatch = bool(raw_mismatch)
             else:
                 # Fallback for old signature
-                (match_name, confidence, expected_duration, phase_name) = result[:4]
-                is_match_mismatch = False
+                if len(result_seq) >= 4:
+                    (
+                        raw_name,
+                        raw_confidence,
+                        raw_expected_duration,
+                        raw_phase_name,
+                    ) = result_seq[:4]
+                    match_name = str(raw_name) if raw_name is not None else None
+                    confidence = float(raw_confidence)
+                    expected_duration = float(raw_expected_duration)
+                    phase_name = (
+                        str(raw_phase_name) if raw_phase_name is not None else None
+                    )
+                    is_match_mismatch = False
 
             # Store confidence for Smart Termination checks
             self._last_match_confidence = confidence or 0.0
@@ -576,6 +596,8 @@ class CycleDetector:
                 start_time = self._current_cycle_start or timestamp
                 current_duration = (timestamp - start_time).total_seconds()
 
+                is_dishwasher = self._config.device_type == "dishwasher"
+
                 # Sanity check: if expected_duration is unreasonable (>6 hours), use fallback
                 max_reasonable = 21600.0  # 6 hours
                 effective_expected = self._expected_duration
@@ -595,6 +617,27 @@ class CycleDetector:
                     effective_expected > 0
                     and current_duration >= (effective_expected * 0.98)
                 )
+
+                # Dishwashers commonly have a long silent dry tail followed by a
+                # short final pump-out burst. If ENDING has already lasted long enough,
+                # or we're near expected completion, treat the burst as terminal.
+                dishwasher_terminal_spike = False
+                if is_dishwasher:
+                    near_expected = (
+                        effective_expected > 0
+                        and current_duration >= (effective_expected * 0.90)
+                    )
+                    long_ending_tail = self._time_in_state >= 120.0
+                    dishwasher_terminal_spike = near_expected or long_ending_tail
+
+                if dishwasher_terminal_spike:
+                    _LOGGER.debug(
+                        "Dishwasher end spike kept in ENDING (duration %.0fs/%.0fs, time_in_ending %.0fs)",
+                        current_duration,
+                        effective_expected,
+                        self._time_in_state,
+                    )
+                    return
 
                 if past_expected:
                     _LOGGER.debug(
@@ -885,7 +928,7 @@ class CycleDetector:
                 final_readings.append((end_time, last_p))
 
         start_ts = self._current_cycle_start.timestamp()
-        cycle_data = {
+        cycle_data: dict[str, Any] = {
             "start_time": self._current_cycle_start.isoformat(),
             "end_time": end_time.isoformat(),
             "duration": duration,
@@ -1029,13 +1072,16 @@ class CycleDetector:
             has_naive_readings = False
 
             for r in readings:
-                if isinstance(r, (list, tuple)) and len(r) == 2:
-                    t = dt_util.parse_datetime(r[0])
+                if isinstance(r, (list, tuple)):
+                    reading = cast(list[Any] | tuple[Any, ...], r)
+                    if len(reading) < 2:
+                        continue
+                    t = dt_util.parse_datetime(str(reading[0]))
                     if t:
                         if t.tzinfo is None:
                             t = t.replace(tzinfo=dt_util.now().tzinfo)
                             has_naive_readings = True
-                        self._power_readings.append((t, float(r[1])))
+                        self._power_readings.append((t, float(reading[1])))
 
             if has_naive_readings:
                 _LOGGER.warning(

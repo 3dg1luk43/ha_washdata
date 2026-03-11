@@ -3,13 +3,8 @@ from __future__ import annotations
 
 import logging
 from typing import Any
-import numpy as np
 
-# Try importing dtw, handle if missing (optional for future use)
-try:
-    from dtw import dtw  # pylint: disable=unused-import
-except ImportError:
-    dtw = None
+import numpy as np
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -181,7 +176,7 @@ def compute_matches_worker(
     config: dict[str, Any]
 ) -> list[dict[str, Any]]:
     """Worker function to compute matches against snapshots."""
-    candidates = []
+    candidates: list[dict[str, Any]] = []
 
     min_duration_ratio = config.get("min_duration_ratio", 0.07)
     max_duration_ratio = config.get("max_duration_ratio", 1.3)
@@ -275,7 +270,7 @@ def compute_dtw_path(
             )
 
     # Backtracking
-    path = []
+    path: list[tuple[int, int]] = []
     i, j = n, m
 
     while i > 0 or j > 0:
@@ -336,7 +331,7 @@ def compute_envelope_worker(
     """
     if not raw_cycles_data:
         return None
-    normalized_curves: list[tuple[np.ndarray, np.ndarray]] = []
+    normalized_curves: list[tuple[np.ndarray, np.ndarray, float]] = []
     sampling_rates: list[float] = []
 
     # 1. Pre-process input

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING, cast
 
 import numpy as np
 from homeassistant.core import HomeAssistant
@@ -180,9 +180,11 @@ class LearningManager:
 
     def _set_suggestion(self, key: str, value: Any, reason: str) -> None:
         """Persist a suggested setting."""
-        current = self.profile_store.get_suggestions().get(key, {})
-        if isinstance(current, dict) and current.get("value") == value:
-            return  # No change
+        current: Any = self.profile_store.get_suggestions().get(key, {})
+        if isinstance(current, dict):
+            current_dict = cast(dict[str, Any], current)
+            if current_dict.get("value") == value:
+                return  # No change
 
         self.profile_store.set_suggestion(key, value, reason=reason)
         # We fire a background save task if possible, or rely on next periodic save.
@@ -381,7 +383,7 @@ class LearningManager:
         )
 
         # Extract match ranking from MatchResult if available (for UI visualization)
-        ranking_summary = []
+        ranking_summary: list[dict[str, Any]] = []
         if match_result and hasattr(match_result, "ranking") and match_result.ranking:
             for cand in match_result.ranking[:5]:  # Store top 5
                 try:

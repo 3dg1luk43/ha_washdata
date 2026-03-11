@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
@@ -21,7 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 STORAGE_KEY_RECORDER = f"{STORAGE_KEY}.recorder"
 
 
-class RecorderStore(Store):
+class RecorderStore(Store[dict[str, Any]]):
     """Store for recorder data with migration support."""
 
     async def _async_migrate_func(
@@ -75,17 +75,20 @@ class CycleRecorder:
 
     async def async_load(self) -> None:
         """Load state from storage."""
-        data = await self._store.async_load()
+        data_raw = await self._store.async_load()
+        data = data_raw if isinstance(data_raw, dict) else {}
         if data:
-            self._is_recording = data.get("is_recording", False)
+            self._is_recording = bool(data.get("is_recording", False))
             start_iso = data.get("start_time")
-            if start_iso:
+            if isinstance(start_iso, str) and start_iso:
                 try:
                     self._start_time = dt_util.parse_datetime(start_iso)
                 except ValueError:
                     self._start_time = None
-            self._buffer = data.get("buffer", [])
-            self._last_run = data.get("last_run")  # Restore last run
+            buffer_raw = data.get("buffer", [])
+            self._buffer = cast(list[tuple[str, float]], buffer_raw) if isinstance(buffer_raw, list) else []
+            last_run_raw = data.get("last_run")
+            self._last_run = cast(dict[str, Any], last_run_raw) if isinstance(last_run_raw, dict) else None  # Restore last run
             _LOGGER.info(
                 "Loaded recorder state: recording=%s, samples=%d, has_last_run=%s",
                 self._is_recording,
@@ -102,7 +105,7 @@ class CycleRecorder:
         self._is_recording = False
 
         # Create output packet
-        result = {
+        result: dict[str, Any] = {
             "start_time": self._start_time.isoformat() if self._start_time else None,
             "end_time": dt_util.now().isoformat(),
             "data": list(self._buffer),  # Copy
@@ -130,7 +133,7 @@ class CycleRecorder:
 
     async def _async_save(self) -> None:
         """Save state to storage."""
-        data = {
+        data: dict[str, Any] = {
             "is_recording": self._is_recording,
             "start_time": self._start_time.isoformat() if self._start_time else None,
             "buffer": self._buffer,
@@ -192,7 +195,7 @@ class CycleRecorder:
             return 0.0, 0.0, 0.0
 
         # Parse timestamps and powers
-        parsed = []
+        parsed: list[tuple[float, float]] = []
         for t_str, p in data:
             t = dt_util.parse_datetime(t_str)
             if t:

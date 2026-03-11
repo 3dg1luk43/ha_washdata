@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 import hashlib
 import inspect
+from asyncio import Task
 from datetime import datetime, timedelta
 from typing import Any, cast
 import numpy as np
@@ -214,15 +215,15 @@ class WashDataManager:
         self._no_update_active_timeout = float(DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
         self._low_power_no_update_timeout = 3600.0 # Default 1h
         self._notify_before_end_minutes = float(DEFAULT_NOTIFY_BEFORE_END_MINUTES)
-        self._notify_service = ""
-        self._notify_events = []
-        self._notify_actions = []
-        self._notify_people = []
+        self._notify_service: str | None = ""
+        self._notify_events: list[str] = []
+        self._notify_actions: list[dict[str, Any]] = []
+        self._notify_people: list[str] = []
         self._notify_only_when_home = DEFAULT_NOTIFY_ONLY_WHEN_HOME
         self._notify_fire_events = DEFAULT_NOTIFY_FIRE_EVENTS
         self._notify_live_interval_seconds = DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
         self._notify_live_overrun_percent = DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
-        self._pending_notifications = []
+        self._pending_notifications: list[dict[str, Any]] = []
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
         self._live_notification_cap = 0
@@ -234,13 +235,13 @@ class WashDataManager:
         self._current_power = 0.0
         self._last_reading_time: datetime | None = None
         self._last_real_reading_time: datetime | None = None # Track last real sensor update
-        self._noise_events = []
-        self._noise_max_powers = []
+        self._noise_events: list[datetime] = []
+        self._noise_max_powers: list[float] = []
         self._last_match_result = None
         self._last_phase_estimate_time = None
-        self._sample_intervals = []
-        self._sample_interval_stats = {}
-        self._matching_task = None
+        self._sample_intervals: list[float] = []
+        self._sample_interval_stats: dict[str, Any] = {}
+        self._matching_task: Task[Any] | None = None
         self._last_state_save = 0.0
         self._last_cycle_end_time: datetime | None = None
         self._remove_state_expiry_timer = None
@@ -317,9 +318,11 @@ class WashDataManager:
                 CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
             )
         )
-        self._notify_service = config_entry.options.get(CONF_NOTIFY_SERVICE)
-        self._notify_events = config_entry.options.get(CONF_NOTIFY_EVENTS, [])
-        self._notify_actions = config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or []
+        self._notify_service = cast(str | None, config_entry.options.get(CONF_NOTIFY_SERVICE))
+        self._notify_events = list(cast(list[str], config_entry.options.get(CONF_NOTIFY_EVENTS, []) or []))
+        self._notify_actions = list(
+            cast(list[dict[str, Any]], config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or [])
+        )
         self._notify_people = list(
             config_entry.options.get(CONF_NOTIFY_PEOPLE, []) or []
         )
@@ -464,7 +467,7 @@ class WashDataManager:
 
         def profile_matcher_wrapper(
             readings: list[tuple[datetime, float]],
-        ) -> tuple[str | None, float, float, str | None, bool] | None:
+        ) -> tuple[str | None, float, float, str | None]:
             """Wraps profile store matching logic with detector callback signature.
 
             Returns: None (async offload)
@@ -488,17 +491,16 @@ class WashDataManager:
                     1.0,
                     expected_duration,
                     manual_phase or "Manual",
-                    False,
                 )
 
             if not readings:
-                return (None, 0.0, 0.0, None, False)
+                return (None, 0.0, 0.0, None)
 
             # Snapshotted for thread safety indirectly by task logic
             # We don't need a wrapper task if we unify with _update_estimates matching
             # but for now let's keep the detector callback as a trigger
             self.hass.async_create_task(self._async_perform_combined_matching(readings))
-            return None
+            return (None, 0.0, 0.0, None)
 
         self.detector = CycleDetector(
             config,
@@ -525,7 +527,7 @@ class WashDataManager:
                 DEFAULT_AUTO_TUNE_NOISE_EVENTS_THRESHOLD,
             )
         )
-        self._current_program = "off"
+        self._current_program: str = "off"
         self._time_remaining: float | None = None
         self._total_duration: float | None = None
         self._last_total_duration_update: datetime | None = None
@@ -571,7 +573,8 @@ class WashDataManager:
             getattr(self, "_matching_task", None) is not None
         )
         # Prevent concurrent matching tasks
-        if getattr(self, "_matching_task", None) and not self._matching_task.done():
+        current_task = self._matching_task
+        if current_task is not None and not current_task.done():
             _LOGGER.debug("Matching skipped: previous task still running")
             return
 
@@ -624,7 +627,7 @@ class WashDataManager:
                 self._current_program not in ("detecting...", "off", "starting", "unknown")
                 and profile_name == self._current_program
             ):
-                history = self._score_history.get(self._current_program, [])
+                history: list[float] = self._score_history.get(self._current_program, [])
                 if len(history) > 3:
                     peak_score = max(history)
                     # If score drops by more than 40% from peak AND is below threshold, unmatch.
@@ -729,7 +732,10 @@ class WashDataManager:
                 self._unmatch_persistence_counter = 0
 
             if should_switch:
-                self._current_program = profile_name
+                if profile_name is None:
+                    self._current_program = "detecting..."
+                else:
+                    self._current_program = profile_name
                 self._last_match_confidence = confidence
                 self._unmatch_persistence_counter = 0 # Reset on switch
                 if profile_name in self._match_persistence_counter:
@@ -770,10 +776,12 @@ class WashDataManager:
             # to confirm if this is a legitimate pause or a mismatch.
             stop_thresh = float(self.detector.config.stop_threshold_w)
             if current_matched and current_power < stop_thresh:
-                formatted = power_data_to_offsets(readings)
+                formatted = power_data_to_offsets(cast(list[list[Any] | tuple[Any, ...]], readings))
                 try:
+                    profile_store_any = cast(Any, self.profile_store)
+                    verify_alignment = profile_store_any.async_verify_alignment
                     is_confirmed, mapped_time, _ = (
-                        await self.profile_store.async_verify_alignment(current_matched, formatted)
+                        await verify_alignment(current_matched, formatted)
                     )
                 except Exception as e: # pylint: disable=broad-exception-caught
                     _LOGGER.error(
@@ -901,14 +909,14 @@ class WashDataManager:
             return []
 
         # Get raw list from ranking (best) or candidates
-        raw_list = []
+        raw_list: list[dict[str, Any]] = []
         if hasattr(self._last_match_result, "ranking") and self._last_match_result.ranking:
             raw_list = self._last_match_result.ranking
         elif hasattr(self._last_match_result, "candidates"):
             raw_list = self._last_match_result.candidates
 
         # SANITIZE: Remove heavy power arrays before sending to Home Assistant attributes
-        sanitized = []
+        sanitized: list[dict[str, Any]] = []
         for cand in raw_list[:5]:
             sanitized.append({
                 "name": cand.get("name"),
@@ -959,7 +967,9 @@ class WashDataManager:
                 )
 
         should_restore = False
-        active_snapshot_to_restore = active_snapshot
+        active_snapshot_to_restore: dict[str, Any] | None = (
+            active_snapshot if isinstance(active_snapshot, dict) else None
+        )
 
         # Helper to check if a snapshot is viable
         def is_viable_restore(last_save_time: datetime) -> bool:
@@ -988,7 +998,7 @@ class WashDataManager:
             # Normalize naive legacy timestamps to system time
             last_save = last_save.replace(tzinfo=dt_util.now().tzinfo)
 
-        if active_snapshot and last_save and is_viable_restore(last_save):
+        if active_snapshot_to_restore is not None and last_save and is_viable_restore(last_save):
             should_restore = True
             age = (dt_util.now() - last_save).total_seconds()
             age = (dt_util.now() - last_save).total_seconds()
@@ -1464,9 +1474,11 @@ class WashDataManager:
 
 
         # Update notification settings
-        self._notify_service = config_entry.options.get(CONF_NOTIFY_SERVICE)
-        self._notify_events = config_entry.options.get(CONF_NOTIFY_EVENTS, [])
-        self._notify_actions = config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or []
+        self._notify_service = cast(str | None, config_entry.options.get(CONF_NOTIFY_SERVICE))
+        self._notify_events = list(cast(list[str], config_entry.options.get(CONF_NOTIFY_EVENTS, []) or []))
+        self._notify_actions = list(
+            cast(list[dict[str, Any]], config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or [])
+        )
         self._notify_people = list(
             config_entry.options.get(CONF_NOTIFY_PEOPLE, []) or []
         )
@@ -1605,7 +1617,7 @@ class WashDataManager:
             )
 
     @callback
-    def _handle_external_trigger_change(self, event: Event) -> None:
+    def _handle_external_trigger_change(self, event: Event[evt.EventStateChangedData]) -> None:
         """Handle external trigger sensor state change."""
         new_state = event.data.get("new_state")
         old_state = event.data.get("old_state")
@@ -2321,7 +2333,7 @@ class WashDataManager:
                     )
                     break
 
-        variables = {
+        variables: dict[str, Any] = {
             "device": self.config_entry.title,
             "program": self._current_program,
             "message": message,
@@ -2412,7 +2424,7 @@ class WashDataManager:
                 if "." in notify_service
                 else ("notify", notify_service)
             )
-            service_data = {"message": message, "title": title}
+            service_data: dict[str, Any] = {"message": message, "title": title}
             if data:
                 service_data["data"] = data
 
@@ -2428,7 +2440,7 @@ class WashDataManager:
 
     def _run_notification_actions(self, variables: dict[str, Any]) -> bool:
         """Run configured notification actions."""
-        actions = self._notify_actions
+        actions: list[dict[str, Any]] = self._notify_actions
         if not actions:
             return False
 
@@ -2457,7 +2469,7 @@ class WashDataManager:
         return False
 
     @callback
-    def _handle_notify_person_change(self, event: Event) -> None:
+    def _handle_notify_person_change(self, event: Event[evt.EventStateChangedData]) -> None:
         """Handle person state changes to release pending notifications."""
         new_state = event.data.get("new_state")
         if not new_state or new_state.state != STATE_HOME:
@@ -2470,7 +2482,7 @@ class WashDataManager:
         person_name = new_state.name or new_state.attributes.get(
             "friendly_name", person_entity_id
         )
-        pending = list(self._pending_notifications)
+        pending: list[dict[str, Any]] = list(self._pending_notifications)
         self._pending_notifications = []
         for entry in pending:
             self._dispatch_notification(
@@ -2947,7 +2959,7 @@ class WashDataManager:
         current_power_data: list[tuple[datetime, float]] | list[tuple[str, float]],
         current_duration: float,
         profile_name: str,
-    ) -> float | None:
+    ) -> tuple[float, float] | None:
         """
         Estimate cycle progress by analyzing which phase we're in.
 
@@ -2972,23 +2984,31 @@ class WashDataManager:
             env_std = envelope.get("std", [])
 
             # Handle both formats: [[t, y], ...] (new) or [y, ...] (legacy)
-            def extract_y_values(data: list) -> np.ndarray:
+            def extract_y_values(data: list[Any]) -> np.ndarray[Any, np.dtype[np.float64]]:
                 if not data:
-                    return np.array([])
-                if isinstance(data[0], (list, tuple)) and len(data[0]) >= 2:
+                    return np.array([], dtype=float)
+                first = data[0]
+                if isinstance(first, (list, tuple)):
+                    first_seq = cast(list[Any] | tuple[Any, ...], first)
+                    if len(first_seq) < 2:
+                        return np.array([], dtype=float)
                     # New format: [[t, y], ...]
-                    return np.array([float(pt[1]) for pt in data])
+                    points = cast(list[list[Any] | tuple[Any, ...]], data)
+                    return np.array([float(pt[1]) for pt in points], dtype=float)
                 # Legacy format: [y, ...]
-                return np.array(data)
+                scalars = cast(list[float | int], data)
+                return np.array(scalars, dtype=float)
 
-            envelope_arrays = {
+            envelope_arrays: dict[str, np.ndarray[Any, np.dtype[np.float64]]] = {
                 "min": extract_y_values(env_min),
                 "max": extract_y_values(env_max),
                 "avg": extract_y_values(env_avg),
                 "std": extract_y_values(env_std),
             }
-            time_grid = np.array(envelope.get("time_grid", []))
-            target_duration = envelope.get("target_duration", 0)
+            time_grid: np.ndarray[Any, np.dtype[np.float64]] = np.array(
+                envelope.get("time_grid", []), dtype=float
+            )
+            target_duration = float(envelope.get("target_duration", 0.0) or 0.0)
         except (KeyError, ValueError, TypeError, IndexError) as e:
             _LOGGER.warning("Invalid envelope format for %s: %s", profile_name, e)
             return None
@@ -3008,7 +3028,9 @@ class WashDataManager:
                 return None
 
         # Extract power offsets from current cycle (any format → [offset, power])
-        current_offsets_list = power_data_to_offsets(current_power_data)
+        current_offsets_list = power_data_to_offsets(
+            cast(list[list[Any] | tuple[Any, ...]], current_power_data)
+        )
         current_offsets = np.array([o for o, _ in current_offsets_list])
         current_values = np.array([p for _, p in current_offsets_list])
 
@@ -3026,14 +3048,14 @@ class WashDataManager:
             _LOGGER.debug("Insufficient data in current window for phase estimation")
             return None
 
-        best_progress = None
+        best_progress: float | None = None
         best_score = -1.0
         in_bounds = False
         best_time_window_start: float | None = None
 
         # Search through envelope TIME grid for best matching position
         for i in range(len(time_grid) - 1):
-            time_window_start = time_grid[i]
+            time_window_start = float(time_grid[i])
 
             # Get envelope values for this time window
             envelope_window_start = i
@@ -3134,8 +3156,17 @@ class WashDataManager:
 
         # Log with envelope metadata
         cycle_count = envelope.get("cycle_count", 0)
-        avg_sample_rates = envelope.get("sampling_rates", [1.0])
-        avg_sample_rate = np.median(avg_sample_rates) if avg_sample_rates else 1.0
+        avg_sample_rates_raw = envelope.get("sampling_rates", [1.0])
+        avg_sample_rates = (
+            cast(list[float | int], avg_sample_rates_raw)
+            if isinstance(avg_sample_rates_raw, list)
+            else [1.0]
+        )
+        avg_sample_rate = (
+            float(np.median(np.array(avg_sample_rates, dtype=float)))
+            if avg_sample_rates
+            else 1.0
+        )
 
         tws = (
             best_time_window_start
@@ -3351,7 +3382,7 @@ class WashDataManager:
             self._update_estimates()  # Trigger immediate re-detection attempt
         else:
             # If not running, clear the forced program
-            self._current_program = None
+            self._current_program = "off"
             self._matched_profile_duration = None
 
         self._notify_update()

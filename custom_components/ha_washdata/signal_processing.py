@@ -151,7 +151,7 @@ def resample_uniform(
     if len(timestamps) < 2:
         return []
 
-    segments = []
+    segments: List[Segment] = []
 
     # Find indices where dt > gap_s
     diffs = np.diff(timestamps)
