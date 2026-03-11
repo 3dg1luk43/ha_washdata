@@ -45,7 +45,8 @@
           "manage_profiles": "Upravljaj profilima",
           "record_cycle": "Snimi ciklus (Ručno)",
           "diagnostics": "Dijagnostika i održavanje",
-          "manage_phase_catalog": "Upravljanje katalogom faza"
+          "manage_phase_catalog": "Upravljanje katalogom faza",
+          "notifications": "Obavijesti"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Raspon faza"
         }
+      },
+      "notifications": {
+        "title": "Obavijesti",
+        "description": "Konfigurirajte kanale obavijesti, predloške i izborna ažuriranja mobilnog napretka uživo.",
+        "data": {
+          "notify_service": "Usluga obavijesti (npr. notify.mobile_app)",
+          "notify_actions": "Radnje obavijesti",
+          "notify_people": "Osobe koje treba obavijestiti",
+          "notify_only_when_home": "Obavijesti samo kad sam kod kuće",
+          "notify_fire_events": "Događaji automatizacije požara",
+          "notify_events": "Događaji za obavijest",
+          "notify_before_end_minutes": "Obavijest prije završetka (minuti prije završetka)",
+          "notify_live_enabled": "Omogući obavijesti o napretku uživo",
+          "notify_live_interval_seconds": "Interval ažuriranja uživo (sekunde)",
+          "notify_live_overrun_percent": "Dopušteno prekoračenje ažuriranja uživo (%)",
+          "notify_title": "Naslov obavijesti",
+          "notify_icon": "Ikona obavijesti",
+          "notify_start_message": "Pokrenite format poruke",
+          "notify_finish_message": "Završi format poruke",
+          "notify_pre_complete_message": "Format poruke prije završetka"
+        },
+        "data_description": {
+          "notify_service": "Usluga obavijesti kućnog pomoćnika za korištenje (neobavezno).",
+          "notify_actions": "Izborni niz radnji kućnog pomoćnika za pokretanje za obavijesti (skripte, obavijesti, TTS itd.). Ako je postavljeno, radnje se pokreću prije servisa obavijesti o zamjeni.",
+          "notify_people": "Entiteti ljudi koji se koriste za prolaz kod kuće/na putu. Kada je omogućeno, obavijesti se odgađaju dok netko ne bude kod kuće.",
+          "notify_only_when_home": "Ako je omogućeno, odgodi obavijesti dok barem jedna odabrana osoba ne bude kod kuće.",
+          "notify_fire_events": "Ako je omogućeno, aktivira događaje kućnog pomoćnika za početak i kraj ciklusa (ha_washdata_cycle_started/ended) za pokretanje automatizacije.",
+          "notify_events": "Za koje događaje slati obavijesti.",
+          "notify_before_end_minutes": "Minute prije procijenjenog kraja ciklusa za pokretanje obavijesti. Postavite na 0 za onemogućavanje. Zadano: 0.",
+          "notify_live_enabled": "Omogućite aktualna ažuriranja napretka uživo za obavijesti mobilnih aplikacija.",
+          "notify_live_interval_seconds": "Koliko se često ažuriranja napretka šalju tijekom izvođenja. Niže vrijednosti su responzivnije, ali troše više obavijesti.",
+          "notify_live_overrun_percent": "Sigurnosna granica iznad procijenjenog broja ažuriranja za duge cikluse/cikluse koji se prekoračuju (na primjer, 20% dopušta 1,2x procijenjena ažuriranja).",
+          "notify_title": "Prilagođeni naslov za obavijesti. Podržava rezervirano mjesto {device}.",
+          "notify_icon": "Ikona koja se koristi za obavijesti (npr. mdi:washing-machine). Ostavite prazno za korištenje zadanog.",
+          "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava rezervirano mjesto {device}.",
+          "notify_finish_message": "Poruka se šalje kada ciklus završi. Podržava rezervirana mjesta {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Message sent before completion. Podržava {device}, {minutes} rezervirana mjesta."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Predložene postavke"
+      },
+      "current_phase": {
+        "name": "Trenutna faza"
       }
     }
   }

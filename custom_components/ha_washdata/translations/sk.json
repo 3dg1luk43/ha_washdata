@@ -45,7 +45,8 @@
           "manage_profiles": "Spravovať profily",
           "record_cycle": "Cyklus nahrávania (manuálne)",
           "diagnostics": "Diagnostika a údržba",
-          "manage_phase_catalog": "Spravovať katalóg fáz"
+          "manage_phase_catalog": "Spravovať katalóg fáz",
+          "notifications": "Upozornenia"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Fázový rozsah"
         }
+      },
+      "notifications": {
+        "title": "Upozornenia",
+        "description": "Nakonfigurujte kanály upozornení, šablóny a voliteľné aktuálne aktualizácie mobilného pokroku.",
+        "data": {
+          "notify_service": "Služba upozornení (napr. notify.mobile_app)",
+          "notify_actions": "Akcie upozornení",
+          "notify_people": "Ľudia, ktorých treba upozorniť",
+          "notify_only_when_home": "Upozorniť iba na domov",
+          "notify_fire_events": "Udalosti požiarnej automatizácie",
+          "notify_events": "Udalosti na upozornenie",
+          "notify_before_end_minutes": "Upozornenie pred dokončením (minúty pred koncom)",
+          "notify_live_enabled": "Povoliť okamžité upozornenia o priebehu",
+          "notify_live_interval_seconds": "Interval živých aktualizácií (sekundy)",
+          "notify_live_overrun_percent": "Povolenie na prekročenie živej aktualizácie (%)",
+          "notify_title": "Názov oznámenia",
+          "notify_icon": "Ikona upozornenia",
+          "notify_start_message": "Spustite formát správy",
+          "notify_finish_message": "Dokončiť formát správy",
+          "notify_pre_complete_message": "Formát správy pred dokončením"
+        },
+        "data_description": {
+          "notify_service": "Na použitie služby upozornení Home Assistant (voliteľné).",
+          "notify_actions": "Voliteľná postupnosť akcií Home Assistant, ktorá sa spustí pre upozornenia (skripty, notifikácia, TTS atď.). Ak je nastavené, akcie sa spustia pred záložnou službou upozornení.",
+          "notify_people": "Osoby entity, ktoré sa majú použiť na vrátanie domov/preč. Keď je táto možnosť povolená, upozornenia sa odložia, kým nie je niekto doma.",
+          "notify_only_when_home": "Ak je táto možnosť povolená, upozornenia sa odložia, kým aspoň jedna vybraná osoba nebude doma.",
+          "notify_fire_events": "Ak je táto možnosť povolená, spúšťajte udalosti Home Assistant pre začiatok a koniec cyklu (ha_washdata_cycle_started/ended) na riadenie automatizácie.",
+          "notify_events": "Na ktoré udalosti posielať upozornenia.",
+          "notify_before_end_minutes": "Minúty pred odhadovaným koncom cyklu na spustenie upozornenia. Pre deaktiváciu nastavte na 0. Predvolená hodnota: 0.",
+          "notify_live_enabled": "Povoľte na mieste živé aktualizácie priebehu pre upozornenia mobilných aplikácií.",
+          "notify_live_interval_seconds": "Ako často sa počas behu odosielajú aktualizácie priebehu. Nižšie hodnoty sú citlivejšie, ale spotrebujú viac upozornení.",
+          "notify_live_overrun_percent": "Bezpečnostná rezerva nad odhadovaným počtom aktualizácií pre dlhé/prekračujúce cykly (napríklad 20 % umožňuje 1,2-násobok odhadovanej aktualizácie).",
+          "notify_title": "Vlastný názov pre upozornenia. Podporuje zástupný symbol {device}.",
+          "notify_icon": "Ikona, ktorá sa má použiť na upozornenia (napr. mdi:pračka). Ak chcete použiť predvolené nastavenie, ponechajte prázdne.",
+          "notify_start_message": "Správa odoslaná pri spustení cyklu. Podporuje zástupný symbol {device}.",
+          "notify_finish_message": "Správa odoslaná po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Správa odoslaná pred dokončením. Podporuje {device}, {minutes} zástupné symboly."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Navrhované nastavenia"
+      },
+      "current_phase": {
+        "name": "Aktuálna fáza"
       }
     },
     "select": {

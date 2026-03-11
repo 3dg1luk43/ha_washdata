@@ -45,7 +45,8 @@
           "manage_profiles": "Administrer profiler",
           "record_cycle": "Ta opp syklus (Manuell)",
           "diagnostics": "Diagnostikk og vedlikehold",
-          "manage_phase_catalog": "Administrer fasekatalog"
+          "manage_phase_catalog": "Administrer fasekatalog",
+          "notifications": "Varsler"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Faseområde"
         }
+      },
+      "notifications": {
+        "title": "Varsler",
+        "description": "Konfigurer varslingskanaler, maler og valgfrie live-fremdriftsoppdateringer for mobil.",
+        "data": {
+          "notify_service": "Varslingstjeneste (f.eks. notify.mobile_app)",
+          "notify_actions": "Varslingshandlinger",
+          "notify_people": "Folk å varsle",
+          "notify_only_when_home": "Bare gi beskjed når du er hjemme",
+          "notify_fire_events": "Brannautomatiseringshendelser",
+          "notify_events": "Hendelser å varsle",
+          "notify_before_end_minutes": "Varsling før fullføring (minutter før slutt)",
+          "notify_live_enabled": "Aktiver Live Progress Notifications",
+          "notify_live_interval_seconds": "Live Update Interval (sekunder)",
+          "notify_live_overrun_percent": "Live Update Overrun Allowance (%)",
+          "notify_title": "Meldingstittel",
+          "notify_icon": "Varslingsikon",
+          "notify_start_message": "Start meldingsformat",
+          "notify_finish_message": "Fullfør meldingsformat",
+          "notify_pre_complete_message": "Meldingsformat før fullføring"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant varsler tjenesten som skal brukes (valgfritt).",
+          "notify_actions": "Valgfri Home Assistant-handlingssekvens for å kjøre for varsler (skript, varsling, TTS, etc.). Hvis angitt, kjøres handlinger før reservevarslingstjenesten.",
+          "notify_people": "Personenheter som skal brukes til hjemme-/borteporter. Når aktivert, blir varslinger utsatt til noen er hjemme.",
+          "notify_only_when_home": "Hvis aktivert, utsett varsler til minst én valgt person er hjemme.",
+          "notify_fire_events": "Hvis aktivert, utløs Home Assistant-hendelser for syklusstart og -slutt (ha_washdata_cycle_started/ended) for å drive automatisering.",
+          "notify_events": "Hvilke hendelser du skal sende varsler om.",
+          "notify_before_end_minutes": "Minutter før beregnet slutt på syklusen for å utløse et varsel. Sett til 0 for å deaktivere. Standard: 0.",
+          "notify_live_enabled": "Aktiver direkte fremdriftsoppdateringer på stedet for mobilappvarsler.",
+          "notify_live_interval_seconds": "Hvor ofte fremdriftsoppdateringer sendes mens du kjører. Lavere verdier er mer responsive, men bruker flere varsler.",
+          "notify_live_overrun_percent": "Sikkerhetsmargin over det estimerte oppdateringsantallet for lange/overløpende sykluser (for eksempel tillater 20 % 1,2x estimerte oppdateringer).",
+          "notify_title": "Egendefinert tittel for varsler. Støtter {device} plassholder.",
+          "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å bruke standard.",
+          "notify_start_message": "Melding sendt når en syklus starter. Støtter {device} plassholder.",
+          "notify_finish_message": "Melding sendt når en syklus er ferdig. Støtter {device}, {duration}, {program} plassholdere.",
+          "notify_pre_complete_message": "Melding sendt før ferdigstillelse. Støtter {device}, {minutes} plassholdere."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Foreslåtte innstillinger"
+      },
+      "current_phase": {
+        "name": "Nåværende fase"
       }
     }
   }

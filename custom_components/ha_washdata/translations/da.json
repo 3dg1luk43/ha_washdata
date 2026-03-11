@@ -45,7 +45,8 @@
           "manage_profiles": "Administrer profiler",
           "record_cycle": "Optag cyklus (Manuelt)",
           "diagnostics": "Diagnostik og vedligeholdelse",
-          "manage_phase_catalog": "Administrer fasekatalog"
+          "manage_phase_catalog": "Administrer fasekatalog",
+          "notifications": "Meddelelser"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Faseområde"
         }
+      },
+      "notifications": {
+        "title": "Meddelelser",
+        "description": "Konfigurer underretningskanaler, skabeloner og valgfri live-opdateringer om mobilfremskridt.",
+        "data": {
+          "notify_service": "Underretningstjeneste (f.eks. notify.mobile_app)",
+          "notify_actions": "Underretningshandlinger",
+          "notify_people": "Folk, der skal underrettes",
+          "notify_only_when_home": "Giv kun besked når du er hjemme",
+          "notify_fire_events": "Brandautomatiseringsbegivenheder",
+          "notify_events": "Begivenheder, der skal underrettes",
+          "notify_before_end_minutes": "Underretning om forudgående afslutning (minutter før afslutning)",
+          "notify_live_enabled": "Aktiver meddelelser om Live Progress",
+          "notify_live_interval_seconds": "Liveopdateringsinterval (sekunder)",
+          "notify_live_overrun_percent": "Live Update Overrun Allowance (%)",
+          "notify_title": "Underretningens titel",
+          "notify_icon": "Meddelelsesikon",
+          "notify_start_message": "Start meddelelsesformat",
+          "notify_finish_message": "Afslut meddelelsesformat",
+          "notify_pre_complete_message": "Pre-Completion Message Format"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant giver besked om, at tjenesten skal bruges (valgfrit).",
+          "notify_actions": "Valgfri Home Assistant-handlingssekvens til at køre for notifikationer (scripts, notify, TTS osv.). Hvis det er angivet, kører handlinger før reserveunderretningstjenesten.",
+          "notify_people": "Personenheder til brug for hjemme-/udebaneporte. Når det er aktiveret, udskydes underretninger, indtil nogen er hjemme.",
+          "notify_only_when_home": "Hvis det er aktiveret, skal du udskyde underretninger, indtil mindst én valgt person er hjemme.",
+          "notify_fire_events": "Hvis det er aktiveret, skal du udløse Home Assistant-hændelser for cyklusstart og -slut (ha_washdata_cycle_started/ended) for at drive automatiseringer.",
+          "notify_events": "Hvilke begivenheder der skal sendes notifikationer om.",
+          "notify_before_end_minutes": "Minutter før den anslåede afslutning af cyklussen for at udløse en notifikation. Indstil til 0 for at deaktivere. Standard: 0.",
+          "notify_live_enabled": "Aktiver live-opdateringer på stedet for meddelelser om mobilapps.",
+          "notify_live_interval_seconds": "Hvor ofte fremskridtsopdateringer sendes, mens de kører. Lavere værdier er mere lydhøre, men bruger flere meddelelser.",
+          "notify_live_overrun_percent": "Sikkerhedsmargen over det estimerede opdateringstal for lange/overløbende cyklusser (for eksempel tillader 20 % 1,2x estimerede opdateringer).",
+          "notify_title": "Brugerdefineret titel til meddelelser. Understøtter {device} pladsholder.",
+          "notify_icon": "Ikon til brug for meddelelser (f.eks. mdi:vaskemaskine). Lad være tom for at bruge standard.",
+          "notify_start_message": "Besked sendt, når en cyklus starter. Understøtter {device} pladsholder.",
+          "notify_finish_message": "Besked sendt, når en cyklus afsluttes. Understøtter {device}, {duration}, {program} pladsholdere.",
+          "notify_pre_complete_message": "Besked sendt før færdiggørelse. Understøtter {device}, {minutes} pladsholdere."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Foreslåede indstillinger"
+      },
+      "current_phase": {
+        "name": "Nuværende fase"
       }
     }
   }

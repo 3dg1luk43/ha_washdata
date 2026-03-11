@@ -45,7 +45,8 @@
           "manage_profiles": "Administri Profilojn",
           "record_cycle": "Rekorda Ciklo (Manlibro)",
           "diagnostics": "Diagnozo kaj Prizorgado",
-          "manage_phase_catalog": "Administri Phase Katalogo"
+          "manage_phase_catalog": "Administri Phase Katalogo",
+          "notifications": "Sciigoj"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Faza Gamo"
         }
+      },
+      "notifications": {
+        "title": "Sciigoj",
+        "description": "Agordu sciigajn kanalojn, ŝablonojn kaj laŭvolajn vivajn poŝtelefonajn progresajn ĝisdatigojn.",
+        "data": {
+          "notify_service": "Sciiga Servo (ekz. notify.mobile_app)",
+          "notify_actions": "Sciigaj Agoj",
+          "notify_people": "Homoj por Sciigi",
+          "notify_only_when_home": "Nur Sciigi Kiam Hejme",
+          "notify_fire_events": "Fajro Aŭtomatigaj Eventoj",
+          "notify_events": "Eventoj por Sciigi",
+          "notify_before_end_minutes": "Antaŭkompletiga Sciigo (minutoj antaŭ fino)",
+          "notify_live_enabled": "Ebligu Vivajn Progresajn Sciigojn",
+          "notify_live_interval_seconds": "Viva Ĝisdatiga Intervalo (sekundoj)",
+          "notify_live_overrun_percent": "Viva Ĝisdatigo Transpaso (%)",
+          "notify_title": "Sciiga Titolo",
+          "notify_icon": "Sciiga Ikono",
+          "notify_start_message": "Komencu Mesaĝan Formaton",
+          "notify_finish_message": "Finu Mesaĝan Formaton",
+          "notify_pre_complete_message": "Antaŭ-kompletiga Mesaĝa Formato"
+        },
+        "data_description": {
+          "notify_service": "Hejma Asistanto sciigas servon por uzi (laŭvola).",
+          "notify_actions": "Laŭvola agsekvenco de Hejma Asistanto por funkcii por sciigoj (skriptoj, sciigoj, TTS, ktp.). Se agordita, agoj ruliĝas antaŭ ol rezerva sciigo de servo.",
+          "notify_people": "Homaj entoj por uzi por hejma/for-pordego. Kiam ĝi estas ebligita, sciigoj estas prokrastitaj ĝis iu estas hejme.",
+          "notify_only_when_home": "Se ĝi estas ebligita, prokrastu sciigojn ĝis almenaŭ unu elektita persono estas hejme.",
+          "notify_fire_events": "Se ebligita, lanĉu eventojn de Hejma Asistanto por ciklokomenco kaj fino (ha_washdata_cycle_started/ended) por funkciigi aŭtomatigojn.",
+          "notify_events": "Por kiuj eventoj sendi sciigojn.",
+          "notify_before_end_minutes": "Minutojn antaŭ la laŭtaksa fino de la ciklo por ekigi sciigon. Agordu al 0 por malŝalti. Defaŭlta: 0.",
+          "notify_live_enabled": "Ebligu surloke realajn progresajn ĝisdatigojn por sciigoj pri moveblaj aplikaĵoj.",
+          "notify_live_interval_seconds": "Kiom ofte estas sendataj progresaj ĝisdatigoj dum kurado. Pli malaltaj valoroj estas pli respondemaj sed konsumas pli da sciigoj.",
+          "notify_live_overrun_percent": "Sekureca marĝeno super la laŭtaksa ĝisdatigo-kalkulo por longaj/superfluaj cikloj (ekzemple 20% permesas 1.2x laŭtaksajn ĝisdatigojn).",
+          "notify_title": "Propra titolo por sciigoj. Subtenas {device} lokokupilon.",
+          "notify_icon": "Ikono por uzi por sciigoj (ekz. mdi:wash-machine). Lasu malplena por uzi defaŭltan.",
+          "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokokupilon.",
+          "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program} anstataŭaĵojn.",
+          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletigo. Subtenas {device}, {minutes} anstataŭaĵojn."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Sugestaj agordoj"
+      },
+      "current_phase": {
+        "name": "Nuna Fazo"
       }
     },
     "select": {

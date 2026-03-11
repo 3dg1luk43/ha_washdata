@@ -45,7 +45,8 @@
           "manage_profiles": "Profilleri Yönet",
           "record_cycle": "Kayıt Döngüsü (Manuel)",
           "diagnostics": "Teşhis ve Bakım",
-          "manage_phase_catalog": "Aşama Kataloğunu Yönet"
+          "manage_phase_catalog": "Aşama Kataloğunu Yönet",
+          "notifications": "Bildirimler"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Faz Aralığı"
         }
+      },
+      "notifications": {
+        "title": "Bildirimler",
+        "description": "Bildirim kanallarını, şablonları ve isteğe bağlı canlı mobil ilerleme güncellemelerini yapılandırın.",
+        "data": {
+          "notify_service": "Bildirim Hizmeti (ör. notify.mobile_app)",
+          "notify_actions": "Bildirim Eylemleri",
+          "notify_people": "Bildirilecek Kişiler",
+          "notify_only_when_home": "Yalnızca Evdeyken Bildir",
+          "notify_fire_events": "Yangın Otomasyonu Etkinlikleri",
+          "notify_events": "Bildirilecek Olaylar",
+          "notify_before_end_minutes": "Tamamlama Öncesi Bildirim (bitişten dakikalar önce)",
+          "notify_live_enabled": "Canlı İlerleme Bildirimlerini Etkinleştir",
+          "notify_live_interval_seconds": "Canlı Güncelleme Aralığı (saniye)",
+          "notify_live_overrun_percent": "Canlı Güncelleme Aşım İzinleri (%)",
+          "notify_title": "Bildirim Başlığı",
+          "notify_icon": "Bildirim Simgesi",
+          "notify_start_message": "Mesaj Formatını Başlat",
+          "notify_finish_message": "Mesaj Formatını Bitir",
+          "notify_pre_complete_message": "Tamamlanma Öncesi Mesaj Formatı"
+        },
+        "data_description": {
+          "notify_service": "Ev Asistanı'nın kullanılması için hizmeti bilgilendirin (isteğe bağlı).",
+          "notify_actions": "Bildirimler (komut dosyaları, bildirim, TTS vb.) için çalıştırılacak isteğe bağlı Ev Asistanı eylem dizisi. Ayarlanırsa eylemler, geri dönüş bildirim hizmetinden önce çalıştırılır.",
+          "notify_people": "Ev/dışarı geçişi için kullanılacak insan varlıkları. Etkinleştirildiğinde bildirimler birisi eve gelene kadar ertelenir.",
+          "notify_only_when_home": "Etkinleştirilirse, seçilen en az bir kişi evde olana kadar bildirimleri erteleyin.",
+          "notify_fire_events": "Etkinleştirilirse, otomasyonları desteklemek için döngü başlangıcı ve bitişi (ha_washdata_cycle_started/end) için Home Assistant olaylarını tetikleyin.",
+          "notify_events": "Hangi etkinlikler için bildirim gönderileceği.",
+          "notify_before_end_minutes": "Bir bildirimin tetiklenmesi için döngünün tahmini bitiminden dakikalar önce. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0.",
+          "notify_live_enabled": "Mobil uygulama bildirimleri için yerinde canlı ilerleme güncellemelerini etkinleştirin.",
+          "notify_live_interval_seconds": "Çalıştırma sırasında ilerleme güncellemelerinin ne sıklıkta gönderildiği. Daha düşük değerler daha duyarlıdır ancak daha fazla bildirim tüketir.",
+          "notify_live_overrun_percent": "Uzun/fazla çalıştırma döngüleri için tahmini güncelleme sayısının üzerindeki güvenlik marjı (örneğin %20, 1,2 kat tahmini güncellemeye izin verir).",
+          "notify_title": "Bildirimler için özel başlık. {device} yer tutucusunu destekler.",
+          "notify_icon": "Bildirimler için kullanılacak simge (ör. mdi:çamaşır makinesi). Varsayılanı kullanmak için boş bırakın.",
+          "notify_start_message": "Bir döngü başladığında gönderilen mesaj. {device} yer tutucusunu destekler.",
+          "notify_finish_message": "Bir döngü tamamlandığında gönderilen mesaj. {device}, {duration}, {program} yer tutucularını destekler.",
+          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Önerilen Ayarlar"
+      },
+      "current_phase": {
+        "name": "Mevcut Aşama"
       }
     },
     "select": {

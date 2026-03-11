@@ -45,7 +45,8 @@
           "manage_profiles": "Kelola Profil",
           "record_cycle": "Siklus Rekam (Manual)",
           "diagnostics": "Diagnostik & Pemeliharaan",
-          "manage_phase_catalog": "Kelola Katalog Fase"
+          "manage_phase_catalog": "Kelola Katalog Fase",
+          "notifications": "Pemberitahuan"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Rentang Fase"
         }
+      },
+      "notifications": {
+        "title": "Pemberitahuan",
+        "description": "Konfigurasikan saluran notifikasi, templat, dan pembaruan kemajuan seluler opsional secara langsung.",
+        "data": {
+          "notify_service": "Layanan Notifikasi (misalnya notify.mobile_app)",
+          "notify_actions": "Tindakan Pemberitahuan",
+          "notify_people": "Orang yang Harus Diberitahu",
+          "notify_only_when_home": "Hanya Beritahu Saat Di Rumah",
+          "notify_fire_events": "Acara Otomasi Kebakaran",
+          "notify_events": "Acara untuk Diberitahukan",
+          "notify_before_end_minutes": "Pemberitahuan Pra-penyelesaian (menit sebelum akhir)",
+          "notify_live_enabled": "Aktifkan Pemberitahuan Kemajuan Langsung",
+          "notify_live_interval_seconds": "Interval Pembaruan Langsung (detik)",
+          "notify_live_overrun_percent": "Tunjangan Kelebihan Pembaruan Langsung (%)",
+          "notify_title": "Judul Pemberitahuan",
+          "notify_icon": "Ikon Pemberitahuan",
+          "notify_start_message": "Mulai Format Pesan",
+          "notify_finish_message": "Selesaikan Format Pesan",
+          "notify_pre_complete_message": "Format Pesan Pra-Penyelesaian"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant memberi tahu layanan untuk digunakan (opsional).",
+          "notify_actions": "Urutan tindakan Asisten Rumah opsional untuk dijalankan untuk notifikasi (skrip, beri tahu, TTS, dll.). Jika disetel, tindakan akan dijalankan sebelum layanan pemberitahuan fallback.",
+          "notify_people": "Entitas orang yang akan digunakan untuk gerbang kandang/tandang. Jika diaktifkan, notifikasi akan ditangguhkan hingga seseorang ada di rumah.",
+          "notify_only_when_home": "Jika diaktifkan, tunda pemberitahuan hingga setidaknya satu orang yang dipilih ada di rumah.",
+          "notify_fire_events": "Jika diaktifkan, aktifkan peristiwa Home Assistant untuk memulai dan mengakhiri siklus (ha_washdata_cycle_started/ended) untuk mendorong otomatisasi.",
+          "notify_events": "Acara mana yang pemberitahuannya harus dikirim.",
+          "notify_before_end_minutes": "Beberapa menit sebelum perkiraan akhir siklus untuk memicu notifikasi. Setel ke 0 untuk menonaktifkan. Bawaan: 0.",
+          "notify_live_enabled": "Aktifkan pembaruan kemajuan langsung di tempat untuk pemberitahuan aplikasi seluler.",
+          "notify_live_interval_seconds": "Seberapa sering pembaruan kemajuan dikirim saat berjalan. Nilai yang lebih rendah lebih responsif tetapi menggunakan lebih banyak notifikasi.",
+          "notify_live_overrun_percent": "Margin keamanan di atas perkiraan jumlah pembaruan untuk siklus yang panjang/berlebihan (misalnya 20% memungkinkan 1,2x perkiraan pembaruan).",
+          "notify_title": "Judul khusus untuk notifikasi. Mendukung pengganti {device}.",
+          "notify_icon": "Ikon yang digunakan untuk notifikasi (misalnya mdi:mesin cuci). Biarkan kosong untuk menggunakan default.",
+          "notify_start_message": "Pesan dikirim ketika siklus dimulai. Mendukung pengganti {device}.",
+          "notify_finish_message": "Pesan dikirim ketika siklus selesai. Mendukung placeholder {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Pesan dikirim sebelum selesai. Mendukung placeholder {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Pengaturan yang Disarankan"
+      },
+      "current_phase": {
+        "name": "Fase Saat Ini"
       }
     },
     "select": {

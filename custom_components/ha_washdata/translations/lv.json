@@ -45,7 +45,8 @@
           "manage_profiles": "Pārvaldīt profilus",
           "record_cycle": "Ierakstīt ciklu (Manuāli)",
           "diagnostics": "Diagnostika un apkope",
-          "manage_phase_catalog": "Pārvaldīt fāzes katalogu"
+          "manage_phase_catalog": "Pārvaldīt fāzes katalogu",
+          "notifications": "Paziņojumi"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Fāzes diapazons"
         }
+      },
+      "notifications": {
+        "title": "Paziņojumi",
+        "description": "Konfigurējiet paziņojumu kanālus, veidnes un izvēles tiešsaistes mobilā progresa atjauninājumus.",
+        "data": {
+          "notify_service": "Paziņojumu pakalpojums (piemēram, notify.mobile_app)",
+          "notify_actions": "Paziņojumu darbības",
+          "notify_people": "Cilvēki, kuriem jāpaziņo",
+          "notify_only_when_home": "Paziņot tikai mājās",
+          "notify_fire_events": "Ugunsgrēka automatizācijas pasākumi",
+          "notify_events": "Pasākumi, par kuriem jāpaziņo",
+          "notify_before_end_minutes": "Paziņojums pirms pabeigšanas (minūtes pirms beigām)",
+          "notify_live_enabled": "Iespējot tiešsaistes progresa paziņojumus",
+          "notify_live_interval_seconds": "Tiešraides atjaunināšanas intervāls (sekundēs)",
+          "notify_live_overrun_percent": "Tiešraides atjauninājumu pārsniegšanas pielaide (%)",
+          "notify_title": "Paziņojuma nosaukums",
+          "notify_icon": "Paziņojuma ikona",
+          "notify_start_message": "Sāciet ziņojuma formātu",
+          "notify_finish_message": "Pabeigt ziņojuma formātu",
+          "notify_pre_complete_message": "Pirmspabeigšanas ziņojuma formāts"
+        },
+        "data_description": {
+          "notify_service": "Mājas palīgs paziņo pakalpojumam, kas jāizmanto (pēc izvēles).",
+          "notify_actions": "Izvēles Home Assistant darbību secība, lai izpildītu paziņojumus (skripti, paziņojums, TTS utt.). Ja tas ir iestatīts, darbības tiek izpildītas pirms rezerves paziņojumu pakalpojuma.",
+          "notify_people": "Cilvēku vienības, ko izmantot mājas/izbraukuma vārtiem. Ja tas ir iespējots, paziņojumi tiek atlikti, līdz kāds būs mājās.",
+          "notify_only_when_home": "Ja tas ir iespējots, aizkavējiet paziņojumus, līdz vismaz viena atlasītā persona ir mājās.",
+          "notify_fire_events": "Ja tas ir iespējots, aktivizējiet Home Assistant notikumus cikla sākumam un beigām (ha_washdata_cycle_started/ended), lai veicinātu automatizāciju.",
+          "notify_events": "Par kuriem notikumiem sūtīt paziņojumus.",
+          "notify_before_end_minutes": "Minūtes pirms paredzamā cikla beigām, lai aktivizētu paziņojumu. Iestatiet uz 0, lai atspējotu. Noklusējums: 0.",
+          "notify_live_enabled": "Iespējojiet mobilo lietotņu paziņojumu tūlītējus progresa atjauninājumus.",
+          "notify_live_interval_seconds": "Cik bieži darbības laikā tiek nosūtīti progresa atjauninājumi. Zemākas vērtības ir atsaucīgākas, taču patērē vairāk paziņojumu.",
+          "notify_live_overrun_percent": "Drošības rezerve pārsniedz aptuveno atjauninājumu skaitu gariem/pārsniegšanas cikliem (piemēram, 20% pieļauj 1,2 reizes aptuveno atjauninājumu skaitu).",
+          "notify_title": "Paziņojumu pielāgots nosaukums. Atbalsta vietturi {device}.",
+          "notify_icon": "Paziņojumiem izmantojamā ikona (piemēram, mdi:veļas mašīna). Atstājiet tukšu, lai izmantotu noklusējumu.",
+          "notify_start_message": "Ziņojums nosūtīts, kad sākas cikls. Atbalsta vietturi {device}.",
+          "notify_finish_message": "Ziņojums nosūtīts, kad cikls beidzas. Atbalsta vietturus {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Ziņa nosūtīta pirms pabeigšanas. Atbalsta vietturus {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Ieteiktie iestatījumi"
+      },
+      "current_phase": {
+        "name": "Pašreizējā fāze"
       }
     }
   }

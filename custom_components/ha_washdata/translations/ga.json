@@ -45,7 +45,8 @@
           "manage_profiles": "Bainistigh Próifílí",
           "record_cycle": "Timthriall Taifead (Lámhleabhar)",
           "diagnostics": "Diagnóisic & Cothabháil",
-          "manage_phase_catalog": "Bainistigh Catalóg Chéim"
+          "manage_phase_catalog": "Bainistigh Catalóg Chéim",
+          "notifications": "Fógraí"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Raon Céime"
         }
+      },
+      "notifications": {
+        "title": "Fógraí",
+        "description": "Cumraigh bealaí fógra, teimpléid, agus nuashonruithe roghnacha ar dhul chun cinn soghluaiste beo.",
+        "data": {
+          "notify_service": "Seirbhís Fógraí (m.sh. notify.mobile_app)",
+          "notify_actions": "Gníomhartha Fógra",
+          "notify_people": "Daoine le Fógra a thabhairt",
+          "notify_only_when_home": "Ná Fógra ach Nuair Abhaile",
+          "notify_fire_events": "Imeachtaí Uathoibrithe Dóiteáin",
+          "notify_events": "Imeachtaí le Fógairt",
+          "notify_before_end_minutes": "Fógra Réamhchríochnaithe (nóiméad roimh dheireadh)",
+          "notify_live_enabled": "Cumasaigh Fógraí Dul Chun Cinn Beo",
+          "notify_live_interval_seconds": "Eatramh Nuashonraithe Beo (soicindí)",
+          "notify_live_overrun_percent": "Liúntas Ró-Reatha Nuashonraithe Beo (%)",
+          "notify_title": "Teideal an Fhógra",
+          "notify_icon": "Deilbhín Fógraí",
+          "notify_start_message": "Tosaigh Formáid Teachtaireacht",
+          "notify_finish_message": "Críochnaigh Formáid na Teachtaireachta",
+          "notify_pre_complete_message": "Formáid Teachtaireachta Réamh-Chríochnaithe"
+        },
+        "data_description": {
+          "notify_service": "Cuireann Cúntóir Baile an tseirbhís in iúl le húsáid (roghnach).",
+          "notify_actions": "Seicheamh gníomhaíochta Roghnach Cúntóir Baile le rith le haghaidh fógraí (scripteanna, fógra a thabhairt, TTS, etc.). Má tá sé socraithe, ritheann gníomhartha roimh an tseirbhís fógra chúltaca.",
+          "notify_people": "Aonáin daoine le húsáid le haghaidh geataí baile / as baile. Nuair a bhíonn siad cumasaithe, cuirtear fógraí siar go dtí go mbíonn duine éigin sa bhaile.",
+          "notify_only_when_home": "Má tá sé cumasaithe, cuir moill ar fhógraí go dtí go mbeidh duine roghnaithe amháin ar a laghad sa bhaile.",
+          "notify_fire_events": "Má tá sé cumasaithe, cuir tine ar imeachtaí Cúntóir Baile le haghaidh thús agus deireadh an timthrialla (ha_washdata_cycle_started/ended) chun uathoibriú a thiomáint.",
+          "notify_events": "Cad iad na himeachtaí ar cheart fógraí a sheoladh chucu.",
+          "notify_before_end_minutes": "Nóiméad roimh dheireadh measta an timthrialla chun fógra a spreagadh. Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 0.",
+          "notify_live_enabled": "Cumasaigh nuashonruithe dul chun cinn beo in-áit le haghaidh fógraí aipeanna móibíleacha.",
+          "notify_live_interval_seconds": "Cé chomh minic is a sheoltar nuashonruithe ar dhul chun cinn agus tú ar siúl. Tá luachanna níos ísle níos freagraí ach ídíonn siad níos mó fógraí.",
+          "notify_live_overrun_percent": "Lamháil sábháilteachta os cionn an chomhairimh nuashonraithe mheasta do thimthriallta fada/ró-reatha (mar shampla ceadaíonn 20% 1.2x nuashonruithe measta).",
+          "notify_title": "Teideal saincheaptha le haghaidh fógraí. Tacaíonn ionadsealbhóir {device}.",
+          "notify_icon": "Deilbhín le húsáid le haghaidh fógraí (m.sh. mdi: meaisín níocháin). Fág folamh chun réamhshocrú a úsáid.",
+          "notify_start_message": "Teachtaireacht seolta nuair a thosaíonn timthriall. Tacaíonn ionadsealbhóir {device}.",
+          "notify_finish_message": "Seoltar teachtaireacht nuair a chríochnaíonn timthriall. Tacaíonn sealbhóirí áite {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Teachtaireacht seolta roimh chríochnú. Tacaíonn sealbhóirí áite {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Socruithe Molta"
+      },
+      "current_phase": {
+        "name": "An Chéim Reatha"
       }
     },
     "select": {

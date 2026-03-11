@@ -45,7 +45,8 @@
           "manage_profiles": "Zarządzaj profilami",
           "record_cycle": "Nagraj cykl (Ręcznie)",
           "diagnostics": "Diagnostyka i konserwacja",
-          "manage_phase_catalog": "Zarządzaj katalogiem faz"
+          "manage_phase_catalog": "Zarządzaj katalogiem faz",
+          "notifications": "Powiadomienia"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Zakres faz"
         }
+      },
+      "notifications": {
+        "title": "Powiadomienia",
+        "description": "Skonfiguruj kanały powiadomień, szablony i opcjonalne aktualizacje postępu na żywo na urządzeniach mobilnych.",
+        "data": {
+          "notify_service": "Usługa powiadomień (np. notify.mobile_app)",
+          "notify_actions": "Działania powiadamiające",
+          "notify_people": "Osoby do powiadomienia",
+          "notify_only_when_home": "Powiadamiaj tylko, gdy jesteś w domu",
+          "notify_fire_events": "Wydarzenia związane z automatyką przeciwpożarową",
+          "notify_events": "Wydarzenia do powiadomienia",
+          "notify_before_end_minutes": "Powiadomienie przed zakończeniem (minuty przed zakończeniem)",
+          "notify_live_enabled": "Włącz powiadomienia o postępie na żywo",
+          "notify_live_interval_seconds": "Interwał aktualizacji na żywo (sekundy)",
+          "notify_live_overrun_percent": "Limit przekroczenia aktualizacji na żywo (%)",
+          "notify_title": "Tytuł powiadomienia",
+          "notify_icon": "Ikona powiadomienia",
+          "notify_start_message": "Rozpocznij formatowanie wiadomości",
+          "notify_finish_message": "Zakończ formatowanie wiadomości",
+          "notify_pre_complete_message": "Format wiadomości przed zakończeniem"
+        },
+        "data_description": {
+          "notify_service": "Asystent domowy powiadamia usługę o konieczności użycia (opcjonalnie).",
+          "notify_actions": "Opcjonalna sekwencja akcji Home Assistant do uruchomienia w przypadku powiadomień (skrypty, powiadomienie, TTS itp.). Jeśli jest ustawione, akcje są uruchamiane przed usługą powiadamiania o awarii.",
+          "notify_people": "Elementy dotyczące osób do wykorzystania w bramkach domowych/poza domem. Po włączeniu powiadomienia są odkładane do czasu, aż ktoś będzie w domu.",
+          "notify_only_when_home": "Jeśli ta opcja jest włączona, opóźnij powiadomienia do czasu, aż przynajmniej jedna wybrana osoba będzie w domu.",
+          "notify_fire_events": "Jeśli ta opcja jest włączona, uruchamiaj zdarzenia Home Assistant na początku i na końcu cyklu (ha_washdata_cycle_started/ended), aby sterować automatyzacją.",
+          "notify_events": "O jakich wydarzeniach wysyłać powiadomienia.",
+          "notify_before_end_minutes": "Minuty przed przewidywanym końcem cyklu, aby wywołać powiadomienie. Ustaw na 0, aby wyłączyć. Wartość domyślna: 0.",
+          "notify_live_enabled": "Włącz lokalne aktualizacje postępu na żywo dla powiadomień aplikacji mobilnej.",
+          "notify_live_interval_seconds": "Jak często aktualizacje postępu są wysyłane podczas działania. Niższe wartości są bardziej responsywne, ale zużywają więcej powiadomień.",
+          "notify_live_overrun_percent": "Margines bezpieczeństwa powyżej szacowanej liczby aktualizacji dla długich/przekroczonych cykli (na przykład 20% umożliwia szacowane aktualizacje 1,2x).",
+          "notify_title": "Niestandardowy tytuł powiadomień. Obsługuje symbol zastępczy {device}.",
+          "notify_icon": "Ikona używana do powiadomień (np. mdi:washing-machine). Pozostaw puste, aby użyć wartości domyślnej.",
+          "notify_start_message": "Wiadomość wysyłana po rozpoczęciu cyklu. Obsługuje symbol zastępczy {device}.",
+          "notify_finish_message": "Wiadomość wysyłana po zakończeniu cyklu. Obsługuje symbole zastępcze {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Wiadomość wysłana przed zakończeniem. Obsługuje symbole zastępcze {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Sugerowane ustawienia"
+      },
+      "current_phase": {
+        "name": "Bieżąca faza"
       }
     }
   }
