@@ -45,7 +45,8 @@
           "manage_profiles": "Menaxho profilet",
           "record_cycle": "Cikli i regjistrimit (manual)",
           "diagnostics": "Diagnostikimi dhe mirëmbajtja",
-          "manage_phase_catalog": "Menaxho Katalogun Fazor"
+          "manage_phase_catalog": "Menaxho Katalogun Fazor",
+          "notifications": "Njoftimet"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Gama e Fazës"
         }
+      },
+      "notifications": {
+        "title": "Njoftimet",
+        "description": "Konfiguro kanalet e njoftimeve, shabllonet dhe përditësimet opsionale të progresit të drejtpërdrejtë celular.",
+        "data": {
+          "notify_service": "Shërbimi i Njoftimeve (p.sh. notify.mobile_app)",
+          "notify_actions": "Veprimet e njoftimit",
+          "notify_people": "Njerëz për të njoftuar",
+          "notify_only_when_home": "Njoftoni vetëm kur jeni në shtëpi",
+          "notify_fire_events": "Ngjarjet e Automatizimit të Zjarrit",
+          "notify_events": "Ngjarjet për të njoftuar",
+          "notify_before_end_minutes": "Njoftim para-përfundimi (minuta para përfundimit)",
+          "notify_live_enabled": "Aktivizo njoftimet e progresit të drejtpërdrejtë",
+          "notify_live_interval_seconds": "Intervali i përditësimit të drejtpërdrejtë (sekonda)",
+          "notify_live_overrun_percent": "Leja e tejkalimit të përditësimeve të drejtpërdrejta (%)",
+          "notify_title": "Titulli i njoftimit",
+          "notify_icon": "Ikona e njoftimit",
+          "notify_start_message": "Filloni formatin e mesazhit",
+          "notify_finish_message": "Formati i Përfundimit të Mesazhit",
+          "notify_pre_complete_message": "Formati i mesazhit të para-përfundimit"
+        },
+        "data_description": {
+          "notify_service": "Shërbimi i njoftimit të Home Assistant për t'u përdorur (opsionale).",
+          "notify_actions": "Sekuenca opsionale e veprimeve të \"Asistentit në shtëpi\" për të ekzekutuar njoftimet (skriptet, njoftimet, TTS, etj.). Nëse caktohet, veprimet ekzekutohen përpara shërbimit të njoftimit të sërishëm.",
+          "notify_people": "Subjektet e njerëzve për t'u përdorur për hyrje në shtëpi/larg. Kur aktivizohet, njoftimet shtyhen derisa dikush të jetë në shtëpi.",
+          "notify_only_when_home": "Nëse aktivizohet, vononi njoftimet derisa të paktën një person i zgjedhur të jetë në shtëpi.",
+          "notify_fire_events": "Nëse aktivizohet, aktivizoni ngjarjet e Home Assistant për fillimin dhe përfundimin e ciklit (ha_washdata_cycle_started/ended) për të drejtuar automatizimet.",
+          "notify_events": "Për cilat ngjarje të dërgohen njoftime.",
+          "notify_before_end_minutes": "Minuta para përfundimit të parashikuar të ciklit për të aktivizuar një njoftim. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0.",
+          "notify_live_enabled": "Aktivizo përditësimet e progresit të drejtpërdrejtë në vend për njoftimet e aplikacioneve celulare.",
+          "notify_live_interval_seconds": "Sa shpesh dërgohen përditësimet e progresit gjatë ekzekutimit. Vlerat më të ulëta janë më të përgjegjshme, por konsumojnë më shumë njoftime.",
+          "notify_live_overrun_percent": "Marzhi i sigurisë mbi numrin e përllogaritur të përditësimeve për cikle të gjata/tejkaluese (për shembull 20% lejon përditësime të vlerësuara 1,2 herë).",
+          "notify_title": "Titulli i personalizuar për njoftimet. Mbështet mbajtësin e vendndodhjes {device}.",
+          "notify_icon": "Ikona për t'u përdorur për njoftime (p.sh. mdi: lavatriçe). Lëreni bosh për të përdorur parazgjedhjen.",
+          "notify_start_message": "Mesazhi dërgohet kur fillon një cikël. Mbështet mbajtësin e vendndodhjes {device}.",
+          "notify_finish_message": "Mesazhi dërgohet kur përfundon një cikël. Mbështet {device}, {duration}, {program} placeholders.",
+          "notify_pre_complete_message": "Mesazhi u dërgua para përfundimit. Mbështet {device}, {minutes} vendmbajtës."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Cilësimet e sugjeruara"
+      },
+      "current_phase": {
+        "name": "Faza aktuale"
       }
     },
     "select": {

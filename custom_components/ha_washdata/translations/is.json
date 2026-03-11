@@ -45,7 +45,8 @@
           "manage_profiles": "Stjórna prófílum",
           "record_cycle": "Upptökulota (handvirkt)",
           "diagnostics": "Greining og viðhald",
-          "manage_phase_catalog": "Stjórna áfangaskrá"
+          "manage_phase_catalog": "Stjórna áfangaskrá",
+          "notifications": "Tilkynningar"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Fasasvið"
         }
+      },
+      "notifications": {
+        "title": "Tilkynningar",
+        "description": "Stilltu tilkynningarásir, sniðmát og valfrjálsar uppfærslur fyrir farsímaframvindu í beinni.",
+        "data": {
+          "notify_service": "Tilkynningaþjónusta (t.d. notify.mobile_app)",
+          "notify_actions": "Tilkynningaaðgerðir",
+          "notify_people": "Fólk til að tilkynna",
+          "notify_only_when_home": "Láta aðeins vita þegar þú ert heima",
+          "notify_fire_events": "Brunasjálfvirkni atburðir",
+          "notify_events": "Viðburðir til að tilkynna",
+          "notify_before_end_minutes": "Tilkynning um fyrir lok (mínútum fyrir lok)",
+          "notify_live_enabled": "Virkjaðu tilkynningar um framvindu í beinni",
+          "notify_live_interval_seconds": "Lifandi uppfærslubil (sekúndur)",
+          "notify_live_overrun_percent": "Heimildir umframkeyrslu í beinni (%)",
+          "notify_title": "Titill tilkynningar",
+          "notify_icon": "Tilkynningatákn",
+          "notify_start_message": "Byrjaðu skilaboðasnið",
+          "notify_finish_message": "Ljúktu skilaboðasniði",
+          "notify_pre_complete_message": "Skilaboðasnið fyrir útfyllingu"
+        },
+        "data_description": {
+          "notify_service": "Aðstoðarmaður heimilis tilkynnir þjónustu til að nota (valfrjálst).",
+          "notify_actions": "Valfrjáls Home Assistant aðgerðaröð til að keyra fyrir tilkynningar (forskriftir, tilkynna, TTS osfrv.). Ef stillt er, keyra aðgerðir áður en varatilkynningaþjónustu er veitt.",
+          "notify_people": "Fólkseiningar til að nota fyrir heima- og fjarhlið. Þegar það er virkt er tilkynningum frestað þar til einhver er heima.",
+          "notify_only_when_home": "Ef það er virkt skaltu fresta tilkynningum þar til að minnsta kosti einn valinn einstaklingur er heima.",
+          "notify_fire_events": "Ef það er virkt skaltu kveikja á Home Assistant-viðburðum fyrir upphaf og lok lotu (ha_washdata_cycle_started/ended) til að keyra sjálfvirkni.",
+          "notify_events": "Hvaða atburði á að senda tilkynningar um.",
+          "notify_before_end_minutes": "Mínútum fyrir áætlaðan lok lotunnar til að kalla fram tilkynningu. Stilltu á 0 til að slökkva á. Sjálfgefið: 0.",
+          "notify_live_enabled": "Virkjaðu uppfærslur á lifandi framvindu fyrir farsímaforritstilkynningar.",
+          "notify_live_interval_seconds": "Hversu oft framvinduuppfærslur eru sendar meðan þær eru í gangi. Lægri gildi svara betur en neyta fleiri tilkynninga.",
+          "notify_live_overrun_percent": "Öryggismörk yfir áætlaðri uppfærslutölu fyrir langa/framkeyrandi lotur (til dæmis leyfa 20% 1,2x áætlaðar uppfærslur).",
+          "notify_title": "Sérsniðinn titill fyrir tilkynningar. Styður {device} staðgengill.",
+          "notify_icon": "Tákn til að nota fyrir tilkynningar (t.d. mdi: þvottavél). Skildu eftir tómt til að nota sjálfgefið.",
+          "notify_start_message": "Skilaboð send þegar hringrás byrjar. Styður {device} staðgengill.",
+          "notify_finish_message": "Skilaboð send þegar lotu lýkur. Styður {device}, {duration}, {program} staðgengla.",
+          "notify_pre_complete_message": "Skilaboð send áður en þeim er lokið. Styður {device}, {minutes} staðgengla."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Tillögur að stillingum"
+      },
+      "current_phase": {
+        "name": "Núverandi áfangi"
       }
     },
     "select": {

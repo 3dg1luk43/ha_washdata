@@ -45,7 +45,8 @@
           "manage_profiles": "נהל פרופילים",
           "record_cycle": "מחזור הקלטות (ידני)",
           "diagnostics": "אבחון ותחזוקה",
-          "manage_phase_catalog": "נהל את קטלוג השלבים"
+          "manage_phase_catalog": "נהל את קטלוג השלבים",
+          "notifications": "התראות"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "טווח שלבים"
         }
+      },
+      "notifications": {
+        "title": "התראות",
+        "description": "הגדר ערוצי התראות, תבניות ועדכוני התקדמות אופציונליים לנייד.",
+        "data": {
+          "notify_service": "שירות התראות (למשל notify.mobile_app)",
+          "notify_actions": "פעולות הודעה",
+          "notify_people": "אנשים להודיע",
+          "notify_only_when_home": "הודע רק כאשר אתה בבית",
+          "notify_fire_events": "אירועי אוטומציה אש",
+          "notify_events": "אירועים להודיע",
+          "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
+          "notify_live_enabled": "אפשר הודעות התקדמות בזמן אמת",
+          "notify_live_interval_seconds": "מרווח עדכון חי (שניות)",
+          "notify_live_overrun_percent": "קצבת חריגת עדכונים בזמן אמת (%)",
+          "notify_title": "כותרת ההודעה",
+          "notify_icon": "סמל הודעה",
+          "notify_start_message": "התחל פורמט הודעה",
+          "notify_finish_message": "סיים את פורמט ההודעה",
+          "notify_pre_complete_message": "פורמט הודעת טרום השלמה"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant מודיע לשירות לשימוש (אופציונלי).",
+          "notify_actions": "רצף פעולה אופציונלי של Home Assistant להפעלת התראות (סקריפטים, התראה, TTS וכו'). אם הוגדר, הפעולות פועלות לפני שירות התראה חוזר.",
+          "notify_people": "ישויות אנשים לשימוש עבור שער בית/חוץ. כאשר מופעלת, ההתראות נדחות עד שמישהו יהיה בבית.",
+          "notify_only_when_home": "אם מופעל, דחה הודעות עד שלפחות אדם נבחר אחד יהיה בבית.",
+          "notify_fire_events": "אם מופעל, הפעל אירועי Home Assistant עבור התחלה וסיום של מחזור (ha_washdata_cycle_started/ended) כדי להניע אוטומציות.",
+          "notify_events": "עבור אילו אירועים לשלוח הודעות.",
+          "notify_before_end_minutes": "דקות לפני סיום המחזור המשוער כדי להפעיל הודעה. הגדר ל-0 כדי להשבית. ברירת מחדל: 0.",
+          "notify_live_enabled": "אפשר עדכוני התקדמות חיים במקום עבור התראות על אפליקציות לנייד.",
+          "notify_live_interval_seconds": "באיזו תדירות נשלחים עדכוני התקדמות בזמן הריצה. ערכים נמוכים יותר מגיבים יותר אך צורכים יותר התראות.",
+          "notify_live_overrun_percent": "מרווח בטיחות מעל ספירת העדכונים המשוערת עבור מחזורים ארוכים/חורגים (לדוגמה 20% מאפשרים עדכונים משוערים פי 1.2).",
+          "notify_title": "כותרת מותאמת אישית עבור התראות. תומך במציין מיקום של {device}.",
+          "notify_icon": "סמל לשימוש עבור התראות (למשל mdi:washing-machine). השאר ריק כדי להשתמש בברירת המחדל.",
+          "notify_start_message": "הודעה נשלחת כאשר מחזור מתחיל. תומך במציין מיקום של {device}.",
+          "notify_finish_message": "הודעה נשלחת כאשר מחזור מסתיים. תומך במצייני מיקום של {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "הודעה נשלחה לפני ההשלמה. תומך במצייני מיקום של {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "הגדרות מוצעות"
+      },
+      "current_phase": {
+        "name": "השלב הנוכחי"
       }
     },
     "select": {

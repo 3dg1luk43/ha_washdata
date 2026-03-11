@@ -45,7 +45,8 @@
           "manage_profiles": "Profile verwalten",
           "record_cycle": "Aufnahmezyklus (manuell)",
           "diagnostics": "Diagnose und Wartung",
-          "manage_phase_catalog": "Phasenkatalog verwalten"
+          "manage_phase_catalog": "Phasenkatalog verwalten",
+          "notifications": "Benachrichtigungen"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Phasenbereich"
         }
+      },
+      "notifications": {
+        "title": "Benachrichtigungen",
+        "description": "Konfigurieren Sie Benachrichtigungskanäle, Vorlagen und optionale Live-Fortschrittsaktualisierungen für Mobilgeräte.",
+        "data": {
+          "notify_service": "Benachrichtigungsdienst (z. B. notify.mobile_app)",
+          "notify_actions": "Benachrichtigungsaktionen",
+          "notify_people": "Zu benachrichtigende Personen",
+          "notify_only_when_home": "Nur benachrichtigen, wenn Sie zu Hause sind",
+          "notify_fire_events": "Veranstaltungen zur Brandautomatisierung",
+          "notify_events": "Zu benachrichtigende Ereignisse",
+          "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
+          "notify_live_enabled": "Aktivieren Sie Live-Fortschrittsbenachrichtigungen",
+          "notify_live_interval_seconds": "Live-Update-Intervall (Sekunden)",
+          "notify_live_overrun_percent": "Live-Update-Überschreitungszuschlag (%)",
+          "notify_title": "Titel der Benachrichtigung",
+          "notify_icon": "Benachrichtigungssymbol",
+          "notify_start_message": "Starten Sie das Nachrichtenformat",
+          "notify_finish_message": "Beenden Sie das Nachrichtenformat",
+          "notify_pre_complete_message": "Nachrichtenformat vor Abschluss"
+        },
+        "data_description": {
+          "notify_service": "Zu verwendender Home Assistant-Benachrichtigungsdienst (optional).",
+          "notify_actions": "Optionale Home Assistant-Aktionssequenz zur Ausführung für Benachrichtigungen (Skripte, Benachrichtigung, TTS usw.). Wenn festgelegt, werden Aktionen vor dem Fallback-Benachrichtigungsdienst ausgeführt.",
+          "notify_people": "Personenentitäten, die für das Heim-/Auswärts-Gating verwendet werden sollen. Wenn diese Option aktiviert ist, werden Benachrichtigungen verschoben, bis jemand zu Hause ist.",
+          "notify_only_when_home": "Wenn diese Option aktiviert ist, werden Benachrichtigungen verzögert, bis mindestens eine ausgewählte Person zu Hause ist.",
+          "notify_fire_events": "Wenn aktiviert, werden Home Assistant-Ereignisse für Zyklusstart und -ende (ha_washdata_cycle_started/ended) ausgelöst, um Automatisierungen voranzutreiben.",
+          "notify_events": "Für welche Ereignisse sollen Benachrichtigungen gesendet werden?",
+          "notify_before_end_minutes": "Minuten vor dem voraussichtlichen Ende des Zyklus, um eine Benachrichtigung auszulösen. Zum Deaktivieren auf 0 setzen. Standard: 0.",
+          "notify_live_enabled": "Aktivieren Sie direkte Live-Fortschrittsaktualisierungen für Benachrichtigungen über mobile Apps.",
+          "notify_live_interval_seconds": "Wie oft Fortschrittsaktualisierungen während der Ausführung gesendet werden. Niedrigere Werte führen zu einer schnelleren Reaktion, verbrauchen jedoch mehr Benachrichtigungen.",
+          "notify_live_overrun_percent": "Sicherheitsmarge über der geschätzten Aktualisierungsanzahl für lange/überlaufende Zyklen (z. B. 20 % ermöglichen das 1,2-fache der geschätzten Aktualisierungen).",
+          "notify_title": "Benutzerdefinierter Titel für Benachrichtigungen. Unterstützt den Platzhalter {device}.",
+          "notify_icon": "Symbol zur Verwendung für Benachrichtigungen (z. B. mdi:washing-machine). Lassen Sie das Feld leer, um die Standardeinstellung zu verwenden.",
+          "notify_start_message": "Nachricht wird gesendet, wenn ein Zyklus beginnt. Unterstützt den Platzhalter {device}.",
+          "notify_finish_message": "Nachricht wird gesendet, wenn ein Zyklus beendet ist. Unterstützt die Platzhalter {device}, {duration} und {program}.",
+          "notify_pre_complete_message": "Nachricht vor Abschluss gesendet. Unterstützt die Platzhalter {device} und {minutes}."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Empfohlene Einstellungen"
+      },
+      "current_phase": {
+        "name": "Aktuelle Phase"
       }
     },
     "select": {

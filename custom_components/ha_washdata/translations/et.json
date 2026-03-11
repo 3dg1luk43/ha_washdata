@@ -45,7 +45,8 @@
           "manage_profiles": "Halda profiile",
           "record_cycle": "Salvesta tsükkel (Käsitsi)",
           "diagnostics": "Diagnostika ja hooldus",
-          "manage_phase_catalog": "Halda faasikataloogi"
+          "manage_phase_catalog": "Halda faasikataloogi",
+          "notifications": "Märguanded"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Faasi vahemik"
         }
+      },
+      "notifications": {
+        "title": "Märguanded",
+        "description": "Seadistage teavituskanalid, mallid ja valikulised reaalajas mobiili edenemise värskendused.",
+        "data": {
+          "notify_service": "Teavitusteenus (nt notify.mobile_app)",
+          "notify_actions": "Teavitustoimingud",
+          "notify_people": "Inimesed, keda teavitada",
+          "notify_only_when_home": "Teavita ainult kodus",
+          "notify_fire_events": "Tulekahju automatiseerimise sündmused",
+          "notify_events": "Sündmused, millest teavitada",
+          "notify_before_end_minutes": "Lõpetamiseelne teatis (minutid enne lõppu)",
+          "notify_live_enabled": "Lubage reaalajas edenemise teatised",
+          "notify_live_interval_seconds": "Reaalajas värskendamise intervall (sekundites)",
+          "notify_live_overrun_percent": "Reaalajas värskenduse ületamise luba (%)",
+          "notify_title": "Teatise pealkiri",
+          "notify_icon": "Teavituse ikoon",
+          "notify_start_message": "Käivitage Sõnumi vorming",
+          "notify_finish_message": "Lõpeta sõnumi vormindamine",
+          "notify_pre_complete_message": "Lõpetamiseelne sõnumivorming"
+        },
+        "data_description": {
+          "notify_service": "Koduabilise teavitamise teenus, mida kasutada (valikuline).",
+          "notify_actions": "Valikuline koduabilise toimingujada märguannete jaoks (skriptid, teavitus, TTS jne). Kui see on määratud, käitatakse toimingud enne varuteatiste teenust.",
+          "notify_people": "Inimesed üksused, mida kasutada kodus/võõrsil väravaks. Kui see on lubatud, lükatakse märguanded edasi, kuni keegi on kodus.",
+          "notify_only_when_home": "Kui see on lubatud, viivitage märguanded, kuni vähemalt üks valitud inimene on kodus.",
+          "notify_fire_events": "Kui see on lubatud, käivitage koduabilise sündmused tsükli alguse ja lõpu jaoks (ha_washdata_cycle_started/ended), et automatiseerida.",
+          "notify_events": "Milliste sündmuste kohta teateid saata.",
+          "notify_before_end_minutes": "Minutid enne tsükli hinnangulist lõppu, et käivitada teatis. Keelamiseks määrake 0. Vaikimisi: 0.",
+          "notify_live_enabled": "Lubage mobiilirakenduste märguannete jaoks kohapealsed reaalajas edenemise värskendused.",
+          "notify_live_interval_seconds": "Kui sageli edenemise värskendusi töötamise ajal saadetakse. Madalamad väärtused reageerivad paremini, kuid tarbivad rohkem märguandeid.",
+          "notify_live_overrun_percent": "Ohutusvaru, mis ületab hinnangulist värskenduste arvu pikkade/ülejooksvate tsüklite korral (näiteks 20% võimaldab 1,2-kordset hinnangulist värskendust).",
+          "notify_title": "Kohandatud pealkiri teatiste jaoks. Toetab kohahoidjat {device}.",
+          "notify_icon": "Märguannete jaoks kasutatav ikoon (nt mdi:pesumasin). Vaikimisi kasutamiseks jätke tühjaks.",
+          "notify_start_message": "Sõnum saadetakse, kui tsükkel algab. Toetab kohahoidjat {device}.",
+          "notify_finish_message": "Sõnum saadetakse pärast tsükli lõppemist. Toetab kohahoidjaid {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Sõnum saadeti enne valmimist. Toetab kohahoidjaid {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Soovitatud seaded"
+      },
+      "current_phase": {
+        "name": "Praegune faas"
       }
     }
   }

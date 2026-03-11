@@ -45,7 +45,8 @@
           "manage_profiles": "管理個人資料",
           "manage_phase_catalog": "管理階段目錄",
           "record_cycle": "記錄週期（手動）",
-          "diagnostics": "診斷與維護"
+          "diagnostics": "診斷與維護",
+          "notifications": "通知"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "相位範圍"
         }
+      },
+      "notifications": {
+        "title": "通知",
+        "description": "配置通知頻道、模板和可選的即時行動進度更新。",
+        "data": {
+          "notify_service": "通知服務（例如notify.mobile_app）",
+          "notify_actions": "通知操作",
+          "notify_people": "需要通知的人",
+          "notify_only_when_home": "僅在回家時通知",
+          "notify_fire_events": "消防自動化事件",
+          "notify_events": "要通知的事件",
+          "notify_before_end_minutes": "預完成通知（結束前幾分鐘）",
+          "notify_live_enabled": "啟用即時進度通知",
+          "notify_live_interval_seconds": "即時更新間隔（秒）",
+          "notify_live_overrun_percent": "即時更新超限容限 (%)",
+          "notify_title": "通知標題",
+          "notify_icon": "通知圖示",
+          "notify_start_message": "啟動訊息格式",
+          "notify_finish_message": "完成訊息格式",
+          "notify_pre_complete_message": "預完成訊息格式"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant 通知要使用的服務（可選）。",
+          "notify_actions": "用於執行通知的選用 Home Assistant 操作序列（腳本、通知、TTS 等）。如果設置，操作將在回退通知服務之前運行。",
+          "notify_people": "用於主/客門控的人員實體。啟用後，通知將推遲到有人在家時才發送。",
+          "notify_only_when_home": "如果啟用，則延遲通知，直到至少一個選定的人在家。",
+          "notify_fire_events": "如果啟用，則觸發循環開始和結束 (ha_washdata_cycle_started/ending) 的 Home Assistant 事件以驅動自動化。",
+          "notify_events": "要發送通知的事件。",
+          "notify_before_end_minutes": "觸發通知的預計週期結束前的分鐘數。設定為 0 以停用。預設值：0。",
+          "notify_live_enabled": "為行動應用程式通知啟用就地即時進度更新。",
+          "notify_live_interval_seconds": "運行時發送進度更新的頻率。值越低，回應速度越快，但會消耗更多通知。",
+          "notify_live_overrun_percent": "安全裕度高於長/超出週期的估計更新計數（例如 20% 允許 1.2 倍估計更新）。",
+          "notify_title": "通知的自訂標題。支援 {device} 佔位符。",
+          "notify_icon": "用於通知的圖示（例如 mdi：洗衣機）。留空以使用預設值。",
+          "notify_start_message": "循環開始時發送的訊息。支援 {device} 佔位符。",
+          "notify_finish_message": "循環結束時發送的訊息。支援 {device}、{duration}、{program} 佔位符。",
+          "notify_pre_complete_message": "訊息在完成之前發送。支援{device}、{minutes}佔位符。"
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "建議設定"
+      },
+      "current_phase": {
+        "name": "當前階段"
       }
     },
     "select": {

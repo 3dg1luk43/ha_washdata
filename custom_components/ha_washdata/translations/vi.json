@@ -45,7 +45,8 @@
           "manage_profiles": "Quản lý hồ sơ",
           "record_cycle": "Chu kỳ ghi (Thủ công)",
           "diagnostics": "Chẩn đoán & Bảo trì",
-          "manage_phase_catalog": "Quản lý danh mục giai đoạn"
+          "manage_phase_catalog": "Quản lý danh mục giai đoạn",
+          "notifications": "Thông báo"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Phạm vi pha"
         }
+      },
+      "notifications": {
+        "title": "Thông báo",
+        "description": "Định cấu hình các kênh thông báo, mẫu và cập nhật tiến trình di động trực tiếp tùy chọn.",
+        "data": {
+          "notify_service": "Dịch vụ thông báo (ví dụ: notification.mobile_app)",
+          "notify_actions": "Hành động thông báo",
+          "notify_people": "Người cần thông báo",
+          "notify_only_when_home": "Chỉ thông báo khi về nhà",
+          "notify_fire_events": "Sự kiện tự động hóa chữa cháy",
+          "notify_events": "Sự kiện cần thông báo",
+          "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
+          "notify_live_enabled": "Bật thông báo tiến độ trực tiếp",
+          "notify_live_interval_seconds": "Khoảng thời gian cập nhật trực tiếp (giây)",
+          "notify_live_overrun_percent": "Phụ cấp tràn cập nhật trực tiếp (%)",
+          "notify_title": "Tiêu đề thông báo",
+          "notify_icon": "Biểu tượng thông báo",
+          "notify_start_message": "Bắt đầu định dạng tin nhắn",
+          "notify_finish_message": "Hoàn tất định dạng tin nhắn",
+          "notify_pre_complete_message": "Định dạng tin nhắn trước khi hoàn thành"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant thông báo dịch vụ sẽ sử dụng (tùy chọn).",
+          "notify_actions": "Chuỗi hành động Home Assistant tùy chọn để chạy thông báo (tập lệnh, thông báo, TTS, v.v.). Nếu được đặt, các hành động sẽ chạy trước dịch vụ thông báo dự phòng.",
+          "notify_people": "Các thực thể con người được sử dụng cho cổng nhà/sân khách. Khi được bật, thông báo sẽ được hoãn lại cho đến khi có người ở nhà.",
+          "notify_only_when_home": "Nếu được bật, hãy trì hoãn thông báo cho đến khi có ít nhất một người được chọn ở nhà.",
+          "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started/kết thúc) để thúc đẩy quá trình tự động hóa.",
+          "notify_events": "Những sự kiện nào cần gửi thông báo.",
+          "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
+          "notify_live_enabled": "Bật cập nhật tiến độ trực tiếp tại chỗ cho thông báo ứng dụng dành cho thiết bị di động.",
+          "notify_live_interval_seconds": "Tần suất cập nhật tiến độ được gửi trong khi chạy. Giá trị thấp hơn phản hồi nhanh hơn nhưng tiêu thụ nhiều thông báo hơn.",
+          "notify_live_overrun_percent": "Biên độ an toàn cao hơn số lượng cập nhật ước tính cho các chu kỳ dài/chạy quá mức (ví dụ: 20% cho phép cập nhật ước tính gấp 1,2 lần).",
+          "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
+          "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để sử dụng mặc định.",
+          "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
+          "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Cài đặt được đề xuất"
+      },
+      "current_phase": {
+        "name": "Giai đoạn hiện tại"
       }
     },
     "select": {

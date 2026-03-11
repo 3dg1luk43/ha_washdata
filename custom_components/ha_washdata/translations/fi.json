@@ -45,7 +45,8 @@
           "manage_profiles": "Hallitse profiileja",
           "record_cycle": "Tallenna sykli (Manuaalinen)",
           "diagnostics": "Diagnostiikka ja huolto",
-          "manage_phase_catalog": "Hallitse vaiheluetteloa"
+          "manage_phase_catalog": "Hallitse vaiheluetteloa",
+          "notifications": "Ilmoitukset"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Vaihealue"
         }
+      },
+      "notifications": {
+        "title": "Ilmoitukset",
+        "description": "Määritä ilmoituskanavia, malleja ja valinnaisia ​​reaaliaikaisia ​​mobiili edistymispäivityksiä.",
+        "data": {
+          "notify_service": "Ilmoituspalvelu (esim. notify.mobile_app)",
+          "notify_actions": "Ilmoitustoiminnot",
+          "notify_people": "Ilmoitavat ihmiset",
+          "notify_only_when_home": "Ilmoita vain kotona",
+          "notify_fire_events": "Paloautomaatiotapahtumat",
+          "notify_events": "Ilmoitavat tapahtumat",
+          "notify_before_end_minutes": "Ilmoitus ennen valmistumista (minuuttia ennen loppua)",
+          "notify_live_enabled": "Ota käyttöön reaaliaikaiset edistymisilmoitukset",
+          "notify_live_interval_seconds": "Live-päivitysväli (sekuntia)",
+          "notify_live_overrun_percent": "Live-päivityksen ylityskorvaus (%)",
+          "notify_title": "Ilmoituksen otsikko",
+          "notify_icon": "Ilmoituskuvake",
+          "notify_start_message": "Käynnistä Viestimuoto",
+          "notify_finish_message": "Viimeistele viestin muoto",
+          "notify_pre_complete_message": "Esitäytetty viestin muoto"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant ilmoittaa käytettävästä palvelusta (valinnainen).",
+          "notify_actions": "Valinnainen Home Assistant -toimintosarja, joka suoritetaan ilmoituksia varten (skriptit, ilmoitus, TTS jne.). Jos asetettu, toiminnot suoritetaan ennen varailmoituspalvelua.",
+          "notify_people": "Henkilökokonaisuudet, joita käytetään koti-/poissaportaisiin. Kun tämä on käytössä, ilmoituksia lykätään, kunnes joku on kotona.",
+          "notify_only_when_home": "Jos tämä on käytössä, viivytä ilmoituksia, kunnes vähintään yksi valittu henkilö on kotona.",
+          "notify_fire_events": "Jos käytössä, käynnistä Home Assistant -tapahtumat syklin alkaessa ja lopussa (ha_washdata_cycle_started/ended) automaation ohjaamiseksi.",
+          "notify_events": "Mistä tapahtumista lähetetään ilmoituksia.",
+          "notify_before_end_minutes": "Minuuttia ennen jakson arvioitua loppua ilmoituksen käynnistämiseksi. Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 0.",
+          "notify_live_enabled": "Ota käyttöön paikan päällä tapahtuvat live-edistyspäivitykset mobiilisovellusten ilmoituksille.",
+          "notify_live_interval_seconds": "Kuinka usein edistymispäivityksiä lähetetään suorituksen aikana. Pienemmät arvot reagoivat paremmin, mutta kuluttavat enemmän ilmoituksia.",
+          "notify_live_overrun_percent": "Turvamarginaali yli arvioidut päivitysmäärät pitkille/ylitysjaksoille (esimerkiksi 20 % sallii 1,2-kertaiset arvioidut päivitykset).",
+          "notify_title": "Mukautettu otsikko ilmoituksille. Tukee {device} paikkamerkkiä.",
+          "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi käyttääksesi oletusarvoa.",
+          "notify_start_message": "Viesti lähetetään, kun sykli alkaa. Tukee {device} paikkamerkkiä.",
+          "notify_finish_message": "Viesti lähetetään, kun jakso on päättynyt. Tukee paikkamerkkejä {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Viesti lähetetty ennen valmistumista. Tukee {device}, {minutes} paikkamerkkejä."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Ehdotetut asetukset"
+      },
+      "current_phase": {
+        "name": "Nykyinen vaihe"
       }
     }
   }

@@ -45,7 +45,8 @@
           "manage_profiles": "Správa profilů",
           "record_cycle": "Zaznamenat cyklus (Ruční)",
           "diagnostics": "Diagnostika a údržba",
-          "manage_phase_catalog": "Správa katalogu fází"
+          "manage_phase_catalog": "Správa katalogu fází",
+          "notifications": "Oznámení"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Fázový rozsah"
         }
+      },
+      "notifications": {
+        "title": "Oznámení",
+        "description": "Nakonfigurujte oznamovací kanály, šablony a volitelné živé aktualizace průběhu mobilního telefonu.",
+        "data": {
+          "notify_service": "Služba oznámení (např. notify.mobile_app)",
+          "notify_actions": "Akce oznámení",
+          "notify_people": "Lidé, které je třeba informovat",
+          "notify_only_when_home": "Upozornit pouze na domovské stránce",
+          "notify_fire_events": "Události požární automatizace",
+          "notify_events": "Události k oznámení",
+          "notify_before_end_minutes": "Upozornění před dokončením (minuty před koncem)",
+          "notify_live_enabled": "Povolte živá oznámení o průběhu",
+          "notify_live_interval_seconds": "Interval živé aktualizace (sekundy)",
+          "notify_live_overrun_percent": "Povolení překročení živé aktualizace (%)",
+          "notify_title": "Název oznámení",
+          "notify_icon": "Ikona oznámení",
+          "notify_start_message": "Spusťte formát zprávy",
+          "notify_finish_message": "Dokončit formát zprávy",
+          "notify_pre_complete_message": "Formát zprávy před dokončením"
+        },
+        "data_description": {
+          "notify_service": "Chcete-li použít službu upozornění Home Assistant (volitelné).",
+          "notify_actions": "Volitelná sekvence akcí Home Assistant, která se spustí pro oznámení (skripty, oznámení, TTS atd.). Je-li nastaveno, akce se spouštějí před službou nouzového upozornění.",
+          "notify_people": "Osoby entity, které se mají použít pro vkládání domů/pryč. Když je tato možnost povolena, oznámení se odkládají, dokud nebude někdo doma.",
+          "notify_only_when_home": "Pokud je tato možnost povolena, odloží oznámení, dokud alespoň jedna vybraná osoba nebude doma.",
+          "notify_fire_events": "Pokud je povoleno, spouštět události Home Assistant pro začátek a konec cyklu (ha_washdata_cycle_started/ended) pro řízení automatizace.",
+          "notify_events": "Na jaké události zasílat upozornění.",
+          "notify_before_end_minutes": "Minuty před odhadovaným koncem cyklu ke spuštění upozornění. Nastavením na 0 deaktivujete. Výchozí: 0.",
+          "notify_live_enabled": "Povolit na místě živé aktualizace průběhu pro oznámení mobilních aplikací.",
+          "notify_live_interval_seconds": "Jak často se za běhu odesílají aktualizace průběhu. Nižší hodnoty reagují lépe, ale spotřebují více oznámení.",
+          "notify_live_overrun_percent": "Bezpečnostní rezerva nad odhadovaným počtem aktualizací pro dlouhé/přesahující cykly (například 20 % umožňuje 1,2x odhadované aktualizace).",
+          "notify_title": "Vlastní název pro oznámení. Podporuje zástupný symbol {device}.",
+          "notify_icon": "Ikona pro upozornění (např. mdi:pračka). Chcete-li použít výchozí, ponechte prázdné.",
+          "notify_start_message": "Zpráva odeslaná při zahájení cyklu. Podporuje zástupný symbol {device}.",
+          "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Zpráva odeslána před dokončením. Podporuje zástupné symboly {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Doporučená nastavení"
+      },
+      "current_phase": {
+        "name": "Aktuální fáze"
       }
     }
   }

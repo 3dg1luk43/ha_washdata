@@ -45,7 +45,8 @@
           "manage_profiles": "Beheare Profilen",
           "record_cycle": "Record Cycle (Hânlieding)",
           "diagnostics": "Diagnostyk en ûnderhâld",
-          "manage_phase_catalog": "Fasekatalogus beheare"
+          "manage_phase_catalog": "Fasekatalogus beheare",
+          "notifications": "Notifikaasjes"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Fase Range"
         }
+      },
+      "notifications": {
+        "title": "Notifikaasjes",
+        "description": "Konfigurearje notifikaasjekanalen, sjabloanen en opsjonele live updates foar mobile foarútgong.",
+        "data": {
+          "notify_service": "Notifikaasjetsjinst (bgl. notify.mobile_app)",
+          "notify_actions": "Notifikaasje Aksjes",
+          "notify_people": "Minsken om te notify",
+          "notify_only_when_home": "Notify allinich as jo thús binne",
+          "notify_fire_events": "Fire Automatisearring Events",
+          "notify_events": "Eveneminten om te notify",
+          "notify_before_end_minutes": "Notifikaasje foar foltôging (minuten foar ein)",
+          "notify_live_enabled": "Aktivearje Live Progress Notifikaasjes",
+          "notify_live_interval_seconds": "Live Update-ynterval (sekonden)",
+          "notify_live_overrun_percent": "Live Update Overrun Allowance (%)",
+          "notify_title": "Notifikaasje titel",
+          "notify_icon": "Notifikaasje Ikoan",
+          "notify_start_message": "Begjin berjochtformaat",
+          "notify_finish_message": "Berjochtformaat foltôgje",
+          "notify_pre_complete_message": "Pre-foltôging berjochtformaat"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant notify tsjinst om te brûken (opsjoneel).",
+          "notify_actions": "Opsjonele aksjesekwinsje fan Home Assistant om te rinnen foar notifikaasjes (skripts, notify, TTS, ensfh.). As ynsteld, rinne aksjes foardat fallback notify tsjinst.",
+          "notify_people": "Minsken entiteiten te brûken foar poarte thús / fuort. As ynskeakele, wurde notifikaasjes útsteld oant immen thús is.",
+          "notify_only_when_home": "As ynskeakele, fertrage notifikaasjes oant op syn minst ien selektearre persoan thús is.",
+          "notify_fire_events": "As ynskeakele, fjoer Home Assistant-eveneminten foar syklusbegjin en -ein (ha_washdata_cycle_started/ended) om automatisaasjes te riden.",
+          "notify_events": "Foar hokker eveneminten om notifikaasjes te stjoeren.",
+          "notify_before_end_minutes": "Minuten foar it rûsde ein fan 'e syklus om in notifikaasje te triggerjen. Stel op 0 om út te skeakeljen. Standert: 0.",
+          "notify_live_enabled": "Aktivearje live foarútgongsupdates op it plak foar notifikaasjes fan mobile app.",
+          "notify_live_interval_seconds": "Hoe faak foarútgong updates wurde ferstjoerd wylst rinnen. Legere wearden binne responsiver, mar konsumearje mear notifikaasjes.",
+          "notify_live_overrun_percent": "Feiligens marzje boppe de rûsde update count foar lange / oerrinnende syklusen (bygelyks 20% tastean 1.2x skatte updates).",
+          "notify_title": "Oanpaste titel foar notifikaasjes. Unterstützt {device} plakhâlder.",
+          "notify_icon": "Ikoan om te brûken foar notifikaasjes (bgl. mdi:wasmachine). Lit leech om standert te brûken.",
+          "notify_start_message": "Berjocht ferstjoerd as in syklus begjint. Unterstützt {device} plakhâlder.",
+          "notify_finish_message": "Berjocht ferstjoerd as in syklus einiget. Unterstützt {device}, {duration}, {program} plakhâlders.",
+          "notify_pre_complete_message": "Berjocht ferstjoerd foar foltôging. Unterstützt {device}, {minutes} plakhâlders."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Foarstelde ynstellings"
+      },
+      "current_phase": {
+        "name": "Aktuele faze"
       }
     },
     "select": {

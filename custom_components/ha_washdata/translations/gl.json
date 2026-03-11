@@ -45,7 +45,8 @@
           "manage_profiles": "Xestionar perfís",
           "record_cycle": "Ciclo de gravación (manual)",
           "diagnostics": "Diagnóstico e Mantemento",
-          "manage_phase_catalog": "Xestionar o catálogo de fases"
+          "manage_phase_catalog": "Xestionar o catálogo de fases",
+          "notifications": "Notificacións"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Rango de fases"
         }
+      },
+      "notifications": {
+        "title": "Notificacións",
+        "description": "Configura as canles de notificación, os modelos e as actualizacións opcionais do progreso móbil en directo.",
+        "data": {
+          "notify_service": "Servizo de notificacións (por exemplo, notify.mobile_app)",
+          "notify_actions": "Accións de notificación",
+          "notify_people": "Persoas a notificar",
+          "notify_only_when_home": "Notificar só cando estea na casa",
+          "notify_fire_events": "Eventos de automatización de incendios",
+          "notify_events": "Eventos a notificar",
+          "notify_before_end_minutes": "Notificación previa á finalización (minutos antes do final)",
+          "notify_live_enabled": "Activa as notificacións de progreso en directo",
+          "notify_live_interval_seconds": "Intervalo de actualización en directo (segundos)",
+          "notify_live_overrun_percent": "Subsidio de excedencia de actualizacións en directo (%)",
+          "notify_title": "Título da notificación",
+          "notify_icon": "Icona de notificación",
+          "notify_start_message": "Iniciar o formato da mensaxe",
+          "notify_finish_message": "Finalizar o formato da mensaxe",
+          "notify_pre_complete_message": "Formato de mensaxe precompletado"
+        },
+        "data_description": {
+          "notify_service": "Servizo de notificación de Home Assistant para usar (opcional).",
+          "notify_actions": "Secuencia de acción opcional do Home Assistant para executar para notificacións (scripts, notificación, TTS, etc.). Se se establece, as accións execútanse antes do servizo de notificación alternativa.",
+          "notify_people": "Entidades de persoas para usar para as portas na casa/ausente. Cando se activa, as notificacións aprázanse ata que alguén estea na casa.",
+          "notify_only_when_home": "Se está activado, atrasa as notificacións ata que polo menos unha persoa seleccionada estea na casa.",
+          "notify_fire_events": "Se está activado, activa os eventos do Home Assistant para o inicio e o final do ciclo (ha_washdata_cycle_started/ended) para impulsar as automatizacións.",
+          "notify_events": "Para que eventos enviar notificacións.",
+          "notify_before_end_minutes": "Minutos antes do final estimado do ciclo para activar unha notificación. Establécese en 0 para desactivar. Por defecto: 0.",
+          "notify_live_enabled": "Activa as actualizacións de progreso en directo no lugar para as notificacións das aplicacións móbiles.",
+          "notify_live_interval_seconds": "Con que frecuencia se envían as actualizacións de progreso durante a execución. Os valores máis baixos responden máis pero consomen máis notificacións.",
+          "notify_live_overrun_percent": "A marxe de seguridade por riba do reconto de actualizacións estimado para ciclos longos ou superados (por exemplo, un 20 % permite actualizacións 1,2 veces estimadas).",
+          "notify_title": "Título personalizado para notificacións. Admite o marcador de posición {device}.",
+          "notify_icon": "Icona para usar para notificacións (por exemplo, mdi:washing-machine). Deixa en branco para usar o predeterminado.",
+          "notify_start_message": "Mensaxe enviada cando comeza un ciclo. Admite o marcador de posición {device}.",
+          "notify_finish_message": "Mensaxe enviada cando remata un ciclo. Admite os marcadores de posición {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite {device}, {minutes} marcadores de posición."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Configuración suxerida"
+      },
+      "current_phase": {
+        "name": "Fase actual"
       }
     },
     "select": {

@@ -45,7 +45,8 @@
           "manage_profiles": "Profielen beheren",
           "record_cycle": "Cyclus opnemen (Handmatig)",
           "diagnostics": "Diagnostiek & onderhoud",
-          "manage_phase_catalog": "Beheer fasecatalogus"
+          "manage_phase_catalog": "Beheer fasecatalogus",
+          "notifications": "Meldingen"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Fasebereik"
         }
+      },
+      "notifications": {
+        "title": "Meldingen",
+        "description": "Configureer meldingskanalen, sjablonen en optionele live mobiele voortgangsupdates.",
+        "data": {
+          "notify_service": "Meldingsservice (bijv. notificatie.mobile_app)",
+          "notify_actions": "Meldingsacties",
+          "notify_people": "Mensen om op de hoogte te stellen",
+          "notify_only_when_home": "Alleen op de hoogte stellen als u thuis bent",
+          "notify_fire_events": "Brandautomatiseringsevenementen",
+          "notify_events": "Gebeurtenissen om te melden",
+          "notify_before_end_minutes": "Pre-voltooiingsmelding (minuten voor einde)",
+          "notify_live_enabled": "Schakel Live voortgangsmeldingen in",
+          "notify_live_interval_seconds": "Live update-interval (seconden)",
+          "notify_live_overrun_percent": "Overschrijdingstoeslag voor live updates (%)",
+          "notify_title": "Titel van melding",
+          "notify_icon": "Meldingspictogram",
+          "notify_start_message": "Berichtformaat starten",
+          "notify_finish_message": "Voltooi het berichtformaat",
+          "notify_pre_complete_message": "Berichtformaat vóór voltooiing"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant-meldingsservice te gebruiken (optioneel).",
+          "notify_actions": "Optionele Home Assistant-actiereeks voor meldingen (scripts, meldingen, TTS, enz.). Indien ingesteld, worden acties uitgevoerd voordat de fallback-waarschuwingsservice wordt verzonden.",
+          "notify_people": "Personentiteiten die u kunt gebruiken voor thuis/uit-poorten. Indien ingeschakeld, worden meldingen uitgesteld totdat er iemand thuis is.",
+          "notify_only_when_home": "Indien ingeschakeld, stelt u meldingen uit totdat ten minste één geselecteerde persoon thuis is.",
+          "notify_fire_events": "Indien ingeschakeld, activeert u Home Assistant-gebeurtenissen voor het begin en einde van de cyclus (ha_washdata_cycle_started/ended) om automatiseringen aan te sturen.",
+          "notify_events": "Voor welke gebeurtenissen meldingen moeten worden verzonden.",
+          "notify_before_end_minutes": "Minuten vóór het geschatte einde van de cyclus om een ​​melding te activeren. Stel in op 0 om uit te schakelen. Standaard: 0.",
+          "notify_live_enabled": "Schakel in-place live voortgangsupdates in voor meldingen van mobiele apps.",
+          "notify_live_interval_seconds": "Hoe vaak voortgangsupdates worden verzonden tijdens het hardlopen. Lagere waarden reageren beter, maar verbruiken meer meldingen.",
+          "notify_live_overrun_percent": "Veiligheidsmarge boven het geschatte aantal updates voor lange/overlopende cycli (20% staat bijvoorbeeld 1,2x het geschatte aantal updates toe).",
+          "notify_title": "Aangepaste titel voor meldingen. Ondersteunt tijdelijke aanduiding voor {device}.",
+          "notify_icon": "Icoon om te gebruiken voor meldingen (bijv. mdi:wasmachine). Laat leeg om de standaard te gebruiken.",
+          "notify_start_message": "Bericht verzonden wanneer een cyclus start. Ondersteunt tijdelijke aanduiding voor {device}.",
+          "notify_finish_message": "Bericht verzonden wanneer een cyclus is voltooid. Ondersteunt tijdelijke aanduidingen voor {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Bericht verzonden vóór voltooiing. Ondersteunt {device}, {minutes} tijdelijke aanduidingen."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Voorgestelde instellingen"
+      },
+      "current_phase": {
+        "name": "Huidige fase"
       }
     }
   }

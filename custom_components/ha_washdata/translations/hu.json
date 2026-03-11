@@ -45,7 +45,8 @@
           "manage_profiles": "Profilok kezelése",
           "record_cycle": "Ciklus rögzítése (Kézi)",
           "diagnostics": "Diagnosztika és karbantartás",
-          "manage_phase_catalog": "Fáziskatalógus kezelése"
+          "manage_phase_catalog": "Fáziskatalógus kezelése",
+          "notifications": "Értesítések"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Fázis tartomány"
         }
+      },
+      "notifications": {
+        "title": "Értesítések",
+        "description": "Konfigurálhatja az értesítési csatornákat, sablonokat és opcionális élő mobil-frissítéseket.",
+        "data": {
+          "notify_service": "Értesítési szolgáltatás (pl. notify.mobile_app)",
+          "notify_actions": "Értesítési műveletek",
+          "notify_people": "Értesítendő személyek",
+          "notify_only_when_home": "Csak akkor értesítsen, ha otthon van",
+          "notify_fire_events": "Tűzautomatizálási események",
+          "notify_events": "Értesítendő események",
+          "notify_before_end_minutes": "Befejezés előtti értesítés (perccel a vége előtt)",
+          "notify_live_enabled": "Élő előrehaladásértesítések engedélyezése",
+          "notify_live_interval_seconds": "Élő frissítési időköz (másodperc)",
+          "notify_live_overrun_percent": "Élő frissítés túllépési engedmény (%)",
+          "notify_title": "Értesítés címe",
+          "notify_icon": "Értesítési ikon",
+          "notify_start_message": "Indítsa el az Üzenetformátumot",
+          "notify_finish_message": "Üzenetformátum befejezése",
+          "notify_pre_complete_message": "Kitöltés előtti üzenetformátum"
+        },
+        "data_description": {
+          "notify_service": "Az Otthoni asszisztens értesíti a szolgáltatást (opcionális).",
+          "notify_actions": "Opcionális Home Assistant műveletsor az értesítésekhez (szkriptek, értesítés, TTS stb.) Ha be van állítva, a műveletek a tartalék értesítési szolgáltatás előtt futnak le.",
+          "notify_people": "Emberi entitások, amelyeket otthoni/idegen kapuzáshoz használnak. Ha engedélyezve van, az értesítéseket elhalasztja, amíg valaki otthon nem lesz.",
+          "notify_only_when_home": "Ha engedélyezve van, késleltesse az értesítéseket, amíg legalább egy kiválasztott személy otthon lesz.",
+          "notify_fire_events": "Ha engedélyezve van, aktiválja a Home Assistant eseményeit a ciklus kezdetéhez és végéhez (ha_washdata_cycle_started/ended) az automatizálások irányítása érdekében.",
+          "notify_events": "Mely eseményekről küldjön értesítést.",
+          "notify_before_end_minutes": "Percekkel a ciklus becsült vége előtt az értesítés elindításához. A letiltáshoz állítsa 0-ra. Alapértelmezett: 0.",
+          "notify_live_enabled": "Engedélyezze a mobilalkalmazás-értesítések helyszíni élő frissítéseit.",
+          "notify_live_interval_seconds": "Milyen gyakran küldenek frissítéseket futás közben. Az alacsonyabb értékek jobban reagálnak, de több értesítést igényelnek.",
+          "notify_live_overrun_percent": "A hosszú/túlfutási ciklusok becsült frissítésszáma feletti biztonsági ráhagyás (például a 20% 1,2-szeres becsült frissítést tesz lehetővé).",
+          "notify_title": "Egyéni cím az értesítésekhez. Támogatja a(z) {device} helyőrzőt.",
+          "notify_icon": "Az értesítésekhez használandó ikon (pl. mdi:mosógép). Hagyja üresen az alapértelmezett használathoz.",
+          "notify_start_message": "Üzenet elküldve, amikor egy ciklus elindul. Támogatja a(z) {device} helyőrzőt.",
+          "notify_finish_message": "Üzenet elküldve, amikor egy ciklus véget ért. Támogatja a {device}, {duration}, {program} helyőrzőket.",
+          "notify_pre_complete_message": "Üzenet elküldve a befejezés előtt. Támogatja a {device}, {minutes} helyőrzőket."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Javasolt beállítások"
+      },
+      "current_phase": {
+        "name": "Jelenlegi fázis"
       }
     }
   }

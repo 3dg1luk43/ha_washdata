@@ -45,7 +45,8 @@
           "manage_profiles": "Gérer les profils",
           "record_cycle": "Enregistrer un cycle (manuel)",
           "diagnostics": "Diagnostics et maintenance",
-          "manage_phase_catalog": "Gérer le catalogue de phases"
+          "manage_phase_catalog": "Gérer le catalogue de phases",
+          "notifications": "Notifications"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Plage de phases"
         }
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Configurez les canaux de notification, les modèles et les mises à jour facultatives de progression mobile en direct.",
+        "data": {
+          "notify_service": "Service de notification (par exemple notify.mobile_app)",
+          "notify_actions": "Actions de notification",
+          "notify_people": "Personnes à avertir",
+          "notify_only_when_home": "Notifier uniquement à la maison",
+          "notify_fire_events": "Événements d'automatisation des incendies",
+          "notify_events": "Événements à notifier",
+          "notify_before_end_minutes": "Notification préalable à l'achèvement (minutes avant la fin)",
+          "notify_live_enabled": "Activer les notifications de progression en direct",
+          "notify_live_interval_seconds": "Intervalle de mise à jour en direct (secondes)",
+          "notify_live_overrun_percent": "Allocation de dépassement de mise à jour en direct (%)",
+          "notify_title": "Titre de la notification",
+          "notify_icon": "Icône de notification",
+          "notify_start_message": "Format du message de démarrage",
+          "notify_finish_message": "Terminer le format du message",
+          "notify_pre_complete_message": "Format du message de pré-achèvement"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant informe le service à utiliser (facultatif).",
+          "notify_actions": "Séquence d'actions facultative de Home Assistant à exécuter pour les notifications (scripts, notification, TTS, etc.). Si cette option est définie, les actions sont exécutées avant le service de notification de secours.",
+          "notify_people": "Entités de personnes à utiliser pour le contrôle domicile/extérieur. Lorsqu'elles sont activées, les notifications sont différées jusqu'à ce que quelqu'un soit à la maison.",
+          "notify_only_when_home": "Si cette option est activée, retardez les notifications jusqu'à ce qu'au moins une personne sélectionnée soit à la maison.",
+          "notify_fire_events": "Si activé, déclenchez les événements Home Assistant pour le début et la fin du cycle (ha_washdata_cycle_started/ended) pour piloter les automatisations.",
+          "notify_events": "Pour quels événements envoyer des notifications.",
+          "notify_before_end_minutes": "Quelques minutes avant la fin estimée du cycle pour déclencher une notification. Réglez sur 0 pour désactiver. Par défaut : 0.",
+          "notify_live_enabled": "Activez les mises à jour de progression en direct sur place pour les notifications d'applications mobiles.",
+          "notify_live_interval_seconds": "À quelle fréquence les mises à jour de progression sont envoyées pendant l'exécution. Les valeurs inférieures sont plus réactives mais consomment plus de notifications.",
+          "notify_live_overrun_percent": "Marge de sécurité au-dessus du nombre de mises à jour estimé pour les cycles longs/dépassants (par exemple, 20 % autorisent 1,2 fois les mises à jour estimées).",
+          "notify_title": "Titre personnalisé pour les notifications. Prend en charge l'espace réservé {device}.",
+          "notify_icon": "Icône à utiliser pour les notifications (par exemple mdi:washing-machine). Laissez vide pour utiliser la valeur par défaut.",
+          "notify_start_message": "Message envoyé au démarrage d'un cycle. Prend en charge l'espace réservé {device}.",
+          "notify_finish_message": "Message envoyé lorsqu'un cycle se termine. Prend en charge les espaces réservés {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Message envoyé avant la fin. Prend en charge les espaces réservés {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Paramètres suggérés"
+      },
+      "current_phase": {
+        "name": "Phase actuelle"
       }
     }
   }

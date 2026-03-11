@@ -45,7 +45,8 @@
           "manage_profiles": "Managen Profiler",
           "record_cycle": "Rekordzyklus (manuell)",
           "diagnostics": "Diagnostik & Ënnerhalt",
-          "manage_phase_catalog": "Managen Phase Katalog"
+          "manage_phase_catalog": "Managen Phase Katalog",
+          "notifications": "Notifikatiounen"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Phase Range"
         }
+      },
+      "notifications": {
+        "title": "Notifikatiounen",
+        "description": "Konfiguréiert Notifikatiounskanäl, Templates an optional Live Mobile Fortschrëtterupdates.",
+        "data": {
+          "notify_service": "Notifikatiounsservice (zB notify.mobile_app)",
+          "notify_actions": "Notifikatioun Aktiounen",
+          "notify_people": "Leit ze Notifikatioun",
+          "notify_only_when_home": "Nëmmen Notifikatioun Wann Doheem",
+          "notify_fire_events": "Feier Automation Eventer",
+          "notify_events": "Eventer fir Notifikatioun",
+          "notify_before_end_minutes": "Pre-Complete Notification (Minute virum Enn)",
+          "notify_live_enabled": "Aktivéiert Live Progress Notifikatiounen",
+          "notify_live_interval_seconds": "Live Update Intervall (Sekonnen)",
+          "notify_live_overrun_percent": "Live Update Iwwerschratt Allowance (%)",
+          "notify_title": "Notifikatioun Titel",
+          "notify_icon": "Notifikatioun Ikon",
+          "notify_start_message": "Start Message Format",
+          "notify_finish_message": "Fäerdeg Message Format",
+          "notify_pre_complete_message": "Pre-Completion Message Format"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant Notifikatiounsservice fir ze benotzen (optional).",
+          "notify_actions": "Optional Home Assistant Action Sequenz fir Notifikatiounen ze lafen (Skripte, Notifikatioun, TTS, etc.). Wann agestallt, lafen Aktiounen virum Fallback Notify Service.",
+          "notify_people": "Leit Entitéite fir doheem / Away Gate ze benotzen. Wann et aktivéiert ass, ginn Notifikatiounen ausgestallt bis een doheem ass.",
+          "notify_only_when_home": "Wann aktivéiert, Verspéid Notifikatiounen bis op d'mannst eng gewielte Persoun doheem ass.",
+          "notify_fire_events": "Wann aktivéiert, Feier Home Assistant Eventer fir Zyklusstart an Enn (ha_washdata_cycle_started/ended) fir Automatisatiounen ze féieren.",
+          "notify_events": "Wéi eng Eventer fir Notifikatiounen ze schécken.",
+          "notify_before_end_minutes": "Minutte virum geschätzte Enn vum Zyklus fir eng Notifikatioun auszeléisen. Setzt op 0 fir auszeschalten. Standard: 0.",
+          "notify_live_enabled": "Aktivéiert Live Fortschrëtterupdates op der Plaz fir mobil App Notifikatiounen.",
+          "notify_live_interval_seconds": "Wéi oft Fortschrëtter Aktualiséierungen geschéckt während Lafen. Méi niddereg Wäerter si méi reaktiounsfäeger awer konsuméiere méi Notifikatiounen.",
+          "notify_live_overrun_percent": "Sécherheetsmarge iwwer de geschätzte Updatezuel fir laang / iwwerlafen Zyklen (zum Beispill 20% erlaabt 1,2x geschätzte Updates).",
+          "notify_title": "Benotzerdefinéiert Titel fir Notifikatiounen. Ënnerstëtzt {device} Plazhalter.",
+          "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:Wäschmaschinn). Loosst eidel fir Standard ze benotzen.",
+          "notify_start_message": "Message geschéckt wann en Zyklus fänkt. Ënnerstëtzt {device} Plazhalter.",
+          "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program} Plazhalter.",
+          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Recommandéiert Astellunge"
+      },
+      "current_phase": {
+        "name": "Aktuell Phase"
       }
     },
     "select": {

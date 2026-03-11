@@ -45,7 +45,8 @@
           "manage_profiles": "Bestuur profiele",
           "record_cycle": "Rekordsiklus (Handmatig)",
           "diagnostics": "Diagnostiek en instandhouding",
-          "manage_phase_catalog": "Bestuur Fasekatalogus"
+          "manage_phase_catalog": "Bestuur Fasekatalogus",
+          "notifications": "Kennisgewings"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Fasereeks"
         }
+      },
+      "notifications": {
+        "title": "Kennisgewings",
+        "description": "Stel kennisgewingskanale, sjablone en opsionele regstreekse mobiele vorderingopdaterings op.",
+        "data": {
+          "notify_service": "Kennisgewingdiens (bv. notify.mobile_app)",
+          "notify_actions": "Kennisgewingsaksies",
+          "notify_people": "Mense om in kennis te stel",
+          "notify_only_when_home": "Stel net in kennis wanneer u tuis is",
+          "notify_fire_events": "Brand Outomatisering Gebeurtenisse",
+          "notify_events": "Gebeurtenisse om in kennis te stel",
+          "notify_before_end_minutes": "Voorafhandelingkennisgewing (minute voor einde)",
+          "notify_live_enabled": "Aktiveer regstreekse vorderingkennisgewings",
+          "notify_live_interval_seconds": "Regstreekse opdateringsinterval (sekondes)",
+          "notify_live_overrun_percent": "Regstreekse opdatering oorskry toelae (%)",
+          "notify_title": "Kennisgewing titel",
+          "notify_icon": "Kennisgewing-ikoon",
+          "notify_start_message": "Begin Boodskapformaat",
+          "notify_finish_message": "Voltooi Boodskapformaat",
+          "notify_pre_complete_message": "Pre-voltooiing Boodskap Formaat"
+        },
+        "data_description": {
+          "notify_service": "Huisassistent stel diens in kennis om te gebruik (opsioneel).",
+          "notify_actions": "Opsionele Home Assistant-aksievolgorde om vir kennisgewings uit te voer (skrifte, kennisgewing, TTS, ens.). Indien gestel, loop aksies voor terugvaldiens in kennis stel.",
+          "notify_people": "Mense-entiteite om te gebruik vir tuis-/weghekke. Wanneer dit geaktiveer is, word kennisgewings uitgestel totdat iemand tuis is.",
+          "notify_only_when_home": "Indien geaktiveer, stel kennisgewings uit totdat ten minste een geselekteerde persoon tuis is.",
+          "notify_fire_events": "As dit geaktiveer is, vuur Home Assistant-gebeurtenisse vir siklusbegin en -einde (ha_washdata_cycle_started/ended) af om outomatisering aan te dryf.",
+          "notify_events": "Vir watter geleenthede om kennisgewings te stuur.",
+          "notify_before_end_minutes": "Minute voor die geskatte einde van die siklus om 'n kennisgewing te aktiveer. Stel op 0 om te deaktiveer. Verstek: 0.",
+          "notify_live_enabled": "Aktiveer in-plek regstreekse vordering-opdaterings vir mobiele toepassingkennisgewings.",
+          "notify_live_interval_seconds": "Hoe gereeld vorderingsopdaterings gestuur word terwyl dit loop. Laer waardes reageer meer, maar verbruik meer kennisgewings.",
+          "notify_live_overrun_percent": "Veiligheidsmarge bo die beraamde opdateringtelling vir lang/oorlopende siklusse (byvoorbeeld 20% laat 1,2x beraamde opdaterings toe).",
+          "notify_title": "Gepasmaakte titel vir kennisgewings. Ondersteun {device} plekhouer.",
+          "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om verstek te gebruik.",
+          "notify_start_message": "Boodskap gestuur wanneer 'n siklus begin. Ondersteun {device} plekhouer.",
+          "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program} plekhouers.",
+          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Voorgestelde instellings"
+      },
+      "current_phase": {
+        "name": "Huidige fase"
       }
     },
     "select": {

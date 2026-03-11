@@ -45,7 +45,8 @@
           "manage_profiles": "프로필 관리",
           "record_cycle": "기록주기(수동)",
           "diagnostics": "진단 및 유지보수",
-          "manage_phase_catalog": "단계 카탈로그 관리"
+          "manage_phase_catalog": "단계 카탈로그 관리",
+          "notifications": "알림"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "위상 범위"
         }
+      },
+      "notifications": {
+        "title": "알림",
+        "description": "알림 채널, 템플릿 및 선택적 라이브 모바일 진행 상황 업데이트를 구성합니다.",
+        "data": {
+          "notify_service": "알림 서비스(예: inform.mobile_app)",
+          "notify_actions": "알림 작업",
+          "notify_people": "알릴 사람",
+          "notify_only_when_home": "집에 있을 때만 알림",
+          "notify_fire_events": "화재 자동화 이벤트",
+          "notify_events": "공지할 이벤트",
+          "notify_before_end_minutes": "사전 완료 알림(종료 몇 분 전)",
+          "notify_live_enabled": "실시간 진행 알림 활성화",
+          "notify_live_interval_seconds": "라이브 업데이트 간격(초)",
+          "notify_live_overrun_percent": "라이브 업데이트 오버런 허용(%)",
+          "notify_title": "알림 제목",
+          "notify_icon": "알림 아이콘",
+          "notify_start_message": "시작 메시지 형식",
+          "notify_finish_message": "완료 메시지 형식",
+          "notify_pre_complete_message": "사전 완료 메시지 형식"
+        },
+        "data_description": {
+          "notify_service": "홈어시스턴트가 사용할 서비스를 알립니다(선택사항).",
+          "notify_actions": "알림(스크립트, 알림, TTS 등)을 위해 실행할 선택적 홈어시스턴트 작업 시퀀스입니다. 설정된 경우 대체 알림 서비스 전에 작업이 실행됩니다.",
+          "notify_people": "홈/어웨이 게이팅에 사용할 사람 엔터티입니다. 활성화하면 누군가 집에 올 때까지 알림이 연기됩니다.",
+          "notify_only_when_home": "활성화되면 선택한 사람 중 최소한 한 명이 집에 올 때까지 알림을 연기합니다.",
+          "notify_fire_events": "활성화된 경우 주기 시작 및 종료(ha_washdata_cycle_started/ended)에 대한 홈어시스턴트 이벤트를 실행하여 자동화를 구동합니다.",
+          "notify_events": "알림을 보낼 이벤트입니다.",
+          "notify_before_end_minutes": "알림을 트리거할 주기의 예상 종료 시간 몇 분 전입니다. 비활성화하려면 0으로 설정합니다. 기본값: 0.",
+          "notify_live_enabled": "모바일 앱 알림에 대한 실시간 진행 업데이트를 활성화합니다.",
+          "notify_live_interval_seconds": "실행 중에 진행률 업데이트가 전송되는 빈도입니다. 값이 낮을수록 반응성이 높아지지만 더 많은 알림을 사용합니다.",
+          "notify_live_overrun_percent": "장기/오버런 주기에 대한 예상 업데이트 횟수보다 높은 안전 여유(예: 20%는 예상 업데이트의 1.2배 허용)",
+          "notify_title": "알림에 대한 사용자 정의 제목입니다. {device} 자리 표시자를 지원합니다.",
+          "notify_icon": "알림에 사용할 아이콘(예: mdi:washing-machine) 기본값을 사용하려면 비워 두세요.",
+          "notify_start_message": "주기가 시작되면 전송되는 메시지입니다. {device} 자리 표시자를 지원합니다.",
+          "notify_finish_message": "주기가 완료되면 전송되는 메시지입니다. {device}, {duration}, {program} 자리 표시자를 지원합니다.",
+          "notify_pre_complete_message": "완료되기 전에 메시지가 전송되었습니다. {device}, {minutes} 자리 표시자를 지원합니다."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "제안된 설정"
+      },
+      "current_phase": {
+        "name": "현재 단계"
       }
     },
     "select": {

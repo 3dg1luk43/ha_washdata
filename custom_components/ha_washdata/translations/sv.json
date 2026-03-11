@@ -45,7 +45,8 @@
           "manage_profiles": "Hantera profiler",
           "record_cycle": "Spela in cykel (Manuell)",
           "diagnostics": "Diagnostik & underhåll",
-          "manage_phase_catalog": "Hantera faskatalog"
+          "manage_phase_catalog": "Hantera faskatalog",
+          "notifications": "Aviseringar"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Fasintervall"
         }
+      },
+      "notifications": {
+        "title": "Aviseringar",
+        "description": "Konfigurera aviseringskanaler, mallar och valfria liveuppdateringar för mobila framsteg.",
+        "data": {
+          "notify_service": "Aviseringstjänst (t.ex. notify.mobile_app)",
+          "notify_actions": "Aviseringsåtgärder",
+          "notify_people": "Människor att meddela",
+          "notify_only_when_home": "Meddela endast när du är hemma",
+          "notify_fire_events": "Brandautomationshändelser",
+          "notify_events": "Händelser att meddela",
+          "notify_before_end_minutes": "Avisering före slutförande (minuter före slut)",
+          "notify_live_enabled": "Aktivera Live Progress Notifications",
+          "notify_live_interval_seconds": "Liveuppdateringsintervall (sekunder)",
+          "notify_live_overrun_percent": "Live Update Overrun Allowance (%)",
+          "notify_title": "Aviseringens rubrik",
+          "notify_icon": "Aviseringsikon",
+          "notify_start_message": "Starta meddelandeformat",
+          "notify_finish_message": "Avsluta meddelandeformat",
+          "notify_pre_complete_message": "Pre-Completion Message Format"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant avisera tjänst att använda (valfritt).",
+          "notify_actions": "Valfri Home Assistant-åtgärdssekvens att köra för aviseringar (skript, avisering, TTS, etc.). Om inställt körs åtgärder innan reservaviseringstjänst.",
+          "notify_people": "Människor enheter att använda för hem/borta gating. När det är aktiverat skjuts aviseringar upp tills någon är hemma.",
+          "notify_only_when_home": "Om aktiverat, fördröja aviseringar tills minst en vald person är hemma.",
+          "notify_fire_events": "Om aktiverat, aktivera Home Assistant-händelser för cykelstart och -slut (ha_washdata_cycle_started/ended) för att driva automatiseringar.",
+          "notify_events": "Vilka händelser man ska skicka aviseringar om.",
+          "notify_before_end_minutes": "Minuter före det beräknade slutet av cykeln för att utlösa ett meddelande. Ställ in på 0 för att inaktivera. Standard: 0.",
+          "notify_live_enabled": "Aktivera på plats liveframstegsuppdateringar för mobilappaviseringar.",
+          "notify_live_interval_seconds": "Hur ofta förloppsuppdateringar skickas under körning. Lägre värden är mer lyhörda men förbrukar fler aviseringar.",
+          "notify_live_overrun_percent": "Säkerhetsmarginal över det uppskattade uppdateringsantalet för långa/överskridande cykler (till exempel 20 % tillåter 1,2x uppskattade uppdateringar).",
+          "notify_title": "Anpassad titel för aviseringar. Stöder platshållare för {device}.",
+          "notify_icon": "Ikon att använda för aviseringar (t.ex. mdi:tvättmaskin). Lämna tomt för att använda standard.",
+          "notify_start_message": "Meddelande skickas när en cykel startar. Stöder platshållare för {device}.",
+          "notify_finish_message": "Meddelande skickas när en cykel är klar. Stöder platshållare för {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Meddelande skickat innan slutförandet. Stöder {device}, {minutes} platshållare."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Föreslagna inställningar"
+      },
+      "current_phase": {
+        "name": "Nuvarande fas"
       }
     }
   }

@@ -45,7 +45,8 @@
           "manage_profiles": "Upravljaj profile",
           "record_cycle": "Posnemi cikel (Ročno)",
           "diagnostics": "Diagnostika in vzdrževanje",
-          "manage_phase_catalog": "Upravljanje kataloga faz"
+          "manage_phase_catalog": "Upravljanje kataloga faz",
+          "notifications": "Obvestila"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Fazno območje"
         }
+      },
+      "notifications": {
+        "title": "Obvestila",
+        "description": "Konfigurirajte kanale za obveščanje, predloge in izbirne posodobitve mobilnega napredka v živo.",
+        "data": {
+          "notify_service": "Storitev obveščanja (npr. notify.mobile_app)",
+          "notify_actions": "Dejanja obveščanja",
+          "notify_people": "Ljudje za obveščanje",
+          "notify_only_when_home": "Obvesti samo, ko sem doma",
+          "notify_fire_events": "Dogodki za avtomatizacijo požara",
+          "notify_events": "Dogodki za obveščanje",
+          "notify_before_end_minutes": "Obvestilo pred zaključkom (minut pred koncem)",
+          "notify_live_enabled": "Omogoči obvestila o napredku v živo",
+          "notify_live_interval_seconds": "Interval posodobitve v živo (sekunde)",
+          "notify_live_overrun_percent": "Dovoljenje za prekoračitev posodobitve v živo (%)",
+          "notify_title": "Naslov obvestila",
+          "notify_icon": "Ikona obvestila",
+          "notify_start_message": "Zaženite obliko sporočila",
+          "notify_finish_message": "Dokončaj obliko sporočila",
+          "notify_pre_complete_message": "Oblika sporočila pred dokončanjem"
+        },
+        "data_description": {
+          "notify_service": "Domači pomočnik obvesti storitev za uporabo (neobvezno).",
+          "notify_actions": "Izbirno zaporedje dejanj domačega pomočnika za zagon za obvestila (skripti, obvestilo, TTS itd.). Če je nastavljeno, se dejanja izvajajo pred nadomestno storitvijo obveščanja.",
+          "notify_people": "Entitete ljudi, ki se uporabljajo za prehode doma/na poti. Ko je omogočeno, so obvestila odložena, dokler nekdo ni doma.",
+          "notify_only_when_home": "Če je omogočeno, odloži obvestila, dokler vsaj ena izbrana oseba ni doma.",
+          "notify_fire_events": "Če je omogočeno, sproži dogodke Home Assistant za začetek in konec cikla (ha_washdata_cycle_started/ended) za poganjanje avtomatizacije.",
+          "notify_events": "Za katere dogodke poslati obvestila.",
+          "notify_before_end_minutes": "Minute pred predvidenim koncem cikla za sprožitev obvestila. Nastavite na 0, da onemogočite. Privzeto: 0.",
+          "notify_live_enabled": "Omogočite sprotne posodobitve napredka za obvestila mobilnih aplikacij.",
+          "notify_live_interval_seconds": "Kako pogosto se pošiljajo posodobitve napredka med izvajanjem. Nižje vrednosti so bolj odzivne, vendar porabijo več obvestil.",
+          "notify_live_overrun_percent": "Varnostna meja nad ocenjenim številom posodobitev za dolge/prekoračljive cikle (na primer 20 % omogoča 1,2-kratno ocenjeno posodobitev).",
+          "notify_title": "Naslov po meri za obvestila. Podpira nadomestno oznako {device}.",
+          "notify_icon": "Ikona za uporabo za obvestila (npr. mdi:washing-machine). Če želite uporabiti privzeto, pustite prazno.",
+          "notify_start_message": "Sporočilo, poslano ob začetku cikla. Podpira nadomestno oznako {device}.",
+          "notify_finish_message": "Sporočilo, poslano, ko se cikel konča. Podpira nadomestne oznake {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Sporočilo poslano pred zaključkom. Podpira nadomestne oznake {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "Predlagane nastavitve"
+      },
+      "current_phase": {
+        "name": "Trenutna faza"
       }
     }
   }

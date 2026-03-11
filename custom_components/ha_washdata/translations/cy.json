@@ -45,7 +45,8 @@
           "manage_profiles": "Rheoli Proffiliau",
           "record_cycle": "Cylchred Record (Llawlyfr)",
           "diagnostics": "Diagnosteg a Chynnal a Chadw",
-          "manage_phase_catalog": "Rheoli Catalog Cyfnod"
+          "manage_phase_catalog": "Rheoli Catalog Cyfnod",
+          "notifications": "Hysbysiadau"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "Ystod Cyfnod"
         }
+      },
+      "notifications": {
+        "title": "Hysbysiadau",
+        "description": "Ffurfweddu sianeli hysbysu, templedi, a diweddariadau cynnydd symudol byw dewisol.",
+        "data": {
+          "notify_service": "Gwasanaeth Hysbysu (e.e. notify.mobile_app)",
+          "notify_actions": "Camau Hysbysu",
+          "notify_people": "Pobl i'w Hysbysu",
+          "notify_only_when_home": "Dim ond Hysbysu Pan Gartref",
+          "notify_fire_events": "Digwyddiadau Awtomeiddio Tân",
+          "notify_events": "Digwyddiadau i'w Hysbysu",
+          "notify_before_end_minutes": "Hysbysiad cyn-gwblhau (munudau cyn diwedd)",
+          "notify_live_enabled": "Galluogi Hysbysiadau Cynnydd Byw",
+          "notify_live_interval_seconds": "Cyfnod Diweddariad Byw (eiliadau)",
+          "notify_live_overrun_percent": "Lwfans Gorwario Diweddariad Byw (%)",
+          "notify_title": "Teitl yr Hysbysiad",
+          "notify_icon": "Eicon Hysbysiad",
+          "notify_start_message": "Dechrau Fformat Neges",
+          "notify_finish_message": "Gorffen Fformat Neges",
+          "notify_pre_complete_message": "Fformat Neges Cyn Cwblhau"
+        },
+        "data_description": {
+          "notify_service": "Cynorthwyydd Cartref yn hysbysu'r gwasanaeth i'w ddefnyddio (dewisol).",
+          "notify_actions": "Dilyniant gweithredu Cynorthwyydd Cartref Dewisol i redeg am hysbysiadau (sgriptiau, hysbysu, TTS, ac ati). Os caiff ei osod, bydd camau gweithredu'n rhedeg cyn y gwasanaeth hysbysu wrth gefn.",
+          "notify_people": "Endidau pobl i'w defnyddio ar gyfer gatiau cartref/i ffwrdd. Pan fyddant wedi'u galluogi, caiff hysbysiadau eu gohirio nes bod rhywun gartref.",
+          "notify_only_when_home": "Os caiff ei alluogi, gohiriwch hysbysiadau nes bod o leiaf un person a ddewiswyd gartref.",
+          "notify_fire_events": "Os yw wedi'i alluogi, tanio digwyddiadau Cynorthwyydd Cartref ar gyfer dechrau a diwedd beiciau (ha_washdata_cycle_started/ended) i yrru awtomeiddio.",
+          "notify_events": "Ar gyfer pa ddigwyddiadau i anfon hysbysiadau.",
+          "notify_before_end_minutes": "Munudau cyn diwedd amcangyfrifedig y cylch i sbarduno hysbysiad. Gosodwch ar 0 i analluogi. Rhagosodedig: 0.",
+          "notify_live_enabled": "Galluogi diweddariadau cynnydd byw yn eu lle ar gyfer hysbysiadau ap symudol.",
+          "notify_live_interval_seconds": "Pa mor aml mae diweddariadau cynnydd yn cael eu hanfon wrth redeg. Mae gwerthoedd is yn fwy ymatebol ond yn defnyddio mwy o hysbysiadau.",
+          "notify_live_overrun_percent": "Ymyl diogelwch uwchlaw'r cyfrif diweddaru amcangyfrifedig ar gyfer cylchoedd hir/rhedegog (er enghraifft mae 20% yn caniatáu 1.2x o ddiweddariadau amcangyfrifedig).",
+          "notify_title": "Teitl personol ar gyfer hysbysiadau. Yn cefnogi dalfan {device}.",
+          "notify_icon": "Eicon i'w ddefnyddio ar gyfer hysbysiadau (e.e. mdi: peiriant golchi). Gadewch yn wag i ddefnyddio rhagosodedig.",
+          "notify_start_message": "Neges wedi'i hanfon pan fydd cylch yn dechrau. Yn cefnogi dalfan {device}.",
+          "notify_finish_message": "Neges wedi'i hanfon pan fydd cylch yn gorffen. Yn cefnogi dalfannau {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Anfonwyd y neges cyn ei chwblhau. Yn cefnogi dalfannau {device}, {minutes}."
+        }
       }
     },
     "error": {
@@ -563,6 +602,9 @@
       },
       "suggestions": {
         "name": "Gosodiadau a Awgrymir"
+      },
+      "current_phase": {
+        "name": "Cyfnod Presennol"
       }
     },
     "select": {

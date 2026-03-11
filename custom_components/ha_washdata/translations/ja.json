@@ -45,7 +45,8 @@
           "manage_profiles": "プロファイル管理",
           "record_cycle": "サイクルを記録（手動）",
           "diagnostics": "診断とメンテナンス",
-          "manage_phase_catalog": "フェーズカタログの管理"
+          "manage_phase_catalog": "フェーズカタログの管理",
+          "notifications": "通知"
         }
       },
       "apply_suggestions": {
@@ -494,6 +495,44 @@
         "data": {
           "range_index": "位相範囲"
         }
+      },
+      "notifications": {
+        "title": "通知",
+        "description": "通知チャネル、テンプレート、およびオプションのライブモバイル進行状況更新を構成します。",
+        "data": {
+          "notify_service": "通知サービス (例:notify.mobile_app)",
+          "notify_actions": "通知アクション",
+          "notify_people": "通知する人",
+          "notify_only_when_home": "在宅時のみ通知",
+          "notify_fire_events": "消防自動化イベント",
+          "notify_events": "通知するイベント",
+          "notify_before_end_minutes": "完了前通知（終了数分前）",
+          "notify_live_enabled": "ライブ進行状況通知を有効にする",
+          "notify_live_interval_seconds": "ライブアップデート間隔 (秒)",
+          "notify_live_overrun_percent": "Live Update オーバーラン許容量 (%)",
+          "notify_title": "通知のタイトル",
+          "notify_icon": "通知アイコン",
+          "notify_start_message": "開始メッセージのフォーマット",
+          "notify_finish_message": "終了メッセージのフォーマット",
+          "notify_pre_complete_message": "完了前メッセージのフォーマット"
+        },
+        "data_description": {
+          "notify_service": "ホーム アシスタントが使用するサービスを通知します (オプション)。",
+          "notify_actions": "通知のために実行するオプションのホーム アシスタント アクション シーケンス (スクリプト、通知、TTS など)。設定されている場合、アクションはフォールバック通知サービスの前に実行されます。",
+          "notify_people": "ホーム/アウェイ ゲートに使用する人物エンティティ。有効にすると、誰かが帰宅するまで通知が延期されます。",
+          "notify_only_when_home": "有効にすると、選択した少なくとも 1 人が帰宅するまで通知が遅延します。",
+          "notify_fire_events": "有効にすると、サイクルの開始と終了のホーム アシスタント イベント (ha_washdata_cycle_started/ended) を起動して自動化を推進します。",
+          "notify_events": "通知を送信するイベント。",
+          "notify_before_end_minutes": "通知をトリガーするサイクルの推定終了時間の数分前。無効にするには 0 に設定します。デフォルト: 0。",
+          "notify_live_enabled": "モバイル アプリ通知のインプレース ライブ進行状況更新を有効にします。",
+          "notify_live_interval_seconds": "実行中に進行状況の更新が送信される頻度。値が低いほど応答性は高くなりますが、消費する通知の量が多くなります。",
+          "notify_live_overrun_percent": "長時間/超過サイクルの推定更新数を上回る安全マージン (たとえば、20% では推定更新数の 1.2 倍が許可されます)。",
+          "notify_title": "通知のカスタム タイトル。 {device} プレースホルダーをサポートします。",
+          "notify_icon": "通知に使用するアイコン (例: mdi:washing-machine)。デフォルトを使用するには空のままにしてください。",
+          "notify_start_message": "サイクルの開始時に送信されるメッセージ。 {device} プレースホルダーをサポートします。",
+          "notify_finish_message": "サイクルの終了時に送信されるメッセージ。 {device}、{duration}、{program} のプレースホルダーをサポートします。",
+          "notify_pre_complete_message": "完了前にメッセージが送信されました。 {device}、{minutes} のプレースホルダーをサポートします。"
+        }
       }
     },
     "error": {
@@ -571,6 +610,9 @@
       },
       "suggestions": {
         "name": "推奨される設定"
+      },
+      "current_phase": {
+        "name": "現在のフェーズ"
       }
     }
   }
