@@ -231,6 +231,7 @@ class WashDataManager:
         self._live_waiting_notification_sent = False
         self._live_notification_tag = f"ha_washdata_{self.entry_id}_live"
         self._start_event_fired = False
+        self._cycle_start_time: datetime | None = None
 
         # State
         self._current_power = 0.0
@@ -883,7 +884,9 @@ class WashDataManager:
                             "device_name": self.config_entry.title,
                             "device_type": self.device_type,
                             "program": self._current_program,
-                            "start_time": dt_util.now().isoformat(),
+                            "start_time": (
+                                self._cycle_start_time or dt_util.now()
+                            ).isoformat(),
                         },
                     )
                     self._start_event_fired = True
@@ -893,14 +896,12 @@ class WashDataManager:
                     msg_template = self.config_entry.options.get(
                         CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE
                     )
-                    # Use fallback formatting in case user has custom template without {program}
-                    try:
-                        msg = msg_template.format(
-                            device=self.config_entry.title,
-                            program=self._current_program
-                        )
-                    except KeyError:
-                        msg = msg_template.format(device=self.config_entry.title)
+                    msg = self._safe_format_template(
+                        msg_template,
+                        fallback_template=DEFAULT_NOTIFY_START_MESSAGE,
+                        device=self.config_entry.title,
+                        program=self._current_program,
+                    )
 
                     self._dispatch_notification(
                         msg,
@@ -1649,8 +1650,11 @@ class WashDataManager:
         new_value = new_state.state
         old_value = old_state.state if old_state else None
 
-        # Ignore unavailability transitions (reconnects, disconnects)
-        if old_value is None or old_value == "unavailable" or new_value == "unavailable":
+        # Ignore unavailability/unknown transitions (reconnects, disconnects)
+        if old_value is None or old_value in ("unavailable", "unknown") or new_value in (
+            "unavailable",
+            "unknown",
+        ):
             return
 
         # Determine if triggered based on inversion setting
@@ -1771,6 +1775,9 @@ class WashDataManager:
         self._last_real_reading_time = now # Track real update
         self._current_power = power
         self.detector.process_reading(power, now)
+
+        if self._cycle_start_time is None and self.detector.current_cycle_start is not None:
+            self._cycle_start_time = self.detector.current_cycle_start
 
         # If running (or paused/ending), try to match profile and update estimates
         if self.detector.state in (
@@ -2117,6 +2124,7 @@ class WashDataManager:
                 self._current_match_candidate = None  # Reset candidate
                 self._notified_start = False # Reset start notification state
                 self._start_event_fired = False
+                self._cycle_start_time = self.detector.current_cycle_start or dt_util.now()
                 self._reset_live_notification_state()
                 self._start_watchdog()  # Start watchdog when cycle starts
             else:
@@ -2127,6 +2135,9 @@ class WashDataManager:
             # Send notification if enabled (Moved to _async_do_perform_matching)
         elif new_state == STATE_OFF and old_state == STATE_RUNNING:
             self._stop_watchdog()  # Stop watchdog when cycle ends
+
+        if new_state == STATE_OFF:
+            self._cycle_start_time = None
 
         self._notify_update()
 
@@ -2259,10 +2270,12 @@ class WashDataManager:
             msg_template = self.config_entry.options.get(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE)
             duration_min = int(cycle_data['duration'] / 60)
             program_name = event_cycle_data.get("profile_name", "unknown")
-            msg = msg_template.format(
+            msg = self._safe_format_template(
+                msg_template,
+                fallback_template=DEFAULT_NOTIFY_FINISH_MESSAGE,
                 device=self.config_entry.title,
                 duration=duration_min,
-                program=program_name
+                program=program_name,
             )
             self._dispatch_notification(
                 msg,
@@ -2294,6 +2307,7 @@ class WashDataManager:
         self._last_estimate_time = None
         self._cycle_progress = 100.0  # 100% = cycle complete
         self._cycle_completed_time = dt_util.now()
+        self._cycle_start_time = None
         self._reset_live_notification_state()
 
         # Start progress reset timer to go back to 0% after user unload window
@@ -2315,6 +2329,42 @@ class WashDataManager:
         """Dispatch notification through actions or notify service."""
         self._dispatch_notification(message, title=title, icon=icon)
 
+    def _safe_format_template(
+        self,
+        template: Any,
+        *,
+        fallback_template: str | None = None,
+        **kwargs: Any,
+    ) -> str:
+        """Format templates safely and return a resilient fallback on any error."""
+        text_template = str(template)
+        try:
+            return text_template.format(**kwargs)
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug(
+                "Failed to format notification template %r with %s: %s",
+                text_template,
+                kwargs,
+                err,
+            )
+
+        if fallback_template:
+            try:
+                return fallback_template.format(**kwargs)
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                _LOGGER.debug(
+                    "Failed to format fallback notification template %r with %s: %s",
+                    fallback_template,
+                    kwargs,
+                    err,
+                )
+
+        device = str(kwargs.get("device") or self.config_entry.title)
+        program = kwargs.get("program")
+        if program:
+            return f"{device}: {program}"
+        return device
+
     def _dispatch_notification(
         self,
         message: str,
@@ -2330,14 +2380,11 @@ class WashDataManager:
         """Route notification via actions or notify service with optional gating."""
         if not title:
             title_template = self.config_entry.options.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE)
-            try:
-                title = title_template.format(device=self.config_entry.title)
-            except Exception as err:  # pylint: disable=broad-exception-caught
-                _LOGGER.error("Failed to format notification title '%s': %s", title_template, err)
-                try:
-                    title = DEFAULT_NOTIFY_TITLE.format(device=self.config_entry.title)
-                except Exception:  # pylint: disable=broad-exception-caught
-                    title = DEFAULT_NOTIFY_TITLE
+            title = self._safe_format_template(
+                title_template,
+                fallback_template=DEFAULT_NOTIFY_TITLE,
+                device=self.config_entry.title,
+            )
 
         if not icon:
             icon = self.config_entry.options.get(CONF_NOTIFY_ICON)
@@ -2387,14 +2434,13 @@ class WashDataManager:
         if self._notify_actions:
             self._run_notification_actions(variables)
 
-        self._send_notification_service(
+        return self._send_notification_service(
             message,
             title=title,
             icon=icon,
             event_type=event_type,
             extra_vars=extra_vars,
         )
-        return True
 
     def _send_notification_service(
         self,
@@ -2403,7 +2449,7 @@ class WashDataManager:
         icon: str | None = None,
         event_type: str | None = None,
         extra_vars: dict[str, Any] | None = None,
-    ) -> None:
+    ) -> bool:
         """Send a notification via configured notify service or persistent notification."""
         notify_service = self._notify_service or self.config_entry.options.get(
             CONF_NOTIFY_SERVICE
@@ -2437,7 +2483,7 @@ class WashDataManager:
                     "Skipping live notification for non-mobile notify service: %s",
                     notify_service,
                 )
-                return
+                return False
 
             domain, service = (
                 notify_service.split(".", 1)
@@ -2451,12 +2497,13 @@ class WashDataManager:
             self.hass.async_create_task(
                 self.hass.services.async_call(domain, service, service_data)
             )
-            return
+            return True
 
         if event_type == NOTIFY_EVENT_LIVE:
-            return
+            return False
 
         _pn_create(self.hass, message, title=title)
+        return True
 
     def _run_notification_actions(self, variables: dict[str, Any]) -> bool:
         """Run configured notification actions."""
@@ -2714,10 +2761,13 @@ class WashDataManager:
             if self._live_waiting_notification_sent:
                 return
 
-            msg = DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE.format(
-                device=self.config_entry.title
+            msg = self._safe_format_template(
+                DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE,
+                fallback_template=DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE,
+                device=self.config_entry.title,
+                program=self._current_program,
             )
-            self._dispatch_notification(
+            sent = self._dispatch_notification(
                 msg,
                 event_type=NOTIFY_EVENT_LIVE,
                 extra_vars={
@@ -2726,7 +2776,7 @@ class WashDataManager:
                     "alert_once": True,
                 },
             )
-            self._live_waiting_notification_sent = True
+            self._live_waiting_notification_sent = sent
             return
 
         interval = max(30, int(self._notify_live_interval_seconds))
@@ -2762,14 +2812,13 @@ class WashDataManager:
             CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
             DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
         )
-        try:
-            msg = msg_template.format(
-                device=self.config_entry.title,
-                minutes=minutes_left,
-                program=self._current_program,
-            )
-        except KeyError:
-            msg = msg_template.format(device=self.config_entry.title)
+        msg = self._safe_format_template(
+            msg_template,
+            fallback_template=DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+            device=self.config_entry.title,
+            minutes=minutes_left,
+            program=self._current_program,
+        )
 
         sent = self._dispatch_notification(
             msg,
@@ -2793,19 +2842,6 @@ class WashDataManager:
 
     def _clear_live_progress_notification(self) -> None:
         """Clear active live progress notification on cycle completion."""
-        if self._live_notification_sent_count <= 0 and not self._live_waiting_notification_sent:
-            return
-
-        self._send_notification_service(
-            "clear_notification",
-            event_type=NOTIFY_EVENT_LIVE,
-            extra_vars={
-                "tag": self._live_notification_tag,
-                "live_update": True,
-                "alert_once": True,
-            },
-        )
-
         # Purge any queued live-progress entries so they don't replay later.
         live_tag = self._live_notification_tag
         self._pending_notifications = [
@@ -2818,6 +2854,19 @@ class WashDataManager:
                 and entry["extra_vars"].get("live_update") is True
             )
         ]
+
+        if self._live_notification_sent_count <= 0 and not self._live_waiting_notification_sent:
+            return
+
+        self._send_notification_service(
+            "clear_notification",
+            event_type=NOTIFY_EVENT_LIVE,
+            extra_vars={
+                "tag": self._live_notification_tag,
+                "live_update": True,
+                "alert_once": True,
+            },
+        )
 
         # Reset live-update state flags and counters.
         self._reset_live_notification_state()
@@ -2841,9 +2890,12 @@ class WashDataManager:
             # Safe default if rounding goes weird equivalent to int()
             minutes_left = int(self._time_remaining / 60) + 1
 
-            msg = msg_template.format(
+            msg = self._safe_format_template(
+                msg_template,
+                fallback_template=DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
                 device=self.config_entry.title,
-                minutes=minutes_left
+                minutes=minutes_left,
+                program=self._current_program,
             )
             self._dispatch_notification(
                 msg,
@@ -3248,12 +3300,26 @@ class WashDataManager:
         """Public method to notify entities of update."""
         self._notify_update()
 
-    @property
     def check_state(self):
         """Return current detector state."""
         if self.recorder.is_recording:
             return STATE_RUNNING
         return self.detector.state
+
+    def list_phase_catalog(self, device_type: str) -> list[dict[str, Any]]:
+        """Return the merged phase catalog for a device type."""
+        return self.profile_store.list_phase_catalog(device_type)
+
+    def get_profile_phase_ranges_for_device(
+        self,
+        profile_name: str,
+        device_type: str,
+    ) -> list[dict[str, Any]]:
+        """Return phase ranges assigned to a profile for a given device type."""
+        return self.profile_store.get_profile_phase_ranges_for_device(
+            profile_name,
+            device_type,
+        )
 
     @property
     def sub_state(self) -> str | None:
