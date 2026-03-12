@@ -102,10 +102,11 @@ def power_data_to_offsets(
         if start_time_iso:
             try:
                 parsed = dt_util.parse_datetime(start_time_iso)
-                if parsed:
-                    base_ts = parsed.timestamp()
+                if parsed is None:
+                    return []
+                base_ts = parsed.timestamp()
             except Exception:  # pylint: disable=broad-exception-caught
-                pass
+                return []
 
         result: list[list[float]] = []
         first_ts: float | None = None

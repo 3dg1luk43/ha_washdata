@@ -112,7 +112,7 @@ async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
             continue
 
         if item_url.endswith(ver):
-            return False
+            return True
 
         item_id = item.get("id")
         if not isinstance(item_id, str):
@@ -163,7 +163,8 @@ class WashDataCardRegistration:
                         "Lovelace component loaded; retrying resource registration"
                     )
                     try:
-                        await _init_resource(self.hass, INTEGRATION_URL, version)
+                        if await _init_resource(self.hass, INTEGRATION_URL, version):
+                            self.hass.data["ha_washdata_card_registered"] = True
                     except Exception:  # pylint: disable=broad-exception-caught
                         _LOGGER.debug(
                             "Delayed auto-registration of lovelace resource failed for %s",
@@ -171,14 +172,19 @@ class WashDataCardRegistration:
                         )
 
             self.hass.bus.async_listen(EVENT_COMPONENT_LOADED, _on_lovelace_loaded)
-            return True
+            return False
 
         # Lovelace is already loaded
         try:
-            await _init_resource(self.hass, INTEGRATION_URL, version)
-            _LOGGER.debug("Auto-registered lovelace resource for %s", INTEGRATION_URL)
-        except Exception:  # pylint: disable=broad-exception-caught
+            registered = await _init_resource(self.hass, INTEGRATION_URL, version)
+        except Exception as err:  # pylint: disable=broad-exception-caught
             _LOGGER.debug(
-                "Auto-registration of lovelace resource failed for %s", INTEGRATION_URL
+                "Auto-registration of lovelace resource failed for %s: %s",
+                INTEGRATION_URL,
+                err,
             )
-        return True
+            return False
+
+        if registered:
+            _LOGGER.debug("Auto-registered lovelace resource for %s", INTEGRATION_URL)
+        return registered

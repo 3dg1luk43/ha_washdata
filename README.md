@@ -85,12 +85,11 @@ If you are using Zigbee2MQTT with smart plugs, ensure your device reporting is r
 
 ### 2. The Golden Rule: "Teach" the Integration
 WashData **does not** come with pre-built profiles because every machine model is different. You must teach it what your cycles look like.
-
 #### Option A: Manual "Record Mode" (Recommended)
 This gives you the cleanest data.
-1. Open the **Dashbord Card**.
-2. Select **Record Cycle (Manual)** from the program list.
-3. Start your machine.
+
+1. Go to **Settings > Devices & Services > WashData > Configure**.
+2. Open **Record Cycle (Manual)**, then start your machine.
 4. When finished, go to **Manage Data & Profiles**, find the recording, and create a profile.
 
 #### Option B: The Natural Way

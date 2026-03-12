@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Optional
 
 import numpy as np
 
 _LOGGER = logging.getLogger(__name__)
+ALIGNMENT_CONTEXT_BUFFER = 50
 
 def find_best_alignment(
     current_power: list[float] | np.ndarray,
@@ -318,13 +319,14 @@ def compute_dtw_path(
     return path
 
 def compute_envelope_worker(
-    raw_cycles_data: list[tuple[list[float], list[float]]],
+    raw_cycles_data: list[tuple[list[float], list[float], Optional[float]]],
     dtw_bandwidth: float
 ) -> tuple[list[float], list[float], list[float], list[float], list[float], float] | None:
     """
     Compute statistical envelope.
     Args:
-        raw_cycles_data: list of (offsets, power_values) tuples.
+        raw_cycles_data: list of (offsets, power_values, duration) tuples.
+            Duration may be None and is used to compute target_duration.
         dtw_bandwidth: ratio.
     Returns:
         (time_grid, min_curve, max_curve, avg_curve, std_curve, target_duration) or None.
@@ -345,8 +347,9 @@ def compute_envelope_worker(
         offsets = np.array(offsets_list)
         values = np.array(values_list)
 
-        # Use provided duration or fallback to last offset
-        dur = float(curve[2]) if len(curve) > 2 else float(offsets[-1])
+        # Use provided duration when valid, otherwise fallback to last offset.
+        curve_duration = curve[2] if len(curve) > 2 else None
+        dur = float(curve_duration) if curve_duration is not None else float(offsets[-1])
 
         normalized_curves.append((offsets, values, dur))
 
@@ -476,7 +479,8 @@ def verify_profile_alignment_worker(
     # Determine the mapping window.
 
     start_ref = max(0, offset)
-    end_ref = min(len(ref), offset + len(curr) + 50)
+    # Keep a small right-side context window to improve local DTW alignment quality.
+    end_ref = min(len(ref), offset + len(curr) + ALIGNMENT_CONTEXT_BUFFER)
 
     if end_ref <= start_ref:
         return 0.0, 9999.0, 0.0
