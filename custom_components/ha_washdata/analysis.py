@@ -275,31 +275,19 @@ def compute_dtw_path(
     i, j = n, m
 
     while i > 0 or j > 0:
-        path.append((i - 1, j - 1))
-
+        # Decide the step first, *then* record the zero-based coordinate so
+        # we never append a negative index.
         if i == 0:
             j -= 1
         elif j == 0:
             i -= 1
         else:
-            center = i * (m / n)
-            start_j = max(1, int(center - w))
-            end_j = min(m, int(center + w) + 1)
-
-            # Constraints for neighbor validity
-            # We must pick one of (i-1, j), (i, j-1), (i-1, j-1)
-            # that is valid (not inf).
-            # Preference: match (diag) > insertion/deletion?
-            # Standard backtracking follows min cost path.
-
             candidates_cost = [
-                (cost_matrix[i - 1, j], 0),    # insertion (i-1)
-                (cost_matrix[i, j - 1], 1),    # deletion (j-1)
+                (cost_matrix[i - 1, j], 0),    # deletion (i-1)
+                (cost_matrix[i, j - 1], 1),    # insertion (j-1)
                 (cost_matrix[i - 1, j - 1], 2) # match (both)
             ]
-            # Sort by cost
             candidates_cost.sort(key=lambda item: item[0])
-
             best_move = candidates_cost[0][1]
             if best_move == 0:
                 i -= 1
@@ -309,12 +297,9 @@ def compute_dtw_path(
                 i -= 1
                 j -= 1
 
+        path.append((i, j))
+
     path.reverse()
-    # Initial (0,0) is implicit but sometimes path loop includes it?
-    # Our loop goes until i=0, j=0.
-    # If path[-1] is (-1, -1), strip it.
-    if path and path[0] == (-1, -1):
-        path.pop(0)
 
     return path
 

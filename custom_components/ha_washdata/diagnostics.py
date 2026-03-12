@@ -21,8 +21,29 @@ async def async_get_config_entry_diagnostics(
     # We access via public export_data() for diagnostics dump
     store_data = manager.profile_store.export_data().get("data", {})
 
+    _SENSITIVE_KEYS = {
+        # config-entry data / options fields that contain personal identifiers
+        "notify_service",
+        "notify_people",
+        "notify_actions",
+        "power_sensor",
+        "external_end_trigger",
+    }
+
+    def _redact(obj: Any) -> Any:
+        if isinstance(obj, dict):
+            return {
+                k: "**REDACTED**" if k in _SENSITIVE_KEYS else _redact(v)
+                for k, v in obj.items()
+            }
+        if isinstance(obj, list):
+            return [_redact(v) for v in obj]
+        return obj
+
+    raw_entry = entry.as_dict()
+
     return {
-        "entry": entry.as_dict(),
+        "entry": _redact(raw_entry),
         "manager_state": {
             "current_state": manager.check_state(),
             "current_program": manager.current_program,
