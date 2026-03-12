@@ -968,7 +968,6 @@ class CycleDetector:
             target = STATE_FORCE_STOPPED
         elif (
             status == "completed"
-            and termination_reason != "user"
             and self._config.anti_wrinkle_enabled
             and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
         ):

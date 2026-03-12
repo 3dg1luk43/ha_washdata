@@ -71,6 +71,7 @@ def test_set_manual_program(manager: WashDataManager) -> None:
     manager.profile_store._data["profiles"] = {
         "Heavy Duty": {"avg_duration": 3600}
     }
+    manager.detector.state = "running"
     
     manager.set_manual_program("Heavy Duty")
     

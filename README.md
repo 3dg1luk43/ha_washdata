@@ -24,7 +24,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Manual Training**: You define your profiles (e.g., "Cotton", "Quick") once; the system learns to recognize them thereafter. Integration **does not** auto-create profiles.
 - **Smart Time Estimation**: "Phase-aware" prediction detects variance (e.g., heating) and locks the countdown to prevent erratic jumps.
 - **Changeable Power Sensor**: Switch plugs without losing history.
-- **Minimal Status Card**: Optional custom Lovelace card.
+- **Tile Card** (Minimal Status Card): Optional custom Lovelace card.
 - **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
 - **Manual Profile Creation**: Create profiles even without historical cycles by specifying a baseline duration (e.g., "Eco Mode - 3h").
 - **Unified Phase Catalog**: Manage phase vocabulary across all supported device types from one catalog view.
@@ -126,6 +126,14 @@ If "Auto-Detect" isn't working perfectly, use **Advanced Settings** to tune the 
 | **Persistent 'Running' State** | Integration stays locked to a long profile after a short cycle diverged. | **Adjust Matching Stability Thresholds** in `const.py`. Divergence detection now automatically reverts to "Detecting..." if confidence drops below 60% of the peak score. |
 
 > **Pro Tip**: Use the **Apply Suggestions** button in Settings. It analyzes your history and calculates the perfect text-book values for your specific machine.
+
+### 🏷️ Phase Catalog & Assignment
+
+Phases are descriptive labels for distinct power stages within a cycle (e.g., "Pre-Wash", "Heating", "Spin").
+
+- **Manage Phase Catalog**: Go to **Configure > Manage Phase Catalog** to add, edit, or remove phase labels for each device type.
+- **Assign Phases to a Profile**: In **Manage Profiles**, select **Assign Phase Ranges** and use the phase range editor to map time regions to phase labels.
+- Phases are scoped to your device type — only relevant phases appear in the assignment dialog.
 
 ---
 

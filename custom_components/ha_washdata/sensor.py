@@ -220,7 +220,7 @@ class WasherProgramSensor(WasherBaseSensor):
             )
         else:
             catalog = []
-            assigned = {}
+            assigned = []
         catalog_view: list[dict[str, Any]] = [
             {
                 "name": p.get("name"),

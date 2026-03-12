@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
@@ -381,7 +381,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register custom card via frontend.py — once per HA instance only.
     if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(
         "ha_washdata_card_deferred"
-    ):
+    ) and not hass.data.get("ha_washdata_card_registering"):
         # pylint: disable=import-outside-toplevel
         from .frontend import (
             CARD_REGISTERED,
@@ -390,11 +390,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
 
         card_reg = WashDataCardRegistration(hass)
+        hass.data["ha_washdata_card_registering"] = True
         try:
             register_result = await card_reg.async_register()
         except Exception as err:  # pylint: disable=broad-exception-caught
+            hass.data["ha_washdata_card_registering"] = False
             _LOGGER.warning("Card registration failed, will retry on next setup: %s", err)
         else:
+            hass.data["ha_washdata_card_registering"] = False
             if register_result == CARD_REGISTERED:
                 hass.data["ha_washdata_card_deferred"] = False
                 hass.data["ha_washdata_card_registered"] = True
@@ -451,32 +454,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
 
             if success:
-                # Save updated profile data
-                await manager.profile_store.async_save()
-
-                # If feedback changed labeling, rebuild envelope so future matching benefits.
-                try:
-                    if corrected_profile:
-                        manager.profile_store.rebuild_envelope(corrected_profile)
-                    else:
-                        # Rebuild for the detected profile if present on the cycle.
-                        cycles = manager.profile_store.get_past_cycles()
-                        cycle = next(
-                            (
-                                cd
-                                for c in cycles
-                                if isinstance(c, dict)
-                                for cd in (cast(dict[str, Any], c),)
-                                if cd.get("id") == cycle_id
-                            ),
-                            None,
-                        )
-                        profile_name = cycle.get("profile_name") if cycle else None
-                        if isinstance(profile_name, str) and profile_name:
-                            manager.profile_store.rebuild_envelope(profile_name)
-                except Exception:  # pylint: disable=broad-exception-caught
-                    _LOGGER.exception("Failed to rebuild envelope after feedback")
-
                 # Best-effort dismiss the feedback notification if it exists.
                 try:
                     notification_id = f"ha_washdata_feedback_{entry_id}_{cycle_id}"

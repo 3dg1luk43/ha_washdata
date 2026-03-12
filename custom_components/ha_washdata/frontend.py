@@ -188,6 +188,22 @@ class WashDataCardRegistration:
                         )
 
             unsubscribe_on_lovelace_loaded = self.hass.bus.async_listen(EVENT_COMPONENT_LOADED, _on_lovelace_loaded)
+
+            # Re-check in case lovelace loaded between the initial check and listener registration.
+            if self.hass.data.get("lovelace"):
+                unsubscribe_on_lovelace_loaded()
+                _LOGGER.debug("Lovelace already loaded after deferred listener; registering now")
+                try:
+                    if await _init_resource(self.hass, INTEGRATION_URL, version):
+                        self.hass.data["ha_washdata_card_registered"] = True
+                        self.hass.data["ha_washdata_card_deferred"] = False
+                        return CARD_REGISTERED
+                    self.hass.data["ha_washdata_card_deferred"] = False
+                    return CARD_FAILED
+                except Exception:  # pylint: disable=broad-exception-caught
+                    self.hass.data["ha_washdata_card_deferred"] = False
+                    return CARD_FAILED
+
             return CARD_DEFERRED
 
         # Lovelace is already loaded

@@ -505,11 +505,10 @@ def verify_profile_alignment_worker(
         ref_seg_idx = last_pair[1]
         mapped_idx = start_ref + ref_seg_idx
 
-    mapped_idx = min(mapped_idx, len(envelope_time_grid)-1)
-
     # Ensure sequences are non-empty before indexing
     if not envelope_time_grid or len(ref) == 0:
         return None
+    mapped_idx = min(mapped_idx, len(envelope_time_grid) - 1, len(ref) - 1)
 
     mapped_time = float(envelope_time_grid[mapped_idx])
     mapped_power = float(ref[mapped_idx])

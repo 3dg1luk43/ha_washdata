@@ -101,5 +101,5 @@ Before hitting submit, please make sure:
 1. ✅ PR title clearly describes the change
 2. ✅ Description is detailed enough for reviewers to understand
 3. ✅ Tests pass locally
-4. ✅ You've reviewed the [CONTRIBUTING.md](../CONTRIBUTING.md) guide
-5. ✅ You've read our [Code of Conduct](../CODE_OF_CONDUCT.md)
+4. ✅ You've reviewed the [CONTRIBUTING.md](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md) guide
+5. ✅ You've read our [Code of Conduct](https://github.com/3dg1luk43/ha_washdata/blob/main/CODE_OF_CONDUCT.md)

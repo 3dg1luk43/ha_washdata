@@ -560,6 +560,7 @@ class WashDataManager:
         self._last_suggestion_update: datetime | None = None
 
         self._manual_program_active: bool = False
+        self._notified_start: bool = False
         self._notified_pre_completion: bool = False
         self._last_match_result: Any = None  # Stores full MatchResult object
         self._score_history: dict[str, list[float]] = {}  # Tracks recent scores for trend analysis
@@ -2145,13 +2146,26 @@ class WashDataManager:
                 self._cycle_start_time = self.detector.current_cycle_start or dt_util.now()
                 self._reset_live_notification_state()
                 self._start_watchdog()  # Start watchdog when cycle starts
+
+                # Fire the start event immediately on cycle detection so listeners always
+                # receive it, even when no profile match occurs yet.
+                if self._notify_fire_events:
+                    self.hass.bus.async_fire(
+                        EVENT_CYCLE_STARTED,
+                        {
+                            "entry_id": self.entry_id,
+                            "device_name": self.config_entry.title,
+                            "device_type": self.device_type,
+                            "program": self._current_program or "unknown",
+                            "start_time": self._cycle_start_time.isoformat(),
+                        },
+                    )
+                    self._start_event_fired = True
             else:
                 _LOGGER.debug("Cycle resumed from %s, preserving estimates", old_state)
                 # Ensure watchdog is running
                 self._start_watchdog()
 
-            # Send notification if enabled (Moved to _async_do_perform_matching)
-        
         # Stop watchdog when transitioning to OFF from any active state
         if new_state == STATE_OFF:
             self._stop_watchdog()  # Stop watchdog regardless of previous state
@@ -2959,7 +2973,7 @@ class WashDataManager:
             self._notified_pre_completion = True
 
             msg_template = self.config_entry.options.get(CONF_NOTIFY_PRE_COMPLETE_MESSAGE, DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE)
-            minutes_left = max(1, math.ceil(self._time_remaining / 60))
+            minutes_left = self._notify_before_end_minutes
 
             msg = self._safe_format_template(
                 msg_template,
