@@ -252,7 +252,7 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
     @property
     def native_value(self):  # type: ignore[override]
         if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE):
-            return "off"
+            return None
         if self._manager.time_remaining:
             return int(self._manager.time_remaining / 60)
         return None
@@ -541,6 +541,7 @@ class WasherProfileSensorManager:
         # which is "washdata_update_{}"
         self._signal = SIGNAL_WASHER_UPDATE.format(entry.entry_id)
         self._update_task: Task[None] | None = None
+        self._pending_update: bool = False
 
         # Register callback for ALL updates (simplest hook we have)
         # Ideally we'd have a specific profile update signal, but general update is fine
@@ -561,6 +562,7 @@ class WasherProfileSensorManager:
     def _update_callback(self) -> None:
         """Handle updates."""
         if self._update_task and not self._update_task.done():
+            self._pending_update = True
             return
 
         task = self._manager.hass.async_create_task(self.async_update())
@@ -569,6 +571,11 @@ class WasherProfileSensorManager:
         def _clear_update_task(done_task: Task[Any]) -> None:
             if self._update_task is done_task:
                 self._update_task = None
+                if self._pending_update:
+                    self._pending_update = False
+                    follow = self._manager.hass.async_create_task(self.async_update())
+                    self._update_task = follow
+                    follow.add_done_callback(_clear_update_task)
 
         task.add_done_callback(_clear_update_task)
 
