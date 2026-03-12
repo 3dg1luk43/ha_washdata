@@ -8,11 +8,11 @@ body:
       value: |
         # ⚠️ IMPORTANT - PLEASE READ ⚠️
 
-        > 🚨 **TRANSLATIONS MUST BE SUBMITTED VIA PULL REQUESTS**
+        > ✅ **Pull requests are preferred for translation fixes.**
         >
-        > **DO NOT** only report bad translations.
+        > Please submit a Pull Request with corrected translations whenever possible.
         >
-        > Instead of opening an issue to report translation problems, please submit a Pull Request with the corrected translations. This is much faster and helps us maintain quality.
+        > If you are unable to submit a PR, you may open an issue describing the problem and the proposed correction.
 
         See: [CONTRIBUTING.md](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md) for translation guidelines.
 

@@ -90,15 +90,16 @@ This gives you the cleanest data.
 
 1. Go to **Settings > Devices & Services > WashData > Configure**.
 2. Open **Record Cycle (Manual)**, then start your machine.
-4. When finished, go to **Manage Data & Profiles**, find the recording, and create a profile.
+3. When finished, go to **Manage Cycles** and find the recording.
+4. Then open **Manage Profiles** and create a profile from that recording.
 
 #### Option B: The Natural Way
 If you prefer to just use it and label later:
 1. **Run a Cycle**: Use your machine as normal. WashData will track it as an "Unknown" cycle.
 2. **Label It**: After the cycle finishes:
-   - Go to **Manage Data & Profiles** (via the Configure button or the Tile Card).
+   - Go to **Manage Cycles** (via the Configure button or the Tile Card).
    - Find the recent "Unknown" cycle.
-   - Click **Create Profile**, name it (e.g., "Cotton 40"), and Save.
+   - Open **Manage Profiles**, click **Create Profile**, name it (e.g., "Cotton 40"), and Save.
 3. **Repeat**: Do this for your 2-3 most common programs.
 
 ### 3. Verification & Learning

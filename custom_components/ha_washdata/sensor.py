@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from asyncio import Task
 import hashlib
+import logging
 from typing import Any
 
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass
@@ -33,6 +34,8 @@ from .const import (
     STATE_UNKNOWN,
 )
 from .manager import WashDataManager
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -621,8 +624,16 @@ class WasherProfileSensorManager:
                     if ent_reg.async_get(sensor.entity_id):
                         ent_reg.async_remove(sensor.entity_id)
                     else:
-                        # Fallback for non-registered entities
-                        await sensor.async_remove()
+                        # Fallback for non-registered entities that were attached.
+                        if sensor.hass:
+                            try:
+                                await sensor.async_remove()
+                            except Exception as err:  # pylint: disable=broad-exception-caught
+                                _LOGGER.debug(
+                                    "Failed to remove sensor '%s' via fallback path: %s",
+                                    name,
+                                    err,
+                                )
 
 
 class WasherSuggestionsSensor(WasherBaseSensor):

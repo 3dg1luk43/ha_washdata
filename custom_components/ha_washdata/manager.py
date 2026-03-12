@@ -1830,7 +1830,8 @@ class WashDataManager:
         This is called from _on_cycle_end when _current_program is still 'detecting...'
         to ensure we try matching with complete cycle data before persistence.
         """
-        # Cycle data from detector has power_data as [(isoformat_str, power), ...]
+        # Cycle data from detector stores power_data as [[offset_seconds, power], ...],
+        # where offsets are relative to cycle start.
         power_data = cycle_data.get("power_data", [])
         duration = cycle_data.get("duration", 0)
 
@@ -1838,7 +1839,7 @@ class WashDataManager:
             _LOGGER.debug("Insufficient power data for final match (< 10 readings)")
             return
 
-        # power_data is already in [(isoformat_str, power), ...] format for matching
+        # power_data is already in [[offset_seconds, power], ...] format for matching.
         _LOGGER.info(
             "Running final match from cycle data: %s samples, %.0fs duration",
             len(power_data),
@@ -2609,11 +2610,13 @@ class WashDataManager:
                 allow_deferral=False,
             )
             if sent and entry.get("event_type") == NOTIFY_EVENT_LIVE:
-                self._live_notification_sent_count += 1
-                self._last_live_notification_time = dt_util.now()
-                ev = entry.get("extra_vars") or {}
+                ev_raw = entry.get("extra_vars")
+                ev: dict[str, Any] = ev_raw if isinstance(ev_raw, dict) else {}
                 if "progress" not in ev:
                     self._live_waiting_notification_sent = True
+                else:
+                    self._live_notification_sent_count += 1
+                    self._last_live_notification_time = dt_util.now()
 
     def _handle_noise_cycle(self, max_power: float) -> None:
         """Handle a detected noise cycle."""
@@ -2890,17 +2893,21 @@ class WashDataManager:
             self._last_live_notification_time = now
 
     def _clear_live_progress_notification(self) -> None:
-        """Clear active live progress notification on cycle completion."""
-        # Purge any queued live-progress entries so they don't replay later.
+        """Clear active live/progress notifications and purge stale deferred alerts."""
+        # Purge queued live-progress entries and stale start/pre-complete entries
+        # so a completed cycle cannot replay them later.
         live_tag = self._live_notification_tag
         self._pending_notifications = [
             entry
             for entry in self._pending_notifications
             if not (
-                entry.get("event_type") == NOTIFY_EVENT_LIVE
-                and isinstance(entry.get("extra_vars"), dict)
-                and entry["extra_vars"].get("tag") == live_tag
-                and entry["extra_vars"].get("live_update") is True
+                (
+                    entry.get("event_type") == NOTIFY_EVENT_LIVE
+                    and isinstance(entry.get("extra_vars"), dict)
+                    and entry["extra_vars"].get("tag") == live_tag
+                    and entry["extra_vars"].get("live_update") is True
+                )
+                or entry.get("event_type") in {NOTIFY_EVENT_START, "pre_complete"}
             )
         ]
 

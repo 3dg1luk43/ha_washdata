@@ -178,7 +178,10 @@ class WashDataCardRegistration:
                         if await _init_resource(self.hass, INTEGRATION_URL, version):
                             self.hass.data["ha_washdata_card_registered"] = True
                             self.hass.data["ha_washdata_card_deferred"] = False
+                        else:
+                            self.hass.data["ha_washdata_card_deferred"] = False
                     except Exception:  # pylint: disable=broad-exception-caught
+                        self.hass.data["ha_washdata_card_deferred"] = False
                         _LOGGER.debug(
                             "Delayed auto-registration of lovelace resource failed for %s",
                             INTEGRATION_URL,

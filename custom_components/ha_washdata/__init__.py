@@ -442,7 +442,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 raise ValueError("Integration not loaded for this entry")
 
             manager = hass.data[DOMAIN][entry_id]
-            success = manager.learning_manager.submit_cycle_feedback(
+            success = await manager.learning_manager.async_submit_cycle_feedback(
                 cycle_id=cycle_id,
                 user_confirmed=user_confirmed,
                 corrected_profile=corrected_profile,

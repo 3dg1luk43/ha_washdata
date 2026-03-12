@@ -330,6 +330,16 @@ def compute_envelope_worker(
         except (ValueError, TypeError):
             continue
 
+        if not offsets_list or not values_list:
+            continue
+
+        if len(offsets_list) != len(values_list):
+            min_len = min(len(offsets_list), len(values_list))
+            if min_len < 3:
+                continue
+            offsets_list = offsets_list[:min_len]
+            values_list = values_list[:min_len]
+
         if len(offsets_list) < 3 or len(values_list) < 3:
             continue
 
@@ -453,7 +463,7 @@ def verify_profile_alignment_worker(
     envelope_avg_curve: list[float],
     envelope_time_grid: list[float],
     dtw_bandwidth: float
-) -> tuple[float, float, float]:
+) -> tuple[float, float, float] | None:
     """
     Verify alignment of current trace against profile envelope.
     Returns: (mapped_envelope_time, mapped_envelope_power, overlap_score)
@@ -498,7 +508,7 @@ def verify_profile_alignment_worker(
     mapped_idx = min(mapped_idx, len(envelope_time_grid)-1)
 
     # Ensure sequences are non-empty before indexing
-    if not envelope_time_grid.size or not ref.size:
+    if not envelope_time_grid or len(ref) == 0:
         return None
 
     mapped_time = float(envelope_time_grid[mapped_idx])

@@ -56,7 +56,7 @@ Describe the breaking change and how to migrate...
 - [ ] I've added/updated docstrings for new functions/classes
 - [ ] I've added corresponding tests (if applicable)
 - [ ] I've updated documentation (README, CHANGELOG, etc. if applicable)
-- [ ] I've checked that `python3 -m py_compile` passes
+- [ ] I've checked that `python3 -m compileall custom_components tests` passes
 - [ ] I've run `./run_tests.sh` and all tests pass
 - [ ] **No hardcoded UI strings** — all user-facing text is in `strings.json` and `translations/`
 - [ ] I've reviewed my own code for quality

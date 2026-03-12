@@ -205,23 +205,20 @@ def resample_adaptive(
 ) -> Tuple[List[Segment], float]:
     """Resample data using an adaptive time step based on input cadence.
 
-    Target dt = clamp(median_interval, min_dt, max_dt).
-    - If data is very dense (1s), we downsample to min_dt (5s).
-    - If data is sparse (30s), we keep it sparse (30s).
-    - If data is VERY sparse (> max_dt), we upsample to max_dt to ensure a minimum grid density
-      Wait, typical logic:
-      If median is 30s, and max_dt is 60s -> target=30s.
-      If median is 120s, and max_dt is 60s -> target=60s. (Upsampling).
+    Target dt is based on observed cadence with a lower bound:
+    ``target_dt = max(min_dt, median_interval)``.
+    - If data is dense (for example 1s), it is downsampled to ``min_dt``.
+    - If data is sparse (for example 30s), cadence is preserved.
 
     Args:
         timestamps: Raw timestamps (seconds).
         power: Raw power values.
         min_dt: Minimum allowed dt (seconds).
-        max_dt: Maximum allowed dt (seconds).
         gap_s: Max gap to interpolate across.
 
     Returns:
-        (List[Segment], used_dt_s)
+        Tuple of ``(segments, used_dt_s)`` where ``segments`` are gap-aware,
+        uniformly sampled chunks and ``used_dt_s`` is the chosen target step.
     """
     if len(timestamps) < 2:
         return [], min_dt

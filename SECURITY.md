@@ -79,10 +79,11 @@ This integration monitors **high-power appliances** via smart plugs. **Electrica
 
 ### Data Privacy
 
-- **No cloud dependencies**: All data stays local to your Home Assistant instance
+- **Core processing is local**: Detection logic and matching run inside your Home Assistant instance
 - **No tracking**: WashData does not collect or send usage analytics
-- **Configuration backups**: Exports are JSON files stored on your device
-- **Power history**: Power readings are stored only on your HA instance
+- **Configuration backups**: Exports are JSON files stored on your device/instance
+- **Power history**: Power readings are stored on your Home Assistant instance
+- **Notification routing is configurable**: If you configure `CONF_NOTIFY_SERVICE` or other notify-related options, payloads may be delivered by your selected notify integration (for example mobile app push, email, or other cloud-backed providers). Without notify integrations enabled, data remains local to Home Assistant.
 
 ### Home Assistant Security
 
@@ -108,11 +109,12 @@ To secure your Home Assistant installation:
 
 ### What WashData DOES NOT DO
 
-❌ Send any data to cloud services  
+❌ Send analytics/telemetry to cloud services on its own  
 ❌ Phone home with usage analytics  
 ❌ Download profiles or firmware updates  
 ❌ Run arbitrary user code  
 ℹ️ Store configuration and power history locally without encryption (relies on filesystem permissions)  
+ℹ️ Optional notify integrations configured via `CONF_NOTIFY_SERVICE`/notify options can forward notification payloads outside the instance; this depends on user configuration.  
 
 ### Dependencies
 
