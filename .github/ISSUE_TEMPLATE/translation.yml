@@ -1,0 +1,95 @@
+name: Translation Issue
+description: Report missing or incorrect translations
+title: "[TRANSLATION] "
+labels: ["translation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # ⚠️ IMPORTANT - PLEASE READ ⚠️
+        
+        <div style="background-color: #ff4444; color: white; padding: 15px; border-radius: 5px; font-weight: bold; font-size: 16px;">
+        
+        **🚨 TRANSLATIONS MUST BE SUBMITTED VIA PULL REQUESTS 🚨**
+        
+        **DO NOT just report bad translations!**
+        
+        Instead of opening an issue to report translation problems, please submit a Pull Request with the corrected translations. This is much faster and helps us maintain quality.
+        
+        See: [CONTRIBUTING.md](https://github.com/your-repo/contributing) for translation guidelines.
+        
+        </div>
+
+  - type: markdown
+    attributes:
+      value: |
+        ## How to Contribute Translations
+
+        1. **Fork the repository** and clone it locally
+        2. **Edit the translation file** for your language (e.g., `custom_components/ha_washdata/translations/[language-code].json`)
+        3. **Submit a Pull Request** with your corrections
+        4. Include a brief description of what was corrected
+
+        Translation files are located in: `custom_components/ha_washdata/translations/`
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      description: Which language has the translation issue?
+      options:
+        - English (en)
+        - Spanish (es)
+        - French (fr)
+        - German (de)
+        - Italian (it)
+        - Dutch (nl)
+        - Polish (pl)
+        - Portuguese (pt)
+        - Russian (ru)
+        - Simplified Chinese (zh-Hans)
+        - Traditional Chinese (zh-Hant)
+        - Japanese (ja)
+        - Korean (ko)
+        - Czech (cs)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue_details
+    attributes:
+      label: Translation Issue Details
+      description: |
+        Describe what's wrong with the translation.
+        - Include the current (incorrect) text
+        - Provide the suggested correction
+        - Explain the context where this appears
+      placeholder: |
+        **Location:** Settings page, "Washing Machine Name" field
+        
+        **Current translation:** "Лавадора Имя" (incorrect grammar)
+        
+        **Suggested correction:** "Имя стиральной машины" (correct)
+        
+        **Context:** Configuration flow, step 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other information that might help (optional)
+      placeholder: "Native speaker feedback, comparison with similar projects, etc."
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        **Thank you for helping improve WashData translations!** 🌍
+        
+        Remember: Pull Requests are the fastest way to get translations merged.

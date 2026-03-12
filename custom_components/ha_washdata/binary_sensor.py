@@ -40,12 +40,13 @@ class WasherRunningBinarySensor(BinarySensorEntity):
 
     _attr_has_entity_name = True
 
+    _attr_translation_key = "running"
+
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize."""
         self._manager = manager
         self._entry = entry
         self._attr_unique_id = f"{entry.entry_id}_running"
-        self._attr_name = "Running"
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry.entry_id)},
             "name": entry.title,
@@ -76,11 +77,12 @@ class WasherRunningBinarySensor(BinarySensorEntity):
 class WasherAmbiguitySensor(WasherRunningBinarySensor):
     """Binary sensor indicating if current profiling is ambiguous."""
 
+    _attr_translation_key = "match_ambiguity"
+
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize."""
         super().__init__(manager, entry)
         self._attr_unique_id = f"{entry.entry_id}_ambiguity"
-        self._attr_name = "Match Ambiguity"
         self._attr_icon = "mdi:alert-circle-outline"
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 

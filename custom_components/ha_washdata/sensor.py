@@ -189,8 +189,8 @@ class WasherProgramSensor(WasherBaseSensor):
         curr = self._manager.current_program
         if curr and curr not in options:
             options.append(curr)
-        if "None" not in options:
-            options.append("None")
+        if "none" not in options:
+            options.append("none")
         if "unknown" not in options:
             options.append("unknown")
         return options
@@ -429,7 +429,7 @@ class WasherTopCandidatesSensor(WasherBaseSensor):
     def native_value(self):  # type: ignore[override]
         candidates = self._manager.top_candidates
         if not candidates:
-            return "None"
+            return "none"
         # Return simplified string: "Name (Score), Name (Score)"
         return ", ".join([f"{c['name']} ({c['score']:.2f})" for c in candidates[:3]])
 
@@ -468,12 +468,12 @@ class WasherProfileCountSensor(WasherBaseSensor):
 
         self.entity_description = SensorEntityDescription(
             key=f"profile_count_{self._safe_name}",
-            name=f"Profile: {profile_name} Count",
+            translation_key="profile_cycle_count",
             icon="mdi:counter",
-            native_unit_of_measurement="cycles",
             state_class="total",
             entity_category=EntityCategory.DIAGNOSTIC,
         )
+        self._attr_translation_placeholders = {"profile_name": profile_name}
         super().__init__(manager, entry)
         # Override unique ID to be profile specific
         self._attr_unique_id = f"{entry.entry_id}_profile_count_{self._safe_name}"
@@ -601,8 +601,8 @@ class WasherSuggestionsSensor(WasherBaseSensor):
     def native_value(self):  # type: ignore[override]
         suggestions = self._manager.suggestions
         if not suggestions:
-            return "No suggestions"
-        return f"{len(suggestions)} pending"
+            return 0
+        return len(suggestions)
 
     @property
     def extra_state_attributes(self):  # type: ignore[override]

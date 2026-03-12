@@ -192,31 +192,31 @@ const TRANSLATIONS = {
     "entity_not_found": "Entity not found"
   },
   "cs": {
-    "washer_program": "Washer Program",
-    "program_placeholder": "Select Program",
-    "duration": "Duration",
+    "washer_program": "Program pračky",
+    "program_placeholder": "Vyberte Program",
+    "duration": "Trvání",
     "minutes": "min",
-    "time_remaining": "Time Remaining",
-    "no_prediction": "No Prediction",
-    "cycle_in_progress": "Cycle in progress",
-    "status": "Status",
-    "progress": "Progress",
-    "select_program": "Select a program to see details",
-    "title": "Title",
-    "status_entity": "Status Entity",
-    "icon": "Icon",
-    "active_color": "Active Icon Color",
-    "show_state": "Show State",
-    "show_program": "Show Program",
-    "show_details": "Show Details",
-    "spin_icon": "Spinning Icon (While running)",
-    "program_entity": "Program Entity",
-    "pct_entity": "Progress Entity (Optional)",
-    "time_entity": "Time Entity (Optional)",
-    "display_mode": "Display Mode",
-    "show_time_remaining": "Show Time Remaining",
-    "show_percentage": "Show Percentage",
-    "entity_not_found": "Entity not found"
+    "time_remaining": "Zbývající čas",
+    "no_prediction": "Žádná předpověď",
+    "cycle_in_progress": "Cyklus probíhá",
+    "status": "Postavení",
+    "progress": "Pokrok",
+    "select_program": "Chcete-li zobrazit podrobnosti, vyberte program",
+    "title": "Titul",
+    "status_entity": "Stavová entita",
+    "icon": "Ikona",
+    "active_color": "Barva aktivní ikony",
+    "show_state": "Zobrazit stav",
+    "show_program": "Zobrazit program",
+    "show_details": "Zobrazit podrobnosti",
+    "spin_icon": "Ikona rotace (při běhu)",
+    "program_entity": "Entita programu",
+    "pct_entity": "Entita průběhu (volitelné)",
+    "time_entity": "Časová entita (volitelné)",
+    "display_mode": "Režim zobrazení",
+    "show_time_remaining": "Zobrazit zbývající čas",
+    "show_percentage": "Zobrazit procento",
+    "entity_not_found": "Entita nenalezena"
   },
   "cy": {
     "washer_program": "Washer Program",
@@ -1733,6 +1733,15 @@ const TRANSLATIONS = {
 };
 
 class WashDataCard extends HTMLElement {
+  _resolveLanguage() {
+    const raw =
+      (this._hass && this._hass.locale && this._hass.locale.language) ||
+      (this._hass && this._hass.language) ||
+      "en";
+    if (!raw || typeof raw !== "string") return "en";
+    return raw;
+  }
+
   static getStubConfig() {
     return {
       entity: "sensor.washing_machine_state",
@@ -1752,8 +1761,9 @@ class WashDataCard extends HTMLElement {
   }
 
   _getTranslation(key) {
-    const lang = this._hass ? this._hass.language : "en";
-    const translations = TRANSLATIONS[lang] || TRANSLATIONS["en"];
+    const lang = this._resolveLanguage();
+    const baseLang = lang.split("-")[0];
+    const translations = TRANSLATIONS[lang] || TRANSLATIONS[baseLang] || TRANSLATIONS["en"];
     return translations[key] || TRANSLATIONS["en"][key] || key;
   }
 
@@ -2009,7 +2019,7 @@ class WashDataCard extends HTMLElement {
       } else if (remaining) {
         // Append 'min' if it is a number (WashData attribute is raw minutes)
         if (!isNaN(remaining)) {
-          parts.push(`${remaining} ${this._getTranslation("min")}`);
+          parts.push(`${remaining} ${this._getTranslation("minutes")}`);
         } else {
           parts.push(remaining);
         }
@@ -2021,9 +2031,19 @@ class WashDataCard extends HTMLElement {
 }
 
 class WashDataCardEditor extends HTMLElement {
+  _resolveLanguage() {
+    const raw =
+      (this._hass && this._hass.locale && this._hass.locale.language) ||
+      (this._hass && this._hass.language) ||
+      "en";
+    if (!raw || typeof raw !== "string") return "en";
+    return raw;
+  }
+
   _getTranslation(key) {
-    const lang = this._hass ? this._hass.language : "en";
-    const translations = TRANSLATIONS[lang] || TRANSLATIONS["en"];
+    const lang = this._resolveLanguage();
+    const baseLang = lang.split("-")[0];
+    const translations = TRANSLATIONS[lang] || TRANSLATIONS[baseLang] || TRANSLATIONS["en"];
     return translations[key] || TRANSLATIONS["en"][key] || key;
   }
 
