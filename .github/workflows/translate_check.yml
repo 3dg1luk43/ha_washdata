@@ -34,6 +34,9 @@ jobs:
         id: git_diff
         run: |
           git diff --exit-code || echo "changes_detected=true" >> $GITHUB_OUTPUT
+          if git status --porcelain --untracked-files=all --ignored | grep -qE '^(\?\?|!!)'; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Mint identity token
         id: 'mint_identity_token'

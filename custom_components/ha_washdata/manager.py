@@ -2082,9 +2082,10 @@ class WashDataManager:
         """Handle state change from detector."""
         _LOGGER.debug("Washer state changed: %s -> %s", old_state, new_state)
         if new_state == STATE_RUNNING:
+            new_cycle_detected = old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN)
             # Only reset estimates if we are truly starting a NEW cycle (from off or starting)
             # If we transition from PAUSED or ENDING, it's a resume - keep estimates!
-            if old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN):
+            if new_cycle_detected:
                 self._cycle_completed_time = None
                 self._stop_state_expiry_timer()
 
@@ -2107,7 +2108,7 @@ class WashDataManager:
                 _LOGGER.debug("Cycle resumed from %s, preserving estimates", old_state)
                 # Ensure watchdog is running
                 self._start_watchdog()
-            if self._notify_fire_events:
+            if self._notify_fire_events and new_cycle_detected:
                 self.hass.bus.async_fire(
                     EVENT_CYCLE_STARTED,
                     {
@@ -2325,7 +2326,14 @@ class WashDataManager:
         """Route notification via actions or notify service with optional gating."""
         if not title:
             title_template = self.config_entry.options.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE)
-            title = title_template.format(device=self.config_entry.title)
+            try:
+                title = title_template.format(device=self.config_entry.title)
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                _LOGGER.error("Failed to format notification title '%s': %s", title_template, err)
+                try:
+                    title = DEFAULT_NOTIFY_TITLE.format(device=self.config_entry.title)
+                except Exception:  # pylint: disable=broad-exception-caught
+                    title = DEFAULT_NOTIFY_TITLE
 
         if not icon:
             icon = self.config_entry.options.get(CONF_NOTIFY_ICON)

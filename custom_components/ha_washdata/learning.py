@@ -246,9 +246,8 @@ class LearningManager:
             if labeled:
                 # Rebuild envelope first, then persist (issue #131)
                 self.hass.async_create_task(
-                    self._async_rebuild_profile_envelope(detected_profile)
+                    self._async_rebuild_and_save_profile(detected_profile)
                 )
-                self.hass.async_create_task(self.profile_store.async_save())
                 _LOGGER.debug("Auto-labeled high-confidence cycle %s", cycle_id)
             return
 
@@ -545,6 +544,11 @@ class LearningManager:
             _LOGGER.debug("Rebuilt envelope for profile '%s'", profile_name)
         except Exception as e:  # pylint: disable=broad-exception-caught
             _LOGGER.error("Failed to rebuild envelope for profile '%s': %s", profile_name, e)
+
+    async def _async_rebuild_and_save_profile(self, detected_profile: str) -> None:
+        """Rebuild profile envelope then persist in deterministic order."""
+        await self._async_rebuild_profile_envelope(detected_profile)
+        await self.profile_store.async_save()
 
     def get_pending_feedback(self) -> dict[str, dict[str, Any]]:
         """Return pending feedback requests."""

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from typing import Any
 
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass
@@ -11,7 +12,7 @@ from homeassistant.const import EntityCategory
 from homeassistant.helpers import entity_registry
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util import dt as dt_util, slugify
+from homeassistant.util import dt as dt_util
 
 from .const import (
     DOMAIN,
@@ -463,12 +464,14 @@ class WasherProfileCountSensor(WasherBaseSensor):
     ) -> None:
         """Initialize."""
         self._profile_name = profile_name
-        self._safe_name = slugify(profile_name)
+        self._profile_token = hashlib.sha256(
+            profile_name.encode("utf-8")
+        ).hexdigest()[:8]
         # We store initial count, but update callback will refresh it
         self._count = count
 
         self.entity_description = SensorEntityDescription(
-            key=f"profile_count_{self._safe_name}",
+            key=f"profile_count_{self._profile_token}",
             translation_key="profile_cycle_count",
             icon="mdi:counter",
             state_class="total",
@@ -477,7 +480,7 @@ class WasherProfileCountSensor(WasherBaseSensor):
         self._attr_translation_placeholders = {"profile_name": profile_name}
         super().__init__(manager, entry)
         # Override unique ID to be profile specific
-        self._attr_unique_id = f"{entry.entry_id}_profile_count_{self._safe_name}"
+        self._attr_unique_id = f"{entry.entry_id}_profile_count_{self._profile_token}"
 
     @property
     def native_value(self) -> int:  # type: ignore[override]

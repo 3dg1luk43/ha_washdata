@@ -352,8 +352,11 @@ def compute_envelope_worker(
 
         if len(offsets) > 1:
             intervals = np.diff(offsets)
-            sr = float(np.median(intervals[intervals > 0]))
-            sampling_rates.append(sr)
+            positive_intervals = intervals[intervals > 0]
+            if positive_intervals.size > 0:
+                sr = float(np.median(positive_intervals))
+                if np.isfinite(sr):
+                    sampling_rates.append(sr)
     if not normalized_curves:
         return None
 

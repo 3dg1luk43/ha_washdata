@@ -460,7 +460,8 @@ class CycleDetector:
             STATE_FORCE_STOPPED,
             STATE_ANTI_WRINKLE,
         ):
-            if anti_wrinkle_active and is_high:
+            started_from_anti_wrinkle = False
+            if anti_wrinkle_active and self._state == STATE_ANTI_WRINKLE and is_high:
                 if self._anti_wrinkle_candidate_start is None:
                     self._anti_wrinkle_candidate_start = timestamp
                     self._anti_wrinkle_candidate_peak = power
@@ -483,18 +484,15 @@ class CycleDetector:
                     self._anti_wrinkle_candidate_start = None
                     self._anti_wrinkle_candidate_peak = 0.0
                     self._transition_to(STATE_STARTING, timestamp)
+                    started_from_anti_wrinkle = True
                     self._current_cycle_start = timestamp
                     self._power_readings = [(timestamp, power)]
                     self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
                     self._cycle_max_power = power
                     self._abrupt_drop = False
-                else:
-                    if self._state != STATE_ANTI_WRINKLE:
-                        self._transition_to(STATE_ANTI_WRINKLE, timestamp)
-                return
-
-            self._anti_wrinkle_candidate_start = None
-            self._anti_wrinkle_candidate_peak = 0.0
+            elif self._state != STATE_ANTI_WRINKLE:
+                self._anti_wrinkle_candidate_start = None
+                self._anti_wrinkle_candidate_peak = 0.0
 
             if self._state == STATE_ANTI_WRINKLE:
                 # Track time in idle (below exit_power threshold)
@@ -519,7 +517,7 @@ class CycleDetector:
                     self._transition_to(STATE_OFF, timestamp)
                 return
 
-            if is_high:
+            if is_high and not started_from_anti_wrinkle:
                 # Transition to STARTING
                 self._transition_to(STATE_STARTING, timestamp)
                 self._current_cycle_start = timestamp

@@ -147,6 +147,7 @@ class SVGCurve:
     opacity: float = 1.0
     stroke_width: int = 2
     dasharray: str | None = None
+    is_polygon: bool = False
 
 
 def _generate_generic_svg(
@@ -199,11 +200,14 @@ def _generate_generic_svg(
             pts.append(f"{to_x(x_val):.1f},{to_y(y_val):.1f}")
 
         path_d = " ".join(pts)
-        style = f'stroke="{c.color}" stroke-width="{c.stroke_width}" stroke-opacity="{c.opacity}" fill="none"'
-        if c.dasharray:
-            style += f' stroke-dasharray="{c.dasharray}"'
-
-        paths.append(f'<polyline points="{path_d}" {style} />')
+        if c.is_polygon:
+            style = f'fill="{c.color}" fill-opacity="{c.opacity}" stroke="none"'
+            paths.append(f'<polygon points="{path_d}" {style} />')
+        else:
+            style = f'stroke="{c.color}" stroke-width="{c.stroke_width}" stroke-opacity="{c.opacity}" fill="none"'
+            if c.dasharray:
+                style += f' stroke-dasharray="{c.dasharray}"'
+            paths.append(f'<polyline points="{path_d}" {style} />')
 
     # Build Markers
     marker_svgs: list[str] = []
@@ -463,7 +467,7 @@ class WashDataStore(Store[JSONDict]):
             custom = old_data.get("custom_phases")
             if isinstance(custom, list):
                 normalized: list[dict[str, Any]] = []
-                seen: set[str] = set()
+                seen: set[tuple[str, str]] = set()
                 for item in cast(list[Any], custom):
                     if not isinstance(item, dict):
                         continue
@@ -471,7 +475,8 @@ class WashDataStore(Store[JSONDict]):
                     name = str(item_dict.get("name", "")).strip()
                     if not name:
                         continue
-                    key = name.casefold()
+                    device_type = str(item_dict.get("device_type", "")).strip()
+                    key = (name.casefold(), device_type.casefold())
                     if key in seen:
                         continue
                     seen.add(key)
@@ -479,14 +484,14 @@ class WashDataStore(Store[JSONDict]):
                         {
                             "name": name,
                             "description": str(item_dict.get("description", "")).strip(),
-                            "device_type": str(item_dict.get("device_type", "")).strip(),
+                            "device_type": device_type,
                             "created_at": item_dict.get("created_at") or dt_util.now().isoformat(),
                         }
                     )
                 old_data["custom_phases"] = normalized
             elif isinstance(custom, dict):
                 normalized: list[dict[str, Any]] = []
-                seen: set[str] = set()
+                seen: set[tuple[str, str]] = set()
                 custom_dict = cast(dict[str, Any], custom)
                 for legacy_device_type, phase_list in custom_dict.items():
                     if not isinstance(phase_list, list):
@@ -498,7 +503,8 @@ class WashDataStore(Store[JSONDict]):
                         name = str(item_dict.get("name", "")).strip()
                         if not name:
                             continue
-                        key = name.casefold()
+                        device_type = str(legacy_device_type or "").strip()
+                        key = (name.casefold(), device_type.casefold())
                         if key in seen:
                             continue
                         seen.add(key)
@@ -506,7 +512,7 @@ class WashDataStore(Store[JSONDict]):
                             {
                                 "name": name,
                                 "description": str(item_dict.get("description", "")).strip(),
-                                "device_type": str(legacy_device_type or "").strip(),
+                                "device_type": device_type,
                                 "created_at": item_dict.get("created_at") or dt_util.now().isoformat(),
                             }
                         )
@@ -687,7 +693,7 @@ class ProfileStore:
 
         # Legacy format: {device_type: [phase, ...]}. Flatten to shared list.
         flattened: list[dict[str, Any]] = []
-        seen: set[str] = set()
+        seen: set[tuple[str, str]] = set()
         if isinstance(raw, dict):
             raw_dict = cast(dict[str, Any], raw)
             for legacy_device_type, phase_list in raw_dict.items():
@@ -700,7 +706,8 @@ class ProfileStore:
                     name = str(item_dict.get("name", "")).strip()
                     if not name:
                         continue
-                    key = name.casefold()
+                    device_type = str(legacy_device_type or "").strip()
+                    key = (name.casefold(), device_type.casefold())
                     if key in seen:
                         continue
                     seen.add(key)
@@ -708,7 +715,7 @@ class ProfileStore:
                         {
                             "name": name,
                             "description": str(item_dict.get("description", "")).strip(),
-                            "device_type": str(legacy_device_type or "").strip(),
+                            "device_type": device_type,
                             "created_at": item_dict.get("created_at") or dt_util.now().isoformat(),
                         }
                     )
@@ -2106,7 +2113,8 @@ class ProfileStore:
                 points=envelope_band_points,
                 color="#3498db",
                 opacity=0.3,
-                stroke_width=0
+                stroke_width=0,
+                is_polygon=True,
             ))
 
             # 2. Average curve (darker blue line)
@@ -3102,9 +3110,9 @@ class ProfileStore:
         )
         return stats
 
-    def _decompress_power_data(self, cycle: CycleDict) -> list[tuple[str, float]]:
+    def _decompress_power_data(self, cycle: CycleDict) -> list[tuple[float, float]]:
         """Decompress cycle power data for matching (wrapper)."""
-        return [(str(offset), float(power)) for offset, power in decompress_power_data(cycle)]
+        return [(float(offset), float(power)) for offset, power in decompress_power_data(cycle)]
 
     async def async_save_cycle(self, cycle_data: dict[str, Any]) -> None:
         """Add and save a cycle. Rebuilds envelope if cycle is labeled."""
@@ -3191,8 +3199,6 @@ class ProfileStore:
             return [cycle_id]
 
         start_dt_base: datetime = start_dt_base_parsed
-        start_ts = start_dt_base.timestamp()
-
         # Use decompress_power_data which handles all format variations
         p_data_tuples = self._decompress_power_data(cycle)
 
@@ -3200,16 +3206,12 @@ class ProfileStore:
             _LOGGER.warning("Failed to decompress data during split for %s", cycle_id)
             return [cycle_id]
 
-        # Convert to relative seconds for array logic
-        # decompress_power_data returns list[tuple[str, float]] (ISO strings)
-        # We need relative seconds for the `seg_ranges` which are inputs in seconds.
+        # Convert to relative seconds for array logic.
+        # _decompress_power_data returns (offset_seconds, power).
 
         points: list[tuple[float, float]] = []
-        for t_str, val in p_data_tuples:
-            dt_p = dt_util.parse_datetime(t_str)
-            if dt_p:
-                rel = dt_p.timestamp() - start_ts
-                points.append((rel, float(val)))
+        for offset_seconds, val in p_data_tuples:
+            points.append((float(offset_seconds), float(val)))
 
         for seg_start, seg_end in seg_ranges:
             # Construct new cycle logic
@@ -3407,14 +3409,10 @@ class ProfileStore:
         start_dt = dt_util.parse_datetime(cycle["start_time"])
         if start_dt is None:
             return []
-        start_ts = start_dt.timestamp()
-
         # Parse all points to (rel_t, power)
         points: list[tuple[float, float]] = []
-        for t_str, val in p_data:
-            dt_p = dt_util.parse_datetime(t_str)
-            if dt_p:
-                points.append((dt_p.timestamp() - start_ts, float(val)))
+        for offset_seconds, val in p_data:
+            points.append((float(offset_seconds), float(val)))
 
         if not points:
             return []
@@ -3481,11 +3479,8 @@ class ProfileStore:
 
         # Prepare points (relative seconds)
         points: list[tuple[float, float]] = []
-        for t_str, val in p_data_tuples:
-            dt_p = dt_util.parse_datetime(t_str)
-            if dt_p:
-                rel = dt_p.timestamp() - start_ts
-                points.append((rel, float(val)))
+        for offset_seconds, val in p_data_tuples:
+            points.append((float(offset_seconds), float(val)))
 
         # Create new cycles
         for seg in segments:
@@ -3606,11 +3601,9 @@ class ProfileStore:
             if base_dt is None:
                 return []
             base_t = base_dt.timestamp()
-            for t_str, val in raw:
-                dt_pt = dt_util.parse_datetime(t_str)
-                if dt_pt:
-                    t_abs = dt_pt.timestamp()
-                    res.append((t_abs, t_abs - base_t, float(val)))
+            for offset_seconds, val in raw:
+                t_abs = base_t + float(offset_seconds)
+                res.append((t_abs, float(offset_seconds), float(val)))
             return res
 
         # Start with C1 points
@@ -3726,12 +3719,9 @@ class ProfileStore:
         start_dt = dt_util.parse_datetime(cycle["start_time"])
         if start_dt is None:
             return ""
-        start_ts = start_dt.timestamp()
         points: list[tuple[float, float]] = []
-        for t_str, val in p_data:
-            t = dt_util.parse_datetime(t_str)
-            if t:
-                points.append((t.timestamp() - start_ts, float(val)))
+        for offset_seconds, val in p_data:
+            points.append((float(offset_seconds), float(val)))
 
         curves: list[SVGCurve] = [SVGCurve(points=points, color="#9E9E9E", opacity=0.5)] # Base ghost
         markers: list[dict[str, Any]] = []
@@ -3780,11 +3770,16 @@ class ProfileStore:
             if not p_data:
                 continue
             points: list[tuple[float, float]] = []
-            for t_str, val in p_data:
-                t = dt_util.parse_datetime(t_str)
-                if t:
-                    rel_t = t.timestamp() - first_start
-                    points.append((rel_t, float(val)))
+            cycle_start_raw = c.get("start_time")
+            if not isinstance(cycle_start_raw, str):
+                continue
+            cycle_start_dt = dt_util.parse_datetime(cycle_start_raw)
+            if cycle_start_dt is None:
+                continue
+            cycle_start = cycle_start_dt.timestamp()
+            for offset_seconds, val in p_data:
+                rel_t = (cycle_start + float(offset_seconds)) - first_start
+                points.append((rel_t, float(val)))
 
             if points:
                 curves.append(SVGCurve(points=points, color=colors[i % len(colors)], stroke_width=2))

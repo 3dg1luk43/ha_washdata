@@ -140,12 +140,12 @@ class WashDataCardRegistration:
     def _src_path(self) -> Path:
         return Path(__file__).parent / "www" / CARD_NAME
 
-    async def async_register(self) -> None:
-        """Register a static path that serves the card from the integration package."""
+    async def async_register(self) -> bool:
+        """Register card assets/resources and report whether setup succeeded."""
         src = self._src_path()
         if not src.exists():
             _LOGGER.warning("Card file not found: %s", src)
-            return
+            return False
 
         _register_static_path(self.hass, INTEGRATION_URL, str(src))
 
@@ -171,7 +171,7 @@ class WashDataCardRegistration:
                         )
 
             self.hass.bus.async_listen(EVENT_COMPONENT_LOADED, _on_lovelace_loaded)
-            return
+            return True
 
         # Lovelace is already loaded
         try:
@@ -181,3 +181,4 @@ class WashDataCardRegistration:
             _LOGGER.debug(
                 "Auto-registration of lovelace resource failed for %s", INTEGRATION_URL
             )
+        return True
