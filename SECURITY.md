@@ -26,6 +26,30 @@ Please provide:
 - Your suggested fix or workaround (if any)
 - Whether you want attribution in the security advisory
 
+### Supported Versions
+
+Security fixes are provided for currently supported release lines, identified by
+semantic version tags (for example `v0.4.3`):
+
+- Supported: latest patch release on the current minor line (for example `0.4.x`)
+- Best effort: previous minor line when impact is high and patching is low-risk
+- End-of-life (EOL): older minors and all unsupported majors
+
+EOL versions may still be triaged, but fixes are not guaranteed and are usually
+delivered only in a newer supported release.
+
+Backport policy:
+
+- Critical vulnerabilities may be backported to another supported line
+- High/medium vulnerabilities are normally fixed in the latest supported line
+- Reporters should expect fix timelines to follow the response timeline below,
+  with critical issues prioritized
+
+Include affected versions in reports using release tags or semver ranges.
+Example:
+
+`Affected versions: v0.4.0 - v0.4.3 (fixed in v0.4.4)`
+
 ### Response Timeline
 
 We aim to:

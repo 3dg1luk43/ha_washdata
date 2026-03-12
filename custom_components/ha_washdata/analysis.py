@@ -275,8 +275,9 @@ def compute_dtw_path(
     i, j = n, m
 
     while i > 0 or j > 0:
-        # Decide the step first, *then* record the zero-based coordinate so
-        # we never append a negative index.
+        # Record current zero-based coordinate before stepping back.
+        path.append((max(i - 1, 0), max(j - 1, 0)))
+
         if i == 0:
             j -= 1
         elif j == 0:
@@ -296,8 +297,6 @@ def compute_dtw_path(
             else:
                 i -= 1
                 j -= 1
-
-        path.append((max(i - 1, 0), max(j - 1, 0)))
 
     path.reverse()
 

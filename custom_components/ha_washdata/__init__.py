@@ -99,6 +99,12 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     version = entry.version or 1
     minor_version = entry.minor_version or 1
 
+    if version > 3:
+        _LOGGER.error(
+            "Refusing to migrate unsupported future schema %s.%s", version, minor_version
+        )
+        return False
+
     if version == 3 and minor_version >= 3:
         return True
 
@@ -180,6 +186,12 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     ]
     for k in keys_to_remove:
         data.pop(k, None)
+
+    if version > 3:
+        _LOGGER.error(
+            "Refusing to rewrite unsupported future schema %s.%s", version, minor_version
+        )
+        return False
 
     hass.config_entries.async_update_entry(
         entry,
@@ -377,19 +389,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "ha_washdata_card_deferred"
     ):
         # pylint: disable=import-outside-toplevel
-        from .frontend import WashDataCardRegistration
+        from .frontend import (
+            CARD_REGISTERED,
+            CARD_DEFERRED,
+            WashDataCardRegistration,
+        )
 
         card_reg = WashDataCardRegistration(hass)
         try:
-            registered = await card_reg.async_register()
+            register_result = await card_reg.async_register()
         except Exception as err:  # pylint: disable=broad-exception-caught
             _LOGGER.warning("Card registration failed, will retry on next setup: %s", err)
         else:
-            if registered:
+            if register_result == CARD_REGISTERED:
                 hass.data["ha_washdata_card_deferred"] = False
                 hass.data["ha_washdata_card_registered"] = True
-            else:
+            elif register_result == CARD_DEFERRED:
                 hass.data["ha_washdata_card_deferred"] = True
+                hass.data["ha_washdata_card_registered"] = False
+            else:
+                hass.data["ha_washdata_card_deferred"] = False
+                hass.data["ha_washdata_card_registered"] = False
+                _LOGGER.warning("Card registration failed and was not deferred")
 
     # Register feedback service
     if not hass.services.has_service(

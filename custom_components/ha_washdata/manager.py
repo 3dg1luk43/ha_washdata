@@ -1816,6 +1816,8 @@ class WashDataManager:
             # Inject manual program flag into snapshot before saving
             snapshot = self.detector.get_state_snapshot()
             snapshot["manual_program"] = self._manual_program_active
+            snapshot["notified_start"] = self._notified_start
+            snapshot["start_event_fired"] = self._start_event_fired
 
             self.hass.async_create_task(
                 self.profile_store.async_save_active_cycle(snapshot)
@@ -2941,7 +2943,6 @@ class WashDataManager:
         if (
             self._notify_before_end_minutes > 0
             and not self._notified_pre_completion
-            and self._start_event_fired
             and self._time_remaining is not None
             and self._time_remaining <= (self._notify_before_end_minutes * 60)
             and self._cycle_progress < 100
@@ -3450,10 +3451,7 @@ class WashDataManager:
     def set_manual_program(self, profile_name: str) -> None:
         """Manually set the current program."""
         if self.detector.state != "running":
-            pass
-
-            snapshot["notified_start"] = self._notified_start
-            snapshot["start_event_fired"] = self._start_event_fired
+            return
         profiles_raw: Any = None
         try:
             profiles_raw = self.profile_store.get_profiles()

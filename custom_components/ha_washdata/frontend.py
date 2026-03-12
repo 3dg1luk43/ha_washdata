@@ -3,7 +3,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Any, TypedDict, cast
+from typing import Any, Literal, TypedDict, cast
 from homeassistant.core import HomeAssistant, Event
 from homeassistant.const import EVENT_COMPONENT_LOADED
 
@@ -12,6 +12,10 @@ _LOGGER = logging.getLogger(__name__)
 LOCAL_SUBDIR = "ha_washdata"
 CARD_NAME = "ha-washdata-card.js"
 INTEGRATION_URL = f"/{LOCAL_SUBDIR}/{CARD_NAME}"
+CARD_REGISTERED = "registered"
+CARD_DEFERRED = "deferred"
+CARD_FAILED = "failed"
+CardRegisterResult = Literal["registered", "deferred", "failed"]
 
 
 class LovelaceResourceItem(TypedDict, total=False):
@@ -145,12 +149,12 @@ class WashDataCardRegistration:
     def _src_path(self) -> Path:
         return Path(__file__).parent / "www" / CARD_NAME
 
-    async def async_register(self) -> bool:
-        """Register card assets/resources and report whether setup succeeded."""
+    async def async_register(self) -> CardRegisterResult:
+        """Register card assets/resources and report registration outcome."""
         src = self._src_path()
         if not src.exists():
             _LOGGER.warning("Card file not found: %s", src)
-            return False
+            return CARD_FAILED
 
         _register_static_path(self.hass, INTEGRATION_URL, str(src))
 
@@ -170,6 +174,7 @@ class WashDataCardRegistration:
                     try:
                         if await _init_resource(self.hass, INTEGRATION_URL, version):
                             self.hass.data["ha_washdata_card_registered"] = True
+                            self.hass.data["ha_washdata_card_deferred"] = False
                     except Exception:  # pylint: disable=broad-exception-caught
                         _LOGGER.debug(
                             "Delayed auto-registration of lovelace resource failed for %s",
@@ -177,7 +182,7 @@ class WashDataCardRegistration:
                         )
 
             self.hass.bus.async_listen(EVENT_COMPONENT_LOADED, _on_lovelace_loaded)
-            return False
+            return CARD_DEFERRED
 
         # Lovelace is already loaded
         try:
@@ -188,8 +193,9 @@ class WashDataCardRegistration:
                 INTEGRATION_URL,
                 err,
             )
-            return False
+            return CARD_FAILED
 
         if registered:
             _LOGGER.debug("Auto-registered lovelace resource for %s", INTEGRATION_URL)
-        return registered
+            return CARD_REGISTERED
+        return CARD_FAILED

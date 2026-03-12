@@ -300,8 +300,8 @@ async def test_cycle_detection(mock_manager):
 
 Write clear, descriptive commit messages:
 
-```
-[TYPE] Brief summary (50 chars max)
+```text
+type: brief summary (50 chars max)
 
 Longer explanation of what changed and why. Wrap at 72 characters.
 Explain the problem you're solving, not just the code changes.

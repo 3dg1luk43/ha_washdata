@@ -81,10 +81,7 @@ class CycleRecorder:
             self._is_recording = bool(data.get("is_recording", False))
             start_iso = data.get("start_time")
             if isinstance(start_iso, str) and start_iso:
-                try:
-                    self._start_time = dt_util.parse_datetime(start_iso)
-                except ValueError:
-                    self._start_time = None
+                self._start_time = dt_util.parse_datetime(start_iso)
             buffer_raw = data.get("buffer", [])
             sanitized: list[tuple[str, float]] = []
             if isinstance(buffer_raw, list):
@@ -135,7 +132,7 @@ class CycleRecorder:
     @property
     def last_run(self) -> dict[str, Any] | None:
         """Return the last recorded cycle data."""
-        return getattr(self, "_last_run", None)
+        return self._last_run
 
     async def clear_last_run(self) -> None:
         """Clear the last recorded run."""

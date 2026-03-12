@@ -155,9 +155,14 @@ class SuggestionEngine:
         if len(power_data) < 10:
             return {}
 
+        start_time_raw = cycle_data.get("start_time")
+        start_time_iso = (
+            start_time_raw if isinstance(start_time_raw, str) and start_time_raw else None
+        )
+
         # Normalise power_data to [[offset_sec, power], ...] regardless of source format.
         try:
-            readings_list = power_data_to_offsets(power_data)
+            readings_list = power_data_to_offsets(power_data, start_time_iso)
         except Exception as e:
             _LOGGER.error("Failed to parse power data for simulation: %s", e)
             return {}
