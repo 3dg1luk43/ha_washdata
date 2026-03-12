@@ -36,6 +36,62 @@
     }
   },
   "options": {
+    "common_text": {
+      "editor_select_info": "Select 1 cycle to split, or 2+ cycles to merge.",
+      "no_cycles_recorded": "No cycles recorded yet.",
+      "profile_summary_line": "- **{name}**: {count} cycles, {avg}m avg",
+      "no_profiles_created": "No profiles created yet.",
+      "phase_preview": "Phase Preview",
+      "phase_preview_no_curve": "Average profile curve is not available yet. Run/label more cycles for this profile.",
+      "average_power_curve": "Average Power Curve",
+      "unit_min": "min",
+      "profile_option_fmt": "{name} ({count} cycles, ~{duration}m avg)",
+      "profile_option_short_fmt": "{name} ({count} cycles, ~{duration}m)",
+      "deleted_cycles_from_profile": "Deleted {count} cycles from {profile}.",
+      "not_enough_data_graph": "Not enough data to generate graph.",
+      "no_profiles_found": "No profiles found.",
+      "cycle_info_fmt": "Cycle: {start}, {duration}m, Current: {label}",
+      "top_candidates_header": "### Top Candidates",
+      "tbl_profile": "Profile",
+      "tbl_confidence": "Confidence",
+      "tbl_correlation": "Correlation",
+      "tbl_duration_match": "Duration Match",
+      "detected_profile": "Detected Profile",
+      "estimated_duration": "Estimated Duration",
+      "actual_duration": "Actual Duration",
+      "choose_action": "__Choose an action below:__",
+      "tbl_count": "Count",
+      "tbl_avg": "Avg",
+      "tbl_min": "Min",
+      "tbl_max": "Max",
+      "tbl_energy_avg": "Energy (Avg)",
+      "tbl_energy_total": "Energy (Total)",
+      "tbl_consistency": "Consist.",
+      "tbl_last_run": "Last Run",
+      "graph_legend_title": "Graph Legend",
+      "graph_legend_body": "The blue band represents the minimum and maximum power draw range observed. The line shows the average power curve.",
+      "recording_preview": "Recording Preview",
+      "trim_start": "Trim Start",
+      "trim_end": "Trim End",
+      "split_preview_title": "Split Preview",
+      "split_preview_found_fmt": "Found {count} segments.",
+      "split_preview_confirm_fmt": "Click Confirm to split this cycle into {count} separate cycles.",
+      "merge_preview_title": "Merge Preview",
+      "merge_preview_joining_fmt": "Joining {count} cycles. Gaps will be filled with 0W readings.",
+      "profile_comparison": "Profile Comparison",
+      "actual_cycle_label": "This cycle (actual)",
+      "storage_usage_header": "Storage Usage",
+      "storage_file_size": "File Size",
+      "storage_cycles": "Cycles",
+      "storage_profiles": "Profiles",
+      "storage_debug_traces": "Debug Traces",
+      "overview_suffix": "Overview",
+      "phase_preview_for_profile": "Phase preview for profile",
+      "current_ranges_header": "Current ranges",
+      "assign_phases_help": "Use actions below to add, edit, delete, or save ranges.",
+      "profile_summary_header": "Profile Summary",
+      "recent_cycles_header": "Recent cycles"
+    },
     "step": {
       "init": {
         "menu_options": {
@@ -235,7 +291,7 @@
       },
       "diagnostics": {
         "title": "Diagnostics & Maintenance",
-        "description": "Run maintenance actions like merging fragmented cycles or migrating stored data.\n\n{storage_stats}"
+        "description": "Run maintenance actions like merging fragmented cycles or migrating stored data.\n\n**Storage Usage**\n\n- File Size: {file_size_kb} KB\n- Cycles: {cycle_count}\n- Profiles: {profile_count}\n- Debug Traces: {debug_count}"
       },
       "clear_debug_data": {
         "title": "Clear Debug Data",
@@ -248,9 +304,23 @@
           "action": "Action"
         }
       },
+      "manage_cycles_empty": {
+        "title": "Manage Cycles",
+        "description": "No cycles recorded yet.",
+        "data": {
+          "action": "Action"
+        }
+      },
       "manage_profiles": {
         "title": "Manage Profiles",
         "description": "Profile Summary:\n{profile_summary}",
+        "data": {
+          "action": "Action"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "Manage Profiles",
+        "description": "No profiles created yet.",
         "data": {
           "action": "Action"
         }
@@ -528,7 +598,7 @@
       },
       "resolve_feedback": {
         "title": "Resolve Feedback",
-        "description": "{comparison_data}",
+        "description": "{comparison_img}{candidates_table}\n**Detected Profile**: {detected_profile} ({confidence_pct}%)\n**Estimated Duration**: {est_duration_min} min\n**Actual Duration**: {act_duration_min} min\n\n__Choose an action below:__",
         "data": {
           "action": "What would you like to do?",
           "corrected_profile": "Correct Program (if correcting)",
@@ -566,10 +636,283 @@
       "debug_data_cleared": "Successfully cleared debug data from {count} cycles."
     }
   },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "Cycle Start",
+        "cycle_finish": "Cycle Finish",
+        "cycle_live": "Live Progress"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(Unlabeled)",
+        "create_new_profile": "Create New Profile",
+        "remove_label": "Remove Label",
+        "no_reference_cycle": "(No reference cycle)",
+        "all_device_types": "All Device Types",
+        "current_suffix": "(current)"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "Split a Cycle (Find gaps)",
+        "merge": "Merge Cycles (Join fragments)",
+        "delete": "Delete Cycle(s)"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "Maintenance: Reprocess & Optimize Data",
+        "clear_debug_data": "Clear Debug Data (Free up space)",
+        "wipe_history": "Wipe ALL data for this device (irreversible)",
+        "export_import": "Export/Import JSON with settings (copy/paste)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "Export All Data",
+        "import": "Import/Merge Data"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "Auto-Label Old Cycles",
+        "select_cycle_to_label": "Label Specific Cycle",
+        "select_cycle_to_label_multi": "Label Multiple Cycles",
+        "select_cycle_to_delete": "Delete Cycle",
+        "interactive_editor": "Merge/Split Interactive Editor"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "Create New Profile",
+        "edit_profile": "Edit/Rename Profile",
+        "delete_profile": "Delete Profile",
+        "profile_stats": "Profile Statistics",
+        "cleanup_profile": "Clean Up History - Graph & Delete",
+        "assign_phases": "Assign Phase Ranges"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "Create New Phase",
+        "edit_custom_phase": "Edit Phase",
+        "delete_custom_phase": "Delete Phase"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "Add Phase Range",
+        "edit_range": "Edit Phase Range",
+        "delete_range": "Delete Phase Range",
+        "clear_ranges": "Clear All Ranges",
+        "save_ranges": "Save and Return"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "Refresh Status",
+        "stop_recording": "Stop Recording (Save & Process)",
+        "start_recording": "Start New Recording",
+        "process_recording": "Process Last Recording (Trim & Save)",
+        "discard_recording": "Discard Last Recording"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "Create New Profile",
+        "existing_profile": "Add to Existing Profile",
+        "discard": "Discard Recording"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "Confirm - Correct Detection",
+        "correct": "Correct - Choose Program/Duration",
+        "ignore": "Ignore - False Positive/Noisy Cycle",
+        "delete": "Delete - Remove from History"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "Label Cycle",
+      "description": "Assign an existing profile to a past cycle, or remove the label.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The washing machine device to label."
+        },
+        "cycle_id": {
+          "name": "Cycle ID",
+          "description": "The ID of the cycle to label."
+        },
+        "profile_name": {
+          "name": "Profile Name",
+          "description": "The name of an existing profile (create profiles in Manage Profiles menu). Leave blank to remove label."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "Create Profile",
+      "description": "Create a new profile (standalone or based on a reference cycle).",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The washing machine device."
+        },
+        "profile_name": {
+          "name": "Profile Name",
+          "description": "Name for the new profile (e.g. 'Heavy Duty', 'Delicates')."
+        },
+        "reference_cycle_id": {
+          "name": "Reference Cycle ID",
+          "description": "Optional cycle ID to base this profile on."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "Delete Profile",
+      "description": "Delete a profile and optionally unlabel cycles using it.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The washing machine device."
+        },
+        "profile_name": {
+          "name": "Profile Name",
+          "description": "The profile to delete."
+        },
+        "unlabel_cycles": {
+          "name": "Unlabel Cycles",
+          "description": "Remove profile label from cycles using this profile."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "Auto-Label Old Cycles",
+      "description": "Retroactively label unlabeled cycles using profile matching.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The washing machine device."
+        },
+        "confidence_threshold": {
+          "name": "Confidence Threshold",
+          "description": "Minimum match confidence (0.50-0.95) to apply labels."
+        }
+      }
+    },
+    "export_config": {
+      "name": "Export Config",
+      "description": "Export this washer's profiles and cycles to a JSON file (per device).",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The washing machine device to export."
+        },
+        "path": {
+          "name": "Path",
+          "description": "Optional absolute file path to write (defaults to /config/ha_washdata_export_<entry>.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "Import Config",
+      "description": "Import profiles and cycles for this washer from a JSON export file.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The washing machine device to import into."
+        },
+        "path": {
+          "name": "Path",
+          "description": "Absolute path to the export JSON file to import."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "Submit Cycle Feedback",
+      "description": "Confirm or correct an auto-detected program after a completed cycle. Provide either `entry_id` (advanced) or `device_id` (recommended).",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The WashData device (recommended instead of entry_id)."
+        },
+        "entry_id": {
+          "name": "Entry ID",
+          "description": "The config entry id for the device (alternative to device_id)."
+        },
+        "cycle_id": {
+          "name": "Cycle ID",
+          "description": "The cycle id shown in the feedback notification / logs."
+        },
+        "user_confirmed": {
+          "name": "Confirm Detected Program",
+          "description": "Set true if the detected program is correct."
+        },
+        "corrected_profile": {
+          "name": "Corrected Profile",
+          "description": "If not confirmed, provide the correct profile/program name."
+        },
+        "corrected_duration": {
+          "name": "Corrected Duration (seconds)",
+          "description": "Optional corrected duration in seconds."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Optional notes about this cycle."
+        }
+      }
+    },
+    "record_start": {
+      "name": "Record Cycle Start",
+      "description": "Start manually recording a clean cycle (bypasses all matching logic).",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The washing machine device to record."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "Record Cycle Stop",
+      "description": "Stop manual recording.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The washing machine device to stop recording."
+        }
+      }
+    }
+  },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "Running"
+      },
+      "match_ambiguity": {
+        "name": "Match Ambiguity"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "State"
+        "name": "State",
+        "state": {
+          "off": "Off",
+          "idle": "Idle",
+          "starting": "Starting",
+          "running": "Running",
+          "paused": "Paused",
+          "ending": "Ending",
+          "finished": "Finished",
+          "anti_wrinkle": "Anti-Wrinkle",
+          "interrupted": "Interrupted",
+          "force_stopped": "Force Stopped",
+          "rinse": "Rinse",
+          "unknown": "Unknown"
+        }
       },
       "washer_program": {
         "name": "Program"
@@ -596,13 +939,20 @@
         "name": "Match Confidence"
       },
       "top_candidates": {
-        "name": "Top Candidates"
+        "name": "Top Candidates",
+        "state": {
+          "none": "None"
+        }
       },
       "current_phase": {
         "name": "Current Phase"
       },
       "wash_phase": {
         "name": "Phase"
+      },
+      "profile_cycle_count": {
+        "name": "Profile {profile_name} Count",
+        "unit_of_measurement": "cycles"
       },
       "suggestions": {
         "name": "Suggested Settings"
@@ -614,6 +964,11 @@
         "state": {
           "auto_detect": "Auto-Detect"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "Force End Cycle"
       }
     }
   }

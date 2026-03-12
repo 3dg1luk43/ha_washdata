@@ -1852,7 +1852,7 @@ class ProfileStore:
 
 
     def generate_profile_spaghetti_svg(
-        self, profile_name: str
+        self, profile_name: str, overview_suffix: str = "Overview"
     ) -> tuple[str | None, dict[str, str]]:
         """
         Generate a 'Spaghetti Plot' SVG showing ALL individual cycles for a profile.
@@ -1927,7 +1927,7 @@ class ProfileStore:
             return None, {}
 
         svg_content = _generate_generic_svg(
-            title=f"{profile_name} (Overview)",
+            title=f"{profile_name} ({overview_suffix})",
             curves=svg_curves,
             width=1000,
             height=400
@@ -1936,7 +1936,13 @@ class ProfileStore:
         return svg_content, cycle_metadata
 
     def generate_preview_svg(
-        self, power_data: list[tuple[str, float]], head_trim: float, tail_trim: float
+        self,
+        power_data: list[tuple[str, float]],
+        head_trim: float,
+        tail_trim: float,
+        title: str = "Recording Preview",
+        trim_start_label: str = "Trim Start",
+        trim_end_label: str = "Trim End",
     ) -> str:
         """
         Generate a preview SVG for a recorded cycle, highlighting trimmed areas.
@@ -1992,12 +1998,12 @@ class ProfileStore:
 
         # Markers
         markers: list[dict[str, Any]] = [
-            {"x": keep_start, "label": "Trim Start", "color": "#e6194b"},
-            {"x": keep_end, "label": "Trim End", "color": "#e6194b"},
+            {"x": keep_start, "label": trim_start_label, "color": "#e6194b"},
+            {"x": keep_end, "label": trim_end_label, "color": "#e6194b"},
         ]
 
         return _generate_generic_svg(
-            title="Recording Preview",
+            title=title,
             curves=curves,
             width=800,
             height=400,
@@ -2190,6 +2196,8 @@ class ProfileStore:
         profile_names: list[str],
         detected_profile: str,
         actual_cycle: CycleDict,
+        chart_title_prefix: str = "Profile Comparison",
+        actual_cycle_label: str = "This cycle (actual)",
     ) -> str | None:
         """Generate a single SVG overlaying all profiles' avg curves with the actual cycle.
 
@@ -2295,7 +2303,7 @@ class ProfileStore:
             )
             elems.append(
                 f'<text x="{width / 2:.0f}" y="{padding_y - 15}" fill="#fff" font-size="26" '
-                f'text-anchor="middle" font-weight="bold">Profile Comparison: {detected_profile}</text>'
+                f'text-anchor="middle" font-weight="bold">{chart_title_prefix}: {detected_profile}</text>'
             )
 
             # Detected-profile envelope band (drawn first, behind all lines)
@@ -2341,7 +2349,7 @@ class ProfileStore:
                 color = colors.get(pname, "#aaa")
                 label = f"\u2605 {pname}" if pname == detected_profile else pname
                 legend_items.append((color, label, 4 if pname == detected_profile else 2))
-            legend_items.append(("#f39c12", "This cycle (actual)", 3))
+            legend_items.append(("#f39c12", actual_cycle_label, 3))
 
             items_per_row = 3
             col_w = (width - 2 * padding_x) // items_per_row
@@ -3698,7 +3706,13 @@ class ProfileStore:
         return new_id
 
     def generate_interactive_split_svg(
-        self, cycle_id: str, segments: list[tuple[float, float]], width: int = 600, height: int = 300
+        self,
+        cycle_id: str,
+        segments: list[tuple[float, float]],
+        width: int = 600,
+        height: int = 300,
+        title_prefix: str = "Split Preview",
+        unlabeled_text: str = "Unlabeled",
     ) -> str:
         """Generate SVG for split preview."""
         cycle = next((c for c in self.get_past_cycles() if c["id"] == cycle_id), None)
@@ -3731,10 +3745,20 @@ class ProfileStore:
                 curves.append(SVGCurve(points=seg_pts, color=color, stroke_width=2))
                 markers.append({"x": seg_start, "label": f"S{i+1}", "color": color})
 
-        return _generate_generic_svg(f"Split Preview: {cycle.get('profile_name') or 'Unlabeled'}", curves, width, height, markers=markers)
+        return _generate_generic_svg(
+            f"{title_prefix}: {cycle.get('profile_name') or unlabeled_text}",
+            curves,
+            width,
+            height,
+            markers=markers,
+        )
 
     def generate_interactive_merge_svg(
-        self, cycle_ids: list[str], width: int = 600, height: int = 300
+        self,
+        cycle_ids: list[str],
+        width: int = 600,
+        height: int = 300,
+        title: str = "Merge Preview",
     ) -> str:
         """Generate SVG for merge preview."""
         cycles = [c for c in self.get_past_cycles() if c["id"] in cycle_ids]
@@ -3765,4 +3789,4 @@ class ProfileStore:
             if points:
                 curves.append(SVGCurve(points=points, color=colors[i % len(colors)], stroke_width=2))
 
-        return _generate_generic_svg("Merge Preview", curves, width, height)
+        return _generate_generic_svg(title, curves, width, height)

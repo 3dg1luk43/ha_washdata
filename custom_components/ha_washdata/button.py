@@ -29,7 +29,7 @@ class WashDataTerminateButton(ButtonEntity):
     """Button to force terminate the current cycle."""
 
     _attr_has_entity_name = True
-    _attr_name = "Force End Cycle"
+    _attr_translation_key = "force_end_cycle"
     _attr_icon = "mdi:stop-circle-outline"
 
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:

@@ -42,7 +42,6 @@ class WashDataProgramSelect(SelectEntity):
         self._manager = manager
         self._config_entry = config_entry
         self._attr_unique_id = f"{config_entry.entry_id}_program_select"
-        self._attr_name = "Cycle Program"
         self._attr_device_info = {
             "identifiers": {(DOMAIN, config_entry.entry_id)},
             "name": config_entry.title,
