@@ -303,7 +303,7 @@ def compute_dtw_path(
     return path
 
 def compute_envelope_worker(
-    raw_cycles_data: list[tuple[list[float], list[float], Optional[float]]],
+    raw_cycles_data: list[tuple[list[float], list[float], Optional[float]]] | list[tuple[list[float], list[float]]],
     dtw_bandwidth: float
 ) -> tuple[list[float], list[float], list[float], list[float], list[float], float] | None:
     """
@@ -322,17 +322,19 @@ def compute_envelope_worker(
 
     # 1. Pre-process input
     for curve in raw_cycles_data:
-        offsets_list = curve[0]
-        values_list = curve[1]
+        # Unpack curve tuple: (offsets, values) or (offsets, values, duration)
+        # Backward compatible with 2-tuple (offsets, values) format
+        try:
+            offsets_list, values_list, *rest = curve
+            curve_duration = rest[0] if rest else None
+        except (ValueError, TypeError):
+            continue
 
         if len(offsets_list) < 3 or len(values_list) < 3:
             continue
 
         offsets = np.array(offsets_list)
         values = np.array(values_list)
-
-        # Use provided duration when valid, otherwise fallback to last offset.
-        curve_duration = curve[2] if len(curve) > 2 else None
         dur = float(curve_duration) if curve_duration is not None else float(offsets[-1])
 
         normalized_curves.append((offsets, values, dur))

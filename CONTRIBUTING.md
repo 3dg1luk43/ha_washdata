@@ -83,7 +83,7 @@ pip install -r requirements-dev.txt
 Verify your Python code before committing:
 
 ```bash
-python3 -m py_compile custom_components/ha_washdata/*.py
+python3 -m compileall custom_components/ha_washdata tests/ --quiet
 ```
 
 ### 4. Run Tests Locally

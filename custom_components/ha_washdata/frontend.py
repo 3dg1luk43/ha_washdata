@@ -165,12 +165,15 @@ class WashDataCardRegistration:
         if not self.hass.data.get("lovelace"):
             _LOGGER.debug("Lovelace not loaded yet; waiting for component loaded event")
 
+            unsubscribe_on_lovelace_loaded: Any = None
 
             async def _on_lovelace_loaded(event: Event) -> None:
                 if event.data.get("component") == "lovelace":
                     _LOGGER.debug(
                         "Lovelace component loaded; retrying resource registration"
                     )
+                    if unsubscribe_on_lovelace_loaded:
+                        unsubscribe_on_lovelace_loaded()
                     try:
                         if await _init_resource(self.hass, INTEGRATION_URL, version):
                             self.hass.data["ha_washdata_card_registered"] = True
@@ -181,7 +184,7 @@ class WashDataCardRegistration:
                             INTEGRATION_URL,
                         )
 
-            self.hass.bus.async_listen(EVENT_COMPONENT_LOADED, _on_lovelace_loaded)
+            unsubscribe_on_lovelace_loaded = self.hass.bus.async_listen(EVENT_COMPONENT_LOADED, _on_lovelace_loaded)
             return CARD_DEFERRED
 
         # Lovelace is already loaded
