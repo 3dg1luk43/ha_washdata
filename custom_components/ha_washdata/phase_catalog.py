@@ -333,15 +333,14 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
         if device_type in DEFAULT_PHASES_BY_DEVICE
         else get_shared_default_phase_catalog()
     )
-    seen_names: set[tuple[str, str]] = set()
+    seen_names: set[str] = set()
     for item in merged:
         try:
             normalized_name = normalize_phase_name(str(item.get("name", "")))
         except ValueError:
             continue
-        item_device_type = str(item.get("device_type", "")).strip()
         if normalized_name:
-            seen_names.add((normalized_name.casefold(), item_device_type.casefold()))
+            seen_names.add(normalized_name.casefold())
 
     custom = custom_phases or []
     for item in custom:
@@ -350,7 +349,7 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
         except ValueError:
             continue
         item_device_type = str(item.get("device_type", "")).strip()
-        key = (normalized_name.casefold(), item_device_type.casefold())
+        key = normalized_name.casefold()
         if not normalized_name or key in seen_names:
             continue
         seen_names.add(key)

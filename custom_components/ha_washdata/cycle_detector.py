@@ -206,9 +206,8 @@ class CycleDetector:
     @property
     def _dynamic_end_threshold(self) -> float:
         """Calculate dynamic end candidate threshold."""
-        # Use a longer floor for anti-wrinkle idle handling.
-        # Let's ensure it's strictly greater than pause threshold to define state progression
-        base = max(self._anti_wrinkle_idle_timeout, 3.0 * self._p95_dt)
+        # Keep this generic for pause->ending transitions across all device types.
+        base = 3.0 * self._p95_dt
         # Ensure end threshold is at least 15s greater than pause threshold
         return max(base, self._dynamic_pause_threshold + 15.0)
 
@@ -498,8 +497,15 @@ class CycleDetector:
             if self._state == STATE_ANTI_WRINKLE:
                 # Track time in idle (below exit_power threshold)
                 if power < self._config.anti_wrinkle_exit_power:
+                    # Low-power gap invalidates any burst candidate collected while in anti-wrinkle.
+                    self._anti_wrinkle_candidate_start = None
+                    self._anti_wrinkle_candidate_peak = 0.0
                     self._anti_wrinkle_idle_time += dt
-                    if self._anti_wrinkle_idle_time >= self._dynamic_end_threshold:
+                    anti_wrinkle_end_threshold = max(
+                        self._dynamic_end_threshold,
+                        self._anti_wrinkle_idle_timeout,
+                    )
+                    if self._anti_wrinkle_idle_time >= anti_wrinkle_end_threshold:
                         self._transition_to(STATE_OFF, timestamp)
                         return
                 else:

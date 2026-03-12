@@ -56,7 +56,7 @@ class WasherRunningBinarySensor(BinarySensorEntity):
     @property
     def is_on(self) -> bool:  # type: ignore[override]
         """Return true if the binary sensor is on."""
-        return self._manager.check_state == STATE_RUNNING
+        return self._manager.check_state() == STATE_RUNNING
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks."""

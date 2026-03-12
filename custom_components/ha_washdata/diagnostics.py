@@ -24,7 +24,7 @@ async def async_get_config_entry_diagnostics(
     return {
         "entry": entry.as_dict(),
         "manager_state": {
-            "current_state": manager.check_state,
+            "current_state": manager.check_state(),
             "current_program": manager.current_program,
             "time_remaining": manager.time_remaining,
             "cycle_progress": manager.cycle_progress,

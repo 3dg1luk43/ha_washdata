@@ -158,7 +158,7 @@ class WasherStateSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        return self._manager.check_state
+        return self._manager.check_state()
 
     @property
     def extra_state_attributes(self):  # type: ignore[override]
@@ -208,8 +208,8 @@ class WasherProgramSensor(WasherBaseSensor):
         if not profile_name or profile_name in ("off", "detecting...", "starting", "unknown"):
             return None
 
-        catalog = self._manager.profile_store.list_phase_catalog(self._manager.device_type)
-        assigned = self._manager.profile_store.get_profile_phase_ranges_for_device(
+        catalog = self._manager.list_phase_catalog(self._manager.device_type)
+        assigned = self._manager.get_profile_phase_ranges_for_device(
             profile_name,
             self._manager.device_type,
         )
@@ -245,13 +245,13 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
     @property
     def native_unit_of_measurement(self) -> str | None:  # type: ignore[override]
         """Return the unit of measurement."""
-        if self._manager.check_state in (STATE_OFF, STATE_ANTI_WRINKLE):
+        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE):
             return None
         return "min"
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state in (STATE_OFF, STATE_ANTI_WRINKLE):
+        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE):
             return "off"
         if self._manager.time_remaining:
             return int(self._manager.time_remaining / 60)
@@ -274,13 +274,13 @@ class WasherTotalDurationSensor(WasherBaseSensor):
     @property
     def native_unit_of_measurement(self) -> str | None:  # type: ignore[override]
         """Return the unit of measurement."""
-        if self._manager.check_state == STATE_OFF:
+        if self._manager.check_state() == STATE_OFF:
             return None
         return "min"
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state == STATE_OFF:
+        if self._manager.check_state() == STATE_OFF:
             return None
         if self._manager.total_duration:
             return int(self._manager.total_duration / 60)
@@ -348,7 +348,7 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state == STATE_OFF:
+        if self._manager.check_state() == STATE_OFF:
             return 0
         start = self._manager.cycle_start_time
         if start:
@@ -373,7 +373,7 @@ class WasherDebugSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        return self._manager.check_state
+        return self._manager.check_state()
 
     @property
     def extra_state_attributes(self):  # type: ignore[override]
