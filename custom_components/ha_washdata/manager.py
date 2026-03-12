@@ -2431,16 +2431,18 @@ class WashDataManager:
                 )
                 return False
 
+        actions_sent = False
         if self._notify_actions:
-            self._run_notification_actions(variables)
+            actions_sent = bool(self._run_notification_actions(variables))
 
-        return self._send_notification_service(
+        service_sent = self._send_notification_service(
             message,
             title=title,
             icon=icon,
             event_type=event_type,
             extra_vars=extra_vars,
         )
+        return actions_sent or service_sent
 
     def _send_notification_service(
         self,
@@ -2565,6 +2567,9 @@ class WashDataManager:
             if sent and entry.get("event_type") == NOTIFY_EVENT_LIVE:
                 self._live_notification_sent_count += 1
                 self._last_live_notification_time = dt_util.now()
+                ev = entry.get("extra_vars") or {}
+                if "progress" not in ev:
+                    self._live_waiting_notification_sent = True
 
     def _handle_noise_cycle(self, max_power: float) -> None:
         """Handle a detected noise cycle."""

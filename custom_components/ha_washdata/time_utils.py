@@ -37,7 +37,7 @@ def detect_power_data_format(
     if not power_data:
         return "empty"
     first = power_data[0]
-    if len(first) < 2:
+    if not isinstance(first, (list, tuple)) or len(first) < 2 or first[0] is None:
         return "unknown"
     ts = first[0]
     if isinstance(ts, datetime):
