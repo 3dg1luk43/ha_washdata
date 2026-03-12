@@ -373,7 +373,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
 
     # Register custom card via frontend.py — once per HA instance only.
-    if not hass.data.get("ha_washdata_card_registered"):
+    if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(
+        "ha_washdata_card_deferred"
+    ):
         # pylint: disable=import-outside-toplevel
         from .frontend import WashDataCardRegistration
 
@@ -384,7 +386,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.warning("Card registration failed, will retry on next setup: %s", err)
         else:
             if registered:
+                hass.data["ha_washdata_card_deferred"] = False
                 hass.data["ha_washdata_card_registered"] = True
+            else:
+                hass.data["ha_washdata_card_deferred"] = True
 
     # Register feedback service
     if not hass.services.has_service(

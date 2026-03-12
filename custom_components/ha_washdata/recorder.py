@@ -86,7 +86,18 @@ class CycleRecorder:
                 except ValueError:
                     self._start_time = None
             buffer_raw = data.get("buffer", [])
-            self._buffer = cast(list[tuple[str, float]], buffer_raw) if isinstance(buffer_raw, list) else []
+            sanitized: list[tuple[str, float]] = []
+            if isinstance(buffer_raw, list):
+                for item in buffer_raw:
+                    if not isinstance(item, (list, tuple)) or len(item) != 2:
+                        continue
+                    key, ts = item[0], item[1]
+                    if not isinstance(key, str) or not key:
+                        continue
+                    if not isinstance(ts, (int, float)):
+                        continue
+                    sanitized.append((key, float(ts)))
+            self._buffer = sanitized
             last_run_raw = data.get("last_run")
             self._last_run = cast(dict[str, Any], last_run_raw) if isinstance(last_run_raw, dict) else None  # Restore last run
             _LOGGER.info(

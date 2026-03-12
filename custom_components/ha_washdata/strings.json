@@ -67,7 +67,7 @@
           "off_delay": "Cycle End Delay (s)",
           "notify_service": "Notification Service (e.g. notify.mobile_app)",
           "notify_actions": "Notification Actions",
-          "notify_people": "People to Notify",
+          "notify_people": "Wait for These People",
           "notify_only_when_home": "Only Notify When Home",
           "notify_fire_events": "Fire Automation Events",
           "notify_events": "Events to Notify",
@@ -105,7 +105,7 @@
         "data": {
           "notify_service": "Notification Service (e.g. notify.mobile_app)",
           "notify_actions": "Notification Actions",
-          "notify_people": "People to Notify",
+          "notify_people": "Wait for These People",
           "notify_only_when_home": "Only Notify When Home",
           "notify_fire_events": "Fire Automation Events",
           "notify_events": "Events to Notify",

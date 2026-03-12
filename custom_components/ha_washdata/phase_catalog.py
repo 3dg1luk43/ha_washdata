@@ -349,6 +349,10 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
         except ValueError:
             continue
         item_device_type = str(item.get("device_type", "")).strip()
+        if item_device_type:
+            target_device_type = str(device_type or "").strip().casefold()
+            if item_device_type.casefold() != target_device_type:
+                continue
         key = normalized_name.casefold()
         if not normalized_name or key in seen_names:
             continue

@@ -17,9 +17,41 @@ async def async_get_config_entry_diagnostics(
     """Return diagnostics for a config entry."""
     manager: WashDataManager = hass.data[DOMAIN][entry.entry_id]
 
-    # Get internal data from the store
-    # We access via public export_data() for diagnostics dump
-    store_data = manager.profile_store.export_data().get("data", {})
+    # Build a safe, whitelisted diagnostics summary from store export metadata.
+    exported = manager.profile_store.export_data()
+    exported_data = exported.get("data", {}) if isinstance(exported, dict) else {}
+    profiles = exported_data.get("profiles", {}) if isinstance(exported_data, dict) else {}
+    past_cycles = (
+        exported_data.get("past_cycles", []) if isinstance(exported_data, dict) else []
+    )
+    envelopes = exported_data.get("envelopes", {}) if isinstance(exported_data, dict) else {}
+
+    last_cycle_summary: dict[str, Any] | None = None
+    if isinstance(past_cycles, list) and past_cycles and isinstance(past_cycles[-1], dict):
+        last_cycle = past_cycles[-1]
+        last_cycle_summary = {
+            "id": last_cycle.get("id"),
+            "profile_name": last_cycle.get("profile_name"),
+            "status": last_cycle.get("status"),
+            "start_time": last_cycle.get("start_time"),
+            "end_time": last_cycle.get("end_time"),
+            "duration": last_cycle.get("duration"),
+            "energy_wh": last_cycle.get("energy_wh"),
+        }
+
+    store_data = {
+        "version": exported.get("version") if isinstance(exported, dict) else None,
+        "exported_at": exported.get("exported_at") if isinstance(exported, dict) else None,
+        "profile_count": len(profiles) if isinstance(profiles, dict) else 0,
+        "past_cycle_count": len(past_cycles) if isinstance(past_cycles, list) else 0,
+        "envelope_count": len(envelopes) if isinstance(envelopes, dict) else 0,
+        "last_cycle_summary": last_cycle_summary,
+        "feature_flags": {
+            "auto_maintenance": bool(getattr(manager, "_auto_maintenance", False)),
+            "save_debug_traces": bool(getattr(manager, "_save_debug_traces", False)),
+            "notify_fire_events": bool(getattr(manager, "_notify_fire_events", False)),
+        },
+    }
 
     _SENSITIVE_KEYS = {
         # config-entry data / options fields that contain personal identifiers

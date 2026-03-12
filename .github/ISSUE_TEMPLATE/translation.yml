@@ -7,18 +7,14 @@ body:
     attributes:
       value: |
         # ⚠️ IMPORTANT - PLEASE READ ⚠️
-        
-        <div style="background-color: #ff4444; color: white; padding: 15px; border-radius: 5px; font-weight: bold; font-size: 16px;">
-        
-        **🚨 TRANSLATIONS MUST BE SUBMITTED VIA PULL REQUESTS 🚨**
-        
-        **DO NOT just report bad translations!**
-        
-        Instead of opening an issue to report translation problems, please submit a Pull Request with the corrected translations. This is much faster and helps us maintain quality.
-        
+
+        > 🚨 **TRANSLATIONS MUST BE SUBMITTED VIA PULL REQUESTS**
+        >
+        > **DO NOT** only report bad translations.
+        >
+        > Instead of opening an issue to report translation problems, please submit a Pull Request with the corrected translations. This is much faster and helps us maintain quality.
+
         See: [CONTRIBUTING.md](https://github.com/3dg1luk43/ha_washdata/blob/main/CONTRIBUTING.md) for translation guidelines.
-        
-        </div>
 
   - type: markdown
     attributes:

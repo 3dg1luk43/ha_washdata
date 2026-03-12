@@ -1,7 +1,7 @@
 """Frontend card registration for WashData."""
 
 import logging
-import time
+import os
 from pathlib import Path
 from typing import Any, TypedDict, cast
 from homeassistant.core import HomeAssistant, Event
@@ -23,8 +23,13 @@ class LovelaceResourceItem(TypedDict, total=False):
 
 
 def get_cache_buster() -> str:
-    """Generate a unique cache buster based on current time."""
-    return str(int(time.time()))
+    """Generate a stable cache buster based on card asset mtime."""
+    try:
+        src = Path(__file__).parent / "www" / CARD_NAME
+        return str(int(os.path.getmtime(src)))
+    except OSError:
+        # Deterministic fallback when file is unavailable.
+        return "1"
 
 
 def _register_static_path(hass: HomeAssistant, url_path: str, path: str) -> None:

@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 import hashlib
 import inspect
+import math
 from asyncio import Task
 from datetime import datetime, timedelta
 from typing import Any, cast
@@ -19,6 +20,7 @@ from homeassistant.helpers.event import (
     async_track_time_interval,
 )
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.const import STATE_UNAVAILABLE, STATE_HOME
 from homeassistant.util import dt as dt_util
 import homeassistant.helpers.event as evt
@@ -868,7 +870,6 @@ class WashDataManager:
             )
 
             self._update_remaining_only()
-            self._check_pre_completion_notification()
 
             # --- START NOTIFICATION LOGIC ---
             # Send the start notification only after we confidently know the program
@@ -910,6 +911,9 @@ class WashDataManager:
                     )
                     self._notified_start = True
                     _LOGGER.info("Sent start notification for program '%s'", self._current_program)
+
+                    # Ensure pre-completion notifications never precede cycle-start signaling.
+                    self._check_pre_completion_notification()
 
             self._check_live_progress_notification()
             self._notify_update()
@@ -1116,9 +1120,13 @@ class WashDataManager:
                     else:
                         self._current_program = "detecting..."
                     
-                    # Mark start as already handled for restored cycles to prevent re-emission
-                    self._notified_start = True
-                    self._start_event_fired = True
+                    # Restore persisted start-notification/event flags from snapshot.
+                    self._notified_start = bool(
+                        active_snapshot_to_restore.get("notified_start", False)
+                    )
+                    self._start_event_fired = bool(
+                        active_snapshot_to_restore.get("start_event_fired", False)
+                    )
                     
                     self._start_watchdog()
                 else:
@@ -1594,6 +1602,8 @@ class WashDataManager:
         if self.detector.state == "running":
             snapshot = self.detector.get_state_snapshot()
             snapshot["manual_program"] = self._manual_program_active
+            snapshot["notified_start"] = self._notified_start
+            snapshot["start_event_fired"] = self._start_event_fired
             await self.profile_store.async_save_active_cycle(snapshot)
 
         self._last_reading_time = None
@@ -2263,7 +2273,7 @@ class WashDataManager:
                     "program": event_cycle_data.get("profile_name", "unknown"),
                     "duration": event_cycle_data.get("duration"),
                     "start_time": event_cycle_data.get("start_time"),
-                    "end_time": dt_util.now().isoformat(),
+                    "end_time": event_cycle_data.get("end_time") or dt_util.now().isoformat(),
                 },
             )
 
@@ -2526,10 +2536,16 @@ class WashDataManager:
                 domain=DOMAIN,
                 logger=_LOGGER,
             )
-        except Exception as err:
-            # Script construction failed - likely invalid configuration/syntax
+        except (ValueError, TypeError, HomeAssistantError) as err:
             _LOGGER.error(
                 "Invalid notification action configuration for %s: %s",
+                self.config_entry.title,
+                err,
+            )
+            return False
+        except Exception as err:
+            _LOGGER.exception(
+                "Unexpected error while building notification actions for %s: %s",
                 self.config_entry.title,
                 err,
             )
@@ -2540,10 +2556,16 @@ class WashDataManager:
                 script.async_run(variables, context=Context())
             )
             return True
-        except Exception as err:
-            # Runtime error during script execution
+        except HomeAssistantError as err:
             _LOGGER.warning(
                 "Notification action execution failed for %s: %s",
+                self.config_entry.title,
+                err,
+            )
+            return False
+        except Exception as err:
+            _LOGGER.exception(
+                "Unexpected error while scheduling notification actions for %s: %s",
                 self.config_entry.title,
                 err,
             )
@@ -2831,7 +2853,7 @@ class WashDataManager:
         )
         remaining_seconds = int(max(0, round(float(self._time_remaining or 0.0))))
         elapsed_seconds = max(0, total_seconds - remaining_seconds)
-        minutes_left = int(remaining_seconds / 60) + 1
+        minutes_left = max(1, math.ceil(remaining_seconds / 60))
 
         msg_template = self.config_entry.options.get(
             CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
@@ -2889,7 +2911,7 @@ class WashDataManager:
             {
                 "device": self.config_entry.title,
                 "program": "",  # Cleared marker
-                "message": "",  # Empty for cleared
+                "message": "clear_notification",  # Clear marker for action handlers
                 "title": "",  # Clear title
                 "icon": None,
                 "event_type": NOTIFY_EVENT_LIVE,
@@ -2919,6 +2941,7 @@ class WashDataManager:
         if (
             self._notify_before_end_minutes > 0
             and not self._notified_pre_completion
+            and self._start_event_fired
             and self._time_remaining is not None
             and self._time_remaining <= (self._notify_before_end_minutes * 60)
             and self._cycle_progress < 100
@@ -2926,12 +2949,9 @@ class WashDataManager:
         ):
             # Send notification!
             self._notified_pre_completion = True
-            # Send notification!
-            self._notified_pre_completion = True
 
             msg_template = self.config_entry.options.get(CONF_NOTIFY_PRE_COMPLETE_MESSAGE, DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE)
-            # Safe default if rounding goes weird equivalent to int()
-            minutes_left = int(self._time_remaining / 60) + 1
+            minutes_left = max(1, math.ceil(self._time_remaining / 60))
 
             msg = self._safe_format_template(
                 msg_template,
@@ -3432,6 +3452,8 @@ class WashDataManager:
         if self.detector.state != "running":
             pass
 
+            snapshot["notified_start"] = self._notified_start
+            snapshot["start_event_fired"] = self._start_event_fired
         profiles_raw: Any = None
         try:
             profiles_raw = self.profile_store.get_profiles()

@@ -76,7 +76,12 @@ class SuggestionEngine:
 
         reason_off = f"Based on observed update cadence (p95={p95_dt:.1f}s) * 5"
         if suggested_off_delay == device_floor:
-            reason_off = f"Used device-specific safe minimum for {self.device_type} ({device_floor}s)."
+            if self.device_type and self.device_type in DEFAULT_OFF_DELAY_BY_DEVICE:
+                reason_off = (
+                    f"Used device-specific safe minimum for {self.device_type} ({device_floor}s)."
+                )
+            else:
+                reason_off = f"Used generic safe minimum ({DEFAULT_OFF_DELAY}s)."
 
         suggestions[CONF_OFF_DELAY] = {
             "value": suggested_off_delay,

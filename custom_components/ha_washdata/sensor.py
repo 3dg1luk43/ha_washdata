@@ -208,11 +208,16 @@ class WasherProgramSensor(WasherBaseSensor):
         if not profile_name or profile_name in ("off", "detecting...", "starting", "unknown"):
             return None
 
-        catalog = self._manager.list_phase_catalog(self._manager.device_type)
-        assigned = self._manager.get_profile_phase_ranges_for_device(
-            profile_name,
-            self._manager.device_type,
-        )
+        device_type = self._manager.device_type
+        if device_type:
+            catalog = self._manager.list_phase_catalog(device_type)
+            assigned = self._manager.get_profile_phase_ranges_for_device(
+                profile_name,
+                device_type,
+            )
+        else:
+            catalog = []
+            assigned = {}
         catalog_view: list[dict[str, Any]] = [
             {
                 "name": p.get("name"),
@@ -558,6 +563,12 @@ class WasherProfileSensorManager:
             self._unsub_dispatcher()
             self._unsub_dispatcher = None
 
+        # Prevent queued follow-up refreshes after teardown.
+        self._pending_update = False
+        if self._update_task and not self._update_task.done():
+            self._update_task.cancel()
+        self._update_task = None
+
     @callback
     def _update_callback(self) -> None:
         """Handle updates."""
@@ -571,7 +582,7 @@ class WasherProfileSensorManager:
         def _clear_update_task(done_task: Task[Any]) -> None:
             if self._update_task is done_task:
                 self._update_task = None
-                if self._pending_update:
+                if self._unsub_dispatcher is not None and self._pending_update:
                     self._pending_update = False
                     follow = self._manager.hass.async_create_task(self.async_update())
                     self._update_task = follow

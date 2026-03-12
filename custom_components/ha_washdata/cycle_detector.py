@@ -481,14 +481,26 @@ class CycleDetector:
                 )
 
                 if exceeds:
+                    candidate_start = self._anti_wrinkle_candidate_start
+                    candidate_peak = self._anti_wrinkle_candidate_peak
                     self._anti_wrinkle_candidate_start = None
                     self._anti_wrinkle_candidate_peak = 0.0
                     self._transition_to(STATE_STARTING, timestamp)
                     started_from_anti_wrinkle = True
-                    self._current_cycle_start = timestamp
-                    self._power_readings = [(timestamp, power)]
-                    self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
-                    self._cycle_max_power = power
+                    self._current_cycle_start = candidate_start or timestamp
+
+                    # Preserve the anti-wrinkle candidate window instead of dropping ramp-up samples.
+                    if candidate_start and candidate_start < timestamp:
+                        start_power = candidate_peak if candidate_peak > 0 else power
+                        self._power_readings = [(candidate_start, start_power), (timestamp, power)]
+                        interval_s = (timestamp - candidate_start).total_seconds()
+                        avg_power = (start_power + power) / 2.0
+                        self._energy_since_idle_wh = max(0.0, avg_power * (interval_s / 3600.0))
+                    else:
+                        self._power_readings = [(timestamp, power)]
+                        self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
+
+                    self._cycle_max_power = max(candidate_peak, power)
                     self._abrupt_drop = False
             elif self._state != STATE_ANTI_WRINKLE:
                 self._anti_wrinkle_candidate_start = None

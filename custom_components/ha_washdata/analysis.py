@@ -297,7 +297,7 @@ def compute_dtw_path(
                 i -= 1
                 j -= 1
 
-        path.append((i, j))
+        path.append((max(i - 1, 0), max(j - 1, 0)))
 
     path.reverse()
 

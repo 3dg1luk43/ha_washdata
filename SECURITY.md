@@ -13,9 +13,8 @@ If you discover a security vulnerability in WashData, please report it responsib
    - Click **"Report a vulnerability"**
    - Describe the issue with steps to reproduce
 
-2. **Email**: Contact the maintainers directly
-   - Email: [security concern] (contact maintainer for details)
-   - Include: Description, impact, proof-of-concept (if safe to share)
+2. **Email**: Private email reporting is not currently published.
+   - Use GitHub Security Advisories above for confidential reporting.
 
 ### What to Include
 
@@ -98,7 +97,7 @@ WashData's dependencies are minimal:
 - **numpy**: Numerical computations (security-conscious library)
 - **Home Assistant**: Core framework (actively maintained)
 
-All dependencies are specified in `manifest.json` and vetted by HACS.
+All dependencies are specified in `manifest.json`.
 
 ---
 

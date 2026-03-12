@@ -42,6 +42,11 @@ Before contributing, please review our [Code of Conduct](CODE_OF_CONDUCT.md). By
    ```bash
    git remote add upstream https://github.com/3dg1luk43/ha_washdata.git
    ```
+4. **Initialize translator submodule** (required for translation tooling):
+   ```bash
+   git submodule update --init --recursive
+   ```
+   This populates `scripts/ha_integration_translator`.
 
 ### Create a Feature Branch
 
@@ -63,6 +68,9 @@ Use descriptive branch names (e.g., `feature/cycle-detection-improvement`, `fix/
 python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
+
+On Windows, if VS Code does not auto-detect the interpreter from `.venv`, set local
+workspace overrides to `.venv\\Scripts\\python.exe` (and use that interpreter for pytest).
 
 ### 2. Install Dependencies
 
@@ -332,7 +340,7 @@ Fixes #123
 
 2. **Submit a Pull Request** with your corrections
    - Include a brief description of what was corrected
-   - Reference the [Translation Issue template](.github/ISSUE_TEMPLATE/language.yml) if needed
+   - Reference the [Translation Issue template](.github/ISSUE_TEMPLATE/translation.yml) if needed
 
 3. **Use translation script** (for Home Assistant translations):
    ```bash
