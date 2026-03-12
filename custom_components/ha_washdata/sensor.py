@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from asyncio import Task
 import hashlib
 from typing import Any
 
@@ -539,6 +540,7 @@ class WasherProfileSensorManager:
         # Determine the signal string. It must match SIGNAL_WASHER_UPDATE from const.py
         # which is "washdata_update_{}"
         self._signal = SIGNAL_WASHER_UPDATE.format(entry.entry_id)
+        self._update_task: Task[None] | None = None
 
         # Register callback for ALL updates (simplest hook we have)
         # Ideally we'd have a specific profile update signal, but general update is fine
@@ -558,7 +560,17 @@ class WasherProfileSensorManager:
     @callback
     def _update_callback(self) -> None:
         """Handle updates."""
-        self._manager.hass.async_create_task(self.async_update())
+        if self._update_task and not self._update_task.done():
+            return
+
+        task = self._manager.hass.async_create_task(self.async_update())
+        self._update_task = task
+
+        def _clear_update_task(done_task: Task[Any]) -> None:
+            if self._update_task is done_task:
+                self._update_task = None
+
+        task.add_done_callback(_clear_update_task)
 
     async def async_update(self) -> None:
         """Reflect profile changes in sensors."""

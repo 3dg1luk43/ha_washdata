@@ -486,12 +486,19 @@ class LearningManager:
             if isinstance(corrected_profile, str) and corrected_profile:
                 # corrected_duration is already in seconds from config_flow
                 duration_sec = float(corrected_duration) if corrected_duration else None
+                detected_profile = pending.get("detected_profile")
 
                 self._apply_correction_learning(
                     cycle_id, corrected_profile, duration_sec
                 )
                 self._auto_label_cycle(cycle_id, corrected_profile, duration_sec)
                 profiles_to_rebuild.add(corrected_profile)
+                if (
+                    isinstance(detected_profile, str)
+                    and detected_profile
+                    and detected_profile != corrected_profile
+                ):
+                    profiles_to_rebuild.add(detected_profile)
 
         # Remove from pending (add_pending_feedback was wrapper, remove is direct)
         if cycle_id in self.profile_store.get_pending_feedback():

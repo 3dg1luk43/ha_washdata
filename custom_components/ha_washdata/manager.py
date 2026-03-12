@@ -230,6 +230,7 @@ class WashDataManager:
         self._last_live_notification_time: datetime | None = None
         self._live_waiting_notification_sent = False
         self._live_notification_tag = f"ha_washdata_{self.entry_id}_live"
+        self._start_event_fired = False
 
         # State
         self._current_power = 0.0
@@ -874,6 +875,19 @@ class WashDataManager:
                 not getattr(self, "_notified_start", False)
                 and self._current_program not in ("detecting...", "off", "starting", "unknown")
             ):
+                if self._notify_fire_events and not self._start_event_fired:
+                    self.hass.bus.async_fire(
+                        EVENT_CYCLE_STARTED,
+                        {
+                            "entry_id": self.entry_id,
+                            "device_name": self.config_entry.title,
+                            "device_type": self.device_type,
+                            "program": self._current_program,
+                            "start_time": dt_util.now().isoformat(),
+                        },
+                    )
+                    self._start_event_fired = True
+
                 events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
                 if NOTIFY_EVENT_START in events:
                     msg_template = self.config_entry.options.get(
@@ -2102,23 +2116,13 @@ class WashDataManager:
                 self._unmatch_persistence_counter = 0  # Reset unmatch counter
                 self._current_match_candidate = None  # Reset candidate
                 self._notified_start = False # Reset start notification state
+                self._start_event_fired = False
                 self._reset_live_notification_state()
                 self._start_watchdog()  # Start watchdog when cycle starts
             else:
                 _LOGGER.debug("Cycle resumed from %s, preserving estimates", old_state)
                 # Ensure watchdog is running
                 self._start_watchdog()
-            if self._notify_fire_events and new_cycle_detected:
-                self.hass.bus.async_fire(
-                    EVENT_CYCLE_STARTED,
-                    {
-                        "entry_id": self.entry_id,
-                        "device_name": self.config_entry.title,
-                        "device_type": self.device_type,
-                        "program": self._current_program,
-                        "start_time": dt_util.now().isoformat(),
-                    },
-                )
 
             # Send notification if enabled (Moved to _async_do_perform_matching)
         elif new_state == STATE_OFF and old_state == STATE_RUNNING:
@@ -2322,7 +2326,7 @@ class WashDataManager:
         person_name: str | None = None,
         extra_vars: dict[str, Any] | None = None,
         allow_deferral: bool = True,
-    ) -> None:
+    ) -> bool:
         """Route notification via actions or notify service with optional gating."""
         if not title:
             title_template = self.config_entry.options.get(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE)
@@ -2378,7 +2382,7 @@ class WashDataManager:
                         "extra_vars": extra_vars,
                     }
                 )
-                return
+                return False
 
         if self._notify_actions:
             self._run_notification_actions(variables)
@@ -2390,6 +2394,7 @@ class WashDataManager:
             event_type=event_type,
             extra_vars=extra_vars,
         )
+        return True
 
     def _send_notification_service(
         self,
@@ -2500,7 +2505,7 @@ class WashDataManager:
         pending: list[dict[str, Any]] = list(self._pending_notifications)
         self._pending_notifications = []
         for entry in pending:
-            self._dispatch_notification(
+            sent = self._dispatch_notification(
                 entry["message"],
                 title=entry.get("title"),
                 icon=entry.get("icon"),
@@ -2510,6 +2515,9 @@ class WashDataManager:
                 extra_vars=entry.get("extra_vars"),
                 allow_deferral=False,
             )
+            if sent and entry.get("event_type") == NOTIFY_EVENT_LIVE:
+                self._live_notification_sent_count += 1
+                self._last_live_notification_time = dt_util.now()
 
     def _handle_noise_cycle(self, max_power: float) -> None:
         """Handle a detected noise cycle."""
@@ -2763,7 +2771,7 @@ class WashDataManager:
         except KeyError:
             msg = msg_template.format(device=self.config_entry.title)
 
-        self._dispatch_notification(
+        sent = self._dispatch_notification(
             msg,
             event_type=NOTIFY_EVENT_LIVE,
             extra_vars={
@@ -2779,8 +2787,9 @@ class WashDataManager:
                 "live_updates_cap": self._live_notification_cap,
             },
         )
-        self._live_notification_sent_count += 1
-        self._last_live_notification_time = now
+        if sent:
+            self._live_notification_sent_count += 1
+            self._last_live_notification_time = now
 
     def _clear_live_progress_notification(self) -> None:
         """Clear active live progress notification on cycle completion."""
