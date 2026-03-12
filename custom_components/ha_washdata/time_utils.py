@@ -193,6 +193,20 @@ def migrate_power_data_to_offsets(cycle: dict[str, Any]) -> bool:
         return False
 
     start_time_iso: str | None = cycle.get("start_time")
+    if not start_time_iso:
+        _LOGGER.warning(
+            "migrate_power_data_to_offsets: missing start_time, skipping"
+        )
+        return False
+    try:
+        datetime.fromisoformat(start_time_iso)
+    except (ValueError, TypeError):
+        _LOGGER.warning(
+            "migrate_power_data_to_offsets: unparsable start_time '%s', skipping",
+            start_time_iso,
+        )
+        return False
+
     converted = power_data_to_offsets(raw_power_data, start_time_iso)
     if not converted:
         _LOGGER.warning(

@@ -95,4 +95,4 @@ class WasherAmbiguitySensor(WasherRunningBinarySensor):
     def extra_state_attributes(self) -> dict[str, Any]:  # type: ignore[override]
         """Return ambiguous candidate info."""
         details = self._manager.last_match_details
-        return {"margin": getattr(details, "ambiguity_margin", 0.0) if details else 0.0}
+        return {"margin": details.get("ambiguity_margin", 0.0) if details else 0.0}

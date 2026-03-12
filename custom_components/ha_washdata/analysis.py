@@ -359,9 +359,7 @@ def compute_envelope_worker(
 
     # 2. Reference Selection (Median Duration)
     # Input is now (offsets, values, duration)
-    normalized_curves_with_dur = normalized_curves
-
-    max_times = [float(dur) for _, _, dur in normalized_curves_with_dur]
+    max_times = [float(dur) for _, _, dur in normalized_curves]
     median_dur = float(np.median(max_times))
     ref_idx = int(np.argmin([abs(t - median_dur) for t in max_times]))
 
@@ -372,13 +370,13 @@ def compute_envelope_worker(
     num_points = max(50, int(target_duration / align_dt))
     time_grid = np.linspace(0.0, target_duration, num_points)
 
-    ref_offsets, ref_values, _ = normalized_curves_with_dur[ref_idx]
+    ref_offsets, ref_values, _ = normalized_curves[ref_idx]
     ref_array = np.interp(time_grid, ref_offsets, ref_values)
 
     # 3. Resample & DTW
     resampled: list[np.ndarray] = []
 
-    for i, (offsets, values, dur) in enumerate(normalized_curves_with_dur):
+    for i, (offsets, values, dur) in enumerate(normalized_curves):
         if i == ref_idx:
             resampled.append(ref_array)
             continue

@@ -335,9 +335,13 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
     )
     custom = custom_phases or []
     for item in custom:
+        try:
+            normalized_name = normalize_phase_name(str(item.get("name", "")))
+        except ValueError:
+            continue
         merged.append(
             {
-                "name": str(item.get("name", "")).strip(),
+                "name": normalized_name,
                 "description": str(item.get("description", "")).strip(),
                 "is_default": False,
             }

@@ -91,11 +91,16 @@ async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
     resources = (
         lovelace.resources if hasattr(lovelace, "resources") else lovelace["resources"]
     )
-    resources_obj = resources
-
-    await resources_obj.async_get_info()
 
     url2 = f"{url}?v={ver}"
+
+    if not isinstance(resources, ResourceStorageCollection):
+        _LOGGER.debug("Add extra JS module (non-storage): %s", url2)
+        add_extra_js_url(hass, url2)
+        return True
+
+    resources_obj = resources
+    await resources_obj.async_get_info()
 
     for raw_item in resources_obj.async_items():
         if not isinstance(raw_item, dict):
@@ -120,12 +125,8 @@ async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
 
         return True
 
-    if isinstance(resources, ResourceStorageCollection):
-        _LOGGER.debug("Add new lovelace resource: %s", url2)
-        await resources_obj.async_create_item({"res_type": "module", "url": url2})
-    else:
-        _LOGGER.debug("Add extra JS module: %s", url2)
-        add_extra_js_url(hass, url2)
+    _LOGGER.debug("Add new lovelace resource: %s", url2)
+    await resources_obj.async_create_item({"res_type": "module", "url": url2})
 
     return True
 

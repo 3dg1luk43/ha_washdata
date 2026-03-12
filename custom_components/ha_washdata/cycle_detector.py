@@ -500,14 +500,17 @@ class CycleDetector:
                 # Track time in idle (below exit_power threshold)
                 if power < self._config.anti_wrinkle_exit_power:
                     self._anti_wrinkle_idle_time += dt
+                    if self._anti_wrinkle_idle_time >= self._dynamic_end_threshold:
+                        self._transition_to(STATE_OFF, timestamp)
+                        return
                 else:
                     # Reset idle timer when power rises (burst detected)
                     self._anti_wrinkle_idle_time = 0.0
 
                 # Exit conditions:
-                # Only exit on:
-                # 1. Safety timeout (2 hours in anti-wrinkle), OR
-                # 2. External trigger (user_stop, external triggers handled by manager)
+                # 1. Idle duration exceeded (handled above), OR
+                # 2. Safety timeout (2 hours in anti-wrinkle), OR
+                # 3. External trigger (user_stop, external triggers handled by manager)
                 if (
                     self._state_enter_time
                     and (timestamp - self._state_enter_time).total_seconds() > 7200
@@ -948,6 +951,7 @@ class CycleDetector:
             target = STATE_FORCE_STOPPED
         elif (
             status == "completed"
+            and termination_reason != "user"
             and self._config.anti_wrinkle_enabled
             and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
         ):

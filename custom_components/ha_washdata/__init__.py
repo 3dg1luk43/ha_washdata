@@ -372,12 +372,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             DOMAIN, "auto_label_cycles", handle_auto_label_cycles
         )
 
-    # Register custom card via frontend.py
-    # pylint: disable=import-outside-toplevel
-    from .frontend import WashDataCardRegistration
+    # Register custom card via frontend.py — once per HA instance only.
+    if not hass.data.get("ha_washdata_card_registered"):
+        hass.data["ha_washdata_card_registered"] = True
+        # pylint: disable=import-outside-toplevel
+        from .frontend import WashDataCardRegistration
 
-    card_reg = WashDataCardRegistration(hass)
-    await card_reg.async_register()
+        card_reg = WashDataCardRegistration(hass)
+        await card_reg.async_register()
 
     # Register feedback service
     if not hass.services.has_service(

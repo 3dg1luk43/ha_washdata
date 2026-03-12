@@ -244,11 +244,11 @@ class LearningManager:
                 confidence_threshold=auto_label_conf,
             )
             if labeled:
-                # Persist label and rebuild envelope for the profile (issue #131)
-                self.hass.async_create_task(self.profile_store.async_save())
+                # Rebuild envelope first, then persist (issue #131)
                 self.hass.async_create_task(
                     self._async_rebuild_profile_envelope(detected_profile)
                 )
+                self.hass.async_create_task(self.profile_store.async_save())
                 _LOGGER.debug("Auto-labeled high-confidence cycle %s", cycle_id)
             return
 
@@ -500,14 +500,14 @@ class LearningManager:
 
         # self.profile_store.remove_pending_feedback(cycle_id) # Redundant if we delete directly above
 
-        await self.profile_store.async_save()
-
         # Rebuild envelopes for all modified profiles to recalculate min/max/avg (issue #131)
         for profile_name in profiles_to_rebuild:
             try:
                 await self.profile_store.async_rebuild_envelope(profile_name)
             except Exception as e:  # pylint: disable=broad-exception-caught
                 _LOGGER.error("Failed to rebuild envelope for profile '%s': %s", profile_name, e)
+
+        await self.profile_store.async_save()
 
         return True
 

@@ -75,6 +75,7 @@ async def async_setup_entry(
     # Initialize dynamic profile sensor manager
     profile_sensor_manager = WasherProfileSensorManager(manager, entry, async_add_entities)
     await profile_sensor_manager.async_update()
+    entry.async_on_unload(profile_sensor_manager.unsubscribe)
 
 
 class WasherBaseSensor(SensorEntity):
@@ -271,13 +272,13 @@ class WasherTotalDurationSensor(WasherBaseSensor):
     @property
     def native_unit_of_measurement(self) -> str | None:  # type: ignore[override]
         """Return the unit of measurement."""
-        if self._manager.check_state == "off":
+        if self._manager.check_state == STATE_OFF:
             return None
         return "min"
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state == "off":
+        if self._manager.check_state == STATE_OFF:
             return None
         if self._manager.total_duration:
             return int(self._manager.total_duration / 60)
@@ -345,7 +346,7 @@ class WasherElapsedTimeSensor(WasherBaseSensor):
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state == "off":
+        if self._manager.check_state == STATE_OFF:
             return 0
         start = self._manager.cycle_start_time
         if start:
@@ -539,11 +540,17 @@ class WasherProfileSensorManager:
         # Register callback for ALL updates (simplest hook we have)
         # Ideally we'd have a specific profile update signal, but general update is fine
         # as long as we debounce or check efficiently.
-        async_dispatcher_connect(
+        self._unsub_dispatcher = async_dispatcher_connect(
             manager.hass,
             self._signal,
             self._update_callback,
         )
+
+    def unsubscribe(self) -> None:
+        """Remove the dispatcher subscription."""
+        if self._unsub_dispatcher:
+            self._unsub_dispatcher()
+            self._unsub_dispatcher = None
 
     @callback
     def _update_callback(self) -> None:

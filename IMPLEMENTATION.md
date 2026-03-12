@@ -692,8 +692,7 @@ SVG Visualization (Power Curve + Phase Spans)
 graph TD
     A["Options Menu"] --> B{Action?}
     
-    B -- "Manage Phase Catalog" --> C["Select Device Type"]
-    C --> D{Action?}
+    B -- "Manage Phase Catalog" --> D{Action?}
     D -- "Create" --> E["Add New Custom Phase"]
     D -- "Edit" --> F["Select Phase"]
     F --> G["Edit Default or Custom"]

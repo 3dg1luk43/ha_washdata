@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 2 # We need at least 2 commits to diff against HEAD~1
 
       - name: Run Translation Script
-        uses: 3dg1luk43/ha_integration_translator/.github/actions/translate@main
+        uses: 3dg1luk43/ha_integration_translator/.github/actions/translate@3770f93dbbf81ea4139acd1e0ba8a5386d345cec
         with:
           translations_dir: custom_components/ha_washdata/translations
           all_languages: "true"

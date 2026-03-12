@@ -975,8 +975,8 @@ class ProfileStore:
             try:
                 start = float(item.get("start", 0.0))
                 end = float(item.get("end", 0.0))
-            except (TypeError, ValueError):
-                raise ValueError("invalid_phase_range")
+            except (TypeError, ValueError) as e:
+                raise ValueError("invalid_phase_range") from e
             if end <= start:
                 raise ValueError("invalid_phase_range")
             normalized.append({"name": name, "start": start, "end": end})
@@ -2187,8 +2187,8 @@ class ProfileStore:
 
             return svg
 
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.error("Error generating feedback comparison SVG: %s", e)
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.exception("Error generating feedback comparison SVG")
             return None
 
     def generate_feedback_multi_profile_svg(

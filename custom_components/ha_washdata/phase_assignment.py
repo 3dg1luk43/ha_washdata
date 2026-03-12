@@ -23,6 +23,8 @@ def parse_phase_timestamp(value: str, cycle_start_dt: datetime) -> datetime | No
 
     parsed = dt_util.parse_datetime(text)
     if parsed is not None:
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=cycle_start_dt.tzinfo)
         return parsed
 
     for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S"):

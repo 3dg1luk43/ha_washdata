@@ -1268,6 +1268,9 @@ class WashDataManager:
             CONF_DEVICE_TYPE,
             config_entry.data.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
         )
+        # Propagate to learning pipeline (captured at construction time)
+        self.learning_manager.device_type = self.device_type
+        self.learning_manager.suggestion_engine.device_type = self.device_type
 
         # Update detector config in-place
         old_min_power = self.detector.config.min_power
@@ -1631,6 +1634,10 @@ class WashDataManager:
 
         new_value = new_state.state
         old_value = old_state.state if old_state else None
+
+        # Ignore unavailability transitions (reconnects, disconnects)
+        if old_value is None or old_value == "unavailable" or new_value == "unavailable":
+            return
 
         # Determine if triggered based on inversion setting
         triggered = False
@@ -2781,6 +2788,22 @@ class WashDataManager:
                 "alert_once": True,
             },
         )
+
+        # Purge any queued live-progress entries so they don't replay later.
+        live_tag = self._live_notification_tag
+        self._pending_notifications = [
+            entry
+            for entry in self._pending_notifications
+            if not (
+                entry.get("event_type") == NOTIFY_EVENT_LIVE
+                and isinstance(entry.get("extra_vars"), dict)
+                and entry["extra_vars"].get("tag") == live_tag
+                and entry["extra_vars"].get("live_update") is True
+            )
+        ]
+
+        # Reset live-update state flags and counters.
+        self._reset_live_notification_state()
 
     def _check_pre_completion_notification(self) -> None:
         """Check and send pre-completion notification."""

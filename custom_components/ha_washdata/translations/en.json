@@ -177,10 +177,10 @@
           "auto_maintenance": "Enable Auto-Maintenance",
           "expose_debug_entities": "Expose Debug Entities",
           "save_debug_traces": "Save Debug Traces",
-          "anti_wrinkle_enabled": "Anti-Wrinkle Shield (Dryer Only)",
-          "anti_wrinkle_max_power": "Anti-Wrinkle Max Power (W)",
-          "anti_wrinkle_max_duration": "Anti-Wrinkle Max Duration (s)",
-          "anti_wrinkle_exit_power": "Anti-Wrinkle Exit Power (W)",
+          "anti_wrinkle_enabled": "Anti-Wrinkle Shield (Dryer/Washer-Dryer Only)",
+          "anti_wrinkle_max_power": "Anti-Wrinkle Max Power (W) (Dryer/Washer-Dryer Only)",
+          "anti_wrinkle_max_duration": "Anti-Wrinkle Max Duration (s) (Dryer/Washer-Dryer Only)",
+          "anti_wrinkle_exit_power": "Anti-Wrinkle Exit Power (W) (Dryer/Washer-Dryer Only)",
           "dtw_bandwidth": "DTW Bandwidth",
           "external_end_trigger_enabled": "Enable External Cycle End Trigger",
           "external_end_trigger": "External Cycle End Sensor",
@@ -739,7 +739,7 @@
       "fields": {
         "device_id": {
           "name": "Device",
-          "description": "The washing machine device to label."
+          "description": "The WashData device to label."
         },
         "cycle_id": {
           "name": "Cycle ID",
@@ -757,7 +757,7 @@
       "fields": {
         "device_id": {
           "name": "Device",
-          "description": "The washing machine device."
+          "description": "The WashData device."
         },
         "profile_name": {
           "name": "Profile Name",
@@ -775,7 +775,7 @@
       "fields": {
         "device_id": {
           "name": "Device",
-          "description": "The washing machine device."
+          "description": "The WashData device."
         },
         "profile_name": {
           "name": "Profile Name",
@@ -793,7 +793,7 @@
       "fields": {
         "device_id": {
           "name": "Device",
-          "description": "The washing machine device."
+          "description": "The WashData device."
         },
         "confidence_threshold": {
           "name": "Confidence Threshold",
@@ -803,11 +803,11 @@
     },
     "export_config": {
       "name": "Export Config",
-      "description": "Export this washer's profiles and cycles to a JSON file (per device).",
+      "description": "Export this device's profiles and cycles to a JSON file (per device).",
       "fields": {
         "device_id": {
           "name": "Device",
-          "description": "The washing machine device to export."
+          "description": "The WashData device to export."
         },
         "path": {
           "name": "Path",
@@ -817,11 +817,11 @@
     },
     "import_config": {
       "name": "Import Config",
-      "description": "Import profiles and cycles for this washer from a JSON export file.",
+      "description": "Import profiles and cycles for this device from a JSON export file.",
       "fields": {
         "device_id": {
           "name": "Device",
-          "description": "The washing machine device to import into."
+          "description": "The WashData device to import into."
         },
         "path": {
           "name": "Path",
@@ -869,7 +869,7 @@
       "fields": {
         "device_id": {
           "name": "Device",
-          "description": "The washing machine device to record."
+          "description": "The WashData device to record."
         }
       }
     },
@@ -879,7 +879,7 @@
       "fields": {
         "device_id": {
           "name": "Device",
-          "description": "The washing machine device to stop recording."
+          "description": "The WashData device to stop recording."
         }
       }
     }
