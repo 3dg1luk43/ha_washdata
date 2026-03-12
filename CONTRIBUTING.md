@@ -169,7 +169,7 @@ Review open PRs and provide constructive feedback. Even experienced contributors
 2. **Test your changes**:
    ```bash
    ./run_tests.sh
-   python3 -m py_compile custom_components/ha_washdata/*.py
+   python3 -m compileall custom_components/ha_washdata tests/ --quiet
    ```
 
 3. **Update documentation**:

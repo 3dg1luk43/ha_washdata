@@ -68,7 +68,7 @@
           "notify_service": "Notification Service (e.g. notify.mobile_app)",
           "notify_actions": "Notification Actions",
           "notify_people": "Delay Delivery Until These People Are Home",
-          "notify_only_when_home": "Only Notify When Home",
+          "notify_only_when_home": "Delay Notifications Until Selected Person Is Home",
           "notify_fire_events": "Fire Automation Events",
           "notify_events": "Events to Notify",
           "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
@@ -89,7 +89,7 @@
           "notify_actions": "Optional Home Assistant action sequence to run for notifications (scripts, notify, TTS, etc.). If set, actions run before fallback notify service.",
           "notify_people": "People entities used for presence gating. When enabled, notification delivery is delayed until at least one selected person is home.",
           "notify_only_when_home": "If enabled, delay notifications until at least one selected person is home.",
-          "notify_fire_events": "If enabled, fire Home Assistant events for cycle start and end (ha_washdata_cycle_started/ended) to drive automations.",
+          "notify_fire_events": "If enabled, fire Home Assistant events for cycle start and end (ha_washdata_cycle_started and ha_washdata_cycle_ended) to drive automations.",
           "notify_events": "Which events to send notifications for.",
           "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
           "notify_title": "Custom title for notifications. Supports {device} placeholder.",
@@ -106,7 +106,7 @@
           "notify_service": "Notification Service (e.g. notify.mobile_app)",
           "notify_actions": "Notification Actions",
           "notify_people": "Delay Delivery Until These People Are Home",
-          "notify_only_when_home": "Only Notify When Home",
+          "notify_only_when_home": "Delay Notifications Until Selected Person Is Home",
           "notify_fire_events": "Fire Automation Events",
           "notify_events": "Events to Notify",
           "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
@@ -124,7 +124,7 @@
           "notify_actions": "Optional Home Assistant action sequence to run for notifications (scripts, notify, TTS, etc.). If set, actions run before fallback notify service.",
           "notify_people": "People entities used for presence gating. When enabled, notification delivery is delayed until at least one selected person is home.",
           "notify_only_when_home": "If enabled, delay notifications until at least one selected person is home.",
-          "notify_fire_events": "If enabled, fire Home Assistant events for cycle start and end (ha_washdata_cycle_started/ended) to drive automations.",
+          "notify_fire_events": "If enabled, fire Home Assistant events for cycle start and end (ha_washdata_cycle_started and ha_washdata_cycle_ended) to drive automations.",
           "notify_events": "Which events to send notifications for.",
           "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
           "notify_live_enabled": "Enable in-place live progress updates for mobile app notifications.",
@@ -803,7 +803,7 @@
     },
     "export_config": {
       "name": "Export Config",
-      "description": "Export this device's profiles and cycles to a JSON file (per device).",
+      "description": "Export this device's profiles, cycles, and settings to a JSON file (per device).",
       "fields": {
         "device_id": {
           "name": "Device",
@@ -817,7 +817,7 @@
     },
     "import_config": {
       "name": "Import Config",
-      "description": "Import profiles and cycles for this device from a JSON export file.",
+      "description": "Import profiles, cycles, and settings for this device from a JSON export file (settings may be overwritten).",
       "fields": {
         "device_id": {
           "name": "Device",

@@ -337,7 +337,9 @@ def compute_envelope_worker(
         values = np.array(values_list)
         dur = float(curve_duration) if curve_duration is not None else float(offsets[-1])
 
-        normalized_curves.append((offsets, values, dur))
+        # Validate duration is positive and finite before appending
+        if dur > 0 and np.isfinite(dur):
+            normalized_curves.append((offsets, values, dur))
 
         if len(offsets) > 1:
             intervals = np.diff(offsets)
@@ -357,6 +359,10 @@ def compute_envelope_worker(
 
     target_duration = max_times[ref_idx]
     avg_sample_rate = float(np.median(sampling_rates)) if sampling_rates else 2.0
+
+    # Ensure target_duration is valid for calculations
+    if not (target_duration > 0 and np.isfinite(target_duration)):
+        target_duration = 1.0  # Safe default
 
     align_dt = avg_sample_rate
     num_points = max(50, int(target_duration / align_dt))
@@ -490,6 +496,10 @@ def verify_profile_alignment_worker(
         mapped_idx = start_ref + ref_seg_idx
 
     mapped_idx = min(mapped_idx, len(envelope_time_grid)-1)
+
+    # Ensure sequences are non-empty before indexing
+    if not envelope_time_grid.size or not ref.size:
+        return None
 
     mapped_time = float(envelope_time_grid[mapped_idx])
     mapped_power = float(ref[mapped_idx])
