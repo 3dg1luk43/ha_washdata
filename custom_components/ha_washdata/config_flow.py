@@ -300,15 +300,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         )
 
     async def _options_text(self, text_key: str, default: str) -> str:
-        """Resolve options-localized text by key."""
+        """Resolve shared localized text by key from selector namespace."""
         lang = self.context.get("language") or self.hass.config.language
-        if self._options_translations is None:
-            self._options_translations = await translation.async_get_translations(
-                self.hass, lang, "options", {DOMAIN}
+        if self._selector_translations is None:
+            self._selector_translations = await translation.async_get_translations(
+                self.hass, lang, "selector", {DOMAIN}
             )
 
-        return self._options_translations.get(
-            f"component.{DOMAIN}.options.common_text.{text_key}",
+        return self._selector_translations.get(
+            f"component.{DOMAIN}.selector.common_text.options.{text_key}",
             default,
         )
 
