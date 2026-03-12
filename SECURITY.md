@@ -112,7 +112,7 @@ To secure your Home Assistant installation:
 ❌ Phone home with usage analytics  
 ❌ Download profiles or firmware updates  
 ❌ Run arbitrary user code  
-❌ Store sensitive data unencrypted on disk  
+ℹ️ Store configuration and power history locally without encryption (relies on filesystem permissions)  
 
 ### Dependencies
 

@@ -187,12 +187,6 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     for k in keys_to_remove:
         data.pop(k, None)
 
-    if version > 3:
-        _LOGGER.error(
-            "Refusing to rewrite unsupported future schema %s.%s", version, minor_version
-        )
-        return False
-
     hass.config_entries.async_update_entry(
         entry,
         data=data,

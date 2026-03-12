@@ -145,7 +145,7 @@ class CycleRecorder:
             "is_recording": self._is_recording,
             "start_time": self._start_time.isoformat() if self._start_time else None,
             "buffer": self._buffer,
-            "last_run": getattr(self, "_last_run", None),
+            "last_run": self._last_run,
         }
         await self._store.async_save(data)
         self._last_save = dt_util.now()
@@ -247,11 +247,11 @@ class CycleRecorder:
             # Median calculation without numpy
             dts.sort()
             mid = len(dts) // 2
-            avg_dt = dts[mid]
-            if avg_dt <= 0:
-                avg_dt = 1.0  # Fallback
+            median_dt = dts[mid]
+            if median_dt <= 0:
+                median_dt = 1.0  # Fallback
         else:
-            avg_dt = 1.0
+            median_dt = 1.0
 
         # 1. Head Trim
         # Time from recording start to first active sample
@@ -264,11 +264,11 @@ class CycleRecorder:
         # We start at rec_start_ts. We want start_time + trim <= head_ts
         # floor ensures this.
 
-        steps_head = int(raw_head_trim / avg_dt)
+        steps_head = int(raw_head_trim / median_dt)
         # Align trim to sampling rate (floor to keep buffer before active sample)
 
         # However, if using the "floor" logic makes it 0, that's fine.
-        head_trim = steps_head * avg_dt
+        head_trim = steps_head * median_dt
 
         # 2. Tail Trim
         # Time from last active sample to recording end
@@ -282,7 +282,7 @@ class CycleRecorder:
         else:
             # If it's very long, suggest trimming but keep a TRIM_BUFFER_S buffer
             tail_trim = max(0.0, raw_tail_trim - TRIM_BUFFER_S)
-            steps_tail = int(tail_trim / avg_dt)
-            tail_trim = steps_tail * avg_dt
+            steps_tail = int(tail_trim / median_dt)
+            tail_trim = steps_tail * median_dt
 
-        return round(head_trim, 1), round(tail_trim, 1), round(avg_dt, 1)
+        return round(head_trim, 1), round(tail_trim, 1), round(median_dt, 1)
