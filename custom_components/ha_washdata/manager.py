@@ -2526,12 +2526,27 @@ class WashDataManager:
                 domain=DOMAIN,
                 logger=_LOGGER,
             )
+        except Exception as err:
+            # Script construction failed - likely invalid configuration/syntax
+            _LOGGER.error(
+                "Invalid notification action configuration for %s: %s",
+                self.config_entry.title,
+                err,
+            )
+            return False
+
+        try:
             self.hass.async_create_task(
                 script.async_run(variables, context=Context())
             )
             return True
         except Exception as err:
-            _LOGGER.warning("Failed to run notification actions: %s", err)
+            # Runtime error during script execution
+            _LOGGER.warning(
+                "Notification action execution failed for %s: %s",
+                self.config_entry.title,
+                err,
+            )
             return False
 
     def _is_any_notify_person_home(self) -> bool:
@@ -2869,8 +2884,17 @@ class WashDataManager:
             return
 
         # Invoke notification actions to clear live notification in action-based setups
+        # Include full context variables expected by notification action handlers
         self._run_notification_actions(
             {
+                "device": self.config_entry.title,
+                "program": "",  # Cleared marker
+                "message": "",  # Empty for cleared
+                "title": "",  # Clear title
+                "icon": None,
+                "event_type": NOTIFY_EVENT_LIVE,
+                "person_entity_id": None,
+                "person_name": None,
                 "tag": self._live_notification_tag,
                 "live_update": True,
                 "alert_once": True,
