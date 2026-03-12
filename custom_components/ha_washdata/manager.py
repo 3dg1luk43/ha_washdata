@@ -1115,6 +1115,11 @@ class WashDataManager:
                         )
                     else:
                         self._current_program = "detecting..."
+                    
+                    # Mark start as already handled for restored cycles to prevent re-emission
+                    self._notified_start = True
+                    self._start_event_fired = True
+                    
                     self._start_watchdog()
                 else:
                     await self.profile_store.async_clear_active_cycle()
@@ -2133,10 +2138,10 @@ class WashDataManager:
                 self._start_watchdog()
 
             # Send notification if enabled (Moved to _async_do_perform_matching)
-        elif new_state == STATE_OFF and old_state == STATE_RUNNING:
-            self._stop_watchdog()  # Stop watchdog when cycle ends
-
+        
+        # Stop watchdog when transitioning to OFF from any active state
         if new_state == STATE_OFF:
+            self._stop_watchdog()  # Stop watchdog regardless of previous state
             self._cycle_start_time = None
 
         self._notify_update()
@@ -2862,6 +2867,15 @@ class WashDataManager:
 
         if self._live_notification_sent_count <= 0 and not self._live_waiting_notification_sent:
             return
+
+        # Invoke notification actions to clear live notification in action-based setups
+        self._run_notification_actions(
+            {
+                "tag": self._live_notification_tag,
+                "live_update": True,
+                "alert_once": True,
+            }
+        )
 
         self._send_notification_service(
             "clear_notification",
