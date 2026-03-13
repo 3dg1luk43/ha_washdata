@@ -2471,6 +2471,7 @@ class WashDataManager:
         if self._notify_actions:
             actions_sent = bool(self._run_notification_actions(variables))
 
+        # Keep action execution independent from notify-service delivery.
         service_sent = self._send_notification_service(
             message,
             title=title,

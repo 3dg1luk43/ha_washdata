@@ -18,6 +18,7 @@ from .const import (
     CONF_EXPOSE_DEBUG_ENTITIES,
 )
 from .manager import WashDataManager
+from .sensor import cleanup_orphaned_diagnostic_entities
 
 
 async def async_setup_entry(
@@ -33,6 +34,7 @@ async def async_setup_entry(
         entities.append(WasherAmbiguitySensor(manager, entry))
 
     async_add_entities(entities)
+    cleanup_orphaned_diagnostic_entities(hass, manager, entry)
 
 
 class WasherRunningBinarySensor(BinarySensorEntity):

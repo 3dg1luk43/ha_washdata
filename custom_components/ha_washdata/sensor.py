@@ -39,6 +39,81 @@ from .manager import WashDataManager
 _LOGGER = logging.getLogger(__name__)
 
 
+_STATIC_DIAGNOSTIC_SUFFIXES = {
+    "debug_info",
+    "suggestions",
+    "match_confidence",
+    "top_candidates",
+    "ambiguity",
+}
+
+
+def _profile_count_unique_id(entry_id: str, profile_name: str) -> str:
+    """Build deterministic unique_id for a profile count diagnostic sensor."""
+    profile_token = hashlib.sha256(profile_name.encode("utf-8")).hexdigest()[:8]
+    return f"{entry_id}_profile_count_{profile_token}"
+
+
+def _expected_diagnostic_unique_ids(manager: WashDataManager, entry: ConfigEntry) -> set[str]:
+    """Return expected diagnostic unique_ids for this config entry."""
+    expected = {
+        f"{entry.entry_id}_debug_info",
+        f"{entry.entry_id}_suggestions",
+    }
+
+    if entry.options.get(CONF_EXPOSE_DEBUG_ENTITIES):
+        expected.update(
+            {
+                f"{entry.entry_id}_match_confidence",
+                f"{entry.entry_id}_top_candidates",
+                f"{entry.entry_id}_ambiguity",
+            }
+        )
+
+    for profile in manager.profile_store.list_profiles():
+        profile_name = profile.get("name")
+        if isinstance(profile_name, str) and profile_name:
+            expected.add(_profile_count_unique_id(entry.entry_id, profile_name))
+
+    return expected
+
+
+def cleanup_orphaned_diagnostic_entities(
+    hass: HomeAssistant, manager: WashDataManager, entry: ConfigEntry
+) -> int:
+    """Remove stale diagnostic entities for this config entry from entity registry."""
+    ent_reg = entity_registry.async_get(hass)
+    expected_unique_ids = _expected_diagnostic_unique_ids(manager, entry)
+
+    removed = 0
+    entry_prefix = f"{entry.entry_id}_"
+    for reg_entry in entity_registry.async_entries_for_config_entry(ent_reg, entry.entry_id):
+        unique_id = reg_entry.unique_id or ""
+        if not unique_id.startswith(entry_prefix):
+            continue
+
+        suffix = unique_id[len(entry_prefix) :]
+        is_diagnostic_family = (
+            suffix in _STATIC_DIAGNOSTIC_SUFFIXES
+            or suffix.startswith("profile_count_")
+            or suffix == "wash_phase"
+        )
+        if not is_diagnostic_family:
+            continue
+
+        if unique_id not in expected_unique_ids:
+            ent_reg.async_remove(reg_entry.entity_id)
+            removed += 1
+
+    if removed:
+        _LOGGER.info(
+            "Removed %s orphaned diagnostic entities for entry %s",
+            removed,
+            entry.entry_id,
+        )
+    return removed
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -71,12 +146,8 @@ async def async_setup_entry(
 
     async_add_entities(entities)
 
-    # Remove legacy diagnostic phase entity from registry if present.
-    ent_reg = entity_registry.async_get(hass)
-    legacy_unique_id = f"{entry.entry_id}_wash_phase"
-    legacy_entity_id = ent_reg.async_get_entity_id("sensor", DOMAIN, legacy_unique_id)
-    if legacy_entity_id:
-        ent_reg.async_remove(legacy_entity_id)
+    # Reconcile diagnostics at startup so stale unavailable entries are auto-removed.
+    cleanup_orphaned_diagnostic_entities(hass, manager, entry)
 
     # Initialize dynamic profile sensor manager
     profile_sensor_manager = WasherProfileSensorManager(manager, entry, async_add_entities)
@@ -262,7 +333,7 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
     def native_value(self):  # type: ignore[override]
         if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE):
             return None
-        if self._manager.time_remaining:
+        if self._manager.time_remaining is not None:
             return int(self._manager.time_remaining / 60)
         return None
 
@@ -635,6 +706,12 @@ class WasherProfileSensorManager:
                                     name,
                                     err,
                                 )
+
+        # Handle stale diagnostics that were left in registry by previous naming schemes
+        # or profile renames processed before this manager was initialized.
+        cleanup_orphaned_diagnostic_entities(
+            self._manager.hass, self._manager, self._entry
+        )
 
 
 class WasherSuggestionsSensor(WasherBaseSensor):

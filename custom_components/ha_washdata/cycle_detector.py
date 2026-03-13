@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, cast
@@ -286,11 +287,17 @@ class CycleDetector:
                 match_name = str(raw_name) if raw_name is not None else None
                 try:
                     confidence = float(raw_confidence)
+                    if not math.isfinite(confidence):
+                        confidence = 0.0
+                        _LOGGER.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
                 except (TypeError, ValueError):
                     confidence = 0.0
                     _LOGGER.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
                 try:
                     expected_duration = float(raw_expected_duration)
+                    if not math.isfinite(expected_duration):
+                        expected_duration = 0.0
+                        _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
                 except (TypeError, ValueError):
                     expected_duration = 0.0
                     _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
@@ -308,12 +315,20 @@ class CycleDetector:
                     match_name = str(raw_name) if raw_name is not None else None
                     try:
                         confidence = float(raw_confidence)
+                        if not math.isfinite(confidence):
+                            confidence = 0.0
+                            _LOGGER.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
                     except (TypeError, ValueError):
                         confidence = 0.0
+                        _LOGGER.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
                     try:
                         expected_duration = float(raw_expected_duration)
+                        if not math.isfinite(expected_duration):
+                            expected_duration = 0.0
+                            _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
                     except (TypeError, ValueError):
                         expected_duration = 0.0
+                        _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
                     phase_name = (
                         str(raw_phase_name) if raw_phase_name is not None else None
                     )
@@ -990,7 +1005,7 @@ class CycleDetector:
             target = STATE_FORCE_STOPPED
         elif (
             status == "completed"
-            and termination_reason in {"timeout", "smart"}
+            and termination_reason in {"timeout", "smart", "user"}
             and self._config.anti_wrinkle_enabled
             and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
         ):
