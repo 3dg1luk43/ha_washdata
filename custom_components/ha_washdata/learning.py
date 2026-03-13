@@ -392,7 +392,7 @@ class LearningManager:
                         "metrics": cand.get("metrics", {}),
                         "profile_duration": float(cand.get("profile_duration", 0.0)),
                     })
-                except (TypeError, ValueError, KeyError):
+                except (TypeError, ValueError, KeyError, AttributeError):
                     continue
 
         feedback_req: dict[str, Any] = {

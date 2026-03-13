@@ -417,7 +417,7 @@
         }
       },
       "label_cycle": {
-        "title": "Label Cycle",
+        "title": "Labelu Cylch",
         "description": "{cycle_info}",
         "data": {
           "profile_name": "Proffil",
@@ -458,7 +458,7 @@
         }
       },
       "editor_select": {
-        "title": "Dewiswch Cycles",
+        "title": "Dewiswch Gylchoedd",
         "description": "Dewiswch y cylch(au) i'w prosesu.\n\n{info_text}",
         "data": {
           "selected_cycles": "Beiciau"
@@ -513,7 +513,7 @@
       },
       "record_cycle": {
         "title": "Cylch Cofnodi",
-        "description": "Cofnodwch gylchred â llaw i greu proffil glân heb ymyrraeth.\n\nStatws: ***{status}**\nHyd: {duration}s\nSamplau: {samples}",
+        "description": "Cofnodwch gylchred â llaw i greu proffil glân heb ymyrraeth.\n\nStatws: **{status}**\nHyd: {duration}s\nSamplau: {samples}",
         "data": {
           "action": "Gweithred"
         }

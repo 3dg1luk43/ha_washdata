@@ -172,8 +172,8 @@
           "auto_tune_noise_events_threshold": "Automatické ladění: Práh událostí hluku",
           "running_dead_zone": "Běžící mrtvá zóna (sekundy)",
           "end_repeat_count": "Ukončit počet opakování",
-          "start_energy_threshold": "Start Energy Gate (Wh)",
-          "end_energy_threshold": "Koncová energetická brána (Wh)",
+          "start_energy_threshold": "Počáteční energetický práh (Wh)",
+          "end_energy_threshold": "Koncový energetický práh (Wh)",
           "auto_maintenance": "Povolit automatickou údržbu",
           "expose_debug_entities": "Vystavit ladicí entity",
           "save_debug_traces": "Uložit stopy ladění",
@@ -522,7 +522,7 @@
         "title": "Procesní záznam",
         "description": "![Graf]({graph_url})\n\n**Graf ukazuje nezpracovaný záznam.** Modrá = Zachovat, Červená = Navrhované oříznutí.\n*Graf je statický a neaktualizuje se změnami formuláře.*\n\nNahrávání zastaveno. Oříznutí jsou zarovnána podle zjištěné vzorkovací frekvence (~{sampling_rate} s).\n\nNezpracovaná délka: {duration} s\nUkázky: {samples}",
         "data": {
-          "head_trim": "Ǟříznutí začátku (sekundy)",
+          "head_trim": "Oříznutí začátku (sekundy)",
           "tail_trim": "Konec oříznutí (sekundy)",
           "save_mode": "Uložit cíl",
           "profile_name": "Název profilu"

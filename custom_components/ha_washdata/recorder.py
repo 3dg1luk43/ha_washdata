@@ -77,6 +77,12 @@ class CycleRecorder:
         """Load state from storage."""
         data_raw = await self._store.async_load()
         data = data_raw if isinstance(data_raw, dict) else {}
+        # Reset to safe defaults before applying loaded values so stale state
+        # is never left in place when loaded data omits keys.
+        self._is_recording = False
+        self._start_time = None
+        self._buffer = []
+        self._last_run = None
         if data:
             self._is_recording = bool(data.get("is_recording", False))
             start_iso = data.get("start_time")
