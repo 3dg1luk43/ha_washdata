@@ -31,7 +31,7 @@ async def async_get_config_entry_diagnostics(
         last_cycle = past_cycles[-1]
         last_cycle_summary = {
             "id": last_cycle.get("id"),
-            "profile_name": last_cycle.get("profile_name"),
+            "has_profile_name": bool(last_cycle.get("profile_name")),
             "status": last_cycle.get("status"),
             "start_time": last_cycle.get("start_time"),
             "end_time": last_cycle.get("end_time"),
@@ -73,6 +73,10 @@ async def async_get_config_entry_diagnostics(
         "external_end_trigger",
     }
 
+    _STORE_REDACT_KEYS = {
+        "profile_name",
+    }
+
     def _redact(obj: Any) -> Any:
         if isinstance(obj, dict):
             return {
@@ -81,6 +85,16 @@ async def async_get_config_entry_diagnostics(
             }
         if isinstance(obj, list):
             return [_redact(v) for v in obj]
+        return obj
+
+    def _sanitize_store_data(obj: Any) -> Any:
+        if isinstance(obj, dict):
+            return {
+                k: "<redacted_profile_name>" if k in _STORE_REDACT_KEYS else _sanitize_store_data(v)
+                for k, v in obj.items()
+            }
+        if isinstance(obj, list):
+            return [_sanitize_store_data(v) for v in obj]
         return obj
 
     raw_entry = entry.as_dict()
@@ -96,5 +110,5 @@ async def async_get_config_entry_diagnostics(
             "profile_sample_repair_stats": manager.profile_sample_repair_stats,
             "suggestions": manager.profile_store.get_suggestions(),
         },
-        "store_data": store_data,
+        "store_data": _sanitize_store_data(store_data),
     }

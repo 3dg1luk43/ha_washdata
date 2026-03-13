@@ -85,7 +85,8 @@ class CycleRecorder:
         self._buffer = []
         self._last_run = None
         if data:
-            self._is_recording = bool(data.get("is_recording", False))
+            value = data.get("is_recording", False)
+            self._is_recording = value if isinstance(value, bool) else False
             start_iso = data.get("start_time")
             if isinstance(start_iso, str) and start_iso:
                 self._start_time = dt_util.parse_datetime(start_iso)

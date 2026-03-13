@@ -452,6 +452,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 corrected_duration=corrected_duration,
                 notes=notes,
             )
+            manager.notify_update()
 
             if success:
                 # Best-effort dismiss the feedback notification if it exists.
