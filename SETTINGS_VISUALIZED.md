@@ -3,6 +3,18 @@
 
 This guide explains the key numerical parameters in **WashData** using visual graphs. Tuning these advanced settings allows the integration to adapt to any appliance's specific power behavior.
 
+## Suggested Settings Workflow
+
+If you see `sensor.<name>_suggested_settings` above `0`, WashData has actionable recommendations ready.
+
+To review them safely:
+1. Open **Settings > Devices & Services > WashData > Configure > Advanced Settings**.
+2. Check **Apply Suggested Values**.
+3. Review the change summary.
+4. Confirm to stage the values, then save only what you want.
+
+Suggestions are optional and require explicit confirmation before they are staged.
+
 ---
 
 ## 1. Signal Conditioning

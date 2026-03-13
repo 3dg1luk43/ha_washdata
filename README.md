@@ -127,6 +127,21 @@ If "Auto-Detect" isn't working perfectly, use **Advanced Settings** to tune the 
 
 > **Pro Tip**: Use the **Apply Suggestions** button in Settings. It analyzes your history and calculates the perfect text-book values for your specific machine.
 
+### Suggested Settings Sensor: What To Do
+
+WashData exposes a diagnostic sensor: `sensor.<name>_suggested_settings`.
+
+- `0` means there are currently no actionable recommendations.
+- `> 0` means recommendations are ready to review.
+
+When this sensor is above 0:
+1. Go to **Settings > Devices & Services > WashData > Configure > Advanced Settings**.
+2. Enable **Apply Suggested Values**.
+3. Review the change summary step.
+4. Confirm to stage values, then save only the changes you agree with.
+
+Suggested values are optional and are never forced automatically.
+
 ### 🏷️ Phase Catalog & Assignment
 
 Phases are descriptive labels for distinct power stages within a cycle (e.g., "Pre-Wash", "Heating", "Spin").
