@@ -193,7 +193,7 @@ class CycleRecorder:
             recording_start: Actual start time of recording (for head trim relative to start)
             recording_end: Actual end time of recording (for tail trim relative to end)
 
-        Returns: (head_trim_seconds, tail_trim_seconds, average_noise_power)
+        Returns: (head_trim_seconds, tail_trim_seconds, median_dt)
         """
         if not data:
             # No data found - return full recording duration as trim
@@ -247,7 +247,10 @@ class CycleRecorder:
             # Median calculation without numpy
             dts.sort()
             mid = len(dts) // 2
-            median_dt = dts[mid]
+            if len(dts) % 2 == 0:
+                median_dt = (dts[mid - 1] + dts[mid]) / 2.0
+            else:
+                median_dt = dts[mid]
             if median_dt <= 0:
                 median_dt = 1.0  # Fallback
         else:

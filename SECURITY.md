@@ -102,7 +102,7 @@ To secure your Home Assistant installation:
 
 ### What WashData DOES
 
-✅ Process power readings locally (no external calls)  
+✅ Process core power readings and detection locally (no external calls); optional notification or integration features may transmit payloads externally  
 ✅ Use NumPy for calculations (stable, well-audited library)  
 ✅ Store config/profiles locally in Home Assistant  
 ✅ Support manual profile creation (no auto-learning from external sources)  

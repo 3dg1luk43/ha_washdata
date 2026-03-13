@@ -343,8 +343,18 @@ def compute_envelope_worker(
         if len(offsets_list) < 3 or len(values_list) < 3:
             continue
 
-        offsets = np.array(offsets_list)
-        values = np.array(values_list)
+        try:
+            offsets = np.asarray(offsets_list, dtype=float)
+            values = np.asarray(values_list, dtype=float)
+        except (TypeError, ValueError):
+            continue
+
+        # Drop paired entries where either coordinate is non-finite.
+        finite_mask = np.isfinite(offsets) & np.isfinite(values)
+        offsets = offsets[finite_mask]
+        values = values[finite_mask]
+        if len(offsets) < 3:
+            continue
 
         try:
             dur = float(curve_duration) if curve_duration is not None else float(offsets[-1])

@@ -126,6 +126,13 @@ def power_data_to_offsets(
                     # Fallback: use first reading as zero reference
                     if first_ts is None:
                         first_ts = t_val
+                        _LOGGER.warning(
+                            "power_data_to_offsets: start_time_iso missing/invalid; "
+                            "shifting timestamps to first sample as zero reference "
+                            "(first sample: %s, total samples: %d)",
+                            ts_raw,
+                            len(power_data),
+                        )
                     offset = round(t_val - first_ts, 1)
                 result.append([max(0.0, offset), p])
             except (TypeError, ValueError, AttributeError, IndexError):

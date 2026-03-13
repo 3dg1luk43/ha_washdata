@@ -403,7 +403,7 @@
         }
       },
       "select_cycle_to_label": {
-        "title": "Kies Cycle to Label",
+        "title": "Kies Siklus om te Etiketeer",
         "description": "✓ = voltooi, ⚠ = hervat, ✗ = onderbreek",
         "data": {
           "cycle_id": "Siklus"

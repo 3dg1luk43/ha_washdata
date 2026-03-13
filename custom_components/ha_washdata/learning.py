@@ -409,7 +409,6 @@ class LearningManager:
             "ranking": ranking_summary,  # Top candidates for UI display
         }
 
-        self.profile_store.get_pending_feedback()[cycle_id] = feedback_req
         self.profile_store.add_pending_feedback(cycle_id, feedback_req)
 
         est_min = int(estimated_duration / 60) if estimated_duration else 0

@@ -76,7 +76,7 @@
           "notify_icon": "Meddelelsesikon",
           "notify_start_message": "Start meddelelsesformat",
           "notify_finish_message": "Afslut meddelelsesformat",
-          "notify_pre_complete_message": "Pre-Completion Message Format",
+          "notify_pre_complete_message": "Format for forudgående færdiggørelsesbesked",
           "show_advanced": "Rediger avancerede indstillinger (næste trin)"
         },
         "data_description": {
@@ -117,7 +117,7 @@
           "notify_icon": "Meddelelsesikon",
           "notify_start_message": "Start meddelelsesformat",
           "notify_finish_message": "Afslut meddelelsesformat",
-          "notify_pre_complete_message": "Pre-Completion Message Format"
+          "notify_pre_complete_message": "Format for forudgående færdiggørelsesbesked"
         },
         "data_description": {
           "notify_service": "Home Assistant giver besked om, at tjenesten skal bruges (valgfrit).",
@@ -157,7 +157,7 @@
           "profile_match_max_duration_ratio": "Maks. varighedsforhold for profilmatch (1,0-3,0)",
           "smoothing_window": "Udglatningsvindue (prøver)",
           "profile_match_threshold": "Profilmatchtærskel",
-          "profile_unmatch_threshold": "Profil Unmatch Threshold",
+          "profile_unmatch_threshold": "Profil afmatchtærskel",
           "profile_duration_tolerance": "Tolerance for profilmatchsvarighed (0-0,5)",
           "interrupted_min_seconds": "Afbrudt: Minimum køretid (sekunder)",
           "abrupt_drop_watts": "Afbrudt: Abrupt Drop Absolute (W)",
@@ -165,7 +165,7 @@
           "abrupt_high_load_factor": "Afbrudt: Højbelastningsfaktor",
           "max_past_cycles": "Retention: Maks. gemte cyklusser",
           "max_full_traces_per_profile": "Retention: Max fulde spor pr. profil",
-          "max_full_traces_unlabeled": "Retention: Max Full Traces Umærket",
+          "max_full_traces_unlabeled": "Retention: Maks. fulde spor umærket",
           "watchdog_interval": "Watchdog-interval (sekunder)",
           "completion_min_seconds": "Gennemførelse Minimum Runtime (sekunder)",
           "notify_before_end_minutes": "Underretning om forudgående afslutning (minutter før afslutning)",
@@ -451,7 +451,7 @@
         }
       },
       "interactive_editor": {
-        "title": "Merge/Split Interactive Editor",
+        "title": "Interaktiv flet/opdel-editor",
         "description": "Vælg en manuel handling, der skal udføres på din cyklushistorik.",
         "data": {
           "editor_action": "Handling"
@@ -473,15 +473,15 @@
           "new_profile_name": "Nyt profilnavn",
           "confirm_commit": "Ja, jeg bekræfter denne handling",
           "segment_0_profile": "Segment 1 profil",
-          "segment_1_profile": "Segment 2-profil",
-          "segment_2_profile": "Segment 3-profil",
+          "segment_1_profile": "Segment 2 profil",
+          "segment_2_profile": "Segment 3 profil",
           "segment_3_profile": "Segment 4 profil",
           "segment_4_profile": "Segment 5 profil",
           "segment_5_profile": "Segment 6 profil",
           "segment_6_profile": "Segment 7 profil",
           "segment_7_profile": "Segment 8 profil",
           "segment_8_profile": "Segment 9 profil",
-          "segment_9_profile": "Segment 10-profil"
+          "segment_9_profile": "Segment 10 profil"
         }
       },
       "editor_split_params": {
@@ -631,7 +631,7 @@
         "recording_preview": "Forhåndsvisning af optagelse",
         "trim_start": "Trim start",
         "trim_end": "Trim ende",
-        "split_preview_title": "Split Preview",
+        "split_preview_title": "Opdel forhåndsvisning",
         "split_preview_found_fmt": "Fandt {count} segmenter.",
         "split_preview_confirm_fmt": "Klik på Bekræft for at opdele denne cyklus i {count} separate cyklusser.",
         "merge_preview_title": "Forhåndsvisning af sammenfletning",
@@ -678,7 +678,7 @@
         "select_cycle_to_label": "Etiketspecifik cyklus",
         "select_cycle_to_label_multi": "Mærk flere cyklusser",
         "select_cycle_to_delete": "Slet cyklus",
-        "interactive_editor": "Merge/Split Interactive Editor"
+        "interactive_editor": "Interaktiv flet/opdel-editor"
       }
     },
     "manage_profiles_action": {
@@ -890,7 +890,7 @@
         "name": "Løb"
       },
       "match_ambiguity": {
-        "name": "Match Tvetydighed"
+        "name": "Matchtvetydighed"
       }
     },
     "sensor": {
@@ -930,10 +930,10 @@
         "name": "Forløbet tid"
       },
       "debug_info": {
-        "name": "Debug info"
+        "name": "Fejlretningsinfo"
       },
       "match_confidence": {
-        "name": "Match selvtillid"
+        "name": "Matchsikkerhed"
       },
       "top_candidates": {
         "name": "Topkandidater",

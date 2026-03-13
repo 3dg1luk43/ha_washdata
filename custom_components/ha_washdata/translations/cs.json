@@ -80,7 +80,7 @@
           "show_advanced": "Upravit pokročilá nastavení (další krok)"
         },
         "data_description": {
-          "apply_suggestions": "Zaškrtnutím tohoto políčka zkopírujete hodnoty navržené algoritmem učení do formuláře. Před uložením zkontrolujte.\n\nDoporučeno (z učení):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- hlídací_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_dôvera: {suggested_auto_label_confidence}\n- tolerance_trvání: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Zaškrtnutím tohoto políčka zkopírujete hodnoty navržené algoritmem učení do formuláře. Před uložením zkontrolujte.\n\nDoporučeno (z učení):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- hlídací_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_důvěra: {suggested_auto_label_confidence}\n- tolerance_trvání: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "Vyberte typ spotřebiče (Pračka, Sušička, Myčka, Kávovar, EV). Tato značka se ukládá s každým cyklem pro lepší organizaci.",
           "power_sensor": "Entita senzoru hlásící výkon v reálném čase (ve wattech). Toto můžete kdykoli změnit bez ztráty historických dat – užitečné, pokud vyměníte chytrou zástrčku.",
           "min_power": "Údaje o výkonu nad touto prahovou hodnotou (ve wattech) indikují, že spotřebič běží. U většiny zařízení začněte s 2W.",
@@ -148,7 +148,7 @@
           "start_duration_threshold": "Doba trvání opuštění začátku (s)",
           "progress_reset_delay": "Prodleva resetování průběhu (sekundy)",
           "no_update_active_timeout": "Časový limit bez aktualizací (s)",
-          "sampling_interval": "Vzorkovací interval (y)",
+          "sampling_interval": "Vzorkovací interval (s)",
           "auto_label_confidence": "Spolehlivost automatického označování (0-1)",
           "learning_confidence": "Důvěra žádosti o zpětnou vazbu (0–1)",
           "duration_tolerance": "Tolerance trvání (0–0,5)",
@@ -187,7 +187,7 @@
           "external_end_trigger_inverted": "Invertovat logiku spouštěče (spouštěč je vypnutý)"
         },
         "data_description": {
-          "apply_suggestions": "Zaškrtnutím tohoto políčka zkopírujete hodnoty navržené algoritmem učení do formuláře. Před uložením zkontrolujte.\n\nDoporučeno (z učení):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- hlídací_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_dôvera: {suggested_auto_label_confidence}\n- tolerance_trvání: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Zaškrtnutím tohoto políčka zkopírujete hodnoty navržené algoritmem učení do formuláře. Před uložením zkontrolujte.\n\nDoporučeno (z učení):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- hlídací_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_důvěra: {suggested_auto_label_confidence}\n- tolerance_trvání: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "Aby bylo možné spustit cyklus, musí výkon stoupnout NAD tuto prahovou hodnotu. Nastavte vyšší výkon, než je váš pohotovostní režim. Výchozí: min_power + 1 W.",
           "stop_threshold_w": "K UKONČENÍ cyklu musí výkon klesnout POD tuto prahovou hodnotu. Nastavte těsně nad nulu, abyste zabránili šumu spouštějícímu falešné konce. Výchozí: 0,6 * min_power.",
           "min_off_gap": "Pokud cyklus začne během těchto mnoha sekund od konce předchozího, budou SLOŽENY do jediného cyklu.",
@@ -403,7 +403,7 @@
         }
       },
       "select_cycle_to_label": {
-        "title": "Vyberte možnost Cyklovat k označení",
+        "title": "Vyberte cyklus pro označení",
         "description": "✓ = dokončeno, ⚠ = obnoveno, ✗ = přerušeno",
         "data": {
           "cycle_id": "Cyklus"
@@ -433,7 +433,7 @@
         },
         "data_description": {
           "time_range": "Počet hodin pro vyhledávání fragmentovaných cyklů ke sloučení. Ke zpracování všech historických dat použijte číslo 999999.\n{info}",
-          "gap_seconds": "Práh pro rozhodnutí rozdělení vs. Mezery KRATŠÍ než toto jsou sloučeny. Mezery DELŠÍ než toto jsou rozděleny. Snižte toto, chcete-li vynutit rozdělení u cyklu, který byl sloučen nesprávně."
+          "gap_seconds": "Práh pro rozhodnutí rozdělení vs. sloučení. Mezery KRATŠÍ než toto jsou sloučeny. Mezery DELŠÍ než toto jsou rozděleny. Snižte toto, chcete-li vynutit rozdělení u cyklu, který byl sloučen nesprávně."
         }
       },
       "cleanup_profile": {
@@ -522,7 +522,7 @@
         "title": "Procesní záznam",
         "description": "![Graf]({graph_url})\n\n**Graf ukazuje nezpracovaný záznam.** Modrá = Zachovat, Červená = Navrhované oříznutí.\n*Graf je statický a neaktualizuje se změnami formuláře.*\n\nNahrávání zastaveno. Oříznutí jsou zarovnána podle zjištěné vzorkovací frekvence (~{sampling_rate} s).\n\nNezpracovaná délka: {duration} s\nUkázky: {samples}",
         "data": {
-          "head_trim": "Trim Start (sekundy)",
+          "head_trim": "Ǟříznutí začátku (sekundy)",
           "tail_trim": "Konec oříznutí (sekundy)",
           "save_mode": "Uložit cíl",
           "profile_name": "Název profilu"
@@ -594,7 +594,7 @@
         "remove_label": "Odebrat štítek",
         "no_reference_cycle": "(Žádný referenční cyklus)",
         "all_device_types": "Všechny typy zařízení",
-        "current_suffix": "(proud)",
+        "current_suffix": "(aktuální)",
         "editor_select_info": "Vyberte 1 cyklus pro rozdělení nebo 2+ cykly pro sloučení.",
         "no_cycles_recorded": "Dosud nebyly zaznamenány žádné cykly.",
         "profile_summary_line": "- **{name}**: {count} cyklů, prům. {avg} m",
@@ -629,7 +629,7 @@
         "graph_legend_title": "Legenda grafu",
         "graph_legend_body": "Modrý pruh představuje minimální a maximální pozorovaný rozsah odběru energie. Čára ukazuje křivku průměrného výkonu.",
         "recording_preview": "Náhled nahrávání",
-        "trim_start": "Trim Start",
+        "trim_start": "Oříznutí začátku",
         "trim_end": "Oříznout konec",
         "split_preview_title": "Rozdělit náhled",
         "split_preview_found_fmt": "Počet nalezených segmentů: {count}.",

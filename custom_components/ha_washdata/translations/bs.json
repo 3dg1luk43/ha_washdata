@@ -42,7 +42,7 @@
           "learning_feedbacks": "Pregledajte povratne informacije o učenju",
           "settings": "Postavke",
           "notifications": "Obavještenja",
-          "manage_cycles": "Manage Cycles",
+          "manage_cycles": "Upravljanje ciklusima",
           "manage_profiles": "Upravljanje profilima",
           "manage_phase_catalog": "Upravljanje katalogom faza",
           "record_cycle": "Ciklus snimanja (ručno)",
@@ -89,7 +89,7 @@
           "notify_actions": "Opcioni niz akcija Home Assistant-a za pokretanje za obavještenja (skripte, obavijesti, TTS, itd.). Ako je postavljeno, radnje se pokreću prije servisa zamjenskog obavijesti.",
           "notify_people": "Ljudi entiteti koji se koriste za gaming prisutnosti. Kada je omogućeno, dostava obavještenja se odgađa sve dok barem jedna odabrana osoba ne bude kod kuće.",
           "notify_only_when_home": "Ako je omogućeno, odgodite obavještenja dok barem jedna odabrana osoba ne bude kod kuće.",
-          "notify_fire_events": "Ako je omogućeno, aktivirajte događaje Home Assistant za početak i kraj ciklusa (ha_washdata_cycle_started i ha_washdata_cycle_end) za pokretanje automatizacije.",
+          "notify_fire_events": "Ako je omogućeno, aktivirajte događaje Home Assistant za početak i kraj ciklusa (ha_washdata_cycle_started i ha_washdata_cycle_ended) za pokretanje automatizacije.",
           "notify_events": "Za koje događaje slati obavještenja.",
           "notify_before_end_minutes": "Nekoliko minuta prije procijenjenog kraja ciklusa za pokretanje obavještenja. Postavite na 0 da biste onemogućili. Podrazumevano: 0.",
           "notify_title": "Prilagođeni naslov za obavještenja. Podržava {device} čuvar mjesta.",
@@ -124,7 +124,7 @@
           "notify_actions": "Opcioni niz akcija Home Assistant-a za pokretanje za obavještenja (skripte, obavijesti, TTS, itd.). Ako je postavljeno, radnje se pokreću prije servisa zamjenskog obavijesti.",
           "notify_people": "Ljudi entiteti koji se koriste za gaming prisutnosti. Kada je omogućeno, dostava obavještenja se odgađa sve dok barem jedna odabrana osoba ne bude kod kuće.",
           "notify_only_when_home": "Ako je omogućeno, odgodite obavještenja dok barem jedna odabrana osoba ne bude kod kuće.",
-          "notify_fire_events": "Ako je omogućeno, aktivirajte događaje Home Assistant za početak i kraj ciklusa (ha_washdata_cycle_started i ha_washdata_cycle_end) za pokretanje automatizacije.",
+          "notify_fire_events": "Ako je omogućeno, aktivirajte događaje Home Assistant za početak i kraj ciklusa (ha_washdata_cycle_started i ha_washdata_cycle_ended) za pokretanje automatizacije.",
           "notify_events": "Za koje događaje slati obavještenja.",
           "notify_before_end_minutes": "Nekoliko minuta prije procijenjenog kraja ciklusa za pokretanje obavještenja. Postavite na 0 da biste onemogućili. Podrazumevano: 0.",
           "notify_live_enabled": "Omogućite ažuriranja napretka uživo na mjestu za obavještenja mobilnih aplikacija.",
@@ -675,7 +675,7 @@
     "manage_cycles_action": {
       "options": {
         "auto_label_cycles": "Auto-Label Old Cycles",
-        "select_cycle_to_label": "Label Specific Cycle",
+        "select_cycle_to_label": "Oznaci specifican ciklus",
         "select_cycle_to_label_multi": "Označite više ciklusa",
         "select_cycle_to_delete": "Izbriši ciklus",
         "interactive_editor": "Interaktivni uređivač spajanja/splitanja"

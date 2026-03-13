@@ -81,7 +81,7 @@ async def async_get_config_entry_diagnostics(
             "current_program": manager.current_program,
             "time_remaining": manager.time_remaining,
             "cycle_progress": manager.cycle_progress,
-            "sample_interval_stats": dict(manager.sample_interval_stats),  # type: ignore[arg-type]
+            "sample_interval_stats": dict(manager.sample_interval_stats) if isinstance(manager.sample_interval_stats, dict) else {},
             "profile_sample_repair_stats": manager.profile_sample_repair_stats,
             "suggestions": manager.profile_store.get_suggestions(),
         },

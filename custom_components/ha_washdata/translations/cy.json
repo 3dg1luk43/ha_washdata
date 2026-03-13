@@ -142,8 +142,8 @@
         "description": "Trothwyon canfod tiwn, dysgu, ac ymddygiad uwch. Mae rhagosodiadau'n gweithio'n dda ar gyfer y rhan fwyaf o setiau.",
         "data": {
           "apply_suggestions": "Cymhwyso Gwerthoedd a Awgrymir",
-          "start_threshold_w": "Trothwy Cychwyn (C)",
-          "stop_threshold_w": "Trothwy Atal (C)",
+          "start_threshold_w": "Trothwy Cychwyn (W)",
+          "stop_threshold_w": "Trothwy Atal (W)",
           "min_off_gap": "Bwlch Isaf Rhwng Cylchoedd (au)",
           "start_duration_threshold": "Dechrau Debounce Hyd(s)",
           "progress_reset_delay": "Oedi Ailosod Cynnydd (eiliadau)",
@@ -309,7 +309,7 @@
       },
       "assign_profile_phases": {
         "title": "Neilltuo Ystod Cyfnod",
-        "description": "Rhagolwg cyfnod ar gyfer proffil: ***{profile_name}**\n\n{timeline_svg}\n\n**Amrediadau presennol:**\n{current_ranges}\n\nDefnyddiwch y gweithredoedd isod i ychwanegu, golygu, dileu, neu gadw ystodau.",
+        "description": "Rhagolwg cyfnod ar gyfer proffil: **{profile_name}**\n\n{timeline_svg}\n\n**Amrediadau presennol:**\n{current_ranges}\n\nDefnyddiwch y gweithredoedd isod i ychwanegu, golygu, dileu, neu gadw ystodau.",
         "data": {
           "action": "Gweithred"
         }

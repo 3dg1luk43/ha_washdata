@@ -22,7 +22,7 @@ body:
     attributes:
       label: Integration Version
       description: What version of WashData are you running?
-      placeholder: "v0.3.1"
+      placeholder: "vX.Y.Z"
     validations:
       required: true
   
