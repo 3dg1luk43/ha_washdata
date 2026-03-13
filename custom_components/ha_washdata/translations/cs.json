@@ -67,8 +67,8 @@
           "off_delay": "Zpoždění konce cyklu (s)",
           "notify_service": "Služba oznámení (např. notify.mobile_app)",
           "notify_actions": "Akce oznámení",
-          "notify_people": "Lidé, které je třeba informovat",
-          "notify_only_when_home": "Upozornit pouze na domovské stránce",
+          "notify_people": "Odložte doručení, dokud nebudou tito lidé doma",
+          "notify_only_when_home": "Zpoždění oznámení, dokud nebude vybraná osoba doma",
           "notify_fire_events": "Události požární automatizace",
           "notify_events": "Události k oznámení",
           "notify_before_end_minutes": "Upozornění před dokončením (minuty před koncem)",
@@ -87,9 +87,9 @@
           "off_delay": "V sekundách musí vyhlazený výkon zůstat pod prahem zastavení, aby bylo možné označit dokončení. Výchozí: 120 s.",
           "notify_service": "Chcete-li použít službu upozornění Home Assistant (volitelné).",
           "notify_actions": "Volitelná sekvence akcí Home Assistant, která se spustí pro oznámení (skripty, oznámení, TTS atd.). Je-li nastaveno, akce se spouštějí před službou nouzového upozornění.",
-          "notify_people": "Osoby entity, které se mají použít pro vkládání domů/pryč. Když je tato možnost povolena, oznámení se odkládají, dokud nebude někdo doma.",
+          "notify_people": "Osoby entity používané pro řízení přítomnosti. Je-li tato možnost povolena, doručení oznámení je odloženo, dokud nebude alespoň jedna vybraná osoba doma.",
           "notify_only_when_home": "Pokud je tato možnost povolena, odloží oznámení, dokud alespoň jedna vybraná osoba nebude doma.",
-          "notify_fire_events": "Pokud je povoleno, spouštět události Home Assistant pro začátek a konec cyklu (ha_washdata_cycle_started/ended) pro řízení automatizace.",
+          "notify_fire_events": "Pokud je povoleno, spouštět události Home Assistant pro začátek a konec cyklu (ha_washdata_cycle_started a ha_washdata_cycle_ended) pro řízení automatizace.",
           "notify_events": "Na jaké události zasílat upozornění.",
           "notify_before_end_minutes": "Minuty před odhadovaným koncem cyklu ke spuštění upozornění. Nastavením na 0 deaktivujete. Výchozí: 0.",
           "notify_title": "Vlastní název pro oznámení. Podporuje zástupný symbol {device}.",
@@ -105,8 +105,8 @@
         "data": {
           "notify_service": "Služba oznámení (např. notify.mobile_app)",
           "notify_actions": "Akce oznámení",
-          "notify_people": "Lidé, které je třeba informovat",
-          "notify_only_when_home": "Upozornit pouze na domovské stránce",
+          "notify_people": "Odložte doručení, dokud nebudou tito lidé doma",
+          "notify_only_when_home": "Zpoždění oznámení, dokud nebude vybraná osoba doma",
           "notify_fire_events": "Události požární automatizace",
           "notify_events": "Události k oznámení",
           "notify_before_end_minutes": "Upozornění před dokončením (minuty před koncem)",
@@ -122,9 +122,9 @@
         "data_description": {
           "notify_service": "Chcete-li použít službu upozornění Home Assistant (volitelné).",
           "notify_actions": "Volitelná sekvence akcí Home Assistant, která se spustí pro oznámení (skripty, oznámení, TTS atd.). Je-li nastaveno, akce se spouštějí před službou nouzového upozornění.",
-          "notify_people": "Osoby entity, které se mají použít pro vkládání domů/pryč. Když je tato možnost povolena, oznámení se odkládají, dokud nebude někdo doma.",
+          "notify_people": "Osoby entity používané pro řízení přítomnosti. Je-li tato možnost povolena, doručení oznámení je odloženo, dokud nebude alespoň jedna vybraná osoba doma.",
           "notify_only_when_home": "Pokud je tato možnost povolena, odloží oznámení, dokud alespoň jedna vybraná osoba nebude doma.",
-          "notify_fire_events": "Pokud je povoleno, spouštět události Home Assistant pro začátek a konec cyklu (ha_washdata_cycle_started/ended) pro řízení automatizace.",
+          "notify_fire_events": "Pokud je povoleno, spouštět události Home Assistant pro začátek a konec cyklu (ha_washdata_cycle_started a ha_washdata_cycle_ended) pro řízení automatizace.",
           "notify_events": "Na jaké události zasílat upozornění.",
           "notify_before_end_minutes": "Minuty před odhadovaným koncem cyklu ke spuštění upozornění. Nastavením na 0 deaktivujete. Výchozí: 0.",
           "notify_live_enabled": "Povolit na místě živé aktualizace průběhu pro oznámení mobilních aplikací.",
@@ -803,7 +803,7 @@
     },
     "export_config": {
       "name": "Export konfigurace",
-      "description": "Exportujte profily a cykly této pračky do souboru JSON (na zařízení).",
+      "description": "Exportujte profily, cykly a nastavení tohoto zařízení do souboru JSON (na zařízení).",
       "fields": {
         "device_id": {
           "name": "Zařízení",
@@ -817,7 +817,7 @@
     },
     "import_config": {
       "name": "Importovat konfiguraci",
-      "description": "Importujte profily a cykly pro tuto podložku z exportního souboru JSON.",
+      "description": "Importujte profily, cykly a nastavení pro toto zařízení z exportního souboru JSON (nastavení mohou být přepsána).",
       "fields": {
         "device_id": {
           "name": "Zařízení",

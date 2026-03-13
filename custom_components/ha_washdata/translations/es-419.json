@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "Revisar los comentarios de aprendizaje",
           "settings": "Ajustes",
+          "notifications": "Notificaciones",
           "manage_cycles": "Administrar ciclos",
           "manage_profiles": "Administrar perfiles",
-          "record_cycle": "Ciclo de grabación (manual)",
-          "diagnostics": "Diagnóstico y mantenimiento",
           "manage_phase_catalog": "Administrar catálogo de fases",
-          "notifications": "Notificaciones"
+          "record_cycle": "Ciclo de grabación (manual)",
+          "diagnostics": "Diagnóstico y mantenimiento"
         }
       },
       "apply_suggestions": {
@@ -66,6 +66,10 @@
           "min_power": "Potencia mínima (W)",
           "off_delay": "Retraso(s) de fin de ciclo",
           "notify_service": "Servicio de notificación (por ejemplo, notify.mobile_app)",
+          "notify_actions": "Acciones de notificación",
+          "notify_people": "Retrasar la entrega hasta que estas personas estén en casa",
+          "notify_only_when_home": "Retrasar notificaciones hasta que la persona seleccionada esté en casa",
+          "notify_fire_events": "Eventos de automatización de incendios",
           "notify_events": "Eventos para notificar",
           "notify_before_end_minutes": "Notificación previa a la finalización (minutos antes de finalizar)",
           "notify_title": "Título de la notificación",
@@ -73,30 +77,64 @@
           "notify_start_message": "Iniciar formato de mensaje",
           "notify_finish_message": "Finalizar formato de mensaje",
           "notify_pre_complete_message": "Formato de mensaje previo a la finalización",
-          "show_advanced": "Editar configuración avanzada (siguiente paso)",
-          "notify_actions": "Acciones de notificación",
-          "notify_people": "Personas a notificar",
-          "notify_only_when_home": "Notificar solo cuando esté en casa",
-          "notify_fire_events": "Eventos de automatización de incendios"
+          "show_advanced": "Editar configuración avanzada (siguiente paso)"
         },
         "data_description": {
-          "apply_suggestions": "Marque esta casilla para copiar los valores sugeridos por el algoritmo de aprendizaje en el formulario. Revisar antes de guardar.\n\nSugerido (a partir del aprendizaje):\n- potencia_min: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- perfil_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duración_tolerancia: {suggested_duration_tolerance}\n- perfil_duración_tolerancia: {suggested_profile_duration_tolerance}\n- perfil_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- perfil_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Marque esta casilla para copiar los valores sugeridos por el algoritmo de aprendizaje en el formulario. Revisar antes de guardar.\n\nSugerido (a partir del aprendizaje):\n- potencia_min: {suggested_min_power}W\n- off_delay: {suggested_off_delay} s\n- intervalo_vigilancia: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- perfil_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duración_tolerancia: {suggested_duration_tolerance}\n- perfil_duración_tolerancia: {suggested_profile_duration_tolerance}\n- perfil_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- perfil_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "Selecciona el tipo de electrodoméstico (Lavadora, Secadora, Lavavajillas, Cafetera, Vehículo Eléctrico). Esta etiqueta se almacena con cada ciclo para una mejor organización.",
           "power_sensor": "La entidad sensora que informa la potencia en tiempo real (en vatios). Puede cambiar esto en cualquier momento sin perder datos históricos, lo cual resulta útil si reemplaza un enchufe inteligente.",
           "min_power": "Las lecturas de energía por encima de este umbral (en vatios) indican que el aparato está funcionando. Comience con 2W para la mayoría de los dispositivos.",
           "off_delay": "Segundos, la potencia suavizada debe permanecer por debajo del umbral de parada para marcar la finalización. Valor predeterminado: 120 s.",
           "notify_service": "Home Assistant notifica el uso del servicio (opcional).",
+          "notify_actions": "Secuencia de acciones opcional de Home Assistant para ejecutar notificaciones (scripts, notificaciones, TTS, etc.). Si se establece, las acciones se ejecutan antes del servicio de notificación de reserva.",
+          "notify_people": "Entidades de personas utilizadas para control de presencia. Cuando está habilitado, la entrega de notificaciones se retrasa hasta que al menos una persona seleccionada esté en casa.",
+          "notify_only_when_home": "Si está habilitado, retrase las notificaciones hasta que al menos una persona seleccionada esté en casa.",
+          "notify_fire_events": "Si está habilitado, activa eventos de Home Assistant para el inicio y el final del ciclo (ha_washdata_cycle_started y ha_washdata_cycle_ended) para impulsar las automatizaciones.",
           "notify_events": "Para qué eventos enviar notificaciones.",
           "notify_before_end_minutes": "Minutos antes del final estimado del ciclo para activar una notificación. Establezca en 0 para desactivar. Predeterminado: 0.",
           "notify_title": "Título personalizado para notificaciones. Admite marcador de posición {device}.",
           "notify_icon": "Icono que se utilizará para notificaciones (por ejemplo, mdi: lavadora). Déjelo vacío para usar el valor predeterminado.",
           "notify_start_message": "Mensaje enviado cuando comienza un ciclo. Admite marcador de posición {device}.",
           "notify_finish_message": "Mensaje enviado cuando finaliza un ciclo. Admite marcadores de posición {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Mensaje enviado antes de finalizar. Admite marcadores de posición {device}, {minutes}.",
+          "notify_pre_complete_message": "Mensaje enviado antes de finalizar. Admite {device}, {minutes} marcadores de posición."
+        }
+      },
+      "notifications": {
+        "title": "Notificaciones",
+        "description": "Configure canales de notificación, plantillas y actualizaciones opcionales de progreso móvil en vivo.",
+        "data": {
+          "notify_service": "Servicio de notificación (por ejemplo, notify.mobile_app)",
+          "notify_actions": "Acciones de notificación",
+          "notify_people": "Retrasar la entrega hasta que estas personas estén en casa",
+          "notify_only_when_home": "Retrasar notificaciones hasta que la persona seleccionada esté en casa",
+          "notify_fire_events": "Eventos de automatización de incendios",
+          "notify_events": "Eventos para notificar",
+          "notify_before_end_minutes": "Notificación previa a la finalización (minutos antes de finalizar)",
+          "notify_live_enabled": "Habilitar notificaciones de progreso en vivo",
+          "notify_live_interval_seconds": "Intervalo de actualización en vivo (segundos)",
+          "notify_live_overrun_percent": "Asignación de exceso de actualización en vivo (%)",
+          "notify_title": "Título de la notificación",
+          "notify_icon": "Icono de notificación",
+          "notify_start_message": "Iniciar formato de mensaje",
+          "notify_finish_message": "Finalizar formato de mensaje",
+          "notify_pre_complete_message": "Formato de mensaje previo a la finalización"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant notifica el uso del servicio (opcional).",
           "notify_actions": "Secuencia de acciones opcional de Home Assistant para ejecutar notificaciones (scripts, notificaciones, TTS, etc.). Si se establece, las acciones se ejecutan antes del servicio de notificación de reserva.",
-          "notify_people": "Entidades de personas que se utilizarán para la puerta de entrada en casa/fuera. Cuando está habilitado, las notificaciones se difieren hasta que haya alguien en casa.",
+          "notify_people": "Entidades de personas utilizadas para control de presencia. Cuando está habilitado, la entrega de notificaciones se retrasa hasta que al menos una persona seleccionada esté en casa.",
           "notify_only_when_home": "Si está habilitado, retrase las notificaciones hasta que al menos una persona seleccionada esté en casa.",
-          "notify_fire_events": "Si está habilitado, activa eventos de Home Assistant para el inicio y el final del ciclo (ha_washdata_cycle_started/ended) para impulsar las automatizaciones."
+          "notify_fire_events": "Si está habilitado, activa eventos de Home Assistant para el inicio y el final del ciclo (ha_washdata_cycle_started y ha_washdata_cycle_ended) para impulsar las automatizaciones.",
+          "notify_events": "Para qué eventos enviar notificaciones.",
+          "notify_before_end_minutes": "Minutos antes del final estimado del ciclo para activar una notificación. Establezca en 0 para desactivar. Predeterminado: 0.",
+          "notify_live_enabled": "Habilite actualizaciones de progreso en vivo locales para notificaciones de aplicaciones móviles.",
+          "notify_live_interval_seconds": "Con qué frecuencia se envían las actualizaciones de progreso mientras se ejecuta. Los valores más bajos responden mejor pero consumen más notificaciones.",
+          "notify_live_overrun_percent": "Margen de seguridad superior al recuento de actualizaciones estimado para ciclos largos/excedidos (por ejemplo, el 20 % permite actualizaciones estimadas 1,2 veces).",
+          "notify_title": "Título personalizado para notificaciones. Admite marcador de posición {device}.",
+          "notify_icon": "Icono que se utilizará para notificaciones (por ejemplo, mdi: lavadora). Déjelo vacío para usar el valor predeterminado.",
+          "notify_start_message": "Mensaje enviado cuando comienza un ciclo. Admite marcador de posición {device}.",
+          "notify_finish_message": "Mensaje enviado cuando finaliza un ciclo. Admite marcadores de posición {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Mensaje enviado antes de finalizar. Admite {device}, {minutes} marcadores de posición."
         }
       },
       "advanced_settings": {
@@ -149,10 +187,10 @@
           "external_end_trigger_inverted": "Invertir lógica de disparo (disparo en OFF)"
         },
         "data_description": {
-          "apply_suggestions": "Marque esta casilla para copiar los valores sugeridos por el algoritmo de aprendizaje en el formulario. Revisar antes de guardar.\n\nSugerido (a partir del aprendizaje):\n- potencia_min: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- perfil_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duración_tolerancia: {suggested_duration_tolerance}\n- perfil_duración_tolerancia: {suggested_profile_duration_tolerance}\n- perfil_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- perfil_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Marque esta casilla para copiar los valores sugeridos por el algoritmo de aprendizaje en el formulario. Revisar antes de guardar.\n\nSugerido (a partir del aprendizaje):\n- potencia_min: {suggested_min_power}W\n- off_delay: {suggested_off_delay} s\n- intervalo_vigilancia: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- perfil_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duración_tolerancia: {suggested_duration_tolerance}\n- perfil_duración_tolerancia: {suggested_profile_duration_tolerance}\n- perfil_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- perfil_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "La energía debe aumentar POR ENCIMA de este umbral para INICIAR un ciclo. Configúrelo por encima de su potencia de espera. Valor predeterminado: min_power + 1 W.",
           "stop_threshold_w": "La energía debe caer POR DEBAJO de este umbral para FINALIZAR un ciclo. Establezca justo por encima de cero para evitar que el ruido provoque extremos falsos. Valor predeterminado: 0,6 * min_power.",
-          "min_off_gap": "Si un ciclo comienza dentro de estos segundos después de que finalice el anterior, se fusionarán en un solo ciclo.",
+          "min_off_gap": "Si un ciclo comienza dentro de esta cantidad de segundos después de que finalice el anterior, se fusionarán en un solo ciclo.",
           "start_duration_threshold": "Ignore los picos de energía breves que sean más cortos que esta duración (segundos). Filtra los picos de arranque (por ejemplo, 60 W durante 2 segundos) antes de que comience el ciclo real. Predeterminado: 5 s.",
           "progress_reset_delay": "Después de que se completa un ciclo (100%), espere tantos segundos de inactividad antes de restablecer el progreso al 0%. Predeterminado: 300s.",
           "no_update_active_timeout": "Para sensores de publicación al cambiar: solo fuerce el final de un ciclo ACTIVO si no llegan actualizaciones durante tantos segundos. La finalización con bajo consumo de energía todavía utiliza el retardo de apagado.",
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "Diagnóstico y mantenimiento",
-        "description": "Ejecute acciones de mantenimiento como fusionar ciclos fragmentados o migrar datos almacenados.\n\n{storage_stats}"
+        "description": "Ejecute acciones de mantenimiento como fusionar ciclos fragmentados o migrar datos almacenados.\n\n**Uso de almacenamiento**\n\n- Tamaño del archivo: {file_size_kb} KB\n- Ciclos: {cycle_count}\n- Perfiles: {profile_count}\n- Seguimientos de depuración: {debug_count}"
       },
       "clear_debug_data": {
         "title": "Borrar datos de depuración",
@@ -210,11 +248,109 @@
           "action": "Acción"
         }
       },
+      "manage_cycles_empty": {
+        "title": "Administrar ciclos",
+        "description": "Aún no se han registrado ciclos.",
+        "data": {
+          "action": "Acción"
+        }
+      },
       "manage_profiles": {
         "title": "Administrar perfiles",
         "description": "Resumen del perfil:\n{profile_summary}",
         "data": {
           "action": "Acción"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "Administrar perfiles",
+        "description": "Aún no se han creado perfiles.",
+        "data": {
+          "action": "Acción"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "Administrar catálogo de fases",
+        "description": "Catálogo de fases (predeterminado para este dispositivo + fases personalizadas):\n{phase_summary}",
+        "data": {
+          "action": "Acción"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Crear fase personalizada",
+        "description": "Cree un nombre y una descripción de fase personalizados y elija a qué tipo de dispositivo se aplica.",
+        "data": {
+          "target_device_type": "Tipo de dispositivo de destino",
+          "phase_name": "Nombre de fase",
+          "phase_description": "Descripción de la fase"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Editar fase personalizada",
+        "description": "Seleccione una fase personalizada para editar.",
+        "data": {
+          "phase_name": "Fase personalizada"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Editar fase personalizada",
+        "description": "Fase de edición: {phase_name}",
+        "data": {
+          "phase_name": "Nombre de fase",
+          "phase_description": "Descripción de la fase"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Eliminar fase personalizada",
+        "description": "Seleccione una fase personalizada para eliminar. Se eliminarán todos los rangos asignados que utilicen esta fase.",
+        "data": {
+          "phase_name": "Fase personalizada"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Asignar rangos de fase",
+        "description": "Vista previa de fase para el perfil: **{profile_name}**\n\n{timeline_svg}\n\n**Rangos actuales:**\n{current_ranges}\n\nUtilice las siguientes acciones para agregar, editar, eliminar o guardar rangos.",
+        "data": {
+          "action": "Acción"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Agregar rango de fase",
+        "description": "Agregue un rango de fase al borrador actual.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Minuto de inicio",
+          "end_min": "Minuto final"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Editar rango de fase",
+        "description": "Seleccione un rango para editar.",
+        "data": {
+          "range_index": "Rango de fase"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Editar rango de fase",
+        "description": "Actualiza el rango de fase seleccionado.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Minuto de inicio",
+          "end_min": "Minuto final"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Eliminar rango de fase",
+        "description": "Seleccione un rango para eliminar del borrador.",
+        "data": {
+          "range_index": "Rango de fase"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Asignar rangos de fase",
+        "description": "Seleccione un perfil para configurar rangos de fases.",
+        "data": {
+          "profile": "Perfil"
         }
       },
       "profile_stats": {
@@ -367,8 +503,8 @@
         "title": "Exportar/Importar JSON",
         "description": "Copie/pegue ciclos, perfiles y configuraciones para este dispositivo. Exporte a continuación o pegue JSON para importar.",
         "data": {
-          "json_payload": "Configuración completa JSON",
-          "mode": "Acción"
+          "mode": "Acción",
+          "json_payload": "Configuración completa JSON"
         },
         "data_description": {
           "mode": "Elija Exportar para copiar datos y configuraciones actuales, o Importar para pegar datos exportados desde otro dispositivo WashData.",
@@ -405,153 +541,31 @@
       },
       "resolve_feedback": {
         "title": "Resolver comentarios",
-        "description": "**Programa detectado**: {profile}\n**Confianza**: {confidence}%\n**Estimado**: {est}m, **Real**: {act}m",
+        "description": "{comparison_img}{candidates_table}\n**Perfil detectado**: {detected_profile} ({confidence_pct}%)\n**Duración estimada**: {est_duration_min} min\n**Duración real**: {act_duration_min} min\n\n__Elige una de las siguientes acciones:__",
         "data": {
+          "action": "¿Qué te gustaría hacer?",
           "corrected_profile": "Programa correcto (si se está corrigiendo)",
-          "corrected_duration": "Duración correcta en minutos (si se corrige)",
-          "action": "¿Qué te gustaría hacer?"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Administrar catálogo de fases",
-        "description": "Fases actuales para este tipo de dispositivo:\n{phase_summary}",
-        "data": {
-          "action": "Acción"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Crear fase personalizada",
-        "description": "Cree un nombre de fase personalizado y una descripción para este tipo de dispositivo.",
-        "data": {
-          "phase_name": "Nombre de fase",
-          "phase_description": "Descripción de la fase",
-          "target_device_type": "Tipo de dispositivo de destino"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Editar fase personalizada",
-        "description": "Seleccione una fase personalizada para editar.",
-        "data": {
-          "phase_name": "Fase personalizada"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Editar fase personalizada",
-        "description": "Fase de edición: {phase_name}",
-        "data": {
-          "phase_name": "Nombre de fase",
-          "phase_description": "Descripción de la fase"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Eliminar fase personalizada",
-        "description": "Seleccione una fase personalizada para eliminar. Se eliminarán todos los rangos asignados que utilicen esta fase.",
-        "data": {
-          "phase_name": "Fase personalizada"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Asignar rangos de fase",
-        "description": "Perfil: **{profile_name}**\nModo: **{assign_mode}**\nSugerencia de ciclo: {cycle_hint}\n\nRangos actuales:\n{current_ranges}\n\nLas etiquetas de fase son para visualización y organización. La detección utiliza patrones de energía, no nombres de fases.",
-        "data": {
-          "action": "Acción"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "Asignar rangos de fase",
-        "description": "Seleccione un perfil para configurar rangos de fases.",
-        "data": {
-          "profile": "Perfil"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Agregar rango de fase",
-        "description": "Agregue un rango de fase al borrador actual.",
-        "data": {
-          "phase_name": "Fase",
-          "start_min": "Minuto de inicio",
-          "end_min": "Minuto final"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Editar rango de fase",
-        "description": "Seleccione un rango para editar.",
-        "data": {
-          "range_index": "Rango de fase"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Editar rango de fase",
-        "description": "Actualiza el rango de fase seleccionado.",
-        "data": {
-          "phase_name": "Fase",
-          "start_min": "Minuto de inicio",
-          "end_min": "Minuto final"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Eliminar rango de fase",
-        "description": "Seleccione un rango para eliminar del borrador.",
-        "data": {
-          "range_index": "Rango de fase"
-        }
-      },
-      "notifications": {
-        "title": "Notificaciones",
-        "description": "Configure canales de notificación, plantillas y actualizaciones opcionales de progreso móvil en vivo.",
-        "data": {
-          "notify_service": "Servicio de notificación (por ejemplo, notify.mobile_app)",
-          "notify_actions": "Acciones de notificación",
-          "notify_people": "Personas a notificar",
-          "notify_only_when_home": "Notificar solo cuando esté en casa",
-          "notify_fire_events": "Eventos de automatización de incendios",
-          "notify_events": "Eventos para notificar",
-          "notify_before_end_minutes": "Notificación previa a la finalización (minutos antes de finalizar)",
-          "notify_live_enabled": "Habilitar notificaciones de progreso en vivo",
-          "notify_live_interval_seconds": "Intervalo de actualización en vivo (segundos)",
-          "notify_live_overrun_percent": "Asignación de exceso de actualización en vivo (%)",
-          "notify_title": "Título de la notificación",
-          "notify_icon": "Icono de notificación",
-          "notify_start_message": "Iniciar formato de mensaje",
-          "notify_finish_message": "Finalizar formato de mensaje",
-          "notify_pre_complete_message": "Formato de mensaje previo a la finalización"
-        },
-        "data_description": {
-          "notify_service": "Home Assistant notifica el uso del servicio (opcional).",
-          "notify_actions": "Secuencia de acciones opcional de Home Assistant para ejecutar notificaciones (scripts, notificaciones, TTS, etc.). Si se establece, las acciones se ejecutan antes del servicio de notificación de reserva.",
-          "notify_people": "Entidades de personas que se utilizarán para la puerta de entrada en casa/fuera. Cuando está habilitado, las notificaciones se difieren hasta que haya alguien en casa.",
-          "notify_only_when_home": "Si está habilitado, retrase las notificaciones hasta que al menos una persona seleccionada esté en casa.",
-          "notify_fire_events": "Si está habilitado, activa eventos de Home Assistant para el inicio y el final del ciclo (ha_washdata_cycle_started/ended) para impulsar las automatizaciones.",
-          "notify_events": "Para qué eventos enviar notificaciones.",
-          "notify_before_end_minutes": "Minutos antes del final estimado del ciclo para activar una notificación. Establezca en 0 para desactivar. Predeterminado: 0.",
-          "notify_live_enabled": "Habilite actualizaciones de progreso en vivo locales para notificaciones de aplicaciones móviles.",
-          "notify_live_interval_seconds": "Con qué frecuencia se envían las actualizaciones de progreso mientras se ejecuta. Los valores más bajos responden mejor pero consumen más notificaciones.",
-          "notify_live_overrun_percent": "Margen de seguridad superior al recuento de actualizaciones estimado para ciclos largos/excedidos (por ejemplo, el 20 % permite actualizaciones estimadas 1,2 veces).",
-          "notify_title": "Título personalizado para notificaciones. Admite marcador de posición {device}.",
-          "notify_icon": "Icono que se utilizará para notificaciones (por ejemplo, mdi: lavadora). Déjelo vacío para usar el valor predeterminado.",
-          "notify_start_message": "Mensaje enviado cuando comienza un ciclo. Admite marcador de posición {device}.",
-          "notify_finish_message": "Mensaje enviado cuando finaliza un ciclo. Admite marcadores de posición {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Mensaje enviado antes de finalizar. Admite marcadores de posición {device}, {minutes}."
+          "corrected_duration": "Duración correcta en minutos (si se corrige)"
         }
       }
     },
     "error": {
-      "import_failed": "La importación falló. Pegue un JSON de exportación WashData válido.",
+      "import_failed": "La importación falló. Pegue un JSON de exportación de WashData válido.",
       "profile_exists": "Ya existe un perfil con este nombre",
       "rename_failed": "No se pudo cambiar el nombre del perfil. Es posible que el perfil no exista o que ya se haya adoptado un nombre nuevo.",
       "assignment_failed": "No se pudo asignar el perfil al ciclo",
-      "feedback_notification_title": "WashData: Verificar ciclo ({device})",
-      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence}% de confianza)\n**Hora**: {time}\n\nWashData necesita su ayuda para verificar este ciclo detectado.\n\nVaya a **Configuración > Dispositivos y servicios > WashData > Configurar > Comentarios de aprendizaje** para confirmar o corregir este resultado.",
       "duplicate_phase": "Ya existe una fase con este nombre.",
       "phase_not_found": "No se encontró la fase seleccionada.",
       "invalid_phase_name": "El nombre de la fase no puede estar vacío.",
       "phase_name_too_long": "El nombre de la fase es demasiado largo.",
-      "invalid_phase_range": "El rango de fase no es válido. El final debe ser mayor que el comienzo.",
+      "invalid_phase_range": "El rango de fase no es válido. El final debe ser mayor que el inicio.",
       "invalid_phase_timestamp": "La marca de tiempo no es válida. Utilice el formato AAAA-MM-DD HH:MM o HH:MM.",
       "overlapping_phase_ranges": "Los rangos de fase se superponen. Ajuste los rangos y vuelva a intentarlo.",
       "incomplete_phase_row": "Cada fila de fase debe incluir una fase más los valores completos de inicio/fin para el modo seleccionado.",
       "timestamp_mode_cycle_required": "Seleccione un ciclo de fuente cuando utilice el modo de marca de tiempo.",
-      "no_phase_ranges": "Aún no hay rangos de fase disponibles para esa acción."
+      "no_phase_ranges": "Aún no hay rangos de fase disponibles para esa acción.",
+      "feedback_notification_title": "WashData: Verificar ciclo ({device})",
+      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence} % de confianza)\n**Hora**: {time}\n\nWashData necesita su ayuda para verificar este ciclo detectado.\n\nVaya a **Configuración > Dispositivos y servicios > WashData > Configurar > Comentarios de aprendizaje** para confirmar o corregir este resultado."
     },
     "abort": {
       "no_cycles_found": "No se encontraron ciclos",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "Todos los ciclos ya están etiquetados.",
       "no_suggestions": "Aún no hay valores sugeridos disponibles. Ejecute algunos ciclos y vuelva a intentarlo.",
       "no_predictions": "Sin predicciones",
+      "no_custom_phases": "No se encontraron fases personalizadas.",
       "reprocess_success": "{count} ciclos reprocesados ​​correctamente.",
-      "debug_data_cleared": "Se borraron correctamente los datos de depuración de {count} ciclos.",
-      "no_custom_phases": "No se encontraron fases personalizadas para este tipo de dispositivo."
+      "debug_data_cleared": "Se borraron correctamente los datos de depuración de {count} ciclos."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "Inicio del ciclo",
+        "cycle_finish": "Finalizar ciclo",
+        "cycle_live": "Progreso en vivo"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(Sin etiqueta)",
+        "create_new_profile": "Crear nuevo perfil",
+        "remove_label": "Quitar etiqueta",
+        "no_reference_cycle": "(Sin ciclo de referencia)",
+        "all_device_types": "Todos los tipos de dispositivos",
+        "current_suffix": "(actual)",
+        "editor_select_info": "Seleccione 1 ciclo para dividir o más de 2 ciclos para fusionar.",
+        "no_cycles_recorded": "Aún no se han registrado ciclos.",
+        "profile_summary_line": "- **{name}**: {count} ciclos, {avg}m de promedio",
+        "no_profiles_created": "Aún no se han creado perfiles.",
+        "phase_preview": "Vista previa de fase",
+        "phase_preview_no_curve": "La curva de perfil promedio aún no está disponible. Ejecute/etiquete más ciclos para este perfil.",
+        "average_power_curve": "Curva de potencia promedio",
+        "unit_min": "mín.",
+        "profile_option_fmt": "{name} ({count} ciclos, ~{duration} m de promedio)",
+        "profile_option_short_fmt": "{name} ({count} ciclos, ~{duration} m)",
+        "deleted_cycles_from_profile": "Se eliminaron {count} ciclos de {profile}.",
+        "not_enough_data_graph": "No hay suficientes datos para generar el gráfico.",
+        "no_profiles_found": "No se encontraron perfiles.",
+        "cycle_info_fmt": "Ciclo: {start}, {duration}m, Actual: {label}",
+        "top_candidates_header": "### Mejores candidatos",
+        "tbl_profile": "Perfil",
+        "tbl_confidence": "Confianza",
+        "tbl_correlation": "Correlación",
+        "tbl_duration_match": "Duración del partido",
+        "detected_profile": "Perfil detectado",
+        "estimated_duration": "Duración estimada",
+        "actual_duration": "Duración real",
+        "choose_action": "__Elige una de las siguientes acciones:__",
+        "tbl_count": "Contar",
+        "tbl_avg": "promedio",
+        "tbl_min": "mín.",
+        "tbl_max": "máx.",
+        "tbl_energy_avg": "Energía (promedio)",
+        "tbl_energy_total": "Energía (Total)",
+        "tbl_consistency": "Consistir.",
+        "tbl_last_run": "Última ejecución",
+        "graph_legend_title": "Leyenda del gráfico",
+        "graph_legend_body": "La banda azul representa el rango de consumo de energía mínimo y máximo observado. La línea muestra la curva de potencia promedio.",
+        "recording_preview": "Vista previa de grabación",
+        "trim_start": "Inicio de recorte",
+        "trim_end": "Extremo de recorte",
+        "split_preview_title": "Vista previa dividida",
+        "split_preview_found_fmt": "Se encontraron {count} segmentos.",
+        "split_preview_confirm_fmt": "Haga clic en Confirmar para dividir este ciclo en {count} ciclos separados.",
+        "merge_preview_title": "Vista previa de fusión",
+        "merge_preview_joining_fmt": "Uniéndose a {count} ciclos. Los huecos se rellenarán con lecturas de 0W.",
+        "profile_comparison": "Comparación de perfiles",
+        "actual_cycle_label": "Este ciclo (real)",
+        "storage_usage_header": "Uso de almacenamiento",
+        "storage_file_size": "Tamaño de archivo",
+        "storage_cycles": "Ciclos",
+        "storage_profiles": "Perfiles",
+        "storage_debug_traces": "Seguimientos de depuración",
+        "overview_suffix": "Descripción general",
+        "phase_preview_for_profile": "Vista previa de fase para perfil",
+        "current_ranges_header": "Rangos actuales",
+        "assign_phases_help": "Utilice las siguientes acciones para agregar, editar, eliminar o guardar rangos.",
+        "profile_summary_header": "Resumen de perfil",
+        "recent_cycles_header": "Ciclos recientes"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "Dividir un ciclo (encontrar huecos)",
+        "merge": "Fusionar ciclos (unir fragmentos)",
+        "delete": "Eliminar ciclo(s)"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "Mantenimiento: reprocesar y optimizar datos",
+        "clear_debug_data": "Borrar datos de depuración (liberar espacio)",
+        "wipe_history": "Borrar TODOS los datos de este dispositivo (irreversible)",
+        "export_import": "Exportar/Importar JSON con configuración (copiar/pegar)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "Exportar todos los datos",
+        "import": "Importar/fusionar datos"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "Etiquetar automáticamente ciclos antiguos",
+        "select_cycle_to_label": "Ciclo específico de etiqueta",
+        "select_cycle_to_label_multi": "Etiquetar múltiples ciclos",
+        "select_cycle_to_delete": "Eliminar ciclo",
+        "interactive_editor": "Fusionar/Dividir Editor Interactivo"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "Crear nuevo perfil",
+        "edit_profile": "Editar/cambiar nombre de perfil",
+        "delete_profile": "Eliminar perfil",
+        "profile_stats": "Estadísticas de perfil",
+        "cleanup_profile": "Limpiar historial: graficar y eliminar",
+        "assign_phases": "Asignar rangos de fase"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "Crear nueva fase",
+        "edit_custom_phase": "Editar fase",
+        "delete_custom_phase": "Eliminar fase"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "Agregar rango de fase",
+        "edit_range": "Editar rango de fase",
+        "delete_range": "Eliminar rango de fase",
+        "clear_ranges": "Borrar todos los rangos",
+        "save_ranges": "Guardar y devolver"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "Actualizar estado",
+        "stop_recording": "Detener grabación (guardar y procesar)",
+        "start_recording": "Iniciar nueva grabación",
+        "process_recording": "Procesar la última grabación (recortar y guardar)",
+        "discard_recording": "Descartar la última grabación"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "Crear nuevo perfil",
+        "existing_profile": "Agregar al perfil existente",
+        "discard": "Descartar grabación"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "Confirmar - Detección correcta",
+        "correct": "Correcto: elija programa/duración",
+        "ignore": "Ignorar: ciclo falso positivo/ruidoso",
+        "delete": "Eliminar - Eliminar del historial"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "Ciclo de etiquetas",
+      "description": "Asigne un perfil existente a un ciclo anterior o elimine la etiqueta.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo de la lavadora para etiquetar."
+        },
+        "cycle_id": {
+          "name": "ID de ciclo",
+          "description": "El ID del ciclo a etiquetar."
+        },
+        "profile_name": {
+          "name": "Nombre del perfil",
+          "description": "El nombre de un perfil existente (cree perfiles en el menú Administrar perfiles). Déjelo en blanco para quitar la etiqueta."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "Crear perfil",
+      "description": "Cree un nuevo perfil (independiente o basado en un ciclo de referencia).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo de la lavadora."
+        },
+        "profile_name": {
+          "name": "Nombre del perfil",
+          "description": "Nombre del nuevo perfil (por ejemplo, \"Heavy Duty\", \"Delicates\")."
+        },
+        "reference_cycle_id": {
+          "name": "ID del ciclo de referencia",
+          "description": "ID de ciclo opcional en el que basar este perfil."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "Eliminar perfil",
+      "description": "Elimine un perfil y, opcionalmente, desetiquete los ciclos que lo utilizan.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo de la lavadora."
+        },
+        "profile_name": {
+          "name": "Nombre del perfil",
+          "description": "El perfil a eliminar."
+        },
+        "unlabel_cycles": {
+          "name": "Desetiquetar ciclos",
+          "description": "Retire la etiqueta del perfil de las bicicletas que utilizan este perfil."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "Etiquetar automáticamente ciclos antiguos",
+      "description": "Etiquete retroactivamente ciclos sin etiquetar utilizando la coincidencia de perfiles.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo de la lavadora."
+        },
+        "confidence_threshold": {
+          "name": "Umbral de confianza",
+          "description": "Confianza de coincidencia mínima (0,50-0,95) para aplicar etiquetas."
+        }
+      }
+    },
+    "export_config": {
+      "name": "Exportar configuración",
+      "description": "Exporte los perfiles, ciclos y configuraciones de este dispositivo a un archivo JSON (por dispositivo).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo de la lavadora para exportar."
+        },
+        "path": {
+          "name": "Camino",
+          "description": "Ruta de archivo absoluta opcional para escribir (el valor predeterminado es /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "Importar configuración",
+      "description": "Importe perfiles, ciclos y configuraciones para este dispositivo desde un archivo de exportación JSON (es posible que se sobrescriban las configuraciones).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo de la lavadora al que importar."
+        },
+        "path": {
+          "name": "Camino",
+          "description": "Ruta absoluta al archivo JSON de exportación para importar."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "Enviar comentarios sobre el ciclo",
+      "description": "Confirme o corrija un programa detectado automáticamente después de un ciclo completo. Proporcione `entry_id` (avanzado) o `device_id` (recomendado).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo WashData (recomendado en lugar de Entry_ID)."
+        },
+        "entry_id": {
+          "name": "ID de entrada",
+          "description": "El ID de entrada de configuración para el dispositivo (alternativa a device_id)."
+        },
+        "cycle_id": {
+          "name": "ID de ciclo",
+          "description": "La identificación del ciclo que se muestra en los registros/notificaciones de comentarios."
+        },
+        "user_confirmed": {
+          "name": "Confirmar programa detectado",
+          "description": "Establezca verdadero si el programa detectado es correcto."
+        },
+        "corrected_profile": {
+          "name": "Perfil corregido",
+          "description": "Si no se confirma, proporcione el nombre correcto del perfil/programa."
+        },
+        "corrected_duration": {
+          "name": "Duración corregida (segundos)",
+          "description": "Duración corregida opcional en segundos."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas opcionales sobre este ciclo."
+        }
+      }
+    },
+    "record_start": {
+      "name": "Inicio del ciclo de grabación",
+      "description": "Comience a registrar manualmente un ciclo de limpieza (omite toda lógica coincidente).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo de la lavadora para grabar."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "Parada del ciclo de grabación",
+      "description": "Detener la grabación manual.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo de la lavadora para dejar de grabar."
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "Correr"
+      },
+      "match_ambiguity": {
+        "name": "Ambigüedad del partido"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "Estado"
+        "name": "Estado",
+        "state": {
+          "off": "Apagado",
+          "idle": "Inactivo",
+          "starting": "A partir de",
+          "running": "Correr",
+          "paused": "En pausa",
+          "ending": "Final",
+          "finished": "Finalizado",
+          "anti_wrinkle": "Antiarrugas",
+          "interrupted": "interrumpido",
+          "force_stopped": "Fuerza detenida",
+          "rinse": "Enjuagar",
+          "unknown": "Desconocido"
+        }
       },
       "washer_program": {
         "name": "Programa"
@@ -595,16 +936,23 @@
         "name": "Confianza del partido"
       },
       "top_candidates": {
-        "name": "Mejores candidatos"
+        "name": "Mejores candidatos",
+        "state": {
+          "none": "Ninguno"
+        }
+      },
+      "current_phase": {
+        "name": "Fase actual"
       },
       "wash_phase": {
         "name": "Fase"
       },
+      "profile_cycle_count": {
+        "name": "Perfil {profile_name} Recuento",
+        "unit_of_measurement": "ciclos"
+      },
       "suggestions": {
         "name": "Configuraciones sugeridas"
-      },
-      "current_phase": {
-        "name": "Fase actual"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "Detección automática"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "Forzar fin de ciclo"
       }
     }
   }

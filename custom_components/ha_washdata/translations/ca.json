@@ -41,17 +41,17 @@
         "menu_options": {
           "learning_feedbacks": "Revisar els comentaris d'aprenentatge",
           "settings": "Configuració",
+          "notifications": "Notificacions",
           "manage_cycles": "Gestionar cicles",
           "manage_profiles": "Gestionar perfils",
-          "record_cycle": "Cicle de gravació (manual)",
-          "diagnostics": "Diagnòstic i Manteniment",
           "manage_phase_catalog": "Gestionar el catàleg de fases",
-          "notifications": "Notificacions"
+          "record_cycle": "Cicle de gravació (manual)",
+          "diagnostics": "Diagnòstic i Manteniment"
         }
       },
       "apply_suggestions": {
         "title": "Copia els valors suggerits",
-        "description": "Això copiarà els valors suggerits actuals a la configuració desada. Aquesta és una acció única i no activa les sobreescritures automàtiques.\n\nValors suggerits per copiar:\n{suggested}",
+        "description": "Això copiarà els valors actuals suggerits a la configuració desada. Aquesta és una acció única i no activa la sobreescritura automàtica.\n\nValors suggerits per copiar:\n{suggested}",
         "data": {
           "confirm": "Confirmeu l'acció de còpia"
         }
@@ -66,6 +66,10 @@
           "min_power": "Potència mínima (W)",
           "off_delay": "Retard de finalització de cicle (s)",
           "notify_service": "Servei de notificacions (p. ex., notify.mobile_app)",
+          "notify_actions": "Accions de notificació",
+          "notify_people": "Endarrerir el lliurament fins que aquestes persones siguin a casa",
+          "notify_only_when_home": "Retarda les notificacions fins que la persona seleccionada sigui a casa",
+          "notify_fire_events": "Esdeveniments d'automatització d'incendis",
           "notify_events": "Esdeveniments a notificar",
           "notify_before_end_minutes": "Notificació prèvia a la finalització (minuts abans del final)",
           "notify_title": "Títol de la notificació",
@@ -73,30 +77,64 @@
           "notify_start_message": "Inicieu el format del missatge",
           "notify_finish_message": "Finalitza el format del missatge",
           "notify_pre_complete_message": "Format de missatge previ a la finalització",
-          "show_advanced": "Edita la configuració avançada (pas següent)",
-          "notify_actions": "Accions de notificació",
-          "notify_people": "Persones a notificar",
-          "notify_only_when_home": "Notificar només quan estigui a casa",
-          "notify_fire_events": "Esdeveniments d'automatització d'incendis"
+          "show_advanced": "Edita la configuració avançada (pas següent)"
         },
         "data_description": {
-          "apply_suggestions": "Marqueu aquesta casella per copiar els valors suggerits per l'algoritme d'aprenentatge al formulari. Revisa abans de desar.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Marqueu aquesta casella per copiar els valors suggerits per l'algoritme d'aprenentatge al formulari. Revisa abans de desar.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- retard_apagat: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerància_durada: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "Seleccioneu el tipus d'aparell (rentadora, assecadora, rentavaixelles, cafetera, EV). Aquesta etiqueta s'emmagatzema amb cada cicle per a una millor organització.",
-          "power_sensor": "L'entitat sensora que informa de la potència en temps real (en watts). Podeu canviar-ho en qualsevol moment sense perdre les dades històriques, útil si substituïu un connector intel·ligent.",
+          "power_sensor": "L'entitat sensora que informa de la potència en temps real (en watts). Podeu canviar-ho en qualsevol moment sense perdre les dades històriques; és útil si substituïu un connector intel·ligent.",
           "min_power": "Les lectures de potència per sobre d'aquest llindar (en watts) indiquen que l'aparell està en funcionament. Comenceu amb 2 W per a la majoria de dispositius.",
-          "off_delay": "En segons, la potència suavitzada ha de romandre per sota del llindar d'aturada per marcar la finalització. Per defecte: 120 s.",
+          "off_delay": "En segons, la potència suavitzada s'ha de mantenir per sota del llindar d'aturada per marcar la finalització. Per defecte: 120 s.",
           "notify_service": "Servei de notificacions de Home Assistant per utilitzar (opcional).",
+          "notify_actions": "Seqüència d'accions de Home Assistant opcional per executar-se per a les notificacions (scripts, notificació, TTS, etc.). Si s'estableix, les accions s'executen abans del servei de notificació alternativa.",
+          "notify_people": "Entitats de persones que s'utilitzen per al control de presència. Quan està activat, l'entrega de notificacions es retarda fins que almenys una persona seleccionada és a casa.",
+          "notify_only_when_home": "Si està activat, retarda les notificacions fins que almenys una persona seleccionada sigui a casa.",
+          "notify_fire_events": "Si està activat, activa els esdeveniments de Home Assistant per a l'inici i el final del cicle (ha_washdata_cycle_started i ha_washdata_cycle_ended) per impulsar les automatitzacions.",
           "notify_events": "Per quins esdeveniments enviar notificacions.",
           "notify_before_end_minutes": "Minuts abans del final estimat del cicle per activar una notificació. Establiu a 0 per desactivar. Per defecte: 0.",
-          "notify_title": "Títol personalitzat per a les notificacions. Admet el marcador de posició {device}.",
+          "notify_title": "Títol personalitzat per a les notificacions. Admet {device} marcador de posició.",
           "notify_icon": "Icona per utilitzar per a les notificacions (p. ex. mdi:washing-machine). Deixeu-lo en blanc per utilitzar-lo per defecte.",
-          "notify_start_message": "Missatge enviat quan comença un cicle. Admet el marcador de posició {device}.",
+          "notify_start_message": "Missatge enviat quan comença un cicle. Admet {device} marcador de posició.",
           "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició.",
+          "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició."
+        }
+      },
+      "notifications": {
+        "title": "Notificacions",
+        "description": "Configura canals de notificació, plantilles i actualitzacions opcionals de progrés mòbils en directe.",
+        "data": {
+          "notify_service": "Servei de notificacions (p. ex., notify.mobile_app)",
+          "notify_actions": "Accions de notificació",
+          "notify_people": "Endarrerir el lliurament fins que aquestes persones siguin a casa",
+          "notify_only_when_home": "Retarda les notificacions fins que la persona seleccionada sigui a casa",
+          "notify_fire_events": "Esdeveniments d'automatització d'incendis",
+          "notify_events": "Esdeveniments a notificar",
+          "notify_before_end_minutes": "Notificació prèvia a la finalització (minuts abans del final)",
+          "notify_live_enabled": "Activa les notificacions de progrés en directe",
+          "notify_live_interval_seconds": "Interval d'actualització en directe (segons)",
+          "notify_live_overrun_percent": "Subsistència d'excés d'actualitzacions en directe (%)",
+          "notify_title": "Títol de la notificació",
+          "notify_icon": "Icona de notificació",
+          "notify_start_message": "Inicieu el format del missatge",
+          "notify_finish_message": "Finalitza el format del missatge",
+          "notify_pre_complete_message": "Format de missatge previ a la finalització"
+        },
+        "data_description": {
+          "notify_service": "Servei de notificacions de Home Assistant per utilitzar (opcional).",
           "notify_actions": "Seqüència d'accions de Home Assistant opcional per executar-se per a les notificacions (scripts, notificació, TTS, etc.). Si s'estableix, les accions s'executen abans del servei de notificació alternativa.",
-          "notify_people": "Entitats de persones que s'han d'utilitzar per a la llar/fora. Quan està activat, les notificacions s'ajornan fins que algú és a casa.",
+          "notify_people": "Entitats de persones que s'utilitzen per al control de presència. Quan està activat, l'entrega de notificacions es retarda fins que almenys una persona seleccionada és a casa.",
           "notify_only_when_home": "Si està activat, retarda les notificacions fins que almenys una persona seleccionada sigui a casa.",
-          "notify_fire_events": "Si està activat, activa els esdeveniments de Home Assistant per a l'inici i el final del cicle (ha_washdata_cycle_started/ended) per impulsar les automatitzacions."
+          "notify_fire_events": "Si està activat, activa els esdeveniments de Home Assistant per a l'inici i el final del cicle (ha_washdata_cycle_started i ha_washdata_cycle_ended) per impulsar les automatitzacions.",
+          "notify_events": "Per quins esdeveniments enviar notificacions.",
+          "notify_before_end_minutes": "Minuts abans del final estimat del cicle per activar una notificació. Establiu a 0 per desactivar. Per defecte: 0.",
+          "notify_live_enabled": "Activa les actualitzacions de progrés en directe per a les notificacions d'aplicacions mòbils.",
+          "notify_live_interval_seconds": "Amb quina freqüència s'envien les actualitzacions de progrés mentre s'executen. Els valors més baixos són més sensibles, però consumeixen més notificacions.",
+          "notify_live_overrun_percent": "Marge de seguretat per sobre del recompte d'actualitzacions estimat per a cicles llargs/excedits (per exemple, el 20% permet actualitzacions 1,2 vegades estimades).",
+          "notify_title": "Títol personalitzat per a les notificacions. Admet {device} marcador de posició.",
+          "notify_icon": "Icona per utilitzar per a les notificacions (p. ex. mdi:washing-machine). Deixeu-lo en blanc per utilitzar-lo per defecte.",
+          "notify_start_message": "Missatge enviat quan comença un cicle. Admet {device} marcador de posició.",
+          "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició."
         }
       },
       "advanced_settings": {
@@ -104,9 +142,9 @@
         "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.",
         "data": {
           "apply_suggestions": "Aplicar els valors suggerits",
-          "start_threshold_w": "Llindar d'inici (W)",
+          "start_threshold_w": "Llindar inicial (W)",
           "stop_threshold_w": "Llindar d'aturada (W)",
-          "min_off_gap": "Distància mínima entre cicles (s)",
+          "min_off_gap": "Bretxa mínima entre cicles (s)",
           "start_duration_threshold": "Durada d'inici de rebot (s)",
           "progress_reset_delay": "Retard de restabliment del progrés (segons)",
           "no_update_active_timeout": "Temps d'espera sense actualització (s)",
@@ -124,9 +162,9 @@
           "interrupted_min_seconds": "Interrupt: temps d'execució mínim (segons)",
           "abrupt_drop_watts": "Interrupt: caiguda abrupta absoluta (W)",
           "abrupt_drop_ratio": "Interromput: ràtio de caiguda brusca (0-1)",
-          "abrupt_high_load_factor": "Interromput: factor de càrrega alta",
+          "abrupt_high_load_factor": "Interrupt: factor de càrrega alta",
           "max_past_cycles": "Retenció: cicles màxims guardats",
-          "max_full_traces_per_profile": "Retenció: màxim de traces completes per perfil",
+          "max_full_traces_per_profile": "Retenció: traces completes màximes per perfil",
           "max_full_traces_unlabeled": "Retenció: màxim de traces completes sense etiquetar",
           "watchdog_interval": "Interval de control (segons)",
           "completion_min_seconds": "Temps d'execució mínim de finalització (segons)",
@@ -140,7 +178,7 @@
           "expose_debug_entities": "Exposa entitats de depuració",
           "save_debug_traces": "Desa les traces de depuració",
           "anti_wrinkle_enabled": "Escut antiarrugues (només assecador)",
-          "anti_wrinkle_max_power": "Potència màxima anti-arrugues (W)",
+          "anti_wrinkle_max_power": "Potència màxima antiarrugues (W)",
           "anti_wrinkle_max_duration": "Durada màxima anti-arrugues (s)",
           "anti_wrinkle_exit_power": "Potència de sortida anti-arrugues (W)",
           "dtw_bandwidth": "Ample de banda DTW",
@@ -149,13 +187,13 @@
           "external_end_trigger_inverted": "Inverteix la lògica de l'activació (disparador desactivat)"
         },
         "data_description": {
-          "apply_suggestions": "Marqueu aquesta casella per copiar els valors suggerits per l'algoritme d'aprenentatge al formulari. Revisa abans de desar.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Marqueu aquesta casella per copiar els valors suggerits per l'algoritme d'aprenentatge al formulari. Revisa abans de desar.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- retard_apagat: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerància_durada: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "La potència ha de pujar per sobre d'aquest llindar per iniciar un cicle. Estableix una potència superior a la teva en espera. Per defecte: min_power + 1 W.",
           "stop_threshold_w": "L'energia ha de baixar per sota d'aquest llindar per FINALITZAR un cicle. Establiu just per sobre de zero per evitar que el soroll provoqui finals falsos. Per defecte: 0,6 * min_power.",
           "min_off_gap": "Si un cicle s'inicia en tants segons des de la finalització de l'anterior, es FUSIONARÀ en un sol cicle.",
           "start_duration_threshold": "Ignoreu pics de potència breus més curts que aquesta durada (segons). Filtra els pics d'arrencada (p. ex., 60 W durant 2 segons) abans que comenci el cicle real. Per defecte: 5 s.",
           "progress_reset_delay": "Un cop finalitzat un cicle (100%), espereu aquests segons d'inactivitat abans de restablir el progrés al 0%. Per defecte: 300 s.",
-          "no_update_active_timeout": "Per als sensors de publicació en canvi: només s'ha de forçar la finalització d'un cicle ACTIV si no arriben actualitzacions durant tants segons. La finalització de baix consum encara utilitza el retard d'apagat.",
+          "no_update_active_timeout": "Per als sensors de publicació al canvi: només s'ha de forçar la finalització d'un cicle ACTIV si no arriben actualitzacions durant tants segons. La finalització de baix consum encara utilitza el retard d'apagat.",
           "sampling_interval": "Interval mínim de mostreig en segons. Les actualitzacions més ràpides que aquesta velocitat s'ignoraran. Per defecte: 2,0 s.",
           "auto_label_confidence": "Etiqueteu automàticament els cicles amb aquesta confiança o per sobre en finalitzar (0,0-1,0).",
           "learning_confidence": "Confiança mínima per sol·licitar la verificació de l'usuari mitjançant un esdeveniment (0,0–1,0).",
@@ -166,7 +204,7 @@
           "smoothing_window": "Nombre de lectures de potència recents utilitzades per a la suavització de mitjana mòbil.",
           "profile_match_threshold": "La puntuació mínima de similitud DTW (0,0–1,0) necessària per considerar un perfil com a coincidència. Major = concordança més estricta, menys falsos positius. Per defecte: 0,4.",
           "profile_unmatch_threshold": "Puntuació de similitud DTW (0,0–1,0) per sota de la qual es rebutja un perfil coincident anteriorment. Hauria de ser inferior al llindar de coincidència per evitar el parpelleig. Per defecte: 0,35.",
-          "profile_duration_tolerance": "Tolerància utilitzada per la concordança de perfils per a la variació de la durada total (0,0–0,5). Comportament per defecte: ±25%.",
+          "profile_duration_tolerance": "Tolerància utilitzada per la concordança de perfils per a la variació de la durada total (0,0-0,5). Comportament per defecte: ±25%.",
           "interrupted_min_seconds": "Els recorreguts més curts que això es poden classificar com a \"interromputs\".",
           "abrupt_drop_watts": "La caiguda de potència absoluta (W) es considera un penya-segat abrupte.",
           "abrupt_drop_ratio": "Relació de caiguda (0–1). Exemple: 0,6 significa que una caiguda del 60% és brusca.",
@@ -174,30 +212,30 @@
           "max_past_cycles": "Nombre total de cicles a conservar (el més antic eliminat). Per defecte: 200.",
           "max_full_traces_per_profile": "Nombre de cicles etiquetats recents per mantenir amb traces de potència total per perfil. Els rastres més antics es resumeixen mitjançant sobres. Per defecte: 20.",
           "max_full_traces_unlabeled": "Nombre de cicles recents sense etiquetar per mantenir amb traces de potència total per admetre l'etiquetatge automàtic. Per defecte: 20.",
-          "watchdog_interval": "Segons entre comprovacions del gos vigilant mentre s'executa. Per defecte: 5 s. ADVERTÈNCIA: assegureu-vos que sigui SUPERIOR que l'interval d'actualització del vostre sensor per evitar falses parades (p. ex., si el sensor s'actualitza cada 60 segons, feu servir més de 65 segons).",
+          "watchdog_interval": "Segons entre comprovacions del gos vigilant mentre s'executa. Per defecte: 5 s. ADVERTÈNCIA: assegureu-vos que sigui SUPERIOR que l'interval d'actualització del vostre sensor per evitar falses parades (p. ex., si el sensor s'actualitza cada 60 s, utilitzeu 65 s o més).",
           "completion_min_seconds": "Els cicles més curts que aquest es marcaran com a \"interromputs\", encara que acabin de manera natural. Per defecte: 600 s.",
           "notify_before_end_minutes": "Minuts abans del final estimat del cicle per activar una notificació. Establiu a 0 per desactivar. Per defecte: 0.",
           "auto_tune_noise_events_threshold": "Nombre de cicles de \"soroll\" curts/baixa potència en 24 h necessaris per ajustar automàticament min_power. Per defecte: 3.",
           "running_dead_zone": "Després d'iniciar el cicle, ignoreu les caigudes de potència durant aquests segons per evitar la detecció de finals falsos durant la fase inicial d'engegada. Establiu a 0 per desactivar. Per defecte: 0 s.",
           "end_repeat_count": "Nombre de vegades que la condició final (potència per sota del llindar per off_delay) s'ha de complir consecutivament abans d'acabar el cicle. Els valors més alts eviten finals falsos durant les pauses. Per defecte: 1.",
-          "start_energy_threshold": "El cicle ha d'acumular almenys aquesta quantitat d'energia (Wh) durant la fase d'inici per ser confirmat. Per defecte: 0,005 Wh.",
+          "start_energy_threshold": "El cicle ha d'acumular almenys aquesta quantitat d'energia (Wh) durant la fase d'arrencada per confirmar-se. Per defecte: 0,005 Wh.",
           "end_energy_threshold": "El cicle acaba només si l'energia de l'última finestra de retard d'apagada està per sota d'aquest valor (Wh). Impedeix finals falsos si la potència fluctua prop de zero. Per defecte: 0,05 Wh.",
           "auto_maintenance": "Habiliteu el manteniment automàtic (repareu mostres, fusioneu fragments).",
           "expose_debug_entities": "Mostra sensors avançats (confiança, fase, ambigüitat) per a la depuració.",
           "save_debug_traces": "Emmagatzema dades detallades de classificació i traça de potència a l'historial (augmenta l'ús d'emmagatzematge).",
-          "anti_wrinkle_enabled": "Ignoreu les rotacions curtes del tambor de baixa potència després d'acabar un cicle per evitar cicles fantasma (només assecadora/rentadora-assecadora).",
+          "anti_wrinkle_enabled": "Ignoreu les rotacions curtes de tambor de baixa potència després d'acabar un cicle per evitar cicles fantasma (només assecadora/rentadora-assecadora).",
           "anti_wrinkle_max_power": "Les ràfegues amb aquesta potència o per sota es tracten com a rotacions anti-arrugues en lloc de nous cicles. Només s'aplica quan l'escut antiarrugues està activat.",
           "anti_wrinkle_max_duration": "Longitud màxima de l'esclat per tractar-se com a rotació anti-arrugues. Només s'aplica quan l'escut antiarrugues està activat.",
-          "anti_wrinkle_exit_power": "Si la potència cau per sota d'aquest nivell, sortiu de l'antiarrugues immediatament (desactivat). Només s'aplica quan l'escut antiarrugues està activat.",
-          "dtw_bandwidth": "Temps màxim permès deformació (estirament) com a relació entre la durada del cicle. Els valors més alts permeten fer coincidir cicles molt variables, però augmenten el cost de la CPU. Per defecte: 0,20 (20%).",
+          "anti_wrinkle_exit_power": "Si la potència cau per sota d'aquest nivell, sortiu de l'antiarrugues immediatament (apagat veritablement). Només s'aplica quan l'escut antiarrugues està activat.",
+          "dtw_bandwidth": "Temps màxim permès deformació (estirament) com a relació de la durada del cicle. Els valors més alts permeten fer coincidir cicles molt variables, però augmenten el cost de la CPU. Per defecte: 0,20 (20%).",
           "external_end_trigger_enabled": "Habiliteu la supervisió d'un sensor binari extern per activar la finalització del cicle.",
-          "external_end_trigger": "Seleccioneu una entitat de sensor binari. Quan aquest sensor s'activa, el cicle actual finalitzarà amb l'estat \"completat\".",
-          "external_end_trigger_inverted": "Per defecte, el disparador s'activa quan el sensor s'activa. Marqueu aquesta casella per activar-se quan el sensor s'apagui."
+          "external_end_trigger": "Seleccioneu una entitat de sensor binari. Quan aquest sensor s'activa, el cicle actual finalitzarà amb l'estat \"complet\".",
+          "external_end_trigger_inverted": "De manera predeterminada, el disparador s'activa quan el sensor s'activa. Marqueu aquesta casella per activar-se quan el sensor s'apagui."
         }
       },
       "diagnostics": {
         "title": "Diagnòstic i Manteniment",
-        "description": "Executeu accions de manteniment, com ara combinar cicles fragmentats o migrar les dades emmagatzemades.\n\n{storage_stats}"
+        "description": "Executeu accions de manteniment, com ara combinar cicles fragmentats o migrar les dades emmagatzemades.\n\n**Ús d'emmagatzematge**\n\n- Mida del fitxer: {file_size_kb} KB\n- Cicles: {cycle_count}\n- Perfils: {profile_count}\n- Traces de depuració: {debug_count}"
       },
       "clear_debug_data": {
         "title": "Esborra les dades de depuració",
@@ -210,11 +248,109 @@
           "action": "Acció"
         }
       },
+      "manage_cycles_empty": {
+        "title": "Gestionar cicles",
+        "description": "Encara no s'han registrat cicles.",
+        "data": {
+          "action": "Acció"
+        }
+      },
       "manage_profiles": {
         "title": "Gestionar perfils",
         "description": "Resum del perfil:\n{profile_summary}",
         "data": {
           "action": "Acció"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "Gestionar perfils",
+        "description": "Encara no s'ha creat cap perfil.",
+        "data": {
+          "action": "Acció"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "Gestionar el catàleg de fases",
+        "description": "Catàleg de fases (valors per defecte per a aquest dispositiu + fases personalitzades):\n{phase_summary}",
+        "data": {
+          "action": "Acció"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Crea una fase personalitzada",
+        "description": "Creeu un nom i una descripció de fase personalitzats i trieu a quin tipus de dispositiu s'aplica.",
+        "data": {
+          "target_device_type": "Tipus de dispositiu objectiu",
+          "phase_name": "Nom de la fase",
+          "phase_description": "Descripció de la fase"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Edita la fase personalitzada",
+        "description": "Seleccioneu una fase personalitzada per editar.",
+        "data": {
+          "phase_name": "Fase personalitzada"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Edita la fase personalitzada",
+        "description": "Fase d'edició: {phase_name}",
+        "data": {
+          "phase_name": "Nom de la fase",
+          "phase_description": "Descripció de la fase"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Suprimeix la fase personalitzada",
+        "description": "Seleccioneu una fase personalitzada per suprimir. Tots els intervals assignats que utilitzin aquesta fase s'eliminaran.",
+        "data": {
+          "phase_name": "Fase personalitzada"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Assignar intervals de fase",
+        "description": "Fase de previsualització del perfil: **{profile_name}**\n\n{timeline_svg}\n\n**Intervals actuals:**\n{current_ranges}\n\nFeu servir les accions següents per afegir, editar, suprimir o desar intervals.",
+        "data": {
+          "action": "Acció"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Afegeix l'interval de fases",
+        "description": "Afegiu un interval de fase a l'esborrany actual.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Minut d'inici",
+          "end_min": "Minut final"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Edita l'interval de fases",
+        "description": "Seleccioneu un interval per editar.",
+        "data": {
+          "range_index": "Interval de fases"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Edita l'interval de fases",
+        "description": "Actualitza l'interval de fase seleccionat.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Minut d'inici",
+          "end_min": "Minut final"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Suprimeix l'interval de fases",
+        "description": "Seleccioneu un interval per eliminar-lo de l'esborrany.",
+        "data": {
+          "range_index": "Interval de fases"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Assignar intervals de fase",
+        "description": "Seleccioneu un perfil per configurar els intervals de fase.",
+        "data": {
+          "profile": "Perfil"
         }
       },
       "profile_stats": {
@@ -293,11 +429,11 @@
         "description": "Netegeu l'historial de cicles combinant execucions fragmentades i dividint cicles combinats incorrectament dins d'una finestra de temps. Introduïu el nombre d'hores per mirar enrere.\n{info}",
         "data": {
           "time_range": "Finestra de consulta (hores)",
-          "gap_seconds": "Fusió/Divisió de la bretxa (segons)"
+          "gap_seconds": "Combinació/Divisió de la bretxa (segons)"
         },
         "data_description": {
           "time_range": "Nombre d'hores per buscar cicles fragmentats per combinar-los. Utilitzeu 999999 per processar totes les dades històriques.\n{info}",
-          "gap_seconds": "Llindar per decidir dividir o combinar. Els buits MÉS CURTS que aquest es combinen. Els buits MÉS LLARGS que aquest estan dividits. Baixeu-ho per forçar una divisió en un cicle que s'ha fusionat incorrectament."
+          "gap_seconds": "Llindar per decidir dividir o combinar. Els buits MÉS CURTS que aquest es combinen. Els buits MÉS LLARG que aquest es divideixen. Baixeu-ho per forçar una divisió en un cicle que s'ha fusionat incorrectament."
         }
       },
       "cleanup_profile": {
@@ -309,7 +445,7 @@
       },
       "cleanup_select": {
         "title": "Neteja l'historial: gràfic i suprimir",
-        "description": "![Gràfic]({graph_url})\n\n**Visualització de {profile_name}**\n\nEl gràfic mostra els cicles individuals com a línies de colors. Identifiqueu els valors atípics (línies allunyades del grup) i feu coincidir el seu color a la llista següent per eliminar-los.\n\n**Seleccioneu cicles per suprimir PERMANENTMENT:**",
+        "description": "![Gràfic]({graph_url})\n\n**Visualització de {profile_name}**\n\nEl gràfic mostra els cicles individuals com a línies de colors. Identifiqueu els valors atípics (línies allunyades del grup) i feu coincidir el seu color a la llista següent per eliminar-los.\n\n**Seleccioneu els cicles per suprimir PERMANENTMENT:**",
         "data": {
           "cycles_to_delete": "Cicles per suprimir (comprova els colors coincidents)"
         }
@@ -352,7 +488,7 @@
         "title": "Configuració dividida",
         "description": "Ajusteu la sensibilitat per dividir aquest cicle. Qualsevol espai inactiu més llarg que això provocarà una divisió.",
         "data": {
-          "min_gap_seconds": "Llindar de separació (segons)"
+          "min_gap_seconds": "Llindar de bretxa dividida (segons)"
         }
       },
       "reprocess_history": {
@@ -367,8 +503,8 @@
         "title": "Exporta/Importa JSON",
         "description": "Copieu/enganxeu cicles, perfils I configuració d'aquest dispositiu. Exporteu a continuació o enganxeu JSON per importar.",
         "data": {
-          "json_payload": "Configuració completa JSON",
-          "mode": "Acció"
+          "mode": "Acció",
+          "json_payload": "Configuració completa JSON"
         },
         "data_description": {
           "mode": "Trieu Exporta per copiar les dades i la configuració actuals, o Importa per enganxar les dades exportades des d'un altre dispositiu WashData.",
@@ -405,143 +541,19 @@
       },
       "resolve_feedback": {
         "title": "Resol comentaris",
-        "description": "**Programa detectat**: {profile}\n**Confiança**: {confidence}%\n**Estimat**: {est}m, **Real**: {act}m",
+        "description": "{comparison_img}{candidates_table}\n**Perfil detectat**: {detected_profile} ({confidence_pct}%)\n**Durada estimada**: {est_duration_min} min\n**Durada real**: {act_duration_min} min\n\n__Tria una acció a continuació:__",
         "data": {
+          "action": "Què t'agradaria fer?",
           "corrected_profile": "Programa correcte (si es corregeix)",
-          "corrected_duration": "Durada correcta en minuts (si es corregeix)",
-          "action": "Què t'agradaria fer?"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Gestionar el catàleg de fases",
-        "description": "Fases actuals per a aquest tipus de dispositiu:\n{phase_summary}",
-        "data": {
-          "action": "Acció"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Crea una fase personalitzada",
-        "description": "Creeu un nom de fase personalitzat i una descripció per a aquest tipus de dispositiu.",
-        "data": {
-          "phase_name": "Nom de la fase",
-          "phase_description": "Descripció de la fase",
-          "target_device_type": "Tipus de dispositiu objectiu"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Edita la fase personalitzada",
-        "description": "Seleccioneu una fase personalitzada per editar.",
-        "data": {
-          "phase_name": "Fase personalitzada"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Edita la fase personalitzada",
-        "description": "Fase d'edició: {phase_name}",
-        "data": {
-          "phase_name": "Nom de la fase",
-          "phase_description": "Descripció de la fase"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Suprimeix la fase personalitzada",
-        "description": "Seleccioneu una fase personalitzada per suprimir. Tots els intervals assignats que utilitzin aquesta fase s'eliminaran.",
-        "data": {
-          "phase_name": "Fase personalitzada"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Assignar intervals de fase",
-        "description": "Perfil: **{profile_name}**\nMode: **{assign_mode}**\nSuggeriment de cicle: {cycle_hint}\n\nIntervals actuals:\n{current_ranges}\n\nLes etiquetes de fase són per a la visualització i l'organització. La detecció utilitza patrons de potència, no noms de fase.",
-        "data": {
-          "action": "Acció"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "Assignar intervals de fase",
-        "description": "Seleccioneu un perfil per configurar els intervals de fase.",
-        "data": {
-          "profile": "Perfil"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Afegeix l'interval de fases",
-        "description": "Afegiu un interval de fase a l'esborrany actual.",
-        "data": {
-          "phase_name": "Fase",
-          "start_min": "Minut d'inici",
-          "end_min": "Minut final"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Edita l'interval de fases",
-        "description": "Seleccioneu un interval per editar.",
-        "data": {
-          "range_index": "Interval de fases"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Edita l'interval de fases",
-        "description": "Actualitza l'interval de fase seleccionat.",
-        "data": {
-          "phase_name": "Fase",
-          "start_min": "Minut d'inici",
-          "end_min": "Minut final"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Suprimeix l'interval de fases",
-        "description": "Seleccioneu un interval per eliminar-lo de l'esborrany.",
-        "data": {
-          "range_index": "Interval de fases"
-        }
-      },
-      "notifications": {
-        "title": "Notificacions",
-        "description": "Configura canals de notificació, plantilles i actualitzacions opcionals de progrés mòbils en directe.",
-        "data": {
-          "notify_service": "Servei de notificacions (p. ex., notify.mobile_app)",
-          "notify_actions": "Accions de notificació",
-          "notify_people": "Persones a notificar",
-          "notify_only_when_home": "Notificar només quan estigui a casa",
-          "notify_fire_events": "Esdeveniments d'automatització d'incendis",
-          "notify_events": "Esdeveniments a notificar",
-          "notify_before_end_minutes": "Notificació prèvia a la finalització (minuts abans del final)",
-          "notify_live_enabled": "Activa les notificacions de progrés en directe",
-          "notify_live_interval_seconds": "Interval d'actualització en directe (segons)",
-          "notify_live_overrun_percent": "Subsistència d'excés d'actualitzacions en directe (%)",
-          "notify_title": "Títol de la notificació",
-          "notify_icon": "Icona de notificació",
-          "notify_start_message": "Inicieu el format del missatge",
-          "notify_finish_message": "Finalitza el format del missatge",
-          "notify_pre_complete_message": "Format de missatge previ a la finalització"
-        },
-        "data_description": {
-          "notify_service": "Servei de notificacions de Home Assistant per utilitzar (opcional).",
-          "notify_actions": "Seqüència d'accions de Home Assistant opcional per executar-se per a les notificacions (scripts, notificació, TTS, etc.). Si s'estableix, les accions s'executen abans del servei de notificació alternativa.",
-          "notify_people": "Entitats de persones que s'han d'utilitzar per a la llar/fora. Quan està activat, les notificacions s'ajornan fins que algú és a casa.",
-          "notify_only_when_home": "Si està activat, retarda les notificacions fins que almenys una persona seleccionada sigui a casa.",
-          "notify_fire_events": "Si està activat, activa els esdeveniments de Home Assistant per a l'inici i el final del cicle (ha_washdata_cycle_started/ended) per impulsar les automatitzacions.",
-          "notify_events": "Per quins esdeveniments enviar notificacions.",
-          "notify_before_end_minutes": "Minuts abans del final estimat del cicle per activar una notificació. Establiu a 0 per desactivar. Per defecte: 0.",
-          "notify_live_enabled": "Activa les actualitzacions de progrés en directe per a les notificacions d'aplicacions mòbils.",
-          "notify_live_interval_seconds": "Amb quina freqüència s'envien les actualitzacions de progrés mentre s'executen. Els valors més baixos són més sensibles, però consumeixen més notificacions.",
-          "notify_live_overrun_percent": "Marge de seguretat per sobre del recompte d'actualitzacions estimat per a cicles llargs/excedits (per exemple, el 20% permet actualitzacions 1,2 vegades estimades).",
-          "notify_title": "Títol personalitzat per a les notificacions. Admet el marcador de posició {device}.",
-          "notify_icon": "Icona per utilitzar per a les notificacions (p. ex. mdi:washing-machine). Deixeu-lo en blanc per utilitzar-lo per defecte.",
-          "notify_start_message": "Missatge enviat quan comença un cicle. Admet el marcador de posició {device}.",
-          "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició."
+          "corrected_duration": "Durada correcta en minuts (si es corregeix)"
         }
       }
     },
     "error": {
-      "import_failed": "La importació ha fallat. Enganxeu un JSON d'exportació WashData vàlid.",
+      "import_failed": "La importació ha fallat. Enganxeu un JSON d'exportació de WashData vàlid.",
       "profile_exists": "Ja existeix un perfil amb aquest nom",
       "rename_failed": "No s'ha pogut canviar el nom del perfil. És possible que el perfil no existeixi o que ja s'ha pres un nom nou.",
       "assignment_failed": "No s'ha pogut assignar el perfil al cicle",
-      "feedback_notification_title": "WashData: verifica el cicle ({device})",
-      "feedback_notification_message": "**Dispositiu**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Hora**: {time}\n\nWashData necessita la teva ajuda per verificar aquest cicle detectat.\n\nAneu a **Configuració > Dispositius i serveis > WashData > Configura > Comentaris d'aprenentatge** per confirmar o corregir aquest resultat.",
       "duplicate_phase": "Ja existeix una fase amb aquest nom.",
       "phase_not_found": "No s'ha trobat la fase seleccionada.",
       "invalid_phase_name": "El nom de la fase no pot estar buit.",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "Els intervals de fase es superposen. Ajusteu els intervals i torneu-ho a provar.",
       "incomplete_phase_row": "Cada fila de fase ha d'incloure una fase més els valors d'inici i finalització complets per al mode seleccionat.",
       "timestamp_mode_cycle_required": "Seleccioneu un cicle d'origen quan utilitzeu el mode de marca de temps.",
-      "no_phase_ranges": "Encara no hi ha rangs de fase disponibles per a aquesta acció."
+      "no_phase_ranges": "Encara no hi ha rangs de fase disponibles per a aquesta acció.",
+      "feedback_notification_title": "WashData: verifica el cicle ({device})",
+      "feedback_notification_message": "**Dispositiu**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Hora**: {time}\n\nWashData necessita la teva ajuda per verificar aquest cicle detectat.\n\nAneu a **Configuració > Dispositius i serveis > WashData > Configura > Comentaris d'aprenentatge** per confirmar o corregir aquest resultat."
     },
     "abort": {
       "no_cycles_found": "No s'han trobat cicles",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "Tots els cicles ja estan etiquetats",
       "no_suggestions": "Encara no hi ha valors suggerits disponibles. Executeu uns quants cicles i torneu-ho a provar.",
       "no_predictions": "Sense prediccions",
+      "no_custom_phases": "No s'han trobat fases personalitzades.",
       "reprocess_success": "S'han reprocessat correctament {count} cicles.",
-      "debug_data_cleared": "S'han esborrat correctament les dades de depuració de {count} cicles.",
-      "no_custom_phases": "No s'han trobat fases personalitzades per a aquest tipus de dispositiu."
+      "debug_data_cleared": "S'han esborrat correctament les dades de depuració de {count} cicles."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "Inici del cicle",
+        "cycle_finish": "Finalització del cicle",
+        "cycle_live": "Progrés en viu"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(Sense etiquetar)",
+        "create_new_profile": "Crea un perfil nou",
+        "remove_label": "Elimina l'etiqueta",
+        "no_reference_cycle": "(Sense cicle de referència)",
+        "all_device_types": "Tots els tipus de dispositius",
+        "current_suffix": "(actual)",
+        "editor_select_info": "Seleccioneu 1 cicle per dividir o més de 2 cicles per combinar.",
+        "no_cycles_recorded": "Encara no s'han registrat cicles.",
+        "profile_summary_line": "- **{name}**: {count} cicles, {avg}m de mitjana",
+        "no_profiles_created": "Encara no s'ha creat cap perfil.",
+        "phase_preview": "Fase de previsualització",
+        "phase_preview_no_curve": "La corba mitjana del perfil encara no està disponible. Executeu/etiqueteu més cicles per a aquest perfil.",
+        "average_power_curve": "Corba de potència mitjana",
+        "unit_min": "min",
+        "profile_option_fmt": "{name} ({count} cicles, ~{duration} m de mitjana)",
+        "profile_option_short_fmt": "{name} ({count} cicles, ~{duration} m)",
+        "deleted_cycles_from_profile": "S'han suprimit {count} cicles de {profile}.",
+        "not_enough_data_graph": "No hi ha prou dades per generar el gràfic.",
+        "no_profiles_found": "No s'han trobat perfils.",
+        "cycle_info_fmt": "Cicle: {start}, {duration}m, Actual: {label}",
+        "top_candidates_header": "### Principals candidats",
+        "tbl_profile": "Perfil",
+        "tbl_confidence": "Confiança",
+        "tbl_correlation": "Correlació",
+        "tbl_duration_match": "Coincidència de durada",
+        "detected_profile": "Perfil detectat",
+        "estimated_duration": "Durada estimada",
+        "actual_duration": "Durada real",
+        "choose_action": "__Tria una acció a continuació:__",
+        "tbl_count": "Compte",
+        "tbl_avg": "Mitjana",
+        "tbl_min": "Min",
+        "tbl_max": "Màx",
+        "tbl_energy_avg": "Energia (mitjana)",
+        "tbl_energy_total": "Energia (total)",
+        "tbl_consistency": "Consistir.",
+        "tbl_last_run": "Última carrera",
+        "graph_legend_title": "Llegenda del gràfic",
+        "graph_legend_body": "La banda blava representa l'interval de consum de potència mínim i màxim observat. La línia mostra la corba de potència mitjana.",
+        "recording_preview": "Vista prèvia de la gravació",
+        "trim_start": "Inici de retall",
+        "trim_end": "Retalla final",
+        "split_preview_title": "Vista prèvia dividida",
+        "split_preview_found_fmt": "S'han trobat {count} segments.",
+        "split_preview_confirm_fmt": "Feu clic a Confirmar per dividir aquest cicle en {count} cicles separats.",
+        "merge_preview_title": "Vista prèvia de la combinació",
+        "merge_preview_joining_fmt": "S'està unint a {count} cicles. Els buits s'ompliran amb lectures de 0W.",
+        "profile_comparison": "Comparació de perfils",
+        "actual_cycle_label": "Aquest cicle (real)",
+        "storage_usage_header": "Ús d'emmagatzematge",
+        "storage_file_size": "Mida del fitxer",
+        "storage_cycles": "Cicles",
+        "storage_profiles": "Perfils",
+        "storage_debug_traces": "Traces de depuració",
+        "overview_suffix": "Visió general",
+        "phase_preview_for_profile": "Fase de previsualització del perfil",
+        "current_ranges_header": "Intervals actuals",
+        "assign_phases_help": "Feu servir les accions següents per afegir, editar, suprimir o desar intervals.",
+        "profile_summary_header": "Resum del perfil",
+        "recent_cycles_header": "Cicles recents"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "Dividir un cicle (Trobar buits)",
+        "merge": "Cicles de combinació (uneix fragments)",
+        "delete": "Suprimeix cicles"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "Manteniment: reprocessament i optimització de dades",
+        "clear_debug_data": "Esborra les dades de depuració (allibera espai)",
+        "wipe_history": "Esborra TOTES les dades d'aquest dispositiu (irreversible)",
+        "export_import": "Exportar/Importar JSON amb la configuració (copiar/enganxar)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "Exporta totes les dades",
+        "import": "Importa/Combina dades"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "Etiqueta automàtica de cicles antics",
+        "select_cycle_to_label": "Cicle específic de l'etiqueta",
+        "select_cycle_to_label_multi": "Etiqueta múltiples cicles",
+        "select_cycle_to_delete": "Suprimeix el cicle",
+        "interactive_editor": "Combinar/dividir Editor interactiu"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "Crea un perfil nou",
+        "edit_profile": "Edita/canvia el nom del perfil",
+        "delete_profile": "Suprimeix el perfil",
+        "profile_stats": "Estadístiques de perfil",
+        "cleanup_profile": "Neteja l'historial: gràfic i suprimir",
+        "assign_phases": "Assignar intervals de fase"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "Crea una nova fase",
+        "edit_custom_phase": "Fase d'edició",
+        "delete_custom_phase": "Suprimeix la fase"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "Afegeix l'interval de fases",
+        "edit_range": "Edita l'interval de fases",
+        "delete_range": "Suprimeix l'interval de fases",
+        "clear_ranges": "Esborra tots els intervals",
+        "save_ranges": "Guarda i torna"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "Estat d'actualització",
+        "stop_recording": "Atura la gravació (Desa i processa)",
+        "start_recording": "Comença una nova gravació",
+        "process_recording": "Processa l'últim enregistrament (retalla i desa)",
+        "discard_recording": "Descarta l'última gravació"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "Crea un perfil nou",
+        "existing_profile": "Afegeix al perfil existent",
+        "discard": "Descarta la gravació"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "Confirmar - Detecció correcta",
+        "correct": "Correcte: seleccioneu Programa/Durada",
+        "ignore": "Ignorar - Fals positiu/cicle sorollós",
+        "delete": "Suprimeix - Elimina de l'historial"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "Cicle d'etiquetes",
+      "description": "Assigna un perfil existent a un cicle anterior o elimina l'etiqueta.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu de la rentadora per etiquetar."
+        },
+        "cycle_id": {
+          "name": "ID del cicle",
+          "description": "L'identificador del cicle a etiquetar."
+        },
+        "profile_name": {
+          "name": "Nom del perfil",
+          "description": "El nom d'un perfil existent (creeu perfils al menú Gestiona perfils). Deixa en blanc per eliminar l'etiqueta."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "Crea un perfil",
+      "description": "Creeu un perfil nou (autònom o basat en un cicle de referència).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu de la rentadora."
+        },
+        "profile_name": {
+          "name": "Nom del perfil",
+          "description": "Nom per al perfil nou (p. ex., \"Heavy Duty\", \"Delicades\")."
+        },
+        "reference_cycle_id": {
+          "name": "ID del cicle de referència",
+          "description": "Identificador de cicle opcional per basar aquest perfil."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "Suprimeix el perfil",
+      "description": "Suprimiu un perfil i, opcionalment, desetiqueteu els cicles que el fan servir.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu de la rentadora."
+        },
+        "profile_name": {
+          "name": "Nom del perfil",
+          "description": "El perfil a esborrar."
+        },
+        "unlabel_cycles": {
+          "name": "Desetiquetar els cicles",
+          "description": "Elimina l'etiqueta del perfil dels cicles amb aquest perfil."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "Etiqueta automàtica de cicles antics",
+      "description": "Etiqueta de manera retroactiva els cicles sense etiquetar mitjançant la concordança de perfils.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu de la rentadora."
+        },
+        "confidence_threshold": {
+          "name": "Llindar de confiança",
+          "description": "Confiança de coincidència mínima (0,50-0,95) per aplicar etiquetes."
+        }
+      }
+    },
+    "export_config": {
+      "name": "Exporta la configuració",
+      "description": "Exporta els perfils, els cicles i la configuració d'aquest dispositiu a un fitxer JSON (per dispositiu).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu de la rentadora per exportar."
+        },
+        "path": {
+          "name": "Camí",
+          "description": "Ruta del fitxer absoluta opcional per escriure (per defecte és /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "Importa la configuració",
+      "description": "Importa els perfils, els cicles i la configuració d'aquest dispositiu des d'un fitxer d'exportació JSON (la configuració es pot sobreescriure).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu de la rentadora a on importar."
+        },
+        "path": {
+          "name": "Camí",
+          "description": "Camí absolut al fitxer JSON d'exportació per importar."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "Enviar comentaris sobre el cicle",
+      "description": "Confirmeu o corregiu un programa detectat automàticament després d'un cicle completat. Proporcioneu `entry_id` (avançat) o `device_id` (recomanat).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu WashData (recomanat en lloc d'entry_id)."
+        },
+        "entry_id": {
+          "name": "ID d'entrada",
+          "description": "L'identificador de l'entrada de configuració del dispositiu (alternativa a device_id)."
+        },
+        "cycle_id": {
+          "name": "ID del cicle",
+          "description": "L'identificador del cicle que es mostra a la notificació/registres de comentaris."
+        },
+        "user_confirmed": {
+          "name": "Confirmeu el programa detectat",
+          "description": "Establiu true si el programa detectat és correcte."
+        },
+        "corrected_profile": {
+          "name": "Perfil corregit",
+          "description": "Si no es confirma, proporcioneu el nom del perfil/programa correcte."
+        },
+        "corrected_duration": {
+          "name": "Durada corregida (segons)",
+          "description": "Durada corregida opcional en segons."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Notes opcionals sobre aquest cicle."
+        }
+      }
+    },
+    "record_start": {
+      "name": "Inici del cicle de gravació",
+      "description": "Comenceu a gravar manualment un cicle de neteja (obvia tota la lògica coincident).",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu de la rentadora per gravar."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "Parada del cicle de gravació",
+      "description": "Atura la gravació manual.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu de la rentadora per aturar la gravació."
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "Córrer"
+      },
+      "match_ambiguity": {
+        "name": "Concorda amb l'ambigüitat"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "Estat"
+        "name": "Estat",
+        "state": {
+          "off": "Apagat",
+          "idle": "Inactiu",
+          "starting": "Començant",
+          "running": "Córrer",
+          "paused": "En pausa",
+          "ending": "Finalització",
+          "finished": "Acabat",
+          "anti_wrinkle": "Antiarrugues",
+          "interrupted": "Interromput",
+          "force_stopped": "Força aturada",
+          "rinse": "Esbandida",
+          "unknown": "Desconegut"
+        }
       },
       "washer_program": {
         "name": "Programa"
@@ -595,16 +936,23 @@
         "name": "Confiança del partit"
       },
       "top_candidates": {
-        "name": "Els millors candidats"
+        "name": "Els millors candidats",
+        "state": {
+          "none": "Cap"
+        }
+      },
+      "current_phase": {
+        "name": "Fase actual"
       },
       "wash_phase": {
         "name": "Fase"
       },
+      "profile_cycle_count": {
+        "name": "Recompte del perfil {profile_name}",
+        "unit_of_measurement": "cicles"
+      },
       "suggestions": {
         "name": "Configuració suggerida"
-      },
-      "current_phase": {
-        "name": "Fase actual"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "Detecció automàtica"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "Força final de cicle"
       }
     }
   }

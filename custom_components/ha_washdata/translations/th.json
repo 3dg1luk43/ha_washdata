@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "ทบทวนผลตอบรับการเรียนรู้",
           "settings": "การตั้งค่า",
+          "notifications": "การแจ้งเตือน",
           "manage_cycles": "จัดการรอบ",
           "manage_profiles": "จัดการโปรไฟล์",
-          "record_cycle": "รอบการบันทึก (ด้วยตนเอง)",
-          "diagnostics": "การวินิจฉัยและการบำรุงรักษา",
           "manage_phase_catalog": "จัดการแคตตาล็อกเฟส",
-          "notifications": "การแจ้งเตือน"
+          "record_cycle": "รอบการบันทึก (แบบแมนนวล)",
+          "diagnostics": "การวินิจฉัยและการบำรุงรักษา"
         }
       },
       "apply_suggestions": {
@@ -67,8 +67,8 @@
           "off_delay": "ความล่าช้าในการสิ้นสุดรอบ (s)",
           "notify_service": "บริการแจ้งเตือน (เช่น notify.mobile_app)",
           "notify_actions": "การดำเนินการแจ้งเตือน",
-          "notify_people": "คนที่จะแจ้งให้ทราบ",
-          "notify_only_when_home": "แจ้งเตือนเมื่อถึงบ้านเท่านั้น",
+          "notify_people": "เลื่อนการจัดส่งจนกว่าคนเหล่านี้จะถึงบ้าน",
+          "notify_only_when_home": "เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกจะถึงบ้าน",
           "notify_fire_events": "เหตุการณ์ระบบอัตโนมัติอัคคีภัย",
           "notify_events": "เหตุการณ์ที่ต้องแจ้งให้ทราบ",
           "notify_before_end_minutes": "การแจ้งเตือนก่อนเสร็จสิ้น (นาทีก่อนสิ้นสุด)",
@@ -80,22 +80,60 @@
           "show_advanced": "แก้ไขการตั้งค่าขั้นสูง (ขั้นตอนถัดไป)"
         },
         "data_description": {
-          "apply_suggestions": "เลือกช่องนี้เพื่อคัดลอกค่าที่แนะนำโดยอัลกอริทึมการเรียนรู้ลงในแบบฟอร์ม ตรวจสอบก่อนบันทึก\n\nแนะนำ (จากการเรียนรู้):\n- min_power: {suggested_min_power} วัตต์\n- off_delay: {suggested_off_delay} วินาที\n- watchdog_interval: {suggested_watchdog_interval} วินาที\n- no_update_active_timeout: {suggested_no_update_active_timeout} วินาที\n- profile_match_interval: {suggested_profile_match_interval} วินาที\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "เลือกช่องนี้เพื่อคัดลอกค่าที่แนะนำโดยอัลกอริทึมการเรียนรู้ลงในแบบฟอร์ม ตรวจสอบก่อนบันทึก\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} วัตต์\n- off_delay: {suggested_off_delay} วินาที\n- watchdog_interval: {suggested_watchdog_interval} วินาที\n- no_update_active_timeout: {suggested_no_update_active_timeout} วินาที\n-profile_match_interval: {suggested_profile_match_interval} วินาที\n- auto_label_confidence: {suggested_auto_label_confidence}\n- ระยะเวลา_ความอดทน: {suggested_duration_tolerance}\n- โปรไฟล์_ระยะเวลา_ความอดทน: {suggested_profile_duration_tolerance}\n- โปรไฟล์_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- โปรไฟล์_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "เลือกประเภทของเครื่องใช้ไฟฟ้า (เครื่องซักผ้า, เครื่องอบผ้า, เครื่องล้างจาน, เครื่องชงกาแฟ, EV) แท็กนี้จะถูกเก็บไว้ในแต่ละรอบเพื่อการจัดระเบียบที่ดีขึ้น",
           "power_sensor": "เอนทิตีเซ็นเซอร์รายงานกำลังแบบเรียลไทม์ (เป็นวัตต์) คุณสามารถเปลี่ยนแปลงได้ตลอดเวลาโดยไม่สูญเสียข้อมูลในอดีต ซึ่งมีประโยชน์หากคุณเปลี่ยนปลั๊กอัจฉริยะ",
           "min_power": "การอ่านค่ากำลังไฟฟ้าที่สูงกว่าเกณฑ์นี้ (เป็นวัตต์) แสดงว่าเครื่องกำลังทำงานอยู่ เริ่มต้นด้วย 2W สำหรับอุปกรณ์ส่วนใหญ่",
           "off_delay": "วินาทีที่กำลังปรับให้เรียบจะต้องอยู่ต่ำกว่าเกณฑ์หยุดเพื่อทำเครื่องหมายว่าเสร็จสมบูรณ์ ค่าเริ่มต้น: 120 วินาที",
           "notify_service": "Home Assistant แจ้งบริการให้ใช้งาน (ไม่บังคับ)",
           "notify_actions": "ลำดับการดำเนินการของ Home Assistant ที่เป็นตัวเลือกสำหรับการแจ้งเตือน (สคริปต์ การแจ้งเตือน TTS ฯลฯ) หากตั้งค่าไว้ การดำเนินการจะทำงานก่อนบริการสำรองจะแจ้ง",
-          "notify_people": "เอนทิตีบุคคลที่จะใช้สำหรับการควบคุมประตูบ้าน/นอกบ้าน เมื่อเปิดใช้งาน การแจ้งเตือนจะถูกเลื่อนออกไปจนกว่าจะมีคนอยู่บ้าน",
+          "notify_people": "เอนทิตีบุคคลที่ใช้สำหรับการตรวจสอบสถานะ เมื่อเปิดใช้งาน การส่งการแจ้งเตือนจะล่าช้าจนกว่าบุคคลที่เลือกอย่างน้อยหนึ่งคนจะถึงบ้าน",
           "notify_only_when_home": "หากเปิดใช้งาน ให้เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกอย่างน้อยหนึ่งคนจะถึงบ้าน",
-          "notify_fire_events": "หากเปิดใช้งาน จะส่งสัญญาณเหตุการณ์ Home Assistant สำหรับการเริ่มและสิ้นสุดรอบ (ha_washdata_cycle_started/ended) เพื่อขับเคลื่อนระบบอัตโนมัติ",
+          "notify_fire_events": "หากเปิดใช้งาน จะส่งสัญญาณเหตุการณ์ Home Assistant สำหรับการเริ่มและสิ้นสุดรอบ (ha_washdata_cycle_started และ ha_washdata_cycle_ended) เพื่อขับเคลื่อนระบบอัตโนมัติ",
           "notify_events": "เหตุการณ์ใดที่จะส่งการแจ้งเตือน",
           "notify_before_end_minutes": "นาทีก่อนที่จะสิ้นสุดรอบโดยประมาณเพื่อทริกเกอร์การแจ้งเตือน ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 0",
           "notify_title": "ชื่อที่กำหนดเองสำหรับการแจ้งเตือน รองรับตัวยึดตำแหน่ง {device}",
           "notify_icon": "ไอคอนที่ใช้สำหรับการแจ้งเตือน (เช่น mdi:washing-machine) เว้นว่างไว้เพื่อใช้ค่าเริ่มต้น",
           "notify_start_message": "ข้อความที่ส่งเมื่อรอบเริ่มต้น รองรับตัวยึดตำแหน่ง {device}",
-          "notify_finish_message": "ข้อความที่ส่งเมื่อรอบสิ้นสุดลง รองรับตัวยึดตำแหน่ง {device}, {duration}, {program}",
+          "notify_finish_message": "ข้อความที่ส่งเมื่อรอบสิ้นสุด รองรับตัวยึดตำแหน่ง {device}, {duration}, {program}",
+          "notify_pre_complete_message": "ข้อความที่ส่งไปก่อนที่จะเสร็จสิ้น รองรับตัวยึดตำแหน่ง {device}, {minutes}"
+        }
+      },
+      "notifications": {
+        "title": "การแจ้งเตือน",
+        "description": "กำหนดค่าช่องทางการแจ้งเตือน เทมเพลต และการอัปเดตความคืบหน้าบนมือถือแบบสดที่เป็นตัวเลือก",
+        "data": {
+          "notify_service": "บริการแจ้งเตือน (เช่น notify.mobile_app)",
+          "notify_actions": "การดำเนินการแจ้งเตือน",
+          "notify_people": "เลื่อนการจัดส่งจนกว่าคนเหล่านี้จะถึงบ้าน",
+          "notify_only_when_home": "เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกจะถึงบ้าน",
+          "notify_fire_events": "เหตุการณ์ระบบอัตโนมัติอัคคีภัย",
+          "notify_events": "เหตุการณ์ที่ต้องแจ้งให้ทราบ",
+          "notify_before_end_minutes": "การแจ้งเตือนก่อนเสร็จสิ้น (นาทีก่อนสิ้นสุด)",
+          "notify_live_enabled": "เปิดใช้งานการแจ้งเตือนความคืบหน้าสด",
+          "notify_live_interval_seconds": "ช่วงเวลาการอัปเดตสด (วินาที)",
+          "notify_live_overrun_percent": "ค่าเผื่อการโอเวอร์รันการอัปเดตสด (%)",
+          "notify_title": "ชื่อการแจ้งเตือน",
+          "notify_icon": "ไอคอนการแจ้งเตือน",
+          "notify_start_message": "เริ่มรูปแบบข้อความ",
+          "notify_finish_message": "เสร็จสิ้นรูปแบบข้อความ",
+          "notify_pre_complete_message": "รูปแบบข้อความก่อนกรอก"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant แจ้งบริการให้ใช้งาน (ไม่บังคับ)",
+          "notify_actions": "ลำดับการดำเนินการของ Home Assistant ที่เป็นตัวเลือกสำหรับการแจ้งเตือน (สคริปต์ การแจ้งเตือน TTS ฯลฯ) หากตั้งค่าไว้ การดำเนินการจะทำงานก่อนบริการสำรองจะแจ้ง",
+          "notify_people": "เอนทิตีบุคคลที่ใช้สำหรับการตรวจสอบสถานะ เมื่อเปิดใช้งาน การส่งการแจ้งเตือนจะล่าช้าจนกว่าบุคคลที่เลือกอย่างน้อยหนึ่งคนจะถึงบ้าน",
+          "notify_only_when_home": "หากเปิดใช้งาน ให้เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกอย่างน้อยหนึ่งคนจะถึงบ้าน",
+          "notify_fire_events": "หากเปิดใช้งาน จะส่งสัญญาณเหตุการณ์ Home Assistant สำหรับการเริ่มและสิ้นสุดรอบ (ha_washdata_cycle_started และ ha_washdata_cycle_ended) เพื่อขับเคลื่อนระบบอัตโนมัติ",
+          "notify_events": "เหตุการณ์ใดที่จะส่งการแจ้งเตือน",
+          "notify_before_end_minutes": "นาทีก่อนที่จะสิ้นสุดรอบโดยประมาณเพื่อทริกเกอร์การแจ้งเตือน ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 0",
+          "notify_live_enabled": "เปิดใช้งานการอัปเดตความคืบหน้าสดแบบแทนที่สำหรับการแจ้งเตือนแอปมือถือ",
+          "notify_live_interval_seconds": "ความถี่ในการส่งการอัปเดตความคืบหน้าขณะทำงาน ค่าที่ต่ำกว่าจะตอบสนองมากกว่าแต่ใช้การแจ้งเตือนมากกว่า",
+          "notify_live_overrun_percent": "อัตราความปลอดภัยที่สูงกว่าจำนวนการอัปเดตโดยประมาณสำหรับรอบที่ยาวนาน/เกินเวลา (เช่น 20% อนุญาตให้มีการอัปเดตโดยประมาณ 1.2 เท่า)",
+          "notify_title": "ชื่อที่กำหนดเองสำหรับการแจ้งเตือน รองรับตัวยึดตำแหน่ง {device}",
+          "notify_icon": "ไอคอนที่ใช้สำหรับการแจ้งเตือน (เช่น mdi:washing-machine) เว้นว่างไว้เพื่อใช้ค่าเริ่มต้น",
+          "notify_start_message": "ข้อความที่ส่งเมื่อรอบเริ่มต้น รองรับตัวยึดตำแหน่ง {device}",
+          "notify_finish_message": "ข้อความที่ส่งเมื่อรอบสิ้นสุด รองรับตัวยึดตำแหน่ง {device}, {duration}, {program}",
           "notify_pre_complete_message": "ข้อความที่ส่งไปก่อนที่จะเสร็จสิ้น รองรับตัวยึดตำแหน่ง {device}, {minutes}"
         }
       },
@@ -104,7 +142,7 @@
         "description": "ปรับแต่งเกณฑ์การตรวจจับ การเรียนรู้ และพฤติกรรมขั้นสูง ค่าเริ่มต้นทำงานได้ดีกับการตั้งค่าส่วนใหญ่",
         "data": {
           "apply_suggestions": "ใช้ค่าที่แนะนำ",
-          "start_threshold_w": "เกณฑ์การเริ่มต้น (W)",
+          "start_threshold_w": "เกณฑ์เริ่มต้น (W)",
           "stop_threshold_w": "หยุดเกณฑ์ (W)",
           "min_off_gap": "ช่องว่างขั้นต่ำระหว่างรอบ (s)",
           "start_duration_threshold": "เริ่มระยะเวลา Debounce (s)",
@@ -122,7 +160,7 @@
           "profile_unmatch_threshold": "เกณฑ์ไม่ตรงกันของโปรไฟล์",
           "profile_duration_tolerance": "ความอดทนต่อระยะเวลาการจับคู่โปรไฟล์ (0-0.5)",
           "interrupted_min_seconds": "ถูกขัดจังหวะ: รันไทม์ขั้นต่ำ (วินาที)",
-          "abrupt_drop_watts": "ถูกขัดจังหวะ: ดรอปสัมบูรณ์ทันที (W)",
+          "abrupt_drop_watts": "ถูกขัดจังหวะ: ดรอปสัมบูรณ์อย่างกะทันหัน (W)",
           "abrupt_drop_ratio": "ขัดจังหวะ: อัตราดรอปฉับพลัน (0-1)",
           "abrupt_high_load_factor": "ขัดจังหวะ: ปัจจัยโหลดสูง",
           "max_past_cycles": "การเก็บรักษา: รอบที่บันทึกไว้สูงสุด",
@@ -149,8 +187,8 @@
           "external_end_trigger_inverted": "สลับลอจิกทริกเกอร์ (ทริกเกอร์เปิดปิด)"
         },
         "data_description": {
-          "apply_suggestions": "เลือกช่องนี้เพื่อคัดลอกค่าที่แนะนำโดยอัลกอริทึมการเรียนรู้ลงในแบบฟอร์ม ตรวจสอบก่อนบันทึก\n\nแนะนำ (จากการเรียนรู้):\n- min_power: {suggested_min_power} วัตต์\n- off_delay: {suggested_off_delay} วินาที\n- watchdog_interval: {suggested_watchdog_interval} วินาที\n- no_update_active_timeout: {suggested_no_update_active_timeout} วินาที\n- profile_match_interval: {suggested_profile_match_interval} วินาที\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "start_threshold_w": "กำลังไฟฟ้าจะต้องสูงกว่าเกณฑ์นี้จึงจะเริ่มต้นวงจรได้ ตั้งค่าให้สูงกว่าพลังงานสแตนด์บายของคุณ ค่าเริ่มต้น: min_power + 1 W.",
+          "apply_suggestions": "เลือกช่องนี้เพื่อคัดลอกค่าที่แนะนำโดยอัลกอริทึมการเรียนรู้ลงในแบบฟอร์ม ตรวจสอบก่อนบันทึก\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} วัตต์\n- off_delay: {suggested_off_delay} วินาที\n- watchdog_interval: {suggested_watchdog_interval} วินาที\n- no_update_active_timeout: {suggested_no_update_active_timeout} วินาที\n-profile_match_interval: {suggested_profile_match_interval} วินาที\n- auto_label_confidence: {suggested_auto_label_confidence}\n- ระยะเวลา_ความอดทน: {suggested_duration_tolerance}\n- โปรไฟล์_ระยะเวลา_ความอดทน: {suggested_profile_duration_tolerance}\n- โปรไฟล์_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- โปรไฟล์_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "start_threshold_w": "กำลังไฟฟ้าต้องสูงกว่าเกณฑ์นี้จึงจะเริ่มต้นวงจรได้ ตั้งค่าให้สูงกว่าพลังงานสแตนด์บายของคุณ ค่าเริ่มต้น: min_power + 1 W.",
           "stop_threshold_w": "กำลังไฟฟ้าต้องต่ำกว่าเกณฑ์นี้จึงจะสิ้นสุดรอบได้ ตั้งค่าให้สูงกว่าศูนย์เพื่อหลีกเลี่ยงสัญญาณรบกวนที่ทำให้เกิดการสิ้นสุดที่ผิดพลาด ค่าเริ่มต้น: 0.6 * min_power",
           "min_off_gap": "หากวงจรเริ่มต้นภายในไม่กี่วินาทีหลังจากรอบก่อนหน้าสิ้นสุดลง วงจรเหล่านั้นจะถูกรวมเข้าเป็นรอบเดียว",
           "start_duration_threshold": "เพิกเฉยต่อการเพิ่มพลังสั้นๆ ที่สั้นกว่าระยะเวลานี้ (วินาที) กรองการเพิ่มขึ้นอย่างรวดเร็วของบูต (เช่น 60W เป็นเวลา 2 วินาที) ก่อนเริ่มรอบจริง ค่าเริ่มต้น: 5 วินาที",
@@ -172,13 +210,13 @@
           "abrupt_drop_ratio": "อัตราส่วนการดรอปสัมพัทธ์ (0–1) ตัวอย่าง: 0.6 หมายถึงการลดลง 60% อย่างกะทันหัน",
           "abrupt_high_load_factor": "ปัจจัยที่อยู่เหนือเส้นพื้นฐานถือว่า 'มีภาระสูง' ก่อนที่จะลดลงอย่างกะทันหัน (ใช้กับการตรวจจับอย่างกะทันหัน)",
           "max_past_cycles": "จำนวนรอบทั้งหมดที่จะเก็บรักษา (ลบเก่าที่สุด) ค่าเริ่มต้น: 200",
-          "max_full_traces_per_profile": "จำนวนรอบที่ติดป้ายกำกับล่าสุดที่จะรักษาด้วยการติดตามพลังงานเต็มต่อโปรไฟล์ ร่องรอยที่เก่ากว่าจะถูกสรุปผ่านซองจดหมาย ค่าเริ่มต้น: 20",
-          "max_full_traces_unlabeled": "จำนวนรอบล่าสุดที่ไม่มีป้ายกำกับที่จะคงไว้ด้วยการติดตามพลังงานเต็มรูปแบบเพื่อรองรับการติดป้ายกำกับอัตโนมัติ ค่าเริ่มต้น: 20",
+          "max_full_traces_per_profile": "จำนวนรอบที่ติดป้ายกำกับล่าสุดที่จะคงไว้พร้อมกับการติดตามกำลังทั้งหมดต่อโปรไฟล์ ร่องรอยที่เก่ากว่าจะถูกสรุปผ่านซองจดหมาย ค่าเริ่มต้น: 20",
+          "max_full_traces_unlabeled": "จำนวนรอบล่าสุดที่ไม่มีการติดป้ายกำกับที่จะคงไว้ด้วยการติดตามพลังงานเต็มรูปแบบเพื่อรองรับการติดป้ายกำกับอัตโนมัติ ค่าเริ่มต้น: 20",
           "watchdog_interval": "วินาทีระหว่างการตรวจสอบสุนัขเฝ้าบ้านขณะวิ่ง ค่าเริ่มต้น: 5 วินาที คำเตือน: ตรวจสอบให้แน่ใจว่านี่สูงกว่าช่วงการอัปเดตเซ็นเซอร์ของคุณเพื่อหลีกเลี่ยงการหยุดที่ผิดพลาด (เช่น หากเซ็นเซอร์อัปเดตทุกๆ 60 วินาที ให้ใช้ 65 วินาทีขึ้นไป)",
           "completion_min_seconds": "รอบที่สั้นกว่านี้จะถูกทำเครื่องหมายว่า 'หยุดชะงัก' แม้ว่าจะเสร็จสิ้นตามธรรมชาติก็ตาม ค่าเริ่มต้น: 600 วินาที",
           "notify_before_end_minutes": "นาทีก่อนที่จะสิ้นสุดรอบโดยประมาณเพื่อทริกเกอร์การแจ้งเตือน ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 0",
           "auto_tune_noise_events_threshold": "จำนวนรอบ 'เสียงรบกวน' ที่ใช้พลังงานต่ำ/สั้นภายใน 24 ชั่วโมงที่จำเป็นในการปรับ min_power อัตโนมัติ ค่าเริ่มต้น: 3.",
-          "running_dead_zone": "หลังจากที่วงจรเริ่มต้นขึ้น ให้เพิกเฉยต่อกำลังที่ลดลงเป็นเวลาหลายวินาทีเพื่อป้องกันการตรวจจับปลายที่ผิดพลาดในระหว่างเฟสการหมุนเริ่มต้น ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 0 วินาที",
+          "running_dead_zone": "หลังจากที่วงจรเริ่มต้นขึ้น ให้เพิกเฉยต่อกำลังที่ลดลงเป็นเวลาหลายวินาทีเพื่อป้องกันการตรวจจับปลายที่ผิดพลาดในระหว่างขั้นตอนการปั่นหมาดครั้งแรก ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 0 วินาที",
           "end_repeat_count": "จำนวนครั้งที่ต้องเป็นไปตามเงื่อนไขการสิ้นสุด (กำลังต่ำกว่าเกณฑ์สำหรับ off_delay) ติดต่อกันก่อนที่จะสิ้นสุดรอบ ค่าที่สูงกว่าจะป้องกันการสิ้นสุดที่ผิดพลาดระหว่างการหยุดชั่วคราว ค่าเริ่มต้น: 1.",
           "start_energy_threshold": "วงจรจะต้องสะสมพลังงาน (Wh) มากเท่านี้เป็นอย่างน้อยในระหว่างระยะเริ่มต้นจึงจะได้รับการยืนยัน ค่าเริ่มต้น: 0.005 Wh.",
           "end_energy_threshold": "รอบการสิ้นสุดจะสิ้นสุดก็ต่อเมื่อพลังงานในหน้าต่าง Off-Delay สุดท้ายต่ำกว่าค่านี้ (Wh) ป้องกันการสิ้นสุดที่ผิดพลาดหากพลังงานผันผวนใกล้ศูนย์ ค่าเริ่มต้น: 0.05 Wh.",
@@ -189,7 +227,7 @@
           "anti_wrinkle_max_power": "การระเบิดที่หรือต่ำกว่ากำลังนี้ถือเป็นการหมุนต่อต้านริ้วรอยแทนรอบใหม่ ใช้ได้เฉพาะเมื่อเปิดใช้งาน Anti-Wrinkle Shield เท่านั้น",
           "anti_wrinkle_max_duration": "ความยาวระเบิดสูงสุดเพื่อใช้เป็นการหมุนต่อต้านริ้วรอย ใช้ได้เฉพาะเมื่อเปิดใช้งาน Anti-Wrinkle Shield เท่านั้น",
           "anti_wrinkle_exit_power": "หากพลังงานลดลงต่ำกว่าระดับนี้ ให้ออกจากโปรแกรมต่อต้านริ้วรอยทันที (ปิดจริง) ใช้ได้เฉพาะเมื่อเปิดใช้งาน Anti-Wrinkle Shield เท่านั้น",
-          "dtw_bandwidth": "การแปรปรวนของเวลาที่อนุญาตสูงสุด (การยืด) ตามอัตราส่วนของระยะเวลารอบ ค่าที่สูงกว่าช่วยให้สามารถจับคู่รอบที่แปรผันได้สูง แต่จะเพิ่มต้นทุน CPU ค่าเริ่มต้น: 0.20 (20%)",
+          "dtw_bandwidth": "การแปรปรวนของเวลาที่อนุญาตสูงสุด (การยืด) ตามอัตราส่วนของระยะเวลารอบ ค่าที่สูงกว่าช่วยให้สามารถจับคู่รอบที่แปรผันสูงได้ แต่จะเพิ่มต้นทุน CPU Default: 0.20 (20%).",
           "external_end_trigger_enabled": "เปิดใช้งานการตรวจสอบเซ็นเซอร์ไบนารีภายนอกเพื่อกระตุ้นให้รอบการทำงานเสร็จสมบูรณ์",
           "external_end_trigger": "เลือกเอนทิตีเซ็นเซอร์ไบนารี เมื่อเซ็นเซอร์นี้ทริกเกอร์ วงจรปัจจุบันจะสิ้นสุดด้วยสถานะ 'เสร็จสมบูรณ์'",
           "external_end_trigger_inverted": "ตามค่าเริ่มต้น ทริกเกอร์จะเริ่มทำงานเมื่อเซ็นเซอร์เปิด เลือกช่องนี้เพื่อเริ่มทำงานเมื่อเซ็นเซอร์ปิดแทน"
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "การวินิจฉัยและการบำรุงรักษา",
-        "description": "ดำเนินการบำรุงรักษา เช่น การรวมวงจรที่กระจัดกระจายหรือการย้ายข้อมูลที่เก็บไว้\n\n{storage_stats}"
+        "description": "ดำเนินการบำรุงรักษา เช่น การรวมวงจรที่กระจัดกระจายหรือการย้ายข้อมูลที่เก็บไว้\n\n**การใช้พื้นที่เก็บข้อมูล**\n\n- ขนาดไฟล์: {file_size_kb} KB\n- รอบ: {cycle_count}\n- โปรไฟล์: {profile_count}\n- การติดตามการแก้ไขข้อบกพร่อง: {debug_count}"
       },
       "clear_debug_data": {
         "title": "ล้างข้อมูลการดีบัก",
@@ -210,11 +248,109 @@
           "action": "การกระทำ"
         }
       },
+      "manage_cycles_empty": {
+        "title": "จัดการรอบ",
+        "description": "ยังไม่มีการบันทึกรอบ",
+        "data": {
+          "action": "การกระทำ"
+        }
+      },
       "manage_profiles": {
         "title": "จัดการโปรไฟล์",
         "description": "สรุปโปรไฟล์:\n{profile_summary}",
         "data": {
           "action": "การกระทำ"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "จัดการโปรไฟล์",
+        "description": "ยังไม่มีการสร้างโปรไฟล์",
+        "data": {
+          "action": "การกระทำ"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "จัดการแคตตาล็อกเฟส",
+        "description": "แค็ตตาล็อกเฟส (ค่าเริ่มต้นสำหรับอุปกรณ์นี้ + เฟสที่กำหนดเอง):\n{phase_summary}",
+        "data": {
+          "action": "การกระทำ"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "สร้างเฟสที่กำหนดเอง",
+        "description": "สร้างชื่อเฟสและคำอธิบายแบบกำหนดเอง และเลือกประเภทอุปกรณ์ที่จะนำไปใช้กับ",
+        "data": {
+          "target_device_type": "ประเภทอุปกรณ์เป้าหมาย",
+          "phase_name": "ชื่อเฟส",
+          "phase_description": "คำอธิบายเฟส"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "แก้ไขเฟสที่กำหนดเอง",
+        "description": "เลือกเฟสที่กำหนดเองเพื่อแก้ไข",
+        "data": {
+          "phase_name": "เฟสที่กำหนดเอง"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "แก้ไขเฟสที่กำหนดเอง",
+        "description": "ขั้นตอนการแก้ไข: {phase_name}",
+        "data": {
+          "phase_name": "ชื่อเฟส",
+          "phase_description": "คำอธิบายเฟส"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "ลบเฟสแบบกำหนดเอง",
+        "description": "เลือกเฟสแบบกำหนดเองที่จะลบ ช่วงที่กำหนดโดยใช้ระยะนี้จะถูกลบออก",
+        "data": {
+          "phase_name": "เฟสที่กำหนดเอง"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "กำหนดช่วงเฟส",
+        "description": "การแสดงตัวอย่างเฟสสำหรับโปรไฟล์: **{profile_name}**\n\n{timeline_svg}\n\n**ช่วงปัจจุบัน:**\n{current_ranges}\n\nใช้การดำเนินการด้านล่างเพื่อเพิ่ม แก้ไข ลบ หรือบันทึกช่วง",
+        "data": {
+          "action": "การกระทำ"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "เพิ่มช่วงเฟส",
+        "description": "เพิ่มช่วงหนึ่งเฟสให้กับร่างปัจจุบัน",
+        "data": {
+          "phase_name": "เฟส",
+          "start_min": "เริ่มต้นนาที",
+          "end_min": "นาทีสุดท้าย"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "แก้ไขช่วงเฟส",
+        "description": "เลือกช่วงที่จะแก้ไข",
+        "data": {
+          "range_index": "ช่วงเฟส"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "แก้ไขช่วงเฟส",
+        "description": "อัปเดตช่วงเฟสที่เลือก",
+        "data": {
+          "phase_name": "เฟส",
+          "start_min": "เริ่มต้นนาที",
+          "end_min": "นาทีสุดท้าย"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "ลบช่วงเฟส",
+        "description": "เลือกช่วงที่จะลบออกจากแบบร่าง",
+        "data": {
+          "range_index": "ช่วงเฟส"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "กำหนดช่วงเฟส",
+        "description": "เลือกโปรไฟล์เพื่อกำหนดค่าช่วงเฟส",
+        "data": {
+          "profile": "ประวัติโดยย่อ"
         }
       },
       "profile_stats": {
@@ -367,8 +503,8 @@
         "title": "ส่งออก/นำเข้า JSON",
         "description": "คัดลอก/วางรอบ โปรไฟล์ และการตั้งค่าสำหรับอุปกรณ์นี้ ส่งออกด้านล่างหรือวาง JSON เพื่อนำเข้า",
         "data": {
-          "json_payload": "กำหนดค่า JSON ให้เสร็จสมบูรณ์",
-          "mode": "การกระทำ"
+          "mode": "การกระทำ",
+          "json_payload": "กำหนดค่า JSON ให้เสร็จสมบูรณ์"
         },
         "data_description": {
           "mode": "เลือกส่งออกเพื่อคัดลอกข้อมูลและการตั้งค่าปัจจุบัน หรือนำเข้าเพื่อวางข้อมูลที่ส่งออกจากอุปกรณ์ WashData อื่น",
@@ -377,17 +513,17 @@
       },
       "record_cycle": {
         "title": "บันทึกวงจร",
-        "description": "บันทึกรอบด้วยตนเองเพื่อสร้างโปรไฟล์ที่สะอาดปราศจากการรบกวน\n\nสถานะ: **{status}**\nระยะเวลา: {duration} วินาที\nตัวอย่าง: {samples}",
+        "description": "บันทึกรอบการทำงานด้วยตนเองเพื่อสร้างโปรไฟล์ที่สะอาดปราศจากการรบกวน\n\nสถานะ: **{status}**\nระยะเวลา: {duration} วิ\nตัวอย่าง: {samples}",
         "data": {
           "action": "การกระทำ"
         }
       },
       "record_process": {
         "title": "การบันทึกกระบวนการ",
-        "description": "![กราฟ]({graph_url})\n\n**กราฟแสดงการบันทึกแบบ Raw** สีฟ้า = เก็บ สีแดง = เสนอการตัดทอน\n*กราฟเป็นแบบคงที่และไม่อัปเดตตามการเปลี่ยนแปลงแบบฟอร์ม*\n\nหยุดการบันทึกแล้ว การตัดแต่งจะสอดคล้องกับอัตราการสุ่มตัวอย่างที่ตรวจพบ (~{sampling_rate}s)\n\nระยะเวลาดิบ: {duration}s\nตัวอย่าง: {samples}",
+        "description": "![กราฟ]({graph_url})\n\n**กราฟแสดงการบันทึกแบบ Raw** สีฟ้า = เก็บ สีแดง = เสนอการตัดทอน\n*กราฟเป็นแบบคงที่และไม่อัปเดตตามการเปลี่ยนแปลงแบบฟอร์ม*\n\nหยุดการบันทึกแล้ว การตัดแต่งจะสอดคล้องกับอัตราการสุ่มตัวอย่างที่ตรวจพบ (~{sampling_rate}s)\n\nระยะเวลาดิบ: {duration} วินาที\nตัวอย่าง: {samples}",
         "data": {
           "head_trim": "ตัดแต่งเริ่มต้น (วินาที)",
-          "tail_trim": "การตัดขอบ (วินาที)",
+          "tail_trim": "สิ้นสุดการตัดแต่ง (วินาที)",
           "save_mode": "บันทึกปลายทาง",
           "profile_name": "ชื่อโปรไฟล์"
         }
@@ -405,133 +541,11 @@
       },
       "resolve_feedback": {
         "title": "แก้ไขคำติชม",
-        "description": "**โปรแกรมที่ตรวจพบ**: {profile}\n**ความมั่นใจ**: {confidence}%\n**ประมาณการ**: {est}ด. **จริง**: {act}ด",
+        "description": "{comparison_img}{candidates_table}\n**โปรไฟล์ที่ตรวจพบ**: {detected_profile} ({confidence_pct}%)\n**ระยะเวลาโดยประมาณ**: {est_duration_min} นาที\n**ระยะเวลาจริง**: {act_duration_min} นาที\n\n__เลือกการกระทำด้านล่าง:__",
         "data": {
-          "corrected_profile": "โปรแกรมที่ถูกต้อง (หากแก้ไข)",
-          "corrected_duration": "แก้ไขระยะเวลาเป็นนาที (หากแก้ไข)",
-          "action": "คุณอยากจะทำอะไร?"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "จัดการแคตตาล็อกเฟส",
-        "description": "ระยะปัจจุบันสำหรับอุปกรณ์ประเภทนี้:\n{phase_summary}",
-        "data": {
-          "action": "การกระทำ"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "สร้างเฟสที่กำหนดเอง",
-        "description": "สร้างชื่อเฟสและคำอธิบายที่กำหนดเองสำหรับอุปกรณ์ประเภทนี้",
-        "data": {
-          "phase_name": "ชื่อเฟส",
-          "phase_description": "คำอธิบายเฟส",
-          "target_device_type": "ประเภทอุปกรณ์เป้าหมาย"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "แก้ไขเฟสที่กำหนดเอง",
-        "description": "เลือกเฟสที่กำหนดเองเพื่อแก้ไข",
-        "data": {
-          "phase_name": "เฟสที่กำหนดเอง"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "แก้ไขเฟสที่กำหนดเอง",
-        "description": "เฟสการแก้ไข: {phase_name}",
-        "data": {
-          "phase_name": "ชื่อเฟส",
-          "phase_description": "คำอธิบายเฟส"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "ลบเฟสแบบกำหนดเอง",
-        "description": "เลือกเฟสแบบกำหนดเองที่จะลบ ช่วงที่กำหนดโดยใช้ระยะนี้จะถูกลบออก",
-        "data": {
-          "phase_name": "เฟสที่กำหนดเอง"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "กำหนดช่วงเฟส",
-        "description": "โปรไฟล์: **{profile_name}**\nโหมด: **{assign_mode}**\nคำแนะนำรอบเดือน: {cycle_hint}\n\nช่วงปัจจุบัน:\n{current_ranges}\n\nป้ายเฟสมีไว้สำหรับจัดแสดงและจัดระเบียบ การตรวจจับใช้รูปแบบกำลัง ไม่ใช่ชื่อเฟส",
-        "data": {
-          "action": "การกระทำ"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "กำหนดช่วงเฟส",
-        "description": "เลือกโปรไฟล์เพื่อกำหนดค่าช่วงเฟส",
-        "data": {
-          "profile": "ประวัติโดยย่อ"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "เพิ่มช่วงเฟส",
-        "description": "เพิ่มช่วงหนึ่งเฟสให้กับร่างปัจจุบัน",
-        "data": {
-          "phase_name": "เฟส",
-          "start_min": "เริ่มต้นนาที",
-          "end_min": "นาทีสุดท้าย"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "แก้ไขช่วงเฟส",
-        "description": "เลือกช่วงที่จะแก้ไข",
-        "data": {
-          "range_index": "ช่วงเฟส"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "แก้ไขช่วงเฟส",
-        "description": "อัปเดตช่วงเฟสที่เลือก",
-        "data": {
-          "phase_name": "เฟส",
-          "start_min": "เริ่มต้นนาที",
-          "end_min": "นาทีสุดท้าย"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "ลบช่วงเฟส",
-        "description": "เลือกช่วงที่จะลบออกจากแบบร่าง",
-        "data": {
-          "range_index": "ช่วงเฟส"
-        }
-      },
-      "notifications": {
-        "title": "การแจ้งเตือน",
-        "description": "กำหนดค่าช่องทางการแจ้งเตือน เทมเพลต และการอัปเดตความคืบหน้าบนมือถือแบบสดที่เป็นตัวเลือก",
-        "data": {
-          "notify_service": "บริการแจ้งเตือน (เช่น notify.mobile_app)",
-          "notify_actions": "การดำเนินการแจ้งเตือน",
-          "notify_people": "คนที่จะแจ้งให้ทราบ",
-          "notify_only_when_home": "แจ้งเตือนเมื่อถึงบ้านเท่านั้น",
-          "notify_fire_events": "เหตุการณ์ระบบอัตโนมัติอัคคีภัย",
-          "notify_events": "เหตุการณ์ที่ต้องแจ้งให้ทราบ",
-          "notify_before_end_minutes": "การแจ้งเตือนก่อนเสร็จสิ้น (นาทีก่อนสิ้นสุด)",
-          "notify_live_enabled": "เปิดใช้งานการแจ้งเตือนความคืบหน้าสด",
-          "notify_live_interval_seconds": "ช่วงเวลาการอัปเดตสด (วินาที)",
-          "notify_live_overrun_percent": "ค่าเผื่อการโอเวอร์รันการอัปเดตสด (%)",
-          "notify_title": "ชื่อการแจ้งเตือน",
-          "notify_icon": "ไอคอนการแจ้งเตือน",
-          "notify_start_message": "เริ่มรูปแบบข้อความ",
-          "notify_finish_message": "เสร็จสิ้นรูปแบบข้อความ",
-          "notify_pre_complete_message": "รูปแบบข้อความก่อนกรอก"
-        },
-        "data_description": {
-          "notify_service": "Home Assistant แจ้งบริการให้ใช้งาน (ไม่บังคับ)",
-          "notify_actions": "ลำดับการดำเนินการของ Home Assistant ที่เป็นตัวเลือกสำหรับการแจ้งเตือน (สคริปต์ การแจ้งเตือน TTS ฯลฯ) หากตั้งค่าไว้ การดำเนินการจะทำงานก่อนบริการสำรองจะแจ้ง",
-          "notify_people": "เอนทิตีบุคคลที่จะใช้สำหรับการควบคุมประตูบ้าน/นอกบ้าน เมื่อเปิดใช้งาน การแจ้งเตือนจะถูกเลื่อนออกไปจนกว่าจะมีคนอยู่บ้าน",
-          "notify_only_when_home": "หากเปิดใช้งาน ให้เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกอย่างน้อยหนึ่งคนจะถึงบ้าน",
-          "notify_fire_events": "หากเปิดใช้งาน จะส่งสัญญาณเหตุการณ์ Home Assistant สำหรับการเริ่มและสิ้นสุดรอบ (ha_washdata_cycle_started/ended) เพื่อขับเคลื่อนระบบอัตโนมัติ",
-          "notify_events": "เหตุการณ์ใดที่จะส่งการแจ้งเตือน",
-          "notify_before_end_minutes": "นาทีก่อนที่จะสิ้นสุดรอบโดยประมาณเพื่อทริกเกอร์การแจ้งเตือน ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 0",
-          "notify_live_enabled": "เปิดใช้งานการอัปเดตความคืบหน้าสดแบบแทนที่สำหรับการแจ้งเตือนแอปมือถือ",
-          "notify_live_interval_seconds": "ความถี่ในการส่งการอัปเดตความคืบหน้าขณะทำงาน ค่าที่ต่ำกว่าจะตอบสนองมากกว่าแต่ใช้การแจ้งเตือนมากกว่า",
-          "notify_live_overrun_percent": "อัตราความปลอดภัยที่สูงกว่าจำนวนการอัปเดตโดยประมาณสำหรับรอบที่ยาวนาน/เกินเวลา (เช่น 20% อนุญาตให้มีการอัปเดตโดยประมาณ 1.2 เท่า)",
-          "notify_title": "ชื่อที่กำหนดเองสำหรับการแจ้งเตือน รองรับตัวยึดตำแหน่ง {device}",
-          "notify_icon": "ไอคอนที่ใช้สำหรับการแจ้งเตือน (เช่น mdi:washing-machine) เว้นว่างไว้เพื่อใช้ค่าเริ่มต้น",
-          "notify_start_message": "ข้อความที่ส่งเมื่อรอบเริ่มต้น รองรับตัวยึดตำแหน่ง {device}",
-          "notify_finish_message": "ข้อความที่ส่งเมื่อรอบสิ้นสุด รองรับตัวยึดตำแหน่ง {device}, {duration}, {program}",
-          "notify_pre_complete_message": "ข้อความที่ส่งไปก่อนที่จะเสร็จสิ้น รองรับตัวยึดตำแหน่ง {device}, {minutes}"
+          "action": "คุณอยากจะทำอะไร?",
+          "corrected_profile": "โปรแกรมที่ถูกต้อง (ถ้าแก้ไข)",
+          "corrected_duration": "แก้ไขระยะเวลาเป็นนาที (หากแก้ไข)"
         }
       }
     },
@@ -540,8 +554,6 @@
       "profile_exists": "มีโปรไฟล์ชื่อนี้อยู่แล้ว",
       "rename_failed": "ไม่สามารถเปลี่ยนชื่อโปรไฟล์ได้ โปรไฟล์อาจไม่มีอยู่หรือมีผู้ใช้ชื่อใหม่แล้ว",
       "assignment_failed": "ไม่สามารถกำหนดโปรไฟล์ให้หมุนเวียนได้",
-      "feedback_notification_title": "WashData: ตรวจสอบรอบการทำงาน ({device})",
-      "feedback_notification_message": "**อุปกรณ์**: {device}\n**โปรแกรม**: {program} (ความมั่นใจ {confidence}%)\n**เวลา**: {time}\n\nWashData ต้องการความช่วยเหลือจากคุณเพื่อตรวจสอบวงจรที่ตรวจพบนี้\n\nโปรดไปที่ **การตั้งค่า > อุปกรณ์และบริการ > WashData > กำหนดค่า > คำติชมการเรียนรู้** เพื่อยืนยันหรือแก้ไขผลลัพธ์นี้",
       "duplicate_phase": "มีเฟสที่ใช้ชื่อนี้อยู่แล้ว",
       "phase_not_found": "ไม่พบเฟสที่เลือก",
       "invalid_phase_name": "ชื่อเฟสต้องไม่เว้นว่าง",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "ช่วงเฟสทับซ้อนกัน ปรับช่วงแล้วลองอีกครั้ง",
       "incomplete_phase_row": "แต่ละแถวของเฟสจะต้องมีเฟสบวกกับค่าเริ่มต้น/สิ้นสุดที่สมบูรณ์สำหรับโหมดที่เลือก",
       "timestamp_mode_cycle_required": "โปรดเลือกวงจรของแหล่งที่มาเมื่อใช้โหมดการประทับเวลา",
-      "no_phase_ranges": "ยังไม่มีช่วงเฟสสำหรับการดำเนินการนั้น"
+      "no_phase_ranges": "ยังไม่มีช่วงเฟสสำหรับการดำเนินการนั้น",
+      "feedback_notification_title": "WashData: ตรวจสอบรอบการทำงาน ({device})",
+      "feedback_notification_message": "**อุปกรณ์**: {device}\n**โปรแกรม**: {program} (ความเชื่อมั่น {confidence}%)\n**เวลา**: {time}\n\nWashData ต้องการความช่วยเหลือจากคุณเพื่อตรวจสอบวงจรที่ตรวจพบนี้\n\nโปรดไปที่ **การตั้งค่า > อุปกรณ์และบริการ > WashData > กำหนดค่า > คำติชมการเรียนรู้** เพื่อยืนยันหรือแก้ไขผลลัพธ์นี้"
     },
     "abort": {
       "no_cycles_found": "ไม่พบรอบ",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "มีป้ายกำกับทุกรอบแล้ว",
       "no_suggestions": "ยังไม่มีค่าที่แนะนำ รันสักสองสามรอบแล้วลองอีกครั้ง",
       "no_predictions": "ไม่มีการคาดการณ์",
+      "no_custom_phases": "ไม่พบเฟสที่กำหนดเอง",
       "reprocess_success": "ประมวลผลซ้ำสำเร็จแล้ว {count} รอบ",
-      "debug_data_cleared": "ล้างข้อมูลการแก้ไขข้อบกพร่องจาก {count} รอบเรียบร้อยแล้ว",
-      "no_custom_phases": "ไม่พบเฟสที่กำหนดเองสำหรับอุปกรณ์ประเภทนี้"
+      "debug_data_cleared": "ล้างข้อมูลการแก้ไขข้อบกพร่องจาก {count} รอบเรียบร้อยแล้ว"
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "วงจรเริ่มต้น",
+        "cycle_finish": "วงจรเสร็จสิ้น",
+        "cycle_live": "ความคืบหน้าสด"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(ไม่มีป้ายกำกับ)",
+        "create_new_profile": "สร้างโปรไฟล์ใหม่",
+        "remove_label": "ลบป้ายกำกับ",
+        "no_reference_cycle": "(ไม่มีรอบการอ้างอิง)",
+        "all_device_types": "อุปกรณ์ทุกประเภท",
+        "current_suffix": "(ปัจจุบัน)",
+        "editor_select_info": "เลือก 1 รอบที่จะแยก หรือ 2+ รอบเพื่อรวม",
+        "no_cycles_recorded": "ยังไม่มีการบันทึกรอบ",
+        "profile_summary_line": "- **{name}**: {count} รอบ เฉลี่ย {avg}ม",
+        "no_profiles_created": "ยังไม่มีการสร้างโปรไฟล์",
+        "phase_preview": "ดูตัวอย่างเฟส",
+        "phase_preview_no_curve": "เส้นโค้งโปรไฟล์เฉลี่ยยังไม่พร้อมใช้งาน เรียกใช้/ติดป้ายกำกับรอบเพิ่มเติมสำหรับโปรไฟล์นี้",
+        "average_power_curve": "เส้นโค้งกำลังเฉลี่ย",
+        "unit_min": "นาที",
+        "profile_option_fmt": "{name} ({count} รอบ ~{duration}m เฉลี่ย)",
+        "profile_option_short_fmt": "{name} ({count} รอบ, ~{duration}ม.)",
+        "deleted_cycles_from_profile": "ลบ {count} รอบจาก {profile}",
+        "not_enough_data_graph": "ข้อมูลไม่เพียงพอที่จะสร้างกราฟ",
+        "no_profiles_found": "ไม่พบโปรไฟล์",
+        "cycle_info_fmt": "วงจร: {start}, {duration}ม. กระแส: {label}",
+        "top_candidates_header": "### ผู้สมัครอันดับต้นๆ",
+        "tbl_profile": "ประวัติโดยย่อ",
+        "tbl_confidence": "ความมั่นใจ",
+        "tbl_correlation": "ความสัมพันธ์",
+        "tbl_duration_match": "การจับคู่ระยะเวลา",
+        "detected_profile": "โปรไฟล์ที่ตรวจพบ",
+        "estimated_duration": "ระยะเวลาโดยประมาณ",
+        "actual_duration": "ระยะเวลาจริง",
+        "choose_action": "__เลือกการกระทำด้านล่าง:__",
+        "tbl_count": "นับ",
+        "tbl_avg": "เฉลี่ย",
+        "tbl_min": "นาที",
+        "tbl_max": "สูงสุด",
+        "tbl_energy_avg": "พลังงาน (เฉลี่ย)",
+        "tbl_energy_total": "พลังงาน (รวม)",
+        "tbl_consistency": "ประกอบด้วย.",
+        "tbl_last_run": "วิ่งครั้งสุดท้าย",
+        "graph_legend_title": "ตำนานกราฟ",
+        "graph_legend_body": "แถบสีน้ำเงินแสดงถึงช่วงการดึงกำลังขั้นต่ำและสูงสุดที่สังเกตได้ เส้นนี้แสดงกราฟกำลังเฉลี่ย",
+        "recording_preview": "ตัวอย่างการบันทึก",
+        "trim_start": "ตัดแต่งเริ่มต้น",
+        "trim_end": "ตัดแต่งปลาย",
+        "split_preview_title": "ดูตัวอย่างแบบแยกส่วน",
+        "split_preview_found_fmt": "พบ {count} ส่วน",
+        "split_preview_confirm_fmt": "คลิกยืนยันเพื่อแบ่งรอบนี้เป็น {count} รอบแยกกัน",
+        "merge_preview_title": "รวมตัวอย่าง",
+        "merge_preview_joining_fmt": "เข้าร่วม {count} รอบ ช่องว่างจะเต็มไปด้วยการอ่าน 0W",
+        "profile_comparison": "การเปรียบเทียบโปรไฟล์",
+        "actual_cycle_label": "รอบนี้ (ตามจริง)",
+        "storage_usage_header": "การใช้พื้นที่เก็บข้อมูล",
+        "storage_file_size": "ขนาดไฟล์",
+        "storage_cycles": "รอบ",
+        "storage_profiles": "โปรไฟล์",
+        "storage_debug_traces": "ดีบักการติดตาม",
+        "overview_suffix": "ภาพรวม",
+        "phase_preview_for_profile": "ตัวอย่างเฟสสำหรับโปรไฟล์",
+        "current_ranges_header": "ช่วงปัจจุบัน",
+        "assign_phases_help": "ใช้การดำเนินการด้านล่างเพื่อเพิ่ม แก้ไข ลบ หรือบันทึกช่วง",
+        "profile_summary_header": "สรุปโปรไฟล์",
+        "recent_cycles_header": "รอบล่าสุด"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "แยกวงจร (ค้นหาช่องว่าง)",
+        "merge": "ผสานวงจร (เข้าร่วมส่วนย่อย)",
+        "delete": "ลบไซเคิล"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "การบำรุงรักษา: ประมวลผลใหม่และเพิ่มประสิทธิภาพข้อมูล",
+        "clear_debug_data": "ล้างข้อมูลการดีบัก (เพิ่มพื้นที่ว่าง)",
+        "wipe_history": "ล้างข้อมูลทั้งหมดสำหรับอุปกรณ์นี้ (ไม่สามารถย้อนกลับได้)",
+        "export_import": "ส่งออก/นำเข้า JSON ด้วยการตั้งค่า (คัดลอก/วาง)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "ส่งออกข้อมูลทั้งหมด",
+        "import": "นำเข้า/รวมข้อมูล"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "ติดป้ายกำกับรอบเก่าโดยอัตโนมัติ",
+        "select_cycle_to_label": "วงจรเฉพาะของฉลาก",
+        "select_cycle_to_label_multi": "ติดป้ายกำกับหลายรอบ",
+        "select_cycle_to_delete": "ลบไซเคิล",
+        "interactive_editor": "ผสาน / แยกตัวแก้ไขเชิงโต้ตอบ"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "สร้างโปรไฟล์ใหม่",
+        "edit_profile": "แก้ไข/เปลี่ยนชื่อโปรไฟล์",
+        "delete_profile": "ลบโปรไฟล์",
+        "profile_stats": "สถิติโปรไฟล์",
+        "cleanup_profile": "ล้างประวัติ - กราฟ & ลบ",
+        "assign_phases": "กำหนดช่วงเฟส"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "สร้างเฟสใหม่",
+        "edit_custom_phase": "แก้ไขเฟส",
+        "delete_custom_phase": "ลบเฟส"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "เพิ่มช่วงเฟส",
+        "edit_range": "แก้ไขช่วงเฟส",
+        "delete_range": "ลบช่วงเฟส",
+        "clear_ranges": "ล้างทุกช่วง",
+        "save_ranges": "บันทึกและส่งคืน"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "รีเฟรชสถานะ",
+        "stop_recording": "หยุดการบันทึก (บันทึกและประมวลผล)",
+        "start_recording": "เริ่มการบันทึกใหม่",
+        "process_recording": "ประมวลผลการบันทึกครั้งล่าสุด (ตัดแต่งและบันทึก)",
+        "discard_recording": "ละทิ้งการบันทึกครั้งล่าสุด"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "สร้างโปรไฟล์ใหม่",
+        "existing_profile": "เพิ่มไปยังโปรไฟล์ที่มีอยู่",
+        "discard": "ยกเลิกการบันทึก"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "ยืนยัน - การตรวจจับที่ถูกต้อง",
+        "correct": "ถูกต้อง - เลือกโปรแกรม/ระยะเวลา",
+        "ignore": "เพิกเฉย - วงจรบวกลวง/มีเสียงดัง",
+        "delete": "ลบ - ลบออกจากประวัติ"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "วงจรฉลาก",
+      "description": "กำหนดโปรไฟล์ที่มีอยู่ให้กับรอบที่ผ่านมา หรือลบป้ายกำกับออก",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์ติดฉลากเครื่องซักผ้า"
+        },
+        "cycle_id": {
+          "name": "รหัสไซเคิล",
+          "description": "ID ของรอบที่จะติดป้ายกำกับ"
+        },
+        "profile_name": {
+          "name": "ชื่อโปรไฟล์",
+          "description": "ชื่อของโปรไฟล์ที่มีอยู่ (สร้างโปรไฟล์ในเมนูจัดการโปรไฟล์) เว้นว่างไว้เพื่อนำป้ายกำกับออก"
+        }
+      }
+    },
+    "create_profile": {
+      "name": "สร้างโปรไฟล์",
+      "description": "สร้างโปรไฟล์ใหม่ (แบบสแตนด์อโลนหรือตามรอบการอ้างอิง)",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์เครื่องซักผ้า"
+        },
+        "profile_name": {
+          "name": "ชื่อโปรไฟล์",
+          "description": "ชื่อของโปรไฟล์ใหม่ (เช่น 'Heavy Duty', 'Delicates')"
+        },
+        "reference_cycle_id": {
+          "name": "รหัสไซเคิลอ้างอิง",
+          "description": "รหัสรอบทางเลือกเพื่อใช้เป็นฐานของโปรไฟล์นี้"
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "ลบโปรไฟล์",
+      "description": "ลบโปรไฟล์และเลือกยกเลิกการติดป้ายกำกับรอบการใช้งาน",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์เครื่องซักผ้า"
+        },
+        "profile_name": {
+          "name": "ชื่อโปรไฟล์",
+          "description": "โปรไฟล์ที่จะลบ"
+        },
+        "unlabel_cycles": {
+          "name": "เลิกติดป้ายกำกับรอบ",
+          "description": "ลบป้ายกำกับโปรไฟล์ออกจากรอบการใช้โปรไฟล์นี้"
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "ติดป้ายกำกับรอบเก่าโดยอัตโนมัติ",
+      "description": "ติดป้ายกำกับรอบการทำงานที่ไม่มีป้ายกำกับย้อนหลังโดยใช้การจับคู่โปรไฟล์",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์เครื่องซักผ้า"
+        },
+        "confidence_threshold": {
+          "name": "เกณฑ์ความเชื่อมั่น",
+          "description": "ความเชื่อมั่นการจับคู่ขั้นต่ำ (0.50-0.95) เพื่อใช้ป้ายกำกับ"
+        }
+      }
+    },
+    "export_config": {
+      "name": "ส่งออกการกำหนดค่า",
+      "description": "ส่งออกโปรไฟล์ รอบ และการตั้งค่าของอุปกรณ์นี้เป็นไฟล์ JSON (ต่ออุปกรณ์)",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์เครื่องซักผ้าเพื่อส่งออก"
+        },
+        "path": {
+          "name": "เส้นทาง",
+          "description": "พาธไฟล์สัมบูรณ์ทางเลือกที่จะเขียน (ค่าเริ่มต้นคือ /config/ha_washdata_export_{entry}.json)"
+        }
+      }
+    },
+    "import_config": {
+      "name": "นำเข้าการกำหนดค่า",
+      "description": "นำเข้าโปรไฟล์ รอบ และการตั้งค่าสำหรับอุปกรณ์นี้จากไฟล์ส่งออก JSON (การตั้งค่าอาจถูกเขียนทับ)",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์เครื่องซักผ้าที่จะนำเข้า"
+        },
+        "path": {
+          "name": "เส้นทาง",
+          "description": "เส้นทางที่แน่นอนไปยังไฟล์ JSON ส่งออกที่จะนำเข้า"
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "ส่งคำติชมรอบ",
+      "description": "ยืนยันหรือแก้ไขโปรแกรมที่ตรวจพบอัตโนมัติหลังจากรอบการทำงานเสร็จสมบูรณ์ ระบุ `entry_id` (ขั้นสูง) หรือ `device_id` (แนะนำ)",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์ WashData (แนะนำแทน entry_id)"
+        },
+        "entry_id": {
+          "name": "รหัสรายการ",
+          "description": "รหัสรายการการกำหนดค่าสำหรับอุปกรณ์ (ทางเลือกอื่นคือ device_id)"
+        },
+        "cycle_id": {
+          "name": "รหัสไซเคิล",
+          "description": "รหัสรอบที่แสดงในการแจ้งเตือน / บันทึกข้อเสนอแนะ"
+        },
+        "user_confirmed": {
+          "name": "ยืนยันโปรแกรมที่ตรวจพบ",
+          "description": "ตั้งค่าเป็นจริงหากโปรแกรมที่ตรวจพบถูกต้อง"
+        },
+        "corrected_profile": {
+          "name": "โปรไฟล์ที่แก้ไขแล้ว",
+          "description": "หากไม่ได้รับการยืนยัน ให้ระบุชื่อโปรไฟล์/โปรแกรมที่ถูกต้อง"
+        },
+        "corrected_duration": {
+          "name": "ระยะเวลาที่แก้ไข (วินาที)",
+          "description": "ระยะเวลาแก้ไขเพิ่มเติมในหน่วยวินาที"
+        },
+        "notes": {
+          "name": "หมายเหตุ",
+          "description": "หมายเหตุเพิ่มเติมเกี่ยวกับรอบนี้"
+        }
+      }
+    },
+    "record_start": {
+      "name": "บันทึกรอบการเริ่มต้น",
+      "description": "เริ่มบันทึกวงจรการทำความสะอาดด้วยตนเอง (ข้ามตรรกะที่ตรงกันทั้งหมด)",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์เครื่องซักผ้าที่จะบันทึก"
+        }
+      }
+    },
+    "record_stop": {
+      "name": "บันทึกรอบการหยุด",
+      "description": "หยุดการบันทึกด้วยตนเอง",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์เครื่องซักผ้าหยุดการบันทึก"
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "วิ่ง"
+      },
+      "match_ambiguity": {
+        "name": "จับคู่ความคลุมเครือ"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "สถานะ"
+        "name": "สถานะ",
+        "state": {
+          "off": "ปิด",
+          "idle": "ไม่ได้ใช้งาน",
+          "starting": "กำลังเริ่มต้น",
+          "running": "วิ่ง",
+          "paused": "หยุดชั่วคราว",
+          "ending": "ตอนจบ",
+          "finished": "ที่เสร็จเรียบร้อย",
+          "anti_wrinkle": "ต่อต้านริ้วรอย",
+          "interrupted": "ขัดจังหวะ",
+          "force_stopped": "บังคับหยุด",
+          "rinse": "ล้าง",
+          "unknown": "ไม่ทราบ"
+        }
       },
       "washer_program": {
         "name": "โปรแกรม"
@@ -595,16 +936,23 @@
         "name": "จับคู่ความมั่นใจ"
       },
       "top_candidates": {
-        "name": "ผู้สมัครอันดับต้นๆ"
+        "name": "ผู้สมัครอันดับต้นๆ",
+        "state": {
+          "none": "ไม่มี"
+        }
+      },
+      "current_phase": {
+        "name": "เฟสปัจจุบัน"
       },
       "wash_phase": {
         "name": "เฟส"
       },
+      "profile_cycle_count": {
+        "name": "โปรไฟล์ {profile_name} จำนวน",
+        "unit_of_measurement": "รอบ"
+      },
       "suggestions": {
         "name": "การตั้งค่าที่แนะนำ"
-      },
-      "current_phase": {
-        "name": "เฟสปัจจุบัน"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "ตรวจจับอัตโนมัติ"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "บังคับให้สิ้นสุดวงจร"
       }
     }
   }

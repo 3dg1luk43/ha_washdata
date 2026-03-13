@@ -345,11 +345,17 @@ def compute_envelope_worker(
 
         offsets = np.array(offsets_list)
         values = np.array(values_list)
-        dur = float(curve_duration) if curve_duration is not None else float(offsets[-1])
 
-        # Validate duration is positive and finite before appending
-        if dur > 0 and np.isfinite(dur):
-            normalized_curves.append((offsets, values, dur))
+        try:
+            dur = float(curve_duration) if curve_duration is not None else float(offsets[-1])
+        except (TypeError, ValueError, OverflowError):
+            continue
+
+        # Validate duration is positive and finite before appending.
+        if not (dur > 0 and np.isfinite(dur)):
+            continue
+
+        normalized_curves.append((offsets, values, dur))
 
         if len(offsets) > 1:
             intervals = np.diff(offsets)

@@ -1589,6 +1589,8 @@ class WashDataManager:
             self._remove_external_trigger_listener()
         if self._remove_notify_people_listener:
             self._remove_notify_people_listener()
+            self._remove_notify_people_listener = None
+            self._pending_notifications = []
         if self._remove_watchdog:
             self._remove_watchdog()
         if (
@@ -1649,6 +1651,8 @@ class WashDataManager:
             self._remove_notify_people_listener = async_track_state_change_event(
                 self.hass, self._notify_people, self._handle_notify_person_change
             )
+        else:
+            self._pending_notifications = []
 
     @callback
     def _handle_external_trigger_change(self, event: Event[evt.EventStateChangedData]) -> None:

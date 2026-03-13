@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "학습 피드백 검토",
           "settings": "설정",
+          "notifications": "알림",
           "manage_cycles": "주기 관리",
           "manage_profiles": "프로필 관리",
-          "record_cycle": "기록주기(수동)",
-          "diagnostics": "진단 및 유지보수",
           "manage_phase_catalog": "단계 카탈로그 관리",
-          "notifications": "알림"
+          "record_cycle": "기록주기(수동)",
+          "diagnostics": "진단 및 유지보수"
         }
       },
       "apply_suggestions": {
@@ -67,8 +67,8 @@
           "off_delay": "사이클 종료 지연(초)",
           "notify_service": "알림 서비스(예: inform.mobile_app)",
           "notify_actions": "알림 작업",
-          "notify_people": "알릴 사람",
-          "notify_only_when_home": "집에 있을 때만 알림",
+          "notify_people": "이 사람들이 집에 올 때까지 배달을 연기하세요",
+          "notify_only_when_home": "선택한 사람이 집에 돌아올 때까지 알림 지연",
           "notify_fire_events": "화재 자동화 이벤트",
           "notify_events": "공지할 이벤트",
           "notify_before_end_minutes": "사전 완료 알림(종료 몇 분 전)",
@@ -80,22 +80,60 @@
           "show_advanced": "고급 설정 편집(다음 단계)"
         },
         "data_description": {
-          "apply_suggestions": "학습 알고리즘에서 제안한 값을 양식에 복사하려면 이 상자를 선택합니다. 저장하기 전에 검토하세요.\n\n(학습에서) 제안:\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} 초\n- watchdog_interval: {suggested_watchdog_interval} 초\n- no_update_active_timeout: {suggested_no_update_active_timeout}초\n- profile_match_interval: {suggested_profile_match_interval} 초\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "학습 알고리즘에서 제안한 값을 양식에 복사하려면 이 상자를 선택하세요. 저장하기 전에 검토하세요.\n\n(학습에서) 제안:\n- 최소 전력: {suggested_min_power} W\n- off_delay: {suggested_off_delay}초\n- watchdog_interval: {suggested_watchdog_interval}초\n- no_update_active_timeout: {suggested_no_update_active_timeout}초\n- profile_match_interval: {suggested_profile_match_interval}초\n- auto_label_confidence: {suggested_auto_label_confidence}\n- 기간_공차: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "가전제품 유형(세탁기, 건조기, 식기세척기, 커피머신, EV)을 선택하세요. 이 태그는 더 나은 구성을 위해 각 주기와 함께 저장됩니다.",
           "power_sensor": "실시간 전력(와트)을 보고하는 센서 엔터티입니다. 기록 데이터 손실 없이 언제든지 이를 변경할 수 있습니다. 스마트 플러그를 교체하는 경우 유용합니다.",
           "min_power": "이 임계값(와트)보다 높은 전력 판독값은 어플라이언스가 실행 중임을 나타냅니다. 대부분의 장치에서는 2W로 시작합니다.",
           "off_delay": "완료를 표시하려면 평활화된 전력이 정지 임계값 아래로 유지되어야 합니다. 기본값: 120초.",
           "notify_service": "홈어시스턴트가 사용할 서비스를 알립니다(선택사항).",
           "notify_actions": "알림(스크립트, 알림, TTS 등)을 위해 실행할 선택적 홈어시스턴트 작업 시퀀스입니다. 설정된 경우 대체 알림 서비스 전에 작업이 실행됩니다.",
-          "notify_people": "홈/어웨이 게이팅에 사용할 사람 엔터티입니다. 활성화하면 누군가 집에 올 때까지 알림이 연기됩니다.",
-          "notify_only_when_home": "활성화하면 선택한 사람 중 최소한 한 명이 집에 올 때까지 알림을 연기합니다.",
-          "notify_fire_events": "활성화된 경우 주기 시작 및 종료(ha_washdata_cycle_started/ended)에 대한 홈어시스턴트 이벤트를 실행하여 자동화를 구동합니다.",
+          "notify_people": "현재 상태 게이팅에 사용되는 사람 엔터티입니다. 활성화되면 선택한 사람 중 최소한 한 명이 집에 도착할 때까지 알림 전달이 지연됩니다.",
+          "notify_only_when_home": "활성화되면 선택한 사람 중 최소한 한 명이 집에 올 때까지 알림을 연기합니다.",
+          "notify_fire_events": "활성화된 경우 주기 시작 및 종료(ha_washdata_cycle_started 및 ha_washdata_cycle_ended)에 대한 홈어시스턴트 이벤트를 실행하여 자동화를 구동합니다.",
           "notify_events": "알림을 보낼 이벤트입니다.",
           "notify_before_end_minutes": "알림을 트리거할 주기의 예상 종료 시간 몇 분 전입니다. 비활성화하려면 0으로 설정합니다. 기본값: 0.",
           "notify_title": "알림에 대한 사용자 정의 제목입니다. {device} 자리 표시자를 지원합니다.",
           "notify_icon": "알림에 사용할 아이콘(예: mdi:washing-machine) 기본값을 사용하려면 비워 두세요.",
           "notify_start_message": "주기가 시작되면 전송되는 메시지입니다. {device} 자리 표시자를 지원합니다.",
-          "notify_finish_message": "주기가 완료되면 전송되는 메시지입니다. {device}, {duration}, {program} 자리 표시자를 지원합니다.",
+          "notify_finish_message": "주기가 완료되면 전송되는 메시지입니다. {device}, {duration}, {program} 자리표시자를 지원합니다.",
+          "notify_pre_complete_message": "완료되기 전에 메시지가 전송되었습니다. {device}, {minutes} 자리 표시자를 지원합니다."
+        }
+      },
+      "notifications": {
+        "title": "알림",
+        "description": "알림 채널, 템플릿 및 선택적 라이브 모바일 진행 상황 업데이트를 구성합니다.",
+        "data": {
+          "notify_service": "알림 서비스(예: inform.mobile_app)",
+          "notify_actions": "알림 작업",
+          "notify_people": "이 사람들이 집에 올 때까지 배달을 연기하세요",
+          "notify_only_when_home": "선택한 사람이 집에 돌아올 때까지 알림 지연",
+          "notify_fire_events": "화재 자동화 이벤트",
+          "notify_events": "공지할 이벤트",
+          "notify_before_end_minutes": "사전 완료 알림(종료 몇 분 전)",
+          "notify_live_enabled": "실시간 진행 알림 활성화",
+          "notify_live_interval_seconds": "라이브 업데이트 간격(초)",
+          "notify_live_overrun_percent": "라이브 업데이트 오버런 허용(%)",
+          "notify_title": "알림 제목",
+          "notify_icon": "알림 아이콘",
+          "notify_start_message": "시작 메시지 형식",
+          "notify_finish_message": "완료 메시지 형식",
+          "notify_pre_complete_message": "사전 완료 메시지 형식"
+        },
+        "data_description": {
+          "notify_service": "홈어시스턴트가 사용할 서비스를 알립니다(선택사항).",
+          "notify_actions": "알림(스크립트, 알림, TTS 등)을 위해 실행할 선택적 홈어시스턴트 작업 시퀀스입니다. 설정된 경우 대체 알림 서비스 전에 작업이 실행됩니다.",
+          "notify_people": "현재 상태 게이팅에 사용되는 사람 엔터티입니다. 활성화되면 선택한 사람 중 최소한 한 명이 집에 도착할 때까지 알림 전달이 지연됩니다.",
+          "notify_only_when_home": "활성화되면 선택한 사람 중 최소한 한 명이 집에 올 때까지 알림을 연기합니다.",
+          "notify_fire_events": "활성화된 경우 주기 시작 및 종료(ha_washdata_cycle_started 및 ha_washdata_cycle_ended)에 대한 홈어시스턴트 이벤트를 실행하여 자동화를 구동합니다.",
+          "notify_events": "알림을 보낼 이벤트입니다.",
+          "notify_before_end_minutes": "알림을 트리거할 주기의 예상 종료 시간 몇 분 전입니다. 비활성화하려면 0으로 설정합니다. 기본값: 0.",
+          "notify_live_enabled": "모바일 앱 알림에 대한 실시간 진행 업데이트를 활성화합니다.",
+          "notify_live_interval_seconds": "실행 중에 진행률 업데이트가 전송되는 빈도입니다. 값이 낮을수록 반응성이 높아지지만 더 많은 알림을 사용합니다.",
+          "notify_live_overrun_percent": "장기/오버런 주기에 대한 예상 업데이트 횟수보다 높은 안전 여유(예: 20%는 예상 업데이트의 1.2배 허용)",
+          "notify_title": "알림에 대한 사용자 정의 제목입니다. {device} 자리 표시자를 지원합니다.",
+          "notify_icon": "알림에 사용할 아이콘(예: mdi:washing-machine) 기본값을 사용하려면 비워 두세요.",
+          "notify_start_message": "주기가 시작되면 전송되는 메시지입니다. {device} 자리 표시자를 지원합니다.",
+          "notify_finish_message": "주기가 완료되면 전송되는 메시지입니다. {device}, {duration}, {program} 자리표시자를 지원합니다.",
           "notify_pre_complete_message": "완료되기 전에 메시지가 전송되었습니다. {device}, {minutes} 자리 표시자를 지원합니다."
         }
       },
@@ -149,7 +187,7 @@
           "external_end_trigger_inverted": "트리거 로직 반전(트리거 ON OFF)"
         },
         "data_description": {
-          "apply_suggestions": "학습 알고리즘에서 제안한 값을 양식에 복사하려면 이 상자를 선택합니다. 저장하기 전에 검토하세요.\n\n(학습에서) 제안:\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} 초\n- watchdog_interval: {suggested_watchdog_interval} 초\n- no_update_active_timeout: {suggested_no_update_active_timeout}초\n- profile_match_interval: {suggested_profile_match_interval} 초\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "학습 알고리즘에서 제안한 값을 양식에 복사하려면 이 상자를 선택하세요. 저장하기 전에 검토하세요.\n\n(학습에서) 제안:\n- 최소 전력: {suggested_min_power} W\n- off_delay: {suggested_off_delay}초\n- watchdog_interval: {suggested_watchdog_interval}초\n- no_update_active_timeout: {suggested_no_update_active_timeout}초\n- profile_match_interval: {suggested_profile_match_interval}초\n- auto_label_confidence: {suggested_auto_label_confidence}\n- 기간_공차: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "사이클을 시작하려면 전력이 이 임계값 이상으로 상승해야 합니다. 대기전력보다 높게 설정하세요. 기본값: min_power + 1W.",
           "stop_threshold_w": "사이클을 종료하려면 전력이 이 임계값 아래로 떨어져야 합니다. 잘못된 종료를 유발하는 노이즈를 방지하려면 0 바로 위에 설정하십시오. 기본값: 0.6 * min_power.",
           "min_off_gap": "이전 종료 후 이 몇 초 내에 사이클이 시작되면 단일 사이클로 병합됩니다.",
@@ -172,12 +210,12 @@
           "abrupt_drop_ratio": "상대 드롭 비율(0-1). 예: 0.6은 60%의 급격한 하락을 의미합니다.",
           "abrupt_high_load_factor": "기준선 위의 요소는 갑작스러운 감소 이전에 '높은 부하'로 간주됩니다(갑작스러운 감지와 함께 사용됨).",
           "max_past_cycles": "유지할 총 주기 수(가장 오래된 주기는 제거됨) 기본값: 200.",
-          "max_full_traces_per_profile": "프로필당 전체 전력 추적을 유지하기 위해 최근에 레이블이 지정된 사이클 수입니다. 오래된 추적은 봉투를 통해 요약됩니다. 기본값: 20.",
+          "max_full_traces_per_profile": "프로필당 최대 전력 추적을 유지하기 위한 최근 레이블이 지정된 사이클 수입니다. 오래된 추적은 봉투를 통해 요약됩니다. 기본값: 20.",
           "max_full_traces_unlabeled": "자동 라벨링을 지원하기 위해 전체 전력 추적을 유지하기 위한 최근 라벨이 지정되지 않은 사이클 수입니다. 기본값: 20.",
           "watchdog_interval": "실행 중 감시 확인 사이의 시간(초)입니다. 기본값: 5초. 경고: 잘못된 중지를 방지하려면 이 값이 센서의 업데이트 간격보다 높은지 확인하세요(예: 센서가 60초마다 업데이트하는 경우 65초 이상 사용).",
           "completion_min_seconds": "이보다 짧은 주기는 자연스럽게 끝나더라도 '중단됨'으로 표시됩니다. 기본값: 600초.",
           "notify_before_end_minutes": "알림을 트리거할 주기의 예상 종료 시간 몇 분 전입니다. 비활성화하려면 0으로 설정합니다. 기본값: 0.",
-          "auto_tune_noise_events_threshold": "min_power를 자동 조정하는 데 필요한 24시간 이내의 짧은/저전력 '잡음' 주기 수입니다. 기본값: 3.",
+          "auto_tune_noise_events_threshold": "min_power를 자동 조정하는 데 필요한 24시간 내의 짧은/저전력 '잡음' 주기 수입니다. 기본값: 3.",
           "running_dead_zone": "사이클이 시작된 후 이 시간 동안 전력 강하를 무시하여 초기 스핀업 단계에서 잘못된 종료 감지를 방지합니다. 비활성화하려면 0으로 설정합니다. 기본값: 0초.",
           "end_repeat_count": "사이클을 종료하기 전에 종료 조건(off_delay에 대한 임계값보다 낮은 전력)이 연속적으로 충족되어야 하는 횟수입니다. 값이 높을수록 일시 중지 중에 잘못된 종료가 방지됩니다. 기본값: 1.",
           "start_energy_threshold": "사이클이 확인되려면 START 단계 동안 최소한 이 정도의 에너지(Wh)를 축적해야 합니다. 기본값: 0.005Wh.",
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "진단 및 유지보수",
-        "description": "단편화된 주기 병합 또는 저장된 데이터 마이그레이션과 같은 유지 관리 작업을 실행합니다.\n\n{storage_stats}"
+        "description": "단편화된 주기 병합 또는 저장된 데이터 마이그레이션과 같은 유지 관리 작업을 실행합니다.\n\n**스토리지 사용량**\n\n- 파일 크기: {file_size_kb}KB\n- 주기: {cycle_count}\n- 프로필: {profile_count}\n- 디버그 추적: {debug_count}"
       },
       "clear_debug_data": {
         "title": "디버그 데이터 지우기",
@@ -210,11 +248,109 @@
           "action": "행동"
         }
       },
+      "manage_cycles_empty": {
+        "title": "주기 관리",
+        "description": "아직 기록된 사이클이 없습니다.",
+        "data": {
+          "action": "행동"
+        }
+      },
       "manage_profiles": {
         "title": "프로필 관리",
         "description": "프로필 요약:\n{profile_summary}",
         "data": {
           "action": "행동"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "프로필 관리",
+        "description": "아직 생성된 프로필이 없습니다.",
+        "data": {
+          "action": "행동"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "단계 카탈로그 관리",
+        "description": "단계 카탈로그(이 장치의 기본값 + 사용자 정의 단계):\n{phase_summary}",
+        "data": {
+          "action": "행동"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "사용자 정의 단계 생성",
+        "description": "사용자 정의 단계 이름과 설명을 만들고 적용할 장치 유형을 선택합니다.",
+        "data": {
+          "target_device_type": "대상 장치 유형",
+          "phase_name": "단계 이름",
+          "phase_description": "단계 설명"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "사용자 정의 단계 편집",
+        "description": "편집할 사용자 정의 단계를 선택하세요.",
+        "data": {
+          "phase_name": "맞춤형 단계"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "사용자 정의 단계 편집",
+        "description": "편집 단계: {phase_name}",
+        "data": {
+          "phase_name": "단계 이름",
+          "phase_description": "단계 설명"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "사용자 정의 단계 삭제",
+        "description": "삭제할 사용자 정의 단계를 선택하세요. 이 단계를 사용하여 할당된 범위는 모두 제거됩니다.",
+        "data": {
+          "phase_name": "맞춤형 단계"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "위상 범위 할당",
+        "description": "프로필의 단계 미리보기: **{profile_name}**\n\n{timeline_svg}\n\n**현재 범위:**\n{current_ranges}\n\n아래 작업을 사용하여 범위를 추가, 편집, 삭제 또는 저장하세요.",
+        "data": {
+          "action": "행동"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "위상 범위 추가",
+        "description": "현재 초안에 하나의 위상 범위를 추가합니다.",
+        "data": {
+          "phase_name": "단계",
+          "start_min": "시작 시간(분)",
+          "end_min": "종료 시간(분)"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "위상 범위 편집",
+        "description": "편집할 범위를 선택하세요.",
+        "data": {
+          "range_index": "위상 범위"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "위상 범위 편집",
+        "description": "선택한 위상 범위를 업데이트합니다.",
+        "data": {
+          "phase_name": "단계",
+          "start_min": "시작 시간(분)",
+          "end_min": "종료 시간(분)"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "위상 범위 삭제",
+        "description": "초안에서 제거할 범위를 선택하세요.",
+        "data": {
+          "range_index": "위상 범위"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "위상 범위 할당",
+        "description": "위상 범위를 구성하려면 프로필을 선택하세요.",
+        "data": {
+          "profile": "윤곽"
         }
       },
       "profile_stats": {
@@ -367,8 +503,8 @@
         "title": "JSON 내보내기/가져오기",
         "description": "이 장치에 대한 사이클, 프로필 및 설정을 복사/붙여넣기하세요. 아래로 내보내거나 JSON을 붙여넣어 가져오세요.",
         "data": {
-          "json_payload": "완전한 구성 JSON",
-          "mode": "행동"
+          "mode": "행동",
+          "json_payload": "완전한 구성 JSON"
         },
         "data_description": {
           "mode": "현재 데이터 및 설정을 복사하려면 내보내기를 선택하고, 다른 WashData 장치에서 내보낸 데이터를 붙여넣으려면 가져오기를 선택하세요.",
@@ -384,7 +520,7 @@
       },
       "record_process": {
         "title": "프로세스 기록",
-        "description": "![그래프]({graph_url})\n\n**그래프는 원본 녹화를 보여줍니다.** 파란색 = 유지, 빨간색 = 제안된 다듬기.\n*그래프는 정적이며 양식 변경으로 업데이트되지 않습니다.*\n\n녹음이 중지되었습니다. 트림은 감지된 샘플링 속도(~{sampling_rate}s)에 맞춰 정렬됩니다.\n\n원시 기간: {duration}s\n샘플: {samples}",
+        "description": "![그래프]({graph_url})\n\n**그래프는 원본 녹화를 보여줍니다.** 파란색 = 유지, 빨간색 = 제안된 다듬기.\n*그래프는 정적이며 양식 변경으로 업데이트되지 않습니다.*\n\n녹음이 중지되었습니다. 트림은 감지된 샘플링 속도(~{sampling_rate}s)에 맞춰 정렬됩니다.\n\n원시 기간: {duration}초\n샘플: {samples}",
         "data": {
           "head_trim": "트림 시작(초)",
           "tail_trim": "자르기 종료(초)",
@@ -405,133 +541,11 @@
       },
       "resolve_feedback": {
         "title": "피드백 해결",
-        "description": "**감지된 프로그램**: {profile}\n**신뢰도**: {confidence}%\n**예상**: {est}m, **실제**: {act}m",
+        "description": "{comparison_img}{candidates_table}\n**감지된 프로필**: {detected_profile}({confidence_pct}%)\n**예상 소요 시간**: {est_duration_min}분\n**실제 기간**: {act_duration_min}분\n\n__아래에서 작업을 선택하세요.__",
         "data": {
+          "action": "무엇을 하고 싶나요?",
           "corrected_profile": "올바른 프로그램(수정하는 경우)",
-          "corrected_duration": "수정 기간(분)(수정하는 경우)",
-          "action": "무엇을 하고 싶나요?"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "단계 카탈로그 관리",
-        "description": "이 장치 유형의 현재 단계:\n{phase_summary}",
-        "data": {
-          "action": "행동"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "사용자 정의 단계 생성",
-        "description": "이 장치 유형에 대한 사용자 정의 단계 이름과 설명을 만듭니다.",
-        "data": {
-          "phase_name": "단계 이름",
-          "phase_description": "단계 설명",
-          "target_device_type": "대상 장치 유형"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "사용자 정의 단계 편집",
-        "description": "편집할 사용자 정의 단계를 선택하세요.",
-        "data": {
-          "phase_name": "맞춤형 단계"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "사용자 정의 단계 편집",
-        "description": "편집 단계: {phase_name}",
-        "data": {
-          "phase_name": "단계 이름",
-          "phase_description": "단계 설명"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "사용자 정의 단계 삭제",
-        "description": "삭제할 사용자 정의 단계를 선택하세요. 이 단계를 사용하여 할당된 범위는 모두 제거됩니다.",
-        "data": {
-          "phase_name": "맞춤형 단계"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "위상 범위 할당",
-        "description": "프로필: **{profile_name}**\n모드: **{assign_mode}**\n주기 힌트: {cycle_hint}\n\n현재 범위:\n{current_ranges}\n\n단계 레이블은 표시 및 구성용입니다. 감지에서는 위상 이름이 아닌 전력 패턴을 사용합니다.",
-        "data": {
-          "action": "행동"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "위상 범위 할당",
-        "description": "위상 범위를 구성하려면 프로필을 선택하세요.",
-        "data": {
-          "profile": "윤곽"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "위상 범위 추가",
-        "description": "현재 초안에 하나의 위상 범위를 추가합니다.",
-        "data": {
-          "phase_name": "단계",
-          "start_min": "시작 시간(분)",
-          "end_min": "종료 시간(분)"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "위상 범위 편집",
-        "description": "편집할 범위를 선택하세요.",
-        "data": {
-          "range_index": "위상 범위"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "위상 범위 편집",
-        "description": "선택한 위상 범위를 업데이트합니다.",
-        "data": {
-          "phase_name": "단계",
-          "start_min": "시작 시간(분)",
-          "end_min": "종료 시간(분)"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "위상 범위 삭제",
-        "description": "초안에서 제거할 범위를 선택하세요.",
-        "data": {
-          "range_index": "위상 범위"
-        }
-      },
-      "notifications": {
-        "title": "알림",
-        "description": "알림 채널, 템플릿 및 선택적 라이브 모바일 진행 상황 업데이트를 구성합니다.",
-        "data": {
-          "notify_service": "알림 서비스(예: inform.mobile_app)",
-          "notify_actions": "알림 작업",
-          "notify_people": "알릴 사람",
-          "notify_only_when_home": "집에 있을 때만 알림",
-          "notify_fire_events": "화재 자동화 이벤트",
-          "notify_events": "공지할 이벤트",
-          "notify_before_end_minutes": "사전 완료 알림(종료 몇 분 전)",
-          "notify_live_enabled": "실시간 진행 알림 활성화",
-          "notify_live_interval_seconds": "라이브 업데이트 간격(초)",
-          "notify_live_overrun_percent": "라이브 업데이트 오버런 허용(%)",
-          "notify_title": "알림 제목",
-          "notify_icon": "알림 아이콘",
-          "notify_start_message": "시작 메시지 형식",
-          "notify_finish_message": "완료 메시지 형식",
-          "notify_pre_complete_message": "사전 완료 메시지 형식"
-        },
-        "data_description": {
-          "notify_service": "홈어시스턴트가 사용할 서비스를 알립니다(선택사항).",
-          "notify_actions": "알림(스크립트, 알림, TTS 등)을 위해 실행할 선택적 홈어시스턴트 작업 시퀀스입니다. 설정된 경우 대체 알림 서비스 전에 작업이 실행됩니다.",
-          "notify_people": "홈/어웨이 게이팅에 사용할 사람 엔터티입니다. 활성화하면 누군가 집에 올 때까지 알림이 연기됩니다.",
-          "notify_only_when_home": "활성화되면 선택한 사람 중 최소한 한 명이 집에 올 때까지 알림을 연기합니다.",
-          "notify_fire_events": "활성화된 경우 주기 시작 및 종료(ha_washdata_cycle_started/ended)에 대한 홈어시스턴트 이벤트를 실행하여 자동화를 구동합니다.",
-          "notify_events": "알림을 보낼 이벤트입니다.",
-          "notify_before_end_minutes": "알림을 트리거할 주기의 예상 종료 시간 몇 분 전입니다. 비활성화하려면 0으로 설정합니다. 기본값: 0.",
-          "notify_live_enabled": "모바일 앱 알림에 대한 실시간 진행 업데이트를 활성화합니다.",
-          "notify_live_interval_seconds": "실행 중에 진행률 업데이트가 전송되는 빈도입니다. 값이 낮을수록 반응성이 높아지지만 더 많은 알림을 사용합니다.",
-          "notify_live_overrun_percent": "장기/오버런 주기에 대한 예상 업데이트 횟수보다 높은 안전 여유(예: 20%는 예상 업데이트의 1.2배 허용)",
-          "notify_title": "알림에 대한 사용자 정의 제목입니다. {device} 자리 표시자를 지원합니다.",
-          "notify_icon": "알림에 사용할 아이콘(예: mdi:washing-machine) 기본값을 사용하려면 비워 두세요.",
-          "notify_start_message": "주기가 시작되면 전송되는 메시지입니다. {device} 자리 표시자를 지원합니다.",
-          "notify_finish_message": "주기가 완료되면 전송되는 메시지입니다. {device}, {duration}, {program} 자리 표시자를 지원합니다.",
-          "notify_pre_complete_message": "완료되기 전에 메시지가 전송되었습니다. {device}, {minutes} 자리 표시자를 지원합니다."
+          "corrected_duration": "수정 기간(분)(수정하는 경우)"
         }
       }
     },
@@ -540,8 +554,6 @@
       "profile_exists": "이 이름을 가진 프로필이 이미 존재합니다.",
       "rename_failed": "프로필 이름을 바꾸지 못했습니다. 프로필이 존재하지 않거나 새 이름이 이미 사용 중입니다.",
       "assignment_failed": "주기에 프로필을 할당하지 못했습니다.",
-      "feedback_notification_title": "WashData: 확인 주기({device})",
-      "feedback_notification_message": "**기기**: {device}\n**프로그램**: {program} ({confidence}% 신뢰도)\n**시간**: {time}\n\nWashData가 감지된 주기를 확인하려면 귀하의 도움이 필요합니다.\n\n이 결과를 확인하거나 수정하려면 **설정 > 장치 및 서비스 > WashData > 구성 > 학습 피드백**으로 이동하세요.",
       "duplicate_phase": "이 이름을 가진 단계가 이미 존재합니다.",
       "phase_not_found": "선택한 단계를 찾을 수 없습니다.",
       "invalid_phase_name": "단계 이름은 비워둘 수 없습니다.",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "위상 범위가 겹칩니다. 범위를 조정하고 다시 시도하세요.",
       "incomplete_phase_row": "각 단계 행에는 단계와 선택한 모드에 대한 전체 시작/종료 값이 포함되어야 합니다.",
       "timestamp_mode_cycle_required": "타임스탬프 모드를 사용할 때 소스 주기를 선택하세요.",
-      "no_phase_ranges": "아직 해당 작업에 사용할 수 있는 위상 범위가 없습니다."
+      "no_phase_ranges": "아직 해당 작업에 사용할 수 있는 위상 범위가 없습니다.",
+      "feedback_notification_title": "WashData: 확인 주기({device})",
+      "feedback_notification_message": "**기기**: {device}\n**프로그램**: {program} ({confidence}% 신뢰도)\n**시간**: {time}\n\nWashData가 감지된 주기를 확인하려면 귀하의 도움이 필요합니다.\n\n이 결과를 확인하거나 수정하려면 **설정 > 장치 및 서비스 > WashData > 구성 > 학습 피드백**으로 이동하세요."
     },
     "abort": {
       "no_cycles_found": "사이클을 찾을 수 없습니다.",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "모든 사이클에는 이미 라벨이 지정되어 있습니다.",
       "no_suggestions": "아직 제안된 값이 없습니다. 몇 주기를 실행하고 다시 시도하십시오.",
       "no_predictions": "예측 없음",
+      "no_custom_phases": "맞춤 단계를 찾을 수 없습니다.",
       "reprocess_success": "{count}주기를 성공적으로 재처리했습니다.",
-      "debug_data_cleared": "{count}주기에서 디버그 데이터를 성공적으로 지웠습니다.",
-      "no_custom_phases": "이 장치 유형에 대한 사용자 정의 단계가 없습니다."
+      "debug_data_cleared": "{count} 주기에서 디버그 데이터를 성공적으로 지웠습니다."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "사이클 시작",
+        "cycle_finish": "사이클 마무리",
+        "cycle_live": "실시간 진행"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(라벨이 지정되지 않음)",
+        "create_new_profile": "새 프로필 만들기",
+        "remove_label": "라벨 제거",
+        "no_reference_cycle": "(참조주기 없음)",
+        "all_device_types": "모든 장치 유형",
+        "current_suffix": "(현재의)",
+        "editor_select_info": "분할할 주기 1개를 선택하거나 병합할 주기 2개 이상을 선택하세요.",
+        "no_cycles_recorded": "아직 기록된 사이클이 없습니다.",
+        "profile_summary_line": "- **{name}**: {count}주기, 평균 {avg}m",
+        "no_profiles_created": "아직 생성된 프로필이 없습니다.",
+        "phase_preview": "단계 미리보기",
+        "phase_preview_no_curve": "평균 프로필 곡선은 아직 사용할 수 없습니다. 이 프로필에 대해 더 많은 주기를 실행/레이블 지정합니다.",
+        "average_power_curve": "평균 전력 곡선",
+        "unit_min": "분",
+        "profile_option_fmt": "{name}({count}주기, ~{duration}m 평균)",
+        "profile_option_short_fmt": "{name}({count}주기, ~{duration}m)",
+        "deleted_cycles_from_profile": "{profile}에서 {count}주기를 삭제했습니다.",
+        "not_enough_data_graph": "그래프를 생성할 데이터가 충분하지 않습니다.",
+        "no_profiles_found": "프로필을 찾을 수 없습니다.",
+        "cycle_info_fmt": "주기: {start}, {duration}분, 현재: {label}",
+        "top_candidates_header": "### 상위 후보자",
+        "tbl_profile": "윤곽",
+        "tbl_confidence": "신뢰",
+        "tbl_correlation": "상관관계",
+        "tbl_duration_match": "기간 일치",
+        "detected_profile": "감지된 프로필",
+        "estimated_duration": "예상 기간",
+        "actual_duration": "실제 기간",
+        "choose_action": "__아래에서 작업을 선택하세요.__",
+        "tbl_count": "세다",
+        "tbl_avg": "평균",
+        "tbl_min": "최소",
+        "tbl_max": "맥스",
+        "tbl_energy_avg": "에너지(평균)",
+        "tbl_energy_total": "에너지(총계)",
+        "tbl_consistency": "이루어져 있다.",
+        "tbl_last_run": "마지막 실행",
+        "graph_legend_title": "그래프 범례",
+        "graph_legend_body": "파란색 띠는 관찰된 최소 및 최대 전력 소모 범위를 나타냅니다. 선은 평균 전력 곡선을 보여줍니다.",
+        "recording_preview": "녹화 미리보기",
+        "trim_start": "트림 시작",
+        "trim_end": "트림 종료",
+        "split_preview_title": "분할 미리보기",
+        "split_preview_found_fmt": "{count}개의 세그먼트를 찾았습니다.",
+        "split_preview_confirm_fmt": "이 주기를 {count}개의 개별 주기로 분할하려면 확인을 클릭하세요.",
+        "merge_preview_title": "병합 미리보기",
+        "merge_preview_joining_fmt": "{count}주기에 참여 중입니다. 간격은 0W 판독값으로 채워집니다.",
+        "profile_comparison": "프로필 비교",
+        "actual_cycle_label": "이번 사이클(실제)",
+        "storage_usage_header": "스토리지 사용량",
+        "storage_file_size": "파일 크기",
+        "storage_cycles": "사이클",
+        "storage_profiles": "프로필",
+        "storage_debug_traces": "디버그 추적",
+        "overview_suffix": "개요",
+        "phase_preview_for_profile": "프로필의 단계 미리보기",
+        "current_ranges_header": "현재 범위",
+        "assign_phases_help": "아래 작업을 사용하여 범위를 추가, 편집, 삭제 또는 저장하세요.",
+        "profile_summary_header": "프로필 요약",
+        "recent_cycles_header": "최근 주기"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "사이클 분할(간격 찾기)",
+        "merge": "병합 주기(조각 결합)",
+        "delete": "주기 삭제"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "유지 관리: 데이터 재처리 및 최적화",
+        "clear_debug_data": "디버그 데이터 지우기(공간 확보)",
+        "wipe_history": "이 기기의 모든 데이터 삭제(되돌릴 수 없음)",
+        "export_import": "설정이 포함된 JSON 내보내기/가져오기(복사/붙여넣기)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "모든 데이터 내보내기",
+        "import": "데이터 가져오기/병합"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "기존 사이클에 자동 라벨 지정",
+        "select_cycle_to_label": "라벨별 주기",
+        "select_cycle_to_label_multi": "여러 주기에 라벨 지정",
+        "select_cycle_to_delete": "주기 삭제",
+        "interactive_editor": "병합/분할 대화형 편집기"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "새 프로필 만들기",
+        "edit_profile": "프로필 편집/이름 바꾸기",
+        "delete_profile": "프로필 삭제",
+        "profile_stats": "프로필 통계",
+        "cleanup_profile": "정리 기록 - 그래프 및 삭제",
+        "assign_phases": "위상 범위 할당"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "새 단계 만들기",
+        "edit_custom_phase": "단계 편집",
+        "delete_custom_phase": "단계 삭제"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "위상 범위 추가",
+        "edit_range": "위상 범위 편집",
+        "delete_range": "위상 범위 삭제",
+        "clear_ranges": "모든 범위 지우기",
+        "save_ranges": "저장하고 돌아가기"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "상태 새로 고침",
+        "stop_recording": "녹음 중지(저장 및 처리)",
+        "start_recording": "새 녹음 시작",
+        "process_recording": "마지막 녹화 처리(트리밍 및 저장)",
+        "discard_recording": "마지막 녹음 취소"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "새 프로필 만들기",
+        "existing_profile": "기존 프로필에 추가",
+        "discard": "녹음 취소"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "확인 - 올바른 감지",
+        "correct": "정답 - 프로그램/기간 선택",
+        "ignore": "무시 - 거짓 긍정/노이즈 주기",
+        "delete": "삭제 - 기록에서 제거"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "라벨주기",
+      "description": "기존 프로필을 과거 주기에 할당하거나 라벨을 제거하세요.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "라벨을 붙일 세탁기 장치입니다."
+        },
+        "cycle_id": {
+          "name": "주기 ID",
+          "description": "라벨을 붙일 주기의 ID입니다."
+        },
+        "profile_name": {
+          "name": "프로필 이름",
+          "description": "기존 프로필의 이름(프로필 관리 메뉴에서 프로필 생성) 라벨을 제거하려면 비워두세요."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "프로필 만들기",
+      "description": "새 프로필을 만듭니다(독립형 또는 참조 주기 기반).",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "세탁기 장치입니다."
+        },
+        "profile_name": {
+          "name": "프로필 이름",
+          "description": "새 프로필의 이름(예: 'Heavy Duty', 'Delicates')"
+        },
+        "reference_cycle_id": {
+          "name": "참조 사이클 ID",
+          "description": "이 프로필의 기반이 되는 선택적 주기 ID입니다."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "프로필 삭제",
+      "description": "프로필을 삭제하고 선택적으로 이를 사용하여 사이클의 라벨을 해제합니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "세탁기 장치입니다."
+        },
+        "profile_name": {
+          "name": "프로필 이름",
+          "description": "삭제할 프로필입니다."
+        },
+        "unlabel_cycles": {
+          "name": "사이클 라벨 해제",
+          "description": "이 프로필을 사용하여 사이클에서 프로필 라벨을 제거합니다."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "기존 사이클에 자동 라벨 지정",
+      "description": "프로필 일치를 사용하여 레이블이 지정되지 않은 주기에 소급하여 레이블을 지정합니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "세탁기 장치입니다."
+        },
+        "confidence_threshold": {
+          "name": "신뢰도 임계값",
+          "description": "라벨을 적용하기 위한 최소 일치 신뢰도(0.50-0.95)입니다."
+        }
+      }
+    },
+    "export_config": {
+      "name": "구성 내보내기",
+      "description": "이 장치의 프로필, 사이클, 설정을 JSON 파일로 내보냅니다(장치별).",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "내보낼 세탁기 장치입니다."
+        },
+        "path": {
+          "name": "길",
+          "description": "쓸 선택적 절대 파일 경로입니다(기본값은 /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "구성 가져오기",
+      "description": "JSON 내보내기 파일에서 이 장치의 프로필, 사이클, 설정을 가져옵니다(설정을 덮어쓸 수 있음).",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "가져올 세탁기 장치입니다."
+        },
+        "path": {
+          "name": "길",
+          "description": "가져올 내보내기 JSON 파일의 절대 경로입니다."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "사이클 피드백 제출",
+      "description": "사이클이 완료된 후 자동 감지된 프로그램을 확인하거나 수정합니다. 'entry_id'(고급) 또는 'device_id'(권장)를 제공하세요.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "WashData 장치(entry_id 대신 권장)"
+        },
+        "entry_id": {
+          "name": "항목 ID",
+          "description": "장치의 구성 항목 ID입니다(device_id 대체)."
+        },
+        "cycle_id": {
+          "name": "주기 ID",
+          "description": "피드백 알림/로그에 표시되는 주기 ID입니다."
+        },
+        "user_confirmed": {
+          "name": "감지된 프로그램 확인",
+          "description": "감지된 프로그램이 정확하면 true를 설정합니다."
+        },
+        "corrected_profile": {
+          "name": "수정된 프로필",
+          "description": "확인되지 않은 경우 올바른 프로필/프로그램 이름을 제공하세요."
+        },
+        "corrected_duration": {
+          "name": "수정된 기간(초)",
+          "description": "선택적 수정 기간(초)입니다."
+        },
+        "notes": {
+          "name": "메모",
+          "description": "이 주기에 대한 선택적 참고 사항입니다."
+        }
+      }
+    },
+    "record_start": {
+      "name": "기록 주기 시작",
+      "description": "수동으로 클린 사이클 기록을 시작합니다(일치하는 모든 로직을 우회합니다).",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "기록할 세탁기 장치입니다."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "기록주기 정지",
+      "description": "수동 녹화를 중지하세요.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "녹화를 중지하는 세탁기 장치입니다."
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "달리기"
+      },
+      "match_ambiguity": {
+        "name": "모호함 일치"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "상태"
+        "name": "상태",
+        "state": {
+          "off": "끄다",
+          "idle": "게으른",
+          "starting": "시작",
+          "running": "달리기",
+          "paused": "일시중지됨",
+          "ending": "종결",
+          "finished": "완성된",
+          "anti_wrinkle": "주름개선",
+          "interrupted": "중단된",
+          "force_stopped": "강제 정지됨",
+          "rinse": "헹구기",
+          "unknown": "알려지지 않은"
+        }
       },
       "washer_program": {
         "name": "프로그램"
@@ -595,16 +936,23 @@
         "name": "일치 신뢰도"
       },
       "top_candidates": {
-        "name": "상위 후보자"
+        "name": "상위 후보자",
+        "state": {
+          "none": "없음"
+        }
+      },
+      "current_phase": {
+        "name": "현재 단계"
       },
       "wash_phase": {
         "name": "단계"
       },
+      "profile_cycle_count": {
+        "name": "프로필 {profile_name} 개수",
+        "unit_of_measurement": "사이클"
+      },
       "suggestions": {
         "name": "제안된 설정"
-      },
-      "current_phase": {
-        "name": "현재 단계"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "자동 감지"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "강제 종료 주기"
       }
     }
   }

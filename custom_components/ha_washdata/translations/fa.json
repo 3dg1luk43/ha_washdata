@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "بازخوردهای آموزشی را مرور کنید",
           "settings": "تنظیمات",
+          "notifications": "اطلاعیه ها",
           "manage_cycles": "چرخه ها را مدیریت کنید",
           "manage_profiles": "مدیریت پروفایل ها",
-          "record_cycle": "چرخه ضبط (دستی)",
-          "diagnostics": "تشخیص و نگهداری",
           "manage_phase_catalog": "مدیریت کاتالوگ فاز",
-          "notifications": "اطلاعیه ها"
+          "record_cycle": "چرخه ضبط (دستی)",
+          "diagnostics": "تشخیص و نگهداری"
         }
       },
       "apply_suggestions": {
@@ -66,6 +66,10 @@
           "min_power": "حداقل توان (W)",
           "off_delay": "تأخیر (های) پایان چرخه",
           "notify_service": "سرویس اعلان (به عنوان مثال notify.mobile_app)",
+          "notify_actions": "اقدامات اطلاع رسانی",
+          "notify_people": "تأخیر تحویل تا زمانی که این افراد در خانه هستند",
+          "notify_only_when_home": "تأخیر اعلان‌ها تا زمانی که فرد منتخب در خانه باشد",
+          "notify_fire_events": "رویدادهای اتوماسیون آتش سوزی",
           "notify_events": "رویدادهایی برای اطلاع رسانی",
           "notify_before_end_minutes": "اعلان پیش از اتمام (دقیقه قبل از پایان)",
           "notify_title": "عنوان اطلاعیه",
@@ -73,30 +77,64 @@
           "notify_start_message": "فرمت پیام را شروع کنید",
           "notify_finish_message": "فرمت پیام پایان",
           "notify_pre_complete_message": "قالب پیام قبل از تکمیل",
-          "show_advanced": "ویرایش تنظیمات پیشرفته (مرحله بعد)",
-          "notify_actions": "اقدامات اطلاع رسانی",
-          "notify_people": "افراد برای اطلاع رسانی",
-          "notify_only_when_home": "فقط هنگام خانه اطلاع دهید",
-          "notify_fire_events": "رویدادهای اتوماسیون آتش سوزی"
+          "show_advanced": "ویرایش تنظیمات پیشرفته (مرحله بعد)"
         },
         "data_description": {
-          "apply_suggestions": "این کادر را علامت بزنید تا مقادیر پیشنهاد شده توسط الگوریتم یادگیری را در فرم کپی کنید. قبل از ذخیره بررسی کنید.\n\nپیشنهادی (از یادگیری):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- خودکار_برچسب_اعتماد: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "این کادر را علامت بزنید تا مقادیر پیشنهاد شده توسط الگوریتم یادگیری را در فرم کپی کنید. قبل از ذخیره بررسی کنید.\n\nپیشنهادی (از یادگیری):\n- حداقل_قدرت: {suggested_min_power} وات\n- off_delay: {suggested_off_delay} ثانیه\n- watchdog_interval: {suggested_watchdog_interval} ثانیه\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} ثانیه\n- خودکار_برچسب_اعتماد: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "نوع دستگاه (ماشین لباسشویی، خشک کن، ماشین ظرفشویی، قهوه ساز، EV) را انتخاب کنید. این تگ با هر چرخه برای سازماندهی بهتر ذخیره می شود.",
           "power_sensor": "موجودیت حسگر که توان آنی را گزارش می‌کند (بر حسب وات). می‌توانید هرزمان خواستید بدون از دست دادن داده‌های تاریخی این مورد را تغییر دهید—در صورت تعویض دوشاخه هوشمند مفید است.",
           "min_power": "خوانش های توان بالاتر از این آستانه (بر حسب وات) نشان می دهد که دستگاه در حال کار است. برای اکثر دستگاه ها با 2W شروع کنید.",
           "off_delay": "چند ثانیه توان هموارسازی شده باید زیر آستانه توقف باقی بماند تا علامت اتمام باشد. پیش فرض: 120 ثانیه",
           "notify_service": "برای استفاده از سرویس اطلاع رسانی Home Assistant (اختیاری).",
+          "notify_actions": "دنباله اقدام اختیاری Home Assistant برای اجرای اعلان ها (اسکریپت ها، اطلاع رسانی، TTS و غیره). در صورت تنظیم، اقدامات قبل از سرویس اطلاع رسانی مجدد اجرا می شود.",
+          "notify_people": "نهادهای افراد برای دروازه حضور استفاده می شود. در صورت فعال بودن، تحویل اعلان تا زمانی که حداقل یک نفر انتخاب شده در خانه باشد به تعویق می افتد.",
+          "notify_only_when_home": "در صورت فعال بودن، اعلان ها را تا زمانی که حداقل یک نفر انتخاب شده در خانه باشد به تاخیر بیاندازید.",
+          "notify_fire_events": "در صورت فعال بودن، رویدادهای Home Assistant را برای شروع و پایان چرخه (ha_washdata_cycle_started و ha_washdata_cycle_ended) برای رانندگی خودکار فعال کنید.",
           "notify_events": "برای کدام رویدادها اعلان ارسال شود.",
           "notify_before_end_minutes": "چند دقیقه قبل از پایان تخمینی چرخه برای راه اندازی یک اعلان. برای غیرفعال کردن، روی 0 تنظیم کنید. پیش فرض: 0.",
-          "notify_title": "عنوان سفارشی برای اعلان ها. جانشین {device} را پشتیبانی می کند.",
+          "notify_title": "عنوان سفارشی برای اعلان ها. از {device} متغیری پشتیبانی می کند.",
           "notify_icon": "نماد مورد استفاده برای اعلان‌ها (مانند mdi: ماشین لباسشویی). برای استفاده از پیش فرض خالی بگذارید.",
-          "notify_start_message": "هنگامی که یک چرخه شروع می شود، پیام ارسال می شود. جانشین {device} را پشتیبانی می کند.",
+          "notify_start_message": "هنگام شروع یک چرخه پیام ارسال می شود. از {device} متغیری پشتیبانی می کند.",
           "notify_finish_message": "پس از پایان یک چرخه، پیام ارسال می شود. از متغیرهای {device}، {duration}، {program} پشتیبانی می کند.",
-          "notify_pre_complete_message": "پیام قبل از تکمیل ارسال شد. از {device}، {minutes} متغیرهایی پشتیبانی می کند.",
+          "notify_pre_complete_message": "پیام قبل از تکمیل ارسال شد. از {device}، {minutes} متغیرهایی پشتیبانی می کند."
+        }
+      },
+      "notifications": {
+        "title": "اطلاعیه ها",
+        "description": "کانال‌های اعلان، الگوها و به‌روزرسانی‌های پیشرفت زنده اختیاری تلفن همراه را پیکربندی کنید.",
+        "data": {
+          "notify_service": "سرویس اعلان (به عنوان مثال notify.mobile_app)",
+          "notify_actions": "اقدامات اطلاع رسانی",
+          "notify_people": "تأخیر تحویل تا زمانی که این افراد در خانه هستند",
+          "notify_only_when_home": "تأخیر اعلان‌ها تا زمانی که فرد منتخب در خانه باشد",
+          "notify_fire_events": "رویدادهای اتوماسیون آتش سوزی",
+          "notify_events": "رویدادهایی برای اطلاع رسانی",
+          "notify_before_end_minutes": "اعلان پیش از اتمام (دقیقه قبل از پایان)",
+          "notify_live_enabled": "اعلان‌های پیشرفت زنده را فعال کنید",
+          "notify_live_interval_seconds": "فاصله به روز رسانی زنده (ثانیه)",
+          "notify_live_overrun_percent": "کمک هزینه به‌روزرسانی زنده (%)",
+          "notify_title": "عنوان اطلاعیه",
+          "notify_icon": "نماد اعلان",
+          "notify_start_message": "فرمت پیام را شروع کنید",
+          "notify_finish_message": "فرمت پیام پایان",
+          "notify_pre_complete_message": "قالب پیام قبل از تکمیل"
+        },
+        "data_description": {
+          "notify_service": "برای استفاده از سرویس اطلاع رسانی Home Assistant (اختیاری).",
           "notify_actions": "دنباله اقدام اختیاری Home Assistant برای اجرای اعلان ها (اسکریپت ها، اطلاع رسانی، TTS و غیره). در صورت تنظیم، اقدامات قبل از سرویس اطلاع رسانی مجدد اجرا می شود.",
-          "notify_people": "نهادهای افراد برای استفاده برای دروازه خانه/خارج از خانه. وقتی فعال باشد، اعلان‌ها تا زمانی که شخصی در خانه باشد به تعویق می‌افتد.",
+          "notify_people": "نهادهای افراد برای دروازه حضور استفاده می شود. در صورت فعال بودن، تحویل اعلان تا زمانی که حداقل یک نفر انتخاب شده در خانه باشد به تعویق می افتد.",
           "notify_only_when_home": "در صورت فعال بودن، اعلان ها را تا زمانی که حداقل یک نفر انتخاب شده در خانه باشد به تاخیر بیاندازید.",
-          "notify_fire_events": "در صورت فعال بودن، رویدادهای Home Assistant را برای شروع و پایان چرخه (ha_washdata_cycle_started/ended) فعال کنید تا اتوماسیون‌ها رانندگی کنید."
+          "notify_fire_events": "در صورت فعال بودن، رویدادهای Home Assistant را برای شروع و پایان چرخه (ha_washdata_cycle_started و ha_washdata_cycle_ended) برای رانندگی خودکار فعال کنید.",
+          "notify_events": "برای کدام رویدادها اعلان ارسال شود.",
+          "notify_before_end_minutes": "چند دقیقه قبل از پایان تخمینی چرخه برای راه اندازی یک اعلان. برای غیرفعال کردن، روی 0 تنظیم کنید. پیش فرض: 0.",
+          "notify_live_enabled": "به‌روزرسانی‌های پیشرفت زنده در محل را برای اعلان‌های برنامه تلفن همراه فعال کنید.",
+          "notify_live_interval_seconds": "هر چند وقت یک‌بار به‌روزرسانی‌های پیشرفت هنگام اجرا ارسال می‌شوند. مقادیر پایین تر پاسخگوتر هستند اما اعلان های بیشتری را مصرف می کنند.",
+          "notify_live_overrun_percent": "حاشیه ایمنی بالاتر از تعداد به‌روزرسانی‌های تخمینی برای چرخه‌های طولانی/بیش از حد مجاز است (به عنوان مثال 20٪ به 1.2 برابر به‌روزرسانی‌های تخمینی اجازه می‌دهد).",
+          "notify_title": "عنوان سفارشی برای اعلان ها. از {device} متغیری پشتیبانی می کند.",
+          "notify_icon": "نماد مورد استفاده برای اعلان‌ها (مانند mdi: ماشین لباسشویی). برای استفاده از پیش فرض خالی بگذارید.",
+          "notify_start_message": "هنگام شروع یک چرخه پیام ارسال می شود. از {device} متغیری پشتیبانی می کند.",
+          "notify_finish_message": "پس از پایان یک چرخه، پیام ارسال می شود. از متغیرهای {device}، {duration}، {program} پشتیبانی می کند.",
+          "notify_pre_complete_message": "پیام قبل از تکمیل ارسال شد. از {device}، {minutes} متغیرهایی پشتیبانی می کند."
         }
       },
       "advanced_settings": {
@@ -149,12 +187,12 @@
           "external_end_trigger_inverted": "معکوس کردن منطق ماشه (تریگر خاموش است)"
         },
         "data_description": {
-          "apply_suggestions": "این کادر را علامت بزنید تا مقادیر پیشنهاد شده توسط الگوریتم یادگیری را در فرم کپی کنید. قبل از ذخیره بررسی کنید.\n\nپیشنهادی (از یادگیری):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- خودکار_برچسب_اعتماد: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "این کادر را علامت بزنید تا مقادیر پیشنهاد شده توسط الگوریتم یادگیری را در فرم کپی کنید. قبل از ذخیره بررسی کنید.\n\nپیشنهادی (از یادگیری):\n- حداقل_قدرت: {suggested_min_power} وات\n- off_delay: {suggested_off_delay} ثانیه\n- watchdog_interval: {suggested_watchdog_interval} ثانیه\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} ثانیه\n- خودکار_برچسب_اعتماد: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "برای شروع یک چرخه، توان باید بالاتر از این آستانه باشد. بالاتر از قدرت آماده به کار خود تنظیم کنید. پیش فرض: min_power + 1 W.",
           "stop_threshold_w": "برای پایان یک چرخه، توان باید زیر این آستانه باشد. برای جلوگیری از سر و صدایی که باعث ایجاد انتهای کاذب می شود، کمی بالای صفر تنظیم کنید. پیش فرض: 0.6 * min_power.",
           "min_off_gap": "اگر یک چرخه در این چند ثانیه از پایان چرخه قبلی شروع شود، آنها در یک چرخه واحد ادغام می شوند.",
           "start_duration_threshold": "نوک کوتاه‌تر از این مدت (ثانیه) را نادیده بگیرید. قبل از شروع چرخه واقعی، نوک های بوت را فیلتر می کند (مثلاً 60 وات برای 2 ثانیه). پیش فرض: 5 ثانیه",
-          "progress_reset_delay": "پس از اتمام یک چرخه (100%)، قبل از بازنشانی پیشرفت به 0٪، این چند ثانیه در حالت بیکار صبر کنید. پیش‌فرض: 300 ثانیه",
+          "progress_reset_delay": "پس از تکمیل یک چرخه (100%)، قبل از تنظیم مجدد پیشرفت به 0٪، این چند ثانیه در حالت بیکار صبر کنید. پیش فرض: 300s.",
           "no_update_active_timeout": "برای حسگرهای انتشار در هنگام تغییر: فقط در صورتی که به‌روزرسانی برای این چند ثانیه صورت نگیرد، چرخه ACTIVE را به اجبار پایان دهید. تکمیل کم مصرف همچنان از تاخیر خاموش استفاده می کند.",
           "sampling_interval": "حداقل فاصله نمونه برداری بر حسب ثانیه به‌روزرسانی‌های سریع‌تر از این نرخ نادیده گرفته می‌شوند. پیش فرض: 2.0 ثانیه",
           "auto_label_confidence": "چرخه‌ها را به‌طور خودکار پس از تکمیل (0.0-1.0) با این اطمینان یا بالاتر از آن برچسب‌گذاری کنید.",
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "تشخیص و نگهداری",
-        "description": "اقدامات تعمیر و نگهداری مانند ادغام چرخه های تکه تکه یا انتقال داده های ذخیره شده را اجرا کنید.\n\n{storage_stats}"
+        "description": "اقدامات تعمیر و نگهداری مانند ادغام چرخه های تکه تکه یا انتقال داده های ذخیره شده را اجرا کنید.\n\n**استفاده از فضای ذخیره سازی**\n\n- حجم فایل: {file_size_kb} کیلوبایت\n- چرخه ها: {cycle_count}\n- نمایه ها: {profile_count}\n- ردیابی اشکال: {debug_count}"
       },
       "clear_debug_data": {
         "title": "پاک کردن دیباگ داده ها",
@@ -210,11 +248,109 @@
           "action": "اقدام"
         }
       },
+      "manage_cycles_empty": {
+        "title": "چرخه ها را مدیریت کنید",
+        "description": "هنوز هیچ چرخه ای ثبت نشده است.",
+        "data": {
+          "action": "اقدام"
+        }
+      },
       "manage_profiles": {
         "title": "مدیریت پروفایل ها",
         "description": "خلاصه نمایه:\n{profile_summary}",
         "data": {
           "action": "اقدام"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "مدیریت پروفایل ها",
+        "description": "هنوز هیچ پروفایلی ایجاد نشده است.",
+        "data": {
+          "action": "اقدام"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "مدیریت کاتالوگ فاز",
+        "description": "کاتالوگ فاز (پیش‌فرض این دستگاه + مراحل سفارشی):\n{phase_summary}",
+        "data": {
+          "action": "اقدام"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "ایجاد فاز سفارشی",
+        "description": "یک نام فاز و شرح سفارشی ایجاد کنید و نوع دستگاه را انتخاب کنید.",
+        "data": {
+          "target_device_type": "نوع دستگاه مورد نظر",
+          "phase_name": "نام فاز",
+          "phase_description": "شرح فاز"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "ویرایش فاز سفارشی",
+        "description": "یک فاز سفارشی را برای ویرایش انتخاب کنید.",
+        "data": {
+          "phase_name": "فاز سفارشی"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "ویرایش فاز سفارشی",
+        "description": "مرحله ویرایش: {phase_name}",
+        "data": {
+          "phase_name": "نام فاز",
+          "phase_description": "شرح فاز"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "حذف فاز سفارشی",
+        "description": "یک فاز سفارشی را برای حذف انتخاب کنید. هر محدوده اختصاص داده شده با استفاده از این فاز حذف خواهد شد.",
+        "data": {
+          "phase_name": "فاز سفارشی"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "محدوده های فاز را تعیین کنید",
+        "description": "پیش نمایش فاز برای نمایه: **{profile_name}**\n\n{timeline_svg}\n\n**محدوده های فعلی:**\n{current_ranges}\n\nاز اقدامات زیر برای افزودن، ویرایش، حذف یا ذخیره محدوده استفاده کنید.",
+        "data": {
+          "action": "اقدام"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "محدوده فاز را اضافه کنید",
+        "description": "یک محدوده فاز را به پیش نویس فعلی اضافه کنید.",
+        "data": {
+          "phase_name": "فاز",
+          "start_min": "دقیقه شروع",
+          "end_min": "دقیقه پایانی"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "ویرایش محدوده فاز",
+        "description": "محدوده ای را برای ویرایش انتخاب کنید.",
+        "data": {
+          "range_index": "محدوده فاز"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "ویرایش محدوده فاز",
+        "description": "محدوده فاز انتخابی را به روز کنید.",
+        "data": {
+          "phase_name": "فاز",
+          "start_min": "دقیقه شروع",
+          "end_min": "دقیقه پایانی"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "حذف محدوده فاز",
+        "description": "محدوده ای را برای حذف از پیش نویس انتخاب کنید.",
+        "data": {
+          "range_index": "محدوده فاز"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "محدوده های فاز را تعیین کنید",
+        "description": "یک نمایه را برای پیکربندی محدوده فاز انتخاب کنید.",
+        "data": {
+          "profile": "نمایه"
         }
       },
       "profile_stats": {
@@ -367,8 +503,8 @@
         "title": "صادرات/وارد کردن JSON",
         "description": "چرخه‌ها، نمایه‌ها، و تنظیمات و کپی/پیست کردن برای این دستگاه. زیر را صادر کنید یا برای وارد کردن JSON جای‌گذاری کنید.",
         "data": {
-          "json_payload": "پیکربندی کامل JSON",
-          "mode": "اقدام"
+          "mode": "اقدام",
+          "json_payload": "پیکربندی کامل JSON"
         },
         "data_description": {
           "mode": "برای کپی کردن داده‌ها و تنظیمات فعلی، صادرات را انتخاب کنید، یا برای جای‌گذاری داده‌های صادر شده از دستگاه WashData دیگری، Import را انتخاب کنید.",
@@ -377,7 +513,7 @@
       },
       "record_cycle": {
         "title": "چرخه ضبط",
-        "description": "یک چرخه را به صورت دستی ضبط کنید تا یک نمایه تمیز بدون تداخل ایجاد کنید.\n\nوضعیت: **{status}**\nمدت زمان: {duration}s\nنمونه ها: {samples}",
+        "description": "یک چرخه را به صورت دستی ضبط کنید تا یک نمایه تمیز بدون تداخل ایجاد کنید.\n\nوضعیت: **{status}**\nمدت زمان: {duration} ثانیه\nنمونه ها: {samples}",
         "data": {
           "action": "اقدام"
         }
@@ -405,133 +541,11 @@
       },
       "resolve_feedback": {
         "title": "بازخورد را حل کنید",
-        "description": "**برنامه شناسایی شده**: {profile}\n**اطمینان**: {confidence}%\n**تخمینی**: {est}m، **واقعی**: {act}m",
+        "description": "{comparison_img}{candidates_table}\n**نمایه شناسایی شده**: {detected_profile} ({confidence_pct}%)\n**مدت زمان تخمینی**: {est_duration_min} دقیقه\n**مدت زمان واقعی **: {act_duration_min} دقیقه\n\n__یک اقدام زیر را انتخاب کنید:__",
         "data": {
+          "action": "دوست دارید چه کار کنید؟",
           "corrected_profile": "برنامه صحیح (در صورت تصحیح)",
-          "corrected_duration": "مدت زمان صحیح بر حسب دقیقه (در صورت تصحیح)",
-          "action": "دوست دارید چه کار کنید؟"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "مدیریت کاتالوگ فاز",
-        "description": "فازهای فعلی برای این نوع دستگاه:\n{phase_summary}",
-        "data": {
-          "action": "اقدام"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "ایجاد فاز سفارشی",
-        "description": "یک نام فاز و توضیحات سفارشی برای این نوع دستگاه ایجاد کنید.",
-        "data": {
-          "phase_name": "نام فاز",
-          "phase_description": "شرح فاز",
-          "target_device_type": "نوع دستگاه مورد نظر"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "ویرایش فاز سفارشی",
-        "description": "یک فاز سفارشی را برای ویرایش انتخاب کنید.",
-        "data": {
-          "phase_name": "فاز سفارشی"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "ویرایش فاز سفارشی",
-        "description": "مرحله ویرایش: {phase_name}",
-        "data": {
-          "phase_name": "نام فاز",
-          "phase_description": "شرح فاز"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "حذف فاز سفارشی",
-        "description": "یک فاز سفارشی را برای حذف انتخاب کنید. هر محدوده اختصاص داده شده با استفاده از این فاز حذف خواهد شد.",
-        "data": {
-          "phase_name": "فاز سفارشی"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "محدوده های فاز را تعیین کنید",
-        "description": "نمایه: **{profile_name}**\nحالت: **{assign_mode}**\nراهنمایی چرخه: {cycle_hint}\n\nمحدوده های فعلی:\n{current_ranges}\n\nبرچسب های فاز برای نمایش و سازماندهی هستند. تشخیص از الگوهای قدرت استفاده می کند، نه نام فاز.",
-        "data": {
-          "action": "اقدام"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "محدوده های فاز را تعیین کنید",
-        "description": "یک نمایه را برای پیکربندی محدوده فاز انتخاب کنید.",
-        "data": {
-          "profile": "نمایه"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "محدوده فاز را اضافه کنید",
-        "description": "یک محدوده فاز را به پیش نویس فعلی اضافه کنید.",
-        "data": {
-          "phase_name": "فاز",
-          "start_min": "دقیقه شروع",
-          "end_min": "دقیقه پایانی"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "ویرایش محدوده فاز",
-        "description": "محدوده ای را برای ویرایش انتخاب کنید.",
-        "data": {
-          "range_index": "محدوده فاز"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "ویرایش محدوده فاز",
-        "description": "محدوده فاز انتخابی را به روز کنید.",
-        "data": {
-          "phase_name": "فاز",
-          "start_min": "دقیقه شروع",
-          "end_min": "دقیقه پایانی"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "حذف محدوده فاز",
-        "description": "محدوده ای را برای حذف از پیش نویس انتخاب کنید.",
-        "data": {
-          "range_index": "محدوده فاز"
-        }
-      },
-      "notifications": {
-        "title": "اطلاعیه ها",
-        "description": "کانال‌های اعلان، الگوها و به‌روزرسانی‌های پیشرفت زنده اختیاری تلفن همراه را پیکربندی کنید.",
-        "data": {
-          "notify_service": "سرویس اعلان (به عنوان مثال notify.mobile_app)",
-          "notify_actions": "اقدامات اطلاع رسانی",
-          "notify_people": "افراد برای اطلاع رسانی",
-          "notify_only_when_home": "فقط هنگام خانه اطلاع دهید",
-          "notify_fire_events": "رویدادهای اتوماسیون آتش سوزی",
-          "notify_events": "رویدادهایی برای اطلاع رسانی",
-          "notify_before_end_minutes": "اعلان پیش از اتمام (دقیقه قبل از پایان)",
-          "notify_live_enabled": "اعلان‌های پیشرفت زنده را فعال کنید",
-          "notify_live_interval_seconds": "فاصله به روز رسانی زنده (ثانیه)",
-          "notify_live_overrun_percent": "کمک هزینه به‌روزرسانی زنده (%)",
-          "notify_title": "عنوان اطلاعیه",
-          "notify_icon": "نماد اعلان",
-          "notify_start_message": "فرمت پیام را شروع کنید",
-          "notify_finish_message": "فرمت پیام پایان",
-          "notify_pre_complete_message": "قالب پیام قبل از تکمیل"
-        },
-        "data_description": {
-          "notify_service": "برای استفاده از سرویس اطلاع رسانی Home Assistant (اختیاری).",
-          "notify_actions": "دنباله اقدام اختیاری Home Assistant برای اجرای اعلان ها (اسکریپت ها، اطلاع رسانی، TTS و غیره). در صورت تنظیم، اقدامات قبل از سرویس اطلاع رسانی مجدد اجرا می شود.",
-          "notify_people": "نهادهای افراد برای استفاده برای دروازه خانه/خارج از خانه. وقتی فعال باشد، اعلان‌ها تا زمانی که شخصی در خانه باشد به تعویق می‌افتد.",
-          "notify_only_when_home": "در صورت فعال بودن، اعلان ها را تا زمانی که حداقل یک نفر انتخاب شده در خانه باشد به تاخیر بیاندازید.",
-          "notify_fire_events": "در صورت فعال بودن، رویدادهای Home Assistant را برای شروع و پایان چرخه (ha_washdata_cycle_started/ended) فعال کنید تا اتوماسیون رانندگی کنید.",
-          "notify_events": "برای کدام رویدادها اعلان ارسال شود.",
-          "notify_before_end_minutes": "چند دقیقه قبل از پایان تخمینی چرخه برای راه اندازی یک اعلان. برای غیرفعال کردن، روی 0 تنظیم کنید. پیش فرض: 0.",
-          "notify_live_enabled": "به‌روزرسانی‌های پیشرفت زنده در محل را برای اعلان‌های برنامه تلفن همراه فعال کنید.",
-          "notify_live_interval_seconds": "هر چند وقت یک‌بار به‌روزرسانی‌های پیشرفت هنگام اجرا ارسال می‌شوند. مقادیر پایین تر پاسخگوتر هستند اما اعلان های بیشتری را مصرف می کنند.",
-          "notify_live_overrun_percent": "حاشیه ایمنی بالاتر از تعداد به‌روزرسانی‌های تخمینی برای چرخه‌های طولانی/بیش از حد مجاز است (به عنوان مثال 20٪ به 1.2 برابر به‌روزرسانی‌های تخمینی اجازه می‌دهد).",
-          "notify_title": "عنوان سفارشی برای اعلان ها. جانشین {device} را پشتیبانی می کند.",
-          "notify_icon": "نماد مورد استفاده برای اعلان‌ها (مانند mdi: ماشین لباسشویی). برای استفاده از پیش فرض خالی بگذارید.",
-          "notify_start_message": "هنگام شروع یک چرخه پیام ارسال می شود. جانشین {device} را پشتیبانی می کند.",
-          "notify_finish_message": "پس از پایان یک چرخه، پیام ارسال می شود. از متغیرهای {device}، {duration}، {program} پشتیبانی می کند.",
-          "notify_pre_complete_message": "پیام قبل از تکمیل ارسال شد. از {device}، {minutes} متغیرهایی پشتیبانی می کند."
+          "corrected_duration": "مدت زمان صحیح بر حسب دقیقه (در صورت تصحیح)"
         }
       }
     },
@@ -540,8 +554,6 @@
       "profile_exists": "نمایه ای با این نام از قبل وجود دارد",
       "rename_failed": "تغییر نام نمایه انجام نشد. ممکن است نمایه وجود نداشته باشد یا نام جدیدی از قبل گرفته شده باشد.",
       "assignment_failed": "تخصیص نمایه به چرخه انجام نشد",
-      "feedback_notification_title": "WashData: چرخه تأیید ({device})",
-      "feedback_notification_message": "**دستگاه**: {device}\n**برنامه**: {program} ({confidence}% اطمینان)\n**زمان**: {time}\n\nWashData برای تأیید این چرخه شناسایی شده به کمک شما نیاز دارد.\n\nلطفاً برای تأیید یا تصحیح این نتیجه به **تنظیمات > دستگاه‌ها و خدمات > WashData > پیکربندی > بازخوردهای یادگیری** بروید.",
       "duplicate_phase": "فازی با این نام از قبل وجود دارد.",
       "phase_not_found": "فاز انتخابی یافت نشد.",
       "invalid_phase_name": "نام فاز نمی تواند خالی باشد.",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "محدوده فازها همپوشانی دارند. محدوده ها را تنظیم کنید و دوباره امتحان کنید.",
       "incomplete_phase_row": "هر ردیف فاز باید شامل یک فاز به اضافه مقادیر شروع/پایان کامل برای حالت انتخاب شده باشد.",
       "timestamp_mode_cycle_required": "لطفاً هنگام استفاده از حالت مهر زمانی، یک چرخه منبع را انتخاب کنید.",
-      "no_phase_ranges": "هنوز هیچ محدوده فازی برای آن اقدام موجود نیست."
+      "no_phase_ranges": "هنوز هیچ محدوده فازی برای آن اقدام موجود نیست.",
+      "feedback_notification_title": "WashData: چرخه تأیید ({device})",
+      "feedback_notification_message": "**دستگاه**: {device}\n**برنامه**: {program} ({confidence}٪ اطمینان)\n**زمان**: {time}\n\nWashData برای تأیید این چرخه شناسایی شده به کمک شما نیاز دارد.\n\nلطفاً برای تأیید یا تصحیح این نتیجه به **تنظیمات > دستگاه‌ها و خدمات > WashData > پیکربندی > بازخوردهای یادگیری** بروید."
     },
     "abort": {
       "no_cycles_found": "هیچ چرخه ای یافت نشد",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "همه چرخه ها قبلاً برچسب گذاری شده اند",
       "no_suggestions": "هنوز مقادیر پیشنهادی موجود نیست. چند چرخه را اجرا کنید و دوباره امتحان کنید.",
       "no_predictions": "بدون پیش بینی",
+      "no_custom_phases": "هیچ فاز سفارشی یافت نشد.",
       "reprocess_success": "{count} چرخه با موفقیت دوباره پردازش شد.",
-      "debug_data_cleared": "داده‌های اشکال‌زدایی از {count} چرخه با موفقیت پاک شد.",
-      "no_custom_phases": "هیچ فاز سفارشی برای این نوع دستگاه یافت نشد."
+      "debug_data_cleared": "داده‌های اشکال‌زدایی از چرخه‌های {count} با موفقیت پاک شد."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "شروع چرخه",
+        "cycle_finish": "چرخه پایان",
+        "cycle_live": "پیشرفت زنده"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(بدون برچسب)",
+        "create_new_profile": "ایجاد نمایه جدید",
+        "remove_label": "حذف برچسب",
+        "no_reference_cycle": "(بدون چرخه مرجع)",
+        "all_device_types": "همه انواع دستگاه",
+        "current_suffix": "(جاری)",
+        "editor_select_info": "1 چرخه را برای تقسیم یا 2+ چرخه را برای ادغام انتخاب کنید.",
+        "no_cycles_recorded": "هنوز هیچ چرخه ای ثبت نشده است.",
+        "profile_summary_line": "- **{name}**: {count} چرخه، میانگین {avg} متر",
+        "no_profiles_created": "هنوز هیچ پروفایلی ایجاد نشده است.",
+        "phase_preview": "پیش نمایش فاز",
+        "phase_preview_no_curve": "منحنی نمایه متوسط ​​هنوز در دسترس نیست. چرخه های بیشتری را برای این نمایه اجرا کنید/برچسب بزنید.",
+        "average_power_curve": "منحنی توان متوسط",
+        "unit_min": "دقیقه",
+        "profile_option_fmt": "{name} ({count} چرخه، میانگین ~{duration} متر)",
+        "profile_option_short_fmt": "{name} ({count} چرخه، ~{duration} متر)",
+        "deleted_cycles_from_profile": "{count} چرخه از {profile} حذف شد.",
+        "not_enough_data_graph": "داده های کافی برای تولید نمودار وجود ندارد.",
+        "no_profiles_found": "هیچ پروفایلی پیدا نشد",
+        "cycle_info_fmt": "چرخه: {start}، {duration}m، فعلی: {label}",
+        "top_candidates_header": "### نامزدهای برتر",
+        "tbl_profile": "نمایه",
+        "tbl_confidence": "اعتماد به نفس",
+        "tbl_correlation": "همبستگی",
+        "tbl_duration_match": "مسابقه مدت",
+        "detected_profile": "نمایه شناسایی شده",
+        "estimated_duration": "مدت زمان تخمینی",
+        "actual_duration": "مدت زمان واقعی",
+        "choose_action": "__یک اقدام زیر را انتخاب کنید:__",
+        "tbl_count": "بشمار",
+        "tbl_avg": "میانگین",
+        "tbl_min": "حداقل",
+        "tbl_max": "حداکثر",
+        "tbl_energy_avg": "انرژی (میانگین)",
+        "tbl_energy_total": "انرژی (کل)",
+        "tbl_consistency": "تشکیل شود.",
+        "tbl_last_run": "آخرین اجرا",
+        "graph_legend_title": "افسانه نمودار",
+        "graph_legend_body": "نوار آبی نشان دهنده حداقل و حداکثر بازه مصرف توان مشاهده شده است. خط منحنی توان متوسط ​​را نشان می دهد.",
+        "recording_preview": "پیش نمایش ضبط",
+        "trim_start": "برش شروع",
+        "trim_end": "پایان را برش دهید",
+        "split_preview_title": "پیش نمایش تقسیم",
+        "split_preview_found_fmt": "{count} بخش پیدا شد.",
+        "split_preview_confirm_fmt": "روی تأیید کلیک کنید تا این چرخه به {count} چرخه جداگانه تقسیم شود.",
+        "merge_preview_title": "پیش نمایش ادغام",
+        "merge_preview_joining_fmt": "پیوستن به {count} چرخه. شکاف ها با قرائت های 0W پر می شوند.",
+        "profile_comparison": "مقایسه پروفایل",
+        "actual_cycle_label": "این چرخه (واقعی)",
+        "storage_usage_header": "استفاده از فضای ذخیره سازی",
+        "storage_file_size": "اندازه فایل",
+        "storage_cycles": "چرخه ها",
+        "storage_profiles": "پروفایل ها",
+        "storage_debug_traces": "ردیابی اشکال زدایی",
+        "overview_suffix": "نمای کلی",
+        "phase_preview_for_profile": "پیش نمایش فاز برای نمایه",
+        "current_ranges_header": "محدوده های فعلی",
+        "assign_phases_help": "از اقدامات زیر برای افزودن، ویرایش، حذف یا ذخیره محدوده استفاده کنید.",
+        "profile_summary_header": "خلاصه نمایه",
+        "recent_cycles_header": "چرخه های اخیر"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "تقسیم یک چرخه (یافتن شکاف ها)",
+        "merge": "چرخه های ادغام (پیوستن قطعات)",
+        "delete": "حذف چرخه(های)"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "نگهداری: پردازش مجدد و بهینه سازی داده ها",
+        "clear_debug_data": "پاک کردن داده های اشکال زدایی (آزاد کردن فضا)",
+        "wipe_history": "پاک کردن تمام داده‌های این دستگاه (غیرقابل برگشت)",
+        "export_import": "صادرات/وارد کردن JSON با تنظیمات (کپی/پیست)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "صادرات همه داده ها",
+        "import": "وارد کردن/ادغام داده ها"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "برچسب‌گذاری خودکار چرخه‌های قدیمی",
+        "select_cycle_to_label": "چرخه خاص برچسب",
+        "select_cycle_to_label_multi": "چرخه های چندگانه را برچسب بزنید",
+        "select_cycle_to_delete": "چرخه را حذف کنید",
+        "interactive_editor": "ادغام / تقسیم ویرایشگر تعاملی"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "ایجاد نمایه جدید",
+        "edit_profile": "ویرایش/تغییر نام نمایه",
+        "delete_profile": "حذف نمایه",
+        "profile_stats": "آمار پروفایل",
+        "cleanup_profile": "پاک کردن تاریخچه - نمودار و حذف",
+        "assign_phases": "محدوده های فاز را تعیین کنید"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "فاز جدید ایجاد کنید",
+        "edit_custom_phase": "فاز ویرایش",
+        "delete_custom_phase": "حذف فاز"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "محدوده فاز را اضافه کنید",
+        "edit_range": "ویرایش محدوده فاز",
+        "delete_range": "حذف محدوده فاز",
+        "clear_ranges": "پاک کردن همه محدوده ها",
+        "save_ranges": "ذخیره و برگردانید"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "وضعیت تازه کردن",
+        "stop_recording": "توقف ضبط (ذخیره و پردازش)",
+        "start_recording": "شروع ضبط جدید",
+        "process_recording": "پردازش آخرین ضبط (برش و ذخیره)",
+        "discard_recording": "حذف آخرین ضبط"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "ایجاد نمایه جدید",
+        "existing_profile": "به نمایه موجود اضافه کنید",
+        "discard": "حذف ضبط"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "تأیید - تشخیص صحیح",
+        "correct": "درست - برنامه/مدت را انتخاب کنید",
+        "ignore": "نادیده گرفتن - چرخه مثبت کاذب/نویز",
+        "delete": "حذف - حذف از تاریخچه"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "چرخه برچسب",
+      "description": "یک نمایه موجود را به چرخه گذشته اختصاص دهید یا برچسب را بردارید.",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه ماشین لباسشویی برای برچسب زدن."
+        },
+        "cycle_id": {
+          "name": "شناسه چرخه",
+          "description": "شناسه چرخه برای برچسب زدن."
+        },
+        "profile_name": {
+          "name": "نام نمایه",
+          "description": "نام یک نمایه موجود (ایجاد نمایه ها در منوی Manage Profiles). برای حذف برچسب خالی بگذارید."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "ایجاد نمایه",
+      "description": "یک نمایه جدید (به تنهایی یا بر اساس یک چرخه مرجع) ایجاد کنید.",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه ماشین لباسشویی."
+        },
+        "profile_name": {
+          "name": "نام نمایه",
+          "description": "نام نمایه جدید (مثلاً \"Heavy Duty\"، \"Delicates\")."
+        },
+        "reference_cycle_id": {
+          "name": "شناسه چرخه مرجع",
+          "description": "شناسه چرخه اختیاری برای استناد به این نمایه."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "حذف نمایه",
+      "description": "یک نمایه را حذف کنید و به صورت اختیاری چرخه ها را با استفاده از آن لغو برچسب کنید.",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه ماشین لباسشویی."
+        },
+        "profile_name": {
+          "name": "نام نمایه",
+          "description": "نمایه برای حذف"
+        },
+        "unlabel_cycles": {
+          "name": "چرخه ها را بدون برچسب",
+          "description": "با استفاده از این نمایه، برچسب نمایه را از چرخه‌ها حذف کنید."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "برچسب‌گذاری خودکار چرخه‌های قدیمی",
+      "description": "با استفاده از تطبیق نمایه، چرخه‌های بدون برچسب را به‌عنوان ماسبق برچسب‌گذاری کنید.",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه ماشین لباسشویی."
+        },
+        "confidence_threshold": {
+          "name": "آستانه اعتماد",
+          "description": "حداقل اطمینان مطابقت (0.50-0.95) برای اعمال برچسب ها."
+        }
+      }
+    },
+    "export_config": {
+      "name": "Export Config",
+      "description": "نمایه‌ها، چرخه‌ها و تنظیمات این دستگاه را به یک فایل JSON (در هر دستگاه) صادر کنید.",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه ماشین لباسشویی برای صادرات."
+        },
+        "path": {
+          "name": "مسیر",
+          "description": "مسیر فایل مطلق اختیاری برای نوشتن (پیش‌فرض /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "پیکربندی را وارد کنید",
+      "description": "نمایه‌ها، چرخه‌ها و تنظیمات این دستگاه را از یک فایل صادراتی JSON وارد کنید (تنظیمات ممکن است بازنویسی شوند).",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه ماشین لباسشویی برای وارد کردن."
+        },
+        "path": {
+          "name": "مسیر",
+          "description": "مسیر مطلق فایل JSON صادراتی برای وارد کردن."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "ارسال بازخورد چرخه",
+      "description": "پس از یک چرخه کامل، یک برنامه شناسایی خودکار را تأیید یا تصحیح کنید. «entry_id» (پیشرفته) یا «device_id» (توصیه می‌شود) را ارائه دهید.",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه WashData (به جای entry_id توصیه می شود)."
+        },
+        "entry_id": {
+          "name": "شناسه ورودی",
+          "description": "شناسه ورودی پیکربندی برای دستگاه (جایگزین device_id)."
+        },
+        "cycle_id": {
+          "name": "شناسه چرخه",
+          "description": "شناسه چرخه نشان داده شده در اعلان بازخورد / سیاهههای مربوط."
+        },
+        "user_confirmed": {
+          "name": "برنامه شناسایی شده را تأیید کنید",
+          "description": "اگر برنامه شناسایی شده درست است، true را تنظیم کنید."
+        },
+        "corrected_profile": {
+          "name": "نمایه تصحیح شده",
+          "description": "اگر تأیید نشد، نام پروفایل/برنامه صحیح را وارد کنید."
+        },
+        "corrected_duration": {
+          "name": "مدت زمان تصحیح شده (ثانیه)",
+          "description": "مدت زمان تصحیح اختیاری در ثانیه."
+        },
+        "notes": {
+          "name": "یادداشت ها",
+          "description": "یادداشت های اختیاری در مورد این چرخه."
+        }
+      }
+    },
+    "record_start": {
+      "name": "شروع چرخه ضبط",
+      "description": "ضبط دستی یک چرخه تمیز را شروع کنید (کلیه منطق منطبق را دور می زند).",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه ماشین لباسشویی برای ضبط."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "توقف چرخه ضبط",
+      "description": "ضبط دستی را متوقف کنید.",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه ماشین لباسشویی ضبط را متوقف می کند."
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "در حال دویدن"
+      },
+      "match_ambiguity": {
+        "name": "ابهام مطابقت"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "ایالت"
+        "name": "ایالت",
+        "state": {
+          "off": "خاموش",
+          "idle": "بیکار",
+          "starting": "شروع کردن",
+          "running": "در حال دویدن",
+          "paused": "مکث کرد",
+          "ending": "پایان یافتن",
+          "finished": "تمام شد",
+          "anti_wrinkle": "ضد چروک",
+          "interrupted": "قطع شد",
+          "force_stopped": "زور متوقف شد",
+          "rinse": "آبکشی کنید",
+          "unknown": "ناشناس"
+        }
       },
       "washer_program": {
         "name": "برنامه"
@@ -595,16 +936,23 @@
         "name": "مطابقت با اعتماد به نفس"
       },
       "top_candidates": {
-        "name": "نامزدهای برتر"
+        "name": "نامزدهای برتر",
+        "state": {
+          "none": "هیچ کدام"
+        }
+      },
+      "current_phase": {
+        "name": "فاز فعلی"
       },
       "wash_phase": {
         "name": "فاز"
       },
+      "profile_cycle_count": {
+        "name": "تعداد {profile_name} نمایه",
+        "unit_of_measurement": "چرخه ها"
+      },
       "suggestions": {
         "name": "تنظیمات پیشنهادی"
-      },
-      "current_phase": {
-        "name": "فاز فعلی"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "تشخیص خودکار"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "چرخه پایان اجباری"
       }
     }
   }

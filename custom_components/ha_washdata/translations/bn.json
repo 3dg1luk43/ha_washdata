@@ -19,7 +19,7 @@
       },
       "first_profile": {
         "title": "প্রথম প্রোফাইল তৈরি করুন",
-        "description": "A **Cycle** is a complete run of your appliance (e.g., a load of laundry). একটি **প্রোফাইল** এই চক্রগুলিকে টাইপ অনুসারে গ্রুপ করে (যেমন, 'কটন', 'কুইক ওয়াশ')। এখন একটি প্রোফাইল তৈরি করা অবিলম্বে ইন্টিগ্রেশন অনুমান সময়কাল সাহায্য করে.\n\nস্বয়ংক্রিয়ভাবে সনাক্ত না হলে আপনি ডিভাইস নিয়ন্ত্রণে এই প্রোফাইলটি ম্যানুয়ালি নির্বাচন করতে পারেন।\n\n**এই ধাপটি এড়িয়ে যেতে 'প্রোফাইল নাম' খালি রাখুন।**",
+        "description": "একটি **সাইকেল** হল আপনার যন্ত্রের সম্পূর্ণ চালানো (যেমন, লন্ড্রির ভার)। একটি **প্রোফাইল** এই চক্রগুলিকে টাইপ অনুসারে গ্রুপ করে (যেমন, 'কটন', 'কুইক ওয়াশ')। এখন একটি প্রোফাইল তৈরি করা অবিলম্বে ইন্টিগ্রেশন অনুমান সময়কাল সাহায্য করে.\n\nস্বয়ংক্রিয়ভাবে সনাক্ত না হলে আপনি ডিভাইস নিয়ন্ত্রণে এই প্রোফাইলটি ম্যানুয়ালি নির্বাচন করতে পারেন।\n\n**এই ধাপটি এড়িয়ে যেতে 'প্রোফাইল নাম' খালি রাখুন।**",
         "data": {
           "profile_name": "প্রোফাইল নাম (ঐচ্ছিক)",
           "manual_duration": "আনুমানিক সময়কাল (মিনিট)"
@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "শেখার প্রতিক্রিয়া পর্যালোচনা করুন",
           "settings": "সেটিংস",
+          "notifications": "বিজ্ঞপ্তি",
           "manage_cycles": "সাইকেল পরিচালনা করুন",
           "manage_profiles": "প্রোফাইল পরিচালনা করুন",
-          "record_cycle": "রেকর্ড চক্র (ম্যানুয়াল)",
-          "diagnostics": "ডায়াগনস্টিকস এবং রক্ষণাবেক্ষণ",
           "manage_phase_catalog": "ফেজ ক্যাটালগ পরিচালনা করুন",
-          "notifications": "বিজ্ঞপ্তি"
+          "record_cycle": "রেকর্ড সাইকেল (ম্যানুয়াল)",
+          "diagnostics": "ডায়াগনস্টিকস এবং রক্ষণাবেক্ষণ"
         }
       },
       "apply_suggestions": {
@@ -66,37 +66,75 @@
           "min_power": "সর্বনিম্ন শক্তি (W)",
           "off_delay": "চক্র শেষ বিলম্ব (গুলি)",
           "notify_service": "বিজ্ঞপ্তি পরিষেবা (যেমন notify.mobile_app)",
+          "notify_actions": "বিজ্ঞপ্তি কর্ম",
+          "notify_people": "এই লোকেরা বাড়িতে না হওয়া পর্যন্ত ডেলিভারি বিলম্বিত করুন",
+          "notify_only_when_home": "নির্বাচিত ব্যক্তি বাড়িতে না আসা পর্যন্ত বিজ্ঞপ্তি বিলম্বিত করুন",
+          "notify_fire_events": "ফায়ার অটোমেশন ইভেন্ট",
           "notify_events": "ইভেন্ট অবহিত করা",
           "notify_before_end_minutes": "প্রাক-সমাপ্তির বিজ্ঞপ্তি (শেষ হওয়ার কয়েক মিনিট আগে)",
-          "notify_title": "বিজ্ঞপ্তির শিরোনাম",
+          "notify_title": "বিজ্ঞপ্তি শিরোনাম",
           "notify_icon": "বিজ্ঞপ্তি আইকন",
           "notify_start_message": "বার্তা বিন্যাস শুরু করুন",
           "notify_finish_message": "বার্তা বিন্যাস শেষ করুন",
           "notify_pre_complete_message": "প্রি-কমপ্লিশন মেসেজ ফরম্যাট",
-          "show_advanced": "উন্নত সেটিংস সম্পাদনা করুন (পরবর্তী ধাপ)",
-          "notify_actions": "বিজ্ঞপ্তি কর্ম",
-          "notify_people": "অবহিত করার জন্য মানুষ",
-          "notify_only_when_home": "বাড়িতে গেলেই কেবল অবহিত করুন",
-          "notify_fire_events": "ফায়ার অটোমেশন ইভেন্ট"
+          "show_advanced": "উন্নত সেটিংস সম্পাদনা করুন (পরবর্তী ধাপ)"
         },
         "data_description": {
-          "apply_suggestions": "ফর্মটিতে শেখার অ্যালগরিদম দ্বারা প্রস্তাবিত মানগুলি অনুলিপি করতে এই বাক্সটি চেক করুন৷ সংরক্ষণ করার আগে পর্যালোচনা করুন।\n\nপ্রস্তাবিত (শিক্ষা থেকে):\n- min_power: {suggested_min_power} W\n- বন্ধ_বিলম্ব: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout}s\n- প্রোফাইল_ম্যাচ_ইন্টারভাল: {suggested_profile_match_interval}\n- স্বয়ংক্রিয়_লেবেল_বিশ্বাস: {suggested_auto_label_confidence}\n- সময়কাল_সহনশীলতা: {suggested_duration_tolerance}\n- প্রোফাইল_সময়কাল_সহনশীলতা: {suggested_profile_duration_tolerance}\n- প্রোফাইল_ম্যাচ_মিনিট_ডুরেশন_অনুপাত: {suggested_profile_match_min_duration_ratio}\n- প্রোফাইল_ম্যাচ_সর্বোচ্চ_অনুপাত_অনুপাত: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "ফর্মটিতে শেখার অ্যালগরিদম দ্বারা প্রস্তাবিত মানগুলি অনুলিপি করতে এই বাক্সটি চেক করুন৷ সংরক্ষণ করার আগে পর্যালোচনা করুন।\n\nপ্রস্তাবিত (শিক্ষা থেকে):\n- min_power: {suggested_min_power} W\n- বন্ধ_বিলম্ব: {suggested_off_delay} সে\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- প্রোফাইল_ম্যাচ_ব্যবধান: {suggested_profile_match_interval} সে\n- স্বয়ংক্রিয়_লেবেল_বিশ্বাস: {suggested_auto_label_confidence}\n- সময়কাল_সহনশীলতা: {suggested_duration_tolerance}\n- প্রোফাইল_সময়কাল_সহনশীলতা: {suggested_profile_duration_tolerance}\n- প্রোফাইল_ম্যাচ_মিনিট_ডুরেশন_অনুপাত: {suggested_profile_match_min_duration_ratio}\n- প্রোফাইল_ম্যাচ_সর্বোচ্চ_কালের_অনুপাত: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "যন্ত্রের ধরন নির্বাচন করুন (ওয়াশিং মেশিন, ড্রায়ার, ডিশওয়াশার, কফি মেশিন, ইভি)। এই ট্যাগটি আরও ভাল সংগঠনের জন্য প্রতিটি চক্রের সাথে সংরক্ষণ করা হয়।",
           "power_sensor": "রিয়েল-টাইম পাওয়ার রিপোর্টিং সেন্সর সত্তা (ওয়াটে)। আপনি ঐতিহাসিক ডেটা না হারিয়ে যেকোনও সময় এটি পরিবর্তন করতে পারেন—যদি আপনি একটি স্মার্ট প্লাগ প্রতিস্থাপন করেন তাহলে এটি কার্যকর।",
           "min_power": "এই থ্রেশহোল্ডের উপরে পাওয়ার রিডিংগুলি (ওয়াটে) নির্দেশ করে যে যন্ত্রটি চলছে৷ বেশিরভাগ ডিভাইসের জন্য 2W দিয়ে শুরু করুন।",
           "off_delay": "সেকেন্ড মসৃণ শক্তি সমাপ্তি চিহ্নিত করার জন্য স্টপ থ্রেশহোল্ডের নিচে থাকতে হবে। ডিফল্ট: 120",
           "notify_service": "হোম অ্যাসিস্ট্যান্ট ব্যবহার করার জন্য বিজ্ঞপ্তি পরিষেবা (ঐচ্ছিক)।",
+          "notify_actions": "বিজ্ঞপ্তিগুলির জন্য চালানোর জন্য ঐচ্ছিক হোম অ্যাসিস্ট্যান্ট অ্যাকশন সিকোয়েন্স (স্ক্রিপ্ট, বিজ্ঞপ্তি, TTS, ইত্যাদি)। সেট করা হলে, ফলব্যাক বিজ্ঞপ্তি পরিষেবার আগে অ্যাকশন চালানো হয়।",
+          "notify_people": "উপস্থিতি গেটিংয়ের জন্য ব্যবহৃত লোক সত্তা। যখন সক্রিয় থাকে, অন্তত একজন নির্বাচিত ব্যক্তি বাড়িতে না আসা পর্যন্ত বিজ্ঞপ্তি বিতরণ বিলম্বিত হয়৷",
+          "notify_only_when_home": "যদি সক্রিয় থাকে, অন্তত একজন নির্বাচিত ব্যক্তি বাড়িতে না আসা পর্যন্ত বিজ্ঞপ্তি বিলম্বিত করুন৷",
+          "notify_fire_events": "সক্ষম থাকলে, অটোমেশন চালানোর জন্য সাইকেল শুরু এবং শেষের (ha_washdata_cycle_started এবং ha_washdata_cycle_ended) হোম সহকারী ইভেন্টগুলিকে ফায়ার করুন৷",
           "notify_events": "কোন ইভেন্টের জন্য বিজ্ঞপ্তি পাঠাতে হবে।",
           "notify_before_end_minutes": "একটি বিজ্ঞপ্তি ট্রিগার করার জন্য চক্রের আনুমানিক শেষের মিনিট আগে। নিষ্ক্রিয় করতে 0 এ সেট করুন। ডিফল্ট: 0।",
-          "notify_title": "বিজ্ঞপ্তির জন্য কাস্টম শিরোনাম। {device} প্লেসহোল্ডার সমর্থন করে।",
+          "notify_title": "বিজ্ঞপ্তির জন্য কাস্টম শিরোনাম। {device} স্থানধারক সমর্থন করে।",
           "notify_icon": "বিজ্ঞপ্তির জন্য ব্যবহার করার জন্য আইকন (যেমন mdi:washing-machine)। ডিফল্ট ব্যবহার করতে খালি ছেড়ে দিন।",
-          "notify_start_message": "একটি চক্র শুরু হলে বার্তা পাঠানো হয়। {device} প্লেসহোল্ডার সমর্থন করে।",
-          "notify_finish_message": "একটি চক্র শেষ হলে বার্তা পাঠানো হয়৷ {device}, {duration}, {program} প্লেসহোল্ডার সমর্থন করে।",
-          "notify_pre_complete_message": "সম্পূর্ণ হওয়ার আগে বার্তা পাঠানো হয়েছে। {device}, {minutes} স্থানধারক সমর্থন করে।",
+          "notify_start_message": "একটি চক্র শুরু হলে বার্তা পাঠানো হয়। {device} স্থানধারক সমর্থন করে।",
+          "notify_finish_message": "একটি চক্র শেষ হলে বার্তা পাঠানো হয়৷ {device}, {duration}, {program} স্থানধারককে সমর্থন করে।",
+          "notify_pre_complete_message": "সম্পূর্ণ হওয়ার আগে বার্তা পাঠানো হয়েছে। সমর্থন করে {device}, {minutes} স্থানধারক।"
+        }
+      },
+      "notifications": {
+        "title": "বিজ্ঞপ্তি",
+        "description": "বিজ্ঞপ্তি চ্যানেল, টেমপ্লেট, এবং ঐচ্ছিক লাইভ মোবাইল অগ্রগতি আপডেট কনফিগার করুন।",
+        "data": {
+          "notify_service": "বিজ্ঞপ্তি পরিষেবা (যেমন notify.mobile_app)",
+          "notify_actions": "বিজ্ঞপ্তি কর্ম",
+          "notify_people": "এই লোকেরা বাড়িতে না হওয়া পর্যন্ত ডেলিভারি বিলম্বিত করুন",
+          "notify_only_when_home": "নির্বাচিত ব্যক্তি বাড়িতে না আসা পর্যন্ত বিজ্ঞপ্তি বিলম্বিত করুন",
+          "notify_fire_events": "ফায়ার অটোমেশন ইভেন্ট",
+          "notify_events": "ইভেন্ট অবহিত করা",
+          "notify_before_end_minutes": "প্রাক-সমাপ্তির বিজ্ঞপ্তি (শেষ হওয়ার কয়েক মিনিট আগে)",
+          "notify_live_enabled": "লাইভ অগ্রগতি বিজ্ঞপ্তি সক্রিয় করুন",
+          "notify_live_interval_seconds": "লাইভ আপডেটের ব্যবধান (সেকেন্ড)",
+          "notify_live_overrun_percent": "লাইভ আপডেট ওভাররান অ্যালাউন্স (%)",
+          "notify_title": "বিজ্ঞপ্তি শিরোনাম",
+          "notify_icon": "বিজ্ঞপ্তি আইকন",
+          "notify_start_message": "বার্তা বিন্যাস শুরু করুন",
+          "notify_finish_message": "বার্তা বিন্যাস শেষ করুন",
+          "notify_pre_complete_message": "প্রি-কমপ্লিশন মেসেজ ফরম্যাট"
+        },
+        "data_description": {
+          "notify_service": "হোম অ্যাসিস্ট্যান্ট ব্যবহার করার জন্য বিজ্ঞপ্তি পরিষেবা (ঐচ্ছিক)।",
           "notify_actions": "বিজ্ঞপ্তিগুলির জন্য চালানোর জন্য ঐচ্ছিক হোম অ্যাসিস্ট্যান্ট অ্যাকশন সিকোয়েন্স (স্ক্রিপ্ট, বিজ্ঞপ্তি, TTS, ইত্যাদি)। সেট করা হলে, ফলব্যাক বিজ্ঞপ্তি পরিষেবার আগে অ্যাকশন চালানো হয়।",
-          "notify_people": "হোম/অ্যাওয়ে গেটিং এর জন্য ব্যবহার করার জন্য লোক সত্তা। সক্রিয় করা হলে, কেউ বাড়িতে না হওয়া পর্যন্ত বিজ্ঞপ্তিগুলি স্থগিত করা হয়৷",
+          "notify_people": "উপস্থিতি গেটিংয়ের জন্য ব্যবহৃত লোক সত্তা। যখন সক্রিয় থাকে, অন্তত একজন নির্বাচিত ব্যক্তি বাড়িতে না আসা পর্যন্ত বিজ্ঞপ্তি বিতরণ বিলম্বিত হয়৷",
           "notify_only_when_home": "যদি সক্রিয় থাকে, অন্তত একজন নির্বাচিত ব্যক্তি বাড়িতে না আসা পর্যন্ত বিজ্ঞপ্তি বিলম্বিত করুন৷",
-          "notify_fire_events": "সক্ষম থাকলে, অটোমেশন চালানোর জন্য সাইকেল শুরু এবং শেষ (ha_washdata_cycle_started/ended) এর জন্য হোম সহকারী ইভেন্টগুলি ফায়ার করুন৷"
+          "notify_fire_events": "সক্ষম থাকলে, অটোমেশন চালানোর জন্য সাইকেল শুরু এবং শেষের (ha_washdata_cycle_started এবং ha_washdata_cycle_ended) হোম সহকারী ইভেন্টগুলিকে ফায়ার করুন৷",
+          "notify_events": "কোন ইভেন্টের জন্য বিজ্ঞপ্তি পাঠাতে হবে।",
+          "notify_before_end_minutes": "একটি বিজ্ঞপ্তি ট্রিগার করার জন্য চক্রের আনুমানিক শেষের মিনিট আগে। নিষ্ক্রিয় করতে 0 এ সেট করুন। ডিফল্ট: 0।",
+          "notify_live_enabled": "মোবাইল অ্যাপ বিজ্ঞপ্তির জন্য ইন-প্লেস লাইভ অগ্রগতি আপডেট সক্ষম করুন।",
+          "notify_live_interval_seconds": "চলমান অবস্থায় কত ঘন ঘন অগ্রগতি আপডেট পাঠানো হয়। নিম্ন মানগুলি আরও প্রতিক্রিয়াশীল তবে আরও বিজ্ঞপ্তি গ্রহণ করে৷",
+          "notify_live_overrun_percent": "দীর্ঘ/অতিরিক্ত চক্রের জন্য আনুমানিক আপডেট সংখ্যার উপরে নিরাপত্তা মার্জিন (উদাহরণস্বরূপ 20% 1.2x আনুমানিক আপডেটের অনুমতি দেয়)।",
+          "notify_title": "বিজ্ঞপ্তির জন্য কাস্টম শিরোনাম। {device} স্থানধারক সমর্থন করে।",
+          "notify_icon": "বিজ্ঞপ্তির জন্য ব্যবহার করার জন্য আইকন (যেমন mdi:washing-machine)। ডিফল্ট ব্যবহার করতে খালি ছেড়ে দিন।",
+          "notify_start_message": "একটি চক্র শুরু হলে বার্তা পাঠানো হয়। {device} স্থানধারক সমর্থন করে।",
+          "notify_finish_message": "একটি চক্র শেষ হলে বার্তা পাঠানো হয়৷ {device}, {duration}, {program} স্থানধারককে সমর্থন করে।",
+          "notify_pre_complete_message": "সম্পূর্ণ হওয়ার আগে বার্তা পাঠানো হয়েছে। সমর্থন করে {device}, {minutes} স্থানধারক।"
         }
       },
       "advanced_settings": {
@@ -135,7 +173,7 @@
           "running_dead_zone": "চলমান মৃত অঞ্চল (সেকেন্ড)",
           "end_repeat_count": "পুনরাবৃত্তি গণনা শেষ করুন",
           "start_energy_threshold": "স্টার্ট এনার্জি গেট (Wh)",
-          "end_energy_threshold": "শেষ শক্তি গেট (Wh)",
+          "end_energy_threshold": "এন্ড এনার্জি গেট (Wh)",
           "auto_maintenance": "স্বয়ংক্রিয় রক্ষণাবেক্ষণ সক্ষম করুন৷",
           "expose_debug_entities": "ডিবাগ সত্তা প্রকাশ করুন",
           "save_debug_traces": "ডিবাগ ট্রেস সংরক্ষণ করুন",
@@ -149,8 +187,8 @@
           "external_end_trigger_inverted": "ইনভার্ট ট্রিগার লজিক (ট্রিগার অন অফ)"
         },
         "data_description": {
-          "apply_suggestions": "ফর্মটিতে শেখার অ্যালগরিদম দ্বারা প্রস্তাবিত মানগুলি অনুলিপি করতে এই বাক্সটি চেক করুন৷ সংরক্ষণ করার আগে পর্যালোচনা করুন।\n\nপ্রস্তাবিত (শিক্ষা থেকে):\n- min_power: {suggested_min_power} W\n- বন্ধ_বিলম্ব: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout}s\n- প্রোফাইল_ম্যাচ_ইন্টারভাল: {suggested_profile_match_interval}\n- স্বয়ংক্রিয়_লেবেল_বিশ্বাস: {suggested_auto_label_confidence}\n- সময়কাল_সহনশীলতা: {suggested_duration_tolerance}\n- প্রোফাইল_সময়কাল_সহনশীলতা: {suggested_profile_duration_tolerance}\n- প্রোফাইল_ম্যাচ_মিনিট_ডুরেশন_অনুপাত: {suggested_profile_match_min_duration_ratio}\n- প্রোফাইল_ম্যাচ_সর্বোচ্চ_অনুপাত_অনুপাত: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
-          "start_threshold_w": "Power must rise ABOVE this threshold to START a cycle. আপনার স্ট্যান্ডবাই পাওয়ারের চেয়ে বেশি সেট করুন। ডিফল্ট: min_power + 1 W.",
+          "apply_suggestions": "ফর্মটিতে শেখার অ্যালগরিদম দ্বারা প্রস্তাবিত মানগুলি অনুলিপি করতে এই বাক্সটি চেক করুন৷ সংরক্ষণ করার আগে পর্যালোচনা করুন।\n\nপ্রস্তাবিত (শিক্ষা থেকে):\n- min_power: {suggested_min_power} W\n- বন্ধ_বিলম্ব: {suggested_off_delay} সে\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- প্রোফাইল_ম্যাচ_ব্যবধান: {suggested_profile_match_interval} সে\n- স্বয়ংক্রিয়_লেবেল_বিশ্বাস: {suggested_auto_label_confidence}\n- সময়কাল_সহনশীলতা: {suggested_duration_tolerance}\n- প্রোফাইল_সময়কাল_সহনশীলতা: {suggested_profile_duration_tolerance}\n- প্রোফাইল_ম্যাচ_মিনিট_ডুরেশন_অনুপাত: {suggested_profile_match_min_duration_ratio}\n- প্রোফাইল_ম্যাচ_সর্বোচ্চ_কালের_অনুপাত: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "start_threshold_w": "একটি চক্র শুরু করতে এই থ্রেশহোল্ডের উপরে শক্তি অবশ্যই উঠতে হবে। আপনার স্ট্যান্ডবাই পাওয়ারের চেয়ে বেশি সেট করুন। ডিফল্ট: min_power + 1 W.",
           "stop_threshold_w": "একটি চক্র শেষ করতে শক্তি অবশ্যই এই থ্রেশহোল্ডের নীচে নামতে হবে। গোলমাল এড়াতে শূন্যের ঠিক উপরে সেট করুন মিথ্যা প্রান্তগুলিকে ট্রিগার করে৷ ডিফল্ট: 0.6 * মিনিট_পাওয়ার।",
           "min_off_gap": "যদি একটি চক্র আগেরটি শেষ হওয়ার এই কয়েক সেকেন্ডের মধ্যে শুরু হয়, তবে সেগুলিকে একক চক্রে একত্রিত করা হবে।",
           "start_duration_threshold": "এই সময়কালের (সেকেন্ড) থেকে ছোট পাওয়ার স্পাইকগুলিকে উপেক্ষা করুন। আসল চক্র শুরু হওয়ার আগে বুট স্পাইকগুলি ফিল্টার করে (যেমন, 2s এর জন্য 60W)। ডিফল্ট: 5s।",
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "ডায়াগনস্টিকস এবং রক্ষণাবেক্ষণ",
-        "description": "খণ্ডিত চক্র একত্রিত করা বা সঞ্চিত ডেটা স্থানান্তর করার মতো রক্ষণাবেক্ষণ কর্মগুলি চালান৷\n\n{storage_stats}"
+        "description": "খণ্ডিত চক্র একত্রিত করা বা সঞ্চিত ডেটা স্থানান্তর করার মতো রক্ষণাবেক্ষণ কর্মগুলি চালান৷\n\n**স্টোরেজ ব্যবহার**\n\n- ফাইলের আকার: {file_size_kb} KB\n- চক্র: {cycle_count}\n- প্রোফাইল: {profile_count}\n- ডিবাগ ট্রেস: {debug_count}"
       },
       "clear_debug_data": {
         "title": "ডিবাগ ডেটা সাফ করুন",
@@ -210,11 +248,109 @@
           "action": "অ্যাকশন"
         }
       },
+      "manage_cycles_empty": {
+        "title": "সাইকেল পরিচালনা করুন",
+        "description": "কোন চক্র এখনও রেকর্ড করা.",
+        "data": {
+          "action": "অ্যাকশন"
+        }
+      },
       "manage_profiles": {
         "title": "প্রোফাইল পরিচালনা করুন",
         "description": "প্রোফাইল সারাংশ:\n{profile_summary}",
         "data": {
           "action": "অ্যাকশন"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "প্রোফাইল পরিচালনা করুন",
+        "description": "এখনো কোন প্রোফাইল তৈরি করা হয়নি.",
+        "data": {
+          "action": "অ্যাকশন"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "ফেজ ক্যাটালগ পরিচালনা করুন",
+        "description": "ফেজ ক্যাটালগ (এই ডিভাইসের জন্য ডিফল্ট + কাস্টম পর্যায়গুলি):\n{phase_summary}",
+        "data": {
+          "action": "অ্যাকশন"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "কাস্টম ফেজ তৈরি করুন",
+        "description": "একটি কাস্টম ফেজের নাম এবং বিবরণ তৈরি করুন এবং এটি কোন ডিভাইসের জন্য প্রযোজ্য তা চয়ন করুন৷",
+        "data": {
+          "target_device_type": "টার্গেট ডিভাইসের ধরন",
+          "phase_name": "ফেজের নাম",
+          "phase_description": "ফেজ বিবরণ"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "কাস্টম ফেজ সম্পাদনা করুন",
+        "description": "সম্পাদনা করতে একটি কাস্টম ফেজ নির্বাচন করুন.",
+        "data": {
+          "phase_name": "কাস্টম ফেজ"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "কাস্টম ফেজ সম্পাদনা করুন",
+        "description": "সম্পাদনা পর্ব: {phase_name}",
+        "data": {
+          "phase_name": "ফেজের নাম",
+          "phase_description": "ফেজ বিবরণ"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "কাস্টম ফেজ মুছুন",
+        "description": "মুছে ফেলার জন্য একটি কাস্টম ফেজ নির্বাচন করুন। এই পর্ব ব্যবহার করে যেকোনও বরাদ্দকৃত ব্যাপ্তি মুছে ফেলা হবে।",
+        "data": {
+          "phase_name": "কাস্টম ফেজ"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "ফেজ রেঞ্জ বরাদ্দ",
+        "description": "প্রোফাইলের জন্য পর্যায় পূর্বরূপ: **{profile_name}**\n\n{timeline_svg}\n\n**বর্তমান রেঞ্জ:**\n{current_ranges}\n\nব্যাপ্তি যোগ করতে, সম্পাদনা করতে, মুছতে বা সংরক্ষণ করতে নিচের ক্রিয়াগুলি ব্যবহার করুন৷",
+        "data": {
+          "action": "অ্যাকশন"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "ফেজ রেঞ্জ যোগ করুন",
+        "description": "বর্তমান খসড়াতে একটি ফেজ পরিসর যোগ করুন।",
+        "data": {
+          "phase_name": "পর্যায়",
+          "start_min": "স্টার্ট মিনিট",
+          "end_min": "শেষ মিনিট"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "ফেজ পরিসীমা সম্পাদনা করুন",
+        "description": "সম্পাদনা করার জন্য একটি পরিসর নির্বাচন করুন৷",
+        "data": {
+          "range_index": "ফেজ রেঞ্জ"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "ফেজ পরিসীমা সম্পাদনা করুন",
+        "description": "নির্বাচিত ফেজ পরিসীমা আপডেট করুন।",
+        "data": {
+          "phase_name": "পর্যায়",
+          "start_min": "স্টার্ট মিনিট",
+          "end_min": "শেষ মিনিট"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "ফেজ রেঞ্জ মুছুন",
+        "description": "খসড়া থেকে সরানোর জন্য একটি ব্যাপ্তি নির্বাচন করুন৷",
+        "data": {
+          "range_index": "ফেজ রেঞ্জ"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "ফেজ রেঞ্জ বরাদ্দ",
+        "description": "ফেজ রেঞ্জ কনফিগার করতে একটি প্রোফাইল নির্বাচন করুন।",
+        "data": {
+          "profile": "প্রোফাইল"
         }
       },
       "profile_stats": {
@@ -367,8 +503,8 @@
         "title": "JSON রপ্তানি/আমদানি করুন",
         "description": "এই ডিভাইসের জন্য চক্র, প্রোফাইল, এবং সেটিংস কপি/পেস্ট করুন। নীচে রপ্তানি করুন বা আমদানি করতে JSON পেস্ট করুন।",
         "data": {
-          "json_payload": "JSON কনফিগারেশন সম্পূর্ণ করুন",
-          "mode": "অ্যাকশন"
+          "mode": "অ্যাকশন",
+          "json_payload": "JSON কনফিগারেশন সম্পূর্ণ করুন"
         },
         "data_description": {
           "mode": "বর্তমান ডেটা এবং সেটিংস কপি করতে রপ্তানি বা অন্য ওয়াশডেটা ডিভাইস থেকে রপ্তানি করা ডেটা পেস্ট করতে আমদানি বেছে নিন।",
@@ -376,15 +512,15 @@
         }
       },
       "record_cycle": {
-        "title": "রেকর্ড চক্র",
-        "description": "হস্তক্ষেপ ছাড়াই একটি পরিষ্কার প্রোফাইল তৈরি করতে ম্যানুয়ালি একটি চক্র রেকর্ড করুন।\n\nস্থিতি: **{status}**\nসময়কাল: {duration}s\nনমুনা: {samples}",
+        "title": "রেকর্ড সাইকেল",
+        "description": "হস্তক্ষেপ ছাড়াই একটি পরিষ্কার প্রোফাইল তৈরি করতে ম্যানুয়ালি একটি চক্র রেকর্ড করুন।\n\nস্থিতি: **{status}**\nসময়কাল: {duration}সে\nনমুনা: {samples}",
         "data": {
           "action": "অ্যাকশন"
         }
       },
       "record_process": {
         "title": "প্রক্রিয়া রেকর্ডিং",
-        "description": "![গ্রাফ]({graph_url})\n\n**গ্রাফ অশোধিত রেকর্ডিং দেখায়।** নীল = রাখুন, লাল = প্রস্তাবিত ট্রিম।\n*গ্রাফ স্থির এবং ফর্ম পরিবর্তনের সাথে আপডেট হয় না।*\n\nরেকর্ডিং বন্ধ। ট্রিমগুলি শনাক্ত করা স্যাম্পলিং রেট (~{sampling_rate}s) এর সাথে সারিবদ্ধ করা হয়।\n\nকাঁচা সময়কাল: {duration}s\nনমুনা: {samples}",
+        "description": "![গ্রাফ]({graph_url})\n\n**গ্রাফ অশোধিত রেকর্ডিং দেখায়।** নীল = রাখুন, লাল = প্রস্তাবিত ট্রিম।\n*গ্রাফ স্থির এবং ফর্ম পরিবর্তনের সাথে আপডেট হয় না।*\n\nরেকর্ডিং বন্ধ। ট্রিমগুলি সনাক্ত করা স্যাম্পলিং রেট (~{sampling_rate}গুলি) এর সাথে সারিবদ্ধ করা হয়৷\n\nকাঁচা সময়কাল: {duration}সে\nনমুনা: {samples}",
         "data": {
           "head_trim": "ট্রিম স্টার্ট (সেকেন্ড)",
           "tail_trim": "ট্রিম এন্ড (সেকেন্ড)",
@@ -405,143 +541,19 @@
       },
       "resolve_feedback": {
         "title": "প্রতিক্রিয়া সমাধান করুন",
-        "description": "**শনাক্ত করা প্রোগ্রাম**: {profile}\n**আত্মবিশ্বাস**: {confidence}%\n**আনুমানিক**: {est}মি, **প্রকৃত**: {act}মি",
+        "description": "{comparison_img}{candidates_table}\n**শনাক্ত করা প্রোফাইল**: {detected_profile} ({confidence_pct}%)\n**আনুমানিক সময়কাল**: {est_duration_min} মিনিট\n**প্রকৃত সময়কাল**: {act_duration_min} মিনিট\n\n__নীচে একটি কর্ম চয়ন করুন:__",
         "data": {
+          "action": "আপনি কি করতে চান?",
           "corrected_profile": "সঠিক প্রোগ্রাম (যদি সংশোধন করা হয়)",
-          "corrected_duration": "মিনিটের মধ্যে সঠিক সময়কাল (যদি সংশোধন করা হয়)",
-          "action": "আপনি কি করতে চান?"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "ফেজ ক্যাটালগ পরিচালনা করুন",
-        "description": "এই ডিভাইসের প্রকারের জন্য বর্তমান পর্যায়গুলি:\n{phase_summary}",
-        "data": {
-          "action": "অ্যাকশন"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "কাস্টম ফেজ তৈরি করুন",
-        "description": "এই ডিভাইসের প্রকারের জন্য একটি কাস্টম ফেজ নাম এবং বিবরণ তৈরি করুন।",
-        "data": {
-          "phase_name": "ফেজের নাম",
-          "phase_description": "ফেজ বিবরণ",
-          "target_device_type": "টার্গেট ডিভাইসের ধরন"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "কাস্টম ফেজ সম্পাদনা করুন",
-        "description": "সম্পাদনা করতে একটি কাস্টম ফেজ নির্বাচন করুন.",
-        "data": {
-          "phase_name": "কাস্টম ফেজ"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "কাস্টম ফেজ সম্পাদনা করুন",
-        "description": "সম্পাদনার পর্যায়: {phase_name}",
-        "data": {
-          "phase_name": "ফেজের নাম",
-          "phase_description": "ফেজ বিবরণ"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "কাস্টম ফেজ মুছুন",
-        "description": "মুছে ফেলার জন্য একটি কাস্টম ফেজ নির্বাচন করুন। এই পর্ব ব্যবহার করে যেকোনও বরাদ্দকৃত ব্যাপ্তি মুছে ফেলা হবে।",
-        "data": {
-          "phase_name": "কাস্টম ফেজ"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "ফেজ রেঞ্জ বরাদ্দ",
-        "description": "প্রোফাইল: **{profile_name}**\nমোড: **{assign_mode}**\nসাইকেল ইঙ্গিত: {cycle_hint}\n\nবর্তমান ব্যাপ্তি:\n{current_ranges}\n\nফেজ লেবেল প্রদর্শন এবং সংগঠন জন্য হয়. সনাক্তকরণ শক্তি নিদর্শন ব্যবহার করে, ফেজের নাম নয়।",
-        "data": {
-          "action": "অ্যাকশন"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "ফেজ রেঞ্জ বরাদ্দ",
-        "description": "ফেজ রেঞ্জ কনফিগার করতে একটি প্রোফাইল নির্বাচন করুন।",
-        "data": {
-          "profile": "প্রোফাইল"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "ফেজ রেঞ্জ যোগ করুন",
-        "description": "বর্তমান খসড়াতে একটি ফেজ পরিসর যোগ করুন।",
-        "data": {
-          "phase_name": "পর্যায়",
-          "start_min": "স্টার্ট মিনিট",
-          "end_min": "শেষ মিনিট"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "ফেজ পরিসীমা সম্পাদনা করুন",
-        "description": "সম্পাদনা করার জন্য একটি পরিসর নির্বাচন করুন৷",
-        "data": {
-          "range_index": "ফেজ রেঞ্জ"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "ফেজ পরিসীমা সম্পাদনা করুন",
-        "description": "নির্বাচিত ফেজ পরিসীমা আপডেট করুন।",
-        "data": {
-          "phase_name": "পর্যায়",
-          "start_min": "স্টার্ট মিনিট",
-          "end_min": "শেষ মিনিট"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "ফেজ রেঞ্জ মুছুন",
-        "description": "খসড়া থেকে সরানোর জন্য একটি ব্যাপ্তি নির্বাচন করুন৷",
-        "data": {
-          "range_index": "ফেজ রেঞ্জ"
-        }
-      },
-      "notifications": {
-        "title": "বিজ্ঞপ্তি",
-        "description": "বিজ্ঞপ্তি চ্যানেল, টেমপ্লেট, এবং ঐচ্ছিক লাইভ মোবাইল অগ্রগতি আপডেট কনফিগার করুন।",
-        "data": {
-          "notify_service": "বিজ্ঞপ্তি পরিষেবা (যেমন notify.mobile_app)",
-          "notify_actions": "বিজ্ঞপ্তি কর্ম",
-          "notify_people": "অবহিত করার জন্য মানুষ",
-          "notify_only_when_home": "শুধুমাত্র বাড়িতে যখন বিজ্ঞপ্তি",
-          "notify_fire_events": "ফায়ার অটোমেশন ইভেন্ট",
-          "notify_events": "ইভেন্ট অবহিত করা",
-          "notify_before_end_minutes": "প্রাক-সমাপ্তির বিজ্ঞপ্তি (শেষ হওয়ার কয়েক মিনিট আগে)",
-          "notify_live_enabled": "লাইভ অগ্রগতি বিজ্ঞপ্তি সক্রিয় করুন",
-          "notify_live_interval_seconds": "লাইভ আপডেটের ব্যবধান (সেকেন্ড)",
-          "notify_live_overrun_percent": "লাইভ আপডেট ওভাররান অ্যালাউন্স (%)",
-          "notify_title": "বিজ্ঞপ্তি শিরোনাম",
-          "notify_icon": "বিজ্ঞপ্তি আইকন",
-          "notify_start_message": "বার্তা বিন্যাস শুরু করুন",
-          "notify_finish_message": "বার্তা বিন্যাস শেষ করুন",
-          "notify_pre_complete_message": "প্রি-কমপ্লিশন মেসেজ ফরম্যাট"
-        },
-        "data_description": {
-          "notify_service": "হোম অ্যাসিস্ট্যান্ট ব্যবহার করার জন্য বিজ্ঞপ্তি পরিষেবা (ঐচ্ছিক)।",
-          "notify_actions": "বিজ্ঞপ্তিগুলির জন্য চালানোর জন্য ঐচ্ছিক হোম অ্যাসিস্ট্যান্ট অ্যাকশন সিকোয়েন্স (স্ক্রিপ্ট, বিজ্ঞপ্তি, TTS, ইত্যাদি)। সেট করা হলে, ফলব্যাক বিজ্ঞপ্তি পরিষেবার আগে অ্যাকশন চালানো হয়।",
-          "notify_people": "হোম/অ্যাওয়ে গেটিং এর জন্য ব্যবহার করার জন্য লোক সত্তা। সক্রিয় করা হলে, কেউ বাড়িতে না হওয়া পর্যন্ত বিজ্ঞপ্তিগুলি স্থগিত করা হয়৷",
-          "notify_only_when_home": "যদি সক্রিয় থাকে, অন্তত একজন নির্বাচিত ব্যক্তি বাড়িতে না আসা পর্যন্ত বিজ্ঞপ্তি বিলম্বিত করুন৷",
-          "notify_fire_events": "সক্ষম থাকলে, অটোমেশন চালানোর জন্য সাইকেল শুরু এবং শেষ (ha_washdata_cycle_started/ended) এর জন্য হোম সহকারী ইভেন্টগুলি ফায়ার করুন৷",
-          "notify_events": "কোন ইভেন্টের জন্য বিজ্ঞপ্তি পাঠাতে হবে।",
-          "notify_before_end_minutes": "একটি বিজ্ঞপ্তি ট্রিগার করার জন্য চক্রের আনুমানিক শেষের মিনিট আগে। নিষ্ক্রিয় করতে 0 এ সেট করুন। ডিফল্ট: 0।",
-          "notify_live_enabled": "মোবাইল অ্যাপ বিজ্ঞপ্তির জন্য ইন-প্লেস লাইভ অগ্রগতি আপডেট সক্ষম করুন।",
-          "notify_live_interval_seconds": "চলমান অবস্থায় কত ঘন ঘন অগ্রগতি আপডেট পাঠানো হয়। নিম্ন মানগুলি আরও প্রতিক্রিয়াশীল তবে আরও বিজ্ঞপ্তি গ্রহণ করে৷",
-          "notify_live_overrun_percent": "দীর্ঘ/অতিরিক্ত চক্রের জন্য আনুমানিক আপডেট সংখ্যার উপরে নিরাপত্তা মার্জিন (উদাহরণস্বরূপ 20% 1.2x আনুমানিক আপডেটের অনুমতি দেয়)।",
-          "notify_title": "বিজ্ঞপ্তির জন্য কাস্টম শিরোনাম। {device} প্লেসহোল্ডার সমর্থন করে।",
-          "notify_icon": "বিজ্ঞপ্তির জন্য ব্যবহার করার জন্য আইকন (যেমন mdi:washing-machine)। ডিফল্ট ব্যবহার করতে খালি ছেড়ে দিন।",
-          "notify_start_message": "একটি চক্র শুরু হলে বার্তা পাঠানো হয়। {device} প্লেসহোল্ডার সমর্থন করে।",
-          "notify_finish_message": "একটি চক্র শেষ হলে বার্তা পাঠানো হয়৷ {device}, {duration}, {program} প্লেসহোল্ডার সমর্থন করে।",
-          "notify_pre_complete_message": "সম্পূর্ণ হওয়ার আগে বার্তা পাঠানো হয়েছে। {device}, {minutes} স্থানধারক সমর্থন করে।"
+          "corrected_duration": "মিনিটের মধ্যে সঠিক সময়কাল (যদি সংশোধন করা হয়)"
         }
       }
     },
     "error": {
-      "import_failed": "আমদানি ব্যর্থ হয়েছে৷ দয়া করে একটি বৈধ WashData এক্সপোর্ট JSON পেস্ট করুন৷",
+      "import_failed": "আমদানি ব্যর্থ হয়েছে৷ অনুগ্রহ করে একটি বৈধ ওয়াশডেটা এক্সপোর্ট JSON পেস্ট করুন।",
       "profile_exists": "এই নামের একটি প্রোফাইল ইতিমধ্যেই বিদ্যমান৷",
       "rename_failed": "প্রোফাইল পুনঃনামকরণ ব্যর্থ হয়েছে. প্রোফাইল বিদ্যমান নাও থাকতে পারে বা নতুন নাম ইতিমধ্যেই নেওয়া হয়েছে৷",
       "assignment_failed": "সাইকেলে প্রোফাইল বরাদ্দ করতে ব্যর্থ হয়েছে৷",
-      "feedback_notification_title": "ওয়াশডেটা: সাইকেল যাচাই করুন ({device})",
-      "feedback_notification_message": "**ডিভাইস**: {device}\n**প্রোগ্রাম**: {program} ({confidence}% confidence)\n**সময়**: {time}\n\nএই শনাক্ত করা চক্রটি যাচাই করতে WashData-এর আপনার সাহায্য প্রয়োজন।\n\nএই ফলাফল নিশ্চিত করতে বা সংশোধন করতে অনুগ্রহ করে **সেটিংস > ডিভাইস ও পরিষেবা > ওয়াশডেটা > কনফিগার > লার্নিং ফিডব্যাক**-এ যান।",
       "duplicate_phase": "এই নামের একটি পর্যায় ইতিমধ্যেই বিদ্যমান।",
       "phase_not_found": "নির্বাচিত পর্যায় পাওয়া যায়নি.",
       "invalid_phase_name": "ফেজ নাম খালি হতে পারে না.",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "ফেজ ব্যাপ্তি ওভারল্যাপ. ব্যাপ্তিগুলি সামঞ্জস্য করুন এবং আবার চেষ্টা করুন৷",
       "incomplete_phase_row": "প্রতিটি ফেজ সারিতে অবশ্যই একটি ফেজ এবং নির্বাচিত মোডের জন্য সম্পূর্ণ শুরু/শেষ মান অন্তর্ভুক্ত করতে হবে।",
       "timestamp_mode_cycle_required": "টাইমস্ট্যাম্প মোড ব্যবহার করার সময় একটি উত্স চক্র নির্বাচন করুন.",
-      "no_phase_ranges": "সেই কর্মের জন্য এখনও কোন ফেজ রেঞ্জ উপলব্ধ নেই।"
+      "no_phase_ranges": "সেই কর্মের জন্য এখনও কোন ফেজ রেঞ্জ উপলব্ধ নেই।",
+      "feedback_notification_title": "ওয়াশডেটা: সাইকেল যাচাই করুন ({device})",
+      "feedback_notification_message": "**ডিভাইস**: {device}\n**প্রোগ্রাম**: {program} ({confidence}% আত্মবিশ্বাস)\n**সময়**: {time}\n\nএই শনাক্ত করা চক্রটি যাচাই করতে WashData-এর আপনার সাহায্য প্রয়োজন।\n\nএই ফলাফল নিশ্চিত করতে বা সংশোধন করতে অনুগ্রহ করে **সেটিংস > ডিভাইস ও পরিষেবা > ওয়াশডেটা > কনফিগার > লার্নিং ফিডব্যাক**-এ যান।"
     },
     "abort": {
       "no_cycles_found": "কোন চক্র পাওয়া যায়নি",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "সমস্ত চক্র ইতিমধ্যে লেবেল করা হয়",
       "no_suggestions": "কোন প্রস্তাবিত মান এখনও উপলব্ধ. কয়েকটি চক্র চালান এবং আবার চেষ্টা করুন।",
       "no_predictions": "কোনো ভবিষ্যদ্বাণী নেই",
-      "reprocess_success": "সফলভাবে {count} চক্র পুনরায় প্রক্রিয়া করা হয়েছে৷",
-      "debug_data_cleared": "{count} চক্র থেকে ডিবাগ ডেটা সফলভাবে সাফ করা হয়েছে৷",
-      "no_custom_phases": "এই ডিভাইস প্রকারের জন্য কোনো কাস্টম পর্যায় পাওয়া যায়নি।"
+      "no_custom_phases": "কোনো কাস্টম পর্যায় পাওয়া যায়নি।",
+      "reprocess_success": "সফলভাবে {count}টি চক্র পুনরায় প্রক্রিয়া করা হয়েছে৷",
+      "debug_data_cleared": "{count} চক্র থেকে ডিবাগ ডেটা সফলভাবে সাফ করা হয়েছে৷"
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "সাইকেল স্টার্ট",
+        "cycle_finish": "সাইকেল ফিনিশ",
+        "cycle_live": "লাইভ অগ্রগতি"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(লেবেলবিহীন)",
+        "create_new_profile": "নতুন প্রোফাইল তৈরি করুন",
+        "remove_label": "লেবেল সরান",
+        "no_reference_cycle": "(কোন রেফারেন্স চক্র নেই)",
+        "all_device_types": "সমস্ত ডিভাইস প্রকার",
+        "current_suffix": "(বর্তমান)",
+        "editor_select_info": "বিভক্ত করতে 1টি চক্র বা একত্রিত করতে 2+ চক্র নির্বাচন করুন৷",
+        "no_cycles_recorded": "কোন চক্র এখনও রেকর্ড করা.",
+        "profile_summary_line": "- **{name}**: {count} চক্র, {avg}মি গড়",
+        "no_profiles_created": "এখনো কোন প্রোফাইল তৈরি করা হয়নি.",
+        "phase_preview": "ফেজ প্রিভিউ",
+        "phase_preview_no_curve": "গড় প্রোফাইল বক্ররেখা এখনও উপলব্ধ নয়. এই প্রোফাইলের জন্য আরো চক্র চালান/লেবেল করুন।",
+        "average_power_curve": "গড় শক্তি বক্ররেখা",
+        "unit_min": "মিনিট",
+        "profile_option_fmt": "{name} ({count} চক্র, ~{duration}মি গড়)",
+        "profile_option_short_fmt": "{name} ({count} চক্র, ~{duration}মি)",
+        "deleted_cycles_from_profile": "{profile} থেকে {count} চক্র মুছে ফেলা হয়েছে৷",
+        "not_enough_data_graph": "গ্রাফ তৈরি করার জন্য পর্যাপ্ত ডেটা নেই।",
+        "no_profiles_found": "কোন প্রোফাইল পাওয়া যায়নি.",
+        "cycle_info_fmt": "চক্র: {start}, {duration}মি, বর্তমান: {label}",
+        "top_candidates_header": "### শীর্ষ প্রার্থী",
+        "tbl_profile": "প্রোফাইল",
+        "tbl_confidence": "আত্মবিশ্বাস",
+        "tbl_correlation": "পারস্পরিক সম্পর্ক",
+        "tbl_duration_match": "সময়কাল ম্যাচ",
+        "detected_profile": "সনাক্ত করা প্রোফাইল",
+        "estimated_duration": "আনুমানিক সময়কাল",
+        "actual_duration": "প্রকৃত সময়কাল",
+        "choose_action": "__নীচে একটি কর্ম চয়ন করুন:__",
+        "tbl_count": "গণনা",
+        "tbl_avg": "গড়",
+        "tbl_min": "মিন",
+        "tbl_max": "সর্বোচ্চ",
+        "tbl_energy_avg": "শক্তি (গড়)",
+        "tbl_energy_total": "শক্তি (মোট)",
+        "tbl_consistency": "গঠিত।",
+        "tbl_last_run": "শেষ রান",
+        "graph_legend_title": "গ্রাফ কিংবদন্তি",
+        "graph_legend_body": "নীল ব্যান্ড ন্যূনতম এবং সর্বাধিক পাওয়ার ড্র পরিসীমা পর্যবেক্ষণ করে। লাইনটি গড় শক্তি বক্ররেখা দেখায়।",
+        "recording_preview": "রেকর্ডিং পূর্বরূপ",
+        "trim_start": "ট্রিম স্টার্ট",
+        "trim_end": "ট্রিম শেষ",
+        "split_preview_title": "বিভক্ত পূর্বরূপ",
+        "split_preview_found_fmt": "{count}টি সেগমেন্ট পাওয়া গেছে।",
+        "split_preview_confirm_fmt": "এই চক্রটিকে {count}টি পৃথক চক্রে বিভক্ত করতে নিশ্চিত করুন ক্লিক করুন৷",
+        "merge_preview_title": "পূর্বরূপ মার্জ করুন",
+        "merge_preview_joining_fmt": "{count} চক্রে যোগদান করা হচ্ছে। শূন্যস্থান 0W রিডিং দিয়ে পূরণ করা হবে।",
+        "profile_comparison": "প্রোফাইল তুলনা",
+        "actual_cycle_label": "এই চক্র (প্রকৃত)",
+        "storage_usage_header": "স্টোরেজ ব্যবহার",
+        "storage_file_size": "ফাইলের আকার",
+        "storage_cycles": "সাইকেল",
+        "storage_profiles": "প্রোফাইল",
+        "storage_debug_traces": "ডিবাগ ট্রেস",
+        "overview_suffix": "ওভারভিউ",
+        "phase_preview_for_profile": "প্রোফাইলের জন্য ফেজ প্রিভিউ",
+        "current_ranges_header": "বর্তমান ব্যাপ্তি",
+        "assign_phases_help": "ব্যাপ্তি যোগ করতে, সম্পাদনা করতে, মুছতে বা সংরক্ষণ করতে নিচের ক্রিয়াগুলি ব্যবহার করুন৷",
+        "profile_summary_header": "প্রোফাইল সারাংশ",
+        "recent_cycles_header": "সাম্প্রতিক চক্র"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "একটি চক্র বিভক্ত করুন (শূন্যস্থান খুঁজুন)",
+        "merge": "সাইকেল একত্র করুন (খন্ডে যোগ দিন)",
+        "delete": "চক্র(গুলি) মুছুন"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "রক্ষণাবেক্ষণ: পুনঃপ্রক্রিয়া এবং ডেটা অপ্টিমাইজ করুন",
+        "clear_debug_data": "ডিবাগ ডেটা সাফ করুন (স্থান খালি করুন)",
+        "wipe_history": "এই ডিভাইসের জন্য সমস্ত ডেটা মুছুন (অপরিবর্তনযোগ্য)",
+        "export_import": "সেটিংস সহ JSON রপ্তানি/আমদানি করুন (কপি/পেস্ট)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "সমস্ত ডেটা রপ্তানি করুন",
+        "import": "ডেটা আমদানি/মার্জ করুন"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "অটো-লেবেল পুরানো চক্র",
+        "select_cycle_to_label": "লেবেল নির্দিষ্ট চক্র",
+        "select_cycle_to_label_multi": "একাধিক চক্র লেবেল করুন",
+        "select_cycle_to_delete": "সাইকেল মুছুন",
+        "interactive_editor": "ইন্টারেক্টিভ এডিটর মার্জ/স্প্লিট করুন"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "নতুন প্রোফাইল তৈরি করুন",
+        "edit_profile": "প্রোফাইল সম্পাদনা/পুনঃনামকরণ করুন",
+        "delete_profile": "প্রোফাইল মুছুন",
+        "profile_stats": "প্রোফাইল পরিসংখ্যান",
+        "cleanup_profile": "ইতিহাস পরিষ্কার করুন - গ্রাফ এবং মুছুন",
+        "assign_phases": "ফেজ রেঞ্জ বরাদ্দ"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "নতুন ফেজ তৈরি করুন",
+        "edit_custom_phase": "ফেজ সম্পাদনা করুন",
+        "delete_custom_phase": "ফেজ মুছুন"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "ফেজ রেঞ্জ যোগ করুন",
+        "edit_range": "ফেজ পরিসীমা সম্পাদনা করুন",
+        "delete_range": "ফেজ রেঞ্জ মুছুন",
+        "clear_ranges": "সমস্ত রেঞ্জ সাফ করুন",
+        "save_ranges": "সংরক্ষণ করুন এবং ফেরত দিন"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "রিফ্রেশ স্থিতি",
+        "stop_recording": "রেকর্ডিং বন্ধ করুন (সংরক্ষণ এবং প্রক্রিয়া)",
+        "start_recording": "নতুন রেকর্ডিং শুরু করুন",
+        "process_recording": "শেষ রেকর্ডিং প্রক্রিয়া করুন (ছাঁটা ও সংরক্ষণ করুন)",
+        "discard_recording": "শেষ রেকর্ডিং বাতিল করুন"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "নতুন প্রোফাইল তৈরি করুন",
+        "existing_profile": "বিদ্যমান প্রোফাইলে যোগ করুন",
+        "discard": "রেকর্ডিং বাতিল করুন"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "নিশ্চিত করুন - সঠিক সনাক্তকরণ",
+        "correct": "সঠিক - প্রোগ্রাম/সময়কাল বেছে নিন",
+        "ignore": "উপেক্ষা করুন - মিথ্যা ইতিবাচক/কোলাহলপূর্ণ চক্র",
+        "delete": "মুছুন - ইতিহাস থেকে সরান"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "লেবেল চক্র",
+      "description": "একটি অতীত চক্রে একটি বিদ্যমান প্রোফাইল বরাদ্দ করুন, বা লেবেলটি সরান৷",
+      "fields": {
+        "device_id": {
+          "name": "ডিভাইস",
+          "description": "ওয়াশিং মেশিন ডিভাইস লেবেল."
+        },
+        "cycle_id": {
+          "name": "সাইকেল আইডি",
+          "description": "লেবেল করার জন্য চক্রের আইডি।"
+        },
+        "profile_name": {
+          "name": "প্রোফাইল নাম",
+          "description": "একটি বিদ্যমান প্রোফাইলের নাম (প্রোফাইল পরিচালনা মেনুতে প্রোফাইল তৈরি করুন)। লেবেল সরাতে ফাঁকা ছেড়ে দিন।"
+        }
+      }
+    },
+    "create_profile": {
+      "name": "প্রোফাইল তৈরি করুন",
+      "description": "একটি নতুন প্রোফাইল তৈরি করুন (স্বতন্ত্র বা একটি রেফারেন্স চক্রের উপর ভিত্তি করে)।",
+      "fields": {
+        "device_id": {
+          "name": "ডিভাইস",
+          "description": "ওয়াশিং মেশিন ডিভাইস।"
+        },
+        "profile_name": {
+          "name": "প্রোফাইল নাম",
+          "description": "নতুন প্রোফাইলের নাম (যেমন 'হেভি ডিউটি', 'ডেলিকেটস')।"
+        },
+        "reference_cycle_id": {
+          "name": "রেফারেন্স সাইকেল আইডি",
+          "description": "এই প্রোফাইলের উপর ভিত্তি করে ঐচ্ছিক সাইকেল আইডি।"
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "প্রোফাইল মুছুন",
+      "description": "একটি প্রোফাইল মুছুন এবং ঐচ্ছিকভাবে এটি ব্যবহার করে চক্রগুলি আনলেবেল করুন৷",
+      "fields": {
+        "device_id": {
+          "name": "ডিভাইস",
+          "description": "ওয়াশিং মেশিন ডিভাইস।"
+        },
+        "profile_name": {
+          "name": "প্রোফাইল নাম",
+          "description": "মুছে ফেলার জন্য প্রোফাইল."
+        },
+        "unlabel_cycles": {
+          "name": "আনলেবেল সাইকেল",
+          "description": "এই প্রোফাইল ব্যবহার করে চক্র থেকে প্রোফাইল লেবেল সরান."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "অটো-লেবেল পুরানো চক্র",
+      "description": "প্রোফাইল ম্যাচিং ব্যবহার করে লেবেলবিহীন চক্রকে পূর্ববর্তীভাবে লেবেল করুন।",
+      "fields": {
+        "device_id": {
+          "name": "ডিভাইস",
+          "description": "ওয়াশিং মেশিন ডিভাইস।"
+        },
+        "confidence_threshold": {
+          "name": "আত্মবিশ্বাস থ্রেশহোল্ড",
+          "description": "লেবেল প্রয়োগ করার জন্য ন্যূনতম ম্যাচ কনফিডেন্স (0.50-0.95)।"
+        }
+      }
+    },
+    "export_config": {
+      "name": "রপ্তানি কনফিগার",
+      "description": "এই ডিভাইসের প্রোফাইল, চক্র এবং সেটিংস একটি JSON ফাইলে (প্রতি ডিভাইসে) রপ্তানি করুন।",
+      "fields": {
+        "device_id": {
+          "name": "ডিভাইস",
+          "description": "রপ্তানি করার জন্য ওয়াশিং মেশিন ডিভাইস।"
+        },
+        "path": {
+          "name": "পথ",
+          "description": "লেখার জন্য ঐচ্ছিক পরম ফাইল পাথ (ডিফল্ট /config/ha_washdata_export_{entry}.json)।"
+        }
+      }
+    },
+    "import_config": {
+      "name": "ইমপোর্ট কনফিগারেশন",
+      "description": "একটি JSON এক্সপোর্ট ফাইল থেকে এই ডিভাইসের জন্য প্রোফাইল, চক্র এবং সেটিংস আমদানি করুন (সেটিংস ওভাররাইট করা হতে পারে)।",
+      "fields": {
+        "device_id": {
+          "name": "ডিভাইস",
+          "description": "যে ওয়াশিং মেশিন ডিভাইসটি আমদানি করতে হবে।"
+        },
+        "path": {
+          "name": "পথ",
+          "description": "আমদানি করার জন্য এক্সপোর্ট JSON ফাইলের সম্পূর্ণ পথ।"
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "সাইকেল ফিডব্যাক জমা দিন",
+      "description": "একটি সম্পূর্ণ চক্রের পরে একটি স্বয়ংক্রিয়-সনাক্ত প্রোগ্রাম নিশ্চিত করুন বা সংশোধন করুন। হয় `entry_id` (উন্নত) অথবা `device_id` (প্রস্তাবিত) প্রদান করুন।",
+      "fields": {
+        "device_id": {
+          "name": "ডিভাইস",
+          "description": "ওয়াশডেটা ডিভাইস (entry_id এর পরিবর্তে প্রস্তাবিত)।"
+        },
+        "entry_id": {
+          "name": "এন্ট্রি আইডি",
+          "description": "ডিভাইসের জন্য কনফিগার এন্ট্রি আইডি (device_id-এর বিকল্প)।"
+        },
+        "cycle_id": {
+          "name": "সাইকেল আইডি",
+          "description": "প্রতিক্রিয়া বিজ্ঞপ্তি / লগ দেখানো চক্র আইডি."
+        },
+        "user_confirmed": {
+          "name": "সনাক্ত করা প্রোগ্রাম নিশ্চিত করুন",
+          "description": "সনাক্ত করা প্রোগ্রাম সঠিক হলে সত্য সেট করুন।"
+        },
+        "corrected_profile": {
+          "name": "সঠিক প্রোফাইল",
+          "description": "নিশ্চিত না হলে, সঠিক প্রোফাইল/প্রোগ্রামের নাম দিন।"
+        },
+        "corrected_duration": {
+          "name": "সঠিক সময়কাল (সেকেন্ড)",
+          "description": "সেকেন্ডের মধ্যে ঐচ্ছিক সংশোধন সময়কাল."
+        },
+        "notes": {
+          "name": "নোট",
+          "description": "এই চক্র সম্পর্কে ঐচ্ছিক নোট."
+        }
+      }
+    },
+    "record_start": {
+      "name": "রেকর্ড সাইকেল শুরু",
+      "description": "ম্যানুয়ালি একটি পরিষ্কার চক্র রেকর্ড করা শুরু করুন (সমস্ত মিলে যাওয়া যুক্তিকে বাইপাস করে)।",
+      "fields": {
+        "device_id": {
+          "name": "ডিভাইস",
+          "description": "রেকর্ড করার জন্য ওয়াশিং মেশিন ডিভাইস।"
+        }
+      }
+    },
+    "record_stop": {
+      "name": "রেকর্ড সাইকেল স্টপ",
+      "description": "ম্যানুয়াল রেকর্ডিং বন্ধ করুন।",
+      "fields": {
+        "device_id": {
+          "name": "ডিভাইস",
+          "description": "রেকর্ডিং বন্ধ করার জন্য ওয়াশিং মেশিন ডিভাইস।"
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "চলছে"
+      },
+      "match_ambiguity": {
+        "name": "অস্পষ্টতা ম্যাচ"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "রাজ্য"
+        "name": "রাজ্য",
+        "state": {
+          "off": "বন্ধ",
+          "idle": "নিষ্ক্রিয়",
+          "starting": "শুরু হচ্ছে",
+          "running": "চলছে",
+          "paused": "বিরতি দেওয়া হয়েছে",
+          "ending": "শেষ",
+          "finished": "সমাপ্ত",
+          "anti_wrinkle": "অ্যান্টি-রিঙ্কেল",
+          "interrupted": "বাধাপ্রাপ্ত",
+          "force_stopped": "ফোর্স স্টপড",
+          "rinse": "ধুয়ে ফেলুন",
+          "unknown": "অজানা"
+        }
       },
       "washer_program": {
         "name": "প্রোগ্রাম"
@@ -595,16 +936,23 @@
         "name": "ম্যাচ কনফিডেন্স"
       },
       "top_candidates": {
-        "name": "শীর্ষ প্রার্থী"
+        "name": "শীর্ষ প্রার্থী",
+        "state": {
+          "none": "কোনোটিই নয়"
+        }
+      },
+      "current_phase": {
+        "name": "বর্তমান পর্যায়"
       },
       "wash_phase": {
         "name": "পর্যায়"
       },
+      "profile_cycle_count": {
+        "name": "প্রোফাইল {profile_name} গণনা",
+        "unit_of_measurement": "চক্র"
+      },
       "suggestions": {
         "name": "প্রস্তাবিত সেটিংস"
-      },
-      "current_phase": {
-        "name": "বর্তমান পর্যায়"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "অটো-ডিটেক্ট"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "ফোর্স এন্ড সাইকেল"
       }
     }
   }

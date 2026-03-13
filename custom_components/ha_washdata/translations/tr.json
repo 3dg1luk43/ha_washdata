@@ -21,7 +21,7 @@
         "title": "İlk Profili Oluştur",
         "description": "**Döngü**, cihazınızın tamamen çalıştırılmasıdır (ör. bir miktar çamaşır). **Profil** bu programları türe göre gruplandırır (ör. 'Pamuklu', 'Hızlı Yıkama'). Artık bir profil oluşturmak entegrasyonun süreyi hemen tahmin etmesine yardımcı oluyor.\n\nOtomatik olarak algılanmazsa bu profili cihaz kontrollerinden manuel olarak seçebilirsiniz.\n\n**Bu adımı atlamak için 'Profil Adı'nı boş bırakın.**",
         "data": {
-          "profile_name": "Profil Adı (İsteğe Bağlı)",
+          "profile_name": "Profil Adı (İsteğe bağlı)",
           "manual_duration": "Tahmini Süre (dakika)"
         }
       }
@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "Öğrenme Geri Bildirimlerini İnceleyin",
           "settings": "Ayarlar",
+          "notifications": "Bildirimler",
           "manage_cycles": "Döngüleri Yönet",
           "manage_profiles": "Profilleri Yönet",
-          "record_cycle": "Kayıt Döngüsü (Manuel)",
-          "diagnostics": "Teşhis ve Bakım",
           "manage_phase_catalog": "Aşama Kataloğunu Yönet",
-          "notifications": "Bildirimler"
+          "record_cycle": "Kayıt Döngüsü (Manuel)",
+          "diagnostics": "Teşhis ve Bakım"
         }
       },
       "apply_suggestions": {
@@ -67,8 +67,8 @@
           "off_delay": "Döngü Sonu Gecikmesi (ler)",
           "notify_service": "Bildirim Hizmeti (ör. notify.mobile_app)",
           "notify_actions": "Bildirim Eylemleri",
-          "notify_people": "Bildirilecek Kişiler",
-          "notify_only_when_home": "Yalnızca Evdeyken Bildir",
+          "notify_people": "Bu İnsanlar Eve Gelene Kadar Teslimatı Erteleyin",
+          "notify_only_when_home": "Seçilen Kişi Eve Gelene Kadar Bildirimleri Erteleyin",
           "notify_fire_events": "Yangın Otomasyonu Etkinlikleri",
           "notify_events": "Bildirilecek Olaylar",
           "notify_before_end_minutes": "Tamamlama Öncesi Bildirim (bitişten dakikalar önce)",
@@ -80,18 +80,56 @@
           "show_advanced": "Gelişmiş Ayarları Düzenle (Sonraki Adım)"
         },
         "data_description": {
-          "apply_suggestions": "Öğrenme algoritması tarafından önerilen değerleri forma kopyalamak için bu kutuyu işaretleyin. Kaydetmeden önce inceleyin.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- sure_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Öğrenme algoritması tarafından önerilen değerleri forma kopyalamak için bu kutuyu işaretleyin. Kaydetmeden önce inceleyin.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- süre_toleransı: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "Cihaz tipini seçin (Çamaşır Makinesi, Kurutucu, Bulaşık Makinesi, Kahve Makinesi, EV). Bu etiket, daha iyi organizasyon için her döngüde saklanır.",
           "power_sensor": "Gerçek zamanlı gücü (watt cinsinden) bildiren sensör varlığı. Geçmiş verileri kaybetmeden bunu istediğiniz zaman değiştirebilirsiniz; akıllı fişi değiştirirseniz kullanışlıdır.",
           "min_power": "Bu eşiğin üzerindeki güç değerleri (watt cinsinden) cihazın çalıştığını gösterir. Çoğu cihaz için 2W ile başlayın.",
           "off_delay": "Tamamlanmayı işaretlemek için yumuşatılmış gücün saniyeler içinde durma eşiğinin altında kalması gerekir. Varsayılan: 120s.",
           "notify_service": "Ev Asistanı'nın kullanılması için hizmeti bilgilendirin (isteğe bağlı).",
           "notify_actions": "Bildirimler (komut dosyaları, bildirim, TTS vb.) için çalıştırılacak isteğe bağlı Ev Asistanı eylem dizisi. Ayarlanırsa eylemler, geri dönüş bildirim hizmetinden önce çalıştırılır.",
-          "notify_people": "Ev/dışarı geçişi için kullanılacak insan varlıkları. Etkinleştirildiğinde bildirimler birisi eve gelene kadar ertelenir.",
+          "notify_people": "Varlık geçidi için kullanılan kişi varlıkları. Etkinleştirildiğinde, seçilen en az bir kişi evde olana kadar bildirim teslimi ertelenir.",
           "notify_only_when_home": "Etkinleştirilirse, seçilen en az bir kişi evde olana kadar bildirimleri erteleyin.",
-          "notify_fire_events": "Etkinleştirilirse, otomasyonları desteklemek için döngü başlangıcı ve bitişi (ha_washdata_cycle_started/end) için Home Assistant olaylarını tetikleyin.",
+          "notify_fire_events": "Etkinleştirilirse, otomasyonları desteklemek için döngü başlangıcı ve bitişi (ha_washdata_cycle_started ve ha_washdata_cycle_end) için Home Assistant olaylarını tetikleyin.",
           "notify_events": "Hangi etkinlikler için bildirim gönderileceği.",
           "notify_before_end_minutes": "Bir bildirimin tetiklenmesi için döngünün tahmini bitiminden dakikalar önce. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0.",
+          "notify_title": "Bildirimler için özel başlık. {device} yer tutucusunu destekler.",
+          "notify_icon": "Bildirimler için kullanılacak simge (ör. mdi:çamaşır makinesi). Varsayılanı kullanmak için boş bırakın.",
+          "notify_start_message": "Bir döngü başladığında gönderilen mesaj. {device} yer tutucusunu destekler.",
+          "notify_finish_message": "Bir döngü tamamlandığında gönderilen mesaj. {device}, {duration}, {program} yer tutucularını destekler.",
+          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler."
+        }
+      },
+      "notifications": {
+        "title": "Bildirimler",
+        "description": "Bildirim kanallarını, şablonları ve isteğe bağlı canlı mobil ilerleme güncellemelerini yapılandırın.",
+        "data": {
+          "notify_service": "Bildirim Hizmeti (ör. notify.mobile_app)",
+          "notify_actions": "Bildirim Eylemleri",
+          "notify_people": "Bu İnsanlar Eve Gelene Kadar Teslimatı Erteleyin",
+          "notify_only_when_home": "Seçilen Kişi Eve Gelene Kadar Bildirimleri Erteleyin",
+          "notify_fire_events": "Yangın Otomasyonu Etkinlikleri",
+          "notify_events": "Bildirilecek Olaylar",
+          "notify_before_end_minutes": "Tamamlama Öncesi Bildirim (bitişten dakikalar önce)",
+          "notify_live_enabled": "Canlı İlerleme Bildirimlerini Etkinleştir",
+          "notify_live_interval_seconds": "Canlı Güncelleme Aralığı (saniye)",
+          "notify_live_overrun_percent": "Canlı Güncelleme Aşım İzinleri (%)",
+          "notify_title": "Bildirim Başlığı",
+          "notify_icon": "Bildirim Simgesi",
+          "notify_start_message": "Mesaj Formatını Başlat",
+          "notify_finish_message": "Mesaj Formatını Bitir",
+          "notify_pre_complete_message": "Tamamlanma Öncesi Mesaj Formatı"
+        },
+        "data_description": {
+          "notify_service": "Ev Asistanı'nın kullanılması için hizmeti bilgilendirin (isteğe bağlı).",
+          "notify_actions": "Bildirimler (komut dosyaları, bildirim, TTS vb.) için çalıştırılacak isteğe bağlı Ev Asistanı eylem dizisi. Ayarlanırsa eylemler, geri dönüş bildirim hizmetinden önce çalıştırılır.",
+          "notify_people": "Varlık geçidi için kullanılan kişi varlıkları. Etkinleştirildiğinde, seçilen en az bir kişi evde olana kadar bildirim teslimi ertelenir.",
+          "notify_only_when_home": "Etkinleştirilirse, seçilen en az bir kişi evde olana kadar bildirimleri erteleyin.",
+          "notify_fire_events": "Etkinleştirilirse, otomasyonları desteklemek için döngü başlangıcı ve bitişi (ha_washdata_cycle_started ve ha_washdata_cycle_end) için Home Assistant olaylarını tetikleyin.",
+          "notify_events": "Hangi etkinlikler için bildirim gönderileceği.",
+          "notify_before_end_minutes": "Bir bildirimin tetiklenmesi için döngünün tahmini bitiminden dakikalar önce. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0.",
+          "notify_live_enabled": "Mobil uygulama bildirimleri için yerinde canlı ilerleme güncellemelerini etkinleştirin.",
+          "notify_live_interval_seconds": "Çalıştırma sırasında ilerleme güncellemelerinin ne sıklıkta gönderildiği. Daha düşük değerler daha duyarlıdır ancak daha fazla bildirim tüketir.",
+          "notify_live_overrun_percent": "Uzun/fazla çalıştırma döngüleri için tahmini güncelleme sayısının üzerindeki güvenlik marjı (örneğin %20, 1,2 kat tahmini güncellemeye izin verir).",
           "notify_title": "Bildirimler için özel başlık. {device} yer tutucusunu destekler.",
           "notify_icon": "Bildirimler için kullanılacak simge (ör. mdi:çamaşır makinesi). Varsayılanı kullanmak için boş bırakın.",
           "notify_start_message": "Bir döngü başladığında gönderilen mesaj. {device} yer tutucusunu destekler.",
@@ -149,7 +187,7 @@
           "external_end_trigger_inverted": "Tetikleme Mantığını Tersine Çevir (Tetikleme KAPALI)"
         },
         "data_description": {
-          "apply_suggestions": "Öğrenme algoritması tarafından önerilen değerleri forma kopyalamak için bu kutuyu işaretleyin. Kaydetmeden önce inceleyin.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- sure_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Öğrenme algoritması tarafından önerilen değerleri forma kopyalamak için bu kutuyu işaretleyin. Kaydetmeden önce inceleyin.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- süre_toleransı: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "Bir döngüyü BAŞLATMAK için gücün bu eşiğin ÜZERİNDE yükselmesi gerekir. Bekleme gücünüzden daha yükseğe ayarlayın. Varsayılan: min_power + 1 W.",
           "stop_threshold_w": "Bir döngüyü SONLANDIRMAK için gücün bu eşiğin ALTINA düşmesi gerekir. Gürültünün yanlış uçları tetiklemesini önlemek için sıfırın hemen üstüne ayarlayın. Varsayılan: 0,6 * min_power.",
           "min_off_gap": "Bir döngü, bir öncekinin bitiminden bu kadar saniye sonra başlarsa, tek bir döngüde BİRLEŞTİRİLECEKTİR.",
@@ -164,7 +202,7 @@
           "profile_match_min_duration_ratio": "Profil eşleştirme için minimum süre oranı. Çalıştırma döngüsünün eşleşmesi için en azından profil süresinin bu kısmı kadar olması gerekir. Daha düşük = daha erken eşleşme. Varsayılan: 0,50 (%50).",
           "profile_match_max_duration_ratio": "Profil eşleştirme için maksimum süre oranı. Çalıştırma döngüsü profil süresinin bu katını aşmamalıdır. Daha yüksek = daha hoşgörülü. Varsayılan: 1,50 (%150).",
           "smoothing_window": "Hareketli ortalama yumuşatma için kullanılan son güç okumalarının sayısı.",
-          "profile_match_threshold": "Bir profili eşleşme olarak değerlendirmek için gereken minimum DTW benzerlik puanı (0,0–1,0). Daha yüksek = daha sıkı eşleştirme, daha az hatalı pozitif sonuç. Varsayılan: 0,4.",
+          "profile_match_threshold": "Bir profili eşleşme olarak değerlendirmek için gereken minimum DTW benzerlik puanı (0,0–1,0). Daha yüksek = daha sıkı eşleştirme, daha az yanlış pozitif. Varsayılan: 0,4.",
           "profile_unmatch_threshold": "Daha önce eşleşen profilin reddedildiği DTW benzerlik puanı (0,0–1,0). Titremeyi önlemek için eşleşme eşiğinden düşük olmalıdır. Varsayılan: 0,35.",
           "profile_duration_tolerance": "Toplam süre farkı için profil eşleştirme tarafından kullanılan tolerans (0,0–0,5). Varsayılan davranış: ±%25.",
           "interrupted_min_seconds": "Bundan daha kısa çalışmalar 'kesintiye uğramış' olarak sınıflandırılabilir.",
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "Teşhis ve Bakım",
-        "description": "Parçalanmış döngüleri birleştirmek veya depolanan verileri taşımak gibi bakım işlemlerini gerçekleştirin.\n\n{storage_stats}"
+        "description": "Parçalanmış döngüleri birleştirmek veya depolanan verileri taşımak gibi bakım işlemlerini gerçekleştirin.\n\n**Depolama Kullanımı**\n\n- Dosya Boyutu: {file_size_kb} KB\n- Döngüler: {cycle_count}\n- Profiller: {profile_count}\n- Hata Ayıklama İzleri: {debug_count}"
       },
       "clear_debug_data": {
         "title": "Hata Ayıklama Verilerini Temizle",
@@ -210,11 +248,109 @@
           "action": "Aksiyon"
         }
       },
+      "manage_cycles_empty": {
+        "title": "Döngüleri Yönet",
+        "description": "Henüz kayıtlı döngü yok.",
+        "data": {
+          "action": "Aksiyon"
+        }
+      },
       "manage_profiles": {
         "title": "Profilleri Yönet",
         "description": "Profil Özeti:\n{profile_summary}",
         "data": {
           "action": "Aksiyon"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "Profilleri Yönet",
+        "description": "Henüz profil oluşturulmadı.",
+        "data": {
+          "action": "Aksiyon"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "Aşama Kataloğunu Yönet",
+        "description": "Aşama kataloğu (bu cihaz için varsayılanlar + özel aşamalar):\n{phase_summary}",
+        "data": {
+          "action": "Aksiyon"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Özel Aşama Oluştur",
+        "description": "Özel bir aşama adı ve açıklaması oluşturun ve bunun hangi cihaz türüne uygulanacağını seçin.",
+        "data": {
+          "target_device_type": "Hedef Cihaz Türü",
+          "phase_name": "Aşama Adı",
+          "phase_description": "Aşama Açıklaması"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Özel Aşamayı Düzenle",
+        "description": "Düzenlemek için özel bir aşama seçin.",
+        "data": {
+          "phase_name": "Özel Aşama"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Özel Aşamayı Düzenle",
+        "description": "Düzenleme aşaması: {phase_name}",
+        "data": {
+          "phase_name": "Aşama Adı",
+          "phase_description": "Aşama Açıklaması"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Özel Aşamayı Sil",
+        "description": "Silinecek özel bir aşama seçin. Bu aşamayı kullanan atanan aralıklar kaldırılacaktır.",
+        "data": {
+          "phase_name": "Özel Aşama"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Faz Aralıklarını Atayın",
+        "description": "Profil için aşama önizlemesi: **{profile_name}**\n\n{timeline_svg}\n\n**Mevcut aralıklar:**\n{current_ranges}\n\nAralıkları eklemek, düzenlemek, silmek veya kaydetmek için aşağıdaki işlemleri kullanın.",
+        "data": {
+          "action": "Aksiyon"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Faz Aralığı Ekle",
+        "description": "Mevcut taslağa bir aşama aralığı ekleyin.",
+        "data": {
+          "phase_name": "Faz",
+          "start_min": "Başlangıç ​​Dakikası",
+          "end_min": "Bitiş Dakikası"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Faz Aralığını Düzenle",
+        "description": "Düzenlemek için bir aralık seçin.",
+        "data": {
+          "range_index": "Faz Aralığı"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Faz Aralığını Düzenle",
+        "description": "Seçilen faz aralığını güncelleyin.",
+        "data": {
+          "phase_name": "Faz",
+          "start_min": "Başlangıç ​​Dakikası",
+          "end_min": "Bitiş Dakikası"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Faz Aralığını Sil",
+        "description": "Taslaktan kaldırılacak bir aralık seçin.",
+        "data": {
+          "range_index": "Faz Aralığı"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Faz Aralıklarını Atayın",
+        "description": "Faz aralıklarını yapılandırmak için bir profil seçin.",
+        "data": {
+          "profile": "Profil"
         }
       },
       "profile_stats": {
@@ -254,7 +390,7 @@
       },
       "delete_profile_confirm": {
         "title": "Profili Silmeyi Onayla",
-        "description": "⚠️ Bu işlem, şu profili kalıcı olarak silecektir: {profile_name}",
+        "description": "⚠️ Bu, şu profili kalıcı olarak silecektir: {profile_name}",
         "data": {
           "unlabel_cycles": "Bu profili kullanarak döngülerden etiketi kaldırın"
         }
@@ -267,7 +403,7 @@
         }
       },
       "select_cycle_to_label": {
-        "title": "Etiketlemek için Döngüyü Seçin",
+        "title": "Etiketlemek için Döngüyü Seç",
         "description": "✓ = tamamlandı, ⚠ = devam ettirildi, ✗ = kesintiye uğradı",
         "data": {
           "cycle_id": "Döngü"
@@ -309,7 +445,7 @@
       },
       "cleanup_select": {
         "title": "Geçmişi Temizleme - Grafikleme ve Silme",
-        "description": "![Grafik]({graph_url})\n\n**{profile_name} görselleştiriliyor**\n\nGrafik bireysel döngüleri renkli çizgilerle gösterir. Aykırı değerleri (gruptan uzaktaki çizgiler) belirleyin ve bunları silmek için aşağıdaki listede renklerini eşleştirin.\n\n**KALICI OLARAK silinecek döngüleri seçin:**",
+        "description": "![Grafik]({graph_url})\n\n**Görselleştiriliyor{profile_name}**\n\nGrafik bireysel döngüleri renkli çizgilerle gösterir. Aykırı değerleri (gruptan uzaktaki çizgiler) belirleyin ve bunları silmek için aşağıdaki listede renklerini eşleştirin.\n\n**KALICI OLARAK silinecek döngüleri seçin:**",
         "data": {
           "cycles_to_delete": "Silinecek Döngüler (eşleşen renkleri kontrol edin)"
         }
@@ -335,7 +471,7 @@
           "confirm_action": "Aksiyon",
           "merged_profile": "Ortaya Çıkan Profil",
           "new_profile_name": "Yeni Profil Adı",
-          "confirm_commit": "Evet, bu eylemi onaylıyorum",
+          "confirm_commit": "Evet, bu işlemi onaylıyorum",
           "segment_0_profile": "Segment 1 Profili",
           "segment_1_profile": "Segment 2 Profili",
           "segment_2_profile": "Segment 3 Profili",
@@ -361,14 +497,14 @@
       },
       "wipe_history": {
         "title": "Geçmişi Sil (Yalnızca Test)",
-        "description": "⚠️ Bu işlem, bu cihaz için saklanan TÜM döngüleri ve profilleri kalıcı olarak silecektir. Bu geri alınamaz!"
+        "description": "⚠️ Bu, bu cihaz için kayıtlı TÜM döngüleri ve profilleri kalıcı olarak silecektir. Bu geri alınamaz!"
       },
       "export_import": {
         "title": "JSON'u Dışa/İçe Aktarma",
         "description": "Bu cihaz için döngüleri, profilleri VE ayarları kopyalayın/yapıştırın. Aşağıya aktarın veya içe aktarmak için JSON'u yapıştırın.",
         "data": {
-          "json_payload": "Yapılandırmayı Tamamla JSON",
-          "mode": "Aksiyon"
+          "mode": "Aksiyon",
+          "json_payload": "Yapılandırmayı Tamamla JSON"
         },
         "data_description": {
           "mode": "Geçerli verileri ve ayarları kopyalamak için Dışa Aktar'ı veya başka bir WashData cihazından dışa aktarılan verileri yapıştırmak için İçe Aktar'ı seçin.",
@@ -377,7 +513,7 @@
       },
       "record_cycle": {
         "title": "Kayıt Döngüsü",
-        "description": "Müdahale olmadan temiz bir profil oluşturmak için bir döngüyü manuel olarak kaydedin.\n\nDurum: **{status}**\nSüre: {duration} sn\nÖrnekler: {samples}",
+        "description": "Müdahale olmadan temiz bir profil oluşturmak için bir döngüyü manuel olarak kaydedin.\n\nDurum: **{status}**\nSüre: {duration}sn\nÖrnekler: {samples}",
         "data": {
           "action": "Aksiyon"
         }
@@ -405,133 +541,11 @@
       },
       "resolve_feedback": {
         "title": "Geri Bildirimi Çözümleyin",
-        "description": "**Algılanan Program**: {profile}\n**Güven**: %{confidence}\n**Tahmini**: {est}m, **Gerçek**: {act}m",
+        "description": "{comparison_img}{candidates_table}\n**Algılanan Profil**: {detected_profile} (%{confidence_pct})\n**Tahmini Süre**: {est_duration_min} dk.\n**Gerçek Süre**: {act_duration_min} dk.\n\n__Aşağıdan bir işlem seçin:__",
         "data": {
+          "action": "Ne yapmak istersin?",
           "corrected_profile": "Doğru Program (düzeltiliyorsa)",
-          "corrected_duration": "Dakika cinsinden Doğru Süre (düzeltiliyorsa)",
-          "action": "Ne yapmak istersin?"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Aşama Kataloğunu Yönet",
-        "description": "Bu cihaz tipi için mevcut aşamalar:\n{phase_summary}",
-        "data": {
-          "action": "Aksiyon"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Özel Aşama Oluştur",
-        "description": "Bu cihaz türü için özel bir aşama adı ve açıklaması oluşturun.",
-        "data": {
-          "phase_name": "Aşama Adı",
-          "phase_description": "Aşama Açıklaması",
-          "target_device_type": "Hedef Cihaz Türü"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Özel Aşamayı Düzenle",
-        "description": "Düzenlemek için özel bir aşama seçin.",
-        "data": {
-          "phase_name": "Özel Aşama"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Özel Aşamayı Düzenle",
-        "description": "Düzenleme aşaması: {phase_name}",
-        "data": {
-          "phase_name": "Aşama Adı",
-          "phase_description": "Aşama Açıklaması"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Özel Aşamayı Sil",
-        "description": "Silinecek özel bir aşama seçin. Bu aşamayı kullanan atanan aralıklar kaldırılacaktır.",
-        "data": {
-          "phase_name": "Özel Aşama"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Faz Aralıklarını Atayın",
-        "description": "Profil: **{profile_name}**\nMod: **{assign_mode}**\nDöngü ipucu: {cycle_hint}\n\nMevcut aralıklar:\n{current_ranges}\n\nFaz etiketleri görüntüleme ve düzenleme amaçlıdır. Algılama, faz adlarını değil, güç modellerini kullanır.",
-        "data": {
-          "action": "Aksiyon"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "Faz Aralıklarını Atayın",
-        "description": "Faz aralıklarını yapılandırmak için bir profil seçin.",
-        "data": {
-          "profile": "Profil"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Faz Aralığı Ekle",
-        "description": "Mevcut taslağa bir aşama aralığı ekleyin.",
-        "data": {
-          "phase_name": "Faz",
-          "start_min": "Başlangıç ​​Dakikası",
-          "end_min": "Bitiş Dakikası"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Faz Aralığını Düzenle",
-        "description": "Düzenlemek için bir aralık seçin.",
-        "data": {
-          "range_index": "Faz Aralığı"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Faz Aralığını Düzenle",
-        "description": "Seçilen faz aralığını güncelleyin.",
-        "data": {
-          "phase_name": "Faz",
-          "start_min": "Başlangıç ​​Dakikası",
-          "end_min": "Bitiş Dakikası"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Faz Aralığını Sil",
-        "description": "Taslaktan kaldırılacak bir aralık seçin.",
-        "data": {
-          "range_index": "Faz Aralığı"
-        }
-      },
-      "notifications": {
-        "title": "Bildirimler",
-        "description": "Bildirim kanallarını, şablonları ve isteğe bağlı canlı mobil ilerleme güncellemelerini yapılandırın.",
-        "data": {
-          "notify_service": "Bildirim Hizmeti (ör. notify.mobile_app)",
-          "notify_actions": "Bildirim Eylemleri",
-          "notify_people": "Bildirilecek Kişiler",
-          "notify_only_when_home": "Yalnızca Evdeyken Bildir",
-          "notify_fire_events": "Yangın Otomasyonu Etkinlikleri",
-          "notify_events": "Bildirilecek Olaylar",
-          "notify_before_end_minutes": "Tamamlama Öncesi Bildirim (bitişten dakikalar önce)",
-          "notify_live_enabled": "Canlı İlerleme Bildirimlerini Etkinleştir",
-          "notify_live_interval_seconds": "Canlı Güncelleme Aralığı (saniye)",
-          "notify_live_overrun_percent": "Canlı Güncelleme Aşım İzinleri (%)",
-          "notify_title": "Bildirim Başlığı",
-          "notify_icon": "Bildirim Simgesi",
-          "notify_start_message": "Mesaj Formatını Başlat",
-          "notify_finish_message": "Mesaj Formatını Bitir",
-          "notify_pre_complete_message": "Tamamlanma Öncesi Mesaj Formatı"
-        },
-        "data_description": {
-          "notify_service": "Ev Asistanı'nın kullanılması için hizmeti bilgilendirin (isteğe bağlı).",
-          "notify_actions": "Bildirimler (komut dosyaları, bildirim, TTS vb.) için çalıştırılacak isteğe bağlı Ev Asistanı eylem dizisi. Ayarlanırsa eylemler, geri dönüş bildirim hizmetinden önce çalıştırılır.",
-          "notify_people": "Ev/dışarı geçişi için kullanılacak insan varlıkları. Etkinleştirildiğinde bildirimler birisi eve gelene kadar ertelenir.",
-          "notify_only_when_home": "Etkinleştirilirse, seçilen en az bir kişi evde olana kadar bildirimleri erteleyin.",
-          "notify_fire_events": "Etkinleştirilirse, otomasyonları desteklemek için döngü başlangıcı ve bitişi (ha_washdata_cycle_started/end) için Home Assistant olaylarını tetikleyin.",
-          "notify_events": "Hangi etkinlikler için bildirim gönderileceği.",
-          "notify_before_end_minutes": "Bir bildirimin tetiklenmesi için döngünün tahmini bitiminden dakikalar önce. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0.",
-          "notify_live_enabled": "Mobil uygulama bildirimleri için yerinde canlı ilerleme güncellemelerini etkinleştirin.",
-          "notify_live_interval_seconds": "Çalıştırma sırasında ilerleme güncellemelerinin ne sıklıkta gönderildiği. Daha düşük değerler daha duyarlıdır ancak daha fazla bildirim tüketir.",
-          "notify_live_overrun_percent": "Uzun/fazla çalıştırma döngüleri için tahmini güncelleme sayısının üzerindeki güvenlik marjı (örneğin %20, 1,2 kat tahmini güncellemeye izin verir).",
-          "notify_title": "Bildirimler için özel başlık. {device} yer tutucusunu destekler.",
-          "notify_icon": "Bildirimler için kullanılacak simge (ör. mdi:çamaşır makinesi). Varsayılanı kullanmak için boş bırakın.",
-          "notify_start_message": "Bir döngü başladığında gönderilen mesaj. {device} yer tutucusunu destekler.",
-          "notify_finish_message": "Bir döngü tamamlandığında gönderilen mesaj. {device}, {duration}, {program} yer tutucularını destekler.",
-          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler."
+          "corrected_duration": "Dakika cinsinden Doğru Süre (düzeltiliyorsa)"
         }
       }
     },
@@ -540,8 +554,6 @@
       "profile_exists": "Bu ada sahip bir profil zaten mevcut",
       "rename_failed": "Profil yeniden adlandırılamadı. Profil mevcut olmayabilir veya yeni ad zaten alınmış olabilir.",
       "assignment_failed": "Profil döngüye atanamadı",
-      "feedback_notification_title": "WashData: Döngüyü Doğrulayın ({device})",
-      "feedback_notification_message": "**Cihaz**: {device}\n**Program**: {program} (%{confidence} güven)\n**Zaman**: {time}\n\nWashData'nın tespit edilen bu döngüyü doğrulamak için yardımınıza ihtiyacı var.\n\nBu sonucu onaylamak veya düzeltmek için lütfen **Ayarlar > Cihazlar ve Hizmetler > WashData > Yapılandır > Öğrenme Geri Bildirimleri** seçeneğine gidin.",
       "duplicate_phase": "Bu ada sahip bir aşama zaten mevcut.",
       "phase_not_found": "Seçilen aşama bulunamadı.",
       "invalid_phase_name": "Aşama adı boş olamaz.",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "Faz aralıkları çakışıyor. Aralıkları ayarlayıp tekrar deneyin.",
       "incomplete_phase_row": "Her aşama satırı, seçilen mod için bir aşama artı tam başlangıç/bitiş değerlerini içermelidir.",
       "timestamp_mode_cycle_required": "Zaman damgası modunu kullanırken lütfen bir kaynak döngüsü seçin.",
-      "no_phase_ranges": "Bu eylem için henüz herhangi bir faz aralığı mevcut değil."
+      "no_phase_ranges": "Bu eylem için henüz herhangi bir faz aralığı mevcut değil.",
+      "feedback_notification_title": "WashData: Döngüyü Doğrula ({device})",
+      "feedback_notification_message": "**Cihaz**: {device}\n**Program**: {program} (%{confidence} güven)\n**Zaman**: {time}\n\nWashData'nın tespit edilen bu döngüyü doğrulamak için yardımınıza ihtiyacı var.\n\nBu sonucu onaylamak veya düzeltmek için lütfen **Ayarlar > Cihazlar ve Hizmetler > WashData > Yapılandır > Öğrenme Geri Bildirimleri** seçeneğine gidin."
     },
     "abort": {
       "no_cycles_found": "Döngü bulunamadı",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "Tüm döngüler zaten etiketlenmiştir",
       "no_suggestions": "Henüz önerilen değer yok. Birkaç döngü çalıştırın ve tekrar deneyin.",
       "no_predictions": "Tahmin yok",
+      "no_custom_phases": "Özel aşama bulunamadı.",
       "reprocess_success": "{count} döngü başarıyla yeniden işlendi.",
-      "debug_data_cleared": "{count} döngüdeki hata ayıklama verileri başarıyla temizlendi.",
-      "no_custom_phases": "Bu cihaz türü için özel aşama bulunamadı."
+      "debug_data_cleared": "{count} döngüdeki hata ayıklama verileri başarıyla temizlendi."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "Döngü Başlatma",
+        "cycle_finish": "Döngü Sonu",
+        "cycle_live": "Canlı İlerleme"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(Etiketlenmemiş)",
+        "create_new_profile": "Yeni Profil Oluştur",
+        "remove_label": "Etiketi Kaldır",
+        "no_reference_cycle": "(Referans döngüsü yok)",
+        "all_device_types": "Tüm Cihaz Tipleri",
+        "current_suffix": "(akım)",
+        "editor_select_info": "Bölmek için 1 döngüyü veya birleştirmek için 2+ döngüyü seçin.",
+        "no_cycles_recorded": "Henüz kayıtlı döngü yok.",
+        "profile_summary_line": "- **{name}**: {count} döngü, {avg}m ort.",
+        "no_profiles_created": "Henüz profil oluşturulmadı.",
+        "phase_preview": "Aşama Önizleme",
+        "phase_preview_no_curve": "Ortalama profil eğrisi henüz mevcut değil. Bu profil için daha fazla döngü çalıştırın/etiketleyin.",
+        "average_power_curve": "Ortalama Güç Eğrisi",
+        "unit_min": "dk.",
+        "profile_option_fmt": "{name} ({count} döngü, ~{duration}m ort)",
+        "profile_option_short_fmt": "{name} ({count} döngü, ~{duration}dk)",
+        "deleted_cycles_from_profile": "{profile} öğesinden {count} döngü silindi.",
+        "not_enough_data_graph": "Grafik oluşturmak için yeterli veri yok.",
+        "no_profiles_found": "Hiçbir profil bulunamadı.",
+        "cycle_info_fmt": "Döngü: {start}, {duration}dk, Akım: {label}",
+        "top_candidates_header": "### En İyi Adaylar",
+        "tbl_profile": "Profil",
+        "tbl_confidence": "Kendinden emin",
+        "tbl_correlation": "Korelasyon",
+        "tbl_duration_match": "Süre Eşleşmesi",
+        "detected_profile": "Algılanan Profil",
+        "estimated_duration": "Tahmini Süre",
+        "actual_duration": "Fiili Süre",
+        "choose_action": "__Aşağıdan bir işlem seçin:__",
+        "tbl_count": "Saymak",
+        "tbl_avg": "Ort.",
+        "tbl_min": "Min.",
+        "tbl_max": "Maksimum",
+        "tbl_energy_avg": "Enerji (Ort.)",
+        "tbl_energy_total": "Enerji (Toplam)",
+        "tbl_consistency": "Meydana gelmek.",
+        "tbl_last_run": "Son Çalıştırma",
+        "graph_legend_title": "Grafik Açıklaması",
+        "graph_legend_body": "Mavi bant gözlemlenen minimum ve maksimum güç çekiş aralığını temsil eder. Çizgi ortalama güç eğrisini gösterir.",
+        "recording_preview": "Kayıt Önizlemesi",
+        "trim_start": "Kırpma Başlangıcı",
+        "trim_end": "Kırpma Sonu",
+        "split_preview_title": "Bölünmüş Önizleme",
+        "split_preview_found_fmt": "{count} segment bulundu.",
+        "split_preview_confirm_fmt": "Bu döngüyü {count} ayrı döngüye bölmek için Onayla'yı tıklayın.",
+        "merge_preview_title": "Önizlemeyi Birleştir",
+        "merge_preview_joining_fmt": "{count} döngüye katılıyoruz. Boşluklar 0W okumalarıyla doldurulacaktır.",
+        "profile_comparison": "Profil Karşılaştırması",
+        "actual_cycle_label": "Bu döngü (gerçek)",
+        "storage_usage_header": "Depolama Kullanımı",
+        "storage_file_size": "Dosya Boyutu",
+        "storage_cycles": "Döngüler",
+        "storage_profiles": "Profiller",
+        "storage_debug_traces": "Hata Ayıklama İzleri",
+        "overview_suffix": "Genel Bakış",
+        "phase_preview_for_profile": "Profil için aşama önizlemesi",
+        "current_ranges_header": "Mevcut aralıklar",
+        "assign_phases_help": "Aralıkları eklemek, düzenlemek, silmek veya kaydetmek için aşağıdaki işlemleri kullanın.",
+        "profile_summary_header": "Profil Özeti",
+        "recent_cycles_header": "Son döngüler"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "Bir Döngüyü Böl (Boşlukları Bul)",
+        "merge": "Döngüleri Birleştir (Parçaları birleştir)",
+        "delete": "Döngüleri Sil"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "Bakım: Verileri Yeniden İşleyin ve Optimize Edin",
+        "clear_debug_data": "Hata Ayıklama Verilerini Temizle (Yer açın)",
+        "wipe_history": "Bu cihaza ait TÜM verileri silin (geri döndürülemez)",
+        "export_import": "JSON'u ayarlarla dışa/içe aktar (kopyala/yapıştır)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "Tüm Verileri Dışa Aktar",
+        "import": "Verileri İçe Aktarma/Birleştirme"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "Eski Döngüleri Otomatik Etiketle",
+        "select_cycle_to_label": "Etikete Özel Döngü",
+        "select_cycle_to_label_multi": "Çoklu Döngüleri Etiketleme",
+        "select_cycle_to_delete": "Döngüyü Sil",
+        "interactive_editor": "Birleştir/Böl İnteraktif Düzenleyici"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "Yeni Profil Oluştur",
+        "edit_profile": "Profili Düzenle/Yeniden Adlandır",
+        "delete_profile": "Profili Sil",
+        "profile_stats": "Profil İstatistikleri",
+        "cleanup_profile": "Geçmişi Temizleme - Grafikleme ve Silme",
+        "assign_phases": "Faz Aralıklarını Atayın"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "Yeni Aşama Oluştur",
+        "edit_custom_phase": "Aşamayı Düzenle",
+        "delete_custom_phase": "Aşamayı Sil"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "Faz Aralığı Ekle",
+        "edit_range": "Faz Aralığını Düzenle",
+        "delete_range": "Faz Aralığını Sil",
+        "clear_ranges": "Tüm Aralıkları Temizle",
+        "save_ranges": "Kaydet ve Geri Dön"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "Durumu Yenile",
+        "stop_recording": "Kaydı Durdur (Kaydet ve İşle)",
+        "start_recording": "Yeni Kaydı Başlat",
+        "process_recording": "Son Kaydı İşle (Kırp ve Kaydet)",
+        "discard_recording": "Son Kaydı Sil"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "Yeni Profil Oluştur",
+        "existing_profile": "Mevcut Profile Ekle",
+        "discard": "Kaydı Sil"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "Onayla - Doğru Tespit",
+        "correct": "Doğru - Program/Süreyi Seçin",
+        "ignore": "Yoksay - Yanlış Pozitif/Gürültülü Döngü",
+        "delete": "Sil - Geçmişten Kaldır"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "Etiket Döngüsü",
+      "description": "Mevcut bir profili geçmiş bir döngüye atayın veya etiketi kaldırın.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "Etiketlenecek çamaşır makinesi cihazı."
+        },
+        "cycle_id": {
+          "name": "Döngü Kimliği",
+          "description": "Etiketlenecek döngünün kimliği."
+        },
+        "profile_name": {
+          "name": "Profil Adı",
+          "description": "Mevcut bir profilin adı (Profilleri Yönet menüsünde profiller oluşturun). Etiketi kaldırmak için boş bırakın."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "Profil Oluştur",
+      "description": "Yeni bir profil oluşturun (bağımsız veya bir referans döngüsüne dayalı).",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "Çamaşır makinesi cihazı."
+        },
+        "profile_name": {
+          "name": "Profil Adı",
+          "description": "Yeni profilin adı (ör. 'Ağır Hizmet', 'Hassas')."
+        },
+        "reference_cycle_id": {
+          "name": "Referans Döngü Kimliği",
+          "description": "Bu profili temel alacak isteğe bağlı döngü kimliği."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "Profili Sil",
+      "description": "Bir profili silin ve isteğe bağlı olarak onu kullanarak döngülerin etiketini kaldırın.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "Çamaşır makinesi cihazı."
+        },
+        "profile_name": {
+          "name": "Profil Adı",
+          "description": "Silinecek profil."
+        },
+        "unlabel_cycles": {
+          "name": "Döngülerin Etiketini Kaldırma",
+          "description": "Bu profili kullanarak profil etiketini döngülerden kaldırın."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "Eski Döngüleri Otomatik Etiketle",
+      "description": "Profil eşleştirmeyi kullanarak etiketlenmemiş döngüleri geriye dönük olarak etiketleyin.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "Çamaşır makinesi cihazı."
+        },
+        "confidence_threshold": {
+          "name": "Güven Eşiği",
+          "description": "Etiketleri uygulamak için minimum eşleşme güvenirliği (0,50-0,95)."
+        }
+      }
+    },
+    "export_config": {
+      "name": "Yapılandırmayı Dışa Aktar",
+      "description": "Bu cihazın profillerini, döngülerini ve ayarlarını bir JSON dosyasına (cihaz başına) aktarın.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "Dışa aktarılacak çamaşır makinesi cihazı."
+        },
+        "path": {
+          "name": "Yol",
+          "description": "Yazılacak isteğe bağlı mutlak dosya yolu (varsayılan olarak /config/ha_washdata_export_{entry}.json şeklindedir)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "Yapılandırmayı İçe Aktar",
+      "description": "Bu cihazın profillerini, döngülerini ve ayarlarını bir JSON dışa aktarma dosyasından içe aktarın (ayarların üzerine yazılabilir).",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "İçe aktarılacak çamaşır makinesi cihazı."
+        },
+        "path": {
+          "name": "Yol",
+          "description": "İçe aktarılacak dışa aktarma JSON dosyasının mutlak yolu."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "Döngü Geri Bildirimi Gönder",
+      "description": "Tamamlanan bir döngüden sonra otomatik olarak algılanan bir programı onaylayın veya düzeltin. \"Entry_id\" (gelişmiş) veya \"device_id\" (önerilen) bilgilerini sağlayın.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "WashData cihazı (entry_id yerine önerilir)."
+        },
+        "entry_id": {
+          "name": "Giriş Kimliği",
+          "description": "Cihazın yapılandırma girişi kimliği (cihaz_id'ye alternatif)."
+        },
+        "cycle_id": {
+          "name": "Döngü Kimliği",
+          "description": "Geri bildirim bildiriminde/günlüklerinde gösterilen döngü kimliği."
+        },
+        "user_confirmed": {
+          "name": "Algılanan Programı Onayla",
+          "description": "Algılanan program doğruysa true'yu ayarlayın."
+        },
+        "corrected_profile": {
+          "name": "Düzeltilmiş Profil",
+          "description": "Onaylanmazsa doğru profil/program adını girin."
+        },
+        "corrected_duration": {
+          "name": "Düzeltilmiş Süre (saniye)",
+          "description": "İsteğe bağlı olarak saniye cinsinden düzeltilmiş süre."
+        },
+        "notes": {
+          "name": "Notlar",
+          "description": "Bu döngüyle ilgili isteğe bağlı notlar."
+        }
+      }
+    },
+    "record_start": {
+      "name": "Kayıt Döngüsü Başlatma",
+      "description": "Temiz bir döngüyü manuel olarak kaydetmeye başlayın (tüm eşleşen mantığı atlar).",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "Kaydetmek için çamaşır makinesi cihazı."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "Kayıt Döngüsünü Durdurma",
+      "description": "Manuel kaydı durdurun.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "Çamaşır makinesi cihazının kaydı durdurması."
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "Koşma"
+      },
+      "match_ambiguity": {
+        "name": "Eşleşme Belirsizliği"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "Durum"
+        "name": "Durum",
+        "state": {
+          "off": "Kapalı",
+          "idle": "Boşta",
+          "starting": "Başlangıç",
+          "running": "Koşma",
+          "paused": "Duraklatıldı",
+          "ending": "Bitiş",
+          "finished": "Bitti",
+          "anti_wrinkle": "Kırışıklık Karşıtı",
+          "interrupted": "Kesintiye uğradı",
+          "force_stopped": "Zorla Durduruldu",
+          "rinse": "Durulmak",
+          "unknown": "Bilinmiyor"
+        }
       },
       "washer_program": {
         "name": "programı"
@@ -595,16 +936,23 @@
         "name": "Maç Güveni"
       },
       "top_candidates": {
-        "name": "En İyi Adaylar"
+        "name": "En İyi Adaylar",
+        "state": {
+          "none": "Hiçbiri"
+        }
+      },
+      "current_phase": {
+        "name": "Mevcut Aşama"
       },
       "wash_phase": {
         "name": "Faz"
       },
+      "profile_cycle_count": {
+        "name": "Profil {profile_name} Sayısı",
+        "unit_of_measurement": "döngüler"
+      },
       "suggestions": {
         "name": "Önerilen Ayarlar"
-      },
-      "current_phase": {
-        "name": "Mevcut Aşama"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "Otomatik Algılama"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "Sonlandırma Döngüsünü Zorla"
       }
     }
   }

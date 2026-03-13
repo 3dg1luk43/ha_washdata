@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "سیکھنے کے تاثرات کا جائزہ لیں۔",
           "settings": "ترتیبات",
+          "notifications": "اطلاعات",
           "manage_cycles": "سائیکلوں کا نظم کریں۔",
           "manage_profiles": "پروفائلز کا نظم کریں۔",
-          "record_cycle": "ریکارڈ سائیکل (دستی)",
-          "diagnostics": "تشخیص اور دیکھ بھال",
           "manage_phase_catalog": "فیز کیٹلاگ کا نظم کریں۔",
-          "notifications": "اطلاعات"
+          "record_cycle": "ریکارڈ سائیکل (دستی)",
+          "diagnostics": "تشخیص اور دیکھ بھال"
         }
       },
       "apply_suggestions": {
@@ -67,8 +67,8 @@
           "off_delay": "سائیکل کے اختتام میں تاخیر",
           "notify_service": "اطلاع کی خدمت (جیسے notify.mobile_app)",
           "notify_actions": "اطلاعی کارروائیاں",
-          "notify_people": "لوگوں کو مطلع کرنا",
-          "notify_only_when_home": "گھر پہنچنے پر صرف اطلاع دیں۔",
+          "notify_people": "جب تک یہ لوگ گھر نہ ہوں ڈیلیوری میں تاخیر کریں۔",
+          "notify_only_when_home": "نوٹیفیکیشن میں اس وقت تک تاخیر کریں جب تک کہ منتخب شخص گھر نہ ہو۔",
           "notify_fire_events": "فائر آٹومیشن ایونٹس",
           "notify_events": "مطلع کرنے کے لیے واقعات",
           "notify_before_end_minutes": "پیشگی تکمیل کی اطلاع (ختم ہونے سے چند منٹ پہلے)",
@@ -80,18 +80,56 @@
           "show_advanced": "اعلی درجے کی ترتیبات میں ترمیم کریں (اگلا مرحلہ)"
         },
         "data_description": {
-          "apply_suggestions": "سیکھنے کے الگورتھم کے ذریعہ تجویز کردہ اقدار کو فارم میں کاپی کرنے کے لیے اس باکس کو چیک کریں۔ محفوظ کرنے سے پہلے جائزہ لیں۔\n\nتجویز کردہ (سیکھنے سے):\n- کم سے کم طاقت: {suggested_min_power} W\n- آف_دیری: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout}s\n- profile_match_interval: {suggested_profile_match_interval} s\n- خودکار_لیبل_اعتماد: {suggested_auto_label_confidence}\n- دورانیہ_رواداری: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- پروفائل_میچ_منٹ_دوران_تناسب: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "سیکھنے کے الگورتھم کے ذریعہ تجویز کردہ اقدار کو فارم میں کاپی کرنے کے لیے اس باکس کو چیک کریں۔ محفوظ کرنے سے پہلے جائزہ لیں۔\n\nتجویز کردہ (سیکھنے سے):\n- کم سے کم طاقت: {suggested_min_power} ڈبلیو\n- آف_دیری: {suggested_off_delay} سیکنڈ\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- خودکار_لیبل_اعتماد: {suggested_auto_label_confidence}\n- دورانیہ_رواداری: {suggested_duration_tolerance}\n- پروفائل_دورانیہ_رواداری: {suggested_profile_duration_tolerance}\n- پروفائل_میچ_منٹ_دوران_تناسب: {suggested_profile_match_min_duration_ratio}\n- پروفائل_میچ_زیادہ سے زیادہ_دورانیہ_تناسب: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "آلات کی قسم منتخب کریں (واشنگ مشین، ڈرائر، ڈش واشر، کافی مشین، ای وی)۔ یہ ٹیگ بہتر تنظیم کے لیے ہر سائیکل کے ساتھ محفوظ کیا جاتا ہے۔",
           "power_sensor": "ریئل ٹائم پاور کی اطلاع دینے والا سینسر ادارہ (واٹ میں)۔ آپ اسے کسی بھی وقت تاریخی ڈیٹا کو کھونے کے بغیر تبدیل کر سکتے ہیں — اگر آپ سمارٹ پلگ تبدیل کرتے ہیں تو مفید ہے۔",
           "min_power": "اس حد سے اوپر پاور ریڈنگ (واٹ میں) اشارہ کرتی ہے کہ آلات چل رہا ہے۔ زیادہ تر آلات کے لیے 2W کے ساتھ شروع کریں۔",
           "off_delay": "مکمل ہونے کے نشان کے لیے ہموار پاور کو سٹاپ کی حد سے نیچے رہنا چاہیے۔ ڈیفالٹ: 120s۔",
           "notify_service": "ہوم اسسٹنٹ مطلع سروس استعمال کرنے کے لیے (اختیاری)۔",
           "notify_actions": "اطلاعات (اسکرپٹس، نوٹیفائی، ٹی ٹی ایس، وغیرہ) کے لیے چلانے کے لیے اختیاری ہوم اسسٹنٹ ایکشن سیکوئنس۔ اگر سیٹ ہو تو فال بیک مطلع سروس سے پہلے کارروائیاں چلتی ہیں۔",
-          "notify_people": "گھر/دور گیٹنگ کے لیے استعمال کرنے والے افراد۔ فعال ہونے پر، اطلاعات اس وقت تک موخر کر دی جاتی ہیں جب تک کہ کوئی گھر نہ ہو۔",
-          "notify_only_when_home": "اگر فعال ہو تو، اطلاعات میں اس وقت تک تاخیر کریں جب تک کہ کم از کم ایک منتخب فرد گھر نہ ہو۔",
-          "notify_fire_events": "اگر فعال ہو تو، آٹومیشن چلانے کے لیے سائیکل کے آغاز اور اختتام (ha_washdata_cycle_started/ended) کے لیے ہوم اسسٹنٹ ایونٹس کو فائر کریں۔",
+          "notify_people": "موجودگی گیٹنگ کے لیے استعمال ہونے والے افراد کے ادارے۔ فعال ہونے پر، اطلاع کی ترسیل میں اس وقت تک تاخیر ہوتی ہے جب تک کہ کم از کم ایک منتخب شخص گھر نہ ہو۔",
+          "notify_only_when_home": "اگر فعال ہو تو، اطلاعات میں اس وقت تک تاخیر کریں جب تک کہ کم از کم ایک منتخب شخص گھر نہ ہو۔",
+          "notify_fire_events": "فعال ہونے پر، آٹومیشن چلانے کے لیے سائیکل کے آغاز اور اختتام (ha_washdata_cycle_started اور ha_washdata_cycle_ended) کے ہوم اسسٹنٹ ایونٹس کو فائر کریں۔",
           "notify_events": "کن واقعات کے لیے اطلاعات بھیجیں۔",
           "notify_before_end_minutes": "ایک اطلاع کو متحرک کرنے کے لیے سائیکل کے متوقع اختتام سے چند منٹ پہلے۔ غیر فعال کرنے کے لیے 0 پر سیٹ کریں۔ ڈیفالٹ: 0۔",
+          "notify_title": "اطلاعات کے لیے حسب ضرورت عنوان۔ {device} پلیس ہولڈر کو سپورٹ کرتا ہے۔",
+          "notify_icon": "اطلاعات کے لیے استعمال کرنے کے لیے آئیکن (جیسے mdi:washing-machine)۔ ڈیفالٹ استعمال کرنے کے لیے خالی چھوڑ دیں۔",
+          "notify_start_message": "ایک سائیکل شروع ہونے پر پیغام بھیجا جاتا ہے۔ {device} پلیس ہولڈر کو سپورٹ کرتا ہے۔",
+          "notify_finish_message": "ایک سائیکل ختم ہونے پر پیغام بھیجا گیا۔ {device}، {duration}، {program} پلیس ہولڈرز کو سپورٹ کرتا ہے۔",
+          "notify_pre_complete_message": "مکمل ہونے سے پہلے پیغام بھیجا گیا۔ {device}، {minutes} پلیس ہولڈرز کو سپورٹ کرتا ہے۔"
+        }
+      },
+      "notifications": {
+        "title": "اطلاعات",
+        "description": "نوٹیفکیشن چینلز، ٹیمپلیٹس، اور اختیاری لائیو موبائل پروگریس اپ ڈیٹس کو ترتیب دیں۔",
+        "data": {
+          "notify_service": "اطلاع کی خدمت (جیسے notify.mobile_app)",
+          "notify_actions": "اطلاعی کارروائیاں",
+          "notify_people": "جب تک یہ لوگ گھر نہ ہوں ڈیلیوری میں تاخیر کریں۔",
+          "notify_only_when_home": "نوٹیفیکیشن میں اس وقت تک تاخیر کریں جب تک کہ منتخب شخص گھر نہ ہو۔",
+          "notify_fire_events": "فائر آٹومیشن ایونٹس",
+          "notify_events": "مطلع کرنے کے لیے واقعات",
+          "notify_before_end_minutes": "پیشگی تکمیل کی اطلاع (ختم ہونے سے چند منٹ پہلے)",
+          "notify_live_enabled": "لائیو پیش رفت کی اطلاعات کو فعال کریں۔",
+          "notify_live_interval_seconds": "لائیو اپ ڈیٹ کا وقفہ (سیکنڈ)",
+          "notify_live_overrun_percent": "لائیو اپ ڈیٹ اووررن الاؤنس (%)",
+          "notify_title": "اطلاع کا عنوان",
+          "notify_icon": "اطلاع کا آئیکن",
+          "notify_start_message": "میسج فارمیٹ شروع کریں۔",
+          "notify_finish_message": "پیغام کی شکل ختم کریں۔",
+          "notify_pre_complete_message": "پری تکمیلی پیغام کی شکل"
+        },
+        "data_description": {
+          "notify_service": "ہوم اسسٹنٹ مطلع سروس استعمال کرنے کے لیے (اختیاری)۔",
+          "notify_actions": "اطلاعات (اسکرپٹس، نوٹیفائی، ٹی ٹی ایس، وغیرہ) کے لیے چلانے کے لیے اختیاری ہوم اسسٹنٹ ایکشن سیکوئنس۔ اگر سیٹ ہو تو فال بیک مطلع سروس سے پہلے کارروائیاں چلتی ہیں۔",
+          "notify_people": "موجودگی گیٹنگ کے لیے استعمال ہونے والے افراد کے ادارے۔ فعال ہونے پر، اطلاع کی ترسیل میں اس وقت تک تاخیر ہوتی ہے جب تک کہ کم از کم ایک منتخب شخص گھر نہ ہو۔",
+          "notify_only_when_home": "اگر فعال ہو تو، اطلاعات میں اس وقت تک تاخیر کریں جب تک کہ کم از کم ایک منتخب شخص گھر نہ ہو۔",
+          "notify_fire_events": "فعال ہونے پر، آٹومیشن چلانے کے لیے سائیکل کے آغاز اور اختتام (ha_washdata_cycle_started اور ha_washdata_cycle_ended) کے ہوم اسسٹنٹ ایونٹس کو فائر کریں۔",
+          "notify_events": "کن واقعات کے لیے اطلاعات بھیجیں۔",
+          "notify_before_end_minutes": "ایک اطلاع کو متحرک کرنے کے لیے سائیکل کے متوقع اختتام سے چند منٹ پہلے۔ غیر فعال کرنے کے لیے 0 پر سیٹ کریں۔ ڈیفالٹ: 0۔",
+          "notify_live_enabled": "موبائل ایپ کی اطلاعات کے لیے ان جگہ لائیو پروگریس اپ ڈیٹس کو فعال کریں۔",
+          "notify_live_interval_seconds": "چلتے وقت کتنی بار پروگریس اپ ڈیٹس بھیجے جاتے ہیں۔ نچلی اقدار زیادہ جوابدہ ہیں لیکن زیادہ اطلاعات استعمال کرتی ہیں۔",
+          "notify_live_overrun_percent": "حفاظتی مارجن لمبے/زیادہ چلنے والے سائیکلوں کے لیے تخمینہ شدہ اپ ڈیٹ کی گنتی سے زیادہ ہے (مثال کے طور پر 20% 1.2x تخمینہ شدہ اپ ڈیٹس کی اجازت دیتا ہے)۔",
           "notify_title": "اطلاعات کے لیے حسب ضرورت عنوان۔ {device} پلیس ہولڈر کو سپورٹ کرتا ہے۔",
           "notify_icon": "اطلاعات کے لیے استعمال کرنے کے لیے آئیکن (جیسے mdi:washing-machine)۔ ڈیفالٹ استعمال کرنے کے لیے خالی چھوڑ دیں۔",
           "notify_start_message": "ایک سائیکل شروع ہونے پر پیغام بھیجا جاتا ہے۔ {device} پلیس ہولڈر کو سپورٹ کرتا ہے۔",
@@ -110,7 +148,7 @@
           "start_duration_threshold": "ڈیباؤنس کا دورانیہ شروع کریں",
           "progress_reset_delay": "پیش رفت دوبارہ ترتیب دینے میں تاخیر (سیکنڈ)",
           "no_update_active_timeout": "کوئی اپ ڈیٹ ٹائم آؤٹ (s)",
-          "sampling_interval": "نمونے لینے کا وقفہ",
+          "sampling_interval": "نمونے لینے کا وقفہ (s)",
           "auto_label_confidence": "خودکار لیبل اعتماد (0-1)",
           "learning_confidence": "تاثرات کی درخواست اعتماد (0-1)",
           "duration_tolerance": "دورانیہ رواداری (0-0.5)",
@@ -149,7 +187,7 @@
           "external_end_trigger_inverted": "الٹا ٹرگر لاجک (ٹرگر آن آف)"
         },
         "data_description": {
-          "apply_suggestions": "سیکھنے کے الگورتھم کے ذریعہ تجویز کردہ اقدار کو فارم میں کاپی کرنے کے لیے اس باکس کو چیک کریں۔ محفوظ کرنے سے پہلے جائزہ لیں۔\n\nتجویز کردہ (سیکھنے سے):\n- کم سے کم طاقت: {suggested_min_power} W\n- آف_دیری: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout}s\n- profile_match_interval: {suggested_profile_match_interval} s\n- خودکار_لیبل_اعتماد: {suggested_auto_label_confidence}\n- دورانیہ_رواداری: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- پروفائل_میچ_منٹ_دوران_تناسب: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "سیکھنے کے الگورتھم کے ذریعہ تجویز کردہ اقدار کو فارم میں کاپی کرنے کے لیے اس باکس کو چیک کریں۔ محفوظ کرنے سے پہلے جائزہ لیں۔\n\nتجویز کردہ (سیکھنے سے):\n- کم سے کم طاقت: {suggested_min_power} ڈبلیو\n- آف_دیری: {suggested_off_delay} سیکنڈ\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- خودکار_لیبل_اعتماد: {suggested_auto_label_confidence}\n- دورانیہ_رواداری: {suggested_duration_tolerance}\n- پروفائل_دورانیہ_رواداری: {suggested_profile_duration_tolerance}\n- پروفائل_میچ_منٹ_دوران_تناسب: {suggested_profile_match_min_duration_ratio}\n- پروفائل_میچ_زیادہ سے زیادہ_دورانیہ_تناسب: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "ایک سائیکل شروع کرنے کے لیے طاقت کو اس حد سے اوپر اٹھنا چاہیے۔ اپنی اسٹینڈ بائی پاور سے اونچا سیٹ کریں۔ ڈیفالٹ: min_power + 1 W",
           "stop_threshold_w": "ایک سائیکل کو ختم کرنے کے لیے طاقت کو اس حد سے نیچے آنا چاہیے۔ جھوٹے سروں کو متحرک کرنے والے شور سے بچنے کے لیے صفر سے بالکل اوپر سیٹ کریں۔ ڈیفالٹ: 0.6 * min_power۔",
           "min_off_gap": "اگر کوئی سائیکل پچھلے ایک ختم ہونے کے اتنے سیکنڈ کے اندر شروع ہوتا ہے، تو وہ ایک ہی چکر میں ضم ہو جائیں گے۔",
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "تشخیص اور دیکھ بھال",
-        "description": "دیکھ بھال کی کارروائیاں چلائیں جیسے بکھرے ہوئے چکروں کو ضم کرنا یا ذخیرہ شدہ ڈیٹا کو منتقل کرنا۔\n\n{storage_stats}"
+        "description": "دیکھ بھال کی کارروائیاں چلائیں جیسے بکھرے ہوئے چکروں کو ضم کرنا یا ذخیرہ شدہ ڈیٹا کو منتقل کرنا۔\n\n**اسٹوریج کا استعمال**\n\n- فائل کا سائز: {file_size_kb} KB\n- سائیکل: {cycle_count}\n- پروفائلز: {profile_count}\n- ڈیبگ ٹریس: {debug_count}"
       },
       "clear_debug_data": {
         "title": "ڈیبگ ڈیٹا صاف کریں۔",
@@ -210,11 +248,109 @@
           "action": "ایکشن"
         }
       },
+      "manage_cycles_empty": {
+        "title": "سائیکلوں کا نظم کریں۔",
+        "description": "ابھی تک کوئی سائیکل ریکارڈ نہیں ہوا۔",
+        "data": {
+          "action": "ایکشن"
+        }
+      },
       "manage_profiles": {
         "title": "پروفائلز کا نظم کریں۔",
         "description": "پروفائل کا خلاصہ:\n{profile_summary}",
         "data": {
           "action": "ایکشن"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "پروفائلز کا نظم کریں۔",
+        "description": "ابھی تک کوئی پروفائل نہیں بنایا گیا ہے۔",
+        "data": {
+          "action": "ایکشن"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "فیز کیٹلاگ کا نظم کریں۔",
+        "description": "فیز کیٹلاگ (اس ڈیوائس کے لیے ڈیفالٹ + حسب ضرورت مراحل):\n{phase_summary}",
+        "data": {
+          "action": "ایکشن"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "اپنی مرضی کا مرحلہ بنائیں",
+        "description": "ایک حسب ضرورت فیز کا نام اور تفصیل بنائیں، اور منتخب کریں کہ یہ کس ڈیوائس کی قسم پر لاگو ہوتا ہے۔",
+        "data": {
+          "target_device_type": "ٹارگٹ ڈیوائس کی قسم",
+          "phase_name": "فیز کا نام",
+          "phase_description": "مرحلے کی تفصیل"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "حسب ضرورت مرحلے میں ترمیم کریں۔",
+        "description": "ترمیم کرنے کے لیے ایک حسب ضرورت مرحلہ منتخب کریں۔",
+        "data": {
+          "phase_name": "حسب ضرورت مرحلہ"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "حسب ضرورت مرحلے میں ترمیم کریں۔",
+        "description": "ترمیم کا مرحلہ: {phase_name}",
+        "data": {
+          "phase_name": "فیز کا نام",
+          "phase_description": "مرحلے کی تفصیل"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "اپنی مرضی کے مرحلے کو حذف کریں۔",
+        "description": "حذف کرنے کے لیے حسب ضرورت مرحلہ منتخب کریں۔ اس مرحلے کا استعمال کرتے ہوئے کسی بھی تفویض کردہ رینجز کو ہٹا دیا جائے گا۔",
+        "data": {
+          "phase_name": "حسب ضرورت مرحلہ"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "فیز رینجز تفویض کریں۔",
+        "description": "پروفائل کے لیے فیز پیش نظارہ: **{profile_name}**\n\n{timeline_svg}\n\n**موجودہ حدود:**\n{current_ranges}\n\nرینجز کو شامل کرنے، ترمیم کرنے، حذف کرنے یا محفوظ کرنے کے لیے نیچے دی گئی کارروائیوں کا استعمال کریں۔",
+        "data": {
+          "action": "ایکشن"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "فیز رینج شامل کریں۔",
+        "description": "موجودہ مسودے میں ایک فیز رینج شامل کریں۔",
+        "data": {
+          "phase_name": "مرحلہ",
+          "start_min": "شروع منٹ",
+          "end_min": "اختتامی منٹ"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "فیز رینج میں ترمیم کریں۔",
+        "description": "ترمیم کرنے کے لیے ایک رینج منتخب کریں۔",
+        "data": {
+          "range_index": "فیز رینج"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "فیز رینج میں ترمیم کریں۔",
+        "description": "منتخب شدہ فیز رینج کو اپ ڈیٹ کریں۔",
+        "data": {
+          "phase_name": "مرحلہ",
+          "start_min": "شروع منٹ",
+          "end_min": "اختتامی منٹ"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "فیز رینج کو حذف کریں۔",
+        "description": "ڈرافٹ سے ہٹانے کے لیے ایک رینج منتخب کریں۔",
+        "data": {
+          "range_index": "فیز رینج"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "فیز رینجز تفویض کریں۔",
+        "description": "فیز رینجز کنفیگر کرنے کے لیے پروفائل منتخب کریں۔",
+        "data": {
+          "profile": "پروفائل"
         }
       },
       "profile_stats": {
@@ -254,7 +390,7 @@
       },
       "delete_profile_confirm": {
         "title": "پروفائل کو حذف کرنے کی تصدیق کریں۔",
-        "description": "⚠️ اس سے پروفائل مستقل طور پر حذف ہو جائے گا: {profile_name}",
+        "description": "⚠️ یہ پروفائل کو مستقل طور پر حذف کر دے گا: {profile_name}",
         "data": {
           "unlabel_cycles": "اس پروفائل کا استعمال کرتے ہوئے سائیکلوں سے لیبل کو ہٹا دیں۔"
         }
@@ -367,8 +503,8 @@
         "title": "JSON برآمد/درآمد کریں۔",
         "description": "اس ڈیوائس کے لیے سائیکل، پروفائلز، اور سیٹنگز کو کاپی/پیسٹ کریں۔ نیچے برآمد کریں یا درآمد کرنے کے لیے JSON چسپاں کریں۔",
         "data": {
-          "json_payload": "مکمل کنفیگریشن JSON",
-          "mode": "ایکشن"
+          "mode": "ایکشن",
+          "json_payload": "مکمل کنفیگریشن JSON"
         },
         "data_description": {
           "mode": "موجودہ ڈیٹا اور سیٹنگز کو کاپی کرنے کے لیے ایکسپورٹ کا انتخاب کریں، یا کسی دوسرے واش ڈیٹا ڈیوائس سے ایکسپورٹ شدہ ڈیٹا کو پیسٹ کرنے کے لیے امپورٹ کریں۔",
@@ -384,7 +520,7 @@
       },
       "record_process": {
         "title": "عمل کی ریکارڈنگ",
-        "description": "![گراف]({graph_url})\n\n**گراف خام ریکارڈنگ دکھاتا ہے۔** نیلا = رکھیں، سرخ = مجوزہ تراشیں۔\n*گراف جامد ہے اور فارم کی تبدیلیوں کے ساتھ اپ ڈیٹ نہیں ہوتا ہے۔*\n\nریکارڈنگ رک گئی۔ تراشے ہوئے نمونے لینے کی شرح (~{sampling_rate}s) سے منسلک ہیں۔\n\nخام دورانیہ: {duration}s\nنمونے: {samples}",
+        "description": "![گراف]({graph_url})\n\n**گراف خام ریکارڈنگ دکھاتا ہے۔** نیلا = رکھیں، سرخ = مجوزہ تراشیں۔\n*گراف جامد ہے اور فارم کی تبدیلیوں کے ساتھ اپ ڈیٹ نہیں ہوتا ہے۔*\n\nریکارڈنگ رک گئی۔ تراشے ہوئے نمونے لینے کی شرح (~{sampling_rate}s) کے ساتھ منسلک ہیں۔\n\nخام دورانیہ: {duration}s\nنمونے: {samples}",
         "data": {
           "head_trim": "ٹرم اسٹارٹ (سیکنڈ)",
           "tail_trim": "ٹرم اینڈ (سیکنڈ)",
@@ -405,143 +541,19 @@
       },
       "resolve_feedback": {
         "title": "تاثرات حل کریں۔",
-        "description": "**پروگرام کا پتہ چلا**: {profile}\n**اعتماد**: {confidence}%\n**تخمینہ**: {est}m، **اصل**: {act}m",
+        "description": "{comparison_img}{candidates_table}\n** پروفائل کا پتہ چلا**: {detected_profile} ({confidence_pct}%)\n**تخمینی مدت**: {est_duration_min} منٹ\n**اصل دورانیہ**: {act_duration_min} منٹ\n\n__ذیل میں ایک عمل کا انتخاب کریں:__",
         "data": {
+          "action": "آپ کیا کرنا چاہیں گے؟",
           "corrected_profile": "درست پروگرام (اگر درست ہو)",
-          "corrected_duration": "منٹوں میں درست دورانیہ (اگر درست ہو)",
-          "action": "آپ کیا کرنا چاہیں گے؟"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "فیز کیٹلاگ کا نظم کریں۔",
-        "description": "اس ڈیوائس کی قسم کے لیے موجودہ مراحل:\n{phase_summary}",
-        "data": {
-          "action": "ایکشن"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "اپنی مرضی کا مرحلہ بنائیں",
-        "description": "اس ڈیوائس کی قسم کے لیے ایک حسب ضرورت فیز کا نام اور تفصیل بنائیں۔",
-        "data": {
-          "phase_name": "فیز کا نام",
-          "phase_description": "مرحلے کی تفصیل",
-          "target_device_type": "ٹارگٹ ڈیوائس کی قسم"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "حسب ضرورت مرحلے میں ترمیم کریں۔",
-        "description": "ترمیم کرنے کے لیے ایک حسب ضرورت مرحلہ منتخب کریں۔",
-        "data": {
-          "phase_name": "حسب ضرورت مرحلہ"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "حسب ضرورت مرحلے میں ترمیم کریں۔",
-        "description": "ترمیم کا مرحلہ: {phase_name}",
-        "data": {
-          "phase_name": "فیز کا نام",
-          "phase_description": "مرحلے کی تفصیل"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "اپنی مرضی کے مرحلے کو حذف کریں۔",
-        "description": "حذف کرنے کے لیے حسب ضرورت مرحلہ منتخب کریں۔ اس مرحلے کا استعمال کرتے ہوئے کسی بھی تفویض کردہ رینجز کو ہٹا دیا جائے گا۔",
-        "data": {
-          "phase_name": "حسب ضرورت مرحلہ"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "فیز رینجز تفویض کریں۔",
-        "description": "پروفائل: **{profile_name}**\nموڈ: **{assign_mode}**\nسائیکل کا اشارہ: {cycle_hint}\n\nموجودہ رینجز:\n{current_ranges}\n\nفیز لیبل ڈسپلے اور تنظیم کے لیے ہیں۔ پتہ لگانے میں پاور پیٹرن استعمال ہوتے ہیں، فیز کے نام نہیں۔",
-        "data": {
-          "action": "ایکشن"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "فیز رینجز تفویض کریں۔",
-        "description": "فیز رینجز کنفیگر کرنے کے لیے پروفائل منتخب کریں۔",
-        "data": {
-          "profile": "پروفائل"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "فیز رینج شامل کریں۔",
-        "description": "موجودہ مسودے میں ایک فیز رینج شامل کریں۔",
-        "data": {
-          "phase_name": "مرحلہ",
-          "start_min": "شروع منٹ",
-          "end_min": "اختتامی منٹ"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "فیز رینج میں ترمیم کریں۔",
-        "description": "ترمیم کرنے کے لیے ایک رینج منتخب کریں۔",
-        "data": {
-          "range_index": "فیز رینج"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "فیز رینج میں ترمیم کریں۔",
-        "description": "منتخب شدہ فیز رینج کو اپ ڈیٹ کریں۔",
-        "data": {
-          "phase_name": "مرحلہ",
-          "start_min": "شروع منٹ",
-          "end_min": "اختتامی منٹ"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "فیز رینج کو حذف کریں۔",
-        "description": "ڈرافٹ سے ہٹانے کے لیے ایک رینج منتخب کریں۔",
-        "data": {
-          "range_index": "فیز رینج"
-        }
-      },
-      "notifications": {
-        "title": "اطلاعات",
-        "description": "نوٹیفکیشن چینلز، ٹیمپلیٹس، اور اختیاری لائیو موبائل پروگریس اپ ڈیٹس کو ترتیب دیں۔",
-        "data": {
-          "notify_service": "اطلاع کی خدمت (جیسے notify.mobile_app)",
-          "notify_actions": "اطلاعی کارروائیاں",
-          "notify_people": "لوگوں کو مطلع کرنا",
-          "notify_only_when_home": "صرف گھر جانے پر مطلع کریں۔",
-          "notify_fire_events": "فائر آٹومیشن ایونٹس",
-          "notify_events": "مطلع کرنے کے لیے واقعات",
-          "notify_before_end_minutes": "پیشگی تکمیل کی اطلاع (ختم ہونے سے چند منٹ پہلے)",
-          "notify_live_enabled": "لائیو پیش رفت کی اطلاعات کو فعال کریں۔",
-          "notify_live_interval_seconds": "لائیو اپ ڈیٹ کا وقفہ (سیکنڈ)",
-          "notify_live_overrun_percent": "لائیو اپ ڈیٹ اووررن الاؤنس (%)",
-          "notify_title": "اطلاع کا عنوان",
-          "notify_icon": "اطلاع کا آئیکن",
-          "notify_start_message": "میسج فارمیٹ شروع کریں۔",
-          "notify_finish_message": "پیغام کی شکل ختم کریں۔",
-          "notify_pre_complete_message": "پری تکمیلی پیغام کی شکل"
-        },
-        "data_description": {
-          "notify_service": "ہوم اسسٹنٹ مطلع سروس استعمال کرنے کے لیے (اختیاری)۔",
-          "notify_actions": "اطلاعات (اسکرپٹس، نوٹیفائی، ٹی ٹی ایس، وغیرہ) کے لیے چلانے کے لیے اختیاری ہوم اسسٹنٹ ایکشن سیکوئنس۔ اگر سیٹ ہو تو فال بیک مطلع سروس سے پہلے کارروائیاں چلتی ہیں۔",
-          "notify_people": "گھر/دور گیٹنگ کے لیے استعمال کرنے والے افراد۔ فعال ہونے پر، اطلاعات اس وقت تک موخر کر دی جاتی ہیں جب تک کہ کوئی گھر نہ ہو۔",
-          "notify_only_when_home": "اگر فعال ہو تو، اطلاعات میں اس وقت تک تاخیر کریں جب تک کہ کم از کم ایک منتخب شخص گھر نہ ہو۔",
-          "notify_fire_events": "اگر فعال ہو تو، آٹومیشن چلانے کے لیے سائیکل کے آغاز اور اختتام (ha_washdata_cycle_started/ended) کے لیے ہوم اسسٹنٹ ایونٹس کو فائر کریں۔",
-          "notify_events": "کن واقعات کے لیے اطلاعات بھیجیں۔",
-          "notify_before_end_minutes": "ایک اطلاع کو متحرک کرنے کے لیے سائیکل کے متوقع اختتام سے چند منٹ پہلے۔ غیر فعال کرنے کے لیے 0 پر سیٹ کریں۔ ڈیفالٹ: 0۔",
-          "notify_live_enabled": "موبائل ایپ کی اطلاعات کے لیے ان جگہ لائیو پروگریس اپ ڈیٹس کو فعال کریں۔",
-          "notify_live_interval_seconds": "چلتے وقت کتنی بار پروگریس اپ ڈیٹس بھیجے جاتے ہیں۔ نچلی اقدار زیادہ جوابدہ ہیں لیکن زیادہ اطلاعات استعمال کرتی ہیں۔",
-          "notify_live_overrun_percent": "حفاظتی مارجن لمبے/زیادہ چلنے والے سائیکلوں کے لیے تخمینہ شدہ اپ ڈیٹ کی گنتی سے زیادہ ہے (مثال کے طور پر 20% 1.2x تخمینہ شدہ اپ ڈیٹس کی اجازت دیتا ہے)۔",
-          "notify_title": "اطلاعات کے لیے حسب ضرورت عنوان۔ {device} پلیس ہولڈر کو سپورٹ کرتا ہے۔",
-          "notify_icon": "اطلاعات کے لیے استعمال کرنے کے لیے آئیکن (جیسے mdi:washing-machine)۔ ڈیفالٹ استعمال کرنے کے لیے خالی چھوڑ دیں۔",
-          "notify_start_message": "ایک سائیکل شروع ہونے پر پیغام بھیجا جاتا ہے۔ {device} پلیس ہولڈر کو سپورٹ کرتا ہے۔",
-          "notify_finish_message": "ایک سائیکل ختم ہونے پر پیغام بھیجا گیا۔ {device}، {duration}، {program} پلیس ہولڈرز کو سپورٹ کرتا ہے۔",
-          "notify_pre_complete_message": "مکمل ہونے سے پہلے پیغام بھیجا گیا۔ {device}، {minutes} پلیس ہولڈرز کو سپورٹ کرتا ہے۔"
+          "corrected_duration": "منٹوں میں درست دورانیہ (اگر درست ہو)"
         }
       }
     },
     "error": {
-      "import_failed": "درآمد ناکام ہو گیا۔ براہ کرم ایک درست HA واش ڈیٹا ایکسپورٹ JSON پیسٹ کریں۔",
+      "import_failed": "درآمد ناکام ہو گیا۔ براہ کرم ایک درست واش ڈیٹا ایکسپورٹ JSON پیسٹ کریں۔",
       "profile_exists": "اس نام کا پروفائل پہلے سے موجود ہے۔",
       "rename_failed": "پروفائل کا نام تبدیل کرنے میں ناکام۔ ہو سکتا ہے پروفائل موجود نہ ہو یا نیا نام پہلے ہی لے لیا گیا ہو۔",
       "assignment_failed": "سائیکل کو پروفائل تفویض کرنے میں ناکام",
-      "feedback_notification_title": "واش ڈیٹا: سائیکل کی تصدیق کریں ({device})",
-      "feedback_notification_message": "**ڈیوائس**: {device}\n**پروگرام**: {program} ({confidence}% confidence)\n**وقت**: {time}\n\nاس دریافت شدہ سائیکل کی توثیق کرنے کے لیے WashData کو آپ کی مدد کی ضرورت ہے۔\n\nاس نتیجے کی تصدیق یا درستگی کے لیے براہ کرم **سیٹنگز> ڈیوائسز اور سروسز> واش ڈیٹا> کنفیگر> لرننگ فیڈ بیکس** پر جائیں۔",
       "duplicate_phase": "اس نام کا ایک مرحلہ پہلے سے موجود ہے۔",
       "phase_not_found": "منتخب مرحلہ نہیں ملا۔",
       "invalid_phase_name": "فیز کا نام خالی نہیں ہو سکتا۔",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "فیز رینج اوورلیپ۔ رینجز کو ایڈجسٹ کریں اور دوبارہ کوشش کریں۔",
       "incomplete_phase_row": "ہر مرحلے کی قطار میں منتخب موڈ کے لیے فیز کے علاوہ مکمل آغاز/اختتام کی قدریں شامل ہونی چاہئیں۔",
       "timestamp_mode_cycle_required": "ٹائم اسٹیمپ موڈ استعمال کرتے وقت براہ کرم سورس سائیکل منتخب کریں۔",
-      "no_phase_ranges": "اس کارروائی کے لیے ابھی تک کوئی فیز رینج دستیاب نہیں ہے۔"
+      "no_phase_ranges": "اس کارروائی کے لیے ابھی تک کوئی فیز رینج دستیاب نہیں ہے۔",
+      "feedback_notification_title": "واش ڈیٹا: سائیکل کی تصدیق کریں ({device})",
+      "feedback_notification_message": "**آلہ**: {device}\n**پروگرام**: {program} ({confidence}% اعتماد)\n**وقت**: {time}\n\nاس دریافت شدہ سائیکل کی توثیق کرنے کے لیے WashData کو آپ کی مدد کی ضرورت ہے۔\n\nاس نتیجے کی تصدیق یا درستگی کے لیے براہ کرم **سیٹنگز> ڈیوائسز اور سروسز> واش ڈیٹا> کنفیگر> لرننگ فیڈ بیکس** پر جائیں۔"
     },
     "abort": {
       "no_cycles_found": "کوئی سائیکل نہیں ملا",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "تمام سائیکلوں پر پہلے ہی لیبل لگا ہوا ہے۔",
       "no_suggestions": "ابھی تک کوئی تجویز کردہ قدر دستیاب نہیں ہے۔ چند سائیکل چلائیں اور دوبارہ کوشش کریں۔",
       "no_predictions": "کوئی پیشین گوئیاں نہیں۔",
-      "reprocess_success": "کامیابی سے {count} سائیکلوں پر دوبارہ عمل کیا گیا۔",
-      "debug_data_cleared": "{count} سائیکلوں سے ڈیبگ ڈیٹا کو کامیابی کے ساتھ صاف کر دیا گیا۔",
-      "no_custom_phases": "اس آلہ کی قسم کے لیے کوئی حسب ضرورت مراحل نہیں ملے۔"
+      "no_custom_phases": "کوئی حسب ضرورت مراحل نہیں ملے۔",
+      "reprocess_success": "کامیابی کے ساتھ {count} سائیکلوں پر دوبارہ عمل کیا گیا۔",
+      "debug_data_cleared": "{count} سائیکلوں سے ڈیبگ ڈیٹا کو کامیابی کے ساتھ صاف کر دیا گیا۔"
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "سائیکل اسٹارٹ",
+        "cycle_finish": "سائیکل ختم",
+        "cycle_live": "لائیو پروگریس"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(غیر لیبل لگا ہوا)",
+        "create_new_profile": "نیا پروفائل بنائیں",
+        "remove_label": "لیبل کو ہٹا دیں۔",
+        "no_reference_cycle": "(کوئی حوالہ سائیکل نہیں)",
+        "all_device_types": "ڈیوائس کی تمام اقسام",
+        "current_suffix": "(موجودہ)",
+        "editor_select_info": "تقسیم کرنے کے لیے 1 سائیکل، یا ضم کرنے کے لیے 2+ سائیکل منتخب کریں۔",
+        "no_cycles_recorded": "ابھی تک کوئی سائیکل ریکارڈ نہیں ہوا۔",
+        "profile_summary_line": "- **{name}**: {count} سائیکل، {avg}m اوسط",
+        "no_profiles_created": "ابھی تک کوئی پروفائل نہیں بنایا گیا ہے۔",
+        "phase_preview": "فیز کا پیش نظارہ",
+        "phase_preview_no_curve": "پروفائل کا اوسط وکر ابھی دستیاب نہیں ہے۔ اس پروفائل کے لیے مزید سائیکل چلائیں/لیبل لگائیں۔",
+        "average_power_curve": "اوسط پاور وکر",
+        "unit_min": "منٹ",
+        "profile_option_fmt": "{name} ({count} سائیکل، ~{duration}m اوسط)",
+        "profile_option_short_fmt": "{name} ({count} سائیکل، ~{duration}m)",
+        "deleted_cycles_from_profile": "{profile} سے {count} سائیکلوں کو حذف کر دیا گیا۔",
+        "not_enough_data_graph": "گراف بنانے کے لیے کافی ڈیٹا نہیں ہے۔",
+        "no_profiles_found": "کوئی پروفائلز نہیں ملے۔",
+        "cycle_info_fmt": "سائیکل: {start}، {duration}m، موجودہ: {label}",
+        "top_candidates_header": "### سرفہرست امیدوار",
+        "tbl_profile": "پروفائل",
+        "tbl_confidence": "اعتماد",
+        "tbl_correlation": "ارتباط",
+        "tbl_duration_match": "دورانیہ میچ",
+        "detected_profile": "پروفائل کا پتہ چلا",
+        "estimated_duration": "متوقع دورانیہ",
+        "actual_duration": "اصل دورانیہ",
+        "choose_action": "__ذیل میں ایک عمل کا انتخاب کریں:__",
+        "tbl_count": "شمار",
+        "tbl_avg": "اوسط",
+        "tbl_min": "کم از کم",
+        "tbl_max": "زیادہ سے زیادہ",
+        "tbl_energy_avg": "توانائی (اوسط)",
+        "tbl_energy_total": "توانائی (کل)",
+        "tbl_consistency": "پر مشتمل",
+        "tbl_last_run": "آخری رن",
+        "graph_legend_title": "گراف لیجنڈ",
+        "graph_legend_body": "نیلا بینڈ مشاہدہ کی گئی کم سے کم اور زیادہ سے زیادہ پاور ڈرا رینج کی نمائندگی کرتا ہے۔ لائن اوسط پاور وکر کو ظاہر کرتی ہے۔",
+        "recording_preview": "ریکارڈنگ کا پیش نظارہ",
+        "trim_start": "ٹرم اسٹارٹ",
+        "trim_end": "ٹرم اینڈ",
+        "split_preview_title": "تقسیم کا پیش نظارہ",
+        "split_preview_found_fmt": "{count} سیگمنٹس ملے۔",
+        "split_preview_confirm_fmt": "اس سائیکل کو {count} الگ الگ سائیکلوں میں تقسیم کرنے کے لیے تصدیق پر کلک کریں۔",
+        "merge_preview_title": "پیش نظارہ کو ضم کریں۔",
+        "merge_preview_joining_fmt": "{count} سائیکلوں میں شامل ہونا۔ خلا کو 0W ریڈنگ سے پُر کیا جائے گا۔",
+        "profile_comparison": "پروفائل کا موازنہ",
+        "actual_cycle_label": "یہ سائیکل (حقیقی)",
+        "storage_usage_header": "اسٹوریج کا استعمال",
+        "storage_file_size": "فائل کا سائز",
+        "storage_cycles": "سائیکل",
+        "storage_profiles": "پروفائلز",
+        "storage_debug_traces": "ڈیبگ ٹریسز",
+        "overview_suffix": "جائزہ",
+        "phase_preview_for_profile": "پروفائل کے لیے فیز کا پیش نظارہ",
+        "current_ranges_header": "موجودہ حدود",
+        "assign_phases_help": "رینجز کو شامل کرنے، ترمیم کرنے، حذف کرنے یا محفوظ کرنے کے لیے نیچے دی گئی کارروائیوں کا استعمال کریں۔",
+        "profile_summary_header": "پروفائل کا خلاصہ",
+        "recent_cycles_header": "حالیہ چکر"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "ایک سائیکل کو تقسیم کریں (خالی تلاش کریں)",
+        "merge": "سائیکلوں کو ضم کریں (ٹکڑوں میں شامل ہوں)",
+        "delete": "سائیکل کو حذف کریں"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "دیکھ بھال: دوبارہ عمل اور ڈیٹا کو بہتر بنائیں",
+        "clear_debug_data": "ڈیبگ ڈیٹا صاف کریں (جگہ خالی کریں)",
+        "wipe_history": "اس آلہ کا تمام ڈیٹا صاف کریں (ناقابل واپسی)",
+        "export_import": "ترتیبات کے ساتھ JSON برآمد/درآمد کریں (کاپی/پیسٹ)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "تمام ڈیٹا ایکسپورٹ کریں۔",
+        "import": "ڈیٹا کو درآمد/ضم کریں۔"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "پرانے سائیکلوں کو آٹو لیبل کریں۔",
+        "select_cycle_to_label": "لیبل مخصوص سائیکل",
+        "select_cycle_to_label_multi": "ایک سے زیادہ سائیکلوں کو لیبل کریں۔",
+        "select_cycle_to_delete": "سائیکل کو حذف کریں۔",
+        "interactive_editor": "انٹرایکٹو ایڈیٹر کو ضم/تقسیم کریں۔"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "نیا پروفائل بنائیں",
+        "edit_profile": "پروفائل میں ترمیم/نام تبدیل کریں۔",
+        "delete_profile": "پروفائل حذف کریں۔",
+        "profile_stats": "پروفائل کے اعدادوشمار",
+        "cleanup_profile": "کلین اپ ہسٹری - گراف اور ڈیلیٹ کریں۔",
+        "assign_phases": "فیز رینجز تفویض کریں۔"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "نیا مرحلہ بنائیں",
+        "edit_custom_phase": "فیز میں ترمیم کریں۔",
+        "delete_custom_phase": "مرحلہ حذف کریں۔"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "فیز رینج شامل کریں۔",
+        "edit_range": "فیز رینج میں ترمیم کریں۔",
+        "delete_range": "فیز رینج کو حذف کریں۔",
+        "clear_ranges": "تمام حدود کو صاف کریں۔",
+        "save_ranges": "محفوظ کریں اور واپس کریں۔"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "ریفریش اسٹیٹس",
+        "stop_recording": "ریکارڈنگ بند کریں (محفوظ کریں اور عمل کریں)",
+        "start_recording": "نئی ریکارڈنگ شروع کریں۔",
+        "process_recording": "آخری ریکارڈنگ پر عمل کریں (تراشیں اور محفوظ کریں)",
+        "discard_recording": "آخری ریکارڈنگ کو مسترد کریں۔"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "نیا پروفائل بنائیں",
+        "existing_profile": "موجودہ پروفائل میں شامل کریں۔",
+        "discard": "ریکارڈنگ کو مسترد کریں۔"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "تصدیق کریں - درست پتہ لگانا",
+        "correct": "درست - پروگرام/دورانیہ کا انتخاب کریں۔",
+        "ignore": "نظر انداز کریں - غلط مثبت/شور کا چکر",
+        "delete": "حذف کریں - تاریخ سے ہٹا دیں۔"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "لیبل سائیکل",
+      "description": "ایک موجودہ پروفائل کو ماضی کے دور میں تفویض کریں، یا لیبل کو ہٹا دیں۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "لیبل لگانے کے لیے واشنگ مشین ڈیوائس۔"
+        },
+        "cycle_id": {
+          "name": "سائیکل ID",
+          "description": "لیبل لگانے کے لیے سائیکل کی ID۔"
+        },
+        "profile_name": {
+          "name": "پروفائل کا نام",
+          "description": "موجودہ پروفائل کا نام (منیج پروفائلز مینو میں پروفائلز بنائیں)۔ لیبل ہٹانے کے لیے خالی چھوڑ دیں۔"
+        }
+      }
+    },
+    "create_profile": {
+      "name": "پروفائل بنائیں",
+      "description": "ایک نیا پروفائل بنائیں (اسٹینڈ لون یا ریفرنس سائیکل پر مبنی)۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "واشنگ مشین کا آلہ۔"
+        },
+        "profile_name": {
+          "name": "پروفائل کا نام",
+          "description": "نئے پروفائل کے لیے نام (مثلاً 'ہیوی ڈیوٹی'، 'ڈیلیکیٹس')۔"
+        },
+        "reference_cycle_id": {
+          "name": "حوالہ سائیکل ID",
+          "description": "اس پروفائل کی بنیاد رکھنے کے لیے اختیاری سائیکل ID۔"
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "پروفائل حذف کریں۔",
+      "description": "پروفائل کو حذف کریں اور اختیاری طور پر اس کا استعمال کرتے ہوئے سائیکلوں کو غیر لیبل کریں۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "واشنگ مشین کا آلہ۔"
+        },
+        "profile_name": {
+          "name": "پروفائل کا نام",
+          "description": "حذف کرنے والا پروفائل۔"
+        },
+        "unlabel_cycles": {
+          "name": "سائیکلوں کو غیر لیبل کریں۔",
+          "description": "اس پروفائل کا استعمال کرتے ہوئے سائیکلوں سے پروفائل لیبل کو ہٹا دیں۔"
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "پرانے سائیکلوں کو آٹو لیبل کریں۔",
+      "description": "پروفائل مماثلت کا استعمال کرتے ہوئے سابقہ ​​طور پر بغیر لیبل والے سائیکلوں کو لیبل کریں۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "واشنگ مشین کا آلہ۔"
+        },
+        "confidence_threshold": {
+          "name": "اعتماد کی حد",
+          "description": "لیبل لگانے کے لیے کم از کم میچ کا اعتماد (0.50-0.95)۔"
+        }
+      }
+    },
+    "export_config": {
+      "name": "ترتیب برآمد کریں۔",
+      "description": "اس ڈیوائس کے پروفائلز، سائیکلز اور سیٹنگز کو JSON فائل (فی ڈیوائس) میں ایکسپورٹ کریں۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "برآمد کرنے کے لیے واشنگ مشین ڈیوائس۔"
+        },
+        "path": {
+          "name": "راستہ",
+          "description": "لکھنے کے لیے اختیاری مطلق فائل کا راستہ (/config/ha_washdata_export_{entry}.json کے لیے پہلے سے طے شدہ)۔"
+        }
+      }
+    },
+    "import_config": {
+      "name": "ترتیب درآمد کریں۔",
+      "description": "JSON ایکسپورٹ فائل سے اس ڈیوائس کے لیے پروفائلز، سائیکل اور سیٹنگز درآمد کریں (ترتیبات اوور رائٹ ہو سکتی ہیں)۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "واشنگ مشین کا آلہ جس میں درآمد کرنا ہے۔"
+        },
+        "path": {
+          "name": "راستہ",
+          "description": "درآمد کرنے کے لیے برآمد JSON فائل کا مطلق راستہ۔"
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "سائیکل فیڈ بیک جمع کروائیں۔",
+      "description": "مکمل سائیکل کے بعد خود بخود پتہ چلنے والے پروگرام کی تصدیق یا درست کریں۔ یا تو `entry_id` (جدید) یا `device_id` (تجویز کردہ) فراہم کریں۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "واش ڈیٹا ڈیوائس (entry_id کے بجائے تجویز کردہ)۔"
+        },
+        "entry_id": {
+          "name": "اندراج کی شناخت",
+          "description": "ڈیوائس کے لیے کنفیگریشن انٹری آئی ڈی (device_id کا متبادل)۔"
+        },
+        "cycle_id": {
+          "name": "سائیکل ID",
+          "description": "فیڈ بیک نوٹیفکیشن / لاگز میں دکھائی گئی سائیکل آئی ڈی۔"
+        },
+        "user_confirmed": {
+          "name": "دریافت شدہ پروگرام کی تصدیق کریں۔",
+          "description": "درست سیٹ کریں اگر پتہ چلا پروگرام درست ہے۔"
+        },
+        "corrected_profile": {
+          "name": "درست شدہ پروفائل",
+          "description": "اگر تصدیق نہ ہو تو درست پروفائل/پروگرام کا نام فراہم کریں۔"
+        },
+        "corrected_duration": {
+          "name": "درست دورانیہ (سیکنڈ)",
+          "description": "سیکنڈوں میں اختیاری درست شدہ دورانیہ۔"
+        },
+        "notes": {
+          "name": "نوٹس",
+          "description": "اس سائیکل کے بارے میں اختیاری نوٹ۔"
+        }
+      }
+    },
+    "record_start": {
+      "name": "ریکارڈ سائیکل اسٹارٹ",
+      "description": "کلین سائیکل کو دستی طور پر ریکارڈ کرنا شروع کریں (تمام مماثل منطق کو نظرانداز کرتا ہے)۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "ریکارڈ کرنے کے لیے واشنگ مشین کا آلہ۔"
+        }
+      }
+    },
+    "record_stop": {
+      "name": "سائیکل سٹاپ کو ریکارڈ کریں۔",
+      "description": "دستی ریکارڈنگ بند کریں۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "ریکارڈنگ کو روکنے کے لیے واشنگ مشین کا آلہ۔"
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "چل رہا ہے۔"
+      },
+      "match_ambiguity": {
+        "name": "میچ ابہام"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "ریاست"
+        "name": "ریاست",
+        "state": {
+          "off": "آف",
+          "idle": "بیکار",
+          "starting": "شروع ہو رہا ہے۔",
+          "running": "چل رہا ہے۔",
+          "paused": "روک دیا گیا",
+          "ending": "ختم ہونے والا",
+          "finished": "ختم",
+          "anti_wrinkle": "اینٹی شیکن",
+          "interrupted": "خلل ڈالا۔",
+          "force_stopped": "زبردستی روکا گیا۔",
+          "rinse": "کلی کریں۔",
+          "unknown": "نامعلوم"
+        }
       },
       "washer_program": {
         "name": "پروگرام"
@@ -595,16 +936,23 @@
         "name": "اعتماد کا میچ"
       },
       "top_candidates": {
-        "name": "سرفہرست امیدوار"
+        "name": "سرفہرست امیدوار",
+        "state": {
+          "none": "کوئی نہیں۔"
+        }
+      },
+      "current_phase": {
+        "name": "موجودہ مرحلہ"
       },
       "wash_phase": {
         "name": "مرحلہ"
       },
+      "profile_cycle_count": {
+        "name": "پروفائل {profile_name} شمار",
+        "unit_of_measurement": "سائیکل"
+      },
       "suggestions": {
         "name": "تجویز کردہ ترتیبات"
-      },
-      "current_phase": {
-        "name": "موجودہ مرحلہ"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "خودکار پتہ لگانا"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "زبردستی اختتامی سائیکل"
       }
     }
   }

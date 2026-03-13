@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "Hersien leerterugvoere",
           "settings": "Instellings",
+          "notifications": "Kennisgewings",
           "manage_cycles": "Bestuur siklusse",
           "manage_profiles": "Bestuur profiele",
-          "record_cycle": "Rekordsiklus (Handmatig)",
-          "diagnostics": "Diagnostiek en instandhouding",
           "manage_phase_catalog": "Bestuur Fasekatalogus",
-          "notifications": "Kennisgewings"
+          "record_cycle": "Rekordsiklus (Handmatig)",
+          "diagnostics": "Diagnostiek en instandhouding"
         }
       },
       "apply_suggestions": {
@@ -66,6 +66,10 @@
           "min_power": "Minimum krag (W)",
           "off_delay": "Siklus eindvertraging (s)",
           "notify_service": "Kennisgewingdiens (bv. notify.mobile_app)",
+          "notify_actions": "Kennisgewingsaksies",
+          "notify_people": "Vertraag aflewering totdat hierdie mense tuis is",
+          "notify_only_when_home": "Vertraag kennisgewings totdat gekose persoon tuis is",
+          "notify_fire_events": "Brand Outomatisering Gebeurtenisse",
           "notify_events": "Gebeurtenisse om in kennis te stel",
           "notify_before_end_minutes": "Voorafhandelingkennisgewing (minute voor einde)",
           "notify_title": "Kennisgewing titel",
@@ -73,30 +77,64 @@
           "notify_start_message": "Begin Boodskapformaat",
           "notify_finish_message": "Voltooi Boodskapformaat",
           "notify_pre_complete_message": "Pre-voltooiing Boodskap Formaat",
-          "show_advanced": "Wysig Gevorderde Instellings (Volgende Stap)",
-          "notify_actions": "Kennisgewingaksies",
-          "notify_people": "Mense om in kennis te stel",
-          "notify_only_when_home": "Stel net in kennis wanneer u tuis is",
-          "notify_fire_events": "Brand Outomatisering Gebeurtenisse"
+          "show_advanced": "Wysig Gevorderde Instellings (Volgende Stap)"
         },
         "data_description": {
-          "apply_suggestions": "Merk hierdie blokkie om waardes voorgestel deur die leeralgoritme in die vorm te kopieer. Hersien voordat u dit stoor.\n\nVoorgestelde (vanaf leer):\n- min_krag: {suggested_min_power} W\n- af_vertraging: {suggested_off_delay} s\n- waghondinterval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Merk hierdie blokkie om waardes voorgestel deur die leeralgoritme in die vorm te kopieer. Hersien voordat u dit stoor.\n\nVoorgestelde (vanaf leer):\n- min_krag: {suggested_min_power} W\n- af_vertraging: {suggested_off_delay} s\n- waghondinterval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profiel_passing_interval: {suggested_profile_match_interval} s\n- outo_etiket_vertroue: {suggested_auto_label_confidence}\n- duur_toleransie: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "Kies die tipe toestel (wasmasjien, droër, skottelgoedwasser, koffiemasjien, EV). Hierdie merker word saam met elke siklus gestoor vir beter organisasie.",
           "power_sensor": "Die sensor-entiteit rapporteer intydse krag (in watt). Jy kan dit enige tyd verander sonder om historiese data te verloor—nuttig as jy 'n slimprop vervang.",
           "min_power": "Kraglesings bo hierdie drempel (in watt) dui aan dat die toestel aan die gang is. Begin met 2W vir die meeste toestelle.",
           "off_delay": "Sekondes moet die gladde krag onder die stopdrempel bly om voltooiing te merk. Verstek: 120s.",
           "notify_service": "Huisassistent stel diens in kennis om te gebruik (opsioneel).",
+          "notify_actions": "Opsionele Home Assistant-aksievolgorde om vir kennisgewings uit te voer (skrifte, kennisgewing, TTS, ens.). Indien gestel, loop aksies voor terugvaldiens in kennis stel.",
+          "notify_people": "Mense-entiteite wat vir teenwoordigheidhek gebruik word. Wanneer dit geaktiveer is, word kennisgewingaflewering vertraag totdat ten minste een geselekteerde persoon tuis is.",
+          "notify_only_when_home": "Indien geaktiveer, stel kennisgewings uit totdat ten minste een geselekteerde persoon tuis is.",
+          "notify_fire_events": "Indien geaktiveer, vuur Home Assistant-gebeurtenisse vir siklusbegin en -einde (ha_washdata_cycle_started en ha_washdata_cycle_ended) af om outomatisering aan te dryf.",
           "notify_events": "Vir watter geleenthede om kennisgewings te stuur.",
           "notify_before_end_minutes": "Minute voor die geskatte einde van die siklus om 'n kennisgewing te aktiveer. Stel op 0 om te deaktiveer. Verstek: 0.",
           "notify_title": "Gepasmaakte titel vir kennisgewings. Ondersteun {device} plekhouer.",
           "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om verstek te gebruik.",
           "notify_start_message": "Boodskap gestuur wanneer 'n siklus begin. Ondersteun {device} plekhouer.",
           "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program} plekhouers.",
-          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers.",
+          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers."
+        }
+      },
+      "notifications": {
+        "title": "Kennisgewings",
+        "description": "Stel kennisgewingskanale, sjablone en opsionele regstreekse mobiele vorderingopdaterings op.",
+        "data": {
+          "notify_service": "Kennisgewingdiens (bv. notify.mobile_app)",
+          "notify_actions": "Kennisgewingsaksies",
+          "notify_people": "Vertraag aflewering totdat hierdie mense tuis is",
+          "notify_only_when_home": "Vertraag kennisgewings totdat gekose persoon tuis is",
+          "notify_fire_events": "Brand Outomatisering Gebeurtenisse",
+          "notify_events": "Gebeurtenisse om in kennis te stel",
+          "notify_before_end_minutes": "Voorafhandelingkennisgewing (minute voor einde)",
+          "notify_live_enabled": "Aktiveer regstreekse vorderingkennisgewings",
+          "notify_live_interval_seconds": "Regstreekse opdateringsinterval (sekondes)",
+          "notify_live_overrun_percent": "Regstreekse opdatering oorskry toelae (%)",
+          "notify_title": "Kennisgewing titel",
+          "notify_icon": "Kennisgewing-ikoon",
+          "notify_start_message": "Begin Boodskapformaat",
+          "notify_finish_message": "Voltooi Boodskapformaat",
+          "notify_pre_complete_message": "Pre-voltooiing Boodskap Formaat"
+        },
+        "data_description": {
+          "notify_service": "Huisassistent stel diens in kennis om te gebruik (opsioneel).",
           "notify_actions": "Opsionele Home Assistant-aksievolgorde om vir kennisgewings uit te voer (skrifte, kennisgewing, TTS, ens.). Indien gestel, loop aksies voor terugvaldiens in kennis stel.",
-          "notify_people": "Mense-entiteite om te gebruik vir tuis-/weghekke. Wanneer dit geaktiveer is, word kennisgewings uitgestel totdat iemand tuis is.",
+          "notify_people": "Mense-entiteite wat vir teenwoordigheidhek gebruik word. Wanneer dit geaktiveer is, word kennisgewingaflewering vertraag totdat ten minste een geselekteerde persoon tuis is.",
           "notify_only_when_home": "Indien geaktiveer, stel kennisgewings uit totdat ten minste een geselekteerde persoon tuis is.",
-          "notify_fire_events": "As dit geaktiveer is, vuur Home Assistant-gebeurtenisse vir siklusbegin en -einde (ha_washdata_cycle_started/ended) af om outomatisering aan te dryf."
+          "notify_fire_events": "Indien geaktiveer, vuur Home Assistant-gebeurtenisse vir siklusbegin en -einde (ha_washdata_cycle_started en ha_washdata_cycle_ended) af om outomatisering aan te dryf.",
+          "notify_events": "Vir watter geleenthede om kennisgewings te stuur.",
+          "notify_before_end_minutes": "Minute voor die geskatte einde van die siklus om 'n kennisgewing te aktiveer. Stel op 0 om te deaktiveer. Verstek: 0.",
+          "notify_live_enabled": "Aktiveer in-plek regstreekse vordering-opdaterings vir mobiele toepassingkennisgewings.",
+          "notify_live_interval_seconds": "Hoe gereeld vorderingsopdaterings gestuur word terwyl dit loop. Laer waardes reageer meer, maar verbruik meer kennisgewings.",
+          "notify_live_overrun_percent": "Veiligheidsmarge bo die beraamde opdateringtelling vir lang/oorlopende siklusse (byvoorbeeld 20% laat 1,2x beraamde opdaterings toe).",
+          "notify_title": "Gepasmaakte titel vir kennisgewings. Ondersteun {device} plekhouer.",
+          "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om verstek te gebruik.",
+          "notify_start_message": "Boodskap gestuur wanneer 'n siklus begin. Ondersteun {device} plekhouer.",
+          "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program} plekhouers.",
+          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers."
         }
       },
       "advanced_settings": {
@@ -133,7 +171,7 @@
           "notify_before_end_minutes": "Voorafhandelingkennisgewing (minute voor einde)",
           "auto_tune_noise_events_threshold": "Outo-instel: Drempel vir geraasgebeurtenisse",
           "running_dead_zone": "Hardloop Dooie Sone (sekondes)",
-          "end_repeat_count": "Eindig Herhaal Telling",
+          "end_repeat_count": "Beëindig Herhaaltelling",
           "start_energy_threshold": "Begin Energiehek (Wh)",
           "end_energy_threshold": "Eindenergiehek (Wh)",
           "auto_maintenance": "Aktiveer outo-onderhoud",
@@ -149,7 +187,7 @@
           "external_end_trigger_inverted": "Keer snellerlogika om (sneller aan AF)"
         },
         "data_description": {
-          "apply_suggestions": "Merk hierdie blokkie om waardes voorgestel deur die leeralgoritme in die vorm te kopieer. Hersien voordat u dit stoor.\n\nVoorgestelde (vanaf leer):\n- min_krag: {suggested_min_power} W\n- af_vertraging: {suggested_off_delay} s\n- waghondinterval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Merk hierdie blokkie om waardes voorgestel deur die leeralgoritme in die vorm te kopieer. Hersien voordat u dit stoor.\n\nVoorgestelde (vanaf leer):\n- min_krag: {suggested_min_power} W\n- af_vertraging: {suggested_off_delay} s\n- waghondinterval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profiel_passing_interval: {suggested_profile_match_interval} s\n- outo_etiket_vertroue: {suggested_auto_label_confidence}\n- duur_toleransie: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "Krag moet BO hierdie drempel styg om 'n siklus te BEGIN. Stel hoër as jou bystandkrag. Verstek: min_krag + 1 W.",
           "stop_threshold_w": "Krag moet ONDER hierdie drempel val om 'n siklus te BEËINDIG. Stel net bo nul om geraas te vermy wat valse punte veroorsaak. Verstek: 0,6 * min_krag.",
           "min_off_gap": "As 'n siklus begin binne soveel sekondes nadat die vorige een geëindig het, sal hulle in 'n enkele siklus saamgesmelt word.",
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "Diagnostiek en instandhouding",
-        "description": "Voer instandhoudingsaksies uit, soos om gefragmenteerde siklusse saam te voeg of gestoorde data te migreer.\n\n{storage_stats}"
+        "description": "Voer instandhoudingsaksies uit, soos om gefragmenteerde siklusse saam te voeg of gestoorde data te migreer.\n\n**berginggebruik**\n\n- Lêergrootte: {file_size_kb} KB\n- Siklusse: {cycle_count}\n- Profiele: {profile_count}\n- Ontfoutspore: {debug_count}"
       },
       "clear_debug_data": {
         "title": "Vee ontfoutdata uit",
@@ -210,11 +248,109 @@
           "action": "Aksie"
         }
       },
+      "manage_cycles_empty": {
+        "title": "Bestuur siklusse",
+        "description": "Geen siklusse is nog aangeteken nie.",
+        "data": {
+          "action": "Aksie"
+        }
+      },
       "manage_profiles": {
         "title": "Bestuur profiele",
         "description": "Profielopsomming:\n{profile_summary}",
         "data": {
           "action": "Aksie"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "Bestuur profiele",
+        "description": "Geen profiele is nog geskep nie.",
+        "data": {
+          "action": "Aksie"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "Bestuur Fasekatalogus",
+        "description": "Fasekatalogus (verstek vir hierdie toestel + pasgemaakte fases):\n{phase_summary}",
+        "data": {
+          "action": "Aksie"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Skep pasgemaakte fase",
+        "description": "Skep 'n pasgemaakte fasenaam en -beskrywing, en kies op watter toesteltipe dit van toepassing is.",
+        "data": {
+          "target_device_type": "Tipe teikentoestel",
+          "phase_name": "Fase Naam",
+          "phase_description": "Fasebeskrywing"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Wysig pasgemaakte fase",
+        "description": "Kies 'n pasgemaakte fase om te wysig.",
+        "data": {
+          "phase_name": "Pasgemaakte fase"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Wysig pasgemaakte fase",
+        "description": "Redigeringsfase: {phase_name}",
+        "data": {
+          "phase_name": "Fase Naam",
+          "phase_description": "Fasebeskrywing"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Vee pasgemaakte fase uit",
+        "description": "Kies 'n pasgemaakte fase om uit te vee. Enige toegewysde reekse wat hierdie fase gebruik, sal verwyder word.",
+        "data": {
+          "phase_name": "Pasgemaakte fase"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Ken fasereekse toe",
+        "description": "Fasevoorskou vir profiel: **{profile_name}**\n\n{timeline_svg}\n\n**Huidige reekse:**\n{current_ranges}\n\nGebruik handelinge hieronder om reekse by te voeg, te wysig, uit te vee of te stoor.",
+        "data": {
+          "action": "Aksie"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Voeg fasereeks by",
+        "description": "Voeg een fasereeks by die huidige konsep.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Begin minuut",
+          "end_min": "Eindminuut"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Wysig fasereeks",
+        "description": "Kies 'n reeks om te wysig.",
+        "data": {
+          "range_index": "Fasereeks"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Wysig fasereeks",
+        "description": "Dateer die geselekteerde fasereeks op.",
+        "data": {
+          "phase_name": "Fase",
+          "start_min": "Begin minuut",
+          "end_min": "Eindminuut"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Vee fasereeks uit",
+        "description": "Kies 'n reeks om uit die konsep te verwyder.",
+        "data": {
+          "range_index": "Fasereeks"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Ken fasereekse toe",
+        "description": "Kies 'n profiel om fasereekse op te stel.",
+        "data": {
+          "profile": "Profiel"
         }
       },
       "profile_stats": {
@@ -367,8 +503,8 @@
         "title": "Voer JSON uit/voer in",
         "description": "Kopieer/plak siklusse, profiele EN instellings vir hierdie toestel. Voer hieronder uit of plak JSON om in te voer.",
         "data": {
-          "json_payload": "Voltooi konfigurasie JSON",
-          "mode": "Aksie"
+          "mode": "Aksie",
+          "json_payload": "Voltooi konfigurasie JSON"
         },
         "data_description": {
           "mode": "Kies Uitvoer om huidige data en instellings te kopieer, of Invoer om uitgevoerde data vanaf 'n ander WashData-toestel te plak.",
@@ -384,7 +520,7 @@
       },
       "record_process": {
         "title": "Proses opname",
-        "description": "![Grafiek]({graph_url})\n\n**Grafiek wys rou opname.** Blou = Hou, Rooi = Voorgestelde snoei.\n*Grafiek is staties en werk nie op met vormveranderings nie.*\n\nOpname het gestop. Trims is in lyn met die bespeurde steekproeftempo (~{sampling_rate}s).\n\nRuwe Duur: {duration}s\nVoorbeelde: {samples}",
+        "description": "![Grafiek]({graph_url})\n\n**Grafiek wys rou opname.** Blou = Hou, Rooi = Voorgestelde snoei.\n*Grafiek is staties en werk nie op met vormveranderings nie.*\n\nOpname het gestop. Trims is in lyn met die bespeurde steekproeftempo (~{sampling_rate}s).\n\nOnbewerkte duur: {duration}s\nVoorbeelde: {samples}",
         "data": {
           "head_trim": "Trim Begin (sekondes)",
           "tail_trim": "Knip einde (sekondes)",
@@ -405,133 +541,11 @@
       },
       "resolve_feedback": {
         "title": "Los terugvoer op",
-        "description": "**Bespeurde program**: {profile}\n**Vertroue**: {confidence}%\n**Geskatte**: {est}m, **Werklik**: {act}m",
+        "description": "{comparison_img}{candidates_table}\n**Bespeurde profiel**: {detected_profile} ({confidence_pct}%)\n**Geskatte duur**: {est_duration_min} min\n**Werklike duur**: {act_duration_min} min\n\n__Kies 'n handeling hieronder:__",
         "data": {
+          "action": "Wat sou jy graag wou doen?",
           "corrected_profile": "Korrekte program (indien reggestel)",
-          "corrected_duration": "Korrekte duur in minute (indien reggestel)",
-          "action": "Wat sou jy graag wou doen?"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Bestuur Fasekatalogus",
-        "description": "Huidige fases vir hierdie toesteltipe:\n{phase_summary}",
-        "data": {
-          "action": "Aksie"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Skep pasgemaakte fase",
-        "description": "Skep 'n pasgemaakte fasenaam en beskrywing vir hierdie toesteltipe.",
-        "data": {
-          "phase_name": "Fase Naam",
-          "phase_description": "Fasebeskrywing",
-          "target_device_type": "Tipe teikentoestel"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Wysig pasgemaakte fase",
-        "description": "Kies 'n pasgemaakte fase om te wysig.",
-        "data": {
-          "phase_name": "Pasgemaakte fase"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Wysig pasgemaakte fase",
-        "description": "Redigeringsfase: {phase_name}",
-        "data": {
-          "phase_name": "Fase Naam",
-          "phase_description": "Fasebeskrywing"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Vee pasgemaakte fase uit",
-        "description": "Kies 'n pasgemaakte fase om uit te vee. Enige toegewysde reekse wat hierdie fase gebruik, sal verwyder word.",
-        "data": {
-          "phase_name": "Pasgemaakte fase"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Ken fasereekse toe",
-        "description": "Profiel: **{profile_name}**\nModus: **{assign_mode}**\nSikluswenk: {cycle_hint}\n\nHuidige reekse:\n{current_ranges}\n\nFase-etikette is vir vertoon en organisasie. Opsporing gebruik kragpatrone, nie fasename nie.",
-        "data": {
-          "action": "Aksie"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "Ken fasereekse toe",
-        "description": "Kies 'n profiel om fasereekse op te stel.",
-        "data": {
-          "profile": "Profiel"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Voeg fasereeks by",
-        "description": "Voeg een fasereeks by die huidige konsep.",
-        "data": {
-          "phase_name": "Fase",
-          "start_min": "Begin minuut",
-          "end_min": "Eindminuut"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Wysig fasereeks",
-        "description": "Kies 'n reeks om te wysig.",
-        "data": {
-          "range_index": "Fasereeks"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Wysig fasereeks",
-        "description": "Dateer die geselekteerde fasereeks op.",
-        "data": {
-          "phase_name": "Fase",
-          "start_min": "Begin minuut",
-          "end_min": "Eindminuut"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Vee fasereeks uit",
-        "description": "Kies 'n reeks om uit die konsep te verwyder.",
-        "data": {
-          "range_index": "Fasereeks"
-        }
-      },
-      "notifications": {
-        "title": "Kennisgewings",
-        "description": "Stel kennisgewingskanale, sjablone en opsionele regstreekse mobiele vorderingopdaterings op.",
-        "data": {
-          "notify_service": "Kennisgewingdiens (bv. notify.mobile_app)",
-          "notify_actions": "Kennisgewingsaksies",
-          "notify_people": "Mense om in kennis te stel",
-          "notify_only_when_home": "Stel net in kennis wanneer u tuis is",
-          "notify_fire_events": "Brand Outomatisering Gebeurtenisse",
-          "notify_events": "Gebeurtenisse om in kennis te stel",
-          "notify_before_end_minutes": "Voorafhandelingkennisgewing (minute voor einde)",
-          "notify_live_enabled": "Aktiveer regstreekse vorderingkennisgewings",
-          "notify_live_interval_seconds": "Regstreekse opdateringsinterval (sekondes)",
-          "notify_live_overrun_percent": "Regstreekse opdatering oorskry toelae (%)",
-          "notify_title": "Kennisgewing titel",
-          "notify_icon": "Kennisgewing-ikoon",
-          "notify_start_message": "Begin Boodskapformaat",
-          "notify_finish_message": "Voltooi Boodskapformaat",
-          "notify_pre_complete_message": "Pre-voltooiing Boodskap Formaat"
-        },
-        "data_description": {
-          "notify_service": "Huisassistent stel diens in kennis om te gebruik (opsioneel).",
-          "notify_actions": "Opsionele Home Assistant-aksievolgorde om vir kennisgewings uit te voer (skrifte, kennisgewing, TTS, ens.). Indien gestel, loop aksies voor terugvaldiens in kennis stel.",
-          "notify_people": "Mense-entiteite om te gebruik vir tuis-/weghekke. Wanneer dit geaktiveer is, word kennisgewings uitgestel totdat iemand tuis is.",
-          "notify_only_when_home": "Indien geaktiveer, stel kennisgewings uit totdat ten minste een geselekteerde persoon tuis is.",
-          "notify_fire_events": "As dit geaktiveer is, vuur Home Assistant-gebeurtenisse vir siklusbegin en -einde (ha_washdata_cycle_started/ended) af om outomatisering aan te dryf.",
-          "notify_events": "Vir watter geleenthede om kennisgewings te stuur.",
-          "notify_before_end_minutes": "Minute voor die geskatte einde van die siklus om 'n kennisgewing te aktiveer. Stel op 0 om te deaktiveer. Verstek: 0.",
-          "notify_live_enabled": "Aktiveer in-plek regstreekse vordering-opdaterings vir mobiele toepassingkennisgewings.",
-          "notify_live_interval_seconds": "Hoe gereeld vorderingsopdaterings gestuur word terwyl dit loop. Laer waardes reageer meer, maar verbruik meer kennisgewings.",
-          "notify_live_overrun_percent": "Veiligheidsmarge bo die beraamde opdateringtelling vir lang/oorlopende siklusse (byvoorbeeld 20% laat 1,2x beraamde opdaterings toe).",
-          "notify_title": "Gepasmaakte titel vir kennisgewings. Ondersteun {device} plekhouer.",
-          "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om verstek te gebruik.",
-          "notify_start_message": "Boodskap gestuur wanneer 'n siklus begin. Ondersteun {device} plekhouer.",
-          "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program} plekhouers.",
-          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers."
+          "corrected_duration": "Korrekte duur in minute (indien reggestel)"
         }
       }
     },
@@ -540,8 +554,6 @@
       "profile_exists": "'n Profiel met hierdie naam bestaan ​​reeds",
       "rename_failed": "Kon nie profiel hernoem nie. Profiel bestaan ​​dalk nie of nuwe naam is reeds geneem.",
       "assignment_failed": "Kon nie profiel aan siklus toewys nie",
-      "feedback_notification_title": "Wasdata: Verifieer siklus ({device})",
-      "feedback_notification_message": "**Toestel**: {device}\n**Program**: {program} ({confidence}% vertroue)\n**Tyd**: {time}\n\nWashData het jou hulp nodig om hierdie bespeurde siklus te verifieer.\n\nGaan asseblief na **Instellings > Toestelle en Dienste > Wasdata > Konfigureer > Leerterugvoere** om hierdie resultaat te bevestig of reg te stel.",
       "duplicate_phase": "'n Fase met hierdie naam bestaan ​​reeds.",
       "phase_not_found": "Geselekteerde fase is nie gevind nie.",
       "invalid_phase_name": "Fasenaam kan nie leeg wees nie.",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "Fasereekse oorvleuel. Pas die reekse aan en probeer weer.",
       "incomplete_phase_row": "Elke fasery moet 'n fase plus volledige begin/eindwaardes vir die geselekteerde modus insluit.",
       "timestamp_mode_cycle_required": "Kies asseblief 'n bronsiklus wanneer jy tydstempelmodus gebruik.",
-      "no_phase_ranges": "Geen fasereekse is nog vir daardie aksie beskikbaar nie."
+      "no_phase_ranges": "Geen fasereekse is nog vir daardie aksie beskikbaar nie.",
+      "feedback_notification_title": "Wasdata: Verifieer siklus ({device})",
+      "feedback_notification_message": "**Toestel**: {device}\n**Program**: {program} ({confidence}% vertroue)\n**Tyd**: {time}\n\nWashData het jou hulp nodig om hierdie bespeurde siklus te verifieer.\n\nGaan asseblief na **Instellings > Toestelle en Dienste > Wasdata > Konfigureer > Leerterugvoere** om hierdie resultaat te bevestig of reg te stel."
     },
     "abort": {
       "no_cycles_found": "Geen siklusse gevind nie",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "Alle siklusse is reeds gemerk",
       "no_suggestions": "Nog geen voorgestelde waardes beskikbaar nie. Hardloop 'n paar siklusse en probeer weer.",
       "no_predictions": "Geen voorspellings nie",
+      "no_custom_phases": "Geen pasgemaakte fases gevind nie.",
       "reprocess_success": "Het {count} siklusse suksesvol herverwerk.",
-      "debug_data_cleared": "Ontfoutdata van {count} siklusse is suksesvol uitgevee.",
-      "no_custom_phases": "Geen pasgemaakte fases vir hierdie toesteltipe gevind nie."
+      "debug_data_cleared": "Het ontfoutdata van {count} siklusse suksesvol uitgevee."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "Siklus begin",
+        "cycle_finish": "Siklus voltooi",
+        "cycle_live": "Regstreekse vordering"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(Ongemerk)",
+        "create_new_profile": "Skep nuwe profiel",
+        "remove_label": "Verwyder etiket",
+        "no_reference_cycle": "(Geen verwysingsiklus nie)",
+        "all_device_types": "Alle toesteltipes",
+        "current_suffix": "(huidige)",
+        "editor_select_info": "Kies 1 siklus om te verdeel, of 2+ siklusse om saam te voeg.",
+        "no_cycles_recorded": "Geen siklusse is nog aangeteken nie.",
+        "profile_summary_line": "- **{name}**: {count} siklusse, {avg}m gem",
+        "no_profiles_created": "Geen profiele is nog geskep nie.",
+        "phase_preview": "Fasevoorskou",
+        "phase_preview_no_curve": "Gemiddelde profielkurwe is nog nie beskikbaar nie. Laat loop/benoem meer siklusse vir hierdie profiel.",
+        "average_power_curve": "Gemiddelde kragkurwe",
+        "unit_min": "min",
+        "profile_option_fmt": "{name} ({count} siklusse, ~{duration}m gemiddeld)",
+        "profile_option_short_fmt": "{name} ({count} siklusse, ~{duration}m)",
+        "deleted_cycles_from_profile": "Het {count} siklusse van {profile} uitgevee.",
+        "not_enough_data_graph": "Nie genoeg data om grafiek te genereer nie.",
+        "no_profiles_found": "Geen profiele gevind nie.",
+        "cycle_info_fmt": "Siklus: {start}, {duration}m, stroom: {label}",
+        "top_candidates_header": "### Topkandidate",
+        "tbl_profile": "Profiel",
+        "tbl_confidence": "Vertroue",
+        "tbl_correlation": "Korrelasie",
+        "tbl_duration_match": "Tydswedstryd",
+        "detected_profile": "Bespeur profiel",
+        "estimated_duration": "Geskatte duur",
+        "actual_duration": "Werklike Duur",
+        "choose_action": "__Kies 'n handeling hieronder:__",
+        "tbl_count": "Tel",
+        "tbl_avg": "Gem",
+        "tbl_min": "Min",
+        "tbl_max": "Maks",
+        "tbl_energy_avg": "Energie (Gem.)",
+        "tbl_energy_total": "Energie (totaal)",
+        "tbl_consistency": "Bestaan.",
+        "tbl_last_run": "Laaste hardloop",
+        "graph_legend_title": "Grafieklegende",
+        "graph_legend_body": "Die blou band verteenwoordig die minimum en maksimum krag trekking reeks waargeneem. Die lyn wys die gemiddelde drywingskromme.",
+        "recording_preview": "Opnamevoorskou",
+        "trim_start": "Trim Begin",
+        "trim_end": "Sny Einde",
+        "split_preview_title": "Verdeel voorskou",
+        "split_preview_found_fmt": "Het {count} segmente gevind.",
+        "split_preview_confirm_fmt": "Klik Bevestig om hierdie siklus in {count} afsonderlike siklusse te verdeel.",
+        "merge_preview_title": "Voeg voorskou saam",
+        "merge_preview_joining_fmt": "Sluit tans aan by {count} siklusse. Leemtes sal gevul word met 0W lesings.",
+        "profile_comparison": "Profielvergelyking",
+        "actual_cycle_label": "Hierdie siklus (werklik)",
+        "storage_usage_header": "Berginggebruik",
+        "storage_file_size": "Lêergrootte",
+        "storage_cycles": "Siklusse",
+        "storage_profiles": "Profiele",
+        "storage_debug_traces": "Ontfout spore",
+        "overview_suffix": "Oorsig",
+        "phase_preview_for_profile": "Fasevoorskou vir profiel",
+        "current_ranges_header": "Huidige reekse",
+        "assign_phases_help": "Gebruik handelinge hieronder om reekse by te voeg, te wysig, uit te vee of te stoor.",
+        "profile_summary_header": "Profielopsomming",
+        "recent_cycles_header": "Onlangse siklusse"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "Verdeel 'n siklus (Vind gapings)",
+        "merge": "Voeg siklusse saam (Sluit fragmente aan)",
+        "delete": "Vee siklus(s) uit"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "Onderhoud: Herverwerk en optimaliseer data",
+        "clear_debug_data": "Vee ontfoutdata uit (maak spasie vry)",
+        "wipe_history": "Vee ALLE data vir hierdie toestel uit (onomkeerbaar)",
+        "export_import": "Voer JSON uit/voer in met instellings (kopieer/plak)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "Voer alle data uit",
+        "import": "Voer data in/voeg saam"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "Outo-etiketteer ou siklusse",
+        "select_cycle_to_label": "Benoem Spesifieke Siklus",
+        "select_cycle_to_label_multi": "Benoem verskeie siklusse",
+        "select_cycle_to_delete": "Vee siklus uit",
+        "interactive_editor": "Voeg saam / verdeel interaktiewe redigeerder"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "Skep nuwe profiel",
+        "edit_profile": "Wysig/hernoem profiel",
+        "delete_profile": "Vee profiel uit",
+        "profile_stats": "Profielstatistieke",
+        "cleanup_profile": "Maak geskiedenis skoon - grafiek en vee uit",
+        "assign_phases": "Ken fasereekse toe"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "Skep nuwe fase",
+        "edit_custom_phase": "Wysig fase",
+        "delete_custom_phase": "Vee Fase uit"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "Voeg fasereeks by",
+        "edit_range": "Wysig fasereeks",
+        "delete_range": "Vee fasereeks uit",
+        "clear_ranges": "Vee alle reekse uit",
+        "save_ranges": "Stoor en keer terug"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "Herlaai status",
+        "stop_recording": "Stop opname (stoor en verwerk)",
+        "start_recording": "Begin nuwe opname",
+        "process_recording": "Verwerk laaste opname (sny en stoor)",
+        "discard_recording": "Gooi laaste opname weg"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "Skep nuwe profiel",
+        "existing_profile": "Voeg by bestaande profiel",
+        "discard": "Gooi opname weg"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "Bevestig - Korrekte opsporing",
+        "correct": "Korrek - Kies program/duur",
+        "ignore": "Ignoreer - Vals Positief/Lawaaierige Siklus",
+        "delete": "Vee uit - Verwyder uit geskiedenis"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "Etiketsiklus",
+      "description": "Ken 'n bestaande profiel aan 'n vorige siklus toe, of verwyder die etiket.",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die wasmasjien toestel te etiketteer."
+        },
+        "cycle_id": {
+          "name": "Siklus ID",
+          "description": "Die ID van die siklus om te etiketteer."
+        },
+        "profile_name": {
+          "name": "Profiel Naam",
+          "description": "Die naam van 'n bestaande profiel (skep profiele in Bestuur profiele-kieslys). Laat leeg om etiket te verwyder."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "Skep profiel",
+      "description": "Skep 'n nuwe profiel (selfstandig of gebaseer op 'n verwysingsiklus).",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die wasmasjien toestel."
+        },
+        "profile_name": {
+          "name": "Profiel Naam",
+          "description": "Naam vir die nuwe profiel (bv. 'Heavy Duty', 'Delicates')."
+        },
+        "reference_cycle_id": {
+          "name": "Verwysingsiklus ID",
+          "description": "Opsionele siklus-ID om hierdie profiel op te baseer."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "Vee profiel uit",
+      "description": "Vee 'n profiel uit en ontmerk siklusse opsioneel deur dit te gebruik.",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die wasmasjien toestel."
+        },
+        "profile_name": {
+          "name": "Profiel Naam",
+          "description": "Die profiel om uit te vee."
+        },
+        "unlabel_cycles": {
+          "name": "Ontmerk siklusse",
+          "description": "Verwyder profieletiket uit siklusse deur hierdie profiel te gebruik."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "Outo-etiketteer ou siklusse",
+      "description": "Benoem ongemerkte siklusse terugwerkend deur profielpassing te gebruik.",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die wasmasjien toestel."
+        },
+        "confidence_threshold": {
+          "name": "Vertrouensdrempel",
+          "description": "Minimum wedstrydvertroue (0.50-0.95) om etikette toe te pas."
+        }
+      }
+    },
+    "export_config": {
+      "name": "Uitvoer Config",
+      "description": "Voer hierdie toestel se profiele, siklusse en instellings uit na 'n JSON-lêer (per toestel).",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die wasmasjien toestel om uit te voer."
+        },
+        "path": {
+          "name": "Pad",
+          "description": "Opsionele absolute lêerpad om te skryf (verstek na /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "Voer konfigurasie in",
+      "description": "Voer profiele, siklusse en instellings vir hierdie toestel in vanaf 'n JSON-uitvoerlêer (instellings kan dalk oorgeskryf word).",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die wasmasjien toestel om in te voer."
+        },
+        "path": {
+          "name": "Pad",
+          "description": "Absolute pad na die uitvoer JSON-lêer om in te voer."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "Dien siklusterugvoer in",
+      "description": "Bevestig of korrigeer 'n outomaties bespeurde program na 'n voltooide siklus. Verskaf óf `entry_id` (gevorderd) of `device_id` (aanbeveel).",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die WashData-toestel (aanbeveel in plaas van entry_id)."
+        },
+        "entry_id": {
+          "name": "Inskrywing ID",
+          "description": "Die config-invoer-ID vir die toestel (alternatief vir device_id)."
+        },
+        "cycle_id": {
+          "name": "Siklus ID",
+          "description": "Die siklus-ID wat in die terugvoerkennisgewing / logs gewys word."
+        },
+        "user_confirmed": {
+          "name": "Bevestig opgespoorde program",
+          "description": "Stel waar as die bespeurde program korrek is."
+        },
+        "corrected_profile": {
+          "name": "Gekorrigeerde profiel",
+          "description": "Indien nie bevestig nie, verskaf die korrekte profiel/programnaam."
+        },
+        "corrected_duration": {
+          "name": "Korrigeerde duur (sekondes)",
+          "description": "Opsionele gekorrigeerde duur in sekondes."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Opsionele notas oor hierdie siklus."
+        }
+      }
+    },
+    "record_start": {
+      "name": "Rekordsiklus begin",
+      "description": "Begin om 'n skoon siklus met die hand op te neem (omseil alle ooreenstemmende logika).",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die wasmasjien toestel om aan te teken."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "Rekordsiklus stop",
+      "description": "Stop handmatige opname.",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die wasmasjien toestel om opname te stop."
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "Hardloop"
+      },
+      "match_ambiguity": {
+        "name": "Pas dubbelsinnigheid by"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "Staat"
+        "name": "Staat",
+        "state": {
+          "off": "Af",
+          "idle": "Ledig",
+          "starting": "Begin",
+          "running": "Hardloop",
+          "paused": "Onderbreek",
+          "ending": "Einde",
+          "finished": "Klaar",
+          "anti_wrinkle": "Anti-rimpel",
+          "interrupted": "Onderbreek",
+          "force_stopped": "Force gestop",
+          "rinse": "Spoel af",
+          "unknown": "Onbekend"
+        }
       },
       "washer_program": {
         "name": "Program"
@@ -595,16 +936,23 @@
         "name": "Pas Vertroue"
       },
       "top_candidates": {
-        "name": "Top kandidate"
+        "name": "Top kandidate",
+        "state": {
+          "none": "Geen"
+        }
+      },
+      "current_phase": {
+        "name": "Huidige fase"
       },
       "wash_phase": {
         "name": "Fase"
       },
+      "profile_cycle_count": {
+        "name": "Profiel {profile_name} Tel",
+        "unit_of_measurement": "siklusse"
+      },
       "suggestions": {
         "name": "Voorgestelde instellings"
-      },
-      "current_phase": {
-        "name": "Huidige fase"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "Outo-bespeur"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "Forseer eindsiklus"
       }
     }
   }

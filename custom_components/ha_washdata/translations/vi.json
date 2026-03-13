@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "Xem lại phản hồi học tập",
           "settings": "Cài đặt",
+          "notifications": "Thông báo",
           "manage_cycles": "Quản lý chu kỳ",
           "manage_profiles": "Quản lý hồ sơ",
-          "record_cycle": "Chu kỳ ghi (Thủ công)",
-          "diagnostics": "Chẩn đoán & Bảo trì",
           "manage_phase_catalog": "Quản lý danh mục giai đoạn",
-          "notifications": "Thông báo"
+          "record_cycle": "Chu kỳ ghi (Thủ công)",
+          "diagnostics": "Chẩn đoán & Bảo trì"
         }
       },
       "apply_suggestions": {
@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Cài đặt",
-        "description": "Điều chỉnh ngưỡng phát hiện, học tập và hành vi nâng cao. Mặc định hoạt động tốt cho hầu hết các thiết lập.",
+        "description": "Điều chỉnh các ngưỡng phát hiện, học tập và hành vi nâng cao. Mặc định hoạt động tốt cho hầu hết các thiết lập.",
         "data": {
           "apply_suggestions": "Áp dụng các giá trị được đề xuất",
           "device_type": "Loại thiết bị",
@@ -67,8 +67,8 @@
           "off_delay": "Độ trễ kết thúc chu kỳ (s)",
           "notify_service": "Dịch vụ thông báo (ví dụ: notification.mobile_app)",
           "notify_actions": "Hành động thông báo",
-          "notify_people": "Người cần thông báo",
-          "notify_only_when_home": "Chỉ thông báo khi về nhà",
+          "notify_people": "Trì hoãn giao hàng cho đến khi những người này về nhà",
+          "notify_only_when_home": "Trì hoãn thông báo cho đến khi người được chọn ở nhà",
           "notify_fire_events": "Sự kiện tự động hóa chữa cháy",
           "notify_events": "Sự kiện cần thông báo",
           "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
@@ -80,16 +80,16 @@
           "show_advanced": "Chỉnh sửa cài đặt nâng cao (Bước tiếp theo)"
         },
         "data_description": {
-          "apply_suggestions": "Chọn hộp này để sao chép các giá trị do thuật toán học đề xuất vào biểu mẫu. Xem lại trước khi lưu.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} giây\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} giây\n- profile_match_interval: {suggested_profile_match_interval} giây\n- auto_label_trust: {suggested_auto_label_confidence}\n- thời lượng_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Chọn hộp này để sao chép các giá trị do thuật toán học đề xuất vào biểu mẫu. Xem lại trước khi lưu.\n\nĐề xuất (từ học tập):\n- công suất tối thiểu: {suggested_min_power} W\n- off_delay: {suggested_off_delay} giây\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} giây\n- profile_match_interval: {suggested_profile_match_interval} giây\n- auto_label_trust: {suggested_auto_label_confidence}\n- thời lượng_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "Chọn loại thiết bị (Máy giặt, Máy sấy, Máy rửa chén, Máy pha cà phê, EV). Thẻ này được lưu trữ theo từng chu kỳ để tổ chức tốt hơn.",
-          "power_sensor": "Thực thể cảm biến báo cáo công suất theo thời gian thực (tính bằng watt). Bạn có thể thay đổi điều này bất cứ lúc nào mà không làm mất dữ liệu lịch sử—hữu ích nếu bạn thay thế phích cắm thông minh.",
+          "power_sensor": "Thực thể cảm biến báo cáo công suất theo thời gian thực (tính bằng watt). Bạn có thể thay đổi điều này bất kỳ lúc nào mà không làm mất dữ liệu lịch sử—hữu ích nếu bạn thay thế phích cắm thông minh.",
           "min_power": "Chỉ số công suất trên ngưỡng này (tính bằng watt) cho biết thiết bị đang chạy. Bắt đầu với 2W cho hầu hết các thiết bị.",
           "off_delay": "Số giây công suất được làm mịn phải ở dưới ngưỡng dừng để đánh dấu mức hoàn thành. Mặc định: 120s.",
           "notify_service": "Home Assistant thông báo dịch vụ sẽ sử dụng (tùy chọn).",
           "notify_actions": "Chuỗi hành động Home Assistant tùy chọn để chạy thông báo (tập lệnh, thông báo, TTS, v.v.). Nếu được đặt, các hành động sẽ chạy trước dịch vụ thông báo dự phòng.",
-          "notify_people": "Các thực thể con người được sử dụng cho cổng nhà/sân khách. Khi được bật, thông báo sẽ được hoãn lại cho đến khi có người ở nhà.",
+          "notify_people": "Các thực thể con người được sử dụng để kiểm soát sự hiện diện. Khi được bật, việc gửi thông báo sẽ bị trì hoãn cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_only_when_home": "Nếu được bật, hãy trì hoãn thông báo cho đến khi có ít nhất một người được chọn ở nhà.",
-          "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started/kết thúc) để thúc đẩy quá trình tự động hóa.",
+          "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started và ha_washdata_cycle_ends) để thúc đẩy quá trình tự động hóa.",
           "notify_events": "Những sự kiện nào cần gửi thông báo.",
           "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
           "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
@@ -99,9 +99,47 @@
           "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}."
         }
       },
+      "notifications": {
+        "title": "Thông báo",
+        "description": "Định cấu hình các kênh thông báo, mẫu và cập nhật tiến trình di động trực tiếp tùy chọn.",
+        "data": {
+          "notify_service": "Dịch vụ thông báo (ví dụ: notification.mobile_app)",
+          "notify_actions": "Hành động thông báo",
+          "notify_people": "Trì hoãn giao hàng cho đến khi những người này về nhà",
+          "notify_only_when_home": "Trì hoãn thông báo cho đến khi người được chọn ở nhà",
+          "notify_fire_events": "Sự kiện tự động hóa chữa cháy",
+          "notify_events": "Sự kiện cần thông báo",
+          "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
+          "notify_live_enabled": "Bật thông báo tiến độ trực tiếp",
+          "notify_live_interval_seconds": "Khoảng thời gian cập nhật trực tiếp (giây)",
+          "notify_live_overrun_percent": "Phụ cấp tràn cập nhật trực tiếp (%)",
+          "notify_title": "Tiêu đề thông báo",
+          "notify_icon": "Biểu tượng thông báo",
+          "notify_start_message": "Bắt đầu định dạng tin nhắn",
+          "notify_finish_message": "Hoàn tất định dạng tin nhắn",
+          "notify_pre_complete_message": "Định dạng tin nhắn trước khi hoàn thành"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant thông báo dịch vụ sẽ sử dụng (tùy chọn).",
+          "notify_actions": "Chuỗi hành động Home Assistant tùy chọn để chạy thông báo (tập lệnh, thông báo, TTS, v.v.). Nếu được đặt, các hành động sẽ chạy trước dịch vụ thông báo dự phòng.",
+          "notify_people": "Các thực thể con người được sử dụng để kiểm soát sự hiện diện. Khi được bật, việc gửi thông báo sẽ bị trì hoãn cho đến khi có ít nhất một người được chọn ở nhà.",
+          "notify_only_when_home": "Nếu được bật, hãy trì hoãn thông báo cho đến khi có ít nhất một người được chọn ở nhà.",
+          "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started và ha_washdata_cycle_ends) để thúc đẩy quá trình tự động hóa.",
+          "notify_events": "Những sự kiện nào cần gửi thông báo.",
+          "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
+          "notify_live_enabled": "Bật cập nhật tiến độ trực tiếp tại chỗ cho thông báo ứng dụng dành cho thiết bị di động.",
+          "notify_live_interval_seconds": "Tần suất cập nhật tiến độ được gửi trong khi chạy. Giá trị thấp hơn phản hồi nhanh hơn nhưng tiêu thụ nhiều thông báo hơn.",
+          "notify_live_overrun_percent": "Biên độ an toàn cao hơn số lượng cập nhật ước tính cho các chu kỳ dài/chạy quá mức (ví dụ: 20% cho phép cập nhật ước tính gấp 1,2 lần).",
+          "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
+          "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để sử dụng mặc định.",
+          "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
+          "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}."
+        }
+      },
       "advanced_settings": {
         "title": "Cài đặt nâng cao",
-        "description": "Điều chỉnh ngưỡng phát hiện, học tập và hành vi nâng cao. Mặc định hoạt động tốt cho hầu hết các thiết lập.",
+        "description": "Điều chỉnh các ngưỡng phát hiện, học tập và hành vi nâng cao. Mặc định hoạt động tốt cho hầu hết các thiết lập.",
         "data": {
           "apply_suggestions": "Áp dụng các giá trị được đề xuất",
           "start_threshold_w": "Ngưỡng bắt đầu (W)",
@@ -149,7 +187,7 @@
           "external_end_trigger_inverted": "Đảo ngược logic kích hoạt (Kích hoạt khi TẮT)"
         },
         "data_description": {
-          "apply_suggestions": "Chọn hộp này để sao chép các giá trị do thuật toán học đề xuất vào biểu mẫu. Xem lại trước khi lưu.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} giây\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} giây\n- profile_match_interval: {suggested_profile_match_interval} giây\n- auto_label_trust: {suggested_auto_label_confidence}\n- thời lượng_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Chọn hộp này để sao chép các giá trị do thuật toán học đề xuất vào biểu mẫu. Xem lại trước khi lưu.\n\nĐề xuất (từ học tập):\n- công suất tối thiểu: {suggested_min_power} W\n- off_delay: {suggested_off_delay} giây\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} giây\n- profile_match_interval: {suggested_profile_match_interval} giây\n- auto_label_trust: {suggested_auto_label_confidence}\n- thời lượng_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "Công suất phải tăng TRÊN ngưỡng này để BẮT ĐẦU một chu kỳ. Đặt cao hơn nguồn điện dự phòng của bạn. Mặc định: min_power + 1 W.",
           "stop_threshold_w": "Công suất phải giảm xuống DƯỚI ngưỡng này để KẾT THÚC một chu kỳ. Đặt ngay trên 0 để tránh tiếng ồn gây ra các đầu sai. Mặc định: 0,6 * min_power.",
           "min_off_gap": "Nếu một chu kỳ bắt đầu trong vòng nhiều giây này kể từ khi kết thúc chu kỳ trước đó, chúng sẽ được HỢP NHẤT thành một chu kỳ duy nhất.",
@@ -184,7 +222,7 @@
           "end_energy_threshold": "Chu kỳ chỉ kết thúc nếu năng lượng trong cửa sổ Tắt trễ cuối cùng thấp hơn giá trị này (Wh). Ngăn chặn các đầu sai nếu nguồn điện dao động gần bằng 0. Mặc định: 0,05 Wh.",
           "auto_maintenance": "Cho phép tự động bảo trì (sửa chữa mẫu, hợp nhất các đoạn).",
           "expose_debug_entities": "Hiển thị các cảm biến nâng cao (Độ tin cậy, Pha, Sự mơ hồ) để gỡ lỗi.",
-          "save_debug_traces": "Lưu trữ chi tiết xếp hạng và dữ liệu theo dõi sức mạnh trong lịch sử (Tăng mức sử dụng bộ nhớ).",
+          "save_debug_traces": "Lưu trữ xếp hạng chi tiết và dữ liệu theo dõi sức mạnh trong lịch sử (Tăng mức sử dụng bộ nhớ).",
           "anti_wrinkle_enabled": "Bỏ qua các vòng quay trống công suất thấp trong thời gian ngắn sau khi chu trình kết thúc để tránh chu kỳ ma (chỉ máy sấy/máy giặt-máy sấy).",
           "anti_wrinkle_max_power": "Các lần tăng tốc bằng hoặc thấp hơn công suất này được coi là các vòng quay chống nếp nhăn thay vì các chu kỳ mới. Chỉ áp dụng khi Tấm chắn chống nhăn được bật.",
           "anti_wrinkle_max_duration": "Chiều dài bùng nổ tối đa được coi là vòng xoay chống nhăn. Chỉ áp dụng khi Tấm chắn chống nhăn được bật.",
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "Chẩn đoán & Bảo trì",
-        "description": "Chạy các hành động bảo trì như hợp nhất các chu trình bị phân mảnh hoặc di chuyển dữ liệu được lưu trữ.\n\n{storage_stats}"
+        "description": "Chạy các hành động bảo trì như hợp nhất các chu trình bị phân mảnh hoặc di chuyển dữ liệu được lưu trữ.\n\n**Sử dụng bộ nhớ**\n\n- Kích thước Tệp: {file_size_kb} KB\n- Chu kỳ: {cycle_count}\n- Hồ sơ: {profile_count}\n- Dấu vết gỡ lỗi: {debug_count}"
       },
       "clear_debug_data": {
         "title": "Xóa dữ liệu gỡ lỗi",
@@ -210,11 +248,109 @@
           "action": "Hoạt động"
         }
       },
+      "manage_cycles_empty": {
+        "title": "Quản lý chu kỳ",
+        "description": "Chưa có chu kỳ nào được ghi lại.",
+        "data": {
+          "action": "Hoạt động"
+        }
+      },
       "manage_profiles": {
         "title": "Quản lý hồ sơ",
         "description": "Tóm tắt hồ sơ:\n{profile_summary}",
         "data": {
           "action": "Hoạt động"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "Quản lý hồ sơ",
+        "description": "Chưa có hồ sơ nào được tạo.",
+        "data": {
+          "action": "Hoạt động"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "Quản lý danh mục giai đoạn",
+        "description": "Danh mục pha (mặc định cho thiết bị này + các pha tùy chỉnh):\n{phase_summary}",
+        "data": {
+          "action": "Hoạt động"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Tạo giai đoạn tùy chỉnh",
+        "description": "Tạo tên và mô tả pha tùy chỉnh, đồng thời chọn loại thiết bị áp dụng.",
+        "data": {
+          "target_device_type": "Loại thiết bị mục tiêu",
+          "phase_name": "Tên giai đoạn",
+          "phase_description": "Giai đoạn Mô tả"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Chỉnh sửa giai đoạn tùy chỉnh",
+        "description": "Chọn một giai đoạn tùy chỉnh để chỉnh sửa.",
+        "data": {
+          "phase_name": "Giai đoạn tùy chỉnh"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Chỉnh sửa giai đoạn tùy chỉnh",
+        "description": "Giai đoạn chỉnh sửa: {phase_name}",
+        "data": {
+          "phase_name": "Tên giai đoạn",
+          "phase_description": "Giai đoạn Mô tả"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Xóa giai đoạn tùy chỉnh",
+        "description": "Chọn một giai đoạn tùy chỉnh để xóa. Mọi phạm vi được chỉ định sử dụng giai đoạn này sẽ bị xóa.",
+        "data": {
+          "phase_name": "Giai đoạn tùy chỉnh"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Chỉ định phạm vi pha",
+        "description": "Xem trước giai đoạn cho hồ sơ: **{profile_name}**\n\n{timeline_svg}\n\n**Phạm vi hiện tại:**\n{current_ranges}\n\nSử dụng các thao tác bên dưới để thêm, chỉnh sửa, xóa hoặc lưu phạm vi.",
+        "data": {
+          "action": "Hoạt động"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Thêm phạm vi pha",
+        "description": "Thêm một phạm vi pha vào dự thảo hiện tại.",
+        "data": {
+          "phase_name": "Giai đoạn",
+          "start_min": "Phút bắt đầu",
+          "end_min": "Phút cuối"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Chỉnh sửa phạm vi pha",
+        "description": "Chọn một phạm vi để chỉnh sửa.",
+        "data": {
+          "range_index": "Phạm vi pha"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Chỉnh sửa phạm vi pha",
+        "description": "Cập nhật phạm vi pha đã chọn.",
+        "data": {
+          "phase_name": "Giai đoạn",
+          "start_min": "Phút bắt đầu",
+          "end_min": "Phút cuối"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Xóa phạm vi pha",
+        "description": "Chọn một phạm vi để loại bỏ khỏi bản nháp.",
+        "data": {
+          "range_index": "Phạm vi pha"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Chỉ định phạm vi pha",
+        "description": "Chọn một cấu hình để cấu hình phạm vi pha.",
+        "data": {
+          "profile": "Hồ sơ"
         }
       },
       "profile_stats": {
@@ -302,7 +438,7 @@
       },
       "cleanup_profile": {
         "title": "Dọn dẹp lịch sử - Chọn hồ sơ",
-        "description": "Select a profile to visualize. Điều này sẽ tạo ra một biểu đồ hiển thị tất cả các chu kỳ trước đây cho cấu hình này để giúp xác định các ngoại lệ.",
+        "description": "Chọn một hồ sơ để trực quan hóa. Điều này sẽ tạo ra một biểu đồ hiển thị tất cả các chu kỳ trước đây cho cấu hình này để giúp xác định các ngoại lệ.",
         "data": {
           "profile": "Hồ sơ"
         }
@@ -367,8 +503,8 @@
         "title": "Xuất/Nhập JSON",
         "description": "Sao chép/dán chu trình, cấu hình VÀ cài đặt cho thiết bị này. Xuất bên dưới hoặc dán JSON để nhập.",
         "data": {
-          "json_payload": "JSON cấu hình hoàn chỉnh",
-          "mode": "Hoạt động"
+          "mode": "Hoạt động",
+          "json_payload": "JSON cấu hình hoàn chỉnh"
         },
         "data_description": {
           "mode": "Chọn Xuất để sao chép dữ liệu và cài đặt hiện tại hoặc Nhập để dán dữ liệu đã xuất từ ​​một thiết bị WashData khác.",
@@ -384,7 +520,7 @@
       },
       "record_process": {
         "title": "Ghi lại quá trình",
-        "description": "![Biểu đồ]({graph_url})\n\n**Biểu đồ hiển thị bản ghi thô.** Xanh = Giữ, Đỏ = Cắt đề xuất.\n*Biểu đồ tĩnh và không cập nhật khi có thay đổi về biểu mẫu.*\n\nĐã dừng ghi. Các phần cắt được căn chỉnh theo tốc độ lấy mẫu được phát hiện (~{sampling_rate}s).\n\nThời lượng thô: {duration} giây\nMẫu: {samples}",
+        "description": "![Biểu đồ]({graph_url})\n\n**Biểu đồ hiển thị bản ghi thô.** Xanh = Giữ, Đỏ = Cắt đề xuất.\n*Biểu đồ tĩnh và không cập nhật khi có thay đổi về biểu mẫu.*\n\nĐã dừng ghi. Các phần cắt được căn chỉnh theo tốc độ lấy mẫu được phát hiện (~{sampling_rate} giây).\n\nThời lượng thô: {duration} giây\nMẫu: {samples}",
         "data": {
           "head_trim": "Cắt bắt đầu (giây)",
           "tail_trim": "Cắt bớt kết thúc (giây)",
@@ -405,133 +541,11 @@
       },
       "resolve_feedback": {
         "title": "Giải quyết phản hồi",
-        "description": "**Chương trình được phát hiện**: {profile}\n**Sự tự tin**: {confidence}%\n**Ước tính**: {est}m, **Thực tế**: {act}m",
+        "description": "{comparison_img}{candidates_table}\n**Hồ sơ được phát hiện**: {detected_profile} ({confidence_pct}%)\n**Thời lượng ước tính**: {est_duration_min} phút\n**Thời lượng thực tế**: {act_duration_min} phút\n\n__Chọn một hành động dưới đây:__",
         "data": {
+          "action": "Bạn muốn làm gì?",
           "corrected_profile": "Đúng chương trình (nếu sửa)",
-          "corrected_duration": "Thời lượng chính xác tính bằng phút (nếu sửa)",
-          "action": "Bạn muốn làm gì?"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Quản lý danh mục giai đoạn",
-        "description": "Các giai đoạn hiện tại của loại thiết bị này:\n{phase_summary}",
-        "data": {
-          "action": "Hoạt động"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Tạo giai đoạn tùy chỉnh",
-        "description": "Tạo tên và mô tả pha tùy chỉnh cho loại thiết bị này.",
-        "data": {
-          "phase_name": "Tên giai đoạn",
-          "phase_description": "Giai đoạn Mô tả",
-          "target_device_type": "Loại thiết bị mục tiêu"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Chỉnh sửa giai đoạn tùy chỉnh",
-        "description": "Chọn một giai đoạn tùy chỉnh để chỉnh sửa.",
-        "data": {
-          "phase_name": "Giai đoạn tùy chỉnh"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Chỉnh sửa giai đoạn tùy chỉnh",
-        "description": "Giai đoạn chỉnh sửa: {phase_name}",
-        "data": {
-          "phase_name": "Tên giai đoạn",
-          "phase_description": "Giai đoạn Mô tả"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Xóa giai đoạn tùy chỉnh",
-        "description": "Chọn một giai đoạn tùy chỉnh để xóa. Mọi phạm vi được chỉ định sử dụng giai đoạn này sẽ bị xóa.",
-        "data": {
-          "phase_name": "Giai đoạn tùy chỉnh"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Chỉ định phạm vi pha",
-        "description": "Hồ sơ: **{profile_name}**\nChế độ: **{assign_mode}**\nGợi ý chu kỳ: {cycle_hint}\n\nPhạm vi hiện tại:\n{current_ranges}\n\nNhãn pha dùng để hiển thị và tổ chức. Phát hiện sử dụng các mẫu nguồn chứ không phải tên pha.",
-        "data": {
-          "action": "Hoạt động"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "Chỉ định phạm vi pha",
-        "description": "Chọn một cấu hình để cấu hình phạm vi pha.",
-        "data": {
-          "profile": "Hồ sơ"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Thêm phạm vi pha",
-        "description": "Thêm một phạm vi pha vào dự thảo hiện tại.",
-        "data": {
-          "phase_name": "Giai đoạn",
-          "start_min": "Phút bắt đầu",
-          "end_min": "Phút cuối"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Chỉnh sửa phạm vi pha",
-        "description": "Chọn một phạm vi để chỉnh sửa.",
-        "data": {
-          "range_index": "Phạm vi pha"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Chỉnh sửa phạm vi pha",
-        "description": "Cập nhật phạm vi pha đã chọn.",
-        "data": {
-          "phase_name": "Giai đoạn",
-          "start_min": "Phút bắt đầu",
-          "end_min": "Phút cuối"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Xóa phạm vi pha",
-        "description": "Chọn một phạm vi để loại bỏ khỏi bản nháp.",
-        "data": {
-          "range_index": "Phạm vi pha"
-        }
-      },
-      "notifications": {
-        "title": "Thông báo",
-        "description": "Định cấu hình các kênh thông báo, mẫu và cập nhật tiến trình di động trực tiếp tùy chọn.",
-        "data": {
-          "notify_service": "Dịch vụ thông báo (ví dụ: notification.mobile_app)",
-          "notify_actions": "Hành động thông báo",
-          "notify_people": "Người cần thông báo",
-          "notify_only_when_home": "Chỉ thông báo khi về nhà",
-          "notify_fire_events": "Sự kiện tự động hóa chữa cháy",
-          "notify_events": "Sự kiện cần thông báo",
-          "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
-          "notify_live_enabled": "Bật thông báo tiến độ trực tiếp",
-          "notify_live_interval_seconds": "Khoảng thời gian cập nhật trực tiếp (giây)",
-          "notify_live_overrun_percent": "Phụ cấp tràn cập nhật trực tiếp (%)",
-          "notify_title": "Tiêu đề thông báo",
-          "notify_icon": "Biểu tượng thông báo",
-          "notify_start_message": "Bắt đầu định dạng tin nhắn",
-          "notify_finish_message": "Hoàn tất định dạng tin nhắn",
-          "notify_pre_complete_message": "Định dạng tin nhắn trước khi hoàn thành"
-        },
-        "data_description": {
-          "notify_service": "Home Assistant thông báo dịch vụ sẽ sử dụng (tùy chọn).",
-          "notify_actions": "Chuỗi hành động Home Assistant tùy chọn để chạy thông báo (tập lệnh, thông báo, TTS, v.v.). Nếu được đặt, các hành động sẽ chạy trước dịch vụ thông báo dự phòng.",
-          "notify_people": "Các thực thể con người được sử dụng cho cổng nhà/sân khách. Khi được bật, thông báo sẽ được hoãn lại cho đến khi có người ở nhà.",
-          "notify_only_when_home": "Nếu được bật, hãy trì hoãn thông báo cho đến khi có ít nhất một người được chọn ở nhà.",
-          "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started/kết thúc) để thúc đẩy quá trình tự động hóa.",
-          "notify_events": "Những sự kiện nào cần gửi thông báo.",
-          "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
-          "notify_live_enabled": "Bật cập nhật tiến độ trực tiếp tại chỗ cho thông báo ứng dụng dành cho thiết bị di động.",
-          "notify_live_interval_seconds": "Tần suất cập nhật tiến độ được gửi trong khi chạy. Giá trị thấp hơn phản hồi nhanh hơn nhưng tiêu thụ nhiều thông báo hơn.",
-          "notify_live_overrun_percent": "Biên độ an toàn cao hơn số lượng cập nhật ước tính cho các chu kỳ dài/chạy quá mức (ví dụ: 20% cho phép cập nhật ước tính gấp 1,2 lần).",
-          "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
-          "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để sử dụng mặc định.",
-          "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
-          "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}."
+          "corrected_duration": "Thời lượng chính xác tính bằng phút (nếu sửa)"
         }
       }
     },
@@ -540,8 +554,6 @@
       "profile_exists": "Hồ sơ có tên này đã tồn tại",
       "rename_failed": "Không đổi tên được hồ sơ. Hồ sơ có thể không tồn tại hoặc tên mới đã được sử dụng.",
       "assignment_failed": "Không thể chỉ định hồ sơ cho chu kỳ",
-      "feedback_notification_title": "WashData: Chu trình xác minh ({device})",
-      "feedback_notification_message": "**Thiết bị**: {device}\n**Chương trình**: {program} ({confidence}%)\n**Thời gian**: {time}\n\nWashData cần sự trợ giúp của bạn để xác minh chu trình được phát hiện này.\n\nVui lòng truy cập **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Phản hồi tìm hiểu** để xác nhận hoặc sửa kết quả này.",
       "duplicate_phase": "Một giai đoạn có tên này đã tồn tại.",
       "phase_not_found": "Giai đoạn đã chọn không được tìm thấy.",
       "invalid_phase_name": "Tên giai đoạn không được để trống.",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "Phạm vi pha chồng chéo. Điều chỉnh phạm vi và thử lại.",
       "incomplete_phase_row": "Mỗi hàng pha phải bao gồm một pha cộng với các giá trị bắt đầu/kết thúc hoàn chỉnh cho chế độ đã chọn.",
       "timestamp_mode_cycle_required": "Vui lòng chọn chu kỳ nguồn khi sử dụng chế độ dấu thời gian.",
-      "no_phase_ranges": "Chưa có phạm vi pha nào cho hành động đó."
+      "no_phase_ranges": "Chưa có phạm vi pha nào cho hành động đó.",
+      "feedback_notification_title": "WashData: Chu trình xác minh ({device})",
+      "feedback_notification_message": "**Thiết bị**: {device}\n**Chương trình**: {program} (độ tin cậy {confidence}%)\n**Thời gian**: {time}\n\nWashData cần sự trợ giúp của bạn để xác minh chu trình được phát hiện này.\n\nVui lòng truy cập **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Phản hồi tìm hiểu** để xác nhận hoặc sửa kết quả này."
     },
     "abort": {
       "no_cycles_found": "Không tìm thấy chu kỳ nào",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "Tất cả các chu kỳ đã được dán nhãn",
       "no_suggestions": "Chưa có giá trị đề xuất nào. Chạy một vài chu kỳ và thử lại.",
       "no_predictions": "Không có dự đoán",
-      "reprocess_success": "Đã xử lý lại thành công chu kỳ {count}.",
-      "debug_data_cleared": "Đã xóa thành công dữ liệu gỡ lỗi khỏi chu kỳ {count}.",
-      "no_custom_phases": "Không tìm thấy giai đoạn tùy chỉnh nào cho loại thiết bị này."
+      "no_custom_phases": "Không tìm thấy giai đoạn tùy chỉnh nào.",
+      "reprocess_success": "Đã xử lý lại thành công {count} chu kỳ.",
+      "debug_data_cleared": "Đã xóa thành công dữ liệu gỡ lỗi khỏi chu kỳ {count}."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "Bắt đầu chu kỳ",
+        "cycle_finish": "Kết thúc chu kỳ",
+        "cycle_live": "Tiến trình trực tiếp"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(Chưa gắn nhãn)",
+        "create_new_profile": "Tạo hồ sơ mới",
+        "remove_label": "Xóa nhãn",
+        "no_reference_cycle": "(Không có chu kỳ tham chiếu)",
+        "all_device_types": "Tất cả các loại thiết bị",
+        "current_suffix": "(hiện hành)",
+        "editor_select_info": "Chọn 1 chu kỳ để tách hoặc hơn 2 chu kỳ để hợp nhất.",
+        "no_cycles_recorded": "Chưa có chu kỳ nào được ghi lại.",
+        "profile_summary_line": "- **{name}**: {count} chu kỳ, trung bình là {avg} tháng",
+        "no_profiles_created": "Chưa có hồ sơ nào được tạo.",
+        "phase_preview": "Xem trước giai đoạn",
+        "phase_preview_no_curve": "Đường cong hồ sơ trung bình chưa có sẵn. Chạy/gắn nhãn nhiều chu kỳ hơn cho hồ sơ này.",
+        "average_power_curve": "Đường cong công suất trung bình",
+        "unit_min": "phút",
+        "profile_option_fmt": "{name} ({count} chu kỳ, trung bình ~{duration}m)",
+        "profile_option_short_fmt": "{name} ({count} chu kỳ, ~{duration}m)",
+        "deleted_cycles_from_profile": "Đã xóa {count} chu kỳ khỏi {profile}.",
+        "not_enough_data_graph": "Không đủ dữ liệu để tạo biểu đồ.",
+        "no_profiles_found": "Không tìm thấy hồ sơ nào.",
+        "cycle_info_fmt": "Chu kỳ: {start}, {duration}m, Hiện tại: {label}",
+        "top_candidates_header": "### Ứng viên hàng đầu",
+        "tbl_profile": "Hồ sơ",
+        "tbl_confidence": "Sự tự tin",
+        "tbl_correlation": "Tương quan",
+        "tbl_duration_match": "Thời lượng khớp",
+        "detected_profile": "Hồ sơ được phát hiện",
+        "estimated_duration": "Thời lượng ước tính",
+        "actual_duration": "Thời lượng thực tế",
+        "choose_action": "__Chọn một hành động dưới đây:__",
+        "tbl_count": "Đếm",
+        "tbl_avg": "Trung bình",
+        "tbl_min": "tối thiểu",
+        "tbl_max": "Tối đa",
+        "tbl_energy_avg": "Năng lượng (Trung bình)",
+        "tbl_energy_total": "Năng lượng (Tổng cộng)",
+        "tbl_consistency": "Bao gồm.",
+        "tbl_last_run": "Lần chạy cuối cùng",
+        "graph_legend_title": "Chú giải biểu đồ",
+        "graph_legend_body": "Dải màu xanh biểu thị phạm vi tiêu thụ điện năng tối thiểu và tối đa được quan sát. Đường này hiển thị đường cong công suất trung bình.",
+        "recording_preview": "Xem trước ghi âm",
+        "trim_start": "Cắt bắt đầu",
+        "trim_end": "Cắt bớt phần cuối",
+        "split_preview_title": "Xem trước tách",
+        "split_preview_found_fmt": "Đã tìm thấy {count} đoạn.",
+        "split_preview_confirm_fmt": "Nhấp vào Xác nhận để chia chu kỳ này thành {count} chu kỳ riêng biệt.",
+        "merge_preview_title": "Hợp nhất bản xem trước",
+        "merge_preview_joining_fmt": "Tham gia {count} chu kỳ. Các khoảng trống sẽ được lấp đầy bằng số đọc 0W.",
+        "profile_comparison": "So sánh hồ sơ",
+        "actual_cycle_label": "Chu kỳ này (thực tế)",
+        "storage_usage_header": "Sử dụng bộ nhớ",
+        "storage_file_size": "Kích thước tệp",
+        "storage_cycles": "Chu kỳ",
+        "storage_profiles": "Hồ sơ",
+        "storage_debug_traces": "Dấu vết gỡ lỗi",
+        "overview_suffix": "Tổng quan",
+        "phase_preview_for_profile": "Xem trước giai đoạn cho hồ sơ",
+        "current_ranges_header": "phạm vi hiện tại",
+        "assign_phases_help": "Sử dụng các thao tác bên dưới để thêm, chỉnh sửa, xóa hoặc lưu phạm vi.",
+        "profile_summary_header": "Tóm tắt hồ sơ",
+        "recent_cycles_header": "Chu kỳ gần đây"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "Tách một chu kỳ (Tìm khoảng trống)",
+        "merge": "Hợp nhất các chu kỳ (Nối các đoạn)",
+        "delete": "Xóa (các) chu kỳ"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "Bảo trì: Tái xử lý & Tối ưu hóa dữ liệu",
+        "clear_debug_data": "Xóa dữ liệu gỡ lỗi (Giải phóng dung lượng)",
+        "wipe_history": "Xóa TẤT CẢ dữ liệu cho thiết bị này (không thể đảo ngược)",
+        "export_import": "Xuất/Nhập JSON kèm theo cài đặt (sao chép/dán)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "Xuất tất cả dữ liệu",
+        "import": "Nhập/Hợp nhất dữ liệu"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "Tự động dán nhãn chu kỳ cũ",
+        "select_cycle_to_label": "Chu kỳ cụ thể của nhãn",
+        "select_cycle_to_label_multi": "Dán nhãn nhiều chu kỳ",
+        "select_cycle_to_delete": "Xóa chu kỳ",
+        "interactive_editor": "Trình soạn thảo tương tác hợp nhất/tách"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "Tạo hồ sơ mới",
+        "edit_profile": "Chỉnh sửa/Đổi tên hồ sơ",
+        "delete_profile": "Xóa hồ sơ",
+        "profile_stats": "Thống kê hồ sơ",
+        "cleanup_profile": "Dọn dẹp lịch sử - Biểu đồ & Xóa",
+        "assign_phases": "Chỉ định phạm vi pha"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "Tạo giai đoạn mới",
+        "edit_custom_phase": "Chỉnh sửa giai đoạn",
+        "delete_custom_phase": "Xóa giai đoạn"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "Thêm phạm vi pha",
+        "edit_range": "Chỉnh sửa phạm vi pha",
+        "delete_range": "Xóa phạm vi pha",
+        "clear_ranges": "Xóa tất cả các phạm vi",
+        "save_ranges": "Lưu và trả lại"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "Trạng thái làm mới",
+        "stop_recording": "Dừng ghi (Lưu & Xử lý)",
+        "start_recording": "Bắt đầu ghi âm mới",
+        "process_recording": "Xử lý bản ghi cuối cùng (Cắt & Lưu)",
+        "discard_recording": "Hủy bản ghi cuối cùng"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "Tạo hồ sơ mới",
+        "existing_profile": "Thêm vào hồ sơ hiện có",
+        "discard": "Hủy ghi âm"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "Xác nhận - Phát hiện chính xác",
+        "correct": "Đúng - Chọn Chương trình/Thời lượng",
+        "ignore": "Bỏ qua - Chu kỳ dương tính giả/ồn ào",
+        "delete": "Xóa - Xóa khỏi Lịch sử"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "Chu kỳ nhãn",
+      "description": "Gán cấu hình hiện có cho chu kỳ trước hoặc xóa nhãn.",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị máy giặt cần dán nhãn."
+        },
+        "cycle_id": {
+          "name": "ID chu kỳ",
+          "description": "ID của chu trình cần dán nhãn."
+        },
+        "profile_name": {
+          "name": "Tên hồ sơ",
+          "description": "Tên của hồ sơ hiện có (tạo hồ sơ trong menu Quản lý hồ sơ). Để trống để loại bỏ nhãn."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "Tạo hồ sơ",
+      "description": "Tạo một hồ sơ mới (độc lập hoặc dựa trên chu trình tham chiếu).",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị máy giặt."
+        },
+        "profile_name": {
+          "name": "Tên hồ sơ",
+          "description": "Tên cho hồ sơ mới (ví dụ: 'Nhiệm vụ nặng nề', 'Món ngon')."
+        },
+        "reference_cycle_id": {
+          "name": "ID chu kỳ tham chiếu",
+          "description": "ID chu kỳ tùy chọn để làm cơ sở cho hồ sơ này."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "Xóa hồ sơ",
+      "description": "Xóa một hồ sơ và tùy ý hủy nhãn các chu kỳ sử dụng nó.",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị máy giặt."
+        },
+        "profile_name": {
+          "name": "Tên hồ sơ",
+          "description": "Hồ sơ cần xóa."
+        },
+        "unlabel_cycles": {
+          "name": "Bỏ nhãn chu kỳ",
+          "description": "Xóa nhãn hồ sơ khỏi các chu kỳ sử dụng hồ sơ này."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "Tự động dán nhãn chu kỳ cũ",
+      "description": "Dán nhãn trước đây cho các chu kỳ không được gắn nhãn bằng cách sử dụng kết hợp hồ sơ.",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị máy giặt."
+        },
+        "confidence_threshold": {
+          "name": "Ngưỡng tin cậy",
+          "description": "Độ tin cậy đối sánh tối thiểu (0,50-0,95) để áp dụng nhãn."
+        }
+      }
+    },
+    "export_config": {
+      "name": "Xuất cấu hình",
+      "description": "Xuất cấu hình, chu kỳ và cài đặt của thiết bị này sang tệp JSON (mỗi thiết bị).",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị máy giặt xuất khẩu."
+        },
+        "path": {
+          "name": "Con đường",
+          "description": "Đường dẫn tệp tuyệt đối tùy chọn để ghi (mặc định là /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "Nhập cấu hình",
+      "description": "Nhập cấu hình, chu trình và cài đặt cho thiết bị này từ tệp xuất JSON (cài đặt có thể bị ghi đè).",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị máy giặt cần nhập khẩu."
+        },
+        "path": {
+          "name": "Con đường",
+          "description": "Đường dẫn tuyệt đối đến tệp JSON xuất cần nhập."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "Gửi phản hồi chu kỳ",
+      "description": "Xác nhận hoặc sửa chương trình được phát hiện tự động sau khi hoàn thành một chu trình. Cung cấp `entry_id` (nâng cao) hoặc `device_id` (được khuyến nghị).",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị WashData (được khuyến nghị thay vì entry_id)."
+        },
+        "entry_id": {
+          "name": "ID mục nhập",
+          "description": "Id mục nhập cấu hình cho thiết bị (thay thế cho device_id)."
+        },
+        "cycle_id": {
+          "name": "ID chu kỳ",
+          "description": "Id chu kỳ được hiển thị trong thông báo/nhật ký phản hồi."
+        },
+        "user_confirmed": {
+          "name": "Xác nhận chương trình đã phát hiện",
+          "description": "Đặt đúng nếu chương trình được phát hiện là chính xác."
+        },
+        "corrected_profile": {
+          "name": "Hồ sơ đã sửa",
+          "description": "Nếu không được xác nhận, hãy cung cấp tên hồ sơ/chương trình chính xác."
+        },
+        "corrected_duration": {
+          "name": "Thời lượng đã sửa (giây)",
+          "description": "Thời lượng hiệu chỉnh tùy chọn tính bằng giây."
+        },
+        "notes": {
+          "name": "Ghi chú",
+          "description": "Ghi chú tùy chọn về chu kỳ này."
+        }
+      }
+    },
+    "record_start": {
+      "name": "Bắt đầu chu kỳ ghi",
+      "description": "Bắt đầu ghi thủ công một chu trình sạch (bỏ qua tất cả logic khớp).",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị máy giặt để ghi lại."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "Ghi lại chu kỳ dừng",
+      "description": "Dừng ghi thủ công.",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị máy giặt dừng ghi."
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "Đang chạy"
+      },
+      "match_ambiguity": {
+        "name": "Sự mơ hồ về trận đấu"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "Tình trạng"
+        "name": "Tình trạng",
+        "state": {
+          "off": "Tắt",
+          "idle": "Nhàn rỗi",
+          "starting": "Bắt đầu",
+          "running": "Đang chạy",
+          "paused": "Đã tạm dừng",
+          "ending": "Kết thúc",
+          "finished": "Hoàn thành",
+          "anti_wrinkle": "Chống nhăn",
+          "interrupted": "Bị gián đoạn",
+          "force_stopped": "Buộc dừng",
+          "rinse": "Rửa sạch",
+          "unknown": "Không xác định"
+        }
       },
       "washer_program": {
         "name": "Chương trình"
@@ -595,16 +936,23 @@
         "name": "Sự tự tin trong trận đấu"
       },
       "top_candidates": {
-        "name": "Ứng viên hàng đầu"
+        "name": "Ứng viên hàng đầu",
+        "state": {
+          "none": "Không có"
+        }
+      },
+      "current_phase": {
+        "name": "Giai đoạn hiện tại"
       },
       "wash_phase": {
         "name": "Giai đoạn"
       },
+      "profile_cycle_count": {
+        "name": "Hồ sơ {profile_name} Đếm",
+        "unit_of_measurement": "cycles"
+      },
       "suggestions": {
         "name": "Cài đặt được đề xuất"
-      },
-      "current_phase": {
-        "name": "Giai đoạn hiện tại"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "Tự động phát hiện"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "Buộc kết thúc chu kỳ"
       }
     }
   }

@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "مراجعة التغذية الراجعة للتعلم",
           "settings": "إعدادات",
+          "notifications": "إشعارات",
           "manage_cycles": "إدارة الدورات",
           "manage_profiles": "إدارة الملفات الشخصية",
-          "record_cycle": "دورة التسجيل (يدوية)",
-          "diagnostics": "التشخيص والصيانة",
           "manage_phase_catalog": "إدارة كتالوج المرحلة",
-          "notifications": "إشعارات"
+          "record_cycle": "دورة التسجيل (يدوية)",
+          "diagnostics": "التشخيص والصيانة"
         }
       },
       "apply_suggestions": {
@@ -66,6 +66,10 @@
           "min_power": "الحد الأدنى من الطاقة (ث)",
           "off_delay": "تأخير (تأخير) نهاية الدورة",
           "notify_service": "خدمة الإشعارات (على سبيل المثال، notify.mobile_app)",
+          "notify_actions": "إجراءات الإخطار",
+          "notify_people": "تأخير التسليم حتى يعود هؤلاء الأشخاص إلى المنزل",
+          "notify_only_when_home": "تأخير الإخطارات حتى يعود الشخص المحدد إلى المنزل",
+          "notify_fire_events": "أحداث أتمتة الحرائق",
           "notify_events": "الأحداث للإخطار",
           "notify_before_end_minutes": "إشعار ما قبل الإكمال (قبل دقائق من النهاية)",
           "notify_title": "عنوان الإخطار",
@@ -73,30 +77,64 @@
           "notify_start_message": "بدء تنسيق الرسالة",
           "notify_finish_message": "إنهاء تنسيق الرسالة",
           "notify_pre_complete_message": "تنسيق رسالة ما قبل الإكمال",
-          "show_advanced": "تحرير الإعدادات المتقدمة (الخطوة التالية)",
-          "notify_actions": "إجراءات الإخطار",
-          "notify_people": "الناس لإخطار",
-          "notify_only_when_home": "الإخطار فقط عندما تكون في المنزل",
-          "notify_fire_events": "أحداث أتمتة الحرائق"
+          "show_advanced": "تحرير الإعدادات المتقدمة (الخطوة التالية)"
         },
         "data_description": {
-          "apply_suggestions": "حدد هذا المربع لنسخ القيم التي تقترحها خوارزمية التعلم في النموذج. المراجعة قبل الحفظ.\n\nمقترح (من التعلم):\n- الحد الأدنى من الطاقة: {suggested_min_power} واط\n- off_delay: {suggested_off_delay} ثانية\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} ثانية\n- Profile_match_interval: {suggested_profile_match_interval} ثانية\n- الثقة_التلقائية: {suggested_auto_label_confidence}\n- مدة_التسامح: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "حدد هذا المربع لنسخ القيم التي تقترحها خوارزمية التعلم في النموذج. المراجعة قبل الحفظ.\n\nمقترح (من التعلم):\n- الحد الأدنى من الطاقة: {suggested_min_power} وات\n- off_delay: {suggested_off_delay} ثانية\n- Watchdog_interval: {suggested_watchdog_interval} ثانية\n- no_update_active_timeout: {suggested_no_update_active_timeout} ثانية\n- Profile_match_interval: {suggested_profile_match_interval} ثانية\n- الثقة_التسمية_التلقائية: {suggested_auto_label_confidence}\n- مدة_التسامح: {suggested_duration_tolerance}\n- ملف_مدة_التسامح: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "اختر نوع الجهاز (غسالة، مجفف، غسالة أطباق، ماكينة صنع القهوة، EV). يتم تخزين هذه العلامة مع كل دورة لتنظيم أفضل.",
           "power_sensor": "يقوم كيان المستشعر بالإبلاغ عن الطاقة في الوقت الفعلي (بالواط). يمكنك تغيير هذا في أي وقت دون فقدان البيانات التاريخية، وهو أمر مفيد إذا قمت باستبدال القابس الذكي.",
           "min_power": "تشير قراءات الطاقة فوق هذا الحد (بالواط) إلى أن الجهاز قيد التشغيل. ابدأ بـ 2 وات لمعظم الأجهزة.",
           "off_delay": "الثواني، يجب أن تظل القوة الممهدة أقل من حد التوقف لوضع علامة على الاكتمال. الافتراضي: 120 ثانية.",
           "notify_service": "خدمة إخطار مساعد المنزل لاستخدامها (اختياري).",
+          "notify_actions": "تسلسل إجراءات Home Assistant الاختياري لتشغيل الإشعارات (البرامج النصية، والإشعارات، وتحويل النص إلى كلام، وما إلى ذلك). في حالة التعيين، سيتم تشغيل الإجراءات قبل خدمة الإشعارات الاحتياطية.",
+          "notify_people": "الكيانات البشرية المستخدمة لبوابة الحضور. عند التمكين، يتم تأخير تسليم الإشعارات حتى يعود شخص واحد محدد على الأقل إلى المنزل.",
+          "notify_only_when_home": "إذا تم تمكينه، قم بتأخير الإشعارات حتى يعود شخص واحد محدد على الأقل إلى المنزل.",
+          "notify_fire_events": "في حالة التمكين، قم بتشغيل أحداث Home Assistant لبدء الدورة ونهايتها (ha_washdata_cycle_started وha_washdata_cycle_end) لتشغيل عمليات التشغيل الآلي.",
           "notify_events": "الأحداث التي سيتم إرسال إشعارات لها.",
           "notify_before_end_minutes": "دقائق قبل النهاية المقدرة للدورة لإطلاق إشعار. اضبط على 0 للتعطيل. الافتراضي: 0.",
           "notify_title": "عنوان مخصص للإخطارات. يدعم العنصر النائب {device}.",
           "notify_icon": "الرمز المطلوب استخدامه للإشعارات (على سبيل المثال، mdi:washing-machine). اتركه فارغًا لاستخدام الافتراضي.",
           "notify_start_message": "يتم إرسال الرسالة عند بدء الدورة. يدعم العنصر النائب {device}.",
-          "notify_finish_message": "يتم إرسال الرسالة عند انتهاء الدورة. يدعم العناصر النائبة لـ {device} و{duration} و{program}.",
-          "notify_pre_complete_message": "تم إرسال الرسالة قبل الانتهاء. يدعم العناصر النائبة لـ {device} و{minutes}.",
+          "notify_finish_message": "يتم إرسال الرسالة عند انتهاء الدورة. يدعم العناصر النائبة {device} و{duration} و{program}.",
+          "notify_pre_complete_message": "تم إرسال الرسالة قبل الانتهاء. يدعم العناصر النائبة {device} و{minutes}."
+        }
+      },
+      "notifications": {
+        "title": "إشعارات",
+        "description": "قم بتكوين قنوات الإشعارات والقوالب وتحديثات تقدم الجوال المباشرة الاختيارية.",
+        "data": {
+          "notify_service": "خدمة الإشعارات (على سبيل المثال، notify.mobile_app)",
+          "notify_actions": "إجراءات الإخطار",
+          "notify_people": "تأخير التسليم حتى يعود هؤلاء الأشخاص إلى المنزل",
+          "notify_only_when_home": "تأخير الإخطارات حتى يعود الشخص المحدد إلى المنزل",
+          "notify_fire_events": "أحداث أتمتة الحرائق",
+          "notify_events": "الأحداث للإخطار",
+          "notify_before_end_minutes": "إشعار ما قبل الإكمال (قبل دقائق من النهاية)",
+          "notify_live_enabled": "تمكين إخطارات التقدم المباشر",
+          "notify_live_interval_seconds": "الفاصل الزمني للتحديث المباشر (ثواني)",
+          "notify_live_overrun_percent": "بدل تجاوز التحديث المباشر (%)",
+          "notify_title": "عنوان الإخطار",
+          "notify_icon": "أيقونة الإخطار",
+          "notify_start_message": "بدء تنسيق الرسالة",
+          "notify_finish_message": "إنهاء تنسيق الرسالة",
+          "notify_pre_complete_message": "تنسيق رسالة ما قبل الإكمال"
+        },
+        "data_description": {
+          "notify_service": "خدمة إخطار مساعد المنزل لاستخدامها (اختياري).",
           "notify_actions": "تسلسل إجراءات Home Assistant الاختياري لتشغيل الإشعارات (البرامج النصية، والإشعارات، وتحويل النص إلى كلام، وما إلى ذلك). في حالة التعيين، سيتم تشغيل الإجراءات قبل خدمة الإشعارات الاحتياطية.",
-          "notify_people": "الكيانات البشرية التي سيتم استخدامها في بوابة المنزل/الخارج. عند التمكين، يتم تأجيل الإشعارات حتى يعود شخص ما إلى المنزل.",
+          "notify_people": "الكيانات البشرية المستخدمة لبوابة الحضور. عند التمكين، يتم تأخير تسليم الإشعارات حتى يعود شخص واحد محدد على الأقل إلى المنزل.",
           "notify_only_when_home": "إذا تم تمكينه، قم بتأخير الإشعارات حتى يعود شخص واحد محدد على الأقل إلى المنزل.",
-          "notify_fire_events": "في حالة التمكين، قم بتشغيل أحداث Home Assistant لبدء الدورة ونهايتها (ha_washdata_cycle_started/end) لتشغيل عمليات التشغيل الآلي."
+          "notify_fire_events": "في حالة التمكين، قم بتشغيل أحداث Home Assistant لبدء الدورة ونهايتها (ha_washdata_cycle_started وha_washdata_cycle_end) لتشغيل عمليات التشغيل الآلي.",
+          "notify_events": "الأحداث التي سيتم إرسال إشعارات لها.",
+          "notify_before_end_minutes": "دقائق قبل النهاية المقدرة للدورة لإطلاق إشعار. اضبط على 0 للتعطيل. الافتراضي: 0.",
+          "notify_live_enabled": "تمكين تحديثات التقدم المباشر في مكانها لإشعارات تطبيقات الهاتف المحمول.",
+          "notify_live_interval_seconds": "عدد مرات إرسال تحديثات التقدم أثناء التشغيل. تكون القيم الأقل أكثر استجابة ولكنها تستهلك المزيد من الإشعارات.",
+          "notify_live_overrun_percent": "هامش أمان أعلى من عدد التحديثات المقدر للدورات الطويلة/المتجاوزة (على سبيل المثال، 20% يسمح بتحديثات مقدرة بمقدار 1.2x).",
+          "notify_title": "عنوان مخصص للإخطارات. يدعم العنصر النائب {device}.",
+          "notify_icon": "الرمز المطلوب استخدامه للإشعارات (على سبيل المثال، mdi:washing-machine). اتركه فارغًا لاستخدام الافتراضي.",
+          "notify_start_message": "يتم إرسال الرسالة عند بدء الدورة. يدعم العنصر النائب {device}.",
+          "notify_finish_message": "يتم إرسال الرسالة عند انتهاء الدورة. يدعم العناصر النائبة {device} و{duration} و{program}.",
+          "notify_pre_complete_message": "تم إرسال الرسالة قبل الانتهاء. يدعم العناصر النائبة {device} و{minutes}."
         }
       },
       "advanced_settings": {
@@ -149,7 +187,7 @@
           "external_end_trigger_inverted": "عكس منطق الزناد (تشغيل الزناد)"
         },
         "data_description": {
-          "apply_suggestions": "حدد هذا المربع لنسخ القيم التي تقترحها خوارزمية التعلم في النموذج. المراجعة قبل الحفظ.\n\nمقترح (من التعلم):\n- الحد الأدنى من الطاقة: {suggested_min_power} واط\n- off_delay: {suggested_off_delay} ثانية\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} ثانية\n- Profile_match_interval: {suggested_profile_match_interval} ثانية\n- الثقة_التلقائية: {suggested_auto_label_confidence}\n- مدة_التسامح: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "حدد هذا المربع لنسخ القيم التي تقترحها خوارزمية التعلم في النموذج. المراجعة قبل الحفظ.\n\nمقترح (من التعلم):\n- الحد الأدنى من الطاقة: {suggested_min_power} وات\n- off_delay: {suggested_off_delay} ثانية\n- Watchdog_interval: {suggested_watchdog_interval} ثانية\n- no_update_active_timeout: {suggested_no_update_active_timeout} ثانية\n- Profile_match_interval: {suggested_profile_match_interval} ثانية\n- الثقة_التسمية_التلقائية: {suggested_auto_label_confidence}\n- مدة_التسامح: {suggested_duration_tolerance}\n- ملف_مدة_التسامح: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "يجب أن ترتفع الطاقة فوق هذا الحد لبدء الدورة. تعيين أعلى من الطاقة الاحتياطية الخاصة بك. الافتراضي: min_power + 1 وات.",
           "stop_threshold_w": "يجب أن تنخفض الطاقة عن هذا الحد لإنهاء الدورة. اضبطه أعلى بقليل من الصفر لتجنب التسبب في حدوث نهايات زائفة. الافتراضي: 0.6 * min_power.",
           "min_off_gap": "إذا بدأت الدورة خلال هذه الثواني العديدة من انتهاء الدورة السابقة، فسيتم دمجها في دورة واحدة.",
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "التشخيص والصيانة",
-        "description": "قم بتشغيل إجراءات الصيانة مثل دمج الدورات المجزأة أو ترحيل البيانات المخزنة.\n\n{storage_stats}"
+        "description": "قم بتشغيل إجراءات الصيانة مثل دمج الدورات المجزأة أو ترحيل البيانات المخزنة.\n\n**استخدام التخزين**\n\n- حجم الملف: {file_size_kb} كيلو بايت\n- الدورات: {cycle_count}\n- الملفات الشخصية: {profile_count}\n- آثار التصحيح: {debug_count}"
       },
       "clear_debug_data": {
         "title": "مسح بيانات التصحيح",
@@ -210,11 +248,109 @@
           "action": "فعل"
         }
       },
+      "manage_cycles_empty": {
+        "title": "إدارة الدورات",
+        "description": "لم يتم تسجيل أي دورات حتى الآن.",
+        "data": {
+          "action": "فعل"
+        }
+      },
       "manage_profiles": {
         "title": "إدارة الملفات الشخصية",
         "description": "ملخص الملف الشخصي:\n{profile_summary}",
         "data": {
           "action": "فعل"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "إدارة الملفات الشخصية",
+        "description": "لم يتم إنشاء أي ملفات شخصية حتى الآن.",
+        "data": {
+          "action": "فعل"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "إدارة كتالوج المرحلة",
+        "description": "كتالوج المرحلة (الافتراضيات لهذا الجهاز + المراحل المخصصة):\n{phase_summary}",
+        "data": {
+          "action": "فعل"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "إنشاء مرحلة مخصصة",
+        "description": "أنشئ اسمًا ووصفًا مخصصًا للمرحلة، واختر نوع الجهاز الذي ينطبق عليه.",
+        "data": {
+          "target_device_type": "نوع الجهاز المستهدف",
+          "phase_name": "اسم المرحلة",
+          "phase_description": "وصف المرحلة"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "تحرير المرحلة المخصصة",
+        "description": "حدد مرحلة مخصصة للتحرير.",
+        "data": {
+          "phase_name": "المرحلة المخصصة"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "تحرير المرحلة المخصصة",
+        "description": "مرحلة التحرير: {phase_name}",
+        "data": {
+          "phase_name": "اسم المرحلة",
+          "phase_description": "وصف المرحلة"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "حذف المرحلة المخصصة",
+        "description": "حدد مرحلة مخصصة لحذفها. ستتم إزالة أي نطاقات مخصصة تستخدم هذه المرحلة.",
+        "data": {
+          "phase_name": "المرحلة المخصصة"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "تعيين نطاقات المرحلة",
+        "description": "معاينة المرحلة للملف الشخصي: **{profile_name}**\n\n{timeline_svg}\n\n** النطاقات الحالية: **\n{current_ranges}\n\nاستخدم الإجراءات أدناه لإضافة النطاقات أو تعديلها أو حذفها أو حفظها.",
+        "data": {
+          "action": "فعل"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "إضافة نطاق المرحلة",
+        "description": "أضف نطاق مرحلة واحدة إلى المسودة الحالية.",
+        "data": {
+          "phase_name": "مرحلة",
+          "start_min": "دقيقة البداية",
+          "end_min": "دقيقة النهاية"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "تحرير نطاق المرحلة",
+        "description": "حدد نطاقًا لتحريره.",
+        "data": {
+          "range_index": "نطاق المرحلة"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "تحرير نطاق المرحلة",
+        "description": "تحديث نطاق المرحلة المحددة.",
+        "data": {
+          "phase_name": "مرحلة",
+          "start_min": "دقيقة البداية",
+          "end_min": "دقيقة النهاية"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "حذف نطاق المرحلة",
+        "description": "حدد نطاقًا لإزالته من المسودة.",
+        "data": {
+          "range_index": "نطاق المرحلة"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "تعيين نطاقات المرحلة",
+        "description": "حدد ملف تعريف لتكوين نطاقات المرحلة.",
+        "data": {
+          "profile": "حساب تعريفي"
         }
       },
       "profile_stats": {
@@ -309,7 +445,7 @@
       },
       "cleanup_select": {
         "title": "تنظيف التاريخ - الرسم البياني والحذف",
-        "description": "![رسم بياني]({graph_url})\n\n**تصور {profile_name}**\n\nيوضح الرسم البياني الدورات الفردية كخطوط ملونة. حدد القيم المتطرفة (الخطوط البعيدة عن المجموعة) وطابق لونها في القائمة أدناه لحذفها.\n\n**حدد الدورات المراد حذفها نهائيًا:**",
+        "description": "![رسم بياني]({graph_url})\n\n**التصور {profile_name}**\n\nيوضح الرسم البياني الدورات الفردية كخطوط ملونة. حدد القيم المتطرفة (الخطوط البعيدة عن المجموعة) وطابق لونها في القائمة أدناه لحذفها.\n\n**حدد الدورات المراد حذفها نهائيًا:**",
         "data": {
           "cycles_to_delete": "الدورات المراد حذفها (تحقق من الألوان المطابقة)"
         }
@@ -367,8 +503,8 @@
         "title": "تصدير/استيراد JSON",
         "description": "نسخ/لصق الدورات والملفات الشخصية والإعدادات لهذا الجهاز. قم بالتصدير أدناه أو لصق JSON للاستيراد.",
         "data": {
-          "json_payload": "استكمال التكوين JSON",
-          "mode": "فعل"
+          "mode": "فعل",
+          "json_payload": "استكمال التكوين JSON"
         },
         "data_description": {
           "mode": "اختر تصدير لنسخ البيانات والإعدادات الحالية، أو استيراد للصق البيانات المصدرة من جهاز WashData آخر.",
@@ -377,14 +513,14 @@
       },
       "record_cycle": {
         "title": "دورة التسجيل",
-        "description": "قم بتسجيل الدورة يدويًا لإنشاء ملف تعريف نظيف دون أي تدخل.\n\nالحالة: **{status}**\nالمدة: {duration}.\nالعينات: {samples}",
+        "description": "قم بتسجيل الدورة يدويًا لإنشاء ملف تعريف نظيف دون أي تدخل.\n\nالحالة: **{status}**\nالمدة: {duration}ث\nالعينات: {samples}",
         "data": {
           "action": "فعل"
         }
       },
       "record_process": {
         "title": "تسجيل العملية",
-        "description": "![رسم بياني]({graph_url})\n\n**يظهر الرسم البياني التسجيل الأولي.** الأزرق = الاحتفاظ، الأحمر = القطع المقترح.\n*الرسم البياني ثابت ولا يتم تحديثه بتغييرات النموذج.*\n\nتوقف التسجيل. تتم محاذاة عمليات القطع مع معدل أخذ العينات المكتشف (~{sampling_rate}s).\n\nالمدة الأولية: {duration}.\nالعينات: {samples}",
+        "description": "![رسم بياني]({graph_url})\n\n**يظهر الرسم البياني التسجيل الأولي.** الأزرق = الاحتفاظ، الأحمر = القطع المقترح.\n*الرسم البياني ثابت ولا يتم تحديثه بتغييرات النموذج.*\n\nتوقف التسجيل. تتم محاذاة عمليات القطع مع معدل أخذ العينات المكتشف (~{sampling_rate}s).\n\nالمدة الأولية: {duration}ث\nالعينات: {samples}",
         "data": {
           "head_trim": "بدء القطع (بالثواني)",
           "tail_trim": "نهاية القطع (ثواني)",
@@ -405,143 +541,19 @@
       },
       "resolve_feedback": {
         "title": "حل ردود الفعل",
-        "description": "**البرنامج الذي تم اكتشافه**: {profile}\n**الثقة**: {confidence}%\n**المقدر**: {est}m، **الفعلي**: {act}m",
+        "description": "{comparison_img}{candidates_table}\n**الملف الشخصي الذي تم اكتشافه**: {detected_profile} ({confidence_pct}%)\n**المدة المقدرة**: {est_duration_min} دقيقة\n**المدة الفعلية**: {act_duration_min} دقيقة\n\n__اختر إجراءً أدناه:__",
         "data": {
+          "action": "ماذا تريد أن تفعل؟",
           "corrected_profile": "البرنامج الصحيح (في حالة التصحيح)",
-          "corrected_duration": "المدة الصحيحة بالدقائق (في حالة التصحيح)",
-          "action": "ماذا تريد أن تفعل؟"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "إدارة كتالوج المرحلة",
-        "description": "المراحل الحالية لهذا النوع من الأجهزة:\n{phase_summary}",
-        "data": {
-          "action": "فعل"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "إنشاء مرحلة مخصصة",
-        "description": "أنشئ اسمًا ووصفًا مخصصًا للمرحلة لنوع الجهاز هذا.",
-        "data": {
-          "phase_name": "اسم المرحلة",
-          "phase_description": "وصف المرحلة",
-          "target_device_type": "نوع الجهاز المستهدف"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "تحرير المرحلة المخصصة",
-        "description": "حدد مرحلة مخصصة للتحرير.",
-        "data": {
-          "phase_name": "المرحلة المخصصة"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "تحرير المرحلة المخصصة",
-        "description": "مرحلة التحرير: {phase_name}",
-        "data": {
-          "phase_name": "اسم المرحلة",
-          "phase_description": "وصف المرحلة"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "حذف المرحلة المخصصة",
-        "description": "حدد مرحلة مخصصة لحذفها. ستتم إزالة أي نطاقات مخصصة تستخدم هذه المرحلة.",
-        "data": {
-          "phase_name": "المرحلة المخصصة"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "تعيين نطاقات المرحلة",
-        "description": "الملف الشخصي: **{profile_name}**\nالوضع: **{assign_mode}**\nتلميح الدورة: {cycle_hint}\n\nالنطاقات الحالية:\n{current_ranges}\n\nتسميات المرحلة مخصصة للعرض والتنظيم. يستخدم الكشف أنماط الطاقة، وليس أسماء المراحل.",
-        "data": {
-          "action": "فعل"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "تعيين نطاقات المرحلة",
-        "description": "حدد ملف تعريف لتكوين نطاقات المرحلة.",
-        "data": {
-          "profile": "حساب تعريفي"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "إضافة نطاق المرحلة",
-        "description": "أضف نطاق مرحلة واحدة إلى المسودة الحالية.",
-        "data": {
-          "phase_name": "مرحلة",
-          "start_min": "دقيقة البداية",
-          "end_min": "دقيقة النهاية"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "تحرير نطاق المرحلة",
-        "description": "حدد نطاقًا لتحريره.",
-        "data": {
-          "range_index": "نطاق المرحلة"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "تحرير نطاق المرحلة",
-        "description": "تحديث نطاق المرحلة المحددة.",
-        "data": {
-          "phase_name": "مرحلة",
-          "start_min": "دقيقة البداية",
-          "end_min": "دقيقة النهاية"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "حذف نطاق المرحلة",
-        "description": "حدد نطاقًا لإزالته من المسودة.",
-        "data": {
-          "range_index": "نطاق المرحلة"
-        }
-      },
-      "notifications": {
-        "title": "إشعارات",
-        "description": "قم بتكوين قنوات الإشعارات والقوالب وتحديثات تقدم الجوال المباشرة الاختيارية.",
-        "data": {
-          "notify_service": "خدمة الإشعارات (على سبيل المثال، notify.mobile_app)",
-          "notify_actions": "إجراءات الإخطار",
-          "notify_people": "الناس لإخطار",
-          "notify_only_when_home": "الإخطار فقط عندما تكون في المنزل",
-          "notify_fire_events": "أحداث أتمتة الحرائق",
-          "notify_events": "الأحداث للإخطار",
-          "notify_before_end_minutes": "إشعار ما قبل الإكمال (قبل دقائق من النهاية)",
-          "notify_live_enabled": "تمكين إخطارات التقدم المباشر",
-          "notify_live_interval_seconds": "الفاصل الزمني للتحديث المباشر (ثواني)",
-          "notify_live_overrun_percent": "بدل تجاوز التحديث المباشر (%)",
-          "notify_title": "عنوان الإخطار",
-          "notify_icon": "أيقونة الإخطار",
-          "notify_start_message": "بدء تنسيق الرسالة",
-          "notify_finish_message": "إنهاء تنسيق الرسالة",
-          "notify_pre_complete_message": "تنسيق رسالة ما قبل الإكمال"
-        },
-        "data_description": {
-          "notify_service": "خدمة إخطار مساعد المنزل لاستخدامها (اختياري).",
-          "notify_actions": "تسلسل إجراءات Home Assistant الاختياري لتشغيل الإشعارات (البرامج النصية، والإشعارات، وتحويل النص إلى كلام، وما إلى ذلك). في حالة التعيين، سيتم تشغيل الإجراءات قبل خدمة الإشعارات الاحتياطية.",
-          "notify_people": "الكيانات البشرية التي سيتم استخدامها في بوابة المنزل/الخارج. عند التمكين، يتم تأجيل الإشعارات حتى يعود شخص ما إلى المنزل.",
-          "notify_only_when_home": "إذا تم تمكينه، قم بتأخير الإشعارات حتى يعود شخص واحد محدد على الأقل إلى المنزل.",
-          "notify_fire_events": "في حالة التمكين، قم بتشغيل أحداث Home Assistant لبدء الدورة ونهايتها (ha_washdata_cycle_started/end) لتشغيل عمليات التشغيل الآلي.",
-          "notify_events": "الأحداث التي سيتم إرسال إشعارات لها.",
-          "notify_before_end_minutes": "دقائق قبل النهاية المقدرة للدورة لإطلاق إشعار. اضبط على 0 للتعطيل. الافتراضي: 0.",
-          "notify_live_enabled": "تمكين تحديثات التقدم المباشر في مكانها لإشعارات تطبيقات الهاتف المحمول.",
-          "notify_live_interval_seconds": "عدد مرات إرسال تحديثات التقدم أثناء التشغيل. تكون القيم الأقل أكثر استجابة ولكنها تستهلك المزيد من الإشعارات.",
-          "notify_live_overrun_percent": "هامش أمان أعلى من عدد التحديثات المقدر للدورات الطويلة/المتجاوزة (على سبيل المثال، 20% يسمح بتحديثات مقدرة بمقدار 1.2x).",
-          "notify_title": "عنوان مخصص للإخطارات. يدعم العنصر النائب {device}.",
-          "notify_icon": "الرمز المطلوب استخدامه للإشعارات (على سبيل المثال، mdi:washing-machine). اتركه فارغًا لاستخدام الافتراضي.",
-          "notify_start_message": "يتم إرسال الرسالة عند بدء الدورة. يدعم العنصر النائب {device}.",
-          "notify_finish_message": "يتم إرسال الرسالة عند انتهاء الدورة. يدعم العناصر النائبة لـ {device} و{duration} و{program}.",
-          "notify_pre_complete_message": "تم إرسال الرسالة قبل الانتهاء. يدعم العناصر النائبة لـ {device} و{minutes}."
+          "corrected_duration": "المدة الصحيحة بالدقائق (في حالة التصحيح)"
         }
       }
     },
     "error": {
-      "import_failed": "فشل الاستيراد. الرجاء لصق ملف JSON صالح لتصدير WashData.",
+      "import_failed": "فشل الاستيراد. يرجى لصق ملف WashData صالح لتصدير JSON.",
       "profile_exists": "يوجد بالفعل ملف تعريف بهذا الاسم",
       "rename_failed": "فشل في إعادة تسمية الملف الشخصي. قد لا يكون الملف الشخصي موجودًا أو أن الاسم الجديد مأخوذ بالفعل.",
       "assignment_failed": "فشل في تعيين ملف التعريف للدورة",
-      "feedback_notification_title": "WashData: التحقق من الدورة ({device})",
-      "feedback_notification_message": "**الجهاز**: {device}\n**البرنامج**: {program} (نسبة الثقة بنسبة {الثقة)\n**الوقت**: {confidence}\n\nيحتاج WashData إلى مساعدتك للتحقق من هذه الدورة المكتشفة.\n\nيرجى الانتقال إلى **الإعدادات > الأجهزة والخدمات > WashData > التكوين > تعليقات التعلم ** لتأكيد هذه النتيجة أو تصحيحها.",
       "duplicate_phase": "هناك مرحلة بهذا الاسم موجودة بالفعل.",
       "phase_not_found": "لم يتم العثور على المرحلة المحددة.",
       "invalid_phase_name": "لا يمكن أن يكون اسم المرحلة فارغًا.",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "تتداخل نطاقات المرحلة. اضبط النطاقات وحاول مرة أخرى.",
       "incomplete_phase_row": "يجب أن يتضمن كل صف مرحلة مرحلة بالإضافة إلى قيم البداية/النهاية الكاملة للوضع المحدد.",
       "timestamp_mode_cycle_required": "الرجاء تحديد دورة المصدر عند استخدام وضع الطابع الزمني.",
-      "no_phase_ranges": "لا توجد نطاقات طورية متاحة لهذا الإجراء حتى الآن."
+      "no_phase_ranges": "لا توجد نطاقات طورية متاحة لهذا الإجراء حتى الآن.",
+      "feedback_notification_title": "WashData: دورة التحقق ({device})",
+      "feedback_notification_message": "**الجهاز**: {device}\n**البرنامج**: {program} (نسبة الثقة {confidence}%)\n**الوقت**: {time}\n\nيحتاج WashData إلى مساعدتك للتحقق من هذه الدورة المكتشفة.\n\nيرجى الانتقال إلى **الإعدادات > الأجهزة والخدمات > WashData > التكوين > تعليقات التعلم ** لتأكيد هذه النتيجة أو تصحيحها."
     },
     "abort": {
       "no_cycles_found": "لم يتم العثور على دورات",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "تم بالفعل تسمية جميع الدورات",
       "no_suggestions": "لا توجد قيم مقترحة متاحة حتى الآن. قم بتشغيل بضع دورات وحاول مرة أخرى.",
       "no_predictions": "لا تنبؤات",
-      "reprocess_success": "تمت إعادة معالجة {count} من الدورات بنجاح.",
-      "debug_data_cleared": "تم مسح بيانات تصحيح الأخطاء من {count} من الدورات بنجاح.",
-      "no_custom_phases": "لم يتم العثور على مراحل مخصصة لهذا النوع من الأجهزة."
+      "no_custom_phases": "لم يتم العثور على مراحل مخصصة.",
+      "reprocess_success": "تمت إعادة معالجة {count} دورة بنجاح.",
+      "debug_data_cleared": "تم مسح بيانات تصحيح الأخطاء من {count} دورة بنجاح."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "بداية الدورة",
+        "cycle_finish": "إنهاء الدورة",
+        "cycle_live": "التقدم المباشر"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(بدون تسمية)",
+        "create_new_profile": "إنشاء ملف تعريف جديد",
+        "remove_label": "إزالة التسمية",
+        "no_reference_cycle": "(لا توجد دورة مرجعية)",
+        "all_device_types": "جميع أنواع الأجهزة",
+        "current_suffix": "(حاضِر)",
+        "editor_select_info": "حدد دورة واحدة للتقسيم، أو أكثر من دورتين للدمج.",
+        "no_cycles_recorded": "لم يتم تسجيل أي دورات حتى الآن.",
+        "profile_summary_line": "- **{name}**: {count} دورات، {avg}م متوسط",
+        "no_profiles_created": "لم يتم إنشاء أي ملفات شخصية حتى الآن.",
+        "phase_preview": "معاينة المرحلة",
+        "phase_preview_no_curve": "متوسط ​​منحنى الملف الشخصي غير متوفر بعد. تشغيل/تسمية المزيد من الدورات لهذا الملف الشخصي.",
+        "average_power_curve": "متوسط ​​منحنى القوة",
+        "unit_min": "دقيقة",
+        "profile_option_fmt": "{name} ({count} دورات، ~{duration}م متوسط)",
+        "profile_option_short_fmt": "{name} ({count} دورات، ~{duration} م)",
+        "deleted_cycles_from_profile": "تم حذف {count} دورة من {profile}.",
+        "not_enough_data_graph": "لا توجد بيانات كافية لإنشاء الرسم البياني.",
+        "no_profiles_found": "لم يتم العثور على أي ملفات شخصية.",
+        "cycle_info_fmt": "الدورة: {start}، {duration}م، التيار: {label}",
+        "top_candidates_header": "### أبرز المرشحين",
+        "tbl_profile": "حساب تعريفي",
+        "tbl_confidence": "ثقة",
+        "tbl_correlation": "علاقة",
+        "tbl_duration_match": "مباراة المدة",
+        "detected_profile": "الملف الشخصي الذي تم اكتشافه",
+        "estimated_duration": "المدة المقدرة",
+        "actual_duration": "المدة الفعلية",
+        "choose_action": "__اختر إجراءً أدناه:__",
+        "tbl_count": "عدد",
+        "tbl_avg": "متوسط",
+        "tbl_min": "دقيقة",
+        "tbl_max": "الأعلى",
+        "tbl_energy_avg": "الطاقة (المتوسط)",
+        "tbl_energy_total": "الطاقة (المجموع)",
+        "tbl_consistency": "تتكون.",
+        "tbl_last_run": "التشغيل الأخير",
+        "graph_legend_title": "أسطورة الرسم البياني",
+        "graph_legend_body": "يمثل النطاق الأزرق الحد الأدنى والحد الأقصى لنطاق سحب الطاقة الذي تمت ملاحظته. يوضح الخط متوسط ​​منحنى القدرة.",
+        "recording_preview": "معاينة التسجيل",
+        "trim_start": "بداية القطع",
+        "trim_end": "نهاية القطع",
+        "split_preview_title": "معاينة الانقسام",
+        "split_preview_found_fmt": "تم العثور على {count} شريحة.",
+        "split_preview_confirm_fmt": "انقر فوق تأكيد لتقسيم هذه الدورة إلى {count} دورات منفصلة.",
+        "merge_preview_title": "معاينة الدمج",
+        "merge_preview_joining_fmt": "الانضمام إلى {count} دورات. سيتم ملء الفجوات بقراءات 0W.",
+        "profile_comparison": "مقارنة الملف الشخصي",
+        "actual_cycle_label": "هذه الدورة (فعلية)",
+        "storage_usage_header": "استخدام التخزين",
+        "storage_file_size": "حجم الملف",
+        "storage_cycles": "دورات",
+        "storage_profiles": "الملفات الشخصية",
+        "storage_debug_traces": "آثار التصحيح",
+        "overview_suffix": "ملخص",
+        "phase_preview_for_profile": "معاينة المرحلة للملف الشخصي",
+        "current_ranges_header": "النطاقات الحالية",
+        "assign_phases_help": "استخدم الإجراءات أدناه لإضافة النطاقات أو تعديلها أو حذفها أو حفظها.",
+        "profile_summary_header": "ملخص الملف الشخصي",
+        "recent_cycles_header": "الدورات الأخيرة"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "تقسيم الدورة (البحث عن الثغرات)",
+        "merge": "دمج الدورات (ربط الأجزاء)",
+        "delete": "حذف الدورة (الدورات)"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "الصيانة: إعادة معالجة البيانات وتحسينها",
+        "clear_debug_data": "مسح بيانات التصحيح (تحرير مساحة)",
+        "wipe_history": "مسح كافة البيانات لهذا الجهاز (لا رجعة فيه)",
+        "export_import": "تصدير/استيراد JSON مع الإعدادات (نسخ/لصق)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "تصدير كافة البيانات",
+        "import": "استيراد/دمج البيانات"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "التسمية التلقائية للدورات القديمة",
+        "select_cycle_to_label": "تسمية دورة محددة",
+        "select_cycle_to_label_multi": "تسمية دورات متعددة",
+        "select_cycle_to_delete": "حذف دورة",
+        "interactive_editor": "دمج/تقسيم المحرر التفاعلي"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "إنشاء ملف تعريف جديد",
+        "edit_profile": "تحرير/إعادة تسمية الملف الشخصي",
+        "delete_profile": "حذف الملف الشخصي",
+        "profile_stats": "إحصائيات الملف الشخصي",
+        "cleanup_profile": "تنظيف التاريخ - الرسم البياني والحذف",
+        "assign_phases": "تعيين نطاقات المرحلة"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "إنشاء مرحلة جديدة",
+        "edit_custom_phase": "تحرير المرحلة",
+        "delete_custom_phase": "حذف المرحلة"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "إضافة نطاق المرحلة",
+        "edit_range": "تحرير نطاق المرحلة",
+        "delete_range": "حذف نطاق المرحلة",
+        "clear_ranges": "مسح كافة النطاقات",
+        "save_ranges": "حفظ والعودة"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "تحديث الحالة",
+        "stop_recording": "إيقاف التسجيل (الحفظ والمعالجة)",
+        "start_recording": "ابدأ التسجيل الجديد",
+        "process_recording": "معالجة التسجيل الأخير (القص والحفظ)",
+        "discard_recording": "تجاهل التسجيل الأخير"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "إنشاء ملف تعريف جديد",
+        "existing_profile": "إضافة إلى الملف الشخصي الموجود",
+        "discard": "تجاهل التسجيل"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "تأكيد - الكشف الصحيح",
+        "correct": "صحيح - اختر البرنامج/المدة",
+        "ignore": "تجاهل - دورة إيجابية كاذبة/صاخبة",
+        "delete": "حذف - إزالة من التاريخ"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "دورة التسمية",
+      "description": "قم بتعيين ملف تعريف موجود لدورة سابقة، أو قم بإزالة التسمية.",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "جهاز الغسالة للتسمية."
+        },
+        "cycle_id": {
+          "name": "معرف الدورة",
+          "description": "معرف الدورة المراد تسميتها."
+        },
+        "profile_name": {
+          "name": "اسم الملف الشخصي",
+          "description": "اسم ملف التعريف الموجود (قم بإنشاء ملفات التعريف في قائمة إدارة الملفات الشخصية). اتركه فارغًا لإزالة التسمية."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "إنشاء الملف الشخصي",
+      "description": "قم بإنشاء ملف تعريف جديد (مستقل أو يعتمد على دورة مرجعية).",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "جهاز الغسالة ."
+        },
+        "profile_name": {
+          "name": "اسم الملف الشخصي",
+          "description": "اسم الملف الشخصي الجديد (على سبيل المثال، \"Heavy Duty\"، \"Delicates\")."
+        },
+        "reference_cycle_id": {
+          "name": "معرف الدورة المرجعية",
+          "description": "معرف الدورة الاختياري لتأسيس ملف التعريف هذا."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "حذف الملف الشخصي",
+      "description": "احذف ملف تعريف وقم بإلغاء تسمية الدورات التي تستخدمه اختياريًا.",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "جهاز الغسالة ."
+        },
+        "profile_name": {
+          "name": "اسم الملف الشخصي",
+          "description": "الملف الشخصي المراد حذفه."
+        },
+        "unlabel_cycles": {
+          "name": "دورات إلغاء التسمية",
+          "description": "قم بإزالة تسمية الملف الشخصي من الدورات التي تستخدم ملف التعريف هذا."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "التسمية التلقائية للدورات القديمة",
+      "description": "قم بتسمية الدورات غير المسماة بأثر رجعي باستخدام مطابقة ملف التعريف.",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "جهاز الغسالة ."
+        },
+        "confidence_threshold": {
+          "name": "عتبة الثقة",
+          "description": "الحد الأدنى لثقة المطابقة (0.50-0.95) لتطبيق التصنيفات."
+        }
+      }
+    },
+    "export_config": {
+      "name": "تكوين التصدير",
+      "description": "قم بتصدير الملفات الشخصية والدورات والإعدادات لهذا الجهاز إلى ملف JSON (لكل جهاز).",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "جهاز الغسالة للتصدير."
+        },
+        "path": {
+          "name": "طريق",
+          "description": "مسار الملف المطلق الاختياري للكتابة (الإعداد الافتراضي هو /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "استيراد التكوين",
+      "description": "قم باستيراد الملفات التعريفية والدورات والإعدادات لهذا الجهاز من ملف تصدير JSON (قد تتم الكتابة فوق الإعدادات).",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "جهاز الغسالة المراد الاستيراد إليه."
+        },
+        "path": {
+          "name": "طريق",
+          "description": "المسار المطلق لملف التصدير JSON المراد استيراده."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "إرسال تعليقات الدورة",
+      "description": "قم بتأكيد أو تصحيح البرنامج الذي تم اكتشافه تلقائيًا بعد انتهاء الدورة. قدِّم إما `entry_id` (متقدم) أو `device_id` (موصى به).",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "جهاز WashData (مستحسن بدلاً من إدخال_id)."
+        },
+        "entry_id": {
+          "name": "معرف الدخول",
+          "description": "معرف إدخال التكوين للجهاز (بديل لـ Device_id)."
+        },
+        "cycle_id": {
+          "name": "معرف الدورة",
+          "description": "معرف الدورة الموضح في إشعار/سجلات التعليقات."
+        },
+        "user_confirmed": {
+          "name": "تأكيد البرنامج المكتشف",
+          "description": "اضبط على \"صحيح\" إذا كان البرنامج المكتشف صحيحًا."
+        },
+        "corrected_profile": {
+          "name": "الملف الشخصي المصحح",
+          "description": "إذا لم يتم التأكيد، قم بتوفير اسم الملف الشخصي/البرنامج الصحيح."
+        },
+        "corrected_duration": {
+          "name": "المدة المصححة (بالثواني)",
+          "description": "المدة المصححة الاختيارية بالثواني."
+        },
+        "notes": {
+          "name": "ملحوظات",
+          "description": "ملاحظات اختيارية حول هذه الدورة."
+        }
+      }
+    },
+    "record_start": {
+      "name": "بدء دورة التسجيل",
+      "description": "ابدأ بتسجيل دورة نظيفة يدويًا (يتجاوز كل منطق المطابقة).",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "جهاز الغسالة للتسجيل."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "سجل توقف الدورة",
+      "description": "إيقاف التسجيل اليدوي.",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "جهاز الغسالة لإيقاف التسجيل."
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "جري"
+      },
+      "match_ambiguity": {
+        "name": "غموض المباراة"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "ولاية"
+        "name": "ولاية",
+        "state": {
+          "off": "عن",
+          "idle": "عاطل",
+          "starting": "البدء",
+          "running": "جري",
+          "paused": "متوقف مؤقتًا",
+          "ending": "إنهاء",
+          "finished": "انتهى",
+          "anti_wrinkle": "مضاد للتجاعيد",
+          "interrupted": "تمت مقاطعته",
+          "force_stopped": "توقفت القوة",
+          "rinse": "شطف",
+          "unknown": "مجهول"
+        }
       },
       "washer_program": {
         "name": "برنامج"
@@ -595,16 +936,23 @@
         "name": "مباراة الثقة"
       },
       "top_candidates": {
-        "name": "كبار المرشحين"
+        "name": "كبار المرشحين",
+        "state": {
+          "none": "لا أحد"
+        }
+      },
+      "current_phase": {
+        "name": "المرحلة الحالية"
       },
       "wash_phase": {
         "name": "مرحلة"
       },
+      "profile_cycle_count": {
+        "name": "عدد الملف الشخصي {profile_name}.",
+        "unit_of_measurement": "دورات"
+      },
       "suggestions": {
         "name": "الإعدادات المقترحة"
-      },
-      "current_phase": {
-        "name": "المرحلة الحالية"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "الكشف التلقائي"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "دورة نهاية القوة"
       }
     }
   }

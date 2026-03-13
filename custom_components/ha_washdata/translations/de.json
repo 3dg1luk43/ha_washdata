@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "Überprüfen Sie die Lernrückmeldungen",
           "settings": "Einstellungen",
+          "notifications": "Benachrichtigungen",
           "manage_cycles": "Zyklen verwalten",
           "manage_profiles": "Profile verwalten",
-          "record_cycle": "Aufnahmezyklus (manuell)",
-          "diagnostics": "Diagnose und Wartung",
           "manage_phase_catalog": "Phasenkatalog verwalten",
-          "notifications": "Benachrichtigungen"
+          "record_cycle": "Aufnahmezyklus (manuell)",
+          "diagnostics": "Diagnose und Wartung"
         }
       },
       "apply_suggestions": {
@@ -66,6 +66,10 @@
           "min_power": "Mindestleistung (W)",
           "off_delay": "Zyklusendeverzögerung (en)",
           "notify_service": "Benachrichtigungsdienst (z. B. notify.mobile_app)",
+          "notify_actions": "Benachrichtigungsaktionen",
+          "notify_people": "Verzögern Sie die Lieferung, bis diese Personen zu Hause sind",
+          "notify_only_when_home": "Benachrichtigungen verzögern, bis die ausgewählte Person zu Hause ist",
+          "notify_fire_events": "Veranstaltungen zur Brandautomatisierung",
           "notify_events": "Zu benachrichtigende Ereignisse",
           "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
           "notify_title": "Titel der Benachrichtigung",
@@ -73,30 +77,64 @@
           "notify_start_message": "Starten Sie das Nachrichtenformat",
           "notify_finish_message": "Beenden Sie das Nachrichtenformat",
           "notify_pre_complete_message": "Nachrichtenformat vor Abschluss",
-          "show_advanced": "Erweiterte Einstellungen bearbeiten (nächster Schritt)",
-          "notify_actions": "Benachrichtigungsaktionen",
-          "notify_people": "Zu benachrichtigende Personen",
-          "notify_only_when_home": "Nur benachrichtigen, wenn Sie zu Hause sind",
-          "notify_fire_events": "Veranstaltungen zur Brandautomatisierung"
+          "show_advanced": "Erweiterte Einstellungen bearbeiten (nächster Schritt)"
         },
         "data_description": {
-          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n-profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Dauer_Toleranz: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n-profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Dauertoleranz: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "Wählen Sie den Gerätetyp (Waschmaschine, Trockner, Geschirrspüler, Kaffeemaschine, Elektroauto). Dieses Tag wird zur besseren Organisation bei jedem Zyklus gespeichert.",
           "power_sensor": "Die Sensoreinheit meldet die Leistung in Echtzeit (in Watt). Sie können dies jederzeit ändern, ohne historische Daten zu verlieren – nützlich, wenn Sie einen Smart Plug austauschen.",
           "min_power": "Leistungswerte über diesem Schwellenwert (in Watt) zeigen an, dass das Gerät läuft. Beginnen Sie bei den meisten Geräten mit 2 W.",
           "off_delay": "Sekunden lang muss die geglättete Leistung unter dem Stoppschwellenwert bleiben, um den Abschluss zu markieren. Standard: 120s.",
           "notify_service": "Zu verwendender Home Assistant-Benachrichtigungsdienst (optional).",
+          "notify_actions": "Optionale Home Assistant-Aktionssequenz zur Ausführung für Benachrichtigungen (Skripte, Benachrichtigung, TTS usw.). Wenn festgelegt, werden Aktionen vor dem Fallback-Benachrichtigungsdienst ausgeführt.",
+          "notify_people": "Personenentitäten, die für das Anwesenheits-Gating verwendet werden. Wenn diese Option aktiviert ist, wird die Zustellung der Benachrichtigung verzögert, bis mindestens eine ausgewählte Person zu Hause ist.",
+          "notify_only_when_home": "Wenn diese Option aktiviert ist, werden Benachrichtigungen verzögert, bis mindestens eine ausgewählte Person zu Hause ist.",
+          "notify_fire_events": "Wenn aktiviert, werden Home Assistant-Ereignisse für Zyklusstart und -ende (ha_washdata_cycle_started und ha_washdata_cycle_ended) ausgelöst, um Automatisierungen voranzutreiben.",
           "notify_events": "Für welche Ereignisse sollen Benachrichtigungen gesendet werden?",
           "notify_before_end_minutes": "Minuten vor dem voraussichtlichen Ende des Zyklus, um eine Benachrichtigung auszulösen. Zum Deaktivieren auf 0 setzen. Standard: 0.",
           "notify_title": "Benutzerdefinierter Titel für Benachrichtigungen. Unterstützt den Platzhalter {device}.",
           "notify_icon": "Symbol zur Verwendung für Benachrichtigungen (z. B. mdi:washing-machine). Lassen Sie das Feld leer, um die Standardeinstellung zu verwenden.",
           "notify_start_message": "Nachricht wird gesendet, wenn ein Zyklus beginnt. Unterstützt den Platzhalter {device}.",
-          "notify_finish_message": "Nachricht wird gesendet, wenn ein Zyklus beendet ist. Unterstützt die Platzhalter {device}, {duration} und {program}.",
-          "notify_pre_complete_message": "Nachricht vor Abschluss gesendet. Unterstützt die Platzhalter {device} und {minutes}.",
+          "notify_finish_message": "Nachricht wird gesendet, wenn ein Zyklus beendet ist. Unterstützt die Platzhalter {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Nachricht vor Abschluss gesendet. Unterstützt die Platzhalter {device}, {minutes}."
+        }
+      },
+      "notifications": {
+        "title": "Benachrichtigungen",
+        "description": "Konfigurieren Sie Benachrichtigungskanäle, Vorlagen und optionale Live-Fortschrittsaktualisierungen für Mobilgeräte.",
+        "data": {
+          "notify_service": "Benachrichtigungsdienst (z. B. notify.mobile_app)",
+          "notify_actions": "Benachrichtigungsaktionen",
+          "notify_people": "Verzögern Sie die Lieferung, bis diese Personen zu Hause sind",
+          "notify_only_when_home": "Benachrichtigungen verzögern, bis die ausgewählte Person zu Hause ist",
+          "notify_fire_events": "Veranstaltungen zur Brandautomatisierung",
+          "notify_events": "Zu benachrichtigende Ereignisse",
+          "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
+          "notify_live_enabled": "Aktivieren Sie Live-Fortschrittsbenachrichtigungen",
+          "notify_live_interval_seconds": "Live-Update-Intervall (Sekunden)",
+          "notify_live_overrun_percent": "Live-Update-Überschreitungszuschlag (%)",
+          "notify_title": "Titel der Benachrichtigung",
+          "notify_icon": "Benachrichtigungssymbol",
+          "notify_start_message": "Starten Sie das Nachrichtenformat",
+          "notify_finish_message": "Beenden Sie das Nachrichtenformat",
+          "notify_pre_complete_message": "Nachrichtenformat vor Abschluss"
+        },
+        "data_description": {
+          "notify_service": "Zu verwendender Home Assistant-Benachrichtigungsdienst (optional).",
           "notify_actions": "Optionale Home Assistant-Aktionssequenz zur Ausführung für Benachrichtigungen (Skripte, Benachrichtigung, TTS usw.). Wenn festgelegt, werden Aktionen vor dem Fallback-Benachrichtigungsdienst ausgeführt.",
-          "notify_people": "Personenentitäten, die für das Heim-/Auswärts-Gating verwendet werden sollen. Wenn diese Option aktiviert ist, werden Benachrichtigungen verschoben, bis jemand zu Hause ist.",
+          "notify_people": "Personenentitäten, die für das Anwesenheits-Gating verwendet werden. Wenn diese Option aktiviert ist, wird die Zustellung der Benachrichtigung verzögert, bis mindestens eine ausgewählte Person zu Hause ist.",
           "notify_only_when_home": "Wenn diese Option aktiviert ist, werden Benachrichtigungen verzögert, bis mindestens eine ausgewählte Person zu Hause ist.",
-          "notify_fire_events": "Wenn aktiviert, werden Home Assistant-Ereignisse für Zyklusstart und -ende (ha_washdata_cycle_started/ended) ausgelöst, um Automatisierungen voranzutreiben."
+          "notify_fire_events": "Wenn aktiviert, werden Home Assistant-Ereignisse für Zyklusstart und -ende (ha_washdata_cycle_started und ha_washdata_cycle_ended) ausgelöst, um Automatisierungen voranzutreiben.",
+          "notify_events": "Für welche Ereignisse sollen Benachrichtigungen gesendet werden?",
+          "notify_before_end_minutes": "Minuten vor dem voraussichtlichen Ende des Zyklus, um eine Benachrichtigung auszulösen. Zum Deaktivieren auf 0 setzen. Standard: 0.",
+          "notify_live_enabled": "Aktivieren Sie direkte Live-Fortschrittsaktualisierungen für Benachrichtigungen über mobile Apps.",
+          "notify_live_interval_seconds": "Wie oft Fortschrittsaktualisierungen während der Ausführung gesendet werden. Niedrigere Werte führen zu einer schnelleren Reaktion, verbrauchen jedoch mehr Benachrichtigungen.",
+          "notify_live_overrun_percent": "Sicherheitsmarge über der geschätzten Aktualisierungsanzahl für lange/überlaufende Zyklen (z. B. 20 % ermöglichen das 1,2-fache der geschätzten Aktualisierungen).",
+          "notify_title": "Benutzerdefinierter Titel für Benachrichtigungen. Unterstützt den Platzhalter {device}.",
+          "notify_icon": "Symbol zur Verwendung für Benachrichtigungen (z. B. mdi:washing-machine). Lassen Sie das Feld leer, um die Standardeinstellung zu verwenden.",
+          "notify_start_message": "Nachricht wird gesendet, wenn ein Zyklus beginnt. Unterstützt den Platzhalter {device}.",
+          "notify_finish_message": "Nachricht wird gesendet, wenn ein Zyklus beendet ist. Unterstützt die Platzhalter {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "Nachricht vor Abschluss gesendet. Unterstützt die Platzhalter {device}, {minutes}."
         }
       },
       "advanced_settings": {
@@ -139,17 +177,17 @@
           "auto_maintenance": "Aktivieren Sie die automatische Wartung",
           "expose_debug_entities": "Debug-Entitäten verfügbar machen",
           "save_debug_traces": "Speichern Sie Debug-Traces",
-          "dtw_bandwidth": "DTW-Bandbreite",
-          "external_end_trigger_enabled": "Aktivieren Sie den externen Zyklusende-Trigger",
-          "external_end_trigger": "Externer Zyklusendesensor",
-          "external_end_trigger_inverted": "Triggerlogik umkehren (Trigger auf AUS)",
           "anti_wrinkle_enabled": "Anti-Falten-Schutz (nur Trockner)",
           "anti_wrinkle_max_power": "Anti-Falten-Maximalleistung (W)",
           "anti_wrinkle_max_duration": "Maximale Anti-Falten-Dauer (s)",
-          "anti_wrinkle_exit_power": "Anti-Falten-Ausgangsleistung (W)"
+          "anti_wrinkle_exit_power": "Anti-Falten-Ausgangsleistung (W)",
+          "dtw_bandwidth": "DTW-Bandbreite",
+          "external_end_trigger_enabled": "Aktivieren Sie den externen Zyklusende-Trigger",
+          "external_end_trigger": "Externer Zyklusendesensor",
+          "external_end_trigger_inverted": "Triggerlogik umkehren (Trigger auf AUS)"
         },
         "data_description": {
-          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n-profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Dauer_Toleranz: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n-profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Dauertoleranz: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "Die Leistung muss ÜBER diesen Schwellenwert ansteigen, um einen Zyklus zu starten. Höher einstellen als Ihre Standby-Leistung. Standard: min_power + 1 W.",
           "stop_threshold_w": "Die Leistung muss UNTER diesen Schwellenwert fallen, um einen Zyklus zu BEENDEN. Stellen Sie den Wert knapp über Null ein, um zu vermeiden, dass Rauschen falsche Enden auslöst. Standard: 0,6 * min_power.",
           "min_off_gap": "Wenn ein Zyklus innerhalb dieser Anzahl von Sekunden nach dem Ende des vorherigen beginnt, werden sie zu einem einzigen Zyklus zusammengeführt.",
@@ -185,19 +223,19 @@
           "auto_maintenance": "Aktivieren Sie die automatische Wartung (Beispiele reparieren, Fragmente zusammenführen).",
           "expose_debug_entities": "Zeigen Sie erweiterte Sensoren (Konfidenz, Phase, Mehrdeutigkeit) zum Debuggen an.",
           "save_debug_traces": "Speichern Sie detaillierte Ranking- und Stromverfolgungsdaten im Verlauf (erhöht die Speichernutzung).",
-          "dtw_bandwidth": "Maximal zulässige Zeitverzerrung (Streckung) im Verhältnis zur Zyklusdauer. Höhere Werte ermöglichen die Anpassung stark variabler Zyklen, erhöhen jedoch die CPU-Kosten. Standard: 0,20 (20 %).",
-          "external_end_trigger_enabled": "Aktivieren Sie die Überwachung eines externen Binärsensors, um den Abschluss des Zyklus auszulösen.",
-          "external_end_trigger": "Wählen Sie eine binäre Sensoreinheit aus. Wenn dieser Sensor auslöst, endet der aktuelle Zyklus mit dem Status „abgeschlossen“.",
-          "external_end_trigger_inverted": "Standardmäßig wird der Auslöser ausgelöst, wenn der Sensor eingeschaltet wird. Aktivieren Sie dieses Kontrollkästchen, um stattdessen auszulösen, wenn der Sensor ausgeschaltet wird.",
           "anti_wrinkle_enabled": "Ignorieren Sie kurze Trommelumdrehungen mit geringer Leistung nach Programmende, um Geisterzyklen zu vermeiden (nur Trockner/Waschtrockner).",
           "anti_wrinkle_max_power": "Ausbrüche bei oder unter dieser Leistung werden als Anti-Falten-Rotationen und nicht als neue Zyklen behandelt. Gilt nur, wenn Anti-Falten-Schutz aktiviert ist.",
           "anti_wrinkle_max_duration": "Maximale Burst-Länge zur Behandlung als Anti-Falten-Rotation. Gilt nur, wenn Anti-Falten-Schutz aktiviert ist.",
-          "anti_wrinkle_exit_power": "Wenn die Leistung unter diesen Wert fällt, beenden Sie die Anti-Falten-Funktion sofort (echt aus). Gilt nur, wenn Anti-Falten-Schutz aktiviert ist."
+          "anti_wrinkle_exit_power": "Wenn die Leistung unter diesen Wert fällt, beenden Sie die Anti-Falten-Funktion sofort (echt aus). Gilt nur, wenn Anti-Falten-Schutz aktiviert ist.",
+          "dtw_bandwidth": "Maximal zulässige Zeitverzerrung (Streckung) im Verhältnis zur Zyklusdauer. Höhere Werte ermöglichen die Anpassung stark variabler Zyklen, erhöhen jedoch die CPU-Kosten. Standard: 0,20 (20 %).",
+          "external_end_trigger_enabled": "Aktivieren Sie die Überwachung eines externen Binärsensors, um den Abschluss des Zyklus auszulösen.",
+          "external_end_trigger": "Wählen Sie eine binäre Sensoreinheit aus. Wenn dieser Sensor auslöst, endet der aktuelle Zyklus mit dem Status „abgeschlossen“.",
+          "external_end_trigger_inverted": "Standardmäßig wird der Auslöser ausgelöst, wenn der Sensor eingeschaltet wird. Aktivieren Sie dieses Kontrollkästchen, um stattdessen auszulösen, wenn der Sensor ausgeschaltet wird."
         }
       },
       "diagnostics": {
         "title": "Diagnose und Wartung",
-        "description": "Führen Sie Wartungsaktionen durch, z. B. das Zusammenführen fragmentierter Zyklen oder das Migrieren gespeicherter Daten.\n\n{storage_stats}"
+        "description": "Führen Sie Wartungsaktionen durch, z. B. das Zusammenführen fragmentierter Zyklen oder das Migrieren gespeicherter Daten.\n\n**Speichernutzung**\n\n- Dateigröße: {file_size_kb} KB\n- Zyklen: {cycle_count}\n- Profile: {profile_count}\n- Debug-Traces: {debug_count}"
       },
       "clear_debug_data": {
         "title": "Debug-Daten löschen",
@@ -210,11 +248,109 @@
           "action": "Aktion"
         }
       },
+      "manage_cycles_empty": {
+        "title": "Zyklen verwalten",
+        "description": "Noch keine Zyklen aufgezeichnet.",
+        "data": {
+          "action": "Aktion"
+        }
+      },
       "manage_profiles": {
         "title": "Profile verwalten",
         "description": "Profilzusammenfassung:\n{profile_summary}",
         "data": {
           "action": "Aktion"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "Profile verwalten",
+        "description": "Noch keine Profile erstellt.",
+        "data": {
+          "action": "Aktion"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "Phasenkatalog verwalten",
+        "description": "Phasenkatalog (Standardeinstellungen für dieses Gerät + benutzerdefinierte Phasen):\n{phase_summary}",
+        "data": {
+          "action": "Aktion"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Erstellen Sie eine benutzerdefinierte Phase",
+        "description": "Erstellen Sie einen benutzerdefinierten Phasennamen und eine Beschreibung und wählen Sie aus, für welchen Gerätetyp sie gelten sollen.",
+        "data": {
+          "target_device_type": "Zielgerätetyp",
+          "phase_name": "Phasenname",
+          "phase_description": "Phasenbeschreibung"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Benutzerdefinierte Phase bearbeiten",
+        "description": "Wählen Sie eine benutzerdefinierte Phase zum Bearbeiten aus.",
+        "data": {
+          "phase_name": "Benutzerdefinierte Phase"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Benutzerdefinierte Phase bearbeiten",
+        "description": "Bearbeitungsphase: {phase_name}",
+        "data": {
+          "phase_name": "Phasenname",
+          "phase_description": "Phasenbeschreibung"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Benutzerdefinierte Phase löschen",
+        "description": "Wählen Sie eine benutzerdefinierte Phase zum Löschen aus. Alle zugewiesenen Bereiche, die diese Phase verwenden, werden entfernt.",
+        "data": {
+          "phase_name": "Benutzerdefinierte Phase"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Phasenbereiche zuweisen",
+        "description": "Phasenvorschau für Profil: **{profile_name}**\n\n{timeline_svg}\n\n**Aktuelle Bereiche:**\n{current_ranges}\n\nVerwenden Sie die folgenden Aktionen, um Bereiche hinzuzufügen, zu bearbeiten, zu löschen oder zu speichern.",
+        "data": {
+          "action": "Aktion"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Phasenbereich hinzufügen",
+        "description": "Fügen Sie dem aktuellen Entwurf einen Phasenbereich hinzu.",
+        "data": {
+          "phase_name": "Phase",
+          "start_min": "Startminute",
+          "end_min": "Endminute"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Phasenbereich bearbeiten",
+        "description": "Wählen Sie einen Bereich zum Bearbeiten aus.",
+        "data": {
+          "range_index": "Phasenbereich"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Phasenbereich bearbeiten",
+        "description": "Aktualisieren Sie den ausgewählten Phasenbereich.",
+        "data": {
+          "phase_name": "Phase",
+          "start_min": "Startminute",
+          "end_min": "Endminute"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Phasenbereich löschen",
+        "description": "Wählen Sie einen Bereich aus, der aus dem Entwurf entfernt werden soll.",
+        "data": {
+          "range_index": "Phasenbereich"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Phasenbereiche zuweisen",
+        "description": "Wählen Sie ein Profil aus, um Phasenbereiche zu konfigurieren.",
+        "data": {
+          "profile": "Profil"
         }
       },
       "profile_stats": {
@@ -254,7 +390,7 @@
       },
       "delete_profile_confirm": {
         "title": "Bestätigen Sie „Profil löschen“.",
-        "description": "⚠️ Dadurch wird das Profil: {profile_name} dauerhaft gelöscht",
+        "description": "⚠️ Dadurch wird das Profil dauerhaft gelöscht: {profile_name}",
         "data": {
           "unlabel_cycles": "Entfernen Sie mit diesem Profil Etiketten von Zyklen"
         }
@@ -367,8 +503,8 @@
         "title": "JSON exportieren/importieren",
         "description": "Kopieren/Einfügen von Zyklen, Profilen und Einstellungen für dieses Gerät. Exportieren Sie unten oder fügen Sie JSON zum Importieren ein.",
         "data": {
-          "json_payload": "Komplette Konfiguration JSON",
-          "mode": "Aktion"
+          "mode": "Aktion",
+          "json_payload": "Komplette Konfiguration JSON"
         },
         "data_description": {
           "mode": "Wählen Sie „Exportieren“, um aktuelle Daten und Einstellungen zu kopieren, oder „Importieren“, um exportierte Daten von einem anderen WashData-Gerät einzufügen.",
@@ -405,133 +541,11 @@
       },
       "resolve_feedback": {
         "title": "Feedback auflösen",
-        "description": "**Erkanntes Programm**: {profile}\n**Konfidenz**: {confidence}%\n**Geschätzt**: {est}m, **Ist**: {act}m",
+        "description": "{comparison_img}{candidates_table}\n**Erkanntes Profil**: {detected_profile} ({confidence_pct} %)\n**Geschätzte Dauer**: {est_duration_min} Min\n**Tatsächliche Dauer**: {act_duration_min} Min\n\n__Wählen Sie unten eine Aktion aus:__",
         "data": {
+          "action": "Was möchten Sie tun?",
           "corrected_profile": "Richtiges Programm (bei Korrektur)",
-          "corrected_duration": "Korrekte Dauer in Minuten (bei Korrektur)",
-          "action": "Was möchten Sie tun?"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "Phasenkatalog verwalten",
-        "description": "Aktuelle Phasen für diesen Gerätetyp:\n{phase_summary}",
-        "data": {
-          "action": "Aktion"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "Erstellen Sie eine benutzerdefinierte Phase",
-        "description": "Erstellen Sie einen benutzerdefinierten Phasennamen und eine Beschreibung für diesen Gerätetyp.",
-        "data": {
-          "phase_name": "Phasenname",
-          "phase_description": "Phasenbeschreibung",
-          "target_device_type": "Zielgerätetyp"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "Benutzerdefinierte Phase bearbeiten",
-        "description": "Wählen Sie eine benutzerdefinierte Phase zum Bearbeiten aus.",
-        "data": {
-          "phase_name": "Benutzerdefinierte Phase"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "Benutzerdefinierte Phase bearbeiten",
-        "description": "Bearbeitungsphase: {phase_name}",
-        "data": {
-          "phase_name": "Phasenname",
-          "phase_description": "Phasenbeschreibung"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "Benutzerdefinierte Phase löschen",
-        "description": "Wählen Sie eine benutzerdefinierte Phase zum Löschen aus. Alle zugewiesenen Bereiche, die diese Phase verwenden, werden entfernt.",
-        "data": {
-          "phase_name": "Benutzerdefinierte Phase"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "Phasenbereiche zuweisen",
-        "description": "Profil: **{profile_name}**\nModus: **{assign_mode}**\nZyklushinweis: {cycle_hint}\n\nAktuelle Bereiche:\n{current_ranges}\n\nPhasenbezeichnungen dienen der Anzeige und Organisation. Bei der Erkennung werden Leistungsmuster und keine Phasennamen verwendet.",
-        "data": {
-          "action": "Aktion"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "Phasenbereiche zuweisen",
-        "description": "Wählen Sie ein Profil aus, um Phasenbereiche zu konfigurieren.",
-        "data": {
-          "profile": "Profil"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "Phasenbereich hinzufügen",
-        "description": "Fügen Sie dem aktuellen Entwurf einen Phasenbereich hinzu.",
-        "data": {
-          "phase_name": "Phase",
-          "start_min": "Startminute",
-          "end_min": "Endminute"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "Phasenbereich bearbeiten",
-        "description": "Wählen Sie einen Bereich zum Bearbeiten aus.",
-        "data": {
-          "range_index": "Phasenbereich"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "Phasenbereich bearbeiten",
-        "description": "Aktualisieren Sie den ausgewählten Phasenbereich.",
-        "data": {
-          "phase_name": "Phase",
-          "start_min": "Startminute",
-          "end_min": "Endminute"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "Phasenbereich löschen",
-        "description": "Wählen Sie einen Bereich aus, der aus dem Entwurf entfernt werden soll.",
-        "data": {
-          "range_index": "Phasenbereich"
-        }
-      },
-      "notifications": {
-        "title": "Benachrichtigungen",
-        "description": "Konfigurieren Sie Benachrichtigungskanäle, Vorlagen und optionale Live-Fortschrittsaktualisierungen für Mobilgeräte.",
-        "data": {
-          "notify_service": "Benachrichtigungsdienst (z. B. notify.mobile_app)",
-          "notify_actions": "Benachrichtigungsaktionen",
-          "notify_people": "Zu benachrichtigende Personen",
-          "notify_only_when_home": "Nur benachrichtigen, wenn Sie zu Hause sind",
-          "notify_fire_events": "Veranstaltungen zur Brandautomatisierung",
-          "notify_events": "Zu benachrichtigende Ereignisse",
-          "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
-          "notify_live_enabled": "Aktivieren Sie Live-Fortschrittsbenachrichtigungen",
-          "notify_live_interval_seconds": "Live-Update-Intervall (Sekunden)",
-          "notify_live_overrun_percent": "Live-Update-Überschreitungszuschlag (%)",
-          "notify_title": "Titel der Benachrichtigung",
-          "notify_icon": "Benachrichtigungssymbol",
-          "notify_start_message": "Starten Sie das Nachrichtenformat",
-          "notify_finish_message": "Beenden Sie das Nachrichtenformat",
-          "notify_pre_complete_message": "Nachrichtenformat vor Abschluss"
-        },
-        "data_description": {
-          "notify_service": "Zu verwendender Home Assistant-Benachrichtigungsdienst (optional).",
-          "notify_actions": "Optionale Home Assistant-Aktionssequenz zur Ausführung für Benachrichtigungen (Skripte, Benachrichtigung, TTS usw.). Wenn festgelegt, werden Aktionen vor dem Fallback-Benachrichtigungsdienst ausgeführt.",
-          "notify_people": "Personenentitäten, die für das Heim-/Auswärts-Gating verwendet werden sollen. Wenn diese Option aktiviert ist, werden Benachrichtigungen verschoben, bis jemand zu Hause ist.",
-          "notify_only_when_home": "Wenn diese Option aktiviert ist, werden Benachrichtigungen verzögert, bis mindestens eine ausgewählte Person zu Hause ist.",
-          "notify_fire_events": "Wenn aktiviert, werden Home Assistant-Ereignisse für Zyklusstart und -ende (ha_washdata_cycle_started/ended) ausgelöst, um Automatisierungen voranzutreiben.",
-          "notify_events": "Für welche Ereignisse sollen Benachrichtigungen gesendet werden?",
-          "notify_before_end_minutes": "Minuten vor dem voraussichtlichen Ende des Zyklus, um eine Benachrichtigung auszulösen. Zum Deaktivieren auf 0 setzen. Standard: 0.",
-          "notify_live_enabled": "Aktivieren Sie direkte Live-Fortschrittsaktualisierungen für Benachrichtigungen über mobile Apps.",
-          "notify_live_interval_seconds": "Wie oft Fortschrittsaktualisierungen während der Ausführung gesendet werden. Niedrigere Werte führen zu einer schnelleren Reaktion, verbrauchen jedoch mehr Benachrichtigungen.",
-          "notify_live_overrun_percent": "Sicherheitsmarge über der geschätzten Aktualisierungsanzahl für lange/überlaufende Zyklen (z. B. 20 % ermöglichen das 1,2-fache der geschätzten Aktualisierungen).",
-          "notify_title": "Benutzerdefinierter Titel für Benachrichtigungen. Unterstützt den Platzhalter {device}.",
-          "notify_icon": "Symbol zur Verwendung für Benachrichtigungen (z. B. mdi:washing-machine). Lassen Sie das Feld leer, um die Standardeinstellung zu verwenden.",
-          "notify_start_message": "Nachricht wird gesendet, wenn ein Zyklus beginnt. Unterstützt den Platzhalter {device}.",
-          "notify_finish_message": "Nachricht wird gesendet, wenn ein Zyklus beendet ist. Unterstützt die Platzhalter {device}, {duration} und {program}.",
-          "notify_pre_complete_message": "Nachricht vor Abschluss gesendet. Unterstützt die Platzhalter {device} und {minutes}."
+          "corrected_duration": "Korrekte Dauer in Minuten (bei Korrektur)"
         }
       }
     },
@@ -540,8 +554,6 @@
       "profile_exists": "Ein Profil mit diesem Namen existiert bereits",
       "rename_failed": "Profil konnte nicht umbenannt werden. Das Profil existiert möglicherweise nicht oder der neue Name ist bereits vergeben.",
       "assignment_failed": "Profil konnte dem Zyklus nicht zugewiesen werden",
-      "feedback_notification_title": "WashData: Zyklus überprüfen ({device})",
-      "feedback_notification_message": "**Gerät**: {device}\n**Programm**: {program} ({confidence}% Konfidenz)\n**Zeit**: {time}\n\nWashData benötigt Ihre Hilfe, um diesen erkannten Zyklus zu überprüfen.\n\nBitte gehen Sie zu **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Lern-Feedbacks**, um dieses Ergebnis zu bestätigen oder zu korrigieren.",
       "duplicate_phase": "Eine Phase mit diesem Namen existiert bereits.",
       "phase_not_found": "Die ausgewählte Phase wurde nicht gefunden.",
       "invalid_phase_name": "Der Phasenname darf nicht leer sein.",
@@ -551,7 +563,9 @@
       "overlapping_phase_ranges": "Phasenbereiche überschneiden sich. Passen Sie die Bereiche an und versuchen Sie es erneut.",
       "incomplete_phase_row": "Jede Phasenzeile muss eine Phase sowie vollständige Start-/Endwerte für den ausgewählten Modus enthalten.",
       "timestamp_mode_cycle_required": "Bitte wählen Sie einen Quellzyklus aus, wenn Sie den Zeitstempelmodus verwenden.",
-      "no_phase_ranges": "Für diese Aktion sind noch keine Phasenbereiche verfügbar."
+      "no_phase_ranges": "Für diese Aktion sind noch keine Phasenbereiche verfügbar.",
+      "feedback_notification_title": "WashData: Zyklus überprüfen ({device})",
+      "feedback_notification_message": "**Gerät**: {device}\n**Programm**: {program} ({confidence} % Konfidenz)\n**Zeit**: {time}\n\nWashData benötigt Ihre Hilfe, um diesen erkannten Zyklus zu überprüfen.\n\nBitte gehen Sie zu **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Lern-Feedbacks**, um dieses Ergebnis zu bestätigen oder zu korrigieren."
     },
     "abort": {
       "no_cycles_found": "Keine Zyklen gefunden",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "Alle Zyklen sind bereits beschriftet",
       "no_suggestions": "Noch keine Wertevorschläge verfügbar. Führen Sie einige Zyklen durch und versuchen Sie es erneut.",
       "no_predictions": "Keine Vorhersagen",
+      "no_custom_phases": "Keine benutzerdefinierten Phasen gefunden.",
       "reprocess_success": "{count} Zyklen erfolgreich erneut verarbeitet.",
-      "debug_data_cleared": "Debug-Daten aus {count} Zyklen erfolgreich gelöscht.",
-      "no_custom_phases": "Für diesen Gerätetyp wurden keine benutzerdefinierten Phasen gefunden."
+      "debug_data_cleared": "Debug-Daten aus {count} Zyklen wurden erfolgreich gelöscht."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "Zyklusstart",
+        "cycle_finish": "Zyklusende",
+        "cycle_live": "Live-Fortschritt"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(Unbeschriftet)",
+        "create_new_profile": "Neues Profil erstellen",
+        "remove_label": "Etikett entfernen",
+        "no_reference_cycle": "(Kein Referenzzyklus)",
+        "all_device_types": "Alle Gerätetypen",
+        "current_suffix": "(aktuell)",
+        "editor_select_info": "Wählen Sie 1 Zyklus zum Teilen oder 2+ Zyklen zum Zusammenführen aus.",
+        "no_cycles_recorded": "Noch keine Zyklen aufgezeichnet.",
+        "profile_summary_line": "- **{name}**: {count} Zyklen, {avg}m durchschnittlich",
+        "no_profiles_created": "Noch keine Profile erstellt.",
+        "phase_preview": "Phasenvorschau",
+        "phase_preview_no_curve": "Die durchschnittliche Profilkurve ist noch nicht verfügbar. Weitere Zyklen für dieses Profil ausführen/kennzeichnen.",
+        "average_power_curve": "Durchschnittliche Leistungskurve",
+        "unit_min": "min",
+        "profile_option_fmt": "{name} ({count} Zyklen, ~{duration}m Durchschnitt)",
+        "profile_option_short_fmt": "{name} ({count} Zyklen, ~{duration}m)",
+        "deleted_cycles_from_profile": "{count} Zyklen von {profile} gelöscht.",
+        "not_enough_data_graph": "Nicht genügend Daten, um ein Diagramm zu erstellen.",
+        "no_profiles_found": "Keine Profile gefunden.",
+        "cycle_info_fmt": "Zyklus: {start}, {duration}m, Strom: {label}",
+        "top_candidates_header": "### Top-Kandidaten",
+        "tbl_profile": "Profil",
+        "tbl_confidence": "Vertrauen",
+        "tbl_correlation": "Korrelation",
+        "tbl_duration_match": "Dauer-Match",
+        "detected_profile": "Erkanntes Profil",
+        "estimated_duration": "Geschätzte Dauer",
+        "actual_duration": "Tatsächliche Dauer",
+        "choose_action": "__Wählen Sie unten eine Aktion aus:__",
+        "tbl_count": "Zählen",
+        "tbl_avg": "Durchschn",
+        "tbl_min": "Min",
+        "tbl_max": "Max",
+        "tbl_energy_avg": "Energie (Durchschn.)",
+        "tbl_energy_total": "Energie (Gesamt)",
+        "tbl_consistency": "Bestehen.",
+        "tbl_last_run": "Letzter Lauf",
+        "graph_legend_title": "Diagrammlegende",
+        "graph_legend_body": "Das blaue Band stellt den beobachteten minimalen und maximalen Leistungsaufnahmebereich dar. Die Linie zeigt die durchschnittliche Leistungskurve.",
+        "recording_preview": "Aufnahmevorschau",
+        "trim_start": "Trimmen beginnen",
+        "trim_end": "Ende abschneiden",
+        "split_preview_title": "Geteilte Vorschau",
+        "split_preview_found_fmt": "{count} Segmente gefunden.",
+        "split_preview_confirm_fmt": "Klicken Sie auf „Bestätigen“, um diesen Zyklus in {count} separate Zyklen aufzuteilen.",
+        "merge_preview_title": "Vorschau zusammenführen",
+        "merge_preview_joining_fmt": "Tritt {count} Zyklen bei. Lücken werden mit 0W-Messwerten gefüllt.",
+        "profile_comparison": "Profilvergleich",
+        "actual_cycle_label": "Dieser Zyklus (aktuell)",
+        "storage_usage_header": "Speichernutzung",
+        "storage_file_size": "Dateigröße",
+        "storage_cycles": "Zyklen",
+        "storage_profiles": "Profile",
+        "storage_debug_traces": "Debug-Traces",
+        "overview_suffix": "Überblick",
+        "phase_preview_for_profile": "Phasenvorschau für Profil",
+        "current_ranges_header": "Aktuelle Bereiche",
+        "assign_phases_help": "Verwenden Sie die folgenden Aktionen, um Bereiche hinzuzufügen, zu bearbeiten, zu löschen oder zu speichern.",
+        "profile_summary_header": "Profilzusammenfassung",
+        "recent_cycles_header": "Aktuelle Zyklen"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "Einen Zyklus aufteilen (Lücken finden)",
+        "merge": "Zyklen zusammenführen (Fragmente verbinden)",
+        "delete": "Zyklus(e) löschen"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "Wartung: Daten erneut verarbeiten und optimieren",
+        "clear_debug_data": "Debug-Daten löschen (Speicherplatz freigeben)",
+        "wipe_history": "ALLE Daten für dieses Gerät löschen (unwiderruflich)",
+        "export_import": "JSON mit Einstellungen exportieren/importieren (Kopieren/Einfügen)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "Alle Daten exportieren",
+        "import": "Daten importieren/zusammenführen"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "Alte Zyklen automatisch kennzeichnen",
+        "select_cycle_to_label": "Beschriften Sie den spezifischen Zyklus",
+        "select_cycle_to_label_multi": "Beschriften Sie mehrere Zyklen",
+        "select_cycle_to_delete": "Zyklus löschen",
+        "interactive_editor": "Interaktiver Editor zum Zusammenführen/Teilen"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "Neues Profil erstellen",
+        "edit_profile": "Profil bearbeiten/umbenennen",
+        "delete_profile": "Profil löschen",
+        "profile_stats": "Profilstatistik",
+        "cleanup_profile": "Verlauf bereinigen – grafisch darstellen und löschen",
+        "assign_phases": "Phasenbereiche zuweisen"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "Neue Phase erstellen",
+        "edit_custom_phase": "Phase bearbeiten",
+        "delete_custom_phase": "Phase löschen"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "Phasenbereich hinzufügen",
+        "edit_range": "Phasenbereich bearbeiten",
+        "delete_range": "Phasenbereich löschen",
+        "clear_ranges": "Alle Bereiche löschen",
+        "save_ranges": "Speichern und zurückgeben"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "Status aktualisieren",
+        "stop_recording": "Aufnahme beenden (Speichern und verarbeiten)",
+        "start_recording": "Neue Aufnahme starten",
+        "process_recording": "Letzte Aufnahme verarbeiten (Zuschneiden und Speichern)",
+        "discard_recording": "Letzte Aufnahme verwerfen"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "Neues Profil erstellen",
+        "existing_profile": "Zum vorhandenen Profil hinzufügen",
+        "discard": "Aufnahme verwerfen"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "Bestätigen – korrekte Erkennung",
+        "correct": "Richtig – Wählen Sie Programm/Dauer",
+        "ignore": "Ignorieren – falsch positiver/verrauschter Zyklus",
+        "delete": "Löschen – Aus dem Verlauf entfernen"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "Etikettenzyklus",
+      "description": "Ordnen Sie ein vorhandenes Profil einem vergangenen Zyklus zu oder entfernen Sie die Bezeichnung.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das Waschmaschinengerät zum Beschriften."
+        },
+        "cycle_id": {
+          "name": "Zyklus-ID",
+          "description": "Die ID des zu kennzeichnenden Zyklus."
+        },
+        "profile_name": {
+          "name": "Profilname",
+          "description": "Der Name eines vorhandenen Profils (Profile erstellen im Menü „Profile verwalten“). Lassen Sie das Feld leer, um das Etikett zu entfernen."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "Profil erstellen",
+      "description": "Erstellen Sie ein neues Profil (eigenständig oder basierend auf einem Referenzzyklus).",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das Waschmaschinengerät."
+        },
+        "profile_name": {
+          "name": "Profilname",
+          "description": "Name für das neue Profil (z. B. „Heavy Duty“, „Delicates“)."
+        },
+        "reference_cycle_id": {
+          "name": "Referenzzyklus-ID",
+          "description": "Optionale Zyklus-ID, auf der dieses Profil basieren soll."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "Profil löschen",
+      "description": "Löschen Sie ein Profil und heben Sie optional die Kennzeichnung von Zyklen auf, die es verwenden.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das Waschmaschinengerät."
+        },
+        "profile_name": {
+          "name": "Profilname",
+          "description": "Das zu löschende Profil."
+        },
+        "unlabel_cycles": {
+          "name": "Zyklen entkennzeichnen",
+          "description": "Entfernen Sie die Profilbezeichnung von Zyklen, die dieses Profil verwenden."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "Alte Zyklen automatisch kennzeichnen",
+      "description": "Beschriften Sie unbeschriftete Zyklen rückwirkend mithilfe des Profilabgleichs.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das Waschmaschinengerät."
+        },
+        "confidence_threshold": {
+          "name": "Vertrauensschwelle",
+          "description": "Mindestübereinstimmungskonfidenz (0,50–0,95) zum Anwenden von Beschriftungen."
+        }
+      }
+    },
+    "export_config": {
+      "name": "Konfiguration exportieren",
+      "description": "Exportieren Sie die Profile, Zyklen und Einstellungen dieses Geräts in eine JSON-Datei (pro Gerät).",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das zu exportierende Waschmaschinengerät."
+        },
+        "path": {
+          "name": "Weg",
+          "description": "Optionaler absoluter Dateipfad zum Schreiben (standardmäßig /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "Konfiguration importieren",
+      "description": "Importieren Sie Profile, Zyklen und Einstellungen für dieses Gerät aus einer JSON-Exportdatei (Einstellungen werden möglicherweise überschrieben).",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das Waschmaschinengerät, in das importiert werden soll."
+        },
+        "path": {
+          "name": "Weg",
+          "description": "Absoluter Pfad zur zu importierenden JSON-Exportdatei."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "Senden Sie Feedback zum Zyklus",
+      "description": "Bestätigen oder korrigieren Sie ein automatisch erkanntes Programm nach einem abgeschlossenen Zyklus. Geben Sie entweder „entry_id“ (erweitert) oder „device_id“ (empfohlen) an.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das WashData-Gerät (empfohlen anstelle von „entry_id“)."
+        },
+        "entry_id": {
+          "name": "Eintrags-ID",
+          "description": "Die Konfigurationseintrags-ID für das Gerät (Alternative zu device_id)."
+        },
+        "cycle_id": {
+          "name": "Zyklus-ID",
+          "description": "Die in der Feedback-Benachrichtigung/in den Protokollen angezeigte Zyklus-ID."
+        },
+        "user_confirmed": {
+          "name": "Bestätigen Sie das erkannte Programm",
+          "description": "Auf „true“ setzen, wenn das erkannte Programm korrekt ist."
+        },
+        "corrected_profile": {
+          "name": "Korrigiertes Profil",
+          "description": "Wenn dies nicht bestätigt wird, geben Sie den korrekten Profil-/Programmnamen an."
+        },
+        "corrected_duration": {
+          "name": "Korrigierte Dauer (Sekunden)",
+          "description": "Optionale korrigierte Dauer in Sekunden."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Optionale Hinweise zu diesem Zyklus."
+        }
+      }
+    },
+    "record_start": {
+      "name": "Zyklusstart aufzeichnen",
+      "description": "Starten Sie die manuelle Aufzeichnung eines Reinigungszyklus (umgeht alle passenden Logiken).",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das Waschmaschinengerät zum Aufnehmen."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "Aufnahmezyklusstopp",
+      "description": "Stoppen Sie die manuelle Aufnahme.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Die Waschmaschine stoppt die Aufnahme."
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "Läuft"
+      },
+      "match_ambiguity": {
+        "name": "Übereinstimmungsmehrdeutigkeit"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "Zustand"
+        "name": "Zustand",
+        "state": {
+          "off": "Aus",
+          "idle": "Leerlauf",
+          "starting": "Beginnt",
+          "running": "Läuft",
+          "paused": "Angehalten",
+          "ending": "Ende",
+          "finished": "Fertig",
+          "anti_wrinkle": "Anti-Falten",
+          "interrupted": "Unterbrochen",
+          "force_stopped": "Kraft gestoppt",
+          "rinse": "Spülen",
+          "unknown": "Unbekannt"
+        }
       },
       "washer_program": {
         "name": "Programm"
@@ -595,16 +936,23 @@
         "name": "Match-Vertrauen"
       },
       "top_candidates": {
-        "name": "Top-Kandidaten"
+        "name": "Top-Kandidaten",
+        "state": {
+          "none": "Keiner"
+        }
+      },
+      "current_phase": {
+        "name": "Aktuelle Phase"
       },
       "wash_phase": {
         "name": "Phase"
       },
+      "profile_cycle_count": {
+        "name": "Profil {profile_name} Anzahl",
+        "unit_of_measurement": "Zyklen"
+      },
       "suggestions": {
         "name": "Empfohlene Einstellungen"
-      },
-      "current_phase": {
-        "name": "Aktuelle Phase"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "Automatische Erkennung"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "Zyklusende erzwingen"
       }
     }
   }

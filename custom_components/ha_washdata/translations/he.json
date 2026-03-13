@@ -41,12 +41,12 @@
         "menu_options": {
           "learning_feedbacks": "עיין במשובי למידה",
           "settings": "הגדרות",
+          "notifications": "התראות",
           "manage_cycles": "נהל מחזורים",
           "manage_profiles": "נהל פרופילים",
-          "record_cycle": "מחזור הקלטות (ידני)",
-          "diagnostics": "אבחון ותחזוקה",
           "manage_phase_catalog": "נהל את קטלוג השלבים",
-          "notifications": "התראות"
+          "record_cycle": "מחזור הקלטות (ידני)",
+          "diagnostics": "אבחון ותחזוקה"
         }
       },
       "apply_suggestions": {
@@ -67,8 +67,8 @@
           "off_delay": "עיכוב סיום מחזור (ים)",
           "notify_service": "שירות התראות (למשל notify.mobile_app)",
           "notify_actions": "פעולות הודעה",
-          "notify_people": "אנשים להודיע",
-          "notify_only_when_home": "הודע רק כאשר אתה בבית",
+          "notify_people": "דחו את המשלוח עד שהאנשים האלה יהיו בבית",
+          "notify_only_when_home": "עיכוב הודעות עד שהאדם הנבחר יהיה בבית",
           "notify_fire_events": "אירועי אוטומציה אש",
           "notify_events": "אירועים להודיע",
           "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
@@ -80,23 +80,61 @@
           "show_advanced": "ערוך הגדרות מתקדמות (השלב ​​הבא)"
         },
         "data_description": {
-          "apply_suggestions": "סמן תיבה זו כדי להעתיק ערכים שהוצעו על ידי אלגוריתם הלמידה לטופס. בדוק לפני השמירה.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "סמן תיבה זו כדי להעתיק ערכים שהוצעו על ידי אלגוריתם הלמידה לטופס. בדוק לפני השמירה.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- מרווח_משמר: {suggested_watchdog_interval} שניות\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- יחס_מינימום_דרכי_התאמת_פרופיל: {suggested_profile_match_min_duration_ratio}\n- ratio_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "בחר את סוג המכשיר (מכונת כביסה, מייבש, מדיח כלים, מכונת קפה, EV). תג זה מאוחסן עם כל מחזור לארגון טוב יותר.",
           "power_sensor": "ישות החיישן מדווחת על הספק בזמן אמת (בוואט). אתה יכול לשנות זאת בכל עת מבלי לאבד נתונים היסטוריים - שימושי אם אתה מחליף תקע חכם.",
           "min_power": "קריאות הספק מעל סף זה (בוואט) מצביעות על כך שהמכשיר פועל. התחל עם 2W עבור רוב המכשירים.",
           "off_delay": "שניות הכוח המוחלק חייב להישאר מתחת לסף העצירה כדי לסמן את ההשלמה. ברירת מחדל: 120 שניות.",
           "notify_service": "Home Assistant מודיע לשירות לשימוש (אופציונלי).",
           "notify_actions": "רצף פעולה אופציונלי של Home Assistant להפעלת התראות (סקריפטים, התראה, TTS וכו'). אם הוגדר, הפעולות פועלות לפני שירות התראה חוזר.",
-          "notify_people": "ישויות אנשים לשימוש עבור שער בית/חוץ. כאשר מופעלת, ההתראות נדחות עד שמישהו יהיה בבית.",
+          "notify_people": "ישויות של אנשים המשמשות עבור שער נוכחות. כאשר מופעל, מסירת ההתראה מתעכבת עד שלפחות אדם נבחר אחד יהיה בבית.",
           "notify_only_when_home": "אם מופעל, דחה הודעות עד שלפחות אדם נבחר אחד יהיה בבית.",
-          "notify_fire_events": "אם מופעל, הפעל אירועי Home Assistant עבור התחלה וסיום של מחזור (ha_washdata_cycle_started/ended) כדי להניע אוטומציות.",
+          "notify_fire_events": "אם מופעל, הפעל אירועי Home Assistant עבור התחלה וסיום של מחזור (ha_washdata_cycle_started ו-ha_washdata_cycle_ended) כדי להניע אוטומציות.",
           "notify_events": "עבור אילו אירועים לשלוח הודעות.",
           "notify_before_end_minutes": "דקות לפני סיום המחזור המשוער כדי להפעיל הודעה. הגדר ל-0 כדי להשבית. ברירת מחדל: 0.",
-          "notify_title": "כותרת מותאמת אישית עבור התראות. תומך במציין מיקום של {device}.",
+          "notify_title": "כותרת מותאמת אישית עבור התראות. תומך ב-{device} מציין מיקום.",
           "notify_icon": "סמל לשימוש עבור התראות (למשל mdi:washing-machine). השאר ריק כדי להשתמש בברירת המחדל.",
-          "notify_start_message": "הודעה נשלחת כאשר מחזור מתחיל. תומך במציין מיקום של {device}.",
-          "notify_finish_message": "הודעה נשלחה כאשר מחזור מסתיים. תומך במצייני מיקום של {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "הודעה נשלחה לפני ההשלמה. תומך במצייני מיקום של {device}, {minutes}."
+          "notify_start_message": "הודעה נשלחת כאשר מחזור מתחיל. תומך ב-{device} מציין מיקום.",
+          "notify_finish_message": "הודעה נשלחת כאשר מחזור מסתיים. תומך במצייני מיקום של {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "הודעה נשלחה לפני ההשלמה. תומך ב-{device}, {minutes} מצייני מיקום."
+        }
+      },
+      "notifications": {
+        "title": "התראות",
+        "description": "הגדר ערוצי התראות, תבניות ועדכוני התקדמות אופציונליים לנייד.",
+        "data": {
+          "notify_service": "שירות התראות (למשל notify.mobile_app)",
+          "notify_actions": "פעולות הודעה",
+          "notify_people": "דחו את המשלוח עד שהאנשים האלה יהיו בבית",
+          "notify_only_when_home": "עיכוב הודעות עד שהאדם הנבחר יהיה בבית",
+          "notify_fire_events": "אירועי אוטומציה אש",
+          "notify_events": "אירועים להודיע",
+          "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
+          "notify_live_enabled": "אפשר הודעות התקדמות בזמן אמת",
+          "notify_live_interval_seconds": "מרווח עדכון חי (שניות)",
+          "notify_live_overrun_percent": "קצבת חריגת עדכונים בזמן אמת (%)",
+          "notify_title": "כותרת ההודעה",
+          "notify_icon": "סמל הודעה",
+          "notify_start_message": "התחל פורמט הודעה",
+          "notify_finish_message": "סיים את פורמט ההודעה",
+          "notify_pre_complete_message": "פורמט הודעת טרום השלמה"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant מודיע לשירות לשימוש (אופציונלי).",
+          "notify_actions": "רצף פעולה אופציונלי של Home Assistant להפעלת התראות (סקריפטים, התראה, TTS וכו'). אם הוגדר, הפעולות פועלות לפני שירות התראה חוזר.",
+          "notify_people": "ישויות של אנשים המשמשות עבור שער נוכחות. כאשר מופעל, מסירת ההתראה מתעכבת עד שלפחות אדם נבחר אחד יהיה בבית.",
+          "notify_only_when_home": "אם מופעל, דחה הודעות עד שלפחות אדם נבחר אחד יהיה בבית.",
+          "notify_fire_events": "אם מופעל, הפעל אירועי Home Assistant עבור התחלה וסיום של מחזור (ha_washdata_cycle_started ו-ha_washdata_cycle_ended) כדי להניע אוטומציות.",
+          "notify_events": "עבור אילו אירועים לשלוח הודעות.",
+          "notify_before_end_minutes": "דקות לפני סיום המחזור המשוער כדי להפעיל הודעה. הגדר ל-0 כדי להשבית. ברירת מחדל: 0.",
+          "notify_live_enabled": "אפשר עדכוני התקדמות חיים במקום עבור התראות על אפליקציות לנייד.",
+          "notify_live_interval_seconds": "באיזו תדירות נשלחים עדכוני התקדמות בזמן הריצה. ערכים נמוכים יותר מגיבים יותר אך צורכים יותר התראות.",
+          "notify_live_overrun_percent": "מרווח בטיחות מעל ספירת העדכונים המשוערת עבור מחזורים ארוכים/חורגים (לדוגמה 20% מאפשרים עדכונים משוערים פי 1.2).",
+          "notify_title": "כותרת מותאמת אישית עבור התראות. תומך ב-{device} מציין מיקום.",
+          "notify_icon": "סמל לשימוש עבור התראות (למשל mdi:washing-machine). השאר ריק כדי להשתמש בברירת המחדל.",
+          "notify_start_message": "הודעה נשלחת כאשר מחזור מתחיל. תומך ב-{device} מציין מיקום.",
+          "notify_finish_message": "הודעה נשלחת כאשר מחזור מסתיים. תומך במצייני מיקום של {device}, {duration}, {program}.",
+          "notify_pre_complete_message": "הודעה נשלחה לפני ההשלמה. תומך ב-{device}, {minutes} מצייני מיקום."
         }
       },
       "advanced_settings": {
@@ -149,7 +187,7 @@
           "external_end_trigger_inverted": "היפוך היגיון טריגר (טריגר מופעל כבוי)"
         },
         "data_description": {
-          "apply_suggestions": "סמן תיבה זו כדי להעתיק ערכים שהוצעו על ידי אלגוריתם הלמידה לטופס. בדוק לפני השמירה.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "סמן תיבה זו כדי להעתיק ערכים שהוצעו על ידי אלגוריתם הלמידה לטופס. בדוק לפני השמירה.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- מרווח_משמר: {suggested_watchdog_interval} שניות\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- יחס_מינימום_דרכי_התאמת_פרופיל: {suggested_profile_match_min_duration_ratio}\n- ratio_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "הכוח חייב לעלות מעל הסף הזה כדי להתחיל מחזור. הגדר גבוה יותר מעוצמת המתנה שלך. ברירת מחדל: min_power + 1 W.",
           "stop_threshold_w": "הכוח חייב לרדת מתחת לסף הזה כדי לסיים מחזור. הגדר מעט מעל אפס כדי למנוע רעש המעורר קצוות כוזבים. ברירת מחדל: 0.6 * min_power.",
           "min_off_gap": "אם מחזור מתחיל בתוך שניות רבות כל כך מהסיום הקודם, הם ימוזגו למחזור בודד.",
@@ -197,7 +235,7 @@
       },
       "diagnostics": {
         "title": "אבחון ותחזוקה",
-        "description": "הפעל פעולות תחזוקה כמו מיזוג מחזורים מפוצלים או העברת נתונים מאוחסנים.\n\n{storage_stats}"
+        "description": "הפעל פעולות תחזוקה כמו מיזוג מחזורים מפוצלים או העברת נתונים מאוחסנים.\n\n**שימוש באחסון**\n\n- גודל קובץ: {file_size_kb} KB\n- מחזורים: {cycle_count}\n- פרופילים: {profile_count}\n- עקבות ניפוי באגים: {debug_count}"
       },
       "clear_debug_data": {
         "title": "נקה נתוני ניפוי באגים",
@@ -210,11 +248,109 @@
           "action": "פְּעוּלָה"
         }
       },
+      "manage_cycles_empty": {
+        "title": "נהל מחזורים",
+        "description": "עדיין לא נרשמו מחזורים.",
+        "data": {
+          "action": "פְּעוּלָה"
+        }
+      },
       "manage_profiles": {
         "title": "נהל פרופילים",
         "description": "סיכום פרופיל:\n{profile_summary}",
         "data": {
           "action": "פְּעוּלָה"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "נהל פרופילים",
+        "description": "עדיין לא נוצרו פרופילים.",
+        "data": {
+          "action": "פְּעוּלָה"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "נהל את קטלוג השלבים",
+        "description": "קטלוג שלבים (ברירות מחדל עבור מכשיר זה + שלבים מותאמים אישית):\n{phase_summary}",
+        "data": {
+          "action": "פְּעוּלָה"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "צור שלב מותאם אישית",
+        "description": "צור שם ותיאור שלב מותאמים אישית ובחר לאיזה סוג מכשיר הוא חל עליו.",
+        "data": {
+          "target_device_type": "סוג מכשיר יעד",
+          "phase_name": "שם השלב",
+          "phase_description": "תיאור השלב"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "ערוך שלב מותאם אישית",
+        "description": "בחר שלב מותאם אישית לעריכה.",
+        "data": {
+          "phase_name": "שלב מותאם אישית"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "ערוך שלב מותאם אישית",
+        "description": "שלב העריכה: {phase_name}",
+        "data": {
+          "phase_name": "שם השלב",
+          "phase_description": "תיאור השלב"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "מחק שלב מותאם אישית",
+        "description": "בחר שלב מותאם אישית למחיקה. כל הטווחים שהוקצו באמצעות שלב זה יוסרו.",
+        "data": {
+          "phase_name": "שלב מותאם אישית"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "הקצה טווחי שלבים",
+        "description": "תצוגה מקדימה של שלב לפרופיל: **{profile_name}**\n\n{timeline_svg}\n\n**טווחים נוכחיים:**\n{current_ranges}\n\nהשתמש בפעולות למטה כדי להוסיף, לערוך, למחוק או לשמור טווחים.",
+        "data": {
+          "action": "פְּעוּלָה"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "הוסף טווח שלבים",
+        "description": "הוסף טווח שלבים אחד לטיוטה הנוכחית.",
+        "data": {
+          "phase_name": "שָׁלָב",
+          "start_min": "דקת התחלה",
+          "end_min": "דקת סיום"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "ערוך טווח שלבים",
+        "description": "בחר טווח לעריכה.",
+        "data": {
+          "range_index": "טווח שלבים"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "ערוך טווח שלבים",
+        "description": "עדכן את טווח השלבים שנבחר.",
+        "data": {
+          "phase_name": "שָׁלָב",
+          "start_min": "דקת התחלה",
+          "end_min": "דקת סיום"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "מחק טווח שלבים",
+        "description": "בחר טווח להסרה מהטיוטה.",
+        "data": {
+          "range_index": "טווח שלבים"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "הקצה טווחי שלבים",
+        "description": "בחר פרופיל להגדרת טווחי פאזות.",
+        "data": {
+          "profile": "פּרוֹפִיל"
         }
       },
       "profile_stats": {
@@ -309,7 +445,7 @@
       },
       "cleanup_select": {
         "title": "נקה היסטוריה - גרף ומחק",
-        "description": "![גרף]({graph_url})\n\n**מציג את {profile_name}**\n\nהגרף מציג מחזורים בודדים כקווים צבעוניים. זהה חריגים (קווים רחוקים מהקבוצה) והתאמת צבעם ברשימה למטה כדי למחוק אותם.\n\n**בחר מחזורים למחיקה לצמיתות:**",
+        "description": "![גרף]({graph_url})\n\n**הצגת {profile_name}**\n\nהגרף מציג מחזורים בודדים כקווים צבעוניים. זהה חריגים (קווים רחוקים מהקבוצה) והתאמת צבעם ברשימה למטה כדי למחוק אותם.\n\n**בחר מחזורים למחיקה לצמיתות:**",
         "data": {
           "cycles_to_delete": "מחזורים למחיקה (בדוק צבעים תואמים)"
         }
@@ -367,8 +503,8 @@
         "title": "ייצוא/ייבוא ​​JSON",
         "description": "העתק/הדבק מחזורים, פרופילים והגדרות עבור מכשיר זה. ייצא למטה או הדבק JSON כדי לייבא.",
         "data": {
-          "json_payload": "השלם תצורה JSON",
-          "mode": "פְּעוּלָה"
+          "mode": "פְּעוּלָה",
+          "json_payload": "השלם תצורה JSON"
         },
         "data_description": {
           "mode": "בחר ייצוא כדי להעתיק נתונים והגדרות נוכחיות, או ייבא כדי להדביק נתונים מיוצאים מהתקן WashData אחר.",
@@ -405,143 +541,19 @@
       },
       "resolve_feedback": {
         "title": "פתרון משוב",
-        "description": "**תוכנית שזוהתה**: {profile}\n**ביטחון**: {confidence}%\n**מוערך**: {est} מ', ** בפועל**: {act} מ'",
+        "description": "{comparison_img}{candidates_table}\n**פרופיל שזוהה**: {detected_profile} ({confidence_pct}%)\n**משך משוער**: {est_duration_min} דקות\n**משך בפועל**: {act_duration_min} דקות\n\n__בחר פעולה למטה:__",
         "data": {
+          "action": "מה היית רוצה לעשות?",
           "corrected_profile": "תוכנית נכונה (אם מתקן)",
-          "corrected_duration": "משך נכון בדקות (אם מתקן)",
-          "action": "מה היית רוצה לעשות?"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "נהל את קטלוג השלבים",
-        "description": "שלבים נוכחיים עבור סוג מכשיר זה:\n{phase_summary}",
-        "data": {
-          "action": "פְּעוּלָה"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "צור שלב מותאם אישית",
-        "description": "צור שם שלב ותיאור מותאם אישית עבור סוג מכשיר זה.",
-        "data": {
-          "phase_name": "שם השלב",
-          "phase_description": "תיאור השלב",
-          "target_device_type": "סוג מכשיר יעד"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "ערוך שלב מותאם אישית",
-        "description": "בחר שלב מותאם אישית לעריכה.",
-        "data": {
-          "phase_name": "שלב מותאם אישית"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "ערוך שלב מותאם אישית",
-        "description": "שלב העריכה: {phase_name}",
-        "data": {
-          "phase_name": "שם השלב",
-          "phase_description": "תיאור השלב"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "מחק שלב מותאם אישית",
-        "description": "בחר שלב מותאם אישית למחיקה. כל הטווחים שהוקצו באמצעות שלב זה יוסרו.",
-        "data": {
-          "phase_name": "שלב מותאם אישית"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "הקצה טווחי שלבים",
-        "description": "פרופיל: **{profile_name}**\nמצב: **{assign_mode}**\nרמז למחזור: {cycle_hint}\n\nטווחים נוכחיים:\n{current_ranges}\n\nתוויות השלב מיועדות לתצוגה ולארגון. איתור משתמש בדפוסי הספק, לא בשמות פאזה.",
-        "data": {
-          "action": "פְּעוּלָה"
-        }
-      },
-      "assign_profile_phases_select": {
-        "title": "הקצה טווחי שלבים",
-        "description": "בחר פרופיל להגדרת טווחי פאזות.",
-        "data": {
-          "profile": "פּרוֹפִיל"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "הוסף טווח שלבים",
-        "description": "הוסף טווח שלבים אחד לטיוטה הנוכחית.",
-        "data": {
-          "phase_name": "שָׁלָב",
-          "start_min": "דקת התחלה",
-          "end_min": "דקת סיום"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "ערוך טווח שלבים",
-        "description": "בחר טווח לעריכה.",
-        "data": {
-          "range_index": "טווח שלבים"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "ערוך טווח שלבים",
-        "description": "עדכן את טווח השלבים שנבחר.",
-        "data": {
-          "phase_name": "שָׁלָב",
-          "start_min": "דקת התחלה",
-          "end_min": "דקת סיום"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "מחק טווח שלבים",
-        "description": "בחר טווח להסרה מהטיוטה.",
-        "data": {
-          "range_index": "טווח שלבים"
-        }
-      },
-      "notifications": {
-        "title": "התראות",
-        "description": "הגדר ערוצי התראות, תבניות ועדכוני התקדמות אופציונליים לנייד.",
-        "data": {
-          "notify_service": "שירות התראות (למשל notify.mobile_app)",
-          "notify_actions": "פעולות הודעה",
-          "notify_people": "אנשים להודיע",
-          "notify_only_when_home": "הודע רק כאשר אתה בבית",
-          "notify_fire_events": "אירועי אוטומציה אש",
-          "notify_events": "אירועים להודיע",
-          "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
-          "notify_live_enabled": "אפשר הודעות התקדמות בזמן אמת",
-          "notify_live_interval_seconds": "מרווח עדכון חי (שניות)",
-          "notify_live_overrun_percent": "קצבת חריגת עדכונים בזמן אמת (%)",
-          "notify_title": "כותרת ההודעה",
-          "notify_icon": "סמל הודעה",
-          "notify_start_message": "התחל פורמט הודעה",
-          "notify_finish_message": "סיים את פורמט ההודעה",
-          "notify_pre_complete_message": "פורמט הודעת טרום השלמה"
-        },
-        "data_description": {
-          "notify_service": "Home Assistant מודיע לשירות לשימוש (אופציונלי).",
-          "notify_actions": "רצף פעולה אופציונלי של Home Assistant להפעלת התראות (סקריפטים, התראה, TTS וכו'). אם הוגדר, הפעולות פועלות לפני שירות התראה חוזר.",
-          "notify_people": "ישויות אנשים לשימוש עבור שער בית/חוץ. כאשר מופעלת, ההתראות נדחות עד שמישהו יהיה בבית.",
-          "notify_only_when_home": "אם מופעל, דחה הודעות עד שלפחות אדם נבחר אחד יהיה בבית.",
-          "notify_fire_events": "אם מופעל, הפעל אירועי Home Assistant עבור התחלה וסיום של מחזור (ha_washdata_cycle_started/ended) כדי להניע אוטומציות.",
-          "notify_events": "עבור אילו אירועים לשלוח הודעות.",
-          "notify_before_end_minutes": "דקות לפני סיום המחזור המשוער כדי להפעיל הודעה. הגדר ל-0 כדי להשבית. ברירת מחדל: 0.",
-          "notify_live_enabled": "אפשר עדכוני התקדמות חיים במקום עבור התראות על אפליקציות לנייד.",
-          "notify_live_interval_seconds": "באיזו תדירות נשלחים עדכוני התקדמות בזמן הריצה. ערכים נמוכים יותר מגיבים יותר אך צורכים יותר התראות.",
-          "notify_live_overrun_percent": "מרווח בטיחות מעל ספירת העדכונים המשוערת עבור מחזורים ארוכים/חורגים (לדוגמה 20% מאפשרים עדכונים משוערים פי 1.2).",
-          "notify_title": "כותרת מותאמת אישית עבור התראות. תומך במציין מיקום של {device}.",
-          "notify_icon": "סמל לשימוש עבור התראות (למשל mdi:washing-machine). השאר ריק כדי להשתמש בברירת המחדל.",
-          "notify_start_message": "הודעה נשלחת כאשר מחזור מתחיל. תומך במציין מיקום של {device}.",
-          "notify_finish_message": "הודעה נשלחת כאשר מחזור מסתיים. תומך במצייני מיקום של {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "הודעה נשלחה לפני ההשלמה. תומך במצייני מיקום של {device}, {minutes}."
+          "corrected_duration": "משך נכון בדקות (אם מתקן)"
         }
       }
     },
     "error": {
-      "import_failed": "הייבוא ​​נכשל. אנא הדבק JSON ייצוא WashData חוקי.",
+      "import_failed": "הייבוא ​​נכשל. אנא הדבק JSON ייצוא חוקי של WashData.",
       "profile_exists": "פרופיל בשם זה כבר קיים",
       "rename_failed": "שינוי שם הפרופיל נכשל. ייתכן שהפרופיל אינו קיים או ששם חדש כבר נלקח.",
       "assignment_failed": "הקצאת הפרופיל למחזור נכשלה",
-      "feedback_notification_title": "WashData: Verify Cycle ({device})",
-      "feedback_notification_message": "**מכשיר**: {device}\n**תוכנית**: {program} ({confidence}% ביטחון)\n**זמן**: {time}\n\nWashData זקוק לעזרתכם כדי לאמת את המחזור שזוהה.\n\nאנא עבור אל **הגדרות > מכשירים ושירותים > WashData > קבע תצורה > משוב למידה** כדי לאשר או לתקן תוצאה זו.",
       "duplicate_phase": "שלב בשם זה כבר קיים.",
       "phase_not_found": "השלב שנבחר לא נמצא.",
       "invalid_phase_name": "שם השלב לא יכול להיות ריק.",
@@ -549,9 +561,11 @@
       "invalid_phase_range": "טווח השלבים אינו חוקי. סוף חייב להיות גדול מההתחלה.",
       "invalid_phase_timestamp": "חותמת הזמן אינה חוקית. השתמש בפורמט YYYY-MM-DD HH:MM או HH:MM.",
       "overlapping_phase_ranges": "טווחי השלבים חופפים. התאם את הטווחים ונסה שוב.",
-      "incomplete_phase_row": "כל שורת שלב חייבת לכלול שלב בתוספת ערכי התחלה/סיום מלאים עבור המצב הנבחר.",
+      "incomplete_phase_row": "כל שורת שלב חייבת לכלול שלב בתוספת ערכי התחלה/סיום מלאים עבור המצב שנבחר.",
       "timestamp_mode_cycle_required": "אנא בחר מחזור מקור בעת שימוש במצב חותמת זמן.",
-      "no_phase_ranges": "אין עדיין טווחי שלבים זמינים עבור הפעולה הזו."
+      "no_phase_ranges": "אין עדיין טווחי שלבים זמינים עבור הפעולה הזו.",
+      "feedback_notification_title": "WashData: מחזור אימות ({device})",
+      "feedback_notification_message": "**מכשיר**: {device}\n**תוכנית**: {program} ({confidence}% ביטחון)\n**זמן**: {time}\n\nWashData זקוק לעזרתכם כדי לאמת את המחזור שזוהה.\n\nאנא עבור אל **הגדרות > מכשירים ושירותים > WashData > קבע תצורה > משוב למידה** כדי לאשר או לתקן תוצאה זו."
     },
     "abort": {
       "no_cycles_found": "לא נמצאו מחזורים",
@@ -560,15 +574,342 @@
       "no_unlabeled_cycles": "כל המחזורים כבר מסומנים",
       "no_suggestions": "אין עדיין ערכים מוצעים זמינים. הפעל כמה מחזורים ונסה שוב.",
       "no_predictions": "אין תחזיות",
+      "no_custom_phases": "לא נמצאו שלבים מותאמים אישית.",
       "reprocess_success": "{count} מחזורים עיבדו מחדש בהצלחה.",
-      "debug_data_cleared": "ניקה בהצלחה נתוני ניפוי באגים מ-{count} מחזורים.",
-      "no_custom_phases": "לא נמצאו שלבים מותאמים אישית עבור סוג מכשיר זה."
+      "debug_data_cleared": "ניקה בהצלחה נתוני ניפוי באגים מ-{count} מחזורים."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "התחלת מחזור",
+        "cycle_finish": "סיום מחזור",
+        "cycle_live": "התקדמות חיה"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(ללא תווית)",
+        "create_new_profile": "צור פרופיל חדש",
+        "remove_label": "הסר תווית",
+        "no_reference_cycle": "(ללא מחזור התייחסות)",
+        "all_device_types": "כל סוגי המכשירים",
+        "current_suffix": "(נוֹכְחִי)",
+        "editor_select_info": "בחר מחזור אחד לפיצול, או 2+ מחזורים למיזוג.",
+        "no_cycles_recorded": "עדיין לא נרשמו מחזורים.",
+        "profile_summary_line": "- **{name}**: {count} מחזורים, {avg}מ' ממוצע",
+        "no_profiles_created": "עדיין לא נוצרו פרופילים.",
+        "phase_preview": "תצוגה מקדימה של שלב",
+        "phase_preview_no_curve": "עקומת פרופיל ממוצעת אינה זמינה עדיין. הפעל/תווית מחזורים נוספים עבור פרופיל זה.",
+        "average_power_curve": "עקומת כוח ממוצעת",
+        "unit_min": "דקה",
+        "profile_option_fmt": "{name} ({count} מחזורים, ~{duration}מ' ממוצע)",
+        "profile_option_short_fmt": "{name} ({count} מחזורים, ~{duration} מ')",
+        "deleted_cycles_from_profile": "נמחקו {count} מחזורים מ-{profile}.",
+        "not_enough_data_graph": "אין מספיק נתונים כדי ליצור גרף.",
+        "no_profiles_found": "לא נמצאו פרופילים.",
+        "cycle_info_fmt": "מחזור: {start}, {duration} מ', נוכחי: {label}",
+        "top_candidates_header": "### מועמדים מובילים",
+        "tbl_profile": "פּרוֹפִיל",
+        "tbl_confidence": "אֵמוּן",
+        "tbl_correlation": "מִתאָם",
+        "tbl_duration_match": "התאמת משך",
+        "detected_profile": "זוהה פרופיל",
+        "estimated_duration": "משך זמן משוער",
+        "actual_duration": "משך בפועל",
+        "choose_action": "__בחר פעולה למטה:__",
+        "tbl_count": "לִסְפּוֹר",
+        "tbl_avg": "ממוצע",
+        "tbl_min": "מינימום",
+        "tbl_max": "מקסימום",
+        "tbl_energy_avg": "אנרגיה (ממוצע)",
+        "tbl_energy_total": "אנרגיה (סה\"כ)",
+        "tbl_consistency": "לְהַכִיל.",
+        "tbl_last_run": "ריצה אחרונה",
+        "graph_legend_title": "מקרא גרף",
+        "graph_legend_body": "הפס הכחול מייצג את טווח צריכת החשמל המינימלי והמקסימלי שנצפה. הקו מציג את עקומת הכוח הממוצעת.",
+        "recording_preview": "תצוגה מקדימה של הקלטה",
+        "trim_start": "Trim Start",
+        "trim_end": "קצץ סוף",
+        "split_preview_title": "פיצול תצוגה מקדימה",
+        "split_preview_found_fmt": "נמצאו {count} פלחים.",
+        "split_preview_confirm_fmt": "לחץ על אשר כדי לפצל מחזור זה ל-{count} מחזורים נפרדים.",
+        "merge_preview_title": "מיזוג תצוגה מקדימה",
+        "merge_preview_joining_fmt": "מצטרף ל-{count} מחזורים. הפערים יתמלאו בקריאות של 0W.",
+        "profile_comparison": "השוואת פרופילים",
+        "actual_cycle_label": "מחזור זה (בפועל)",
+        "storage_usage_header": "שימוש באחסון",
+        "storage_file_size": "גודל קובץ",
+        "storage_cycles": "מחזורים",
+        "storage_profiles": "פרופילים",
+        "storage_debug_traces": "איתור באגים",
+        "overview_suffix": "סקירה כללית",
+        "phase_preview_for_profile": "תצוגה מקדימה של שלב לפרופיל",
+        "current_ranges_header": "טווחים נוכחיים",
+        "assign_phases_help": "השתמש בפעולות למטה כדי להוסיף, לערוך, למחוק או לשמור טווחים.",
+        "profile_summary_header": "סיכום פרופיל",
+        "recent_cycles_header": "מחזורים אחרונים"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "פיצול מחזור (מצא פערים)",
+        "merge": "מיזוג מחזורים (הצטרפות לשברים)",
+        "delete": "מחק מחזורים"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "תחזוקה: עיבוד ואופטימיזציה של נתונים",
+        "clear_debug_data": "נקה נתוני ניפוי באגים (פנה מקום)",
+        "wipe_history": "מחק את כל הנתונים עבור המכשיר הזה (בלתי הפיך)",
+        "export_import": "ייצוא/ייבוא ​​JSON עם הגדרות (העתק/הדבק)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "ייצוא כל הנתונים",
+        "import": "ייבוא/מיזוג נתונים"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "תיוג אוטומטי של מחזורים ישנים",
+        "select_cycle_to_label": "מחזור ספציפי של תווית",
+        "select_cycle_to_label_multi": "תווית מחזורים מרובים",
+        "select_cycle_to_delete": "מחק מחזור",
+        "interactive_editor": "מיזוג/פיצול עורך אינטראקטיבי"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "צור פרופיל חדש",
+        "edit_profile": "ערוך/שנה שם פרופיל",
+        "delete_profile": "מחק פרופיל",
+        "profile_stats": "סטטיסטיקת פרופיל",
+        "cleanup_profile": "נקה היסטוריה - גרף ומחק",
+        "assign_phases": "הקצה טווחי שלבים"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "צור שלב חדש",
+        "edit_custom_phase": "ערוך שלב",
+        "delete_custom_phase": "מחק את השלב"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "הוסף טווח שלבים",
+        "edit_range": "ערוך טווח שלבים",
+        "delete_range": "מחק טווח שלבים",
+        "clear_ranges": "נקה את כל הטווחים",
+        "save_ranges": "שמור והחזר"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "סטטוס רענון",
+        "stop_recording": "הפסקת הקלטה (שמירה ועיבוד)",
+        "start_recording": "התחל הקלטה חדשה",
+        "process_recording": "עיבוד הקלטה אחרונה (חתוך ושמירה)",
+        "discard_recording": "בטל את ההקלטה האחרונה"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "צור פרופיל חדש",
+        "existing_profile": "הוסף לפרופיל קיים",
+        "discard": "בטל את ההקלטה"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "אשר - זיהוי נכון",
+        "correct": "נכון - בחר תוכנית/משך",
+        "ignore": "התעלם - מחזור חיובי/רועש כוזב",
+        "delete": "מחק - הסר מההיסטוריה"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "מחזור התוויות",
+      "description": "הקצה פרופיל קיים למחזור עבר, או הסר את התווית.",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר מכונת הכביסה לתיוג."
+        },
+        "cycle_id": {
+          "name": "מזהה מחזור",
+          "description": "המזהה של המחזור לתיוג."
+        },
+        "profile_name": {
+          "name": "שם פרופיל",
+          "description": "שם פרופיל קיים (צור פרופילים בתפריט ניהול פרופילים). השאר ריק כדי להסיר את התווית."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "צור פרופיל",
+      "description": "צור פרופיל חדש (עצמאי או מבוסס על מחזור התייחסות).",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר מכונת הכביסה."
+        },
+        "profile_name": {
+          "name": "שם פרופיל",
+          "description": "שם עבור הפרופיל החדש (למשל 'Heavy Duty', 'Delicates')."
+        },
+        "reference_cycle_id": {
+          "name": "מזהה מחזור עזר",
+          "description": "מזהה מחזור אופציונלי לבסס פרופיל זה."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "מחק פרופיל",
+      "description": "מחק פרופיל ובאופן אופציונלי בטל תווית של מחזורים באמצעותו.",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר מכונת הכביסה."
+        },
+        "profile_name": {
+          "name": "שם פרופיל",
+          "description": "הפרופיל שיש למחוק."
+        },
+        "unlabel_cycles": {
+          "name": "ביטול תווית מחזורים",
+          "description": "הסר את תווית הפרופיל ממחזורים באמצעות פרופיל זה."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "תיוג אוטומטי של מחזורים ישנים",
+      "description": "סמן רטרואקטיבית מחזורים ללא תווית באמצעות התאמת פרופיל.",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר מכונת הכביסה."
+        },
+        "confidence_threshold": {
+          "name": "סף ביטחון",
+          "description": "בטחון התאמה מינימלי (0.50-0.95) להחלת תוויות."
+        }
+      }
+    },
+    "export_config": {
+      "name": "ייצוא תצורה",
+      "description": "ייצא את הפרופילים, המחזורים וההגדרות של המכשיר הזה לקובץ JSON (לכל מכשיר).",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר מכונת הכביסה לייצוא."
+        },
+        "path": {
+          "name": "נָתִיב",
+          "description": "נתיב קובץ אבסולוטי אופציונלי לכתיבה (ברירת המחדל היא /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "ייבוא ​​תצורה",
+      "description": "ייבא פרופילים, מחזורים והגדרות עבור מכשיר זה מקובץ ייצוא JSON (ייתכן שההגדרות יידרסו).",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר מכונת הכביסה לייבא אליו."
+        },
+        "path": {
+          "name": "נָתִיב",
+          "description": "נתיב מוחלט לקובץ ה-JSON הייצוא לייבוא."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "שלח משוב מחזור",
+      "description": "אשר או תקן תוכנית שזוהתה אוטומטית לאחר מחזור שהושלם. ספק `entry_id` (מתקדם) או `device_id` (מומלץ).",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "התקן WashData (מומלץ במקום entry_id)."
+        },
+        "entry_id": {
+          "name": "מזהה כניסה",
+          "description": "מזהה ערך התצורה של המכשיר (חלופה ל-device_id)."
+        },
+        "cycle_id": {
+          "name": "מזהה מחזור",
+          "description": "מזהה המחזור המוצג בהודעת המשוב/יומנים."
+        },
+        "user_confirmed": {
+          "name": "אשר את התוכנית שזוהתה",
+          "description": "הגדר אמת אם התוכנית שזוהתה נכונה."
+        },
+        "corrected_profile": {
+          "name": "פרופיל מתוקן",
+          "description": "אם לא אושר, ספק את שם הפרופיל/התוכנית הנכון."
+        },
+        "corrected_duration": {
+          "name": "משך זמן מתוקן (שניות)",
+          "description": "משך זמן מתוקן אופציונלי בשניות."
+        },
+        "notes": {
+          "name": "הערות",
+          "description": "הערות אופציונליות לגבי מחזור זה."
+        }
+      }
+    },
+    "record_start": {
+      "name": "התחלת מחזור שיא",
+      "description": "התחל להקליט ידני של מחזור נקי (עוקף את כל ההיגיון התואם).",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר מכונת הכביסה להקליט."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "עצירת מחזור שיא",
+      "description": "הפסק את ההקלטה הידנית.",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר מכונת הכביסה להפסקת ההקלטה."
+        }
+      }
     }
   },
   "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "רִיצָה"
+      },
+      "match_ambiguity": {
+        "name": "התאמה עמימות"
+      }
+    },
     "sensor": {
       "washer_state": {
-        "name": "מְדִינָה"
+        "name": "מְדִינָה",
+        "state": {
+          "off": "כבוי",
+          "idle": "לְהִתְבַּטֵל",
+          "starting": "מתחיל",
+          "running": "רִיצָה",
+          "paused": "מושהה",
+          "ending": "סִיוּם",
+          "finished": "גָמוּר",
+          "anti_wrinkle": "נגד קמטים",
+          "interrupted": "מוּפרָע",
+          "force_stopped": "כוח נעצר",
+          "rinse": "לִשְׁטוֹף",
+          "unknown": "לֹא יְדוּעַ"
+        }
       },
       "washer_program": {
         "name": "תָכְנִית"
@@ -595,16 +936,23 @@
         "name": "Match Confidence"
       },
       "top_candidates": {
-        "name": "מועמדים מובילים"
+        "name": "מועמדים מובילים",
+        "state": {
+          "none": "אַף לֹא אֶחָד"
+        }
+      },
+      "current_phase": {
+        "name": "השלב הנוכחי"
       },
       "wash_phase": {
         "name": "שָׁלָב"
       },
+      "profile_cycle_count": {
+        "name": "ספירת פרופיל {profile_name}",
+        "unit_of_measurement": "מחזורים"
+      },
       "suggestions": {
         "name": "הגדרות מוצעות"
-      },
-      "current_phase": {
-        "name": "השלב הנוכחי"
       }
     },
     "select": {
@@ -613,6 +961,11 @@
         "state": {
           "auto_detect": "זיהוי אוטומטי"
         }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "כוח סיום מחזור"
       }
     }
   }

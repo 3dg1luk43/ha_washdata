@@ -193,6 +193,7 @@ class CycleDetector:
         # Anti-wrinkle tracking (dryers only)
         self._anti_wrinkle_candidate_start: datetime | None = None
         self._anti_wrinkle_candidate_peak: float = 0.0
+        self._anti_wrinkle_candidate_start_power: float = 0.0
         self._anti_wrinkle_idle_time: float = 0.0  # Track time spent below exit_power while in ANTI_WRINKLE
         self._anti_wrinkle_idle_timeout: float = 120.0
 
@@ -346,6 +347,7 @@ class CycleDetector:
         self._ignore_power_until_idle = False  # Reset lockout
         self._anti_wrinkle_candidate_start = None
         self._anti_wrinkle_candidate_peak = 0.0
+        self._anti_wrinkle_candidate_start_power = 0.0
         # Reset idle time tracker for anti-wrinkle
         self._anti_wrinkle_idle_time = 0.0
 
@@ -465,6 +467,7 @@ class CycleDetector:
                 if self._anti_wrinkle_candidate_start is None:
                     self._anti_wrinkle_candidate_start = timestamp
                     self._anti_wrinkle_candidate_peak = power
+                    self._anti_wrinkle_candidate_start_power = power
                 else:
                     self._anti_wrinkle_candidate_peak = max(
                         self._anti_wrinkle_candidate_peak, power
@@ -483,15 +486,17 @@ class CycleDetector:
                 if exceeds:
                     candidate_start = self._anti_wrinkle_candidate_start
                     candidate_peak = self._anti_wrinkle_candidate_peak
+                    candidate_start_power = self._anti_wrinkle_candidate_start_power
                     self._anti_wrinkle_candidate_start = None
                     self._anti_wrinkle_candidate_peak = 0.0
+                    self._anti_wrinkle_candidate_start_power = 0.0
                     self._transition_to(STATE_STARTING, timestamp)
                     started_from_anti_wrinkle = True
                     self._current_cycle_start = candidate_start or timestamp
 
                     # Preserve the anti-wrinkle candidate window instead of dropping ramp-up samples.
                     if candidate_start and candidate_start < timestamp:
-                        start_power = candidate_peak if candidate_peak > 0 else power
+                        start_power = candidate_start_power if candidate_start_power > 0 else power
                         self._power_readings = [(candidate_start, start_power), (timestamp, power)]
                         interval_s = (timestamp - candidate_start).total_seconds()
                         avg_power = (start_power + power) / 2.0
@@ -505,6 +510,7 @@ class CycleDetector:
             elif self._state != STATE_ANTI_WRINKLE:
                 self._anti_wrinkle_candidate_start = None
                 self._anti_wrinkle_candidate_peak = 0.0
+                self._anti_wrinkle_candidate_start_power = 0.0
 
             if self._state == STATE_ANTI_WRINKLE:
                 # Track time in idle (below exit_power threshold)
@@ -512,6 +518,7 @@ class CycleDetector:
                     # Low-power gap invalidates any burst candidate collected while in anti-wrinkle.
                     self._anti_wrinkle_candidate_start = None
                     self._anti_wrinkle_candidate_peak = 0.0
+                    self._anti_wrinkle_candidate_start_power = 0.0
                     self._anti_wrinkle_idle_time += dt
                     anti_wrinkle_end_threshold = max(
                         self._dynamic_end_threshold,
@@ -812,6 +819,7 @@ class CycleDetector:
         elif new_state == STATE_ANTI_WRINKLE:
             self._anti_wrinkle_candidate_start = None
             self._anti_wrinkle_candidate_peak = 0.0
+            self._anti_wrinkle_candidate_start_power = 0.0
             self._anti_wrinkle_idle_time = 0.0  # Reset idle time when entering ANTI_WRINKLE
             self._sub_state = "Anti-Wrinkle"
         elif new_state == STATE_STARTING:
@@ -968,6 +976,7 @@ class CycleDetector:
             target = STATE_FORCE_STOPPED
         elif (
             status == "completed"
+            and termination_reason != "user"
             and self._config.anti_wrinkle_enabled
             and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
         ):
