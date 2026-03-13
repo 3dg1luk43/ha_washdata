@@ -97,6 +97,26 @@ class LearningManager:
         self._sample_interval_model = StatisticalModel(max_samples=200)
         self._last_suggestion_update: datetime | None = None
 
+    def _apply_suggestions_and_notify(self, suggestions: dict[str, Any]) -> None:
+        """Apply suggestions and notify once when they become actionable."""
+        if not suggestions:
+            return
+
+        current = self.profile_store.get_suggestions()
+        before_count = len(current) if isinstance(current, dict) else 0
+
+        self.suggestion_engine.apply_suggestions(suggestions)
+
+        updated = self.profile_store.get_suggestions()
+        after_count = len(updated) if isinstance(updated, dict) else 0
+
+        if before_count == 0 and after_count > 0:
+            entry = self.hass.config_entries.async_get_entry(self.entry_id)
+            device_title = entry.title if entry else DOMAIN
+            self.hass.async_create_task(
+                self._async_send_suggestions_ready_notification(device_title, after_count)
+            )
+
     def process_power_reading(
         self, _power: float, now: datetime, last_reading_time: datetime | None
     ) -> None:
@@ -153,7 +173,7 @@ class LearningManager:
                 self.suggestion_engine.run_simulation, cycle_data
             )
             if new_suggestions:
-                self.suggestion_engine.apply_suggestions(new_suggestions)
+                self._apply_suggestions_and_notify(new_suggestions)
                 _LOGGER.debug("Post-cycle simulation completed with suggestions: %s", new_suggestions.keys())
         except Exception as e:
             _LOGGER.error("Background simulation failed: %s", e)
@@ -170,13 +190,56 @@ class LearningManager:
             return
 
         suggestions = self.suggestion_engine.generate_operational_suggestions(p95, median)
-        self.suggestion_engine.apply_suggestions(suggestions)
+        self._apply_suggestions_and_notify(suggestions)
         self._last_suggestion_update = now
 
     def _update_model_suggestions(self, now: datetime) -> None:
         """Generate suggestions for model parameters (tolerances, ratios)."""
         suggestions = self.suggestion_engine.generate_model_suggestions()
-        self.suggestion_engine.apply_suggestions(suggestions)
+        self._apply_suggestions_and_notify(suggestions)
+
+    async def _async_send_suggestions_ready_notification(
+        self, device_title: str, suggestions_count: int
+    ) -> None:
+        """Send a one-time persistent notification when suggestions become available."""
+        try:
+            notification_id = f"ha_washdata_suggestions_ready_{self.entry_id}"
+
+            translations = await translation.async_get_translations(
+                self.hass, self.hass.config.language, "options", {DOMAIN}
+            )
+
+            default_title = "WashData: Suggested Settings Ready ({device})"
+            default_msg = (
+                "The **Suggested Settings** sensor now reports **{count}** actionable recommendations.\n\n"
+                "To review and apply them: **Settings > Devices & Services > WashData > Configure > "
+                "Advanced Settings > Apply Suggested Values**.\n\n"
+                "Suggestions are optional and shown for review before you save."
+            )
+
+            title_template = translations.get(
+                f"component.{DOMAIN}.options.error.suggestions_ready_notification_title",
+                default_title,
+            )
+            msg_template = translations.get(
+                f"component.{DOMAIN}.options.error.suggestions_ready_notification_message",
+                default_msg,
+            )
+
+            title = title_template.format(device=device_title)
+            message = msg_template.format(count=suggestions_count)
+
+            await self.hass.services.async_call(
+                "persistent_notification",
+                "create",
+                {
+                    "message": message,
+                    "title": title,
+                    "notification_id": notification_id,
+                },
+            )
+        except Exception:  # pylint: disable=broad-exception-caught
+            _LOGGER.exception("Failed to create suggestions-ready notification")
 
     def _set_suggestion(self, key: str, value: Any, reason: str) -> None:
         """Persist a suggested setting."""

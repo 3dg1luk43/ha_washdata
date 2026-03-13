@@ -56,9 +56,16 @@
           "confirm": "Confirm copy action"
         }
       },
+      "apply_suggestions_confirm": {
+        "title": "Review Suggested Changes",
+        "description": "WashData found {pending_count} suggested values to apply.\n\nChanges to review:\n{changes}\n\nConfirm below to stage these values in the form. They are not saved until you submit Advanced Settings.",
+        "data": {
+          "confirm_apply_suggestions": "Stage suggested values in Advanced Settings"
+        }
+      },
       "settings": {
         "title": "Settings",
-        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.",
+        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.\n\nSuggested Settings currently available: {suggestions_count}.\nIf this is above 0, open Advanced Settings and use Apply Suggested Values to review recommendations.",
         "data": {
           "apply_suggestions": "Apply Suggested Values",
           "device_type": "Device Type",
@@ -137,7 +144,7 @@
       },
       "advanced_settings": {
         "title": "Advanced Settings",
-        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.",
+        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.\n\nSuggested Settings currently available: {suggestions_count}. Use Apply Suggested Values to review changes before you save.",
         "data": {
           "apply_suggestions": "Apply Suggested Values",
           "start_threshold_w": "Start Threshold (W)",
@@ -185,7 +192,7 @@
           "external_end_trigger_inverted": "Invert Trigger Logic (Trigger on OFF)"
         },
         "data_description": {
-          "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Check this box to open a review step for suggested values from the learning algorithm. Nothing is saved automatically.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "start_threshold_w": "Power must rise ABOVE this threshold to START a cycle. Set higher than your standby power. Default: min_power + 1 W.",
           "stop_threshold_w": "Power must fall BELOW this threshold to END a cycle. Set just above zero to avoid noise triggering false ends. Default: 0.6 * min_power.",
           "min_off_gap": "If a cycle starts within this many seconds of the previous one ending, they will be MERGED into a single cycle.",
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Please select a source cycle when using timestamp mode.",
       "no_phase_ranges": "No phase ranges are available for that action yet.",
       "feedback_notification_title": "WashData: Verify Cycle ({device})",
-      "feedback_notification_message": "**Device**: {device}\n**Program**: {program} ({confidence}% confidence)\n**Time**: {time}\n\nWashData needs your help to verify this detected cycle.\n\nPlease go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result."
+      "feedback_notification_message": "**Device**: {device}\n**Program**: {program} ({confidence}% confidence)\n**Time**: {time}\n\nWashData needs your help to verify this detected cycle.\n\nPlease go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result.",
+      "suggestions_ready_notification_title": "WashData: Suggested Settings Ready ({device})",
+      "suggestions_ready_notification_message": "The **Suggested Settings** sensor now reports **{count}** actionable recommendations.\n\nTo review and apply them: **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSuggestions are optional and shown for review before you save."
     },
     "abort": {
       "no_cycles_found": "No cycles found",
@@ -950,7 +959,7 @@
         "unit_of_measurement": "cycles"
       },
       "suggestions": {
-        "name": "Suggested Settings"
+        "name": "Suggested Settings Available"
       }
     },
     "select": {

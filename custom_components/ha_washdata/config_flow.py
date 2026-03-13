@@ -250,7 +250,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._selected_cycle_id: str | None = None
         self._selected_profile: str | None = None
         self._suggested_values: dict[str, Any] | None = None
-        self._suggested_values: dict[str, Any] | None = None
+        self._pending_suggestion_diffs_md: str = ""
+        self._pending_suggestion_count: int = 0
         self._basic_options: dict[str, Any] = {}
         self._editor_action: str | None = None
         self._editor_selected_ids: list[str] = []
@@ -298,6 +299,46 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             f"component.{DOMAIN}.selector.common_text.options.{text_key}",
             default,
         )
+
+    @staticmethod
+    def _suggestion_keys_to_apply() -> list[str]:
+        """Return settings keys that can be populated from suggestions."""
+        return [
+            CONF_MIN_POWER,
+            CONF_OFF_DELAY,
+            CONF_WATCHDOG_INTERVAL,
+            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+            CONF_SAMPLING_INTERVAL,
+            CONF_PROFILE_MATCH_INTERVAL,
+            CONF_AUTO_LABEL_CONFIDENCE,
+            CONF_DURATION_TOLERANCE,
+            CONF_PROFILE_DURATION_TOLERANCE,
+            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+            CONF_MIN_OFF_GAP,
+        ]
+
+    @staticmethod
+    def _format_preview_value(value: Any) -> str:
+        """Format values for change preview output."""
+        if value is None:
+            return "-"
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        if isinstance(value, int):
+            return str(value)
+        if isinstance(value, float):
+            return str(int(value)) if value.is_integer() else f"{value:.2f}"
+        return str(value)
+
+    def _count_applicable_suggestions(self, suggestions: dict[str, Any]) -> int:
+        """Count suggestions that are actually applicable in this options flow."""
+        count = 0
+        for key in self._suggestion_keys_to_apply():
+            entry = suggestions.get(key)
+            if isinstance(entry, dict) and entry.get("value") is not None:
+                count += 1
+        return count
 
     async def _options_text(self, text_key: str, default: str) -> str:
         """Resolve shared localized text by key from selector namespace."""
@@ -359,6 +400,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             }
             return self.async_create_entry(title="", data=merged_options)
 
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        suggestions = manager.suggestions if manager else {}
+        suggestions_count = (
+            self._count_applicable_suggestions(suggestions)
+            if isinstance(suggestions, dict)
+            else 0
+        )
+
         current_sensor = self.config_entry.options.get(
             CONF_POWER_SENSOR, self.config_entry.data.get(CONF_POWER_SENSOR, "")
         )
@@ -416,10 +465,42 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(schema),
             description_placeholders={
                 "error": "",
+                "suggestions_count": str(suggestions_count),
                 "device": "{device}",
                 "duration": "{duration}",
                 "program": "{program}",
                 "minutes": "{minutes}",
+            },
+        )
+
+    async def async_step_apply_suggestions_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Review and confirm suggested values before applying them."""
+        if not self._suggested_values:
+            return self.async_abort(reason="no_suggestions")
+
+        if user_input is not None:
+            if user_input.get("confirm_apply_suggestions"):
+                return await self.async_step_advanced_settings(user_input=None)
+
+            # User declined, clear staged values and return to advanced form.
+            self._suggested_values = None
+            self._pending_suggestion_diffs_md = ""
+            self._pending_suggestion_count = 0
+            return await self.async_step_advanced_settings(user_input=None)
+
+        changes_md = self._pending_suggestion_diffs_md or "- No value changes detected."
+        return self.async_show_form(
+            step_id="apply_suggestions_confirm",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("confirm_apply_suggestions", default=False): bool,
+                }
+            ),
+            description_placeholders={
+                "pending_count": str(self._pending_suggestion_count),
+                "changes": changes_md,
             },
         )
 
@@ -573,29 +654,23 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         suggestions = manager.suggestions if manager else {}
 
+        def get_existing_value(key: str, default: Any) -> Any:
+            if key in self._basic_options:
+                return self._basic_options[key]
+            return self.config_entry.options.get(
+                key, self.config_entry.data.get(key, default)
+            )
+
         if user_input is not None:
             # If "Apply Suggestions" checkbox was checked, merge suggested values into the input
             if user_input.get(CONF_APPLY_SUGGESTIONS):
-                keys_to_apply = [
-                    CONF_MIN_POWER,
-                    CONF_OFF_DELAY,
-                    CONF_WATCHDOG_INTERVAL,
-                    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-                    CONF_SAMPLING_INTERVAL,
-                    CONF_PROFILE_MATCH_INTERVAL,
-                    CONF_AUTO_LABEL_CONFIDENCE,
-                    CONF_DURATION_TOLERANCE,
-                    CONF_PROFILE_DURATION_TOLERANCE,
-                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
-                    CONF_MIN_OFF_GAP,
-                ]
+                keys_to_apply = self._suggestion_keys_to_apply()
 
                 updated_input = {**user_input}
-
                 updated_input[CONF_APPLY_SUGGESTIONS] = False
 
                 applied_count = 0
+                diff_lines: list[str] = []
                 for key in keys_to_apply:
                     entry = (
                         suggestions.get(key) if isinstance(suggestions, dict) else None
@@ -609,17 +684,37 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             CONF_WATCHDOG_INTERVAL,
                             CONF_NO_UPDATE_ACTIVE_TIMEOUT,
                             CONF_PROFILE_MATCH_INTERVAL,
-
                             CONF_MIN_OFF_GAP,
                         ):
-                            updated_input[key] = int(float(val))
+                            suggested_val: Any = int(float(val))
                         else:
-                            updated_input[key] = float(val)
+                            suggested_val = float(val)
+
+                        current_val = user_input.get(
+                            key,
+                            get_existing_value(key, suggested_val),
+                        )
+                        if current_val != suggested_val:
+                            diff_lines.append(
+                                (
+                                    f"- `{key}`: "
+                                    f"`{self._format_preview_value(current_val)}` -> "
+                                    f"`{self._format_preview_value(suggested_val)}`"
+                                )
+                            )
+
+                        updated_input[key] = suggested_val
                         applied_count += 1
 
                 if applied_count > 0:
                     self._suggested_values = updated_input
-                    return await self.async_step_advanced_settings(user_input=None)
+                    self._pending_suggestion_count = applied_count
+                    self._pending_suggestion_diffs_md = (
+                        "\n".join(diff_lines) if diff_lines else "- No value changes detected."
+                    )
+                    return await self.async_step_apply_suggestions_confirm()
+
+                return self.async_abort(reason="no_suggestions")
 
             # Ensure clearing CONF_EXTERNAL_END_TRIGGER translates to None/Empty
             # Handle missing key, empty list [], empty string "", or None
@@ -990,6 +1085,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=data_schema,
             description_placeholders={
                 "error": "",
+                "suggestions_count": str(
+                    self._count_applicable_suggestions(suggestions)
+                    if isinstance(suggestions, dict)
+                    else 0
+                ),
                 "suggested": suggested_reason or "No suggestions available yet.",
                 "suggested_min_power": _fmt_suggested(CONF_MIN_POWER),
                 "suggested_off_delay": _fmt_suggested(CONF_OFF_DELAY),

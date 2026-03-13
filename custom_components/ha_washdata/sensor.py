@@ -18,8 +18,20 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    CONF_AUTO_LABEL_CONFIDENCE,
+    CONF_DURATION_TOLERANCE,
     DOMAIN,
+    CONF_MIN_OFF_GAP,
+    CONF_MIN_POWER,
+    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+    CONF_OFF_DELAY,
+    CONF_PROFILE_DURATION_TOLERANCE,
+    CONF_PROFILE_MATCH_INTERVAL,
+    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_SAMPLING_INTERVAL,
     SIGNAL_WASHER_UPDATE,
+    CONF_WATCHDOG_INTERVAL,
     CONF_EXPOSE_DEBUG_ENTITIES,
     STATE_OFF,
     STATE_IDLE,
@@ -726,13 +738,48 @@ class WasherSuggestionsSensor(WasherBaseSensor):
         )
         super().__init__(manager, entry)
 
+    @staticmethod
+    def _applicable_suggestion_keys() -> tuple[str, ...]:
+        """Return suggestion keys that can be applied in options flow."""
+        return (
+            CONF_MIN_POWER,
+            CONF_OFF_DELAY,
+            CONF_WATCHDOG_INTERVAL,
+            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+            CONF_SAMPLING_INTERVAL,
+            CONF_PROFILE_MATCH_INTERVAL,
+            CONF_AUTO_LABEL_CONFIDENCE,
+            CONF_DURATION_TOLERANCE,
+            CONF_PROFILE_DURATION_TOLERANCE,
+            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+            CONF_MIN_OFF_GAP,
+        )
+
+    def _count_applicable_suggestions(self, suggestions: dict[str, Any]) -> int:
+        """Count only suggestions with values that can be applied from options flow."""
+        count = 0
+        for key in self._applicable_suggestion_keys():
+            entry = suggestions.get(key)
+            if isinstance(entry, dict) and entry.get("value") is not None:
+                count += 1
+        return count
+
     @property
     def native_value(self):  # type: ignore[override]
         suggestions = self._manager.suggestions
         if not suggestions:
             return 0
-        return len(suggestions)
+        return self._count_applicable_suggestions(suggestions)
 
     @property
     def extra_state_attributes(self):  # type: ignore[override]
-        return {"suggestions": self._manager.suggestions}
+        suggestions: dict[str, Any] = self._manager.suggestions or {}
+
+        attrs: dict[str, Any] = {
+            "has_actionable_suggestions": bool(suggestions),
+            "suggestions_count": self._count_applicable_suggestions(suggestions),
+            "suggested_option_keys": sorted(suggestions.keys()),
+            "suggestions": suggestions,
+        }
+        return attrs
