@@ -490,7 +490,6 @@ class LearningManager:
                 self._apply_correction_learning(
                     cycle_id, corrected_profile, duration_sec
                 )
-                self._auto_label_cycle(cycle_id, corrected_profile, duration_sec)
                 profiles_to_rebuild.add(corrected_profile)
                 if (
                     isinstance(detected_profile, str)

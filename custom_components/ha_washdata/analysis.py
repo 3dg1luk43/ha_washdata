@@ -479,7 +479,7 @@ def verify_profile_alignment_worker(
     envelope_avg_curve: list[float],
     envelope_time_grid: list[float],
     dtw_bandwidth: float
-) -> tuple[float, float, float] | None:
+) -> tuple[float, float, float]:
     """
     Verify alignment of current trace against profile envelope.
     Returns: (mapped_envelope_time, mapped_envelope_power, overlap_score)

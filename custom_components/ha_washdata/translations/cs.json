@@ -69,7 +69,7 @@
           "notify_actions": "Akce oznámení",
           "notify_people": "Odložte doručení, dokud nebudou tito lidé doma",
           "notify_only_when_home": "Zpoždění oznámení, dokud nebude vybraná osoba doma",
-          "notify_fire_events": "Události požární automatizace",
+          "notify_fire_events": "Události spuštění automatizací",
           "notify_events": "Události k oznámení",
           "notify_before_end_minutes": "Upozornění před dokončením (minuty před koncem)",
           "notify_title": "Název oznámení",
@@ -107,7 +107,7 @@
           "notify_actions": "Akce oznámení",
           "notify_people": "Odložte doručení, dokud nebudou tito lidé doma",
           "notify_only_when_home": "Zpoždění oznámení, dokud nebude vybraná osoba doma",
-          "notify_fire_events": "Události požární automatizace",
+          "notify_fire_events": "Události spuštění automatizací",
           "notify_events": "Události k oznámení",
           "notify_before_end_minutes": "Upozornění před dokončením (minuty před koncem)",
           "notify_live_enabled": "Povolte živá oznámení o průběhu",
@@ -145,7 +145,7 @@
           "start_threshold_w": "Počáteční práh (W)",
           "stop_threshold_w": "Práh zastavení (W)",
           "min_off_gap": "Minimální mezera mezi cykly (s)",
-          "start_duration_threshold": "Doba trvání opuštění začátku (s)",
+          "start_duration_threshold": "Minimální délka spuštění (s)",
           "progress_reset_delay": "Prodleva resetování průběhu (sekundy)",
           "no_update_active_timeout": "Časový limit bez aktualizací (s)",
           "sampling_interval": "Vzorkovací interval (s)",
@@ -157,7 +157,7 @@
           "profile_match_max_duration_ratio": "Poměr maximálního trvání shody profilu (1,0–3,0)",
           "smoothing_window": "Vyhlazovací okno (ukázky)",
           "profile_match_threshold": "Práh shody profilu",
-          "profile_unmatch_threshold": "Profil Unmatch Threshold",
+          "profile_unmatch_threshold": "Prahová hodnota neshody profilu",
           "profile_duration_tolerance": "Tolerance trvání shody profilu (0–0,5)",
           "interrupted_min_seconds": "Přerušeno: Minimální doba běhu (sekundy)",
           "abrupt_drop_watts": "Přerušeno: Absolutní náhlý pokles (W)",
@@ -165,7 +165,7 @@
           "abrupt_high_load_factor": "Přerušeno: Faktor vysokého zatížení",
           "max_past_cycles": "Uchování: Maximální počet uložených cyklů",
           "max_full_traces_per_profile": "Uchování: Maximální počet úplných stop na profil",
-          "max_full_traces_unlabeled": "Retence: Max Full Traces Unlabeled",
+          "max_full_traces_unlabeled": "Retence: Max. počet neoznačených úplných stop",
           "watchdog_interval": "Interval hlídacího psa (v sekundách)",
           "completion_min_seconds": "Minimální doba běhu dokončení (v sekundách)",
           "notify_before_end_minutes": "Upozornění před dokončením (minuty před koncem)",
@@ -413,11 +413,11 @@
         "title": "Smazat cyklus",
         "description": "⚠️ Tímto trvale smažete vybraný cyklus",
         "data": {
-          "cycle_id": "Cyklicky smazat"
+          "cycle_id": "ID cyklu"
         }
       },
       "label_cycle": {
-        "title": "Cyklus štítků",
+        "title": "Označit cyklus",
         "description": "{cycle_info}",
         "data": {
           "profile_name": "Profil",

@@ -216,9 +216,7 @@ def migrate_power_data_to_offsets(cycle: dict[str, Any]) -> bool:
                 "migrate_power_data_to_offsets: missing start_time, skipping"
             )
             return False
-        try:
-            datetime.fromisoformat(start_time_iso)
-        except (ValueError, TypeError):
+        if dt_util.parse_datetime(start_time_iso) is None:
             _LOGGER.warning(
                 "migrate_power_data_to_offsets: unparsable start_time '%s', skipping",
                 start_time_iso,

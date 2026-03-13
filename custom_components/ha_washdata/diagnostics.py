@@ -54,7 +54,17 @@ async def async_get_config_entry_diagnostics(
     }
 
     _SENSITIVE_KEYS = {
-        # config-entry data / options fields that contain personal identifiers
+        # Common ConfigEntry metadata and flow/user identifiers.
+        "auth",
+        "entry_id",
+        "flow_id",
+        "flow_title",
+        "handler",
+        "source",
+        "title",
+        "unique_id",
+        "user_id",
+        # config-entry data / options fields that can include personal identifiers
         "notify_service",
         "notify_people",
         "notify_actions",

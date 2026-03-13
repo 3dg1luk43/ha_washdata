@@ -1,6 +1,7 @@
 """Recorder for raw cycle data in WashData."""
 from __future__ import annotations
 
+import copy
 import logging
 from datetime import datetime
 from typing import Any, cast
@@ -88,6 +89,11 @@ class CycleRecorder:
             start_iso = data.get("start_time")
             if isinstance(start_iso, str) and start_iso:
                 self._start_time = dt_util.parse_datetime(start_iso)
+            if self._is_recording and self._start_time is None:
+                _LOGGER.warning(
+                    "Recorder state had is_recording=True with invalid start_time; restoring as not recording"
+                )
+                self._is_recording = False
             buffer_raw = data.get("buffer", [])
             sanitized: list[tuple[str, float]] = []
             if isinstance(buffer_raw, list):
@@ -102,7 +108,11 @@ class CycleRecorder:
                     sanitized.append((key, float(ts)))
             self._buffer = sanitized
             last_run_raw = data.get("last_run")
-            self._last_run = cast(dict[str, Any], last_run_raw) if isinstance(last_run_raw, dict) else None  # Restore last run
+            self._last_run = (
+                copy.deepcopy(cast(dict[str, Any], last_run_raw))
+                if isinstance(last_run_raw, dict)
+                else None
+            )
             _LOGGER.info(
                 "Loaded recorder state: recording=%s, samples=%d, has_last_run=%s",
                 self._is_recording,
@@ -122,11 +132,11 @@ class CycleRecorder:
         result: dict[str, Any] = {
             "start_time": self._start_time.isoformat() if self._start_time else None,
             "end_time": dt_util.now().isoformat(),
-            "data": list(self._buffer),  # Copy
+            "data": copy.deepcopy(self._buffer),
         }
 
         # Save as last run (persisted)
-        self._last_run = result
+        self._last_run = copy.deepcopy(result)
 
         # Clear active state
         self._start_time = None
@@ -138,7 +148,7 @@ class CycleRecorder:
     @property
     def last_run(self) -> dict[str, Any] | None:
         """Return the last recorded cycle data."""
-        return self._last_run
+        return copy.deepcopy(self._last_run)
 
     async def clear_last_run(self) -> None:
         """Clear the last recorded run."""
