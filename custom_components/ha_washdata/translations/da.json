@@ -64,7 +64,7 @@
           "device_type": "Enhedstype",
           "power_sensor": "Strømsensorenhed",
           "min_power": "Minimum effekt (W)",
-          "off_delay": "Cyklusslutforsinkelse(r)",
+          "off_delay": "Cyklusslutforsinkelse (s)",
           "notify_service": "Underretningstjeneste (f.eks. notify.mobile_app)",
           "notify_actions": "Underretningshandlinger",
           "notify_people": "Udsæt levering, indtil disse mennesker er hjemme",
@@ -145,10 +145,10 @@
           "start_threshold_w": "Startgrænse (W)",
           "stop_threshold_w": "Stoptærskel (W)",
           "min_off_gap": "Minimumsgab mellem cyklusser (s)",
-          "start_duration_threshold": "Start afvisningsvarighed (r)",
+          "start_duration_threshold": "Start afvisningsvarighed (s)",
           "progress_reset_delay": "Forsinkelse af nulstilling af status (sekunder)",
           "no_update_active_timeout": "Timeout uden opdatering(er)",
-          "sampling_interval": "Sampling interval (r)",
+          "sampling_interval": "Sampling interval (s)",
           "auto_label_confidence": "Auto-label-sikkerhed (0-1)",
           "learning_confidence": "Feedbackanmodning om tillid (0-1)",
           "duration_tolerance": "Varighedstolerance (0-0,5)",
@@ -179,7 +179,7 @@
           "save_debug_traces": "Gem fejlretningsspor",
           "anti_wrinkle_enabled": "Anti-rynkeskjold (kun tørretumbler)",
           "anti_wrinkle_max_power": "Anti-rynke maksimal effekt (W)",
-          "anti_wrinkle_max_duration": "Anti-rynke maks. varighed (r)",
+          "anti_wrinkle_max_duration": "Anti-rynke maks. varighed (s)",
           "anti_wrinkle_exit_power": "Anti-Rynke Exit Power (W)",
           "dtw_bandwidth": "DTW-båndbredde",
           "external_end_trigger_enabled": "Aktiver ekstern cyklusslutudløser",
@@ -403,7 +403,7 @@
         }
       },
       "select_cycle_to_label": {
-        "title": "Vælg Skift til etiket",
+        "title": "Vælg cyklus til etiket",
         "description": "✓ = afsluttet, ⚠ = genoptaget, ✗ = afbrudt",
         "data": {
           "cycle_id": "Cyklus"
@@ -413,7 +413,7 @@
         "title": "Slet cyklus",
         "description": "⚠️ Dette vil permanent slette den valgte cyklus",
         "data": {
-          "cycle_id": "Skift for at slette"
+          "cycle_id": "Cyklus at slette"
         }
       },
       "label_cycle": {
@@ -458,7 +458,7 @@
         }
       },
       "editor_select": {
-        "title": "Vælg Cycles",
+        "title": "Vælg cyklusser",
         "description": "Vælg den eller de cyklusser, der skal behandles.\n\n{info_text}",
         "data": {
           "selected_cycles": "Cykler"
@@ -488,7 +488,7 @@
         "title": "Split konfiguration",
         "description": "Juster følsomheden for at opdele denne cyklus. Ethvert tomgangsmellemrum, der er længere end dette, vil forårsage en opdeling.",
         "data": {
-          "min_gap_seconds": "Split Gap Threshold (sekunder)"
+          "min_gap_seconds": "Minimumsopdelgab (sekunder)"
         }
       },
       "reprocess_history": {

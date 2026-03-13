@@ -523,7 +523,7 @@ def verify_profile_alignment_worker(
 
     # Ensure sequences are non-empty before indexing
     if not envelope_time_grid or len(ref) == 0:
-        return None
+        return 0.0, 9999.0, 0.0
     mapped_idx = min(mapped_idx, len(envelope_time_grid) - 1, len(ref) - 1)
 
     mapped_time = float(envelope_time_grid[mapped_idx])

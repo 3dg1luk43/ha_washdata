@@ -134,6 +134,12 @@ def power_data_to_offsets(
                             len(power_data),
                         )
                     offset = round(t_val - first_ts, 1)
+                if offset < 0:
+                    _LOGGER.debug(
+                        "power_data_to_offsets: clamping negative offset %.1f to 0 "
+                        "(power=%.1f, index=%d)",
+                        offset, p, len(result),
+                    )
                 result.append([max(0.0, offset), p])
             except (TypeError, ValueError, AttributeError, IndexError):
                 continue
