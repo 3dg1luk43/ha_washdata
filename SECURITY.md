@@ -69,6 +69,7 @@ We aim to:
 This integration monitors **high-power appliances** via smart plugs. **Electrical hazards are real:**
 
 - **Fire Risk**: Cheap smart plugs rated for <10A may overheat under sustained loads >2500W
+- **Fire Risk**: Cheap smart plugs rated for <10A may overheat under sustained high loads (W = A × V; e.g., 10 A ≈ 1200 W at 120 V or ≈ 2300–2500 W at 230–250 V) — check your region's voltage
 - **Recommendations**:
   - Use plugs rated for **peak power** of your appliance
   - For washing machines/dryers: **16A+** plugs or hardwired modules

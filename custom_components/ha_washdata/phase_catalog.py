@@ -333,14 +333,15 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
         if device_type in DEFAULT_PHASES_BY_DEVICE
         else get_shared_default_phase_catalog()
     )
-    seen_names: set[str] = set()
+    seen_names: set[tuple[str, str]] = set()
     for item in merged:
         try:
             normalized_name = normalize_phase_name(str(item.get("name", "")))
         except ValueError:
             continue
         if normalized_name:
-            seen_names.add(normalized_name.casefold())
+            scope = str(item.get("source") or item.get("scope") or "").casefold()
+            seen_names.add((scope, normalized_name.casefold()))
 
     custom = custom_phases or []
     for item in custom:
@@ -353,8 +354,25 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
             target_device_type = str(device_type or "").strip().casefold()
             if item_device_type.casefold() != target_device_type:
                 continue
-        key = normalized_name.casefold()
-        if not normalized_name or key in seen_names:
+        scope = str(item.get("source") or item.get("scope") or "").casefold()
+        key = (scope, normalized_name.casefold())
+        if not normalized_name:
+            continue
+        if key in seen_names:
+            # Allow custom entries to update the description of the existing
+            # default phase (description-only override).
+            new_desc = str(item.get("description", "")).strip()
+            if new_desc:
+                for existing in merged:
+                    try:
+                        ex_name = normalize_phase_name(str(existing.get("name", "")))
+                    except ValueError:
+                        continue
+                    ex_scope = str(existing.get("source") or existing.get("scope") or "").casefold()
+                    if (ex_scope, ex_name.casefold()) == key:
+                        existing["description"] = new_desc
+                        existing["is_default"] = False
+                        break
             continue
         seen_names.add(key)
         merged.append(

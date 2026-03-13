@@ -69,7 +69,7 @@
           "notify_actions": "Kennisgewingsaksies",
           "notify_people": "Vertraag aflewering totdat hierdie mense tuis is",
           "notify_only_when_home": "Vertraag kennisgewings totdat gekose persoon tuis is",
-          "notify_fire_events": "Brand Outomatisering Gebeurtenisse",
+          "notify_fire_events": "Aktiveer outomatiseringsgebeure",
           "notify_events": "Gebeurtenisse om in kennis te stel",
           "notify_before_end_minutes": "Voorafhandelingkennisgewing (minute voor einde)",
           "notify_title": "Kennisgewing titel",
@@ -107,7 +107,7 @@
           "notify_actions": "Kennisgewingsaksies",
           "notify_people": "Vertraag aflewering totdat hierdie mense tuis is",
           "notify_only_when_home": "Vertraag kennisgewings totdat gekose persoon tuis is",
-          "notify_fire_events": "Brand Outomatisering Gebeurtenisse",
+          "notify_fire_events": "Aktiveer outomatiseringsgebeure",
           "notify_events": "Gebeurtenisse om in kennis te stel",
           "notify_before_end_minutes": "Voorafhandelingkennisgewing (minute voor einde)",
           "notify_live_enabled": "Aktiveer regstreekse vorderingkennisgewings",
@@ -160,7 +160,7 @@
           "profile_unmatch_threshold": "Profiel Onpas Drempel",
           "profile_duration_tolerance": "Profielwedstrydduurverdraagsaamheid (0-0,5)",
           "interrupted_min_seconds": "Onderbreek: Minimum Looptyd (sekondes)",
-          "abrupt_drop_watts": "Onderbreek: Abrupt Drop Absolute (W)",
+          "abrupt_drop_watts": "Onderbreek: Skielike absolute kragdaling (W)",
           "abrupt_drop_ratio": "Onderbreek: Skielike daalverhouding (0-1)",
           "abrupt_high_load_factor": "Onderbreek: Hoë-lasfaktor",
           "max_past_cycles": "Retensie: Maksimum gestoorde siklusse",
@@ -224,9 +224,9 @@
           "expose_debug_entities": "Wys gevorderde sensors (vertroue, fase, dubbelsinnigheid) vir ontfouting.",
           "save_debug_traces": "Stoor gedetailleerde rangorde en kragspoordata in geskiedenis (Verhoog berginggebruik).",
           "anti_wrinkle_enabled": "Ignoreer kort laekrag-dromrotasies nadat 'n siklus geëindig het om spooksiklusse te voorkom (slegs droër/wasdroër).",
-          "anti_wrinkle_max_power": "Uitbarstings by of onder hierdie krag word behandel as anti-rimpel rotasies in plaas van nuwe siklusse. Slegs van toepassing wanneer Anti-Wrinkle Shield geaktiveer is.",
-          "anti_wrinkle_max_duration": "Maksimum barslengte om te behandel as anti-rimpel rotasie. Slegs van toepassing wanneer Anti-Wrinkle Shield geaktiveer is.",
-          "anti_wrinkle_exit_power": "As krag onder hierdie vlak daal, verlaat die anti-rimpel onmiddellik (waar af). Slegs van toepassing wanneer Anti-Wrinkle Shield geaktiveer is.",
+          "anti_wrinkle_max_power": "Uitbarstings by of onder hierdie krag word behandel as anti-rimpel rotasies in plaas van nuwe siklusse. Slegs van toepassing wanneer Anti-Wrimpel Skild geaktiveer is.",
+          "anti_wrinkle_max_duration": "Maksimum barslengte om te behandel as anti-rimpel rotasie. Slegs van toepassing wanneer Anti-Wrimpel Skild geaktiveer is.",
+          "anti_wrinkle_exit_power": "As krag onder hierdie vlak daal, verlaat die anti-rimpel onmiddellik (waar af). Slegs van toepassing wanneer Anti-Wrimpel Skild geaktiveer is.",
           "dtw_bandwidth": "Maksimum toegelate tydstrekking (strek) as 'n verhouding van siklusduur. Hoër waardes laat bypassende hoogs veranderlike siklusse toe, maar verhoog SVE-koste. Verstek: 0,20 (20%).",
           "external_end_trigger_enabled": "Aktiveer monitering van 'n eksterne binêre sensor om siklusvoltooiing te aktiveer.",
           "external_end_trigger": "Kies 'n binêre sensor-entiteit. Wanneer hierdie sensor aktiveer, sal die huidige siklus eindig met status 'voltooid'.",
@@ -802,7 +802,7 @@
       }
     },
     "export_config": {
-      "name": "Uitvoer Config",
+      "name": "Uitvoer Konfigurasie",
       "description": "Voer hierdie toestel se profiele, siklusse en instellings uit na 'n JSON-lêer (per toestel).",
       "fields": {
         "device_id": {

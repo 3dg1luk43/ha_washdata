@@ -457,13 +457,26 @@ class LearningManager:
         if not pending:
             return False
 
+        # Parse corrected_duration before writing to history so a bad value
+        # never leaves a partially-applied state.
+        duration_sec: float | None = None
+        if corrected_duration is not None:
+            try:
+                duration_sec = float(corrected_duration)
+            except (TypeError, ValueError):
+                _LOGGER.warning(
+                    "Invalid corrected_duration %r for cycle %s, ignoring",
+                    corrected_duration,
+                    cycle_id,
+                )
+
         feedback_record: dict[str, Any] = {
             "cycle_id": cycle_id,
             "original_detected_profile": pending["detected_profile"],
             "original_confidence": pending["confidence"],
             "user_confirmed": user_confirmed,
             "corrected_profile": corrected_profile,
-            "corrected_duration": corrected_duration,
+            "corrected_duration": duration_sec,
             "notes": notes,
             "submitted_at": dt_util.now().isoformat(),
         }
@@ -484,7 +497,6 @@ class LearningManager:
         else:
             if isinstance(corrected_profile, str) and corrected_profile:
                 # corrected_duration is already in seconds from config_flow
-                duration_sec = float(corrected_duration) if corrected_duration else None
                 detected_profile = pending.get("detected_profile")
 
                 self._apply_correction_learning(

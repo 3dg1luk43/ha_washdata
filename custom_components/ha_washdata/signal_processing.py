@@ -236,7 +236,9 @@ def resample_adaptive(
     # Logic: Never resample finer than sensor (median_dt).
     # Also enforce min_dt (don't go finer than 5s).
     # We ignore max_dt for clamping down, to respect "never finer" rule.
+    min_dt = max(min_dt, 1e-3)  # Guard against non-positive step
     target_dt = max(min_dt, median_dt)
+    gap_s = max(gap_s, target_dt * 1.5, 1e-3)  # Guard against non-positive gap
 
     # Delegate to uniform resampler with chosen dt
     segments = resample_uniform(timestamps, power, dt_s=target_dt, gap_s=gap_s)

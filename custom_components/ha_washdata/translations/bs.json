@@ -242,14 +242,14 @@
         "description": "Jeste li sigurni da želite izbrisati sve pohranjene tragove za otklanjanje grešaka? Ovo će osloboditi prostor, ali ukloniti detaljne informacije o rangiranju iz prošlih ciklusa."
       },
       "manage_cycles": {
-        "title": "Manage Cycles",
+        "title": "Upravljanje ciklima",
         "description": "Nedavni ciklusi:\n{recent_cycles}",
         "data": {
           "action": "Akcija"
         }
       },
       "manage_cycles_empty": {
-        "title": "Manage Cycles",
+        "title": "Upravljanje ciklima",
         "description": "Još uvijek nema zabilježenih ciklusa.",
         "data": {
           "action": "Akcija"
@@ -906,7 +906,7 @@
           "finished": "Završeno",
           "anti_wrinkle": "Anti-Wrinkle",
           "interrupted": "Prekinut",
-          "force_stopped": "Force Stoped",
+          "force_stopped": "Force Stopped",
           "rinse": "Isperite",
           "unknown": "Nepoznato"
         }
