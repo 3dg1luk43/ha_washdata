@@ -112,8 +112,11 @@ class SuggestionEngine:
             prof = profiles.get(profile_name)
             if not prof:
                 continue
-            avg = float(prof.get("avg_duration", 0.0) or 0.0)
-            dur = float(c.get("duration", 0.0) or 0.0)
+            try:
+                avg = float(prof.get("avg_duration") or 0.0)
+                dur = float(c.get("duration") or 0.0)
+            except (TypeError, ValueError):
+                continue
             if avg > 60 and dur > 60:
                 ratios.append(dur / avg)
 
@@ -196,7 +199,7 @@ class SuggestionEngine:
         # but we can look for early dips for dead zone.
         dead_zone = 0
         for ts_offset, p in readings:
-            elapsed = ts_offset - readings[0][0]
+            elapsed = ts_offset
             if elapsed > 300:
                 break
             if p < 5.0 and elapsed > 5.0:

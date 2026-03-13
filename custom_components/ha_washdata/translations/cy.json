@@ -6,7 +6,7 @@
         "description": "Ffurfweddwch eich peiriant golchi neu declyn arall.\n\nMae angen synhwyrydd pŵer.\n\n**Nesaf, gofynnir i chi a ydych am greu eich proffil cyntaf.**",
         "data": {
           "name": "Enw Dyfais",
-          "device_type": "Math o Ddychymyg",
+          "device_type": "Math o Ddyfais",
           "power_sensor": "Synhwyrydd Pŵer",
           "min_power": "Trothwy Pŵer Isafswm (W)"
         },
@@ -61,7 +61,7 @@
         "description": "Trothwyon canfod tiwn, dysgu, ac ymddygiad uwch. Mae rhagosodiadau'n gweithio'n dda ar gyfer y rhan fwyaf o setiau.",
         "data": {
           "apply_suggestions": "Cymhwyso Gwerthoedd a Awgrymir",
-          "device_type": "Math o Ddychymyg",
+          "device_type": "Math o Ddyfais",
           "power_sensor": "Endid Synhwyrydd Pŵer",
           "min_power": "Isafswm Pŵer (W)",
           "off_delay": "Oedi (au) Diwedd Beic",
@@ -593,7 +593,7 @@
         "create_new_profile": "Creu Proffil Newydd",
         "remove_label": "Dileu Label",
         "no_reference_cycle": "(Dim cylch cyfeirio)",
-        "all_device_types": "Pob Math o Ddychymyg",
+        "all_device_types": "Pob Math o Ddyfais",
         "current_suffix": "(cyfredol)",
         "editor_select_info": "Dewiswch 1 cylch i rannu, neu 2+ gylchred i uno.",
         "no_cycles_recorded": "Dim cylchoedd wedi'u cofnodi eto.",
@@ -734,7 +734,7 @@
   },
   "services": {
     "label_cycle": {
-      "name": "Label Cycle",
+      "name": "Cylch Label",
       "description": "Neilltuo proffil sy'n bodoli eisoes i gylchred gorffennol, neu ddileu'r label.",
       "fields": {
         "device_id": {
@@ -965,7 +965,7 @@
     },
     "button": {
       "force_end_cycle": {
-        "name": "Cylch Terfyn yr Heddlu"
+        "name": "Gorfodi Diwedd y Cylch"
       }
     }
   }

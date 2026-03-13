@@ -10,6 +10,7 @@ from typing import Any
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.const import EntityCategory
 from homeassistant.helpers import entity_registry
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
@@ -628,8 +629,8 @@ class WasherProfileSensorManager:
                         if sensor.hass:
                             try:
                                 await sensor.async_remove()
-                            except Exception as err:  # pylint: disable=broad-exception-caught
-                                _LOGGER.debug(
+                            except HomeAssistantError as err:
+                                _LOGGER.warning(
                                     "Failed to remove sensor '%s' via fallback path: %s",
                                     name,
                                     err,

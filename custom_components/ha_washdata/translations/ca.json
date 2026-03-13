@@ -69,7 +69,7 @@
           "notify_actions": "Accions de notificació",
           "notify_people": "Endarrerir el lliurament fins que aquestes persones siguin a casa",
           "notify_only_when_home": "Retarda les notificacions fins que la persona seleccionada sigui a casa",
-          "notify_fire_events": "Esdeveniments d'automatització d'incendis",
+          "notify_fire_events": "Activar esdeveniments d'automatització",
           "notify_events": "Esdeveniments a notificar",
           "notify_before_end_minutes": "Notificació prèvia a la finalització (minuts abans del final)",
           "notify_title": "Títol de la notificació",
@@ -107,7 +107,7 @@
           "notify_actions": "Accions de notificació",
           "notify_people": "Endarrerir el lliurament fins que aquestes persones siguin a casa",
           "notify_only_when_home": "Retarda les notificacions fins que la persona seleccionada sigui a casa",
-          "notify_fire_events": "Esdeveniments d'automatització d'incendis",
+          "notify_fire_events": "Activar esdeveniments d'automatització",
           "notify_events": "Esdeveniments a notificar",
           "notify_before_end_minutes": "Notificació prèvia a la finalització (minuts abans del final)",
           "notify_live_enabled": "Activa les notificacions de progrés en directe",
@@ -523,7 +523,7 @@
         "description": "![Gràfic]({graph_url})\n\n**El gràfic mostra l'enregistrament en brut.** Blau = Mantenir, Vermell = Retall proposat.\n*El gràfic és estàtic i no s'actualitza amb els canvis de formulari.*\n\nS'ha aturat la gravació. Els retalls s'alineen amb la freqüència de mostreig detectada (~{sampling_rate}s).\n\nDurada bruta: {duration} s\nMostres: {samples}",
         "data": {
           "head_trim": "Inici de retall (segons)",
-          "tail_trim": "Final de retalla (segons)",
+          "tail_trim": "Final de retall (segons)",
           "save_mode": "Desa la destinació",
           "profile_name": "Nom del perfil"
         }
@@ -595,7 +595,7 @@
         "no_reference_cycle": "(Sense cicle de referència)",
         "all_device_types": "Tots els tipus de dispositius",
         "current_suffix": "(actual)",
-        "editor_select_info": "Seleccioneu 1 cicle per dividir o més de 2 cicles per combinar.",
+        "editor_select_info": "Seleccioneu 1 cicle per dividir o 2 o més cicles per combinar.",
         "no_cycles_recorded": "Encara no s'han registrat cicles.",
         "profile_summary_line": "- **{name}**: {count} cicles, {avg}m de mitjana",
         "no_profiles_created": "Encara no s'ha creat cap perfil.",

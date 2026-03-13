@@ -120,7 +120,7 @@ async def _init_resource(hass: HomeAssistant, url: str, ver: str) -> bool:
         if not isinstance(item_url, str) or not item_url.startswith(url):
             continue
 
-        if item_url.endswith(ver) and item.get("res_type") == "module":
+        if item_url == url2 and item.get("res_type") == "module":
             return True
 
         item_id = item.get("id")

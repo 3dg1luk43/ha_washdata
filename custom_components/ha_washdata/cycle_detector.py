@@ -284,8 +284,16 @@ class CycleDetector:
                     raw_mismatch,
                 ) = result_seq[:5]
                 match_name = str(raw_name) if raw_name is not None else None
-                confidence = float(raw_confidence)
-                expected_duration = float(raw_expected_duration)
+                try:
+                    confidence = float(raw_confidence)
+                except (TypeError, ValueError):
+                    confidence = 0.0
+                    _LOGGER.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
+                try:
+                    expected_duration = float(raw_expected_duration)
+                except (TypeError, ValueError):
+                    expected_duration = 0.0
+                    _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
                 phase_name = str(raw_phase_name) if raw_phase_name is not None else None
                 is_match_mismatch = bool(raw_mismatch)
             else:
@@ -298,8 +306,14 @@ class CycleDetector:
                         raw_phase_name,
                     ) = result_seq[:4]
                     match_name = str(raw_name) if raw_name is not None else None
-                    confidence = float(raw_confidence)
-                    expected_duration = float(raw_expected_duration)
+                    try:
+                        confidence = float(raw_confidence)
+                    except (TypeError, ValueError):
+                        confidence = 0.0
+                    try:
+                        expected_duration = float(raw_expected_duration)
+                    except (TypeError, ValueError):
+                        expected_duration = 0.0
                     phase_name = (
                         str(raw_phase_name) if raw_phase_name is not None else None
                     )
@@ -976,7 +990,7 @@ class CycleDetector:
             target = STATE_FORCE_STOPPED
         elif (
             status == "completed"
-            and termination_reason != "user"
+            and termination_reason in {"timeout", "smart"}
             and self._config.anti_wrinkle_enabled
             and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
         ):
@@ -1105,12 +1119,15 @@ class CycleDetector:
                     reading = cast(list[Any] | tuple[Any, ...], r)
                     if len(reading) < 2:
                         continue
-                    t = dt_util.parse_datetime(str(reading[0]))
-                    if t:
-                        if t.tzinfo is None:
-                            t = t.replace(tzinfo=dt_util.now().tzinfo)
-                            has_naive_readings = True
-                        self._power_readings.append((t, float(reading[1])))
+                    try:
+                        t = dt_util.parse_datetime(str(reading[0]))
+                        if t:
+                            if t.tzinfo is None:
+                                t = t.replace(tzinfo=dt_util.now().tzinfo)
+                                has_naive_readings = True
+                            self._power_readings.append((t, float(reading[1])))
+                    except (TypeError, ValueError) as exc:
+                        _LOGGER.debug("Skipping malformed power reading %s: %s", r, exc)
 
             if has_naive_readings:
                 _LOGGER.warning(

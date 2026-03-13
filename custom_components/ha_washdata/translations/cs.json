@@ -164,7 +164,7 @@
           "abrupt_drop_ratio": "Přerušeno: Poměr náhlého poklesu (0-1)",
           "abrupt_high_load_factor": "Přerušeno: Faktor vysokého zatížení",
           "max_past_cycles": "Uchování: Maximální počet uložených cyklů",
-          "max_full_traces_per_profile": "Uchování: Maximální počet úplných stop na profil",
+          "max_full_traces_per_profile": "Retence: Maximální počet úplných stop na profil",
           "max_full_traces_unlabeled": "Retence: Max. počet neoznačených úplných stop",
           "watchdog_interval": "Interval hlídacího psa (v sekundách)",
           "completion_min_seconds": "Minimální doba běhu dokončení (v sekundách)",
