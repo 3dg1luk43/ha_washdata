@@ -543,7 +543,7 @@
         "data": {
           "action": "Ką norėtum veikti?",
           "corrected_profile": "Teisinga programa (jei taisoma)",
-          "corrected_duration": "Teisinga trukmė minutėmis (jei taisoma)"
+          "corrected_duration": "Teisinga trukmė sekundėmis (jei taisoma)"
         }
       },
       "apply_suggestions_confirm": {

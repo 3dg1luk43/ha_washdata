@@ -543,7 +543,7 @@
         "data": {
           "action": "mit szeretnél csinálni?",
           "corrected_profile": "Helyes program (ha javít)",
-          "corrected_duration": "Helyes időtartam percekben (javítás esetén)"
+          "corrected_duration": "Helyes időtartam másodpercekben (javítás esetén)"
         }
       },
       "apply_suggestions_confirm": {

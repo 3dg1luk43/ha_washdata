@@ -543,7 +543,7 @@
         "data": {
           "action": "čo by ste chceli robiť?",
           "corrected_profile": "Správny program (ak opravujete)",
-          "corrected_duration": "Správne trvanie v minútach (ak opravujete)"
+          "corrected_duration": "Správne trvanie v sekundách (ak opravujete)"
         }
       },
       "apply_suggestions_confirm": {

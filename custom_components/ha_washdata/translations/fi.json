@@ -543,7 +543,7 @@
         "data": {
           "action": "Mitä haluaisit tehdä?",
           "corrected_profile": "Oikea ohjelma (jos korjataan)",
-          "corrected_duration": "Oikea kesto minuutteina (jos korjataan)"
+          "corrected_duration": "Oikea kesto sekunteina (jos korjataan)"
         }
       },
       "apply_suggestions_confirm": {

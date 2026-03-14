@@ -543,7 +543,7 @@
         "data": {
           "action": "Wat wolle jo dwaan?",
           "corrected_profile": "Korrekte programma (as korrigearje)",
-          "corrected_duration": "Korrekte doer yn minuten (as korreksje)"
+          "corrected_duration": "Korrekte doer yn sekonden (as korreksje)"
         }
       },
       "apply_suggestions_confirm": {

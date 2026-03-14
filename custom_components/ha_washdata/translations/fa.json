@@ -543,7 +543,7 @@
         "data": {
           "action": "دوست دارید چه کار کنید؟",
           "corrected_profile": "برنامه صحیح (در صورت تصحیح)",
-          "corrected_duration": "مدت زمان صحیح بر حسب دقیقه (در صورت تصحیح)"
+          "corrected_duration": "مدت زمان صحیح بر حسب ثانیه (در صورت تصحیح)"
         }
       },
       "apply_suggestions_confirm": {

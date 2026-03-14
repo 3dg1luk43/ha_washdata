@@ -543,7 +543,7 @@
         "data": {
           "action": "Ko jūs vēlētos darīt?",
           "corrected_profile": "Pareiza programma (ja tiek labota)",
-          "corrected_duration": "Pareizais ilgums minūtēs (ja tiek labots)"
+          "corrected_duration": "Pareizais ilgums sekundēs (ja tiek labots)"
         }
       },
       "apply_suggestions_confirm": {

@@ -543,7 +543,7 @@
         "data": {
           "action": "Ne yapmak istersin?",
           "corrected_profile": "Doğru Program (düzeltiliyorsa)",
-          "corrected_duration": "Dakika cinsinden Doğru Süre (düzeltiliyorsa)"
+          "corrected_duration": "Saniye cinsinden Doğru Süre (düzeltiliyorsa)"
         }
       },
       "apply_suggestions_confirm": {

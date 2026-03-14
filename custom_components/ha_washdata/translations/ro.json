@@ -543,7 +543,7 @@
         "data": {
           "action": "Ce ai vrea sa faci?",
           "corrected_profile": "Programul corect (dacă se corectează)",
-          "corrected_duration": "Durata corectă în minute (dacă se corectează)"
+          "corrected_duration": "Durata corectă în secunde (dacă se corectează)"
         }
       },
       "apply_suggestions_confirm": {

@@ -543,7 +543,7 @@
         "data": {
           "action": "Mida sa teha tahaksid?",
           "corrected_profile": "Õige programm (kui parandate)",
-          "corrected_duration": "Õige kestus minutites (kui parandate)"
+          "corrected_duration": "Õige kestus sekundites (kui parandate)"
         }
       },
       "apply_suggestions_confirm": {

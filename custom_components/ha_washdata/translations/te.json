@@ -543,7 +543,7 @@
         "data": {
           "action": "మీరు ఏమి చేయాలనుకుంటున్నారు?",
           "corrected_profile": "సరైన ప్రోగ్రామ్ (సరిదిద్దితే)",
-          "corrected_duration": "నిమిషాల్లో సరైన వ్యవధి (సవరిస్తే)"
+          "corrected_duration": "సెకన్లలో సరైన వ్యవధి (సవరిస్తే)"
         }
       },
       "apply_suggestions_confirm": {

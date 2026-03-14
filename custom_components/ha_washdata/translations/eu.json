@@ -543,7 +543,7 @@
         "data": {
           "action": "Zer egin nahiko zenuke?",
           "corrected_profile": "Programa zuzena (zuzentzen bada)",
-          "corrected_duration": "Zuzena iraupena minututan (zuzentzen bada)"
+          "corrected_duration": "Zuzena iraupena segundutan (zuzentzen bada)"
         }
       },
       "apply_suggestions_confirm": {

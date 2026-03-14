@@ -543,7 +543,7 @@
         "data": {
           "action": "Ի՞նչ կցանկանայիք անել։",
           "corrected_profile": "Ճիշտ ծրագիր (եթե ուղղվում է)",
-          "corrected_duration": "Ճիշտ տեւողությունը րոպեներով (եթե ուղղվում է)"
+          "corrected_duration": "Ճիշտ տեւողությունը վայրկյաններով (եթե ուղղվում է)"
         }
       },
       "apply_suggestions_confirm": {

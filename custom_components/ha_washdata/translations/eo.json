@@ -543,7 +543,7 @@
         "data": {
           "action": "Kion vi ŝatus fari?",
           "corrected_profile": "Ĝusta Programo (se korektante)",
-          "corrected_duration": "Ĝusta Daŭro en minutoj (se korektante)"
+          "corrected_duration": "Ĝusta Daŭro en sekundoj (se korektante)"
         }
       },
       "apply_suggestions_confirm": {

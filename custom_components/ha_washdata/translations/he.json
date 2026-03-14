@@ -543,7 +543,7 @@
         "data": {
           "action": "מה היית רוצה לעשות?",
           "corrected_profile": "תוכנית נכונה (אם מתקן)",
-          "corrected_duration": "משך נכון בדקות (אם מתקן)"
+          "corrected_duration": "משך נכון בשניות (אם מתקן)"
         }
       },
       "apply_suggestions_confirm": {

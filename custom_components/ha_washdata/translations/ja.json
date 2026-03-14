@@ -543,7 +543,7 @@
         "data": {
           "action": "何をしたいですか?",
           "corrected_profile": "正しいプログラム (修正している場合)",
-          "corrected_duration": "修正期間 (分単位) (修正する場合)"
+          "corrected_duration": "修正期間 (秒単位) (修正する場合)"
         }
       },
       "apply_suggestions_confirm": {

@@ -543,7 +543,7 @@
         "data": {
           "action": "Bạn muốn làm gì?",
           "corrected_profile": "Đúng chương trình (nếu sửa)",
-          "corrected_duration": "Thời lượng chính xác tính bằng phút (nếu sửa)"
+          "corrected_duration": "Thời lượng chính xác tính bằng giây (nếu sửa)"
         }
       },
       "apply_suggestions_confirm": {

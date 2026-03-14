@@ -543,7 +543,7 @@
         "data": {
           "action": "আপনি কি করতে চান?",
           "corrected_profile": "সঠিক প্রোগ্রাম (যদি সংশোধন করা হয়)",
-          "corrected_duration": "মিনিটের মধ্যে সঠিক সময়কাল (যদি সংশোধন করা হয়)"
+          "corrected_duration": "সেকেন্ডে সঠিক সময়কাল (যদি সংশোধন করা হয়)"
         }
       },
       "apply_suggestions_confirm": {

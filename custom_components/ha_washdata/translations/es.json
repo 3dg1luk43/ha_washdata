@@ -543,7 +543,7 @@
         "data": {
           "action": "¿Qué te gustaría hacer?",
           "corrected_profile": "Programa correcto (si se está corrigiendo)",
-          "corrected_duration": "Duración correcta en minutos (si se corrige)"
+          "corrected_duration": "Duración correcta en segundos (si se corrige)"
         }
       },
       "apply_suggestions_confirm": {

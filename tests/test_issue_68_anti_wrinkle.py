@@ -278,7 +278,7 @@ def test_anti_wrinkle_interrupted_cycle_no_transition(
     dryer_config_with_anti_wrinkle: CycleDetectorConfig,
     mock_callbacks: dict[str, Mock],
 ) -> None:
-    """Test that anti-wrinkle still works even for interrupted cycles."""
+    """Test that user-stopped cycles bypass anti-wrinkle (manual completion)."""
     detector = CycleDetector(
         config=dryer_config_with_anti_wrinkle,
         on_state_change=mock_callbacks["on_state_change"],
@@ -290,9 +290,9 @@ def test_anti_wrinkle_interrupted_cycle_no_transition(
     detector.process_reading(500.0, dt(10))
     for t in range(10, 400, 10):
         detector.process_reading(500.0, dt(t))
-    
-    # User stop (ends cycle as completed, so anti-wrinkle applies)
+
+    # User stop (manual/external completion bypasses anti-wrinkle)
     detector.user_stop()
-    
-    # Should end in ANTI_WRINKLE for dryers even when user-stopped (completed status)
-    assert detector.state == STATE_ANTI_WRINKLE
+
+    # Should end in FINISHED (not ANTI_WRINKLE) when user-stopped
+    assert detector.state == STATE_FINISHED

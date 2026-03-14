@@ -240,14 +240,14 @@
         "description": "Jeste li sigurni da želite izbrisati sve pohranjene tragove za otklanjanje grešaka? Ovo će osloboditi prostor, ali ukloniti detaljne informacije o rangiranju iz prošlih ciklusa."
       },
       "manage_cycles": {
-        "title": "Upravljanje ciklima",
+        "title": "Upravljanje ciklusima",
         "description": "Nedavni ciklusi:\n{recent_cycles}",
         "data": {
           "action": "Akcija"
         }
       },
       "manage_cycles_empty": {
-        "title": "Upravljanje ciklima",
+        "title": "Upravljanje ciklusima",
         "description": "Još uvijek nema zabilježenih ciklusa.",
         "data": {
           "action": "Akcija"
@@ -543,7 +543,7 @@
         "data": {
           "action": "šta biste željeli raditi?",
           "corrected_profile": "Ispravan program (ako se ispravlja)",
-          "corrected_duration": "Ispravno trajanje u minutama (ako se ispravlja)"
+          "corrected_duration": "Ispravno trajanje u sekundama (ako se ispravlja)"
         }
       },
       "apply_suggestions_confirm": {
