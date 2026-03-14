@@ -1,5 +1,5 @@
 name: Bug Report
-description: Create a report to help us improve HA WashData
+description: Create a report to help us improve WashData
 title: "[BUG] "
 labels: ["bug"]
 body:
@@ -21,8 +21,8 @@ body:
     id: version
     attributes:
       label: Integration Version
-      description: What version of HA WashData are you running?
-      placeholder: "v0.3.1"
+      description: What version of WashData are you running?
+      placeholder: "vX.Y.Z"
     validations:
       required: true
   

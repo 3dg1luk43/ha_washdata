@@ -1,12 +1,12 @@
-# HA WashData – AI Development Instructions
+# WashData – AI Development Instructions
 # Updated: January 8, 2026
 
 ## Project Summary
 
-**HA WashData** is a Home Assistant custom integration that monitors washing machines, dryers, dishwashers, and coffee machines via smart socket power readings. It uses NumPy-powered shape correlation matching to detect cycle programs and estimate completion times.
+**WashData** is a Home Assistant custom integration that monitors washing machines, dryers, dishwashers, and coffee machines via smart socket power readings. It uses NumPy-powered shape correlation matching to detect cycle programs and estimate completion times.
 
 **Repository**: `/root/ha_washdata`
-**Current Version**: 0.3.2
+**Current Version**: 0.4.3
 
 ---
 
@@ -127,4 +127,4 @@ Priority items (see `.dev_notes/` for details):
 
 ---
 
-*This file provides context for AI development assistants working on HA WashData.*
+*This file provides context for AI development assistants working on WashData.*

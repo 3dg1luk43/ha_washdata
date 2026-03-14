@@ -4,7 +4,7 @@
 ![HACS](https://img.shields.io/github/actions/workflow/status/3dg1luk43/ha_washdata/validate.yaml?label=HACS)
 [![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://ko-fi.com/3dg1luk43)
 
-# HA WashData Integration
+# WashData Integration
 
 A Home Assistant custom component to monitor washing machines via smart sockets, learn power profiles, and estimate completion time using shape-correlation matching.
 
@@ -24,9 +24,11 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Manual Training**: You define your profiles (e.g., "Cotton", "Quick") once; the system learns to recognize them thereafter. Integration **does not** auto-create profiles.
 - **Smart Time Estimation**: "Phase-aware" prediction detects variance (e.g., heating) and locks the countdown to prevent erratic jumps.
 - **Changeable Power Sensor**: Switch plugs without losing history.
-- **Minimal Status Card**: Optional custom Lovelace card.
+- **Tile Card** (Minimal Status Card): Optional custom Lovelace card.
 - **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
 - **Manual Profile Creation**: Create profiles even without historical cycles by specifying a baseline duration (e.g., "Eco Mode - 3h").
+- **Unified Phase Catalog**: Manage phase vocabulary across all supported device types from one catalog view.
+- **Scoped Phase Assignment**: Phase assignment dialogs show only phases relevant to the configured device type.
 - **Ghost Cycle Suppression**: Intelligent filtering with **"Suspicious Window"** (20 mins) prevents end-spikes from triggering duplicate cycles. **Now Persistent**: Remembers cycle history across HA restarts to prevent ghost detections after reboots.
 - **Robust vNext State Machine**: Advanced filtering with `start_energy` and `end_energy` gates prevents false starts/ends.
 - **Multi-Stage Matching Pipeline**: Uses Fast Reject -> Core Similarity -> DTW-Lite tie-breaking for superior accuracy.
@@ -83,21 +85,21 @@ If you are using Zigbee2MQTT with smart plugs, ensure your device reporting is r
 
 ### 2. The Golden Rule: "Teach" the Integration
 WashData **does not** come with pre-built profiles because every machine model is different. You must teach it what your cycles look like.
-
 #### Option A: Manual "Record Mode" (Recommended)
 This gives you the cleanest data.
-1. Open the **Dashbord Card**.
-2. Select **Record Cycle (Manual)** from the program list.
-3. Start your machine.
-4. When finished, go to **Manage Data & Profiles**, find the recording, and create a profile.
+
+1. Go to **Settings > Devices & Services > WashData > Configure**.
+2. Open **Record Cycle (Manual)**, then start your machine.
+3. When finished, go to **Manage Cycles** and find the recording.
+4. Then open **Manage Profiles** and create a profile from that recording.
 
 #### Option B: The Natural Way
 If you prefer to just use it and label later:
 1. **Run a Cycle**: Use your machine as normal. WashData will track it as an "Unknown" cycle.
 2. **Label It**: After the cycle finishes:
-   - Go to **Manage Data & Profiles** (via the Configure button or the Tile Card).
+   - Go to **Manage Cycles** (via the Configure button or the Tile Card).
    - Find the recent "Unknown" cycle.
-   - Click **Create Profile**, name it (e.g., "Cotton 40"), and Save.
+   - Open **Manage Profiles**, click **Create Profile**, name it (e.g., "Cotton 40"), and Save.
 3. **Repeat**: Do this for your 2-3 most common programs.
 
 ### 3. Verification & Learning
@@ -124,6 +126,29 @@ If "Auto-Detect" isn't working perfectly, use **Advanced Settings** to tune the 
 | **Persistent 'Running' State** | Integration stays locked to a long profile after a short cycle diverged. | **Adjust Matching Stability Thresholds** in `const.py`. Divergence detection now automatically reverts to "Detecting..." if confidence drops below 60% of the peak score. |
 
 > **Pro Tip**: Use the **Apply Suggestions** button in Settings. It analyzes your history and calculates the perfect text-book values for your specific machine.
+
+### Suggested Settings Sensor: What To Do
+
+WashData exposes a diagnostic sensor: `sensor.<name>_suggested_settings`.
+
+- `0` means there are currently no actionable recommendations.
+- `> 0` means recommendations are ready to review.
+
+When this sensor is above 0:
+1. Go to **Settings > Devices & Services > WashData > Configure > Advanced Settings**.
+2. Enable **Apply Suggested Values**.
+3. Review the change summary step.
+4. Confirm to stage values, then save only the changes you agree with.
+
+Suggested values are optional and are never forced automatically.
+
+### 🏷️ Phase Catalog & Assignment
+
+Phases are descriptive labels for distinct power stages within a cycle (e.g., "Pre-Wash", "Heating", "Spin").
+
+- **Manage Phase Catalog**: Go to **Configure > Manage Phase Catalog** to add, edit, or remove phase labels for each device type.
+- **Assign Phases to a Profile**: In **Manage Profiles**, select **Assign Phase Ranges** and use the phase range editor to map time regions to phase labels.
+- Phases are scoped to your device type — only relevant phases appear in the assignment dialog.
 
 ---
 

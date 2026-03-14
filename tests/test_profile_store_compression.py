@@ -37,13 +37,10 @@ def test_compression_decompression(store):
     decompressed = decompress_power_data(cycle_compressed)
     
     assert len(decompressed) == 3
-    # Use fromisoformat and check total seconds since start to be timezone agnostic
-    start_dt = datetime.fromisoformat(cycle["start_time"])
-    p1_dt = datetime.fromisoformat(decompressed[1][0])
-    
-    # We expect 10s offset
-    assert (p1_dt.timestamp() - start_dt.timestamp()) == 10.0
-    assert decompressed[1][1] == 100.5
+    # decompress_power_data now returns (offset_seconds, power) tuples
+    offset_1, power_1 = decompressed[1]
+    assert offset_1 == pytest.approx(10.0, abs=0.1), "Expected 10s offset"
+    assert power_1 == pytest.approx(100.5)
 
 @pytest.mark.asyncio
 async def test_migration_to_compressed(store):

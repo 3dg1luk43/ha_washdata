@@ -1,11 +1,11 @@
-"""The HA WashData integration."""
+"""The WashData integration."""
 
 from __future__ import annotations
 
 import json
 import logging
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
@@ -21,6 +21,16 @@ from .const import (
     CONF_DEVICE_TYPE,
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_PEOPLE,
+    CONF_NOTIFY_ONLY_WHEN_HOME,
+    CONF_NOTIFY_FIRE_EVENTS,
+    CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
+    CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+    DEFAULT_NOTIFY_ONLY_WHEN_HOME,
+    DEFAULT_NOTIFY_FIRE_EVENTS,
+    DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
+    DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -89,7 +99,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     version = entry.version or 1
     minor_version = entry.minor_version or 1
 
-    if version == 3 and minor_version >= 2:
+    if version > 3:
+        _LOGGER.error(
+            "Refusing to migrate unsupported future schema %s.%s", version, minor_version
+        )
+        return False
+
+    if version == 3 and minor_version >= 3:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -149,6 +165,18 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
     )
 
+    # Normalize notification options (added in 0.3.2)
+    options.setdefault(CONF_NOTIFY_ACTIONS, [])
+    options.setdefault(CONF_NOTIFY_PEOPLE, [])
+    options.setdefault(CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME)
+    options.setdefault(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
+    options.setdefault(
+        CONF_NOTIFY_LIVE_INTERVAL_SECONDS, DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
+    )
+    options.setdefault(
+        CONF_NOTIFY_LIVE_OVERRUN_PERCENT, DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
+    )
+
     keys_to_remove = [
         CONF_MIN_POWER,
         CONF_OFF_DELAY,
@@ -164,16 +192,16 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data=data,
         options=options,
         version=3,
-        minor_version=2,
+        minor_version=3,
     )
     _LOGGER.info(
-        "Migrated HA WashData entry from version %s.%s to 3.2", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.3", version, minor_version
     )
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up HA WashData from a config entry."""
+    """Set up WashData from a config entry."""
     # Guard against duplicate setup during hot-reload
     if entry.entry_id in hass.data.get(DOMAIN, {}):
         _LOGGER.warning(
@@ -350,14 +378,36 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             DOMAIN, "auto_label_cycles", handle_auto_label_cycles
         )
 
-    # Register custom card via frontend.py (only once, not per entry)
-    if not hass.data.get(f"{DOMAIN}_card_registered"):
+    # Register custom card via frontend.py — once per HA instance only.
+    if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(
+        "ha_washdata_card_deferred"
+    ) and not hass.data.get("ha_washdata_card_registering"):
         # pylint: disable=import-outside-toplevel
-        from .frontend import WashDataCardRegistration
+        from .frontend import (
+            CARD_REGISTERED,
+            CARD_DEFERRED,
+            WashDataCardRegistration,
+        )
 
         card_reg = WashDataCardRegistration(hass)
-        await card_reg.async_register()
-        hass.data[f"{DOMAIN}_card_registered"] = True
+        hass.data["ha_washdata_card_registering"] = True
+        try:
+            register_result = await card_reg.async_register()
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            hass.data["ha_washdata_card_registering"] = False
+            _LOGGER.warning("Card registration failed, will retry on next setup: %s", err)
+        else:
+            hass.data["ha_washdata_card_registering"] = False
+            if register_result == CARD_REGISTERED:
+                hass.data["ha_washdata_card_deferred"] = False
+                hass.data["ha_washdata_card_registered"] = True
+            elif register_result == CARD_DEFERRED:
+                hass.data["ha_washdata_card_deferred"] = True
+                hass.data["ha_washdata_card_registered"] = False
+            else:
+                hass.data["ha_washdata_card_deferred"] = False
+                hass.data["ha_washdata_card_registered"] = False
+                _LOGGER.warning("Card registration failed and was not deferred")
 
     # Register feedback service
     if not hass.services.has_service(
@@ -395,41 +445,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 raise ValueError("Integration not loaded for this entry")
 
             manager = hass.data[DOMAIN][entry_id]
-            success = manager.learning_manager.submit_cycle_feedback(
+            success = await manager.learning_manager.async_submit_cycle_feedback(
                 cycle_id=cycle_id,
                 user_confirmed=user_confirmed,
                 corrected_profile=corrected_profile,
                 corrected_duration=corrected_duration,
                 notes=notes,
             )
+            manager.notify_update()
 
             if success:
-                # Save updated profile data
-                await manager.profile_store.async_save()
-
-                # If feedback changed labeling, rebuild envelope so future matching benefits.
-                try:
-                    if corrected_profile:
-                        manager.profile_store.rebuild_envelope(corrected_profile)
-                    else:
-                        # Rebuild for the detected profile if present on the cycle.
-                        cycles = manager.profile_store.get_past_cycles()
-                        cycle = next(
-                            (
-                                cd
-                                for c in cycles
-                                if isinstance(c, dict)
-                                for cd in (cast(dict[str, Any], c),)
-                                if cd.get("id") == cycle_id
-                            ),
-                            None,
-                        )
-                        profile_name = cycle.get("profile_name") if cycle else None
-                        if isinstance(profile_name, str) and profile_name:
-                            manager.profile_store.rebuild_envelope(profile_name)
-                except Exception:  # pylint: disable=broad-exception-caught
-                    _LOGGER.exception("Failed to rebuild envelope after feedback")
-
                 # Best-effort dismiss the feedback notification if it exists.
                 try:
                     notification_id = f"ha_washdata_feedback_{entry_id}_{cycle_id}"

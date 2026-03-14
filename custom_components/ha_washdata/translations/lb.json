@@ -1,0 +1,979 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "WashData Setup",
+        "description": "Konfiguréiert Är Wäschmaschinn oder aneren Apparat.\n\nPower Sensor ass néideg.\n\n**Nächst gëtt Dir gefrot ob Dir Ären éischte Profil wëllt erstellen.**",
+        "data": {
+          "name": "Apparat Numm",
+          "device_type": "Apparat Typ",
+          "power_sensor": "Power Sensor",
+          "min_power": "Minimum Power Threshold (W)"
+        },
+        "data_description": {
+          "name": "E frëndlechen Numm fir dësen Apparat (zB 'Wäschmaschinn', 'Spullmaschinn').",
+          "device_type": "Wéi eng Zort Apparat ass dëst? Hëlleft d'Erkennung an d'Etikettéieren unzepassen.",
+          "power_sensor": "D'Sensorentitéit déi Echtzäit Stroumverbrauch (a Watt) vun Ärem Smart Plug bericht.",
+          "min_power": "Power Liesungen iwwer dës Schwell (a Watt) weisen datt den Apparat leeft. Start mat 2W fir déi meescht Apparater."
+        }
+      },
+      "first_profile": {
+        "title": "Erstellt Éischte Profil",
+        "description": "E **Zyklus** ass e komplette Laf vun Ärem Apparat (z.B. eng Laascht Wäschmaschinn). E **Profil** gruppéiert dës Zyklen no Typ (z.B. 'Cotton', 'Quick Wash'). E Profil erstellen hëlleft elo d'Integratiounszäit direkt ze schätzen.\n\nDir kënnt dëse Profil manuell an den Apparat Kontrollen auswielen wann et net automatesch erkannt gëtt.\n\n**Loosst 'Profilnumm' eidel fir dëse Schrëtt ze iwwersprangen.**",
+        "data": {
+          "profile_name": "Profilnumm (fakultativ)",
+          "manual_duration": "Geschätzte Dauer (Minuten)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Konnt net konnektéieren",
+      "invalid_auth": "Ongülteg Authentifikatioun",
+      "unknown": "Onerwaarte Feeler"
+    },
+    "abort": {
+      "already_configured": "Den Apparat ass scho konfiguréiert"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "menu_options": {
+          "learning_feedbacks": "Iwwerpréift Léieren Feedback",
+          "settings": "Astellungen",
+          "notifications": "Notifikatiounen",
+          "manage_cycles": "Cycles managen",
+          "manage_profiles": "Managen Profiler",
+          "manage_phase_catalog": "Phase Katalog verwalten",
+          "record_cycle": "Rekordzyklus (manuell)",
+          "diagnostics": "Diagnostik & Ënnerhalt"
+        }
+      },
+      "apply_suggestions": {
+        "title": "Copie proposéiert Wäerter",
+        "description": "Dëst kopéiert déi aktuell proposéiert Wäerter an Är gespäichert Astellungen. Dëst ass eng eemoleg Aktioun an aktivéiert net automatesch Iwwerschreiwe.\n\nRecommandéiert Wäerter fir ze kopéieren:\n{suggested}",
+        "data": {
+          "confirm": "Confirméieren Kopie Aktioun"
+        }
+      },
+      "settings": {
+        "title": "Astellungen",
+        "description": "Tune Detektiounsschwellen, Léieren a fortgeschratt Verhalen. Defaults funktionnéieren gutt fir déi meescht Setups.",
+        "data": {
+          "apply_suggestions": "Gëlle proposéiert Wäerter",
+          "device_type": "Apparat Typ",
+          "power_sensor": "Power Sensor Entitéit",
+          "min_power": "Minimum Muecht (W)",
+          "off_delay": "Zyklus Enn Verzögerung (en)",
+          "notify_service": "Notifikatiounsservice (zB notify.mobile_app)",
+          "notify_actions": "Notifikatioun Aktiounen",
+          "notify_people": "Verspéid d'Liwwerung bis dës Leit Heem sinn",
+          "notify_only_when_home": "Verspéid Notifikatiounen Bis déi gewielte Persoun Heem ass",
+          "notify_fire_events": "Feier Automation Eventer",
+          "notify_events": "Eventer fir Notifikatioun",
+          "notify_before_end_minutes": "Pre-Complete Notification (Minute virum Enn)",
+          "notify_title": "Notifikatioun Titel",
+          "notify_icon": "Notifikatioun Ikon",
+          "notify_start_message": "Start Message Format",
+          "notify_finish_message": "Fäerdeg Message Format",
+          "notify_pre_complete_message": "Pre-Completion Message Format",
+          "show_advanced": "Fortgeschratt Astellungen änneren (nächste Schrëtt)"
+        },
+        "data_description": {
+          "apply_suggestions": "Kuckt dës Këscht fir Wäerter ze kopéieren, déi vum Léieralgorithmus an d'Form proposéiert ginn. Iwwerpréift ier Dir späichert.\n\nRecommandéiert (vum Léieren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "device_type": "Wielt den Typ vum Apparat (Wäschmaschinn, Dryer, Spullmaschinn, Kaffismaschinn, EV). Dëse Tag gëtt mat all Zyklus gespäichert fir eng besser Organisatioun.",
+          "power_sensor": "D'Sensor Entitéit bericht Echtzäit Kraaft (a Watt). Dir kënnt dëst zu all Moment änneren ouni historesch Daten ze verléieren - nëtzlech wann Dir e Smart Plug ersetzt.",
+          "min_power": "Power Liesungen iwwer dës Schwell (a Watt) weisen datt den Apparat leeft. Start mat 2W fir déi meescht Apparater.",
+          "off_delay": "Sekonnen muss déi glat Kraaft ënner der Stoppschwell bleiwen fir d'Réalisatioun ze markéieren. Standard: 120s.",
+          "notify_service": "Home Assistant Notifikatiounsservice fir ze benotzen (optional).",
+          "notify_actions": "Optional Home Assistant Action Sequenz fir Notifikatiounen ze lafen (Skripte, Notifikatioun, TTS, etc.). Wann agestallt, lafen Aktiounen virum Fallback Notify Service.",
+          "notify_people": "Leit Entitéite benotzt fir Präsenz gating. Wann aktivéiert, gëtt d'Notifikatioun Liwwerung verspéit bis op d'mannst eng gewielte Persoun doheem ass.",
+          "notify_only_when_home": "Wann aktivéiert, Verspéid Notifikatiounen bis op d'mannst eng gewielte Persoun doheem ass.",
+          "notify_fire_events": "Wann aktivéiert, Feier Home Assistant Eventer fir Zyklusstart an Enn (ha_washdata_cycle_started an ha_washdata_cycle_ended) fir Automatisatiounen ze féieren.",
+          "notify_events": "Wéi eng Eventer fir Notifikatiounen ze schécken.",
+          "notify_before_end_minutes": "Minutte virum geschätzte Enn vum Zyklus fir eng Notifikatioun auszeléisen. Setzt op 0 fir auszeschalten. Standard: 0.",
+          "notify_title": "Benotzerdefinéiert Titel fir Notifikatiounen. Ënnerstëtzt {device} Plazhalter.",
+          "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:Wäschmaschinn). Loosst eidel fir Standard ze benotzen.",
+          "notify_start_message": "Message geschéckt wann en Zyklus fänkt. Ënnerstëtzt {device} Plazhalter.",
+          "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program} Plazhalter.",
+          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter."
+        }
+      },
+      "notifications": {
+        "title": "Notifikatiounen",
+        "description": "Konfiguréiert Notifikatiounskanäl, Templates an optional Live Mobile Fortschrëtterupdates.",
+        "data": {
+          "notify_service": "Notifikatiounsservice (zB notify.mobile_app)",
+          "notify_actions": "Notifikatioun Aktiounen",
+          "notify_people": "Verspéid d'Liwwerung bis dës Leit Heem sinn",
+          "notify_only_when_home": "Verspéid Notifikatiounen Bis déi gewielte Persoun Heem ass",
+          "notify_fire_events": "Feier Automation Eventer",
+          "notify_events": "Eventer fir Notifikatioun",
+          "notify_before_end_minutes": "Pre-Complete Notification (Minute virum Enn)",
+          "notify_live_interval_seconds": "Live Update Intervall (Sekonnen)",
+          "notify_live_overrun_percent": "Live Update Iwwerschratt Allowance (%)",
+          "notify_title": "Notifikatioun Titel",
+          "notify_icon": "Notifikatioun Ikon",
+          "notify_start_message": "Start Message Format",
+          "notify_finish_message": "Fäerdeg Message Format",
+          "notify_pre_complete_message": "Pre-Completion Message Format"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant Notifikatiounsservice fir ze benotzen (optional).",
+          "notify_actions": "Optional Home Assistant Action Sequenz fir Notifikatiounen ze lafen (Skripte, Notifikatioun, TTS, etc.). Wann agestallt, lafen Aktiounen virum Fallback Notify Service.",
+          "notify_people": "Leit Entitéite benotzt fir Präsenz gating. Wann aktivéiert, gëtt d'Notifikatioun Liwwerung verspéit bis op d'mannst eng gewielte Persoun doheem ass.",
+          "notify_only_when_home": "Wann aktivéiert, Verspéid Notifikatiounen bis op d'mannst eng gewielte Persoun doheem ass.",
+          "notify_fire_events": "Wann aktivéiert, Feier Home Assistant Eventer fir Zyklusstart an Enn (ha_washdata_cycle_started an ha_washdata_cycle_ended) fir Automatisatiounen ze féieren.",
+          "notify_events": "Wéi eng Eventer fir Notifikatiounen ze schécken.",
+          "notify_before_end_minutes": "Minutte virum geschätzte Enn vum Zyklus fir eng Notifikatioun auszeléisen. Setzt op 0 fir auszeschalten. Standard: 0.",
+          "notify_live_interval_seconds": "Wéi oft Fortschrëtter Aktualiséierungen geschéckt während Lafen. Méi niddereg Wäerter si méi reaktiounsfäeger awer konsuméiere méi Notifikatiounen. E Minimum vun 30 Sekonnen gëtt duerchgesat - Wäerter ënner 30 Sekonnen ginn automatesch op 30 Sekonnen ofgerënnt.",
+          "notify_live_overrun_percent": "Sécherheetsmarge iwwer de geschätzte Updatezuel fir laang / iwwerlafen Zyklen (zum Beispill 20% erlaabt 1,2x geschätzte Updates).",
+          "notify_title": "Benotzerdefinéiert Titel fir Notifikatiounen. Ënnerstëtzt {device} Plazhalter.",
+          "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:Wäschmaschinn). Loosst eidel fir Standard ze benotzen.",
+          "notify_start_message": "Message geschéckt wann en Zyklus fänkt. Ënnerstëtzt {device} Plazhalter.",
+          "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program} Plazhalter.",
+          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter."
+        }
+      },
+      "advanced_settings": {
+        "title": "Fortgeschratt Astellungen",
+        "description": "Tune Detektiounsschwellen, Léieren a fortgeschratt Verhalen. Defaults funktionnéieren gutt fir déi meescht Setups.",
+        "data": {
+          "apply_suggestions": "Gëlle proposéiert Wäerter",
+          "start_threshold_w": "Startschwell (W)",
+          "stop_threshold_w": "Stoppdrempel (W)",
+          "min_off_gap": "Min Gap Between Cycles (en)",
+          "start_duration_threshold": "Start Debounce Dauer (en)",
+          "progress_reset_delay": "Fortschrëtt Reset Verzögerung (Sekonnen)",
+          "no_update_active_timeout": "No-Update Timeout (en)",
+          "sampling_interval": "Sampling Intervall (en)",
+          "auto_label_confidence": "Auto-Label Vertrauen (0-1)",
+          "learning_confidence": "Feedback Ufro Vertrauen (0-1)",
+          "duration_tolerance": "Dauer Toleranz (0-0,5)",
+          "profile_match_interval": "Profil Match Intervall (Sekonnen)",
+          "profile_match_min_duration_ratio": "Profil Match Min Dauer Verhältnis (0.1-1.0)",
+          "profile_match_max_duration_ratio": "Profil Match Max Dauer Verhältnis (1.0-3.0)",
+          "smoothing_window": "Smoothing Window (Proben)",
+          "profile_match_threshold": "Profil Match Threshold",
+          "profile_unmatch_threshold": "Profil Unmatch Threshold",
+          "profile_duration_tolerance": "Profil Match Dauer Toleranz (0-0,5)",
+          "interrupted_min_seconds": "Ënnerbrach: Minimum Runtime (Sekonnen)",
+          "abrupt_drop_watts": "Ënnerbrach: Abrupt Drop Absolute (W)",
+          "abrupt_drop_ratio": "Ënnerbrach: Abrupt Drop Verhältnis (0-1)",
+          "abrupt_high_load_factor": "Ënnerbrach: High-Load Faktor",
+          "max_past_cycles": "Retention: Max gespäichert Zyklen",
+          "max_full_traces_per_profile": "Retention: Max Voll Spure pro Profil",
+          "max_full_traces_unlabeled": "Retentioun: Max Voll Spuren net markéiert",
+          "watchdog_interval": "Watchdog Intervall (Sekonnen)",
+          "completion_min_seconds": "Ofschloss Minimum Runtime (Sekonnen)",
+          "notify_before_end_minutes": "Pre-Complete Notification (Minute virum Enn)",
+          "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
+          "running_dead_zone": "Running Dead Zone (Sekonnen)",
+          "end_repeat_count": "Enn widderhuelen Grof",
+          "start_energy_threshold": "Start Energy Gate (Wh)",
+          "end_energy_threshold": "End Energy Gate (Wh)",
+          "auto_maintenance": "Aktivéiert Auto-Maintenance",
+          "expose_debug_entities": "Entdeckt Debug Entitéiten",
+          "save_debug_traces": "Retten Debug Spure",
+          "anti_wrinkle_enabled": "Anti-Wrinkle Shield (nëmmen Trockner)",
+          "anti_wrinkle_max_power": "Anti-Wrinkle Max Power (W)",
+          "anti_wrinkle_max_duration": "Anti-Falten Max Dauer (en)",
+          "anti_wrinkle_exit_power": "Anti-Wrinkle Exit Power (W)",
+          "dtw_bandwidth": "DTW Bandbreed",
+          "external_end_trigger_enabled": "Aktivéiert externen Zyklus Enn Ausléiser",
+          "external_end_trigger": "Extern Zyklus Enn Sensor",
+          "external_end_trigger_inverted": "Invertéiert Trigger Logik (Trigger op OFF)"
+        },
+        "data_description": {
+          "apply_suggestions": "Kuckt dës Këscht fir Wäerter ze kopéieren, déi vum Léieralgorithmus an d'Form proposéiert ginn. Iwwerpréift ier Dir späichert.\n\nRecommandéiert (vum Léieren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "start_threshold_w": "D'Kraaft muss iwwer dës Schwell eropgoen fir en Zyklus ze STARTEN. Setzt méi héich wéi Är Standby Kraaft. Standard: min_power + 1 W.",
+          "stop_threshold_w": "D'Kraaft muss ËNNEREN dëser Schwell falen fir en Zyklus opzehalen. Setzt just iwwer Null fir Geräischer ze vermeiden déi falsch Enden ausléisen. Standard: 0,6 * min_power.",
+          "min_off_gap": "Wann en Zyklus bannent dëse ville Sekonnen vum viregten Enn ufänkt, gi se an engem eenzegen Zyklus fusionéiert.",
+          "start_duration_threshold": "Ignoréieren kuerz Kraaft Spikes méi kuerz wéi dës Dauer (Sekonnen). Filtert Boot Spikes (zB 60W fir 2s) ier de richtege Zyklus ufänkt. Standard: 5s.",
+          "progress_reset_delay": "Nodeems en Zyklus fäerdeg ass (100%), waart dës vill Sekonnen vun Idle ier de Fortschrëtt op 0% zréckgesat gëtt. Standard: 300s.",
+          "no_update_active_timeout": "Fir Verëffentlechungs-op-Ännerung Sensoren: nëmmen en AKTIV Zyklus forcéieren wann keng Updates fir dës vill Sekonnen ukommen. Low-Power Ofschloss benotzt nach ëmmer den Off Delay.",
+          "sampling_interval": "Minimum Sampling Intervall a Sekonnen. Updates méi séier wéi dësen Taux ginn ignoréiert. Standard: 2.0s.",
+          "auto_label_confidence": "Etikett automatesch Zyklen op oder iwwer dëst Vertrauen beim Ofschloss (0.0-1.0).",
+          "learning_confidence": "Minimum Vertraue fir d'Benotzerverifikatioun iwwer en Event ze froen (0.0–1.0).",
+          "duration_tolerance": "Toleranz fir dauerhafte Schätzungen während engem Laf (0,0-0,5 entsprécht 0-50%).",
+          "profile_match_interval": "Wéi dacks (a Sekonnen) fir Profilmatching während engem Zyklus ze probéieren. Méi niddereg Wäerter bidden méi séier Detektioun awer benotze méi CPU. Standard: 300s (5 Minutten).",
+          "profile_match_min_duration_ratio": "Minimum Dauer Verhältnis fir Profil passende. Lafen Zyklus muss op d'mannst dës Fraktioun vun Profil Dauer sinn ze Match. Ënneschten = fréiere passende. Standard: 0,50 (50%).",
+          "profile_match_max_duration_ratio": "Maximum Dauer Verhältnis fir Profil passende. Lafen Zyklus däerf dës Multiple vun der Profildauer net iwwerschreiden. Méi héich = méi léif. Standard: 1,50 (150%).",
+          "smoothing_window": "Zuel vun de rezente Kraaftlesungen, déi fir d'Moyenne-Moyenne Glättung benotzt ginn.",
+          "profile_match_threshold": "Minimum DTW Ähnlechkeet Score (0.0-1.0) néideg fir e Profil als Match ze betruecht. Méi héich = méi streng Matching, manner falsch Positiver. Standard: 0,4.",
+          "profile_unmatch_threshold": "DTW Ähnlechkeet Score (0.0-1.0) ënner deem e virdru passend Profil refuséiert gëtt. Sollt méi niddereg wéi d'Matchschwelle sinn fir Flickeren ze vermeiden. Standard: 0,35.",
+          "profile_duration_tolerance": "Toleranz benotzt duerch Profilmatching fir total Dauervarianz (0,0-0,5). Standardverhalen: ± 25%.",
+          "interrupted_min_seconds": "Laf méi kuerz wéi dëst kann als 'ënnerbrach' klasséiert ginn.",
+          "abrupt_drop_watts": "Absolute Kraaftfall (W) betruecht en abrupt Cliff.",
+          "abrupt_drop_ratio": "Relativ Offallverhältnis (0-1). Beispill: 0,6 heescht datt e Réckgang vun 60% abrupt ass.",
+          "abrupt_high_load_factor": "Faktor iwwer d'Basislinn ugesinn als 'héich Belaaschtung' virun engem abrupt Réckgang (benotzt mat abrupt Detektioun).",
+          "max_past_cycles": "Gesamtzuel vun Zyklen fir ze halen (eelst ewechgeholl). Standard: 200.",
+          "max_full_traces_per_profile": "Zuel vu rezent markéierten Zyklen fir mat voller Kraaftspuren pro Profil ze halen. Eeler Spure ginn iwwer Enveloppe zesummegefaasst. Standard: 20.",
+          "max_full_traces_unlabeled": "Zuel vu rezenten unlabeled Zyklen fir mat voller Kraaftspuren ze halen fir d'Auto-Etikettéierung z'ënnerstëtzen. Standard: 20.",
+          "watchdog_interval": "Sekonnen tëscht Iwwerwaachungskontrolle beim Laafen. Standard: 5s. OPGEPASST: Vergewëssert Iech datt dëst HÉIEREN ass wéi den Aktualiséierungsintervall vun Ärem Sensor fir falsch Arrêten ze vermeiden (z.B. wann de Sensor all 60s aktualiséiert, benotzt 65s+).",
+          "completion_min_seconds": "Cyclen méi kuerz wéi dëst ginn als 'ënnerbrach' markéiert, och wa se natierlech fäerdeg sinn. Standard: 600s.",
+          "notify_before_end_minutes": "Minutte virum geschätzte Enn vum Zyklus fir eng Notifikatioun auszeléisen. Setzt op 0 fir auszeschalten. Standard: 0.",
+          "auto_tune_noise_events_threshold": "Zuel vu kuerzen / Low-Power 'Geräisch' Zyklen bannent 24h néideg fir min_power automatesch unzepassen. Standard: 3.",
+          "running_dead_zone": "Nom Zyklus ufänkt, ignoréiert Power Dips fir dës vill Sekonnen fir falsch Ennerkennung während der initialer Spin-up Phase ze vermeiden. Setzt op 0 fir auszeschalten. Standard: 0s.",
+          "end_repeat_count": "Unzuel vun Mol d'Ennkonditioun (Kraaft ënner der Schwell fir Off_delay) muss konsekutiv erfëllt ginn ier den Zyklus ofgeschloss ass. Méi héich Wäerter verhënneren falsch Enn während Pausen. Standard: 1.",
+          "start_energy_threshold": "Zyklus muss op d'mannst esou vill Energie (Wh) während der START Phase accumuléieren fir ze bestätegen. Standard: 0,005 Wh.",
+          "end_energy_threshold": "Den Zyklus endet nëmmen wann d'Energie an der leschter Off-Delay Fënster ënner dësem Wäert (Wh) ass. Verhënnert falsch Enn wann d'Kraaft no bei Null schwankt. Standard: 0,05 Wh.",
+          "auto_maintenance": "Aktivéiert automatesch Ënnerhalt (Reparatiounsproben, Fragmenter fusionéieren).",
+          "expose_debug_entities": "Show fortgeschratt Sensoren (Vertrauen, Phase, Ambiguitéit) fir Debugging.",
+          "save_debug_traces": "Späichert detailléiert Ranking a Kraaft Trace Daten an der Geschicht (Erhéicht d'Späicherverbrauch).",
+          "anti_wrinkle_enabled": "Ignoréieren kuerz Low-Power Trommelrotatiounen no engem Zyklus eriwwer fir Geeschterzyklen ze vermeiden (nëmmen Trockner / Wäschmaschinn-Trockner).",
+          "anti_wrinkle_max_power": "Bursts op oder ënner dëser Kraaft ginn als Anti-Faltenrotatiounen behandelt anstatt nei Zyklen. Gëllt nëmme wann Anti-Wrinkle Shield aktivéiert ass.",
+          "anti_wrinkle_max_duration": "Maximal Burstlängt fir als Anti-Faltenrotatioun ze behandelen. Gëllt nëmme wann Anti-Wrinkle Shield aktivéiert ass.",
+          "anti_wrinkle_exit_power": "Wann d'Kraaft ënner dësem Niveau fällt, gitt direkt Anti-Falten aus (richteg aus). Gëllt nëmme wann Anti-Wrinkle Shield aktivéiert ass.",
+          "dtw_bandwidth": "Maximal erlaabt Zäit Warping (Stretching) als Verhältnis vun Zyklus Dauer. Méi héich Wäerter erlaben passende héich variabel Zyklen awer erhéijen d'CPU Käschten. Standard: 0,20 (20%).",
+          "external_end_trigger_enabled": "Aktivéiert d'Iwwerwaachung vun engem externen binäre Sensor fir den Zyklus ofzeschléissen.",
+          "external_end_trigger": "Wielt eng binär Sensor Entitéit. Wann dëse Sensor ausléist, wäert den aktuellen Zyklus mam Status \"ofgeschloss\" ophalen.",
+          "external_end_trigger_inverted": "Par défaut fiert den Ausléiser wann de Sensor ON dréit. Kuckt dës Këscht fir ze brennen wann de Sensor amplaz OFF ass."
+        }
+      },
+      "diagnostics": {
+        "title": "Diagnostik & Ënnerhalt",
+        "description": "Run Ënnerhalt Aktiounen wéi fragmentéiert Zyklen fusionéieren oder gespäichert Daten migréieren.\n\n** Späicherverbrauch**\n\n- Dateigréisst: {file_size_kb} KB\n- Zyklen: {cycle_count}\n- Profiler: {profile_count}\n- Debug Spuren: {debug_count}"
+      },
+      "clear_debug_data": {
+        "title": "Kloer Debug Daten",
+        "description": "Sidd Dir sécher, datt Dir all gespäichert Debug-Spuere läschen wëllt? Dëst befreit Plaz awer läscht detailléiert Rankinginformatioun aus vergaangene Zyklen."
+      },
+      "manage_cycles": {
+        "title": "Cycles managen",
+        "description": "Rezent Zyklen:\n{recent_cycles}",
+        "data": {
+          "action": "Aktioun"
+        }
+      },
+      "manage_cycles_empty": {
+        "title": "Cycles managen",
+        "description": "Nach keng Zyklen opgeholl.",
+        "data": {
+          "action": "Aktioun"
+        }
+      },
+      "manage_profiles": {
+        "title": "Managen Profiler",
+        "description": "Resumé vum Profil:\n{profile_summary}",
+        "data": {
+          "action": "Aktioun"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "Managen Profiler",
+        "description": "Keng Profiler erstallt nach.",
+        "data": {
+          "action": "Aktioun"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "Phase Katalog verwalten",
+        "description": "Phase Katalog (Standard fir dësen Apparat + Benotzerdefinéiert Phasen):\n{phase_summary}",
+        "data": {
+          "action": "Aktioun"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "Erstellt Benotzerdefinéiert Phase",
+        "description": "Erstellt e personaliséierte Phasnumm a Beschreiwung, a wielt op wéi eng Apparatart et gëllt.",
+        "data": {
+          "target_device_type": "Zil Gerät Typ",
+          "phase_name": "Phase Numm",
+          "phase_description": "Phase Beschreiwung"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "Benotzerdefinéiert Phase änneren",
+        "description": "Wielt eng personaliséiert Phase fir z'änneren.",
+        "data": {
+          "phase_name": "Benotzerdefinéiert Phase"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "Benotzerdefinéiert Phase änneren",
+        "description": "Editéierungsphase: {phase_name}",
+        "data": {
+          "phase_name": "Phase Numm",
+          "phase_description": "Phase Beschreiwung"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "Benotzerdefinéiert Phase läschen",
+        "description": "Wielt eng personaliséiert Phase fir ze läschen. All zougewisen Beräicher mat dëser Phase ginn ewechgeholl.",
+        "data": {
+          "phase_name": "Benotzerdefinéiert Phase"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "Assignéiert Phase Ranges",
+        "description": "Phase Virschau fir Profil: **{profile_name}**\n\n{timeline_svg}\n\n** Aktuelle Beräicher:**\n{current_ranges}\n\nBenotzt d'Aktiounen hei drënner fir Beräicher ze addéieren, z'änneren, ze läschen oder ze späicheren.",
+        "data": {
+          "action": "Aktioun"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "Füügt Phase Range",
+        "description": "Füügt eng Phasebereich zum aktuellen Entworf.",
+        "data": {
+          "phase_name": "Phase",
+          "start_min": "Start Minutt",
+          "end_min": "Enn Minutt"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "Phase Range änneren",
+        "description": "Wielt eng Rei fir z'änneren.",
+        "data": {
+          "range_index": "Phase Range"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "Phase Range änneren",
+        "description": "Update de gewielte Phasebereich.",
+        "data": {
+          "phase_name": "Phase",
+          "start_min": "Start Minutt",
+          "end_min": "Enn Minutt"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "Läschen Phase Range",
+        "description": "Wielt eng Rei fir aus dem Entworf ze läschen.",
+        "data": {
+          "range_index": "Phase Range"
+        }
+      },
+      "assign_profile_phases_select": {
+        "title": "Assignéiert Phase Ranges",
+        "description": "Wielt e Profil fir Phasebereich ze konfiguréieren.",
+        "data": {
+          "profile": "Profil"
+        }
+      },
+      "profile_stats": {
+        "title": "Profil Statistiken",
+        "description": "{stats_table}"
+      },
+      "create_profile": {
+        "title": "Schafen neie Profil",
+        "description": "Erstellt en neie Profil manuell oder aus engem vergaangene Zyklus.\n\nBeispiller vum Profilnumm: 'Delicates', 'Heavy Duty', 'Quick Wash'",
+        "data": {
+          "profile_name": "Profil Numm",
+          "reference_cycle": "Referenzzyklus (optional)",
+          "manual_duration": "Manuell Dauer (Minuten)"
+        }
+      },
+      "edit_profile": {
+        "title": "Profil änneren",
+        "description": "Wielt e Profil fir ëmbenennen",
+        "data": {
+          "profile": "Profil"
+        }
+      },
+      "rename_profile": {
+        "title": "Änneren Profil Detailer",
+        "description": "Aktuelle Profil: {current_name}",
+        "data": {
+          "new_name": "Profil Numm",
+          "manual_duration": "Manuell Dauer (Minuten)"
+        }
+      },
+      "delete_profile_select": {
+        "title": "Läschen Profil",
+        "description": "Wielt e Profil fir ze läschen",
+        "data": {
+          "profile": "Profil"
+        }
+      },
+      "delete_profile_confirm": {
+        "title": "Confirméieren Läschen Profil",
+        "description": "⚠️ Dëst wäert de Profil permanent läschen: {profile_name}",
+        "data": {
+          "unlabel_cycles": "Ewechzehuelen Label aus Zyklen mat dësem Profil"
+        }
+      },
+      "auto_label_cycles": {
+        "title": "Auto-Label Old Cycles",
+        "description": "{info}",
+        "data": {
+          "confidence_threshold": "Minimum Vertrauen (0.50-0.95)"
+        }
+      },
+      "select_cycle_to_label": {
+        "title": "Wielt Cycle zu Label",
+        "description": "✓ = ofgeschloss, ⚠ = opgeholl, ✗ = ënnerbrach",
+        "data": {
+          "cycle_id": "Zyklus"
+        }
+      },
+      "select_cycle_to_delete": {
+        "title": "Läschen Cycle",
+        "description": "⚠️ Dëst wäert de gewielten Zyklus permanent läschen",
+        "data": {
+          "cycle_id": "Zyklus fir ze läschen"
+        }
+      },
+      "label_cycle": {
+        "title": "Label Cycle",
+        "description": "{cycle_info}",
+        "data": {
+          "profile_name": "Profil",
+          "new_profile_name": "Neie Profilnumm (wann erstellt)"
+        }
+      },
+      "post_process": {
+        "title": "Prozessgeschicht (Merge / Split)",
+        "description": "Propper Zyklusgeschicht andeems se fragmentéiert Runen fusionéieren an falsch fusionéierte Zyklen bannent enger Zäitfenster opzedeelen. Gitt d'Zuel vun de Stonnen un fir zréck ze kucken.\n{info}",
+        "data": {
+          "time_range": "Réckbléckfenster (Stonnen)",
+          "gap_seconds": "Merge / Split Gap (Sekonnen)"
+        },
+        "data_description": {
+          "time_range": "Unzuel vun Stonnen fir ze scannen fir fragmentéiert Zyklen ze fusionéieren. Benotzt 999999 fir all historesch Daten ze veraarbecht.\n{info}",
+          "gap_seconds": "Schwell fir Split vs Fusioun ze entscheeden. Lücken KËRTER wéi dëst sinn fusionéiert. Lücken LENG wéi dëst sinn opgedeelt. Senk dat fir eng Spaltung op engem Zyklus ze zwéngen deen falsch fusionéiert gouf."
+        }
+      },
+      "cleanup_profile": {
+        "title": "Botzen Geschicht - Wielt Profil",
+        "description": "Wielt e Profil fir ze visualiséieren. Dëst generéiert eng Grafik déi all vergaangen Zyklen fir dëse Profil weist fir Auslänner z'identifizéieren.",
+        "data": {
+          "profile": "Profil"
+        }
+      },
+      "cleanup_select": {
+        "title": "Botzen Geschicht - Grafik & Läschen",
+        "description": "![Grafik]({graph_url})\n\n**Visualiséieren {profile_name}**\n\nD'Grafik weist eenzel Zyklen als faarweg Linnen. Identifizéieren Outliers (Linnen wäit vun der Grupp) a passen hir Faarf an der Lëscht hei drënner fir se ze läschen.\n\n** Wielt Zyklen fir PERMANENT ze läschen:**",
+        "data": {
+          "cycles_to_delete": "Zyklen fir ze läschen (checkt passende Faarwen)"
+        }
+      },
+      "interactive_editor": {
+        "title": "Merge / Split Interactive Editor",
+        "description": "Wielt eng manuell Aktioun fir Är Zyklusgeschicht auszeféieren.",
+        "data": {
+          "editor_action": "Aktioun"
+        }
+      },
+      "editor_select": {
+        "title": "Wielt Cycles",
+        "description": "Wielt den Zyklus (en) fir ze veraarbecht.\n\n{info_text}",
+        "data": {
+          "selected_cycles": "Cyclen"
+        }
+      },
+      "editor_configure": {
+        "title": "Configuréieren & gëllen",
+        "description": "{preview_md}",
+        "data": {
+          "confirm_action": "Aktioun",
+          "merged_profile": "Resultat Profil",
+          "new_profile_name": "Neie Profil Numm",
+          "confirm_commit": "Jo, ech bestätegen dës Aktioun",
+          "segment_0_profile": "Segment 1 Profil",
+          "segment_1_profile": "Segment 2 Profil",
+          "segment_2_profile": "Segment 3 Profil",
+          "segment_3_profile": "Segment 4 Profil",
+          "segment_4_profile": "Segment 5 Profil",
+          "segment_5_profile": "Segment 6 Profil",
+          "segment_6_profile": "Segment 7 Profil",
+          "segment_7_profile": "Segment 8 Profil",
+          "segment_8_profile": "Segment 9 Profil",
+          "segment_9_profile": "Segment 10 Profil"
+        }
+      },
+      "editor_split_params": {
+        "title": "Split Configuratioun",
+        "description": "Ajustéiert d'Sensibilitéit fir dësen Zyklus opzedeelen. All Idle Spalt méi laang wéi dëst wäert eng Spalt verursaachen.",
+        "data": {
+          "min_gap_seconds": "Split Gap Threshold (Sekonnen)"
+        }
+      },
+      "reprocess_history": {
+        "title": "Ënnerhalt: Reprocessen & Optimiséieren Daten",
+        "description": "Féiert déif Botzen vun historeschen Donnéeën:\n1. Trimmen null-Muecht Liesungen (Stille).\n2. Fixes Zyklus timing / Dauer.\n3. Recalculates all statistesch Modeller (Enveloppe).\n\n** Run dëst fir Datenprobleemer ze fixéieren oder nei Algorithmen anzesetzen.**"
+      },
+      "wipe_history": {
+        "title": "Wischen Geschicht (Nëmmen Testen)",
+        "description": "⚠️ Dëst wäert ALL gespäichert Zyklen a Profiler fir dësen Apparat permanent läschen. Dëst kann net réckgängeg gemaach ginn!"
+      },
+      "export_import": {
+        "title": "Export / Import JSON",
+        "description": "Kopéiert / Paste Zyklen, Profiler, AN Astellunge fir dësen Apparat. Export ënnert oder Paste JSON fir z'importéieren.",
+        "data": {
+          "mode": "Aktioun",
+          "json_payload": "Komplett Konfiguratioun JSON"
+        },
+        "data_description": {
+          "mode": "Wielt Export fir aktuell Donnéeën an Astellungen ze kopéieren, oder Import fir exportéiert Daten vun engem aneren WashData Apparat ze pechen.",
+          "json_payload": "Fir Export: kopéiert dësen JSON (enthält Zyklen, Profiler an all fein gestëmmt Astellungen). Fir Import: Paste JSON aus WashData exportéiert."
+        }
+      },
+      "record_cycle": {
+        "title": "Rekord Zyklus",
+        "description": "Manuell en Zyklus notéieren fir e proppere Profil ouni Amëschung ze kreéieren.\n\nStatus: **{status}**\nDauer: {duration}s\nEchantillon: {samples}",
+        "data": {
+          "action": "Aktioun"
+        }
+      },
+      "record_process": {
+        "title": "Prozess Recording",
+        "description": "![Grafik]({graph_url})\n\n**Grafik weist rau Opnahmen.** Blo = Keep, Red = Proposéiert Trim.\n*Grafik ass statesch an aktualiséiert net mat Form Ännerungen.*\n\nOpnahmen gestoppt. Trimmen sinn op d'detektéiert Samplingsrate (~{sampling_rate}s) ausgeriicht.\n\nRaw Dauer: {duration}s\nEchantillon: {samples}",
+        "data": {
+          "head_trim": "Trim Start (Sekonnen)",
+          "tail_trim": "Trim Enn (Sekonnen)",
+          "save_mode": "Retten Destinatioun",
+          "profile_name": "Profil Numm"
+        }
+      },
+      "learning_feedbacks": {
+        "title": "Léieren Feedback",
+        "description": "Wielt eng Zyklus Bewäertungsufro fir ze veraarbecht.",
+        "data": {
+          "selected_feedback": "Wielt Cycle fir ze iwwerpréiwen"
+        }
+      },
+      "learning_feedbacks_empty": {
+        "title": "Léieren Feedback",
+        "description": "Keng pendend Feedback Ufroe fonnt."
+      },
+      "resolve_feedback": {
+        "title": "Feedback léisen",
+        "description": "{comparison_img}{candidates_table}\n**Erkannt Profil**: {detected_profile} ({confidence_pct}%)\n**Geschätzte Dauer**: {est_duration_min} min\n**Tatsächlech Dauer**: {act_duration_min} min\n\n__Wielt eng Aktioun hei drënner:__",
+        "data": {
+          "action": "Wat géift Dir gären maachen?",
+          "corrected_profile": "Korrekt Programm (wann Dir korrigéiert)",
+          "corrected_duration": "Korrekt Dauer a Sekonnen (wann Dir korrigéiert)"
+        }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Iwwerpréift proposéiert Ännerungen",
+        "description": "WashData fonnt {pending_count} proposéiert Wäerter fir ze gëllen.\n\nÄnnerungen ze iwwerpréiwen:\n{changes}\n\nConfirméiert ënnendrënner fir dës Wäerter an der Form ze setzen. Si ginn net gespäichert bis Dir Advanced Settings ofginn.",
+        "data": {
+          "confirm_apply_suggestions": "Stage proposéiert Wäerter an Advanced Settings"
+        }
+      }
+    },
+    "error": {
+      "import_failed": "Import gescheitert. Paste w.e.g. e gültege WashData Export JSON.",
+      "profile_exists": "E Profil mat dësem Numm gëtt et schonn",
+      "rename_failed": "Ausgefall Profil ëmbenennen. Profil existéiert vläicht net oder en neien Numm ass scho geholl.",
+      "assignment_failed": "Ausgefall Profil ze Zyklus zougewisen",
+      "duplicate_phase": "Eng Phase mat dësem Numm gëtt et schonn.",
+      "phase_not_found": "Ausgewielt Phase gouf net fonnt.",
+      "invalid_phase_name": "Phasennumm kann net eidel sinn.",
+      "phase_name_too_long": "Phasennumm ass ze laang.",
+      "invalid_phase_range": "Phasebereich ass ongëlteg. Enn muss méi grouss sinn wéi den Ufank.",
+      "invalid_phase_timestamp": "Zäitstempel ass ongëlteg. Benotzt JJJJ-MM-DD HH:MM oder HH:MM Format.",
+      "overlapping_phase_ranges": "Phasebereich iwwerlappt. Passt d'Gamme un a probéiert nach eng Kéier.",
+      "incomplete_phase_row": "All Phase Zeil muss eng Phas enthalen plus komplett Start- / Ennwäerter fir de gewielte Modus.",
+      "timestamp_mode_cycle_required": "Wielt w.e.g. e Quellzyklus wann Dir Zäitstempelmodus benotzt.",
+      "no_phase_ranges": "Et sinn nach keng Phasebereich fir dës Aktioun verfügbar.",
+      "feedback_notification_title": "WashData: Verifizéierungszyklus ({device})",
+      "feedback_notification_message": "**Apparat**: {device}\n**Programm**: {program} ({confidence}% Vertrauen)\n**Zäit**: {time}\n\nWashData brauch Är Hëllef fir dësen entdeckten Zyklus z'iwwerpréiwen.\n\nGitt w.e.g. op **Astellungen> Apparater & Servicer> WashData> Konfiguréieren> Léierfeedbacks** fir dëst Resultat ze bestätegen oder ze korrigéieren.",
+      "suggestions_ready_notification_title": "WashData: Suggested Settings Ready ({device})",
+      "suggestions_ready_notification_message": "De Sensor **Sugged Settings** mellt elo **{count}** handlungsfäeg Empfehlungen.\n\nFir se z'iwwerpréiwen an z'applizéieren: ** Astellungen > Apparater & Servicer > WashData > Konfiguréieren > Fortgeschratt Astellungen > Suggestioune Wäerter uwenden **.\n\nVirschléi sinn fakultativ a fir Iwwerpréiwung gewisen ier Dir späichert."
+    },
+    "abort": {
+      "no_cycles_found": "Keng Zyklen fonnt",
+      "no_profiles_found": "Keng Profiler fonnt. Schafen e Profil éischt.",
+      "no_profiles_for_matching": "Keng Profiler sinn fir passenden. Schafen Profiler éischt.",
+      "no_unlabeled_cycles": "All Zyklen si scho markéiert",
+      "no_suggestions": "Et sinn nach keng proposéiert Wäerter verfügbar. Run e puer Zyklen a probéiert nach eng Kéier.",
+      "no_predictions": "Keng Prognosen",
+      "no_custom_phases": "Keng personaliséiert Phasen fonnt.",
+      "reprocess_success": "{count} Zyklen erfollegräich nei veraarbecht.",
+      "debug_data_cleared": "Debugdaten aus {count} Zyklen erfollegräich geläscht."
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "Zyklus Start",
+        "cycle_finish": "Cycle fäerdeg",
+        "cycle_live": "Live Fortschrëtter"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "(net markéiert)",
+        "create_new_profile": "Schafen neie Profil",
+        "remove_label": "Ewechzehuelen Label",
+        "no_reference_cycle": "(Keng Referenz Zyklus)",
+        "all_device_types": "All Apparat Zorte",
+        "current_suffix": "(aktuell)",
+        "editor_select_info": "Wielt 1 Zyklus fir opzedeelen, oder 2+ Zyklen fir ze fusionéieren.",
+        "no_cycles_recorded": "Nach keng Zyklen opgeholl.",
+        "profile_summary_line": "- **{name}**: {count} Zyklen, {avg}m avg",
+        "no_profiles_created": "Keng Profiler erstallt nach.",
+        "phase_preview": "Phase Preview",
+        "phase_preview_no_curve": "Duerchschnëtt Profilkurve ass nach net verfügbar. Run / Label méi Zyklen fir dëse Profil.",
+        "average_power_curve": "Duerchschnëtt Power Curve",
+        "unit_min": "min",
+        "profile_option_fmt": "{name} ({count} Zyklen, ~{duration}m Duerchschnëtt)",
+        "profile_option_short_fmt": "{name} ({count} Zyklen, ~{duration}m)",
+        "deleted_cycles_from_profile": "{count} Zyklen vum {profile} geläscht.",
+        "not_enough_data_graph": "Net genuch Daten fir eng Grafik ze generéieren.",
+        "no_profiles_found": "Keng Profiler fonnt.",
+        "cycle_info_fmt": "Zyklus: {start}, {duration}m, Aktuell: {label}",
+        "top_candidates_header": "### Top Kandidaten",
+        "tbl_profile": "Profil",
+        "tbl_confidence": "Vertrauen",
+        "tbl_correlation": "Korrelatioun",
+        "tbl_duration_match": "Dauer Match",
+        "detected_profile": "Detektéiert Profil",
+        "estimated_duration": "Geschätzte Dauer",
+        "actual_duration": "Tatsächlech Dauer",
+        "choose_action": "__Wielt eng Aktioun hei drënner:__",
+        "tbl_count": "Grof",
+        "tbl_avg": "Avg",
+        "tbl_min": "Min",
+        "tbl_max": "Max",
+        "tbl_energy_avg": "Energie (Moyenne)",
+        "tbl_energy_total": "Energie (Gesamt)",
+        "tbl_consistency": "besteet aus.",
+        "tbl_last_run": "Last Run",
+        "graph_legend_title": "Graf Legend",
+        "graph_legend_body": "Déi blo Band duerstellt de Minimum a maximal Muecht Zeechnen Beräich observéiert. D'Linn weist d'Moyenne Kraaftkurve.",
+        "recording_preview": "Opnam Preview",
+        "trim_start": "Trimmen Start",
+        "trim_end": "Trim Enn",
+        "split_preview_title": "Split Preview",
+        "split_preview_found_fmt": "{count} Segmenter fonnt.",
+        "split_preview_confirm_fmt": "Klickt Confirméieren fir dësen Zyklus an {count} separat Zyklen opzedeelen.",
+        "merge_preview_title": "Fusioun Preview",
+        "merge_preview_joining_fmt": "Bäitrëtt {count} Zyklen. Lücken ginn mat 0W Liesungen gefëllt.",
+        "profile_comparison": "Profil Verglach",
+        "actual_cycle_label": "Dësen Zyklus (tatsächlech)",
+        "storage_usage_header": "Stockage Benotzung",
+        "storage_file_size": "Dateigréisst",
+        "storage_cycles": "Cyclen",
+        "storage_profiles": "Profiler",
+        "storage_debug_traces": "Debug Spuren",
+        "overview_suffix": "Iwwersiicht",
+        "phase_preview_for_profile": "Phase Virschau fir Profil",
+        "current_ranges_header": "Aktuelle Beräicher",
+        "assign_phases_help": "Benotzt d'Aktiounen hei drënner fir Beräicher ze addéieren, z'änneren, ze läschen oder ze späicheren.",
+        "profile_summary_header": "Profil Resumé",
+        "recent_cycles_header": "Rezent Zyklen"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "Split e Cycle (Lücken fannen)",
+        "merge": "Merge Cycles (Join Fragmenter)",
+        "delete": "Zyklus(en) läschen"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "Ënnerhalt: Reprocessen & Optimiséieren Daten",
+        "clear_debug_data": "Debug Daten läschen (Plaz befreien)",
+        "wipe_history": "Wëschen ALL Daten fir dësen Apparat (irreversibel)",
+        "export_import": "Export / Import JSON mat Astellungen (Kopie / Paste)"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "Export All Daten",
+        "import": "Import / Merge Daten"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "Auto-Label Old Cycles",
+        "select_cycle_to_label": "Label Spezifesch Zyklus",
+        "select_cycle_to_label_multi": "Label Multiple Cycles",
+        "select_cycle_to_delete": "Läschen Cycle",
+        "interactive_editor": "Merge / Split Interactive Editor"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "Schafen neie Profil",
+        "edit_profile": "Änneren / ëmbenennen Profil",
+        "delete_profile": "Läschen Profil",
+        "profile_stats": "Profil Statistiken",
+        "cleanup_profile": "Botzen Geschicht - Grafik & Läschen",
+        "assign_phases": "Assignéiert Phase Ranges"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "Nei Phas erstellen",
+        "edit_custom_phase": "Phase änneren",
+        "delete_custom_phase": "Läschen Phase"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "Füügt Phase Range",
+        "edit_range": "Phase Range änneren",
+        "delete_range": "Läschen Phase Range",
+        "clear_ranges": "All Ranges läschen",
+        "save_ranges": "Späicheren an zréck"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "Erfrëschen Status",
+        "stop_recording": "Opname stoppen (Späicheren & Prozess)",
+        "start_recording": "Start New Recording",
+        "process_recording": "Process Last Recording (Trim & Save)",
+        "discard_recording": "Läscht Recording ofzeginn"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "Schafen neie Profil",
+        "existing_profile": "Add to bestehend Profil",
+        "discard": "Entlooss Recording"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "Confirméieren - Korrekt Detektioun",
+        "correct": "Richteg - Wielt Programm / Dauer",
+        "ignore": "Ignoréieren - Falsch Positiv / Kaméidi Zyklus",
+        "delete": "Läschen - Ewechzehuelen aus der Geschicht"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "Label Cycle",
+      "description": "Gitt e existente Profil un e vergaangene Zyklus, oder läscht de Label.",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "D'Wäschmaschinn Apparat ze Label."
+        },
+        "cycle_id": {
+          "name": "Zyklus ID",
+          "description": "D'ID vun der Zyklus ze Label."
+        },
+        "profile_name": {
+          "name": "Profil Numm",
+          "description": "Den Numm vun engem existente Profil (erstellt Profiler am Menü Profiler verwalten). Loosst eidel fir de Label ze läschen."
+        }
+      }
+    },
+    "create_profile": {
+      "name": "Schafen Profil",
+      "description": "Erstellt en neie Profil (standalone oder baséiert op engem Referenzzyklus).",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "D'Wäschmaschinn Apparat."
+        },
+        "profile_name": {
+          "name": "Profil Numm",
+          "description": "Numm fir den neie Profil (zB 'Heavy Duty', 'Delicates')."
+        },
+        "reference_cycle_id": {
+          "name": "Referenz Zyklus ID",
+          "description": "Optional Zyklus ID fir dëse Profil ze baséieren."
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "Läschen Profil",
+      "description": "Läschen e Profil an optional unlabel Zyklen benotzt et.",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "D'Wäschmaschinn Apparat."
+        },
+        "profile_name": {
+          "name": "Profil Numm",
+          "description": "De Profil fir ze läschen."
+        },
+        "unlabel_cycles": {
+          "name": "Unlabel Cycles",
+          "description": "Ewechzehuelen Profillabel aus Zyklen mat dësem Profil."
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "Auto-Label Old Cycles",
+      "description": "Retroaktiv Label unlabeled Zyklen benotzt Profil Matching.",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "D'Wäschmaschinn Apparat."
+        },
+        "confidence_threshold": {
+          "name": "Vertrauensgrenz",
+          "description": "Minimum Match Vertrauen (0,50-0,95) Etiketten ze gëllen."
+        }
+      }
+    },
+    "export_config": {
+      "name": "Export Config",
+      "description": "Exportéiert d'Profiler, d'Zyklen an d'Astellunge vun dësem Apparat an eng JSON Datei (pro Apparat).",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "D'Wäschmaschinn Apparat ze exportéieren."
+        },
+        "path": {
+          "name": "Wee",
+          "description": "Optional absolute Dateiwee fir ze schreiwen (Standard op /config/ha_washdata_export_{entry}.json)."
+        }
+      }
+    },
+    "import_config": {
+      "name": "Import Config",
+      "description": "Importéiert Profiler, Zyklen an Astellunge fir dësen Apparat aus enger JSON Exportdatei (Astellunge kënnen iwwerschriwwe ginn).",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "D'Wäschmaschinn Apparat fir z'importéieren."
+        },
+        "path": {
+          "name": "Wee",
+          "description": "Absolute Wee fir d'Export JSON Datei fir z'importéieren."
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "Cycle Feedback ofginn",
+      "description": "Bestätegt oder korrigéiert en auto-detektéierte Programm no engem ofgeschlossen Zyklus. Gitt entweder `entry_id` (fortgeschratt) oder `device_id` (recommandéiert).",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "De WashData Apparat (recommandéiert amplaz vun entry_id)."
+        },
+        "entry_id": {
+          "name": "Entrée ID",
+          "description": "D'Config Entrée ID fir den Apparat (Alternativ zu device_id)."
+        },
+        "cycle_id": {
+          "name": "Zyklus ID",
+          "description": "D'Zyklus ID gewisen an der Feedback Notifikatioun / Logbicher."
+        },
+        "user_confirmed": {
+          "name": "Confirméieren entdeckt Programm",
+          "description": "Stellt richteg wann de festgestallte Programm richteg ass."
+        },
+        "corrected_profile": {
+          "name": "Korrigéiert Profil",
+          "description": "Wann net bestätegt, gitt de richtege Profil / Programmnumm."
+        },
+        "corrected_duration": {
+          "name": "Korrigéiert Dauer (Sekonnen)",
+          "description": "Optional korrigéiert Dauer a Sekonnen."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Optional Notizen iwwer dësen Zyklus."
+        }
+      }
+    },
+    "record_start": {
+      "name": "Record Cycle Start",
+      "description": "Fänkt manuell e propperen Zyklus opzehuelen (iwwergräifend all passende Logik).",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "D'Wäschmaschinn Apparat ze Rekord."
+        }
+      }
+    },
+    "record_stop": {
+      "name": "Record Cycle Stop",
+      "description": "Stop manuell Opnam.",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "D'Wäschmaschinn Apparat fir den Opnahmen ze stoppen."
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "Lafen"
+      },
+      "match_ambiguity": {
+        "name": "Match Ambiguitéit"
+      }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "Staat",
+        "state": {
+          "off": "Off",
+          "idle": "Idle",
+          "starting": "Ugefaangen",
+          "running": "Lafen",
+          "paused": "Pauséiert",
+          "ending": "Enn",
+          "finished": "Fäerdeg",
+          "anti_wrinkle": "Anti-Falten",
+          "interrupted": "Ënnerbrach",
+          "force_stopped": "Kraaft gestoppt",
+          "rinse": "Spülen",
+          "unknown": "Onbekannt"
+        }
+      },
+      "washer_program": {
+        "name": "Programm"
+      },
+      "time_remaining": {
+        "name": "Zäit Rescht"
+      },
+      "total_duration": {
+        "name": "Total Dauer"
+      },
+      "cycle_progress": {
+        "name": "Fortschrëtt"
+      },
+      "current_power": {
+        "name": "Aktuell Kraaft"
+      },
+      "elapsed_time": {
+        "name": "Vergaangen Zäit"
+      },
+      "debug_info": {
+        "name": "Debug Info"
+      },
+      "match_confidence": {
+        "name": "Match Vertrauen"
+      },
+      "top_candidates": {
+        "name": "Top Kandidaten",
+        "state": {
+          "none": "Keen"
+        }
+      },
+      "current_phase": {
+        "name": "Aktuell Phase"
+      },
+      "wash_phase": {
+        "name": "Phase"
+      },
+      "profile_cycle_count": {
+        "name": "Profil {profile_name} Zuel",
+        "unit_of_measurement": "Zyklen"
+      },
+      "suggestions": {
+        "name": "Recommandéiert Astellungen"
+      }
+    },
+    "select": {
+      "program_select": {
+        "name": "Cycle Programm",
+        "state": {
+          "auto_detect": "Auto-Detectioun"
+        }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "Kraaft Enn Zyklus"
+      }
+    }
+  }
+}
