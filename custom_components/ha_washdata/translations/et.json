@@ -545,6 +545,13 @@
           "corrected_profile": "Õige programm (kui parandate)",
           "corrected_duration": "Õige kestus minutites (kui parandate)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Vaadake üle soovitatud muudatused",
+        "description": "WashData leidis rakendamiseks {pending_count} soovitatud väärtust.\n\nÜlevaatavad muudatused:\n{changes}\n\nNende väärtuste vormistamiseks kinnitage allpool. Neid ei salvestata enne, kui saadate täpsemad sätted.",
+        "data": {
+          "confirm_apply_suggestions": "Määrake soovitatud väärtused jaotises Täpsemad seaded"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Valige ajatemplirežiimi kasutamisel allika tsükkel.",
       "no_phase_ranges": "Selle toimingu jaoks pole veel faasivahemikke saadaval.",
       "feedback_notification_title": "WashData: kontrolli tsükkel ({device})",
-      "feedback_notification_message": "**Seade**: {device}\n**Programm**: {program} ({confidence}% usaldusväärsus)\n**Aeg**: {time}\n\nWashData vajab tuvastatud tsükli kontrollimiseks teie abi.\n\nSelle tulemuse kinnitamiseks või parandamiseks minge jaotisse **Seaded > Seadmed ja teenused > WashData > Seadistamine > Tagasiside õppimine**."
+      "feedback_notification_message": "**Seade**: {device}\n**Programm**: {program} ({confidence}% usaldusväärsus)\n**Aeg**: {time}\n\nWashData vajab tuvastatud tsükli kontrollimiseks teie abi.\n\nSelle tulemuse kinnitamiseks või parandamiseks minge jaotisse **Seaded > Seadmed ja teenused > WashData > Seadistamine > Tagasiside õppimine**.",
+      "suggestions_ready_notification_title": "WashData: soovituslikud seaded on valmis ({device})",
+      "suggestions_ready_notification_message": "Andur **Soovitatud seaded** annab nüüd **{count}** rakendatavaid soovitusi.\n\nNende ülevaatamiseks ja rakendamiseks tehke järgmist. **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSoovitused on valikulised ja neid kuvatakse enne salvestamist ülevaatamiseks."
     },
     "abort": {
       "no_cycles_found": "Tsükleid ei leitud",

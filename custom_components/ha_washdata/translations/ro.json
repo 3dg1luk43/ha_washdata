@@ -545,6 +545,13 @@
           "corrected_profile": "Programul corect (dacă se corectează)",
           "corrected_duration": "Durata corectă în minute (dacă se corectează)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Examinați modificările sugerate",
+        "description": "WashData a găsit {pending_count} valori sugerate de aplicat.\n\nModificări de revizuire:\n{changes}\n\nConfirmați mai jos pentru a introduce aceste valori în formular. Acestea nu sunt salvate până când nu trimiteți Setări avansate.",
+        "data": {
+          "confirm_apply_suggestions": "Etapați valorile sugerate în Setări avansate"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Vă rugăm să selectați un ciclu sursă când utilizați modul marcaj temporal.",
       "no_phase_ranges": "Încă nu sunt disponibile intervale de fază pentru acea acțiune.",
       "feedback_notification_title": "WashData: Verificați ciclul ({device})",
-      "feedback_notification_message": "**Dispozitiv**: {device}\n**Program**: {program} ({confidence}% încredere)\n**Ora**: {time}\n\nWashData are nevoie de ajutorul tău pentru a verifica acest ciclu detectat.\n\nVă rugăm să accesați **Setări > Dispozitive și servicii > WashData > Configurare > Feedbacks de învățare** pentru a confirma sau corecta acest rezultat."
+      "feedback_notification_message": "**Dispozitiv**: {device}\n**Program**: {program} ({confidence}% încredere)\n**Ora**: {time}\n\nWashData are nevoie de ajutorul tău pentru a verifica acest ciclu detectat.\n\nVă rugăm să accesați **Setări > Dispozitive și servicii > WashData > Configurare > Feedbacks de învățare** pentru a confirma sau corecta acest rezultat.",
+      "suggestions_ready_notification_title": "WashData: gata de setări sugerate ({device})",
+      "suggestions_ready_notification_message": "Senzorul **Setări sugerate** raportează acum **{count}** recomandări posibile.\n\nPentru a le revizui și aplica: **Setări > Dispozitive și servicii > WashData > Configurare > Setări avansate > Aplicați valorile sugerate**.\n\nSugestiile sunt opționale și sunt afișate pentru examinare înainte de a salva."
     },
     "abort": {
       "no_cycles_found": "Nu s-au găsit cicluri",

@@ -545,6 +545,13 @@
           "corrected_profile": "Program yang Benar (jika mengoreksi)",
           "corrected_duration": "Durasi Benar dalam hitungan menit (jika mengoreksi)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Tinjau Perubahan yang Disarankan",
+        "description": "WashData menemukan {pending_count} nilai yang disarankan untuk diterapkan.\n\nPerubahan untuk ditinjau:\n{changes}\n\nKonfirmasikan di bawah untuk menampilkan nilai-nilai ini dalam formulir. Pengaturan tersebut tidak disimpan sampai Anda mengirimkan Pengaturan Lanjutan.",
+        "data": {
+          "confirm_apply_suggestions": "Nilai yang disarankan panggung di Pengaturan Lanjutan"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Silakan pilih siklus sumber saat menggunakan mode stempel waktu.",
       "no_phase_ranges": "Belum ada rentang fase yang tersedia untuk tindakan tersebut.",
       "feedback_notification_title": "WashData: Verifikasi Siklus ({device})",
-      "feedback_notification_message": "**Perangkat**: {device}\n**Program**: {program} (keyakinan {confidence}%)\n**Waktu**: {time}\n\nWashData memerlukan bantuan Anda untuk memverifikasi siklus yang terdeteksi ini.\n\nSilakan buka **Pengaturan > Perangkat & Layanan > WashData > Konfigurasi > Masukan Pembelajaran** untuk mengonfirmasi atau memperbaiki hasil ini."
+      "feedback_notification_message": "**Perangkat**: {device}\n**Program**: {program} (keyakinan {confidence}%)\n**Waktu**: {time}\n\nWashData memerlukan bantuan Anda untuk memverifikasi siklus yang terdeteksi ini.\n\nSilakan buka **Pengaturan > Perangkat & Layanan > WashData > Konfigurasi > Masukan Pembelajaran** untuk mengonfirmasi atau memperbaiki hasil ini.",
+      "suggestions_ready_notification_title": "WashData: Setelan yang Disarankan Siap ({device})",
+      "suggestions_ready_notification_message": "Sensor **Setelan yang Disarankan** kini melaporkan **{count}** rekomendasi yang dapat ditindaklanjuti.\n\nUntuk meninjau dan menerapkannya: **Pengaturan > Perangkat & Layanan > WashData > Konfigurasi > Pengaturan Lanjutan > Terapkan Nilai yang Disarankan**.\n\nSaran bersifat opsional dan ditampilkan untuk ditinjau sebelum Anda menyimpannya."
     },
     "abort": {
       "no_cycles_found": "Tidak ada siklus yang ditemukan",

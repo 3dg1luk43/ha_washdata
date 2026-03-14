@@ -545,6 +545,13 @@
           "corrected_profile": "Teisinga programa (jei taisoma)",
           "corrected_duration": "Teisinga trukmė minutėmis (jei taisoma)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Peržiūrėkite siūlomus pakeitimus",
+        "description": "„WashData“ rado {pending_count} siūlomas taikyti vertes.\n\nPakeitimai, kuriuos reikia peržiūrėti:\n{changes}\n\nPatvirtinkite toliau, kad nustatytumėte šias vertes formoje. Jie neišsaugomi, kol nepateiksite išplėstinių nustatymų.",
+        "data": {
+          "confirm_apply_suggestions": "Išplėstiniuose nustatymuose nustatykite siūlomas vertes"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Naudodami laiko žymos režimą pasirinkite šaltinio ciklą.",
       "no_phase_ranges": "Dar nėra šio veiksmo fazių diapazonų.",
       "feedback_notification_title": "„WashData“: patvirtinimo ciklas ({device})",
-      "feedback_notification_message": "**Įrenginys**: {device}\n**Programa**: {program} ({confidence} % pasitikėjimo)\n**Laikas**: {time}\n\n„WashData“ reikia jūsų pagalbos, kad patikrintų šį aptiktą ciklą.\n\nEikite į **Nustatymai > Įrenginiai ir paslaugos > WashData > Konfigūruoti > Mokymosi atsiliepimai**, kad patvirtintumėte arba pataisytumėte šį rezultatą."
+      "feedback_notification_message": "**Įrenginys**: {device}\n**Programa**: {program} ({confidence} % pasitikėjimo)\n**Laikas**: {time}\n\n„WashData“ reikia jūsų pagalbos, kad patikrintų šį aptiktą ciklą.\n\nEikite į **Nustatymai > Įrenginiai ir paslaugos > WashData > Konfigūruoti > Mokymosi atsiliepimai**, kad patvirtintumėte arba pataisytumėte šį rezultatą.",
+      "suggestions_ready_notification_title": "„WashData“: siūlomi nustatymai paruošti ({device})",
+      "suggestions_ready_notification_message": "**Siūlomi nustatymai** jutiklis dabar pateikia **{count}** įgyvendinamas rekomendacijas.\n\nNorėdami juos peržiūrėti ir pritaikyti: **Nustatymai > Įrenginiai ir paslaugos > „WashData“ > Konfigūruoti > Išplėstiniai nustatymai > Taikyti siūlomas reikšmes**.\n\nPasiūlymai yra neprivalomi ir rodomi peržiūrėti prieš išsaugant."
     },
     "abort": {
       "no_cycles_found": "Ciklų nerasta",

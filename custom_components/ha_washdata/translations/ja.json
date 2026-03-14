@@ -545,6 +545,13 @@
           "corrected_profile": "正しいプログラム (修正している場合)",
           "corrected_duration": "修正期間 (分単位) (修正する場合)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "提案された変更を確認する",
+        "description": "WashData は、適用する推奨値が {pending_count} 個見つかりました。\n\nレビューすべき変更点:\n{changes}\n\nこれらの値をフォームにステージングするには、以下を確認してください。これらは、詳細設定を送信するまで保存されません。",
+        "data": {
+          "confirm_apply_suggestions": "詳細設定でのステージ推奨値"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "タイムスタンプモードを使用する場合はソースサイクルを選択してください。",
       "no_phase_ranges": "そのアクションに使用できるフェーズ範囲はまだありません。",
       "feedback_notification_title": "WashData: サイクルの検証 ({device})",
-      "feedback_notification_message": "**デバイス**: {device}\n**プログラム**: {program} (信頼度: {confidence}%)\n**時間**: {time}\n\nWashData は、この検出されたサイクルを確認するためにあなたの助けを必要としています。\n\nこの結果を確認または修正するには、**[設定] > [デバイスとサービス] > [WashData] > [構成] > [学習フィードバック]** に移動してください。"
+      "feedback_notification_message": "**デバイス**: {device}\n**プログラム**: {program} (信頼度: {confidence}%)\n**時間**: {time}\n\nWashData は、この検出されたサイクルを確認するためにあなたの助けを必要としています。\n\nこの結果を確認または修正するには、**[設定] > [デバイスとサービス] > [WashData] > [構成] > [学習フィードバック]** に移動してください。",
+      "suggestions_ready_notification_title": "WashData: 推奨設定の準備完了 ({device})",
+      "suggestions_ready_notification_message": "**推奨設定**センサーは**{count}**の実用的な推奨事項を報告するようになりました。\n\nそれらを確認して適用するには: **[設定] > [デバイスとサービス] > [WashData] > [構成] > [詳細設定] > [推奨値を適用]**。\n\n提案はオプションであり、保存する前に確認するために表示されます。"
     },
     "abort": {
       "no_cycles_found": "サイクルが見つかりませんでした",

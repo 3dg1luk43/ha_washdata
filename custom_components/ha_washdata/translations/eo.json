@@ -545,6 +545,13 @@
           "corrected_profile": "Ĝusta Programo (se korektante)",
           "corrected_duration": "Ĝusta Daŭro en minutoj (se korektante)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Revizu Sugestajn Ŝanĝojn",
+        "description": "WashData trovis {pending_count} proponitajn valorojn por apliki.\n\nŜanĝoj por revizii:\n{changes}\n\nKonfirmu ĉi sube por enscenigi ĉi tiujn valorojn en la formularo. Ili ne estas konservitaj ĝis vi sendas Altnivelajn Agordojn.",
+        "data": {
+          "confirm_apply_suggestions": "Scenigu proponitajn valorojn en Altnivelaj Agordoj"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Bonvolu elekti fontciklon kiam vi uzas tempostampilon.",
       "no_phase_ranges": "Neniuj fazintervaloj ankoraŭ haveblas por tiu ago.",
       "feedback_notification_title": "WashData: Kontrolu Ciklon ({device})",
-      "feedback_notification_message": "**Aparato**: {device}\n**Programo**: {program} ({confidence}% fido)\n**Tempo**: {time}\n\nWashData bezonas vian helpon por kontroli ĉi tiun detektitan ciklon.\n\nBonvolu iri al **Agordoj > Aparatoj kaj Servoj > WashData > Agordi > Lernado-Resigoj** por konfirmi aŭ korekti ĉi tiun rezulton."
+      "feedback_notification_message": "**Aparato**: {device}\n**Programo**: {program} ({confidence}% fido)\n**Tempo**: {time}\n\nWashData bezonas vian helpon por kontroli ĉi tiun detektitan ciklon.\n\nBonvolu iri al **Agordoj > Aparatoj kaj Servoj > WashData > Agordi > Lernado-Resigoj** por konfirmi aŭ korekti ĉi tiun rezulton.",
+      "suggestions_ready_notification_title": "WashData: Pretaj Sugestaj Agordoj ({device})",
+      "suggestions_ready_notification_message": "La **Sugestita Agordo** sentilo nun raportas **{count}** ageblajn rekomendojn.\n\nPor revizii kaj apliki ilin: **Agordoj > Aparatoj kaj Servoj > WashData > Agordu > Altnivelaj Agordoj > Apliki Sugestajn Valorojn**.\n\nSugestoj estas laŭvolaj kaj montrataj por revizio antaŭ ol vi konservas."
     },
     "abort": {
       "no_cycles_found": "Neniuj cikloj trovitaj",

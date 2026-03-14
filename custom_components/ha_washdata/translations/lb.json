@@ -545,6 +545,13 @@
           "corrected_profile": "Korrekt Programm (wann Dir korrigéiert)",
           "corrected_duration": "Korrekt Dauer a Minutten (wann Dir korrigéiert)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Iwwerpréift proposéiert Ännerungen",
+        "description": "WashData fonnt {pending_count} proposéiert Wäerter fir ze gëllen.\n\nÄnnerungen ze iwwerpréiwen:\n{changes}\n\nConfirméiert ënnendrënner fir dës Wäerter an der Form ze setzen. Si ginn net gespäichert bis Dir Advanced Settings ofginn.",
+        "data": {
+          "confirm_apply_suggestions": "Stage proposéiert Wäerter an Advanced Settings"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Wielt w.e.g. e Quellzyklus wann Dir Zäitstempelmodus benotzt.",
       "no_phase_ranges": "Et sinn nach keng Phasebereich fir dës Aktioun verfügbar.",
       "feedback_notification_title": "WashData: Verifizéierungszyklus ({device})",
-      "feedback_notification_message": "**Apparat**: {device}\n**Programm**: {program} ({confidence}% Vertrauen)\n**Zäit**: {time}\n\nWashData brauch Är Hëllef fir dësen entdeckten Zyklus z'iwwerpréiwen.\n\nGitt w.e.g. op **Astellungen> Apparater & Servicer> WashData> Konfiguréieren> Léierfeedbacks** fir dëst Resultat ze bestätegen oder ze korrigéieren."
+      "feedback_notification_message": "**Apparat**: {device}\n**Programm**: {program} ({confidence}% Vertrauen)\n**Zäit**: {time}\n\nWashData brauch Är Hëllef fir dësen entdeckten Zyklus z'iwwerpréiwen.\n\nGitt w.e.g. op **Astellungen> Apparater & Servicer> WashData> Konfiguréieren> Léierfeedbacks** fir dëst Resultat ze bestätegen oder ze korrigéieren.",
+      "suggestions_ready_notification_title": "WashData: Suggested Settings Ready ({device})",
+      "suggestions_ready_notification_message": "De Sensor **Sugged Settings** mellt elo **{count}** handlungsfäeg Empfehlungen.\n\nFir se z'iwwerpréiwen an z'applizéieren: ** Astellungen > Apparater & Servicer > WashData > Konfiguréieren > Fortgeschratt Astellungen > Suggestioune Wäerter uwenden **.\n\nVirschléi sinn fakultativ a fir Iwwerpréiwung gewisen ier Dir späichert."
     },
     "abort": {
       "no_cycles_found": "Keng Zyklen fonnt",

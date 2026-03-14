@@ -545,6 +545,13 @@
           "corrected_profile": "Programa correcte (si es corregeix)",
           "corrected_duration": "Durada correcta en minuts (si es corregeix)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Reviseu els canvis suggerits",
+        "description": "WashData ha trobat {pending_count} valors suggerits per aplicar.\n\nCanvis a revisar:\n{changes}\n\nConfirmeu a continuació per escenificar aquests valors al formulari. No es desaran fins que no envieu la configuració avançada.",
+        "data": {
+          "confirm_apply_suggestions": "Escenifica els valors suggerits a la configuració avançada"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Seleccioneu un cicle d'origen quan utilitzeu el mode de marca de temps.",
       "no_phase_ranges": "Encara no hi ha rangs de fase disponibles per a aquesta acció.",
       "feedback_notification_title": "WashData: verifica el cicle ({device})",
-      "feedback_notification_message": "**Dispositiu**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Hora**: {time}\n\nWashData necessita la teva ajuda per verificar aquest cicle detectat.\n\nAneu a **Configuració > Dispositius i serveis > WashData > Configura > Comentaris d'aprenentatge** per confirmar o corregir aquest resultat."
+      "feedback_notification_message": "**Dispositiu**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Hora**: {time}\n\nWashData necessita la teva ajuda per verificar aquest cicle detectat.\n\nAneu a **Configuració > Dispositius i serveis > WashData > Configura > Comentaris d'aprenentatge** per confirmar o corregir aquest resultat.",
+      "suggestions_ready_notification_title": "WashData: configuracions suggerides a punt ({device})",
+      "suggestions_ready_notification_message": "El sensor de **Configuració suggerida** ara informa de **{count}** recomanacions accionables.\n\nPer revisar-los i aplicar-los: **Configuració > Dispositius i serveis > WashData > Configura > Configuració avançada > Aplica els valors suggerits**.\n\nEls suggeriments són opcionals i es mostren per revisar-los abans de desar-los."
     },
     "abort": {
       "no_cycles_found": "No s'han trobat cicles",

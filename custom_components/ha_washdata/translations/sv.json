@@ -545,6 +545,13 @@
           "corrected_profile": "Rätt program (om du korrigerar)",
           "corrected_duration": "Korrekt varaktighet i minuter (om korrigering)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Granska föreslagna ändringar",
+        "description": "WashData hittade {pending_count} föreslagna värden att tillämpa.\n\nÄndringar att granska:\n{changes}\n\nBekräfta nedan för att placera dessa värden i formuläret. De sparas inte förrän du skickar avancerade inställningar.",
+        "data": {
+          "confirm_apply_suggestions": "Steg föreslagna värden i avancerade inställningar"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Välj en källcykel när du använder tidsstämpelläget.",
       "no_phase_ranges": "Inga fasintervall är tillgängliga för den åtgärden ännu.",
       "feedback_notification_title": "WashData: Verifieringscykel ({device})",
-      "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence}% konfidens)\n**Tid**: {time}\n\nWashData behöver din hjälp för att verifiera denna upptäckta cykel.\n\nGå till **Inställningar > Enheter och tjänster > WashData > Konfigurera > Inlärningsfeedback** för att bekräfta eller korrigera detta resultat."
+      "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence}% konfidens)\n**Tid**: {time}\n\nWashData behöver din hjälp för att verifiera denna upptäckta cykel.\n\nGå till **Inställningar > Enheter och tjänster > WashData > Konfigurera > Inlärningsfeedback** för att bekräfta eller korrigera detta resultat.",
+      "suggestions_ready_notification_title": "WashData: Föreslagna inställningar redo ({device})",
+      "suggestions_ready_notification_message": "Sensorn **Föreslagna inställningar** rapporterar nu **{count}** rekommendationer som kan användas.\n\nSå här granskar och tillämpar du dem: **Inställningar > Enheter och tjänster > WashData > Konfigurera > Avancerade inställningar > Använd föreslagna värden**.\n\nFörslag är valfria och visas för granskning innan du sparar."
     },
     "abort": {
       "no_cycles_found": "Inga cykler hittades",

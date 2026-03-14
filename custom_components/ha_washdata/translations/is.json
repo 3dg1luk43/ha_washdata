@@ -545,6 +545,13 @@
           "corrected_profile": "Rétt forrit (ef leiðrétt er)",
           "corrected_duration": "Rétt lengd í mínútum (ef leiðrétt er)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Skoðaðu breytingartillögur",
+        "description": "WashData fann {pending_count} tillögur að gildum til að nota.\n\nBreytingar til endurskoðunar:\n{changes}\n\nStaðfestu hér að neðan til að setja þessi gildi á eyðublaðið. Þær eru ekki vistaðar fyrr en þú sendir ítarlegar stillingar.",
+        "data": {
+          "confirm_apply_suggestions": "Stig tillögur að gildum í Ítarlegri stillingum"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Vinsamlegast veldu upprunalotu þegar þú notar tímastimplaham.",
       "no_phase_ranges": "Engin áfangasvið eru enn tiltæk fyrir þá aðgerð.",
       "feedback_notification_title": "WashData: Staðfestu hringrás ({device})",
-      "feedback_notification_message": "**Tæki**: {device}\n**Prógramm**: {program} ({confidence}% sjálfstraust)\n**Tími**: {time}\n\nWashData þarf á aðstoð þinni að halda til að staðfesta þessa greindu lotu.\n\nVinsamlegast farðu í **Stillingar > Tæki og þjónusta > WashData > Stilla > Námsendurgjöf** til að staðfesta eða leiðrétta þessa niðurstöðu."
+      "feedback_notification_message": "**Tæki**: {device}\n**Prógramm**: {program} ({confidence}% sjálfstraust)\n**Tími**: {time}\n\nWashData þarf á aðstoð þinni að halda til að staðfesta þessa greindu lotu.\n\nVinsamlegast farðu í **Stillingar > Tæki og þjónusta > WashData > Stilla > Námsendurgjöf** til að staðfesta eða leiðrétta þessa niðurstöðu.",
+      "suggestions_ready_notification_title": "WashData: Ráðlagðar stillingar tilbúnar ({device})",
+      "suggestions_ready_notification_message": "Skynjarinn **Tillögur að stillingum** tilkynnir nú **{count}** ráðleggingar sem hægt er að nota.\n\nTil að fara yfir og nota þær: **Stillingar > Tæki og þjónusta > WashData > Stilla > Ítarlegar stillingar > Nota ráðlögð gildi**.\n\nTillögur eru valfrjálsar og sýndar til skoðunar áður en þú vistar."
     },
     "abort": {
       "no_cycles_found": "Engar lotur fundust",

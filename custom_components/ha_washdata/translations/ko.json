@@ -545,6 +545,13 @@
           "corrected_profile": "올바른 프로그램(수정하는 경우)",
           "corrected_duration": "수정 기간(분)(수정하는 경우)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "제안된 변경 사항 검토",
+        "description": "WashData가 적용할 제안 값 {pending_count}개를 찾았습니다.\n\n검토할 변경사항:\n{changes}\n\n양식에 해당 값을 스테이징하려면 아래를 확인하세요. 고급 설정을 제출할 때까지 저장되지 않습니다.",
+        "data": {
+          "confirm_apply_suggestions": "고급 설정에서 제안된 값을 준비합니다."
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "타임스탬프 모드를 사용할 때 소스 주기를 선택하세요.",
       "no_phase_ranges": "아직 해당 작업에 사용할 수 있는 위상 범위가 없습니다.",
       "feedback_notification_title": "WashData: 확인 주기({device})",
-      "feedback_notification_message": "**기기**: {device}\n**프로그램**: {program} ({confidence}% 신뢰도)\n**시간**: {time}\n\nWashData가 감지된 주기를 확인하려면 귀하의 도움이 필요합니다.\n\n이 결과를 확인하거나 수정하려면 **설정 > 장치 및 서비스 > WashData > 구성 > 학습 피드백**으로 이동하세요."
+      "feedback_notification_message": "**기기**: {device}\n**프로그램**: {program} ({confidence}% 신뢰도)\n**시간**: {time}\n\nWashData가 감지된 주기를 확인하려면 귀하의 도움이 필요합니다.\n\n이 결과를 확인하거나 수정하려면 **설정 > 장치 및 서비스 > WashData > 구성 > 학습 피드백**으로 이동하세요.",
+      "suggestions_ready_notification_title": "WashData: 제안 설정 준비됨({device})",
+      "suggestions_ready_notification_message": "**제안 설정** 센서는 이제 **{count}** 실행 가능한 권장 사항을 보고합니다.\n\n이를 검토하고 적용하려면: **설정 > 장치 및 서비스 > WashData > 구성 > 고급 설정 > 제안 값 적용**.\n\n제안사항은 선택사항이며 저장하기 전에 검토를 위해 표시됩니다."
     },
     "abort": {
       "no_cycles_found": "사이클을 찾을 수 없습니다.",

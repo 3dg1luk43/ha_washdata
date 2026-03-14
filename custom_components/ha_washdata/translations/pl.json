@@ -545,6 +545,13 @@
           "corrected_profile": "Prawidłowy program (jeśli poprawiany)",
           "corrected_duration": "Prawidłowy czas trwania w minutach (jeśli poprawiany)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Przejrzyj sugerowane zmiany",
+        "description": "WashData znalazł {pending_count} sugerowanych wartości do zastosowania.\n\nZmiany do sprawdzenia:\n{changes}\n\nPotwierdź poniżej, aby umieścić te wartości w formularzu. Nie są one zapisywane, dopóki nie prześlesz Ustawień zaawansowanych.",
+        "data": {
+          "confirm_apply_suggestions": "Sugerowane wartości etapu w Ustawieniach zaawansowanych"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Jeśli korzystasz z trybu znacznika czasu, wybierz cykl źródłowy.",
       "no_phase_ranges": "Dla tej akcji nie są jeszcze dostępne żadne zakresy faz.",
       "feedback_notification_title": "WashData: Sprawdź cykl ({device})",
-      "feedback_notification_message": "**Urządzenie**: {device}\n**Program**: {program} ({confidence}% pewności)\n**Czas**: {time}\n\nWashData potrzebuje Twojej pomocy, aby zweryfikować wykryty cykl.\n\nPrzejdź do **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Informacje zwrotne**, aby potwierdzić lub poprawić ten wynik."
+      "feedback_notification_message": "**Urządzenie**: {device}\n**Program**: {program} ({confidence}% pewności)\n**Czas**: {time}\n\nWashData potrzebuje Twojej pomocy, aby zweryfikować wykryty cykl.\n\nPrzejdź do **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Informacje zwrotne**, aby potwierdzić lub poprawić ten wynik.",
+      "suggestions_ready_notification_title": "WashData: Gotowe sugerowane ustawienia ({device})",
+      "suggestions_ready_notification_message": "Czujnik **Sugerowane ustawienia** zgłasza teraz **{count}** rekomendacje, które można zastosować.\n\nAby je przejrzeć i zastosować: **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Ustawienia zaawansowane > Zastosuj sugerowane wartości**.\n\nSugestie są opcjonalne i wyświetlane do sprawdzenia przed zapisaniem."
     },
     "abort": {
       "no_cycles_found": "Nie znaleziono cykli",

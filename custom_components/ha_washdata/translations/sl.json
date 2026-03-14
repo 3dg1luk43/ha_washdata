@@ -545,6 +545,13 @@
           "corrected_profile": "Pravilen program (če se popravlja)",
           "corrected_duration": "Pravilno trajanje v minutah (če se popravlja)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Preglejte predlagane spremembe",
+        "description": "WashData je našel {pending_count} predlaganih vrednosti za uporabo.\n\nSpremembe za pregled:\n{changes}\n\nSpodaj potrdite, da umestite te vrednosti v obrazec. Shranijo se šele, ko oddate napredne nastavitve.",
+        "data": {
+          "confirm_apply_suggestions": "Prilagodite predlagane vrednosti v naprednih nastavitvah"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Ko uporabljate način časovnega žiga, izberite izvorni cikel.",
       "no_phase_ranges": "Za to dejanje še ni na voljo noben fazni obseg.",
       "feedback_notification_title": "WashData: cikel preverjanja ({device})",
-      "feedback_notification_message": "**Naprava**: {device}\n**Program**: {program} ({confidence} % zaupanja)\n**Čas**: {time}\n\nWashData potrebuje vašo pomoč, da preveri ta zaznani cikel.\n\nPojdite na **Nastavitve > Naprave in storitve > WashData > Konfiguracija > Povratne informacije o učenju**, da potrdite ali popravite ta rezultat."
+      "feedback_notification_message": "**Naprava**: {device}\n**Program**: {program} ({confidence} % zaupanja)\n**Čas**: {time}\n\nWashData potrebuje vašo pomoč, da preveri ta zaznani cikel.\n\nPojdite na **Nastavitve > Naprave in storitve > WashData > Konfiguracija > Povratne informacije o učenju**, da potrdite ali popravite ta rezultat.",
+      "suggestions_ready_notification_title": "WashData: Predlagane nastavitve pripravljene ({device})",
+      "suggestions_ready_notification_message": "Senzor **Predlagane nastavitve** zdaj poroča o **{count}** priporočilih za ukrepanje.\n\nČe jih želite pregledati in uporabiti: **Nastavitve > Naprave in storitve > WashData > Konfiguracija > Napredne nastavitve > Uporabi predlagane vrednosti**.\n\nPredlogi niso obvezni in so prikazani v pregledu, preden jih shranite."
     },
     "abort": {
       "no_cycles_found": "Ni najdenih ciklov",

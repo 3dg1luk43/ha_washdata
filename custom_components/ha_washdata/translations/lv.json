@@ -545,6 +545,13 @@
           "corrected_profile": "Pareiza programma (ja tiek labota)",
           "corrected_duration": "Pareizais ilgums minūtēs (ja tiek labots)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Pārskatiet ieteiktās izmaiņas",
+        "description": "WashData atrada {pending_count} ieteiktās vērtības, ko lietot.\n\nPārskatāmās izmaiņas:\n{changes}\n\nApstipriniet tālāk, lai ievietotu šīs vērtības formā. Tie netiek saglabāti, kamēr neesat iesniedzis papildu iestatījumus.",
+        "data": {
+          "confirm_apply_suggestions": "Iestatiet ieteiktās vērtības papildu iestatījumos"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Lūdzu, atlasiet avota ciklu, izmantojot laikspiedola režīmu.",
       "no_phase_ranges": "Šai darbībai vēl nav pieejams neviens fāzes diapazons.",
       "feedback_notification_title": "WashData: Pārbaudīt ciklu ({device})",
-      "feedback_notification_message": "**Ierīce**: {device}\n**Programma**: {program} ({confidence}% ticamība)\n**Laiks**: {time}\n\nWashData ir nepieciešama jūsu palīdzība, lai pārbaudītu šo noteikto ciklu.\n\nLai apstiprinātu vai labotu šo rezultātu, lūdzu, dodieties uz sadaļu **Iestatījumi > Ierīces un pakalpojumi > WashData > Konfigurēt > Mācību atsauksmes**."
+      "feedback_notification_message": "**Ierīce**: {device}\n**Programma**: {program} ({confidence}% ticamība)\n**Laiks**: {time}\n\nWashData ir nepieciešama jūsu palīdzība, lai pārbaudītu šo noteikto ciklu.\n\nLai apstiprinātu vai labotu šo rezultātu, lūdzu, dodieties uz sadaļu **Iestatījumi > Ierīces un pakalpojumi > WashData > Konfigurēt > Mācību atsauksmes**.",
+      "suggestions_ready_notification_title": "WashData: ieteicamie iestatījumi ir gatavi ({device})",
+      "suggestions_ready_notification_message": "Sensors **Ieteiktie iestatījumi** tagad ziņo par **{count}** praktiski izmantojamiem ieteikumiem.\n\nLai tos pārskatītu un lietotu: **Iestatījumi > Ierīces un pakalpojumi > WashData > Konfigurēt > Papildu iestatījumi > Lietot ieteiktās vērtības**.\n\nIeteikumi nav obligāti un tiek parādīti pārskatīšanai pirms saglabāšanas."
     },
     "abort": {
       "no_cycles_found": "Nav atrasts neviens cikls",

@@ -298,6 +298,9 @@ class CycleDetector:
                     if not math.isfinite(expected_duration):
                         expected_duration = 0.0
                         _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                    elif expected_duration > 6 * 3600.0:
+                        expected_duration = 0.0
+                        _LOGGER.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
                 except (TypeError, ValueError):
                     expected_duration = 0.0
                     _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
@@ -326,6 +329,9 @@ class CycleDetector:
                         if not math.isfinite(expected_duration):
                             expected_duration = 0.0
                             _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                        elif expected_duration > 6 * 3600.0:
+                            expected_duration = 0.0
+                            _LOGGER.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
                     except (TypeError, ValueError):
                         expected_duration = 0.0
                         _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
@@ -543,7 +549,8 @@ class CycleDetector:
 
             if self._state == STATE_ANTI_WRINKLE:
                 # Track time in idle (below exit_power threshold)
-                if power < self._config.anti_wrinkle_exit_power:
+                effective_exit = max(self._config.anti_wrinkle_exit_power, self._config.stop_threshold_w)
+                if power < effective_exit:
                     # Low-power gap invalidates any burst candidate collected while in anti-wrinkle.
                     self._anti_wrinkle_candidate_start = None
                     self._anti_wrinkle_candidate_peak = 0.0

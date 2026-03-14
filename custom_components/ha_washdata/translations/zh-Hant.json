@@ -545,6 +545,13 @@
           "corrected_profile": "正確的程序（如果更正）",
           "corrected_duration": "正確持續時間（以分鐘為單位）（如果進行更正）"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "查看建議的更改",
+        "description": "WashData 發現 {pending_count} 個要套用的建議值。\n\n審查變更：\n{changes}\n\n確認以下內容以在表單中暫存這些值。在您提交高級設定之前，它們不會保存。",
+        "data": {
+          "confirm_apply_suggestions": "在進階設定中暫存建議值"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "使用時間戳模式時請選擇來源週期。",
       "no_phase_ranges": "尚無可用於該操作的階段範圍。",
       "feedback_notification_title": "WashData：驗證週期 ({device})",
-      "feedback_notification_message": "**设备**：{device}\n**程式**：{program}（{confidence}% 置信度）\n**時間**：{time}\n\nWashData 需要您的協助來驗證偵測到的此週期。\n\n請前往 **設定 > 裝置與服務 > WashData > 設定 > 學習回饋** 以確認或修正此結果。"
+      "feedback_notification_message": "**设备**：{device}\n**程式**：{program}（{confidence}% 置信度）\n**時間**：{time}\n\nWashData 需要您的協助來驗證偵測到的此週期。\n\n請前往 **設定 > 裝置與服務 > WashData > 設定 > 學習回饋** 以確認或修正此結果。",
+      "suggestions_ready_notification_title": "WashData：建議設定已就緒 ({device})",
+      "suggestions_ready_notification_message": "**建議設定**感測器現在報告 **{count}** 可操作的建議。\n\n若要查看並套用它們：**設定 > 裝置和服務 > WashData > 配置 > 進階設定 > 套用建議值**。\n\n建議是可選的，並會在您儲存之前顯示以供審核。"
     },
     "abort": {
       "no_cycles_found": "沒有找到循環",

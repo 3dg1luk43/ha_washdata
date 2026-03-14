@@ -545,6 +545,13 @@
           "corrected_profile": "Ispravan program (ako se ispravlja)",
           "corrected_duration": "Ispravno trajanje u minutama (ako se ispravlja)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Pregledajte predložene izmjene",
+        "description": "WashData je pronašao {pending_count} predloženih vrijednosti za primjenu.\n\nPromjene za pregled:\n{changes}\n\nPotvrdite ispod da biste ove vrijednosti postavili u obrazac. Ne pohranjuju se dok ne pošaljete Napredne postavke.",
+        "data": {
+          "confirm_apply_suggestions": "Postavite predložene vrijednosti u Naprednim postavkama"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Molimo odaberite izvorni ciklus kada koristite način vremenske oznake.",
       "no_phase_ranges": "Još uvijek nema dostupnih raspona faza za tu radnju.",
       "feedback_notification_title": "WashData: Potvrda ciklusa ({device})",
-      "feedback_notification_message": "**Uređaj**: {device}\n**Program**: {program} ({confidence}% povjerenja)\n**Vrijeme**: {time}\n\nWashData treba vašu pomoć da potvrdi ovaj otkriveni ciklus.\n\nMolimo idite na **Postavke > Uređaji i usluge > WashData > Konfiguriši > Povratne informacije o učenju** da potvrdite ili ispravite ovaj rezultat."
+      "feedback_notification_message": "**Uređaj**: {device}\n**Program**: {program} ({confidence}% povjerenja)\n**Vrijeme**: {time}\n\nWashData treba vašu pomoć da potvrdi ovaj otkriveni ciklus.\n\nMolimo idite na **Postavke > Uređaji i usluge > WashData > Konfiguriši > Povratne informacije o učenju** da potvrdite ili ispravite ovaj rezultat.",
+      "suggestions_ready_notification_title": "WashData: Spremne predložene postavke ({device})",
+      "suggestions_ready_notification_message": "Senzor **Predložene postavke** sada izvještava o **{count}** preporukama koje se mogu primijeniti.\n\nDa biste ih pregledali i primijenili: **Postavke > Uređaji i usluge > WashData > Konfiguriraj > Napredne postavke > Primijeni predložene vrijednosti**.\n\nPrijedlozi su opcioni i prikazani su za pregled prije nego što ih sačuvate."
     },
     "abort": {
       "no_cycles_found": "Nisu pronađeni ciklusi",

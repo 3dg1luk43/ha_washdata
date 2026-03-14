@@ -9,6 +9,7 @@ from typing import Any, Optional, TYPE_CHECKING, cast
 import numpy as np
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import translation
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 import homeassistant.util.dt as dt_util
 
 from .const import (
@@ -19,6 +20,7 @@ from .const import (
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
     DOMAIN,
+    SIGNAL_WASHER_UPDATE,
 )
 from .suggestion_engine import SuggestionEngine
 
@@ -558,26 +560,28 @@ class LearningManager:
                 self._auto_label_cycle(cycle_id, profile_name)
                 profiles_to_rebuild.add(profile_name)
         else:
-            if isinstance(corrected_profile, str) and corrected_profile:
-                # corrected_duration is already in seconds from config_flow
+            # Correction path
+            # If corrected_profile is missing, fallback to the original detected profile
+            # This ensures duration changes (Issue #155) are saved even if the profile remains unchanged.
+            target_profile = corrected_profile or pending.get("detected_profile")
+            
+            if isinstance(target_profile, str) and target_profile:
                 detected_profile = pending.get("detected_profile")
 
                 self._apply_correction_learning(
-                    cycle_id, corrected_profile, duration_sec
+                    cycle_id, target_profile, duration_sec
                 )
-                profiles_to_rebuild.add(corrected_profile)
+                profiles_to_rebuild.add(target_profile)
                 if (
                     isinstance(detected_profile, str)
                     and detected_profile
-                    and detected_profile != corrected_profile
+                    and detected_profile != target_profile
                 ):
                     profiles_to_rebuild.add(detected_profile)
 
         # Remove from pending (add_pending_feedback was wrapper, remove is direct)
         if cycle_id in self.profile_store.get_pending_feedback():
             del self.profile_store.get_pending_feedback()[cycle_id]
-
-        # self.profile_store.remove_pending_feedback(cycle_id) # Redundant if we delete directly above
 
         # Rebuild envelopes for all modified profiles to recalculate min/max/avg (issue #131)
         for profile_name in profiles_to_rebuild:
@@ -586,7 +590,11 @@ class LearningManager:
             except Exception as e:  # pylint: disable=broad-exception-caught
                 _LOGGER.error("Failed to rebuild envelope for profile '%s': %s", profile_name, e)
 
+        # Persist changes
         await self.profile_store.async_save()
+        
+        # Trigger UI and sensor refresh (Issue #155)
+        async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
 
         return True
 
@@ -612,6 +620,11 @@ class LearningManager:
         (min/max/avg) from labeled cycles, ensuring accuracy.
         """
         self._auto_label_cycle(cycle_id, corrected_profile, corrected_duration)
+        if corrected_duration is not None:
+            cycles = self.profile_store.get_past_cycles()
+            cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+            if cycle:
+                cycle["duration"] = corrected_duration
         # Profile stats will be recalculated when envelope is rebuilt
 
     async def _async_rebuild_profile_envelope(self, profile_name: str) -> None:

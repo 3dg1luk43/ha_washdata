@@ -545,6 +545,13 @@
           "corrected_profile": "Clár Ceart (má tá sé á cheartú)",
           "corrected_duration": "Ceart Fad i nóiméid (má ceartaítear é)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Athbhreithnigh Athruithe Molta",
+        "description": "Fuair ​​WashData {pending_count} luachanna molta le cur i bhfeidhm.\n\nAthruithe ar athbhreithniú:\n{changes}\n\nDeimhnigh thíos na luachanna seo a chéimniú san fhoirm. Ní shábhálfar iad go dtí go gcuireann tú Ardsocruithe isteach.",
+        "data": {
+          "confirm_apply_suggestions": "Céimnigh na luachanna molta in Ardsocruithe"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Roghnaigh timthriall foinse agus tú ag úsáid mód an stampa ama.",
       "no_phase_ranges": "Níl aon raonta céime ar fáil don ghníomh sin fós.",
       "feedback_notification_title": "WashData: Fíoraigh an tSraith ({device})",
-      "feedback_notification_message": "**Gléas**: {device}\n**Clár**: {program} ({confidence}% muinín)\n**Am**: {time}\n\nTeastaíonn do chabhair ó WashData chun an timthriall braite seo a fhíorú.\n\nTéigh go **Socruithe > Gléasanna & Seirbhísí > WashData > Cumraigh > Aiseolas Foghlama** chun an toradh seo a dhearbhú nó a cheartú."
+      "feedback_notification_message": "**Gléas**: {device}\n**Clár**: {program} ({confidence}% muinín)\n**Am**: {time}\n\nTeastaíonn do chabhair ó WashData chun an timthriall braite seo a fhíorú.\n\nTéigh go **Socruithe > Gléasanna & Seirbhísí > WashData > Cumraigh > Aiseolas Foghlama** chun an toradh seo a dhearbhú nó a cheartú.",
+      "suggestions_ready_notification_title": "WashData: Socruithe Molta Réidh ({device})",
+      "suggestions_ready_notification_message": "Tuairiscíonn an braiteoir **Socruithe Molta** anois **{count}** moltaí inghníomhaithe.\n\nChun iad a athbhreithniú agus a chur i bhfeidhm: **Socruithe > Gléasanna & Seirbhísí > WashData > Cumraigh > Ardsocruithe > Cuir Luachanna Molta i bhFeidhm**.\n\nTá na moltaí roghnach agus taispeántar iad le haghaidh athbhreithniú sula ndéanann tú shábháil."
     },
     "abort": {
       "no_cycles_found": "Níor aimsíodh aon timthriallta",

@@ -545,6 +545,13 @@
           "corrected_profile": "Korrekte program (indien reggestel)",
           "corrected_duration": "Korrekte duur in minute (indien reggestel)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Hersien voorgestelde veranderinge",
+        "description": "WashData het {pending_count} voorgestelde waardes gevind om toe te pas.\n\nVeranderinge om te hersien:\n{changes}\n\nBevestig hieronder om hierdie waardes in die vorm te verhoog. Hulle word nie gestoor totdat jy Gevorderde instellings indien nie.",
+        "data": {
+          "confirm_apply_suggestions": "Stadium voorgestelde waardes in Gevorderde instellings"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Kies asseblief 'n bronsiklus wanneer jy tydstempelmodus gebruik.",
       "no_phase_ranges": "Geen fasereekse is nog vir daardie aksie beskikbaar nie.",
       "feedback_notification_title": "Wasdata: Verifieer siklus ({device})",
-      "feedback_notification_message": "**Toestel**: {device}\n**Program**: {program} ({confidence}% vertroue)\n**Tyd**: {time}\n\nWashData het jou hulp nodig om hierdie bespeurde siklus te verifieer.\n\nGaan asseblief na **Instellings > Toestelle en Dienste > Wasdata > Konfigureer > Leerterugvoere** om hierdie resultaat te bevestig of reg te stel."
+      "feedback_notification_message": "**Toestel**: {device}\n**Program**: {program} ({confidence}% vertroue)\n**Tyd**: {time}\n\nWashData het jou hulp nodig om hierdie bespeurde siklus te verifieer.\n\nGaan asseblief na **Instellings > Toestelle en Dienste > Wasdata > Konfigureer > Leerterugvoere** om hierdie resultaat te bevestig of reg te stel.",
+      "suggestions_ready_notification_title": "WashData: Voorgestelde instellings gereed ({device})",
+      "suggestions_ready_notification_message": "Die **Voorgestelde instellings**-sensor rapporteer nou **{count}** uitvoerbare aanbevelings.\n\nOm dit te hersien en toe te pas: **Instellings > Toestelle en Dienste > Wasdata > Konfigureer > Gevorderde instellings > Pas voorgestelde waardes toe**.\n\nVoorstelle is opsioneel en gewys vir hersiening voordat jy stoor."
     },
     "abort": {
       "no_cycles_found": "Geen siklusse gevind nie",

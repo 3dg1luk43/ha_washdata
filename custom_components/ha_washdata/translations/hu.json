@@ -545,6 +545,13 @@
           "corrected_profile": "Helyes program (ha javít)",
           "corrected_duration": "Helyes időtartam percekben (javítás esetén)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Tekintse át a javasolt változtatásokat",
+        "description": "A WashData {pending_count} javasolt értéket talált az alkalmazásra.\n\nÁttekintendő változtatások:\n{changes}\n\nErősítse meg alább ezeket az értékeket az űrlapon. A rendszer nem menti őket, amíg el nem küldi a Speciális beállításokat.",
+        "data": {
+          "confirm_apply_suggestions": "Állítsa be a javasolt értékeket a Speciális beállításokban"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Kérjük, válasszon forrásciklust az időbélyeg mód használatakor.",
       "no_phase_ranges": "Ehhez a művelethez még nem állnak rendelkezésre fázistartományok.",
       "feedback_notification_title": "WashData: Ciklus ellenőrzése ({device})",
-      "feedback_notification_message": "**Eszköz**: {device}\n**Program**: {program} ({confidence}%-os megbízhatóság)\n**Idő**: {time}\n\nA WashData segítségére van szüksége az észlelt ciklus ellenőrzéséhez.\n\nAz eredmény megerősítéséhez vagy javításához lépjen a **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Tanulási visszajelzések** menüpontra."
+      "feedback_notification_message": "**Eszköz**: {device}\n**Program**: {program} ({confidence}%-os megbízhatóság)\n**Idő**: {time}\n\nA WashData segítségére van szüksége az észlelt ciklus ellenőrzéséhez.\n\nAz eredmény megerősítéséhez vagy javításához lépjen a **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Tanulási visszajelzések** menüpontra.",
+      "suggestions_ready_notification_title": "WashData: A javasolt beállítások készen állnak ({device})",
+      "suggestions_ready_notification_message": "A **Javasolt beállítások** érzékelő mostantól **{count}** használható javaslatokat közöl.\n\nÁttekintésük és alkalmazásuk: **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Speciális beállítások > Javasolt értékek alkalmazása**.\n\nA javaslatok nem kötelezőek, és mentés előtt áttekinthetők."
     },
     "abort": {
       "no_cycles_found": "Nem található ciklus",

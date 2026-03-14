@@ -545,6 +545,13 @@
           "corrected_profile": "Doğru Program (düzeltiliyorsa)",
           "corrected_duration": "Dakika cinsinden Doğru Süre (düzeltiliyorsa)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Önerilen Değişiklikleri İnceleyin",
+        "description": "WashData, uygulanacak {pending_count} önerilen değer buldu.\n\nİncelenecek değişiklikler:\n{changes}\n\nBu değerleri forma yerleştirmek için aşağıyı onaylayın. Siz Gelişmiş Ayarları gönderene kadar kaydedilmezler.",
+        "data": {
+          "confirm_apply_suggestions": "Önerilen değerleri Gelişmiş Ayarlar'da aşamalandırın"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Zaman damgası modunu kullanırken lütfen bir kaynak döngüsü seçin.",
       "no_phase_ranges": "Bu eylem için henüz herhangi bir faz aralığı mevcut değil.",
       "feedback_notification_title": "WashData: Döngüyü Doğrula ({device})",
-      "feedback_notification_message": "**Cihaz**: {device}\n**Program**: {program} (%{confidence} güven)\n**Zaman**: {time}\n\nWashData'nın tespit edilen bu döngüyü doğrulamak için yardımınıza ihtiyacı var.\n\nBu sonucu onaylamak veya düzeltmek için lütfen **Ayarlar > Cihazlar ve Hizmetler > WashData > Yapılandır > Öğrenme Geri Bildirimleri** seçeneğine gidin."
+      "feedback_notification_message": "**Cihaz**: {device}\n**Program**: {program} (%{confidence} güven)\n**Zaman**: {time}\n\nWashData'nın tespit edilen bu döngüyü doğrulamak için yardımınıza ihtiyacı var.\n\nBu sonucu onaylamak veya düzeltmek için lütfen **Ayarlar > Cihazlar ve Hizmetler > WashData > Yapılandır > Öğrenme Geri Bildirimleri** seçeneğine gidin.",
+      "suggestions_ready_notification_title": "WashData: Önerilen Ayarlar Hazır ({device})",
+      "suggestions_ready_notification_message": "**Önerilen Ayarlar** sensörü artık **{count}** uygulanabilir öneriler raporluyor.\n\nBunları incelemek ve uygulamak için: **Ayarlar > Cihazlar ve Hizmetler > WashData > Yapılandır > Gelişmiş Ayarlar > Önerilen Değerleri Uygula**.\n\nÖneriler isteğe bağlıdır ve kaydetmeden önce incelenmek üzere gösterilir."
     },
     "abort": {
       "no_cycles_found": "Döngü bulunamadı",

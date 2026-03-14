@@ -545,6 +545,13 @@
           "corrected_profile": "Programa zuzena (zuzentzen bada)",
           "corrected_duration": "Zuzena iraupena minututan (zuzentzen bada)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Berrikusi Iradokitako Aldaketak",
+        "description": "WashData-k aplikatu beharreko iradokitako {pending_count} balio aurkitu ditu.\n\nBerrikusteko aldaketak:\n{changes}\n\nBerretsi behean balio hauek formularioan eszenifikatzeko. Ez dira gordetzen Ezarpen aurreratuak bidali arte.",
+        "data": {
+          "confirm_apply_suggestions": "Jarri iradokitako balioak Ezarpen aurreratuan"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Mesedez, hautatu iturburu-ziklo bat denbora-zigilu modua erabiltzean.",
       "no_phase_ranges": "Oraindik ez dago fase-barrutirik erabilgarri ekintza horretarako.",
       "feedback_notification_title": "WashData: Egiaztatu Zikloa ({device})",
-      "feedback_notification_message": "**Gailua**: {device}\n**Programa**: {program} (% {confidence} konfiantza)\n**Ordua**: {time}\n\nWashData-k zure laguntza behar du hautemandako ziklo hau egiaztatzeko.\n\nMesedez, joan **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ikaskuntza-iritziak** atalera emaitza hau berresteko edo zuzentzeko."
+      "feedback_notification_message": "**Gailua**: {device}\n**Programa**: {program} (% {confidence} konfiantza)\n**Ordua**: {time}\n\nWashData-k zure laguntza behar du hautemandako ziklo hau egiaztatzeko.\n\nMesedez, joan **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ikaskuntza-iritziak** atalera emaitza hau berresteko edo zuzentzeko.",
+      "suggestions_ready_notification_title": "WashData: iradokitako ezarpenak prest ({device})",
+      "suggestions_ready_notification_message": "**Iradokitako ezarpenak** sentsoreak **{count}** gomendio akziogarriak ematen ditu orain.\n\nHoriek berrikusteko eta aplikatzeko: **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ezarpen aurreratuak > Aplikatu iradokitako balioak**.\n\nIradokizunak aukerakoak dira eta gorde aurretik berrikusteko erakusten dira."
     },
     "abort": {
       "no_cycles_found": "Ez da ziklorik aurkitu",

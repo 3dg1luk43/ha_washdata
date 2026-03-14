@@ -545,6 +545,13 @@
           "corrected_profile": "Đúng chương trình (nếu sửa)",
           "corrected_duration": "Thời lượng chính xác tính bằng phút (nếu sửa)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Xem lại các thay đổi được đề xuất",
+        "description": "WashData đã tìm thấy {pending_count} giá trị được đề xuất để áp dụng.\n\nNhững thay đổi để xem xét:\n{changes}\n\nXác nhận bên dưới để sắp xếp các giá trị này trong biểu mẫu. Chúng không được lưu cho đến khi bạn gửi Cài đặt nâng cao.",
+        "data": {
+          "confirm_apply_suggestions": "Giai đoạn các giá trị được đề xuất trong Cài đặt nâng cao"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Vui lòng chọn chu kỳ nguồn khi sử dụng chế độ dấu thời gian.",
       "no_phase_ranges": "Chưa có phạm vi pha nào cho hành động đó.",
       "feedback_notification_title": "WashData: Chu trình xác minh ({device})",
-      "feedback_notification_message": "**Thiết bị**: {device}\n**Chương trình**: {program} (độ tin cậy {confidence}%)\n**Thời gian**: {time}\n\nWashData cần sự trợ giúp của bạn để xác minh chu trình được phát hiện này.\n\nVui lòng truy cập **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Phản hồi tìm hiểu** để xác nhận hoặc sửa kết quả này."
+      "feedback_notification_message": "**Thiết bị**: {device}\n**Chương trình**: {program} (độ tin cậy {confidence}%)\n**Thời gian**: {time}\n\nWashData cần sự trợ giúp của bạn để xác minh chu trình được phát hiện này.\n\nVui lòng truy cập **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Phản hồi tìm hiểu** để xác nhận hoặc sửa kết quả này.",
+      "suggestions_ready_notification_title": "WashData: Sẵn sàng cài đặt được đề xuất ({device})",
+      "suggestions_ready_notification_message": "Cảm biến **Cài đặt được đề xuất** hiện báo cáo **{count}** đề xuất có thể thực hiện được.\n\nĐể xem xét và áp dụng chúng: **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Cài đặt nâng cao > Áp dụng các giá trị được đề xuất**.\n\nĐề xuất là tùy chọn và được hiển thị để xem xét trước khi bạn lưu."
     },
     "abort": {
       "no_cycles_found": "Không tìm thấy chu kỳ nào",

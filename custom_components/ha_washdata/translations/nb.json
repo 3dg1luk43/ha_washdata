@@ -545,6 +545,13 @@
           "corrected_profile": "Riktig program (hvis korrigering)",
           "corrected_duration": "Riktig varighet i minutter (hvis korrigering)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Gjennomgå foreslåtte endringer",
+        "description": "WashData fant {pending_count} foreslåtte verdier å bruke.\n\nEndringer til vurdering:\n{changes}\n\nBekreft nedenfor for å plassere disse verdiene i skjemaet. De lagres ikke før du sender inn avanserte innstillinger.",
+        "data": {
+          "confirm_apply_suggestions": "Stage foreslåtte verdier i avanserte innstillinger"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Velg en kildesyklus når du bruker tidsstempelmodus.",
       "no_phase_ranges": "Ingen faseområder er tilgjengelige for den handlingen ennå.",
       "feedback_notification_title": "WashData: Bekreft syklus ({device})",
-      "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence} % konfidens)\n**Tid**: {time}\n\nWashData trenger din hjelp for å bekrefte denne oppdagede syklusen.\n\nGå til **Innstillinger > Enheter og tjenester > WashData > Konfigurer > Læretilbakemeldinger** for å bekrefte eller korrigere dette resultatet."
+      "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence} % konfidens)\n**Tid**: {time}\n\nWashData trenger din hjelp for å bekrefte denne oppdagede syklusen.\n\nGå til **Innstillinger > Enheter og tjenester > WashData > Konfigurer > Læretilbakemeldinger** for å bekrefte eller korrigere dette resultatet.",
+      "suggestions_ready_notification_title": "WashData: Foreslåtte innstillinger klar ({device})",
+      "suggestions_ready_notification_message": "Sensoren **Foreslåtte innstillinger** rapporterer nå **{count}** nyttige anbefalinger.\n\nSlik ser du og bruker dem: **Innstillinger > Enheter og tjenester > WashData > Konfigurer > Avanserte innstillinger > Bruk foreslåtte verdier**.\n\nForslag er valgfrie og vises for vurdering før du lagrer."
     },
     "abort": {
       "no_cycles_found": "Ingen sykluser funnet",

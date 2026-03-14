@@ -545,6 +545,13 @@
           "corrected_profile": "Správny program (ak opravujete)",
           "corrected_duration": "Správne trvanie v minútach (ak opravujete)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Skontrolujte navrhované zmeny",
+        "description": "WashData našiel {pending_count} navrhovaných hodnôt na použitie.\n\nZmeny na kontrolu:\n{changes}\n\nAk chcete tieto hodnoty uviesť do formulára, potvrďte nižšie. Neuložia sa, kým neodošlete Rozšírené nastavenia.",
+        "data": {
+          "confirm_apply_suggestions": "Navrhnuté hodnoty vytvorte v rozšírených nastaveniach"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Pri použití režimu časovej pečiatky vyberte zdrojový cyklus.",
       "no_phase_ranges": "Pre túto akciu zatiaľ nie sú dostupné žiadne fázové rozsahy.",
       "feedback_notification_title": "WashData: Overiť cyklus ({device})",
-      "feedback_notification_message": "**Zariadenie**: {device}\n**Program**: {program} (spoľahlivosť {confidence} %)\n**Čas**: {time}\n\nWashData potrebuje vašu pomoc na overenie tohto zisteného cyklu.\n\nAk chcete potvrdiť alebo opraviť tento výsledok, prejdite do časti **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Spätná väzba na vzdelávanie."
+      "feedback_notification_message": "**Zariadenie**: {device}\n**Program**: {program} (spoľahlivosť {confidence} %)\n**Čas**: {time}\n\nWashData potrebuje vašu pomoc na overenie tohto zisteného cyklu.\n\nAk chcete potvrdiť alebo opraviť tento výsledok, prejdite do časti **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Spätná väzba na vzdelávanie.",
+      "suggestions_ready_notification_title": "WashData: Navrhnuté nastavenia sú pripravené ({device})",
+      "suggestions_ready_notification_message": "Senzor **Suggested Settings** teraz hlási **{count}** odporúčania, ktoré je možné vykonať.\n\nAk ich chcete skontrolovať a použiť: **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Rozšírené nastavenia > Použiť navrhované hodnoty**.\n\nNávrhy sú voliteľné a pred uložením sa zobrazia na kontrolu."
     },
     "abort": {
       "no_cycles_found": "Nenašli sa žiadne cykly",

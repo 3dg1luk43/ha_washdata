@@ -545,6 +545,13 @@
           "corrected_profile": "Correct programma (indien gecorrigeerd)",
           "corrected_duration": "Correctieduur in minuten (indien gecorrigeerd)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Bekijk voorgestelde wijzigingen",
+        "description": "WashData heeft {pending_count} voorgestelde waarden gevonden die kunnen worden toegepast.\n\nWijzigingen om te beoordelen:\n{changes}\n\nBevestig hieronder om deze waarden in het formulier in te vullen. Ze worden pas opgeslagen als u Geavanceerde instellingen indient.",
+        "data": {
+          "confirm_apply_suggestions": "Fase voorgestelde waarden in Geavanceerde instellingen"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Selecteer een broncyclus als u de tijdstempelmodus gebruikt.",
       "no_phase_ranges": "Er zijn nog geen fasebereiken beschikbaar voor die actie.",
       "feedback_notification_title": "WashData: verificatiecyclus ({device})",
-      "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% betrouwbaarheid)\n**Tijd**: {time}\n\nWashData heeft uw hulp nodig om deze gedetecteerde cyclus te verifiëren.\n\nGa naar **Instellingen > Apparaten en services > WashData > Configureren > Leerfeedbacks** om dit resultaat te bevestigen of te corrigeren."
+      "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% betrouwbaarheid)\n**Tijd**: {time}\n\nWashData heeft uw hulp nodig om deze gedetecteerde cyclus te verifiëren.\n\nGa naar **Instellingen > Apparaten en services > WashData > Configureren > Leerfeedbacks** om dit resultaat te bevestigen of te corrigeren.",
+      "suggestions_ready_notification_title": "WashData: voorgestelde instellingen gereed ({device})",
+      "suggestions_ready_notification_message": "De sensor **Voorgestelde instellingen** rapporteert nu **{count}** bruikbare aanbevelingen.\n\nOm ze te bekijken en toe te passen: **Instellingen > Apparaten en services > WashData > Configureren > Geavanceerde instellingen > Voorgestelde waarden toepassen**.\n\nSuggesties zijn optioneel en worden ter beoordeling weergegeven voordat u ze opslaat."
     },
     "abort": {
       "no_cycles_found": "Geen cycli gevonden",

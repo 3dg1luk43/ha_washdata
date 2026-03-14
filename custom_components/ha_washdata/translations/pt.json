@@ -545,6 +545,13 @@
           "corrected_profile": "Programa correto (se estiver corrigindo)",
           "corrected_duration": "Duração correta em minutos (se estiver corrigindo)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Revise as alterações sugeridas",
+        "description": "WashData encontrou {pending_count} valores sugeridos para aplicar.\n\nMudanças para revisão:\n{changes}\n\nConfirme abaixo para organizar esses valores no formulário. Elas não são salvas até que você envie as Configurações Avançadas.",
+        "data": {
+          "confirm_apply_suggestions": "Preparar valores sugeridos em Configurações avançadas"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Selecione um ciclo de origem ao usar o modo carimbo de data/hora.",
       "no_phase_ranges": "Ainda não há intervalos de fase disponíveis para essa ação.",
       "feedback_notification_title": "WashData: ciclo de verificação ({device})",
-      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Tempo**: {time}\n\nWashData precisa da sua ajuda para verificar este ciclo detectado.\n\nVá para **Configurações > Dispositivos e serviços > WashData > Configurar > Feedbacks de aprendizagem** para confirmar ou corrigir este resultado."
+      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Tempo**: {time}\n\nWashData precisa da sua ajuda para verificar este ciclo detectado.\n\nVá para **Configurações > Dispositivos e serviços > WashData > Configurar > Feedbacks de aprendizagem** para confirmar ou corrigir este resultado.",
+      "suggestions_ready_notification_title": "WashData: configurações sugeridas prontas ({device})",
+      "suggestions_ready_notification_message": "O sensor **Configurações sugeridas** agora informa **{count}** recomendações acionáveis.\n\nPara revisá-los e aplicá-los: **Configurações > Dispositivos e serviços > WashData > Configurar > Configurações avançadas > Aplicar valores sugeridos**.\n\nAs sugestões são opcionais e mostradas para revisão antes de salvar."
     },
     "abort": {
       "no_cycles_found": "Nenhum ciclo encontrado",

@@ -89,7 +89,14 @@ class CycleRecorder:
             self._is_recording = value if isinstance(value, bool) else False
             start_iso = data.get("start_time")
             if isinstance(start_iso, str) and start_iso:
-                self._start_time = dt_util.parse_datetime(start_iso)
+                parsed_time = dt_util.parse_datetime(start_iso)
+                if parsed_time is not None and getattr(parsed_time, "tzinfo", None) is None:
+                    _LOGGER.warning(
+                        "Recorder state loaded naive start_time (%s); treating as invalid", start_iso
+                    )
+                    self._start_time = None
+                else:
+                    self._start_time = parsed_time
             if self._is_recording and self._start_time is None:
                 _LOGGER.warning(
                     "Recorder state had is_recording=True with invalid start_time; restoring as not recording"

@@ -545,6 +545,13 @@
           "corrected_profile": "Programa correcto (se está corrixindo)",
           "corrected_duration": "Duración correcta en minutos (se se corrixe)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Revisa os cambios suxeridos",
+        "description": "WashData atopou {pending_count} valores suxeridos para aplicar.\n\nCambios para revisar:\n{changes}\n\nConfirma a continuación para organizar estes valores no formulario. Non se gardan ata que envíes Configuración avanzada.",
+        "data": {
+          "confirm_apply_suggestions": "Pon os valores suxeridos na configuración avanzada"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Seleccione un ciclo de orixe cando use o modo de marca de tempo.",
       "no_phase_ranges": "Aínda non hai intervalos de fase dispoñibles para esa acción.",
       "feedback_notification_title": "WashData: verificar o ciclo ({device})",
-      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence} % de confianza)\n**Hora**: {time}\n\nWashData precisa da túa axuda para verificar este ciclo detectado.\n\nVaia a **Configuración > Dispositivos e servizos > WashData > Configurar > Comentarios de aprendizaxe** para confirmar ou corrixir este resultado."
+      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence} % de confianza)\n**Hora**: {time}\n\nWashData precisa da túa axuda para verificar este ciclo detectado.\n\nVaia a **Configuración > Dispositivos e servizos > WashData > Configurar > Comentarios de aprendizaxe** para confirmar ou corrixir este resultado.",
+      "suggestions_ready_notification_title": "WashData: configuracións suxeridas listas ({device})",
+      "suggestions_ready_notification_message": "O sensor de **Configuración suxerida** agora informa de **{count}** recomendacións útiles.\n\nPara revisalos e aplicalos: **Configuración > Dispositivos e servizos > WashData > Configurar > Configuración avanzada > Aplicar valores suxeridos**.\n\nAs suxestións son opcionais e móstranse para revisar antes de gardar."
     },
     "abort": {
       "no_cycles_found": "Non se atoparon ciclos",

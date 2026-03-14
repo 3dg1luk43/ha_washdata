@@ -545,6 +545,13 @@
           "corrected_profile": "Korrekt program (hvis der rettes)",
           "corrected_duration": "Korrekt varighed i minutter (hvis der rettes)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Gennemgå foreslåede ændringer",
+        "description": "WashData fandt {pending_count} foreslåede værdier at anvende.\n\nÆndringer til gennemgang:\n{changes}\n\nBekræft nedenfor for at placere disse værdier i formularen. De gemmes ikke, før du indsender avancerede indstillinger.",
+        "data": {
+          "confirm_apply_suggestions": "Stage foreslåede værdier i avancerede indstillinger"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Vælg venligst en kildecyklus, når du bruger tidsstempeltilstand.",
       "no_phase_ranges": "Ingen faseintervaller er tilgængelige for den handling endnu.",
       "feedback_notification_title": "WashData: Bekræft cyklus ({device})",
-      "feedback_notification_message": "**Enhed**: {device}\n**Program**: {program} ({confidence} % konfidens)\n**Tid**: {time}\n\nWashData har brug for din hjælp til at verificere denne detekterede cyklus.\n\nGå til **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Læringsfeedback** for at bekræfte eller rette dette resultat."
+      "feedback_notification_message": "**Enhed**: {device}\n**Program**: {program} ({confidence} % konfidens)\n**Tid**: {time}\n\nWashData har brug for din hjælp til at verificere denne detekterede cyklus.\n\nGå til **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Læringsfeedback** for at bekræfte eller rette dette resultat.",
+      "suggestions_ready_notification_title": "WashData: Foreslåede indstillinger klar ({device})",
+      "suggestions_ready_notification_message": "Sensoren **Foreslåede indstillinger** rapporterer nu **{count}** handlingsrettede anbefalinger.\n\nSådan gennemgår og anvender du dem: **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Avancerede indstillinger > Anvend foreslåede værdier**.\n\nForslag er valgfrie og vises til gennemgang, før du gemmer."
     },
     "abort": {
       "no_cycles_found": "Ingen cyklusser fundet",

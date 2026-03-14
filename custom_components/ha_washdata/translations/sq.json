@@ -545,6 +545,13 @@
           "corrected_profile": "Programi i saktë (nëse korrigjohet)",
           "corrected_duration": "Kohëzgjatja e saktë në minuta (nëse korrigjohet)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Rishiko ndryshimet e sugjeruara",
+        "description": "WashData gjeti {pending_count} vlera të sugjeruara për t'u aplikuar.\n\nNdryshimet për shqyrtim:\n{changes}\n\nKonfirmo më poshtë për të vendosur këto vlera në formë. Ato nuk ruhen derisa të paraqisni Cilësimet e Avancuara.",
+        "data": {
+          "confirm_apply_suggestions": "Vendosni vlerat e sugjeruara në Cilësimet e Avancuara"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Ju lutemi zgjidhni një cikël burimi kur përdorni modalitetin e vulës kohore.",
       "no_phase_ranges": "Nuk disponohet ende asnjë interval fazor për atë veprim.",
       "feedback_notification_title": "Wash Data: Verifiko Cikli ({device})",
-      "feedback_notification_message": "**Pajisja**: {device}\n**Programi**: {program} ({confidence}% besim)\n**Koha **: {time}\n\nWashData ka nevojë për ndihmën tuaj për të verifikuar këtë cikël të zbuluar.\n\nJu lutemi, shkoni te **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Mësimi Feedbacks** për të konfirmuar ose korrigjuar këtë rezultat."
+      "feedback_notification_message": "**Pajisja**: {device}\n**Programi**: {program} ({confidence}% besim)\n**Koha **: {time}\n\nWashData ka nevojë për ndihmën tuaj për të verifikuar këtë cikël të zbuluar.\n\nJu lutemi, shkoni te **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Mësimi Feedbacks** për të konfirmuar ose korrigjuar këtë rezultat.",
+      "suggestions_ready_notification_title": "WashData: Cilësimet e sugjeruara janë gati ({device})",
+      "suggestions_ready_notification_message": "Sensori **Cilësimet e sugjeruara** raporton tani **{count}** rekomandime të zbatueshme.\n\nPër t'i rishikuar dhe zbatuar ato: **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Cilësimet e avancuara > Aplikoni vlerat e sugjeruara**.\n\nSugjerimet janë opsionale dhe shfaqen për shqyrtim përpara se të ruani."
     },
     "abort": {
       "no_cycles_found": "Nuk u gjetën cikle",

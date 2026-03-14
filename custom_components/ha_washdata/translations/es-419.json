@@ -545,6 +545,13 @@
           "corrected_profile": "Programa correcto (si se está corrigiendo)",
           "corrected_duration": "Duración correcta en minutos (si se corrige)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Revisar los cambios sugeridos",
+        "description": "WashData encontró {pending_count} valores sugeridos para aplicar.\n\nCambios a revisar:\n{changes}\n\nConfirme a continuación para incluir estos valores en el formulario. No se guardan hasta que envíe la Configuración avanzada.",
+        "data": {
+          "confirm_apply_suggestions": "Valores sugeridos de etapa en Configuración avanzada"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Seleccione un ciclo de fuente cuando utilice el modo de marca de tiempo.",
       "no_phase_ranges": "Aún no hay rangos de fase disponibles para esa acción.",
       "feedback_notification_title": "WashData: Verificar ciclo ({device})",
-      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence} % de confianza)\n**Hora**: {time}\n\nWashData necesita su ayuda para verificar este ciclo detectado.\n\nVaya a **Configuración > Dispositivos y servicios > WashData > Configurar > Comentarios de aprendizaje** para confirmar o corregir este resultado."
+      "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence} % de confianza)\n**Hora**: {time}\n\nWashData necesita su ayuda para verificar este ciclo detectado.\n\nVaya a **Configuración > Dispositivos y servicios > WashData > Configurar > Comentarios de aprendizaje** para confirmar o corregir este resultado.",
+      "suggestions_ready_notification_title": "WashData: Configuración sugerida lista ({device})",
+      "suggestions_ready_notification_message": "El sensor **Configuración sugerida** ahora informa **{count}** recomendaciones prácticas.\n\nPara revisarlos y aplicarlos: **Configuración > Dispositivos y servicios > WashData > Configurar > Configuración avanzada > Aplicar valores sugeridos**.\n\nLas sugerencias son opcionales y se muestran para revisarlas antes de guardarlas."
     },
     "abort": {
       "no_cycles_found": "No se encontraron ciclos",

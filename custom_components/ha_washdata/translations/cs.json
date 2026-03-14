@@ -545,6 +545,13 @@
           "corrected_profile": "Správný program (pokud opravujete)",
           "corrected_duration": "Správná doba trvání v minutách (pokud opravujete)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Zkontrolujte navrhované změny",
+        "description": "WashData nalezl {pending_count} navrhovaných hodnot k použití.\n\nZměny ke kontrole:\n{changes}\n\nChcete-li tyto hodnoty zařadit do formuláře, potvrďte níže. Neuloží se, dokud neodešlete Pokročilá nastavení.",
+        "data": {
+          "confirm_apply_suggestions": "Navrhované hodnoty nastavte v Pokročilých nastaveních"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Při použití režimu časového razítka vyberte zdrojový cyklus.",
       "no_phase_ranges": "Pro tuto akci zatím nejsou k dispozici žádné fázové rozsahy.",
       "feedback_notification_title": "WashData: Ověřit cyklus ({device})",
-      "feedback_notification_message": "**Zařízení**: {device}\n**Program**: {program} (spolehlivost {confidence} %)\n**Čas**: {time}\n\nWashData potřebuje vaši pomoc k ověření tohoto zjištěného cyklu.\n\nPřejděte do **Nastavení > Zařízení a služby > WashData > Konfigurovat > Zpětná vazba učení** a potvrďte nebo opravte tento výsledek."
+      "feedback_notification_message": "**Zařízení**: {device}\n**Program**: {program} (spolehlivost {confidence} %)\n**Čas**: {time}\n\nWashData potřebuje vaši pomoc k ověření tohoto zjištěného cyklu.\n\nPřejděte do **Nastavení > Zařízení a služby > WashData > Konfigurovat > Zpětná vazba učení** a potvrďte nebo opravte tento výsledek.",
+      "suggestions_ready_notification_title": "WashData: Navrhovaná nastavení připravena ({device})",
+      "suggestions_ready_notification_message": "Senzor **Suggested Settings** nyní hlásí **{count}** praktická doporučení.\n\nChcete-li je zkontrolovat a použít: **Nastavení > Zařízení a služby > WashData > Konfigurovat > Pokročilá nastavení > Použít navrhované hodnoty**.\n\nNávrhy jsou volitelné a před uložením se zobrazí ke kontrole."
     },
     "abort": {
       "no_cycles_found": "Nebyly nalezeny žádné cykly",

@@ -545,6 +545,13 @@
           "corrected_profile": "תוכנית נכונה (אם מתקן)",
           "corrected_duration": "משך נכון בדקות (אם מתקן)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "סקור שינויים מוצעים",
+        "description": "WashData מצא {pending_count} ערכים מוצעים ליישום.\n\nשינויים לסקירה:\n{changes}\n\nאשר למטה כדי לשלב ערכים אלה בטופס. הם לא נשמרים עד שתשלח הגדרות מתקדמות.",
+        "data": {
+          "confirm_apply_suggestions": "ערכים מוצעים בשלב בהגדרות מתקדמות"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "אנא בחר מחזור מקור בעת שימוש במצב חותמת זמן.",
       "no_phase_ranges": "אין עדיין טווחי שלבים זמינים עבור הפעולה הזו.",
       "feedback_notification_title": "WashData: מחזור אימות ({device})",
-      "feedback_notification_message": "**מכשיר**: {device}\n**תוכנית**: {program} ({confidence}% ביטחון)\n**זמן**: {time}\n\nWashData זקוק לעזרתכם כדי לאמת את המחזור שזוהה.\n\nאנא עבור אל **הגדרות > מכשירים ושירותים > WashData > קבע תצורה > משוב למידה** כדי לאשר או לתקן תוצאה זו."
+      "feedback_notification_message": "**מכשיר**: {device}\n**תוכנית**: {program} ({confidence}% ביטחון)\n**זמן**: {time}\n\nWashData זקוק לעזרתכם כדי לאמת את המחזור שזוהה.\n\nאנא עבור אל **הגדרות > מכשירים ושירותים > WashData > קבע תצורה > משוב למידה** כדי לאשר או לתקן תוצאה זו.",
+      "suggestions_ready_notification_title": "WashData: הגדרות מוצעות מוכנות ({device})",
+      "suggestions_ready_notification_message": "חיישן **הגדרות מוצעות** מדווח כעת על המלצות **{count}** שניתן לפעול.\n\nכדי לסקור ולהחיל אותם: **הגדרות > מכשירים ושירותים > WashData > הגדר > הגדרות מתקדמות > החל ערכים מוצעים**.\n\nהצעות הן אופציונליות ומוצגות לבדיקה לפני השמירה."
     },
     "abort": {
       "no_cycles_found": "לא נמצאו מחזורים",

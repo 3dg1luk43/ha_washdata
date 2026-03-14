@@ -545,6 +545,13 @@
           "corrected_profile": "Rhaglen Gywir (os yn cywiro)",
           "corrected_duration": "Cywir Hyd mewn munudau (os yn cywiro)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Adolygu Newidiadau a Awgrymir",
+        "description": "Daeth WashData o hyd i {pending_count} o werthoedd awgrymedig i'w cymhwyso.\n\nNewidiadau i adolygiad:\n{changes}\n\nCadarnhewch isod i lwyfannu'r gwerthoedd hyn yn y ffurf. Nid ydynt yn cael eu cadw nes i chi gyflwyno Gosodiadau Uwch.",
+        "data": {
+          "confirm_apply_suggestions": "Cam y gwerthoedd a awgrymir yn y Gosodiadau Uwch"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Dewiswch gylchred ffynhonnell wrth ddefnyddio modd stamp amser.",
       "no_phase_ranges": "Nid oes unrhyw ystodau cyfnod ar gael ar gyfer y cam gweithredu hwnnw eto.",
       "feedback_notification_title": "Golchi Data: Verify Cycle ({device})",
-      "feedback_notification_message": "**Dyfais**: {device}\n**Rhaglen**: {program} ({confidence}% hyder)\n**Amser**: {time}\n\nMae angen eich help ar WashData i ddilysu'r cylch canfyddedig hwn.\n\nEwch i **Gosodiadau > Dyfeisiau a Gwasanaethau > Golchi Data > Ffurfweddu > Adborth Dysgu** i gadarnhau neu gywiro'r canlyniad hwn."
+      "feedback_notification_message": "**Dyfais**: {device}\n**Rhaglen**: {program} ({confidence}% hyder)\n**Amser**: {time}\n\nMae angen eich help ar WashData i ddilysu'r cylch canfyddedig hwn.\n\nEwch i **Gosodiadau > Dyfeisiau a Gwasanaethau > Golchi Data > Ffurfweddu > Adborth Dysgu** i gadarnhau neu gywiro'r canlyniad hwn.",
+      "suggestions_ready_notification_title": "Data Golchi: Gosodiadau Awgrymedig Yn Barod ({device})",
+      "suggestions_ready_notification_message": "Mae'r synhwyrydd **Gosodiadau a Awgrymir** bellach yn adrodd ar argymhellion y gellir eu gweithredu **{count}**.\n\nI'w hadolygu a'u cymhwyso: **Gosodiadau > Dyfeisiau a Gwasanaethau > Golchi Data > Ffurfweddu > Gosodiadau Uwch > Cymhwyso Gwerthoedd a Awgrymir**.\n\nMae awgrymiadau yn ddewisol ac yn cael eu dangos i'w hadolygu cyn i chi gadw."
     },
     "abort": {
       "no_cycles_found": "Heb ganfod cylchoedd",

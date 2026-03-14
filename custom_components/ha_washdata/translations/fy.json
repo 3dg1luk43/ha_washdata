@@ -545,6 +545,13 @@
           "corrected_profile": "Korrekte programma (as korrigearje)",
           "corrected_duration": "Korrekte doer yn minuten (as korreksje)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Review Suggested Changes",
+        "description": "WashData fûn {pending_count} foarstelde wearden om oan te passen.\n\nFeroarings om te besjen:\n{changes}\n\nBefêstigje hjirûnder om dizze wearden yn it formulier op te setten. Se wurde net bewarre oant jo Avansearre ynstellings yntsjinje.",
+        "data": {
+          "confirm_apply_suggestions": "Stage foarstelde wearden yn Avansearre ynstellings"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Selektearje asjebleaft in boarnesyklus by it brûken fan tiidstempelmodus.",
       "no_phase_ranges": "Der binne noch gjin fazebereiken beskikber foar dy aksje.",
       "feedback_notification_title": "WashData: ferifiearje syklus ({device})",
-      "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% fertrouwen)\n**Tiid**: {time}\n\nWashData hat jo help nedich om dizze ûntdekte syklus te ferifiearjen.\n\nGean asjebleaft nei **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Learning Feedbacks** om dit resultaat te befêstigjen of te korrigearjen."
+      "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% fertrouwen)\n**Tiid**: {time}\n\nWashData hat jo help nedich om dizze ûntdekte syklus te ferifiearjen.\n\nGean asjebleaft nei **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Learning Feedbacks** om dit resultaat te befêstigjen of te korrigearjen.",
+      "suggestions_ready_notification_title": "WashData: Suggested Settings Ready ({device})",
+      "suggestions_ready_notification_message": "De sensor **Foarstelde ynstellings** rapportearret no **{count}** aksjebere oanbefellings.\n\nOm se te besjen en ta te passen: **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Avansearre ynstellings> Oanbefelle wearden tapasse**.\n\nSuggestjes binne opsjoneel en werjûn foar beoardieling foardat jo bewarje."
     },
     "abort": {
       "no_cycles_found": "Gjin cycles fûn",

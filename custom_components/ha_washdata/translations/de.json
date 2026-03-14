@@ -545,6 +545,13 @@
           "corrected_profile": "Richtiges Programm (bei Korrektur)",
           "corrected_duration": "Korrekte Dauer in Minuten (bei Korrektur)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Überprüfen Sie die vorgeschlagenen Änderungen",
+        "description": "WashData hat {pending_count} vorgeschlagene Werte zur Anwendung gefunden.\n\nZu überprüfende Änderungen:\n{changes}\n\nBestätigen Sie unten, um diese Werte im Formular bereitzustellen. Sie werden erst gespeichert, wenn Sie die erweiterten Einstellungen übermitteln.",
+        "data": {
+          "confirm_apply_suggestions": "Stufenvorgeschlagene Werte in den erweiterten Einstellungen"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Bitte wählen Sie einen Quellzyklus aus, wenn Sie den Zeitstempelmodus verwenden.",
       "no_phase_ranges": "Für diese Aktion sind noch keine Phasenbereiche verfügbar.",
       "feedback_notification_title": "WashData: Zyklus überprüfen ({device})",
-      "feedback_notification_message": "**Gerät**: {device}\n**Programm**: {program} ({confidence} % Konfidenz)\n**Zeit**: {time}\n\nWashData benötigt Ihre Hilfe, um diesen erkannten Zyklus zu überprüfen.\n\nBitte gehen Sie zu **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Lern-Feedbacks**, um dieses Ergebnis zu bestätigen oder zu korrigieren."
+      "feedback_notification_message": "**Gerät**: {device}\n**Programm**: {program} ({confidence} % Konfidenz)\n**Zeit**: {time}\n\nWashData benötigt Ihre Hilfe, um diesen erkannten Zyklus zu überprüfen.\n\nBitte gehen Sie zu **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Lern-Feedbacks**, um dieses Ergebnis zu bestätigen oder zu korrigieren.",
+      "suggestions_ready_notification_title": "WashData: Vorgeschlagene Einstellungen bereit ({device})",
+      "suggestions_ready_notification_message": "Der Sensor **Vorgeschlagene Einstellungen** meldet jetzt **{count}** umsetzbare Empfehlungen.\n\nUm sie zu überprüfen und anzuwenden: **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Erweiterte Einstellungen > Vorgeschlagene Werte anwenden**.\n\nVorschläge sind optional und werden vor dem Speichern zur Überprüfung angezeigt."
     },
     "abort": {
       "no_cycles_found": "Keine Zyklen gefunden",

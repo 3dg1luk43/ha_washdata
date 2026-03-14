@@ -545,6 +545,13 @@
           "corrected_profile": "Oikea ohjelma (jos korjataan)",
           "corrected_duration": "Oikea kesto minuutteina (jos korjataan)"
         }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Tarkista ehdotetut muutokset",
+        "description": "WashData löysi {pending_count} ehdotettua arvoa käytettäväksi.\n\nTarkistettavat muutokset:\n{changes}\n\nVahvista alla asettaaksesi nämä arvot lomakkeeseen. Niitä ei tallenneta ennen kuin lähetät lisäasetukset.",
+        "data": {
+          "confirm_apply_suggestions": "Aseta ehdotetut arvot lisäasetuksiin"
+        }
       }
     },
     "error": {
@@ -563,7 +570,9 @@
       "timestamp_mode_cycle_required": "Valitse lähdejakso, kun käytät aikaleimatilaa.",
       "no_phase_ranges": "Vaihealueita ei ole vielä saatavilla tälle toiminnolle.",
       "feedback_notification_title": "WashData: Tarkista sykli ({device})",
-      "feedback_notification_message": "**Laite**: {device}\n**Ohjelma**: {program} ({confidence} %:n luottamus)\n**Aika**: {time}\n\nWashData tarvitsee apuasi tämän havaitun jakson vahvistamiseksi.\n\nSiirry kohtaan **Asetukset > Laitteet ja palvelut > WashData > Configure > Learning Feedbacks** vahvistaaksesi tai korjataksesi tämän tuloksen."
+      "feedback_notification_message": "**Laite**: {device}\n**Ohjelma**: {program} ({confidence} %:n luottamus)\n**Aika**: {time}\n\nWashData tarvitsee apuasi tämän havaitun jakson vahvistamiseksi.\n\nSiirry kohtaan **Asetukset > Laitteet ja palvelut > WashData > Configure > Learning Feedbacks** vahvistaaksesi tai korjataksesi tämän tuloksen.",
+      "suggestions_ready_notification_title": "WashData: Ehdotetut asetukset valmiina ({device})",
+      "suggestions_ready_notification_message": "**Ehdotetut asetukset** -anturi raportoi nyt **{count}** toimivia suosituksia.\n\nTarkista ja ota ne käyttöön seuraavasti: **Asetukset > Laitteet ja palvelut > WashData > Määritä > Lisäasetukset > Käytä ehdotettuja arvoja**.\n\nEhdotukset ovat valinnaisia, ja ne näytetään tarkistettavaksi ennen tallentamista."
     },
     "abort": {
       "no_cycles_found": "Syklejä ei löytynyt",
