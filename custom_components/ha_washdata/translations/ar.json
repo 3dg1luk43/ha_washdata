@@ -543,7 +543,7 @@
         "data": {
           "action": "ماذا تريد أن تفعل؟",
           "corrected_profile": "البرنامج الصحيح (في حالة التصحيح)",
-          "corrected_duration": "المدة الصحيحة بالدقائق (في حالة التصحيح)"
+          "corrected_duration": "المدة الصحيحة بالثواني (في حالة التصحيح)"
         }
       },
       "apply_suggestions_confirm": {

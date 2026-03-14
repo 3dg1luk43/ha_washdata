@@ -543,7 +543,7 @@
         "data": {
           "action": "Apa yang ingin kamu lakukan?",
           "corrected_profile": "Program yang Benar (jika mengoreksi)",
-          "corrected_duration": "Durasi Benar dalam hitungan menit (jika mengoreksi)"
+          "corrected_duration": "Durasi Benar dalam hitungan detik (jika mengoreksi)"
         }
       },
       "apply_suggestions_confirm": {

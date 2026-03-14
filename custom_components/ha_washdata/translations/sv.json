@@ -543,7 +543,7 @@
         "data": {
           "action": "Vad skulle du vilja göra?",
           "corrected_profile": "Rätt program (om du korrigerar)",
-          "corrected_duration": "Korrekt varaktighet i minuter (om korrigering)"
+          "corrected_duration": "Korrekt varaktighet i sekunder (om korrigering)"
         }
       },
       "apply_suggestions_confirm": {

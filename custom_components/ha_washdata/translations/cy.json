@@ -543,7 +543,7 @@
         "data": {
           "action": "Beth hoffech chi ei wneud?",
           "corrected_profile": "Rhaglen Gywir (os yn cywiro)",
-          "corrected_duration": "Cywir Hyd mewn munudau (os yn cywiro)"
+          "corrected_duration": "Cywir Hyd mewn eiliadau (os yn cywiro)"
         }
       },
       "apply_suggestions_confirm": {
@@ -569,7 +569,7 @@
       "incomplete_phase_row": "Rhaid i bob rhes cam gynnwys cam ynghyd â gwerthoedd cychwyn/diwedd cyflawn ar gyfer y modd a ddewiswyd.",
       "timestamp_mode_cycle_required": "Dewiswch gylchred ffynhonnell wrth ddefnyddio modd stamp amser.",
       "no_phase_ranges": "Nid oes unrhyw ystodau cyfnod ar gael ar gyfer y cam gweithredu hwnnw eto.",
-      "feedback_notification_title": "Golchi Data: Verify Cycle ({device})",
+      "feedback_notification_title": "Golchi Data: Cadarnhau'r Cylch ({device})",
       "feedback_notification_message": "**Dyfais**: {device}\n**Rhaglen**: {program} ({confidence}% hyder)\n**Amser**: {time}\n\nMae angen eich help ar WashData i ddilysu'r cylch canfyddedig hwn.\n\nEwch i **Gosodiadau > Dyfeisiau a Gwasanaethau > Golchi Data > Ffurfweddu > Adborth Dysgu** i gadarnhau neu gywiro'r canlyniad hwn.",
       "suggestions_ready_notification_title": "Data Golchi: Gosodiadau Awgrymedig Yn Barod ({device})",
       "suggestions_ready_notification_message": "Mae'r synhwyrydd **Gosodiadau a Awgrymir** bellach yn adrodd ar argymhellion y gellir eu gweithredu **{count}**.\n\nI'w hadolygu a'u cymhwyso: **Gosodiadau > Dyfeisiau a Gwasanaethau > Golchi Data > Ffurfweddu > Gosodiadau Uwch > Cymhwyso Gwerthoedd a Awgrymir**.\n\nMae awgrymiadau yn ddewisol ac yn cael eu dangos i'w hadolygu cyn i chi gadw."
@@ -661,8 +661,8 @@
     "interactive_editor_action": {
       "options": {
         "split": "Rhannu Cylch (Dod o hyd i fylchau)",
-        "merge": "Cyfuno Cycles (Ymuno darnau)",
-        "delete": "Dileu Cylch(au)"
+        "merge": "Cyfuno Cylchoedd (Ymuno darnau)",
+        "delete": "Dileu Cylchoedd"
       }
     },
     "diagnostics_action": {
@@ -809,7 +809,7 @@
       }
     },
     "export_config": {
-      "name": "Config Allforio",
+      "name": "Allforio",
       "description": "Allforio proffiliau, cylchoedd a gosodiadau'r ddyfais hon i ffeil JSON (fesul dyfais).",
       "fields": {
         "device_id": {
@@ -823,7 +823,7 @@
       }
     },
     "import_config": {
-      "name": "Mewnforio Config",
+      "name": "Mewnforio",
       "description": "Mewnforio proffiliau, cylchoedd a gosodiadau ar gyfer y ddyfais hon o ffeil allforio JSON (efallai y bydd y gosodiadau wedi'u trosysgrifo).",
       "fields": {
         "device_id": {

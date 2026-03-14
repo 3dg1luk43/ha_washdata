@@ -543,7 +543,7 @@
         "data": {
           "action": "Hvað myndir þú vilja gera?",
           "corrected_profile": "Rétt forrit (ef leiðrétt er)",
-          "corrected_duration": "Rétt lengd í mínútum (ef leiðrétt er)"
+          "corrected_duration": "Rétt lengd í sekúndum (ef leiðrétt er)"
         }
       },
       "apply_suggestions_confirm": {

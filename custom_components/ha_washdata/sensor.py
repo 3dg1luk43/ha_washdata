@@ -628,6 +628,7 @@ class WasherProfileSensorManager:
         self._entry = entry
         self._async_add_entities = async_add_entities
         self._sensors: dict[str, WasherProfileCountSensor] = {}
+        self._diagnostics_cleanup_done: bool = False
 
         # Determine the signal string. It must match SIGNAL_WASHER_UPDATE from const.py
         # which is "washdata_update_{}"
@@ -643,6 +644,13 @@ class WasherProfileSensorManager:
             self._signal,
             self._update_callback,
         )
+
+        # Handle stale diagnostics that were left in registry by previous naming schemes
+        # or profile renames. Run once at initialization instead of on every update.
+        cleanup_orphaned_diagnostic_entities(
+            self._manager.hass, self._manager, self._entry
+        )
+        self._diagnostics_cleanup_done = True
 
     def unsubscribe(self) -> None:
         """Remove the dispatcher subscription."""
@@ -718,12 +726,6 @@ class WasherProfileSensorManager:
                                     name,
                                     err,
                                 )
-
-        # Handle stale diagnostics that were left in registry by previous naming schemes
-        # or profile renames processed before this manager was initialized.
-        cleanup_orphaned_diagnostic_entities(
-            self._manager.hass, self._manager, self._entry
-        )
 
 
 class WasherSuggestionsSensor(WasherBaseSensor):

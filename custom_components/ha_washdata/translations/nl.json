@@ -543,7 +543,7 @@
         "data": {
           "action": "Wat zou je graag willen doen?",
           "corrected_profile": "Correct programma (indien gecorrigeerd)",
-          "corrected_duration": "Correctieduur in minuten (indien gecorrigeerd)"
+          "corrected_duration": "Correctieduur in seconden (indien gecorrigeerd)"
         }
       },
       "apply_suggestions_confirm": {

@@ -543,7 +543,7 @@
         "data": {
           "action": "Što biste htjeli raditi?",
           "corrected_profile": "Ispravan program (ako se ispravlja)",
-          "corrected_duration": "Točno trajanje u minutama (ako se ispravlja)"
+          "corrected_duration": "Točno trajanje u sekundama (ako se ispravlja)"
         }
       },
       "apply_suggestions_confirm": {

@@ -543,7 +543,7 @@
         "data": {
           "action": "Çfarë do të dëshironit të bënit?",
           "corrected_profile": "Programi i saktë (nëse korrigjohet)",
-          "corrected_duration": "Kohëzgjatja e saktë në minuta (nëse korrigjohet)"
+          "corrected_duration": "Kohëzgjatja e saktë në sekonda (nëse korrigjohet)"
         }
       },
       "apply_suggestions_confirm": {

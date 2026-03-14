@@ -543,7 +543,7 @@
         "data": {
           "action": "무엇을 하고 싶나요?",
           "corrected_profile": "올바른 프로그램(수정하는 경우)",
-          "corrected_duration": "수정 기간(분)(수정하는 경우)"
+          "corrected_duration": "수정 기간(초)(수정하는 경우)"
         }
       },
       "apply_suggestions_confirm": {

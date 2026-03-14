@@ -543,7 +543,7 @@
         "data": {
           "action": "آپ کیا کرنا چاہیں گے؟",
           "corrected_profile": "درست پروگرام (اگر درست ہو)",
-          "corrected_duration": "منٹوں میں درست دورانیہ (اگر درست ہو)"
+          "corrected_duration": "سیکنڈ میں درست دورانیہ (اگر درست ہو)"
         }
       },
       "apply_suggestions_confirm": {

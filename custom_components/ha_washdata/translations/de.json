@@ -64,19 +64,19 @@
           "device_type": "Gerätetyp",
           "power_sensor": "Leistungssensoreinheit",
           "min_power": "Mindestleistung (W)",
-          "off_delay": "Zyklusendeverzögerung (en)",
+          "off_delay": "Zyklusendeverzögerung (s)",
           "notify_service": "Benachrichtigungsdienst (z. B. notify.mobile_app)",
           "notify_actions": "Benachrichtigungsaktionen",
           "notify_people": "Verzögern Sie die Lieferung, bis diese Personen zu Hause sind",
           "notify_only_when_home": "Benachrichtigungen verzögern, bis die ausgewählte Person zu Hause ist",
-          "notify_fire_events": "Veranstaltungen zur Brandautomatisierung",
+          "notify_fire_events": "Home Assistant-Ereignisse auslösen",
           "notify_events": "Zu benachrichtigende Ereignisse",
           "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
           "notify_title": "Titel der Benachrichtigung",
           "notify_icon": "Benachrichtigungssymbol",
-          "notify_start_message": "Starten Sie das Nachrichtenformat",
-          "notify_finish_message": "Beenden Sie das Nachrichtenformat",
-          "notify_pre_complete_message": "Nachrichtenformat vor Abschluss",
+          "notify_start_message": "Startnachricht",
+          "notify_finish_message": "Abschlussnachricht",
+          "notify_pre_complete_message": "Nachricht vor Abschluss",
           "show_advanced": "Erweiterte Einstellungen bearbeiten (nächster Schritt)"
         },
         "data_description": {
@@ -107,7 +107,7 @@
           "notify_actions": "Benachrichtigungsaktionen",
           "notify_people": "Verzögern Sie die Lieferung, bis diese Personen zu Hause sind",
           "notify_only_when_home": "Benachrichtigungen verzögern, bis die ausgewählte Person zu Hause ist",
-          "notify_fire_events": "Veranstaltungen zur Brandautomatisierung",
+          "notify_fire_events": "Home Assistant-Ereignisse auslösen",
           "notify_events": "Zu benachrichtigende Ereignisse",
           "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
           "notify_live_interval_seconds": "Live-Update-Intervall (Sekunden)",
@@ -146,7 +146,7 @@
           "start_duration_threshold": "Start-Entprellungsdauer (s)",
           "progress_reset_delay": "Verzögerung beim Zurücksetzen des Fortschritts (Sekunden)",
           "no_update_active_timeout": "Zeitüberschreitung bei fehlender Aktualisierung (s)",
-          "sampling_interval": "Abtastintervall (e)",
+          "sampling_interval": "Abtastintervall (s)",
           "auto_label_confidence": "Auto-Label-Konfidenz (0-1)",
           "learning_confidence": "Vertrauen der Feedback-Anfrage (0-1)",
           "duration_tolerance": "Dauertoleranz (0–0,5)",
@@ -159,7 +159,7 @@
           "profile_duration_tolerance": "Toleranz der Profilübereinstimmungsdauer (0–0,5)",
           "interrupted_min_seconds": "Unterbrochen: Mindestlaufzeit (Sekunden)",
           "abrupt_drop_watts": "Unterbrochen: Abrupter Abfall Absolut (W)",
-          "abrupt_drop_ratio": "Unterbrochen: Abruptes Drop-Verhältnis (0-1)",
+          "abrupt_drop_ratio": "Unterbrochen: Abruptes Abfallverhältnis (0-1)",
           "abrupt_high_load_factor": "Unterbrochen: Hoher Belastungsfaktor",
           "max_past_cycles": "Aufbewahrung: Max. gespeicherte Zyklen",
           "max_full_traces_per_profile": "Aufbewahrung: Max. vollständige Traces pro Profil",
@@ -170,8 +170,8 @@
           "auto_tune_noise_events_threshold": "Auto-Tune: Schwellenwert für Geräuschereignisse",
           "running_dead_zone": "Running Dead Zone (Sekunden)",
           "end_repeat_count": "Anzahl der Wiederholungen beenden",
-          "start_energy_threshold": "Startenergietor (Wh)",
-          "end_energy_threshold": "Endenergietor (Wh)",
+          "start_energy_threshold": "Startenergieschwelle (Wh)",
+          "end_energy_threshold": "Endenergieschwelle (Wh)",
           "auto_maintenance": "Aktivieren Sie die automatische Wartung",
           "expose_debug_entities": "Debug-Entitäten verfügbar machen",
           "save_debug_traces": "Speichern Sie Debug-Traces",
@@ -204,7 +204,7 @@
           "profile_unmatch_threshold": "DTW-Ähnlichkeitswert (0,0–1,0), unterhalb dessen ein zuvor übereinstimmendes Profil abgelehnt wird. Sollte niedriger als der Übereinstimmungsschwellenwert sein, um ein Flackern zu verhindern. Standard: 0,35.",
           "profile_duration_tolerance": "Vom Profilabgleich verwendete Toleranz für die Gesamtdauervarianz (0,0–0,5). Standardverhalten: ±25 %.",
           "interrupted_min_seconds": "Längere Läufe können als „unterbrochen“ eingestuft werden.",
-          "abrupt_drop_watts": "Der absolute Leistungsabfall (W) gilt als abrupter Anstieg.",
+          "abrupt_drop_watts": "Der absolute Leistungsabfall (W) gilt als abrupter Abfall.",
           "abrupt_drop_ratio": "Relatives Drop-Verhältnis (0–1). Beispiel: 0,6 bedeutet, dass ein Abfall um 60 % abrupt erfolgt.",
           "abrupt_high_load_factor": "Faktor über dem Ausgangswert gilt als „hohe Belastung“ vor einem abrupten Abfall (wird bei abrupter Erkennung verwendet).",
           "max_past_cycles": "Gesamtzahl der beizubehaltenden Zyklen (älteste entfernt). Standard: 200.",
@@ -401,7 +401,7 @@
         }
       },
       "select_cycle_to_label": {
-        "title": "Wählen Sie „Zum Etikett wechseln“ aus",
+        "title": "Zyklus zum Beschriften auswählen",
         "description": "✓ = abgeschlossen, ⚠ = fortgesetzt, ✗ = unterbrochen",
         "data": {
           "cycle_id": "Zyklus"
@@ -411,11 +411,11 @@
         "title": "Zyklus löschen",
         "description": "⚠️ Dadurch wird der ausgewählte Zyklus dauerhaft gelöscht",
         "data": {
-          "cycle_id": "Zum Löschen wechseln"
+          "cycle_id": "Zyklus zum Löschen auswählen"
         }
       },
       "label_cycle": {
-        "title": "Etikettenzyklus",
+        "title": "Zyklus beschriften",
         "description": "{cycle_info}",
         "data": {
           "profile_name": "Profil",
@@ -543,14 +543,14 @@
         "data": {
           "action": "Was möchten Sie tun?",
           "corrected_profile": "Richtiges Programm (bei Korrektur)",
-          "corrected_duration": "Korrekte Dauer in Minuten (bei Korrektur)"
+          "corrected_duration": "Korrekte Dauer in Sekunden (bei Korrektur)"
         }
       },
       "apply_suggestions_confirm": {
         "title": "Überprüfen Sie die vorgeschlagenen Änderungen",
         "description": "WashData hat {pending_count} vorgeschlagene Werte zur Anwendung gefunden.\n\nZu überprüfende Änderungen:\n{changes}\n\nBestätigen Sie unten, um diese Werte im Formular bereitzustellen. Sie werden erst gespeichert, wenn Sie die erweiterten Einstellungen übermitteln.",
         "data": {
-          "confirm_apply_suggestions": "Stufenvorgeschlagene Werte in den erweiterten Einstellungen"
+          "confirm_apply_suggestions": "Vorgeschlagene Werte in den erweiterten Einstellungen übernehmen"
         }
       }
     },
@@ -741,8 +741,8 @@
   },
   "services": {
     "label_cycle": {
-      "name": "Etikettenzyklus",
-      "description": "Ordnen Sie ein vorhandenes Profil einem vergangenen Zyklus zu oder entfernen Sie die Bezeichnung.",
+      "name": "Zyklus beschriften",
+      "description": "Ordnen Sie ein vorhandenes Profil einem vergangenen Zyklus zu oder entfernen Sie die Beschriftung.",
       "fields": {
         "device_id": {
           "name": "Gerät",

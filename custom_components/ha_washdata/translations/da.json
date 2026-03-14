@@ -87,7 +87,7 @@
           "off_delay": "Sekunder skal den udjævnede effekt forblive under stoptærsklen for at markere fuldførelse. Standard: 120s.",
           "notify_service": "Home Assistant giver besked om, at tjenesten skal bruges (valgfrit).",
           "notify_actions": "Valgfri Home Assistant-handlingssekvens til at køre for notifikationer (scripts, notify, TTS osv.). Hvis det er angivet, kører handlinger før reserveunderretningstjenesten.",
-          "notify_people": "Personenheder, der bruges til tilstedeværelsesporting. Når det er aktiveret, forsinkes leveringen af ​​meddelelser, indtil mindst én valgt person er hjemme.",
+          "notify_people": "Personenheder, der bruges til tilstedeværelsesportering. Når det er aktiveret, forsinkes leveringen af ​​meddelelser, indtil mindst én valgt person er hjemme.",
           "notify_only_when_home": "Hvis det er aktiveret, skal du udskyde underretninger, indtil mindst én valgt person er hjemme.",
           "notify_fire_events": "Hvis aktiveret, udløs Home Assistant-hændelser for cyklusstart og -slut (ha_washdata_cycle_started og ha_washdata_cycle_ended) for at drive automatiseringer.",
           "notify_events": "Hvilke begivenheder der skal sendes notifikationer om.",
@@ -121,7 +121,7 @@
         "data_description": {
           "notify_service": "Home Assistant giver besked om, at tjenesten skal bruges (valgfrit).",
           "notify_actions": "Valgfri Home Assistant-handlingssekvens til at køre for notifikationer (scripts, notify, TTS osv.). Hvis det er angivet, kører handlinger før reserveunderretningstjenesten.",
-          "notify_people": "Personenheder, der bruges til tilstedeværelsesporting. Når det er aktiveret, forsinkes leveringen af ​​meddelelser, indtil mindst én valgt person er hjemme.",
+          "notify_people": "Personenheder, der bruges til tilstedeværelsesportering. Når det er aktiveret, forsinkes leveringen af ​​meddelelser, indtil mindst én valgt person er hjemme.",
           "notify_only_when_home": "Hvis det er aktiveret, skal du udskyde underretninger, indtil mindst én valgt person er hjemme.",
           "notify_fire_events": "Hvis aktiveret, udløs Home Assistant-hændelser for cyklusstart og -slut (ha_washdata_cycle_started og ha_washdata_cycle_ended) for at drive automatiseringer.",
           "notify_events": "Hvilke begivenheder der skal sendes notifikationer om.",
@@ -543,7 +543,7 @@
         "data": {
           "action": "Hvad vil du gerne lave?",
           "corrected_profile": "Korrekt program (hvis der rettes)",
-          "corrected_duration": "Korrekt varighed i minutter (hvis der rettes)"
+          "corrected_duration": "Korrekt varighed i sekunder (hvis der rettes)"
         }
       },
       "apply_suggestions_confirm": {

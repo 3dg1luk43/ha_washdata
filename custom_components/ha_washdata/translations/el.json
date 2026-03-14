@@ -543,7 +543,7 @@
         "data": {
           "action": "Τι θα ήθελες να κάνεις;",
           "corrected_profile": "Σωστό πρόγραμμα (αν διορθωθεί)",
-          "corrected_duration": "Σωστή διάρκεια σε λεπτά (εάν διορθωθεί)"
+          "corrected_duration": "Σωστή διάρκεια σε δευτερόλεπτα (εάν διορθωθεί)"
         }
       },
       "apply_suggestions_confirm": {

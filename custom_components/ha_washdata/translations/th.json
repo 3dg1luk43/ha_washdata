@@ -543,7 +543,7 @@
         "data": {
           "action": "คุณอยากจะทำอะไร?",
           "corrected_profile": "โปรแกรมที่ถูกต้อง (ถ้าแก้ไข)",
-          "corrected_duration": "แก้ไขระยะเวลาเป็นนาที (หากแก้ไข)"
+          "corrected_duration": "แก้ไขระยะเวลาเป็นวินาที (หากแก้ไข)"
         }
       },
       "apply_suggestions_confirm": {

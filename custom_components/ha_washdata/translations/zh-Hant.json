@@ -543,7 +543,7 @@
         "data": {
           "action": "你想做什麼？",
           "corrected_profile": "正確的程序（如果更正）",
-          "corrected_duration": "正確持續時間（以分鐘為單位）（如果進行更正）"
+          "corrected_duration": "正確持續時間（以秒為單位）（如果進行更正）"
         }
       },
       "apply_suggestions_confirm": {

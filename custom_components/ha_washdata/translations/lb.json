@@ -543,7 +543,7 @@
         "data": {
           "action": "Wat géift Dir gären maachen?",
           "corrected_profile": "Korrekt Programm (wann Dir korrigéiert)",
-          "corrected_duration": "Korrekt Dauer a Minutten (wann Dir korrigéiert)"
+          "corrected_duration": "Korrekt Dauer a Sekonnen (wann Dir korrigéiert)"
         }
       },
       "apply_suggestions_confirm": {
