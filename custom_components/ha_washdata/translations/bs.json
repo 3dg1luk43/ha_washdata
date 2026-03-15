@@ -344,6 +344,17 @@
           "range_index": "Phase Range"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automatski otkrivene faze",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**Automatski otkrivena faza ({detected_count}).** Odaberite radnju ispod.",
+        "data": {
+          "action": "Akcija"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Naziv Detected Phases",
+        "description": "Profil: **{profile_name}**\n\n**Otkriveno je {detected_count} faza:**\n{ranges_summary}\n\nDodijelite naziv svakoj fazi."
+      },
       "assign_profile_phases_select": {
         "title": "Dodijelite raspon faza",
         "description": "Odaberite profil za konfiguriranje faznih raspona.",
@@ -711,6 +722,7 @@
         "edit_range": "Uredi raspon faza",
         "delete_range": "Izbriši raspon faza",
         "clear_ranges": "Obriši sve opsege",
+        "auto_detect_ranges": "Automatsko otkrivanje faza",
         "save_ranges": "Sačuvaj i vrati"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Ispravno - Odaberite Program/Trajanje",
         "ignore": "Ignoriraj - Lažno pozitivan/bučni ciklus",
         "delete": "Izbriši - Ukloni iz istorije"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Imenujte i primenite faze",
+        "cancel": "Vratite se bez promjena"
       }
     }
   },

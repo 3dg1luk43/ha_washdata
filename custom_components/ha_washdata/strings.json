@@ -351,6 +351,17 @@
           "range_index": "Phase Range"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Auto-detected Phases",
+        "description": "Profile: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} phase(s) detected automatically.** Choose an action below.",
+        "data": {
+          "action": "Action"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Name Detected Phases",
+        "description": "Profile: **{profile_name}**\n\n**{detected_count} phase(s) detected:**\n{ranges_summary}\n\nAssign a name to each phase."
+      },
       "assign_profile_phases_select": {
         "title": "Assign Phase Ranges",
         "description": "Select a profile to configure phase ranges.",
@@ -705,12 +716,19 @@
         "delete_custom_phase": "Delete Phase"
       }
     },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Name & apply phases",
+        "cancel": "Go back without changes"
+      }
+    },
     "assign_profile_phases_action": {
       "options": {
         "add_range": "Add Phase Range",
         "edit_range": "Edit Phase Range",
         "delete_range": "Delete Phase Range",
         "clear_ranges": "Clear All Ranges",
+        "auto_detect_ranges": "Auto-detect Phases",
         "save_ranges": "Save and Return"
       }
     },

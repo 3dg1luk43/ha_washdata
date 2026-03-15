@@ -344,6 +344,17 @@
           "range_index": "Fase Range"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Auto-detekteare fazen",
+        "description": "Profyl: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} faze(s) automatysk ûntdutsen.** Kies in aksje hjirûnder.",
+        "data": {
+          "action": "Aksje"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Namme ûntdutsen fazen",
+        "description": "Profyl: **{profile_name}**\n\n**{detected_count} faze(s) ûntdutsen:**\n{ranges_summary}\n\nJou elke faze in namme ta."
+      },
       "assign_profile_phases_select": {
         "title": "Fasebereiken tawize",
         "description": "Selektearje in profyl om fazeberiken te konfigurearjen.",
@@ -711,6 +722,7 @@
         "edit_range": "Faseberik bewurkje",
         "delete_range": "Faseberik wiskje",
         "clear_ranges": "Alle berikken wiskje",
+        "auto_detect_ranges": "Fazen automatysk ûntdekke",
         "save_ranges": "Bewarje en werom"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Korrekt - Kies programma / Duration",
         "ignore": "Negearje - False Positive / Noisy Cycle",
         "delete": "Wiskje - Fuortsmite út Skiednis"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Namme & tapasse fazen",
+        "cancel": "Gean werom sûnder feroarings"
       }
     }
   },

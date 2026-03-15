@@ -344,6 +344,17 @@
           "range_index": "Vaihealue"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automaattisesti tunnistetut vaiheet",
+        "description": "Profiili: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} vaihetta tunnistettu automaattisesti.** Valitse toiminto alta.",
+        "data": {
+          "action": "Toiminta"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Nimeä havaitut vaiheet",
+        "description": "Profiili: **{profile_name}**\n\n**{detected_count} vaihetta havaittu:**\n{ranges_summary}\n\nAnna jokaiselle vaiheelle nimi."
+      },
       "assign_profile_phases_select": {
         "title": "Määritä vaihealueet",
         "description": "Valitse profiili määrittääksesi vaihealueet.",
@@ -711,6 +722,7 @@
         "edit_range": "Muokkaa vaihealuetta",
         "delete_range": "Poista vaihealue",
         "clear_ranges": "Tyhjennä kaikki alueet",
+        "auto_detect_ranges": "Tunnista vaiheet automaattisesti",
         "save_ranges": "Tallenna ja palauta"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Oikein - Valitse Ohjelma/kesto",
         "ignore": "Ohita - Väärä positiivinen/kohinainen sykli",
         "delete": "Poista - Poista historiasta"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Nimeä ja käytä vaiheita",
+        "cancel": "Palaa takaisin ilman muutoksia"
       }
     }
   },

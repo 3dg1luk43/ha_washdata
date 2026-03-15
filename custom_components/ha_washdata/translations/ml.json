@@ -344,6 +344,17 @@
           "range_index": "ഘട്ടം ശ്രേണി"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "സ്വയം കണ്ടെത്തിയ ഘട്ടങ്ങൾ",
+        "description": "പ്രൊഫൈൽ: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} ഘട്ടം(കൾ) സ്വയമേവ കണ്ടെത്തി.** താഴെ ഒരു പ്രവർത്തനം തിരഞ്ഞെടുക്കുക.",
+        "data": {
+          "action": "ആക്ഷൻ"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "കണ്ടെത്തിയ ഘട്ടങ്ങളുടെ പേര്",
+        "description": "പ്രൊഫൈൽ: **{profile_name}**\n\n**{detected_count} ഘട്ടം(കൾ) കണ്ടെത്തി:**\n{ranges_summary}\n\nഓരോ ഘട്ടത്തിനും ഒരു പേര് നൽകുക."
+      },
       "assign_profile_phases_select": {
         "title": "ഘട്ടം ശ്രേണികൾ നിയോഗിക്കുക",
         "description": "ഘട്ട ശ്രേണികൾ കോൺഫിഗർ ചെയ്യാൻ ഒരു പ്രൊഫൈൽ തിരഞ്ഞെടുക്കുക.",
@@ -711,6 +722,7 @@
         "edit_range": "ഘട്ട ശ്രേണി എഡിറ്റ് ചെയ്യുക",
         "delete_range": "ഘട്ട ശ്രേണി ഇല്ലാതാക്കുക",
         "clear_ranges": "എല്ലാ ശ്രേണികളും മായ്‌ക്കുക",
+        "auto_detect_ranges": "ഘട്ടങ്ങൾ സ്വയം കണ്ടെത്തുക",
         "save_ranges": "സംരക്ഷിച്ച് മടങ്ങുക"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "ശരി - പ്രോഗ്രാം/ദൈർഘ്യം തിരഞ്ഞെടുക്കുക",
         "ignore": "അവഗണിക്കുക - തെറ്റായ പോസിറ്റീവ്/ശബ്ദ ചക്രം",
         "delete": "ഇല്ലാതാക്കുക - ചരിത്രത്തിൽ നിന്ന് നീക്കം ചെയ്യുക"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "ഘട്ടങ്ങൾക്ക് പേര് നൽകുകയും പ്രയോഗിക്കുകയും ചെയ്യുക",
+        "cancel": "മാറ്റങ്ങളില്ലാതെ മടങ്ങുക"
       }
     }
   },

@@ -344,6 +344,17 @@
           "range_index": "相位範圍"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "自動檢測階段",
+        "description": "個人資料：***{profile_name}**\n\n{timeline_svg}\n\n**自動偵測到 {detected_count} 個階段。 ** 選擇下面的操作。",
+        "data": {
+          "action": "行動"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "命名檢測到的階段",
+        "description": "個人資料：***{profile_name}**\n\n**偵測到{detected_count}相：**\n{ranges_summary}\n\n為每個階段指定一個名稱。"
+      },
       "assign_profile_phases_select": {
         "title": "分配相位範圍",
         "description": "選擇一個設定檔來配置相位範圍。",
@@ -711,6 +722,7 @@
         "edit_range": "編輯相位範圍",
         "delete_range": "刪除相位範圍",
         "clear_ranges": "清除所有範圍",
+        "auto_detect_ranges": "自動檢測相位",
         "save_ranges": "儲存並返回"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "正確 - 選擇項目/持續時間",
         "ignore": "忽略 - 誤報/噪音循環",
         "delete": "刪除 - 從歷史記錄中刪除"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "命名和應用階段",
+        "cancel": "不做任何修改返回"
       }
     }
   },

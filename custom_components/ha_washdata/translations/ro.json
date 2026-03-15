@@ -344,6 +344,17 @@
           "range_index": "Interval de fază"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Faze detectate automat",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fază(e) detectată(e) automat.** Alegeți o acțiune de mai jos.",
+        "data": {
+          "action": "Acţiune"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Denumirea fazelor detectate",
+        "description": "Profil: **{profile_name}**\n\n**{detected_count} fază(e) detectată(e):**\n{ranges_summary}\n\nAtribuiți un nume fiecărei etape."
+      },
       "assign_profile_phases_select": {
         "title": "Atribuiți intervale de fază",
         "description": "Selectați un profil pentru a configura intervalele de fază.",
@@ -711,6 +722,7 @@
         "edit_range": "Editați intervalul de fază",
         "delete_range": "Ștergeți intervalul de fază",
         "clear_ranges": "Ștergeți toate intervalele",
+        "auto_detect_ranges": "Detectarea automată a fazelor",
         "save_ranges": "Salvați și întoarceți"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Corect - Alegeți Program/Durată",
         "ignore": "Ignorare - Ciclu fals pozitiv/zgomotos",
         "delete": "Șterge - Eliminați din istoric"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Denumiți și aplicați fazele",
+        "cancel": "Întoarceți-vă fără modificări"
       }
     }
   },

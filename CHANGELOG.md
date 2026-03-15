@@ -55,6 +55,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Current Phase Sensor Exposure**: Added a standard device sensor for current phase (`sensor.<device>_current_phase`) so active phase is visible in normal entity views without enabling diagnostics.
 - **Phase-Only Offset Input**: Simplified phase assignment to use offset-based time entry (minutes from cycle start) instead of timestamp selection, reducing complexity and user error.
 - **Suggested Settings Discoverability**: Improved the Suggested Settings UX with sensor-first guidance, a one-time "suggestions ready" notification when recommendations become available, and an explicit review step before suggested values are staged in Advanced Settings.
+- **Phase Unique ID Management**: Built-in and custom phases are now assigned stable unique IDs. Phase catalog operations (edit, delete) resolve by ID rather than by name, eliminating ambiguity when similarly-named phases exist across different scopes. Includes improved error handling for rename/delete conflicts.
+- **Duration Consistency Metric**: Profile sensor attributes now expose a `consistency_min` field (standard deviation of recorded cycle durations, in minutes), allowing users to diagnose variability in learned profiles directly from the entity state.
+- **Signal Processing Edge-Case Guards**: Added guards against non-positive step and gap values in the resampling pipeline, preventing division-by-zero and NaN propagation in high-noise or sparse-sensor environments.
+- **Cycle Detector Numeric Guards**: `update_match` now validates confidence and expected-duration values with `math.isfinite()`, falling back to `0.0` with a debug log entry instead of propagating NaN or infinity into downstream sensors.
+- **Suggestion Engine Resilience**: Added `TypeError`/`ValueError` guards when parsing profile data in the `SuggestionEngine`, preventing crashes when stored profile fields contain unexpected types.
+- **Card Registration Resilience**: Dashboard card asset registration now catches all setup exceptions and logs a warning, allowing the rest of the integration to load normally; setup will retry on the next Home Assistant restart.
+- **Live Notification Interval Constraint**: Added minimum-value constraint documentation for `notify_live_interval_seconds` across all supported languages, guiding users away from excessively short polling intervals.
+- **Diagnostics Sensitive Data Redaction**: Config entry diagnostics now automatically redact personally identifiable fields (`notify_service`, `notify_people`, `notify_actions`, `power_sensor`, `external_end_trigger`) before the report is generated.
+- **Services Description Consistency**: Updated `services.yaml` descriptions to consistently refer to "WashData" instead of "washing machine", accurately reflecting multi-device support.
 
 ### 🐛 Bug Fixes
 - **Manual Recording Revert (#151)**: Fixed an issue where manual recordings could unexpectedly revert configuration changes.
@@ -82,6 +91,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Pre-Completion Notification Tests** (`test_manager_precompletion_harness.py`): Pins the ambiguity gate — notifications are suppressed when `_last_match_ambiguous=True`, sent exactly once when unambiguous, and not re-sent on subsequent calls.
 - **Match Persistence / Transition Tests** (`test_manager_matching_harness.py`): Covers the full persistence-counter state machine inside `_async_do_perform_matching`: single-call accumulation, below-threshold staying at `detecting...`, threshold commit, profile-change counter reset, high-confidence override bypassing persistence, and ambiguous-result gating.
 - **Live Notification Harness** (`test_manager_live_notifications.py`): Added focused coverage for mobile-only routing, payload keys, overrun cap enforcement, away-mode deferred live coalescing, clear-on-end behavior, `STATE_ENDING` support, one-time pre-match waiting message, and post-match periodic update activation.
+- **Phase Catalog Atomic Operations** (`test_issue_166_phase_catalog.py`): Validates that phase renames and deletions behave atomically with unique-ID resolution, preventing unintended collisions or cascading updates across scopes.
+- **Profile Sensor Attributes** (`test_profile_sensor_attributes.py`): Covers the exposure of new sensor attributes including `consistency_min` on profile sensors.
+- **Diagnostic Entity Cleanup** (`test_diagnostic_entity_cleanup.py`): Validates automatic removal of orphaned diagnostic entities on startup, covering stale profile count sensors, legacy `wash_phase` entries, and debug entity visibility toggling based on `expose_debug_entities`.
 
 ## [0.4.2.1] - 2026-02-13
 

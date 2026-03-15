@@ -344,6 +344,17 @@
           "range_index": "نطاق المرحلة"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "المراحل المكتشفة تلقائيًا",
+        "description": "الملف الشخصي: **{profile_name}**\n\n{timeline_svg}\n\n**تم اكتشاف {detected_count} مرحلة (مراحل) تلقائيًا. ** اختر إجراءً أدناه.",
+        "data": {
+          "action": "فعل"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "اسم المراحل المكتشفة",
+        "description": "الملف الشخصي: **{profile_name}**\n\n**{detected_count} المرحلة (المراحل) التي تم اكتشافها:**\n{ranges_summary}\n\nخصص اسمًا لكل مرحلة."
+      },
       "assign_profile_phases_select": {
         "title": "تعيين نطاقات المرحلة",
         "description": "حدد ملف تعريف لتكوين نطاقات المرحلة.",
@@ -711,6 +722,7 @@
         "edit_range": "تحرير نطاق المرحلة",
         "delete_range": "حذف نطاق المرحلة",
         "clear_ranges": "مسح كافة النطاقات",
+        "auto_detect_ranges": "مراحل الكشف التلقائي",
         "save_ranges": "حفظ والعودة"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "صحيح - اختر البرنامج/المدة",
         "ignore": "تجاهل - دورة إيجابية كاذبة/صاخبة",
         "delete": "حذف - إزالة من التاريخ"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "مراحل الاسم والتطبيق",
+        "cancel": "العودة دون تغييرات"
       }
     }
   },

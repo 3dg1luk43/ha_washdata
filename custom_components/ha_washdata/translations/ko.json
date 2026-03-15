@@ -344,6 +344,17 @@
           "range_index": "위상 범위"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "자동 감지 단계",
+        "description": "프로필: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count}개 단계가 자동으로 감지되었습니다.** 아래에서 작업을 선택하세요.",
+        "data": {
+          "action": "행동"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "감지된 단계 이름 지정",
+        "description": "프로필: **{profile_name}**\n\n**{detected_count}개 단계가 감지되었습니다:**\n{ranges_summary}\n\n각 단계에 이름을 지정합니다."
+      },
       "assign_profile_phases_select": {
         "title": "위상 범위 할당",
         "description": "위상 범위를 구성하려면 프로필을 선택하세요.",
@@ -711,6 +722,7 @@
         "edit_range": "위상 범위 편집",
         "delete_range": "위상 범위 삭제",
         "clear_ranges": "모든 범위 지우기",
+        "auto_detect_ranges": "위상 자동 감지",
         "save_ranges": "저장하고 돌아가기"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "정답 - 프로그램/기간 선택",
         "ignore": "무시 - 거짓 긍정/노이즈 주기",
         "delete": "삭제 - 기록에서 제거"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "이름 지정 및 적용 단계",
+        "cancel": "변경사항 없이 돌아가기"
       }
     }
   },

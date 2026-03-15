@@ -344,6 +344,17 @@
           "range_index": "טווח שלבים"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "שלבים שזוהו אוטומטית",
+        "description": "פרופיל: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} שלבים זוהו באופן אוטומטי.** בחר פעולה למטה.",
+        "data": {
+          "action": "פְּעוּלָה"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "שם זוהה שלבים",
+        "description": "פרופיל: **{profile_name}**\n\n**{detected_count} שלב(ים) זוהו:**\n{ranges_summary}\n\nהקצה שם לכל שלב."
+      },
       "assign_profile_phases_select": {
         "title": "הקצה טווחי שלבים",
         "description": "בחר פרופיל להגדרת טווחי פאזות.",
@@ -711,6 +722,7 @@
         "edit_range": "ערוך טווח שלבים",
         "delete_range": "מחק טווח שלבים",
         "clear_ranges": "נקה את כל הטווחים",
+        "auto_detect_ranges": "זיהוי אוטומטי של שלבים",
         "save_ranges": "שמור והחזר"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "נכון - בחר תוכנית/משך",
         "ignore": "התעלם - מחזור חיובי/רועש כוזב",
         "delete": "מחק - הסר מההיסטוריה"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "שם והחל שלבים",
+        "cancel": "חזור ללא שינויים"
       }
     }
   },

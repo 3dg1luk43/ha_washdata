@@ -344,6 +344,17 @@
           "range_index": "Faz Aralığı"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Otomatik Algılanan Aşamalar",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} aşama otomatik olarak algılandı.** Aşağıdan bir işlem seçin.",
+        "data": {
+          "action": "Aksiyon"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Ad Algılanan Aşamalar",
+        "description": "Profil: **{profile_name}**\n\n**{detected_count} aşama algılandı:**\n{ranges_summary}\n\nHer aşamaya bir ad atayın."
+      },
       "assign_profile_phases_select": {
         "title": "Faz Aralıklarını Atayın",
         "description": "Faz aralıklarını yapılandırmak için bir profil seçin.",
@@ -711,6 +722,7 @@
         "edit_range": "Faz Aralığını Düzenle",
         "delete_range": "Faz Aralığını Sil",
         "clear_ranges": "Tüm Aralıkları Temizle",
+        "auto_detect_ranges": "Aşamaları Otomatik Algıla",
         "save_ranges": "Kaydet ve Geri Dön"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Doğru - Program/Süreyi Seçin",
         "ignore": "Yoksay - Yanlış Pozitif/Gürültülü Döngü",
         "delete": "Sil - Geçmişten Kaldır"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Aşamaları adlandırın ve uygulayın",
+        "cancel": "Değişiklik yapmadan geri dön"
       }
     }
   },

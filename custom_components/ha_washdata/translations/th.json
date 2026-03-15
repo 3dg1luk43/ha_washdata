@@ -344,6 +344,17 @@
           "range_index": "ช่วงเฟส"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "เฟสที่ตรวจพบอัตโนมัติ",
+        "description": "โปรไฟล์: **{profile_name}**\n\n{timeline_svg}\n\n**ตรวจพบเฟส {detected_count} เฟสโดยอัตโนมัติ** เลือกการดำเนินการด้านล่าง",
+        "data": {
+          "action": "การกระทำ"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "ชื่อเฟสที่ตรวจพบ",
+        "description": "โปรไฟล์: **{profile_name}**\n\n**ตรวจพบเฟส{detected_count}:**\n{ranges_summary}\n\nตั้งชื่อให้กับแต่ละเฟส"
+      },
       "assign_profile_phases_select": {
         "title": "กำหนดช่วงเฟส",
         "description": "เลือกโปรไฟล์เพื่อกำหนดค่าช่วงเฟส",
@@ -711,6 +722,7 @@
         "edit_range": "แก้ไขช่วงเฟส",
         "delete_range": "ลบช่วงเฟส",
         "clear_ranges": "ล้างทุกช่วง",
+        "auto_detect_ranges": "ตรวจจับเฟสอัตโนมัติ",
         "save_ranges": "บันทึกและส่งคืน"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "ถูกต้อง - เลือกโปรแกรม/ระยะเวลา",
         "ignore": "เพิกเฉย - วงจรบวกลวง/มีเสียงดัง",
         "delete": "ลบ - ลบออกจากประวัติ"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "ตั้งชื่อและสมัครเฟส",
+        "cancel": "กลับไปโดยไม่มีการเปลี่ยนแปลง"
       }
     }
   },

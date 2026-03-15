@@ -344,6 +344,17 @@
           "range_index": "Фазов обхват"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Автоматично разпознати фази",
+        "description": "Профил: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} фази са открити автоматично.** Изберете действие по-долу.",
+        "data": {
+          "action": "Действие"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Име на откритите фази",
+        "description": "Профил: **{profile_name}**\n\n**{detected_count} открити фази:**\n{ranges_summary}\n\nЗадайте име на всяка фаза."
+      },
       "assign_profile_phases_select": {
         "title": "Задайте фазови диапазони",
         "description": "Изберете профил, за да конфигурирате фазови диапазони.",
@@ -711,6 +722,7 @@
         "edit_range": "Редактиране на фазовия диапазон",
         "delete_range": "Изтриване на фазов диапазон",
         "clear_ranges": "Изчистване на всички диапазони",
+        "auto_detect_ranges": "Автоматично откриване на фази",
         "save_ranges": "Запазване и връщане"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Правилно - Изберете програма/продължителност",
         "ignore": "Игнориране - фалшив положителен/шумен цикъл",
         "delete": "Изтриване - премахване от историята"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Наименувайте и прилагайте фази",
+        "cancel": "Върнете се назад без промени"
       }
     }
   },

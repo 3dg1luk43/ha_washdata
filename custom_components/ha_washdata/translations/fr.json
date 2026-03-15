@@ -344,6 +344,17 @@
           "range_index": "Plage de phases"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Phases détectées automatiquement",
+        "description": "Profil : **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} phase(s) détectée(s) automatiquement.** Choisissez une action ci-dessous.",
+        "data": {
+          "action": "Action"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Nommer les phases détectées",
+        "description": "Profil : **{profile_name}**\n\n**{detected_count} phase(s) détectée(s) :**\n{ranges_summary}\n\nAttribuez un nom à chaque phase."
+      },
       "assign_profile_phases_select": {
         "title": "Attribuer des plages de phases",
         "description": "Sélectionnez un profil pour configurer les plages de phases.",
@@ -711,6 +722,7 @@
         "edit_range": "Modifier la plage de phases",
         "delete_range": "Supprimer la plage de phases",
         "clear_ranges": "Effacer toutes les plages",
+        "auto_detect_ranges": "Détection automatique des phases",
         "save_ranges": "Enregistrer et retourner"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Correct - Choisissez le programme/la durée",
         "ignore": "Ignorer - Cycle faux positif/bruyant",
         "delete": "Supprimer - Supprimer de l'historique"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Nommer et appliquer les phases",
+        "cancel": "Revenir sans modifications"
       }
     }
   },

@@ -264,6 +264,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._phase_assign_cycle_id: str | None = None
         self._phase_assign_draft: list[dict[str, Any]] = []
         self._phase_assign_edit_index: int | None = None
+        self._phase_assign_auto_detected: list[dict[str, Any]] = []
         self._selector_translations: dict[str, str] | None = None
         self._options_translations: dict[str, str] | None = None
 
@@ -2168,6 +2169,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             clamped = max(0.0, min(max_power, power_w))
             return plot_top + plot_height - (clamped / max_power) * plot_height
 
+        def pick_grid_interval(total_min_val: int) -> int:
+            label_w_px = 91  # conservative width of widest label at font-size 22
+            min_iv = (label_w_px / plot_width) * total_min_val
+            for candidate in (1, 2, 5, 10, 15, 20, 30, 60):
+                if candidate > min_iv:
+                    return candidate
+            return 60
+
         ordered = sorted(
             ranges,
             key=lambda x: (float(x.get("start", 0.0)), float(x.get("end", 0.0))),
@@ -2199,6 +2208,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             f"<rect x='{plot_left}' y='{plot_top}' width='{plot_width}' height='{plot_height}' fill='#111111' stroke='#444' stroke-width='2' rx='8'/>",
         ]
 
+        # Adaptive time grid — vertical lines drawn first so they sit behind everything.
+        total_min = int(max_time / 60)
+        grid_interval = pick_grid_interval(total_min)
+        grid_ticks_min = list(range(0, total_min + 1, grid_interval))
+        for tick_min in grid_ticks_min:
+            tx = to_x(tick_min * 60.0)
+            parts.append(
+                f"<line x1='{tx:.2f}' y1='{plot_top}' x2='{tx:.2f}' y2='{plot_top + plot_height}' stroke='#2a2a2a' stroke-width='1' stroke-opacity='0.9'/>",
+            )
+
         # Phase background spans + gating lines.
         for idx, row in enumerate(ordered):
             start = max(0.0, float(row.get("start", 0.0)))
@@ -2221,6 +2240,41 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     f"<line x1='{x2:.2f}' y1='{plot_top}' x2='{x2:.2f}' y2='{plot_top + plot_height}' stroke='{color}' stroke-width='2.2' stroke-dasharray='7 5' stroke-opacity='0.95'/>",
                 )
 
+        # Minute labels on each phase boundary gating line, placed above the plot.
+        # Two-row stagger handles closely-packed boundaries without increasing SVG height.
+        _gate_label_w = 72
+        _gate_row1_y = plot_top - 10  # y=54 for default plot_top=64
+        _gate_row2_y = plot_top - 28  # y=36
+        _placed: list[tuple[float, float, int]] = []
+        for idx, row in enumerate(ordered):
+            start = max(0.0, float(row.get("start", 0.0)))
+            end = max(start, float(row.get("end", 0.0)))
+            if start > max_time:
+                continue
+            color = palette[idx % len(palette)]
+            for t_sec, skip_if_over in ((start, False), (end, True)):
+                if skip_if_over and end > max_time:
+                    continue
+                t_min = int(t_sec / 60)
+                tx = to_x(t_sec)
+                xl, xr = tx - _gate_label_w / 2, tx + _gate_label_w / 2
+                chosen_y = _gate_row1_y
+                for y_cand in (_gate_row1_y, _gate_row2_y):
+                    if not any(xl < pr and xr > pl for pl, pr, py in _placed if py == y_cand):
+                        chosen_y = y_cand
+                        break
+                _placed.append((xl, xr, chosen_y))
+                if tx - _gate_label_w / 2 < plot_left:
+                    anchor, label_x = "start", float(plot_left)
+                elif tx + _gate_label_w / 2 > plot_left + plot_width:
+                    anchor, label_x = "end", float(plot_left + plot_width)
+                else:
+                    anchor, label_x = "middle", tx
+                parts.append(
+                    f"<text x='{label_x:.2f}' y='{chosen_y}' font-family='sans-serif' font-size='22'"
+                    f" fill='{color}' fill-opacity='0.9' text-anchor='{anchor}'>{t_min} {esc(txt['min'])}</text>",
+                )
+
         # Axis helper lines.
         for frac in (0.25, 0.5, 0.75):
             y = plot_top + plot_height * frac
@@ -2234,16 +2288,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             f"<polyline points='{avg_poly}' fill='none' stroke='#3498db' stroke-width='4.2' stroke-linecap='round' stroke-linejoin='round'/>",
         )
 
-        # Axes labels.
-        total_min = int(max_time / 60)
-        mid_min = int(total_min / 2)
-        parts.extend(
-            [
-                f"<text x='{plot_left}' y='{marker_y}' font-family='sans-serif' font-size='26' fill='#d1d5db'>0 min</text>",
-                f"<text x='{plot_left + plot_width / 2:.2f}' y='{marker_y}' font-family='sans-serif' font-size='26' fill='#d1d5db' text-anchor='middle'>{mid_min} {esc(txt['min'])}</text>",
-                f"<text x='{plot_left + plot_width:.2f}' y='{marker_y}' font-family='sans-serif' font-size='26' fill='#d1d5db' text-anchor='end'>{total_min} {esc(txt['min'])}</text>",
-            ]
-        )
+        # Adaptive x-axis tick labels (total_min / grid_interval / grid_ticks_min already computed above).
+        for tick_min in grid_ticks_min:
+            tx = to_x(tick_min * 60.0)
+            half_w = 45
+            if tx - half_w < plot_left:
+                anchor, label_x = "start", float(plot_left)
+            elif tx + half_w > plot_left + plot_width:
+                anchor, label_x = "end", float(plot_left + plot_width)
+            else:
+                anchor, label_x = "middle", tx
+            parts.append(
+                f"<text x='{label_x:.2f}' y='{marker_y}' font-family='sans-serif' font-size='22'"
+                f" fill='#9ca3af' text-anchor='{anchor}'>{tick_min} {esc(txt['min'])}</text>",
+            )
 
         # Legend: average curve + each phase color.
         legend_entries: list[tuple[str, str]] = [("#3498db", txt["avg_curve"])]
@@ -2284,6 +2342,59 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if start_min is None or end_min is None:
             return None, None, "incomplete_phase_row"
         return float(start_min) * 60.0, float(end_min) * 60.0, None
+
+    def _auto_detect_phase_ranges(
+        self,
+        avg_points: list[tuple[float, float]],
+        catalog: list[dict[str, Any]],
+        power_threshold_frac: float = 0.08,
+        min_gap_sec: float = 120.0,
+        min_phase_sec: float = 60.0,
+    ) -> list[dict[str, Any]]:
+        """Detect phase ranges from an average power curve using step-change segmentation."""
+        if len(avg_points) < 2:
+            return []
+        max_power = max(p[1] for p in avg_points)
+        if max_power < 1.0:
+            return []
+        # Box-smooth to suppress noise (the avg curve is already relatively clean,
+        # but individual extremes can still trigger false segment boundaries).
+        window = max(1, min(15, len(avg_points) // 8))
+        smoothed: list[tuple[float, float]] = []
+        for i, (t, _p) in enumerate(avg_points):
+            lo = max(0, i - window // 2)
+            hi = min(len(avg_points), i + window // 2 + 1)
+            smoothed.append((t, sum(avg_points[j][1] for j in range(lo, hi)) / (hi - lo)))
+        threshold = max_power * power_threshold_frac
+        # Find contiguous active segments.
+        segments: list[list[float]] = []
+        in_seg = False
+        seg_start = 0.0
+        for t, p in smoothed:
+            if p >= threshold and not in_seg:
+                seg_start = t
+                in_seg = True
+            elif p < threshold and in_seg:
+                segments.append([seg_start, t])
+                in_seg = False
+        if in_seg:
+            segments.append([seg_start, smoothed[-1][0]])
+        # Merge gaps shorter than min_gap_sec (handles brief dips within a phase).
+        merged: list[list[float]] = []
+        for seg in segments:
+            if merged and seg[0] - merged[-1][1] < min_gap_sec:
+                merged[-1][1] = seg[1]
+            else:
+                merged.append([seg[0], seg[1]])
+        # Drop phases that are too short to be meaningful.
+        phases = [s for s in merged if s[1] - s[0] >= min_phase_sec]
+        # Assign names from the phase catalog in order (cycle if more phases than names).
+        names = [p["name"] for p in catalog] if catalog else []
+        result: list[dict[str, Any]] = []
+        for i, (start, end) in enumerate(phases):
+            name = names[i % len(names)] if names else f"phase_{i + 1}"
+            result.append({"name": name, "start": float(start), "end": float(end)})
+        return result
 
     def _validate_phase_ranges(
         self,
@@ -2376,6 +2487,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     return await self.async_step_assign_profile_phases_delete()
             if action == "clear_ranges":
                 self._phase_assign_draft = []
+            if action == "auto_detect_ranges":
+                return await self.async_step_assign_profile_phases_auto_detect()
             if action == "save_ranges":
                 try:
                     await store.async_set_profile_phase_ranges(profile_name, self._phase_assign_draft)
@@ -2425,6 +2538,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             "edit_range",
                             "delete_range",
                             "clear_ranges",
+                            "auto_detect_ranges",
                             "save_ranges",
                         ],
                         translation_key="assign_profile_phases_action",
@@ -2436,6 +2550,133 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "profile_name": profile_name,
                 "current_ranges": summary,
                 "timeline_svg": timeline_svg,
+            },
+        )
+
+    async def async_step_assign_profile_phases_auto_detect(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Show auto-detected phase ranges with an action choice (name & apply, or go back)."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        profile_name = self._phase_assign_profile
+        if not profile_name:
+            return await self.async_step_assign_profile_phases_select()
+
+        envelope = store.get_envelope(profile_name)
+        if envelope is None:
+            try:
+                await store.async_rebuild_envelope(profile_name)
+                envelope = store.get_envelope(profile_name)
+            except Exception:  # pylint: disable=broad-exception-caught
+                envelope = None
+
+        avg_points: list[tuple[float, float]] = []
+        if envelope and isinstance(envelope.get("avg"), list):
+            for pt in envelope["avg"]:
+                if isinstance(pt, (list, tuple)) and len(pt) >= 2:
+                    try:
+                        avg_points.append((float(pt[0]), float(pt[1])))
+                    except (TypeError, ValueError):
+                        pass
+
+        catalog = store.list_phase_catalog(manager.device_type)
+        # Detect once and cache so the naming step can use the same result.
+        self._phase_assign_auto_detected = self._auto_detect_phase_ranges(avg_points, catalog)
+        detected = self._phase_assign_auto_detected
+
+        if user_input is not None:
+            action = user_input.get("action")
+            if action == "name_phases" and detected:
+                return await self.async_step_assign_profile_phases_auto_detect_name()
+            # "cancel" or no phases found — go back without changes.
+            return await self.async_step_assign_profile_phases()
+
+        svg_labels = {
+            "phase_preview": await self._options_text("phase_preview", "Phase Preview"),
+            "no_curve": await self._options_text(
+                "phase_preview_no_curve",
+                "Average profile curve is not available yet. Run/label more cycles for this profile.",
+            ),
+            "min": await self._options_text("unit_min", "min"),
+            "avg_curve": await self._options_text("average_power_curve", "Average Power Curve"),
+        }
+        timeline_svg = self._phase_assignment_svg_markdown(profile_name, detected, envelope, labels=svg_labels)
+
+        actions = ["name_phases", "cancel"] if detected else ["cancel"]
+        return self.async_show_form(
+            step_id="assign_profile_phases_auto_detect",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("action"): self._translated_select(
+                        options=actions,
+                        translation_key="assign_profile_phases_auto_detect_action",
+                    )
+                }
+            ),
+            description_placeholders={
+                "profile_name": profile_name,
+                "detected_count": str(len(detected)),
+                "timeline_svg": timeline_svg,
+            },
+        )
+
+    async def async_step_assign_profile_phases_auto_detect_name(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Assign a name to each auto-detected phase range."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        profile_name = self._phase_assign_profile
+        if not profile_name or not self._phase_assign_auto_detected:
+            return await self.async_step_assign_profile_phases()
+
+        detected = self._phase_assign_auto_detected
+
+        catalog = store.list_phase_catalog(manager.device_type)
+        phase_options = [
+            selector.SelectOptionDict(
+                value=p["name"],
+                label=f"{p['name']} – {str(p.get('description', ''))[:52]}",
+            )
+            for p in catalog
+        ]
+
+        if user_input is not None:
+            named = []
+            for i, phase in enumerate(detected):
+                name = user_input.get(f"name_{i}", phase["name"])
+                named.append({"name": name, "start": phase["start"], "end": phase["end"]})
+            self._phase_assign_draft = named
+            self._phase_assign_auto_detected = []
+            return await self.async_step_assign_profile_phases()
+
+        schema_dict: dict[Any, Any] = {}
+        for i, phase in enumerate(detected):
+            start_min = int(phase["start"] / 60)
+            end_min = int(phase["end"] / 60)
+            schema_dict[
+                vol.Required(f"name_{i}", default=phase["name"],
+                             description={"suggested_value": phase["name"]})
+            ] = selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=phase_options,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                )
+            )
+
+        # Build a summary of time ranges for the description.
+        ranges_summary = "\n".join(
+            f"- **Phase {i + 1}**: {int(ph['start'] / 60)}–{int(ph['end'] / 60)} min"
+            for i, ph in enumerate(detected)
+        )
+        return self.async_show_form(
+            step_id="assign_profile_phases_auto_detect_name",
+            data_schema=vol.Schema(schema_dict),
+            description_placeholders={
+                "profile_name": profile_name,
+                "detected_count": str(len(detected)),
+                "ranges_summary": ranges_summary,
             },
         )
 

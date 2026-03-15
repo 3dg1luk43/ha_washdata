@@ -344,6 +344,17 @@
           "range_index": "相位范围"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "自动检测阶段",
+        "description": "个人资料：***{profile_name}**\n\n{timeline_svg}\n\n**自动检测到 {detected_count} 个阶段。** 选择下面的操作。",
+        "data": {
+          "action": "行动"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "命名检测到的阶段",
+        "description": "个人资料：***{profile_name}**\n\n**检测到{detected_count}相：**\n{ranges_summary}\n\n为每个阶段指定一个名称。"
+      },
       "assign_profile_phases_select": {
         "title": "分配相位范围",
         "description": "选择一个配置文件来配置相位范围。",
@@ -711,6 +722,7 @@
         "edit_range": "编辑相位范围",
         "delete_range": "删除相位范围",
         "clear_ranges": "清除所有范围",
+        "auto_detect_ranges": "自动检测相位",
         "save_ranges": "保存并返回"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "正确 - 选择项目/持续时间",
         "ignore": "忽略 - 误报/噪声循环",
         "delete": "删除 - 从历史记录中删除"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "命名和应用阶段",
+        "cancel": "不做任何修改返回"
       }
     }
   },

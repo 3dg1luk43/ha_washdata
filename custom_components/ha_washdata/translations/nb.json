@@ -344,6 +344,17 @@
           "range_index": "Faseområde"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automatisk oppdagede faser",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fase(r) oppdaget automatisk.** Velg en handling nedenfor.",
+        "data": {
+          "action": "Handling"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Navn oppdaget faser",
+        "description": "Profil: **{profile_name}**\n\n**{detected_count} fase(r) oppdaget:**\n{ranges_summary}\n\nGi hver fase et navn."
+      },
       "assign_profile_phases_select": {
         "title": "Tilordne faseområder",
         "description": "Velg en profil for å konfigurere faseområder.",
@@ -711,6 +722,7 @@
         "edit_range": "Rediger faseområde",
         "delete_range": "Slett faseområde",
         "clear_ranges": "Fjern alle områder",
+        "auto_detect_ranges": "Automatisk oppdage faser",
         "save_ranges": "Lagre og returner"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Riktig - Velg Program/Varighet",
         "ignore": "Ignorer - falsk positiv/støyende syklus",
         "delete": "Slett - Fjern fra loggen"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Navngi og bruk faser",
+        "cancel": "Gå tilbake uten endringer"
       }
     }
   },

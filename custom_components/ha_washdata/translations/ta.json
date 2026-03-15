@@ -344,6 +344,17 @@
           "range_index": "கட்ட வரம்பு"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "தானாக கண்டறியப்பட்ட கட்டங்கள்",
+        "description": "சுயவிவரம்: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} கட்டம்(கள்) தானாக கண்டறியப்பட்டது.** கீழே ஒரு செயலைத் தேர்வு செய்யவும்.",
+        "data": {
+          "action": "செயல்"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "பெயர் கண்டறியப்பட்ட கட்டங்கள்",
+        "description": "சுயவிவரம்: **{profile_name}**\n\n**{detected_count} கட்டம்(கள்) கண்டறியப்பட்டது:**\n{ranges_summary}\n\nஒவ்வொரு கட்டத்திற்கும் ஒரு பெயரை ஒதுக்கவும்."
+      },
       "assign_profile_phases_select": {
         "title": "கட்ட வரம்புகளை ஒதுக்கவும்",
         "description": "கட்ட வரம்புகளை உள்ளமைக்க சுயவிவரத்தைத் தேர்ந்தெடுக்கவும்.",
@@ -711,6 +722,7 @@
         "edit_range": "கட்ட வரம்பைத் திருத்தவும்",
         "delete_range": "கட்ட வரம்பை நீக்கு",
         "clear_ranges": "அனைத்து வரம்புகளையும் அழி",
+        "auto_detect_ranges": "தானாக கண்டறிதல் கட்டங்கள்",
         "save_ranges": "சேமித்து திரும்பவும்"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "சரியானது - நிரல்/காலத்தை தேர்வு செய்யவும்",
         "ignore": "புறக்கணிப்பு - தவறான நேர்மறை/இரைச்சல் சுழற்சி",
         "delete": "நீக்கு - வரலாற்றிலிருந்து நீக்கு"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "கட்டங்களை பெயரிட்டு விண்ணப்பிக்கவும்",
+        "cancel": "மாற்றங்கள் இல்லாமல் திரும்பிச் செல்லுங்கள்"
       }
     }
   },

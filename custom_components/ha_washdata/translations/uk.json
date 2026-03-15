@@ -344,6 +344,17 @@
           "range_index": "Діапазон фаз"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Автоматично визначені фази",
+        "description": "Профіль: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} фази виявлено автоматично.** Виберіть дію нижче.",
+        "data": {
+          "action": "Дія"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Назвіть виявлені фази",
+        "description": "Профіль: **{profile_name}**\n\n**Виявлено {detected_count} фази:**\n{ranges_summary}\n\nПрисвойте назву кожній фазі."
+      },
       "assign_profile_phases_select": {
         "title": "Призначте діапазони фаз",
         "description": "Виберіть профіль, щоб налаштувати діапазони фаз.",
@@ -711,6 +722,7 @@
         "edit_range": "Редагувати діапазон фаз",
         "delete_range": "Видалити діапазон фаз",
         "clear_ranges": "Очистити всі діапазони",
+        "auto_detect_ranges": "Автоматичне визначення фаз",
         "save_ranges": "Зберегти та повернути"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Правильно - Виберіть програму/тривалість",
         "ignore": "Ігнорувати - хибний позитивний/шумовий цикл",
         "delete": "Видалити - видалити з історії"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Назвіть і застосуйте фази",
+        "cancel": "Повернутися без змін"
       }
     }
   },

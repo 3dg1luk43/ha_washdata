@@ -344,6 +344,17 @@
           "range_index": "Εύρος Φάσης"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Φάσεις που ανιχνεύονται αυτόματα",
+        "description": "Προφίλ: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} φάσεις εντοπίστηκαν αυτόματα.** Επιλέξτε μια ενέργεια παρακάτω.",
+        "data": {
+          "action": "Δράση"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Φάσεις που εντοπίστηκαν με όνομα",
+        "description": "Προφίλ: **{profile_name}**\n\n**Εντοπίστηκαν {detected_count} φάσεις:**\n{ranges_summary}\n\nΔώστε ένα όνομα σε κάθε φάση."
+      },
       "assign_profile_phases_select": {
         "title": "Εκχώρηση εύρους φάσεων",
         "description": "Επιλέξτε ένα προφίλ για να διαμορφώσετε τις περιοχές φάσεων.",
@@ -711,6 +722,7 @@
         "edit_range": "Επεξεργασία εύρους φάσης",
         "delete_range": "Διαγραφή εύρους φάσης",
         "clear_ranges": "Εκκαθάριση όλων των εύρους",
+        "auto_detect_ranges": "Φάσεις αυτόματης ανίχνευσης",
         "save_ranges": "Αποθήκευση και επιστροφή"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Σωστό - Επιλέξτε Πρόγραμμα/Διάρκεια",
         "ignore": "Παράβλεψη - Ψευδής θετικός/Θορυβώδης κύκλος",
         "delete": "Διαγραφή - Κατάργηση από το ιστορικό"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Ονομασία και εφαρμογή φάσεων",
+        "cancel": "Επιστρέψτε χωρίς αλλαγές"
       }
     }
   },

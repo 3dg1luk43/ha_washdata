@@ -344,6 +344,17 @@
           "range_index": "Phase Range"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Auto-detektéiert Phasen",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} Phas(en) automatesch festgestallt.** Wielt eng Aktioun hei drënner.",
+        "data": {
+          "action": "Aktioun"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Numm entdeckt Phasen",
+        "description": "Profil: **{profile_name}**\n\n**{detected_count} Phase(n) entdeckt:**\n{ranges_summary}\n\nGitt en Numm un all Phase."
+      },
       "assign_profile_phases_select": {
         "title": "Assignéiert Phase Ranges",
         "description": "Wielt e Profil fir Phasebereich ze konfiguréieren.",
@@ -711,6 +722,7 @@
         "edit_range": "Phase Range änneren",
         "delete_range": "Läschen Phase Range",
         "clear_ranges": "All Ranges läschen",
+        "auto_detect_ranges": "Auto-detektéieren Phasen",
         "save_ranges": "Späicheren an zréck"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Richteg - Wielt Programm / Dauer",
         "ignore": "Ignoréieren - Falsch Positiv / Kaméidi Zyklus",
         "delete": "Läschen - Ewechzehuelen aus der Geschicht"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Numm & applizéiert Phasen",
+        "cancel": "Gitt zréck ouni Ännerungen"
       }
     }
   },

@@ -344,6 +344,17 @@
           "range_index": "Raon Céime"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Céimeanna uathbhraite",
+        "description": "Próifíl: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} céim(eanna) aimsithe go huathoibríoch.** Roghnaigh gníomh thíos.",
+        "data": {
+          "action": "Gníomh"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Ainm Céimeanna Braite",
+        "description": "Próifíl: **{profile_name}**\n\n**{detected_count} chéim(eanna) braite:**\n{ranges_summary}\n\nTabhair ainm do gach céim."
+      },
       "assign_profile_phases_select": {
         "title": "Sann Raonta Céime",
         "description": "Roghnaigh próifíl chun raonta na gcéimeanna a chumrú.",
@@ -711,6 +722,7 @@
         "edit_range": "Cuir Raon Céime in Eagar",
         "delete_range": "Scrios Raon Céime",
         "clear_ranges": "Glan Gach Raon",
+        "auto_detect_ranges": "Céimeanna a bhrath go huathoibríoch",
         "save_ranges": "Sábháil agus Fill ar ais"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Ceart - Roghnaigh Clár / Ré",
         "ignore": "Déan neamhaird de - Timthriall Bréagach Dearfach/Torthach",
         "delete": "Scrios - Bain as an Stair"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Ainmnigh & cuir na céimeanna i bhfeidhm",
+        "cancel": "Téigh ar ais gan athruithe"
       }
     }
   },

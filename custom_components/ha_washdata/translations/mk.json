@@ -344,6 +344,17 @@
           "range_index": "Опсег на фази"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Автоматски откриени фази",
+        "description": "Профил: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} фази се откриени автоматски.** Изберете дејство подолу.",
+        "data": {
+          "action": "Акција"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Откриени фази со име",
+        "description": "Профил: **{profile_name}**\n\n**{detected_count} откриени фази:**\n{ranges_summary}\n\nДоделете име на секоја фаза."
+      },
       "assign_profile_phases_select": {
         "title": "Доделете опсези на фази",
         "description": "Изберете профил за да ги конфигурирате опсезите на фази.",
@@ -711,6 +722,7 @@
         "edit_range": "Уреди опсег на фази",
         "delete_range": "Избришете опсег на фази",
         "clear_ranges": "Исчистете ги сите опсези",
+        "auto_detect_ranges": "Фази за автоматско откривање",
         "save_ranges": "Зачувај и Врати"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Точно - Изберете Програма/Времетраење",
         "ignore": "Игнорирај - Лажно позитивен/бучен циклус",
         "delete": "Избриши - Отстрани од историјата"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Именувајте и применувајте фази",
+        "cancel": "Вратете се назад без промени"
       }
     }
   },

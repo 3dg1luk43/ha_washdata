@@ -344,6 +344,17 @@
           "range_index": "Zakres faz"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automatycznie wykrywane fazy",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fazy wykryte automatycznie.** Wybierz działanie poniżej.",
+        "data": {
+          "action": "Działanie"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Nazwij wykryte fazy",
+        "description": "Profil: **{profile_name}**\n\n**Wykryto fazy:{detected_count}:**\n{ranges_summary}\n\nPrzypisz nazwę do każdej fazy."
+      },
       "assign_profile_phases_select": {
         "title": "Przypisz zakresy faz",
         "description": "Wybierz profil, aby skonfigurować zakresy faz.",
@@ -711,6 +722,7 @@
         "edit_range": "Edytuj zakres faz",
         "delete_range": "Usuń zakres faz",
         "clear_ranges": "Wyczyść wszystkie zakresy",
+        "auto_detect_ranges": "Automatyczne wykrywanie faz",
         "save_ranges": "Zapisz i wróć"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Poprawnie — wybierz program/czas trwania",
         "ignore": "Ignoruj ​​– cykl fałszywie dodatni/zakłócony",
         "delete": "Usuń – Usuń z historii"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Nazwij i zastosuj fazy",
+        "cancel": "Wróć bez zmian"
       }
     }
   },

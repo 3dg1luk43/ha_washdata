@@ -344,6 +344,17 @@
           "range_index": "ფაზის დიაპაზონი"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "ავტომატურად გამოვლენილი ფაზები",
+        "description": "პროფილი: **{profile_name}**\n\n{timeline_svg}\n\n** ავტომატურად აღმოჩენილია {detected_count} ფაზა.** აირჩიეთ ქმედება ქვემოთ.",
+        "data": {
+          "action": "მოქმედება"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "დაასახელეთ გამოვლენილი ფაზები",
+        "description": "პროფილი: **{profile_name}**\n\n** აღმოჩენილია {detected_count} ფაზა:**\n{ranges_summary}\n\nმიანიჭეთ სახელი თითოეულ ფაზას."
+      },
       "assign_profile_phases_select": {
         "title": "მიანიჭეთ ფაზის დიაპაზონები",
         "description": "აირჩიეთ პროფილი ფაზის დიაპაზონების კონფიგურაციისთვის.",
@@ -711,6 +722,7 @@
         "edit_range": "ფაზის დიაპაზონის რედაქტირება",
         "delete_range": "ფაზის დიაპაზონის წაშლა",
         "clear_ranges": "ყველა დიაპაზონის გასუფთავება",
+        "auto_detect_ranges": "ფაზების ავტომატური გამოვლენა",
         "save_ranges": "შენახვა და დაბრუნება"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "სწორი - აირჩიეთ პროგრამა/ხანგრძლივობა",
         "ignore": "იგნორირება - ცრუ დადებითი/ხმაურიანი ციკლი",
         "delete": "წაშლა - ამოღება ისტორიიდან"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "დაასახელეთ და გამოიყენეთ ფაზები",
+        "cancel": "დაბრუნდით უკან ცვლილებების გარეშე"
       }
     }
   },

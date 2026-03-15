@@ -344,6 +344,17 @@
           "range_index": "Fazių diapazonas"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automatiškai aptiktos fazės",
+        "description": "Profilis: **{profile_name}**\n\n{timeline_svg}\n\n**Automatiškai aptiktos {detected_count} fazės.** Toliau pasirinkite veiksmą.",
+        "data": {
+          "action": "Veiksmas"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Pavadinkite aptiktas fazes",
+        "description": "Profilis: **{profile_name}**\n\n**Aptikta {detected_count} fazė (-ės):**\n{ranges_summary}\n\nKiekvienai fazei priskirkite pavadinimą."
+      },
       "assign_profile_phases_select": {
         "title": "Priskirkite fazių diapazonus",
         "description": "Pasirinkite profilį, kad sukonfigūruotumėte fazių diapazonus.",
@@ -711,6 +722,7 @@
         "edit_range": "Redaguoti fazių diapazoną",
         "delete_range": "Ištrinti fazių diapazoną",
         "clear_ranges": "Išvalyti visus diapazonus",
+        "auto_detect_ranges": "Automatiškai aptikti fazes",
         "save_ranges": "Išsaugoti ir grąžinti"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Teisingai – pasirinkite programą / trukmę",
         "ignore": "Ignoruoti – klaidingas teigiamas / triukšmingas ciklas",
         "delete": "Ištrinti – pašalinti iš istorijos"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Pavadinkite ir pritaikykite fazes",
+        "cancel": "Grįžkite be pakeitimų"
       }
     }
   },

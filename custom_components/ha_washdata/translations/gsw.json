@@ -344,6 +344,17 @@
           "range_index": "Phasenbereich"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automatisch erkannte Phasen",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} Phase(n) automatisch erkannt.** Wählen Sie unten eine Aktion aus.",
+        "data": {
+          "action": "Aktion"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Benennen Sie die erkannten Phasen",
+        "description": "Profil: **{profile_name}**\n\n**{detected_count} Phase(n) erkannt:**\n{ranges_summary}\n\nWeisen Sie jeder Phase einen Namen zu."
+      },
       "assign_profile_phases_select": {
         "title": "Phasenbereiche zuweisen",
         "description": "Wählen Sie ein Profil aus, um Phasenbereiche zu konfigurieren.",
@@ -711,6 +722,7 @@
         "edit_range": "Phasenbereich bearbeiten",
         "delete_range": "Phasenbereich löschen",
         "clear_ranges": "Alle Bereiche löschen",
+        "auto_detect_ranges": "Phasen automatisch erkennen",
         "save_ranges": "Speichern und zurückgeben"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Richtig – Wählen Sie Programm/Dauer",
         "ignore": "Ignorieren – falsch positiver/verrauschter Zyklus",
         "delete": "Löschen – Aus dem Verlauf entfernen"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Phasen benennen und anwenden",
+        "cancel": "Gehen Sie ohne Änderungen zurück"
       }
     }
   },

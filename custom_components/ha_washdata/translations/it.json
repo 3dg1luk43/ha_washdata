@@ -344,6 +344,17 @@
           "range_index": "Intervallo di fase"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Fasi rilevate automaticamente",
+        "description": "Profilo: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fase/i rilevata/e automaticamente.** Scegli un'azione di seguito.",
+        "data": {
+          "action": "Azione"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Nome fasi rilevate",
+        "description": "Profilo: **{profile_name}**\n\n**{detected_count} fase/i rilevata/e:**\n{ranges_summary}\n\nAssegnare un nome a ciascuna fase."
+      },
       "assign_profile_phases_select": {
         "title": "Assegna intervalli di fase",
         "description": "Seleziona un profilo per configurare gli intervalli di fase.",
@@ -711,6 +722,7 @@
         "edit_range": "Modifica intervallo di fasi",
         "delete_range": "Elimina intervallo di fasi",
         "clear_ranges": "Cancella tutti gli intervalli",
+        "auto_detect_ranges": "Rilevamento automatico delle fasi",
         "save_ranges": "Salva e ritorna"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Corretto: scegli Programma/Durata",
         "ignore": "Ignora: ciclo falso positivo/rumoroso",
         "delete": "Elimina: rimuovi dalla cronologia"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Assegna un nome e applica le fasi",
+        "cancel": "Torna indietro senza modifiche"
       }
     }
   },

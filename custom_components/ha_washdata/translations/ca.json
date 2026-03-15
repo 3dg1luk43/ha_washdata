@@ -344,6 +344,17 @@
           "range_index": "Interval de fases"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Fases detectades automàticament",
+        "description": "Perfil: **{profile_name}**\n\n{timeline_svg}\n\n**S'han detectat {detected_count} fases automàticament.** Trieu una acció a continuació.",
+        "data": {
+          "action": "Acció"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Nom Fases detectades",
+        "description": "Perfil: **{profile_name}**\n\n**S'han detectat {detected_count} fases:**\n{ranges_summary}\n\nAssigna un nom a cada fase."
+      },
       "assign_profile_phases_select": {
         "title": "Assignar intervals de fase",
         "description": "Seleccioneu un perfil per configurar els intervals de fase.",
@@ -711,6 +722,7 @@
         "edit_range": "Edita l'interval de fases",
         "delete_range": "Suprimeix l'interval de fases",
         "clear_ranges": "Esborra tots els intervals",
+        "auto_detect_ranges": "Autodetecció de fases",
         "save_ranges": "Guarda i torna"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Correcte: seleccioneu Programa/Durada",
         "ignore": "Ignorar - Fals positiu/cicle sorollós",
         "delete": "Suprimeix - Elimina de l'historial"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Anomena i aplica les fases",
+        "cancel": "Tornar enrere sense canvis"
       }
     }
   },

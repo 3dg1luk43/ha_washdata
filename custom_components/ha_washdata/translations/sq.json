@@ -344,6 +344,17 @@
           "range_index": "Gama e Fazës"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Fazat e zbuluara automatikisht",
+        "description": "Profili: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} faza (faza) u zbuluan automatikisht.** Zgjidhni një veprim më poshtë.",
+        "data": {
+          "action": "Veprimi"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Emri i fazave të zbuluara",
+        "description": "Profili: **{profile_name}**\n\n**{detected_count} faza (faza) e zbuluar:**\n{ranges_summary}\n\nCaktoni një emër për secilën fazë."
+      },
       "assign_profile_phases_select": {
         "title": "Caktoni vargjet e fazave",
         "description": "Zgjidhni një profil për të konfiguruar diapazonin e fazave.",
@@ -711,6 +722,7 @@
         "edit_range": "Redakto diapazonin e fazës",
         "delete_range": "Fshi Gama e Fazës",
         "clear_ranges": "Pastro të gjitha vargjet",
+        "auto_detect_ranges": "Fazat e zbulimit automatik",
         "save_ranges": "Ruaj dhe Kthehu"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "E saktë - Zgjidhni Programin/Kohëzgjatjen",
         "ignore": "Injoro - Cikli i rremë pozitiv/zhurmë",
         "delete": "Fshije - Hiqe nga historia"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Emërtoni dhe zbatoni fazat",
+        "cancel": "Kthehu pa ndryshime"
       }
     }
   },

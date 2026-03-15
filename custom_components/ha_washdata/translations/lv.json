@@ -344,6 +344,17 @@
           "range_index": "Fāzes diapazons"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automātiski noteiktas fāzes",
+        "description": "Profils: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fāze(-s) noteikta(s) automātiski.** Izvēlieties darbību tālāk.",
+        "data": {
+          "action": "Darbība"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Nosaukums Atklātās fāzes",
+        "description": "Profils: **{profile_name}**\n\n**Noteikta {detected_count} fāze(s):**\n{ranges_summary}\n\nKatrai fāzei piešķiriet nosaukumu."
+      },
       "assign_profile_phases_select": {
         "title": "Piešķiriet fāzes diapazonus",
         "description": "Izvēlieties profilu, lai konfigurētu fāzes diapazonus.",
@@ -711,6 +722,7 @@
         "edit_range": "Rediģēt fāzes diapazonu",
         "delete_range": "Dzēst fāzes diapazonu",
         "clear_ranges": "Notīrīt visus diapazonus",
+        "auto_detect_ranges": "Automātiski noteikt fāzes",
         "save_ranges": "Saglabāt un atgriezt"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Pareizi — izvēlieties programmu/ilgumu",
         "ignore": "Ignorēt — viltus pozitīvs/trokšņains cikls",
         "delete": "Dzēst — noņemt no vēstures"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Nosauciet un piemērojiet fāzes",
+        "cancel": "Dodieties atpakaļ bez izmaiņām"
       }
     }
   },

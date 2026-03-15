@@ -344,6 +344,17 @@
           "range_index": "Phạm vi pha"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Các pha được phát hiện tự động",
+        "description": "Hồ sơ: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} (các) pha được phát hiện tự động.** Chọn một hành động bên dưới.",
+        "data": {
+          "action": "Hoạt động"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Tên các giai đoạn được phát hiện",
+        "description": "Hồ sơ: **{profile_name}**\n\n**{detected_count} pha được phát hiện:**\n{ranges_summary}\n\nGán tên cho từng giai đoạn."
+      },
       "assign_profile_phases_select": {
         "title": "Chỉ định phạm vi pha",
         "description": "Chọn một cấu hình để cấu hình phạm vi pha.",
@@ -711,6 +722,7 @@
         "edit_range": "Chỉnh sửa phạm vi pha",
         "delete_range": "Xóa phạm vi pha",
         "clear_ranges": "Xóa tất cả các phạm vi",
+        "auto_detect_ranges": "Tự động phát hiện các pha",
         "save_ranges": "Lưu và trả lại"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Đúng - Chọn Chương trình/Thời lượng",
         "ignore": "Bỏ qua - Chu kỳ dương tính giả/ồn ào",
         "delete": "Xóa - Xóa khỏi Lịch sử"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Đặt tên và áp dụng các giai đoạn",
+        "cancel": "Quay lại mà không thay đổi"
       }
     }
   },

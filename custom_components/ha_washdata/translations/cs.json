@@ -344,6 +344,17 @@
           "range_index": "Fázový rozsah"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automaticky detekované fáze",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**Automaticky zjištěno {detected_count} fází.** Níže vyberte akci.",
+        "data": {
+          "action": "Akce"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Pojmenujte zjištěné fáze",
+        "description": "Profil: **{profile_name}**\n\n**Zjištěno {detected_count} fází:**\n{ranges_summary}\n\nPřiřaďte každé fázi název."
+      },
       "assign_profile_phases_select": {
         "title": "Přiřadit fázové rozsahy",
         "description": "Vyberte profil pro konfiguraci fázových rozsahů.",
@@ -711,6 +722,7 @@
         "edit_range": "Upravit rozsah fází",
         "delete_range": "Smazat fázový rozsah",
         "clear_ranges": "Vymazat všechny rozsahy",
+        "auto_detect_ranges": "Automatická detekce fází",
         "save_ranges": "Uložit a vrátit"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Správně - Zvolte Program/Duration",
         "ignore": "Ignorovat – cyklus falešně pozitivní/hlučný",
         "delete": "Smazat – Odebrat z historie"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Fáze pojmenování a aplikace",
+        "cancel": "Vraťte se zpět beze změn"
       }
     }
   },

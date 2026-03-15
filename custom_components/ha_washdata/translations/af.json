@@ -344,6 +344,17 @@
           "range_index": "Fasereeks"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Fases wat outomaties opgespoor is",
+        "description": "Profiel: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fase(s) word outomaties bespeur.** Kies 'n handeling hieronder.",
+        "data": {
+          "action": "Aksie"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Naam Bespeur Fases",
+        "description": "Profiel: **{profile_name}**\n\n**{detected_count} fase(s) bespeur:**\n{ranges_summary}\n\nKen 'n naam aan elke fase toe."
+      },
       "assign_profile_phases_select": {
         "title": "Ken fasereekse toe",
         "description": "Kies 'n profiel om fasereekse op te stel.",
@@ -711,6 +722,7 @@
         "edit_range": "Wysig fasereeks",
         "delete_range": "Vee fasereeks uit",
         "clear_ranges": "Vee alle reekse uit",
+        "auto_detect_ranges": "Bespeur fases outomaties",
         "save_ranges": "Stoor en keer terug"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Korrek - Kies program/duur",
         "ignore": "Ignoreer - Vals Positief/Lawaaierige Siklus",
         "delete": "Vee uit - Verwyder uit geskiedenis"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Noem en pas fases toe",
+        "cancel": "Gaan terug sonder veranderinge"
       }
     }
   },

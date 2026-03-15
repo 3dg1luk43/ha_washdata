@@ -344,6 +344,17 @@
           "range_index": "Фазовый диапазон"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Автоматически определяемые фазы",
+        "description": "Профиль: **{profile_name}**\n\n{timeline_svg}\n\n**Фазы обнаружены автоматически: {detected_count}.** Выберите действие ниже.",
+        "data": {
+          "action": "Действие"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Название обнаруженных фаз",
+        "description": "Профиль: **{profile_name}**\n\n**Обнаружено {detected_count} фаз:**\n{ranges_summary}\n\nПрисвойте имя каждому этапу."
+      },
       "assign_profile_phases_select": {
         "title": "Назначьте диапазоны фаз",
         "description": "Выберите профиль для настройки диапазонов фаз.",
@@ -711,6 +722,7 @@
         "edit_range": "Редактировать фазовый диапазон",
         "delete_range": "Удалить диапазон фаз",
         "clear_ranges": "Очистить все диапазоны",
+        "auto_detect_ranges": "Автоматическое определение фаз",
         "save_ranges": "Сохранить и вернуть"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Правильно – выберите программу/продолжительность",
         "ignore": "Игнорировать – цикл ложного срабатывания/шума",
         "delete": "Удалить – Удалить из истории"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Назовите и примените этапы",
+        "cancel": "Вернуться без изменений"
       }
     }
   },

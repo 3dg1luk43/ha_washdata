@@ -570,7 +570,7 @@ const TRANSLATIONS = {
     "entity_not_found": "Entité introuvable"
   },
   "fy": {
-    "washer_program": "Washer Program",
+    "washer_program": "Washer programma",
     "program_placeholder": "Selektearje Programma",
     "duration": "Doer",
     "minutes": "min",

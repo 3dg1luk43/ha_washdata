@@ -344,6 +344,17 @@
           "range_index": "Ystod Cyfnod"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Cyfnodau a ganfuwyd yn awtomatig",
+        "description": "Proffil: ***{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} cam(au) wedi'u canfod yn awtomatig.** Dewiswch weithred isod.",
+        "data": {
+          "action": "Gweithred"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Enw Cyfnodau Canfyddedig",
+        "description": "Proffil: ***{profile_name}**\n\n**{detected_count} cam(au) wedi'u canfod:**\n{ranges_summary}\n\nRhowch enw i bob cam."
+      },
       "assign_profile_phases_select": {
         "title": "Neilltuo Ystod Cyfnod",
         "description": "Dewiswch broffil i ffurfweddu ystodau cyfnodau.",
@@ -711,6 +722,7 @@
         "edit_range": "Golygu Ystod Cyfnod",
         "delete_range": "Dileu Ystod Cyfnod",
         "clear_ranges": "Clirio Pob Ystod",
+        "auto_detect_ranges": "Auto-canfod Cyfnodau",
         "save_ranges": "Cadw a Dychwelyd"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Cywir - Dewiswch Raglen/Hyd",
         "ignore": "Anwybyddu - Cylchred Anghywir/Swnllyd",
         "delete": "Dileu - Dileu o Hanes"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Enw a chamau cymhwyso",
+        "cancel": "Ewch yn ôl heb newidiadau"
       }
     }
   },

@@ -344,6 +344,17 @@
           "range_index": "Փուլային միջակայք"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Ավտոմատ հայտնաբերված փուլեր",
+        "description": "Պրոֆիլ՝ **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} փուլ(եր) ինքնաբերաբար հայտնաբերվեց:** Ընտրեք գործողությունը ստորև:",
+        "data": {
+          "action": "Գործողություն"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Հայտնաբերված փուլերի անվանումը",
+        "description": "Պրոֆիլ՝ **{profile_name}**\n\n** Հայտնաբերվել է {detected_count} փուլ(եր)՝ **\n{ranges_summary}\n\nՅուրաքանչյուր փուլին անուն տվեք:"
+      },
       "assign_profile_phases_select": {
         "title": "Նշանակել փուլերի միջակայքերը",
         "description": "Ընտրեք պրոֆիլ՝ փուլային միջակայքերը կարգավորելու համար:",
@@ -711,6 +722,7 @@
         "edit_range": "Խմբագրել փուլերի տիրույթը",
         "delete_range": "Ջնջել փուլային տիրույթը",
         "clear_ranges": "Մաքրել բոլոր տիրույթները",
+        "auto_detect_ranges": "Ավտոմատ հայտնաբերման փուլեր",
         "save_ranges": "Պահպանել և վերադարձնել"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Ճիշտ - Ընտրեք Ծրագիր/Տևողություն",
         "ignore": "Անտեսել - Կեղծ դրական/աղմկոտ ցիկլ",
         "delete": "Ջնջել - Հեռացնել պատմությունից"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Անվանեք և կիրառեք փուլերը",
+        "cancel": "Վերադարձեք առանց փոփոխությունների"
       }
     }
   },

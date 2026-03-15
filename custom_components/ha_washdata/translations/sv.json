@@ -344,6 +344,17 @@
           "range_index": "Fasintervall"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Autodetekterade faser",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fas(er) identifieras automatiskt.** Välj en åtgärd nedan.",
+        "data": {
+          "action": "Handling"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Namn Detekterade faser",
+        "description": "Profil: **{profile_name}**\n\n**{detected_count} fas(er) upptäckt:**\n{ranges_summary}\n\nTilldela ett namn till varje fas."
+      },
       "assign_profile_phases_select": {
         "title": "Tilldela fasintervall",
         "description": "Välj en profil för att konfigurera fasintervall.",
@@ -711,6 +722,7 @@
         "edit_range": "Redigera fasintervall",
         "delete_range": "Ta bort fasintervall",
         "clear_ranges": "Rensa alla intervall",
+        "auto_detect_ranges": "Autoupptäck faser",
         "save_ranges": "Spara och returnera"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Korrekt - Välj Program/Längd",
         "ignore": "Ignorera - Falskt positiv/bullrig cykel",
         "delete": "Ta bort - Ta bort från historiken"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Namnge och tillämpa faser",
+        "cancel": "Gå tillbaka utan ändringar"
       }
     }
   },

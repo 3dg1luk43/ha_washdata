@@ -344,6 +344,17 @@
           "range_index": "位相範囲"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "自動検出されたフェーズ",
+        "description": "プロフィール: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} フェーズが自動的に検出されました。** 以下のアクションを選択してください。",
+        "data": {
+          "action": "アクション"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "検出されたフェーズの名前",
+        "description": "プロフィール: **{profile_name}**\n\n**{detected_count} 相が検出されました:**\n{ranges_summary}\n\n各フェーズに名前を割り当てます。"
+      },
       "assign_profile_phases_select": {
         "title": "位相範囲の割り当て",
         "description": "プロファイルを選択して位相範囲を設定します。",
@@ -711,6 +722,7 @@
         "edit_range": "位相範囲の編集",
         "delete_range": "位相範囲の削除",
         "clear_ranges": "すべての範囲をクリア",
+        "auto_detect_ranges": "フェーズの自動検出",
         "save_ranges": "保存して戻る"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "正解 - プログラム/期間を選択してください",
         "ignore": "無視 - 誤検知/ノイズの多いサイクル",
         "delete": "削除 - 履歴から削除"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "フェーズに名前を付けて適用する",
+        "cancel": "変更せずに戻る"
       }
     }
   },

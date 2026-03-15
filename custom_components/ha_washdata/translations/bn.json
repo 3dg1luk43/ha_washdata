@@ -344,6 +344,17 @@
           "range_index": "ফেজ রেঞ্জ"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "স্বয়ংক্রিয়ভাবে সনাক্ত করা পর্যায়গুলি",
+        "description": "প্রোফাইল: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} পর্যায়(গুলি) স্বয়ংক্রিয়ভাবে শনাক্ত হয়েছে।** নিচের একটি ক্রিয়া বেছে নিন।",
+        "data": {
+          "action": "অ্যাকশন"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "নাম সনাক্ত পর্যায়",
+        "description": "প্রোফাইল: **{profile_name}**\n\n**{detected_count} পর্যায়(গুলি) সনাক্ত করা হয়েছে:**\n{ranges_summary}\n\nপ্রতিটি পর্বে একটি নাম বরাদ্দ করুন।"
+      },
       "assign_profile_phases_select": {
         "title": "ফেজ রেঞ্জ বরাদ্দ",
         "description": "ফেজ রেঞ্জ কনফিগার করতে একটি প্রোফাইল নির্বাচন করুন।",
@@ -711,6 +722,7 @@
         "edit_range": "ফেজ পরিসীমা সম্পাদনা করুন",
         "delete_range": "ফেজ রেঞ্জ মুছুন",
         "clear_ranges": "সমস্ত রেঞ্জ সাফ করুন",
+        "auto_detect_ranges": "পর্যায়গুলি স্বয়ংক্রিয়ভাবে সনাক্ত করুন৷",
         "save_ranges": "সংরক্ষণ করুন এবং ফেরত দিন"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "সঠিক - প্রোগ্রাম/সময়কাল বেছে নিন",
         "ignore": "উপেক্ষা করুন - মিথ্যা ইতিবাচক/কোলাহলপূর্ণ চক্র",
         "delete": "মুছুন - ইতিহাস থেকে সরান"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "নাম এবং পর্যায়গুলি প্রয়োগ করুন",
+        "cancel": "পরিবর্তন ছাড়াই ফিরে যান"
       }
     }
   },

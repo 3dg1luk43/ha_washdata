@@ -344,6 +344,17 @@
           "range_index": "محدوده فاز"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "فازهای شناسایی خودکار",
+        "description": "نمایه: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} مرحله (های) به طور خودکار شناسایی شد.** اقدامی را در زیر انتخاب کنید.",
+        "data": {
+          "action": "اقدام"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "نام فازهای شناسایی شده",
+        "description": "نمایه: **{profile_name}**\n\n**{detected_count} مرحله شناسایی شد:**\n{ranges_summary}\n\nبرای هر مرحله یک نام تعیین کنید."
+      },
       "assign_profile_phases_select": {
         "title": "محدوده های فاز را تعیین کنید",
         "description": "یک نمایه را برای پیکربندی محدوده فاز انتخاب کنید.",
@@ -711,6 +722,7 @@
         "edit_range": "ویرایش محدوده فاز",
         "delete_range": "حذف محدوده فاز",
         "clear_ranges": "پاک کردن همه محدوده ها",
+        "auto_detect_ranges": "تشخیص خودکار فازها",
         "save_ranges": "ذخیره و برگردانید"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "درست - برنامه/مدت را انتخاب کنید",
         "ignore": "نادیده گرفتن - چرخه مثبت کاذب/نویز",
         "delete": "حذف - حذف از تاریخچه"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "نام و اعمال مراحل",
+        "cancel": "بدون تغییر به عقب برگردید"
       }
     }
   },

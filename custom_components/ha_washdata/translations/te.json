@@ -344,6 +344,17 @@
           "range_index": "దశ పరిధి"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "స్వయంచాలకంగా గుర్తించబడిన దశలు",
+        "description": "ప్రొఫైల్: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} దశ(లు) స్వయంచాలకంగా గుర్తించబడ్డాయి.** దిగువ చర్యను ఎంచుకోండి.",
+        "data": {
+          "action": "చర్య"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "గుర్తించబడిన దశల పేరు",
+        "description": "ప్రొఫైల్: **{profile_name}**\n\n**{detected_count} దశ(లు) గుర్తించబడ్డాయి:**\n{ranges_summary}\n\nప్రతి దశకు ఒక పేరును కేటాయించండి."
+      },
       "assign_profile_phases_select": {
         "title": "దశ పరిధులను కేటాయించండి",
         "description": "దశ పరిధులను కాన్ఫిగర్ చేయడానికి ప్రొఫైల్‌ను ఎంచుకోండి.",
@@ -711,6 +722,7 @@
         "edit_range": "దశ పరిధిని సవరించండి",
         "delete_range": "దశ పరిధిని తొలగించండి",
         "clear_ranges": "అన్ని పరిధులను క్లియర్ చేయండి",
+        "auto_detect_ranges": "దశలను స్వయంచాలకంగా గుర్తించండి",
         "save_ranges": "సేవ్ మరియు తిరిగి"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "సరైనది - ప్రోగ్రామ్/వ్యవధిని ఎంచుకోండి",
         "ignore": "విస్మరించండి - ఫాల్స్ పాజిటివ్/నాయిస్ సైకిల్",
         "delete": "తొలగించు - చరిత్ర నుండి తీసివేయి"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "దశలకు పేరు పెట్టండి & దరఖాస్తు చేయండి",
+        "cancel": "మార్పులు లేకుండా వెనక్కి వెళ్లండి"
       }
     }
   },

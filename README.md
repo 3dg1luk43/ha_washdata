@@ -52,6 +52,7 @@ Designed for new users to get up and running quickly.
 This integration is a default repository in HACS.
 
 1. Click the button below to open the repository in HACS:
+
    [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=3dg1luk43&repository=ha_washdata&category=integration)
 2. Click **Download**.
 3. Restart Home Assistant.

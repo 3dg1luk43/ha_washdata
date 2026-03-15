@@ -344,6 +344,17 @@
           "range_index": "Fasebereik"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automatisch gedetecteerde fasen",
+        "description": "Profiel: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fase(s) automatisch gedetecteerd.** Kies hieronder een actie.",
+        "data": {
+          "action": "Actie"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Geef de gedetecteerde fasen een naam",
+        "description": "Profiel: **{profile_name}**\n\n**{detected_count} fase(s) gedetecteerd:**\n{ranges_summary}\n\nGeef elke fase een naam."
+      },
       "assign_profile_phases_select": {
         "title": "Fasebereiken toewijzen",
         "description": "Selecteer een profiel om fasebereiken te configureren.",
@@ -711,6 +722,7 @@
         "edit_range": "Fasebereik bewerken",
         "delete_range": "Fasebereik verwijderen",
         "clear_ranges": "Wis alle bereiken",
+        "auto_detect_ranges": "Fasen automatisch detecteren",
         "save_ranges": "Opslaan en retourneren"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Correct - Kies Programma/Duur",
         "ignore": "Negeren - Vals positieve/luidruchtige cyclus",
         "delete": "Verwijderen - Verwijderen uit geschiedenis"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Fasen benoemen en toepassen",
+        "cancel": "Ga terug zonder wijzigingen"
       }
     }
   },

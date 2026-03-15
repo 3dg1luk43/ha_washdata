@@ -344,6 +344,17 @@
           "range_index": "Rango de fase"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Fases detectadas automáticamente",
+        "description": "Perfil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fase(s) detectadas automáticamente.** Elija una acción a continuación.",
+        "data": {
+          "action": "Acción"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Nombre Fases detectadas",
+        "description": "Perfil: **{profile_name}**\n\n**{detected_count} fase(s) detectada(s):**\n{ranges_summary}\n\nAsigne un nombre a cada fase."
+      },
       "assign_profile_phases_select": {
         "title": "Asignar rangos de fase",
         "description": "Seleccione un perfil para configurar rangos de fases.",
@@ -711,6 +722,7 @@
         "edit_range": "Editar rango de fase",
         "delete_range": "Eliminar rango de fase",
         "clear_ranges": "Borrar todos los rangos",
+        "auto_detect_ranges": "Fases de detección automática",
         "save_ranges": "Guardar y devolver"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Correcto: elija programa/duración",
         "ignore": "Ignorar: ciclo falso positivo/ruidoso",
         "delete": "Eliminar - Eliminar del historial"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Nombrar y aplicar fases",
+        "cancel": "Volver sin cambios"
       }
     }
   },

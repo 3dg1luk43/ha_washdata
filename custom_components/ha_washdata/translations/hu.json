@@ -344,6 +344,17 @@
           "range_index": "Fázis tartomány"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automatikusan észlelt fázisok",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fázis automatikusan észlelve.** Válasszon egy műveletet lent.",
+        "data": {
+          "action": "Akció"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Az észlelt fázisok neve",
+        "description": "Profil: **{profile_name}**\n\n**{detected_count} fázis észlelve:**\n{ranges_summary}\n\nAdjon nevet minden fázisnak."
+      },
       "assign_profile_phases_select": {
         "title": "Fázistartományok hozzárendelése",
         "description": "Válasszon egy profilt a fázistartományok konfigurálásához.",
@@ -711,6 +722,7 @@
         "edit_range": "Fázistartomány szerkesztése",
         "delete_range": "Fázistartomány törlése",
         "clear_ranges": "Minden tartomány törlése",
+        "auto_detect_ranges": "Fázisok automatikus felismerése",
         "save_ranges": "Mentés és visszaküldés"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Helyes – Válassza a Program/Időtartam lehetőséget",
         "ignore": "Figyelmen kívül hagyás – téves pozitív/zajos ciklus",
         "delete": "Törlés – Eltávolítás az előzményekből"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Nevezze meg és alkalmazza a fázisokat",
+        "cancel": "Menjen vissza változtatások nélkül"
       }
     }
   },

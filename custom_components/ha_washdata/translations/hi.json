@@ -344,6 +344,17 @@
           "range_index": "चरण सीमा"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "स्वत: पता लगाए गए चरण",
+        "description": "प्रोफ़ाइल: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} चरण स्वचालित रूप से पता चला।** नीचे एक क्रिया चुनें।",
+        "data": {
+          "action": "कार्रवाई"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "पता लगाए गए चरणों का नाम",
+        "description": "प्रोफ़ाइल: **{profile_name}**\n\n**{detected_count} चरण का पता चला:**\n{ranges_summary}\n\nप्रत्येक चरण को एक नाम निर्दिष्ट करें."
+      },
       "assign_profile_phases_select": {
         "title": "चरण रेंज निर्दिष्ट करें",
         "description": "चरण श्रेणियों को कॉन्फ़िगर करने के लिए एक प्रोफ़ाइल का चयन करें।",
@@ -711,6 +722,7 @@
         "edit_range": "चरण सीमा संपादित करें",
         "delete_range": "चरण सीमा हटाएँ",
         "clear_ranges": "सभी श्रेणियां साफ़ करें",
+        "auto_detect_ranges": "चरणों का स्वतः पता लगाएं",
         "save_ranges": "सहेजें और वापस करें"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "सही - कार्यक्रम/अवधि चुनें",
         "ignore": "नज़रअंदाज़ करें - ग़लत सकारात्मक/शोर चक्र",
         "delete": "हटाएँ - इतिहास से हटाएँ"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "चरणों को नाम दें और लागू करें",
+        "cancel": "बिना बदलाव के वापस जाएं"
       }
     }
   },

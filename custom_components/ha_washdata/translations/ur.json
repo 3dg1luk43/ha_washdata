@@ -344,6 +344,17 @@
           "range_index": "فیز رینج"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "خود بخود پتہ چلنے والے مراحل",
+        "description": "پروفائل: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} مرحلے (مرحلوں) کا خود بخود پتہ چلا۔** نیچے ایک کارروائی کا انتخاب کریں۔",
+        "data": {
+          "action": "ایکشن"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "نام معلوم شدہ مراحل",
+        "description": "پروفائل: **{profile_name}**\n\n**{detected_count} مرحلے کا پتہ چلا:**\n{ranges_summary}\n\nہر مرحلے کو ایک نام تفویض کریں۔"
+      },
       "assign_profile_phases_select": {
         "title": "فیز رینجز تفویض کریں۔",
         "description": "فیز رینجز کنفیگر کرنے کے لیے پروفائل منتخب کریں۔",
@@ -711,6 +722,7 @@
         "edit_range": "فیز رینج میں ترمیم کریں۔",
         "delete_range": "فیز رینج کو حذف کریں۔",
         "clear_ranges": "تمام حدود کو صاف کریں۔",
+        "auto_detect_ranges": "مراحل کا خود بخود پتہ لگائیں۔",
         "save_ranges": "محفوظ کریں اور واپس کریں۔"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "درست - پروگرام/دورانیہ کا انتخاب کریں۔",
         "ignore": "نظر انداز کریں - غلط مثبت/شور کا چکر",
         "delete": "حذف کریں - تاریخ سے ہٹا دیں۔"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "نام کریں اور مراحل کا اطلاق کریں۔",
+        "cancel": "بغیر کسی تبدیلی کے واپس جائیں۔"
       }
     }
   },

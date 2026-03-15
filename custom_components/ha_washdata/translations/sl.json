@@ -344,6 +344,17 @@
           "range_index": "Fazno območje"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Samodejno zaznane faze",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} faza(-e) zaznana samodejno.** Izberite dejanje spodaj.",
+        "data": {
+          "action": "Akcija"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Poimenujte zaznane faze",
+        "description": "Profil: **{profile_name}**\n\n**{detected_count} zaznanih faz:**\n{ranges_summary}\n\nVsaki fazi dodelite ime."
+      },
       "assign_profile_phases_select": {
         "title": "Dodelite fazne razpone",
         "description": "Izberite profil za konfiguracijo faznih razponov.",
@@ -711,6 +722,7 @@
         "edit_range": "Urejanje faznega obsega",
         "delete_range": "Izbriši fazno območje",
         "clear_ranges": "Počisti vse obsege",
+        "auto_detect_ranges": "Samodejno zaznavanje faz",
         "save_ranges": "Shrani in vrni"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Pravilno - izberite program/trajanje",
         "ignore": "Ignoriraj – lažno pozitiven/šumni cikel",
         "delete": "Izbriši – Odstrani iz zgodovine"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Poimenujte in uporabite faze",
+        "cancel": "Nazaj brez sprememb"
       }
     }
   },

@@ -344,6 +344,17 @@
           "range_index": "Rentang Fase"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Fase yang terdeteksi secara otomatis",
+        "description": "Profil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fase terdeteksi secara otomatis.** Pilih tindakan di bawah.",
+        "data": {
+          "action": "Tindakan"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Nama Fase Terdeteksi",
+        "description": "Profil: **{profile_name}**\n\n**{detected_count} fase terdeteksi:**\n{ranges_summary}\n\nTetapkan nama untuk setiap fase."
+      },
       "assign_profile_phases_select": {
         "title": "Tetapkan Rentang Fase",
         "description": "Pilih profil untuk mengonfigurasi rentang fase.",
@@ -711,6 +722,7 @@
         "edit_range": "Edit Rentang Fase",
         "delete_range": "Hapus Rentang Fase",
         "clear_ranges": "Hapus Semua Rentang",
+        "auto_detect_ranges": "Fase Deteksi Otomatis",
         "save_ranges": "Simpan dan Kembalikan"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Benar - Pilih Program/Durasi",
         "ignore": "Abaikan - Siklus Positif Palsu/Bising",
         "delete": "Hapus - Hapus dari Riwayat"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Beri nama & terapkan fase",
+        "cancel": "Kembali tanpa perubahan"
       }
     }
   },

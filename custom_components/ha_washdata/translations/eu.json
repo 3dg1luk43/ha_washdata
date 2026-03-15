@@ -344,6 +344,17 @@
           "range_index": "Fase barrutia"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Auto-detektaturiko faseak",
+        "description": "Profila: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fase(k) automatikoki detektatu dira.** Aukeratu ekintza bat behean.",
+        "data": {
+          "action": "Ekintza"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Izena detektaturiko faseak",
+        "description": "Profila: **{profile_name}**\n\n**{detected_count} fase(k) detektatu dira:**\n{ranges_summary}\n\nIzen bat eman fase bakoitzari."
+      },
       "assign_profile_phases_select": {
         "title": "Esleitu fase-barrutiak",
         "description": "Hautatu profil bat fase-barrutiak konfiguratzeko.",
@@ -711,6 +722,7 @@
         "edit_range": "Editatu fase-barrutia",
         "delete_range": "Ezabatu fase-barrutia",
         "clear_ranges": "Garbitu barruti guztiak",
+        "auto_detect_ranges": "Auto-detektatzeko faseak",
         "save_ranges": "Gorde eta Itzuli"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Zuzena - Aukeratu Programa/Iraupena",
         "ignore": "Ez ikusi egin - Positibo faltsu/Ziklo zaratatsua",
         "delete": "Ezabatu - Kendu historiatik"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Faseak izendatu eta aplikatu",
+        "cancel": "Atzera egin aldaketarik gabe"
       }
     }
   },

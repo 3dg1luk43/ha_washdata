@@ -344,6 +344,17 @@
           "range_index": "Faza Gamo"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Aŭtomate detektitaj Fazoj",
+        "description": "Profilo: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fazo(j) detektita(j) aŭtomate.** Elektu agon sube.",
+        "data": {
+          "action": "Ago"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Nomo Detektita Fazoj",
+        "description": "Profilo: **{profile_name}**\n\n**{detected_count} fazo(j) detektita(j):**\n{ranges_summary}\n\nAsignu nomon al ĉiu fazo."
+      },
       "assign_profile_phases_select": {
         "title": "Asignu Fazintervalojn",
         "description": "Elektu profilon por agordi fazintervalojn.",
@@ -711,6 +722,7 @@
         "edit_range": "Redakti Phase Range",
         "delete_range": "Forigi Fazan Gamon",
         "clear_ranges": "Forigi Ĉiuj Gamoj",
+        "auto_detect_ranges": "Aŭtomate detekti Fazojn",
         "save_ranges": "Konservu kaj Revenu"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Ĝuste - Elektu Programon/Daŭron",
         "ignore": "Ignori - Falsa Pozitiva/Brua Ciklo",
         "delete": "Forigi - Forigi el Historio"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Nomu kaj apliki fazojn",
+        "cancel": "Reiru sen ŝanĝoj"
       }
     }
   },

@@ -344,6 +344,17 @@
           "range_index": "Faasi vahemik"
         }
       },
+      "assign_profile_phases_auto_detect": {
+        "title": "Automaatselt tuvastatud faasid",
+        "description": "Profiil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} faasi tuvastati automaatselt.** Valige allpool toiming.",
+        "data": {
+          "action": "Tegevus"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "Nimetage tuvastatud faasid",
+        "description": "Profiil: **{profile_name}**\n\n**Tuvastati {detected_count} faasi(t):**\n{ranges_summary}\n\nMäärake igale faasile nimi."
+      },
       "assign_profile_phases_select": {
         "title": "Määrake faasivahemikud",
         "description": "Valige faasivahemike konfigureerimiseks profiil.",
@@ -711,6 +722,7 @@
         "edit_range": "Redigeeri faasivahemikku",
         "delete_range": "Kustuta faasivahemik",
         "clear_ranges": "Kustuta kõik vahemikud",
+        "auto_detect_ranges": "Faaside automaatne tuvastamine",
         "save_ranges": "Salvesta ja tagasta"
       }
     },
@@ -736,6 +748,12 @@
         "correct": "Õige – valige Programm/Kestus",
         "ignore": "Ignoreeri – valepositiivne/mürarikas tsükkel",
         "delete": "Kustuta – eemalda ajaloost"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "Nimetage ja rakendage faase",
+        "cancel": "Minge tagasi ilma muudatusteta"
       }
     }
   },
