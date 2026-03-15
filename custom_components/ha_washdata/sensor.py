@@ -599,6 +599,12 @@ class WasherProfileCountSensor(WasherBaseSensor):
         avg_energy = profile.get("avg_energy")
         count = profile.get("cycle_count", 0)
         total_energy = (avg_energy * count) if avg_energy is not None else None
+        duration_std_dev = profile.get("duration_std_dev")
+        consistency_min = (
+            float(duration_std_dev) / 60.0
+            if isinstance(duration_std_dev, (int, float))
+            else None
+        )
 
         # Helper to format duration
         def _to_min(sec: float) -> int:
@@ -611,6 +617,7 @@ class WasherProfileCountSensor(WasherBaseSensor):
             "average_length_min": _to_min(profile.get("avg_duration", 0)),
             "min_length_min": _to_min(profile.get("min_duration", 0)),
             "max_length_min": _to_min(profile.get("max_duration", 0)),
+            "consistency_min": consistency_min,
         }
 
 

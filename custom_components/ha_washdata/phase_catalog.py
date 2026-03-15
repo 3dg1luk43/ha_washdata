@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from copy import deepcopy
 from typing import Any
 
@@ -17,6 +18,12 @@ from .const import (
 )
 
 PhaseItem = dict[str, Any]
+
+
+def _builtin_phase_id(device_type: str, name: str) -> str:
+    """Return a stable ID like 'washing_machine.pre_wash' for a built-in phase."""
+    slug = re.sub(r"[^a-z0-9]+", "_", name.strip().lower()).strip("_")
+    return f"{device_type}.{slug}"
 
 DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
     DEVICE_TYPE_WASHING_MACHINE: [
@@ -299,15 +306,19 @@ def normalize_phase_name(name: str) -> str:
 
 
 def get_default_phase_catalog(device_type: str) -> list[PhaseItem]:
-    """Return default phase catalog for a device type."""
-    return deepcopy(DEFAULT_PHASES_BY_DEVICE.get(device_type, []))
+    """Return default phase catalog for a device type, with id and device_type injected."""
+    phases = deepcopy(DEFAULT_PHASES_BY_DEVICE.get(device_type, []))
+    for phase in phases:
+        phase["id"] = _builtin_phase_id(device_type, str(phase.get("name", "")))
+        phase["device_type"] = device_type
+    return phases
 
 
 def get_shared_default_phase_catalog() -> list[PhaseItem]:
     """Return a shared default catalog deduplicated across all device types."""
     merged: list[PhaseItem] = []
     seen: set[str] = set()
-    for device_phases in DEFAULT_PHASES_BY_DEVICE.values():
+    for device_type, device_phases in DEFAULT_PHASES_BY_DEVICE.items():
         for item in device_phases:
             name = str(item.get("name", "")).strip()
             if not name:
@@ -318,6 +329,8 @@ def get_shared_default_phase_catalog() -> list[PhaseItem]:
             seen.add(key)
             merged.append(
                 {
+                    "id": _builtin_phase_id(device_type, name),
+                    "device_type": device_type,
                     "name": name,
                     "description": str(item.get("description", "")).strip(),
                     "is_default": True,
@@ -326,61 +339,109 @@ def get_shared_default_phase_catalog() -> list[PhaseItem]:
     return merged
 
 
+def get_builtin_phase_by_id(phase_id: str) -> PhaseItem | None:
+    """Return a copy of the built-in phase with the given id, or None."""
+    for device_type, device_phases in DEFAULT_PHASES_BY_DEVICE.items():
+        for item in device_phases:
+            name = str(item.get("name", "")).strip()
+            if _builtin_phase_id(device_type, name) == phase_id:
+                result = deepcopy(item)
+                result["id"] = phase_id
+                result["device_type"] = device_type
+                return result
+    return None
+
+
 def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None) -> list[PhaseItem]:
-    """Merge device defaults with custom phases for UI/selection."""
+    """Merge device defaults with custom phases. Uses 'id' as the primary collision key."""
     merged = (
         get_default_phase_catalog(device_type)
         if device_type in DEFAULT_PHASES_BY_DEVICE
         else get_shared_default_phase_catalog()
     )
-    seen_names: set[tuple[str, str]] = set()
-    for item in merged:
-        try:
-            normalized_name = normalize_phase_name(str(item.get("name", "")))
-        except ValueError:
-            continue
-        if normalized_name:
-            scope = str(item.get("source") or item.get("scope") or "").casefold()
-            seen_names.add((scope, normalized_name.casefold()))
 
-    custom = custom_phases or []
-    for item in custom:
+    # Index built-ins by id and by (device_type, name) for the name-based fallback.
+    builtin_by_id: dict[str, int] = {}
+    builtin_by_name: dict[tuple[str, str], int] = {}
+    for idx, item in enumerate(merged):
+        item_id = str(item.get("id", ""))
+        if item_id:
+            builtin_by_id[item_id] = idx
+        item_dt = str(item.get("device_type", "")).casefold()
+        item_name = str(item.get("name", "")).strip().casefold()
+        if item_name:
+            builtin_by_name[(item_dt, item_name)] = idx
+
+    seen_ids: set[str] = set(builtin_by_id.keys())
+    seen_names: set[tuple[str, str]] = set(builtin_by_name.keys())
+
+    # All known built-in names — used to guard against polluting unrelated catalogs.
+    all_builtin_names = {
+        str(p.get("name", "")).strip().casefold()
+        for phases_list in DEFAULT_PHASES_BY_DEVICE.values()
+        for p in phases_list
+    }
+
+    for item in (custom_phases or []):
         try:
             normalized_name = normalize_phase_name(str(item.get("name", "")))
         except ValueError:
             continue
-        item_device_type = str(item.get("device_type", "")).strip()
-        if item_device_type:
-            target_device_type = str(device_type or "").strip().casefold()
-            if item_device_type.casefold() != target_device_type:
-                continue
-        scope = str(item.get("source") or item.get("scope") or "").casefold()
-        key = (scope, normalized_name.casefold())
         if not normalized_name:
             continue
-        if key in seen_names:
-            # Allow custom entries to update the description of the existing
-            # default phase (description-only override).
-            new_desc = str(item.get("description", "")).strip()
-            if new_desc:
-                for existing in merged:
-                    try:
-                        ex_name = normalize_phase_name(str(existing.get("name", "")))
-                    except ValueError:
-                        continue
-                    ex_scope = str(existing.get("source") or existing.get("scope") or "").casefold()
-                    if (ex_scope, ex_name.casefold()) == key:
-                        existing["description"] = new_desc
-                        existing["is_default"] = False
-                        break
-            continue
-        seen_names.add(key)
-        merged.append(
-            {
+
+        item_device_type = str(item.get("device_type", "")).strip()
+        # Skip if this custom phase targets a different specific device type.
+        if item_device_type:
+            if item_device_type.casefold() != str(device_type or "").strip().casefold():
+                continue
+
+        phase_id = str(item.get("id", "")).strip()
+
+        # Primary: id-based in-place replacement of a built-in entry.
+        if phase_id and phase_id in builtin_by_id:
+            idx = builtin_by_id[phase_id]
+            original_device_type = str(merged[idx].get("device_type", item_device_type))
+            merged[idx] = {
+                "id": phase_id,
+                "device_type": original_device_type,
                 "name": normalized_name,
                 "description": str(item.get("description", "")).strip(),
-                "device_type": item_device_type,
                 "is_default": False,
             }
-        )
+            continue
+
+        # Fallback: name-based match for old data without ids.
+        name_key = (item_device_type.casefold(), normalized_name.casefold())
+        if name_key in builtin_by_name:
+            idx = builtin_by_name[name_key]
+            new_desc = str(item.get("description", "")).strip()
+            if new_desc:
+                merged[idx]["description"] = new_desc
+            merged[idx]["is_default"] = False
+            continue
+
+        # New phase: guard against universal overrides leaking into unrelated catalogs.
+        if not item_device_type and normalized_name.casefold() in all_builtin_names:
+            continue
+
+        # Deduplicate before appending.
+        if phase_id and phase_id in seen_ids:
+            continue
+        append_name_key = (item_device_type.casefold(), normalized_name.casefold())
+        if append_name_key in seen_names:
+            continue
+
+        new_phase: PhaseItem = {
+            "name": normalized_name,
+            "description": str(item.get("description", "")).strip(),
+            "device_type": item_device_type,
+            "is_default": False,
+        }
+        if phase_id:
+            new_phase["id"] = phase_id
+            seen_ids.add(phase_id)
+        seen_names.add(append_name_key)
+        merged.append(new_phase)
+
     return [p for p in merged if p.get("name")]

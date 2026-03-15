@@ -550,7 +550,7 @@
         "data": {
           "action": "What would you like to do?",
           "corrected_profile": "Correct Program (if correcting)",
-          "corrected_duration": "Correct Duration in seconds (if correcting)"
+          "corrected_duration": "Correct Duration in minutes (if correcting)"
         }
       }
     },

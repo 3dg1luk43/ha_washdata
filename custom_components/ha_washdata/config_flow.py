@@ -258,6 +258,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._editor_split_gap: int = 900
         self._selected_phase_name: str | None = None
         self._selected_phase_device_type: str | None = None
+        self._selected_phase_id: str | None = None
         self._phase_assign_profile: str | None = None
         self._phase_assign_mode: str = "offset_mode"
         self._phase_assign_cycle_id: str | None = None
@@ -1859,31 +1860,38 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         store = manager.profile_store
 
         # Gather unique phases from all device types.
-        # Global phases (device_type="") appear in every per-device list,
-        # so we dedupe by (name, device_type).
-        all_phases: list[dict[str, Any]] = []
+        # Built-in phases have no device_type field; use the iteration device_type
+        # as the effective scope for display and deduplication only.
+        # The actual_scope stored in phase_index is the real phase device_type
+        # (empty string for built-ins), so that editing a built-in always produces
+        # a universal override (device_type="") rather than a device-specific one.
+        all_phases: list[tuple[dict[str, Any], str, str]] = []
         seen: set[tuple[str, str]] = set()
         for device_type in DEVICE_TYPES.keys():
             for phase in store.list_phase_catalog(device_type):
                 phase_name = str(phase.get("name", "")).strip()
                 phase_scope = str(phase.get("device_type", "")).strip()
-                dedupe_key = (phase_name.casefold(), phase_scope)
+                is_default = bool(phase.get("is_default"))
+                # Built-in phases carry no device_type; use iteration device_type
+                # for display label so they don't all read "[All Devices]".
+                effective_scope = phase_scope if (phase_scope or not is_default) else device_type
+                dedupe_key = (phase_name.casefold(), effective_scope)
                 if not phase_name or dedupe_key in seen:
                     continue
                 seen.add(dedupe_key)
-                all_phases.append(phase)
+                all_phases.append((phase, effective_scope, phase_scope))
 
         if not all_phases:
             return self.async_abort(reason="no_phases_available")
 
         options: list[selector.SelectOptionDict] = []
-        phase_index: dict[str, tuple[str, str]] = {}
-        for phase in all_phases:
+        phase_index: dict[str, tuple[str, str, str]] = {}
+        for phase, effective_scope, actual_scope in all_phases:
             phase_name = str(phase.get("name", "")).strip()
-            phase_scope = str(phase.get("device_type", "")).strip()
-            scope_label = DEVICE_TYPES.get(phase_scope, "All Devices") if phase_scope else "All Devices"
-            option_key = f"{phase_scope}::{phase_name}"
-            phase_index[option_key] = (phase_name, phase_scope)
+            phase_id = str(phase.get("id", "")).strip()
+            scope_label = DEVICE_TYPES.get(effective_scope, "All Devices") if effective_scope else "All Devices"
+            option_key = phase_id if phase_id else f"{effective_scope}::{phase_name}"
+            phase_index[option_key] = (phase_name, actual_scope, phase_id)
             options.append(
                 selector.SelectOptionDict(
                     value=option_key,
@@ -1898,6 +1906,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 return await self.async_step_phase_catalog_edit_select()
             self._selected_phase_name = selected_meta[0]
             self._selected_phase_device_type = selected_meta[1]
+            self._selected_phase_id = selected_meta[2] or None
             return await self.async_step_phase_catalog_edit()
 
         return self.async_show_form(
@@ -1920,20 +1929,24 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Edit selected phase from all device types."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
-        if not self._selected_phase_name:
-            return await self.async_step_phase_catalog_edit_select()
-        if self._selected_phase_device_type is None:
+        if not self._selected_phase_id and not self._selected_phase_name:
             return await self.async_step_phase_catalog_edit_select()
 
-        selected = next(
-            (
-                p
-                for p in store.list_phase_catalog(self._selected_phase_device_type)
-                if str(p.get("name", "")).strip() == self._selected_phase_name
-                and str(p.get("device_type", "")).strip() == self._selected_phase_device_type
-            ),
-            None,
-        )
+        catalog = store.list_phase_catalog(self._selected_phase_device_type or "")
+        if self._selected_phase_id:
+            selected = next(
+                (p for p in catalog if str(p.get("id", "")) == self._selected_phase_id),
+                None,
+            )
+        else:
+            selected = next(
+                (
+                    p for p in catalog
+                    if str(p.get("name", "")).strip() == self._selected_phase_name
+                    and str(p.get("device_type", "")).strip() == self._selected_phase_device_type
+                ),
+                None,
+            )
 
         if not selected:
             return await self.async_step_phase_catalog_edit_select()
@@ -1941,9 +1954,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
+                phase_id = self._selected_phase_id or str(selected.get("id", ""))
                 await store.async_update_custom_phase(
-                    self._selected_phase_device_type,
-                    self._selected_phase_name,
+                    phase_id,
                     user_input["phase_name"],
                     user_input.get("phase_description", ""),
                 )
@@ -1977,19 +1990,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         # Gather unique custom phases from all device types.
         # Global phases (device_type="") appear in every per-device list,
         # so dedupe by (name, device_type).
-        all_custom_phases: dict[str, str] = {}
-        seen: set[tuple[str, str]] = set()
+        # Collect unique user-added phases (not built-in overrides) across all device types.
+        all_custom_phases: dict[str, dict[str, str]] = {}  # phase_id -> {name, scope}
+        seen_ids: set[str] = set()
         for device_type in DEVICE_TYPES.keys():
             custom_phases = store.list_custom_phases(device_type)
             for p in custom_phases:
                 phase_name = str(p.get("name", "")).strip()
                 phase_scope = str(p.get("device_type", "")).strip()
-                dedupe_key = (phase_name.casefold(), phase_scope)
-                if not phase_name or dedupe_key in seen:
+                phase_id = str(p.get("id", "")).strip()
+                if not phase_name or not phase_id or phase_id in seen_ids:
                     continue
-                seen.add(dedupe_key)
-                option_key = f"{phase_scope}::{phase_name}"
-                all_custom_phases[option_key] = phase_scope
+                seen_ids.add(phase_id)
+                all_custom_phases[phase_id] = {"name": phase_name, "scope": phase_scope}
 
         if not all_custom_phases:
             return self.async_abort(reason="no_custom_phases")
@@ -1997,11 +2010,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         errors: dict[str, str] = {}
         if user_input is not None:
             selected_key = user_input["phase_name"]
-            phase_device_type = all_custom_phases.get(selected_key)
-            if phase_device_type:
-                phase_name = selected_key.split("::", 1)[1]
+            if selected_key in all_custom_phases:
+                phase_name = all_custom_phases[selected_key]["name"]
                 try:
-                    removed = await store.async_delete_custom_phase(phase_device_type, phase_name)
+                    removed = await store.async_delete_custom_phase(selected_key)
                     manager.notify_update()
                     _LOGGER.info(
                         "Deleted custom phase '%s' and removed %s phase assignments",
@@ -2011,14 +2023,17 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     return await self.async_step_manage_phase_catalog()
                 except ValueError as err:
                     errors["base"] = str(err)
+            else:
+                return await self.async_step_phase_catalog_delete()
 
         options = []
-        for option_key, phase_scope in all_custom_phases.items():
-            phase_name = option_key.split("::", 1)[1]
+        for phase_id, phase_meta in all_custom_phases.items():
+            phase_name = phase_meta["name"]
+            phase_scope = phase_meta["scope"]
             scope_label = DEVICE_TYPES.get(phase_scope, "All Devices") if phase_scope else "All Devices"
             usage = store.count_phase_usage(phase_name)
             label = f"[{scope_label}] {phase_name} ({usage} assignments)"
-            options.append(selector.SelectOptionDict(value=option_key, label=label))
+            options.append(selector.SelectOptionDict(value=phase_id, label=label))
 
         return self.async_show_form(
             step_id="phase_catalog_delete",

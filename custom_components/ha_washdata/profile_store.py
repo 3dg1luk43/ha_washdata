@@ -7,6 +7,7 @@ import hashlib
 import logging
 import os
 import re
+import uuid
 from datetime import datetime, timedelta
 from typing import Any, TypeAlias, cast
 import json
@@ -33,6 +34,9 @@ from .time_utils import (
     power_data_to_offsets,
 )
 from .phase_catalog import (
+    DEFAULT_PHASES_BY_DEVICE,
+    _builtin_phase_id,
+    get_builtin_phase_by_id,
     merge_phase_catalog,
     normalize_phase_name,
 )
@@ -51,6 +55,23 @@ def _empty_ranking() -> list[dict[str, Any]]:
 def _empty_debug_details() -> dict[str, Any]:
     """Typed default factory for debug details."""
     return {}
+
+
+def _value_to_timestamp(value: Any) -> float | None:
+    """Parse supported datetime-like values into unix seconds."""
+    if isinstance(value, datetime):
+        return value.timestamp()
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str) and value:
+        parsed = dt_util.parse_datetime(value)
+        if parsed is not None:
+            return parsed.timestamp()
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+    return None
 
 
 def profile_sort_key(name: str) -> tuple[int, int, str]:
@@ -305,7 +326,10 @@ def decompress_power_data(cycle: CycleDict) -> list[tuple[float, float]]:
     if not isinstance(raw, list) or not raw:
         return []
 
-    start_time_iso: str | None = cycle.get("start_time")
+    start_time_raw = cycle.get("start_time")
+    start_time_iso: str | None = start_time_raw if isinstance(start_time_raw, str) and start_time_raw else None
+    if isinstance(start_time_raw, datetime):
+        start_time_iso = start_time_raw.isoformat()
     offsets = power_data_to_offsets(cast(list[list[Any] | tuple[Any, ...]], raw), start_time_iso)
     return [(float(o), float(p)) for o, p in offsets]
 
@@ -336,7 +360,9 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
         return None
 
     try:
-        start_ts = datetime.fromisoformat(cycle["start_time"]).timestamp()
+        start_ts = _value_to_timestamp(cycle.get("start_time"))
+        if start_ts is None:
+            return None
         compressed: list[list[float]] = []
 
         last_saved_p = -999.0
@@ -350,10 +376,9 @@ def compress_power_data(cycle: CycleDict) -> list[Any] | None:
                 t_str, p_val_raw = entry_seq
                 try:
                     # Handle both ISO string and potential timestamp float
-                    if isinstance(t_str, str):
-                        t = datetime.fromisoformat(t_str).timestamp()
-                    else:
-                        t = float(t_str)
+                    t = _value_to_timestamp(t_str)
+                    if t is None:
+                        continue
 
                     p_val = float(p_val_raw)
                     offset = round(t - start_ts, 1)
@@ -735,6 +760,7 @@ class ProfileStore:
         phases = self._get_shared_custom_phases()
         return [
             {
+                "id": str(p.get("id", "")),
                 "name": str(p.get("name", "")).strip(),
                 "description": str(p.get("description", "")).strip(),
                 "device_type": str(p.get("device_type", "")).strip(),
@@ -765,6 +791,7 @@ class ProfileStore:
 
         self._get_shared_custom_phases().append(
             {
+                "id": str(uuid.uuid4()),
                 "name": name,
                 "description": desc,
                 "device_type": target_device_type,
@@ -775,63 +802,59 @@ class ProfileStore:
 
     async def async_update_custom_phase(
         self,
-        device_type: str,
-        old_name: str,
+        phase_id: str,
         new_name: str,
         description: str = "",
     ) -> None:
-        """Update a shared custom phase and propagate rename to profile assignments.
-        
-        If the old_name is a default phase, creates a custom override.
+        """Update a phase by id, propagating rename to profile assignments.
+
+        If phase_id matches a built-in, a custom override is created using the
+        built-in's id so the merge can replace it in-place.
         """
         target_name = normalize_phase_name(new_name)
         desc = str(description or "").strip()
-        target_device_type = str(device_type or "").strip()
         phases = self._get_shared_custom_phases()
 
-        def applies_to_target(item_device_type: str, target: str) -> bool:
-            if not item_device_type:
-                return True
-            return item_device_type == target
+        # Look for an existing custom entry with this id.
+        found: dict[str, Any] | None = next(
+            (p for p in phases if str(p.get("id", "")) == phase_id), None
+        )
+        creating_new = found is None
 
-        # Look for existing custom phase
-        found = None
-        for item in phases:
-            if str(item.get("name", "")).casefold() != old_name.casefold():
-                continue
-            if not applies_to_target(str(item.get("device_type", "")).strip(), target_device_type):
-                continue
-            found = item
-            break
-        
-        # If not found, check if it's a default phase that needs an override
-        if found is None:
-            catalog = self.list_phase_catalog(target_device_type)
-            is_default = any(p["name"].casefold() == old_name.casefold() for p in catalog)
-            if not is_default:
+        if creating_new:
+            builtin = get_builtin_phase_by_id(phase_id)
+            if builtin is None:
                 raise ValueError("phase_not_found")
-            # Create new custom override for this default phase
-            found = {
-                "name": old_name,
+            candidate: dict[str, Any] = {
+                "id": phase_id,
+                "name": str(builtin.get("name", "")),
                 "description": "",
-                "device_type": target_device_type,
+                "device_type": str(builtin.get("device_type", "")),
                 "created_at": dt_util.now().isoformat(),
             }
-            phases.append(found)
+        else:
+            candidate = found  # type: ignore[assignment]
 
+        old_name = str(candidate.get("name", ""))
+        target_device_type = str(candidate.get("device_type", "")).strip()
+
+        # Duplicate-name check before any mutation.
         for p in self.list_phase_catalog(target_device_type):
             pname = str(p.get("name", ""))
             if pname.casefold() == target_name.casefold() and pname.casefold() != old_name.casefold():
                 raise ValueError("duplicate_phase")
 
-        found["name"] = target_name
-        found["description"] = desc
-        phase_scope = str(found.get("device_type", "")).strip()
+        if creating_new:
+            phases.append(candidate)
+            found = candidate
 
-        profiles = self.get_profiles()
-        for profile in profiles.values():
+        found["name"] = target_name  # type: ignore[index]
+        found["description"] = desc  # type: ignore[index]
+
+        # Propagate rename to profile assignments.
+        for profile in self.get_profiles().values():
             profile_device_type = str(profile.get("device_type", "")).strip()
-            if phase_scope and profile_device_type != phase_scope:
+            if target_device_type and profile_device_type != target_device_type:
                 continue
             phases_assigned = profile.get("phases", [])
             if not isinstance(phases_assigned, list):
@@ -857,46 +880,28 @@ class ProfileStore:
             )
         return used
 
-    async def async_delete_custom_phase(self, device_type: str, phase_name: str) -> int:
-        """Delete a custom phase and remove matching profile assignments.
+    async def async_delete_custom_phase(self, phase_id: str) -> int:
+        """Delete a custom phase by id and remove matching profile assignments.
 
         Returns number of removed assignments.
+        Raises ValueError('phase_not_found') if no custom phase has this id.
+        Raises ValueError('cannot_delete_builtin') if the id is a built-in phase.
         """
-        target_device_type = str(device_type or "").strip()
         phases = self._get_shared_custom_phases()
-
-        def applies_to_target(item_device_type: str, target: str) -> bool:
-            if not item_device_type:
-                return True
-            return item_device_type == target
-
-        removed_items = [
-            p
-            for p in phases
-            if str(p.get("name", "")).casefold() == phase_name.casefold()
-            and applies_to_target(str(p.get("device_type", "")).strip(), target_device_type)
-        ]
-        kept = [
-            p
-            for p in phases
-            if not (
-                str(p.get("name", "")).casefold() == phase_name.casefold()
-                and applies_to_target(str(p.get("device_type", "")).strip(), target_device_type)
-            )
-        ]
-        if len(kept) == len(phases):
+        found = next((p for p in phases if str(p.get("id", "")) == phase_id), None)
+        if found is None:
             raise ValueError("phase_not_found")
-        self._data["custom_phases"] = kept
+        if get_builtin_phase_by_id(phase_id) is not None:
+            raise ValueError("cannot_delete_builtin")
 
-        removed_scope = ""
-        if removed_items:
-            removed_scope = str(removed_items[0].get("device_type", "")).strip()
+        phase_name = str(found.get("name", ""))
+        phase_scope = str(found.get("device_type", "")).strip()
+        self._data["custom_phases"] = [p for p in phases if str(p.get("id", "")) != phase_id]
 
         removed_assignments = 0
-        profiles = self.get_profiles()
-        for profile in profiles.values():
+        for profile in self.get_profiles().values():
             profile_device_type = str(profile.get("device_type", "")).strip()
-            if removed_scope and profile_device_type != removed_scope:
+            if phase_scope and profile_device_type != phase_scope:
                 continue
             assigned = profile.get("phases", [])
             if not isinstance(assigned, list):
@@ -904,8 +909,7 @@ class ProfileStore:
             assigned_list = cast(list[dict[str, Any]], assigned)
             before = len(assigned_list)
             profile["phases"] = [
-                p
-                for p in assigned_list
+                p for p in assigned_list
                 if str(p.get("name", "")).casefold() != phase_name.casefold()
             ]
             removed_assignments += before - len(profile["phases"])
@@ -1032,6 +1036,31 @@ class ProfileStore:
         except (TypeError, ValueError):
             pass
 
+    def _migrate_phase_ids(self) -> bool:
+        """Assign ids to any custom phase missing one. Returns True if anything changed."""
+        phases = self._data.get("custom_phases", [])
+        if not isinstance(phases, list):
+            return False
+        changed = False
+        for phase in cast(list[dict[str, Any]], phases):
+            if phase.get("id"):
+                continue
+            dt = str(phase.get("device_type", "")).strip()
+            name = str(phase.get("name", "")).strip()
+            matched_id: str | None = None
+            for bdt, bphases in DEFAULT_PHASES_BY_DEVICE.items():
+                if dt and bdt != dt:
+                    continue
+                for bp in bphases:
+                    if str(bp.get("name", "")).strip().casefold() == name.casefold():
+                        matched_id = _builtin_phase_id(bdt, str(bp.get("name", "")))
+                        break
+                if matched_id:
+                    break
+            phase["id"] = matched_id if matched_id else str(uuid.uuid4())
+            changed = True
+        return changed
+
     async def async_load(self) -> None:
         """Load data from storage with migration."""
         # WashDataStore handles migration internally via _async_migrate_func
@@ -1040,6 +1069,9 @@ class ProfileStore:
             self._data = data
         # Ensure legacy custom phase formats are normalized in-memory.
         self._get_shared_custom_phases()
+        # Assign ids to any custom phase missing one.
+        if self._migrate_phase_ids():
+            await self.async_save()
 
     # _migrate_v1_to_v2 and _decompress_power_from_raw removed; logic moved to WashDataStore
 
@@ -1189,7 +1221,11 @@ class ProfileStore:
         _LOGGER.debug("add_cycle: raw_data has %s points", len(raw_data))
 
         if raw_data:
-            start_ts = datetime.fromisoformat(cycle_data["start_time"]).timestamp()
+            start_ts = _value_to_timestamp(cycle_data.get("start_time"))
+            if start_ts is None:
+                _LOGGER.debug("add_cycle: invalid start_time %r, skipping power_data normalization", cycle_data.get("start_time"))
+                self._data["past_cycles"].append(cycle_data)
+                return
             stored: list[list[float]] = []
             offsets: list[float] = []
 
@@ -1203,14 +1239,8 @@ class ProfileStore:
                 except IndexError:
                     continue
 
-                if isinstance(ts_raw, str):
-                    try:
-                        t_val = datetime.fromisoformat(ts_raw).timestamp()
-                    except ValueError:
-                        continue
-                elif isinstance(ts_raw, (int, float)):
-                    t_val = float(ts_raw)
-                else:
+                t_val = _value_to_timestamp(ts_raw)
+                if t_val is None:
                     continue
 
                 try:
@@ -2843,6 +2873,7 @@ class ProfileStore:
             # Fetch envelope stats
             envelope = self.get_envelope(name)
             avg_energy = envelope.get("avg_energy") if envelope else None
+            duration_std_dev = envelope.get("duration_std_dev") if envelope else None
 
             profiles.append(
                 {
@@ -2854,6 +2885,7 @@ class ProfileStore:
                     "cycle_count": cycle_count,
                     "last_run": last_run,
                     "avg_energy": avg_energy,
+                    "duration_std_dev": duration_std_dev,
                 }
             )
         return sorted(profiles, key=lambda p: profile_sort_key(p.get("name", "")))
