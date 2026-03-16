@@ -1381,6 +1381,9 @@ class ProfileStore:
             key: str | None = key_any if isinstance(key_any, str) and key_any else None
             by_profile.setdefault(key, []).append(cy)
 
+        # Collect cycle IDs that have pending feedback — never strip their power_data
+        pending_feedback_ids: set[str] = set(self._data.get("pending_feedback", {}).keys())
+
         for key, group in by_profile.items():
             # newest first based on start_time
             try:
@@ -1414,6 +1417,10 @@ class ProfileStore:
 
                     # EXEMPTION: Never strip power data from the profile's sample cycle!
                     if sample_id and c.get("id") == sample_id:
+                        continue
+
+                    # EXEMPTION: Never strip power data from cycles awaiting feedback review
+                    if c.get("id") in pending_feedback_ids:
                         continue
 
                     if c.get("power_data"):
@@ -2138,22 +2145,8 @@ class ProfileStore:
             if not envelope or not envelope.get("time_grid"):
                 return None
 
-            # Get actual power data
-            actual_power_raw = actual_cycle.get("power_data", [])
-            if not actual_power_raw:
-                return None
-
-            # Decompress actual cycle power data
-            actual_pairs: list[tuple[float, float]] = []
-            for item in cast(list[Any], actual_power_raw):
-                if isinstance(item, (list, tuple)):
-                    item_seq = cast(list[Any] | tuple[Any, ...], item)
-                    if len(item_seq) < 2:
-                        continue
-                    try:
-                        actual_pairs.append((float(item_seq[0]), float(item_seq[1])))
-                    except (ValueError, TypeError):
-                        continue
+            # Decompress actual cycle power data (handles both ISO-timestamp and offset formats)
+            actual_pairs = decompress_power_data(actual_cycle)
 
             if len(actual_pairs) < 3:
                 return None
@@ -2327,17 +2320,8 @@ class ProfileStore:
             if not profile_envs:
                 return None
 
-            # Decompress actual cycle power data
-            actual_pairs: list[tuple[float, float]] = []
-            for item in cast(list[Any], actual_cycle.get("power_data", [])):
-                if isinstance(item, (list, tuple)):
-                    item_seq = cast(list[Any] | tuple[Any, ...], item)
-                    if len(item_seq) < 2:
-                        continue
-                    try:
-                        actual_pairs.append((float(item_seq[0]), float(item_seq[1])))
-                    except (ValueError, TypeError):
-                        continue
+            # Decompress actual cycle power data (handles both ISO-timestamp and offset formats)
+            actual_pairs = decompress_power_data(actual_cycle)
 
             if len(actual_pairs) < 3:
                 return None
