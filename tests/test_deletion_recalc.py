@@ -30,28 +30,9 @@ async def test_deletion_recalculates_stats(mock_store_cls, mock_dt, mock_hass: H
     
     store.async_save = AsyncMock()
     def mock_decompress(cycle):
-        # Return list of (iso_ts, power)
-        # Assuming simple offsets
-        # Use simple fixed epoch if string parsing is annoying, but we have iso strings in cycle
-        try:
-             # simple approach: just return dummy data that parses
-             # or use cycle start
-             start_str = cycle.get("start_time")
-             # parse
-             dt = datetime.fromisoformat(start_str)
-             if not dt.tzinfo:
-                 dt = dt.replace(tzinfo=timezone.utc)
-             base_ts = dt.timestamp()
-             
-             data = cycle.get("power_data", [])
-             res = []
-             for item in data:
-                 # item is [offset, val]
-                 ts = base_ts + float(item[0])
-                 res.append((datetime.fromtimestamp(ts, tz=timezone.utc).isoformat(), float(item[1])))
-             return res
-        except Exception:
-             return []
+        # Return list of (offset_seconds, power) floats — matches real _decompress_power_data format
+        data = cycle.get("power_data", [])
+        return [(float(item[0]), float(item[1])) for item in data]
 
     store._decompress_power_data = mock_decompress
 

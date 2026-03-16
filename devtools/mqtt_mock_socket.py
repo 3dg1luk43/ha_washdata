@@ -1,4 +1,4 @@
-"""MQTT mock power socket for HA WashData dev/testing - Synthesis Only."""
+"""MQTT mock power socket for WashData dev/testing - Synthesis Only."""
 from __future__ import annotations
 import argparse
 import importlib.util
@@ -400,7 +400,7 @@ class MockWasherManager:
             logger.error("MQTT Connection Failed: %s", e)
 
     def _publish_discovery(self):
-        device = {"identifiers": [DEVICE_ID], "name": DEVICE_NAME, "manufacturer": "HA WashData", "model": "Mock Socket"}
+        device = {"identifiers": [DEVICE_ID], "name": DEVICE_NAME, "manufacturer": "WashData", "model": "Mock Socket"}
         sensor_cfg = {"name": "Mock Washer Power", "state_topic": SENSOR_STATE_TOPIC, "availability_topic": AVAIL_TOPIC, "unit_of_measurement": "W", "device_class": "power", "state_class": "measurement", "unique_id": f"{DEVICE_ID}_power", "device": device}
         switch_cfg = {"name": "Mock Washer Start", "command_topic": COMMAND_TOPIC, "state_topic": STATE_TOPIC, "availability_topic": AVAIL_TOPIC, "payload_on": "ON", "payload_off": "OFF", "unique_id": f"{DEVICE_ID}_switch", "device": device}
         self.client.publish(SENSOR_CONFIG_TOPIC, json.dumps(sensor_cfg), retain=True)

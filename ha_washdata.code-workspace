@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../ha_config"
+		},
+		{
+			"path": "../ha_integration_translator"
 		}
 	],
 	"settings": {}

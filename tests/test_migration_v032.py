@@ -106,5 +106,7 @@ async def test_migration_v1_to_v2_logic(mock_hass, tmp_path):
     with open(path, "r") as f:
         saved_data = json.load(f)
         
-    assert saved_data["version"] == 3, "Storage version should be updated to 3"
+    assert (
+        saved_data["version"] == STORAGE_VERSION
+    ), f"Storage version should be updated to {STORAGE_VERSION}"
     assert saved_data["data"]["past_cycles"][0].get("signature") is not None
