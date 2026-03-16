@@ -77,6 +77,7 @@ from .const import (
     DEFAULT_START_DURATION_THRESHOLD,
     CONF_START_DURATION_THRESHOLD,
 )
+from .log_utils import DeviceLoggerAdapter
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -96,11 +97,12 @@ def _require_str(value: Any, name: str) -> str:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate config entry to the latest version while preserving settings."""
+    _log = DeviceLoggerAdapter(_LOGGER, entry.title)
     version = entry.version or 1
     minor_version = entry.minor_version or 1
 
     if version > 3:
-        _LOGGER.error(
+        _log.error(
             "Refusing to migrate unsupported future schema %s.%s", version, minor_version
         )
         return False
@@ -194,7 +196,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         version=3,
         minor_version=3,
     )
-    _LOGGER.info(
+    _log.info(
         "Migrated WashData entry from version %s.%s to 3.3", version, minor_version
     )
     return True
@@ -202,9 +204,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WashData from a config entry."""
+    _log = DeviceLoggerAdapter(_LOGGER, entry.title)
     # Guard against duplicate setup during hot-reload
     if entry.entry_id in hass.data.get(DOMAIN, {}):
-        _LOGGER.warning(
+        _log.warning(
             "Entry %s already set up, skipping duplicate setup", entry.entry_id
         )
         return True
@@ -219,7 +222,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     old_switch_id = f"{entry.entry_id}_auto_maintenance"
     old_entity = ent_reg.async_get_entity_id("switch", DOMAIN, old_switch_id)
     if old_entity:
-        _LOGGER.info(
+        _log.info(
             "Removing deprecated auto_maintenance switch entity: %s", old_entity
         )
         ent_reg.async_remove(old_entity)
@@ -243,7 +246,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 await manager.profile_store.create_profile_standalone(
                     name, avg_duration=duration
                 )
-                _LOGGER.info("Created initial profile '%s' from onboarding", name)
+                manager._logger.info("Created initial profile '%s' from onboarding", name)
 
                 # Clean up config entry (remove initial_profile to avoid re-creation or cruft)
                 new_data = {
@@ -252,7 +255,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 hass.config_entries.async_update_entry(entry, data=new_data)
 
             except Exception as e:  # pylint: disable=broad-exception-caught
-                _LOGGER.error("Failed to create initial profile: %s", e)
+                manager._logger.error("Failed to create initial profile: %s", e)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -368,7 +371,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
             manager.notify_update()
 
-            _LOGGER.info(
+            manager._logger.info(
                 "Auto-label complete: %s labeled, %s skipped",
                 stats["labeled"],
                 stats["skipped"],
@@ -395,7 +398,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             register_result = await card_reg.async_register()
         except Exception as err:  # pylint: disable=broad-exception-caught
             hass.data["ha_washdata_card_registering"] = False
-            _LOGGER.warning("Card registration failed, will retry on next setup: %s", err)
+            _log.warning("Card registration failed, will retry on next setup: %s", err)
         else:
             hass.data["ha_washdata_card_registering"] = False
             if register_result == CARD_REGISTERED:
@@ -407,7 +410,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             else:
                 hass.data["ha_washdata_card_deferred"] = False
                 hass.data["ha_washdata_card_registered"] = False
-                _LOGGER.warning("Card registration failed and was not deferred")
+                _log.warning("Card registration failed and was not deferred")
 
     # Register feedback service
     if not hass.services.has_service(
@@ -464,9 +467,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 except Exception:  # pylint: disable=broad-exception-caught
                     pass
 
-                _LOGGER.info("Cycle feedback submitted for %s", cycle_id)
+                manager._logger.info("Cycle feedback submitted for %s", cycle_id)
             else:
-                _LOGGER.warning("Failed to submit feedback for cycle %s", cycle_id)
+                manager._logger.warning("Failed to submit feedback for cycle %s", cycle_id)
 
         hass.services.async_register(
             DOMAIN,
@@ -510,7 +513,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             # Write export
             target.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-            _LOGGER.info("Exported ha_washdata entry %s to %s", entry_id, target)
+            manager._logger.info("Exported ha_washdata entry %s to %s", entry_id, target)
 
         hass.services.async_register(DOMAIN, "export_config", handle_export_config)
 
@@ -572,9 +575,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     data=new_data,
                     options=new_options,
                 )
-                _LOGGER.info("Applied imported settings to config entry %s", entry_id)
+                manager._logger.info("Applied imported settings to config entry %s", entry_id)
 
-            _LOGGER.info("Imported ha_washdata entry %s from %s", entry_id, source)
+            manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
 
         hass.services.async_register(DOMAIN, "import_config", handle_import_config)
 

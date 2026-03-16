@@ -40,6 +40,7 @@ from .phase_catalog import (
     merge_phase_catalog,
     normalize_phase_name,
 )
+from .log_utils import DeviceLoggerAdapter
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -608,10 +609,12 @@ class ProfileStore:
         save_debug_traces: bool = False,
         match_threshold: float = 0.4,
         unmatch_threshold: float = 0.35,
+        device_name: str = "",
     ) -> None:
         """Initialize the profile store."""
         self.hass = hass
         self.entry_id = entry_id
+        self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self._min_duration_ratio = min_duration_ratio
         self._max_duration_ratio = max_duration_ratio
         self._match_threshold = match_threshold
@@ -1218,12 +1221,12 @@ class ProfileStore:
         # Format: [seconds_offset, power] preserves actual sample rate from device
         # (e.g., 3s intervals from test socket, 60s intervals from real socket)
         raw_data: list[Any] = cycle_data.get("power_data", []) or []
-        _LOGGER.debug("add_cycle: raw_data has %s points", len(raw_data))
+        self._logger.debug("add_cycle: raw_data has %s points", len(raw_data))
 
         if raw_data:
             start_ts = _value_to_timestamp(cycle_data.get("start_time"))
             if start_ts is None:
-                _LOGGER.debug("add_cycle: invalid start_time %r, skipping power_data normalization", cycle_data.get("start_time"))
+                self._logger.debug("add_cycle: invalid start_time %r, skipping power_data normalization", cycle_data.get("start_time"))
                 self._data["past_cycles"].append(cycle_data)
                 return
             stored: list[list[float]] = []
@@ -1270,7 +1273,7 @@ class ProfileStore:
                         start_idx = i
                         break
                 stored = stored[start_idx:]
-                _LOGGER.debug("add_cycle: Skipping trailing trim for completed cycle")
+                self._logger.debug("add_cycle: Skipping trailing trim for completed cycle")
             else:
                 stored = trim_zero_power_data(stored, threshold=1.0)
 
@@ -1286,7 +1289,7 @@ class ProfileStore:
                 sig = compute_signature(ts_arr, p_arr)
                 cycle_data["signature"] = dataclasses.asdict(sig)
 
-            _LOGGER.debug(
+            self._logger.debug(
                 "add_cycle: stored %s samples at %.1fs intervals",
                 len(stored),
                 sampling_interval,
@@ -1309,7 +1312,7 @@ class ProfileStore:
                 # Use async rebuild task
                 self.hass.async_create_task(self.async_rebuild_envelope(p))
             except Exception as e: # pylint: disable=broad-exception-caught
-                _LOGGER.warning("Failed to schedule envelope rebuild for %s: %s", p, e)
+                self._logger.warning("Failed to schedule envelope rebuild for %s: %s", p, e)
 
     def _enforce_retention_data(self) -> set[str]:
         """Internal retention logic (data operations only).
@@ -1436,7 +1439,7 @@ class ProfileStore:
 
         for name in orphaned:
             del self._data["profiles"][name]
-            _LOGGER.info(
+            self._logger.info(
                 "Cleaned up orphaned profile '%s' (cycle no longer exists)", name
             )
 
@@ -1471,7 +1474,7 @@ class ProfileStore:
         # 4. Save if any changes made (smart process saves internally if needed, but explicit save safe)
         if any(stats.values()):
             await self.async_save()
-            _LOGGER.info("Maintenance completed: %s", stats)
+            self._logger.info("Maintenance completed: %s", stats)
 
         return stats
 
@@ -1535,7 +1538,7 @@ class ProfileStore:
                                 cycle["power_data"] = shifted_data
                                 processed_count += 1
                             except (ValueError, TypeError) as e:
-                                _LOGGER.warning("Failed to shift start_time for trimmed cycle: %s", e)
+                                self._logger.warning("Failed to shift start_time for trimmed cycle: %s", e)
                         else:
                             # Only trailing trimmed or no shift needed
                             cycle["power_data"] = trimmed
@@ -1572,7 +1575,7 @@ class ProfileStore:
                         cycle["signature"] = dataclasses.asdict(sig)
                         processed_count += 1
                 except Exception as e: # pylint: disable=broad-exception-caught
-                    _LOGGER.warning("Failed to reprocess signature: %s", e)
+                    self._logger.warning("Failed to reprocess signature: %s", e)
 
         # 2. Rebuild Envelopes
 
@@ -1589,7 +1592,7 @@ class ProfileStore:
 
         Returns total number of cycles processed.
         """
-        _LOGGER.info("Starting reprocessing (offloaded)...")
+        self._logger.info("Starting reprocessing (offloaded)...")
 
         # Offload heavy synchronous work
         processed_count = await self.hass.async_add_executor_job(
@@ -1638,7 +1641,7 @@ class ProfileStore:
 
         if count > 0:
             await self.async_save()
-            _LOGGER.info("Cleared debug data from %s cycles", count)
+            self._logger.info("Cleared debug data from %s cycles", count)
 
         return count
 
@@ -1869,7 +1872,7 @@ class ProfileStore:
             return svg
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.error("Error generating SVG for %s: %s", profile_name, e)
+            self._logger.error("Error generating SVG for %s: %s", profile_name, e)
             return None
 
 
@@ -2212,7 +2215,7 @@ class ProfileStore:
             return svg
 
         except Exception:  # pylint: disable=broad-exception-caught
-            _LOGGER.exception("Error generating feedback comparison SVG")
+            self._logger.exception("Error generating feedback comparison SVG")
             return None
 
     def generate_feedback_multi_profile_svg(
@@ -2408,7 +2411,7 @@ class ProfileStore:
             )
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.error("Error generating multi-profile comparison SVG: %s", e)
+            self._logger.error("Error generating multi-profile comparison SVG: %s", e)
             return None
 
     def get_match_candidates_summary(
@@ -2489,7 +2492,7 @@ class ProfileStore:
             self._cached_sample_segments[key] = sample_seg
             return sample_seg
         except Exception as e: # pylint: disable=broad-exception-caught
-            _LOGGER.warning("Error caching sample segment %s: %s", cycle_id, e)
+            self._logger.warning("Error caching sample segment %s: %s", cycle_id, e)
             return None
 
     async def async_match_profile(
@@ -2581,7 +2584,7 @@ class ProfileStore:
                 })
 
             if skipped_profiles:
-                _LOGGER.debug(
+                self._logger.debug(
                     "Profile matching skipped %d profiles: %s",
                     len(skipped_profiles),
                     "; ".join(skipped_profiles)
@@ -2594,7 +2597,7 @@ class ProfileStore:
             }
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.error("Preparation for async match failed: %s", e)
+            self._logger.error("Preparation for async match failed: %s", e)
             return MatchResult(None, 0.0, 0.0, None, [], False, 0.0)
 
         # 2. Run Heavy Logic in Executor
@@ -2610,7 +2613,7 @@ class ProfileStore:
         if not candidates:
             profiles_count = len(self._data.get("profiles", {}))
             snapshots_count = len(snapshots) if 'snapshots' in dir() else 0
-            _LOGGER.debug(
+            self._logger.debug(
                 "No profile match candidates: profiles=%d, snapshots=%d, "
                 "duration=%.0fs. Possible reasons: duration ratio filter, "
                 "no labeled cycles, or no profiles defined.",
@@ -2752,7 +2755,7 @@ class ProfileStore:
                         env_time = [float(i * 60) for i in range(len(env_power))]
         except (TypeError, ValueError, IndexError) as e:
             first_type_name = type(env_avg_raw[0]).__name__ if env_avg_raw else "None"
-            _LOGGER.error(
+            self._logger.error(
                 "Malformed envelope 'avg' data for %s. Type: %s, Length: %d, Error: %s",
                 profile_name, first_type_name, len(env_avg_raw), e
             )
@@ -2916,7 +2919,7 @@ class ProfileStore:
         await self.async_rebuild_envelope(name)
 
         await self.async_save()
-        _LOGGER.info("Created standalone profile '%s'", name)
+        self._logger.info("Created standalone profile '%s'", name)
 
     async def update_profile(
         self, old_name: str, new_name: str, avg_duration: float | None = None
@@ -2953,7 +2956,7 @@ class ProfileStore:
             # but envelope is usually rebuilt from data.
             # However, for manual profiles, envelope might be empty or theoretical.
             # Let's log it.
-            _LOGGER.info(
+            self._logger.info(
                 "Updated baseline duration for '%s' to %ss",
                 target_name,
                 avg_duration,
@@ -2982,7 +2985,7 @@ class ProfileStore:
                 if record.get("corrected_profile") == old_name:
                     record["corrected_profile"] = new_name
 
-            _LOGGER.info(
+            self._logger.info(
                 "Renamed profile '%s' to '%s', updated %s cycles and associated feedback",
                 old_name,
                 new_name,
@@ -3013,7 +3016,7 @@ class ProfileStore:
 
         await self.async_save()
         action = "unlabeled" if unlabel_cycles else "orphaned"
-        _LOGGER.info("Deleted profile '%s', %s %s cycles", name, action, count)
+        self._logger.info("Deleted profile '%s', %s %s cycles", name, action, count)
         return count
 
     async def clear_all_data(self) -> None:
@@ -3021,7 +3024,7 @@ class ProfileStore:
         self._data["past_cycles"] = []
         self._data["profiles"] = {}
         await self.async_save()
-        _LOGGER.info("Cleared all WashData storage")
+        self._logger.info("Cleared all WashData storage")
 
     async def assign_profile_to_cycle(
         self, cycle_id: str, profile_name: str | None
@@ -3059,7 +3062,7 @@ class ProfileStore:
             await self.async_enforce_retention()
 
         await self.async_save()
-        _LOGGER.info("Assigned profile '%s' to cycle %s", profile_name, cycle_id)
+        self._logger.info("Assigned profile '%s' to cycle %s", profile_name, cycle_id)
         # Trigger smart processing to potentially merge now-labeled cycle
         await self.async_smart_process_history()
 
@@ -3104,7 +3107,7 @@ class ProfileStore:
                     if current_label != result.best_profile:
                         cycle["profile_name"] = result.best_profile
                         stats["relabeled"] += 1
-                        _LOGGER.info(
+                        self._logger.info(
                             "Relabeled cycle %s: '%s' -> '%s' (confidence: %.2f)",
                             cycle["id"],
                             current_label,
@@ -3114,7 +3117,7 @@ class ProfileStore:
                 else:
                     cycle["profile_name"] = result.best_profile
                     stats["labeled"] += 1
-                    _LOGGER.info(
+                    self._logger.info(
                         "Auto-labeled cycle %s as '%s' (confidence: %.2f)",
                         cycle["id"],
                         result.best_profile,
@@ -3128,7 +3131,7 @@ class ProfileStore:
             # Trigger smart processing after bulk labeling
             await self.async_smart_process_history()
 
-        _LOGGER.info(
+        self._logger.info(
             "Auto-labeling complete: %s labeled, %s relabeled, %s skipped",
             stats["labeled"],
             stats["relabeled"],
@@ -3183,11 +3186,11 @@ class ProfileStore:
                     cycle["power_data"] = compressed
                     migrated += 1
             except Exception as e:  # pylint: disable=broad-exception-caught
-                _LOGGER.warning("Failed to migrate cycle %s: %s", cycle.get("id"), e)
+                self._logger.warning("Failed to migrate cycle %s: %s", cycle.get("id"), e)
                 continue
 
         if migrated > 0:
-            _LOGGER.info("Migrated %s cycles to compressed format", migrated)
+            self._logger.info("Migrated %s cycles to compressed format", migrated)
             await self.async_save()
 
         return migrated
@@ -3221,7 +3224,7 @@ class ProfileStore:
         start_dt_base_parsed = dt_util.parse_datetime(cycle["start_time"])
         if not start_dt_base_parsed:
             # Should not happen as analyze checked it, but safety
-            _LOGGER.warning("Failed to parse start time during split apply for %s", cycle_id)
+            self._logger.warning("Failed to parse start time during split apply for %s", cycle_id)
             return [cycle_id]
 
         start_dt_base: datetime = start_dt_base_parsed
@@ -3229,7 +3232,7 @@ class ProfileStore:
         p_data_tuples = self._decompress_power_data(cycle)
 
         if not p_data_tuples:
-            _LOGGER.warning("Failed to decompress data during split for %s", cycle_id)
+            self._logger.warning("Failed to decompress data during split for %s", cycle_id)
             return [cycle_id]
 
         # Convert to relative seconds for array logic.
@@ -3302,15 +3305,15 @@ class ProfileStore:
         stats = {"cleaned_profiles": 0}
 
         # 1. Cleanup
-        _LOGGER.debug("Running maintenance: cleanup_orphaned_profiles")
+        self._logger.debug("Running maintenance: cleanup_orphaned_profiles")
         stats["cleaned_profiles"] = self.cleanup_orphaned_profiles()
 
         # 2. Retention
-        _LOGGER.debug("Running maintenance: async_enforce_retention")
+        self._logger.debug("Running maintenance: async_enforce_retention")
         await self.async_enforce_retention()
 
         # 3. Save
-        _LOGGER.debug("Maintenance complete, saving")
+        self._logger.debug("Maintenance complete, saving")
         await self.async_save()
 
         return stats
@@ -3334,7 +3337,7 @@ class ProfileStore:
         # Keep last 50 adjustments
         if len(self._data["auto_adjustments"]) > 50:
             self._data["auto_adjustments"] = self._data["auto_adjustments"][-50:]
-        _LOGGER.info(
+        self._logger.info(
             "Auto-adjustment: %s changed from %s to %s (%s)",
             setting_name,
             old_value,
@@ -3368,7 +3371,7 @@ class ProfileStore:
                 "past_cycles": payload.get("past_cycles", []),
                 "envelopes": payload.get("envelopes", {}),
             }
-            _LOGGER.info(
+            self._logger.info(
                 "Importing v1 format: %s cycles", len(data_dict.get("past_cycles", []))
             )
         else:
@@ -3379,7 +3382,7 @@ class ProfileStore:
                     "Invalid export payload (missing or invalid 'data' key)"
                 )
             data_dict = cast(JSONDict, data)
-            _LOGGER.info(
+            self._logger.info(
                 "Importing v2 format: %s cycles", len(data_dict.get("past_cycles", []))
             )
 
@@ -3463,7 +3466,7 @@ class ProfileStore:
         if len(valid_segments) < 2:
             return []
 
-        _LOGGER.debug(
+        self._logger.debug(
             "Analyzed split for %s: found %d segments",
             cycle.get("id"),
             len(valid_segments)
@@ -3574,7 +3577,7 @@ class ProfileStore:
             await self.async_rebuild_envelope(original_profile)
 
         await self.async_save()
-        _LOGGER.info("Interactive Split Applied to %s -> %s", cycle_id, new_ids)
+        self._logger.info("Interactive Split Applied to %s -> %s", cycle_id, new_ids)
         return new_ids
 
     async def apply_merge_interactive(
@@ -3710,10 +3713,10 @@ class ProfileStore:
                 sig = compute_signature(ts_arr, p_arr)
                 c1["signature"] = dataclasses.asdict(sig)
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.warning("Failed to update signature for merged cycle %s: %s", new_id, e)
+            self._logger.warning("Failed to update signature for merged cycle %s: %s", new_id, e)
 
         await self.async_save()
-        _LOGGER.info("Interactive Merge Applied: %s -> %s", cycle_ids, new_id)
+        self._logger.info("Interactive Merge Applied: %s -> %s", cycle_ids, new_id)
 
         # Rebuild envelopes for all affected profiles
         for p_name in affected_profiles:

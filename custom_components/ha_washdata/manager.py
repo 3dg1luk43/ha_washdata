@@ -165,6 +165,7 @@ from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
 from .profile_store import ProfileStore, decompress_power_data
 from .recorder import CycleRecorder
+from .log_utils import DeviceLoggerAdapter
 from .time_utils import power_data_to_offsets
 
 _LOGGER = logging.getLogger(__name__)
@@ -202,6 +203,7 @@ class WashDataManager:
         self.hass = hass
         self.config_entry = config_entry
         self.entry_id = config_entry.entry_id
+        self._logger = DeviceLoggerAdapter(_LOGGER, config_entry.title)
 
         # Prioritize options -> data for power sensor (allows changing it)
         self.power_sensor_entity_id = config_entry.options.get(
@@ -273,14 +275,16 @@ class WashDataManager:
             save_debug_traces=config_entry.options.get(CONF_SAVE_DEBUG_TRACES, False),
             match_threshold=match_threshold,
             unmatch_threshold=unmatch_threshold,
+            device_name=config_entry.title,
         )
         self.profile_store.dtw_bandwidth = float(
             config_entry.options.get(CONF_DTW_BANDWIDTH, DEFAULT_DTW_BANDWIDTH)
         )
         self.learning_manager = LearningManager(
-            hass, self.entry_id, self.profile_store, self.device_type
+            hass, self.entry_id, self.profile_store, self.device_type,
+            device_name=config_entry.title,
         )
-        self.recorder = CycleRecorder(hass, self.entry_id)
+        self.recorder = CycleRecorder(hass, self.entry_id, device_name=config_entry.title)
 
         # Priority: Options > Data > Default
         min_power = config_entry.options.get(
@@ -384,7 +388,7 @@ class WashDataManager:
             config_entry.options.get(CONF_END_REPEAT_COUNT, DEFAULT_END_REPEAT_COUNT)
         )
 
-        _LOGGER.info(
+        self._logger.info(
             "Manager init: min_power=%sW, off_delay=%ss, type=%s",
             min_power,
             off_delay,
@@ -511,6 +515,7 @@ class WashDataManager:
             self._on_state_change,
             self._on_cycle_end,
             profile_matcher=profile_matcher_wrapper,
+            device_name=config_entry.title,
         )
 
         self._remove_listener = None
@@ -572,7 +577,7 @@ class WashDataManager:
         self, readings: list[tuple[datetime, float]]
     ) -> None:
         """PRIMARY matching task: Updates both Manager and Detector using best method."""
-        _LOGGER.debug(
+        self._logger.debug(
             "Matching trigger: readings=%d, task_exists=%s",
             len(readings) if readings else 0,
             getattr(self, "_matching_task", None) is not None
@@ -580,17 +585,17 @@ class WashDataManager:
         # Prevent concurrent matching tasks
         current_task = self._matching_task
         if current_task is not None and not current_task.done():
-            _LOGGER.debug("Matching skipped: previous task still running")
+            self._logger.debug("Matching skipped: previous task still running")
             return
 
         try:
             if not readings:
-                _LOGGER.debug("Matching skipped: no readings")
+                self._logger.debug("Matching skipped: no readings")
                 return
 
             self._matching_task = self.hass.async_create_task(self._async_do_perform_matching(readings))
         except Exception as e:
-            _LOGGER.error("Perform combined matching trigger failed: %s", e)
+            self._logger.error("Perform combined matching trigger failed: %s", e)
 
     async def _async_do_perform_matching(self, readings: list[tuple[datetime, float]]) -> None:
         """Inner task to handle actual matching logic."""
@@ -643,7 +648,7 @@ class WashDataManager:
                             self._current_program = "detecting..."
                             self._matched_profile_duration = None
                             self._unmatch_persistence_counter = 0
-                            _LOGGER.info(
+                            self._logger.info(
                                 "Divergence detected for profile '%s' (confidence %.3f < 60%% of peak %.3f). "
                                 "Reverting to detection.",
                                 profile_name, confidence, peak_score
@@ -676,7 +681,7 @@ class WashDataManager:
                     should_switch = True
                     switch_reason = f"initial_match (persistent {self._match_persistence_counter[profile_name]}x)"
                 else:
-                    _LOGGER.debug(
+                    self._logger.debug(
                         "Match persistence: %s at %d/%d matches. Stay at detecting...",
                         profile_name, self._match_persistence_counter.get(profile_name, 0), self._match_persistence
                     )
@@ -713,7 +718,7 @@ class WashDataManager:
                     self._current_program = "detecting..."
                     self._matched_profile_duration = None
                     self._unmatch_persistence_counter = 0
-                    _LOGGER.info(
+                    self._logger.info(
                         "Unmatched profile '%s' (confidence %.3f < threshold %.3f persistent %dx). "
                         "Reverting to detection.",
                         profile_name,
@@ -722,7 +727,7 @@ class WashDataManager:
                         self._match_persistence
                     )
                 else:
-                    _LOGGER.debug(
+                    self._logger.debug(
                         "Unmatch persistence: %s at %d/%d low-confidence matches. Stay at %s...",
                         profile_name, self._unmatch_persistence_counter, self._match_persistence, profile_name
                     )
@@ -748,7 +753,7 @@ class WashDataManager:
 
                 avg_duration = float(matched_duration)
                 self._matched_profile_duration = avg_duration if avg_duration > 0 else None
-                _LOGGER.info(
+                self._logger.info(
                      "Switching to profile '%s' (reason: %s). Expected duration: %.0fs (%smin)",
                      profile_name, switch_reason, avg_duration, int(avg_duration / 60),
                 )
@@ -789,7 +794,7 @@ class WashDataManager:
                         await verify_alignment(current_matched, formatted)
                     )
                 except Exception as e: # pylint: disable=broad-exception-caught
-                    _LOGGER.error(
+                    self._logger.error(
                         "Alignment verification crashed for profile %s: %s",
                         current_matched, e, exc_info=True
                     )
@@ -798,7 +803,7 @@ class WashDataManager:
 
                 if is_confirmed:
                     if not verified_pause:
-                        _LOGGER.info(
+                        self._logger.info(
                             "Envelope verified expected low power phase for %s. Enabling verified pause.",
                             current_matched
                         )
@@ -810,12 +815,12 @@ class WashDataManager:
                             avg_dur = profile.get("avg_duration", 0)
                             if avg_dur > 0 and (mapped_time / avg_dur) > 0.95:
                                 verified_pause = False
-                                _LOGGER.info("Smart Termination: Near end of profile. Releasing pause lock.")
+                                self._logger.info("Smart Termination: Near end of profile. Releasing pause lock.")
                     except Exception as e:
-                        _LOGGER.debug("Smart Termination alignment verification failed: %s", e)
+                        self._logger.debug("Smart Termination alignment verification failed: %s", e)
                 else:
                     if verified_pause:
-                        _LOGGER.info(
+                        self._logger.info(
                             "Envelope indicates UNEXPECTED low power for %s. Disabling verified pause.",
                             current_matched
                         )
@@ -839,7 +844,7 @@ class WashDataManager:
                         if prof:
                             self._matched_profile_duration = float(prof.get("avg_duration", 0))
                     except Exception as e:
-                        _LOGGER.debug("Failed to fetch profile duration on switch: %s", e)
+                        self._logger.debug("Failed to fetch profile duration on switch: %s", e)
                 else:
                     self._current_program = "detecting..."
                     self._matched_profile_duration = None
@@ -865,7 +870,7 @@ class WashDataManager:
             )
 
             # --- LOGGING (Unified) ---
-            _LOGGER.info(
+            self._logger.info(
                 "Profile match attempt: name=%s, confidence=%.3f, duration=%.0fs, samples=%d",
                 profile_name, confidence, current_duration, len(readings),
             )
@@ -911,7 +916,7 @@ class WashDataManager:
                         extra_vars={"program": self._current_program},
                     )
                     self._notified_start = True
-                    _LOGGER.info("Sent start notification for program '%s'", self._current_program)
+                    self._logger.info("Sent start notification for program '%s'", self._current_program)
 
                     # Ensure pre-completion notifications never precede cycle-start signaling.
                     self._check_pre_completion_notification()
@@ -920,7 +925,7 @@ class WashDataManager:
             self._notify_update()
 
         except Exception as e:
-            _LOGGER.error("Perform combined matching failed: %s", e, exc_info=True)
+            self._logger.error("Perform combined matching failed: %s", e, exc_info=True)
 
     @property
     def top_candidates(self) -> list[dict[str, Any]]:
@@ -979,7 +984,7 @@ class WashDataManager:
                 power_is_valid = True
             except (ValueError, TypeError):
                 # Power sensor state is not numeric during restoration; treat as 0W
-                _LOGGER.debug(
+                self._logger.debug(
                     "Power sensor %s state %r is not numeric during restoration; "
                     "treating as 0W and not restoring by power",
                     self.power_sensor_entity_id,
@@ -1022,7 +1027,7 @@ class WashDataManager:
             should_restore = True
             age = (dt_util.now() - last_save).total_seconds()
             age = (dt_util.now() - last_save).total_seconds()
-            _LOGGER.info(
+            self._logger.info(
                 "Found recently saved active cycle (last_save=%s, age=%.0fs), restoring...",
                 last_save,
                 age
@@ -1049,7 +1054,7 @@ class WashDataManager:
                         status = last_cycle.get("status")
 
                         if is_recent and status != "completed":
-                            _LOGGER.info(
+                            self._logger.info(
                                 "Found recent interrupted cycle in history "
                                 "(id=%s, gap=%.0fs). Resurrecting...",
                                 last_cycle["id"],
@@ -1087,7 +1092,7 @@ class WashDataManager:
                                     past_cycles.pop()
                                     await self.profile_store.async_save()
                             except Exception as e:
-                                _LOGGER.error("Failed to resurrect cycle: %s", e)
+                                self._logger.error("Failed to resurrect cycle: %s", e)
 
         if should_restore and active_snapshot_to_restore:
             try:
@@ -1104,7 +1109,7 @@ class WashDataManager:
                     # immediately quit. For now we just log this; the cycle
                     # detector's off_delay will handle actual shutdown.
                     if power_is_valid and current_power < self._config.min_power:
-                        _LOGGER.debug(
+                        self._logger.debug(
                             "Restored active cycle in low-power state "
                             "(power=%.2fW < min_power=%.2fW); waiting for "
                             "detector off_delay before marking as finished",
@@ -1114,7 +1119,7 @@ class WashDataManager:
 
                     if self.detector.matched_profile:
                         self._current_program = self.detector.matched_profile
-                        _LOGGER.info(
+                        self._logger.info(
                             "Restored/Resurrected washer cycle with profile: %s",
                             self._current_program,
                         )
@@ -1133,12 +1138,12 @@ class WashDataManager:
                 else:
                     await self.profile_store.async_clear_active_cycle()
             except Exception as err:
-                _LOGGER.warning("Failed to restore active cycle: %s, clearing", err)
+                self._logger.warning("Failed to restore active cycle: %s, clearing", err)
                 await self.profile_store.async_clear_active_cycle()
         else:
             if last_save:
                 age = (dt_util.now() - last_save).total_seconds()
-                _LOGGER.info("Active cycle too stale (age=%.0fs), clearing", age)
+                self._logger.info("Active cycle too stale (age=%.0fs), clearing", age)
             await self.profile_store.async_clear_active_cycle()
 
     async def async_setup(self) -> None:
@@ -1176,14 +1181,14 @@ class WashDataManager:
             if stats.get("profiles_repaired", 0) or stats.get(
                 "cycles_labeled_as_sample", 0
             ):
-                _LOGGER.warning(
+                self._logger.warning(
                     "Repaired profile sample references for %s: %s",
                     self.entry_id,
                     stats,
                 )
                 await self.profile_store.async_save()
         except Exception:
-            _LOGGER.exception(
+            self._logger.exception(
                 "Failed repairing profile sample references for %s", self.entry_id
             )
 
@@ -1205,10 +1210,10 @@ class WashDataManager:
                         ts = dt_util.parse_datetime(cycle["end_time"])
                         if ts:
                             self._last_cycle_end_time = ts
-                            _LOGGER.debug("Restored last cycle end time: %s", ts)
+                            self._logger.debug("Restored last cycle end time: %s", ts)
                             break
         except Exception:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Failed to restore last cycle end time")
+            self._logger.debug("Failed to restore last cycle end time")
 
         # Load recorder state
         await self.recorder.async_load()
@@ -1240,7 +1245,7 @@ class WashDataManager:
         Updates detector config in-place.
         Handles Power Sensor entity change by reconnecting listener.
         """
-        _LOGGER.info("Reloading configuration for %s", self.entry_id)
+        self._logger.info("Reloading configuration for %s", self.entry_id)
         # Replace reference
         self.config_entry = config_entry
 
@@ -1251,14 +1256,14 @@ class WashDataManager:
         if new_sensor and new_sensor != self.power_sensor_entity_id:
             # Block sensor changes when a cycle is active to prevent inconsistent state
             d_state = self.detector.state
-            _LOGGER.debug(
+            self._logger.debug(
                 "Reloading config: detector.state=%r (type=%s), RUNNING=%r",
                 d_state,
                 type(d_state),
                 STATE_RUNNING,
             )
             if d_state == STATE_RUNNING:
-                _LOGGER.warning(
+                self._logger.warning(
                     "Cannot change power sensor from %s to %s while a cycle "
                     "is active. Please wait for the current cycle to complete "
                     "before changing the power sensor.",
@@ -1268,7 +1273,7 @@ class WashDataManager:
                 # Skip sensor change but continue with other config updates
                 return
 
-            _LOGGER.info(
+            self._logger.info(
                 "Power sensor changed: %s -> %s", self.power_sensor_entity_id, new_sensor
             )
             self.power_sensor_entity_id = new_sensor
@@ -1286,7 +1291,7 @@ class WashDataManager:
                     power = float(state.state)
                     self.detector.process_reading(power, dt_util.now())
                 except ValueError:
-                    _LOGGER.debug(
+                    self._logger.debug(
                         "Initial power value for %s after config reload is not numeric: %r",
                         self.power_sensor_entity_id,
                         state.state,
@@ -1438,7 +1443,7 @@ class WashDataManager:
             or old_abrupt_drop_ratio != new_abrupt_drop_ratio
             or old_abrupt_high_load != new_abrupt_high_load
         ):
-            _LOGGER.info(
+            self._logger.info(
                 "Updated detector config: min_power %.1fW→%.1fW, off_delay %ds→%ds, "
                 "smoothing %d→%d, interrupted_min %ds→%ds, abrupt_drop %.0fW→%.0fW, "
                 "abrupt_ratio %.2f→%.2f, high_load %.1f→%.1f",
@@ -1478,7 +1483,7 @@ class WashDataManager:
             self.profile_store.set_duration_ratio_limits(
                 min_ratio=new_min_ratio, max_ratio=new_max_ratio
             )
-            _LOGGER.info(
+            self._logger.info(
                 "Updated duration ratios: min %.2f→%.2f, max %.2f→%.2f",
                 old_min_ratio,
                 new_min_ratio,
@@ -1495,7 +1500,7 @@ class WashDataManager:
         )
         if old_interval != new_interval:
             self._profile_match_interval = new_interval
-            _LOGGER.info("Updated match interval: %ds→%ds", old_interval, new_interval)
+            self._logger.info("Updated match interval: %ds→%ds", old_interval, new_interval)
 
         # Update other configurable options
         self._profile_duration_tolerance = float(
@@ -1554,7 +1559,7 @@ class WashDataManager:
                 self._reset_live_notification_state()
                 self._check_live_progress_notification()
 
-        _LOGGER.info("Configuration reloaded successfully")
+        self._logger.info("Configuration reloaded successfully")
 
         # Trigger entity updates to reflect any changes
         async_dispatcher_send(self.hass, f"ha_washdata_update_{self.entry_id}")
@@ -1572,14 +1577,14 @@ class WashDataManager:
         )
         if old_sampling != new_sampling:
             self._sampling_interval = new_sampling
-            _LOGGER.info(
+            self._logger.info(
                 "Updated sampling interval: %.1fs -> %.1fs", old_sampling, new_sampling
             )
 
         # RESTORE STATE (only if recent enough, otherwise treat as stale)
         await self._attempt_state_restoration()
 
-        _LOGGER.info("Configuration reloaded successfully")
+        self._logger.info("Configuration reloaded successfully")
 
     async def async_shutdown(self) -> None:
         """Shutdown."""
@@ -1623,16 +1628,16 @@ class WashDataManager:
             CONF_EXTERNAL_END_TRIGGER_ENABLED, False
         )
         if not enabled:
-            _LOGGER.debug("External cycle end trigger is disabled")
+            self._logger.debug("External cycle end trigger is disabled")
             return
 
         # Get entity ID
         entity_id = self.config_entry.options.get(CONF_EXTERNAL_END_TRIGGER, "")
         if not entity_id:
-            _LOGGER.debug("External cycle end trigger: no entity configured")
+            self._logger.debug("External cycle end trigger: no entity configured")
             return
 
-        _LOGGER.info(
+        self._logger.info(
             "Setting up external cycle end trigger: %s", entity_id
         )
 
@@ -1715,7 +1720,7 @@ class WashDataManager:
                 triggered = True
 
         if triggered:
-            _LOGGER.info(
+            self._logger.info(
                 "External cycle end trigger activated by %s (inverted=%s)",
                 event.data.get("entity_id"),
                 inverted
@@ -1723,10 +1728,10 @@ class WashDataManager:
             # End cycle with "completed" status (not interrupted)
             if self.detector.state == STATE_ANTI_WRINKLE:
                 self.detector.reset(STATE_OFF)
-                _LOGGER.info("Anti-wrinkle exited via external trigger")
+                self._logger.info("Anti-wrinkle exited via external trigger")
             elif self.detector.state != STATE_OFF:
                 self.detector.user_stop()
-                _LOGGER.info("Cycle completed via external trigger")
+                self._logger.info("Cycle completed via external trigger")
 
     async def _setup_maintenance_scheduler(self) -> None:
         """Set up daily maintenance task at midnight."""
@@ -1741,7 +1746,7 @@ class WashDataManager:
             self._remove_maintenance_scheduler = None
 
         if not auto_maintenance:
-            _LOGGER.debug("Auto-maintenance disabled")
+            self._logger.debug("Auto-maintenance disabled")
             return
 
         # Calculate next midnight
@@ -1752,19 +1757,19 @@ class WashDataManager:
         # Schedule first run at midnight
         async def run_maintenance(_now: datetime | None = None) -> None:
             """Run maintenance task."""
-            _LOGGER.info("Running scheduled maintenance")
+            self._logger.info("Running scheduled maintenance")
             try:
                 stats = await self.profile_store.async_run_maintenance()
-                _LOGGER.info("Maintenance completed: %s", stats)
+                self._logger.info("Maintenance completed: %s", stats)
             except Exception as err:
-                _LOGGER.error("Maintenance failed: %s", err, exc_info=True)
+                self._logger.error("Maintenance failed: %s", err, exc_info=True)
 
         # Use async_track_point_in_time for midnight, then reschedule daily
         self._remove_maintenance_scheduler = evt.async_track_point_in_time(
             self.hass, run_maintenance, next_midnight
         )
 
-        _LOGGER.info("Scheduled maintenance at %s", next_midnight)
+        self._logger.info("Scheduled maintenance at %s", next_midnight)
 
         # Also schedule daily repeat after first run
         async def maintenance_wrapper(_now: datetime) -> None:
@@ -1867,11 +1872,11 @@ class WashDataManager:
         duration = cycle_data.get("duration", 0)
 
         if not power_data or len(power_data) < 10:
-            _LOGGER.debug("Insufficient power data for final match (< 10 readings)")
+            self._logger.debug("Insufficient power data for final match (< 10 readings)")
             return
 
         # power_data is already in [[offset_seconds, power], ...] format for matching.
-        _LOGGER.info(
+        self._logger.info(
             "Running final match from cycle data: %s samples, %.0fs duration",
             len(power_data),
             duration,
@@ -1887,7 +1892,7 @@ class WashDataManager:
         # Accept match at lower threshold since cycle is complete
         # Also ignore ambiguity for completed cycles - pick the best match
         if profile_name and confidence >= 0.15:
-            _LOGGER.info(
+            self._logger.info(
                 "Final match from cycle data: '%s' with confidence %.3f",
                 profile_name,
                 confidence,
@@ -1895,7 +1900,7 @@ class WashDataManager:
             self._current_program = profile_name
             self._last_match_confidence = confidence
         else:
-            _LOGGER.info(
+            self._logger.info(
                 "No confident match from cycle data (best: %s, conf=%.3f)",
                 profile_name,
                 confidence,
@@ -1907,7 +1912,7 @@ class WashDataManager:
             return  # Already running
 
         interval = self._watchdog_interval
-        _LOGGER.debug(
+        self._logger.debug(
             "Starting watchdog timer (configured=%ss)",
             self._watchdog_interval,
         )
@@ -1918,7 +1923,7 @@ class WashDataManager:
     def _stop_watchdog(self) -> None:
         """Stop the watchdog timer when cycle ends."""
         if self._remove_watchdog:
-            _LOGGER.debug("Stopping watchdog timer")
+            self._logger.debug("Stopping watchdog timer")
             self._remove_watchdog()
             self._remove_watchdog = None
 
@@ -1930,7 +1935,7 @@ class WashDataManager:
         if self._remove_state_expiry_timer:
             return  # Already running
 
-        _LOGGER.debug(
+        self._logger.debug(
             "Starting state expiry timer (will reset after %ss)",
             self._progress_reset_delay,
         )
@@ -1946,7 +1951,7 @@ class WashDataManager:
             hasattr(self, "_remove_state_expiry_timer")
             and self._remove_state_expiry_timer
         ):
-            _LOGGER.debug("Stopping state expiry timer")
+            self._logger.debug("Stopping state expiry timer")
             self._remove_state_expiry_timer()
             self._remove_state_expiry_timer = None
 
@@ -1964,7 +1969,7 @@ class WashDataManager:
 
         if time_since_complete > self._progress_reset_delay:
             # Auto-expire the "Finished" (or other terminal) state
-            _LOGGER.debug(
+            self._logger.debug(
                 "State expiry: cycle idle for %.0fs (threshold: %ss). Resetting to OFF.",
                 time_since_complete,
                 self._progress_reset_delay,
@@ -1996,7 +2001,7 @@ class WashDataManager:
         # If cycle has run significantly longer than expected (300%), kill it.
         # Only applies if we have a profile match.
         if expected > 0 and elapsed > (expected * 3.0) and elapsed > 14400:
-            _LOGGER.warning(
+            self._logger.warning(
                 "Watchdog: Zombie cycle detected (%.0fs > 300%% of expected %.0fs). Force-ending.",
                 elapsed, expected
             )
@@ -2022,7 +2027,7 @@ class WashDataManager:
             and elapsed > 600  # 10 minutes
             and time_since_real_update > 300  # 5 minutes of silence
         ):
-            _LOGGER.warning(
+            self._logger.warning(
                 "Watchdog: Ghost cycle suppressed (within suspicious window). Detecting for %.0fs with %.0fs silence.",
                 elapsed, time_since_real_update
             )
@@ -2063,7 +2068,7 @@ class WashDataManager:
             pause_limit = DEFAULT_MAX_DEFERRAL_SECONDS + 1800
             if pause_limit > effective_low_power_timeout:
                 effective_low_power_timeout = pause_limit
-                _LOGGER.debug(
+                self._logger.debug(
                     "Watchdog: Extending timeout to %.0fs due to verified pause",
                     effective_low_power_timeout
                 )
@@ -2072,7 +2077,7 @@ class WashDataManager:
 
             # 2. Staleness Check
             if time_since_real_update > effective_low_power_timeout:
-                _LOGGER.warning(
+                self._logger.warning(
                     "Watchdog: Force-ending cycle. Low-power state stale for %.0fs (> %.0fs).",
                     time_since_real_update,
                     effective_low_power_timeout
@@ -2087,7 +2092,7 @@ class WashDataManager:
             # If silence > _config.off_delay, inject 0W to keep detector clock moving
             # so it can evaluate profile logic (smart termination) or just mark time passing.
             if time_since_any_update > self._config.off_delay:
-                _LOGGER.debug(
+                self._logger.debug(
                     "Watchdog: Low power silence (%.0fs). Injecting 0W keepalive.",
                     time_since_any_update
                 )
@@ -2108,7 +2113,7 @@ class WashDataManager:
             and self._current_power < self.detector.config.min_power
         ):
             # Treating as start of low power wait
-            _LOGGER.debug("Watchdog: Silence at low power (%.0fs). Injecting 0W.", time_since_any_update)
+            self._logger.debug("Watchdog: Silence at low power (%.0fs). Injecting 0W.", time_since_any_update)
             self.detector.process_reading(0.0, now)
             self._last_reading_time = now
             self._current_power = 0.0
@@ -2128,7 +2133,7 @@ class WashDataManager:
                 limit = (expected + 14400) if expected > 0 else 14400 # 4h default
 
                 if elapsed < limit:
-                    _LOGGER.info(
+                    self._logger.info(
                         "Watchdog: High power (%.1fW) stale (%.0fs). Injecting refresh.",
                         self._current_power, time_since_any_update
                     )
@@ -2138,7 +2143,7 @@ class WashDataManager:
                     return
 
             # If we get here, it's truly stuck/offline
-            _LOGGER.warning(
+            self._logger.warning(
                 "Watchdog: Force-ending cycle. Active state stale for %.0fs (> timeout).",
                 time_since_any_update
             )
@@ -2150,7 +2155,7 @@ class WashDataManager:
 
     def _on_state_change(self, old_state: str, new_state: str) -> None:
         """Handle state change from detector."""
-        _LOGGER.debug("Washer state changed: %s -> %s", old_state, new_state)
+        self._logger.debug("Washer state changed: %s -> %s", old_state, new_state)
         if new_state == STATE_RUNNING:
             new_cycle_detected = old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN)
             # Only reset estimates if we are truly starting a NEW cycle (from off or starting)
@@ -2192,7 +2197,7 @@ class WashDataManager:
                     )
                     self._start_event_fired = True
             else:
-                _LOGGER.debug("Cycle resumed from %s, preserving estimates", old_state)
+                self._logger.debug("Cycle resumed from %s, preserving estimates", old_state)
                 # Ensure watchdog is running
                 self._start_watchdog()
 
@@ -2266,7 +2271,7 @@ class WashDataManager:
             )
             if res.best_profile and res.confidence >= self._auto_label_confidence:
                 cycle_data["profile_name"] = res.best_profile
-                _LOGGER.info(
+                self._logger.info(
                     "Post-cycle auto-labeled as '%s' (confidence: %.2f)",
                     res.best_profile,
                     res.confidence,
@@ -2284,7 +2289,7 @@ class WashDataManager:
             if profile_name:
                 await self.profile_store.async_rebuild_envelope(profile_name)
         except Exception as e: # pylint: disable=broad-exception-caught
-            _LOGGER.error("Failed to add cycle to store: %s", e)
+            self._logger.error("Failed to add cycle to store: %s", e)
 
         # Ensure cycle has a stable ID even if store add failed (or did not mutate).
         if not cycle_data.get("id"):
@@ -2403,7 +2408,7 @@ class WashDataManager:
         try:
             return text_template.format(**kwargs)
         except Exception as err:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug(
+            self._logger.debug(
                 "Failed to format notification template %r with %s: %s",
                 text_template,
                 kwargs,
@@ -2414,7 +2419,7 @@ class WashDataManager:
             try:
                 return fallback_template.format(**kwargs)
             except Exception as err:  # pylint: disable=broad-exception-caught
-                _LOGGER.debug(
+                self._logger.debug(
                     "Failed to format fallback notification template %r with %s: %s",
                     fallback_template,
                     kwargs,
@@ -2551,7 +2556,7 @@ class WashDataManager:
             if event_type == NOTIFY_EVENT_LIVE and not self._is_mobile_notify_service(
                 notify_service
             ):
-                _LOGGER.debug(
+                self._logger.debug(
                     "Skipping live notification for non-mobile notify service: %s",
                     notify_service,
                 )
@@ -2592,14 +2597,14 @@ class WashDataManager:
                 logger=_LOGGER,
             )
         except (ValueError, TypeError, HomeAssistantError) as err:
-            _LOGGER.error(
+            self._logger.error(
                 "Invalid notification action configuration for %s: %s",
                 self.config_entry.title,
                 err,
             )
             return False
         except Exception as err:
-            _LOGGER.exception(
+            self._logger.exception(
                 "Unexpected error while building notification actions for %s: %s",
                 self.config_entry.title,
                 err,
@@ -2612,14 +2617,14 @@ class WashDataManager:
             )
             return True
         except HomeAssistantError as err:
-            _LOGGER.warning(
+            self._logger.warning(
                 "Notification action execution failed for %s: %s",
                 self.config_entry.title,
                 err,
             )
             return False
         except Exception as err:
-            _LOGGER.exception(
+            self._logger.exception(
                 "Unexpected error while scheduling notification actions for %s: %s",
                 self.config_entry.title,
                 err,
@@ -2708,7 +2713,7 @@ class WashDataManager:
             self._noise_max_powers = []
             return
 
-        _LOGGER.info(
+        self._logger.info(
             "Auto-Tune suggestion: min_power from %.1fW -> %.1fW due to noise",
             current_min,
             new_min,
@@ -3030,7 +3035,7 @@ class WashDataManager:
                 event_type="pre_complete",
                 extra_vars={"minutes_left": minutes_left, "minutes": minutes_left},
             )
-            _LOGGER.info("Sent pre-completion notification: %s", msg)
+            self._logger.info("Sent pre-completion notification: %s", msg)
 
     def _update_remaining_only(self) -> None:
         """Recompute remaining/progress using phase-aware estimation."""
@@ -3080,7 +3085,7 @@ class WashDataManager:
                         alpha = 0.2  # Default
                         if phase_variance > 100.0:
                             alpha = 0.05  # Very slow updates (mostly locked)
-                            _LOGGER.debug(
+                            self._logger.debug(
                                 "High variance phase (std=%.1fW), "
                                 "locking time estimate (alpha=0.05)",
                                 phase_variance,
@@ -3101,7 +3106,7 @@ class WashDataManager:
                             self._smoothed_progress = (current_smoothed * 0.95) + (
                                 phase_progress * 0.05
                             )
-                            _LOGGER.debug(
+                            self._logger.debug(
                                 "Progress drop detected (%.1f%% < %.1f%% - %.1f%%), "
                                 "applying heavy damping for %s",
                                 phase_progress,
@@ -3131,7 +3136,7 @@ class WashDataManager:
                     self._total_duration = duration_so_far + remaining
                     self._last_total_duration_update = now
 
-                    _LOGGER.debug(
+                    self._logger.debug(
                         "Phase-aware estimate: raw=%.1f%%, smoothed=%.1f%%, remaining=%smin",
                         phase_progress,
                         self._cycle_progress,
@@ -3158,7 +3163,7 @@ class WashDataManager:
             self._total_duration = duration_so_far + remaining
             self._last_total_duration_update = now
             self._cycle_progress = max(0.0, min(self._smoothed_progress, 100.0))
-            _LOGGER.debug(
+            self._logger.debug(
                 "Linear estimate: remaining=%smin, progress=%.1f%%",
                 int(remaining / 60),
                 self._cycle_progress,
@@ -3170,7 +3175,7 @@ class WashDataManager:
             self._total_duration = None
             self._cycle_progress = 0.0
             self._smoothed_progress = 0.0
-            _LOGGER.debug(
+            self._logger.debug(
                 "No profile matched yet, elapsed=%smin", int(duration_so_far / 60)
             )
 
@@ -3192,7 +3197,7 @@ class WashDataManager:
         envelope = self.profile_store.get_envelope(profile_name)
 
         if envelope is None:
-            _LOGGER.debug("No envelope cached for profile %s", profile_name)
+            self._logger.debug("No envelope cached for profile %s", profile_name)
             return None
 
         # Convert cached lists back to numpy arrays
@@ -3230,7 +3235,7 @@ class WashDataManager:
             )
             target_duration = float(envelope.get("target_duration", 0.0) or 0.0)
         except (KeyError, ValueError, TypeError, IndexError) as e:
-            _LOGGER.warning("Invalid envelope format for %s: %s", profile_name, e)
+            self._logger.warning("Invalid envelope format for %s: %s", profile_name, e)
             return None
 
         if len(time_grid) == 0 or target_duration <= 0:
@@ -3238,13 +3243,13 @@ class WashDataManager:
                 # Reconstruct time_grid if missing (Legacy envelope support)
                 count = len(envelope_arrays["avg"])
                 time_grid = np.linspace(0, target_duration, count)
-                _LOGGER.debug(
+                self._logger.debug(
                     "Reconstructed missing time_grid for %s (n=%d)",
                     profile_name,
                     count,
                 )
             else:
-                _LOGGER.debug("Envelope missing time grid/duration, cannot estimate phase")
+                self._logger.debug("Envelope missing time grid/duration, cannot estimate phase")
                 return None
 
         # Extract power offsets from current cycle (any format → [offset, power])
@@ -3265,7 +3270,7 @@ class WashDataManager:
         current_window_values = current_values[window_mask]
 
         if len(current_window_values) < 3:
-            _LOGGER.debug("Insufficient data in current window for phase estimation")
+            self._logger.debug("Insufficient data in current window for phase estimation")
             return None
 
         best_progress: float | None = None
@@ -3352,7 +3357,7 @@ class WashDataManager:
                 continue
 
         if best_progress is None or best_score < 0.4:
-            _LOGGER.debug("Phase detection failed: best_score=%.3f", best_score)
+            self._logger.debug("Phase detection failed: best_score=%.3f", best_score)
             return None
 
         # Calculate variance for the best window (Smart Time Prediction)
@@ -3394,7 +3399,7 @@ class WashDataManager:
             else float(current_duration)
         )
         if not in_bounds:
-            _LOGGER.debug(
+            self._logger.debug(
                 "Phase detection: progress=%.1f%%, score=%.3f, var=%.1fW, "
                 "time=%.0f/%.0fs [OUT OF BOUNDS, %s cycles, avg_sample_rate=%.1fs]",
                 best_progress,
@@ -3406,7 +3411,7 @@ class WashDataManager:
                 avg_sample_rate,
             )
         else:
-            _LOGGER.debug(
+            self._logger.debug(
                 "Phase detection: progress=%.1f%%, score=%.3f, var=%.1fW, "
                 "time=%.0f/%.0fs [IN BOUNDS, %s cycles, avg_sample_rate=%.1fs]",
                 best_progress,
@@ -3535,7 +3540,7 @@ class WashDataManager:
             )
 
         if profile_name not in profiles:
-            _LOGGER.warning("Cannot set manual program: '%s' not found", profile_name)
+            self._logger.warning("Cannot set manual program: '%s' not found", profile_name)
             return
 
         self._current_program = profile_name
@@ -3547,7 +3552,7 @@ class WashDataManager:
             avg = float(profile.get("avg_duration", 0.0))
             if avg > 0:
                 self._matched_profile_duration = avg
-                _LOGGER.info(
+                self._logger.info(
                     "Manual program set to %s, duration=%.0fs", profile_name, avg
                 )
 
@@ -3557,7 +3562,7 @@ class WashDataManager:
 
     async def async_terminate_cycle(self) -> None:
         """Force terminate the current cycle via user request."""
-        _LOGGER.warning("Force terminating cycle by user request")
+        self._logger.warning("Force terminating cycle by user request")
 
         # Trigger natural cycle end via detector
         # This will call _on_cycle_end callback, which handles:
@@ -3578,7 +3583,7 @@ class WashDataManager:
     async def async_start_recording(self) -> None:
         """Start manual recording of a cycle."""
         if self.recorder.is_recording:
-            _LOGGER.warning("Already recording")
+            self._logger.warning("Already recording")
             return
 
         # Ensure we are in a clean state (stop any running cycle first?)
@@ -3588,7 +3593,7 @@ class WashDataManager:
         # or just override state. My override in checks_state handles UI.
         # But should we clear current program?
         if self.detector.state != "off":
-            _LOGGER.info("Forcing detector reset before recording")
+            self._logger.info("Forcing detector reset before recording")
             self.detector.reset()
 
         await self.recorder.start_recording()
@@ -3619,7 +3624,7 @@ class WashDataManager:
             self._matched_profile_duration = None
 
         self._notify_update()
-        _LOGGER.info("Manual program cleared, reverting to auto-detection")
+        self._logger.info("Manual program cleared, reverting to auto-detection")
 
     async def _run_post_cycle_processing(self) -> None:
         """Run post-cycle processing (merge fragments, split anomalies)."""
@@ -3631,10 +3636,10 @@ class WashDataManager:
             merged = stats.get("merged_cycles", 0)
             split = stats.get("split_cycles", 0)
             if merged > 0 or split > 0:
-                _LOGGER.info(
+                self._logger.info(
                     "Post-cycle processing: Merged %s, Split %s cycle(s)", merged, split
                 )
 
             # Note: async_run_maintenance saves automatically if changes occur
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.error("Post-cycle processing failed: %s", e)
+            self._logger.error("Post-cycle processing failed: %s", e)

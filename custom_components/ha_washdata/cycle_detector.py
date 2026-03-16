@@ -11,6 +11,7 @@ import numpy as np
 
 from homeassistant.util import dt as dt_util
 
+from .log_utils import DeviceLoggerAdapter
 from .const import (
     STATE_OFF,
     STATE_STARTING,
@@ -145,8 +146,10 @@ class CycleDetector:
             ]
             | None
         ) = None,
+        device_name: str = "",
     ) -> None:
         """Initialize the cycle detector."""
+        self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self._config = config
         self._on_state_change = on_state_change
         self._on_cycle_end = on_cycle_end
@@ -257,7 +260,7 @@ class CycleDetector:
                 self.update_match(result)
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Profile match failed: %s", e)
+            self._logger.debug("Profile match failed: %s", e)
 
     def update_match(self, result: tuple[Any, ...] | list[Any] | Any) -> None:  # type: ignore[misc]
         """Process a match result (synchronously).
@@ -289,21 +292,21 @@ class CycleDetector:
                     confidence = float(raw_confidence)
                     if not math.isfinite(confidence):
                         confidence = 0.0
-                        _LOGGER.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
+                        self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
                 except (TypeError, ValueError):
                     confidence = 0.0
-                    _LOGGER.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
+                    self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
                 try:
                     expected_duration = float(raw_expected_duration)
                     if not math.isfinite(expected_duration):
                         expected_duration = 0.0
-                        _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                        self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
                     elif expected_duration <= 0 or expected_duration > 6 * 3600.0:
                         expected_duration = 0.0
-                        _LOGGER.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
+                        self._logger.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
                 except (TypeError, ValueError):
                     expected_duration = 0.0
-                    _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                    self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
                 phase_name = str(raw_phase_name) if raw_phase_name is not None else None
                 is_match_mismatch = raw_mismatch if isinstance(raw_mismatch, bool) else bool(raw_mismatch)
             else:
@@ -320,21 +323,21 @@ class CycleDetector:
                         confidence = float(raw_confidence)
                         if not math.isfinite(confidence):
                             confidence = 0.0
-                            _LOGGER.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
+                            self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
                     except (TypeError, ValueError):
                         confidence = 0.0
-                        _LOGGER.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
+                        self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
                     try:
                         expected_duration = float(raw_expected_duration)
                         if not math.isfinite(expected_duration):
                             expected_duration = 0.0
-                            _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                            self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
                         elif expected_duration <= 0 or expected_duration > 6 * 3600.0:
                             expected_duration = 0.0
-                            _LOGGER.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
+                            self._logger.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
                     except (TypeError, ValueError):
                         expected_duration = 0.0
-                        _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                        self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
                     phase_name = (
                         str(raw_phase_name) if raw_phase_name is not None else None
                     )
@@ -429,7 +432,7 @@ class CycleDetector:
         if self._ignore_power_until_idle:
             if power < self._config.start_threshold_w:
                 self._ignore_power_until_idle = False
-                _LOGGER.debug(
+                self._logger.debug(
                     "Power dropped below start threshold. Manual stop lockout cleared."
                 )
             else:
@@ -606,7 +609,7 @@ class CycleDetector:
             # Abort if power drops below threshold before confirmation
             if not is_high and self._time_below_threshold > 1.0:  # 1s grace period
                 # False start
-                _LOGGER.debug(
+                self._logger.debug(
                     "False start detected: power dropped after %.2fs",
                     self._time_above_threshold,
                 )
@@ -652,7 +655,7 @@ class CycleDetector:
             if is_high:
                 # End spike detected! Mark it
                 self._end_spike_seen = True
-                _LOGGER.debug("End spike detected (power high in ENDING state)")
+                self._logger.debug("End spike detected (power high in ENDING state)")
 
                 # Check if we're past expected duration - if so, DON'T resume to RUNNING
                 # This prevents the cycle from bouncing forever on pump-out spikes
@@ -670,7 +673,7 @@ class CycleDetector:
                     # (Assumes any cycle over 3 hours running is near completion when in ENDING)
                     if current_duration > 10800:  # 3 hours
                         effective_expected = current_duration * 0.99  # Always past threshold
-                        _LOGGER.debug(
+                        self._logger.debug(
                             "End spike check using fallback: expected_duration=%ds is unreasonable, "
                             "using current_duration=%ds as reference",
                             int(self._expected_duration), int(current_duration)
@@ -681,21 +684,22 @@ class CycleDetector:
                     and current_duration >= (effective_expected * 0.98)
                 )
 
-                # Dishwashers commonly have a long silent dry tail followed by a
-                # short final pump-out burst. If ENDING has already lasted long enough,
-                # or we're near expected completion, treat the burst as terminal.
-                dishwasher_terminal_spike = False
+                # If ENDING has already lasted long enough, treat any power burst as
+                # terminal (applies to all device types). Dishwashers additionally check
+                # proximity to the expected duration.
+                long_ending_tail = self._time_in_state >= 120.0
+                terminal_spike = long_ending_tail
+
                 if is_dishwasher:
                     near_expected = (
                         effective_expected > 0
                         and current_duration >= (effective_expected * 0.90)
                     )
-                    long_ending_tail = self._time_in_state >= 120.0
-                    dishwasher_terminal_spike = near_expected or long_ending_tail
+                    terminal_spike = near_expected or long_ending_tail
 
-                if dishwasher_terminal_spike:
-                    _LOGGER.debug(
-                        "Dishwasher end spike kept in ENDING (duration %.0fs/%.0fs, time_in_ending %.0fs)",
+                if terminal_spike:
+                    self._logger.debug(
+                        "End spike kept in ENDING (duration %.0fs/%.0fs, time_in_ending %.0fs)",
                         current_duration,
                         effective_expected,
                         self._time_in_state,
@@ -703,7 +707,7 @@ class CycleDetector:
                     return
 
                 if past_expected:
-                    _LOGGER.debug(
+                    self._logger.debug(
                         "End spike ignored for state transition (past expected duration %.0fs/%.0fs)",
                         current_duration, effective_expected
                     )
@@ -762,7 +766,7 @@ class CycleDetector:
                                 and not end_spike_seen
                                 and not past_wait_period
                             ):
-                                _LOGGER.debug(
+                                self._logger.debug(
                                     "Waiting for end spike (duration %.0fs, expected %.0fs + "
                                     "%.0fs wait)",
                                     current_duration,
@@ -771,7 +775,7 @@ class CycleDetector:
                                 )
                                 return  # Don't finish yet, wait for spike or timeout
 
-                            _LOGGER.info(
+                            self._logger.info(
                                 "Smart Termination: Profile '%s' match confirmed (duration %.0fs, "
                                 "conf %.2f, spike_seen=%s), ending.",
                                 self._matched_profile,
@@ -826,7 +830,7 @@ class CycleDetector:
                         self._finish_cycle(timestamp, status="completed")
                     else:
 
-                        _LOGGER.debug(
+                        self._logger.debug(
                             "Cycle ending prevented by energy gate: %.4fWh > %.4fWh",
                             recent_e,
                             self._config.end_energy_threshold,
@@ -862,7 +866,7 @@ class CycleDetector:
             # Reset idle time if exiting ANTI_WRINKLE to STARTING (high-power burst resumed)
             self._anti_wrinkle_idle_time = 0.0
 
-        _LOGGER.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
+        self._logger.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)
 
     def should_defer_for_profile(self) -> bool:
@@ -878,7 +882,7 @@ class CycleDetector:
         """Check if we should defer termination based on expected duration."""
         # Check explicit verified pause override from manager
         if getattr(self, "_verified_pause", False):
-            _LOGGER.debug("Deferring cycle finish: Verified pause active")
+            self._logger.debug("Deferring cycle finish: Verified pause active")
             return True
 
         if not self._matched_profile or self._expected_duration <= 0:
@@ -886,7 +890,7 @@ class CycleDetector:
 
         # Safety: Don't defer forever
         if duration > (self._expected_duration + DEFAULT_MAX_DEFERRAL_SECONDS):
-            _LOGGER.warning(
+            self._logger.warning(
                 "Deferral limit exceeded (%.0fs > expected %.0f + %s), allowing finish",
                 duration,
                 self._expected_duration,
@@ -902,7 +906,7 @@ class CycleDetector:
         # we only defer if we are VERY confident this profile is correct.
         # This prevents hanging on too-long profiles that matched early but are now diverging.
         if self._last_match_confidence < DEFAULT_DEFER_FINISH_CONFIDENCE:
-            _LOGGER.debug(
+            self._logger.debug(
                 "Not deferring finish: confidence %.2f too low for unverified pause (profile: %s)",
                 self._last_match_confidence,
                 self._matched_profile,
@@ -917,7 +921,7 @@ class CycleDetector:
 
         # Primary check: Is duration significantly below expectation?
         if duration < (self._expected_duration * ratio):
-            _LOGGER.debug(
+            self._logger.debug(
                 "Deferring cycle finish: duration %.0fs < %.0f%% of expected %.0fs (profile: %s, confidence %.2f)",
                 duration,
                 ratio * 100,
@@ -1002,7 +1006,7 @@ class CycleDetector:
             "power_data": [[round(t.timestamp() - start_ts, 1), p] for t, p in final_readings],
         }
 
-        _LOGGER.info("Cycle Finished: %s, %.1f min", status, duration / 60)
+        self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)
 
         target = STATE_FINISHED
@@ -1072,6 +1076,7 @@ class CycleDetector:
             "state_enter_time": (
                 self._state_enter_time.isoformat() if self._state_enter_time else None
             ),
+            "end_spike_seen": self._end_spike_seen,
         }
 
     def get_elapsed_seconds(self) -> float:
@@ -1108,14 +1113,18 @@ class CycleDetector:
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
             self._matched_profile = snapshot.get("matched_profile")
             self._expected_duration = snapshot.get("expected_duration", 0.0)
+            self._end_spike_seen = snapshot.get("end_spike_seen", False)
 
-            # Restore state enter time
+            # Restore state enter time and recompute time_in_state from it
             enter_time = snapshot.get("state_enter_time")
             if enter_time:
                 try:
                     self._state_enter_time = dt_util.parse_datetime(enter_time)
+                    if self._state_enter_time:
+                        elapsed = (dt_util.now() - self._state_enter_time).total_seconds()
+                        self._time_in_state = max(0.0, elapsed)
                 except Exception: # pylint: disable=broad-exception-caught
-                    _LOGGER.warning("Failed to parse state enter time")
+                    self._logger.warning("Failed to parse state enter time")
 
             start = snapshot.get("current_cycle_start")
             self._current_cycle_start = None
@@ -1125,10 +1134,10 @@ class CycleDetector:
                     if dt_start and dt_start.tzinfo is None:
                         # Fix Naive Timestamp (Legacy Data)
                         dt_start = dt_start.replace(tzinfo=dt_util.now().tzinfo)
-                        _LOGGER.warning("Restored Naive start_time, assuming local: %s", dt_start)
+                        self._logger.warning("Restored Naive start_time, assuming local: %s", dt_start)
                     self._current_cycle_start = dt_start
                 except Exception:  # pylint: disable=broad-exception-caught
-                    _LOGGER.warning("Failed to parse start time: %s", start)
+                    self._logger.warning("Failed to parse start time: %s", start)
 
             readings = snapshot.get("power_readings", [])
             self._power_readings = []
@@ -1151,10 +1160,10 @@ class CycleDetector:
                             if math.isfinite(value):
                                 self._power_readings.append((t, value))
                     except (TypeError, ValueError) as exc:
-                        _LOGGER.debug("Skipping malformed power reading %s: %s", r, exc)
+                        self._logger.debug("Skipping malformed power reading %s: %s", r, exc)
 
             if has_naive_readings:
-                _LOGGER.warning(
+                self._logger.warning(
                     "Restored %d power readings with Naive timestamps (fixed to local)",
                     len(self._power_readings),
                 )
@@ -1170,5 +1179,5 @@ class CycleDetector:
                 self._last_active_time = self._current_cycle_start
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.error("Failed restore: %s", e)
+            self._logger.error("Failed restore: %s", e)
             self.reset()

@@ -33,6 +33,7 @@ from .const import (
     SIGNAL_WASHER_UPDATE,
 )
 from .suggestion_engine import SuggestionEngine
+from .log_utils import DeviceLoggerAdapter
 
 if TYPE_CHECKING:
     from .profile_store import ProfileStore
@@ -95,8 +96,10 @@ class LearningManager:
         entry_id: str,
         profile_store: "ProfileStore",
         device_type: str | None = None,
+        device_name: str = "",
     ) -> None:
         """Initialize the learning manager."""
+        self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self.hass = hass
         self.entry_id = entry_id
         self.profile_store = profile_store
@@ -207,9 +210,9 @@ class LearningManager:
             )
             if new_suggestions:
                 self._apply_suggestions_and_notify(new_suggestions)
-                _LOGGER.debug("Post-cycle simulation completed with suggestions: %s", new_suggestions.keys())
+                self._logger.debug("Post-cycle simulation completed with suggestions: %s", new_suggestions.keys())
         except Exception as e:
-            _LOGGER.error("Background simulation failed: %s", e)
+            self._logger.error("Background simulation failed: %s", e)
 
     def _update_operational_suggestions(self, now: datetime) -> None:
         """Generate suggestions for operational parameters (intervals, timeouts)."""
@@ -272,7 +275,7 @@ class LearningManager:
                 },
             )
         except Exception:  # pylint: disable=broad-exception-caught
-            _LOGGER.exception("Failed to create suggestions-ready notification")
+            self._logger.exception("Failed to create suggestions-ready notification")
 
     def _set_suggestion(self, key: str, value: Any, reason: str) -> None:
         """Persist a suggested setting."""
@@ -313,7 +316,7 @@ class LearningManager:
         # Get the cycle ID from the cycle_data
         cycle_id = cycle_data.get("id")
         if not cycle_id:
-            _LOGGER.warning("Cycle data missing ID, cannot request feedback")
+            self._logger.warning("Cycle data missing ID, cannot request feedback")
             return
 
         # Get Configured Thresholds
@@ -344,12 +347,12 @@ class LearningManager:
                 self.hass.async_create_task(
                     self._async_rebuild_and_save_profile(detected_profile)
                 )
-                _LOGGER.debug("Auto-labeled high-confidence cycle %s", cycle_id)
+                self._logger.debug("Auto-labeled high-confidence cycle %s", cycle_id)
             return
 
         # Skip low-confidence matches below learning threshold
         if confidence < learning_conf:
-            _LOGGER.debug(
+            self._logger.debug(
                 "Skipping feedback for low-confidence match (conf=%.2f < %.2f)",
                 confidence,
                 learning_conf,
@@ -446,7 +449,7 @@ class LearningManager:
                 },
             )
         except Exception:  # pylint: disable=broad-exception-caught
-            _LOGGER.exception("Failed to create feedback notification")
+            self._logger.exception("Failed to create feedback notification")
 
     def _send_feedback_notification(
         self, device_title: str, cycle_data: dict[str, Any], profile: str, confidence: float
@@ -508,7 +511,7 @@ class LearningManager:
         self.profile_store.add_pending_feedback(cycle_id, feedback_req)
 
         est_min = int(estimated_duration / 60) if estimated_duration else 0
-        _LOGGER.info(
+        self._logger.info(
             "Feedback requested for cycle %s: profile='%s' (conf=%.2f), "
             "est=%smin, actual=%smin (%.0f%%)",
             cycle_id,
@@ -560,7 +563,7 @@ class LearningManager:
             try:
                 duration_sec = float(corrected_duration)
             except (TypeError, ValueError):
-                _LOGGER.warning(
+                self._logger.warning(
                     "Invalid corrected_duration %r for cycle %s, ignoring",
                     corrected_duration,
                     cycle_id,
@@ -624,7 +627,7 @@ class LearningManager:
             try:
                 await self.profile_store.async_rebuild_envelope(profile_name)
             except Exception as e:  # pylint: disable=broad-exception-caught
-                _LOGGER.error("Failed to rebuild envelope for profile '%s': %s", profile_name, e)
+                self._logger.error("Failed to rebuild envelope for profile '%s': %s", profile_name, e)
 
         # Persist changes
         await self.profile_store.async_save()
@@ -670,9 +673,9 @@ class LearningManager:
         """
         try:
             await self.profile_store.async_rebuild_envelope(profile_name)
-            _LOGGER.debug("Rebuilt envelope for profile '%s'", profile_name)
+            self._logger.debug("Rebuilt envelope for profile '%s'", profile_name)
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.error("Failed to rebuild envelope for profile '%s': %s", profile_name, e)
+            self._logger.error("Failed to rebuild envelope for profile '%s': %s", profile_name, e)
 
     async def _async_rebuild_and_save_profile(self, detected_profile: str) -> None:
         """Rebuild profile envelope then persist in deterministic order."""

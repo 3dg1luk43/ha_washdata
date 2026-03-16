@@ -16,6 +16,7 @@ from .const import (
     SHORT_SILENCE_THRESHOLD_S,
     TRIM_BUFFER_S,
 )
+from .log_utils import DeviceLoggerAdapter
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,8 +45,9 @@ class RecorderStore(Store[dict[str, Any]]):
 class CycleRecorder:
     """Records raw power data without interference from detection logic."""
 
-    def __init__(self, hass: HomeAssistant, entry_id: str) -> None:
+    def __init__(self, hass: HomeAssistant, entry_id: str, device_name: str = "") -> None:
         """Initialize the recorder."""
+        self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self.hass = hass
         self.entry_id = entry_id
         self._store = RecorderStore(hass, STORAGE_VERSION, f"{STORAGE_KEY_RECORDER}.{entry_id}")
@@ -91,14 +93,14 @@ class CycleRecorder:
             if isinstance(start_iso, str) and start_iso:
                 parsed_time = dt_util.parse_datetime(start_iso)
                 if parsed_time is not None and getattr(parsed_time, "tzinfo", None) is None:
-                    _LOGGER.warning(
+                    self._logger.warning(
                         "Recorder state loaded naive start_time (%s); treating as invalid", start_iso
                     )
                     self._start_time = None
                 else:
                     self._start_time = parsed_time
             if self._is_recording and self._start_time is None:
-                _LOGGER.warning(
+                self._logger.warning(
                     "Recorder state had is_recording=True with invalid start_time; restoring as not recording"
                 )
                 self._is_recording = False
@@ -121,7 +123,7 @@ class CycleRecorder:
                 if isinstance(last_run_raw, dict)
                 else None
             )
-            _LOGGER.info(
+            self._logger.info(
                 "Loaded recorder state: recording=%s, samples=%d, has_last_run=%s",
                 self._is_recording,
                 len(self._buffer),
@@ -133,7 +135,7 @@ class CycleRecorder:
         if not self._is_recording:
             return {}
 
-        _LOGGER.info("Stopping cycle recording. Total samples: %d", len(self._buffer))
+        self._logger.info("Stopping cycle recording. Total samples: %d", len(self._buffer))
         self._is_recording = False
 
         # Create output packet
@@ -177,10 +179,10 @@ class CycleRecorder:
     async def start_recording(self) -> None:
         """Start a new recording."""
         if self._is_recording:
-            _LOGGER.warning("Recording already in progress")
+            self._logger.warning("Recording already in progress")
             return
 
-        _LOGGER.info("Starting new cycle recording")
+        self._logger.info("Starting new cycle recording")
         # Previous recordings are kept until explicitly cleared or overwritten
 
         self._is_recording = True
