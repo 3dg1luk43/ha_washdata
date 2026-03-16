@@ -1246,7 +1246,30 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_editor_configure(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Step 3: Configure and Preview."""
+        """
+        Render the interactive editor preview and apply split or merge actions for selected cycles.
+        
+        If called with `user_input`, executes the chosen editor action ("split" or "merge") when the user confirms:
+        - For "split": analyzes the selected cycle into segments, optionally assigns profiles from per-segment inputs, applies the split, and triggers background envelope rebuild.
+        - For "merge": optionally creates a new profile, applies the merge with the chosen profile (or unlabeled), and triggers background envelope rebuild.
+        
+        When called without `user_input`, prepares a preview form:
+        - For "split": runs split analysis, generates an SVG preview, and presents per-segment profile selectors plus a confirmation checkbox (`confirm_commit`).
+        - For "merge": generates a merge preview (SVG or fallback message), presents a profile selector (`merged_profile` or `create_new`), an optional `new_profile_name`, and a confirmation checkbox (`confirm_commit`).
+        
+        Parameters:
+            user_input (dict[str, Any] | None): Submitted form values when committing an action. Expected keys vary by action:
+                - Split preview commit:
+                    - "confirm_commit" (bool): required to execute the split.
+                    - "segment_{i}_profile" (str): optional per-segment profile name or "none".
+                - Merge preview commit:
+                    - "confirm_commit" (bool): required to execute the merge.
+                    - "merged_profile" (str): one of profile names, "none", or "create_new".
+                    - "new_profile_name" (str): when "create_new" is selected, name for the new profile.
+        
+        Returns:
+            FlowResult: A flow result that either shows the preview form, creates an entry after applying changes, or aborts with an error if required data (e.g., cycles or segments) is missing.
+        """
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
 

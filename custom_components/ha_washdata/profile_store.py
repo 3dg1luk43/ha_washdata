@@ -3583,9 +3583,26 @@ class ProfileStore:
     async def apply_merge_interactive(
         self, cycle_ids: list[str], target_profile: str | None
     ) -> str | None:
-        """Apply a manual merge of multiple cycles with gap filling.
-
-        Returns the new merged cycle ID.
+        """
+        Merge multiple past cycles into a single cycle record, filling gaps between traces with short zero-power segments.
+        
+        Parameters:
+            cycle_ids (list[str]): Ordered list of past-cycle IDs to merge; at least two IDs are required.
+            target_profile (str | None): Profile name to assign to the merged cycle, or `None` to leave unlabeled.
+        
+        Description:
+            When successful, this replaces the first cycle in `cycle_ids` with the merged cycle, removes the other consumed cycles,
+            and updates related metadata.
+        
+            Side effects:
+            - Updates the store's past_cycles (removes consumed cycles and replaces the first cycle with the merged record).
+            - Clears any `manual_duration` override on the resulting cycle.
+            - Updates `sample_cycle_id` references in profiles that pointed to removed cycles.
+            - Attempts to recompute and store the merged cycle's signature.
+            - Persists changes to storage and triggers envelope rebuilds for affected profiles.
+        
+        Returns:
+            merged_id (str | None): The new merged cycle's ID if the merge was applied, `None` if the merge could not be performed.
         """
         if len(cycle_ids) < 2:
             return None
@@ -3598,6 +3615,15 @@ class ProfileStore:
 
         # Sort by time — use timestamp comparison to handle mixed timezone offsets correctly
         def _cycle_start_ts(c: CycleDict) -> float:
+            """
+            Return the cycle's start time as a POSIX timestamp, or positive infinity if missing or unparsable.
+            
+            Parameters:
+                c (CycleDict): Cycle dictionary; expected to contain a 'start_time' value (ISO string or datetime) parseable by dt_util.parse_datetime.
+            
+            Returns:
+                float: Seconds since the epoch for the cycle's start time, or float('inf') when the start time is absent or cannot be parsed.
+            """
             dt = dt_util.parse_datetime(str(c.get("start_time", "")))
             return dt.timestamp() if dt is not None else float("inf")
 
@@ -3796,10 +3822,32 @@ class ProfileStore:
         height: int = 300,
         title: str = "Merge Preview",
     ) -> str:
-        """Generate SVG for merge preview."""
+        """
+        Generate an SVG preview that overlays power traces from the specified past cycles to illustrate the result of merging them.
+        
+        Cycles are ordered by their parsed start_time and each cycle's power data is aligned to the earliest cycle start to form overlaid curves.
+        
+        Parameters:
+            cycle_ids (list[str]): IDs of past cycles to include in the preview.
+            width (int): Width of the generated SVG in pixels.
+            height (int): Height of the generated SVG in pixels.
+            title (str): Title text shown in the SVG header.
+        
+        Returns:
+            str: SVG markup for the merge preview. Returns an empty string if no valid cycles or if the first cycle's start_time cannot be parsed. If cycles are present but none contain power data, returns a placeholder SVG containing a message indicating "No power data available for preview".
+        """
         cycles = [c for c in self.get_past_cycles() if c["id"] in cycle_ids]
 
         def _sort_ts(c: CycleDict) -> float:
+            """
+            Provide a numeric sort key for a cycle by converting its `start_time` to a UNIX timestamp.
+            
+            Parameters:
+                c (CycleDict): Cycle mapping that may contain a `start_time` value in any parseable datetime form.
+            
+            Returns:
+                float: UNIX timestamp in seconds parsed from `start_time`, or `float('inf')` when `start_time` is missing or cannot be parsed so the cycle sorts after valid-dated cycles.
+            """
             dt = dt_util.parse_datetime(str(c.get("start_time", "")))
             return dt.timestamp() if dt is not None else float("inf")
 
