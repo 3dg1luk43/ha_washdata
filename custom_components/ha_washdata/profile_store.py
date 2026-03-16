@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
+import html
 import logging
 import os
 import re
@@ -3887,14 +3888,16 @@ class ProfileStore:
 
         if not curves:
             # No power data available — return a placeholder SVG with a message
+            safe_title = html.escape(title)
+            safe_label = html.escape(no_data_label or "")
             return (
                 f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
                 f'style="background-color: #1c1c1c; font-family: sans-serif;">'
                 f'<rect x="0" y="0" width="{width}" height="{height}" fill="#1c1c1c" />'
                 f'<text x="{width // 2}" y="{height // 2 - 10}" fill="#aaa" font-size="16" '
-                f'text-anchor="middle">{title}</text>'
+                f'text-anchor="middle">{safe_title}</text>'
                 f'<text x="{width // 2}" y="{height // 2 + 14}" fill="#666" font-size="13" '
-                f'text-anchor="middle">{no_data_label or ""}</text>'
+                f'text-anchor="middle">{safe_label}</text>'
                 f'</svg>'
             )
 
