@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import timedelta, datetime, timezone
 from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager
@@ -17,7 +17,7 @@ from custom_components.ha_washdata.const import (
 def mock_hass():
     hass = MagicMock()
     hass.data = {}
-    hass.services.async_call = MagicMock()
+    hass.services.async_call = AsyncMock()
     hass.bus.async_fire = MagicMock()
     hass.async_create_task = MagicMock(
         side_effect=lambda coro: getattr(coro, "close", lambda: None)()

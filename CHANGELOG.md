@@ -1,108 +1,11 @@
 # Changelog
 
-All notable changes to WashData will be documented in this file.
+All notable changes to HA WashData will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.4.3 - 2026-03-16
-
-### ✨ Features
-- **New Device Types**: Added full support for **Air Fryer** (#133) and **Heat Pump** (#134), with optimized defaults and custom icons (`mdi:pot-steam`, `mdi:heat-pump`).
-- **Anti-Wrinkle Mode**: Added a dedicated anti-wrinkle state for dryers and washer-dryer combos, including state transitions and shielding (#68).
-- **Card Customization**: Added new dashboard card settings including specialized toggles for `Spinning Icon`, `Show State`, `Show Program`, and `Show Details`.
-- **Automated Translation Sync**: Enhanced `translate.py` to automatically update the frontend card's `TRANSLATIONS` object from language files, providing out-of-the-box localization for all 27+ supported languages.
-- **Inverted External Trigger**: Added a new setting to invert the logic of the external cycle end trigger. Users can now choose to complete a cycle when an external binary sensor turns OFF instead of ON.
-- **Randomized Cache Buster**: The dashboard card now uses a timestamp-based cache buster that refreshes every time the integration is loaded, ensuring immediate updates without browser cache clearance.
-- **Action-Based Notifications**: Added notification actions with priority dispatch and fallback routing (actions → notify service → persistent notification).
-- **Presence-Gated Notifications**: Optional home/away gating to defer notifications until a tracked person is home.
-- **Live Progress Mobile Notifications**: Added in-place companion-app live updates (`cycle_live`) with per-cycle throttling, overrun protection caps, mobile-only payload routing, and automatic clear on cycle completion.
-- **Feedback Review Power Visualization**: Added an inline SVG chart in "Review Learned Feedbacks" that overlays the current cycle trace with learned profile data for faster manual verification.
-- **Multi-Profile Comparison Graph**: Feedback review now renders all candidate profiles in a single combined chart, highlighting the detected profile and showing the actual cycle trace for direct visual comparison.
-- **Top Match Candidates Summary**: Added ranked candidate details (confidence, MAE, correlation, duration ratio) to feedback review to improve correction decisions.
-
-### 🛠️ Improvements
-- **Per-Device Log Context**: All log messages emitted by the core engine (`WashDataManager`, `ProfileStore`, `CycleDetector`, `LearningManager`, `CycleRecorder`) now include the device name as a `[Device Name]` prefix. When running two or more devices simultaneously, every log line is immediately attributable to its source without cross-referencing entry IDs.
-- **UI Menu Clarity**: All `SelectSelector` dropdowns in the configuration flow now use `SelectOptionDict` with explicit human-readable labels (e.g. "Split a Cycle (Find gaps)", "Export All Data", "Confirm - Correct Detection"). Previously, raw internal values such as `"split"` or `"auto_label_cycles"` were displayed directly in the UI.
-- **Translation Cleanup**: Removed stale action option keys from `strings.json` and `en.json` that were no longer backed by selectors in the config flow (`assign_mode`, export/import mode, cycle history editor actions, and several management menu entries). Reduces translator noise and prevents spurious untranslated keys in other languages.
-- **Phase Catalog Translations**: Extended `manage_phase_catalog` action labels and descriptions to Swedish, Tamil, Telugu, and Simplified Chinese.
-- **Unified Time Handling**: Refactored the core engine to use a single canonical offset-based time format for storage. Includes automatic migration of legacy data to prevent corruption and fixes "offset-naive/offset-aware" comparison bugs (#144).
-- **Profile Rename Cascade**: Renaming a profile now automatically updates all historically recorded cycles and pending feedback requests, maintaining end-to-end data integrity (#154).
-- **Detection Persistence**: Implemented temporal persistence for profile matching. Start notifications now only fire after a match remains stable over several intervals, drastically reducing false or jittery alerts.
-- **Enhanced Feedback Resolution**: Overhauled the feedback resolution flow with new "Delete" and "Ignore" actions, giving users more granular control over learned cycles.
-- **Sub-State Extraction**: The dashboard card now intelligently extracts and displays the specific phase from the state (e.g., showing "Rinsing" instead of "Running (Rinsing)") for a cleaner UI experience.
-- **History Timeline Restoration**: Restored categorical history diagrams for State and Program sensors by implementing the `enum` device class (#157).
-- **Localized Menus**: Updated configuration flow to use `SelectSelector`, enabling natively localized menu options across all supported languages.
-- **Notification Event Toggle**: Added `notify_fire_events` option to control emission of cycle start/end events.
-- **Migration Normalization**: Added migration helper defaults for new notification options to ensure deterministic upgrades.
-- **Notification Options UX**: Moved notification settings to a dedicated "Notifications" options step and removed duplicate live-enable controls, using event selection as the single source of truth.
-- **Live Progress Match-Aware Flow**: Live notifications now send a one-time "no profile matched yet" message before detection converges, then switch to periodic progress updates only after a profile duration is available.
-- **Ultra-Long Cycle Support**: Significantly improved handling for modern high-efficiency dishwashers with cycles exceeding 230 minutes.
-  - Increased `DEFAULT_MAX_DEFERRAL_SECONDS` to 4 hours to prevent long silent Eco drying phases from being cut off.
-  - Extended dishwasher-specific `NO_UPDATE_ACTIVE_TIMEOUT` to 4 hours.
-  - Increased the default dishwasher `MIN_OFF_GAP` to 1 hour to prevent fragmentation when no profile is matched.
-- **Robust Zombie Killer**: Refined the "Zombie Killer" hard-limit to be more lenient, now triggering at 300% of expected duration (previously 200%) and requiring at least 4 hours of runtime. This prevents premature termination of long-running appliances while still protecting against runaway ghost cycles.
-- **Device-Aware Suggestions**: The `SuggestionEngine` is now aware of the configured device type and uses device-specific safety floors for `off_delay` recommendations, preventing it from suggesting dangerously short timeouts for dishwashers.
-- **Translation Tool Docs**: Added documentation for the Home Assistant integration translation helper script.
-- **Learning Pipeline Context Propagation**: Propagated runtime match ranking through manager/learning flow so feedback requests retain candidate context.
-- **Feedback Chart Readability**: Increased chart and legend typography and spacing to improve readability on Home Assistant dialogs.
-- **Phase Assignment Visualization**: Replaced ASCII timeline with interactive SVG power curve chart showing average cycle profile, colored phase spans, and gating line boundaries for better profile phase visualization.
-- **Phase Catalog Management**: Implemented full create/edit/delete capabilities for custom phases in the phase catalog, allowing users to build device-specific phase vocabularies. **Default phases can also be edited**, with overrides automatically stored in the custom phases list.
-- **Device-Type Phase Filtering**: Phase options in the profile assignment flow are now automatically filtered by the currently selected device type, ensuring only relevant phases appear in dropdowns.
-- **Cross-Device Catalog View**: "Manage Phase Catalog" now displays and groups phases for all supported device types in one place, instead of only the current integration device type.
-- **Phase Action Wording Cleanup**: Updated phase management action labels to clearer wording ("Create New Phase", "Edit Phase", "Delete Phase").
-- **Current Phase Sensor Exposure**: Added a standard device sensor for current phase (`sensor.<device>_current_phase`) so active phase is visible in normal entity views without enabling diagnostics.
-- **Phase-Only Offset Input**: Simplified phase assignment to use offset-based time entry (minutes from cycle start) instead of timestamp selection, reducing complexity and user error.
-- **Suggested Settings Discoverability**: Improved the Suggested Settings UX with sensor-first guidance, a one-time "suggestions ready" notification when recommendations become available, and an explicit review step before suggested values are staged in Advanced Settings.
-- **Phase Unique ID Management**: Built-in and custom phases are now assigned stable unique IDs. Phase catalog operations (edit, delete) resolve by ID rather than by name, eliminating ambiguity when similarly-named phases exist across different scopes. Includes improved error handling for rename/delete conflicts.
-- **Duration Consistency Metric**: Profile sensor attributes now expose a `consistency_min` field (standard deviation of recorded cycle durations, in minutes), allowing users to diagnose variability in learned profiles directly from the entity state.
-- **Signal Processing Edge-Case Guards**: Added guards against non-positive step and gap values in the resampling pipeline, preventing division-by-zero and NaN propagation in high-noise or sparse-sensor environments.
-- **Cycle Detector Numeric Guards**: `update_match` now validates confidence and expected-duration values with `math.isfinite()`, falling back to `0.0` with a debug log entry instead of propagating NaN or infinity into downstream sensors.
-- **Suggestion Engine Resilience**: Added `TypeError`/`ValueError` guards when parsing profile data in the `SuggestionEngine`, preventing crashes when stored profile fields contain unexpected types.
-- **Card Registration Resilience**: Dashboard card asset registration now catches all setup exceptions and logs a warning, allowing the rest of the integration to load normally; setup will retry on the next Home Assistant restart.
-- **Live Notification Interval Constraint**: Added minimum-value constraint documentation for `notify_live_interval_seconds` across all supported languages, guiding users away from excessively short polling intervals.
-- **Diagnostics Sensitive Data Redaction**: Config entry diagnostics now automatically redact personally identifiable fields (`notify_service`, `notify_people`, `notify_actions`, `power_sensor`, `external_end_trigger`) before the report is generated.
-- **Services Description Consistency**: Updated `services.yaml` descriptions to consistently refer to "WashData" instead of "washing machine", accurately reflecting multi-device support.
-- **Enhanced Issue Templates**: Overhauled bug report and feature request templates to cover all 8 supported device types (Washing Machine, Dryer, Washer-Dryer Combo, Dishwasher, Coffee Machine, Electric Vehicle, Air Fryer, Heat Pump). Improved debug log guidance to clearly distinguish copy-paste (short logs) from file attachment (long logs), and added a separate note explaining that HA diagnostics exports are distinct from debug logs and must be attached as files. Added a pre-submission checklist requiring reporters to confirm they searched for duplicates and filled in all applicable fields. Translation contributions are now handled via a dedicated Pull Request template instead of an issue template.
-- **Issue Triage Automation**: Added a GitHub Actions workflow that automatically validates new and edited issues, comments with targeted guidance on any missing required sections, and applies a `needs-more-info` label — keeping the issue queue actionable without manual triage.
-
-### 🐛 Bug Fixes
-- **Manual Recording Revert (#151)**: Fixed an issue where manual recordings could unexpectedly revert configuration changes.
-- **Data Import Fix (#152)**: Resolved a bug that prevented successful data imports into the profile store.
-- **Profile Store Reliability (#155)**: Fixed synchronization issues when updating profile statuses and statistics.
-- **Translation Consistency**: Synchronized `en.json` with `strings.json` to ensure a canonical source of truth for translations.
-- **Energy Threshold Defaults**: Fixed a bug where `start_energy_threshold` and `end_energy_threshold` were incorrectly defaulting to 0.0W in the detector configuration, which could lead to premature cycle ends in noisy environments. They now correctly respect device-specific constant defaults.
-- **Config Reload Consistency**: Added missing energy threshold updates to the configuration reload logic, ensuring settings take effect immediately when changed in the UI.
-- **Config Flow Null Option Guard**: Fixed a crash in the options flow where a `SelectSelector` entry with a `None` value would cause a `KeyError` during form processing. Such entries are now silently skipped.
-- **Profile Stats After Deletion**: Fixed `async_rebuild_envelope` incorrectly computing `min_duration` and `max_duration` from the outlier-filtered duration set. `min`/`max` now reflect the true observed range of all cycles; only `avg_duration` uses the IQR-filtered set for robustness. This means deleting an outlier cycle now correctly recalculates the profile's duration range.
-- **Feedback Translation Placeholder Mismatch**: Fixed options-flow description placeholders (`{comparison_data}`) to prevent missing-value translation errors during feedback review.
-- **Feedback SVG Legend Clipping**: Fixed a viewBox height mismatch that could render legend content outside the visible area.
-- **Global Phase Duplication in Selectors**: Fixed edit/delete phase dialogs duplicating "All Devices" phases once per device type by introducing scoped deduplication and explicit scope keys.
-- **Phase Scope Resolution in Edit/Delete**: Fixed phase edit/delete operations to resolve against the selected phase scope (`device_type`) so similarly named phases remain deterministic.
-- **Notification Action Script Context**: Fixed Home Assistant script action execution by passing a valid `Context` to `script.async_run`, resolving runtime errors like "Running script requires passing in a context".
-- **Notification Dispatch Ordering**: Fixed a routing regression where configured actions could suppress notify-service delivery; actions and mobile notifications now run together as expected.
-- **Live State Coverage**: Fixed live-progress gating to continue updates during `STATE_ENDING` (not only `RUNNING`/`PAUSED`) until cycle completion.
-- **Legacy Phase Diagnostic Confusion**: Removed stale diagnostic phase entity behavior and added cleanup of the old `wash_phase` registry entry to prevent misleading duplicate/legacy phase sensors.
-- **Orphaned Diagnostic Entity Cleanup**: Added automatic registry reconciliation for diagnostic entities on startup and profile updates, removing stale unavailable duplicates (including old `profile_count_*` entries left behind by profile renames) without manual per-device cleanup.
-- **End-Spike Revert to Running**: Fixed a bug where a power burst during the `ENDING` state (e.g. the final pump-out on a dishwasher) could incorrectly transition the device back to `running`, delaying the reported cycle end by several minutes. The `long_ending_tail` guard (ignore any spike after 120 s in `ENDING`) now applies to **all** device types, not only dishwashers.
-- **`_time_in_state` Reset After Config Reload**: Fixed a bug where reloading the integration configuration reset the in-state timer to zero. On the next power spike the guard checked `0 s >= 120 s` and failed, causing a false `ending → running` transition. The timer is now recomputed from the persisted `state_enter_time` on restore so the guard works correctly across reloads.
-- **Cycle Split "Unknown Error" (#167)**: Fixed a `TypeError: argument must be str` crash in `analyze_split_sync` caused by a dead-code `dt_util.parse_datetime(cycle["start_time"])` call that failed when `start_time` is a `datetime` object rather than an ISO string. The parsed value was never used; the line has been removed.
-- **Unknown Cycle Statistics Empty (#168)**: Fixed two root causes for statistics (graph and energy) being blank after assigning an unknown cycle to a new profile.
-  - `_rebuild_envelope_sync` now uses the shared `_decompress_power_data()` helper instead of raw iteration with `float()` conversion. The raw conversion silently discarded every data point for cycles stored in the legacy ISO-timestamp format, producing an empty envelope and a blank graph.
-  - `create_profile_standalone` now labels the reference cycle with the new profile name (when it is currently unlabeled) and immediately rebuilds the envelope, so statistics are populated as soon as the profile is created — without requiring a separate feedback-correction step.
-
-### 🧪 Tests
-- **HA Test Harness Adoption**: Replaced `MagicMock`-based hass objects with real `HomeAssistant` instances from `pytest_homeassistant_custom_component` across all new test modules. Only `ProfileStore` and `CycleDetector` are patched as true external I/O boundaries.
-- **Event Payload & Ghost Cycle Tests** (`test_manager_event_payload_and_ghosts.py`): Covers `EVENT_CYCLE_ENDED` payload field exclusion (`power_data`, `debug_data`, `power_trace`) and ghost-cycle energy threshold detection using real HA event bus listeners.
-- **Migration Harness Tests** (`test_migration_harness.py`): Validates `async_migrate_entry` field movement (data → options), idempotency on re-run, and no-op behaviour when already at the latest schema version.
-- **Pre-Completion Notification Tests** (`test_manager_precompletion_harness.py`): Pins the ambiguity gate — notifications are suppressed when `_last_match_ambiguous=True`, sent exactly once when unambiguous, and not re-sent on subsequent calls.
-- **Match Persistence / Transition Tests** (`test_manager_matching_harness.py`): Covers the full persistence-counter state machine inside `_async_do_perform_matching`: single-call accumulation, below-threshold staying at `detecting...`, threshold commit, profile-change counter reset, high-confidence override bypassing persistence, and ambiguous-result gating.
-- **Live Notification Harness** (`test_manager_live_notifications.py`): Added focused coverage for mobile-only routing, payload keys, overrun cap enforcement, away-mode deferred live coalescing, clear-on-end behavior, `STATE_ENDING` support, one-time pre-match waiting message, and post-match periodic update activation.
-- **Phase Catalog Atomic Operations** (`test_issue_166_phase_catalog.py`): Validates that phase renames and deletions behave atomically with unique-ID resolution, preventing unintended collisions or cascading updates across scopes.
-- **Profile Sensor Attributes** (`test_profile_sensor_attributes.py`): Covers the exposure of new sensor attributes including `consistency_min` on profile sensors.
-- **Diagnostic Entity Cleanup** (`test_diagnostic_entity_cleanup.py`): Validates automatic removal of orphaned diagnostic entities on startup, covering stale profile count sensors, legacy `wash_phase` entries, and debug entity visibility toggling based on `expose_debug_entities`.
-
-## 0.4.2.1 - 2026-02-13
+## [0.4.2.1] - 2026-02-13
 
 ### 🐛 Fixed
 - **Manual Recording Trimming**: Fixed a bug where manual recordings (e.g., Dishwashers in Eco mode) were internally shortened by incorrectly snapping the cycle duration to the last recorded power reading, losing trailing silence like drying phases.
@@ -111,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Data Optimization Logic**: Fixed maintenance logic that was incorrectly snapping durations to the last power reading during start-time shift corrections.
 - **Envelope Reconstruction**: Updated the statistical engine to correctly respect explicit cycle durations even when power sensor updates are sparse or missing at the end of a run.
 
-## 0.4.2 - 2026-02-11
+## [0.4.2] - 2026-02-11
 
 ### ✨ Features
 - **Advanced Parameter Auto-Suggestion**:
@@ -169,7 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Test Stability**:
   - Resolved several `TypeError` issues in the test suite and improved mocking reliability for sensors and configs.
 
-## 0.4.1 - 2026-02-03
+## [0.4.1] - 2026-02-03
 
 ### ✨ Features
 - **Persistent Terminal States**:
@@ -191,14 +94,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **State Logic**: Fixed assertions and logic validation for terminal states.
 - **Notification Tests**: Fixed test environment formatting for notification services.
 
-## 0.4.0 - 2026-01-12
+## [0.4.0] - 2026-01-12
 
 **Major Architectural Rewrite ("vNext")**
 
-This release marks a complete re-engineering of the WashData core, transitioning from simple heuristics to a rigorous signal processing pipeline and robust state machine. While the version number is minor, this is effectively a new engine under the hood.
+This release marks a complete re-engineering of the HA WashData core, transitioning from simple heuristics to a rigorous signal processing pipeline and robust state machine. While the version number is minor, this is effectively a new engine under the hood.
 
 🎉 **Milestones Reached!**
-- WashData is now available in the **HACS Default Repository**!
+- HA WashData is now available in the **HACS Default Repository**!
 - Passed **1,000 active installations** across the community.
 - Reached **500+ stars** on GitHub.
 
@@ -286,7 +189,7 @@ Thank you to everyone who has been patient during development and to all contrib
 - **Legacy Logic**: Removed "consecutive samples" based detection in favor of time-aware accumulators.
 - **Sliders**: Removed slider inputs in config flow in favor of precise text inputs.
 
-## 0.3.2 - 2026-01-02
+## [0.3.2] - 2026-01-02
 
 ### Added
 - **Manual Control**: "Force End Cycle" button to manually terminate stuck cycles (treats as "Completed" and saves data).
@@ -306,7 +209,7 @@ Thank you to everyone who has been patient during development and to all contrib
 - **Bug**: Ensure stats are immediately rebuilt after merging cycles.
 - **Translation Keys**: Corrected missing labels for "Smart Extension Threshold" and other advanced settings.
 
-## 0.3.1 - 2024-12-31
+## [0.3.1] - 2024-12-31
 
 ### Added
 - **Manual Duration for Profiles**: Users can now specify a manual "Baseline Duration" when creating profiles, useful for setting up profiles without historical data (e.g., "Eco Mode - 180 mins").
@@ -319,9 +222,9 @@ Thank you to everyone who has been patient during development and to all contrib
 - **Mocking Issues**: Improved test verification process for Config Flow.
 - **Manual Override**: Fixed issue where unselecting a manual profile while idle would not clear the program sensor.
 
-## 0.3.0 - 2024-12-31
+## [0.3.0] - 2024-12-31
 
-This release marks a significant milestone for WashData, introducing intelligent profile-based cycle detection, a dedicated dashboard card, a completely rewritten configuration experience, and major improvements to cycle detection and time estimation.
+This release marks a significant milestone for HA WashData, introducing intelligent profile-based cycle detection, a dedicated dashboard card, a completely rewritten configuration experience, and major improvements to cycle detection and time estimation.
 
 ### Added
 
@@ -468,7 +371,7 @@ None. This release is fully backward compatible with v0.2.x configurations.
 
 ---
 
-## 0.2.x - Previous Releases
+## [0.2.x] - Previous Releases
 
 See git history for details on previous releases.
 

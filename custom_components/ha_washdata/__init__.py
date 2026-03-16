@@ -1,11 +1,11 @@
-"""The WashData integration."""
+"""The HA WashData integration."""
 
 from __future__ import annotations
 
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
@@ -21,16 +21,6 @@ from .const import (
     CONF_DEVICE_TYPE,
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
-    CONF_NOTIFY_ACTIONS,
-    CONF_NOTIFY_PEOPLE,
-    CONF_NOTIFY_ONLY_WHEN_HOME,
-    CONF_NOTIFY_FIRE_EVENTS,
-    CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
-    CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
-    DEFAULT_NOTIFY_ONLY_WHEN_HOME,
-    DEFAULT_NOTIFY_FIRE_EVENTS,
-    DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
-    DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -77,7 +67,6 @@ from .const import (
     DEFAULT_START_DURATION_THRESHOLD,
     CONF_START_DURATION_THRESHOLD,
 )
-from .log_utils import DeviceLoggerAdapter
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -97,17 +86,10 @@ def _require_str(value: Any, name: str) -> str:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate config entry to the latest version while preserving settings."""
-    _log = DeviceLoggerAdapter(_LOGGER, entry.title)
     version = entry.version or 1
     minor_version = entry.minor_version or 1
 
-    if version > 3:
-        _log.error(
-            "Refusing to migrate unsupported future schema %s.%s", version, minor_version
-        )
-        return False
-
-    if version == 3 and minor_version >= 3:
+    if version == 3 and minor_version >= 2:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -167,18 +149,6 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
     )
 
-    # Normalize notification options (added in 0.3.2)
-    options.setdefault(CONF_NOTIFY_ACTIONS, [])
-    options.setdefault(CONF_NOTIFY_PEOPLE, [])
-    options.setdefault(CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME)
-    options.setdefault(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS)
-    options.setdefault(
-        CONF_NOTIFY_LIVE_INTERVAL_SECONDS, DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
-    )
-    options.setdefault(
-        CONF_NOTIFY_LIVE_OVERRUN_PERCENT, DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
-    )
-
     keys_to_remove = [
         CONF_MIN_POWER,
         CONF_OFF_DELAY,
@@ -194,20 +164,19 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data=data,
         options=options,
         version=3,
-        minor_version=3,
+        minor_version=2,
     )
-    _log.info(
-        "Migrated WashData entry from version %s.%s to 3.3", version, minor_version
+    _LOGGER.info(
+        "Migrated HA WashData entry from version %s.%s to 3.2", version, minor_version
     )
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up WashData from a config entry."""
-    _log = DeviceLoggerAdapter(_LOGGER, entry.title)
+    """Set up HA WashData from a config entry."""
     # Guard against duplicate setup during hot-reload
     if entry.entry_id in hass.data.get(DOMAIN, {}):
-        _log.warning(
+        _LOGGER.warning(
             "Entry %s already set up, skipping duplicate setup", entry.entry_id
         )
         return True
@@ -222,7 +191,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     old_switch_id = f"{entry.entry_id}_auto_maintenance"
     old_entity = ent_reg.async_get_entity_id("switch", DOMAIN, old_switch_id)
     if old_entity:
-        _log.info(
+        _LOGGER.info(
             "Removing deprecated auto_maintenance switch entity: %s", old_entity
         )
         ent_reg.async_remove(old_entity)
@@ -246,7 +215,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 await manager.profile_store.create_profile_standalone(
                     name, avg_duration=duration
                 )
-                manager._logger.info("Created initial profile '%s' from onboarding", name)
+                _LOGGER.info("Created initial profile '%s' from onboarding", name)
 
                 # Clean up config entry (remove initial_profile to avoid re-creation or cruft)
                 new_data = {
@@ -255,7 +224,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 hass.config_entries.async_update_entry(entry, data=new_data)
 
             except Exception as e:  # pylint: disable=broad-exception-caught
-                manager._logger.error("Failed to create initial profile: %s", e)
+                _LOGGER.error("Failed to create initial profile: %s", e)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -371,7 +340,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
             manager.notify_update()
 
-            manager._logger.info(
+            _LOGGER.info(
                 "Auto-label complete: %s labeled, %s skipped",
                 stats["labeled"],
                 stats["skipped"],
@@ -381,36 +350,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             DOMAIN, "auto_label_cycles", handle_auto_label_cycles
         )
 
-    # Register custom card via frontend.py — once per HA instance only.
-    if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(
-        "ha_washdata_card_deferred"
-    ) and not hass.data.get("ha_washdata_card_registering"):
+    # Register custom card via frontend.py (only once, not per entry)
+    if not hass.data.get(f"{DOMAIN}_card_registered"):
         # pylint: disable=import-outside-toplevel
-        from .frontend import (
-            CARD_REGISTERED,
-            CARD_DEFERRED,
-            WashDataCardRegistration,
-        )
+        from .frontend import WashDataCardRegistration
 
         card_reg = WashDataCardRegistration(hass)
-        hass.data["ha_washdata_card_registering"] = True
-        try:
-            register_result = await card_reg.async_register()
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            hass.data["ha_washdata_card_registering"] = False
-            _log.warning("Card registration failed, will retry on next setup: %s", err)
-        else:
-            hass.data["ha_washdata_card_registering"] = False
-            if register_result == CARD_REGISTERED:
-                hass.data["ha_washdata_card_deferred"] = False
-                hass.data["ha_washdata_card_registered"] = True
-            elif register_result == CARD_DEFERRED:
-                hass.data["ha_washdata_card_deferred"] = True
-                hass.data["ha_washdata_card_registered"] = False
-            else:
-                hass.data["ha_washdata_card_deferred"] = False
-                hass.data["ha_washdata_card_registered"] = False
-                _log.warning("Card registration failed and was not deferred")
+        await card_reg.async_register()
+        hass.data[f"{DOMAIN}_card_registered"] = True
 
     # Register feedback service
     if not hass.services.has_service(
@@ -443,23 +390,46 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             corrected_profile = call.data.get("corrected_profile")
             corrected_duration = call.data.get("corrected_duration")  # in seconds
             notes = call.data.get("notes", "")
-            dismiss = call.data.get("dismiss", False)
 
             if entry_id not in hass.data[DOMAIN]:
                 raise ValueError("Integration not loaded for this entry")
 
             manager = hass.data[DOMAIN][entry_id]
-            success = await manager.learning_manager.async_submit_cycle_feedback(
+            success = manager.learning_manager.submit_cycle_feedback(
                 cycle_id=cycle_id,
                 user_confirmed=user_confirmed,
                 corrected_profile=corrected_profile,
                 corrected_duration=corrected_duration,
                 notes=notes,
-                dismiss=dismiss,
             )
-            manager.notify_update()
 
             if success:
+                # Save updated profile data
+                await manager.profile_store.async_save()
+
+                # If feedback changed labeling, rebuild envelope so future matching benefits.
+                try:
+                    if corrected_profile:
+                        manager.profile_store.rebuild_envelope(corrected_profile)
+                    else:
+                        # Rebuild for the detected profile if present on the cycle.
+                        cycles = manager.profile_store.get_past_cycles()
+                        cycle = next(
+                            (
+                                cd
+                                for c in cycles
+                                if isinstance(c, dict)
+                                for cd in (cast(dict[str, Any], c),)
+                                if cd.get("id") == cycle_id
+                            ),
+                            None,
+                        )
+                        profile_name = cycle.get("profile_name") if cycle else None
+                        if isinstance(profile_name, str) and profile_name:
+                            manager.profile_store.rebuild_envelope(profile_name)
+                except Exception:  # pylint: disable=broad-exception-caught
+                    _LOGGER.exception("Failed to rebuild envelope after feedback")
+
                 # Best-effort dismiss the feedback notification if it exists.
                 try:
                     notification_id = f"ha_washdata_feedback_{entry_id}_{cycle_id}"
@@ -467,9 +437,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 except Exception:  # pylint: disable=broad-exception-caught
                     pass
 
-                manager._logger.info("Cycle feedback submitted for %s", cycle_id)
+                _LOGGER.info("Cycle feedback submitted for %s", cycle_id)
             else:
-                manager._logger.warning("Failed to submit feedback for cycle %s", cycle_id)
+                _LOGGER.warning("Failed to submit feedback for cycle %s", cycle_id)
 
         hass.services.async_register(
             DOMAIN,
@@ -513,7 +483,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
             # Write export
             target.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-            manager._logger.info("Exported ha_washdata entry %s to %s", entry_id, target)
+            _LOGGER.info("Exported ha_washdata entry %s to %s", entry_id, target)
 
         hass.services.async_register(DOMAIN, "export_config", handle_export_config)
 
@@ -575,9 +545,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     data=new_data,
                     options=new_options,
                 )
-                manager._logger.info("Applied imported settings to config entry %s", entry_id)
+                _LOGGER.info("Applied imported settings to config entry %s", entry_id)
 
-            manager._logger.info("Imported ha_washdata entry %s from %s", entry_id, source)
+            _LOGGER.info("Imported ha_washdata entry %s from %s", entry_id, source)
 
         hass.services.async_register(DOMAIN, "import_config", handle_import_config)
 

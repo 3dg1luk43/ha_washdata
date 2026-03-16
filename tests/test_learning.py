@@ -18,7 +18,6 @@ class MockProfileStore:
         self.past_cycles = []
         self.profiles = {}
         self.suggestions = {}
-        self.rebuilt_profiles: list[str] = []
 
     def get_feedback_history(self):
         return self.feedback
@@ -43,9 +42,6 @@ class MockProfileStore:
 
     async def async_save(self):
         pass
-
-    async def async_rebuild_envelope(self, profile_name: str) -> None:
-        self.rebuilt_profiles.append(profile_name)
 
 @pytest.fixture
 def mock_entry():
@@ -185,7 +181,6 @@ async def test_submit_feedback_lifecycle(learning_manager):
     assert cycle_id in learning_manager.profile_store.feedback
     assert learning_manager.profile_store.feedback[cycle_id]["corrected_profile"] == "Actual"
     assert cycle_data["profile_name"] == "Actual"
-    assert "Actual" in learning_manager.profile_store.rebuilt_profiles
 
 def test_suggestion_engine_run_simulation(mock_hass):
     from custom_components.ha_washdata.suggestion_engine import SuggestionEngine
