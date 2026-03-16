@@ -1732,6 +1732,8 @@ class ProfileStore:
                     repaired_rows.append([round(float(pt[0]) + start_ts, 1), round(float(pt[1]), 1)])
                 except (TypeError, ValueError):
                     continue
+            if not repaired_rows:
+                continue  # all rows malformed — leave original trace untouched
             cycle["power_data"] = repaired_rows
             repaired += 1
             repaired_data = cycle["power_data"]
@@ -1741,7 +1743,14 @@ class ProfileStore:
                 r_pos = r_intervals[r_intervals > 0]
                 r_si = float(np.median(r_pos)) if len(r_pos) > 0 else 1.0
                 cycle["sampling_interval"] = round(r_si, 1)
-                cycle["duration"] = round(r_offsets[-1] - r_offsets[0], 1)
+                # duration = last sample offset from cycle start (not span between
+                # first and last sample, which would be wrong when leading zeros
+                # were trimmed before storage)
+                r_duration = round(r_offsets[-1], 1)
+                cycle["duration"] = r_duration
+                cycle["end_time"] = dt_util.utc_from_timestamp(
+                    start_ts + r_duration
+                ).isoformat()
                 r_ts = np.array(r_offsets, dtype=float)
                 r_p = np.array([pt[1] for pt in repaired_data], dtype=float)
                 r_sig = compute_signature(r_ts, r_p)
@@ -1749,6 +1758,7 @@ class ProfileStore:
             elif len(repaired_data) == 1:
                 cycle["sampling_interval"] = 1.0
                 cycle["duration"] = 0.0
+                cycle["end_time"] = dt_util.utc_from_timestamp(start_ts).isoformat()
                 cycle["signature"] = None
 
         if repaired:

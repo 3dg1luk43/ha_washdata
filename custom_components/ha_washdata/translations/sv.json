@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Trim misslyckades – cykeln hittades inte, ingen strömdata eller det resulterande fönstret är tomt."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s måste vara större än trim_start_s."
     }
   }
 }

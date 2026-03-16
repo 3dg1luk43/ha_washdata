@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "การตัดขอบล้มเหลว — ไม่พบรอบการทำงาน ไม่มีข้อมูลพลังงาน หรือหน้าต่างผลลัพธ์ว่างเปล่า"
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s ต้องมากกว่า trim_start_s"
     }
   }
 }

@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "A vágás sikertelen – a ciklus nem található, nincsenek tápellátási adatok, vagy a kapott ablak üres."
+    },
+    "trim_invalid_range": {
+      "message": "A trim_end_s nagyobbnak kell lennie, mint a trim_start_s."
     }
   }
 }

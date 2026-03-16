@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "החיתוך נכשל - המחזור לא נמצא, אין נתוני צריכת חשמל או שהחלון שנוצר ריק."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s חייב להיות גדול יותר trim_start_s."
     }
   }
 }

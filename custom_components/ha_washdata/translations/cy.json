@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Methodd y trimio - ni chanfuwyd y cylch, dim data pŵer, neu mae'r ffenestr ganlyniadol yn wag."
+    },
+    "trim_invalid_range": {
+      "message": "rhaid i trim_end_s fod yn fwy na trim_start_s."
     }
   }
 }

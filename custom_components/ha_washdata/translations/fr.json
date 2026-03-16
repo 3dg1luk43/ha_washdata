@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Échec du trim : cycle introuvable, aucune donnée d'alimentation ou la fenêtre résultante est vide."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s doit être supérieur à trim_start_s."
     }
   }
 }

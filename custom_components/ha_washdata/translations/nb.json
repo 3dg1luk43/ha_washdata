@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Trim mislyktes – syklusen ble ikke funnet, ingen strømdata eller det resulterende vinduet er tomt."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s må være større enn trim_start_s."
     }
   }
 }

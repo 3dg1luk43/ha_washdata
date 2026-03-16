@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Cắt không thành công — không tìm thấy chu kỳ, không có dữ liệu nguồn hoặc cửa sổ kết quả trống."
+    },
+    "trim_invalid_range": {
+      "message": "TRIM_end_s phải lớn hơn TRIM_start_s."
     }
   }
 }

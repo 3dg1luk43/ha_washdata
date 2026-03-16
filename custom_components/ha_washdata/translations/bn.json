@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "ট্রিম ব্যর্থ হয়েছে — চক্র পাওয়া যায়নি, কোনো পাওয়ার ডেটা নেই, বা ফলস্বরূপ উইন্ডোটি খালি।"
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s অবশ্যই trim_start_s থেকে বড় হতে হবে।"
     }
   }
 }

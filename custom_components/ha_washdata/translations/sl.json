@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Obrezovanje ni uspelo — cikel ni najden, ni podatkov o moči ali pa je okno, ki je nastalo, prazno."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s mora biti večje od trim_start_s."
     }
   }
 }
