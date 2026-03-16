@@ -1241,6 +1241,8 @@ class ProfileStore:
                     pass
             if start_time_iso is None and _value_to_timestamp(start_time_raw) is None:
                 self._logger.debug("add_cycle: invalid start_time %r, skipping power_data normalization", start_time_raw)
+                if hasattr(self, "_save_debug_traces") and not self._save_debug_traces:
+                    cycle_data.pop("debug_data", None)
                 self._data["past_cycles"].append(cycle_data)
                 return
 
@@ -1727,6 +1729,22 @@ class ProfileStore:
                 if isinstance(pt, (list, tuple)) and len(pt) >= 2
             ]
             repaired += 1
+            repaired_data = cycle["power_data"]
+            if len(repaired_data) > 1:
+                r_offsets = [pt[0] for pt in repaired_data]
+                r_intervals = np.diff(r_offsets)
+                r_pos = r_intervals[r_intervals > 0]
+                r_si = float(np.median(r_pos)) if len(r_pos) > 0 else 1.0
+                cycle["sampling_interval"] = round(r_si, 1)
+                cycle["duration"] = round(r_offsets[-1] - r_offsets[0], 1)
+                r_ts = np.array(r_offsets, dtype=float)
+                r_p = np.array([pt[1] for pt in repaired_data], dtype=float)
+                r_sig = compute_signature(r_ts, r_p)
+                cycle["signature"] = dataclasses.asdict(r_sig)
+            elif len(repaired_data) == 1:
+                cycle["sampling_interval"] = 1.0
+                cycle["duration"] = 0.0
+                cycle["signature"] = None
 
         if repaired:
             self._logger.warning(
@@ -3514,6 +3532,14 @@ class ProfileStore:
             [round(offset - base, 2), power] for offset, power in kept
         ]
 
+        # Advance start_time when trimming from the front
+        if base > 0:
+            start_ts = _value_to_timestamp(cycle.get("start_time"))
+            if start_ts is not None:
+                cycle["start_time"] = dt_util.utc_from_timestamp(
+                    start_ts + base
+                ).isoformat()
+
         # Recompute sampling interval
         if len(renorm) > 1:
             offsets_arr = np.array([r[0] for r in renorm], dtype=float)
@@ -3529,10 +3555,20 @@ class ProfileStore:
         if len(ts_arr) > 1:
             sig = compute_signature(ts_arr, p_arr)
             cycle["signature"] = dataclasses.asdict(sig)
+        else:
+            cycle["signature"] = None
 
+        new_duration = round(renorm[-1][0], 1) if renorm else 0.0
         cycle["power_data"] = renorm
         cycle["sampling_interval"] = round(sampling_interval, 1)
-        cycle["duration"] = round(renorm[-1][0], 1)
+        cycle["duration"] = new_duration
+
+        # Keep end_time consistent with the updated start_time and duration
+        new_start_ts = _value_to_timestamp(cycle.get("start_time"))
+        if new_start_ts is not None:
+            cycle["end_time"] = dt_util.utc_from_timestamp(
+                new_start_ts + new_duration
+            ).isoformat()
 
         # Rebuild envelope for the associated profile
         profile_name = cycle.get("profile_name")

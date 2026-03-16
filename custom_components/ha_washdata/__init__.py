@@ -11,6 +11,7 @@ from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import device_registry as dr
 
 from .const import (
@@ -392,13 +393,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)
             if not device:
-                raise ValueError("Device not found")
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="device_not_found",
+                )
 
             entry_id = next(iter(device.config_entries), None)
             if not entry_id:
-                raise ValueError("No config entry found for device")
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="no_config_entry",
+                )
             if entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded for this device")
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="integration_not_loaded",
+                )
 
             manager = hass.data[DOMAIN][entry_id]
             store = manager.profile_store
@@ -410,14 +420,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             else:
                 p_data = store.get_cycle_power_data(cycle_id)
                 if not p_data:
-                    raise ValueError(f"Cycle '{cycle_id}' not found or has no power data")
-                trim_end_s = p_data[-1][0]
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="cycle_not_found_or_no_power",
+                    )
+                trim_end_s = max(point[0] for point in p_data)
 
             ok = await store.trim_cycle_power_data(cycle_id, trim_start_s, trim_end_s)
             if not ok:
-                raise ValueError(
-                    f"Trim failed for cycle '{cycle_id}' — cycle not found, "
-                    "no power data, or resulting window is empty"
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="trim_failed_empty_window",
                 )
             manager.notify_update()
 

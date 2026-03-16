@@ -4400,6 +4400,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         trim_end_s: float,
         title: str = "Cycle Trim Preview",
         label_min: str = "min",
+        no_data_text: str = "No power data available for this cycle.",
     ) -> str:
         """Render the cycle power curve with trim-region overlays as a base64 SVG."""
 
@@ -4427,8 +4428,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "<rect x='0' y='0' width='100%' height='100%' fill='#1c1c1c'/>"
                 f"<text x='22' y='42' font-family='sans-serif' font-size='24'"
                 f" fill='#f3f4f6' font-weight='bold'>{esc(title)}</text>"
-                "<text x='22' y='90' font-family='sans-serif' font-size='18' fill='#94a3b8'>"
-                "No power data available for this cycle."
+                f"<text x='22' y='90' font-family='sans-serif' font-size='18' fill='#94a3b8'>"
+                f"{esc(no_data_text)}"
                 "</text></svg>"
             )
             encoded = base64.b64encode(empty_svg.encode("utf-8")).decode("ascii")
@@ -4629,6 +4630,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self._trim_end_s,
             title=await self._options_text("trim_cycle_preview_title", "Cycle Trim Preview"),
             label_min=label_min,
+            no_data_text=await self._options_text(
+                "trim_cycle_preview_no_data", "No power data available for this cycle."
+            ),
         )
 
         start_min = int(self._trim_start_s / 60)
@@ -4638,9 +4642,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         kept_s = max(0.0, self._trim_end_s - self._trim_start_s)
         kept_min = int(kept_s / 60)
         kept_sec = int(kept_s % 60)
+        kept_suffix = await self._options_text("trim_cycle_preview_kept_suffix", "kept")
         summary = (
             f"{start_min}:{start_sec:02d} — {end_min}:{end_sec:02d}"
-            f"  ({kept_min}:{kept_sec:02d} kept)"
+            f"  ({kept_min}:{kept_sec:02d} {kept_suffix})"
         )
 
         return self.async_show_form(

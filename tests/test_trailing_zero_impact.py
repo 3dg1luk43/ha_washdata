@@ -136,6 +136,24 @@ def test_trailing_zero_impact():
         tail_s = duration_before - duration_after
         delta_e = energy_before - energy_after
 
+        # Invariants that must hold for every cycle
+        assert energy_after <= energy_before + 1e-9, (
+            f"energy increased after trim in {c['file']}[{c['index']}]"
+        )
+        assert duration_after <= duration_before + 1e-9, (
+            f"duration increased after trim in {c['file']}[{c['index']}]"
+        )
+        assert n_trailing == len(pd) - len(trimmed), (
+            f"trailing count mismatch in {c['file']}[{c['index']}]"
+        )
+        if n_trailing > 0:
+            assert tail_s >= 0, (
+                f"negative tail_s in {c['file']}[{c['index']}]"
+            )
+            assert delta_e >= 0, (
+                f"negative energy delta in {c['file']}[{c['index']}]"
+            )
+
         agg.total += 1
         st = agg.by_status.setdefault(status, Stats())
         st.total += 1
