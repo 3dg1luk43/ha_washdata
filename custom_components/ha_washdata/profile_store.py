@@ -3822,7 +3822,7 @@ class ProfileStore:
         width: int = 600,
         height: int = 300,
         title: str = "Merge Preview",
-        no_data_label: str = "No power data available for preview",
+        no_data_label: str | None = None,
     ) -> str:
         """
         Generate an SVG preview that overlays power traces from the specified past cycles to illustrate the result of merging them.
@@ -3894,7 +3894,7 @@ class ProfileStore:
                 f'<text x="{width // 2}" y="{height // 2 - 10}" fill="#aaa" font-size="16" '
                 f'text-anchor="middle">{title}</text>'
                 f'<text x="{width // 2}" y="{height // 2 + 14}" fill="#666" font-size="13" '
-                f'text-anchor="middle">{no_data_label}</text>'
+                f'text-anchor="middle">{no_data_label or ""}</text>'
                 f'</svg>'
             )
 
