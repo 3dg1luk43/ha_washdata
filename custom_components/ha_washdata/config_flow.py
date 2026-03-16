@@ -1708,7 +1708,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         options=[
                             "auto_label_cycles",
                             "select_cycle_to_label",
-                            "select_cycle_to_label_multi",
                             "select_cycle_to_delete",
                             "interactive_editor",
                             "trim_cycle",

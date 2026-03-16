@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Etiqueta automàtica de cicles antics",
         "select_cycle_to_label": "Cicle específic de l'etiqueta",
-        "select_cycle_to_label_multi": "Etiqueta múltiples cicles",
         "select_cycle_to_delete": "Suprimeix el cicle",
         "interactive_editor": "Combinar/dividir Editor interactiu",
         "trim_cycle": "Dades del cicle de retallada"

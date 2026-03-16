@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Alte Zyklen automatisch kennzeichnen",
         "select_cycle_to_label": "Beschriften Sie den spezifischen Zyklus",
-        "select_cycle_to_label_multi": "Beschriften Sie mehrere Zyklen",
         "select_cycle_to_delete": "Zyklus löschen",
         "interactive_editor": "Interaktiver Editor zum Zusammenführen/Teilen",
         "trim_cycle": "Trimmzyklusdaten"

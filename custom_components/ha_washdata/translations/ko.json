@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "기존 사이클에 자동 라벨 지정",
         "select_cycle_to_label": "라벨별 주기",
-        "select_cycle_to_label_multi": "여러 주기에 라벨 지정",
         "select_cycle_to_delete": "주기 삭제",
         "interactive_editor": "병합/분할 대화형 편집기",
         "trim_cycle": "트림 사이클 데이터"

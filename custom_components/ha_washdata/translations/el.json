@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Αυτόματη επισήμανση παλιών κύκλων",
         "select_cycle_to_label": "Ειδικός κύκλος ετικέτας",
-        "select_cycle_to_label_multi": "Επισημάνετε πολλαπλούς κύκλους",
         "select_cycle_to_delete": "Διαγραφή κύκλου",
         "interactive_editor": "Συγχώνευση/Διάσπαση διαδραστικής επεξεργασίας",
         "trim_cycle": "Δεδομένα κύκλου περικοπής"

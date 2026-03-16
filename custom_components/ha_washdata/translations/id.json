@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Beri Label Otomatis pada Siklus Lama",
         "select_cycle_to_label": "Labeli Siklus Tertentu",
-        "select_cycle_to_label_multi": "Labeli Beberapa Siklus",
         "select_cycle_to_delete": "Hapus Siklus",
         "interactive_editor": "Gabungkan/Pisahkan Editor Interaktif",
         "trim_cycle": "Potong Data Siklus"

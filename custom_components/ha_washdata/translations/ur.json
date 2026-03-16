@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "پرانے سائیکلوں کو آٹو لیبل کریں۔",
         "select_cycle_to_label": "لیبل مخصوص سائیکل",
-        "select_cycle_to_label_multi": "ایک سے زیادہ سائیکلوں کو لیبل کریں۔",
         "select_cycle_to_delete": "سائیکل کو حذف کریں۔",
         "interactive_editor": "انٹرایکٹو ایڈیٹر کو ضم/تقسیم کریں۔",
         "trim_cycle": "ٹرم سائیکل ڈیٹا"

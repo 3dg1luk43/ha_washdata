@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Automatyczne etykietowanie starych cykli",
         "select_cycle_to_label": "Oznacz określony cykl",
-        "select_cycle_to_label_multi": "Oznacz wiele cykli",
         "select_cycle_to_delete": "Usuń cykl",
         "interactive_editor": "Interaktywny edytor scalania/dzielenia",
         "trim_cycle": "Dane cyklu przycinania"

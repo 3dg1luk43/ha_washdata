@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Auto-etiketatu Ziklo Zaharrak",
         "select_cycle_to_label": "Etiketa Ziklo Espezifikoa",
-        "select_cycle_to_label_multi": "Etiketatu Ziklo Anitz",
         "select_cycle_to_delete": "Ezabatu Zikloa",
         "interactive_editor": "Batu/Zatitu Editore Interaktiboa",
         "trim_cycle": "Moztu Zikloaren Datuak"

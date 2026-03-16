@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Oude cycli automatisch labelen",
         "select_cycle_to_label": "Label specifieke cyclus",
-        "select_cycle_to_label_multi": "Label meerdere cycli",
         "select_cycle_to_delete": "Cyclus verwijderen",
         "interactive_editor": "Interactieve editor samenvoegen/splitsen",
         "trim_cycle": "Trimcyclusgegevens"

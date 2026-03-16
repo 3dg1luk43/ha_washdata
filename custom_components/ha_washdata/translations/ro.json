@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Etichetare automată a ciclurilor vechi",
         "select_cycle_to_label": "Ciclul specific al etichetei",
-        "select_cycle_to_label_multi": "Etichetați mai multe cicluri",
         "select_cycle_to_delete": "Șterge ciclul",
         "interactive_editor": "Editor interactiv Merge/Split",
         "trim_cycle": "Date ciclului de tăiere"

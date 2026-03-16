@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Etiquetar automáticamente ciclos antiguos",
         "select_cycle_to_label": "Ciclo específico de etiqueta",
-        "select_cycle_to_label_multi": "Etiquetar múltiples ciclos",
         "select_cycle_to_delete": "Eliminar ciclo",
         "interactive_editor": "Fusionar/Dividir Editor Interactivo",
         "trim_cycle": "Datos del ciclo de recorte"

@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Merkitse vanhat syklit automaattisesti",
         "select_cycle_to_label": "Tarrakohtainen sykli",
-        "select_cycle_to_label_multi": "Merkitse useita syklejä",
         "select_cycle_to_delete": "Poista sykli",
         "interactive_editor": "Yhdistä/jakaa interaktiivinen editori",
         "trim_cycle": "Trimmausjakson tiedot"

@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "অটো-লেবেল পুরানো চক্র",
         "select_cycle_to_label": "লেবেল নির্দিষ্ট চক্র",
-        "select_cycle_to_label_multi": "একাধিক চক্র লেবেল করুন",
         "select_cycle_to_delete": "সাইকেল মুছুন",
         "interactive_editor": "ইন্টারেক্টিভ এডিটর মার্জ/স্প্লিট করুন",
         "trim_cycle": "ট্রিম সাইকেল ডেটা"

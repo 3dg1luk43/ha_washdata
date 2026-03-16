@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Uath-Lipéadáil Sean Timthriallta",
         "select_cycle_to_label": "Lipéad Timthriall Sonrach",
-        "select_cycle_to_label_multi": "Lipéadaigh Timthriallta Il",
         "select_cycle_to_delete": "Scrios an tSraith",
         "interactive_editor": "Cumaisc / Scoilt Eagarthóir Idirghníomhach",
         "trim_cycle": "Sonraí Rothaíochta Baile Átha Troim"

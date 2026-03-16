@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Awto-Labelu Hen Feiciau",
         "select_cycle_to_label": "Label Cylch Penodol",
-        "select_cycle_to_label_multi": "Labelu Cylchoedd Lluosog",
         "select_cycle_to_delete": "Dileu Beic",
         "interactive_editor": "Cyfuno/Hollti Golygydd Rhyngweithiol",
         "trim_cycle": "Trimio Data Beicio"

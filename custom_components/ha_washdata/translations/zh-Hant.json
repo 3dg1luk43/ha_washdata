@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "自動標記舊自行車",
         "select_cycle_to_label": "標籤特定週期",
-        "select_cycle_to_label_multi": "標記多個週期",
         "select_cycle_to_delete": "刪除循環",
         "interactive_editor": "合併/拆分互動式編輯器",
         "trim_cycle": "修剪週期數據"

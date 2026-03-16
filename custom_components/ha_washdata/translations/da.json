@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Auto-mærke gamle cyklusser",
         "select_cycle_to_label": "Etiketspecifik cyklus",
-        "select_cycle_to_label_multi": "Mærk flere cyklusser",
         "select_cycle_to_delete": "Slet cyklus",
         "interactive_editor": "Interaktiv flet/opdel-editor",
         "trim_cycle": "Trim cyklusdata"

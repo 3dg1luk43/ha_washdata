@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Auto-Label Old Cycles",
         "select_cycle_to_label": "Label Specific Cycle",
-        "select_cycle_to_label_multi": "Label Multiple Cycles",
         "select_cycle_to_delete": "Delete Cycle",
         "interactive_editor": "Merge/Split Interactive Editor",
         "trim_cycle": "Trim Cycle Data"

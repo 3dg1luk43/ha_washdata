@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Automatsko označavanje starih ciklusa",
         "select_cycle_to_label": "Specifični ciklus oznake",
-        "select_cycle_to_label_multi": "Označite više ciklusa",
         "select_cycle_to_delete": "Izbriši ciklus",
         "interactive_editor": "Interaktivni uređivač spajanja/razdvajanja",
         "trim_cycle": "Podaci o ciklusu trimanja"

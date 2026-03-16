@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Automatické označení starých cyklů",
         "select_cycle_to_label": "Specifický cyklus štítku",
-        "select_cycle_to_label_multi": "Označit více cyklů",
         "select_cycle_to_delete": "Smazat cyklus",
         "interactive_editor": "Interaktivní editor sloučení/rozdělení",
         "trim_cycle": "Data cyklu trimování"

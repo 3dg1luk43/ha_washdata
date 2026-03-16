@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "പഴയ സൈക്കിളുകൾ സ്വയമേവ ലേബൽ ചെയ്യുക",
         "select_cycle_to_label": "നിർദ്ദിഷ്ട സൈക്കിൾ ലേബൽ ചെയ്യുക",
-        "select_cycle_to_label_multi": "ഒന്നിലധികം സൈക്കിളുകൾ ലേബൽ ചെയ്യുക",
         "select_cycle_to_delete": "സൈക്കിൾ ഇല്ലാതാക്കുക",
         "interactive_editor": "ഇൻ്ററാക്ടീവ് എഡിറ്റർ ലയിപ്പിക്കുക/വിഭജിക്കുക",
         "trim_cycle": "സൈക്കിൾ ഡാറ്റ ട്രിം ചെയ്യുക"

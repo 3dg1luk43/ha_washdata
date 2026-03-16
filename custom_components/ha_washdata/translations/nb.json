@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Auto-merk gamle sykluser",
         "select_cycle_to_label": "Etikettspesifikk syklus",
-        "select_cycle_to_label_multi": "Merk flere sykluser",
         "select_cycle_to_delete": "Slett syklus",
         "interactive_editor": "Slå sammen/splitt interaktiv editor",
         "trim_cycle": "Trim syklusdata"

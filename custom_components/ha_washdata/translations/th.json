@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "ติดป้ายกำกับรอบเก่าโดยอัตโนมัติ",
         "select_cycle_to_label": "วงจรเฉพาะของฉลาก",
-        "select_cycle_to_label_multi": "ติดป้ายกำกับหลายรอบ",
         "select_cycle_to_delete": "ลบไซเคิล",
         "interactive_editor": "ผสาน / แยกตัวแก้ไขเชิงโต้ตอบ",
         "trim_cycle": "ข้อมูลรอบการตัดแต่ง"

@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "பழைய சைக்கிள்களைத் தானாக லேபிளிடுங்கள்",
         "select_cycle_to_label": "லேபிள் குறிப்பிட்ட சுழற்சி",
-        "select_cycle_to_label_multi": "பல சுழற்சிகளை லேபிளிடு",
         "select_cycle_to_delete": "சுழற்சியை நீக்கு",
         "interactive_editor": "இன்டராக்டிவ் எடிட்டரை ஒன்றிணைத்தல்/பிரித்தல்",
         "trim_cycle": "சுழற்சி தரவை ஒழுங்கமைக்கவும்"
