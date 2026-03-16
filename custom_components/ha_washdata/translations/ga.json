@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Theip ar an mBaile Átha Troim - níor aimsíodh an timthriall, níl aon sonraí cumhachta ann, nó tá an fhuinneog mar thoradh folamh."
+    },
+    "trim_invalid_range": {
+      "message": "caithfidh trim_end_s a bheith níos mó ná trim_start_s."
     }
   }
 }

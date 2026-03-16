@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "트림 실패 — 사이클을 찾을 수 없거나 전력 데이터가 없거나 결과 창이 비어 있습니다."
+    },
+    "trim_invalid_range": {
+      "message": "Trim_end_s는 Trim_start_s보다 커야 합니다."
     }
   }
 }

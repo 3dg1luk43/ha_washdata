@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Falha no ajuste — ciclo não encontrado, sem dados de energia ou a janela resultante está vazia."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s deve ser maior que trim_start_s."
     }
   }
 }

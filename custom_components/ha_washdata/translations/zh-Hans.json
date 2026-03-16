@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "修剪失败 — 未找到周期、无功率数据或生成的窗口为空。"
+    },
+    "trim_invalid_range": {
+      "message": "TRIM_END_S必须大于TRIM_START_S。"
     }
   }
 }

@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Trimmen fehlgeschlagen – Zyklus nicht gefunden, keine Leistungsdaten oder resultierendes Fenster ist leer."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s muss größer als trim_start_s sein."
     }
   }
 }

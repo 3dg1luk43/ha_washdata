@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Shkurtimi dështoi - cikli nuk u gjet, nuk ka të dhëna të energjisë ose dritarja që rezulton është bosh."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s duhet të jetë më i madh se trim_start_s."
     }
   }
 }

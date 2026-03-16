@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "トリムに失敗しました — サイクルが見つからないか、パワーデータがないか、結果のウィンドウが空です。"
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s は、trim_start_s より大きくなければなりません。"
     }
   }
 }

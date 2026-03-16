@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "Pemangkasan gagal — siklus tidak ditemukan, tidak ada data daya, atau jendela yang dihasilkan kosong."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s harus lebih besar dari trim_start_s."
     }
   }
 }

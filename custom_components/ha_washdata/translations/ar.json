@@ -1076,6 +1076,9 @@
     },
     "trim_failed_empty_window": {
       "message": "فشل القطع — لم يتم العثور على الدورة، أو لا توجد بيانات طاقة، أو أن النافذة الناتجة فارغة."
+    },
+    "trim_invalid_range": {
+      "message": "يجب أن تكون Trim_end_s أكبر من Trim_start_s."
     }
   }
 }
