@@ -5,7 +5,7 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.3] - 2026-03-10
+## 0.4.3 - 2026-03-10
 
 ### ✨ Features
 - **New Device Types**: Added full support for **Air Fryer** (#133) and **Heat Pump** (#134), with optimized defaults and custom icons (`mdi:pot-steam`, `mdi:heat-pump`).
@@ -96,7 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Profile Sensor Attributes** (`test_profile_sensor_attributes.py`): Covers the exposure of new sensor attributes including `consistency_min` on profile sensors.
 - **Diagnostic Entity Cleanup** (`test_diagnostic_entity_cleanup.py`): Validates automatic removal of orphaned diagnostic entities on startup, covering stale profile count sensors, legacy `wash_phase` entries, and debug entity visibility toggling based on `expose_debug_entities`.
 
-## [0.4.2.1] - 2026-02-13
+## 0.4.2.1 - 2026-02-13
 
 ### 🐛 Fixed
 - **Manual Recording Trimming**: Fixed a bug where manual recordings (e.g., Dishwashers in Eco mode) were internally shortened by incorrectly snapping the cycle duration to the last recorded power reading, losing trailing silence like drying phases.
@@ -105,7 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Data Optimization Logic**: Fixed maintenance logic that was incorrectly snapping durations to the last power reading during start-time shift corrections.
 - **Envelope Reconstruction**: Updated the statistical engine to correctly respect explicit cycle durations even when power sensor updates are sparse or missing at the end of a run.
 
-## [0.4.2] - 2026-02-11
+## 0.4.2 - 2026-02-11
 
 ### ✨ Features
 - **Advanced Parameter Auto-Suggestion**:
@@ -163,7 +163,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Test Stability**:
   - Resolved several `TypeError` issues in the test suite and improved mocking reliability for sensors and configs.
 
-## [0.4.1] - 2026-02-03
+## 0.4.1 - 2026-02-03
 
 ### ✨ Features
 - **Persistent Terminal States**:
@@ -185,7 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **State Logic**: Fixed assertions and logic validation for terminal states.
 - **Notification Tests**: Fixed test environment formatting for notification services.
 
-## [0.4.0] - 2026-01-12
+## 0.4.0 - 2026-01-12
 
 **Major Architectural Rewrite ("vNext")**
 
@@ -280,7 +280,7 @@ Thank you to everyone who has been patient during development and to all contrib
 - **Legacy Logic**: Removed "consecutive samples" based detection in favor of time-aware accumulators.
 - **Sliders**: Removed slider inputs in config flow in favor of precise text inputs.
 
-## [0.3.2] - 2026-01-02
+## 0.3.2 - 2026-01-02
 
 ### Added
 - **Manual Control**: "Force End Cycle" button to manually terminate stuck cycles (treats as "Completed" and saves data).
@@ -300,7 +300,7 @@ Thank you to everyone who has been patient during development and to all contrib
 - **Bug**: Ensure stats are immediately rebuilt after merging cycles.
 - **Translation Keys**: Corrected missing labels for "Smart Extension Threshold" and other advanced settings.
 
-## [0.3.1] - 2024-12-31
+## 0.3.1 - 2024-12-31
 
 ### Added
 - **Manual Duration for Profiles**: Users can now specify a manual "Baseline Duration" when creating profiles, useful for setting up profiles without historical data (e.g., "Eco Mode - 180 mins").
@@ -313,7 +313,7 @@ Thank you to everyone who has been patient during development and to all contrib
 - **Mocking Issues**: Improved test verification process for Config Flow.
 - **Manual Override**: Fixed issue where unselecting a manual profile while idle would not clear the program sensor.
 
-## [0.3.0] - 2024-12-31
+## 0.3.0 - 2024-12-31
 
 This release marks a significant milestone for WashData, introducing intelligent profile-based cycle detection, a dedicated dashboard card, a completely rewritten configuration experience, and major improvements to cycle detection and time estimation.
 
@@ -462,7 +462,7 @@ None. This release is fully backward compatible with v0.2.x configurations.
 
 ---
 
-## [0.2.x] - Previous Releases
+## 0.2.x - Previous Releases
 
 See git history for details on previous releases.
 

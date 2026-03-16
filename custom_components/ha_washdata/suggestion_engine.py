@@ -166,11 +166,7 @@ class SuggestionEngine:
         )
 
         # Normalise power_data to [[offset_sec, power], ...] regardless of source format.
-        try:
-            readings_list = power_data_to_offsets(power_data, start_time_iso)
-        except Exception as e:
-            _LOGGER.error("Failed to parse power data for simulation: %s", e)
-            return {}
+        readings_list = power_data_to_offsets(power_data, start_time_iso)
 
         readings: list[tuple[float, float]] = [
             (float(offset), float(power)) for offset, power in readings_list

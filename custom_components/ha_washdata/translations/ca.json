@@ -915,7 +915,7 @@
         "name": "Córrer"
       },
       "match_ambiguity": {
-        "name": "Concorda amb l'ambigüitat"
+        "name": "Ambigüitat de la coincidència"
       }
     },
     "sensor": {
@@ -958,7 +958,7 @@
         "name": "Informació de depuració"
       },
       "match_confidence": {
-        "name": "Confiança del partit"
+        "name": "Confiança de coincidència"
       },
       "top_candidates": {
         "name": "Els millors candidats",

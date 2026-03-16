@@ -5,13 +5,13 @@ This guide explains the key numerical parameters in **WashData** using visual gr
 
 ## Suggested Settings Workflow
 
-If you see `sensor.<name>_suggested_settings` above `0`, WashData has actionable recommendations ready.
+If you see `sensor.<name>_suggested_settings` (e.g. `sensor.washer_suggested_settings` or `sensor.laundry_sensor_suggested_settings`, where `<name>` is your device identifier) above `0`, WashData has actionable recommendations ready.
 
 To review them safely:
 1. Open **Settings > Devices & Services > WashData > Configure > Advanced Settings**.
-2. Check **Apply Suggested Values**.
-3. Review the change summary.
-4. Confirm to stage the values, then save only what you want.
+2. Enable the **Apply Suggested Values** checkbox.
+3. Review the change summary shown for each setting.
+4. Confirm to stage the values into the form fields, then edit or clear any individual field you do not want to keep before pressing **Submit** to save only the values you want.
 
 Suggestions are optional and require explicit confirmation before they are staged.
 

@@ -422,7 +422,7 @@
         "title": "Izbriši ciklus",
         "description": "⚠️ Ovo će trajno izbrisati odabrani ciklus",
         "data": {
-          "cycle_id": "Pokreni za brisanje"
+          "cycle_id": "Ciklus"
         }
       },
       "label_cycle": {
@@ -731,7 +731,7 @@
         "refresh_status": "Osvježi status",
         "stop_recording": "Zaustavi snimanje (Sačuvaj i obradi)",
         "start_recording": "Započni novo snimanje",
-        "process_recording": "Obraditi posljednje snimanje (Trim & Save)",
+        "process_recording": "Obraditi posljednje snimanje (Podreži i sačuvaj)",
         "discard_recording": "Odbaci zadnji snimak"
       }
     },
@@ -923,13 +923,13 @@
         "name": "Stanje",
         "state": {
           "off": "Isključeno",
-          "idle": "Idle",
+          "idle": "Mirovanje",
           "starting": "Počinje",
           "running": "Pokrenuto",
           "paused": "Pauzirano",
           "ending": "Kraj",
           "finished": "Završeno",
-          "anti_wrinkle": "Anti-Wrinkle",
+          "anti_wrinkle": "Anti-gužvanje",
           "interrupted": "Prekinut",
           "force_stopped": "Prisilno zaustavljeno",
           "rinse": "Isperite",
@@ -984,7 +984,7 @@
       "program_select": {
         "name": "Program ciklusa",
         "state": {
-          "auto_detect": "Auto-Detect"
+          "auto_detect": "Automatsko otkrivanje"
         }
       }
     },

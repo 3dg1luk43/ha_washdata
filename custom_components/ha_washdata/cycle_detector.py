@@ -305,7 +305,7 @@ class CycleDetector:
                     expected_duration = 0.0
                     _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
                 phase_name = str(raw_phase_name) if raw_phase_name is not None else None
-                is_match_mismatch = bool(raw_mismatch)
+                is_match_mismatch = raw_mismatch if isinstance(raw_mismatch, bool) else bool(raw_mismatch)
             else:
                 # Fallback for old signature
                 if len(result_seq) >= 4:
