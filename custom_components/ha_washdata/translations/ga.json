@@ -565,28 +565,28 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Timthriall Baile Átha Troim - Roghnaigh Timthriall",
+        "title": "Timthriall Bearrtha — Roghnaigh Timthriall",
         "description": "Roghnaigh timthriall le bearradh. ✓ = críochnaithe, ⚠ = atosaithe, ✗ = isteach",
         "data": {
           "cycle_id": "Rothaíocht"
         }
       },
       "trim_cycle": {
-        "title": "Timthriall Baile Átha Troim",
+        "title": "Timthriall Bearrtha",
         "description": "Fuinneog reatha: {trim_summary}\n\n{trim_svg}",
         "data": {
           "action": "Gníomh"
         }
       },
       "trim_cycle_start": {
-        "title": "Socraigh Tosaigh Baile Átha Troim",
+        "title": "Socraigh Tús Bearrtha",
         "description": "Cuir isteach an fhritháireamh nóiméad chun tús a chur le sonraí a choinneáil ó (0 = tús timthriall).",
         "data": {
           "trim_start_min": "Tosaigh (nóiméad)"
         }
       },
       "trim_cycle_end": {
-        "title": "Socraigh Deireadh Baile Átha Troim",
+        "title": "Socraigh Deireadh Bearrtha",
         "description": "Cuir isteach an fhritháireamh nóiméad chun stop a choinneáil ar shonraí ag.",
         "data": {
           "trim_end_min": "Deireadh (nóiméid)"
@@ -612,8 +612,8 @@
       "feedback_notification_message": "**Gléas**: {device}\n**Clár**: {program} ({confidence}% muinín)\n**Am**: {time}\n\nTeastaíonn do chabhair ó WashData chun an timthriall braite seo a fhíorú.\n\nTéigh go **Socruithe > Gléasanna & Seirbhísí > WashData > Cumraigh > Aiseolas Foghlama** chun an toradh seo a dhearbhú nó a cheartú.",
       "suggestions_ready_notification_title": "WashData: Socruithe Molta Réidh ({device})",
       "suggestions_ready_notification_message": "Tuairiscíonn an braiteoir **Socruithe Molta** anois **{count}** moltaí inghníomhaithe.\n\nChun iad a athbhreithniú agus a chur i bhfeidhm: **Socruithe > Gléasanna & Seirbhísí > WashData > Cumraigh > Ardsocruithe > Cuir Luachanna Molta i bhFeidhm**.\n\nTá na moltaí roghnach agus taispeántar iad le haghaidh athbhreithniú sula ndéanann tú shábháil.",
-      "trim_range_invalid": "Ní mór tosú roimh dheireadh. Coigeartaigh do phointí Baile Átha Troim.",
-      "trim_failed": "Theip ar Bhaile Átha Troim. Seans nach bhfuil an timthriall ann a thuilleadh nó go bhfuil an fhuinneog folamh."
+      "trim_range_invalid": "Ní mór tosú roimh dheireadh. Coigeartaigh do phointí bearrtha.",
+      "trim_failed": "Theip ar an mbearradh. Seans nach bhfuil an timthriall ann a thuilleadh nó go bhfuil an fhuinneog folamh."
     },
     "abort": {
       "no_cycles_found": "Níor aimsíodh aon timthriallta",
@@ -699,7 +699,7 @@
         "profile_summary_header": "Achoimre Próifíl",
         "recent_cycles_header": "Timthriallta le déanaí",
         "no_power_preview": "* Níl aon sonraí cumhachta ar fáil le haghaidh réamhamharc.*",
-        "trim_cycle_preview_title": "Réamhamhairc Rothaíochta Baile Átha Troim",
+        "trim_cycle_preview_title": "Réamhamharc Bearrtha Timthriall",
         "trim_cycle_preview_no_data": "Níl aon sonraí cumhachta ar fáil don timthriall seo.",
         "trim_cycle_preview_kept_suffix": "coinnithe"
       }
@@ -731,7 +731,7 @@
         "select_cycle_to_label": "Lipéad Timthriall Sonrach",
         "select_cycle_to_delete": "Scrios an tSraith",
         "interactive_editor": "Cumaisc / Scoilt Eagarthóir Idirghníomhach",
-        "trim_cycle": "Sonraí Rothaíochta Baile Átha Troim"
+        "trim_cycle": "Sonraí Timthriall Bearrtha"
       }
     },
     "manage_profiles_action": {
@@ -796,7 +796,7 @@
         "set_start": "Socraigh Pointe Tosaigh",
         "set_end": "Socraigh Deireadhphointe",
         "reset": "Athshocraigh go Ré Iomlán",
-        "apply": "Cuir Baile Átha Troim i bhfeidhm",
+        "apply": "Cuir bearradh i bhfeidhm",
         "cancel": "Cealaigh"
       }
     }
@@ -953,7 +953,7 @@
       }
     },
     "trim_cycle": {
-      "name": "Timthriall Baile Átha Troim",
+      "name": "Timthriall Bearrtha",
       "description": "Trim na sonraí cumhachta ó thimthriall a chuaigh thart go dtí fuinneog ama ar leith.",
       "fields": {
         "device_id": {
@@ -965,11 +965,11 @@
           "description": "ID an timthrialla le bearradh."
         },
         "trim_start_s": {
-          "name": "Tosaigh Baile Átha Troim (soicindí)",
+          "name": "Tús Bearrtha (soicindí)",
           "description": "Coinnigh sonraí ón bhfritháireamh seo i soicindí. Réamhshocrú 0."
         },
         "trim_end_s": {
-          "name": "Deireadh Baile Átha Troim (soicindí)",
+          "name": "Deireadh Bearrtha (soicindí)",
           "description": "Coinnigh sonraí suas go dtí an fritháireamh seo i soicindí. Réamhshocrú = ré iomlán."
         }
       }
@@ -1074,7 +1074,7 @@
       "message": "Timthriall gan aimsiú nó níl aon sonraí cumhachta."
     },
     "trim_failed_empty_window": {
-      "message": "Theip ar an mBaile Átha Troim - níor aimsíodh an timthriall, níl aon sonraí cumhachta ann, nó tá an fhuinneog mar thoradh folamh."
+      "message": "Theip ar an mbearradh - níor aimsíodh an timthriall, níl aon sonraí cumhachta ann, nó tá an fhuinneog mar thoradh folamh."
     },
     "trim_invalid_range": {
       "message": "caithfidh trim_end_s a bheith níos mó ná trim_start_s."

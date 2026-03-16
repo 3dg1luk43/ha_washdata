@@ -586,7 +586,7 @@
         }
       },
       "trim_cycle_end": {
-        "title": "Cakto Trim End",
+        "title": "Cakto Fundin e Prerjes",
         "description": "Fut zhvendosjen e minutës për të ndaluar mbajtjen e të dhënave.",
         "data": {
           "trim_end_min": "Përfundimi (minuta)"
@@ -613,7 +613,7 @@
       "suggestions_ready_notification_title": "WashData: Cilësimet e sugjeruara janë gati ({device})",
       "suggestions_ready_notification_message": "Sensori **Cilësimet e sugjeruara** raporton tani **{count}** rekomandime të zbatueshme.\n\nPër t'i rishikuar dhe zbatuar ato: **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Cilësimet e avancuara > Aplikoni vlerat e sugjeruara**.\n\nSugjerimet janë opsionale dhe shfaqen për shqyrtim përpara se të ruani.",
       "trim_range_invalid": "Fillimi duhet të jetë para fundit. Ju lutemi rregulloni pikat tuaja të shkurtimit.",
-      "trim_failed": "Trim failed. Cikli mund të mos ekzistojë më ose dritarja është bosh."
+      "trim_failed": "Prerja dështoi. Cikli mund të mos ekzistojë më ose dritarja është bosh."
     },
     "abort": {
       "no_cycles_found": "Nuk u gjetën cikle",
@@ -796,7 +796,7 @@
         "set_start": "Vendosni pikën e fillimit",
         "set_end": "Vendosni pikën përfundimtare",
         "reset": "Rivendos në kohëzgjatje të plotë",
-        "apply": "Aplikoni Trim",
+        "apply": "Aplikoni Prerje",
         "cancel": "Anulo"
       }
     }

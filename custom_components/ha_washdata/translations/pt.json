@@ -698,7 +698,7 @@
         "assign_phases_help": "Use as ações abaixo para adicionar, editar, excluir ou salvar intervalos.",
         "profile_summary_header": "Resumo do perfil",
         "recent_cycles_header": "Ciclos recentes",
-        "no_power_preview": "*Não há dados de energia disponíveis para visualização.*",
+        "no_power_preview": "*Não há dados de potência disponíveis para visualização.*",
         "trim_cycle_preview_title": "Visualização do corte do ciclo",
         "trim_cycle_preview_no_data": "Não há dados de potência disponíveis para este ciclo.",
         "trim_cycle_preview_kept_suffix": "mantido"
@@ -1074,7 +1074,7 @@
       "message": "Ciclo não encontrado ou não possui dados de potência."
     },
     "trim_failed_empty_window": {
-      "message": "Falha no ajuste — ciclo não encontrado, sem dados de energia ou a janela resultante está vazia."
+      "message": "Falha no ajuste — ciclo não encontrado, sem dados de potência ou a janela resultante está vazia."
     },
     "trim_invalid_range": {
       "message": "trim_end_s deve ser maior que trim_start_s."

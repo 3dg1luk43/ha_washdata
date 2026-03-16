@@ -611,7 +611,7 @@
       "feedback_notification_title": "WashData: Verifizéierungszyklus ({device})",
       "feedback_notification_message": "**Apparat**: {device}\n**Programm**: {program} ({confidence}% Vertrauen)\n**Zäit**: {time}\n\nWashData brauch Är Hëllef fir dësen entdeckten Zyklus z'iwwerpréiwen.\n\nGitt w.e.g. op **Astellungen> Apparater & Servicer> WashData> Konfiguréieren> Léierfeedbacks** fir dëst Resultat ze bestätegen oder ze korrigéieren.",
       "suggestions_ready_notification_title": "WashData: Suggested Settings Ready ({device})",
-      "suggestions_ready_notification_message": "De Sensor **Sugged Settings** mellt elo **{count}** handlungsfäeg Empfehlungen.\n\nFir se z'iwwerpréiwen an z'applizéieren: ** Astellungen > Apparater & Servicer > WashData > Konfiguréieren > Fortgeschratt Astellungen > Suggestioune Wäerter uwenden **.\n\nVirschléi sinn fakultativ a fir Iwwerpréiwung gewisen ier Dir späichert.",
+      "suggestions_ready_notification_message": "De Sensor **Suggested Settings** mellt elo **{count}** handlungsfäeg Empfehlungen.\n\nFir se z'iwwerpréiwen an z'applizéieren: ** Astellungen > Apparater & Servicer > WashData > Konfiguréieren > Fortgeschratt Astellungen > Suggestioune Wäerter uwenden **.\n\nVirschléi sinn fakultativ a fir Iwwerpréiwung gewisen ier Dir späichert.",
       "trim_range_invalid": "Start muss virum Enn sinn. Passt w.e.g. Är Trimmpunkten un.",
       "trim_failed": "Trim gescheitert. Den Zyklus kann net méi existéieren oder d'Fënster ass eidel."
     },

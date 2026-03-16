@@ -565,28 +565,28 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle - Selektearje Cycle",
+        "title": "Syklus trimme — Selektearje Syklus",
         "description": "Selektearje in syklus om te trimmen. ✓ = foltôge, ⚠ = opnij, ✗ = ûnderbrutsen",
         "data": {
           "cycle_id": "Syklus"
         }
       },
       "trim_cycle": {
-        "title": "Trim Cycle",
+        "title": "Syklus trimme",
         "description": "Aktueel finster: {trim_summary}\n\n{trim_svg}",
         "data": {
           "action": "Aksje"
         }
       },
       "trim_cycle_start": {
-        "title": "Trim Start ynstelle",
+        "title": "Trimstart ynstelle",
         "description": "Fier de minút offset yn om te begjinnen mei it hâlden fan gegevens fan (0 = syklusstart).",
         "data": {
           "trim_start_min": "Start (minuten)"
         }
       },
       "trim_cycle_end": {
-        "title": "Trim Ein ynstelle",
+        "title": "Trimein ynstelle",
         "description": "Fier de minút offset yn om te stopjen mei it hâlden fan gegevens op.",
         "data": {
           "trim_end_min": "Einde (minuten)"
@@ -699,7 +699,7 @@
         "profile_summary_header": "Profile Gearfetting",
         "recent_cycles_header": "Resinte syklusen",
         "no_power_preview": "*Gjin machtgegevens beskikber foar foarbyld.*",
-        "trim_cycle_preview_title": "Foarbyld fan Cycle Trim",
+        "trim_cycle_preview_title": "Foarbyld fan syklus trimme",
         "trim_cycle_preview_no_data": "Gjin macht gegevens beskikber foar dizze syklus.",
         "trim_cycle_preview_kept_suffix": "hâlden"
       }
@@ -731,7 +731,7 @@
         "select_cycle_to_label": "Label Spesifike Cycle",
         "select_cycle_to_delete": "Wiskje Cycle",
         "interactive_editor": "Ynteraktive bewurker gearfoegje / splitsen",
-        "trim_cycle": "Trim Cycle Data"
+        "trim_cycle": "Syklusgegevens trimme"
       }
     },
     "manage_profiles_action": {
@@ -953,7 +953,7 @@
       }
     },
     "trim_cycle": {
-      "name": "Trim Cycle",
+      "name": "Syklus trimme",
       "description": "Trim de krêftgegevens fan in ferline syklus nei in spesifyk tiidfinster.",
       "fields": {
         "device_id": {
@@ -1074,7 +1074,7 @@
       "message": "Syklus net fûn of hat gjin macht gegevens."
     },
     "trim_failed_empty_window": {
-      "message": "Trim mislearre - syklus net fûn, gjin macht gegevens, of resultearjend finster is leech."
+      "message": "Trimmen mislearre - syklus net fûn, gjin macht gegevens, of resultearjend finster is leech."
     },
     "trim_invalid_range": {
       "message": "trim_end_s moat grutter wêze as trim_start_s."

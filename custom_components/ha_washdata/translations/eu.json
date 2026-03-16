@@ -579,14 +579,14 @@
         }
       },
       "trim_cycle_start": {
-        "title": "Ezarri Trim Start",
+        "title": "Ezarri Moztu Hasiera",
         "description": "Idatzi minutuko desplazamendua datuak gordetzen hasteko (0 = zikloaren hasiera).",
         "data": {
           "trim_start_min": "Hasiera (minutuak)"
         }
       },
       "trim_cycle_end": {
-        "title": "Ezarri Trim End",
+        "title": "Ezarri Moztu Amaiera",
         "description": "Idatzi minutuko desplazamendua datuak gordetzeari uzteko.",
         "data": {
           "trim_end_min": "Amaiera (minutuak)"

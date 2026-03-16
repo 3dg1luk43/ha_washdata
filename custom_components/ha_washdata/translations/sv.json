@@ -412,7 +412,7 @@
         }
       },
       "select_cycle_to_label": {
-        "title": "Välj Cycle to Label",
+        "title": "Välj cykel att märka",
         "description": "✓ = klar, ⚠ = återupptas, ✗ = avbruten",
         "data": {
           "cycle_id": "Cykel"
@@ -541,7 +541,7 @@
         "title": "Lärande feedback",
         "description": "Välj en begäran om cykelgranskning att behandla.",
         "data": {
-          "selected_feedback": "Välj Cycle to Review"
+          "selected_feedback": "Välj cykel att granska"
         }
       },
       "learning_feedbacks_empty": {
@@ -565,7 +565,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle — Välj Cycle",
+        "title": "Trimcykel — Välj cykel",
         "description": "Välj en cykel att trimma. ✓ = klar, ⚠ = återupptas, ✗ = avbruten",
         "data": {
           "cycle_id": "Cykel"
@@ -698,8 +698,8 @@
         "assign_phases_help": "Använd åtgärderna nedan för att lägga till, redigera, ta bort eller spara intervall.",
         "profile_summary_header": "Profilsammanfattning",
         "recent_cycles_header": "Senaste cyklerna",
-        "no_power_preview": "*Ingen energidata tillgänglig för förhandsgranskning.*",
-        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "no_power_preview": "*Ingen effektdata tillgänglig för förhandsgranskning.*",
+        "trim_cycle_preview_title": "Förhandsgranskning av cykeltrimmning",
         "trim_cycle_preview_no_data": "Ingen effektdata tillgänglig för denna cykel.",
         "trim_cycle_preview_kept_suffix": "hålls"
       }

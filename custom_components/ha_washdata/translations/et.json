@@ -586,7 +586,7 @@
         }
       },
       "trim_cycle_end": {
-        "title": "Määra Trim End",
+        "title": "Määra kärpimise lõpp",
         "description": "Andmete säilitamise lõpetamiseks sisestage minutinihe.",
         "data": {
           "trim_end_min": "Lõpp (minutites)"
@@ -611,7 +611,7 @@
       "feedback_notification_title": "WashData: kontrolli tsükkel ({device})",
       "feedback_notification_message": "**Seade**: {device}\n**Programm**: {program} ({confidence}% usaldusväärsus)\n**Aeg**: {time}\n\nWashData vajab tuvastatud tsükli kontrollimiseks teie abi.\n\nSelle tulemuse kinnitamiseks või parandamiseks minge jaotisse **Seaded > Seadmed ja teenused > WashData > Seadistamine > Tagasiside õppimine**.",
       "suggestions_ready_notification_title": "WashData: soovituslikud seaded on valmis ({device})",
-      "suggestions_ready_notification_message": "Andur **Soovitatud seaded** annab nüüd **{count}** rakendatavaid soovitusi.\n\nNende ülevaatamiseks ja rakendamiseks tehke järgmist. **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSoovitused on valikulised ja neid kuvatakse enne salvestamist ülevaatamiseks.",
+      "suggestions_ready_notification_message": "Andur **Soovitatud seaded** annab nüüd **{count}** rakendatavaid soovitusi.\n\nNende ülevaatamiseks ja rakendamiseks tehke järgmist. **Seaded > Seadmed ja teenused > WashData > Seadistamine > Täpsemad seaded > Rakenda soovitatud väärtused**.\n\nSoovitused on valikulised ja neid kuvatakse enne salvestamist ülevaatamiseks.",
       "trim_range_invalid": "Algus peab olema enne lõppu. Palun kohandage oma trimmipunkte.",
       "trim_failed": "Kärpimine ebaõnnestus. Tsüklit ei pruugi enam eksisteerida või aken on tühi."
     },
@@ -796,7 +796,7 @@
         "set_start": "Määra alguspunkt",
         "set_end": "Määra lõpp-punkt",
         "reset": "Lähtestage täiskestusele",
-        "apply": "Rakenda Trim",
+        "apply": "Rakenda kärpimine",
         "cancel": "Tühista"
       }
     }

@@ -565,7 +565,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle — Válassza a Ciklus lehetőséget",
+        "title": "Vágási ciklus — Válasszon ciklust",
         "description": "Válassza ki a vágni kívánt ciklust. ✓ = befejezve, ⚠ = folytatva, ✗ = megszakítva",
         "data": {
           "cycle_id": "Ciklus"
@@ -699,7 +699,7 @@
         "profile_summary_header": "Profil összefoglaló",
         "recent_cycles_header": "Legutóbbi ciklusok",
         "no_power_preview": "*Az előnézethez nem állnak rendelkezésre teljesítményadatok.*",
-        "trim_cycle_preview_title": "Cycle Trim Előnézet",
+        "trim_cycle_preview_title": "Vágási ciklus előnézete",
         "trim_cycle_preview_no_data": "Ehhez a ciklushoz nem állnak rendelkezésre teljesítményadatok.",
         "trim_cycle_preview_kept_suffix": "tartotta"
       }
@@ -731,7 +731,7 @@
         "select_cycle_to_label": "Címkespecifikus ciklus",
         "select_cycle_to_delete": "Ciklus törlése",
         "interactive_editor": "Egyesítés/felosztás interaktív szerkesztő",
-        "trim_cycle": "Trim Cycle Data"
+        "trim_cycle": "Vágási ciklus adatai"
       }
     },
     "manage_profiles_action": {
@@ -796,7 +796,7 @@
         "set_start": "Állítsa be a kezdőpontot",
         "set_end": "Végpont beállítása",
         "reset": "Állítsa vissza a teljes időtartamra",
-        "apply": "Alkalmazza Trim",
+        "apply": "Vágás alkalmazása",
         "cancel": "Mégsem"
       }
     }
@@ -965,7 +965,7 @@
           "description": "A vágni kívánt ciklus azonosítója."
         },
         "trim_start_s": {
-          "name": "Trim Start (másodperc)",
+          "name": "Vágás kezdete (másodperc)",
           "description": "Az ebből az eltolásból származó adatokat másodpercben tárolja. Alapértelmezett 0."
         },
         "trim_end_s": {

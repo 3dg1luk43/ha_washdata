@@ -565,7 +565,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle — Vyberte Cyklus",
+        "title": "Ořezávací cyklus — Vyberte cyklus",
         "description": "Vyberte cyklus, který chcete oříznout. ✓ = dokončeno, ⚠ = obnoveno, ✗ = přerušeno",
         "data": {
           "cycle_id": "Cyklus"
@@ -579,7 +579,7 @@
         }
       },
       "trim_cycle_start": {
-        "title": "Nastavte Trim Start",
+        "title": "Nastavte počáteční bod ořezu",
         "description": "Zadejte minutovou odchylku, od které se mají začít uchovávat data (0 = začátek cyklu).",
         "data": {
           "trim_start_min": "Začátek (minuty)"
@@ -965,7 +965,7 @@
           "description": "ID cyklu, který se má oříznout."
         },
         "trim_start_s": {
-          "name": "Trim Start (sekundy)",
+          "name": "Počátek ořezu (sekundy)",
           "description": "Uchovávejte data z tohoto offsetu během několika sekund. Výchozí 0."
         },
         "trim_end_s": {

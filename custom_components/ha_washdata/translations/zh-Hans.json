@@ -613,7 +613,7 @@
       "suggestions_ready_notification_title": "WashData：建议设置已就绪 ({device})",
       "suggestions_ready_notification_message": "**建议设置**传感器现在报告 **{count}** 可操作的建议。\n\n要查看并应用它们：**设置 > 设备和服务 > WashData > 配置 > 高级设置 > 应用建议值**。\n\n建议是可选的，并会在您保存之前显示以供审核。",
       "trim_range_invalid": "开始必须在结束之前。请调整您的修剪点。",
-      "trim_failed": "修剪失败。 The cycle may no longer exist or the window is empty."
+      "trim_failed": "修剪失败。周期可能已不存在或窗口为空。"
     },
     "abort": {
       "no_cycles_found": "没有找到循环",
@@ -1071,13 +1071,13 @@
       "message": "未为此设备加载集成。"
     },
     "cycle_not_found_or_no_power": {
-      "message": "未找到自行车或没有功率数据。"
+      "message": "未找到周期或没有功率数据。"
     },
     "trim_failed_empty_window": {
       "message": "修剪失败 — 未找到周期、无功率数据或生成的窗口为空。"
     },
     "trim_invalid_range": {
-      "message": "TRIM_END_S必须大于TRIM_START_S。"
+      "message": "trim_end_s必须大于trim_start_s。"
     }
   }
 }

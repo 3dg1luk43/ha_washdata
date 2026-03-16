@@ -699,7 +699,7 @@
         "profile_summary_header": "Rezumatul profilului",
         "recent_cycles_header": "Cicluri recente",
         "no_power_preview": "*Nu sunt disponibile date de putere pentru previzualizare.*",
-        "trim_cycle_preview_title": "Previzualizare Cycle Trim",
+        "trim_cycle_preview_title": "Previzualizare ajustare ciclu",
         "trim_cycle_preview_no_data": "Nu sunt disponibile date de putere pentru acest ciclu.",
         "trim_cycle_preview_kept_suffix": "păstrat"
       }
@@ -1074,7 +1074,7 @@
       "message": "Ciclul nu a fost găsit sau nu are date de putere."
     },
     "trim_failed_empty_window": {
-      "message": "Trim failed — ciclul nu a fost găsit, nu există date de putere sau fereastra rezultată este goală."
+      "message": "Eșec la ajustare — ciclul nu a fost găsit, nu există date de putere sau fereastra rezultată este goală."
     },
     "trim_invalid_range": {
       "message": "trim_end_s trebuie să fie mai mare decât trim_start_s."

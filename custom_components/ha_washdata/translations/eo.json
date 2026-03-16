@@ -700,7 +700,7 @@
         "recent_cycles_header": "Freŝaj cikloj",
         "no_power_preview": "*Neniu elektraj datumoj disponeblaj por antaŭrigardo.*",
         "trim_cycle_preview_title": "Ciklo Trim Antaŭrigardo",
-        "trim_cycle_preview_no_data": "Neniuj energidatenoj haveblaj por ĉi tiu ciklo.",
+        "trim_cycle_preview_no_data": "Neniuj potenc-tracdatenoj haveblaj por ĉi tiu ciklo.",
         "trim_cycle_preview_kept_suffix": "konservita"
       }
     },
@@ -1074,7 +1074,7 @@
       "message": "Ciklo ne trovita aŭ havas neniujn potencajn datumojn."
     },
     "trim_failed_empty_window": {
-      "message": "Tondado malsukcesis — ciklo ne trovita, neniuj energidatenoj, aŭ rezulta fenestro estas malplena."
+      "message": "Tondado malsukcesis — ciklo ne trovita, neniuj potenc-tracdatenoj, aŭ rezulta fenestro estas malplena."
     },
     "trim_invalid_range": {
       "message": "trim_end_s devas esti pli granda ol trim_start_s."

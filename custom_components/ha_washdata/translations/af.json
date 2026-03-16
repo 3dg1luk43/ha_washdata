@@ -565,28 +565,28 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle - Kies Cycle",
+        "title": "Snoei Siklus — Kies Siklus",
         "description": "Kies 'n siklus om te snoei. ✓ = voltooi, ⚠ = hervat, ✗ = onderbreek",
         "data": {
           "cycle_id": "Siklus"
         }
       },
       "trim_cycle": {
-        "title": "Trim siklus",
+        "title": "Snoei siklus",
         "description": "Huidige venster: {trim_summary}\n\n{trim_svg}",
         "data": {
           "action": "Aksie"
         }
       },
       "trim_cycle_start": {
-        "title": "Stel Trim Start",
+        "title": "Stel Snoeibegin",
         "description": "Voer die minuut-afset in om data vanaf te begin hou (0 = siklusbegin).",
         "data": {
           "trim_start_min": "Begin (minute)"
         }
       },
       "trim_cycle_end": {
-        "title": "Stel Trim End",
+        "title": "Stel Snoei-einde",
         "description": "Voer die minuutverstelling in om op te hou om data te hou.",
         "data": {
           "trim_end_min": "Einde (minute)"

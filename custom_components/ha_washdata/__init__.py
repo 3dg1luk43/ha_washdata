@@ -388,7 +388,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async def handle_trim_cycle(call: ServiceCall) -> None:
             device_id = _require_str(call.data.get("device_id"), "device_id")
             cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
-            trim_start_s = float(call.data.get("trim_start_s", 0))
+            trim_start_s = max(0.0, float(call.data.get("trim_start_s", 0)))
 
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)
@@ -416,7 +416,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             # Determine trim end — default to full cycle duration if not supplied
             raw_end = call.data.get("trim_end_s")
             if raw_end is not None:
-                trim_end_s = float(raw_end)
+                trim_end_s = max(0.0, float(raw_end))
             else:
                 p_data = store.get_cycle_power_data(cycle_id)
                 if not p_data:

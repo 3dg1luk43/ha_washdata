@@ -565,7 +565,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle — Izberite Cycle",
+        "title": "Obrezovanje cikla — izberite cikel",
         "description": "Izberite cikel za obrezovanje. ✓ = končano, ⚠ = nadaljevanje, ✗ = prekinjeno",
         "data": {
           "cycle_id": "Cikel"
@@ -579,7 +579,7 @@
         }
       },
       "trim_cycle_start": {
-        "title": "Nastavite Trim Start",
+        "title": "Nastavite začetek obrezovanja",
         "description": "Vnesite minutni odmik, od katerega začnete hraniti podatke (0 = začetek cikla).",
         "data": {
           "trim_start_min": "Začetek (minute)"

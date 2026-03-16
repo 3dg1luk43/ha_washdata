@@ -565,17 +565,17 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trimmausjakso — Valitse Cycle",
+        "title": "Trimmausjakso — Valitse sykli",
         "description": "Valitse trimmattava sykli. ✓ = valmis, ⚠ = jatkunut, ✗ = keskeytetty",
         "data": {
-          "cycle_id": "Kierrä"
+          "cycle_id": "Syklin tunnus"
         }
       },
       "trim_cycle": {
         "title": "Trimmaussykli",
         "description": "Nykyinen ikkuna: {trim_summary}\n\n{trim_svg}",
         "data": {
-          "action": "Toiminta"
+          "action": "Toimenpide"
         }
       },
       "trim_cycle_start": {
@@ -699,7 +699,7 @@
         "profile_summary_header": "Profiilin yhteenveto",
         "recent_cycles_header": "Viimeaikaiset syklit",
         "no_power_preview": "*Tehotietoja ei ole saatavilla esikatseluun.*",
-        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "trim_cycle_preview_title": "Sykli — trimmauksen esikatselu",
         "trim_cycle_preview_no_data": "Tälle jaksolle ei ole saatavilla tehotietoja.",
         "trim_cycle_preview_kept_suffix": "pidetty"
       }
@@ -961,7 +961,7 @@
           "description": "WashData-laite."
         },
         "cycle_id": {
-          "name": "Cycle ID",
+          "name": "Syklin tunnus",
           "description": "Trimmoitavan syklin tunnus."
         },
         "trim_start_s": {
@@ -1074,7 +1074,7 @@
       "message": "Jaksoa ei löydy tai siinä ei ole virtatietoja."
     },
     "trim_failed_empty_window": {
-      "message": "Trim failed – sykliä ei löydy, ei virtatietoja tai tuloksena oleva ikkuna on tyhjä."
+      "message": "Trimmaus epäonnistui – sykliä ei löydy, ei virtatietoja tai tuloksena oleva ikkuna on tyhjä."
     },
     "trim_invalid_range": {
       "message": "trim_end_s on oltava suurempi kuin trim_start_s."

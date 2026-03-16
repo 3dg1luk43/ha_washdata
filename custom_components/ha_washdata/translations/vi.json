@@ -415,7 +415,7 @@
         "title": "Chọn chu trình để dán nhãn",
         "description": "✓ = hoàn thành, ⚠ = tiếp tục, ✗ = bị gián đoạn",
         "data": {
-          "cycle_id": "Xe đạp"
+          "cycle_id": "ID chu kỳ"
         }
       },
       "select_cycle_to_delete": {
@@ -568,7 +568,7 @@
         "title": "Chu trình cắt — Chọn chu trình",
         "description": "Chọn một chu kỳ để cắt. ✓ = hoàn thành, ⚠ = tiếp tục, ✗ = bị gián đoạn",
         "data": {
-          "cycle_id": "Xe đạp"
+          "cycle_id": "ID chu kỳ"
         }
       },
       "trim_cycle": {
@@ -1077,7 +1077,7 @@
       "message": "Cắt không thành công — không tìm thấy chu kỳ, không có dữ liệu nguồn hoặc cửa sổ kết quả trống."
     },
     "trim_invalid_range": {
-      "message": "TRIM_end_s phải lớn hơn TRIM_start_s."
+      "message": "trim_end_s phải lớn hơn trim_start_s."
     }
   }
 }

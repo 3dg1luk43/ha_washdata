@@ -531,7 +531,7 @@
         "title": "Proces nahrávania",
         "description": "![Graf]({graph_url})\n\n**Graf ukazuje nespracovaný záznam.** Modrá = Ponechať, Červená = Navrhované orezanie.\n*Graf je statický a pri zmenách formulára sa neaktualizuje.*\n\nNahrávanie bolo zastavené. Orezania sú zarovnané so zistenou vzorkovacou frekvenciou (~{sampling_rate} s).\n\nSurové trvanie: {duration} s\nVzorky: {samples}",
         "data": {
-          "head_trim": "Trim Start (sekundy)",
+          "head_trim": "Začiatok trimovania (sekundy)",
           "tail_trim": "Koniec orezania (sekundy)",
           "save_mode": "Uložiť cieľ",
           "profile_name": "Názov profilu"
@@ -565,21 +565,21 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle — Zvoľte Cyklus",
+        "title": "Trimovací cyklus — zvoľte cyklus",
         "description": "Vyberte cyklus, ktorý chcete orezať. ✓ = dokončené, ⚠ = obnovené, ✗ = prerušené",
         "data": {
           "cycle_id": "Cyklus"
         }
       },
       "trim_cycle": {
-        "title": "Trim Cycle",
+        "title": "Trimovací cyklus",
         "description": "Aktuálne okno: {trim_summary}\n\n{trim_svg}",
         "data": {
           "action": "Akcia"
         }
       },
       "trim_cycle_start": {
-        "title": "Nastavte Trim Start",
+        "title": "Nastavte začiatok trimovania",
         "description": "Zadajte minútový posun, od ktorého sa začnú uchovávať údaje (0 = začiatok cyklu).",
         "data": {
           "trim_start_min": "Štart (minúty)"
@@ -611,7 +611,7 @@
       "feedback_notification_title": "WashData: Overiť cyklus ({device})",
       "feedback_notification_message": "**Zariadenie**: {device}\n**Program**: {program} (spoľahlivosť {confidence} %)\n**Čas**: {time}\n\nWashData potrebuje vašu pomoc na overenie tohto zisteného cyklu.\n\nAk chcete potvrdiť alebo opraviť tento výsledok, prejdite do časti **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Spätná väzba na vzdelávanie.",
       "suggestions_ready_notification_title": "WashData: Navrhnuté nastavenia sú pripravené ({device})",
-      "suggestions_ready_notification_message": "Senzor **Suggested Settings** teraz hlási **{count}** odporúčania, ktoré je možné vykonať.\n\nAk ich chcete skontrolovať a použiť: **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Rozšírené nastavenia > Použiť navrhované hodnoty**.\n\nNávrhy sú voliteľné a pred uložením sa zobrazia na kontrolu.",
+      "suggestions_ready_notification_message": "Senzor **Odporúčané nastavenia** teraz hlási **{count}** odporúčania, ktoré je možné vykonať.\n\nAk ich chcete skontrolovať a použiť: **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Rozšírené nastavenia > Použiť navrhované hodnoty**.\n\nNávrhy sú voliteľné a pred uložením sa zobrazia na kontrolu.",
       "trim_range_invalid": "Začiatok musí byť pred koncom. Upravte si body orezania.",
       "trim_failed": "Orezanie zlyhalo. Cyklus už nemusí existovať alebo je okno prázdne."
     },
@@ -678,7 +678,7 @@
         "graph_legend_title": "Legenda grafu",
         "graph_legend_body": "Modrý pás predstavuje minimálny a maximálny pozorovaný rozsah odberu energie. Čiara zobrazuje krivku priemerného výkonu.",
         "recording_preview": "Ukážka nahrávania",
-        "trim_start": "Trim Start",
+        "trim_start": "Začiatok trimovania",
         "trim_end": "Orezať koniec",
         "split_preview_title": "Rozdeliť ukážku",
         "split_preview_found_fmt": "Počet nájdených segmentov: {count}.",
@@ -953,7 +953,7 @@
       }
     },
     "trim_cycle": {
-      "name": "Trim Cycle",
+      "name": "Trimovací cyklus",
       "description": "Orezať údaje o spotrebe z minulého cyklu na konkrétne časové okno.",
       "fields": {
         "device_id": {
@@ -965,12 +965,12 @@
           "description": "ID cyklu, ktorý sa má orezať."
         },
         "trim_start_s": {
-          "name": "Trim Start (sekundy)",
-          "description": "Uchovávajte údaje z tohto posunu v priebehu niekoľkých sekúnd. Predvolená hodnota 0."
+          "name": "Začiatok trimovania (sekundy)",
+          "description": "Uchovávajte údaje z tohto posunu v sekundách. Predvolená hodnota 0."
         },
         "trim_end_s": {
           "name": "Koniec orezania (sekundy)",
-          "description": "Udržujte údaje až do tohto posunu v priebehu niekoľkých sekúnd. Predvolená hodnota = celé trvanie."
+          "description": "Udržujte údaje až do tohto posunu v sekundách. Predvolená hodnota = celé trvanie."
         }
       }
     }

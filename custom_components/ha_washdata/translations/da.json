@@ -586,8 +586,8 @@
         }
       },
       "trim_cycle_end": {
-        "title": "Indstil Trim End",
-        "description": "Indtast minutforskydningen for at stoppe med at holde data på.",
+        "title": "Indstil trim slutposition",
+        "description": "Indtast minutforskydningen for at stoppe med at gemme data.",
         "data": {
           "trim_end_min": "Slut (minutter)"
         }
@@ -699,7 +699,7 @@
         "profile_summary_header": "Profiloversigt",
         "recent_cycles_header": "Seneste cyklusser",
         "no_power_preview": "*Ingen strømdata tilgængelige til forhåndsvisning.*",
-        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "trim_cycle_preview_title": "Forhåndsvisning af cyklustrim",
         "trim_cycle_preview_no_data": "Ingen strømdata tilgængelige for denne cyklus.",
         "trim_cycle_preview_kept_suffix": "holdt"
       }
@@ -966,11 +966,11 @@
         },
         "trim_start_s": {
           "name": "Trimstart (sekunder)",
-          "description": "Gem data fra denne offset på få sekunder. Standard 0."
+          "description": "Gem data fra denne offset i sekunder. Standard 0."
         },
         "trim_end_s": {
           "name": "Trim slut (sekunder)",
-          "description": "Hold data op til denne offset på få sekunder. Standard = fuld varighed."
+          "description": "Hold data op til denne offset i sekunder. Standard = fuld varighed."
         }
       }
     }

@@ -701,7 +701,7 @@
         "no_power_preview": "*No hay datos de energía disponibles para vista previa.*",
         "trim_cycle_preview_title": "Vista previa del recorte del ciclo",
         "trim_cycle_preview_no_data": "No hay datos de potencia disponibles para este ciclo.",
-        "trim_cycle_preview_kept_suffix": "conservó"
+        "trim_cycle_preview_kept_suffix": "conservado"
       }
     },
     "interactive_editor_action": {

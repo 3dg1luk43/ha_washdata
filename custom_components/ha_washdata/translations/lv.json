@@ -579,7 +579,7 @@
         }
       },
       "trim_cycle_start": {
-        "title": "Iestatiet Trim Start",
+        "title": "Iestatiet apgriešanas sākumu",
         "description": "Ievadiet minūšu nobīdi, lai sāktu datu saglabāšanu (0 = cikla sākums).",
         "data": {
           "trim_start_min": "Sākums (minūtes)"
@@ -796,7 +796,7 @@
         "set_start": "Iestatiet sākuma punktu",
         "set_end": "Iestatiet beigu punktu",
         "reset": "Atiestatīt uz pilnu ilgumu",
-        "apply": "Uzklājiet Trim",
+        "apply": "Uzklājiet apgriešanu",
         "cancel": "Atcelt"
       }
     }

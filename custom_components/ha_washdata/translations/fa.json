@@ -700,7 +700,7 @@
         "recent_cycles_header": "چرخه های اخیر",
         "no_power_preview": "*داده برق برای پیش نمایش موجود نیست.*",
         "trim_cycle_preview_title": "پیش نمایش برش چرخه",
-        "trim_cycle_preview_no_data": "هیچ داده انرژی برای این چرخه در دسترس نیست.",
+        "trim_cycle_preview_no_data": "هیچ داده توان برای این چرخه در دسترس نیست.",
         "trim_cycle_preview_kept_suffix": "نگهداری می شود"
       }
     },

@@ -565,31 +565,31 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Трим Цицле — Изаберите Циклус",
-        "description": "Изаберите циклус за исецање. ✓ = завршено, ⚠ = настављено, ✗ = прекинуто",
+        "title": "Trim ciklus — Izaberite ciklus",
+        "description": "Izaberite ciklus za isecanje. ✓ = završeno, ⚠ = nastavljeno, ✗ = prekinuto",
         "data": {
-          "cycle_id": "Циклус"
+          "cycle_id": "Ciklus"
         }
       },
       "trim_cycle": {
-        "title": "Трим Цицле",
-        "description": "Тренутни прозор: {trim_summary}\n\n{trim_svg}",
+        "title": "Trim ciklus",
+        "description": "Trenutni prozor: {trim_summary}\n\n{trim_svg}",
         "data": {
-          "action": "Акција"
+          "action": "Akcija"
         }
       },
       "trim_cycle_start": {
-        "title": "Поставите Трим Старт",
-        "description": "Унесите минутни помак за почетак чувања података од (0 = почетак циклуса).",
+        "title": "Postavite trim start",
+        "description": "Unesite minutni pomak za početak čuvanja podataka od (0 = početak ciklusa).",
         "data": {
-          "trim_start_min": "Почетак (минути)"
+          "trim_start_min": "Početak (minuti)"
         }
       },
       "trim_cycle_end": {
-        "title": "Поставите Трим Енд",
-        "description": "Унесите минутни помак да бисте престали да чувате податке.",
+        "title": "Postavite trim kraj",
+        "description": "Unesite minutni pomak da biste prestali da čuvate podatke.",
         "data": {
-          "trim_end_min": "Крај (минути)"
+          "trim_end_min": "Kraj (minuti)"
         }
       }
     },
@@ -698,7 +698,7 @@
         "assign_phases_help": "Користите радње у наставку да бисте додали, изменили, избрисали или сачували опсеге.",
         "profile_summary_header": "Профил Резиме",
         "recent_cycles_header": "Недавни циклуси",
-        "no_power_preview": "* Нема доступних података о снази за преглед.*",
+        "no_power_preview": "*Нема доступних података о снази за преглед.*",
         "trim_cycle_preview_title": "Преглед трим циклуса",
         "trim_cycle_preview_no_data": "Нема доступних података о снази за овај циклус.",
         "trim_cycle_preview_kept_suffix": "чувао"
@@ -1077,7 +1077,7 @@
       "message": "Трим није успео — циклус није пронађен, нема података о напајању или је прозор као резултат празан."
     },
     "trim_invalid_range": {
-      "message": "трим_енд_с мора бити већи од трим_старт_с."
+      "message": "trim_end_s мора бити већи од trim_start_s."
     }
   }
 }

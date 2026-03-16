@@ -565,7 +565,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Apkarpymo ciklas — pasirinkite Ciklas",
+        "title": "Apkarpymas — pasirinkite ciklą",
         "description": "Pasirinkite ciklą, kurį norite apkarpyti. ✓ = baigta, ⚠ = atnaujinta, ✗ = nutraukta",
         "data": {
           "cycle_id": "Ciklas"
@@ -579,14 +579,14 @@
         }
       },
       "trim_cycle_start": {
-        "title": "Nustatykite Trim Start",
+        "title": "Nustatykite apkarpymo pradžią",
         "description": "Įveskite minutės poslinkį, kad pradėtumėte saugoti duomenis (0 = ciklo pradžia).",
         "data": {
           "trim_start_min": "Pradžia (minutės)"
         }
       },
       "trim_cycle_end": {
-        "title": "Nustatyti Trim End",
+        "title": "Nustatyti apkarpymo pabaigą",
         "description": "Įveskite minutės poslinkį, kad nustotumėte saugoti duomenis.",
         "data": {
           "trim_end_min": "Pabaiga (minutės)"
@@ -612,7 +612,7 @@
       "feedback_notification_message": "**Įrenginys**: {device}\n**Programa**: {program} ({confidence} % pasitikėjimo)\n**Laikas**: {time}\n\n„WashData“ reikia jūsų pagalbos, kad patikrintų šį aptiktą ciklą.\n\nEikite į **Nustatymai > Įrenginiai ir paslaugos > WashData > Konfigūruoti > Mokymosi atsiliepimai**, kad patvirtintumėte arba pataisytumėte šį rezultatą.",
       "suggestions_ready_notification_title": "„WashData“: siūlomi nustatymai paruošti ({device})",
       "suggestions_ready_notification_message": "**Siūlomi nustatymai** jutiklis dabar pateikia **{count}** įgyvendinamas rekomendacijas.\n\nNorėdami juos peržiūrėti ir pritaikyti: **Nustatymai > Įrenginiai ir paslaugos > „WashData“ > Konfigūruoti > Išplėstiniai nustatymai > Taikyti siūlomas reikšmes**.\n\nPasiūlymai yra neprivalomi ir rodomi peržiūrėti prieš išsaugant.",
-      "trim_range_invalid": "Pradžia turi būti prieš pabaigą. Pakoreguokite apdailos taškus.",
+      "trim_range_invalid": "Pradžia turi būti prieš pabaigą. Pakoreguokite apkarpymo taškus.",
       "trim_failed": "Apkarpyti nepavyko. Ciklo gali nebebūti arba langas tuščias."
     },
     "abort": {
@@ -796,7 +796,7 @@
         "set_start": "Nustatykite pradžios tašką",
         "set_end": "Nustatyti pabaigos tašką",
         "reset": "Iš naujo nustatyti visą trukmę",
-        "apply": "Taikyti Trim",
+        "apply": "Taikyti apkarpymą",
         "cancel": "Atšaukti"
       }
     }
@@ -952,25 +952,25 @@
         }
       }
     },
-    "trim_cycle": {
-      "name": "Apkarpymo ciklas",
-      "description": "Sutrumpinkite praėjusio ciklo galios duomenis iki konkretaus laiko lango.",
-      "fields": {
-        "device_id": {
-          "name": "Įrenginys",
-          "description": "„WashData“ įrenginys."
+    “trim_cycle”: {
+      “name”: “Apkarpymo ciklas”,
+      “description”: “Apkarpykite nurodyto išsaugoto ciklo galios duomenis iki konkretaus laiko lango.”,
+      “fields”: {
+        “device_id”: {
+          “name”: “Įrenginys”,
+          “description”: “„WashData” įrenginys.”
         },
-        "cycle_id": {
-          "name": "Ciklo ID",
-          "description": "Apkarpytino ciklo ID."
+        “cycle_id”: {
+          “name”: “Ciklo ID”,
+          “description”: “Bet kurio išsaugoto ciklo, kurį reikia apkarpyti, ID.”
         },
-        "trim_start_s": {
-          "name": "Apkarpymo pradžia (sekundėmis)",
-          "description": "Išsaugokite duomenis nuo šio poslinkio sekundėmis. Numatytasis 0."
+        “trim_start_s”: {
+          “name”: “Apkarpymo pradžia (sekundėmis)”,
+          “description”: “Išsaugokite duomenis nuo šio poslinkio sekundėmis. Numatytasis 0.”
         },
-        "trim_end_s": {
-          "name": "Apkarpymo pabaiga (sekundėmis)",
-          "description": "Išsaugokite duomenis iki šio poslinkio per kelias sekundes. Numatytasis = visa trukmė."
+        “trim_end_s”: {
+          “name”: “Apkarpymo pabaiga (sekundėmis)”,
+          “description”: “Išsaugokite duomenis iki šio sekundžių poslinkio. Numatytasis = visa trukmė.”
         }
       }
     }
@@ -1071,10 +1071,10 @@
       "message": "Šio įrenginio integracija neįkelta."
     },
     "cycle_not_found_or_no_power": {
-      "message": "Ciklas nerastas arba neturi maitinimo duomenų."
+      "message": "Ciklas nerastas arba neturi galios duomenų."
     },
     "trim_failed_empty_window": {
-      "message": "Apkarpymas nepavyko – ciklas nerastas, nėra maitinimo duomenų arba gautas langas tuščias."
+      "message": "Apkarpymas nepavyko – ciklas nerastas, nėra galios duomenų arba gautas langas tuščias."
     },
     "trim_invalid_range": {
       "message": "trim_end_s turi būti didesnis nei trim_start_s."

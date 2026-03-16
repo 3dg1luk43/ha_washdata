@@ -141,10 +141,11 @@ def test_trailing_zero_impact():
     for c in cycles:
         pd = c["power_data"]
         status = c["status"]
+        cleaned = _clean(pd)
         n_trailing = _trailing_zero_count(pd, TRIM_THRESHOLD_W)
 
-        duration_before = pd[-1][0] - pd[0][0] if len(pd) > 1 else 0.0
-        energy_before = _energy_wh(pd)
+        duration_before = cleaned[-1][0] - cleaned[0][0] if len(cleaned) > 1 else 0.0
+        energy_before = _energy_wh(cleaned)
 
         trimmed = _trim_trailing(pd, TRIM_THRESHOLD_W)
         duration_after = trimmed[-1][0] - trimmed[0][0] if len(trimmed) > 1 else 0.0
@@ -160,7 +161,7 @@ def test_trailing_zero_impact():
         assert duration_after <= duration_before + 1e-9, (
             f"duration increased after trim in {c['file']}[{c['index']}]"
         )
-        assert n_trailing == len(pd) - len(trimmed), (
+        assert n_trailing == len(cleaned) - len(trimmed), (
             f"trailing count mismatch in {c['file']}[{c['index']}]"
         )
         if n_trailing > 0:

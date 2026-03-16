@@ -565,7 +565,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle — Odaberite Ciklus",
+        "title": "Ciklus trimanja — Odaberite Ciklus",
         "description": "Odaberite ciklus za obrezivanje. ✓ = dovršeno, ⚠ = nastavljeno, ✗ = prekinuto",
         "data": {
           "cycle_id": "Ciklus"
@@ -579,7 +579,7 @@
         }
       },
       "trim_cycle_start": {
-        "title": "Postavite Trim Start",
+        "title": "Postavite početak trimanja",
         "description": "Unesite minutni pomak od kojeg želite početi čuvati podatke (0 = početak ciklusa).",
         "data": {
           "trim_start_min": "Početak (minute)"
@@ -613,7 +613,7 @@
       "suggestions_ready_notification_title": "WashData: Predložene postavke spremne ({device})",
       "suggestions_ready_notification_message": "Senzor **Predložene postavke** sada javlja **{count}** preporuke koje se mogu poduzeti.\n\nDa biste ih pregledali i primijenili: **Postavke > Uređaji i usluge > WashData > Konfiguracija > Napredne postavke > Primijeni predložene vrijednosti**.\n\nPrijedlozi nisu obavezni i prikazuju se na pregled prije spremanja.",
       "trim_range_invalid": "Početak mora biti prije kraja. Molimo prilagodite svoje trim točke.",
-      "trim_failed": "Trim nije uspio. Ciklus možda više ne postoji ili je prozor prazan."
+      "trim_failed": "Trimanje nije uspjelo. Ciklus možda više ne postoji ili je prozor prazan."
     },
     "abort": {
       "no_cycles_found": "Nisu pronađeni ciklusi",
@@ -796,7 +796,7 @@
         "set_start": "Postavite početnu točku",
         "set_end": "Postavite krajnju točku",
         "reset": "Vrati na puno trajanje",
-        "apply": "Primijeni Trim",
+        "apply": "Primijeni trimanje",
         "cancel": "Otkazati"
       }
     }

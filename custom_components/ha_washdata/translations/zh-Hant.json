@@ -1071,13 +1071,13 @@
       "message": "未為此設備載入整合。"
     },
     "cycle_not_found_or_no_power": {
-      "message": "未找到自行車或沒有功率數據。"
+      "message": "未找到週期或沒有功率數據。"
     },
     "trim_failed_empty_window": {
       "message": "修剪失敗 — 未找到週期、無功率資料或產生的視窗為空。"
     },
     "trim_invalid_range": {
-      "message": "TRIM_END_S必須大於TRIM_START_S。"
+      "message": "trim_end_s必須大於trim_start_s。"
     }
   }
 }

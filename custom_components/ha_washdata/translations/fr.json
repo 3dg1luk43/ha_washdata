@@ -415,7 +415,7 @@
         "title": "Sélectionnez Cycle pour étiqueter",
         "description": "✓ = terminé, ⚠ = repris, ✗ = interrompu",
         "data": {
-          "cycle_id": "Faire du vélo"
+          "cycle_id": "Cycle"
         }
       },
       "select_cycle_to_delete": {
@@ -568,7 +568,7 @@
         "title": "Cycle de coupe — Sélectionnez le cycle",
         "description": "Sélectionnez un cycle à couper. ✓ = terminé, ⚠ = repris, ✗ = interrompu",
         "data": {
-          "cycle_id": "Faire du vélo"
+          "cycle_id": "Cycle"
         }
       },
       "trim_cycle": {
@@ -699,7 +699,7 @@
         "profile_summary_header": "Résumé du profil",
         "recent_cycles_header": "Cycles récents",
         "no_power_preview": "*Aucune donnée de puissance disponible pour l'aperçu.*",
-        "trim_cycle_preview_title": "Aperçu du réglage du cycle",
+        "trim_cycle_preview_title": "Aperçu du découpage du cycle",
         "trim_cycle_preview_no_data": "Aucune donnée de puissance disponible pour ce cycle.",
         "trim_cycle_preview_kept_suffix": "gardé"
       }
@@ -796,7 +796,7 @@
         "set_start": "Définir le point de départ",
         "set_end": "Définir le point final",
         "reset": "Réinitialiser à la durée complète",
-        "apply": "Appliquer la garniture",
+        "apply": "Appliquer le découpage",
         "cancel": "Annuler"
       }
     }

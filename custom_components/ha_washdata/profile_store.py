@@ -1080,6 +1080,7 @@ class ProfileStore:
         if self.repair_corrupted_power_data():
             await self.async_save()
             await self.async_rebuild_all_envelopes()
+            await self.async_save()
 
     # _migrate_v1_to_v2 and _decompress_power_from_raw removed; logic moved to WashDataStore
 
@@ -1232,7 +1233,18 @@ class ProfileStore:
             start_time_raw = cycle_data.get("start_time")
             start_time_iso: str | None = None
             if isinstance(start_time_raw, str) and start_time_raw:
-                start_time_iso = start_time_raw
+                parsed_dt = dt_util.parse_datetime(start_time_raw)
+                if parsed_dt is not None:
+                    start_time_iso = start_time_raw
+                else:
+                    try:
+                        ts = float(start_time_raw)
+                        start_time_iso = dt_util.utc_from_timestamp(ts).isoformat()
+                    except (ValueError, OSError):
+                        self._logger.debug(
+                            "add_cycle: unparseable string start_time %r, falling back",
+                            start_time_raw,
+                        )
             elif isinstance(start_time_raw, datetime):
                 start_time_iso = start_time_raw.isoformat()
             elif isinstance(start_time_raw, (int, float)):

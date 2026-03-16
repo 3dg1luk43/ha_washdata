@@ -699,7 +699,7 @@
         "profile_summary_header": "Resum del perfil",
         "recent_cycles_header": "Cicles recents",
         "no_power_preview": "*No hi ha dades de potència disponibles per a la vista prèvia.*",
-        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "trim_cycle_preview_title": "Previsualització retallat del cicle",
         "trim_cycle_preview_no_data": "No hi ha dades de potència disponibles per a aquest cicle.",
         "trim_cycle_preview_kept_suffix": "guardada"
       }

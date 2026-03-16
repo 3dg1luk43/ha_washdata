@@ -565,28 +565,28 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle — Veldu Cycle",
+        "title": "Klipptu hringrás — Veldu hringrás",
         "description": "Veldu hringrás til að klippa. ✓ = lokið, ⚠ = haldið áfram, ✗ = truflað",
         "data": {
           "cycle_id": "Hringrás"
         }
       },
       "trim_cycle": {
-        "title": "Trim Cycle",
+        "title": "Klipptu hringrás",
         "description": "Núverandi gluggi: {trim_summary}\n\n{trim_svg}",
         "data": {
           "action": "Aðgerð"
         }
       },
       "trim_cycle_start": {
-        "title": "Stilltu Trim Start",
+        "title": "Stilltu klippiupphaf",
         "description": "Sláðu inn mínútujöfnunina til að byrja að halda gögnum frá (0 = hringrás byrjun).",
         "data": {
           "trim_start_min": "Byrja (mínútur)"
         }
       },
       "trim_cycle_end": {
-        "title": "Stilltu Trim End",
+        "title": "Stilltu klippienda",
         "description": "Sláðu inn mínútujöfnunina til að hætta að halda gögnum á.",
         "data": {
           "trim_end_min": "Lok (mínútur)"
@@ -699,7 +699,7 @@
         "profile_summary_header": "Samantekt prófíls",
         "recent_cycles_header": "Nýlegar lotur",
         "no_power_preview": "*Engin orkugögn tiltæk til forskoðunar.*",
-        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "trim_cycle_preview_title": "Forskoðun klippingar hringrásar",
         "trim_cycle_preview_no_data": "Engin orkugögn tiltæk fyrir þessa lotu.",
         "trim_cycle_preview_kept_suffix": "haldið"
       }
@@ -731,7 +731,7 @@
         "select_cycle_to_label": "Merki ákveðin hringrás",
         "select_cycle_to_delete": "Eyða hringrás",
         "interactive_editor": "Sameina/skipta gagnvirkum ritstjóra",
-        "trim_cycle": "Trim Cycle Data"
+        "trim_cycle": "Gögn klippingar hringrásar"
       }
     },
     "manage_profiles_action": {
@@ -796,7 +796,7 @@
         "set_start": "Stilltu upphafspunkt",
         "set_end": "Stilltu endapunkt",
         "reset": "Endurstilla á fulla lengd",
-        "apply": "Notaðu Trim",
+        "apply": "Beita klippingu",
         "cancel": "Hætta við"
       }
     }
@@ -953,7 +953,7 @@
       }
     },
     "trim_cycle": {
-      "name": "Trim Cycle",
+      "name": "Klipptu hringrás",
       "description": "Klipptu aflgögn fyrri lotu í ákveðinn tímaglugga.",
       "fields": {
         "device_id": {
@@ -965,7 +965,7 @@
           "description": "Auðkenni hringrásarinnar sem á að klippa."
         },
         "trim_start_s": {
-          "name": "Trim Start (sekúndur)",
+          "name": "Klippiupphaf (sekúndur)",
           "description": "Geymdu gögn frá þessari færslu á nokkrum sekúndum. Sjálfgefið 0."
         },
         "trim_end_s": {
