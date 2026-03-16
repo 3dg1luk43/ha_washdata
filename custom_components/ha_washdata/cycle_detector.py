@@ -1,15 +1,17 @@
-"""Cycle detection logic for HA WashData."""
+"""Cycle detection logic for WashData."""
 
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any, Callable, cast
 import numpy as np
 
 from homeassistant.util import dt as dt_util
 
+from .log_utils import DeviceLoggerAdapter
 from .const import (
     STATE_OFF,
     STATE_STARTING,
@@ -17,10 +19,13 @@ from .const import (
     STATE_PAUSED,
     STATE_ENDING,
     STATE_FINISHED,
+    STATE_ANTI_WRINKLE,
     STATE_INTERRUPTED,
     STATE_FORCE_STOPPED,
     STATE_UNKNOWN,
     DEVICE_TYPE_WASHING_MACHINE,
+    DEVICE_TYPE_DRYER,
+    DEVICE_TYPE_WASHER_DRYER,
     DEFAULT_MAX_DEFERRAL_SECONDS,
     DEFAULT_DEFER_FINISH_CONFIDENCE,
 )
@@ -53,6 +58,10 @@ class CycleDetectorConfig:
     min_duration_ratio: float = 0.8  # Default deferred finish ratio
     match_interval: int = 300  # Default profile match interval
     profile_duration_tolerance: float = 0.25  # Default tolerance (±25%)
+    anti_wrinkle_enabled: bool = False
+    anti_wrinkle_max_power: float = 400.0
+    anti_wrinkle_max_duration: float = 60.0
+    anti_wrinkle_exit_power: float = 0.8
 
 
 @dataclass
@@ -137,8 +146,10 @@ class CycleDetector:
             ]
             | None
         ) = None,
+        device_name: str = "",
     ) -> None:
         """Initialize the cycle detector."""
+        self._logger = DeviceLoggerAdapter(_LOGGER, device_name)
         self._config = config
         self._on_state_change = on_state_change
         self._on_cycle_end = on_cycle_end
@@ -183,6 +194,13 @@ class CycleDetector:
         self._last_match_confidence: float = 0.0
         self._end_spike_seen: bool = False
 
+        # Anti-wrinkle tracking (dryers only)
+        self._anti_wrinkle_candidate_start: datetime | None = None
+        self._anti_wrinkle_candidate_peak: float = 0.0
+        self._anti_wrinkle_candidate_start_power: float = 0.0
+        self._anti_wrinkle_idle_time: float = 0.0  # Track time spent below exit_power while in ANTI_WRINKLE
+        self._anti_wrinkle_idle_timeout: float = 120.0
+
     @property
     def _dynamic_pause_threshold(self) -> float:
         """Calculate dynamic pause threshold based on sampling cadence."""
@@ -193,9 +211,8 @@ class CycleDetector:
     @property
     def _dynamic_end_threshold(self) -> float:
         """Calculate dynamic end candidate threshold."""
-        # Default 30s or 3 * p95 + buffer
-        # Let's ensure it's strictly greater than pause threshold to define state progression
-        base = max(30.0, 3.0 * self._p95_dt)
+        # Keep this generic for pause->ending transitions across all device types.
+        base = 3.0 * self._p95_dt
         # Ensure end threshold is at least 15s greater than pause threshold
         return max(base, self._dynamic_pause_threshold + 15.0)
 
@@ -243,9 +260,9 @@ class CycleDetector:
                 self.update_match(result)
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.debug("Profile match failed: %s", e)
+            self._logger.debug("Profile match failed: %s", e)
 
-    def update_match(self, result: tuple | Any) -> None:
+    def update_match(self, result: tuple[Any, ...] | list[Any] | Any) -> None:  # type: ignore[misc]
         """Process a match result (synchronously).
 
         Can be called by the matcher callback directly or asynchronously.
@@ -255,22 +272,76 @@ class CycleDetector:
         # Or MatchResult object if refactored, but currently wrapper returns tuple.
 
         is_match_mismatch = False
-        match_name = None
-        phase_name = None
+        match_name: str | None = None
+        phase_name: str | None = None
+        confidence: float = 0.0
+        expected_duration: float = 0.0
 
-        if isinstance(result, (list, tuple)):
-            if len(result) >= 5:
+        if isinstance(result, (list, tuple)):  # type: ignore[misc]
+            result_seq = cast(tuple[Any, ...] | list[Any], result)
+            if len(result_seq) >= 5:
                 (
-                    match_name,
-                    confidence,
-                    expected_duration,
-                    phase_name,
-                    is_match_mismatch,
-                ) = result[:5]
+                    raw_name,
+                    raw_confidence,
+                    raw_expected_duration,
+                    raw_phase_name,
+                    raw_mismatch,
+                ) = result_seq[:5]
+                match_name = str(raw_name) if raw_name is not None else None
+                try:
+                    confidence = float(raw_confidence)
+                    if not math.isfinite(confidence):
+                        confidence = 0.0
+                        self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
+                except (TypeError, ValueError):
+                    confidence = 0.0
+                    self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
+                try:
+                    expected_duration = float(raw_expected_duration)
+                    if not math.isfinite(expected_duration):
+                        expected_duration = 0.0
+                        self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                    elif expected_duration <= 0 or expected_duration > 6 * 3600.0:
+                        expected_duration = 0.0
+                        self._logger.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
+                except (TypeError, ValueError):
+                    expected_duration = 0.0
+                    self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                phase_name = str(raw_phase_name) if raw_phase_name is not None else None
+                is_match_mismatch = raw_mismatch if isinstance(raw_mismatch, bool) else bool(raw_mismatch)
             else:
                 # Fallback for old signature
-                (match_name, confidence, expected_duration, phase_name) = result[:4]
-                is_match_mismatch = False
+                if len(result_seq) >= 4:
+                    (
+                        raw_name,
+                        raw_confidence,
+                        raw_expected_duration,
+                        raw_phase_name,
+                    ) = result_seq[:4]
+                    match_name = str(raw_name) if raw_name is not None else None
+                    try:
+                        confidence = float(raw_confidence)
+                        if not math.isfinite(confidence):
+                            confidence = 0.0
+                            self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
+                    except (TypeError, ValueError):
+                        confidence = 0.0
+                        self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
+                    try:
+                        expected_duration = float(raw_expected_duration)
+                        if not math.isfinite(expected_duration):
+                            expected_duration = 0.0
+                            self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                        elif expected_duration <= 0 or expected_duration > 6 * 3600.0:
+                            expected_duration = 0.0
+                            self._logger.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
+                    except (TypeError, ValueError):
+                        expected_duration = 0.0
+                        self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                    phase_name = (
+                        str(raw_phase_name) if raw_phase_name is not None else None
+                    )
+                    is_match_mismatch = False
 
             # Store confidence for Smart Termination checks
             self._last_match_confidence = confidence or 0.0
@@ -305,10 +376,18 @@ class CycleDetector:
         self._ma_buffer = []
         self._energy_since_idle_wh = 0.0
         self._time_above_threshold = 0.0
-        self._time_below_threshold = 0.0
+        # Only reset time_below_threshold if not transitioning to ANTI_WRINKLE
+        # (ANTI_WRINKLE needs to track idle time to determine true-off)
+        if target_state != STATE_ANTI_WRINKLE:
+            self._time_below_threshold = 0.0
         self._last_match_time = None
         self._matched_profile = None
         self._ignore_power_until_idle = False  # Reset lockout
+        self._anti_wrinkle_candidate_start = None
+        self._anti_wrinkle_candidate_peak = 0.0
+        self._anti_wrinkle_candidate_start_power = 0.0
+        # Reset idle time tracker for anti-wrinkle
+        self._anti_wrinkle_idle_time = 0.0
 
     @property
     def state(self) -> str:
@@ -353,7 +432,7 @@ class CycleDetector:
         if self._ignore_power_until_idle:
             if power < self._config.start_threshold_w:
                 self._ignore_power_until_idle = False
-                _LOGGER.debug(
+                self._logger.debug(
                     "Power dropped below start threshold. Manual stop lockout cleared."
                 )
             else:
@@ -407,10 +486,103 @@ class CycleDetector:
 
         self._last_power = power
 
+        anti_wrinkle_active = (
+            self._config.anti_wrinkle_enabled
+            and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
+        )
+
         # 3. State Machine
 
-        if self._state in (STATE_OFF, STATE_FINISHED, STATE_INTERRUPTED, STATE_FORCE_STOPPED):
-            if is_high:
+        if self._state in (
+            STATE_OFF,
+            STATE_FINISHED,
+            STATE_INTERRUPTED,
+            STATE_FORCE_STOPPED,
+            STATE_ANTI_WRINKLE,
+        ):
+            started_from_anti_wrinkle = False
+            if anti_wrinkle_active and self._state == STATE_ANTI_WRINKLE and is_high:
+                if self._anti_wrinkle_candidate_start is None:
+                    self._anti_wrinkle_candidate_start = timestamp
+                    self._anti_wrinkle_candidate_peak = power
+                    self._anti_wrinkle_candidate_start_power = power
+                else:
+                    self._anti_wrinkle_candidate_peak = max(
+                        self._anti_wrinkle_candidate_peak, power
+                    )
+
+                candidate_duration = (
+                    timestamp - self._anti_wrinkle_candidate_start
+                ).total_seconds()
+                exceeds = (
+                    self._anti_wrinkle_candidate_peak
+                    > self._config.anti_wrinkle_max_power
+                    or power > self._config.anti_wrinkle_max_power
+                    or candidate_duration > self._config.anti_wrinkle_max_duration
+                )
+
+                if exceeds:
+                    candidate_start = self._anti_wrinkle_candidate_start
+                    candidate_peak = self._anti_wrinkle_candidate_peak
+                    candidate_start_power = self._anti_wrinkle_candidate_start_power
+                    self._anti_wrinkle_candidate_start = None
+                    self._anti_wrinkle_candidate_peak = 0.0
+                    self._anti_wrinkle_candidate_start_power = 0.0
+                    self._transition_to(STATE_STARTING, timestamp)
+                    started_from_anti_wrinkle = True
+                    self._current_cycle_start = candidate_start or timestamp
+
+                    # Preserve the anti-wrinkle candidate window instead of dropping ramp-up samples.
+                    if candidate_start and candidate_start < timestamp:
+                        start_power = candidate_start_power if candidate_start_power > 0 else power
+                        self._power_readings = [(candidate_start, start_power), (timestamp, power)]
+                        interval_s = (timestamp - candidate_start).total_seconds()
+                        avg_power = (start_power + power) / 2.0
+                        self._energy_since_idle_wh = max(0.0, avg_power * (interval_s / 3600.0))
+                    else:
+                        self._power_readings = [(timestamp, power)]
+                        self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
+
+                    self._cycle_max_power = max(candidate_peak, power)
+                    self._abrupt_drop = False
+            elif self._state != STATE_ANTI_WRINKLE:
+                self._anti_wrinkle_candidate_start = None
+                self._anti_wrinkle_candidate_peak = 0.0
+                self._anti_wrinkle_candidate_start_power = 0.0
+
+            if self._state == STATE_ANTI_WRINKLE:
+                # Track time in idle (below exit_power threshold)
+                effective_exit = max(self._config.anti_wrinkle_exit_power, self._config.stop_threshold_w)
+                if power < effective_exit:
+                    # Low-power gap invalidates any burst candidate collected while in anti-wrinkle.
+                    self._anti_wrinkle_candidate_start = None
+                    self._anti_wrinkle_candidate_peak = 0.0
+                    self._anti_wrinkle_candidate_start_power = 0.0
+                    self._anti_wrinkle_idle_time += dt
+                    anti_wrinkle_end_threshold = max(
+                        self._dynamic_end_threshold,
+                        self._anti_wrinkle_idle_timeout,
+                    )
+                    if self._anti_wrinkle_idle_time >= anti_wrinkle_end_threshold:
+                        self._transition_to(STATE_OFF, timestamp)
+                        return
+                else:
+                    # Reset idle timer when power rises (burst detected)
+                    self._anti_wrinkle_idle_time = 0.0
+
+                # Exit conditions:
+                # 1. Idle duration exceeded (handled above), OR
+                # 2. Safety timeout (2 hours in anti-wrinkle), OR
+                # 3. External trigger (user_stop, external triggers handled by manager)
+                if (
+                    self._state_enter_time
+                    and (timestamp - self._state_enter_time).total_seconds() > 7200
+                ):
+                    # Safety timeout: 2 hours in anti-wrinkle
+                    self._transition_to(STATE_OFF, timestamp)
+                return
+
+            if is_high and not started_from_anti_wrinkle:
                 # Transition to STARTING
                 self._transition_to(STATE_STARTING, timestamp)
                 self._current_cycle_start = timestamp
@@ -420,7 +592,10 @@ class CycleDetector:
                 self._abrupt_drop = False
             elif self._state != STATE_OFF:
                 # Auto-expire terminal states after 30 minutes
-                if self._state_enter_time and (timestamp - self._state_enter_time).total_seconds() > 1800:
+                if (
+                    self._state_enter_time
+                    and (timestamp - self._state_enter_time).total_seconds() > 1800
+                ):
                     self._transition_to(STATE_OFF, timestamp)
 
         elif self._state == STATE_STARTING:
@@ -434,7 +609,7 @@ class CycleDetector:
             # Abort if power drops below threshold before confirmation
             if not is_high and self._time_below_threshold > 1.0:  # 1s grace period
                 # False start
-                _LOGGER.debug(
+                self._logger.debug(
                     "False start detected: power dropped after %.2fs",
                     self._time_above_threshold,
                 )
@@ -480,35 +655,59 @@ class CycleDetector:
             if is_high:
                 # End spike detected! Mark it
                 self._end_spike_seen = True
-                _LOGGER.debug("End spike detected (power high in ENDING state)")
-                
+                self._logger.debug("End spike detected (power high in ENDING state)")
+
                 # Check if we're past expected duration - if so, DON'T resume to RUNNING
                 # This prevents the cycle from bouncing forever on pump-out spikes
                 start_time = self._current_cycle_start or timestamp
                 current_duration = (timestamp - start_time).total_seconds()
-                
+
+                is_dishwasher = self._config.device_type == "dishwasher"
+
                 # Sanity check: if expected_duration is unreasonable (>6 hours), use fallback
                 max_reasonable = 21600.0  # 6 hours
                 effective_expected = self._expected_duration
-                
+
                 if effective_expected <= 0 or effective_expected > max_reasonable:
                     # Fallback: use current duration + buffer if we've run > 3 hours
                     # (Assumes any cycle over 3 hours running is near completion when in ENDING)
                     if current_duration > 10800:  # 3 hours
                         effective_expected = current_duration * 0.99  # Always past threshold
-                        _LOGGER.debug(
+                        self._logger.debug(
                             "End spike check using fallback: expected_duration=%ds is unreasonable, "
                             "using current_duration=%ds as reference",
                             int(self._expected_duration), int(current_duration)
                         )
-                
+
                 past_expected = (
-                    effective_expected > 0 
+                    effective_expected > 0
                     and current_duration >= (effective_expected * 0.98)
                 )
-                
+
+                # If ENDING has already lasted long enough, treat any power burst as
+                # terminal (applies to all device types). Dishwashers additionally check
+                # proximity to the expected duration.
+                long_ending_tail = self._time_in_state >= 120.0
+                terminal_spike = long_ending_tail
+
+                if is_dishwasher:
+                    near_expected = (
+                        effective_expected > 0
+                        and current_duration >= (effective_expected * 0.90)
+                    )
+                    terminal_spike = near_expected or long_ending_tail
+
+                if terminal_spike:
+                    self._logger.debug(
+                        "End spike kept in ENDING (duration %.0fs/%.0fs, time_in_ending %.0fs)",
+                        current_duration,
+                        effective_expected,
+                        self._time_in_state,
+                    )
+                    return
+
                 if past_expected:
-                    _LOGGER.debug(
+                    self._logger.debug(
                         "End spike ignored for state transition (past expected duration %.0fs/%.0fs)",
                         current_duration, effective_expected
                     )
@@ -567,7 +766,7 @@ class CycleDetector:
                                 and not end_spike_seen
                                 and not past_wait_period
                             ):
-                                _LOGGER.debug(
+                                self._logger.debug(
                                     "Waiting for end spike (duration %.0fs, expected %.0fs + "
                                     "%.0fs wait)",
                                     current_duration,
@@ -576,7 +775,7 @@ class CycleDetector:
                                 )
                                 return  # Don't finish yet, wait for spike or timeout
 
-                            _LOGGER.info(
+                            self._logger.info(
                                 "Smart Termination: Profile '%s' match confirmed (duration %.0fs, "
                                 "conf %.2f, spike_seen=%s), ending.",
                                 self._matched_profile,
@@ -631,7 +830,7 @@ class CycleDetector:
                         self._finish_cycle(timestamp, status="completed")
                     else:
 
-                        _LOGGER.debug(
+                        self._logger.debug(
                             "Cycle ending prevented by energy gate: %.4fWh > %.4fWh",
                             recent_e,
                             self._config.end_energy_threshold,
@@ -651,12 +850,23 @@ class CycleDetector:
         # Reset energy accumulator on transition to OFF
         if new_state == STATE_OFF:
             self._energy_since_idle_wh = 0.0
+            # Also reset idle time tracker when leaving ANTI_WRINKLE
+            self._anti_wrinkle_idle_time = 0.0
 
         # Reset end spike tracker when entering ENDING state
         if new_state == STATE_ENDING:
             self._end_spike_seen = False
+        elif new_state == STATE_ANTI_WRINKLE:
+            self._anti_wrinkle_candidate_start = None
+            self._anti_wrinkle_candidate_peak = 0.0
+            self._anti_wrinkle_candidate_start_power = 0.0
+            self._anti_wrinkle_idle_time = 0.0  # Reset idle time when entering ANTI_WRINKLE
+            self._sub_state = "Anti-Wrinkle"
+        elif new_state == STATE_STARTING:
+            # Reset idle time if exiting ANTI_WRINKLE to STARTING (high-power burst resumed)
+            self._anti_wrinkle_idle_time = 0.0
 
-        _LOGGER.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
+        self._logger.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)
 
     def should_defer_for_profile(self) -> bool:
@@ -672,7 +882,7 @@ class CycleDetector:
         """Check if we should defer termination based on expected duration."""
         # Check explicit verified pause override from manager
         if getattr(self, "_verified_pause", False):
-            _LOGGER.debug("Deferring cycle finish: Verified pause active")
+            self._logger.debug("Deferring cycle finish: Verified pause active")
             return True
 
         if not self._matched_profile or self._expected_duration <= 0:
@@ -680,7 +890,7 @@ class CycleDetector:
 
         # Safety: Don't defer forever
         if duration > (self._expected_duration + DEFAULT_MAX_DEFERRAL_SECONDS):
-            _LOGGER.warning(
+            self._logger.warning(
                 "Deferral limit exceeded (%.0fs > expected %.0f + %s), allowing finish",
                 duration,
                 self._expected_duration,
@@ -696,7 +906,7 @@ class CycleDetector:
         # we only defer if we are VERY confident this profile is correct.
         # This prevents hanging on too-long profiles that matched early but are now diverging.
         if self._last_match_confidence < DEFAULT_DEFER_FINISH_CONFIDENCE:
-            _LOGGER.debug(
+            self._logger.debug(
                 "Not deferring finish: confidence %.2f too low for unverified pause (profile: %s)",
                 self._last_match_confidence,
                 self._matched_profile,
@@ -711,7 +921,7 @@ class CycleDetector:
 
         # Primary check: Is duration significantly below expectation?
         if duration < (self._expected_duration * ratio):
-            _LOGGER.debug(
+            self._logger.debug(
                 "Deferring cycle finish: duration %.0fs < %.0f%% of expected %.0fs (profile: %s, confidence %.2f)",
                 duration,
                 ratio * 100,
@@ -785,25 +995,33 @@ class CycleDetector:
             if last_t < end_time:
                 final_readings.append((end_time, last_p))
 
-        cycle_data = {
+        start_ts = self._current_cycle_start.timestamp()
+        cycle_data: dict[str, Any] = {
             "start_time": self._current_cycle_start.isoformat(),
             "end_time": end_time.isoformat(),
             "duration": duration,
             "max_power": self._cycle_max_power,
             "status": status,
             "termination_reason": termination_reason,
-            "power_data": [(t.isoformat(), p) for t, p in final_readings],
+            "power_data": [[round(t.timestamp() - start_ts, 1), p] for t, p in final_readings],
         }
 
-        _LOGGER.info("Cycle Finished: %s, %.1f min", status, duration / 60)
+        self._logger.info("Cycle Finished: %s, %.1f min", status, duration / 60)
         self._on_cycle_end(cycle_data)
-        
+
         target = STATE_FINISHED
         if status == "interrupted":
             target = STATE_INTERRUPTED
         elif status == "force_stopped":
             target = STATE_FORCE_STOPPED
-            
+        elif (
+            status == "completed"
+            and termination_reason in {"timeout", "smart"}
+            and self._config.anti_wrinkle_enabled
+            and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
+        ):
+            target = STATE_ANTI_WRINKLE
+
         self.reset(target_state=target)
 
     # Stub methods for compatibility or simpler logic
@@ -858,6 +1076,7 @@ class CycleDetector:
             "state_enter_time": (
                 self._state_enter_time.isoformat() if self._state_enter_time else None
             ),
+            "end_spike_seen": self._end_spike_seen,
         }
 
     def get_elapsed_seconds(self) -> float:
@@ -894,14 +1113,18 @@ class CycleDetector:
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
             self._matched_profile = snapshot.get("matched_profile")
             self._expected_duration = snapshot.get("expected_duration", 0.0)
+            self._end_spike_seen = snapshot.get("end_spike_seen", False)
 
-            # Restore state enter time
+            # Restore state enter time and recompute time_in_state from it
             enter_time = snapshot.get("state_enter_time")
             if enter_time:
                 try:
                     self._state_enter_time = dt_util.parse_datetime(enter_time)
+                    if self._state_enter_time:
+                        elapsed = (dt_util.now() - self._state_enter_time).total_seconds()
+                        self._time_in_state = max(0.0, elapsed)
                 except Exception: # pylint: disable=broad-exception-caught
-                     _LOGGER.warning("Failed to parse state enter time")
+                    self._logger.warning("Failed to parse state enter time")
 
             start = snapshot.get("current_cycle_start")
             self._current_cycle_start = None
@@ -911,10 +1134,10 @@ class CycleDetector:
                     if dt_start and dt_start.tzinfo is None:
                         # Fix Naive Timestamp (Legacy Data)
                         dt_start = dt_start.replace(tzinfo=dt_util.now().tzinfo)
-                        _LOGGER.warning("Restored Naive start_time, assuming local: %s", dt_start)
+                        self._logger.warning("Restored Naive start_time, assuming local: %s", dt_start)
                     self._current_cycle_start = dt_start
                 except Exception:  # pylint: disable=broad-exception-caught
-                    _LOGGER.warning("Failed to parse start time: %s", start)
+                    self._logger.warning("Failed to parse start time: %s", start)
 
             readings = snapshot.get("power_readings", [])
             self._power_readings = []
@@ -923,16 +1146,24 @@ class CycleDetector:
             has_naive_readings = False
 
             for r in readings:
-                if isinstance(r, (list, tuple)) and len(r) == 2:
-                    t = dt_util.parse_datetime(r[0])
-                    if t:
-                        if t.tzinfo is None:
-                            t = t.replace(tzinfo=dt_util.now().tzinfo)
-                            has_naive_readings = True
-                        self._power_readings.append((t, float(r[1])))
+                if isinstance(r, (list, tuple)):
+                    reading = cast(list[Any] | tuple[Any, ...], r)
+                    if len(reading) < 2:
+                        continue
+                    try:
+                        t = dt_util.parse_datetime(str(reading[0]))
+                        if t:
+                            if t.tzinfo is None:
+                                t = t.replace(tzinfo=dt_util.now().tzinfo)
+                                has_naive_readings = True
+                            value = float(reading[1])
+                            if math.isfinite(value):
+                                self._power_readings.append((t, value))
+                    except (TypeError, ValueError) as exc:
+                        self._logger.debug("Skipping malformed power reading %s: %s", r, exc)
 
             if has_naive_readings:
-                _LOGGER.warning(
+                self._logger.warning(
                     "Restored %d power readings with Naive timestamps (fixed to local)",
                     len(self._power_readings),
                 )
@@ -948,5 +1179,5 @@ class CycleDetector:
                 self._last_active_time = self._current_cycle_start
 
         except Exception as e:  # pylint: disable=broad-exception-caught
-            _LOGGER.error("Failed restore: %s", e)
+            self._logger.error("Failed restore: %s", e)
             self.reset()

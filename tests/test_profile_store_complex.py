@@ -54,9 +54,11 @@ async def test_import_data(store):
     }
     
     with patch.object(store, "async_rebuild_envelope", AsyncMock(return_value=True)):
-        # async_import_data currently returns None despite type hint
-        await store.async_import_data(payload)
-        
+        result = await store.async_import_data(payload)
+
+    assert isinstance(result, dict)
+    assert "entry_data" in result
+    assert "entry_options" in result
     assert "Imported" in store.get_profiles()
     assert len(store.get_past_cycles()) == 1
 
