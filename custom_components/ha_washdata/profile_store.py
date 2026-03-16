@@ -1229,11 +1229,16 @@ class ProfileStore:
 
         if raw_data:
             start_time_raw = cycle_data.get("start_time")
-            start_time_iso: str | None = (
-                start_time_raw if isinstance(start_time_raw, str) and start_time_raw
-                else start_time_raw.isoformat() if isinstance(start_time_raw, datetime)
-                else None
-            )
+            start_time_iso: str | None = None
+            if isinstance(start_time_raw, str) and start_time_raw:
+                start_time_iso = start_time_raw
+            elif isinstance(start_time_raw, datetime):
+                start_time_iso = start_time_raw.isoformat()
+            elif isinstance(start_time_raw, (int, float)):
+                try:
+                    start_time_iso = dt_util.utc_from_timestamp(float(start_time_raw)).isoformat()
+                except (ValueError, OSError):
+                    pass
             if start_time_iso is None and _value_to_timestamp(start_time_raw) is None:
                 self._logger.debug("add_cycle: invalid start_time %r, skipping power_data normalization", start_time_raw)
                 self._data["past_cycles"].append(cycle_data)
