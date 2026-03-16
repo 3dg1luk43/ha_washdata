@@ -80,7 +80,7 @@
           "show_advanced": "Golygu Gosodiadau Uwch (Cam Nesaf)"
         },
         "data_description": {
-          "apply_suggestions": "Ticiwch y blwch hwn i gopïo'r gwerthoedd a awgrymir gan yr algorithm dysgu i'r ffurflen. Adolygu cyn cadw.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power}W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- dim_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- hyd_goddefgarwch: {suggested_duration_tolerance}\n- proffil_hyd_goddefgarwch: {suggested_profile_duration_tolerance}\n- proffil_match_min_duration_cymhareb: {suggested_profile_match_min_duration_ratio}\n- proffil_match_max_duration_cymhareb: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Ticiwch y blwch hwn i gopïo'r gwerthoedd a awgrymir gan yr algorithm dysgu i'r ffurflen. Adolygu cyn cadw.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power}W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- dim_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- hyd_goddefgarwch: {suggested_duration_tolerance}\n- proffil_hyd_goddefgarwch: {suggested_profile_duration_tolerance}\n- proffil_match_min_duration_cymhareb: {suggested_profile_match_min_duration_ratio}\n- proffil_match_max_duration_cymhareb: {suggested_profile_match_max_duration_ratio}\n- cychwyn_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Dewiswch y math o offer (Peiriant Golchi, Sychwr, Peiriant golchi llestri, Peiriant Coffi, EV). Mae'r tag hwn yn cael ei storio gyda phob cylch ar gyfer trefniadaeth well.",
           "power_sensor": "Yr endid synhwyrydd sy'n adrodd am bŵer amser real (mewn watiau). Gallwch chi newid hyn unrhyw bryd heb golli data hanesyddol - mae'n ddefnyddiol os ydych chi'n amnewid plwg clyfar.",
           "min_power": "Mae darlleniadau pŵer uwchlaw'r trothwy hwn (mewn watiau) yn dangos bod y teclyn yn rhedeg. Dechreuwch gyda 2W ar gyfer y rhan fwyaf o ddyfeisiau.",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Rhesymeg Sbardun Gwrthdro (Sbardun wedi'i DIFFODD)"
         },
         "data_description": {
-          "apply_suggestions": "Ticiwch y blwch hwn i gopïo'r gwerthoedd a awgrymir gan yr algorithm dysgu i'r ffurflen. Adolygu cyn cadw.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power}W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- dim_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- hyd_goddefgarwch: {suggested_duration_tolerance}\n- proffil_hyd_goddefgarwch: {suggested_profile_duration_tolerance}\n- proffil_match_min_duration_cymhareb: {suggested_profile_match_min_duration_ratio}\n- proffil_match_max_duration_cymhareb: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "Ticiwch y blwch hwn i agor cam adolygu ar gyfer gwerthoedd a awgrymir o'r algorithm dysgu. Nid oes dim yn cael ei arbed yn awtomatig.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power}W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- dim_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- hyd_goddefgarwch: {suggested_duration_tolerance}\n- proffil_hyd_goddefgarwch: {suggested_profile_duration_tolerance}\n- proffil_match_min_duration_cymhareb: {suggested_profile_match_min_duration_ratio}\n- proffil_match_max_duration_cymhareb: {suggested_profile_match_max_duration_ratio}\n- cychwyn_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Rhaid i bŵer godi UCHOD y trothwy hwn i DECHRAU cylchred. Gosodwch yn uwch na'ch pŵer wrth gefn. Diofyn: min_power + 1 W.",
           "stop_threshold_w": "Mae'n rhaid i bŵer ddisgyn DAN y trothwy hwn i DDIWEDDU cylchred. Gosodwch ychydig yn uwch na sero i osgoi sŵn sy'n sbarduno pennau ffug. Diofyn: 0.6 * min_power.",
           "min_off_gap": "Os bydd cylchred yn dechrau o fewn yr eiliadau lawer hyn i'r diwedd un blaenorol, byddant yn cael eu HUNOD yn un gylchred.",
@@ -346,14 +346,14 @@
       },
       "assign_profile_phases_auto_detect": {
         "title": "Cyfnodau a ganfuwyd yn awtomatig",
-        "description": "Proffil: ***{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} cam(au) wedi'u canfod yn awtomatig.** Dewiswch weithred isod.",
+        "description": "Proffil: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} cam(au) wedi'u canfod yn awtomatig.** Dewiswch weithred isod.",
         "data": {
           "action": "Gweithred"
         }
       },
       "assign_profile_phases_auto_detect_name": {
         "title": "Enw Cyfnodau Canfyddedig",
-        "description": "Proffil: ***{profile_name}**\n\n**{detected_count} cam(au) wedi'u canfod:**\n{ranges_summary}\n\nRhowch enw i bob cam."
+        "description": "Proffil: **{profile_name}**\n\n**{detected_count} cam(au) wedi'u canfod:**\n{ranges_summary}\n\nRhowch enw i bob cam."
       },
       "assign_profile_phases_select": {
         "title": "Neilltuo Ystod Cyfnod",
@@ -638,7 +638,7 @@
         "choose_action": "__Dewiswch weithred isod:__",
         "tbl_count": "Cyfri",
         "tbl_avg": "Cyf",
-        "tbl_min": "Minnau",
+        "tbl_min": "Lleiaf",
         "tbl_max": "Max",
         "tbl_energy_avg": "Egni (Cyf)",
         "tbl_energy_total": "Ynni (Cyfanswm)",
@@ -807,7 +807,7 @@
           "description": "Y proffil i'w ddileu."
         },
         "unlabel_cycles": {
-          "name": "Unlabel Cycles",
+          "name": "Dad-labelu Cylchoedd",
           "description": "Tynnwch label proffil o gylchoedd gan ddefnyddio'r proffil hwn."
         }
       }

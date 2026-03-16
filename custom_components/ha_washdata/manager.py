@@ -2471,7 +2471,14 @@ class WashDataManager:
         if self._notify_actions:
             actions_sent = bool(self._run_notification_actions(variables))
 
-        # Keep action execution independent from notify-service delivery.
+        # If actions fired and there is no notify service configured, skip the
+        # service/persistent-notification path entirely.
+        notify_service = self._notify_service or self.config_entry.options.get(
+            CONF_NOTIFY_SERVICE
+        )
+        if actions_sent and not notify_service:
+            return True
+
         service_sent = self._send_notification_service(
             message,
             title=title,

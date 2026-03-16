@@ -106,11 +106,13 @@ class SuggestionEngine:
 
         ratios: list[float] = []
         for c in cycles:
+            if not isinstance(c, dict):
+                continue
             profile_name = c.get("profile_name")
             if not isinstance(profile_name, str) or c.get("status") == "interrupted":
                 continue
             prof = profiles.get(profile_name)
-            if not prof:
+            if not isinstance(prof, dict):
                 continue
             try:
                 avg = float(prof.get("avg_duration") or 0.0)

@@ -80,7 +80,7 @@
           "show_advanced": "تحرير الإعدادات المتقدمة (الخطوة التالية)"
         },
         "data_description": {
-          "apply_suggestions": "حدد هذا المربع لنسخ القيم التي تقترحها خوارزمية التعلم في النموذج. المراجعة قبل الحفظ.\n\nمقترح (من التعلم):\n- الحد الأدنى من الطاقة: {suggested_min_power} وات\n- off_delay: {suggested_off_delay} ثانية\n- Watchdog_interval: {suggested_watchdog_interval} ثانية\n- no_update_active_timeout: {suggested_no_update_active_timeout} ثانية\n- Profile_match_interval: {suggested_profile_match_interval} ثانية\n- الثقة_التسمية_التلقائية: {suggested_auto_label_confidence}\n- مدة_التسامح: {suggested_duration_tolerance}\n- ملف_مدة_التسامح: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "حدد هذا المربع لنسخ القيم التي تقترحها خوارزمية التعلم في النموذج. المراجعة قبل الحفظ.\n\nمقترح (من التعلم):\n- الحد الأدنى من الطاقة: {suggested_min_power} وات\n- off_delay: {suggested_off_delay} ثانية\n- Watchdog_interval: {suggested_watchdog_interval} ثانية\n- no_update_active_timeout: {suggested_no_update_active_timeout} ثانية\n- Profile_match_interval: {suggested_profile_match_interval} ثانية\n- الثقة_التسمية_التلقائية: {suggested_auto_label_confidence}\n- مدة_التسامح: {suggested_duration_tolerance}\n- ملف_مدة_التسامح: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} ث\n- stop_threshold_w: {suggested_stop_threshold_w} دبليو\n- حد_طاقة_نهاية_الطاقة: {suggested_end_energy_threshold} وات\n- منطقة_التشغيل_الميتة: {suggested_running_dead_zone} ثانية\n{suggested_reason}",
           "device_type": "اختر نوع الجهاز (غسالة، مجفف، غسالة أطباق، ماكينة صنع القهوة، EV). يتم تخزين هذه العلامة مع كل دورة لتنظيم أفضل.",
           "power_sensor": "يقوم كيان المستشعر بالإبلاغ عن الطاقة في الوقت الفعلي (بالواط). يمكنك تغيير هذا في أي وقت دون فقدان البيانات التاريخية، وهو أمر مفيد إذا قمت باستبدال القابس الذكي.",
           "min_power": "تشير قراءات الطاقة فوق هذا الحد (بالواط) إلى أن الجهاز قيد التشغيل. ابدأ بـ 2 وات لمعظم الأجهزة.",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "عكس منطق الزناد (تشغيل الزناد)"
         },
         "data_description": {
-          "apply_suggestions": "حدد هذا المربع لنسخ القيم التي تقترحها خوارزمية التعلم في النموذج. المراجعة قبل الحفظ.\n\nمقترح (من التعلم):\n- الحد الأدنى من الطاقة: {suggested_min_power} وات\n- off_delay: {suggested_off_delay} ثانية\n- Watchdog_interval: {suggested_watchdog_interval} ثانية\n- no_update_active_timeout: {suggested_no_update_active_timeout} ثانية\n- Profile_match_interval: {suggested_profile_match_interval} ثانية\n- الثقة_التسمية_التلقائية: {suggested_auto_label_confidence}\n- مدة_التسامح: {suggested_duration_tolerance}\n- ملف_مدة_التسامح: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "apply_suggestions": "حدد هذا المربع لفتح خطوة مراجعة للقيم المقترحة من خوارزمية التعلم. لا يتم حفظ أي شيء تلقائيًا.\n\nمقترح (من التعلم):\n- الحد الأدنى من الطاقة: {suggested_min_power} وات\n- off_delay: {suggested_off_delay} ثانية\n- Watchdog_interval: {suggested_watchdog_interval} ثانية\n- no_update_active_timeout: {suggested_no_update_active_timeout} ثانية\n- Profile_match_interval: {suggested_profile_match_interval} ثانية\n- الثقة_التسمية_التلقائية: {suggested_auto_label_confidence}\n- مدة_التسامح: {suggested_duration_tolerance}\n- ملف_مدة_التسامح: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} ث\n- stop_threshold_w: {suggested_stop_threshold_w} دبليو\n- حد_طاقة_نهاية_الطاقة: {suggested_end_energy_threshold} وات\n- منطقة_التشغيل_الميتة: {suggested_running_dead_zone} ثانية\n{suggested_reason}",
           "start_threshold_w": "يجب أن ترتفع الطاقة فوق هذا الحد لبدء الدورة. تعيين أعلى من الطاقة الاحتياطية الخاصة بك. الافتراضي: min_power + 1 وات.",
           "stop_threshold_w": "يجب أن تنخفض الطاقة عن هذا الحد لإنهاء الدورة. اضبطه أعلى بقليل من الصفر لتجنب التسبب في حدوث نهايات زائفة. الافتراضي: 0.6 * min_power.",
           "min_off_gap": "إذا بدأت الدورة خلال هذه الثواني العديدة من انتهاء الدورة السابقة، فسيتم دمجها في دورة واحدة.",
@@ -307,7 +307,7 @@
       },
       "assign_profile_phases": {
         "title": "تعيين نطاقات المرحلة",
-        "description": "معاينة المرحلة للملف الشخصي: **{profile_name}**\n\n{timeline_svg}\n\n** النطاقات الحالية: **\n{current_ranges}\n\nاستخدم الإجراءات أدناه لإضافة النطاقات أو تعديلها أو حذفها أو حفظها.",
+        "description": "معاينة المرحلة للملف الشخصي: **{profile_name}**\n\n{timeline_svg}\n\n**النطاقات الحالية:**\n{current_ranges}\n\nاستخدم الإجراءات أدناه لإضافة النطاقات أو تعديلها أو حذفها أو حفظها.",
         "data": {
           "action": "فعل"
         }
@@ -346,7 +346,7 @@
       },
       "assign_profile_phases_auto_detect": {
         "title": "المراحل المكتشفة تلقائيًا",
-        "description": "الملف الشخصي: **{profile_name}**\n\n{timeline_svg}\n\n**تم اكتشاف {detected_count} مرحلة (مراحل) تلقائيًا. ** اختر إجراءً أدناه.",
+        "description": "الملف الشخصي: **{profile_name}**\n\n{timeline_svg}\n\n**تم اكتشاف {detected_count} مرحلة (مراحل) تلقائيًا.** اختر إجراءً أدناه.",
         "data": {
           "action": "فعل"
         }
@@ -581,9 +581,9 @@
       "timestamp_mode_cycle_required": "الرجاء تحديد دورة المصدر عند استخدام وضع الطابع الزمني.",
       "no_phase_ranges": "لا توجد نطاقات طورية متاحة لهذا الإجراء حتى الآن.",
       "feedback_notification_title": "WashData: دورة التحقق ({device})",
-      "feedback_notification_message": "**الجهاز**: {device}\n**البرنامج**: {program} (نسبة الثقة {confidence}%)\n**الوقت**: {time}\n\nيحتاج WashData إلى مساعدتك للتحقق من هذه الدورة المكتشفة.\n\nيرجى الانتقال إلى **الإعدادات > الأجهزة والخدمات > WashData > التكوين > تعليقات التعلم ** لتأكيد هذه النتيجة أو تصحيحها.",
+      "feedback_notification_message": "**الجهاز**: {device}\n**البرنامج**: {program} (نسبة الثقة {confidence}%)\n**الوقت**: {time}\n\nيحتاج WashData إلى مساعدتك للتحقق من هذه الدورة المكتشفة.\n\nيرجى الانتقال إلى **الإعدادات > الأجهزة والخدمات > WashData > التكوين > تعليقات التعلم** لتأكيد هذه النتيجة أو تصحيحها.",
       "suggestions_ready_notification_title": "WashData: الإعدادات المقترحة جاهزة ({device})",
-      "suggestions_ready_notification_message": "يقدم مستشعر **الإعدادات المقترحة** الآن **{count}** توصيات قابلة للتنفيذ.\n\nلمراجعتها وتطبيقها: **الإعدادات > الأجهزة والخدمات > WashData > التكوين > الإعدادات المتقدمة > تطبيق القيم المقترحة **.\n\nالاقتراحات اختيارية ويتم عرضها للمراجعة قبل حفظها."
+      "suggestions_ready_notification_message": "يقدم مستشعر **الإعدادات المقترحة** الآن **{count}** توصيات قابلة للتنفيذ.\n\nلمراجعتها وتطبيقها: **الإعدادات > الأجهزة والخدمات > WashData > التكوين > الإعدادات المتقدمة > تطبيق القيم المقترحة**.\n\nالاقتراحات اختيارية ويتم عرضها للمراجعة قبل حفظها."
     },
     "abort": {
       "no_cycles_found": "لم يتم العثور على دورات",
@@ -912,7 +912,7 @@
   "entity": {
     "binary_sensor": {
       "running": {
-        "name": "جري"
+        "name": "قيد التشغيل"
       },
       "match_ambiguity": {
         "name": "غموض المباراة"
@@ -920,12 +920,12 @@
     },
     "sensor": {
       "washer_state": {
-        "name": "ولاية",
+        "name": "الحالة",
         "state": {
-          "off": "عن",
+          "off": "إيقاف",
           "idle": "عاطل",
           "starting": "البدء",
-          "running": "جري",
+          "running": "قيد التشغيل",
           "paused": "متوقف مؤقتًا",
           "ending": "إنهاء",
           "finished": "انتهى",
@@ -990,7 +990,7 @@
     },
     "button": {
       "force_end_cycle": {
-        "name": "دورة نهاية القوة"
+        "name": "إنهاء قسري للدورة"
       }
     }
   }

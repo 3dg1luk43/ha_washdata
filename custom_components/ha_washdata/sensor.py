@@ -784,11 +784,16 @@ class WasherSuggestionsSensor(WasherBaseSensor):
     @property
     def extra_state_attributes(self):  # type: ignore[override]
         suggestions: dict[str, Any] = self._manager.suggestions or {}
+        count = self._count_applicable_suggestions(suggestions)
+        applicable_keys = sorted(
+            k for k in self._applicable_suggestion_keys()
+            if isinstance(suggestions.get(k), dict) and suggestions[k].get("value") is not None
+        )
 
         attrs: dict[str, Any] = {
-            "has_actionable_suggestions": bool(suggestions),
-            "suggestions_count": self._count_applicable_suggestions(suggestions),
-            "suggested_option_keys": sorted(suggestions.keys()),
+            "has_actionable_suggestions": count > 0,
+            "suggestions_count": count,
+            "suggested_option_keys": applicable_keys,
             "suggestions": suggestions,
         }
         return attrs

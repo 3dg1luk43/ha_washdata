@@ -271,6 +271,10 @@ def compute_dtw_path(
             )
 
     # Backtracking
+    if np.isinf(cost_matrix[n, m]):
+        # Endpoint is unreachable (e.g. Sakoe-Chiba band excluded it); no valid path.
+        return []
+
     path: list[tuple[int, int]] = []
     i, j = n, m
 
@@ -354,6 +358,9 @@ def compute_envelope_worker(
         offsets = offsets[finite_mask]
         values = values[finite_mask]
         if len(offsets) < 3:
+            continue
+
+        if not np.all(np.diff(offsets) > 0):
             continue
 
         try:
@@ -496,9 +503,10 @@ def verify_profile_alignment_worker(
     # 2. Extract aligned segments
     # Determine the mapping window.
 
-    start_ref = max(0, offset)
-    # Keep a small right-side context window to improve local DTW alignment quality.
-    end_ref = min(len(ref), offset + len(curr) + ALIGNMENT_CONTEXT_BUFFER)
+    # Symmetric context window: pad equally left and right of the coarse alignment.
+    half = ALIGNMENT_CONTEXT_BUFFER // 2
+    start_ref = max(0, offset - half)
+    end_ref = min(len(ref), offset + len(curr) + half)
 
     if end_ref <= start_ref:
         return 0.0, 9999.0, 0.0

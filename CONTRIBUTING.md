@@ -340,7 +340,6 @@ Fixes #123
 
 2. **Submit a Pull Request** with your corrections
    - Include a brief description of what was corrected
-   - Reference the [Translation Issue template](.github/ISSUE_TEMPLATE/translation.yml) if needed
 
 3. **Use translation script** (for Home Assistant translations):
    ```bash

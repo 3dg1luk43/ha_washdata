@@ -13,12 +13,22 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 import homeassistant.util.dt as dt_util
 
 from .const import (
+    CONF_AUTO_LABEL_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
     CONF_LEARNING_CONFIDENCE,
-    DEFAULT_LEARNING_CONFIDENCE,
-    CONF_AUTO_LABEL_CONFIDENCE,
+    CONF_MIN_OFF_GAP,
+    CONF_MIN_POWER,
+    CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+    CONF_OFF_DELAY,
+    CONF_PROFILE_DURATION_TOLERANCE,
+    CONF_PROFILE_MATCH_INTERVAL,
+    CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_SAMPLING_INTERVAL,
+    CONF_WATCHDOG_INTERVAL,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
+    DEFAULT_LEARNING_CONFIDENCE,
     DOMAIN,
     SIGNAL_WASHER_UPDATE,
 )
@@ -104,13 +114,34 @@ class LearningManager:
         if not suggestions:
             return
 
+        _actionable_keys = (
+            CONF_MIN_POWER,
+            CONF_OFF_DELAY,
+            CONF_WATCHDOG_INTERVAL,
+            CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+            CONF_SAMPLING_INTERVAL,
+            CONF_PROFILE_MATCH_INTERVAL,
+            CONF_AUTO_LABEL_CONFIDENCE,
+            CONF_DURATION_TOLERANCE,
+            CONF_PROFILE_DURATION_TOLERANCE,
+            CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+            CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
+            CONF_MIN_OFF_GAP,
+        )
+
+        def _count_actionable(s: dict) -> int:
+            return sum(
+                1 for k in _actionable_keys
+                if isinstance(s.get(k), dict) and s[k].get("value") is not None
+            )
+
         current = self.profile_store.get_suggestions()
-        before_count = len(current) if isinstance(current, dict) else 0
+        before_count = _count_actionable(current) if isinstance(current, dict) else 0
 
         self.suggestion_engine.apply_suggestions(suggestions)
 
         updated = self.profile_store.get_suggestions()
-        after_count = len(updated) if isinstance(updated, dict) else 0
+        after_count = _count_actionable(updated) if isinstance(updated, dict) else 0
 
         if before_count == 0 and after_count > 0:
             entry = self.hass.config_entries.async_get_entry(self.entry_id)
@@ -557,7 +588,12 @@ class LearningManager:
         elif user_confirmed:
             profile_name = pending.get("detected_profile")
             if isinstance(profile_name, str) and profile_name:
-                self._auto_label_cycle(cycle_id, profile_name)
+                self._auto_label_cycle(cycle_id, profile_name, duration_sec)
+                if duration_sec is not None:
+                    cycles = self.profile_store.get_past_cycles()
+                    confirmed_cycle = next((c for c in cycles if c["id"] == cycle_id), None)
+                    if confirmed_cycle:
+                        confirmed_cycle["duration"] = duration_sec
                 profiles_to_rebuild.add(profile_name)
         else:
             # Correction path
