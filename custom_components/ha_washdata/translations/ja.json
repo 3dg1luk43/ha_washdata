@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "古いサイクルに自動ラベル付け",
         "select_cycle_to_label": "ラベル固有のサイクル",
-        "select_cycle_to_label_multi": "複数のサイクルにラベルを付ける",
         "select_cycle_to_delete": "サイクルの削除",
         "interactive_editor": "インタラクティブ エディターの結合/分割",
         "trim_cycle": "トリムサイクルデータ"

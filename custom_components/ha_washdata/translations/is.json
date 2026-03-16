@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Sjálfvirk merking á gömlum hringrásum",
         "select_cycle_to_label": "Merki ákveðin hringrás",
-        "select_cycle_to_label_multi": "Merktu margar lotur",
         "select_cycle_to_delete": "Eyða hringrás",
         "interactive_editor": "Sameina/skipta gagnvirkum ritstjóra",
         "trim_cycle": "Trim Cycle Data"

@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Automātiski iezīmējiet vecos ciklus",
         "select_cycle_to_label": "Etiķetes specifiskais cikls",
-        "select_cycle_to_label_multi": "Iezīmējiet vairākus ciklus",
         "select_cycle_to_delete": "Dzēst ciklu",
         "interactive_editor": "Apvienot/sadalīt interaktīvo redaktoru",
         "trim_cycle": "Apgriešanas cikla dati"

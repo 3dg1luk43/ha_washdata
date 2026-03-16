@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Aŭto-Etikedaj Malnovaj Cikloj",
         "select_cycle_to_label": "Etikedo Specifa Ciklo",
-        "select_cycle_to_label_multi": "Etikedu Multoblaj Cikloj",
         "select_cycle_to_delete": "Forigi Ciklon",
         "interactive_editor": "Kunfandi/Disigi Interaga Redaktoro",
         "trim_cycle": "Trim Ciklaj Datumoj"

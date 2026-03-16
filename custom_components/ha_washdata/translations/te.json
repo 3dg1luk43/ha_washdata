@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "పాత సైకిళ్లను ఆటో-లేబుల్ చేయండి",
         "select_cycle_to_label": "లేబుల్ నిర్దిష్ట చక్రం",
-        "select_cycle_to_label_multi": "బహుళ చక్రాలను లేబుల్ చేయండి",
         "select_cycle_to_delete": "సైకిల్‌ను తొలగించండి",
         "interactive_editor": "ఇంటరాక్టివ్ ఎడిటర్‌ను విలీనం చేయండి/స్ప్లిట్ చేయండి",
         "trim_cycle": "సైకిల్ డేటాను ట్రిమ్ చేయండి"

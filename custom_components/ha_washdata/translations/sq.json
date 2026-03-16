@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Etiketimi automatik i cikleve të vjetra",
         "select_cycle_to_label": "Cikli specifik i etiketës",
-        "select_cycle_to_label_multi": "Etiketoni cikle të shumëfishta",
         "select_cycle_to_delete": "Fshi ciklin",
         "interactive_editor": "Bashkoni/Ndajeni redaktuesin interaktiv",
         "trim_cycle": "Të dhënat e ciklit të shkurtimit"

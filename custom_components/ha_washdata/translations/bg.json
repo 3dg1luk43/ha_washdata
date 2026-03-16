@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Автоматично етикетиране на стари цикли",
         "select_cycle_to_label": "Изберете цикъл за етикетиране",
-        "select_cycle_to_label_multi": "Етикетиране на множество цикли",
         "select_cycle_to_delete": "Изтриване на цикъл",
         "interactive_editor": "Интерактивен редактор за сливане/разделяне",
         "trim_cycle": "Данни за цикъл на подрязване"

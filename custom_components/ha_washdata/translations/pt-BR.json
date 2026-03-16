@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Rotular automaticamente ciclos antigos",
         "select_cycle_to_label": "Ciclo Específico do Rótulo",
-        "select_cycle_to_label_multi": "Rotular vários ciclos",
         "select_cycle_to_delete": "Excluir ciclo",
         "interactive_editor": "Editor interativo de mesclar/dividir",
         "trim_cycle": "Dados do ciclo de corte"

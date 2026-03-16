@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Ауто-Лабел Олд Цицлес",
         "select_cycle_to_label": "Специфичан циклус за етикету",
-        "select_cycle_to_label_multi": "Означите више циклуса",
         "select_cycle_to_delete": "Избриши циклус",
         "interactive_editor": "Интерактивни уређивач спајања/раздвајања",
         "trim_cycle": "Подаци циклуса обрезивања"

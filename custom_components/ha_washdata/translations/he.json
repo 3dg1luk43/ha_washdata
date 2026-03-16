@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "תיוג אוטומטי של מחזורים ישנים",
         "select_cycle_to_label": "מחזור ספציפי של תווית",
-        "select_cycle_to_label_multi": "תווית מחזורים מרובים",
         "select_cycle_to_delete": "מחק מחזור",
         "interactive_editor": "מיזוג/פיצול עורך אינטראקטיבי",
         "trim_cycle": "Trim Cycle Data"

@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Tự động dán nhãn chu kỳ cũ",
         "select_cycle_to_label": "Chu kỳ cụ thể của nhãn",
-        "select_cycle_to_label_multi": "Dán nhãn nhiều chu kỳ",
         "select_cycle_to_delete": "Xóa chu kỳ",
         "interactive_editor": "Trình soạn thảo tương tác hợp nhất/tách",
         "trim_cycle": "Dữ liệu chu kỳ cắt"

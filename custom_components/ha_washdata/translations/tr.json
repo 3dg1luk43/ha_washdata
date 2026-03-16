@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Eski Döngüleri Otomatik Etiketle",
         "select_cycle_to_label": "Etikete Özel Döngü",
-        "select_cycle_to_label_multi": "Çoklu Döngüleri Etiketleme",
         "select_cycle_to_delete": "Döngüyü Sil",
         "interactive_editor": "Birleştir/Böl İnteraktif Düzenleyici",
         "trim_cycle": "Döngü Verilerini Kırp"

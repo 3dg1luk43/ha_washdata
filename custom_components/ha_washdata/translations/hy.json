@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Հին ցիկլերի ավտոմատ պիտակավորում",
         "select_cycle_to_label": "Պիտակի հատուկ ցիկլ",
-        "select_cycle_to_label_multi": "Նշեք բազմակի ցիկլեր",
         "select_cycle_to_delete": "Ջնջել ցիկլը",
         "interactive_editor": "Միաձուլել / բաժանել ինտերակտիվ խմբագիր",
         "trim_cycle": "Կտրման ցիկլի տվյալները"

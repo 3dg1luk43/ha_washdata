@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "ძველი ციკლების ავტომატური მარკირება",
         "select_cycle_to_label": "ლეიბლის სპეციფიკური ციკლი",
-        "select_cycle_to_label_multi": "მონიშნეთ მრავალი ციკლი",
         "select_cycle_to_delete": "ციკლის წაშლა",
         "interactive_editor": "შერწყმა/გაყოფა ინტერაქტიული რედაქტორი",
         "trim_cycle": "ამოჭრა ციკლის მონაცემები"

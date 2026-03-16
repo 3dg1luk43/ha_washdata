@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Auto-label Alde Cycles",
         "select_cycle_to_label": "Label Spesifike Cycle",
-        "select_cycle_to_label_multi": "Label Meardere Cycles",
         "select_cycle_to_delete": "Wiskje Cycle",
         "interactive_editor": "Ynteraktive bewurker gearfoegje / splitsen",
         "trim_cycle": "Trim Cycle Data"

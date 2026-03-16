@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Automatinis senų ciklų žymėjimas",
         "select_cycle_to_label": "Etiketės specifinis ciklas",
-        "select_cycle_to_label_multi": "Pažymėkite kelis ciklus",
         "select_cycle_to_delete": "Ištrinti ciklą",
         "interactive_editor": "Sujungti / išskaidyti interaktyvų redaktorių",
         "trim_cycle": "Apkarpymo ciklo duomenys"

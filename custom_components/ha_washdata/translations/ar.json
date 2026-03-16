@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "التسمية التلقائية للدورات القديمة",
         "select_cycle_to_label": "تسمية دورة محددة",
-        "select_cycle_to_label_multi": "تسمية دورات متعددة",
         "select_cycle_to_delete": "حذف دورة",
         "interactive_editor": "دمج/تقسيم المحرر التفاعلي",
         "trim_cycle": "تقليم بيانات الدورة"

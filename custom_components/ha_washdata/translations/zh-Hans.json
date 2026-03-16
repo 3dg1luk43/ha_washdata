@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "自动标记旧自行车",
         "select_cycle_to_label": "标签特定周期",
-        "select_cycle_to_label_multi": "标记多个周期",
         "select_cycle_to_delete": "删除循环",
         "interactive_editor": "合并/拆分交互式编辑器",
         "trim_cycle": "修剪周期数据"

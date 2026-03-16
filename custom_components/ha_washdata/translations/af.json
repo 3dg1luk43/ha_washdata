@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Outo-etiketteer ou siklusse",
         "select_cycle_to_label": "Benoem Spesifieke Siklus",
-        "select_cycle_to_label_multi": "Benoem verskeie siklusse",
         "select_cycle_to_delete": "Vee siklus uit",
         "interactive_editor": "Voeg saam / verdeel interaktiewe redigeerder",
         "trim_cycle": "Knip siklusdata"

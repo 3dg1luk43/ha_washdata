@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Автоматичне позначення старих циклів",
         "select_cycle_to_label": "Спеціальний цикл етикетки",
-        "select_cycle_to_label_multi": "Позначте кілька циклів",
         "select_cycle_to_delete": "Видалити цикл",
         "interactive_editor": "Інтерактивний редактор злиття/розділу",
         "trim_cycle": "Дані циклу обрізання"

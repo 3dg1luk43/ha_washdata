@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Vanade tsüklite automaatne sildistamine",
         "select_cycle_to_label": "Sildi spetsiifiline tsükkel",
-        "select_cycle_to_label_multi": "Märgista mitu tsüklit",
         "select_cycle_to_delete": "Kustuta tsükkel",
         "interactive_editor": "Interaktiivne redaktori ühendamine/tükeldamine",
         "trim_cycle": "Kärpimistsükli andmed"

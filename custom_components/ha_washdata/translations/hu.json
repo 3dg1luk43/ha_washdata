@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Régi ciklusok automatikus címkézése",
         "select_cycle_to_label": "Címkespecifikus ciklus",
-        "select_cycle_to_label_multi": "Több ciklus címkézése",
         "select_cycle_to_delete": "Ciklus törlése",
         "interactive_editor": "Egyesítés/felosztás interaktív szerkesztő",
         "trim_cycle": "Trim Cycle Data"

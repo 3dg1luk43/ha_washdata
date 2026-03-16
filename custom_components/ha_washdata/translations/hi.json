@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "पुरानी साइकिलों को ऑटो-लेबल करें",
         "select_cycle_to_label": "विशिष्ट चक्र लेबल करें",
-        "select_cycle_to_label_multi": "एकाधिक चक्रों को लेबल करें",
         "select_cycle_to_delete": "चक्र हटाएँ",
         "interactive_editor": "मर्ज/स्प्लिट इंटरैक्टिव संपादक",
         "trim_cycle": "ट्रिम साइकिल डेटा"

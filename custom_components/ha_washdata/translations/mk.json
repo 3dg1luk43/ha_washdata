@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Автоматско обележување на старите циклуси",
         "select_cycle_to_label": "Специфичен циклус на етикетата",
-        "select_cycle_to_label_multi": "Обележете повеќе циклуси",
         "select_cycle_to_delete": "Избриши циклус",
         "interactive_editor": "Спој/Сплит интерактивен уредник",
         "trim_cycle": "Податоци за скратување на циклусот"

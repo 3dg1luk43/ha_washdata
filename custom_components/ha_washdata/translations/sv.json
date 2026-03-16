@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "Auto-etikett gamla cykler",
         "select_cycle_to_label": "Märk specifik cykel",
-        "select_cycle_to_label_multi": "Märk flera cykler",
         "select_cycle_to_delete": "Ta bort cykel",
         "interactive_editor": "Sammanfoga/Dela interaktiv redigerare",
         "trim_cycle": "Trimma cykeldata"

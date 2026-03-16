@@ -729,7 +729,6 @@
       "options": {
         "auto_label_cycles": "برچسب‌گذاری خودکار چرخه‌های قدیمی",
         "select_cycle_to_label": "چرخه خاص برچسب",
-        "select_cycle_to_label_multi": "چرخه های چندگانه را برچسب بزنید",
         "select_cycle_to_delete": "چرخه را حذف کنید",
         "interactive_editor": "ادغام / تقسیم ویرایشگر تعاملی",
         "trim_cycle": "داده های چرخه برش"
