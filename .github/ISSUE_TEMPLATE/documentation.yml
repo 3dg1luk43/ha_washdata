@@ -1,27 +1,39 @@
 name: Documentation Improvement
-description: Suggest a change to the documentation
+description: Report missing, incorrect, or unclear documentation
 title: "[DOCS] "
 labels: ["documentation"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping improve our docs!
+        Thanks for helping improve our documentation!
+
+        If you are able to fix the issue yourself, a **Pull Request is preferred** over an issue. See the contribution guide for details.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before You Submit
+      options:
+        - label: I have checked that this documentation problem has not already been reported.
+          required: true
+        - label: I am not able to (or not sure how to) submit a pull request to fix this myself.
+          required: false
 
   - type: input
     id: page
     attributes:
       label: Page / Section
-      description: Which page or section of the documentation needs improvement?
-      placeholder: "README.md -> Configuration"
+      description: Which file or section of the documentation needs improvement?
+      placeholder: "README.md → Configuration, or wiki page name"
     validations:
       required: true
 
   - type: textarea
     id: wrong
     attributes:
-      label: What is wrong / missing?
-      description: Description of the inaccuracy or missing information.
+      label: What is Wrong or Missing?
+      description: Describe the inaccuracy, gap, or confusing part. Quote the existing text if relevant.
     validations:
       required: true
 
@@ -29,6 +41,14 @@ body:
     id: suggestion
     attributes:
       label: Suggested Change
-      description: If possible, propose the new text or clear structure for the change.
+      description: If possible, propose the corrected or new text. Even a rough draft is helpful.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Screenshots, links, or any other context that helps explain the problem.
     validations:
       required: false
