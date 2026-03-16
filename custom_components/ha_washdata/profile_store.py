@@ -3599,7 +3599,7 @@ class ProfileStore:
         # Sort by time — use timestamp comparison to handle mixed timezone offsets correctly
         def _cycle_start_ts(c: CycleDict) -> float:
             dt = dt_util.parse_datetime(str(c.get("start_time", "")))
-            return dt.timestamp() if dt is not None else 0.0
+            return dt.timestamp() if dt is not None else float("inf")
 
         target_cycles.sort(key=_cycle_start_ts)
 
@@ -3801,7 +3801,7 @@ class ProfileStore:
 
         def _sort_ts(c: CycleDict) -> float:
             dt = dt_util.parse_datetime(str(c.get("start_time", "")))
-            return dt.timestamp() if dt is not None else 0.0
+            return dt.timestamp() if dt is not None else float("inf")
 
         cycles.sort(key=_sort_ts)
 

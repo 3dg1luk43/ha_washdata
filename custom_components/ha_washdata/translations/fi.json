@@ -666,7 +666,8 @@
         "current_ranges_header": "Nykyiset alueet",
         "assign_phases_help": "Käytä alla olevia toimintoja alueiden lisäämiseen, muokkaamiseen, poistamiseen tai tallentamiseen.",
         "profile_summary_header": "Profiilin yhteenveto",
-        "recent_cycles_header": "Viimeaikaiset syklit"
+        "recent_cycles_header": "Viimeaikaiset syklit",
+        "no_power_preview": "*Tehotietoja ei ole saatavilla esikatseluun.*"
       }
     },
     "interactive_editor_action": {

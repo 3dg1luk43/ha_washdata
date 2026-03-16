@@ -666,7 +666,8 @@
         "current_ranges_header": "Aktuální rozsahy",
         "assign_phases_help": "Pomocí akcí níže můžete přidat, upravit, odstranit nebo uložit rozsahy.",
         "profile_summary_header": "Shrnutí profilu",
-        "recent_cycles_header": "Nedávné cykly"
+        "recent_cycles_header": "Nedávné cykly",
+        "no_power_preview": "*Pro náhled nejsou k dispozici žádné údaje o napájení.*"
       }
     },
     "interactive_editor_action": {

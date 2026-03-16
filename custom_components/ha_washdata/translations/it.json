@@ -666,7 +666,8 @@
         "current_ranges_header": "Intervalli attuali",
         "assign_phases_help": "Utilizza le azioni seguenti per aggiungere, modificare, eliminare o salvare intervalli.",
         "profile_summary_header": "Riepilogo del profilo",
-        "recent_cycles_header": "Cicli recenti"
+        "recent_cycles_header": "Cicli recenti",
+        "no_power_preview": "*Nessun dato di potenza disponibile per l'anteprima.*"
       }
     },
     "interactive_editor_action": {

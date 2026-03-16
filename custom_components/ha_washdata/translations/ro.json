@@ -666,7 +666,8 @@
         "current_ranges_header": "Domenii de curent",
         "assign_phases_help": "Utilizați acțiunile de mai jos pentru a adăuga, edita, șterge sau salva intervale.",
         "profile_summary_header": "Rezumatul profilului",
-        "recent_cycles_header": "Cicluri recente"
+        "recent_cycles_header": "Cicluri recente",
+        "no_power_preview": "*Nu sunt disponibile date de putere pentru previzualizare.*"
       }
     },
     "interactive_editor_action": {

@@ -666,7 +666,8 @@
         "current_ranges_header": "النطاقات الحالية",
         "assign_phases_help": "استخدم الإجراءات أدناه لإضافة النطاقات أو تعديلها أو حذفها أو حفظها.",
         "profile_summary_header": "ملخص الملف الشخصي",
-        "recent_cycles_header": "الدورات الأخيرة"
+        "recent_cycles_header": "الدورات الأخيرة",
+        "no_power_preview": "*لا توجد بيانات طاقة متاحة للمعاينة.*"
       }
     },
     "interactive_editor_action": {

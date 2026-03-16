@@ -666,7 +666,8 @@
         "current_ranges_header": "Trenutni razponi",
         "assign_phases_help": "Uporabite spodnja dejanja za dodajanje, urejanje, brisanje ali shranjevanje obsegov.",
         "profile_summary_header": "Povzetek profila",
-        "recent_cycles_header": "Nedavni cikli"
+        "recent_cycles_header": "Nedavni cikli",
+        "no_power_preview": "*Podatkov o moči ni na voljo za predogled.*"
       }
     },
     "interactive_editor_action": {

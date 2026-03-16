@@ -666,7 +666,8 @@
         "current_ranges_header": "მიმდინარე დიაპაზონები",
         "assign_phases_help": "გამოიყენეთ ქვემოთ მოცემული მოქმედებები დიაპაზონების დასამატებლად, რედაქტირებისთვის, წაშლისთვის ან შესანახად.",
         "profile_summary_header": "პროფილის შეჯამება",
-        "recent_cycles_header": "ბოლო ციკლები"
+        "recent_cycles_header": "ბოლო ციკლები",
+        "no_power_preview": "*ენერგიის მონაცემები არ არის ხელმისაწვდომი წინასწარი გადახედვისთვის.*"
       }
     },
     "interactive_editor_action": {

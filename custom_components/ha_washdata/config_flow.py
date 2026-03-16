@@ -1410,7 +1410,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
                 graph_line = f"![Preview](data:image/svg+xml;base64,{b64})"
             else:
-                graph_line = "*No power data available for preview.*"
+                graph_line = await self._options_text(
+                    "no_power_preview", "*No power data available for preview.*"
+                )
             preview_md = f"""
 ### {merge_title}
 {merge_joining_fmt.format(count=len(cycles_to_merge))}

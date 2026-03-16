@@ -666,7 +666,8 @@
         "current_ranges_header": "Aktuális tartományok",
         "assign_phases_help": "Tartományok hozzáadásához, szerkesztéséhez, törléséhez vagy mentéséhez használja az alábbi műveleteket.",
         "profile_summary_header": "Profil összefoglaló",
-        "recent_cycles_header": "Legutóbbi ciklusok"
+        "recent_cycles_header": "Legutóbbi ciklusok",
+        "no_power_preview": "*Az előnézethez nem állnak rendelkezésre teljesítményadatok.*"
       }
     },
     "interactive_editor_action": {

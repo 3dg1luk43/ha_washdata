@@ -666,7 +666,8 @@
         "current_ranges_header": "Pašreizējie diapazoni",
         "assign_phases_help": "Izmantojiet tālāk norādītās darbības, lai pievienotu, rediģētu, dzēstu vai saglabātu diapazonus.",
         "profile_summary_header": "Profila kopsavilkums",
-        "recent_cycles_header": "Pēdējie cikli"
+        "recent_cycles_header": "Pēdējie cikli",
+        "no_power_preview": "*Priekšskatīšanai nav pieejami jaudas dati.*"
       }
     },
     "interactive_editor_action": {

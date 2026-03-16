@@ -90,6 +90,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Unknown Cycle Statistics Empty (#168)**: Fixed two root causes for statistics (graph and energy) being blank after assigning an unknown cycle to a new profile.
   - `_rebuild_envelope_sync` now uses the shared `_decompress_power_data()` helper instead of raw iteration with `float()` conversion. The raw conversion silently discarded every data point for cycles stored in the legacy ISO-timestamp format, producing an empty envelope and a blank graph.
   - `create_profile_standalone` now labels the reference cycle with the new profile name (when it is currently unlabeled) and immediately rebuilds the envelope, so statistics are populated as soon as the profile is created — without requiring a separate feedback-correction step.
+- **Merge Preview Graph Empty**: Fixed the cycle merge preview showing a blank graph. When cycles have no recorded power data, a proper "No power data available for preview" placeholder is rendered instead of a broken empty image. The config flow also falls back to italic text if the SVG cannot be built.
+- **Broken Duration After Merge**: Fixed merged cycles showing wildly incorrect durations (e.g. `-29555478m`). Two root causes were addressed:
+  - **Sort order**: cycles were sorted lexicographically by ISO timestamp string, which gives wrong chronological order when start times use different UTC offset representations (e.g. `+01:00` vs `+02:00`). Sorting now uses the parsed UTC timestamp.
+  - **Corrupt `last_t_abs`**: the end timestamp was taken from the last element of the power-data list, which could be a corrupted or out-of-order entry near Unix epoch. The merge now takes the **maximum** absolute timestamp across all collected data points, and falls back to the cycle's stored `end_time` field when no power data is available at all.
+- **`manual_duration` Persisting After Merge**: The merged cycle no longer inherits the source cycle's `manual_duration` override, ensuring the freshly computed duration is always displayed.
 
 ### 🧪 Tests
 - **HA Test Harness Adoption**: Replaced `MagicMock`-based hass objects with real `HomeAssistant` instances from `pytest_homeassistant_custom_component` across all new test modules. Only `ProfileStore` and `CycleDetector` are patched as true external I/O boundaries.

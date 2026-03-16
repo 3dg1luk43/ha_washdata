@@ -666,7 +666,8 @@
         "current_ranges_header": "Rangos actuales",
         "assign_phases_help": "Utilice las siguientes acciones para agregar, editar, eliminar o guardar rangos.",
         "profile_summary_header": "Resumen de perfil",
-        "recent_cycles_header": "Ciclos recientes"
+        "recent_cycles_header": "Ciclos recientes",
+        "no_power_preview": "*No hay datos de energía disponibles para vista previa.*"
       }
     },
     "interactive_editor_action": {

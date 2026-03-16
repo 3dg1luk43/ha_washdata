@@ -666,7 +666,8 @@
         "current_ranges_header": "Aktuelle Beräicher",
         "assign_phases_help": "Benotzt d'Aktiounen hei drënner fir Beräicher ze addéieren, z'änneren, ze läschen oder ze späicheren.",
         "profile_summary_header": "Profil Resumé",
-        "recent_cycles_header": "Rezent Zyklen"
+        "recent_cycles_header": "Rezent Zyklen",
+        "no_power_preview": "*Keng Kraaftdaten verfügbar fir Virschau.*"
       }
     },
     "interactive_editor_action": {

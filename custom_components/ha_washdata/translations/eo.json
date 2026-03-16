@@ -666,7 +666,8 @@
         "current_ranges_header": "Nunaj intervaloj",
         "assign_phases_help": "Uzu agojn sube por aldoni, redakti, forigi aŭ konservi intervalojn.",
         "profile_summary_header": "Profila Resumo",
-        "recent_cycles_header": "Freŝaj cikloj"
+        "recent_cycles_header": "Freŝaj cikloj",
+        "no_power_preview": "*Neniu elektraj datumoj disponeblaj por antaŭrigardo.*"
       }
     },
     "interactive_editor_action": {

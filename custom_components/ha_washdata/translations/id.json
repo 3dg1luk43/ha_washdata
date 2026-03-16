@@ -666,7 +666,8 @@
         "current_ranges_header": "Rentang saat ini",
         "assign_phases_help": "Gunakan tindakan di bawah ini untuk menambah, mengedit, menghapus, atau menyimpan rentang.",
         "profile_summary_header": "Ringkasan Profil",
-        "recent_cycles_header": "Siklus terkini"
+        "recent_cycles_header": "Siklus terkini",
+        "no_power_preview": "*Tidak ada data daya yang tersedia untuk pratinjau.*"
       }
     },
     "interactive_editor_action": {

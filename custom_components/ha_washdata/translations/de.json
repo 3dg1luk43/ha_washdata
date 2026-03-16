@@ -666,7 +666,8 @@
         "current_ranges_header": "Aktuelle Bereiche",
         "assign_phases_help": "Verwenden Sie die folgenden Aktionen, um Bereiche hinzuzufügen, zu bearbeiten, zu löschen oder zu speichern.",
         "profile_summary_header": "Profilzusammenfassung",
-        "recent_cycles_header": "Aktuelle Zyklen"
+        "recent_cycles_header": "Aktuelle Zyklen",
+        "no_power_preview": "*Keine Leistungsdaten für die Vorschau verfügbar.*"
       }
     },
     "interactive_editor_action": {

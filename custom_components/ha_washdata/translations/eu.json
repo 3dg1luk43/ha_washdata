@@ -666,7 +666,8 @@
         "current_ranges_header": "Egungo barrutiak",
         "assign_phases_help": "Erabili beheko ekintzak barrutiak gehitzeko, editatzeko, ezabatzeko edo gordetzeko.",
         "profile_summary_header": "Profilaren laburpena",
-        "recent_cycles_header": "Azken zikloak"
+        "recent_cycles_header": "Azken zikloak",
+        "no_power_preview": "*Ez dago energia-daturik eskuragarri aurrebistarako.*"
       }
     },
     "interactive_editor_action": {

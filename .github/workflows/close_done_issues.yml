@@ -42,14 +42,12 @@ jobs:
               }
 
               // Fetch comments to verify the last one is from the owner
-              const comments = await github.rest.issues.listComments({
+              const allComments = await github.paginate(github.rest.issues.listComments, {
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
                 per_page: 100,
               });
-
-              const allComments = comments.data;
 
               if (allComments.length === 0) {
                 console.log(`#${issue.number}: no comments, skipping (last commenter check requires at least one comment).`);

@@ -666,7 +666,8 @@
         "current_ranges_header": "电流范围",
         "assign_phases_help": "使用以下操作来添加、编辑、删除或保存范围。",
         "profile_summary_header": "简介摘要",
-        "recent_cycles_header": "最近的周期"
+        "recent_cycles_header": "最近的周期",
+        "no_power_preview": "*没有可供预览的功率数据。*"
       }
     },
     "interactive_editor_action": {

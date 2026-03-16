@@ -666,7 +666,8 @@
         "current_ranges_header": "Gammes actuelles",
         "assign_phases_help": "Utilisez les actions ci-dessous pour ajouter, modifier, supprimer ou enregistrer des plages.",
         "profile_summary_header": "Résumé du profil",
-        "recent_cycles_header": "Cycles récents"
+        "recent_cycles_header": "Cycles récents",
+        "no_power_preview": "*Aucune donnée de puissance disponible pour l'aperçu.*"
       }
     },
     "interactive_editor_action": {

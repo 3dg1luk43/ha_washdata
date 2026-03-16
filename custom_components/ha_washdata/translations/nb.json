@@ -666,7 +666,8 @@
         "current_ranges_header": "Gjeldende områder",
         "assign_phases_help": "Bruk handlingene nedenfor for å legge til, redigere, slette eller lagre områder.",
         "profile_summary_header": "Profilsammendrag",
-        "recent_cycles_header": "Nylige sykluser"
+        "recent_cycles_header": "Nylige sykluser",
+        "no_power_preview": "*Ingen strømdata tilgjengelig for forhåndsvisning.*"
       }
     },
     "interactive_editor_action": {

@@ -666,7 +666,8 @@
         "current_ranges_header": "Srovės diapazonai",
         "assign_phases_help": "Norėdami pridėti, redaguoti, ištrinti arba išsaugoti diapazonus, naudokite toliau nurodytus veiksmus.",
         "profile_summary_header": "Profilio santrauka",
-        "recent_cycles_header": "Naujausi ciklai"
+        "recent_cycles_header": "Naujausi ciklai",
+        "no_power_preview": "*Peržiūrėti galios duomenų nėra.*"
       }
     },
     "interactive_editor_action": {

@@ -666,7 +666,8 @@
         "current_ranges_header": "Тековни опсези",
         "assign_phases_help": "Користете ги дејствата подолу за додавање, уредување, бришење или зачувување опсези.",
         "profile_summary_header": "Резиме на профилот",
-        "recent_cycles_header": "Неодамнешни циклуси"
+        "recent_cycles_header": "Неодамнешни циклуси",
+        "no_power_preview": "*Нема достапни податоци за напојување за преглед.*"
       }
     },
     "interactive_editor_action": {

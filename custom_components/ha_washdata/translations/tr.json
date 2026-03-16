@@ -666,7 +666,8 @@
         "current_ranges_header": "Mevcut aralıklar",
         "assign_phases_help": "Aralıkları eklemek, düzenlemek, silmek veya kaydetmek için aşağıdaki işlemleri kullanın.",
         "profile_summary_header": "Profil Özeti",
-        "recent_cycles_header": "Son döngüler"
+        "recent_cycles_header": "Son döngüler",
+        "no_power_preview": "*Önizleme için güç verisi yok.*"
       }
     },
     "interactive_editor_action": {

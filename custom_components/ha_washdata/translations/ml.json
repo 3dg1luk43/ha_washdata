@@ -666,7 +666,8 @@
         "current_ranges_header": "നിലവിലെ ശ്രേണികൾ",
         "assign_phases_help": "ശ്രേണികൾ ചേർക്കാനോ എഡിറ്റ് ചെയ്യാനോ ഇല്ലാതാക്കാനോ സംരക്ഷിക്കാനോ ചുവടെയുള്ള പ്രവർത്തനങ്ങൾ ഉപയോഗിക്കുക.",
         "profile_summary_header": "പ്രൊഫൈൽ സംഗ്രഹം",
-        "recent_cycles_header": "സമീപകാല ചക്രങ്ങൾ"
+        "recent_cycles_header": "സമീപകാല ചക്രങ്ങൾ",
+        "no_power_preview": "*പ്രിവ്യൂവിന് പവർ ഡാറ്റയൊന്നും ലഭ്യമല്ല.*"
       }
     },
     "interactive_editor_action": {

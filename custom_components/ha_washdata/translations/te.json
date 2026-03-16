@@ -666,7 +666,8 @@
         "current_ranges_header": "ప్రస్తుత పరిధులు",
         "assign_phases_help": "పరిధులను జోడించడానికి, సవరించడానికి, తొలగించడానికి లేదా సేవ్ చేయడానికి దిగువ చర్యలను ఉపయోగించండి.",
         "profile_summary_header": "ప్రొఫైల్ సారాంశం",
-        "recent_cycles_header": "ఇటీవలి చక్రాలు"
+        "recent_cycles_header": "ఇటీవలి చక్రాలు",
+        "no_power_preview": "*ప్రివ్యూ కోసం పవర్ డేటా అందుబాటులో లేదు.*"
       }
     },
     "interactive_editor_action": {

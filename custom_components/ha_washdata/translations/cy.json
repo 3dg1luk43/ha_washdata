@@ -666,7 +666,8 @@
         "current_ranges_header": "Ystodau cyfredol",
         "assign_phases_help": "Defnyddiwch y gweithredoedd isod i ychwanegu, golygu, dileu, neu gadw ystodau.",
         "profile_summary_header": "Crynodeb Proffil",
-        "recent_cycles_header": "Cylchoedd diweddar"
+        "recent_cycles_header": "Cylchoedd diweddar",
+        "no_power_preview": "* Dim data pŵer ar gael ar gyfer rhagolwg.*"
       }
     },
     "interactive_editor_action": {

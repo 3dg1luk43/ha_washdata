@@ -666,7 +666,8 @@
         "current_ranges_header": "Intervalos atuais",
         "assign_phases_help": "Use as ações abaixo para adicionar, editar, excluir ou salvar intervalos.",
         "profile_summary_header": "Resumo do perfil",
-        "recent_cycles_header": "Ciclos recentes"
+        "recent_cycles_header": "Ciclos recentes",
+        "no_power_preview": "*Não há dados de energia disponíveis para visualização.*"
       }
     },
     "interactive_editor_action": {

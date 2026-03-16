@@ -666,7 +666,8 @@
         "current_ranges_header": "Ընթացիկ միջակայքերը",
         "assign_phases_help": "Օգտագործեք ստորև նշված գործողությունները՝ միջակայքերը ավելացնելու, խմբագրելու, ջնջելու կամ պահպանելու համար:",
         "profile_summary_header": "Անձնագրի ամփոփում",
-        "recent_cycles_header": "Վերջին ցիկլերը"
+        "recent_cycles_header": "Վերջին ցիկլերը",
+        "no_power_preview": "*Նախադիտման համար հոսանքի տվյալներ չկան։*"
       }
     },
     "interactive_editor_action": {

@@ -666,7 +666,8 @@
         "current_ranges_header": "Діапазон струму",
         "assign_phases_help": "Використовуйте наведені нижче дії, щоб додавати, редагувати, видаляти або зберігати діапазони.",
         "profile_summary_header": "Резюме профілю",
-        "recent_cycles_header": "Останні цикли"
+        "recent_cycles_header": "Останні цикли",
+        "no_power_preview": "*Немає даних про потужність для попереднього перегляду.*"
       }
     },
     "interactive_editor_action": {
