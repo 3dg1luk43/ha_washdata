@@ -29,3 +29,13 @@ tests/repro/data_files.txt
 tests/benchmarks/__pycache__/
 .coverage
 .venv_translation/
+.github/agents
+.github/rules
+.github/scripts
+.github/skills
+.github/ui-ux-pro-max
+.github/workflows copy
+.github/ARCHITECTURE.md
+devtools/.mock_socket.pid
+bin
+CLAUDE.md

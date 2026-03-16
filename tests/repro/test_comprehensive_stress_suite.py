@@ -113,8 +113,11 @@ async def test_stress_dishwasher_zombie(hass):
     async def _executor(target, *args):
         return target(*args)
     hass.async_add_executor_job = _executor
+    hass.async_create_task = MagicMock(
+        side_effect=lambda coro: getattr(coro, "close", lambda: None)()
+    )
     
-    with patch("homeassistant.core.ServiceRegistry.async_call", new_callable=AsyncMock), \
+    with patch("homeassistant.core.ServiceRegistry.async_call", new_callable=MagicMock), \
          patch("homeassistant.core.EventBus.async_fire"):
 
         mock_entry = create_mock_entry("dishwasher", {
@@ -143,11 +146,11 @@ async def test_stress_dishwasher_zombie(hass):
         # Configure AsyncMocks
         mock_store_instance = MockStore.return_value
         mock_store_instance.async_match_profile = AsyncMock(return_value=MagicMock(best_profile="Dishwasher Eco", confidence=1.0))
-        mock_store_instance.async_sample_profile = AsyncMock()
-        mock_store_instance.async_save = AsyncMock()
-        mock_store_instance.async_clear_active_cycle = AsyncMock()
-        mock_store_instance.async_add_cycle = AsyncMock()
-        mock_store_instance.async_rebuild_envelope = AsyncMock()
+        mock_store_instance.async_sample_profile = MagicMock()
+        mock_store_instance.async_save = MagicMock()
+        mock_store_instance.async_clear_active_cycle = MagicMock()
+        mock_store_instance.async_add_cycle = MagicMock()
+        mock_store_instance.async_rebuild_envelope = MagicMock()
          
         # Run Iterations
         for i in range(NUM_CYCLES):
@@ -267,8 +270,11 @@ async def test_stress_washing_machine_regression(hass):
     async def _executor(target, *args):
         return target(*args)
     hass.async_add_executor_job = _executor
+    hass.async_create_task = MagicMock(
+        side_effect=lambda coro: getattr(coro, "close", lambda: None)()
+    )
     
-    with patch("homeassistant.core.ServiceRegistry.async_call", new_callable=AsyncMock), \
+    with patch("homeassistant.core.ServiceRegistry.async_call", new_callable=MagicMock), \
          patch("homeassistant.core.EventBus.async_fire"):
 
         mock_entry = create_mock_entry("washing_machine", {
@@ -290,11 +296,11 @@ async def test_stress_washing_machine_regression(hass):
          
         mock_store_instance = MockStore.return_value
         mock_store_instance.async_match_profile = AsyncMock(return_value=MagicMock(best_profile="1:37 bavlna", confidence=1.0))
-        mock_store_instance.async_sample_profile = AsyncMock()
-        mock_store_instance.async_save = AsyncMock()
-        mock_store_instance.async_clear_active_cycle = AsyncMock()
-        mock_store_instance.async_add_cycle = AsyncMock()
-        mock_store_instance.async_rebuild_envelope = AsyncMock()
+        mock_store_instance.async_sample_profile = MagicMock()
+        mock_store_instance.async_save = MagicMock()
+        mock_store_instance.async_clear_active_cycle = MagicMock()
+        mock_store_instance.async_add_cycle = MagicMock()
+        mock_store_instance.async_rebuild_envelope = MagicMock()
         mock_store_instance.get_profiles.return_value = {"1:37 bavlna": {}}
 
         for i in range(NUM_CYCLES):

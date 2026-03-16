@@ -10,7 +10,8 @@ from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_NOTIFY_BEFORE_END_MINUTES,
-    CONF_POWER_SENSOR, STATE_RUNNING, STATE_OFF, CONF_NOTIFY_EVENTS, NOTIFY_EVENT_FINISH
+    CONF_POWER_SENSOR, STATE_RUNNING, STATE_OFF, CONF_NOTIFY_EVENTS, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_START,
+    CONF_NOTIFY_ACTIONS, CONF_NOTIFY_PEOPLE, CONF_NOTIFY_ONLY_WHEN_HOME, CONF_NOTIFY_FIRE_EVENTS
 )
 
 @pytest.fixture
@@ -70,6 +71,7 @@ def test_set_manual_program(manager: WashDataManager) -> None:
     manager.profile_store._data["profiles"] = {
         "Heavy Duty": {"avg_duration": 3600}
     }
+    manager.detector.state = "running"
     
     manager.set_manual_program("Heavy Duty")
     
@@ -475,4 +477,126 @@ async def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, m
     args = manager.profile_store.async_add_cycle.call_args[0]
     added_cycle = args[0]
     assert added_cycle["profile_name"] == "DerivedProfile"
+
+@pytest.mark.asyncio
+async def test_start_notification_deferred_when_ambiguous(manager: WashDataManager, mock_hass: Any, mock_entry: Any) -> None:
+    """Test that the START notification is deferred until the match achieves persistence."""
+    # Enable START notification
+    mock_entry.options[CONF_NOTIFY_EVENTS] = [NOTIFY_EVENT_START]
+    mock_entry.options["notify_service"] = "notify.mobile_app_test"
+    manager.config_entry = mock_entry
+    manager._notified_start = False
+    manager._current_program = "detecting..."
+    manager.detector.config.stop_threshold_w = 5.0
+    manager._match_persistence = 3  # Assume 3 intervals are needed
+
+    mock_res_ambiguous = MagicMock()
+    mock_res_ambiguous.best_profile = "Heavy Duty"
+    mock_res_ambiguous.expected_duration = 3600.0
+    mock_res_ambiguous.matched_phase = None
+    mock_res_ambiguous.confidence = 0.5
+    mock_res_ambiguous.is_ambiguous = True
+    mock_res_ambiguous.is_confident_mismatch = False
+    mock_res_ambiguous.candidates = [{"name":"Heavy Duty", "score":0.5}, {"name":"Normal", "score":0.49}]
+    
+    manager.profile_store.async_match_profile = AsyncMock(return_value=mock_res_ambiguous)
+    # Ensure profile alignment verification returns False so verified_pause doesn't trigger override
+    manager.profile_store.async_verify_alignment = AsyncMock(return_value=(False, 0.0, None))
+    
+    # Reset internal manager state for test
+    manager._match_persistence_counter = {}
+    manager._current_match_candidate = None
+    
+    # 1st Interval (Power set to 1000 so it doesn't trigger low-power verified_pause logic either)
+    readings = [(dt_util.now(), 1000.0), (dt_util.now() + timedelta(seconds=10), 1000.0)]
+    await manager._async_do_perform_matching(readings)
+    
+    mock_hass.services.async_call.assert_not_called()
+    assert manager._notified_start is False
+    assert manager._current_program == "detecting..."
+
+    # 2nd Interval (Still under persistence threshold)
+    await manager._async_do_perform_matching(readings)
+    mock_hass.services.async_call.assert_not_called()
+    assert manager._notified_start is False
+    assert manager._current_program == "detecting..."
+
+    # 3rd Interval (Reaches persistence threshold)
+    await manager._async_do_perform_matching(readings)
+    
+    # Now it should switch and notify
+    mock_hass.services.async_call.assert_called()
+    assert manager._notified_start is True
+    assert manager._current_program == "Heavy Duty"
+
+
+def test_notification_actions_run_alongside_notify_service(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Configured actions should run and notify service should still be called."""
+    manager.config_entry.options["notify_service"] = "notify.mobile_app_test"
+    manager._notify_actions = [{"action": "script.test_notify"}]
+    manager._run_notification_actions = MagicMock(return_value=True)
+
+    manager._dispatch_notification("hello")
+
+    manager._run_notification_actions.assert_called_once()
+    mock_hass.services.async_call.assert_called_once()
+
+
+def test_notification_is_deferred_when_no_person_home(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Notifications should queue when home-gating is enabled and nobody is home."""
+    manager._notify_only_when_home = True
+    manager._notify_people = ["person.alice"]
+    manager._notify_actions = []
+    manager.config_entry.options["notify_service"] = "notify.mobile_app_test"
+    mock_hass.states.get = MagicMock(return_value=MagicMock(state="not_home"))
+
+    manager._dispatch_notification("queued message", event_type=NOTIFY_EVENT_FINISH)
+
+    assert len(manager._pending_notifications) == 1
+    mock_hass.services.async_call.assert_not_called()
+
+
+def test_pending_notifications_release_on_person_home(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Pending notifications should deliver when a tracked person arrives home."""
+    manager._notify_only_when_home = True
+    manager._notify_people = ["person.alice"]
+    manager._notify_actions = []
+    manager.config_entry.options["notify_service"] = "notify.mobile_app_test"
+    manager._pending_notifications = [{
+        "message": "cycle finished",
+        "title": "WashData",
+        "icon": None,
+        "event_type": NOTIFY_EVENT_FINISH,
+        "extra_vars": {"program": "Cotton"},
+    }]
+
+    new_state = MagicMock()
+    new_state.state = "home"
+    new_state.entity_id = "person.alice"
+    new_state.name = "Alice"
+    new_state.attributes = {"friendly_name": "Alice"}
+    event = MagicMock()
+    event.data = {"new_state": new_state}
+
+    manager._handle_notify_person_change(event)
+
+    assert manager._pending_notifications == []
+    mock_hass.services.async_call.assert_called_once()
+
+
+def test_cycle_start_event_respects_notify_fire_events_toggle(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Cycle start events should not fire when event toggle is disabled."""
+    manager._notify_fire_events = False
+
+    manager._on_state_change("off", "running")
+
+    mock_hass.bus.async_fire.assert_not_called()
 

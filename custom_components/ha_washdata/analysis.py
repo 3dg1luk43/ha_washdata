@@ -2,16 +2,12 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Optional
+
 import numpy as np
 
-# Try importing dtw, handle if missing (optional for future use)
-try:
-    from dtw import dtw  # pylint: disable=unused-import
-except ImportError:
-    dtw = None
-
 _LOGGER = logging.getLogger(__name__)
+ALIGNMENT_CONTEXT_BUFFER = 50
 
 def find_best_alignment(
     current_power: list[float] | np.ndarray,
@@ -137,25 +133,25 @@ def compute_dtw_lite(
         end_j = min(m, center + w + 1)
 
         curr_row.fill(float("inf"))
-        
+
         # Pre-calculate costs for the current window to reduce Python overhead
         # x is 0-indexed, so x[i-1]
         val_x = x[i - 1]
-        
+
         for j in range(start_j, end_j + 1):
             cost = abs(float(val_x - y[j - 1]))
-            
+
             # Standard DTW recursion
             # curr_row[j] = cost + min(insertion, deletion, match)
             # insertion: prev_row[j]
             # deletion: curr_row[j-1]
             # match: prev_row[j-1]
-            
+
             # Use a slightly faster min implementation if possible
             m1 = prev_row[j]
             m2 = curr_row[j - 1]
             m3 = prev_row[j - 1]
-            
+
             if m1 < m2:
                 if m1 < m3:
                     best_prev = m1
@@ -166,9 +162,9 @@ def compute_dtw_lite(
                     best_prev = m2
                 else:
                     best_prev = m3
-                    
+
             curr_row[j] = cost + best_prev
-            
+
         # Swap rows
         prev_row[:] = curr_row[:]
 
@@ -181,7 +177,7 @@ def compute_matches_worker(
     config: dict[str, Any]
 ) -> list[dict[str, Any]]:
     """Worker function to compute matches against snapshots."""
-    candidates = []
+    candidates: list[dict[str, Any]] = []
 
     min_duration_ratio = config.get("min_duration_ratio", 0.07)
     max_duration_ratio = config.get("max_duration_ratio", 1.3)
@@ -275,35 +271,28 @@ def compute_dtw_path(
             )
 
     # Backtracking
-    path = []
+    if np.isinf(cost_matrix[n, m]):
+        # Endpoint is unreachable (e.g. Sakoe-Chiba band excluded it); no valid path.
+        return []
+
+    path: list[tuple[int, int]] = []
     i, j = n, m
 
     while i > 0 or j > 0:
-        path.append((i - 1, j - 1))
+        # Record current zero-based coordinate before stepping back.
+        path.append((max(i - 1, 0), max(j - 1, 0)))
 
         if i == 0:
             j -= 1
         elif j == 0:
             i -= 1
         else:
-            center = i * (m / n)
-            start_j = max(1, int(center - w))
-            end_j = min(m, int(center + w) + 1)
-
-            # Constraints for neighbor validity
-            # We must pick one of (i-1, j), (i, j-1), (i-1, j-1)
-            # that is valid (not inf).
-            # Preference: match (diag) > insertion/deletion?
-            # Standard backtracking follows min cost path.
-
             candidates_cost = [
-                (cost_matrix[i - 1, j], 0),    # insertion (i-1)
-                (cost_matrix[i, j - 1], 1),    # deletion (j-1)
+                (cost_matrix[i - 1, j], 0),    # deletion (i-1)
+                (cost_matrix[i, j - 1], 1),    # insertion (j-1)
                 (cost_matrix[i - 1, j - 1], 2) # match (both)
             ]
-            # Sort by cost
             candidates_cost.sort(key=lambda item: item[0])
-
             best_move = candidates_cost[0][1]
             if best_move == 0:
                 i -= 1
@@ -314,76 +303,111 @@ def compute_dtw_path(
                 j -= 1
 
     path.reverse()
-    # Initial (0,0) is implicit but sometimes path loop includes it?
-    # Our loop goes until i=0, j=0.
-    # If path[-1] is (-1, -1), strip it.
-    if path and path[0] == (-1, -1):
-        path.pop(0)
 
     return path
 
 def compute_envelope_worker(
-    raw_cycles_data: list[tuple[list[float], list[float]]],
+    raw_cycles_data: list[tuple[list[float], list[float], Optional[float]]] | list[tuple[list[float], list[float]]],
     dtw_bandwidth: float
 ) -> tuple[list[float], list[float], list[float], list[float], list[float], float] | None:
     """
     Compute statistical envelope.
     Args:
-        raw_cycles_data: list of (offsets, power_values) tuples.
+        raw_cycles_data: list of (offsets, power_values, duration) tuples.
+            Duration may be None and is used to compute target_duration.
         dtw_bandwidth: ratio.
     Returns:
         (time_grid, min_curve, max_curve, avg_curve, std_curve, target_duration) or None.
     """
     if not raw_cycles_data:
         return None
-    normalized_curves: list[tuple[np.ndarray, np.ndarray]] = []
+    normalized_curves: list[tuple[np.ndarray, np.ndarray, float]] = []
     sampling_rates: list[float] = []
 
     # 1. Pre-process input
     for curve in raw_cycles_data:
-        offsets_list = curve[0]
-        values_list = curve[1]
-        
+        # Unpack curve tuple: (offsets, values) or (offsets, values, duration)
+        # Backward compatible with 2-tuple (offsets, values) format
+        try:
+            offsets_list, values_list, *rest = curve
+            curve_duration = rest[0] if rest else None
+        except (ValueError, TypeError):
+            continue
+
+        if not offsets_list or not values_list:
+            continue
+
+        if len(offsets_list) != len(values_list):
+            min_len = min(len(offsets_list), len(values_list))
+            if min_len < 3:
+                continue
+            offsets_list = offsets_list[:min_len]
+            values_list = values_list[:min_len]
+
         if len(offsets_list) < 3 or len(values_list) < 3:
             continue
-            
-        offsets = np.array(offsets_list)
-        values = np.array(values_list)
-        
-        # Use provided duration or fallback to last offset
-        dur = float(curve[2]) if len(curve) > 2 else float(offsets[-1])
-        
+
+        try:
+            offsets = np.asarray(offsets_list, dtype=float)
+            values = np.asarray(values_list, dtype=float)
+        except (TypeError, ValueError):
+            continue
+
+        # Drop paired entries where either coordinate is non-finite.
+        finite_mask = np.isfinite(offsets) & np.isfinite(values)
+        offsets = offsets[finite_mask]
+        values = values[finite_mask]
+        if len(offsets) < 3:
+            continue
+
+        if not np.all(np.diff(offsets) > 0):
+            continue
+
+        try:
+            dur = float(curve_duration) if curve_duration is not None else float(offsets[-1])
+        except (TypeError, ValueError, OverflowError):
+            continue
+
+        # Validate duration is positive and finite before appending.
+        if not (dur > 0 and np.isfinite(dur)):
+            continue
+
         normalized_curves.append((offsets, values, dur))
-        
+
         if len(offsets) > 1:
             intervals = np.diff(offsets)
-            sr = float(np.median(intervals[intervals > 0]))
-            sampling_rates.append(sr)
+            positive_intervals = intervals[intervals > 0]
+            if positive_intervals.size > 0:
+                sr = float(np.median(positive_intervals))
+                if np.isfinite(sr):
+                    sampling_rates.append(sr)
     if not normalized_curves:
         return None
 
     # 2. Reference Selection (Median Duration)
     # Input is now (offsets, values, duration)
-    normalized_curves_with_dur = normalized_curves
-    
-    max_times = [float(dur) for _, _, dur in normalized_curves_with_dur]
+    max_times = [float(dur) for _, _, dur in normalized_curves]
     median_dur = float(np.median(max_times))
     ref_idx = int(np.argmin([abs(t - median_dur) for t in max_times]))
 
     target_duration = max_times[ref_idx]
     avg_sample_rate = float(np.median(sampling_rates)) if sampling_rates else 2.0
 
+    # Ensure target_duration is valid for calculations
+    if not (target_duration > 0 and np.isfinite(target_duration)):
+        target_duration = 1.0  # Safe default
+
     align_dt = avg_sample_rate
     num_points = max(50, int(target_duration / align_dt))
     time_grid = np.linspace(0.0, target_duration, num_points)
 
-    ref_offsets, ref_values, _ = normalized_curves_with_dur[ref_idx]
+    ref_offsets, ref_values, _ = normalized_curves[ref_idx]
     ref_array = np.interp(time_grid, ref_offsets, ref_values)
 
     # 3. Resample & DTW
     resampled: list[np.ndarray] = []
 
-    for i, (offsets, values, dur) in enumerate(normalized_curves_with_dur):
+    for i, (offsets, values, dur) in enumerate(normalized_curves):
         if i == ref_idx:
             resampled.append(ref_array)
             continue
@@ -475,24 +499,26 @@ def verify_profile_alignment_worker(
 
     # 1. Coarse Alignment
     score, _, offset = find_best_alignment(curr, ref, 1.0)
-    
+
     # 2. Extract aligned segments
     # Determine the mapping window.
-    
-    start_ref = max(0, offset)
-    end_ref = min(len(ref), offset + len(curr) + 50) 
-    
+
+    # Symmetric context window: pad equally left and right of the coarse alignment.
+    half = ALIGNMENT_CONTEXT_BUFFER // 2
+    start_ref = max(0, offset - half)
+    end_ref = min(len(ref), offset + len(curr) + half)
+
     if end_ref <= start_ref:
-       return 0.0, 9999.0, 0.0
-       
+        return 0.0, 9999.0, 0.0
+
     ref_seg = ref[start_ref:end_ref]
-    curr_seg = curr 
-    
+    curr_seg = curr
+
     if offset < 0:
         curr_seg = curr[-offset:]
-        
+
     path = compute_dtw_path(curr_seg, ref_seg, band_width_ratio=dtw_bandwidth)
-    
+
     if not path:
         # Fallback to linear mapping based on offset
         mapped_idx = min(len(ref)-1, offset + len(curr) - 1)
@@ -502,10 +528,13 @@ def verify_profile_alignment_worker(
         last_pair = path[-1]
         ref_seg_idx = last_pair[1]
         mapped_idx = start_ref + ref_seg_idx
-        
-    mapped_idx = min(mapped_idx, len(envelope_time_grid)-1)
-    
+
+    # Ensure sequences are non-empty before indexing
+    if not envelope_time_grid or len(ref) == 0:
+        return 0.0, 9999.0, 0.0
+    mapped_idx = min(mapped_idx, len(envelope_time_grid) - 1, len(ref) - 1)
+
     mapped_time = float(envelope_time_grid[mapped_idx])
     mapped_power = float(ref[mapped_idx])
-    
+
     return mapped_time, mapped_power, float(score)
