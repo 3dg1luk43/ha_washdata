@@ -3641,7 +3641,7 @@ class ProfileStore:
 
         # We modify the first cycle (c1) to become the merged one
         c1 = target_cycles[0]
-        ids_to_remove = [c["id"] for c in target_cycles[1:]]
+        ids_to_remove: list[str] = []
 
         # Base setup
         c1_start_dt = dt_util.parse_datetime(c1["start_time"])
@@ -3703,6 +3703,7 @@ class ProfileStore:
                     last_t_abs = t_abs
 
             max_power = max(max_power, next_c.get("max_power", 0))
+            ids_to_remove.append(next_c["id"])
 
         # Derive merged end time from power data when available; otherwise fall back to
         # the end_time field of the last cycle (handles cycles without recorded power data).
@@ -3835,9 +3836,14 @@ class ProfileStore:
             width (int): Width of the generated SVG in pixels.
             height (int): Height of the generated SVG in pixels.
             title (str): Title text shown in the SVG header.
-        
+            no_data_label (str | None): Message rendered in the placeholder SVG when cycles are
+                present but contain no recorded power data. Defaults to None (empty message).
+
         Returns:
-            str: SVG markup for the merge preview. Returns an empty string if no valid cycles or if the first cycle's start_time cannot be parsed. If cycles are present but none contain power data, returns a placeholder SVG containing a message indicating "No power data available for preview".
+            str: SVG markup for the merge preview. Returns an empty string if no valid cycles or
+            if the first cycle's start_time cannot be parsed. If cycles are present but none
+            contain power data, returns a placeholder SVG using no_data_label as the descriptive
+            message instead of a fixed string.
         """
         cycles = [c for c in self.get_past_cycles() if c["id"] in cycle_ids]
 
@@ -3901,4 +3907,4 @@ class ProfileStore:
                 f'</svg>'
             )
 
-        return _generate_generic_svg(title, curves, width, height)
+        return _generate_generic_svg(html.escape(title), curves, width, height)
