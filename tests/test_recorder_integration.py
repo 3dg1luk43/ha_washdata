@@ -78,7 +78,6 @@ async def test_record_flow_stop_process(mock_hass, mock_config_entry):
     flow = OptionsFlowHandler(mock_config_entry)
     flow.hass = mock_hass
     flow.handler = mock_config_entry.entry_id
-    flow._selector_translations = {}  # Skip translation fetch in tests
     
     # 1. Stop Recording
     result = await flow.async_step_record_cycle(user_input={"action": "stop_recording"})

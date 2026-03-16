@@ -2,364 +2,199 @@
   "config": {
     "step": {
       "user": {
-        "title": "ウォッシュデータのセットアップ",
-        "description": "洗濯機またはその他の家電製品を設定します。\n\nパワーセンサーが必要です。\n\n**次に、最初のプロファイルを作成するかどうかを尋ねられます。**",
+        "title": "WashData セットアップ",
+        "description": "洗濯機またはその他の家電製品を設定します。\n\n電力センサーが必要です。\n\n**次に、最初のプロファイルを作成するかどうか尋ねられます。**",
         "data": {
           "name": "デバイス名",
-          "device_type": "デバイスの種類",
-          "power_sensor": "パワーセンサー",
+          "device_type": "デバイスタイプ",
+          "power_sensor": "電力センサー",
           "min_power": "最小電力しきい値 (W)"
         },
         "data_description": {
-          "name": "このデバイスのわかりやすい名前 (「洗濯機」、「食器洗い機」など)。",
-          "device_type": "これはどのような種類の器具ですか?検出とラベル付けをカスタマイズするのに役立ちます。",
-          "power_sensor": "スマート プラグからリアルタイムの電力消費量 (ワット単位) を報告するセンサー エンティティ。",
-          "min_power": "このしきい値 (ワット単位) を超える電力測定値は、アプライアンスが実行されていることを示します。ほとんどのデバイスでは 2W から始めます。"
+          "name": "このデバイスの分かりやすい名前（例：「洗濯機」、「食器洗い機」）。",
+          "device_type": "これはどのタイプの家電製品ですか？検出とラベル付けを調整するのに役立ちます。",
+          "power_sensor": "スマートプラグからのリアルタイム消費電力（ワット単位）を報告するセンサーエンティティ。",
+          "min_power": "このしきい値（ワット単位）を超える電力測定値は、アプライアンスが稼働中であることを示します。ほとんどのデバイスでは 2W から始めてください。"
         }
       },
       "first_profile": {
-        "title": "最初のプロファイルを作成する",
-        "description": "**サイクル** とは、アプライアンスの完全な実行です (大量の洗濯物など)。 **プロファイル** は、これらのサイクルをタイプ別にグループ化します (例: 「コットン」、「クイックウォッシュ」)。プロファイルを作成すると、統合期間をすぐに見積もることができるようになりました。\n\nこのプロファイルが自動的に検出されない場合は、デバイス コントロールで手動で選択できます。\n\n**この手順をスキップするには、「プロファイル名」を空のままにしておきます。**",
+        "title": "最初のプロファイルを作成",
+        "description": "**サイクル**とは、家電製品の完全な動作（例：洗濯物の1回の負荷）です。**プロファイル**は、これらのサイクルをタイプ別（例：「綿」、「クイックウォッシュ」）にグループ化します。今すぐプロファイルを作成すると、統合機能が期間を即座に推定するのに役立ちます。\n\n自動的に検出されない場合は、デバイスコントロールでこのプロファイルを手動で選択できます。\n\n**この手順をスキップするには、「プロファイル名」を空のままにしてください。**",
         "data": {
-          "profile_name": "プロファイル名 (オプション)",
-          "manual_duration": "推定所要時間 (分)"
+          "profile_name": "プロファイル名（オプション）",
+          "manual_duration": "推定所要時間（分）"
         }
       }
     },
     "error": {
       "cannot_connect": "接続に失敗しました",
-      "invalid_auth": "無効な認証",
+      "invalid_auth": "認証が無効です",
       "unknown": "予期しないエラー"
     },
     "abort": {
-      "already_configured": "デバイスはすでに構成されています"
+      "already_configured": "デバイスはすでに設定されています"
     }
   },
   "options": {
     "step": {
       "init": {
         "menu_options": {
-          "learning_feedbacks": "学習フィードバックを確認する",
+          "learning_feedbacks": "学習フィードバックを確認",
           "settings": "設定",
-          "notifications": "通知",
-          "manage_cycles": "サイクルの管理",
-          "manage_profiles": "プロファイルの管理",
-          "manage_phase_catalog": "フェーズカタログの管理",
-          "record_cycle": "記録周期（手動）",
+          "manage_cycles": "サイクル管理",
+          "manage_profiles": "プロファイル管理",
+          "record_cycle": "サイクルを記録（手動）",
           "diagnostics": "診断とメンテナンス"
         }
       },
       "apply_suggestions": {
         "title": "推奨値をコピー",
-        "description": "これにより、現在の推奨値が保存された設定にコピーされます。これは 1 回限りのアクションであり、自動上書きは有効になりません。\n\nコピーする推奨値:\n{suggested}",
+        "description": "これにより、現在の推奨値が保存された設定にコピーされます。これは1回限りのアクションであり、自動上書きは有効になりません。\n\nコピーする推奨値：\n{suggested}",
         "data": {
-          "confirm": "コピーアクションの確認"
+          "confirm": "コピーを確認"
         }
       },
       "settings": {
         "title": "設定",
-        "description": "検出しきい値、学習、および高度な動作を調整します。ほとんどのセットアップではデフォルトで問題なく機能します。",
+        "description": "検出のしきい値、学習、および高度な動作を調整します。デフォルト値はほとんどの設定でうまく機能します。",
         "data": {
-          "apply_suggestions": "推奨値を適用する",
-          "device_type": "デバイスの種類",
-          "power_sensor": "パワーセンサーエンティティ",
+          "apply_suggestions": "推奨値を適用",
+          "device_type": "デバイスタイプ",
+          "power_sensor": "電力センサーエンティティ",
           "min_power": "最小電力 (W)",
-          "off_delay": "サイクル終了遅延 (秒)",
-          "notify_service": "通知サービス (例:notify.mobile_app)",
-          "notify_actions": "通知アクション",
-          "notify_people": "対象者が帰宅するまで配達を遅らせる",
-          "notify_only_when_home": "選択した人が帰宅するまで通知を遅らせる",
-          "notify_fire_events": "消防自動化イベント",
+          "off_delay": "サイクル終了遅延 (s)",
+          "notify_service": "通知サービス (例: notify.mobile_app)",
           "notify_events": "通知するイベント",
-          "notify_before_end_minutes": "完了前通知（終了数分前）",
-          "notify_title": "通知のタイトル",
+          "notify_before_end_minutes": "完了前通知（終了の数分前）",
+          "notify_title": "通知タイトル",
           "notify_icon": "通知アイコン",
-          "notify_start_message": "開始メッセージのフォーマット",
-          "notify_finish_message": "終了メッセージのフォーマット",
-          "notify_pre_complete_message": "完了前メッセージのフォーマット",
-          "show_advanced": "詳細設定の編集 (次のステップ)"
+          "notify_start_message": "開始メッセージの形式",
+          "notify_finish_message": "終了メッセージの形式",
+          "notify_pre_complete_message": "完了前メッセージの形式",
+          "show_advanced": "詳細設定を編集（次のステップ）"
         },
         "data_description": {
-          "apply_suggestions": "学習アルゴリズムによって提案された値をフォームにコピーするには、このボックスをチェックします。保存する前に確認してください。\n\n提案 (学習から):\n- min_power: {suggested_min_power} W\n- オフ遅延: {suggested_off_delay} 秒\n- ウォッチドッグ間隔: {suggested_watchdog_interval} 秒\n- no_update_active_timeout: {suggested_no_update_active_timeout} 秒\n- profile_match_interval: {suggested_profile_match_interval} 秒\n- auto_label_confidence: {suggested_auto_label_confidence}\n- 期間許容値: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold}Wh\n- running_dead_zone: {suggested_running_dead_zone} 秒\n{suggested_reason}",
+          "apply_suggestions": "このボックスをチェックすると、学習アルゴリズムによって提案された値がフォームにコピーされます。保存前に確認してください。\n\n推奨（学習から）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
           "device_type": "家電製品のタイプ (洗濯機、乾燥機、食器洗い機、コーヒーマシン、EV) を選択します。このタグは、より適切に整理するために各サイクルとともに保存されます。",
-          "power_sensor": "リアルタイムの電力 (ワット単位) を報告するセンサー エンティティ。これは、履歴データを失うことなくいつでも変更できます。スマート プラグを交換する場合に便利です。",
-          "min_power": "このしきい値 (ワット単位) を超える電力測定値は、アプライアンスが実行されていることを示します。ほとんどのデバイスでは 2W から始めます。",
-          "off_delay": "完了をマークするには、平滑化された電力が停止しきい値を下回っている必要がある秒数。デフォルト: 120 秒。",
-          "notify_service": "ホーム アシスタントが使用するサービスを通知します (オプション)。",
-          "notify_actions": "通知のために実行するオプションのホーム アシスタント アクション シーケンス (スクリプト、通知、TTS など)。設定されている場合、アクションはフォールバック通知サービスの前に実行されます。",
-          "notify_people": "プレゼンス ゲーティングに使用される人物エンティティ。有効にすると、選択した少なくとも 1 人が帰宅するまで通知の配信が遅れます。",
-          "notify_only_when_home": "有効にすると、選択した少なくとも 1 人が帰宅するまで通知が遅延します。",
-          "notify_fire_events": "有効にすると、サイクルの開始と終了のホーム アシスタント イベント (ha_washdata_cycle_started と ha_washdata_cycle_ended) を起動して自動化を推進します。",
+          "power_sensor": "リアルタイムの電力（ワット単位）を報告するセンサーエンティティ。履歴データを失うことなくいつでも変更できます—スマートプラグを交換する場合に便利です。",
+          "min_power": "このしきい値（ワット単位）を超える電力測定値は、アプライアンスが稼働中であることを示します。ほとんどのデバイスでは 2W から始めてください。",
+          "off_delay": "完了をマークするために、平滑化された電力が停止しきい値を下回っている必要がある秒数。デフォルト：120s。",
+          "notify_service": "使用する Home Assistant 通知サービス（オプション）。",
           "notify_events": "通知を送信するイベント。",
-          "notify_before_end_minutes": "通知をトリガーするサイクルの推定終了時間の数分前。無効にするには 0 に設定します。デフォルト: 0。",
-          "notify_title": "通知のカスタム タイトル。 {device} プレースホルダーをサポートします。",
-          "notify_icon": "通知に使用するアイコン (例: mdi:washing-machine)。デフォルトを使用するには空のままにしてください。",
-          "notify_start_message": "サイクルの開始時に送信されるメッセージ。 {device} プレースホルダーをサポートします。",
-          "notify_finish_message": "サイクルの終了時に送信されるメッセージ。 {device}、{duration}、{program} プレースホルダーをサポートします。",
-          "notify_pre_complete_message": "完了前にメッセージが送信されました。 {device}、{minutes} プレースホルダーをサポートします。"
-        }
-      },
-      "notifications": {
-        "title": "通知",
-        "description": "通知チャネル、テンプレート、およびオプションのライブモバイル進行状況更新を構成します。",
-        "data": {
-          "notify_service": "通知サービス (例:notify.mobile_app)",
-          "notify_actions": "通知アクション",
-          "notify_people": "対象者が帰宅するまで配達を遅らせる",
-          "notify_only_when_home": "選択した人が帰宅するまで通知を遅らせる",
-          "notify_fire_events": "消防自動化イベント",
-          "notify_events": "通知するイベント",
-          "notify_before_end_minutes": "完了前通知（終了数分前）",
-          "notify_live_interval_seconds": "ライブアップデート間隔 (秒)",
-          "notify_live_overrun_percent": "Live Update オーバーラン許容量 (%)",
-          "notify_title": "通知のタイトル",
-          "notify_icon": "通知アイコン",
-          "notify_start_message": "開始メッセージのフォーマット",
-          "notify_finish_message": "終了メッセージのフォーマット",
-          "notify_pre_complete_message": "完了前メッセージのフォーマット"
-        },
-        "data_description": {
-          "notify_service": "ホーム アシスタントが使用するサービスを通知します (オプション)。",
-          "notify_actions": "通知のために実行するオプションのホーム アシスタント アクション シーケンス (スクリプト、通知、TTS など)。設定されている場合、アクションはフォールバック通知サービスの前に実行されます。",
-          "notify_people": "プレゼンス ゲーティングに使用される人物エンティティ。有効にすると、選択した少なくとも 1 人が帰宅するまで通知の配信が遅れます。",
-          "notify_only_when_home": "有効にすると、選択した少なくとも 1 人が帰宅するまで通知が遅延します。",
-          "notify_fire_events": "有効にすると、サイクルの開始と終了のホーム アシスタント イベント (ha_washdata_cycle_started と ha_washdata_cycle_ended) を起動して自動化を推進します。",
-          "notify_events": "通知を送信するイベント。",
-          "notify_before_end_minutes": "通知をトリガーするサイクルの推定終了時間の数分前。無効にするには 0 に設定します。デフォルト: 0。",
-          "notify_live_interval_seconds": "実行中に進行状況の更新が送信される頻度。値が低いほど応答性は高くなりますが、消費する通知の量が多くなります。最低 30 秒が強制されます。30 秒未満の値は自動的に 30 秒に切り上げられます。",
-          "notify_live_overrun_percent": "長時間/超過サイクルの推定更新数を上回る安全マージン (たとえば、20% では推定更新数の 1.2 倍が許可されます)。",
-          "notify_title": "通知のカスタム タイトル。 {device} プレースホルダーをサポートします。",
-          "notify_icon": "通知に使用するアイコン (例: mdi:washing-machine)。デフォルトを使用するには空のままにしてください。",
-          "notify_start_message": "サイクルの開始時に送信されるメッセージ。 {device} プレースホルダーをサポートします。",
-          "notify_finish_message": "サイクルの終了時に送信されるメッセージ。 {device}、{duration}、{program} プレースホルダーをサポートします。",
-          "notify_pre_complete_message": "完了前にメッセージが送信されました。 {device}、{minutes} プレースホルダーをサポートします。"
+          "notify_before_end_minutes": "通知をトリガーする推定サイクル終了の数分前。無効にするには 0 に設定します。デフォルト：0。",
+          "notify_title": "通知のカスタムタイトル。{device} プレースホルダーをサポートします。",
+          "notify_icon": "通知に使用するアイコン（例：mdi:washing-machine）。デフォルトを使用するには空のままにしてください。",
+          "notify_start_message": "サイクル開始時に送信されるメッセージ。{device} プレースホルダーをサポートします。",
+          "notify_finish_message": "サイクル終了時に送信されるメッセージ。{device}, {duration}, {program} プレースホルダーをサポートします。",
+          "notify_pre_complete_message": "完了前に送信されるメッセージ。{device}, {minutes} プレースホルダーをサポートします。"
         }
       },
       "advanced_settings": {
         "title": "詳細設定",
-        "description": "検出しきい値、学習、および高度な動作を調整します。ほとんどのセットアップではデフォルトで問題なく機能します。",
+        "description": "検出のしきい値、学習、および高度な動作を調整します。デフォルト値はほとんどの設定でうまく機能します。",
         "data": {
-          "apply_suggestions": "推奨値を適用する",
-          "start_threshold_w": "開始閾値(W)",
-          "stop_threshold_w": "停止閾値(W)",
-          "min_off_gap": "サイクル間の最小ギャップ (秒)",
-          "start_duration_threshold": "開始デバウンス期間 (秒)",
-          "progress_reset_delay": "進行状況リセット遅延 (秒)",
-          "no_update_active_timeout": "無更新タイムアウト (秒)",
-          "sampling_interval": "サンプリング間隔 (秒)",
-          "auto_label_confidence": "自動ラベル付けの信頼性 (0-1)",
+          "apply_suggestions": "推奨値を適用",
+          "start_threshold_w": "開始しきい値 (W)",
+          "stop_threshold_w": "停止しきい値 (W)",
+          "min_off_gap": "サイクル間の最小間隔 (s)",
+          "start_duration_threshold": "開始デバウンス期間 (s)",
+          "progress_reset_delay": "進捗リセット遅延 (秒)",
+          "no_update_active_timeout": "更新なしタイムアウト (s)",
+          "sampling_interval": "サンプリング間隔 (s)",
+          "auto_label_confidence": "自動ラベル信頼度 (0-1)",
           "learning_confidence": "フィードバック要求の信頼度 (0-1)",
-          "duration_tolerance": "期間許容値 (0 ～ 0.5)",
-          "profile_match_interval": "プロファイル一致間隔 (秒)",
-          "profile_match_min_duration_ratio": "プロファイル一致最小継続時間比 (0.1-1.0)",
-          "profile_match_max_duration_ratio": "プロファイル一致最大持続時間比 (1.0-3.0)",
-          "smoothing_window": "スムージング ウィンドウ (サンプル)",
+          "duration_tolerance": "期間の許容範囲 (0-0.5)",
+          "profile_match_interval": "プロファイル一致間隔（秒）",
+          "profile_match_min_duration_ratio": "プロファイル一致最小期間比 (0.1-1.0)",
+          "profile_match_max_duration_ratio": "プロファイル一致最大期間比 (1.0-3.0)",
+          "smoothing_window": "平滑化ウィンドウ（サンプル）",
           "profile_match_threshold": "プロファイル一致しきい値",
-          "profile_unmatch_threshold": "プロファイルの不一致しきい値",
-          "profile_duration_tolerance": "プロファイル一致期間の許容範囲 (0 ～ 0.5)",
-          "interrupted_min_seconds": "中断: 最小実行時間 (秒)",
-          "abrupt_drop_watts": "中断：急降下アブソリュート（W）",
-          "abrupt_drop_ratio": "中断: 突然のドロップ率 (0-1)",
-          "abrupt_high_load_factor": "中断: 高負荷率",
-          "max_past_cycles": "保持: 最大保存サイクル数",
-          "max_full_traces_per_profile": "保持: プロファイルごとの最大完全なトレース",
-          "max_full_traces_unlabeled": "保持: ラベルなしの最大完全なトレース",
-          "watchdog_interval": "ウォッチドッグ間隔 (秒)",
-          "completion_min_seconds": "完了の最小実行時間 (秒)",
-          "notify_before_end_minutes": "完了前通知（終了数分前）",
-          "auto_tune_noise_events_threshold": "自動調整: ノイズ イベントのしきい値",
-          "running_dead_zone": "ランニングデッドゾーン(秒)",
-          "end_repeat_count": "終了繰り返し回数",
-          "start_energy_threshold": "スタートエナジーゲート(Wh)",
-          "end_energy_threshold": "エンドエナジーゲート(Wh)",
-          "auto_maintenance": "自動メンテナンスを有効にする",
-          "expose_debug_entities": "デバッグエンティティを公開する",
-          "save_debug_traces": "デバッグ トレースの保存",
-          "anti_wrinkle_enabled": "シワ防止シールド（乾燥機のみ）",
-          "anti_wrinkle_max_power": "しわ防止最大出力 (W)",
-          "anti_wrinkle_max_duration": "シワ防止最大持続時間 (秒)",
-          "anti_wrinkle_exit_power": "しわ防止出力 (W)",
+          "profile_unmatch_threshold": "プロファイル不一致しきい値",
+          "profile_duration_tolerance": "プロファイル一致期間の許容範囲 (0-0.5)",
+          "interrupted_min_seconds": "中断：最小実行時間（秒）",
+          "abrupt_drop_watts": "中断：急激な低下の絶対値 (W)",
+          "abrupt_drop_ratio": "中断：急激な低下率 (0-1)",
+          "abrupt_high_load_factor": "中断：高負荷係数",
+          "max_past_cycles": "保持：最大保存サイクル数",
+          "max_full_traces_per_profile": "保持：プロファイルごとの最大完全トレース数",
+          "max_full_traces_unlabeled": "保持：未ラベルの最大完全トレース数",
+          "watchdog_interval": "ウォッチドッグ間隔（秒）",
+          "completion_min_seconds": "完了最小実行時間（秒）",
+          "notify_before_end_minutes": "完了前通知（終了の数分前）",
+          "auto_tune_noise_events_threshold": "自動調整：ノイズイベントしきい値",
+          "running_dead_zone": "実行中のデッドゾーン（秒）",
+          "end_repeat_count": "終了繰り返しカウント",
+          "start_energy_threshold": "開始エネルギーゲート (Wh)",
+          "end_energy_threshold": "終了エネルギーゲート (Wh)",
+          "auto_maintenance": "自動メンテナンスを有効化",
+          "expose_debug_entities": "デバッグエンティティを公開",
+          "save_debug_traces": "デバッグトレースを保存",
           "dtw_bandwidth": "DTW 帯域幅",
-          "external_end_trigger_enabled": "外部サイクル終了トリガーを有効にする",
-          "external_end_trigger": "外部サイクルエンドセンサー",
-          "external_end_trigger_inverted": "トリガーロジックを反転 (トリガーオンオフ)"
+          "external_end_trigger_enabled": "外部サイクル終了トリガーを有効化",
+          "external_end_trigger": "外部サイクル終了センサー"
         },
         "data_description": {
-          "apply_suggestions": "このボックスをチェックすると、学習アルゴリズムからの推奨値のレビュー ステップが開きます。何も自動的には保存されません。\n\n提案 (学習から):\n- min_power: {suggested_min_power} W\n- オフ遅延: {suggested_off_delay} 秒\n- ウォッチドッグ間隔: {suggested_watchdog_interval} 秒\n- no_update_active_timeout: {suggested_no_update_active_timeout} 秒\n- profile_match_interval: {suggested_profile_match_interval} 秒\n- auto_label_confidence: {suggested_auto_label_confidence}\n- 期間許容値: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold}Wh\n- running_dead_zone: {suggested_running_dead_zone} 秒\n{suggested_reason}",
-          "start_threshold_w": "サイクルを開始するには、電力がこのしきい値を超える必要があります。待機電力よりも高い値に設定してください。デフォルト: min_power + 1 W。",
-          "stop_threshold_w": "サイクルを終了するには、電力がこのしきい値を下回る必要があります。誤終了を引き起こすノイズを避けるために、ゼロより少し上に設定します。デフォルト: 0.6 * min_power。",
-          "min_off_gap": "前のサイクルが終了してからこの秒数以内にサイクルが開始された場合、それらは 1 つのサイクルにマージされます。",
-          "start_duration_threshold": "この期間 (秒) より短い短い電力スパイクは無視します。実際のサイクルが開始する前に、ブート スパイク (例: 2 秒間 60 W) をフィルタリングします。デフォルト: 5秒。",
-          "progress_reset_delay": "サイクルが完了 (100%) した後、進行状況を 0% にリセットする前に、アイドル状態でこの秒数待機します。デフォルト: 300 秒。",
-          "no_update_active_timeout": "変更時公開センサーの場合: この秒数の間更新が到着しない場合にのみ、ACTIVE サイクルを強制終了します。低電力完了では引き続きオフ遅延が使用されます。",
-          "sampling_interval": "最小サンプリング間隔 (秒単位)。この速度よりも速い更新は無視されます。デフォルト: 2.0秒。",
-          "auto_label_confidence": "完了時にこの信頼度 (0.0 ～ 1.0) 以上のサイクルに自動的にラベルを付けます。",
-          "learning_confidence": "イベント経由でユーザー検証を要求するための最小信頼度 (0.0 ～ 1.0)。",
-          "duration_tolerance": "実行中の残り時間の推定値の許容範囲 (0.0 ～ 0.5 は 0 ～ 50% に相当します)。",
-          "profile_match_interval": "サイクル中にプロファイルの一致を試行する頻度 (秒単位)。値を小さくすると検出が速くなりますが、CPU の使用量が多くなります。デフォルト: 300 秒 (5 分)。",
-          "profile_match_min_duration_ratio": "プロファイル一致の最小継続時間比率。一致させるには、実行サイクルが少なくともプロファイル期間のこの部分である必要があります。低い = より早い一致。デフォルト: 0.50 (50%)。",
-          "profile_match_max_duration_ratio": "プロファイル一致の最大継続時間比率。実行サイクルは、プロファイル期間のこの倍数を超えてはなりません。高い = より寛大です。デフォルト: 1.50 (150%)。",
-          "smoothing_window": "移動平均の平滑化に使用される最近の電力測定値の数。",
-          "profile_match_threshold": "プロファイルを一致とみなすために必要な最小 DTW 類似性スコア (0.0 ～ 1.0)。高い = 一致が厳密になり、誤検知が少なくなります。デフォルト: 0.4。",
-          "profile_unmatch_threshold": "DTW 類似性スコア (0.0 ～ 1.0)。このスコアを下回ると、以前に一致したプロファイルは拒否されます。ちらつきを防ぐために、一致しきい値よりも低くする必要があります。デフォルト: 0.35。",
-          "profile_duration_tolerance": "合計期間の分散に対するプロファイル マッチングで使用される許容値 (0.0 ～ 0.5)。デフォルトの動作: ±25%。",
+          "apply_suggestions": "このボックスをチェックすると、学習アルゴリズムによって提案された値がフォームにコピーされます。保存前に確認してください。\n\n推奨（学習から）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n{suggested_reason}",
+          "start_threshold_w": "サイクルを開始するには、電力がこのしきい値を上回る必要があります。待機電力よりも高く設定してください。デフォルト：min_power + 1 W。",
+          "stop_threshold_w": "サイクルを終了するには、電力がこのしきい値を下回る必要があります。ノイズによる誤った終了を防ぐために、ゼロより少し上に設定してください。デフォルト：0.6 * min_power。",
+          "min_off_gap": "前のサイクルが終了してからこの秒数以内にサイクルが開始された場合、それらは単一のサイクルにマージされます。",
+          "start_duration_threshold": "この持続時間（秒）より短い短い電力スパイクを無視します。実際のサイクル開始前のブートスパイク（例：2秒間60W）を除外します。デフォルト：5s。",
+          "progress_reset_delay": "サイクル完了（100%）後、進捗を0%にリセットする前にこの秒数のアイドル時間を待機します。デフォルト：300s。",
+          "no_update_active_timeout": "変更時公開センサーの場合：この秒数以内に更新が届かない場合のみ、アクティブなサイクルを強制終了します。",
+          "sampling_interval": "秒単位の最小サンプリング間隔。このレートより速い更新は無視されます。デフォルト：2.0s。",
+          "auto_label_confidence": "完了時にこの信頼度以上でサイクルに自動的にラベルを付けます (0.0–1.0)。",
+          "learning_confidence": "イベントを通じてユーザー検証を要求する最小信頼度 (0.0–1.0)。",
+          "duration_tolerance": "実行中の残り時間推定の許容範囲（0.0–0.5は0–50%に対応）。",
+          "profile_match_interval": "サイクル中にプロファイル照合を試行する頻度（秒単位）。値が低いほど検出は速くなりますが、CPU使用率が高くなります。デフォルト：300s（5分）。",
+          "profile_match_min_duration_ratio": "プロファイル照合の最小期間比。実行中のサイクルは、プロファイル期間の少なくともこの割合である必要があります。小さい = 早い照合。デフォルト：0.50 (50%)。",
+          "profile_match_max_duration_ratio": "プロファイル照合の最大期間比。実行中のサイクルは、プロファイル期間のこの倍数を超えてはなりません。大きい = より寛容。デフォルト：1.50 (150%)。",
+          "smoothing_window": "移動平均平滑化に使用される最近の電力測定値の数。",
+          "profile_match_threshold": "プロファイルを一致と見なすために必要な最小 DTW 類似度スコア (0.0–1.0)。高い = より厳密な一致、誤検知が少ない。デフォルト：0.4。",
+          "profile_unmatch_threshold": "DTW 類似度スコア (0.0–1.0)。これを下回ると、以前に一致したプロファイルが拒否されます。ちらつきを防ぐために、一致しきい値よりも低くする必要があります。デフォルト：0.35。",
+          "profile_duration_tolerance": "プロファイル照合で総持続時間の分散に使用される許容範囲 (0.0–0.5)。デフォルトの動作：±25%。",
           "interrupted_min_seconds": "これより短い実行は「中断」として分類される場合があります。",
-          "abrupt_drop_watts": "絶対的なパワードロップ (W) は急激な崖と考えられます。",
-          "abrupt_drop_ratio": "相対的なドロップ率 (0 ～ 1)。例: 0.6 は、60% の低下が急激であることを意味します。",
-          "abrupt_high_load_factor": "ベースラインを超える係数は、突然の低下の前に「高負荷」とみなされます (突然の検出で使用されます)。",
-          "max_past_cycles": "保持するサイクルの合計数 (最も古いものは削除されます)。デフォルト: 200。",
-          "max_full_traces_per_profile": "プロファイルごとのフルパワートレースとともに保持する最近のラベル付きサイクルの数。古いトレースはエンベロープを介して要約されます。デフォルト: 20。",
-          "max_full_traces_unlabeled": "自動ラベル付けをサポートするためにフルパワー トレースとともに保持する最近のラベルなしサイクルの数。デフォルト: 20。",
-          "watchdog_interval": "実行中のウォッチドッグチェック間の秒数。デフォルト: 5秒。警告: 誤停止を避けるために、これがセンサーの更新間隔よりも大きいことを確認してください (たとえば、センサーが 60 秒ごとに更新する場合は、65 秒以上を使用します)。",
-          "completion_min_seconds": "これより短いサイクルは、自然に終了したとしても「中断」としてマークされます。デフォルト: 600 秒。",
-          "notify_before_end_minutes": "通知をトリガーするサイクルの推定終了時間の数分前。無効にするには 0 に設定します。デフォルト: 0。",
-          "auto_tune_noise_events_threshold": "min_power の自動調整に必要な 24 時間以内の短い/低電力の「ノイズ」サイクルの数。デフォルト: 3。",
-          "running_dead_zone": "サイクルの開始後、最初のスピンアップ段階での誤った終了検出を防ぐために、この秒数の間電力低下を無視します。無効にするには 0 に設定します。デフォルト: 0。",
-          "end_repeat_count": "サイクルを終了する前に、終了条件 (off_lay のしきい値を下回る電力) が連続して満たされる必要がある回数。値を大きくすると、一時停止中の誤終了が防止されます。デフォルト: 1。",
-          "start_energy_threshold": "サイクルが確認されるには、開始フェーズ中に少なくともこの量のエネルギー (Wh) を蓄積する必要があります。デフォルト: 0.005Wh。",
-          "end_energy_threshold": "サイクルは、最後のオフ遅延ウィンドウのエネルギーがこの値 (Wh) を下回った場合にのみ終了します。電力がゼロ付近で変動した場合の誤終了を防止します。デフォルト: 0.05Wh。",
-          "auto_maintenance": "自動メンテナンスを有効にします (サンプルの修復、フラグメントのマージ)。",
-          "expose_debug_entities": "デバッグ用の高度なセンサー (信頼性、位相、曖昧性) を表示します。",
-          "save_debug_traces": "詳細なランキングと電力追跡データを履歴に保存します (ストレージ使用量が増加します)。",
-          "anti_wrinkle_enabled": "ゴーストサイクルを防ぐため、サイクル終了後の低出力ドラムの短い回転を無視します (乾燥機/洗濯乾燥機のみ)。",
-          "anti_wrinkle_max_power": "このパワー以下のバーストは、新しいサイクルではなく、しわ防止ローテーションとして扱われます。アンチリンクル シールドが有効な場合にのみ適用されます。",
-          "anti_wrinkle_max_duration": "しわ防止回転として扱う最大バースト長。アンチリンクル シールドが有効な場合にのみ適用されます。",
-          "anti_wrinkle_exit_power": "電力がこのレベルを下回った場合は、しわ防止機能をすぐに終了します (真のオフ)。アンチリンクル シールドが有効な場合にのみ適用されます。",
-          "dtw_bandwidth": "サイクル期間の比率としての最大許容タイムワーピング (ストレッチ)。値を大きくすると、変動性の高いサイクルに一致させることができますが、CPU コストが増加します。デフォルト: 0.20 (20%)。",
-          "external_end_trigger_enabled": "外部バイナリセンサーの監視を有効にして、サイクル完了をトリガーします。",
-          "external_end_trigger": "バイナリ センサー エンティティを選択します。このセンサーがトリガーされると、現在のサイクルはステータス「完了」で終了します。",
-          "external_end_trigger_inverted": "デフォルトでは、センサーがオンになるとトリガーが作動します。このボックスをチェックすると、センサーがオフになったときに起動します。"
+          "abrupt_drop_watts": "急な崖と見なされる絶対的な電力低下 (W)。",
+          "abrupt_drop_ratio": "相対的な低下率 (0–1)。例：0.6は60%の低下が急であることを意味します。",
+          "abrupt_high_load_factor": "急な低下の前に「高負荷」と見なされるベースラインを超える係数。",
+          "max_past_cycles": "保持するサイクルの総数（最も古いものが削除されます）。デフォルト：200。",
+          "max_full_traces_per_profile": "プロファイルごとに完全な電力トレースを備えた最近ラベル付けされたサイクルの保持数。古いトレースはエンベロープを介して要約されます。デフォルト：20。",
+          "max_full_traces_unlabeled": "自動ラベル付けをサポートするために完全な電力トレースを備えた最近の未ラベルサイクルの保持数。デフォルト：20。",
+          "watchdog_interval": "実行中のウォッチドッグチェックの間隔（秒）。デフォルト：5s。警告：誤った停止を避けるために、これがセンサーの更新間隔よりも高いことを確認してください（例：センサーが60秒ごとに更新する場合、65秒以上を使用）。",
+          "completion_min_seconds": "これより短いサイクルは、自然に終了しても「中断」としてマークされます。デフォルト：600s。",
+          "notify_before_end_minutes": "通知をトリガーする推定サイクル終了の数分前。無効にするには 0 に設定します。デフォルト：0。",
+          "auto_tune_noise_events_threshold": "min_power を自動調整するために必要な、24時間以内の短い/低電力「ノイズ」サイクルの数。デフォルト：3。",
+          "running_dead_zone": "サイクル開始後、初期スピンアップフェーズ中の誤った終了検出を防ぐために、この秒数の間、電力低下を無視します。無効にするには 0 に設定します。デフォルト：0s。",
+          "end_repeat_count": "サイクルを終了する前に、終了条件（off_delay 内で電力がしきい値を下回る）を連続して満たす必要がある回数。高い値は、一時停止中の誤った終了を防ぎます。デフォルト：1。",
+          "start_energy_threshold": "サイクルは、確認されるために開始フェーズ中に少なくともこれだけのエネルギー (Wh) を蓄積する必要があります。デフォルト：0.005 Wh。",
+          "end_energy_threshold": "サイクルは、最後の Off-Delay ウィンドウのエネルギーがこの値 (Wh) を下回った場合にのみ終了します。電力がゼロ付近で変動する場合の誤った終了を防ぎます。デフォルト：0.05 Wh。",
+          "auto_maintenance": "夜間メンテナンスを有効にして、サンプルを修復し、断片化したサイクルをマージし、ストレージを健全に保ちます。",
+          "expose_debug_entities": "デバッグ用の高度なセンサー（信頼度、フェーズ、あいまいさ）を表示します。",
+          "save_debug_traces": "履歴に詳細なランキングと電力トレースデータを保存します（ストレージ使用量が増加します）。",
+          "dtw_bandwidth": "サイクル期間の比率としての最大許容時間ワーピング（ストレッチ）。値が高いほど、変動の激しいサイクル（センサー遅延フェーズなど）に一致させることができますが、CPUコストが増加します。デフォルト：0.20 (20%)。",
+          "external_end_trigger_enabled": "外部バイナリセンサーの監視を有効にして、サイクル完了をトリガーします。有効にすると、センサーが「オン」になるとすぐに現在のサイクルが完了します。",
+          "external_end_trigger": "バイナリセンサーエンティティを選択します。このセンサーが「オン」になると、現在のサイクルはステータス「完了」（「中断」ではない）で終了します。"
         }
       },
       "diagnostics": {
         "title": "診断とメンテナンス",
-        "description": "断片化したサイクルの結合や保存されたデータの移行などのメンテナンス アクションを実行します。\n\n**ストレージの使用量**\n\n- ファイルサイズ: {file_size_kb} KB\n- サイクル: {cycle_count}\n- プロフィール: {profile_count}\n- デバッグ トレース: {debug_count}"
+        "description": "断片化したサイクルのマージや保存データの移行などのメンテナンスアクションを実行します。\n\n{storage_stats}"
       },
       "clear_debug_data": {
-        "title": "デバッグデータのクリア",
-        "description": "保存されているすべてのデバッグ トレースを削除してもよろしいですか?これによりスペースが解放されますが、過去のサイクルから詳細なランキング情報が削除されます。"
+        "title": "デバッグデータをクリア",
+        "description": "保存されているすべてのデバッグトレースを削除してもよろしいですか？これによりスペースは解放されますが、過去のサイクルの詳細なランキング情報は削除されます。"
       },
       "manage_cycles": {
-        "title": "サイクルの管理",
-        "description": "最近のサイクル:\n{recent_cycles}",
-        "data": {
-          "action": "アクション"
-        }
-      },
-      "manage_cycles_empty": {
-        "title": "サイクルの管理",
-        "description": "まだサイクルが記録されていません。",
+        "title": "サイクル管理",
+        "description": "最近のサイクル：\n{recent_cycles}",
         "data": {
           "action": "アクション"
         }
       },
       "manage_profiles": {
-        "title": "プロファイルの管理",
-        "description": "プロフィールの概要:\n{profile_summary}",
+        "title": "プロファイル管理",
+        "description": "プロファイル概要：\n{profile_summary}",
         "data": {
           "action": "アクション"
-        }
-      },
-      "manage_profiles_empty": {
-        "title": "プロファイルの管理",
-        "description": "まだプロファイルが作成されていません。",
-        "data": {
-          "action": "アクション"
-        }
-      },
-      "manage_phase_catalog": {
-        "title": "フェーズカタログの管理",
-        "description": "フェーズ カタログ (このデバイスのデフォルト + カスタム フェーズ):\n{phase_summary}",
-        "data": {
-          "action": "アクション"
-        }
-      },
-      "phase_catalog_create": {
-        "title": "カスタムフェーズの作成",
-        "description": "カスタム フェーズの名前と説明を作成し、それを適用するデバイス タイプを選択します。",
-        "data": {
-          "target_device_type": "ターゲットデバイスの種類",
-          "phase_name": "フェーズ名",
-          "phase_description": "フェーズの説明"
-        }
-      },
-      "phase_catalog_edit_select": {
-        "title": "カスタムフェーズの編集",
-        "description": "編集するカスタム フェーズを選択します。",
-        "data": {
-          "phase_name": "カスタムフェーズ"
-        }
-      },
-      "phase_catalog_edit": {
-        "title": "カスタムフェーズの編集",
-        "description": "編集フェーズ: {phase_name}",
-        "data": {
-          "phase_name": "フェーズ名",
-          "phase_description": "フェーズの説明"
-        }
-      },
-      "phase_catalog_delete": {
-        "title": "カスタムフェーズの削除",
-        "description": "削除するカスタム フェーズを選択します。このフェーズを使用して割り当てられた範囲はすべて削除されます。",
-        "data": {
-          "phase_name": "カスタムフェーズ"
-        }
-      },
-      "assign_profile_phases": {
-        "title": "位相範囲の割り当て",
-        "description": "プロファイルのフェーズ プレビュー: **{profile_name}**\n\n{timeline_svg}\n\n**電流範囲:**\n{current_ranges}\n\n範囲を追加、編集、削除、または保存するには、以下のアクションを使用します。",
-        "data": {
-          "action": "アクション"
-        }
-      },
-      "assign_profile_phases_add": {
-        "title": "位相範囲の追加",
-        "description": "現在のドラフトに 1 つのフェーズ範囲を追加します。",
-        "data": {
-          "phase_name": "段階",
-          "start_min": "開始分",
-          "end_min": "終了分"
-        }
-      },
-      "assign_profile_phases_edit_select": {
-        "title": "位相範囲の編集",
-        "description": "編集する範囲を選択します。",
-        "data": {
-          "range_index": "位相範囲"
-        }
-      },
-      "assign_profile_phases_edit": {
-        "title": "位相範囲の編集",
-        "description": "選択した位相範囲を更新します。",
-        "data": {
-          "phase_name": "段階",
-          "start_min": "開始分",
-          "end_min": "終了分"
-        }
-      },
-      "assign_profile_phases_delete": {
-        "title": "位相範囲の削除",
-        "description": "下書きから削除する範囲を選択します。",
-        "data": {
-          "range_index": "位相範囲"
-        }
-      },
-      "assign_profile_phases_auto_detect": {
-        "title": "自動検出されたフェーズ",
-        "description": "プロフィール: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} フェーズが自動的に検出されました。** 以下のアクションを選択してください。",
-        "data": {
-          "action": "アクション"
-        }
-      },
-      "assign_profile_phases_auto_detect_name": {
-        "title": "検出されたフェーズの名前",
-        "description": "プロフィール: **{profile_name}**\n\n**{detected_count} 相が検出されました:**\n{ranges_summary}\n\n各フェーズに名前を割り当てます。"
-      },
-      "assign_profile_phases_select": {
-        "title": "位相範囲の割り当て",
-        "description": "プロファイルを選択して位相範囲を設定します。",
-        "data": {
-          "profile": "プロフィール"
         }
       },
       "profile_stats": {
@@ -367,41 +202,41 @@
         "description": "{stats_table}"
       },
       "create_profile": {
-        "title": "新しいプロファイルの作成",
-        "description": "新しいプロファイルを手動で作成するか、過去のサイクルから作成します。\n\nプロファイル名の例: 「デリケート」、「ヘビーデューティー」、「クイックウォッシュ」",
+        "title": "新しいプロファイルを作成",
+        "description": "手動または過去のサイクルから新しいプロファイルを作成します。\n\nプロファイル名の例：「デリケート」、「強力洗い」、「クイックウォッシュ」",
         "data": {
           "profile_name": "プロファイル名",
-          "reference_cycle": "基準サイクル (オプション)",
-          "manual_duration": "手動所要時間 (分)"
+          "reference_cycle": "参照サイクル（オプション）",
+          "manual_duration": "手動期間（分）"
         }
       },
       "edit_profile": {
-        "title": "プロフィールの編集",
-        "description": "名前を変更するプロファイルを選択してください",
+        "title": "プロファイルを編集",
+        "description": "名前を変更するプロファイルを選択",
         "data": {
-          "profile": "プロフィール"
+          "profile": "プロファイル"
         }
       },
       "rename_profile": {
-        "title": "プロファイルの詳細を編集する",
-        "description": "現在のプロフィール: {current_name}",
+        "title": "プロファイル詳細を編集",
+        "description": "現在のプロファイル：{current_name}",
         "data": {
           "new_name": "プロファイル名",
-          "manual_duration": "手動所要時間 (分)"
+          "manual_duration": "手動期間（分）"
         }
       },
       "delete_profile_select": {
-        "title": "プロフィールの削除",
-        "description": "削除するプロファイルを選択してください",
+        "title": "プロファイルを削除",
+        "description": "削除するプロファイルを選択",
         "data": {
-          "profile": "プロフィール"
+          "profile": "プロファイル"
         }
       },
       "delete_profile_confirm": {
-        "title": "プロファイルの削除の確認",
-        "description": "⚠️ これにより、プロフィールが完全に削除されます: {profile_name}",
+        "title": "プロファイル削除の確認",
+        "description": "⚠️ これにより、プロファイル {profile_name} が完全に削除されます",
         "data": {
-          "unlabel_cycles": "このプロファイルを使用してサイクルからラベルを削除します"
+          "unlabel_cycles": "このプロファイルを使用しているサイクルからラベルを削除"
         }
       },
       "auto_label_cycles": {
@@ -413,584 +248,178 @@
       },
       "select_cycle_to_label": {
         "title": "ラベルを付けるサイクルを選択",
-        "description": "✓ = 完了、⚠ = 再開、✗ = 中断",
+        "description": "✓ = 完了, ⚠ = 再開, ✗ = 中断",
         "data": {
           "cycle_id": "サイクル"
         }
       },
       "select_cycle_to_delete": {
-        "title": "サイクルの削除",
+        "title": "サイクルを削除",
         "description": "⚠️ これにより、選択したサイクルが完全に削除されます",
         "data": {
-          "cycle_id": "削除までのサイクル"
+          "cycle_id": "削除するサイクル"
         }
       },
       "label_cycle": {
-        "title": "ラベルサイクル",
+        "title": "サイクルにラベルを付ける",
         "description": "{cycle_info}",
         "data": {
-          "profile_name": "プロフィール",
-          "new_profile_name": "新しいプロファイル名 (作成する場合)"
+          "profile_name": "プロファイル",
+          "new_profile_name": "新しいプロファイル名（作成する場合）"
         }
       },
       "post_process": {
-        "title": "処理履歴（結合/分割）",
-        "description": "時間枠内で断片化された実行をマージし、誤ってマージされたサイクルを分割することにより、サイクル履歴をクリーンアップします。過去を振り返る時間数を入力します。\n{info}",
+        "title": "履歴を処理 (マージ/分割)",
+        "description": "時間枠内で断片化した実行をマージし、誤ってマージされたサイクルを分割することで、サイクル履歴をクリーンアップします。振り返る時間数を入力してください。\n{info}",
         "data": {
-          "time_range": "ルックバック ウィンドウ (時間)",
-          "gap_seconds": "ギャップのマージ/分割 (秒)"
+          "time_range": "ルックバックウィンドウ（時間）",
+          "gap_seconds": "マージ/分割間隔（秒）"
         },
         "data_description": {
-          "time_range": "マージする断片化されたサイクルをスキャンする時間数。すべての履歴データを処理するには、999999 を使用します。\n{info}",
-          "gap_seconds": "分割かマージかを決定するためのしきい値。これより短いギャップはマージされます。これより長いギャップは分割されます。誤ってマージされたサイクルを強制的に分割するには、この値を下げます。"
+          "time_range": "マージする断片化されたサイクルをスキャンする時間数。すべての履歴データを処理するには 999999 を使用します。\n{info}",
+          "gap_seconds": "分割とマージを決定するしきい値。これより短いギャップはマージされます。これより長いギャップは分割されます。これを下げると、誤ってマージされたサイクルが強制的に分割されます。"
         }
       },
       "cleanup_profile": {
-        "title": "履歴のクリーンアップ - プロファイルの選択",
-        "description": "視覚化するプロファイルを選択します。これにより、外れ値の特定に役立つ、このプロファイルの過去のすべてのサイクルを示すグラフが生成されます。",
+        "title": "履歴をクリーンアップ - プロファイル選択",
+        "description": "視覚化するプロファイルを選択します。これにより、異常値を特定するのに役立つように、このプロファイルの過去のすべてのサイクルを示すグラフが生成されます。",
         "data": {
-          "profile": "プロフィール"
+          "profile": "プロファイル"
         }
       },
       "cleanup_select": {
-        "title": "履歴のクリーンアップ - グラフ化して削除",
-        "description": "![グラフ]({graph_url})\n\n**{profile_name} を視覚化しています**\n\nグラフには、個々のサイクルが色付きの線で表示されます。外れ値 (グループから遠く離れた線) を特定し、以下のリストでその色と一致させて削除します。\n\n**永久に削除するサイクルを選択してください:**",
+        "title": "履歴をクリーンアップ - グラフと削除",
+        "description": "![Graph]({graph_url})\n\n**{profile_name} の視覚化**\n\nグラフは、個々のサイクルを色付きの線として示しています。外れ値（グループから離れた線）を特定し、下のリストでその色を一致させて削除します。\n\n**完全に削除するサイクルを選択：**",
         "data": {
-          "cycles_to_delete": "削除するサイクル (一致する色を確認)"
+          "cycles_to_delete": "削除するサイクル（一致する色を確認）"
         }
       },
       "interactive_editor": {
-        "title": "インタラクティブ エディターの結合/分割",
-        "description": "周期履歴に対して実行する手動アクションを選択します。",
+        "title": "マージ/分割インタラクティブエディタ",
+        "description": "サイクル履歴に対して実行する手動アクションを選択します。",
         "data": {
           "editor_action": "アクション"
         }
       },
       "editor_select": {
-        "title": "サイクルの選択",
-        "description": "処理するサイクルを選択します。\n\n{info_text}",
+        "title": "サイクルを選択",
+        "description": "処理するサイクルを選択してください。\n\n{info_text}",
         "data": {
           "selected_cycles": "サイクル"
         }
       },
       "editor_configure": {
-        "title": "設定と適用",
+        "title": "設定して適用",
         "description": "{preview_md}",
         "data": {
           "confirm_action": "アクション",
-          "merged_profile": "結果として得られるプロファイル",
+          "merged_profile": "結果のプロファイル",
           "new_profile_name": "新しいプロファイル名",
-          "confirm_commit": "はい、このアクションを承認します",
-          "segment_0_profile": "セグメント 1 のプロファイル",
-          "segment_1_profile": "セグメント 2 のプロファイル",
-          "segment_2_profile": "セグメント 3 のプロファイル",
-          "segment_3_profile": "セグメント 4 プロファイル",
-          "segment_4_profile": "セグメント 5 プロファイル",
-          "segment_5_profile": "セグメント 6 プロファイル",
-          "segment_6_profile": "セグメント 7 プロファイル",
-          "segment_7_profile": "セグメント 8 プロファイル",
-          "segment_8_profile": "セグメント 9 プロファイル",
-          "segment_9_profile": "セグメント 10 のプロファイル"
+          "confirm_commit": "はい、このアクションを確認します",
+          "segment_0_profile": "セグメント1 プロファイル",
+          "segment_1_profile": "セグメント2 プロファイル",
+          "segment_2_profile": "セグメント3 プロファイル",
+          "segment_3_profile": "セグメント4 プロファイル",
+          "segment_4_profile": "セグメント5 プロファイル",
+          "segment_5_profile": "セグメント6 プロファイル",
+          "segment_6_profile": "セグメント7 プロファイル",
+          "segment_7_profile": "セグメント8 プロファイル",
+          "segment_8_profile": "セグメント9 プロファイル",
+          "segment_9_profile": "セグメント10 プロファイル"
         }
       },
       "editor_split_params": {
-        "title": "分割構成",
-        "description": "このサイクルを分割する感度を調整します。これより長いアイドルギャップがあると、分割が発生します。",
+        "title": "分割設定",
+        "description": "このサイクルを分割するための感度を調整します。これより長いアイドル間隔は分割を引き起こします。",
         "data": {
-          "min_gap_seconds": "スプリットギャップしきい値 (秒)"
+          "min_gap_seconds": "分割ギャップしきい値（秒）"
         }
       },
       "reprocess_history": {
-        "title": "メンテナンス: データの再処理と最適化",
-        "description": "履歴データの徹底的なクリーニングを実行します。\n1. ゼロパワー測定値をトリミングします (無音)。\n2. サイクルのタイミング/期間を修正します。\n3. すべての統計モデル (エンベロープ) を再計算します。\n\n**これを実行してデータの問題を修正するか、新しいアルゴリズムを適用します。**"
+        "title": "メンテナンス：データの再処理と最適化",
+        "description": "履歴データの詳細なクリーニングを実行します：\n1. ゼロ電力測定値をトリミング（無音）。\n2. サイクルタイミング/持続時間を修正。\n3. すべての統計モデル（エンベロープ）を再計算。\n\n**データの問題を修正したり、新しいアルゴリズムを適用したりするには、これを実行してください。**"
       },
       "wipe_history": {
-        "title": "履歴の消去 (テストのみ)",
-        "description": "⚠️ これにより、このデバイスに保存されているすべてのサイクルとプロファイルが完全に削除されます。これは取り消しできません!"
+        "title": "履歴を消去（テストのみ）",
+        "description": "⚠️ これにより、このデバイスのすべての保存済みサイクルとプロファイルが永久に削除されます。これは元に戻せません！"
       },
       "export_import": {
-        "title": "JSONのエクスポート/インポート",
-        "description": "このデバイスのサイクル、プロファイル、および設定をコピー/ペーストします。以下にエクスポートするか、JSON を貼り付けてインポートします。",
+        "title": "JSON のエクスポート/インポート",
+        "description": "このデバイスのサイクル、プロファイル、および設定をコピー/貼り付けします。以下にエクスポートするか、JSONを貼り付けてインポートします。",
         "data": {
           "mode": "アクション",
-          "json_payload": "完全な構成 JSON"
+          "json_payload": "完全な設定 JSON"
         },
         "data_description": {
-          "mode": "[エクスポート] を選択して現在のデータと設定をコピーするか、[インポート] を選択して別の WashData デバイスからエクスポートされたデータを貼り付けます。",
-          "json_payload": "エクスポートの場合: この JSON (サイクル、プロファイル、およびすべての微調整された設定を含む) をコピーします。インポートの場合: WashData からエクスポートした JSON を貼り付けます。"
+          "mode": "現在のデータと設定をコピーするには「エクスポート」を選択し、別の WashData デバイスからエクスポートされたデータを貼り付けるには「インポート」を選択します。",
+          "json_payload": "エクスポートの場合：この JSON（サイクル、プロファイル、およびすべての微調整された設定を含む）をコピーします。インポートの場合：WashData からエクスポートされた JSON を貼り付けます。"
         }
       },
       "record_cycle": {
-        "title": "記録サイクル",
-        "description": "サイクルを手動で記録して、干渉のないきれいなプロファイルを作成します。\n\nステータス: **{status}**\n期間: {duration}秒\nサンプル: {samples}",
+        "title": "サイクルを記録",
+        "description": "手動でサイクルを記録して、干渉のないクリーンなプロファイルを作成します。\n\nステータス：**{status}**\n期間：{duration}s\nサンプル：{samples}",
         "data": {
-          "action": "アクション"
+          "action": "アクション",
+          "refresh_status": "ステータスを更新"
         }
       },
       "record_process": {
-        "title": "プロセスの記録",
-        "description": "![グラフ]({graph_url})\n\n**グラフは生の録音を示しています。** 青 = 維持、赤 = 提案されたトリム。\n*グラフは静的であり、フォームの変更によって更新されません。*\n\n録音が停止されました。トリムは、検出されたサンプリング レート (~{sampling_rate}s) に合わせて調整されます。\n\n生の継続時間: {duration} 秒\nサンプル: {samples}",
+        "title": "記録を処理",
+        "description": "![Graph]({graph_url})\n\n**グラフは生の記録を示しています。** 青 = 保持、赤 = 提案されたトリム。\n*グラフは静的であり、フォームの変更に応じて更新されません。*\n\n記録が停止しました。トリムは検出されたサンプリングレート (~{sampling_rate}s) に合わせられます。\n\n生の期間：{duration}s\nサンプル：{samples}",
         "data": {
-          "head_trim": "トリム開始 (秒)",
-          "tail_trim": "トリムエンド (秒)",
+          "head_trim": "開始をトリム（秒）",
+          "tail_trim": "終了をトリム（秒）",
           "save_mode": "保存先",
           "profile_name": "プロファイル名"
         }
       },
       "learning_feedbacks": {
         "title": "学習フィードバック",
-        "description": "処理するサイクル レビュー リクエストを選択します。",
+        "description": "処理するサイクルレビューリクエストを選択してください。",
         "data": {
-          "selected_feedback": "レビューするサイクルを選択してください"
+          "selected_feedback": "レビューするサイクルを選択"
         }
       },
       "learning_feedbacks_empty": {
         "title": "学習フィードバック",
-        "description": "保留中のフィードバック リクエストは見つかりませんでした。"
+        "description": "保留中のフィードバックリクエストは見つかりませんでした。"
       },
       "resolve_feedback": {
-        "title": "フィードバックを解決する",
-        "description": "{comparison_img}{candidates_table}\n**検出されたプロファイル**: {detected_profile} ({confidence_pct}%)\n**推定所要時間**: {est_duration_min} 分\n**実際の所要時間**: {act_duration_min} 分\n\n__以下のアクションを選択してください:__",
+        "title": "フィードバックを解決",
+        "description": "**検出されたプログラム**: {profile}\n**信頼度**: {confidence}%\n**推定**: {est}分, **実際**: {act}分",
         "data": {
-          "action": "何をしたいですか?",
-          "corrected_profile": "正しいプログラム (修正している場合)",
-          "corrected_duration": "修正期間 (秒単位) (修正する場合)"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "提案された変更を確認する",
-        "description": "WashData は、適用する推奨値が {pending_count} 個見つかりました。\n\nレビューすべき変更点:\n{changes}\n\nこれらの値をフォームにステージングするには、以下を確認してください。これらは、詳細設定を送信するまで保存されません。",
-        "data": {
-          "confirm_apply_suggestions": "詳細設定でのステージ推奨値"
+          "action": "何をしたいですか？",
+          "corrected_profile": "正しいプログラム（修正する場合）",
+          "corrected_duration": "正しい期間（分）（修正する場合）"
         }
       }
     },
     "error": {
-      "import_failed": "インポートに失敗しました。有効な WashData エクスポート JSON を貼り付けてください。",
-      "profile_exists": "この名前のプロファイルはすでに存在します",
-      "rename_failed": "プロファイル名の変更に失敗しました。プロファイルが存在しないか、新しい名前がすでに使用されている可能性があります。",
+      "import_failed": "インポートに失敗しました。有効な HA WashData エクスポート JSON を貼り付けてください。",
+      "profile_exists": "この名前のプロファイルは既に存在します",
+      "rename_failed": "プロファイルの名前変更に失敗しました。プロファイルが存在しないか、新しい名前が既に使用されています。",
       "assignment_failed": "プロファイルをサイクルに割り当てることができませんでした",
-      "duplicate_phase": "この名前のフェーズはすでに存在します。",
-      "phase_not_found": "選択されたフェーズが見つかりませんでした。",
-      "invalid_phase_name": "フェーズ名を空にすることはできません。",
-      "phase_name_too_long": "フェーズ名が長すぎます。",
-      "invalid_phase_range": "位相範囲が無効です。終了は開始より大きくなければなりません。",
-      "invalid_phase_timestamp": "タイムスタンプが無効です。 YYYY-MM-DD HH:MM または HH:MM 形式を使用します。",
-      "overlapping_phase_ranges": "位相範囲が重複します。範囲を調整して再試行してください。",
-      "incomplete_phase_row": "各フェーズ行には、フェーズと、選択したモードの完全な開始/終了値が含まれている必要があります。",
-      "timestamp_mode_cycle_required": "タイムスタンプモードを使用する場合はソースサイクルを選択してください。",
-      "no_phase_ranges": "そのアクションに使用できるフェーズ範囲はまだありません。",
-      "feedback_notification_title": "WashData: サイクルの検証 ({device})",
-      "feedback_notification_message": "**デバイス**: {device}\n**プログラム**: {program} (信頼度: {confidence}%)\n**時間**: {time}\n\nWashData は、この検出されたサイクルを確認するためにあなたの助けを必要としています。\n\nこの結果を確認または修正するには、**[設定] > [デバイスとサービス] > [WashData] > [構成] > [学習フィードバック]** に移動してください。",
-      "suggestions_ready_notification_title": "WashData: 推奨設定の準備完了 ({device})",
-      "suggestions_ready_notification_message": "**推奨設定**センサーは**{count}**の実用的な推奨事項を報告するようになりました。\n\nそれらを確認して適用するには: **[設定] > [デバイスとサービス] > [WashData] > [構成] > [詳細設定] > [推奨値を適用]**。\n\n提案はオプションであり、保存する前に確認するために表示されます。"
+      "feedback_notification_title": "WashData: サイクルを確認 ({device})",
+      "feedback_notification_message": "**デバイス**: {device}\n**プログラム**: {program} ({confidence}% 信頼度)\n**時間**: {time}\n\nWashData は、この検出されたサイクルを確認するためにあなたの助けを必要としています。\n\nこの結果を確認または修正するには、**設定 > デバイスとサービス > WashData > 設定 > 学習フィードバック** にアクセスしてください。"
     },
     "abort": {
-      "no_cycles_found": "サイクルが見つかりませんでした",
-      "no_profiles_found": "プロファイルが見つかりませんでした。まずプロファイルを作成します。",
-      "no_profiles_for_matching": "一致するプロファイルがありません。まずプロファイルを作成します。",
-      "no_unlabeled_cycles": "すべてのサイクルにはすでにラベルが付けられています",
-      "no_suggestions": "利用可能な推奨値はまだありません。いくつかのサイクルを実行して、再試行してください。",
-      "no_predictions": "予測はありません",
-      "no_custom_phases": "カスタムフェーズが見つかりません。",
-      "reprocess_success": "{count} サイクルが正常に再処理されました。",
-      "debug_data_cleared": "{count} サイクルのデバッグ データが正常にクリアされました。"
-    }
-  },
-  "selector": {
-    "notify_events_option": {
-      "options": {
-        "cycle_start": "サイクルスタート",
-        "cycle_finish": "サイクルフィニッシュ",
-        "cycle_live": "ライブの進行状況"
-      }
-    },
-    "common_text": {
-      "options": {
-        "unlabeled": "(ラベルなし)",
-        "create_new_profile": "新しいプロファイルの作成",
-        "remove_label": "ラベルを削除する",
-        "no_reference_cycle": "(基準周期なし)",
-        "all_device_types": "すべてのデバイスタイプ",
-        "current_suffix": "（現在）",
-        "editor_select_info": "分割するには 1 サイクルを選択するか、マージするには 2 サイクル以上を選択します。",
-        "no_cycles_recorded": "まだサイクルが記録されていません。",
-        "profile_summary_line": "- **{name}**: {count} サイクル、平均 {avg}m",
-        "no_profiles_created": "まだプロファイルが作成されていません。",
-        "phase_preview": "フェーズのプレビュー",
-        "phase_preview_no_curve": "平均プロファイル曲線はまだ利用できません。このプロファイルに対してさらにサイクルを実行/ラベル付けします。",
-        "average_power_curve": "平均パワーカーブ",
-        "unit_min": "分",
-        "profile_option_fmt": "{name} ({count} サイクル、平均 ~{duration}m)",
-        "profile_option_short_fmt": "{name} ({count} サイクル、~{duration} 分)",
-        "deleted_cycles_from_profile": "{profile} から {count} サイクルを削除しました。",
-        "not_enough_data_graph": "グラフを生成するにはデータが不足しています。",
-        "no_profiles_found": "プロファイルが見つかりませんでした。",
-        "cycle_info_fmt": "サイクル: {start}、{duration}m、電流: {label}",
-        "top_candidates_header": "### 上位候補者",
-        "tbl_profile": "プロフィール",
-        "tbl_confidence": "自信",
-        "tbl_correlation": "相関",
-        "tbl_duration_match": "期間一致",
-        "detected_profile": "検出されたプロファイル",
-        "estimated_duration": "推定所要時間",
-        "actual_duration": "実際の継続時間",
-        "choose_action": "__以下のアクションを選択してください:__",
-        "tbl_count": "カウント",
-        "tbl_avg": "平均",
-        "tbl_min": "分",
-        "tbl_max": "マックス",
-        "tbl_energy_avg": "エネルギー (平均)",
-        "tbl_energy_total": "エネルギー（合計）",
-        "tbl_consistency": "構成。",
-        "tbl_last_run": "ラストラン",
-        "graph_legend_title": "グラフの凡例",
-        "graph_legend_body": "青色のバンドは、観察された最小および最大電力消費範囲を表します。線は平均電力曲線を示しています。",
-        "recording_preview": "録音プレビュー",
-        "trim_start": "トリムスタート",
-        "trim_end": "トリムエンド",
-        "split_preview_title": "分割プレビュー",
-        "split_preview_found_fmt": "{count} 個のセグメントが見つかりました。",
-        "split_preview_confirm_fmt": "[確認] をクリックして、このサイクルを {count} 個の個別のサイクルに分割します。",
-        "merge_preview_title": "マージプレビュー",
-        "merge_preview_joining_fmt": "{count} サイクルに参加しています。ギャップは 0W の測定値で埋められます。",
-        "profile_comparison": "プロファイルの比較",
-        "actual_cycle_label": "今回のサイクル（実績）",
-        "storage_usage_header": "ストレージの使用量",
-        "storage_file_size": "ファイルサイズ",
-        "storage_cycles": "サイクル",
-        "storage_profiles": "プロフィール",
-        "storage_debug_traces": "デバッグトレース",
-        "overview_suffix": "概要",
-        "phase_preview_for_profile": "プロファイルのフェーズ プレビュー",
-        "current_ranges_header": "電流範囲",
-        "assign_phases_help": "範囲を追加、編集、削除、または保存するには、以下のアクションを使用します。",
-        "profile_summary_header": "プロフィールの概要",
-        "recent_cycles_header": "最近のサイクル"
-      }
-    },
-    "interactive_editor_action": {
-      "options": {
-        "split": "サイクルを分割する (ギャップを見つける)",
-        "merge": "サイクルのマージ (フラグメントの結合)",
-        "delete": "サイクルの削除"
-      }
-    },
-    "diagnostics_action": {
-      "options": {
-        "reprocess_history": "メンテナンス: データの再処理と最適化",
-        "clear_debug_data": "デバッグデータをクリアする (スペースを解放する)",
-        "wipe_history": "このデバイスのすべてのデータを消去します (元に戻せません)",
-        "export_import": "設定を含む JSON のエクスポート/インポート (コピー/ペースト)"
-      }
-    },
-    "export_import_mode": {
-      "options": {
-        "export": "すべてのデータをエクスポート",
-        "import": "データのインポート/マージ"
-      }
-    },
-    "manage_cycles_action": {
-      "options": {
-        "auto_label_cycles": "古いサイクルに自動ラベル付け",
-        "select_cycle_to_label": "ラベル固有のサイクル",
-        "select_cycle_to_label_multi": "複数のサイクルにラベルを付ける",
-        "select_cycle_to_delete": "サイクルの削除",
-        "interactive_editor": "インタラクティブ エディターの結合/分割"
-      }
-    },
-    "manage_profiles_action": {
-      "options": {
-        "create_profile": "新しいプロファイルの作成",
-        "edit_profile": "プロファイルの編集/名前変更",
-        "delete_profile": "プロフィールの削除",
-        "profile_stats": "プロファイル統計",
-        "cleanup_profile": "履歴のクリーンアップ - グラフ化して削除",
-        "assign_phases": "位相範囲の割り当て"
-      }
-    },
-    "manage_phase_catalog_action": {
-      "options": {
-        "create_custom_phase": "新しいフェーズの作成",
-        "edit_custom_phase": "編集フェーズ",
-        "delete_custom_phase": "フェーズの削除"
-      }
-    },
-    "assign_profile_phases_action": {
-      "options": {
-        "add_range": "位相範囲の追加",
-        "edit_range": "位相範囲の編集",
-        "delete_range": "位相範囲の削除",
-        "clear_ranges": "すべての範囲をクリア",
-        "auto_detect_ranges": "フェーズの自動検出",
-        "save_ranges": "保存して戻る"
-      }
-    },
-    "record_cycle_action": {
-      "options": {
-        "refresh_status": "ステータスの更新",
-        "stop_recording": "記録を停止 (保存して処理)",
-        "start_recording": "新しい録音を開始する",
-        "process_recording": "最後の録音を処理 (トリミングして保存)",
-        "discard_recording": "最後の録音を破棄"
-      }
-    },
-    "record_process_save_mode": {
-      "options": {
-        "new_profile": "新しいプロファイルの作成",
-        "existing_profile": "既存のプロファイルに追加",
-        "discard": "録音の破棄"
-      }
-    },
-    "resolve_feedback_action": {
-      "options": {
-        "confirm": "確認 - 正しい検出",
-        "correct": "正解 - プログラム/期間を選択してください",
-        "ignore": "無視 - 誤検知/ノイズの多いサイクル",
-        "delete": "削除 - 履歴から削除"
-      }
-    },
-    "assign_profile_phases_auto_detect_action": {
-      "options": {
-        "name_phases": "フェーズに名前を付けて適用する",
-        "cancel": "変更せずに戻る"
-      }
-    }
-  },
-  "services": {
-    "label_cycle": {
-      "name": "ラベルサイクル",
-      "description": "既存のプロファイルを過去のサイクルに割り当てるか、ラベルを削除します。",
-      "fields": {
-        "device_id": {
-          "name": "デバイス",
-          "description": "ラベルを付ける洗濯機デバイス。"
-        },
-        "cycle_id": {
-          "name": "サイクルID",
-          "description": "ラベルを付けるサイクルの ID。"
-        },
-        "profile_name": {
-          "name": "プロファイル名",
-          "description": "既存のプロファイルの名前 ([プロファイルの管理] メニューでプロファイルを作成します)。ラベルを削除するには空白のままにします。"
-        }
-      }
-    },
-    "create_profile": {
-      "name": "プロファイルの作成",
-      "description": "新しいプロファイルを作成します (スタンドアロンまたは参照サイクルに基づいて)。",
-      "fields": {
-        "device_id": {
-          "name": "デバイス",
-          "description": "洗濯機の装置です。"
-        },
-        "profile_name": {
-          "name": "プロファイル名",
-          "description": "新しいプロファイルの名前 (例: 「Heavy Duty」、「Delicates」)。"
-        },
-        "reference_cycle_id": {
-          "name": "参照サイクルID",
-          "description": "このプロファイルのベースとなるオプションのサイクル ID。"
-        }
-      }
-    },
-    "delete_profile": {
-      "name": "プロフィールの削除",
-      "description": "プロファイルを削除し、必要に応じてそれを使用してサイクルのラベルを解除します。",
-      "fields": {
-        "device_id": {
-          "name": "デバイス",
-          "description": "洗濯機の装置です。"
-        },
-        "profile_name": {
-          "name": "プロファイル名",
-          "description": "削除するプロファイル。"
-        },
-        "unlabel_cycles": {
-          "name": "サイクルのラベルを解除する",
-          "description": "このプロファイルを使用するサイクルからプロファイル ラベルを削除します。"
-        }
-      }
-    },
-    "auto_label_cycles": {
-      "name": "古いサイクルに自動ラベル付け",
-      "description": "プロファイルマッチングを使用して、ラベルのないサイクルに遡ってラベルを付けます。",
-      "fields": {
-        "device_id": {
-          "name": "デバイス",
-          "description": "洗濯機の装置です。"
-        },
-        "confidence_threshold": {
-          "name": "信頼閾値",
-          "description": "ラベルを適用するための最小一致信頼度 (0.50 ～ 0.95)。"
-        }
-      }
-    },
-    "export_config": {
-      "name": "設定のエクスポート",
-      "description": "このデバイスのプロファイル、サイクル、設定を JSON ファイルにエクスポートします (デバイスごと)。",
-      "fields": {
-        "device_id": {
-          "name": "デバイス",
-          "description": "エクスポートする洗濯機デバイス。"
-        },
-        "path": {
-          "name": "パス",
-          "description": "書き込むオプションの絶対ファイル パス (デフォルトは /config/ha_washdata_export_{entry}.json)。"
-        }
-      }
-    },
-    "import_config": {
-      "name": "構成のインポート",
-      "description": "このデバイスのプロファイル、サイクル、設定を JSON エクスポート ファイルからインポートします (設定は上書きされる可能性があります)。",
-      "fields": {
-        "device_id": {
-          "name": "デバイス",
-          "description": "インポートする洗濯機デバイス。"
-        },
-        "path": {
-          "name": "パス",
-          "description": "インポートするエクスポート JSON ファイルへの絶対パス。"
-        }
-      }
-    },
-    "submit_cycle_feedback": {
-      "name": "サイクルフィードバックを送信する",
-      "description": "完了したサイクル後に、自動検出されたプログラムを確認または修正します。 「entry_id」 (詳細) または「device_id」 (推奨) のいずれかを指定します。",
-      "fields": {
-        "device_id": {
-          "name": "デバイス",
-          "description": "WashData デバイス (entry_id の代わりに推奨)。"
-        },
-        "entry_id": {
-          "name": "エントリーID",
-          "description": "デバイスの構成エントリ ID (device_id の代替)。"
-        },
-        "cycle_id": {
-          "name": "サイクルID",
-          "description": "フィードバック通知/ログに表示されるサイクル ID。"
-        },
-        "user_confirmed": {
-          "name": "検出されたプログラムを確認する",
-          "description": "検出されたプログラムが正しい場合は true を設定します。"
-        },
-        "corrected_profile": {
-          "name": "修正されたプロフィール",
-          "description": "確認されていない場合は、正しいプロファイル/プログラム名を入力してください。"
-        },
-        "corrected_duration": {
-          "name": "修正後の持続時間 (秒)",
-          "description": "オプションの修正期間 (秒単位)。"
-        },
-        "notes": {
-          "name": "注意事項",
-          "description": "このサイクルに関するオプションのメモ。"
-        }
-      }
-    },
-    "record_start": {
-      "name": "記録サイクルの開始",
-      "description": "クリーンなサイクルの記録を手動で開始します (一致するロジックをすべてバイパスします)。",
-      "fields": {
-        "device_id": {
-          "name": "デバイス",
-          "description": "記録する洗濯機のデバイス。"
-        }
-      }
-    },
-    "record_stop": {
-      "name": "記録サイクル停止",
-      "description": "手動録画を停止します。",
-      "fields": {
-        "device_id": {
-          "name": "デバイス",
-          "description": "洗濯機の録画を停止する装置。"
-        }
-      }
+      "no_cycles_found": "サイクルが見つかりません",
+      "no_profiles_found": "プロファイルが見つかりません。最初にプロファイルを作成してください。",
+      "no_profiles_for_matching": "一致に使用できるプロファイルがありません。最初にプロファイルを作成してください。",
+      "no_unlabeled_cycles": "すべてのサイクルはすでにラベル付けされています",
+      "no_suggestions": "推奨値はまだありません。いくつかのサイクルを実行してから再試行してください。",
+      "no_predictions": "予測なし",
+      "reprocess_success": "{count} サイクルを正常に再処理しました。",
+      "debug_data_cleared": "{count} サイクルからデバッグデータを正常に消去しました。"
     }
   },
   "entity": {
-    "binary_sensor": {
-      "running": {
-        "name": "ランニング"
-      },
-      "match_ambiguity": {
-        "name": "一致の曖昧さ"
-      }
-    },
-    "sensor": {
-      "washer_state": {
-        "name": "州",
-        "state": {
-          "off": "オフ",
-          "idle": "アイドル状態",
-          "starting": "起動",
-          "running": "ランニング",
-          "paused": "一時停止中",
-          "ending": "エンディング",
-          "finished": "終了した",
-          "anti_wrinkle": "しわ防止",
-          "interrupted": "中断されました",
-          "force_stopped": "強制停止",
-          "rinse": "リンス",
-          "unknown": "未知"
-        }
-      },
-      "washer_program": {
-        "name": "プログラム"
-      },
-      "time_remaining": {
-        "name": "残り時間"
-      },
-      "total_duration": {
-        "name": "合計所要時間"
-      },
-      "cycle_progress": {
-        "name": "進捗"
-      },
-      "current_power": {
-        "name": "現在の電力"
-      },
-      "elapsed_time": {
-        "name": "経過時間"
-      },
-      "debug_info": {
-        "name": "デバッグ情報"
-      },
-      "match_confidence": {
-        "name": "一致の信頼度"
-      },
-      "top_candidates": {
-        "name": "上位候補者",
-        "state": {
-          "none": "なし"
-        }
-      },
-      "current_phase": {
-        "name": "現在のフェーズ"
-      },
-      "wash_phase": {
-        "name": "段階"
-      },
-      "profile_cycle_count": {
-        "name": "プロファイル {profile_name} 数",
-        "unit_of_measurement": "サイクル"
-      },
-      "suggestions": {
-        "name": "推奨される設定"
-      }
-    },
     "select": {
       "program_select": {
         "name": "サイクルプログラム",
         "state": {
           "auto_detect": "自動検出"
         }
-      }
-    },
-    "button": {
-      "force_end_cycle": {
-        "name": "強制終了サイクル"
       }
     }
   }

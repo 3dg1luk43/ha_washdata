@@ -1,0 +1,106 @@
+[
+  {
+    "timestamp": "2026-01-12T23:36:24.539288",
+    "template_id": "d1fe29f66db9",
+    "profile_name": "2:47",
+    "warped_factors": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "duration_real": 8370.0
+  },
+  {
+    "timestamp": "2026-01-13T02:05:54.567571",
+    "template_id": "d1fe29f66db9",
+    "profile_name": "2:47",
+    "warped_factors": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "duration_real": 8370.0
+  },
+  {
+    "timestamp": "2026-01-13T03:57:09.590238",
+    "template_id": "86578bdd9625",
+    "profile_name": "1:37 bavlna",
+    "warped_factors": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "duration_real": 6075.0
+  },
+  {
+    "timestamp": "2026-01-13T05:48:24.612074",
+    "template_id": "86578bdd9625",
+    "profile_name": "1:37 bavlna",
+    "warped_factors": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "duration_real": 6075.0
+  },
+  {
+    "timestamp": "2026-01-13T07:39:39.638265",
+    "template_id": "86578bdd9625",
+    "profile_name": "1:37 bavlna",
+    "warped_factors": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "duration_real": 6075.0
+  },
+  {
+    "timestamp": "2026-01-13T09:22:09.663400",
+    "template_id": "a0beb9b4ab54",
+    "profile_name": "1:37 bavlna",
+    "warped_factors": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "duration_real": 5550.0
+  },
+  {
+    "timestamp": "2026-01-13T10:55:29.682994",
+    "template_id": "fe511ce33c76",
+    "profile_name": "1:37 bavlna",
+    "warped_factors": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "duration_real": 5000.0
+  },
+  {
+    "timestamp": "2026-01-13T12:37:59.702862",
+    "template_id": "a0beb9b4ab54",
+    "profile_name": "1:37 bavlna",
+    "warped_factors": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "duration_real": 5550.0
+  }
+]

@@ -1,4 +1,4 @@
-"""Binary sensor for WashData."""
+"""Binary sensor for HA WashData."""
 
 from __future__ import annotations
 
@@ -18,7 +18,6 @@ from .const import (
     CONF_EXPOSE_DEBUG_ENTITIES,
 )
 from .manager import WashDataManager
-from .sensor import cleanup_orphaned_diagnostic_entities
 
 
 async def async_setup_entry(
@@ -34,7 +33,6 @@ async def async_setup_entry(
         entities.append(WasherAmbiguitySensor(manager, entry))
 
     async_add_entities(entities)
-    cleanup_orphaned_diagnostic_entities(hass, manager, entry)
 
 
 class WasherRunningBinarySensor(BinarySensorEntity):
@@ -42,23 +40,22 @@ class WasherRunningBinarySensor(BinarySensorEntity):
 
     _attr_has_entity_name = True
 
-    _attr_translation_key = "running"
-
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize."""
         self._manager = manager
         self._entry = entry
         self._attr_unique_id = f"{entry.entry_id}_running"
+        self._attr_name = "Running"
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry.entry_id)},
             "name": entry.title,
-            "manufacturer": "WashData",
+            "manufacturer": "HA WashData",
         }
 
     @property
-    def is_on(self) -> bool | None:
+    def is_on(self) -> bool:
         """Return true if the binary sensor is on."""
-        return self._manager.check_state() == STATE_RUNNING
+        return self._manager.check_state == STATE_RUNNING
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks."""
@@ -79,22 +76,21 @@ class WasherRunningBinarySensor(BinarySensorEntity):
 class WasherAmbiguitySensor(WasherRunningBinarySensor):
     """Binary sensor indicating if current profiling is ambiguous."""
 
-    _attr_translation_key = "match_ambiguity"
-
     def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
         """Initialize."""
         super().__init__(manager, entry)
         self._attr_unique_id = f"{entry.entry_id}_ambiguity"
+        self._attr_name = "Match Ambiguity"
         self._attr_icon = "mdi:alert-circle-outline"
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
-    def is_on(self) -> bool:  # type: ignore[override]
+    def is_on(self) -> bool:
         """Return true if match is ambiguous."""
         return self._manager.match_ambiguity
 
     @property
-    def extra_state_attributes(self) -> dict[str, Any]:  # type: ignore[override]
+    def extra_state_attributes(self) -> dict[str, Any]:
         """Return ambiguous candidate info."""
         details = self._manager.last_match_details
-        return {"margin": details.get("ambiguity_margin", 0.0) if details else 0.0}
+        return {"margin": getattr(details, "ambiguity_margin", 0.0) if details else 0.0}

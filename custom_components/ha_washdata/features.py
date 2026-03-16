@@ -1,4 +1,4 @@
-"""Feature extraction logic for WashData.
+"""Feature extraction logic for HA WashData.
 
 Constraint: NumPy only.
 Constraint: All computations must be dt-aware.
@@ -77,7 +77,7 @@ def detect_events(
     # Let's use absolute threshold + noise factor.
     noise_allowance = max(10.0, 5.0 * idle_mad)
 
-    events: list[PowerEvent] = []
+    events = []
 
     for i, r in enumerate(rate):
         if not valid[i]:
@@ -131,7 +131,7 @@ def segment_phases(timestamps: np.ndarray, power: np.ndarray) -> list[CyclePhase
     thresh_high = max(q_high, min_high)
     thresh_med = max(q_low, min_motor)
 
-    labels: list[str] = []
+    labels = []
     for p in power:
         if p >= thresh_high:
             labels.append("HEATER")
@@ -141,11 +141,11 @@ def segment_phases(timestamps: np.ndarray, power: np.ndarray) -> list[CyclePhase
             labels.append("IDLE")
 
     # Merge consecutive
-    phases: list[CyclePhase] = []
+    phases = []
     if not labels:
         return []
 
-    current_label: str = labels[0]
+    current_label = labels[0]
     start_idx = 0
 
     for i in range(1, len(labels)):
