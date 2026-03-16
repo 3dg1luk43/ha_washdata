@@ -5,13 +5,11 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.4.3 - 2026-03-10
+## 0.4.3 - 2026-03-16
 
 ### ✨ Features
 - **New Device Types**: Added full support for **Air Fryer** (#133) and **Heat Pump** (#134), with optimized defaults and custom icons (`mdi:pot-steam`, `mdi:heat-pump`).
 - **Anti-Wrinkle Mode**: Added a dedicated anti-wrinkle state for dryers and washer-dryer combos, including state transitions and shielding (#68).
-- **Slovak Localization**: Full support for Slovak language in the integration, diagnostics, and frontend card (#156).
-- **Traditional Chinese Localization**: Added full Traditional Chinese (`zh-Hant`) translations for all configuration and options menus.
 - **Card Customization**: Added new dashboard card settings including specialized toggles for `Spinning Icon`, `Show State`, `Show Program`, and `Show Details`.
 - **Automated Translation Sync**: Enhanced `translate.py` to automatically update the frontend card's `TRANSLATIONS` object from language files, providing out-of-the-box localization for all 27+ supported languages.
 - **Inverted External Trigger**: Added a new setting to invert the logic of the external cycle end trigger. Users can now choose to complete a cycle when an external binary sensor turns OFF instead of ON.
@@ -24,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Top Match Candidates Summary**: Added ranked candidate details (confidence, MAE, correlation, duration ratio) to feedback review to improve correction decisions.
 
 ### 🛠️ Improvements
+- **Per-Device Log Context**: All log messages emitted by the core engine (`WashDataManager`, `ProfileStore`, `CycleDetector`, `LearningManager`, `CycleRecorder`) now include the device name as a `[Device Name]` prefix. When running two or more devices simultaneously, every log line is immediately attributable to its source without cross-referencing entry IDs.
 - **UI Menu Clarity**: All `SelectSelector` dropdowns in the configuration flow now use `SelectOptionDict` with explicit human-readable labels (e.g. "Split a Cycle (Find gaps)", "Export All Data", "Confirm - Correct Detection"). Previously, raw internal values such as `"split"` or `"auto_label_cycles"` were displayed directly in the UI.
 - **Translation Cleanup**: Removed stale action option keys from `strings.json` and `en.json` that were no longer backed by selectors in the config flow (`assign_mode`, export/import mode, cycle history editor actions, and several management menu entries). Reduces translator noise and prevents spurious untranslated keys in other languages.
 - **Phase Catalog Translations**: Extended `manage_phase_catalog` action labels and descriptions to Swedish, Tamil, Telugu, and Simplified Chinese.
@@ -64,6 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Live Notification Interval Constraint**: Added minimum-value constraint documentation for `notify_live_interval_seconds` across all supported languages, guiding users away from excessively short polling intervals.
 - **Diagnostics Sensitive Data Redaction**: Config entry diagnostics now automatically redact personally identifiable fields (`notify_service`, `notify_people`, `notify_actions`, `power_sensor`, `external_end_trigger`) before the report is generated.
 - **Services Description Consistency**: Updated `services.yaml` descriptions to consistently refer to "WashData" instead of "washing machine", accurately reflecting multi-device support.
+- **Enhanced Issue Templates**: Overhauled bug report and feature request templates to cover all 8 supported device types (Washing Machine, Dryer, Washer-Dryer Combo, Dishwasher, Coffee Machine, Electric Vehicle, Air Fryer, Heat Pump). Improved debug log guidance to clearly distinguish copy-paste (short logs) from file attachment (long logs), and added a separate note explaining that HA diagnostics exports are distinct from debug logs and must be attached as files. Added a pre-submission checklist requiring reporters to confirm they searched for duplicates and filled in all applicable fields. Translation contributions are now handled via a dedicated Pull Request template instead of an issue template.
+- **Issue Triage Automation**: Added a GitHub Actions workflow that automatically validates new and edited issues, comments with targeted guidance on any missing required sections, and applies a `needs-more-info` label — keeping the issue queue actionable without manual triage.
 
 ### 🐛 Bug Fixes
 - **Manual Recording Revert (#151)**: Fixed an issue where manual recordings could unexpectedly revert configuration changes.
@@ -83,7 +84,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Live State Coverage**: Fixed live-progress gating to continue updates during `STATE_ENDING` (not only `RUNNING`/`PAUSED`) until cycle completion.
 - **Legacy Phase Diagnostic Confusion**: Removed stale diagnostic phase entity behavior and added cleanup of the old `wash_phase` registry entry to prevent misleading duplicate/legacy phase sensors.
 - **Orphaned Diagnostic Entity Cleanup**: Added automatic registry reconciliation for diagnostic entities on startup and profile updates, removing stale unavailable duplicates (including old `profile_count_*` entries left behind by profile renames) without manual per-device cleanup.
+- **End-Spike Revert to Running**: Fixed a bug where a power burst during the `ENDING` state (e.g. the final pump-out on a dishwasher) could incorrectly transition the device back to `running`, delaying the reported cycle end by several minutes. The `long_ending_tail` guard (ignore any spike after 120 s in `ENDING`) now applies to **all** device types, not only dishwashers.
+- **`_time_in_state` Reset After Config Reload**: Fixed a bug where reloading the integration configuration reset the in-state timer to zero. On the next power spike the guard checked `0 s >= 120 s` and failed, causing a false `ending → running` transition. The timer is now recomputed from the persisted `state_enter_time` on restore so the guard works correctly across reloads.
 - **Cycle Split "Unknown Error" (#167)**: Fixed a `TypeError: argument must be str` crash in `analyze_split_sync` caused by a dead-code `dt_util.parse_datetime(cycle["start_time"])` call that failed when `start_time` is a `datetime` object rather than an ISO string. The parsed value was never used; the line has been removed.
+- **Unknown Cycle Statistics Empty (#168)**: Fixed two root causes for statistics (graph and energy) being blank after assigning an unknown cycle to a new profile.
+  - `_rebuild_envelope_sync` now uses the shared `_decompress_power_data()` helper instead of raw iteration with `float()` conversion. The raw conversion silently discarded every data point for cycles stored in the legacy ISO-timestamp format, producing an empty envelope and a blank graph.
+  - `create_profile_standalone` now labels the reference cycle with the new profile name (when it is currently unlabeled) and immediately rebuilds the envelope, so statistics are populated as soon as the profile is created — without requiring a separate feedback-correction step.
 
 ### 🧪 Tests
 - **HA Test Harness Adoption**: Replaced `MagicMock`-based hass objects with real `HomeAssistant` instances from `pytest_homeassistant_custom_component` across all new test modules. Only `ProfileStore` and `CycleDetector` are patched as true external I/O boundaries.
