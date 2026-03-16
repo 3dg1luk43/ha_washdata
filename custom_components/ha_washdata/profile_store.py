@@ -3596,8 +3596,12 @@ class ProfileStore:
         if len(target_cycles) != len(cycle_ids):
             return None
 
-        # Sort by time
-        target_cycles.sort(key=lambda c: str(c.get("start_time", "")))
+        # Sort by time — use timestamp comparison to handle mixed timezone offsets correctly
+        def _cycle_start_ts(c: CycleDict) -> float:
+            dt = dt_util.parse_datetime(str(c.get("start_time", "")))
+            return dt.timestamp() if dt is not None else 0.0
+
+        target_cycles.sort(key=_cycle_start_ts)
 
         # Collect affected profiles for envelope rebuild
         affected_profiles: set[str] = set()
@@ -3640,13 +3644,14 @@ class ProfileStore:
         for t_abs, _, p in c1_pts:
             merged_points_abs.append([t_abs, p])
 
-        last_t_abs = c1_pts[-1][0] if c1_pts else c1_start_dt.timestamp()
+        # Use the maximum t_abs seen so far (guards against out-of-order or corrupted points)
+        last_t_abs = max((pt[0] for pt in c1_pts), default=c1_start_dt.timestamp())
 
         # Iterate others
         max_power = c1.get("max_power", 0)
 
         for next_c in target_cycles[1:]:
-            c_start_dt = dt_util.parse_datetime(next_c["start_time"])
+            c_start_dt = dt_util.parse_datetime(str(next_c.get("start_time", "")))
             if not c_start_dt:
                 continue
 
@@ -3663,21 +3668,36 @@ class ProfileStore:
                 merged_points_abs.append([last_t_abs + 0.1, 0.0])
                 merged_points_abs.append([current_start_ts - 0.1, 0.0])
 
-            # Append points
+            # Append points; track the running maximum to guard against reversed/corrupt data
             for t_abs, _, p in c_pts:
                 merged_points_abs.append([t_abs, p])
-                last_t_abs = t_abs
+                if t_abs > last_t_abs:
+                    last_t_abs = t_abs
 
             max_power = max(max_power, next_c.get("max_power", 0))
 
-        # Update C1 metadata
-        final_end_dt = dt_util.utc_from_timestamp(last_t_abs)
+        # Derive merged end time from power data when available; otherwise fall back to
+        # the end_time field of the last cycle (handles cycles without recorded power data).
+        if merged_points_abs:
+            # Use the maximum absolute timestamp from all collected data points
+            last_t_abs = max(pt[0] for pt in merged_points_abs)
+            final_end_dt = dt_util.utc_from_timestamp(last_t_abs)
+        else:
+            last_cycle = target_cycles[-1]
+            fallback_end_dt = dt_util.parse_datetime(str(last_cycle.get("end_time", "")))
+            if fallback_end_dt is not None:
+                final_end_dt = fallback_end_dt
+            else:
+                final_end_dt = c1_start_dt
+
         new_dur = (final_end_dt - c1_start_dt).total_seconds()
 
         c1["end_time"] = final_end_dt.isoformat()
         c1["duration"] = round(new_dur, 1)
         c1["max_power"] = max_power
         c1["profile_name"] = target_profile
+        # Remove manual_duration override so the freshly computed duration is shown
+        c1.pop("manual_duration", None)
 
         # Generate new compressed power_data [offset, power]
         new_power_data: list[list[float]] = []
@@ -3778,12 +3798,17 @@ class ProfileStore:
     ) -> str:
         """Generate SVG for merge preview."""
         cycles = [c for c in self.get_past_cycles() if c["id"] in cycle_ids]
-        cycles.sort(key=lambda c: str(c.get("start_time", "")))
+
+        def _sort_ts(c: CycleDict) -> float:
+            dt = dt_util.parse_datetime(str(c.get("start_time", "")))
+            return dt.timestamp() if dt is not None else 0.0
+
+        cycles.sort(key=_sort_ts)
 
         if not cycles:
             return ""
 
-        first_start_dt = dt_util.parse_datetime(cycles[0]["start_time"])
+        first_start_dt = dt_util.parse_datetime(str(cycles[0].get("start_time", "")))
         if first_start_dt is None:
             return ""
         first_start = first_start_dt.timestamp()
@@ -3809,5 +3834,18 @@ class ProfileStore:
 
             if points:
                 curves.append(SVGCurve(points=points, color=colors[i % len(colors)], stroke_width=2))
+
+        if not curves:
+            # No power data available — return a placeholder SVG with a message
+            return (
+                f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
+                f'style="background-color: #1c1c1c; font-family: sans-serif;">'
+                f'<rect x="0" y="0" width="{width}" height="{height}" fill="#1c1c1c" />'
+                f'<text x="{width // 2}" y="{height // 2 - 10}" fill="#aaa" font-size="16" '
+                f'text-anchor="middle">{title}</text>'
+                f'<text x="{width // 2}" y="{height // 2 + 14}" fill="#666" font-size="13" '
+                f'text-anchor="middle">No power data available for preview</text>'
+                f'</svg>'
+            )
 
         return _generate_generic_svg(title, curves, width, height)
