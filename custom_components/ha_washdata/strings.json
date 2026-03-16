@@ -563,6 +563,34 @@
           "corrected_profile": "Correct Program (if correcting)",
           "corrected_duration": "Correct Duration in minutes (if correcting)"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim Cycle — Select Cycle",
+        "description": "Select a cycle to trim. ✓ = completed, ⚠ = resumed, ✗ = interrupted",
+        "data": {
+          "cycle_id": "Cycle"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trim Cycle",
+        "description": "Current window: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Action"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Set Trim Start",
+        "description": "Enter the minute offset to start keeping data from (0 = cycle start).",
+        "data": {
+          "trim_start_min": "Start (minutes)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Set Trim End",
+        "description": "Enter the minute offset to stop keeping data at.",
+        "data": {
+          "trim_end_min": "End (minutes)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Verify Cycle ({device})",
       "feedback_notification_message": "**Device**: {device}\n**Program**: {program} ({confidence}% confidence)\n**Time**: {time}\n\nWashData needs your help to verify this detected cycle.\n\nPlease go to **Settings > Devices & Services > WashData > Configure > Learning Feedbacks** to confirm or correct this result.",
       "suggestions_ready_notification_title": "WashData: Suggested Settings Ready ({device})",
-      "suggestions_ready_notification_message": "The **Suggested Settings** sensor now reports **{count}** actionable recommendations.\n\nTo review and apply them: **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSuggestions are optional and shown for review before you save."
+      "suggestions_ready_notification_message": "The **Suggested Settings** sensor now reports **{count}** actionable recommendations.\n\nTo review and apply them: **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSuggestions are optional and shown for review before you save.",
+      "trim_range_invalid": "Start must be before end. Please adjust your trim points.",
+      "trim_failed": "Trim failed. The cycle may no longer exist or the window is empty."
     },
     "abort": {
       "no_cycles_found": "No cycles found",
@@ -697,7 +727,8 @@
         "select_cycle_to_label": "Label Specific Cycle",
         "select_cycle_to_label_multi": "Label Multiple Cycles",
         "select_cycle_to_delete": "Delete Cycle",
-        "interactive_editor": "Merge/Split Interactive Editor"
+        "interactive_editor": "Merge/Split Interactive Editor",
+        "trim_cycle": "Trim Cycle Data"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +786,15 @@
         "correct": "Correct - Choose Program/Duration",
         "ignore": "Ignore - False Positive/Noisy Cycle",
         "delete": "Delete - Remove from History"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Set Start Point",
+        "set_end": "Set End Point",
+        "reset": "Reset to Full Duration",
+        "apply": "Apply Trim",
+        "cancel": "Cancel"
       }
     }
   },
@@ -908,6 +948,28 @@
           "description": "The WashData device to stop recording."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trim Cycle",
+      "description": "Trim the power data of a past cycle to a specific time window.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The WashData device."
+        },
+        "cycle_id": {
+          "name": "Cycle ID",
+          "description": "The ID of the cycle to trim."
+        },
+        "trim_start_s": {
+          "name": "Trim Start (seconds)",
+          "description": "Keep data from this offset in seconds. Default 0."
+        },
+        "trim_end_s": {
+          "name": "Trim End (seconds)",
+          "description": "Keep data up to this offset in seconds. Default = full duration."
+        }
+      }
     }
   },
   "entity": {
@@ -994,5 +1056,6 @@
         "name": "Force End Cycle"
       }
     }
-  }
+  },
+  "errors": {}
 }

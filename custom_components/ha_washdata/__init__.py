@@ -381,6 +381,48 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             DOMAIN, "auto_label_cycles", handle_auto_label_cycles
         )
 
+    # Register trim_cycle service
+    if not hass.services.has_service(DOMAIN, "trim_cycle"):
+
+        async def handle_trim_cycle(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
+            trim_start_s = float(call.data.get("trim_start_s", 0))
+
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ValueError("Device not found")
+
+            entry_id = next(iter(device.config_entries), None)
+            if not entry_id:
+                raise ValueError("No config entry found for device")
+            if entry_id not in hass.data[DOMAIN]:
+                raise ValueError("Integration not loaded for this device")
+
+            manager = hass.data[DOMAIN][entry_id]
+            store = manager.profile_store
+
+            # Determine trim end — default to full cycle duration if not supplied
+            raw_end = call.data.get("trim_end_s")
+            if raw_end is not None:
+                trim_end_s = float(raw_end)
+            else:
+                p_data = store.get_cycle_power_data(cycle_id)
+                if not p_data:
+                    raise ValueError(f"Cycle '{cycle_id}' not found or has no power data")
+                trim_end_s = p_data[-1][0]
+
+            ok = await store.trim_cycle_power_data(cycle_id, trim_start_s, trim_end_s)
+            if not ok:
+                raise ValueError(
+                    f"Trim failed for cycle '{cycle_id}' — cycle not found, "
+                    "no power data, or resulting window is empty"
+                )
+            manager.notify_update()
+
+        hass.services.async_register(DOMAIN, "trim_cycle", handle_trim_cycle)
+
     # Register custom card via frontend.py — once per HA instance only.
     if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(
         "ha_washdata_card_deferred"
