@@ -1381,7 +1381,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 [c["id"] for c in cycles_to_merge],
                 title=merge_title,
             )
-            b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
 
             # Profile Selector
             profiles = store.list_profiles()
@@ -1407,10 +1406,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "merge_preview_joining_fmt",
                 "Joining {count} cycles. Gaps will be filled with 0W readings.",
             )
+            if svg:
+                b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+                graph_line = f"![Preview](data:image/svg+xml;base64,{b64})"
+            else:
+                graph_line = "*No power data available for preview.*"
             preview_md = f"""
 ### {merge_title}
 {merge_joining_fmt.format(count=len(cycles_to_merge))}
-![Preview](data:image/svg+xml;base64,{b64})
+{graph_line}
 """
             schema = {
                 vol.Optional("merged_profile", default=default_prof): selector.SelectSelector(
