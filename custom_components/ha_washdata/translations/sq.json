@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Vendosni vlerat e sugjeruara në Cilësimet e Avancuara"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Cikli i shkurtimit — Zgjidhni Cikli",
+        "description": "Zgjidhni një cikël për të shkurtuar. ✓ = përfunduar, ⚠ = rifilluar, ✗ = ndërprerë",
+        "data": {
+          "cycle_id": "Cikli"
+        }
+      },
+      "trim_cycle": {
+        "title": "Cikli i shkurtimit",
+        "description": "Dritarja aktuale: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Veprimi"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Vendosni fillimin e shkurtimit",
+        "description": "Futni zhvendosjen e minutës për të filluar mbajtjen e të dhënave nga (0 = fillimi i ciklit).",
+        "data": {
+          "trim_start_min": "Fillimi (minuta)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Cakto Trim End",
+        "description": "Fut zhvendosjen e minutës për të ndaluar mbajtjen e të dhënave.",
+        "data": {
+          "trim_end_min": "Përfundimi (minuta)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "Wash Data: Verifiko Cikli ({device})",
       "feedback_notification_message": "**Pajisja**: {device}\n**Programi**: {program} ({confidence}% besim)\n**Koha **: {time}\n\nWashData ka nevojë për ndihmën tuaj për të verifikuar këtë cikël të zbuluar.\n\nJu lutemi, shkoni te **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Mësimi Feedbacks** për të konfirmuar ose korrigjuar këtë rezultat.",
       "suggestions_ready_notification_title": "WashData: Cilësimet e sugjeruara janë gati ({device})",
-      "suggestions_ready_notification_message": "Sensori **Cilësimet e sugjeruara** raporton tani **{count}** rekomandime të zbatueshme.\n\nPër t'i rishikuar dhe zbatuar ato: **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Cilësimet e avancuara > Aplikoni vlerat e sugjeruara**.\n\nSugjerimet janë opsionale dhe shfaqen për shqyrtim përpara se të ruani."
+      "suggestions_ready_notification_message": "Sensori **Cilësimet e sugjeruara** raporton tani **{count}** rekomandime të zbatueshme.\n\nPër t'i rishikuar dhe zbatuar ato: **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Cilësimet e avancuara > Aplikoni vlerat e sugjeruara**.\n\nSugjerimet janë opsionale dhe shfaqen për shqyrtim përpara se të ruani.",
+      "trim_range_invalid": "Fillimi duhet të jetë para fundit. Ju lutemi rregulloni pikat tuaja të shkurtimit.",
+      "trim_failed": "Trim failed. Cikli mund të mos ekzistojë më ose dritarja është bosh."
     },
     "abort": {
       "no_cycles_found": "Nuk u gjetën cikle",
@@ -594,7 +624,8 @@
       "no_predictions": "Asnjë parashikim",
       "no_custom_phases": "Nuk u gjetën faza të personalizuara.",
       "reprocess_success": "{count} cikle u ripërpunuan me sukses.",
-      "debug_data_cleared": "Të dhënat e korrigjimit u pastruan me sukses nga {count} cikle."
+      "debug_data_cleared": "Të dhënat e korrigjimit u pastruan me sukses nga {count} cikle.",
+      "no_power_data": "Nuk ka të dhëna për gjurmët e fuqisë për ciklin e zgjedhur."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Përdorni veprimet e mëposhtme për të shtuar, modifikuar, fshirë ose ruajtur vargjet.",
         "profile_summary_header": "Përmbledhje e profilit",
         "recent_cycles_header": "Ciklet e fundit",
-        "no_power_preview": "*Nuk ka të dhëna për energjinë e disponueshme për shikim paraprak.*"
+        "no_power_preview": "*Nuk ka të dhëna për energjinë e disponueshme për shikim paraprak.*",
+        "trim_cycle_preview_title": "Pamja paraprake e shkurtimit të ciklit",
+        "trim_cycle_preview_no_data": "Nuk ka të dhëna për energjinë për këtë cikël.",
+        "trim_cycle_preview_kept_suffix": "mbajtur"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Cikli specifik i etiketës",
         "select_cycle_to_label_multi": "Etiketoni cikle të shumëfishta",
         "select_cycle_to_delete": "Fshi ciklin",
-        "interactive_editor": "Bashkoni/Ndajeni redaktuesin interaktiv"
+        "interactive_editor": "Bashkoni/Ndajeni redaktuesin interaktiv",
+        "trim_cycle": "Të dhënat e ciklit të shkurtimit"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Emërtoni dhe zbatoni fazat",
         "cancel": "Kthehu pa ndryshime"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Vendosni pikën e fillimit",
+        "set_end": "Vendosni pikën përfundimtare",
+        "reset": "Rivendos në kohëzgjatje të plotë",
+        "apply": "Aplikoni Trim",
+        "cancel": "Anulo"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Pajisja e makinës larëse për të ndaluar regjistrimin."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Cikli i shkurtimit",
+      "description": "Shkurtoni të dhënat e fuqisë së një cikli të kaluar në një dritare kohe specifike.",
+      "fields": {
+        "device_id": {
+          "name": "Pajisja",
+          "description": "Pajisja WashData."
+        },
+        "cycle_id": {
+          "name": "ID e ciklit",
+          "description": "ID-ja e ciklit për t'u shkurtuar."
+        },
+        "trim_start_s": {
+          "name": "Fillimi i shkurtimit (sekonda)",
+          "description": "Mbajini të dhënat nga ky kompensim në sekonda. Parazgjedhja 0."
+        },
+        "trim_end_s": {
+          "name": "Shkurtimi i fundit (sekonda)",
+          "description": "Mbani të dhënat deri në këtë kompensim në sekonda. Default = kohëzgjatja e plotë."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Cikli i përfundimit të forcës"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Pajisja nuk u gjet."
+    },
+    "no_config_entry": {
+      "message": "Nuk u gjet asnjë hyrje konfigurimi për pajisjen."
+    },
+    "integration_not_loaded": {
+      "message": "Integrimi nuk është ngarkuar për këtë pajisje."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Cikli nuk u gjet ose nuk ka të dhëna për energjinë."
+    },
+    "trim_failed_empty_window": {
+      "message": "Shkurtimi dështoi - cikli nuk u gjet, nuk ka të dhëna të energjisë ose dritarja që rezulton është bosh."
     }
   }
 }

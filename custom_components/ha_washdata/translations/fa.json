@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "مقادیر پیشنهادی را در تنظیمات پیشرفته قرار دهید"
         }
+      },
+      "trim_cycle_select": {
+        "title": "چرخه برش - چرخه را انتخاب کنید",
+        "description": "یک چرخه را برای برش انتخاب کنید. ✓ = کامل شد، ⚠ = از سر گرفته شد، ✗ = قطع شد",
+        "data": {
+          "cycle_id": "چرخه"
+        }
+      },
+      "trim_cycle": {
+        "title": "چرخه برش",
+        "description": "پنجره فعلی: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "اقدام"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Trim Start را تنظیم کنید",
+        "description": "فاصله دقیقه را برای شروع نگهداری داده ها از (0 = شروع چرخه) وارد کنید.",
+        "data": {
+          "trim_start_min": "شروع (دقیقه)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Trim End را تنظیم کنید",
+        "description": "برای توقف نگه‌داشتن داده‌ها، فاصله دقیقه را وارد کنید.",
+        "data": {
+          "trim_end_min": "پایان (دقیقه)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: چرخه تأیید ({device})",
       "feedback_notification_message": "**دستگاه**: {device}\n**برنامه**: {program} ({confidence}٪ اطمینان)\n**زمان**: {time}\n\nWashData برای تأیید این چرخه شناسایی شده به کمک شما نیاز دارد.\n\nلطفاً برای تأیید یا تصحیح این نتیجه به **تنظیمات > دستگاه‌ها و خدمات > WashData > پیکربندی > بازخوردهای یادگیری** بروید.",
       "suggestions_ready_notification_title": "WashData: تنظیمات پیشنهادی آماده ({device})",
-      "suggestions_ready_notification_message": "حسگر **تنظیمات پیشنهادی** اکنون **{count}** توصیه های قابل اجرا را گزارش می دهد.\n\nبرای بررسی و اعمال آنها: **تنظیمات > دستگاه‌ها و خدمات > WashData > پیکربندی > تنظیمات پیشرفته > اعمال مقادیر پیشنهادی**.\n\nپیشنهادات اختیاری هستند و قبل از ذخیره برای بررسی نشان داده می شوند."
+      "suggestions_ready_notification_message": "حسگر **تنظیمات پیشنهادی** اکنون **{count}** توصیه های قابل اجرا را گزارش می دهد.\n\nبرای بررسی و اعمال آنها: **تنظیمات > دستگاه‌ها و خدمات > WashData > پیکربندی > تنظیمات پیشرفته > اعمال مقادیر پیشنهادی**.\n\nپیشنهادات اختیاری هستند و قبل از ذخیره برای بررسی نشان داده می شوند.",
+      "trim_range_invalid": "شروع باید قبل از پایان باشد. لطفا نقاط برش خود را تنظیم کنید.",
+      "trim_failed": "برش انجام نشد. ممکن است چرخه دیگر وجود نداشته باشد یا پنجره خالی باشد."
     },
     "abort": {
       "no_cycles_found": "هیچ چرخه ای یافت نشد",
@@ -594,7 +624,8 @@
       "no_predictions": "بدون پیش بینی",
       "no_custom_phases": "هیچ فاز سفارشی یافت نشد.",
       "reprocess_success": "{count} چرخه با موفقیت دوباره پردازش شد.",
-      "debug_data_cleared": "داده‌های اشکال‌زدایی از چرخه‌های {count} با موفقیت پاک شد."
+      "debug_data_cleared": "داده‌های اشکال‌زدایی از چرخه‌های {count} با موفقیت پاک شد.",
+      "no_power_data": "هیچ داده ردیابی نیرو برای چرخه انتخابی موجود نیست."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "از اقدامات زیر برای افزودن، ویرایش، حذف یا ذخیره محدوده استفاده کنید.",
         "profile_summary_header": "خلاصه نمایه",
         "recent_cycles_header": "چرخه های اخیر",
-        "no_power_preview": "*داده برق برای پیش نمایش موجود نیست.*"
+        "no_power_preview": "*داده برق برای پیش نمایش موجود نیست.*",
+        "trim_cycle_preview_title": "پیش نمایش برش چرخه",
+        "trim_cycle_preview_no_data": "هیچ داده انرژی برای این چرخه در دسترس نیست.",
+        "trim_cycle_preview_kept_suffix": "نگهداری می شود"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "چرخه خاص برچسب",
         "select_cycle_to_label_multi": "چرخه های چندگانه را برچسب بزنید",
         "select_cycle_to_delete": "چرخه را حذف کنید",
-        "interactive_editor": "ادغام / تقسیم ویرایشگر تعاملی"
+        "interactive_editor": "ادغام / تقسیم ویرایشگر تعاملی",
+        "trim_cycle": "داده های چرخه برش"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "نام و اعمال مراحل",
         "cancel": "بدون تغییر به عقب برگردید"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "نقطه شروع را تنظیم کنید",
+        "set_end": "نقطه پایان را تنظیم کنید",
+        "reset": "بازنشانی به مدت زمان کامل",
+        "apply": "Trim را اعمال کنید",
+        "cancel": "لغو کنید"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "دستگاه ماشین لباسشویی ضبط را متوقف می کند."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "چرخه برش",
+      "description": "داده های قدرت یک چرخه گذشته را در یک پنجره زمانی خاص برش دهید.",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه WashData."
+        },
+        "cycle_id": {
+          "name": "شناسه چرخه",
+          "description": "شناسه چرخه برای اصلاح."
+        },
+        "trim_start_s": {
+          "name": "برش شروع (ثانیه)",
+          "description": "داده های این افست را در چند ثانیه نگه دارید. پیش فرض 0."
+        },
+        "trim_end_s": {
+          "name": "پایان برش (ثانیه)",
+          "description": "داده ها را در عرض چند ثانیه تا این میزان افست نگه دارید. پیش فرض = مدت زمان کامل."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "چرخه پایان اجباری"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "دستگاه پیدا نشد"
+    },
+    "no_config_entry": {
+      "message": "هیچ ورودی پیکربندی برای دستگاه یافت نشد."
+    },
+    "integration_not_loaded": {
+      "message": "ادغام برای این دستگاه بارگیری نشده است."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "چرخه یافت نشد یا داده برق ندارد."
+    },
+    "trim_failed_empty_window": {
+      "message": "برش انجام نشد - چرخه یافت نشد، هیچ داده برق یا پنجره حاصل خالی است."
     }
   }
 }

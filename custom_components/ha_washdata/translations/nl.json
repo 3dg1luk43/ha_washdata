@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Fase voorgestelde waarden in Geavanceerde instellingen"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trimcyclus — Selecteer Cyclus",
+        "description": "Selecteer een cyclus die u wilt trimmen. ✓ = voltooid, ⚠ = hervat, ✗ = onderbroken",
+        "data": {
+          "cycle_id": "Cyclus"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trimcyclus",
+        "description": "Huidig venster: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Actie"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Stel Trimstart in",
+        "description": "Voer de minuutafwijking in vanaf waar de gegevens moeten worden bijgehouden (0 = cyclusstart).",
+        "data": {
+          "trim_start_min": "Begin (minuten)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Stel het trimeinde in",
+        "description": "Voer de minuutverschuiving in waar u wilt stoppen met het bijhouden van gegevens.",
+        "data": {
+          "trim_end_min": "Einde (minuten)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: verificatiecyclus ({device})",
       "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% betrouwbaarheid)\n**Tijd**: {time}\n\nWashData heeft uw hulp nodig om deze gedetecteerde cyclus te verifiëren.\n\nGa naar **Instellingen > Apparaten en services > WashData > Configureren > Leerfeedbacks** om dit resultaat te bevestigen of te corrigeren.",
       "suggestions_ready_notification_title": "WashData: voorgestelde instellingen gereed ({device})",
-      "suggestions_ready_notification_message": "De sensor **Voorgestelde instellingen** rapporteert nu **{count}** bruikbare aanbevelingen.\n\nOm ze te bekijken en toe te passen: **Instellingen > Apparaten en services > WashData > Configureren > Geavanceerde instellingen > Voorgestelde waarden toepassen**.\n\nSuggesties zijn optioneel en worden ter beoordeling weergegeven voordat u ze opslaat."
+      "suggestions_ready_notification_message": "De sensor **Voorgestelde instellingen** rapporteert nu **{count}** bruikbare aanbevelingen.\n\nOm ze te bekijken en toe te passen: **Instellingen > Apparaten en services > WashData > Configureren > Geavanceerde instellingen > Voorgestelde waarden toepassen**.\n\nSuggesties zijn optioneel en worden ter beoordeling weergegeven voordat u ze opslaat.",
+      "trim_range_invalid": "Het begin moet vóór het einde liggen. Pas uw trimpunten aan.",
+      "trim_failed": "Trimmen mislukt. Mogelijk bestaat de cyclus niet meer of is het venster leeg."
     },
     "abort": {
       "no_cycles_found": "Geen cycli gevonden",
@@ -594,7 +624,8 @@
       "no_predictions": "Geen voorspellingen",
       "no_custom_phases": "Geen aangepaste fasen gevonden.",
       "reprocess_success": "{count} cycli opnieuw verwerkt.",
-      "debug_data_cleared": "Foutopsporingsgegevens uit {count} cycli zijn gewist."
+      "debug_data_cleared": "Foutopsporingsgegevens uit {count} cycli zijn gewist.",
+      "no_power_data": "Er zijn geen vermogenstraceringgegevens beschikbaar voor de geselecteerde cyclus."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Gebruik onderstaande acties om bereiken toe te voegen, te bewerken, te verwijderen of op te slaan.",
         "profile_summary_header": "Profielsamenvatting",
         "recent_cycles_header": "Recente cycli",
-        "no_power_preview": "*Geen vermogensgegevens beschikbaar voor preview.*"
+        "no_power_preview": "*Geen vermogensgegevens beschikbaar voor preview.*",
+        "trim_cycle_preview_title": "Voorbeeld van cyclustrim",
+        "trim_cycle_preview_no_data": "Er zijn geen vermogensgegevens beschikbaar voor deze cyclus.",
+        "trim_cycle_preview_kept_suffix": "gehouden"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Label specifieke cyclus",
         "select_cycle_to_label_multi": "Label meerdere cycli",
         "select_cycle_to_delete": "Cyclus verwijderen",
-        "interactive_editor": "Interactieve editor samenvoegen/splitsen"
+        "interactive_editor": "Interactieve editor samenvoegen/splitsen",
+        "trim_cycle": "Trimcyclusgegevens"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Fasen benoemen en toepassen",
         "cancel": "Ga terug zonder wijzigingen"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Startpunt instellen",
+        "set_end": "Eindpunt instellen",
+        "reset": "Resetten naar volledige duur",
+        "apply": "Pas trimmen toe",
+        "cancel": "Annuleren"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Het wasmachineapparaat om de opname te stoppen."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trimcyclus",
+      "description": "Trim de vermogensgegevens van een afgelopen cyclus tot een specifiek tijdvenster.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Het WashData-apparaat."
+        },
+        "cycle_id": {
+          "name": "Cyclus-ID",
+          "description": "De ID van de cyclus die moet worden bijgesneden."
+        },
+        "trim_start_s": {
+          "name": "Trimstart (seconden)",
+          "description": "Houd gegevens van deze offset binnen enkele seconden bij. Standaard 0."
+        },
+        "trim_end_s": {
+          "name": "Trimeinde (seconden)",
+          "description": "Houd gegevens binnen enkele seconden op deze offset. Standaard = volledige duur."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Eindcyclus forceren"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Apparaat niet gevonden."
+    },
+    "no_config_entry": {
+      "message": "Geen configuratie-item gevonden voor apparaat."
+    },
+    "integration_not_loaded": {
+      "message": "Integratie niet geladen voor dit apparaat."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Cyclus niet gevonden of heeft geen vermogensgegevens."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim mislukt - cyclus niet gevonden, geen vermogensgegevens of het resulterende venster is leeg."
     }
   }
 }

@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Stage proposéiert Wäerter an Advanced Settings"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim Cycle - Wielt Cycle",
+        "description": "Wielt en Zyklus fir ze trimmen. ✓ = ofgeschloss, ⚠ = opgeholl, ✗ = ënnerbrach",
+        "data": {
+          "cycle_id": "Zyklus"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trim Cycle",
+        "description": "Aktuell Fënster: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Aktioun"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Trim Start setzen",
+        "description": "Gitt d'Minute Offset un fir unzefänken Daten ze halen (0 = Zyklusstart).",
+        "data": {
+          "trim_start_min": "Start (Minuten)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Set Trim Enn",
+        "description": "Gitt d'Minute Offset un fir opzehalen Daten ze halen.",
+        "data": {
+          "trim_end_min": "Enn (Minuten)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Verifizéierungszyklus ({device})",
       "feedback_notification_message": "**Apparat**: {device}\n**Programm**: {program} ({confidence}% Vertrauen)\n**Zäit**: {time}\n\nWashData brauch Är Hëllef fir dësen entdeckten Zyklus z'iwwerpréiwen.\n\nGitt w.e.g. op **Astellungen> Apparater & Servicer> WashData> Konfiguréieren> Léierfeedbacks** fir dëst Resultat ze bestätegen oder ze korrigéieren.",
       "suggestions_ready_notification_title": "WashData: Suggested Settings Ready ({device})",
-      "suggestions_ready_notification_message": "De Sensor **Sugged Settings** mellt elo **{count}** handlungsfäeg Empfehlungen.\n\nFir se z'iwwerpréiwen an z'applizéieren: ** Astellungen > Apparater & Servicer > WashData > Konfiguréieren > Fortgeschratt Astellungen > Suggestioune Wäerter uwenden **.\n\nVirschléi sinn fakultativ a fir Iwwerpréiwung gewisen ier Dir späichert."
+      "suggestions_ready_notification_message": "De Sensor **Sugged Settings** mellt elo **{count}** handlungsfäeg Empfehlungen.\n\nFir se z'iwwerpréiwen an z'applizéieren: ** Astellungen > Apparater & Servicer > WashData > Konfiguréieren > Fortgeschratt Astellungen > Suggestioune Wäerter uwenden **.\n\nVirschléi sinn fakultativ a fir Iwwerpréiwung gewisen ier Dir späichert.",
+      "trim_range_invalid": "Start muss virum Enn sinn. Passt w.e.g. Är Trimmpunkten un.",
+      "trim_failed": "Trim gescheitert. Den Zyklus kann net méi existéieren oder d'Fënster ass eidel."
     },
     "abort": {
       "no_cycles_found": "Keng Zyklen fonnt",
@@ -594,7 +624,8 @@
       "no_predictions": "Keng Prognosen",
       "no_custom_phases": "Keng personaliséiert Phasen fonnt.",
       "reprocess_success": "{count} Zyklen erfollegräich nei veraarbecht.",
-      "debug_data_cleared": "Debugdaten aus {count} Zyklen erfollegräich geläscht."
+      "debug_data_cleared": "Debugdaten aus {count} Zyklen erfollegräich geläscht.",
+      "no_power_data": "Keng Kraaftspurdaten verfügbar fir den ausgewielten Zyklus."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Benotzt d'Aktiounen hei drënner fir Beräicher ze addéieren, z'änneren, ze läschen oder ze späicheren.",
         "profile_summary_header": "Profil Resumé",
         "recent_cycles_header": "Rezent Zyklen",
-        "no_power_preview": "*Keng Kraaftdaten verfügbar fir Virschau.*"
+        "no_power_preview": "*Keng Kraaftdaten verfügbar fir Virschau.*",
+        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "trim_cycle_preview_no_data": "Keng Kraaftdaten verfügbar fir dësen Zyklus.",
+        "trim_cycle_preview_kept_suffix": "gehalen"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Label Spezifesch Zyklus",
         "select_cycle_to_label_multi": "Label Multiple Cycles",
         "select_cycle_to_delete": "Läschen Cycle",
-        "interactive_editor": "Merge / Split Interactive Editor"
+        "interactive_editor": "Merge / Split Interactive Editor",
+        "trim_cycle": "Trim Cycle Daten"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Numm & applizéiert Phasen",
         "cancel": "Gitt zréck ouni Ännerungen"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Start Punkt setzen",
+        "set_end": "Set End Point",
+        "reset": "Zerécksetzen op Voll Dauer",
+        "apply": "Trim applizéieren",
+        "cancel": "Ofbriechen"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "D'Wäschmaschinn Apparat fir den Opnahmen ze stoppen."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trim Cycle",
+      "description": "Trimm d'Muechtdaten vun engem vergaangene Zyklus op eng spezifesch Zäitfenster.",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "WashData Apparat."
+        },
+        "cycle_id": {
+          "name": "Zyklus ID",
+          "description": "D'ID vum Zyklus fir ze trimmen."
+        },
+        "trim_start_s": {
+          "name": "Trim Start (Sekonnen)",
+          "description": "Haalt Daten aus dëser Offset a Sekonnen. Standard 0."
+        },
+        "trim_end_s": {
+          "name": "Trim Enn (Sekonnen)",
+          "description": "Halt d'Daten bis zu dësem Offset a Sekonnen. Standard = voll Dauer."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Kraaft Enn Zyklus"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Apparat net fonnt."
+    },
+    "no_config_entry": {
+      "message": "Kee Configuratiounseintrag fir den Apparat fonnt."
+    },
+    "integration_not_loaded": {
+      "message": "Integratioun net gelueden fir dësen Apparat."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Zyklus net fonnt oder huet keng Kraaftdaten."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim gescheitert - Zyklus net fonnt, keng Kraaftdaten oder déi resultéierend Fënster ass eidel."
     }
   }
 }

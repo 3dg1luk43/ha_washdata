@@ -1256,7 +1256,8 @@ class ProfileStore:
             # Calculate average sampling interval (in seconds)
             if len(offsets) > 1:
                 intervals = np.diff(offsets)
-                sampling_interval = float(np.median(intervals[intervals > 0]))
+                positive_intervals = intervals[intervals > 0]
+                sampling_interval = float(np.median(positive_intervals)) if positive_intervals.size > 0 else 0.0
             else:
                 sampling_interval = 1.0  # Default fallback
 
@@ -1723,11 +1724,15 @@ class ProfileStore:
             if start_ts is None:
                 continue
 
-            cycle["power_data"] = [
-                [round(pt[0] + start_ts, 1), round(pt[1], 1)]
-                for pt in power_data
-                if isinstance(pt, (list, tuple)) and len(pt) >= 2
-            ]
+            repaired_rows: list[list[float]] = []
+            for pt in power_data:
+                if not isinstance(pt, (list, tuple)) or len(pt) < 2:
+                    continue
+                try:
+                    repaired_rows.append([round(float(pt[0]) + start_ts, 1), round(float(pt[1]), 1)])
+                except (TypeError, ValueError):
+                    continue
+            cycle["power_data"] = repaired_rows
             repaired += 1
             repaired_data = cycle["power_data"]
             if len(repaired_data) > 1:
@@ -3518,11 +3523,14 @@ class ProfileStore:
         new_start_s = max(0.0, float(new_start_s))
         new_end_s = float(new_end_s)
 
-        kept = [
-            (offset, power)
-            for offset, power in p_data
-            if new_start_s <= offset <= new_end_s
-        ]
+        kept = sorted(
+            (
+                (offset, power)
+                for offset, power in p_data
+                if new_start_s <= offset <= new_end_s
+            ),
+            key=lambda x: x[0],
+        )
         if not kept:
             return False
 
@@ -3569,6 +3577,15 @@ class ProfileStore:
             cycle["end_time"] = dt_util.utc_from_timestamp(
                 new_start_ts + new_duration
             ).isoformat()
+
+        # Clear manual_duration override — trimmed duration is now authoritative
+        cycle.pop("manual_duration", None)
+
+        # Invalidate cached sample segments for this cycle so future lookups
+        # are recomputed from the trimmed data
+        stale_keys = [k for k in self._cached_sample_segments if k[0] == cycle_id]
+        for k in stale_keys:
+            del self._cached_sample_segments[k]
 
         # Rebuild envelope for the associated profile
         profile_name = cycle.get("profile_name")

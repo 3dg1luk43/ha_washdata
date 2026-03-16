@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Stage foreslåede værdier i avancerede indstillinger"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim cyklus — Vælg cyklus",
+        "description": "Vælg en cyklus at trimme. ✓ = afsluttet, ⚠ = genoptaget, ✗ = afbrudt",
+        "data": {
+          "cycle_id": "Cyklus"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trim cyklus",
+        "description": "Aktuelt vindue: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Handling"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Indstil trimstart",
+        "description": "Indtast minutforskydningen for at begynde at gemme data fra (0 = cyklusstart).",
+        "data": {
+          "trim_start_min": "Start (minutter)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Indstil Trim End",
+        "description": "Indtast minutforskydningen for at stoppe med at holde data på.",
+        "data": {
+          "trim_end_min": "Slut (minutter)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Bekræft cyklus ({device})",
       "feedback_notification_message": "**Enhed**: {device}\n**Program**: {program} ({confidence} % konfidens)\n**Tid**: {time}\n\nWashData har brug for din hjælp til at verificere denne detekterede cyklus.\n\nGå til **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Læringsfeedback** for at bekræfte eller rette dette resultat.",
       "suggestions_ready_notification_title": "WashData: Foreslåede indstillinger klar ({device})",
-      "suggestions_ready_notification_message": "Sensoren **Foreslåede indstillinger** rapporterer nu **{count}** handlingsrettede anbefalinger.\n\nSådan gennemgår og anvender du dem: **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Avancerede indstillinger > Anvend foreslåede værdier**.\n\nForslag er valgfrie og vises til gennemgang, før du gemmer."
+      "suggestions_ready_notification_message": "Sensoren **Foreslåede indstillinger** rapporterer nu **{count}** handlingsrettede anbefalinger.\n\nSådan gennemgår og anvender du dem: **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Avancerede indstillinger > Anvend foreslåede værdier**.\n\nForslag er valgfrie og vises til gennemgang, før du gemmer.",
+      "trim_range_invalid": "Start skal være før slut. Juster venligst dine trimpunkter.",
+      "trim_failed": "Trimning mislykkedes. Cyklussen eksisterer muligvis ikke længere, eller vinduet er tomt."
     },
     "abort": {
       "no_cycles_found": "Ingen cyklusser fundet",
@@ -594,7 +624,8 @@
       "no_predictions": "Ingen forudsigelser",
       "no_custom_phases": "Ingen tilpassede faser fundet.",
       "reprocess_success": "Genbehandlet {count} cyklusser.",
-      "debug_data_cleared": "Fejlretningsdata fra {count} cyklusser blev ryddet."
+      "debug_data_cleared": "Fejlretningsdata fra {count} cyklusser blev ryddet.",
+      "no_power_data": "Ingen strømsporingsdata tilgængelige for den valgte cyklus."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Brug handlingerne nedenfor til at tilføje, redigere, slette eller gemme områder.",
         "profile_summary_header": "Profiloversigt",
         "recent_cycles_header": "Seneste cyklusser",
-        "no_power_preview": "*Ingen strømdata tilgængelige til forhåndsvisning.*"
+        "no_power_preview": "*Ingen strømdata tilgængelige til forhåndsvisning.*",
+        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "trim_cycle_preview_no_data": "Ingen strømdata tilgængelige for denne cyklus.",
+        "trim_cycle_preview_kept_suffix": "holdt"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Etiketspecifik cyklus",
         "select_cycle_to_label_multi": "Mærk flere cyklusser",
         "select_cycle_to_delete": "Slet cyklus",
-        "interactive_editor": "Interaktiv flet/opdel-editor"
+        "interactive_editor": "Interaktiv flet/opdel-editor",
+        "trim_cycle": "Trim cyklusdata"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Navngiv og anvend faser",
         "cancel": "Gå tilbage uden ændringer"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Indstil startpunkt",
+        "set_end": "Indstil slutpunkt",
+        "reset": "Nulstil til fuld varighed",
+        "apply": "Påfør Trim",
+        "cancel": "Ophæve"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Vaskemaskinen enheden til at stoppe optagelsen."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trim cyklus",
+      "description": "Trim effektdataene for en tidligere cyklus til et bestemt tidsvindue.",
+      "fields": {
+        "device_id": {
+          "name": "Enhed",
+          "description": "WashData-enheden."
+        },
+        "cycle_id": {
+          "name": "Cyklus ID",
+          "description": "ID'et for den cyklus, der skal trimmes."
+        },
+        "trim_start_s": {
+          "name": "Trimstart (sekunder)",
+          "description": "Gem data fra denne offset på få sekunder. Standard 0."
+        },
+        "trim_end_s": {
+          "name": "Trim slut (sekunder)",
+          "description": "Hold data op til denne offset på få sekunder. Standard = fuld varighed."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Tving afslutningscyklus"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Enheden blev ikke fundet."
+    },
+    "no_config_entry": {
+      "message": "Ingen konfigurationsindgang fundet for enheden."
+    },
+    "integration_not_loaded": {
+      "message": "Integration ikke indlæst for denne enhed."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Cyklus ikke fundet eller har ingen strømdata."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim mislykkedes — cyklus blev ikke fundet, ingen strømdata, eller det resulterende vindue er tomt."
     }
   }
 }

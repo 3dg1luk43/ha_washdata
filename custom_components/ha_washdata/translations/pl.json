@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Sugerowane wartości etapu w Ustawieniach zaawansowanych"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Cykl przycinania — wybierz Cykl",
+        "description": "Wybierz cykl do przycięcia. ✓ = zakończone, ⚠ = wznowione, ✗ = przerwane",
+        "data": {
+          "cycle_id": "Cykl"
+        }
+      },
+      "trim_cycle": {
+        "title": "Cykl przycinania",
+        "description": "Bieżące okno: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Działanie"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Ustaw początek przycinania",
+        "description": "Wprowadź przesunięcie minutowe, od którego chcesz rozpocząć zapisywanie danych (0 = początek cyklu).",
+        "data": {
+          "trim_start_min": "Początek (minuty)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Ustaw koniec przycięcia",
+        "description": "Wprowadź przesunięcie minutowe, w którym chcesz zakończyć zapisywanie danych.",
+        "data": {
+          "trim_end_min": "Koniec (minuty)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Sprawdź cykl ({device})",
       "feedback_notification_message": "**Urządzenie**: {device}\n**Program**: {program} ({confidence}% pewności)\n**Czas**: {time}\n\nWashData potrzebuje Twojej pomocy, aby zweryfikować wykryty cykl.\n\nPrzejdź do **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Informacje zwrotne**, aby potwierdzić lub poprawić ten wynik.",
       "suggestions_ready_notification_title": "WashData: Gotowe sugerowane ustawienia ({device})",
-      "suggestions_ready_notification_message": "Czujnik **Sugerowane ustawienia** zgłasza teraz **{count}** rekomendacje, które można zastosować.\n\nAby je przejrzeć i zastosować: **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Ustawienia zaawansowane > Zastosuj sugerowane wartości**.\n\nSugestie są opcjonalne i wyświetlane do sprawdzenia przed zapisaniem."
+      "suggestions_ready_notification_message": "Czujnik **Sugerowane ustawienia** zgłasza teraz **{count}** rekomendacje, które można zastosować.\n\nAby je przejrzeć i zastosować: **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Ustawienia zaawansowane > Zastosuj sugerowane wartości**.\n\nSugestie są opcjonalne i wyświetlane do sprawdzenia przed zapisaniem.",
+      "trim_range_invalid": "Początek musi być przed końcem. Dostosuj punkty przycięcia.",
+      "trim_failed": "Przycinanie nie powiodło się. Cykl może już nie istnieć lub okno jest puste."
     },
     "abort": {
       "no_cycles_found": "Nie znaleziono cykli",
@@ -594,7 +624,8 @@
       "no_predictions": "Żadnych prognoz",
       "no_custom_phases": "Nie znaleziono faz niestandardowych.",
       "reprocess_success": "Pomyślnie przetworzono ponownie {count} cykli.",
-      "debug_data_cleared": "Pomyślnie wyczyszczono dane debugowania z {count} cykli."
+      "debug_data_cleared": "Pomyślnie wyczyszczono dane debugowania z {count} cykli.",
+      "no_power_data": "Brak dostępnych danych śledzenia mocy dla wybranego cyklu."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Aby dodawać, edytować, usuwać lub zapisywać zakresy, wykonaj poniższe czynności.",
         "profile_summary_header": "Podsumowanie profilu",
         "recent_cycles_header": "Ostatnie cykle",
-        "no_power_preview": "*Brak danych dotyczących mocy dostępnych do podglądu.*"
+        "no_power_preview": "*Brak danych dotyczących mocy dostępnych do podglądu.*",
+        "trim_cycle_preview_title": "Podgląd przycinania cyklu",
+        "trim_cycle_preview_no_data": "Brak danych dotyczących mocy dla tego cyklu.",
+        "trim_cycle_preview_kept_suffix": "zachowane"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Oznacz określony cykl",
         "select_cycle_to_label_multi": "Oznacz wiele cykli",
         "select_cycle_to_delete": "Usuń cykl",
-        "interactive_editor": "Interaktywny edytor scalania/dzielenia"
+        "interactive_editor": "Interaktywny edytor scalania/dzielenia",
+        "trim_cycle": "Dane cyklu przycinania"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Nazwij i zastosuj fazy",
         "cancel": "Wróć bez zmian"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Ustaw punkt początkowy",
+        "set_end": "Ustaw punkt końcowy",
+        "reset": "Zresetuj do pełnego czasu trwania",
+        "apply": "Zastosuj Przytnij",
+        "cancel": "Anulować"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Urządzenie pralki, aby zatrzymać nagrywanie."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Cykl przycinania",
+      "description": "Przytnij dane dotyczące mocy z poprzedniego cyklu do określonego okna czasowego.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie",
+          "description": "Urządzenie WashData."
+        },
+        "cycle_id": {
+          "name": "Identyfikator cyklu",
+          "description": "Identyfikator cyklu do przycięcia."
+        },
+        "trim_start_s": {
+          "name": "Rozpoczęcie przycinania (sekundy)",
+          "description": "Przechowuj dane z tego przesunięcia w ciągu kilku sekund. Domyślnie 0."
+        },
+        "trim_end_s": {
+          "name": "Przytnij koniec (sekundy)",
+          "description": "Przechowuj dane do tego przesunięcia w ciągu kilku sekund. Wartość domyślna = pełny czas trwania."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Wymuś zakończenie cyklu"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Nie znaleziono urządzenia."
+    },
+    "no_config_entry": {
+      "message": "Nie znaleziono wpisu konfiguracji dla urządzenia."
+    },
+    "integration_not_loaded": {
+      "message": "Nie załadowano integracji dla tego urządzenia."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Nie znaleziono cyklu lub nie ma danych dotyczących mocy."
+    },
+    "trim_failed_empty_window": {
+      "message": "Przycinanie nie powiodło się — nie znaleziono cyklu, brak danych dotyczących zasilania lub wynikowe okno jest puste."
     }
   }
 }

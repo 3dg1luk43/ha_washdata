@@ -617,6 +617,7 @@
     },
     "abort": {
       "no_cycles_found": "No cycles found",
+      "no_power_data": "No power trace data available for the selected cycle.",
       "no_profiles_found": "No profiles found. Create a profile first.",
       "no_profiles_for_matching": "No profiles available for matching. Create profiles first.",
       "no_unlabeled_cycles": "All cycles are already labeled",
@@ -697,7 +698,10 @@
         "current_ranges_header": "Current ranges",
         "assign_phases_help": "Use actions below to add, edit, delete, or save ranges.",
         "profile_summary_header": "Profile Summary",
-        "recent_cycles_header": "Recent cycles"
+        "recent_cycles_header": "Recent cycles",
+        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "trim_cycle_preview_no_data": "No power data available for this cycle.",
+        "trim_cycle_preview_kept_suffix": "kept"
       }
     },
     "interactive_editor_action": {
@@ -1055,6 +1059,26 @@
       "force_end_cycle": {
         "name": "Force End Cycle"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Device not found."
+    },
+    "no_config_entry": {
+      "message": "No config entry found for device."
+    },
+    "integration_not_loaded": {
+      "message": "Integration not loaded for this device."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Cycle not found or has no power data."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim failed — cycle not found, no power data, or resulting window is empty."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s must be greater than trim_start_s."
     }
   }
 }

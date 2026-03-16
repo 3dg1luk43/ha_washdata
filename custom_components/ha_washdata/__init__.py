@@ -426,6 +426,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     )
                 trim_end_s = max(point[0] for point in p_data)
 
+            if trim_end_s <= trim_start_s:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="trim_invalid_range",
+                )
+
             ok = await store.trim_cycle_power_data(cycle_id, trim_start_s, trim_end_s)
             if not ok:
                 raise ServiceValidationError(

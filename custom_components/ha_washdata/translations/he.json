@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "ערכים מוצעים בשלב בהגדרות מתקדמות"
         }
+      },
+      "trim_cycle_select": {
+        "title": "מחזור חיתוך - בחר מחזור",
+        "description": "בחר מחזור לקצץ. ✓ = הושלם, ⚠ = התחדש, ✗ = הופסק",
+        "data": {
+          "cycle_id": "מַחזוֹר"
+        }
+      },
+      "trim_cycle": {
+        "title": "מחזור חיתוך",
+        "description": "Current window: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "פְּעוּלָה"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Set Trim Start",
+        "description": "הזן את קיזוז הדקות שממנו יש להתחיל לשמור נתונים (0 = תחילת מחזור).",
+        "data": {
+          "trim_start_min": "Start (minutes)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Set Trim End",
+        "description": "הזן את קיזוז הדקות כדי להפסיק לשמור נתונים.",
+        "data": {
+          "trim_end_min": "End (minutes)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: מחזור אימות ({device})",
       "feedback_notification_message": "**מכשיר**: {device}\n**תוכנית**: {program} ({confidence}% ביטחון)\n**זמן**: {time}\n\nWashData זקוק לעזרתכם כדי לאמת את המחזור שזוהה.\n\nאנא עבור אל **הגדרות > מכשירים ושירותים > WashData > קבע תצורה > משוב למידה** כדי לאשר או לתקן תוצאה זו.",
       "suggestions_ready_notification_title": "WashData: הגדרות מוצעות מוכנות ({device})",
-      "suggestions_ready_notification_message": "חיישן **הגדרות מוצעות** מדווח כעת על המלצות **{count}** שניתן לפעול.\n\nכדי לסקור ולהחיל אותם: **הגדרות > מכשירים ושירותים > WashData > הגדר > הגדרות מתקדמות > החל ערכים מוצעים**.\n\nהצעות הן אופציונליות ומוצגות לבדיקה לפני השמירה."
+      "suggestions_ready_notification_message": "חיישן **הגדרות מוצעות** מדווח כעת על המלצות **{count}** שניתן לפעול.\n\nכדי לסקור ולהחיל אותם: **הגדרות > מכשירים ושירותים > WashData > הגדר > הגדרות מתקדמות > החל ערכים מוצעים**.\n\nהצעות הן אופציונליות ומוצגות לבדיקה לפני השמירה.",
+      "trim_range_invalid": "ההתחלה חייבת להיות לפני הסוף. נא להתאים את נקודות החיתוך שלך.",
+      "trim_failed": "Trim failed. ייתכן שהמחזור כבר לא קיים או שהחלון ריק."
     },
     "abort": {
       "no_cycles_found": "לא נמצאו מחזורים",
@@ -594,7 +624,8 @@
       "no_predictions": "אין תחזיות",
       "no_custom_phases": "לא נמצאו שלבים מותאמים אישית.",
       "reprocess_success": "{count} מחזורים עיבדו מחדש בהצלחה.",
-      "debug_data_cleared": "ניקה בהצלחה נתוני ניפוי באגים מ-{count} מחזורים."
+      "debug_data_cleared": "ניקה בהצלחה נתוני ניפוי באגים מ-{count} מחזורים.",
+      "no_power_data": "אין נתוני מעקב כוח זמינים עבור המחזור שנבחר."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "השתמש בפעולות למטה כדי להוסיף, לערוך, למחוק או לשמור טווחים.",
         "profile_summary_header": "סיכום פרופיל",
         "recent_cycles_header": "מחזורים אחרונים",
-        "no_power_preview": "*אין נתוני חשמל זמינים לתצוגה מקדימה.*"
+        "no_power_preview": "*אין נתוני חשמל זמינים לתצוגה מקדימה.*",
+        "trim_cycle_preview_title": "תצוגה מקדימה של חיתוך מחזור",
+        "trim_cycle_preview_no_data": "אין נתוני חשמל זמינים עבור מחזור זה.",
+        "trim_cycle_preview_kept_suffix": "נשמר"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "מחזור ספציפי של תווית",
         "select_cycle_to_label_multi": "תווית מחזורים מרובים",
         "select_cycle_to_delete": "מחק מחזור",
-        "interactive_editor": "מיזוג/פיצול עורך אינטראקטיבי"
+        "interactive_editor": "מיזוג/פיצול עורך אינטראקטיבי",
+        "trim_cycle": "Trim Cycle Data"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "שם והחל שלבים",
         "cancel": "חזור ללא שינויים"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "הגדר נקודת התחלה",
+        "set_end": "הגדר נקודת סיום",
+        "reset": "אפס למשך מלא",
+        "apply": "החל Trim",
+        "cancel": "לְבַטֵל"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "מכשיר מכונת הכביסה להפסקת ההקלטה."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "מחזור חיתוך",
+      "description": "חתוך את נתוני ההספק של מחזור עבר לחלון זמן מסוים.",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר ה-WashData."
+        },
+        "cycle_id": {
+          "name": "מזהה מחזור",
+          "description": "מזהה המחזור שיש לקצץ."
+        },
+        "trim_start_s": {
+          "name": "התחלה של חיתוך (שניות)",
+          "description": "שמור נתונים מהקיזוז זה בשניות. ברירת מחדל 0."
+        },
+        "trim_end_s": {
+          "name": "קצץ סוף (שניות)",
+          "description": "שמור נתונים עד לקיזוז זה תוך שניות. ברירת מחדל = משך מלא."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "כוח סיום מחזור"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "המכשיר לא נמצא."
+    },
+    "no_config_entry": {
+      "message": "לא נמצאה ערך תצורה עבור המכשיר."
+    },
+    "integration_not_loaded": {
+      "message": "אינטגרציה לא נטענה עבור מכשיר זה."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "המחזור לא נמצא או שאין לו נתוני חשמל."
+    },
+    "trim_failed_empty_window": {
+      "message": "החיתוך נכשל - המחזור לא נמצא, אין נתוני צריכת חשמל או שהחלון שנוצר ריק."
     }
   }
 }

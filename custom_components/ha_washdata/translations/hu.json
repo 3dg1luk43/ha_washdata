@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Állítsa be a javasolt értékeket a Speciális beállításokban"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim Cycle — Válassza a Ciklus lehetőséget",
+        "description": "Válassza ki a vágni kívánt ciklust. ✓ = befejezve, ⚠ = folytatva, ✗ = megszakítva",
+        "data": {
+          "cycle_id": "Ciklus"
+        }
+      },
+      "trim_cycle": {
+        "title": "Vágási ciklus",
+        "description": "Jelenlegi ablak: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Akció"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Állítsa be a Vágás kezdetét",
+        "description": "Adja meg a perceltolást az adatok tárolásának megkezdéséhez (0 = ciklus indítása).",
+        "data": {
+          "trim_start_min": "Kezdés (perc)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Állítsa be a Vágás végét",
+        "description": "Adja meg a perceltolást az adatok tárolásának leállításához.",
+        "data": {
+          "trim_end_min": "vége (perc)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Ciklus ellenőrzése ({device})",
       "feedback_notification_message": "**Eszköz**: {device}\n**Program**: {program} ({confidence}%-os megbízhatóság)\n**Idő**: {time}\n\nA WashData segítségére van szüksége az észlelt ciklus ellenőrzéséhez.\n\nAz eredmény megerősítéséhez vagy javításához lépjen a **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Tanulási visszajelzések** menüpontra.",
       "suggestions_ready_notification_title": "WashData: A javasolt beállítások készen állnak ({device})",
-      "suggestions_ready_notification_message": "A **Javasolt beállítások** érzékelő mostantól **{count}** használható javaslatokat közöl.\n\nÁttekintésük és alkalmazásuk: **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Speciális beállítások > Javasolt értékek alkalmazása**.\n\nA javaslatok nem kötelezőek, és mentés előtt áttekinthetők."
+      "suggestions_ready_notification_message": "A **Javasolt beállítások** érzékelő mostantól **{count}** használható javaslatokat közöl.\n\nÁttekintésük és alkalmazásuk: **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Speciális beállítások > Javasolt értékek alkalmazása**.\n\nA javaslatok nem kötelezőek, és mentés előtt áttekinthetők.",
+      "trim_range_invalid": "A kezdésnek a vége előtt kell lennie. Kérjük, módosítsa a vágási pontokat.",
+      "trim_failed": "A vágás nem sikerült. Lehetséges, hogy a ciklus már nem létezik, vagy az ablak üres."
     },
     "abort": {
       "no_cycles_found": "Nem található ciklus",
@@ -594,7 +624,8 @@
       "no_predictions": "Nincsenek jóslatok",
       "no_custom_phases": "Nem található egyéni fázis.",
       "reprocess_success": "{count} ciklus sikeresen újrafeldolgozva.",
-      "debug_data_cleared": "A hibakeresési adatok sikeresen törölve {count} ciklusból."
+      "debug_data_cleared": "A hibakeresési adatok sikeresen törölve {count} ciklusból.",
+      "no_power_data": "A kiválasztott ciklushoz nem állnak rendelkezésre teljesítménynyomkövetési adatok."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Tartományok hozzáadásához, szerkesztéséhez, törléséhez vagy mentéséhez használja az alábbi műveleteket.",
         "profile_summary_header": "Profil összefoglaló",
         "recent_cycles_header": "Legutóbbi ciklusok",
-        "no_power_preview": "*Az előnézethez nem állnak rendelkezésre teljesítményadatok.*"
+        "no_power_preview": "*Az előnézethez nem állnak rendelkezésre teljesítményadatok.*",
+        "trim_cycle_preview_title": "Cycle Trim Előnézet",
+        "trim_cycle_preview_no_data": "Ehhez a ciklushoz nem állnak rendelkezésre teljesítményadatok.",
+        "trim_cycle_preview_kept_suffix": "tartotta"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Címkespecifikus ciklus",
         "select_cycle_to_label_multi": "Több ciklus címkézése",
         "select_cycle_to_delete": "Ciklus törlése",
-        "interactive_editor": "Egyesítés/felosztás interaktív szerkesztő"
+        "interactive_editor": "Egyesítés/felosztás interaktív szerkesztő",
+        "trim_cycle": "Trim Cycle Data"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Nevezze meg és alkalmazza a fázisokat",
         "cancel": "Menjen vissza változtatások nélkül"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Állítsa be a kezdőpontot",
+        "set_end": "Végpont beállítása",
+        "reset": "Állítsa vissza a teljes időtartamra",
+        "apply": "Alkalmazza Trim",
+        "cancel": "Mégsem"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "A mosógép eszköz a felvétel leállításához."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Vágási ciklus",
+      "description": "Vágja le az elmúlt ciklus teljesítményadatait egy adott időablakra.",
+      "fields": {
+        "device_id": {
+          "name": "Eszköz",
+          "description": "A WashData eszköz."
+        },
+        "cycle_id": {
+          "name": "Ciklusazonosító",
+          "description": "A vágni kívánt ciklus azonosítója."
+        },
+        "trim_start_s": {
+          "name": "Trim Start (másodperc)",
+          "description": "Az ebből az eltolásból származó adatokat másodpercben tárolja. Alapértelmezett 0."
+        },
+        "trim_end_s": {
+          "name": "Vágás vége (másodperc)",
+          "description": "Tartsa az adatokat másodpercek alatt ezen eltolásig. Alapértelmezett = teljes időtartam."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Ciklus kényszerítése"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Az eszköz nem található."
+    },
+    "no_config_entry": {
+      "message": "Nem található az eszköz konfigurációs bejegyzése."
+    },
+    "integration_not_loaded": {
+      "message": "Az integráció nincs betöltve ehhez az eszközhöz."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "A ciklus nem található, vagy nincsenek tápellátási adatai."
+    },
+    "trim_failed_empty_window": {
+      "message": "A vágás sikertelen – a ciklus nem található, nincsenek tápellátási adatok, vagy a kapott ablak üres."
     }
   }
 }

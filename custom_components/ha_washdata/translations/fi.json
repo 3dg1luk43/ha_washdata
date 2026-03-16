@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Aseta ehdotetut arvot lisäasetuksiin"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trimmausjakso — Valitse Cycle",
+        "description": "Valitse trimmattava sykli. ✓ = valmis, ⚠ = jatkunut, ✗ = keskeytetty",
+        "data": {
+          "cycle_id": "Kierrä"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trimmaussykli",
+        "description": "Nykyinen ikkuna: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Toiminta"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Aseta trimmauksen aloitus",
+        "description": "Syötä minuuttipoikkeama tietojen säilyttämisen aloittamiseksi (0 = syklin aloitus).",
+        "data": {
+          "trim_start_min": "Aloitus (minuuttia)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Aseta trimmauksen loppu",
+        "description": "Syötä minuuttipoikkeama lopettaaksesi tietojen säilyttämisen.",
+        "data": {
+          "trim_end_min": "Loppu (minuuttia)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Tarkista sykli ({device})",
       "feedback_notification_message": "**Laite**: {device}\n**Ohjelma**: {program} ({confidence} %:n luottamus)\n**Aika**: {time}\n\nWashData tarvitsee apuasi tämän havaitun jakson vahvistamiseksi.\n\nSiirry kohtaan **Asetukset > Laitteet ja palvelut > WashData > Configure > Learning Feedbacks** vahvistaaksesi tai korjataksesi tämän tuloksen.",
       "suggestions_ready_notification_title": "WashData: Ehdotetut asetukset valmiina ({device})",
-      "suggestions_ready_notification_message": "**Ehdotetut asetukset** -anturi raportoi nyt **{count}** toimivia suosituksia.\n\nTarkista ja ota ne käyttöön seuraavasti: **Asetukset > Laitteet ja palvelut > WashData > Määritä > Lisäasetukset > Käytä ehdotettuja arvoja**.\n\nEhdotukset ovat valinnaisia, ja ne näytetään tarkistettavaksi ennen tallentamista."
+      "suggestions_ready_notification_message": "**Ehdotetut asetukset** -anturi raportoi nyt **{count}** toimivia suosituksia.\n\nTarkista ja ota ne käyttöön seuraavasti: **Asetukset > Laitteet ja palvelut > WashData > Määritä > Lisäasetukset > Käytä ehdotettuja arvoja**.\n\nEhdotukset ovat valinnaisia, ja ne näytetään tarkistettavaksi ennen tallentamista.",
+      "trim_range_invalid": "Aloitus on oltava ennen loppua. Säädä leikkauspisteitäsi.",
+      "trim_failed": "Leikkaus epäonnistui. Jaksoa ei ehkä enää ole tai ikkuna on tyhjä."
     },
     "abort": {
       "no_cycles_found": "Syklejä ei löytynyt",
@@ -594,7 +624,8 @@
       "no_predictions": "Ei ennusteita",
       "no_custom_phases": "Mukautettuja vaiheita ei löytynyt.",
       "reprocess_success": "Uudelleenkäsitelty {count} jaksoa.",
-      "debug_data_cleared": "Virheenkorjaustiedot tyhjennettiin {count} jaksosta."
+      "debug_data_cleared": "Virheenkorjaustiedot tyhjennettiin {count} jaksosta.",
+      "no_power_data": "Valitulle jaksolle ei ole saatavilla tehojäljitystietoja."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Käytä alla olevia toimintoja alueiden lisäämiseen, muokkaamiseen, poistamiseen tai tallentamiseen.",
         "profile_summary_header": "Profiilin yhteenveto",
         "recent_cycles_header": "Viimeaikaiset syklit",
-        "no_power_preview": "*Tehotietoja ei ole saatavilla esikatseluun.*"
+        "no_power_preview": "*Tehotietoja ei ole saatavilla esikatseluun.*",
+        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "trim_cycle_preview_no_data": "Tälle jaksolle ei ole saatavilla tehotietoja.",
+        "trim_cycle_preview_kept_suffix": "pidetty"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Tarrakohtainen sykli",
         "select_cycle_to_label_multi": "Merkitse useita syklejä",
         "select_cycle_to_delete": "Poista sykli",
-        "interactive_editor": "Yhdistä/jakaa interaktiivinen editori"
+        "interactive_editor": "Yhdistä/jakaa interaktiivinen editori",
+        "trim_cycle": "Trimmausjakson tiedot"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Nimeä ja käytä vaiheita",
         "cancel": "Palaa takaisin ilman muutoksia"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Aseta aloituspiste",
+        "set_end": "Aseta päätepiste",
+        "reset": "Palauta täysi kesto",
+        "apply": "Käytä trimmaa",
+        "cancel": "Peruuttaa"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Pesukone laite lopettaa tallennuksen."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trimmaussykli",
+      "description": "Leikkaa edellisen jakson tehotiedot tiettyyn aikaikkunaan.",
+      "fields": {
+        "device_id": {
+          "name": "Laite",
+          "description": "WashData-laite."
+        },
+        "cycle_id": {
+          "name": "Cycle ID",
+          "description": "Trimmoitavan syklin tunnus."
+        },
+        "trim_start_s": {
+          "name": "Trimmauksen aloitus (sekuntia)",
+          "description": "Säilytä tiedot tästä siirtymästä sekunneissa. Oletusarvo 0."
+        },
+        "trim_end_s": {
+          "name": "Trimmaus loppu (sekuntia)",
+          "description": "Säilytä tiedot tässä poikkeamassa sekunneissa. Oletus = koko kesto."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Pakota lopetusjakso"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Laitetta ei löydy."
+    },
+    "no_config_entry": {
+      "message": "Laitteelle ei löytynyt asetusmerkintää."
+    },
+    "integration_not_loaded": {
+      "message": "Integraatiota ei ole ladattu tälle laitteelle."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Jaksoa ei löydy tai siinä ei ole virtatietoja."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim failed – sykliä ei löydy, ei virtatietoja tai tuloksena oleva ikkuna on tyhjä."
     }
   }
 }
