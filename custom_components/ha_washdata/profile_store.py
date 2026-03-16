@@ -1079,6 +1079,7 @@ class ProfileStore:
         # Repair cycles whose power_data was corrupted by the double-subtract bug.
         if self.repair_corrupted_power_data():
             await self.async_save()
+            await self.async_rebuild_all_envelopes()
 
     # _migrate_v1_to_v2 and _decompress_power_from_raw removed; logic moved to WashDataStore
 
@@ -1239,6 +1240,8 @@ class ProfileStore:
                     start_time_iso = dt_util.utc_from_timestamp(float(start_time_raw)).isoformat()
                 except (ValueError, OSError):
                     pass
+            if start_time_iso is not None:
+                cycle_data["start_time"] = start_time_iso
             if start_time_iso is None and _value_to_timestamp(start_time_raw) is None:
                 self._logger.debug("add_cycle: invalid start_time %r, skipping power_data normalization", start_time_raw)
                 if hasattr(self, "_save_debug_traces") and not self._save_debug_traces:
