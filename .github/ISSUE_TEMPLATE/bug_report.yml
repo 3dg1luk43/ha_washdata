@@ -8,6 +8,21 @@ body:
       value: |
         Thanks for taking the time to fill out this bug report!
 
+        Please complete **all required fields**. For fields that don't apply to your specific bug (e.g. device details for a purely UI issue), enter `N/A` — but do not skip them without reason. Issues missing key information will be automatically flagged and may be closed without investigation.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before You Submit
+      description: Please confirm all of the following before opening this issue.
+      options:
+        - label: I have searched the [existing issues](https://github.com/3dg1luk43/ha_washdata/issues) and this is not a duplicate.
+          required: true
+        - label: I have enabled debug logging and the logs below were captured while the bug was occurring (or entered `N/A` with a reason if genuinely not applicable).
+          required: true
+        - label: I have filled in all applicable fields with real values and used `N/A` only where the field is genuinely irrelevant to my bug.
+          required: true
+
   - type: textarea
     id: description
     attributes:
@@ -17,23 +32,50 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: device_type
+    attributes:
+      label: Device Type
+      description: What type of appliance is this bug related to?
+      options:
+        - Washing Machine
+        - Dryer
+        - Washer-Dryer Combo
+        - Dishwasher
+        - Coffee Machine
+        - Electric Vehicle (EV)
+        - Air Fryer
+        - Heat Pump
+        - Other / Not applicable
+    validations:
+      required: true
+
+  - type: input
+    id: device_brand_model
+    attributes:
+      label: Device Brand & Model
+      description: The brand and model number of your appliance (e.g. "Miele W1 WCG370"). Enter `N/A` if this bug is not related to a specific device.
+      placeholder: "Brand Model Number or N/A"
+    validations:
+      required: true
+
   - type: input
     id: version
     attributes:
-      label: Integration Version
-      description: What version of WashData are you running?
+      label: WashData Integration Version
+      description: What version of WashData are you running? (found in HACS or Settings → Integrations)
       placeholder: "vX.Y.Z"
     validations:
       required: true
-  
+
   - type: input
     id: ha_version
     attributes:
       label: Home Assistant Version
-      description: What version of Home Assistant Core are you running?
+      description: What version of Home Assistant Core are you running? (found in Settings → About)
       placeholder: "2024.12.0"
     validations:
-      required: false
+      required: true
 
   - type: textarea
     id: reproduction
@@ -59,15 +101,43 @@ body:
   - type: textarea
     id: debug_log
     attributes:
-      label: Debug LOG
+      label: Debug Logs
       description: |
-        Please enable debug logging for `custom_components.ha_washdata` and `custom_components.ha_washdata.profile_store`.
-        
-        To enable via YAML:
+        **This is required.** Logs without debug level enabled are rarely useful for troubleshooting.
+
+        > ⚠️ **Debug logs and the HA Diagnostics export are two different things.**
+        > - **Debug logs** = text output from `Settings → System → Logs`. This is what we need here.
+        > - **Diagnostics export** = the JSON file from `Settings → Devices → your device → Download Diagnostics`. This can be hundreds of lines and **must be attached as a file**, never pasted.
+        > If you have both, provide both — but in the right way (see below).
+
+        **Step 1 — Enable debug logging** by adding this to your `configuration.yaml`:
         ```yaml
         logger:
           default: info
           logs:
             custom_components.ha_washdata: debug
         ```
+        Then restart Home Assistant.
+
+        **Step 2 — Reproduce the bug** so the relevant log lines are captured.
+
+        **Step 3 — Provide the logs:**
+        - **Short logs (< ~50 lines):** copy and paste directly into the box below.
+        - **Long logs:** download the full log file from `Settings → System → Logs → Download full log` (top-right button) and attach it to this issue as a file.
+        - **Diagnostics export (device data):** always attach as a file — do not paste.
+
+        Include log output covering at least 30 seconds before and after the event.
+
+        > **Tip:** You can filter live logs by `ha_washdata` under `Settings → System → Logs` to quickly find relevant lines.
+      placeholder: "Paste short debug log output here, or describe what file(s) you have attached above..."
       render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Any other context about the problem (screenshots, related automations, unusual HA setup, etc.)
+    validations:
+      required: false
