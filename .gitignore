@@ -37,3 +37,5 @@ tests/benchmarks/__pycache__/
 .github/workflows copy
 .github/ARCHITECTURE.md
 devtools/.mock_socket.pid
+bin
+CLAUDE.md
