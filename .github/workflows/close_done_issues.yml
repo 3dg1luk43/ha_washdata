@@ -1,0 +1,81 @@
+name: Close Inactive Done Issues
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # daily at 09:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  issues: write
+
+jobs:
+  close-done-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close issues labeled done with no activity for 5 days
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const OWNER_LOGIN = '3dg1luk43';
+            const INACTIVITY_DAYS = 5;
+            const cutoff = new Date(Date.now() - INACTIVITY_DAYS * 24 * 60 * 60 * 1000);
+
+            // Fetch all open issues with the "done" label
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'done',
+              per_page: 100,
+            });
+
+            console.log(`Found ${issues.length} open issue(s) with label "done".`);
+
+            for (const issue of issues) {
+              // Skip pull requests
+              if (issue.pull_request) continue;
+
+              const updatedAt = new Date(issue.updated_at);
+              if (updatedAt >= cutoff) {
+                console.log(`#${issue.number}: updated recently (${issue.updated_at}), skipping.`);
+                continue;
+              }
+
+              // Fetch comments to verify the last one is from the owner
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                per_page: 100,
+              });
+
+              const allComments = comments.data;
+
+              if (allComments.length === 0) {
+                console.log(`#${issue.number}: no comments, skipping (last commenter check requires at least one comment).`);
+                continue;
+              }
+
+              const lastComment = allComments[allComments.length - 1];
+              if (lastComment.user.login !== OWNER_LOGIN) {
+                console.log(`#${issue.number}: last comment is from @${lastComment.user.login}, not owner — skipping.`);
+                continue;
+              }
+
+              console.log(`#${issue.number}: closing — labeled "done", inactive for ${INACTIVITY_DAYS}+ days, owner's comment is last.`);
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Closing this issue due to ${INACTIVITY_DAYS} days of inactivity after it was marked **done**.\n\nIf the problem still persists, please reopen the issue (or create a new one) and assign **@${OWNER_LOGIN}** — I'll take another look. 🙏`,
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+                state_reason: 'completed',
+              });
+            }
