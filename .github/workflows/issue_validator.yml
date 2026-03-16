@@ -83,17 +83,7 @@ jobs:
               }
 
               const problemList = problems.map(p => `- ${p}`).join('\n');
-              const comment = `👋 Hey @${issue.user.login}, thanks for the report!
-
-              Looks like a few things are missing that we need before we can investigate:
-
-              ${problemList}
-
-              Please update the issue with the missing information. Without it, we won't be able to reproduce or debug the problem, and the issue may be closed.
-
-              > **How to edit this issue:** click the three-dot menu (⋯) at the top-right of your post → *Edit*.
-
-              _This check runs automatically. Once the issue is updated, it will be re-evaluated._`;
+              const comment = `👋 Hey @${issue.user.login}, thanks for the report!\n\nLooks like a few things are missing that we need before we can investigate:\n\n${problemList}\n\nPlease update the issue with the missing information. Without it, we won't be able to reproduce or debug the problem, and the issue may be closed.\n\n> **How to edit this issue:** click the three-dot menu (⋯) at the top-right of your post → *Edit*.\n\n_This check runs automatically. Once the issue is updated, it will be re-evaluated._`;
 
               // Only post a new comment if we haven't already (avoid comment spam on edits)
               const comments = await github.rest.issues.listComments({

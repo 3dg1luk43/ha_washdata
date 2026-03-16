@@ -91,8 +91,8 @@ def power_data_to_offsets(
                 parsed_start = dt_util.parse_datetime(start_time_iso)
                 if parsed_start is not None:
                     start_ts = parsed_start.timestamp()
-            except Exception:  # pylint: disable=broad-exception-caught
-                pass
+            except (ValueError, OSError) as e:
+                _LOGGER.debug("Failed to parse datetime %s: %s", start_time_iso, e)
         result: list[list[float]] = []
         for item in power_data:
             try:
@@ -117,7 +117,8 @@ def power_data_to_offsets(
                 if parsed is None:
                     return []
                 base_ts = parsed.timestamp()
-            except Exception:  # pylint: disable=broad-exception-caught
+            except (ValueError, OSError) as e:
+                _LOGGER.debug("Failed to parse datetime %s: %s", start_time_iso, e)
                 return []
 
         result: list[list[float]] = []

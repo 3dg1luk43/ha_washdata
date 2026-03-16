@@ -727,8 +727,8 @@ class WasherProfileSensorManager:
                         if sensor.hass:
                             try:
                                 await sensor.async_remove()
-                            except HomeAssistantError as err:
-                                _LOGGER.warning(
+                            except Exception as err:  # pylint: disable=broad-exception-caught
+                                _LOGGER.debug(
                                     "Failed to remove sensor '%s' via fallback path: %s",
                                     name,
                                     err,

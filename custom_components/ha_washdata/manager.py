@@ -1651,6 +1651,32 @@ class WashDataManager:
             self._remove_notify_people_listener = async_track_state_change_event(
                 self.hass, self._notify_people, self._handle_notify_person_change
             )
+            # If someone is already home when (re-)attaching, flush any queued
+            # notifications immediately so they aren't stranded.
+            if self._pending_notifications and self._is_any_notify_person_home():
+                person_entity_id: str | None = None
+                person_name: str | None = None
+                for eid in self._notify_people:
+                    state = self.hass.states.get(eid)
+                    if state and state.state == STATE_HOME:
+                        person_entity_id = eid
+                        person_name = state.name or state.attributes.get(
+                            "friendly_name", eid
+                        )
+                        break
+                pending = list(self._pending_notifications)
+                self._pending_notifications = []
+                for entry in pending:
+                    self._dispatch_notification(
+                        entry["message"],
+                        title=entry.get("title"),
+                        icon=entry.get("icon"),
+                        event_type=entry.get("event_type"),
+                        person_entity_id=person_entity_id,
+                        person_name=person_name,
+                        extra_vars=entry.get("extra_vars"),
+                        allow_deferral=False,
+                    )
         else:
             self._pending_notifications = []
 
@@ -2835,6 +2861,11 @@ class WashDataManager:
         has_profile_match = bool(
             self._matched_profile_duration and self._matched_profile_duration > 0
         )
+        if has_profile_match:
+            # A profile has been matched — reset the waiting latch so future
+            # "no profile yet" phases (e.g. after a cycle restart) will send
+            # the waiting message again.
+            self._live_waiting_notification_sent = False
         if not has_profile_match:
             if self._live_waiting_notification_sent:
                 return
