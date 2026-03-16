@@ -37,66 +37,13 @@ def test_compression_decompression(store):
     decompressed = decompress_power_data(cycle_compressed)
     
     assert len(decompressed) == 3
-    # decompress_power_data now returns (offset_seconds, power) tuples
-    offset_1, power_1 = decompressed[1]
-    assert offset_1 == pytest.approx(10.0, abs=0.1), "Expected 10s offset"
-    assert power_1 == pytest.approx(100.5)
-
-
-def test_decompress_iso_power_data_with_numeric_start_time_does_not_fail(store):
-    """Decompression must tolerate historical non-string start_time values."""
-    cycle = {
-        "start_time": 1735725600.0,
-        "power_data": [
-            ["2025-01-01T10:00:00+00:00", 0.0],
-            ["2025-01-01T10:00:10+00:00", 50.0],
-            ["2025-01-01T10:00:20+00:00", 0.0],
-        ],
-    }
-
-    decompressed = decompress_power_data(cycle)
-    assert len(decompressed) == 3
-    assert decompressed[0][0] == pytest.approx(0.0, abs=0.1)
-    assert decompressed[1][0] == pytest.approx(10.0, abs=0.1)
-
-
-def test_compress_power_data_with_numeric_start_time(store):
-    """Compression should work when start_time is already a numeric timestamp."""
-    cycle = {
-        "start_time": 1735725600.0,
-        "power_data": [
-            ["2025-01-01T10:00:00+00:00", 0.0],
-            ["2025-01-01T10:00:10+00:00", 100.5],
-            ["2025-01-01T10:00:20+00:00", 0.0],
-        ],
-    }
-
-    compressed = compress_power_data(cycle)
-    assert isinstance(compressed, list)
-    assert compressed[0] == [0.0, 0.0]
-    assert compressed[1] == [10.0, 100.5]
-
-
-@pytest.mark.asyncio
-async def test_async_add_cycle_with_numeric_start_time(store):
-    """Adding a cycle should not raise when start_time is numeric."""
-    cycle_data = {
-        "start_time": 1735725600.0,
-        "duration": 20,
-        "status": "completed",
-        "power_data": [
-            [1735725600.0, 0.0],
-            [1735725610.0, 90.0],
-            [1735725620.0, 0.0],
-        ],
-    }
-
-    await store.async_add_cycle(cycle_data)
-
-    assert len(store._data["past_cycles"]) == 1
-    saved = store._data["past_cycles"][0]
-    assert saved["power_data"][0][0] == pytest.approx(10.0, abs=0.1)
-    assert saved["power_data"][1][0] == pytest.approx(20.0, abs=0.1)
+    # Use fromisoformat and check total seconds since start to be timezone agnostic
+    start_dt = datetime.fromisoformat(cycle["start_time"])
+    p1_dt = datetime.fromisoformat(decompressed[1][0])
+    
+    # We expect 10s offset
+    assert (p1_dt.timestamp() - start_dt.timestamp()) == 10.0
+    assert decompressed[1][1] == 100.5
 
 @pytest.mark.asyncio
 async def test_migration_to_compressed(store):

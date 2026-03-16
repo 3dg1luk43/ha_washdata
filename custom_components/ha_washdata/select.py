@@ -1,4 +1,4 @@
-"""Select entity for WashData."""
+"""Select entity for HA WashData."""
 
 from __future__ import annotations
 
@@ -42,10 +42,11 @@ class WashDataProgramSelect(SelectEntity):
         self._manager = manager
         self._config_entry = config_entry
         self._attr_unique_id = f"{config_entry.entry_id}_program_select"
+        self._attr_name = "Cycle Program"
         self._attr_device_info = {
             "identifiers": {(DOMAIN, config_entry.entry_id)},
             "name": config_entry.title,
-            "manufacturer": "WashData",
+            "manufacturer": "HA WashData",
         }
 
         # Determine icon based on device type
@@ -58,10 +59,6 @@ class WashDataProgramSelect(SelectEntity):
             self._attr_icon = "mdi:car-electric"
         elif dtype == "coffee_machine":
             self._attr_icon = "mdi:coffee"
-        elif dtype == "air_fryer":
-            self._attr_icon = "mdi:pot-steam"
-        elif dtype == "heat_pump":
-            self._attr_icon = "mdi:heat-pump"
         else:
             self._attr_icon = "mdi:washing-machine"  # Default and washing_machine
 

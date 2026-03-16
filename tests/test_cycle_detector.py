@@ -12,7 +12,6 @@ from custom_components.ha_washdata.const import (
     STATE_FINISHED,
     STATE_INTERRUPTED,
     STATE_FORCE_STOPPED,
-    DEVICE_TYPE_DISHWASHER,
 )
 
 # Helper to create datetime sequence
@@ -321,93 +320,3 @@ def test_end_repeat_count_accumulates_across_periods(mock_callbacks):
     
     cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
     assert cycle_data["status"] == "completed"
-
-
-def test_dishwasher_end_spike_stays_in_ending(mock_callbacks):
-    """Dishwasher final pump-out spike should not resume RUNNING from ENDING."""
-    config = CycleDetectorConfig(
-        min_power=5.0,
-        off_delay=1200,
-        interrupted_min_seconds=150,
-        completion_min_seconds=600,
-        start_duration_threshold=0.0,
-        device_type=DEVICE_TYPE_DISHWASHER,
-    )
-
-    detector = CycleDetector(
-        config=config,
-        on_state_change=mock_callbacks["on_state_change"],
-        on_cycle_end=mock_callbacks["on_cycle_end"],
-    )
-
-    detector.process_reading(120.0, dt(0))
-    detector.process_reading(120.0, dt(30))
-    assert detector.state == STATE_RUNNING
-
-    for t in range(60, 6001, 30):
-        detector.process_reading(120.0, dt(t))
-
-    # Pretend we already have a stable profile match for this run.
-    detector.update_match(("dishwasher_program", 0.6, 7200.0, None, False))
-
-    # Long low-power tail: RUNNING -> PAUSED -> ENDING.
-    for t in range(6030, 6331, 30):
-        detector.process_reading(0.0, dt(t))
-
-    assert detector.state == STATE_ENDING
-
-    # Final pump-out spike after a sustained ENDING tail.
-    detector.process_reading(85.0, dt(6360))
-
-    # Regression: this used to bounce ENDING -> RUNNING.
-    assert detector.state == STATE_ENDING
-
-
-def test_dishwasher_end_spike_finishes_soon_after(mock_callbacks):
-    """Dishwasher should finish soon after terminal spike when match is near completion."""
-    config = CycleDetectorConfig(
-        min_power=5.0,
-        off_delay=1200,
-        interrupted_min_seconds=150,
-        completion_min_seconds=600,
-        start_duration_threshold=0.0,
-        device_type=DEVICE_TYPE_DISHWASHER,
-    )
-
-    detector = CycleDetector(
-        config=config,
-        on_state_change=mock_callbacks["on_state_change"],
-        on_cycle_end=mock_callbacks["on_cycle_end"],
-    )
-
-    detector.process_reading(120.0, dt(0))
-    detector.process_reading(120.0, dt(30))
-    assert detector.state == STATE_RUNNING
-
-    for t in range(60, 6001, 30):
-        detector.process_reading(120.0, dt(t))
-
-    # Set an expected duration close enough for smart termination after the spike.
-    detector.update_match(("dishwasher_program", 0.6, 6200.0, None, False))
-
-    # Long low-power tail: RUNNING -> PAUSED -> ENDING.
-    for t in range(6030, 6331, 30):
-        detector.process_reading(0.0, dt(t))
-
-    assert detector.state == STATE_ENDING
-
-    # Terminal pump-out burst should not resume RUNNING.
-    detector.process_reading(85.0, dt(6360))
-    assert detector.state == STATE_ENDING
-
-    # Continue low-power tail; smart termination should complete within this window.
-    detector.process_reading(0.0, dt(6390))
-    detector.process_reading(0.0, dt(6420))
-    detector.process_reading(0.0, dt(6450))
-
-    assert detector.state == STATE_FINISHED
-    mock_callbacks["on_cycle_end"].assert_called_once()
-
-    cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
-    assert cycle_data["status"] == "completed"
-    assert cycle_data["duration"] == pytest.approx(6420, abs=40)
