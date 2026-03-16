@@ -565,7 +565,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Apkarpymas — pasirinkite ciklą",
+        "title": "Apkarpymo ciklas — pasirinkite ciklą",
         "description": "Pasirinkite ciklą, kurį norite apkarpyti. ✓ = baigta, ⚠ = atnaujinta, ✗ = nutraukta",
         "data": {
           "cycle_id": "Ciklas"
@@ -952,25 +952,25 @@
         }
       }
     },
-    “trim_cycle”: {
-      “name”: “Apkarpymo ciklas”,
-      “description”: “Apkarpykite nurodyto išsaugoto ciklo galios duomenis iki konkretaus laiko lango.”,
-      “fields”: {
-        “device_id”: {
-          “name”: “Įrenginys”,
-          “description”: “„WashData” įrenginys.”
+    "trim_cycle": {
+      "name": "Apkarpymo ciklas",
+      "description": "Apkarpykite nurodyto išsaugoto ciklo galios duomenis iki konkretaus laiko lango.",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "„WashData“ įrenginys."
         },
-        “cycle_id”: {
-          “name”: “Ciklo ID”,
-          “description”: “Bet kurio išsaugoto ciklo, kurį reikia apkarpyti, ID.”
+        "cycle_id": {
+          "name": "Ciklo ID",
+          "description": "Bet kurio išsaugoto ciklo, kurį reikia apkarpyti, ID."
         },
-        “trim_start_s”: {
-          “name”: “Apkarpymo pradžia (sekundėmis)”,
-          “description”: “Išsaugokite duomenis nuo šio poslinkio sekundėmis. Numatytasis 0.”
+        "trim_start_s": {
+          "name": "Apkarpymo pradžia (sekundėmis)",
+          "description": "Išsaugokite duomenis nuo šio poslinkio sekundėmis. Numatytasis 0."
         },
-        “trim_end_s”: {
-          “name”: “Apkarpymo pabaiga (sekundėmis)”,
-          “description”: “Išsaugokite duomenis iki šio sekundžių poslinkio. Numatytasis = visa trukmė.”
+        "trim_end_s": {
+          "name": "Apkarpymo pabaiga (sekundėmis)",
+          "description": "Išsaugokite duomenis iki šio sekundžių poslinkio. Numatytasis = visa trukmė."
         }
       }
     }
