@@ -666,7 +666,8 @@
         "current_ranges_header": "Huidige reekse",
         "assign_phases_help": "Gebruik handelinge hieronder om reekse by te voeg, te wysig, uit te vee of te stoor.",
         "profile_summary_header": "Profielopsomming",
-        "recent_cycles_header": "Onlangse siklusse"
+        "recent_cycles_header": "Onlangse siklusse",
+        "no_power_preview": "*Geen kragdata beskikbaar vir voorskou nie.*"
       }
     },
     "interactive_editor_action": {

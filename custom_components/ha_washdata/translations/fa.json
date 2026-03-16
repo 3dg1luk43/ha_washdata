@@ -666,7 +666,8 @@
         "current_ranges_header": "محدوده های فعلی",
         "assign_phases_help": "از اقدامات زیر برای افزودن، ویرایش، حذف یا ذخیره محدوده استفاده کنید.",
         "profile_summary_header": "خلاصه نمایه",
-        "recent_cycles_header": "چرخه های اخیر"
+        "recent_cycles_header": "چرخه های اخیر",
+        "no_power_preview": "*داده برق برای پیش نمایش موجود نیست.*"
       }
     },
     "interactive_editor_action": {

@@ -666,7 +666,8 @@
         "current_ranges_header": "Aktuella intervall",
         "assign_phases_help": "Använd åtgärderna nedan för att lägga till, redigera, ta bort eller spara intervall.",
         "profile_summary_header": "Profilsammanfattning",
-        "recent_cycles_header": "Senaste cyklerna"
+        "recent_cycles_header": "Senaste cyklerna",
+        "no_power_preview": "*Ingen energidata tillgänglig för förhandsgranskning.*"
       }
     },
     "interactive_editor_action": {

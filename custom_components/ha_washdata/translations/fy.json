@@ -666,7 +666,8 @@
         "current_ranges_header": "Aktuele berik",
         "assign_phases_help": "Brûk de aksjes hjirûnder om berikken ta te foegjen, te bewurkjen, te wiskjen of op te slaan.",
         "profile_summary_header": "Profile Gearfetting",
-        "recent_cycles_header": "Resinte syklusen"
+        "recent_cycles_header": "Resinte syklusen",
+        "no_power_preview": "*Gjin machtgegevens beskikber foar foarbyld.*"
       }
     },
     "interactive_editor_action": {

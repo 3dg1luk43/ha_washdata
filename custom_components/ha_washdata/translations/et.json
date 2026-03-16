@@ -666,7 +666,8 @@
         "current_ranges_header": "Praegused vahemikud",
         "assign_phases_help": "Kasutage allolevaid toiminguid vahemike lisamiseks, muutmiseks, kustutamiseks või salvestamiseks.",
         "profile_summary_header": "Profiili kokkuvõte",
-        "recent_cycles_header": "Viimased tsüklid"
+        "recent_cycles_header": "Viimased tsüklid",
+        "no_power_preview": "*Eelvaateks pole võimsusandmeid saadaval.*"
       }
     },
     "interactive_editor_action": {

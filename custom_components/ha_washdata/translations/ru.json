@@ -666,7 +666,8 @@
         "current_ranges_header": "Текущие диапазоны",
         "assign_phases_help": "Используйте действия ниже, чтобы добавлять, редактировать, удалять или сохранять диапазоны.",
         "profile_summary_header": "Сводка профиля",
-        "recent_cycles_header": "Последние циклы"
+        "recent_cycles_header": "Последние циклы",
+        "no_power_preview": "*Данные о мощности недоступны для предварительного просмотра.*"
       }
     },
     "interactive_editor_action": {

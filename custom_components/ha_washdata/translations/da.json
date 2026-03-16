@@ -666,7 +666,8 @@
         "current_ranges_header": "Aktuelle intervaller",
         "assign_phases_help": "Brug handlingerne nedenfor til at tilføje, redigere, slette eller gemme områder.",
         "profile_summary_header": "Profiloversigt",
-        "recent_cycles_header": "Seneste cyklusser"
+        "recent_cycles_header": "Seneste cyklusser",
+        "no_power_preview": "*Ingen strømdata tilgængelige til forhåndsvisning.*"
       }
     },
     "interactive_editor_action": {

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 import hashlib
+import html
 import logging
 import os
 import re
@@ -3583,9 +3584,27 @@ class ProfileStore:
     async def apply_merge_interactive(
         self, cycle_ids: list[str], target_profile: str | None
     ) -> str | None:
-        """Apply a manual merge of multiple cycles with gap filling.
+        """
+        Merge multiple past cycles into a single cycle record, filling gaps between traces with short zero-power segments.
+        
+        Parameters:
+            cycle_ids (list[str]): Unordered set of past-cycle IDs to merge; at least two IDs are required.
+                The function internally sorts cycles by start_time and mutates the chronologically earliest cycle.
+            target_profile (str | None): Profile name to assign to the merged cycle, or `None` to leave unlabeled.
 
-        Returns the new merged cycle ID.
+        Description:
+            When successful, this sorts the provided cycles by start_time and replaces the earliest cycle with the merged cycle,
+            removing the other consumed cycles and updating related metadata.
+        
+            Side effects:
+            - Updates the store's past_cycles (removes consumed cycles and replaces the first cycle with the merged record).
+            - Clears any `manual_duration` override on the resulting cycle.
+            - Updates `sample_cycle_id` references in profiles that pointed to removed cycles.
+            - Attempts to recompute and store the merged cycle's signature.
+            - Persists changes to storage and triggers envelope rebuilds for affected profiles.
+        
+        Returns:
+            merged_id (str | None): The new merged cycle's ID if the merge was applied, `None` if the merge could not be performed.
         """
         if len(cycle_ids) < 2:
             return None
@@ -3596,8 +3615,21 @@ class ProfileStore:
         if len(target_cycles) != len(cycle_ids):
             return None
 
-        # Sort by time
-        target_cycles.sort(key=lambda c: str(c.get("start_time", "")))
+        # Sort by time — use timestamp comparison to handle mixed timezone offsets correctly
+        def _cycle_start_ts(c: CycleDict) -> float:
+            """
+            Return the cycle's start time as a POSIX timestamp, or positive infinity if missing or unparsable.
+            
+            Parameters:
+                c (CycleDict): Cycle dictionary; expected to contain a 'start_time' value (ISO string or datetime) parseable by dt_util.parse_datetime.
+            
+            Returns:
+                float: Seconds since the epoch for the cycle's start time, or float('inf') when the start time is absent or cannot be parsed.
+            """
+            dt = dt_util.parse_datetime(str(c.get("start_time", "")))
+            return dt.timestamp() if dt is not None else float("inf")
+
+        target_cycles.sort(key=_cycle_start_ts)
 
         # Collect affected profiles for envelope rebuild
         affected_profiles: set[str] = set()
@@ -3609,7 +3641,7 @@ class ProfileStore:
 
         # We modify the first cycle (c1) to become the merged one
         c1 = target_cycles[0]
-        ids_to_remove = [c["id"] for c in target_cycles[1:]]
+        ids_to_remove: list[str] = []
 
         # Base setup
         c1_start_dt = dt_util.parse_datetime(c1["start_time"])
@@ -3640,13 +3672,14 @@ class ProfileStore:
         for t_abs, _, p in c1_pts:
             merged_points_abs.append([t_abs, p])
 
-        last_t_abs = c1_pts[-1][0] if c1_pts else c1_start_dt.timestamp()
+        # Use the maximum t_abs seen so far (guards against out-of-order or corrupted points)
+        last_t_abs = max((pt[0] for pt in c1_pts), default=c1_start_dt.timestamp())
 
         # Iterate others
         max_power = c1.get("max_power", 0)
 
         for next_c in target_cycles[1:]:
-            c_start_dt = dt_util.parse_datetime(next_c["start_time"])
+            c_start_dt = dt_util.parse_datetime(str(next_c.get("start_time", "")))
             if not c_start_dt:
                 continue
 
@@ -3663,21 +3696,37 @@ class ProfileStore:
                 merged_points_abs.append([last_t_abs + 0.1, 0.0])
                 merged_points_abs.append([current_start_ts - 0.1, 0.0])
 
-            # Append points
+            # Append points; track the running maximum to guard against reversed/corrupt data
             for t_abs, _, p in c_pts:
                 merged_points_abs.append([t_abs, p])
-                last_t_abs = t_abs
+                if t_abs > last_t_abs:
+                    last_t_abs = t_abs
 
             max_power = max(max_power, next_c.get("max_power", 0))
+            ids_to_remove.append(next_c["id"])
 
-        # Update C1 metadata
-        final_end_dt = dt_util.utc_from_timestamp(last_t_abs)
+        # Derive merged end time from power data when available; otherwise fall back to
+        # the end_time field of the last cycle (handles cycles without recorded power data).
+        if merged_points_abs:
+            # Use the maximum absolute timestamp from all collected data points
+            last_t_abs = max(pt[0] for pt in merged_points_abs)
+            final_end_dt = dt_util.utc_from_timestamp(last_t_abs)
+        else:
+            last_cycle = target_cycles[-1]
+            fallback_end_dt = dt_util.parse_datetime(str(last_cycle.get("end_time", "")))
+            if fallback_end_dt is not None:
+                final_end_dt = fallback_end_dt
+            else:
+                final_end_dt = c1_start_dt
+
         new_dur = (final_end_dt - c1_start_dt).total_seconds()
 
         c1["end_time"] = final_end_dt.isoformat()
         c1["duration"] = round(new_dur, 1)
         c1["max_power"] = max_power
         c1["profile_name"] = target_profile
+        # Remove manual_duration override so the freshly computed duration is shown
+        c1.pop("manual_duration", None)
 
         # Generate new compressed power_data [offset, power]
         new_power_data: list[list[float]] = []
@@ -3775,15 +3824,48 @@ class ProfileStore:
         width: int = 600,
         height: int = 300,
         title: str = "Merge Preview",
+        no_data_label: str | None = None,
     ) -> str:
-        """Generate SVG for merge preview."""
+        """
+        Generate an SVG preview that overlays power traces from the specified past cycles to illustrate the result of merging them.
+        
+        Cycles are ordered by their parsed start_time and each cycle's power data is aligned to the earliest cycle start to form overlaid curves.
+        
+        Parameters:
+            cycle_ids (list[str]): IDs of past cycles to include in the preview.
+            width (int): Width of the generated SVG in pixels.
+            height (int): Height of the generated SVG in pixels.
+            title (str): Title text shown in the SVG header.
+            no_data_label (str | None): Message rendered in the placeholder SVG when cycles are
+                present but contain no recorded power data. Defaults to None (empty message).
+
+        Returns:
+            str: SVG markup for the merge preview. Returns an empty string if no valid cycles or
+            if the first cycle's start_time cannot be parsed. If cycles are present but none
+            contain power data, returns a placeholder SVG using no_data_label as the descriptive
+            message instead of a fixed string.
+        """
         cycles = [c for c in self.get_past_cycles() if c["id"] in cycle_ids]
-        cycles.sort(key=lambda c: str(c.get("start_time", "")))
+
+        def _sort_ts(c: CycleDict) -> float:
+            """
+            Provide a numeric sort key for a cycle by converting its `start_time` to a UNIX timestamp.
+            
+            Parameters:
+                c (CycleDict): Cycle mapping that may contain a `start_time` value in any parseable datetime form.
+            
+            Returns:
+                float: UNIX timestamp in seconds parsed from `start_time`, or `float('inf')` when `start_time` is missing or cannot be parsed so the cycle sorts after valid-dated cycles.
+            """
+            dt = dt_util.parse_datetime(str(c.get("start_time", "")))
+            return dt.timestamp() if dt is not None else float("inf")
+
+        cycles.sort(key=_sort_ts)
 
         if not cycles:
             return ""
 
-        first_start_dt = dt_util.parse_datetime(cycles[0]["start_time"])
+        first_start_dt = dt_util.parse_datetime(str(cycles[0].get("start_time", "")))
         if first_start_dt is None:
             return ""
         first_start = first_start_dt.timestamp()
@@ -3810,4 +3892,19 @@ class ProfileStore:
             if points:
                 curves.append(SVGCurve(points=points, color=colors[i % len(colors)], stroke_width=2))
 
-        return _generate_generic_svg(title, curves, width, height)
+        if not curves:
+            # No power data available — return a placeholder SVG with a message
+            safe_title = html.escape(title)
+            safe_label = html.escape(no_data_label or "")
+            return (
+                f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
+                f'style="background-color: #1c1c1c; font-family: sans-serif;">'
+                f'<rect x="0" y="0" width="{width}" height="{height}" fill="#1c1c1c" />'
+                f'<text x="{width // 2}" y="{height // 2 - 10}" fill="#aaa" font-size="16" '
+                f'text-anchor="middle">{safe_title}</text>'
+                f'<text x="{width // 2}" y="{height // 2 + 14}" fill="#666" font-size="13" '
+                f'text-anchor="middle">{safe_label}</text>'
+                f'</svg>'
+            )
+
+        return _generate_generic_svg(html.escape(title), curves, width, height)

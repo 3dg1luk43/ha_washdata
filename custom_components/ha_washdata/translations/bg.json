@@ -666,7 +666,8 @@
         "current_ranges_header": "Текущи диапазони",
         "assign_phases_help": "Използвайте действията по-долу, за да добавяте, редактирате, изтривате или запазвате диапазони.",
         "profile_summary_header": "Резюме на профила",
-        "recent_cycles_header": "Последни цикли"
+        "recent_cycles_header": "Последни цикли",
+        "no_power_preview": "*Няма налични данни за мощността за преглед.*"
       }
     },
     "interactive_editor_action": {

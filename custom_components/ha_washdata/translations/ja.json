@@ -666,7 +666,8 @@
         "current_ranges_header": "電流範囲",
         "assign_phases_help": "範囲を追加、編集、削除、または保存するには、以下のアクションを使用します。",
         "profile_summary_header": "プロフィールの概要",
-        "recent_cycles_header": "最近のサイクル"
+        "recent_cycles_header": "最近のサイクル",
+        "no_power_preview": "*プレビューに使用できる電力データはありません。*"
       }
     },
     "interactive_editor_action": {

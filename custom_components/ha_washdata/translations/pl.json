@@ -666,7 +666,8 @@
         "current_ranges_header": "Aktualne zakresy",
         "assign_phases_help": "Aby dodawać, edytować, usuwać lub zapisywać zakresy, wykonaj poniższe czynności.",
         "profile_summary_header": "Podsumowanie profilu",
-        "recent_cycles_header": "Ostatnie cykle"
+        "recent_cycles_header": "Ostatnie cykle",
+        "no_power_preview": "*Brak danych dotyczących mocy dostępnych do podglądu.*"
       }
     },
     "interactive_editor_action": {

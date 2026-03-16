@@ -666,7 +666,8 @@
         "current_ranges_header": "Gama aktuale",
         "assign_phases_help": "Përdorni veprimet e mëposhtme për të shtuar, modifikuar, fshirë ose ruajtur vargjet.",
         "profile_summary_header": "Përmbledhje e profilit",
-        "recent_cycles_header": "Ciklet e fundit"
+        "recent_cycles_header": "Ciklet e fundit",
+        "no_power_preview": "*Nuk ka të dhëna për energjinë e disponueshme për shikim paraprak.*"
       }
     },
     "interactive_editor_action": {

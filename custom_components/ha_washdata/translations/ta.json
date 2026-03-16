@@ -666,7 +666,8 @@
         "current_ranges_header": "தற்போதைய வரம்புகள்",
         "assign_phases_help": "வரம்புகளைச் சேர்க்க, திருத்த, நீக்க அல்லது சேமிக்க கீழே உள்ள செயல்களைப் பயன்படுத்தவும்.",
         "profile_summary_header": "சுயவிவர சுருக்கம்",
-        "recent_cycles_header": "சமீபத்திய சுழற்சிகள்"
+        "recent_cycles_header": "சமீபத்திய சுழற்சிகள்",
+        "no_power_preview": "*முன்பார்வைக்கு ஆற்றல் தரவு எதுவும் இல்லை.*"
       }
     },
     "interactive_editor_action": {

@@ -666,7 +666,8 @@
         "current_ranges_header": "Raonta reatha",
         "assign_phases_help": "Úsáid na gníomhartha thíos chun raonta a chur leis, a chur in eagar, a scriosadh nó a shábháil.",
         "profile_summary_header": "Achoimre Próifíl",
-        "recent_cycles_header": "Timthriallta le déanaí"
+        "recent_cycles_header": "Timthriallta le déanaí",
+        "no_power_preview": "* Níl aon sonraí cumhachta ar fáil le haghaidh réamhamharc.*"
       }
     },
     "interactive_editor_action": {

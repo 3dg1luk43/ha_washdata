@@ -666,7 +666,8 @@
         "current_ranges_header": "موجودہ حدود",
         "assign_phases_help": "رینجز کو شامل کرنے، ترمیم کرنے، حذف کرنے یا محفوظ کرنے کے لیے نیچے دی گئی کارروائیوں کا استعمال کریں۔",
         "profile_summary_header": "پروفائل کا خلاصہ",
-        "recent_cycles_header": "حالیہ چکر"
+        "recent_cycles_header": "حالیہ چکر",
+        "no_power_preview": "*پیش نظارہ کے لیے کوئی پاور ڈیٹا دستیاب نہیں ہے۔*"
       }
     },
     "interactive_editor_action": {

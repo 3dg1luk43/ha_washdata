@@ -666,7 +666,8 @@
         "current_ranges_header": "वर्तमान श्रेणियाँ",
         "assign_phases_help": "श्रेणियाँ जोड़ने, संपादित करने, हटाने या सहेजने के लिए नीचे दी गई क्रियाओं का उपयोग करें।",
         "profile_summary_header": "प्रोफ़ाइल सारांश",
-        "recent_cycles_header": "हाल के चक्र"
+        "recent_cycles_header": "हाल के चक्र",
+        "no_power_preview": "*पूर्वावलोकन के लिए कोई पावर डेटा उपलब्ध नहीं है।*"
       }
     },
     "interactive_editor_action": {

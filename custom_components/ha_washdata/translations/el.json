@@ -666,7 +666,8 @@
         "current_ranges_header": "Τρέχοντα εύρη",
         "assign_phases_help": "Χρησιμοποιήστε τις παρακάτω ενέργειες για να προσθέσετε, να επεξεργαστείτε, να διαγράψετε ή να αποθηκεύσετε εύρη.",
         "profile_summary_header": "Περίληψη προφίλ",
-        "recent_cycles_header": "Πρόσφατοι κύκλοι"
+        "recent_cycles_header": "Πρόσφατοι κύκλοι",
+        "no_power_preview": "*Δεν υπάρχουν διαθέσιμα δεδομένα ενέργειας για προεπισκόπηση.*"
       }
     },
     "interactive_editor_action": {

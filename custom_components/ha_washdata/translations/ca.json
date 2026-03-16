@@ -666,7 +666,8 @@
         "current_ranges_header": "Intervals actuals",
         "assign_phases_help": "Feu servir les accions següents per afegir, editar, suprimir o desar intervals.",
         "profile_summary_header": "Resum del perfil",
-        "recent_cycles_header": "Cicles recents"
+        "recent_cycles_header": "Cicles recents",
+        "no_power_preview": "*No hi ha dades de potència disponibles per a la vista prèvia.*"
       }
     },
     "interactive_editor_action": {

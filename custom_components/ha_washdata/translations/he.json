@@ -666,7 +666,8 @@
         "current_ranges_header": "טווחים נוכחיים",
         "assign_phases_help": "השתמש בפעולות למטה כדי להוסיף, לערוך, למחוק או לשמור טווחים.",
         "profile_summary_header": "סיכום פרופיל",
-        "recent_cycles_header": "מחזורים אחרונים"
+        "recent_cycles_header": "מחזורים אחרונים",
+        "no_power_preview": "*אין נתוני חשמל זמינים לתצוגה מקדימה.*"
       }
     },
     "interactive_editor_action": {

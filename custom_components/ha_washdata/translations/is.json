@@ -666,7 +666,8 @@
         "current_ranges_header": "Núverandi svið",
         "assign_phases_help": "Notaðu aðgerðir hér að neðan til að bæta við, breyta, eyða eða vista svið.",
         "profile_summary_header": "Samantekt prófíls",
-        "recent_cycles_header": "Nýlegar lotur"
+        "recent_cycles_header": "Nýlegar lotur",
+        "no_power_preview": "*Engin orkugögn tiltæk til forskoðunar.*"
       }
     },
     "interactive_editor_action": {

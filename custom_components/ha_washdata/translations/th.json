@@ -666,7 +666,8 @@
         "current_ranges_header": "ช่วงปัจจุบัน",
         "assign_phases_help": "ใช้การดำเนินการด้านล่างเพื่อเพิ่ม แก้ไข ลบ หรือบันทึกช่วง",
         "profile_summary_header": "สรุปโปรไฟล์",
-        "recent_cycles_header": "รอบล่าสุด"
+        "recent_cycles_header": "รอบล่าสุด",
+        "no_power_preview": "*ไม่มีข้อมูลพลังงานสำหรับการดูตัวอย่าง*"
       }
     },
     "interactive_editor_action": {

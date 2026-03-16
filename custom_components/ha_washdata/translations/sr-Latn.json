@@ -666,7 +666,8 @@
         "current_ranges_header": "Тренутни распони",
         "assign_phases_help": "Користите радње у наставку да бисте додали, изменили, избрисали или сачували опсеге.",
         "profile_summary_header": "Профил Резиме",
-        "recent_cycles_header": "Недавни циклуси"
+        "recent_cycles_header": "Недавни циклуси",
+        "no_power_preview": "* Нема доступних података о снази за преглед.*"
       }
     },
     "interactive_editor_action": {

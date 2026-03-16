@@ -666,7 +666,8 @@
         "current_ranges_header": "phạm vi hiện tại",
         "assign_phases_help": "Sử dụng các thao tác bên dưới để thêm, chỉnh sửa, xóa hoặc lưu phạm vi.",
         "profile_summary_header": "Tóm tắt hồ sơ",
-        "recent_cycles_header": "Chu kỳ gần đây"
+        "recent_cycles_header": "Chu kỳ gần đây",
+        "no_power_preview": "*Không có dữ liệu nguồn để xem trước.*"
       }
     },
     "interactive_editor_action": {

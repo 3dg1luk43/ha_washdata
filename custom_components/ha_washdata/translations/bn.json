@@ -666,7 +666,8 @@
         "current_ranges_header": "বর্তমান ব্যাপ্তি",
         "assign_phases_help": "ব্যাপ্তি যোগ করতে, সম্পাদনা করতে, মুছতে বা সংরক্ষণ করতে নিচের ক্রিয়াগুলি ব্যবহার করুন৷",
         "profile_summary_header": "প্রোফাইল সারাংশ",
-        "recent_cycles_header": "সাম্প্রতিক চক্র"
+        "recent_cycles_header": "সাম্প্রতিক চক্র",
+        "no_power_preview": "*প্রিভিউয়ের জন্য কোনো পাওয়ার ডেটা উপলব্ধ নেই।*"
       }
     },
     "interactive_editor_action": {

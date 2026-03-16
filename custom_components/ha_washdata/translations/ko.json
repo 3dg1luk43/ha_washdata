@@ -666,7 +666,8 @@
         "current_ranges_header": "현재 범위",
         "assign_phases_help": "아래 작업을 사용하여 범위를 추가, 편집, 삭제 또는 저장하세요.",
         "profile_summary_header": "프로필 요약",
-        "recent_cycles_header": "최근 주기"
+        "recent_cycles_header": "최근 주기",
+        "no_power_preview": "*미리보기에 사용할 수 있는 전력 데이터가 없습니다.*"
       }
     },
     "interactive_editor_action": {

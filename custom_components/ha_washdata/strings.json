@@ -654,6 +654,7 @@
         "split_preview_confirm_fmt": "Click Confirm to split this cycle into {count} separate cycles.",
         "merge_preview_title": "Merge Preview",
         "merge_preview_joining_fmt": "Joining {count} cycles. Gaps will be filled with 0W readings.",
+        "no_power_preview": "*No power data available for preview.*",
         "profile_comparison": "Profile Comparison",
         "actual_cycle_label": "This cycle (actual)",
         "storage_usage_header": "Storage Usage",

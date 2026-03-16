@@ -666,7 +666,8 @@
         "current_ranges_header": "Huidige bereiken",
         "assign_phases_help": "Gebruik onderstaande acties om bereiken toe te voegen, te bewerken, te verwijderen of op te slaan.",
         "profile_summary_header": "Profielsamenvatting",
-        "recent_cycles_header": "Recente cycli"
+        "recent_cycles_header": "Recente cycli",
+        "no_power_preview": "*Geen vermogensgegevens beschikbaar voor preview.*"
       }
     },
     "interactive_editor_action": {
