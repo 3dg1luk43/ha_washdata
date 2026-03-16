@@ -1,0 +1,997 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "清洗資料設定",
+        "description": "配置您的洗衣機或其他設備。\n\n需要功率感測器。\n\n**接下來，系統會詢問您是否要建立您的第一個個人資料。 **",
+        "data": {
+          "name": "設備名稱",
+          "device_type": "設備類型",
+          "power_sensor": "功率感測器",
+          "min_power": "最小功率閾值（W）"
+        },
+        "data_description": {
+          "name": "該設備的友善名稱（例如“洗衣機”、“洗碗機”）。",
+          "device_type": "這是什麼類型的設備？幫助定制檢測和標記。",
+          "power_sensor": "報告智慧插頭即時功耗（以瓦為單位）的感測器實體。",
+          "min_power": "功率讀數高於此閾值（以瓦為單位）表示設備正在運作。大多數設備從 2W 開始。"
+        }
+      },
+      "first_profile": {
+        "title": "建立第一個設定檔",
+        "description": "**週期**是您的設備的完整運作（例如，一堆衣物）。 **設定檔**將這些週期分組（例如「棉質」、「快洗」）。現在建立設定檔可以幫助整合立即估計持續時間。\n\n如果未自動偵測到此設定文件，您可以在裝置控制項中手動選擇它。\n\n**將「設定檔名稱」留空以跳過此步驟。 **",
+        "data": {
+          "profile_name": "設定檔名稱（可選）",
+          "manual_duration": "預計持續時間（分鐘）"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "連線失敗",
+      "invalid_auth": "驗證無效",
+      "unknown": "意外錯誤"
+    },
+    "abort": {
+      "already_configured": "設備已配置"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "menu_options": {
+          "learning_feedbacks": "查看學習回饋",
+          "settings": "設定",
+          "notifications": "通知",
+          "manage_cycles": "管理週期",
+          "manage_profiles": "管理個人資料",
+          "manage_phase_catalog": "管理階段目錄",
+          "record_cycle": "記錄週期（手動）",
+          "diagnostics": "診斷與維護"
+        }
+      },
+      "apply_suggestions": {
+        "title": "複製建議值",
+        "description": "這會將目前建議值複製到您已儲存的設定中。這是一次性操作，不會啟用自動覆蓋。\n\n建議複製的值：\n{suggested}",
+        "data": {
+          "confirm": "確認複製操作"
+        }
+      },
+      "settings": {
+        "title": "設定",
+        "description": "調整檢測閾值、學習和高階行為。預設值適用於大多數設定。",
+        "data": {
+          "apply_suggestions": "應用建議值",
+          "device_type": "設備類型",
+          "power_sensor": "功率感測器實體",
+          "min_power": "最小功率（瓦）",
+          "off_delay": "週期結束延遲（秒）",
+          "notify_service": "通知服務（例如notify.mobile_app）",
+          "notify_actions": "通知操作",
+          "notify_people": "延遲送貨，直到這些人回家",
+          "notify_only_when_home": "延遲通知，直到選定的人在家",
+          "notify_fire_events": "消防自動化事件",
+          "notify_events": "要通知的事件",
+          "notify_before_end_minutes": "預完成通知（結束前幾分鐘）",
+          "notify_title": "通知標題",
+          "notify_icon": "通知圖示",
+          "notify_start_message": "啟動訊息格式",
+          "notify_finish_message": "完成訊息格式",
+          "notify_pre_complete_message": "預完成訊息格式",
+          "show_advanced": "編輯進階設定（下一步）"
+        },
+        "data_description": {
+          "apply_suggestions": "勾選此方塊可將學習演算法建議的值複製到表單中。保存前檢查。\n\n建議（來自學習）：\n- 最小功率：{suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout：{suggested_no_update_active_timeout} s\n- profile_match_interval：{suggested_profile_match_interval}秒\n- 自動標籤信賴度：{suggested_auto_label_confidence}\n- 持續時間容差：{suggested_duration_tolerance}\n- profile_duration_tolerance：{suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio：{suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio：{suggested_profile_match_max_duration_ratio}\n- start_threshold_w：{suggested_start_threshold_w} W\n- stop_threshold_w：{suggested_stop_threshold_w} W\n- end_energy_threshold：{suggested_end_energy_threshold} 瓦時\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "device_type": "選擇設備類型（洗衣機、烘乾機、洗碗機、咖啡機、電動車）。此標籤隨每個週期一起存儲，以便更好地組織。",
+          "power_sensor": "感測器實體報告即時功率（以瓦為單位）。您可以隨時更改此設置，而不會丟失歷史數據 - 如果您更換智慧插頭，這很有用。",
+          "min_power": "功率讀數高於此閾值（以瓦為單位）表示設備正在運作。大多數設備從 2W 開始。",
+          "off_delay": "平滑功率必須保持低於停止閾值的秒數才能標記完成。預設值：120 秒。",
+          "notify_service": "Home Assistant 通知要使用的服務（可選）。",
+          "notify_actions": "用於執行通知的選用 Home Assistant 操作序列（腳本、通知、TTS 等）。如果設置，操作將在回退通知服務之前運行。",
+          "notify_people": "用於存在門控的人員實體。啟用後，通知發送會延遲，直到至少有一名選定的人在家。",
+          "notify_only_when_home": "如果啟用，則延遲通知，直到至少一個選定的人在家。",
+          "notify_fire_events": "如果啟用，則觸發循環開始和結束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_end）以驅動自動化。",
+          "notify_events": "要發送通知的事件。",
+          "notify_before_end_minutes": "觸發通知的預計週期結束前的分鐘數。設定為 0 以停用。預設值：0。",
+          "notify_title": "通知的自訂標題。支援 {device} 佔位符。",
+          "notify_icon": "用於通知的圖示（例如 mdi：洗衣機）。留空以使用預設值。",
+          "notify_start_message": "循環開始時發送的訊息。支援 {device} 佔位符。",
+          "notify_finish_message": "循環結束時發送的訊息。支援 {device}、{duration}、{program} 佔位符。",
+          "notify_pre_complete_message": "訊息在完成之前發送。支援 {device}、{minutes} 佔位符。"
+        }
+      },
+      "notifications": {
+        "title": "通知",
+        "description": "配置通知頻道、模板和可選的即時行動進度更新。",
+        "data": {
+          "notify_service": "通知服務（例如notify.mobile_app）",
+          "notify_actions": "通知操作",
+          "notify_people": "延遲送貨，直到這些人回家",
+          "notify_only_when_home": "延遲通知，直到選定的人在家",
+          "notify_fire_events": "消防自動化事件",
+          "notify_events": "要通知的事件",
+          "notify_before_end_minutes": "預完成通知（結束前幾分鐘）",
+          "notify_live_interval_seconds": "即時更新間隔（秒）",
+          "notify_live_overrun_percent": "即時更新超限容限 (%)",
+          "notify_title": "通知標題",
+          "notify_icon": "通知圖示",
+          "notify_start_message": "啟動訊息格式",
+          "notify_finish_message": "完成訊息格式",
+          "notify_pre_complete_message": "預完成訊息格式"
+        },
+        "data_description": {
+          "notify_service": "Home Assistant 通知要使用的服務（可選）。",
+          "notify_actions": "用於執行通知的選用 Home Assistant 操作序列（腳本、通知、TTS 等）。如果設置，操作將在回退通知服務之前運行。",
+          "notify_people": "用於存在門控的人員實體。啟用後，通知發送會延遲，直到至少有一名選定的人在家。",
+          "notify_only_when_home": "如果啟用，則延遲通知，直到至少一個選定的人在家。",
+          "notify_fire_events": "如果啟用，則觸發循環開始和結束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_end）以驅動自動化。",
+          "notify_events": "要發送通知的事件。",
+          "notify_before_end_minutes": "觸發通知的預計週期結束前的分鐘數。設定為 0 以停用。預設值：0。",
+          "notify_live_interval_seconds": "運行時發送進度更新的頻率。值越低，回應速度越快，但會消耗更多通知。強制執行至少 30 秒 - 低於 30 秒的值將自動四捨五入為 30 秒。",
+          "notify_live_overrun_percent": "安全裕度高於長/超出週期的估計更新計數（例如 20% 允許 1.2 倍估計更新）。",
+          "notify_title": "通知的自訂標題。支援 {device} 佔位符。",
+          "notify_icon": "用於通知的圖示（例如 mdi：洗衣機）。留空以使用預設值。",
+          "notify_start_message": "循環開始時發送的訊息。支援 {device} 佔位符。",
+          "notify_finish_message": "循環結束時發送的訊息。支援 {device}、{duration}、{program} 佔位符。",
+          "notify_pre_complete_message": "訊息在完成之前發送。支援 {device}、{minutes} 佔位符。"
+        }
+      },
+      "advanced_settings": {
+        "title": "進階設定",
+        "description": "調整檢測閾值、學習和高階行為。預設值適用於大多數設定。",
+        "data": {
+          "apply_suggestions": "應用建議值",
+          "start_threshold_w": "啟動閾值（W）",
+          "stop_threshold_w": "停止閾值（W）",
+          "min_off_gap": "週期之間的最小間隙（秒）",
+          "start_duration_threshold": "開始去抖持續時間（秒）",
+          "progress_reset_delay": "進度重置延遲（秒）",
+          "no_update_active_timeout": "無更新超時（秒）",
+          "sampling_interval": "採樣間隔（秒）",
+          "auto_label_confidence": "自動標記置信度 (0-1)",
+          "learning_confidence": "回饋請求置信度 (0-1)",
+          "duration_tolerance": "持續時間容差（0-0.5）",
+          "profile_match_interval": "設定檔匹配間隔（秒）",
+          "profile_match_min_duration_ratio": "設定檔匹配最短持續時間比率（0.1-1.0）",
+          "profile_match_max_duration_ratio": "設定檔匹配最大持續時間比率 (1.0-3.0)",
+          "smoothing_window": "平滑視窗（樣本）",
+          "profile_match_threshold": "設定檔匹配閾值",
+          "profile_unmatch_threshold": "設定檔不匹配閾值",
+          "profile_duration_tolerance": "設定檔匹配持續時間容差 (0-0.5)",
+          "interrupted_min_seconds": "中斷：最短運轉時間（秒）",
+          "abrupt_drop_watts": "中斷：絕對突變 (W)",
+          "abrupt_drop_ratio": "中斷：突然下降比率（0-1）",
+          "abrupt_high_load_factor": "中斷：高負載率",
+          "max_past_cycles": "保留：最大保存週期",
+          "max_full_traces_per_profile": "保留：每個設定檔的最大完整跡線",
+          "max_full_traces_unlabeled": "保留：最大完整跡線未標記",
+          "watchdog_interval": "看門狗間隔（秒）",
+          "completion_min_seconds": "完成最短運轉時間（秒）",
+          "notify_before_end_minutes": "預完成通知（結束前幾分鐘）",
+          "auto_tune_noise_events_threshold": "自動調諧：噪音事件閾值",
+          "running_dead_zone": "運行死區（秒）",
+          "end_repeat_count": "結束重複計數",
+          "start_energy_threshold": "啟動能量門（Wh）",
+          "end_energy_threshold": "最終能量門（Wh）",
+          "auto_maintenance": "啟用自動維護",
+          "expose_debug_entities": "公開除錯實體",
+          "save_debug_traces": "保存調試追蹤",
+          "anti_wrinkle_enabled": "抗皺護罩（僅限烘乾機）",
+          "anti_wrinkle_max_power": "抗皺最大功率(W)",
+          "anti_wrinkle_max_duration": "抗皺最大持續時間（秒）",
+          "anti_wrinkle_exit_power": "抗皺退出功率（W）",
+          "dtw_bandwidth": "DTW 頻寬",
+          "external_end_trigger_enabled": "啟用外部循環結束觸發器",
+          "external_end_trigger": "外部循環結束感測器",
+          "external_end_trigger_inverted": "反轉觸發邏輯（觸發關閉）"
+        },
+        "data_description": {
+          "apply_suggestions": "勾選此方塊可開啟學習演算法建議值的檢查步驟。沒有任何內容會自動儲存。\n\n建議（來自學習）：\n- 最小功率：{suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout：{suggested_no_update_active_timeout} s\n- profile_match_interval：{suggested_profile_match_interval}秒\n- 自動標籤信賴度：{suggested_auto_label_confidence}\n- 持續時間容差：{suggested_duration_tolerance}\n- profile_duration_tolerance：{suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio：{suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio：{suggested_profile_match_max_duration_ratio}\n- start_threshold_w：{suggested_start_threshold_w} W\n- stop_threshold_w：{suggested_stop_threshold_w} W\n- end_energy_threshold：{suggested_end_energy_threshold} 瓦時\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "start_threshold_w": "功率必須上升到該閾值以上才能開始一個週期。設定高於待機功率。預設值：min_power + 1 W。",
+          "stop_threshold_w": "功率必須低於該閾值才能結束一個週期。設定略高於零以避免噪音觸發錯誤結束。預設值：0.6 * min_power。",
+          "min_off_gap": "如果一個週期在前一個週期結束後的這麼多秒內開始，它們將合併為一個週期。",
+          "start_duration_threshold": "忽略短於此持續時間（秒）的短暫功率峰值。在實際週期開始之前過濾掉啟動尖峰（例如 60W 持續 2 秒）。預設值：5 秒。",
+          "progress_reset_delay": "一個週期完成 (100%) 後，等待這麼多秒的空閒時間，然後再將進度重設為 0%。預設值：300 秒。",
+          "no_update_active_timeout": "對於更改發布感應器：只有在這麼多秒內沒有更新到達時才強制結束 ACTIVE 週期。低功耗完成仍然使用關閉延遲。",
+          "sampling_interval": "最小採樣間隔（以秒為單位）。超過此速率的更新將被忽略。預設值：2.0 秒。",
+          "auto_label_confidence": "完成時自動標記等於或高於此置信度的迴圈 (0.0–1.0)。",
+          "learning_confidence": "透過事件請求使用者驗證的最低置信度 (0.0–1.0)。",
+          "duration_tolerance": "運行期間剩餘時間估計的容差（0.0–0.5 對應於 0–50%）。",
+          "profile_match_interval": "在一個週期內嘗試設定檔匹配的頻率（以秒為單位）。較低的值可提供更快的偵測速度，但會使用更多的 CPU。預設值：300 秒（5 分鐘）。",
+          "profile_match_min_duration_ratio": "設定檔匹配的最小持續時間比率。運行週期必須至少是設定檔持續時間的這一部分才能匹配。較低 = 較早配對。預設值：0.50 (50%)。",
+          "profile_match_max_duration_ratio": "設定檔匹配的最大持續時間比。運行週期不得超過設定檔持續時間的倍數。更高=更寬鬆。預設值：1.50 (150%)。",
+          "smoothing_window": "用於移動平均平滑的最近功率讀數的數量。",
+          "profile_match_threshold": "將設定檔視為匹配所需的最低 DTW 相似度分數 (0.0–1.0)。越高=匹配越嚴格，誤報越少。預設值：0.4。",
+          "profile_unmatch_threshold": "DTW 相似性得分 (0.0–1.0)，低於該得分的先前匹配的配置將被拒絕。應低於匹配閾值以防止閃爍。預設值：0.35。",
+          "profile_duration_tolerance": "設定檔匹配所使用的總持續時間變異數的容差 (0.0–0.5)。預設行為：±25%。",
+          "interrupted_min_seconds": "比這短的運行可能被歸類為「中斷」。",
+          "abrupt_drop_watts": "絕對功率下降 (W) 被視為陡峭懸崖。",
+          "abrupt_drop_ratio": "相對下降率 (0–1)。例：0.6 表示 60% 的下降是突然的。",
+          "abrupt_high_load_factor": "高於基線的因素在突然下降之前被視為“高負載”（與突然檢測一起使用）。",
+          "max_past_cycles": "要保留的周期總數（最舊的已刪除）。預設值：200。",
+          "max_full_traces_per_profile": "與每個設定檔的全功率追蹤保持一致的最近標記週期數。較舊的痕跡透過信封進行總結。預設值：20。",
+          "max_full_traces_unlabeled": "最近未標記的周期數與全功率追蹤保持一致以支援自動標記。預設值：20。",
+          "watchdog_interval": "運轉時看門狗檢查之間的秒數。預設值：5 秒。警告：確保該值高於感測器的更新間隔，以避免錯誤停止（例如，如果感測器每 60 秒更新一次，則使用 65 秒以上）。",
+          "completion_min_seconds": "比這短的周期即使自然結束也會被標記為「中斷」。預設值：600 秒。",
+          "notify_before_end_minutes": "觸發通知的預計週期結束前的分鐘數。設定為 0 以停用。預設值：0。",
+          "auto_tune_noise_events_threshold": "自動調整 min_power 所需的 24 小時內短/低功耗「雜訊」週期數。預設值：3。",
+          "running_dead_zone": "週期開始後，忽略如此多秒的功率驟降，以防止初始旋轉階段期間的錯誤結束偵測。設定為 0 以停用。預設值：0 秒。",
+          "end_repeat_count": "在結束週期之前必須連續滿足結束條件（功率低於 off_delay 閾值）的次數。較高的值可防止暫停期間發生錯誤結束。預設值：1。",
+          "start_energy_threshold": "循環必須在啟動階段累積至少這麼多的能量 (Wh) 才能得到確認。預設值：0.005 瓦時。",
+          "end_energy_threshold": "只有當最後一個關閉延遲視窗中的能量低於該值 (Wh) 時，循環才會結束。如果功率波動接近零，可防止錯誤結束。預設值：0.05 瓦時。",
+          "auto_maintenance": "啟用自動維護（修復樣本、合併片段）。",
+          "expose_debug_entities": "顯示高級感測器（置信度、相位、模糊度）以進行調試。",
+          "save_debug_traces": "在歷史記錄中儲存詳細的排名和電量追蹤資料（增加儲存使用量）。",
+          "anti_wrinkle_enabled": "循環結束後忽略短暫的低功率滾筒旋轉，以防止幽靈循環（僅限烘乾機/洗衣烘乾機）。",
+          "anti_wrinkle_max_power": "等於或低於該功率的爆發被視為抗皺旋轉而不是新的循環。僅在啟用抗皺護罩時適用。",
+          "anti_wrinkle_max_duration": "視為抗皺旋轉的最大爆破長度。僅在啟用抗皺護罩時適用。",
+          "anti_wrinkle_exit_power": "如果功率低於此水平，請立即退出抗皺（真正關閉）。僅在啟用抗皺護罩時適用。",
+          "dtw_bandwidth": "最大允許時間扭曲（拉伸）與週期持續時間的比率。较高的值允许匹配高度可变的周期，但会增加 CPU 成本。預設值：0.20 (20%)。",
+          "external_end_trigger_enabled": "啟用對外部二進位感測器的監控以觸發循環完成。",
+          "external_end_trigger": "選擇二進制感測器實體。當此感測器觸發時，當前週期將以「已完成」狀態結束。",
+          "external_end_trigger_inverted": "預設情況下，當感測器開啟時觸發器會觸發。選取此方塊以在感測器關閉時觸發。"
+        }
+      },
+      "diagnostics": {
+        "title": "診斷與維護",
+        "description": "運行維護操作，例如合併碎片週期或遷移儲存的資料。\n\n**儲存使用情況**\n\n- 檔案大小：{file_size_kb} KB\n- 週期：{cycle_count}\n- 個人資料：{profile_count}\n- 調試追蹤：{debug_count}"
+      },
+      "clear_debug_data": {
+        "title": "清除調試數據",
+        "description": "您確定要刪除所有儲存的調試追蹤嗎？這將釋放空間，但會刪除過去週期中的詳細排名資訊。"
+      },
+      "manage_cycles": {
+        "title": "管理週期",
+        "description": "最近的周期：\n{recent_cycles}",
+        "data": {
+          "action": "行動"
+        }
+      },
+      "manage_cycles_empty": {
+        "title": "管理週期",
+        "description": "尚未記錄任何週期。",
+        "data": {
+          "action": "行動"
+        }
+      },
+      "manage_profiles": {
+        "title": "管理個人資料",
+        "description": "簡介摘要：\n{profile_summary}",
+        "data": {
+          "action": "行動"
+        }
+      },
+      "manage_profiles_empty": {
+        "title": "管理個人資料",
+        "description": "尚未建立設定檔。",
+        "data": {
+          "action": "行動"
+        }
+      },
+      "manage_phase_catalog": {
+        "title": "管理階段目錄",
+        "description": "階段目錄（該設備的預設值+自訂階段）：\n{phase_summary}",
+        "data": {
+          "action": "行動"
+        }
+      },
+      "phase_catalog_create": {
+        "title": "建立自訂階段",
+        "description": "建立自訂階段名稱和描述，然後選擇其適用的裝置類型。",
+        "data": {
+          "target_device_type": "目標設備類型",
+          "phase_name": "階段名稱",
+          "phase_description": "階段描述"
+        }
+      },
+      "phase_catalog_edit_select": {
+        "title": "編輯自訂階段",
+        "description": "選擇要編輯的自訂階段。",
+        "data": {
+          "phase_name": "客製化階段"
+        }
+      },
+      "phase_catalog_edit": {
+        "title": "編輯自訂階段",
+        "description": "編輯階段：{phase_name}",
+        "data": {
+          "phase_name": "階段名稱",
+          "phase_description": "階段描述"
+        }
+      },
+      "phase_catalog_delete": {
+        "title": "刪除自訂階段",
+        "description": "選擇要刪除的自訂階段。使用此階段的任何指定範圍都將被刪除。",
+        "data": {
+          "phase_name": "客製化階段"
+        }
+      },
+      "assign_profile_phases": {
+        "title": "分配相位範圍",
+        "description": "設定檔的階段預覽：**{profile_name}**\n\n{timeline_svg}\n\n**目前範圍：**\n{current_ranges}\n\n使用以下操作來新增、編輯、刪除或儲存範圍。",
+        "data": {
+          "action": "行動"
+        }
+      },
+      "assign_profile_phases_add": {
+        "title": "增加相位範圍",
+        "description": "在目前草稿中新增一個階段範圍。",
+        "data": {
+          "phase_name": "階段",
+          "start_min": "開始時間",
+          "end_min": "結束分鐘"
+        }
+      },
+      "assign_profile_phases_edit_select": {
+        "title": "編輯相位範圍",
+        "description": "選擇要編輯的範圍。",
+        "data": {
+          "range_index": "相位範圍"
+        }
+      },
+      "assign_profile_phases_edit": {
+        "title": "編輯相位範圍",
+        "description": "更新選定的相位範圍。",
+        "data": {
+          "phase_name": "階段",
+          "start_min": "開始時間",
+          "end_min": "結束分鐘"
+        }
+      },
+      "assign_profile_phases_delete": {
+        "title": "刪除相位範圍",
+        "description": "選擇要從草稿中刪除的範圍。",
+        "data": {
+          "range_index": "相位範圍"
+        }
+      },
+      "assign_profile_phases_auto_detect": {
+        "title": "自動檢測階段",
+        "description": "個人資料：***{profile_name}**\n\n{timeline_svg}\n\n**自動偵測到 {detected_count} 個階段。 ** 選擇下面的操作。",
+        "data": {
+          "action": "行動"
+        }
+      },
+      "assign_profile_phases_auto_detect_name": {
+        "title": "命名檢測到的階段",
+        "description": "個人資料：***{profile_name}**\n\n**偵測到{detected_count}相：**\n{ranges_summary}\n\n為每個階段指定一個名稱。"
+      },
+      "assign_profile_phases_select": {
+        "title": "分配相位範圍",
+        "description": "選擇一個設定檔來配置相位範圍。",
+        "data": {
+          "profile": "輪廓"
+        }
+      },
+      "profile_stats": {
+        "title": "個人資料統計",
+        "description": "{stats_table}"
+      },
+      "create_profile": {
+        "title": "建立新的個人資料",
+        "description": "手動或從過去的周期建立新的設定檔。\n\n設定檔名稱範例：“Delicates”、“Heavy Duty”、“Quick Wash”",
+        "data": {
+          "profile_name": "個人資料名稱",
+          "reference_cycle": "參考週期（可選）",
+          "manual_duration": "手動持續時間（分鐘）"
+        }
+      },
+      "edit_profile": {
+        "title": "編輯個人資料",
+        "description": "選擇要重新命名的設定文件",
+        "data": {
+          "profile": "輪廓"
+        }
+      },
+      "rename_profile": {
+        "title": "編輯個人資料詳細信息",
+        "description": "目前個人資料：{current_name}",
+        "data": {
+          "new_name": "個人資料名稱",
+          "manual_duration": "手動持續時間（分鐘）"
+        }
+      },
+      "delete_profile_select": {
+        "title": "刪除個人資料",
+        "description": "選擇要刪除的設定文件",
+        "data": {
+          "profile": "輪廓"
+        }
+      },
+      "delete_profile_confirm": {
+        "title": "確認刪除個人資料",
+        "description": "⚠️ 這將永久刪除個人資料：{profile_name}",
+        "data": {
+          "unlabel_cycles": "使用此設定檔從循環中刪除標籤"
+        }
+      },
+      "auto_label_cycles": {
+        "title": "自動標記舊自行車",
+        "description": "{info}",
+        "data": {
+          "confidence_threshold": "最低信賴度 (0.50-0.95)"
+        }
+      },
+      "select_cycle_to_label": {
+        "title": "選擇循環標籤",
+        "description": "✓ = 已完成，⚠ = 已恢復，✗ = 已中斷",
+        "data": {
+          "cycle_id": "循環"
+        }
+      },
+      "select_cycle_to_delete": {
+        "title": "刪除循環",
+        "description": "⚠️這將永久刪除所選週期",
+        "data": {
+          "cycle_id": "循環刪除"
+        }
+      },
+      "label_cycle": {
+        "title": "標籤週期",
+        "description": "{cycle_info}",
+        "data": {
+          "profile_name": "輪廓",
+          "new_profile_name": "新設定檔名稱（如果建立）"
+        }
+      },
+      "post_process": {
+        "title": "流程歷史記錄（合併/拆分）",
+        "description": "透過合併碎片運行並在時間視窗內分割錯誤合併的周期來清理週期歷史記錄。輸入要回顧的小時數。\n{info}",
+        "data": {
+          "time_range": "回顧視窗（小時）",
+          "gap_seconds": "合併/拆分間隙（秒）"
+        },
+        "data_description": {
+          "time_range": "掃描要合併的碎片週期的小時數。使用999999處理所有歷史資料。\n{info}",
+          "gap_seconds": "決定拆分還是合併的閾值。比這更短的間隙將被合併。比這更長的間隙被分開。降低此值可強制對錯誤合併的循環進行拆分。"
+        }
+      },
+      "cleanup_profile": {
+        "title": "清理歷史記錄 - 選擇設定文件",
+        "description": "選擇要視覺化的設定檔。這將產生一個圖表，顯示該設定檔的所有過去週期，以幫助識別異常值。",
+        "data": {
+          "profile": "輪廓"
+        }
+      },
+      "cleanup_select": {
+        "title": "清理歷史記錄 - 圖表和刪除",
+        "description": "![圖表]({graph_url})\n\n**可視化{profile_name}**\n\n此圖將各個週期顯示為彩色線。識別異常值（遠離該組的線）並在下面的列表中匹配它們的顏色以將其刪除。\n\n**選擇要永久刪除的週期：**",
+        "data": {
+          "cycles_to_delete": "循環刪除（檢查匹配顏色）"
+        }
+      },
+      "interactive_editor": {
+        "title": "合併/拆分互動式編輯器",
+        "description": "選擇要對您的週期歷史記錄執行的手動操作。",
+        "data": {
+          "editor_action": "行動"
+        }
+      },
+      "editor_select": {
+        "title": "選擇週期",
+        "description": "選擇要處理的周期。\n\n{info_text}",
+        "data": {
+          "selected_cycles": "週期"
+        }
+      },
+      "editor_configure": {
+        "title": "配置和應用",
+        "description": "{preview_md}",
+        "data": {
+          "confirm_action": "行動",
+          "merged_profile": "產生的設定檔",
+          "new_profile_name": "新設定檔名稱",
+          "confirm_commit": "是的，我確認此操作",
+          "segment_0_profile": "第 1 段簡介",
+          "segment_1_profile": "2 段簡介",
+          "segment_2_profile": "第 3 段簡介",
+          "segment_3_profile": "第 4 段簡介",
+          "segment_4_profile": "5 段簡介",
+          "segment_5_profile": "6 段簡介",
+          "segment_6_profile": "7 段簡介",
+          "segment_7_profile": "8 段簡介",
+          "segment_8_profile": "9 段簡介",
+          "segment_9_profile": "10 段簡介"
+        }
+      },
+      "editor_split_params": {
+        "title": "分離配置",
+        "description": "調整分割此循環的靈敏度。任何超過此長度的空閒間隙都會導致分裂。",
+        "data": {
+          "min_gap_seconds": "分割間隙閾值（秒）"
+        }
+      },
+      "reprocess_history": {
+        "title": "維護：重新處理和優化數據",
+        "description": "對歷史資料進行深入清理：\n1. 調整零功率讀數（靜音）。\n2. 修復循環時間/持續時間。\n3. 重新計算所有統計模型（包絡線）。\n\n**執行此命令可以修復資料問題或應用新演算法。 **"
+      },
+      "wipe_history": {
+        "title": "擦除歷史記錄（僅測試）",
+        "description": "⚠️ 這將永久刪除該裝置的所有儲存週期和設定檔。這無法撤銷！"
+      },
+      "export_import": {
+        "title": "導出/導入 JSON",
+        "description": "複製/貼上該設備的周期、設定檔和設定。下面匯出或貼上 JSON 進行匯入。",
+        "data": {
+          "mode": "行動",
+          "json_payload": "完整設定 JSON"
+        },
+        "data_description": {
+          "mode": "選擇「匯出」以複製目前資料和設置，或選擇「匯入」以貼上從另一個 WashData 裝置匯出的資料。",
+          "json_payload": "對於匯出：複製此 JSON（包括週期、設定檔和所有微調設定）。對於導入：貼上從 WashData 匯出的 JSON。"
+        }
+      },
+      "record_cycle": {
+        "title": "記錄週期",
+        "description": "手動記錄一個週期以建立無幹擾的乾淨輪廓。\n\n狀態：***{status}**\n持續時間：{duration}秒\n樣本：{samples}",
+        "data": {
+          "action": "行動"
+        }
+      },
+      "record_process": {
+        "title": "流程記錄",
+        "description": "![圖表]({graph_url})\n\n**圖表顯示原始記錄。 **藍色 = 保留，紅色 = 建議的修剪。\n*圖表是靜態的，不會隨著表單變更而更新。 *\n\n錄音停止了。修剪與偵測到的取樣率 (~{sampling_rate}s) 對齊。\n\n原始持續時間：{duration} 秒\n樣本：{samples}",
+        "data": {
+          "head_trim": "修剪開始（秒）",
+          "tail_trim": "修剪結束（秒）",
+          "save_mode": "儲存目的地",
+          "profile_name": "個人資料名稱"
+        }
+      },
+      "learning_feedbacks": {
+        "title": "學習回饋",
+        "description": "選擇要處理的周期審核請求。",
+        "data": {
+          "selected_feedback": "選擇要審核的週期"
+        }
+      },
+      "learning_feedbacks_empty": {
+        "title": "學習回饋",
+        "description": "未找到待處理的回饋請求。"
+      },
+      "resolve_feedback": {
+        "title": "解決回饋",
+        "description": "{comparison_img}{candidates_table}\n**偵測到的設定檔**：{detected_profile} ({confidence_pct}%)\n**預計持續時間**：{est_duration_min} 分鐘\n**實際持續時間**：{act_duration_min} 分鐘\n\n__選擇以下操作：__",
+        "data": {
+          "action": "你想做什麼？",
+          "corrected_profile": "正確的程序（如果更正）",
+          "corrected_duration": "正確持續時間（以秒為單位）（如果進行更正）"
+        }
+      },
+      "apply_suggestions_confirm": {
+        "title": "查看建議的更改",
+        "description": "WashData 發現 {pending_count} 個要套用的建議值。\n\n審查變更：\n{changes}\n\n確認以下內容以在表單中暫存這些值。在您提交高級設定之前，它們不會保存。",
+        "data": {
+          "confirm_apply_suggestions": "在進階設定中暫存建議值"
+        }
+      }
+    },
+    "error": {
+      "import_failed": "導入失敗。請貼上有效的 WashData 匯出 JSON。",
+      "profile_exists": "同名的設定檔已存在",
+      "rename_failed": "無法重命名設定檔。設定檔可能不存在或新名稱已被使用。",
+      "assignment_failed": "無法將設定檔指派給循環",
+      "duplicate_phase": "具有此名稱的階段已存在。",
+      "phase_not_found": "未找到所選相。",
+      "invalid_phase_name": "階段名稱不能為空。",
+      "phase_name_too_long": "相名太長。",
+      "invalid_phase_range": "相位範圍無效。結束必須大於開始。",
+      "invalid_phase_timestamp": "時間戳無效。使用 YYYY-MM-DD HH:MM 或 HH:MM 格式。",
+      "overlapping_phase_ranges": "相位範圍重疊。調整範圍並重試。",
+      "incomplete_phase_row": "每個階段行必須包含一個階段以及所選模式的完整開始/結束值。",
+      "timestamp_mode_cycle_required": "使用時間戳模式時請選擇來源週期。",
+      "no_phase_ranges": "尚無可用於該操作的階段範圍。",
+      "feedback_notification_title": "WashData：驗證週期 ({device})",
+      "feedback_notification_message": "**设备**：{device}\n**程式**：{program}（{confidence}% 置信度）\n**時間**：{time}\n\nWashData 需要您的協助來驗證偵測到的此週期。\n\n請前往 **設定 > 裝置與服務 > WashData > 設定 > 學習回饋** 以確認或修正此結果。",
+      "suggestions_ready_notification_title": "WashData：建議設定已就緒 ({device})",
+      "suggestions_ready_notification_message": "**建議設定**感測器現在報告 **{count}** 可操作的建議。\n\n若要查看並套用它們：**設定 > 裝置和服務 > WashData > 配置 > 進階設定 > 套用建議值**。\n\n建議是可選的，並會在您儲存之前顯示以供審核。"
+    },
+    "abort": {
+      "no_cycles_found": "沒有找到循環",
+      "no_profiles_found": "未找到設定檔。首先建立一個設定檔。",
+      "no_profiles_for_matching": "沒有可用於匹配的設定檔。首先建立設定檔。",
+      "no_unlabeled_cycles": "所有周期均已標記",
+      "no_suggestions": "尚無可用的建議值。運行幾個週期並重試。",
+      "no_predictions": "沒有預測",
+      "no_custom_phases": "未找到自訂階段。",
+      "reprocess_success": "已成功重新處理 {count} 個週期。",
+      "debug_data_cleared": "已成功清除 {count} 個週期的偵錯資料。"
+    }
+  },
+  "selector": {
+    "notify_events_option": {
+      "options": {
+        "cycle_start": "循環開始",
+        "cycle_finish": "循環完成",
+        "cycle_live": "即時進展"
+      }
+    },
+    "common_text": {
+      "options": {
+        "unlabeled": "（未標記）",
+        "create_new_profile": "建立新的個人資料",
+        "remove_label": "移除標籤",
+        "no_reference_cycle": "（無參考週期）",
+        "all_device_types": "所有設備類型",
+        "current_suffix": "（當前的）",
+        "editor_select_info": "選擇 1 個循環進行拆分，或選擇 2 個以上循環進行合併。",
+        "no_cycles_recorded": "尚未記錄任何週期。",
+        "profile_summary_line": "- **{name}**：{count} 個週期，平均 {avg} 分鐘",
+        "no_profiles_created": "尚未建立設定檔。",
+        "phase_preview": "階段預覽",
+        "phase_preview_no_curve": "平均輪廓曲線尚不可用。為此設定檔運行/標記更多周期。",
+        "average_power_curve": "平均功率曲線",
+        "unit_min": "分分鐘",
+        "profile_option_fmt": "{name}（{count} 個週期，平均 ~{duration}m）",
+        "profile_option_short_fmt": "{name}（{count} 個週期，~{duration} 分鐘）",
+        "deleted_cycles_from_profile": "已從 {profile} 中刪除 {count} 個週期。",
+        "not_enough_data_graph": "數據不足，無法產生圖表。",
+        "no_profiles_found": "未找到設定檔。",
+        "cycle_info_fmt": "週期：{start}，{duration}米，電流：{label}",
+        "top_candidates_header": "### 最佳候選人",
+        "tbl_profile": "輪廓",
+        "tbl_confidence": "信心",
+        "tbl_correlation": "相關性",
+        "tbl_duration_match": "持續時間匹配",
+        "detected_profile": "偵測到的設定檔",
+        "estimated_duration": "預計持續時間",
+        "actual_duration": "實際持續時間",
+        "choose_action": "__選擇以下操作：__",
+        "tbl_count": "數數",
+        "tbl_avg": "平均",
+        "tbl_min": "最小",
+        "tbl_max": "最大限度",
+        "tbl_energy_avg": "能量（平均）",
+        "tbl_energy_total": "能量（總計）",
+        "tbl_consistency": "組成。",
+        "tbl_last_run": "最後一次運行",
+        "graph_legend_title": "圖例",
+        "graph_legend_body": "藍色帶代表觀察到的最小和最大功率消耗範圍。此線顯示平均功率曲線。",
+        "recording_preview": "錄音預覽",
+        "trim_start": "修剪開始",
+        "trim_end": "修剪末端",
+        "split_preview_title": "分割預覽",
+        "split_preview_found_fmt": "找到 {count} 個分段。",
+        "split_preview_confirm_fmt": "按一下「確認」將此週期拆分為 {count} 個單獨的周期。",
+        "merge_preview_title": "合併預覽",
+        "merge_preview_joining_fmt": "加入 {count} 個週期。間隙將以 0W 讀數填充。",
+        "profile_comparison": "簡介比較",
+        "actual_cycle_label": "本週期（實際）",
+        "storage_usage_header": "儲存使用情況",
+        "storage_file_size": "文件大小",
+        "storage_cycles": "週期",
+        "storage_profiles": "型材",
+        "storage_debug_traces": "偵錯追蹤",
+        "overview_suffix": "概述",
+        "phase_preview_for_profile": "設定檔的階段預覽",
+        "current_ranges_header": "電流範圍",
+        "assign_phases_help": "使用以下操作來新增、編輯、刪除或儲存範圍。",
+        "profile_summary_header": "簡介摘要",
+        "recent_cycles_header": "最近的週期"
+      }
+    },
+    "interactive_editor_action": {
+      "options": {
+        "split": "分割一個週期（查找間隙）",
+        "merge": "合併循環（連結片段）",
+        "delete": "刪除週期"
+      }
+    },
+    "diagnostics_action": {
+      "options": {
+        "reprocess_history": "維護：重新處理和優化數據",
+        "clear_debug_data": "清除調試資料（釋放空間）",
+        "wipe_history": "擦除該裝置的所有資料（不可逆）",
+        "export_import": "使用設定導出/匯入 JSON（複製/貼上）"
+      }
+    },
+    "export_import_mode": {
+      "options": {
+        "export": "匯出所有數據",
+        "import": "導入/合併數據"
+      }
+    },
+    "manage_cycles_action": {
+      "options": {
+        "auto_label_cycles": "自動標記舊自行車",
+        "select_cycle_to_label": "標籤特定週期",
+        "select_cycle_to_label_multi": "標記多個週期",
+        "select_cycle_to_delete": "刪除循環",
+        "interactive_editor": "合併/拆分互動式編輯器"
+      }
+    },
+    "manage_profiles_action": {
+      "options": {
+        "create_profile": "建立新的個人資料",
+        "edit_profile": "編輯/重新命名設定檔",
+        "delete_profile": "刪除個人資料",
+        "profile_stats": "個人資料統計",
+        "cleanup_profile": "清理歷史記錄 - 圖表和刪除",
+        "assign_phases": "分配相位範圍"
+      }
+    },
+    "manage_phase_catalog_action": {
+      "options": {
+        "create_custom_phase": "建立新階段",
+        "edit_custom_phase": "編輯階段",
+        "delete_custom_phase": "刪除階段"
+      }
+    },
+    "assign_profile_phases_action": {
+      "options": {
+        "add_range": "增加相位範圍",
+        "edit_range": "編輯相位範圍",
+        "delete_range": "刪除相位範圍",
+        "clear_ranges": "清除所有範圍",
+        "auto_detect_ranges": "自動檢測相位",
+        "save_ranges": "儲存並返回"
+      }
+    },
+    "record_cycle_action": {
+      "options": {
+        "refresh_status": "刷新狀態",
+        "stop_recording": "停止錄影（儲存並處理）",
+        "start_recording": "開始新錄音",
+        "process_recording": "處理最後的錄音（修剪和保存）",
+        "discard_recording": "放棄最後的錄音"
+      }
+    },
+    "record_process_save_mode": {
+      "options": {
+        "new_profile": "建立新的個人資料",
+        "existing_profile": "新增至現有設定檔",
+        "discard": "放棄錄音"
+      }
+    },
+    "resolve_feedback_action": {
+      "options": {
+        "confirm": "確認-檢測正確",
+        "correct": "正確 - 選擇項目/持續時間",
+        "ignore": "忽略 - 誤報/噪音循環",
+        "delete": "刪除 - 從歷史記錄中刪除"
+      }
+    },
+    "assign_profile_phases_auto_detect_action": {
+      "options": {
+        "name_phases": "命名和應用階段",
+        "cancel": "不做任何修改返回"
+      }
+    }
+  },
+  "services": {
+    "label_cycle": {
+      "name": "標籤週期",
+      "description": "將現有設定檔指派給過去的周期，或刪除標籤。",
+      "fields": {
+        "device_id": {
+          "name": "裝置",
+          "description": "洗衣機裝置要貼上標籤。"
+        },
+        "cycle_id": {
+          "name": "週期ID",
+          "description": "要標記的周期的 ID。"
+        },
+        "profile_name": {
+          "name": "個人資料名稱",
+          "description": "現有設定檔的名稱（在「管理設定檔」選單中建立設定檔）。留空以刪除標籤。"
+        }
+      }
+    },
+    "create_profile": {
+      "name": "建立個人資料",
+      "description": "建立新的設定檔（獨立或基於參考週期）。",
+      "fields": {
+        "device_id": {
+          "name": "裝置",
+          "description": "洗衣機裝置。"
+        },
+        "profile_name": {
+          "name": "個人資料名稱",
+          "description": "新設定檔的名稱（例如“重型”、“熟食”）。"
+        },
+        "reference_cycle_id": {
+          "name": "參考週期 ID",
+          "description": "此設定檔所基於的可選循環 ID。"
+        }
+      }
+    },
+    "delete_profile": {
+      "name": "刪除個人資料",
+      "description": "刪除設定檔並可選擇使用它取消標記循環。",
+      "fields": {
+        "device_id": {
+          "name": "裝置",
+          "description": "洗衣機裝置。"
+        },
+        "profile_name": {
+          "name": "個人資料名稱",
+          "description": "要刪除的設定檔。"
+        },
+        "unlabel_cycles": {
+          "name": "取消標籤循環",
+          "description": "使用此輪廓從循環中刪除輪廓標籤。"
+        }
+      }
+    },
+    "auto_label_cycles": {
+      "name": "自動標記舊自行車",
+      "description": "使用設定檔匹配追溯標記未標記的循環。",
+      "fields": {
+        "device_id": {
+          "name": "裝置",
+          "description": "洗衣機裝置。"
+        },
+        "confidence_threshold": {
+          "name": "置信閾值",
+          "description": "應用標籤的最小匹配置信度 (0.50-0.95)。"
+        }
+      }
+    },
+    "export_config": {
+      "name": "匯出配置",
+      "description": "將此設備的設定檔、週期和設定匯出到 JSON 檔案（每個設備）。",
+      "fields": {
+        "device_id": {
+          "name": "裝置",
+          "description": "洗衣機裝置出口。"
+        },
+        "path": {
+          "name": "小路",
+          "description": "可選的要寫入的絕對檔案路徑（預設為 /config/ha_washdata_export_{entry}.json）。"
+        }
+      }
+    },
+    "import_config": {
+      "name": "導入配置",
+      "description": "從 JSON 匯出檔案匯入此裝置的設定檔、週期和設定（設定可能會被覆寫）。",
+      "fields": {
+        "device_id": {
+          "name": "裝置",
+          "description": "洗衣機裝置導入。"
+        },
+        "path": {
+          "name": "小路",
+          "description": "要匯入的匯出 JSON 檔案的絕對路徑。"
+        }
+      }
+    },
+    "submit_cycle_feedback": {
+      "name": "提交週期回饋",
+      "description": "完成循環後確認或修正自動偵測的程序。提供“entry_id”（高級）或“device_id”（建議）。",
+      "fields": {
+        "device_id": {
+          "name": "裝置",
+          "description": "WashData 設備（建議而不是entry_id）。"
+        },
+        "entry_id": {
+          "name": "條目 ID",
+          "description": "裝置的配置條目 ID（替代 device_id）。"
+        },
+        "cycle_id": {
+          "name": "週期ID",
+          "description": "回饋通知/日誌中顯示的周期 ID。"
+        },
+        "user_confirmed": {
+          "name": "確認偵測到的程序",
+          "description": "如果偵測到的程式正確，則設為 true。"
+        },
+        "corrected_profile": {
+          "name": "修正後的輪廓",
+          "description": "如果未確認，請提供正確的設定檔/程式名稱。"
+        },
+        "corrected_duration": {
+          "name": "修正的持續時間（秒）",
+          "description": "可選的修正持續時間（以秒為單位）。"
+        },
+        "notes": {
+          "name": "筆記",
+          "description": "關於此週期的可選註釋。"
+        }
+      }
+    },
+    "record_start": {
+      "name": "記錄週期開始",
+      "description": "開始手動記錄一個乾淨的循環（繞過所有匹配邏輯）。",
+      "fields": {
+        "device_id": {
+          "name": "裝置",
+          "description": "洗衣機設備進行記錄。"
+        }
+      }
+    },
+    "record_stop": {
+      "name": "記錄循環停止",
+      "description": "停止手動錄製。",
+      "fields": {
+        "device_id": {
+          "name": "裝置",
+          "description": "洗衣機裝置停止錄音。"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "running": {
+        "name": "跑步"
+      },
+      "match_ambiguity": {
+        "name": "匹配歧義"
+      }
+    },
+    "sensor": {
+      "washer_state": {
+        "name": "狀態",
+        "state": {
+          "off": "離開",
+          "idle": "閒置的",
+          "starting": "開始",
+          "running": "跑步",
+          "paused": "已暫停",
+          "ending": "結束",
+          "finished": "完成的",
+          "anti_wrinkle": "抗皺",
+          "interrupted": "被打斷",
+          "force_stopped": "強制停止",
+          "rinse": "沖洗",
+          "unknown": "未知"
+        }
+      },
+      "washer_program": {
+        "name": "程式"
+      },
+      "time_remaining": {
+        "name": "剩餘時間"
+      },
+      "total_duration": {
+        "name": "總持續時間"
+      },
+      "cycle_progress": {
+        "name": "進步"
+      },
+      "current_power": {
+        "name": "當前功率"
+      },
+      "elapsed_time": {
+        "name": "經過時間"
+      },
+      "debug_info": {
+        "name": "偵錯資訊"
+      },
+      "match_confidence": {
+        "name": "比賽信心"
+      },
+      "top_candidates": {
+        "name": "最佳候選人",
+        "state": {
+          "none": "沒有任何"
+        }
+      },
+      "current_phase": {
+        "name": "當前階段"
+      },
+      "wash_phase": {
+        "name": "階段"
+      },
+      "profile_cycle_count": {
+        "name": "設定檔 {profile_name} 計數",
+        "unit_of_measurement": "週期"
+      },
+      "suggestions": {
+        "name": "建議設定"
+      }
+    },
+    "select": {
+      "program_select": {
+        "name": "循環計劃",
+        "state": {
+          "auto_detect": "自動偵測"
+        }
+      }
+    },
+    "button": {
+      "force_end_cycle": {
+        "name": "強制結束循環"
+      }
+    }
+  }
+}

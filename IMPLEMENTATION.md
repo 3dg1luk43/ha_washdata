@@ -1,6 +1,6 @@
-# HA WashData Implementation Guide
+# WashData Implementation Guide
 
-Note: Despite the name, HA WashData also works well for other appliances (e.g., dryers and dishwashers) as long as the power-draw cycle is reasonably predictable.
+Note: Despite the name, WashData also works well for other appliances (e.g., dryers and dishwashers) as long as the power-draw cycle is reasonably predictable.
 
 ## Overview
 
@@ -215,6 +215,25 @@ python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 
 **UI & Scoring:**
 - ✓ cases are considered successful; ✗ is flagged as abnormal; ⚠ retains reduced confidence.
+
+---
+
+### 1c. Phase Catalog Scope Model (0.4.3)
+
+**Problem:**
+- Users need a single catalog to manage phases across all appliance types.
+- At the same time, profile phase assignment should stay device-specific.
+- Global phases (empty `device_type`, meaning "All Devices") are present in per-device lists and can appear duplicated in edit/delete selectors.
+
+**Solution:**
+- Phase Catalog management view aggregates all device types and renders grouped sections by device label.
+- Assign Phase flow keeps strict device-type filtering.
+- Edit/Delete selectors now use a scoped internal key (`device_type::phase_name`) and dedupe by `(name, device_type)` so global phases are shown once.
+
+**Implementation Notes:**
+- UI selectors in config flow track selected phase name and selected phase scope separately.
+- Update/delete operations resolve against the selected scope, preventing accidental edits in the wrong device context.
+- Global phases are displayed as "All Devices" and not repeated for each device type.
 
 ---
 
@@ -611,7 +630,7 @@ manager._cycle_completed_time  # When cycle finished (ISO)
 
 During the expansion of the test suite (Phase 4), several minor issues and areas for improvement were identified:
 
-1.  **ProfileStore.async_import_data Return Value**: The method signature indicates -> dict[str, Any], but the implementation currently returns None. Tests have been adjusted to ignore the return value for now.
+1.  **ProfileStore.async_import_data Return Value**: The method correctly returns a dict with `entry_data` and `entry_options` keys extracted from the payload.
 2.  **CycleDetector Minimum Samples for Matching**: The matching logic requires at least 12 samples after resampling. Highly irregular data with large gaps (e.g., 250s) can lead to failed matches if the total cycle duration is short, even if the "shape" is recognizable.
 3.  **Timezone Sensitivity in decompress_power_data**: The isoformat() conversion in decompress_power_data uses datetime.fromtimestamp(ts) which defaults to local time. This can cause mismatches in tests comparing against UTC strings. Using dt_util.utc_from_timestamp or always using aware datetimes is recommended.
 4.  **ProfileStore.delete_cycle is Async**: Some older test code or assumptions might treat it as sync. It MUST be awaited as it triggers async_rebuild_envelope and async_save.
@@ -627,3 +646,152 @@ The integration includes specialized handling for different appliance types to a
 - **Dishwasher**: Multi-hour silent drying phases; end pump-out spikes; requires multi-hour watchdog extensions and conservative smart termination.
 - **Electric Vehicle (EV)**: High-power charging cycles; supports "Charging" and "Maintenance" phase heuristics; 15-minute off-gap to handle brief charger disconnections.
 - **Coffee Machine**: Very short cycles; rapid sampling requirements.
+
+---
+
+## 9. Phase Management System
+
+### Overview
+Phases are **purely informational labels** that segment a cycle into meaningful time-based regions (Wash, Rinse, Spin, etc.). They do **NOT** affect cycle detection, profile matching, or time estimation—these all use power-curve analysis independently.
+
+### Architecture
+```text
+Phase Catalog (Default + Custom)
+    ↓
+Device-Type Filtering
+    ↓
+Phase Assignment (Offset-Based Ranges)
+    ↓
+SVG Visualization (Power Curve + Phase Spans)
+```
+
+### Key Concepts
+
+**1. Phase Catalog**
+- **Default Phases**: Predefined phases for each device type (Washing Machine: Pre-Wash, Wash, Rinse, Spin, Soak, Anti-Crease)
+- **Custom Phases**: User-created phases per device type (e.g., "Eco Mode", "TurboWash")
+- **Device-Type Scoping**: Each phase is associated with a device type, ensuring only relevant phases appear in UI dropdowns
+
+**2. Phase Assignment**
+- **Time-Based Ranges**: Phases are defined as offset-based ranges from cycle start (e.g., "Wash: 5-15 minutes")
+- **Per-Profile Assignment**: Each profile can have its own phase segmentation
+- **Validation**: Overlapping ranges are rejected; ranges must be contiguous with cycle duration
+
+**3. Phase Visualization**
+- **SVG Power Curve Chart**: Interactive chart showing:
+  - Average power curve (blue line) from all cycles in the profile
+  - Colored phase spans (semi-transparent rectangles) 
+  - Dashed gating lines at phase boundaries
+  - Time axis (0/mid/total minutes)
+  - Legend with phase names and ranges
+- **Real-Time Updates**: Chart refresh as user edits phase ranges in the assignment dialog
+
+### Workflow: Creating & Assigning Phases
+
+```mermaid
+graph TD
+    A["Options Menu"] --> B{Action?}
+    
+    B -- "Manage Phase Catalog" --> D{Action?}
+    D -- "Create" --> E["Add New Custom Phase"]
+    D -- "Edit" --> F["Select Phase"]
+    F --> G["Edit Default or Custom"]
+    G --> H["Update Phase Metadata"]
+    D -- "Delete" --> I["Remove Custom Phase"]
+    
+    E --> J["Phase Added to Catalog"]
+    H --> J
+    I --> K["Phase Removed from Catalog"]
+    
+    B -- "Manage Profiles" --> L["Select Profile"]
+    L --> M["Assign Phase Ranges"]
+    M --> N["Choose Phases from Catalog"]
+    N --> O["Enter Time Ranges (min)"]
+    O --> P["Preview on SVG Chart"]
+    P --> Q["Save Profile with Phases"]
+    
+    J --> R["Phases Available in Dropdowns"]
+    Q --> S["Phases Displayed in Event Data"]
+```
+
+### API Reference
+
+**ProfileStore Methods:**
+```python
+list_phase_catalog(device_type: str) → list[dict]
+    # Returns merged default + custom phases for device
+
+list_custom_phases(device_type: str) → list[dict]
+    # Returns only user-created phases (and overrides of defaults)
+
+async_create_custom_phase(device_type: str, name: str, description: str)
+    # Create new phase in catalog
+
+async_update_custom_phase(device_type: str, old_name: str, new_name: str, description: str)
+    # Edit phase (default or custom). If editing a default phase, creates an override entry.
+    # Cascades rename to all assigned profiles.
+
+async_delete_custom_phase(device_type: str, name: str)
+    # Remove custom phase from catalog (removes all assignments)
+    # Note: Only custom phases can be deleted; defaults are immutable.
+
+get_profile_phase_ranges(profile_name: str) → list[dict]
+    # Get phase assignments for a profile
+
+async_set_profile_phase_ranges(profile_name: str, ranges: list[dict])
+    # Update phase assignments (validates no overlap)
+```
+
+### Storage Format
+
+**Phase Catalog (in `_data["_custom_phases"]`):**
+```json
+{
+  "name": "Eco Mode",
+  "description": "Energy-saving cycle",
+  "device_type": "washing_machine",
+  "created_at": "2026-03-11T14:30:00+00:00"
+}
+```
+
+**Profile Phase Assignment (in `_data["profiles"][profile_name]["phases"]`):**
+```json
+{
+  "name": "Pre-Wash",
+  "start": 300,      // seconds from cycle start
+  "end": 900,        // seconds from cycle start
+  "description": ""
+}
+```
+
+### Important Notes
+
+1. **Detection Independence**: Phases are NOT used in:
+   - Cycle start/end detection (uses power thresholds)
+   - Profile matching (uses power curve similarity)
+   - Duration estimation (uses avg_duration from profile)
+   - Any matching or analysis logic
+
+2. **Metadata Only**: Phases are display labels that:
+   - Appear in event data when a cycle is running
+   - Show on the dashboard card (if enabled)
+   - Help users understand cycle progression
+   - Aid in manual recording validation
+
+3. **Cascade Updates**: 
+   - If a phase is renamed in the catalog, all profiles using that phase are updated
+   - If a phase is deleted from catalog, all assignments are removed
+   - Profile rename does NOT update phase catalogs
+
+4. **Device-Type Filtering**:
+   - Phase dropdowns in assignment dialogs automatically filter to current device type
+   - Custom phases created for one device type don't appear in other device types
+   - Default phases are immutable but **CAN be edited** to create device-specific overrides
+   - When editing a default phase, an override entry is created in the custom phases list
+
+5. **Editing Default Phases**:
+   - Select "Edit Phase" in the catalog manager
+   - Choose any phase (default or custom) from the dropdown
+   - Modify the name and/or description
+   - An override entry is automatically created for default phases
+   - This allows device-specific customization without affecting the built-in defaults
