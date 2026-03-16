@@ -5,6 +5,15 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.3.1 - 2026-03-16
+
+### 🛠️ Improvements
+- **Full Diagnostics Export**: The HA diagnostics download now returns the complete store export — all profiles (including power samples), all past cycles, envelopes, feedback history, auto-adjustments, suggestions, custom phases, and full `entry_data`/`entry_options` config. Previously it returned only counts and a single-cycle summary, making it nearly useless for debugging. Personally identifiable fields (`power_sensor`, `notify_service`, `notify_people`, `name`, `unique_id`, etc.) are still redacted.
+
+### 🐛 Bug Fixes
+- **Profile Statistics Graph Flat Line**: Fixed a bug where newly detected cycles showed a flat line at zero and `0.00 kWh` in the Profile Statistics graph. The cycle storage routine (`_add_cycle_data`) incorrectly treated already-converted offset values (`[seconds, power]`) as unix timestamps, subtracting the cycle start unix timestamp from them a second time. This produced large negative offsets (≈ −1.7 billion seconds) that caused `np.interp` in the envelope builder to extrapolate to the boundary power value (typically ~0 W) across the entire time grid, rendering a flat zero curve regardless of actual power draw.
+- **Automatic Recovery of Corrupted Cycles**: On startup, the integration now automatically detects and repairs any cycles stored with the corrupted negative offsets (first offset < −10⁸ s is physically impossible for an appliance cycle). The original offsets are recovered by adding the cycle's `start_time` unix timestamp back. Affected cycles are repaired in-place and saved transparently — no manual action required.
+
 ## 0.4.3 - 2026-03-16
 
 ### ✨ Features

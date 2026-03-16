@@ -1076,6 +1076,9 @@ class ProfileStore:
         # Assign ids to any custom phase missing one.
         if self._migrate_phase_ids():
             await self.async_save()
+        # Repair cycles whose power_data was corrupted by the double-subtract bug.
+        if self.repair_corrupted_power_data():
+            await self.async_save()
 
     # _migrate_v1_to_v2 and _decompress_power_from_raw removed; logic moved to WashDataStore
 
@@ -1225,37 +1228,23 @@ class ProfileStore:
         self._logger.debug("add_cycle: raw_data has %s points", len(raw_data))
 
         if raw_data:
-            start_ts = _value_to_timestamp(cycle_data.get("start_time"))
-            if start_ts is None:
-                self._logger.debug("add_cycle: invalid start_time %r, skipping power_data normalization", cycle_data.get("start_time"))
+            start_time_raw = cycle_data.get("start_time")
+            start_time_iso: str | None = (
+                start_time_raw if isinstance(start_time_raw, str) and start_time_raw
+                else start_time_raw.isoformat() if isinstance(start_time_raw, datetime)
+                else None
+            )
+            if start_time_iso is None and _value_to_timestamp(start_time_raw) is None:
+                self._logger.debug("add_cycle: invalid start_time %r, skipping power_data normalization", start_time_raw)
                 self._data["past_cycles"].append(cycle_data)
                 return
-            stored: list[list[float]] = []
-            offsets: list[float] = []
 
-            for point in raw_data:
-                if not isinstance(point, (list, tuple)):
-                    continue
-                point_any = cast(list[Any] | tuple[Any, ...], point)
-                try:
-                    ts_raw = point_any[0]
-                    p_raw = point_any[1]
-                except IndexError:
-                    continue
-
-                t_val = _value_to_timestamp(ts_raw)
-                if t_val is None:
-                    continue
-
-                try:
-                    p_val = float(p_raw)
-                except (TypeError, ValueError):
-                    continue
-
-                # Store as [offset_seconds, power] for consistency
-                offset = round(t_val - start_ts, 1)
-                offsets.append(offset)
-                stored.append([offset, round(p_val, 1)])
+            # Use unified normalizer: handles offset, ISO-string, and datetime formats
+            pairs = power_data_to_offsets(
+                cast(list[list[Any] | tuple[Any, ...]], raw_data), start_time_iso
+            )
+            stored: list[list[float]] = [[round(p[0], 1), round(p[1], 1)] for p in pairs]
+            offsets: list[float] = [p[0] for p in stored]
 
             # Calculate average sampling interval (in seconds)
             if len(offsets) > 1:
@@ -1700,6 +1689,45 @@ class ProfileStore:
             if await self.async_rebuild_envelope(profile_name):
                 count += 1
         return count
+
+    def repair_corrupted_power_data(self) -> int:
+        """Fix cycles whose power_data offsets were corrupted by the double-subtract bug.
+
+        The bug caused ``offset = small_float - unix_timestamp`` to be stored instead of
+        just ``small_float``.  Corrupted cycles have a first-offset < -1e8 (a value that
+        can never occur for a real appliance cycle offset).  Recovery: add ``start_ts``
+        back to every offset in the affected cycle.
+
+        Returns the number of cycles repaired.
+        """
+        repaired = 0
+        for cycle in self._data.get("past_cycles", []):
+            power_data = cycle.get("power_data")
+            if not isinstance(power_data, list) or not power_data:
+                continue
+            first = power_data[0]
+            if not isinstance(first, (list, tuple)) or len(first) < 2:
+                continue
+            first_offset = first[0]
+            if not isinstance(first_offset, (int, float)) or first_offset > -1e8:
+                continue  # Not corrupted
+
+            start_ts = _value_to_timestamp(cycle.get("start_time"))
+            if start_ts is None:
+                continue
+
+            cycle["power_data"] = [
+                [round(pt[0] + start_ts, 1), round(pt[1], 1)]
+                for pt in power_data
+                if isinstance(pt, (list, tuple)) and len(pt) >= 2
+            ]
+            repaired += 1
+
+        if repaired:
+            self._logger.warning(
+                "Repaired corrupted power_data offsets in %d cycle(s)", repaired
+            )
+        return repaired
 
     async def async_rebuild_envelope(self, profile_name: str) -> bool:
         """
