@@ -3456,6 +3456,87 @@ class ProfileStore:
             return True
         return False
 
+    def get_cycle_power_data(self, cycle_id: str) -> list[tuple[float, float]]:
+        """Return decompressed power data for a cycle as [(offset_s, watts), ...].
+
+        Returns an empty list if the cycle is not found or has no power data.
+        """
+        cycle = next(
+            (c for c in self.get_past_cycles() if c.get("id") == cycle_id), None
+        )
+        if cycle is None:
+            return []
+        return self._decompress_power_data(cycle)
+
+    async def trim_cycle_power_data(
+        self,
+        cycle_id: str,
+        new_start_s: float,
+        new_end_s: float,
+    ) -> bool:
+        """Trim a cycle's power_data to the window [new_start_s, new_end_s].
+
+        Offsets are renormalized so the kept segment starts at 0.0.
+        The cycle's ``duration``, ``signature``, and ``sampling_interval`` are
+        recomputed from the trimmed data.
+
+        Returns True if successful, False if the cycle was not found or the
+        resulting data is empty.
+        """
+        cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
+        cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
+        if cycle is None:
+            return False
+
+        p_data = self._decompress_power_data(cycle)
+        if not p_data:
+            return False
+
+        new_start_s = max(0.0, float(new_start_s))
+        new_end_s = float(new_end_s)
+
+        kept = [
+            (offset, power)
+            for offset, power in p_data
+            if new_start_s <= offset <= new_end_s
+        ]
+        if not kept:
+            return False
+
+        # Re-normalize offsets so the trimmed segment starts at 0.0
+        base = kept[0][0]
+        renorm: list[list[float]] = [
+            [round(offset - base, 2), power] for offset, power in kept
+        ]
+
+        # Recompute sampling interval
+        if len(renorm) > 1:
+            offsets_arr = np.array([r[0] for r in renorm], dtype=float)
+            intervals = np.diff(offsets_arr)
+            pos = intervals[intervals > 0]
+            sampling_interval = float(np.median(pos)) if len(pos) > 0 else 1.0
+        else:
+            sampling_interval = 1.0
+
+        # Recompute signature
+        ts_arr = np.array([r[0] for r in renorm], dtype=float)
+        p_arr = np.array([r[1] for r in renorm], dtype=float)
+        if len(ts_arr) > 1:
+            sig = compute_signature(ts_arr, p_arr)
+            cycle["signature"] = dataclasses.asdict(sig)
+
+        cycle["power_data"] = renorm
+        cycle["sampling_interval"] = round(sampling_interval, 1)
+        cycle["duration"] = round(renorm[-1][0], 1)
+
+        # Rebuild envelope for the associated profile
+        profile_name = cycle.get("profile_name")
+        if profile_name:
+            await self.async_rebuild_envelope(profile_name)
+
+        await self.async_save()
+        return True
+
     def analyze_split_sync(
         self, cycle: CycleDict, min_gap_s: int = 900, idle_power: float = 2.0
     ) -> list[tuple[float, float]]:
