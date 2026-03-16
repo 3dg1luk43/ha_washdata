@@ -3587,12 +3587,13 @@ class ProfileStore:
         Merge multiple past cycles into a single cycle record, filling gaps between traces with short zero-power segments.
         
         Parameters:
-            cycle_ids (list[str]): Ordered list of past-cycle IDs to merge; at least two IDs are required.
+            cycle_ids (list[str]): Unordered set of past-cycle IDs to merge; at least two IDs are required.
+                The function internally sorts cycles by start_time and mutates the chronologically earliest cycle.
             target_profile (str | None): Profile name to assign to the merged cycle, or `None` to leave unlabeled.
-        
+
         Description:
-            When successful, this replaces the first cycle in `cycle_ids` with the merged cycle, removes the other consumed cycles,
-            and updates related metadata.
+            When successful, this sorts the provided cycles by start_time and replaces the earliest cycle with the merged cycle,
+            removing the other consumed cycles and updating related metadata.
         
             Side effects:
             - Updates the store's past_cycles (removes consumed cycles and replaces the first cycle with the merged record).
@@ -3821,6 +3822,7 @@ class ProfileStore:
         width: int = 600,
         height: int = 300,
         title: str = "Merge Preview",
+        no_data_label: str = "No power data available for preview",
     ) -> str:
         """
         Generate an SVG preview that overlays power traces from the specified past cycles to illustrate the result of merging them.
@@ -3892,7 +3894,7 @@ class ProfileStore:
                 f'<text x="{width // 2}" y="{height // 2 - 10}" fill="#aaa" font-size="16" '
                 f'text-anchor="middle">{title}</text>'
                 f'<text x="{width // 2}" y="{height // 2 + 14}" fill="#666" font-size="13" '
-                f'text-anchor="middle">No power data available for preview</text>'
+                f'text-anchor="middle">{no_data_label}</text>'
                 f'</svg>'
             )
 

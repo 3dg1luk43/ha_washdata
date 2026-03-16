@@ -1400,9 +1400,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
             # Generate SVG
             merge_title = await self._options_text("merge_preview_title", "Merge Preview")
+            no_power_label = await self._options_text(
+                "no_power_preview", "No power data available for preview"
+            )
             svg = store.generate_interactive_merge_svg(
                 [c["id"] for c in cycles_to_merge],
                 title=merge_title,
+                no_data_label=no_power_label,
             )
 
             # Profile Selector

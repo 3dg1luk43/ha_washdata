@@ -16,7 +16,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const OWNER_LOGIN = '3dg1luk43';
+            const OWNER_LOGIN = context.repo.owner;
             const INACTIVITY_DAYS = 5;
             const cutoff = new Date(Date.now() - INACTIVITY_DAYS * 24 * 60 * 60 * 1000);
 
