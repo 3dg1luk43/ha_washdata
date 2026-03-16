@@ -298,7 +298,7 @@ class CycleDetector:
                     if not math.isfinite(expected_duration):
                         expected_duration = 0.0
                         _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
-                    elif expected_duration > 6 * 3600.0:
+                    elif expected_duration <= 0 or expected_duration > 6 * 3600.0:
                         expected_duration = 0.0
                         _LOGGER.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
                 except (TypeError, ValueError):
@@ -329,7 +329,7 @@ class CycleDetector:
                         if not math.isfinite(expected_duration):
                             expected_duration = 0.0
                             _LOGGER.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
-                        elif expected_duration > 6 * 3600.0:
+                        elif expected_duration <= 0 or expected_duration > 6 * 3600.0:
                             expected_duration = 0.0
                             _LOGGER.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
                     except (TypeError, ValueError):
@@ -1147,7 +1147,9 @@ class CycleDetector:
                             if t.tzinfo is None:
                                 t = t.replace(tzinfo=dt_util.now().tzinfo)
                                 has_naive_readings = True
-                            self._power_readings.append((t, float(reading[1])))
+                            value = float(reading[1])
+                            if math.isfinite(value):
+                                self._power_readings.append((t, value))
                     except (TypeError, ValueError) as exc:
                         _LOGGER.debug("Skipping malformed power reading %s: %s", r, exc)
 

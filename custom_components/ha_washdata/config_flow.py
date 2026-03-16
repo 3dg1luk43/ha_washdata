@@ -318,6 +318,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
             CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
             CONF_MIN_OFF_GAP,
+            CONF_START_THRESHOLD_W,
+            CONF_STOP_THRESHOLD_W,
+            CONF_END_ENERGY_THRESHOLD,
+            CONF_RUNNING_DEAD_ZONE,
         ]
 
     @staticmethod
@@ -687,6 +691,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             CONF_NO_UPDATE_ACTIVE_TIMEOUT,
                             CONF_PROFILE_MATCH_INTERVAL,
                             CONF_MIN_OFF_GAP,
+                            CONF_RUNNING_DEAD_ZONE,
                         ):
                             suggested_val: Any = int(float(val))
                         else:
@@ -1118,6 +1123,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "suggested_profile_match_max_duration_ratio": _fmt_suggested(
                     CONF_PROFILE_MATCH_MAX_DURATION_RATIO
                 ),
+                "suggested_start_threshold_w": _fmt_suggested(CONF_START_THRESHOLD_W),
+                "suggested_stop_threshold_w": _fmt_suggested(CONF_STOP_THRESHOLD_W),
+                "suggested_end_energy_threshold": _fmt_suggested(CONF_END_ENERGY_THRESHOLD),
+                "suggested_running_dead_zone": _fmt_suggested(CONF_RUNNING_DEAD_ZONE),
 
                 "suggested_reason": suggested_reason,
                 # Placeholders for keys in data_description

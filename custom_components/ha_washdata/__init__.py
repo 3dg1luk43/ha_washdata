@@ -440,6 +440,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             corrected_profile = call.data.get("corrected_profile")
             corrected_duration = call.data.get("corrected_duration")  # in seconds
             notes = call.data.get("notes", "")
+            dismiss = call.data.get("dismiss", False)
 
             if entry_id not in hass.data[DOMAIN]:
                 raise ValueError("Integration not loaded for this entry")
@@ -451,6 +452,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 corrected_profile=corrected_profile,
                 corrected_duration=corrected_duration,
                 notes=notes,
+                dismiss=dismiss,
             )
             manager.notify_update()
 

@@ -1496,66 +1496,67 @@ class ProfileStore:
                 and isinstance(p_data[0], (list, tuple))
             ):
                 first_point = cast(list[Any] | tuple[Any, ...], p_data[0])
-                if len(first_point) != 2 or not isinstance(first_point[0], (int, float)):
-                    continue
-                p_data_list = cast(list[list[float]], p_data)
-                # Apply trim helper
-                original_len = len(p_data_list)
+                # Only trim offset-format data (numeric offsets). Legacy ISO-format
+                # cycles skip trimming but still reach the signature block below.
+                if len(first_point) == 2 and isinstance(first_point[0], (int, float)):
+                    p_data_list = cast(list[list[float]], p_data)
+                    # Apply trim helper
+                    original_len = len(p_data_list)
 
-                # Logic: For completed cycles, only trim leading zeros.
-                # For others, trim both ends.
-                if cycle.get("status") in ("completed", "force_stopped"):
-                    # Only trim leading
-                    start_idx = 0
-                    for i, point in enumerate(p_data_list):
-                        if point[1] > 1.0: # Match threshold below
-                            start_idx = i
-                            break
-                    trimmed: list[list[float]] = p_data_list[start_idx:]
-                else:
-                    trimmed = trim_zero_power_data(p_data_list, threshold=1.0) # Conservative 1W threshold
-
-                if trimmed and len(trimmed) < original_len:
-                    # Data was trimmed - check for start time shift
-                    first_offset = trimmed[0][0]
-
-                    if first_offset > 0:
-                        # Leading zeros removed - Must shift start_time forward
-                        try:
-                            start_dt = datetime.fromisoformat(cycle["start_time"])
-                            new_start = start_dt + timedelta(seconds=first_offset)
-                            cycle["start_time"] = new_start.isoformat()
-
-                            # Re-normalize offsets to 0
-                            shifted_data: list[list[float]] = []
-                            for row in trimmed:
-                                # row is [offset, power]
-                                shifted_data.append([round(row[0] - first_offset, 1), row[1]])
-                            cycle["power_data"] = shifted_data
-                            processed_count += 1
-                        except (ValueError, TypeError) as e:
-                            _LOGGER.warning("Failed to shift start_time for trimmed cycle: %s", e)
+                    # Logic: For completed cycles, only trim leading zeros.
+                    # For others, trim both ends.
+                    if cycle.get("status") in ("completed", "force_stopped"):
+                        # Only trim leading
+                        start_idx = 0
+                        for i, point in enumerate(p_data_list):
+                            if point[1] > 1.0: # Match threshold below
+                                start_idx = i
+                                break
+                        trimmed: list[list[float]] = p_data_list[start_idx:]
                     else:
-                        # Only trailing trimmed or no shift needed
-                        cycle["power_data"] = trimmed
-                        processed_count += 1
+                        trimmed = trim_zero_power_data(p_data_list, threshold=1.0) # Conservative 1W threshold
 
-                    # Update duration to match new data length
-                    # If we only trimmed the head, the new duration is old_duration - first_offset
-                    # This preserves trailing silence.
-                    if cycle.get("power_data"):
-                        old_dur = float(cycle.get("duration", 0.0) or 0.0)
-                        # If we shifted (first_offset > 0), new duration is old_dur - first_offset
-                        # Otherwise if we only trimmed tail, we might want to snap,
-                        # but for completed cycles we don't trim tail in this loop.
+                    if trimmed and len(trimmed) < original_len:
+                        # Data was trimmed - check for start time shift
+                        first_offset = trimmed[0][0]
+
                         if first_offset > 0:
-                            cycle["duration"] = max(0.0, old_dur - first_offset)
+                            # Leading zeros removed - Must shift start_time forward
+                            try:
+                                start_dt = datetime.fromisoformat(cycle["start_time"])
+                                new_start = start_dt + timedelta(seconds=first_offset)
+                                cycle["start_time"] = new_start.isoformat()
+
+                                # Re-normalize offsets to 0
+                                shifted_data: list[list[float]] = []
+                                for row in trimmed:
+                                    # row is [offset, power]
+                                    shifted_data.append([round(row[0] - first_offset, 1), row[1]])
+                                cycle["power_data"] = shifted_data
+                                processed_count += 1
+                            except (ValueError, TypeError) as e:
+                                _LOGGER.warning("Failed to shift start_time for trimmed cycle: %s", e)
                         else:
-                            # Only trailing was trimmed (not expected for completed cycles here)
-                            # or no trim happened.
-                            # If trailing was trimmed, we SHOULD snap.
-                            if len(trimmed) < original_len:
-                                cycle["duration"] = cycle["power_data"][-1][0]
+                            # Only trailing trimmed or no shift needed
+                            cycle["power_data"] = trimmed
+                            processed_count += 1
+
+                        # Update duration to match new data length
+                        # If we only trimmed the head, the new duration is old_duration - first_offset
+                        # This preserves trailing silence.
+                        if cycle.get("power_data"):
+                            old_dur = float(cycle.get("duration", 0.0) or 0.0)
+                            # If we shifted (first_offset > 0), new duration is old_dur - first_offset
+                            # Otherwise if we only trimmed tail, we might want to snap,
+                            # but for completed cycles we don't trim tail in this loop.
+                            if first_offset > 0:
+                                cycle["duration"] = max(0.0, old_dur - first_offset)
+                            else:
+                                # Only trailing was trimmed (not expected for completed cycles here)
+                                # or no trim happened.
+                                # If trailing was trimmed, we SHOULD snap.
+                                if len(trimmed) < original_len:
+                                    cycle["duration"] = cycle["power_data"][-1][0]
 
             if cycle.get("power_data"):
                 try:
@@ -1651,24 +1652,9 @@ class ProfileStore:
         durations: list[float] = []
 
         for cycle in labeled_cycles:
-            power_data_raw = cycle.get("power_data", [])
-            if not isinstance(power_data_raw, list):
-                continue
-            power_data = cast(list[Any], power_data_raw)
-            if len(power_data) < 3:
-                continue
-
-            # Parse pairs
-            pairs: list[tuple[float, float]] = []
-            for item in power_data:
-                if isinstance(item, (list, tuple)):
-                    item_seq = cast(list[Any] | tuple[Any, ...], item)
-                    if len(item_seq) < 2:
-                        continue
-                    try:
-                        pairs.append((float(item_seq[0]), float(item_seq[1])))
-                    except (ValueError, TypeError):
-                        continue
+            # Use the shared decompressor so both legacy ISO-timestamp format
+            # and the current offset-float format are handled transparently.
+            pairs = self._decompress_power_data(cycle)
 
             if len(pairs) < 3:
                 continue
@@ -2913,6 +2899,10 @@ class ProfileStore:
                     "avg_duration": cycle["duration"],
                     "sample_cycle_id": reference_cycle_id,
                 }
+                # Label the reference cycle with the new profile so that
+                # statistics are immediately populated after creation.
+                if not cycle.get("profile_name"):
+                    cycle["profile_name"] = name
         elif avg_duration is not None and avg_duration > 0:
             profile_data = {
                 "avg_duration": float(avg_duration),
@@ -2921,6 +2911,10 @@ class ProfileStore:
         # Create profile with minimal data (will be updated when cycles are labeled)
         profile_data.setdefault("phases", [])
         self._data.setdefault("profiles", {})[name] = profile_data
+
+        # Build the envelope from any already-labeled cycles (e.g. reference cycle above)
+        await self.async_rebuild_envelope(name)
+
         await self.async_save()
         _LOGGER.info("Created standalone profile '%s'", name)
 
@@ -3438,9 +3432,6 @@ class ProfileStore:
         if not p_data:
             return []
 
-        start_dt = dt_util.parse_datetime(cycle["start_time"])
-        if start_dt is None:
-            return []
         # Parse all points to (rel_t, power)
         points: list[tuple[float, float]] = []
         for offset_seconds, val in p_data:

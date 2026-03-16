@@ -220,6 +220,8 @@ def resample_adaptive(
         Tuple of ``(segments, used_dt_s)`` where ``segments`` are gap-aware,
         uniformly sampled chunks and ``used_dt_s`` is the chosen target step.
     """
+    min_dt = max(min_dt, 1e-3)  # Clamp before any early return
+
     if len(timestamps) < 2:
         return [], min_dt
 

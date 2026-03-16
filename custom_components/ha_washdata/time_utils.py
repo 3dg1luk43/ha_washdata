@@ -62,7 +62,9 @@ def power_data_to_offsets(
         power_data: Input list in any recognised format.
         start_time_iso: ISO-8601 cycle start time string. Required when
             converting from the ISO-string format so that offsets can be
-            computed. Ignored for offset / datetime formats.
+            computed. When converting from datetime format, used as the anchor
+            if provided; falls back to the first sample's timestamp otherwise.
+            Ignored for offset format.
 
     Returns:
         List of ``[offset_seconds, power]`` pairs. Empty list on failure.
@@ -84,6 +86,13 @@ def power_data_to_offsets(
 
     if fmt == "datetime":
         start_ts: float | None = None
+        if start_time_iso:
+            try:
+                parsed_start = dt_util.parse_datetime(start_time_iso)
+                if parsed_start is not None:
+                    start_ts = parsed_start.timestamp()
+            except Exception:  # pylint: disable=broad-exception-caught
+                pass
         result: list[list[float]] = []
         for item in power_data:
             try:
