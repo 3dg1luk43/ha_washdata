@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Giai đoạn các giá trị được đề xuất trong Cài đặt nâng cao"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Chu trình cắt — Chọn chu trình",
+        "description": "Chọn một chu kỳ để cắt. ✓ = hoàn thành, ⚠ = tiếp tục, ✗ = bị gián đoạn",
+        "data": {
+          "cycle_id": "Xe đạp"
+        }
+      },
+      "trim_cycle": {
+        "title": "Chu kỳ cắt",
+        "description": "Cửa sổ hiện tại: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Hoạt động"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Đặt bắt đầu cắt",
+        "description": "Nhập độ lệch phút để bắt đầu giữ dữ liệu từ (0 = bắt đầu chu kỳ).",
+        "data": {
+          "trim_start_min": "Bắt đầu (phút)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Đặt phần cuối",
+        "description": "Nhập độ lệch phút để ngừng lưu giữ dữ liệu.",
+        "data": {
+          "trim_end_min": "Kết thúc (phút)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Chu trình xác minh ({device})",
       "feedback_notification_message": "**Thiết bị**: {device}\n**Chương trình**: {program} (độ tin cậy {confidence}%)\n**Thời gian**: {time}\n\nWashData cần sự trợ giúp của bạn để xác minh chu trình được phát hiện này.\n\nVui lòng truy cập **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Phản hồi tìm hiểu** để xác nhận hoặc sửa kết quả này.",
       "suggestions_ready_notification_title": "WashData: Sẵn sàng cài đặt được đề xuất ({device})",
-      "suggestions_ready_notification_message": "Cảm biến **Cài đặt được đề xuất** hiện báo cáo **{count}** đề xuất có thể thực hiện được.\n\nĐể xem xét và áp dụng chúng: **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Cài đặt nâng cao > Áp dụng các giá trị được đề xuất**.\n\nĐề xuất là tùy chọn và được hiển thị để xem xét trước khi bạn lưu."
+      "suggestions_ready_notification_message": "Cảm biến **Cài đặt được đề xuất** hiện báo cáo **{count}** đề xuất có thể thực hiện được.\n\nĐể xem xét và áp dụng chúng: **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Cài đặt nâng cao > Áp dụng các giá trị được đề xuất**.\n\nĐề xuất là tùy chọn và được hiển thị để xem xét trước khi bạn lưu.",
+      "trim_range_invalid": "Bắt đầu phải trước khi kết thúc. Hãy điều chỉnh điểm cắt của bạn.",
+      "trim_failed": "Cắt không thành công. Chu trình có thể không còn tồn tại hoặc cửa sổ trống."
     },
     "abort": {
       "no_cycles_found": "Không tìm thấy chu kỳ nào",
@@ -594,7 +624,8 @@
       "no_predictions": "Không có dự đoán",
       "no_custom_phases": "Không tìm thấy giai đoạn tùy chỉnh nào.",
       "reprocess_success": "Đã xử lý lại thành công {count} chu kỳ.",
-      "debug_data_cleared": "Đã xóa thành công dữ liệu gỡ lỗi khỏi chu kỳ {count}."
+      "debug_data_cleared": "Đã xóa thành công dữ liệu gỡ lỗi khỏi chu kỳ {count}.",
+      "no_power_data": "Không có dữ liệu theo dõi nguồn điện cho chu kỳ đã chọn."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Sử dụng các thao tác bên dưới để thêm, chỉnh sửa, xóa hoặc lưu phạm vi.",
         "profile_summary_header": "Tóm tắt hồ sơ",
         "recent_cycles_header": "Chu kỳ gần đây",
-        "no_power_preview": "*Không có dữ liệu nguồn để xem trước.*"
+        "no_power_preview": "*Không có dữ liệu nguồn để xem trước.*",
+        "trim_cycle_preview_title": "Xem trước chu kỳ cắt",
+        "trim_cycle_preview_no_data": "Không có dữ liệu nguồn cho chu kỳ này.",
+        "trim_cycle_preview_kept_suffix": "giữ"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Chu kỳ cụ thể của nhãn",
         "select_cycle_to_label_multi": "Dán nhãn nhiều chu kỳ",
         "select_cycle_to_delete": "Xóa chu kỳ",
-        "interactive_editor": "Trình soạn thảo tương tác hợp nhất/tách"
+        "interactive_editor": "Trình soạn thảo tương tác hợp nhất/tách",
+        "trim_cycle": "Dữ liệu chu kỳ cắt"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Đặt tên và áp dụng các giai đoạn",
         "cancel": "Quay lại mà không thay đổi"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Đặt điểm bắt đầu",
+        "set_end": "Đặt điểm cuối",
+        "reset": "Đặt lại về thời lượng đầy đủ",
+        "apply": "Áp dụng Cắt",
+        "cancel": "Hủy bỏ"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Thiết bị máy giặt dừng ghi."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Chu kỳ cắt",
+      "description": "Cắt bớt dữ liệu nguồn của chu kỳ trước thành một khoảng thời gian cụ thể.",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị WashData."
+        },
+        "cycle_id": {
+          "name": "ID chu kỳ",
+          "description": "ID của chu trình cần cắt."
+        },
+        "trim_start_s": {
+          "name": "Cắt bắt đầu (giây)",
+          "description": "Giữ dữ liệu từ phần bù này trong vài giây. Mặc định 0."
+        },
+        "trim_end_s": {
+          "name": "Cắt bớt kết thúc (giây)",
+          "description": "Giữ dữ liệu ở mức bù này trong vài giây. Mặc định = thời lượng đầy đủ."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Buộc kết thúc chu kỳ"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Không tìm thấy thiết bị."
+    },
+    "no_config_entry": {
+      "message": "Không tìm thấy mục cấu hình cho thiết bị."
+    },
+    "integration_not_loaded": {
+      "message": "Tích hợp không được tải cho thiết bị này."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Không tìm thấy chu trình hoặc không có dữ liệu nguồn."
+    },
+    "trim_failed_empty_window": {
+      "message": "Cắt không thành công — không tìm thấy chu kỳ, không có dữ liệu nguồn hoặc cửa sổ kết quả trống."
     }
   }
 }

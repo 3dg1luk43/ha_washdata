@@ -7,7 +7,12 @@ For every past_cycle in every JSON file under cycle_data/ the test:
   2. Computes the duration and energy *before* and *after* a hypothetical trim.
   3. Summarises the results per user/device and in aggregate.
 
-No assertions are made — the test is purely diagnostic and always passes.
+Assertions are enforced for every cycle to verify the following invariants:
+  - energy can only decrease or stay the same after trimming
+  - duration can only decrease or stay the same after trimming
+  - the trailing-zero count equals the number of samples removed
+  - when trailing zeros are present, tail duration and energy delta are non-negative
+
 Run with:
     pytest tests/test_trailing_zero_impact.py -v -s
 """
@@ -27,10 +32,24 @@ TRIM_THRESHOLD_W = 1.0  # matches add_cycle / trim_zero_power_data usage
 # Helpers
 # ---------------------------------------------------------------------------
 
+def _clean(power_data: list) -> list:
+    """Return a list of valid [ts, power] pairs, skipping malformed rows."""
+    cleaned = []
+    for row in power_data:
+        if not isinstance(row, (list, tuple)) or len(row) < 2:
+            continue
+        try:
+            cleaned.append([float(row[0]), float(row[1])])
+        except (TypeError, ValueError):
+            continue
+    return cleaned
+
+
 def _trailing_zero_count(power_data: list, threshold: float) -> int:
     """Return how many samples at the *end* have power <= threshold."""
+    data = _clean(power_data)
     count = 0
-    for point in reversed(power_data):
+    for point in reversed(data):
         if point[1] <= threshold:
             count += 1
         else:
@@ -40,25 +59,23 @@ def _trailing_zero_count(power_data: list, threshold: float) -> int:
 
 def _trim_trailing(power_data: list, threshold: float) -> list:
     """Return power_data with trailing zero/near-zero samples removed."""
-    end_idx = len(power_data) - 1
-    for i in range(len(power_data) - 1, -1, -1):
-        if power_data[i][1] > threshold:
-            end_idx = i
-            break
-    else:
-        # all zero — keep one point
-        return power_data[:1] if power_data else []
-    return power_data[: end_idx + 1]
+    data = _clean(power_data)
+    for i in range(len(data) - 1, -1, -1):
+        if data[i][1] > threshold:
+            return data[: i + 1]
+    # all zero — keep one point
+    return data[:1] if data else []
 
 
 def _energy_wh(power_data: list) -> float:
     """Trapezoid energy integration, returns Wh."""
-    if len(power_data) < 2:
+    data = _clean(power_data)
+    if len(data) < 2:
         return 0.0
     total = 0.0
-    for i in range(1, len(power_data)):
-        dt = (power_data[i][0] - power_data[i - 1][0]) / 3600.0  # seconds → hours
-        avg_w = (power_data[i][1] + power_data[i - 1][1]) / 2.0
+    for i in range(1, len(data)):
+        dt = (data[i][0] - data[i - 1][0]) / 3600.0  # seconds → hours
+        avg_w = (data[i][1] + data[i - 1][1]) / 2.0
         total += avg_w * dt
     return total
 

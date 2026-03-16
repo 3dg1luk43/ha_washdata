@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Prilagodite predlagane vrednosti v naprednih nastavitvah"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim Cycle — Izberite Cycle",
+        "description": "Izberite cikel za obrezovanje. ✓ = končano, ⚠ = nadaljevanje, ✗ = prekinjeno",
+        "data": {
+          "cycle_id": "Cikel"
+        }
+      },
+      "trim_cycle": {
+        "title": "Cikel obrezovanja",
+        "description": "Trenutno okno: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Akcija"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Nastavite Trim Start",
+        "description": "Vnesite minutni odmik, od katerega začnete hraniti podatke (0 = začetek cikla).",
+        "data": {
+          "trim_start_min": "Začetek (minute)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Nastavite konec obrezovanja",
+        "description": "Vnesite minutni odmik, pri katerem želite prenehati hraniti podatke.",
+        "data": {
+          "trim_end_min": "Konec (minute)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: cikel preverjanja ({device})",
       "feedback_notification_message": "**Naprava**: {device}\n**Program**: {program} ({confidence} % zaupanja)\n**Čas**: {time}\n\nWashData potrebuje vašo pomoč, da preveri ta zaznani cikel.\n\nPojdite na **Nastavitve > Naprave in storitve > WashData > Konfiguracija > Povratne informacije o učenju**, da potrdite ali popravite ta rezultat.",
       "suggestions_ready_notification_title": "WashData: Predlagane nastavitve pripravljene ({device})",
-      "suggestions_ready_notification_message": "Senzor **Predlagane nastavitve** zdaj poroča o **{count}** priporočilih za ukrepanje.\n\nČe jih želite pregledati in uporabiti: **Nastavitve > Naprave in storitve > WashData > Konfiguracija > Napredne nastavitve > Uporabi predlagane vrednosti**.\n\nPredlogi niso obvezni in so prikazani v pregledu, preden jih shranite."
+      "suggestions_ready_notification_message": "Senzor **Predlagane nastavitve** zdaj poroča o **{count}** priporočilih za ukrepanje.\n\nČe jih želite pregledati in uporabiti: **Nastavitve > Naprave in storitve > WashData > Konfiguracija > Napredne nastavitve > Uporabi predlagane vrednosti**.\n\nPredlogi niso obvezni in so prikazani v pregledu, preden jih shranite.",
+      "trim_range_invalid": "Začetek mora biti pred koncem. Prosimo, prilagodite svoje trim točke.",
+      "trim_failed": "Obrezovanje ni uspelo. Cikel morda ne obstaja več ali pa je okno prazno."
     },
     "abort": {
       "no_cycles_found": "Ni najdenih ciklov",
@@ -594,7 +624,8 @@
       "no_predictions": "Brez napovedi",
       "no_custom_phases": "Ni faz po meri.",
       "reprocess_success": "Uspešno ponovno obdelanih {count} ciklov.",
-      "debug_data_cleared": "Podatki o odpravljanju napak iz {count} ciklov so bili uspešno izbrisani."
+      "debug_data_cleared": "Podatki o odpravljanju napak iz {count} ciklov so bili uspešno izbrisani.",
+      "no_power_data": "Za izbrani cikel ni na voljo nobenih podatkov o sledenju moči."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Uporabite spodnja dejanja za dodajanje, urejanje, brisanje ali shranjevanje obsegov.",
         "profile_summary_header": "Povzetek profila",
         "recent_cycles_header": "Nedavni cikli",
-        "no_power_preview": "*Podatkov o moči ni na voljo za predogled.*"
+        "no_power_preview": "*Podatkov o moči ni na voljo za predogled.*",
+        "trim_cycle_preview_title": "Predogled cikličnega obrezovanja",
+        "trim_cycle_preview_no_data": "Za ta cikel ni podatkov o moči.",
+        "trim_cycle_preview_kept_suffix": "hraniti"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Poseben cikel oznake",
         "select_cycle_to_label_multi": "Označite več ciklov",
         "select_cycle_to_delete": "Izbriši cikel",
-        "interactive_editor": "Interaktivni urejevalnik za spajanje/razdelitev"
+        "interactive_editor": "Interaktivni urejevalnik za spajanje/razdelitev",
+        "trim_cycle": "Podatki cikla obrezovanja"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Poimenujte in uporabite faze",
         "cancel": "Nazaj brez sprememb"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Nastavite začetno točko",
+        "set_end": "Nastavite končno točko",
+        "reset": "Ponastavi na polno trajanje",
+        "apply": "Uporabi Trim",
+        "cancel": "Prekliči"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Naprava pralnega stroja za zaustavitev snemanja."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Cikel obrezovanja",
+      "description": "Prirežite podatke o moči preteklega cikla na določeno časovno okno.",
+      "fields": {
+        "device_id": {
+          "name": "Naprava",
+          "description": "Naprava WashData."
+        },
+        "cycle_id": {
+          "name": "ID cikla",
+          "description": "ID cikla za obrezovanje."
+        },
+        "trim_start_s": {
+          "name": "Začetek obrezovanja (sekunde)",
+          "description": "Shranite podatke iz tega odmika v nekaj sekundah. Privzeto 0."
+        },
+        "trim_end_s": {
+          "name": "Konec obrezovanja (sekunde)",
+          "description": "Ohranite podatke do tega odmika v nekaj sekundah. Privzeto = celotno trajanje."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Prisilni konec cikla"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Naprave ni bilo mogoče najti."
+    },
+    "no_config_entry": {
+      "message": "Za napravo ni bil najden noben konfiguracijski vnos."
+    },
+    "integration_not_loaded": {
+      "message": "Integracija ni naložena za to napravo."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Cikel ni najden ali nima podatkov o moči."
+    },
+    "trim_failed_empty_window": {
+      "message": "Obrezovanje ni uspelo — cikel ni najden, ni podatkov o moči ali pa je okno, ki je nastalo, prazno."
     }
   }
 }

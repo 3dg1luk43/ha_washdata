@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Stadium voorgestelde waardes in Gevorderde instellings"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim Cycle - Kies Cycle",
+        "description": "Kies 'n siklus om te snoei. ✓ = voltooi, ⚠ = hervat, ✗ = onderbreek",
+        "data": {
+          "cycle_id": "Siklus"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trim siklus",
+        "description": "Huidige venster: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Aksie"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Stel Trim Start",
+        "description": "Voer die minuut-afset in om data vanaf te begin hou (0 = siklusbegin).",
+        "data": {
+          "trim_start_min": "Begin (minute)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Stel Trim End",
+        "description": "Voer die minuutverstelling in om op te hou om data te hou.",
+        "data": {
+          "trim_end_min": "Einde (minute)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "Wasdata: Verifieer siklus ({device})",
       "feedback_notification_message": "**Toestel**: {device}\n**Program**: {program} ({confidence}% vertroue)\n**Tyd**: {time}\n\nWashData het jou hulp nodig om hierdie bespeurde siklus te verifieer.\n\nGaan asseblief na **Instellings > Toestelle en Dienste > Wasdata > Konfigureer > Leerterugvoere** om hierdie resultaat te bevestig of reg te stel.",
       "suggestions_ready_notification_title": "WashData: Voorgestelde instellings gereed ({device})",
-      "suggestions_ready_notification_message": "Die **Voorgestelde instellings**-sensor rapporteer nou **{count}** uitvoerbare aanbevelings.\n\nOm dit te hersien en toe te pas: **Instellings > Toestelle en Dienste > Wasdata > Konfigureer > Gevorderde instellings > Pas voorgestelde waardes toe**.\n\nVoorstelle is opsioneel en gewys vir hersiening voordat jy stoor."
+      "suggestions_ready_notification_message": "Die **Voorgestelde instellings**-sensor rapporteer nou **{count}** uitvoerbare aanbevelings.\n\nOm dit te hersien en toe te pas: **Instellings > Toestelle en Dienste > Wasdata > Konfigureer > Gevorderde instellings > Pas voorgestelde waardes toe**.\n\nVoorstelle is opsioneel en gewys vir hersiening voordat jy stoor.",
+      "trim_range_invalid": "Begin moet voor einde wees. Pas asseblief jou snoeipunte aan.",
+      "trim_failed": "Sny het misluk. Die siklus bestaan ​​dalk nie meer nie of die venster is leeg."
     },
     "abort": {
       "no_cycles_found": "Geen siklusse gevind nie",
@@ -594,7 +624,8 @@
       "no_predictions": "Geen voorspellings nie",
       "no_custom_phases": "Geen pasgemaakte fases gevind nie.",
       "reprocess_success": "Het {count} siklusse suksesvol herverwerk.",
-      "debug_data_cleared": "Het ontfoutdata van {count} siklusse suksesvol uitgevee."
+      "debug_data_cleared": "Het ontfoutdata van {count} siklusse suksesvol uitgevee.",
+      "no_power_data": "Geen kragspoordata beskikbaar vir die geselekteerde siklus nie."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Gebruik handelinge hieronder om reekse by te voeg, te wysig, uit te vee of te stoor.",
         "profile_summary_header": "Profielopsomming",
         "recent_cycles_header": "Onlangse siklusse",
-        "no_power_preview": "*Geen kragdata beskikbaar vir voorskou nie.*"
+        "no_power_preview": "*Geen kragdata beskikbaar vir voorskou nie.*",
+        "trim_cycle_preview_title": "Siklus Trim Voorskou",
+        "trim_cycle_preview_no_data": "Geen kragdata beskikbaar vir hierdie siklus nie.",
+        "trim_cycle_preview_kept_suffix": "gehou"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Benoem Spesifieke Siklus",
         "select_cycle_to_label_multi": "Benoem verskeie siklusse",
         "select_cycle_to_delete": "Vee siklus uit",
-        "interactive_editor": "Voeg saam / verdeel interaktiewe redigeerder"
+        "interactive_editor": "Voeg saam / verdeel interaktiewe redigeerder",
+        "trim_cycle": "Knip siklusdata"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Noem en pas fases toe",
         "cancel": "Gaan terug sonder veranderinge"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Stel Beginpunt",
+        "set_end": "Stel Eindpunt",
+        "reset": "Stel terug na volle duur",
+        "apply": "Pas Trim toe",
+        "cancel": "Kanselleer"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Die wasmasjien toestel om opname te stop."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trim siklus",
+      "description": "Sny die kragdata van 'n vorige siklus na 'n spesifieke tydvenster.",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die WashData-toestel."
+        },
+        "cycle_id": {
+          "name": "Siklus ID",
+          "description": "Die ID van die siklus om te snoei."
+        },
+        "trim_start_s": {
+          "name": "Trim Begin (sekondes)",
+          "description": "Hou data van hierdie afwyking binne sekondes. Verstek 0."
+        },
+        "trim_end_s": {
+          "name": "Knip einde (sekondes)",
+          "description": "Hou data binne sekondes tot by hierdie afwyking. Default = full duration."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,26 @@
       "force_end_cycle": {
         "name": "Forseer eindsiklus"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Toestel nie gevind nie."
+    },
+    "no_config_entry": {
+      "message": "Geen konfigurasie-inskrywing vir toestel gevind nie."
+    },
+    "integration_not_loaded": {
+      "message": "Integrasie nie vir hierdie toestel gelaai nie."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Siklus nie gevind nie of het geen kragdata nie."
+    },
+    "trim_failed_empty_window": {
+      "message": "Snoei het misluk – siklus nie gevind nie, geen kragdata nie, of die gevolglike venster is leeg."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s moet groter as trim_start_s wees."
     }
   }
 }

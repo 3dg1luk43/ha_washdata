@@ -29,10 +29,11 @@ PowerData = list[PowerPoint]
 
 def detect_power_data_format(
     power_data: PowerData,
-) -> Literal["offset", "iso", "datetime", "empty", "unknown"]:
+) -> Literal["offset", "iso", "datetime", "empty", "unknown", "unix_timestamp"]:
     """Identify which format a power_data list is in.
 
-    Returns one of: ``"offset"``, ``"iso"``, ``"datetime"``, ``"empty"``, ``"unknown"``.
+    Returns one of: ``"offset"``, ``"iso"``, ``"datetime"``, ``"empty"``,
+    ``"unknown"``, ``"unix_timestamp"``.
     """
     if not power_data:
         return "empty"
@@ -240,7 +241,7 @@ def migrate_power_data_to_offsets(cycle: dict[str, Any]) -> bool:
     if fmt in ("offset", "empty"):
         return False  # Already canonical
 
-    if fmt not in ("iso", "datetime"):
+    if fmt not in ("iso", "datetime", "unix_timestamp"):
         _LOGGER.warning(
             "migrate_power_data_to_offsets: unknown format '%s', skipping", fmt
         )

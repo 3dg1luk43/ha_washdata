@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Étapes des valeurs suggérées dans les paramètres avancés"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Cycle de coupe — Sélectionnez le cycle",
+        "description": "Sélectionnez un cycle à couper. ✓ = terminé, ⚠ = repris, ✗ = interrompu",
+        "data": {
+          "cycle_id": "Faire du vélo"
+        }
+      },
+      "trim_cycle": {
+        "title": "Cycle de coupe",
+        "description": "Fenêtre actuelle : {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Action"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Définir le début du découpage",
+        "description": "Entrez le décalage des minutes à partir duquel commencer à conserver les données (0 = début du cycle).",
+        "data": {
+          "trim_start_min": "Début (minutes)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Définir la fin de la coupe",
+        "description": "Entrez le décalage des minutes auquel arrêter de conserver les données.",
+        "data": {
+          "trim_end_min": "Fin (minutes)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData : Vérifier le cycle ({device})",
       "feedback_notification_message": "**Appareil** : {device}\n**Programme** : {program} ({confidence} % de confiance)\n**Heure** : {time}\n\nWashData a besoin de votre aide pour vérifier ce cycle détecté.\n\nVeuillez accéder à **Paramètres > Appareils et services > WashData > Configurer > Commentaires d'apprentissage** pour confirmer ou corriger ce résultat.",
       "suggestions_ready_notification_title": "WashData : Paramètres suggérés prêts ({device})",
-      "suggestions_ready_notification_message": "Le capteur **Paramètres suggérés** signale désormais **{count}** recommandations exploitables.\n\nPour les consulter et les appliquer : **Paramètres > Appareils et services > WashData > Configurer > Paramètres avancés > Appliquer les valeurs suggérées**.\n\nLes suggestions sont facultatives et affichées pour examen avant d’enregistrer."
+      "suggestions_ready_notification_message": "Le capteur **Paramètres suggérés** signale désormais **{count}** recommandations exploitables.\n\nPour les consulter et les appliquer : **Paramètres > Appareils et services > WashData > Configurer > Paramètres avancés > Appliquer les valeurs suggérées**.\n\nLes suggestions sont facultatives et affichées pour examen avant d’enregistrer.",
+      "trim_range_invalid": "Le début doit être avant la fin. Veuillez ajuster vos points de coupe.",
+      "trim_failed": "Le découpage a échoué. Le cycle n'existe peut-être plus ou la fenêtre est vide."
     },
     "abort": {
       "no_cycles_found": "Aucun cycle trouvé",
@@ -594,7 +624,8 @@
       "no_predictions": "Aucune prédiction",
       "no_custom_phases": "Aucune phase personnalisée trouvée.",
       "reprocess_success": "{count} cycles ont été retraités avec succès.",
-      "debug_data_cleared": "Les données de débogage de {count} cycles ont été effacées avec succès."
+      "debug_data_cleared": "Les données de débogage de {count} cycles ont été effacées avec succès.",
+      "no_power_data": "Aucune donnée de trace de puissance disponible pour le cycle sélectionné."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Utilisez les actions ci-dessous pour ajouter, modifier, supprimer ou enregistrer des plages.",
         "profile_summary_header": "Résumé du profil",
         "recent_cycles_header": "Cycles récents",
-        "no_power_preview": "*Aucune donnée de puissance disponible pour l'aperçu.*"
+        "no_power_preview": "*Aucune donnée de puissance disponible pour l'aperçu.*",
+        "trim_cycle_preview_title": "Aperçu du réglage du cycle",
+        "trim_cycle_preview_no_data": "Aucune donnée de puissance disponible pour ce cycle.",
+        "trim_cycle_preview_kept_suffix": "gardé"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Cycle spécifique à l'étiquette",
         "select_cycle_to_label_multi": "Étiqueter plusieurs cycles",
         "select_cycle_to_delete": "Supprimer le cycle",
-        "interactive_editor": "Fusionner/diviser l'éditeur interactif"
+        "interactive_editor": "Fusionner/diviser l'éditeur interactif",
+        "trim_cycle": "Données du cycle de coupe"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Nommer et appliquer les phases",
         "cancel": "Revenir sans modifications"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Définir le point de départ",
+        "set_end": "Définir le point final",
+        "reset": "Réinitialiser à la durée complète",
+        "apply": "Appliquer la garniture",
+        "cancel": "Annuler"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Le dispositif de la machine à laver pour arrêter l'enregistrement."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Cycle de coupe",
+      "description": "Ajustez les données de puissance d'un cycle passé à une fenêtre de temps spécifique.",
+      "fields": {
+        "device_id": {
+          "name": "Appareil",
+          "description": "Le périphérique WashData."
+        },
+        "cycle_id": {
+          "name": "Identifiant du cycle",
+          "description": "L’ID du cycle à découper."
+        },
+        "trim_start_s": {
+          "name": "Démarrage du trim (secondes)",
+          "description": "Conservez les données de ce décalage en secondes. Par défaut 0."
+        },
+        "trim_end_s": {
+          "name": "Fin de coupe (secondes)",
+          "description": "Conservez les données jusqu'à ce décalage en secondes. Par défaut = durée complète."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Forcer la fin du cycle"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Appareil introuvable."
+    },
+    "no_config_entry": {
+      "message": "Aucune entrée de configuration trouvée pour l'appareil."
+    },
+    "integration_not_loaded": {
+      "message": "Intégration non chargée pour cet appareil."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Cycle introuvable ou ne comportant aucune donnée de puissance."
+    },
+    "trim_failed_empty_window": {
+      "message": "Échec du trim : cycle introuvable, aucune donnée d'alimentation ou la fenêtre résultante est vide."
     }
   }
 }

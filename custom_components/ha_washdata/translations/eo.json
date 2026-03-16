@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Scenigu proponitajn valorojn en Altnivelaj Agordoj"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Tondi Ciklo - Elektu Ciklo",
+        "description": "Elektu ciklon por tondi. ✓ = finita, ⚠ = rekomencita, ✗ = interrompita",
+        "data": {
+          "cycle_id": "Ciklo"
+        }
+      },
+      "trim_cycle": {
+        "title": "Tondi Ciklo",
+        "description": "Nuna fenestro: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Ago"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Agordu Trim Start",
+        "description": "Enigu la minuton ofseton por komenci konservi datumojn de (0 = ciklokomenco).",
+        "data": {
+          "trim_start_min": "Komenco (minutoj)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Agordu Trim End",
+        "description": "Enigu la minuton kompenson por ĉesi konservi datumojn ĉe.",
+        "data": {
+          "trim_end_min": "Fino (minutoj)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Kontrolu Ciklon ({device})",
       "feedback_notification_message": "**Aparato**: {device}\n**Programo**: {program} ({confidence}% fido)\n**Tempo**: {time}\n\nWashData bezonas vian helpon por kontroli ĉi tiun detektitan ciklon.\n\nBonvolu iri al **Agordoj > Aparatoj kaj Servoj > WashData > Agordi > Lernado-Resigoj** por konfirmi aŭ korekti ĉi tiun rezulton.",
       "suggestions_ready_notification_title": "WashData: Pretaj Sugestaj Agordoj ({device})",
-      "suggestions_ready_notification_message": "La **Sugestita Agordo** sentilo nun raportas **{count}** ageblajn rekomendojn.\n\nPor revizii kaj apliki ilin: **Agordoj > Aparatoj kaj Servoj > WashData > Agordu > Altnivelaj Agordoj > Apliki Sugestajn Valorojn**.\n\nSugestoj estas laŭvolaj kaj montrataj por revizio antaŭ ol vi konservas."
+      "suggestions_ready_notification_message": "La **Sugestita Agordo** sentilo nun raportas **{count}** ageblajn rekomendojn.\n\nPor revizii kaj apliki ilin: **Agordoj > Aparatoj kaj Servoj > WashData > Agordu > Altnivelaj Agordoj > Apliki Sugestajn Valorojn**.\n\nSugestoj estas laŭvolaj kaj montrataj por revizio antaŭ ol vi konservas.",
+      "trim_range_invalid": "Komenco devas esti antaŭ fino. Bonvolu ĝustigi viajn eltondajn punktojn.",
+      "trim_failed": "Trim malsukcesis. La ciklo eble ne plu ekzistas aŭ la fenestro estas malplena."
     },
     "abort": {
       "no_cycles_found": "Neniuj cikloj trovitaj",
@@ -594,7 +624,8 @@
       "no_predictions": "Neniuj antaŭdiroj",
       "no_custom_phases": "Neniuj kutimaj fazoj trovitaj.",
       "reprocess_success": "Sukcese reprocesitaj {count} cikloj.",
-      "debug_data_cleared": "Sukcese forigis sencimigajn datumojn el {count} cikloj."
+      "debug_data_cleared": "Sukcese forigis sencimigajn datumojn el {count} cikloj.",
+      "no_power_data": "Neniuj potencospuraj datumoj haveblaj por la elektita ciklo."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Uzu agojn sube por aldoni, redakti, forigi aŭ konservi intervalojn.",
         "profile_summary_header": "Profila Resumo",
         "recent_cycles_header": "Freŝaj cikloj",
-        "no_power_preview": "*Neniu elektraj datumoj disponeblaj por antaŭrigardo.*"
+        "no_power_preview": "*Neniu elektraj datumoj disponeblaj por antaŭrigardo.*",
+        "trim_cycle_preview_title": "Ciklo Trim Antaŭrigardo",
+        "trim_cycle_preview_no_data": "Neniuj energidatenoj haveblaj por ĉi tiu ciklo.",
+        "trim_cycle_preview_kept_suffix": "konservita"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Etikedo Specifa Ciklo",
         "select_cycle_to_label_multi": "Etikedu Multoblaj Cikloj",
         "select_cycle_to_delete": "Forigi Ciklon",
-        "interactive_editor": "Kunfandi/Disigi Interaga Redaktoro"
+        "interactive_editor": "Kunfandi/Disigi Interaga Redaktoro",
+        "trim_cycle": "Trim Ciklaj Datumoj"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Nomu kaj apliki fazojn",
         "cancel": "Reiru sen ŝanĝoj"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Agordu Komencan Punkton",
+        "set_end": "Agordu Finpunkton",
+        "reset": "Restarigi al Plena Daŭro",
+        "apply": "Apliki Trim",
+        "cancel": "Nuligi"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "La lavmaŝino aparato por ĉesi registradon."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Tondi Ciklo",
+      "description": "Tondi la potencajn datumojn de pasinta ciklo al specifa tempofenestro.",
+      "fields": {
+        "device_id": {
+          "name": "Aparato",
+          "description": "La WashData-aparato."
+        },
+        "cycle_id": {
+          "name": "Cikla ID",
+          "description": "La ID de la ciklo por tondi."
+        },
+        "trim_start_s": {
+          "name": "Tondi Komenco (sekundoj)",
+          "description": "Konservu datumojn de ĉi tiu ofseto en sekundoj. Defaŭlte 0."
+        },
+        "trim_end_s": {
+          "name": "Tondi Finon (sekundoj)",
+          "description": "Konservu datumojn ĝis ĉi tiu kompenso en sekundoj. Default = plena daŭro."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Forto Fina Ciklo"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Aparato ne trovita."
+    },
+    "no_config_entry": {
+      "message": "Neniu agorda eniro trovita por aparato."
+    },
+    "integration_not_loaded": {
+      "message": "Integriĝo ne ŝarĝita por ĉi tiu aparato."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Ciklo ne trovita aŭ havas neniujn potencajn datumojn."
+    },
+    "trim_failed_empty_window": {
+      "message": "Tondado malsukcesis — ciklo ne trovita, neniuj energidatenoj, aŭ rezulta fenestro estas malplena."
     }
   }
 }

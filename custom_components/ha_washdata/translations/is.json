@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Stig tillögur að gildum í Ítarlegri stillingum"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim Cycle — Veldu Cycle",
+        "description": "Veldu hringrás til að klippa. ✓ = lokið, ⚠ = haldið áfram, ✗ = truflað",
+        "data": {
+          "cycle_id": "Hringrás"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trim Cycle",
+        "description": "Núverandi gluggi: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Aðgerð"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Stilltu Trim Start",
+        "description": "Sláðu inn mínútujöfnunina til að byrja að halda gögnum frá (0 = hringrás byrjun).",
+        "data": {
+          "trim_start_min": "Byrja (mínútur)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Stilltu Trim End",
+        "description": "Sláðu inn mínútujöfnunina til að hætta að halda gögnum á.",
+        "data": {
+          "trim_end_min": "Lok (mínútur)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Staðfestu hringrás ({device})",
       "feedback_notification_message": "**Tæki**: {device}\n**Prógramm**: {program} ({confidence}% sjálfstraust)\n**Tími**: {time}\n\nWashData þarf á aðstoð þinni að halda til að staðfesta þessa greindu lotu.\n\nVinsamlegast farðu í **Stillingar > Tæki og þjónusta > WashData > Stilla > Námsendurgjöf** til að staðfesta eða leiðrétta þessa niðurstöðu.",
       "suggestions_ready_notification_title": "WashData: Ráðlagðar stillingar tilbúnar ({device})",
-      "suggestions_ready_notification_message": "Skynjarinn **Tillögur að stillingum** tilkynnir nú **{count}** ráðleggingar sem hægt er að nota.\n\nTil að fara yfir og nota þær: **Stillingar > Tæki og þjónusta > WashData > Stilla > Ítarlegar stillingar > Nota ráðlögð gildi**.\n\nTillögur eru valfrjálsar og sýndar til skoðunar áður en þú vistar."
+      "suggestions_ready_notification_message": "Skynjarinn **Tillögur að stillingum** tilkynnir nú **{count}** ráðleggingar sem hægt er að nota.\n\nTil að fara yfir og nota þær: **Stillingar > Tæki og þjónusta > WashData > Stilla > Ítarlegar stillingar > Nota ráðlögð gildi**.\n\nTillögur eru valfrjálsar og sýndar til skoðunar áður en þú vistar.",
+      "trim_range_invalid": "Byrjun verður að vera fyrir lok. Vinsamlegast stilltu klippingarpunktana þína.",
+      "trim_failed": "Snyrting mistókst. Hringrásin gæti ekki lengur verið til eða glugginn er tómur."
     },
     "abort": {
       "no_cycles_found": "Engar lotur fundust",
@@ -594,7 +624,8 @@
       "no_predictions": "Engar spár",
       "no_custom_phases": "Engir sérsniðnir áfangar fundust.",
       "reprocess_success": "Tókst að endurvinna {count} lotur.",
-      "debug_data_cleared": "Tókst að hreinsa villuleitargögn úr {count} lotum."
+      "debug_data_cleared": "Tókst að hreinsa villuleitargögn úr {count} lotum.",
+      "no_power_data": "Engin gögn um orkuspor eru tiltæk fyrir valda lotu."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Notaðu aðgerðir hér að neðan til að bæta við, breyta, eyða eða vista svið.",
         "profile_summary_header": "Samantekt prófíls",
         "recent_cycles_header": "Nýlegar lotur",
-        "no_power_preview": "*Engin orkugögn tiltæk til forskoðunar.*"
+        "no_power_preview": "*Engin orkugögn tiltæk til forskoðunar.*",
+        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "trim_cycle_preview_no_data": "Engin orkugögn tiltæk fyrir þessa lotu.",
+        "trim_cycle_preview_kept_suffix": "haldið"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Merki ákveðin hringrás",
         "select_cycle_to_label_multi": "Merktu margar lotur",
         "select_cycle_to_delete": "Eyða hringrás",
-        "interactive_editor": "Sameina/skipta gagnvirkum ritstjóra"
+        "interactive_editor": "Sameina/skipta gagnvirkum ritstjóra",
+        "trim_cycle": "Trim Cycle Data"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Nefndu og notaðu áfanga",
         "cancel": "Farðu til baka án breytinga"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Stilltu upphafspunkt",
+        "set_end": "Stilltu endapunkt",
+        "reset": "Endurstilla á fulla lengd",
+        "apply": "Notaðu Trim",
+        "cancel": "Hætta við"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Þvottavél tæki til að hætta upptöku."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trim Cycle",
+      "description": "Klipptu aflgögn fyrri lotu í ákveðinn tímaglugga.",
+      "fields": {
+        "device_id": {
+          "name": "Tæki",
+          "description": "WashData tækið."
+        },
+        "cycle_id": {
+          "name": "Auðkenni hringrásar",
+          "description": "Auðkenni hringrásarinnar sem á að klippa."
+        },
+        "trim_start_s": {
+          "name": "Trim Start (sekúndur)",
+          "description": "Geymdu gögn frá þessari færslu á nokkrum sekúndum. Sjálfgefið 0."
+        },
+        "trim_end_s": {
+          "name": "Klipptu enda (sekúndur)",
+          "description": "Haltu gögnum upp að þessari frávik á nokkrum sekúndum. Sjálfgefið = full lengd."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Þvingaðu lokahring"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Tæki fannst ekki."
+    },
+    "no_config_entry": {
+      "message": "Engin stillingarfærsla fannst fyrir tækið."
+    },
+    "integration_not_loaded": {
+      "message": "Samþætting ekki hlaðin fyrir þetta tæki."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Hringrás fannst ekki eða hefur engin orkugögn."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim mistókst — hringrás fannst ekki, engin orkugögn eða gluggi sem myndast er tómur."
     }
   }
 }

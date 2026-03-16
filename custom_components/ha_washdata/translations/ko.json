@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "고급 설정에서 제안된 값을 준비합니다."
         }
+      },
+      "trim_cycle_select": {
+        "title": "트림 주기 - 주기 선택",
+        "description": "트리밍할 주기를 선택하세요. ✓ = 완료됨, ⚠ = 재개됨, ✗ = 중단됨",
+        "data": {
+          "cycle_id": "주기"
+        }
+      },
+      "trim_cycle": {
+        "title": "트림주기",
+        "description": "현재 창: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "행동"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "트림 시작 설정",
+        "description": "(0 = 사이클 시작)부터 데이터 보관을 시작하기 위한 분 오프셋을 입력합니다.",
+        "data": {
+          "trim_start_min": "시작(분)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "트림 종료 설정",
+        "description": "데이터 보관을 중지할 분 오프셋을 입력하세요.",
+        "data": {
+          "trim_end_min": "종료(분)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: 확인 주기({device})",
       "feedback_notification_message": "**기기**: {device}\n**프로그램**: {program} ({confidence}% 신뢰도)\n**시간**: {time}\n\nWashData가 감지된 주기를 확인하려면 귀하의 도움이 필요합니다.\n\n이 결과를 확인하거나 수정하려면 **설정 > 장치 및 서비스 > WashData > 구성 > 학습 피드백**으로 이동하세요.",
       "suggestions_ready_notification_title": "WashData: 제안 설정 준비됨({device})",
-      "suggestions_ready_notification_message": "**제안 설정** 센서는 이제 **{count}** 실행 가능한 권장 사항을 보고합니다.\n\n이를 검토하고 적용하려면: **설정 > 장치 및 서비스 > WashData > 구성 > 고급 설정 > 제안 값 적용**.\n\n제안사항은 선택사항이며 저장하기 전에 검토를 위해 표시됩니다."
+      "suggestions_ready_notification_message": "**제안 설정** 센서는 이제 **{count}** 실행 가능한 권장 사항을 보고합니다.\n\n이를 검토하고 적용하려면: **설정 > 장치 및 서비스 > WashData > 구성 > 고급 설정 > 제안 값 적용**.\n\n제안사항은 선택사항이며 저장하기 전에 검토를 위해 표시됩니다.",
+      "trim_range_invalid": "시작은 종료 이전이어야 합니다. 트림 포인트를 조정해주세요.",
+      "trim_failed": "트림에 실패했습니다. 주기가 더 이상 존재하지 않거나 창이 비어 있습니다."
     },
     "abort": {
       "no_cycles_found": "사이클을 찾을 수 없습니다.",
@@ -594,7 +624,8 @@
       "no_predictions": "예측 없음",
       "no_custom_phases": "맞춤 단계를 찾을 수 없습니다.",
       "reprocess_success": "{count}주기를 성공적으로 재처리했습니다.",
-      "debug_data_cleared": "{count} 주기에서 디버그 데이터를 성공적으로 지웠습니다."
+      "debug_data_cleared": "{count} 주기에서 디버그 데이터를 성공적으로 지웠습니다.",
+      "no_power_data": "선택한 주기에 사용할 수 있는 전력 추적 데이터가 없습니다."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "아래 작업을 사용하여 범위를 추가, 편집, 삭제 또는 저장하세요.",
         "profile_summary_header": "프로필 요약",
         "recent_cycles_header": "최근 주기",
-        "no_power_preview": "*미리보기에 사용할 수 있는 전력 데이터가 없습니다.*"
+        "no_power_preview": "*미리보기에 사용할 수 있는 전력 데이터가 없습니다.*",
+        "trim_cycle_preview_title": "사이클 트림 미리보기",
+        "trim_cycle_preview_no_data": "이 주기에 사용할 수 있는 전력 데이터가 없습니다.",
+        "trim_cycle_preview_kept_suffix": "유지된"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "라벨별 주기",
         "select_cycle_to_label_multi": "여러 주기에 라벨 지정",
         "select_cycle_to_delete": "주기 삭제",
-        "interactive_editor": "병합/분할 대화형 편집기"
+        "interactive_editor": "병합/분할 대화형 편집기",
+        "trim_cycle": "트림 사이클 데이터"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "이름 지정 및 적용 단계",
         "cancel": "변경사항 없이 돌아가기"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "시작점 설정",
+        "set_end": "끝점 설정",
+        "reset": "전체 기간으로 재설정",
+        "apply": "트림 적용",
+        "cancel": "취소"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "녹화를 중지하는 세탁기 장치입니다."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "트림주기",
+      "description": "과거 주기의 전력 데이터를 특정 시간 창으로 자릅니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "WashData 장치."
+        },
+        "cycle_id": {
+          "name": "주기 ID",
+          "description": "트리밍할 주기의 ID입니다."
+        },
+        "trim_start_s": {
+          "name": "트림 시작(초)",
+          "description": "이 오프셋의 데이터를 초 단위로 유지합니다. 기본값은 0입니다."
+        },
+        "trim_end_s": {
+          "name": "자르기 종료(초)",
+          "description": "초 단위로 이 오프셋까지 데이터를 유지합니다. 기본값은 전체 기간입니다."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "강제 종료 주기"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "장치를 찾을 수 없습니다."
+    },
+    "no_config_entry": {
+      "message": "장치에 대한 구성 항목을 찾을 수 없습니다."
+    },
+    "integration_not_loaded": {
+      "message": "이 기기에 대한 통합이 로드되지 않았습니다."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "사이클을 찾을 수 없거나 전력 데이터가 없습니다."
+    },
+    "trim_failed_empty_window": {
+      "message": "트림 실패 — 사이클을 찾을 수 없거나 전력 데이터가 없거나 결과 창이 비어 있습니다."
     }
   }
 }

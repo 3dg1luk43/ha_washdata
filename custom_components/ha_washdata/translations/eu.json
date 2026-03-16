@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Jarri iradokitako balioak Ezarpen aurreratuan"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Moztu Zikloa — Hautatu Zikloa",
+        "description": "Hautatu mozteko ziklo bat. ✓ = amaitu, ⚠ = berriro hasi, ✗ = eten",
+        "data": {
+          "cycle_id": "Zikloa"
+        }
+      },
+      "trim_cycle": {
+        "title": "Moztu Zikloa",
+        "description": "Uneko leihoa: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Ekintza"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Ezarri Trim Start",
+        "description": "Idatzi minutuko desplazamendua datuak gordetzen hasteko (0 = zikloaren hasiera).",
+        "data": {
+          "trim_start_min": "Hasiera (minutuak)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Ezarri Trim End",
+        "description": "Idatzi minutuko desplazamendua datuak gordetzeari uzteko.",
+        "data": {
+          "trim_end_min": "Amaiera (minutuak)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Egiaztatu Zikloa ({device})",
       "feedback_notification_message": "**Gailua**: {device}\n**Programa**: {program} (% {confidence} konfiantza)\n**Ordua**: {time}\n\nWashData-k zure laguntza behar du hautemandako ziklo hau egiaztatzeko.\n\nMesedez, joan **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ikaskuntza-iritziak** atalera emaitza hau berresteko edo zuzentzeko.",
       "suggestions_ready_notification_title": "WashData: iradokitako ezarpenak prest ({device})",
-      "suggestions_ready_notification_message": "**Iradokitako ezarpenak** sentsoreak **{count}** gomendio akziogarriak ematen ditu orain.\n\nHoriek berrikusteko eta aplikatzeko: **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ezarpen aurreratuak > Aplikatu iradokitako balioak**.\n\nIradokizunak aukerakoak dira eta gorde aurretik berrikusteko erakusten dira."
+      "suggestions_ready_notification_message": "**Iradokitako ezarpenak** sentsoreak **{count}** gomendio akziogarriak ematen ditu orain.\n\nHoriek berrikusteko eta aplikatzeko: **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ezarpen aurreratuak > Aplikatu iradokitako balioak**.\n\nIradokizunak aukerakoak dira eta gorde aurretik berrikusteko erakusten dira.",
+      "trim_range_invalid": "Hasiera amaiera baino lehen izan behar da. Mesedez, egokitu zure mozketa-puntuak.",
+      "trim_failed": "Moztu huts egin du. Baliteke zikloa ez egotea edo leihoa hutsik egotea."
     },
     "abort": {
       "no_cycles_found": "Ez da ziklorik aurkitu",
@@ -594,7 +624,8 @@
       "no_predictions": "Iragarpenik ez",
       "no_custom_phases": "Ez da fase pertsonalizaturik aurkitu.",
       "reprocess_success": "Behar bezala birprozesatu dira {count} ziklo.",
-      "debug_data_cleared": "Behar bezala garbitu dira {count} zikloetako arazketa-datuak."
+      "debug_data_cleared": "Behar bezala garbitu dira {count} zikloetako arazketa-datuak.",
+      "no_power_data": "Ez dago potentzia-aztarna daturik aukeratutako ziklorako."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Erabili beheko ekintzak barrutiak gehitzeko, editatzeko, ezabatzeko edo gordetzeko.",
         "profile_summary_header": "Profilaren laburpena",
         "recent_cycles_header": "Azken zikloak",
-        "no_power_preview": "*Ez dago energia-daturik eskuragarri aurrebistarako.*"
+        "no_power_preview": "*Ez dago energia-daturik eskuragarri aurrebistarako.*",
+        "trim_cycle_preview_title": "Zikloaren mozketaren aurrebista",
+        "trim_cycle_preview_no_data": "Ez dago energia-daturik eskuragarri ziklo honetarako.",
+        "trim_cycle_preview_kept_suffix": "mantendu"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Etiketa Ziklo Espezifikoa",
         "select_cycle_to_label_multi": "Etiketatu Ziklo Anitz",
         "select_cycle_to_delete": "Ezabatu Zikloa",
-        "interactive_editor": "Batu/Zatitu Editore Interaktiboa"
+        "interactive_editor": "Batu/Zatitu Editore Interaktiboa",
+        "trim_cycle": "Moztu Zikloaren Datuak"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Faseak izendatu eta aplikatu",
         "cancel": "Atzera egin aldaketarik gabe"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Ezarri Abiapuntua",
+        "set_end": "Ezarri amaiera-puntua",
+        "reset": "Berrezarri iraupen osoa",
+        "apply": "Aplikatu Trim",
+        "cancel": "Utzi"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Garbigailuaren gailua grabazioa gelditzeko."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Moztu Zikloa",
+      "description": "Moztu iraganeko ziklo baten potentzia-datuak denbora-leiho zehatz batera.",
+      "fields": {
+        "device_id": {
+          "name": "Gailua",
+          "description": "WashData gailua."
+        },
+        "cycle_id": {
+          "name": "Zikloaren IDa",
+          "description": "Moztu beharreko zikloaren IDa."
+        },
+        "trim_start_s": {
+          "name": "Moztu hasiera (segundoak)",
+          "description": "Gorde desplazamendu honen datuak segundotan. Lehenetsia 0."
+        },
+        "trim_end_s": {
+          "name": "Moztu amaiera (segundoak)",
+          "description": "Mantendu datuak desplazamendu honetarako segundotan. Lehenetsia = iraupen osoa."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Indar Amaierako Zikloa"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Ez da gailua aurkitu."
+    },
+    "no_config_entry": {
+      "message": "Ez da aurkitu gailurako konfigurazio-sarrerarik."
+    },
+    "integration_not_loaded": {
+      "message": "Ez da kargatu gailu honetarako integrazioa."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Zikloa ez da aurkitu edo ez du energia-daturik."
+    },
+    "trim_failed_empty_window": {
+      "message": "Moztu huts egin du — zikloa ez da aurkitu, ez dago energia-daturik edo ondoriozko leihoa hutsik dago."
     }
   }
 }

@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "詳細設定でのステージ推奨値"
         }
+      },
+      "trim_cycle_select": {
+        "title": "トリムサイクル — サイクルの選択",
+        "description": "トリムするサイクルを選択します。 ✓ = 完了、⚠ = 再開、✗ = 中断",
+        "data": {
+          "cycle_id": "サイクル"
+        }
+      },
+      "trim_cycle": {
+        "title": "トリムサイクル",
+        "description": "現在のウィンドウ: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "アクション"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "トリム開始の設定",
+        "description": "データの保持を開始する分のオフセットを入力します (0 = サイクル開始)。",
+        "data": {
+          "trim_start_min": "開始 (分)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "トリムエンドの設定",
+        "description": "データの保持を停止する分のオフセットを入力します。",
+        "data": {
+          "trim_end_min": "終了（分）"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: サイクルの検証 ({device})",
       "feedback_notification_message": "**デバイス**: {device}\n**プログラム**: {program} (信頼度: {confidence}%)\n**時間**: {time}\n\nWashData は、この検出されたサイクルを確認するためにあなたの助けを必要としています。\n\nこの結果を確認または修正するには、**[設定] > [デバイスとサービス] > [WashData] > [構成] > [学習フィードバック]** に移動してください。",
       "suggestions_ready_notification_title": "WashData: 推奨設定の準備完了 ({device})",
-      "suggestions_ready_notification_message": "**推奨設定**センサーは**{count}**の実用的な推奨事項を報告するようになりました。\n\nそれらを確認して適用するには: **[設定] > [デバイスとサービス] > [WashData] > [構成] > [詳細設定] > [推奨値を適用]**。\n\n提案はオプションであり、保存する前に確認するために表示されます。"
+      "suggestions_ready_notification_message": "**推奨設定**センサーは**{count}**の実用的な推奨事項を報告するようになりました。\n\nそれらを確認して適用するには: **[設定] > [デバイスとサービス] > [WashData] > [構成] > [詳細設定] > [推奨値を適用]**。\n\n提案はオプションであり、保存する前に確認するために表示されます。",
+      "trim_range_invalid": "開始は終了より前になければなりません。トリムポイントを調整してください。",
+      "trim_failed": "トリムに失敗しました。サイクルが存在しないか、ウィンドウが空である可能性があります。"
     },
     "abort": {
       "no_cycles_found": "サイクルが見つかりませんでした",
@@ -594,7 +624,8 @@
       "no_predictions": "予測はありません",
       "no_custom_phases": "カスタムフェーズが見つかりません。",
       "reprocess_success": "{count} サイクルが正常に再処理されました。",
-      "debug_data_cleared": "{count} サイクルのデバッグ データが正常にクリアされました。"
+      "debug_data_cleared": "{count} サイクルのデバッグ データが正常にクリアされました。",
+      "no_power_data": "選択したサイクルで使用できる電力トレース データがありません。"
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "範囲を追加、編集、削除、または保存するには、以下のアクションを使用します。",
         "profile_summary_header": "プロフィールの概要",
         "recent_cycles_header": "最近のサイクル",
-        "no_power_preview": "*プレビューに使用できる電力データはありません。*"
+        "no_power_preview": "*プレビューに使用できる電力データはありません。*",
+        "trim_cycle_preview_title": "サイクルトリムプレビュー",
+        "trim_cycle_preview_no_data": "このサイクルでは利用可能な電力データがありません。",
+        "trim_cycle_preview_kept_suffix": "保たれた"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "ラベル固有のサイクル",
         "select_cycle_to_label_multi": "複数のサイクルにラベルを付ける",
         "select_cycle_to_delete": "サイクルの削除",
-        "interactive_editor": "インタラクティブ エディターの結合/分割"
+        "interactive_editor": "インタラクティブ エディターの結合/分割",
+        "trim_cycle": "トリムサイクルデータ"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "フェーズに名前を付けて適用する",
         "cancel": "変更せずに戻る"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "開始点の設定",
+        "set_end": "終点の設定",
+        "reset": "全期間にリセット",
+        "apply": "トリムを適用",
+        "cancel": "キャンセル"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "洗濯機の録画を停止する装置。"
         }
       }
+    },
+    "trim_cycle": {
+      "name": "トリムサイクル",
+      "description": "過去のサイクルの電力データを特定の時間枠にトリミングします。",
+      "fields": {
+        "device_id": {
+          "name": "デバイス",
+          "description": "WashData デバイス。"
+        },
+        "cycle_id": {
+          "name": "サイクルID",
+          "description": "トリムするサイクルの ID。"
+        },
+        "trim_start_s": {
+          "name": "トリム開始 (秒)",
+          "description": "このオフセットからのデータを秒単位で保持します。デフォルトは 0。"
+        },
+        "trim_end_s": {
+          "name": "トリムエンド (秒)",
+          "description": "データをこのオフセットまで数秒で維持します。デフォルト = 全期間。"
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "強制終了サイクル"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "デバイスが見つかりません。"
+    },
+    "no_config_entry": {
+      "message": "デバイスの構成エントリが見つかりません。"
+    },
+    "integration_not_loaded": {
+      "message": "このデバイスには統合がロードされていません。"
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "サイクルが見つからないか、電力データがありません。"
+    },
+    "trim_failed_empty_window": {
+      "message": "トリムに失敗しました — サイクルが見つからないか、パワーデータがないか、結果のウィンドウが空です。"
     }
   }
 }

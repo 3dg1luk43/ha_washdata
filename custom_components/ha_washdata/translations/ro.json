@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Etapați valorile sugerate în Setări avansate"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Ciclu de tăiere — Selectați Ciclu",
+        "description": "Selectați un ciclu de tăiat. ✓ = finalizat, ⚠ = reluat, ✗ = întrerupt",
+        "data": {
+          "cycle_id": "Ciclu"
+        }
+      },
+      "trim_cycle": {
+        "title": "Ciclu de tăiere",
+        "description": "Fereastra curentă: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Acţiune"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Setați Trim Start",
+        "description": "Introduceți decalajul de minute pentru a începe păstrarea datelor de la (0 = începerea ciclului).",
+        "data": {
+          "trim_start_min": "Start (minute)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Setați sfârșitul tăierii",
+        "description": "Introduceți decalajul de minute pentru a opri păstrarea datelor la.",
+        "data": {
+          "trim_end_min": "Sfârșit (minute)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Verificați ciclul ({device})",
       "feedback_notification_message": "**Dispozitiv**: {device}\n**Program**: {program} ({confidence}% încredere)\n**Ora**: {time}\n\nWashData are nevoie de ajutorul tău pentru a verifica acest ciclu detectat.\n\nVă rugăm să accesați **Setări > Dispozitive și servicii > WashData > Configurare > Feedbacks de învățare** pentru a confirma sau corecta acest rezultat.",
       "suggestions_ready_notification_title": "WashData: gata de setări sugerate ({device})",
-      "suggestions_ready_notification_message": "Senzorul **Setări sugerate** raportează acum **{count}** recomandări posibile.\n\nPentru a le revizui și aplica: **Setări > Dispozitive și servicii > WashData > Configurare > Setări avansate > Aplicați valorile sugerate**.\n\nSugestiile sunt opționale și sunt afișate pentru examinare înainte de a salva."
+      "suggestions_ready_notification_message": "Senzorul **Setări sugerate** raportează acum **{count}** recomandări posibile.\n\nPentru a le revizui și aplica: **Setări > Dispozitive și servicii > WashData > Configurare > Setări avansate > Aplicați valorile sugerate**.\n\nSugestiile sunt opționale și sunt afișate pentru examinare înainte de a salva.",
+      "trim_range_invalid": "Începutul trebuie să fie înainte de sfârșit. Vă rugăm să vă ajustați punctele de tăiere.",
+      "trim_failed": "Tăierea eșuată. Este posibil ca ciclul să nu mai existe sau fereastra este goală."
     },
     "abort": {
       "no_cycles_found": "Nu s-au găsit cicluri",
@@ -594,7 +624,8 @@
       "no_predictions": "Fara predictii",
       "no_custom_phases": "Nu s-au găsit faze personalizate.",
       "reprocess_success": "S-au reprocesat cu succes {count} cicluri.",
-      "debug_data_cleared": "S-au șters datele de depanare din {count} cicluri."
+      "debug_data_cleared": "S-au șters datele de depanare din {count} cicluri.",
+      "no_power_data": "Nu sunt disponibile date de urmărire a puterii pentru ciclul selectat."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Utilizați acțiunile de mai jos pentru a adăuga, edita, șterge sau salva intervale.",
         "profile_summary_header": "Rezumatul profilului",
         "recent_cycles_header": "Cicluri recente",
-        "no_power_preview": "*Nu sunt disponibile date de putere pentru previzualizare.*"
+        "no_power_preview": "*Nu sunt disponibile date de putere pentru previzualizare.*",
+        "trim_cycle_preview_title": "Previzualizare Cycle Trim",
+        "trim_cycle_preview_no_data": "Nu sunt disponibile date de putere pentru acest ciclu.",
+        "trim_cycle_preview_kept_suffix": "păstrat"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Ciclul specific al etichetei",
         "select_cycle_to_label_multi": "Etichetați mai multe cicluri",
         "select_cycle_to_delete": "Șterge ciclul",
-        "interactive_editor": "Editor interactiv Merge/Split"
+        "interactive_editor": "Editor interactiv Merge/Split",
+        "trim_cycle": "Date ciclului de tăiere"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Denumiți și aplicați fazele",
         "cancel": "Întoarceți-vă fără modificări"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Setați punctul de pornire",
+        "set_end": "Setați punctul final",
+        "reset": "Resetați la Durată completă",
+        "apply": "Aplicați Trim",
+        "cancel": "Anula"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Dispozitivul mașinii de spălat rufe pentru a opri înregistrarea."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Ciclu de tăiere",
+      "description": "Tăiați datele de putere ale unui ciclu trecut la o anumită fereastră de timp.",
+      "fields": {
+        "device_id": {
+          "name": "Dispozitiv",
+          "description": "Dispozitivul WashData."
+        },
+        "cycle_id": {
+          "name": "ID-ul ciclului",
+          "description": "ID-ul ciclului de tăiat."
+        },
+        "trim_start_s": {
+          "name": "Începutul tăierii (secunde)",
+          "description": "Păstrați datele din acest offset în câteva secunde. Implicit 0."
+        },
+        "trim_end_s": {
+          "name": "Sfârșitul tăierii (secunde)",
+          "description": "Păstrați datele până la această compensare în câteva secunde. Implicit = durata intreaga."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Forțare a ciclului de sfârșit"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Dispozitivul nu a fost găsit."
+    },
+    "no_config_entry": {
+      "message": "Nu a fost găsită nicio intrare de configurare pentru dispozitiv."
+    },
+    "integration_not_loaded": {
+      "message": "Integrarea nu a fost încărcată pentru acest dispozitiv."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Ciclul nu a fost găsit sau nu are date de putere."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim failed — ciclul nu a fost găsit, nu există date de putere sau fereastra rezultată este goală."
     }
   }
 }

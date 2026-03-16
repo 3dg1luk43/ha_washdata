@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Steg föreslagna värden i avancerade inställningar"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim Cycle — Välj Cycle",
+        "description": "Välj en cykel att trimma. ✓ = klar, ⚠ = återupptas, ✗ = avbruten",
+        "data": {
+          "cycle_id": "Cykel"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trimcykel",
+        "description": "Aktuellt fönster: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Handling"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Ställ in trimstart",
+        "description": "Ange minutoffset för att börja spara data från (0 = cykelstart).",
+        "data": {
+          "trim_start_min": "Start (minuter)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Ställ in Trim End",
+        "description": "Ange minutförskjutningen för att sluta hålla data vid.",
+        "data": {
+          "trim_end_min": "Slut (minuter)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Verifieringscykel ({device})",
       "feedback_notification_message": "**Enhet**: {device}\n**Program**: {program} ({confidence}% konfidens)\n**Tid**: {time}\n\nWashData behöver din hjälp för att verifiera denna upptäckta cykel.\n\nGå till **Inställningar > Enheter och tjänster > WashData > Konfigurera > Inlärningsfeedback** för att bekräfta eller korrigera detta resultat.",
       "suggestions_ready_notification_title": "WashData: Föreslagna inställningar redo ({device})",
-      "suggestions_ready_notification_message": "Sensorn **Föreslagna inställningar** rapporterar nu **{count}** rekommendationer som kan användas.\n\nSå här granskar och tillämpar du dem: **Inställningar > Enheter och tjänster > WashData > Konfigurera > Avancerade inställningar > Använd föreslagna värden**.\n\nFörslag är valfria och visas för granskning innan du sparar."
+      "suggestions_ready_notification_message": "Sensorn **Föreslagna inställningar** rapporterar nu **{count}** rekommendationer som kan användas.\n\nSå här granskar och tillämpar du dem: **Inställningar > Enheter och tjänster > WashData > Konfigurera > Avancerade inställningar > Använd föreslagna värden**.\n\nFörslag är valfria och visas för granskning innan du sparar.",
+      "trim_range_invalid": "Start måste vara före slutet. Vänligen justera dina trimpunkter.",
+      "trim_failed": "Trim misslyckades. Cykeln kanske inte längre finns eller så är fönstret tomt."
     },
     "abort": {
       "no_cycles_found": "Inga cykler hittades",
@@ -594,7 +624,8 @@
       "no_predictions": "Inga förutsägelser",
       "no_custom_phases": "Inga anpassade faser hittades.",
       "reprocess_success": "Omarbetade {count} cykler.",
-      "debug_data_cleared": "Felsökningsdata från {count} cykler har rensats."
+      "debug_data_cleared": "Felsökningsdata från {count} cykler har rensats.",
+      "no_power_data": "Inga kraftspårningsdata tillgängliga för den valda cykeln."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Använd åtgärderna nedan för att lägga till, redigera, ta bort eller spara intervall.",
         "profile_summary_header": "Profilsammanfattning",
         "recent_cycles_header": "Senaste cyklerna",
-        "no_power_preview": "*Ingen energidata tillgänglig för förhandsgranskning.*"
+        "no_power_preview": "*Ingen energidata tillgänglig för förhandsgranskning.*",
+        "trim_cycle_preview_title": "Cycle Trim Preview",
+        "trim_cycle_preview_no_data": "Ingen effektdata tillgänglig för denna cykel.",
+        "trim_cycle_preview_kept_suffix": "hålls"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Märk specifik cykel",
         "select_cycle_to_label_multi": "Märk flera cykler",
         "select_cycle_to_delete": "Ta bort cykel",
-        "interactive_editor": "Sammanfoga/Dela interaktiv redigerare"
+        "interactive_editor": "Sammanfoga/Dela interaktiv redigerare",
+        "trim_cycle": "Trimma cykeldata"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Namnge och tillämpa faser",
         "cancel": "Gå tillbaka utan ändringar"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Ställ in startpunkt",
+        "set_end": "Ställ in slutpunkt",
+        "reset": "Återställ till Full Duration",
+        "apply": "Applicera Trim",
+        "cancel": "Avboka"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Tvättmaskinen för att stoppa inspelningen."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trimcykel",
+      "description": "Trimma effektdata för en tidigare cykel till ett specifikt tidsfönster.",
+      "fields": {
+        "device_id": {
+          "name": "Anordning",
+          "description": "WashData-enheten."
+        },
+        "cycle_id": {
+          "name": "Cykel-ID",
+          "description": "ID för cykeln som ska trimmas."
+        },
+        "trim_start_s": {
+          "name": "Trimstart (sekunder)",
+          "description": "Behåll data från denna offset på några sekunder. Standard 0."
+        },
+        "trim_end_s": {
+          "name": "Trimslut (sekunder)",
+          "description": "Håll data upp till denna offset på några sekunder. Default = full duration."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Tvinga slutcykel"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Enheten hittades inte."
+    },
+    "no_config_entry": {
+      "message": "Ingen konfigurationspost hittades för enheten."
+    },
+    "integration_not_loaded": {
+      "message": "Integrationen har inte laddats för den här enheten."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Cykeln hittades inte eller har inga strömdata."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim misslyckades – cykeln hittades inte, ingen strömdata eller det resulterande fönstret är tomt."
     }
   }
 }

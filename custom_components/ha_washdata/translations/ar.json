@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "قم بتصنيف القيم المقترحة في الإعدادات المتقدمة"
         }
+      },
+      "trim_cycle_select": {
+        "title": "دورة القطع — اختر دورة",
+        "description": "حدد دورة لقصها. ✓ = اكتمل، ⚠ = مستأنف، ✗ = متقطع",
+        "data": {
+          "cycle_id": "دورة"
+        }
+      },
+      "trim_cycle": {
+        "title": "دورة القطع",
+        "description": "النافذة الحالية: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "فعل"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "ضبط بداية القطع",
+        "description": "أدخل إزاحة الدقيقة لبدء حفظ البيانات من (0 = بداية الدورة).",
+        "data": {
+          "trim_start_min": "البدء (دقيقة)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "ضبط نهاية القطع",
+        "description": "أدخل إزاحة الدقيقة لإيقاف الاحتفاظ بالبيانات عندها.",
+        "data": {
+          "trim_end_min": "النهاية (دقائق)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: دورة التحقق ({device})",
       "feedback_notification_message": "**الجهاز**: {device}\n**البرنامج**: {program} (نسبة الثقة {confidence}%)\n**الوقت**: {time}\n\nيحتاج WashData إلى مساعدتك للتحقق من هذه الدورة المكتشفة.\n\nيرجى الانتقال إلى **الإعدادات > الأجهزة والخدمات > WashData > التكوين > تعليقات التعلم** لتأكيد هذه النتيجة أو تصحيحها.",
       "suggestions_ready_notification_title": "WashData: الإعدادات المقترحة جاهزة ({device})",
-      "suggestions_ready_notification_message": "يقدم مستشعر **الإعدادات المقترحة** الآن **{count}** توصيات قابلة للتنفيذ.\n\nلمراجعتها وتطبيقها: **الإعدادات > الأجهزة والخدمات > WashData > التكوين > الإعدادات المتقدمة > تطبيق القيم المقترحة**.\n\nالاقتراحات اختيارية ويتم عرضها للمراجعة قبل حفظها."
+      "suggestions_ready_notification_message": "يقدم مستشعر **الإعدادات المقترحة** الآن **{count}** توصيات قابلة للتنفيذ.\n\nلمراجعتها وتطبيقها: **الإعدادات > الأجهزة والخدمات > WashData > التكوين > الإعدادات المتقدمة > تطبيق القيم المقترحة**.\n\nالاقتراحات اختيارية ويتم عرضها للمراجعة قبل حفظها.",
+      "trim_range_invalid": "البداية يجب أن تكون قبل النهاية. يرجى ضبط نقاط القطع الخاصة بك.",
+      "trim_failed": "فشل القطع. ربما لم تعد الدورة موجودة أو أن النافذة فارغة."
     },
     "abort": {
       "no_cycles_found": "لم يتم العثور على دورات",
@@ -594,7 +624,8 @@
       "no_predictions": "لا تنبؤات",
       "no_custom_phases": "لم يتم العثور على مراحل مخصصة.",
       "reprocess_success": "تمت إعادة معالجة {count} دورة بنجاح.",
-      "debug_data_cleared": "تم مسح بيانات تصحيح الأخطاء من {count} دورة بنجاح."
+      "debug_data_cleared": "تم مسح بيانات تصحيح الأخطاء من {count} دورة بنجاح.",
+      "no_power_data": "لا تتوفر بيانات تتبع الطاقة للدورة المحددة."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "استخدم الإجراءات أدناه لإضافة النطاقات أو تعديلها أو حذفها أو حفظها.",
         "profile_summary_header": "ملخص الملف الشخصي",
         "recent_cycles_header": "الدورات الأخيرة",
-        "no_power_preview": "*لا توجد بيانات طاقة متاحة للمعاينة.*"
+        "no_power_preview": "*لا توجد بيانات طاقة متاحة للمعاينة.*",
+        "trim_cycle_preview_title": "معاينة دورة القطع",
+        "trim_cycle_preview_no_data": "لا توجد بيانات طاقة متاحة لهذه الدورة.",
+        "trim_cycle_preview_kept_suffix": "أبقى"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "تسمية دورة محددة",
         "select_cycle_to_label_multi": "تسمية دورات متعددة",
         "select_cycle_to_delete": "حذف دورة",
-        "interactive_editor": "دمج/تقسيم المحرر التفاعلي"
+        "interactive_editor": "دمج/تقسيم المحرر التفاعلي",
+        "trim_cycle": "تقليم بيانات الدورة"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "مراحل الاسم والتطبيق",
         "cancel": "العودة دون تغييرات"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "تعيين نقطة البداية",
+        "set_end": "تعيين نقطة النهاية",
+        "reset": "إعادة التعيين إلى المدة الكاملة",
+        "apply": "تطبيق تريم",
+        "cancel": "يلغي"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "جهاز الغسالة لإيقاف التسجيل."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "دورة القطع",
+      "description": "قم بقص بيانات الطاقة الخاصة بالدورة الماضية إلى نافذة زمنية محددة.",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "جهاز WashData."
+        },
+        "cycle_id": {
+          "name": "معرف الدورة",
+          "description": "معرف الدورة المراد قطعها."
+        },
+        "trim_start_s": {
+          "name": "بدء القطع (بالثواني)",
+          "description": "احتفظ بالبيانات من هذه الإزاحة في ثوانٍ. الافتراضي 0."
+        },
+        "trim_end_s": {
+          "name": "نهاية القطع (ثواني)",
+          "description": "احتفظ بالبيانات حتى هذه الإزاحة في ثوانٍ. الافتراضي = المدة الكاملة."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "إنهاء قسري للدورة"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "لم يتم العثور على الجهاز."
+    },
+    "no_config_entry": {
+      "message": "لم يتم العثور على إدخال تكوين للجهاز."
+    },
+    "integration_not_loaded": {
+      "message": "لم يتم تحميل التكامل لهذا الجهاز."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "لم يتم العثور على الدورة أو لا تحتوي على بيانات طاقة."
+    },
+    "trim_failed_empty_window": {
+      "message": "فشل القطع — لم يتم العثور على الدورة، أو لا توجد بيانات طاقة، أو أن النافذة الناتجة فارغة."
     }
   }
 }

@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Stage foarstelde wearden yn Avansearre ynstellings"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim Cycle - Selektearje Cycle",
+        "description": "Selektearje in syklus om te trimmen. ✓ = foltôge, ⚠ = opnij, ✗ = ûnderbrutsen",
+        "data": {
+          "cycle_id": "Syklus"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trim Cycle",
+        "description": "Aktueel finster: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Aksje"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Trim Start ynstelle",
+        "description": "Fier de minút offset yn om te begjinnen mei it hâlden fan gegevens fan (0 = syklusstart).",
+        "data": {
+          "trim_start_min": "Start (minuten)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Trim Ein ynstelle",
+        "description": "Fier de minút offset yn om te stopjen mei it hâlden fan gegevens op.",
+        "data": {
+          "trim_end_min": "Einde (minuten)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: ferifiearje syklus ({device})",
       "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% fertrouwen)\n**Tiid**: {time}\n\nWashData hat jo help nedich om dizze ûntdekte syklus te ferifiearjen.\n\nGean asjebleaft nei **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Learning Feedbacks** om dit resultaat te befêstigjen of te korrigearjen.",
       "suggestions_ready_notification_title": "WashData: Suggested Settings Ready ({device})",
-      "suggestions_ready_notification_message": "De sensor **Foarstelde ynstellings** rapportearret no **{count}** aksjebere oanbefellings.\n\nOm se te besjen en ta te passen: **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Avansearre ynstellings> Oanbefelle wearden tapasse**.\n\nSuggestjes binne opsjoneel en werjûn foar beoardieling foardat jo bewarje."
+      "suggestions_ready_notification_message": "De sensor **Foarstelde ynstellings** rapportearret no **{count}** aksjebere oanbefellings.\n\nOm se te besjen en ta te passen: **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Avansearre ynstellings> Oanbefelle wearden tapasse**.\n\nSuggestjes binne opsjoneel en werjûn foar beoardieling foardat jo bewarje.",
+      "trim_range_invalid": "Start moat foar ein wêze. Pas jo trimpunten asjebleaft oan.",
+      "trim_failed": "Trim mislearre. De syklus kin net mear bestean of it finster is leech."
     },
     "abort": {
       "no_cycles_found": "Gjin cycles fûn",
@@ -594,7 +624,8 @@
       "no_predictions": "Gjin foarsizzings",
       "no_custom_phases": "Gjin oanpaste fazen fûn.",
       "reprocess_success": "Mei sukses ferwurke {count} syklusen.",
-      "debug_data_cleared": "Debuggegevens fan {count} syklusen mei súkses wiske."
+      "debug_data_cleared": "Debuggegevens fan {count} syklusen mei súkses wiske.",
+      "no_power_data": "Gjin macht trace gegevens beskikber foar de selektearre syklus."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Brûk de aksjes hjirûnder om berikken ta te foegjen, te bewurkjen, te wiskjen of op te slaan.",
         "profile_summary_header": "Profile Gearfetting",
         "recent_cycles_header": "Resinte syklusen",
-        "no_power_preview": "*Gjin machtgegevens beskikber foar foarbyld.*"
+        "no_power_preview": "*Gjin machtgegevens beskikber foar foarbyld.*",
+        "trim_cycle_preview_title": "Foarbyld fan Cycle Trim",
+        "trim_cycle_preview_no_data": "Gjin macht gegevens beskikber foar dizze syklus.",
+        "trim_cycle_preview_kept_suffix": "hâlden"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Label Spesifike Cycle",
         "select_cycle_to_label_multi": "Label Meardere Cycles",
         "select_cycle_to_delete": "Wiskje Cycle",
-        "interactive_editor": "Ynteraktive bewurker gearfoegje / splitsen"
+        "interactive_editor": "Ynteraktive bewurker gearfoegje / splitsen",
+        "trim_cycle": "Trim Cycle Data"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Namme & tapasse fazen",
         "cancel": "Gean werom sûnder feroarings"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Begjinpunt ynstelle",
+        "set_end": "Einpunt ynstelle",
+        "reset": "Weromsette nei Folsleine Duration",
+        "apply": "Trim tapasse",
+        "cancel": "Ofbrekke"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "De waskmasine apparaat te stopjen opname."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trim Cycle",
+      "description": "Trim de krêftgegevens fan in ferline syklus nei in spesifyk tiidfinster.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "It WashData-apparaat."
+        },
+        "cycle_id": {
+          "name": "Cycle ID",
+          "description": "De ID fan 'e syklus om te trimmen."
+        },
+        "trim_start_s": {
+          "name": "Trimstart (sekonden)",
+          "description": "Hâld gegevens fan dizze offset yn sekonden. Standert 0."
+        },
+        "trim_end_s": {
+          "name": "Trim ein (sekonden)",
+          "description": "Hâld gegevens oant dizze offset yn sekonden. Standert = folsleine doer."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Force End Cycle"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Apparaat net fûn."
+    },
+    "no_config_entry": {
+      "message": "Gjin konfiguraasje-yngong fûn foar apparaat."
+    },
+    "integration_not_loaded": {
+      "message": "Yntegraasje net laden foar dit apparaat."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Syklus net fûn of hat gjin macht gegevens."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim mislearre - syklus net fûn, gjin macht gegevens, of resultearjend finster is leech."
     }
   }
 }

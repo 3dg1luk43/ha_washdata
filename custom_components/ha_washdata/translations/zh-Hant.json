@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "在進階設定中暫存建議值"
         }
+      },
+      "trim_cycle_select": {
+        "title": "修剪週期 — 選擇週期",
+        "description": "選擇要修剪的周期。 ✓ = 已完成，⚠ = 已恢復，✗ = 已中斷",
+        "data": {
+          "cycle_id": "循環"
+        }
+      },
+      "trim_cycle": {
+        "title": "修剪週期",
+        "description": "目前視窗：{trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "行動"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "設定修剪開始",
+        "description": "輸入開始保存資料的分鐘偏移量（0 = 循環開始）。",
+        "data": {
+          "trim_start_min": "開始（分鐘）"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "設定修剪結束",
+        "description": "輸入停止保存資料的分鐘偏移量。",
+        "data": {
+          "trim_end_min": "結束（分鐘）"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData：驗證週期 ({device})",
       "feedback_notification_message": "**设备**：{device}\n**程式**：{program}（{confidence}% 置信度）\n**時間**：{time}\n\nWashData 需要您的協助來驗證偵測到的此週期。\n\n請前往 **設定 > 裝置與服務 > WashData > 設定 > 學習回饋** 以確認或修正此結果。",
       "suggestions_ready_notification_title": "WashData：建議設定已就緒 ({device})",
-      "suggestions_ready_notification_message": "**建議設定**感測器現在報告 **{count}** 可操作的建議。\n\n若要查看並套用它們：**設定 > 裝置和服務 > WashData > 配置 > 進階設定 > 套用建議值**。\n\n建議是可選的，並會在您儲存之前顯示以供審核。"
+      "suggestions_ready_notification_message": "**建議設定**感測器現在報告 **{count}** 可操作的建議。\n\n若要查看並套用它們：**設定 > 裝置和服務 > WashData > 配置 > 進階設定 > 套用建議值**。\n\n建議是可選的，並會在您儲存之前顯示以供審核。",
+      "trim_range_invalid": "開始必須在結束之前。請調整您的修剪點。",
+      "trim_failed": "修剪失敗。循環可能不再存在或視窗為空。"
     },
     "abort": {
       "no_cycles_found": "沒有找到循環",
@@ -594,7 +624,8 @@
       "no_predictions": "沒有預測",
       "no_custom_phases": "未找到自訂階段。",
       "reprocess_success": "已成功重新處理 {count} 個週期。",
-      "debug_data_cleared": "已成功清除 {count} 個週期的偵錯資料。"
+      "debug_data_cleared": "已成功清除 {count} 個週期的偵錯資料。",
+      "no_power_data": "所選週期沒有可用的功率追蹤資料。"
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "使用以下操作來新增、編輯、刪除或儲存範圍。",
         "profile_summary_header": "簡介摘要",
         "recent_cycles_header": "最近的週期",
-        "no_power_preview": "*沒有可供預覽的功率數據。 *"
+        "no_power_preview": "*沒有可供預覽的功率數據。 *",
+        "trim_cycle_preview_title": "循環修剪預覽",
+        "trim_cycle_preview_no_data": "此週期沒有可用的功率資料。",
+        "trim_cycle_preview_kept_suffix": "保留"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "標籤特定週期",
         "select_cycle_to_label_multi": "標記多個週期",
         "select_cycle_to_delete": "刪除循環",
-        "interactive_editor": "合併/拆分互動式編輯器"
+        "interactive_editor": "合併/拆分互動式編輯器",
+        "trim_cycle": "修剪週期數據"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "命名和應用階段",
         "cancel": "不做任何修改返回"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "設定起點",
+        "set_end": "設定終點",
+        "reset": "重置為完整持續時間",
+        "apply": "應用修剪",
+        "cancel": "取消"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "洗衣機裝置停止錄音。"
         }
       }
+    },
+    "trim_cycle": {
+      "name": "修剪週期",
+      "description": "將過去週期的功率資料修剪到特定時間視窗。",
+      "fields": {
+        "device_id": {
+          "name": "裝置",
+          "description": "WashData 設備。"
+        },
+        "cycle_id": {
+          "name": "週期ID",
+          "description": "要修剪的周期的 ID。"
+        },
+        "trim_start_s": {
+          "name": "修剪開始（秒）",
+          "description": "在幾秒鐘內保留此偏移量的資料。預設 0。"
+        },
+        "trim_end_s": {
+          "name": "修剪結束（秒）",
+          "description": "在幾秒鐘內將資料保持到此偏移量。預設 = 完整持續時間。"
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "強制結束循環"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "未找到設備。"
+    },
+    "no_config_entry": {
+      "message": "找不到設備的配置條目。"
+    },
+    "integration_not_loaded": {
+      "message": "未為此設備載入整合。"
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "未找到自行車或沒有功率數據。"
+    },
+    "trim_failed_empty_window": {
+      "message": "修剪失敗 — 未找到週期、無功率資料或產生的視窗為空。"
     }
   }
 }

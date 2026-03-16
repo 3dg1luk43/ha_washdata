@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Navrhnuté hodnoty vytvorte v rozšírených nastaveniach"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim Cycle — Zvoľte Cyklus",
+        "description": "Vyberte cyklus, ktorý chcete orezať. ✓ = dokončené, ⚠ = obnovené, ✗ = prerušené",
+        "data": {
+          "cycle_id": "Cyklus"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trim Cycle",
+        "description": "Aktuálne okno: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Akcia"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Nastavte Trim Start",
+        "description": "Zadajte minútový posun, od ktorého sa začnú uchovávať údaje (0 = začiatok cyklu).",
+        "data": {
+          "trim_start_min": "Štart (minúty)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Nastavte koniec orezania",
+        "description": "Zadajte minútový posun, na ktorom sa prestanú uchovávať údaje.",
+        "data": {
+          "trim_end_min": "Koniec (minúty)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Overiť cyklus ({device})",
       "feedback_notification_message": "**Zariadenie**: {device}\n**Program**: {program} (spoľahlivosť {confidence} %)\n**Čas**: {time}\n\nWashData potrebuje vašu pomoc na overenie tohto zisteného cyklu.\n\nAk chcete potvrdiť alebo opraviť tento výsledok, prejdite do časti **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Spätná väzba na vzdelávanie.",
       "suggestions_ready_notification_title": "WashData: Navrhnuté nastavenia sú pripravené ({device})",
-      "suggestions_ready_notification_message": "Senzor **Suggested Settings** teraz hlási **{count}** odporúčania, ktoré je možné vykonať.\n\nAk ich chcete skontrolovať a použiť: **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Rozšírené nastavenia > Použiť navrhované hodnoty**.\n\nNávrhy sú voliteľné a pred uložením sa zobrazia na kontrolu."
+      "suggestions_ready_notification_message": "Senzor **Suggested Settings** teraz hlási **{count}** odporúčania, ktoré je možné vykonať.\n\nAk ich chcete skontrolovať a použiť: **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Rozšírené nastavenia > Použiť navrhované hodnoty**.\n\nNávrhy sú voliteľné a pred uložením sa zobrazia na kontrolu.",
+      "trim_range_invalid": "Začiatok musí byť pred koncom. Upravte si body orezania.",
+      "trim_failed": "Orezanie zlyhalo. Cyklus už nemusí existovať alebo je okno prázdne."
     },
     "abort": {
       "no_cycles_found": "Nenašli sa žiadne cykly",
@@ -594,7 +624,8 @@
       "no_predictions": "Žiadne predpovede",
       "no_custom_phases": "Nenašli sa žiadne vlastné fázy.",
       "reprocess_success": "Počet úspešne opätovne spracovaných cyklov: {count}.",
-      "debug_data_cleared": "Údaje ladenia z {count} cyklov boli úspešne vymazané."
+      "debug_data_cleared": "Údaje ladenia z {count} cyklov boli úspešne vymazané.",
+      "no_power_data": "Pre zvolený cyklus nie sú k dispozícii žiadne údaje sledovania výkonu."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Ak chcete pridať, upraviť, odstrániť alebo uložiť rozsahy, použite akcie uvedené nižšie.",
         "profile_summary_header": "Súhrn profilu",
         "recent_cycles_header": "Nedávne cykly",
-        "no_power_preview": "*Pre ukážku nie sú k dispozícii žiadne údaje o výkone.*"
+        "no_power_preview": "*Pre ukážku nie sú k dispozícii žiadne údaje o výkone.*",
+        "trim_cycle_preview_title": "Ukážka orezania cyklu",
+        "trim_cycle_preview_no_data": "Pre tento cyklus nie sú k dispozícii žiadne údaje o výkone.",
+        "trim_cycle_preview_kept_suffix": "zachované"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Špecifický cyklus štítku",
         "select_cycle_to_label_multi": "Označenie viacerých cyklov",
         "select_cycle_to_delete": "Odstrániť cyklus",
-        "interactive_editor": "Interaktívny editor Zlúčiť/Rozdeliť"
+        "interactive_editor": "Interaktívny editor Zlúčiť/Rozdeliť",
+        "trim_cycle": "Údaje o cykle trimovania"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Fázy pomenovania a aplikácie",
         "cancel": "Vráťte sa späť bez zmien"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Nastavte počiatočný bod",
+        "set_end": "Nastaviť koncový bod",
+        "reset": "Obnoviť na plnú dobu trvania",
+        "apply": "Použiť Trim",
+        "cancel": "Zrušiť"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Zariadenie práčky na zastavenie nahrávania."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trim Cycle",
+      "description": "Orezať údaje o spotrebe z minulého cyklu na konkrétne časové okno.",
+      "fields": {
+        "device_id": {
+          "name": "Zariadenie",
+          "description": "Zariadenie WashData."
+        },
+        "cycle_id": {
+          "name": "ID cyklu",
+          "description": "ID cyklu, ktorý sa má orezať."
+        },
+        "trim_start_s": {
+          "name": "Trim Start (sekundy)",
+          "description": "Uchovávajte údaje z tohto posunu v priebehu niekoľkých sekúnd. Predvolená hodnota 0."
+        },
+        "trim_end_s": {
+          "name": "Koniec orezania (sekundy)",
+          "description": "Udržujte údaje až do tohto posunu v priebehu niekoľkých sekúnd. Predvolená hodnota = celé trvanie."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Vynútený koniec cyklu"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Zariadenie sa nenašlo."
+    },
+    "no_config_entry": {
+      "message": "Pre zariadenie sa nenašla žiadna konfiguračná položka."
+    },
+    "integration_not_loaded": {
+      "message": "Integrácia pre toto zariadenie nie je načítaná."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Cyklus sa nenašiel alebo nemá žiadne údaje o napájaní."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim zlyhal – cyklus sa nenašiel, žiadne údaje o napájaní alebo výsledné okno je prázdne."
     }
   }
 }

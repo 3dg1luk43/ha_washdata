@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "在高级设置中暂存建议值"
         }
+      },
+      "trim_cycle_select": {
+        "title": "修剪周期 — 选择周期",
+        "description": "选择要修剪的周期。 ✓ = 已完成，⚠ = 已恢复，✗ = 已中断",
+        "data": {
+          "cycle_id": "循环"
+        }
+      },
+      "trim_cycle": {
+        "title": "修剪周期",
+        "description": "当前窗口：{trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "行动"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "设置修剪开始",
+        "description": "输入开始保存数据的分钟偏移量（0 = 循环开始）。",
+        "data": {
+          "trim_start_min": "开始（分钟）"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "设置修剪结束",
+        "description": "输入停止保存数据的分钟偏移量。",
+        "data": {
+          "trim_end_min": "结束（分钟）"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData：验证周期 ({device})",
       "feedback_notification_message": "**设备**：{device}\n**程序**：{program}（{confidence}% 置信度）\n**时间**：{time}\n\nWashData 需要您的帮助来验证检测到的此周期。\n\n请转至 **设置 > 设备和服务 > WashData > 配置 > 学习反馈** 以确认或更正此结果。",
       "suggestions_ready_notification_title": "WashData：建议设置已就绪 ({device})",
-      "suggestions_ready_notification_message": "**建议设置**传感器现在报告 **{count}** 可操作的建议。\n\n要查看并应用它们：**设置 > 设备和服务 > WashData > 配置 > 高级设置 > 应用建议值**。\n\n建议是可选的，并会在您保存之前显示以供审核。"
+      "suggestions_ready_notification_message": "**建议设置**传感器现在报告 **{count}** 可操作的建议。\n\n要查看并应用它们：**设置 > 设备和服务 > WashData > 配置 > 高级设置 > 应用建议值**。\n\n建议是可选的，并会在您保存之前显示以供审核。",
+      "trim_range_invalid": "开始必须在结束之前。请调整您的修剪点。",
+      "trim_failed": "修剪失败。 The cycle may no longer exist or the window is empty."
     },
     "abort": {
       "no_cycles_found": "没有找到循环",
@@ -594,7 +624,8 @@
       "no_predictions": "没有预测",
       "no_custom_phases": "未找到自定义阶段。",
       "reprocess_success": "已成功重新处理 {count} 个周期。",
-      "debug_data_cleared": "已成功清除 {count} 个周期的调试数据。"
+      "debug_data_cleared": "已成功清除 {count} 个周期的调试数据。",
+      "no_power_data": "所选周期没有可用的功率跟踪数据。"
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "使用以下操作来添加、编辑、删除或保存范围。",
         "profile_summary_header": "简介摘要",
         "recent_cycles_header": "最近的周期",
-        "no_power_preview": "*没有可供预览的功率数据。*"
+        "no_power_preview": "*没有可供预览的功率数据。*",
+        "trim_cycle_preview_title": "循环修剪预览",
+        "trim_cycle_preview_no_data": "此周期没有可用的功率数据。",
+        "trim_cycle_preview_kept_suffix": "保留"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "标签特定周期",
         "select_cycle_to_label_multi": "标记多个周期",
         "select_cycle_to_delete": "删除循环",
-        "interactive_editor": "合并/拆分交互式编辑器"
+        "interactive_editor": "合并/拆分交互式编辑器",
+        "trim_cycle": "修剪周期数据"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "命名和应用阶段",
         "cancel": "不做任何修改返回"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "设置起点",
+        "set_end": "设置终点",
+        "reset": "重置为完整持续时间",
+        "apply": "应用修剪",
+        "cancel": "取消"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "洗衣机装置停止录音。"
         }
       }
+    },
+    "trim_cycle": {
+      "name": "修剪周期",
+      "description": "将过去周期的功率数据修剪到特定时间窗口。",
+      "fields": {
+        "device_id": {
+          "name": "设备",
+          "description": "WashData 设备。"
+        },
+        "cycle_id": {
+          "name": "周期ID",
+          "description": "要修剪的周期的 ID。"
+        },
+        "trim_start_s": {
+          "name": "修剪开始（秒）",
+          "description": "在几秒钟内保留此偏移量的数据。默认 0。"
+        },
+        "trim_end_s": {
+          "name": "修剪结束（秒）",
+          "description": "在几秒钟内将数据保持到此偏移量。默认 = 完整持续时间。"
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "强制结束循环"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "未找到设备。"
+    },
+    "no_config_entry": {
+      "message": "找不到设备的配置条目。"
+    },
+    "integration_not_loaded": {
+      "message": "未为此设备加载集成。"
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "未找到自行车或没有功率数据。"
+    },
+    "trim_failed_empty_window": {
+      "message": "修剪失败 — 未找到周期、无功率数据或生成的窗口为空。"
     }
   }
 }

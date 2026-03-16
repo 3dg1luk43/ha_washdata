@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Preparar valores sugeridos em Configurações avançadas"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Ciclo de corte — Selecione o ciclo",
+        "description": "Selecione um ciclo para cortar. ✓ = concluído, ⚠ = retomado, ✗ = interrompido",
+        "data": {
+          "cycle_id": "Ciclo"
+        }
+      },
+      "trim_cycle": {
+        "title": "Ciclo de corte",
+        "description": "Janela atual: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Ação"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Definir início do corte",
+        "description": "Insira o deslocamento de minutos para começar a manter os dados (0 = início do ciclo).",
+        "data": {
+          "trim_start_min": "Início (minutos)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Definir final de corte",
+        "description": "Insira o deslocamento de minuto para parar de manter os dados.",
+        "data": {
+          "trim_end_min": "Fim (minutos)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: ciclo de verificação ({device})",
       "feedback_notification_message": "**Dispositivo**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Tempo**: {time}\n\nWashData precisa da sua ajuda para verificar este ciclo detectado.\n\nVá para **Configurações > Dispositivos e serviços > WashData > Configurar > Feedbacks de aprendizagem** para confirmar ou corrigir este resultado.",
       "suggestions_ready_notification_title": "WashData: configurações sugeridas prontas ({device})",
-      "suggestions_ready_notification_message": "O sensor **Configurações sugeridas** agora informa **{count}** recomendações acionáveis.\n\nPara revisá-los e aplicá-los: **Configurações > Dispositivos e serviços > WashData > Configurar > Configurações avançadas > Aplicar valores sugeridos**.\n\nAs sugestões são opcionais e mostradas para revisão antes de salvar."
+      "suggestions_ready_notification_message": "O sensor **Configurações sugeridas** agora informa **{count}** recomendações acionáveis.\n\nPara revisá-los e aplicá-los: **Configurações > Dispositivos e serviços > WashData > Configurar > Configurações avançadas > Aplicar valores sugeridos**.\n\nAs sugestões são opcionais e mostradas para revisão antes de salvar.",
+      "trim_range_invalid": "O início deve ser antes do fim. Por favor, ajuste seus pontos de corte.",
+      "trim_failed": "O corte falhou. O ciclo pode não existir mais ou a janela está vazia."
     },
     "abort": {
       "no_cycles_found": "Nenhum ciclo encontrado",
@@ -594,7 +624,8 @@
       "no_predictions": "Sem previsões",
       "no_custom_phases": "Nenhuma fase personalizada encontrada.",
       "reprocess_success": "{count} ciclos reprocessados ​​com sucesso.",
-      "debug_data_cleared": "Dados de depuração de {count} ciclos limpos com sucesso."
+      "debug_data_cleared": "Dados de depuração de {count} ciclos limpos com sucesso.",
+      "no_power_data": "Não há dados de rastreamento de energia disponíveis para o ciclo selecionado."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Use as ações abaixo para adicionar, editar, excluir ou salvar intervalos.",
         "profile_summary_header": "Resumo do perfil",
         "recent_cycles_header": "Ciclos recentes",
-        "no_power_preview": "*Não há dados de energia disponíveis para visualização.*"
+        "no_power_preview": "*Não há dados de energia disponíveis para visualização.*",
+        "trim_cycle_preview_title": "Visualização do corte do ciclo",
+        "trim_cycle_preview_no_data": "Não há dados de potência disponíveis para este ciclo.",
+        "trim_cycle_preview_kept_suffix": "mantido"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Ciclo Específico do Rótulo",
         "select_cycle_to_label_multi": "Rotular vários ciclos",
         "select_cycle_to_delete": "Excluir ciclo",
-        "interactive_editor": "Editor interativo de mesclar/dividir"
+        "interactive_editor": "Editor interativo de mesclar/dividir",
+        "trim_cycle": "Dados do ciclo de corte"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Nomear e aplicar fases",
         "cancel": "Voltar sem alterações"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Definir ponto inicial",
+        "set_end": "Definir ponto final",
+        "reset": "Redefinir para duração total",
+        "apply": "Aplicar corte",
+        "cancel": "Cancelar"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "O dispositivo da máquina de lavar para parar a gravação."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Ciclo de corte",
+      "description": "Corte os dados de potência de um ciclo anterior para uma janela de tempo específica.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "O dispositivo WashData."
+        },
+        "cycle_id": {
+          "name": "ID do ciclo",
+          "description": "O ID do ciclo a ser cortado."
+        },
+        "trim_start_s": {
+          "name": "Início do corte (segundos)",
+          "description": "Mantenha os dados deste deslocamento em segundos. Padrão 0."
+        },
+        "trim_end_s": {
+          "name": "Fim do corte (segundos)",
+          "description": "Mantenha os dados até esse deslocamento em segundos. Padrão = duração total."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Forçar fim do ciclo"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Dispositivo não encontrado."
+    },
+    "no_config_entry": {
+      "message": "Nenhuma entrada de configuração encontrada para o dispositivo."
+    },
+    "integration_not_loaded": {
+      "message": "Integração não carregada para este dispositivo."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Ciclo não encontrado ou não possui dados de potência."
+    },
+    "trim_failed_empty_window": {
+      "message": "Falha no ajuste — ciclo não encontrado, sem dados de energia ou a janela resultante está vazia."
     }
   }
 }

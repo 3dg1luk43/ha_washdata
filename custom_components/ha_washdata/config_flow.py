@@ -4743,7 +4743,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Required("trim_end_min", default=default_min): selector.NumberSelector(
                         selector.NumberSelectorConfig(
-                            min=1,
+                            min=0,
                             max=total_min,
                             step=1,
                             unit_of_measurement="min",

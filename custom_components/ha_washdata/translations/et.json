@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Määrake soovitatud väärtused jaotises Täpsemad seaded"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Kärpimistsükkel — valige Tsükkel",
+        "description": "Valige kärpimiseks tsükkel. ✓ = lõpetatud, ⚠ = jätkatud, ✗ = katkestatud",
+        "data": {
+          "cycle_id": "Tsükkel"
+        }
+      },
+      "trim_cycle": {
+        "title": "Kärpimistsükkel",
+        "description": "Praegune aken: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Tegevus"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Määra kärpimise algus",
+        "description": "Andmete säilitamise alustamiseks sisestage minutinihe (0 = tsükli algus).",
+        "data": {
+          "trim_start_min": "Algus (minutid)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Määra Trim End",
+        "description": "Andmete säilitamise lõpetamiseks sisestage minutinihe.",
+        "data": {
+          "trim_end_min": "Lõpp (minutites)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: kontrolli tsükkel ({device})",
       "feedback_notification_message": "**Seade**: {device}\n**Programm**: {program} ({confidence}% usaldusväärsus)\n**Aeg**: {time}\n\nWashData vajab tuvastatud tsükli kontrollimiseks teie abi.\n\nSelle tulemuse kinnitamiseks või parandamiseks minge jaotisse **Seaded > Seadmed ja teenused > WashData > Seadistamine > Tagasiside õppimine**.",
       "suggestions_ready_notification_title": "WashData: soovituslikud seaded on valmis ({device})",
-      "suggestions_ready_notification_message": "Andur **Soovitatud seaded** annab nüüd **{count}** rakendatavaid soovitusi.\n\nNende ülevaatamiseks ja rakendamiseks tehke järgmist. **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSoovitused on valikulised ja neid kuvatakse enne salvestamist ülevaatamiseks."
+      "suggestions_ready_notification_message": "Andur **Soovitatud seaded** annab nüüd **{count}** rakendatavaid soovitusi.\n\nNende ülevaatamiseks ja rakendamiseks tehke järgmist. **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSoovitused on valikulised ja neid kuvatakse enne salvestamist ülevaatamiseks.",
+      "trim_range_invalid": "Algus peab olema enne lõppu. Palun kohandage oma trimmipunkte.",
+      "trim_failed": "Kärpimine ebaõnnestus. Tsüklit ei pruugi enam eksisteerida või aken on tühi."
     },
     "abort": {
       "no_cycles_found": "Tsükleid ei leitud",
@@ -594,7 +624,8 @@
       "no_predictions": "Ei mingeid ennustusi",
       "no_custom_phases": "Kohandatud faase ei leitud.",
       "reprocess_success": "{count} tsüklit edukalt uuesti töödeldud.",
-      "debug_data_cleared": "Silumisandmete kustutamine {count} tsüklist õnnestus."
+      "debug_data_cleared": "Silumisandmete kustutamine {count} tsüklist õnnestus.",
+      "no_power_data": "Valitud tsükli kohta pole võimsuse jälgimise andmeid saadaval."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Kasutage allolevaid toiminguid vahemike lisamiseks, muutmiseks, kustutamiseks või salvestamiseks.",
         "profile_summary_header": "Profiili kokkuvõte",
         "recent_cycles_header": "Viimased tsüklid",
-        "no_power_preview": "*Eelvaateks pole võimsusandmeid saadaval.*"
+        "no_power_preview": "*Eelvaateks pole võimsusandmeid saadaval.*",
+        "trim_cycle_preview_title": "Tsükli kärpimise eelvaade",
+        "trim_cycle_preview_no_data": "Selle tsükli võimsusandmed pole saadaval.",
+        "trim_cycle_preview_kept_suffix": "hoitud"
       }
     },
     "interactive_editor_action": {
@@ -697,7 +731,8 @@
         "select_cycle_to_label": "Sildi spetsiifiline tsükkel",
         "select_cycle_to_label_multi": "Märgista mitu tsüklit",
         "select_cycle_to_delete": "Kustuta tsükkel",
-        "interactive_editor": "Interaktiivne redaktori ühendamine/tükeldamine"
+        "interactive_editor": "Interaktiivne redaktori ühendamine/tükeldamine",
+        "trim_cycle": "Kärpimistsükli andmed"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +790,15 @@
       "options": {
         "name_phases": "Nimetage ja rakendage faase",
         "cancel": "Minge tagasi ilma muudatusteta"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Määra alguspunkt",
+        "set_end": "Määra lõpp-punkt",
+        "reset": "Lähtestage täiskestusele",
+        "apply": "Rakenda Trim",
+        "cancel": "Tühista"
       }
     }
   },
@@ -908,6 +952,28 @@
           "description": "Pesumasina seade salvestamise peatamiseks."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Kärpimistsükkel",
+      "description": "Kärbige möödunud tsükli võimsusandmeid kindlale ajaaknale.",
+      "fields": {
+        "device_id": {
+          "name": "Seade",
+          "description": "Seade WashData."
+        },
+        "cycle_id": {
+          "name": "Tsükli ID",
+          "description": "Kärbitava tsükli ID."
+        },
+        "trim_start_s": {
+          "name": "Kärbi algus (sekundites)",
+          "description": "Säilitage andmed sellest nihkest sekundites. Vaikimisi 0."
+        },
+        "trim_end_s": {
+          "name": "Kärbi lõpp (sekundites)",
+          "description": "Hoidke andmeid sekundites selle nihkeni. Vaikimisi = täiskestus."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1059,23 @@
       "force_end_cycle": {
         "name": "Sundlõpeta tsükkel"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Seadet ei leitud."
+    },
+    "no_config_entry": {
+      "message": "Seadme konfiguratsioonikirjet ei leitud."
+    },
+    "integration_not_loaded": {
+      "message": "Selle seadme jaoks pole integreerimist laaditud."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Tsüklit ei leitud või sellel puuduvad toiteandmed."
+    },
+    "trim_failed_empty_window": {
+      "message": "Kärpimine ebaõnnestus – tsüklit ei leitud, toiteandmeid pole või tulemuseks olev aken on tühi."
     }
   }
 }
