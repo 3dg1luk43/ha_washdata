@@ -93,7 +93,7 @@
           "notify_events": "Vir watter geleenthede om kennisgewings te stuur.",
           "notify_before_end_minutes": "Minute voor die geskatte einde van die siklus om 'n kennisgewing te aktiveer. Stel op 0 om te deaktiveer. Verstek: 0.",
           "notify_title": "Gepasmaakte titel vir kennisgewings. Ondersteun {device} plekhouer.",
-          "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om verstek te gebruik.",
+          "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om sonder ikoon te stuur.",
           "notify_start_message": "Boodskap gestuur wanneer 'n siklus begin. Ondersteun {device} plekhouer.",
           "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program} plekhouers.",
           "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Hoe gereeld vorderingsopdaterings gestuur word terwyl dit loop. Laer waardes reageer meer, maar verbruik meer kennisgewings. 'n Minimum van 30 sekondes word afgedwing — waardes onder 30 s word outomaties na 30 s afgerond.",
           "notify_live_overrun_percent": "Veiligheidsmarge bo die beraamde opdateringtelling vir lang/oorlopende siklusse (byvoorbeeld 20% laat 1,2x beraamde opdaterings toe).",
           "notify_title": "Gepasmaakte titel vir kennisgewings. Ondersteun {device} plekhouer.",
-          "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om verstek te gebruik.",
+          "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om sonder ikoon te stuur.",
           "notify_start_message": "Boodskap gestuur wanneer 'n siklus begin. Ondersteun {device} plekhouer.",
           "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program} plekhouers.",
           "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers."

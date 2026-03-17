@@ -100,7 +100,7 @@
           "notify_events": "Wéi eng Eventer fir Notifikatiounen ze schécken.",
           "notify_before_end_minutes": "Minutten virum geschätzte Enn vum Zyklus fir eng Notifikatioun auszeléisen. Op 0 setzen fir auszeschalten. Standard: 0.",
           "notify_title": "Benotzerdefinéierte Titel fir Notifikatiounen. Ënnerstëtzt {device} Plazhalter.",
-          "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:washing-machine). Eidel loossen fir Standard ze benotzen.",
+          "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:washing-machine). Eidel loossen fir ouni Ikon ze schécken.",
           "notify_start_message": "Message geschéckt wann en Zyklus ufänkt. Ënnerstëtzt {device} Plazhalter.",
           "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program} Plazhalter.",
           "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter."
@@ -136,7 +136,7 @@
           "notify_live_interval_seconds": "Wéi oft Fortschrëtterupdates während dem Lafen geschéckt ginn. Méi niddereg Wäerter si méi reaktiounsfäeger awer konsuméieren méi Notifikatiounen. E Minimum vun 30 Sekonnen gëtt duerchgesat - Wäerter ënner 30 Sekonnen ginn automatesch op 30 Sekonnen ofgerënnt.",
           "notify_live_overrun_percent": "Sécherheetsmarge iwwer de geschätzte Updatezuel fir laang / iwwerlafend Zyklen (zum Beispill 20% erlaabt 1,2x geschätzte Updates).",
           "notify_title": "Benotzerdefinéierte Titel fir Notifikatiounen. Ënnerstëtzt {device} Plazhalter.",
-          "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:washing-machine). Eidel loossen fir Standard ze benotzen.",
+          "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:washing-machine). Eidel loossen fir ouni Ikon ze schécken.",
           "notify_start_message": "Message geschéckt wann en Zyklus ufänkt. Ënnerstëtzt {device} Plazhalter.",
           "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program} Plazhalter.",
           "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter."

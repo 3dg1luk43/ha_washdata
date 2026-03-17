@@ -93,7 +93,7 @@
           "notify_events": "Për cilat ngjarje të dërgohen njoftime.",
           "notify_before_end_minutes": "Minuta para përfundimit të parashikuar të ciklit për të aktivizuar një njoftim. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0.",
           "notify_title": "Titulli i personalizuar për njoftimet. Mbështet mbajtësin e vendndodhjes {device}.",
-          "notify_icon": "Ikona për t'u përdorur për njoftime (p.sh. mdi:washing-machine). Lëreni bosh për të përdorur parazgjedhjen.",
+          "notify_icon": "Ikona për t'u përdorur për njoftime (p.sh. mdi:washing-machine). Lëreni bosh për të dërguar pa ikonë.",
           "notify_start_message": "Mesazhi dërgohet kur fillon një cikël. Mbështet mbajtësin e vendndodhjes {device}.",
           "notify_finish_message": "Mesazhi dërgohet kur përfundon një cikël. Mbështet {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Mesazhi dërguar para përfundimit. Mbështet {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Sa shpesh dërgohen përditësimet e progresit gjatë ekzekutimit. Vlerat më të ulëta janë më të përgjegjshme, por konsumojnë më shumë njoftime. Zbatohet një minimum prej 30 sekondash — vlerat nën 30 s rrumbullakohen automatikisht në 30 s.",
           "notify_live_overrun_percent": "Marzhi i sigurisë mbi numrin e përllogaritur të përditësimeve për cikle të gjata/tejkaluese (për shembull 20% lejon 1.2 herë përditësimet e vlerësuara).",
           "notify_title": "Titulli i personalizuar për njoftimet. Mbështet mbajtësin e vendndodhjes {device}.",
-          "notify_icon": "Ikona për t'u përdorur për njoftime (p.sh. mdi:washing-machine). Lëreni bosh për të përdorur parazgjedhjen.",
+          "notify_icon": "Ikona për t'u përdorur për njoftime (p.sh. mdi:washing-machine). Lëreni bosh për të dërguar pa ikonë.",
           "notify_start_message": "Mesazhi dërgohet kur fillon një cikël. Mbështet mbajtësin e vendndodhjes {device}.",
           "notify_finish_message": "Mesazhi dërgohet kur përfundon një cikël. Mbështet {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Mesazhi dërguar para përfundimit. Mbështet {device}, {minutes}."

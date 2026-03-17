@@ -93,7 +93,7 @@
           "notify_events": "Ar gyfer pa ddigwyddiadau i anfon hysbysiadau.",
           "notify_before_end_minutes": "Munudau cyn diwedd amcangyfrifedig y cylch i sbarduno hysbysiad. Gosodwch ar 0 i analluogi. Rhagosodedig: 0.",
           "notify_title": "Teitl personol ar gyfer hysbysiadau. Yn cefnogi {device} dalfan.",
-          "notify_icon": "Eicon i'w ddefnyddio ar gyfer hysbysiadau (e.e. mdi: peiriant golchi). Gadewch yn wag i ddefnyddio rhagosodedig.",
+          "notify_icon": "Eicon i'w ddefnyddio ar gyfer hysbysiadau (e.e. mdi: peiriant golchi). Gadewch yn wag i anfon heb eicon.",
           "notify_start_message": "Neges wedi'i hanfon pan fydd cylch yn dechrau. Yn cefnogi {device} dalfan.",
           "notify_finish_message": "Neges wedi'i hanfon pan fydd cylch yn gorffen. Yn cefnogi {device}, {duration}, {program} dalfan.",
           "notify_pre_complete_message": "Anfonwyd y neges cyn ei chwblhau. Yn cefnogi {device}, {minutes} dalfan."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Pa mor aml mae diweddariadau cynnydd yn cael eu hanfon wrth redeg. Mae gwerthoedd is yn fwy ymatebol ond yn defnyddio mwy o hysbysiadau. Mae isafswm o 30 eiliad yn cael ei orfodi — mae gwerthoedd o dan 30 s yn cael eu talgrynnu'n awtomatig hyd at 30 s.",
           "notify_live_overrun_percent": "Ymyl diogelwch uwchlaw'r cyfrif diweddaru amcangyfrifedig ar gyfer cylchoedd hir/rhedegog (er enghraifft mae 20% yn caniatáu 1.2x o ddiweddariadau amcangyfrifedig).",
           "notify_title": "Teitl personol ar gyfer hysbysiadau. Yn cefnogi {device} dalfan.",
-          "notify_icon": "Eicon i'w ddefnyddio ar gyfer hysbysiadau (e.e. mdi: peiriant golchi). Gadewch yn wag i ddefnyddio rhagosodedig.",
+          "notify_icon": "Eicon i'w ddefnyddio ar gyfer hysbysiadau (e.e. mdi: peiriant golchi). Gadewch yn wag i anfon heb eicon.",
           "notify_start_message": "Neges wedi'i hanfon pan fydd cylch yn dechrau. Yn cefnogi {device} dalfan.",
           "notify_finish_message": "Neges wedi'i hanfon pan fydd cylch yn gorffen. Yn cefnogi {device}, {duration}, {program} dalfan.",
           "notify_pre_complete_message": "Anfonwyd y neges cyn ei chwblhau. Yn cefnogi {device}, {minutes} dalfan."

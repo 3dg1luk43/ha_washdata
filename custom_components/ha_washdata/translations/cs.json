@@ -93,7 +93,7 @@
           "notify_events": "Na jaké události zasílat upozornění.",
           "notify_before_end_minutes": "Minuty před odhadovaným koncem cyklu ke spuštění upozornění. Nastavením na 0 deaktivujete. Výchozí: 0.",
           "notify_title": "Vlastní název pro oznámení. Podporuje zástupný symbol {device}.",
-          "notify_icon": "Ikona pro upozornění (např. mdi:washing-machine). Chcete-li použít výchozí, ponechte prázdné.",
+          "notify_icon": "Ikona pro upozornění (např. mdi:washing-machine). Chcete-li odeslat bez ikony, ponechte prázdné.",
           "notify_start_message": "Zpráva odeslaná při zahájení cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Zpráva odeslána před dokončením. Podporuje zástupné symboly {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Jak často se za běhu odesílají aktualizace průběhu. Nižší hodnoty reagují lépe, ale spotřebují více oznámení. Je vynuceno minimálně 30 sekund — hodnoty pod 30 s jsou automaticky zaokrouhleny na 30 s.",
           "notify_live_overrun_percent": "Bezpečnostní rezerva nad odhadovaným počtem aktualizací pro dlouhé/přesahující cykly (například 20 % umožňuje 1,2x odhadované aktualizace).",
           "notify_title": "Vlastní název pro oznámení. Podporuje zástupný symbol {device}.",
-          "notify_icon": "Ikona pro upozornění (např. mdi:washing-machine). Chcete-li použít výchozí, ponechte prázdné.",
+          "notify_icon": "Ikona pro upozornění (např. mdi:washing-machine). Chcete-li odeslat bez ikony, ponechte prázdné.",
           "notify_start_message": "Zpráva odeslaná při zahájení cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Zpráva odeslána před dokončením. Podporuje zástupné symboly {device}, {minutes}."
