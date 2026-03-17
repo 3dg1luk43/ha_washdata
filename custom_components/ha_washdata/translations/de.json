@@ -640,7 +640,7 @@
       "options": {
         "unlabeled": "(nicht zugeordnet)",
         "create_new_profile": "Neues Profil erstellen",
-        "remove_label": "Etikett entfernen",
+        "remove_label": "Zuordnung entfernen",
         "no_reference_cycle": "(Kein Referenzzyklus)",
         "all_device_types": "Alle Gerätetypen",
         "current_suffix": "(aktuell)",
@@ -816,7 +816,7 @@
         },
         "profile_name": {
           "name": "Profilname",
-          "description": "Der Name eines vorhandenen Profils (Profile erstellen im Menü „Profile verwalten“). Feld leer lassen, um das Etikett zu entfernen."
+          "description": "Der Name eines vorhandenen Profils (Profile erstellen im Menü „Profile verwalten“). Feld leer lassen, um die Zuordnung zu entfernen."
         }
       }
     },
