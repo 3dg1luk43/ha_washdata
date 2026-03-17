@@ -14,7 +14,7 @@
           "name": "Ein benutzerfreundlicher Name für dieses Gerät (z. B. „Waschmaschine“, „Geschirrspüler“).",
           "device_type": "Um welche Art von Gerät handelt es sich? Dies hilft bei der individuellen Erkennung und Zuordnung.",
           "power_sensor": "Die Sensoreinheit, die den Stromverbrauch (in Watt) Ihres Smart Plugs in Echtzeit meldet.",
-          "min_power": "Leistungswerte über diesem Schwellwert (in Watt) zeigen an, dass das Gerät läuft. Für die meisten Geräten ist 2W ein guter Anfang."
+          "min_power": "Leistungswerte über diesem Schwellwert (in Watt) zeigen an, dass das Gerät läuft. Für die meisten Geräte ist 2W ein guter Anfang."
         }
       },
       "first_profile": {
@@ -75,7 +75,7 @@
           "notify_service": "Benachrichtigungsdienst (z. B. notify.mobile_app)",
           "notify_actions": "Benachrichtigungsaktionen",
           "notify_people": "Benachrichtigungen warten auf folgende Personen",
-          "notify_only_when_home": "Benachrichtigungen zurückhalten, bis ausgewählte Personen zu Hause ist",
+          "notify_only_when_home": "Benachrichtigungen zurückhalten, bis ausgewählte Person zu Hause ist",
           "notify_fire_events": "Home Assistant-Ereignisse auslösen",
           "notify_events": "Zu benachrichtigende Ereignisse",
           "notify_before_end_minutes": "Benachrichtigung vor Abschluss (Minuten vor Ende)",
@@ -90,7 +90,7 @@
           "apply_suggestions": "Aktivieren um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Gerätetyp wählen (Waschmaschine, Trockner, Geschirrspüler, Kaffeemaschine, Elektroauto). Dieses Tag wird zur besseren Organisation bei jedem Zyklus gespeichert.",
           "power_sensor": "Die Sensoreinheit meldet die Leistung in Echtzeit (in Watt). Sie können dies jederzeit ändern, ohne historische Daten zu verlieren – nützlich, wenn Sie einen Smart Plug austauschen.",
-          "min_power": "Leistungswerte über diesem Schwellwert (in Watt) zeigen an, dass das Gerät läuft. Für die meisten Geräten ist 2W ein guter Anfang.",
+          "min_power": "Leistungswerte über diesem Schwellwert (in Watt) zeigen an, dass das Gerät läuft. Für die meisten Geräte ist 2W ein guter Anfang.",
           "off_delay": "Die geglättete Leistung muss für diesen Zeitraum (in Sekunden) unter dem Stoppschwellwert bleiben, um den Abschluss zu markieren. Standard: 120s.",
           "notify_service": "Zu verwendender Home Assistant-Benachrichtigungsdienst (optional).",
           "notify_actions": "Optionale Home Assistant-Aktionssequenz zur Ausführung für Benachrichtigungen (Skripte, Benachrichtigung, TTS usw.). Wenn festgelegt, werden Aktionen vor dem Fallback-Benachrichtigungsdienst ausgeführt.",
@@ -169,8 +169,8 @@
           "abrupt_drop_ratio": "Unterbrochen: Abruptes Abfallverhältnis (0-1)",
           "abrupt_high_load_factor": "Unterbrochen: Hoher Belastungsfaktor",
           "max_past_cycles": "Aufbewahrung: Max. gespeicherte Zyklen",
-          "max_full_traces_per_profile": "Aufbewahrung: Max. vollständige Traces pro Profil",
-          "max_full_traces_unlabeled": "Aufbewahrung: Max. vollständige Spuren ohne Zuordnung",
+          "max_full_traces_per_profile": "Aufbewahrung: Max. vollständige Aufzeichnungen pro Profil",
+          "max_full_traces_unlabeled": "Aufbewahrung: Max. vollständige Aufzeichnungen ohne Zuordnung",
           "watchdog_interval": "Watchdog-Intervall (Sekunden)",
           "completion_min_seconds": "Mindestlaufzeit für den Abschluss (Sekunden)",
           "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
@@ -215,8 +215,8 @@
           "abrupt_drop_ratio": "Relatives Drop-Verhältnis (0–1). Beispiel: 0,6 bedeutet, dass ein Abfall um 60 % abrupt erfolgt.",
           "abrupt_high_load_factor": "Faktor über dem Ausgangswert gilt als „hohe Belastung“ vor einem abrupten Abfall (wird bei abrupter Erkennung verwendet).",
           "max_past_cycles": "Gesamtzahl der beizubehaltenden Zyklen (älteste entfernt). Standard: 200.",
-          "max_full_traces_per_profile": "Anzahl der letzten nicht zugeordneten Zyklen, die mit vollen Leistungsspuren pro Profil beibehalten werden sollen. Ältere Spuren werden über Umschläge zusammengefasst. Standard: 20.",
-          "max_full_traces_unlabeled": "Anzahl der letzten nicht zugeordneten Zyklen, die mit vollständigen Leistungsverfolgungen beibehalten werden sollen, um die automatische Zuordnung zu unterstützen. Standard: 20.",
+          "max_full_traces_per_profile": "Anzahl zugeordneter Aufzeichnungen pro Profil, die mit vollem Leistungsverlauf beibehalten werden sollen. Ältere Aufzeichnungen werden über Hüllkurven zusammengefasst. Standard: 20.",
+          "max_full_traces_unlabeled": "Anzahl nicht zugeordneter Aufzeichnungen, die mit vollem Leistungsverlauf beibehalten werden sollen, um die automatische Zuordnung zu unterstützen. Standard: 20.",
           "watchdog_interval": "Sekunden zwischen Watchdog-Prüfungen während der Ausführung. Standard: 5s. WARNUNG: Stellen Sie sicher, dass dieser Wert HÖHER ist als das Aktualisierungsintervall Ihres Sensors, um falsche Stopps zu vermeiden (z. B. wenn der Sensor alle 60 Sekunden aktualisiert wird, verwenden Sie 65 Sekunden+).",
           "completion_min_seconds": "Zyklen, die kürzer sind, werden als „unterbrochen“ markiert, auch wenn sie natürlich enden. Standard: 600s.",
           "notify_before_end_minutes": "Wie viele Minuten vor dem voraussichtlichen Ende des Zyklus soll eine Benachrichtigung gesendet werden. Zum Deaktivieren auf 0 setzen. Standard: 0.",
@@ -227,7 +227,7 @@
           "end_energy_threshold": "Der Zyklus endet nur, wenn die Energie im letzten Ausschaltverzögerungsfenster unter diesem Wert (Wh) liegt. Verhindert falsche Enden, wenn die Leistung nahe Null schwankt. Standard: 0,05 Wh.",
           "auto_maintenance": "Automatische Wartung aktivieren (Beispiele reparieren, Fragmente zusammenführen).",
           "expose_debug_entities": "Erweiterte Sensoren anzeigen (Konfidenz, Phase, Mehrdeutigkeit) zum Debuggen an.",
-          "save_debug_traces": "Detaillierte Ranking- und Stromverfolgungsdaten im Verlauf speichern (erhöht die Speichernutzung).",
+          "save_debug_traces": "Detaillierte Ranking- und Stromverläufe im Verlauf speichern (erhöht die Speichernutzung).",
           "anti_wrinkle_enabled": "Kurze Trommelumdrehungen mit geringer Leistung nach Programmende ignorieren, um Geisterzyklen zu vermeiden (nur Trockner/Waschtrockner).",
           "anti_wrinkle_max_power": "Leistungsspitzen unter diesem Schwellwert werden als Knitterschutz-Rotationen und nicht als neue Zyklen behandelt. Gilt nur, wenn Knitterschutz aktiviert ist.",
           "anti_wrinkle_max_duration": "Maximale Burst-Länge zur Behandlung als Knitterschutz-Rotation. Gilt nur, wenn Knitterschutz aktiviert ist.",
@@ -283,7 +283,7 @@
       },
       "phase_catalog_create": {
         "title": "Benutzerdefinierte Phase erstellen",
-        "description": "Benutzerdefinierten Phasen erstellen und Gerätetyp zuweisen.",
+        "description": "Benutzerdefinierte Phasen erstellen und Gerätetyp zuweisen.",
         "data": {
           "target_device_type": "Zielgerätetyp",
           "phase_name": "Phasenname",
@@ -419,7 +419,7 @@
         }
       },
       "select_cycle_to_label": {
-        "title": "Zyklus zum Zuordnung auswählen",
+        "title": "Zyklus zum Zuordnen auswählen",
         "description": "✓ = abgeschlossen, ⚠ = fortgesetzt, ✗ = unterbrochen",
         "data": {
           "cycle_id": "Zyklus"
@@ -475,7 +475,7 @@
       },
       "editor_select": {
         "title": "Zyklen auswählen",
-        "description": "Zu verarbeitenden Zyklen auswählen.\n\n{info_text}",
+        "description": "Zu verarbeitende Zyklen auswählen.\n\n{info_text}",
         "data": {
           "selected_cycles": "Zyklen"
         }
@@ -524,7 +524,7 @@
         },
         "data_description": {
           "mode": "Wählen Sie „Exportieren“, um aktuelle Daten und Einstellungen zu kopieren, oder „Importieren“, um exportierte Daten von einem anderen WashData-Gerät einzufügen.",
-          "json_payload": "Für den Export: Dieses JSON kopieren (enthält Zyklen, Profile und allen erweiterten Einstellungen). Für den Import: JSON einfügen, das aus WashData exportiert wurde."
+          "json_payload": "Für den Export: Dieses JSON kopieren (enthält Zyklen, Profile und alle erweiterten Einstellungen). Für den Import: JSON einfügen, das aus WashData exportiert wurde."
         }
       },
       "record_cycle": {
@@ -617,7 +617,7 @@
     },
     "abort": {
       "no_cycles_found": "Keine Zyklen gefunden",
-      "no_power_data": "Für den ausgewählten Zyklus sind keine Leistungsverfolgungsdaten verfügbar.",
+      "no_power_data": "Für den ausgewählten Zyklus sind keine Leistungsverläufe verfügbar.",
       "no_profiles_found": "Keine Profile gefunden. Erstellen Sie zunächst ein Profil.",
       "no_profiles_for_matching": "Keine Profile zum Abgleich verfügbar. Erstellen Sie zunächst Profile.",
       "no_unlabeled_cycles": "Alle Zyklen sind bereits zugeordnet",
@@ -696,7 +696,7 @@
         "overview_suffix": "Überblick",
         "phase_preview_for_profile": "Phasenvorschau für Profil",
         "current_ranges_header": "Aktuelle Zeiträume",
-        "assign_phases_help": "Die folgenden Aktionen verwenden, um Zeiträume hinzuzufügen, zu bearbeiten, zu löschen oder zu speichern.",
+        "assign_phases_help": "Folgende Aktionen verwenden, um Zeiträume hinzuzufügen, zu bearbeiten, zu löschen oder zu speichern.",
         "profile_summary_header": "Profilzusammenfassung",
         "recent_cycles_header": "Aktuelle Zyklen",
         "trim_cycle_preview_title": "Zykluszuschnittsvorschau",
@@ -851,7 +851,7 @@
           "description": "Das zu löschende Profil."
         },
         "unlabel_cycles": {
-          "name": "Zyklen-Zuordnung aufhebn",
+          "name": "Zyklen-Zuordnung aufheben",
           "description": "Zuordnung aller Zyklen aufheben, die dieses Profil verwenden."
         }
       }
@@ -962,7 +962,7 @@
         },
         "cycle_id": {
           "name": "Zyklus-ID",
-          "description": "Die ID des zuzuschneidenen Zyklus."
+          "description": "Die ID des zuzuschneidenden Zyklus."
         },
         "trim_start_s": {
           "name": "Anfang zuschneiden (Sekunden)",
