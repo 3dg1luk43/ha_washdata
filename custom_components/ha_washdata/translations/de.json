@@ -113,7 +113,7 @@
           "notify_service": "Benachrichtigungsdienst (z. B. notify.mobile_app)",
           "notify_actions": "Benachrichtigungsaktionen",
           "notify_people": "Benachrichtigungen warten auf folgende Personen",
-          "notify_only_when_home": "Benachrichtigungen zurückhalten, bis ausgewählte Personen zu Hause ist",
+          "notify_only_when_home": "Benachrichtigungen zurückhalten, bis ausgewählte Person zu Hause ist",
           "notify_fire_events": "Home Assistant-Ereignisse auslösen",
           "notify_events": "Zu benachrichtigende Ereignisse",
           "notify_before_end_minutes": "Benachrichtigung vor Abschluss (Minuten vor Ende)",
@@ -174,7 +174,7 @@
           "watchdog_interval": "Watchdog-Intervall (Sekunden)",
           "completion_min_seconds": "Mindestlaufzeit für den Abschluss (Sekunden)",
           "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
-          "auto_tune_noise_events_threshold": "Auto-Tune: Schwellwert für Geräuschereignisse",
+          "auto_tune_noise_events_threshold": "Auto-Tune: Schwellwert für Rausch-Ereignisse",
           "running_dead_zone": "Running Dead Zone (Sekunden)",
           "end_repeat_count": "Anzahl der Wiederholungen beenden",
           "start_energy_threshold": "Startenergieschwelle (Wh)",
@@ -220,18 +220,18 @@
           "watchdog_interval": "Sekunden zwischen Watchdog-Prüfungen während der Ausführung. Standard: 5s. WARNUNG: Stellen Sie sicher, dass dieser Wert HÖHER ist als das Aktualisierungsintervall Ihres Sensors, um falsche Stopps zu vermeiden (z. B. wenn der Sensor alle 60 Sekunden aktualisiert wird, verwenden Sie 65 Sekunden+).",
           "completion_min_seconds": "Zyklen, die kürzer sind, werden als „unterbrochen“ markiert, auch wenn sie natürlich enden. Standard: 600s.",
           "notify_before_end_minutes": "Wie viele Minuten vor dem voraussichtlichen Ende des Zyklus soll eine Benachrichtigung gesendet werden. Zum Deaktivieren auf 0 setzen. Standard: 0.",
-          "auto_tune_noise_events_threshold": "Anzahl der kurzen/Low-Power-„Rauschen“-Zyklen innerhalb von 24 Stunden, die zur automatischen Anpassung von min_power erforderlich sind. Standard: 3.",
+          "auto_tune_noise_events_threshold": "Anzahl der kurzen/Low-Power-„Rausch“-Zyklen innerhalb von 24 Stunden, die zur automatischen Anpassung von min_power erforderlich sind. Standard: 3.",
           "running_dead_zone": "Nach dem Start des Zyklus Stromeinbrüche für diesen Zeitraum (in Sekunden) ignorieren, um eine falsche Enderkennung während der anfänglichen Hochlaufphase zu verhindern. Zum Deaktivieren auf 0 setzen. Standard: 0s.",
           "end_repeat_count": "Gibt an, wie oft die Endbedingung (Leistung unter dem Schwellwert für Ausschaltverzögerung) nacheinander erfüllt sein muss, bevor der Zyklus beendet wird. Höhere Werte verhindern falsches Ende während Pausen. Standard: 1.",
           "start_energy_threshold": "Um bestätigt zu werden, muss der Zyklus während der START-Phase mindestens so viel Energie (Wh) akkumulieren. Standard: 0,005 Wh.",
           "end_energy_threshold": "Der Zyklus endet nur, wenn die Energie im letzten Ausschaltverzögerungsfenster unter diesem Wert (Wh) liegt. Verhindert falsche Enden, wenn die Leistung nahe Null schwankt. Standard: 0,05 Wh.",
           "auto_maintenance": "Automatische Wartung aktivieren (Beispiele reparieren, Fragmente zusammenführen).",
-          "expose_debug_entities": "Erweiterte Sensoren anzeigen (Konfidenz, Phase, Mehrdeutigkeit) zum Debuggen an.",
+          "expose_debug_entities": "Erweiterte Sensoren (Konfidenz, Phase, Mehrdeutigkeit) zum Debuggen anzeigen.",
           "save_debug_traces": "Detaillierte Ranking- und Stromverläufe im Verlauf speichern (erhöht die Speichernutzung).",
           "anti_wrinkle_enabled": "Kurze Trommelumdrehungen mit geringer Leistung nach Programmende ignorieren, um Geisterzyklen zu vermeiden (nur Trockner/Waschtrockner).",
           "anti_wrinkle_max_power": "Leistungsspitzen unter diesem Schwellwert werden als Knitterschutz-Rotationen und nicht als neue Zyklen behandelt. Gilt nur, wenn Knitterschutz aktiviert ist.",
           "anti_wrinkle_max_duration": "Maximale Burst-Länge zur Behandlung als Knitterschutz-Rotation. Gilt nur, wenn Knitterschutz aktiviert ist.",
-          "anti_wrinkle_exit_power": "Wenn die Leistung unter diesen Wert fällt, die Knitterschutz-Funktion sofort beendet (tatsächliches Ende). Gilt nur, wenn Knitterschutz aktiviert ist.",
+          "anti_wrinkle_exit_power": "Wenn die Leistung unter diesen Wert fällt, die Knitterschutz-Funktion sofort beenden (tatsächliches Ende). Gilt nur, wenn Knitterschutz aktiviert ist.",
           "dtw_bandwidth": "Maximal zulässige Zeitverzerrung (Streckung) im Verhältnis zur Zyklusdauer. Höhere Werte ermöglichen die Anpassung stark variabler Zyklen, erhöhen jedoch die CPU-Kosten. Standard: 0,20 (20 %).",
           "external_end_trigger_enabled": "Überwachung eines externen Binärsensors aktivieren, um den Abschluss des Zyklus auszulösen.",
           "external_end_trigger": "Binäre Sensoreinheit auswählen. Wenn dieser Sensor auslöst, endet der aktuelle Zyklus mit dem Status „abgeschlossen“.",
@@ -359,7 +359,7 @@
         }
       },
       "assign_profile_phases_auto_detect_name": {
-        "title": "Erkannten Phasen benennen",
+        "title": "Erkannte Phasen benennen",
         "description": "Profil: **{profile_name}**\n\n**{detected_count} Phase(n) erkannt:**\n{ranges_summary}\n\nJeder Phase einen Namen zuweisen."
       },
       "assign_profile_phases_select": {
@@ -934,7 +934,7 @@
     },
     "record_start": {
       "name": "Zyklusstart aufzeichnen",
-      "description": "Manuelle Aufzeichnung eines sauberen Zyklus starten (umgeht alle passenden Logiken).",
+      "description": "Manuelle Aufzeichnung eines sauberen Zyklus starten (umgeht alle Matching-Funktionen).",
       "fields": {
         "device_id": {
           "name": "Gerät",
