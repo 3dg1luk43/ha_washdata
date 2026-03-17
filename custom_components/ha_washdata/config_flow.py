@@ -518,6 +518,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage notification settings."""
         if user_input is not None:
+            # Normalize icon: if the user cleared the field it may be absent or
+            # empty.  Set it explicitly so the merge below overwrites any
+            # previously-saved value rather than keeping the stale one.
+            user_input[CONF_NOTIFY_ICON] = user_input.get(CONF_NOTIFY_ICON) or ""
             merged_options = {
                 **self.config_entry.data,
                 **self.config_entry.options,
@@ -626,7 +630,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.TextSelector(),
             vol.Optional(
                 CONF_NOTIFY_ICON,
-                default=get_val(CONF_NOTIFY_ICON, ""),
+                description={"suggested_value": get_val(CONF_NOTIFY_ICON, "")},
             ): selector.IconSelector(),
             vol.Optional(
                 CONF_NOTIFY_START_MESSAGE,
