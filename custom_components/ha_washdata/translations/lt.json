@@ -100,7 +100,7 @@
           "notify_events": "Apie kokius įvykius siųsti pranešimus.",
           "notify_before_end_minutes": "Minutės iki numatomos ciklo pabaigos, kad būtų suaktyvintas pranešimas. Norėdami išjungti, nustatykite 0. Numatytasis: 0.",
           "notify_title": "Pasirinktinis pranešimų pavadinimas. Palaikomas {device} rezervuotos vietos žymeklis.",
-          "notify_icon": "Pranešimams naudojama piktograma (pvz., mdi:washing-machine). Palikite tuščią, kad naudotumėte numatytąją.",
+          "notify_icon": "Pranešimams naudojama piktograma (pvz., mdi:washing-machine). Palikite tuščią, kad siųstumėte be piktogramos.",
           "notify_start_message": "Pranešimas siunčiamas, kai prasideda ciklas. Palaikomas {device} rezervuotos vietos žymeklis.",
           "notify_finish_message": "Pranešimas siunčiamas, kai ciklas baigiasi. Palaikomi {device}, {duration}, {program} rezervuotų vietų žymekliai.",
           "notify_pre_complete_message": "Pranešimas siunčiamas prieš pabaigą. Palaikomi {device}, {minutes} rezervuotų vietų žymekliai."
@@ -136,7 +136,7 @@
           "notify_live_interval_seconds": "Kaip dažnai veikiant siunčiami eigos naujiniai. Mažesnės reikšmės reaguoja greičiau, bet sunaudoja daugiau pranešimų. Taikoma ne mažiau kaip 30 sekundžių – mažesnės nei 30 s reikšmės automatiškai suapvalinamos iki 30 s.",
           "notify_live_overrun_percent": "Saugos atsarga, viršijanti numatomą naujinimų skaičių ilgiems / per ilgiems ciklams (pvz., 20 % leidžia 1,2 karto apskaičiuotus naujinius).",
           "notify_title": "Pasirinktinis pranešimų pavadinimas. Palaikomas {device} rezervuotos vietos žymeklis.",
-          "notify_icon": "Pranešimams naudojama piktograma (pvz., mdi:washing-machine). Palikite tuščią, kad naudotumėte numatytąją.",
+          "notify_icon": "Pranešimams naudojama piktograma (pvz., mdi:washing-machine). Palikite tuščią, kad siųstumėte be piktogramos.",
           "notify_start_message": "Pranešimas siunčiamas, kai prasideda ciklas. Palaikomas {device} rezervuotos vietos žymeklis.",
           "notify_finish_message": "Pranešimas siunčiamas, kai ciklas baigiasi. Palaikomi {device}, {duration}, {program} rezervuotų vietų žymekliai.",
           "notify_pre_complete_message": "Pranešimas siunčiamas prieš pabaigą. Palaikomi {device}, {minutes} rezervuotų vietų žymekliai."

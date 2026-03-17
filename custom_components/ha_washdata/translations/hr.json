@@ -93,7 +93,7 @@
           "notify_events": "Za koje događaje slati obavijesti.",
           "notify_before_end_minutes": "Minute prije procijenjenog kraja ciklusa za pokretanje obavijesti. Postavite na 0 za onemogućavanje. Zadano: 0.",
           "notify_title": "Prilagođeni naslov za obavijesti. Podržava rezervirano mjesto {device}.",
-          "notify_icon": "Ikona koja se koristi za obavijesti (npr. mdi:washing-machine). Ostavite prazno za korištenje zadanog.",
+          "notify_icon": "Ikona koja se koristi za obavijesti (npr. mdi:washing-machine). Ostavite prazno za slanje bez ikone.",
           "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava rezervirano mjesto {device}.",
           "notify_finish_message": "Poruka se šalje kada ciklus završi. Podržava rezervirana mjesta {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} rezervirana mjesta."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Koliko se često ažuriranja napretka šalju tijekom izvođenja. Niže vrijednosti su responzivnije, ali troše više obavijesti. Primjenjuje se minimalno 30 sekundi — vrijednosti ispod 30 s automatski se zaokružuju na 30 s.",
           "notify_live_overrun_percent": "Sigurnosna granica iznad procijenjenog broja ažuriranja za duge cikluse/cikluse koji se prekoračuju (na primjer, 20% dopušta 1,2x procijenjena ažuriranja).",
           "notify_title": "Prilagođeni naslov za obavijesti. Podržava rezervirano mjesto {device}.",
-          "notify_icon": "Ikona koja se koristi za obavijesti (npr. mdi:washing-machine). Ostavite prazno za korištenje zadanog.",
+          "notify_icon": "Ikona koja se koristi za obavijesti (npr. mdi:washing-machine). Ostavite prazno za slanje bez ikone.",
           "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava rezervirano mjesto {device}.",
           "notify_finish_message": "Poruka se šalje kada ciklus završi. Podržava rezervirana mjesta {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} rezervirana mjesta."

@@ -93,7 +93,7 @@
           "notify_events": "要發送通知的事件。",
           "notify_before_end_minutes": "觸發通知的預計週期結束前的分鐘數。設定為 0 以停用。預設值：0。",
           "notify_title": "通知的自訂標題。支援 {device} 佔位符。",
-          "notify_icon": "用於通知的圖示（例如 mdi：洗衣機）。留空以使用預設值。",
+          "notify_icon": "用於通知的圖示（例如 mdi：洗衣機）。留空以不傳送圖示。",
           "notify_start_message": "循環開始時發送的訊息。支援 {device} 佔位符。",
           "notify_finish_message": "循環結束時發送的訊息。支援 {device}、{duration}、{program} 佔位符。",
           "notify_pre_complete_message": "訊息在完成之前發送。支援 {device}、{minutes} 佔位符。"
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "運行時發送進度更新的頻率。值越低，回應速度越快，但會消耗更多通知。強制執行至少 30 秒 - 低於 30 秒的值將自動四捨五入為 30 秒。",
           "notify_live_overrun_percent": "安全裕度高於長/超出週期的估計更新計數（例如 20% 允許 1.2 倍估計更新）。",
           "notify_title": "通知的自訂標題。支援 {device} 佔位符。",
-          "notify_icon": "用於通知的圖示（例如 mdi：洗衣機）。留空以使用預設值。",
+          "notify_icon": "用於通知的圖示（例如 mdi：洗衣機）。留空以不傳送圖示。",
           "notify_start_message": "循環開始時發送的訊息。支援 {device} 佔位符。",
           "notify_finish_message": "循環結束時發送的訊息。支援 {device}、{duration}、{program} 佔位符。",
           "notify_pre_complete_message": "訊息在完成之前發送。支援 {device}、{minutes} 佔位符。"

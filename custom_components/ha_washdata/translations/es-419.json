@@ -100,7 +100,7 @@
           "notify_events": "Para qué eventos enviar notificaciones.",
           "notify_before_end_minutes": "Minutos antes del fin estimado del ciclo para activar una notificación. Pon 0 para deshabilitar. Predeterminado: 0.",
           "notify_title": "Título personalizado para notificaciones. Admite el marcador {device}.",
-          "notify_icon": "Ícono para notificaciones (por ejemplo, mdi:washing-machine). Deja vacío para usar el predeterminado.",
+          "notify_icon": "Ícono para notificaciones (por ejemplo, mdi:washing-machine). Deja vacío para enviar sin ícono.",
           "notify_start_message": "Mensaje enviado cuando comienza un ciclo. Admite el marcador {device}.",
           "notify_finish_message": "Mensaje enviado cuando finaliza un ciclo. Admite los marcadores {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Mensaje enviado antes de la finalización. Admite los marcadores {device}, {minutes}."
@@ -136,7 +136,7 @@
           "notify_live_interval_seconds": "Con qué frecuencia se envían actualizaciones de progreso durante el funcionamiento. Los valores más bajos son más responsivos pero consumen más notificaciones. Se aplica un mínimo de 30 segundos; los valores por debajo de 30 s se redondean automáticamente a 30 s.",
           "notify_live_overrun_percent": "Margen de seguridad sobre el recuento estimado de actualizaciones para ciclos largos o que se extienden (por ejemplo, el 20% permite 1,2 veces las actualizaciones estimadas).",
           "notify_title": "Título personalizado para notificaciones. Admite el marcador {device}.",
-          "notify_icon": "Ícono para notificaciones (por ejemplo, mdi:washing-machine). Deja vacío para usar el predeterminado.",
+          "notify_icon": "Ícono para notificaciones (por ejemplo, mdi:washing-machine). Deja vacío para enviar sin ícono.",
           "notify_start_message": "Mensaje enviado cuando comienza un ciclo. Admite el marcador {device}.",
           "notify_finish_message": "Mensaje enviado cuando finaliza un ciclo. Admite los marcadores {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Mensaje enviado antes de la finalización. Admite los marcadores {device}, {minutes}."

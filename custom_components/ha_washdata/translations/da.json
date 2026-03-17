@@ -93,7 +93,7 @@
           "notify_events": "Hvilke begivenheder der skal sendes notifikationer om.",
           "notify_before_end_minutes": "Minutter før den anslåede afslutning af cyklussen for at udløse en notifikation. Indstil til 0 for at deaktivere. Standard: 0.",
           "notify_title": "Brugerdefineret titel til meddelelser. Understøtter {device} pladsholder.",
-          "notify_icon": "Ikon til brug for meddelelser (f.eks. mdi:vaskemaskine). Lad være tom for at bruge standard.",
+          "notify_icon": "Ikon til brug for meddelelser (f.eks. mdi:vaskemaskine). Lad være tom for at sende uden ikon.",
           "notify_start_message": "Besked sendt, når en cyklus starter. Understøtter {device} pladsholder.",
           "notify_finish_message": "Besked sendt, når en cyklus afsluttes. Understøtter {device}, {duration}, {program} pladsholdere.",
           "notify_pre_complete_message": "Besked sendt før færdiggørelse. Understøtter {device}, {minutes} pladsholdere."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Hvor ofte fremskridtsopdateringer sendes, mens de kører. Lavere værdier er mere lydhøre, men bruger flere meddelelser. Der håndhæves minimum 30 sekunder - værdier under 30 s rundes automatisk op til 30 s.",
           "notify_live_overrun_percent": "Sikkerhedsmargen over det estimerede opdateringstal for lange/overløbende cyklusser (for eksempel tillader 20 % 1,2x estimerede opdateringer).",
           "notify_title": "Brugerdefineret titel til meddelelser. Understøtter {device} pladsholder.",
-          "notify_icon": "Ikon til brug for meddelelser (f.eks. mdi:vaskemaskine). Lad være tom for at bruge standard.",
+          "notify_icon": "Ikon til brug for meddelelser (f.eks. mdi:vaskemaskine). Lad være tom for at sende uden ikon.",
           "notify_start_message": "Besked sendt, når en cyklus starter. Understøtter {device} pladsholder.",
           "notify_finish_message": "Besked sendt, når en cyklus afsluttes. Understøtter {device}, {duration}, {program} pladsholdere.",
           "notify_pre_complete_message": "Besked sendt før færdiggørelse. Understøtter {device}, {minutes} pladsholdere."

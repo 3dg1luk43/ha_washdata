@@ -100,7 +100,7 @@
           "notify_events": "Dla jakich zdarzeń wysyłać powiadomienia.",
           "notify_before_end_minutes": "Minuty przed przewidywanym końcem cyklu, aby wywołać powiadomienie. Ustaw 0, aby wyłączyć. Domyślnie: 0.",
           "notify_title": "Niestandardowy tytuł powiadomień. Obsługuje symbol zastępczy {device}.",
-          "notify_icon": "Ikona używana do powiadomień (np. mdi:washing-machine). Pozostaw puste, aby użyć domyślnej.",
+          "notify_icon": "Ikona używana do powiadomień (np. mdi:washing-machine). Pozostaw puste, aby wysłać bez ikony.",
           "notify_start_message": "Wiadomość wysyłana po rozpoczęciu cyklu. Obsługuje symbol zastępczy {device}.",
           "notify_finish_message": "Wiadomość wysyłana po zakończeniu cyklu. Obsługuje symbole zastępcze {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Wiadomość wysyłana przed zakończeniem. Obsługuje symbole zastępcze {device}, {minutes}."
@@ -136,7 +136,7 @@
           "notify_live_interval_seconds": "Jak często aktualizacje postępu są wysyłane podczas pracy. Niższe wartości są bardziej responsywne, ale zużywają więcej powiadomień. Wymuszone jest minimum 30 sekund — wartości poniżej 30 s są automatycznie zaokrąglane do 30 s.",
           "notify_live_overrun_percent": "Margines bezpieczeństwa powyżej szacowanej liczby aktualizacji dla długich lub przekraczających cykli (np. 20% zezwala na 1,2× szacowanych aktualizacji).",
           "notify_title": "Niestandardowy tytuł powiadomień. Obsługuje symbol zastępczy {device}.",
-          "notify_icon": "Ikona używana do powiadomień (np. mdi:washing-machine). Pozostaw puste, aby użyć domyślnej.",
+          "notify_icon": "Ikona używana do powiadomień (np. mdi:washing-machine). Pozostaw puste, aby wysłać bez ikony.",
           "notify_start_message": "Wiadomość wysyłana po rozpoczęciu cyklu. Obsługuje symbol zastępczy {device}.",
           "notify_finish_message": "Wiadomość wysyłana po zakończeniu cyklu. Obsługuje symbole zastępcze {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Wiadomość wysyłana przed zakończeniem. Obsługuje symbole zastępcze {device}, {minutes}."

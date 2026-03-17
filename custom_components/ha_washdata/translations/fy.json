@@ -93,7 +93,7 @@
           "notify_events": "Foar hokker eveneminten om notifikaasjes te stjoeren.",
           "notify_before_end_minutes": "Minuten foar it rûsde ein fan 'e syklus om in notifikaasje te triggerjen. Stel op 0 om út te skeakeljen. Standert: 0.",
           "notify_title": "Oanpaste titel foar notifikaasjes. Unterstützt {device} plakhâlder.",
-          "notify_icon": "Ikoan om te brûken foar notifikaasjes (bgl. mdi:wasmachine). Lit leech om standert te brûken.",
+          "notify_icon": "Ikoan om te brûken foar notifikaasjes (bgl. mdi:wasmachine). Lit leech om sûnder ikoan te stjoeren.",
           "notify_start_message": "Berjocht ferstjoerd as in syklus begjint. Unterstützt {device} plakhâlder.",
           "notify_finish_message": "Berjocht ferstjoerd as in syklus einiget. Unterstützt {device}, {duration}, {program} plakhâlders.",
           "notify_pre_complete_message": "Berjocht ferstjoerd foar foltôging. Unterstützt {device}, {minutes} plakhâlders."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Hoe faak foarútgong updates wurde ferstjoerd wylst rinnen. Legere wearden binne responsiver, mar konsumearje mear notifikaasjes. In minimum fan 30 sekonden wurdt hanthavene - wearden ûnder 30 s wurde automatysk ôfrûn nei 30 s.",
           "notify_live_overrun_percent": "Feiligens marzje boppe de rûsde update count foar lange / oerrinnende syklusen (bygelyks 20% tastean 1.2x skatte updates).",
           "notify_title": "Oanpaste titel foar notifikaasjes. Unterstützt {device} plakhâlder.",
-          "notify_icon": "Ikoan om te brûken foar notifikaasjes (bgl. mdi:wasmachine). Lit leech om standert te brûken.",
+          "notify_icon": "Ikoan om te brûken foar notifikaasjes (bgl. mdi:wasmachine). Lit leech om sûnder ikoan te stjoeren.",
           "notify_start_message": "Berjocht ferstjoerd as in syklus begjint. Unterstützt {device} plakhâlder.",
           "notify_finish_message": "Berjocht ferstjoerd as in syklus einiget. Unterstützt {device}, {duration}, {program} plakhâlders.",
           "notify_pre_complete_message": "Berjocht ferstjoerd foar foltôging. Unterstützt {device}, {minutes} plakhâlders."

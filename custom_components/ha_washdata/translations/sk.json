@@ -93,7 +93,7 @@
           "notify_events": "Na ktoré udalosti posielať upozornenia.",
           "notify_before_end_minutes": "Minúty pred odhadovaným koncom cyklu na spustenie upozornenia. Pre deaktiváciu nastavte na 0. Predvolená hodnota: 0.",
           "notify_title": "Vlastný názov pre upozornenia. Podporuje zástupný symbol {device}.",
-          "notify_icon": "Ikona, ktorá sa má použiť na upozornenia (napr. mdi:washing-machine). Ak chcete použiť predvolené nastavenie, ponechajte prázdne.",
+          "notify_icon": "Ikona, ktorá sa má použiť na upozornenia (napr. mdi:washing-machine). Ponechajte prázdne pre odoslanie bez ikony.",
           "notify_start_message": "Správa odoslaná pri spustení cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Správa odoslaná po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Správa odoslaná pred dokončením. Podporuje zástupné symboly {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Ako často sa počas behu odosielajú aktualizácie priebehu. Nižšie hodnoty sú citlivejšie, ale spotrebujú viac upozornení. Vynucuje sa minimálne 30 sekúnd — hodnoty pod 30 s sa automaticky zaokrúhľujú na 30 s.",
           "notify_live_overrun_percent": "Bezpečnostná rezerva nad odhadovaným počtom aktualizácií pre dlhé/prekračujúce cykly (napríklad 20 % umožňuje 1,2-násobok odhadovanej aktualizácie).",
           "notify_title": "Vlastný názov pre upozornenia. Podporuje zástupný symbol {device}.",
-          "notify_icon": "Ikona, ktorá sa má použiť na upozornenia (napr. mdi:washing-machine). Ak chcete použiť predvolené nastavenie, ponechajte prázdne.",
+          "notify_icon": "Ikona, ktorá sa má použiť na upozornenia (napr. mdi:washing-machine). Ponechajte prázdne pre odoslanie bez ikony.",
           "notify_start_message": "Správa odoslaná pri spustení cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Správa odoslaná po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Správa odoslaná pred dokončením. Podporuje zástupné symboly {device}, {minutes}."

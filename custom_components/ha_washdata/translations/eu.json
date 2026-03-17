@@ -93,7 +93,7 @@
           "notify_events": "Jakinarazpenak zein gertaeratara bidali.",
           "notify_before_end_minutes": "Zikloaren amaiera estimatua baino minutu batzuk lehenago jakinarazpen bat abiarazteko. Ezarri 0 desgaitzeko. Lehenetsia: 0.",
           "notify_title": "Jakinarazpenetarako izenburu pertsonalizatua. {device} leku-marka onartzen du.",
-          "notify_icon": "Jakinarazpenetarako erabiltzeko ikonoa (adibidez, mdi:washing-machine). Utzi hutsik lehenetsia erabiltzeko.",
+          "notify_icon": "Jakinarazpenetarako erabiltzeko ikonoa (adibidez, mdi:washing-machine). Utzi hutsik ikonorik gabe bidaltzeko.",
           "notify_start_message": "Ziklo bat hasten denean bidalitako mezua. {device} leku-marka onartzen du.",
           "notify_finish_message": "Ziklo bat amaitzean bidalitako mezua. {device}, {duration}, {program} leku-markak onartzen ditu.",
           "notify_pre_complete_message": "Amaitu aurretik bidalitako mezua. {device}, {minutes} leku-markak onartzen ditu."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Aurrerapen-eguneratzeak zenbateko maiztasuna bidaltzen diren exekutatzen ari zaren bitartean. Balio baxuagoek erantzun handiagoa dute baina jakinarazpen gehiago kontsumitzen dute. Gutxienez 30 segundo behar dira; 30 s-tik beherako balioak automatikoki 30 s-ra biribiltzen dira.",
           "notify_live_overrun_percent": "Segurtasun-marjina zenbatetsitako eguneratze-kopurutik gorako ziklo luzeak/gainekotan (adibidez, % 20ak 1,2 aldiz zenbatetsitako eguneratzeak onartzen ditu).",
           "notify_title": "Jakinarazpenetarako izenburu pertsonalizatua. {device} leku-marka onartzen du.",
-          "notify_icon": "Jakinarazpenetarako erabiltzeko ikonoa (adibidez, mdi:washing-machine). Utzi hutsik lehenetsia erabiltzeko.",
+          "notify_icon": "Jakinarazpenetarako erabiltzeko ikonoa (adibidez, mdi:washing-machine). Utzi hutsik ikonorik gabe bidaltzeko.",
           "notify_start_message": "Ziklo bat hasten denean bidalitako mezua. {device} leku-marka onartzen du.",
           "notify_finish_message": "Ziklo bat amaitzean bidalitako mezua. {device}, {duration}, {program} leku-markak onartzen ditu.",
           "notify_pre_complete_message": "Amaitu aurretik bidalitako mezua. {device}, {minutes} leku-markak onartzen ditu."

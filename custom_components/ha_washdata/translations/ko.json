@@ -100,7 +100,7 @@
           "notify_events": "알림을 보낼 이벤트를 선택하세요.",
           "notify_before_end_minutes": "사이클의 예상 종료 몇 분 전에 알림을 발생시킵니다. 비활성화하려면 0으로 설정하세요. 기본값: 0.",
           "notify_title": "알림의 맞춤 제목입니다. {device} 자리 표시자를 지원합니다.",
-          "notify_icon": "알림에 사용할 아이콘입니다(예: mdi:washing-machine). 기본값을 사용하려면 비워두세요.",
+          "notify_icon": "알림에 사용할 아이콘입니다(예: mdi:washing-machine). 아이콘 없이 보내려면 비워두세요.",
           "notify_start_message": "사이클이 시작될 때 전송되는 메시지입니다. {device} 자리 표시자를 지원합니다.",
           "notify_finish_message": "사이클이 완료될 때 전송되는 메시지입니다. {device}, {duration}, {program} 자리 표시자를 지원합니다.",
           "notify_pre_complete_message": "완료 전에 전송되는 메시지입니다. {device}, {minutes} 자리 표시자를 지원합니다."
@@ -136,7 +136,7 @@
           "notify_live_interval_seconds": "실행 중 진행 상황 업데이트가 전송되는 빈도입니다. 값이 낮을수록 반응이 빠르지만 알림을 더 많이 사용합니다. 최소 30초가 적용됩니다. 30초 미만의 값은 자동으로 30초로 반올림됩니다.",
           "notify_live_overrun_percent": "장기/초과 실행 사이클에 대한 예상 업데이트 횟수 이상의 안전 마진입니다(예: 20%는 예상 업데이트의 1.2배를 허용).",
           "notify_title": "알림의 맞춤 제목입니다. {device} 자리 표시자를 지원합니다.",
-          "notify_icon": "알림에 사용할 아이콘입니다(예: mdi:washing-machine). 기본값을 사용하려면 비워두세요.",
+          "notify_icon": "알림에 사용할 아이콘입니다(예: mdi:washing-machine). 아이콘 없이 보내려면 비워두세요.",
           "notify_start_message": "사이클이 시작될 때 전송되는 메시지입니다. {device} 자리 표시자를 지원합니다.",
           "notify_finish_message": "사이클이 완료될 때 전송되는 메시지입니다. {device}, {duration}, {program} 자리 표시자를 지원합니다.",
           "notify_pre_complete_message": "완료 전에 전송되는 메시지입니다. {device}, {minutes} 자리 표시자를 지원합니다."

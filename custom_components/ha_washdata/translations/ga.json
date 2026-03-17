@@ -100,7 +100,7 @@
           "notify_events": "Cad iad na himeachtaí ar cheart fógraí a sheoladh chucu.",
           "notify_before_end_minutes": "Nóiméid roimh dheireadh measta an timthrialla chun fógra a spreagadh. Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 0.",
           "notify_title": "Teideal saincheaptha le haghaidh fógraí. Tacaíonn sé le {device} ionadsealbhóir.",
-          "notify_icon": "Deilbhín le húsáid le haghaidh fógraí (m.sh. mdi:washing-machine). Fág folamh chun réamhshocrú a úsáid.",
+          "notify_icon": "Deilbhín le húsáid le haghaidh fógraí (m.sh. mdi:washing-machine). Fág folamh chun seoladh gan deilbhín.",
           "notify_start_message": "Teachtaireacht seolta nuair a thosaíonn timthriall. Tacaíonn sé le {device} ionadsealbhóir.",
           "notify_finish_message": "Seoltar teachtaireacht nuair a chríochnaíonn timthriall. Tacaíonn sé le {device}, {duration}, {program} ionadsealbhóirí.",
           "notify_pre_complete_message": "Teachtaireacht seolta roimh chríochnú. Tacaíonn sé le {device}, {minutes} ionadsealbhóirí."
@@ -136,7 +136,7 @@
           "notify_live_interval_seconds": "Cé chomh minic is a sheoltar nuashonruithe ar dhul chun cinn agus tú ag rith. Tá luachanna níos ísle níos freagraí ach ídíonn siad níos mó fógraí. Cuirtear 30 soicind ar a laghad i bhfeidhm — déantar luachanna faoi 30 s a shlánú go huathoibríoch suas go 30 s.",
           "notify_live_overrun_percent": "Lamháil sábháilteachta os cionn an chomhairimh nuashonraithe mheasta do thimthriallta fada nó forríofa (mar shampla ceadaíonn 20% 1.2x nuashonruithe measta).",
           "notify_title": "Teideal saincheaptha le haghaidh fógraí. Tacaíonn sé le {device} ionadsealbhóir.",
-          "notify_icon": "Deilbhín le húsáid le haghaidh fógraí (m.sh. mdi:washing-machine). Fág folamh chun réamhshocrú a úsáid.",
+          "notify_icon": "Deilbhín le húsáid le haghaidh fógraí (m.sh. mdi:washing-machine). Fág folamh chun seoladh gan deilbhín.",
           "notify_start_message": "Teachtaireacht seolta nuair a thosaíonn timthriall. Tacaíonn sé le {device} ionadsealbhóir.",
           "notify_finish_message": "Seoltar teachtaireacht nuair a chríochnaíonn timthriall. Tacaíonn sé le {device}, {duration}, {program} ionadsealbhóirí.",
           "notify_pre_complete_message": "Teachtaireacht seolta roimh chríochnú. Tacaíonn sé le {device}, {minutes} ionadsealbhóirí."
