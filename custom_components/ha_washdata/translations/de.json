@@ -314,7 +314,7 @@
       },
       "assign_profile_phases": {
         "title": "Phasenzeiträume zuweisen",
-        "description": "Phasenvorschau für Profil: **{profile_name}**\n\n{timeline_svg}\n\n**Aktuelle Zeiträume:**\n{current_ranges}\n\nFolgenden Aktionen verwenden, um Zeiträume hinzuzufügen, zu bearbeiten, zu löschen oder zu speichern.",
+        "description": "Phasenvorschau für Profil: **{profile_name}**\n\n{timeline_svg}\n\n**Aktuelle Zeiträume:**\n{current_ranges}\n\nFolgende Aktionen verwenden, um Zeiträume hinzuzufügen, zu bearbeiten, zu löschen oder zu speichern.",
         "data": {
           "action": "Aktion"
         }
