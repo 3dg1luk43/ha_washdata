@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Beállítások",
-        "description": "Az észlelési küszöbök, a tanulás és a speciális viselkedés hangolása. Az alapértelmezések jól működnek a legtöbb beállításnál.\n\nJelenleg elérhető javasolt beállítások: {suggestions_count}.\nHa ez a szám 0 felett van, nyissa meg a Speciális beállításokat, és használja a „Javasolt értékek alkalmazása" lehetőséget az ajánlások áttekintéséhez.",
+        "description": "Az észlelési küszöbök, a tanulás és a speciális viselkedés hangolása. Az alapértelmezések jól működnek a legtöbb beállításnál.\n\nJelenleg elérhető javasolt beállítások: {suggestions_count}.\nHa ez a szám 0 felett van, nyissa meg a Speciális beállításokat, és használja a „Javasolt értékek alkalmazása” lehetőséget az ajánlások áttekintéséhez.",
         "data": {
           "apply_suggestions": "Alkalmazza a javasolt értékeket",
           "device_type": "Eszköz típusa",

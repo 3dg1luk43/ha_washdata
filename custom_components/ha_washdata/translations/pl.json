@@ -11,7 +11,7 @@
           "min_power": "Minimalny próg mocy (W)"
         },
         "data_description": {
-          "name": "Przyjazna nazwa tego urządzenia (np. „Pralka", „Zmywarka").",
+          "name": "Przyjazna nazwa tego urządzenia (np. „Pralka”, „Zmywarka”).",
           "device_type": "Jakiego typu jest to urządzenie? Pomaga dostosować wykrywanie i etykietowanie.",
           "power_sensor": "Encja czujnika, która raportuje zużycie energii w czasie rzeczywistym (w watach) przez inteligentną wtyczkę.",
           "min_power": "Odczyty mocy powyżej tego progu (w watach) wskazują, że urządzenie pracuje. Zacznij od 2 W dla większości urządzeń."
@@ -19,7 +19,7 @@
       },
       "first_profile": {
         "title": "Utwórz pierwszy profil",
-        "description": "**Cykl** to pełny przebieg urządzenia (np. załadowanie prania). **Profil** grupuje te cykle według rodzaju (np. „Bawełna", „Pranie szybkie"). Utworzenie profilu teraz umożliwia natychmiastowe szacowanie czasu trwania.\n\nMożesz ręcznie wybrać ten profil w elementach sterujących urządzenia, jeśli nie zostanie wykryty automatycznie.\n\n**Pozostaw pole „Nazwa profilu" puste, aby pominąć ten krok.**",
+        "description": "**Cykl** to pełny przebieg urządzenia (np. załadowanie prania). **Profil** grupuje te cykle według rodzaju (np. „Bawełna”, „Pranie szybkie”). Utworzenie profilu teraz umożliwia natychmiastowe szacowanie czasu trwania.\n\nMożesz ręcznie wybrać ten profil w elementach sterujących urządzenia, jeśli nie zostanie wykryty automatycznie.\n\n**Pozostaw pole „Nazwa profilu” puste, aby pominąć ten krok.**",
         "data": {
           "profile_name": "Nazwa profilu (opcjonalnie)",
           "manual_duration": "Szacowany czas trwania (minuty)"
@@ -210,15 +210,15 @@
           "profile_match_threshold": "Minimalny wynik podobieństwa DTW (0,0–1,0) wymagany do uznania profilu za dopasowany. Wyższy = ściślejsze dopasowanie, mniej wyników fałszywie dodatnich. Domyślnie: 0,4.",
           "profile_unmatch_threshold": "Wynik podobieństwa DTW (0,0–1,0), poniżej którego wcześniej dopasowany profil jest odrzucany. Powinien być niższy niż próg dopasowania, aby zapobiec migotaniu. Domyślnie: 0,35.",
           "profile_duration_tolerance": "Tolerancja stosowana przez dopasowanie profilu dla całkowitej wariancji czasu trwania (0,0–0,5). Domyślne zachowanie: ±25%.",
-          "interrupted_min_seconds": "Przebiegi krótsze niż ten czas mogą zostać sklasyfikowane jako „przerwane".",
+          "interrupted_min_seconds": "Przebiegi krótsze niż ten czas mogą zostać sklasyfikowane jako „przerwane”.",
           "abrupt_drop_watts": "Bezwzględny spadek mocy (W) uznawany za nagły spadek.",
           "abrupt_drop_ratio": "Względny współczynnik spadku (0–1). Przykład: 0,6 oznacza, że spadek o 60% jest nagły.",
-          "abrupt_high_load_factor": "Współczynnik powyżej wartości bazowej uznawany za „wysokie obciążenie" przed nagłym spadkiem (używany przy wykrywaniu nagłych spadków).",
+          "abrupt_high_load_factor": "Współczynnik powyżej wartości bazowej uznawany za „wysokie obciążenie” przed nagłym spadkiem (używany przy wykrywaniu nagłych spadków).",
           "max_past_cycles": "Całkowita liczba cykli do przechowania (najstarsze są usuwane). Domyślnie: 200.",
           "max_full_traces_per_profile": "Liczba ostatnich etykietowanych cykli do przechowania z pełnymi śladami mocy na profil. Starsze ślady są podsumowywane w kopertach. Domyślnie: 20.",
           "max_full_traces_unlabeled": "Liczba ostatnich nieetykietowanych cykli do przechowania z pełnymi śladami mocy, aby wspierać automatyczne etykietowanie. Domyślnie: 20.",
           "watchdog_interval": "Sekundy między kontrolami watchdoga podczas pracy. Domyślnie: 5 s. OSTRZEŻENIE: Upewnij się, że jest WYŻSZY niż interwał aktualizacji czujnika, aby uniknąć fałszywych zatrzymań (np. jeśli czujnik aktualizuje się co 60 s, użyj 65 s+).",
-          "completion_min_seconds": "Cykle krótsze niż ten czas zostaną oznaczone jako „przerwane", nawet jeśli zakończą się naturalnie. Domyślnie: 600 s.",
+          "completion_min_seconds": "Cykle krótsze niż ten czas zostaną oznaczone jako „przerwane”, nawet jeśli zakończą się naturalnie. Domyślnie: 600 s.",
           "notify_before_end_minutes": "Minuty przed przewidywanym końcem cyklu, aby wywołać powiadomienie. Ustaw 0, aby wyłączyć. Domyślnie: 0.",
           "auto_tune_noise_events_threshold": "Liczba krótkich/niskiemocowych cykli szumowych w ciągu 24 h potrzebna do automatycznej regulacji min_power. Domyślnie: 3.",
           "running_dead_zone": "Po rozpoczęciu cyklu ignoruj spadki mocy przez tyle sekund, aby zapobiec fałszywemu wykryciu końca podczas fazy rozruchu. Ustaw 0, aby wyłączyć. Domyślnie: 0 s.",
@@ -234,7 +234,7 @@
           "anti_wrinkle_exit_power": "Jeśli moc spadnie poniżej tego poziomu, natychmiast zakończ tryb antygniotowy (prawdziwe wyłączenie). Dotyczy tylko wtedy, gdy Tarcza antygniotowa jest włączona.",
           "dtw_bandwidth": "Maksymalne dozwolone rozciąganie czasu jako stosunek czasu trwania cyklu. Wyższe wartości umożliwiają dopasowanie bardzo zmiennych cykli, ale zwiększają obciążenie CPU. Domyślnie: 0,20 (20%).",
           "external_end_trigger_enabled": "Włącz monitorowanie zewnętrznego czujnika binarnego, aby wyzwolić zakończenie cyklu.",
-          "external_end_trigger": "Wybierz encję czujnika binarnego. Po uruchomieniu tego czujnika bieżący cykl zakończy się ze statusem „zakończony".",
+          "external_end_trigger": "Wybierz encję czujnika binarnego. Po uruchomieniu tego czujnika bieżący cykl zakończy się ze statusem „zakończony”.",
           "external_end_trigger_inverted": "Domyślnie wyzwalacz uruchamia się, gdy czujnik się WŁĄCZY. Zaznacz to pole, aby wyzwalać, gdy czujnik się WYŁĄCZY."
         }
       },
@@ -375,7 +375,7 @@
       },
       "create_profile": {
         "title": "Utwórz nowy profil",
-        "description": "Utwórz nowy profil ręcznie lub z poprzedniego cyklu.\n\nPrzykłady nazw profili: „Delikatne", „Intensywne", „Szybkie pranie"",
+        "description": "Utwórz nowy profil ręcznie lub z poprzedniego cyklu.\n\nPrzykłady nazw profili: „Delikatne”, „Intensywne”, „Szybkie pranie”",
         "data": {
           "profile_name": "Nazwa profilu",
           "reference_cycle": "Cykl referencyjny (opcjonalnie)",
@@ -830,7 +830,7 @@
         },
         "profile_name": {
           "name": "Nazwa profilu",
-          "description": "Nazwa nowego profilu (np. „Intensywne", „Delikatne")."
+          "description": "Nazwa nowego profilu (np. „Intensywne”, „Delikatne”)."
         },
         "reference_cycle_id": {
           "name": "Identyfikator cyklu referencyjnego",

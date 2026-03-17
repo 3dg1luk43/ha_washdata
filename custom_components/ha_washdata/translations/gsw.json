@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Einstellungen",
-        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.\n\nAktuell verfügbare Einstellungsvorschläge: {suggestions_count}.\nFalls dieser Wert über 0 liegt, öffnen Sie die Erweiterten Einstellungen und nutzen Sie „Vorgeschlagene Werte anwenden", um die Empfehlungen zu prüfen.",
+        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.\n\nAktuell verfügbare Einstellungsvorschläge: {suggestions_count}.\nFalls dieser Wert über 0 liegt, öffnen Sie die Erweiterten Einstellungen und nutzen Sie „Vorgeschlagene Werte anwenden”, um die Empfehlungen zu prüfen.",
         "data": {
           "apply_suggestions": "Vorgeschlagene Werte anwenden",
           "device_type": "Gerätetyp",
@@ -411,8 +411,8 @@
           "confidence_threshold": "Minimales Vertrauen (0,50–0,95)"
         }
       },
-      “select_cycle_to_label”: {
-        “title”: “Zyklus zum Beschriften auswählen”,
+      "select_cycle_to_label": {
+        "title": "Zyklus zum Beschriften auswählen",
         "description": "✓ = abgeschlossen, ⚠ = fortgesetzt, ✗ = unterbrochen",
         "data": {
           "cycle_id": "Zyklus"

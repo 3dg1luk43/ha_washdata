@@ -11,7 +11,7 @@
           "min_power": "Pragul minim de putere (W)"
         },
         "data_description": {
-          "name": "Un nume prietenos pentru acest dispozitiv (de exemplu, „Mașină de spălat", „Mașină de spălat vase").",
+          "name": "Un nume prietenos pentru acest dispozitiv (de exemplu, „Mașină de spălat”, „Mașină de spălat vase”).",
           "device_type": "Ce tip de aparat este acesta? Ajută la personalizarea detectării și etichetării.",
           "power_sensor": "Entitatea senzor care raportează consumul de energie în timp real (în wați) de la priza inteligentă.",
           "min_power": "Citirile de putere peste acest prag (în wați) indică faptul că aparatul funcționează. Începeți cu 2W pentru majoritatea dispozitivelor."
@@ -19,7 +19,7 @@
       },
       "first_profile": {
         "title": "Creați primul profil",
-        "description": "Un **ciclu** este o funcționare completă a aparatului dvs. (de exemplu, o încărcătură de rufe). Un **Profil** grupează aceste cicluri după tip (de exemplu, „Bumbac", „Spălare rapidă"). Crearea unui profil acum ajută integrarea să estimeze durata imediat.\n\nPuteți selecta manual acest profil în comenzile dispozitivului dacă nu este detectat automat.\n\n**Lăsați „Numele profilului" necompletat pentru a sări peste acest pas.**",
+        "description": "Un **ciclu** este o funcționare completă a aparatului dvs. (de exemplu, o încărcătură de rufe). Un **Profil** grupează aceste cicluri după tip (de exemplu, „Bumbac”, „Spălare rapidă”). Crearea unui profil acum ajută integrarea să estimeze durata imediat.\n\nPuteți selecta manual acest profil în comenzile dispozitivului dacă nu este detectat automat.\n\n**Lăsați „Numele profilului” necompletat pentru a sări peste acest pas.**",
         "data": {
           "profile_name": "Nume profil (opțional)",
           "manual_duration": "Durata estimată (minute)"
@@ -203,17 +203,17 @@
           "profile_match_threshold": "Scorul minim de similaritate DTW (0,0–1,0) necesar pentru a considera un profil ca potrivit. Mai mare = potrivire mai strictă, mai puține false pozitive. Implicit: 0,4.",
           "profile_unmatch_threshold": "Scorul de similaritate DTW (0,0–1,0) sub care un profil potrivit anterior este respins. Trebuie să fie mai mic decât pragul de potrivire pentru a preveni oscilațiile. Implicit: 0,35.",
           "profile_duration_tolerance": "Toleranța utilizată de potrivirea profilului pentru variația duratei totale (0,0–0,5). Comportament implicit: ±25%.",
-          "interrupted_min_seconds": "Rulările mai scurte decât aceasta pot fi clasificate ca „întrerupte".",
+          "interrupted_min_seconds": "Rulările mai scurte decât aceasta pot fi clasificate ca „întrerupte”.",
           "abrupt_drop_watts": "Căderea absolută de putere (W) considerată o scădere bruscă.",
           "abrupt_drop_ratio": "Rata de cădere relativă (0–1). Exemplu: 0,6 înseamnă că o scădere de 60% este bruscă.",
-          "abrupt_high_load_factor": "Factorul peste valoarea de referință considerată „încărcare mare" înainte de o scădere bruscă (utilizat cu detectarea scăderilor bruște).",
+          "abrupt_high_load_factor": "Factorul peste valoarea de referință considerată „încărcare mare” înainte de o scădere bruscă (utilizat cu detectarea scăderilor bruște).",
           "max_past_cycles": "Numărul total de cicluri de păstrat (cel mai vechi este eliminat). Implicit: 200.",
           "max_full_traces_per_profile": "Numărul de cicluri etichetate recente de păstrat cu urme complete de putere per profil. Urmele mai vechi sunt rezumate prin plicuri. Implicit: 20.",
           "max_full_traces_unlabeled": "Numărul de cicluri recente neetichetate de păstrat cu urme complete de putere pentru a sprijini etichetarea automată. Implicit: 20.",
           "watchdog_interval": "Secunde între verificările watchdog în timpul funcționării. Implicit: 5s. ATENȚIE: Asigurați-vă că acesta este MAI MARE decât intervalul de actualizare al senzorului pentru a evita opririle false (de exemplu, dacă senzorul se actualizează la fiecare 60 de secunde, utilizați 65s+).",
-          "completion_min_seconds": "Ciclurile mai scurte decât aceasta vor fi marcate ca „întrerupte", chiar dacă se termină în mod natural. Implicit: 600s.",
+          "completion_min_seconds": "Ciclurile mai scurte decât aceasta vor fi marcate ca „întrerupte”, chiar dacă se termină în mod natural. Implicit: 600s.",
           "notify_before_end_minutes": "Cu câte minute înainte de sfârșitul estimat al ciclului pentru a declanșa o notificare. Setați la 0 pentru a dezactiva. Implicit: 0.",
-          "auto_tune_noise_events_threshold": "Numărul de cicluri de „zgomot" scurte/de putere redusă în 24 de ore necesare pentru a regla automat min_power. Implicit: 3.",
+          "auto_tune_noise_events_threshold": "Numărul de cicluri de „zgomot” scurte/de putere redusă în 24 de ore necesare pentru a regla automat min_power. Implicit: 3.",
           "running_dead_zone": "După începerea ciclului, ignorați scăderile de putere timp de atâtea secunde pentru a preveni detectarea falsă a finalului în timpul fazei inițiale de pornire. Setați la 0 pentru a dezactiva. Implicit: 0s.",
           "end_repeat_count": "De câte ori condiția de final (putere sub pragul pentru off_delay) trebuie îndeplinită consecutiv înainte de încheierea ciclului. Valorile mai mari previn finaluri false în timpul pauzelor. Implicit: 1.",
           "start_energy_threshold": "Ciclul trebuie să acumuleze cel puțin atâta energie (Wh) în timpul fazei de START pentru a fi confirmat. Implicit: 0,005 Wh.",
@@ -227,7 +227,7 @@
           "anti_wrinkle_exit_power": "Dacă puterea scade sub acest nivel, ieșiți imediat din modul antirid (oprit cu adevărat). Se aplică numai când Scutul Antirid este activat.",
           "dtw_bandwidth": "Timpul maxim permis de deformare (întindere) ca raport al duratei ciclului. Valorile mai mari permit potrivirea ciclurilor foarte variabile, dar cresc costul CPU. Implicit: 0,20 (20%).",
           "external_end_trigger_enabled": "Activați monitorizarea unui senzor binar extern pentru a declanșa finalizarea ciclului.",
-          "external_end_trigger": "Selectați o entitate senzor binar. Când acest senzor se declanșează, ciclul curent se va încheia cu starea „finalizat".",
+          "external_end_trigger": "Selectați o entitate senzor binar. Când acest senzor se declanșează, ciclul curent se va încheia cu starea „finalizat”.",
           "external_end_trigger_inverted": "În mod implicit, declanșatorul se activează când senzorul este PORNIT. Bifați această casetă pentru a se activa când senzorul se OPRESTE."
         }
       },
@@ -368,7 +368,7 @@
       },
       "create_profile": {
         "title": "Creați un profil nou",
-        "description": "Creați un profil nou manual sau dintr-un ciclu anterior.\n\nExemple de nume de profil: „Delicate", „Rezistente", „Spălare rapidă"",
+        "description": "Creați un profil nou manual sau dintr-un ciclu anterior.\n\nExemple de nume de profil: „Delicate”, „Rezistente”, „Spălare rapidă”",
         "data": {
           "profile_name": "Nume profil",
           "reference_cycle": "Ciclu de referință (opțional)",
@@ -830,7 +830,7 @@
         },
         "profile_name": {
           "name": "Nume profil",
-          "description": "Nume pentru noul profil (de exemplu, „Rezistente", „Delicate")."
+          "description": "Nume pentru noul profil (de exemplu, „Rezistente”, „Delicate”)."
         },
         "reference_cycle_id": {
           "name": "ID ciclu de referință",
@@ -900,7 +900,7 @@
     },
     "submit_cycle_feedback": {
       "name": "Trimiteți feedback pentru ciclu",
-      "description": "Confirmați sau corectați un program detectat automat după un ciclu finalizat. Furnizați fie „entry_id" (avansat), fie „device_id" (recomandat).",
+      "description": "Confirmați sau corectați un program detectat automat după un ciclu finalizat. Furnizați fie „entry_id” (avansat), fie „device_id” (recomandat).",
       "fields": {
         "device_id": {
           "name": "Dispozitiv",

@@ -19,7 +19,7 @@
       },
       "first_profile": {
         "title": "Búðu til fyrsta prófíl",
-        “description”: “**Hringrás** er heildarkeyrsla á heimilistækinu þínu (t.d. fullt af þvotti). **Prófíll** flokkar þessar lotur eftir tegund (t.d. „Bómull”, „Fljótþvottur”). Að búa til prófíl hjálpar nú við að meta tímalengd samþættingar strax.\n\nÞú getur valið þennan prófíl handvirkt í stjórntækjum tækisins ef það greinist ekki sjálfkrafa.\n\n**Láttu 'Nafn prófíls' autt til að sleppa þessu skrefi.**”,
+        "description": "**Hringrás** er heildarkeyrsla á heimilistækinu þínu (t.d. fullt af þvotti). **Prófíll** flokkar þessar lotur eftir tegund (t.d. „Bómull”, „Fljótþvottur”). Að búa til prófíl hjálpar nú við að meta tímalengd samþættingar strax.\n\nÞú getur valið þennan prófíl handvirkt í stjórntækjum tækisins ef það greinist ekki sjálfkrafa.\n\n**Láttu 'Nafn prófíls' autt til að sleppa þessu skrefi.**",
         "data": {
           "profile_name": "Nafn prófíls (valfrjálst)",
           "manual_duration": "Áætluð lengd (mínútur)"
