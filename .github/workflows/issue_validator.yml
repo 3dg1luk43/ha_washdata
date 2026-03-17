@@ -3,6 +3,8 @@ name: Issue Validator
 on:
   issues:
     types: [opened, edited, reopened]
+  issue_comment:
+    types: [created]
   workflow_dispatch:
     inputs:
       issue_body:
@@ -17,11 +19,46 @@ permissions:
   issues: write
 
 jobs:
+  handle-fine-command:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'issue_comment' &&
+      startsWith(github.event.comment.body, '/fine') &&
+      (github.event.comment.author_association == 'OWNER' ||
+       github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'COLLABORATOR')
+
+    steps:
+      - name: Handle /fine command
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = context.payload.issue.number;
+            const incompleteLabel = 'more info required';
+            const currentLabels = context.payload.issue.labels.map(l => l.name);
+
+            if (currentLabels.includes(incompleteLabel)) {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                name: incompleteLabel,
+              });
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `✅ Cleared by @${context.payload.comment.user.login} — issue marked as fine and queued for review.`,
+            });
+
   validate-bug-report:
     runs-on: ubuntu-latest
     if: >
       github.event_name == 'workflow_dispatch' ||
-      contains(github.event.issue.labels.*.name, 'bug')
+      (github.event_name == 'issues' &&
+       contains(github.event.issue.labels.*.name, 'bug'))
 
     steps:
       - name: Validate bug report completeness
@@ -36,7 +73,7 @@ jobs:
               labels: [],
             } : context.payload.issue;
             const body = issue.body || '';
-            const incompleteLabel = 'needs-more-info';
+            const incompleteLabel = 'more info required';
 
             // ── Checks ────────────────────────────────────────────────────────────
             const problems = [];
@@ -63,26 +100,21 @@ jobs:
               problems.push('**Home Assistant Version** is missing. You can find it in Settings → About.');
             }
 
-            // 4. Debug Logs — must contain actual log output, or a clear N/A with stated reason (min length to prevent bare "N/A")
+            // 4. Debug Logs — must contain actual log output, an attached file, or a clear N/A with stated reason
             const logMatch = body.match(/###\s*Debug Logs\s*\n+([\s\S]*?)(?=\n###|$)/);
             const logContent = logMatch ? logMatch[1].trim() : '';
-            const logIsExplainedNA = /^n\/?a\b.{10,}/i.test(logContent); // "N/A" followed by at least 10 chars of explanation
+            const logIsExplainedNA = /^n\/?a/i.test(logContent);
+            // Detect GitHub file attachments (pasted as markdown links)
+            const hasAttachment = /https:\/\/github\.com\/[^)]+\/files\//.test(logContent) ||
+              /https:\/\/github\.com\/user-attachments\//.test(logContent);
             const hasLogs = logContent &&
               logContent !== '_No response_' &&
               logContent !== 'Paste debug log output here...' &&
-              logContent.length > 50;
+              (logContent.length > 50 || hasAttachment);
             if (!hasLogs && !logIsExplainedNA) {
-              problems.push('**Debug Logs** are missing or appear empty. This is the most important piece of information for diagnosing bugs. Please enable debug logging and paste the relevant log section. If logs are genuinely not applicable, write `N/A` followed by a clear explanation of why.');
+              problems.push('**Debug Logs** are missing or appear empty. This is the most important piece of information for diagnosing bugs. Please enable debug logging and paste the relevant log section (or attach a log file). If logs are genuinely not applicable, write `N/A` followed by a clear explanation of why.');
             }
 
-            // 5. Debug logs should contain 'ha_washdata' to confirm they're the right logs (skip if N/A)
-            const logsHaveComponent = hasLogs && (
-              logContent.includes('ha_washdata') ||
-              logContent.includes('washdata')
-            );
-            if (hasLogs && !logsHaveComponent) {
-              problems.push('**Debug Logs** do not appear to contain any `ha_washdata` entries. Please make sure debug logging is enabled for `custom_components.ha_washdata` and that you are reproducing the bug *after* enabling it.');
-            }
 
             // ── Label management ─────────────────────────────────────────────────
             const currentLabels = issue.labels.map(l => l.name);

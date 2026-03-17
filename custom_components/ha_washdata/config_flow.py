@@ -265,6 +265,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._phase_assign_draft: list[dict[str, Any]] = []
         self._phase_assign_edit_index: int | None = None
         self._phase_assign_auto_detected: list[dict[str, Any]] = []
+        self._trim_cycle_id: str | None = None
+        self._trim_start_s: float = 0.0
+        self._trim_end_s: float = 0.0
         self._selector_translations: dict[str, str] | None = None
         self._options_translations: dict[str, str] | None = None
 
@@ -515,6 +518,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage notification settings."""
         if user_input is not None:
+            # Normalize icon: if the user cleared the field it may be absent or
+            # empty.  Set it explicitly so the merge below overwrites any
+            # previously-saved value rather than keeping the stale one.
+            user_input[CONF_NOTIFY_ICON] = user_input.get(CONF_NOTIFY_ICON) or ""
             merged_options = {
                 **self.config_entry.data,
                 **self.config_entry.options,
@@ -623,7 +630,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.TextSelector(),
             vol.Optional(
                 CONF_NOTIFY_ICON,
-                default=get_val(CONF_NOTIFY_ICON, ""),
+                description={"suggested_value": get_val(CONF_NOTIFY_ICON, "")},
             ): selector.IconSelector(),
             vol.Optional(
                 CONF_NOTIFY_START_MESSAGE,
@@ -1691,6 +1698,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 self._editor_selected_ids = []
                 self._editor_split_gap = 900
                 return await self.async_step_interactive_editor()
+            if action == "trim_cycle":
+                self._trim_cycle_id = None
+                self._trim_start_s = 0.0
+                self._trim_end_s = 0.0
+                return await self.async_step_trim_cycle_select()
 
         return self.async_show_form(
             step_id="manage_cycles" if has_cycles else "manage_cycles_empty",
@@ -1700,9 +1712,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         options=[
                             "auto_label_cycles",
                             "select_cycle_to_label",
-                            "select_cycle_to_label_multi",
                             "select_cycle_to_delete",
                             "interactive_editor",
+                            "trim_cycle",
                         ],
                         translation_key="manage_cycles_action",
                     )
@@ -4378,4 +4390,370 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     ),
                 }
             ),
+        )
+
+    # ------------------------------------------------------------------
+    # Cycle Trimmer
+    # ------------------------------------------------------------------
+
+    def _trim_cycle_svg_markdown(
+        self,
+        p_data: list[tuple[float, float]],
+        trim_start_s: float,
+        trim_end_s: float,
+        title: str = "Cycle Trim Preview",
+        label_min: str = "min",
+        no_data_text: str = "No power data available for this cycle.",
+    ) -> str:
+        """Render the cycle power curve with trim-region overlays as a base64 SVG."""
+
+        def esc(text: object) -> str:
+            return (
+                str(text)
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+            )
+
+        width = 1360
+        plot_left = 12
+        plot_right = 12
+        plot_top = 64
+        plot_height = 300
+        plot_width = width - plot_left - plot_right
+        axis_y = plot_top + plot_height + 32
+        total_height = axis_y + 32
+
+        if not p_data or len(p_data) < 2:
+            empty_svg = (
+                f"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='140'"
+                f" viewBox='0 0 {width} 140' style='background-color:#1c1c1c;'>"
+                "<rect x='0' y='0' width='100%' height='100%' fill='#1c1c1c'/>"
+                f"<text x='22' y='42' font-family='sans-serif' font-size='24'"
+                f" fill='#f3f4f6' font-weight='bold'>{esc(title)}</text>"
+                f"<text x='22' y='90' font-family='sans-serif' font-size='18' fill='#94a3b8'>"
+                f"{esc(no_data_text)}"
+                "</text></svg>"
+            )
+            encoded = base64.b64encode(empty_svg.encode("utf-8")).decode("ascii")
+            return f"![Trim preview](data:image/svg+xml;base64,{encoded})"
+
+        max_time_s = p_data[-1][0]
+        max_power = max((p for _, p in p_data), default=0.0)
+        max_power = max(10.0, max_power) * 1.08
+        max_time_s = max(1.0, max_time_s)
+
+        def to_x(t: float) -> float:
+            return plot_left + (max(0.0, min(max_time_s, t)) / max_time_s) * plot_width
+
+        def to_y(p: float) -> float:
+            return plot_top + plot_height - (max(0.0, min(max_power, p)) / max_power) * plot_height
+
+        def pick_grid_interval(total_min_val: int) -> int:
+            label_w_px = 91
+            min_iv = (label_w_px / plot_width) * total_min_val
+            for candidate in (1, 2, 5, 10, 15, 20, 30, 60):
+                if candidate > min_iv:
+                    return candidate
+            return 60
+
+        parts: list[str] = [
+            f"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{total_height}'"
+            f" viewBox='0 0 {width} {total_height}'>",
+            "<rect x='0' y='0' width='100%' height='100%' fill='#1c1c1c'/>",
+            f"<rect x='{plot_left}' y='{plot_top}' width='{plot_width}' height='{plot_height}'"
+            " fill='#111111' stroke='#444' stroke-width='2' rx='8'/>",
+        ]
+
+        # Title
+        parts.append(
+            f"<text x='22' y='42' font-family='sans-serif' font-size='24'"
+            f" fill='#f3f4f6' font-weight='bold'>{esc(title)}</text>"
+        )
+
+        # Time grid
+        total_min = int(max_time_s / 60)
+        grid_interval = pick_grid_interval(total_min)
+        for tick_min in range(0, total_min + 1, grid_interval):
+            tx = to_x(tick_min * 60.0)
+            parts.append(
+                f"<line x1='{tx:.2f}' y1='{plot_top}' x2='{tx:.2f}'"
+                f" y2='{plot_top + plot_height}' stroke='#2a2a2a' stroke-width='1'/>"
+            )
+            parts.append(
+                f"<text x='{tx:.2f}' y='{axis_y}' font-family='sans-serif'"
+                f" font-size='20' fill='#64748b' text-anchor='middle'>"
+                f"{tick_min} {esc(label_min)}</text>"
+            )
+
+        # Trimmed-region shading (before start and after end)
+        x_start = to_x(trim_start_s)
+        x_end = to_x(trim_end_s)
+        if x_start > plot_left:
+            parts.append(
+                f"<rect x='{plot_left}' y='{plot_top}' width='{x_start - plot_left:.2f}'"
+                f" height='{plot_height}' fill='#000000' fill-opacity='0.55' rx='8'/>"
+            )
+        if x_end < plot_left + plot_width:
+            parts.append(
+                f"<rect x='{x_end:.2f}' y='{plot_top}'"
+                f" width='{plot_left + plot_width - x_end:.2f}' height='{plot_height}'"
+                " fill='#000000' fill-opacity='0.55'/>"
+            )
+
+        # Power curve polyline
+        pts = " ".join(f"{to_x(t):.2f},{to_y(p):.2f}" for t, p in p_data)
+        parts.append(
+            f"<polyline points='{pts}' fill='none'"
+            " stroke='#60a5fa' stroke-width='2' stroke-linejoin='round' stroke-linecap='round'/>"
+        )
+
+        # Trim marker lines and labels
+        _label_offset_y = plot_top - 10
+        for t_s, color, key in (
+            (trim_start_s, "#22c55e", "S"),
+            (trim_end_s, "#ef4444", "E"),
+        ):
+            tx = to_x(t_s)
+            t_min_label = f"{int(t_s / 60)}:{int(t_s % 60):02d}"
+            parts.append(
+                f"<line x1='{tx:.2f}' y1='{plot_top}' x2='{tx:.2f}'"
+                f" y2='{plot_top + plot_height}' stroke='{color}'"
+                " stroke-width='2.5' stroke-dasharray='8 4'/>"
+            )
+            parts.append(
+                f"<text x='{tx:.2f}' y='{_label_offset_y}' font-family='sans-serif'"
+                f" font-size='22' fill='{color}' text-anchor='middle'"
+                f" font-weight='bold'>{key}: {esc(t_min_label)}</text>"
+            )
+
+        parts.append("</svg>")
+        svg_str = "\n".join(parts)
+        encoded = base64.b64encode(svg_str.encode("utf-8")).decode("ascii")
+        return f"![Trim preview](data:image/svg+xml;base64,{encoded})"
+
+    async def async_step_trim_cycle_select(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Select a cycle to trim."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+
+        cycles = store.get_past_cycles()[-20:]
+        options = []
+        for c in reversed(cycles):
+            dt = dt_util.parse_datetime(c["start_time"])
+            start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
+            duration_min = int(c.get("manual_duration", c["duration"]) / 60)
+            prof = c.get("profile_name") or await self._selector_text("unlabeled", "Unlabeled")
+            status = c.get("status", "completed")
+            status_icon = (
+                "✓" if status in ("completed", "force_stopped")
+                else "⚠" if status == "resumed"
+                else "✗"
+            )
+            label = f"[{status_icon}] {start} — {duration_min}m — {prof}"
+            options.append(selector.SelectOptionDict(value=c["id"], label=label))
+
+        if not options:
+            return self.async_abort(reason="no_cycles_found")
+
+        if user_input is not None:
+            cycle_id = user_input["cycle_id"]
+            p_data = store.get_cycle_power_data(cycle_id)
+            if not p_data:
+                return self.async_abort(reason="no_power_data")
+            self._trim_cycle_id = cycle_id
+            self._trim_start_s = 0.0
+            self._trim_end_s = p_data[-1][0]
+            return await self.async_step_trim_cycle()
+
+        return self.async_show_form(
+            step_id="trim_cycle_select",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("cycle_id"): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=options,
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                        )
+                    )
+                }
+            ),
+        )
+
+    async def async_step_trim_cycle(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Main cycle trimmer editor."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+
+        if not self._trim_cycle_id:
+            return await self.async_step_trim_cycle_select()
+
+        p_data = store.get_cycle_power_data(self._trim_cycle_id)
+        if not p_data:
+            return self.async_abort(reason="no_power_data")
+
+        full_end_s = p_data[-1][0]
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            action = user_input.get("action")
+            if action == "set_start":
+                return await self.async_step_trim_cycle_start()
+            if action == "set_end":
+                return await self.async_step_trim_cycle_end()
+            if action == "reset":
+                self._trim_start_s = 0.0
+                self._trim_end_s = full_end_s
+            if action == "apply":
+                if self._trim_start_s >= self._trim_end_s:
+                    errors["base"] = "trim_range_invalid"
+                else:
+                    ok = await store.trim_cycle_power_data(
+                        self._trim_cycle_id,
+                        self._trim_start_s,
+                        self._trim_end_s,
+                    )
+                    if ok:
+                        manager.notify_update()
+                        self._trim_cycle_id = None
+                        return await self.async_step_manage_cycles()
+                    errors["base"] = "trim_failed"
+            if action == "cancel":
+                self._trim_cycle_id = None
+                return await self.async_step_manage_cycles()
+
+        label_min = await self._options_text("unit_min", "min")
+        svg = self._trim_cycle_svg_markdown(
+            p_data,
+            self._trim_start_s,
+            self._trim_end_s,
+            title=await self._options_text("trim_cycle_preview_title", "Cycle Trim Preview"),
+            label_min=label_min,
+            no_data_text=await self._options_text(
+                "trim_cycle_preview_no_data", "No power data available for this cycle."
+            ),
+        )
+
+        start_min = int(self._trim_start_s / 60)
+        start_sec = int(self._trim_start_s % 60)
+        end_min = int(self._trim_end_s / 60)
+        end_sec = int(self._trim_end_s % 60)
+        kept_s = max(0.0, self._trim_end_s - self._trim_start_s)
+        kept_min = int(kept_s / 60)
+        kept_sec = int(kept_s % 60)
+        kept_suffix = await self._options_text("trim_cycle_preview_kept_suffix", "kept")
+        summary = (
+            f"{start_min}:{start_sec:02d} — {end_min}:{end_sec:02d}"
+            f"  ({kept_min}:{kept_sec:02d} {kept_suffix})"
+        )
+
+        return self.async_show_form(
+            step_id="trim_cycle",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("action"): self._translated_select(
+                        options=["set_start", "set_end", "reset", "apply", "cancel"],
+                        translation_key="trim_cycle_action",
+                    )
+                }
+            ),
+            errors=errors,
+            description_placeholders={
+                "trim_summary": summary,
+                "trim_svg": svg,
+            },
+        )
+
+    async def async_step_trim_cycle_start(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Set the trim start point (minutes from cycle start)."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+
+        if not self._trim_cycle_id:
+            return await self.async_step_trim_cycle_select()
+
+        p_data = store.get_cycle_power_data(self._trim_cycle_id)
+        if not p_data:
+            return self.async_abort(reason="no_power_data")
+
+        full_end_s = p_data[-1][0]
+        total_min = max(1, int(full_end_s / 60))
+        default_min = int(self._trim_start_s / 60)
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            new_start_s = float(user_input["trim_start_min"]) * 60.0
+            if new_start_s >= self._trim_end_s:
+                errors["trim_start_min"] = "trim_range_invalid"
+            else:
+                self._trim_start_s = new_start_s
+                return await self.async_step_trim_cycle()
+
+        return self.async_show_form(
+            step_id="trim_cycle_start",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("trim_start_min", default=default_min): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=0,
+                            max=total_min - 1,
+                            step=1,
+                            unit_of_measurement="min",
+                            mode=selector.NumberSelectorMode.BOX,
+                        )
+                    ),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_trim_cycle_end(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Set the trim end point (minutes from cycle start)."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+
+        if not self._trim_cycle_id:
+            return await self.async_step_trim_cycle_select()
+
+        p_data = store.get_cycle_power_data(self._trim_cycle_id)
+        if not p_data:
+            return self.async_abort(reason="no_power_data")
+
+        full_end_s = p_data[-1][0]
+        total_min = max(1, int(full_end_s / 60) + 1)
+        default_min = int(self._trim_end_s / 60)
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            new_end_s = float(user_input["trim_end_min"]) * 60.0
+            if new_end_s <= self._trim_start_s:
+                errors["trim_end_min"] = "trim_range_invalid"
+            else:
+                self._trim_end_s = new_end_s
+                return await self.async_step_trim_cycle()
+
+        return self.async_show_form(
+            step_id="trim_cycle_end",
+            data_schema=vol.Schema(
+                {
+                    vol.Required("trim_end_min", default=default_min): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=0,
+                            max=total_min,
+                            step=1,
+                            unit_of_measurement="min",
+                            mode=selector.NumberSelectorMode.BOX,
+                        )
+                    ),
+                }
+            ),
+            errors=errors,
         )

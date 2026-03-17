@@ -19,7 +19,7 @@
       },
       "first_profile": {
         "title": "Búðu til fyrsta prófíl",
-        "description": "**Hringrás** er heildarkeyrsla á heimilistækinu þínu (t.d. fullt af þvotti). **Profile** flokkar þessar lotur eftir tegund (t.d. „Bómull“, „Fljótþvottur“). Að búa til prófíl hjálpar nú við að meta tímalengd samþættingar strax.\n\nÞú getur valið þetta snið handvirkt í stjórntækjum tækisins ef það greinist ekki sjálfkrafa.\n\n**Láttu 'Profile Name' autt til að sleppa þessu skrefi.**",
+        "description": "**Hringrás** er heildarkeyrsla á heimilistækinu þínu (t.d. fullt af þvotti). **Prófíll** flokkar þessar lotur eftir tegund (t.d. „Bómull”, „Fljótþvottur”). Að búa til prófíl hjálpar nú við að meta tímalengd samþættingar strax.\n\nÞú getur valið þennan prófíl handvirkt í stjórntækjum tækisins ef það greinist ekki sjálfkrafa.\n\n**Láttu 'Nafn prófíls' autt til að sleppa þessu skrefi.**",
         "data": {
           "profile_name": "Nafn prófíls (valfrjálst)",
           "manual_duration": "Áætluð lengd (mínútur)"
@@ -58,18 +58,18 @@
       },
       "settings": {
         "title": "Stillingar",
-        "description": "Stilla greiningarþröskuld, nám og háþróaða hegðun. Sjálfgefnar stillingar virka vel fyrir flestar uppsetningar.",
+        "description": "Stilla greiningarþröskuld, nám og háþróaða hegðun. Sjálfgefnar stillingar virka vel fyrir flestar uppsetningar.\n\nTillögðar stillingar í boði: {suggestions_count}.\nEf þetta er hærra en 0, opnaðu Ítarlegar stillingar og notaðu 'Notaðu tillögð gildi' til að fara yfir ráðleggingar.",
         "data": {
           "apply_suggestions": "Notaðu tillögð gildi",
           "device_type": "Tegund tækis",
-          "power_sensor": "Power Sensor Eining",
+          "power_sensor": "Aflskynjareining",
           "min_power": "Lágmarksafl (W)",
           "off_delay": "Lokaseinkun (s)",
           "notify_service": "Tilkynningaþjónusta (t.d. notify.mobile_app)",
           "notify_actions": "Tilkynningaaðgerðir",
           "notify_people": "Fresta afhendingu þar til þetta fólk er komið heim",
           "notify_only_when_home": "Seinkað tilkynningum þar til valinn einstaklingur er kominn heim",
-          "notify_fire_events": "Brunasjálfvirkni atburðir",
+          "notify_fire_events": "Kveikja á sjálfvirkniviðburðum",
           "notify_events": "Viðburðir til að tilkynna",
           "notify_before_end_minutes": "Tilkynning um fyrir lok (mínútum fyrir lok)",
           "notify_title": "Titill tilkynningar",
@@ -80,7 +80,7 @@
           "show_advanced": "Breyta ítarlegum stillingum (næsta skref)"
         },
         "data_description": {
-          "apply_suggestions": "Merktu við þennan reit til að afrita gildi sem lærdómsreikniritið leggur til í eyðublaðið. Skoðaðu áður en þú vistar.\n\nTillögur (frá námi):\n- lágmark_afl: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- vakthundabil: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- sjálfvirkt_merki_öryggi: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- upphafsþröskuldur_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wst\n- hlaupandi_dautt_svæði: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Merktu við þennan reit til að afrita gildi sem lærdómsreikniritið leggur til í eyðublaðið. Skoðaðu áður en þú vistar.\n\nTillögur (frá námi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Veldu gerð tækis (þvottavél, þurrkari, uppþvottavél, kaffivél, rafbíll). Þetta merki er geymt með hverri lotu fyrir betra skipulag.",
           "power_sensor": "Skynjaraeiningin gefur frá sér rauntímaafli (í vöttum). Þú getur breytt þessu hvenær sem er án þess að tapa sögulegum gögnum — gagnlegt ef þú skiptir um snjalltappa.",
           "min_power": "Aflmælingar yfir þessum viðmiðunarmörkum (í vöttum) gefa til kynna að heimilistækið sé í gangi. Byrjaðu með 2W fyrir flest tæki.",
@@ -107,7 +107,7 @@
           "notify_actions": "Tilkynningaaðgerðir",
           "notify_people": "Fresta afhendingu þar til þetta fólk er komið heim",
           "notify_only_when_home": "Seinkað tilkynningum þar til valinn einstaklingur er kominn heim",
-          "notify_fire_events": "Brunasjálfvirkni atburðir",
+          "notify_fire_events": "Kveikja á sjálfvirkniviðburðum",
           "notify_events": "Viðburðir til að tilkynna",
           "notify_before_end_minutes": "Tilkynning um fyrir lok (mínútum fyrir lok)",
           "notify_live_interval_seconds": "Lifandi uppfærslubil (sekúndur)",
@@ -160,18 +160,18 @@
           "interrupted_min_seconds": "Truflun: Lágmarks keyrslutími (sekúndur)",
           "abrupt_drop_watts": "Truflað: Skyndilegt fall algjört (W)",
           "abrupt_drop_ratio": "Brotið: Skyndilegt fallhlutfall (0-1)",
-          "abrupt_high_load_factor": "Truflun: High-Load Factor",
+          "abrupt_high_load_factor": "Truflun: Háhleðslustuðull",
           "max_past_cycles": "Varðveisla: Hámark vistaðar lotur",
           "max_full_traces_per_profile": "Varðveisla: Hámark fullra spora á hvern prófíl",
-          "max_full_traces_unlabeled": "Varðveisla: Max Full Traces Ómerkt",
+          "max_full_traces_unlabeled": "Varðveisla: Hámark fullra spora ómerkt",
           "watchdog_interval": "Varðhundabil (sekúndur)",
           "completion_min_seconds": "Lágmarks keyrslutími (sekúndur)",
           "notify_before_end_minutes": "Tilkynning um fyrir lok (mínútum fyrir lok)",
-          "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
-          "running_dead_zone": "Running Dead Zone (sekúndur)",
+          "auto_tune_noise_events_threshold": "Sjálfstilling: Þröskuldur hávaðaviðburða",
+          "running_dead_zone": "Dautt svæði við ræsingu (sekúndur)",
           "end_repeat_count": "Endurtaka talningu",
-          "start_energy_threshold": "Start Energy Gate (Wh)",
-          "end_energy_threshold": "End Energy Gate (Wh)",
+          "start_energy_threshold": "Orkuhlið við ræsingu (Wh)",
+          "end_energy_threshold": "Orkuhlið við lok (Wh)",
           "auto_maintenance": "Virkja sjálfvirkt viðhald",
           "expose_debug_entities": "Afhjúpa villuleitareiningar",
           "save_debug_traces": "Vista villuleitarspor",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Snúa kveikjulögfræði við (kveikja á OFF)"
         },
         "data_description": {
-          "apply_suggestions": "Merktu við þennan reit til að opna yfirferðarskref fyrir tillögur að gildum úr námsalgríminu. Ekkert er vistað sjálfkrafa.\n\nTillögur (frá námi):\n- lágmark_afl: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- vakthundabil: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- sjálfvirkt_merki_öryggi: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- upphafsþröskuldur_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wst\n- hlaupandi_dautt_svæði: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Merktu við þennan reit til að opna yfirferðarskref fyrir tillögur að gildum úr námsalgríminu. Ekkert er vistað sjálfkrafa.\n\nTillögur (frá námi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Afl verður að hækka ÚR þessum þröskuldi til að BYRJA lotu. Stilltu hærra en biðstyrkur þinn. Sjálfgefið: min_power + 1 W.",
           "stop_threshold_w": "Afl verður að falla UNDIR þessum þröskuldi til að LOKA lotu. Stilltu rétt fyrir ofan núll til að koma í veg fyrir hávaða sem kallar fram falska enda. Sjálfgefið: 0,6 * mín_power.",
           "min_off_gap": "Ef lota byrjar innan margra sekúndna frá því að fyrri lýkur, verða þær sameinaðar í eina lotu.",
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Stig tillögur að gildum í Ítarlegri stillingum"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Klipptu hringrás — Veldu hringrás",
+        "description": "Veldu hringrás til að klippa. ✓ = lokið, ⚠ = haldið áfram, ✗ = truflað",
+        "data": {
+          "cycle_id": "Hringrás"
+        }
+      },
+      "trim_cycle": {
+        "title": "Klipptu hringrás",
+        "description": "Núverandi gluggi: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Aðgerð"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Stilltu klippiupphaf",
+        "description": "Sláðu inn mínútujöfnunina til að byrja að halda gögnum frá (0 = hringrás byrjun).",
+        "data": {
+          "trim_start_min": "Byrja (mínútur)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Stilltu klippienda",
+        "description": "Sláðu inn mínútujöfnunina til að hætta að halda gögnum á.",
+        "data": {
+          "trim_end_min": "Lok (mínútur)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Staðfestu hringrás ({device})",
       "feedback_notification_message": "**Tæki**: {device}\n**Prógramm**: {program} ({confidence}% sjálfstraust)\n**Tími**: {time}\n\nWashData þarf á aðstoð þinni að halda til að staðfesta þessa greindu lotu.\n\nVinsamlegast farðu í **Stillingar > Tæki og þjónusta > WashData > Stilla > Námsendurgjöf** til að staðfesta eða leiðrétta þessa niðurstöðu.",
       "suggestions_ready_notification_title": "WashData: Ráðlagðar stillingar tilbúnar ({device})",
-      "suggestions_ready_notification_message": "Skynjarinn **Tillögur að stillingum** tilkynnir nú **{count}** ráðleggingar sem hægt er að nota.\n\nTil að fara yfir og nota þær: **Stillingar > Tæki og þjónusta > WashData > Stilla > Ítarlegar stillingar > Nota ráðlögð gildi**.\n\nTillögur eru valfrjálsar og sýndar til skoðunar áður en þú vistar."
+      "suggestions_ready_notification_message": "Skynjarinn **Tillögur að stillingum** tilkynnir nú **{count}** ráðleggingar sem hægt er að nota.\n\nTil að fara yfir og nota þær: **Stillingar > Tæki og þjónusta > WashData > Stilla > Ítarlegar stillingar > Nota ráðlögð gildi**.\n\nTillögur eru valfrjálsar og sýndar til skoðunar áður en þú vistar.",
+      "trim_range_invalid": "Byrjun verður að vera fyrir lok. Vinsamlegast stilltu klippingarpunktana þína.",
+      "trim_failed": "Snyrting mistókst. Hringrásin gæti ekki lengur verið til eða glugginn er tómur."
     },
     "abort": {
       "no_cycles_found": "Engar lotur fundust",
@@ -594,7 +624,8 @@
       "no_predictions": "Engar spár",
       "no_custom_phases": "Engir sérsniðnir áfangar fundust.",
       "reprocess_success": "Tókst að endurvinna {count} lotur.",
-      "debug_data_cleared": "Tókst að hreinsa villuleitargögn úr {count} lotum."
+      "debug_data_cleared": "Tókst að hreinsa villuleitargögn úr {count} lotum.",
+      "no_power_data": "Engin gögn um orkuspor eru tiltæk fyrir valda lotu."
     }
   },
   "selector": {
@@ -647,7 +678,7 @@
         "graph_legend_title": "Grafík Legend",
         "graph_legend_body": "Bláa bandið táknar lágmarks- og hámarksaflspennusvið sem sést. Línan sýnir meðalaflsferilinn.",
         "recording_preview": "Forskoðun upptöku",
-        "trim_start": "Trim Start",
+        "trim_start": "Klippa upphaf",
         "trim_end": "Klipptu enda",
         "split_preview_title": "Skipt forskoðun",
         "split_preview_found_fmt": "Fann {count} hluti.",
@@ -667,7 +698,10 @@
         "assign_phases_help": "Notaðu aðgerðir hér að neðan til að bæta við, breyta, eyða eða vista svið.",
         "profile_summary_header": "Samantekt prófíls",
         "recent_cycles_header": "Nýlegar lotur",
-        "no_power_preview": "*Engin orkugögn tiltæk til forskoðunar.*"
+        "no_power_preview": "*Engin orkugögn tiltæk til forskoðunar.*",
+        "trim_cycle_preview_title": "Forskoðun klippingar hringrásar",
+        "trim_cycle_preview_no_data": "Engin orkugögn tiltæk fyrir þessa lotu.",
+        "trim_cycle_preview_kept_suffix": "haldið"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "Sjálfvirk merking á gömlum hringrásum",
         "select_cycle_to_label": "Merki ákveðin hringrás",
-        "select_cycle_to_label_multi": "Merktu margar lotur",
         "select_cycle_to_delete": "Eyða hringrás",
-        "interactive_editor": "Sameina/skipta gagnvirkum ritstjóra"
+        "interactive_editor": "Sameina/skipta gagnvirkum ritstjóra",
+        "trim_cycle": "Gögn klippingar hringrásar"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "Nefndu og notaðu áfanga",
         "cancel": "Farðu til baka án breytinga"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Stilltu upphafspunkt",
+        "set_end": "Stilltu endapunkt",
+        "reset": "Endurstilla á fulla lengd",
+        "apply": "Beita klippingu",
+        "cancel": "Hætta við"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "Þvottavél tæki til að hætta upptöku."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Klipptu hringrás",
+      "description": "Klipptu aflgögn fyrri lotu í ákveðinn tímaglugga.",
+      "fields": {
+        "device_id": {
+          "name": "Tæki",
+          "description": "WashData tækið."
+        },
+        "cycle_id": {
+          "name": "Auðkenni hringrásar",
+          "description": "Auðkenni hringrásarinnar sem á að klippa."
+        },
+        "trim_start_s": {
+          "name": "Klippiupphaf (sekúndur)",
+          "description": "Geymdu gögn frá þessari færslu á nokkrum sekúndum. Sjálfgefið 0."
+        },
+        "trim_end_s": {
+          "name": "Klipptu enda (sekúndur)",
+          "description": "Haltu gögnum upp að þessari frávik á nokkrum sekúndum. Sjálfgefið = full lengd."
+        }
+      }
     }
   },
   "entity": {
@@ -959,7 +1024,7 @@
         "name": "Villuleit upplýsingar"
       },
       "match_confidence": {
-        "name": "Match Traust"
+        "name": "Samsvörunaröryggi"
       },
       "top_candidates": {
         "name": "Efstu frambjóðendur",
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "Þvingaðu lokahring"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Tæki fannst ekki."
+    },
+    "no_config_entry": {
+      "message": "Engin stillingarfærsla fannst fyrir tækið."
+    },
+    "integration_not_loaded": {
+      "message": "Samþætting ekki hlaðin fyrir þetta tæki."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Hringrás fannst ekki eða hefur engin orkugögn."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim mistókst — hringrás fannst ekki, engin orkugögn eða gluggi sem myndast er tómur."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s verða að vera stærri en trim_start_s."
     }
   }
 }

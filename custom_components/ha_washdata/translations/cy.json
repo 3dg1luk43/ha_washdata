@@ -42,7 +42,7 @@
           "learning_feedbacks": "Adolygu Adborth Dysgu",
           "settings": "Gosodiadau",
           "notifications": "Hysbysiadau",
-          "manage_cycles": "Rheoli Beiciau",
+          "manage_cycles": "Rheoli Cylchoedd",
           "manage_profiles": "Rheoli Proffiliau",
           "manage_phase_catalog": "Rheoli Catalog Cyfnod",
           "record_cycle": "Cylchred Record (Llawlyfr)",
@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Gosodiadau",
-        "description": "Trothwyon canfod tiwn, dysgu, ac ymddygiad uwch. Mae rhagosodiadau'n gweithio'n dda ar gyfer y rhan fwyaf o setiau.",
+        "description": "Trothwyon canfod tiwn, dysgu, ac ymddygiad uwch. Mae rhagosodiadau'n gweithio'n dda ar gyfer y rhan fwyaf o setiau.\n\nGosodiadau a awgrymir ar gael ar hyn o bryd: {suggestions_count}.\nOs yw hwn uwchlaw 0, agorwch Gosodiadau Uwch a defnyddiwch 'Cymhwyso Gwerthoedd a Awgrymir' i adolygu argymhellion.",
         "data": {
           "apply_suggestions": "Cymhwyso Gwerthoedd a Awgrymir",
           "device_type": "Math o Ddyfais",
@@ -80,7 +80,7 @@
           "show_advanced": "Golygu Gosodiadau Uwch (Cam Nesaf)"
         },
         "data_description": {
-          "apply_suggestions": "Ticiwch y blwch hwn i gopïo'r gwerthoedd a awgrymir gan yr algorithm dysgu i'r ffurflen. Adolygu cyn cadw.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power}W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- dim_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- hyd_goddefgarwch: {suggested_duration_tolerance}\n- proffil_hyd_goddefgarwch: {suggested_profile_duration_tolerance}\n- proffil_match_min_duration_cymhareb: {suggested_profile_match_min_duration_ratio}\n- proffil_match_max_duration_cymhareb: {suggested_profile_match_max_duration_ratio}\n- cychwyn_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Ticiwch y blwch hwn i gopïo'r gwerthoedd a awgrymir gan yr algorithm dysgu i'r ffurflen. Adolygu cyn cadw.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Dewiswch y math o offer (Peiriant Golchi, Sychwr, Peiriant golchi llestri, Peiriant Coffi, EV). Mae'r tag hwn yn cael ei storio gyda phob cylch ar gyfer trefniadaeth well.",
           "power_sensor": "Yr endid synhwyrydd sy'n adrodd am bŵer amser real (mewn watiau). Gallwch chi newid hyn unrhyw bryd heb golli data hanesyddol - mae'n ddefnyddiol os ydych chi'n amnewid plwg clyfar.",
           "min_power": "Mae darlleniadau pŵer uwchlaw'r trothwy hwn (mewn watiau) yn dangos bod y teclyn yn rhedeg. Dechreuwch gyda 2W ar gyfer y rhan fwyaf o ddyfeisiau.",
@@ -137,7 +137,7 @@
       },
       "advanced_settings": {
         "title": "Gosodiadau Uwch",
-        "description": "Trothwyon canfod tiwn, dysgu, ac ymddygiad uwch. Mae rhagosodiadau'n gweithio'n dda ar gyfer y rhan fwyaf o setiau.",
+        "description": "Trothwyon canfod tiwn, dysgu, ac ymddygiad uwch. Mae rhagosodiadau'n gweithio'n dda ar gyfer y rhan fwyaf o setiau.\n\nGosodiadau a awgrymir ar gael ar hyn o bryd: {suggestions_count}. Defnyddiwch 'Cymhwyso Gwerthoedd a Awgrymir' i adolygu newidiadau cyn cadw.",
         "data": {
           "apply_suggestions": "Cymhwyso Gwerthoedd a Awgrymir",
           "start_threshold_w": "Trothwy Cychwyn (W)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Rhesymeg Sbardun Gwrthdro (Sbardun wedi'i DIFFODD)"
         },
         "data_description": {
-          "apply_suggestions": "Ticiwch y blwch hwn i agor cam adolygu ar gyfer gwerthoedd a awgrymir o'r algorithm dysgu. Nid oes dim yn cael ei arbed yn awtomatig.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power}W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- dim_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- hyd_goddefgarwch: {suggested_duration_tolerance}\n- proffil_hyd_goddefgarwch: {suggested_profile_duration_tolerance}\n- proffil_match_min_duration_cymhareb: {suggested_profile_match_min_duration_ratio}\n- proffil_match_max_duration_cymhareb: {suggested_profile_match_max_duration_ratio}\n- cychwyn_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Ticiwch y blwch hwn i agor cam adolygu ar gyfer gwerthoedd a awgrymir o'r algorithm dysgu. Nid oes dim yn cael ei arbed yn awtomatig.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Rhaid i bŵer godi UCHOD y trothwy hwn i DECHRAU cylchred. Gosodwch yn uwch na'ch pŵer wrth gefn. Diofyn: min_power + 1 W.",
           "stop_threshold_w": "Mae'n rhaid i bŵer ddisgyn DAN y trothwy hwn i DDIWEDDU cylchred. Gosodwch ychydig yn uwch na sero i osgoi sŵn sy'n sbarduno pennau ffug. Diofyn: 0.6 * min_power.",
           "min_off_gap": "Os bydd cylchred yn dechrau o fewn yr eiliadau lawer hyn i'r diwedd un blaenorol, byddant yn cael eu HUNOD yn un gylchred.",
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Cam y gwerthoedd a awgrymir yn y Gosodiadau Uwch"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim Cycle - Dewiswch Beic",
+        "description": "Dewiswch gylchred i'w docio. ✓ = cwblhau, ⚠ = ailddechrau, ✗ = torri ar draws",
+        "data": {
+          "cycle_id": "Beicio"
+        }
+      },
+      "trim_cycle": {
+        "title": "Cylch Trimio",
+        "description": "Ffenestr gyfredol: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Gweithred"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Gosod Trim Start",
+        "description": "Rhowch y munud gwrthbwyso i ddechrau cadw data o (0 = cychwyn cylch).",
+        "data": {
+          "trim_start_min": "Dechrau (munudau)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Gosod Trim End",
+        "description": "Rhowch y munud gwrthbwyso i roi'r gorau i gadw data ar.",
+        "data": {
+          "trim_end_min": "Diwedd (munudau)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "Golchi Data: Cadarnhau'r Cylch ({device})",
       "feedback_notification_message": "**Dyfais**: {device}\n**Rhaglen**: {program} ({confidence}% hyder)\n**Amser**: {time}\n\nMae angen eich help ar WashData i ddilysu'r cylch canfyddedig hwn.\n\nEwch i **Gosodiadau > Dyfeisiau a Gwasanaethau > Golchi Data > Ffurfweddu > Adborth Dysgu** i gadarnhau neu gywiro'r canlyniad hwn.",
       "suggestions_ready_notification_title": "Data Golchi: Gosodiadau Awgrymedig Yn Barod ({device})",
-      "suggestions_ready_notification_message": "Mae'r synhwyrydd **Gosodiadau a Awgrymir** bellach yn adrodd ar argymhellion y gellir eu gweithredu **{count}**.\n\nI'w hadolygu a'u cymhwyso: **Gosodiadau > Dyfeisiau a Gwasanaethau > Golchi Data > Ffurfweddu > Gosodiadau Uwch > Cymhwyso Gwerthoedd a Awgrymir**.\n\nMae awgrymiadau yn ddewisol ac yn cael eu dangos i'w hadolygu cyn i chi gadw."
+      "suggestions_ready_notification_message": "Mae'r synhwyrydd **Gosodiadau a Awgrymir** bellach yn adrodd ar argymhellion y gellir eu gweithredu **{count}**.\n\nI'w hadolygu a'u cymhwyso: **Gosodiadau > Dyfeisiau a Gwasanaethau > Golchi Data > Ffurfweddu > Gosodiadau Uwch > Cymhwyso Gwerthoedd a Awgrymir**.\n\nMae awgrymiadau yn ddewisol ac yn cael eu dangos i'w hadolygu cyn i chi gadw.",
+      "trim_range_invalid": "Rhaid dechrau cyn diwedd. Addaswch eich pwyntiau trimio.",
+      "trim_failed": "Methodd trimio. Efallai nad yw'r cylch yn bodoli mwyach neu mae'r ffenestr yn wag."
     },
     "abort": {
       "no_cycles_found": "Heb ganfod cylchoedd",
@@ -594,7 +624,8 @@
       "no_predictions": "Dim rhagfynegiadau",
       "no_custom_phases": "Ni chanfuwyd unrhyw gamau personol.",
       "reprocess_success": "Wedi ailbrosesu {count} cylch yn llwyddiannus.",
-      "debug_data_cleared": "Llwyddwyd i glirio data dadfygio o {count} gylchred."
+      "debug_data_cleared": "Llwyddwyd i glirio data dadfygio o {count} gylchred.",
+      "no_power_data": "Dim data olrhain pŵer ar gael ar gyfer y cylch a ddewiswyd."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Defnyddiwch y gweithredoedd isod i ychwanegu, golygu, dileu, neu gadw ystodau.",
         "profile_summary_header": "Crynodeb Proffil",
         "recent_cycles_header": "Cylchoedd diweddar",
-        "no_power_preview": "* Dim data pŵer ar gael ar gyfer rhagolwg.*"
+        "no_power_preview": "* Dim data pŵer ar gael ar gyfer rhagolwg.*",
+        "trim_cycle_preview_title": "Rhagolwg Trim Beic",
+        "trim_cycle_preview_no_data": "Nid oes data pŵer ar gael ar gyfer y cylch hwn.",
+        "trim_cycle_preview_kept_suffix": "cadw"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "Awto-Labelu Hen Feiciau",
         "select_cycle_to_label": "Label Cylch Penodol",
-        "select_cycle_to_label_multi": "Labelu Cylchoedd Lluosog",
         "select_cycle_to_delete": "Dileu Beic",
-        "interactive_editor": "Cyfuno/Hollti Golygydd Rhyngweithiol"
+        "interactive_editor": "Cyfuno/Hollti Golygydd Rhyngweithiol",
+        "trim_cycle": "Trimio Data Beicio"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "Enw a chamau cymhwyso",
         "cancel": "Ewch yn ôl heb newidiadau"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Gosod Man Cychwyn",
+        "set_end": "Gosod Pwynt Terfyn",
+        "reset": "Ailosod i Hyd Llawn",
+        "apply": "Gwneud cais Trim",
+        "cancel": "Canslo"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "Dyfais y peiriant golchi i roi'r gorau i recordio."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Cylch Trimio",
+      "description": "Torrwch ddata pŵer cylchred gorffennol i ffenestr amser benodol.",
+      "fields": {
+        "device_id": {
+          "name": "Dyfais",
+          "description": "Y ddyfais WashData."
+        },
+        "cycle_id": {
+          "name": "ID Beic",
+          "description": "ID y cylch i'w docio."
+        },
+        "trim_start_s": {
+          "name": "Trimio Cychwyn (eiliadau)",
+          "description": "Cadw data o'r gwrthbwyso hwn mewn eiliadau. Rhagosodiad 0."
+        },
+        "trim_end_s": {
+          "name": "Diwedd Trimio (eiliadau)",
+          "description": "Cadw data hyd at y gwrthbwyso hwn mewn eiliadau. Diofyn = hyd llawn."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "Gorfodi Diwedd y Cylch"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Heb ganfod dyfais."
+    },
+    "no_config_entry": {
+      "message": "Ni chanfuwyd cofnod ffurfweddu ar gyfer dyfais."
+    },
+    "integration_not_loaded": {
+      "message": "Integreiddio heb ei lwytho ar gyfer y ddyfais hon."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Beic heb ei ganfod neu nid oes ganddo ddata pŵer."
+    },
+    "trim_failed_empty_window": {
+      "message": "Methodd y trimio - ni chanfuwyd y cylch, dim data pŵer, neu mae'r ffenestr ganlyniadol yn wag."
+    },
+    "trim_invalid_range": {
+      "message": "rhaid i trim_end_s fod yn fwy na trim_start_s."
     }
   }
 }

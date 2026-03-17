@@ -52,15 +52,15 @@ async def test_run_post_cycle_processing_logs_activity(manager):
         "split_cycles": 1,
     }
     
-    with patch("custom_components.ha_washdata.manager._LOGGER") as mock_logger:
+    # Patch the instance-level DeviceLoggerAdapter (holds a reference to the real
+    # logger, so patching the module-level _LOGGER name has no effect).
+    with patch.object(manager, "_logger") as mock_logger:
         await manager._run_post_cycle_processing()
-        
+
         # Verify info log
         mock_logger.info.assert_called()
-        # call_args.args[0] or similar. call_args_list[0].args[0]
-        # Verify call arguments
         args, _ = mock_logger.info.call_args_list[0]
-        assert "merged %s" in args[0].lower() or "split %s" in args[0].lower()
+        assert "merged" in args[0].lower() or "split" in args[0].lower()
 
 @pytest.mark.asyncio
 async def test_process_cycle_end_triggers_processing(manager):

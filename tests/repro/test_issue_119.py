@@ -36,12 +36,16 @@ async def test_repro_issue_119_differentiation(store, mock_hass):
     await store.async_add_cycle({"start_time": start_ts.isoformat(), "duration": 5400.0, "status": "completed", "power_data": p60_data})
     await store.create_profile("Mix 60C", store._data["past_cycles"][-1]["id"])
     
-    # Profile 2: Mix 30C
+    # Profile 2: Mix 30C  (timestamps must use the same start as the cycle's start_time)
+    start_ts_30 = start_ts + timedelta(days=1)
     p30_data = []
-    for i in range(0, 1200, 60): p30_data.append([(start_ts + timedelta(seconds=i)).isoformat(), 100.0])
-    for i in range(1200, 1800, 60): p30_data.append([(start_ts + timedelta(seconds=i)).isoformat(), 2000.0])
-    for i in range(1800, 3000, 60): p30_data.append([(start_ts + timedelta(seconds=i)).isoformat(), 200.0])
-    await store.async_add_cycle({"start_time": (start_ts + timedelta(days=1)).isoformat(), "duration": 3000.0, "status": "completed", "power_data": p30_data})
+    for i in range(0, 1200, 60):
+        p30_data.append([(start_ts_30 + timedelta(seconds=i)).isoformat(), 100.0])
+    for i in range(1200, 1800, 60):
+        p30_data.append([(start_ts_30 + timedelta(seconds=i)).isoformat(), 2000.0])
+    for i in range(1800, 3000, 60):
+        p30_data.append([(start_ts_30 + timedelta(seconds=i)).isoformat(), 200.0])
+    await store.async_add_cycle({"start_time": start_ts_30.isoformat(), "duration": 3000.0, "status": "completed", "power_data": p30_data})
     await store.create_profile("Mix 30C", store._data["past_cycles"][-1]["id"])
     
     # 40m Divergence Check

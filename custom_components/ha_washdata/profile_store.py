@@ -1076,6 +1076,11 @@ class ProfileStore:
         # Assign ids to any custom phase missing one.
         if self._migrate_phase_ids():
             await self.async_save()
+        # Repair cycles whose power_data was corrupted by the double-subtract bug.
+        if self.repair_corrupted_power_data():
+            await self.async_save()
+            await self.async_rebuild_all_envelopes()
+            await self.async_save()
 
     # _migrate_v1_to_v2 and _decompress_power_from_raw removed; logic moved to WashDataStore
 
@@ -1225,42 +1230,49 @@ class ProfileStore:
         self._logger.debug("add_cycle: raw_data has %s points", len(raw_data))
 
         if raw_data:
-            start_ts = _value_to_timestamp(cycle_data.get("start_time"))
-            if start_ts is None:
-                self._logger.debug("add_cycle: invalid start_time %r, skipping power_data normalization", cycle_data.get("start_time"))
+            start_time_raw = cycle_data.get("start_time")
+            start_time_iso: str | None = None
+            if isinstance(start_time_raw, str) and start_time_raw:
+                parsed_dt = dt_util.parse_datetime(start_time_raw)
+                if parsed_dt is not None:
+                    start_time_iso = start_time_raw
+                else:
+                    try:
+                        ts = float(start_time_raw)
+                        start_time_iso = dt_util.utc_from_timestamp(ts).isoformat()
+                    except (ValueError, OSError):
+                        self._logger.debug(
+                            "add_cycle: unparseable string start_time %r, falling back",
+                            start_time_raw,
+                        )
+            elif isinstance(start_time_raw, datetime):
+                start_time_iso = start_time_raw.isoformat()
+            elif isinstance(start_time_raw, (int, float)):
+                try:
+                    start_time_iso = dt_util.utc_from_timestamp(float(start_time_raw)).isoformat()
+                except (ValueError, OSError):
+                    pass
+            if start_time_iso is not None:
+                cycle_data["start_time"] = start_time_iso
+            if start_time_iso is None and _value_to_timestamp(start_time_raw) is None:
+                self._logger.debug("add_cycle: invalid start_time %r, skipping power_data normalization", start_time_raw)
+                if hasattr(self, "_save_debug_traces") and not self._save_debug_traces:
+                    cycle_data.pop("debug_data", None)
                 self._data["past_cycles"].append(cycle_data)
                 return
-            stored: list[list[float]] = []
-            offsets: list[float] = []
 
-            for point in raw_data:
-                if not isinstance(point, (list, tuple)):
-                    continue
-                point_any = cast(list[Any] | tuple[Any, ...], point)
-                try:
-                    ts_raw = point_any[0]
-                    p_raw = point_any[1]
-                except IndexError:
-                    continue
-
-                t_val = _value_to_timestamp(ts_raw)
-                if t_val is None:
-                    continue
-
-                try:
-                    p_val = float(p_raw)
-                except (TypeError, ValueError):
-                    continue
-
-                # Store as [offset_seconds, power] for consistency
-                offset = round(t_val - start_ts, 1)
-                offsets.append(offset)
-                stored.append([offset, round(p_val, 1)])
+            # Use unified normalizer: handles offset, ISO-string, and datetime formats
+            pairs = power_data_to_offsets(
+                cast(list[list[Any] | tuple[Any, ...]], raw_data), start_time_iso
+            )
+            stored: list[list[float]] = [[round(p[0], 1), round(p[1], 1)] for p in pairs]
+            offsets: list[float] = [p[0] for p in stored]
 
             # Calculate average sampling interval (in seconds)
             if len(offsets) > 1:
                 intervals = np.diff(offsets)
-                sampling_interval = float(np.median(intervals[intervals > 0]))
+                positive_intervals = intervals[intervals > 0]
+                sampling_interval = float(np.median(positive_intervals)) if positive_intervals.size > 0 else 0.0
             else:
                 sampling_interval = 1.0  # Default fallback
 
@@ -1381,6 +1393,9 @@ class ProfileStore:
             key: str | None = key_any if isinstance(key_any, str) and key_any else None
             by_profile.setdefault(key, []).append(cy)
 
+        # Collect cycle IDs that have pending feedback — never strip their power_data
+        pending_feedback_ids: set[str] = set(self._data.get("pending_feedback", {}).keys())
+
         for key, group in by_profile.items():
             # newest first based on start_time
             try:
@@ -1414,6 +1429,10 @@ class ProfileStore:
 
                     # EXEMPTION: Never strip power data from the profile's sample cycle!
                     if sample_id and c.get("id") == sample_id:
+                        continue
+
+                    # EXEMPTION: Never strip power data from cycles awaiting feedback review
+                    if c.get("id") in pending_feedback_ids:
                         continue
 
                     if c.get("power_data"):
@@ -1700,6 +1719,75 @@ class ProfileStore:
             if await self.async_rebuild_envelope(profile_name):
                 count += 1
         return count
+
+    def repair_corrupted_power_data(self) -> int:
+        """Fix cycles whose power_data offsets were corrupted by the double-subtract bug.
+
+        The bug caused ``offset = small_float - unix_timestamp`` to be stored instead of
+        just ``small_float``.  Corrupted cycles have a first-offset < -1e8 (a value that
+        can never occur for a real appliance cycle offset).  Recovery: add ``start_ts``
+        back to every offset in the affected cycle.
+
+        Returns the number of cycles repaired.
+        """
+        repaired = 0
+        for cycle in self._data.get("past_cycles", []):
+            power_data = cycle.get("power_data")
+            if not isinstance(power_data, list) or not power_data:
+                continue
+            first = power_data[0]
+            if not isinstance(first, (list, tuple)) or len(first) < 2:
+                continue
+            first_offset = first[0]
+            if not isinstance(first_offset, (int, float)) or first_offset > -1e8:
+                continue  # Not corrupted
+
+            start_ts = _value_to_timestamp(cycle.get("start_time"))
+            if start_ts is None:
+                continue
+
+            repaired_rows: list[list[float]] = []
+            for pt in power_data:
+                if not isinstance(pt, (list, tuple)) or len(pt) < 2:
+                    continue
+                try:
+                    repaired_rows.append([round(float(pt[0]) + start_ts, 1), round(float(pt[1]), 1)])
+                except (TypeError, ValueError):
+                    continue
+            if not repaired_rows:
+                continue  # all rows malformed — leave original trace untouched
+            cycle["power_data"] = repaired_rows
+            repaired += 1
+            repaired_data = cycle["power_data"]
+            if len(repaired_data) > 1:
+                r_offsets = [pt[0] for pt in repaired_data]
+                r_intervals = np.diff(r_offsets)
+                r_pos = r_intervals[r_intervals > 0]
+                r_si = float(np.median(r_pos)) if len(r_pos) > 0 else 1.0
+                cycle["sampling_interval"] = round(r_si, 1)
+                # duration = last sample offset from cycle start (not span between
+                # first and last sample, which would be wrong when leading zeros
+                # were trimmed before storage)
+                r_duration = round(r_offsets[-1], 1)
+                cycle["duration"] = r_duration
+                cycle["end_time"] = dt_util.utc_from_timestamp(
+                    start_ts + r_duration
+                ).isoformat()
+                r_ts = np.array(r_offsets, dtype=float)
+                r_p = np.array([pt[1] for pt in repaired_data], dtype=float)
+                r_sig = compute_signature(r_ts, r_p)
+                cycle["signature"] = dataclasses.asdict(r_sig)
+            elif len(repaired_data) == 1:
+                cycle["sampling_interval"] = 1.0
+                cycle["duration"] = 0.0
+                cycle["end_time"] = dt_util.utc_from_timestamp(start_ts).isoformat()
+                cycle["signature"] = None
+
+        if repaired:
+            self._logger.warning(
+                "Repaired corrupted power_data offsets in %d cycle(s)", repaired
+            )
+        return repaired
 
     async def async_rebuild_envelope(self, profile_name: str) -> bool:
         """
@@ -2069,22 +2157,8 @@ class ProfileStore:
             if not envelope or not envelope.get("time_grid"):
                 return None
 
-            # Get actual power data
-            actual_power_raw = actual_cycle.get("power_data", [])
-            if not actual_power_raw:
-                return None
-
-            # Decompress actual cycle power data
-            actual_pairs: list[tuple[float, float]] = []
-            for item in cast(list[Any], actual_power_raw):
-                if isinstance(item, (list, tuple)):
-                    item_seq = cast(list[Any] | tuple[Any, ...], item)
-                    if len(item_seq) < 2:
-                        continue
-                    try:
-                        actual_pairs.append((float(item_seq[0]), float(item_seq[1])))
-                    except (ValueError, TypeError):
-                        continue
+            # Decompress actual cycle power data (handles both ISO-timestamp and offset formats)
+            actual_pairs = decompress_power_data(actual_cycle)
 
             if len(actual_pairs) < 3:
                 return None
@@ -2258,17 +2332,8 @@ class ProfileStore:
             if not profile_envs:
                 return None
 
-            # Decompress actual cycle power data
-            actual_pairs: list[tuple[float, float]] = []
-            for item in cast(list[Any], actual_cycle.get("power_data", [])):
-                if isinstance(item, (list, tuple)):
-                    item_seq = cast(list[Any] | tuple[Any, ...], item)
-                    if len(item_seq) < 2:
-                        continue
-                    try:
-                        actual_pairs.append((float(item_seq[0]), float(item_seq[1])))
-                    except (ValueError, TypeError):
-                        continue
+            # Decompress actual cycle power data (handles both ISO-timestamp and offset formats)
+            actual_pairs = decompress_power_data(actual_cycle)
 
             if len(actual_pairs) < 3:
                 return None
@@ -3427,6 +3492,117 @@ class ProfileStore:
             await self.async_save()
             return True
         return False
+
+    def get_cycle_power_data(self, cycle_id: str) -> list[tuple[float, float]]:
+        """Return decompressed power data for a cycle as [(offset_s, watts), ...].
+
+        Returns an empty list if the cycle is not found or has no power data.
+        """
+        cycle = next(
+            (c for c in self.get_past_cycles() if c.get("id") == cycle_id), None
+        )
+        if cycle is None:
+            return []
+        return self._decompress_power_data(cycle)
+
+    async def trim_cycle_power_data(
+        self,
+        cycle_id: str,
+        new_start_s: float,
+        new_end_s: float,
+    ) -> bool:
+        """Trim a cycle's power_data to the window [new_start_s, new_end_s].
+
+        Offsets are renormalized so the kept segment starts at 0.0.
+        The cycle's ``duration``, ``signature``, and ``sampling_interval`` are
+        recomputed from the trimmed data.
+
+        Returns True if successful, False if the cycle was not found or the
+        resulting data is empty.
+        """
+        cycles = cast(list[CycleDict], self._data.get("past_cycles", []))
+        cycle = next((c for c in cycles if c.get("id") == cycle_id), None)
+        if cycle is None:
+            return False
+
+        p_data = self._decompress_power_data(cycle)
+        if not p_data:
+            return False
+
+        new_start_s = max(0.0, float(new_start_s))
+        new_end_s = float(new_end_s)
+
+        kept = sorted(
+            (
+                (offset, power)
+                for offset, power in p_data
+                if new_start_s <= offset <= new_end_s
+            ),
+            key=lambda x: x[0],
+        )
+        if not kept:
+            return False
+
+        # Re-normalize offsets so the trimmed segment starts at 0.0
+        base = kept[0][0]
+        renorm: list[list[float]] = [
+            [round(offset - base, 2), power] for offset, power in kept
+        ]
+
+        # Advance start_time when trimming from the front
+        if base > 0:
+            start_ts = _value_to_timestamp(cycle.get("start_time"))
+            if start_ts is not None:
+                cycle["start_time"] = dt_util.utc_from_timestamp(
+                    start_ts + base
+                ).isoformat()
+
+        # Recompute sampling interval
+        if len(renorm) > 1:
+            offsets_arr = np.array([r[0] for r in renorm], dtype=float)
+            intervals = np.diff(offsets_arr)
+            pos = intervals[intervals > 0]
+            sampling_interval = float(np.median(pos)) if len(pos) > 0 else 1.0
+        else:
+            sampling_interval = 1.0
+
+        # Recompute signature
+        ts_arr = np.array([r[0] for r in renorm], dtype=float)
+        p_arr = np.array([r[1] for r in renorm], dtype=float)
+        if len(ts_arr) > 1:
+            sig = compute_signature(ts_arr, p_arr)
+            cycle["signature"] = dataclasses.asdict(sig)
+        else:
+            cycle["signature"] = None
+
+        new_duration = round(renorm[-1][0], 1) if renorm else 0.0
+        cycle["power_data"] = renorm
+        cycle["sampling_interval"] = round(sampling_interval, 1)
+        cycle["duration"] = new_duration
+
+        # Keep end_time consistent with the updated start_time and duration
+        new_start_ts = _value_to_timestamp(cycle.get("start_time"))
+        if new_start_ts is not None:
+            cycle["end_time"] = dt_util.utc_from_timestamp(
+                new_start_ts + new_duration
+            ).isoformat()
+
+        # Clear manual_duration override — trimmed duration is now authoritative
+        cycle.pop("manual_duration", None)
+
+        # Invalidate cached sample segments for this cycle so future lookups
+        # are recomputed from the trimmed data
+        stale_keys = [k for k in self._cached_sample_segments if k[0] == cycle_id]
+        for k in stale_keys:
+            del self._cached_sample_segments[k]
+
+        # Rebuild envelope for the associated profile
+        profile_name = cycle.get("profile_name")
+        if profile_name:
+            await self.async_rebuild_envelope(profile_name)
+
+        await self.async_save()
+        return True
 
     def analyze_split_sync(
         self, cycle: CycleDict, min_gap_s: int = 900, idle_power: float = 2.0

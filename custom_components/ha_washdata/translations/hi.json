@@ -12,7 +12,7 @@
         },
         "data_description": {
           "name": "इस उपकरण के लिए एक अनुकूल नाम (जैसे, 'वॉशिंग मशीन', 'डिशवॉशर')।",
-          "device_type": "यह किस प्रकार का उपकरण है? दर्जी का पता लगाने और लेबलिंग में मदद करता है।",
+          "device_type": "यह किस प्रकार का उपकरण है? विशिष्ट पहचान और लेबलिंग में मदद करता है।",
           "power_sensor": "सेंसर इकाई जो आपके स्मार्ट प्लग से वास्तविक समय की बिजली खपत (वाट में) की रिपोर्ट करती है।",
           "min_power": "इस सीमा से ऊपर पावर रीडिंग (वाट में) इंगित करती है कि उपकरण चल रहा है। अधिकांश उपकरणों के लिए 2W से प्रारंभ करें।"
         }
@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "सेटिंग्स",
-        "description": "ट्यून डिटेक्शन थ्रेशोल्ड, सीखना और उन्नत व्यवहार। अधिकांश सेटअपों के लिए डिफ़ॉल्ट अच्छी तरह से काम करते हैं।",
+        "description": "ट्यून डिटेक्शन थ्रेशोल्ड, सीखना और उन्नत व्यवहार। अधिकांश सेटअपों के लिए डिफ़ॉल्ट अच्छी तरह से काम करते हैं।\n\nवर्तमान में उपलब्ध सुझाई गई सेटिंग्स: {suggestions_count}.\nयदि यह 0 से अधिक है, तो उन्नत सेटिंग्स खोलें और सिफारिशें देखने के लिए 'सुझाए गए मान लागू करें' चुनें।",
         "data": {
           "apply_suggestions": "सुझाए गए मान लागू करें",
           "device_type": "डिवाइस का प्रकार",
@@ -69,7 +69,7 @@
           "notify_actions": "अधिसूचना क्रियाएँ",
           "notify_people": "जब तक ये लोग घर नहीं पहुंच जाते तब तक डिलिवरी में देरी करें",
           "notify_only_when_home": "चयनित व्यक्ति के घर आने तक विलंबित सूचनाएं",
-          "notify_fire_events": "अग्नि स्वचालन घटनाएँ",
+          "notify_fire_events": "स्वचालन घटनाएँ सक्रिय करें",
           "notify_events": "सूचित करने योग्य घटनाएँ",
           "notify_before_end_minutes": "समापन पूर्व अधिसूचना (समाप्ति से कुछ मिनट पहले)",
           "notify_title": "अधिसूचना शीर्षक",
@@ -80,7 +80,7 @@
           "show_advanced": "उन्नत सेटिंग्स संपादित करें (अगला चरण)"
         },
         "data_description": {
-          "apply_suggestions": "लर्निंग एल्गोरिदम द्वारा सुझाए गए मानों को फ़ॉर्म में कॉपी करने के लिए इस बॉक्स को चेक करें। सहेजने से पहले समीक्षा करें.\n\nसुझाव (सीखने से):\n- न्यूनतम_शक्ति: {suggested_min_power} डब्ल्यू\n- ऑफ_डिले: {suggested_off_delay} एस\n- वॉचडॉग_इंटरवल: {suggested_watchdog_interval} एस\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- प्रोफ़ाइल_मैच_इंटरवल: {suggested_profile_match_interval} एस\n- ऑटो_लेबल_कॉन्फिडेंस: {suggested_auto_label_confidence}\n- अवधि_सहिष्णुता: {suggested_duration_tolerance}\n- प्रोफ़ाइल_अवधि_सहनशीलता: {suggested_profile_duration_tolerance}\n- प्रोफ़ाइल_मैच_मिनट_अवधि_अनुपात: {suggested_profile_match_min_duration_ratio}\n- प्रोफ़ाइल_मैच_अधिकतम_अवधि_अनुपात: {suggested_profile_match_max_duration_ratio}\n- स्टार्ट_थ्रेसहोल्ड_डब्ल्यू: {suggested_start_threshold_w} डब्ल्यू\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- एंड_एनर्जी_थ्रेसहोल्ड: {suggested_end_energy_threshold} क\n- रनिंग_डेड_ज़ोन: {suggested_running_dead_zone} एस\n{suggested_reason}",
+          "apply_suggestions": "लर्निंग एल्गोरिदम द्वारा सुझाए गए मानों को फ़ॉर्म में कॉपी करने के लिए इस बॉक्स को चेक करें। सहेजने से पहले समीक्षा करें.\n\nसुझाव (सीखने से):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "उपकरण का प्रकार चुनें (वॉशिंग मशीन, ड्रायर, डिशवॉशर, कॉफी मशीन, ईवी)। बेहतर संगठन के लिए यह टैग प्रत्येक चक्र के साथ संग्रहीत किया जाता है।",
           "power_sensor": "सेंसर इकाई वास्तविक समय बिजली (वाट में) की रिपोर्ट करती है। आप ऐतिहासिक डेटा खोए बिना इसे कभी भी बदल सकते हैं—यदि आप स्मार्ट प्लग बदलते हैं तो यह उपयोगी है।",
           "min_power": "इस सीमा से ऊपर पावर रीडिंग (वाट में) इंगित करती है कि उपकरण चल रहा है। अधिकांश उपकरणों के लिए 2W से प्रारंभ करें।",
@@ -107,7 +107,7 @@
           "notify_actions": "अधिसूचना क्रियाएँ",
           "notify_people": "जब तक ये लोग घर नहीं पहुंच जाते तब तक डिलिवरी में देरी करें",
           "notify_only_when_home": "चयनित व्यक्ति के घर आने तक विलंबित सूचनाएं",
-          "notify_fire_events": "अग्नि स्वचालन घटनाएँ",
+          "notify_fire_events": "स्वचालन घटनाएँ सक्रिय करें",
           "notify_events": "सूचित करने योग्य घटनाएँ",
           "notify_before_end_minutes": "समापन पूर्व अधिसूचना (समाप्ति से कुछ मिनट पहले)",
           "notify_live_interval_seconds": "लाइव अपडेट अंतराल (सेकंड)",
@@ -170,7 +170,7 @@
           "auto_tune_noise_events_threshold": "ऑटो-ट्यून: शोर इवेंट थ्रेशोल्ड",
           "running_dead_zone": "रनिंग डेड ज़ोन (सेकंड)",
           "end_repeat_count": "दोहराव गणना समाप्त करें",
-          "start_energy_threshold": "एनर्जी गेट शुरू करें (कब)",
+          "start_energy_threshold": "प्रारंभ ऊर्जा गेट (Wh)",
           "end_energy_threshold": "अंत ऊर्जा गेट (डब्ल्यूएच)",
           "auto_maintenance": "ऑटो-रखरखाव सक्षम करें",
           "expose_debug_entities": "डिबग इकाइयों को उजागर करें",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "इनवर्ट ट्रिगर लॉजिक (ट्रिगर ऑन ऑफ)"
         },
         "data_description": {
-          "apply_suggestions": "शिक्षण एल्गोरिदम से सुझाए गए मानों के लिए समीक्षा चरण खोलने के लिए इस बॉक्स को चेक करें। कुछ भी स्वचालित रूप से सहेजा नहीं जाता है.\n\nसुझाव (सीखने से):\n- न्यूनतम_शक्ति: {suggested_min_power} डब्ल्यू\n- ऑफ_डिले: {suggested_off_delay} एस\n- वॉचडॉग_इंटरवल: {suggested_watchdog_interval} एस\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- प्रोफ़ाइल_मैच_इंटरवल: {suggested_profile_match_interval} एस\n- ऑटो_लेबल_कॉन्फिडेंस: {suggested_auto_label_confidence}\n- अवधि_सहिष्णुता: {suggested_duration_tolerance}\n- प्रोफ़ाइल_अवधि_सहनशीलता: {suggested_profile_duration_tolerance}\n- प्रोफ़ाइल_मैच_मिनट_अवधि_अनुपात: {suggested_profile_match_min_duration_ratio}\n- प्रोफ़ाइल_मैच_अधिकतम_अवधि_अनुपात: {suggested_profile_match_max_duration_ratio}\n- स्टार्ट_थ्रेसहोल्ड_डब्ल्यू: {suggested_start_threshold_w} डब्ल्यू\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- एंड_एनर्जी_थ्रेसहोल्ड: {suggested_end_energy_threshold} क\n- रनिंग_डेड_ज़ोन: {suggested_running_dead_zone} एस\n{suggested_reason}",
+          "apply_suggestions": "शिक्षण एल्गोरिदम से सुझाए गए मानों के लिए समीक्षा चरण खोलने के लिए इस बॉक्स को चेक करें। कुछ भी स्वचालित रूप से सहेजा नहीं जाता है.\n\nसुझाव (सीखने से):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "एक चक्र शुरू करने के लिए शक्ति को इस सीमा से ऊपर उठना होगा। अपनी स्टैंडबाय पावर से अधिक सेट करें। डिफ़ॉल्ट: min_power + 1 W.",
           "stop_threshold_w": "एक चक्र को समाप्त करने के लिए शक्ति को इस सीमा से नीचे गिरना चाहिए। शोर उत्पन्न करने वाले झूठे सिरों से बचने के लिए शून्य से ठीक ऊपर सेट करें। डिफ़ॉल्ट: 0.6 * न्यूनतम_शक्ति।",
           "min_off_gap": "यदि कोई चक्र पिछले समाप्त होने के इतने सेकंड के भीतर शुरू होता है, तो उन्हें एक ही चक्र में विलीन कर दिया जाएगा।",
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "उन्नत सेटिंग्स में सुझाए गए मानों को चरणबद्ध करें"
         }
+      },
+      "trim_cycle_select": {
+        "title": "ट्रिम साइकिल - साइकिल का चयन करें",
+        "description": "ट्रिम करने के लिए एक चक्र चुनें. ✓ = पूरा, ⚠ = फिर से शुरू, ✗ = बाधित",
+        "data": {
+          "cycle_id": "चक्र"
+        }
+      },
+      "trim_cycle": {
+        "title": "ट्रिम साइकिल",
+        "description": "वर्तमान विंडो: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "कार्रवाई"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "ट्रिम स्टार्ट सेट करें",
+        "description": "(0 = चक्र प्रारंभ) से डेटा रखना शुरू करने के लिए मिनट ऑफसेट दर्ज करें।",
+        "data": {
+          "trim_start_min": "प्रारंभ (मिनट)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "ट्रिम एंड सेट करें",
+        "description": "डेटा रखना बंद करने के लिए मिनट ऑफसेट दर्ज करें।",
+        "data": {
+          "trim_end_min": "समाप्ति (मिनट)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "वॉशडेटा: चक्र सत्यापित करें ({device})",
       "feedback_notification_message": "**डिवाइस**: {device}\n**कार्यक्रम**: {program} ({confidence}% विश्वास)\n**समय**: {time}\n\nइस ज्ञात चक्र को सत्यापित करने के लिए वॉशडेटा को आपकी सहायता की आवश्यकता है।\n\nकृपया इस परिणाम की पुष्टि या सुधार करने के लिए **सेटिंग्स > डिवाइस और सेवाएं > वॉशडेटा > कॉन्फिगर > लर्निंग फीडबैक** पर जाएं।",
       "suggestions_ready_notification_title": "वॉशडेटा: सुझाई गई सेटिंग्स तैयार ({device})",
-      "suggestions_ready_notification_message": "**सुझाई गई सेटिंग्स** सेंसर अब **{count}** कार्रवाई योग्य अनुशंसाओं की रिपोर्ट करता है।\n\nउनकी समीक्षा करने और उन्हें लागू करने के लिए: **सेटिंग्स > उपकरण और सेवाएँ > वॉशडेटा > कॉन्फ़िगर करें > उन्नत सेटिंग्स > सुझाए गए मान लागू करें**।\n\nसुझाव वैकल्पिक हैं और आपके सहेजने से पहले समीक्षा के लिए दिखाए जाते हैं।"
+      "suggestions_ready_notification_message": "**सुझाई गई सेटिंग्स** सेंसर अब **{count}** कार्रवाई योग्य अनुशंसाओं की रिपोर्ट करता है।\n\nउनकी समीक्षा करने और उन्हें लागू करने के लिए: **सेटिंग्स > उपकरण और सेवाएँ > वॉशडेटा > कॉन्फ़िगर करें > उन्नत सेटिंग्स > सुझाए गए मान लागू करें**।\n\nसुझाव वैकल्पिक हैं और आपके सहेजने से पहले समीक्षा के लिए दिखाए जाते हैं।",
+      "trim_range_invalid": "प्रारंभ अंत से पहले होना चाहिए. कृपया अपने ट्रिम पॉइंट समायोजित करें।",
+      "trim_failed": "ट्रिम विफल रहा. हो सकता है कि चक्र अब मौजूद न हो या खिड़की खाली हो।"
     },
     "abort": {
       "no_cycles_found": "कोई साइकिल नहीं मिली",
@@ -594,7 +624,8 @@
       "no_predictions": "कोई भविष्यवाणी नहीं",
       "no_custom_phases": "कोई कस्टम चरण नहीं मिला.",
       "reprocess_success": "{count} चक्रों को सफलतापूर्वक पुन:संसाधित किया गया।",
-      "debug_data_cleared": "{count} चक्रों से डिबग डेटा सफलतापूर्वक साफ़ किया गया।"
+      "debug_data_cleared": "{count} चक्रों से डिबग डेटा सफलतापूर्वक साफ़ किया गया।",
+      "no_power_data": "चयनित चक्र के लिए कोई पावर ट्रेस डेटा उपलब्ध नहीं है।"
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "श्रेणियाँ जोड़ने, संपादित करने, हटाने या सहेजने के लिए नीचे दी गई क्रियाओं का उपयोग करें।",
         "profile_summary_header": "प्रोफ़ाइल सारांश",
         "recent_cycles_header": "हाल के चक्र",
-        "no_power_preview": "*पूर्वावलोकन के लिए कोई पावर डेटा उपलब्ध नहीं है।*"
+        "no_power_preview": "*पूर्वावलोकन के लिए कोई पावर डेटा उपलब्ध नहीं है।*",
+        "trim_cycle_preview_title": "साइकिल ट्रिम पूर्वावलोकन",
+        "trim_cycle_preview_no_data": "इस चक्र के लिए कोई पावर डेटा उपलब्ध नहीं है।",
+        "trim_cycle_preview_kept_suffix": "रखा"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "पुरानी साइकिलों को ऑटो-लेबल करें",
         "select_cycle_to_label": "विशिष्ट चक्र लेबल करें",
-        "select_cycle_to_label_multi": "एकाधिक चक्रों को लेबल करें",
         "select_cycle_to_delete": "चक्र हटाएँ",
-        "interactive_editor": "मर्ज/स्प्लिट इंटरैक्टिव संपादक"
+        "interactive_editor": "मर्ज/स्प्लिट इंटरैक्टिव संपादक",
+        "trim_cycle": "ट्रिम साइकिल डेटा"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "चरणों को नाम दें और लागू करें",
         "cancel": "बिना बदलाव के वापस जाएं"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "प्रारंभिक बिंदू निश्चित करें",
+        "set_end": "अंतिम बिंदु सेट करें",
+        "reset": "पूर्ण अवधि पर रीसेट करें",
+        "apply": "ट्रिम लागू करें",
+        "cancel": "रद्द करना"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "रिकॉर्डिंग बंद करने के लिए वॉशिंग मशीन डिवाइस।"
         }
       }
+    },
+    "trim_cycle": {
+      "name": "ट्रिम साइकिल",
+      "description": "पिछले चक्र के पावर डेटा को एक विशिष्ट समय विंडो में ट्रिम करें।",
+      "fields": {
+        "device_id": {
+          "name": "उपकरण",
+          "description": "वॉशडेटा डिवाइस।"
+        },
+        "cycle_id": {
+          "name": "साइकिल आईडी",
+          "description": "ट्रिम करने के लिए साइकिल की आईडी."
+        },
+        "trim_start_s": {
+          "name": "ट्रिम प्रारंभ (सेकंड)",
+          "description": "इस ऑफसेट से डेटा को सेकंडों में रखें। डिफ़ॉल्ट 0."
+        },
+        "trim_end_s": {
+          "name": "ट्रिम अंत (सेकंड)",
+          "description": "सेकंड में इस ऑफसेट तक डेटा रखें। डिफ़ॉल्ट = पूर्ण अवधि."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "बल समाप्ति चक्र"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "युक्ति नहीं मिला।"
+    },
+    "no_config_entry": {
+      "message": "डिवाइस के लिए कोई कॉन्फ़िगरेशन प्रविष्टि नहीं मिली."
+    },
+    "integration_not_loaded": {
+      "message": "इस डिवाइस के लिए एकीकरण लोड नहीं किया गया है."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "साइकिल नहीं मिली या उसमें पावर डेटा नहीं है।"
+    },
+    "trim_failed_empty_window": {
+      "message": "ट्रिम विफल - चक्र नहीं मिला, कोई पावर डेटा नहीं, या परिणामी विंडो खाली है।"
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s, trim_start_s से बड़ा होना चाहिए।"
     }
   }
 }

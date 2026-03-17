@@ -69,7 +69,7 @@
           "notify_actions": "การดำเนินการแจ้งเตือน",
           "notify_people": "เลื่อนการจัดส่งจนกว่าคนเหล่านี้จะถึงบ้าน",
           "notify_only_when_home": "เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกจะถึงบ้าน",
-          "notify_fire_events": "เหตุการณ์ระบบอัตโนมัติอัคคีภัย",
+          "notify_fire_events": "เปิดใช้งานเหตุการณ์ระบบอัตโนมัติ",
           "notify_events": "เหตุการณ์ที่ต้องแจ้งให้ทราบ",
           "notify_before_end_minutes": "การแจ้งเตือนก่อนเสร็จสิ้น (นาทีก่อนสิ้นสุด)",
           "notify_title": "ชื่อการแจ้งเตือน",
@@ -80,7 +80,7 @@
           "show_advanced": "แก้ไขการตั้งค่าขั้นสูง (ขั้นตอนถัดไป)"
         },
         "data_description": {
-          "apply_suggestions": "เลือกช่องนี้เพื่อคัดลอกค่าที่แนะนำโดยอัลกอริทึมการเรียนรู้ลงในแบบฟอร์ม ตรวจสอบก่อนบันทึก\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} วัตต์\n- off_delay: {suggested_off_delay} วินาที\n- watchdog_interval: {suggested_watchdog_interval} วินาที\n- no_update_active_timeout: {suggested_no_update_active_timeout} วินาที\n-profile_match_interval: {suggested_profile_match_interval} วินาที\n- auto_label_confidence: {suggested_auto_label_confidence}\n- ระยะเวลา_ความอดทน: {suggested_duration_tolerance}\n- โปรไฟล์_ระยะเวลา_ความอดทน: {suggested_profile_duration_tolerance}\n- โปรไฟล์_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- โปรไฟล์_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} วัตต์\n- stop_threshold_w: {suggested_stop_threshold_w} อ\n- end_energy_threshold: {suggested_end_energy_threshold} วัตต์ชั่วโมง\n- running_dead_zone: {suggested_running_dead_zone} วินาที\n{suggested_reason}",
+          "apply_suggestions": "เลือกช่องนี้เพื่อคัดลอกค่าที่แนะนำโดยอัลกอริทึมการเรียนรู้ลงในแบบฟอร์ม ตรวจสอบก่อนบันทึก\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "เลือกประเภทของเครื่องใช้ไฟฟ้า (เครื่องซักผ้า, เครื่องอบผ้า, เครื่องล้างจาน, เครื่องชงกาแฟ, EV) แท็กนี้จะถูกเก็บไว้ในแต่ละรอบเพื่อการจัดระเบียบที่ดีขึ้น",
           "power_sensor": "เอนทิตีเซ็นเซอร์รายงานกำลังแบบเรียลไทม์ (เป็นวัตต์) คุณสามารถเปลี่ยนแปลงได้ตลอดเวลาโดยไม่สูญเสียข้อมูลในอดีต ซึ่งมีประโยชน์หากคุณเปลี่ยนปลั๊กอัจฉริยะ",
           "min_power": "การอ่านค่ากำลังไฟฟ้าที่สูงกว่าเกณฑ์นี้ (เป็นวัตต์) แสดงว่าเครื่องกำลังทำงานอยู่ เริ่มต้นด้วย 2W สำหรับอุปกรณ์ส่วนใหญ่",
@@ -107,7 +107,7 @@
           "notify_actions": "การดำเนินการแจ้งเตือน",
           "notify_people": "เลื่อนการจัดส่งจนกว่าคนเหล่านี้จะถึงบ้าน",
           "notify_only_when_home": "เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกจะถึงบ้าน",
-          "notify_fire_events": "เหตุการณ์ระบบอัตโนมัติอัคคีภัย",
+          "notify_fire_events": "เปิดใช้งานเหตุการณ์ระบบอัตโนมัติ",
           "notify_events": "เหตุการณ์ที่ต้องแจ้งให้ทราบ",
           "notify_before_end_minutes": "การแจ้งเตือนก่อนเสร็จสิ้น (นาทีก่อนสิ้นสุด)",
           "notify_live_interval_seconds": "ช่วงเวลาการอัปเดตสด (วินาที)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "สลับลอจิกทริกเกอร์ (ทริกเกอร์เปิดปิด)"
         },
         "data_description": {
-          "apply_suggestions": "เลือกช่องนี้เพื่อเปิดขั้นตอนการทบทวนค่าที่แนะนำจากอัลกอริทึมการเรียนรู้ ไม่มีสิ่งใดถูกบันทึกโดยอัตโนมัติ\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} วัตต์\n- off_delay: {suggested_off_delay} วินาที\n- watchdog_interval: {suggested_watchdog_interval} วินาที\n- no_update_active_timeout: {suggested_no_update_active_timeout} วินาที\n-profile_match_interval: {suggested_profile_match_interval} วินาที\n- auto_label_confidence: {suggested_auto_label_confidence}\n- ระยะเวลา_ความอดทน: {suggested_duration_tolerance}\n- โปรไฟล์_ระยะเวลา_ความอดทน: {suggested_profile_duration_tolerance}\n- โปรไฟล์_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- โปรไฟล์_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} วัตต์\n- stop_threshold_w: {suggested_stop_threshold_w} อ\n- end_energy_threshold: {suggested_end_energy_threshold} วัตต์ชั่วโมง\n- running_dead_zone: {suggested_running_dead_zone} วินาที\n{suggested_reason}",
+          "apply_suggestions": "เลือกช่องนี้เพื่อเปิดขั้นตอนการทบทวนค่าที่แนะนำจากอัลกอริทึมการเรียนรู้ ไม่มีสิ่งใดถูกบันทึกโดยอัตโนมัติ\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "กำลังไฟฟ้าต้องสูงกว่าเกณฑ์นี้จึงจะเริ่มต้นวงจรได้ ตั้งค่าให้สูงกว่าพลังงานสแตนด์บายของคุณ ค่าเริ่มต้น: min_power + 1 W.",
           "stop_threshold_w": "กำลังไฟฟ้าต้องต่ำกว่าเกณฑ์นี้จึงจะสิ้นสุดรอบได้ ตั้งค่าให้สูงกว่าศูนย์เพื่อหลีกเลี่ยงสัญญาณรบกวนที่ทำให้เกิดการสิ้นสุดที่ผิดพลาด ค่าเริ่มต้น: 0.6 * min_power",
           "min_off_gap": "หากวงจรเริ่มต้นภายในไม่กี่วินาทีหลังจากรอบก่อนหน้าสิ้นสุดลง วงจรเหล่านั้นจะถูกรวมเข้าเป็นรอบเดียว",
@@ -353,13 +353,13 @@
       },
       "assign_profile_phases_auto_detect_name": {
         "title": "ชื่อเฟสที่ตรวจพบ",
-        "description": "โปรไฟล์: **{profile_name}**\n\n**ตรวจพบเฟส{detected_count}:**\n{ranges_summary}\n\nตั้งชื่อให้กับแต่ละเฟส"
+        "description": "โปรไฟล์: **{profile_name}**\n\n**ตรวจพบ {detected_count} เฟส:**\n{ranges_summary}\n\nกำหนดชื่อให้กับแต่ละเฟส"
       },
       "assign_profile_phases_select": {
         "title": "กำหนดช่วงเฟส",
         "description": "เลือกโปรไฟล์เพื่อกำหนดค่าช่วงเฟส",
         "data": {
-          "profile": "ประวัติโดยย่อ"
+          "profile": "โปรไฟล์"
         }
       },
       "profile_stats": {
@@ -379,7 +379,7 @@
         "title": "แก้ไขโปรไฟล์",
         "description": "เลือกโปรไฟล์ที่จะเปลี่ยนชื่อ",
         "data": {
-          "profile": "ประวัติโดยย่อ"
+          "profile": "โปรไฟล์"
         }
       },
       "rename_profile": {
@@ -394,7 +394,7 @@
         "title": "ลบโปรไฟล์",
         "description": "เลือกโปรไฟล์ที่จะลบ",
         "data": {
-          "profile": "ประวัติโดยย่อ"
+          "profile": "โปรไฟล์"
         }
       },
       "delete_profile_confirm": {
@@ -429,7 +429,7 @@
         "title": "วงจรฉลาก",
         "description": "{cycle_info}",
         "data": {
-          "profile_name": "ประวัติโดยย่อ",
+          "profile_name": "โปรไฟล์",
           "new_profile_name": "ชื่อโปรไฟล์ใหม่ (หากกำลังสร้าง)"
         }
       },
@@ -449,7 +449,7 @@
         "title": "ล้างประวัติ - เลือกโปรไฟล์",
         "description": "เลือกโปรไฟล์เพื่อแสดงภาพ ซึ่งจะสร้างกราฟที่แสดงรอบที่ผ่านมาทั้งหมดสำหรับโปรไฟล์นี้เพื่อช่วยระบุค่าผิดปกติ",
         "data": {
-          "profile": "ประวัติโดยย่อ"
+          "profile": "โปรไฟล์"
         }
       },
       "cleanup_select": {
@@ -561,7 +561,35 @@
         "title": "ตรวจสอบการเปลี่ยนแปลงที่แนะนำ",
         "description": "WashData พบค่าที่แนะนำ {pending_count} ค่าที่จะใช้\n\nการเปลี่ยนแปลงที่ต้องตรวจสอบ:\n{changes}\n\nยืนยันด้านล่างเพื่อจัดระยะค่าเหล่านี้ในแบบฟอร์ม จะไม่ถูกบันทึกจนกว่าคุณจะส่งการตั้งค่าขั้นสูง",
         "data": {
-          "confirm_apply_suggestions": "ขั้นค่าที่แนะนำในการตั้งค่าขั้นสูง"
+          "confirm_apply_suggestions": "นำค่าที่แนะนำไปใส่ในการตั้งค่าขั้นสูง"
+        }
+      },
+      "trim_cycle_select": {
+        "title": "ทริมวงจร — เลือกวงจร",
+        "description": "เลือกรอบที่จะตัดแต่ง ✓ = เสร็จสิ้น ⚠ = ดำเนินการต่อ ✗ = ถูกขัดจังหวะ",
+        "data": {
+          "cycle_id": "วงจร"
+        }
+      },
+      "trim_cycle": {
+        "title": "วงจรตัดแต่ง",
+        "description": "หน้าต่างปัจจุบัน: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "การกระทำ"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "ตั้งค่าเริ่มต้นการตัดแต่ง",
+        "description": "ป้อนค่าชดเชยนาทีเพื่อเริ่มเก็บข้อมูล (0 = เริ่มต้นรอบ)",
+        "data": {
+          "trim_start_min": "เริ่มต้น (นาที)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "ตั้งค่าการสิ้นสุดการตัดแต่ง",
+        "description": "ป้อนค่าชดเชยนาทีเพื่อหยุดเก็บข้อมูล",
+        "data": {
+          "trim_end_min": "สิ้นสุด (นาที)"
         }
       }
     },
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: ตรวจสอบรอบการทำงาน ({device})",
       "feedback_notification_message": "**อุปกรณ์**: {device}\n**โปรแกรม**: {program} (ความเชื่อมั่น {confidence}%)\n**เวลา**: {time}\n\nWashData ต้องการความช่วยเหลือจากคุณเพื่อตรวจสอบวงจรที่ตรวจพบนี้\n\nโปรดไปที่ **การตั้งค่า > อุปกรณ์และบริการ > WashData > กำหนดค่า > คำติชมการเรียนรู้** เพื่อยืนยันหรือแก้ไขผลลัพธ์นี้",
       "suggestions_ready_notification_title": "WashData: การตั้งค่าที่แนะนำพร้อมแล้ว ({device})",
-      "suggestions_ready_notification_message": "ขณะนี้เซ็นเซอร์ **การตั้งค่าที่แนะนำ** รายงานคำแนะนำที่สามารถดำเนินการได้ **{count}**\n\nหากต้องการตรวจสอบและนำไปใช้: **การตั้งค่า > อุปกรณ์และบริการ > WashData > กำหนดค่า > การตั้งค่าขั้นสูง > ใช้ค่าที่แนะนำ**\n\nคำแนะนำเป็นทางเลือกและแสดงให้ตรวจสอบก่อนบันทึก"
+      "suggestions_ready_notification_message": "ขณะนี้เซ็นเซอร์ **การตั้งค่าที่แนะนำ** รายงานคำแนะนำที่สามารถดำเนินการได้ **{count}**\n\nหากต้องการตรวจสอบและนำไปใช้: **การตั้งค่า > อุปกรณ์และบริการ > WashData > กำหนดค่า > การตั้งค่าขั้นสูง > ใช้ค่าที่แนะนำ**\n\nคำแนะนำเป็นทางเลือกและแสดงให้ตรวจสอบก่อนบันทึก",
+      "trim_range_invalid": "เริ่มต้นจะต้องมาก่อนสิ้นสุด โปรดปรับจุดตัดของคุณ",
+      "trim_failed": "ตัดแต่งล้มเหลว วงจรอาจไม่มีอยู่อีกต่อไปหรือหน้าต่างว่างเปล่า"
     },
     "abort": {
       "no_cycles_found": "ไม่พบรอบ",
@@ -594,7 +624,8 @@
       "no_predictions": "ไม่มีการคาดการณ์",
       "no_custom_phases": "ไม่พบเฟสที่กำหนดเอง",
       "reprocess_success": "ประมวลผลซ้ำสำเร็จแล้ว {count} รอบ",
-      "debug_data_cleared": "ล้างข้อมูลการแก้ไขข้อบกพร่องจาก {count} รอบเรียบร้อยแล้ว"
+      "debug_data_cleared": "ล้างข้อมูลการแก้ไขข้อบกพร่องจาก {count} รอบเรียบร้อยแล้ว",
+      "no_power_data": "ไม่มีข้อมูลการติดตามพลังงานสำหรับรอบการทำงานที่เลือก"
     }
   },
   "selector": {
@@ -628,7 +659,7 @@
         "no_profiles_found": "ไม่พบโปรไฟล์",
         "cycle_info_fmt": "วงจร: {start}, {duration}ม. กระแส: {label}",
         "top_candidates_header": "### ผู้สมัครอันดับต้นๆ",
-        "tbl_profile": "ประวัติโดยย่อ",
+        "tbl_profile": "โปรไฟล์",
         "tbl_confidence": "ความมั่นใจ",
         "tbl_correlation": "ความสัมพันธ์",
         "tbl_duration_match": "การจับคู่ระยะเวลา",
@@ -667,7 +698,10 @@
         "assign_phases_help": "ใช้การดำเนินการด้านล่างเพื่อเพิ่ม แก้ไข ลบ หรือบันทึกช่วง",
         "profile_summary_header": "สรุปโปรไฟล์",
         "recent_cycles_header": "รอบล่าสุด",
-        "no_power_preview": "*ไม่มีข้อมูลพลังงานสำหรับการดูตัวอย่าง*"
+        "no_power_preview": "*ไม่มีข้อมูลพลังงานสำหรับการดูตัวอย่าง*",
+        "trim_cycle_preview_title": "ดูตัวอย่างการตัดวงจร",
+        "trim_cycle_preview_no_data": "ไม่มีข้อมูลกำลังสำหรับรอบนี้",
+        "trim_cycle_preview_kept_suffix": "เก็บไว้"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "ติดป้ายกำกับรอบเก่าโดยอัตโนมัติ",
         "select_cycle_to_label": "วงจรเฉพาะของฉลาก",
-        "select_cycle_to_label_multi": "ติดป้ายกำกับหลายรอบ",
         "select_cycle_to_delete": "ลบไซเคิล",
-        "interactive_editor": "ผสาน / แยกตัวแก้ไขเชิงโต้ตอบ"
+        "interactive_editor": "ผสาน / แยกตัวแก้ไขเชิงโต้ตอบ",
+        "trim_cycle": "ข้อมูลรอบการตัดแต่ง"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "ตั้งชื่อและสมัครเฟส",
         "cancel": "กลับไปโดยไม่มีการเปลี่ยนแปลง"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "กำหนดจุดเริ่มต้น",
+        "set_end": "กำหนดจุดสิ้นสุด",
+        "reset": "รีเซ็ตเป็นระยะเวลาเต็ม",
+        "apply": "ใช้ตัดแต่ง",
+        "cancel": "ยกเลิก"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "อุปกรณ์เครื่องซักผ้าหยุดการบันทึก"
         }
       }
+    },
+    "trim_cycle": {
+      "name": "วงจรตัดแต่ง",
+      "description": "ตัดข้อมูลกำลังของรอบที่ผ่านมาเป็นกรอบเวลาที่กำหนด",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์ WashData"
+        },
+        "cycle_id": {
+          "name": "รหัสไซเคิล",
+          "description": "ID ของวงรอบที่จะตัดแต่ง"
+        },
+        "trim_start_s": {
+          "name": "ตัดแต่งเริ่มต้น (วินาที)",
+          "description": "เก็บข้อมูลจากการชดเชยนี้ในไม่กี่วินาที ค่าเริ่มต้น 0"
+        },
+        "trim_end_s": {
+          "name": "การตัดขอบ (วินาที)",
+          "description": "เก็บข้อมูลจนถึงออฟเซ็ตนี้ในไม่กี่วินาที ค่าเริ่มต้น = ระยะเวลาเต็ม"
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "บังคับให้สิ้นสุดวงจร"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "ไม่พบอุปกรณ์"
+    },
+    "no_config_entry": {
+      "message": "ไม่พบรายการการกำหนดค่าสำหรับอุปกรณ์"
+    },
+    "integration_not_loaded": {
+      "message": "ไม่ได้โหลดการบูรณาการสำหรับอุปกรณ์นี้"
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "ไม่พบรอบการทำงานหรือไม่มีข้อมูลกำลัง"
+    },
+    "trim_failed_empty_window": {
+      "message": "การตัดขอบล้มเหลว — ไม่พบรอบการทำงาน ไม่มีข้อมูลพลังงาน หรือหน้าต่างผลลัพธ์ว่างเปล่า"
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s ต้องมากกว่า trim_start_s"
     }
   }
 }

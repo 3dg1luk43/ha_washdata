@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Einstellungen",
-        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.",
+        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.\n\nDerzeit verfügbare empfohlene Einstellungen: {suggestions_count}.\nWenn dies über 0 liegt, öffnen Sie die Erweiterten Einstellungen und verwenden Sie 'Vorgeschlagene Werte anwenden', um die Empfehlungen zu überprüfen.",
         "data": {
           "apply_suggestions": "Vorgeschlagene Werte anwenden",
           "device_type": "Gerätetyp",
@@ -80,7 +80,7 @@
           "show_advanced": "Erweiterte Einstellungen bearbeiten (nächster Schritt)"
         },
         "data_description": {
-          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n-profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Dauertoleranz: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Wählen Sie den Gerätetyp (Waschmaschine, Trockner, Geschirrspüler, Kaffeemaschine, Elektroauto). Dieses Tag wird zur besseren Organisation bei jedem Zyklus gespeichert.",
           "power_sensor": "Die Sensoreinheit meldet die Leistung in Echtzeit (in Watt). Sie können dies jederzeit ändern, ohne historische Daten zu verlieren – nützlich, wenn Sie einen Smart Plug austauschen.",
           "min_power": "Leistungswerte über diesem Schwellenwert (in Watt) zeigen an, dass das Gerät läuft. Beginnen Sie bei den meisten Geräten mit 2 W.",
@@ -137,7 +137,7 @@
       },
       "advanced_settings": {
         "title": "Erweiterte Einstellungen",
-        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.",
+        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.\n\nDerzeit verfügbare empfohlene Einstellungen: {suggestions_count}. Verwenden Sie 'Vorgeschlagene Werte anwenden', um Änderungen vor dem Speichern zu überprüfen.",
         "data": {
           "apply_suggestions": "Vorgeschlagene Werte anwenden",
           "start_threshold_w": "Startschwelle (W)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Triggerlogik umkehren (Trigger auf AUS)"
         },
         "data_description": {
-          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um einen Überprüfungsschritt für vorgeschlagene Werte vom Lernalgorithmus zu öffnen. Es wird nichts automatisch gespeichert.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n-profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Dauertoleranz: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um einen Überprüfungsschritt für vorgeschlagene Werte vom Lernalgorithmus zu öffnen. Es wird nichts automatisch gespeichert.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Die Leistung muss ÜBER diesen Schwellenwert ansteigen, um einen Zyklus zu starten. Höher einstellen als Ihre Standby-Leistung. Standard: min_power + 1 W.",
           "stop_threshold_w": "Die Leistung muss UNTER diesen Schwellenwert fallen, um einen Zyklus zu BEENDEN. Stellen Sie den Wert knapp über Null ein, um zu vermeiden, dass Rauschen falsche Enden auslöst. Standard: 0,6 * min_power.",
           "min_off_gap": "Wenn ein Zyklus innerhalb dieser Anzahl von Sekunden nach dem Ende des vorherigen beginnt, werden sie zu einem einzigen Zyklus zusammengeführt.",
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Vorgeschlagene Werte in den erweiterten Einstellungen übernehmen"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trimmzyklus – Wählen Sie Zyklus aus",
+        "description": "Wählen Sie einen Zyklus zum Trimmen aus. ✓ = abgeschlossen, ⚠ = fortgesetzt, ✗ = unterbrochen",
+        "data": {
+          "cycle_id": "Zyklus"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trimmzyklus",
+        "description": "Aktuelles Fenster: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Aktion"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Legen Sie den Trim-Start fest",
+        "description": "Geben Sie den Minutenversatz ein, ab dem mit der Datenspeicherung begonnen werden soll (0 = Zyklusstart).",
+        "data": {
+          "trim_start_min": "Start (Minuten)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Trimmende festlegen",
+        "description": "Geben Sie den Minutenversatz ein, bei dem die Daten nicht mehr gespeichert werden sollen.",
+        "data": {
+          "trim_end_min": "Ende (Minuten)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Zyklus überprüfen ({device})",
       "feedback_notification_message": "**Gerät**: {device}\n**Programm**: {program} ({confidence} % Konfidenz)\n**Zeit**: {time}\n\nWashData benötigt Ihre Hilfe, um diesen erkannten Zyklus zu überprüfen.\n\nBitte gehen Sie zu **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Lern-Feedbacks**, um dieses Ergebnis zu bestätigen oder zu korrigieren.",
       "suggestions_ready_notification_title": "WashData: Vorgeschlagene Einstellungen bereit ({device})",
-      "suggestions_ready_notification_message": "Der Sensor **Vorgeschlagene Einstellungen** meldet jetzt **{count}** umsetzbare Empfehlungen.\n\nUm sie zu überprüfen und anzuwenden: **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Erweiterte Einstellungen > Vorgeschlagene Werte anwenden**.\n\nVorschläge sind optional und werden vor dem Speichern zur Überprüfung angezeigt."
+      "suggestions_ready_notification_message": "Der Sensor **Vorgeschlagene Einstellungen** meldet jetzt **{count}** umsetzbare Empfehlungen.\n\nUm sie zu überprüfen und anzuwenden: **Einstellungen > Geräte & Dienste > WashData > Konfigurieren > Erweiterte Einstellungen > Vorgeschlagene Werte anwenden**.\n\nVorschläge sind optional und werden vor dem Speichern zur Überprüfung angezeigt.",
+      "trim_range_invalid": "Der Start muss vor dem Ende liegen. Bitte passen Sie Ihre Trimmpunkte an.",
+      "trim_failed": "Das Trimmen ist fehlgeschlagen. Möglicherweise existiert der Zyklus nicht mehr oder das Fenster ist leer."
     },
     "abort": {
       "no_cycles_found": "Keine Zyklen gefunden",
@@ -594,7 +624,8 @@
       "no_predictions": "Keine Vorhersagen",
       "no_custom_phases": "Keine benutzerdefinierten Phasen gefunden.",
       "reprocess_success": "{count} Zyklen erfolgreich erneut verarbeitet.",
-      "debug_data_cleared": "Debug-Daten aus {count} Zyklen wurden erfolgreich gelöscht."
+      "debug_data_cleared": "Debug-Daten aus {count} Zyklen wurden erfolgreich gelöscht.",
+      "no_power_data": "Für den ausgewählten Zyklus sind keine Leistungsverfolgungsdaten verfügbar."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Verwenden Sie die folgenden Aktionen, um Bereiche hinzuzufügen, zu bearbeiten, zu löschen oder zu speichern.",
         "profile_summary_header": "Profilzusammenfassung",
         "recent_cycles_header": "Aktuelle Zyklen",
-        "no_power_preview": "*Keine Leistungsdaten für die Vorschau verfügbar.*"
+        "no_power_preview": "*Keine Leistungsdaten für die Vorschau verfügbar.*",
+        "trim_cycle_preview_title": "Zyklustrimmvorschau",
+        "trim_cycle_preview_no_data": "Für diesen Zyklus sind keine Leistungsdaten verfügbar.",
+        "trim_cycle_preview_kept_suffix": "gehalten"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "Alte Zyklen automatisch kennzeichnen",
         "select_cycle_to_label": "Beschriften Sie den spezifischen Zyklus",
-        "select_cycle_to_label_multi": "Beschriften Sie mehrere Zyklen",
         "select_cycle_to_delete": "Zyklus löschen",
-        "interactive_editor": "Interaktiver Editor zum Zusammenführen/Teilen"
+        "interactive_editor": "Interaktiver Editor zum Zusammenführen/Teilen",
+        "trim_cycle": "Trimmzyklusdaten"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "Phasen benennen und anwenden",
         "cancel": "Gehen Sie ohne Änderungen zurück"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Startpunkt festlegen",
+        "set_end": "Endpunkt festlegen",
+        "reset": "Auf volle Dauer zurücksetzen",
+        "apply": "Trimmen anwenden",
+        "cancel": "Stornieren"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "Das WashData-Gerät stoppt die Aufnahme."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trimmzyklus",
+      "description": "Trimmen Sie die Leistungsdaten eines vergangenen Zyklus auf ein bestimmtes Zeitfenster.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das WashData-Gerät."
+        },
+        "cycle_id": {
+          "name": "Zyklus-ID",
+          "description": "Die ID des zu trimmenden Zyklus."
+        },
+        "trim_start_s": {
+          "name": "Trimmstart (Sekunden)",
+          "description": "Behalten Sie die Daten von diesem Offset in Sekunden bei. Standard 0."
+        },
+        "trim_end_s": {
+          "name": "Trimmende (Sekunden)",
+          "description": "Halten Sie die Daten in Sekunden auf diesem Offset. Standard = volle Dauer."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "Zyklusende erzwingen"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Gerät nicht gefunden."
+    },
+    "no_config_entry": {
+      "message": "Für das Gerät wurde kein Konfigurationseintrag gefunden."
+    },
+    "integration_not_loaded": {
+      "message": "Die Integration wurde für dieses Gerät nicht geladen."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Zyklus nicht gefunden oder hat keine Leistungsdaten."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trimmen fehlgeschlagen – Zyklus nicht gefunden, keine Leistungsdaten oder resultierendes Fenster ist leer."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s muss größer als trim_start_s sein."
     }
   }
 }
