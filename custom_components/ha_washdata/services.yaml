@@ -206,3 +206,44 @@ record_stop:
       selector:
         device:
           integration: ha_washdata
+
+trim_cycle:
+  name: Trim Cycle
+  description: >
+    Trim the power data of a past cycle to a specific time window.
+    Offsets are renormalized to start from 0 and the cycle duration is updated.
+  fields:
+    device_id:
+      name: Device
+      description: The WashData device.
+      required: true
+      selector:
+        device:
+          integration: ha_washdata
+    cycle_id:
+      name: Cycle ID
+      description: The ID of the cycle to trim.
+      required: true
+      selector:
+        text:
+    trim_start_s:
+      name: Trim Start (seconds)
+      description: Keep data from this offset (seconds from cycle start). Default 0.
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 86400
+          step: 1
+          mode: box
+    trim_end_s:
+      name: Trim End (seconds)
+      description: Keep data up to this offset (seconds from cycle start). Default = full duration.
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 86400
+          step: 1
+          mode: box

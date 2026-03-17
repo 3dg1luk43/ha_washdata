@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "清洗数据设置",
+        "title": "WashData 设置",
         "description": "配置您的洗衣机或其他设备。\n\n需要功率传感器。\n\n**接下来，系统会询问您是否要创建您的第一个个人资料。**",
         "data": {
           "name": "设备名称",
@@ -69,7 +69,7 @@
           "notify_actions": "通知操作",
           "notify_people": "延迟送货，直到这些人回家",
           "notify_only_when_home": "延迟通知，直到选定的人在家",
-          "notify_fire_events": "消防自动化事件",
+          "notify_fire_events": "触发自动化事件",
           "notify_events": "要通知的事件",
           "notify_before_end_minutes": "预完成通知（结束前几分钟）",
           "notify_title": "通知标题",
@@ -80,7 +80,7 @@
           "show_advanced": "编辑高级设置（下一步）"
         },
         "data_description": {
-          "apply_suggestions": "选中此框可将学习算法建议的值复制到表单中。保存前检查。\n\n建议（来自学习）：\n- 最小功率：{suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout：{suggested_no_update_active_timeout} s\n- profile_match_interval：{suggested_profile_match_interval}秒\n- 自动标签置信度：{suggested_auto_label_confidence}\n- 持续时间容差：{suggested_duration_tolerance}\n- profile_duration_tolerance：{suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio：{suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio：{suggested_profile_match_max_duration_ratio}\n- start_threshold_w：{suggested_start_threshold_w} W\n- stop_threshold_w：{suggested_stop_threshold_w} W\n- end_energy_threshold：{suggested_end_energy_threshold} 瓦时\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "选中此框可将学习算法建议的值复制到表单中。保存前检查。\n\n建议（来自学习）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "选择设备类型（洗衣机、烘干机、洗碗机、咖啡机、电动汽车）。该标签随每个周期一起存储，以便更好地组织。",
           "power_sensor": "传感器实体报告实时功率（以瓦为单位）。您可以随时更改此设置，而不会丢失历史数据 - 如果您更换智能插头，这很有用。",
           "min_power": "功率读数高于此阈值（以瓦为单位）表明设备正在运行。大多数设备从 2W 开始。",
@@ -89,7 +89,7 @@
           "notify_actions": "用于运行通知的可选 Home Assistant 操作序列（脚本、通知、TTS 等）。如果设置，操作将在回退通知服务之前运行。",
           "notify_people": "用于存在门控的人员实体。启用后，通知发送会延迟，直到至少一名选定的人在家。",
           "notify_only_when_home": "如果启用，则延迟通知，直到至少一个选定的人在家。",
-          "notify_fire_events": "如果启用，则触发循环开始和结束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_end）以驱动自动化。",
+          "notify_fire_events": "如果启用，则触发循环开始和结束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_ended）以驱动自动化。",
           "notify_events": "要发送通知的事件。",
           "notify_before_end_minutes": "触发通知的预计周期结束前的分钟数。设置为 0 以禁用。默认值：0。",
           "notify_title": "通知的自定义标题。支持 {device} 占位符。",
@@ -107,7 +107,7 @@
           "notify_actions": "通知操作",
           "notify_people": "延迟送货，直到这些人回家",
           "notify_only_when_home": "延迟通知，直到选定的人在家",
-          "notify_fire_events": "消防自动化事件",
+          "notify_fire_events": "触发自动化事件",
           "notify_events": "要通知的事件",
           "notify_before_end_minutes": "预完成通知（结束前几分钟）",
           "notify_live_interval_seconds": "实时更新间隔（秒）",
@@ -123,7 +123,7 @@
           "notify_actions": "用于运行通知的可选 Home Assistant 操作序列（脚本、通知、TTS 等）。如果设置，操作将在回退通知服务之前运行。",
           "notify_people": "用于存在门控的人员实体。启用后，通知发送会延迟，直到至少一名选定的人在家。",
           "notify_only_when_home": "如果启用，则延迟通知，直到至少一个选定的人在家。",
-          "notify_fire_events": "如果启用，则触发循环开始和结束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_end）以驱动自动化。",
+          "notify_fire_events": "如果启用，则触发循环开始和结束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_ended）以驱动自动化。",
           "notify_events": "要发送通知的事件。",
           "notify_before_end_minutes": "触发通知的预计周期结束前的分钟数。设置为 0 以禁用。默认值：0。",
           "notify_live_interval_seconds": "运行时发送进度更新的频率。值越低，响应速度越快，但会消耗更多通知。强制执行至少 30 秒 - 低于 30 秒的值将自动四舍五入为 30 秒。",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "反转触发逻辑（触发关闭）"
         },
         "data_description": {
-          "apply_suggestions": "选中此框可打开学习算法建议值的检查步骤。没有任何内容会自动保存。\n\n建议（来自学习）：\n- 最小功率：{suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout：{suggested_no_update_active_timeout} s\n- profile_match_interval：{suggested_profile_match_interval}秒\n- 自动标签置信度：{suggested_auto_label_confidence}\n- 持续时间容差：{suggested_duration_tolerance}\n- profile_duration_tolerance：{suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio：{suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio：{suggested_profile_match_max_duration_ratio}\n- start_threshold_w：{suggested_start_threshold_w} W\n- stop_threshold_w：{suggested_stop_threshold_w} W\n- end_energy_threshold：{suggested_end_energy_threshold} 瓦时\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "选中此框可打开学习算法建议值的检查步骤。没有任何内容会自动保存。\n\n建议（来自学习）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "功率必须上升到该阈值以上才能开始一个周期。设置高于待机功率。默认值：min_power + 1 W。",
           "stop_threshold_w": "功率必须低于该阈值才能结束一个周期。设置略高于零以避免噪音触发错误结束。默认值：0.6 * min_power。",
           "min_off_gap": "如果一个周期在前一个周期结束后的这么多秒内开始，它们将被合并为一个周期。",
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "在高级设置中暂存建议值"
         }
+      },
+      "trim_cycle_select": {
+        "title": "修剪周期 — 选择周期",
+        "description": "选择要修剪的周期。 ✓ = 已完成，⚠ = 已恢复，✗ = 已中断",
+        "data": {
+          "cycle_id": "循环"
+        }
+      },
+      "trim_cycle": {
+        "title": "修剪周期",
+        "description": "当前窗口：{trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "行动"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "设置修剪开始",
+        "description": "输入开始保存数据的分钟偏移量（0 = 循环开始）。",
+        "data": {
+          "trim_start_min": "开始（分钟）"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "设置修剪结束",
+        "description": "输入停止保存数据的分钟偏移量。",
+        "data": {
+          "trim_end_min": "结束（分钟）"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData：验证周期 ({device})",
       "feedback_notification_message": "**设备**：{device}\n**程序**：{program}（{confidence}% 置信度）\n**时间**：{time}\n\nWashData 需要您的帮助来验证检测到的此周期。\n\n请转至 **设置 > 设备和服务 > WashData > 配置 > 学习反馈** 以确认或更正此结果。",
       "suggestions_ready_notification_title": "WashData：建议设置已就绪 ({device})",
-      "suggestions_ready_notification_message": "**建议设置**传感器现在报告 **{count}** 可操作的建议。\n\n要查看并应用它们：**设置 > 设备和服务 > WashData > 配置 > 高级设置 > 应用建议值**。\n\n建议是可选的，并会在您保存之前显示以供审核。"
+      "suggestions_ready_notification_message": "**建议设置**传感器现在报告 **{count}** 可操作的建议。\n\n要查看并应用它们：**设置 > 设备和服务 > WashData > 配置 > 高级设置 > 应用建议值**。\n\n建议是可选的，并会在您保存之前显示以供审核。",
+      "trim_range_invalid": "开始必须在结束之前。请调整您的修剪点。",
+      "trim_failed": "修剪失败。周期可能已不存在或窗口为空。"
     },
     "abort": {
       "no_cycles_found": "没有找到循环",
@@ -594,7 +624,8 @@
       "no_predictions": "没有预测",
       "no_custom_phases": "未找到自定义阶段。",
       "reprocess_success": "已成功重新处理 {count} 个周期。",
-      "debug_data_cleared": "已成功清除 {count} 个周期的调试数据。"
+      "debug_data_cleared": "已成功清除 {count} 个周期的调试数据。",
+      "no_power_data": "所选周期没有可用的功率跟踪数据。"
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "使用以下操作来添加、编辑、删除或保存范围。",
         "profile_summary_header": "简介摘要",
         "recent_cycles_header": "最近的周期",
-        "no_power_preview": "*没有可供预览的功率数据。*"
+        "no_power_preview": "*没有可供预览的功率数据。*",
+        "trim_cycle_preview_title": "循环修剪预览",
+        "trim_cycle_preview_no_data": "此周期没有可用的功率数据。",
+        "trim_cycle_preview_kept_suffix": "保留"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "自动标记旧自行车",
         "select_cycle_to_label": "标签特定周期",
-        "select_cycle_to_label_multi": "标记多个周期",
         "select_cycle_to_delete": "删除循环",
-        "interactive_editor": "合并/拆分交互式编辑器"
+        "interactive_editor": "合并/拆分交互式编辑器",
+        "trim_cycle": "修剪周期数据"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "命名和应用阶段",
         "cancel": "不做任何修改返回"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "设置起点",
+        "set_end": "设置终点",
+        "reset": "重置为完整持续时间",
+        "apply": "应用修剪",
+        "cancel": "取消"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "洗衣机装置停止录音。"
         }
       }
+    },
+    "trim_cycle": {
+      "name": "修剪周期",
+      "description": "将过去周期的功率数据修剪到特定时间窗口。",
+      "fields": {
+        "device_id": {
+          "name": "设备",
+          "description": "WashData 设备。"
+        },
+        "cycle_id": {
+          "name": "周期ID",
+          "description": "要修剪的周期的 ID。"
+        },
+        "trim_start_s": {
+          "name": "修剪开始（秒）",
+          "description": "在几秒钟内保留此偏移量的数据。默认 0。"
+        },
+        "trim_end_s": {
+          "name": "修剪结束（秒）",
+          "description": "在几秒钟内将数据保持到此偏移量。默认 = 完整持续时间。"
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "强制结束循环"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "未找到设备。"
+    },
+    "no_config_entry": {
+      "message": "找不到设备的配置条目。"
+    },
+    "integration_not_loaded": {
+      "message": "未为此设备加载集成。"
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "未找到周期或没有功率数据。"
+    },
+    "trim_failed_empty_window": {
+      "message": "修剪失败 — 未找到周期、无功率数据或生成的窗口为空。"
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s必须大于trim_start_s。"
     }
   }
 }

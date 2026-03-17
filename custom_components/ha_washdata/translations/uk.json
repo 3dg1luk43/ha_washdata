@@ -69,18 +69,18 @@
           "notify_actions": "Дії сповіщень",
           "notify_people": "Відкладіть доставку, поки ці люди не повернуться вдома",
           "notify_only_when_home": "Відкласти сповіщення, поки вибрана особа не буде вдома",
-          "notify_fire_events": "Події пожежної автоматики",
+          "notify_fire_events": "Активувати події автоматизації",
           "notify_events": "Події для сповіщення",
           "notify_before_end_minutes": "Сповіщення перед завершенням (за хвилини до завершення)",
           "notify_title": "Заголовок сповіщення",
           "notify_icon": "Значок сповіщення",
-          "notify_start_message": "Запустіть форматування повідомлення",
-          "notify_finish_message": "Завершити форматування повідомлення",
+          "notify_start_message": "Формат повідомлення про початок",
+          "notify_finish_message": "Формат повідомлення про завершення",
           "notify_pre_complete_message": "Формат повідомлення перед завершенням",
           "show_advanced": "Змінити розширені налаштування (наступний крок)"
         },
         "data_description": {
-          "apply_suggestions": "Поставте цей прапорець, щоб скопіювати значення, запропоновані алгоритмом навчання, у форму. Перегляньте перед збереженням.\n\nРекомендовано (з вивчення):\n- min_power: {suggested_min_power} Вт\n- затримка вимкнення: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- робоча_мертва_зона: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Поставте цей прапорець, щоб скопіювати значення, запропоновані алгоритмом навчання, у форму. Перегляньте перед збереженням.\n\nРекомендовано (з вивчення):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Виберіть тип приладу (пральна машина, сушильна машина, посудомийна машина, кавова машина, EV). Цей тег зберігається з кожним циклом для кращої організації.",
           "power_sensor": "Датчик, який повідомляє про потужність у реальному часі (у ватах). Ви можете будь-коли змінити це, не втрачаючи історичних даних — це стане в нагоді, якщо ви заміните розумну вилку.",
           "min_power": "Показники потужності вище цього порогу (у ватах) вказують на те, що прилад працює. Почніть з 2 Вт для більшості пристроїв.",
@@ -107,15 +107,15 @@
           "notify_actions": "Дії сповіщень",
           "notify_people": "Відкладіть доставку, поки ці люди не повернуться вдома",
           "notify_only_when_home": "Відкласти сповіщення, поки вибрана особа не буде вдома",
-          "notify_fire_events": "Події пожежної автоматики",
+          "notify_fire_events": "Активувати події автоматизації",
           "notify_events": "Події для сповіщення",
           "notify_before_end_minutes": "Сповіщення перед завершенням (за хвилини до завершення)",
           "notify_live_interval_seconds": "Інтервал оновлення в реальному часі (секунди)",
           "notify_live_overrun_percent": "Дозвіл на перевищення поточного оновлення (%)",
           "notify_title": "Заголовок сповіщення",
           "notify_icon": "Значок сповіщення",
-          "notify_start_message": "Запустіть форматування повідомлення",
-          "notify_finish_message": "Завершити форматування повідомлення",
+          "notify_start_message": "Формат повідомлення про початок",
+          "notify_finish_message": "Формат повідомлення про завершення",
           "notify_pre_complete_message": "Формат повідомлення перед завершенням"
         },
         "data_description": {
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Інвертувати логіку тригера (тригер увімкнено ВИМК.)"
         },
         "data_description": {
-          "apply_suggestions": "Установіть цей прапорець, щоб відкрити етап перегляду запропонованих значень від алгоритму навчання. Автоматично нічого не зберігається.\n\nРекомендовано (з вивчення):\n- min_power: {suggested_min_power} Вт\n- затримка вимкнення: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- робоча_мертва_зона: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Установіть цей прапорець, щоб відкрити етап перегляду запропонованих значень від алгоритму навчання. Автоматично нічого не зберігається.\n\nРекомендовано (з вивчення):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Потужність має піднятися ВИЩЕ за цей поріг, щоб ЗАПУСТИТИ цикл. Встановіть більше, ніж у режимі очікування. За замовчуванням: min_power + 1 Вт.",
           "stop_threshold_w": "Потужність має впасти НИЖЧЕ цього порогу, щоб ЗАВЕРШИТИ цикл. Встановіть трохи вище нуля, щоб уникнути шуму, що викликає помилкові закінчення. Типове значення: 0,6 * min_power.",
           "min_off_gap": "Якщо цикл починається протягом такої кількості секунд після закінчення попереднього, вони будуть ОБ’ЄДНАНІ в один цикл.",
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Відкрийте запропоновані значення в Розширених налаштуваннях"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Цикл обрізання — виберіть цикл",
+        "description": "Виберіть цикл для обрізання. ✓ = завершено, ⚠ = відновлено, ✗ = перервано",
+        "data": {
+          "cycle_id": "Цикл"
+        }
+      },
+      "trim_cycle": {
+        "title": "Цикл обрізки",
+        "description": "Поточне вікно: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Дія"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Установіть початок обрізки",
+        "description": "Введіть хвилинний зсув, з якого потрібно почати зберігати дані (0 = початок циклу).",
+        "data": {
+          "trim_start_min": "Початок (хвилин)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Встановити завершення обрізки",
+        "description": "Введіть хвилинний зсув, щоб припинити збереження даних.",
+        "data": {
+          "trim_end_min": "Кінець (хвилин)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: перевірити цикл ({device})",
       "feedback_notification_message": "**Пристрій**: {device}\n**Програма**: {program} ({confidence}% впевненості)\n**Час**: {time}\n\nWashData потрібна ваша допомога, щоб перевірити цей виявлений цикл.\n\nБудь ласка, перейдіть до **Налаштування > Пристрої та служби > WashData > Налаштувати > Відгуки про навчання**, щоб підтвердити або виправити цей результат.",
       "suggestions_ready_notification_title": "WashData: пропоновані налаштування готові ({device})",
-      "suggestions_ready_notification_message": "Датчик **Пропонованих налаштувань** тепер повідомляє **{count}** дієві рекомендації.\n\nЩоб переглянути та застосувати їх: **Налаштування > Пристрої та служби > WashData > Налаштувати > Розширені параметри > Застосувати запропоновані значення**.\n\nПропозиції є необов’язковими та відображаються для перегляду перед збереженням."
+      "suggestions_ready_notification_message": "Датчик **Пропонованих налаштувань** тепер повідомляє **{count}** дієві рекомендації.\n\nЩоб переглянути та застосувати їх: **Налаштування > Пристрої та служби > WashData > Налаштувати > Розширені параметри > Застосувати запропоновані значення**.\n\nПропозиції є необов’язковими та відображаються для перегляду перед збереженням.",
+      "trim_range_invalid": "Початок має бути перед закінченням. Будь ласка, відкоригуйте точки обрізки.",
+      "trim_failed": "Не вдалося обрізати. Можливо, цикл більше не існує або вікно порожнє."
     },
     "abort": {
       "no_cycles_found": "Цикли не знайдено",
@@ -594,7 +624,8 @@
       "no_predictions": "Жодних прогнозів",
       "no_custom_phases": "Спеціальні фази не знайдено.",
       "reprocess_success": "Успішно повторно оброблено {count} циклів.",
-      "debug_data_cleared": "Успішно видалено дані налагодження з {count} циклів."
+      "debug_data_cleared": "Успішно видалено дані налагодження з {count} циклів.",
+      "no_power_data": "Немає доступних даних трасування потужності для вибраного циклу."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Використовуйте наведені нижче дії, щоб додавати, редагувати, видаляти або зберігати діапазони.",
         "profile_summary_header": "Резюме профілю",
         "recent_cycles_header": "Останні цикли",
-        "no_power_preview": "*Немає даних про потужність для попереднього перегляду.*"
+        "no_power_preview": "*Немає даних про потужність для попереднього перегляду.*",
+        "trim_cycle_preview_title": "Попередній перегляд циклічного обрізання",
+        "trim_cycle_preview_no_data": "Немає даних про потужність для цього циклу.",
+        "trim_cycle_preview_kept_suffix": "зберігався"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "Автоматичне позначення старих циклів",
         "select_cycle_to_label": "Спеціальний цикл етикетки",
-        "select_cycle_to_label_multi": "Позначте кілька циклів",
         "select_cycle_to_delete": "Видалити цикл",
-        "interactive_editor": "Інтерактивний редактор злиття/розділу"
+        "interactive_editor": "Інтерактивний редактор злиття/розділу",
+        "trim_cycle": "Дані циклу обрізання"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "Назвіть і застосуйте фази",
         "cancel": "Повернутися без змін"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Встановити початкову точку",
+        "set_end": "Встановити кінцеву точку",
+        "reset": "Скинути до повної тривалості",
+        "apply": "Застосувати Trim",
+        "cancel": "Скасувати"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "Пристрій пральної машини для припинення запису."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Цикл обрізки",
+      "description": "Обріжте дані про потужність минулого циклу до певного часового вікна.",
+      "fields": {
+        "device_id": {
+          "name": "пристрій",
+          "description": "Пристрій WashData."
+        },
+        "cycle_id": {
+          "name": "Ідентифікатор циклу",
+          "description": "Ідентифікатор циклу, який потрібно обрізати."
+        },
+        "trim_start_s": {
+          "name": "Початок обрізки (секунди)",
+          "description": "Зберігайте дані з цього зміщення за лічені секунди. За замовчуванням 0."
+        },
+        "trim_end_s": {
+          "name": "Кінець обрізання (секунди)",
+          "description": "Зберігайте дані до цього зміщення за лічені секунди. За замовчуванням = повна тривалість."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "Цикл примусового завершення"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Пристрій не знайдено."
+    },
+    "no_config_entry": {
+      "message": "Для пристрою не знайдено жодного запису конфігурації."
+    },
+    "integration_not_loaded": {
+      "message": "Інтеграція не завантажена для цього пристрою."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Цикл не знайдено або немає даних про потужність."
+    },
+    "trim_failed_empty_window": {
+      "message": "Помилка обрізання — цикл не знайдено, немає даних про живлення або кінцеве вікно порожнє."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s має бути більше, ніж trim_start_s."
     }
   }
 }

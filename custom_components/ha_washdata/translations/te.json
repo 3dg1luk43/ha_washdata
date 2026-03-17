@@ -69,7 +69,7 @@
           "notify_actions": "నోటిఫికేషన్ చర్యలు",
           "notify_people": "ఈ వ్యక్తులు ఇంటికి వచ్చే వరకు డెలివరీ ఆలస్యం",
           "notify_only_when_home": "ఎంపిక చేయబడిన వ్యక్తి ఇంట్లో ఉండే వరకు నోటిఫికేషన్‌లను ఆలస్యం చేయండి",
-          "notify_fire_events": "ఫైర్ ఆటోమేషన్ ఈవెంట్‌లు",
+          "notify_fire_events": "ఆటోమేషన్ ఈవెంట్‌లను ప్రారంభించు",
           "notify_events": "తెలియజేయాల్సిన ఈవెంట్‌లు",
           "notify_before_end_minutes": "ప్రీ-కంప్లీషన్ నోటిఫికేషన్ (ముగింపుకు నిమిషాల ముందు)",
           "notify_title": "నోటిఫికేషన్ శీర్షిక",
@@ -80,7 +80,7 @@
           "show_advanced": "అధునాతన సెట్టింగ్‌లను సవరించండి (తదుపరి దశ)"
         },
         "data_description": {
-          "apply_suggestions": "లెర్నింగ్ అల్గారిథమ్ సూచించిన విలువలను ఫారమ్‌లోకి కాపీ చేయడానికి ఈ పెట్టెను ఎంచుకోండి. సేవ్ చేసే ముందు సమీక్షించండి.\n\nసూచించబడినవి (నేర్చుకోవడం నుండి):\n- min_power: {suggested_min_power} W\n- ఆఫ్_డిలే: {suggested_off_delay} సె\n- watchdog_interval: {suggested_watchdog_interval} సె\n- no_update_active_timeout: {suggested_no_update_active_timeout} సె\n- profile_match_interval: {suggested_profile_match_interval} సె\n- auto_label_కాన్ఫిడెన్స్: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- నడుస్తున్న_డెడ్_జోన్: {suggested_running_dead_zone} సె\n{suggested_reason}",
+          "apply_suggestions": "లెర్నింగ్ అల్గారిథమ్ సూచించిన విలువలను ఫారమ్‌లోకి కాపీ చేయడానికి ఈ పెట్టెను ఎంచుకోండి. సేవ్ చేసే ముందు సమీక్షించండి.\n\nసూచించబడినవి (నేర్చుకోవడం నుండి):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "ఉపకరణం యొక్క రకాన్ని ఎంచుకోండి (వాషింగ్ మెషిన్, డ్రైయర్, డిష్వాషర్, కాఫీ మెషిన్, EV). మెరుగైన సంస్థ కోసం ఈ ట్యాగ్ ప్రతి చక్రంతో నిల్వ చేయబడుతుంది.",
           "power_sensor": "సెన్సార్ ఎంటిటీ నిజ-సమయ శక్తిని నివేదిస్తుంది (వాట్స్‌లో). చారిత్రక డేటాను కోల్పోకుండా మీరు దీన్ని ఎప్పుడైనా మార్చవచ్చు—మీరు స్మార్ట్ ప్లగ్‌ని భర్తీ చేస్తే ఉపయోగకరంగా ఉంటుంది.",
           "min_power": "ఈ థ్రెషోల్డ్ (వాట్స్‌లో) పైన ఉన్న పవర్ రీడింగ్‌లు ఉపకరణం నడుస్తున్నట్లు సూచిస్తున్నాయి. చాలా పరికరాల కోసం 2Wతో ప్రారంభించండి.",
@@ -107,7 +107,7 @@
           "notify_actions": "నోటిఫికేషన్ చర్యలు",
           "notify_people": "ఈ వ్యక్తులు ఇంటికి వచ్చే వరకు డెలివరీ ఆలస్యం",
           "notify_only_when_home": "ఎంపిక చేయబడిన వ్యక్తి ఇంట్లో ఉండే వరకు నోటిఫికేషన్‌లను ఆలస్యం చేయండి",
-          "notify_fire_events": "ఫైర్ ఆటోమేషన్ ఈవెంట్‌లు",
+          "notify_fire_events": "ఆటోమేషన్ ఈవెంట్‌లను ప్రారంభించు",
           "notify_events": "తెలియజేయాల్సిన ఈవెంట్‌లు",
           "notify_before_end_minutes": "ప్రీ-కంప్లీషన్ నోటిఫికేషన్ (ముగింపుకు నిమిషాల ముందు)",
           "notify_live_interval_seconds": "ప్రత్యక్ష నవీకరణ విరామం (సెకన్లు)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "విలోమం ట్రిగ్గర్ లాజిక్ (ట్రిగ్గర్ ఆన్ ఆఫ్)"
         },
         "data_description": {
-          "apply_suggestions": "అభ్యాస అల్గారిథమ్ నుండి సూచించబడిన విలువల కోసం సమీక్ష దశను తెరవడానికి ఈ పెట్టెను ఎంచుకోండి. ఏదీ స్వయంచాలకంగా సేవ్ చేయబడదు.\n\nసూచించబడినవి (నేర్చుకోవడం నుండి):\n- min_power: {suggested_min_power} W\n- ఆఫ్_డిలే: {suggested_off_delay} సె\n- watchdog_interval: {suggested_watchdog_interval} సె\n- no_update_active_timeout: {suggested_no_update_active_timeout} సె\n- profile_match_interval: {suggested_profile_match_interval} సె\n- auto_label_కాన్ఫిడెన్స్: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- నడుస్తున్న_డెడ్_జోన్: {suggested_running_dead_zone} సె\n{suggested_reason}",
+          "apply_suggestions": "అభ్యాస అల్గారిథమ్ నుండి సూచించబడిన విలువల కోసం సమీక్ష దశను తెరవడానికి ఈ పెట్టెను ఎంచుకోండి. ఏదీ స్వయంచాలకంగా సేవ్ చేయబడదు.\n\nసూచించబడినవి (నేర్చుకోవడం నుండి):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "చక్రాన్ని ప్రారంభించడానికి శక్తి తప్పనిసరిగా ఈ థ్రెషోల్డ్ పైన పెరగాలి. మీ స్టాండ్‌బై పవర్ కంటే ఎక్కువగా సెట్ చేయండి. డిఫాల్ట్: min_power + 1 W.",
           "stop_threshold_w": "చక్రాన్ని ముగించడానికి శక్తి తప్పనిసరిగా ఈ థ్రెషోల్డ్‌కి దిగువన పడిపోతుంది. తప్పుడు చివరలను ప్రేరేపించే శబ్దాన్ని నివారించడానికి సున్నా కంటే కొంచెం పైన సెట్ చేయండి. డిఫాల్ట్: 0.6 * min_power.",
           "min_off_gap": "ఒక చక్రం అంతకు ముందు ముగిసిన చాలా సెకన్లలోపు ప్రారంభమైతే, అవి ఒకే చక్రంలో విలీనం చేయబడతాయి.",
@@ -196,7 +196,7 @@
           "auto_label_confidence": "పూర్తయిన తర్వాత (0.0–1.0) ఈ విశ్వాసం వద్ద లేదా అంతకంటే ఎక్కువ సైకిల్‌లను స్వయంచాలకంగా లేబుల్ చేయండి.",
           "learning_confidence": "ఈవెంట్ ద్వారా వినియోగదారు ధృవీకరణను అభ్యర్థించడానికి కనీస విశ్వాసం (0.0–1.0).",
           "duration_tolerance": "పరుగు సమయంలో మిగిలి ఉన్న అంచనాల కోసం సహనం (0.0–0.5 0–50%కి అనుగుణంగా ఉంటుంది).",
-          "profile_match_interval": "How often (in seconds) to attempt profile matching during a cycle. తక్కువ విలువలు వేగంగా గుర్తింపును అందిస్తాయి కానీ ఎక్కువ CPUని ఉపయోగిస్తాయి. డిఫాల్ట్: 300సె (5 నిమిషాలు).",
+          "profile_match_interval": "ఒక సైకిల్ సమయంలో ప్రొఫైల్ మ్యాచింగ్‌ని ఎంత తరచుగా (సెకన్లలో) ప్రయత్నించాలి. తక్కువ విలువలు వేగంగా గుర్తింపును అందిస్తాయి కానీ ఎక్కువ CPUని ఉపయోగిస్తాయి. డిఫాల్ట్: 300సె (5 నిమిషాలు).",
           "profile_match_min_duration_ratio": "ప్రొఫైల్ సరిపోలిక కోసం కనీస వ్యవధి నిష్పత్తి. రన్నింగ్ సైకిల్ సరిపోలడానికి ప్రొఫైల్ వ్యవధిలో కనీసం ఈ భాగానికి అయినా ఉండాలి. దిగువ = ముందు సరిపోలిక. డిఫాల్ట్: 0.50 (50%).",
           "profile_match_max_duration_ratio": "ప్రొఫైల్ సరిపోలిక కోసం గరిష్ట వ్యవధి నిష్పత్తి. రన్నింగ్ సైకిల్ ప్రొఫైల్ వ్యవధి యొక్క ఈ గుణిజాలను మించకూడదు. Higher = మరింత సౌమ్యమైన. డిఫాల్ట్: 1.50 (150%).",
           "smoothing_window": "కదిలే-సగటు స్మూటింగ్ కోసం ఉపయోగించిన ఇటీవలి పవర్ రీడింగ్‌ల సంఖ్య.",
@@ -422,7 +422,7 @@
         "title": "సైకిల్‌ను తొలగించండి",
         "description": "⚠️ ఇది ఎంచుకున్న సైకిల్‌ని శాశ్వతంగా తొలగిస్తుంది",
         "data": {
-          "cycle_id": "తొలగించడానికి సైకిల్ చేయండి"
+          "cycle_id": "తొలగించాల్సిన సైకిల్"
         }
       },
       "label_cycle": {
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "అధునాతన సెట్టింగ్‌లలో దశ సూచించిన విలువలు"
         }
+      },
+      "trim_cycle_select": {
+        "title": "ట్రిమ్ సైకిల్ - సైకిల్ ఎంచుకోండి",
+        "description": "ట్రిమ్ చేయడానికి సైకిల్‌ను ఎంచుకోండి. ✓ = పూర్తయింది, ⚠ = పునఃప్రారంభించబడింది, ✗ = అంతరాయం ఏర్పడింది",
+        "data": {
+          "cycle_id": "సైకిల్"
+        }
+      },
+      "trim_cycle": {
+        "title": "ట్రిమ్ సైకిల్",
+        "description": "ప్రస్తుత విండో: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "చర్య"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "ట్రిమ్ ప్రారంభాన్ని సెట్ చేయండి",
+        "description": "(0 = సైకిల్ ప్రారంభం) నుండి డేటాను ఉంచడం ప్రారంభించడానికి నిమిషం ఆఫ్‌సెట్‌ను నమోదు చేయండి.",
+        "data": {
+          "trim_start_min": "ప్రారంభం (నిమిషాలు)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "ట్రిమ్ ముగింపుని సెట్ చేయండి",
+        "description": "డేటాను ఉంచడం ఆపడానికి నిమిషం ఆఫ్‌సెట్‌ను నమోదు చేయండి.",
+        "data": {
+          "trim_end_min": "ముగింపు (నిమిషాలు)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: సైకిల్‌ని ధృవీకరించండి ({device})",
       "feedback_notification_message": "**పరికరం**: {device}\n**ప్రోగ్రామ్**: {program} ({confidence}% విశ్వాసం)\n**సమయం**: {time}\n\nకనుగొనబడిన ఈ చక్రాన్ని ధృవీకరించడానికి WashDataకి మీ సహాయం కావాలి.\n\nదయచేసి ఈ ఫలితాన్ని నిర్ధారించడానికి లేదా సరిచేయడానికి **సెట్టింగ్‌లు > పరికరాలు & సేవలు > WashData > కాన్ఫిగర్ > లెర్నింగ్ ఫీడ్‌బ్యాక్‌లు**కి వెళ్లండి.",
       "suggestions_ready_notification_title": "WashData: సూచించబడిన సెట్టింగ్‌లు సిద్ధంగా ఉన్నాయి ({device})",
-      "suggestions_ready_notification_message": "**సూచించబడిన సెట్టింగ్‌లు** సెన్సార్ ఇప్పుడు **{count}** చర్య తీసుకోదగిన సిఫార్సులను నివేదిస్తుంది.\n\nవాటిని సమీక్షించడానికి మరియు వర్తింపజేయడానికి: **సెట్టింగ్‌లు > పరికరాలు & సేవలు > WashData > కాన్ఫిగర్ > అధునాతన సెట్టింగ్‌లు > సూచించబడిన విలువలను వర్తింపజేయండి**.\n\nసూచనలు ఐచ్ఛికం మరియు మీరు సేవ్ చేసే ముందు సమీక్ష కోసం చూపబడతాయి."
+      "suggestions_ready_notification_message": "**సూచించబడిన సెట్టింగ్‌లు** సెన్సార్ ఇప్పుడు **{count}** చర్య తీసుకోదగిన సిఫార్సులను నివేదిస్తుంది.\n\nవాటిని సమీక్షించడానికి మరియు వర్తింపజేయడానికి: **సెట్టింగ్‌లు > పరికరాలు & సేవలు > WashData > కాన్ఫిగర్ > అధునాతన సెట్టింగ్‌లు > సూచించబడిన విలువలను వర్తింపజేయండి**.\n\nసూచనలు ఐచ్ఛికం మరియు మీరు సేవ్ చేసే ముందు సమీక్ష కోసం చూపబడతాయి.",
+      "trim_range_invalid": "ప్రారంభం తప్పనిసరిగా ముగింపుకు ముందు ఉండాలి. దయచేసి మీ ట్రిమ్ పాయింట్‌లను సర్దుబాటు చేయండి.",
+      "trim_failed": "ట్రిమ్ విఫలమైంది. చక్రం ఉనికిలో ఉండకపోవచ్చు లేదా విండో ఖాళీగా ఉంది."
     },
     "abort": {
       "no_cycles_found": "చక్రాలు ఏవీ కనుగొనబడలేదు",
@@ -594,7 +624,8 @@
       "no_predictions": "అంచనాలు లేవు",
       "no_custom_phases": "అనుకూల దశలు ఏవీ కనుగొనబడలేదు.",
       "reprocess_success": "{count} సైకిళ్లు విజయవంతంగా రీప్రాసెస్ చేయబడ్డాయి.",
-      "debug_data_cleared": "{count} సైకిళ్ల నుండి డీబగ్ డేటా విజయవంతంగా క్లియర్ చేయబడింది."
+      "debug_data_cleared": "{count} సైకిళ్ల నుండి డీబగ్ డేటా విజయవంతంగా క్లియర్ చేయబడింది.",
+      "no_power_data": "ఎంచుకున్న సైకిల్ కోసం పవర్ ట్రేస్ డేటా అందుబాటులో లేదు."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "పరిధులను జోడించడానికి, సవరించడానికి, తొలగించడానికి లేదా సేవ్ చేయడానికి దిగువ చర్యలను ఉపయోగించండి.",
         "profile_summary_header": "ప్రొఫైల్ సారాంశం",
         "recent_cycles_header": "ఇటీవలి చక్రాలు",
-        "no_power_preview": "*ప్రివ్యూ కోసం పవర్ డేటా అందుబాటులో లేదు.*"
+        "no_power_preview": "*ప్రివ్యూ కోసం పవర్ డేటా అందుబాటులో లేదు.*",
+        "trim_cycle_preview_title": "సైకిల్ ట్రిమ్ ప్రివ్యూ",
+        "trim_cycle_preview_no_data": "ఈ సైకిల్ కోసం పవర్ డేటా అందుబాటులో లేదు.",
+        "trim_cycle_preview_kept_suffix": "ఉంచింది"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "పాత సైకిళ్లను ఆటో-లేబుల్ చేయండి",
         "select_cycle_to_label": "లేబుల్ నిర్దిష్ట చక్రం",
-        "select_cycle_to_label_multi": "బహుళ చక్రాలను లేబుల్ చేయండి",
         "select_cycle_to_delete": "సైకిల్‌ను తొలగించండి",
-        "interactive_editor": "ఇంటరాక్టివ్ ఎడిటర్‌ను విలీనం చేయండి/స్ప్లిట్ చేయండి"
+        "interactive_editor": "ఇంటరాక్టివ్ ఎడిటర్‌ను విలీనం చేయండి/స్ప్లిట్ చేయండి",
+        "trim_cycle": "సైకిల్ డేటాను ట్రిమ్ చేయండి"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "దశలకు పేరు పెట్టండి & దరఖాస్తు చేయండి",
         "cancel": "మార్పులు లేకుండా వెనక్కి వెళ్లండి"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "ప్రారంభ స్థానం సెట్ చేయండి",
+        "set_end": "ముగింపు పాయింట్‌ని సెట్ చేయండి",
+        "reset": "పూర్తి వ్యవధికి రీసెట్ చేయండి",
+        "apply": "ట్రిమ్ వర్తించు",
+        "cancel": "రద్దు చేయి"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "రికార్డింగ్ ఆపడానికి వాషింగ్ మెషీన్ పరికరం."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "ట్రిమ్ సైకిల్",
+      "description": "గత చక్రం యొక్క పవర్ డేటాను నిర్దిష్ట సమయ విండోకు ట్రిమ్ చేయండి.",
+      "fields": {
+        "device_id": {
+          "name": "పరికరం",
+          "description": "WashData పరికరం."
+        },
+        "cycle_id": {
+          "name": "సైకిల్ ID",
+          "description": "ట్రిమ్ చేయడానికి సైకిల్ యొక్క ID."
+        },
+        "trim_start_s": {
+          "name": "ట్రిమ్ ప్రారంభం (సెకన్లు)",
+          "description": "ఈ ఆఫ్‌సెట్ నుండి డేటాను సెకన్లలో ఉంచండి. డిఫాల్ట్ 0."
+        },
+        "trim_end_s": {
+          "name": "ట్రిమ్ ఎండ్ (సెకన్లు)",
+          "description": "ఈ ఆఫ్‌సెట్ వరకు డేటాను సెకన్లలో ఉంచండి. డిఫాల్ట్ = పూర్తి వ్యవధి."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "ఫోర్స్ ఎండ్ సైకిల్"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "పరికరం కనుగొనబడలేదు."
+    },
+    "no_config_entry": {
+      "message": "పరికరం కోసం కాన్ఫిగర్ ఎంట్రీ కనుగొనబడలేదు."
+    },
+    "integration_not_loaded": {
+      "message": "ఈ పరికరం కోసం ఇంటిగ్రేషన్ లోడ్ చేయబడలేదు."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "సైకిల్ కనుగొనబడలేదు లేదా పవర్ డేటా లేదు."
+    },
+    "trim_failed_empty_window": {
+      "message": "ట్రిమ్ విఫలమైంది - సైకిల్ కనుగొనబడలేదు, పవర్ డేటా లేదు లేదా ఫలితంగా విండో ఖాళీగా ఉంది."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s తప్పనిసరిగా trim_start_s కంటే ఎక్కువగా ఉండాలి."
     }
   }
 }

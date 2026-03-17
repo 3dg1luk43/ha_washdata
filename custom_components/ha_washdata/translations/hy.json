@@ -19,7 +19,7 @@
       },
       "first_profile": {
         "title": "Ստեղծեք առաջին պրոֆիլը",
-        "description": "**Հեծանիվը**-ը ձեր սարքի ամբողջական գործարկումն է (օրինակ՝ լվացքի բեռնվածություն): **Պրոֆիլը** խմբավորում է այս ցիկլերը ըստ տեսակի (օրինակ՝ «Բամբակ», «Արագ լվացում»): Այժմ պրոֆիլի ստեղծումն օգնում է անմիջապես ինտեգրման գնահատման տևողությանը:\n\nԴուք կարող եք ձեռքով ընտրել այս պրոֆիլը սարքի կառավարում, եթե այն ինքնաբերաբար չի հայտնաբերվում:\n\n**Այս քայլը բաց թողնելու համար թողեք «Պրոֆիլի անունը» դատարկ։**",
+        "description": "**Ցիկլ**-ը ձեր սարքի ամբողջական գործարկումն է (օրինակ՝ լվացքի բեռնվածություն): **Պրոֆիլը** խմբավորում է այս ցիկլերը ըստ տեսակի (օրինակ՝ «Բամբակ», «Արագ լվացում»): Այժմ պրոֆիլի ստեղծումն օգնում է անմիջապես ինտեգրման գնահատման տևողությանը:\n\nԴուք կարող եք ձեռքով ընտրել այս պրոֆիլը սարքի կառավարում, եթե այն ինքնաբերաբար չի հայտնաբերվում:\n\n**Այս քայլը բաց թողնելու համար թողեք «Պրոֆիլի անունը» դատարկ։**",
         "data": {
           "profile_name": "Պրոֆիլի անունը (ըստ ցանկության)",
           "manual_duration": "Մոտավոր տեւողությունը (րոպե)"
@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Կարգավորումներ",
-        "description": "Կարգավորել հայտնաբերման շեմերը, սովորելը և առաջադեմ վարքագիծը: Կանխադրվածները լավ են աշխատում կարգավորումների մեծ մասի համար:",
+        "description": "Կարգավորել հայտնաբերման շեմերը, սովորելը և առաջադեմ վարքագիծը: Կանխադրվածները լավ են աշխատում կարգավորումների մեծ մասի համար:\n\nՀասանելի առաջարկված կարգավորումներ. {suggestions_count}:\nԵթե ​​այս թիվը 0-ից մեծ է, բացեք Ընդլայնված կարգավորումները և օգտագործեք «Կիրառել առաջարկվող արժեքները» տարբերակը՝ առաջարկությունները վերանայելու համար:",
         "data": {
           "apply_suggestions": "Կիրառել առաջարկվող արժեքները",
           "device_type": "Սարքի տեսակը",
@@ -69,7 +69,7 @@
           "notify_actions": "Ծանուցման գործողություններ",
           "notify_people": "Հետաձգեք առաքումը, քանի դեռ այս մարդիկ տանը չեն",
           "notify_only_when_home": "Հետաձգել ծանուցումները, քանի դեռ ընտրված անձը տուն չէ",
-          "notify_fire_events": "Հրդեհային ավտոմատացման միջոցառումներ",
+          "notify_fire_events": "Ավտոմատացման իրադարձությունների գործարկում",
           "notify_events": "Իրադարձություններ, որոնց մասին պետք է տեղեկացնել",
           "notify_before_end_minutes": "Նախնական ավարտի ծանուցում (ավարտից րոպեներ առաջ)",
           "notify_title": "Ծանուցման վերնագիր",
@@ -80,7 +80,7 @@
           "show_advanced": "Խմբագրել Ընդլայնված կարգավորումները (Հաջորդ քայլը)"
         },
         "data_description": {
-          "apply_suggestions": "Նշեք այս վանդակը՝ ուսուցման ալգորիթմի առաջարկած արժեքները ձևաթղթում պատճենելու համար: Վերանայեք նախքան պահպանումը:\n\nԱռաջարկվում է (սովորելուց).\n- նվազագույն_հզորությունը՝ {suggested_min_power} Վտ\n- off_delay՝ {suggested_off_delay} վ\n- watchdog_interval՝ {suggested_watchdog_interval} վ\n- no_update_active_timeout՝ {suggested_no_update_active_timeout} s\n- profile_match_interval՝ {suggested_profile_match_interval} վ\n- ավտոմատ_պիտակ_վստահություն՝ {suggested_auto_label_confidence}\n- տևողություն_հանդուրժողականություն՝ {suggested_duration_tolerance}\n- պրոֆիլի_տեւողության_հանդուրժողականություն՝ {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio՝ {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio՝ {suggested_profile_match_max_duration_ratio}\n- start_threshold_w՝ {suggested_start_threshold_w} W\n- stop_threshold_w՝ {suggested_stop_threshold_w} Վ\n- վերջի_էներգիայի_շեմը՝ {suggested_end_energy_threshold} Վտ\n- running_dead_zone՝ {suggested_running_dead_zone} վ\n{suggested_reason}",
+          "apply_suggestions": "Նշեք այս վանդակը՝ ուսուցման ալգորիթմի առաջարկած արժեքները ձևաթղթում պատճենելու համար: Վերանայեք նախքան պահպանումը:\n\nԱռաջարկվում է (սովորելուց).\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Ընտրեք սարքի տեսակը (Լվացքի մեքենա, չորանոց, աման լվացող մեքենա, սուրճի մեքենա, EV): Այս պիտակը պահվում է յուրաքանչյուր ցիկլի հետ ավելի լավ կազմակերպման համար:",
           "power_sensor": "Սենսորային միավորը, որը հաղորդում է իրական ժամանակի հզորությունը (վտներով): Դուք ցանկացած ժամանակ կարող եք փոխել սա՝ առանց պատմական տվյալների կորստի, ինչը օգտակար է, եթե փոխարինեք խելացի վարդակից:",
           "min_power": "Այս շեմից բարձր հզորության ցուցանիշները (վտ) ցույց են տալիս, որ սարքը աշխատում է: Սարքերի մեծ մասի համար սկսեք 2W-ից:",
@@ -107,7 +107,7 @@
           "notify_actions": "Ծանուցման գործողություններ",
           "notify_people": "Հետաձգեք առաքումը, քանի դեռ այս մարդիկ տանը չեն",
           "notify_only_when_home": "Հետաձգել ծանուցումները, քանի դեռ ընտրված անձը տուն չէ",
-          "notify_fire_events": "Հրդեհային ավտոմատացման միջոցառումներ",
+          "notify_fire_events": "Ավտոմատացման իրադարձությունների գործարկում",
           "notify_events": "Իրադարձություններ, որոնց մասին պետք է տեղեկացնել",
           "notify_before_end_minutes": "Նախնական ավարտի ծանուցում (ավարտից րոպեներ առաջ)",
           "notify_live_interval_seconds": "Ուղիղ թարմացումների ընդմիջում (վայրկյաններ)",
@@ -163,15 +163,15 @@
           "abrupt_high_load_factor": "Ընդհատված՝ բարձր ծանրաբեռնվածության գործակից",
           "max_past_cycles": "Պահպանում. առավելագույն պահպանված ցիկլեր",
           "max_full_traces_per_profile": "Պահպանում. առավելագույն ամբողջական հետքեր մեկ պրոֆիլում",
-          "max_full_traces_unlabeled": "Պահպանում. Max Full Traces Unlabeled",
+          "max_full_traces_unlabeled": "Պահպանում. Առավելագույն ամբողջական հետքեր՝ առանց պիտակի",
           "watchdog_interval": "Watchdog ընդմիջում (վայրկյան)",
           "completion_min_seconds": "Ավարտման նվազագույն ժամկետը (վայրկյան)",
           "notify_before_end_minutes": "Նախնական ավարտի ծանուցում (ավարտից րոպեներ առաջ)",
           "auto_tune_noise_events_threshold": "Ավտոմատ կարգավորում. աղմուկի իրադարձությունների շեմ",
-          "running_dead_zone": "Վազող մեռյալ գոտի (վայրկյան)",
+          "running_dead_zone": "Մեռյալ գոտի մեկնարկից հետո (վայրկյան)",
           "end_repeat_count": "Ավարտել Կրկնությունների հաշվարկը",
-          "start_energy_threshold": "Start Energy Gate (Wh)",
-          "end_energy_threshold": "End Energy Gate (Wh)",
+          "start_energy_threshold": "Մեկնարկի էներգիայի դարպաս (Wh)",
+          "end_energy_threshold": "Ավարտի էներգիայի դարպաս (Wh)",
           "auto_maintenance": "Միացնել ավտոմատ սպասարկումը",
           "expose_debug_entities": "Բացահայտեք վրիպազերծման սուբյեկտները",
           "save_debug_traces": "Պահպանեք վրիպազերծման հետքերը",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Շրջել ձգանման տրամաբանությունը (գործարկիչը անջատված է)"
         },
         "data_description": {
-          "apply_suggestions": "Նշեք այս վանդակը՝ ուսումնական ալգորիթմից առաջարկվող արժեքների վերանայման քայլ բացելու համար: Ոչինչ ինքնաբերաբար չի պահպանվում:\n\nԱռաջարկվում է (սովորելուց).\n- նվազագույն_հզորությունը՝ {suggested_min_power} Վտ\n- off_delay՝ {suggested_off_delay} վ\n- watchdog_interval՝ {suggested_watchdog_interval} վ\n- no_update_active_timeout՝ {suggested_no_update_active_timeout} s\n- profile_match_interval՝ {suggested_profile_match_interval} վ\n- ավտոմատ_պիտակ_վստահություն՝ {suggested_auto_label_confidence}\n- տևողություն_հանդուրժողականություն՝ {suggested_duration_tolerance}\n- պրոֆիլի_տեւողության_հանդուրժողականություն՝ {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio՝ {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio՝ {suggested_profile_match_max_duration_ratio}\n- start_threshold_w՝ {suggested_start_threshold_w} W\n- stop_threshold_w՝ {suggested_stop_threshold_w} Վ\n- վերջի_էներգիայի_շեմը՝ {suggested_end_energy_threshold} Վտ\n- running_dead_zone՝ {suggested_running_dead_zone} վ\n{suggested_reason}",
+          "apply_suggestions": "Նշեք այս վանդակը՝ ուսումնական ալգորիթմից առաջարկվող արժեքների վերանայման քայլ բացելու համար: Ոչինչ ինքնաբերաբար չի պահպանվում:\n\nԱռաջարկվում է (սովորելուց).\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Ցիկլը սկսելու համար հզորությունը պետք է բարձրանա այս շեմից: Սահմանեք ավելի բարձր, քան ձեր սպասման հզորությունը: Կանխադրված՝ min_power + 1 W:",
           "stop_threshold_w": "Հզորությունը պետք է ընկնի այս շեմից՝ ցիկլը ավարտելու համար: Սահմանեք զրոյից մի փոքր վեր՝ կեղծ ծայրեր առաջացնող աղմուկից խուսափելու համար: Կանխադրված՝ 0,6 * min_power:",
           "min_off_gap": "Եթե ​​ցիկլը սկսվում է նախորդի ավարտից այս վայրկյանների ընթացքում, ապա դրանք կմիաձուլվեն մեկ ցիկլի մեջ:",
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Բեմադրեք առաջարկվող արժեքները Ընդլայնված կարգավորումներում"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Կտրման ցիկլ — Ընտրեք ցիկլ",
+        "description": "Ընտրեք ցիկլը կտրելու համար: ✓ = ավարտված, ⚠ = վերսկսված, ✗ = ընդհատված",
+        "data": {
+          "cycle_id": "Ցիկլ"
+        }
+      },
+      "trim_cycle": {
+        "title": "Կտրման ցիկլ",
+        "description": "Ընթացիկ պատուհան՝ {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Գործողություն"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Սահմանել կտրման մեկնարկ",
+        "description": "Մուտքագրեք րոպեի շեղումը, որից սկսեք տվյալները պահել (0 = ցիկլի սկիզբ):",
+        "data": {
+          "trim_start_min": "Սկիզբ (րոպե)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Սահմանել կտրման ավարտ",
+        "description": "Մուտքագրեք րոպեի շեղումը, որպեսզի դադարեցնեք տվյալների պահպանումը:",
+        "data": {
+          "trim_end_min": "Ավարտ (րոպե)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData. Ստուգեք ցիկլը ({device})",
       "feedback_notification_message": "**Սարք**՝ {device}\n**Ծրագիր**՝ {program} ({confidence}% վստահություն)\n**Ժամանակը**՝ {time}\n\nWashData-ն ձեր օգնության կարիքն ունի այս հայտնաբերված ցիկլը ստուգելու համար:\n\nԽնդրում ենք գնալ **Կարգավորումներ > Սարքեր և ծառայություններ > WashData > Կարգավորել > Ուսուցման հետադարձ կապ**՝ այս արդյունքը հաստատելու կամ ուղղելու համար:",
       "suggestions_ready_notification_title": "WashData. Առաջարկվող կարգավորումները պատրաստ են ({device})",
-      "suggestions_ready_notification_message": "**Առաջարկվող կարգավորումներ** սենսորն այժմ հաղորդում է **{count}** գործող առաջարկներ:\n\nԴրանք վերանայելու և կիրառելու համար՝ **Կարգավորումներ > Սարքեր և ծառայություններ > WashData > Կարգավորել > Ընդլայնված կարգավորումներ > Կիրառել առաջարկվող արժեքները**:\n\nԱռաջարկությունները կամընտիր են և ցուցադրվում են վերանայման համար՝ նախքան պահելը:"
+      "suggestions_ready_notification_message": "**Առաջարկվող կարգավորումներ** սենսորն այժմ հաղորդում է **{count}** գործող առաջարկներ:\n\nԴրանք վերանայելու և կիրառելու համար՝ **Կարգավորումներ > Սարքեր և ծառայություններ > WashData > Կարգավորել > Ընդլայնված կարգավորումներ > Կիրառել առաջարկվող արժեքները**:\n\nԱռաջարկությունները կամընտիր են և ցուցադրվում են վերանայման համար՝ նախքան պահելը:",
+      "trim_range_invalid": "Սկիզբը պետք է լինի մինչև վերջ: Խնդրում ենք հարմարեցնել ձեր կտրման կետերը:",
+      "trim_failed": "Չհաջողվեց կտրել: Ցիկլը կարող է այլևս գոյություն չունենա կամ պատուհանը դատարկ է:"
     },
     "abort": {
       "no_cycles_found": "Ցիկլեր չեն գտնվել",
@@ -594,7 +624,8 @@
       "no_predictions": "Կանխատեսումներ չկան",
       "no_custom_phases": "Հատուկ փուլեր չեն գտնվել:",
       "reprocess_success": "{count} ցիկլերը հաջողությամբ վերամշակվեցին:",
-      "debug_data_cleared": "{count} ցիկլերից վրիպազերծման տվյալները հաջողությամբ մաքրվեցին:"
+      "debug_data_cleared": "{count} ցիկլերից վրիպազերծման տվյալները հաջողությամբ մաքրվեցին:",
+      "no_power_data": "Ընտրված ցիկլի համար հոսանքի հետքի տվյալներ չկան:"
     }
   },
   "selector": {
@@ -647,9 +678,9 @@
         "graph_legend_title": "Գրաֆիկի լեգենդ",
         "graph_legend_body": "Կապույտ գոտին ներկայացնում է նվազագույն և առավելագույն էներգիայի ընդունման տիրույթը: Գիծը ցույց է տալիս միջին հզորության կորը:",
         "recording_preview": "Ձայնագրման նախադիտում",
-        "trim_start": "Կարճացրեք մեկնարկը",
+        "trim_start": "Կտրման մեկնարկ",
         "trim_end": "Կտրել վերջը",
-        "split_preview_title": "Split Preview",
+        "split_preview_title": "Բաժանման նախադիտում",
         "split_preview_found_fmt": "Գտնվել է {count} հատված:",
         "split_preview_confirm_fmt": "Սեղմեք Հաստատել՝ այս ցիկլը {count} առանձին ցիկլերի բաժանելու համար:",
         "merge_preview_title": "Միաձուլման նախադիտում",
@@ -667,7 +698,10 @@
         "assign_phases_help": "Օգտագործեք ստորև նշված գործողությունները՝ միջակայքերը ավելացնելու, խմբագրելու, ջնջելու կամ պահպանելու համար:",
         "profile_summary_header": "Անձնագրի ամփոփում",
         "recent_cycles_header": "Վերջին ցիկլերը",
-        "no_power_preview": "*Նախադիտման համար հոսանքի տվյալներ չկան։*"
+        "no_power_preview": "*Նախադիտման համար հոսանքի տվյալներ չկան։*",
+        "trim_cycle_preview_title": "Ցիկլի կտրվածքի նախադիտում",
+        "trim_cycle_preview_no_data": "Էլեկտրաէներգիայի վերաբերյալ տվյալներ չկան այս ցիկլի համար:",
+        "trim_cycle_preview_kept_suffix": "պահված"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "Հին ցիկլերի ավտոմատ պիտակավորում",
         "select_cycle_to_label": "Պիտակի հատուկ ցիկլ",
-        "select_cycle_to_label_multi": "Նշեք բազմակի ցիկլեր",
         "select_cycle_to_delete": "Ջնջել ցիկլը",
-        "interactive_editor": "Միաձուլել / բաժանել ինտերակտիվ խմբագիր"
+        "interactive_editor": "Միաձուլել / բաժանել ինտերակտիվ խմբագիր",
+        "trim_cycle": "Կտրման ցիկլի տվյալները"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "Անվանեք և կիրառեք փուլերը",
         "cancel": "Վերադարձեք առանց փոփոխությունների"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Սահմանեք մեկնարկային կետը",
+        "set_end": "Սահմանեք վերջնակետը",
+        "reset": "Վերականգնել ամբողջական տևողության",
+        "apply": "Կիրառել Trim-ը",
+        "cancel": "Չեղարկել"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "Լվացքի մեքենայի սարքը՝ ձայնագրումը դադարեցնելու համար։"
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Կտրման ցիկլ",
+      "description": "Կտրեք անցյալ ցիկլի էներգիայի տվյալները որոշակի ժամանակային պատուհանի վրա:",
+      "fields": {
+        "device_id": {
+          "name": "Սարք",
+          "description": "WashData սարքը:"
+        },
+        "cycle_id": {
+          "name": "Ցիկլի ID",
+          "description": "Կտրելու ցիկլի ID-ն:"
+        },
+        "trim_start_s": {
+          "name": "Կտրել սկիզբ (վայրկյան)",
+          "description": "Պահպանեք տվյալներն այս օֆսեթից վայրկյանների ընթացքում: Կանխադրված 0:"
+        },
+        "trim_end_s": {
+          "name": "Կտրել վերջը (վայրկյան)",
+          "description": "Պահպանեք տվյալները մինչև այս օֆսեթը վայրկյանների ընթացքում: Կանխադրված = լրիվ տևողություն:"
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "Ուժի ավարտի ցիկլը"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Սարքը չի գտնվել:"
+    },
+    "no_config_entry": {
+      "message": "Սարքի կոնֆիգուրացիայի մուտքագրում չի գտնվել:"
+    },
+    "integration_not_loaded": {
+      "message": "Ինտեգրումը բեռնված չէ այս սարքի համար:"
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Ցիկլը չի ​​գտնվել կամ չունի էներգիայի տվյալներ:"
+    },
+    "trim_failed_empty_window": {
+      "message": "Չհաջողվեց կրճատել. ցիկլը չի ​​գտնվել, հոսանքի տվյալներ չկան, կամ արդյունքում պատուհանը դատարկ է:"
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s-ը պետք է մեծ լինի trim_start_s-ից:"
     }
   }
 }

@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Configuració",
-        "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.",
+        "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.\n\nConfiguració suggerida disponible actualment: {suggestions_count}.\nSi és superior a 0, obre la Configuració avançada i usa 'Aplica els valors suggerits' per revisar les recomanacions.",
         "data": {
           "apply_suggestions": "Aplicar els valors suggerits",
           "device_type": "Tipus de dispositiu",
@@ -80,7 +80,7 @@
           "show_advanced": "Edita la configuració avançada (pas següent)"
         },
         "data_description": {
-          "apply_suggestions": "Marqueu aquesta casella per copiar els valors suggerits per l'algoritme d'aprenentatge al formulari. Revisa abans de desar.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- retard_apagat: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerància_durada: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- llindar_energètic_final: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Marqueu aquesta casella per copiar els valors suggerits per l'algoritme d'aprenentatge al formulari. Revisa abans de desar.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Seleccioneu el tipus d'aparell (rentadora, assecadora, rentavaixelles, cafetera, EV). Aquesta etiqueta s'emmagatzema amb cada cicle per a una millor organització.",
           "power_sensor": "L'entitat sensora que informa de la potència en temps real (en watts). Podeu canviar-ho en qualsevol moment sense perdre les dades històriques; és útil si substituïu un connector intel·ligent.",
           "min_power": "Les lectures de potència per sobre d'aquest llindar (en watts) indiquen que l'aparell està en funcionament. Comenceu amb 2 W per a la majoria de dispositius.",
@@ -137,7 +137,7 @@
       },
       "advanced_settings": {
         "title": "Configuració avançada",
-        "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.",
+        "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.\n\nConfiguració suggerida disponible actualment: {suggestions_count}. Usa 'Aplica els valors suggerits' per revisar els canvis abans de desar.",
         "data": {
           "apply_suggestions": "Aplicar els valors suggerits",
           "start_threshold_w": "Llindar inicial (W)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Inverteix la lògica de l'activació (disparador desactivat)"
         },
         "data_description": {
-          "apply_suggestions": "Marqueu aquesta casella per obrir un pas de revisió dels valors suggerits de l'algoritme d'aprenentatge. No es desa res automàticament.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- retard_apagat: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerància_durada: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- llindar_energètic_final: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Marqueu aquesta casella per obrir un pas de revisió dels valors suggerits de l'algoritme d'aprenentatge. No es desa res automàticament.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "La potència ha de pujar per sobre d'aquest llindar per iniciar un cicle. Estableix una potència superior a la teva en espera. Per defecte: min_power + 1 W.",
           "stop_threshold_w": "L'energia ha de baixar per sota d'aquest llindar per FINALITZAR un cicle. Establiu just per sobre de zero per evitar que el soroll provoqui finals falsos. Per defecte: 0,6 * min_power.",
           "min_off_gap": "Si un cicle s'inicia en tants segons des de la finalització de l'anterior, es FUSIONARÀ en un sol cicle.",
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Escenifica els valors suggerits a la configuració avançada"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Cicle de retall: seleccioneu Cicle",
+        "description": "Seleccioneu un cicle per retallar. ✓ = completat, ⚠ = reprès, ✗ = interromput",
+        "data": {
+          "cycle_id": "Cicle"
+        }
+      },
+      "trim_cycle": {
+        "title": "Cicle de tall",
+        "description": "Finestra actual: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Acció"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Estableix Trim Start",
+        "description": "Introduïu el desplaçament de minuts per començar a guardar les dades (0 = inici del cicle).",
+        "data": {
+          "trim_start_min": "Inici (minuts)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Estableix el final de retall",
+        "description": "Introduïu el desplaçament de minuts per deixar de conservar les dades.",
+        "data": {
+          "trim_end_min": "Final (minuts)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: verifica el cicle ({device})",
       "feedback_notification_message": "**Dispositiu**: {device}\n**Programa**: {program} ({confidence}% de confiança)\n**Hora**: {time}\n\nWashData necessita la teva ajuda per verificar aquest cicle detectat.\n\nAneu a **Configuració > Dispositius i serveis > WashData > Configura > Comentaris d'aprenentatge** per confirmar o corregir aquest resultat.",
       "suggestions_ready_notification_title": "WashData: configuracions suggerides a punt ({device})",
-      "suggestions_ready_notification_message": "El sensor de **Configuració suggerida** ara informa de **{count}** recomanacions accionables.\n\nPer revisar-los i aplicar-los: **Configuració > Dispositius i serveis > WashData > Configura > Configuració avançada > Aplica els valors suggerits**.\n\nEls suggeriments són opcionals i es mostren per revisar-los abans de desar-los."
+      "suggestions_ready_notification_message": "El sensor de **Configuració suggerida** ara informa de **{count}** recomanacions accionables.\n\nPer revisar-los i aplicar-los: **Configuració > Dispositius i serveis > WashData > Configura > Configuració avançada > Aplica els valors suggerits**.\n\nEls suggeriments són opcionals i es mostren per revisar-los abans de desar-los.",
+      "trim_range_invalid": "L'inici ha de ser abans del final. Ajusteu els vostres punts de retallat.",
+      "trim_failed": "Ha fallat el retall. És possible que el cicle ja no existeixi o que la finestra estigui buida."
     },
     "abort": {
       "no_cycles_found": "No s'han trobat cicles",
@@ -594,7 +624,8 @@
       "no_predictions": "Sense prediccions",
       "no_custom_phases": "No s'han trobat fases personalitzades.",
       "reprocess_success": "S'han reprocessat correctament {count} cicles.",
-      "debug_data_cleared": "S'han esborrat correctament les dades de depuració de {count} cicles."
+      "debug_data_cleared": "S'han esborrat correctament les dades de depuració de {count} cicles.",
+      "no_power_data": "No hi ha dades de traça de potència disponibles per al cicle seleccionat."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Feu servir les accions següents per afegir, editar, suprimir o desar intervals.",
         "profile_summary_header": "Resum del perfil",
         "recent_cycles_header": "Cicles recents",
-        "no_power_preview": "*No hi ha dades de potència disponibles per a la vista prèvia.*"
+        "no_power_preview": "*No hi ha dades de potència disponibles per a la vista prèvia.*",
+        "trim_cycle_preview_title": "Previsualització retallat del cicle",
+        "trim_cycle_preview_no_data": "No hi ha dades de potència disponibles per a aquest cicle.",
+        "trim_cycle_preview_kept_suffix": "guardada"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "Etiqueta automàtica de cicles antics",
         "select_cycle_to_label": "Cicle específic de l'etiqueta",
-        "select_cycle_to_label_multi": "Etiqueta múltiples cicles",
         "select_cycle_to_delete": "Suprimeix el cicle",
-        "interactive_editor": "Combinar/dividir Editor interactiu"
+        "interactive_editor": "Combinar/dividir Editor interactiu",
+        "trim_cycle": "Dades del cicle de retallada"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "Anomena i aplica les fases",
         "cancel": "Tornar enrere sense canvis"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Estableix el punt d'inici",
+        "set_end": "Estableix el punt final",
+        "reset": "Restableix a la durada completa",
+        "apply": "Aplicar Trim",
+        "cancel": "Cancel·la"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "El dispositiu de la rentadora per aturar la gravació."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Cicle de tall",
+      "description": "Retalla les dades de potència d'un cicle passat a una finestra de temps específica.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu WashData."
+        },
+        "cycle_id": {
+          "name": "ID del cicle",
+          "description": "L'ID del cicle a retallar."
+        },
+        "trim_start_s": {
+          "name": "Inici de retall (segons)",
+          "description": "Conserva les dades d'aquest desplaçament en segons. Per defecte 0."
+        },
+        "trim_end_s": {
+          "name": "Final de retalla (segons)",
+          "description": "Manteniu les dades amb aquest desplaçament en segons. Per defecte = durada completa."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "Força final de cicle"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "No s'ha trobat el dispositiu."
+    },
+    "no_config_entry": {
+      "message": "No s'ha trobat cap entrada de configuració per al dispositiu."
+    },
+    "integration_not_loaded": {
+      "message": "La integració no s'ha carregat per a aquest dispositiu."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "No s'ha trobat el cicle o no té dades de potència."
+    },
+    "trim_failed_empty_window": {
+      "message": "Error de retalla: no s'ha trobat el cicle, no hi ha dades d'energia o la finestra resultant està buida."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s ha de ser més gran que trim_start_s."
     }
   }
 }

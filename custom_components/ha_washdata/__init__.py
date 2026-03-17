@@ -11,6 +11,7 @@ from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import device_registry as dr
 
 from .const import (
@@ -380,6 +381,66 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.services.async_register(
             DOMAIN, "auto_label_cycles", handle_auto_label_cycles
         )
+
+    # Register trim_cycle service
+    if not hass.services.has_service(DOMAIN, "trim_cycle"):
+
+        async def handle_trim_cycle(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            cycle_id = _require_str(call.data.get("cycle_id"), "cycle_id")
+            trim_start_s = max(0.0, float(call.data.get("trim_start_s", 0)))
+
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="device_not_found",
+                )
+
+            entry_id = next(iter(device.config_entries), None)
+            if not entry_id:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="no_config_entry",
+                )
+            if entry_id not in hass.data[DOMAIN]:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="integration_not_loaded",
+                )
+
+            manager = hass.data[DOMAIN][entry_id]
+            store = manager.profile_store
+
+            # Determine trim end — default to full cycle duration if not supplied
+            raw_end = call.data.get("trim_end_s")
+            if raw_end is not None:
+                trim_end_s = max(0.0, float(raw_end))
+            else:
+                p_data = store.get_cycle_power_data(cycle_id)
+                if not p_data:
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="cycle_not_found_or_no_power",
+                    )
+                trim_end_s = max(point[0] for point in p_data)
+
+            if trim_end_s <= trim_start_s:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="trim_invalid_range",
+                )
+
+            ok = await store.trim_cycle_power_data(cycle_id, trim_start_s, trim_end_s)
+            if not ok:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="trim_failed_empty_window",
+                )
+            manager.notify_update()
+
+        hass.services.async_register(DOMAIN, "trim_cycle", handle_trim_cycle)
 
     # Register custom card via frontend.py — once per HA instance only.
     if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(

@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Indstillinger",
-        "description": "Indstil registreringstærskler, indlæring og avanceret adfærd. Standarder fungerer godt for de fleste opsætninger.",
+        "description": "Indstil registreringstærskler, indlæring og avanceret adfærd. Standarder fungerer godt for de fleste opsætninger.\n\nForeslåede indstillinger tilgængelige nu: {suggestions_count}.\nHvis dette er over 0, åbn Avancerede indstillinger og brug 'Anvend foreslåede værdier' til at gennemgå anbefalingerne.",
         "data": {
           "apply_suggestions": "Anvend foreslåede værdier",
           "device_type": "Enhedstype",
@@ -80,7 +80,7 @@
           "show_advanced": "Rediger avancerede indstillinger (næste trin)"
         },
         "data_description": {
-          "apply_suggestions": "Marker dette felt for at kopiere værdier foreslået af indlæringsalgoritmen til formularen. Gennemgå før du gemmer.\n\nForeslået (fra læring):\n- min_effekt: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Marker dette felt for at kopiere værdier foreslået af indlæringsalgoritmen til formularen. Gennemgå før du gemmer.\n\nForeslået (fra læring):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Vælg type apparat (vaskemaskine, tørretumbler, opvaskemaskine, kaffemaskine, EV). Dette tag gemmes med hver cyklus for bedre organisering.",
           "power_sensor": "Sensorenheden rapporterer effekt i realtid (i watt). Du kan ændre dette når som helst uden at miste historiske data - nyttigt, hvis du udskifter et smart stik.",
           "min_power": "Effektaflæsninger over denne tærskel (i watt) indikerer, at apparatet kører. Start med 2W for de fleste enheder.",
@@ -137,7 +137,7 @@
       },
       "advanced_settings": {
         "title": "Avancerede indstillinger",
-        "description": "Indstil registreringstærskler, indlæring og avanceret adfærd. Standarder fungerer godt for de fleste opsætninger.",
+        "description": "Indstil registreringstærskler, indlæring og avanceret adfærd. Standarder fungerer godt for de fleste opsætninger.\n\nForeslåede indstillinger tilgængelige nu: {suggestions_count}. Brug 'Anvend foreslåede værdier' til at gennemgå ændringerne, inden du gemmer.",
         "data": {
           "apply_suggestions": "Anvend foreslåede værdier",
           "start_threshold_w": "Startgrænse (W)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Inverter triggerlogik (trigger til FRA)"
         },
         "data_description": {
-          "apply_suggestions": "Marker dette felt for at åbne et gennemgangstrin for foreslåede værdier fra indlæringsalgoritmen. Intet gemmes automatisk.\n\nForeslået (fra læring):\n- min_effekt: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Marker dette felt for at åbne et gennemgangstrin for foreslåede værdier fra indlæringsalgoritmen. Intet gemmes automatisk.\n\nForeslået (fra læring):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Effekten skal stige OVER denne tærskel for at STARTE en cyklus. Indstil højere end din standbyeffekt. Standard: min_power + 1 W.",
           "stop_threshold_w": "Strømmen skal falde UNDER denne tærskel for at AFSLUTTE en cyklus. Indstil lige over nul for at undgå støj, der udløser falske ender. Standard: 0,6 * min_power.",
           "min_off_gap": "Hvis en cyklus starter inden for så mange sekunder efter, at den forrige sluttede, vil de blive fusioneret til en enkelt cyklus.",
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "Stage foreslåede værdier i avancerede indstillinger"
         }
+      },
+      "trim_cycle_select": {
+        "title": "Trim cyklus — Vælg cyklus",
+        "description": "Vælg en cyklus at trimme. ✓ = afsluttet, ⚠ = genoptaget, ✗ = afbrudt",
+        "data": {
+          "cycle_id": "Cyklus"
+        }
+      },
+      "trim_cycle": {
+        "title": "Trim cyklus",
+        "description": "Aktuelt vindue: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "Handling"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "Indstil trimstart",
+        "description": "Indtast minutforskydningen for at begynde at gemme data fra (0 = cyklusstart).",
+        "data": {
+          "trim_start_min": "Start (minutter)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "Indstil trim slutposition",
+        "description": "Indtast minutforskydningen for at stoppe med at gemme data.",
+        "data": {
+          "trim_end_min": "Slut (minutter)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "WashData: Bekræft cyklus ({device})",
       "feedback_notification_message": "**Enhed**: {device}\n**Program**: {program} ({confidence} % konfidens)\n**Tid**: {time}\n\nWashData har brug for din hjælp til at verificere denne detekterede cyklus.\n\nGå til **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Læringsfeedback** for at bekræfte eller rette dette resultat.",
       "suggestions_ready_notification_title": "WashData: Foreslåede indstillinger klar ({device})",
-      "suggestions_ready_notification_message": "Sensoren **Foreslåede indstillinger** rapporterer nu **{count}** handlingsrettede anbefalinger.\n\nSådan gennemgår og anvender du dem: **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Avancerede indstillinger > Anvend foreslåede værdier**.\n\nForslag er valgfrie og vises til gennemgang, før du gemmer."
+      "suggestions_ready_notification_message": "Sensoren **Foreslåede indstillinger** rapporterer nu **{count}** handlingsrettede anbefalinger.\n\nSådan gennemgår og anvender du dem: **Indstillinger > Enheder og tjenester > WashData > Konfigurer > Avancerede indstillinger > Anvend foreslåede værdier**.\n\nForslag er valgfrie og vises til gennemgang, før du gemmer.",
+      "trim_range_invalid": "Start skal være før slut. Juster venligst dine trimpunkter.",
+      "trim_failed": "Trimning mislykkedes. Cyklussen eksisterer muligvis ikke længere, eller vinduet er tomt."
     },
     "abort": {
       "no_cycles_found": "Ingen cyklusser fundet",
@@ -594,7 +624,8 @@
       "no_predictions": "Ingen forudsigelser",
       "no_custom_phases": "Ingen tilpassede faser fundet.",
       "reprocess_success": "Genbehandlet {count} cyklusser.",
-      "debug_data_cleared": "Fejlretningsdata fra {count} cyklusser blev ryddet."
+      "debug_data_cleared": "Fejlretningsdata fra {count} cyklusser blev ryddet.",
+      "no_power_data": "Ingen strømsporingsdata tilgængelige for den valgte cyklus."
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "Brug handlingerne nedenfor til at tilføje, redigere, slette eller gemme områder.",
         "profile_summary_header": "Profiloversigt",
         "recent_cycles_header": "Seneste cyklusser",
-        "no_power_preview": "*Ingen strømdata tilgængelige til forhåndsvisning.*"
+        "no_power_preview": "*Ingen strømdata tilgængelige til forhåndsvisning.*",
+        "trim_cycle_preview_title": "Forhåndsvisning af cyklustrim",
+        "trim_cycle_preview_no_data": "Ingen strømdata tilgængelige for denne cyklus.",
+        "trim_cycle_preview_kept_suffix": "holdt"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "Auto-mærke gamle cyklusser",
         "select_cycle_to_label": "Etiketspecifik cyklus",
-        "select_cycle_to_label_multi": "Mærk flere cyklusser",
         "select_cycle_to_delete": "Slet cyklus",
-        "interactive_editor": "Interaktiv flet/opdel-editor"
+        "interactive_editor": "Interaktiv flet/opdel-editor",
+        "trim_cycle": "Trim cyklusdata"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "Navngiv og anvend faser",
         "cancel": "Gå tilbage uden ændringer"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "Indstil startpunkt",
+        "set_end": "Indstil slutpunkt",
+        "reset": "Nulstil til fuld varighed",
+        "apply": "Påfør Trim",
+        "cancel": "Ophæve"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "Vaskemaskinen enheden til at stoppe optagelsen."
         }
       }
+    },
+    "trim_cycle": {
+      "name": "Trim cyklus",
+      "description": "Trim effektdataene for en tidligere cyklus til et bestemt tidsvindue.",
+      "fields": {
+        "device_id": {
+          "name": "Enhed",
+          "description": "WashData-enheden."
+        },
+        "cycle_id": {
+          "name": "Cyklus ID",
+          "description": "ID'et for den cyklus, der skal trimmes."
+        },
+        "trim_start_s": {
+          "name": "Trimstart (sekunder)",
+          "description": "Gem data fra denne offset i sekunder. Standard 0."
+        },
+        "trim_end_s": {
+          "name": "Trim slut (sekunder)",
+          "description": "Hold data op til denne offset i sekunder. Standard = fuld varighed."
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "Tving afslutningscyklus"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "Enheden blev ikke fundet."
+    },
+    "no_config_entry": {
+      "message": "Ingen konfigurationsindgang fundet for enheden."
+    },
+    "integration_not_loaded": {
+      "message": "Integration ikke indlæst for denne enhed."
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "Cyklus ikke fundet eller har ingen strømdata."
+    },
+    "trim_failed_empty_window": {
+      "message": "Trim mislykkedes — cyklus blev ikke fundet, ingen strømdata, eller det resulterende vindue er tomt."
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s skal være større end trim_start_s."
     }
   }
 }

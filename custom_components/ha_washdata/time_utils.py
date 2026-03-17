@@ -29,10 +29,11 @@ PowerData = list[PowerPoint]
 
 def detect_power_data_format(
     power_data: PowerData,
-) -> Literal["offset", "iso", "datetime", "empty", "unknown"]:
+) -> Literal["offset", "iso", "datetime", "empty", "unknown", "unix_timestamp"]:
     """Identify which format a power_data list is in.
 
-    Returns one of: ``"offset"``, ``"iso"``, ``"datetime"``, ``"empty"``, ``"unknown"``.
+    Returns one of: ``"offset"``, ``"iso"``, ``"datetime"``, ``"empty"``,
+    ``"unknown"``, ``"unix_timestamp"``.
     """
     if not power_data:
         return "empty"
@@ -48,6 +49,10 @@ def detect_power_data_format(
     if isinstance(ts, str):
         return "iso"
     if isinstance(ts, (int, float)):
+        # Values > 1e8 (≈ 3+ years of seconds) are absolute Unix epoch timestamps,
+        # not relative offsets. Treat them differently so we can subtract start_time.
+        if float(ts) > 1e8:
+            return "unix_timestamp"
         return "offset"
     return "unknown"
 
@@ -73,6 +78,29 @@ def power_data_to_offsets(
         return []
 
     fmt = detect_power_data_format(power_data)
+
+    if fmt == "unix_timestamp":
+        # Absolute Unix epoch floats — subtract cycle start to get relative offsets.
+        base_ts: float | None = None
+        if start_time_iso:
+            try:
+                parsed_start = dt_util.parse_datetime(start_time_iso)
+                if parsed_start is not None:
+                    base_ts = parsed_start.timestamp()
+            except (ValueError, OSError) as e:
+                _LOGGER.debug("Failed to parse start_time_iso %s: %s", start_time_iso, e)
+        result: list[list[float]] = []
+        for item in power_data:
+            try:
+                ts_abs = float(item[0])
+                p = float(item[1])
+                if base_ts is None:
+                    base_ts = ts_abs  # use first reading as anchor
+                offset = round(ts_abs - base_ts, 1)
+                result.append([max(0.0, offset), p])
+            except (TypeError, ValueError, IndexError):
+                continue
+        return result
 
     if fmt == "offset":
         # Already canonical – return a clean list of [float, float]
@@ -213,7 +241,7 @@ def migrate_power_data_to_offsets(cycle: dict[str, Any]) -> bool:
     if fmt in ("offset", "empty"):
         return False  # Already canonical
 
-    if fmt not in ("iso", "datetime"):
+    if fmt not in ("iso", "datetime", "unix_timestamp"):
         _LOGGER.warning(
             "migrate_power_data_to_offsets: unknown format '%s', skipping", fmt
         )

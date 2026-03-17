@@ -69,7 +69,7 @@
           "notify_actions": "اطلاعی کارروائیاں",
           "notify_people": "جب تک یہ لوگ گھر نہ ہوں ڈیلیوری میں تاخیر کریں۔",
           "notify_only_when_home": "نوٹیفیکیشن میں اس وقت تک تاخیر کریں جب تک کہ منتخب شخص گھر نہ ہو۔",
-          "notify_fire_events": "فائر آٹومیشن ایونٹس",
+          "notify_fire_events": "آٹومیشن ایونٹس فعال کریں",
           "notify_events": "مطلع کرنے کے لیے واقعات",
           "notify_before_end_minutes": "پیشگی تکمیل کی اطلاع (ختم ہونے سے چند منٹ پہلے)",
           "notify_title": "اطلاع کا عنوان",
@@ -80,7 +80,7 @@
           "show_advanced": "اعلی درجے کی ترتیبات میں ترمیم کریں (اگلا مرحلہ)"
         },
         "data_description": {
-          "apply_suggestions": "سیکھنے کے الگورتھم کے ذریعہ تجویز کردہ اقدار کو فارم میں کاپی کرنے کے لیے اس باکس کو چیک کریں۔ محفوظ کرنے سے پہلے جائزہ لیں۔\n\nتجویز کردہ (سیکھنے سے):\n- کم سے کم طاقت: {suggested_min_power} ڈبلیو\n- آف_دیری: {suggested_off_delay} سیکنڈ\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- خودکار_لیبل_اعتماد: {suggested_auto_label_confidence}\n- دورانیہ_رواداری: {suggested_duration_tolerance}\n- پروفائل_دورانیہ_رواداری: {suggested_profile_duration_tolerance}\n- پروفائل_میچ_منٹ_دوران_تناسب: {suggested_profile_match_min_duration_ratio}\n- پروفائل_میچ_زیادہ سے زیادہ_دورانیہ_تناسب: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- run_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "سیکھنے کے الگورتھم کے ذریعہ تجویز کردہ اقدار کو فارم میں کاپی کرنے کے لیے اس باکس کو چیک کریں۔ محفوظ کرنے سے پہلے جائزہ لیں۔\n\nتجویز کردہ (سیکھنے سے):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "آلات کی قسم منتخب کریں (واشنگ مشین، ڈرائر، ڈش واشر، کافی مشین، ای وی)۔ یہ ٹیگ بہتر تنظیم کے لیے ہر سائیکل کے ساتھ محفوظ کیا جاتا ہے۔",
           "power_sensor": "ریئل ٹائم پاور کی اطلاع دینے والا سینسر ادارہ (واٹ میں)۔ آپ اسے کسی بھی وقت تاریخی ڈیٹا کو کھونے کے بغیر تبدیل کر سکتے ہیں — اگر آپ سمارٹ پلگ تبدیل کرتے ہیں تو مفید ہے۔",
           "min_power": "اس حد سے اوپر پاور ریڈنگ (واٹ میں) اشارہ کرتی ہے کہ آلات چل رہا ہے۔ زیادہ تر آلات کے لیے 2W کے ساتھ شروع کریں۔",
@@ -107,7 +107,7 @@
           "notify_actions": "اطلاعی کارروائیاں",
           "notify_people": "جب تک یہ لوگ گھر نہ ہوں ڈیلیوری میں تاخیر کریں۔",
           "notify_only_when_home": "نوٹیفیکیشن میں اس وقت تک تاخیر کریں جب تک کہ منتخب شخص گھر نہ ہو۔",
-          "notify_fire_events": "فائر آٹومیشن ایونٹس",
+          "notify_fire_events": "آٹومیشن ایونٹس فعال کریں",
           "notify_events": "مطلع کرنے کے لیے واقعات",
           "notify_before_end_minutes": "پیشگی تکمیل کی اطلاع (ختم ہونے سے چند منٹ پہلے)",
           "notify_live_interval_seconds": "لائیو اپ ڈیٹ کا وقفہ (سیکنڈ)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "الٹا ٹرگر لاجک (ٹرگر آن آف)"
         },
         "data_description": {
-          "apply_suggestions": "سیکھنے کے الگورتھم سے تجویز کردہ اقدار کے لیے جائزہ لینے کا مرحلہ کھولنے کے لیے اس باکس کو چیک کریں۔ کچھ بھی خود بخود محفوظ نہیں ہوتا ہے۔\n\nتجویز کردہ (سیکھنے سے):\n- کم سے کم طاقت: {suggested_min_power} ڈبلیو\n- آف_دیری: {suggested_off_delay} سیکنڈ\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- خودکار_لیبل_اعتماد: {suggested_auto_label_confidence}\n- دورانیہ_رواداری: {suggested_duration_tolerance}\n- پروفائل_دورانیہ_رواداری: {suggested_profile_duration_tolerance}\n- پروفائل_میچ_منٹ_دوران_تناسب: {suggested_profile_match_min_duration_ratio}\n- پروفائل_میچ_زیادہ سے زیادہ_دورانیہ_تناسب: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- run_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "سیکھنے کے الگورتھم سے تجویز کردہ اقدار کے لیے جائزہ لینے کا مرحلہ کھولنے کے لیے اس باکس کو چیک کریں۔ کچھ بھی خود بخود محفوظ نہیں ہوتا ہے۔\n\nتجویز کردہ (سیکھنے سے):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "ایک سائیکل شروع کرنے کے لیے طاقت کو اس حد سے اوپر اٹھنا چاہیے۔ اپنی اسٹینڈ بائی پاور سے اونچا سیٹ کریں۔ ڈیفالٹ: min_power + 1 W",
           "stop_threshold_w": "ایک سائیکل کو ختم کرنے کے لیے طاقت کو اس حد سے نیچے آنا چاہیے۔ جھوٹے سروں کو متحرک کرنے والے شور سے بچنے کے لیے صفر سے بالکل اوپر سیٹ کریں۔ ڈیفالٹ: 0.6 * min_power۔",
           "min_off_gap": "اگر کوئی سائیکل پچھلے ایک ختم ہونے کے اتنے سیکنڈ کے اندر شروع ہوتا ہے، تو وہ ایک ہی چکر میں ضم ہو جائیں گے۔",
@@ -563,6 +563,34 @@
         "data": {
           "confirm_apply_suggestions": "اعلی درجے کی ترتیبات میں اسٹیج کی تجویز کردہ اقدار"
         }
+      },
+      "trim_cycle_select": {
+        "title": "ٹرم سائیکل - سائیکل کو منتخب کریں۔",
+        "description": "تراشنے کے لیے ایک سائیکل منتخب کریں۔ ✓ = مکمل، ⚠ = دوبارہ شروع، ✗ = رکاوٹ",
+        "data": {
+          "cycle_id": "سائیکل"
+        }
+      },
+      "trim_cycle": {
+        "title": "ٹرم سائیکل",
+        "description": "موجودہ ونڈو: {trim_summary}\n\n{trim_svg}",
+        "data": {
+          "action": "ایکشن"
+        }
+      },
+      "trim_cycle_start": {
+        "title": "ٹرم اسٹارٹ سیٹ کریں۔",
+        "description": "(0 = سائیکل شروع) سے ڈیٹا رکھنا شروع کرنے کے لیے آفسیٹ منٹ درج کریں۔",
+        "data": {
+          "trim_start_min": "شروع کریں (منٹ)"
+        }
+      },
+      "trim_cycle_end": {
+        "title": "ٹرم اینڈ سیٹ کریں۔",
+        "description": "ڈیٹا کو رکھنا بند کرنے کے لیے آفسیٹ منٹ درج کریں۔",
+        "data": {
+          "trim_end_min": "اختتام (منٹ)"
+        }
       }
     },
     "error": {
@@ -583,7 +611,9 @@
       "feedback_notification_title": "واش ڈیٹا: سائیکل کی تصدیق کریں ({device})",
       "feedback_notification_message": "**آلہ**: {device}\n**پروگرام**: {program} ({confidence}% اعتماد)\n**وقت**: {time}\n\nاس دریافت شدہ سائیکل کی توثیق کرنے کے لیے WashData کو آپ کی مدد کی ضرورت ہے۔\n\nاس نتیجے کی تصدیق یا درستگی کے لیے براہ کرم **سیٹنگز> ڈیوائسز اور سروسز> واش ڈیٹا> کنفیگر> لرننگ فیڈ بیکس** پر جائیں۔",
       "suggestions_ready_notification_title": "واش ڈیٹا: تجویز کردہ ترتیبات تیار ({device})",
-      "suggestions_ready_notification_message": "**تجویز کردہ ترتیبات** سینسر اب **{count}** قابل عمل تجاویز کی اطلاع دیتا ہے۔\n\nان کا جائزہ لینے اور لاگو کرنے کے لیے: ** سیٹنگز > ڈیوائسز اور سروسز > واش ڈیٹا > کنفیگر > ایڈوانسڈ سیٹنگز > اپلائی تجویز کردہ ویلیوز**۔\n\nتجاویز اختیاری ہیں اور محفوظ کرنے سے پہلے نظرثانی کے لیے دکھائی جاتی ہیں۔"
+      "suggestions_ready_notification_message": "**تجویز کردہ ترتیبات** سینسر اب **{count}** قابل عمل تجاویز کی اطلاع دیتا ہے۔\n\nان کا جائزہ لینے اور لاگو کرنے کے لیے: ** سیٹنگز > ڈیوائسز اور سروسز > واش ڈیٹا > کنفیگر > ایڈوانسڈ سیٹنگز > اپلائی تجویز کردہ ویلیوز**۔\n\nتجاویز اختیاری ہیں اور محفوظ کرنے سے پہلے نظرثانی کے لیے دکھائی جاتی ہیں۔",
+      "trim_range_invalid": "آغاز ختم ہونے سے پہلے ہونا چاہیے۔ براہ کرم اپنے ٹرم پوائنٹس کو ایڈجسٹ کریں۔",
+      "trim_failed": "تراشنا ناکام ہو گیا۔ ہو سکتا ہے کہ سائیکل اب موجود نہ ہو یا ونڈو خالی ہو۔"
     },
     "abort": {
       "no_cycles_found": "کوئی سائیکل نہیں ملا",
@@ -594,7 +624,8 @@
       "no_predictions": "کوئی پیشین گوئیاں نہیں۔",
       "no_custom_phases": "کوئی حسب ضرورت مراحل نہیں ملے۔",
       "reprocess_success": "کامیابی کے ساتھ {count} سائیکلوں پر دوبارہ عمل کیا گیا۔",
-      "debug_data_cleared": "{count} سائیکلوں سے ڈیبگ ڈیٹا کو کامیابی کے ساتھ صاف کر دیا گیا۔"
+      "debug_data_cleared": "{count} سائیکلوں سے ڈیبگ ڈیٹا کو کامیابی کے ساتھ صاف کر دیا گیا۔",
+      "no_power_data": "منتخب شدہ سائیکل کے لیے کوئی پاور ٹریس ڈیٹا دستیاب نہیں ہے۔"
     }
   },
   "selector": {
@@ -667,7 +698,10 @@
         "assign_phases_help": "رینجز کو شامل کرنے، ترمیم کرنے، حذف کرنے یا محفوظ کرنے کے لیے نیچے دی گئی کارروائیوں کا استعمال کریں۔",
         "profile_summary_header": "پروفائل کا خلاصہ",
         "recent_cycles_header": "حالیہ چکر",
-        "no_power_preview": "*پیش نظارہ کے لیے کوئی پاور ڈیٹا دستیاب نہیں ہے۔*"
+        "no_power_preview": "*پیش نظارہ کے لیے کوئی پاور ڈیٹا دستیاب نہیں ہے۔*",
+        "trim_cycle_preview_title": "سائیکل ٹرم کا پیش نظارہ",
+        "trim_cycle_preview_no_data": "اس سائیکل کے لیے کوئی پاور ڈیٹا دستیاب نہیں ہے۔",
+        "trim_cycle_preview_kept_suffix": "رکھا"
       }
     },
     "interactive_editor_action": {
@@ -695,9 +729,9 @@
       "options": {
         "auto_label_cycles": "پرانے سائیکلوں کو آٹو لیبل کریں۔",
         "select_cycle_to_label": "لیبل مخصوص سائیکل",
-        "select_cycle_to_label_multi": "ایک سے زیادہ سائیکلوں کو لیبل کریں۔",
         "select_cycle_to_delete": "سائیکل کو حذف کریں۔",
-        "interactive_editor": "انٹرایکٹو ایڈیٹر کو ضم/تقسیم کریں۔"
+        "interactive_editor": "انٹرایکٹو ایڈیٹر کو ضم/تقسیم کریں۔",
+        "trim_cycle": "ٹرم سائیکل ڈیٹا"
       }
     },
     "manage_profiles_action": {
@@ -755,6 +789,15 @@
       "options": {
         "name_phases": "نام کریں اور مراحل کا اطلاق کریں۔",
         "cancel": "بغیر کسی تبدیلی کے واپس جائیں۔"
+      }
+    },
+    "trim_cycle_action": {
+      "options": {
+        "set_start": "سٹارٹ پوائنٹ سیٹ کریں۔",
+        "set_end": "اختتامی نقطہ مقرر کریں۔",
+        "reset": "مکمل دورانیہ پر ری سیٹ کریں۔",
+        "apply": "ٹرم لگائیں۔",
+        "cancel": "منسوخ کریں۔"
       }
     }
   },
@@ -908,6 +951,28 @@
           "description": "ریکارڈنگ کو روکنے کے لیے واشنگ مشین کا آلہ۔"
         }
       }
+    },
+    "trim_cycle": {
+      "name": "ٹرم سائیکل",
+      "description": "ماضی کے سائیکل کے پاور ڈیٹا کو مخصوص ٹائم ونڈو میں ٹرم کریں۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "واش ڈیٹا ڈیوائس۔"
+        },
+        "cycle_id": {
+          "name": "سائیکل ID",
+          "description": "ٹرم کرنے کے لیے سائیکل کی ID۔"
+        },
+        "trim_start_s": {
+          "name": "ٹرم اسٹارٹ (سیکنڈ)",
+          "description": "اس آفسیٹ سے ڈیٹا کو سیکنڈوں میں رکھیں۔ ڈیفالٹ 0۔"
+        },
+        "trim_end_s": {
+          "name": "ٹرم اینڈ (سیکنڈ)",
+          "description": "ڈیٹا کو سیکنڈوں میں اس آفسیٹ تک رکھیں۔ ڈیفالٹ = پوری مدت۔"
+        }
+      }
     }
   },
   "entity": {
@@ -993,6 +1058,26 @@
       "force_end_cycle": {
         "name": "زبردستی اختتامی سائیکل"
       }
+    }
+  },
+  "exceptions": {
+    "device_not_found": {
+      "message": "آلہ نہیں ملا۔"
+    },
+    "no_config_entry": {
+      "message": "ڈیوائس کے لیے کوئی کنفیگریشن اندراج نہیں ملا۔"
+    },
+    "integration_not_loaded": {
+      "message": "انٹیگریشن اس ڈیوائس کے لیے لوڈ نہیں ہے۔"
+    },
+    "cycle_not_found_or_no_power": {
+      "message": "سائیکل نہیں ملا یا کوئی پاور ڈیٹا نہیں ہے۔"
+    },
+    "trim_failed_empty_window": {
+      "message": "ٹرم ناکام ہو گئی — سائیکل نہیں ملا، کوئی پاور ڈیٹا نہیں، یا نتیجے میں آنے والی ونڈو خالی ہے۔"
+    },
+    "trim_invalid_range": {
+      "message": "trim_end_s trim_start_s سے بڑا ہونا چاہیے۔"
     }
   }
 }
