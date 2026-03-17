@@ -283,7 +283,7 @@
       },
       "phase_catalog_create": {
         "title": "Benutzerdefinierte Phase erstellen",
-        "description": "Benutzerdefinierte Phasen erstellen und Gerätetyp zuweisen.",
+        "description": "Benutzerdefinierte Phase erstellen und Gerätetyp zuweisen.",
         "data": {
           "target_device_type": "Zielgerätetyp",
           "phase_name": "Phasenname",
