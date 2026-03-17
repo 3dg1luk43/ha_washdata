@@ -93,7 +93,7 @@
           "notify_events": "Acara mana yang pemberitahuannya harus dikirim.",
           "notify_before_end_minutes": "Beberapa menit sebelum perkiraan akhir siklus untuk memicu notifikasi. Setel ke 0 untuk menonaktifkan. Bawaan: 0.",
           "notify_title": "Judul khusus untuk notifikasi. Mendukung {device} pengganti.",
-          "notify_icon": "Ikon yang digunakan untuk notifikasi (misalnya mdi:mesin cuci). Biarkan kosong untuk menggunakan default.",
+          "notify_icon": "Ikon yang digunakan untuk notifikasi (misalnya mdi:mesin cuci). Biarkan kosong untuk mengirim tanpa ikon.",
           "notify_start_message": "Pesan dikirim ketika siklus dimulai. Mendukung {device} pengganti.",
           "notify_finish_message": "Pesan dikirim ketika siklus selesai. Mendukung placeholder {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Pesan dikirim sebelum selesai. Mendukung {device}, {minutes} placeholder."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Seberapa sering pembaruan kemajuan dikirim saat berjalan. Nilai yang lebih rendah lebih responsif tetapi menggunakan lebih banyak notifikasi. Minimum 30 detik diberlakukan — nilai di bawah 30 detik secara otomatis dibulatkan menjadi 30 detik.",
           "notify_live_overrun_percent": "Margin keamanan di atas perkiraan jumlah pembaruan untuk siklus yang panjang/berlebihan (misalnya 20% memungkinkan 1,2x perkiraan pembaruan).",
           "notify_title": "Judul khusus untuk notifikasi. Mendukung {device} pengganti.",
-          "notify_icon": "Ikon yang digunakan untuk notifikasi (misalnya mdi:mesin cuci). Biarkan kosong untuk menggunakan default.",
+          "notify_icon": "Ikon yang digunakan untuk notifikasi (misalnya mdi:mesin cuci). Biarkan kosong untuk mengirim tanpa ikon.",
           "notify_start_message": "Pesan dikirim ketika siklus dimulai. Mendukung {device} pengganti.",
           "notify_finish_message": "Pesan dikirim ketika siklus selesai. Mendukung placeholder {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Pesan dikirim sebelum selesai. Mendukung {device}, {minutes} placeholder."

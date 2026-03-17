@@ -93,7 +93,7 @@
           "notify_events": "Za koje događaje slati obavještenja.",
           "notify_before_end_minutes": "Nekoliko minuta prije procijenjenog kraja ciklusa za pokretanje obavještenja. Postavite na 0 da biste onemogućili. Podrazumevano: 0.",
           "notify_title": "Prilagođeni naslov za obavještenja. Podržava {device} čuvar mjesta.",
-          "notify_icon": "Ikona za korištenje za obavještenja (npr. mdi:washing-machine). Ostavite prazno da koristite zadanu vrijednost.",
+          "notify_icon": "Ikona za korištenje za obavještenja (npr. mdi:washing-machine). Ostavite prazno za slanje bez ikone.",
           "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava {device} čuvar mjesta.",
           "notify_finish_message": "Poruka se šalje kada se ciklus završi. Podržava {device}, {duration}, {program} čuvare mjesta.",
           "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Koliko često se ažuriranja napretka šalju tokom rada. Niže vrijednosti bolje reagiraju, ali troše više obavijesti. Primjenjuje se minimalno 30 sekundi — vrijednosti ispod 30 s se automatski zaokružuju na 30 s.",
           "notify_live_overrun_percent": "Sigurnosna margina iznad procijenjenog broja ažuriranja za duge cikluse/prekoračivanje (na primjer, 20% dozvoljava 1,2x procijenjenih ažuriranja).",
           "notify_title": "Prilagođeni naslov za obavještenja. Podržava {device} čuvar mjesta.",
-          "notify_icon": "Ikona za korištenje za obavještenja (npr. mdi:washing-machine). Ostavite prazno da koristite zadanu vrijednost.",
+          "notify_icon": "Ikona za korištenje za obavještenja (npr. mdi:washing-machine). Ostavite prazno za slanje bez ikone.",
           "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava {device} čuvar mjesta.",
           "notify_finish_message": "Poruka se šalje kada se ciklus završi. Podržava {device}, {duration}, {program} čuvare mjesta.",
           "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta."

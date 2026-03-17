@@ -100,7 +100,7 @@
           "notify_events": "Vilka händelser aviseringar ska skickas för.",
           "notify_before_end_minutes": "Minuter före det beräknade slutet av cykeln för att utlösa ett meddelande. Ställ in på 0 för att inaktivera. Standard: 0.",
           "notify_title": "Anpassad rubrik för aviseringar. Stöder platshållaren {device}.",
-          "notify_icon": "Ikon att använda för aviseringar (t.ex. mdi:washing-machine). Lämna tomt för att använda standard.",
+          "notify_icon": "Ikon att använda för aviseringar (t.ex. mdi:washing-machine). Lämna tomt för att skicka utan ikon.",
           "notify_start_message": "Meddelande som skickas när en cykel startar. Stöder platshållaren {device}.",
           "notify_finish_message": "Meddelande som skickas när en cykel är klar. Stöder platshållarna {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Meddelande som skickas innan slutförandet. Stöder platshållarna {device}, {minutes}."
@@ -136,7 +136,7 @@
           "notify_live_interval_seconds": "Hur ofta förloppsuppdateringar skickas under körning. Lägre värden är mer lyhörda men förbrukar fler aviseringar. Minst 30 sekunder tillämpas — värden under 30 s avrundas automatiskt uppåt till 30 s.",
           "notify_live_overrun_percent": "Säkerhetsmarginal över det uppskattade uppdateringsantalet för långa/överskridande cykler (t.ex. 20 % tillåter 1,2x uppskattade uppdateringar).",
           "notify_title": "Anpassad rubrik för aviseringar. Stöder platshållaren {device}.",
-          "notify_icon": "Ikon att använda för aviseringar (t.ex. mdi:washing-machine). Lämna tomt för att använda standard.",
+          "notify_icon": "Ikon att använda för aviseringar (t.ex. mdi:washing-machine). Lämna tomt för att skicka utan ikon.",
           "notify_start_message": "Meddelande som skickas när en cykel startar. Stöder platshållaren {device}.",
           "notify_finish_message": "Meddelande som skickas när en cykel är klar. Stöder platshållarna {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Meddelande som skickas innan slutförandet. Stöder platshållarna {device}, {minutes}."

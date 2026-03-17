@@ -93,7 +93,7 @@
           "notify_events": "Milliste sündmuste kohta teateid saata.",
           "notify_before_end_minutes": "Minutid enne tsükli hinnangulist lõppu, et käivitada teatis. Keelamiseks määrake 0. Vaikimisi: 0.",
           "notify_title": "Kohandatud pealkiri teatiste jaoks. Toetab kohatäidet {device}.",
-          "notify_icon": "Märguannete jaoks kasutatav ikoon (nt mdi:pesumasin). Vaikimisi kasutamiseks jätke tühjaks.",
+          "notify_icon": "Märguannete jaoks kasutatav ikoon (nt mdi:pesumasin). Ikooni saatmata jätmiseks jätke tühjaks.",
           "notify_start_message": "Sõnum saadetakse, kui tsükkel algab. Toetab kohatäidet {device}.",
           "notify_finish_message": "Sõnum saadetakse pärast tsükli lõppemist. Toetab kohahoidjaid {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Sõnum saadeti enne valmimist. Toetab kohahoidjaid {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Kui sageli edenemise värskendusi töötamise ajal saadetakse. Madalamad väärtused reageerivad paremini, kuid tarbivad rohkem märguandeid. Jõustatakse vähemalt 30 sekundit – alla 30 s väärtused ümardatakse automaatselt 30 sekundini.",
           "notify_live_overrun_percent": "Ohutusvaru, mis ületab hinnangulist värskenduste arvu pikkade/ülejooksvate tsüklite korral (näiteks 20% võimaldab 1,2-kordset hinnangulist värskendust).",
           "notify_title": "Kohandatud pealkiri teatiste jaoks. Toetab kohatäidet {device}.",
-          "notify_icon": "Märguannete jaoks kasutatav ikoon (nt mdi:pesumasin). Vaikimisi kasutamiseks jätke tühjaks.",
+          "notify_icon": "Märguannete jaoks kasutatav ikoon (nt mdi:pesumasin). Ikooni saatmata jätmiseks jätke tühjaks.",
           "notify_start_message": "Sõnum saadetakse, kui tsükkel algab. Toetab kohatäidet {device}.",
           "notify_finish_message": "Sõnum saadetakse pärast tsükli lõppemist. Toetab kohahoidjaid {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Sõnum saadeti enne valmimist. Toetab kohahoidjaid {device}, {minutes}."

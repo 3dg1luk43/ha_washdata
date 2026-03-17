@@ -93,7 +93,7 @@
           "notify_events": "通知を送信するイベントを選択します。",
           "notify_before_end_minutes": "サイクルの推定終了時刻の何分前に通知を発火するか。0に設定すると無効になります。デフォルト：0。",
           "notify_title": "通知のカスタムタイトル。{device} プレースホルダーに対応。",
-          "notify_icon": "通知に使用するアイコン（例：mdi:washing-machine）。空白にするとデフォルトを使用。",
+          "notify_icon": "通知に使用するアイコン（例：mdi:washing-machine）。空白にするとアイコンなしで送信。",
           "notify_start_message": "サイクル開始時に送信されるメッセージ。{device} プレースホルダーに対応。",
           "notify_finish_message": "サイクル終了時に送信されるメッセージ。{device}、{duration}、{program} プレースホルダーに対応。",
           "notify_pre_complete_message": "完了前に送信されるメッセージ。{device}、{minutes} プレースホルダーに対応。"
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "動作中に進捗更新を送信する頻度。値が小さいほどレスポンシブですが、通知数が増えます。最低30秒が適用されます — 30秒未満の値は自動的に30秒に切り上げられます。",
           "notify_live_overrun_percent": "長時間・超過したサイクルに対する推定更新数の余裕マージン（例：20%で推定の1.2倍の更新が許可されます）。",
           "notify_title": "通知のカスタムタイトル。{device} プレースホルダーに対応。",
-          "notify_icon": "通知に使用するアイコン（例：mdi:washing-machine）。空白にするとデフォルトを使用。",
+          "notify_icon": "通知に使用するアイコン（例：mdi:washing-machine）。空白にするとアイコンなしで送信。",
           "notify_start_message": "サイクル開始時に送信されるメッセージ。{device} プレースホルダーに対応。",
           "notify_finish_message": "サイクル終了時に送信されるメッセージ。{device}、{duration}、{program} プレースホルダーに対応。",
           "notify_pre_complete_message": "完了前に送信されるメッセージ。{device}、{minutes} プレースホルダーに対応。"

@@ -93,7 +93,7 @@
           "notify_events": "Par kuriem notikumiem sūtīt paziņojumus.",
           "notify_before_end_minutes": "Minūtes pirms paredzamā cikla beigām, lai aktivizētu paziņojumu. Iestatiet uz 0, lai atspējotu. Noklusējums: 0.",
           "notify_title": "Paziņojumu pielāgots nosaukums. Atbalsta vietturi {device}.",
-          "notify_icon": "Paziņojumiem izmantojamā ikona (piemēram, mdi:veļas mašīna). Atstājiet tukšu, lai izmantotu noklusējumu.",
+          "notify_icon": "Paziņojumiem izmantojamā ikona (piemēram, mdi:veļas mašīna). Atstājiet tukšu, lai sūtītu bez ikonas.",
           "notify_start_message": "Ziņojums nosūtīts, kad sākas cikls. Atbalsta vietturi {device}.",
           "notify_finish_message": "Ziņojums nosūtīts, kad cikls beidzas. Atbalsta vietturus {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Ziņa nosūtīta pirms pabeigšanas. Atbalsta vietturi {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Cik bieži darbības laikā tiek nosūtīti progresa atjauninājumi. Zemākas vērtības ir atsaucīgākas, taču patērē vairāk paziņojumu. Tiek ieviests vismaz 30 s — vērtības, kas ir mazākas par 30 s, tiek automātiski noapaļotas līdz 30 s.",
           "notify_live_overrun_percent": "Drošības rezerve pārsniedz aptuveno atjauninājumu skaitu gariem/pārsniegšanas cikliem (piemēram, 20% pieļauj 1,2 reizes aptuveno atjauninājumu skaitu).",
           "notify_title": "Paziņojumu pielāgots nosaukums. Atbalsta vietturi {device}.",
-          "notify_icon": "Paziņojumiem izmantojamā ikona (piemēram, mdi:veļas mašīna). Atstājiet tukšu, lai izmantotu noklusējumu.",
+          "notify_icon": "Paziņojumiem izmantojamā ikona (piemēram, mdi:veļas mašīna). Atstājiet tukšu, lai sūtītu bez ikonas.",
           "notify_start_message": "Ziņojums nosūtīts, kad sākas cikls. Atbalsta vietturi {device}.",
           "notify_finish_message": "Ziņojums nosūtīts, kad cikls beidzas. Atbalsta vietturus {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Ziņa nosūtīta pirms pabeigšanas. Atbalsta vietturi {device}, {minutes}."

@@ -93,7 +93,7 @@
           "notify_events": "Za katere dogodke poslati obvestila.",
           "notify_before_end_minutes": "Minute pred predvidenim koncem cikla za sprožitev obvestila. Nastavite na 0, da onemogočite. Privzeto: 0.",
           "notify_title": "Naslov po meri za obvestila. Podpira nadomestni znak {device}.",
-          "notify_icon": "Ikona za uporabo pri obvestilih (npr. mdi:washing-machine). Pustite prazno za privzeto.",
+          "notify_icon": "Ikona za uporabo pri obvestilih (npr. mdi:washing-machine). Pustite prazno za pošiljanje brez ikone.",
           "notify_start_message": "Sporočilo, poslano ob začetku cikla. Podpira nadomestni znak {device}.",
           "notify_finish_message": "Sporočilo, poslano, ko se cikel konča. Podpira nadomestne znake {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Sporočilo, poslano pred dokončanjem. Podpira nadomestne znake {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Kako pogosto se pošiljajo posodobitve napredka med delovanjem. Nižje vrednosti so bolj odzivne, vendar porabijo več obvestil. Velja najmanj 30 sekund — vrednosti pod 30 s se samodejno zaokrožijo na 30 s.",
           "notify_live_overrun_percent": "Varnostna meja nad ocenjenim številom posodobitev za dolge/prekoračljive cikle (na primer 20 % omogoča 1,2-kratno ocenjeno posodobitev).",
           "notify_title": "Naslov po meri za obvestila. Podpira nadomestni znak {device}.",
-          "notify_icon": "Ikona za uporabo pri obvestilih (npr. mdi:washing-machine). Pustite prazno za privzeto.",
+          "notify_icon": "Ikona za uporabo pri obvestilih (npr. mdi:washing-machine). Pustite prazno za pošiljanje brez ikone.",
           "notify_start_message": "Sporočilo, poslano ob začetku cikla. Podpira nadomestni znak {device}.",
           "notify_finish_message": "Sporočilo, poslano, ko se cikel konča. Podpira nadomestne znake {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Sporočilo, poslano pred dokončanjem. Podpira nadomestne znake {device}, {minutes}."

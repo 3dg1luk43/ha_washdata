@@ -93,7 +93,7 @@
           "notify_events": "Per quali eventi inviare le notifiche.",
           "notify_before_end_minutes": "Minuti prima della fine stimata del ciclo per attivare una notifica. Imposta su 0 per disabilitare. Predefinito: 0.",
           "notify_title": "Titolo personalizzato per le notifiche. Supporta il segnaposto {device}.",
-          "notify_icon": "Icona da usare per le notifiche (es. mdi:washing-machine). Lascia vuoto per usare il valore predefinito.",
+          "notify_icon": "Icona da usare per le notifiche (es. mdi:washing-machine). Lascia vuoto per inviare senza icona.",
           "notify_start_message": "Messaggio inviato all'avvio di un ciclo. Supporta il segnaposto {device}.",
           "notify_finish_message": "Messaggio inviato al termine di un ciclo. Supporta i segnaposto {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Messaggio inviato prima del completamento. Supporta i segnaposto {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Con quale frequenza vengono inviati gli aggiornamenti sull'avanzamento durante l'esecuzione. Valori più bassi sono più reattivi ma consumano più notifiche. È applicato un minimo di 30 secondi — i valori inferiori a 30 s vengono arrotondati automaticamente a 30 s.",
           "notify_live_overrun_percent": "Margine di sicurezza oltre il conteggio stimato degli aggiornamenti per cicli lunghi o in ritardo (ad esempio il 20% consente 1,2x aggiornamenti stimati).",
           "notify_title": "Titolo personalizzato per le notifiche. Supporta il segnaposto {device}.",
-          "notify_icon": "Icona da usare per le notifiche (es. mdi:washing-machine). Lascia vuoto per usare il valore predefinito.",
+          "notify_icon": "Icona da usare per le notifiche (es. mdi:washing-machine). Lascia vuoto per inviare senza icona.",
           "notify_start_message": "Messaggio inviato all'avvio di un ciclo. Supporta il segnaposto {device}.",
           "notify_finish_message": "Messaggio inviato al termine di un ciclo. Supporta i segnaposto {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Messaggio inviato prima del completamento. Supporta i segnaposto {device}, {minutes}."

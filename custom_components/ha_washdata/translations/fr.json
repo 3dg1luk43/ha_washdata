@@ -93,7 +93,7 @@
           "notify_events": "Pour quels événements envoyer des notifications.",
           "notify_before_end_minutes": "Quelques minutes avant la fin estimée du cycle pour déclencher une notification. Réglez sur 0 pour désactiver. Par défaut : 0.",
           "notify_title": "Titre personnalisé pour les notifications. Prend en charge l'espace réservé {device}.",
-          "notify_icon": "Icône à utiliser pour les notifications (par exemple mdi:washing-machine). Laissez vide pour utiliser la valeur par défaut.",
+          "notify_icon": "Icône à utiliser pour les notifications (par exemple mdi:washing-machine). Laissez vide pour envoyer sans icône.",
           "notify_start_message": "Message envoyé au démarrage d'un cycle. Prend en charge l'espace réservé {device}.",
           "notify_finish_message": "Message envoyé lorsqu'un cycle se termine. Prend en charge les espaces réservés {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Message envoyé avant la fin. Prend en charge les espaces réservés {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "À quelle fréquence les mises à jour de progression sont envoyées pendant l'exécution. Les valeurs inférieures sont plus réactives mais consomment plus de notifications. Un minimum de 30 secondes est appliqué — les valeurs inférieures à 30 s sont automatiquement arrondies à 30 s.",
           "notify_live_overrun_percent": "Marge de sécurité au-dessus du nombre de mises à jour estimé pour les cycles longs/dépassants (par exemple, 20 % autorisent 1,2 fois les mises à jour estimées).",
           "notify_title": "Titre personnalisé pour les notifications. Prend en charge l'espace réservé {device}.",
-          "notify_icon": "Icône à utiliser pour les notifications (par exemple mdi:washing-machine). Laissez vide pour utiliser la valeur par défaut.",
+          "notify_icon": "Icône à utiliser pour les notifications (par exemple mdi:washing-machine). Laissez vide pour envoyer sans icône.",
           "notify_start_message": "Message envoyé au démarrage d'un cycle. Prend en charge l'espace réservé {device}.",
           "notify_finish_message": "Message envoyé lorsqu'un cycle se termine. Prend en charge les espaces réservés {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Message envoyé avant la fin. Prend en charge les espaces réservés {device}, {minutes}."

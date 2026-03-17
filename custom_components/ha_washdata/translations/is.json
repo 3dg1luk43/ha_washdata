@@ -93,7 +93,7 @@
           "notify_events": "Hvaða atburði á að senda tilkynningar um.",
           "notify_before_end_minutes": "Mínútum fyrir áætlaðan lok lotunnar til að kalla fram tilkynningu. Stilltu á 0 til að slökkva á. Sjálfgefið: 0.",
           "notify_title": "Sérsniðinn titill fyrir tilkynningar. Styður {device} staðgengil.",
-          "notify_icon": "Tákn til að nota fyrir tilkynningar (t.d. mdi: þvottavél). Skildu eftir tómt til að nota sjálfgefið.",
+          "notify_icon": "Tákn til að nota fyrir tilkynningar (t.d. mdi: þvottavél). Skildu eftir tómt til að senda án tákns.",
           "notify_start_message": "Skilaboð send þegar hringrás byrjar. Styður {device} staðgengil.",
           "notify_finish_message": "Skilaboð send þegar lotu lýkur. Styður {device}, {duration}, {program} staðgengla.",
           "notify_pre_complete_message": "Skilaboð send áður en þeim er lokið. Styður {device}, {minutes} staðgengla."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Hversu oft framvinduuppfærslur eru sendar meðan þær eru í gangi. Lægri gildi svara betur en neyta fleiri tilkynninga. Að lágmarki 30 sekúndum er framfylgt — gildi undir 30 sekúndum eru sjálfkrafa námunduð upp í 30 sek.",
           "notify_live_overrun_percent": "Öryggismörk yfir áætlaðri uppfærslutölu fyrir langa/framkeyrandi lotur (til dæmis leyfa 20% 1,2x áætlaðar uppfærslur).",
           "notify_title": "Sérsniðinn titill fyrir tilkynningar. Styður {device} staðgengil.",
-          "notify_icon": "Tákn til að nota fyrir tilkynningar (t.d. mdi: þvottavél). Skildu eftir tómt til að nota sjálfgefið.",
+          "notify_icon": "Tákn til að nota fyrir tilkynningar (t.d. mdi: þvottavél). Skildu eftir tómt til að senda án tákns.",
           "notify_start_message": "Skilaboð send þegar hringrás byrjar. Styður {device} staðgengil.",
           "notify_finish_message": "Skilaboð send þegar lotu lýkur. Styður {device}, {duration}, {program} staðgengla.",
           "notify_pre_complete_message": "Skilaboð send áður en þeim er lokið. Styður {device}, {minutes} staðgengla."

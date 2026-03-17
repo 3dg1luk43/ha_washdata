@@ -93,7 +93,7 @@
           "notify_events": "Mistä tapahtumista lähetetään ilmoituksia.",
           "notify_before_end_minutes": "Minuuttia ennen jakson arvioitua loppua ilmoituksen käynnistämiseksi. Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 0.",
           "notify_title": "Mukautettu otsikko ilmoituksille. Tukee paikkamerkkiä {device}.",
-          "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi käyttääksesi oletusarvoa.",
+          "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi lähettääksesi ilman kuvaketta.",
           "notify_start_message": "Viesti lähetetään, kun sykli alkaa. Tukee paikkamerkkiä {device}.",
           "notify_finish_message": "Viesti lähetetään, kun jakso on päättynyt. Tukee paikkamerkkejä {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Viesti lähetetty ennen valmistumista. Tukee paikkamerkkejä {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Kuinka usein edistymispäivityksiä lähetetään suorituksen aikana. Pienemmät arvot reagoivat paremmin, mutta kuluttavat enemmän ilmoituksia. Vähintään 30 sekuntia pakotetaan – alle 30 sekuntia olevat arvot pyöristetään automaattisesti 30 sekuntiin.",
           "notify_live_overrun_percent": "Turvamarginaali yli arvioidut päivitysmäärät pitkille/ylitysjaksoille (esimerkiksi 20 % sallii 1,2-kertaiset arvioidut päivitykset).",
           "notify_title": "Mukautettu otsikko ilmoituksille. Tukee paikkamerkkiä {device}.",
-          "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi käyttääksesi oletusarvoa.",
+          "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi lähettääksesi ilman kuvaketta.",
           "notify_start_message": "Viesti lähetetään, kun sykli alkaa. Tukee paikkamerkkiä {device}.",
           "notify_finish_message": "Viesti lähetetään, kun jakso on päättynyt. Tukee paikkamerkkejä {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Viesti lähetetty ennen valmistumista. Tukee paikkamerkkejä {device}, {minutes}."

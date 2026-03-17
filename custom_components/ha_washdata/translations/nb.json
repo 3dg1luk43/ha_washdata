@@ -93,7 +93,7 @@
           "notify_events": "Hvilke hendelser du skal sende varsler om.",
           "notify_before_end_minutes": "Minutter før beregnet slutt på syklusen for å utløse et varsel. Sett til 0 for å deaktivere. Standard: 0.",
           "notify_title": "Egendefinert tittel for varsler. Støtter {device} plassholder.",
-          "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å bruke standard.",
+          "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å sende uten ikon.",
           "notify_start_message": "Melding sendt når en syklus starter. Støtter {device} plassholder.",
           "notify_finish_message": "Melding sendt når en syklus er ferdig. Støtter {device}, {duration}, {program} plassholdere.",
           "notify_pre_complete_message": "Melding sendt før ferdigstillelse. Støtter {device}, {minutes} plassholdere."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Hvor ofte fremdriftsoppdateringer sendes mens du kjører. Lavere verdier er mer responsive, men bruker flere varsler. Minimum 30 sekunder håndheves – verdier under 30 s rundes automatisk av opp til 30 s.",
           "notify_live_overrun_percent": "Sikkerhetsmargin over det estimerte oppdateringsantallet for lange/overløpende sykluser (for eksempel tillater 20 % 1,2x estimerte oppdateringer).",
           "notify_title": "Egendefinert tittel for varsler. Støtter {device} plassholder.",
-          "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å bruke standard.",
+          "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å sende uten ikon.",
           "notify_start_message": "Melding sendt når en syklus starter. Støtter {device} plassholder.",
           "notify_finish_message": "Melding sendt når en syklus er ferdig. Støtter {device}, {duration}, {program} plassholdere.",
           "notify_pre_complete_message": "Melding sendt før ferdigstillelse. Støtter {device}, {minutes} plassholdere."

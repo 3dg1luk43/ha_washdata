@@ -93,7 +93,7 @@
           "notify_events": "Pentru ce evenimente să trimiteți notificări.",
           "notify_before_end_minutes": "Cu câte minute înainte de sfârșitul estimat al ciclului pentru a declanșa o notificare. Setați la 0 pentru a dezactiva. Implicit: 0.",
           "notify_title": "Titlu personalizat pentru notificări. Acceptă substituentul {device}.",
-          "notify_icon": "Pictogramă de utilizat pentru notificări (de exemplu, mdi:washing-machine). Lăsați gol pentru a utiliza implicit.",
+          "notify_icon": "Pictogramă de utilizat pentru notificări (de exemplu, mdi:washing-machine). Lăsați gol pentru a trimite fără pictogramă.",
           "notify_start_message": "Mesaj trimis când începe un ciclu. Acceptă substituentul {device}.",
           "notify_finish_message": "Mesaj trimis când un ciclu se termină. Acceptă substituenții {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Mesaj trimis înainte de finalizare. Acceptă substituenții {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Cât de des sunt trimise actualizările de progres în timpul funcționării. Valorile mai mici sunt mai receptive, dar consumă mai multe notificări. Este impus un minim de 30 de secunde — valorile sub 30s sunt rotunjite automat la 30s.",
           "notify_live_overrun_percent": "Marja de siguranță peste numărul estimat de actualizări pentru cicluri lungi/depășite (de exemplu, 20% permite de 1,2 ori actualizările estimate).",
           "notify_title": "Titlu personalizat pentru notificări. Acceptă substituentul {device}.",
-          "notify_icon": "Pictogramă de utilizat pentru notificări (de exemplu, mdi:washing-machine). Lăsați gol pentru a utiliza implicit.",
+          "notify_icon": "Pictogramă de utilizat pentru notificări (de exemplu, mdi:washing-machine). Lăsați gol pentru a trimite fără pictogramă.",
           "notify_start_message": "Mesaj trimis când începe un ciclu. Acceptă substituentul {device}.",
           "notify_finish_message": "Mesaj trimis când un ciclu se termină. Acceptă substituenții {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Mesaj trimis înainte de finalizare. Acceptă substituenții {device}, {minutes}."

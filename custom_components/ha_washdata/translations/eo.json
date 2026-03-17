@@ -100,7 +100,7 @@
           "notify_events": "Por kiuj eventoj sendi sciigojn.",
           "notify_before_end_minutes": "Minutoj antaŭ la laŭtaksa fino de la ciklo por ekigi sciigon. Agordu al 0 por malŝalti. Defaŭlte: 0.",
           "notify_title": "Propra titolo por sciigoj. Subtenas {device} lokanombron.",
-          "notify_icon": "Piktogramo por sciigoj (ekz. mdi:washing-machine). Lasu malplena por uzi la defaŭltan.",
+          "notify_icon": "Piktogramo por sciigoj (ekz. mdi:washing-machine). Lasu malplena por sendi sen piktogramo.",
           "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokanombron.",
           "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program} lokanombrojn.",
           "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn."
@@ -136,7 +136,7 @@
           "notify_live_interval_seconds": "Kiom ofte progresaj ĝisdatigoj estas senditaj dum funkciado. Pli malaltaj valoroj estas pli respondemaj sed konsumas pli da sciigoj. Minimume 30 sekundoj estas devigita — valoroj sub 30s aŭtomate rondiĝas al 30s.",
           "notify_live_overrun_percent": "Sekureca marĝeno super la laŭtaksa ĝisdatiga kalkulo por longaj/superkurantaj cikloj (ekzemple 20% permesas 1.2x laŭtaksajn ĝisdatigojn).",
           "notify_title": "Propra titolo por sciigoj. Subtenas {device} lokanombron.",
-          "notify_icon": "Piktogramo por sciigoj (ekz. mdi:washing-machine). Lasu malplena por uzi la defaŭltan.",
+          "notify_icon": "Piktogramo por sciigoj (ekz. mdi:washing-machine). Lasu malplena por sendi sen piktogramo.",
           "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokanombron.",
           "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program} lokanombrojn.",
           "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn."

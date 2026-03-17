@@ -93,7 +93,7 @@
           "notify_events": "要发送通知的事件。",
           "notify_before_end_minutes": "触发通知的预计周期结束前的分钟数。设置为 0 以禁用。默认值：0。",
           "notify_title": "通知的自定义标题。支持 {device} 占位符。",
-          "notify_icon": "用于通知的图标（例如 mdi：洗衣机）。留空以使用默认值。",
+          "notify_icon": "用于通知的图标（例如 mdi：洗衣机）。留空以不发送图标。",
           "notify_start_message": "循环开始时发送的消息。支持 {device} 占位符。",
           "notify_finish_message": "循环结束时发送的消息。支持 {device}、{duration}、{program} 占位符。",
           "notify_pre_complete_message": "消息在完成之前发送。支持 {device}、{minutes} 占位符。"
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "运行时发送进度更新的频率。值越低，响应速度越快，但会消耗更多通知。强制执行至少 30 秒 - 低于 30 秒的值将自动四舍五入为 30 秒。",
           "notify_live_overrun_percent": "安全裕度高于长/超出周期的估计更新计数（例如 20% 允许 1.2 倍估计更新）。",
           "notify_title": "通知的自定义标题。支持 {device} 占位符。",
-          "notify_icon": "用于通知的图标（例如 mdi：洗衣机）。留空以使用默认值。",
+          "notify_icon": "用于通知的图标（例如 mdi：洗衣机）。留空以不发送图标。",
           "notify_start_message": "循环开始时发送的消息。支持 {device} 占位符。",
           "notify_finish_message": "循环结束时发送的消息。支持 {device}、{duration}、{program} 占位符。",
           "notify_pre_complete_message": "消息在完成之前发送。支持 {device}、{minutes} 占位符。"

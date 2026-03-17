@@ -93,7 +93,7 @@
           "notify_events": "Para que eventos enviar notificacións.",
           "notify_before_end_minutes": "Minutos antes do final estimado do ciclo para activar unha notificación. Establécese en 0 para desactivar. Por defecto: 0.",
           "notify_title": "Título personalizado para notificacións. Admite o marcador de posición {device}.",
-          "notify_icon": "Icona para usar para notificacións (por exemplo, mdi:washing-machine). Deixa en branco para usar o predeterminado.",
+          "notify_icon": "Icona para usar para notificacións (por exemplo, mdi:washing-machine). Deixa en branco para enviar sen icona.",
           "notify_start_message": "Mensaxe enviada cando comeza un ciclo. Admite o marcador de posición {device}.",
           "notify_finish_message": "Mensaxe enviada cando remata un ciclo. Admite os marcadores de posición {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite os marcadores de posición {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Con que frecuencia se envían as actualizacións de progreso durante a execución. Os valores máis baixos responden máis pero consomen máis notificacións. Aplícase un mínimo de 30 segundos; os valores inferiores a 30 s redondéanse automaticamente a 30 s.",
           "notify_live_overrun_percent": "A marxe de seguridade por riba do reconto de actualizacións estimado para ciclos longos ou superados (por exemplo, un 20 % permite actualizacións 1,2 veces estimadas).",
           "notify_title": "Título personalizado para notificacións. Admite o marcador de posición {device}.",
-          "notify_icon": "Icona para usar para notificacións (por exemplo, mdi:washing-machine). Deixa en branco para usar o predeterminado.",
+          "notify_icon": "Icona para usar para notificacións (por exemplo, mdi:washing-machine). Deixa en branco para enviar sen icona.",
           "notify_start_message": "Mensaxe enviada cando comeza un ciclo. Admite o marcador de posición {device}.",
           "notify_finish_message": "Mensaxe enviada cando remata un ciclo. Admite os marcadores de posición {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite os marcadores de posición {device}, {minutes}."

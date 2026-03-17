@@ -93,7 +93,7 @@
           "notify_events": "Những sự kiện nào cần gửi thông báo.",
           "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
           "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
-          "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để sử dụng mặc định.",
+          "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để gửi không có biểu tượng.",
           "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
           "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Tần suất cập nhật tiến độ được gửi trong khi chạy. Giá trị thấp hơn phản hồi nhanh hơn nhưng tiêu thụ nhiều thông báo hơn. Tối thiểu 30 giây được thực thi — các giá trị dưới 30 giây sẽ tự động được làm tròn thành 30 giây.",
           "notify_live_overrun_percent": "Biên độ an toàn cao hơn số lượng cập nhật ước tính cho các chu kỳ dài/chạy quá mức (ví dụ: 20% cho phép cập nhật ước tính gấp 1,2 lần).",
           "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
-          "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để sử dụng mặc định.",
+          "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để gửi không có biểu tượng.",
           "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
           "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}."

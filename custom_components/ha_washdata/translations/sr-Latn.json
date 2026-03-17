@@ -93,7 +93,7 @@
           "notify_events": "Za koje događaje slati obaveštenja.",
           "notify_before_end_minutes": "Nekoliko minuta pre predviđenog kraja ciklusa za pokretanje obaveštenja. Postavi na 0 da onemogućiš. Podrazumevano: 0.",
           "notify_title": "Prilagođeni naslov za obaveštenja. Podržava {device} čuvar mesta.",
-          "notify_icon": "Ikona za korišćenje u obaveštenjima (npr. mdi:washing-machine). Ostavi praznim da koristiš podrazumevano.",
+          "notify_icon": "Ikona za korišćenje u obaveštenjima (npr. mdi:washing-machine). Ostavi praznim da pošalješ bez ikone.",
           "notify_start_message": "Poruka koja se šalje kada ciklus počne. Podržava {device} čuvar mesta.",
           "notify_finish_message": "Poruka koja se šalje kada se ciklus završi. Podržava čuvare mesta {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Poruka poslata pre završetka. Podržava {device}, {minutes} čuvare mesta."
@@ -129,7 +129,7 @@
           "notify_live_interval_seconds": "Koliko često se ažuriranja napretka šalju tokom rada. Niže vrednosti bolje reaguju, ali troše više obaveštenja. Primenjuje se minimum od 30 sekundi — vrednosti ispod 30s se automatski zaokružuju na 30s.",
           "notify_live_overrun_percent": "Sigurnosna granica iznad procenjenog broja ažuriranja za duge cikluse/cikluse prekoračenja (na primer, 20% dozvoljava 1,2× procenjenih ažuriranja).",
           "notify_title": "Prilagođeni naslov za obaveštenja. Podržava {device} čuvar mesta.",
-          "notify_icon": "Ikona za korišćenje u obaveštenjima (npr. mdi:washing-machine). Ostavi praznim da koristiš podrazumevano.",
+          "notify_icon": "Ikona za korišćenje u obaveštenjima (npr. mdi:washing-machine). Ostavi praznim da pošalješ bez ikone.",
           "notify_start_message": "Poruka koja se šalje kada ciklus počne. Podržava {device} čuvar mesta.",
           "notify_finish_message": "Poruka koja se šalje kada se ciklus završi. Podržava čuvare mesta {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Poruka poslata pre završetka. Podržava {device}, {minutes} čuvare mesta."
