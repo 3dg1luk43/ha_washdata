@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Pengaturan",
-        "description": "Sesuaikan ambang deteksi, pembelajaran, dan perilaku tingkat lanjut. Default berfungsi dengan baik untuk sebagian besar pengaturan.",
+        "description": "Sesuaikan ambang deteksi, pembelajaran, dan perilaku tingkat lanjut. Default berfungsi dengan baik untuk sebagian besar pengaturan.\n\nPengaturan yang disarankan saat ini tersedia: {suggestions_count}.\nJika angka ini di atas 0, buka Pengaturan Lanjutan dan gunakan 'Terapkan Nilai yang Disarankan' untuk meninjau rekomendasi.",
         "data": {
           "apply_suggestions": "Terapkan Nilai yang Disarankan",
           "device_type": "Jenis Perangkat",
@@ -69,7 +69,7 @@
           "notify_actions": "Tindakan Pemberitahuan",
           "notify_people": "Tunda Pengiriman Sampai Orang-Orang Ini Pulang",
           "notify_only_when_home": "Tunda Pemberitahuan Hingga Orang Terpilih Ada di Rumah",
-          "notify_fire_events": "Acara Otomasi Kebakaran",
+          "notify_fire_events": "Aktifkan Acara Otomasi",
           "notify_events": "Acara untuk Diberitahukan",
           "notify_before_end_minutes": "Pemberitahuan Pra-penyelesaian (menit sebelum akhir)",
           "notify_title": "Judul Pemberitahuan",
@@ -80,7 +80,7 @@
           "show_advanced": "Edit Pengaturan Lanjutan (Langkah Berikutnya)"
         },
         "data_description": {
-          "apply_suggestions": "Centang kotak ini untuk menyalin nilai yang disarankan oleh algoritma pembelajaran ke dalam formulir. Tinjau sebelum menyimpan.\n\nDisarankan (dari pembelajaran):\n- daya_min: {suggested_min_power}W\n- off_delay: {suggested_off_delay} dtk\n- interval_anjing penjaga: {suggested_watchdog_interval} dtk\n- no_update_active_timeout: {suggested_no_update_active_timeout} dtk\n- profile_match_interval: {suggested_profile_match_interval} dtk\n- label_keyakinan_otomatis: {suggested_auto_label_confidence}\n- durasi_toleransi: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- rasio_durasi_min_pertandingan_profil: {suggested_profile_match_min_duration_ratio}\n- rasio_durasi_maks_pertandingan_profil: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- ambang_energi_akhir: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} dtk\n{suggested_reason}",
+          "apply_suggestions": "Centang kotak ini untuk menyalin nilai yang disarankan oleh algoritma pembelajaran ke dalam formulir. Tinjau sebelum menyimpan.\n\nDisarankan (dari pembelajaran):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Pilih jenis peralatan (Mesin Cuci, Pengering, Mesin Pencuci Piring, Mesin Kopi, EV). Tag ini disimpan pada setiap siklus untuk pengorganisasian yang lebih baik.",
           "power_sensor": "Entitas sensor melaporkan daya secara real-time (dalam watt). Anda dapat mengubahnya kapan saja tanpa kehilangan data historis—berguna jika Anda mengganti smart plug.",
           "min_power": "Pembacaan daya di atas ambang batas ini (dalam watt) menunjukkan alat sedang bekerja. Mulailah dengan 2W untuk sebagian besar perangkat.",
@@ -107,7 +107,7 @@
           "notify_actions": "Tindakan Pemberitahuan",
           "notify_people": "Tunda Pengiriman Sampai Orang-Orang Ini Pulang",
           "notify_only_when_home": "Tunda Pemberitahuan Hingga Orang Terpilih Ada di Rumah",
-          "notify_fire_events": "Acara Otomasi Kebakaran",
+          "notify_fire_events": "Aktifkan Acara Otomasi",
           "notify_events": "Acara untuk Diberitahukan",
           "notify_before_end_minutes": "Pemberitahuan Pra-penyelesaian (menit sebelum akhir)",
           "notify_live_interval_seconds": "Interval Pembaruan Langsung (detik)",
@@ -168,7 +168,7 @@
           "completion_min_seconds": "Waktu Proses Minimum Penyelesaian (detik)",
           "notify_before_end_minutes": "Pemberitahuan Pra-penyelesaian (menit sebelum akhir)",
           "auto_tune_noise_events_threshold": "Penyetelan Otomatis: Ambang Batas Peristiwa Kebisingan",
-          "running_dead_zone": "Menjalankan Zona Mati (detik)",
+          "running_dead_zone": "Zona Mati Awal Siklus (detik)",
           "end_repeat_count": "Akhir Pengulangan Hitungan",
           "start_energy_threshold": "Mulai Gerbang Energi (Wh)",
           "end_energy_threshold": "Gerbang Energi Akhir (Wh)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Pembalikan Logika Pemicu (Pemicu dalam keadaan MATI)"
         },
         "data_description": {
-          "apply_suggestions": "Centang kotak ini untuk membuka langkah peninjauan nilai yang disarankan dari algoritma pembelajaran. Tidak ada yang disimpan secara otomatis.\n\nDisarankan (dari pembelajaran):\n- daya_min: {suggested_min_power}W\n- off_delay: {suggested_off_delay} dtk\n- interval_anjing penjaga: {suggested_watchdog_interval} dtk\n- no_update_active_timeout: {suggested_no_update_active_timeout} dtk\n- profile_match_interval: {suggested_profile_match_interval} dtk\n- label_keyakinan_otomatis: {suggested_auto_label_confidence}\n- durasi_toleransi: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- rasio_durasi_min_pertandingan_profil: {suggested_profile_match_min_duration_ratio}\n- rasio_durasi_maks_pertandingan_profil: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- ambang_energi_akhir: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} dtk\n{suggested_reason}",
+          "apply_suggestions": "Centang kotak ini untuk membuka langkah peninjauan nilai yang disarankan dari algoritma pembelajaran. Tidak ada yang disimpan secara otomatis.\n\nDisarankan (dari pembelajaran):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Daya harus naik DI ATAS ambang batas ini untuk MEMULAI sebuah siklus. Tetapkan lebih tinggi dari daya siaga Anda. Bawaan: min_power + 1 W.",
           "stop_threshold_w": "Daya harus berada DI BAWAH ambang batas ini untuk MENGAKHIRI sebuah siklus. Tetapkan tepat di atas nol untuk menghindari kebisingan yang memicu tujuan yang salah. Bawaan: 0,6 * min_power.",
           "min_off_gap": "Jika sebuah siklus dimulai dalam beberapa detik dari akhir siklus sebelumnya, siklus tersebut akan DIGABUNG menjadi satu siklus.",
@@ -662,7 +662,7 @@
         "tbl_profile": "Profil",
         "tbl_confidence": "Kepercayaan diri",
         "tbl_correlation": "Korelasi",
-        "tbl_duration_match": "Durasi Pertandingan",
+        "tbl_duration_match": "Kecocokan Durasi",
         "detected_profile": "Profil Terdeteksi",
         "estimated_duration": "Perkiraan Durasi",
         "actual_duration": "Durasi Sebenarnya",
@@ -1024,7 +1024,7 @@
         "name": "Info Debug"
       },
       "match_confidence": {
-        "name": "Keyakinan Pertandingan"
+        "name": "Keyakinan Kecocokan"
       },
       "top_candidates": {
         "name": "Kandidat Teratas",

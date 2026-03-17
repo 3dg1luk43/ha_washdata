@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "הגדרות",
-        "description": "כוונון ספי זיהוי, למידה והתנהגות מתקדמת. ברירת המחדל עובדת היטב עבור רוב ההגדרות.",
+        "description": "כוונון ספי זיהוי, למידה והתנהגות מתקדמת. ברירת המחדל עובדת היטב עבור רוב ההגדרות.\n\nהגדרות מוצעות הזמינות כעת: {suggestions_count}.\nאם המספר גדול מ-0, פתח הגדרות מתקדמות ובחר 'החל ערכים מוצעים' לסקירת ההמלצות.",
         "data": {
           "apply_suggestions": "החל ערכים מוצעים",
           "device_type": "סוג מכשיר",
@@ -69,7 +69,7 @@
           "notify_actions": "פעולות הודעה",
           "notify_people": "דחו את המשלוח עד שהאנשים האלה יהיו בבית",
           "notify_only_when_home": "עיכוב הודעות עד שהאדם הנבחר יהיה בבית",
-          "notify_fire_events": "אירועי אוטומציה אש",
+          "notify_fire_events": "הפעלת אירועי אוטומציה",
           "notify_events": "אירועים להודיע",
           "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
           "notify_title": "כותרת ההודעה",
@@ -80,7 +80,7 @@
           "show_advanced": "ערוך הגדרות מתקדמות (השלב ​​הבא)"
         },
         "data_description": {
-          "apply_suggestions": "סמן תיבה זו כדי להעתיק ערכים שהוצעו על ידי אלגוריתם הלמידה לטופס. בדוק לפני השמירה.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- מרווח_משמר: {suggested_watchdog_interval} שניות\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- יחס_מינימום_דרכי_התאמת_פרופיל: {suggested_profile_match_min_duration_ratio}\n- ratio_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- End_energy_threshold: {suggested_end_energy_threshold} ו\"ש\n- אזור_מת_ריצה: {suggested_running_dead_zone} שניות\n{suggested_reason}",
+          "apply_suggestions": "סמן תיבה זו כדי להעתיק ערכים שהוצעו על ידי אלגוריתם הלמידה לטופס. בדוק לפני השמירה.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- watchdog_interval: {suggested_watchdog_interval} שניות\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} שניות\n{suggested_reason}",
           "device_type": "בחר את סוג המכשיר (מכונת כביסה, מייבש, מדיח כלים, מכונת קפה, EV). תג זה מאוחסן עם כל מחזור לארגון טוב יותר.",
           "power_sensor": "ישות החיישן מדווחת על הספק בזמן אמת (בוואט). אתה יכול לשנות זאת בכל עת מבלי לאבד נתונים היסטוריים - שימושי אם אתה מחליף תקע חכם.",
           "min_power": "קריאות הספק מעל סף זה (בוואט) מצביעות על כך שהמכשיר פועל. התחל עם 2W עבור רוב המכשירים.",
@@ -107,7 +107,7 @@
           "notify_actions": "פעולות הודעה",
           "notify_people": "דחו את המשלוח עד שהאנשים האלה יהיו בבית",
           "notify_only_when_home": "עיכוב הודעות עד שהאדם הנבחר יהיה בבית",
-          "notify_fire_events": "אירועי אוטומציה אש",
+          "notify_fire_events": "הפעלת אירועי אוטומציה",
           "notify_events": "אירועים להודיע",
           "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
           "notify_live_interval_seconds": "מרווח עדכון חי (שניות)",
@@ -168,10 +168,10 @@
           "completion_min_seconds": "זמן ריצה מינימלי (שניות)",
           "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
           "auto_tune_noise_events_threshold": "כוונון אוטומטי: סף אירועי רעש",
-          "running_dead_zone": "ריצה אזור מת (שניות)",
+          "running_dead_zone": "אזור מת בהפעלה (שניות)",
           "end_repeat_count": "סיום ספירת חזרות",
           "start_energy_threshold": "התחל שער אנרגיה (Wh)",
-          "end_energy_threshold": "End Energy Gate (Wh)",
+          "end_energy_threshold": "שער אנרגיית סיום (Wh)",
           "auto_maintenance": "הפעל תחזוקה אוטומטית",
           "expose_debug_entities": "חשוף ישויות ניפוי באגים",
           "save_debug_traces": "שמור עקבות ניפוי באגים",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "היפוך היגיון טריגר (טריגר מופעל כבוי)"
         },
         "data_description": {
-          "apply_suggestions": "סמן תיבה זו כדי לפתוח שלב סקירה עבור ערכים מוצעים מאלגוריתם הלמידה. שום דבר לא נשמר אוטומטית.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- מרווח_משמר: {suggested_watchdog_interval} שניות\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- יחס_מינימום_דרכי_התאמת_פרופיל: {suggested_profile_match_min_duration_ratio}\n- ratio_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- End_energy_threshold: {suggested_end_energy_threshold} ו\"ש\n- אזור_מת_ריצה: {suggested_running_dead_zone} שניות\n{suggested_reason}",
+          "apply_suggestions": "סמן תיבה זו כדי לפתוח שלב סקירה עבור ערכים מוצעים מאלגוריתם הלמידה. שום דבר לא נשמר אוטומטית.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- watchdog_interval: {suggested_watchdog_interval} שניות\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} שניות\n{suggested_reason}",
           "start_threshold_w": "הכוח חייב לעלות מעל הסף הזה כדי להתחיל מחזור. הגדר גבוה יותר מעוצמת המתנה שלך. ברירת מחדל: min_power + 1 W.",
           "stop_threshold_w": "הכוח חייב לרדת מתחת לסף הזה כדי לסיים מחזור. הגדר מעט מעל אפס כדי למנוע רעש המעורר קצוות כוזבים. ברירת מחדל: 0.6 * min_power.",
           "min_off_gap": "אם מחזור מתחיל בתוך שניות רבות כל כך מהסיום הקודם, הם ימוזגו למחזור בודד.",
@@ -422,7 +422,7 @@
         "title": "מחק מחזור",
         "description": "⚠️ פעולה זו תמחק לצמיתות את המחזור שנבחר",
         "data": {
-          "cycle_id": "בצע מחזור למחיקה"
+          "cycle_id": "מחזור למחיקה"
         }
       },
       "label_cycle": {
@@ -678,7 +678,7 @@
         "graph_legend_title": "מקרא גרף",
         "graph_legend_body": "הפס הכחול מייצג את טווח צריכת החשמל המינימלי והמקסימלי שנצפה. הקו מציג את עקומת הכוח הממוצעת.",
         "recording_preview": "תצוגה מקדימה של הקלטה",
-        "trim_start": "Trim Start",
+        "trim_start": "תחילת חיתוך",
         "trim_end": "קצץ סוף",
         "split_preview_title": "פיצול תצוגה מקדימה",
         "split_preview_found_fmt": "נמצאו {count} פלחים.",
@@ -1024,7 +1024,7 @@
         "name": "מידע על ניפוי באגים"
       },
       "match_confidence": {
-        "name": "Match Confidence"
+        "name": "רמת ביטחון בהתאמה"
       },
       "top_candidates": {
         "name": "מועמדים מובילים",

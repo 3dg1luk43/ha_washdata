@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "WashData Setup",
+        "title": "WashData ynstelle",
         "description": "Konfigurearje jo waskmasine of oare apparaat.\n\nPower sensor is nedich.\n\n**Dêrnei wurdt jo frege oft jo jo earste profyl meitsje wolle.**",
         "data": {
           "name": "Apparaat Namme",
@@ -22,7 +22,7 @@
         "description": "In ** Cycle ** is in folsleine run fan jo apparaat (bgl. in lading wask). In **Profyl** groepearret dizze syklusen op type (bgl. 'Katoen', 'Fluchwaskje'). It oanmeitsjen fan in profyl helpt no direkt de yntegraasje skatting doer.\n\nJo kinne dit profyl manuell selektearje yn 'e apparaatkontrôles as it net automatysk ûntdutsen wurdt.\n\n**Lit 'Profylnamme' leech om dizze stap oer te slaan.**",
         "data": {
           "profile_name": "Profylnamme (opsjoneel)",
-          "manual_duration": "Geschatte doer (minuten)"
+          "manual_duration": "Ynschatte doer (minuten)"
         }
       }
     },
@@ -39,13 +39,13 @@
     "step": {
       "init": {
         "menu_options": {
-          "learning_feedbacks": "Review Learning Feedbacks",
+          "learning_feedbacks": "Learfeedbacks beoardielje",
           "settings": "Ynstellings",
           "notifications": "Notifikaasjes",
           "manage_cycles": "Behear Cycles",
           "manage_profiles": "Beheare Profilen",
           "manage_phase_catalog": "Fasekatalogus beheare",
-          "record_cycle": "Record Cycle (Hânlieding)",
+          "record_cycle": "Syklus opnimme (hânmjittich)",
           "diagnostics": "Diagnostyk en ûnderhâld"
         }
       },
@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Ynstellings",
-        "description": "Tune detection drompels, learen, en avansearre gedrach. Standerts wurkje goed foar de measte opset.",
+        "description": "Tune detection drompels, learen, en avansearre gedrach. Standerts wurkje goed foar de measte opset.\n\nFoarstelde ynstellings beskikber: {suggestions_count}.\nAs dit boppe 0 is, iepenje Avansearre ynstellings en brûk Oanbefelle wearden tapasse.",
         "data": {
           "apply_suggestions": "Oanbefelle wearden tapasse",
           "device_type": "Apparaat Type",
@@ -69,7 +69,7 @@
           "notify_actions": "Notifikaasje Aksjes",
           "notify_people": "Fertrage levering oant dizze minsken thús binne",
           "notify_only_when_home": "Notifikaasjes fertrage oant selekteare persoan thús is",
-          "notify_fire_events": "Fire Automatisearring Events",
+          "notify_fire_events": "Automatisearring eveneminten triggerje",
           "notify_events": "Eveneminten om te notify",
           "notify_before_end_minutes": "Notifikaasje foar foltôging (minuten foar ein)",
           "notify_title": "Notifikaasje titel",
@@ -80,7 +80,7 @@
           "show_advanced": "Avansearre ynstellings bewurkje (Folgjende stap)"
         },
         "data_description": {
-          "apply_suggestions": "Selektearje dit fakje om wearden foarsteld troch it learalgoritme nei it formulier te kopiearjen. Kontrolearje foardat jo bewarje.\n\nOanbefelle (fan learen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profyl_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Selektearje dit fakje om wearden foarsteld troch it learalgoritme nei it formulier te kopiearjen. Kontrolearje foardat jo bewarje.\n\nOanbefelle (fan learen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Selektearje it type apparaat (waskmasine, droeger, ôfwaskmasine, kofjemasine, EV). Dizze tag wurdt opslein mei elke syklus foar bettere organisaasje.",
           "power_sensor": "De sensor-entiteit rapportearret real-time macht (yn watt). Jo kinne dit op elk momint feroarje sûnder histoaryske gegevens te ferliezen - nuttich as jo in smart plug ferfange.",
           "min_power": "Stromlêzingen boppe dizze drompel (yn watt) jouwe oan dat it apparaat wurket. Begjin mei 2W foar de measte apparaten.",
@@ -89,7 +89,7 @@
           "notify_actions": "Opsjonele aksjesekwinsje fan Home Assistant om te rinnen foar notifikaasjes (skripts, notify, TTS, ensfh.). As ynsteld, rinne aksjes foardat fallback notify tsjinst.",
           "notify_people": "Minsken entiteiten brûkt foar oanwêzigens gating. As ynskeakele, wurdt de levering fan notifikaasjes fertrage oant op syn minst ien selektearre persoan thús is.",
           "notify_only_when_home": "As ynskeakele, fertrage notifikaasjes oant op syn minst ien selektearre persoan thús is.",
-          "notify_fire_events": "As ynskeakele, fjoer Home Assistant-eveneminten foar syklusbegjin en -ein (ha_washdata_cycle_started en ha_washdata_cycle_ended) om automatisaasjes te riden.",
+          "notify_fire_events": "As ynskeakele, trigger Home Assistant-eveneminten foar syklusbegjin en -ein (ha_washdata_cycle_started en ha_washdata_cycle_ended) om automatisaasjes te riden.",
           "notify_events": "Foar hokker eveneminten om notifikaasjes te stjoeren.",
           "notify_before_end_minutes": "Minuten foar it rûsde ein fan 'e syklus om in notifikaasje te triggerjen. Stel op 0 om út te skeakeljen. Standert: 0.",
           "notify_title": "Oanpaste titel foar notifikaasjes. Unterstützt {device} plakhâlder.",
@@ -107,7 +107,7 @@
           "notify_actions": "Notifikaasje Aksjes",
           "notify_people": "Fertrage levering oant dizze minsken thús binne",
           "notify_only_when_home": "Notifikaasjes fertrage oant selekteare persoan thús is",
-          "notify_fire_events": "Fire Automatisearring Events",
+          "notify_fire_events": "Automatisearring eveneminten triggerje",
           "notify_events": "Eveneminten om te notify",
           "notify_before_end_minutes": "Notifikaasje foar foltôging (minuten foar ein)",
           "notify_live_interval_seconds": "Live Update-ynterval (sekonden)",
@@ -123,7 +123,7 @@
           "notify_actions": "Opsjonele aksjesekwinsje fan Home Assistant om te rinnen foar notifikaasjes (skripts, notify, TTS, ensfh.). As ynsteld, rinne aksjes foardat fallback notify tsjinst.",
           "notify_people": "Minsken entiteiten brûkt foar oanwêzigens gating. As ynskeakele, wurdt de levering fan notifikaasjes fertrage oant op syn minst ien selektearre persoan thús is.",
           "notify_only_when_home": "As ynskeakele, fertrage notifikaasjes oant op syn minst ien selektearre persoan thús is.",
-          "notify_fire_events": "As ynskeakele, fjoer Home Assistant-eveneminten foar syklusbegjin en -ein (ha_washdata_cycle_started en ha_washdata_cycle_ended) om automatisaasjes te riden.",
+          "notify_fire_events": "As ynskeakele, trigger Home Assistant-eveneminten foar syklusbegjin en -ein (ha_washdata_cycle_started en ha_washdata_cycle_ended) om automatisaasjes te riden.",
           "notify_events": "Foar hokker eveneminten om notifikaasjes te stjoeren.",
           "notify_before_end_minutes": "Minuten foar it rûsde ein fan 'e syklus om in notifikaasje te triggerjen. Stel op 0 om út te skeakeljen. Standert: 0.",
           "notify_live_interval_seconds": "Hoe faak foarútgong updates wurde ferstjoerd wylst rinnen. Legere wearden binne responsiver, mar konsumearje mear notifikaasjes. In minimum fan 30 sekonden wurdt hanthavene - wearden ûnder 30 s wurde automatysk ôfrûn nei 30 s.",
@@ -137,7 +137,7 @@
       },
       "advanced_settings": {
         "title": "Avansearre ynstellings",
-        "description": "Tune detection drompels, learen, en avansearre gedrach. Standerts wurkje goed foar de measte opset.",
+        "description": "Tune detection drompels, learen, en avansearre gedrach. Standerts wurkje goed foar de measte opset.\n\nFoarstelde ynstellings beskikber: {suggestions_count}. Brûk Oanbefelle wearden tapasse om feroarings te besjen foardat jo bewarje.",
         "data": {
           "apply_suggestions": "Oanbefelle wearden tapasse",
           "start_threshold_w": "Startdrempel (W)",
@@ -154,8 +154,8 @@
           "profile_match_min_duration_ratio": "Profylwedstriid Min Duration Ratio (0.1-1.0)",
           "profile_match_max_duration_ratio": "Profylwedstriid Max Duration Ratio (1.0-3.0)",
           "smoothing_window": "Smoothing Window (samples)",
-          "profile_match_threshold": "Profile Match Threshold",
-          "profile_unmatch_threshold": "Profile Unmatch Threshold",
+          "profile_match_threshold": "Profyl oerienkomstdrompel",
+          "profile_unmatch_threshold": "Profyl net-oerienkomstdrompel",
           "profile_duration_tolerance": "Tolerânsje fan profylwedstriiddoer (0-0.5)",
           "interrupted_min_seconds": "Underbrutsen: Minimum Runtime (sekonden)",
           "abrupt_drop_watts": "Underbrutsen: Abrupt Drop Absolute (W)",
@@ -168,13 +168,13 @@
           "completion_min_seconds": "Minimale foltôgingstiid (sekonden)",
           "notify_before_end_minutes": "Notifikaasje foar foltôging (minuten foar ein)",
           "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
-          "running_dead_zone": "Running Dead Zone (sekonden)",
+          "running_dead_zone": "Rint-dea-sône (sekonden)",
           "end_repeat_count": "End Repeat Count",
           "start_energy_threshold": "Start Energy Gate (Wh)",
           "end_energy_threshold": "End Energy Gate (Wh)",
           "auto_maintenance": "Auto-ûnderhâld ynskeakelje",
           "expose_debug_entities": "Debug-entiteiten eksposearje",
-          "save_debug_traces": "Debug Traces bewarje",
+          "save_debug_traces": "Debug-spoaren bewarje",
           "anti_wrinkle_enabled": "Anti-rimpelskerm (allinich droeger)",
           "anti_wrinkle_max_power": "Anti-rimpel Max Power (W)",
           "anti_wrinkle_max_duration": "Anti-rimpel Max Duration (s)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Invert Trigger Logic (Trigger op OFF)"
         },
         "data_description": {
-          "apply_suggestions": "Selektearje dit fakje om in resinsjestap te iepenjen foar foarstelde wearden út it learalgoritme. Neat wurdt automatysk bewarre.\n\nOanbefelle (fan learen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profyl_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Selektearje dit fakje om in resinsjestap te iepenjen foar foarstelde wearden út it learalgoritme. Neat wurdt automatysk bewarre.\n\nOanbefelle (fan learen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Macht moat boppe dizze drompel opkomme om in syklus te STARTEN. Stel heger dan jo standby-krêft. Standert: min_power + 1 W.",
           "stop_threshold_w": "Power moat falle Ûnder dizze drompel foar END in syklus. Stel krekt boppe nul om lûd te foarkommen dat falske eintsjes trigger. Standert: 0,6 * min_power.",
           "min_off_gap": "As in syklus begjint binnen safolle sekonden fan 'e foarige ein, sille se wurde gearfoege yn ien syklus.",
@@ -240,14 +240,14 @@
         "description": "Binne jo wis dat jo alle bewarre debug-spoaren wiskje wolle? Dit sil romte frijmeitsje, mar detaillearre ranglistynformaasje fuortsmite fan ferline syklusen."
       },
       "manage_cycles": {
-        "title": "Behear Cycles",
+        "title": "Behear syklusen",
         "description": "Resinte syklusen:\n{recent_cycles}",
         "data": {
           "action": "Aksje"
         }
       },
       "manage_cycles_empty": {
-        "title": "Behear Cycles",
+        "title": "Behear syklusen",
         "description": "Noch gjin syklusen opnommen.",
         "data": {
           "action": "Aksje"
@@ -255,7 +255,7 @@
       },
       "manage_profiles": {
         "title": "Beheare Profilen",
-        "description": "Profile gearfetting:\n{profile_summary}",
+        "description": "Profyl gearfetting:\n{profile_summary}",
         "data": {
           "action": "Aksje"
         }
@@ -363,7 +363,7 @@
         }
       },
       "profile_stats": {
-        "title": "Profile Statistics",
+        "title": "Profylstatistiken",
         "description": "{stats_table}"
       },
       "create_profile": {
@@ -376,14 +376,14 @@
         }
       },
       "edit_profile": {
-        "title": "Profile bewurkje",
+        "title": "Profyl bewurkje",
         "description": "Selektearje in profyl om omneame",
         "data": {
           "profile": "Profyl"
         }
       },
       "rename_profile": {
-        "title": "Profile Details bewurkje",
+        "title": "Profyldetails bewurkje",
         "description": "Aktueel profyl: {current_name}",
         "data": {
           "new_name": "Profylnamme",
@@ -405,28 +405,28 @@
         }
       },
       "auto_label_cycles": {
-        "title": "Auto-label Alde Cycles",
+        "title": "Auto-label âlde syklusen",
         "description": "{info}",
         "data": {
           "confidence_threshold": "Minimum fertrouwen (0.50-0.95)"
         }
       },
       "select_cycle_to_label": {
-        "title": "Selektearje Cycle nei Label",
+        "title": "Selektearje syklus om te labelen",
         "description": "✓ = foltôge, ⚠ = opnij, ✗ = ûnderbrutsen",
         "data": {
           "cycle_id": "Syklus"
         }
       },
       "select_cycle_to_delete": {
-        "title": "Wiskje Cycle",
+        "title": "Wiskje syklus",
         "description": "⚠️ Dit sil de selekteare syklus permanint wiskje",
         "data": {
-          "cycle_id": "Cycle om te wiskjen"
+          "cycle_id": "Syklus om te wiskjen"
         }
       },
       "label_cycle": {
-        "title": "Label Cycle",
+        "title": "Syklus labelen",
         "description": "{cycle_info}",
         "data": {
           "profile_name": "Profyl",
@@ -461,7 +461,7 @@
       },
       "interactive_editor": {
         "title": "Ynteraktive bewurker gearfoegje / splitsen",
-        "description": "Selektearje in hânmjittige aksje om út te fieren op jo fytsskiednis.",
+        "description": "Selektearje in hânmjittige aksje om út te fieren op jo syklusskiednis.",
         "data": {
           "editor_action": "Aksje"
         }
@@ -521,14 +521,14 @@
         }
       },
       "record_cycle": {
-        "title": "Record Cycle",
+        "title": "Syklus opnimme",
         "description": "Meitsje in syklus manuell op om in skjin profyl te meitsjen sûnder ynterferinsje.\n\nStatus: **{status}**\nDuration: {duration}s\nFoarbylden: {samples}",
         "data": {
           "action": "Aksje"
         }
       },
       "record_process": {
-        "title": "Proses Recording",
+        "title": "Opname ferwurkje",
         "description": "![Graph]({graph_url})\n\n** Grafyk toant rau opname. ** Blau = Keep, Red = Foarstelde Trim.\n*De grafyk is statysk en wurdt net bywurke mei formulierwizigingen.*\n\nOpname stoppe. Trimmen wurde ôfstimd op de ûntdutsen sampling rate (~{sampling_rate}s).\n\nRaw Duration: {duration}s\nFoarbylden: {samples}",
         "data": {
           "head_trim": "Trimstart (sekonden)",
@@ -538,14 +538,14 @@
         }
       },
       "learning_feedbacks": {
-        "title": "Learning Feedbacks",
+        "title": "Learfeedbacks",
         "description": "Selektearje in fersyk foar syklusbeoardieling om te ferwurkjen.",
         "data": {
           "selected_feedback": "Selektearje Cycle om te besjen"
         }
       },
       "learning_feedbacks_empty": {
-        "title": "Learning Feedbacks",
+        "title": "Learfeedbacks",
         "description": "Gjin wachtsjende feedbackoanfragen fûn."
       },
       "resolve_feedback": {
@@ -558,7 +558,7 @@
         }
       },
       "apply_suggestions_confirm": {
-        "title": "Review Suggested Changes",
+        "title": "Foarstelde feroarings beoardielje",
         "description": "WashData fûn {pending_count} foarstelde wearden om oan te passen.\n\nFeroarings om te besjen:\n{changes}\n\nBefêstigje hjirûnder om dizze wearden yn it formulier op te setten. Se wurde net bewarre oant jo Avansearre ynstellings yntsjinje.",
         "data": {
           "confirm_apply_suggestions": "Stage foarstelde wearden yn Avansearre ynstellings"
@@ -597,7 +597,7 @@
       "import_failed": "Ymport mislearre. Plak asjebleaft in jildige WashData eksport JSON.",
       "profile_exists": "In profyl mei dizze namme bestiet al",
       "rename_failed": "Omneame profyl mislearre. It profyl bestiet mooglik net of in nije namme is al nommen.",
-      "assignment_failed": "It tawizen fan profyl oan fytsen is net slagge",
+      "assignment_failed": "It tawizen fan profyl oan syklus is net slagge",
       "duplicate_phase": "In faze mei dizze namme bestiet al.",
       "phase_not_found": "Selekteare faze waard net fûn.",
       "invalid_phase_name": "Fazenamme kin net leech wêze.",
@@ -610,7 +610,7 @@
       "no_phase_ranges": "Der binne noch gjin fazebereiken beskikber foar dy aksje.",
       "feedback_notification_title": "WashData: ferifiearje syklus ({device})",
       "feedback_notification_message": "**Apparaat**: {device}\n**Programma**: {program} ({confidence}% fertrouwen)\n**Tiid**: {time}\n\nWashData hat jo help nedich om dizze ûntdekte syklus te ferifiearjen.\n\nGean asjebleaft nei **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Learning Feedbacks** om dit resultaat te befêstigjen of te korrigearjen.",
-      "suggestions_ready_notification_title": "WashData: Suggested Settings Ready ({device})",
+      "suggestions_ready_notification_title": "WashData: Foarstelde ynstellings klear ({device})",
       "suggestions_ready_notification_message": "De sensor **Foarstelde ynstellings** rapportearret no **{count}** aksjebere oanbefellings.\n\nOm se te besjen en ta te passen: **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Avansearre ynstellings> Oanbefelle wearden tapasse**.\n\nSuggestjes binne opsjoneel en werjûn foar beoardieling foardat jo bewarje.",
       "trim_range_invalid": "Start moat foar ein wêze. Pas jo trimpunten asjebleaft oan.",
       "trim_failed": "Trim mislearre. De syklus kin net mear bestean of it finster is leech."
@@ -631,8 +631,8 @@
   "selector": {
     "notify_events_option": {
       "options": {
-        "cycle_start": "Cycle Start",
-        "cycle_finish": "Cycle Finish",
+        "cycle_start": "Syklus begjin",
+        "cycle_finish": "Syklus ein",
         "cycle_live": "Live foarútgong"
       }
     },
@@ -646,57 +646,57 @@
         "current_suffix": "(aktueel)",
         "editor_select_info": "Selektearje 1 syklus om te splitsen, of 2+ syklusen om te fusearjen.",
         "no_cycles_recorded": "Noch gjin syklusen opnommen.",
-        "profile_summary_line": "- **{name}**: {count} syklusen, {avg}m gem",
+        "profile_summary_line": "- **{name}**: {count} syklusen, {avg} min gem.",
         "no_profiles_created": "Gjin profilen makke noch.",
         "phase_preview": "Fasefoarbyld",
         "phase_preview_no_curve": "Gemiddelde profylkromme is noch net beskikber. Run/labelje mear syklusen foar dit profyl.",
         "average_power_curve": "Gemiddelde Power Curve",
         "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} syklusen, ~{duration}m gem.)",
-        "profile_option_short_fmt": "{name} ({count} syklusen, ~{duration}m)",
+        "profile_option_fmt": "{name} ({count} syklusen, ~{duration} min gem.)",
+        "profile_option_short_fmt": "{name} ({count} syklusen, ~{duration} min)",
         "deleted_cycles_from_profile": "Wiske {count} syklusen fan {profile}.",
         "not_enough_data_graph": "Net genôch gegevens om grafyk te generearjen.",
         "no_profiles_found": "Gjin profilen fûn.",
-        "cycle_info_fmt": "Syklus: {start}, {duration}m, Strom: {label}",
+        "cycle_info_fmt": "Syklus: {start}, {duration} min, Etiket: {label}",
         "top_candidates_header": "### Topkandidaten",
         "tbl_profile": "Profyl",
         "tbl_confidence": "Betrouwen",
         "tbl_correlation": "Korrelaasje",
-        "tbl_duration_match": "Duration Match",
+        "tbl_duration_match": "Doer oerienkomst",
         "detected_profile": "Detektearre profyl",
-        "estimated_duration": "Estimated Duration",
-        "actual_duration": "Eigentlike Duration",
+        "estimated_duration": "Rûsde doer",
+        "actual_duration": "Eigentlike doer",
         "choose_action": "__Kies in aksje hjirûnder:__",
-        "tbl_count": "Telle",
+        "tbl_count": "Oantal",
         "tbl_avg": "Gem",
         "tbl_min": "Min",
         "tbl_max": "Max",
         "tbl_energy_avg": "Enerzjy (Gem.)",
         "tbl_energy_total": "Enerzjy (totaal)",
-        "tbl_consistency": "Bestean.",
-        "tbl_last_run": "Lêste Run",
+        "tbl_consistency": "Konsistinsje",
+        "tbl_last_run": "Lêste syklus",
         "graph_legend_title": "Grafyk Legend",
         "graph_legend_body": "De blauwe bân stiet foar it waarnommen minimale en maksimale power draw berik. De line toant de gemiddelde krêftkurve.",
         "recording_preview": "Opname Preview",
-        "trim_start": "Trim Start",
+        "trim_start": "Trim begjin",
         "trim_end": "Trim ein",
         "split_preview_title": "Split Preview",
         "split_preview_found_fmt": "Fûn {count} segminten.",
         "split_preview_confirm_fmt": "Klik Befêstigje om dizze syklus te splitsen yn {count} aparte syklusen.",
         "merge_preview_title": "Foarbyld gearfoegje",
         "merge_preview_joining_fmt": "Doch mei oan {count} syklusen. Hiaten sille wurde fol mei 0W lêzingen.",
-        "profile_comparison": "Profile Fergeliking",
+        "profile_comparison": "Profyl fergeliking",
         "actual_cycle_label": "Dizze syklus (werklik)",
         "storage_usage_header": "Opslach gebrûk",
         "storage_file_size": "Triemgrutte",
-        "storage_cycles": "Cycles",
+        "storage_cycles": "Syklusen",
         "storage_profiles": "Profilen",
-        "storage_debug_traces": "Debug Spoaren",
+        "storage_debug_traces": "Debug-spoaren",
         "overview_suffix": "Oersicht",
         "phase_preview_for_profile": "Fasefoarbyld foar profyl",
         "current_ranges_header": "Aktuele berik",
         "assign_phases_help": "Brûk de aksjes hjirûnder om berikken ta te foegjen, te bewurkjen, te wiskjen of op te slaan.",
-        "profile_summary_header": "Profile Gearfetting",
+        "profile_summary_header": "Profyl gearfetting",
         "recent_cycles_header": "Resinte syklusen",
         "no_power_preview": "*Gjin machtgegevens beskikber foar foarbyld.*",
         "trim_cycle_preview_title": "Foarbyld fan syklus trimme",
@@ -727,9 +727,9 @@
     },
     "manage_cycles_action": {
       "options": {
-        "auto_label_cycles": "Auto-label Alde Cycles",
-        "select_cycle_to_label": "Label Spesifike Cycle",
-        "select_cycle_to_delete": "Wiskje Cycle",
+        "auto_label_cycles": "Âlde syklusen auto-labelje",
+        "select_cycle_to_label": "Spesifike syklus labelen",
+        "select_cycle_to_delete": "Syklus wiskje",
         "interactive_editor": "Ynteraktive bewurker gearfoegje / splitsen",
         "trim_cycle": "Syklusgegevens trimme"
       }
@@ -737,9 +737,9 @@
     "manage_profiles_action": {
       "options": {
         "create_profile": "Meitsje nij profyl",
-        "edit_profile": "Profile bewurkje/omneame",
+        "edit_profile": "Profyl bewurkje/omneame",
         "delete_profile": "Wiskje profyl",
-        "profile_stats": "Profile Statistics",
+        "profile_stats": "Profylstatistiken",
         "cleanup_profile": "Skiednis skjinmeitsje - Grafyk en wiskje",
         "assign_phases": "Fasebereiken tawize"
       }
@@ -774,7 +774,7 @@
       "options": {
         "new_profile": "Meitsje nij profyl",
         "existing_profile": "Taheakje oan besteande profyl",
-        "discard": "Discard Recording"
+        "discard": "Opname fuortsmite"
       }
     },
     "resolve_feedback_action": {
@@ -803,7 +803,7 @@
   },
   "services": {
     "label_cycle": {
-      "name": "Label Cycle",
+      "name": "Syklus labelen",
       "description": "Tawize in besteand profyl oan in ferline syklus, of fuortsmite it label.",
       "fields": {
         "device_id": {
@@ -811,7 +811,7 @@
           "description": "De waskmasine apparaat te label."
         },
         "cycle_id": {
-          "name": "Cycle ID",
+          "name": "Syklus-ID",
           "description": "De ID fan 'e syklus om te labeljen."
         },
         "profile_name": {
@@ -833,7 +833,7 @@
           "description": "Namme foar it nije profyl (bgl. 'Heavy Duty', 'Delicates')."
         },
         "reference_cycle_id": {
-          "name": "Reference Cycle ID",
+          "name": "Referinsjesyklus-ID",
           "description": "Opsjonele syklus-ID om dit profyl op te basearjen."
         }
       }
@@ -851,13 +851,13 @@
           "description": "It profyl om te wiskjen."
         },
         "unlabel_cycles": {
-          "name": "Unlabel Cycles",
-          "description": "Ferwiderje profyllabel út cycles mei dit profyl."
+          "name": "Label fuortsmite fan syklusen",
+          "description": "Ferwiderje profyllabel út syklusen mei dit profyl."
         }
       }
     },
     "auto_label_cycles": {
-      "name": "Auto-label Alde Cycles",
+      "name": "Âlde syklusen auto-labelje",
       "description": "Labelje net-labele syklusen mei retroaktyf mei profyloanpassing.",
       "fields": {
         "device_id": {
@@ -871,7 +871,7 @@
       }
     },
     "export_config": {
-      "name": "Eksportearje Config",
+      "name": "Konfiguraasje eksportearje",
       "description": "Eksportearje de profilen, syklusen en ynstellings fan dit apparaat nei in JSON-bestân (per apparaat).",
       "fields": {
         "device_id": {
@@ -885,7 +885,7 @@
       }
     },
     "import_config": {
-      "name": "Ymportearje Config",
+      "name": "Konfiguraasje ymportearje",
       "description": "Ymportearje profilen, syklusen, en ynstellings foar dit apparaat út in JSON eksport triem (ynstellings kinne wurde oerskreaun).",
       "fields": {
         "device_id": {
@@ -899,7 +899,7 @@
       }
     },
     "submit_cycle_feedback": {
-      "name": "Submit Cycle Feedback",
+      "name": "Syklusfeedback yntsjinje",
       "description": "Befêstigje of korrigearje in automatysk ûntdutsen programma nei in foltôge syklus. Jou of `entry_id` (avansearre) of `device_id` (oanrikkemandearre).",
       "fields": {
         "device_id": {
@@ -911,11 +911,11 @@
           "description": "De konfiguraasje-ynfier-id foar it apparaat (alternatyf foar apparaat_id)."
         },
         "cycle_id": {
-          "name": "Cycle ID",
+          "name": "Syklus-ID",
           "description": "De syklus-id werjûn yn 'e feedbacknotifikaasje / logs."
         },
         "user_confirmed": {
-          "name": "Befêstigje Detected Program",
+          "name": "Ûntdutsen programma befêstigje",
           "description": "Stel wier as it ûntdekte programma goed is."
         },
         "corrected_profile": {
@@ -933,7 +933,7 @@
       }
     },
     "record_start": {
-      "name": "Record Cycle Start",
+      "name": "Syklus opname starte",
       "description": "Begjinne mei it manuell opnimmen fan in skjinne syklus (omgiet alle oerienkommende logika).",
       "fields": {
         "device_id": {
@@ -943,7 +943,7 @@
       }
     },
     "record_stop": {
-      "name": "Record Cycle Stop",
+      "name": "Syklus opname stopje",
       "description": "Stopje hânmjittich opnimmen.",
       "fields": {
         "device_id": {
@@ -961,7 +961,7 @@
           "description": "It WashData-apparaat."
         },
         "cycle_id": {
-          "name": "Cycle ID",
+          "name": "Syklus-ID",
           "description": "De ID fan 'e syklus om te trimmen."
         },
         "trim_start_s": {
@@ -978,27 +978,27 @@
   "entity": {
     "binary_sensor": {
       "running": {
-        "name": "Te rinnen"
+        "name": "Oan it rinnen"
       },
       "match_ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Oerienkomst ûndúdlikheid"
       }
     },
     "sensor": {
       "washer_state": {
-        "name": "Steat",
+        "name": "Tastân",
         "state": {
           "off": "Út",
-          "idle": "Idle",
-          "starting": "Starting",
-          "running": "Te rinnen",
+          "idle": "Rêstend",
+          "starting": "Opstarten",
+          "running": "Oan it rinnen",
           "paused": "Pauzearre",
-          "ending": "Einde",
-          "finished": "Finished",
+          "ending": "Oan it einigjen",
+          "finished": "Klear",
           "anti_wrinkle": "Anti-rimpel",
           "interrupted": "Underbrutsen",
-          "force_stopped": "Force stoppe",
-          "rinse": "Rinse",
+          "force_stopped": "Twongen stoppe",
+          "rinse": "Spoelje",
           "unknown": "Ûnbekend"
         }
       },
@@ -1009,22 +1009,22 @@
         "name": "Tiid oerbleaun"
       },
       "total_duration": {
-        "name": "Totale Duration"
+        "name": "Totale doer"
       },
       "cycle_progress": {
         "name": "Foarútgong"
       },
       "current_power": {
-        "name": "Aktuele Power"
+        "name": "Aktueel fermogen"
       },
       "elapsed_time": {
         "name": "Ferline tiid"
       },
       "debug_info": {
-        "name": "Debug Info"
+        "name": "Debug ynformaasje"
       },
       "match_confidence": {
-        "name": "Wedstriid fertrouwen"
+        "name": "Oerienkomst fertrouwen"
       },
       "top_candidates": {
         "name": "Topkandidaten",
@@ -1039,8 +1039,8 @@
         "name": "Faze"
       },
       "profile_cycle_count": {
-        "name": "Profyl {profile_name} Tel",
-        "unit_of_measurement": "cycles"
+        "name": "Profyl {profile_name} syklustel",
+        "unit_of_measurement": "syklusen"
       },
       "suggestions": {
         "name": "Foarstelde ynstellings"
@@ -1048,7 +1048,7 @@
     },
     "select": {
       "program_select": {
-        "name": "Cycle Program",
+        "name": "Syklusprogramma",
         "state": {
           "auto_detect": "Auto-detect"
         }
@@ -1056,7 +1056,7 @@
     },
     "button": {
       "force_end_cycle": {
-        "name": "Force End Cycle"
+        "name": "Syklus twongen beeinigje"
       }
     }
   },

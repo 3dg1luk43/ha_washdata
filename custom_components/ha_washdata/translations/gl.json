@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Configuración",
-        "description": "Axusta os limiares de detección, a aprendizaxe e o comportamento avanzado. Os valores predeterminados funcionan ben para a maioría das configuracións.",
+        "description": "Axusta os limiares de detección, a aprendizaxe e o comportamento avanzado. Os valores predeterminados funcionan ben para a maioría das configuracións.\n\nConfiguración suxerida dispoñible actualmente: {suggestions_count}.\nSe isto supera 0, abre a Configuración avanzada e usa Aplicar valores suxeridos para revisar as recomendacións.",
         "data": {
           "apply_suggestions": "Aplicar os valores suxeridos",
           "device_type": "Tipo de dispositivo",
@@ -69,7 +69,7 @@
           "notify_actions": "Accións de notificación",
           "notify_people": "Atrasa a entrega ata que estas persoas estean na casa",
           "notify_only_when_home": "Atrasa as notificacións ata que a persoa seleccionada estea na casa",
-          "notify_fire_events": "Eventos de automatización de incendios",
+          "notify_fire_events": "Lanzar eventos de automatización",
           "notify_events": "Eventos a notificar",
           "notify_before_end_minutes": "Notificación previa á finalización (minutos antes do final)",
           "notify_title": "Título da notificación",
@@ -107,7 +107,7 @@
           "notify_actions": "Accións de notificación",
           "notify_people": "Atrasa a entrega ata que estas persoas estean na casa",
           "notify_only_when_home": "Atrasa as notificacións ata que a persoa seleccionada estea na casa",
-          "notify_fire_events": "Eventos de automatización de incendios",
+          "notify_fire_events": "Lanzar eventos de automatización",
           "notify_events": "Eventos a notificar",
           "notify_before_end_minutes": "Notificación previa á finalización (minutos antes do final)",
           "notify_live_interval_seconds": "Intervalo de actualización en directo (segundos)",
@@ -168,17 +168,17 @@
           "completion_min_seconds": "Tempo de execución mínimo de finalización (segundos)",
           "notify_before_end_minutes": "Notificación previa á finalización (minutos antes do final)",
           "auto_tune_noise_events_threshold": "Sintonización automática: limiar de eventos de ruído",
-          "running_dead_zone": "Running Dead Zone (segundos)",
+          "running_dead_zone": "Zona morta de execución (segundos)",
           "end_repeat_count": "Finalizar o reconto de repeticións",
           "start_energy_threshold": "Iniciar Energy Gate (Wh)",
           "end_energy_threshold": "End Energy Gate (Wh)",
           "auto_maintenance": "Activar o mantemento automático",
           "expose_debug_entities": "Expoñer entidades de depuración",
           "save_debug_traces": "Gardar trazos de depuración",
-          "anti_wrinkle_enabled": "Protector antiengurras (só secador)",
-          "anti_wrinkle_max_power": "Potencia máxima antiengurras (W)",
-          "anti_wrinkle_max_duration": "Duración máxima antiengurras (s)",
-          "anti_wrinkle_exit_power": "Potencia de saída antiengurras (W)",
+          "anti_wrinkle_enabled": "Protector antiengurras (só secadora/lavadora-secadora)",
+          "anti_wrinkle_max_power": "Potencia máxima antiengurras (W) (só secadora/lavadora-secadora)",
+          "anti_wrinkle_max_duration": "Duración máxima antiengurras (s) (só secadora/lavadora-secadora)",
+          "anti_wrinkle_exit_power": "Potencia de saída antiengurras (W) (só secadora/lavadora-secadora)",
           "dtw_bandwidth": "Ancho de banda DTW",
           "external_end_trigger_enabled": "Activar o disparador de fin de ciclo externo",
           "external_end_trigger": "Sensor externo de fin de ciclo",
@@ -662,7 +662,7 @@
         "tbl_profile": "Perfil",
         "tbl_confidence": "Confianza",
         "tbl_correlation": "Correlación",
-        "tbl_duration_match": "Partido de duración",
+        "tbl_duration_match": "Coincidencia de duración",
         "detected_profile": "Perfil detectado",
         "estimated_duration": "Duración estimada",
         "actual_duration": "Duración real",
@@ -684,7 +684,7 @@
         "split_preview_found_fmt": "Atopáronse {count} segmentos.",
         "split_preview_confirm_fmt": "Fai clic en Confirmar para dividir este ciclo en {count} ciclos separados.",
         "merge_preview_title": "Vista previa de combinación",
-        "merge_preview_joining_fmt": "Unirse a {count} ciclos. As lagoas cubriranse con lecturas de 0W.",
+        "merge_preview_joining_fmt": "Unindo {count} ciclos. As lagoas cubriranse con lecturas de 0W.",
         "profile_comparison": "Comparación de perfiles",
         "actual_cycle_label": "Este ciclo (real)",
         "storage_usage_header": "Uso de almacenamento",
@@ -981,7 +981,7 @@
         "name": "Correndo"
       },
       "match_ambiguity": {
-        "name": "Coincidir ambigüidade"
+        "name": "Ambigüidade de coincidencia"
       }
     },
     "sensor": {
@@ -1024,7 +1024,7 @@
         "name": "Información de depuración"
       },
       "match_confidence": {
-        "name": "Confianza do partido"
+        "name": "Confianza de coincidencia"
       },
       "top_candidates": {
         "name": "Principais candidatos",
@@ -1039,11 +1039,11 @@
         "name": "Fase"
       },
       "profile_cycle_count": {
-        "name": "Perfil {profile_name} Count",
+        "name": "Conta do perfil {profile_name}",
         "unit_of_measurement": "ciclos"
       },
       "suggestions": {
-        "name": "Configuración suxerida"
+        "name": "Configuración suxerida dispoñible"
       }
     },
     "select": {

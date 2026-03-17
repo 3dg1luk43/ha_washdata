@@ -19,7 +19,7 @@
       },
       "first_profile": {
         "title": "ایجاد اولین نمایه",
-        "description": "**دوچرخه** کارکرد کامل دستگاه شما (به عنوان مثال، یک بار لباسشویی) است. یک **نمایه** این چرخه ها را بر اساس نوع گروه بندی می کند (به عنوان مثال، \"پنبه\"، \"شستشوی سریع\"). ایجاد نمایه اکنون به تخمین مدت زمان یکپارچه سازی کمک می کند.\n\nاگر به صورت خودکار شناسایی نشد، می‌توانید این نمایه را به‌صورت دستی در کنترل‌های دستگاه انتخاب کنید.\n\n**برای رد شدن از این مرحله، \"نام نمایه\" را خالی بگذارید.**",
+        "description": "یک **چرخه** اجرای کامل دستگاه شما است (به عنوان مثال، یک بار لباسشویی). یک **نمایه** این چرخه‌ها را بر اساس نوع گروه‌بندی می‌کند (به عنوان مثال، «پنبه»، «شستشوی سریع»). ایجاد نمایه اکنون به یکپارچه‌سازی کمک می‌کند تا فوری مدت زمان را تخمین بزند.\n\nاگر به صورت خودکار شناسایی نشد، می‌توانید این نمایه را به‌صورت دستی در کنترل‌های دستگاه انتخاب کنید.\n\n**برای رد شدن از این مرحله، «نام نمایه» را خالی بگذارید.**",
         "data": {
           "profile_name": "نام نمایه (اختیاری)",
           "manual_duration": "مدت زمان تخمینی (دقیقه)"
@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "تنظیمات",
-        "description": "آستانه تشخیص، یادگیری و رفتار پیشرفته را تنظیم کنید. پیش فرض ها برای اکثر تنظیمات به خوبی کار می کنند.",
+        "description": "آستانه تشخیص، یادگیری و رفتار پیشرفته را تنظیم کنید. پیش‌فرض‌ها برای اکثر تنظیمات به خوبی کار می‌کنند.\n\nتعداد تنظیمات پیشنهادی موجود: {suggestions_count}.\nاگر بزرگ‌تر از 0 است، تنظیمات پیشرفته را باز کنید و از «اعمال مقادیر پیشنهادی» برای بررسی توصیه‌ها استفاده کنید.",
         "data": {
           "apply_suggestions": "اعمال مقادیر پیشنهادی",
           "device_type": "نوع دستگاه",
@@ -69,7 +69,7 @@
           "notify_actions": "اقدامات اطلاع رسانی",
           "notify_people": "تأخیر تحویل تا زمانی که این افراد در خانه هستند",
           "notify_only_when_home": "تأخیر اعلان‌ها تا زمانی که فرد منتخب در خانه باشد",
-          "notify_fire_events": "رویدادهای اتوماسیون آتش سوزی",
+          "notify_fire_events": "فعال‌سازی رویدادهای اتوماسیون",
           "notify_events": "رویدادهایی برای اطلاع رسانی",
           "notify_before_end_minutes": "اعلان پیش از اتمام (دقیقه قبل از پایان)",
           "notify_title": "عنوان اطلاعیه",
@@ -80,7 +80,7 @@
           "show_advanced": "ویرایش تنظیمات پیشرفته (مرحله بعد)"
         },
         "data_description": {
-          "apply_suggestions": "این کادر را علامت بزنید تا مقادیر پیشنهاد شده توسط الگوریتم یادگیری را در فرم کپی کنید. قبل از ذخیره بررسی کنید.\n\nپیشنهادی (از یادگیری):\n- حداقل_قدرت: {suggested_min_power} وات\n- off_delay: {suggested_off_delay} ثانیه\n- watchdog_interval: {suggested_watchdog_interval} ثانیه\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} ثانیه\n- خودکار_برچسب_اعتماد: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- آستانه_پایان_انرژی: {suggested_end_energy_threshold} ساعت\n- running_dead_zone: {suggested_running_dead_zone} ثانیه\n{suggested_reason}",
+          "apply_suggestions": "این کادر را علامت بزنید تا مقادیر پیشنهاد شده توسط الگوریتم یادگیری را در فرم کپی کنید. قبل از ذخیره بررسی کنید.\n\nپیشنهادی (از یادگیری):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "نوع دستگاه (ماشین لباسشویی، خشک کن، ماشین ظرفشویی، قهوه ساز، EV) را انتخاب کنید. این تگ با هر چرخه برای سازماندهی بهتر ذخیره می شود.",
           "power_sensor": "موجودیت حسگر که توان آنی را گزارش می‌کند (بر حسب وات). می‌توانید هرزمان خواستید بدون از دست دادن داده‌های تاریخی این مورد را تغییر دهید—در صورت تعویض دوشاخه هوشمند مفید است.",
           "min_power": "خوانش های توان بالاتر از این آستانه (بر حسب وات) نشان می دهد که دستگاه در حال کار است. برای اکثر دستگاه ها با 2W شروع کنید.",
@@ -107,7 +107,7 @@
           "notify_actions": "اقدامات اطلاع رسانی",
           "notify_people": "تأخیر تحویل تا زمانی که این افراد در خانه هستند",
           "notify_only_when_home": "تأخیر اعلان‌ها تا زمانی که فرد منتخب در خانه باشد",
-          "notify_fire_events": "رویدادهای اتوماسیون آتش سوزی",
+          "notify_fire_events": "فعال‌سازی رویدادهای اتوماسیون",
           "notify_events": "رویدادهایی برای اطلاع رسانی",
           "notify_before_end_minutes": "اعلان پیش از اتمام (دقیقه قبل از پایان)",
           "notify_live_interval_seconds": "فاصله به روز رسانی زنده (ثانیه)",
@@ -137,7 +137,7 @@
       },
       "advanced_settings": {
         "title": "تنظیمات پیشرفته",
-        "description": "آستانه تشخیص، یادگیری و رفتار پیشرفته را تنظیم کنید. پیش فرض ها برای اکثر تنظیمات به خوبی کار می کنند.",
+        "description": "آستانه تشخیص، یادگیری و رفتار پیشرفته را تنظیم کنید. پیش‌فرض‌ها برای اکثر تنظیمات به خوبی کار می‌کنند.\n\nتعداد تنظیمات پیشنهادی موجود: {suggestions_count}. از «اعمال مقادیر پیشنهادی» برای بررسی تغییرات قبل از ذخیره استفاده کنید.",
         "data": {
           "apply_suggestions": "اعمال مقادیر پیشنهادی",
           "start_threshold_w": "آستانه شروع (W)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "معکوس کردن منطق ماشه (تریگر خاموش است)"
         },
         "data_description": {
-          "apply_suggestions": "این کادر را علامت بزنید تا یک مرحله بررسی برای مقادیر پیشنهادی از الگوریتم یادگیری باز شود. هیچ چیزی به طور خودکار ذخیره نمی شود.\n\nپیشنهادی (از یادگیری):\n- حداقل_قدرت: {suggested_min_power} وات\n- off_delay: {suggested_off_delay} ثانیه\n- watchdog_interval: {suggested_watchdog_interval} ثانیه\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} ثانیه\n- خودکار_برچسب_اعتماد: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- آستانه_پایان_انرژی: {suggested_end_energy_threshold} ساعت\n- running_dead_zone: {suggested_running_dead_zone} ثانیه\n{suggested_reason}",
+          "apply_suggestions": "این کادر را علامت بزنید تا یک مرحله بررسی برای مقادیر پیشنهادی از الگوریتم یادگیری باز شود. هیچ چیزی به طور خودکار ذخیره نمی شود.\n\nپیشنهادی (از یادگیری):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "برای شروع یک چرخه، توان باید بالاتر از این آستانه باشد. بالاتر از قدرت آماده به کار خود تنظیم کنید. پیش فرض: min_power + 1 W.",
           "stop_threshold_w": "برای پایان یک چرخه، توان باید زیر این آستانه باشد. برای جلوگیری از سر و صدایی که باعث ایجاد انتهای کاذب می شود، کمی بالای صفر تنظیم کنید. پیش فرض: 0.6 * min_power.",
           "min_off_gap": "اگر یک چرخه در این چند ثانیه از پایان چرخه قبلی شروع شود، آنها در یک چرخه واحد ادغام می شوند.",
@@ -579,14 +579,14 @@
         }
       },
       "trim_cycle_start": {
-        "title": "Trim Start را تنظیم کنید",
+        "title": "تنظیم نقطه شروع کوتاه‌سازی",
         "description": "فاصله دقیقه را برای شروع نگهداری داده ها از (0 = شروع چرخه) وارد کنید.",
         "data": {
           "trim_start_min": "شروع (دقیقه)"
         }
       },
       "trim_cycle_end": {
-        "title": "Trim End را تنظیم کنید",
+        "title": "تنظیم نقطه پایان کوتاه‌سازی",
         "description": "برای توقف نگه‌داشتن داده‌ها، فاصله دقیقه را وارد کنید.",
         "data": {
           "trim_end_min": "پایان (دقیقه)"
@@ -646,34 +646,34 @@
         "current_suffix": "(جاری)",
         "editor_select_info": "1 چرخه را برای تقسیم یا 2+ چرخه را برای ادغام انتخاب کنید.",
         "no_cycles_recorded": "هنوز هیچ چرخه ای ثبت نشده است.",
-        "profile_summary_line": "- **{name}**: {count} چرخه، میانگین {avg} متر",
+        "profile_summary_line": "- **{name}**: {count} چرخه، میانگین {avg} دقیقه",
         "no_profiles_created": "هنوز هیچ پروفایلی ایجاد نشده است.",
         "phase_preview": "پیش نمایش فاز",
         "phase_preview_no_curve": "منحنی نمایه متوسط ​​هنوز در دسترس نیست. چرخه های بیشتری را برای این نمایه اجرا کنید/برچسب بزنید.",
         "average_power_curve": "منحنی توان متوسط",
         "unit_min": "دقیقه",
-        "profile_option_fmt": "{name} ({count} چرخه، میانگین ~{duration} متر)",
-        "profile_option_short_fmt": "{name} ({count} چرخه، ~{duration} متر)",
+        "profile_option_fmt": "{name} ({count} چرخه، ~{duration} دقیقه به طور میانگین)",
+        "profile_option_short_fmt": "{name} ({count} چرخه، ~{duration} دقیقه)",
         "deleted_cycles_from_profile": "{count} چرخه از {profile} حذف شد.",
         "not_enough_data_graph": "داده های کافی برای تولید نمودار وجود ندارد.",
         "no_profiles_found": "هیچ پروفایلی پیدا نشد",
-        "cycle_info_fmt": "چرخه: {start}، {duration}m، فعلی: {label}",
+        "cycle_info_fmt": "چرخه: {start}، {duration} دقیقه، فعلی: {label}",
         "top_candidates_header": "### نامزدهای برتر",
         "tbl_profile": "نمایه",
-        "tbl_confidence": "اعتماد به نفس",
+        "tbl_confidence": "اطمینان",
         "tbl_correlation": "همبستگی",
-        "tbl_duration_match": "مسابقه مدت",
+        "tbl_duration_match": "تطابق مدت",
         "detected_profile": "نمایه شناسایی شده",
         "estimated_duration": "مدت زمان تخمینی",
         "actual_duration": "مدت زمان واقعی",
         "choose_action": "__یک اقدام زیر را انتخاب کنید:__",
-        "tbl_count": "بشمار",
+        "tbl_count": "تعداد",
         "tbl_avg": "میانگین",
         "tbl_min": "حداقل",
         "tbl_max": "حداکثر",
         "tbl_energy_avg": "انرژی (میانگین)",
         "tbl_energy_total": "انرژی (کل)",
-        "tbl_consistency": "تشکیل شود.",
+        "tbl_consistency": "یکنواختی",
         "tbl_last_run": "آخرین اجرا",
         "graph_legend_title": "افسانه نمودار",
         "graph_legend_body": "نوار آبی نشان دهنده حداقل و حداکثر بازه مصرف توان مشاهده شده است. خط منحنی توان متوسط ​​را نشان می دهد.",
@@ -871,7 +871,7 @@
       }
     },
     "export_config": {
-      "name": "Export Config",
+      "name": "صادر کردن پیکربندی",
       "description": "نمایه‌ها، چرخه‌ها و تنظیمات این دستگاه را به یک فایل JSON (در هر دستگاه) صادر کنید.",
       "fields": {
         "device_id": {
@@ -978,7 +978,7 @@
   "entity": {
     "binary_sensor": {
       "running": {
-        "name": "در حال دویدن"
+        "name": "در حال کار"
       },
       "match_ambiguity": {
         "name": "ابهام مطابقت"
@@ -986,19 +986,19 @@
     },
     "sensor": {
       "washer_state": {
-        "name": "ایالت",
+        "name": "وضعیت",
         "state": {
           "off": "خاموش",
-          "idle": "بیکار",
-          "starting": "شروع کردن",
-          "running": "در حال دویدن",
+          "idle": "در انتظار",
+          "starting": "در حال شروع",
+          "running": "در حال کار",
           "paused": "مکث کرد",
           "ending": "پایان یافتن",
           "finished": "تمام شد",
           "anti_wrinkle": "ضد چروک",
           "interrupted": "قطع شد",
-          "force_stopped": "زور متوقف شد",
-          "rinse": "آبکشی کنید",
+          "force_stopped": "اجباری متوقف شد",
+          "rinse": "آبکشی",
           "unknown": "ناشناس"
         }
       },
@@ -1024,7 +1024,7 @@
         "name": "اطلاعات اشکال زدایی"
       },
       "match_confidence": {
-        "name": "مطابقت با اعتماد به نفس"
+        "name": "اطمینان تطابق"
       },
       "top_candidates": {
         "name": "نامزدهای برتر",
@@ -1039,11 +1039,11 @@
         "name": "فاز"
       },
       "profile_cycle_count": {
-        "name": "تعداد {profile_name} نمایه",
+        "name": "تعداد چرخه‌های نمایه {profile_name}",
         "unit_of_measurement": "چرخه ها"
       },
       "suggestions": {
-        "name": "تنظیمات پیشنهادی"
+        "name": "تنظیمات پیشنهادی موجود"
       }
     },
     "select": {
@@ -1056,7 +1056,7 @@
     },
     "button": {
       "force_end_cycle": {
-        "name": "چرخه پایان اجباری"
+        "name": "پایان اجباری چرخه"
       }
     }
   },
