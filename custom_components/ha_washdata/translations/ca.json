@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Configuració",
-        "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.",
+        "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.\n\nConfiguració suggerida disponible actualment: {suggestions_count}.\nSi és superior a 0, obre la Configuració avançada i usa 'Aplica els valors suggerits' per revisar les recomanacions.",
         "data": {
           "apply_suggestions": "Aplicar els valors suggerits",
           "device_type": "Tipus de dispositiu",
@@ -80,7 +80,7 @@
           "show_advanced": "Edita la configuració avançada (pas següent)"
         },
         "data_description": {
-          "apply_suggestions": "Marqueu aquesta casella per copiar els valors suggerits per l'algoritme d'aprenentatge al formulari. Revisa abans de desar.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- retard_apagat: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerància_durada: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- llindar_energètic_final: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Marqueu aquesta casella per copiar els valors suggerits per l'algoritme d'aprenentatge al formulari. Revisa abans de desar.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Seleccioneu el tipus d'aparell (rentadora, assecadora, rentavaixelles, cafetera, EV). Aquesta etiqueta s'emmagatzema amb cada cicle per a una millor organització.",
           "power_sensor": "L'entitat sensora que informa de la potència en temps real (en watts). Podeu canviar-ho en qualsevol moment sense perdre les dades històriques; és útil si substituïu un connector intel·ligent.",
           "min_power": "Les lectures de potència per sobre d'aquest llindar (en watts) indiquen que l'aparell està en funcionament. Comenceu amb 2 W per a la majoria de dispositius.",
@@ -137,7 +137,7 @@
       },
       "advanced_settings": {
         "title": "Configuració avançada",
-        "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.",
+        "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.\n\nConfiguració suggerida disponible actualment: {suggestions_count}. Usa 'Aplica els valors suggerits' per revisar els canvis abans de desar.",
         "data": {
           "apply_suggestions": "Aplicar els valors suggerits",
           "start_threshold_w": "Llindar inicial (W)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Inverteix la lògica de l'activació (disparador desactivat)"
         },
         "data_description": {
-          "apply_suggestions": "Marqueu aquesta casella per obrir un pas de revisió dels valors suggerits de l'algoritme d'aprenentatge. No es desa res automàticament.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- retard_apagat: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerància_durada: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- llindar_energètic_final: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Marqueu aquesta casella per obrir un pas de revisió dels valors suggerits de l'algoritme d'aprenentatge. No es desa res automàticament.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "La potència ha de pujar per sobre d'aquest llindar per iniciar un cicle. Estableix una potència superior a la teva en espera. Per defecte: min_power + 1 W.",
           "stop_threshold_w": "L'energia ha de baixar per sota d'aquest llindar per FINALITZAR un cicle. Establiu just per sobre de zero per evitar que el soroll provoqui finals falsos. Per defecte: 0,6 * min_power.",
           "min_off_gap": "Si un cicle s'inicia en tants segons des de la finalització de l'anterior, es FUSIONARÀ en un sol cicle.",

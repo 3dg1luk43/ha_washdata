@@ -40,7 +40,7 @@
       "init": {
         "menu_options": {
           "learning_feedbacks": "Pregledajte povratne informacije o učenju",
-          "settings": "postavke",
+          "settings": "Postavke",
           "notifications": "Obavijesti",
           "manage_cycles": "Upravljanje ciklusima",
           "manage_profiles": "Upravljanje profilima",
@@ -57,8 +57,8 @@
         }
       },
       "settings": {
-        "title": "postavke",
-        "description": "Podešavanje pragova otkrivanja, učenja i naprednog ponašanja. Zadane postavke dobro funkcioniraju za većinu postavki.",
+        "title": "Postavke",
+        "description": "Podešavanje pragova otkrivanja, učenja i naprednog ponašanja. Zadane postavke dobro funkcioniraju za većinu postavki.\n\nTrenutno dostupne predložene postavke: {suggestions_count}.\nAko je taj broj veći od 0, otvorite Napredne postavke i upotrijebite 'Primijeni predložene vrijednosti' za pregled preporuka.",
         "data": {
           "apply_suggestions": "Primijeni predložene vrijednosti",
           "device_type": "Vrsta uređaja",
@@ -69,7 +69,7 @@
           "notify_actions": "Radnje obavijesti",
           "notify_people": "Odgodite dostavu dok ovi ljudi ne dođu kući",
           "notify_only_when_home": "Odgodite obavijesti dok odabrana osoba ne bude kod kuće",
-          "notify_fire_events": "Događaji automatizacije požara",
+          "notify_fire_events": "Aktiviranje automatizacijskih događaja",
           "notify_events": "Događaji za obavijest",
           "notify_before_end_minutes": "Obavijest prije završetka (minuti prije završetka)",
           "notify_title": "Naslov obavijesti",
@@ -80,7 +80,7 @@
           "show_advanced": "Uredi napredne postavke (sljedeći korak)"
         },
         "data_description": {
-          "apply_suggestions": "Označite ovaj okvir za kopiranje vrijednosti koje predlaže algoritam učenja u obrazac. Pregledajte prije spremanja.\n\nPredloženo (iz učenja):\n- min_snaga: {suggested_min_power} W\n- odgoda_isključivanja: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerancija_trajanja: {suggested_duration_tolerance}\n- tolerancija_trajanja profila: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- početni_prag_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- trčanje_mrtva_zona: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Označite ovaj okvir za kopiranje vrijednosti koje predlaže algoritam učenja u obrazac. Pregledajte prije spremanja.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Odaberite vrstu uređaja (perilica rublja, sušilica rublja, perilica posuđa, aparat za kavu, EV). Ova oznaka se pohranjuje sa svakim ciklusom radi bolje organizacije.",
           "power_sensor": "Entitet senzora koji prijavljuje snagu u stvarnom vremenu (u vatima). To možete promijeniti bilo kada bez gubitka povijesnih podataka—korisno ako zamijenite pametni utikač.",
           "min_power": "Očitavanje snage iznad ovog praga (u vatima) znači da uređaj radi. Počnite s 2 W za većinu uređaja.",
@@ -107,7 +107,7 @@
           "notify_actions": "Radnje obavijesti",
           "notify_people": "Odgodite dostavu dok ovi ljudi ne dođu kući",
           "notify_only_when_home": "Odgodite obavijesti dok odabrana osoba ne bude kod kuće",
-          "notify_fire_events": "Događaji automatizacije požara",
+          "notify_fire_events": "Aktiviranje automatizacijskih događaja",
           "notify_events": "Događaji za obavijest",
           "notify_before_end_minutes": "Obavijest prije završetka (minuti prije završetka)",
           "notify_live_interval_seconds": "Interval ažuriranja uživo (sekunde)",
@@ -168,9 +168,9 @@
           "completion_min_seconds": "Minimalno vrijeme izvođenja do završetka (sekunde)",
           "notify_before_end_minutes": "Obavijest prije završetka (minuti prije završetka)",
           "auto_tune_noise_events_threshold": "Auto-Tune: Prag događaja buke",
-          "running_dead_zone": "Trčanje mrtve zone (sekunde)",
+          "running_dead_zone": "Mrtva zona pri pokretanju (sekunde)",
           "end_repeat_count": "Kraj brojanja ponavljanja",
-          "start_energy_threshold": "Start Energy Gate (Wh)",
+          "start_energy_threshold": "Prag početne energije (Wh)",
           "end_energy_threshold": "Vrata krajnje energije (Wh)",
           "auto_maintenance": "Omogući automatsko održavanje",
           "expose_debug_entities": "Izložite entitete za otklanjanje pogrešaka",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Invertiraj logiku okidača (okidač uključen)"
         },
         "data_description": {
-          "apply_suggestions": "Označite ovaj okvir da biste otvorili korak pregleda za predložene vrijednosti iz algoritma učenja. Ništa se ne sprema automatski.\n\nPredloženo (iz učenja):\n- min_snaga: {suggested_min_power} W\n- odgoda_isključivanja: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerancija_trajanja: {suggested_duration_tolerance}\n- tolerancija_trajanja profila: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- početni_prag_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- trčanje_mrtva_zona: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Označite ovaj okvir da biste otvorili korak pregleda za predložene vrijednosti iz algoritma učenja. Ništa se ne sprema automatski.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Snaga mora porasti IZNAD ovog praga da bi ciklus POČEO. Postavite više od snage u stanju pripravnosti. Zadano: min_power + 1 W.",
           "stop_threshold_w": "Snaga mora pasti ISPOD ovog praga da bi se ciklus ZAVRŠIO. Postavite malo iznad nule kako biste izbjegli buku koja izaziva lažne završetke. Zadano: 0,6 * min_power.",
           "min_off_gap": "Ako ciklus započne unutar toliko sekundi od završetka prethodnog, bit će SPOJENI u jedan ciklus.",
@@ -678,7 +678,7 @@
         "graph_legend_title": "Legenda grafikona",
         "graph_legend_body": "Plava traka predstavlja promatrani minimalni i maksimalni raspon potrošnje energije. Linija prikazuje krivulju prosječne snage.",
         "recording_preview": "Pregled snimanja",
-        "trim_start": "Trim Start",
+        "trim_start": "Početak podrezivanja",
         "trim_end": "Trim End",
         "split_preview_title": "Split Preview",
         "split_preview_found_fmt": "Pronađeno je {count} segmenata.",
@@ -1024,7 +1024,7 @@
         "name": "Informacije o otklanjanju pogrešaka"
       },
       "match_confidence": {
-        "name": "Podudaranje povjerenja"
+        "name": "Pouzdanost podudaranja"
       },
       "top_candidates": {
         "name": "Najbolji kandidati",

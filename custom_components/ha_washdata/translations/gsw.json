@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Einstellungen",
-        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.",
+        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.\n\nAktuell verfügbare Einstellungsvorschläge: {suggestions_count}.\nFalls dieser Wert über 0 liegt, öffnen Sie die Erweiterten Einstellungen und nutzen Sie „Vorgeschlagene Werte anwenden", um die Empfehlungen zu prüfen.",
         "data": {
           "apply_suggestions": "Vorgeschlagene Werte anwenden",
           "device_type": "Gerätetyp",
@@ -69,7 +69,7 @@
           "notify_actions": "Benachrichtigungsaktionen",
           "notify_people": "Verzögern Sie die Lieferung, bis diese Personen zu Hause sind",
           "notify_only_when_home": "Benachrichtigungen verzögern, bis die ausgewählte Person zu Hause ist",
-          "notify_fire_events": "Veranstaltungen zur Brandautomatisierung",
+          "notify_fire_events": "Automatisierungsereignisse auslösen",
           "notify_events": "Zu benachrichtigende Ereignisse",
           "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
           "notify_title": "Titel der Benachrichtigung",
@@ -80,7 +80,7 @@
           "show_advanced": "Erweiterte Einstellungen bearbeiten (nächster Schritt)"
         },
         "data_description": {
-          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n-profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Dauertoleranz: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um vom Lernalgorithmus vorgeschlagene Werte in das Formular zu kopieren. Vor dem Speichern überprüfen.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Wählen Sie den Gerätetyp (Waschmaschine, Trockner, Geschirrspüler, Kaffeemaschine, Elektroauto). Dieses Tag wird zur besseren Organisation bei jedem Zyklus gespeichert.",
           "power_sensor": "Die Sensoreinheit meldet die Leistung in Echtzeit (in Watt). Sie können dies jederzeit ändern, ohne historische Daten zu verlieren – nützlich, wenn Sie einen Smart Plug austauschen.",
           "min_power": "Leistungswerte über diesem Schwellenwert (in Watt) zeigen an, dass das Gerät läuft. Beginnen Sie bei den meisten Geräten mit 2 W.",
@@ -107,7 +107,7 @@
           "notify_actions": "Benachrichtigungsaktionen",
           "notify_people": "Verzögern Sie die Lieferung, bis diese Personen zu Hause sind",
           "notify_only_when_home": "Benachrichtigungen verzögern, bis die ausgewählte Person zu Hause ist",
-          "notify_fire_events": "Veranstaltungen zur Brandautomatisierung",
+          "notify_fire_events": "Automatisierungsereignisse auslösen",
           "notify_events": "Zu benachrichtigende Ereignisse",
           "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
           "notify_live_interval_seconds": "Live-Update-Intervall (Sekunden)",
@@ -146,7 +146,7 @@
           "start_duration_threshold": "Start-Entprellungsdauer (s)",
           "progress_reset_delay": "Verzögerung beim Zurücksetzen des Fortschritts (Sekunden)",
           "no_update_active_timeout": "Zeitüberschreitung bei fehlender Aktualisierung (s)",
-          "sampling_interval": "Abtastintervall (e)",
+          "sampling_interval": "Abtastintervall (s)",
           "auto_label_confidence": "Auto-Label-Konfidenz (0-1)",
           "learning_confidence": "Vertrauen der Feedback-Anfrage (0-1)",
           "duration_tolerance": "Dauertoleranz (0–0,5)",
@@ -168,7 +168,7 @@
           "completion_min_seconds": "Mindestlaufzeit für den Abschluss (Sekunden)",
           "notify_before_end_minutes": "Benachrichtigung vor Fertigstellung (Minuten vor Ende)",
           "auto_tune_noise_events_threshold": "Auto-Tune: Schwellenwert für Geräuschereignisse",
-          "running_dead_zone": "Running Dead Zone (Sekunden)",
+          "running_dead_zone": "Toter Bereich beim Start (Sekunden)",
           "end_repeat_count": "Anzahl der Wiederholungen beenden",
           "start_energy_threshold": "Startenergietor (Wh)",
           "end_energy_threshold": "Endenergietor (Wh)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Triggerlogik umkehren (Trigger auf AUS)"
         },
         "data_description": {
-          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um einen Überprüfungsschritt für vorgeschlagene Werte vom Lernalgorithmus zu öffnen. Es wird nichts automatisch gespeichert.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n-profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- Dauertoleranz: {suggested_duration_tolerance}\n- Profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- Profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- Profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Aktivieren Sie dieses Kontrollkästchen, um einen Überprüfungsschritt für vorgeschlagene Werte vom Lernalgorithmus zu öffnen. Es wird nichts automatisch gespeichert.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Die Leistung muss ÜBER diesen Schwellenwert ansteigen, um einen Zyklus zu starten. Höher einstellen als Ihre Standby-Leistung. Standard: min_power + 1 W.",
           "stop_threshold_w": "Die Leistung muss UNTER diesen Schwellenwert fallen, um einen Zyklus zu BEENDEN. Stellen Sie den Wert knapp über Null ein, um zu vermeiden, dass Rauschen falsche Enden auslöst. Standard: 0,6 * min_power.",
           "min_off_gap": "Wenn ein Zyklus innerhalb dieser Anzahl von Sekunden nach dem Ende des vorherigen beginnt, werden sie zu einem einzigen Zyklus zusammengeführt.",
@@ -411,8 +411,8 @@
           "confidence_threshold": "Minimales Vertrauen (0,50–0,95)"
         }
       },
-      "select_cycle_to_label": {
-        "title": "Wählen Sie „Zum Etikett wechseln“ aus",
+      “select_cycle_to_label”: {
+        “title”: “Zyklus zum Beschriften auswählen”,
         "description": "✓ = abgeschlossen, ⚠ = fortgesetzt, ✗ = unterbrochen",
         "data": {
           "cycle_id": "Zyklus"
@@ -422,11 +422,11 @@
         "title": "Zyklus löschen",
         "description": "⚠️ Dadurch wird der ausgewählte Zyklus dauerhaft gelöscht",
         "data": {
-          "cycle_id": "Zum Löschen wechseln"
+          "cycle_id": "Zu löschender Zyklus"
         }
       },
       "label_cycle": {
-        "title": "Etikettenzyklus",
+        "title": "Zyklus beschriften",
         "description": "{cycle_info}",
         "data": {
           "profile_name": "Profil",
@@ -803,7 +803,7 @@
   },
   "services": {
     "label_cycle": {
-      "name": "Etikettenzyklus",
+      "name": "Zyklus beschriften",
       "description": "Ordnen Sie ein vorhandenes Profil einem vergangenen Zyklus zu oder entfernen Sie die Bezeichnung.",
       "fields": {
         "device_id": {

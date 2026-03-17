@@ -19,7 +19,7 @@
       },
       "first_profile": {
         "title": "Ստեղծեք առաջին պրոֆիլը",
-        "description": "**Հեծանիվը**-ը ձեր սարքի ամբողջական գործարկումն է (օրինակ՝ լվացքի բեռնվածություն): **Պրոֆիլը** խմբավորում է այս ցիկլերը ըստ տեսակի (օրինակ՝ «Բամբակ», «Արագ լվացում»): Այժմ պրոֆիլի ստեղծումն օգնում է անմիջապես ինտեգրման գնահատման տևողությանը:\n\nԴուք կարող եք ձեռքով ընտրել այս պրոֆիլը սարքի կառավարում, եթե այն ինքնաբերաբար չի հայտնաբերվում:\n\n**Այս քայլը բաց թողնելու համար թողեք «Պրոֆիլի անունը» դատարկ։**",
+        "description": "**Ցիկլ**-ը ձեր սարքի ամբողջական գործարկումն է (օրինակ՝ լվացքի բեռնվածություն): **Պրոֆիլը** խմբավորում է այս ցիկլերը ըստ տեսակի (օրինակ՝ «Բամբակ», «Արագ լվացում»): Այժմ պրոֆիլի ստեղծումն օգնում է անմիջապես ինտեգրման գնահատման տևողությանը:\n\nԴուք կարող եք ձեռքով ընտրել այս պրոֆիլը սարքի կառավարում, եթե այն ինքնաբերաբար չի հայտնաբերվում:\n\n**Այս քայլը բաց թողնելու համար թողեք «Պրոֆիլի անունը» դատարկ։**",
         "data": {
           "profile_name": "Պրոֆիլի անունը (ըստ ցանկության)",
           "manual_duration": "Մոտավոր տեւողությունը (րոպե)"
@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Կարգավորումներ",
-        "description": "Կարգավորել հայտնաբերման շեմերը, սովորելը և առաջադեմ վարքագիծը: Կանխադրվածները լավ են աշխատում կարգավորումների մեծ մասի համար:",
+        "description": "Կարգավորել հայտնաբերման շեմերը, սովորելը և առաջադեմ վարքագիծը: Կանխադրվածները լավ են աշխատում կարգավորումների մեծ մասի համար:\n\nՀասանելի առաջարկված կարգավորումներ. {suggestions_count}:\nԵթե ​​այս թիվը 0-ից մեծ է, բացեք Ընդլայնված կարգավորումները և օգտագործեք «Կիրառել առաջարկվող արժեքները» տարբերակը՝ առաջարկությունները վերանայելու համար:",
         "data": {
           "apply_suggestions": "Կիրառել առաջարկվող արժեքները",
           "device_type": "Սարքի տեսակը",
@@ -69,7 +69,7 @@
           "notify_actions": "Ծանուցման գործողություններ",
           "notify_people": "Հետաձգեք առաքումը, քանի դեռ այս մարդիկ տանը չեն",
           "notify_only_when_home": "Հետաձգել ծանուցումները, քանի դեռ ընտրված անձը տուն չէ",
-          "notify_fire_events": "Հրդեհային ավտոմատացման միջոցառումներ",
+          "notify_fire_events": "Ավտոմատացման իրադարձությունների գործարկում",
           "notify_events": "Իրադարձություններ, որոնց մասին պետք է տեղեկացնել",
           "notify_before_end_minutes": "Նախնական ավարտի ծանուցում (ավարտից րոպեներ առաջ)",
           "notify_title": "Ծանուցման վերնագիր",
@@ -80,7 +80,7 @@
           "show_advanced": "Խմբագրել Ընդլայնված կարգավորումները (Հաջորդ քայլը)"
         },
         "data_description": {
-          "apply_suggestions": "Նշեք այս վանդակը՝ ուսուցման ալգորիթմի առաջարկած արժեքները ձևաթղթում պատճենելու համար: Վերանայեք նախքան պահպանումը:\n\nԱռաջարկվում է (սովորելուց).\n- նվազագույն_հզորությունը՝ {suggested_min_power} Վտ\n- off_delay՝ {suggested_off_delay} վ\n- watchdog_interval՝ {suggested_watchdog_interval} վ\n- no_update_active_timeout՝ {suggested_no_update_active_timeout} s\n- profile_match_interval՝ {suggested_profile_match_interval} վ\n- ավտոմատ_պիտակ_վստահություն՝ {suggested_auto_label_confidence}\n- տևողություն_հանդուրժողականություն՝ {suggested_duration_tolerance}\n- պրոֆիլի_տեւողության_հանդուրժողականություն՝ {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio՝ {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio՝ {suggested_profile_match_max_duration_ratio}\n- start_threshold_w՝ {suggested_start_threshold_w} W\n- stop_threshold_w՝ {suggested_stop_threshold_w} Վ\n- վերջի_էներգիայի_շեմը՝ {suggested_end_energy_threshold} Վտ\n- running_dead_zone՝ {suggested_running_dead_zone} վ\n{suggested_reason}",
+          "apply_suggestions": "Նշեք այս վանդակը՝ ուսուցման ալգորիթմի առաջարկած արժեքները ձևաթղթում պատճենելու համար: Վերանայեք նախքան պահպանումը:\n\nԱռաջարկվում է (սովորելուց).\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Ընտրեք սարքի տեսակը (Լվացքի մեքենա, չորանոց, աման լվացող մեքենա, սուրճի մեքենա, EV): Այս պիտակը պահվում է յուրաքանչյուր ցիկլի հետ ավելի լավ կազմակերպման համար:",
           "power_sensor": "Սենսորային միավորը, որը հաղորդում է իրական ժամանակի հզորությունը (վտներով): Դուք ցանկացած ժամանակ կարող եք փոխել սա՝ առանց պատմական տվյալների կորստի, ինչը օգտակար է, եթե փոխարինեք խելացի վարդակից:",
           "min_power": "Այս շեմից բարձր հզորության ցուցանիշները (վտ) ցույց են տալիս, որ սարքը աշխատում է: Սարքերի մեծ մասի համար սկսեք 2W-ից:",
@@ -107,7 +107,7 @@
           "notify_actions": "Ծանուցման գործողություններ",
           "notify_people": "Հետաձգեք առաքումը, քանի դեռ այս մարդիկ տանը չեն",
           "notify_only_when_home": "Հետաձգել ծանուցումները, քանի դեռ ընտրված անձը տուն չէ",
-          "notify_fire_events": "Հրդեհային ավտոմատացման միջոցառումներ",
+          "notify_fire_events": "Ավտոմատացման իրադարձությունների գործարկում",
           "notify_events": "Իրադարձություններ, որոնց մասին պետք է տեղեկացնել",
           "notify_before_end_minutes": "Նախնական ավարտի ծանուցում (ավարտից րոպեներ առաջ)",
           "notify_live_interval_seconds": "Ուղիղ թարմացումների ընդմիջում (վայրկյաններ)",
@@ -163,15 +163,15 @@
           "abrupt_high_load_factor": "Ընդհատված՝ բարձր ծանրաբեռնվածության գործակից",
           "max_past_cycles": "Պահպանում. առավելագույն պահպանված ցիկլեր",
           "max_full_traces_per_profile": "Պահպանում. առավելագույն ամբողջական հետքեր մեկ պրոֆիլում",
-          "max_full_traces_unlabeled": "Պահպանում. Max Full Traces Unlabeled",
+          "max_full_traces_unlabeled": "Պահպանում. Առավելագույն ամբողջական հետքեր՝ առանց պիտակի",
           "watchdog_interval": "Watchdog ընդմիջում (վայրկյան)",
           "completion_min_seconds": "Ավարտման նվազագույն ժամկետը (վայրկյան)",
           "notify_before_end_minutes": "Նախնական ավարտի ծանուցում (ավարտից րոպեներ առաջ)",
           "auto_tune_noise_events_threshold": "Ավտոմատ կարգավորում. աղմուկի իրադարձությունների շեմ",
-          "running_dead_zone": "Վազող մեռյալ գոտի (վայրկյան)",
+          "running_dead_zone": "Մեռյալ գոտի մեկնարկից հետո (վայրկյան)",
           "end_repeat_count": "Ավարտել Կրկնությունների հաշվարկը",
-          "start_energy_threshold": "Start Energy Gate (Wh)",
-          "end_energy_threshold": "End Energy Gate (Wh)",
+          "start_energy_threshold": "Մեկնարկի էներգիայի դարպաս (Wh)",
+          "end_energy_threshold": "Ավարտի էներգիայի դարպաս (Wh)",
           "auto_maintenance": "Միացնել ավտոմատ սպասարկումը",
           "expose_debug_entities": "Բացահայտեք վրիպազերծման սուբյեկտները",
           "save_debug_traces": "Պահպանեք վրիպազերծման հետքերը",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Շրջել ձգանման տրամաբանությունը (գործարկիչը անջատված է)"
         },
         "data_description": {
-          "apply_suggestions": "Նշեք այս վանդակը՝ ուսումնական ալգորիթմից առաջարկվող արժեքների վերանայման քայլ բացելու համար: Ոչինչ ինքնաբերաբար չի պահպանվում:\n\nԱռաջարկվում է (սովորելուց).\n- նվազագույն_հզորությունը՝ {suggested_min_power} Վտ\n- off_delay՝ {suggested_off_delay} վ\n- watchdog_interval՝ {suggested_watchdog_interval} վ\n- no_update_active_timeout՝ {suggested_no_update_active_timeout} s\n- profile_match_interval՝ {suggested_profile_match_interval} վ\n- ավտոմատ_պիտակ_վստահություն՝ {suggested_auto_label_confidence}\n- տևողություն_հանդուրժողականություն՝ {suggested_duration_tolerance}\n- պրոֆիլի_տեւողության_հանդուրժողականություն՝ {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio՝ {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio՝ {suggested_profile_match_max_duration_ratio}\n- start_threshold_w՝ {suggested_start_threshold_w} W\n- stop_threshold_w՝ {suggested_stop_threshold_w} Վ\n- վերջի_էներգիայի_շեմը՝ {suggested_end_energy_threshold} Վտ\n- running_dead_zone՝ {suggested_running_dead_zone} վ\n{suggested_reason}",
+          "apply_suggestions": "Նշեք այս վանդակը՝ ուսումնական ալգորիթմից առաջարկվող արժեքների վերանայման քայլ բացելու համար: Ոչինչ ինքնաբերաբար չի պահպանվում:\n\nԱռաջարկվում է (սովորելուց).\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Ցիկլը սկսելու համար հզորությունը պետք է բարձրանա այս շեմից: Սահմանեք ավելի բարձր, քան ձեր սպասման հզորությունը: Կանխադրված՝ min_power + 1 W:",
           "stop_threshold_w": "Հզորությունը պետք է ընկնի այս շեմից՝ ցիկլը ավարտելու համար: Սահմանեք զրոյից մի փոքր վեր՝ կեղծ ծայրեր առաջացնող աղմուկից խուսափելու համար: Կանխադրված՝ 0,6 * min_power:",
           "min_off_gap": "Եթե ​​ցիկլը սկսվում է նախորդի ավարտից այս վայրկյանների ընթացքում, ապա դրանք կմիաձուլվեն մեկ ցիկլի մեջ:",
@@ -579,14 +579,14 @@
         }
       },
       "trim_cycle_start": {
-        "title": "Կարգավորել Trim Start-ը",
+        "title": "Սահմանել կտրման մեկնարկ",
         "description": "Մուտքագրեք րոպեի շեղումը, որից սկսեք տվյալները պահել (0 = ցիկլի սկիզբ):",
         "data": {
           "trim_start_min": "Սկիզբ (րոպե)"
         }
       },
       "trim_cycle_end": {
-        "title": "Կարգավորել Trim End",
+        "title": "Սահմանել կտրման ավարտ",
         "description": "Մուտքագրեք րոպեի շեղումը, որպեսզի դադարեցնեք տվյալների պահպանումը:",
         "data": {
           "trim_end_min": "Ավարտ (րոպե)"
@@ -678,9 +678,9 @@
         "graph_legend_title": "Գրաֆիկի լեգենդ",
         "graph_legend_body": "Կապույտ գոտին ներկայացնում է նվազագույն և առավելագույն էներգիայի ընդունման տիրույթը: Գիծը ցույց է տալիս միջին հզորության կորը:",
         "recording_preview": "Ձայնագրման նախադիտում",
-        "trim_start": "Կարճացրեք մեկնարկը",
+        "trim_start": "Կտրման մեկնարկ",
         "trim_end": "Կտրել վերջը",
-        "split_preview_title": "Split Preview",
+        "split_preview_title": "Բաժանման նախադիտում",
         "split_preview_found_fmt": "Գտնվել է {count} հատված:",
         "split_preview_confirm_fmt": "Սեղմեք Հաստատել՝ այս ցիկլը {count} առանձին ցիկլերի բաժանելու համար:",
         "merge_preview_title": "Միաձուլման նախադիտում",

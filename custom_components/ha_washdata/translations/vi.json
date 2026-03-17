@@ -69,7 +69,7 @@
           "notify_actions": "Hành động thông báo",
           "notify_people": "Trì hoãn giao hàng cho đến khi những người này về nhà",
           "notify_only_when_home": "Trì hoãn thông báo cho đến khi người được chọn ở nhà",
-          "notify_fire_events": "Sự kiện tự động hóa chữa cháy",
+          "notify_fire_events": "Kích hoạt sự kiện tự động hóa",
           "notify_events": "Sự kiện cần thông báo",
           "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
           "notify_title": "Tiêu đề thông báo",
@@ -80,7 +80,7 @@
           "show_advanced": "Chỉnh sửa cài đặt nâng cao (Bước tiếp theo)"
         },
         "data_description": {
-          "apply_suggestions": "Chọn hộp này để sao chép các giá trị do thuật toán học đề xuất vào biểu mẫu. Xem lại trước khi lưu.\n\nĐề xuất (từ học tập):\n- công suất tối thiểu: {suggested_min_power} W\n- off_delay: {suggested_off_delay} giây\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} giây\n- profile_match_interval: {suggested_profile_match_interval} giây\n- auto_label_trust: {suggested_auto_label_confidence}\n- thời lượng_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- Running_dead_zone: {suggested_running_dead_zone} giây\n{suggested_reason}",
+          "apply_suggestions": "Chọn hộp này để sao chép các giá trị do thuật toán học đề xuất vào biểu mẫu. Xem lại trước khi lưu.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Chọn loại thiết bị (Máy giặt, Máy sấy, Máy rửa chén, Máy pha cà phê, EV). Thẻ này được lưu trữ theo từng chu kỳ để tổ chức tốt hơn.",
           "power_sensor": "Thực thể cảm biến báo cáo công suất theo thời gian thực (tính bằng watt). Bạn có thể thay đổi điều này bất kỳ lúc nào mà không làm mất dữ liệu lịch sử—hữu ích nếu bạn thay thế phích cắm thông minh.",
           "min_power": "Chỉ số công suất trên ngưỡng này (tính bằng watt) cho biết thiết bị đang chạy. Bắt đầu với 2W cho hầu hết các thiết bị.",
@@ -89,7 +89,7 @@
           "notify_actions": "Chuỗi hành động Home Assistant tùy chọn để chạy thông báo (tập lệnh, thông báo, TTS, v.v.). Nếu được đặt, các hành động sẽ chạy trước dịch vụ thông báo dự phòng.",
           "notify_people": "Các thực thể con người được sử dụng để kiểm soát sự hiện diện. Khi được bật, việc gửi thông báo sẽ bị trì hoãn cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_only_when_home": "Nếu được bật, hãy trì hoãn thông báo cho đến khi có ít nhất một người được chọn ở nhà.",
-          "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started và ha_washdata_cycle_ends) để thúc đẩy quá trình tự động hóa.",
+          "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started và ha_washdata_cycle_ended) để thúc đẩy quá trình tự động hóa.",
           "notify_events": "Những sự kiện nào cần gửi thông báo.",
           "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
           "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
@@ -107,7 +107,7 @@
           "notify_actions": "Hành động thông báo",
           "notify_people": "Trì hoãn giao hàng cho đến khi những người này về nhà",
           "notify_only_when_home": "Trì hoãn thông báo cho đến khi người được chọn ở nhà",
-          "notify_fire_events": "Sự kiện tự động hóa chữa cháy",
+          "notify_fire_events": "Kích hoạt sự kiện tự động hóa",
           "notify_events": "Sự kiện cần thông báo",
           "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
           "notify_live_interval_seconds": "Khoảng thời gian cập nhật trực tiếp (giây)",
@@ -123,7 +123,7 @@
           "notify_actions": "Chuỗi hành động Home Assistant tùy chọn để chạy thông báo (tập lệnh, thông báo, TTS, v.v.). Nếu được đặt, các hành động sẽ chạy trước dịch vụ thông báo dự phòng.",
           "notify_people": "Các thực thể con người được sử dụng để kiểm soát sự hiện diện. Khi được bật, việc gửi thông báo sẽ bị trì hoãn cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_only_when_home": "Nếu được bật, hãy trì hoãn thông báo cho đến khi có ít nhất một người được chọn ở nhà.",
-          "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started và ha_washdata_cycle_ends) để thúc đẩy quá trình tự động hóa.",
+          "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started và ha_washdata_cycle_ended) để thúc đẩy quá trình tự động hóa.",
           "notify_events": "Những sự kiện nào cần gửi thông báo.",
           "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
           "notify_live_interval_seconds": "Tần suất cập nhật tiến độ được gửi trong khi chạy. Giá trị thấp hơn phản hồi nhanh hơn nhưng tiêu thụ nhiều thông báo hơn. Tối thiểu 30 giây được thực thi — các giá trị dưới 30 giây sẽ tự động được làm tròn thành 30 giây.",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Đảo ngược logic kích hoạt (Kích hoạt khi TẮT)"
         },
         "data_description": {
-          "apply_suggestions": "Chọn hộp này để mở bước xem xét các giá trị được đề xuất từ ​​thuật toán học. Không có gì được lưu tự động.\n\nĐề xuất (từ học tập):\n- công suất tối thiểu: {suggested_min_power} W\n- off_delay: {suggested_off_delay} giây\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} giây\n- profile_match_interval: {suggested_profile_match_interval} giây\n- auto_label_trust: {suggested_auto_label_confidence}\n- thời lượng_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- Running_dead_zone: {suggested_running_dead_zone} giây\n{suggested_reason}",
+          "apply_suggestions": "Chọn hộp này để mở bước xem xét các giá trị được đề xuất từ ​​thuật toán học. Không có gì được lưu tự động.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Công suất phải tăng TRÊN ngưỡng này để BẮT ĐẦU một chu kỳ. Đặt cao hơn nguồn điện dự phòng của bạn. Mặc định: min_power + 1 W.",
           "stop_threshold_w": "Công suất phải giảm xuống DƯỚI ngưỡng này để KẾT THÚC một chu kỳ. Đặt ngay trên 0 để tránh tiếng ồn gây ra các đầu sai. Mặc định: 0,6 * min_power.",
           "min_off_gap": "Nếu một chu kỳ bắt đầu trong vòng nhiều giây này kể từ khi kết thúc chu kỳ trước đó, chúng sẽ được HỢP NHẤT thành một chu kỳ duy nhất.",

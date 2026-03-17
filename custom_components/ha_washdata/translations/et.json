@@ -45,7 +45,7 @@
           "manage_cycles": "Tsükleid hallata",
           "manage_profiles": "Profiilide haldamine",
           "manage_phase_catalog": "Halda faasikataloogi",
-          "record_cycle": "Salvestustsükkel (käsitsi)",
+          "record_cycle": "Tsükli salvestamine (käsitsi)",
           "diagnostics": "Diagnostika ja hooldus"
         }
       },
@@ -58,7 +58,7 @@
       },
       "settings": {
         "title": "Seaded",
-        "description": "Tuvastamise lävede, õppimise ja täiustatud käitumise häälestamine. Vaikimisi töötavad enamiku seadistuste puhul hästi.",
+        "description": "Tuvastamise lävede, õppimise ja täiustatud käitumise häälestamine. Vaikimisi töötavad enamiku seadistuste puhul hästi.\n\nPraegu saadaolevate soovituslike seadete arv: {suggestions_count}.\nKui see on suurem kui 0, ava Täpsemad seaded ja kasuta Rakenda soovituslikud väärtused soovituste ülevaatamiseks.",
         "data": {
           "apply_suggestions": "Rakendage soovitatud väärtused",
           "device_type": "Seadme tüüp",
@@ -69,19 +69,19 @@
           "notify_actions": "Teavitustoimingud",
           "notify_people": "Viivitada kohaletoimetamisega, kuni need inimesed koju jõuavad",
           "notify_only_when_home": "Viivitage teatised, kuni valitud inimene on kodus",
-          "notify_fire_events": "Tulekahju automatiseerimise sündmused",
+          "notify_fire_events": "Automaatikaürituste käivitamine",
           "notify_events": "Sündmused, millest teavitada",
           "notify_before_end_minutes": "Lõpetamiseelne teatis (minutid enne lõppu)",
           "notify_title": "Teatise pealkiri",
           "notify_icon": "Teavituse ikoon",
-          "notify_start_message": "Käivitage Sõnumi vorming",
-          "notify_finish_message": "Lõpeta sõnumi vormindamine",
+          "notify_start_message": "Käivitussõnumi vorming",
+          "notify_finish_message": "Lõpusõnumi vorming",
           "notify_pre_complete_message": "Lõpetamiseelne sõnumivorming",
           "show_advanced": "Muuda täpsemaid seadeid (järgmine samm)"
         },
         "data_description": {
-          "apply_suggestions": "Märkige see ruut, et kopeerida vormile õppealgoritmi soovitatud väärtused. Enne salvestamist vaadake üle.\n\nSoovitatav (õppimisest):\n- min_võimsus: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- valvekoera_intervall: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- automaatne_sildi_kindlus: {suggested_auto_label_confidence}\n- kestuse_tolerants: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- algus_lävi_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- lõpp_energia_lävi: {suggested_end_energy_threshold} Wh\n- jooksev_surnud_tsoon: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "Valige seadme tüüp (pesumasin, kuivati, nõudepesumasin, kohvimasin, EV). See silt salvestatakse paremaks korraldamiseks iga tsükliga.",
+          "apply_suggestions": "Märkige see ruut, et kopeerida vormile õppealgoritmi soovitatud väärtused. Enne salvestamist vaadake üle.\n\nSoovitatav (õppimisest):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "device_type": "Vali seadme tüüp (pesumasin, kuivati, nõudepesumasin, kohvimasin, EV). See silt salvestatakse paremaks korraldamiseks iga tsükliga.",
           "power_sensor": "Anduri olem, mis annab aru reaalajas võimsusest (vattides). Saate seda igal ajal muuta ilma ajaloolisi andmeid kaotamata – see on kasulik, kui vahetate nutika pistiku.",
           "min_power": "Sellest läviväärtusest kõrgemad võimsusnäidud (vattides) näitavad, et seade töötab. Enamiku seadmete puhul alustage 2W-st.",
           "off_delay": "Sekundite jooksul peab tasandatud võimsus jääma allapoole peatumisläve, et tähistada lõpetamist. Vaikimisi: 120 s.",
@@ -107,15 +107,15 @@
           "notify_actions": "Teavitustoimingud",
           "notify_people": "Viivitada kohaletoimetamisega, kuni need inimesed koju jõuavad",
           "notify_only_when_home": "Viivitage teatised, kuni valitud inimene on kodus",
-          "notify_fire_events": "Tulekahju automatiseerimise sündmused",
+          "notify_fire_events": "Automaatikaürituste käivitamine",
           "notify_events": "Sündmused, millest teavitada",
           "notify_before_end_minutes": "Lõpetamiseelne teatis (minutid enne lõppu)",
           "notify_live_interval_seconds": "Reaalajas värskendamise intervall (sekundites)",
           "notify_live_overrun_percent": "Reaalajas värskenduse ületamise luba (%)",
           "notify_title": "Teatise pealkiri",
           "notify_icon": "Teavituse ikoon",
-          "notify_start_message": "Käivitage Sõnumi vorming",
-          "notify_finish_message": "Lõpeta sõnumi vormindamine",
+          "notify_start_message": "Käivitussõnumi vorming",
+          "notify_finish_message": "Lõpusõnumi vorming",
           "notify_pre_complete_message": "Lõpetamiseelne sõnumivorming"
         },
         "data_description": {
@@ -137,7 +137,7 @@
       },
       "advanced_settings": {
         "title": "Täpsemad seaded",
-        "description": "Tuvastamise lävede, õppimise ja täiustatud käitumise häälestamine. Vaikimisi töötavad enamiku seadistuste puhul hästi.",
+        "description": "Tuvastamise lävede, õppimise ja täiustatud käitumise häälestamine. Vaikimisi töötavad enamiku seadistuste puhul hästi.\n\nPraegu saadaolevate soovituslike seadete arv: {suggestions_count}. Kasuta Rakenda soovituslikud väärtused muudatuste ülevaatamiseks enne salvestamist.",
         "data": {
           "apply_suggestions": "Rakendage soovitatud väärtused",
           "start_threshold_w": "Alguslävi (W)",
@@ -158,7 +158,7 @@
           "profile_unmatch_threshold": "Profiili mittevastavuse lävi",
           "profile_duration_tolerance": "Profiilivaste kestuse tolerants (0–0,5)",
           "interrupted_min_seconds": "Katkestatud: minimaalne tööaeg (sekundites)",
-          "abrupt_drop_watts": "Katkestatud: Abrupt Drop Absolute (W)",
+          "abrupt_drop_watts": "Katkestatud: järsu languse absoluutväärtus (W)",
           "abrupt_drop_ratio": "Katkestatud: järsu languse suhe (0-1)",
           "abrupt_high_load_factor": "Katkestatud: kõrge koormustegur",
           "max_past_cycles": "Säilitamine: maksimaalne salvestatud tsüklite arv",
@@ -182,10 +182,10 @@
           "dtw_bandwidth": "DTW ribalaius",
           "external_end_trigger_enabled": "Luba väline tsükli lõpu päästik",
           "external_end_trigger": "Väline tsükli lõpu andur",
-          "external_end_trigger_inverted": "Invert Trigger Logic (päästik on VÄLJAS)"
+          "external_end_trigger_inverted": "Pöörake päästiku loogika ümber (päästik VÄLJAS-sündmusel)"
         },
         "data_description": {
-          "apply_suggestions": "Märkige see ruut, et avada õppealgoritmi soovitatud väärtuste ülevaatamise etapp. Midagi ei salvestata automaatselt.\n\nSoovitatav (õppimisest):\n- min_võimsus: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- valvekoera_intervall: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- automaatne_sildi_kindlus: {suggested_auto_label_confidence}\n- kestuse_tolerants: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- algus_lävi_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- lõpp_energia_lävi: {suggested_end_energy_threshold} Wh\n- jooksev_surnud_tsoon: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Märkige see ruut, et avada õppealgoritmi soovitatud väärtuste ülevaatamise etapp. Midagi ei salvestata automaatselt.\n\nSoovitatav (õppimisest):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "Tsükli alustamiseks peab võimsus tõusma ÜLE selle läve. Seadistage ooterežiimi võimsusest kõrgemaks. Vaikimisi: min_võimsus + 1 W.",
           "stop_threshold_w": "Tsükli LÕPPEKS peab võimsus langema ALLALLA seda läve. Seadke nullist veidi kõrgemale, et vältida müra, mis käivitaks valeotste. Vaikimisi: 0,6 * min_võimsus.",
           "min_off_gap": "Kui tsükkel algab selle mitme sekundi jooksul pärast eelmise lõppemist, LIIDEtakse need üheks tsükliks.",
@@ -646,18 +646,18 @@
         "current_suffix": "(praegune)",
         "editor_select_info": "Valige poolitamiseks 1 tsükkel või ühendamiseks 2+ tsüklit.",
         "no_cycles_recorded": "Tsükleid pole veel salvestatud.",
-        "profile_summary_line": "- **{name}**: {count} tsüklit, {avg} m keskm",
+        "profile_summary_line": "- **{name}**: {count} tsüklit, {avg} min keskm",
         "no_profiles_created": "Ühtegi profiili pole veel loodud.",
         "phase_preview": "Faasi eelvaade",
         "phase_preview_no_curve": "Keskmine profiilikõver pole veel saadaval. Käivita/sildista selle profiili jaoks veel tsükleid.",
         "average_power_curve": "Keskmine võimsuskõver",
         "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} tsüklit, ~{duration} m keskmine)",
-        "profile_option_short_fmt": "{name} ({count} tsüklit, ~{duration} m)",
+        "profile_option_fmt": "{name} ({count} tsüklit, ~{duration} min keskmiselt)",
+        "profile_option_short_fmt": "{name} ({count} tsüklit, ~{duration} min)",
         "deleted_cycles_from_profile": "Kustutatud {count} tsüklit domeenist {profile}.",
         "not_enough_data_graph": "Graafiku loomiseks pole piisavalt andmeid.",
         "no_profiles_found": "Ühtegi profiili ei leitud.",
-        "cycle_info_fmt": "Tsükkel: {start}, {duration} m, praegune: {label}",
+        "cycle_info_fmt": "Tsükkel: {start}, {duration} min, praegune: {label}",
         "top_candidates_header": "### Parimad kandidaadid",
         "tbl_profile": "Profiil",
         "tbl_confidence": "Usaldus",
@@ -667,13 +667,13 @@
         "estimated_duration": "Eeldatav kestus",
         "actual_duration": "Tegelik kestus",
         "choose_action": "__Valige allpool toiming:__",
-        "tbl_count": "Count",
+        "tbl_count": "Arv",
         "tbl_avg": "Keskm",
         "tbl_min": "Min",
         "tbl_max": "Max",
         "tbl_energy_avg": "Energia (keskm.)",
         "tbl_energy_total": "Energia (kokku)",
-        "tbl_consistency": "Koosneda.",
+        "tbl_consistency": "Järjepidevus",
         "tbl_last_run": "Viimane jooks",
         "graph_legend_title": "Graafiku legend",
         "graph_legend_body": "Sinine riba tähistab täheldatud minimaalset ja maksimaalset energiatarbimise vahemikku. Joon näitab keskmist võimsuskõverat.",
@@ -728,7 +728,7 @@
     "manage_cycles_action": {
       "options": {
         "auto_label_cycles": "Vanade tsüklite automaatne sildistamine",
-        "select_cycle_to_label": "Sildi spetsiifiline tsükkel",
+        "select_cycle_to_label": "Sildi konkreetne tsükkel",
         "select_cycle_to_delete": "Kustuta tsükkel",
         "interactive_editor": "Interaktiivne redaktori ühendamine/tükeldamine",
         "trim_cycle": "Kärpimistsükli andmed"
@@ -803,7 +803,7 @@
   },
   "services": {
     "label_cycle": {
-      "name": "Sildi tsükkel",
+      "name": "Tsükli sildistamine",
       "description": "Määrake olemasolev profiil eelmisele tsüklile või eemaldage silt.",
       "fields": {
         "device_id": {
@@ -933,7 +933,7 @@
       }
     },
     "record_start": {
-      "name": "Salvestustsükli algus",
+      "name": "Tsükli salvestamise alustamine",
       "description": "Alustage puhta tsükli käsitsi salvestamist (läheb mööda kogu sobivast loogikast).",
       "fields": {
         "device_id": {
@@ -943,7 +943,7 @@
       }
     },
     "record_stop": {
-      "name": "Salvestustsükkel Stop",
+      "name": "Tsükli salvestamise lõpetamine",
       "description": "Peatage käsitsi salvestamine.",
       "fields": {
         "device_id": {
@@ -953,7 +953,7 @@
       }
     },
     "trim_cycle": {
-      "name": "Kärpimistsükkel",
+      "name": "Tsükli kärpimine",
       "description": "Kärbige möödunud tsükli võimsusandmeid kindlale ajaaknale.",
       "fields": {
         "device_id": {
@@ -978,27 +978,27 @@
   "entity": {
     "binary_sensor": {
       "running": {
-        "name": "Jooksmine"
+        "name": "Töötab"
       },
       "match_ambiguity": {
-        "name": "Match Ebamäärasus"
+        "name": "Vaste ebamäärasus"
       }
     },
     "sensor": {
       "washer_state": {
-        "name": "osariik",
+        "name": "Olek",
         "state": {
           "off": "Väljas",
-          "idle": "Tühikäik",
+          "idle": "Ootel",
           "starting": "Käivitamine",
-          "running": "Jooksmine",
+          "running": "Töötab",
           "paused": "Peatatud",
           "ending": "Lõpetamine",
           "finished": "Valmis",
           "anti_wrinkle": "Kortsudevastane",
           "interrupted": "Katkestatud",
           "force_stopped": "Sundpeatatud",
-          "rinse": "Loputa",
+          "rinse": "Loputamine",
           "unknown": "Tundmatu"
         }
       },
@@ -1024,7 +1024,7 @@
         "name": "Silumisinfo"
       },
       "match_confidence": {
-        "name": "Matši enesekindlus"
+        "name": "Vaste usaldusväärsus"
       },
       "top_candidates": {
         "name": "Parimad kandidaadid",
@@ -1043,7 +1043,7 @@
         "unit_of_measurement": "tsüklid"
       },
       "suggestions": {
-        "name": "Soovitatud seaded"
+        "name": "Saadaolevad soovituslikud seaded"
       }
     },
     "select": {

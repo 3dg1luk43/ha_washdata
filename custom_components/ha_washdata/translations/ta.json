@@ -69,7 +69,7 @@
           "notify_actions": "அறிவிப்பு நடவடிக்கைகள்",
           "notify_people": "இவர்கள் வீட்டில் இருக்கும் வரை டெலிவரி தாமதம்",
           "notify_only_when_home": "தேர்ந்தெடுக்கப்பட்ட நபர் வீட்டில் இருக்கும் வரை அறிவிப்புகளை தாமதப்படுத்தவும்",
-          "notify_fire_events": "தீ ஆட்டோமேஷன் நிகழ்வுகள்",
+          "notify_fire_events": "ஆட்டோமேஷன் நிகழ்வுகளை இயக்கு",
           "notify_events": "அறிவிக்க வேண்டிய நிகழ்வுகள்",
           "notify_before_end_minutes": "நிறைவுக்கு முந்தைய அறிவிப்பு (முடிவதற்கு சில நிமிடங்களுக்கு முன்)",
           "notify_title": "அறிவிப்பு தலைப்பு",
@@ -80,7 +80,7 @@
           "show_advanced": "மேம்பட்ட அமைப்புகளைத் திருத்து (அடுத்த படி)"
         },
         "data_description": {
-          "apply_suggestions": "படிவத்தில் கற்றல் அல்காரிதம் பரிந்துரைத்த மதிப்புகளை நகலெடுக்க இந்தப் பெட்டியைத் தேர்வு செய்யவும். சேமிப்பதற்கு முன் மதிப்பாய்வு செய்யவும்.\n\nபரிந்துரைக்கப்படுகிறது (கற்றலில் இருந்து):\n- min_power: {suggested_min_power} W\n- இனிய_தாமதம்: {suggested_off_delay} வி\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "படிவத்தில் கற்றல் அல்காரிதம் பரிந்துரைத்த மதிப்புகளை நகலெடுக்க இந்தப் பெட்டியைத் தேர்வு செய்யவும். சேமிப்பதற்கு முன் மதிப்பாய்வு செய்யவும்.\n\nபரிந்துரைக்கப்படுகிறது (கற்றலில் இருந்து):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "சாதனத்தின் வகையைத் தேர்ந்தெடுக்கவும் (சலவை இயந்திரம், உலர்த்தி, பாத்திரங்கழுவி, காபி இயந்திரம், EV). இந்த குறிச்சொல் சிறந்த அமைப்பிற்காக ஒவ்வொரு சுழற்சியிலும் சேமிக்கப்படுகிறது.",
           "power_sensor": "நிகழ்நேர ஆற்றலைப் புகாரளிக்கும் சென்சார் நிறுவனம் (வாட்களில்). வரலாற்றுத் தரவை இழக்காமல் இதை எப்போது வேண்டுமானாலும் மாற்றலாம்— ஸ்மார்ட் பிளக்கை மாற்றினால் பயனுள்ளதாக இருக்கும்.",
           "min_power": "இந்த வரம்புக்கு மேலே உள்ள சக்தி அளவீடுகள் (வாட்களில்) சாதனம் இயங்குவதைக் குறிக்கிறது. பெரும்பாலான சாதனங்களுக்கு 2W உடன் தொடங்கவும்.",
@@ -107,7 +107,7 @@
           "notify_actions": "அறிவிப்பு நடவடிக்கைகள்",
           "notify_people": "இவர்கள் வீட்டில் இருக்கும் வரை டெலிவரி தாமதம்",
           "notify_only_when_home": "தேர்ந்தெடுக்கப்பட்ட நபர் வீட்டில் இருக்கும் வரை அறிவிப்புகளை தாமதப்படுத்தவும்",
-          "notify_fire_events": "தீ ஆட்டோமேஷன் நிகழ்வுகள்",
+          "notify_fire_events": "ஆட்டோமேஷன் நிகழ்வுகளை இயக்கு",
           "notify_events": "அறிவிக்க வேண்டிய நிகழ்வுகள்",
           "notify_before_end_minutes": "நிறைவுக்கு முந்தைய அறிவிப்பு (முடிவதற்கு சில நிமிடங்களுக்கு முன்)",
           "notify_live_interval_seconds": "நேரடி புதுப்பிப்பு இடைவெளி (வினாடிகள்)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "தூண்டுதல் தர்க்கத்தைத் தலைகீழாக மாற்றவும் (Trigger on OFF)"
         },
         "data_description": {
-          "apply_suggestions": "கற்றல் அல்காரிதத்திலிருந்து பரிந்துரைக்கப்பட்ட மதிப்புகளுக்கான மதிப்பாய்வுப் படியைத் திறக்க இந்தப் பெட்டியைத் தேர்வு செய்யவும். எதுவும் தானாகவே சேமிக்கப்படாது.\n\nபரிந்துரைக்கப்படுகிறது (கற்றலில் இருந்து):\n- min_power: {suggested_min_power} W\n- இனிய_தாமதம்: {suggested_off_delay} வி\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "கற்றல் அல்காரிதத்திலிருந்து பரிந்துரைக்கப்பட்ட மதிப்புகளுக்கான மதிப்பாய்வுப் படியைத் திறக்க இந்தப் பெட்டியைத் தேர்வு செய்யவும். எதுவும் தானாகவே சேமிக்கப்படாது.\n\nபரிந்துரைக்கப்படுகிறது (கற்றலில் இருந்து):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "ஒரு சுழற்சியைத் தொடங்க சக்தி இந்த வரம்புக்கு மேல் உயர வேண்டும். உங்கள் காத்திருப்பு சக்தியை விட அதிகமாக அமைக்கவும். இயல்புநிலை: min_power + 1 W.",
           "stop_threshold_w": "ஒரு சுழற்சியை முடிக்க சக்தி இந்த வரம்புக்கு கீழே விழ வேண்டும். தவறான முனைகளைத் தூண்டும் சத்தத்தைத் தவிர்க்க பூஜ்ஜியத்திற்கு சற்று மேலே அமைக்கவும். இயல்புநிலை: 0.6 * min_power.",
           "min_off_gap": "முந்தையது முடிவடைந்த பல வினாடிகளுக்குள் ஒரு சுழற்சி தொடங்கினால், அவை ஒரே சுழற்சியில் இணைக்கப்படும்.",

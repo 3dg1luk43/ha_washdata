@@ -3,26 +3,26 @@
     "step": {
       "user": {
         "title": "Agordo de WashData",
-        "description": "Agordu vian lavmaŝinon aŭ alian aparaton.\n\nPotenca sensilo estas bezonata.\n\n**Sekva, oni demandos vin ĉu vi volas krei vian unuan profilon.**",
+        "description": "Agordu vian lavmaŝinon aŭ alian aparaton.\n\nPotenca sensilo estas bezonata.\n\n**Poste oni demandos vin ĉu vi volas krei vian unuan profilon.**",
         "data": {
-          "name": "Aparato Nomo",
-          "device_type": "Aparato Tipo",
-          "power_sensor": "Potenca Sensilo",
-          "min_power": "Minimuma Potenca Sojlo (W)"
+          "name": "Nomo de aparato",
+          "device_type": "Tipo de aparato",
+          "power_sensor": "Potenca sensilo",
+          "min_power": "Minimuma potenca sojlo (W)"
         },
         "data_description": {
-          "name": "Amika nomo por ĉi tiu aparato (ekz., 'Lavmaŝino', 'Velvazlavilo').",
-          "device_type": "Kia aparato ĉi tio estas? Helpas tajloran detekton kaj etikedadon.",
-          "power_sensor": "La sensila ento, kiu raportas realtempan elektrokonsumon (en vatoj) de via inteligenta ŝtopilo.",
-          "min_power": "Potencaj valoroj super ĉi tiu sojlo (en vatoj) indikas, ke la aparato funkcias. Komencu per 2W por plej multaj aparatoj."
+          "name": "Amika nomo por ĉi tiu aparato (ekz. 'Lavmaŝino', 'Telerlavaparato').",
+          "device_type": "Kia aparato ĉi tio estas? Helpas adapti detekton kaj etikedadon.",
+          "power_sensor": "La sensila ento kiu raportas realtempan elektrokonsumon (en vatoj) de via inteligenta ŝtopilo.",
+          "min_power": "Potencaj valoroj super ĉi tiu sojlo (en vatoj) indikas ke la aparato funkcias. Komencu per 2W por plej multaj aparatoj."
         }
       },
       "first_profile": {
-        "title": "Krei Unuan Profilon",
-        "description": "**Ciklo** estas kompleta kuro de via aparato (ekz., ŝarĝo da lavotaĵo). **Profilo** grupigas ĉi tiujn ciklojn laŭ tipo (ekz., 'Kotono', 'Rapida Lavo'). Krei profilon nun helpas la integrigan takson tuj.\n\nVi povas permane elekti ĉi tiun profilon en la aparato-kontroloj se ĝi ne estas aŭtomate detektita.\n\n**Lasu 'Profilo-Nomon' malplena por preterlasi ĉi tiun paŝon.**",
+        "title": "Krei unuan profilon",
+        "description": "**Ciklo** estas kompleta laboro de via aparato (ekz. unu ŝarĝo da lavotaĵo). **Profilo** grupigas tiujn ciklojn laŭ tipo (ekz. 'Kotono', 'Rapida Lavo'). Krei profilon nun helpas la integracion tuj taksi la daŭron.\n\nVi povas permane elekti ĉi tiun profilon en la aparataj regiloj se ĝi ne estas aŭtomate detektita.\n\n**Lasu 'Profilon Nomo' malplena por preteriri ĉi tiun paŝon.**",
         "data": {
-          "profile_name": "Profila Nomo (Laŭvola)",
-          "manual_duration": "Laŭtaksa Daŭro (minutoj)"
+          "profile_name": "Profila nomo (laŭvola)",
+          "manual_duration": "Laŭtaksa daŭro (minutoj)"
         }
       }
     },
@@ -32,454 +32,461 @@
       "unknown": "Neatendita eraro"
     },
     "abort": {
-      "already_configured": "La aparato jam estas agordita"
+      "already_configured": "Aparato jam estas agordita"
     }
   },
   "options": {
     "step": {
       "init": {
         "menu_options": {
-          "learning_feedbacks": "Revizii Lernajn Rimarkojn",
+          "learning_feedbacks": "Revizii lernajn reagojn",
           "settings": "Agordoj",
           "notifications": "Sciigoj",
-          "manage_cycles": "Administri Ciklojn",
-          "manage_profiles": "Administri Profilojn",
-          "manage_phase_catalog": "Administri Faza Katalogo",
-          "record_cycle": "Rekorda Ciklo (Manlibro)",
-          "diagnostics": "Diagnozo kaj Prizorgado"
+          "manage_cycles": "Administri ciklojn",
+          "manage_profiles": "Administri profilojn",
+          "manage_phase_catalog": "Administri fazan katalogon",
+          "record_cycle": "Registri ciklon (permane)",
+          "diagnostics": "Diagnostiko kaj prizorgado"
         }
       },
       "apply_suggestions": {
-        "title": "Kopiu Sugestajn Valorojn",
-        "description": "Ĉi tio kopios la nunajn proponitajn valorojn en viajn konservitajn Agordojn. Ĉi tio estas unufoja ago kaj ne ebligas aŭtomatajn anstataŭigojn.\n\nProponitaj valoroj por kopii:\n{suggested}",
+        "title": "Kopii sugestitajn valorojn",
+        "description": "Ĉi tio kopios la aktualajn sugestitajn valorojn en viajn konservitajn agordojn. Ĉi tiu estas unufoja ago kaj ne ebligas aŭtomatajn anstataŭigojn.\n\nSugestitaj valoroj por kopii:\n{suggested}",
         "data": {
-          "confirm": "Konfirmu kopian agon"
+          "confirm": "Konfirmi kopian agon"
+        }
+      },
+      "apply_suggestions_confirm": {
+        "title": "Revizii sugestitajn ŝanĝojn",
+        "description": "WashData trovis {pending_count} sugestitajn valorojn por apliki.\n\nŜanĝoj por revizii:\n{changes}\n\nKonfirmu sube por stadi ĉi tiujn valorojn en la formularo. Ili ne estas konservitaj ĝis vi sendas Altnivelajn Agordojn.",
+        "data": {
+          "confirm_apply_suggestions": "Stadi sugestitajn valorojn en Altnivelaj Agordoj"
         }
       },
       "settings": {
         "title": "Agordoj",
-        "description": "Agordu detektajn sojlojn, lernadon kaj altnivelan konduton. Defaŭltoj funkcias bone por plej multaj agordoj.",
+        "description": "Agordu detektajn sojlojn, lernadon kaj altnivelan konduton. La defaŭltaj valoroj funkcias bone por plej multaj agordoj.\n\nSugestitaj agordoj nuntempe disponeblaj: {suggestions_count}.\nSe ĉi tio estas super 0, malfermu Altnivelaj Agordoj kaj uzu Apliki Sugestitajn Valorojn por revizii rekomendojn.",
         "data": {
-          "apply_suggestions": "Apliki Sugestajn Valorojn",
-          "device_type": "Aparato Tipo",
-          "power_sensor": "Potenca Sensila Ento",
+          "apply_suggestions": "Apliki sugestitajn valorojn",
+          "device_type": "Tipo de aparato",
+          "power_sensor": "Potenca sensila ento",
           "min_power": "Minimuma potenco (W)",
-          "off_delay": "Cikla Finprokrasto (j)",
-          "notify_service": "Sciiga Servo (ekz. notify.mobile_app)",
-          "notify_actions": "Sciigaj Agoj",
-          "notify_people": "Prokrastu Liveron Ĝis Ĉi tiuj Homoj Estas Hejmaj",
-          "notify_only_when_home": "Prokrastu Sciigojn Ĝis Elektita Persono Estas Hejme",
-          "notify_fire_events": "Fajro Aŭtomatigaj Eventoj",
-          "notify_events": "Eventoj por Sciigi",
-          "notify_before_end_minutes": "Antaŭkompletiga Sciigo (minutoj antaŭ fino)",
-          "notify_title": "Sciiga Titolo",
-          "notify_icon": "Sciiga Ikono",
-          "notify_start_message": "Komencu Mesaĝan Formaton",
-          "notify_finish_message": "Finu Mesaĝan Formaton",
-          "notify_pre_complete_message": "Antaŭ-kompletiga Mesaĝa Formato",
-          "show_advanced": "Redaktu Altnivelajn Agordojn (Sekva Paŝo)"
+          "off_delay": "Cikla fina prokrasto (s)",
+          "notify_service": "Sciiga servo (ekz. notify.mobile_app)",
+          "notify_actions": "Sciigaj agoj",
+          "notify_people": "Prokrasti liveradon ĝis tiuj homoj estas hejme",
+          "notify_only_when_home": "Prokrasti sciigojn ĝis elektita persono estas hejme",
+          "notify_fire_events": "Lanĉi aŭtomatigajn eventojn",
+          "notify_events": "Eventoj por sciigi",
+          "notify_before_end_minutes": "Antaŭ-kompletiga sciigo (minutoj antaŭ fino)",
+          "notify_title": "Sciiga titolo",
+          "notify_icon": "Sciiga piktogramo",
+          "notify_start_message": "Formulo de komenca mesaĝo",
+          "notify_finish_message": "Formulo de fina mesaĝo",
+          "notify_pre_complete_message": "Formulo de antaŭ-kompletiga mesaĝo",
+          "show_advanced": "Redakti altnivelaj agordojn (sekva paŝo)"
         },
         "data_description": {
-          "apply_suggestions": "Marku ĉi tiun skatolon por kopii valorojn proponitajn de la lernalgoritmo en la formularon. Revizu antaŭ konservi.\n\nSugestita (de lernado):\n- min_potenco: {suggested_min_power} W\n- malprokrasto: {suggested_off_delay} s\n- gardhundo_intervalo: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- daŭro_toleremo: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "Elektu la tipon de aparato (Lavmaŝino, Sekigilo, Vazlavilo, Kafomaŝino, EV). Ĉi tiu etikedo estas konservita kun ĉiu ciklo por pli bona organizo.",
-          "power_sensor": "La sensila ento raportanta realtempan potencon (en vatoj). Vi povas ŝanĝi ĉi tion iam ajn sen perdi historiajn datumojn - utila se vi anstataŭigas inteligentan ŝtopilon.",
-          "min_power": "Potencaj valoroj super ĉi tiu sojlo (en vatoj) indikas, ke la aparato funkcias. Komencu per 2W por plej multaj aparatoj.",
-          "off_delay": "Sekundoj la glatigita potenco devas resti sub la halta sojlo por marki finiĝon. Defaŭlte: 120s.",
-          "notify_service": "Hejma Asistanto sciigas servon por uzi (laŭvola).",
-          "notify_actions": "Laŭvola agsekvenco de Hejma Asistanto por funkcii por sciigoj (skriptoj, sciigoj, TTS, ktp.). Se agordita, agoj ruliĝas antaŭ ol rezerva sciigo de servo.",
-          "notify_people": "Homaj estaĵoj uzataj por ĉeestaj enirejoj. Kiam ĝi estas ebligita, sciiga livero estas prokrastita ĝis almenaŭ unu elektita persono estas hejme.",
-          "notify_only_when_home": "Se ĝi estas ebligita, prokrastu sciigojn ĝis almenaŭ unu elektita persono estas hejme.",
-          "notify_fire_events": "Se ĝi estas ebligita, lanĉu eventojn de Hejma Asistanto por ciklokomenco kaj fino (ha_washdata_cycle_started kaj ha_washdata_cycle_ended) por funkciigi aŭtomatigojn.",
+          "apply_suggestions": "Marku ĉi tiun skatolon por kopii valorojn sugestitajn de la lerna algoritmo en la formularon. Revizii antaŭ konservi.\n\nSugesto (de lernado):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "device_type": "Elektu la tipon de aparato (Lavmaŝino, Sekigilo, Telerlavaparato, Kafmaŝino, EV). Ĉi tiu etikedo estas konservita kun ĉiu ciklo por pli bona organizado.",
+          "power_sensor": "La sensila ento raportanta realtempan potencon (en vatoj). Vi povas ŝanĝi ĝin iam ajn sen perdi historiajn datumojn — utile se vi anstataŭigas inteligen ŝtopilon.",
+          "min_power": "Potencaj valoroj super ĉi tiu sojlo (en vatoj) indikas ke la aparato funkcias. Komencu per 2W por plej multaj aparatoj.",
+          "off_delay": "Sekundoj dum kiuj la glatigita potenco devas resti sub la haltsojlo por marki kompletadon. Defaŭlte: 120s.",
+          "notify_service": "Sciiga servo de Home Assistant por uzi (laŭvola).",
+          "notify_actions": "Laŭvola ago-sekvenco de Home Assistant por sciigoj (skriptoj, notify, TTS, ktp.). Se agordita, agoj ekfunkciiĝas antaŭ la rezerva sciiga servo.",
+          "notify_people": "Personaj entoj uzataj por ĉeesta pordego. Kiam ŝaltita, sciiga livero prokrastiĝas ĝis almenaŭ unu elektita persono estas hejme.",
+          "notify_only_when_home": "Se ŝaltita, prokrasti sciigojn ĝis almenaŭ unu elektita persono estas hejme.",
+          "notify_fire_events": "Se ŝaltita, lanĉi Home Assistant eventojn por cikla komenco kaj fino (ha_washdata_cycle_started kaj ha_washdata_cycle_ended) por aŭtomatigoj.",
           "notify_events": "Por kiuj eventoj sendi sciigojn.",
-          "notify_before_end_minutes": "Minutojn antaŭ la laŭtaksa fino de la ciklo por ekigi sciigon. Agordu al 0 por malŝalti. Defaŭlta: 0.",
-          "notify_title": "Propra titolo por sciigoj. Subtenas {device} lokokupilon.",
-          "notify_icon": "Ikono por uzi por sciigoj (ekz. mdi:wash-machine). Lasu malplena por uzi defaŭltan.",
-          "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokokupilon.",
-          "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program} anstataŭaĵojn.",
-          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletigo. Subtenas {device}, {minutes} anstataŭaĵojn."
+          "notify_before_end_minutes": "Minutoj antaŭ la laŭtaksa fino de la ciklo por ekigi sciigon. Agordu al 0 por malŝalti. Defaŭlte: 0.",
+          "notify_title": "Propra titolo por sciigoj. Subtenas {device} lokanombron.",
+          "notify_icon": "Piktogramo por sciigoj (ekz. mdi:washing-machine). Lasu malplena por uzi la defaŭltan.",
+          "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokanombron.",
+          "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program} lokanombrojn.",
+          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn."
         }
       },
       "notifications": {
         "title": "Sciigoj",
-        "description": "Agordu sciigajn kanalojn, ŝablonojn kaj laŭvolajn vivajn poŝtelefonajn progresajn ĝisdatigojn.",
+        "description": "Agordu sciigajn kanalojn, ŝablonojn kaj laŭvolajn ŝarĝajn progresajn ĝisdatigojn.",
         "data": {
-          "notify_service": "Sciiga Servo (ekz. notify.mobile_app)",
-          "notify_actions": "Sciigaj Agoj",
-          "notify_people": "Prokrastu Liveron Ĝis Ĉi tiuj Homoj Estas Hejmaj",
-          "notify_only_when_home": "Prokrastu Sciigojn Ĝis Elektita Persono Estas Hejme",
-          "notify_fire_events": "Fajro Aŭtomatigaj Eventoj",
-          "notify_events": "Eventoj por Sciigi",
-          "notify_before_end_minutes": "Antaŭkompletiga Sciigo (minutoj antaŭ fino)",
-          "notify_live_interval_seconds": "Viva Ĝisdatiga Intervalo (sekundoj)",
-          "notify_live_overrun_percent": "Viva Ĝisdatigo Transpaso (%)",
-          "notify_title": "Sciiga Titolo",
-          "notify_icon": "Sciiga Ikono",
-          "notify_start_message": "Komencu Mesaĝan Formaton",
-          "notify_finish_message": "Finu Mesaĝan Formaton",
-          "notify_pre_complete_message": "Antaŭ-kompletiga Mesaĝa Formato"
+          "notify_service": "Sciiga servo (ekz. notify.mobile_app)",
+          "notify_actions": "Sciigaj agoj",
+          "notify_people": "Prokrasti liveradon ĝis tiuj homoj estas hejme",
+          "notify_only_when_home": "Prokrasti sciigojn ĝis elektita persono estas hejme",
+          "notify_fire_events": "Lanĉi aŭtomatigajn eventojn",
+          "notify_events": "Eventoj por sciigi",
+          "notify_before_end_minutes": "Antaŭ-kompletiga sciigo (minutoj antaŭ fino)",
+          "notify_live_interval_seconds": "Vivupdata intervalo (sekundoj)",
+          "notify_live_overrun_percent": "Vivupdata superkuro-toleranco (%)",
+          "notify_title": "Sciiga titolo",
+          "notify_icon": "Sciiga piktogramo",
+          "notify_start_message": "Formulo de komenca mesaĝo",
+          "notify_finish_message": "Formulo de fina mesaĝo",
+          "notify_pre_complete_message": "Formulo de antaŭ-kompletiga mesaĝo"
         },
         "data_description": {
-          "notify_service": "Hejma Asistanto sciigas servon por uzi (laŭvola).",
-          "notify_actions": "Laŭvola agsekvenco de Hejma Asistanto por funkcii por sciigoj (skriptoj, sciigoj, TTS, ktp.). Se agordita, agoj ruliĝas antaŭ ol rezerva sciigo de servo.",
-          "notify_people": "Homaj estaĵoj uzataj por ĉeestaj enirejoj. Kiam ĝi estas ebligita, sciiga livero estas prokrastita ĝis almenaŭ unu elektita persono estas hejme.",
-          "notify_only_when_home": "Se ĝi estas ebligita, prokrastu sciigojn ĝis almenaŭ unu elektita persono estas hejme.",
-          "notify_fire_events": "Se ĝi estas ebligita, lanĉu eventojn de Hejma Asistanto por ciklokomenco kaj fino (ha_washdata_cycle_started kaj ha_washdata_cycle_ended) por funkciigi aŭtomatigojn.",
+          "notify_service": "Sciiga servo de Home Assistant por uzi (laŭvola).",
+          "notify_actions": "Laŭvola ago-sekvenco de Home Assistant por sciigoj (skriptoj, notify, TTS, ktp.). Se agordita, agoj ekfunkciiĝas antaŭ la rezerva sciiga servo.",
+          "notify_people": "Personaj entoj uzataj por ĉeesta pordego. Kiam ŝaltita, sciiga livero prokrastiĝas ĝis almenaŭ unu elektita persono estas hejme.",
+          "notify_only_when_home": "Se ŝaltita, prokrasti sciigojn ĝis almenaŭ unu elektita persono estas hejme.",
+          "notify_fire_events": "Se ŝaltita, lanĉi Home Assistant eventojn por cikla komenco kaj fino (ha_washdata_cycle_started kaj ha_washdata_cycle_ended) por aŭtomatigoj.",
           "notify_events": "Por kiuj eventoj sendi sciigojn.",
-          "notify_before_end_minutes": "Minutojn antaŭ la laŭtaksa fino de la ciklo por ekigi sciigon. Agordu al 0 por malŝalti. Defaŭlta: 0.",
-          "notify_live_interval_seconds": "Kiom ofte estas sendataj progresaj ĝisdatigoj dum kurado. Pli malaltaj valoroj estas pli respondemaj sed konsumas pli da sciigoj. Minimumo de 30 sekundoj estas devigitaj — valoroj sub 30 s estas aŭtomate rondigitaj ĝis 30 s.",
-          "notify_live_overrun_percent": "Sekureca marĝeno super la laŭtaksa ĝisdatigo-kalkulo por longaj/superfluaj cikloj (ekzemple 20% permesas 1.2x laŭtaksajn ĝisdatigojn).",
-          "notify_title": "Propra titolo por sciigoj. Subtenas {device} lokokupilon.",
-          "notify_icon": "Ikono por uzi por sciigoj (ekz. mdi:wash-machine). Lasu malplena por uzi defaŭltan.",
-          "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokokupilon.",
-          "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program} anstataŭaĵojn.",
-          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletigo. Subtenas {device}, {minutes} anstataŭaĵojn."
+          "notify_before_end_minutes": "Minutoj antaŭ la laŭtaksa fino de la ciklo por ekigi sciigon. Agordu al 0 por malŝalti. Defaŭlte: 0.",
+          "notify_live_interval_seconds": "Kiom ofte progresaj ĝisdatigoj estas senditaj dum funkciado. Pli malaltaj valoroj estas pli respondemaj sed konsumas pli da sciigoj. Minimume 30 sekundoj estas devigita — valoroj sub 30s aŭtomate rondiĝas al 30s.",
+          "notify_live_overrun_percent": "Sekureca marĝeno super la laŭtaksa ĝisdatiga kalkulo por longaj/superkurantaj cikloj (ekzemple 20% permesas 1.2x laŭtaksajn ĝisdatigojn).",
+          "notify_title": "Propra titolo por sciigoj. Subtenas {device} lokanombron.",
+          "notify_icon": "Piktogramo por sciigoj (ekz. mdi:washing-machine). Lasu malplena por uzi la defaŭltan.",
+          "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokanombron.",
+          "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program} lokanombrojn.",
+          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn."
         }
       },
       "advanced_settings": {
-        "title": "Altnivelaj Agordoj",
-        "description": "Agordu detektajn sojlojn, lernadon kaj altnivelan konduton. Defaŭltoj funkcias bone por plej multaj agordoj.",
+        "title": "Altnivelaj agordoj",
+        "description": "Agordu detektajn sojlojn, lernadon kaj altnivelan konduton. La defaŭltaj valoroj funkcias bone por plej multaj agordoj.\n\nSugestitaj agordoj nuntempe disponeblaj: {suggestions_count}. Uzu Apliki Sugestitajn Valorojn por revizii ŝanĝojn antaŭ konservi.",
         "data": {
-          "apply_suggestions": "Apliki Sugestajn Valorojn",
-          "start_threshold_w": "Komenca Sojlo (W)",
-          "stop_threshold_w": "Halta Sojlo (W)",
-          "min_off_gap": "Min Interspaco Inter Ciklo (j)",
-          "start_duration_threshold": "Daŭro(j) Komencu Reboton",
-          "progress_reset_delay": "Prokrasto Restarigita Prokrasto (sekundoj)",
-          "no_update_active_timeout": "Sen-ĝisdatiga tempo(j)",
-          "sampling_interval": "Specimena Intervalo (j)",
-          "auto_label_confidence": "Aŭtomata Etikedo Fido (0-1)",
-          "learning_confidence": "Reago-Peto Fido (0-1)",
-          "duration_tolerance": "Toleremo de Daŭro (0-0.5)",
-          "profile_match_interval": "Profila Match-Intervalo (sekundoj)",
-          "profile_match_min_duration_ratio": "Profila Match Min Daŭro-Proporcio (0.1-1.0)",
-          "profile_match_max_duration_ratio": "Proporcio de Maksimuma Daŭro de Profila Match (1.0-3.0)",
-          "smoothing_window": "Glatiga Fenestro (specimenoj)",
-          "profile_match_threshold": "Profila Match Sojlo",
-          "profile_unmatch_threshold": "Profila Unmatch Sojlo",
-          "profile_duration_tolerance": "Toleremo de Daŭro de Profila Match (0-0.5)",
-          "interrupted_min_seconds": "Interrompita: Minimuma Rultempo (sekundoj)",
-          "abrupt_drop_watts": "Interrompita: Abrupta Guto Absoluto (W)",
-          "abrupt_drop_ratio": "Interrompita: Abrupta Gutoproporcio (0-1)",
-          "abrupt_high_load_factor": "Interrompita: Alta Ŝarĝo-Faktoro",
-          "max_past_cycles": "Retenado: Maksimumaj Savitaj Cikloj",
-          "max_full_traces_per_profile": "Retenado: Maksimumaj Plenaj Spuroj per Profilo",
-          "max_full_traces_unlabeled": "Retenado: Max Plenaj Spuroj Senetikeditaj",
-          "watchdog_interval": "Gardhundo-Intervalo (sekundoj)",
-          "completion_min_seconds": "Kompleta Minimuma Rultempo (sekundoj)",
-          "notify_before_end_minutes": "Antaŭkompletiga Sciigo (minutoj antaŭ fino)",
-          "auto_tune_noise_events_threshold": "Aŭtomata agordo: Sojlo de Bruaj Eventoj",
-          "running_dead_zone": "Kuranta Morta Zono (sekundoj)",
-          "end_repeat_count": "Finu Ripetan Nombradon",
-          "start_energy_threshold": "Komencu Energia Pordego (Wh)",
-          "end_energy_threshold": "Fina Energia Pordego (Wh)",
-          "auto_maintenance": "Ebligu Aŭtomatan Bontenadon",
-          "expose_debug_entities": "Malkovru Sencimigajn Entojn",
-          "save_debug_traces": "Konservu Sencimigajn Spurojn",
-          "anti_wrinkle_enabled": "Kontraŭsulka Ŝildo (Nur Sekigilo)",
-          "anti_wrinkle_max_power": "Maksimuma potenco kontraŭ sulko (W)",
-          "anti_wrinkle_max_duration": "Kontraŭulka Maksimuma Daŭro (j)",
-          "anti_wrinkle_exit_power": "Kontraŭsulka eliro-potenco (W)",
-          "dtw_bandwidth": "DTW Bandwidth",
-          "external_end_trigger_enabled": "Ebligu Eksteran Ciklan Finan Trigger",
-          "external_end_trigger": "Ekstera Cikla Fina Sensilo",
-          "external_end_trigger_inverted": "Inversigi Trigger-Logikon (Eligilo sur OFF)"
+          "apply_suggestions": "Apliki sugestitajn valorojn",
+          "start_threshold_w": "Starta sojlo (W)",
+          "stop_threshold_w": "Halta sojlo (W)",
+          "min_off_gap": "Minimuma intertempo inter cikloj (s)",
+          "start_duration_threshold": "Starta cimfiltra daŭro (s)",
+          "progress_reset_delay": "Progresa restarigo-prokrasto (sekundoj)",
+          "no_update_active_timeout": "Tempofino sen ĝisdatigo (s)",
+          "sampling_interval": "Specimena intervalo (s)",
+          "auto_label_confidence": "Aŭtomata etikedada konfido (0-1)",
+          "learning_confidence": "Reago-peta konfido (0-1)",
+          "duration_tolerance": "Daŭra toleranco (0-0.5)",
+          "profile_match_interval": "Profila kongrua intervalo (sekundoj)",
+          "profile_match_min_duration_ratio": "Profila kongrua minimuma daŭra proporcio (0.1-1.0)",
+          "profile_match_max_duration_ratio": "Profila kongrua maksimuma daŭra proporcio (1.0-3.0)",
+          "smoothing_window": "Glatiganta fenestro (specimenoj)",
+          "profile_match_threshold": "Profila kongrua sojlo",
+          "profile_unmatch_threshold": "Profila malkongrua sojlo",
+          "profile_duration_tolerance": "Profila kongrua daŭra toleranco (0-0.5)",
+          "interrupted_min_seconds": "Interrompita: minimuma ekzekuta tempo (sekundoj)",
+          "abrupt_drop_watts": "Interrompita: abrupte falo absoluta (W)",
+          "abrupt_drop_ratio": "Interrompita: abrupte fala proporcio (0-1)",
+          "abrupt_high_load_factor": "Interrompita: alta ŝarĝa faktoro",
+          "max_past_cycles": "Konservado: maksimuma konservita cikloj",
+          "max_full_traces_per_profile": "Konservado: maksimuma plenaj spuroj po profilo",
+          "max_full_traces_unlabeled": "Konservado: maksimuma plenaj spuroj senetikeditaj",
+          "watchdog_interval": "Gardohunda intervalo (sekundoj)",
+          "completion_min_seconds": "Kompletiga minimuma ekzekuta tempo (sekundoj)",
+          "notify_before_end_minutes": "Antaŭ-kompletiga sciigo (minutoj antaŭ fino)",
+          "auto_tune_noise_events_threshold": "Aŭtomata agordo: bruaj eventaj sojlo",
+          "running_dead_zone": "Ekzekuta mortzoneto (sekundoj)",
+          "end_repeat_count": "Fina ripeta kalkulo",
+          "start_energy_threshold": "Starta energia pordego (Wh)",
+          "end_energy_threshold": "Fina energia pordego (Wh)",
+          "auto_maintenance": "Ŝalti aŭtomatan prizorgadon",
+          "expose_debug_entities": "Montri sencimigajn entojn",
+          "save_debug_traces": "Konservi sencimigajn spurojn",
+          "anti_wrinkle_enabled": "Kontraŭfaldiga ŝildo (nur sekigilo/lavmaŝino-sekigilo)",
+          "anti_wrinkle_max_power": "Kontraŭfaldiga maksimuma potenco (W) (nur sekigilo/lavmaŝino-sekigilo)",
+          "anti_wrinkle_max_duration": "Kontraŭfaldiga maksimuma daŭro (s) (nur sekigilo/lavmaŝino-sekigilo)",
+          "anti_wrinkle_exit_power": "Kontraŭfaldiga elira potenco (W) (nur sekigilo/lavmaŝino-sekigilo)",
+          "dtw_bandwidth": "DTW bendolarĝo",
+          "external_end_trigger_enabled": "Ŝalti eksteran ciklan fin-ekigilon",
+          "external_end_trigger": "Ekstera cikla fina sensilo",
+          "external_end_trigger_inverted": "Inversigi ekigan logikon (ekigi ĉe MALŜALTO)"
         },
         "data_description": {
-          "apply_suggestions": "Marku ĉi tiun skatolon por malfermi revizian paŝon por proponitaj valoroj de la lernalgoritmo. Nenio estas konservita aŭtomate.\n\nSugestita (de lernado):\n- min_potenco: {suggested_min_power} W\n- malprokrasto: {suggested_off_delay} s\n- gardhundo_intervalo: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- daŭro_toleremo: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "start_threshold_w": "Potenco devas altiĝi SUPER ĉi tiu sojlo por KOMENCI ciklon. Agordu pli alta ol via standby potenco. Defaŭlte: min_potenco + 1 W.",
-          "stop_threshold_w": "Potenco devas fali SUB ĉi tiu sojlo por FINI ciklon. Agordu tuj super nulo por eviti bruon deĉenigi falsajn finojn. Defaŭlte: 0,6 * min_potenco.",
-          "min_off_gap": "Se ciklo komenciĝas ene de ĉi tiuj multaj sekundoj de la antaŭa finiĝo, ili estos FUNDITAJ en ununuran ciklon.",
-          "start_duration_threshold": "Ignoru mallongajn potencpikojn pli mallongajn ol ĉi tiu daŭro (sekundoj). Filtrigas lanĉajn piklojn (ekz. 60W por 2s) antaŭ ol reala ciklo komenciĝas. Defaŭlte: 5s.",
-          "progress_reset_delay": "Post kiam ciklo finiĝas (100%), atendu tiom da sekundoj da neaktiva antaŭ ol restarigi progreson al 0%. Defaŭlte: 300s.",
-          "no_update_active_timeout": "Por publikig-sur-ŝanĝaj sensiloj: nur devigu fini AKTIVAN ciklon se neniuj ĝisdatigoj alvenas dum tiom da sekundoj. Malalt-motora kompletigo daŭre uzas la For Prokraston.",
-          "sampling_interval": "Minimuma specimena intervalo en sekundoj. Ĝisdatigoj pli rapide ol ĉi tiu tarifo estos ignoritaj. Defaŭlte: 2.0s.",
-          "auto_label_confidence": "Aŭtomate etikedu ciklojn je aŭ super ĉi tiu fido post kompletigo (0.0–1.0).",
-          "learning_confidence": "Minimuma konfido peti uzantan konfirmon per evento (0.0–1.0).",
-          "duration_tolerance": "Toleremo por tempo restantaj taksoj dum kuro (0.0-0.5 egalrilatas al 0-50%).",
-          "profile_match_interval": "Kiom ofte (en sekundoj) provi profilkongruon dum ciklo. Pli malaltaj valoroj disponigas pli rapidan detekton sed uzas pli da CPU. Defaŭlte: 300s (5 minutoj).",
-          "profile_match_min_duration_ratio": "Minimuma daŭroproporcio por profila kongruo. Kuranta ciklo devas esti almenaŭ ĉi tiu frakcio de profildaŭro por kongrui. Lower = pli frua kongruo. Defaŭlte: 0,50 (50%).",
-          "profile_match_max_duration_ratio": "Maksimuma daŭroproporcio por profila kongruo. Kuranta ciklo ne devas superi ĉi tiun multoblon de profildaŭro. Higher = pli malsevera. Defaŭlte: 1,50 (150%).",
-          "smoothing_window": "Nombro de lastatempaj potencaj legaĵoj uzataj por mov-averaĝa glatigo.",
-          "profile_match_threshold": "Minimuma DTW-similecpoentaro (0.0-1.0) postulata por konsideri profilon matĉon. Pli alta = pli strikta kongruo, malpli da falsaj pozitivoj. Defaŭlte: 0.4.",
-          "profile_unmatch_threshold": "DTW-similecpoentaro (0.0-1.0) sub kiu antaŭe egalita profilo estas malakceptita. Devus esti pli malalta ol egala sojlo por malhelpi flagradon. Defaŭlte: 0.35.",
-          "profile_duration_tolerance": "Toleremo uzata de profila kongruo por totala daŭrovarianco (0.0-0.5). Defaŭlta konduto: ± 25%.",
-          "interrupted_min_seconds": "Kuroj pli mallongaj ol tio povas esti klasifikitaj kiel \"interrompitaj\".",
-          "abrupt_drop_watts": "Absoluta potencofalo (W) konsiderita abrupta klifo.",
-          "abrupt_drop_ratio": "Relativa gutoproporcio (0–1). Ekzemplo: 0.6 signifas, ke 60% guto estas subita.",
-          "abrupt_high_load_factor": "Faktoro super bazlinio konsiderita \"alta ŝarĝo\" antaŭ subita guto (uzita kun subita detekto).",
-          "max_past_cycles": "Tuta nombro da cikloj por konservi (plej malnova forigita). Defaŭlta: 200.",
-          "max_full_traces_per_profile": "Nombro de lastatempaj etikeditaj cikloj por konservi kun plena potenco spuroj per profilo. Pli malnovaj spuroj estas resumitaj per kovertoj. Defaŭlte: 20.",
-          "max_full_traces_unlabeled": "Nombro de lastatempaj neetikeditaj cikloj por konservi kun plenaj potencaj spuroj por subteni aŭtomatan etikedadon. Defaŭlte: 20.",
-          "watchdog_interval": "Sekundoj inter gardohundaj kontroloj dum kurado. Defaŭlte: 5s. AVERTO: Certigu, ke ĉi tio estas pli ALTA ol la ĝisdatiga intervalo de via sensilo por eviti falsajn haltojn (ekz., se sensilo ĝisdatigas ĉiujn 60-ojn, uzu 65-ojn+).",
-          "completion_min_seconds": "Cikloj pli mallongaj ol tio estos markitaj kiel \"interrompitaj\" eĉ se ili finiĝas nature. Defaŭlte: 600s.",
-          "notify_before_end_minutes": "Minutojn antaŭ la laŭtaksa fino de la ciklo por ekigi sciigon. Agordu al 0 por malŝalti. Defaŭlta: 0.",
-          "auto_tune_noise_events_threshold": "Nombro de mallongaj/malaltpotencaj \"bruaj\" cikloj ene de 24h necesaj por aŭtomate alĝustigi min_power. Defaŭlte: 3.",
-          "running_dead_zone": "Post kiam la ciklo komenciĝas, ignoru potencon dum ĉi tiuj multaj sekundoj por malhelpi falsan fin-detekton dum komenca ŝprucfazo. Agordu al 0 por malŝalti. Defaŭlte: 0s.",
-          "end_repeat_count": "Nombro da fojoj la finkondiĉo (potenco sub sojlo por off_delay) devas esti plenumita sinsekve antaŭ fini la ciklon. Pli altaj valoroj malhelpas falsajn finojn dum paŭzoj. Defaŭlte: 1.",
-          "start_energy_threshold": "Ciklo devas amasigi almenaŭ tiom da energio (Wh) dum la START-fazo por esti konfirmita. Defaŭlte: 0,005 Wh.",
-          "end_energy_threshold": "Ciklo finiĝas nur se energio en la lasta Malprokrasta fenestro estas sub ĉi tiu valoro (Wh). Malhelpas falsajn finojn se potenco fluktuas proksime de nulo. Defaŭlte: 0,05 Wh.",
-          "auto_maintenance": "Ebligu aŭtomatan prizorgadon (ripari specimenojn, kunfandi fragmentojn).",
-          "expose_debug_entities": "Montru altnivelajn sensilojn (Fido, Fazo, Ambigueco) por senararigado.",
-          "save_debug_traces": "Stoku detalajn rangotabelojn kaj potencospurajn datumojn en la historio (Pliigas stokadouzon).",
-          "anti_wrinkle_enabled": "Ignoru mallongajn malfortajn tamburrotadojn post kiam ciklo finiĝas por malhelpi fantomajn ciklojn (nur sekigilo/lavilo-sekigilo).",
-          "anti_wrinkle_max_power": "Eksplodoj ĉe aŭ sub ĉi tiu potenco estas traktataj kiel kontraŭ-sulkaj rotacioj anstataŭ novaj cikloj. Nur validas kiam Kontraŭ-Sulka Ŝildo estas ebligita.",
-          "anti_wrinkle_max_duration": "Maksimuma kreva longo por trakti kiel kontraŭ-sulka rotacio. Nur validas kiam Kontraŭ-Sulka Ŝildo estas ebligita.",
-          "anti_wrinkle_exit_power": "Se potenco falas sub ĉi tiu nivelo, eliru kontraŭ-sulko tuj (vera for). Nur validas kiam Kontraŭ-Sulka Ŝildo estas ebligita.",
-          "dtw_bandwidth": "Maksimuma permesita tempoformiĝo (streĉado) kiel rilatumo de ciklodaŭro. Pli altaj valoroj permesas kongrui tre variajn ciklojn sed pliigas CPU-koston. Defaŭlte: 0,20 (20%).",
-          "external_end_trigger_enabled": "Ebligu monitoradon de ekstera binara sensilo por ekigi ciklokompletigon.",
-          "external_end_trigger": "Elektu binaran sensilon. Kiam ĉi tiu sensilo ekfunkciigas, la nuna ciklo finiĝos kun statuso \"kompletigita\".",
-          "external_end_trigger_inverted": "Defaŭlte, la ellasilo pafas kiam la sensilo ŝaltas. Marku ĉi tiun skatolon por ekbruligi kiam la sensilo malŝaltas anstataŭe."
+          "apply_suggestions": "Marku ĉi tiun skatolon por malfermi revizian paŝon por sugestitaj valoroj de la lerna algoritmo. Nenio estas konservita aŭtomate.\n\nSugesto (de lernado):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "start_threshold_w": "Potenco devas SUPERI ĉi tiun sojlon por KOMENCI ciklon. Agordu pli alte ol via atenda potenco. Defaŭlte: min_power + 1W.",
+          "stop_threshold_w": "Potenco devas FALI SUB ĉi tiun sojlon por FINI ciklon. Agordu iom super nulo por eviti bruon kiu ekigas falsajn finojn. Defaŭlte: 0.6 × min_power.",
+          "min_off_gap": "Se ciklo komenciĝas ene de ĉi tiom da sekundoj post la fino de la antaŭa, ili estos KUNFANDITAJ en ununuran ciklon.",
+          "start_duration_threshold": "Ignori mallongajn potencajn pintojn pli mallongajn ol ĉi tiu daŭro (sekundoj). Filtras ekigajn pintojn (ekz. 60W por 2s) antaŭ veraj ciklaj komencoj. Defaŭlte: 5s.",
+          "progress_reset_delay": "Post kiam ciklo kompletaĵis (100%), atendi ĉi tiom da sekundoj da senaktiveco antaŭ restarigi progreson al 0%. Defaŭlte: 300s.",
+          "no_update_active_timeout": "Por publikigu-sur-ŝanĝo sensiloj: nur perforte fini AKTIVAN ciklon se neniuj ĝisdatigoj alvenas dum ĉi tiom da sekundoj. Malalta-pova kompletado ankoraŭ uzas la Malŝaltan Prokraston.",
+          "sampling_interval": "Minimuma specimena intervalo en sekundoj. Ĝisdatigoj pli rapidaj ol ĉi tiu rapideco estos ignoritaj. Defaŭlte: 2.0s.",
+          "auto_label_confidence": "Aŭtomate etikedi ciklojn je aŭ super ĉi tiu konfido ĉe kompletado (0.0–1.0).",
+          "learning_confidence": "Minimuma konfido por peti uzantan konfirmon per evento (0.0–1.0).",
+          "duration_tolerance": "Toleranco por restanta-tempo-takstoj dum ekzekuto (0.0–0.5 egalas al 0–50%).",
+          "profile_match_interval": "Kiom ofte (en sekundoj) provi profilan kongruon dum ciklo. Pli malaltaj valoroj donas pli rapidan detekton sed uzas pli da CPU. Defaŭlte: 300s (5 minutoj).",
+          "profile_match_min_duration_ratio": "Minimuma daŭra proporcio por profila kongruo. La ekzekutanta ciklo devas esti almenaŭ ĉi tiu frakcio de la profila daŭro por kongrui. Pli malalta = pli frua kongruo. Defaŭlte: 0.50 (50%).",
+          "profile_match_max_duration_ratio": "Maksimuma daŭra proporcio por profila kongruo. La ekzekutanta ciklo ne devas superi ĉi tiun oblon de la profila daŭro. Pli alta = pli permesema. Defaŭlte: 1.50 (150%).",
+          "smoothing_window": "Nombro da lastatempaj potencaj legaĵoj uzataj por movanta-averaĝa glatigo.",
+          "profile_match_threshold": "Minimuma DTW simileca poentaro (0.0–1.0) bezonata por konsideri profilon kiel kongruon. Pli alta = pli strikta kongruo, malpli da falsaj pozitivoj. Defaŭlte: 0.4.",
+          "profile_unmatch_threshold": "DTW simileca poentaro (0.0–1.0) sub kiu antaŭe kongruinta profilo estas malaprobita. Devas esti pli malalta ol la kongrua sojlo por eviti flakeron. Defaŭlte: 0.35.",
+          "profile_duration_tolerance": "Toleranco uzata de profila kongruo por totala daŭra vario (0.0–0.5). Defaŭlta konduto: ±25%.",
+          "interrupted_min_seconds": "Ekzekutoj pli mallongaj ol ĉi tio povas esti klasifikitaj kiel 'interrompitaj'.",
+          "abrupt_drop_watts": "Absoluta potenca falo (W) konsiderata abruptan klifo.",
+          "abrupt_drop_ratio": "Relativa fala proporcio (0–1). Ekzemple: 0.6 signifas 60% falon.",
+          "abrupt_high_load_factor": "Faktoro super baza linio konsiderata 'alta ŝarĝo' antaŭ abruptan falon.",
+          "max_past_cycles": "Tuta nombro da cikloj por reteni (plej malnovaj forigataj). Defaŭlte: 200.",
+          "max_full_traces_per_profile": "Nombro da lastatempaj etikeditaj cikloj por reteni kun plenaj potencaj spuroj po profilo. Pli malnovaj spuroj estas resumitaj per kovertoj. Defaŭlte: 20.",
+          "max_full_traces_unlabeled": "Nombro da lastatempaj neetikeditaj cikloj por reteni kun plenaj potencaj spuroj por subteni aŭtomatan etikedadon. Defaŭlte: 20.",
+          "watchdog_interval": "Sekundoj inter gardohundaj kontroloj dum ekzekuto. Defaŭlte: 5s. AVERTO: Certigu ke ĉi tio estas PLI ALTA ol la ĝisdatiga intervalo de via sensilo por eviti falsajn haltojn (ekz. se sensilo ĝisdatigas ĉiun 60s, uzu 65s+).",
+          "completion_min_seconds": "Cikloj pli mallongaj ol ĉi tio estos markitaj kiel 'interrompitaj' eĉ se ili finiĝas nature. Defaŭlte: 600s.",
+          "notify_before_end_minutes": "Minutoj antaŭ la laŭtaksa fino de la ciklo por ekigi sciigon. Agordu al 0 por malŝalti. Defaŭlte: 0.",
+          "auto_tune_noise_events_threshold": "Nombro da mallongaj/malalta-povaj 'brua' cikloj ene de 24h bezonataj por aŭtomate ĝustigi min_power. Defaŭlte: 3.",
+          "running_dead_zone": "Post kiam ciklo komenciĝas, ignori potencajn falojn dum ĉi tiom da sekundoj por malhelpi falsajn fin-detektojn dum komenca startfazo. Agordu al 0 por malŝalti. Defaŭlte: 0s.",
+          "end_repeat_count": "Nombro da fojoj kiom la fina kondiĉo (potenco sub sojlo dum off_delay) devas esti plenumita sinsekve antaŭ fini la ciklon. Pli altaj valoroj malhelpos falsajn finojn dum paŭzoj. Defaŭlte: 1.",
+          "start_energy_threshold": "Ciklo devas akumuli almenaŭ ĉi tiom da energio (Wh) dum la STARTA fazo por esti konfirmita. Defaŭlte: 0.005Wh.",
+          "end_energy_threshold": "Ciklo finiĝas nur se energio en la lasta Malŝalta-Prokrasta fenestro estas sub ĉi tiu valoro (Wh). Malhelpos falsajn finojn se potenco fluktuacias proksime al nulo. Defaŭlte: 0.05Wh.",
+          "auto_maintenance": "Ŝalti aŭtomatan prizorgadon (ripari specimenov, kunfandi fragmentojn).",
+          "expose_debug_entities": "Montri altnivelaj sensilojn (Konfido, Fazo, Ambigueco) por sencimigado.",
+          "save_debug_traces": "Konservi detalajn rangordajn kaj potencajn spurdatumojn en historio (Pliigas stokadan uzadon).",
+          "anti_wrinkle_enabled": "Ignori mallongajn malalta-povajn tamburajn rotaciojn post kiam ciklo finiĝas por malhelpi fantomajn ciklojn (nur sekigilo/lavmaŝino-sekigilo).",
+          "anti_wrinkle_max_power": "Eksplodoj je aŭ sub ĉi tiu potenco estas traktataj kiel kontraŭfaldiga rotacioj anstataŭ novaj cikloj. Validas nur kiam Kontraŭfaldiga Ŝildo estas ŝaltita.",
+          "anti_wrinkle_max_duration": "Maksimuma eksplodlongo por trakti kiel kontraŭfaldigar rotacion. Validas nur kiam Kontraŭfaldiga Ŝildo estas ŝaltita.",
+          "anti_wrinkle_exit_power": "Se potenco falas sub ĉi tiun nivelon, tuj eliri kontraŭfaldigecon (vera malŝalto). Validas nur kiam Kontraŭfaldiga Ŝildo estas ŝaltita.",
+          "dtw_bandwidth": "Maksimuma permesita tempan tordadon (etendadon) kiel proporcio de cikla daŭro. Pli altaj valoroj permesas kongruon de tre variablaj cikloj sed pliigas CPU-koston. Defaŭlte: 0.20 (20%).",
+          "external_end_trigger_enabled": "Ŝalti monitoradon de ekstera duuma sensilo por ekigi ciklan kompletadon.",
+          "external_end_trigger": "Elektu duuman sensilan enton. Kiam ĉi tiu sensilo ekigas, la aktuala ciklo finiĝos kun statuso 'kompletigita'.",
+          "external_end_trigger_inverted": "Defaŭlte, la ekigilo pafas kiam la sensilo ŝaltiĝas. Marku ĉi tiun skatolon por pafi kiam la sensilo malŝaltiĝas anstataŭe."
         }
       },
       "diagnostics": {
-        "title": "Diagnozo kaj Prizorgado",
-        "description": "Rulu prizorgajn agojn kiel kunfandi fragmentajn ciklojn aŭ migri konservitajn datumojn.\n\n**Stokado-Uzo**\n\n- Dosiera Grandeco: {file_size_kb} KB\n- Cikloj: {cycle_count}\n- Profiloj: {profile_count}\n- Sencimigi spurojn: {debug_count}"
+        "title": "Diagnostiko kaj prizorgado",
+        "description": "Ruli prizorgadajn agojn kiel kunfandado de fragmentitaj cikloj aŭ migracio de stokitaj datumoj.\n\n**Stokada Uzado**\n\n- Dosiergrandeco: {file_size_kb} KB\n- Cikloj: {cycle_count}\n- Profiloj: {profile_count}\n- Sencimigaj Spuroj: {debug_count}"
       },
       "clear_debug_data": {
-        "title": "Klarigi Sencimigajn Datumojn",
-        "description": "Ĉu vi certas, ke vi volas forigi ĉiujn konservitajn sencimigajn spurojn? Ĉi tio liberigos spacon sed forigos detalajn rangajn informojn de pasintaj cikloj."
+        "title": "Forigi sencimigajn datumojn",
+        "description": "Ĉu vi certas ke vi volas forigi ĉiujn stokitajn sencimigajn spurojn? Ĉi tio liberigos spacon sed forigos detalajn rangordajn informojn el pasintaj cikloj."
       },
       "manage_cycles": {
-        "title": "Administri Ciklojn",
+        "title": "Administri ciklojn",
         "description": "Lastatempaj cikloj:\n{recent_cycles}",
         "data": {
           "action": "Ago"
         }
       },
       "manage_cycles_empty": {
-        "title": "Administri Ciklojn",
-        "description": "Neniuj cikloj ankoraŭ registritaj.",
+        "title": "Administri ciklojn",
+        "description": "Neniuj cikloj registritaj ankoraŭ.",
         "data": {
           "action": "Ago"
         }
       },
       "manage_profiles": {
-        "title": "Administri Profilojn",
-        "description": "Profila Resumo:\n{profile_summary}",
+        "title": "Administri profilojn",
+        "description": "Profila resumo:\n{profile_summary}",
         "data": {
           "action": "Ago"
         }
       },
       "manage_profiles_empty": {
-        "title": "Administri Profilojn",
+        "title": "Administri profilojn",
         "description": "Neniuj profiloj kreitaj ankoraŭ.",
         "data": {
           "action": "Ago"
         }
       },
       "manage_phase_catalog": {
-        "title": "Administri Faza Katalogo",
-        "description": "Faza katalogo (defaŭlte por ĉi tiu aparato + kutimaj fazoj):\n{phase_summary}",
+        "title": "Administri fazan katalogon",
+        "description": "Faza katalogo (defaŭltoj por ĉi tiu aparato + propraj fazoj):\n{phase_summary}",
         "data": {
           "action": "Ago"
         }
       },
       "phase_catalog_create": {
-        "title": "Krei Propran Fazon",
-        "description": "Kreu kutiman fazan nomon kaj priskribon, kaj elektu al kiu aparato tipo ĝi aplikas.",
+        "title": "Krei propran fazon",
+        "description": "Kreu propran fazan nomon kaj priskribon, kaj elektu al kiu aparattipo ĝi aplikeblas.",
         "data": {
-          "target_device_type": "Cela Aparato Tipo",
-          "phase_name": "Faza Nomo",
-          "phase_description": "Faza Priskribo"
+          "target_device_type": "Cela aparato tipo",
+          "phase_name": "Faza nomo",
+          "phase_description": "Faza priskribo"
         }
       },
       "phase_catalog_edit_select": {
-        "title": "Redakti Propran Fazon",
-        "description": "Elektu kutiman fazon por redakti.",
+        "title": "Redakti propran fazon",
+        "description": "Elektu propran fazon por redakti.",
         "data": {
-          "phase_name": "Propra Fazo"
+          "phase_name": "Propra fazo"
         }
       },
       "phase_catalog_edit": {
-        "title": "Redakti Propran Fazon",
-        "description": "Redakta fazo: {phase_name}",
+        "title": "Redakti propran fazon",
+        "description": "Redaktante fazon: {phase_name}",
         "data": {
-          "phase_name": "Faza Nomo",
-          "phase_description": "Faza Priskribo"
+          "phase_name": "Faza nomo",
+          "phase_description": "Faza priskribo"
         }
       },
       "phase_catalog_delete": {
-        "title": "Forigi Propran Fazon",
-        "description": "Elektu kutiman fazon por forigi. Ĉiuj asignitaj intervaloj uzantaj ĉi tiun fazon estos forigitaj.",
+        "title": "Forigi propran fazon",
+        "description": "Elektu propran fazon por forigi. Iuj asignitaj intervaloj uzantaj ĉi tiun fazon estos forigitaj.",
         "data": {
-          "phase_name": "Propra Fazo"
+          "phase_name": "Propra fazo"
         }
       },
       "assign_profile_phases": {
-        "title": "Asignu Fazintervalojn",
-        "description": "Faza antaŭrigardo por profilo: **{profile_name}**\n\n{timeline_svg}\n\n**Nuntempaj intervaloj:**\n{current_ranges}\n\nUzu agojn sube por aldoni, redakti, forigi aŭ konservi intervalojn.",
+        "title": "Asigni fazajn intervalojn",
+        "description": "Faza antaŭvido por profilo: **{profile_name}**\n\n{timeline_svg}\n\n**Aktualaj intervaloj:**\n{current_ranges}\n\nUzu agojn sube por aldoni, redakti, forigi aŭ konservi intervalojn.",
         "data": {
           "action": "Ago"
         }
       },
       "assign_profile_phases_add": {
-        "title": "Aldonu Fazan Gamon",
-        "description": "Aldonu unu fazan gamon al la nuna skizo.",
+        "title": "Aldoni fazan intervalon",
+        "description": "Aldonu unu fazan intervalon al la aktuala skizo.",
         "data": {
           "phase_name": "Fazo",
-          "start_min": "Komenca Minuto",
-          "end_min": "Fina Minuto"
+          "start_min": "Startminuto",
+          "end_min": "Finminuto"
         }
       },
       "assign_profile_phases_edit_select": {
-        "title": "Redakti Phase Range",
-        "description": "Elektu gamon por redakti.",
+        "title": "Redakti fazan intervalon",
+        "description": "Elektu intervalon por redakti.",
         "data": {
-          "range_index": "Faza Gamo"
+          "range_index": "Faza intervalo"
         }
       },
       "assign_profile_phases_edit": {
-        "title": "Redakti Phase Range",
-        "description": "Ĝisdatigu la elektitan fazan gamon.",
+        "title": "Redakti fazan intervalon",
+        "description": "Ĝisdatigi la elektitan fazan intervalon.",
         "data": {
           "phase_name": "Fazo",
-          "start_min": "Komenca Minuto",
-          "end_min": "Fina Minuto"
+          "start_min": "Startminuto",
+          "end_min": "Finminuto"
         }
       },
       "assign_profile_phases_delete": {
-        "title": "Forigi Fazan Gamon",
-        "description": "Elektu gamon por forigi el la skizo.",
+        "title": "Forigi fazan intervalon",
+        "description": "Elektu intervalon por forigi el la skizo.",
         "data": {
-          "range_index": "Faza Gamo"
+          "range_index": "Faza intervalo"
         }
       },
       "assign_profile_phases_auto_detect": {
-        "title": "Aŭtomate detektitaj Fazoj",
-        "description": "Profilo: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fazo(j) detektita(j) aŭtomate.** Elektu agon sube.",
+        "title": "Aŭtomate detektitaj fazoj",
+        "description": "Profilo: **{profile_name}**\n\n{timeline_svg}\n\n**{detected_count} fazoj aŭtomate detektitaj.** Elektu agon sube.",
         "data": {
           "action": "Ago"
         }
       },
       "assign_profile_phases_auto_detect_name": {
-        "title": "Nomo Detektita Fazoj",
-        "description": "Profilo: **{profile_name}**\n\n**{detected_count} fazo(j) detektita(j):**\n{ranges_summary}\n\nAsignu nomon al ĉiu fazo."
+        "title": "Nomi detektitajn fazojn",
+        "description": "Profilo: **{profile_name}**\n\n**{detected_count} fazoj detektitaj:**\n{ranges_summary}\n\nAsignu nomon al ĉiu fazo."
       },
       "assign_profile_phases_select": {
-        "title": "Asignu Fazintervalojn",
-        "description": "Elektu profilon por agordi fazintervalojn.",
+        "title": "Asigni fazajn intervalojn",
+        "description": "Elektu profilon por agordi fazajn intervalojn.",
         "data": {
           "profile": "Profilo"
         }
       },
       "profile_stats": {
-        "title": "Profila Statistiko",
+        "title": "Profilej statistikoj",
         "description": "{stats_table}"
       },
       "create_profile": {
-        "title": "Krei Novan Profilon",
-        "description": "Kreu novan profilon permane aŭ de pasinta ciklo.\n\nEkzemploj de nomoj de profilo: 'Delikataĵoj', 'Pez-devo', 'Rapida Lavo'",
+        "title": "Krei novan profilon",
+        "description": "Kreu novan profilon permane aŭ el pasinta ciklo.\n\nEkzemplaj profilej nomoj: 'Delikatoj', 'Peza Lavo', 'Rapida Lavo'",
         "data": {
-          "profile_name": "Profila Nomo",
-          "reference_cycle": "Referenca Ciklo (laŭvola)",
-          "manual_duration": "Mana Daŭro (minutoj)"
+          "profile_name": "Profila nomo",
+          "reference_cycle": "Referenca ciklo (laŭvola)",
+          "manual_duration": "Permana daŭro (minutoj)"
         }
       },
       "edit_profile": {
-        "title": "Redakti Profilon",
-        "description": "Elektu profilon por renomi",
+        "title": "Redakti profilon",
+        "description": "Elektu profilon por renomigi",
         "data": {
           "profile": "Profilo"
         }
       },
       "rename_profile": {
-        "title": "Redaktu Profilajn Detalojn",
-        "description": "Nuna profilo: {current_name}",
+        "title": "Redakti profilejn detalojn",
+        "description": "Aktuala profilo: {current_name}",
         "data": {
-          "new_name": "Profila Nomo",
-          "manual_duration": "Mana Daŭro (minutoj)"
+          "new_name": "Profila nomo",
+          "manual_duration": "Permana daŭro (minutoj)"
         }
       },
       "delete_profile_select": {
-        "title": "Forigi Profilon",
+        "title": "Forigi profilon",
         "description": "Elektu profilon por forigi",
         "data": {
           "profile": "Profilo"
         }
       },
       "delete_profile_confirm": {
-        "title": "Konfirmu Forigi Profilon",
+        "title": "Konfirmu forigi profilon",
         "description": "⚠️ Ĉi tio konstante forigos profilon: {profile_name}",
         "data": {
-          "unlabel_cycles": "Forigu etikedon de cikloj uzante ĉi tiun profilon"
+          "unlabel_cycles": "Forigu etikedon de cikloj uzantaj ĉi tiun profilon"
         }
       },
       "auto_label_cycles": {
-        "title": "Aŭto-Etikedaj Malnovaj Cikloj",
+        "title": "Aŭtomate etikedi malnovajn ciklojn",
         "description": "{info}",
         "data": {
-          "confidence_threshold": "Minimuma Konfido (0.50-0.95)"
+          "confidence_threshold": "Minimuma konfido (0.50-0.95)"
         }
       },
       "select_cycle_to_label": {
-        "title": "Elektu Ciklo al Etikedo",
+        "title": "Elekti ciklon por etikedi",
         "description": "✓ = kompletigita, ⚠ = rekomencita, ✗ = interrompita",
         "data": {
           "cycle_id": "Ciklo"
         }
       },
       "select_cycle_to_delete": {
-        "title": "Forigi Ciklon",
+        "title": "Forigi ciklon",
         "description": "⚠️ Ĉi tio konstante forigos la elektitan ciklon",
         "data": {
-          "cycle_id": "Ciklo por Forigi"
+          "cycle_id": "Ciklo por forigi"
         }
       },
       "label_cycle": {
-        "title": "Etikedo-Ciklo",
+        "title": "Etikedi ciklon",
         "description": "{cycle_info}",
         "data": {
           "profile_name": "Profilo",
-          "new_profile_name": "Nova Profila Nomo (se kreado)"
+          "new_profile_name": "Nova profila nomo (se kreante)"
         }
       },
       "post_process": {
-        "title": "Procezhistorio (Kunfandi/Disigi)",
-        "description": "Purigu ciklohistorion kunfandante fragmentajn kurojn kaj dividante malĝuste kunfanditajn ciklojn ene de tempofenestro. Enigu nombron da horoj por retrorigardi.\n{info}",
+        "title": "Procezi historion (Kunfandi/Dividi)",
+        "description": "Purigu ciklohistorion kunfandante fragmentitajn ekzekutojn kaj dividante malĝuste kunfanditajn ciklojn ene de tempofenestro. Enigu nombron da horoj por retrorigardi.\n{info}",
         "data": {
-          "time_range": "Retrofenestro (horoj)",
-          "gap_seconds": "Kunfandi/Disigi Interspacon (sekundoj)"
+          "time_range": "Retrorigarda fenestro (horoj)",
+          "gap_seconds": "Kunfandi/Dividi intertempo (sekundoj)"
         },
         "data_description": {
-          "time_range": "Nombro da horoj por skani por kunfandi fragmentajn ciklojn. Uzu 999999 por prilabori ĉiujn historiajn datumojn.\n{info}",
-          "gap_seconds": "Sojlo por decidi disigo vs kunfandi. Interspacoj PLI MALlongaj ol ĉi estas kunfanditaj. Interspacoj PLI LONGAJ ol ĉi estas dividitaj. Malaltigu ĉi tion por devigi disigon sur ciklo kiu estis kunfandita malĝuste."
+          "time_range": "Nombro da horoj por skani por kunfandi fragmentitajn ciklojn. Uzu 999999 por procezi ĉiujn historiajn datumojn.\n{info}",
+          "gap_seconds": "Sojlo por decidi divido kontraŭ kunfando. Intertempoj PLI MALLONGAJ ol ĉi tio estas kunfanditaj. Intertempoj PLI LONGAJ ol ĉi tio estas dividitaj. Malaltigu ĉi tion por devigi dividon sur ciklo kiu estis kunfandita malĝuste."
         }
       },
       "cleanup_profile": {
-        "title": "Purigi Historion - Elektu Profilon",
+        "title": "Purigi historion — Elekti profilon",
         "description": "Elektu profilon por bildigi. Ĉi tio generos grafeon montrantan ĉiujn pasintajn ciklojn por ĉi tiu profilo por helpi identigi eksteraĵojn.",
         "data": {
           "profile": "Profilo"
         }
       },
       "cleanup_select": {
-        "title": "Purigu Historion - Grafiku kaj Forigi",
-        "description": "![Grafiko]({graph_url})\n\n**Vidigu {profile_name}**\n\nLa grafikaĵo montras individuajn ciklojn kiel kolorajn liniojn. Identigu eksteraĵojn (liniojn malproksime de la grupo) kaj kongruu ilian koloron en la suba listo por forigi ilin.\n\n**Elektu ciklojn por PERMANENTE forigi:**",
+        "title": "Purigi historion — Grafiko kaj forigo",
+        "description": "![Grafiko]({graph_url})\n\n**Vidigu {profile_name}**\n\nLa grafikaĵo montras individuajn ciklojn kiel kolorajn liniojn. Identigu eksteraĵojn (liniojn malproksime de la grupo) kaj kongruu ilian koloron en la suba listo por forigi ilin.\n\n**Elektu ciklojn por KONSTANTE forigi:**",
         "data": {
-          "cycles_to_delete": "Cikloj por Forigi (kontrolu kongruajn kolorojn)"
+          "cycles_to_delete": "Cikloj por forigi (kongruu kolorojn)"
         }
       },
       "interactive_editor": {
-        "title": "Kunfandi/Disigi Interaga Redaktoro",
-        "description": "Elektu manan agon por plenumi en via ciklo-historio.",
+        "title": "Interaga redaktisto por kunfando/divido",
+        "description": "Elektu manan agon por plenumi en via ciklohistorio.",
         "data": {
           "editor_action": "Ago"
         }
       },
       "editor_select": {
-        "title": "Elektu Ciklojn",
-        "description": "Elektu la ciklo(j)n por prilabori.\n\n{info_text}",
+        "title": "Elekti ciklojn",
+        "description": "Elektu la ciklo(j)n por procezi.\n\n{info_text}",
         "data": {
           "selected_cycles": "Cikloj"
         }
       },
       "editor_configure": {
-        "title": "Agordi & Apliki",
+        "title": "Agordi kaj apliki",
         "description": "{preview_md}",
         "data": {
           "confirm_action": "Ago",
-          "merged_profile": "Rezulta Profilo",
-          "new_profile_name": "Nova Profila Nomo",
+          "merged_profile": "Rezulta profilo",
+          "new_profile_name": "Nova profila nomo",
           "confirm_commit": "Jes, mi konfirmas ĉi tiun agon",
           "segment_0_profile": "Segmento 1 Profilo",
           "segment_1_profile": "Segmento 2 Profilo",
@@ -494,100 +501,93 @@
         }
       },
       "editor_split_params": {
-        "title": "Split Agordo",
-        "description": "Alĝustigu la sentemon por dividi ĉi tiun ciklon. Ajna neaktiva breĉo pli longa ol tio kaŭzos disigon.",
+        "title": "Divida agordo",
+        "description": "Ĝustigi la sentemon por dividi ĉi tiun ciklon. Ajna senaktiva interspaco pli longa ol tio kaŭzos dividon.",
         "data": {
-          "min_gap_seconds": "Split Gap Sojlo (sekundoj)"
+          "min_gap_seconds": "Divida interspaca sojlo (sekundoj)"
         }
       },
       "reprocess_history": {
-        "title": "Prizorgado: Reprocesi & Optimumigi Datumojn",
-        "description": "Elfaras profundan purigadon de historiaj datumoj:\n1. Tondas nul-potencajn legaĵojn (silento).\n2. Riparas ciklon tempon/daŭron.\n3. Rekalkulas ĉiujn statistikajn modelojn (kovertojn).\n\n**Rulu ĉi tion por ripari datumojn aŭ apliki novajn algoritmojn.**"
+        "title": "Prizorgado: Reprocesi kaj optimumigi datumojn",
+        "description": "Elfaras profundan purigadon de historiaj datumoj:\n1. Tondas nul-potencajn legaĵojn (silento).\n2. Riparas ciklan tempon/daŭron.\n3. Rekalkulas ĉiujn statistikajn modelojn (kovertojn).\n\n**Rulu ĉi tion por ripari datumajn problemojn aŭ apliki novajn algoritmojn.**"
       },
       "wipe_history": {
-        "title": "Viŝi Historion (Nur Testado)",
-        "description": "⚠️ Ĉi tio konstante forigos ĈIUJN konservitajn ciklojn kaj profilojn por ĉi tiu aparato. Ĉi tio ne povas esti malfarita!"
+        "title": "Viŝi historion (nur por testado)",
+        "description": "⚠️ Ĉi tio konstante forigos ĈIUJN stokitajn ciklojn kaj profilojn por ĉi tiu aparato. Ĉi tio ne povas esti malfarita!"
       },
       "export_import": {
         "title": "Eksporti/Importi JSON",
         "description": "Kopiu/gluu ciklojn, profilojn, KAJ agordojn por ĉi tiu aparato. Eksportu sube aŭ algluu JSON por importi.",
         "data": {
           "mode": "Ago",
-          "json_payload": "Kompleta Agordo JSON"
+          "json_payload": "Kompleta agordo JSON"
         },
         "data_description": {
           "mode": "Elektu Eksporti por kopii aktualajn datumojn kaj agordojn, aŭ Importi por alglui eksportitajn datumojn de alia WashData-aparato.",
-          "json_payload": "Por Eksporti: kopiu ĉi tiun JSON (inkludas ciklojn, profilojn kaj ĉiujn agorditajn agordojn). Por Importi: algluu JSON eksportitan de WashData."
+          "json_payload": "Por Eksporti: kopiu ĉi tiun JSON (inkludas ciklojn, profilojn kaj ĉiujn precize agordojn). Por Importi: algluu JSON eksportitan de WashData."
         }
       },
       "record_cycle": {
-        "title": "Rekorda Ciklo",
+        "title": "Registri ciklon",
         "description": "Mane registri ciklon por krei puran profilon sen interfero.\n\nStatuso: **{status}**\nDaŭro: {duration}s\nSpecimenoj: {samples}",
         "data": {
           "action": "Ago"
         }
       },
       "record_process": {
-        "title": "Proceza Registrado",
-        "description": "![Grafiko]({graph_url})\n\n**Grafeo montras krudan registradon.** Blua = Konservu, Ruĝa = Proponita tajlado.\n*Grafiko estas senmova kaj ne ĝisdatiĝas kun formoŝanĝoj.*\n\nRegistrado ĉesis. Tondiloj estas vicigitaj al la detektita specimena indico (~{sampling_rate}s).\n\nKruda Daŭro: {duration}s\nSpecimenoj: {samples}",
+        "title": "Procezi registradon",
+        "description": "![Grafiko]({graph_url})\n\n**Grafeo montras krudan registradon.** Blua = Konservi, Ruĝa = Proponita tondado.\n*Grafiko estas senmova kaj ne ĝisdatiĝas kun formaj ŝanĝoj.*\n\nRegistrado ĉesis. Tondiloj estas vicigitaj al la detektita specimena kadencio (~{sampling_rate}s).\n\nKruda daŭro: {duration}s\nSpecimenoj: {samples}",
         "data": {
-          "head_trim": "Tondi Komenco (sekundoj)",
-          "tail_trim": "Tondi Finon (sekundoj)",
-          "save_mode": "Konservu Celon",
-          "profile_name": "Profila Nomo"
+          "head_trim": "Tondado komenco (sekundoj)",
+          "tail_trim": "Tondado fino (sekundoj)",
+          "save_mode": "Konserva celo",
+          "profile_name": "Profila nomo"
         }
       },
       "learning_feedbacks": {
-        "title": "Lernado de Rimarkoj",
-        "description": "Elektu ciklorevizian peton por procesi.",
+        "title": "Lernaj reagoj",
+        "description": "Elektu ciklan revizian peton por procezi.",
         "data": {
-          "selected_feedback": "Elektu Ciklo por Revizio"
+          "selected_feedback": "Elektu ciklon por revizii"
         }
       },
       "learning_feedbacks_empty": {
-        "title": "Lernado de Rimarkoj",
-        "description": "Neniuj pritraktataj sugestoj trovitaj."
+        "title": "Lernaj reagoj",
+        "description": "Neniuj pritraktataj reagopetoj trovitaj."
       },
       "resolve_feedback": {
-        "title": "Solvu Reago",
-        "description": "{comparison_img}{candidates_table}\n**Detektita Profilo**: {detected_profile} ({confidence_pct}%)\n**Taksita Daŭro**: {est_duration_min} min\n**Fakta Daŭro**: {act_duration_min} min\n\n__Elektu agon sube:__",
+        "title": "Solvi reagon",
+        "description": "{comparison_img}{candidates_table}\n**Detektita profilo**: {detected_profile} ({confidence_pct}%)\n**Taksita daŭro**: {est_duration_min} min\n**Fakta daŭro**: {act_duration_min} min\n\n__Elektu agon sube:__",
         "data": {
           "action": "Kion vi ŝatus fari?",
-          "corrected_profile": "Ĝusta Programo (se korektante)",
-          "corrected_duration": "Ĝusta Daŭro en sekundoj (se korektante)"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Revizu Sugestajn Ŝanĝojn",
-        "description": "WashData trovis {pending_count} proponitajn valorojn por apliki.\n\nŜanĝoj por revizii:\n{changes}\n\nKonfirmu ĉi sube por enscenigi ĉi tiujn valorojn en la formularo. Ili ne estas konservitaj ĝis vi sendas Altnivelajn Agordojn.",
-        "data": {
-          "confirm_apply_suggestions": "Scenigu proponitajn valorojn en Altnivelaj Agordoj"
+          "corrected_profile": "Ĝusta programo (se korektante)",
+          "corrected_duration": "Ĝusta daŭro en sekundoj (se korektante)"
         }
       },
       "trim_cycle_select": {
-        "title": "Tondi Ciklo - Elektu Ciklo",
+        "title": "Tondi ciklon — Elekti ciklon",
         "description": "Elektu ciklon por tondi. ✓ = finita, ⚠ = rekomencita, ✗ = interrompita",
         "data": {
           "cycle_id": "Ciklo"
         }
       },
       "trim_cycle": {
-        "title": "Tondi Ciklo",
-        "description": "Nuna fenestro: {trim_summary}\n\n{trim_svg}",
+        "title": "Tondi ciklon",
+        "description": "Aktuala fenestro: {trim_summary}\n\n{trim_svg}",
         "data": {
           "action": "Ago"
         }
       },
       "trim_cycle_start": {
-        "title": "Agordu Trim Start",
-        "description": "Enigu la minuton ofseton por komenci konservi datumojn de (0 = ciklokomenco).",
+        "title": "Agordi tondadan komencon",
+        "description": "Enigu la minuton ofseton por komenci konservi datumojn de (0 = cikla komenco).",
         "data": {
           "trim_start_min": "Komenco (minutoj)"
         }
       },
       "trim_cycle_end": {
-        "title": "Agordu Trim End",
-        "description": "Enigu la minuton kompenson por ĉesi konservi datumojn ĉe.",
+        "title": "Agordi tondadan finon",
+        "description": "Enigu la minuton ofseton ĉe kiu ĉesi konservi datumojn.",
         "data": {
           "trim_end_min": "Fino (minutoj)"
         }
@@ -596,301 +596,301 @@
     "error": {
       "import_failed": "Importo malsukcesis. Bonvolu alglui validan WashData-eksportan JSON.",
       "profile_exists": "Profilo kun ĉi tiu nomo jam ekzistas",
-      "rename_failed": "Malsukcesis renomi profilon. Profilo eble ne ekzistas aŭ nova nomo jam estas prenita.",
-      "assignment_failed": "Malsukcesis atribui profilon al biciklo",
+      "rename_failed": "Malsukcesis renomigi profilon. Profilo eble ne ekzistas aŭ nova nomo jam estas uzata.",
+      "assignment_failed": "Malsukcesis asigni profilon al ciklo",
       "duplicate_phase": "Fazo kun ĉi tiu nomo jam ekzistas.",
       "phase_not_found": "Elektita fazo ne estis trovita.",
-      "invalid_phase_name": "Faznomo ne povas esti malplena.",
+      "invalid_phase_name": "Faza nomo ne povas esti malplena.",
       "phase_name_too_long": "Faza nomo estas tro longa.",
-      "invalid_phase_range": "Fazintervalo estas nevalida. Fino devas esti pli granda ol komenco.",
+      "invalid_phase_range": "Faza intervalo estas nevalida. Fino devas esti pli granda ol komenco.",
       "invalid_phase_timestamp": "Tempostampo estas nevalida. Uzu la formaton YYYY-MM-DD HH:MM aŭ HH:MM.",
-      "overlapping_phase_ranges": "Fazaj intervaloj interkovras. Alĝustigu la intervalojn kaj provu denove.",
-      "incomplete_phase_row": "Ĉiu fazvico devas inkludi fazon kaj pliajn kompletajn komencajn/finvalorojn por la elektita reĝimo.",
-      "timestamp_mode_cycle_required": "Bonvolu elekti fontciklon kiam vi uzas tempostampilon.",
-      "no_phase_ranges": "Neniuj fazintervaloj ankoraŭ haveblas por tiu ago.",
-      "feedback_notification_title": "WashData: Kontrolu Ciklon ({device})",
-      "feedback_notification_message": "**Aparato**: {device}\n**Programo**: {program} ({confidence}% fido)\n**Tempo**: {time}\n\nWashData bezonas vian helpon por kontroli ĉi tiun detektitan ciklon.\n\nBonvolu iri al **Agordoj > Aparatoj kaj Servoj > WashData > Agordi > Lernado-Resigoj** por konfirmi aŭ korekti ĉi tiun rezulton.",
-      "suggestions_ready_notification_title": "WashData: Pretaj Sugestaj Agordoj ({device})",
-      "suggestions_ready_notification_message": "La **Sugestita Agordo** sentilo nun raportas **{count}** ageblajn rekomendojn.\n\nPor revizii kaj apliki ilin: **Agordoj > Aparatoj kaj Servoj > WashData > Agordu > Altnivelaj Agordoj > Apliki Sugestajn Valorojn**.\n\nSugestoj estas laŭvolaj kaj montrataj por revizio antaŭ ol vi konservas.",
-      "trim_range_invalid": "Komenco devas esti antaŭ fino. Bonvolu ĝustigi viajn eltondajn punktojn.",
-      "trim_failed": "Trim malsukcesis. La ciklo eble ne plu ekzistas aŭ la fenestro estas malplena."
+      "overlapping_phase_ranges": "Fazaj intervaloj interkovras. Ĝustigi la intervalojn kaj provi denove.",
+      "incomplete_phase_row": "Ĉiu faza vico devas inkludi fazon kaj pliajn kompletajn komenco/finvalorojn por la elektita reĝimo.",
+      "timestamp_mode_cycle_required": "Bonvolu elekti fonta ciklon kiam vi uzas tempostampilan reĝimon.",
+      "no_phase_ranges": "Neniuj fazaj intervaloj ankoraŭ disponeblaj por tiu ago.",
+      "feedback_notification_title": "WashData: Kontrolu ciklon ({device})",
+      "feedback_notification_message": "**Aparato**: {device}\n**Programo**: {program} ({confidence}% konfido)\n**Tempo**: {time}\n\nWashData bezonas vian helpon por kontroli ĉi tiun detektitan ciklon.\n\nBonvolu iri al **Agordoj > Aparatoj kaj Servoj > WashData > Agordi > Lernaj Reagoj** por konfirmi aŭ korekti ĉi tiun rezulton.",
+      "suggestions_ready_notification_title": "WashData: Sugestitaj agordoj pretaj ({device})",
+      "suggestions_ready_notification_message": "La **Sugestitaj Agordoj** sensilo nun raportas **{count}** ageblajn rekomendojn.\n\nPor revizii kaj apliki ilin: **Agordoj > Aparatoj kaj Servoj > WashData > Agordi > Altnivelaj Agordoj > Apliki Sugestitajn Valorojn**.\n\nSugestoj estas laŭvolaj kaj montrataj por revizio antaŭ ol vi konservas.",
+      "trim_range_invalid": "Komenco devas esti antaŭ fino. Bonvolu ĝustigi viajn tondadajn punktojn.",
+      "trim_failed": "Tondado malsukcesis. La ciklo eble ne plu ekzistas aŭ la fenestro estas malplena."
     },
     "abort": {
       "no_cycles_found": "Neniuj cikloj trovitaj",
+      "no_power_data": "Neniuj potencaj spurdatumoj disponeblaj por la elektita ciklo.",
       "no_profiles_found": "Neniuj profiloj trovitaj. Kreu profilon unue.",
       "no_profiles_for_matching": "Neniuj profiloj disponeblaj por kongruo. Kreu profilojn unue.",
       "no_unlabeled_cycles": "Ĉiuj cikloj jam estas etikeditaj",
-      "no_suggestions": "Ankoraŭ neniuj proponitaj valoroj haveblaj. Kuru kelkajn ciklojn kaj provu denove.",
-      "no_predictions": "Neniuj antaŭdiroj",
-      "no_custom_phases": "Neniuj kutimaj fazoj trovitaj.",
+      "no_suggestions": "Ankoraŭ neniuj sugestitaj valoroj disponeblaj. Rulu kelkajn ciklojn kaj provu denove.",
+      "no_predictions": "Neniuj prognozoj",
+      "no_custom_phases": "Neniuj propraj fazoj trovitaj.",
       "reprocess_success": "Sukcese reprocesitaj {count} cikloj.",
-      "debug_data_cleared": "Sukcese forigis sencimigajn datumojn el {count} cikloj.",
-      "no_power_data": "Neniuj potencospuraj datumoj haveblaj por la elektita ciklo."
+      "debug_data_cleared": "Sukcese forigitaj sencimigaj datumoj el {count} cikloj."
     }
   },
   "selector": {
     "notify_events_option": {
       "options": {
-        "cycle_start": "Cikla Komenco",
-        "cycle_finish": "Cikla Fino",
-        "cycle_live": "Viva Progreso"
+        "cycle_start": "Cikla komenco",
+        "cycle_finish": "Cikla fino",
+        "cycle_live": "Viva progreso"
       }
     },
     "common_text": {
       "options": {
         "unlabeled": "(Neetikedita)",
-        "create_new_profile": "Krei Novan Profilon",
-        "remove_label": "Forigi Etikedon",
+        "create_new_profile": "Krei novan profilon",
+        "remove_label": "Forigi etikedon",
         "no_reference_cycle": "(Neniu referenca ciklo)",
-        "all_device_types": "Ĉiuj Tipoj de Aparato",
+        "all_device_types": "Ĉiuj aparataj tipoj",
         "current_suffix": "(aktuala)",
         "editor_select_info": "Elektu 1 ciklon por dividi, aŭ 2+ ciklojn por kunfandi.",
         "no_cycles_recorded": "Neniuj cikloj ankoraŭ registritaj.",
-        "profile_summary_line": "- **{name}**: {count} cikloj, {avg}m mez",
+        "profile_summary_line": "- **{name}**: {count} cikloj, mezo {avg}m",
         "no_profiles_created": "Neniuj profiloj kreitaj ankoraŭ.",
-        "phase_preview": "Faza Antaŭrigardo",
-        "phase_preview_no_curve": "Averaĝa profilkurbo ankoraŭ ne haveblas. Kuru/marku pli da cikloj por ĉi tiu profilo.",
-        "average_power_curve": "Averaĝa Potenca Kurbo",
+        "phase_preview": "Faza antaŭvido",
+        "phase_preview_no_curve": "Averaĝa profila kurbo ankoraŭ ne disponebla. Rulu/etikedi pli da cikloj por ĉi tiu profilo.",
+        "average_power_curve": "Averaĝa potenca kurbo",
         "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} cikloj, ~{duration}m mezumo)",
+        "profile_option_fmt": "{name} ({count} cikloj, ~{duration}m mezo)",
         "profile_option_short_fmt": "{name} ({count} cikloj, ~{duration}m)",
         "deleted_cycles_from_profile": "Forigitaj {count} cikloj de {profile}.",
         "not_enough_data_graph": "Ne sufiĉas datumoj por generi grafeon.",
         "no_profiles_found": "Neniuj profiloj trovitaj.",
-        "cycle_info_fmt": "Ciklo: {start}, {duration}m, Kurento: {label}",
-        "top_candidates_header": "### Plej bonaj Kandidatoj",
+        "cycle_info_fmt": "Ciklo: {start}, {duration}m, Aktuala: {label}",
+        "top_candidates_header": "### Plej bonaj kandidatoj",
         "tbl_profile": "Profilo",
         "tbl_confidence": "Konfido",
         "tbl_correlation": "Korelacio",
-        "tbl_duration_match": "Daŭro Matĉo",
-        "detected_profile": "Detektita Profilo",
-        "estimated_duration": "Estimata Daŭro",
-        "actual_duration": "Fakta Daŭro",
+        "tbl_duration_match": "Daŭra kongruo",
+        "detected_profile": "Detektita profilo",
+        "estimated_duration": "Taksita daŭro",
+        "actual_duration": "Fakta daŭro",
         "choose_action": "__Elektu agon sube:__",
-        "tbl_count": "grafo",
-        "tbl_avg": "Avg",
+        "tbl_count": "Kalkulo",
+        "tbl_avg": "Mezo",
         "tbl_min": "Min",
         "tbl_max": "Maks",
-        "tbl_energy_avg": "Energio (mezumo)",
+        "tbl_energy_avg": "Energio (mezo)",
         "tbl_energy_total": "Energio (totalo)",
-        "tbl_consistency": "Konsisti.",
-        "tbl_last_run": "Lasta Kuro",
-        "graph_legend_title": "Grafika Legendo",
-        "graph_legend_body": "La blua bando reprezentas la minimuman kaj maksimuman potencan remizintervalon observitan. La linio montras la mezan kurbon.",
-        "recording_preview": "Antaŭrigardo pri registrado",
-        "trim_start": "Tondi Komenco",
-        "trim_end": "Trim End",
-        "split_preview_title": "Split Antaŭrigardo",
-        "split_preview_found_fmt": "Trovis {count} segmentojn.",
+        "tbl_consistency": "Konsisteco",
+        "tbl_last_run": "Lasta ekzekuto",
+        "graph_legend_title": "Grafika legendo",
+        "graph_legend_body": "La blua bendo reprezentas la minimuman kaj maksimuman observitan potenckonsumo-amplitudon. La linio montras la averaĝan potencan kurbon.",
+        "recording_preview": "Registrada antaŭvido",
+        "trim_start": "Tondada komenco",
+        "trim_end": "Tondada fino",
+        "split_preview_title": "Divida antaŭvido",
+        "split_preview_found_fmt": "Trovitaj {count} segmentoj.",
         "split_preview_confirm_fmt": "Klaku Konfirmi por dividi ĉi tiun ciklon en {count} apartajn ciklojn.",
-        "merge_preview_title": "Kunfandi Antaŭrigardon",
-        "merge_preview_joining_fmt": "Aliĝo al {count} cikloj. Mankoj estos plenigitaj per 0W-legadoj.",
-        "profile_comparison": "Profila Komparo",
+        "merge_preview_title": "Kunfanda antaŭvido",
+        "merge_preview_joining_fmt": "Kunfandante {count} ciklojn. Intertempoj estos plenigitaj per 0W-legaĵoj.",
+        "profile_comparison": "Profila komparo",
         "actual_cycle_label": "Ĉi tiu ciklo (fakta)",
-        "storage_usage_header": "Stokado Uzado",
-        "storage_file_size": "Dosiera Grandeco",
+        "storage_usage_header": "Stokada uzado",
+        "storage_file_size": "Dosiergrandeco",
         "storage_cycles": "Cikloj",
         "storage_profiles": "Profiloj",
-        "storage_debug_traces": "Sencimigi Spurojn",
+        "storage_debug_traces": "Sencimigaj spuroj",
         "overview_suffix": "Superrigardo",
-        "phase_preview_for_profile": "Faza antaŭrigardo por profilo",
-        "current_ranges_header": "Nunaj intervaloj",
+        "phase_preview_for_profile": "Faza antaŭvido por profilo",
+        "current_ranges_header": "Aktualaj intervaloj",
         "assign_phases_help": "Uzu agojn sube por aldoni, redakti, forigi aŭ konservi intervalojn.",
-        "profile_summary_header": "Profila Resumo",
-        "recent_cycles_header": "Freŝaj cikloj",
-        "no_power_preview": "*Neniu elektraj datumoj disponeblaj por antaŭrigardo.*",
-        "trim_cycle_preview_title": "Ciklo Trim Antaŭrigardo",
-        "trim_cycle_preview_no_data": "Neniuj potenc-tracdatenoj haveblaj por ĉi tiu ciklo.",
+        "profile_summary_header": "Profila resumo",
+        "recent_cycles_header": "Lastatempaj cikloj",
+        "no_power_preview": "*Neniuj potencaj datumoj disponeblaj por antaŭvido.*",
+        "trim_cycle_preview_title": "Cikla tondada antaŭvido",
+        "trim_cycle_preview_no_data": "Neniuj potencaj datumoj disponeblaj por ĉi tiu ciklo.",
         "trim_cycle_preview_kept_suffix": "konservita"
       }
     },
     "interactive_editor_action": {
       "options": {
-        "split": "Dividi Ciklon (Trovu interspacojn)",
-        "merge": "Kunfandi Ciklojn (Aliĝi al fragmentoj)",
+        "split": "Dividi ciklon (trovi intertempojn)",
+        "merge": "Kunfandi ciklojn (kunigi fragmentojn)",
         "delete": "Forigi ciklo(j)n"
       }
     },
     "diagnostics_action": {
       "options": {
-        "reprocess_history": "Prizorgado: Reprocesi & Optimumigi Datumojn",
-        "clear_debug_data": "Forigi Sencimigajn Datumojn (Liberigi spacon)",
-        "wipe_history": "Forviŝu ĈIUJN datumojn por ĉi tiu aparato (nereversigebla)",
-        "export_import": "Eksportu/Importu JSON kun agordoj (kopiu/gluu)"
+        "reprocess_history": "Prizorgado: reprocesi kaj optimumigi datumojn",
+        "clear_debug_data": "Forigi sencimigajn datumojn (liberigi spacon)",
+        "wipe_history": "Forviŝi ĈIUJN datumojn por ĉi tiu aparato (nereversigebla)",
+        "export_import": "Eksporti/importi JSON kun agordoj (kopii/glui)"
       }
     },
     "export_import_mode": {
       "options": {
-        "export": "Eksportu Ĉiuj Datumoj",
-        "import": "Importi/Kunfandi Datumojn"
+        "export": "Eksporti ĉiujn datumojn",
+        "import": "Importi/kunfandi datumojn"
       }
     },
     "manage_cycles_action": {
       "options": {
-        "auto_label_cycles": "Aŭto-Etikedaj Malnovaj Cikloj",
-        "select_cycle_to_label": "Etikedo Specifa Ciklo",
-        "select_cycle_to_delete": "Forigi Ciklon",
-        "interactive_editor": "Kunfandi/Disigi Interaga Redaktoro",
-        "trim_cycle": "Trim Ciklaj Datumoj"
+        "auto_label_cycles": "Aŭtomate etikedi malnovajn ciklojn",
+        "select_cycle_to_label": "Etikedi specifan ciklon",
+        "select_cycle_to_delete": "Forigi ciklon",
+        "interactive_editor": "Interaga redaktisto por kunfando/divido",
+        "trim_cycle": "Tondi ciklajn datumojn"
       }
     },
     "manage_profiles_action": {
       "options": {
-        "create_profile": "Krei Novan Profilon",
-        "edit_profile": "Redakti/Renomigi Profilon",
-        "delete_profile": "Forigi Profilon",
-        "profile_stats": "Profila Statistiko",
-        "cleanup_profile": "Purigu Historion - Grafiku kaj Forigi",
-        "assign_phases": "Asignu Fazintervalojn"
+        "create_profile": "Krei novan profilon",
+        "edit_profile": "Redakti/renomigi profilon",
+        "delete_profile": "Forigi profilon",
+        "profile_stats": "Profilej statistikoj",
+        "cleanup_profile": "Purigi historion — grafiko kaj forigo",
+        "assign_phases": "Asigni fazajn intervalojn"
       }
     },
     "manage_phase_catalog_action": {
       "options": {
-        "create_custom_phase": "Krei Novan Fazon",
-        "edit_custom_phase": "Redakti Fazon",
-        "delete_custom_phase": "Forigi Fazon"
+        "create_custom_phase": "Krei novan fazon",
+        "edit_custom_phase": "Redakti fazon",
+        "delete_custom_phase": "Forigi fazon"
       }
     },
     "assign_profile_phases_action": {
       "options": {
-        "add_range": "Aldonu Fazan Gamon",
-        "edit_range": "Redakti Phase Range",
-        "delete_range": "Forigi Fazan Gamon",
-        "clear_ranges": "Forigi Ĉiuj Gamoj",
-        "auto_detect_ranges": "Aŭtomate detekti Fazojn",
-        "save_ranges": "Konservu kaj Revenu"
+        "add_range": "Aldoni fazan intervalon",
+        "edit_range": "Redakti fazan intervalon",
+        "delete_range": "Forigi fazan intervalon",
+        "clear_ranges": "Forigi ĉiujn intervalojn",
+        "auto_detect_ranges": "Aŭtomate detekti fazojn",
+        "save_ranges": "Konservi kaj reveni"
       }
     },
     "record_cycle_action": {
       "options": {
-        "refresh_status": "Refreŝiga Statuso",
-        "stop_recording": "Ĉesu Registradon (Konservi & Procesi)",
-        "start_recording": "Komencu Novan Registradon",
-        "process_recording": "Procezi Lastan Registradon (Tordi & Konservi)",
-        "discard_recording": "Forĵeti Lastan Registradon"
+        "refresh_status": "Refreŝigi staton",
+        "stop_recording": "Ĉesi registradon (konservi kaj procezi)",
+        "start_recording": "Komenci novan registradon",
+        "process_recording": "Procezi lastan registradon (tondadi kaj konservi)",
+        "discard_recording": "Forĵeti lastan registradon"
       }
     },
     "record_process_save_mode": {
       "options": {
-        "new_profile": "Krei Novan Profilon",
-        "existing_profile": "Aldoni al Ekzistanta Profilo",
-        "discard": "Forĵeti Registradon"
+        "new_profile": "Krei novan profilon",
+        "existing_profile": "Aldoni al ekzistanta profilo",
+        "discard": "Forĵeti registradon"
       }
     },
     "resolve_feedback_action": {
       "options": {
-        "confirm": "Konfirmu - Ĝusta Detektado",
-        "correct": "Ĝuste - Elektu Programon/Daŭron",
-        "ignore": "Ignori - Falsa Pozitiva/Brua Ciklo",
-        "delete": "Forigi - Forigi el Historio"
+        "confirm": "Konfirmi — Ĝusta detektado",
+        "correct": "Korekti — Elekti programon/daŭron",
+        "ignore": "Ignori — Falsa pozitiva/brua ciklo",
+        "delete": "Forigi — Forigi el historio"
       }
     },
     "assign_profile_phases_auto_detect_action": {
       "options": {
-        "name_phases": "Nomu kaj apliki fazojn",
-        "cancel": "Reiru sen ŝanĝoj"
+        "name_phases": "Nomi kaj apliki fazojn",
+        "cancel": "Reiri sen ŝanĝoj"
       }
     },
     "trim_cycle_action": {
       "options": {
-        "set_start": "Agordu Komencan Punkton",
-        "set_end": "Agordu Finpunkton",
-        "reset": "Restarigi al Plena Daŭro",
-        "apply": "Apliki Trim",
+        "set_start": "Agordi komencan punkton",
+        "set_end": "Agordi finan punkton",
+        "reset": "Restarigi al plena daŭro",
+        "apply": "Apliki tondadon",
         "cancel": "Nuligi"
       }
     }
   },
   "services": {
     "label_cycle": {
-      "name": "Etikedo-Ciklo",
-      "description": "Asignu ekzistantan profilon al pasinta ciklo, aŭ forigu la etikedon.",
+      "name": "Etikedi ciklon",
+      "description": "Asigni ekzistantan profilon al pasinta ciklo, aŭ forigi la etikedon.",
       "fields": {
         "device_id": {
           "name": "Aparato",
-          "description": "La lavmaŝino aparato por etikedi."
+          "description": "La WashData-aparato por etikedi."
         },
         "cycle_id": {
           "name": "Cikla ID",
           "description": "La ID de la ciklo por etikedi."
         },
         "profile_name": {
-          "name": "Profila Nomo",
+          "name": "Profila nomo",
           "description": "La nomo de ekzistanta profilo (kreu profilojn en la menuo Administri Profilojn). Lasu malplena por forigi etikedon."
         }
       }
     },
     "create_profile": {
-      "name": "Krei Profilon",
-      "description": "Kreu novan profilon (sendependa aŭ bazita sur referenca ciklo).",
+      "name": "Krei profilon",
+      "description": "Krei novan profilon (sendependa aŭ bazita sur referenca ciklo).",
       "fields": {
         "device_id": {
           "name": "Aparato",
-          "description": "La lavmaŝino aparato."
+          "description": "La WashData-aparato."
         },
         "profile_name": {
-          "name": "Profila Nomo",
-          "description": "Nomo por la nova profilo (ekz. 'Heavy Duty', 'Delikates')."
+          "name": "Profila nomo",
+          "description": "Nomo por la nova profilo (ekz. 'Peza Lavo', 'Delikatoj')."
         },
         "reference_cycle_id": {
-          "name": "Referenca Ciklo-ID",
-          "description": "Laŭvola cikla ID por bazi ĉi tiun profilon."
+          "name": "Referenca cikla ID",
+          "description": "Laŭvola cikla ID sur kiu bazi ĉi tiun profilon."
         }
       }
     },
     "delete_profile": {
-      "name": "Forigi Profilon",
-      "description": "Forigu profilon kaj laŭvole maletikedu ciklojn uzante ĝin.",
+      "name": "Forigi profilon",
+      "description": "Forigi profilon kaj laŭvole maletiked ciklojn uzantajn ĝin.",
       "fields": {
         "device_id": {
           "name": "Aparato",
-          "description": "La lavmaŝino aparato."
+          "description": "La WashData-aparato."
         },
         "profile_name": {
-          "name": "Profila Nomo",
+          "name": "Profila nomo",
           "description": "La profilo por forigi."
         },
         "unlabel_cycles": {
-          "name": "Maletikedu Ciklojn",
-          "description": "Forigu profiletikedon de cikloj uzante ĉi tiun profilon."
+          "name": "Maletikedu ciklojn",
+          "description": "Forigi profiletikedon de cikloj uzantaj ĉi tiun profilon."
         }
       }
     },
     "auto_label_cycles": {
-      "name": "Aŭto-Etikedaj Malnovaj Cikloj",
-      "description": "Retroaktive etikedu neetikeditajn ciklojn uzante profilkongruon.",
+      "name": "Aŭtomate etikedi malnovajn ciklojn",
+      "description": "Retroaktive etikedi neetikeditajn ciklojn uzante profilan kongruon.",
       "fields": {
         "device_id": {
           "name": "Aparato",
-          "description": "La lavmaŝino aparato."
+          "description": "La WashData-aparato."
         },
         "confidence_threshold": {
-          "name": "Konfida Sojlo",
-          "description": "Minimuma matĉofido (0.50-0.95) por apliki etikedojn."
+          "name": "Konfida sojlo",
+          "description": "Minimuma kongrua konfido (0.50-0.95) por apliki etikedojn."
         }
       }
     },
     "export_config": {
-      "name": "Eksporti Agordon",
-      "description": "Eksportu la profilojn, ciklojn kaj agordojn de ĉi tiu aparato al JSON-dosiero (po aparato).",
+      "name": "Eksporti agordon",
+      "description": "Eksporti la profilojn, ciklojn kaj agordojn de ĉi tiu aparato al JSON-dosiero (po aparato).",
       "fields": {
         "device_id": {
           "name": "Aparato",
-          "description": "La lavmaŝino aparato por eksporti."
+          "description": "La WashData-aparato por eksporti."
         },
         "path": {
           "name": "Vojo",
-          "description": "Laŭvola absoluta dosiervojo por skribi (defaŭlte al /config/ha_washdata_export_{entry}.json)."
+          "description": "Laŭvola absoluta dosiera vojo por skribi (defaŭlte al /config/ha_washdata_export_{entry}.json)."
         }
       }
     },
     "import_config": {
-      "name": "Importi Agordon",
-      "description": "Importu profilojn, ciklojn kaj agordojn por ĉi tiu aparato el JSON-eksportdosiero (agordoj povas esti anstataŭitaj).",
+      "name": "Importi agordon",
+      "description": "Importi profilojn, ciklojn kaj agordojn por ĉi tiu aparato el JSON-eksporta dosiero (agordoj povas esti anstataŭitaj).",
       "fields": {
         "device_id": {
           "name": "Aparato",
-          "description": "La lavmaŝino aparato por importi."
+          "description": "La WashData-aparato por importi."
         },
         "path": {
           "name": "Vojo",
@@ -899,31 +899,31 @@
       }
     },
     "submit_cycle_feedback": {
-      "name": "Sendu Ciklajn Rimarkojn",
-      "description": "Konfirmu aŭ korektu aŭtomate detektita programon post finita ciklo. Provizu aŭ `entry_id` (altnivela) aŭ `device_id` (rekomendita).",
+      "name": "Sendi ciklan reagon",
+      "description": "Konfirmi aŭ korekti aŭtomate detektitan programon post finita ciklo. Provizu aŭ `entry_id` (altnivela) aŭ `device_id` (rekomendita).",
       "fields": {
         "device_id": {
           "name": "Aparato",
           "description": "La WashData-aparato (rekomendita anstataŭ entry_id)."
         },
         "entry_id": {
-          "name": "Enira ID",
-          "description": "La agorda enirid por la aparato (alternativa al device_id)."
+          "name": "Eniga ID",
+          "description": "La agorda eniga ID por la aparato (alternativo al device_id)."
         },
         "cycle_id": {
           "name": "Cikla ID",
-          "description": "La ciklo-identigilo montrita en la sugesta sciigo / protokoloj."
+          "description": "La cikla identigilo montrita en la reaga sciigo / protokoloj."
         },
         "user_confirmed": {
-          "name": "Konfirmu Detektita Programo",
+          "name": "Konfirmi detektitan programon",
           "description": "Agordu vera se la detektita programo estas ĝusta."
         },
         "corrected_profile": {
-          "name": "Korektita Profilo",
-          "description": "Se ne konfirmite, donu la ĝustan profilon/programan nomon."
+          "name": "Korektita profilo",
+          "description": "Se ne konfirmita, donu la ĝustan profilan/programan nomon."
         },
         "corrected_duration": {
-          "name": "Korektita Daŭro (sekundoj)",
+          "name": "Korektita daŭro (sekundoj)",
           "description": "Laŭvola korektita daŭro en sekundoj."
         },
         "notes": {
@@ -933,28 +933,28 @@
       }
     },
     "record_start": {
-      "name": "Rekorda Ciklo-Komenco",
-      "description": "Komencu permane registri puran ciklon (preterpasas ĉian kongruan logikon).",
+      "name": "Registri ciklan komencon",
+      "description": "Komenci mane registri puran ciklon (preterpasas ĉian kongruigan logikon).",
       "fields": {
         "device_id": {
           "name": "Aparato",
-          "description": "La lavmaŝino aparato por registri."
+          "description": "La WashData-aparato por registri."
         }
       }
     },
     "record_stop": {
-      "name": "Rekorda Ciklo Halto",
-      "description": "Ĉesu manan registradon.",
+      "name": "Registri ciklan halton",
+      "description": "Ĉesi manan registradon.",
       "fields": {
         "device_id": {
           "name": "Aparato",
-          "description": "La lavmaŝino aparato por ĉesi registradon."
+          "description": "La WashData-aparato por ĉesi registradon."
         }
       }
     },
     "trim_cycle": {
-      "name": "Tondi Ciklo",
-      "description": "Tondi la potencajn datumojn de pasinta ciklo al specifa tempofenestro.",
+      "name": "Tondi ciklon",
+      "description": "Tondadi la potencajn datumojn de pasinta ciklo al specifa tempofenestro.",
       "fields": {
         "device_id": {
           "name": "Aparato",
@@ -962,15 +962,15 @@
         },
         "cycle_id": {
           "name": "Cikla ID",
-          "description": "La ID de la ciklo por tondi."
+          "description": "La ID de la ciklo por tondadi."
         },
         "trim_start_s": {
-          "name": "Tondi Komenco (sekundoj)",
-          "description": "Konservu datumojn de ĉi tiu ofseto en sekundoj. Defaŭlte 0."
+          "name": "Tondada komenco (sekundoj)",
+          "description": "Konservi datumojn de ĉi tiu ofseto en sekundoj. Defaŭlte 0."
         },
         "trim_end_s": {
-          "name": "Tondi Finon (sekundoj)",
-          "description": "Konservu datumojn ĝis ĉi tiu kompenso en sekundoj. Default = plena daŭro."
+          "name": "Tondada fino (sekundoj)",
+          "description": "Konservi datumojn ĝis ĉi tiu ofseto en sekundoj. Defaŭlte = plena daŭro."
         }
       }
     }
@@ -978,27 +978,27 @@
   "entity": {
     "binary_sensor": {
       "running": {
-        "name": "Kurante"
+        "name": "Funkcianta"
       },
       "match_ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Kongrua ambigueco"
       }
     },
     "sensor": {
       "washer_state": {
-        "name": "Ŝtato",
+        "name": "Stato",
         "state": {
           "off": "Malŝaltita",
-          "idle": "Senlabore",
-          "starting": "Komencante",
-          "running": "Kurante",
+          "idle": "Senokupa",
+          "starting": "Startas",
+          "running": "Funkcianta",
           "paused": "Paŭzita",
-          "ending": "Finiĝo",
+          "ending": "Finiĝanta",
           "finished": "Finita",
-          "anti_wrinkle": "Kontraŭsulko",
+          "anti_wrinkle": "Kontraŭfaldiga",
           "interrupted": "Interrompita",
-          "force_stopped": "Forto Ĉesis",
-          "rinse": "Rinse",
+          "force_stopped": "Perforte haltita",
+          "rinse": "Rinso",
           "unknown": "Nekonata"
         }
       },
@@ -1006,57 +1006,57 @@
         "name": "Programo"
       },
       "time_remaining": {
-        "name": "Tempo Restanta"
+        "name": "Restanta tempo"
       },
       "total_duration": {
-        "name": "Tuta Daŭro"
+        "name": "Tuta daŭro"
       },
       "cycle_progress": {
         "name": "Progreso"
       },
       "current_power": {
-        "name": "Nuna Potenco"
+        "name": "Aktuala potenco"
       },
       "elapsed_time": {
-        "name": "Pasita Tempo"
+        "name": "Pasinta tempo"
       },
       "debug_info": {
-        "name": "Sencimigi Informojn"
+        "name": "Sencimigaj informoj"
       },
       "match_confidence": {
-        "name": "Matĉa Konfido"
+        "name": "Kongrua konfido"
       },
       "top_candidates": {
-        "name": "Plej bonaj Kandidatoj",
+        "name": "Plej bonaj kandidatoj",
         "state": {
           "none": "Neniu"
         }
       },
       "current_phase": {
-        "name": "Nuna Fazo"
+        "name": "Aktuala fazo"
       },
       "wash_phase": {
         "name": "Fazo"
       },
       "profile_cycle_count": {
-        "name": "Profilo {profile_name} Kalkulo",
+        "name": "Profilo {profile_name} kalkulo",
         "unit_of_measurement": "cikloj"
       },
       "suggestions": {
-        "name": "Sugestaj agordoj"
+        "name": "Disponeblaj sugestitaj agordoj"
       }
     },
     "select": {
       "program_select": {
-        "name": "Cikla Programo",
+        "name": "Cikla programo",
         "state": {
-          "auto_detect": "Aŭtomata Detekti"
+          "auto_detect": "Aŭtomata detektado"
         }
       }
     },
     "button": {
       "force_end_cycle": {
-        "name": "Forto Fina Ciklo"
+        "name": "Perforte fini ciklon"
       }
     }
   },
@@ -1068,13 +1068,13 @@
       "message": "Neniu agorda eniro trovita por aparato."
     },
     "integration_not_loaded": {
-      "message": "Integriĝo ne ŝarĝita por ĉi tiu aparato."
+      "message": "Integraĵo ne ŝarĝita por ĉi tiu aparato."
     },
     "cycle_not_found_or_no_power": {
       "message": "Ciklo ne trovita aŭ havas neniujn potencajn datumojn."
     },
     "trim_failed_empty_window": {
-      "message": "Tondado malsukcesis — ciklo ne trovita, neniuj potenc-tracdatenoj, aŭ rezulta fenestro estas malplena."
+      "message": "Tondado malsukcesis — ciklo ne trovita, neniuj potencaj spurdatumoj, aŭ rezulta fenestro estas malplena."
     },
     "trim_invalid_range": {
       "message": "trim_end_s devas esti pli granda ol trim_start_s."

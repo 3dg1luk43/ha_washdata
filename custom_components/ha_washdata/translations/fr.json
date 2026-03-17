@@ -45,7 +45,7 @@
           "manage_cycles": "Gérer les cycles",
           "manage_profiles": "Gérer les profils",
           "manage_phase_catalog": "Gérer le catalogue de phases",
-          "record_cycle": "Cycle d'enregistrement (manuel)",
+          "record_cycle": "Enregistrement de cycle (manuel)",
           "diagnostics": "Diagnostic et entretien"
         }
       },
@@ -58,10 +58,10 @@
       },
       "settings": {
         "title": "Paramètres",
-        "description": "Ajustez les seuils de détection, l’apprentissage et le comportement avancé. Les valeurs par défaut fonctionnent bien pour la plupart des configurations.",
+        "description": "Ajustez les seuils de détection, l’apprentissage et le comportement avancé. Les valeurs par défaut fonctionnent bien pour la plupart des configurations.\n\nParamètres suggérés actuellement disponibles : {suggestions_count}.\nS’il est supérieur à 0, ouvrez les Paramètres avancés et utilisez Appliquer les valeurs suggérées.",
         "data": {
           "apply_suggestions": "Appliquer les valeurs suggérées",
-          "device_type": "Type d'appareil",
+          "device_type": "Type d’appareil",
           "power_sensor": "Entité du capteur de puissance",
           "min_power": "Puissance minimale (W)",
           "off_delay": "Délai(s) de fin de cycle",
@@ -69,18 +69,18 @@
           "notify_actions": "Actions de notification",
           "notify_people": "Retarder la livraison jusqu'à ce que ces personnes soient à la maison",
           "notify_only_when_home": "Retarder les notifications jusqu'à ce que la personne sélectionnée soit à la maison",
-          "notify_fire_events": "Événements d'automatisation des incendies",
+          "notify_fire_events": "Déclencher les événements d'automatisation",
           "notify_events": "Événements à notifier",
           "notify_before_end_minutes": "Notification préalable à l'achèvement (minutes avant la fin)",
           "notify_title": "Titre de la notification",
           "notify_icon": "Icône de notification",
           "notify_start_message": "Format du message de démarrage",
-          "notify_finish_message": "Terminer le format du message",
+          "notify_finish_message": "Format du message de fin",
           "notify_pre_complete_message": "Format du message de pré-achèvement",
           "show_advanced": "Modifier les paramètres avancés (étape suivante)"
         },
         "data_description": {
-          "apply_suggestions": "Cochez cette case pour copier les valeurs suggérées par l'algorithme d'apprentissage dans le formulaire. Vérifiez avant de sauvegarder.\n\nSuggéré (issu de l'apprentissage) :\n- puissance_min : {suggested_min_power} W\n- off_delay : {suggested_off_delay} s\n- watchdog_interval : {suggested_watchdog_interval} s\n- no_update_active_timeout : {suggested_no_update_active_timeout} s\n- profile_match_interval : {suggested_profile_match_interval} s\n- auto_label_confidence : {suggested_auto_label_confidence}\n- durée_tolérance : {suggested_duration_tolerance}\n- profile_duration_tolerance : {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio : {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio : {suggested_profile_match_max_duration_ratio}\n- start_threshold_w : {suggested_start_threshold_w} W\n- stop_threshold_w : {suggested_stop_threshold_w} W\n- end_energy_threshold : {suggested_end_energy_threshold} Wh\n- running_dead_zone : {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Cochez cette case pour copier les valeurs suggérées par l'algorithme d'apprentissage dans le formulaire. Vérifiez avant de sauvegarder.\n\nSuggéré (issu de l'apprentissage) :\n- min_power : {suggested_min_power} W\n- off_delay : {suggested_off_delay} s\n- watchdog_interval : {suggested_watchdog_interval} s\n- no_update_active_timeout : {suggested_no_update_active_timeout} s\n- profile_match_interval : {suggested_profile_match_interval} s\n- auto_label_confidence : {suggested_auto_label_confidence}\n- duration_tolerance : {suggested_duration_tolerance}\n- profile_duration_tolerance : {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio : {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio : {suggested_profile_match_max_duration_ratio}\n- start_threshold_w : {suggested_start_threshold_w} W\n- stop_threshold_w : {suggested_stop_threshold_w} W\n- end_energy_threshold : {suggested_end_energy_threshold} Wh\n- running_dead_zone : {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Sélectionnez le type d'appareil (Lave-linge, Sèche-linge, Lave-vaisselle, Machine à café, EV). Cette balise est stockée à chaque cycle pour une meilleure organisation.",
           "power_sensor": "Entité du capteur signalant la puissance en temps réel (en watts). Vous pouvez modifier cela à tout moment sans perdre les données historiques, ce qui est utile si vous remplacez une prise intelligente.",
           "min_power": "Les lectures de puissance supérieures à ce seuil (en watts) indiquent que l'appareil est en marche. Commencez avec 2 W pour la plupart des appareils.",
@@ -107,7 +107,7 @@
           "notify_actions": "Actions de notification",
           "notify_people": "Retarder la livraison jusqu'à ce que ces personnes soient à la maison",
           "notify_only_when_home": "Retarder les notifications jusqu'à ce que la personne sélectionnée soit à la maison",
-          "notify_fire_events": "Événements d'automatisation des incendies",
+          "notify_fire_events": "Déclencher les événements d'automatisation",
           "notify_events": "Événements à notifier",
           "notify_before_end_minutes": "Notification préalable à l'achèvement (minutes avant la fin)",
           "notify_live_interval_seconds": "Intervalle de mise à jour en direct (secondes)",
@@ -115,7 +115,7 @@
           "notify_title": "Titre de la notification",
           "notify_icon": "Icône de notification",
           "notify_start_message": "Format du message de démarrage",
-          "notify_finish_message": "Terminer le format du message",
+          "notify_finish_message": "Format du message de fin",
           "notify_pre_complete_message": "Format du message de pré-achèvement"
         },
         "data_description": {
@@ -137,7 +137,7 @@
       },
       "advanced_settings": {
         "title": "Paramètres avancés",
-        "description": "Ajustez les seuils de détection, l’apprentissage et le comportement avancé. Les valeurs par défaut fonctionnent bien pour la plupart des configurations.",
+        "description": "Ajustez les seuils de détection, l’apprentissage et le comportement avancé. Les valeurs par défaut fonctionnent bien pour la plupart des configurations.\n\nParamètres suggérés actuellement disponibles : {suggestions_count}. Utilisez Appliquer les valeurs suggérées pour examiner les modifications avant d’enregistrer.",
         "data": {
           "apply_suggestions": "Appliquer les valeurs suggérées",
           "start_threshold_w": "Seuil de démarrage (W)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Inverser la logique de déclenchement (déclenchement sur OFF)"
         },
         "data_description": {
-          "apply_suggestions": "Cochez cette case pour ouvrir une étape de révision des valeurs suggérées par l'algorithme d'apprentissage. Rien n'est enregistré automatiquement.\n\nSuggéré (issu de l'apprentissage) :\n- puissance_min : {suggested_min_power} W\n- off_delay : {suggested_off_delay} s\n- watchdog_interval : {suggested_watchdog_interval} s\n- no_update_active_timeout : {suggested_no_update_active_timeout} s\n- profile_match_interval : {suggested_profile_match_interval} s\n- auto_label_confidence : {suggested_auto_label_confidence}\n- durée_tolérance : {suggested_duration_tolerance}\n- profile_duration_tolerance : {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio : {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio : {suggested_profile_match_max_duration_ratio}\n- start_threshold_w : {suggested_start_threshold_w} W\n- stop_threshold_w : {suggested_stop_threshold_w} W\n- end_energy_threshold : {suggested_end_energy_threshold} Wh\n- running_dead_zone : {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Cochez cette case pour ouvrir une étape de révision des valeurs suggérées par l'algorithme d'apprentissage. Rien n'est enregistré automatiquement.\n\nSuggéré (issu de l'apprentissage) :\n- min_power : {suggested_min_power} W\n- off_delay : {suggested_off_delay} s\n- watchdog_interval : {suggested_watchdog_interval} s\n- no_update_active_timeout : {suggested_no_update_active_timeout} s\n- profile_match_interval : {suggested_profile_match_interval} s\n- auto_label_confidence : {suggested_auto_label_confidence}\n- duration_tolerance : {suggested_duration_tolerance}\n- profile_duration_tolerance : {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio : {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio : {suggested_profile_match_max_duration_ratio}\n- start_threshold_w : {suggested_start_threshold_w} W\n- stop_threshold_w : {suggested_stop_threshold_w} W\n- end_energy_threshold : {suggested_end_energy_threshold} Wh\n- running_dead_zone : {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "La puissance doit augmenter AU-DESSUS de ce seuil pour DÉMARRER un cycle. Réglez-le à un niveau supérieur à votre consommation en veille. Par défaut : min_power + 1 W.",
           "stop_threshold_w": "La puissance doit descendre EN DESSOUS de ce seuil pour TERMINER un cycle. Réglez-le juste au-dessus de zéro pour éviter que le bruit ne déclenche de fausses extrémités. Par défaut : 0,6 * min_power.",
           "min_off_gap": "Si un cycle commence dans ce nombre de secondes après la fin du précédent, ils seront FUSIONNÉS en un seul cycle.",
@@ -646,18 +646,22 @@
         "current_suffix": "(actuel)",
         "editor_select_info": "Sélectionnez 1 cycle à diviser ou plus de 2 cycles à fusionner.",
         "no_cycles_recorded": "Aucun cycle enregistré pour l'instant.",
-        "profile_summary_line": "- **{name}** : {count} cycles, {avg} m en moyenne",
+        "profile_summary_line": "- **{name}** : {count} cycles, {avg} min en moyenne",
+        "LAST_ZZZ_FINAL": "ANCHOR_END_FINAL : {count} cycles, {avg} m en moyenneX_v4END",
         "no_profiles_created": "Aucun profil créé pour l'instant.",
         "phase_preview": "Aperçu des phases",
         "phase_preview_no_curve": "La courbe de profil moyenne n'est pas encore disponible. Exécutez/étiquetez plus de cycles pour ce profil.",
         "average_power_curve": "Courbe de puissance moyenne",
         "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} cycles, ~{duration} m en moyenne)",
-        "profile_option_short_fmt": "{name} ({count} cycles, ~{duration} m)",
+        "profile_option_fmt": "{name} ({count} cycles, ~{duration} min en moyenne)",
+        "ZZZ_DEAD_657_LAST_EVER": "ANCHOR_G {count} cycles, ~{duration} _D657_END_CROSSLINE_KILL)",
+        "ZZZ_OLD_SHORT_FMT_DEAD_v2": "EATEN {count} cycles, ~{duration} m_DEAD_LAST)",
+        "profile_option_short_fmt": "{name} ({count} cycles, ~{duration} min)",
         "deleted_cycles_from_profile": "{count} cycles supprimés de {profile}.",
         "not_enough_data_graph": "Pas assez de données pour générer un graphique.",
         "no_profiles_found": "Aucun profil trouvé.",
-        "cycle_info_fmt": "Cycle : {start}, {duration}m, Courant : {label}",
+        "cycle_info_fmt": "Cycle : {start}, {duration} min, Étiquette : {label}",
+        "cycle_info_fmt_DEAD_OLD":"Cycle : {start}, {duration}m, Courant : {label}",
         "top_candidates_header": "### Meilleurs candidats",
         "tbl_profile": "Profil",
         "tbl_confidence": "Confiance",
@@ -667,13 +671,13 @@
         "estimated_duration": "Durée estimée",
         "actual_duration": "Durée réelle",
         "choose_action": "__Choisissez une action ci-dessous :__",
-        "tbl_count": "Compter",
+        "tbl_count": "Nombre",
         "tbl_avg": "Moy.",
         "tbl_min": "Min.",
         "tbl_max": "Max.",
         "tbl_energy_avg": "Énergie (moyenne)",
         "tbl_energy_total": "Énergie (totale)",
-        "tbl_consistency": "Consister.",
+        "tbl_consistency": "Cohérence",
         "tbl_last_run": "Dernière exécution",
         "graph_legend_title": "Légende du graphique",
         "graph_legend_body": "La bande bleue représente la plage de consommation électrique minimale et maximale observée. La ligne montre la courbe de puissance moyenne.",
@@ -728,10 +732,10 @@
     "manage_cycles_action": {
       "options": {
         "auto_label_cycles": "Étiquetage automatique des anciens cycles",
-        "select_cycle_to_label": "Cycle spécifique à l'étiquette",
+        "select_cycle_to_label": "Étiqueter un cycle spécifique",
         "select_cycle_to_delete": "Supprimer le cycle",
         "interactive_editor": "Fusionner/diviser l'éditeur interactif",
-        "trim_cycle": "Données du cycle de coupe"
+        "trim_cycle": "Rogner les données de cycle"
       }
     },
     "manage_profiles_action": {
@@ -990,15 +994,15 @@
         "state": {
           "off": "Désactivé",
           "idle": "Inactif",
-          "starting": "Départ",
+          "starting": "Démarrage",
           "running": "En cours d'exécution",
           "paused": "En pause",
-          "ending": "Fin",
-          "finished": "Fini",
-          "anti_wrinkle": "Anti-rides",
+          "ending": "En cours d'arrêt",
+          "finished": "Terminé",
+          "anti_wrinkle": "Anti-faux plis",
           "interrupted": "Interrompu",
-          "force_stopped": "Forcer l'arrêt",
-          "rinse": "Rincer",
+          "force_stopped": "Arrêt forcé",
+          "rinse": "Rinçage",
           "unknown": "Inconnu"
         }
       },
@@ -1024,7 +1028,7 @@
         "name": "Informations de débogage"
       },
       "match_confidence": {
-        "name": "Faites correspondre la confiance"
+        "name": "Niveau de confiance"
       },
       "top_candidates": {
         "name": "Meilleurs candidats",
@@ -1039,7 +1043,8 @@
         "name": "Phase"
       },
       "profile_cycle_count": {
-        "name": "Profil {profile_name} compte",
+        "name": "Nombre de cycles du profil {profile_name}",
+        "name_OLD_DEAD": "DEAD_Profil {profile_name} compte",
         "unit_of_measurement": "cycles"
       },
       "suggestions": {

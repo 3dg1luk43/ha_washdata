@@ -69,7 +69,7 @@
           "notify_actions": "การดำเนินการแจ้งเตือน",
           "notify_people": "เลื่อนการจัดส่งจนกว่าคนเหล่านี้จะถึงบ้าน",
           "notify_only_when_home": "เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกจะถึงบ้าน",
-          "notify_fire_events": "เหตุการณ์ระบบอัตโนมัติอัคคีภัย",
+          "notify_fire_events": "เปิดใช้งานเหตุการณ์ระบบอัตโนมัติ",
           "notify_events": "เหตุการณ์ที่ต้องแจ้งให้ทราบ",
           "notify_before_end_minutes": "การแจ้งเตือนก่อนเสร็จสิ้น (นาทีก่อนสิ้นสุด)",
           "notify_title": "ชื่อการแจ้งเตือน",
@@ -80,7 +80,7 @@
           "show_advanced": "แก้ไขการตั้งค่าขั้นสูง (ขั้นตอนถัดไป)"
         },
         "data_description": {
-          "apply_suggestions": "เลือกช่องนี้เพื่อคัดลอกค่าที่แนะนำโดยอัลกอริทึมการเรียนรู้ลงในแบบฟอร์ม ตรวจสอบก่อนบันทึก\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} วัตต์\n- off_delay: {suggested_off_delay} วินาที\n- watchdog_interval: {suggested_watchdog_interval} วินาที\n- no_update_active_timeout: {suggested_no_update_active_timeout} วินาที\n-profile_match_interval: {suggested_profile_match_interval} วินาที\n- auto_label_confidence: {suggested_auto_label_confidence}\n- ระยะเวลา_ความอดทน: {suggested_duration_tolerance}\n- โปรไฟล์_ระยะเวลา_ความอดทน: {suggested_profile_duration_tolerance}\n- โปรไฟล์_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- โปรไฟล์_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} วัตต์\n- stop_threshold_w: {suggested_stop_threshold_w} อ\n- end_energy_threshold: {suggested_end_energy_threshold} วัตต์ชั่วโมง\n- running_dead_zone: {suggested_running_dead_zone} วินาที\n{suggested_reason}",
+          "apply_suggestions": "เลือกช่องนี้เพื่อคัดลอกค่าที่แนะนำโดยอัลกอริทึมการเรียนรู้ลงในแบบฟอร์ม ตรวจสอบก่อนบันทึก\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "เลือกประเภทของเครื่องใช้ไฟฟ้า (เครื่องซักผ้า, เครื่องอบผ้า, เครื่องล้างจาน, เครื่องชงกาแฟ, EV) แท็กนี้จะถูกเก็บไว้ในแต่ละรอบเพื่อการจัดระเบียบที่ดีขึ้น",
           "power_sensor": "เอนทิตีเซ็นเซอร์รายงานกำลังแบบเรียลไทม์ (เป็นวัตต์) คุณสามารถเปลี่ยนแปลงได้ตลอดเวลาโดยไม่สูญเสียข้อมูลในอดีต ซึ่งมีประโยชน์หากคุณเปลี่ยนปลั๊กอัจฉริยะ",
           "min_power": "การอ่านค่ากำลังไฟฟ้าที่สูงกว่าเกณฑ์นี้ (เป็นวัตต์) แสดงว่าเครื่องกำลังทำงานอยู่ เริ่มต้นด้วย 2W สำหรับอุปกรณ์ส่วนใหญ่",
@@ -107,7 +107,7 @@
           "notify_actions": "การดำเนินการแจ้งเตือน",
           "notify_people": "เลื่อนการจัดส่งจนกว่าคนเหล่านี้จะถึงบ้าน",
           "notify_only_when_home": "เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกจะถึงบ้าน",
-          "notify_fire_events": "เหตุการณ์ระบบอัตโนมัติอัคคีภัย",
+          "notify_fire_events": "เปิดใช้งานเหตุการณ์ระบบอัตโนมัติ",
           "notify_events": "เหตุการณ์ที่ต้องแจ้งให้ทราบ",
           "notify_before_end_minutes": "การแจ้งเตือนก่อนเสร็จสิ้น (นาทีก่อนสิ้นสุด)",
           "notify_live_interval_seconds": "ช่วงเวลาการอัปเดตสด (วินาที)",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "สลับลอจิกทริกเกอร์ (ทริกเกอร์เปิดปิด)"
         },
         "data_description": {
-          "apply_suggestions": "เลือกช่องนี้เพื่อเปิดขั้นตอนการทบทวนค่าที่แนะนำจากอัลกอริทึมการเรียนรู้ ไม่มีสิ่งใดถูกบันทึกโดยอัตโนมัติ\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} วัตต์\n- off_delay: {suggested_off_delay} วินาที\n- watchdog_interval: {suggested_watchdog_interval} วินาที\n- no_update_active_timeout: {suggested_no_update_active_timeout} วินาที\n-profile_match_interval: {suggested_profile_match_interval} วินาที\n- auto_label_confidence: {suggested_auto_label_confidence}\n- ระยะเวลา_ความอดทน: {suggested_duration_tolerance}\n- โปรไฟล์_ระยะเวลา_ความอดทน: {suggested_profile_duration_tolerance}\n- โปรไฟล์_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- โปรไฟล์_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} วัตต์\n- stop_threshold_w: {suggested_stop_threshold_w} อ\n- end_energy_threshold: {suggested_end_energy_threshold} วัตต์ชั่วโมง\n- running_dead_zone: {suggested_running_dead_zone} วินาที\n{suggested_reason}",
+          "apply_suggestions": "เลือกช่องนี้เพื่อเปิดขั้นตอนการทบทวนค่าที่แนะนำจากอัลกอริทึมการเรียนรู้ ไม่มีสิ่งใดถูกบันทึกโดยอัตโนมัติ\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "start_threshold_w": "กำลังไฟฟ้าต้องสูงกว่าเกณฑ์นี้จึงจะเริ่มต้นวงจรได้ ตั้งค่าให้สูงกว่าพลังงานสแตนด์บายของคุณ ค่าเริ่มต้น: min_power + 1 W.",
           "stop_threshold_w": "กำลังไฟฟ้าต้องต่ำกว่าเกณฑ์นี้จึงจะสิ้นสุดรอบได้ ตั้งค่าให้สูงกว่าศูนย์เพื่อหลีกเลี่ยงสัญญาณรบกวนที่ทำให้เกิดการสิ้นสุดที่ผิดพลาด ค่าเริ่มต้น: 0.6 * min_power",
           "min_off_gap": "หากวงจรเริ่มต้นภายในไม่กี่วินาทีหลังจากรอบก่อนหน้าสิ้นสุดลง วงจรเหล่านั้นจะถูกรวมเข้าเป็นรอบเดียว",
@@ -353,13 +353,13 @@
       },
       "assign_profile_phases_auto_detect_name": {
         "title": "ชื่อเฟสที่ตรวจพบ",
-        "description": "โปรไฟล์: **{profile_name}**\n\n**ตรวจพบเฟส{detected_count}:**\n{ranges_summary}\n\nตั้งชื่อให้กับแต่ละเฟส"
+        "description": "โปรไฟล์: **{profile_name}**\n\n**ตรวจพบ {detected_count} เฟส:**\n{ranges_summary}\n\nกำหนดชื่อให้กับแต่ละเฟส"
       },
       "assign_profile_phases_select": {
         "title": "กำหนดช่วงเฟส",
         "description": "เลือกโปรไฟล์เพื่อกำหนดค่าช่วงเฟส",
         "data": {
-          "profile": "ประวัติโดยย่อ"
+          "profile": "โปรไฟล์"
         }
       },
       "profile_stats": {
@@ -379,7 +379,7 @@
         "title": "แก้ไขโปรไฟล์",
         "description": "เลือกโปรไฟล์ที่จะเปลี่ยนชื่อ",
         "data": {
-          "profile": "ประวัติโดยย่อ"
+          "profile": "โปรไฟล์"
         }
       },
       "rename_profile": {
@@ -394,7 +394,7 @@
         "title": "ลบโปรไฟล์",
         "description": "เลือกโปรไฟล์ที่จะลบ",
         "data": {
-          "profile": "ประวัติโดยย่อ"
+          "profile": "โปรไฟล์"
         }
       },
       "delete_profile_confirm": {
@@ -429,7 +429,7 @@
         "title": "วงจรฉลาก",
         "description": "{cycle_info}",
         "data": {
-          "profile_name": "ประวัติโดยย่อ",
+          "profile_name": "โปรไฟล์",
           "new_profile_name": "ชื่อโปรไฟล์ใหม่ (หากกำลังสร้าง)"
         }
       },
@@ -449,7 +449,7 @@
         "title": "ล้างประวัติ - เลือกโปรไฟล์",
         "description": "เลือกโปรไฟล์เพื่อแสดงภาพ ซึ่งจะสร้างกราฟที่แสดงรอบที่ผ่านมาทั้งหมดสำหรับโปรไฟล์นี้เพื่อช่วยระบุค่าผิดปกติ",
         "data": {
-          "profile": "ประวัติโดยย่อ"
+          "profile": "โปรไฟล์"
         }
       },
       "cleanup_select": {
@@ -561,7 +561,7 @@
         "title": "ตรวจสอบการเปลี่ยนแปลงที่แนะนำ",
         "description": "WashData พบค่าที่แนะนำ {pending_count} ค่าที่จะใช้\n\nการเปลี่ยนแปลงที่ต้องตรวจสอบ:\n{changes}\n\nยืนยันด้านล่างเพื่อจัดระยะค่าเหล่านี้ในแบบฟอร์ม จะไม่ถูกบันทึกจนกว่าคุณจะส่งการตั้งค่าขั้นสูง",
         "data": {
-          "confirm_apply_suggestions": "ขั้นค่าที่แนะนำในการตั้งค่าขั้นสูง"
+          "confirm_apply_suggestions": "นำค่าที่แนะนำไปใส่ในการตั้งค่าขั้นสูง"
         }
       },
       "trim_cycle_select": {
@@ -659,7 +659,7 @@
         "no_profiles_found": "ไม่พบโปรไฟล์",
         "cycle_info_fmt": "วงจร: {start}, {duration}ม. กระแส: {label}",
         "top_candidates_header": "### ผู้สมัครอันดับต้นๆ",
-        "tbl_profile": "ประวัติโดยย่อ",
+        "tbl_profile": "โปรไฟล์",
         "tbl_confidence": "ความมั่นใจ",
         "tbl_correlation": "ความสัมพันธ์",
         "tbl_duration_match": "การจับคู่ระยะเวลา",
