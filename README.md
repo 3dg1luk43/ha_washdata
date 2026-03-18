@@ -218,6 +218,28 @@ data:
 ```
 - `ha_washdata.label_cycle`: Assign profile to history programmatically.
 
+
+### 🤝 Contribute Training Data
+
+The more real-world cycle data WashData has, the smarter its detection becomes — across different appliance brands, ages, and programs.
+
+If you'd like to help, you can submit a diagnostics export directly from Home Assistant. It takes less than 2 minutes and requires no technical knowledge.
+
+**How to export:**
+
+1. Open Home Assistant and go to** Settings → Devices & Services**
+2. Find your **WashData** integration and click on it
+3. Open device you want to submit data for
+4. Navigate left, to **"Device info"** section
+5. Select **"Download diagnostics"**
+6. A .json file will be downloaded to your device
+
+> 🔒 **Privacy:** The export contains your appliance's power data and integration settings. It does **not** include your name, home details, location, or any other personal information.
+
+➡️ **[Submit your data here](https://forms.gle/m6iGfP8QTasXWg5z7)**
+
+All contributions are used solely to improve the WashData integration.
+
 ### Supported Languages
 🇬🇧 English • 🇨🇿 Čeština • 🇩🇰 Dansk • 🇩🇪 Deutsch • 🇬🇷 Ελληνικά • 🇪🇸 Español • 🇪🇪 Eesti • 🇫🇮 Suomi • 🇫🇷 Français • 🇭🇷 Hrvatski • 🇭🇺 Magyar • 🇮🇹 Italiano • 🇯🇵 日本語 • 🇱🇹 Lietuvių • 🇱🇻 Latviešu • 🇳🇴 Norsk • 🇳🇱 Nederlands • 🇧🇪 Nederlands (BE) • 🇵🇱 Polski • 🇵🇹 Português • 🇷🇴 Română • 🇸🇰 Slovenčina • 🇸🇮 Slovenščina • 🇷🇸 Srpski • 🇸🇪 Svenska • 🇺🇦 Українська • 🇨🇳 简体中文
 
