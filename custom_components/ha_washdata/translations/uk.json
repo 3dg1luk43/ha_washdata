@@ -39,18 +39,18 @@
     "step": {
       "init": {
         "menu_options": {
-          "learning_feedbacks": "Перегляньте відгуки про навчання",
+          "learning_feedbacks": "Відгуки про навчання",
           "settings": "Налаштування",
           "notifications": "Сповіщення",
-          "manage_cycles": "Керуйте циклами",
-          "manage_profiles": "Керувати профілями",
-          "manage_phase_catalog": "Керувати каталогом фаз",
-          "record_cycle": "Цикл запису (ручний)",
+          "manage_cycles": "Керування циклами",
+          "manage_profiles": "Керування профілями",
+          "manage_phase_catalog": "Керування каталогом фаз",
+          "record_cycle": "Запис циклу (ручний)",
           "diagnostics": "Діагностика та технічне обслуговування"
         }
       },
       "apply_suggestions": {
-        "title": "Скопіюйте запропоновані значення",
+        "title": "Копіювання запропонованих значень",
         "description": "Це скопіює поточні запропоновані значення у ваші збережені налаштування. Це одноразова дія, яка не вмикає автоматичне перезаписування.\n\nРекомендовані значення для копіювання:\n{suggested}",
         "data": {
           "confirm": "Підтвердити копіювання"
@@ -80,7 +80,7 @@
           "show_advanced": "Змінити розширені налаштування (наступний крок)"
         },
         "data_description": {
-          "apply_suggestions": "Поставте цей прапорець, щоб скопіювати значення, запропоновані алгоритмом навчання, у форму. Перегляньте перед збереженням.\n\nРекомендовано (з вивчення):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Поставте цей прапорець, щоб скопіювати значення, запропоновані алгоритмом навчання, у форму. Перегляньте перед збереженням.\n\nРекомендовано (з вивчення):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} Вт\n- stop_threshold_w: {suggested_stop_threshold_w} Вт\n- end_energy_threshold: {suggested_end_energy_threshold} Вт·год\n- running_dead_zone: {suggested_running_dead_zone} с\n{suggested_reason}",
           "device_type": "Виберіть тип приладу (пральна машина, сушильна машина, посудомийна машина, кавова машина, EV). Цей тег зберігається з кожним циклом для кращої організації.",
           "power_sensor": "Датчик, який повідомляє про потужність у реальному часі (у ватах). Ви можете будь-коли змінити це, не втрачаючи історичних даних — це стане в нагоді, якщо ви заміните розумну вилку.",
           "min_power": "Показники потужності вище цього порогу (у ватах) вказують на те, що прилад працює. Почніть з 2 Вт для більшості пристроїв.",
@@ -142,13 +142,13 @@
           "apply_suggestions": "Застосувати запропоновані значення",
           "start_threshold_w": "Початковий поріг (Вт)",
           "stop_threshold_w": "Поріг зупинки (Вт)",
-          "min_off_gap": "Мінімальний інтервал між циклами (s)",
+          "min_off_gap": "Мінімальний інтервал між циклами (с)",
           "start_duration_threshold": "Тривалість усунення стрибків (с)",
           "progress_reset_delay": "Затримка скидання прогресу (секунди)",
           "no_update_active_timeout": "Час очікування без оновлення (с)",
-          "sampling_interval": "Інтервал вибірки (s)",
+          "sampling_interval": "Інтервал вибірки (с)",
           "auto_label_confidence": "Впевненість автоматичної мітки (0-1)",
-          "learning_confidence": "Запит на зворотний зв'язок Достовірність (0-1)",
+          "learning_confidence": "Достовірність запиту зворотного зв'язку (0-1)",
           "duration_tolerance": "Допустима тривалість (0-0,5)",
           "profile_match_interval": "Інтервал збігу профілю (секунди)",
           "profile_match_min_duration_ratio": "Коефіцієнт мінімальної тривалості відповідності профілю (0,1-1,0)",
@@ -158,7 +158,7 @@
           "profile_unmatch_threshold": "Поріг невідповідності профілю",
           "profile_duration_tolerance": "Допуск на тривалість відповідності профілю (0-0,5)",
           "interrupted_min_seconds": "Перервано: мінімальний час виконання (секунди)",
-          "abrupt_drop_watts": "Перервано: Абсолютне різке падіння (W)",
+          "abrupt_drop_watts": "Перервано: Абсолютне різке падіння (Вт)",
           "abrupt_drop_ratio": "Перервано: коефіцієнт різкого падіння (0-1)",
           "abrupt_high_load_factor": "Перервано: високий коефіцієнт навантаження",
           "max_past_cycles": "Зберігання: максимальна кількість збережених циклів",
@@ -185,7 +185,7 @@
           "external_end_trigger_inverted": "Інвертувати логіку тригера (тригер увімкнено ВИМК.)"
         },
         "data_description": {
-          "apply_suggestions": "Установіть цей прапорець, щоб відкрити етап перегляду запропонованих значень від алгоритму навчання. Автоматично нічого не зберігається.\n\nРекомендовано (з вивчення):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
+          "apply_suggestions": "Установіть цей прапорець, щоб відкрити етап перегляду запропонованих значень від алгоритму навчання. Автоматично нічого не зберігається.\n\nРекомендовано (з вивчення):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} Вт\n- stop_threshold_w: {suggested_stop_threshold_w} Вт\n- end_energy_threshold: {suggested_end_energy_threshold} Вт·год\n- running_dead_zone: {suggested_running_dead_zone} с\n{suggested_reason}",
           "start_threshold_w": "Потужність має піднятися ВИЩЕ за цей поріг, щоб ЗАПУСТИТИ цикл. Встановіть більше, ніж у режимі очікування. За замовчуванням: min_power + 1 Вт.",
           "stop_threshold_w": "Потужність має впасти НИЖЧЕ цього порогу, щоб ЗАВЕРШИТИ цикл. Встановіть трохи вище нуля, щоб уникнути шуму, що викликає помилкові закінчення. Типове значення: 0,6 * min_power.",
           "min_off_gap": "Якщо цикл починається протягом такої кількості секунд після закінчення попереднього, вони будуть ОБ’ЄДНАНІ в один цикл.",
@@ -240,35 +240,35 @@
         "description": "Ви впевнені, що бажаєте видалити всі збережені трасування налагодження? Це звільнить місце, але видалить детальну інформацію про рейтинг із минулих циклів."
       },
       "manage_cycles": {
-        "title": "Керуйте циклами",
+        "title": "Керування циклами",
         "description": "Останні цикли:\n{recent_cycles}",
         "data": {
           "action": "Дія"
         }
       },
       "manage_cycles_empty": {
-        "title": "Керуйте циклами",
+        "title": "Керування циклами",
         "description": "Циклів ще не зареєстровано.",
         "data": {
           "action": "Дія"
         }
       },
       "manage_profiles": {
-        "title": "Керувати профілями",
+        "title": "Керування профілями",
         "description": "Підсумок профілю:\n{profile_summary}",
         "data": {
           "action": "Дія"
         }
       },
       "manage_profiles_empty": {
-        "title": "Керувати профілями",
+        "title": "Керування профілями",
         "description": "Профілі ще не створені.",
         "data": {
           "action": "Дія"
         }
       },
       "manage_phase_catalog": {
-        "title": "Керувати каталогом фаз",
+        "title": "Керування каталогом фаз",
         "description": "Каталог фаз (за умовчанням для цього пристрою + спеціальні фази):\n{phase_summary}",
         "data": {
           "action": "Дія"
@@ -412,7 +412,7 @@
         }
       },
       "select_cycle_to_label": {
-        "title": "Виберіть Перейти до мітки",
+        "title": "Виберіть цикл для позначення",
         "description": "✓ = завершено, ⚠ = відновлено, ✗ = перервано",
         "data": {
           "cycle_id": "Цикл"
@@ -422,11 +422,11 @@
         "title": "Видалити цикл",
         "description": "⚠️ Це назавжди видалить вибраний цикл",
         "data": {
-          "cycle_id": "Цикл, щоб видалити"
+          "cycle_id": "Цикл для видалення"
         }
       },
       "label_cycle": {
-        "title": "Цикл етикетки",
+        "title": "Позначення циклу",
         "description": "{cycle_info}",
         "data": {
           "profile_name": "Профіль",
@@ -434,7 +434,7 @@
         }
       },
       "post_process": {
-        "title": "Історія процесу (злиття/розділення)",
+        "title": "Обробка історії (злиття/розділення)",
         "description": "Очистіть історію циклів, об’єднавши фрагментовані цикли та розділивши неправильно об’єднані цикли в межах часового вікна. Введіть кількість годин для перегляду.\n{info}",
         "data": {
           "time_range": "Вікно огляду (годин)",
@@ -454,7 +454,7 @@
       },
       "cleanup_select": {
         "title": "Очистити історію - побудувати графік і видалити",
-        "description": "![Графік]({graph_url})\n\n**Візуалізація {profile_name}**\n\nГрафік показує окремі цикли кольоровими лініями. Визначте викиди (лінії, віддалені від групи) і зіставте їхній колір у списку нижче, щоб видалити їх.\n\n**Виберіть цикли для ПОСТАЧНОГО видалення:**",
+        "description": "![Графік]({graph_url})\n\n**Візуалізація {profile_name}**\n\nГрафік показує окремі цикли кольоровими лініями. Визначте викиди (лінії, віддалені від групи) і зіставте їхній колір у списку нижче, щоб видалити їх.\n\n**Виберіть цикли для ПОСТІЙНОГО видалення:**",
         "data": {
           "cycles_to_delete": "Цикли для видалення (перевірте відповідність кольорів)"
         }
@@ -467,7 +467,7 @@
         }
       },
       "editor_select": {
-        "title": "Виберіть Цикли",
+        "title": "Виберіть цикли",
         "description": "Виберіть цикл(и) для обробки.\n\n{info_text}",
         "data": {
           "selected_cycles": "Цикли"
@@ -494,7 +494,7 @@
         }
       },
       "editor_split_params": {
-        "title": "Розділена конфігурація",
+        "title": "Конфігурація розділення",
         "description": "Відрегулюйте чутливість для розділення цього циклу. Будь-який проміжок простою, довший за цей, призведе до розколу.",
         "data": {
           "min_gap_seconds": "Порогове значення розриву (секунди)"
@@ -521,14 +521,14 @@
         }
       },
       "record_cycle": {
-        "title": "Цикл запису",
+        "title": "Запис циклу",
         "description": "Запишіть цикл вручну, щоб створити чистий профіль без перешкод.\n\nСтатус: **{status}**\nТривалість: {duration} с\nЗразки: {samples}",
         "data": {
           "action": "Дія"
         }
       },
       "record_process": {
-        "title": "Запис процесу",
+        "title": "Обробка запису",
         "description": "![Графік]({graph_url})\n\n**На графіку показано необроблений запис.** Синій = зберегти, червоний = запропоноване обрізання.\n*Графік є статичним і не оновлюється зі змінами форми.*\n\nЗапис зупинено. Обрізки вирівнюються відповідно до виявленої частоти дискретизації (~{sampling_rate} с).\n\nНеоброблена тривалість: {duration} с\nЗразки: {samples}",
         "data": {
           "head_trim": "Початок обрізки (секунди)",
@@ -541,7 +541,7 @@
         "title": "Відгуки про навчання",
         "description": "Виберіть запит на перегляд циклу для обробки.",
         "data": {
-          "selected_feedback": "Виберіть «Перевірити»."
+          "selected_feedback": "Виберіть цикл для перегляду"
         }
       },
       "learning_feedbacks_empty": {
@@ -552,13 +552,13 @@
         "title": "Вирішити відгук",
         "description": "{comparison_img}{candidates_table}\n**Виявлений профіль**: {detected_profile} ({confidence_pct}%)\n**Орієнтовна тривалість**: {est_duration_min} хв\n**Фактична тривалість**: {act_duration_min} хв\n\n__Оберіть дію нижче:__",
         "data": {
-          "action": "Що б ти хотіла зробити?",
-          "corrected_profile": "Правильна програма (якщо виправляється)",
-          "corrected_duration": "Правильна тривалість у секундах (якщо виправляється)"
+          "action": "Що ви хочете зробити?",
+          "corrected_profile": "Змінити програму (якщо виправляється)",
+          "corrected_duration": "Змінити тривалість у секундах (якщо виправляється)"
         }
       },
       "apply_suggestions_confirm": {
-        "title": "Перегляньте запропоновані зміни",
+        "title": "Перегляд запропонованих змін",
         "description": "WashData знайшов {pending_count} запропонованих значень для застосування.\n\nЗміни для перегляду:\n{changes}\n\nПідтвердьте нижче, щоб розмістити ці значення у формі. Вони не зберігаються, доки ви не подасте додаткові параметри.",
         "data": {
           "confirm_apply_suggestions": "Відкрийте запропоновані значення в Розширених налаштуваннях"
@@ -646,7 +646,7 @@
         "current_suffix": "(поточний)",
         "editor_select_info": "Виберіть 1 цикл, щоб розділити, або 2+ цикли, щоб об’єднати.",
         "no_cycles_recorded": "Циклів ще не зареєстровано.",
-        "profile_summary_line": "- **{name}**: {count} циклів, {avg} м. сер",
+        "profile_summary_line": "- **{name}**: {count} циклів, {avg} хв. сер.",
         "no_profiles_created": "Профілі ще не створені.",
         "phase_preview": "Попередній перегляд фази",
         "phase_preview_no_curve": "Середня профільна крива поки що недоступна. Запустити/позначити більше циклів для цього профілю.",
@@ -660,21 +660,21 @@
         "cycle_info_fmt": "Цикл: {start}, {duration} хв, поточна: {label}",
         "top_candidates_header": "### Кращі кандидати",
         "tbl_profile": "Профіль",
-        "tbl_confidence": "впевненість",
+        "tbl_confidence": "Впевненість",
         "tbl_correlation": "Кореляція",
         "tbl_duration_match": "Збіг тривалості",
         "detected_profile": "Виявлений профіль",
         "estimated_duration": "Розрахункова тривалість",
         "actual_duration": "Фактична тривалість",
         "choose_action": "__Оберіть дію нижче:__",
-        "tbl_count": "Граф",
+        "tbl_count": "Кількість",
         "tbl_avg": "Середнє",
         "tbl_min": "Хв",
         "tbl_max": "Макс",
         "tbl_energy_avg": "Енергія (середнє)",
         "tbl_energy_total": "Енергія (загальна)",
-        "tbl_consistency": "складаються.",
-        "tbl_last_run": "Останній біг",
+        "tbl_consistency": "Стабільність",
+        "tbl_last_run": "Останній запуск",
         "graph_legend_title": "Легенда графіка",
         "graph_legend_body": "Синя смуга позначає мінімальний і максимальний діапазон споживаної потужності. Лінія показує середню криву потужності.",
         "recording_preview": "Попередній перегляд запису",
@@ -701,7 +701,7 @@
         "no_power_preview": "*Немає даних про потужність для попереднього перегляду.*",
         "trim_cycle_preview_title": "Попередній перегляд циклічного обрізання",
         "trim_cycle_preview_no_data": "Немає даних про потужність для цього циклу.",
-        "trim_cycle_preview_kept_suffix": "зберігався"
+        "trim_cycle_preview_kept_suffix": "збережено"
       }
     },
     "interactive_editor_action": {
@@ -728,10 +728,10 @@
     "manage_cycles_action": {
       "options": {
         "auto_label_cycles": "Автоматичне позначення старих циклів",
-        "select_cycle_to_label": "Спеціальний цикл етикетки",
+        "select_cycle_to_label": "Позначити конкретний цикл",
         "select_cycle_to_delete": "Видалити цикл",
         "interactive_editor": "Інтерактивний редактор злиття/розділу",
-        "trim_cycle": "Дані циклу обрізання"
+        "trim_cycle": "Обрізати дані циклу"
       }
     },
     "manage_profiles_action": {
@@ -741,7 +741,7 @@
         "delete_profile": "Видалити профіль",
         "profile_stats": "Статистика профілю",
         "cleanup_profile": "Очистити історію - побудувати графік і видалити",
-        "assign_phases": "Призначте діапазони фаз"
+        "assign_phases": "Призначити діапазони фаз"
       }
     },
     "manage_phase_catalog_action": {
@@ -753,7 +753,7 @@
     },
     "assign_profile_phases_action": {
       "options": {
-        "add_range": "Додайте діапазон фаз",
+        "add_range": "Додати діапазон фаз",
         "edit_range": "Редагувати діапазон фаз",
         "delete_range": "Видалити діапазон фаз",
         "clear_ranges": "Очистити всі діапазони",
@@ -803,12 +803,12 @@
   },
   "services": {
     "label_cycle": {
-      "name": "Цикл етикетки",
+      "name": "Позначити цикл",
       "description": "Призначте існуючий профіль минулому циклу або видаліть мітку.",
       "fields": {
         "device_id": {
-          "name": "пристрій",
-          "description": "Пристрій пральної машини для маркування."
+          "name": "Пристрій",
+          "description": "Пристрій WashData для маркування."
         },
         "cycle_id": {
           "name": "Ідентифікатор циклу",
@@ -825,8 +825,8 @@
       "description": "Створіть новий профіль (окремий або на основі контрольного циклу).",
       "fields": {
         "device_id": {
-          "name": "пристрій",
-          "description": "Пристрій пральної машини."
+          "name": "Пристрій",
+          "description": "Пристрій WashData."
         },
         "profile_name": {
           "name": "Ім'я профілю",
@@ -843,8 +843,8 @@
       "description": "Видалити профіль і за бажанням скасувати мітки циклів, використовуючи його.",
       "fields": {
         "device_id": {
-          "name": "пристрій",
-          "description": "Пристрій пральної машини."
+          "name": "Пристрій",
+          "description": "Пристрій WashData."
         },
         "profile_name": {
           "name": "Ім'я профілю",
@@ -861,8 +861,8 @@
       "description": "Заднім числом позначайте немарковані цикли за допомогою відповідності профілів.",
       "fields": {
         "device_id": {
-          "name": "пристрій",
-          "description": "Пристрій пральної машини."
+          "name": "Пристрій",
+          "description": "Пристрій WashData."
         },
         "confidence_threshold": {
           "name": "Поріг впевненості",
@@ -875,11 +875,11 @@
       "description": "Експортуйте профілі, цикли та налаштування цього пристрою у файл JSON (для кожного пристрою).",
       "fields": {
         "device_id": {
-          "name": "пристрій",
-          "description": "Пристрій пральної машини на експорт."
+          "name": "Пристрій",
+          "description": "Пристрій WashData для експорту."
         },
         "path": {
-          "name": "шлях",
+          "name": "Шлях",
           "description": "Додатковий абсолютний шлях до файлу для запису (за замовчуванням /config/ha_washdata_export_{entry}.json)."
         }
       }
@@ -889,11 +889,11 @@
       "description": "Імпортуйте профілі, цикли та налаштування для цього пристрою з файлу експорту JSON (параметри можуть бути перезаписані).",
       "fields": {
         "device_id": {
-          "name": "пристрій",
-          "description": "Пристрій пральної машини для імпорту."
+          "name": "Пристрій",
+          "description": "Пристрій WashData для імпорту."
         },
         "path": {
-          "name": "шлях",
+          "name": "Шлях",
           "description": "Абсолютний шлях до експортованого файлу JSON для імпорту."
         }
       }
@@ -903,7 +903,7 @@
       "description": "Підтвердьте або виправте автоматично визначену програму після завершення циклу. Укажіть `entry_id` (розширений) або `device_id` (рекомендовано).",
       "fields": {
         "device_id": {
-          "name": "пристрій",
+          "name": "Пристрій",
           "description": "Пристрій WashData (рекомендовано замість entry_id)."
         },
         "entry_id": {
@@ -937,8 +937,8 @@
       "description": "Почніть запис чистого циклу вручну (обійде всю відповідну логіку).",
       "fields": {
         "device_id": {
-          "name": "пристрій",
-          "description": "Пристрій пральної машини для запису."
+          "name": "Пристрій",
+          "description": "Пристрій WashData для запису."
         }
       }
     },
@@ -947,8 +947,8 @@
       "description": "Зупиніть ручний запис.",
       "fields": {
         "device_id": {
-          "name": "пристрій",
-          "description": "Пристрій пральної машини для припинення запису."
+          "name": "Пристрій",
+          "description": "Пристрій WashData для зупинки запису."
         }
       }
     },
@@ -957,7 +957,7 @@
       "description": "Обріжте дані про потужність минулого циклу до певного часового вікна.",
       "fields": {
         "device_id": {
-          "name": "пристрій",
+          "name": "Пристрій",
           "description": "Пристрій WashData."
         },
         "cycle_id": {
@@ -978,7 +978,7 @@
   "entity": {
     "binary_sensor": {
       "running": {
-        "name": "Біг"
+        "name": "Працює"
       },
       "match_ambiguity": {
         "name": "Неоднозначність відповідності"
@@ -986,24 +986,24 @@
     },
     "sensor": {
       "washer_state": {
-        "name": "Держава",
+        "name": "Стан",
         "state": {
           "off": "Вимкнено",
           "idle": "Бездіяльність",
           "starting": "Запуск",
-          "running": "Біг",
+          "running": "Працює",
           "paused": "Призупинено",
           "ending": "Закінчення",
           "finished": "Готово",
           "anti_wrinkle": "Проти зморшок",
           "interrupted": "Перерваний",
           "force_stopped": "Примусово зупинено",
-          "rinse": "промити",
-          "unknown": "Невідомий"
+          "rinse": "Полоскання",
+          "unknown": "Невідомо"
         }
       },
       "washer_program": {
-        "name": "програма"
+        "name": "Програма"
       },
       "time_remaining": {
         "name": "Час, що залишився"
@@ -1024,7 +1024,7 @@
         "name": "Інформація про налагодження"
       },
       "match_confidence": {
-        "name": "Впевненість матчу"
+        "name": "Впевненість збігу"
       },
       "top_candidates": {
         "name": "Кращі кандидати",
@@ -1043,7 +1043,7 @@
         "unit_of_measurement": "циклів"
       },
       "suggestions": {
-        "name": "Пропоновані налаштування"
+        "name": "Доступні пропоновані налаштування"
       }
     },
     "select": {
@@ -1056,7 +1056,7 @@
     },
     "button": {
       "force_end_cycle": {
-        "name": "Цикл примусового завершення"
+        "name": "Примусово завершити цикл"
       }
     }
   },
