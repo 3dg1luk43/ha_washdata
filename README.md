@@ -27,12 +27,6 @@ localisation for 25+ languages.
 
 ---
 
-## 📸 Preview
-
-![Card preview](doc/images/manage_cycles.png)
-
----
-
 ## 📦 Installation
 
 ### Option A: HACS (Recommended)
