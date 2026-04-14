@@ -33,6 +33,9 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_START_SERVICES,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
     CONF_NOTIFY_PEOPLE,
     CONF_NOTIFY_ONLY_WHEN_HOME,
     CONF_NOTIFY_FIRE_EVENTS,
@@ -81,6 +84,10 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_PUMP_STUCK_DURATION,
+    DEFAULT_PUMP_STUCK_DURATION,
+    EVENT_PUMP_STUCK,
+    DEVICE_TYPE_PUMP,
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
@@ -124,6 +131,7 @@ from .const import (
     CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+    CONF_NOTIFY_LIVE_CHRONOMETER,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
@@ -133,6 +141,7 @@ from .const import (
     DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
     DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+    DEFAULT_NOTIFY_LIVE_CHRONOMETER,
 
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
@@ -165,6 +174,7 @@ from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
 from .profile_store import ProfileStore, decompress_power_data
 from .recorder import CycleRecorder
+from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
 from .time_utils import power_data_to_offsets
 
@@ -204,6 +214,7 @@ class WashDataManager:
         self.config_entry = config_entry
         self.entry_id = config_entry.entry_id
         self._logger = DeviceLoggerAdapter(_LOGGER, config_entry.title)
+        self.diag_buffer = DiagBuffer(config_entry.title)
 
         # Prioritize options -> data for power sensor (allows changing it)
         self.power_sensor_entity_id = config_entry.options.get(
@@ -219,14 +230,16 @@ class WashDataManager:
         self._no_update_active_timeout = float(DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
         self._low_power_no_update_timeout = 3600.0 # Default 1h
         self._notify_before_end_minutes = float(DEFAULT_NOTIFY_BEFORE_END_MINUTES)
-        self._notify_service: str | None = ""
-        self._notify_events: list[str] = []
+        self._notify_start_services: list[str] = []
+        self._notify_finish_services: list[str] = []
+        self._notify_live_services: list[str] = []
         self._notify_actions: list[dict[str, Any]] = []
         self._notify_people: list[str] = []
         self._notify_only_when_home = DEFAULT_NOTIFY_ONLY_WHEN_HOME
         self._notify_fire_events = DEFAULT_NOTIFY_FIRE_EVENTS
         self._notify_live_interval_seconds = DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
         self._notify_live_overrun_percent = DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
+        self._notify_live_chronometer = DEFAULT_NOTIFY_LIVE_CHRONOMETER
         self._pending_notifications: list[dict[str, Any]] = []
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
@@ -326,8 +339,20 @@ class WashDataManager:
                 CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
             )
         )
-        self._notify_service = cast(str | None, config_entry.options.get(CONF_NOTIFY_SERVICE))
-        self._notify_events = list(cast(list[str], config_entry.options.get(CONF_NOTIFY_EVENTS, []) or []))
+        self._notify_start_services = list(config_entry.options.get(CONF_NOTIFY_START_SERVICES, []) or [])
+        self._notify_finish_services = list(config_entry.options.get(CONF_NOTIFY_FINISH_SERVICES, []) or [])
+        self._notify_live_services = list(config_entry.options.get(CONF_NOTIFY_LIVE_SERVICES, []) or [])
+        # Backward compat: migrate old single notify_service + notify_events to new per-event lists
+        if not (self._notify_start_services or self._notify_finish_services or self._notify_live_services):
+            _old_svc = config_entry.options.get(CONF_NOTIFY_SERVICE, "")
+            _old_events = list(config_entry.options.get(CONF_NOTIFY_EVENTS, []) or [])
+            if _old_svc:
+                if not _old_events or NOTIFY_EVENT_START in _old_events:
+                    self._notify_start_services = [_old_svc]
+                if not _old_events or NOTIFY_EVENT_FINISH in _old_events:
+                    self._notify_finish_services = [_old_svc]
+                if not _old_events or NOTIFY_EVENT_LIVE in _old_events:
+                    self._notify_live_services = [_old_svc]
         self._notify_actions = list(
             cast(list[dict[str, Any]], config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or [])
         )
@@ -352,6 +377,12 @@ class WashDataManager:
             config_entry.options.get(
                 CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
                 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+            )
+        )
+        self._notify_live_chronometer = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_CHRONOMETER,
+                DEFAULT_NOTIFY_LIVE_CHRONOMETER,
             )
         )
 
@@ -563,6 +594,12 @@ class WashDataManager:
         self._profile_sample_repair_stats: dict[str, int] | None = None
 
         self._last_suggestion_update: datetime | None = None
+
+        # Pump Monitor state
+        self._pump_stuck_duration: int = int(
+            config_entry.options.get(CONF_PUMP_STUCK_DURATION, DEFAULT_PUMP_STUCK_DURATION)
+        )
+        self._pump_stuck: bool = False  # True once the stuck threshold has fired for this cycle
 
         self._manual_program_active: bool = False
         self._notified_start: bool = False
@@ -898,8 +935,7 @@ class WashDataManager:
                     )
                     self._start_event_fired = True
 
-                events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
-                if NOTIFY_EVENT_START in events:
+                if self._notify_start_services or self._notify_actions:
                     msg_template = self.config_entry.options.get(
                         CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE
                     )
@@ -1434,6 +1470,11 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_max_duration = new_anti_wrinkle_max_duration
         self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
 
+        # Pump Monitor setting
+        self._pump_stuck_duration = int(
+            config_entry.options.get(CONF_PUMP_STUCK_DURATION, DEFAULT_PUMP_STUCK_DURATION)
+        )
+
         if (
             old_min_power != new_min_power
             or old_off_delay != new_off_delay
@@ -1511,8 +1552,20 @@ class WashDataManager:
 
 
         # Update notification settings
-        self._notify_service = cast(str | None, config_entry.options.get(CONF_NOTIFY_SERVICE))
-        self._notify_events = list(cast(list[str], config_entry.options.get(CONF_NOTIFY_EVENTS, []) or []))
+        self._notify_start_services = list(config_entry.options.get(CONF_NOTIFY_START_SERVICES, []) or [])
+        self._notify_finish_services = list(config_entry.options.get(CONF_NOTIFY_FINISH_SERVICES, []) or [])
+        self._notify_live_services = list(config_entry.options.get(CONF_NOTIFY_LIVE_SERVICES, []) or [])
+        # Backward compat: migrate old single notify_service + notify_events
+        if not (self._notify_start_services or self._notify_finish_services or self._notify_live_services):
+            _old_svc = config_entry.options.get(CONF_NOTIFY_SERVICE, "")
+            _old_events = list(config_entry.options.get(CONF_NOTIFY_EVENTS, []) or [])
+            if _old_svc:
+                if not _old_events or NOTIFY_EVENT_START in _old_events:
+                    self._notify_start_services = [_old_svc]
+                if not _old_events or NOTIFY_EVENT_FINISH in _old_events:
+                    self._notify_finish_services = [_old_svc]
+                if not _old_events or NOTIFY_EVENT_LIVE in _old_events:
+                    self._notify_live_services = [_old_svc]
         self._notify_actions = list(
             cast(list[dict[str, Any]], config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or [])
         )
@@ -1544,6 +1597,12 @@ class WashDataManager:
                 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
             )
         )
+        self._notify_live_chronometer = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_CHRONOMETER,
+                DEFAULT_NOTIFY_LIVE_CHRONOMETER,
+            )
+        )
 
         # Re-subscribe to external cycle end trigger
         await self._setup_external_end_trigger()
@@ -1555,7 +1614,7 @@ class WashDataManager:
         # reset counters and fire the first live notification immediately so the
         # user doesn't have to wait for the next power sensor poll.
         if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
-            if NOTIFY_EVENT_LIVE in self._notify_events:
+            if self._notify_live_services or self._notify_actions:
                 self._reset_live_notification_state()
                 self._check_live_progress_notification()
 
@@ -1605,6 +1664,8 @@ class WashDataManager:
             self._remove_state_expiry_timer()
         if self._remove_maintenance_scheduler:
             self._remove_maintenance_scheduler()
+
+        self.diag_buffer.uninstall()
 
         # Save active state before shutdown
         if self.detector.state == "running":
@@ -1797,6 +1858,11 @@ class WashDataManager:
             power = float(new_state.state)
         except ValueError:
             return
+
+        # Capture every raw sensor reading before any throttling or processing.
+        # Use the sensor's own last_updated timestamp so the trace reflects
+        # when the plug actually reported the value, not when we received it.
+        self.diag_buffer.record_power(power, new_state.last_updated)
 
         # RECORD MODE INTERCEPTION
         if self.recorder.is_recording:
@@ -1997,6 +2063,30 @@ class WashDataManager:
         elapsed = self.detector.get_elapsed_seconds()
         expected = getattr(self.detector, "expected_duration_seconds", 0)
 
+        # 0a. PUMP STUCK DETECTION (Pump Monitor only)
+        # If a pump cycle has been running longer than the configured stuck threshold,
+        # fire a single warning event so the user can wire an automation/alert.
+        if self.device_type == DEVICE_TYPE_PUMP and not self._pump_stuck:
+            if elapsed >= self._pump_stuck_duration:
+                self._pump_stuck = True
+                self._logger.warning(
+                    "Pump stuck detected: cycle has been running for %.0fs "
+                    "(threshold: %ds). Firing %s event.",
+                    elapsed,
+                    self._pump_stuck_duration,
+                    EVENT_PUMP_STUCK,
+                )
+                self.hass.bus.async_fire(
+                    EVENT_PUMP_STUCK,
+                    {
+                        "device": self.config_entry.title,
+                        "entry_id": self.entry_id,
+                        "elapsed_seconds": round(elapsed),
+                        "threshold_seconds": self._pump_stuck_duration,
+                    },
+                )
+                self._notify_update()
+
         # 0. ZOMBIE KILLER (Hard Limit)
         # If cycle has run significantly longer than expected (300%), kill it.
         # Only applies if we have a profile match.
@@ -2017,15 +2107,30 @@ class WashDataManager:
         cycle_start = self.detector.current_cycle_start
         is_suspicious = False
         if cycle_start and self._last_cycle_end_time:
-            # If started within 3 minutes of previous cycle finish (prevent back-to-back ghosting)
-            if (cycle_start - self._last_cycle_end_time).total_seconds() < 180:
+            # Dishwashers have a drain pump-out that fires 3–8 min after the main
+            # cycle ends; use a wider suspicious window so the ghost suppressor can
+            # catch it without false-positives on washing machines / dryers.
+            suspicious_window = 600 if self.device_type == "dishwasher" else 180
+            if (cycle_start - self._last_cycle_end_time).total_seconds() < suspicious_window:
                 is_suspicious = True
+
+        # For dishwashers in the suspicious window, kill pump-out ghosts faster.
+        # Pump-outs last 1–3 min then go silent; the standard 10-min wait allows
+        # them to accumulate too much runtime before suppression fires.
+        dishwasher_pump_out = (
+            is_suspicious
+            and self.device_type == "dishwasher"
+            and elapsed > 180   # 3 minutes
+            and time_since_real_update > 60  # 1 minute of silence
+        )
 
         if (
             self._current_program == "detecting..."
             and is_suspicious
-            and elapsed > 600  # 10 minutes
-            and time_since_real_update > 300  # 5 minutes of silence
+            and (
+                dishwasher_pump_out
+                or (elapsed > 600 and time_since_real_update > 300)
+            )
         ):
             self._logger.warning(
                 "Watchdog: Ghost cycle suppressed (within suspicious window). Detecting for %.0fs with %.0fs silence.",
@@ -2042,13 +2147,18 @@ class WashDataManager:
         # low_power_no_update_timeout is reached.
 
         # Dishwashers can have very long silent drying phases (up to 2h)
-        # We use the device-specific timeout as the floor for this effective timeout
+        # We use the device-specific timeout as the floor for this effective timeout.
+        # The floor is applied unconditionally — dishwashers have passive drying phases
+        # even when no profile has been matched yet.  The original restriction to matched
+        # cycles caused premature kills: with the default 3600s timeout, an unmatched
+        # dishwasher cycle was killed ~1h after the last sensor update, while the
+        # physical drying phase could still have 1–2h of silent runtime remaining.
         low_power_floor = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE.get(
             self.device_type, 0
         )
-        effective_low_power_timeout = self._low_power_no_update_timeout
-        if self._current_program not in ("detecting...", "off"):
-            effective_low_power_timeout = max(low_power_floor, effective_low_power_timeout)
+        effective_low_power_timeout = max(
+            low_power_floor, self._low_power_no_update_timeout
+        )
 
         # Profile-Aware Extension:
         # If we have a matched profile, ensure we don't kill during the expected duration.
@@ -2089,8 +2199,34 @@ class WashDataManager:
                 return
 
             # 3. Injection Check (Keepalive)
-            # If silence > _config.off_delay, inject 0W to keep detector clock moving
-            # so it can evaluate profile logic (smart termination) or just mark time passing.
+            # 3a. Honour the user-configured no_update_active_timeout for low-power silence.
+            # Publish-on-change sensors go completely silent once they stabilise at a low
+            # standby value (e.g. 1 W).  The existing off_delay-based injection fires
+            # every 2 watchdog ticks, which is fine with a short watchdog interval but can
+            # take many minutes with a larger one.  Respecting no_update_active_timeout
+            # here gives users a predictable upper bound on how long a cycle lingers after
+            # the appliance reaches standby, consistent with what the setting implies.
+            # Verified pauses (e.g. dishwasher drying confirmed by envelope) are excluded
+            # so that legitimate long silent phases are not prematurely terminated.
+            if (
+                not getattr(self.detector, "_verified_pause", False)
+                and time_since_real_update > self._no_update_active_timeout
+            ):
+                self._logger.debug(
+                    "Watchdog: Low-power real-update silence (%.0fs) > no_update_active_timeout (%.0fs). "
+                    "Injecting 0W keepalive to advance accumulator.",
+                    time_since_real_update,
+                    self._no_update_active_timeout,
+                )
+                self.detector.process_reading(0.0, now)
+                self._last_reading_time = now
+                self._current_power = 0.0
+                self._notify_update()
+                return
+
+            # 3b. Fallback: inject 0W when any-update silence exceeds off_delay.
+            # This keeps the accumulator moving even when no_update_active_timeout has
+            # not been exceeded (e.g. the user left it at the default 600 s).
             if time_since_any_update > self._config.off_delay:
                 self._logger.debug(
                     "Watchdog: Low power silence (%.0fs). Injecting 0W keepalive.",
@@ -2108,9 +2244,10 @@ class WashDataManager:
 
         # Fallback for old "Case 1.5" logic (Low Power but NOT is_waiting_low_power)
         # Check this BEFORE High Power timeout to prevent trapping "Not Yet Waiting" states
-        if (
+        # Inject as soon as the earliest of: off_delay silence OR no_update_active_timeout.
+        if self._current_power < self.detector.config.min_power and (
             time_since_any_update > self._config.off_delay
-            and self._current_power < self.detector.config.min_power
+            or time_since_real_update > self._no_update_active_timeout
         ):
             # Treating as start of low power wait
             self._logger.debug("Watchdog: Silence at low power (%.0fs). Injecting 0W.", time_since_any_update)
@@ -2156,6 +2293,9 @@ class WashDataManager:
     def _on_state_change(self, old_state: str, new_state: str) -> None:
         """Handle state change from detector."""
         self._logger.debug("Washer state changed: %s -> %s", old_state, new_state)
+        self.diag_buffer.record_state(
+            old_state, new_state, self._current_program, dt_util.now()
+        )
         if new_state == STATE_RUNNING:
             new_cycle_detected = old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN)
             # Only reset estimates if we are truly starting a NEW cycle (from off or starting)
@@ -2216,7 +2356,9 @@ class WashDataManager:
         # IMMEDIATELY stop all active timers when cycle determined to have ended
         self._stop_watchdog()  # Stop active cycle watchdog
         self._stop_state_expiry_timer()  # Cancel any pending progress reset
+        prev_cycle_end_time = self._last_cycle_end_time
         self._last_cycle_end_time = dt_util.now()
+        self._pump_stuck = False  # Reset for next pump cycle
 
         # Auto-Tune: Check for ghost cycles (short duration AND low energy)
         # Ghost = duration < 60s AND total energy < 0.05 Wh (avoids killing pump-out spikes)
@@ -2236,6 +2378,27 @@ class WashDataManager:
         # Ghost cycle: short AND low energy (real cycles have energy even if short)
         if duration < 60 and cycle_energy_wh < 0.05:
             self._handle_noise_cycle(max_power)
+        elif self.device_type == "dishwasher" and prev_cycle_end_time is not None:
+            # Pump-out suppression: dishwashers end cycles with a brief drain pump
+            # (typically 30–300 s, < 1 Wh) a few minutes after the main cycle
+            # finishes.  If a short, low-energy cycle starts within 10 minutes of
+            # the previous cycle, treat it as a pump-out ghost and do not store it.
+            cycle_start_str = cycle_data.get("start_time")
+            cycle_start_dt = (
+                dt_util.parse_datetime(cycle_start_str) if cycle_start_str else None
+            )
+            if cycle_start_dt is not None:
+                gap = (cycle_start_dt - prev_cycle_end_time).total_seconds()
+                if 0 < gap < 600 and duration < 300 and cycle_energy_wh < 1.0:
+                    self._logger.info(
+                        "Suppressing dishwasher pump-out ghost: "
+                        "gap=%.0fs, duration=%.0fs, energy=%.3f Wh",
+                        gap,
+                        duration,
+                        cycle_energy_wh,
+                    )
+                    self._handle_noise_cycle(max_power)
+                    return  # Do not store this as a real cycle
 
         # Schedule heavy post-processing asynchronously
         self.hass.async_create_task(self._async_process_cycle_end(cycle_data))
@@ -2332,8 +2495,7 @@ class WashDataManager:
         self._clear_live_progress_notification()
 
         # Send notification if enabled
-        events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
-        if NOTIFY_EVENT_FINISH in events:
+        if self._notify_finish_services or self._notify_actions:
             msg_template = self.config_entry.options.get(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE)
             duration_min = int(cycle_data['duration'] / 60)
             program_name = event_cycle_data.get("profile_name", "unknown")
@@ -2372,6 +2534,7 @@ class WashDataManager:
         self._time_remaining = None
         self._matched_profile_duration = None
         self._last_estimate_time = None
+        self._last_match_result = None  # Clear so phase sensor resets to "Off" (issue #192)
         self._cycle_progress = 100.0  # 100% = cycle complete
         self._cycle_completed_time = dt_util.now()
         self._cycle_start_time = None
@@ -2431,6 +2594,16 @@ class WashDataManager:
         if program:
             return f"{device}: {program}"
         return device
+
+    def _get_services_for_event(self, event_type: str | None) -> list[str]:
+        """Return the configured notify service list for the given event type."""
+        if event_type == NOTIFY_EVENT_START:
+            return self._notify_start_services
+        if event_type in (NOTIFY_EVENT_FINISH, "pre_complete"):
+            return self._notify_finish_services
+        if event_type == NOTIFY_EVENT_LIVE:
+            return self._notify_live_services
+        return []
 
     def _dispatch_notification(
         self,
@@ -2502,16 +2675,15 @@ class WashDataManager:
         if self._notify_actions:
             actions_sent = bool(self._run_notification_actions(variables))
 
-        # If actions fired and there is no notify service configured, skip the
+        # If actions fired and there are no per-event services, skip the
         # service/persistent-notification path entirely.
-        notify_service = self._notify_service or self.config_entry.options.get(
-            CONF_NOTIFY_SERVICE
-        )
-        if actions_sent and not notify_service:
+        services = self._get_services_for_event(event_type)
+        if actions_sent and not services:
             return True
 
         service_sent = self._send_notification_service(
             message,
+            services=services,
             title=title,
             icon=icon,
             event_type=event_type,
@@ -2522,16 +2694,14 @@ class WashDataManager:
     def _send_notification_service(
         self,
         message: str,
+        *,
+        services: list[str],
         title: str | None = None,
         icon: str | None = None,
         event_type: str | None = None,
         extra_vars: dict[str, Any] | None = None,
     ) -> bool:
-        """Send a notification via configured notify service or persistent notification."""
-        notify_service = self._notify_service or self.config_entry.options.get(
-            CONF_NOTIFY_SERVICE
-        )
-
+        """Send a notification to each configured notify service, or fall back to persistent notification."""
         data: dict[str, Any] = {}
         if icon:
             data["icon"] = icon
@@ -2548,11 +2718,15 @@ class WashDataManager:
                 "minutes_left",
                 "live_updates_sent",
                 "live_updates_cap",
+                "chronometer",
+                "when",
+                "countdown",
             ):
                 if key in extra_vars:
                     data[key] = extra_vars[key]
 
-        if notify_service:
+        sent = False
+        for notify_service in services:
             if event_type == NOTIFY_EVENT_LIVE and not self._is_mobile_notify_service(
                 notify_service
             ):
@@ -2560,7 +2734,7 @@ class WashDataManager:
                     "Skipping live notification for non-mobile notify service: %s",
                     notify_service,
                 )
-                return False
+                continue
 
             domain, service = (
                 notify_service.split(".", 1)
@@ -2574,13 +2748,15 @@ class WashDataManager:
             self.hass.async_create_task(
                 self.hass.services.async_call(domain, service, service_data)
             )
+            sent = True
+
+        if not sent:
+            if event_type == NOTIFY_EVENT_LIVE:
+                return False
+            _pn_create(self.hass, message, title=title)
             return True
 
-        if event_type == NOTIFY_EVENT_LIVE:
-            return False
-
-        _pn_create(self.hass, message, title=title)
-        return True
+        return sent
 
     def _run_notification_actions(self, variables: dict[str, Any]) -> bool:
         """Run configured notification actions."""
@@ -2727,24 +2903,27 @@ class WashDataManager:
         )
         await self.profile_store.async_save()
 
-        # Notify user
-        notify_service = self.config_entry.options.get(CONF_NOTIFY_SERVICE)
+        # Notify user — use finish services as the natural channel for device suggestions
         message = (
             f"Washing Machine '{self.config_entry.title}' detected ghost cycles. "
             f"Suggested min_power change: {current_min:.1f}W → {new_min:.1f}W "
             f"(not applied automatically)."
         )
-
-        if notify_service:
-            # call service notify.<name>
-            domain, service = (
-                notify_service.split(".", 1)
-                if "." in notify_service
-                else ("notify", notify_service)
-            )
-            self.hass.async_create_task(
-                self.hass.services.async_call(domain, service, {"message": message})
-            )
+        autotune_services = (
+            self._notify_finish_services
+            or self._notify_start_services
+            or self._notify_live_services
+        )
+        if autotune_services:
+            for notify_service in autotune_services:
+                domain, service = (
+                    notify_service.split(".", 1)
+                    if "." in notify_service
+                    else ("notify", notify_service)
+                )
+                self.hass.async_create_task(
+                    self.hass.services.async_call(domain, service, {"message": message})
+                )
         else:
             _pn_create(self.hass, message, title="WashData Auto-Tune")
 
@@ -2858,7 +3037,7 @@ class WashDataManager:
 
     def _check_live_progress_notification(self) -> None:
         """Send throttled live progress notifications for compatible mobile targets."""
-        if NOTIFY_EVENT_LIVE not in self._notify_events:
+        if not self._notify_live_services and not self._notify_actions:
             return
         if self.detector.state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
             return
@@ -2934,21 +3113,26 @@ class WashDataManager:
             program=self._current_program,
         )
 
+        extra_vars: dict[str, Any] = {
+            "tag": self._live_notification_tag,
+            "progress": elapsed_seconds,
+            "progress_max": total_seconds,
+            "live_update": True,
+            "alert_once": True,
+            "cycle_seconds": total_seconds,
+            "time_remaining_seconds": remaining_seconds,
+            "minutes_left": minutes_left,
+            "live_updates_sent": self._live_notification_sent_count + 1,
+            "live_updates_cap": self._live_notification_cap,
+        }
+        if self._notify_live_chronometer and remaining_seconds > 0:
+            extra_vars["chronometer"] = True
+            extra_vars["when"] = int(now.timestamp()) + remaining_seconds
+            extra_vars["countdown"] = True
         sent = self._dispatch_notification(
             msg,
             event_type=NOTIFY_EVENT_LIVE,
-            extra_vars={
-                "tag": self._live_notification_tag,
-                "progress": elapsed_seconds,
-                "progress_max": total_seconds,
-                "live_update": True,
-                "alert_once": True,
-                "cycle_seconds": total_seconds,
-                "time_remaining_seconds": remaining_seconds,
-                "minutes_left": minutes_left,
-                "live_updates_sent": self._live_notification_sent_count + 1,
-                "live_updates_cap": self._live_notification_cap,
-            },
+            extra_vars=extra_vars,
         )
         if sent:
             self._live_notification_sent_count += 1
@@ -2996,6 +3180,7 @@ class WashDataManager:
 
         self._send_notification_service(
             "clear_notification",
+            services=self._notify_live_services,
             event_type=NOTIFY_EVENT_LIVE,
             extra_vars={
                 "tag": self._live_notification_tag,
@@ -3511,6 +3696,40 @@ class WashDataManager:
     def sample_interval_stats(self):
         """Return statistics about sampling intervals."""
         return self._sample_interval_stats
+
+    @property
+    def pump_stuck(self) -> bool:
+        """Return True if the pump stuck threshold has fired for the current cycle."""
+        return self._pump_stuck
+
+    @property
+    def pump_runs_today(self) -> int:
+        """Return the number of completed pump cycles that started in the last 24 hours.
+
+        Counts all past cycles whose ``start_time`` falls within the rolling 24-hour
+        window ending now.  Returns 0 for non-pump device types.
+        """
+        if self.device_type != DEVICE_TYPE_PUMP:
+            return 0
+        cutoff = dt_util.now().timestamp() - 86400.0
+        count = 0
+        for cycle in self.profile_store.get_past_cycles():
+            start_raw = cycle.get("start_time")
+            if not start_raw:
+                continue
+            try:
+                if isinstance(start_raw, str):
+                    from datetime import datetime as _dt
+                    import re as _re
+                    # Parse ISO string — handle offset-aware and naive
+                    ts = _dt.fromisoformat(start_raw).timestamp()
+                else:
+                    ts = float(start_raw)
+                if ts >= cutoff:
+                    count += 1
+            except (ValueError, OSError):
+                continue
+        return count
 
     @property
     def manual_program_active(self) -> bool:

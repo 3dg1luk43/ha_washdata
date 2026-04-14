@@ -34,6 +34,9 @@ from .const import (
     CONF_NOTIFY_ONLY_WHEN_HOME,
     CONF_NOTIFY_FIRE_EVENTS,
     CONF_NOTIFY_EVENTS,
+    CONF_NOTIFY_START_SERVICES,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_SMOOTHING_WINDOW,
     CONF_START_DURATION_THRESHOLD,
@@ -44,6 +47,11 @@ from .const import (
     CONF_PROGRESS_RESET_DELAY,
     CONF_DURATION_TOLERANCE,
     CONF_AUTO_LABEL_CONFIDENCE,
+    DEFAULT_AUTO_LABEL_CONFIDENCE,
+    CONF_LEARNING_CONFIDENCE,
+    DEFAULT_LEARNING_CONFIDENCE,
+    CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+    DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     CONF_EXPOSE_DEBUG_ENTITIES,
     CONF_SAVE_DEBUG_TRACES,
     CONF_PROFILE_MATCH_INTERVAL,
@@ -104,6 +112,7 @@ from .const import (
     CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+    CONF_NOTIFY_LIVE_CHRONOMETER,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
@@ -112,6 +121,7 @@ from .const import (
     DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
     DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+    DEFAULT_NOTIFY_LIVE_CHRONOMETER,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_OFF_DELAY_BY_DEVICE,
     DEFAULT_SAMPLING_INTERVAL_BY_DEVICE,
@@ -121,6 +131,9 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
+    CONF_PUMP_STUCK_DURATION,
+    DEFAULT_PUMP_STUCK_DURATION,
+    DEVICE_TYPE_PUMP,
 )
 from .profile_store import profile_sort_key
 
@@ -527,24 +540,43 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 **self.config_entry.options,
                 **user_input,
             }
+            # Remove deprecated single-service keys now that per-event lists are saved.
+            merged_options.pop(CONF_NOTIFY_SERVICE, None)
+            merged_options.pop(CONF_NOTIFY_EVENTS, None)
             return self.async_create_entry(title="", data=merged_options)
 
-        notify_services: list[str] = []
-        services = self.hass.services.async_services()
-        for service in services.get("notify", {}):
-            notify_services.append(f"notify.{service}")
-        notify_services.sort()
-
-        current_notify = self.config_entry.options.get(
-            CONF_NOTIFY_SERVICE, self.config_entry.data.get(CONF_NOTIFY_SERVICE, "")
+        notify_services: list[str] = sorted(
+            f"notify.{s}"
+            for s in self.hass.services.async_services().get("notify", {})
         )
-        if current_notify and current_notify not in notify_services:
-            notify_services.append(current_notify)
 
         def get_val(key: str, default: Any) -> Any:
             return self.config_entry.options.get(
                 key, self.config_entry.data.get(key, default)
             )
+
+        # Migrate old single notify_service + notify_events to per-event service lists.
+        _old_svc: str = get_val(CONF_NOTIFY_SERVICE, "")
+        _old_events: list[str] = list(get_val(CONF_NOTIFY_EVENTS, []) or [])
+
+        def _migrate_or_load(new_key: str, event_type: str) -> list[str]:
+            existing = list(get_val(new_key, []) or [])
+            if existing:
+                return existing
+            if _old_svc and (not _old_events or event_type in _old_events):
+                return [_old_svc]
+            return []
+
+        start_services = _migrate_or_load(CONF_NOTIFY_START_SERVICES, NOTIFY_EVENT_START)
+        finish_services = _migrate_or_load(CONF_NOTIFY_FINISH_SERVICES, NOTIFY_EVENT_FINISH)
+        live_services = _migrate_or_load(CONF_NOTIFY_LIVE_SERVICES, NOTIFY_EVENT_LIVE)
+
+        # Ensure any already-saved custom service values appear in the dropdown.
+        known = set(notify_services)
+        for svc in start_services + finish_services + live_services:
+            if svc and svc not in known:
+                notify_services.append(svc)
+                known.add(svc)
 
         schema = {
             vol.Optional(
@@ -566,23 +598,37 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 default=get_val(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS),
             ): bool,
             vol.Optional(
-                CONF_NOTIFY_SERVICE,
-                default=get_val(CONF_NOTIFY_SERVICE, ""),
+                CONF_NOTIFY_START_SERVICES,
+                default=start_services,
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=notify_services,
+                    multiple=True,
                     mode=selector.SelectSelectorMode.DROPDOWN,
                     custom_value=True,
                 )
             ),
             vol.Optional(
-                CONF_NOTIFY_EVENTS,
-                default=list(get_val(CONF_NOTIFY_EVENTS, [])),
-            ): self._translated_select(
-                options=[NOTIFY_EVENT_START, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_LIVE],
-                translation_key="notify_events_option",
-                multiple=True,
-                mode=selector.SelectSelectorMode.LIST,
+                CONF_NOTIFY_FINISH_SERVICES,
+                default=finish_services,
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=notify_services,
+                    multiple=True,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                    custom_value=True,
+                )
+            ),
+            vol.Optional(
+                CONF_NOTIFY_LIVE_SERVICES,
+                default=live_services,
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=notify_services,
+                    multiple=True,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                    custom_value=True,
+                )
             ),
             vol.Optional(
                 CONF_NOTIFY_BEFORE_END_MINUTES,
@@ -624,6 +670,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
+            vol.Optional(
+                CONF_NOTIFY_LIVE_CHRONOMETER,
+                default=get_val(
+                    CONF_NOTIFY_LIVE_CHRONOMETER,
+                    DEFAULT_NOTIFY_LIVE_CHRONOMETER,
+                ),
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_NOTIFY_TITLE,
                 default=get_val(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE),
@@ -744,6 +797,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 **user_input,
             }
             final_options.pop(CONF_APPLY_SUGGESTIONS, None)
+            if self._suggested_values:
+                await manager.profile_store.clear_suggestions()
+                self._suggested_values = None
+                self._pending_suggestion_diffs_md = ""
+                self._pending_suggestion_count = 0
+                manager.notify_update()
             return self.async_create_entry(title="", data=final_options)
 
         # Helper to get current value
@@ -969,6 +1028,29 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 )
             ),
             vol.Optional(
+                CONF_AUTO_LABEL_CONFIDENCE,
+                default=get_val(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.5, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX
+                )
+            ),
+            vol.Optional(
+                CONF_LEARNING_CONFIDENCE,
+                default=get_val(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.0, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX
+                )
+            ),
+            vol.Optional(
+                CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+                default=get_val(
+                    CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+                    DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+                ),
+            ): bool,
+            vol.Optional(
                 CONF_DURATION_TOLERANCE,
                 default=get_val(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE),
             ): selector.NumberSelector(
@@ -1086,6 +1168,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_EXTERNAL_END_TRIGGER_INVERTED,
                 default=get_val(CONF_EXTERNAL_END_TRIGGER_INVERTED, False),
             ): bool,
+            # --- Pump Monitor (Pump / Sump Pump only) ---
+            vol.Optional(
+                CONF_PUMP_STUCK_DURATION,
+                default=get_val(CONF_PUMP_STUCK_DURATION, DEFAULT_PUMP_STUCK_DURATION),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=60,
+                    max=86400,
+                    step=60,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
         }
 
         data_schema = vol.Schema(schema)

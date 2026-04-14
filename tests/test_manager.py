@@ -10,7 +10,7 @@ from homeassistant.util import dt as dt_util
 from custom_components.ha_washdata.manager import WashDataManager
 from custom_components.ha_washdata.const import (
     CONF_MIN_POWER, CONF_COMPLETION_MIN_SECONDS, CONF_NOTIFY_BEFORE_END_MINUTES,
-    CONF_POWER_SENSOR, STATE_RUNNING, STATE_OFF, CONF_NOTIFY_EVENTS, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_START,
+    CONF_POWER_SENSOR, STATE_RUNNING, STATE_OFF, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_START,
     CONF_NOTIFY_ACTIONS, CONF_NOTIFY_PEOPLE, CONF_NOTIFY_ONLY_WHEN_HOME, CONF_NOTIFY_FIRE_EVENTS
 )
 
@@ -39,7 +39,7 @@ def mock_entry() -> Any:
         CONF_COMPLETION_MIN_SECONDS: 600,
         CONF_NOTIFY_BEFORE_END_MINUTES: 5,
         "power_sensor": "sensor.test_power",
-        CONF_NOTIFY_EVENTS: [NOTIFY_EVENT_FINISH],
+        "notify_finish_services": [],
     }
     return entry
 
@@ -133,11 +133,8 @@ async def test_cycle_end_requests_feedback(manager: WashDataManager, mock_hass: 
     manager._learning_confidence = 0.70
     manager._auto_label_confidence = 0.95
 
-    # Configure notify service to trigger async_call
-    manager.config_entry.options = {
-        **manager.config_entry.options,
-        "notify_service": "notify.mobile_app_test"
-    }
+    # Configure finish notification target to trigger async_call
+    manager._notify_finish_services = ["notify.mobile_app_test"]
 
     # Mock async methods called in _async_process_cycle_end
     # Create a mock MatchResult
@@ -201,10 +198,8 @@ async def test_cycle_end_auto_labels_high_confidence(manager: WashDataManager, m
     manager._auto_label_confidence = 0.95
 
     # Disable finish notification for this test to avoid polluting call count
-    manager.config_entry.options = {
-        **manager.config_entry.options,
-        CONF_NOTIFY_EVENTS: []
-    }
+    manager._notify_finish_services = []
+    manager._notify_actions = []
 
     manager.learning_manager.auto_label_high_confidence = MagicMock(return_value=True)
     manager.learning_manager.request_cycle_verification = MagicMock()
@@ -482,9 +477,8 @@ async def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, m
 async def test_start_notification_deferred_when_ambiguous(manager: WashDataManager, mock_hass: Any, mock_entry: Any) -> None:
     """Test that the START notification is deferred until the match achieves persistence."""
     # Enable START notification
-    mock_entry.options[CONF_NOTIFY_EVENTS] = [NOTIFY_EVENT_START]
-    mock_entry.options["notify_service"] = "notify.mobile_app_test"
     manager.config_entry = mock_entry
+    manager._notify_start_services = ["notify.mobile_app_test"]
     manager._notified_start = False
     manager._current_program = "detecting..."
     manager.detector.config.stop_threshold_w = 5.0
@@ -534,11 +528,11 @@ def test_notification_actions_run_alongside_notify_service(
     manager: WashDataManager, mock_hass: Any
 ) -> None:
     """Configured actions should run and notify service should still be called."""
-    manager.config_entry.options["notify_service"] = "notify.mobile_app_test"
+    manager._notify_finish_services = ["notify.mobile_app_test"]
     manager._notify_actions = [{"action": "script.test_notify"}]
     manager._run_notification_actions = MagicMock(return_value=True)
 
-    manager._dispatch_notification("hello")
+    manager._dispatch_notification("hello", event_type=NOTIFY_EVENT_FINISH)
 
     manager._run_notification_actions.assert_called_once()
     mock_hass.services.async_call.assert_called_once()
@@ -551,7 +545,7 @@ def test_notification_is_deferred_when_no_person_home(
     manager._notify_only_when_home = True
     manager._notify_people = ["person.alice"]
     manager._notify_actions = []
-    manager.config_entry.options["notify_service"] = "notify.mobile_app_test"
+    manager._notify_finish_services = ["notify.mobile_app_test"]
     mock_hass.states.get = MagicMock(return_value=MagicMock(state="not_home"))
 
     manager._dispatch_notification("queued message", event_type=NOTIFY_EVENT_FINISH)
@@ -567,7 +561,7 @@ def test_pending_notifications_release_on_person_home(
     manager._notify_only_when_home = True
     manager._notify_people = ["person.alice"]
     manager._notify_actions = []
-    manager.config_entry.options["notify_service"] = "notify.mobile_app_test"
+    manager._notify_finish_services = ["notify.mobile_app_test"]
     manager._pending_notifications = [{
         "message": "cycle finished",
         "title": "WashData",

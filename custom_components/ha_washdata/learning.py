@@ -25,10 +25,12 @@ from .const import (
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_SAMPLING_INTERVAL,
+    CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
     DEFAULT_LEARNING_CONFIDENCE,
+    DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     DOMAIN,
     SIGNAL_WASHER_UPDATE,
 )
@@ -132,6 +134,29 @@ class LearningManager:
             CONF_MIN_OFF_GAP,
         )
 
+        # Drop suggestions whose value already matches the current config — so
+        # that applied suggestions don't immediately reappear on the next cycle.
+        entry = self.hass.config_entries.async_get_entry(self.entry_id)
+        current_options: dict[str, Any] = {}
+        if entry:
+            current_options = {**entry.data, **entry.options}
+
+        filtered_suggestions: dict[str, Any] = {}
+        for key, data in suggestions.items():
+            if isinstance(data, dict) and "value" in data:
+                current_val = current_options.get(key)
+                suggested_val = data["value"]
+                if current_val is not None and suggested_val is not None:
+                    try:
+                        if float(current_val) == float(suggested_val):
+                            continue  # already applied, skip
+                    except (TypeError, ValueError):
+                        pass
+            filtered_suggestions[key] = data
+
+        if not filtered_suggestions:
+            return
+
         def _count_actionable(s: dict) -> int:
             return sum(
                 1 for k in _actionable_keys
@@ -141,13 +166,12 @@ class LearningManager:
         current = self.profile_store.get_suggestions()
         before_count = _count_actionable(current) if isinstance(current, dict) else 0
 
-        self.suggestion_engine.apply_suggestions(suggestions)
+        self.suggestion_engine.apply_suggestions(filtered_suggestions)
 
         updated = self.profile_store.get_suggestions()
         after_count = _count_actionable(updated) if isinstance(updated, dict) else 0
 
         if before_count == 0 and after_count > 0:
-            entry = self.hass.config_entries.async_get_entry(self.entry_id)
             device_title = entry.title if entry else DOMAIN
             self.hass.async_create_task(
                 self._async_send_suggestions_ready_notification(device_title, after_count)
@@ -375,12 +399,19 @@ class LearningManager:
         # Persist pending feedback request so it survives restart
         self.hass.async_create_task(self.profile_store.async_save())
 
-        # Create user-visible notification
-        self.hass.async_create_task(
-            self._async_send_feedback_notification(
-                entry.title, cycle_data, detected_profile, confidence
+        # Create user-visible notification (skipped when suppressed via option).
+        # Use `is True` so that un-configured mock objects in tests don't
+        # accidentally suppress notifications by being truthy.
+        suppress = entry.options.get(
+            CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+            DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+        ) is True
+        if not suppress:
+            self.hass.async_create_task(
+                self._async_send_feedback_notification(
+                    entry.title, cycle_data, detected_profile, confidence
+                )
             )
-        )
 
     async def _async_send_feedback_notification(
         self, device_title: str, cycle_data: dict[str, Any], profile: str, confidence: float
@@ -600,23 +631,40 @@ class LearningManager:
                 profiles_to_rebuild.add(profile_name)
         else:
             # Correction path
-            # If corrected_profile is missing, fallback to the original detected profile
-            # This ensures duration changes (Issue #155) are saved even if the profile remains unchanged.
+            # If corrected_profile is missing, fallback to the original detected profile.
+            # This ensures duration changes (Issue #155) are saved even if the profile
+            # remains unchanged.
             target_profile = corrected_profile or pending.get("detected_profile")
-            
-            if isinstance(target_profile, str) and target_profile:
-                detected_profile = pending.get("detected_profile")
+            detected_profile_name = pending.get("detected_profile")
 
+            if isinstance(target_profile, str) and target_profile:
                 self._apply_correction_learning(
                     cycle_id, target_profile, duration_sec
                 )
                 profiles_to_rebuild.add(target_profile)
                 if (
-                    isinstance(detected_profile, str)
-                    and detected_profile
-                    and detected_profile != target_profile
+                    isinstance(detected_profile_name, str)
+                    and detected_profile_name
+                    and detected_profile_name != target_profile
                 ):
-                    profiles_to_rebuild.add(detected_profile)
+                    profiles_to_rebuild.add(detected_profile_name)
+            elif duration_sec is not None:
+                # No valid profile could be determined, but a duration correction was
+                # explicitly provided — apply it directly to the cycle so the value
+                # is never silently dropped.
+                cycles = self.profile_store.get_past_cycles()
+                cycle_to_fix = next((c for c in cycles if c["id"] == cycle_id), None)
+                if cycle_to_fix:
+                    cycle_to_fix["duration"] = duration_sec
+                    cycle_to_fix["manual_duration"] = duration_sec
+                    existing_profile = cycle_to_fix.get("profile_name")
+                    if isinstance(existing_profile, str) and existing_profile:
+                        profiles_to_rebuild.add(existing_profile)
+                else:
+                    self._logger.warning(
+                        "Duration correction skipped: cycle %s not found in past_cycles",
+                        cycle_id,
+                    )
 
         # Remove from pending (add_pending_feedback was wrapper, remove is direct)
         if cycle_id in self.profile_store.get_pending_feedback():

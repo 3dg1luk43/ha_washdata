@@ -72,12 +72,13 @@
           "power_sensor": "Power Sensor Entity",
           "min_power": "Minimum Power (W)",
           "off_delay": "Cycle End Delay (s)",
-          "notify_service": "Notification Service (e.g. notify.mobile_app)",
           "notify_actions": "Notification Actions",
           "notify_people": "Delay Delivery Until These People Are Home",
           "notify_only_when_home": "Delay Notifications Until Selected Person Is Home",
           "notify_fire_events": "Fire Automation Events",
-          "notify_events": "Events to Notify",
+          "notify_start_services": "Cycle Start — Notification Targets",
+          "notify_finish_services": "Cycle Finish — Notification Targets",
+          "notify_live_services": "Live Progress — Notification Targets",
           "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
           "notify_title": "Notification Title",
           "notify_icon": "Notification Icon",
@@ -88,16 +89,17 @@
         },
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "device_type": "Select the type of appliance (Washing Machine, Dryer, Dishwasher, Coffee Machine, EV). This tag is stored with each cycle for better organization.",
+          "device_type": "Select the type of appliance (Washing Machine, Dryer, Dishwasher, Coffee Machine, EV, Bread Maker). This tag is stored with each cycle for better organization.",
           "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data—useful if you replace a smart plug.",
           "min_power": "Power readings above this threshold (in watts) indicate the appliance is running. Start with 2W for most devices.",
           "off_delay": "Seconds the smoothed power must stay below the stop threshold to mark completion. Default: 120s.",
-          "notify_service": "Home Assistant notify service to use (optional).",
-          "notify_actions": "Optional Home Assistant action sequence to run for notifications (scripts, notify, TTS, etc.). If set, actions run before fallback notify service.",
+          "notify_actions": "Optional Home Assistant action sequence to run for notifications (scripts, notify, TTS, etc.). If set, actions run before per-event service targets.",
           "notify_people": "People entities used for presence gating. When enabled, notification delivery is delayed until at least one selected person is home.",
           "notify_only_when_home": "If enabled, delay notifications until at least one selected person is home.",
           "notify_fire_events": "If enabled, fire Home Assistant events for cycle start and end (ha_washdata_cycle_started and ha_washdata_cycle_ended) to drive automations.",
-          "notify_events": "Which events to send notifications for.",
+          "notify_start_services": "One or more notify services to alert when a cycle begins. Leave empty to skip start notifications.",
+          "notify_finish_services": "One or more notify services to alert when a cycle finishes or nears completion. Leave empty to skip finish notifications.",
+          "notify_live_services": "One or more notify services to receive live progress updates while the cycle runs (mobile companion app only). Leave empty to skip live updates.",
           "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
           "notify_title": "Custom title for notifications. Supports {device} placeholder.",
           "notify_icon": "Icon to use for notifications (e.g. mdi:washing-machine). Leave empty to send no icon.",
@@ -108,17 +110,19 @@
       },
       "notifications": {
         "title": "Notifications",
-        "description": "Configure notification channels, templates, and optional live mobile progress updates.",
+        "description": "Configure notification targets per event type and optional live mobile progress updates. Each event type can be sent to a different set of recipients.",
         "data": {
-          "notify_service": "Notification Service (e.g. notify.mobile_app)",
           "notify_actions": "Notification Actions",
           "notify_people": "Delay Delivery Until These People Are Home",
           "notify_only_when_home": "Delay Notifications Until Selected Person Is Home",
           "notify_fire_events": "Fire Automation Events",
-          "notify_events": "Events to Notify",
+          "notify_start_services": "Cycle Start — Notification Targets",
+          "notify_finish_services": "Cycle Finish — Notification Targets",
+          "notify_live_services": "Live Progress — Notification Targets",
           "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
           "notify_live_interval_seconds": "Live Update Interval (seconds)",
           "notify_live_overrun_percent": "Live Update Overrun Allowance (%)",
+          "notify_live_chronometer": "Chronometer Countdown Timer",
           "notify_title": "Notification Title",
           "notify_icon": "Notification Icon",
           "notify_start_message": "Start Message Format",
@@ -126,15 +130,17 @@
           "notify_pre_complete_message": "Pre-Completion Message Format"
         },
         "data_description": {
-          "notify_service": "Home Assistant notify service to use (optional).",
-          "notify_actions": "Optional Home Assistant action sequence to run for notifications (scripts, notify, TTS, etc.). If set, actions run before fallback notify service.",
+          "notify_actions": "Optional Home Assistant action sequence to run for every notification event (scripts, notify, TTS, etc.). Actions fire before the per-event service targets.",
           "notify_people": "People entities used for presence gating. When enabled, notification delivery is delayed until at least one selected person is home.",
           "notify_only_when_home": "If enabled, delay notifications until at least one selected person is home.",
           "notify_fire_events": "If enabled, fire Home Assistant events for cycle start and end (ha_washdata_cycle_started and ha_washdata_cycle_ended) to drive automations.",
-          "notify_events": "Which events to send notifications for.",
+          "notify_start_services": "One or more notify services to alert when a cycle begins (e.g. notify.mobile_app_my_phone). Leave empty to skip start notifications.",
+          "notify_finish_services": "One or more notify services to alert when a cycle finishes or nears completion. Leave empty to skip finish notifications.",
+          "notify_live_services": "One or more notify services to receive live progress updates while the cycle runs (mobile companion app only). Leave empty to skip live updates.",
           "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
           "notify_live_interval_seconds": "How often progress updates are sent while running. Lower values are more responsive but consume more notifications. A minimum of 30 seconds is enforced — values below 30 s are automatically rounded up to 30 s.",
           "notify_live_overrun_percent": "Safety margin above the estimated update count for long/overrunning cycles (for example 20% allows 1.2x estimated updates).",
+          "notify_live_chronometer": "When enabled, each live update includes a chronometer countdown to the estimated finish time. The notification timer ticks down automatically on the device between updates (Android companion app only).",
           "notify_title": "Custom title for notifications. Supports {device} placeholder.",
           "notify_icon": "Icon to use for notifications (e.g. mdi:washing-machine). Leave empty to send no icon.",
           "notify_start_message": "Message sent when a cycle starts. Supports {device} placeholder.",
@@ -156,6 +162,7 @@
           "sampling_interval": "Sampling Interval (s)",
           "auto_label_confidence": "Auto-Label Confidence (0-1)",
           "learning_confidence": "Feedback Request Confidence (0-1)",
+          "suppress_feedback_notifications": "Suppress Feedback Notifications",
           "duration_tolerance": "Duration Tolerance (0-0.5)",
           "profile_match_interval": "Profile Match Interval (seconds)",
           "profile_match_min_duration_ratio": "Profile Match Min Duration Ratio (0.1-1.0)",
@@ -189,7 +196,8 @@
           "dtw_bandwidth": "DTW Bandwidth",
           "external_end_trigger_enabled": "Enable External Cycle End Trigger",
           "external_end_trigger": "External Cycle End Sensor",
-          "external_end_trigger_inverted": "Invert Trigger Logic (Trigger on OFF)"
+          "external_end_trigger_inverted": "Invert Trigger Logic (Trigger on OFF)",
+          "pump_stuck_duration": "Pump Stuck Alert Threshold (s) (Pump Only)"
         },
         "data_description": {
           "apply_suggestions": "Check this box to open a review step for suggested values from the learning algorithm. Nothing is saved automatically.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -202,6 +210,7 @@
           "sampling_interval": "Minimum sampling interval in seconds. Updates faster than this rate will be ignored. Default: 2.0s.",
           "auto_label_confidence": "Automatically label cycles at or above this confidence on completion (0.0–1.0).",
           "learning_confidence": "Minimum confidence to request user verification via an event (0.0–1.0).",
+          "suppress_feedback_notifications": "When enabled, WashData will still track and request feedback internally but will not show persistent notifications asking you to confirm cycles. Useful when cycles are always detected correctly and you find the prompts distracting.",
           "duration_tolerance": "Tolerance for time-remaining estimates during a run (0.0–0.5 corresponds to 0–50%).",
           "profile_match_interval": "How often (in seconds) to attempt profile matching during a cycle. Lower values provide faster detection but use more CPU. Default: 300s (5 minutes).",
           "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.50 (50%).",
@@ -235,7 +244,8 @@
           "dtw_bandwidth": "Maximum allowed time warping (stretching) as a ratio of cycle duration. Higher values allow matching highly variable cycles but increase CPU cost. Default: 0.20 (20%).",
           "external_end_trigger_enabled": "Enable monitoring of an external binary sensor to trigger cycle completion.",
           "external_end_trigger": "Select a binary sensor entity. When this sensor triggers, the current cycle will end with status 'completed'.",
-          "external_end_trigger_inverted": "By default, the trigger fires when the sensor turns ON. Check this box to fire when the sensor turns OFF instead."
+          "external_end_trigger_inverted": "By default, the trigger fires when the sensor turns ON. Check this box to fire when the sensor turns OFF instead.",
+          "pump_stuck_duration": "If a pump cycle is still running after this many seconds, a ha_washdata_pump_stuck event is fired once. Use this to detect a jammed motor (typical sump pump run is under 60 s). Default: 1800 s (30 min). Pump device type only."
         }
       },
       "diagnostics": {
@@ -1044,6 +1054,9 @@
       },
       "suggestions": {
         "name": "Suggested Settings Available"
+      },
+      "pump_runs_today": {
+        "name": "Pump Runs (Last 24 h)"
       }
     },
     "select": {
