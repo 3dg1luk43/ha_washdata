@@ -667,6 +667,11 @@ class ProfileStore:
             return suggestions.copy()
         return {}
 
+    async def clear_suggestions(self) -> None:
+        """Clear all pending suggestions and persist."""
+        self._data["suggestions"] = {}
+        await self.async_save()
+
     def get_feedback_history(self) -> dict[str, dict[str, Any]]:
         """Return mutable feedback history mapping (cycle_id -> record)."""
         raw = self._data.setdefault("feedback_history", {})
@@ -1815,6 +1820,20 @@ class ProfileStore:
         )
 
         if not result_pkg:
+            # Envelope shape couldn't be built (no power data / too few points).
+            # Still update profile min/max/avg from raw cycle durations so that
+            # a duration correction via feedback is immediately reflected in stats.
+            if labeled_cycles and profile_name in self._data.get("profiles", {}):
+                raw_durs = [
+                    float(c.get("manual_duration") or c.get("duration", 0))
+                    for c in labeled_cycles
+                ]
+                raw_durs = [d for d in raw_durs if d > 60]
+                if raw_durs:
+                    raw_arr_fallback = np.array(raw_durs, dtype=float)
+                    self._data["profiles"][profile_name]["min_duration"] = float(np.min(raw_arr_fallback))
+                    self._data["profiles"][profile_name]["max_duration"] = float(np.max(raw_arr_fallback))
+                    self._data["profiles"][profile_name]["avg_duration"] = float(np.mean(raw_arr_fallback))
             if profile_name in self._data.get("envelopes", {}):
                 del self._data["envelopes"][profile_name]
             return False
@@ -2627,6 +2646,26 @@ class ProfileStore:
                           and c.get("power_data")),
                         None
                     )
+                # Prefer envelope avg curve when ≥2 labeled cycles have been
+                # confirmed — it gives a more representative reference signal
+                # than the original sample alone, so confidence improves over
+                # time as the user keeps confirming correct detections.
+                envelope = self._data.get("envelopes", {}).get(name)
+                if envelope and envelope.get("cycle_count", 0) >= 2 and envelope.get("avg"):
+                    avg_y = [float(p[1]) for p in envelope["avg"]]
+                    avg_duration = (
+                        envelope.get("target_duration") or
+                        profile.get("avg_duration") or
+                        len(avg_y) * used_dt
+                    )
+                    snapshots.append({
+                        "name": name,
+                        "avg_duration": float(avg_duration),
+                        "sample_power": avg_y,
+                        "sample_dt": used_dt,
+                    })
+                    continue
+
                 if not sample_cycle:
                     skipped_profiles.append(
                         f"{name}: no sample cycle (sample_id={sample_id})"
@@ -2640,11 +2679,22 @@ class ProfileStore:
                         f"{name}: failed to resample cycle {sample_cycle.get('id')}"
                     )
                     continue
+                # avg_duration preference order:
+                #   1. profile["avg_duration"] (rolling average, most accurate)
+                #   2. sample_cycle["duration"] (raw cycle field)
+                #   3. len(segment) × dt (estimate from the resampled data)
+                # Profiles created before avg_duration tracking was added may have
+                # 0 or a missing value; falling back to the segment estimate prevents
+                # update_match() from always seeing expected_duration=0, which
+                # silences time-remaining estimates and logs a misleading warning.
+                avg_dur = (
+                    profile.get("avg_duration") or
+                    sample_cycle.get("duration") or
+                    len(sample_seg.power) * used_dt
+                )
                 snapshots.append({
                     "name": name,
-                    "avg_duration": profile.get(
-                        "avg_duration", sample_cycle.get("duration", 0)
-                    ),
+                    "avg_duration": float(avg_dur),
                     "sample_power": sample_seg.power.tolist(),
                     "sample_dt": used_dt
                 })
@@ -3086,9 +3136,14 @@ class ProfileStore:
         return count
 
     async def clear_all_data(self) -> None:
-        """Clear all profiles and cycle data."""
+        """Clear all profiles, cycle data, and derived state."""
         self._data["past_cycles"] = []
         self._data["profiles"] = {}
+        self._data["envelopes"] = {}
+        self._data["suggestions"] = {}
+        self._data["feedback_history"] = {}
+        self._data["pending_feedback"] = {}
+        self._data["auto_adjustments"] = []
         await self.async_save()
         self._logger.info("Cleared all WashData storage")
 

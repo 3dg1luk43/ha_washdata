@@ -33,6 +33,7 @@ from .const import (
     SIGNAL_WASHER_UPDATE,
     CONF_WATCHDOG_INTERVAL,
     CONF_EXPOSE_DEBUG_ENTITIES,
+    DEVICE_TYPE_PUMP,
     STATE_OFF,
     STATE_IDLE,
     STATE_STARTING,
@@ -147,6 +148,10 @@ async def async_setup_entry(
         WasherSuggestionsSensor(manager, entry),
     ]
 
+    # Add pump-specific sensors
+    if manager.device_type == DEVICE_TYPE_PUMP:
+        entities.append(PumpRunsTodaySensor(manager, entry))
+
     # Add debug entities if enabled
     if entry.options.get(CONF_EXPOSE_DEBUG_ENTITIES):
         entities.extend(
@@ -241,6 +246,8 @@ class WasherStateSensor(WasherBaseSensor):
             return "mdi:pot-steam"
         if dtype == "heat_pump":
             return "mdi:heat-pump"
+        if dtype == "pump":
+            return "mdi:water-pump"
         return "mdi:washing-machine"
 
     @property
@@ -254,6 +261,8 @@ class WasherStateSensor(WasherBaseSensor):
             "current_program_guess": self._manager.current_program,
             "sub_state": self._manager.sub_state,
         }
+        if self._manager.device_type == DEVICE_TYPE_PUMP:
+            attrs["pump_stuck"] = self._manager.pump_stuck
         return attrs
 
 
@@ -797,3 +806,23 @@ class WasherSuggestionsSensor(WasherBaseSensor):
             "suggestions": suggestions,
         }
         return attrs
+
+
+class PumpRunsTodaySensor(WasherBaseSensor):
+    """Sensor reporting how many pump cycles occurred in the last 24 hours.
+
+    Only created when device type is ``pump``.
+    """
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="pump_runs_today",
+            translation_key="pump_runs_today",
+            icon="mdi:counter",
+            native_unit_of_measurement="cycles",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self) -> int:  # type: ignore[override]
+        return self._manager.pump_runs_today

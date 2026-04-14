@@ -7,12 +7,15 @@ CONF_POWER_SENSOR = "power_sensor"
 CONF_NAME = "name"
 CONF_MIN_POWER = "min_power"
 CONF_OFF_DELAY = "off_delay"
-CONF_NOTIFY_SERVICE = "notify_service"
+CONF_NOTIFY_SERVICE = "notify_service"  # Deprecated — kept for migration only
 CONF_NOTIFY_ACTIONS = "notify_actions"
 CONF_NOTIFY_PEOPLE = "notify_people"
 CONF_NOTIFY_ONLY_WHEN_HOME = "notify_only_when_home"
 CONF_NOTIFY_FIRE_EVENTS = "notify_fire_events"
-CONF_NOTIFY_EVENTS = "notify_events"
+CONF_NOTIFY_EVENTS = "notify_events"  # Deprecated — kept for migration only
+CONF_NOTIFY_START_SERVICES = "notify_start_services"
+CONF_NOTIFY_FINISH_SERVICES = "notify_finish_services"
+CONF_NOTIFY_LIVE_SERVICES = "notify_live_services"
 CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
 CONF_LOW_POWER_NO_UPDATE_TIMEOUT = "low_power_no_update_timeout"
 CONF_SMOOTHING_WINDOW = "smoothing_window"
@@ -80,6 +83,7 @@ CONF_NOTIFY_FINISH_MESSAGE = "notify_finish_message"
 CONF_NOTIFY_PRE_COMPLETE_MESSAGE = "notify_pre_complete_message"
 CONF_NOTIFY_LIVE_INTERVAL_SECONDS = "notify_live_interval_seconds"
 CONF_NOTIFY_LIVE_OVERRUN_PERCENT = "notify_live_overrun_percent"
+CONF_NOTIFY_LIVE_CHRONOMETER = "notify_live_chronometer"
 
 DEFAULT_NOTIFY_TITLE = "WashData: {device}"
 DEFAULT_NOTIFY_START_MESSAGE = "{device} started {program}."
@@ -90,6 +94,7 @@ DEFAULT_NOTIFY_ONLY_WHEN_HOME = False
 DEFAULT_NOTIFY_FIRE_EVENTS = True
 DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS = 300
 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
+DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
 
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts
@@ -145,6 +150,11 @@ DEFAULT_ANTI_WRINKLE_MAX_POWER = 400.0  # W
 DEFAULT_ANTI_WRINKLE_MAX_DURATION = 60.0  # s
 DEFAULT_ANTI_WRINKLE_EXIT_POWER = 0.8  # W
 
+# Pump Monitor settings (pump device type only)
+CONF_PUMP_STUCK_DURATION = "pump_stuck_duration"  # Seconds before a running pump is flagged as stuck
+DEFAULT_PUMP_STUCK_DURATION = 1800  # 30 min — typical sump pump runs <60 s; 30 min implies motor is jammed
+EVENT_PUMP_STUCK = "ha_washdata_pump_stuck"  # Fired when stuck-pump threshold is exceeded
+
 # Profile Matching Thresholds
 CONF_PROFILE_MATCH_THRESHOLD = "profile_match_threshold"
 CONF_PROFILE_UNMATCH_THRESHOLD = "profile_unmatch_threshold"
@@ -154,6 +164,9 @@ DEFAULT_PROFILE_UNMATCH_THRESHOLD = 0.35
 
 CONF_DTW_BANDWIDTH = "dtw_bandwidth"
 DEFAULT_DTW_BANDWIDTH = 0.20  # 20% Sakoe-Chiba constraint
+
+CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS = "suppress_feedback_notifications"
+DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS = False  # Show persistent notifications by default
 
 # States
 STATE_OFF = "off"
@@ -186,6 +199,8 @@ DEVICE_TYPE_COFFEE_MACHINE = "coffee_machine"
 DEVICE_TYPE_EV = "ev"
 DEVICE_TYPE_AIR_FRYER = "air_fryer"
 DEVICE_TYPE_HEAT_PUMP = "heat_pump"
+DEVICE_TYPE_BREAD_MAKER = "bread_maker"
+DEVICE_TYPE_PUMP = "pump"
 
 DEVICE_TYPES = {
     DEVICE_TYPE_WASHING_MACHINE: "Washing Machine",
@@ -196,6 +211,8 @@ DEVICE_TYPES = {
     DEVICE_TYPE_EV: "Electric Vehicle",
     DEVICE_TYPE_AIR_FRYER: "Air Fryer",
     DEVICE_TYPE_HEAT_PUMP: "Heat Pump",
+    DEVICE_TYPE_BREAD_MAKER: "Bread Maker",
+    DEVICE_TYPE_PUMP: "Pump / Sump Pump",
 }
 
 # Device Type Defaults
@@ -204,6 +221,8 @@ DEVICE_TYPES = {
 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 14400,  # 4 hours (Drying can be long)
     DEVICE_TYPE_HEAT_PUMP: 14400,  # 4 hours (Heat pumps can run a long time with slow updates)
+    DEVICE_TYPE_BREAD_MAKER: 7200,  # 2 hours (Proving/Rising is very low-power for extended periods)
+    DEVICE_TYPE_PUMP: 600,  # 10 min (Pumps cycle quickly; long silence = offline)
 }
 
 DEFAULT_MAX_DEFERRAL_SECONDS = 14400  # 4 hours max safe deferral
@@ -212,6 +231,8 @@ DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
     DEVICE_TYPE_COFFEE_MACHINE: 300,  # 5 min (Warming/Pause handling)
     DEVICE_TYPE_HEAT_PUMP: 600,  # 10 min (Defrosting pauses)
+    DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
+    DEVICE_TYPE_PUMP: 20,  # 20 s (Pumps cut off sharply; no warm-down phase)
 }
 
 # Device-specific progress smoothing thresholds (percentage points)
@@ -224,6 +245,8 @@ DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_COFFEE_MACHINE: 2.0,  # Short cycles, rapid transitions, less tolerance
     DEVICE_TYPE_AIR_FRYER: 2.0,  # Constant load with sudden drop
     DEVICE_TYPE_HEAT_PUMP: 5.0,  # Variable load, long periods
+    DEVICE_TYPE_BREAD_MAKER: 5.0,  # Large power swings between kneading, proving, baking
+    DEVICE_TYPE_PUMP: 2.0,  # Binary on/off spikes; minimal smoothing needed
 }
 
 CONF_VERIFICATION_POLL_INTERVAL = "verification_poll_interval"  # Internal setting
@@ -239,6 +262,8 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_EV: 600,  # 10 min
     DEVICE_TYPE_AIR_FRYER: 300,  # 5 min minimum
     DEVICE_TYPE_HEAT_PUMP: 900,  # 15 min minimum
+    DEVICE_TYPE_BREAD_MAKER: 1800,  # 30 min (even express bread takes 30+ min)
+    DEVICE_TYPE_PUMP: 5,  # 5 s — pump cycles can be under 30 seconds
 }
 
 # Default min_off_gap by device type (seconds)
@@ -256,6 +281,8 @@ DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_EV: 900,  # 15 min (Brief unplug/replug)
     DEVICE_TYPE_AIR_FRYER: 120,  # 2 min (Shaking food)
     DEVICE_TYPE_HEAT_PUMP: 1800,  # 30 min (Defrost cycle / resting gap)
+    DEVICE_TYPE_BREAD_MAKER: 600,  # 10 min (Resting between knead/prove keeps same cycle together)
+    DEVICE_TYPE_PUMP: 60,  # 1 min (Pumps can cycle every 3-5 min in heavy rain)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
 
@@ -271,10 +298,13 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_EV: 0.5,  # High power charging
     DEVICE_TYPE_AIR_FRYER: 0.2,  # Heater kicks in
     DEVICE_TYPE_HEAT_PUMP: 0.2,  # Compressor spins up
+    DEVICE_TYPE_BREAD_MAKER: 0.2,  # Kneading motor starts (~200W for a few seconds)
+    DEVICE_TYPE_PUMP: 0.003,  # ~100W motor for ~0.1 s is enough to confirm a pump cycle
 }
 # Default sampling interval by device type
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
     DEVICE_TYPE_COFFEE_MACHINE: 10.0,  # 10s is sufficient for brew cycles
+    DEVICE_TYPE_PUMP: 10.0,  # 10s — pump cycles can be <30 s; 30s default would miss them
 }
 
 # Default profile match min duration ratio by device type

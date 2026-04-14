@@ -24,6 +24,9 @@ _SENSITIVE_KEYS = {
     "user_id",
     # HA entity / service references that reveal home topology.
     "notify_service",
+    "notify_start_services",
+    "notify_finish_services",
+    "notify_live_services",
     "notify_people",
     "notify_actions",
     "power_sensor",
@@ -76,4 +79,9 @@ async def async_get_config_entry_diagnostics(
             },
         },
         "store_export": _redact(exported),
+        # Rolling 24-hour in-memory buffers.
+        # power_trace:   [[iso_ts, watts], …] – every raw sensor reading
+        # state_history: [{ts, from, to, program}, …] – detector state changes
+        # logs:          [{ts, lvl, msg}, …] – integration debug/info/warning/error lines
+        "live_diagnostics": manager.diag_buffer.snapshot(),
     }

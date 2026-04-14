@@ -301,7 +301,10 @@ class CycleDetector:
                     if not math.isfinite(expected_duration):
                         expected_duration = 0.0
                         self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
-                    elif expected_duration <= 0 or expected_duration > 6 * 3600.0:
+                    elif expected_duration <= 0:
+                        expected_duration = 0.0
+                        self._logger.debug("update_match: invalid raw_expected_duration %r (<= 0), defaulting to 0.0", raw_expected_duration)
+                    elif expected_duration > 6 * 3600.0:
                         expected_duration = 0.0
                         self._logger.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
                 except (TypeError, ValueError):
@@ -332,7 +335,10 @@ class CycleDetector:
                         if not math.isfinite(expected_duration):
                             expected_duration = 0.0
                             self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
-                        elif expected_duration <= 0 or expected_duration > 6 * 3600.0:
+                        elif expected_duration <= 0:
+                            expected_duration = 0.0
+                            self._logger.debug("update_match: invalid raw_expected_duration %r (<= 0), defaulting to 0.0", raw_expected_duration)
+                        elif expected_duration > 6 * 3600.0:
                             expected_duration = 0.0
                             self._logger.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
                     except (TypeError, ValueError):
@@ -795,6 +801,17 @@ class CycleDetector:
                 # --- FALLBACK TIMEOUT CHECK ---
                 # Rule: To separate cycles, we must wait at least min_off_gap.
                 effective_off_delay = max(self._config.off_delay, self._config.min_off_gap)
+
+                # Dishwasher-specific: after a terminal end spike (pump-out), an
+                # unmatched cycle doesn't need to wait the full min_off_gap (up to
+                # 9000s) before closing. Cap at 30 min so cycle 3 ends cleanly
+                # ~30 min after the pump-out rather than sitting open for hours.
+                if (
+                    self._config.device_type == "dishwasher"
+                    and not self._matched_profile
+                    and self._end_spike_seen
+                ):
+                    effective_off_delay = min(effective_off_delay, 1800)
 
                 if self._time_below_threshold >= effective_off_delay:
 

@@ -8,6 +8,7 @@ from typing import Any
 
 from .const import (
     DEVICE_TYPE_AIR_FRYER,
+    DEVICE_TYPE_BREAD_MAKER,
     DEVICE_TYPE_COFFEE_MACHINE,
     DEVICE_TYPE_DISHWASHER,
     DEVICE_TYPE_DRYER,
@@ -289,6 +290,33 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
         {
             "name": "Boost",
             "description": "High-output operation for rapid temperature change.",
+            "is_default": True,
+        },
+    ],
+    DEVICE_TYPE_BREAD_MAKER: [
+        {
+            "name": "Kneading",
+            "description": "Motor-driven dough mixing and development. High power draw.",
+            "is_default": True,
+        },
+        {
+            "name": "Resting",
+            "description": "Short low-power pause between kneading stages for gluten relaxation.",
+            "is_default": True,
+        },
+        {
+            "name": "Proving",
+            "description": "Low-heat rising period to allow yeast fermentation and dough expansion.",
+            "is_default": True,
+        },
+        {
+            "name": "Baking",
+            "description": "High-temperature heating element active for crust and crumb formation.",
+            "is_default": True,
+        },
+        {
+            "name": "Keep Warm",
+            "description": "Low-heat holding stage to keep the loaf warm after baking.",
             "is_default": True,
         },
     ],
