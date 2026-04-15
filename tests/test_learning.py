@@ -7,7 +7,8 @@ from custom_components.ha_washdata.const import (
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_LEARNING_CONFIDENCE,
-    CONF_DURATION_TOLERANCE
+    CONF_DURATION_TOLERANCE,
+    CONF_PROFILE_DURATION_TOLERANCE,
 )
 
 # Mock ProfileStore
@@ -115,7 +116,7 @@ def test_duration_learning(learning_manager):
         
     learning_manager._update_model_suggestions(datetime.now(timezone.utc))
     sugg = learning_manager.profile_store.get_suggestions()
-    assert CONF_DURATION_TOLERANCE in sugg
+    assert CONF_PROFILE_DURATION_TOLERANCE in sugg
 
 @pytest.mark.asyncio
 async def test_process_cycle_end_with_feedback(learning_manager):
