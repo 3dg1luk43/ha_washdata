@@ -339,20 +339,7 @@ class WashDataManager:
                 CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
             )
         )
-        self._notify_start_services = list(config_entry.options.get(CONF_NOTIFY_START_SERVICES, []) or [])
-        self._notify_finish_services = list(config_entry.options.get(CONF_NOTIFY_FINISH_SERVICES, []) or [])
-        self._notify_live_services = list(config_entry.options.get(CONF_NOTIFY_LIVE_SERVICES, []) or [])
-        # Backward compat: migrate old single notify_service + notify_events to new per-event lists
-        if not (self._notify_start_services or self._notify_finish_services or self._notify_live_services):
-            _old_svc = config_entry.options.get(CONF_NOTIFY_SERVICE, "")
-            _old_events = list(config_entry.options.get(CONF_NOTIFY_EVENTS, []) or [])
-            if _old_svc:
-                if not _old_events or NOTIFY_EVENT_START in _old_events:
-                    self._notify_start_services = [_old_svc]
-                if not _old_events or NOTIFY_EVENT_FINISH in _old_events:
-                    self._notify_finish_services = [_old_svc]
-                if not _old_events or NOTIFY_EVENT_LIVE in _old_events:
-                    self._notify_live_services = [_old_svc]
+        self._load_notify_services(config_entry)
         self._notify_actions = list(
             cast(list[dict[str, Any]], config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or [])
         )
@@ -1274,6 +1261,23 @@ class WashDataManager:
         # Subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
 
+    def _load_notify_services(self, config_entry: ConfigEntry) -> None:
+        """Load notification service lists, migrating legacy single-service config."""
+        self._notify_start_services = list(config_entry.options.get(CONF_NOTIFY_START_SERVICES, []) or [])
+        self._notify_finish_services = list(config_entry.options.get(CONF_NOTIFY_FINISH_SERVICES, []) or [])
+        self._notify_live_services = list(config_entry.options.get(CONF_NOTIFY_LIVE_SERVICES, []) or [])
+        # Backward compat: migrate old single notify_service + notify_events to new per-event lists
+        if not (self._notify_start_services or self._notify_finish_services or self._notify_live_services):
+            _old_svc = config_entry.options.get(CONF_NOTIFY_SERVICE, "")
+            _old_events = list(config_entry.options.get(CONF_NOTIFY_EVENTS, []) or [])
+            if _old_svc:
+                if not _old_events or NOTIFY_EVENT_START in _old_events:
+                    self._notify_start_services = [_old_svc]
+                if not _old_events or NOTIFY_EVENT_FINISH in _old_events:
+                    self._notify_finish_services = [_old_svc]
+                if not _old_events or NOTIFY_EVENT_LIVE in _old_events:
+                    self._notify_live_services = [_old_svc]
+
     async def async_reload_config(self, config_entry: ConfigEntry) -> None:
         """
         Reload configuration options without interrupting running cycle detection.
@@ -1552,20 +1556,7 @@ class WashDataManager:
 
 
         # Update notification settings
-        self._notify_start_services = list(config_entry.options.get(CONF_NOTIFY_START_SERVICES, []) or [])
-        self._notify_finish_services = list(config_entry.options.get(CONF_NOTIFY_FINISH_SERVICES, []) or [])
-        self._notify_live_services = list(config_entry.options.get(CONF_NOTIFY_LIVE_SERVICES, []) or [])
-        # Backward compat: migrate old single notify_service + notify_events
-        if not (self._notify_start_services or self._notify_finish_services or self._notify_live_services):
-            _old_svc = config_entry.options.get(CONF_NOTIFY_SERVICE, "")
-            _old_events = list(config_entry.options.get(CONF_NOTIFY_EVENTS, []) or [])
-            if _old_svc:
-                if not _old_events or NOTIFY_EVENT_START in _old_events:
-                    self._notify_start_services = [_old_svc]
-                if not _old_events or NOTIFY_EVENT_FINISH in _old_events:
-                    self._notify_finish_services = [_old_svc]
-                if not _old_events or NOTIFY_EVENT_LIVE in _old_events:
-                    self._notify_live_services = [_old_svc]
+        self._load_notify_services(config_entry)
         self._notify_actions = list(
             cast(list[dict[str, Any]], config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or [])
         )
@@ -2107,7 +2098,7 @@ class WashDataManager:
         cycle_start = self.detector.current_cycle_start
         is_suspicious = False
         if cycle_start and self._last_cycle_end_time:
-            # Dishwashers have a drain pump-out that fires 3–8 min after the main
+            # Dishwashers have a drain pump-out that fires 3-8 min after the main
             # cycle ends; use a wider suspicious window so the ghost suppressor can
             # catch it without false-positives on washing machines / dryers.
             suspicious_window = 600 if self.device_type == "dishwasher" else 180
@@ -2115,7 +2106,7 @@ class WashDataManager:
                 is_suspicious = True
 
         # For dishwashers in the suspicious window, kill pump-out ghosts faster.
-        # Pump-outs last 1–3 min then go silent; the standard 10-min wait allows
+        # Pump-outs last 1-3 min then go silent; the standard 10-min wait allows
         # them to accumulate too much runtime before suppression fires.
         dishwasher_pump_out = (
             is_suspicious
@@ -3719,13 +3710,15 @@ class WashDataManager:
                 continue
             try:
                 if isinstance(start_raw, str):
-                    # Parse ISO string — handle offset-aware and naive
-                    ts = datetime.fromisoformat(start_raw).timestamp()
+                    parsed = dt_util.parse_datetime(start_raw)
+                    if parsed is None:
+                        continue
+                    ts = parsed.timestamp()
                 else:
                     ts = float(start_raw)
                 if ts >= cutoff:
                     count += 1
-            except (ValueError, OSError):
+            except (TypeError, ValueError):
                 continue
         return count
 
