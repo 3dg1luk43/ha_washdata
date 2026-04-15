@@ -106,6 +106,13 @@ def cleanup_orphaned_diagnostic_entities(
             continue
 
         suffix = unique_id[len(entry_prefix) :]
+
+        # Remove stale pump_runs_today when device type has changed away from pump.
+        if suffix == "pump_runs_today" and manager.device_type != DEVICE_TYPE_PUMP:
+            ent_reg.async_remove(reg_entry.entity_id)
+            removed += 1
+            continue
+
         is_diagnostic_family = (
             suffix in _STATIC_DIAGNOSTIC_SUFFIXES
             or suffix.startswith("profile_count_")

@@ -59,7 +59,7 @@ class _LogHandler(logging.Handler):
                 return
             self._buf.append((record.created, record.levelname, msg))
         except Exception:  # pylint: disable=broad-except
-            pass
+            self.handleError(record)
 
     def snapshot(self, cutoff: float) -> list[dict[str, Any]]:
         return [
@@ -124,6 +124,22 @@ class DiagBuffer:
     # ------------------------------------------------------------------
     # Snapshot
     # ------------------------------------------------------------------
+
+    def redacted_snapshot(self) -> dict[str, Any]:
+        """Like :meth:`snapshot` but with identifying fields removed.
+
+        Strips ``device_name`` from the top-level dict and removes the ``msg``
+        field from each log entry so raw log text (which contains the device
+        name prefix injected by :class:`~.log_utils.DeviceLoggerAdapter`) is
+        not included in exported diagnostics.
+        """
+        data = self.snapshot()
+        data.pop("device_name", None)
+        data["logs"] = [
+            {k: v for k, v in entry.items() if k != "msg"}
+            for entry in data.get("logs", [])
+        ]
+        return data
 
     def snapshot(self) -> dict[str, Any]:
         """Return all three buffers filtered to the last 24 hours.

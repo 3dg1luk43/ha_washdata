@@ -83,5 +83,5 @@ async def async_get_config_entry_diagnostics(
         # power_trace:   [[iso_ts, watts], …] – every raw sensor reading
         # state_history: [{ts, from, to, program}, …] – detector state changes
         # logs:          [{ts, lvl, msg}, …] – integration debug/info/warning/error lines
-        "live_diagnostics": manager.diag_buffer.snapshot(),
+        "live_diagnostics": manager.diag_buffer.redacted_snapshot(),
     }

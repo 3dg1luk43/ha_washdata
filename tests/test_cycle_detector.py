@@ -477,7 +477,7 @@ def test_dishwasher_unmatched_end_spike_caps_off_delay_at_1800s(mock_callbacks):
     # after the cap fires (at exactly t_spike + 1800 s the spike is still in-window).
     # Therefore we need 62 readings (1860 s) to push the spike out of the window and
     # let the energy gate pass.
-    for _ in range(65):  # 65 × 30 s = 1950 s — comfortably past the gate
+    for _ in range(65):  # 65 x 30 s = 1950 s -- comfortably past the gate
         detector.process_reading(LOW, dt(t))
         t += 30
 
@@ -524,7 +524,7 @@ def test_dishwasher_no_spike_uses_full_off_delay(mock_callbacks):
 
     assert detector.state == STATE_ENDING
 
-    # Feed 60 × 30 s = 1800 s of low readings — no spike, so _end_spike_seen = False.
+    # Feed 60 x 30 s = 1800 s of low readings -- no spike, so _end_spike_seen = False.
     for _ in range(60):
         detector.process_reading(LOW, dt(t))
         t += 30
