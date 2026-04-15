@@ -1168,11 +1168,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_EXTERNAL_END_TRIGGER_INVERTED,
                 default=get_val(CONF_EXTERNAL_END_TRIGGER_INVERTED, False),
             ): bool,
-            # --- Pump Monitor (Pump / Sump Pump only) ---
-            vol.Optional(
-                CONF_PUMP_STUCK_DURATION,
-                default=get_val(CONF_PUMP_STUCK_DURATION, DEFAULT_PUMP_STUCK_DURATION),
-            ): selector.NumberSelector(
+        }
+
+        # --- Pump Monitor (Pump / Sump Pump only) ---
+        if current_device_type == DEVICE_TYPE_PUMP:
+            schema[
+                vol.Optional(
+                    CONF_PUMP_STUCK_DURATION,
+                    default=get_val(CONF_PUMP_STUCK_DURATION, DEFAULT_PUMP_STUCK_DURATION),
+                )
+            ] = selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=60,
                     max=86400,
@@ -1180,8 +1185,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     unit_of_measurement="s",
                     mode=selector.NumberSelectorMode.BOX,
                 )
-            ),
-        }
+            )
 
         data_schema = vol.Schema(schema)
         data_schema = self.add_suggested_values_to_schema(

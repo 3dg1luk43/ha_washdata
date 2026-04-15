@@ -3719,10 +3719,8 @@ class WashDataManager:
                 continue
             try:
                 if isinstance(start_raw, str):
-                    from datetime import datetime as _dt
-                    import re as _re
                     # Parse ISO string — handle offset-aware and naive
-                    ts = _dt.fromisoformat(start_raw).timestamp()
+                    ts = datetime.fromisoformat(start_raw).timestamp()
                 else:
                     ts = float(start_raw)
                 if ts >= cutoff:

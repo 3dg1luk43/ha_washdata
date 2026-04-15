@@ -802,6 +802,11 @@ class CycleDetector:
                 # Rule: To separate cycles, we must wait at least min_off_gap.
                 effective_off_delay = max(self._config.off_delay, self._config.min_off_gap)
 
+                # Energy gate always looks back off_delay seconds by default;
+                # overridden below for the dishwasher cap case so the window
+                # is consistent with the shortened effective_off_delay.
+                gate_window = self._config.off_delay
+
                 # Dishwasher-specific: after a terminal end spike (pump-out), an
                 # unmatched cycle doesn't need to wait the full min_off_gap (up to
                 # 9000s) before closing. Cap at 30 min so cycle 3 ends cleanly
@@ -812,13 +817,14 @@ class CycleDetector:
                     and self._end_spike_seen
                 ):
                     effective_off_delay = min(effective_off_delay, 1800)
+                    gate_window = effective_off_delay
 
                 if self._time_below_threshold >= effective_off_delay:
 
                     recent_window = [
                         r
                         for r in self._power_readings
-                        if (timestamp - r[0]).total_seconds() <= self._config.off_delay
+                        if (timestamp - r[0]).total_seconds() <= gate_window
                     ]
 
                     if not recent_window:

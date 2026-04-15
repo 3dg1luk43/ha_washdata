@@ -17,6 +17,7 @@ Fixes:
 """
 from __future__ import annotations
 
+import inspect
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
@@ -43,7 +44,14 @@ def mock_hass():
     hass = MagicMock()
     hass.data = {DOMAIN: {}}
     hass.async_add_executor_job = AsyncMock(side_effect=lambda f, *a: f(*a))
-    hass.async_create_task = MagicMock()
+
+    def _create_task(coro_or_awaitable):
+        # Close coroutines immediately so they don't leak as "never awaited".
+        if inspect.iscoroutine(coro_or_awaitable):
+            coro_or_awaitable.close()
+        return MagicMock()
+
+    hass.async_create_task = MagicMock(side_effect=_create_task)
     return hass
 
 
