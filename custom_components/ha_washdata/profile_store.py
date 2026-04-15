@@ -3146,6 +3146,7 @@ class ProfileStore:
         self._data["auto_adjustments"] = []
         self._data["active_cycle"] = None
         self._data["last_active_save"] = None
+        self._cached_sample_segments = {}
         await self.async_save()
         self._logger.info("Cleared all WashData storage")
 
