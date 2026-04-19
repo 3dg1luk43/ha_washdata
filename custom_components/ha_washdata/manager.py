@@ -138,7 +138,9 @@ from .const import (
     CONF_ENERGY_PRICE_ENTITY,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_PAUSE_CUTS_POWER,
+    CONF_SWITCH_ENTITY,
     CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
+    CONF_NOTIFY_UNLOAD_MESSAGE,
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_MESSAGE,
     STATE_CLEAN,
@@ -179,7 +181,6 @@ from .const import (
     STATE_ANTI_WRINKLE,
     STATE_IDLE,
     STATE_UNKNOWN,
-    STATE_CLEAN,
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
@@ -571,7 +572,6 @@ class WashDataManager:
 
         self._remove_listener = None
         self._remove_external_trigger_listener = None  # External cycle end trigger
-        self._remove_door_sensor_listener = None  # Door sensor state changes
         self._remove_watchdog = None
         self._watchdog_interval = int(
             config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
@@ -2147,7 +2147,7 @@ class WashDataManager:
             if time_in_clean >= self._notify_unload_delay_minutes * 60:
                 duration_min = int(time_since_complete / 60)
                 msg_template = self.config_entry.options.get(
-                    "notify_unload_message", DEFAULT_NOTIFY_UNLOAD_MESSAGE
+                    CONF_NOTIFY_UNLOAD_MESSAGE, DEFAULT_NOTIFY_UNLOAD_MESSAGE
                 )
                 msg = self._safe_format_template(
                     msg_template,
@@ -2200,7 +2200,9 @@ class WashDataManager:
         # 0a. PUMP STUCK DETECTION (Pump Monitor only)
         # If a pump cycle has been running longer than the configured stuck threshold,
         # fire a single warning event so the user can wire an automation/alert.
-        if self.device_type == DEVICE_TYPE_PUMP and not self._pump_stuck:
+        # Skip while user-paused or detector-verified-pause to avoid false positives.
+        _verified_pause = getattr(self.detector, "_verified_pause", False)
+        if self.device_type == DEVICE_TYPE_PUMP and not self._pump_stuck and not self._is_user_paused and not _verified_pause:
             if elapsed >= self._pump_stuck_duration:
                 self._pump_stuck = True
                 self._logger.warning(
@@ -3125,7 +3127,7 @@ class WashDataManager:
             self.hass, self.hass.config.language, "options", {DOMAIN}
         )
         _default_msg = (
-            "{device_type} '{device_title}' detected ghost cycles. "
+            "{device_type} {device_title} detected ghost cycles. "
             "Suggested min_power change: {current_min}W -> {new_min}W "
             "(not applied automatically)."
         )
@@ -4059,15 +4061,20 @@ class WashDataManager:
 
         if self._pause_cuts_power:
             switch_entity = self.config_entry.options.get(
-                "switch_entity"
-            ) or self.config_entry.data.get("switch_entity")
+                CONF_SWITCH_ENTITY
+            ) or self.config_entry.data.get(CONF_SWITCH_ENTITY)
             if switch_entity:
                 self._logger.info(
                     "pause_cuts_power: turning off switch %s", switch_entity
                 )
-                await self.hass.services.async_call(
-                    "switch", "turn_off", {"entity_id": switch_entity}
-                )
+                try:
+                    await self.hass.services.async_call(
+                        "switch", "turn_off", {"entity_id": switch_entity}
+                    )
+                except HomeAssistantError as err:
+                    self._logger.warning(
+                        "pause_cuts_power: failed to turn off %s: %s", switch_entity, err
+                    )
 
         self._notify_update()
 
@@ -4096,15 +4103,20 @@ class WashDataManager:
 
         if self._pause_cuts_power:
             switch_entity = self.config_entry.options.get(
-                "switch_entity"
-            ) or self.config_entry.data.get("switch_entity")
+                CONF_SWITCH_ENTITY
+            ) or self.config_entry.data.get(CONF_SWITCH_ENTITY)
             if switch_entity:
                 self._logger.info(
                     "pause_cuts_power: turning on switch %s", switch_entity
                 )
-                await self.hass.services.async_call(
-                    "switch", "turn_on", {"entity_id": switch_entity}
-                )
+                try:
+                    await self.hass.services.async_call(
+                        "switch", "turn_on", {"entity_id": switch_entity}
+                    )
+                except HomeAssistantError as err:
+                    self._logger.warning(
+                        "pause_cuts_power: failed to turn on %s: %s", switch_entity, err
+                    )
 
         self._notify_update()
 
