@@ -675,6 +675,39 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.services.async_register(DOMAIN, "record_stop", handle_record_stop)
 
+    # Register pause/resume services
+    if not hass.services.has_service(DOMAIN, "pause_cycle"):
+        async def handle_pause_cycle(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ValueError("Device not found")
+            entry_id = next(iter(device.config_entries), None)
+            if not entry_id or entry_id not in hass.data[DOMAIN]:
+                raise ValueError("Integration not loaded")
+
+            manager = hass.data[DOMAIN][entry_id]
+            await manager.async_pause_cycle()
+
+        hass.services.async_register(DOMAIN, "pause_cycle", handle_pause_cycle)
+
+    if not hass.services.has_service(DOMAIN, "resume_cycle"):
+        async def handle_resume_cycle(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ValueError("Device not found")
+            entry_id = next(iter(device.config_entries), None)
+            if not entry_id or entry_id not in hass.data[DOMAIN]:
+                raise ValueError("Integration not loaded")
+
+            manager = hass.data[DOMAIN][entry_id]
+            await manager.async_resume_cycle()
+
+        hass.services.async_register(DOMAIN, "resume_cycle", handle_resume_cycle)
+
     return True
 
 

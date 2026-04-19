@@ -113,6 +113,8 @@ from .const import (
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_NOTIFY_LIVE_CHRONOMETER,
+    CONF_ENERGY_PRICE_STATIC,
+    CONF_ENERGY_PRICE_ENTITY,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
@@ -134,6 +136,10 @@ from .const import (
     CONF_PUMP_STUCK_DURATION,
     DEFAULT_PUMP_STUCK_DURATION,
     DEVICE_TYPE_PUMP,
+    CONF_DOOR_SENSOR_ENTITY,
+    CONF_PAUSE_CUTS_POWER,
+    CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
+    DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
 )
 from .profile_store import profile_sort_key
 
@@ -700,6 +706,26 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
                 ),
             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+            vol.Optional(
+                CONF_ENERGY_PRICE_ENTITY,
+                description={"suggested_value": get_val(CONF_ENERGY_PRICE_ENTITY, None)},
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain=["sensor", "input_number", "number"],
+                    multiple=False,
+                )
+            ),
+            vol.Optional(
+                CONF_ENERGY_PRICE_STATIC,
+                description={"suggested_value": get_val(CONF_ENERGY_PRICE_STATIC, None)},
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=10,
+                    step=0.001,
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
         }
 
         return self.async_show_form(
@@ -710,6 +736,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "duration": "{duration}",
                 "program": "{program}",
                 "minutes": "{minutes}",
+                "energy_kwh": "{energy_kwh}",
+                "cost": "{cost}",
             },
         )
 
@@ -788,6 +816,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             _trigger_val = user_input.get(CONF_EXTERNAL_END_TRIGGER)
             if not _trigger_val:
                 user_input[CONF_EXTERNAL_END_TRIGGER] = None
+
+            # Same treatment for door sensor entity
+            _door_val = user_input.get(CONF_DOOR_SENSOR_ENTITY)
+            if not _door_val:
+                user_input[CONF_DOOR_SENSOR_ENTITY] = None
 
             # Final Save
             final_options = {
@@ -1168,6 +1201,33 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_EXTERNAL_END_TRIGGER_INVERTED,
                 default=get_val(CONF_EXTERNAL_END_TRIGGER_INVERTED, False),
             ): bool,
+            # --- Door Sensor & Pause ---
+            vol.Optional(
+                CONF_DOOR_SENSOR_ENTITY,
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="binary_sensor",
+                    multiple=False,
+                )
+            ),
+            vol.Optional(
+                CONF_PAUSE_CUTS_POWER,
+                default=get_val(CONF_PAUSE_CUTS_POWER, False),
+            ): bool,
+            vol.Optional(
+                CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
+                default=get_val(
+                    CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=480,
+                    step=5,
+                    unit_of_measurement="min",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
         }
 
         # --- Pump Monitor (Pump / Sump Pump only) ---
@@ -1190,7 +1250,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         data_schema = vol.Schema(schema)
         data_schema = self.add_suggested_values_to_schema(
             data_schema,
-            {CONF_EXTERNAL_END_TRIGGER: get_val(CONF_EXTERNAL_END_TRIGGER, None)},
+            {
+                CONF_EXTERNAL_END_TRIGGER: get_val(CONF_EXTERNAL_END_TRIGGER, None),
+                CONF_DOOR_SENSOR_ENTITY: get_val(CONF_DOOR_SENSOR_ENTITY, None),
+            },
         )
 
         return self.async_show_form(
