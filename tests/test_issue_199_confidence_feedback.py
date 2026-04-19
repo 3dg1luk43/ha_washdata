@@ -106,7 +106,7 @@ async def test_envelope_used_for_matching_when_available(store):
     representative than a single sample, so confidence should be higher and
     stable across repeated identical cycles.
     """
-    # A distinctive dishwasher-like power signature — needs ≥12 samples for matcher
+    # A distinctive dishwasher-like power signature - needs ≥12 samples for matcher
     pattern = [
         0.0, 2.0, 5.0, 200.0, 600.0, 800.0, 750.0, 400.0, 300.0,
         200.0, 150.0, 100.0, 80.0, 50.0, 20.0, 10.0, 5.0, 2.0, 0.0, 0.0,
@@ -134,7 +134,7 @@ async def test_envelope_used_for_matching_when_available(store):
         }
     ]
 
-    # Build envelope from 3 confirmed cycles — avg is the exact pattern
+    # Build envelope from 3 confirmed cycles - avg is the exact pattern
     store._data["envelopes"] = {
         "Normal 65°C": {
             "cycle_count": 3,
@@ -294,12 +294,12 @@ def test_maybe_request_feedback_not_suppressed(learning_manager, mock_hass):
 # ---------------------------------------------------------------------------
 
 def test_learning_confidence_default():
-    """Default learning_confidence is 0.6 — the lower bound for feedback requests."""
+    """Default learning_confidence is 0.6 - the lower bound for feedback requests."""
     assert DEFAULT_LEARNING_CONFIDENCE == 0.6
 
 
 def test_auto_label_confidence_default():
-    """Default auto_label_confidence is 0.9 — cycles above this are auto-labeled."""
+    """Default auto_label_confidence is 0.9 - cycles above this are auto-labeled."""
     assert DEFAULT_AUTO_LABEL_CONFIDENCE == 0.9
 
 

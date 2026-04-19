@@ -65,19 +65,20 @@
           "power_sensor": "เอนทิตีเซ็นเซอร์กำลัง",
           "min_power": "กำลังไฟขั้นต่ำ (W)",
           "off_delay": "ความล่าช้าในการสิ้นสุดรอบ (s)",
-          "notify_service": "บริการแจ้งเตือน (เช่น notify.mobile_app)",
           "notify_actions": "การดำเนินการแจ้งเตือน",
           "notify_people": "เลื่อนการจัดส่งจนกว่าคนเหล่านี้จะถึงบ้าน",
           "notify_only_when_home": "เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกจะถึงบ้าน",
           "notify_fire_events": "เปิดใช้งานเหตุการณ์ระบบอัตโนมัติ",
-          "notify_events": "เหตุการณ์ที่ต้องแจ้งให้ทราบ",
           "notify_before_end_minutes": "การแจ้งเตือนก่อนเสร็จสิ้น (นาทีก่อนสิ้นสุด)",
           "notify_title": "ชื่อการแจ้งเตือน",
           "notify_icon": "ไอคอนการแจ้งเตือน",
           "notify_start_message": "เริ่มรูปแบบข้อความ",
           "notify_finish_message": "เสร็จสิ้นรูปแบบข้อความ",
           "notify_pre_complete_message": "รูปแบบข้อความก่อนกรอก",
-          "show_advanced": "แก้ไขการตั้งค่าขั้นสูง (ขั้นตอนถัดไป)"
+          "show_advanced": "แก้ไขการตั้งค่าขั้นสูง (ขั้นตอนถัดไป)",
+          "notify_start_services": "เริ่มรอบ - เป้าหมายการแจ้งเตือน",
+          "notify_finish_services": "วงจรเสร็จสิ้น - เป้าหมายการแจ้งเตือน",
+          "notify_live_services": "ความคืบหน้าสด - เป้าหมายการแจ้งเตือน"
         },
         "data_description": {
           "apply_suggestions": "เลือกช่องนี้เพื่อคัดลอกค่าที่แนะนำโดยอัลกอริทึมการเรียนรู้ลงในแบบฟอร์ม ตรวจสอบก่อนบันทึก\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "เอนทิตีเซ็นเซอร์รายงานกำลังแบบเรียลไทม์ (เป็นวัตต์) คุณสามารถเปลี่ยนแปลงได้ตลอดเวลาโดยไม่สูญเสียข้อมูลในอดีต ซึ่งมีประโยชน์หากคุณเปลี่ยนปลั๊กอัจฉริยะ",
           "min_power": "การอ่านค่ากำลังไฟฟ้าที่สูงกว่าเกณฑ์นี้ (เป็นวัตต์) แสดงว่าเครื่องกำลังทำงานอยู่ เริ่มต้นด้วย 2W สำหรับอุปกรณ์ส่วนใหญ่",
           "off_delay": "วินาทีที่กำลังปรับให้เรียบจะต้องอยู่ต่ำกว่าเกณฑ์หยุดเพื่อทำเครื่องหมายว่าเสร็จสมบูรณ์ ค่าเริ่มต้น: 120 วินาที",
-          "notify_service": "Home Assistant แจ้งบริการให้ใช้งาน (ไม่บังคับ)",
           "notify_actions": "ลำดับการดำเนินการของ Home Assistant ที่เป็นตัวเลือกสำหรับการแจ้งเตือน (สคริปต์ การแจ้งเตือน TTS ฯลฯ) หากตั้งค่าไว้ การดำเนินการจะทำงานก่อนบริการสำรองจะแจ้ง",
           "notify_people": "เอนทิตีบุคคลที่ใช้สำหรับการตรวจสอบสถานะ เมื่อเปิดใช้งาน การส่งการแจ้งเตือนจะล่าช้าจนกว่าบุคคลที่เลือกอย่างน้อยหนึ่งคนจะถึงบ้าน",
           "notify_only_when_home": "หากเปิดใช้งาน ให้เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกอย่างน้อยหนึ่งคนจะถึงบ้าน",
           "notify_fire_events": "หากเปิดใช้งาน จะส่งสัญญาณเหตุการณ์ Home Assistant สำหรับการเริ่มและสิ้นสุดรอบ (ha_washdata_cycle_started และ ha_washdata_cycle_ended) เพื่อขับเคลื่อนระบบอัตโนมัติ",
-          "notify_events": "เหตุการณ์ใดที่จะส่งการแจ้งเตือน",
           "notify_before_end_minutes": "นาทีก่อนที่จะสิ้นสุดรอบโดยประมาณเพื่อทริกเกอร์การแจ้งเตือน ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 0",
           "notify_title": "ชื่อที่กำหนดเองสำหรับการแจ้งเตือน รองรับตัวยึดตำแหน่ง {device}",
           "notify_icon": "ไอคอนที่ใช้สำหรับการแจ้งเตือน (เช่น mdi:washing-machine) เว้นว่างไว้เพื่อส่งโดยไม่มีไอคอน",
           "notify_start_message": "ข้อความที่ส่งเมื่อรอบเริ่มต้น รองรับตัวยึดตำแหน่ง {device}",
           "notify_finish_message": "ข้อความที่ส่งเมื่อรอบสิ้นสุด รองรับตัวยึดตำแหน่ง {device}, {duration}, {program}",
-          "notify_pre_complete_message": "ข้อความที่ส่งไปก่อนที่จะเสร็จสิ้น รองรับตัวยึดตำแหน่ง {device}, {minutes}"
+          "notify_pre_complete_message": "ข้อความที่ส่งไปก่อนที่จะเสร็จสิ้น รองรับตัวยึดตำแหน่ง {device}, {minutes}",
+          "notify_start_services": "บริการแจ้งเตือนอย่างน้อยหนึ่งรายการเพื่อแจ้งเตือนเมื่อรอบเริ่มต้น เว้นว่างไว้เพื่อข้ามการแจ้งเตือนการเริ่มต้น",
+          "notify_finish_services": "บริการแจ้งเตือนอย่างน้อยหนึ่งบริการเพื่อแจ้งเตือนเมื่อรอบการสิ้นสุดหรือใกล้จะเสร็จสิ้น เว้นว่างไว้เพื่อข้ามการแจ้งเตือนให้เสร็จสิ้น",
+          "notify_live_services": "แจ้งบริการอย่างน้อยหนึ่งรายการเพื่อรับการอัปเดตความคืบหน้าสดในขณะที่วงจรดำเนินไป (เฉพาะแอปที่แสดงร่วมบนมือถือเท่านั้น) เว้นว่างไว้เพื่อข้ามการอัปเดตสด"
         }
       },
       "notifications": {
         "title": "การแจ้งเตือน",
         "description": "กำหนดค่าช่องทางการแจ้งเตือน เทมเพลต และการอัปเดตความคืบหน้าบนมือถือแบบสดที่เป็นตัวเลือก",
         "data": {
-          "notify_service": "บริการแจ้งเตือน (เช่น notify.mobile_app)",
           "notify_actions": "การดำเนินการแจ้งเตือน",
           "notify_people": "เลื่อนการจัดส่งจนกว่าคนเหล่านี้จะถึงบ้าน",
           "notify_only_when_home": "เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกจะถึงบ้าน",
           "notify_fire_events": "เปิดใช้งานเหตุการณ์ระบบอัตโนมัติ",
-          "notify_events": "เหตุการณ์ที่ต้องแจ้งให้ทราบ",
           "notify_before_end_minutes": "การแจ้งเตือนก่อนเสร็จสิ้น (นาทีก่อนสิ้นสุด)",
           "notify_live_interval_seconds": "ช่วงเวลาการอัปเดตสด (วินาที)",
           "notify_live_overrun_percent": "ค่าเผื่อการโอเวอร์รันการอัปเดตสด (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "ไอคอนการแจ้งเตือน",
           "notify_start_message": "เริ่มรูปแบบข้อความ",
           "notify_finish_message": "เสร็จสิ้นรูปแบบข้อความ",
-          "notify_pre_complete_message": "รูปแบบข้อความก่อนกรอก"
+          "notify_pre_complete_message": "รูปแบบข้อความก่อนกรอก",
+          "notify_start_services": "เริ่มรอบ - เป้าหมายการแจ้งเตือน",
+          "notify_finish_services": "วงจรเสร็จสิ้น - เป้าหมายการแจ้งเตือน",
+          "notify_live_services": "ความคืบหน้าสด - เป้าหมายการแจ้งเตือน",
+          "notify_live_chronometer": "เครื่องจับเวลาถอยหลังโครโนมิเตอร์",
+          "energy_price_entity": "ราคาพลังงาน - เอนทิตี (ไม่บังคับ)",
+          "energy_price_static": "ราคาพลังงาน - มูลค่าคงที่ (ไม่บังคับ)"
         },
         "data_description": {
-          "notify_service": "Home Assistant แจ้งบริการให้ใช้งาน (ไม่บังคับ)",
           "notify_actions": "ลำดับการดำเนินการของ Home Assistant ที่เป็นตัวเลือกสำหรับการแจ้งเตือน (สคริปต์ การแจ้งเตือน TTS ฯลฯ) หากตั้งค่าไว้ การดำเนินการจะทำงานก่อนบริการสำรองจะแจ้ง",
           "notify_people": "เอนทิตีบุคคลที่ใช้สำหรับการตรวจสอบสถานะ เมื่อเปิดใช้งาน การส่งการแจ้งเตือนจะล่าช้าจนกว่าบุคคลที่เลือกอย่างน้อยหนึ่งคนจะถึงบ้าน",
           "notify_only_when_home": "หากเปิดใช้งาน ให้เลื่อนการแจ้งเตือนจนกว่าบุคคลที่เลือกอย่างน้อยหนึ่งคนจะถึงบ้าน",
           "notify_fire_events": "หากเปิดใช้งาน จะส่งสัญญาณเหตุการณ์ Home Assistant สำหรับการเริ่มและสิ้นสุดรอบ (ha_washdata_cycle_started และ ha_washdata_cycle_ended) เพื่อขับเคลื่อนระบบอัตโนมัติ",
-          "notify_events": "เหตุการณ์ใดที่จะส่งการแจ้งเตือน",
           "notify_before_end_minutes": "นาทีก่อนที่จะสิ้นสุดรอบโดยประมาณเพื่อทริกเกอร์การแจ้งเตือน ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 0",
           "notify_live_interval_seconds": "ความถี่ในการส่งการอัปเดตความคืบหน้าขณะทำงาน ค่าที่ต่ำกว่าจะตอบสนองมากกว่าแต่ใช้การแจ้งเตือนมากกว่า บังคับใช้อย่างน้อย 30 วินาที - ค่าที่ต่ำกว่า 30 วินาทีจะถูกปัดเศษเป็น 30 วินาทีโดยอัตโนมัติ",
           "notify_live_overrun_percent": "อัตราความปลอดภัยที่สูงกว่าจำนวนการอัปเดตโดยประมาณสำหรับรอบที่ยาวนาน/เกินเวลา (เช่น 20% อนุญาตให้มีการอัปเดตโดยประมาณ 1.2 เท่า)",
@@ -132,7 +136,13 @@
           "notify_icon": "ไอคอนที่ใช้สำหรับการแจ้งเตือน (เช่น mdi:washing-machine) เว้นว่างไว้เพื่อส่งโดยไม่มีไอคอน",
           "notify_start_message": "ข้อความที่ส่งเมื่อรอบเริ่มต้น รองรับตัวยึดตำแหน่ง {device}",
           "notify_finish_message": "ข้อความที่ส่งเมื่อรอบสิ้นสุด รองรับตัวยึดตำแหน่ง {device}, {duration}, {program}",
-          "notify_pre_complete_message": "ข้อความที่ส่งไปก่อนที่จะเสร็จสิ้น รองรับตัวยึดตำแหน่ง {device}, {minutes}"
+          "notify_pre_complete_message": "ข้อความที่ส่งไปก่อนที่จะเสร็จสิ้น รองรับตัวยึดตำแหน่ง {device}, {minutes}",
+          "notify_start_services": "บริการแจ้งเตือนอย่างน้อยหนึ่งรายการเพื่อแจ้งเตือนเมื่อรอบเริ่มต้น (เช่น notify.mobile_app_my_phone) เว้นว่างไว้เพื่อข้ามการแจ้งเตือนการเริ่มต้น",
+          "notify_finish_services": "บริการแจ้งเตือนอย่างน้อยหนึ่งบริการเพื่อแจ้งเตือนเมื่อรอบการสิ้นสุดหรือใกล้จะเสร็จสิ้น เว้นว่างไว้เพื่อข้ามการแจ้งเตือนให้เสร็จสิ้น",
+          "notify_live_services": "แจ้งบริการอย่างน้อยหนึ่งรายการเพื่อรับการอัปเดตความคืบหน้าสดในขณะที่วงจรดำเนินไป (เฉพาะแอปที่แสดงร่วมบนมือถือเท่านั้น) เว้นว่างไว้เพื่อข้ามการอัปเดตสด",
+          "notify_live_chronometer": "เมื่อเปิดใช้งาน การอัปเดตแบบเรียลไทม์แต่ละครั้งจะมีการนับถอยหลังโครโนมิเตอร์จนถึงเวลาสิ้นสุดโดยประมาณ ตัวจับเวลาการแจ้งเตือนจะทำเครื่องหมายบนอุปกรณ์โดยอัตโนมัติระหว่างการอัปเดต (เฉพาะแอปที่ใช้ร่วมกับ Android เท่านั้น)",
+          "energy_price_entity": "เลือกเอนทิตีตัวเลขที่เก็บราคาไฟฟ้าปัจจุบัน (เช่น sensor.electricity_price, input_number.energy_rate) เมื่อตั้งค่าแล้ว ให้เปิดใช้งานตัวยึดตำแหน่ง {cost} มีความสำคัญมากกว่ามูลค่าคงที่หากมีการกำหนดค่าทั้งสองรายการ",
+          "energy_price_static": "ราคาไฟฟ้าคงที่ต่อกิโลวัตต์ชั่วโมง เมื่อตั้งค่าแล้ว ให้เปิดใช้งานตัวยึดตำแหน่ง {cost} ละเว้นหากมีการกำหนดค่าเอนทิตีด้านบน เพิ่มสัญลักษณ์สกุลเงินของคุณในเทมเพลตข้อความ เช่น {cost} €"
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "แบนด์วิธ DTW",
           "external_end_trigger_enabled": "เปิดใช้งานทริกเกอร์การสิ้นสุดรอบภายนอก",
           "external_end_trigger": "เซ็นเซอร์ปลายรอบภายนอก",
-          "external_end_trigger_inverted": "สลับลอจิกทริกเกอร์ (ทริกเกอร์เปิดปิด)"
+          "external_end_trigger_inverted": "สลับลอจิกทริกเกอร์ (ทริกเกอร์เปิดปิด)",
+          "suppress_feedback_notifications": "ระงับการแจ้งเตือนข้อเสนอแนะ",
+          "pump_stuck_duration": "เกณฑ์การแจ้งเตือนปั๊มติด (s) (เฉพาะปั๊ม)",
+          "door_sensor_entity": "เซ็นเซอร์ประตู",
+          "pause_cuts_power": "ตัดไฟเมื่อหยุดชั่วคราว",
+          "notify_unload_delay_minutes": "การแจ้งเตือนการรอซักรีดล่าช้า (นาที)"
         },
         "data_description": {
           "apply_suggestions": "เลือกช่องนี้เพื่อเปิดขั้นตอนการทบทวนค่าที่แนะนำจากอัลกอริทึมการเรียนรู้ ไม่มีสิ่งใดถูกบันทึกโดยอัตโนมัติ\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "การแปรปรวนของเวลาที่อนุญาตสูงสุด (การยืด) ตามอัตราส่วนของระยะเวลารอบ ค่าที่สูงกว่าช่วยให้สามารถจับคู่รอบที่แปรผันสูงได้ แต่จะเพิ่มต้นทุน CPU Default: 0.20 (20%).",
           "external_end_trigger_enabled": "เปิดใช้งานการตรวจสอบเซ็นเซอร์ไบนารีภายนอกเพื่อกระตุ้นให้รอบการทำงานเสร็จสมบูรณ์",
           "external_end_trigger": "เลือกเอนทิตีเซ็นเซอร์ไบนารี เมื่อเซ็นเซอร์นี้ทริกเกอร์ วงจรปัจจุบันจะสิ้นสุดด้วยสถานะ 'เสร็จสมบูรณ์'",
-          "external_end_trigger_inverted": "ตามค่าเริ่มต้น ทริกเกอร์จะเริ่มทำงานเมื่อเซ็นเซอร์เปิด เลือกช่องนี้เพื่อเริ่มทำงานเมื่อเซ็นเซอร์ปิดแทน"
+          "external_end_trigger_inverted": "ตามค่าเริ่มต้น ทริกเกอร์จะเริ่มทำงานเมื่อเซ็นเซอร์เปิด เลือกช่องนี้เพื่อเริ่มทำงานเมื่อเซ็นเซอร์ปิดแทน",
+          "suppress_feedback_notifications": "เมื่อเปิดใช้งาน WashData จะยังคงติดตามและขอคำติชมภายใน แต่จะไม่แสดงการแจ้งเตือนอย่างต่อเนื่องเพื่อขอให้คุณยืนยันรอบการทำงาน มีประโยชน์เมื่อตรวจพบรอบอย่างถูกต้องเสมอและคุณพบว่าข้อความแจ้งรบกวนสมาธิ",
+          "pump_stuck_duration": "หากรอบปั๊มยังคงทำงานอยู่หลังจากผ่านไปหลายวินาทีนี้ เหตุการณ์ ha_washdata_pump_stuck จะทำงานหนึ่งครั้ง ใช้สิ่งนี้เพื่อตรวจจับมอเตอร์ที่ติดขัด (การทำงานของปั๊มบ่อโดยทั่วไปคือต่ำกว่า 60 วินาที) ค่าเริ่มต้น: 1800 วินาที (30 นาที) ประเภทอุปกรณ์ปั๊มเท่านั้น",
+          "door_sensor_entity": "เซ็นเซอร์ไบนารี่เสริมสำหรับประตูเครื่องจักร (เปิด = เปิด, ปิด = ปิด) เมื่อประตูเปิดออกระหว่างโปรแกรมที่ใช้งานอยู่ WashData จะยืนยันโปรแกรมดังกล่าวว่าหยุดชั่วคราวโดยเจตนา หลังจากสิ้นสุดรอบ หากประตูยังคงปิดอยู่ สถานะจะเปลี่ยนเป็น 'ทำความสะอาด' จนกว่าประตูจะเปิด หมายเหตุ: การปิดประตูจะไม่กลับมาทำงานต่อโดยอัตโนมัติตามรอบที่หยุดชั่วคราว - การกลับมาทำงานต่อจะต้องถูกกระตุ้นด้วยตนเองผ่านปุ่ม ทำงานต่อรอบการทำงานหรือบริการ",
+          "pause_cuts_power": "เมื่อหยุดชั่วคราวผ่านปุ่มหยุดรอบชั่วคราวหรือบริการ ให้ปิดเอนทิตีสวิตช์ที่กำหนดค่าไว้ด้วย จะมีผลเฉพาะเมื่อมีการกำหนดค่าเอนทิตีสวิตช์สำหรับอุปกรณ์นี้",
+          "notify_unload_delay_minutes": "ส่งการแจ้งเตือนผ่านช่องทางแจ้งเตือนเมื่อสิ้นสุดรอบและไม่ได้เปิดประตูเป็นเวลาหลายนาที (ต้องใช้เซ็นเซอร์ประตู) ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 60 นาที"
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "ทริมวงจร — เลือกวงจร",
+        "title": "ทริมวงจร - เลือกวงจร",
         "description": "เลือกรอบที่จะตัดแต่ง ✓ = เสร็จสิ้น ⚠ = ดำเนินการต่อ ✗ = ถูกขัดจังหวะ",
         "data": {
           "cycle_id": "วงจร"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: การตั้งค่าที่แนะนำพร้อมแล้ว ({device})",
       "suggestions_ready_notification_message": "ขณะนี้เซ็นเซอร์ **การตั้งค่าที่แนะนำ** รายงานคำแนะนำที่สามารถดำเนินการได้ **{count}**\n\nหากต้องการตรวจสอบและนำไปใช้: **การตั้งค่า > อุปกรณ์และบริการ > WashData > กำหนดค่า > การตั้งค่าขั้นสูง > ใช้ค่าที่แนะนำ**\n\nคำแนะนำเป็นทางเลือกและแสดงให้ตรวจสอบก่อนบันทึก",
       "trim_range_invalid": "เริ่มต้นจะต้องมาก่อนสิ้นสุด โปรดปรับจุดตัดของคุณ",
-      "trim_failed": "ตัดแต่งล้มเหลว วงจรอาจไม่มีอยู่อีกต่อไปหรือหน้าต่างว่างเปล่า"
+      "trim_failed": "ตัดแต่งล้มเหลว วงจรอาจไม่มีอยู่อีกต่อไปหรือหน้าต่างว่างเปล่า",
+      "auto_tune_suggestion": "{device_type} {device_title} ตรวจพบวงจรโกสต์ การเปลี่ยนแปลง min_power ที่แนะนำ: {current_min}W -> {new_min}W (ไม่ได้ใช้โดยอัตโนมัติ)",
+      "auto_tune_title": "WashData ปรับอัตโนมัติ",
+      "auto_tune_fallback": "{device_type} {device_title} ตรวจพบวงจรโกสต์ การเปลี่ยนแปลง min_power ที่แนะนำ: {current_min}W -> {new_min}W (ไม่ได้ใช้โดยอัตโนมัติ)"
     },
     "abort": {
       "no_cycles_found": "ไม่พบรอบ",
@@ -999,7 +1022,8 @@
           "interrupted": "ขัดจังหวะ",
           "force_stopped": "บังคับหยุด",
           "rinse": "ล้าง",
-          "unknown": "ไม่ทราบ"
+          "unknown": "ไม่ทราบ",
+          "clean": "ทำความสะอาด"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "การตั้งค่าที่แนะนำ"
+      },
+      "pump_runs_today": {
+        "name": "ปั๊มรัน (24 ชั่วโมงล่าสุด)"
+      },
+      "cycle_count": {
+        "name": "จำนวนรอบ"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "บังคับให้สิ้นสุดวงจร"
+      },
+      "pause_cycle": {
+        "name": "หยุดวงจรชั่วคราว"
+      },
+      "resume_cycle": {
+        "name": "ดำเนินการต่อวงจร"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "ไม่พบรอบการทำงานหรือไม่มีข้อมูลกำลัง"
     },
     "trim_failed_empty_window": {
-      "message": "การตัดขอบล้มเหลว — ไม่พบรอบการทำงาน ไม่มีข้อมูลพลังงาน หรือหน้าต่างผลลัพธ์ว่างเปล่า"
+      "message": "การตัดขอบล้มเหลว - ไม่พบรอบการทำงาน ไม่มีข้อมูลพลังงาน หรือหน้าต่างผลลัพธ์ว่างเปล่า"
     },
     "trim_invalid_range": {
       "message": "trim_end_s ต้องมากกว่า trim_start_s"
+    },
+    "device_id_required": {
+      "message": "จำเป็นต้องมี device_id ที่ถูกต้อง"
     }
   }
 }

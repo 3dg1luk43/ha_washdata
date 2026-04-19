@@ -65,19 +65,20 @@
           "power_sensor": "Entitat del sensor de potència",
           "min_power": "Potència mínima (W)",
           "off_delay": "Retard de finalització de cicle (s)",
-          "notify_service": "Servei de notificacions (p. ex., notify.mobile_app)",
           "notify_actions": "Accions de notificació",
           "notify_people": "Endarrerir el lliurament fins que aquestes persones siguin a casa",
           "notify_only_when_home": "Retarda les notificacions fins que la persona seleccionada sigui a casa",
           "notify_fire_events": "Activar esdeveniments d'automatització",
-          "notify_events": "Esdeveniments a notificar",
           "notify_before_end_minutes": "Notificació prèvia a la finalització (minuts abans del final)",
           "notify_title": "Títol de la notificació",
           "notify_icon": "Icona de notificació",
           "notify_start_message": "Inicieu el format del missatge",
           "notify_finish_message": "Finalitza el format del missatge",
           "notify_pre_complete_message": "Format de missatge previ a la finalització",
-          "show_advanced": "Edita la configuració avançada (pas següent)"
+          "show_advanced": "Edita la configuració avançada (pas següent)",
+          "notify_start_services": "Inici del cicle - Objectius de notificació",
+          "notify_finish_services": "Finalització del cicle: objectius de notificació",
+          "notify_live_services": "Progrés en directe: objectius de notificació"
         },
         "data_description": {
           "apply_suggestions": "Marqueu aquesta casella per copiar els valors suggerits per l'algoritme d'aprenentatge al formulari. Revisa abans de desar.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "L'entitat sensora que informa de la potència en temps real (en watts). Podeu canviar-ho en qualsevol moment sense perdre les dades històriques; és útil si substituïu un connector intel·ligent.",
           "min_power": "Les lectures de potència per sobre d'aquest llindar (en watts) indiquen que l'aparell està en funcionament. Comenceu amb 2 W per a la majoria de dispositius.",
           "off_delay": "En segons, la potència suavitzada s'ha de mantenir per sota del llindar d'aturada per marcar la finalització. Per defecte: 120 s.",
-          "notify_service": "Servei de notificacions de Home Assistant per utilitzar (opcional).",
           "notify_actions": "Seqüència d'accions de Home Assistant opcional per executar-se per a les notificacions (scripts, notificació, TTS, etc.). Si s'estableix, les accions s'executen abans del servei de notificació alternativa.",
           "notify_people": "Entitats de persones que s'utilitzen per al control de presència. Quan està activat, l'entrega de notificacions es retarda fins que almenys una persona seleccionada és a casa.",
           "notify_only_when_home": "Si està activat, retarda les notificacions fins que almenys una persona seleccionada sigui a casa.",
           "notify_fire_events": "Si està activat, activa els esdeveniments de Home Assistant per a l'inici i el final del cicle (ha_washdata_cycle_started i ha_washdata_cycle_ended) per impulsar les automatitzacions.",
-          "notify_events": "Per quins esdeveniments enviar notificacions.",
           "notify_before_end_minutes": "Minuts abans del final estimat del cicle per activar una notificació. Establiu a 0 per desactivar. Per defecte: 0.",
           "notify_title": "Títol personalitzat per a les notificacions. Admet {device} marcador de posició.",
           "notify_icon": "Icona per utilitzar per a les notificacions (p. ex. mdi:washing-machine). Deixeu-lo en blanc per enviar sense icona.",
           "notify_start_message": "Missatge enviat quan comença un cicle. Admet {device} marcador de posició.",
           "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició."
+          "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició.",
+          "notify_start_services": "Un o més serveis de notificació per avisar quan comença un cicle. Deixa en blanc per saltar les notificacions d'inici.",
+          "notify_finish_services": "Un o més serveis de notificació per avisar quan un cicle acaba o s'apropa a la seva finalització. Deixa en blanc per saltar les notificacions de finalització.",
+          "notify_live_services": "Un o més serveis de notificació per rebre actualitzacions de progrés en directe mentre s'executa el cicle (només l'aplicació mòbil complementària). Deixeu el camp buit per saltar les actualitzacions en directe."
         }
       },
       "notifications": {
         "title": "Notificacions",
         "description": "Configura canals de notificació, plantilles i actualitzacions opcionals de progrés mòbils en directe.",
         "data": {
-          "notify_service": "Servei de notificacions (p. ex., notify.mobile_app)",
           "notify_actions": "Accions de notificació",
           "notify_people": "Endarrerir el lliurament fins que aquestes persones siguin a casa",
           "notify_only_when_home": "Retarda les notificacions fins que la persona seleccionada sigui a casa",
           "notify_fire_events": "Activar esdeveniments d'automatització",
-          "notify_events": "Esdeveniments a notificar",
           "notify_before_end_minutes": "Notificació prèvia a la finalització (minuts abans del final)",
           "notify_live_interval_seconds": "Interval d'actualització en directe (segons)",
           "notify_live_overrun_percent": "Marge de seguretat per a sobrecàrrega d'actualitzacions en directe (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "Icona de notificació",
           "notify_start_message": "Inicieu el format del missatge",
           "notify_finish_message": "Finalitza el format del missatge",
-          "notify_pre_complete_message": "Format de missatge previ a la finalització"
+          "notify_pre_complete_message": "Format de missatge previ a la finalització",
+          "notify_start_services": "Inici del cicle - Objectius de notificació",
+          "notify_finish_services": "Finalització del cicle: objectius de notificació",
+          "notify_live_services": "Progrés en directe: objectius de notificació",
+          "notify_live_chronometer": "Temporitzador de compte enrere del cronòmetre",
+          "energy_price_entity": "Preu de l'energia - Entitat (opcional)",
+          "energy_price_static": "Preu de l'energia: valor estàtic (opcional)"
         },
         "data_description": {
-          "notify_service": "Servei de notificacions de Home Assistant per utilitzar (opcional).",
           "notify_actions": "Seqüència d'accions de Home Assistant opcional per executar-se per a les notificacions (scripts, notificació, TTS, etc.). Si s'estableix, les accions s'executen abans del servei de notificació alternativa.",
           "notify_people": "Entitats de persones que s'utilitzen per al control de presència. Quan està activat, l'entrega de notificacions es retarda fins que almenys una persona seleccionada és a casa.",
           "notify_only_when_home": "Si està activat, retarda les notificacions fins que almenys una persona seleccionada sigui a casa.",
           "notify_fire_events": "Si està activat, activa els esdeveniments de Home Assistant per a l'inici i el final del cicle (ha_washdata_cycle_started i ha_washdata_cycle_ended) per impulsar les automatitzacions.",
-          "notify_events": "Per quins esdeveniments enviar notificacions.",
           "notify_before_end_minutes": "Minuts abans del final estimat del cicle per activar una notificació. Establiu a 0 per desactivar. Per defecte: 0.",
           "notify_live_interval_seconds": "Amb quina freqüència s'envien les actualitzacions de progrés mentre s'executen. Els valors més baixos són més sensibles, però consumeixen més notificacions. S'aplica un mínim de 30 segons: els valors inferiors a 30 s s'arrodoneixen automàticament a 30 s.",
           "notify_live_overrun_percent": "Marge de seguretat per sobre del recompte d'actualitzacions estimat per a cicles llargs/excedits (per exemple, el 20% permet actualitzacions 1,2 vegades estimades).",
@@ -132,7 +136,13 @@
           "notify_icon": "Icona per utilitzar per a les notificacions (p. ex. mdi:washing-machine). Deixeu-lo en blanc per enviar sense icona.",
           "notify_start_message": "Missatge enviat quan comença un cicle. Admet {device} marcador de posició.",
           "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició."
+          "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició.",
+          "notify_start_services": "Un o més serveis de notificació per avisar quan comença un cicle (p. ex., notify.mobile_app_my_phone). Deixa en blanc per saltar les notificacions d'inici.",
+          "notify_finish_services": "Un o més serveis de notificació per avisar quan un cicle acaba o s'apropa a la seva finalització. Deixa en blanc per saltar les notificacions de finalització.",
+          "notify_live_services": "Un o més serveis de notificació per rebre actualitzacions de progrés en directe mentre s'executa el cicle (només l'aplicació mòbil complementària). Deixeu el camp buit per saltar les actualitzacions en directe.",
+          "notify_live_chronometer": "Quan està activat, cada actualització en directe inclou un compte enrere del cronòmetre fins a l'hora d'acabament estimada. El temporitzador de notificacions s'activa automàticament al dispositiu entre les actualitzacions (només l'aplicació complementària d'Android).",
+          "energy_price_entity": "Seleccioneu una entitat numèrica que contingui el preu actual de l'electricitat (p. ex., sensor.electricity_price, input_number.energy_rate). Quan s'estableix, activa el marcador de posició {cost}. Té prioritat sobre el valor estàtic si tots dos estan configurats.",
+          "energy_price_static": "Preu fix de l'electricitat per kWh. Quan s'estableix, activa el marcador de posició {cost}. S'ignora si una entitat està configurada més amunt. Afegiu el vostre símbol de moneda a la plantilla del missatge, p. ex. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "Ample de banda DTW",
           "external_end_trigger_enabled": "Activa l'activador de final de cicle extern",
           "external_end_trigger": "Sensor de final de cicle extern",
-          "external_end_trigger_inverted": "Inverteix la lògica de l'activació (disparador desactivat)"
+          "external_end_trigger_inverted": "Inverteix la lògica de l'activació (disparador desactivat)",
+          "suppress_feedback_notifications": "Suprimeix les notificacions de comentaris",
+          "pump_stuck_duration": "Llindar (s) d'alerta de bomba bloquejada (només bomba)",
+          "door_sensor_entity": "Sensor de porta",
+          "pause_cuts_power": "Talleu l'alimentació quan feu una pausa",
+          "notify_unload_delay_minutes": "Retard de notificació d'espera de bugaderia (min)"
         },
         "data_description": {
           "apply_suggestions": "Marqueu aquesta casella per obrir un pas de revisió dels valors suggerits de l'algoritme d'aprenentatge. No es desa res automàticament.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Temps màxim permès deformació (estirament) com a relació de la durada del cicle. Els valors més alts permeten fer coincidir cicles molt variables, però augmenten el cost de la CPU. Per defecte: 0,20 (20%).",
           "external_end_trigger_enabled": "Habiliteu la supervisió d'un sensor binari extern per activar la finalització del cicle.",
           "external_end_trigger": "Seleccioneu una entitat de sensor binari. Quan aquest sensor s'activa, el cicle actual finalitzarà amb l'estat \"complet\".",
-          "external_end_trigger_inverted": "De manera predeterminada, el disparador s'activa quan el sensor s'activa. Marqueu aquesta casella per activar-se quan el sensor s'apagui."
+          "external_end_trigger_inverted": "De manera predeterminada, el disparador s'activa quan el sensor s'activa. Marqueu aquesta casella per activar-se quan el sensor s'apagui.",
+          "suppress_feedback_notifications": "Quan està activat, WashData seguirà fent un seguiment i sol·licitant comentaris internament, però no mostrarà notificacions persistents que us demanin que confirmeu els cicles. Útil quan els cicles sempre es detecten correctament i trobeu que les indicacions distreuen.",
+          "pump_stuck_duration": "Si un cicle de bomba encara s'està executant després d'aquests segons, s'activa un esdeveniment ha_washdata_pump_stuck. Utilitzeu-ho per detectar un motor encallat (el funcionament típic de la bomba de carter és inferior a 60 s). Per defecte: 1800 s (30 min). Només tipus de dispositiu de bomba.",
+          "door_sensor_entity": "Sensor binari opcional per a la porta de la màquina (encesa = oberta, apagada = tancada). Quan la porta s'obre durant un cicle actiu, WashData confirmarà el cicle com a pausa intencionada. Un cop finalitza el cicle, si la porta encara està tancada, l'estat canvia a \"Neteja\" fins que la porta s'obre. Nota: el tancament de la porta NO reprèn automàticament un cicle en pausa; el reinici s'ha d'activar manualment mitjançant el botó o el servei Reprèn el cicle.",
+          "pause_cuts_power": "Quan feu una pausa mitjançant el botó o el servei de pausa del cicle, també desactiveu l'entitat de commutació configurada. Només té efecte si es configura una entitat de commutació per a aquest dispositiu.",
+          "notify_unload_delay_minutes": "Envieu una notificació a través del canal de notificació d'acabament un cop finalitzi el cicle i la porta no s'hagi obert durant tants minuts (requereix el sensor de la porta). Establiu a 0 per desactivar. Per defecte: 60 min."
         }
       },
       "diagnostics": {
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: configuracions suggerides a punt ({device})",
       "suggestions_ready_notification_message": "El sensor de **Configuració suggerida** ara informa de **{count}** recomanacions accionables.\n\nPer revisar-los i aplicar-los: **Configuració > Dispositius i serveis > WashData > Configura > Configuració avançada > Aplica els valors suggerits**.\n\nEls suggeriments són opcionals i es mostren per revisar-los abans de desar-los.",
       "trim_range_invalid": "L'inici ha de ser abans del final. Ajusteu els vostres punts de retallat.",
-      "trim_failed": "Ha fallat el retall. És possible que el cicle ja no existeixi o que la finestra estigui buida."
+      "trim_failed": "Ha fallat el retall. És possible que el cicle ja no existeixi o que la finestra estigui buida.",
+      "auto_tune_suggestion": "{device_type} {device_title} han detectat cicles fantasmes. Canvi de min_power suggerit: {current_min}W -> {new_min}W (no s'aplica automàticament).",
+      "auto_tune_title": "Sintonització automàtica de WashData",
+      "auto_tune_fallback": "{device_type} {device_title} han detectat cicles fantasmes. Canvi de min_power suggerit: {current_min}W -> {new_min}W (no s'aplica automàticament)."
     },
     "abort": {
       "no_cycles_found": "No s'han trobat cicles",
@@ -999,7 +1022,8 @@
           "interrupted": "Interromput",
           "force_stopped": "Força aturada",
           "rinse": "Esbandida",
-          "unknown": "Desconegut"
+          "unknown": "Desconegut",
+          "clean": "Neteja"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Configuració suggerida"
+      },
+      "pump_runs_today": {
+        "name": "Funcionament de la bomba (últimes 24 h)"
+      },
+      "cycle_count": {
+        "name": "Recompte de cicles"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Força final de cicle"
+      },
+      "pause_cycle": {
+        "name": "Cicle de pausa"
+      },
+      "resume_cycle": {
+        "name": "Reprendre el cicle"
       }
     }
   },
@@ -1078,6 +1114,9 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s ha de ser més gran que trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Cal un device_id vàlid."
     }
   }
 }

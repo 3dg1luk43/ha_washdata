@@ -463,7 +463,7 @@ def test_dishwasher_unmatched_end_spike_caps_off_delay_at_1800s(mock_callbacks):
         t += 30
 
     # Pump-out spike: high reading → _end_spike_seen = True.
-    # long_ending_tail is True, so the spike is terminal — stays in ENDING.
+    # long_ending_tail is True, so the spike is terminal - stays in ENDING.
     detector.process_reading(50.0, dt(t))
     t += 30
     assert detector._end_spike_seen, "Pump-out spike should set _end_spike_seen"
@@ -489,7 +489,7 @@ def test_dishwasher_unmatched_end_spike_caps_off_delay_at_1800s(mock_callbacks):
 def test_dishwasher_no_spike_uses_full_off_delay(mock_callbacks):
     """Fix B guard: without an end spike, the full effective_off_delay (3600 s) is used.
 
-    At 1800 s of continuous low-power silence — with no end spike — the cycle must
+    At 1800 s of continuous low-power silence - with no end spike - the cycle must
     NOT yet be finished (it still needs the remaining 1800 s to reach 3600 s).
     """
     config = CycleDetectorConfig(

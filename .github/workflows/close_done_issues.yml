@@ -56,17 +56,17 @@ jobs:
 
               const lastComment = allComments[allComments.length - 1];
               if (lastComment.user.login !== OWNER_LOGIN) {
-                console.log(`#${issue.number}: last comment is from @${lastComment.user.login}, not owner — skipping.`);
+                console.log(`#${issue.number}: last comment is from @${lastComment.user.login}, not owner - skipping.`);
                 continue;
               }
 
-              console.log(`#${issue.number}: closing — labeled "done", inactive for ${INACTIVITY_DAYS}+ days, owner's comment is last.`);
+              console.log(`#${issue.number}: closing - labeled "done", inactive for ${INACTIVITY_DAYS}+ days, owner's comment is last.`);
 
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue.number,
-                body: `Closing this issue due to ${INACTIVITY_DAYS} days of inactivity after it was marked **done**.\n\nIf the problem still persists, please reopen the issue (or create a new one) and assign **@${OWNER_LOGIN}** — I'll take another look. 🙏`,
+                body: `Closing this issue due to ${INACTIVITY_DAYS} days of inactivity after it was marked **done**.\n\nIf the problem still persists, please reopen the issue (or create a new one) and assign **@${OWNER_LOGIN}** - I'll take another look. 🙏`,
               });
 
               await github.rest.issues.update({

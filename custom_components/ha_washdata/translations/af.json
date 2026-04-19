@@ -65,50 +65,50 @@
           "power_sensor": "Kragsensor-entiteit",
           "min_power": "Minimum krag (W)",
           "off_delay": "Siklus eindvertraging (s)",
-          "notify_service": "Kennisgewingdiens (bv. notify.mobile_app)",
           "notify_actions": "Kennisgewingsaksies",
           "notify_people": "Vertraag aflewering totdat hierdie mense tuis is",
           "notify_only_when_home": "Vertraag kennisgewings totdat gekose persoon tuis is",
           "notify_fire_events": "Aktiveer outomatiseringsgebeure",
-          "notify_events": "Gebeurtenisse om in kennis te stel",
           "notify_before_end_minutes": "Voorafhandelingkennisgewing (minute voor einde)",
           "notify_title": "Kennisgewing titel",
           "notify_icon": "Kennisgewing-ikoon",
           "notify_start_message": "Begin Boodskapformaat",
           "notify_finish_message": "Voltooi Boodskapformaat",
           "notify_pre_complete_message": "Pre-voltooiing Boodskap Formaat",
-          "show_advanced": "Wysig Gevorderde Instellings (Volgende Stap)"
+          "show_advanced": "Wysig Gevorderde Instellings (Volgende Stap)",
+          "notify_start_services": "Siklusbegin - Kennisgewingteikens",
+          "notify_finish_services": "Siklus Voltooi - Kennisgewing teikens",
+          "notify_live_services": "Regstreekse vordering - Kennisgewingteikens"
         },
         "data_description": {
           "apply_suggestions": "Merk hierdie blokkie om waardes voorgestel deur die leeralgoritme in die vorm te kopieer. Hersien voordat u dit stoor.\n\nVoorgestelde (vanaf leer):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Kies die tipe toestel (wasmasjien, droër, skottelgoedwasser, koffiemasjien, EV). Hierdie merker word saam met elke siklus gestoor vir beter organisasie.",
-          "power_sensor": "Die sensor-entiteit rapporteer intydse krag (in watt). Jy kan dit enige tyd verander sonder om historiese data te verloor—nuttig as jy 'n slimprop vervang.",
+          "power_sensor": "Die sensor-entiteit rapporteer intydse krag (in watt). Jy kan dit enige tyd verander sonder om historiese data te verloor-nuttig as jy 'n slimprop vervang.",
           "min_power": "Kraglesings bo hierdie drempel (in watt) dui aan dat die toestel aan die gang is. Begin met 2W vir die meeste toestelle.",
           "off_delay": "Sekondes moet die gladde krag onder die stopdrempel bly om voltooiing te merk. Verstek: 120s.",
-          "notify_service": "Huisassistent stel diens in kennis om te gebruik (opsioneel).",
           "notify_actions": "Opsionele Home Assistant-aksievolgorde om vir kennisgewings uit te voer (skrifte, kennisgewing, TTS, ens.). Indien gestel, loop aksies voor terugvaldiens in kennis stel.",
           "notify_people": "Mense-entiteite wat vir teenwoordigheidhek gebruik word. Wanneer dit geaktiveer is, word kennisgewingaflewering vertraag totdat ten minste een geselekteerde persoon tuis is.",
           "notify_only_when_home": "Indien geaktiveer, stel kennisgewings uit totdat ten minste een geselekteerde persoon tuis is.",
           "notify_fire_events": "Indien geaktiveer, vuur Home Assistant-gebeurtenisse vir siklusbegin en -einde (ha_washdata_cycle_started en ha_washdata_cycle_ended) af om outomatisering aan te dryf.",
-          "notify_events": "Vir watter geleenthede om kennisgewings te stuur.",
           "notify_before_end_minutes": "Minute voor die geskatte einde van die siklus om 'n kennisgewing te aktiveer. Stel op 0 om te deaktiveer. Verstek: 0.",
           "notify_title": "Gepasmaakte titel vir kennisgewings. Ondersteun {device} plekhouer.",
           "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om sonder ikoon te stuur.",
           "notify_start_message": "Boodskap gestuur wanneer 'n siklus begin. Ondersteun {device} plekhouer.",
           "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program} plekhouers.",
-          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers."
+          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers.",
+          "notify_start_services": "Een of meer stel dienste in kennis om te waarsku wanneer 'n siklus begin. Laat leeg om beginkennisgewings oor te slaan.",
+          "notify_finish_services": "Een of meer stel dienste in kennis om te waarsku wanneer 'n siklus eindig of naby voltooiing is. Laat leeg om afwerkingkennisgewings oor te slaan.",
+          "notify_live_services": "Een of meer stel dienste in kennis om regstreekse vorderingopdaterings te ontvang terwyl die siklus loop (slegs mobiele metgesel-toepassing). Laat leeg om regstreekse opdaterings oor te slaan."
         }
       },
       "notifications": {
         "title": "Kennisgewings",
         "description": "Stel kennisgewingskanale, sjablone en opsionele regstreekse mobiele vorderingopdaterings op.",
         "data": {
-          "notify_service": "Kennisgewingdiens (bv. notify.mobile_app)",
           "notify_actions": "Kennisgewingsaksies",
           "notify_people": "Vertraag aflewering totdat hierdie mense tuis is",
           "notify_only_when_home": "Vertraag kennisgewings totdat gekose persoon tuis is",
           "notify_fire_events": "Aktiveer outomatiseringsgebeure",
-          "notify_events": "Gebeurtenisse om in kennis te stel",
           "notify_before_end_minutes": "Voorafhandelingkennisgewing (minute voor einde)",
           "notify_live_interval_seconds": "Regstreekse opdateringsinterval (sekondes)",
           "notify_live_overrun_percent": "Regstreekse opdatering oorskry toelae (%)",
@@ -116,23 +116,33 @@
           "notify_icon": "Kennisgewing-ikoon",
           "notify_start_message": "Begin Boodskapformaat",
           "notify_finish_message": "Voltooi Boodskapformaat",
-          "notify_pre_complete_message": "Pre-voltooiing Boodskap Formaat"
+          "notify_pre_complete_message": "Pre-voltooiing Boodskap Formaat",
+          "notify_start_services": "Siklusbegin - Kennisgewingsteikens",
+          "notify_finish_services": "Siklus Voltooi - Kennisgewing teikens",
+          "notify_live_services": "Regstreekse vordering - Kennisgewingteikens",
+          "notify_live_chronometer": "Chronometer Countdown Timer",
+          "energy_price_entity": "Energieprys – Entiteit (opsioneel)",
+          "energy_price_static": "Energieprys – Statiese waarde (opsioneel)"
         },
         "data_description": {
-          "notify_service": "Huisassistent stel diens in kennis om te gebruik (opsioneel).",
           "notify_actions": "Opsionele Home Assistant-aksievolgorde om vir kennisgewings uit te voer (skrifte, kennisgewing, TTS, ens.). Indien gestel, loop aksies voor terugvaldiens in kennis stel.",
           "notify_people": "Mense-entiteite wat vir teenwoordigheidhek gebruik word. Wanneer dit geaktiveer is, word kennisgewingaflewering vertraag totdat ten minste een geselekteerde persoon tuis is.",
           "notify_only_when_home": "Indien geaktiveer, stel kennisgewings uit totdat ten minste een geselekteerde persoon tuis is.",
           "notify_fire_events": "Indien geaktiveer, vuur Home Assistant-gebeurtenisse vir siklusbegin en -einde (ha_washdata_cycle_started en ha_washdata_cycle_ended) af om outomatisering aan te dryf.",
-          "notify_events": "Vir watter geleenthede om kennisgewings te stuur.",
           "notify_before_end_minutes": "Minute voor die geskatte einde van die siklus om 'n kennisgewing te aktiveer. Stel op 0 om te deaktiveer. Verstek: 0.",
-          "notify_live_interval_seconds": "Hoe gereeld vorderingsopdaterings gestuur word terwyl dit loop. Laer waardes reageer meer, maar verbruik meer kennisgewings. 'n Minimum van 30 sekondes word afgedwing — waardes onder 30 s word outomaties na 30 s afgerond.",
+          "notify_live_interval_seconds": "Hoe gereeld vorderingsopdaterings gestuur word terwyl dit loop. Laer waardes reageer meer, maar verbruik meer kennisgewings. 'n Minimum van 30 sekondes word afgedwing - waardes onder 30 s word outomaties na 30 s afgerond.",
           "notify_live_overrun_percent": "Veiligheidsmarge bo die beraamde opdateringtelling vir lang/oorlopende siklusse (byvoorbeeld 20% laat 1,2x beraamde opdaterings toe).",
           "notify_title": "Gepasmaakte titel vir kennisgewings. Ondersteun {device} plekhouer.",
           "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om sonder ikoon te stuur.",
           "notify_start_message": "Boodskap gestuur wanneer 'n siklus begin. Ondersteun {device} plekhouer.",
           "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program} plekhouers.",
-          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers."
+          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers.",
+          "notify_start_services": "Een of meer stel dienste in kennis om te waarsku wanneer 'n siklus begin (bv. notify.mobile_app_my_phone). Laat leeg om beginkennisgewings oor te slaan.",
+          "notify_finish_services": "Een of meer stel dienste in kennis om te waarsku wanneer 'n siklus eindig of naby voltooiing is. Laat leeg om afwerkingkennisgewings oor te slaan.",
+          "notify_live_services": "Een of meer stel dienste in kennis om regstreekse vorderingopdaterings te ontvang terwyl die siklus loop (slegs mobiele metgesel-toepassing). Laat leeg om regstreekse opdaterings oor te slaan.",
+          "notify_live_chronometer": "Wanneer dit geaktiveer is, bevat elke regstreekse opdatering 'n chronometer-aftelling na die geskatte eindtyd. Die kennisgewingtydteller tik outomaties af op die toestel tussen opdaterings (slegs Android-metgeseltoepassing).",
+          "energy_price_entity": "Kies 'n numeriese entiteit wat die huidige elektrisiteitsprys hou (bv. sensor.electricity_price, input_number.energy_rate). As dit gestel is, aktiveer die {cost} plekhouer. Kry voorrang bo die statiese waarde as albei gekonfigureer is.",
+          "energy_price_static": "Vaste elektrisiteitsprys per kWh. As dit gestel is, aktiveer die {cost} plekhouer. Ignoreer as 'n entiteit hierbo gekonfigureer is. Voeg jou geldeenheid simbool in die boodskap sjabloon, bv. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "DTW-bandwydte",
           "external_end_trigger_enabled": "Aktiveer eksterne siklus-eindsneller",
           "external_end_trigger": "Eksterne siklus-eindsensor",
-          "external_end_trigger_inverted": "Keer snellerlogika om (sneller aan AF)"
+          "external_end_trigger_inverted": "Keer snellerlogika om (sneller aan AF)",
+          "suppress_feedback_notifications": "Onderdruk terugvoerkennisgewings",
+          "pump_stuck_duration": "Pomp vas waarskuwingsdrempel(s) (slegs pomp)",
+          "door_sensor_entity": "Deursensor",
+          "pause_cuts_power": "Sny krag tydens pouse",
+          "notify_unload_delay_minutes": "Wasgoedwagkennisgewingvertraging (min.)"
         },
         "data_description": {
           "apply_suggestions": "Merk hierdie blokkie om 'n hersieningstap oop te maak vir voorgestelde waardes van die leeralgoritme. Niks word outomaties gestoor nie.\n\nVoorgestelde (vanaf leer):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Maksimum toegelate tydstrekking (strek) as 'n verhouding van siklusduur. Hoër waardes laat bypassende hoogs veranderlike siklusse toe, maar verhoog SVE-koste. Verstek: 0,20 (20%).",
           "external_end_trigger_enabled": "Aktiveer monitering van 'n eksterne binêre sensor om siklusvoltooiing te aktiveer.",
           "external_end_trigger": "Kies 'n binêre sensor-entiteit. Wanneer hierdie sensor aktiveer, sal die huidige siklus eindig met status 'voltooid'.",
-          "external_end_trigger_inverted": "Die sneller brand by verstek wanneer die sensor AAN skakel. Merk hierdie blokkie om te brand wanneer die sensor eerder AF skakel."
+          "external_end_trigger_inverted": "Die sneller brand by verstek wanneer die sensor AAN skakel. Merk hierdie blokkie om te brand wanneer die sensor eerder AF skakel.",
+          "suppress_feedback_notifications": "Wanneer dit geaktiveer is, sal WashData steeds intern terugvoer naspoor en versoek, maar sal nie aanhoudende kennisgewings wys wat jou vra om siklusse te bevestig nie. Nuttig wanneer siklusse altyd korrek opgespoor word en jy vind die opdragte steurend.",
+          "pump_stuck_duration": "As 'n pompsiklus na soveel sekondes steeds aan die gang is, word 'n ha_washdata_pump_stuck-gebeurtenis een keer afgevuur. Gebruik dit om 'n motor wat vasgesteek is op te spoor (tipiese sumppomploop is minder as 60 s). Verstek: 1800 s (30 min.). Slegs tipe pomptoestel.",
+          "door_sensor_entity": "Opsionele binêre sensor vir die masjiendeur (aan = oop, af = toe). Wanneer die deur oopmaak tydens 'n aktiewe siklus, sal WashData die siklus bevestig as opsetlik onderbreek. Nadat die siklus geëindig het, as die deur nog gesluit is, verander die toestand na 'Skoon' totdat die deur oopgemaak word. Let wel: die sluiting van die deur hervat NIE 'n onderbreekte siklus outomaties nie - hervat moet handmatig geaktiveer word via die Hervat siklus-knoppie of diens.",
+          "pause_cuts_power": "Skakel ook die gekonfigureerde skakelaar-entiteit af wanneer jy met die Pouse-siklus-knoppie of diens onderbreek. Tree slegs in werking as 'n skakelaar-entiteit vir hierdie toestel opgestel is.",
+          "notify_unload_delay_minutes": "Stuur 'n kennisgewing via die afwerkingkennisgewingkanaal nadat die siklus geëindig het en die deur vir soveel minute nie oopgemaak is nie (vereis deursensor). Stel op 0 om te deaktiveer. Verstek: 60 min."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Snoei Siklus — Kies Siklus",
+        "title": "Snoei Siklus - Kies Siklus",
         "description": "Kies 'n siklus om te snoei. ✓ = voltooi, ⚠ = hervat, ✗ = onderbreek",
         "data": {
           "cycle_id": "Siklus"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: Voorgestelde instellings gereed ({device})",
       "suggestions_ready_notification_message": "Die **Voorgestelde instellings**-sensor rapporteer nou **{count}** uitvoerbare aanbevelings.\n\nOm dit te hersien en toe te pas: **Instellings > Toestelle en Dienste > Wasdata > Konfigureer > Gevorderde instellings > Pas voorgestelde waardes toe**.\n\nVoorstelle is opsioneel en gewys vir hersiening voordat jy stoor.",
       "trim_range_invalid": "Begin moet voor einde wees. Pas asseblief jou snoeipunte aan.",
-      "trim_failed": "Sny het misluk. Die siklus bestaan ​​dalk nie meer nie of die venster is leeg."
+      "trim_failed": "Sny het misluk. Die siklus bestaan ​​dalk nie meer nie of die venster is leeg.",
+      "auto_tune_suggestion": "{device_type} {device_title} het spooksiklusse bespeur. Voorgestelde min_kragverandering: {current_min}W -> {new_min}W (nie outomaties toegepas nie).",
+      "auto_tune_title": "WashData Outo-Tune",
+      "auto_tune_fallback": "{device_type} {device_title} het spooksiklusse bespeur. Voorgestelde min_kragverandering: {current_min}W -> {new_min}W (nie outomaties toegepas nie)."
     },
     "abort": {
       "no_cycles_found": "Geen siklusse gevind nie",
@@ -999,7 +1022,8 @@
           "interrupted": "Onderbreek",
           "force_stopped": "Geforseer gestop",
           "rinse": "Spoel af",
-          "unknown": "Onbekend"
+          "unknown": "Onbekend",
+          "clean": "Skoon"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Voorgestelde instellings"
+      },
+      "pump_runs_today": {
+        "name": "Pomp loop (laaste 24 uur)"
+      },
+      "cycle_count": {
+        "name": "Siklus telling"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Forseer eindsiklus"
+      },
+      "pause_cycle": {
+        "name": "Onderbreek siklus"
+      },
+      "resume_cycle": {
+        "name": "Hervat siklus"
       }
     }
   },
@@ -1078,6 +1114,9 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s moet groter as trim_start_s wees."
+    },
+    "device_id_required": {
+      "message": "'n Geldige toestel-ID word vereis."
     }
   }
 }

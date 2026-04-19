@@ -58,7 +58,7 @@ Describe the breaking change and how to migrate...
 - [ ] I've updated documentation (README, CHANGELOG, etc. if applicable)
 - [ ] I've checked that `python3 -m compileall custom_components tests` passes
 - [ ] I've run `./run_tests.sh` and all tests pass
-- [ ] **No hardcoded UI strings** — all user-facing text is in `strings.json` and `translations/`
+- [ ] **No hardcoded UI strings** - all user-facing text is in `strings.json` and `translations/`
 - [ ] I've reviewed my own code for quality
 - [ ] I've synced with upstream: `git fetch upstream && git rebase upstream/main`
 

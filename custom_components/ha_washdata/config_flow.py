@@ -866,7 +866,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 else None
             )
             if val is None:
-                return "—"
+                return "-"
             try:
                 return str(int(val)) if float(val).is_integer() else f"{float(val):.2f}"
             except Exception:  # pylint: disable=broad-exception-caught
@@ -2431,7 +2431,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             f"<rect x='{plot_left}' y='{plot_top}' width='{plot_width}' height='{plot_height}' fill='#111111' stroke='#444' stroke-width='2' rx='8'/>",
         ]
 
-        # Adaptive time grid — vertical lines drawn first so they sit behind everything.
+        # Adaptive time grid - vertical lines drawn first so they sit behind everything.
         total_min = int(max_time / 60)
         grid_interval = pick_grid_interval(total_min)
         grid_ticks_min = list(range(0, total_min + 1, grid_interval))
@@ -2812,7 +2812,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             action = user_input.get("action")
             if action == "name_phases" and detected:
                 return await self.async_step_assign_profile_phases_auto_detect_name()
-            # "cancel" or no phases found — go back without changes.
+            # "cancel" or no phases found - go back without changes.
             return await self.async_step_assign_profile_phases()
 
         svg_labels = {
@@ -4721,7 +4721,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 else "⚠" if status == "resumed"
                 else "✗"
             )
-            label = f"[{status_icon}] {start} — {duration_min}m — {prof}"
+            label = f"[{status_icon}] {start} - {duration_min}m - {prof}"
             options.append(selector.SelectOptionDict(value=c["id"], label=label))
 
         if not options:
@@ -4816,7 +4816,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         kept_sec = int(kept_s % 60)
         kept_suffix = await self._options_text("trim_cycle_preview_kept_suffix", "kept")
         summary = (
-            f"{start_min}:{start_sec:02d} — {end_min}:{end_sec:02d}"
+            f"{start_min}:{start_sec:02d} - {end_min}:{end_sec:02d}"
             f"  ({kept_min}:{kept_sec:02d} {kept_suffix})"
         )
 

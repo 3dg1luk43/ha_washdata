@@ -76,9 +76,9 @@
           "notify_people": "Delay Delivery Until These People Are Home",
           "notify_only_when_home": "Delay Notifications Until Selected Person Is Home",
           "notify_fire_events": "Fire Automation Events",
-          "notify_start_services": "Cycle Start — Notification Targets",
-          "notify_finish_services": "Cycle Finish — Notification Targets",
-          "notify_live_services": "Live Progress — Notification Targets",
+          "notify_start_services": "Cycle Start - Notification Targets",
+          "notify_finish_services": "Cycle Finish - Notification Targets",
+          "notify_live_services": "Live Progress - Notification Targets",
           "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
           "notify_title": "Notification Title",
           "notify_icon": "Notification Icon",
@@ -90,7 +90,7 @@
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Select the type of appliance (Washing Machine, Dryer, Dishwasher, Coffee Machine, EV, Bread Maker, Pump). This tag is stored with each cycle for better organization.",
-          "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data—useful if you replace a smart plug.",
+          "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data-useful if you replace a smart plug.",
           "min_power": "Power readings above this threshold (in watts) indicate the appliance is running. Start with 2W for most devices.",
           "off_delay": "Seconds the smoothed power must stay below the stop threshold to mark completion. Default: 120s.",
           "notify_actions": "Optional Home Assistant action sequence to run for notifications (scripts, notify, TTS, etc.). If set, actions run before per-event service targets.",
@@ -116,9 +116,9 @@
           "notify_people": "Delay Delivery Until These People Are Home",
           "notify_only_when_home": "Delay Notifications Until Selected Person Is Home",
           "notify_fire_events": "Fire Automation Events",
-          "notify_start_services": "Cycle Start — Notification Targets",
-          "notify_finish_services": "Cycle Finish — Notification Targets",
-          "notify_live_services": "Live Progress — Notification Targets",
+          "notify_start_services": "Cycle Start - Notification Targets",
+          "notify_finish_services": "Cycle Finish - Notification Targets",
+          "notify_live_services": "Live Progress - Notification Targets",
           "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
           "notify_live_interval_seconds": "Live Update Interval (seconds)",
           "notify_live_overrun_percent": "Live Update Overrun Allowance (%)",
@@ -128,8 +128,8 @@
           "notify_start_message": "Start Message Format",
           "notify_finish_message": "Finish Message Format",
           "notify_pre_complete_message": "Pre-Completion Message Format",
-          "energy_price_entity": "Energy Price — Entity (optional)",
-          "energy_price_static": "Energy Price — Static value (optional)"
+          "energy_price_entity": "Energy Price - Entity (optional)",
+          "energy_price_static": "Energy Price - Static value (optional)"
         },
         "data_description": {
           "notify_actions": "Optional Home Assistant action sequence to run for every notification event (scripts, notify, TTS, etc.). Actions fire before the per-event service targets.",
@@ -140,7 +140,7 @@
           "notify_finish_services": "One or more notify services to alert when a cycle finishes or nears completion. Leave empty to skip finish notifications.",
           "notify_live_services": "One or more notify services to receive live progress updates while the cycle runs (mobile companion app only). Leave empty to skip live updates.",
           "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
-          "notify_live_interval_seconds": "How often progress updates are sent while running. Lower values are more responsive but consume more notifications. A minimum of 30 seconds is enforced — values below 30 s are automatically rounded up to 30 s.",
+          "notify_live_interval_seconds": "How often progress updates are sent while running. Lower values are more responsive but consume more notifications. A minimum of 30 seconds is enforced - values below 30 s are automatically rounded up to 30 s.",
           "notify_live_overrun_percent": "Safety margin above the estimated update count for long/overrunning cycles (for example 20% allows 1.2x estimated updates).",
           "notify_live_chronometer": "When enabled, each live update includes a chronometer countdown to the estimated finish time. The notification timer ticks down automatically on the device between updates (Android companion app only).",
           "notify_title": "Custom title for notifications. Supports {device} placeholder.",
@@ -253,7 +253,7 @@
           "external_end_trigger": "Select a binary sensor entity. When this sensor triggers, the current cycle will end with status 'completed'.",
           "external_end_trigger_inverted": "By default, the trigger fires when the sensor turns ON. Check this box to fire when the sensor turns OFF instead.",
           "pump_stuck_duration": "If a pump cycle is still running after this many seconds, a ha_washdata_pump_stuck event is fired once. Use this to detect a jammed motor (typical sump pump run is under 60 s). Default: 1800 s (30 min). Pump device type only.",
-          "door_sensor_entity": "Optional binary sensor for the machine door (on = open, off = closed). When the door opens during an active cycle, WashData will confirm the cycle as intentionally paused. After the cycle ends, if the door is still closed, the state changes to 'Clean' until the door is opened. Note: closing the door does NOT auto-resume a paused cycle — resume must be triggered manually via the Resume Cycle button or service.",
+          "door_sensor_entity": "Optional binary sensor for the machine door (on = open, off = closed). When the door opens during an active cycle, WashData will confirm the cycle as intentionally paused. After the cycle ends, if the door is still closed, the state changes to 'Clean' until the door is opened. Note: closing the door does NOT auto-resume a paused cycle - resume must be triggered manually via the Resume Cycle button or service.",
           "pause_cuts_power": "When pausing via the Pause Cycle button or service, also turn off the configured switch entity. Only takes effect if a switch entity is configured for this device.",
           "notify_unload_delay_minutes": "Send a notification via the finish notification channel after the cycle ends and the door has not been opened for this many minutes (requires Door Sensor). Set to 0 to disable. Default: 60 min."
         }
@@ -395,7 +395,7 @@
       },
       "create_profile": {
         "title": "Create New Profile",
-        "description": "Create a new profile manually or from a past cycle.\n\nProfile name examples: 'Cotton 40°C', 'Eco', 'Quick Wash', 'Cotton + Cupboard Dry'.\n\n**What the matcher uses:** power-consumption shape, total cycle duration, and total energy. It does not read temperature or spin settings directly.\n\n**Profiles that will be reliably auto-detected:** programs with clearly different durations or power patterns — e.g. a 20-minute Quick Wash vs a 3-hour Cotton cycle, or a wash-only cycle vs a wash+dry combo (which typically runs 2-3× longer).\n\n**Profiles that may need manual selection:** variants of the same program that differ only in temperature or spin speed (e.g. Cotton 40°C vs Cotton 60°C) often produce similar power shapes. The system will still attempt to distinguish them and learn from your corrections over time, but expect to confirm matches manually at first.\n\n**Washer-dryer tip:** create separate profiles for wash-only and wash+dry runs — the duration and energy difference is large enough for reliable auto-detection.",
+        "description": "Create a new profile manually or from a past cycle.\n\nProfile name examples: 'Cotton 40°C', 'Eco', 'Quick Wash', 'Cotton + Cupboard Dry'.\n\n**What the matcher uses:** power-consumption shape, total cycle duration, and total energy. It does not read temperature or spin settings directly.\n\n**Profiles that will be reliably auto-detected:** programs with clearly different durations or power patterns - e.g. a 20-minute Quick Wash vs a 3-hour Cotton cycle, or a wash-only cycle vs a wash+dry combo (which typically runs 2-3× longer).\n\n**Profiles that may need manual selection:** variants of the same program that differ only in temperature or spin speed (e.g. Cotton 40°C vs Cotton 60°C) often produce similar power shapes. The system will still attempt to distinguish them and learn from your corrections over time, but expect to confirm matches manually at first.\n\n**Washer-dryer tip:** create separate profiles for wash-only and wash+dry runs - the duration and energy difference is large enough for reliable auto-detection.",
         "data": {
           "profile_name": "Profile Name",
           "reference_cycle": "Reference Cycle (optional)",
@@ -585,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle — Select Cycle",
+        "title": "Trim Cycle - Select Cycle",
         "description": "Select a cycle to trim. ✓ = completed, ⚠ = resumed, ✗ = interrupted",
         "data": {
           "cycle_id": "Cycle"
@@ -1113,7 +1113,7 @@
       "message": "Cycle not found or has no power data."
     },
     "trim_failed_empty_window": {
-      "message": "Trim failed — cycle not found, no power data, or resulting window is empty."
+      "message": "Trim failed - cycle not found, no power data, or resulting window is empty."
     },
     "trim_invalid_range": {
       "message": "trim_end_s must be greater than trim_start_s."

@@ -157,7 +157,7 @@ async def test_profile_change_resets_persistence_counter(
     """Switching to a different profile mid-accumulation resets the new counter to 1.
 
     Two calls for Cotton build counter to 2.  One call for Quick resets Quick's
-    counter to 1.  Quick is not persistent yet — must remain 'detecting...'.
+    counter to 1.  Quick is not persistent yet - must remain 'detecting...'.
     """
     manager.profile_store.async_match_profile = AsyncMock(
         return_value=_make_result(PROFILE_COTTON)
@@ -213,7 +213,7 @@ async def test_high_confidence_override_bypasses_persistence(
 async def test_ambiguous_result_does_not_commit_before_persistence(
     manager: WashDataManager,
 ) -> None:
-    """An ambiguous single result must not commit — persistence must be met first.
+    """An ambiguous single result must not commit - persistence must be met first.
 
     Ambiguity gate: (not is_ambiguous OR is_persistent).  With is_ambiguous=True
     and counter=1 (not persistent), the gate is False and no switch occurs.

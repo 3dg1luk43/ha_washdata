@@ -1409,7 +1409,7 @@ class ProfileStore:
             key: str | None = key_any if isinstance(key_any, str) and key_any else None
             by_profile.setdefault(key, []).append(cy)
 
-        # Collect cycle IDs that have pending feedback — never strip their power_data
+        # Collect cycle IDs that have pending feedback - never strip their power_data
         pending_feedback_ids: set[str] = set(self._data.get("pending_feedback", {}).keys())
 
         for key, group in by_profile.items():
@@ -1771,7 +1771,7 @@ class ProfileStore:
                 except (TypeError, ValueError):
                     continue
             if not repaired_rows:
-                continue  # all rows malformed — leave original trace untouched
+                continue  # all rows malformed - leave original trace untouched
             cycle["power_data"] = repaired_rows
             repaired += 1
             repaired_data = cycle["power_data"]
@@ -2658,7 +2658,7 @@ class ProfileStore:
                         None
                     )
                 # Prefer envelope avg curve when ≥2 labeled cycles have been
-                # confirmed — it gives a more representative reference signal
+                # confirmed - it gives a more representative reference signal
                 # than the original sample alone, so confidence improves over
                 # time as the user keeps confirming correct detections.
                 envelope = self._data.get("envelopes", {}).get(name)
@@ -3667,7 +3667,7 @@ class ProfileStore:
                 new_start_ts + new_duration
             ).isoformat()
 
-        # Clear manual_duration override — trimmed duration is now authoritative
+        # Clear manual_duration override - trimmed duration is now authoritative
         cycle.pop("manual_duration", None)
 
         # Invalidate cached sample segments for this cycle so future lookups
@@ -3871,7 +3871,7 @@ class ProfileStore:
         if len(target_cycles) != len(cycle_ids):
             return None
 
-        # Sort by time — use timestamp comparison to handle mixed timezone offsets correctly
+        # Sort by time - use timestamp comparison to handle mixed timezone offsets correctly
         def _cycle_start_ts(c: CycleDict) -> float:
             """
             Return the cycle's start time as a POSIX timestamp, or positive infinity if missing or unparsable.
@@ -4149,7 +4149,7 @@ class ProfileStore:
                 curves.append(SVGCurve(points=points, color=colors[i % len(colors)], stroke_width=2))
 
         if not curves:
-            # No power data available — return a placeholder SVG with a message
+            # No power data available - return a placeholder SVG with a message
             safe_title = html.escape(title)
             safe_label = html.escape(no_data_label or "")
             return (

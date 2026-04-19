@@ -314,7 +314,7 @@ class SuggestionEngine:
         for c in cycles:
             if not isinstance(c, dict):
                 continue
-            label = c.get("label")
+            label = c.get("label") or c.get("profile_name")
             if not isinstance(label, str) or not label:
                 continue
             if not (

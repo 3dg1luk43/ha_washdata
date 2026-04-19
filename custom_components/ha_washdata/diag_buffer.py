@@ -1,4 +1,4 @@
-"""Diagnostic ring buffers for WashData — rolling 24-hour window.
+"""Diagnostic ring buffers for WashData - rolling 24-hour window.
 
 Each WashDataManager owns one DiagBuffer instance that accumulates three
 independent time-series for the last 24 hours:

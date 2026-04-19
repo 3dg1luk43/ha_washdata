@@ -65,50 +65,50 @@
           "power_sensor": "Entitas Sensor Daya",
           "min_power": "Daya Minimal (W)",
           "off_delay": "Penundaan Akhir Siklus",
-          "notify_service": "Layanan Notifikasi (misalnya notify.mobile_app)",
           "notify_actions": "Tindakan Pemberitahuan",
           "notify_people": "Tunda Pengiriman Sampai Orang-Orang Ini Pulang",
           "notify_only_when_home": "Tunda Pemberitahuan Hingga Orang Terpilih Ada di Rumah",
           "notify_fire_events": "Aktifkan Acara Otomasi",
-          "notify_events": "Acara untuk Diberitahukan",
           "notify_before_end_minutes": "Pemberitahuan Pra-penyelesaian (menit sebelum akhir)",
           "notify_title": "Judul Pemberitahuan",
           "notify_icon": "Ikon Pemberitahuan",
           "notify_start_message": "Mulai Format Pesan",
           "notify_finish_message": "Selesaikan Format Pesan",
           "notify_pre_complete_message": "Format Pesan Pra-Penyelesaian",
-          "show_advanced": "Edit Pengaturan Lanjutan (Langkah Berikutnya)"
+          "show_advanced": "Edit Pengaturan Lanjutan (Langkah Berikutnya)",
+          "notify_start_services": "Siklus Mulai - Target Pemberitahuan",
+          "notify_finish_services": "Siklus Selesai - Target Pemberitahuan",
+          "notify_live_services": "Kemajuan Langsung - Target Pemberitahuan"
         },
         "data_description": {
           "apply_suggestions": "Centang kotak ini untuk menyalin nilai yang disarankan oleh algoritma pembelajaran ke dalam formulir. Tinjau sebelum menyimpan.\n\nDisarankan (dari pembelajaran):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Pilih jenis peralatan (Mesin Cuci, Pengering, Mesin Pencuci Piring, Mesin Kopi, EV). Tag ini disimpan pada setiap siklus untuk pengorganisasian yang lebih baik.",
-          "power_sensor": "Entitas sensor melaporkan daya secara real-time (dalam watt). Anda dapat mengubahnya kapan saja tanpa kehilangan data historis—berguna jika Anda mengganti smart plug.",
+          "power_sensor": "Entitas sensor melaporkan daya secara real-time (dalam watt). Anda dapat mengubahnya kapan saja tanpa kehilangan data historis-berguna jika Anda mengganti smart plug.",
           "min_power": "Pembacaan daya di atas ambang batas ini (dalam watt) menunjukkan alat sedang bekerja. Mulailah dengan 2W untuk sebagian besar perangkat.",
           "off_delay": "Beberapa detik tenaga yang dihaluskan harus tetap berada di bawah ambang batas berhenti untuk menandai selesainya. Standar: 120 detik.",
-          "notify_service": "Home Assistant memberi tahu layanan untuk digunakan (opsional).",
           "notify_actions": "Urutan tindakan Asisten Rumah opsional untuk dijalankan untuk notifikasi (skrip, beri tahu, TTS, dll.). Jika disetel, tindakan akan dijalankan sebelum layanan pemberitahuan fallback.",
           "notify_people": "Entitas orang yang digunakan untuk gerbang kehadiran. Jika diaktifkan, pengiriman notifikasi akan tertunda hingga setidaknya satu orang yang dipilih ada di rumah.",
           "notify_only_when_home": "Jika diaktifkan, tunda pemberitahuan hingga setidaknya satu orang yang dipilih ada di rumah.",
           "notify_fire_events": "Jika diaktifkan, aktifkan peristiwa Home Assistant untuk memulai dan mengakhiri siklus (ha_washdata_cycle_started dan ha_washdata_cycle_ended) untuk mendorong otomatisasi.",
-          "notify_events": "Acara mana yang pemberitahuannya harus dikirim.",
           "notify_before_end_minutes": "Beberapa menit sebelum perkiraan akhir siklus untuk memicu notifikasi. Setel ke 0 untuk menonaktifkan. Bawaan: 0.",
           "notify_title": "Judul khusus untuk notifikasi. Mendukung {device} pengganti.",
           "notify_icon": "Ikon yang digunakan untuk notifikasi (misalnya mdi:mesin cuci). Biarkan kosong untuk mengirim tanpa ikon.",
           "notify_start_message": "Pesan dikirim ketika siklus dimulai. Mendukung {device} pengganti.",
           "notify_finish_message": "Pesan dikirim ketika siklus selesai. Mendukung placeholder {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Pesan dikirim sebelum selesai. Mendukung {device}, {minutes} placeholder."
+          "notify_pre_complete_message": "Pesan dikirim sebelum selesai. Mendukung {device}, {minutes} placeholder.",
+          "notify_start_services": "Satu atau lebih layanan pemberitahuan untuk memperingatkan ketika siklus dimulai. Biarkan kosong untuk melewati pemberitahuan awal.",
+          "notify_finish_services": "Satu atau lebih layanan pemberitahuan untuk memperingatkan ketika suatu siklus selesai atau hampir selesai. Biarkan kosong untuk melewati pemberitahuan selesai.",
+          "notify_live_services": "Satu atau lebih layanan pemberitahuan untuk menerima pembaruan kemajuan langsung saat siklus berjalan (hanya aplikasi pendamping seluler). Biarkan kosong untuk melewati pembaruan langsung."
         }
       },
       "notifications": {
         "title": "Pemberitahuan",
         "description": "Konfigurasikan saluran notifikasi, templat, dan pembaruan kemajuan seluler opsional secara langsung.",
         "data": {
-          "notify_service": "Layanan Notifikasi (misalnya notify.mobile_app)",
           "notify_actions": "Tindakan Pemberitahuan",
           "notify_people": "Tunda Pengiriman Sampai Orang-Orang Ini Pulang",
           "notify_only_when_home": "Tunda Pemberitahuan Hingga Orang Terpilih Ada di Rumah",
           "notify_fire_events": "Aktifkan Acara Otomasi",
-          "notify_events": "Acara untuk Diberitahukan",
           "notify_before_end_minutes": "Pemberitahuan Pra-penyelesaian (menit sebelum akhir)",
           "notify_live_interval_seconds": "Interval Pembaruan Langsung (detik)",
           "notify_live_overrun_percent": "Tunjangan Kelebihan Pembaruan Langsung (%)",
@@ -116,23 +116,33 @@
           "notify_icon": "Ikon Pemberitahuan",
           "notify_start_message": "Mulai Format Pesan",
           "notify_finish_message": "Selesaikan Format Pesan",
-          "notify_pre_complete_message": "Format Pesan Pra-Penyelesaian"
+          "notify_pre_complete_message": "Format Pesan Pra-Penyelesaian",
+          "notify_start_services": "Siklus Mulai - Target Pemberitahuan",
+          "notify_finish_services": "Siklus Selesai - Target Pemberitahuan",
+          "notify_live_services": "Kemajuan Langsung - Target Pemberitahuan",
+          "notify_live_chronometer": "Penghitung Waktu Mundur Kronometer",
+          "energy_price_entity": "Harga Energi - Entitas (opsional)",
+          "energy_price_static": "Harga Energi - Nilai statis (opsional)"
         },
         "data_description": {
-          "notify_service": "Home Assistant memberi tahu layanan untuk digunakan (opsional).",
           "notify_actions": "Urutan tindakan Asisten Rumah opsional untuk dijalankan untuk notifikasi (skrip, beri tahu, TTS, dll.). Jika disetel, tindakan akan dijalankan sebelum layanan pemberitahuan fallback.",
           "notify_people": "Entitas orang yang digunakan untuk gerbang kehadiran. Jika diaktifkan, pengiriman notifikasi akan tertunda hingga setidaknya satu orang yang dipilih ada di rumah.",
           "notify_only_when_home": "Jika diaktifkan, tunda pemberitahuan hingga setidaknya satu orang yang dipilih ada di rumah.",
           "notify_fire_events": "Jika diaktifkan, aktifkan peristiwa Home Assistant untuk memulai dan mengakhiri siklus (ha_washdata_cycle_started dan ha_washdata_cycle_ended) untuk mendorong otomatisasi.",
-          "notify_events": "Acara mana yang pemberitahuannya harus dikirim.",
           "notify_before_end_minutes": "Beberapa menit sebelum perkiraan akhir siklus untuk memicu notifikasi. Setel ke 0 untuk menonaktifkan. Bawaan: 0.",
-          "notify_live_interval_seconds": "Seberapa sering pembaruan kemajuan dikirim saat berjalan. Nilai yang lebih rendah lebih responsif tetapi menggunakan lebih banyak notifikasi. Minimum 30 detik diberlakukan — nilai di bawah 30 detik secara otomatis dibulatkan menjadi 30 detik.",
+          "notify_live_interval_seconds": "Seberapa sering pembaruan kemajuan dikirim saat berjalan. Nilai yang lebih rendah lebih responsif tetapi menggunakan lebih banyak notifikasi. Minimum 30 detik diberlakukan - nilai di bawah 30 detik secara otomatis dibulatkan menjadi 30 detik.",
           "notify_live_overrun_percent": "Margin keamanan di atas perkiraan jumlah pembaruan untuk siklus yang panjang/berlebihan (misalnya 20% memungkinkan 1,2x perkiraan pembaruan).",
           "notify_title": "Judul khusus untuk notifikasi. Mendukung {device} pengganti.",
           "notify_icon": "Ikon yang digunakan untuk notifikasi (misalnya mdi:mesin cuci). Biarkan kosong untuk mengirim tanpa ikon.",
           "notify_start_message": "Pesan dikirim ketika siklus dimulai. Mendukung {device} pengganti.",
           "notify_finish_message": "Pesan dikirim ketika siklus selesai. Mendukung placeholder {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Pesan dikirim sebelum selesai. Mendukung {device}, {minutes} placeholder."
+          "notify_pre_complete_message": "Pesan dikirim sebelum selesai. Mendukung {device}, {minutes} placeholder.",
+          "notify_start_services": "Satu atau lebih layanan notifikasi untuk memberi peringatan ketika siklus dimulai (misalnya notify.mobile_app_my_phone). Biarkan kosong untuk melewati pemberitahuan awal.",
+          "notify_finish_services": "Satu atau lebih layanan pemberitahuan untuk memperingatkan ketika suatu siklus selesai atau hampir selesai. Biarkan kosong untuk melewati pemberitahuan selesai.",
+          "notify_live_services": "Satu atau lebih layanan pemberitahuan untuk menerima pembaruan kemajuan langsung saat siklus berjalan (hanya aplikasi pendamping seluler). Biarkan kosong untuk melewati pembaruan langsung.",
+          "notify_live_chronometer": "Jika diaktifkan, setiap pembaruan langsung menyertakan hitungan mundur kronometer hingga perkiraan waktu selesai. Pengatur waktu notifikasi berdetak secara otomatis di perangkat di antara pembaruan (khusus aplikasi pendamping Android).",
+          "energy_price_entity": "Pilih entitas numerik yang menyimpan harga listrik saat ini (misalnya sensor.electricity_price, input_number.energy_rate). Jika disetel, aktifkan placeholder {cost}. Diutamakan daripada nilai statis jika keduanya dikonfigurasi.",
+          "energy_price_static": "Harga listrik tetap per kWh. Jika disetel, aktifkan placeholder {cost}. Diabaikan jika entitas dikonfigurasi di atas. Tambahkan simbol mata uang Anda di templat pesan, mis. {cost}€."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "Bandwidth DTW",
           "external_end_trigger_enabled": "Aktifkan Pemicu Akhir Siklus Eksternal",
           "external_end_trigger": "Sensor Akhir Siklus Eksternal",
-          "external_end_trigger_inverted": "Pembalikan Logika Pemicu (Pemicu dalam keadaan MATI)"
+          "external_end_trigger_inverted": "Pembalikan Logika Pemicu (Pemicu dalam keadaan MATI)",
+          "suppress_feedback_notifications": "Menekan Pemberitahuan Umpan Balik",
+          "pump_stuck_duration": "Ambang Batas Peringatan Pompa Terjebak (Hanya Pompa)",
+          "door_sensor_entity": "Sensor Pintu",
+          "pause_cuts_power": "Matikan Daya Saat Menjeda",
+          "notify_unload_delay_minutes": "Penundaan Notifikasi Tunggu Laundry (mnt)"
         },
         "data_description": {
           "apply_suggestions": "Centang kotak ini untuk membuka langkah peninjauan nilai yang disarankan dari algoritma pembelajaran. Tidak ada yang disimpan secara otomatis.\n\nDisarankan (dari pembelajaran):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Waktu pembengkokan (peregangan) maksimum yang diperbolehkan sebagai rasio durasi siklus. Nilai yang lebih tinggi memungkinkan pencocokan siklus yang sangat bervariasi namun meningkatkan biaya CPU. Bawaan: 0,20 (20%).",
           "external_end_trigger_enabled": "Aktifkan pemantauan sensor biner eksternal untuk memicu penyelesaian siklus.",
           "external_end_trigger": "Pilih entitas sensor biner. Saat sensor ini terpicu, siklus saat ini akan berakhir dengan status 'selesai'.",
-          "external_end_trigger_inverted": "Secara default, pemicu menyala saat sensor AKTIF. Centang kotak ini untuk menyala ketika sensor dimatikan."
+          "external_end_trigger_inverted": "Secara default, pemicu menyala saat sensor AKTIF. Centang kotak ini untuk menyala ketika sensor dimatikan.",
+          "suppress_feedback_notifications": "Saat diaktifkan, WashData akan tetap melacak dan meminta umpan balik secara internal tetapi tidak akan menampilkan pemberitahuan terus-menerus yang meminta Anda mengonfirmasi siklus. Berguna ketika siklus selalu terdeteksi dengan benar dan Anda merasa petunjuknya mengganggu.",
+          "pump_stuck_duration": "Jika siklus pompa masih berjalan setelah beberapa detik ini, kejadian ha_washdata_pump_stuck dipicu satu kali. Gunakan ini untuk mendeteksi motor yang macet (umumnya pompa air bekerja di bawah 60 detik). Default: 1800 detik (30 menit). Hanya jenis perangkat pompa.",
+          "door_sensor_entity": "Sensor biner opsional untuk pintu mesin (hidup = terbuka, mati = tertutup). Ketika pintu terbuka selama siklus aktif, WashData akan mengonfirmasi bahwa siklus tersebut sengaja dijeda. Setelah siklus berakhir, jika pintu masih tertutup, statusnya berubah menjadi 'Bersih' hingga pintu terbuka. Catatan: menutup pintu TIDAK secara otomatis melanjutkan siklus yang dijeda - melanjutkan harus dipicu secara manual melalui tombol atau layanan Lanjutkan Siklus.",
+          "pause_cuts_power": "Saat menjeda melalui tombol atau layanan Pause Cycle, matikan juga entitas sakelar yang dikonfigurasi. Hanya berlaku jika entitas saklar dikonfigurasi untuk perangkat ini.",
+          "notify_unload_delay_minutes": "Kirim notifikasi melalui saluran notifikasi selesai setelah siklus berakhir dan pintu belum dibuka selama beberapa menit (membutuhkan Sensor Pintu). Setel ke 0 untuk menonaktifkan. Default: 60 menit."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Potong Siklus — Pilih Siklus",
+        "title": "Potong Siklus - Pilih Siklus",
         "description": "Pilih siklus yang akan dipangkas. ✓ = selesai, ⚠ = dilanjutkan, ✗ = terputus",
         "data": {
           "cycle_id": "Siklus"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: Setelan yang Disarankan Siap ({device})",
       "suggestions_ready_notification_message": "Sensor **Setelan yang Disarankan** kini melaporkan **{count}** rekomendasi yang dapat ditindaklanjuti.\n\nUntuk meninjau dan menerapkannya: **Pengaturan > Perangkat & Layanan > WashData > Konfigurasi > Pengaturan Lanjutan > Terapkan Nilai yang Disarankan**.\n\nSaran bersifat opsional dan ditampilkan untuk ditinjau sebelum Anda menyimpannya.",
       "trim_range_invalid": "Awal harus sebelum akhir. Silakan sesuaikan titik trim Anda.",
-      "trim_failed": "Pemangkasan gagal. Siklus tersebut mungkin sudah tidak ada lagi atau jendelanya kosong."
+      "trim_failed": "Pemangkasan gagal. Siklus tersebut mungkin sudah tidak ada lagi atau jendelanya kosong.",
+      "auto_tune_suggestion": "{device_type} {device_title} mendeteksi siklus hantu. Perubahan min_power yang disarankan: {current_min}W -> {new_min}W (tidak diterapkan secara otomatis).",
+      "auto_tune_title": "Penyetelan Otomatis WashData",
+      "auto_tune_fallback": "{device_type} {device_title} mendeteksi siklus hantu. Perubahan min_power yang disarankan: {current_min}W -> {new_min}W (tidak diterapkan secara otomatis)."
     },
     "abort": {
       "no_cycles_found": "Tidak ada siklus yang ditemukan",
@@ -999,7 +1022,8 @@
           "interrupted": "Terganggu",
           "force_stopped": "Paksa Berhenti",
           "rinse": "Membilas",
-          "unknown": "Tidak dikenal"
+          "unknown": "Tidak dikenal",
+          "clean": "Membersihkan"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Pengaturan yang Disarankan"
+      },
+      "pump_runs_today": {
+        "name": "Pompa Berjalan (24 jam terakhir)"
+      },
+      "cycle_count": {
+        "name": "Hitungan Siklus"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Siklus Akhir Paksa"
+      },
+      "pause_cycle": {
+        "name": "Jeda Siklus"
+      },
+      "resume_cycle": {
+        "name": "Lanjutkan Siklus"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "Siklus tidak ditemukan atau tidak memiliki data daya."
     },
     "trim_failed_empty_window": {
-      "message": "Pemangkasan gagal — siklus tidak ditemukan, tidak ada data daya, atau jendela yang dihasilkan kosong."
+      "message": "Pemangkasan gagal - siklus tidak ditemukan, tidak ada data daya, atau jendela yang dihasilkan kosong."
     },
     "trim_invalid_range": {
       "message": "trim_end_s harus lebih besar dari trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Device_id yang valid diperlukan."
     }
   }
 }

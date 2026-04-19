@@ -2163,15 +2163,17 @@ class WashDataManager:
                     time_since_complete / 60,
                 )
 
-        unload_delay_s = self._notify_unload_delay_minutes * 60
-        _reset_threshold = max(
-            self._progress_reset_delay,
-            unload_delay_s if unload_delay_s > 0 else self._progress_reset_delay,
-        )
-        if time_since_complete > _reset_threshold or (
-            time_since_complete > self._progress_reset_delay
-            and (self._notified_clean_laundry or self._notify_unload_delay_minutes <= 0)
-        ):
+        if time_since_complete > self._progress_reset_delay:
+            # Defer the reset when a clean-state unload notification is still pending.
+            # Without this guard the 30-min progress reset fires before the 60-min
+            # unload nag, clearing _is_clean_state before the notification can fire.
+            if (
+                self._is_clean_state
+                and not self._notified_clean_laundry
+                and self._notify_unload_delay_minutes > 0
+                and time_since_complete < self._notify_unload_delay_minutes * 60
+            ):
+                return
             # Auto-expire the "Finished" (or other terminal) state
             self._logger.debug(
                 "State expiry: cycle idle for %.0fs (threshold: %ss). Resetting to OFF.",
@@ -2491,7 +2493,7 @@ class WashDataManager:
                     )
                     self._start_event_fired = True
 
-                # Fire push notification immediately — do not wait for profile matching.
+                # Fire push notification immediately - do not wait for profile matching.
                 if not self._notified_start and (self._notify_start_services or self._notify_actions):
                     msg_template = self.config_entry.options.get(
                         CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE
@@ -3290,7 +3292,7 @@ class WashDataManager:
             self._matched_profile_duration and self._matched_profile_duration > 0
         )
         if has_profile_match:
-            # A profile has been matched — reset the waiting latch so future
+            # A profile has been matched - reset the waiting latch so future
             # "no profile yet" phases (e.g. after a cycle restart) will send
             # the waiting message again.
             self._live_waiting_notification_sent = False
@@ -4086,7 +4088,7 @@ class WashDataManager:
                     )
                 except HomeAssistantError as err:
                     self._logger.warning(
-                        "pause_cuts_power: failed to turn off %s: %s — rolling back pause state",
+                        "pause_cuts_power: failed to turn off %s: %s - rolling back pause state",
                         switch_entity, err,
                     )
                     self._is_user_paused = False
@@ -4135,7 +4137,7 @@ class WashDataManager:
                     )
                 except HomeAssistantError as err:
                     self._logger.warning(
-                        "pause_cuts_power: failed to turn on %s: %s — rolling back resume state",
+                        "pause_cuts_power: failed to turn on %s: %s - rolling back resume state",
                         switch_entity, err,
                     )
                     self._total_user_paused_seconds -= accumulated

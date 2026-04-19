@@ -72,50 +72,50 @@
           "power_sensor": "Potenca sensila ento",
           "min_power": "Minimuma potenco (W)",
           "off_delay": "Cikla fina prokrasto (s)",
-          "notify_service": "Sciiga servo (ekz. notify.mobile_app)",
           "notify_actions": "Sciigaj agoj",
           "notify_people": "Prokrasti liveradon ĝis tiuj homoj estas hejme",
           "notify_only_when_home": "Prokrasti sciigojn ĝis elektita persono estas hejme",
           "notify_fire_events": "Lanĉi aŭtomatigajn eventojn",
-          "notify_events": "Eventoj por sciigi",
           "notify_before_end_minutes": "Antaŭ-kompletiga sciigo (minutoj antaŭ fino)",
           "notify_title": "Sciiga titolo",
           "notify_icon": "Sciiga piktogramo",
           "notify_start_message": "Formulo de komenca mesaĝo",
           "notify_finish_message": "Formulo de fina mesaĝo",
           "notify_pre_complete_message": "Formulo de antaŭ-kompletiga mesaĝo",
-          "show_advanced": "Redakti altnivelaj agordojn (sekva paŝo)"
+          "show_advanced": "Redakti altnivelaj agordojn (sekva paŝo)",
+          "notify_start_services": "Cikla Komenco - Sciigo-Celoj",
+          "notify_finish_services": "Cikla Finiĝo - Sciigo-Celoj",
+          "notify_live_services": "Viva Progreso - Sciigo-Celoj"
         },
         "data_description": {
           "apply_suggestions": "Marku ĉi tiun skatolon por kopii valorojn sugestitajn de la lerna algoritmo en la formularon. Revizii antaŭ konservi.\n\nSugesto (de lernado):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Elektu la tipon de aparato (Lavmaŝino, Sekigilo, Telerlavaparato, Kafmaŝino, EV). Ĉi tiu etikedo estas konservita kun ĉiu ciklo por pli bona organizado.",
-          "power_sensor": "La sensila ento raportanta realtempan potencon (en vatoj). Vi povas ŝanĝi ĝin iam ajn sen perdi historiajn datumojn — utile se vi anstataŭigas inteligen ŝtopilon.",
+          "power_sensor": "La sensila ento raportanta realtempan potencon (en vatoj). Vi povas ŝanĝi ĝin iam ajn sen perdi historiajn datumojn - utile se vi anstataŭigas inteligen ŝtopilon.",
           "min_power": "Potencaj valoroj super ĉi tiu sojlo (en vatoj) indikas ke la aparato funkcias. Komencu per 2W por plej multaj aparatoj.",
           "off_delay": "Sekundoj dum kiuj la glatigita potenco devas resti sub la haltsojlo por marki kompletadon. Defaŭlte: 120s.",
-          "notify_service": "Sciiga servo de Home Assistant por uzi (laŭvola).",
           "notify_actions": "Laŭvola ago-sekvenco de Home Assistant por sciigoj (skriptoj, notify, TTS, ktp.). Se agordita, agoj ekfunkciiĝas antaŭ la rezerva sciiga servo.",
           "notify_people": "Personaj entoj uzataj por ĉeesta pordego. Kiam ŝaltita, sciiga livero prokrastiĝas ĝis almenaŭ unu elektita persono estas hejme.",
           "notify_only_when_home": "Se ŝaltita, prokrasti sciigojn ĝis almenaŭ unu elektita persono estas hejme.",
           "notify_fire_events": "Se ŝaltita, lanĉi Home Assistant eventojn por cikla komenco kaj fino (ha_washdata_cycle_started kaj ha_washdata_cycle_ended) por aŭtomatigoj.",
-          "notify_events": "Por kiuj eventoj sendi sciigojn.",
           "notify_before_end_minutes": "Minutoj antaŭ la laŭtaksa fino de la ciklo por ekigi sciigon. Agordu al 0 por malŝalti. Defaŭlte: 0.",
           "notify_title": "Propra titolo por sciigoj. Subtenas {device} lokanombron.",
           "notify_icon": "Piktogramo por sciigoj (ekz. mdi:washing-machine). Lasu malplena por sendi sen piktogramo.",
           "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokanombron.",
           "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program} lokanombrojn.",
-          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn."
+          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn.",
+          "notify_start_services": "Unu aŭ pluraj sciigu servojn por atentigi kiam ciklo komenciĝas. Lasu malplena por preterlasi startajn sciigojn.",
+          "notify_finish_services": "Unu aŭ pluraj sciigu servojn por atentigi kiam ciklo finiĝas aŭ preskaŭ finiĝas. Lasu malplena por preterlasi finajn sciigojn.",
+          "notify_live_services": "Unu aŭ pluraj sciigas servojn por ricevi vivajn progresajn ĝisdatigojn dum la ciklo funkcias (nur por movebla akompana aplikaĵo). Lasu malplena por preterlasi vivajn ĝisdatigojn."
         }
       },
       "notifications": {
         "title": "Sciigoj",
         "description": "Agordu sciigajn kanalojn, ŝablonojn kaj laŭvolajn ŝarĝajn progresajn ĝisdatigojn.",
         "data": {
-          "notify_service": "Sciiga servo (ekz. notify.mobile_app)",
           "notify_actions": "Sciigaj agoj",
           "notify_people": "Prokrasti liveradon ĝis tiuj homoj estas hejme",
           "notify_only_when_home": "Prokrasti sciigojn ĝis elektita persono estas hejme",
           "notify_fire_events": "Lanĉi aŭtomatigajn eventojn",
-          "notify_events": "Eventoj por sciigi",
           "notify_before_end_minutes": "Antaŭ-kompletiga sciigo (minutoj antaŭ fino)",
           "notify_live_interval_seconds": "Vivupdata intervalo (sekundoj)",
           "notify_live_overrun_percent": "Vivupdata superkuro-toleranco (%)",
@@ -123,23 +123,33 @@
           "notify_icon": "Sciiga piktogramo",
           "notify_start_message": "Formulo de komenca mesaĝo",
           "notify_finish_message": "Formulo de fina mesaĝo",
-          "notify_pre_complete_message": "Formulo de antaŭ-kompletiga mesaĝo"
+          "notify_pre_complete_message": "Formulo de antaŭ-kompletiga mesaĝo",
+          "notify_start_services": "Cikla Komenco - Sciigo-Celoj",
+          "notify_finish_services": "Cikla Finiĝo - Sciigo-Celoj",
+          "notify_live_services": "Viva Progreso - Sciigo-Celoj",
+          "notify_live_chronometer": "Kronometra Retronombrada Temporizilo",
+          "energy_price_entity": "Energia Prezo - Ento (laŭvola)",
+          "energy_price_static": "Energia Prezo - Senmova valoro (laŭvola)"
         },
         "data_description": {
-          "notify_service": "Sciiga servo de Home Assistant por uzi (laŭvola).",
           "notify_actions": "Laŭvola ago-sekvenco de Home Assistant por sciigoj (skriptoj, notify, TTS, ktp.). Se agordita, agoj ekfunkciiĝas antaŭ la rezerva sciiga servo.",
           "notify_people": "Personaj entoj uzataj por ĉeesta pordego. Kiam ŝaltita, sciiga livero prokrastiĝas ĝis almenaŭ unu elektita persono estas hejme.",
           "notify_only_when_home": "Se ŝaltita, prokrasti sciigojn ĝis almenaŭ unu elektita persono estas hejme.",
           "notify_fire_events": "Se ŝaltita, lanĉi Home Assistant eventojn por cikla komenco kaj fino (ha_washdata_cycle_started kaj ha_washdata_cycle_ended) por aŭtomatigoj.",
-          "notify_events": "Por kiuj eventoj sendi sciigojn.",
           "notify_before_end_minutes": "Minutoj antaŭ la laŭtaksa fino de la ciklo por ekigi sciigon. Agordu al 0 por malŝalti. Defaŭlte: 0.",
-          "notify_live_interval_seconds": "Kiom ofte progresaj ĝisdatigoj estas senditaj dum funkciado. Pli malaltaj valoroj estas pli respondemaj sed konsumas pli da sciigoj. Minimume 30 sekundoj estas devigita — valoroj sub 30s aŭtomate rondiĝas al 30s.",
+          "notify_live_interval_seconds": "Kiom ofte progresaj ĝisdatigoj estas senditaj dum funkciado. Pli malaltaj valoroj estas pli respondemaj sed konsumas pli da sciigoj. Minimume 30 sekundoj estas devigita - valoroj sub 30s aŭtomate rondiĝas al 30s.",
           "notify_live_overrun_percent": "Sekureca marĝeno super la laŭtaksa ĝisdatiga kalkulo por longaj/superkurantaj cikloj (ekzemple 20% permesas 1.2x laŭtaksajn ĝisdatigojn).",
           "notify_title": "Propra titolo por sciigoj. Subtenas {device} lokanombron.",
           "notify_icon": "Piktogramo por sciigoj (ekz. mdi:washing-machine). Lasu malplena por sendi sen piktogramo.",
           "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokanombron.",
           "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program} lokanombrojn.",
-          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn."
+          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn.",
+          "notify_start_services": "Unu aŭ pluraj sciigaj servoj por atentigi kiam ciklo komenciĝas (ekz. notify.mobile_app_my_phone). Lasu malplena por preterlasi startajn sciigojn.",
+          "notify_finish_services": "Unu aŭ pluraj sciigu servojn por atentigi kiam ciklo finiĝas aŭ preskaŭ finiĝas. Lasu malplena por preterlasi finajn sciigojn.",
+          "notify_live_services": "Unu aŭ pluraj sciigas servojn por ricevi vivajn progresajn ĝisdatigojn dum la ciklo funkcias (nur por movebla akompana aplikaĵo). Lasu malplena por preterlasi vivajn ĝisdatigojn.",
+          "notify_live_chronometer": "Kiam ĝi estas ebligita, ĉiu viva ĝisdatigo inkluzivas kronometran retronombradon ĝis la laŭtaksa fintempo. La sciiga tempigilo aŭtomate malaltiĝas sur la aparato inter ĝisdatigoj (nur Android-akompana aplikaĵo).",
+          "energy_price_entity": "Elektu nombran enton, kiu tenas la nunan elektroprezon (ekz. sensor.electricity_price, input_number.energy_rate). Kiam agordita, ebligas la lokokupilon {cost}. Havas prioritaton super la senmova valoro se ambaŭ estas agorditaj.",
+          "energy_price_static": "Fiksa elektroprezo por kWh. Kiam agordita, ebligas la lokokupilon {cost}. Ignorita se ento estas agordita supre. Aldonu vian valutan simbolon en la mesaĝŝablono, ekz. {cost} €."
         }
       },
       "advanced_settings": {
@@ -189,7 +199,12 @@
           "dtw_bandwidth": "DTW bendolarĝo",
           "external_end_trigger_enabled": "Ŝalti eksteran ciklan fin-ekigilon",
           "external_end_trigger": "Ekstera cikla fina sensilo",
-          "external_end_trigger_inverted": "Inversigi ekigan logikon (ekigi ĉe MALŜALTO)"
+          "external_end_trigger_inverted": "Inversigi ekigan logikon (ekigi ĉe MALŜALTO)",
+          "suppress_feedback_notifications": "Subpremi Sciigojn pri Reago",
+          "pump_stuck_duration": "Pumpilo Ŝtopiĝinta Alerta Sojlo (j) (Pumpilo Nur)",
+          "door_sensor_entity": "Porda Sensilo",
+          "pause_cuts_power": "Tranĉi Potencon Kiam Paŭzo",
+          "notify_unload_delay_minutes": "Prokrasto de Sciigo de Atendo de Lavejo (min)"
         },
         "data_description": {
           "apply_suggestions": "Marku ĉi tiun skatolon por malfermi revizian paŝon por sugestitaj valoroj de la lerna algoritmo. Nenio estas konservita aŭtomate.\n\nSugesto (de lernado):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -235,7 +250,12 @@
           "dtw_bandwidth": "Maksimuma permesita tempan tordadon (etendadon) kiel proporcio de cikla daŭro. Pli altaj valoroj permesas kongruon de tre variablaj cikloj sed pliigas CPU-koston. Defaŭlte: 0.20 (20%).",
           "external_end_trigger_enabled": "Ŝalti monitoradon de ekstera duuma sensilo por ekigi ciklan kompletadon.",
           "external_end_trigger": "Elektu duuman sensilan enton. Kiam ĉi tiu sensilo ekigas, la aktuala ciklo finiĝos kun statuso 'kompletigita'.",
-          "external_end_trigger_inverted": "Defaŭlte, la ekigilo pafas kiam la sensilo ŝaltiĝas. Marku ĉi tiun skatolon por pafi kiam la sensilo malŝaltiĝas anstataŭe."
+          "external_end_trigger_inverted": "Defaŭlte, la ekigilo pafas kiam la sensilo ŝaltiĝas. Marku ĉi tiun skatolon por pafi kiam la sensilo malŝaltiĝas anstataŭe.",
+          "suppress_feedback_notifications": "Kiam ĝi estas ebligita, WashData ankoraŭ spuros kaj petos retrosciigon interne sed ne montros konstantajn sciigojn petante vin konfirmi ciklojn. Utila kiam cikloj ĉiam estas detektitaj ĝuste kaj vi trovas la instigojn distraj.",
+          "pump_stuck_duration": "Se pumpciklo daŭre funkcias post tiom da sekundoj, evento ha_washdata_pump_stuck estas lanĉita unufoje. Uzu ĉi tion por detekti ŝtopiĝintan motoron (tipa sumppumpilfunkciado estas malpli ol 60 s). Defaŭlte: 1800 s (30 min). Tipo de pumpilo nur.",
+          "door_sensor_entity": "Laŭvola binara sensilo por la maŝinpordo (ŝaltita = malfermita, malŝaltita = fermita). Kiam la pordo malfermiĝas dum aktiva ciklo, WashData konfirmos la ciklon kiel intencite paŭzitan. Post kiam la ciklo finiĝas, se la pordo ankoraŭ estas fermita, la stato ŝanĝiĝas al \"Puriga\" ĝis la pordo estas malfermita. Noto: fermi la pordon NE aŭtomate rekomencas paŭzitan ciklon - rekomenco devas esti ekigita permane per la butono aŭ servo de Rekomenco de Ciklo.",
+          "pause_cuts_power": "Dum paŭzo per la butono aŭ servo de Paŭzo-Ciklo, ankaŭ malŝaltu la agorditan ŝaltilon. Nur efektiviĝas se ŝanĝa ento estas agordita por ĉi tiu aparato.",
+          "notify_unload_delay_minutes": "Sendu sciigon per la finfina sciiga kanalo post kiam la ciklo finiĝas kaj la pordo ne estis malfermita dum tiom da minutoj (postulas Pordo-Sensilon). Agordu al 0 por malŝalti. Defaŭlte: 60 min."
         }
       },
       "diagnostics": {
@@ -453,14 +473,14 @@
         }
       },
       "cleanup_profile": {
-        "title": "Purigi historion — Elekti profilon",
+        "title": "Purigi historion - Elekti profilon",
         "description": "Elektu profilon por bildigi. Ĉi tio generos grafeon montrantan ĉiujn pasintajn ciklojn por ĉi tiu profilo por helpi identigi eksteraĵojn.",
         "data": {
           "profile": "Profilo"
         }
       },
       "cleanup_select": {
-        "title": "Purigi historion — Grafiko kaj forigo",
+        "title": "Purigi historion - Grafiko kaj forigo",
         "description": "![Grafiko]({graph_url})\n\n**Vidigu {profile_name}**\n\nLa grafikaĵo montras individuajn ciklojn kiel kolorajn liniojn. Identigu eksteraĵojn (liniojn malproksime de la grupo) kaj kongruu ilian koloron en la suba listo por forigi ilin.\n\n**Elektu ciklojn por KONSTANTE forigi:**",
         "data": {
           "cycles_to_delete": "Cikloj por forigi (kongruu kolorojn)"
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Tondi ciklon — Elekti ciklon",
+        "title": "Tondi ciklon - Elekti ciklon",
         "description": "Elektu ciklon por tondi. ✓ = finita, ⚠ = rekomencita, ✗ = interrompita",
         "data": {
           "cycle_id": "Ciklo"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: Sugestitaj agordoj pretaj ({device})",
       "suggestions_ready_notification_message": "La **Sugestitaj Agordoj** sensilo nun raportas **{count}** ageblajn rekomendojn.\n\nPor revizii kaj apliki ilin: **Agordoj > Aparatoj kaj Servoj > WashData > Agordi > Altnivelaj Agordoj > Apliki Sugestitajn Valorojn**.\n\nSugestoj estas laŭvolaj kaj montrataj por revizio antaŭ ol vi konservas.",
       "trim_range_invalid": "Komenco devas esti antaŭ fino. Bonvolu ĝustigi viajn tondadajn punktojn.",
-      "trim_failed": "Tondado malsukcesis. La ciklo eble ne plu ekzistas aŭ la fenestro estas malplena."
+      "trim_failed": "Tondado malsukcesis. La ciklo eble ne plu ekzistas aŭ la fenestro estas malplena.",
+      "auto_tune_suggestion": "{device_type} {device_title} detektis fantomajn ciklojn. Sugestita min_potenca ŝanĝo: {current_min}W -> {new_min}W (ne aplikata aŭtomate).",
+      "auto_tune_title": "Aŭtomatagordo de WashData",
+      "auto_tune_fallback": "{device_type} {device_title} detektis fantomajn ciklojn. Sugestita min_potenca ŝanĝo: {current_min}W -> {new_min}W (ne aplikata aŭtomate)."
     },
     "abort": {
       "no_cycles_found": "Neniuj cikloj trovitaj",
@@ -740,7 +763,7 @@
         "edit_profile": "Redakti/renomigi profilon",
         "delete_profile": "Forigi profilon",
         "profile_stats": "Profilej statistikoj",
-        "cleanup_profile": "Purigi historion — grafiko kaj forigo",
+        "cleanup_profile": "Purigi historion - grafiko kaj forigo",
         "assign_phases": "Asigni fazajn intervalojn"
       }
     },
@@ -779,10 +802,10 @@
     },
     "resolve_feedback_action": {
       "options": {
-        "confirm": "Konfirmi — Ĝusta detektado",
-        "correct": "Korekti — Elekti programon/daŭron",
-        "ignore": "Ignori — Falsa pozitiva/brua ciklo",
-        "delete": "Forigi — Forigi el historio"
+        "confirm": "Konfirmi - Ĝusta detektado",
+        "correct": "Korekti - Elekti programon/daŭron",
+        "ignore": "Ignori - Falsa pozitiva/brua ciklo",
+        "delete": "Forigi - Forigi el historio"
       }
     },
     "assign_profile_phases_auto_detect_action": {
@@ -999,7 +1022,8 @@
           "interrupted": "Interrompita",
           "force_stopped": "Perforte haltita",
           "rinse": "Rinso",
-          "unknown": "Nekonata"
+          "unknown": "Nekonata",
+          "clean": "Pura"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Disponeblaj sugestitaj agordoj"
+      },
+      "pump_runs_today": {
+        "name": "Pumpilaj Funkcioj (Lastaj 24 horoj)"
+      },
+      "cycle_count": {
+        "name": "Ciklokalkulo"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Perforte fini ciklon"
+      },
+      "pause_cycle": {
+        "name": "Paŭza Ciklo"
+      },
+      "resume_cycle": {
+        "name": "Rekomencu Ciklon"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "Ciklo ne trovita aŭ havas neniujn potencajn datumojn."
     },
     "trim_failed_empty_window": {
-      "message": "Tondado malsukcesis — ciklo ne trovita, neniuj potencaj spurdatumoj, aŭ rezulta fenestro estas malplena."
+      "message": "Tondado malsukcesis - ciklo ne trovita, neniuj potencaj spurdatumoj, aŭ rezulta fenestro estas malplena."
     },
     "trim_invalid_range": {
       "message": "trim_end_s devas esti pli granda ol trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Valida device_id estas bezonata."
     }
   }
 }

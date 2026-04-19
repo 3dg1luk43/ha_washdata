@@ -65,19 +65,20 @@
           "power_sensor": "Güç Sensörü Öğesi",
           "min_power": "Minimum Güç (W)",
           "off_delay": "Döngü Sonu Gecikmesi (ler)",
-          "notify_service": "Bildirim Hizmeti (ör. notify.mobile_app)",
           "notify_actions": "Bildirim Eylemleri",
           "notify_people": "Bu İnsanlar Eve Gelene Kadar Teslimatı Erteleyin",
           "notify_only_when_home": "Seçilen Kişi Eve Gelene Kadar Bildirimleri Erteleyin",
           "notify_fire_events": "Otomasyon Olaylarını Tetikle",
-          "notify_events": "Bildirilecek Olaylar",
           "notify_before_end_minutes": "Tamamlama Öncesi Bildirim (bitişten dakikalar önce)",
           "notify_title": "Bildirim Başlığı",
           "notify_icon": "Bildirim Simgesi",
           "notify_start_message": "Mesaj Formatını Başlat",
           "notify_finish_message": "Mesaj Formatını Bitir",
           "notify_pre_complete_message": "Tamamlanma Öncesi Mesaj Formatı",
-          "show_advanced": "Gelişmiş Ayarları Düzenle (Sonraki Adım)"
+          "show_advanced": "Gelişmiş Ayarları Düzenle (Sonraki Adım)",
+          "notify_start_services": "Döngü Başlatma - Bildirim Hedefleri",
+          "notify_finish_services": "Döngü Sonu - Bildirim Hedefleri",
+          "notify_live_services": "Canlı İlerleme - Bildirim Hedefleri"
         },
         "data_description": {
           "apply_suggestions": "Öğrenme algoritması tarafından önerilen değerleri forma kopyalamak için bu kutuyu işaretleyin. Kaydetmeden önce inceleyin.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} sn\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "Gerçek zamanlı gücü (watt cinsinden) bildiren sensör varlığı. Geçmiş verileri kaybetmeden bunu istediğiniz zaman değiştirebilirsiniz; akıllı fişi değiştirirseniz kullanışlıdır.",
           "min_power": "Bu eşiğin üzerindeki güç değerleri (watt cinsinden) cihazın çalıştığını gösterir. Çoğu cihaz için 2W ile başlayın.",
           "off_delay": "Tamamlanmayı işaretlemek için yumuşatılmış gücün saniyeler içinde durma eşiğinin altında kalması gerekir. Varsayılan: 120s.",
-          "notify_service": "Ev Asistanı'nın kullanılması için hizmeti bilgilendirin (isteğe bağlı).",
           "notify_actions": "Bildirimler (komut dosyaları, bildirim, TTS vb.) için çalıştırılacak isteğe bağlı Ev Asistanı eylem dizisi. Ayarlanırsa eylemler, geri dönüş bildirim hizmetinden önce çalıştırılır.",
           "notify_people": "Varlık geçidi için kullanılan kişi varlıkları. Etkinleştirildiğinde, seçilen en az bir kişi evde olana kadar bildirim teslimi ertelenir.",
           "notify_only_when_home": "Etkinleştirilirse, seçilen en az bir kişi evde olana kadar bildirimleri erteleyin.",
           "notify_fire_events": "Etkinleştirilirse, otomasyonları desteklemek için döngü başlangıcı ve bitişi (ha_washdata_cycle_started ve ha_washdata_cycle_ended) için Home Assistant olaylarını tetikleyin.",
-          "notify_events": "Hangi etkinlikler için bildirim gönderileceği.",
           "notify_before_end_minutes": "Bir bildirimin tetiklenmesi için döngünün tahmini bitiminden dakikalar önce. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0.",
           "notify_title": "Bildirimler için özel başlık. {device} yer tutucusunu destekler.",
           "notify_icon": "Bildirimler için kullanılacak simge (ör. mdi:çamaşır makinesi). Simge göndermemek için boş bırakın.",
           "notify_start_message": "Bir döngü başladığında gönderilen mesaj. {device} yer tutucusunu destekler.",
           "notify_finish_message": "Bir döngü tamamlandığında gönderilen mesaj. {device}, {duration}, {program} yer tutucularını destekler.",
-          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler."
+          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler.",
+          "notify_start_services": "Bir döngü başladığında uyarı verecek bir veya daha fazla bildirim hizmeti. Başlangıç ​​bildirimlerini atlamak için boş bırakın.",
+          "notify_finish_services": "Bir döngü tamamlandığında veya tamamlanmaya yaklaştığında uyarı verecek bir veya daha fazla bildirim hizmeti. Bitirme bildirimlerini atlamak için boş bırakın.",
+          "notify_live_services": "Döngü çalışırken canlı ilerleme güncellemelerini almak için bir veya daha fazla bildirim hizmeti (yalnızca mobil yardımcı uygulama). Canlı güncellemeleri atlamak için boş bırakın."
         }
       },
       "notifications": {
         "title": "Bildirimler",
         "description": "Bildirim kanallarını, şablonları ve isteğe bağlı canlı mobil ilerleme güncellemelerini yapılandırın.",
         "data": {
-          "notify_service": "Bildirim Hizmeti (ör. notify.mobile_app)",
           "notify_actions": "Bildirim Eylemleri",
           "notify_people": "Bu İnsanlar Eve Gelene Kadar Teslimatı Erteleyin",
           "notify_only_when_home": "Seçilen Kişi Eve Gelene Kadar Bildirimleri Erteleyin",
           "notify_fire_events": "Otomasyon Olaylarını Tetikle",
-          "notify_events": "Bildirilecek Olaylar",
           "notify_before_end_minutes": "Tamamlama Öncesi Bildirim (bitişten dakikalar önce)",
           "notify_live_interval_seconds": "Canlı Güncelleme Aralığı (saniye)",
           "notify_live_overrun_percent": "Canlı Güncelleme Aşım İzinleri (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "Bildirim Simgesi",
           "notify_start_message": "Mesaj Formatını Başlat",
           "notify_finish_message": "Mesaj Formatını Bitir",
-          "notify_pre_complete_message": "Tamamlanma Öncesi Mesaj Formatı"
+          "notify_pre_complete_message": "Tamamlanma Öncesi Mesaj Formatı",
+          "notify_start_services": "Döngü Başlatma - Bildirim Hedefleri",
+          "notify_finish_services": "Döngü Sonu - Bildirim Hedefleri",
+          "notify_live_services": "Canlı İlerleme - Bildirim Hedefleri",
+          "notify_live_chronometer": "Kronometre Geri Sayım Sayacı",
+          "energy_price_entity": "Enerji Fiyatı – Varlık (isteğe bağlı)",
+          "energy_price_static": "Enerji Fiyatı - Statik değer (isteğe bağlı)"
         },
         "data_description": {
-          "notify_service": "Ev Asistanı'nın kullanılması için hizmeti bilgilendirin (isteğe bağlı).",
           "notify_actions": "Bildirimler (komut dosyaları, bildirim, TTS vb.) için çalıştırılacak isteğe bağlı Ev Asistanı eylem dizisi. Ayarlanırsa eylemler, geri dönüş bildirim hizmetinden önce çalıştırılır.",
           "notify_people": "Varlık geçidi için kullanılan kişi varlıkları. Etkinleştirildiğinde, seçilen en az bir kişi evde olana kadar bildirim teslimi ertelenir.",
           "notify_only_when_home": "Etkinleştirilirse, seçilen en az bir kişi evde olana kadar bildirimleri erteleyin.",
           "notify_fire_events": "Etkinleştirilirse, otomasyonları desteklemek için döngü başlangıcı ve bitişi (ha_washdata_cycle_started ve ha_washdata_cycle_ended) için Home Assistant olaylarını tetikleyin.",
-          "notify_events": "Hangi etkinlikler için bildirim gönderileceği.",
           "notify_before_end_minutes": "Bir bildirimin tetiklenmesi için döngünün tahmini bitiminden dakikalar önce. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0.",
           "notify_live_interval_seconds": "Çalıştırma sırasında ilerleme güncellemelerinin ne sıklıkta gönderildiği. Daha düşük değerler daha duyarlıdır ancak daha fazla bildirim tüketir. Minimum 30 saniye uygulanır; 30 saniyenin altındaki değerler otomatik olarak 30 saniyeye yuvarlanır.",
           "notify_live_overrun_percent": "Uzun/fazla çalıştırma döngüleri için tahmini güncelleme sayısının üzerindeki güvenlik marjı (örneğin %20, 1,2 kat tahmini güncellemeye izin verir).",
@@ -132,7 +136,13 @@
           "notify_icon": "Bildirimler için kullanılacak simge (ör. mdi:çamaşır makinesi). Simge göndermemek için boş bırakın.",
           "notify_start_message": "Bir döngü başladığında gönderilen mesaj. {device} yer tutucusunu destekler.",
           "notify_finish_message": "Bir döngü tamamlandığında gönderilen mesaj. {device}, {duration}, {program} yer tutucularını destekler.",
-          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler."
+          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler.",
+          "notify_start_services": "Bir döngü başladığında uyarı verecek bir veya daha fazla bildirim hizmeti (ör. notify.mobile_app_my_phone). Başlangıç ​​bildirimlerini atlamak için boş bırakın.",
+          "notify_finish_services": "Bir döngü tamamlandığında veya tamamlanmaya yaklaştığında uyarı verecek bir veya daha fazla bildirim hizmeti. Bitirme bildirimlerini atlamak için boş bırakın.",
+          "notify_live_services": "Döngü çalışırken canlı ilerleme güncellemelerini almak için bir veya daha fazla bildirim hizmeti (yalnızca mobil yardımcı uygulama). Canlı güncellemeleri atlamak için boş bırakın.",
+          "notify_live_chronometer": "Etkinleştirildiğinde, her canlı güncelleme tahmini bitiş süresine kadar bir kronometre geri sayımı içerir. Güncellemeler arasında bildirim zamanlayıcısı cihazda otomatik olarak yavaşlar (yalnızca Android tamamlayıcı uygulaması).",
+          "energy_price_entity": "Geçerli elektrik fiyatını içeren sayısal bir varlık seçin (ör. sensör.elektrik_fiyat, giriş_numarası.enerji_oranı). Ayarlandığında, {cost} yer tutucusunu etkinleştirir. Her ikisi de yapılandırılmışsa statik değere göre önceliklidir.",
+          "energy_price_static": "kWh başına sabit elektrik fiyatı. Ayarlandığında, {cost} yer tutucusunu etkinleştirir. Yukarıda bir varlık yapılandırılmışsa yoksayılır. Mesaj şablonuna para birimi simgenizi ekleyin, ör. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "DTW Bant Genişliği",
           "external_end_trigger_enabled": "Harici Döngü Sonu Tetikleyicisini Etkinleştir",
           "external_end_trigger": "Harici Döngü Sonu Sensörü",
-          "external_end_trigger_inverted": "Tetikleme Mantığını Tersine Çevir (Tetikleme KAPALI)"
+          "external_end_trigger_inverted": "Tetikleme Mantığını Tersine Çevir (Tetikleme KAPALI)",
+          "suppress_feedback_notifications": "Geri Bildirim Bildirimlerini Bastır",
+          "pump_stuck_duration": "Pompa Sıkışmış Uyarı Eşiği (ler) (Yalnızca Pompa)",
+          "door_sensor_entity": "Kapı Sensörü",
+          "pause_cuts_power": "Duraklatıldığında Gücü Kesin",
+          "notify_unload_delay_minutes": "Çamaşır Bekleniyor Bildirim Gecikmesi (dk)"
         },
         "data_description": {
           "apply_suggestions": "Öğrenme algoritmasından önerilen değerlere yönelik bir inceleme adımı açmak için bu kutuyu işaretleyin. Hiçbir şey otomatik olarak kaydedilmez.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} sn\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Döngü süresinin bir oranı olarak izin verilen maksimum zaman bükülmesi (uzama). Daha yüksek değerler, oldukça değişken döngülerin eşleştirilmesine olanak tanır ancak CPU maliyetini artırır. Varsayılan: 0,20 (%20).",
           "external_end_trigger_enabled": "Döngünün tamamlanmasını tetiklemek için harici bir ikili sensörün izlenmesini etkinleştirin.",
           "external_end_trigger": "Bir ikili sensör varlığı seçin. Bu sensör tetiklendiğinde mevcut döngü 'tamamlandı' durumuyla sona erecektir.",
-          "external_end_trigger_inverted": "Varsayılan olarak tetik, sensör AÇIK konuma getirildiğinde etkinleşir. Bunun yerine sensör KAPALI duruma geldiğinde ateşleme yapmak için bu kutuyu işaretleyin."
+          "external_end_trigger_inverted": "Varsayılan olarak tetik, sensör AÇIK konuma getirildiğinde etkinleşir. Bunun yerine sensör KAPALI duruma geldiğinde ateşleme yapmak için bu kutuyu işaretleyin.",
+          "suppress_feedback_notifications": "Etkinleştirildiğinde, WashData yine de dahili olarak takip edecek ve geri bildirim isteyecektir ancak döngüleri onaylamanızı isteyen kalıcı bildirimler göstermeyecektir. Döngüler her zaman doğru şekilde algılandığında ve istemlerin dikkatinizi dağıttığını düşündüğünüzde kullanışlıdır.",
+          "pump_stuck_duration": "Bu kadar saniyeden sonra bir pompa döngüsü hala çalışıyorsa, bir kez ha_washdata_pump_stuck olayı tetiklenir. Sıkışan bir motoru tespit etmek için bunu kullanın (tipik karter pompası çalışması 60 saniyenin altındadır). Varsayılan: 1800 sn (30 dk). Yalnızca pompa cihazı tipi.",
+          "door_sensor_entity": "Makine kapısı için opsiyonel ikili sensör (açık = açık, kapalı = kapalı). Etkin bir döngü sırasında kapı açıldığında, WashData döngünün kasıtlı olarak duraklatıldığını onaylayacaktır. Döngü sona erdikten sonra kapı hala kapalıysa, kapı açılıncaya kadar durum 'Temiz' olarak değişir. Not: Kapının kapatılması, duraklatılmış bir döngüyü otomatik olarak DEVAM ETMEZ; devam ettirme, Döngüyü Sürdür düğmesi veya hizmet aracılığıyla manuel olarak tetiklenmelidir.",
+          "pause_cuts_power": "Döngüyü Duraklat düğmesi veya hizmeti aracılığıyla duraklatırken, yapılandırılmış anahtar varlığını da kapatın. Yalnızca bu cihaz için bir anahtar varlığı yapılandırıldığında etkili olur.",
+          "notify_unload_delay_minutes": "Döngü bittikten ve kapı bu kadar dakika boyunca açılmadıktan sonra bitiş bildirimi kanalı aracılığıyla bir bildirim gönderin (Kapı Sensörü gerektirir). Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 60 dk."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Kırpma Döngüsü — Döngüyü Seçin",
+        "title": "Kırpma Döngüsü - Döngüyü Seçin",
         "description": "Kırpılacak bir döngü seçin. ✓ = tamamlandı, ⚠ = devam ettirildi, ✗ = kesintiye uğradı",
         "data": {
           "cycle_id": "Döngü"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: Önerilen Ayarlar Hazır ({device})",
       "suggestions_ready_notification_message": "**Önerilen Ayarlar** sensörü artık **{count}** uygulanabilir öneriler raporluyor.\n\nBunları incelemek ve uygulamak için: **Ayarlar > Cihazlar ve Hizmetler > WashData > Yapılandır > Gelişmiş Ayarlar > Önerilen Değerleri Uygula**.\n\nÖneriler isteğe bağlıdır ve kaydetmeden önce incelenmek üzere gösterilir.",
       "trim_range_invalid": "Başlangıç ​​bitişten önce olmalıdır. Lütfen trim noktalarınızı ayarlayın.",
-      "trim_failed": "Kırpma başarısız oldu. Döngü artık mevcut olmayabilir veya pencere boş olabilir."
+      "trim_failed": "Kırpma başarısız oldu. Döngü artık mevcut olmayabilir veya pencere boş olabilir.",
+      "auto_tune_suggestion": "{device_type} {device_title} hayalet döngüleri algıladı. Önerilen min_güç değişikliği: {current_min}W -> {new_min}W (otomatik olarak uygulanmaz).",
+      "auto_tune_title": "WashData Otomatik Ayarlama",
+      "auto_tune_fallback": "{device_type} {device_title} hayalet döngüleri algıladı. Önerilen min_güç değişikliği: {current_min}W -> {new_min}W (otomatik olarak uygulanmaz)."
     },
     "abort": {
       "no_cycles_found": "Döngü bulunamadı",
@@ -999,7 +1022,8 @@
           "interrupted": "Kesintiye uğradı",
           "force_stopped": "Zorla Durduruldu",
           "rinse": "Durulmak",
-          "unknown": "Bilinmiyor"
+          "unknown": "Bilinmiyor",
+          "clean": "Temiz"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Önerilen Ayarlar"
+      },
+      "pump_runs_today": {
+        "name": "Pompa Çalışmaları (Son 24 saat)"
+      },
+      "cycle_count": {
+        "name": "Döngü Sayısı"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Sonlandırma Döngüsünü Zorla"
+      },
+      "pause_cycle": {
+        "name": "Döngüyü Duraklat"
+      },
+      "resume_cycle": {
+        "name": "Döngüyü Devam Ettir"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "Döngü bulunamadı veya güç verisi yok."
     },
     "trim_failed_empty_window": {
-      "message": "Kesim başarısız oldu — döngü bulunamadı, güç verisi yok veya ortaya çıkan pencere boş."
+      "message": "Kesim başarısız oldu - döngü bulunamadı, güç verisi yok veya ortaya çıkan pencere boş."
     },
     "trim_invalid_range": {
       "message": "trim_end_s, trim_start_s'den büyük olmalıdır."
+    },
+    "device_id_required": {
+      "message": "Geçerli bir cihaz_kimliği gerekli."
     }
   }
 }

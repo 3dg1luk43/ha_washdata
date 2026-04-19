@@ -7,12 +7,12 @@ CONF_POWER_SENSOR = "power_sensor"
 CONF_NAME = "name"
 CONF_MIN_POWER = "min_power"
 CONF_OFF_DELAY = "off_delay"
-CONF_NOTIFY_SERVICE = "notify_service"  # Deprecated — kept for migration only
+CONF_NOTIFY_SERVICE = "notify_service"  # Deprecated - kept for migration only
 CONF_NOTIFY_ACTIONS = "notify_actions"
 CONF_NOTIFY_PEOPLE = "notify_people"
 CONF_NOTIFY_ONLY_WHEN_HOME = "notify_only_when_home"
 CONF_NOTIFY_FIRE_EVENTS = "notify_fire_events"
-CONF_NOTIFY_EVENTS = "notify_events"  # Deprecated — kept for migration only
+CONF_NOTIFY_EVENTS = "notify_events"  # Deprecated - kept for migration only
 CONF_NOTIFY_START_SERVICES = "notify_start_services"
 CONF_NOTIFY_FINISH_SERVICES = "notify_finish_services"
 CONF_NOTIFY_LIVE_SERVICES = "notify_live_services"
@@ -106,7 +106,7 @@ DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS = 300
 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
 DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
 DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES = 60  # 1 hour before "still waiting" nag notification
-DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago — laundry is still inside."
+DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago - laundry is still inside."
 
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts
@@ -164,7 +164,7 @@ DEFAULT_ANTI_WRINKLE_EXIT_POWER = 0.8  # W
 
 # Pump Monitor settings (pump device type only)
 CONF_PUMP_STUCK_DURATION = "pump_stuck_duration"  # Seconds before a running pump is flagged as stuck
-DEFAULT_PUMP_STUCK_DURATION = 1800  # 30 min — typical sump pump runs <60 s; 30 min implies motor is jammed
+DEFAULT_PUMP_STUCK_DURATION = 1800  # 30 min - typical sump pump runs <60 s; 30 min implies motor is jammed
 EVENT_PUMP_STUCK = "ha_washdata_pump_stuck"  # Fired when stuck-pump threshold is exceeded
 
 # Profile Matching Thresholds
@@ -276,7 +276,7 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_AIR_FRYER: 300,  # 5 min minimum
     DEVICE_TYPE_HEAT_PUMP: 900,  # 15 min minimum
     DEVICE_TYPE_BREAD_MAKER: 1800,  # 30 min (even express bread takes 30+ min)
-    DEVICE_TYPE_PUMP: 5,  # 5 s — pump cycles can be under 30 seconds
+    DEVICE_TYPE_PUMP: 5,  # 5 s - pump cycles can be under 30 seconds
 }
 
 # Default min_off_gap by device type (seconds)
@@ -317,7 +317,7 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
 # Default sampling interval by device type
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
     DEVICE_TYPE_COFFEE_MACHINE: 10.0,  # 10s is sufficient for brew cycles
-    DEVICE_TYPE_PUMP: 10.0,  # 10s — pump cycles can be <30 s; 30s default would miss them
+    DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
 }
 
 # Default profile match min duration ratio by device type

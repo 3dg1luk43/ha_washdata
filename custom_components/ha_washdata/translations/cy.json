@@ -65,19 +65,20 @@
           "power_sensor": "Endid Synhwyrydd Pŵer",
           "min_power": "Isafswm Pŵer (W)",
           "off_delay": "Oedi (au) Diwedd Beic",
-          "notify_service": "Gwasanaeth Hysbysu (e.e. notify.mobile_app)",
           "notify_actions": "Camau Hysbysu",
           "notify_people": "Oedi Wrth Ddarlledu Nes Bod y Bobl Hyn Adref",
           "notify_only_when_home": "Gohirio Hysbysiadau Hyd nes y bydd y Person a Ddetholir Adref",
           "notify_fire_events": "Digwyddiadau Awtomeiddio Tân",
-          "notify_events": "Digwyddiadau i'w Hysbysu",
           "notify_before_end_minutes": "Hysbysiad cyn-gwblhau (munudau cyn diwedd)",
           "notify_title": "Teitl yr Hysbysiad",
           "notify_icon": "Eicon Hysbysiad",
           "notify_start_message": "Dechrau Fformat Neges",
           "notify_finish_message": "Gorffen Fformat Neges",
           "notify_pre_complete_message": "Fformat Neges Cyn Cwblhau",
-          "show_advanced": "Golygu Gosodiadau Uwch (Cam Nesaf)"
+          "show_advanced": "Golygu Gosodiadau Uwch (Cam Nesaf)",
+          "notify_start_services": "Cychwyn Beicio - Targedau Hysbysu",
+          "notify_finish_services": "Gorffen Beic - Targedau Hysbysu",
+          "notify_live_services": "Cynnydd Byw - Targedau Hysbysu"
         },
         "data_description": {
           "apply_suggestions": "Ticiwch y blwch hwn i gopïo'r gwerthoedd a awgrymir gan yr algorithm dysgu i'r ffurflen. Adolygu cyn cadw.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "Yr endid synhwyrydd sy'n adrodd am bŵer amser real (mewn watiau). Gallwch chi newid hyn unrhyw bryd heb golli data hanesyddol - mae'n ddefnyddiol os ydych chi'n amnewid plwg clyfar.",
           "min_power": "Mae darlleniadau pŵer uwchlaw'r trothwy hwn (mewn watiau) yn dangos bod y teclyn yn rhedeg. Dechreuwch gyda 2W ar gyfer y rhan fwyaf o ddyfeisiau.",
           "off_delay": "Eiliadau rhaid i'r pŵer llyfnhau aros o dan y trothwy stopio i nodi cwblhau. Diofyn: 120s.",
-          "notify_service": "Cynorthwyydd Cartref yn hysbysu'r gwasanaeth i'w ddefnyddio (dewisol).",
           "notify_actions": "Dilyniant gweithredu Cynorthwyydd Cartref Dewisol i redeg am hysbysiadau (sgriptiau, hysbysu, TTS, ac ati). Os caiff ei osod, bydd camau gweithredu'n rhedeg cyn y gwasanaeth hysbysu wrth gefn.",
           "notify_people": "Endidau pobl a ddefnyddir ar gyfer gatiau presenoldeb. Pan fydd wedi'i alluogi, bydd yr hysbysiad yn cael ei ohirio nes bod o leiaf un person dethol gartref.",
           "notify_only_when_home": "Os caiff ei alluogi, gohiriwch hysbysiadau nes bod o leiaf un person a ddewiswyd gartref.",
           "notify_fire_events": "Os yw wedi'i alluogi, tanio digwyddiadau Cynorthwyydd Cartref ar gyfer dechrau a diwedd beiciau (ha_washdata_cycle_started a ha_washdata_cycle_ended) i yrru awtomeiddio.",
-          "notify_events": "Ar gyfer pa ddigwyddiadau i anfon hysbysiadau.",
           "notify_before_end_minutes": "Munudau cyn diwedd amcangyfrifedig y cylch i sbarduno hysbysiad. Gosodwch ar 0 i analluogi. Rhagosodedig: 0.",
           "notify_title": "Teitl personol ar gyfer hysbysiadau. Yn cefnogi {device} dalfan.",
           "notify_icon": "Eicon i'w ddefnyddio ar gyfer hysbysiadau (e.e. mdi: peiriant golchi). Gadewch yn wag i anfon heb eicon.",
           "notify_start_message": "Neges wedi'i hanfon pan fydd cylch yn dechrau. Yn cefnogi {device} dalfan.",
           "notify_finish_message": "Neges wedi'i hanfon pan fydd cylch yn gorffen. Yn cefnogi {device}, {duration}, {program} dalfan.",
-          "notify_pre_complete_message": "Anfonwyd y neges cyn ei chwblhau. Yn cefnogi {device}, {minutes} dalfan."
+          "notify_pre_complete_message": "Anfonwyd y neges cyn ei chwblhau. Yn cefnogi {device}, {minutes} dalfan.",
+          "notify_start_services": "Mae un neu fwy yn hysbysu gwasanaethau i rybuddio pan fydd cylch yn dechrau. Gadewch yn wag i hepgor hysbysiadau cychwyn.",
+          "notify_finish_services": "Mae un neu fwy yn hysbysu gwasanaethau i rybuddio pan fydd cylch yn gorffen neu bron â chael ei gwblhau. Gadewch yn wag i hepgor hysbysiadau gorffen.",
+          "notify_live_services": "Mae un neu fwy yn hysbysu gwasanaethau i dderbyn diweddariadau cynnydd byw tra bod y cylch yn rhedeg (ap cydymaith symudol yn unig). Gadewch yn wag i hepgor diweddariadau byw."
         }
       },
       "notifications": {
         "title": "Hysbysiadau",
         "description": "Ffurfweddu sianeli hysbysu, templedi, a diweddariadau cynnydd symudol byw dewisol.",
         "data": {
-          "notify_service": "Gwasanaeth Hysbysu (e.e. notify.mobile_app)",
           "notify_actions": "Camau Hysbysu",
           "notify_people": "Oedi Wrth Ddarlledu Nes Bod y Bobl Hyn Adref",
           "notify_only_when_home": "Gohirio Hysbysiadau Hyd nes y bydd y Person a Ddetholir Adref",
           "notify_fire_events": "Digwyddiadau Awtomeiddio Tân",
-          "notify_events": "Digwyddiadau i'w Hysbysu",
           "notify_before_end_minutes": "Hysbysiad cyn-gwblhau (munudau cyn diwedd)",
           "notify_live_interval_seconds": "Cyfnod Diweddariad Byw (eiliadau)",
           "notify_live_overrun_percent": "Lwfans Gorwario Diweddariad Byw (%)",
@@ -116,23 +116,33 @@
           "notify_icon": "Eicon Hysbysiad",
           "notify_start_message": "Dechrau Fformat Neges",
           "notify_finish_message": "Gorffen Fformat Neges",
-          "notify_pre_complete_message": "Fformat Neges Cyn Cwblhau"
+          "notify_pre_complete_message": "Fformat Neges Cyn Cwblhau",
+          "notify_start_services": "Cychwyn Beicio - Targedau Hysbysu",
+          "notify_finish_services": "Gorffen Beic - Targedau Hysbysu",
+          "notify_live_services": "Cynnydd Byw - Targedau Hysbysu",
+          "notify_live_chronometer": "Amserydd Cyfrif Down cronomedr",
+          "energy_price_entity": "Pris Ynni - Endid (dewisol)",
+          "energy_price_static": "Pris Ynni - Gwerth statig (dewisol)"
         },
         "data_description": {
-          "notify_service": "Cynorthwyydd Cartref yn hysbysu'r gwasanaeth i'w ddefnyddio (dewisol).",
           "notify_actions": "Dilyniant gweithredu Cynorthwyydd Cartref Dewisol i redeg am hysbysiadau (sgriptiau, hysbysu, TTS, ac ati). Os caiff ei osod, bydd camau gweithredu'n rhedeg cyn y gwasanaeth hysbysu wrth gefn.",
           "notify_people": "Endidau pobl a ddefnyddir ar gyfer gatiau presenoldeb. Pan fydd wedi'i alluogi, bydd yr hysbysiad yn cael ei ohirio nes bod o leiaf un person dethol gartref.",
           "notify_only_when_home": "Os caiff ei alluogi, gohiriwch hysbysiadau nes bod o leiaf un person a ddewiswyd gartref.",
           "notify_fire_events": "Os yw wedi'i alluogi, tanio digwyddiadau Cynorthwyydd Cartref ar gyfer dechrau a diwedd beiciau (ha_washdata_cycle_started a ha_washdata_cycle_ended) i yrru awtomeiddio.",
-          "notify_events": "Ar gyfer pa ddigwyddiadau i anfon hysbysiadau.",
           "notify_before_end_minutes": "Munudau cyn diwedd amcangyfrifedig y cylch i sbarduno hysbysiad. Gosodwch ar 0 i analluogi. Rhagosodedig: 0.",
-          "notify_live_interval_seconds": "Pa mor aml mae diweddariadau cynnydd yn cael eu hanfon wrth redeg. Mae gwerthoedd is yn fwy ymatebol ond yn defnyddio mwy o hysbysiadau. Mae isafswm o 30 eiliad yn cael ei orfodi — mae gwerthoedd o dan 30 s yn cael eu talgrynnu'n awtomatig hyd at 30 s.",
+          "notify_live_interval_seconds": "Pa mor aml mae diweddariadau cynnydd yn cael eu hanfon wrth redeg. Mae gwerthoedd is yn fwy ymatebol ond yn defnyddio mwy o hysbysiadau. Mae isafswm o 30 eiliad yn cael ei orfodi - mae gwerthoedd o dan 30 s yn cael eu talgrynnu'n awtomatig hyd at 30 s.",
           "notify_live_overrun_percent": "Ymyl diogelwch uwchlaw'r cyfrif diweddaru amcangyfrifedig ar gyfer cylchoedd hir/rhedegog (er enghraifft mae 20% yn caniatáu 1.2x o ddiweddariadau amcangyfrifedig).",
           "notify_title": "Teitl personol ar gyfer hysbysiadau. Yn cefnogi {device} dalfan.",
           "notify_icon": "Eicon i'w ddefnyddio ar gyfer hysbysiadau (e.e. mdi: peiriant golchi). Gadewch yn wag i anfon heb eicon.",
           "notify_start_message": "Neges wedi'i hanfon pan fydd cylch yn dechrau. Yn cefnogi {device} dalfan.",
           "notify_finish_message": "Neges wedi'i hanfon pan fydd cylch yn gorffen. Yn cefnogi {device}, {duration}, {program} dalfan.",
-          "notify_pre_complete_message": "Anfonwyd y neges cyn ei chwblhau. Yn cefnogi {device}, {minutes} dalfan."
+          "notify_pre_complete_message": "Anfonwyd y neges cyn ei chwblhau. Yn cefnogi {device}, {minutes} dalfan.",
+          "notify_start_services": "Mae un neu fwy yn hysbysu gwasanaethau i rybuddio pan fydd cylch yn dechrau (e.e. notify.mobile_app_my_phone). Gadewch yn wag i hepgor hysbysiadau cychwyn.",
+          "notify_finish_services": "Mae un neu fwy yn hysbysu gwasanaethau i rybuddio pan fydd cylch yn gorffen neu bron â chael ei gwblhau. Gadewch yn wag i hepgor hysbysiadau gorffen.",
+          "notify_live_services": "Mae un neu fwy yn hysbysu gwasanaethau i dderbyn diweddariadau cynnydd byw tra bod y cylch yn rhedeg (ap cydymaith symudol yn unig). Gadewch yn wag i hepgor diweddariadau byw.",
+          "notify_live_chronometer": "Pan fydd wedi'i alluogi, mae pob diweddariad byw yn cynnwys cyfrif cronomedr i'r amser gorffen amcangyfrifedig. Mae'r amserydd hysbysu yn ticio i lawr yn awtomatig ar y ddyfais rhwng diweddariadau (app cydymaith Android yn unig).",
+          "energy_price_entity": "Dewiswch endid rhifol sy'n dal y pris trydan cyfredol (e.e. sensor.electricity_price, mewnbwn_number.energy_rate). Pan fydd wedi'i osod, mae'n galluogi'r dalfan {cost}. Yn cael blaenoriaeth dros y gwerth statig os yw'r ddau wedi'u ffurfweddu.",
+          "energy_price_static": "Pris trydan sefydlog fesul kWh. Pan fydd wedi'i osod, mae'n galluogi'r dalfan {cost}. Wedi'i anwybyddu os yw endid wedi'i ffurfweddu uchod. Ychwanegwch eich symbol arian cyfred yn y templed neges, e.e. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "Lled Band DTW",
           "external_end_trigger_enabled": "Galluogi Sbardun Diwedd Beic Allanol",
           "external_end_trigger": "Synhwyrydd Terfyn Beic Allanol",
-          "external_end_trigger_inverted": "Rhesymeg Sbardun Gwrthdro (Sbardun wedi'i DIFFODD)"
+          "external_end_trigger_inverted": "Rhesymeg Sbardun Gwrthdro (Sbardun wedi'i DIFFODD)",
+          "suppress_feedback_notifications": "Atal Hysbysiadau Adborth",
+          "pump_stuck_duration": "Trothwy(au) Rhybudd Pwmp yn Sownd (Pwmp yn Unig)",
+          "door_sensor_entity": "Synhwyrydd Drws",
+          "pause_cuts_power": "Torri Pŵer Wrth Oedi",
+          "notify_unload_delay_minutes": "Oedi Hysbysiad Aros Golchdy (munud)"
         },
         "data_description": {
           "apply_suggestions": "Ticiwch y blwch hwn i agor cam adolygu ar gyfer gwerthoedd a awgrymir o'r algorithm dysgu. Nid oes dim yn cael ei arbed yn awtomatig.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Uchafswm yr amser ysbeilio (ymestyn) fel cymhareb hyd y cylch. Mae gwerthoedd uwch yn caniatáu paru cylchoedd amrywiol iawn ond yn cynyddu cost CPU. Diofyn: 0.20 (20%).",
           "external_end_trigger_enabled": "Galluogi monitro synhwyrydd deuaidd allanol i sbarduno cwblhau cylchred.",
           "external_end_trigger": "Dewiswch endid synhwyrydd deuaidd. Pan fydd y synhwyrydd hwn yn sbarduno, bydd y cylch presennol yn dod i ben gyda statws 'cwblhawyd'.",
-          "external_end_trigger_inverted": "Yn ddiofyn, mae'r sbardun yn tanio pan fydd y synhwyrydd yn troi YMLAEN. Gwiriwch y blwch hwn i danio pan fydd y synhwyrydd yn diffodd yn lle hynny."
+          "external_end_trigger_inverted": "Yn ddiofyn, mae'r sbardun yn tanio pan fydd y synhwyrydd yn troi YMLAEN. Gwiriwch y blwch hwn i danio pan fydd y synhwyrydd yn diffodd yn lle hynny.",
+          "suppress_feedback_notifications": "Pan fydd wedi'i alluogi, bydd WashData yn dal i olrhain a gofyn am adborth yn fewnol ond ni fydd yn dangos hysbysiadau cyson yn gofyn ichi gadarnhau cylchoedd. Mae'n ddefnyddiol pan fydd beiciau bob amser yn cael eu canfod yn gywir a'r anogwyr yn tynnu sylw.",
+          "pump_stuck_duration": "Os yw cylch pwmp yn dal i redeg ar ôl yr eiliadau lawer hyn, mae digwyddiad ha_washdata_pump_stuck yn cael ei danio unwaith. Defnyddiwch hwn i ganfod modur wedi'i jamio (mae rhediad pwmp swmp nodweddiadol o dan 60 s). Diofyn: 1800 s (30 mun). Math o ddyfais pwmp yn unig.",
+          "door_sensor_entity": "Synhwyrydd deuaidd dewisol ar gyfer drws y peiriant (ar = agored, i ffwrdd = ar gau). Pan fydd y drws yn agor yn ystod cylch gweithredol, bydd WashData yn cadarnhau bod y cylch wedi'i seibio'n fwriadol. Ar ôl i'r cylch ddod i ben, os yw'r drws yn dal i fod ar gau, mae'r cyflwr yn newid i 'Glan' nes bod y drws yn cael ei agor. Sylwch: NID yw cau'r drws yn ailddechrau cylch wedi'i seibio'n awtomatig - rhaid cychwyn ailddechrau â llaw trwy'r botwm neu'r gwasanaeth Ail-ddechrau Seiclo.",
+          "pause_cuts_power": "Wrth oedi trwy'r botwm Pause Cycle neu'r gwasanaeth, trowch yr endid switsh ffurfweddu i ffwrdd hefyd. Dim ond os yw endid switsh wedi'i ffurfweddu ar gyfer y ddyfais hon y daw i rym.",
+          "notify_unload_delay_minutes": "Anfonwch hysbysiad trwy'r sianel hysbysu gorffen ar ôl i'r cylch ddod i ben ac nid yw'r drws wedi'i agor am lawer o funudau (angen Synhwyrydd Drws). Gosodwch ar 0 i analluogi. Diofyn: 60 mun."
         }
       },
       "diagnostics": {
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "Data Golchi: Gosodiadau Awgrymedig Yn Barod ({device})",
       "suggestions_ready_notification_message": "Mae'r synhwyrydd **Gosodiadau a Awgrymir** bellach yn adrodd ar argymhellion y gellir eu gweithredu **{count}**.\n\nI'w hadolygu a'u cymhwyso: **Gosodiadau > Dyfeisiau a Gwasanaethau > Golchi Data > Ffurfweddu > Gosodiadau Uwch > Cymhwyso Gwerthoedd a Awgrymir**.\n\nMae awgrymiadau yn ddewisol ac yn cael eu dangos i'w hadolygu cyn i chi gadw.",
       "trim_range_invalid": "Rhaid dechrau cyn diwedd. Addaswch eich pwyntiau trimio.",
-      "trim_failed": "Methodd trimio. Efallai nad yw'r cylch yn bodoli mwyach neu mae'r ffenestr yn wag."
+      "trim_failed": "Methodd trimio. Efallai nad yw'r cylch yn bodoli mwyach neu mae'r ffenestr yn wag.",
+      "auto_tune_suggestion": "{device_type} {device_title} cylchoedd ysbrydion wedi'u canfod. Newid min_power a awgrymir: {current_min}W -> {new_min}W (heb ei gymhwyso'n awtomatig).",
+      "auto_tune_title": "Awto-Alaw WashData",
+      "auto_tune_fallback": "{device_type} {device_title} cylchoedd ysbrydion wedi'u canfod. Newid min_power a awgrymir: {current_min}W -> {new_min}W (heb ei gymhwyso'n awtomatig)."
     },
     "abort": {
       "no_cycles_found": "Heb ganfod cylchoedd",
@@ -999,7 +1022,8 @@
           "interrupted": "Torri ar draws",
           "force_stopped": "Gorfod Wedi Stopio",
           "rinse": "Rinsiwch",
-          "unknown": "Anhysbys"
+          "unknown": "Anhysbys",
+          "clean": "Glan"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Gosodiadau a Awgrymir"
+      },
+      "pump_runs_today": {
+        "name": "Rhediadau Pwmp (24 h diwethaf)"
+      },
+      "cycle_count": {
+        "name": "Cyfrif Beiciau"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Gorfodi Diwedd y Cylch"
+      },
+      "pause_cycle": {
+        "name": "Pause Cycle"
+      },
+      "resume_cycle": {
+        "name": "Ail-ddechrau Beicio"
       }
     }
   },
@@ -1078,6 +1114,9 @@
     },
     "trim_invalid_range": {
       "message": "rhaid i trim_end_s fod yn fwy na trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Mae angen ID device_ dilys."
     }
   }
 }

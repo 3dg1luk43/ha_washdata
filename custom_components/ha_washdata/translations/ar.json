@@ -65,19 +65,20 @@
           "power_sensor": "كيان استشعار الطاقة",
           "min_power": "الحد الأدنى من الطاقة (W)",
           "off_delay": "تأخير نهاية الدورة (ثواني)",
-          "notify_service": "خدمة الإشعارات (على سبيل المثال، notify.mobile_app)",
           "notify_actions": "إجراءات الإخطار",
           "notify_people": "تأخير التسليم حتى يعود هؤلاء الأشخاص إلى المنزل",
           "notify_only_when_home": "تأخير الإخطارات حتى يعود الشخص المحدد إلى المنزل",
           "notify_fire_events": "أحداث تشغيل الأتمتة",
-          "notify_events": "الأحداث للإخطار",
           "notify_before_end_minutes": "إشعار ما قبل الإكمال (قبل دقائق من النهاية)",
           "notify_title": "عنوان الإخطار",
           "notify_icon": "أيقونة الإخطار",
           "notify_start_message": "بدء تنسيق الرسالة",
           "notify_finish_message": "إنهاء تنسيق الرسالة",
           "notify_pre_complete_message": "تنسيق رسالة ما قبل الإكمال",
-          "show_advanced": "تحرير الإعدادات المتقدمة (الخطوة التالية)"
+          "show_advanced": "تحرير الإعدادات المتقدمة (الخطوة التالية)",
+          "notify_start_services": "بداية الدورة - أهداف الإخطار",
+          "notify_finish_services": "إنهاء الدورة - أهداف الإخطار",
+          "notify_live_services": "التقدم المباشر - أهداف الإخطار"
         },
         "data_description": {
           "apply_suggestions": "حدد هذا المربع لنسخ القيم التي تقترحها خوارزمية التعلم في النموذج. المراجعة قبل الحفظ.\n\nمقترح (من التعلم):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "يقوم كيان المستشعر بالإبلاغ عن الطاقة في الوقت الفعلي (بالواط). يمكنك تغيير هذا في أي وقت دون فقدان البيانات التاريخية، وهو أمر مفيد إذا قمت باستبدال القابس الذكي.",
           "min_power": "تشير قراءات الطاقة فوق هذا الحد (بالواط) إلى أن الجهاز قيد التشغيل. ابدأ بـ 2 وات لمعظم الأجهزة.",
           "off_delay": "الثواني، يجب أن تظل القوة الممهدة أقل من حد التوقف لوضع علامة على الاكتمال. الافتراضي: 120 ثانية.",
-          "notify_service": "خدمة إخطار مساعد المنزل لاستخدامها (اختياري).",
           "notify_actions": "تسلسل إجراءات Home Assistant الاختياري لتشغيل الإشعارات (البرامج النصية، والإشعارات، وتحويل النص إلى كلام، وما إلى ذلك). في حالة التعيين، سيتم تشغيل الإجراءات قبل خدمة الإشعارات الاحتياطية.",
           "notify_people": "الكيانات البشرية المستخدمة لبوابة الحضور. عند التمكين، يتم تأخير تسليم الإشعارات حتى يعود شخص واحد محدد على الأقل إلى المنزل.",
           "notify_only_when_home": "إذا تم تمكينه، قم بتأخير الإشعارات حتى يعود شخص واحد محدد على الأقل إلى المنزل.",
           "notify_fire_events": "في حالة التمكين، قم بتشغيل أحداث Home Assistant لبدء الدورة ونهايتها (ha_washdata_cycle_started وha_washdata_cycle_ended) لتشغيل عمليات التشغيل الآلي.",
-          "notify_events": "الأحداث التي سيتم إرسال إشعارات لها.",
           "notify_before_end_minutes": "دقائق قبل النهاية المقدرة للدورة لإطلاق إشعار. اضبط على 0 للتعطيل. الافتراضي: 0.",
           "notify_title": "عنوان مخصص للإخطارات. يدعم العنصر النائب {device}.",
           "notify_icon": "الرمز المطلوب استخدامه للإشعارات (على سبيل المثال، mdi:washing-machine). اتركه فارغًا لاستخدام الافتراضي.",
           "notify_start_message": "يتم إرسال الرسالة عند بدء الدورة. يدعم العنصر النائب {device}.",
           "notify_finish_message": "يتم إرسال الرسالة عند انتهاء الدورة. يدعم العناصر النائبة {device} و{duration} و{program}.",
-          "notify_pre_complete_message": "تم إرسال الرسالة قبل الانتهاء. يدعم العناصر النائبة {device} و{minutes}."
+          "notify_pre_complete_message": "تم إرسال الرسالة قبل الانتهاء. يدعم العناصر النائبة {device} و{minutes}.",
+          "notify_start_services": "خدمة إخطار واحدة أو أكثر للتنبيه عند بدء الدورة. اتركه فارغًا لتخطي إشعارات البدء.",
+          "notify_finish_services": "تقوم واحدة أو أكثر من خدمات الإخطار بالتنبيه عند انتهاء الدورة أو اقترابها من الانتهاء. اتركه فارغًا لتخطي إشعارات الانتهاء.",
+          "notify_live_services": "تقوم خدمة واحدة أو أكثر بإخطار الخدمات لتلقي تحديثات التقدم المباشرة أثناء تشغيل الدورة (تطبيق الهاتف المصاحب فقط). اتركه فارغًا لتخطي التحديثات المباشرة."
         }
       },
       "notifications": {
         "title": "إشعارات",
         "description": "قم بتكوين قنوات الإشعارات والقوالب وتحديثات تقدم الجوال المباشرة الاختيارية.",
         "data": {
-          "notify_service": "خدمة الإشعارات (على سبيل المثال، notify.mobile_app)",
           "notify_actions": "إجراءات الإخطار",
           "notify_people": "تأخير التسليم حتى يعود هؤلاء الأشخاص إلى المنزل",
           "notify_only_when_home": "تأخير الإخطارات حتى يعود الشخص المحدد إلى المنزل",
           "notify_fire_events": "أحداث تشغيل الأتمتة",
-          "notify_events": "الأحداث للإخطار",
           "notify_before_end_minutes": "إشعار ما قبل الإكمال (قبل دقائق من النهاية)",
           "notify_live_interval_seconds": "الفاصل الزمني للتحديث المباشر (ثواني)",
           "notify_live_overrun_percent": "بدل تجاوز التحديث المباشر (%)",
@@ -116,23 +116,33 @@
           "notify_icon": "أيقونة الإخطار",
           "notify_start_message": "بدء تنسيق الرسالة",
           "notify_finish_message": "إنهاء تنسيق الرسالة",
-          "notify_pre_complete_message": "تنسيق رسالة ما قبل الإكمال"
+          "notify_pre_complete_message": "تنسيق رسالة ما قبل الإكمال",
+          "notify_start_services": "بداية الدورة - أهداف الإخطار",
+          "notify_finish_services": "إنهاء الدورة - أهداف الإخطار",
+          "notify_live_services": "التقدم المباشر - أهداف الإخطار",
+          "notify_live_chronometer": "الكرونومتر للعد التنازلي",
+          "energy_price_entity": "سعر الطاقة - الكيان (اختياري)",
+          "energy_price_static": "سعر الطاقة - القيمة الثابتة (اختياري)"
         },
         "data_description": {
-          "notify_service": "خدمة إخطار مساعد المنزل لاستخدامها (اختياري).",
           "notify_actions": "تسلسل إجراءات Home Assistant الاختياري لتشغيل الإشعارات (البرامج النصية، والإشعارات، وتحويل النص إلى كلام، وما إلى ذلك). في حالة التعيين، سيتم تشغيل الإجراءات قبل خدمة الإشعارات الاحتياطية.",
           "notify_people": "الكيانات البشرية المستخدمة لبوابة الحضور. عند التمكين، يتم تأخير تسليم الإشعارات حتى يعود شخص واحد محدد على الأقل إلى المنزل.",
           "notify_only_when_home": "إذا تم تمكينه، قم بتأخير الإشعارات حتى يعود شخص واحد محدد على الأقل إلى المنزل.",
           "notify_fire_events": "في حالة التمكين، قم بتشغيل أحداث Home Assistant لبدء الدورة ونهايتها (ha_washdata_cycle_started وha_washdata_cycle_ended) لتشغيل عمليات التشغيل الآلي.",
-          "notify_events": "الأحداث التي سيتم إرسال إشعارات لها.",
           "notify_before_end_minutes": "دقائق قبل النهاية المقدرة للدورة لإطلاق إشعار. اضبط على 0 للتعطيل. الافتراضي: 0.",
-          "notify_live_interval_seconds": "عدد مرات إرسال تحديثات التقدم أثناء التشغيل. تكون القيم الأقل أكثر استجابة ولكنها تستهلك المزيد من الإشعارات. يتم فرض 30 ثانية على الأقل — يتم تقريب القيم الأقل من 30 ثانية تلقائيًا إلى 30 ثانية.",
+          "notify_live_interval_seconds": "عدد مرات إرسال تحديثات التقدم أثناء التشغيل. تكون القيم الأقل أكثر استجابة ولكنها تستهلك المزيد من الإشعارات. يتم فرض 30 ثانية على الأقل - يتم تقريب القيم الأقل من 30 ثانية تلقائيًا إلى 30 ثانية.",
           "notify_live_overrun_percent": "هامش أمان أعلى من عدد التحديثات المقدر للدورات الطويلة/المتجاوزة (على سبيل المثال، 20% يسمح بتحديثات مقدرة بمقدار 1.2x).",
           "notify_title": "عنوان مخصص للإخطارات. يدعم العنصر النائب {device}.",
           "notify_icon": "الرمز المطلوب استخدامه للإشعارات (على سبيل المثال، mdi:washing-machine). اتركه فارغًا لاستخدام الافتراضي.",
           "notify_start_message": "يتم إرسال الرسالة عند بدء الدورة. يدعم العنصر النائب {device}.",
           "notify_finish_message": "يتم إرسال الرسالة عند انتهاء الدورة. يدعم العناصر النائبة {device} و{duration} و{program}.",
-          "notify_pre_complete_message": "تم إرسال الرسالة قبل الانتهاء. يدعم العناصر النائبة {device} و{minutes}."
+          "notify_pre_complete_message": "تم إرسال الرسالة قبل الانتهاء. يدعم العناصر النائبة {device} و{minutes}.",
+          "notify_start_services": "خدمة إخطار واحدة أو أكثر للتنبيه عند بدء الدورة (على سبيل المثال، notify.mobile_app_my_phone). اتركه فارغًا لتخطي إشعارات البدء.",
+          "notify_finish_services": "تقوم واحدة أو أكثر من خدمات الإخطار بالتنبيه عند انتهاء الدورة أو اقترابها من الانتهاء. اتركه فارغًا لتخطي إشعارات الانتهاء.",
+          "notify_live_services": "تقوم خدمة واحدة أو أكثر بإخطار الخدمات لتلقي تحديثات التقدم المباشرة أثناء تشغيل الدورة (تطبيق الهاتف المصاحب فقط). اتركه فارغًا لتخطي التحديثات المباشرة.",
+          "notify_live_chronometer": "عند التمكين، يتضمن كل تحديث مباشر عدًا تنازليًا للكرونومتر حتى وقت الانتهاء المقدر. يتوقف مؤقت الإشعارات تلقائيًا على الجهاز بين التحديثات (تطبيق Android المصاحب فقط).",
+          "energy_price_entity": "حدد كيانًا رقميًا يحمل سعر الكهرباء الحالي (على سبيل المثال، Sensor.electricity_price، input_number.energy_rate). عند التعيين، قم بتمكين العنصر النائب {cost}. تكون له الأسبقية على القيمة الثابتة إذا تم تكوين كليهما.",
+          "energy_price_static": "سعر الكهرباء الثابت لكل كيلووات ساعة. عند التعيين، قم بتمكين العنصر النائب {cost}. يتم تجاهله إذا تم تكوين الكيان أعلاه. أضف رمز العملة الخاص بك في قالب الرسالة، على سبيل المثال. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "عرض النطاق الترددي DTW",
           "external_end_trigger_enabled": "تمكين مشغل نهاية الدورة الخارجية",
           "external_end_trigger": "مستشعر نهاية الدورة الخارجية",
-          "external_end_trigger_inverted": "عكس منطق الزناد (تشغيل الزناد)"
+          "external_end_trigger_inverted": "عكس منطق الزناد (تشغيل الزناد)",
+          "suppress_feedback_notifications": "قمع إشعارات التعليقات",
+          "pump_stuck_duration": "عتبة (عتبات) التنبيه بشأن توقف المضخة (المضخة فقط)",
+          "door_sensor_entity": "مستشعر الباب",
+          "pause_cuts_power": "قطع الطاقة عند التوقف",
+          "notify_unload_delay_minutes": "تأخير إشعار انتظار الغسيل (الحد الأدنى)"
         },
         "data_description": {
           "apply_suggestions": "حدد هذا المربع لفتح خطوة مراجعة للقيم المقترحة من خوارزمية التعلم. لا يتم حفظ أي شيء تلقائيًا.\n\nمقترح (من التعلم):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "الحد الأقصى المسموح به لتشويه الوقت (التمدد) كنسبة من مدة الدورة. تسمح القيم الأعلى بمطابقة الدورات المتغيرة للغاية ولكنها تزيد من تكلفة وحدة المعالجة المركزية. الافتراضي: 0.20 (20%).",
           "external_end_trigger_enabled": "تمكين مراقبة جهاز استشعار ثنائي خارجي لتحفيز إكمال الدورة.",
           "external_end_trigger": "حدد كيان استشعار ثنائي. عندما يتم تشغيل هذا المستشعر، ستنتهي الدورة الحالية بالحالة \"مكتملة\".",
-          "external_end_trigger_inverted": "افتراضيًا، يتم تشغيل المشغل عند تشغيل المستشعر. حدد هذا المربع لإطلاق النار عند إيقاف تشغيل المستشعر بدلاً من ذلك."
+          "external_end_trigger_inverted": "افتراضيًا، يتم تشغيل المشغل عند تشغيل المستشعر. حدد هذا المربع لإطلاق النار عند إيقاف تشغيل المستشعر بدلاً من ذلك.",
+          "suppress_feedback_notifications": "عند التمكين، ستستمر WashData في تتبع وطلب التعليقات داخليًا ولكنها لن تعرض إشعارات مستمرة تطلب منك تأكيد الدورات. يكون هذا مفيدًا عندما يتم اكتشاف الدورات دائمًا بشكل صحيح وتجد أن المطالبات تشتت انتباهك.",
+          "pump_stuck_duration": "إذا كانت دورة المضخة لا تزال تعمل بعد هذه الثواني العديدة، فسيتم إطلاق حدث ha_washdata_pump_stuck مرة واحدة. استخدم هذا للكشف عن محرك محشور (تشغيل المضخة الغاطسة النموذجية أقل من 60 ثانية). الافتراضي: 1800 ثانية (30 دقيقة). نوع جهاز المضخة فقط.",
+          "door_sensor_entity": "مستشعر ثنائي اختياري لباب الماكينة (تشغيل = مفتوح، إيقاف = مغلق). عندما يفتح الباب أثناء دورة نشطة، ستؤكد WashData أن الدورة متوقفة مؤقتًا عن عمد. بعد انتهاء الدورة، إذا كان الباب لا يزال مغلقًا، تتغير الحالة إلى \"نظيف\" حتى يتم فتح الباب. ملحوظة: إغلاق الباب لا يؤدي إلى استئناف الدورة المتوقفة مؤقتًا تلقائيًا - يجب تشغيل الاستئناف يدويًا عبر زر أو خدمة استئناف الدورة.",
+          "pause_cuts_power": "عند الإيقاف المؤقت عبر زر أو خدمة الإيقاف المؤقت للدورة، قم أيضًا بإيقاف تشغيل كيان التبديل الذي تم تكوينه. يسري مفعوله فقط إذا تم تكوين كيان التبديل لهذا الجهاز.",
+          "notify_unload_delay_minutes": "أرسل إشعارًا عبر قناة إشعار الانتهاء بعد انتهاء الدورة وعدم فتح الباب لعدة دقائق (يتطلب مستشعر الباب). اضبط على 0 للتعطيل. الافتراضي: 60 دقيقة."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "دورة القطع — اختر دورة",
+        "title": "دورة القطع - اختر دورة",
         "description": "حدد دورة لقصها. ✓ = اكتمل، ⚠ = مستأنف، ✗ = متقطع",
         "data": {
           "cycle_id": "دورة"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: الإعدادات المقترحة جاهزة ({device})",
       "suggestions_ready_notification_message": "يقدم مستشعر **الإعدادات المقترحة** الآن **{count}** توصيات قابلة للتنفيذ.\n\nلمراجعتها وتطبيقها: **الإعدادات > الأجهزة والخدمات > WashData > التكوين > الإعدادات المتقدمة > تطبيق القيم المقترحة**.\n\nالاقتراحات اختيارية ويتم عرضها للمراجعة قبل حفظها.",
       "trim_range_invalid": "البداية يجب أن تكون قبل النهاية. يرجى ضبط نقاط القطع الخاصة بك.",
-      "trim_failed": "فشل القطع. ربما لم تعد الدورة موجودة أو أن النافذة فارغة."
+      "trim_failed": "فشل القطع. ربما لم تعد الدورة موجودة أو أن النافذة فارغة.",
+      "auto_tune_suggestion": "تم اكتشاف {device_type} {device_title} دورات شبحية. التغيير الأدنى المقترح للطاقة: {current_min}W -> {new_min}W (لا يتم تطبيقه تلقائيًا).",
+      "auto_tune_title": "ضبط تلقائي لـ WashData",
+      "auto_tune_fallback": "تم اكتشاف {device_type} {device_title} دورات شبحية. التغيير الأدنى المقترح للطاقة: {current_min}W -> {new_min}W (لا يتم تطبيقه تلقائيًا)."
     },
     "abort": {
       "no_cycles_found": "لم يتم العثور على دورات",
@@ -999,7 +1022,8 @@
           "interrupted": "تمت مقاطعته",
           "force_stopped": "توقفت القوة",
           "rinse": "شطف",
-          "unknown": "مجهول"
+          "unknown": "مجهول",
+          "clean": "ينظف"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "الإعدادات المقترحة"
+      },
+      "pump_runs_today": {
+        "name": "تشغيل المضخة (آخر 24 ساعة)"
+      },
+      "cycle_count": {
+        "name": "عدد الدورات"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "إنهاء قسري للدورة"
+      },
+      "pause_cycle": {
+        "name": "دورة الإيقاف المؤقت"
+      },
+      "resume_cycle": {
+        "name": "استئناف الدورة"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "لم يتم العثور على الدورة أو لا تحتوي على بيانات طاقة."
     },
     "trim_failed_empty_window": {
-      "message": "فشل القطع — لم يتم العثور على الدورة، أو لا توجد بيانات طاقة، أو أن النافذة الناتجة فارغة."
+      "message": "فشل القطع - لم يتم العثور على الدورة، أو لا توجد بيانات طاقة، أو أن النافذة الناتجة فارغة."
     },
     "trim_invalid_range": {
       "message": "يجب أن تكون trim_end_s أكبر من trim_start_s."
+    },
+    "device_id_required": {
+      "message": "مطلوب معرف جهاز صالح."
     }
   }
 }

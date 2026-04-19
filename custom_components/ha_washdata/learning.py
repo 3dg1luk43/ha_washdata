@@ -143,7 +143,7 @@ class LearningManager:
             CONF_RUNNING_DEAD_ZONE,
         )
 
-        # Drop suggestions whose value already matches the current config — so
+        # Drop suggestions whose value already matches the current config - so
         # that applied suggestions don't immediately reappear on the next cycle.
         entry = self.hass.config_entries.async_get_entry(self.entry_id)
         current_options: dict[str, Any] = {}
@@ -701,7 +701,7 @@ class LearningManager:
                     profiles_to_rebuild.add(detected_profile_name)
             elif duration_sec is not None:
                 # No valid profile could be determined, but a duration correction was
-                # explicitly provided — apply it directly to the cycle so the value
+                # explicitly provided - apply it directly to the cycle so the value
                 # is never silently dropped.
                 cycles = self.profile_store.get_past_cycles()
                 cycle_to_fix = next((c for c in cycles if c["id"] == cycle_id), None)
