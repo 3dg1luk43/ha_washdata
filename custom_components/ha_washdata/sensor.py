@@ -46,6 +46,7 @@ from .const import (
     STATE_FORCE_STOPPED,
     STATE_RINSE,
     STATE_UNKNOWN,
+    STATE_CLEAN,
 )
 from .manager import WashDataManager
 
@@ -153,6 +154,7 @@ async def async_setup_entry(
         WasherElapsedTimeSensor(manager, entry),
         WasherDebugSensor(manager, entry),
         WasherSuggestionsSensor(manager, entry),
+        WasherCycleCountSensor(manager, entry),
     ]
 
     # Add pump-specific sensors
@@ -233,6 +235,7 @@ class WasherStateSensor(WasherBaseSensor):
                 STATE_FORCE_STOPPED,
                 STATE_RINSE,
                 STATE_UNKNOWN,
+                STATE_CLEAN,
             ],
         )
         super().__init__(manager, entry)
@@ -833,3 +836,21 @@ class PumpRunsTodaySensor(WasherBaseSensor):
     @property
     def native_value(self) -> int:  # type: ignore[override]
         return self._manager.pump_runs_today
+
+
+class WasherCycleCountSensor(WasherBaseSensor):
+    """Sensor reporting the total number of completed cycles stored for this device."""
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="cycle_count",
+            translation_key="cycle_count",
+            icon="mdi:counter",
+            native_unit_of_measurement="cycles",
+            state_class="total_increasing",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self) -> int:  # type: ignore[override]
+        return self._manager.cycle_count

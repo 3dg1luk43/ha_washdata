@@ -1307,6 +1307,12 @@ class ProfileStore:
                 sig = compute_signature(ts_arr, p_arr)
                 cycle_data["signature"] = dataclasses.asdict(sig)
 
+            # Compute and store energy (Wh) if not already set (e.g. by manager)
+            if "energy_wh" not in cycle_data and len(ts_arr) > 1:
+                dt_h = np.diff(ts_arr) / 3600.0
+                avg_p = (p_arr[:-1] + p_arr[1:]) / 2
+                cycle_data["energy_wh"] = round(float(np.sum(avg_p * np.abs(dt_h))), 3)
+
             self._logger.debug(
                 "add_cycle: stored %s samples at %.1fs intervals",
                 len(stored),

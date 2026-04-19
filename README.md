@@ -104,7 +104,35 @@ If you prefer to just use it and label later:
    - Open **Manage Profiles**, click **Create Profile**, name it (e.g., "Cotton 40"), and Save.
 3. **Repeat**: Do this for your 2-3 most common programs.
 
-### 3. Verification & Learning
+### 3. Profile Granularity — How Detailed Should Profiles Be?
+
+WashData matches cycles using **power-consumption shape, cycle duration, and total energy** — not temperature or spin-speed settings directly. This affects how granular your profile library should be.
+
+#### What will be reliably auto-detected
+
+Programs with clearly different durations or power patterns are always distinguished well:
+
+| Example pair | Why it works |
+| :--- | :--- |
+| Quick Wash (~20 min) vs Cotton (~3 h) | Huge duration gap — no ambiguity |
+| Wash-only vs Wash+Dry | Drying adds 100–200 min and significant extra energy |
+| Cotton vs Delicates | Different agitation/heating patterns and often different durations |
+
+#### Temperature and spin-speed variants
+
+Programs that differ **only** in temperature or spin speed (e.g. Cotton 40°C vs Cotton 60°C) often produce similar power shapes and durations. The matcher will attempt to distinguish them using correlation and energy differences, but:
+
+- On first run the system may assign the wrong variant — **use the Learning Feedbacks menu to correct it**.
+- With a few confirmed corrections the system learns; 3–5 corrections per variant pair is usually enough.
+- If your machine's power draw barely changes between temperatures, the variants may remain hard to distinguish automatically. In that case, selecting the program manually via the Program Selector dropdown remains reliable.
+
+#### Practical advice for washer-dryer combos
+
+Create **separate profiles** for every wash+dry combination you use regularly (e.g. "Cotton 40°C Wash", "Cotton 40°C + Cupboard Dry"). The drying phase adds so much duration and energy that wash-only vs wash+dry is one of the easiest distinctions for the matcher to make.
+
+Start with a small set of your most-used and most-different programs, then add temperature/spin variants gradually as you accumulate history.
+
+### 4. Verification & Learning
 Once profiles are created, WashData starts **matching** new cycles automatically.
 - **Feedback**: If a match is found but confidence is moderate, you may get a "Verify Cycle" notification.
 - **Refinement**: Go to **Configure > Learning Feedbacks** to Confirm or Correct the detection.

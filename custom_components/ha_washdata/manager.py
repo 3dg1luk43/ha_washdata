@@ -92,6 +92,7 @@ from .const import (
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
+    NOTIFY_EVENT_CLEAN,
     EVENT_CYCLE_STARTED,
     EVENT_CYCLE_ENDED,
     DEFAULT_MIN_POWER,
@@ -132,6 +133,14 @@ from .const import (
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_NOTIFY_LIVE_CHRONOMETER,
+    CONF_ENERGY_PRICE_STATIC,
+    CONF_ENERGY_PRICE_ENTITY,
+    CONF_DOOR_SENSOR_ENTITY,
+    CONF_PAUSE_CUTS_POWER,
+    CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
+    DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
+    DEFAULT_NOTIFY_UNLOAD_MESSAGE,
+    STATE_CLEAN,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
@@ -169,6 +178,7 @@ from .const import (
     STATE_ANTI_WRINKLE,
     STATE_IDLE,
     STATE_UNKNOWN,
+    STATE_CLEAN,
 )
 from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
@@ -243,6 +253,28 @@ class WashDataManager:
         self._pending_notifications: list[dict[str, Any]] = []
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
+
+        # Pause tracking (user-triggered)
+        self._user_pause_start: datetime | None = None
+        self._total_user_paused_seconds: float = 0.0
+        self._is_user_paused: bool = False
+        self._pause_cuts_power: bool = bool(
+            config_entry.options.get(CONF_PAUSE_CUTS_POWER, False)
+        )
+
+        # Door sensor + clean state
+        self._door_sensor_entity: str | None = config_entry.options.get(
+            CONF_DOOR_SENSOR_ENTITY
+        ) or None
+        self._remove_door_sensor_listener = None
+        self._is_clean_state: bool = False
+        self._clean_state_start: datetime | None = None
+        self._notified_clean_laundry: bool = False
+        self._notify_unload_delay_minutes: int = int(
+            config_entry.options.get(
+                CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
+            )
+        )
         self._live_notification_cap = 0
         self._last_live_notification_time: datetime | None = None
         self._live_waiting_notification_sent = False
@@ -538,6 +570,7 @@ class WashDataManager:
 
         self._remove_listener = None
         self._remove_external_trigger_listener = None  # External cycle end trigger
+        self._remove_door_sensor_listener = None  # Door sensor state changes
         self._remove_watchdog = None
         self._watchdog_interval = int(
             config_entry.options.get(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL)
@@ -1258,6 +1291,9 @@ class WashDataManager:
         # Subscribe to external cycle end trigger (if enabled)
         await self._setup_external_end_trigger()
 
+        # Subscribe to door sensor (if configured)
+        await self._setup_door_sensor_listener()
+
         # Subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
 
@@ -1595,8 +1631,20 @@ class WashDataManager:
             )
         )
 
+        # Reload door sensor / pause config
+        self._pause_cuts_power = bool(config_entry.options.get(CONF_PAUSE_CUTS_POWER, False))
+        self._door_sensor_entity = config_entry.options.get(CONF_DOOR_SENSOR_ENTITY) or None
+        self._notify_unload_delay_minutes = int(
+            config_entry.options.get(
+                CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
+            )
+        )
+
         # Re-subscribe to external cycle end trigger
         await self._setup_external_end_trigger()
+
+        # Re-subscribe to door sensor
+        await self._setup_door_sensor_listener()
 
         # Re-subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
@@ -1697,6 +1745,63 @@ class WashDataManager:
         self._remove_external_trigger_listener = async_track_state_change_event(
             self.hass, [entity_id], self._handle_external_trigger_change
         )
+
+    async def _setup_door_sensor_listener(self) -> None:
+        """Set up listener for optional door sensor binary sensor."""
+        if self._remove_door_sensor_listener:
+            self._remove_door_sensor_listener()
+            self._remove_door_sensor_listener = None
+
+        entity_id = self._door_sensor_entity
+        if not entity_id:
+            self._logger.debug("Door sensor not configured")
+            return
+
+        self._logger.info("Setting up door sensor listener: %s", entity_id)
+        self._remove_door_sensor_listener = async_track_state_change_event(
+            self.hass, [entity_id], self._handle_door_sensor_change
+        )
+
+    @callback
+    def _handle_door_sensor_change(self, event: Event[evt.EventStateChangedData]) -> None:
+        """Handle door sensor state changes.
+
+        Opening the door during an active cycle confirms an intentional pause (verified_pause).
+        Opening the door after a cycle clears the 'Clean' state.
+        Note: door closing does NOT auto-resume a cycle — the user must do this explicitly.
+        """
+        new_state = event.data.get("new_state")
+        old_state = event.data.get("old_state")
+
+        if new_state is None:
+            return
+
+        new_val = new_state.state
+        old_val = old_state.state if old_state else None
+
+        # Ignore unavailability transitions
+        if new_val in ("unavailable", "unknown") or (
+            old_val in ("unavailable", "unknown")
+        ):
+            return
+
+        door_open = new_val == "on"  # binary_sensor: on = open
+
+        if door_open:
+            if self._is_clean_state:
+                # User opened the door after the cycle — laundry retrieved
+                self._logger.debug("Door opened: clearing Clean state")
+                self._is_clean_state = False
+                self._clean_state_start = None
+                self._notified_clean_laundry = False
+                self._notify_update()
+            elif self.detector.state in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
+                # Door opened during active cycle → soft pause confirmation
+                self._logger.debug(
+                    "Door opened during active cycle: setting verified_pause=True"
+                )
+                self.detector.set_verified_pause(True)
+        # Door closing is intentionally not handled — no auto-resume
 
     async def _setup_notify_people_listener(self) -> None:
         """Set up listener for person presence changes used by notification gating."""
@@ -2024,6 +2129,33 @@ class WashDataManager:
 
         time_since_complete = (now - self._cycle_completed_time).total_seconds()
 
+        # Clean laundry nag notification
+        if (
+            self._is_clean_state
+            and not self._notified_clean_laundry
+            and self._clean_state_start is not None
+            and self._notify_unload_delay_minutes > 0
+        ):
+            time_in_clean = (now - self._clean_state_start).total_seconds()
+            if time_in_clean >= self._notify_unload_delay_minutes * 60:
+                duration_min = int(time_since_complete / 60)
+                msg_template = self.config_entry.options.get(
+                    "notify_unload_message", DEFAULT_NOTIFY_UNLOAD_MESSAGE
+                )
+                msg = self._safe_format_template(
+                    msg_template,
+                    fallback_template=DEFAULT_NOTIFY_UNLOAD_MESSAGE,
+                    device=self.config_entry.title,
+                    duration=duration_min,
+                    delay=self._notify_unload_delay_minutes,
+                )
+                self._dispatch_notification(msg, event_type=NOTIFY_EVENT_CLEAN)
+                self._notified_clean_laundry = True
+                self._logger.info(
+                    "Sent clean laundry nag notification (%.0f min after cycle end)",
+                    time_since_complete / 60,
+                )
+
         if time_since_complete > self._progress_reset_delay:
             # Auto-expire the "Finished" (or other terminal) state
             self._logger.debug(
@@ -2033,6 +2165,10 @@ class WashDataManager:
             )
             self._cycle_progress = 0.0
             self._cycle_completed_time = None
+            # Clear clean state when progress expires
+            self._is_clean_state = False
+            self._clean_state_start = None
+            self._notified_clean_laundry = False
             self.detector.reset(STATE_OFF)
             self._stop_state_expiry_timer()
             self._notify_update()
@@ -2311,6 +2447,15 @@ class WashDataManager:
                 self._start_event_fired = False
                 self._cycle_start_time = self.detector.current_cycle_start or dt_util.now()
                 self._reset_live_notification_state()
+
+                # Reset pause tracking and clean state for new cycle
+                self._is_user_paused = False
+                self._user_pause_start = None
+                self._total_user_paused_seconds = 0.0
+                self._is_clean_state = False
+                self._clean_state_start = None
+                self._notified_clean_laundry = False
+
                 self._start_watchdog()  # Start watchdog when cycle starts
 
                 # Fire the start event immediately on cycle detection so listeners always
@@ -2390,6 +2535,9 @@ class WashDataManager:
                     )
                     self._handle_noise_cycle(max_power)
                     return  # Do not store this as a real cycle
+
+        # Store energy for notification and persistence (calculated above for ghost detection)
+        cycle_data["energy_wh"] = round(cycle_energy_wh, 3)
 
         # Schedule heavy post-processing asynchronously
         self.hass.async_create_task(self._async_process_cycle_end(cycle_data))
@@ -2490,12 +2638,37 @@ class WashDataManager:
             msg_template = self.config_entry.options.get(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE)
             duration_min = int(cycle_data['duration'] / 60)
             program_name = event_cycle_data.get("profile_name", "unknown")
+
+            energy_kwh = round(cycle_data.get("energy_wh", 0.0) / 1000, 3)
+
+            # Resolve energy price: entity takes precedence over static value
+            options = self.config_entry.options
+            price: float | None = None
+            price_entity = options.get(CONF_ENERGY_PRICE_ENTITY)
+            if price_entity:
+                state = self.hass.states.get(price_entity)
+                if state is not None:
+                    try:
+                        price = float(state.state)
+                    except (ValueError, TypeError):
+                        price = None
+            if price is None:
+                static = options.get(CONF_ENERGY_PRICE_STATIC)
+                if static is not None:
+                    try:
+                        price = float(static)
+                    except (ValueError, TypeError):
+                        price = None
+            cost_str = f"{energy_kwh * price:.2f}" if price is not None else ""
+
             msg = self._safe_format_template(
                 msg_template,
                 fallback_template=DEFAULT_NOTIFY_FINISH_MESSAGE,
                 device=self.config_entry.title,
                 duration=duration_min,
                 program=program_name,
+                energy_kwh=f"{energy_kwh:.3f}",
+                cost=cost_str,
             )
             self._dispatch_notification(
                 msg,
@@ -2504,6 +2677,8 @@ class WashDataManager:
                     "duration_minutes": duration_min,
                     "duration_seconds": cycle_data["duration"],
                     "program": program_name,
+                    "energy_kwh": energy_kwh,
+                    "cost": cost_str,
                 },
             )
 
@@ -2530,6 +2705,24 @@ class WashDataManager:
         self._cycle_completed_time = dt_util.now()
         self._cycle_start_time = None
         self._reset_live_notification_state()
+
+        # Reset pause tracking for the next cycle
+        self._is_user_paused = False
+        self._user_pause_start = None
+        self._total_user_paused_seconds = 0.0
+
+        # Enter Clean state if door sensor is configured and door is currently closed
+        self._is_clean_state = False
+        self._clean_state_start = None
+        self._notified_clean_laundry = False
+        if self._door_sensor_entity:
+            door_state = self.hass.states.get(self._door_sensor_entity)
+            if door_state and door_state.state == "off":  # binary_sensor: off = closed
+                self._is_clean_state = True
+                self._clean_state_start = dt_util.now()
+                self._logger.debug(
+                    "Cycle ended with door closed: entering Clean state"
+                )
 
         # Start progress reset timer to go back to 0% after user unload window
         self._start_state_expiry_timer()
@@ -2590,7 +2783,7 @@ class WashDataManager:
         """Return the configured notify service list for the given event type."""
         if event_type == NOTIFY_EVENT_START:
             return self._notify_start_services
-        if event_type in (NOTIFY_EVENT_FINISH, "pre_complete"):
+        if event_type in (NOTIFY_EVENT_FINISH, "pre_complete", NOTIFY_EVENT_CLEAN):
             return self._notify_finish_services
         if event_type == NOTIFY_EVENT_LIVE:
             return self._notify_live_services
@@ -3231,7 +3424,9 @@ class WashDataManager:
             return
         self._last_phase_estimate_time = now
 
-        duration_so_far = float(self.detector.get_elapsed_seconds())
+        # Use net elapsed (wall-clock minus user-paused time) for all time estimates
+        # so that paused time is excluded from progress / remaining / total duration.
+        duration_so_far = float(self.net_elapsed_seconds)
 
         if self._matched_profile_duration and self._matched_profile_duration > 0:
             # Get current power trace for phase analysis
@@ -3609,10 +3804,31 @@ class WashDataManager:
         """Public method to notify entities of update."""
         self._notify_update()
 
+    @property
+    def is_user_paused(self) -> bool:
+        """Return True if cycle is currently user-paused."""
+        return self._is_user_paused
+
+    @property
+    def is_clean_state(self) -> bool:
+        """Return True if machine is in Clean state (cycle ended, door not yet opened)."""
+        return self._is_clean_state
+
+    @property
+    def net_elapsed_seconds(self) -> float:
+        """Elapsed seconds in the current cycle, excluding user-paused time."""
+        raw = float(self.detector.get_elapsed_seconds())
+        paused = self._total_user_paused_seconds
+        if self._user_pause_start is not None:
+            paused += (dt_util.now() - self._user_pause_start).total_seconds()
+        return max(0.0, raw - paused)
+
     def check_state(self):
         """Return current detector state."""
         if self.recorder.is_recording:
             return STATE_RUNNING
+        if self._is_clean_state and self.detector.state == STATE_OFF:
+            return STATE_CLEAN
         return self.detector.state
 
     def list_phase_catalog(self, device_type: str) -> list[dict[str, Any]]:
@@ -3723,6 +3939,11 @@ class WashDataManager:
         return count
 
     @property
+    def cycle_count(self) -> int:
+        """Return the total number of completed cycles stored for this device."""
+        return len(self.profile_store.get_past_cycles())
+
+    @property
     def manual_program_active(self) -> bool:
         """Return True if a manual program override is active."""
         return getattr(self, "_manual_program_active", False)
@@ -3769,6 +3990,78 @@ class WashDataManager:
                 # Update estimates if running
                 if self.detector.state == "running":
                     self._update_estimates()
+
+    async def async_pause_cycle(self) -> None:
+        """Pause the current cycle (user-triggered).
+
+        Sets verified_pause so the cycle is not finalized when power drops.
+        Optionally cuts power to the switch entity if CONF_PAUSE_CUTS_POWER is enabled.
+        """
+        if self.detector.state not in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
+            self._logger.debug(
+                "async_pause_cycle: ignored (detector state=%s)", self.detector.state
+            )
+            return
+
+        if self._is_user_paused:
+            self._logger.debug("async_pause_cycle: already user-paused, ignoring")
+            return
+
+        self._logger.info("Cycle paused by user")
+        self._is_user_paused = True
+        self._user_pause_start = dt_util.now()
+        self.detector.set_verified_pause(True)
+
+        if self._pause_cuts_power:
+            switch_entity = self.config_entry.options.get(
+                "switch_entity"
+            ) or self.config_entry.data.get("switch_entity")
+            if switch_entity:
+                self._logger.info(
+                    "pause_cuts_power: turning off switch %s", switch_entity
+                )
+                await self.hass.services.async_call(
+                    "switch", "turn_off", {"entity_id": switch_entity}
+                )
+
+        self._notify_update()
+
+    async def async_resume_cycle(self) -> None:
+        """Resume a user-paused cycle.
+
+        Accumulates elapsed paused time and clears the verified pause flag.
+        Optionally restores power via the switch entity if CONF_PAUSE_CUTS_POWER is enabled.
+        """
+        if not self._is_user_paused:
+            self._logger.debug("async_resume_cycle: not user-paused, ignoring")
+            return
+
+        now = dt_util.now()
+        if self._user_pause_start is not None:
+            self._total_user_paused_seconds += (
+                now - self._user_pause_start
+            ).total_seconds()
+
+        self._user_pause_start = None
+        self._is_user_paused = False
+        self.detector.set_verified_pause(False)
+        self._logger.info(
+            "Cycle resumed by user (total paused: %.0fs)", self._total_user_paused_seconds
+        )
+
+        if self._pause_cuts_power:
+            switch_entity = self.config_entry.options.get(
+                "switch_entity"
+            ) or self.config_entry.data.get("switch_entity")
+            if switch_entity:
+                self._logger.info(
+                    "pause_cuts_power: turning on switch %s", switch_entity
+                )
+                await self.hass.services.async_call(
+                    "switch", "turn_on", {"entity_id": switch_entity}
+                )
+
+        self._notify_update()
 
     async def async_terminate_cycle(self) -> None:
         """Force terminate the current cycle via user request."""

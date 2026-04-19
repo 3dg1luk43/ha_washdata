@@ -113,6 +113,7 @@ class LearningManager:
         # Operational Stats
         self._sample_interval_model = StatisticalModel(max_samples=200)
         self._last_suggestion_update: datetime | None = None
+        self._last_batch_simulation_count: int = 0  # track when to re-run batch
 
     def _apply_suggestions_and_notify(self, suggestions: dict[str, Any]) -> None:
         """Apply suggestions and notify once when they become actionable."""
@@ -223,6 +224,44 @@ class LearningManager:
 
         # 3. Update model-based suggestions (durations etc)
         self._update_model_suggestions(dt_util.now())
+
+        # 4. Run multi-cycle batch simulation when enough new labeled cycles have accumulated
+        self._maybe_run_batch_simulation()
+
+    def _maybe_run_batch_simulation(self) -> None:
+        """Schedule a batch simulation when enough new labeled cycles have arrived."""
+        _BATCH_MIN = 5
+        _BATCH_RERUN_DELTA = 5  # Re-run every 5 new labeled cycles
+
+        labeled_cycles = [
+            c for c in self.profile_store.get_past_cycles()
+            if isinstance(c, dict) and c.get("profile_name") and c.get("power_data")
+        ]
+        current_count = len(labeled_cycles)
+
+        if current_count < _BATCH_MIN:
+            return
+        if (current_count - self._last_batch_simulation_count) < _BATCH_RERUN_DELTA:
+            return
+
+        self._last_batch_simulation_count = current_count
+        self.hass.async_create_task(self._async_run_batch_simulation(labeled_cycles))
+
+    async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]]) -> None:
+        """Run multi-cycle batch simulation asynchronously."""
+        try:
+            new_suggestions = await self.hass.async_add_executor_job(
+                self.suggestion_engine.run_batch_simulation, cycles
+            )
+            if new_suggestions:
+                self._apply_suggestions_and_notify(new_suggestions)
+                self._logger.debug(
+                    "Batch simulation (%d cycles) produced suggestions: %s",
+                    len(cycles),
+                    list(new_suggestions.keys()),
+                )
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("Batch simulation failed: %s", e)
 
     async def _async_run_simulation(self, cycle_data: dict[str, Any]) -> None:
         """Run simulation asynchronously."""

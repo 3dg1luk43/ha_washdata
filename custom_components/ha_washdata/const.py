@@ -75,6 +75,7 @@ CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true
 NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
 NOTIFY_EVENT_LIVE = "cycle_live"
+NOTIFY_EVENT_CLEAN = "cycle_clean"  # Laundry still inside after cycle ends
 
 CONF_NOTIFY_TITLE = "notify_title"
 CONF_NOTIFY_ICON = "notify_icon"
@@ -84,6 +85,13 @@ CONF_NOTIFY_PRE_COMPLETE_MESSAGE = "notify_pre_complete_message"
 CONF_NOTIFY_LIVE_INTERVAL_SECONDS = "notify_live_interval_seconds"
 CONF_NOTIFY_LIVE_OVERRUN_PERCENT = "notify_live_overrun_percent"
 CONF_NOTIFY_LIVE_CHRONOMETER = "notify_live_chronometer"
+CONF_ENERGY_PRICE_STATIC = "energy_price_static"
+CONF_ENERGY_PRICE_ENTITY = "energy_price_entity"
+
+# Door sensor & pause
+CONF_DOOR_SENSOR_ENTITY = "door_sensor_entity"  # Optional binary_sensor for machine door
+CONF_PAUSE_CUTS_POWER = "pause_cuts_power"  # Also turn off switch entity when pausing
+CONF_NOTIFY_UNLOAD_DELAY_MINUTES = "notify_unload_delay_minutes"  # Minutes before "laundry waiting" nag
 
 DEFAULT_NOTIFY_TITLE = "WashData: {device}"
 DEFAULT_NOTIFY_START_MESSAGE = "{device} started {program}."
@@ -95,6 +103,8 @@ DEFAULT_NOTIFY_FIRE_EVENTS = True
 DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS = 300
 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
 DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
+DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES = 60  # 1 hour before "still waiting" nag notification
+DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago — laundry is still inside."
 
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts
@@ -181,6 +191,7 @@ STATE_INTERRUPTED = "interrupted"
 STATE_FORCE_STOPPED = "force_stopped"
 STATE_RINSE = "rinse"
 STATE_UNKNOWN = "unknown"
+STATE_CLEAN = "clean"  # Cycle ended but door not yet opened (laundry still inside)
 
 # Cycle Status (how the cycle ended)
 CYCLE_STATUS_COMPLETED = "completed"  # Natural completion (power dropped)
