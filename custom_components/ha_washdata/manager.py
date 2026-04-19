@@ -1709,7 +1709,7 @@ class WashDataManager:
         self.diag_buffer.uninstall()
 
         # Save active state before shutdown
-        if self.detector.state == "running":
+        if self.detector.state in {STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING}:
             snapshot = self.detector.get_state_snapshot()
             snapshot["manual_program"] = self._manual_program_active
             snapshot["notified_start"] = self._notified_start
@@ -2163,7 +2163,15 @@ class WashDataManager:
                     time_since_complete / 60,
                 )
 
-        if time_since_complete > self._progress_reset_delay:
+        unload_delay_s = self._notify_unload_delay_minutes * 60
+        _reset_threshold = max(
+            self._progress_reset_delay,
+            unload_delay_s if unload_delay_s > 0 else self._progress_reset_delay,
+        )
+        if time_since_complete > _reset_threshold or (
+            time_since_complete > self._progress_reset_delay
+            and (self._notified_clean_laundry or self._notify_unload_delay_minutes <= 0)
+        ):
             # Auto-expire the "Finished" (or other terminal) state
             self._logger.debug(
                 "State expiry: cycle idle for %.0fs (threshold: %ss). Resetting to OFF.",
@@ -2203,12 +2211,13 @@ class WashDataManager:
         # Skip while user-paused or detector-verified-pause to avoid false positives.
         _verified_pause = getattr(self.detector, "_verified_pause", False)
         if self.device_type == DEVICE_TYPE_PUMP and not self._pump_stuck and not self._is_user_paused and not _verified_pause:
-            if elapsed >= self._pump_stuck_duration:
+            adjusted_elapsed = elapsed - self._total_user_paused_seconds
+            if adjusted_elapsed >= self._pump_stuck_duration:
                 self._pump_stuck = True
                 self._logger.warning(
-                    "Pump stuck detected: cycle has been running for %.0fs "
+                    "Pump stuck detected: cycle has been running for %.0fs net "
                     "(threshold: %ds). Firing %s event.",
-                    elapsed,
+                    adjusted_elapsed,
                     self._pump_stuck_duration,
                     EVENT_PUMP_STUCK,
                 )
@@ -2217,7 +2226,7 @@ class WashDataManager:
                     {
                         "device": self.config_entry.title,
                         "entry_id": self.entry_id,
-                        "elapsed_seconds": round(elapsed),
+                        "elapsed_seconds": round(adjusted_elapsed),
                         "threshold_seconds": self._pump_stuck_duration,
                     },
                 )
@@ -3131,8 +3140,12 @@ class WashDataManager:
             "Suggested min_power change: {current_min}W -> {new_min}W "
             "(not applied automatically)."
         )
+        _default_title = "WashData Auto-Tune"
         _msg_template = _translations.get(
             f"component.{DOMAIN}.options.error.auto_tune_suggestion", _default_msg
+        )
+        _title = _translations.get(
+            f"component.{DOMAIN}.options.error.auto_tune_title", _default_title
         )
         message = _msg_template.format(
             device_type=self.device_type,
@@ -3156,7 +3169,7 @@ class WashDataManager:
                     self.hass.services.async_call(domain, service, {"message": message})
                 )
         else:
-            _pn_create(self.hass, message, title="WashData Auto-Tune")
+            _pn_create(self.hass, message, title=_title)
 
         # Reset trackers
         self._noise_events = []
@@ -4073,8 +4086,13 @@ class WashDataManager:
                     )
                 except HomeAssistantError as err:
                     self._logger.warning(
-                        "pause_cuts_power: failed to turn off %s: %s", switch_entity, err
+                        "pause_cuts_power: failed to turn off %s: %s — rolling back pause state",
+                        switch_entity, err,
                     )
+                    self._is_user_paused = False
+                    self._user_pause_start = None
+                    self.detector.set_verified_pause(False)
+                    return
 
         self._notify_update()
 
@@ -4089,11 +4107,13 @@ class WashDataManager:
             return
 
         now = dt_util.now()
-        if self._user_pause_start is not None:
-            self._total_user_paused_seconds += (
-                now - self._user_pause_start
-            ).total_seconds()
+        prev_pause_start = self._user_pause_start
+        accumulated = (
+            (now - prev_pause_start).total_seconds()
+            if prev_pause_start is not None else 0.0
+        )
 
+        self._total_user_paused_seconds += accumulated
         self._user_pause_start = None
         self._is_user_paused = False
         self.detector.set_verified_pause(False)
@@ -4115,8 +4135,14 @@ class WashDataManager:
                     )
                 except HomeAssistantError as err:
                     self._logger.warning(
-                        "pause_cuts_power: failed to turn on %s: %s", switch_entity, err
+                        "pause_cuts_power: failed to turn on %s: %s — rolling back resume state",
+                        switch_entity, err,
                     )
+                    self._total_user_paused_seconds -= accumulated
+                    self._user_pause_start = prev_pause_start
+                    self._is_user_paused = True
+                    self.detector.set_verified_pause(True)
+                    return
 
         self._notify_update()
 

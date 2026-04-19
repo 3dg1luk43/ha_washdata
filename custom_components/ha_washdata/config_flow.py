@@ -541,6 +541,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # empty.  Set it explicitly so the merge below overwrites any
             # previously-saved value rather than keeping the stale one.
             user_input[CONF_NOTIFY_ICON] = user_input.get(CONF_NOTIFY_ICON) or ""
+            # Normalize energy price fields: selectors may omit the key entirely
+            # when the user clears them.  Explicitly writing None ensures the
+            # merged options dict overrides any previously-stored value.
+            if not user_input.get(CONF_ENERGY_PRICE_ENTITY):
+                user_input[CONF_ENERGY_PRICE_ENTITY] = None
+            if not user_input.get(CONF_ENERGY_PRICE_STATIC):
+                user_input[CONF_ENERGY_PRICE_STATIC] = None
             merged_options = {
                 **self.config_entry.data,
                 **self.config_entry.options,

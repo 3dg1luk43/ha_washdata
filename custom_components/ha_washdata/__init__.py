@@ -92,7 +92,10 @@ PLATFORMS: list[Platform] = [
 
 def _require_str(value: Any, name: str) -> str:
     if not isinstance(value, str) or not value:
-        raise ValueError(f"{name} is required")
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key="device_id_required",
+        )
     return value
 
 

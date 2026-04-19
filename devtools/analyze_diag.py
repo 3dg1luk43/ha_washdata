@@ -544,9 +544,19 @@ def print_report(
     # ------------------------------------------------------------------ #
     # Summary / action prompt                                              #
     # ------------------------------------------------------------------ #
+    def _values_equal(a: Any, b: Any) -> bool:
+        if a is None and b is None:
+            return True
+        if a is None or b is None:
+            return False
+        try:
+            return abs(float(a) - float(b)) < 1e-6
+        except (TypeError, ValueError):
+            return a == b
+
     actionable_keys = [
         k for k in suggestions
-        if suggestions[k].get("value") != current.get(k)
+        if not _values_equal(suggestions[k].get("value"), current.get(k))
     ]
     print()
     print(bold("=" * 92))

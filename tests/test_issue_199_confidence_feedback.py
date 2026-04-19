@@ -236,7 +236,7 @@ def test_maybe_request_feedback_suppressed(learning_manager, mock_hass):
         learning_manager._maybe_request_feedback(
             cycle_data=cycle_data,
             detected_profile="Normal 65°C",
-            confidence=0.66,  # within the 0.6–0.9 feedback zone
+            confidence=0.66,  # within the 0.6-0.9 feedback zone
             predicted_duration=3600.0,
         )
 

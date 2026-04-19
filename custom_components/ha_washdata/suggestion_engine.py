@@ -314,6 +314,15 @@ class SuggestionEngine:
         for c in cycles:
             if not isinstance(c, dict):
                 continue
+            label = c.get("label")
+            if not isinstance(label, str) or not label:
+                continue
+            if not (
+                isinstance(c.get("end_time"), str)
+                or c.get("state") == "completed"
+                or c.get("status") in ("completed", "force_stopped")
+            ):
+                continue
             raw = c.get("power_data")
             if not isinstance(raw, list) or len(raw) < 5:
                 continue

@@ -245,6 +245,7 @@ class LearningManager:
             c for c in self.profile_store.get_past_cycles()
             if isinstance(c, dict)
             and c.get("profile_name")
+            and c.get("profile_name") != "noise"
             and c.get("power_data")
             and c.get("status") in ("completed", "force_stopped")
         ]
