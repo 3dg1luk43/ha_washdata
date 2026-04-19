@@ -243,7 +243,10 @@ class LearningManager:
 
         labeled_cycles = [
             c for c in self.profile_store.get_past_cycles()
-            if isinstance(c, dict) and c.get("profile_name") and c.get("power_data")
+            if isinstance(c, dict)
+            and c.get("profile_name")
+            and c.get("power_data")
+            and c.get("status") in ("completed", "force_stopped")
         ]
         current_count = len(labeled_cycles)
 

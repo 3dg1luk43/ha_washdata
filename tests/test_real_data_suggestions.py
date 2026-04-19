@@ -220,11 +220,10 @@ class TestModelSuggestionsMinOffGap:
         engine = SuggestionEngine(mock_hass, "test", store, device_type="washing_machine")
 
         result = engine.generate_model_suggestions()
-        # min_off_gap may or may not fire depending on gap/floor; if it fires it must be valid
-        if CONF_MIN_OFF_GAP in result:
-            val = result[CONF_MIN_OFF_GAP]["value"]
-            assert val > 0
-            assert val <= 3600
+        assert CONF_MIN_OFF_GAP in result, "_suggest_min_off_gap should emit a suggestion for 5 completed cycles"
+        val = result[CONF_MIN_OFF_GAP]["value"]
+        assert val > 0
+        assert val <= 3600
 
     def test_min_off_gap_not_emitted_with_too_few_gaps(self, mock_hass):
         # Only 2 cycles → 1 gap → not enough

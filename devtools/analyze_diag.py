@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -176,7 +177,7 @@ def compute_suggestions(
                 "reason": f"5th-percentile of minimum-active-power across {len(labeled)} labeled cycles.",
             }
             suggestions[CONF_START_THRESHOLD_W] = {
-                "value": round(pt.get("suggested_start_threshold_w", stop_w * 1.5), 2),
+                "value": round(pt.get("suggested_start_threshold_w", stop_w * 1.2), 2),
                 "reason": "Hysteresis band above the stop threshold (x1.2).",
             }
 
@@ -417,9 +418,6 @@ def _print_section_header(title: str) -> None:
 
 
 def _col(text: str, width: int, align: str = "<") -> str:
-    plain = text
-    # Strip ANSI for length calc
-    import re
     plain = re.sub(r"\033\[[0-9;]*m", "", text)
     pad = max(0, width - len(plain))
     if align == ">":
@@ -593,7 +591,7 @@ def print_profile_summary(profiles: dict[str, Any], cycles: list[dict[str, Any]]
         + bold(f"{'Cycles':>7}")
         + bold(f"{'Avg (min)':>10}")
         + bold(f"{'SD (min)':>9}")
-        + bold(f"{'Variance':>9}")
+        + bold(f"{'CV (%)':>9}")
     )
     print(header)
     print(dim("  " + "─" * 75))

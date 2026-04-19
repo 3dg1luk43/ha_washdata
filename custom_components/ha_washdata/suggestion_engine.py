@@ -174,8 +174,8 @@ class SuggestionEngine:
             if not label or label == "noise":
                 continue
             try:
-                start = float(c["start_time"]) if isinstance(c.get("start_time"), float) else None
-                end = float(c["end_time"]) if isinstance(c.get("end_time"), float) else None
+                start = float(c["start_time"]) if isinstance(c.get("start_time"), (int, float)) and not isinstance(c.get("start_time"), bool) else None
+                end = float(c["end_time"]) if isinstance(c.get("end_time"), (int, float)) and not isinstance(c.get("end_time"), bool) else None
                 if start is None or end is None:
                     # Try ISO string parsing
                     from datetime import datetime
