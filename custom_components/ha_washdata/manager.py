@@ -1808,6 +1808,9 @@ class WashDataManager:
                     "Door opened during active cycle: setting verified_pause=True"
                 )
                 self.detector.set_verified_pause(True)
+                # Mark as user-paused so async_resume_cycle and net_elapsed_seconds handle it correctly
+                self._is_user_paused = True
+                self._user_pause_start = dt_util.now()
         # Door closing is intentionally not handled - no auto-resume
 
     async def _setup_notify_people_listener(self) -> None:
