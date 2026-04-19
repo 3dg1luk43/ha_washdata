@@ -147,7 +147,7 @@ def test_update_match_valid_duration_no_warning(
 
 def test_profile_snapshot_uses_segment_duration_when_avg_duration_zero() -> None:
     """Bug 2: when profile.avg_duration=0 and cycle.duration=0, the snapshot should
-    estimate duration from the resampled segment (n_samples × used_dt) so that
+    estimate duration from the resampled segment (n_samples x used_dt) so that
     update_match() receives a non-zero expected_duration."""
     import numpy as np
 
@@ -156,7 +156,7 @@ def test_profile_snapshot_uses_segment_duration_when_avg_duration_zero() -> None
     sample_cycle: dict[str, Any] = {"id": "cycle-001", "duration": 0}
     used_dt = 30.0  # 30 s resampling interval
 
-    # A realistic resampled segment: 300 samples × 30 s = 9000 s expected duration
+    # A realistic resampled segment: 300 samples x 30 s = 9000 s expected duration
     n_samples = 300
     sample_power = np.ones(n_samples) * 150.0  # shape (300,)
 

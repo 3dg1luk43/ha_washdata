@@ -62,9 +62,10 @@ class _LogHandler(logging.Handler):
             self.handleError(record)
 
     def snapshot(self, cutoff: float) -> list[dict[str, Any]]:
+        items = list(self._buf)
         return [
             {"ts": _ts_iso(ts), "lvl": lvl, "msg": msg}
-            for ts, lvl, msg in self._buf
+            for ts, lvl, msg in items
             if ts >= cutoff
         ]
 
@@ -155,17 +156,19 @@ class DiagBuffer:
             }
         """
         cutoff = (dt_util.now() - _WINDOW).timestamp()
+        power_items = list(self._power)
+        state_items = list(self._states)
         return {
             "window_hours": 24,
             "device_name": self._device_name,
             "power_trace": [
                 [_ts_iso(ts), w]
-                for ts, w in self._power
+                for ts, w in power_items
                 if ts >= cutoff
             ],
             "state_history": [
                 {"ts": _ts_iso(ts), "from": f, "to": t, "program": prog}
-                for ts, f, t, prog in self._states
+                for ts, f, t, prog in state_items
                 if ts >= cutoff
             ],
             "logs": self._log_handler.snapshot(cutoff),
