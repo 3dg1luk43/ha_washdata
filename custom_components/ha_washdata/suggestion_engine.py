@@ -360,11 +360,19 @@ class SuggestionEngine:
             in_pause = False
             pause_energy = 0.0
             stop_w = 2.0
+            max_gap_s = 3600.0  # 1 hour - skip intervals with excessive gaps (e.g., outages)
             for i in range(1, len(readings)):
                 t0, p0 = readings[i - 1]
                 t1, p1 = readings[i]
+                dt_s = t1 - t0
+                # Guard against non-positive or excessively large time gaps
+                if dt_s <= 0 or dt_s > max_gap_s:
+                    # Skip this interval and reset pause state
+                    in_pause = False
+                    pause_energy = 0.0
+                    continue
                 avg_p = (p0 + p1) / 2.0
-                dt_h = (t1 - t0) / 3600.0
+                dt_h = dt_s / 3600.0
                 if avg_p < stop_w:
                     if not in_pause:
                         in_pause = True

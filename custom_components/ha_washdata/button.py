@@ -78,7 +78,7 @@ class WashDataPauseCycleButton(ButtonEntity):
     def available(self) -> bool:
         """Only available when a cycle is active and not already user-paused."""
         return (
-            self._manager.check_state() in (STATE_RUNNING, STATE_STARTING)
+            self._manager.check_state() in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING)
             and not self._manager.is_user_paused
         )
 

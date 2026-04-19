@@ -138,6 +138,7 @@ from .const import (
     DEVICE_TYPE_PUMP,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_PAUSE_CUTS_POWER,
+    CONF_SWITCH_ENTITY,
     CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
 )
@@ -556,6 +557,17 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # Remove deprecated single-service keys now that per-event lists are saved.
             merged_options.pop(CONF_NOTIFY_SERVICE, None)
             merged_options.pop(CONF_NOTIFY_EVENTS, None)
+
+            # Also remove deprecated keys from config entry data so manager won't fall back
+            updated_data = dict(self.config_entry.data)
+            updated_data.pop(CONF_NOTIFY_SERVICE, None)
+            updated_data.pop(CONF_NOTIFY_EVENTS, None)
+
+            self.hass.config_entries.async_update_entry(
+                self.config_entry,
+                data=updated_data,
+            )
+
             return self.async_create_entry(title="", data=merged_options)
 
         notify_services: list[str] = sorted(
@@ -1221,6 +1233,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_PAUSE_CUTS_POWER,
                 default=get_val(CONF_PAUSE_CUTS_POWER, False),
             ): bool,
+            vol.Optional(
+                CONF_SWITCH_ENTITY,
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="switch",
+                    multiple=False,
+                )
+            ),
             vol.Optional(
                 CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
                 default=get_val(
