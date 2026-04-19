@@ -474,12 +474,19 @@ async def test_cycle_end_auto_labels_unmatched_cycle(manager: WashDataManager, m
     assert added_cycle["profile_name"] == "DerivedProfile"
 
 @pytest.mark.asyncio
-async def test_start_notification_deferred_when_ambiguous(manager: WashDataManager, mock_hass: Any, mock_entry: Any) -> None:
-    """Test that the START notification is deferred until the match achieves persistence."""
+async def test_start_notification_fires_immediately_in_fallback(manager: WashDataManager, mock_hass: Any, mock_entry: Any) -> None:
+    """Test that the START notification fallback in matching fires immediately without waiting for persistence.
+
+    This covers the restart-recovery path: if _notified_start is False when matching
+    runs (e.g. HA restarted before the cycle-start snapshot was saved), the notification
+    fires on the first matching interval regardless of ambiguity or persistence count.
+    Under normal operation, _notified_start is set True in _on_state_change before
+    matching ever runs.
+    """
     # Enable START notification
     manager.config_entry = mock_entry
     manager._notify_start_services = ["notify.mobile_app_test"]
-    manager._notified_start = False
+    manager._notified_start = False  # Simulate restart-recovery scenario
     manager._current_program = "detecting..."
     manager.detector.config.stop_threshold_w = 5.0
     manager._match_persistence = 3  # Assume 3 intervals are needed
@@ -492,35 +499,29 @@ async def test_start_notification_deferred_when_ambiguous(manager: WashDataManag
     mock_res_ambiguous.is_ambiguous = True
     mock_res_ambiguous.is_confident_mismatch = False
     mock_res_ambiguous.candidates = [{"name":"Heavy Duty", "score":0.5}, {"name":"Normal", "score":0.49}]
-    
+
     manager.profile_store.async_match_profile = AsyncMock(return_value=mock_res_ambiguous)
-    # Ensure profile alignment verification returns False so verified_pause doesn't trigger override
     manager.profile_store.async_verify_alignment = AsyncMock(return_value=(False, 0.0, None))
-    
+
     # Reset internal manager state for test
     manager._match_persistence_counter = {}
     manager._current_match_candidate = None
-    
-    # 1st Interval (Power set to 1000 so it doesn't trigger low-power verified_pause logic either)
+
+    # 1st Interval — fallback fires immediately without waiting for program detection
     readings = [(dt_util.now(), 1000.0), (dt_util.now() + timedelta(seconds=10), 1000.0)]
     await manager._async_do_perform_matching(readings)
-    
-    mock_hass.services.async_call.assert_not_called()
-    assert manager._notified_start is False
-    assert manager._current_program == "detecting..."
 
-    # 2nd Interval (Still under persistence threshold)
-    await manager._async_do_perform_matching(readings)
-    mock_hass.services.async_call.assert_not_called()
-    assert manager._notified_start is False
-    assert manager._current_program == "detecting..."
-
-    # 3rd Interval (Reaches persistence threshold)
-    await manager._async_do_perform_matching(readings)
-    
-    # Now it should switch and notify
     mock_hass.services.async_call.assert_called()
     assert manager._notified_start is True
+    assert manager._current_program == "detecting..."  # Program not yet resolved
+
+    # 2nd and 3rd Intervals — no additional start notifications, program resolves on 3rd
+    mock_hass.services.async_call.reset_mock()
+    await manager._async_do_perform_matching(readings)
+    await manager._async_do_perform_matching(readings)
+
+    # Notification fired only once; program now resolved via persistence
+    assert mock_hass.services.async_call.call_count == 0  # No extra start notification
     assert manager._current_program == "Heavy Duty"
 
 

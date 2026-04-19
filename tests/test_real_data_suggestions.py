@@ -2,7 +2,7 @@
 
 These tests load cycle exports from cycle_data/ (including user-contributed data)
 and verify that the suggestion pipeline produces sensible parameter recommendations.
-They are not strict unit tests – they validate *plausibility* bounds so that
+They are not strict unit tests - they validate *plausibility* bounds so that
 regressions in the suggestion algorithms are caught early with real-world data.
 """
 
@@ -56,7 +56,7 @@ def _build_mock_store(cycles: list[dict], profiles: dict | None = None) -> Magic
 @pytest.fixture(scope="module")
 def all_cycles() -> list[dict]:
     cycles = _load_all_cycles()
-    if len(cycles) < 5:
+    if len(cycles) < 10:
         pytest.skip("Not enough cycle_data to run real-data tests")
     return cycles
 
@@ -103,7 +103,7 @@ class TestParameterOptimizer:
 
     def test_power_thresholds_plausible(self, optimizer):
         result = optimizer.analyze_power_thresholds()
-        assert CONF_STOP_THRESHOLD_W.replace("_threshold_w", "") or True  # key name mapping
+        assert "suggested_stop_threshold_w" in result, "analyze_power_thresholds must produce suggested_stop_threshold_w"
         stop = result.get("suggested_stop_threshold_w")
         start = result.get("suggested_start_threshold_w")
         assert stop is not None, "No stop threshold suggestion generated"
@@ -173,7 +173,7 @@ class TestBatchSimulation:
 
         if single_stops and batch_stop is not None:
             avg_single = sum(single_stops) / len(single_stops)
-            # Batch should be in the same ballpark – not wildly different
+            # Batch should be in the same ballpark - not wildly different
             assert abs(batch_stop - avg_single) < avg_single * 2, (
                 f"Batch stop ({batch_stop}) far from mean single ({avg_single:.2f})"
             )
@@ -191,7 +191,7 @@ class TestBatchSimulation:
 
 
 # ---------------------------------------------------------------------------
-# SuggestionEngine.generate_model_suggestions – min_off_gap tests
+# SuggestionEngine.generate_model_suggestions - min_off_gap tests
 # ---------------------------------------------------------------------------
 
 class TestModelSuggestionsMinOffGap:

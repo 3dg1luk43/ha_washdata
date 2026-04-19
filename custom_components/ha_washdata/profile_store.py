@@ -1309,9 +1309,14 @@ class ProfileStore:
 
             # Compute and store energy (Wh) if not already set (e.g. by manager)
             if "energy_wh" not in cycle_data and len(ts_arr) > 1:
-                dt_h = np.diff(ts_arr) / 3600.0
-                avg_p = (p_arr[:-1] + p_arr[1:]) / 2
-                cycle_data["energy_wh"] = round(float(np.sum(avg_p * np.abs(dt_h))), 3)
+                sort_idx = np.argsort(ts_arr)
+                ts_s = ts_arr[sort_idx]
+                p_s = p_arr[sort_idx]
+                dt_h = np.diff(ts_s) / 3600.0
+                _MAX_GAP_H = 1.0
+                mask = (dt_h > 0) & (dt_h <= _MAX_GAP_H)
+                avg_p = (p_s[:-1] + p_s[1:]) / 2
+                cycle_data["energy_wh"] = round(float(np.sum(avg_p[mask] * dt_h[mask])), 3)
 
             self._logger.debug(
                 "add_cycle: stored %s samples at %.1fs intervals",
@@ -2659,9 +2664,15 @@ class ProfileStore:
                 envelope = self._data.get("envelopes", {}).get(name)
                 if envelope and envelope.get("cycle_count", 0) >= 2 and envelope.get("avg"):
                     avg_y = [float(p[1]) for p in envelope["avg"]]
+                    _env_avg = envelope["avg"]
+                    _env_ts_duration = (
+                        float(_env_avg[-1][0]) - float(_env_avg[0][0])
+                        if len(_env_avg) > 1 else 0.0
+                    )
                     avg_duration = (
                         envelope.get("target_duration") or
                         profile.get("avg_duration") or
+                        _env_ts_duration or
                         len(avg_y) * used_dt
                     )
                     snapshots.append({
@@ -2688,14 +2699,19 @@ class ProfileStore:
                 # avg_duration preference order:
                 #   1. profile["avg_duration"] (rolling average, most accurate)
                 #   2. sample_cycle["duration"] (raw cycle field)
-                #   3. len(segment) × dt (estimate from the resampled data)
+                #   3. timestamp span of sample_seg (estimate from the resampled data)
                 # Profiles created before avg_duration tracking was added may have
                 # 0 or a missing value; falling back to the segment estimate prevents
                 # update_match() from always seeing expected_duration=0, which
                 # silences time-remaining estimates and logs a misleading warning.
+                _seg_ts_duration = (
+                    float(sample_seg.timestamps[-1]) - float(sample_seg.timestamps[0])
+                    if len(sample_seg.timestamps) > 1 else 0.0
+                )
                 avg_dur = (
                     profile.get("avg_duration") or
                     sample_cycle.get("duration") or
+                    _seg_ts_duration or
                     len(sample_seg.power) * used_dt
                 )
                 snapshots.append({

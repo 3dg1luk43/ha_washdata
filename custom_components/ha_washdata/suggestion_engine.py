@@ -168,7 +168,10 @@ class SuggestionEngine:
         for c in cycles:
             if not isinstance(c, dict):
                 continue
-            if c.get("status") == "interrupted":
+            if c.get("status") not in ("completed", "force_stopped"):
+                continue
+            label = c.get("profile_name") or c.get("label")
+            if not label or label == "noise":
                 continue
             try:
                 start = float(c["start_time"]) if isinstance(c.get("start_time"), float) else None
@@ -410,80 +413,11 @@ class SuggestionEngine:
                 ),
             }
 
+        min_off_gap = self._suggest_min_off_gap(cycles)
+        if min_off_gap is not None:
+            suggestions[CONF_MIN_OFF_GAP] = min_off_gap
+
         return suggestions
-        """Replay a cycle with varied parameters to find optimal settings."""
-        power_data_raw: Any = cycle_data.get("power_data", [])
-        if not isinstance(power_data_raw, list):
-            return {}
-        power_data = cast(list[list[float] | tuple[Any, float]], power_data_raw)
-        if len(power_data) < 10:
-            return {}
-
-        start_time_raw = cycle_data.get("start_time")
-        start_time_iso = (
-            start_time_raw if isinstance(start_time_raw, str) and start_time_raw else None
-        )
-
-        # Normalise power_data to [[offset_sec, power], ...] regardless of source format.
-        readings_list = power_data_to_offsets(power_data, start_time_iso)
-
-        readings: list[tuple[float, float]] = [
-            (float(offset), float(power)) for offset, power in readings_list
-        ]
-
-        if not readings:
-            return {}
-
-        # 1. Base suggestions from actual trace data (Offline Heuristics)
-        # Note: We reuse logic from parameter_optimizer.py but simplified for runtime
-        powers = np.array([p[1] for p in readings])
-        active_powers = powers[powers > 0.5]
-
-        if len(active_powers) < 5:
-            return {}
-
-        min_active = np.min(active_powers)
-
-        suggested_stop = round(min_active * 0.8, 2)
-        suggested_start = round(min_active * 1.2, 2)
-
-        # Energy suggestions
-        # Simplified: Use 0.05Wh as default end gate
-        suggested_end_energy = 0.05
-
-        # Timing suggestions (Aggressive as per user feedback)
-        # We can't really do gap analysis on a single cycle,
-        # but we can look for early dips for dead zone.
-        dead_zone = 0
-        for ts_offset, p in readings:
-            elapsed = ts_offset
-            if elapsed > 300:
-                break
-            if p < 5.0 and elapsed > 5.0:
-                dead_zone = int(elapsed)
-
-        suggested_dead_zone = min(300, dead_zone) if dead_zone > 0 else 60
-
-        new_suggestions: dict[str, dict[str, Any]] = {
-            CONF_STOP_THRESHOLD_W: {
-                "value": suggested_stop,
-                "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle."
-            },
-            CONF_START_THRESHOLD_W: {
-                "value": suggested_start,
-                "reason": f"Based on minimum active power ({min_active:.1f}W) observed in last cycle."
-            },
-            CONF_END_ENERGY_THRESHOLD: {
-                "value": suggested_end_energy,
-                "reason": "Default recommended baseline for end-of-cycle noise gate."
-            },
-            CONF_RUNNING_DEAD_ZONE: {
-                "value": suggested_dead_zone,
-                "reason": f"Based on early power dip detected at {suggested_dead_zone}s."
-            }
-        }
-
-        return new_suggestions
 
     def apply_suggestions(self, suggestions: dict[str, Any]) -> None:
         """Persist suggestions to the profile store."""

@@ -682,10 +682,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)
             if not device:
-                raise ValueError("Device not found")
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="device_not_found",
+                )
             entry_id = next(iter(device.config_entries), None)
-            if not entry_id or entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded")
+            if not entry_id:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="no_config_entry",
+                )
+            if entry_id not in hass.data[DOMAIN]:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="integration_not_loaded",
+                )
 
             manager = hass.data[DOMAIN][entry_id]
             await manager.async_pause_cycle()
@@ -698,10 +709,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             registry = dr.async_get(hass)
             device = registry.async_get(device_id)
             if not device:
-                raise ValueError("Device not found")
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="device_not_found",
+                )
             entry_id = next(iter(device.config_entries), None)
-            if not entry_id or entry_id not in hass.data[DOMAIN]:
-                raise ValueError("Integration not loaded")
+            if not entry_id:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="no_config_entry",
+                )
+            if entry_id not in hass.data[DOMAIN]:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="integration_not_loaded",
+                )
 
             manager = hass.data[DOMAIN][entry_id]
             await manager.async_resume_cycle()

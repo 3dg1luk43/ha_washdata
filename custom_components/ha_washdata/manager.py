@@ -25,6 +25,7 @@ from homeassistant.const import STATE_UNAVAILABLE, STATE_HOME
 from homeassistant.util import dt as dt_util
 import homeassistant.helpers.event as evt
 from homeassistant.helpers import script as script_helper
+from homeassistant.helpers import translation
 
 from .const import (
     DOMAIN,
@@ -935,11 +936,9 @@ class WashDataManager:
             self._update_remaining_only()
 
             # --- START NOTIFICATION LOGIC ---
-            # Send the start notification only after we confidently know the program
-            if (
-                not getattr(self, "_notified_start", False)
-                and self._current_program not in ("detecting...", "off", "starting", "unknown")
-            ):
+            # Fallback for restart-recovery: fires only if the immediate notification in
+            # _on_state_change was missed (e.g., HA restarted mid-cycle before snapshot).
+            if not getattr(self, "_notified_start", False):
                 if self._notify_fire_events and not self._start_event_fired:
                     self.hass.bus.async_fire(
                         EVENT_CYCLE_STARTED,
@@ -1690,6 +1689,9 @@ class WashDataManager:
             self._remove_listener()
         if self._remove_external_trigger_listener:
             self._remove_external_trigger_listener()
+        if self._remove_door_sensor_listener:
+            self._remove_door_sensor_listener()
+            self._remove_door_sensor_listener = None
         if self._remove_notify_people_listener:
             self._remove_notify_people_listener()
             self._remove_notify_people_listener = None
@@ -1768,7 +1770,7 @@ class WashDataManager:
 
         Opening the door during an active cycle confirms an intentional pause (verified_pause).
         Opening the door after a cycle clears the 'Clean' state.
-        Note: door closing does NOT auto-resume a cycle — the user must do this explicitly.
+        Note: door closing does NOT auto-resume a cycle - the user must do this explicitly.
         """
         new_state = event.data.get("new_state")
         old_state = event.data.get("old_state")
@@ -1789,11 +1791,16 @@ class WashDataManager:
 
         if door_open:
             if self._is_clean_state:
-                # User opened the door after the cycle — laundry retrieved
+                # User opened the door after the cycle - laundry retrieved
                 self._logger.debug("Door opened: clearing Clean state")
                 self._is_clean_state = False
                 self._clean_state_start = None
                 self._notified_clean_laundry = False
+                # Purge any deferred clean-laundry notifications from the queue
+                self._pending_notifications = [
+                    n for n in self._pending_notifications
+                    if n.get("event_type") != NOTIFY_EVENT_CLEAN
+                ]
                 self._notify_update()
             elif self.detector.state in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
                 # Door opened during active cycle → soft pause confirmation
@@ -1801,7 +1808,7 @@ class WashDataManager:
                     "Door opened during active cycle: setting verified_pause=True"
                 )
                 self.detector.set_verified_pause(True)
-        # Door closing is intentionally not handled — no auto-resume
+        # Door closing is intentionally not handled - no auto-resume
 
     async def _setup_notify_people_listener(self) -> None:
         """Set up listener for person presence changes used by notification gating."""
@@ -2275,11 +2282,11 @@ class WashDataManager:
 
         # Dishwashers can have very long silent drying phases (up to 2h)
         # We use the device-specific timeout as the floor for this effective timeout.
-        # The floor is applied unconditionally — dishwashers have passive drying phases
+        # The floor is applied unconditionally - dishwashers have passive drying phases
         # even when no profile has been matched yet.  The original restriction to matched
         # cycles caused premature kills: with the default 3600s timeout, an unmatched
         # dishwasher cycle was killed ~1h after the last sensor update, while the
-        # physical drying phase could still have 1–2h of silent runtime remaining.
+        # physical drying phase could still have 1-2h of silent runtime remaining.
         low_power_floor = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE.get(
             self.device_type, 0
         )
@@ -2472,6 +2479,28 @@ class WashDataManager:
                         },
                     )
                     self._start_event_fired = True
+
+                # Fire push notification immediately — do not wait for profile matching.
+                if not self._notified_start and (self._notify_start_services or self._notify_actions):
+                    msg_template = self.config_entry.options.get(
+                        CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE
+                    )
+                    msg = self._safe_format_template(
+                        msg_template,
+                        fallback_template=DEFAULT_NOTIFY_START_MESSAGE,
+                        device=self.config_entry.title,
+                        program=self._current_program,
+                    )
+                    self._dispatch_notification(
+                        msg,
+                        event_type=NOTIFY_EVENT_START,
+                        extra_vars={"program": self._current_program},
+                    )
+                    self._notified_start = True
+                    self._logger.info(
+                        "Sent start notification for program '%s'", self._current_program
+                    )
+                    self._check_pre_completion_notification()
             else:
                 self._logger.debug("Cycle resumed from %s, preserving estimates", old_state)
                 # Ensure watchdog is running
@@ -2502,12 +2531,16 @@ class WashDataManager:
         cycle_energy_wh = 0.0
         if power_data and len(power_data) >= 2:
             try:
-                ts = np.array([float(p[0]) if isinstance(p[0], (int, float)) else 0 for p in power_data])
-                ps = np.array([float(p[1]) for p in power_data])
-                # Simple trapezoidal integration
-                dt_h = np.diff(ts) / 3600.0 if ts[0] > 1e9 else np.diff(ts) / 3600.0  # seconds -> hours
-                avg_p = (ps[:-1] + ps[1:]) / 2
-                cycle_energy_wh = float(np.sum(avg_p * np.abs(dt_h)))
+                valid = [(float(p[0]), float(p[1])) for p in power_data if isinstance(p[0], (int, float)) and isinstance(p[1], (int, float))]
+                if len(valid) >= 2:
+                    valid.sort(key=lambda x: x[0])
+                    ts = np.array([v[0] for v in valid])
+                    ps = np.array([v[1] for v in valid])
+                    dt_h = np.diff(ts) / 3600.0
+                    _MAX_GAP_H = 1.0  # skip segments longer than 1 hour
+                    mask = (dt_h > 0) & (dt_h <= _MAX_GAP_H)
+                    avg_p = (ps[:-1] + ps[1:]) / 2
+                    cycle_energy_wh = float(np.sum(avg_p[mask] * dt_h[mask]))
             except Exception:
                 cycle_energy_wh = 0.0
 
@@ -2516,7 +2549,7 @@ class WashDataManager:
             self._handle_noise_cycle(max_power)
         elif self.device_type == "dishwasher" and prev_cycle_end_time is not None:
             # Pump-out suppression: dishwashers end cycles with a brief drain pump
-            # (typically 30–300 s, < 1 Wh) a few minutes after the main cycle
+            # (typically 30-300 s, < 1 Wh) a few minutes after the main cycle
             # finishes.  If a short, low-energy cycle starts within 10 minutes of
             # the previous cycle, treat it as a pump-out ghost and do not store it.
             cycle_start_str = cycle_data.get("start_time")
@@ -3087,11 +3120,23 @@ class WashDataManager:
         )
         await self.profile_store.async_save()
 
-        # Notify user — use finish services as the natural channel for device suggestions
-        message = (
-            f"Washing Machine '{self.config_entry.title}' detected ghost cycles. "
-            f"Suggested min_power change: {current_min:.1f}W → {new_min:.1f}W "
-            f"(not applied automatically)."
+        # Notify user - use finish services as the natural channel for device suggestions
+        _translations = await translation.async_get_translations(
+            self.hass, self.hass.config.language, "options", {DOMAIN}
+        )
+        _default_msg = (
+            "{device_type} '{device_title}' detected ghost cycles. "
+            "Suggested min_power change: {current_min}W -> {new_min}W "
+            "(not applied automatically)."
+        )
+        _msg_template = _translations.get(
+            f"component.{DOMAIN}.options.error.auto_tune_suggestion", _default_msg
+        )
+        message = _msg_template.format(
+            device_type=self.device_type,
+            device_title=self.config_entry.title,
+            current_min=f"{current_min:.1f}",
+            new_min=f"{new_min:.1f}",
         )
         autotune_services = (
             self._notify_finish_services

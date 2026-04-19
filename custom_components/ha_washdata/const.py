@@ -94,7 +94,7 @@ CONF_PAUSE_CUTS_POWER = "pause_cuts_power"  # Also turn off switch entity when p
 CONF_NOTIFY_UNLOAD_DELAY_MINUTES = "notify_unload_delay_minutes"  # Minutes before "laundry waiting" nag
 
 DEFAULT_NOTIFY_TITLE = "WashData: {device}"
-DEFAULT_NOTIFY_START_MESSAGE = "{device} started {program}."
+DEFAULT_NOTIFY_START_MESSAGE = "{device} started."
 DEFAULT_NOTIFY_FINISH_MESSAGE = "{device} finished. Duration: {duration}m."
 DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE = "{device}: Less than {minutes} minutes remaining."
 DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE = "{device}: No profile matched yet."
