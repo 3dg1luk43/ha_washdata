@@ -108,14 +108,16 @@ def extract_current_settings(data: dict[str, Any]) -> dict[str, Any]:
     """Merge entry.data + entry.options into a flat settings dict."""
     entry = data.get("data", {}).get("entry", {})
     merged: dict[str, Any] = {}
+    entry_present = isinstance(entry, dict) and (entry.get("data") or entry.get("options"))
     if isinstance(entry, dict):
         merged.update(entry.get("data", {}))
         merged.update(entry.get("options", {}))
-    # Fallback: older store_export fields
-    store_export = data.get("data", {}).get("store_export", {})
-    if isinstance(store_export, dict):
-        merged.update(store_export.get("entry_data", {}))
-        merged.update(store_export.get("entry_options", {}))
+    # Fallback: older store_export fields - only when entry block is absent or empty
+    if not entry_present:
+        store_export = data.get("data", {}).get("store_export", {})
+        if isinstance(store_export, dict):
+            merged.update(store_export.get("entry_data", {}))
+            merged.update(store_export.get("entry_options", {}))
     return merged
 
 
@@ -175,7 +177,7 @@ def compute_suggestions(
             }
             suggestions[CONF_START_THRESHOLD_W] = {
                 "value": round(pt.get("suggested_start_threshold_w", stop_w * 1.5), 2),
-                "reason": "Hysteresis band above the stop threshold (×1.2).",
+                "reason": "Hysteresis band above the stop threshold (x1.2).",
             }
 
         et = optimizer.analyze_energy_thresholds(stop_threshold=stop_w)
@@ -188,7 +190,7 @@ def compute_suggestions(
             if "suggested_start_energy_threshold" in et:
                 suggestions[CONF_START_ENERGY_THRESHOLD] = {
                     "value": round(et["suggested_start_energy_threshold"], 4),
-                    "reason": "5th-percentile of first-60s energy (Wh) × 0.5 safety factor.",
+                    "reason": "5th-percentile of first-60s energy (Wh) x 0.5 safety factor.",
                 }
 
         tp = optimizer.analyze_timing_parameters()
@@ -222,7 +224,7 @@ def compute_suggestions(
         n = len(ratios)
         suggestions[CONF_DURATION_TOLERANCE] = {
             "value": tol,
-            "reason": f"p95 duration deviation across {n} labeled cycles = {p95_dev:.2f} → +0.05 buffer.",
+            "reason": f"p95 duration deviation across {n} labeled cycles = {p95_dev:.2f} -> +0.05 buffer.",
         }
         suggestions[CONF_PROFILE_DURATION_TOLERANCE] = {
             "value": tol,
@@ -235,7 +237,7 @@ def compute_suggestions(
         if min_r < max_r - 0.2:
             suggestions[CONF_PROFILE_MATCH_MIN_DURATION_RATIO] = {
                 "value": min_r,
-                "reason": f"p05 of actual/expected duration ratio ({p05:.2f}) − 0.10 buffer.",
+                "reason": f"p05 of actual/expected duration ratio ({p05:.2f}) - 0.10 buffer.",
             }
             suggestions[CONF_PROFILE_MATCH_MAX_DURATION_RATIO] = {
                 "value": max_r,
@@ -267,7 +269,7 @@ def compute_suggestions(
         suggestions[CONF_MIN_OFF_GAP] = {
             "value": suggested_gap,
             "reason": (
-                f"p05 of {len(gaps)} inter-cycle gaps ({p05_gap:.0f}s) × 0.8, "
+                f"p05 of {len(gaps)} inter-cycle gaps ({p05_gap:.0f}s) x 0.8, "
                 f"floored by device default ({device_floor}s)."
             ),
         }
@@ -312,22 +314,22 @@ def compute_suggestions(
         )
         suggestions[CONF_WATCHDOG_INTERVAL] = {
             "value": int(max(30, p95_dt * 10)),
-            "reason": f"p95 sampling interval ({p95_dt:.1f}s) × 10, minimum 30s.",
+            "reason": f"p95 sampling interval ({p95_dt:.1f}s) x 10, minimum 30s.",
         }
         suggestions[CONF_NO_UPDATE_ACTIVE_TIMEOUT] = {
             "value": int(max(60, p95_dt * 20)),
-            "reason": f"p95 sampling interval ({p95_dt:.1f}s) × 20, minimum 60s.",
+            "reason": f"p95 sampling interval ({p95_dt:.1f}s) x 20, minimum 60s.",
         }
         suggestions[CONF_OFF_DELAY] = {
             "value": int(max(device_off_floor, p95_dt * 5)),
             "reason": (
-                f"p95 sampling interval ({p95_dt:.1f}s) × 5, "
+                f"p95 sampling interval ({p95_dt:.1f}s) x 5, "
                 f"floored by device default ({device_off_floor}s)."
             ),
         }
         suggestions[CONF_PROFILE_MATCH_INTERVAL] = {
             "value": int(max(10, median_dt * 10)),
-            "reason": f"Median sampling interval ({median_dt:.1f}s) × 10.",
+            "reason": f"Median sampling interval ({median_dt:.1f}s) x 10.",
         }
 
     return suggestions
@@ -585,12 +587,12 @@ def print_profile_summary(profiles: dict[str, Any], cycles: list[dict[str, Any]]
             except (TypeError, ValueError):
                 pass
 
-    _print_section_header("Cycle History – Profiles")
+    _print_section_header("Cycle History - Profiles")
     header = (
         bold(f"  {'Program':<35}")
         + bold(f"{'Cycles':>7}")
         + bold(f"{'Avg (min)':>10}")
-        + bold(f"{'σ (min)':>9}")
+        + bold(f"{'SD (min)':>9}")
         + bold(f"{'Variance':>9}")
     )
     print(header)

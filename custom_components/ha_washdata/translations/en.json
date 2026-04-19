@@ -633,7 +633,8 @@
       "suggestions_ready_notification_title": "WashData: Suggested Settings Ready ({device})",
       "suggestions_ready_notification_message": "The **Suggested Settings** sensor now reports **{count}** actionable recommendations.\n\nTo review and apply them: **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSuggestions are optional and shown for review before you save.",
       "trim_range_invalid": "Start must be before end. Please adjust your trim points.",
-      "trim_failed": "Trim failed. The cycle may no longer exist or the window is empty."
+      "trim_failed": "Trim failed. The cycle may no longer exist or the window is empty.",
+      "auto_tune_suggestion": "{device_type} '{device_title}' detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically)."
     },
     "abort": {
       "no_cycles_found": "No cycles found",

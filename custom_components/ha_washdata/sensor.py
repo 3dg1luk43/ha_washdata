@@ -21,6 +21,7 @@ from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
     DOMAIN,
+    CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -29,7 +30,10 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
     SIGNAL_WASHER_UPDATE,
     CONF_WATCHDOG_INTERVAL,
     CONF_EXPOSE_DEBUG_ENTITIES,
@@ -782,6 +786,10 @@ class WasherSuggestionsSensor(WasherBaseSensor):
             CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
             CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
             CONF_MIN_OFF_GAP,
+            CONF_STOP_THRESHOLD_W,
+            CONF_START_THRESHOLD_W,
+            CONF_END_ENERGY_THRESHOLD,
+            CONF_RUNNING_DEAD_ZONE,
         )
 
     def _count_applicable_suggestions(self, suggestions: dict[str, Any]) -> int:
@@ -847,7 +855,6 @@ class WasherCycleCountSensor(WasherBaseSensor):
             translation_key="cycle_count",
             icon="mdi:counter",
             native_unit_of_measurement="cycles",
-            state_class="total_increasing",
         )
         super().__init__(manager, entry)
 
