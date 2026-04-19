@@ -365,6 +365,13 @@ class SuggestionEngine:
             for i in range(1, len(readings)):
                 t0, p0 = readings[i - 1]
                 t1, p1 = readings[i]
+                dt_s = t1 - t0
+                # Guard against non-positive or excessively large time gaps
+                if dt_s <= 0 or dt_s > max_gap_s:
+                    # Skip this interval and reset pause state
+                    in_pause = False
+                    pause_energy = 0.0
+                    continue
                 avg_p = (p0 + p1) / 2.0
                 dt_h = (t1 - t0) / 3600.0
                 if t1 <= t0 or dt_h > _MAX_PAUSE_GAP_H:
