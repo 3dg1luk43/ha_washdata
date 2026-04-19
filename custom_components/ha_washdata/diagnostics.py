@@ -79,9 +79,9 @@ async def async_get_config_entry_diagnostics(
             },
         },
         "store_export": _redact(exported),
-        # Rolling 24-hour in-memory buffers.
+        # Rolling 24-hour in-memory buffers (redacted: msg fields stripped from logs).
         # power_trace:   [[iso_ts, watts], ...] - every raw sensor reading
         # state_history: [{ts, from, to, program}, ...] - detector state changes
-        # logs:          [{ts, lvl, msg}, ...] - integration debug/info/warning/error lines
+        # logs:          [{ts, lvl}, ...] - log timestamps and levels (msg removed)
         "live_diagnostics": manager.diag_buffer.redacted_snapshot(),
     }

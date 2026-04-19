@@ -138,6 +138,7 @@ from .const import (
     DEVICE_TYPE_PUMP,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_PAUSE_CUTS_POWER,
+    CONF_SWITCH_ENTITY,
     CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
 )
@@ -544,9 +545,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # Normalize energy price fields: selectors may omit the key entirely
             # when the user clears them.  Explicitly writing None ensures the
             # merged options dict overrides any previously-stored value.
-            if not user_input.get(CONF_ENERGY_PRICE_ENTITY):
+            if user_input.get(CONF_ENERGY_PRICE_ENTITY) in (None, ""):
                 user_input[CONF_ENERGY_PRICE_ENTITY] = None
-            if not user_input.get(CONF_ENERGY_PRICE_STATIC):
+            if user_input.get(CONF_ENERGY_PRICE_STATIC) in (None, ""):
                 user_input[CONF_ENERGY_PRICE_STATIC] = None
             merged_options = {
                 **self.config_entry.data,
@@ -556,6 +557,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # Remove deprecated single-service keys now that per-event lists are saved.
             merged_options.pop(CONF_NOTIFY_SERVICE, None)
             merged_options.pop(CONF_NOTIFY_EVENTS, None)
+            # Also remove deprecated keys from entry.data so the manager doesn't fall back to them.
+            if CONF_NOTIFY_SERVICE in self.config_entry.data or CONF_NOTIFY_EVENTS in self.config_entry.data:
+                new_data = {
+                    k: v for k, v in self.config_entry.data.items()
+                    if k not in (CONF_NOTIFY_SERVICE, CONF_NOTIFY_EVENTS)
+                }
+                self.hass.config_entries.async_update_entry(self.config_entry, data=new_data)
             return self.async_create_entry(title="", data=merged_options)
 
         notify_services: list[str] = sorted(
@@ -829,6 +837,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if not _door_val:
                 user_input[CONF_DOOR_SENSOR_ENTITY] = None
 
+            # Same treatment for switch entity
+            _switch_val = user_input.get(CONF_SWITCH_ENTITY)
+            if not _switch_val:
+                user_input[CONF_SWITCH_ENTITY] = None
+
             # Final Save
             final_options = {
                 **self.config_entry.data,
@@ -837,6 +850,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 **user_input,
             }
             final_options.pop(CONF_APPLY_SUGGESTIONS, None)
+            # Drop pump-only keys when the device type is not pump
+            if final_options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE) != DEVICE_TYPE_PUMP:
+                final_options.pop(CONF_PUMP_STUCK_DURATION, None)
             if self._suggested_values:
                 await manager.profile_store.clear_suggestions()
                 self._suggested_values = None
@@ -1221,6 +1237,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_PAUSE_CUTS_POWER,
                 default=get_val(CONF_PAUSE_CUTS_POWER, False),
             ): bool,
+            vol.Optional(
+                CONF_SWITCH_ENTITY,
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="switch",
+                    multiple=False,
+                )
+            ),
             vol.Optional(
                 CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
                 default=get_val(

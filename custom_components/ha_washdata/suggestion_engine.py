@@ -317,9 +317,10 @@ class SuggestionEngine:
             label = c.get("label") or c.get("profile_name")
             if not isinstance(label, str) or not label:
                 continue
+            if label.lower() == "noise":
+                continue
             if not (
-                isinstance(c.get("end_time"), str)
-                or c.get("state") == "completed"
+                c.get("state") == "completed"
                 or c.get("status") in ("completed", "force_stopped")
             ):
                 continue
@@ -360,11 +361,16 @@ class SuggestionEngine:
             in_pause = False
             pause_energy = 0.0
             stop_w = 2.0
+            _MAX_PAUSE_GAP_H = 1.0
             for i in range(1, len(readings)):
                 t0, p0 = readings[i - 1]
                 t1, p1 = readings[i]
                 avg_p = (p0 + p1) / 2.0
                 dt_h = (t1 - t0) / 3600.0
+                if t1 <= t0 or dt_h > _MAX_PAUSE_GAP_H:
+                    in_pause = False
+                    pause_energy = 0.0
+                    continue
                 if avg_p < stop_w:
                     if not in_pause:
                         in_pause = True

@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Prag (s) upozorenja zastoja pumpe (samo pumpa)",
           "door_sensor_entity": "Door Sensor",
           "pause_cuts_power": "Isključite napajanje prilikom pauze",
-          "notify_unload_delay_minutes": "Kašnjenje obavijesti o čekanju rublja (min)"
+          "notify_unload_delay_minutes": "Kašnjenje obavijesti o čekanju rublja (min)",
+          "switch_entity": "Prebacite entitet (za pauziranje isključenja struje)"
         },
         "data_description": {
           "apply_suggestions": "Označite ovo polje za otvaranje koraka pregleda za predložene vrijednosti iz algoritma učenja. Ništa se ne pohranjuje automatski.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Ako ciklus pumpe i dalje radi nakon ovoliko sekundi, događaj ha_washdata_pump_stuck se aktivira jednom. Upotrijebite ovo za otkrivanje zaglavljenog motora (uobičajeni rad pumpe ispod 60 s). Zadano: 1800 s (30 min). Samo tip uređaja za pumpu.",
           "door_sensor_entity": "Opcioni binarni senzor za vrata mašine (uključeno = otvoreno, isključeno = zatvoreno). Kada se vrata otvore tokom aktivnog ciklusa, WashData će potvrditi da je ciklus namjerno pauziran. Nakon završetka ciklusa, ako su vrata i dalje zatvorena, stanje se mijenja u 'Clean' dok se vrata ne otvore. Napomena: zatvaranje vrata NE nastavlja automatski pauzirani ciklus - nastavak se mora pokrenuti ručno putem dugmeta Nastavi ciklus ili usluge.",
           "pause_cuts_power": "Prilikom pauziranja pomoću tipke Pause Cycle ili usluge, također isključite konfigurirani entitet prekidača. Stupa na snagu samo ako je entitet prekidača konfiguriran za ovaj uređaj.",
-          "notify_unload_delay_minutes": "Pošaljite obavijest putem kanala obavijesti o završetku nakon što se ciklus završi, a vrata nisu bila otvorena ovoliko minuta (zahtijeva senzor vrata). Postavite na 0 da biste onemogućili. Podrazumevano: 60 min."
+          "notify_unload_delay_minutes": "Pošaljite obavijest putem kanala obavijesti o završetku nakon što se ciklus završi, a vrata nisu bila otvorena ovoliko minuta (zahtijeva senzor vrata). Postavite na 0 da biste onemogućili. Podrazumevano: 60 min.",
+          "switch_entity": "Prebacivanje entiteta za prebacivanje kada pauzirate ili nastavljate. Potrebno kada je omogućeno 'Prekini napajanje prilikom pauze'."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Zadržite podatke do ovog pomaka u sekundama. Zadano = puno trajanje."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pauziraj ciklus",
+      "description": "Pauzirajte aktivni ciklus za WashData uređaj.",
+      "fields": {
+        "device_id": {
+          "name": "Uređaj",
+          "description": "Uređaj WashData za pauziranje."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Nastavi ciklus",
+      "description": "Nastavite pauzirani ciklus za WashData uređaj.",
+      "fields": {
+        "device_id": {
+          "name": "Uređaj",
+          "description": "Uređaj WashData za nastavak."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Potreban je važeći device_id."
+    },
+    "cycle_id_required": {
+      "message": "Potreban je važeći id_ciklusa."
+    },
+    "profile_name_required": {
+      "message": "Potrebno je važeće ime_profila."
     }
   }
 }

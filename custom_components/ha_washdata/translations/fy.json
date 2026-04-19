@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Pomp fêst warskôgingsdrempel (s) (allinich pomp)",
           "door_sensor_entity": "Door Sensor",
           "pause_cuts_power": "Snij de macht by it pauze",
-          "notify_unload_delay_minutes": "Wasserij Wacht-notifikaasje fertraging (min)"
+          "notify_unload_delay_minutes": "Wasserij Wacht-notifikaasje fertraging (min)",
+          "switch_entity": "Switch Entity (foar Pause Power Cut)"
         },
         "data_description": {
           "apply_suggestions": "Selektearje dit fakje om in resinsjestap te iepenjen foar foarstelde wearden út it learalgoritme. Neat wurdt automatysk bewarre.\n\nOanbefelle (fan learen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "As in pomp syklus noch rint nei dit protte sekonden, in ha_washdata_pump_stuck evenemint wurdt ûntslein ien kear. Brûk dit om in blokkearre motor te detektearjen (typyske sumppomp is ûnder 60 s). Standert: 1800 s (30 min). Allinnich type pompapparaat.",
           "door_sensor_entity": "Opsjonele binêre sensor foar de masine doar (oan = iepen, út = sluten). As de doar iepenet tidens in aktive syklus, sil WashData de syklus befêstigje as opsetlik ûnderbrutsen. Nei't de syklus einiget, as de doar noch ticht is, feroaret de steat nei 'Skjin' oant de doar iepene wurdt. Opmerking: it sluten fan 'e doar sil NET in pauze syklus automatysk ferfetsje - ferfetsje moat manuell wurde aktivearre fia de knop Resume Cycle of tsjinst.",
           "pause_cuts_power": "As jo ​​​​pauze fia de Pause Cycle knop of tsjinst, útsette ek de ynstelde switch entiteit. Allinnich effekt as in switch entiteit is konfigurearre foar dit apparaat.",
-          "notify_unload_delay_minutes": "Stjoer in notifikaasje fia it finish-notifikaasjekanaal nei't de syklus einiget en de doar foar dizze protte minuten net iepene is (fereasket Door Sensor). Stel op 0 om út te skeakeljen. Standert: 60 min."
+          "notify_unload_delay_minutes": "Stjoer in notifikaasje fia it finish-notifikaasjekanaal nei't de syklus einiget en de doar foar dizze protte minuten net iepene is (fereasket Door Sensor). Stel op 0 om út te skeakeljen. Standert: 60 min.",
+          "switch_entity": "De switch-entiteit om te wikseljen by pauze of trochstart. Fereaske as 'Stromje besunigje by pauze' ynskeakele is."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Hâld gegevens oant dizze offset yn sekonden. Standert = folsleine doer."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pause Cycle",
+      "description": "Pause de aktive syklus foar in WashData apparaat.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "It WashData-apparaat om te pausen."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Resume Cycle",
+      "description": "Ferfetsje in pauze syklus foar in WashData-apparaat.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "It WashData-apparaat om troch te gean."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "In jildich device_id is fereaske."
+    },
+    "cycle_id_required": {
+      "message": "In jildich cycle_id is fereaske."
+    },
+    "profile_name_required": {
+      "message": "In jildige profylnamme is fereaske."
     }
   }
 }

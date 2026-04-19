@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Ponpa trabatuta dagoen alerta-atalasea (k) (ponpa soilik)",
           "door_sensor_entity": "Ate-sentsorea",
           "pause_cuts_power": "Moztu energia pausatzean",
-          "notify_unload_delay_minutes": "Garbitegia zain jakinarazpenaren atzerapena (min)"
+          "notify_unload_delay_minutes": "Garbitegia zain jakinarazpenaren atzerapena (min)",
+          "switch_entity": "Aldatu entitatea (Pausatu energia mozterako)"
         },
         "data_description": {
           "apply_suggestions": "Markatu lauki hau ikaskuntza-algoritmoan iradokitako balioen berrikuspen-urrats bat irekitzeko. Ezer ez da automatikoki gordetzen.\n\nIradokitako (ikaskuntzatik):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Segundo horren ondoren ponpaketa-ziklo bat martxan badago, ha_washdata_pump_stuck gertaera bat piztuko da behin. Erabili hau trabatuta dagoen motor bat detektatzeko (putzu-ponparen funtzionamendu arrunta 60 s baino gutxiagokoa da). Lehenetsia: 1800 s (30 min). Ponpa-gailu mota soilik.",
           "door_sensor_entity": "Makinaren atearen aukerako sentsore bitarra (aktibatuta = irekita, itzalita = itxita). Ziklo aktibo batean atea irekitzen denean, WashData-k zikloa nahita pausatu dela baieztatuko du. Zikloa amaitu ondoren, atea oraindik itxita badago, egoera 'Garbitu'-ra aldatzen da atea ireki arte. Oharra: atea ixteak EZ du pausatutako ziklo bat automatikoki berresten; eskuz abiarazi behar da berrezartzea Zikloa berrekin batera botoiaren edo zerbitzuaren bidez.",
           "pause_cuts_power": "Etenaldiaren zikloa botoiaren edo zerbitzuaren bidez pausatzen duzunean, desaktibatu konfiguratutako etengailu-entitatea ere. Gailu honetarako aldatzeko entitate bat konfiguratuta badago bakarrik izango du eragina.",
-          "notify_unload_delay_minutes": "Bidali jakinarazpena amaierako jakinarazpen-kanalaren bidez, zikloa amaitu eta atea minutu askotan ireki ez denean (ate-sentsorea behar da). Ezarri 0 desgaitzeko. Lehenetsia: 60 min."
+          "notify_unload_delay_minutes": "Bidali jakinarazpena amaierako jakinarazpen-kanalaren bidez, zikloa amaitu eta atea minutu askotan ireki ez denean (ate-sentsorea behar da). Ezarri 0 desgaitzeko. Lehenetsia: 60 min.",
+          "switch_entity": "Etenaldian edo berriro hastean aldatzeko entitatea. Beharrezkoa da \"Eztu energia pausatzean\" gaituta dagoenean."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Mantendu datuak desplazamendu honetarako segundotan. Lehenetsia = iraupen osoa."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Eten zikloa",
+      "description": "Pausatu WashData gailu baten ziklo aktiboa.",
+      "fields": {
+        "device_id": {
+          "name": "Gailua",
+          "description": "WashData gailua pausatzeko."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Zikloa berreskuratzea",
+      "description": "Berrekin pausatutako ziklo bati WashData gailu baterako.",
+      "fields": {
+        "device_id": {
+          "name": "Gailua",
+          "description": "Berrekiteko WashData gailua."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Baliozko device_id behar da."
+    },
+    "cycle_id_required": {
+      "message": "Baliozko cycle_id bat behar da."
+    },
+    "profile_name_required": {
+      "message": "Baliozko profile_name bat behar da."
     }
   }
 }

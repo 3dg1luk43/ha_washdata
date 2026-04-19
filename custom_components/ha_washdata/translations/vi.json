@@ -197,7 +197,8 @@
           "pump_stuck_duration": "(Các) Ngưỡng cảnh báo bị kẹt máy bơm (Chỉ máy bơm)",
           "door_sensor_entity": "Cảm biến cửa",
           "pause_cuts_power": "Cắt điện khi tạm dừng",
-          "notify_unload_delay_minutes": "Độ trễ thông báo chờ giặt (phút)"
+          "notify_unload_delay_minutes": "Độ trễ thông báo chờ giặt (phút)",
+          "switch_entity": "Chuyển đổi thực thể (để tạm dừng cắt điện)"
         },
         "data_description": {
           "apply_suggestions": "Chọn hộp này để mở bước xem xét các giá trị được đề xuất từ ​​thuật toán học. Không có gì được lưu tự động.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Nếu chu trình bơm vẫn chạy sau nhiều giây này, sự kiện ha_washdata_pump_stuck sẽ được kích hoạt một lần. Sử dụng tính năng này để phát hiện động cơ bị kẹt (thời gian chạy máy bơm bể phốt thông thường là dưới 60 giây). Mặc định: 1800 giây (30 phút). Chỉ loại thiết bị bơm.",
           "door_sensor_entity": "Cảm biến nhị phân tùy chọn cho cửa máy (bật = mở, tắt = đóng). Khi cửa mở trong một chu trình đang hoạt động, WashData sẽ xác nhận chu trình đó được tạm dừng một cách có chủ ý. Sau khi chu trình kết thúc, nếu cửa vẫn đóng, trạng thái sẽ chuyển sang 'Sạch' cho đến khi cửa được mở. Lưu ý: việc đóng cửa KHÔNG tự động tiếp tục lại chu trình đã tạm dừng - việc tiếp tục phải được kích hoạt thủ công thông qua nút hoặc dịch vụ Tiếp tục chu trình.",
           "pause_cuts_power": "Khi tạm dừng thông qua nút hoặc dịch vụ Tạm dừng Chu kỳ, hãy tắt cả thực thể chuyển đổi đã định cấu hình. Chỉ có hiệu lực nếu thực thể chuyển đổi được định cấu hình cho thiết bị này.",
-          "notify_unload_delay_minutes": "Gửi thông báo qua kênh thông báo kết thúc sau khi chu trình kết thúc và cửa chưa được mở trong nhiều phút này (yêu cầu Cảm biến cửa). Đặt thành 0 để tắt. Mặc định: 60 phút."
+          "notify_unload_delay_minutes": "Gửi thông báo qua kênh thông báo kết thúc sau khi chu trình kết thúc và cửa chưa được mở trong nhiều phút này (yêu cầu Cảm biến cửa). Đặt thành 0 để tắt. Mặc định: 60 phút.",
+          "switch_entity": "Thực thể chuyển đổi để chuyển đổi khi tạm dừng hoặc tiếp tục. Bắt buộc khi bật 'Cắt nguồn khi tạm dừng'."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Giữ dữ liệu ở mức bù này trong vài giây. Mặc định = thời lượng đầy đủ."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Chu kỳ tạm dừng",
+      "description": "Tạm dừng chu trình hoạt động cho thiết bị WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị WashData sẽ tạm dừng."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Tiếp tục chu kỳ",
+      "description": "Tiếp tục chu trình đã tạm dừng cho thiết bị WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Thiết bị",
+          "description": "Thiết bị WashData sẽ tiếp tục."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Cần có device_id hợp lệ."
+    },
+    "cycle_id_required": {
+      "message": "Cần có Cycle_id hợp lệ."
+    },
+    "profile_name_required": {
+      "message": "Cần có profile_name hợp lệ."
     }
   }
 }

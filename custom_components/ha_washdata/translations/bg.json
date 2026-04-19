@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Предупредителен праг (и) за блокиране на помпата (само помпа)",
           "door_sensor_entity": "Сензор за врата",
           "pause_cuts_power": "Прекъснете захранването при пауза",
-          "notify_unload_delay_minutes": "Забавяне на известието за чакащо пране (мин.)"
+          "notify_unload_delay_minutes": "Забавяне на известието за чакащо пране (мин.)",
+          "switch_entity": "Превключвател на обект (за спиране на захранването на пауза)"
         },
         "data_description": {
           "apply_suggestions": "Поставете отметка в това квадратче, за да отворите стъпка за преглед за предложени стойности от алгоритъма за обучение. Нищо не се запазва автоматично.\n\nПредложено (от обучението):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Ако цикъл на помпа продължава да работи след толкова много секунди, събитие ha_washdata_pump_stuck се задейства веднъж. Използвайте това, за да откриете заседнал двигател (типичната работа на помпата е под 60 s). По подразбиране: 1800 s (30 min). Само тип помпено устройство.",
           "door_sensor_entity": "Допълнителен бинарен сензор за вратата на машината (включено = отворено, изключено = затворено). Когато вратата се отвори по време на активен цикъл, WashData ще потвърди, че цикълът е умишлено поставен на пауза. След края на цикъла, ако вратата все още е затворена, състоянието се променя на „Почистено“, докато вратата не бъде отворена. Забележка: затварянето на вратата НЕ възобновява автоматично поставен на пауза цикъл - възобновяването трябва да се задейства ръчно чрез бутона Възобновяване на цикъла или услугата.",
           "pause_cuts_power": "Когато поставяте на пауза чрез бутона или услугата Пауза на цикъл, изключете и конфигурирания превключвател. Влиза в сила само ако за това устройство е конфигуриран обект за превключване.",
-          "notify_unload_delay_minutes": "Изпратете известие чрез канала за уведомяване за приключване, след като цикълът приключи и вратата не е била отваряна толкова много минути (изисква сензор за врата). Задайте 0, за да деактивирате. По подразбиране: 60 мин."
+          "notify_unload_delay_minutes": "Изпратете известие чрез канала за уведомяване за приключване, след като цикълът приключи и вратата не е била отваряна толкова много минути (изисква сензор за врата). Задайте 0, за да деактивирате. По подразбиране: 60 мин.",
+          "switch_entity": "Обектът за превключване, който да превключвате при пауза или възобновяване. Изисква се, когато е активирано „Прекъсване на захранването при пауза“."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Съхранявайте данните до това отместване за секунди. По подразбиране = пълна продължителност."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Цикъл на пауза",
+      "description": "Поставете на пауза активния цикъл за устройство WashData.",
+      "fields": {
+        "device_id": {
+          "name": "устройство",
+          "description": "Устройството WashData за пауза."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Цикъл на възобновяване",
+      "description": "Възобновете цикъл на пауза за устройство WashData.",
+      "fields": {
+        "device_id": {
+          "name": "устройство",
+          "description": "Устройството WashData за възобновяване."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Изисква се валиден device_id."
+    },
+    "cycle_id_required": {
+      "message": "Изисква се валиден cycle_id."
+    },
+    "profile_name_required": {
+      "message": "Изисква се валидно име на профил."
     }
   }
 }

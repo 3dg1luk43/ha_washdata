@@ -197,7 +197,8 @@
           "pump_stuck_duration": "סף התראה על משאבה תקועה (ים) (משאבה בלבד)",
           "door_sensor_entity": "חיישן דלת",
           "pause_cuts_power": "ניתוק חשמל בעת השהייה",
-          "notify_unload_delay_minutes": "עיכוב בהודעת כביסה ממתינה (דקות)"
+          "notify_unload_delay_minutes": "עיכוב בהודעת כביסה ממתינה (דקות)",
+          "switch_entity": "מתג ישות (עבור הפסקת חשמל)"
         },
         "data_description": {
           "apply_suggestions": "סמן תיבה זו כדי לפתוח שלב סקירה עבור ערכים מוצעים מאלגוריתם הלמידה. שום דבר לא נשמר אוטומטית.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- watchdog_interval: {suggested_watchdog_interval} שניות\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} שניות\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "אם מחזור משאבה עדיין פועל לאחר שניות רבות כל כך, אירוע ha_washdata_pump_stuck מופעל פעם אחת. השתמש בזה כדי לזהות מנוע תקוע (הפעולה הטיפוסית של משאבת הבור היא מתחת ל-60 שניות). ברירת מחדל: 1800 שניות (30 דקות). סוג התקן משאבה בלבד.",
           "door_sensor_entity": "חיישן בינארי אופציונלי לדלת המכונה (מופעל = פתוח, כבוי = סגור). כאשר הדלת נפתחת במהלך מחזור פעיל, WashData תאשר את המחזור כמושהה בכוונה. לאחר סיום המחזור, אם הדלת עדיין סגורה, המצב משתנה ל'נקי' עד לפתיחת הדלת. הערה: סגירת הדלת אינה ממשיכה אוטומטית מחזור מושהה - יש להפעיל את החידוש באופן ידני באמצעות לחצן חידוש מחזור או שירות.",
           "pause_cuts_power": "בעת השהייה באמצעות לחצן או שירות השהה מחזור, כבה גם את ישות המתג המוגדרת. ייכנס לתוקף רק אם מוגדרת ישות מתג עבור מכשיר זה.",
-          "notify_unload_delay_minutes": "שלח הודעה דרך ערוץ הודעת הסיום לאחר סיום המחזור והדלת לא נפתחה במשך דקות רבות כל כך (דורש חיישן דלת). הגדר ל-0 כדי להשבית. ברירת מחדל: 60 דקות."
+          "notify_unload_delay_minutes": "שלח הודעה דרך ערוץ הודעת הסיום לאחר סיום המחזור והדלת לא נפתחה במשך דקות רבות כל כך (דורש חיישן דלת). הגדר ל-0 כדי להשבית. ברירת מחדל: 60 דקות.",
+          "switch_entity": "ישות המתג למעבר בעת השהייה או חידוש. נדרש כאשר 'ניתוק חשמל בעת השהייה' מופעל."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "שמור נתונים עד לקיזוז זה תוך שניות. ברירת מחדל = משך מלא."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "השהה מחזור",
+      "description": "השהה את המחזור הפעיל עבור התקן WashData.",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר ה-WashData להשהות."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "המשך מחזור",
+      "description": "המשך מחזור מושהה עבור מכשיר WashData.",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר WashData לחידוש."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "נדרש device_id חוקי."
+    },
+    "cycle_id_required": {
+      "message": "נדרש מזהה_cycle חוקי."
+    },
+    "profile_name_required": {
+      "message": "נדרש profile_name חוקי."
     }
   }
 }

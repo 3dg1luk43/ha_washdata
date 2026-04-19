@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Varselterskel (er) for pumpe fastlåst (kun pumpe)",
           "door_sensor_entity": "Dørsensor",
           "pause_cuts_power": "Kutt strømmen under pause",
-          "notify_unload_delay_minutes": "Forsinkelse for varsel om klesvask (min)"
+          "notify_unload_delay_minutes": "Forsinkelse for varsel om klesvask (min)",
+          "switch_entity": "Bryterenhet (for Pause Power Cut)"
         },
         "data_description": {
           "apply_suggestions": "Merk av i denne boksen for å åpne et gjennomgangstrinn for foreslåtte verdier fra læringsalgoritmen. Ingenting lagres automatisk.\n\nForeslått (fra læring):\n- min_effekt: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Hvis en pumpesyklus fortsatt kjører etter så mange sekunder, utløses en ha_washdata_pump_stuck-hendelse én gang. Bruk denne til å oppdage en motor som har satt seg fast (typisk pumpekjøring er under 60 s). Standard: 1800 s (30 min). Kun type pumpeenhet.",
           "door_sensor_entity": "Valgfri binær sensor for maskindøren (på = åpen, av = lukket). Når døren åpnes under en aktiv syklus, vil WashData bekrefte at syklusen er satt på pause. Etter at syklusen er ferdig, hvis døren fortsatt er lukket, endres tilstanden til 'Rengjør' til døren åpnes. Merk: lukking av døren gjenopptar IKKE en midlertidig stoppet syklus – gjenoppta må utløses manuelt via Gjenoppta syklus-knappen eller tjenesten.",
           "pause_cuts_power": "Når du setter på pause via pausesyklus-knappen eller tjenesten, må du også slå av den konfigurerte bryterenheten. Trer bare i kraft hvis en bryterenhet er konfigurert for denne enheten.",
-          "notify_unload_delay_minutes": "Send et varsel via sluttmeldingskanalen etter at syklusen er ferdig og døren ikke har vært åpnet på så mange minutter (krever dørsensor). Sett til 0 for å deaktivere. Standard: 60 min."
+          "notify_unload_delay_minutes": "Send et varsel via sluttmeldingskanalen etter at syklusen er ferdig og døren ikke har vært åpnet på så mange minutter (krever dørsensor). Sett til 0 for å deaktivere. Standard: 60 min.",
+          "switch_entity": "Bytteenheten som skal veksles når du setter på pause eller gjenopptar. Nødvendig når 'Kutt strøm ved pause' er aktivert."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Hold data opp til denne forskyvningen på sekunder. Standard = full varighet."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pause syklus",
+      "description": "Sett den aktive syklusen på pause for en WashData-enhet.",
+      "fields": {
+        "device_id": {
+          "name": "Enhet",
+          "description": "WashData-enheten skal settes på pause."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Fortsett syklus",
+      "description": "Gjenoppta en midlertidig stoppet syklus for en WashData-enhet.",
+      "fields": {
+        "device_id": {
+          "name": "Enhet",
+          "description": "WashData-enheten for å gjenoppta."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "En gyldig device_id kreves."
+    },
+    "cycle_id_required": {
+      "message": "En gyldig cycle_id kreves."
+    },
+    "profile_name_required": {
+      "message": "Et gyldig profilnavn kreves."
     }
   }
 }

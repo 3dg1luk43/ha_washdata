@@ -94,7 +94,7 @@ def _require_str(value: Any, name: str) -> str:
     if not isinstance(value, str) or not value:
         raise ServiceValidationError(
             translation_domain=DOMAIN,
-            translation_key="device_id_required",
+            translation_key=f"{name}_required",
         )
     return value
 
@@ -689,16 +689,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_domain=DOMAIN,
                     translation_key="device_not_found",
                 )
-            entry_id = next(iter(device.config_entries), None)
+            entry_id = next(
+                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
+                None,
+            )
             if not entry_id:
+                if any(eid for eid in device.config_entries):
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="integration_not_loaded",
+                    )
                 raise ServiceValidationError(
                     translation_domain=DOMAIN,
                     translation_key="no_config_entry",
-                )
-            if entry_id not in hass.data[DOMAIN]:
-                raise ServiceValidationError(
-                    translation_domain=DOMAIN,
-                    translation_key="integration_not_loaded",
                 )
 
             manager = hass.data[DOMAIN][entry_id]
@@ -716,16 +719,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     translation_domain=DOMAIN,
                     translation_key="device_not_found",
                 )
-            entry_id = next(iter(device.config_entries), None)
+            entry_id = next(
+                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
+                None,
+            )
             if not entry_id:
+                if any(eid for eid in device.config_entries):
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="integration_not_loaded",
+                    )
                 raise ServiceValidationError(
                     translation_domain=DOMAIN,
                     translation_key="no_config_entry",
-                )
-            if entry_id not in hass.data[DOMAIN]:
-                raise ServiceValidationError(
-                    translation_domain=DOMAIN,
-                    translation_key="integration_not_loaded",
                 )
 
             manager = hass.data[DOMAIN][entry_id]

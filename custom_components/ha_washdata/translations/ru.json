@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Порог предупреждения о застревании насоса (s) (только насос)",
           "door_sensor_entity": "Датчик двери",
           "pause_cuts_power": "Отключение питания при паузе",
-          "notify_unload_delay_minutes": "Задержка уведомления об ожидании стирки (мин)"
+          "notify_unload_delay_minutes": "Задержка уведомления об ожидании стирки (мин)",
+          "switch_entity": "Объект переключения (для приостановки отключения электроэнергии)"
         },
         "data_description": {
           "apply_suggestions": "Установите этот флажок, чтобы открыть шаг проверки предложенных значений алгоритма обучения. Ничего не сохраняется автоматически.\n\nПредлагается (из обучения):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} Вт\n- stop_threshold_w: {suggested_stop_threshold_w} Вт\n- end_energy_threshold: {suggested_end_energy_threshold} Втч\n- running_dead_zone: {suggested_running_dead_zone} с\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Если по прошествии этого количества секунд цикл помпы все еще продолжается, событие ha_washdata_pump_stuck запускается один раз. Используйте это для обнаружения заклинившего двигателя (обычное время работы водоотливного насоса составляет менее 60 с). По умолчанию: 1800 с (30 мин). Только тип насосного устройства.",
           "door_sensor_entity": "Дополнительный бинарный датчик для дверцы машины (вкл. = открыто, выкл. = закрыто). Когда дверца откроется во время активного цикла, WashData подтвердит, что цикл был намеренно приостановлен. Если после завершения цикла дверца все еще закрыта, состояние меняется на «Очистка», пока дверца не откроется. Примечание. Закрытие двери НЕ приводит к автоматическому возобновлению приостановленного цикла - возобновление необходимо запускать вручную с помощью кнопки возобновления цикла или службы.",
           "pause_cuts_power": "При приостановке с помощью кнопки или службы «Пауза цикла» также отключите настроенный объект переключателя. Вступает в силу только в том случае, если для этого устройства настроен объект коммутатора.",
-          "notify_unload_delay_minutes": "Отправьте уведомление через канал уведомления о завершении после того, как цикл завершится и дверь не будет открыта в течение указанного количества минут (требуется датчик двери). Установите значение 0, чтобы отключить. По умолчанию: 60 мин."
+          "notify_unload_delay_minutes": "Отправьте уведомление через канал уведомления о завершении после того, как цикл завершится и дверь не будет открыта в течение указанного количества минут (требуется датчик двери). Установите значение 0, чтобы отключить. По умолчанию: 60 мин.",
+          "switch_entity": "Объект-переключатель для переключения при приостановке или возобновлении. Требуется, если включена функция «Отключение питания при паузе»."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Сохранять данные до этого смещения в секундах. По умолчанию = полная продолжительность."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Пауза цикла",
+      "description": "Приостановите активный цикл устройства WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Устройство",
+          "description": "Устройство WashData, которое необходимо приостановить."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Возобновить цикл",
+      "description": "Возобновите приостановленный цикл для устройства WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Устройство",
+          "description": "Устройство WashData для возобновления работы."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Требуется действительный идентификатор устройства."
+    },
+    "cycle_id_required": {
+      "message": "Требуется действительный Cycl_id."
+    },
+    "profile_name_required": {
+      "message": "Требуется действительное имя_профиля."
     }
   }
 }

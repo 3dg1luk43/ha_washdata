@@ -197,7 +197,8 @@
           "pump_stuck_duration": "پمپ اسٹک الرٹ تھریشولڈ (صرف پمپ)",
           "door_sensor_entity": "دروازے کا سینسر",
           "pause_cuts_power": "موقوف کرتے وقت پاور کاٹ دیں۔",
-          "notify_unload_delay_minutes": "لانڈری کے انتظار کی اطلاع میں تاخیر (منٹ)"
+          "notify_unload_delay_minutes": "لانڈری کے انتظار کی اطلاع میں تاخیر (منٹ)",
+          "switch_entity": "سوئچ ہستی (پاور کٹ کو روکنے کے لیے)"
         },
         "data_description": {
           "apply_suggestions": "سیکھنے کے الگورتھم سے تجویز کردہ اقدار کے لیے جائزہ لینے کا مرحلہ کھولنے کے لیے اس باکس کو چیک کریں۔ کچھ بھی خود بخود محفوظ نہیں ہوتا ہے۔\n\nتجویز کردہ (سیکھنے سے):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "اگر اتنے سیکنڈز کے بعد بھی پمپ سائیکل چل رہا ہے تو ایک ha_washdata_pump_stuck ایونٹ ایک بار فائر کیا جاتا ہے۔ اسے جام شدہ موٹر کا پتہ لگانے کے لیے استعمال کریں (عام سمپ پمپ رن 60 سیکنڈ سے کم ہے)۔ ڈیفالٹ: 1800 سیکنڈ (30 منٹ)۔ صرف پمپ ڈیوائس کی قسم۔",
           "door_sensor_entity": "مشین کے دروازے کے لیے اختیاری بائنری سینسر (آن = اوپن، آف = بند)۔ جب ایک فعال سائیکل کے دوران دروازہ کھلتا ہے، تو WashData سائیکل کی تصدیق کرے گا جیسا کہ جان بوجھ کر موقوف کیا گیا ہے۔ سائیکل ختم ہونے کے بعد، اگر دروازہ ابھی بھی بند ہے، تو حالت اس وقت تک 'کلین' میں بدل جاتی ہے جب تک کہ دروازہ کھلا نہ ہو۔ نوٹ: دروازہ بند کرنے سے رکے ہوئے سائیکل کو خودکار طور پر دوبارہ شروع نہیں کیا جاتا ہے - دوبارہ شروع کرنے کو دستی طور پر ریزیومے سائیکل بٹن یا سروس کے ذریعے متحرک ہونا چاہیے۔",
           "pause_cuts_power": "پاز سائیکل بٹن یا سروس کے ذریعے توقف کرتے وقت، کنفیگر شدہ سوئچ ہستی کو بھی بند کر دیں۔ صرف اس صورت میں اثر انداز ہوتا ہے جب اس آلہ کے لیے ایک سوئچ ہستی کو کنفیگر کیا گیا ہو۔",
-          "notify_unload_delay_minutes": "سائیکل ختم ہونے کے بعد فنش نوٹیفکیشن چینل کے ذریعے ایک اطلاع بھیجیں اور اس کئی منٹ تک دروازہ نہیں کھولا گیا (دروازے کے سینسر کی ضرورت ہے)۔ غیر فعال کرنے کے لیے 0 پر سیٹ کریں۔ ڈیفالٹ: 60 منٹ۔"
+          "notify_unload_delay_minutes": "سائیکل ختم ہونے کے بعد فنش نوٹیفکیشن چینل کے ذریعے ایک اطلاع بھیجیں اور اس کئی منٹ تک دروازہ نہیں کھولا گیا (دروازے کے سینسر کی ضرورت ہے)۔ غیر فعال کرنے کے لیے 0 پر سیٹ کریں۔ ڈیفالٹ: 60 منٹ۔",
+          "switch_entity": "موقوف یا دوبارہ شروع کرنے پر ٹوگل کرنے کے لیے سوئچ ہستی۔ جب 'روکتے وقت پاور کاٹنا' فعال ہو تو درکار ہے۔"
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "ڈیٹا کو سیکنڈوں میں اس آفسیٹ تک رکھیں۔ ڈیفالٹ = پوری مدت۔"
         }
       }
+    },
+    "pause_cycle": {
+      "name": "سائیکل موقوف کریں۔",
+      "description": "واش ڈیٹا ڈیوائس کے لیے ایکٹو سائیکل کو روک دیں۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "موقوف کرنے کے لیے واش ڈیٹا ڈیوائس۔"
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "سائیکل دوبارہ شروع کریں۔",
+      "description": "WashData ڈیوائس کے لیے موقوف شدہ سائیکل دوبارہ شروع کریں۔",
+      "fields": {
+        "device_id": {
+          "name": "ڈیوائس",
+          "description": "واش ڈیٹا ڈیوائس دوبارہ شروع کرنا ہے۔"
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "ایک درست device_id درکار ہے۔"
+    },
+    "cycle_id_required": {
+      "message": "ایک درست cycle_id درکار ہے۔"
+    },
+    "profile_name_required": {
+      "message": "ایک درست پروفائل_نام درکار ہے۔"
     }
   }
 }

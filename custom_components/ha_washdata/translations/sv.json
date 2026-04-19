@@ -204,7 +204,8 @@
           "pump_stuck_duration": "Varningströskel för pump fastnat (er) (endast pump)",
           "door_sensor_entity": "Dörrsensor",
           "pause_cuts_power": "Bryt strömmen vid paus",
-          "notify_unload_delay_minutes": "Fördröjning av meddelande för tvätt som väntar (min)"
+          "notify_unload_delay_minutes": "Fördröjning av meddelande för tvätt som väntar (min)",
+          "switch_entity": "Switch Entity (för pausströmavbrott)"
         },
         "data_description": {
           "apply_suggestions": "Markera den här rutan för att öppna ett granskningssteg för föreslagna värden från inlärningsalgoritmen. Ingenting sparas automatiskt.\n\nFöreslagna (från inlärning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "Om en pumpcykel fortfarande körs efter så här många sekunder, utlöses en ha_washdata_pump_stuck-händelse en gång. Använd denna för att upptäcka en motor som har fastnat (typisk drift av sumppumpen är under 60 s). Standard: 1800 s (30 min). Endast pumpenhetstyp.",
           "door_sensor_entity": "Tillval binär sensor för maskindörren (på = öppen, av = stängd). När dörren öppnas under en aktiv cykel, kommer WashData att bekräfta att cykeln är avsiktlig pausad. Efter cykelns slut, om dörren fortfarande är stängd, ändras tillståndet till 'Rengör' tills dörren öppnas. Obs: att stänga dörren återupptar INTE en pausad cykel automatiskt – återuppta måste utlösas manuellt via knappen Återuppta cykel eller tjänst.",
           "pause_cuts_power": "När du pausar via Pause Cycle-knappen eller tjänsten, stäng också av den konfigurerade switch-entiteten. träder endast i kraft om en switch-enhet är konfigurerad för den här enheten.",
-          "notify_unload_delay_minutes": "Skicka ett meddelande via aviseringskanalen för mål efter att cykeln är slut och dörren inte har öppnats på så många minuter (kräver Dörrsensor). Ställ in på 0 för att inaktivera. Standard: 60 min."
+          "notify_unload_delay_minutes": "Skicka ett meddelande via aviseringskanalen för mål efter att cykeln är slut och dörren inte har öppnats på så många minuter (kräver Dörrsensor). Ställ in på 0 för att inaktivera. Standard: 60 min.",
+          "switch_entity": "Växlingsenheten att växla när du pausar eller återupptar. Krävs när \"Klipp av ström vid paus\" är aktiverat."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Behåll data upp till denna offset i sekunder. Standard = full varaktighet."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pauscykel",
+      "description": "Pausa den aktiva cykeln för en WashData-enhet.",
+      "fields": {
+        "device_id": {
+          "name": "Anordning",
+          "description": "WashData-enheten att pausa."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Återuppta cykeln",
+      "description": "Återuppta en pausad cykel för en WashData-enhet.",
+      "fields": {
+        "device_id": {
+          "name": "Anordning",
+          "description": "WashData-enheten ska återupptas."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Ett giltigt device_id krävs."
+    },
+    "cycle_id_required": {
+      "message": "Ett giltigt cycle_id krävs."
+    },
+    "profile_name_required": {
+      "message": "Ett giltigt profile_name krävs."
     }
   }
 }

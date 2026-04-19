@@ -204,7 +204,8 @@
           "pump_stuck_duration": "펌프 정체 경고 임계값(펌프만 해당)",
           "door_sensor_entity": "도어 센서",
           "pause_cuts_power": "일시 정지 시 전원 차단",
-          "notify_unload_delay_minutes": "세탁 대기 알림 지연(분)"
+          "notify_unload_delay_minutes": "세탁 대기 알림 지연(분)",
+          "switch_entity": "스위치 엔터티(정전 일시 정지용)"
         },
         "data_description": {
           "apply_suggestions": "학습 알고리즘에서 제안된 값의 검토 단계를 열려면 이 상자를 선택하세요. 아무것도 자동으로 저장되지 않습니다.\n\n제안 (학습에서):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "이 시간이 지난 후에도 펌프 사이클이 계속 실행 중인 경우 ha_washdata_pump_stuck 이벤트가 한 번 실행됩니다. 이를 사용하여 걸린 모터를 감지합니다(일반적인 배수 펌프 작동 시간은 60초 미만입니다). 기본값: 1800초(30분) 펌프 장치 유형만 해당.",
           "door_sensor_entity": "기계 도어용 옵션 바이너리 센서(켜짐 = 열림, 꺼짐 = 닫힘). 활성 사이클 중에 문이 열리면 WashData는 사이클이 의도적으로 일시 중지되었음을 확인합니다. 사이클 종료 후에도 도어가 여전히 닫혀 있으면 도어가 열릴 때까지 'Clean' 상태로 변경됩니다. 참고: 도어를 닫아도 일시 중지된 주기가 자동으로 재개되지 않습니다. 재개는 주기 재개 버튼 또는 서비스를 통해 수동으로 실행되어야 합니다.",
           "pause_cuts_power": "Pause Cycle 버튼이나 서비스를 통해 일시 중지하는 경우 구성된 스위치 엔터티도 끄십시오. 이 장치에 스위치 엔터티가 구성된 경우에만 적용됩니다.",
-          "notify_unload_delay_minutes": "사이클이 종료되고 몇 분 동안 문이 열리지 않으면 완료 알림 채널을 통해 알림을 보냅니다(도어 센서 필요). 비활성화하려면 0으로 설정합니다. 기본값: 60분"
+          "notify_unload_delay_minutes": "사이클이 종료되고 몇 분 동안 문이 열리지 않으면 완료 알림 채널을 통해 알림을 보냅니다(도어 센서 필요). 비활성화하려면 0으로 설정합니다. 기본값: 60분",
+          "switch_entity": "일시중지하거나 재개할 때 전환할 스위치 엔터티입니다. '일시 중지 시 전원 차단'이 활성화된 경우 필요합니다."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "이 오프셋(초)까지 데이터를 유지합니다. 기본값 = 전체 기간."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "일시정지 주기",
+      "description": "WashData 장치의 활성 주기를 일시 중지합니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "일시중지할 WashData 장치입니다."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "재개주기",
+      "description": "WashData 장치에 대해 일시 중지된 주기를 재개합니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "재개할 WashData 장치입니다."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "유효한 device_id가 필요합니다."
+    },
+    "cycle_id_required": {
+      "message": "유효한 Cycle_id가 필요합니다."
+    },
+    "profile_name_required": {
+      "message": "유효한 profile_name이 필요합니다."
     }
   }
 }

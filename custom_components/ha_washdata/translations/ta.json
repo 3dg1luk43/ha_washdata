@@ -197,7 +197,8 @@
           "pump_stuck_duration": "பம்ப் ஸ்டக் அலர்ட் த்ரெஷோல்ட் (கள்) (பம்ப் மட்டும்)",
           "door_sensor_entity": "கதவு சென்சார்",
           "pause_cuts_power": "இடைநிறுத்தப்படும் போது பவரை வெட்டுங்கள்",
-          "notify_unload_delay_minutes": "சலவை காத்திருப்பு அறிவிப்பு தாமதம் (நிமிடம்)"
+          "notify_unload_delay_minutes": "சலவை காத்திருப்பு அறிவிப்பு தாமதம் (நிமிடம்)",
+          "switch_entity": "நிறுவனத்தை மாற்றவும் (பவர் கட் இடைநிறுத்தப்படுவதற்கு)"
         },
         "data_description": {
           "apply_suggestions": "கற்றல் அல்காரிதத்திலிருந்து பரிந்துரைக்கப்பட்ட மதிப்புகளுக்கான மதிப்பாய்வுப் படியைத் திறக்க இந்தப் பெட்டியைத் தேர்வு செய்யவும். எதுவும் தானாகவே சேமிக்கப்படாது.\n\nபரிந்துரைக்கப்படுகிறது (கற்றலில் இருந்து):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "இந்த பல வினாடிகளுக்குப் பிறகும் ஒரு பம்ப் சுழற்சி இயங்கினால், ha_washdata_pump_stuck நிகழ்வு ஒரு முறை சுடப்படும். நெரிசலான மோட்டாரைக் கண்டறிய இதைப் பயன்படுத்தவும் (வழக்கமான சம்ப் பம்ப் ரன் 60 வினாடிகளுக்கு கீழ் இருக்கும்). இயல்புநிலை: 1800 வி (30 நிமிடம்). பம்ப் சாதன வகை மட்டுமே.",
           "door_sensor_entity": "இயந்திர கதவுக்கான விருப்ப பைனரி சென்சார் (ஆன் = திறந்த, ஆஃப் = மூடப்பட்டது). செயலில் உள்ள சுழற்சியின் போது கதவு திறக்கும் போது, ​​WashData வேண்டுமென்றே இடைநிறுத்தப்பட்ட சுழற்சியை உறுதி செய்யும். சுழற்சி முடிந்ததும், கதவு மூடியிருந்தால், கதவு திறக்கும் வரை 'சுத்தம்' நிலை மாறும். குறிப்பு: கதவை மூடுவது இடைநிறுத்தப்பட்ட சுழற்சியை தானாக மீண்டும் தொடங்காது - ரெஸ்யூம் சைக்கிள் பட்டன் அல்லது சேவையின் மூலம் கைமுறையாக ரெஸ்யூம் தூண்டப்பட வேண்டும்.",
           "pause_cuts_power": "இடைநிறுத்தம் சுழற்சி பொத்தான் அல்லது சேவை வழியாக இடைநிறுத்தப்படும் போது, ​​உள்ளமைக்கப்பட்ட சுவிட்ச் உட்பொருளையும் அணைக்கவும். இந்தச் சாதனத்தில் சுவிட்ச் உட்பொருளை உள்ளமைத்தால் மட்டுமே நடைமுறைக்கு வரும்.",
-          "notify_unload_delay_minutes": "சுழற்சி முடிந்த பிறகும், பல நிமிடங்களுக்கு கதவு திறக்கப்படாமல் இருந்த பிறகு, பினிஷ் அறிவிப்பு சேனல் வழியாக அறிவிப்பை அனுப்பவும் (டோர் சென்சார் தேவை). முடக்க 0 என அமைக்கவும். இயல்புநிலை: 60 நிமிடம்."
+          "notify_unload_delay_minutes": "சுழற்சி முடிந்த பிறகும், பல நிமிடங்களுக்கு கதவு திறக்கப்படாமல் இருந்த பிறகு, பினிஷ் அறிவிப்பு சேனல் வழியாக அறிவிப்பை அனுப்பவும் (டோர் சென்சார் தேவை). முடக்க 0 என அமைக்கவும். இயல்புநிலை: 60 நிமிடம்.",
+          "switch_entity": "இடைநிறுத்தப்படும்போது அல்லது மீண்டும் தொடங்கும் போது மாறுவதற்கான சுவிட்ச் நிறுவனம். 'இடைநிறுத்தும்போது மின்வெட்டு' இயக்கப்பட்டிருக்கும் போது தேவை."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "வினாடிகளில் இந்த ஆஃப்செட் வரை தரவை வைத்திருக்கவும். இயல்புநிலை = முழு கால அளவு."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "சுழற்சியை இடைநிறுத்தவும்",
+      "description": "WashData சாதனத்திற்கான செயலில் உள்ள சுழற்சியை இடைநிறுத்தவும்.",
+      "fields": {
+        "device_id": {
+          "name": "சாதனம்",
+          "description": "WashData சாதனம் இடைநிறுத்தப்படும்."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "சுழற்சியை மீண்டும் தொடங்கவும்",
+      "description": "WashData சாதனத்திற்கான இடைநிறுத்தப்பட்ட சுழற்சியை மீண்டும் தொடங்கவும்.",
+      "fields": {
+        "device_id": {
+          "name": "சாதனம்",
+          "description": "WashData சாதனம் மீண்டும் தொடங்கும்."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "சரியான device_id தேவை."
+    },
+    "cycle_id_required": {
+      "message": "சரியான சுழற்சி_ஐடி தேவை."
+    },
+    "profile_name_required": {
+      "message": "சரியான profile_பெயர் தேவை."
     }
   }
 }

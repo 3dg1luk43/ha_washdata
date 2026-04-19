@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Pump Stuck Alert շեմ (ներ) (միայն պոմպ)",
           "door_sensor_entity": "Դռների սենսոր",
           "pause_cuts_power": "Անջատեք սնուցումը դադարի ժամանակ",
-          "notify_unload_delay_minutes": "Լվացքի սպասման ծանուցման ուշացում (րոպե)"
+          "notify_unload_delay_minutes": "Լվացքի սպասման ծանուցման ուշացում (րոպե)",
+          "switch_entity": "Անջատիչ սարք (սնուցման անջատման դադարեցման համար)"
         },
         "data_description": {
           "apply_suggestions": "Նշեք այս վանդակը՝ ուսումնական ալգորիթմից առաջարկվող արժեքների վերանայման քայլ բացելու համար: Ոչինչ ինքնաբերաբար չի պահպանվում:\n\nԱռաջարկվում է (սովորելուց).\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Եթե ​​այսքան վայրկյանից հետո պոմպի ցիկլը դեռ աշխատում է, ha_washdata_pump_stuck իրադարձությունը գործարկվում է մեկ անգամ: Օգտագործեք սա խցանված շարժիչը հայտնաբերելու համար (սովորական ջրամբարի պոմպի աշխատանքը 60 վրկ-ից ցածր է): Կանխադրված՝ 1800 վ (30 րոպե): Միայն պոմպի սարքի տեսակը:",
           "door_sensor_entity": "Լրացուցիչ երկուական սենսոր մեքենայի դռան համար (միացված = բաց, անջատված = փակ): Երբ դուռը բացվում է ակտիվ ցիկլի ընթացքում, WashData-ն կհաստատի ցիկլը որպես միտումնավոր դադար: Ցիկլը ավարտվելուց հետո, եթե դուռը դեռ փակ է, վիճակը փոխվում է «Մաքուր» մինչև դուռը բացվի: Նշում․ դուռը փակելով չի վերսկսվում դադարեցված ցիկլը. ռեզյումեն պետք է գործարկվի ձեռքով Resume Cycle կոճակի կամ ծառայության միջոցով:",
           "pause_cuts_power": "Pause Cycle կոճակի կամ ծառայության միջոցով դադարեցնելիս անջատեք նաև կազմաձևված անջատիչ սարքը: Գործում է միայն այն դեպքում, եթե անջատիչի կազմաձևված է այս սարքի համար:",
-          "notify_unload_delay_minutes": "Ուղարկեք ծանուցում ավարտի ծանուցման ալիքով այն բանից հետո, երբ ցիկլը ավարտվի, և դուռը այսքան րոպե չի բացվել (պահանջվում է Դռան ցուցիչ): Անջատելու համար դրեք 0: Կանխադրված՝ 60 րոպե:"
+          "notify_unload_delay_minutes": "Ուղարկեք ծանուցում ավարտի ծանուցման ալիքով այն բանից հետո, երբ ցիկլը ավարտվի, և դուռը այսքան րոպե չի բացվել (պահանջվում է Դռան ցուցիչ): Անջատելու համար դրեք 0: Կանխադրված՝ 60 րոպե:",
+          "switch_entity": "Անջատիչի միավորը պետք է փոխարկվի դադարի կամ վերսկսման ժամանակ: Պահանջվում է, երբ միացված է «Կտրել սնուցումը դադարեցման ժամանակ»:"
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Պահպանեք տվյալները մինչև այս օֆսեթը վայրկյանների ընթացքում: Կանխադրված = լրիվ տևողություն:"
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Դադար ցիկլ",
+      "description": "Դադարեցնել WashData սարքի ակտիվ ցիկլը:",
+      "fields": {
+        "device_id": {
+          "name": "Սարք",
+          "description": "WashData սարքը դադարեցնելու համար:"
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Վերսկսման ցիկլ",
+      "description": "Վերսկսեք դադարեցված ցիկլը WashData սարքի համար:",
+      "fields": {
+        "device_id": {
+          "name": "Սարք",
+          "description": "WashData սարքը վերսկսվում է:"
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Պահանջվում է վավեր device_id:"
+    },
+    "cycle_id_required": {
+      "message": "Պահանջվում է վավեր cycle_id:"
+    },
+    "profile_name_required": {
+      "message": "Պահանջվում է վավեր profile_name:"
     }
   }
 }

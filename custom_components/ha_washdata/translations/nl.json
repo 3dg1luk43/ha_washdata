@@ -204,7 +204,8 @@
           "pump_stuck_duration": "Waarschuwingsdrempel(s) voor pomp vastgelopen (alleen pomp)",
           "door_sensor_entity": "Deursensor",
           "pause_cuts_power": "Schakel de stroom uit tijdens het pauzeren",
-          "notify_unload_delay_minutes": "Vertraging wasgoed wachtmelding (min)"
+          "notify_unload_delay_minutes": "Vertraging wasgoed wachtmelding (min)",
+          "switch_entity": "Schakelentiteit (voor pauze stroomuitval)"
         },
         "data_description": {
           "apply_suggestions": "Vink dit vakje aan om een beoordelingsstap te openen voor voorgestelde waarden van het leeralgoritme. Er wordt niets automatisch opgeslagen.\n\nVoorgesteld (door leeralgoritme):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "Als een pompcyclus na dit aantal seconden nog steeds actief is, wordt er één keer een ha_washdata_pump_stuck-gebeurtenis geactiveerd. Gebruik dit om een ​​vastgelopen motor te detecteren (de typische pomplooptijd van de pomp bedraagt ​​minder dan 60 s). Standaard: 1800 s (30 min). Alleen type pompapparaat.",
           "door_sensor_entity": "Optionele binaire sensor voor de machinedeur (aan = open, uit = gesloten). Wanneer de deur opengaat tijdens een actieve cyclus, bevestigt WashData dat de cyclus opzettelijk is onderbroken. Nadat de cyclus is afgelopen en de deur nog steeds gesloten is, verandert de status in 'Reinigen' totdat de deur wordt geopend. Let op: als u de deur sluit, wordt een gepauzeerde cyclus NIET automatisch hervat; het hervatten moet handmatig worden geactiveerd via de knop Cyclus hervatten of via de service.",
           "pause_cuts_power": "Wanneer u pauzeert via de knop Pause Cycle of service, schakelt u ook de geconfigureerde switch-entiteit uit. Wordt alleen van kracht als er voor dit apparaat een switch-entiteit is geconfigureerd.",
-          "notify_unload_delay_minutes": "Stuur een melding via het finishmeldingskanaal nadat de cyclus is afgelopen en de deur al zoveel minuten niet is geopend (vereist Door Sensor). Stel in op 0 om uit te schakelen. Standaard: 60 minuten."
+          "notify_unload_delay_minutes": "Stuur een melding via het finishmeldingskanaal nadat de cyclus is afgelopen en de deur al zoveel minuten niet is geopend (vereist Door Sensor). Stel in op 0 om uit te schakelen. Standaard: 60 minuten.",
+          "switch_entity": "De schakelentiteit die moet worden omgeschakeld tijdens het pauzeren of hervatten. Vereist wanneer 'Cut Power When Pausing' is ingeschakeld."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Gegevens bewaren tot deze offset in seconden. Standaard = volledige duur."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pauzeer cyclus",
+      "description": "Pauzeer de actieve cyclus voor een WashData-apparaat.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Het WashData-apparaat om te pauzeren."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Hervat cyclus",
+      "description": "Hervat een gepauzeerde cyclus voor een WashData-apparaat.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Het WashData-apparaat om te hervatten."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Een geldige device_id is vereist."
+    },
+    "cycle_id_required": {
+      "message": "Een geldige cyclus_id is vereist."
+    },
+    "profile_name_required": {
+      "message": "Een geldige profielnaam is vereist."
     }
   }
 }

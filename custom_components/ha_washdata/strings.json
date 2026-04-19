@@ -204,6 +204,7 @@
           "pump_stuck_duration": "Pump Stuck Alert Threshold (s) (Pump Only)",
           "door_sensor_entity": "Door Sensor",
           "pause_cuts_power": "Cut Power When Pausing",
+          "switch_entity": "Switch Entity (for Pause Power Cut)",
           "notify_unload_delay_minutes": "Laundry Waiting Notification Delay (min)"
         },
         "data_description": {
@@ -255,6 +256,7 @@
           "pump_stuck_duration": "If a pump cycle is still running after this many seconds, a ha_washdata_pump_stuck event is fired once. Use this to detect a jammed motor (typical sump pump run is under 60 s). Default: 1800 s (30 min). Pump device type only.",
           "door_sensor_entity": "Optional binary sensor for the machine door (on = open, off = closed). When the door opens during an active cycle, WashData will confirm the cycle as intentionally paused. After the cycle ends, if the door is still closed, the state changes to 'Clean' until the door is opened. Note: closing the door does NOT auto-resume a paused cycle - resume must be triggered manually via the Resume Cycle button or service.",
           "pause_cuts_power": "When pausing via the Pause Cycle button or service, also turn off the configured switch entity. Only takes effect if a switch entity is configured for this device.",
+          "switch_entity": "The switch entity to toggle when pausing or resuming. Required when 'Cut Power When Pausing' is enabled.",
           "notify_unload_delay_minutes": "Send a notification via the finish notification channel after the cycle ends and the door has not been opened for this many minutes (requires Door Sensor). Set to 0 to disable. Default: 60 min."
         }
       },
@@ -996,6 +998,26 @@
           "description": "Keep data up to this offset in seconds. Default = full duration."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pause Cycle",
+      "description": "Pause the active cycle for a WashData device.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The WashData device to pause."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Resume Cycle",
+      "description": "Resume a paused cycle for a WashData device.",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The WashData device to resume."
+        }
+      }
     }
   },
   "entity": {
@@ -1099,6 +1121,12 @@
   "exceptions": {
     "device_id_required": {
       "message": "A valid device_id is required."
+    },
+    "cycle_id_required": {
+      "message": "A valid cycle_id is required."
+    },
+    "profile_name_required": {
+      "message": "A valid profile_name is required."
     },
     "device_not_found": {
       "message": "Device not found."

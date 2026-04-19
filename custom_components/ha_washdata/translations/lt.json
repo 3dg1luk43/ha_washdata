@@ -204,7 +204,8 @@
           "pump_stuck_duration": "Siurblio užstrigimo įspėjimo slenkstis (-ai) (tik siurblys)",
           "door_sensor_entity": "Durų jutiklis",
           "pause_cuts_power": "Išjunkite maitinimą pristabdydami",
-          "notify_unload_delay_minutes": "Pranešimo apie skalbinių laukimą delsa (min.)"
+          "notify_unload_delay_minutes": "Pranešimo apie skalbinių laukimą delsa (min.)",
+          "switch_entity": "Jungiklio objektas (pristabdyti maitinimo nutraukimą)"
         },
         "data_description": {
           "apply_suggestions": "Pažymėkite šį laukelį, kad atidarytumėte siūlomų verčių iš mokymosi algoritmo peržiūros žingsnį. Niekas neišsaugoma automatiškai.\n\nSiūloma (iš mokymosi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "Jei po tiek sekundžių vis dar veikia siurblio ciklas, vieną kartą suaktyvinamas įvykis ha_washdata_pump_stuck. Naudokite tai norėdami aptikti užstrigusį variklį (įprastas karterio siurblio veikimas yra trumpesnis nei 60 s). Numatytasis: 1800 s (30 min.). Tik siurblio įrenginio tipas.",
           "door_sensor_entity": "Pasirenkamas dvejetainis mašinos durelių jutiklis (įjungta = atidaryta, išjungta = uždaryta). Kai durelės atsidaro aktyvaus ciklo metu, WashData patvirtins, kad ciklas buvo tyčia pristabdytas. Pasibaigus ciklui, jei durelės vis dar uždarytos, būsena pasikeičia į „Clean“, kol durys bus atidarytos. Pastaba: uždarius dureles automatiškai NEatnaujinamas pristabdytas ciklas – atnaujinimas turi būti suaktyvintas rankiniu būdu, naudojant mygtuką Tęsti ciklą arba paslauga.",
           "pause_cuts_power": "Pristabdydami naudodami mygtuką Pause Cycle arba paslaugą, taip pat išjunkite sukonfigūruotą jungiklio objektą. Įsigalioja tik tada, jei šiam įrenginiui sukonfigūruotas jungiklio objektas.",
-          "notify_unload_delay_minutes": "Pasibaigus ciklui ir durims neatidarius tiek minučių, išsiųskite pranešimą per pranešimo apie pabaigą kanalą (reikalingas durų jutiklis). Norėdami išjungti, nustatykite 0. Numatytasis: 60 min."
+          "notify_unload_delay_minutes": "Pasibaigus ciklui ir durims neatidarius tiek minučių, išsiųskite pranešimą per pranešimo apie pabaigą kanalą (reikalingas durų jutiklis). Norėdami išjungti, nustatykite 0. Numatytasis: 60 min.",
+          "switch_entity": "Perjungimo objektas, perjungiamas pristabdant arba tęsiant. Reikalingas, kai įjungta parinktis „Išjungti maitinimą pristabdant“."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Išsaugoti duomenis iki šio poslinkio sekundėmis. Numatytasis = visa trukmė."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pristabdyti ciklą",
+      "description": "Pristabdykite aktyvų WashData įrenginio ciklą.",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "„WashData“ įrenginį pristabdyti."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Tęsti ciklą",
+      "description": "Tęsti pristabdytą WashData įrenginio ciklą.",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "„WashData“ įrenginys, kad būtų atnaujintas."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Būtinas galiojantis įrenginio_id."
+    },
+    "cycle_id_required": {
+      "message": "Būtinas galiojantis ciklo_id."
+    },
+    "profile_name_required": {
+      "message": "Reikalingas galiojantis profile_name."
     }
   }
 }

@@ -204,7 +204,8 @@
           "pump_stuck_duration": "Όριο (α) ειδοποίησης κολλημένης αντλίας (μόνο για αντλία)",
           "door_sensor_entity": "Αισθητήρας πόρτας",
           "pause_cuts_power": "Κόψτε την τροφοδοσία κατά την παύση",
-          "notify_unload_delay_minutes": "Καθυστέρηση ειδοποίησης αναμονής πλυντηρίου (λεπτά)"
+          "notify_unload_delay_minutes": "Καθυστέρηση ειδοποίησης αναμονής πλυντηρίου (λεπτά)",
+          "switch_entity": "Εναλλαγή οντότητας (για παύση διακοπής ρεύματος)"
         },
         "data_description": {
           "apply_suggestions": "Επιλέξτε αυτό το πλαίσιο για να ανοίξετε ένα βήμα ελέγχου για προτεινόμενες τιμές από τον αλγόριθμο μάθησης. Τίποτα δεν αποθηκεύεται αυτόματα.\n\nΠροτεινόμενα (από μάθηση):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "Εάν ένας κύκλος αντλίας εξακολουθεί να εκτελείται μετά από τόσα πολλά δευτερόλεπτα, ένα συμβάν ha_washdata_pump_stuck ενεργοποιείται μία φορά. Χρησιμοποιήστε το για να εντοπίσετε εμπλοκή κινητήρα (η τυπική λειτουργία αντλίας φρεατίου είναι μικρότερη από 60 δευτερόλεπτα). Προεπιλογή: 1800 s (30 λεπτά). Μόνο τύπος συσκευής αντλίας.",
           "door_sensor_entity": "Προαιρετικός δυαδικός αισθητήρας για την πόρτα του μηχανήματος (on = ανοιχτό, off = κλειστό). Όταν η πόρτα ανοίγει κατά τη διάρκεια ενός ενεργού κύκλου, το WashData θα επιβεβαιώσει τον κύκλο ως σκόπιμη παύση. Μετά το τέλος του κύκλου, εάν η πόρτα είναι ακόμα κλειστή, η κατάσταση αλλάζει σε «Καθαρισμός» μέχρι να ανοίξει η πόρτα. Σημείωση: το κλείσιμο της πόρτας ΔΕΝ επαναλαμβάνει αυτόματα έναν κύκλο σε παύση - η συνέχιση πρέπει να ενεργοποιηθεί χειροκίνητα μέσω του κουμπιού ή του σέρβις του Κύκλου Συνέχισης.",
           "pause_cuts_power": "Όταν κάνετε παύση μέσω του κουμπιού ή της υπηρεσίας Pause Cycle, απενεργοποιήστε επίσης τη διαμορφωμένη οντότητα διακόπτη. Εφαρμόζεται μόνο εάν έχει διαμορφωθεί μια οντότητα διακόπτη για αυτήν τη συσκευή.",
-          "notify_unload_delay_minutes": "Στείλτε μια ειδοποίηση μέσω του καναλιού ειδοποίησης τερματισμού αφού τελειώσει ο κύκλος και η πόρτα δεν έχει ανοίξει για τόσα πολλά λεπτά (απαιτείται αισθητήρας πόρτας). Ορίστε στο 0 για απενεργοποίηση. Προεπιλογή: 60 λεπτά."
+          "notify_unload_delay_minutes": "Στείλτε μια ειδοποίηση μέσω του καναλιού ειδοποίησης τερματισμού αφού τελειώσει ο κύκλος και η πόρτα δεν έχει ανοίξει για τόσα πολλά λεπτά (απαιτείται αισθητήρας πόρτας). Ορίστε στο 0 για απενεργοποίηση. Προεπιλογή: 60 λεπτά.",
+          "switch_entity": "Η οντότητα διακόπτη για εναλλαγή κατά την παύση ή τη συνέχιση. Απαιτείται όταν είναι ενεργοποιημένη η \"Διακοπή ρεύματος κατά την παύση\"."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Διατήρηση δεδομένων έως αυτή τη μετατόπιση σε δευτερόλεπτα. Προεπιλογή = πλήρης διάρκεια."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Κύκλος παύσης",
+      "description": "Παύση του ενεργού κύκλου για μια συσκευή WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Συσκευή",
+          "description": "Η συσκευή WashData για παύση."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Κύκλος Συνέχισης",
+      "description": "Συνέχιση ενός κύκλου σε παύση για μια συσκευή WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Συσκευή",
+          "description": "Η συσκευή WashData για συνέχιση."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Απαιτείται έγκυρο αναγνωριστικό συσκευής."
+    },
+    "cycle_id_required": {
+      "message": "Απαιτείται έγκυρο cycle_id."
+    },
+    "profile_name_required": {
+      "message": "Απαιτείται έγκυρο όνομα_προφίλ."
     }
   }
 }

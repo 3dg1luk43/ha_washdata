@@ -197,7 +197,8 @@
           "pump_stuck_duration": "ポンプスタック警告しきい値 (秒) (ポンプのみ)",
           "door_sensor_entity": "ドアセンサー",
           "pause_cuts_power": "一時停止時に電源を切る",
-          "notify_unload_delay_minutes": "ランドリー待機通知遅延 (分)"
+          "notify_unload_delay_minutes": "ランドリー待機通知遅延 (分)",
+          "switch_entity": "スイッチエンティティ (一時停止電源切断用)"
         },
         "data_description": {
           "apply_suggestions": "このボックスにチェックを入れると、学習アルゴリズムの推奨値の確認ステップが開きます。何も自動的に保存されません。\n\n推奨値（学習より）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "この秒数が経過してもポンプ サイクルがまだ実行されている場合は、ha_washdata_pump_stuck イベントが 1 回発生します。これを使用してモーターの詰まりを検出します (通常、排水ポンプの動作は 60 秒未満です)。デフォルト: 1800 秒 (30 分)。ポンプ装置タイプのみ。",
           "door_sensor_entity": "機械ドア用のオプションのバイナリ センサー (オン = 開いている、オフ = 閉じている)。アクティブなサイクル中にドアが開くと、WashData はサイクルが意図的に一時停止されたことを確認します。サイクル終了後、ドアがまだ閉じている場合、ドアが開くまで状態は「Clean」に変わります。注: ドアを閉めても、一時停止したサイクルは自動的に再開されません。再開は、「サイクル再開」ボタンまたはサービスを介して手動でトリガーする必要があります。",
           "pause_cuts_power": "[Pause Cycle] ボタンまたはサービスを使用して一時停止する場合は、設定されたスイッチ エンティティもオフにします。スイッチ エンティティがこのデバイスに設定されている場合にのみ有効です。",
-          "notify_unload_delay_minutes": "サイクルが終了し、一定時間ドアが開かなかった後、終了通知チャネル経由で通知を送信します (ドア センサーが必要)。無効にするには 0 に設定します。デフォルト: 60 分。"
+          "notify_unload_delay_minutes": "サイクルが終了し、一定時間ドアが開かなかった後、終了通知チャネル経由で通知を送信します (ドア センサーが必要)。無効にするには 0 に設定します。デフォルト: 60 分。",
+          "switch_entity": "一時停止または再開するときに切り替えるスイッチ エンティティ。 「一時停止時に電源を切る」が有効な場合に必要です。"
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "このオフセット（秒）までデータを保持します。デフォルト = 全所要時間。"
         }
       }
+    },
+    "pause_cycle": {
+      "name": "サイクルを一時停止する",
+      "description": "WashData デバイスのアクティブなサイクルを一時停止します。",
+      "fields": {
+        "device_id": {
+          "name": "デバイス",
+          "description": "WashData デバイスを一時停止します。"
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "サイクルを再開する",
+      "description": "WashData デバイスの一時停止したサイクルを再開します。",
+      "fields": {
+        "device_id": {
+          "name": "デバイス",
+          "description": "再開する WashData デバイス。"
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "有効な device_id が必要です。"
+    },
+    "cycle_id_required": {
+      "message": "有効なcycle_idが必要です。"
+    },
+    "profile_name_required": {
+      "message": "有効な profile_name が必要です。"
     }
   }
 }

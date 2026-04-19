@@ -197,7 +197,8 @@
           "pump_stuck_duration": "เกณฑ์การแจ้งเตือนปั๊มติด (s) (เฉพาะปั๊ม)",
           "door_sensor_entity": "เซ็นเซอร์ประตู",
           "pause_cuts_power": "ตัดไฟเมื่อหยุดชั่วคราว",
-          "notify_unload_delay_minutes": "การแจ้งเตือนการรอซักรีดล่าช้า (นาที)"
+          "notify_unload_delay_minutes": "การแจ้งเตือนการรอซักรีดล่าช้า (นาที)",
+          "switch_entity": "สวิตช์เอนทิตี (สำหรับการหยุดตัดไฟชั่วคราว)"
         },
         "data_description": {
           "apply_suggestions": "เลือกช่องนี้เพื่อเปิดขั้นตอนการทบทวนค่าที่แนะนำจากอัลกอริทึมการเรียนรู้ ไม่มีสิ่งใดถูกบันทึกโดยอัตโนมัติ\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "หากรอบปั๊มยังคงทำงานอยู่หลังจากผ่านไปหลายวินาทีนี้ เหตุการณ์ ha_washdata_pump_stuck จะทำงานหนึ่งครั้ง ใช้สิ่งนี้เพื่อตรวจจับมอเตอร์ที่ติดขัด (การทำงานของปั๊มบ่อโดยทั่วไปคือต่ำกว่า 60 วินาที) ค่าเริ่มต้น: 1800 วินาที (30 นาที) ประเภทอุปกรณ์ปั๊มเท่านั้น",
           "door_sensor_entity": "เซ็นเซอร์ไบนารี่เสริมสำหรับประตูเครื่องจักร (เปิด = เปิด, ปิด = ปิด) เมื่อประตูเปิดออกระหว่างโปรแกรมที่ใช้งานอยู่ WashData จะยืนยันโปรแกรมดังกล่าวว่าหยุดชั่วคราวโดยเจตนา หลังจากสิ้นสุดรอบ หากประตูยังคงปิดอยู่ สถานะจะเปลี่ยนเป็น 'ทำความสะอาด' จนกว่าประตูจะเปิด หมายเหตุ: การปิดประตูจะไม่กลับมาทำงานต่อโดยอัตโนมัติตามรอบที่หยุดชั่วคราว - การกลับมาทำงานต่อจะต้องถูกกระตุ้นด้วยตนเองผ่านปุ่ม ทำงานต่อรอบการทำงานหรือบริการ",
           "pause_cuts_power": "เมื่อหยุดชั่วคราวผ่านปุ่มหยุดรอบชั่วคราวหรือบริการ ให้ปิดเอนทิตีสวิตช์ที่กำหนดค่าไว้ด้วย จะมีผลเฉพาะเมื่อมีการกำหนดค่าเอนทิตีสวิตช์สำหรับอุปกรณ์นี้",
-          "notify_unload_delay_minutes": "ส่งการแจ้งเตือนผ่านช่องทางแจ้งเตือนเมื่อสิ้นสุดรอบและไม่ได้เปิดประตูเป็นเวลาหลายนาที (ต้องใช้เซ็นเซอร์ประตู) ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 60 นาที"
+          "notify_unload_delay_minutes": "ส่งการแจ้งเตือนผ่านช่องทางแจ้งเตือนเมื่อสิ้นสุดรอบและไม่ได้เปิดประตูเป็นเวลาหลายนาที (ต้องใช้เซ็นเซอร์ประตู) ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 60 นาที",
+          "switch_entity": "เอนทิตีสวิตช์เพื่อสลับเมื่อหยุดชั่วคราวหรือดำเนินการต่อ จำเป็นเมื่อเปิดใช้งาน 'ตัดไฟเมื่อหยุดชั่วคราว'"
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "เก็บข้อมูลจนถึงออฟเซ็ตนี้ในไม่กี่วินาที ค่าเริ่มต้น = ระยะเวลาเต็ม"
         }
       }
+    },
+    "pause_cycle": {
+      "name": "หยุดวงจรชั่วคราว",
+      "description": "หยุดวงจรที่ใช้งานชั่วคราวสำหรับอุปกรณ์ WashData",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์ WashData เพื่อหยุดชั่วคราว"
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "ดำเนินรอบต่อ",
+      "description": "ดำเนินรอบที่หยุดชั่วคราวต่อสำหรับอุปกรณ์ WashData",
+      "fields": {
+        "device_id": {
+          "name": "อุปกรณ์",
+          "description": "อุปกรณ์ WashData เพื่อดำเนินการต่อ"
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "จำเป็นต้องมี device_id ที่ถูกต้อง"
+    },
+    "cycle_id_required": {
+      "message": "จำเป็นต้องมี Cycle_id ที่ถูกต้อง"
+    },
+    "profile_name_required": {
+      "message": "จำเป็นต้องมีprofile_nameที่ถูกต้อง"
     }
   }
 }

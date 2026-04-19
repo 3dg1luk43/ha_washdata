@@ -197,7 +197,8 @@
           "pump_stuck_duration": "पंप अटक चेतावनी सीमा(ओं) (केवल पंप)",
           "door_sensor_entity": "दरवाज़ा सेंसर",
           "pause_cuts_power": "रुकते समय बिजली काट दें",
-          "notify_unload_delay_minutes": "लाँड्री प्रतीक्षा अधिसूचना विलंब (न्यूनतम)"
+          "notify_unload_delay_minutes": "लाँड्री प्रतीक्षा अधिसूचना विलंब (न्यूनतम)",
+          "switch_entity": "स्विच एंटिटी (पावर कट रोकने के लिए)"
         },
         "data_description": {
           "apply_suggestions": "शिक्षण एल्गोरिदम से सुझाए गए मानों के लिए समीक्षा चरण खोलने के लिए इस बॉक्स को चेक करें। कुछ भी स्वचालित रूप से सहेजा नहीं जाता है.\n\nसुझाव (सीखने से):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "यदि एक पंप चक्र इतने सेकंड के बाद भी चल रहा है, तो ha_washdata_pump_stuck इवेंट को एक बार सक्रिय किया जाता है। जाम मोटर का पता लगाने के लिए इसका उपयोग करें (सामान्य नाबदान पंप रन 60 सेकंड से कम है)। डिफ़ॉल्ट: 1800 सेकंड (30 मिनट)। केवल पंप डिवाइस प्रकार.",
           "door_sensor_entity": "मशीन के दरवाजे के लिए वैकल्पिक बाइनरी सेंसर (चालू = खुला, बंद = बंद)। जब सक्रिय चक्र के दौरान दरवाज़ा खुलता है, तो वॉशडेटा पुष्टि करेगा कि चक्र जानबूझकर रोका गया है। चक्र समाप्त होने के बाद, यदि दरवाज़ा अभी भी बंद है, तो दरवाज़ा खुलने तक स्थिति 'स्वच्छ' में बदल जाती है। ध्यान दें: दरवाज़ा बंद करने से रुका हुआ चक्र अपने आप फिर से शुरू नहीं होता है - रेज़्यूमे को रेज़्यूमे साइकिल बटन या सेवा के माध्यम से मैन्युअल रूप से चालू किया जाना चाहिए।",
           "pause_cuts_power": "पॉज़ साइकल बटन या सेवा के माध्यम से रुकते समय, कॉन्फ़िगर की गई स्विच इकाई को भी बंद कर दें। केवल तभी प्रभावी होता है जब इस डिवाइस के लिए एक स्विच इकाई कॉन्फ़िगर की गई हो।",
-          "notify_unload_delay_minutes": "चक्र समाप्त होने के बाद फिनिश नोटिफिकेशन चैनल के माध्यम से एक अधिसूचना भेजें और इतने मिनटों तक दरवाजा नहीं खोला गया है (डोर सेंसर की आवश्यकता है)। अक्षम करने के लिए 0 पर सेट करें. डिफ़ॉल्ट: 60 मिनट."
+          "notify_unload_delay_minutes": "चक्र समाप्त होने के बाद फिनिश नोटिफिकेशन चैनल के माध्यम से एक अधिसूचना भेजें और इतने मिनटों तक दरवाजा नहीं खोला गया है (डोर सेंसर की आवश्यकता है)। अक्षम करने के लिए 0 पर सेट करें. डिफ़ॉल्ट: 60 मिनट.",
+          "switch_entity": "रुकने या फिर से शुरू करने पर टॉगल करने वाली स्विच इकाई। 'रुकते समय बिजली काटना' सक्षम होने पर यह आवश्यक है।"
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "सेकंड में इस ऑफसेट तक डेटा रखें। डिफ़ॉल्ट = पूर्ण अवधि."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "चक्र रोकें",
+      "description": "वॉशडेटा डिवाइस के लिए सक्रिय चक्र को रोकें।",
+      "fields": {
+        "device_id": {
+          "name": "उपकरण",
+          "description": "वॉशडेटा डिवाइस को रोकने के लिए।"
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "साइकिल फिर से शुरू करें",
+      "description": "वॉशडेटा डिवाइस के लिए रुके हुए चक्र को फिर से शुरू करें।",
+      "fields": {
+        "device_id": {
+          "name": "उपकरण",
+          "description": "वॉशडेटा डिवाइस फिर से शुरू करने के लिए।"
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "एक वैध डिवाइस_आईडी आवश्यक है।"
+    },
+    "cycle_id_required": {
+      "message": "एक वैधcycle_id आवश्यक है."
+    },
+    "profile_name_required": {
+      "message": "एक वैध प्रोफ़ाइल_नाम आवश्यक है."
     }
   }
 }

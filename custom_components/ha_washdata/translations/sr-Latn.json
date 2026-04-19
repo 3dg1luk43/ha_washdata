@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Праг (с) упозорења застоја пумпе (само пумпа)",
           "door_sensor_entity": "Доор Сенсор",
           "pause_cuts_power": "Искључите напајање приликом паузе",
-          "notify_unload_delay_minutes": "Кашњење обавештења о чекању веша (мин)"
+          "notify_unload_delay_minutes": "Кашњење обавештења о чекању веша (мин)",
+          "switch_entity": "Пребаците ентитет (за паузирање искључења струје)"
         },
         "data_description": {
           "apply_suggestions": "Označi ovo polje da otvoriš korak pregleda za predložene vrednosti iz algoritma učenja. Ništa se ne čuva automatski.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Ако циклус пумпе и даље ради након оволико секунди, догађај ха_васхдата_пумп_стуцк се покреће једном. Користите ово за откривање заглављеног мотора (типични рад пумпе је испод 60 с). Подразумевано: 1800 с (30 мин). Само тип уређаја за пумпу.",
           "door_sensor_entity": "Опциони бинарни сензор за врата машине (укључено = отворено, искључено = затворено). Када се врата отворе током активног циклуса, ВасхДата ће потврдити да је циклус намерно паузиран. Након завршетка циклуса, ако су врата и даље затворена, стање се мења у 'Цлеан' док се врата не отворе. Напомена: затварање врата НЕ наставља аутоматски паузирани циклус - наставак се мора покренути ручно преко дугмета Настави циклус или услуге.",
           "pause_cuts_power": "Када паузирате преко дугмета Паусе Цицле или услуге, такође искључите конфигурисани ентитет прекидача. Ступа на снагу само ако је ентитет прекидача конфигурисан за овај уређај.",
-          "notify_unload_delay_minutes": "Пошаљите обавештење путем канала обавештења о завршетку након што се циклус заврши и врата нису била отворена оволико минута (захтева сензор врата). Поставите на 0 да бисте онемогућили. Подразумевано: 60 мин."
+          "notify_unload_delay_minutes": "Пошаљите обавештење путем канала обавештења о завршетку након што се циклус заврши и врата нису била отворена оволико минута (захтева сензор врата). Поставите на 0 да бисте онемогућили. Подразумевано: 60 мин.",
+          "switch_entity": "Ентитет прекидача за пребацивање када паузирате или настављате. Обавезно када је омогућено „Прекини напајање при паузирању“."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Zadrži podatke do ovog pomaka u sekundama. Podrazumevano = puno trajanje."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Паузирај циклус",
+      "description": "Паузирајте активни циклус за ВасхДата уређај.",
+      "fields": {
+        "device_id": {
+          "name": "Уређај",
+          "description": "Уређај ВасхДата за паузирање."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Настави циклус",
+      "description": "Наставите паузирани циклус за ВасхДата уређај.",
+      "fields": {
+        "device_id": {
+          "name": "Уређај",
+          "description": "Уређај ВасхДата за наставак."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Неопходан је важећи ИД уређаја."
+    },
+    "cycle_id_required": {
+      "message": "Потребан је важећи ид_циклуса."
+    },
+    "profile_name_required": {
+      "message": "Потребно је важеће име_профила."
     }
   }
 }

@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Soglia/e di avviso pompa bloccata (solo pompa)",
           "door_sensor_entity": "Sensore porta",
           "pause_cuts_power": "Interrompere l'alimentazione durante la pausa",
-          "notify_unload_delay_minutes": "Ritardo notifica attesa lavanderia (min)"
+          "notify_unload_delay_minutes": "Ritardo notifica attesa lavanderia (min)",
+          "switch_entity": "Cambia entità (per pausa interruzione alimentazione)"
         },
         "data_description": {
           "apply_suggestions": "Seleziona questa casella per aprire una fase di revisione dei valori suggeriti dall'algoritmo di apprendimento. Nulla viene salvato automaticamente.\n\nSuggeriti (dall'apprendimento):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Se un ciclo della pompa è ancora in esecuzione dopo questo numero di secondi, viene generato un evento ha_washdata_pump_stuck una volta. Utilizzarlo per rilevare un motore bloccato (il funzionamento tipico della pompa di raccolta è inferiore a 60 s). Impostazione predefinita: 1800 s (30 min). Solo tipo di dispositivo pompa.",
           "door_sensor_entity": "Sensore binario opzionale per la porta della macchina (on = aperto, off = chiuso). Quando la porta si apre durante un ciclo attivo, WashData confermerà che il ciclo è stato intenzionalmente messo in pausa. Al termine del ciclo, se la porta è ancora chiusa, lo stato cambia in \"Pulizia\" finché la porta non viene aperta. Nota: la chiusura della porta NON riprende automaticamente un ciclo in pausa: la ripresa deve essere attivata manualmente tramite il pulsante o il servizio Riprendi ciclo.",
           "pause_cuts_power": "Quando si mette in pausa tramite il pulsante o il servizio Pausa ciclo, disattivare anche l'entità interruttore configurata. Ha effetto solo se è configurata un'entità interruttore per questo dispositivo.",
-          "notify_unload_delay_minutes": "Invia una notifica tramite il canale di notifica di fine dopo che il ciclo è terminato e la porta non è stata aperta per questo numero di minuti (richiede il sensore porta). Impostare su 0 per disabilitare. Predefinito: 60 minuti."
+          "notify_unload_delay_minutes": "Invia una notifica tramite il canale di notifica di fine dopo che il ciclo è terminato e la porta non è stata aperta per questo numero di minuti (richiede il sensore porta). Impostare su 0 per disabilitare. Predefinito: 60 minuti.",
+          "switch_entity": "L'entità interruttore da attivare durante la pausa o la ripresa. Richiesto quando è abilitata l'opzione \"Taglia alimentazione durante la pausa\"."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Conserva i dati fino a questo offset in secondi. Predefinito = durata intera."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pausa ciclo",
+      "description": "Mettere in pausa il ciclo attivo per un dispositivo WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "Il dispositivo WashData da mettere in pausa."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Riprendi ciclo",
+      "description": "Riprendere un ciclo in pausa per un dispositivo WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "Il dispositivo WashData da riprendere."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "È richiesto un device_id valido."
+    },
+    "cycle_id_required": {
+      "message": "È richiesto un cycle_id valido."
+    },
+    "profile_name_required": {
+      "message": "È richiesto un nome_profilo valido."
     }
   }
 }

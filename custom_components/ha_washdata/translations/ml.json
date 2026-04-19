@@ -197,7 +197,8 @@
           "pump_stuck_duration": "പമ്പ് സ്റ്റക്ക് അലേർട്ട് ത്രെഷോൾഡ് (കൾ) (പമ്പ് മാത്രം)",
           "door_sensor_entity": "ഡോർ സെൻസർ",
           "pause_cuts_power": "താൽക്കാലികമായി നിർത്തുമ്പോൾ പവർ കട്ട് ചെയ്യുക",
-          "notify_unload_delay_minutes": "അലക്കൽ കാത്തിരിപ്പ് അറിയിപ്പ് കാലതാമസം (മിനിറ്റ്)"
+          "notify_unload_delay_minutes": "അലക്കൽ കാത്തിരിപ്പ് അറിയിപ്പ് കാലതാമസം (മിനിറ്റ്)",
+          "switch_entity": "എൻ്റിറ്റി മാറുക (താൽക്കാലികമായി പവർ കട്ടിനായി)"
         },
         "data_description": {
           "apply_suggestions": "പഠന അൽഗോരിതത്തിൽ നിന്ന് നിർദ്ദേശിച്ച മൂല്യങ്ങൾക്കായി ഒരു അവലോകന ഘട്ടം തുറക്കാൻ ഈ ബോക്സ് പരിശോധിക്കുക. യാന്ത്രികമായി ഒന്നും സംരക്ഷിക്കപ്പെടുന്നില്ല.\n\nനിർദ്ദേശിച്ചത് (പഠനത്തിൽ നിന്ന്):\n- മിനി_പവർ: {suggested_min_power} W\n- ഓഫ്_ഡെലേ: {suggested_off_delay} സെ\n- watchdog_interval: {suggested_watchdog_interval} സെ\n- no_update_active_timeout: {suggested_no_update_active_timeout} സെ\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} സെ\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "ഇത്രയും സെക്കൻ്റുകൾക്ക് ശേഷവും ഒരു പമ്പ് സൈക്കിൾ പ്രവർത്തിക്കുന്നുണ്ടെങ്കിൽ, ഒരു ha_washdata_pump_stuck ഇവൻ്റ് ഒരിക്കൽ ഫയർ ചെയ്യപ്പെടും. ഒരു തടസ്സപ്പെട്ട മോട്ടോർ കണ്ടെത്താൻ ഇത് ഉപയോഗിക്കുക (സാധാരണ സംപ് പമ്പ് റൺ 60 സെക്കൻഡിൽ താഴെയാണ്). സ്ഥിരസ്ഥിതി: 1800 സെക്കൻഡ് (30 മിനിറ്റ്). പമ്പ് ഉപകരണത്തിൻ്റെ തരം മാത്രം.",
           "door_sensor_entity": "മെഷീൻ ഡോറിനുള്ള ഓപ്ഷണൽ ബൈനറി സെൻസർ (ഓൺ = ഓപ്പൺ, ഓഫ് = ക്ലോസ്). ഒരു സജീവ സൈക്കിൾ സമയത്ത് വാതിൽ തുറക്കുമ്പോൾ, WashData സൈക്കിൾ മനഃപൂർവ്വം താൽക്കാലികമായി നിർത്തിയതായി സ്ഥിരീകരിക്കും. സൈക്കിൾ അവസാനിച്ചതിന് ശേഷവും, വാതിൽ അടഞ്ഞിരിക്കുകയാണെങ്കിൽ, വാതിൽ തുറക്കുന്നത് വരെ 'ക്ലീൻ' എന്ന അവസ്ഥയിലേക്ക് മാറുന്നു. ശ്രദ്ധിക്കുക: വാതിൽ അടയ്ക്കുന്നത് താൽക്കാലികമായി നിർത്തിയ സൈക്കിൾ സ്വയമേവ പുനരാരംഭിക്കില്ല - റെസ്യൂം സൈക്കിൾ ബട്ടൺ അല്ലെങ്കിൽ സേവനം വഴി സ്വമേധയാ പ്രവർത്തനക്ഷമമാക്കണം.",
           "pause_cuts_power": "പോസ് സൈക്കിൾ ബട്ടണിലൂടെയോ സേവനത്തിലൂടെയോ താൽക്കാലികമായി നിർത്തുമ്പോൾ, കോൺഫിഗർ ചെയ്‌ത സ്വിച്ച് എൻ്റിറ്റിയും ഓഫാക്കുക. ഈ ഉപകരണത്തിനായി ഒരു സ്വിച്ച് എൻ്റിറ്റി കോൺഫിഗർ ചെയ്‌തിട്ടുണ്ടെങ്കിൽ മാത്രമേ പ്രാബല്യത്തിൽ വരികയുള്ളൂ.",
-          "notify_unload_delay_minutes": "സൈക്കിൾ അവസാനിച്ചതിന് ശേഷം ഫിനിഷ് അറിയിപ്പ് ചാനൽ വഴി ഒരു അറിയിപ്പ് അയയ്‌ക്കുക, ഇത്രയും മിനിറ്റായിട്ടും വാതിൽ തുറന്നിട്ടില്ല (ഡോർ സെൻസർ ആവശ്യമാണ്). പ്രവർത്തനരഹിതമാക്കാൻ 0 ആയി സജ്ജമാക്കുക. സ്ഥിരസ്ഥിതി: 60 മിനിറ്റ്."
+          "notify_unload_delay_minutes": "സൈക്കിൾ അവസാനിച്ചതിന് ശേഷം ഫിനിഷ് അറിയിപ്പ് ചാനൽ വഴി ഒരു അറിയിപ്പ് അയയ്‌ക്കുക, ഇത്രയും മിനിറ്റായിട്ടും വാതിൽ തുറന്നിട്ടില്ല (ഡോർ സെൻസർ ആവശ്യമാണ്). പ്രവർത്തനരഹിതമാക്കാൻ 0 ആയി സജ്ജമാക്കുക. സ്ഥിരസ്ഥിതി: 60 മിനിറ്റ്.",
+          "switch_entity": "താൽക്കാലികമായി നിർത്തുമ്പോഴോ പുനരാരംഭിക്കുമ്പോഴോ ടോഗിൾ ചെയ്യാനുള്ള സ്വിച്ച് എൻ്റിറ്റി. 'താൽക്കാലികമായി നിർത്തുമ്പോൾ കട്ട് പവർ' പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ ആവശ്യമാണ്."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "സെക്കൻ്റുകൾക്കുള്ളിൽ ഈ ഓഫ്‌സെറ്റ് വരെ ഡാറ്റ നിലനിർത്തുക. ഡീഫോൾറ്റ് = മുഴുവൻ ദൈർഘ്യം."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "സൈക്കിൾ താൽക്കാലികമായി നിർത്തുക",
+      "description": "ഒരു WashData ഉപകരണത്തിനായി സജീവമായ സൈക്കിൾ താൽക്കാലികമായി നിർത്തുക.",
+      "fields": {
+        "device_id": {
+          "name": "ഉപകരണം",
+          "description": "WashData ഉപകരണം താൽക്കാലികമായി നിർത്താൻ."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "സൈക്കിൾ പുനരാരംഭിക്കുക",
+      "description": "WashData ഉപകരണത്തിനായി താൽക്കാലികമായി നിർത്തിയ സൈക്കിൾ പുനരാരംഭിക്കുക.",
+      "fields": {
+        "device_id": {
+          "name": "ഉപകരണം",
+          "description": "WashData ഉപകരണം പുനരാരംഭിക്കും."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "സാധുവായ ഒരു device_id ആവശ്യമാണ്."
+    },
+    "cycle_id_required": {
+      "message": "സാധുവായ സൈക്കിൾ_ഐഡി ആവശ്യമാണ്."
+    },
+    "profile_name_required": {
+      "message": "ഒരു സാധുവായ profile_name ആവശ്യമാണ്."
     }
   }
 }

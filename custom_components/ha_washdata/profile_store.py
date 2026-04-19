@@ -2673,8 +2673,13 @@ class ProfileStore:
                         envelope.get("target_duration") or
                         profile.get("avg_duration") or
                         _env_ts_duration or
-                        len(avg_y) * used_dt
+                        None
                     )
+                    if not avg_duration:
+                        skipped_profiles.append(
+                            f"{name}: no valid duration (envelope has no target_duration, avg_duration, or timestamp span)"
+                        )
+                        continue
                     snapshots.append({
                         "name": name,
                         "avg_duration": float(avg_duration),
@@ -3873,17 +3878,8 @@ class ProfileStore:
 
         # Sort by time - use timestamp comparison to handle mixed timezone offsets correctly
         def _cycle_start_ts(c: CycleDict) -> float:
-            """
-            Return the cycle's start time as a POSIX timestamp, or positive infinity if missing or unparsable.
-            
-            Parameters:
-                c (CycleDict): Cycle dictionary; expected to contain a 'start_time' value (ISO string or datetime) parseable by dt_util.parse_datetime.
-            
-            Returns:
-                float: Seconds since the epoch for the cycle's start time, or float('inf') when the start time is absent or cannot be parsed.
-            """
-            dt = dt_util.parse_datetime(str(c.get("start_time", "")))
-            return dt.timestamp() if dt is not None else float("inf")
+            ts = _value_to_timestamp(c.get("start_time"))
+            return ts if ts is not None else float("inf")
 
         target_cycles.sort(key=_cycle_start_ts)
 

@@ -204,7 +204,8 @@
           "pump_stuck_duration": "Tairseach(í) Foláirimh Caidéil (Caidéil Amháin)",
           "door_sensor_entity": "Braiteoir Doras",
           "pause_cuts_power": "Gearr Cumhacht Agus Sos",
-          "notify_unload_delay_minutes": "Moill ar Fhógra Feithimh Níocháin (nóiméad)"
+          "notify_unload_delay_minutes": "Moill ar Fhógra Feithimh Níocháin (nóiméad)",
+          "switch_entity": "Aonán Athraigh (chun Power Cut a chur ar sos)"
         },
         "data_description": {
           "apply_suggestions": "Ticeáil an bosca seo chun céim athbhreithnithe a oscailt le haghaidh luachanna molta ón algartam foghlama. Ní dhéantar aon rud a shábháil go huathoibríoch.\n\nMolta (ó fhoghlaim):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "Má tá timthriall caidéil fós ar siúl tar éis an iliomad soicind seo, cuirtear imeacht ha_washdata_pump_stuck amach uair amháin. Bain úsáid as seo chun mótair jammed a bhrath (tá gnáth-rith caidéil sump faoi bhun 60 s). Réamhshocrú: 1800 s (30 min). Cineál gléas caidéil amháin.",
           "door_sensor_entity": "Braiteoir dénártha roghnach do dhoras an mheaisín (ar = oscailte, as = dúnta). Nuair a osclaíonn an doras le linn timthriall gníomhach, deimhneoidh WashData go bhfuil an timthriall ar sos d’aon ghnó. Tar éis don timthriall críochnú, má tá an doras fós dúnta, athraíonn an stát go 'Glan' go dtí go n-osclaítear an doras. Tabhair faoi deara: NÍ dúnadh an doras go huathoibríoch-atosú ar thimthriall ar sos - ní mór atosú a thosú de láimh tríd an gcnaipe nó an tseirbhís Lean ar aghaidh ar an Rothaíocht.",
           "pause_cuts_power": "Nuair a bheidh tú ar sos tríd an gcnaipe nó an tseirbhís Sos Cycle, múch an t-aonán lasc cumraithe freisin. Ní thiocfaidh sé i bhfeidhm ach amháin má tá aonán lasc cumraithe don ghléas seo.",
-          "notify_unload_delay_minutes": "Seol fógra tríd an gcainéal fógartha bailchríoch tar éis don timthriall críochnú agus níor osclaíodh an doras le fada an lá seo (tá Braiteoir Doras ag teastáil). Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 60 min."
+          "notify_unload_delay_minutes": "Seol fógra tríd an gcainéal fógartha bailchríoch tar éis don timthriall críochnú agus níor osclaíodh an doras le fada an lá seo (tá Braiteoir Doras ag teastáil). Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 60 min.",
+          "switch_entity": "An t-aonán lasc le scoránú agus é ag sos nó ag atosú. Ag teastáil nuair atá 'Cut Power When Pausing' cumasaithe."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Coinnigh sonraí suas go dtí an fritháireamh seo i soicindí. Réamhshocrú = fad iomlán."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Sos Timthriall",
+      "description": "Cuir an timthriall gníomhach do ghléas WashData ar sos.",
+      "fields": {
+        "device_id": {
+          "name": "Gléas",
+          "description": "An gléas WashData le sos."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Lean an Rothaíocht",
+      "description": "Lean ar aghaidh le timthriall sosaithe le haghaidh gléas WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Gléas",
+          "description": "An gléas WashData le atosú."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Teastaíonn aitheantas_gléas bailí."
+    },
+    "cycle_id_required": {
+      "message": "Tá cycle_id bailí ag teastáil."
+    },
+    "profile_name_required": {
+      "message": "Tá próifíl_ainm bailí ag teastáil."
     }
   }
 }
