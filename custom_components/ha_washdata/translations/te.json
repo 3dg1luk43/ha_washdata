@@ -197,7 +197,8 @@
           "pump_stuck_duration": "పంప్ స్టక్ అలర్ట్ థ్రెషోల్డ్ (లు) (పంప్ మాత్రమే)",
           "door_sensor_entity": "డోర్ సెన్సార్",
           "pause_cuts_power": "పాజ్ చేస్తున్నప్పుడు పవర్ కట్",
-          "notify_unload_delay_minutes": "లాండ్రీ వెయిటింగ్ నోటిఫికేషన్ ఆలస్యం (నిమి)"
+          "notify_unload_delay_minutes": "లాండ్రీ వెయిటింగ్ నోటిఫికేషన్ ఆలస్యం (నిమి)",
+          "switch_entity": "స్విచ్ ఎంటిటీ (పాజ్ పవర్ కట్ కోసం)"
         },
         "data_description": {
           "apply_suggestions": "అభ్యాస అల్గారిథమ్ నుండి సూచించబడిన విలువల కోసం సమీక్ష దశను తెరవడానికి ఈ పెట్టెను ఎంచుకోండి. ఏదీ స్వయంచాలకంగా సేవ్ చేయబడదు.\n\nసూచించబడినవి (నేర్చుకోవడం నుండి):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "ఇన్ని సెకన్ల తర్వాత కూడా పంప్ సైకిల్ నడుస్తుంటే, ha_washdata_pump_stuck ఈవెంట్ ఒకసారి తొలగించబడుతుంది. జామ్ అయిన మోటారును గుర్తించడానికి దీన్ని ఉపయోగించండి (సాధారణ సంప్ పంప్ రన్ 60 సెకన్లలోపు ఉంటుంది). డిఫాల్ట్: 1800 సె (30 నిమి). పంప్ పరికరం రకం మాత్రమే.",
           "door_sensor_entity": "మెషిన్ డోర్ కోసం ఐచ్ఛిక బైనరీ సెన్సార్ (ఆన్ = ఓపెన్, ఆఫ్ = మూసివేయబడింది). యాక్టివ్ సైకిల్ సమయంలో తలుపు తెరిచినప్పుడు, WashData సైకిల్‌ను ఉద్దేశపూర్వకంగా పాజ్ చేసినట్లు నిర్ధారిస్తుంది. చక్రం ముగిసిన తర్వాత, తలుపు ఇంకా మూసివేయబడితే, తలుపు తెరవబడే వరకు స్థితి 'క్లీన్'కి మారుతుంది. గమనిక: తలుపును మూసివేయడం వలన పాజ్ చేయబడిన సైకిల్ స్వయంచాలకంగా పునఃప్రారంభించబడదు - పునఃప్రారంభం తప్పక రెజ్యూమ్ సైకిల్ బటన్ లేదా సేవ ద్వారా మాన్యువల్‌గా ట్రిగ్గర్ చేయబడాలి.",
           "pause_cuts_power": "పాజ్ సైకిల్ బటన్ లేదా సేవ ద్వారా పాజ్ చేస్తున్నప్పుడు, కాన్ఫిగర్ చేయబడిన స్విచ్ ఎంటిటీని కూడా ఆఫ్ చేయండి. ఈ పరికరం కోసం స్విచ్ ఎంటిటీని కాన్ఫిగర్ చేసినట్లయితే మాత్రమే ప్రభావం చూపుతుంది.",
-          "notify_unload_delay_minutes": "సైకిల్ ముగిసిన తర్వాత మరియు ఇన్ని నిమిషాల వరకు తలుపు తెరవబడన తర్వాత ముగింపు నోటిఫికేషన్ ఛానెల్ ద్వారా నోటిఫికేషన్‌ను పంపండి (డోర్ సెన్సార్ అవసరం). నిలిపివేయడానికి 0కి సెట్ చేయండి. డిఫాల్ట్: 60 నిమి."
+          "notify_unload_delay_minutes": "సైకిల్ ముగిసిన తర్వాత మరియు ఇన్ని నిమిషాల వరకు తలుపు తెరవబడన తర్వాత ముగింపు నోటిఫికేషన్ ఛానెల్ ద్వారా నోటిఫికేషన్‌ను పంపండి (డోర్ సెన్సార్ అవసరం). నిలిపివేయడానికి 0కి సెట్ చేయండి. డిఫాల్ట్: 60 నిమి.",
+          "switch_entity": "పాజ్ చేస్తున్నప్పుడు లేదా పునఃప్రారంభించేటప్పుడు టోగుల్ చేయడానికి స్విచ్ ఎంటిటీ. 'పాజ్ చేస్తున్నప్పుడు పవర్ కట్' ప్రారంభించబడినప్పుడు అవసరం."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "ఈ ఆఫ్‌సెట్ వరకు డేటాను సెకన్లలో ఉంచండి. డిఫాల్ట్ = పూర్తి వ్యవధి."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "పాజ్ సైకిల్",
+      "description": "WashData పరికరం కోసం క్రియాశీల చక్రాన్ని పాజ్ చేయండి.",
+      "fields": {
+        "device_id": {
+          "name": "పరికరం",
+          "description": "WashData పరికరం పాజ్ చేయబడుతుంది."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "చక్రాన్ని పునఃప్రారంభించండి",
+      "description": "WashData పరికరం కోసం పాజ్ చేయబడిన సైకిల్‌ను మళ్లీ ప్రారంభించండి.",
+      "fields": {
+        "device_id": {
+          "name": "పరికరం",
+          "description": "WashData పరికరం పునఃప్రారంభించబడుతుంది."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "చెల్లుబాటు అయ్యే device_id అవసరం."
+    },
+    "cycle_id_required": {
+      "message": "చెల్లుబాటు అయ్యే సైకిల్_ఐడి అవసరం."
+    },
+    "profile_name_required": {
+      "message": "చెల్లుబాటు అయ్యే ప్రొఫైల్_పేరు అవసరం."
     }
   }
 }

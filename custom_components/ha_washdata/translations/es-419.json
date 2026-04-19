@@ -204,7 +204,8 @@
           "pump_stuck_duration": "Umbrales de alerta de bomba atascada (sólo bomba)",
           "door_sensor_entity": "Sensor de puerta",
           "pause_cuts_power": "Cortar la energía al hacer una pausa",
-          "notify_unload_delay_minutes": "Retraso de notificación de espera de lavandería (min)"
+          "notify_unload_delay_minutes": "Retraso de notificación de espera de lavandería (min)",
+          "switch_entity": "Cambiar entidad (para pausar el corte de energía)"
         },
         "data_description": {
           "apply_suggestions": "Marca esta casilla para abrir un paso de revisión de los valores sugeridos por el algoritmo de aprendizaje. Nada se guarda automáticamente.\n\nSugerido (del aprendizaje):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "Si un ciclo de bomba sigue ejecutándose después de tantos segundos, se activa una vez un evento ha_washdata_pump_stuck. Utilícelo para detectar un motor atascado (el funcionamiento típico de la bomba de sumidero es inferior a 60 s). Predeterminado: 1800 s (30 min). Solo tipo de dispositivo de bomba.",
           "door_sensor_entity": "Sensor binario opcional para la puerta de la máquina (on = abierto, off = cerrado). Cuando la puerta se abre durante un ciclo activo, WashData confirmará que el ciclo está pausado intencionalmente. Una vez finalizado el ciclo, si la puerta aún está cerrada, el estado cambia a \"Limpiar\" hasta que se abre la puerta. Nota: cerrar la puerta NO reanuda automáticamente un ciclo en pausa; la reanudación debe activarse manualmente mediante el botón Reanudar ciclo o el servicio.",
           "pause_cuts_power": "Al hacer una pausa mediante el botón o servicio Pause Cycle, también apague la entidad de conmutación configurada. Solo tiene efecto si se configura una entidad de conmutación para este dispositivo.",
-          "notify_unload_delay_minutes": "Envíe una notificación a través del canal de notificación de finalización después de que finalice el ciclo y la puerta no se haya abierto durante tantos minutos (requiere sensor de puerta). Establezca en 0 para desactivar. Predeterminado: 60 min."
+          "notify_unload_delay_minutes": "Envíe una notificación a través del canal de notificación de finalización después de que finalice el ciclo y la puerta no se haya abierto durante tantos minutos (requiere sensor de puerta). Establezca en 0 para desactivar. Predeterminado: 60 min.",
+          "switch_entity": "La entidad de cambio para alternar al pausar o reanudar. Requerido cuando está habilitado 'Cortar energía al pausar'."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Conservar datos hasta este desplazamiento en segundos. Predeterminado = duración completa."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Ciclo de pausa",
+      "description": "Pausa el ciclo activo de un dispositivo WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo WashData se pausará."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Reanudar ciclo",
+      "description": "Reanudar un ciclo en pausa para un dispositivo WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "El dispositivo WashData para reanudar."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Se requiere un ID de dispositivo válido."
+    },
+    "cycle_id_required": {
+      "message": "Se requiere un id_ciclo válido."
+    },
+    "profile_name_required": {
+      "message": "Se requiere un nombre de perfil válido."
     }
   }
 }

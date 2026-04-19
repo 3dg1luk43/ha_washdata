@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Sūkņa iestrēgšanas brīdinājuma slieksnis (-i) (tikai sūknis)",
           "door_sensor_entity": "Durvju sensors",
           "pause_cuts_power": "Apturot, pārtrauciet strāvu",
-          "notify_unload_delay_minutes": "Veļas gaidīšanas paziņojuma aizkave (min)"
+          "notify_unload_delay_minutes": "Veļas gaidīšanas paziņojuma aizkave (min)",
+          "switch_entity": "Slēdža entītija (pauzēt strāvas padevei)"
         },
         "data_description": {
           "apply_suggestions": "Atzīmējiet šo izvēles rūtiņu, lai atvērtu mācību algoritma ieteikto vērtību pārskatīšanas darbību. Nekas netiek saglabāts automātiski.\n\nIeteikts (no mācīšanās):\n- min_jauda: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_ trust: {suggested_auto_label_confidence}\n- ilgums_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- sākuma_slieksnis_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- darbojas_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Ja sūkņa cikls joprojām darbojas pēc šīm sekundēm, vienreiz tiek aktivizēts notikums ha_washdata_pump_stuck. Izmantojiet to, lai noteiktu iestrēgušu motoru (parasti sūkņa darbības laiks ir mazāks par 60 s). Noklusējums: 1800 s (30 min). Tikai sūkņa ierīces tips.",
           "door_sensor_entity": "Izvēles binārais sensors mašīnas durvīm (ieslēgts = atvērts, izslēgts = aizvērts). Kad durvis atveras aktīvā cikla laikā, WashData apstiprinās ciklu kā apzināti apturētu. Pēc cikla beigām, ja durvis joprojām ir aizvērtas, stāvoklis mainās uz 'Clean', līdz durvis tiek atvērtas. Piezīme: durvju aizvēršana NAV automātiski atsākta apturēts cikls - atsākšana ir jāaktivizē manuāli, izmantojot pogu Resume Cycle vai pakalpojumu.",
           "pause_cuts_power": "Apturot, izmantojot pogu Pause Cycle vai pakalpojumu, izslēdziet arī konfigurēto slēdža entītiju. Stājas spēkā tikai tad, ja šai ierīcei ir konfigurēta slēdža entītija.",
-          "notify_unload_delay_minutes": "Nosūtiet paziņojumu pa finiša paziņojumu kanālu pēc tam, kad cikls ir beidzies un durvis nav atvērtas tik daudzas minūtes (nepieciešams durvju sensors). Iestatiet uz 0, lai atspējotu. Noklusējums: 60 min."
+          "notify_unload_delay_minutes": "Nosūtiet paziņojumu pa finiša paziņojumu kanālu pēc tam, kad cikls ir beidzies un durvis nav atvērtas tik daudzas minūtes (nepieciešams durvju sensors). Iestatiet uz 0, lai atspējotu. Noklusējums: 60 min.",
+          "switch_entity": "Slēdža entītija, lai pārslēgtos, kad tiek apturēta vai atsākta. Nepieciešams, ja ir iespējota funkcija “Izslēdziet strāvu, kad tiek apturēta”."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Saglabājiet datus līdz šai nobīdei sekundēs. Noklusējums = pilns ilgums."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Apturēt ciklu",
+      "description": "Apturiet WashData ierīces aktīvo ciklu.",
+      "fields": {
+        "device_id": {
+          "name": "Ierīce",
+          "description": "WashData ierīce, lai apturētu."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Atsākt ciklu",
+      "description": "Atsāciet WashData ierīces apturēto ciklu.",
+      "fields": {
+        "device_id": {
+          "name": "Ierīce",
+          "description": "WashData ierīce, lai atsāktu."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Nepieciešams derīgs ierīces_id."
+    },
+    "cycle_id_required": {
+      "message": "Nepieciešams derīgs cikla_id."
+    },
+    "profile_name_required": {
+      "message": "Nepieciešams derīgs profila_nosaukums."
     }
   }
 }

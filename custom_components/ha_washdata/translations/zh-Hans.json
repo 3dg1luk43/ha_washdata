@@ -197,7 +197,8 @@
           "pump_stuck_duration": "泵卡住警报阈值（仅限泵）",
           "door_sensor_entity": "门磁",
           "pause_cuts_power": "暂停时切断电源",
-          "notify_unload_delay_minutes": "洗衣等待通知延迟（分钟）"
+          "notify_unload_delay_minutes": "洗衣等待通知延迟（分钟）",
+          "switch_entity": "开关实体（用于暂停断电）"
         },
         "data_description": {
           "apply_suggestions": "选中此框可打开学习算法建议值的检查步骤。没有任何内容会自动保存。\n\n建议（来自学习）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "如果泵循环在这么多秒后仍在运行，则会触发一次 ha_washdata_pump_stuck 事件。用它来检测堵塞的电机（典型的污水泵运行时间低于 60 秒）。默认值：1800 秒（30 分钟）。仅限泵设备类型。",
           "door_sensor_entity": "用于机器门的可选二进制传感器（开=打开，关=关闭）。当门在活动周期期间打开时，WashData 将确认该周期是有意暂停的。循环结束后，如果门仍然关闭，则状态更改为“清洁”，直到门打开。注意：关上门不会自动恢复暂停的循环 - 必须通过“恢复循环”按钮或服务手动触发恢复。",
           "pause_cuts_power": "通过“暂停循环”按钮或服务暂停时，还要关闭配置的开关实体。仅当为该设备配置了交换实体时才生效。",
-          "notify_unload_delay_minutes": "循环结束且门在这么多分钟内未打开后，通过完成通知通道发送通知（需要门传感器）。设置为 0 以禁用。默认值：60 分钟"
+          "notify_unload_delay_minutes": "循环结束且门在这么多分钟内未打开后，通过完成通知通道发送通知（需要门传感器）。设置为 0 以禁用。默认值：60 分钟",
+          "switch_entity": "暂停或恢复时要切换的开关实体。启用“暂停时切断电源”时需要。"
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "在几秒钟内将数据保持到此偏移量。默认 = 完整持续时间。"
         }
       }
+    },
+    "pause_cycle": {
+      "name": "暂停循环",
+      "description": "暂停 WashData 设备的活动周期。",
+      "fields": {
+        "device_id": {
+          "name": "设备",
+          "description": "WashData 设备暂停。"
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "恢复周期",
+      "description": "恢复 WashData 设备的暂停周期。",
+      "fields": {
+        "device_id": {
+          "name": "设备",
+          "description": "WashData 设备恢复。"
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "需要有效的 device_id。"
+    },
+    "cycle_id_required": {
+      "message": "需要有效的cycle_id。"
+    },
+    "profile_name_required": {
+      "message": "需要有效的 profile_name。"
     }
   }
 }

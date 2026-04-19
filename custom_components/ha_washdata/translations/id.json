@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Ambang Batas Peringatan Pompa Terjebak (Hanya Pompa)",
           "door_sensor_entity": "Sensor Pintu",
           "pause_cuts_power": "Matikan Daya Saat Menjeda",
-          "notify_unload_delay_minutes": "Penundaan Notifikasi Tunggu Laundry (mnt)"
+          "notify_unload_delay_minutes": "Penundaan Notifikasi Tunggu Laundry (mnt)",
+          "switch_entity": "Ganti Entitas (untuk Jeda Pemadaman Listrik)"
         },
         "data_description": {
           "apply_suggestions": "Centang kotak ini untuk membuka langkah peninjauan nilai yang disarankan dari algoritma pembelajaran. Tidak ada yang disimpan secara otomatis.\n\nDisarankan (dari pembelajaran):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Jika siklus pompa masih berjalan setelah beberapa detik ini, kejadian ha_washdata_pump_stuck dipicu satu kali. Gunakan ini untuk mendeteksi motor yang macet (umumnya pompa air bekerja di bawah 60 detik). Default: 1800 detik (30 menit). Hanya jenis perangkat pompa.",
           "door_sensor_entity": "Sensor biner opsional untuk pintu mesin (hidup = terbuka, mati = tertutup). Ketika pintu terbuka selama siklus aktif, WashData akan mengonfirmasi bahwa siklus tersebut sengaja dijeda. Setelah siklus berakhir, jika pintu masih tertutup, statusnya berubah menjadi 'Bersih' hingga pintu terbuka. Catatan: menutup pintu TIDAK secara otomatis melanjutkan siklus yang dijeda - melanjutkan harus dipicu secara manual melalui tombol atau layanan Lanjutkan Siklus.",
           "pause_cuts_power": "Saat menjeda melalui tombol atau layanan Pause Cycle, matikan juga entitas sakelar yang dikonfigurasi. Hanya berlaku jika entitas saklar dikonfigurasi untuk perangkat ini.",
-          "notify_unload_delay_minutes": "Kirim notifikasi melalui saluran notifikasi selesai setelah siklus berakhir dan pintu belum dibuka selama beberapa menit (membutuhkan Sensor Pintu). Setel ke 0 untuk menonaktifkan. Default: 60 menit."
+          "notify_unload_delay_minutes": "Kirim notifikasi melalui saluran notifikasi selesai setelah siklus berakhir dan pintu belum dibuka selama beberapa menit (membutuhkan Sensor Pintu). Setel ke 0 untuk menonaktifkan. Default: 60 menit.",
+          "switch_entity": "Entitas peralihan untuk beralih saat menjeda atau melanjutkan. Diperlukan ketika 'Memutus Daya Saat Menjeda' diaktifkan."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Simpan data hingga offset ini dalam hitungan detik. Default = durasi penuh."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Jeda Siklus",
+      "description": "Jeda siklus aktif untuk perangkat WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Perangkat",
+          "description": "Perangkat WashData akan dijeda."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Lanjutkan Siklus",
+      "description": "Melanjutkan siklus yang dijeda untuk perangkat WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Perangkat",
+          "description": "Perangkat WashData akan dilanjutkan."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Device_id yang valid diperlukan."
+    },
+    "cycle_id_required": {
+      "message": "Cycle_id yang valid diperlukan."
+    },
+    "profile_name_required": {
+      "message": "Diperlukan nama_profil yang valid."
     }
   }
 }

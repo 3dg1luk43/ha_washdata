@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Pumba kinnijäämise hoiatuslävi (ainult pumbad)",
           "door_sensor_entity": "Ukse andur",
           "pause_cuts_power": "Katkesta voolu peatamise ajal",
-          "notify_unload_delay_minutes": "Pesu ootamise teatise viivitus (min)"
+          "notify_unload_delay_minutes": "Pesu ootamise teatise viivitus (min)",
+          "switch_entity": "Lüliti olem (toitekatkestuse peatamiseks)"
         },
         "data_description": {
           "apply_suggestions": "Märkige see ruut, et avada õppealgoritmi soovitatud väärtuste ülevaatamise etapp. Midagi ei salvestata automaatselt.\n\nSoovitatav (õppimisest):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Kui pumbatsükkel töötab ka pärast seda mitu sekundit, käivitatakse üks kord sündmus ha_washdata_pump_stuck. Kasutage seda kinnikiilunud mootori tuvastamiseks (tavaline karteripumba tööaeg on alla 60 s). Vaikimisi: 1800 s (30 min). Ainult pumba seadme tüüp.",
           "door_sensor_entity": "Valikuline binaarandur masina ukse jaoks (sees = avatud, väljas = suletud). Kui uks aktiivse tsükli ajal avaneb, kinnitab WashData, et tsükkel on tahtlikult peatatud. Kui uks on endiselt suletud, muutub pärast tsükli lõppu olek \"Puhasta\", kuni uks avatakse. Märkus: ukse sulgemine EI jätka automaatselt peatatud tsüklit – jätkamine tuleb käivitada käsitsi nupu Resume Cycle või teenuse kaudu.",
           "pause_cuts_power": "Kui peatate nupu Pause Cycle või teenuse kaudu, lülitage välja ka konfigureeritud lüliti olem. Jõuab ainult siis, kui selle seadme jaoks on konfigureeritud lüliti olem.",
-          "notify_unload_delay_minutes": "Kui tsükkel on lõppenud ja ust pole nii mitu minutit avatud, saatke teavitus finišiteatekanali kaudu (vajalik on ukseandur). Keelamiseks määrake 0. Vaikimisi: 60 min."
+          "notify_unload_delay_minutes": "Kui tsükkel on lõppenud ja ust pole nii mitu minutit avatud, saatke teavitus finišiteatekanali kaudu (vajalik on ukseandur). Keelamiseks määrake 0. Vaikimisi: 60 min.",
+          "switch_entity": "Peatamisel või jätkamisel lülituv olem. Nõutav, kui 'Katkesta voolu peatamisel' on lubatud."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Hoidke andmeid sekundites selle nihkeni. Vaikimisi = täiskestus."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Peata tsükkel",
+      "description": "Peatage WashData seadme aktiivne tsükkel.",
+      "fields": {
+        "device_id": {
+          "name": "Seade",
+          "description": "Seade WashData peatamiseks."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Tsükli jätkamine",
+      "description": "Jätkake WashData seadme peatatud tsüklit.",
+      "fields": {
+        "device_id": {
+          "name": "Seade",
+          "description": "WashData seade jätkamiseks."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Nõutav on kehtiv seadme_id."
+    },
+    "cycle_id_required": {
+      "message": "Nõutav on kehtiv tsükli_id."
+    },
+    "profile_name_required": {
+      "message": "Nõutav on kehtiv profile_name."
     }
   }
 }

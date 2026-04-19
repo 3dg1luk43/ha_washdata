@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Pomp vas waarskuwingsdrempel(s) (slegs pomp)",
           "door_sensor_entity": "Deursensor",
           "pause_cuts_power": "Sny krag tydens pouse",
-          "notify_unload_delay_minutes": "Wasgoedwagkennisgewingvertraging (min.)"
+          "notify_unload_delay_minutes": "Wasgoedwagkennisgewingvertraging (min.)",
+          "switch_entity": "Skakel entiteit (vir pouse kragonderbreking)"
         },
         "data_description": {
           "apply_suggestions": "Merk hierdie blokkie om 'n hersieningstap oop te maak vir voorgestelde waardes van die leeralgoritme. Niks word outomaties gestoor nie.\n\nVoorgestelde (vanaf leer):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "As 'n pompsiklus na soveel sekondes steeds aan die gang is, word 'n ha_washdata_pump_stuck-gebeurtenis een keer afgevuur. Gebruik dit om 'n motor wat vasgesteek is op te spoor (tipiese sumppomploop is minder as 60 s). Verstek: 1800 s (30 min.). Slegs tipe pomptoestel.",
           "door_sensor_entity": "Opsionele binêre sensor vir die masjiendeur (aan = oop, af = toe). Wanneer die deur oopmaak tydens 'n aktiewe siklus, sal WashData die siklus bevestig as opsetlik onderbreek. Nadat die siklus geëindig het, as die deur nog gesluit is, verander die toestand na 'Skoon' totdat die deur oopgemaak word. Let wel: die sluiting van die deur hervat NIE 'n onderbreekte siklus outomaties nie - hervat moet handmatig geaktiveer word via die Hervat siklus-knoppie of diens.",
           "pause_cuts_power": "Skakel ook die gekonfigureerde skakelaar-entiteit af wanneer jy met die Pouse-siklus-knoppie of diens onderbreek. Tree slegs in werking as 'n skakelaar-entiteit vir hierdie toestel opgestel is.",
-          "notify_unload_delay_minutes": "Stuur 'n kennisgewing via die afwerkingkennisgewingkanaal nadat die siklus geëindig het en die deur vir soveel minute nie oopgemaak is nie (vereis deursensor). Stel op 0 om te deaktiveer. Verstek: 60 min."
+          "notify_unload_delay_minutes": "Stuur 'n kennisgewing via die afwerkingkennisgewingkanaal nadat die siklus geëindig het en die deur vir soveel minute nie oopgemaak is nie (vereis deursensor). Stel op 0 om te deaktiveer. Verstek: 60 min.",
+          "switch_entity": "Die skakel-entiteit om te wissel wanneer onderbreek of hervat word. Vereis wanneer 'Sny krag tydens pouse' geaktiveer is."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Hou data binne sekondes tot by hierdie afwyking. Default = full duration."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Onderbreek siklus",
+      "description": "Onderbreek die aktiewe siklus vir 'n WashData-toestel.",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die WashData-toestel om te onderbreek."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Hervat siklus",
+      "description": "Hervat 'n onderbreekte siklus vir 'n WashData-toestel.",
+      "fields": {
+        "device_id": {
+          "name": "Toestel",
+          "description": "Die WashData-toestel om te hervat."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "'n Geldige toestel-ID word vereis."
+    },
+    "cycle_id_required": {
+      "message": "'n Geldige siklus_id word vereis."
+    },
+    "profile_name_required": {
+      "message": "'n Geldige profielnaam word vereis."
     }
   }
 }

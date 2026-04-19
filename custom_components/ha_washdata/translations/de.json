@@ -204,7 +204,8 @@
           "pump_stuck_duration": "Schwellenwert(e) für Warnung „Pumpe blockiert“ (nur Pumpe)",
           "door_sensor_entity": "Türsensor",
           "pause_cuts_power": "Unterbrechen Sie die Stromversorgung, wenn Sie pausieren",
-          "notify_unload_delay_minutes": "Verzögerung der Wäsche-Warten-Benachrichtigung (Min.)"
+          "notify_unload_delay_minutes": "Verzögerung der Wäsche-Warten-Benachrichtigung (Min.)",
+          "switch_entity": "Entität wechseln (für Stromausfall pausieren)"
         },
         "data_description": {
           "apply_suggestions": "Aktivieren um einen Überprüfungsschritt für vorgeschlagene Werte vom Lernalgorithmus zu öffnen. Es wird nichts automatisch gespeichert.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "Wenn nach dieser Anzahl von Sekunden immer noch ein Pumpenzyklus läuft, wird einmalig ein ha_washdata_pump_stuck-Ereignis ausgelöst. Verwenden Sie dies, um einen blockierten Motor zu erkennen (die typische Laufzeit der Sumpfpumpe beträgt weniger als 60 s). Standard: 1800 s (30 min). Nur Pumpengerätetyp.",
           "door_sensor_entity": "Optionaler binärer Sensor für die Maschinentür (ein = offen, aus = geschlossen). Wenn sich die Tür während eines aktiven Zyklus öffnet, bestätigt WashData, dass der Zyklus absichtlich angehalten wurde. Wenn der Zyklus beendet ist und die Tür noch geschlossen ist, wechselt der Zustand zu „Reinigen“, bis die Tür geöffnet wird. Hinweis: Durch das Schließen der Tür wird ein angehaltener Zyklus NICHT automatisch fortgesetzt. Die Wiederaufnahme muss manuell über die Schaltfläche „Zyklus fortsetzen“ oder den entsprechenden Dienst ausgelöst werden.",
           "pause_cuts_power": "Wenn Sie über die Schaltfläche „Zyklus anhalten“ oder den Dienst anhalten, schalten Sie auch die konfigurierte Schaltereinheit aus. Wird nur wirksam, wenn für dieses Gerät eine Switch-Entität konfiguriert ist.",
-          "notify_unload_delay_minutes": "Senden Sie eine Benachrichtigung über den Abschlussbenachrichtigungskanal, nachdem der Zyklus beendet ist und die Tür so viele Minuten lang nicht geöffnet wurde (erfordert Türsensor). Zum Deaktivieren auf 0 setzen. Standard: 60 Min."
+          "notify_unload_delay_minutes": "Senden Sie eine Benachrichtigung über den Abschlussbenachrichtigungskanal, nachdem der Zyklus beendet ist und die Tür so viele Minuten lang nicht geöffnet wurde (erfordert Türsensor). Zum Deaktivieren auf 0 setzen. Standard: 60 Min.",
+          "switch_entity": "Die Schalterentität, die beim Anhalten oder Fortsetzen umgeschaltet wird. Erforderlich, wenn „Stromversorgung bei Pause abschalten“ aktiviert ist."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Daten bis zu diesem Zeitpunkt behalten. Standard = Zyklusende."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Zyklus anhalten",
+      "description": "Unterbrechen Sie den aktiven Zyklus für ein WashData-Gerät.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das WashData-Gerät, das angehalten werden soll."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Zyklus fortsetzen",
+      "description": "Setzen Sie einen angehaltenen Zyklus für ein WashData-Gerät fort.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das WashData-Gerät, das fortgesetzt werden soll."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Eine gültige Geräte-ID ist erforderlich."
+    },
+    "cycle_id_required": {
+      "message": "Eine gültige Cycle_ID ist erforderlich."
+    },
+    "profile_name_required": {
+      "message": "Ein gültiger Profilname ist erforderlich."
     }
   }
 }

@@ -197,7 +197,8 @@
           "pump_stuck_duration": "عتبة (عتبات) التنبيه بشأن توقف المضخة (المضخة فقط)",
           "door_sensor_entity": "مستشعر الباب",
           "pause_cuts_power": "قطع الطاقة عند التوقف",
-          "notify_unload_delay_minutes": "تأخير إشعار انتظار الغسيل (الحد الأدنى)"
+          "notify_unload_delay_minutes": "تأخير إشعار انتظار الغسيل (الحد الأدنى)",
+          "switch_entity": "تبديل الكيان (لإيقاف انقطاع التيار الكهربائي مؤقتًا)"
         },
         "data_description": {
           "apply_suggestions": "حدد هذا المربع لفتح خطوة مراجعة للقيم المقترحة من خوارزمية التعلم. لا يتم حفظ أي شيء تلقائيًا.\n\nمقترح (من التعلم):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "إذا كانت دورة المضخة لا تزال تعمل بعد هذه الثواني العديدة، فسيتم إطلاق حدث ha_washdata_pump_stuck مرة واحدة. استخدم هذا للكشف عن محرك محشور (تشغيل المضخة الغاطسة النموذجية أقل من 60 ثانية). الافتراضي: 1800 ثانية (30 دقيقة). نوع جهاز المضخة فقط.",
           "door_sensor_entity": "مستشعر ثنائي اختياري لباب الماكينة (تشغيل = مفتوح، إيقاف = مغلق). عندما يفتح الباب أثناء دورة نشطة، ستؤكد WashData أن الدورة متوقفة مؤقتًا عن عمد. بعد انتهاء الدورة، إذا كان الباب لا يزال مغلقًا، تتغير الحالة إلى \"نظيف\" حتى يتم فتح الباب. ملحوظة: إغلاق الباب لا يؤدي إلى استئناف الدورة المتوقفة مؤقتًا تلقائيًا - يجب تشغيل الاستئناف يدويًا عبر زر أو خدمة استئناف الدورة.",
           "pause_cuts_power": "عند الإيقاف المؤقت عبر زر أو خدمة الإيقاف المؤقت للدورة، قم أيضًا بإيقاف تشغيل كيان التبديل الذي تم تكوينه. يسري مفعوله فقط إذا تم تكوين كيان التبديل لهذا الجهاز.",
-          "notify_unload_delay_minutes": "أرسل إشعارًا عبر قناة إشعار الانتهاء بعد انتهاء الدورة وعدم فتح الباب لعدة دقائق (يتطلب مستشعر الباب). اضبط على 0 للتعطيل. الافتراضي: 60 دقيقة."
+          "notify_unload_delay_minutes": "أرسل إشعارًا عبر قناة إشعار الانتهاء بعد انتهاء الدورة وعدم فتح الباب لعدة دقائق (يتطلب مستشعر الباب). اضبط على 0 للتعطيل. الافتراضي: 60 دقيقة.",
+          "switch_entity": "كيان التبديل المطلوب تبديله عند الإيقاف المؤقت أو الاستئناف. مطلوب عند تمكين \"قطع الطاقة عند الإيقاف المؤقت\"."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "احتفظ بالبيانات حتى هذه الإزاحة في ثوانٍ. الافتراضي = المدة الكاملة."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "دورة الإيقاف المؤقت",
+      "description": "قم بإيقاف الدورة النشطة مؤقتًا لجهاز WashData.",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "توقف جهاز WashData مؤقتًا."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "استئناف الدورة",
+      "description": "استئناف دورة متوقفة مؤقتًا لجهاز WashData.",
+      "fields": {
+        "device_id": {
+          "name": "جهاز",
+          "description": "سيتم استئناف تشغيل جهاز WashData."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "مطلوب معرف جهاز صالح."
+    },
+    "cycle_id_required": {
+      "message": "مطلوب معرف دورة صالح."
+    },
+    "profile_name_required": {
+      "message": "مطلوب ملف تعريف صالح."
     }
   }
 }

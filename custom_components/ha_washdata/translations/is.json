@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Viðvörunarþröskuldur við dælu föst (s) (aðeins dæla)",
           "door_sensor_entity": "Hurðarskynjari",
           "pause_cuts_power": "Slökktu á rafmagni þegar gert er hlé",
-          "notify_unload_delay_minutes": "Seinkun á tilkynningu um þvottahús (mín.)"
+          "notify_unload_delay_minutes": "Seinkun á tilkynningu um þvottahús (mín.)",
+          "switch_entity": "Skiptaeining (fyrir hlé á raforku)"
         },
         "data_description": {
           "apply_suggestions": "Merktu við þennan reit til að opna yfirferðarskref fyrir tillögur að gildum úr námsalgríminu. Ekkert er vistað sjálfkrafa.\n\nTillögur (frá námi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Ef dælulota er enn í gangi eftir þessar margar sekúndur, er ha_washdata_pump_stuck atvik ræst einu sinni. Notaðu þetta til að greina fastan mótor (venjulegur dælugangur er undir 60 sekúndum). Sjálfgefið: 1800 s (30 mín). Aðeins gerð dælubúnaðar.",
           "door_sensor_entity": "Valfrjáls tvöfaldur skynjari fyrir hurð vélarinnar (kveikt = opið, slökkt = lokað). Þegar hurðin opnast meðan á virkri lotu stendur mun WashData staðfesta að lotan sé vísvitandi í bið. Eftir að lotunni lýkur, ef hurðin er enn lokuð, breytist ástandið í „Hreint“ þar til hurðin er opnuð. Athugið: lokun hurðarinnar fer EKKI í gang sjálfkrafa aftur í hléi - endurupptöku verður að vera ræst handvirkt með hnappinum Resume Cycle eða þjónustu.",
           "pause_cuts_power": "Þegar gert er hlé með Pause Cycle hnappinum eða þjónustunni, slökktu einnig á stillta rofaeiningunni. Tekur aðeins gildi ef skiptaeining er stillt fyrir þetta tæki.",
-          "notify_unload_delay_minutes": "Sendu tilkynningu í gegnum tilkynningarásina eftir að lotunni lýkur og hurðin hefur ekki verið opnuð í þessar margar mínútur (þarfnast hurðarskynjara). Stilltu á 0 til að slökkva á. Sjálfgefið: 60 mín."
+          "notify_unload_delay_minutes": "Sendu tilkynningu í gegnum tilkynningarásina eftir að lotunni lýkur og hurðin hefur ekki verið opnuð í þessar margar mínútur (þarfnast hurðarskynjara). Stilltu á 0 til að slökkva á. Sjálfgefið: 60 mín.",
+          "switch_entity": "Skiptaeiningin til að skipta á þegar gert er hlé á eða haldið áfram. Nauðsynlegt þegar 'Slökkva á rafmagni við hlé' er virkt."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Haltu gögnum upp að þessari frávik á nokkrum sekúndum. Sjálfgefið = full lengd."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Gera hlé á hringrás",
+      "description": "Gerðu hlé á virku hringrásinni fyrir WashData tæki.",
+      "fields": {
+        "device_id": {
+          "name": "Tæki",
+          "description": "WashData tækið til að gera hlé."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Halda áfram hringrás",
+      "description": "Haltu áfram að gera hlé á lotu fyrir WashData tæki.",
+      "fields": {
+        "device_id": {
+          "name": "Tæki",
+          "description": "WashData tækið að halda áfram."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Gilt device_id er krafist."
+    },
+    "cycle_id_required": {
+      "message": "Gilt cycle_id er krafist."
+    },
+    "profile_name_required": {
+      "message": "Gilt prófílnafn er krafist."
     }
   }
 }

@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Trothwy(au) Rhybudd Pwmp yn Sownd (Pwmp yn Unig)",
           "door_sensor_entity": "Synhwyrydd Drws",
           "pause_cuts_power": "Torri Pŵer Wrth Oedi",
-          "notify_unload_delay_minutes": "Oedi Hysbysiad Aros Golchdy (munud)"
+          "notify_unload_delay_minutes": "Oedi Hysbysiad Aros Golchdy (munud)",
+          "switch_entity": "Newid Endid (ar gyfer Saib Power Cut)"
         },
         "data_description": {
           "apply_suggestions": "Ticiwch y blwch hwn i agor cam adolygu ar gyfer gwerthoedd a awgrymir o'r algorithm dysgu. Nid oes dim yn cael ei arbed yn awtomatig.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Os yw cylch pwmp yn dal i redeg ar ôl yr eiliadau lawer hyn, mae digwyddiad ha_washdata_pump_stuck yn cael ei danio unwaith. Defnyddiwch hwn i ganfod modur wedi'i jamio (mae rhediad pwmp swmp nodweddiadol o dan 60 s). Diofyn: 1800 s (30 mun). Math o ddyfais pwmp yn unig.",
           "door_sensor_entity": "Synhwyrydd deuaidd dewisol ar gyfer drws y peiriant (ar = agored, i ffwrdd = ar gau). Pan fydd y drws yn agor yn ystod cylch gweithredol, bydd WashData yn cadarnhau bod y cylch wedi'i seibio'n fwriadol. Ar ôl i'r cylch ddod i ben, os yw'r drws yn dal i fod ar gau, mae'r cyflwr yn newid i 'Glan' nes bod y drws yn cael ei agor. Sylwch: NID yw cau'r drws yn ailddechrau cylch wedi'i seibio'n awtomatig - rhaid cychwyn ailddechrau â llaw trwy'r botwm neu'r gwasanaeth Ail-ddechrau Seiclo.",
           "pause_cuts_power": "Wrth oedi trwy'r botwm Pause Cycle neu'r gwasanaeth, trowch yr endid switsh ffurfweddu i ffwrdd hefyd. Dim ond os yw endid switsh wedi'i ffurfweddu ar gyfer y ddyfais hon y daw i rym.",
-          "notify_unload_delay_minutes": "Anfonwch hysbysiad trwy'r sianel hysbysu gorffen ar ôl i'r cylch ddod i ben ac nid yw'r drws wedi'i agor am lawer o funudau (angen Synhwyrydd Drws). Gosodwch ar 0 i analluogi. Diofyn: 60 mun."
+          "notify_unload_delay_minutes": "Anfonwch hysbysiad trwy'r sianel hysbysu gorffen ar ôl i'r cylch ddod i ben ac nid yw'r drws wedi'i agor am lawer o funudau (angen Synhwyrydd Drws). Gosodwch ar 0 i analluogi. Diofyn: 60 mun.",
+          "switch_entity": "Yr endid switsh i'w doglo wrth oedi neu ailddechrau. Yn ofynnol pan fydd 'Cut Power When Pausing' wedi'i alluogi."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Cadw data hyd at y gwrthbwyso hwn mewn eiliadau. Diofyn = hyd llawn."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pause Cycle",
+      "description": "Oedwch y cylch gweithredol ar gyfer dyfais WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dyfais",
+          "description": "Y ddyfais WashData i seibio."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Ail-ddechrau Beicio",
+      "description": "Ail-ddechrau cylch seibio ar gyfer dyfais WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dyfais",
+          "description": "Y ddyfais WashData i ailddechrau."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Mae angen ID device_ dilys."
+    },
+    "cycle_id_required": {
+      "message": "Mae angen cycle_id dilys."
+    },
+    "profile_name_required": {
+      "message": "Mae angen enw_proffil dilys."
     }
   }
 }

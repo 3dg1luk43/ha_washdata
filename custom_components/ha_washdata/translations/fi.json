@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Pumpun jumiutuneen hälytyskynnys (vain pumppu)",
           "door_sensor_entity": "Oven anturi",
           "pause_cuts_power": "Katkaise virta tauon aikana",
-          "notify_unload_delay_minutes": "Pyykin odotusilmoituksen viive (min)"
+          "notify_unload_delay_minutes": "Pyykin odotusilmoituksen viive (min)",
+          "switch_entity": "Kytkinentiteetti (keskeytä virtakatkos)"
         },
         "data_description": {
           "apply_suggestions": "Valitse tämä valintaruutu avataksesi tarkistusvaiheen oppimisalgoritmin ehdotettujen arvojen tarkastelulle. Mitään ei tallenneta automaattisesti.\n\nSuositeltu (oppimisesta):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Jos pumppujakso on edelleen käynnissä tämän monen sekunnin jälkeen, ha_washdata_pump_stuck -tapahtuma käynnistyy kerran. Käytä tätä havaitaksesi juuttunut moottori (tyypillinen öljypohjapumpun käynti on alle 60 s). Oletus: 1800 s (30 min). Vain pumppulaitetyyppi.",
           "door_sensor_entity": "Valinnainen binäärianturi koneen ovelle (päällä = auki, pois = kiinni). Kun luukku avautuu aktiivisen jakson aikana, WashData vahvistaa ohjelman tahallisesti keskeytetyksi. Jakson päätyttyä, jos ovi on edelleen kiinni, tila muuttuu 'Clean'-tilaan, kunnes ovi avataan. Huomautus: luukun sulkeminen EI jatka automaattisesti keskeytettyä jaksoa – jatkaminen on käynnistettävä manuaalisesti Resume Cycle -painikkeen tai palvelun kautta.",
           "pause_cuts_power": "Kun keskeytät Pause Cycle -painikkeen tai palvelun kautta, sammuta myös määritetty kytkinkokonaisuus. Tulee voimaan vain, jos tälle laitteelle on määritetty kytkinyksikkö.",
-          "notify_unload_delay_minutes": "Lähetä ilmoitus lopetusilmoituskanavan kautta, kun jakso on päättynyt ja ovea ei ole avattu näin moneen minuuttiin (vaatii ovitunnistimen). Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 60 min."
+          "notify_unload_delay_minutes": "Lähetä ilmoitus lopetusilmoituskanavan kautta, kun jakso on päättynyt ja ovea ei ole avattu näin moneen minuuttiin (vaatii ovitunnistimen). Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 60 min.",
+          "switch_entity": "Vaihtoyksikkö, joka vaihtaa, kun keskeytetään tai jatketaan. Vaaditaan, kun \"Katkaise virta tauon aikana\" on käytössä."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Säilytä tiedot tässä poikkeamassa sekunneissa. Oletus = koko kesto."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Keskeytä sykli",
+      "description": "Keskeytä WashData-laitteen aktiivinen sykli.",
+      "fields": {
+        "device_id": {
+          "name": "Laite",
+          "description": "WashData-laite keskeytettäväksi."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Jatka sykliä",
+      "description": "Jatka keskeytettyä jaksoa WashData-laitteella.",
+      "fields": {
+        "device_id": {
+          "name": "Laite",
+          "description": "WashData-laite jatkaa."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Kelvollinen laitetunnus vaaditaan."
+    },
+    "cycle_id_required": {
+      "message": "Kelvollinen cycle_id vaaditaan."
+    },
+    "profile_name_required": {
+      "message": "Kelvollinen profile_name vaaditaan."
     }
   }
 }

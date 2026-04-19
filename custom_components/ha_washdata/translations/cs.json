@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Prah (y) upozornění na zaseknutí pumpy (pouze pumpa)",
           "door_sensor_entity": "Snímač dveří",
           "pause_cuts_power": "Vypnout napájení při pozastavení",
-          "notify_unload_delay_minutes": "Zpoždění oznámení o čekání na prádelnu (min)"
+          "notify_unload_delay_minutes": "Zpoždění oznámení o čekání na prádelnu (min)",
+          "switch_entity": "Přepnout entitu (pro pozastavení vypnutí)"
         },
         "data_description": {
           "apply_suggestions": "Zaškrtnutím tohoto políčka otevřete krok kontroly navrhovaných hodnot z algoritmu učení. Nic se neukládá automaticky.\n\nDoporučeno (z učení):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Pokud cyklus pumpy stále běží i po tomto počtu sekund, událost ha_washdata_pump_stuck se spustí jednou. Použijte toto k detekci zaseknutého motoru (typický běh kalového čerpadla je kratší než 60 s). Výchozí: 1800 s (30 min). Pouze typ čerpadla.",
           "door_sensor_entity": "Volitelný binární senzor pro dvířka stroje (zapnuto = otevřeno, vypnuto = zavřeno). Když se dvířka otevřou během aktivního cyklu, WashData potvrdí cyklus jako záměrně pozastavený. Po skončení cyklu, pokud jsou dvířka stále zavřená, se stav změní na 'Vyčistit', dokud se dvířka neotevře. Poznámka: zavření dvířek NEOBNOVÍ automaticky pozastavený cyklus – obnovení musí být spuštěno ručně pomocí tlačítka nebo služby Resume Cycle.",
           "pause_cuts_power": "Při pozastavení pomocí tlačítka nebo služby Pause Cycle také vypněte nakonfigurovanou entitu přepínače. Platí pouze v případě, že je pro toto zařízení nakonfigurována entita přepínače.",
-          "notify_unload_delay_minutes": "Odešlete upozornění prostřednictvím kanálu upozornění na ukončení poté, co cyklus skončí a dveře nebyly po tolik minut otevřeny (vyžaduje čidlo dveří). Nastavením na 0 deaktivujete. Výchozí: 60 min."
+          "notify_unload_delay_minutes": "Odešlete upozornění prostřednictvím kanálu upozornění na ukončení poté, co cyklus skončí a dveře nebyly po tolik minut otevřeny (vyžaduje čidlo dveří). Nastavením na 0 deaktivujete. Výchozí: 60 min.",
+          "switch_entity": "Entita přepínače, která se má přepnout při pozastavení nebo obnovení. Vyžadováno, když je povolena možnost „Cut Power When Pausing“."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Udržujte data až do tohoto posunu v sekundách. Výchozí = plné trvání."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pozastavit cyklus",
+      "description": "Pozastavte aktivní cyklus pro zařízení WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Pozastavení zařízení WashData."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Obnovit cyklus",
+      "description": "Obnovte pozastavený cyklus pro zařízení WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Zařízení",
+          "description": "Zařízení WashData pro obnovení."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Je vyžadováno platné device_id."
+    },
+    "cycle_id_required": {
+      "message": "Je vyžadován platný cycle_id."
+    },
+    "profile_name_required": {
+      "message": "Je vyžadován platný název_profilu."
     }
   }
 }

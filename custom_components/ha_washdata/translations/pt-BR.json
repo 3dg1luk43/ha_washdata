@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Limite(s) de alerta de bomba presa (somente bomba)",
           "door_sensor_entity": "Sensor de porta",
           "pause_cuts_power": "Corte a energia ao pausar",
-          "notify_unload_delay_minutes": "Atraso na notificação de espera de lavanderia (min)"
+          "notify_unload_delay_minutes": "Atraso na notificação de espera de lavanderia (min)",
+          "switch_entity": "Entidade de comutação (para pausar corte de energia)"
         },
         "data_description": {
           "apply_suggestions": "Marque esta caixa para abrir uma etapa de revisão dos valores sugeridos pelo algoritmo de aprendizagem. Nada é salvo automaticamente.\n\nSugerido (pelo aprendizado):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Se um ciclo de bomba ainda estiver em execução após esses segundos, um evento ha_washdata_pump_stuck será acionado uma vez. Use isto para detectar um motor emperrado (o funcionamento típico da bomba do reservatório é inferior a 60 s). Padrão: 1800 s (30 min). Apenas tipo de dispositivo de bomba.",
           "door_sensor_entity": "Sensor binário opcional para a porta da máquina (ligado = aberto, desligado = fechado). Quando a porta abre durante um ciclo ativo, WashData confirmará o ciclo como pausado intencionalmente. Após o término do ciclo, se a porta ainda estiver fechada, o estado muda para 'Limpar' até que a porta seja aberta. Nota: fechar a porta NÃO retoma automaticamente um ciclo pausado – a retomada deve ser acionada manualmente por meio do botão Retomar Ciclo ou serviço.",
           "pause_cuts_power": "Ao pausar por meio do botão Pause Cycle ou serviço, desligue também a entidade de switch configurada. Só entra em vigor se uma entidade de switch estiver configurada para este dispositivo.",
-          "notify_unload_delay_minutes": "Envie uma notificação por meio do canal de notificação de término após o término do ciclo e a porta não tiver sido aberta por tantos minutos (requer Sensor de Porta). Defina como 0 para desativar. Padrão: 60 min."
+          "notify_unload_delay_minutes": "Envie uma notificação por meio do canal de notificação de término após o término do ciclo e a porta não tiver sido aberta por tantos minutos (requer Sensor de Porta). Defina como 0 para desativar. Padrão: 60 min.",
+          "switch_entity": "A entidade switch a ser alternada ao pausar ou retomar. Obrigatório quando 'Cortar energia ao pausar' está ativado."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Mantém os dados até este deslocamento em segundos. Padrão = duração total."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Ciclo de pausa",
+      "description": "Pause o ciclo ativo para um dispositivo WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "O dispositivo WashData a ser pausado."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Retomar ciclo",
+      "description": "Retome um ciclo pausado para um dispositivo WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "O dispositivo WashData a ser retomado."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "É necessário um device_id válido."
+    },
+    "cycle_id_required": {
+      "message": "É necessário um cycle_id válido."
+    },
+    "profile_name_required": {
+      "message": "É necessário um profile_name válido."
     }
   }
 }

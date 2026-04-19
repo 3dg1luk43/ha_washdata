@@ -164,6 +164,8 @@ class LearningManager:
             filtered_suggestions[key] = data
 
         if not filtered_suggestions:
+            if self.profile_store.get_suggestions():
+                self.hass.async_create_task(self.profile_store.clear_suggestions())
             return
 
         def _count_actionable(s: dict) -> int:
@@ -256,10 +258,9 @@ class LearningManager:
         if (current_count - self._last_batch_simulation_count) < _BATCH_RERUN_DELTA:
             return
 
-        self._last_batch_simulation_count = current_count
-        self.hass.async_create_task(self._async_run_batch_simulation(labeled_cycles))
+        self.hass.async_create_task(self._async_run_batch_simulation(labeled_cycles, current_count))
 
-    async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]]) -> None:
+    async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]], expected_count: int) -> None:
         """Run multi-cycle batch simulation asynchronously."""
         try:
             new_suggestions = await self.hass.async_add_executor_job(
@@ -272,6 +273,7 @@ class LearningManager:
                     len(cycles),
                     list(new_suggestions.keys()),
                 )
+            self._last_batch_simulation_count = expected_count
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Batch simulation failed: %s", e)
 

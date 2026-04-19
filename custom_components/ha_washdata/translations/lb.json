@@ -204,7 +204,8 @@
           "pump_stuck_duration": "Pompel Stuck Alarmschwell (en) (nëmmen Pompel)",
           "door_sensor_entity": "Dier Sensor",
           "pause_cuts_power": "Maacht Kraaft beim Pausen",
-          "notify_unload_delay_minutes": "Wäschwart Notifikatioun Verspéidung (min)"
+          "notify_unload_delay_minutes": "Wäschwart Notifikatioun Verspéidung (min)",
+          "switch_entity": "Switch Entity (fir Pause Power Cut)"
         },
         "data_description": {
           "apply_suggestions": "Kuckt dës Këscht un fir e Iwwerpréiwungsschrëtt opzemaachen fir proposéiert Wäerter vum Léieralgorithmus. Näischt gëtt automatesch gespäichert.\n\nProposéiert (vum Léieren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "Wann e Pompel Zyklus nach laafen no dëse ville Sekonnen, engem ha_washdata_pump_stuck Event eemol gebrannt. Benotzt dëst fir e verstoppte Motor z'entdecken (typesch Sumppompellaf ass ënner 60 s). Standard: 1800 s (30 min). Pompel Apparat Typ nëmmen.",
           "door_sensor_entity": "Optional Binärsensor fir d'Maschinntür (an = oppen, aus = zou). Wann d'Dier während engem aktive Zyklus opmécht, wäert WashData den Zyklus bestätegen als bewosst gepaust. Nodeems den Zyklus eriwwer ass, wann d'Dier nach ëmmer zou ass, ännert den Zoustand op 'Clean' bis d'Dier opgemaach gëtt. Bemierkung: D'Zoumaache vun der Dier hëlt NET automatesch e gepauzten Zyklus weider - Resume muss manuell iwwer de Resume Cycle Knäppchen oder Service ausgeléist ginn.",
           "pause_cuts_power": "Wann Dir iwwer de Pause Cycle Knäppchen oder Service pauséiert, schalt och déi konfiguréiert Schalter Entitéit aus. Gëtt nëmme Kraaft wann eng Schalter Entitéit fir dësen Apparat konfiguréiert ass.",
-          "notify_unload_delay_minutes": "Schéckt eng Notifikatioun iwwer d'Finish Notifikatiounskanal nodeems den Zyklus eriwwer ass an d'Dier fir dës vill Minutten net opgemaach gouf (erfuerdert Door Sensor). Setzt op 0 fir auszeschalten. Standard: 60 min."
+          "notify_unload_delay_minutes": "Schéckt eng Notifikatioun iwwer d'Finish Notifikatiounskanal nodeems den Zyklus eriwwer ass an d'Dier fir dës vill Minutten net opgemaach gouf (erfuerdert Door Sensor). Setzt op 0 fir auszeschalten. Standard: 60 min.",
+          "switch_entity": "D'Schalter Entitéit fir ze wiesselen wann Dir Paus oder weider geet. Obligatoresch wann 'Kraaft schneiden beim Pausen' aktivéiert ass."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Daten bis zu dësem Offset a Sekonnen behalen. Standard = voll Dauer."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Paus Zyklus",
+      "description": "Paus den aktive Zyklus fir e WashData Apparat.",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "De WashData Apparat fir ze pausen."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Zyklus erëmfannen",
+      "description": "Fuert e pauséierten Zyklus fir e WashData Apparat erëm.",
+      "fields": {
+        "device_id": {
+          "name": "Apparat",
+          "description": "De WashData Apparat fir weiderzeféieren."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Eng valabel device_id ass erfuerderlech."
+    },
+    "cycle_id_required": {
+      "message": "Eng valabel cycle_id ass erfuerderlech."
+    },
+    "profile_name_required": {
+      "message": "E gültege Profilnumm ass erfuerderlech."
     }
   }
 }

@@ -197,7 +197,8 @@
           "pump_stuck_duration": "A szivattyú elakadt riasztási küszöbértéke (csak a szivattyú)",
           "door_sensor_entity": "Ajtó érzékelő",
           "pause_cuts_power": "Áramtalanítás szüneteltetéskor",
-          "notify_unload_delay_minutes": "A mosásra váró értesítés késése (perc)"
+          "notify_unload_delay_minutes": "A mosásra váró értesítés késése (perc)",
+          "switch_entity": "Kapcsoló entitás (az áramszünet szüneteltetéséhez)"
         },
         "data_description": {
           "apply_suggestions": "Jelölje be ezt a jelölőnégyzetet a tanulási algoritmus által javasolt értékek áttekintési lépésének megnyitásához. Semmi sem kerül automatikusan mentésre.\n\nJavasolt (tanulásból):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Ha egy szivattyúciklus ennyi másodperc után is fut, a ha_washdata_pump_stuck esemény egyszer aktiválódik. Használja ezt az elakadt motor észlelésére (tipikus olajteknő szivattyú futása 60 s alatt van). Alapértelmezett: 1800 s (30 perc). Csak a szivattyú készülék típusa.",
           "door_sensor_entity": "Opcionális bináris érzékelő a gépajtóhoz (be = nyitva, ki = zárva). Ha az ajtó kinyílik egy aktív ciklus alatt, a WashData megerősíti, hogy a ciklus szándékosan szünetel. A ciklus végén, ha az ajtó még mindig zárva van, az állapot „Clean”-ra vált, amíg az ajtót ki nem nyitják. Megjegyzés: az ajtó bezárása NEM folytatja automatikusan a szünetelt ciklust – a folytatást manuálisan kell elindítani a Ciklus folytatása gombbal vagy a szervizzel.",
           "pause_cuts_power": "Ha a Pause Cycle gombbal vagy szolgáltatással szüneteltet, kapcsolja ki a konfigurált kapcsoló entitást is. Csak akkor lép életbe, ha kapcsoló entitás van konfigurálva ehhez az eszközhöz.",
-          "notify_unload_delay_minutes": "Értesítés küldése a befejezésértesítési csatornán, miután a ciklus véget ért, és az ajtót ennyi percig nem nyitották ki (Ajtóérzékelő szükséges). A letiltáshoz állítsa 0-ra. Alapértelmezett: 60 perc."
+          "notify_unload_delay_minutes": "Értesítés küldése a befejezésértesítési csatornán, miután a ciklus véget ért, és az ajtót ennyi percig nem nyitották ki (Ajtóérzékelő szükséges). A letiltáshoz állítsa 0-ra. Alapértelmezett: 60 perc.",
+          "switch_entity": "A kapcsoló entitás, amely szüneteltetéskor vagy folytatáskor válthat. Szükséges, ha a „Tápellátás leállítása szüneteltetéskor” engedélyezve van."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Tartsa az adatokat másodpercek alatt ezen eltolásig. Alapértelmezett = teljes időtartam."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Ciklus szüneteltetése",
+      "description": "A WashData eszköz aktív ciklusának szüneteltetése.",
+      "fields": {
+        "device_id": {
+          "name": "Eszköz",
+          "description": "A WashData eszköz szüneteltetése."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Ciklus folytatása",
+      "description": "Szünetelt ciklus folytatása egy WashData eszköznél.",
+      "fields": {
+        "device_id": {
+          "name": "Eszköz",
+          "description": "A WashData eszköz a folytatáshoz."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Érvényes device_id megadása kötelező."
+    },
+    "cycle_id_required": {
+      "message": "Érvényes ciklusazonosító szükséges."
+    },
+    "profile_name_required": {
+      "message": "Érvényes profile_name megadása kötelező."
     }
   }
 }

@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Llindar (s) d'alerta de bomba bloquejada (només bomba)",
           "door_sensor_entity": "Sensor de porta",
           "pause_cuts_power": "Talleu l'alimentació quan feu una pausa",
-          "notify_unload_delay_minutes": "Retard de notificació d'espera de bugaderia (min)"
+          "notify_unload_delay_minutes": "Retard de notificació d'espera de bugaderia (min)",
+          "switch_entity": "Canvia d'entitat (per a la pausa del tall d'alimentació)"
         },
         "data_description": {
           "apply_suggestions": "Marqueu aquesta casella per obrir un pas de revisió dels valors suggerits de l'algoritme d'aprenentatge. No es desa res automàticament.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Si un cicle de bomba encara s'està executant després d'aquests segons, s'activa un esdeveniment ha_washdata_pump_stuck. Utilitzeu-ho per detectar un motor encallat (el funcionament típic de la bomba de carter és inferior a 60 s). Per defecte: 1800 s (30 min). Només tipus de dispositiu de bomba.",
           "door_sensor_entity": "Sensor binari opcional per a la porta de la màquina (encesa = oberta, apagada = tancada). Quan la porta s'obre durant un cicle actiu, WashData confirmarà el cicle com a pausa intencionada. Un cop finalitza el cicle, si la porta encara està tancada, l'estat canvia a \"Neteja\" fins que la porta s'obre. Nota: el tancament de la porta NO reprèn automàticament un cicle en pausa; el reinici s'ha d'activar manualment mitjançant el botó o el servei Reprèn el cicle.",
           "pause_cuts_power": "Quan feu una pausa mitjançant el botó o el servei de pausa del cicle, també desactiveu l'entitat de commutació configurada. Només té efecte si es configura una entitat de commutació per a aquest dispositiu.",
-          "notify_unload_delay_minutes": "Envieu una notificació a través del canal de notificació d'acabament un cop finalitzi el cicle i la porta no s'hagi obert durant tants minuts (requereix el sensor de la porta). Establiu a 0 per desactivar. Per defecte: 60 min."
+          "notify_unload_delay_minutes": "Envieu una notificació a través del canal de notificació d'acabament un cop finalitzi el cicle i la porta no s'hagi obert durant tants minuts (requereix el sensor de la porta). Establiu a 0 per desactivar. Per defecte: 60 min.",
+          "switch_entity": "L'entitat de commutació per alternar quan s'atura o es reprèn. Necessari quan l'opció \"Tallar l'alimentació en pausa\" està activada."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Manteniu les dades amb aquest desplaçament en segons. Per defecte = durada completa."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Cicle de pausa",
+      "description": "Posa en pausa el cicle actiu d'un dispositiu WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu WashData per posar en pausa."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Reprendre el cicle",
+      "description": "Reprèn un cicle en pausa per a un dispositiu WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositiu",
+          "description": "El dispositiu WashData per reprendre."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Cal un device_id vàlid."
+    },
+    "cycle_id_required": {
+      "message": "Es requereix un cycle_id vàlid."
+    },
+    "profile_name_required": {
+      "message": "Cal un perfil_name vàlid."
     }
   }
 }

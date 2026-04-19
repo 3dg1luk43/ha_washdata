@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Pragul de alertă de blocare a pompei (doar pompă)",
           "door_sensor_entity": "Senzor de ușă",
           "pause_cuts_power": "Opriți puterea la pauză",
-          "notify_unload_delay_minutes": "Întârziere de notificare în așteptare pentru spălătorie (min.)"
+          "notify_unload_delay_minutes": "Întârziere de notificare în așteptare pentru spălătorie (min.)",
+          "switch_entity": "Comutare entitate (pentru întreruperea alimentării în pauză)"
         },
         "data_description": {
           "apply_suggestions": "Bifați această casetă pentru a deschide un pas de revizuire pentru valorile sugerate din algoritmul de învățare. Nimic nu este salvat automat.\n\nSugerat (din învățare):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Dacă un ciclu de pompă continuă să ruleze după atâtea secunde, un eveniment ha_washdata_pump_stuck este declanșat o dată. Utilizați acest lucru pentru a detecta un motor blocat (funcționarea tipică a pompei de carter este sub 60 s). Implicit: 1800 s (30 min). Numai tipul dispozitivului de pompare.",
           "door_sensor_entity": "Senzor binar opțional pentru ușa mașinii (pornit = deschis, oprit = închis). Când ușa se deschide în timpul unui ciclu activ, WashData va confirma ciclul ca fiind întrerupt intenționat. După încheierea ciclului, dacă ușa este încă închisă, starea se schimbă în „Curățare” până când ușa este deschisă. Notă: închiderea ușii NU reia automat un ciclu întrerupt - reluarea trebuie declanșată manual prin intermediul butonului Reluare ciclu sau serviciu.",
           "pause_cuts_power": "Când întrerupeți prin intermediul butonului sau al serviciului Pauză ciclu, dezactivați, de asemenea, entitatea de comutare configurată. Are efect numai dacă o entitate de comutare este configurată pentru acest dispozitiv.",
-          "notify_unload_delay_minutes": "Trimiteți o notificare prin canalul de notificare de terminare după ce ciclul se termină și ușa nu a fost deschisă timp de atâtea minute (necesită Senzor de ușă). Setați la 0 pentru a dezactiva. Implicit: 60 min."
+          "notify_unload_delay_minutes": "Trimiteți o notificare prin canalul de notificare de terminare după ce ciclul se termină și ușa nu a fost deschisă timp de atâtea minute (necesită Senzor de ușă). Setați la 0 pentru a dezactiva. Implicit: 60 min.",
+          "switch_entity": "Entitatea comutatoare pentru a comuta atunci când întrerupeți sau reluați. Obligatoriu atunci când „Tăiați puterea la pauză” este activat."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Păstrați datele până la acest offset în secunde. Implicit = durata totală."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Ciclul de pauză",
+      "description": "Întrerupeți ciclul activ pentru un dispozitiv WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispozitiv",
+          "description": "Dispozitivul WashData se întrerupe."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Reluați ciclul",
+      "description": "Reluați un ciclu întrerupt pentru un dispozitiv WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispozitiv",
+          "description": "Dispozitivul WashData trebuie reluat."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Este necesar un device_id valid."
+    },
+    "cycle_id_required": {
+      "message": "Este necesar un cycle_id valid."
+    },
+    "profile_name_required": {
+      "message": "Este necesar un nume_profil valid."
     }
   }
 }

@@ -204,7 +204,8 @@
           "pump_stuck_duration": "Pump Stuck Alert ბარიერი (ები) (მხოლოდ ტუმბო)",
           "door_sensor_entity": "კარის სენსორი",
           "pause_cuts_power": "გამორთეთ კვების ბლოკი პაუზის დროს",
-          "notify_unload_delay_minutes": "სამრეცხაო ელოდება შეტყობინების დაგვიანება (წთ)"
+          "notify_unload_delay_minutes": "სამრეცხაო ელოდება შეტყობინების დაგვიანება (წთ)",
+          "switch_entity": "ერთეულის გადართვა (ენერგიის გათიშვის პაუზისთვის)"
         },
         "data_description": {
           "apply_suggestions": "მონიშნეთ ეს ველი სასწავლო ალგორითმის შემოთავაზებული მნიშვნელობების გადახედვის ეტაპის გასახსნელად. არაფერი ავტომატურად არ ინახება.\n\nშემოთავაზებული (სწავლიდან):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "თუ ამდენი წამის შემდეგ ტუმბოს ციკლი კვლავ მუშაობს, ha_washdata_pump_stuck ღონისძიება ერთხელ გააქტიურდება. გამოიყენეთ ეს გაჭედილი ძრავის გამოსავლენად (ჩვეულებრივი წყალსადენის ტუმბოს მუშაობა 60 წამზე ნაკლებია). ნაგულისხმევი: 1800 წმ (30 წთ). მხოლოდ ტუმბოს მოწყობილობის ტიპი.",
           "door_sensor_entity": "არჩევითი ორობითი სენსორი მანქანის კარისთვის (ჩართული = ღია, გამორთული = დახურული). როდესაც კარი იხსნება აქტიური ციკლის დროს, WashData დაადასტურებს, რომ ციკლი განზრახ შეჩერებულია. ციკლის დასრულების შემდეგ, თუ კარი მაინც დაკეტილია, მდგომარეობა იცვლება „სუფთა“ კარის გახსნამდე. შენიშვნა: კარის დახურვა ავტომატურად არ განაახლებს შეჩერებულ ციკლს - რეზიუმე უნდა ამოქმედდეს ხელით Resume Cycle ღილაკის ან სერვისის მეშვეობით.",
           "pause_cuts_power": "პაუზის ციკლის ღილაკის ან სერვისის საშუალებით შეჩერებისას, ასევე გამორთეთ კონფიგურირებული გადამრთველი ერთეული. ძალაში შედის მხოლოდ იმ შემთხვევაში, თუ გადამრთველი ერთეული კონფიგურირებულია ამ მოწყობილობისთვის.",
-          "notify_unload_delay_minutes": "გაგზავნეთ შეტყობინება დასრულების შეტყობინებების არხით ციკლის დასრულების შემდეგ და კარი არ გაიღო ამდენი წუთის განმავლობაში (საჭიროებს კარის სენსორს). გამორთვისთვის დააყენეთ 0. ნაგულისხმევი: 60 წთ."
+          "notify_unload_delay_minutes": "გაგზავნეთ შეტყობინება დასრულების შეტყობინებების არხით ციკლის დასრულების შემდეგ და კარი არ გაიღო ამდენი წუთის განმავლობაში (საჭიროებს კარის სენსორს). გამორთვისთვის დააყენეთ 0. ნაგულისხმევი: 60 წთ.",
+          "switch_entity": "გადამრთველი ერთეულის გადართვა შეჩერების ან განახლებისას. საჭიროა, როცა ჩართულია \"ჩართვა პაუზის დროს\"."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "ამ ოფსეტამდე წამებში მონაცემების შენახვა. ნაგულისხმევი = სრული ხანგრძლივობა."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "პაუზის ციკლი",
+      "description": "შეაჩერეთ აქტიური ციკლი WashData მოწყობილობისთვის.",
+      "fields": {
+        "device_id": {
+          "name": "მოწყობილობა",
+          "description": "WashData მოწყობილობა შეჩერდება."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "განახლების ციკლი",
+      "description": "განაახლეთ შეჩერებული ციკლი WashData მოწყობილობისთვის.",
+      "fields": {
+        "device_id": {
+          "name": "მოწყობილობა",
+          "description": "WashData მოწყობილობა განახლდება."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "საჭიროა სწორი device_id."
+    },
+    "cycle_id_required": {
+      "message": "საჭიროა სწორი cycle_id."
+    },
+    "profile_name_required": {
+      "message": "საჭიროა სწორი profile_name."
     }
   }
 }

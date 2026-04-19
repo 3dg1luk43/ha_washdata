@@ -204,7 +204,8 @@
           "pump_stuck_duration": "Próg alarmu o zablokowaniu pompy (tylko pompa)",
           "door_sensor_entity": "Czujnik drzwi",
           "pause_cuts_power": "Odetnij zasilanie podczas pauzy",
-          "notify_unload_delay_minutes": "Opóźnienie powiadomienia o oczekiwaniu na pranie (min)"
+          "notify_unload_delay_minutes": "Opóźnienie powiadomienia o oczekiwaniu na pranie (min)",
+          "switch_entity": "Jednostka przełączająca (w celu wstrzymania przerwy w dostawie prądu)"
         },
         "data_description": {
           "apply_suggestions": "Zaznacz to pole, aby otworzyć krok przeglądu sugerowanych wartości z algorytmu uczącego. Nic nie jest zapisywane automatycznie.\n\nSugerowane (z algorytmu uczącego):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -255,7 +256,8 @@
           "pump_stuck_duration": "Jeżeli po tylu sekundach cykl pompy nadal trwa, jednokrotnie uruchamiane jest zdarzenie ha_washdata_pump_stuck. Użyj tego, aby wykryć zablokowany silnik (typowy czas pracy pompy ściekowej wynosi mniej niż 60 s). Domyślnie: 1800 s (30 min). Tylko typ urządzenia pompującego.",
           "door_sensor_entity": "Opcjonalny czujnik binarny drzwi maszyny (wł. = otwarte, wył. = zamknięte). Kiedy drzwiczki zostaną otwarte podczas aktywnego cyklu, WashData potwierdzi, że cykl został celowo wstrzymany. Jeśli po zakończeniu cyklu drzwi są nadal zamknięte, stan zmienia się na „Czyszczenie” do czasu otwarcia drzwi. Uwaga: zamknięcie drzwi NIE powoduje automatycznego wznowienia wstrzymanego cyklu - wznowienie należy uruchomić ręcznie za pomocą przycisku Wznów cykl lub za pomocą usługi.",
           "pause_cuts_power": "Wstrzymując się za pomocą przycisku lub usługi Wstrzymaj cykl, wyłącz także skonfigurowaną jednostkę przełączającą. Działa tylko wtedy, gdy dla tego urządzenia skonfigurowano jednostkę przełączającą.",
-          "notify_unload_delay_minutes": "Wyślij powiadomienie za pośrednictwem kanału powiadomień o zakończeniu, gdy cykl się zakończy, a drzwi nie zostaną otwarte przez tyle minut (wymaga czujnika drzwi). Ustaw na 0, aby wyłączyć. Domyślnie: 60 minut."
+          "notify_unload_delay_minutes": "Wyślij powiadomienie za pośrednictwem kanału powiadomień o zakończeniu, gdy cykl się zakończy, a drzwi nie zostaną otwarte przez tyle minut (wymaga czujnika drzwi). Ustaw na 0, aby wyłączyć. Domyślnie: 60 minut.",
+          "switch_entity": "Jednostka przełączająca do przełączania podczas wstrzymywania lub wznawiania. Wymagane, gdy włączona jest opcja „Odetnij zasilanie podczas pauzy”."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Zachowuj dane do tego przesunięcia w sekundach. Domyślnie = pełny czas trwania."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Wstrzymaj cykl",
+      "description": "Wstrzymaj aktywny cykl urządzenia WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie",
+          "description": "Urządzenie WashData do wstrzymania."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Wznów cykl",
+      "description": "Wznów wstrzymany cykl dla urządzenia WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie",
+          "description": "Urządzenie WashData do wznowienia."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Wymagany jest prawidłowy identyfikator urządzenia."
+    },
+    "cycle_id_required": {
+      "message": "Wymagany jest prawidłowy identyfikator cyklu."
+    },
+    "profile_name_required": {
+      "message": "Wymagana jest prawidłowa nazwa_profilu."
     }
   }
 }

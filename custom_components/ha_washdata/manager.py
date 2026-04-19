@@ -1808,6 +1808,9 @@ class WashDataManager:
                     "Door opened during active cycle: setting verified_pause=True"
                 )
                 self.detector.set_verified_pause(True)
+                if not self._is_user_paused:
+                    self._is_user_paused = True
+                    self._user_pause_start = dt_util.now()
         # Door closing is intentionally not handled - no auto-resume
 
     async def _setup_notify_people_listener(self) -> None:
@@ -2145,23 +2148,27 @@ class WashDataManager:
         ):
             time_in_clean = (now - self._clean_state_start).total_seconds()
             if time_in_clean >= self._notify_unload_delay_minutes * 60:
-                duration_min = int(time_since_complete / 60)
-                msg_template = self.config_entry.options.get(
-                    CONF_NOTIFY_UNLOAD_MESSAGE, DEFAULT_NOTIFY_UNLOAD_MESSAGE
-                )
-                msg = self._safe_format_template(
-                    msg_template,
-                    fallback_template=DEFAULT_NOTIFY_UNLOAD_MESSAGE,
-                    device=self.config_entry.title,
-                    duration=duration_min,
-                    delay=self._notify_unload_delay_minutes,
-                )
-                self._dispatch_notification(msg, event_type=NOTIFY_EVENT_CLEAN)
-                self._notified_clean_laundry = True
-                self._logger.info(
-                    "Sent clean laundry nag notification (%.0f min after cycle end)",
-                    time_since_complete / 60,
-                )
+                if self._notify_finish_services or self._notify_actions:
+                    duration_min = int(time_since_complete / 60)
+                    msg_template = self.config_entry.options.get(
+                        CONF_NOTIFY_UNLOAD_MESSAGE, DEFAULT_NOTIFY_UNLOAD_MESSAGE
+                    )
+                    msg = self._safe_format_template(
+                        msg_template,
+                        fallback_template=DEFAULT_NOTIFY_UNLOAD_MESSAGE,
+                        device=self.config_entry.title,
+                        duration=duration_min,
+                        delay=self._notify_unload_delay_minutes,
+                    )
+                    sent = self._dispatch_notification(msg, event_type=NOTIFY_EVENT_CLEAN)
+                    if sent:
+                        self._notified_clean_laundry = True
+                        self._logger.info(
+                            "Sent clean laundry nag notification (%.0f min after cycle end)",
+                            time_since_complete / 60,
+                        )
+                else:
+                    self._notified_clean_laundry = True
 
         if time_since_complete > self._progress_reset_delay:
             # Defer the reset when a clean-state unload notification is still pending.
@@ -2543,9 +2550,14 @@ class WashDataManager:
         power_data = cycle_data.get("power_data", [])
         cycle_energy_wh = 0.0
         if power_data and len(power_data) >= 2:
-            try:
-                valid = [(float(p[0]), float(p[1])) for p in power_data if isinstance(p[0], (int, float)) and isinstance(p[1], (int, float))]
-                if len(valid) >= 2:
+            valid: list[tuple[float, float]] = []
+            for p in power_data:
+                try:
+                    valid.append((float(p[0]), float(p[1])))
+                except (TypeError, ValueError, IndexError):
+                    pass
+            if len(valid) >= 2:
+                try:
                     valid.sort(key=lambda x: x[0])
                     ts = np.array([v[0] for v in valid])
                     ps = np.array([v[1] for v in valid])
@@ -2554,8 +2566,8 @@ class WashDataManager:
                     mask = (dt_h > 0) & (dt_h <= _MAX_GAP_H)
                     avg_p = (ps[:-1] + ps[1:]) / 2
                     cycle_energy_wh = float(np.sum(avg_p[mask] * dt_h[mask]))
-            except Exception:
-                cycle_energy_wh = 0.0
+                except Exception:
+                    cycle_energy_wh = 0.0
 
         # Ghost cycle: short AND low energy (real cycles have energy even if short)
         if duration < 60 and cycle_energy_wh < 0.05:
@@ -4070,6 +4082,7 @@ class WashDataManager:
             return
 
         self._logger.info("Cycle paused by user")
+        prev_verified = self.detector._verified_pause
         self._is_user_paused = True
         self._user_pause_start = dt_util.now()
         self.detector.set_verified_pause(True)
@@ -4093,7 +4106,7 @@ class WashDataManager:
                     )
                     self._is_user_paused = False
                     self._user_pause_start = None
-                    self.detector.set_verified_pause(False)
+                    self.detector.set_verified_pause(prev_verified)
                     return
 
         self._notify_update()

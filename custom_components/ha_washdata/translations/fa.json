@@ -197,7 +197,8 @@
           "pump_stuck_duration": "آستانه هشدار گیر کردن پمپ (فقط پمپ)",
           "door_sensor_entity": "سنسور درب",
           "pause_cuts_power": "قطع برق هنگام مکث",
-          "notify_unload_delay_minutes": "تأخیر اعلان انتظار لباسشویی (دقیقه)"
+          "notify_unload_delay_minutes": "تأخیر اعلان انتظار لباسشویی (دقیقه)",
+          "switch_entity": "سوئیچ نهاد (برای توقف موقت قطع برق)"
         },
         "data_description": {
           "apply_suggestions": "این کادر را علامت بزنید تا یک مرحله بررسی برای مقادیر پیشنهادی از الگوریتم یادگیری باز شود. هیچ چیزی به طور خودکار ذخیره نمی شود.\n\nپیشنهادی (از یادگیری):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "اگر چرخه پمپ پس از این چند ثانیه همچنان در حال اجرا باشد، یک رویداد ha_washdata_pump_stuck یک بار اجرا می شود. از این برای تشخیص موتور گیر کرده استفاده کنید (معمولاً پمپ کارکرد زیر 60 ثانیه است). پیش‌فرض: 1800 ثانیه (30 دقیقه). فقط نوع دستگاه پمپ",
           "door_sensor_entity": "سنسور باینری اختیاری برای درب دستگاه (روشن = باز، خاموش = بسته). هنگامی که در در طول یک چرخه فعال باز می شود، WashData چرخه را به عنوان توقف عمدی تایید می کند. پس از پایان چرخه، اگر درب همچنان بسته باشد، وضعیت به \"تمیز\" تغییر می کند تا درب باز شود. توجه: بستن در، چرخه توقف موقت را به طور خودکار از سر نمی گیرد - رزومه باید به صورت دستی از طریق دکمه یا سرویس چرخه از سرگیری فعال شود.",
           "pause_cuts_power": "هنگام مکث از طریق دکمه یا سرویس چرخه مکث، موجودیت سوئیچ پیکربندی شده را نیز خاموش کنید. فقط در صورتی اعمال می شود که یک موجودیت سوئیچ برای این دستگاه پیکربندی شده باشد.",
-          "notify_unload_delay_minutes": "پس از پایان چرخه و باز نشدن درب برای این چند دقیقه، از طریق کانال اعلان پایان، اعلان ارسال کنید (نیاز به سنسور درب دارد). برای غیرفعال کردن، روی 0 تنظیم کنید. پیش‌فرض: 60 دقیقه"
+          "notify_unload_delay_minutes": "پس از پایان چرخه و باز نشدن درب برای این چند دقیقه، از طریق کانال اعلان پایان، اعلان ارسال کنید (نیاز به سنسور درب دارد). برای غیرفعال کردن، روی 0 تنظیم کنید. پیش‌فرض: 60 دقیقه",
+          "switch_entity": "موجودیت سوئیچ برای تغییر هنگام توقف یا از سرگیری. زمانی که «قطع برق هنگام مکث» فعال باشد، لازم است."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "داده ها را در عرض چند ثانیه تا این میزان افست نگه دارید. پیش فرض = مدت زمان کامل."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "چرخه مکث",
+      "description": "چرخه فعال دستگاه WashData را متوقف کنید.",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه WashData برای مکث."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "چرخه از سرگیری",
+      "description": "یک چرخه متوقف شده را برای دستگاه WashData از سر بگیرید.",
+      "fields": {
+        "device_id": {
+          "name": "دستگاه",
+          "description": "دستگاه WashData از سر گرفته می شود."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "یک device_id معتبر مورد نیاز است."
+    },
+    "cycle_id_required": {
+      "message": "یک cycle_id معتبر مورد نیاز است."
+    },
+    "profile_name_required": {
+      "message": "یک profile_name معتبر لازم است."
     }
   }
 }

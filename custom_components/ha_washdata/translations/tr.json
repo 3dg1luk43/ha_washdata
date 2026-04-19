@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Pompa Sıkışmış Uyarı Eşiği (ler) (Yalnızca Pompa)",
           "door_sensor_entity": "Kapı Sensörü",
           "pause_cuts_power": "Duraklatıldığında Gücü Kesin",
-          "notify_unload_delay_minutes": "Çamaşır Bekleniyor Bildirim Gecikmesi (dk)"
+          "notify_unload_delay_minutes": "Çamaşır Bekleniyor Bildirim Gecikmesi (dk)",
+          "switch_entity": "Varlık Değiştir (Güç Kesintisini Duraklatmak için)"
         },
         "data_description": {
           "apply_suggestions": "Öğrenme algoritmasından önerilen değerlere yönelik bir inceleme adımı açmak için bu kutuyu işaretleyin. Hiçbir şey otomatik olarak kaydedilmez.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} sn\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Bu kadar saniyeden sonra bir pompa döngüsü hala çalışıyorsa, bir kez ha_washdata_pump_stuck olayı tetiklenir. Sıkışan bir motoru tespit etmek için bunu kullanın (tipik karter pompası çalışması 60 saniyenin altındadır). Varsayılan: 1800 sn (30 dk). Yalnızca pompa cihazı tipi.",
           "door_sensor_entity": "Makine kapısı için opsiyonel ikili sensör (açık = açık, kapalı = kapalı). Etkin bir döngü sırasında kapı açıldığında, WashData döngünün kasıtlı olarak duraklatıldığını onaylayacaktır. Döngü sona erdikten sonra kapı hala kapalıysa, kapı açılıncaya kadar durum 'Temiz' olarak değişir. Not: Kapının kapatılması, duraklatılmış bir döngüyü otomatik olarak DEVAM ETMEZ; devam ettirme, Döngüyü Sürdür düğmesi veya hizmet aracılığıyla manuel olarak tetiklenmelidir.",
           "pause_cuts_power": "Döngüyü Duraklat düğmesi veya hizmeti aracılığıyla duraklatırken, yapılandırılmış anahtar varlığını da kapatın. Yalnızca bu cihaz için bir anahtar varlığı yapılandırıldığında etkili olur.",
-          "notify_unload_delay_minutes": "Döngü bittikten ve kapı bu kadar dakika boyunca açılmadıktan sonra bitiş bildirimi kanalı aracılığıyla bir bildirim gönderin (Kapı Sensörü gerektirir). Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 60 dk."
+          "notify_unload_delay_minutes": "Döngü bittikten ve kapı bu kadar dakika boyunca açılmadıktan sonra bitiş bildirimi kanalı aracılığıyla bir bildirim gönderin (Kapı Sensörü gerektirir). Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 60 dk.",
+          "switch_entity": "Duraklatırken veya devam ettirirken geçiş yapılacak anahtar varlığı. 'Duraklatıldığında Gücü Kes' etkinleştirildiğinde gereklidir."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Verileri saniyeler içinde bu ofset seviyesinde tutun. Varsayılan = tam süre."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Döngüyü Duraklat",
+      "description": "Bir WashData cihazının aktif döngüsünü duraklatın.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "WashData cihazının duraklatılması."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Döngüyü Devam Ettir",
+      "description": "WashData cihazı için duraklatılmış bir döngüyü devam ettirin.",
+      "fields": {
+        "device_id": {
+          "name": "Cihaz",
+          "description": "WashData cihazı devam ettirilecek."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Geçerli bir cihaz_kimliği gerekli."
+    },
+    "cycle_id_required": {
+      "message": "Geçerli bircycle_id gereklidir."
+    },
+    "profile_name_required": {
+      "message": "Geçerli bir profil_adı gerekli."
     }
   }
 }

@@ -197,7 +197,8 @@
           "pump_stuck_duration": "Pragu i alarmit të bllokimit të pompës (vetëm pompa)",
           "door_sensor_entity": "Sensori i derës",
           "pause_cuts_power": "Ndërpreni energjinë kur ndaloni",
-          "notify_unload_delay_minutes": "Vonesa e njoftimit në pritje të rrobave (min.)"
+          "notify_unload_delay_minutes": "Vonesa e njoftimit në pritje të rrobave (min.)",
+          "switch_entity": "Ndërro entitetin (për ndërprerjen e energjisë në pauzë)"
         },
         "data_description": {
           "apply_suggestions": "Zgjidhni këtë kuti për të hapur një hap rishikimi për vlerat e sugjeruara nga algoritmi i të mësuarit. Asgjë nuk ruhet automatikisht.\n\nSugjeruar (nga të mësuarit):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -248,7 +249,8 @@
           "pump_stuck_duration": "Nëse një cikël pompe vazhdon të funksionojë pas kaq shumë sekondash, një ngjarje ha_washdata_pump_stuck aktivizohet një herë. Përdoreni këtë për të zbuluar një motor të bllokuar (punimi tipik i pompës së gropës është nën 60 s). Parazgjedhja: 1800 s (30 min). Vetëm lloji i pajisjes së pompës.",
           "door_sensor_entity": "Sensori binar opsional për derën e makinës (ndezur = hapur, fikur = mbyllur). Kur dera hapet gjatë një cikli aktiv, WashData do të konfirmojë ciklin si të ndërprerë qëllimisht. Pas përfundimit të ciklit, nëse dera është ende e mbyllur, gjendja ndryshon në \"Pastrim\" derisa të hapet dera. Shënim: mbyllja e derës NUK rifillon automatikisht një cikël të ndërprerë - rifillimi duhet të aktivizohet manualisht nëpërmjet butonit ose shërbimit të Ciklit të Rifillimit.",
           "pause_cuts_power": "Kur bëni pauzë nëpërmjet butonit ose shërbimit të Ciklit të Pauzës, fikni gjithashtu entitetin e konfiguruar të ndërprerës. Hyn në fuqi vetëm nëse për këtë pajisje është konfiguruar një ent ndërruesi.",
-          "notify_unload_delay_minutes": "Dërgoni një njoftim nëpërmjet kanalit të njoftimit të përfundimit pasi të përfundojë cikli dhe dera nuk është hapur për kaq shumë minuta (kërkon Sensori i derës). Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 60 min."
+          "notify_unload_delay_minutes": "Dërgoni një njoftim nëpërmjet kanalit të njoftimit të përfundimit pasi të përfundojë cikli dhe dera nuk është hapur për kaq shumë minuta (kërkon Sensori i derës). Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 60 min.",
+          "switch_entity": "Njësia e ndërrimit për t'u ndërruar kur ndalon ose rifillon. Kërkohet kur aktivizohet \"Prini energjinë kur ndalon\"."
         }
       },
       "diagnostics": {
@@ -996,6 +998,26 @@
           "description": "Mbani të dhënat deri në këtë kompensim në sekonda. Parazgjedhja = kohëzgjatja e plotë."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Cikli i pauzës",
+      "description": "Ndalo ciklin aktiv për një pajisje WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Pajisja",
+          "description": "Pajisja WashData në pauzë."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Cikli i rifillimit",
+      "description": "Rifilloni një cikël të ndërprerë për një pajisje WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Pajisja",
+          "description": "Pajisja WashData për të rifilluar."
+        }
+      }
     }
   },
   "entity": {
@@ -1117,6 +1139,12 @@
     },
     "device_id_required": {
       "message": "Kërkohet një ID e vlefshme e pajisjes."
+    },
+    "cycle_id_required": {
+      "message": "Kërkohet një cikli_id i vlefshëm."
+    },
+    "profile_name_required": {
+      "message": "Kërkohet një emër_profili i vlefshëm."
     }
   }
 }
