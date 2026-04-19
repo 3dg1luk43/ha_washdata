@@ -72,19 +72,20 @@
           "power_sensor": "Power Sensor Entitéit",
           "min_power": "Minimum Muecht (W)",
           "off_delay": "Zyklus Enn Verzögerung (s)",
-          "notify_service": "Notifikatiounsservice (zB notify.mobile_app)",
           "notify_actions": "Notifikatioun Aktiounen",
           "notify_people": "Liwwerung verzögeren bis dës Leit doheem sinn",
           "notify_only_when_home": "Notifikatiounen verzögeren bis déi gewielte Persoun doheem ass",
           "notify_fire_events": "Automatisatioun Eventer ausléisen",
-          "notify_events": "Eventer fir Notifikatioun",
           "notify_before_end_minutes": "Virof-Notifikatioun (Minutten virum Enn)",
           "notify_title": "Notifikatioun Titel",
           "notify_icon": "Notifikatioun Ikon",
           "notify_start_message": "Start Message Format",
           "notify_finish_message": "Fäerdeg Message Format",
           "notify_pre_complete_message": "Virof-Ofschloss Message Format",
-          "show_advanced": "Advanced Astellungen änneren (nächste Schrëtt)"
+          "show_advanced": "Advanced Astellungen änneren (nächste Schrëtt)",
+          "notify_start_services": "Cycle Start - Notifikatiounsziler",
+          "notify_finish_services": "Cycle Finish - Notifikatiounsziler",
+          "notify_live_services": "Live Progress - Notifikatiounsziler"
         },
         "data_description": {
           "apply_suggestions": "Kuckt dës Këscht fir Wäerter ze kopéieren, déi vum Léieralgorithmus an d'Form proposéiert ginn. Iwwerpréift ier Dir späichert.\n\nProposéiert (vum Léieren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -92,30 +93,29 @@
           "power_sensor": "D'Sensor Entitéit bericht Echtzäit Kraaft (a Watt). Dir kënnt dëst zu all Moment änneren ouni historesch Daten ze verléieren - nëtzlech wann Dir e Smart Plug ersetzt.",
           "min_power": "Power Liesungen iwwer dës Schwell (a Watt) weisen datt den Apparat leeft. Start mat 2W fir déi meescht Apparater.",
           "off_delay": "Sekonnen muss déi glat Kraaft ënner der Stoppschwell bleiwen fir d'Fäerdegstellung ze markéieren. Standard: 120s.",
-          "notify_service": "Home Assistant Notifikatiounsservice fir ze benotzen (fakultativ).",
           "notify_actions": "Fakultativ Home Assistant Aktiounssequenz fir Notifikatiounen ze lafen (Skripte, Notify, TTS, etc.). Wann agestallt, lafen Aktiounen virum Fallback Notify Service.",
           "notify_people": "Leit Entitéite benotzt fir Präsenz-Gating. Wann aktivéiert, gëtt d'Notifikatiounsliwwerung verspéit bis op d'mannst eng gewielte Persoun doheem ass.",
           "notify_only_when_home": "Wann aktivéiert, Notifikatiounen verzögeren bis op d'mannst eng gewielte Persoun doheem ass.",
           "notify_fire_events": "Wann aktivéiert, Home Assistant Eventer fir Zyklusstart an Enn ausléisen (ha_washdata_cycle_started an ha_washdata_cycle_ended) fir Automatisatiounen ze féieren.",
-          "notify_events": "Wéi eng Eventer fir Notifikatiounen ze schécken.",
           "notify_before_end_minutes": "Minutten virum geschätzte Enn vum Zyklus fir eng Notifikatioun auszeléisen. Op 0 setzen fir auszeschalten. Standard: 0.",
           "notify_title": "Benotzerdefinéierte Titel fir Notifikatiounen. Ënnerstëtzt {device} Plazhalter.",
           "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:washing-machine). Eidel loossen fir ouni Ikon ze schécken.",
           "notify_start_message": "Message geschéckt wann en Zyklus ufänkt. Ënnerstëtzt {device} Plazhalter.",
           "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program} Plazhalter.",
-          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter."
+          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter.",
+          "notify_start_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus ufänkt. Loosst eidel fir Start Notifikatiounen ze sprangen.",
+          "notify_finish_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus fäerdeg ass oder bal fäerdeg ass. Loosst eidel fir fäerdeg Notifikatiounen ze sprangen.",
+          "notify_live_services": "Een oder méi Notifikatiounsservicer fir Live Fortschrëtterupdates ze kréien wärend den Zyklus leeft (nëmmen mobil Begleeder App). Loosst eidel fir Live Updates ze sprangen."
         }
       },
       "notifications": {
         "title": "Notifikatiounen",
         "description": "Konfiguréiert Notifikatiounskanäl, Templates an fakultativ Live Mobile Fortschrëtterupdates.",
         "data": {
-          "notify_service": "Notifikatiounsservice (zB notify.mobile_app)",
           "notify_actions": "Notifikatioun Aktiounen",
           "notify_people": "Liwwerung verzögeren bis dës Leit doheem sinn",
           "notify_only_when_home": "Notifikatiounen verzögeren bis déi gewielte Persoun doheem ass",
           "notify_fire_events": "Automatisatioun Eventer ausléisen",
-          "notify_events": "Eventer fir Notifikatioun",
           "notify_before_end_minutes": "Virof-Notifikatioun (Minutten virum Enn)",
           "notify_live_interval_seconds": "Live Update Intervall (Sekonnen)",
           "notify_live_overrun_percent": "Live Update Iwwerlaf Toleranz (%)",
@@ -123,15 +123,19 @@
           "notify_icon": "Notifikatioun Ikon",
           "notify_start_message": "Start Message Format",
           "notify_finish_message": "Fäerdeg Message Format",
-          "notify_pre_complete_message": "Virof-Ofschloss Message Format"
+          "notify_pre_complete_message": "Virof-Ofschloss Message Format",
+          "notify_start_services": "Cycle Start - Notifikatiounsziler",
+          "notify_finish_services": "Cycle Finish - Notifikatiounsziler",
+          "notify_live_services": "Live Progress - Notifikatiounsziler",
+          "notify_live_chronometer": "Chronometer Countdown Timer",
+          "energy_price_entity": "Energiepräis - Entitéit (optional)",
+          "energy_price_static": "Energiepräis - Statesche Wäert (optional)"
         },
         "data_description": {
-          "notify_service": "Home Assistant Notifikatiounsservice fir ze benotzen (fakultativ).",
           "notify_actions": "Fakultativ Home Assistant Aktiounssequenz fir Notifikatiounen ze lafen (Skripte, Notify, TTS, etc.). Wann agestallt, lafen Aktiounen virum Fallback Notify Service.",
           "notify_people": "Leit Entitéite benotzt fir Präsenz-Gating. Wann aktivéiert, gëtt d'Notifikatiounsliwwerung verspéit bis op d'mannst eng gewielte Persoun doheem ass.",
           "notify_only_when_home": "Wann aktivéiert, Notifikatiounen verzögeren bis op d'mannst eng gewielte Persoun doheem ass.",
           "notify_fire_events": "Wann aktivéiert, Home Assistant Eventer fir Zyklusstart an Enn ausléisen (ha_washdata_cycle_started an ha_washdata_cycle_ended) fir Automatisatiounen ze féieren.",
-          "notify_events": "Wéi eng Eventer fir Notifikatiounen ze schécken.",
           "notify_before_end_minutes": "Minutten virum geschätzte Enn vum Zyklus fir eng Notifikatioun auszeléisen. Op 0 setzen fir auszeschalten. Standard: 0.",
           "notify_live_interval_seconds": "Wéi oft Fortschrëtterupdates während dem Lafen geschéckt ginn. Méi niddereg Wäerter si méi reaktiounsfäeger awer konsuméieren méi Notifikatiounen. E Minimum vun 30 Sekonnen gëtt duerchgesat - Wäerter ënner 30 Sekonnen ginn automatesch op 30 Sekonnen ofgerënnt.",
           "notify_live_overrun_percent": "Sécherheetsmarge iwwer de geschätzte Updatezuel fir laang / iwwerlafend Zyklen (zum Beispill 20% erlaabt 1,2x geschätzte Updates).",
@@ -139,7 +143,13 @@
           "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:washing-machine). Eidel loossen fir ouni Ikon ze schécken.",
           "notify_start_message": "Message geschéckt wann en Zyklus ufänkt. Ënnerstëtzt {device} Plazhalter.",
           "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program} Plazhalter.",
-          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter."
+          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter.",
+          "notify_start_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus ufänkt (z.B. notify.mobile_app_my_phone). Loosst eidel fir Start Notifikatiounen ze sprangen.",
+          "notify_finish_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus fäerdeg ass oder bal fäerdeg ass. Loosst eidel fir fäerdeg Notifikatiounen ze sprangen.",
+          "notify_live_services": "Een oder méi Notifikatiounsservicer fir Live Fortschrëtterupdates ze kréien wärend den Zyklus leeft (nëmmen mobil Begleeder App). Loosst eidel fir Live Updates ze sprangen.",
+          "notify_live_chronometer": "Wann aktivéiert, enthält all Live Update e Chronometer Countdown op déi geschätzte Schlusszäit. Den Notifikatiounstimer tickt automatesch op den Apparat tëscht Updates (nëmmen Android Begleeder App).",
+          "energy_price_entity": "Wielt eng numeresch Entitéit déi den aktuellen Stroumpräis hält (zB Sensor.electricity_price, input_number.energy_rate). Wann agestallt, aktivéiert den {cost} Plazhalter. Huelt Virrang iwwer de statesche Wäert wa béid konfiguréiert sinn.",
+          "energy_price_static": "Fixe Stroumpräis pro kWh. Wann agestallt, aktivéiert den {cost} Plazhalter. Ignoréiert wann eng Entitéit uewen konfiguréiert ass. Füügt Äert Währungssymbol an de Message Schabloun, z.B. {cost} €."
         }
       },
       "advanced_settings": {
@@ -189,7 +199,12 @@
           "dtw_bandwidth": "DTW Bandbreet",
           "external_end_trigger_enabled": "Externen Zyklus Enn Ausléiser aktivéieren",
           "external_end_trigger": "Externen Zyklus Enn Sensor",
-          "external_end_trigger_inverted": "Trigger Logik invertéieren (Trigger op OFF)"
+          "external_end_trigger_inverted": "Trigger Logik invertéieren (Trigger op OFF)",
+          "suppress_feedback_notifications": "Ënnerdréckt Feedback Notifikatiounen",
+          "pump_stuck_duration": "Pompel Stuck Alarmschwell (en) (nëmmen Pompel)",
+          "door_sensor_entity": "Dier Sensor",
+          "pause_cuts_power": "Maacht Kraaft beim Pausen",
+          "notify_unload_delay_minutes": "Wäschwart Notifikatioun Verspéidung (min)"
         },
         "data_description": {
           "apply_suggestions": "Kuckt dës Këscht un fir e Iwwerpréiwungsschrëtt opzemaachen fir proposéiert Wäerter vum Léieralgorithmus. Näischt gëtt automatesch gespäichert.\n\nProposéiert (vum Léieren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -235,7 +250,12 @@
           "dtw_bandwidth": "Maximal erlaabt Zäit Warping (Stretching) als Verhältnis vun der Zyklusdauer. Méi héich Wäerter erlaben d'Matching vun héich variabelen Zyklen awer erhéijen d'CPU Käschten. Standard: 0,20 (20%).",
           "external_end_trigger_enabled": "Iwwerwaachung vun engem externen Binärsensor aktivéieren fir den Zyklus ofzeschléissen.",
           "external_end_trigger": "Eng binär Sensor Entitéit auswielen. Wann dëse Sensor ausléist, wäert den aktuellen Zyklus mat dem Status 'ofgeschloss' ophalen.",
-          "external_end_trigger_inverted": "Par défaut léist den Trigger aus wann de Sensor op ON dréit. Dës Këscht unklicken fir z'ausléisen wann de Sensor amplaz op OFF dréit."
+          "external_end_trigger_inverted": "Par défaut léist den Trigger aus wann de Sensor op ON dréit. Dës Këscht unklicken fir z'ausléisen wann de Sensor amplaz op OFF dréit.",
+          "suppress_feedback_notifications": "Wann et aktivéiert ass, wäert WashData nach ëmmer intern verfollegen an e Feedback froen, awer net persistent Notifikatiounen weisen, déi Iech froen Zyklen ze bestätegen. Nëtzlech wann Zyklen ëmmer korrekt festgestallt ginn an Dir fannt d'Uweisungen oflenken.",
+          "pump_stuck_duration": "Wann e Pompel Zyklus nach laafen no dëse ville Sekonnen, engem ha_washdata_pump_stuck Event eemol gebrannt. Benotzt dëst fir e verstoppte Motor z'entdecken (typesch Sumppompellaf ass ënner 60 s). Standard: 1800 s (30 min). Pompel Apparat Typ nëmmen.",
+          "door_sensor_entity": "Optional Binärsensor fir d'Maschinntür (an = oppen, aus = zou). Wann d'Dier während engem aktive Zyklus opmécht, wäert WashData den Zyklus bestätegen als bewosst gepaust. Nodeems den Zyklus eriwwer ass, wann d'Dier nach ëmmer zou ass, ännert den Zoustand op 'Clean' bis d'Dier opgemaach gëtt. Bemierkung: D'Zoumaache vun der Dier hëlt NET automatesch e gepauzten Zyklus weider - Resume muss manuell iwwer de Resume Cycle Knäppchen oder Service ausgeléist ginn.",
+          "pause_cuts_power": "Wann Dir iwwer de Pause Cycle Knäppchen oder Service pauséiert, schalt och déi konfiguréiert Schalter Entitéit aus. Gëtt nëmme Kraaft wann eng Schalter Entitéit fir dësen Apparat konfiguréiert ass.",
+          "notify_unload_delay_minutes": "Schéckt eng Notifikatioun iwwer d'Finish Notifikatiounskanal nodeems den Zyklus eriwwer ass an d'Dier fir dës vill Minutten net opgemaach gouf (erfuerdert Door Sensor). Setzt op 0 fir auszeschalten. Standard: 60 min."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Zyklus Trim — Zyklus auswielen",
+        "title": "Zyklus Trim - Zyklus auswielen",
         "description": "Wielt en Zyklus fir ze trimmen. ✓ = ofgeschloss, ⚠ = opgeholl, ✗ = ënnerbrach",
         "data": {
           "cycle_id": "Zyklus"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: Proposéiert Astellungen bereet ({device})",
       "suggestions_ready_notification_message": "De Sensor **Proposéiert Astellungen** bericht elo **{count}** handlungsfäeg Empfehlungen.\n\nFir se z'iwwerpréiwen an unzewendeden: **Astellungen > Apparater & Servicer > WashData > Konfiguréieren > Advanced Astellungen > Proposéiert Wäerter uwenden**.\n\nVirschléi si fakultativ a ginn fir Iwwerpréiwung gewisen ier Dir späichert.",
       "trim_range_invalid": "Start muss virum Enn sinn. W.e.g. Är Trim Punkte upassen.",
-      "trim_failed": "Trim gescheitert. De Zyklus existéiert vläicht net méi oder d'Fënster ass eidel."
+      "trim_failed": "Trim gescheitert. De Zyklus existéiert vläicht net méi oder d'Fënster ass eidel.",
+      "auto_tune_suggestion": "{device_type} {device_title} entdeckt Geeschterzyklen. Proposéiert min_power Ännerung: {current_min}W -> {new_min}W (net automatesch ugewannt).",
+      "auto_tune_title": "WashData Auto-Tune",
+      "auto_tune_fallback": "{device_type} {device_title} entdeckt Geeschterzyklen. Proposéiert min_power Ännerung: {current_min}W -> {new_min}W (net automatesch ugewannt)."
     },
     "abort": {
       "no_cycles_found": "Keng Zyklen fonnt",
@@ -999,7 +1022,8 @@
           "interrupted": "Ënnerbrach",
           "force_stopped": "Manuell gestoppt",
           "rinse": "Spülen",
-          "unknown": "Onbekannt"
+          "unknown": "Onbekannt",
+          "clean": "Propper"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Verfügbar proposéiert Astellungen"
+      },
+      "pump_runs_today": {
+        "name": "Pompel leeft (läscht 24 h)"
+      },
+      "cycle_count": {
+        "name": "Cycle Grof"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Zyklus manuell stoppen"
+      },
+      "pause_cycle": {
+        "name": "Paus Zyklus"
+      },
+      "resume_cycle": {
+        "name": "Zyklus erëmfannen"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "Zyklus net fonnt oder huet keng Power Daten."
     },
     "trim_failed_empty_window": {
-      "message": "Trim gescheitert — Zyklus net fonnt, keng Power Daten oder déi resultéierend Fënster ass eidel."
+      "message": "Trim gescheitert - Zyklus net fonnt, keng Power Daten oder déi resultéierend Fënster ass eidel."
     },
     "trim_invalid_range": {
       "message": "trim_end_s muss méi grouss sinn wéi trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Eng valabel device_id ass erfuerderlech."
     }
   }
 }

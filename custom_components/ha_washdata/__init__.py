@@ -416,7 +416,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager = hass.data[DOMAIN][entry_id]
             store = manager.profile_store
 
-            # Determine trim end — default to full cycle duration if not supplied
+            # Determine trim end - default to full cycle duration if not supplied
             raw_end = call.data.get("trim_end_s")
             if raw_end is not None:
                 trim_end_s = max(0.0, float(raw_end))
@@ -445,7 +445,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.services.async_register(DOMAIN, "trim_cycle", handle_trim_cycle)
 
-    # Register custom card via frontend.py — once per HA instance only.
+    # Register custom card via frontend.py - once per HA instance only.
     if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(
         "ha_washdata_card_deferred"
     ) and not hass.data.get("ha_washdata_card_registering"):

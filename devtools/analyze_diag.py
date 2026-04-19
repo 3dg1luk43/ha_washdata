@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""analyze_diag.py — WashData diagnostic export analyser.
+"""analyze_diag.py - WashData diagnostic export analyser.
 
 Reads a WashData diagnostic export (JSON) and prints a comparison of the
 *current* settings stored in the file against *suggested* settings derived
@@ -389,7 +389,7 @@ _UNITS: dict[str, str] = {}  # units already in labels above
 def _fmt_val(v: Any, key: str) -> str:
     """Format a value for display."""
     if v is None:
-        return dim("—")
+        return dim("-")
     if isinstance(v, float):
         return f"{v:.4g}"
     return str(v)

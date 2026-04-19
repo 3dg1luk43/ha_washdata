@@ -83,7 +83,7 @@ async def test_feedback_duration_correction(learning_manager, store):
 async def test_profile_avg_duration_updated_after_correction_no_power_data(store):
     """When a cycle has no power data the envelope sync is skipped, but
     avg_duration must still be updated from the corrected duration (issue #155)."""
-    # Cycle with no power_data — _rebuild_envelope_sync would skip it
+    # Cycle with no power_data - _rebuild_envelope_sync would skip it
     cycle_id = "c_no_power"
     store._data["profiles"] = {"TestProfile": {"avg_duration": 7440.0}}  # 124m stale
     store._data["past_cycles"] = [
@@ -94,7 +94,7 @@ async def test_profile_avg_duration_updated_after_correction_no_power_data(store
             "manual_duration": 6600.0,
             "status": "completed",
             "start_time": "2025-01-01T10:00:00+00:00",
-            # no "power_data" key — envelope sync will return None
+            # no "power_data" key - envelope sync will return None
         }
     ]
 

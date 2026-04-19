@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN
 from .manager import WashDataManager
 
-# Keys that can identify the user or their home network — redacted in all contexts.
+# Keys that can identify the user or their home network - redacted in all contexts.
 _SENSITIVE_KEYS = {
     "auth",
     "entry_id",
@@ -51,7 +51,7 @@ async def async_get_config_entry_diagnostics(
     """Return diagnostics for a config entry."""
     manager: WashDataManager = hass.data[DOMAIN][entry.entry_id]
 
-    # Full store export — same payload as the export_config service, but the
+    # Full store export - same payload as the export_config service, but the
     # entry_data / entry_options pass through the redactor to strip personal keys.
     exported: dict[str, Any] = manager.profile_store.export_data(
         entry_data=dict(entry.data),

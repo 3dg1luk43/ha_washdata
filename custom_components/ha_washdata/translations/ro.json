@@ -65,50 +65,50 @@
           "power_sensor": "Entitate senzor de putere",
           "min_power": "Putere minimă (W)",
           "off_delay": "Întârziere de încheiere a ciclului (s)",
-          "notify_service": "Serviciul de notificare (de exemplu, notify.mobile_app)",
           "notify_actions": "Acțiuni de notificare",
           "notify_people": "Amânați livrarea până când aceste persoane sunt acasă",
           "notify_only_when_home": "Întârziați notificările până când persoana selectată este acasă",
           "notify_fire_events": "Declanșare evenimente de automatizare",
-          "notify_events": "Evenimente de notificat",
           "notify_before_end_minutes": "Notificare înainte de finalizare (minute înainte de sfârșit)",
           "notify_title": "Titlul notificării",
           "notify_icon": "Pictograma de notificare",
           "notify_start_message": "Format mesaj de pornire",
           "notify_finish_message": "Format mesaj de finalizare",
           "notify_pre_complete_message": "Format mesaj pre-finalizare",
-          "show_advanced": "Editați setările avansate (pasul următor)"
+          "show_advanced": "Editați setările avansate (pasul următor)",
+          "notify_start_services": "Cycle Start - Ținte de notificare",
+          "notify_finish_services": "Terminare ciclu - Ținte de notificare",
+          "notify_live_services": "Progres live - Ținte de notificare"
         },
         "data_description": {
           "apply_suggestions": "Bifați această casetă pentru a copia în formular valorile sugerate de algoritmul de învățare. Examinați înainte de a salva.\n\nSugerat (din învățare):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Selectați tipul de aparat (Mașină de spălat, Uscător, Mașină de spălat vase, Aparat de cafea, VE). Această etichetă este stocată cu fiecare ciclu pentru o mai bună organizare.",
-          "power_sensor": "Entitatea senzor care raportează puterea în timp real (în wați). Puteți schimba oricând acest lucru fără a pierde datele istorice — util dacă înlocuiți o priză inteligentă.",
+          "power_sensor": "Entitatea senzor care raportează puterea în timp real (în wați). Puteți schimba oricând acest lucru fără a pierde datele istorice - util dacă înlocuiți o priză inteligentă.",
           "min_power": "Citirile de putere peste acest prag (în wați) indică faptul că aparatul funcționează. Începeți cu 2W pentru majoritatea dispozitivelor.",
           "off_delay": "Câte secunde puterea netezită trebuie să rămână sub pragul de oprire pentru a marca finalizarea. Implicit: 120s.",
-          "notify_service": "Serviciul de notificare Home Assistant de utilizat (opțional).",
           "notify_actions": "Secvență de acțiuni opțională Home Assistant care se rulează pentru notificări (scripturi, notify, TTS etc.). Dacă este setat, acțiunile rulează înaintea serviciului de notificare alternativă.",
           "notify_people": "Entități de persoane utilizate pentru controlul prezenței. Când este activată, livrarea notificărilor este întârziată până când cel puțin o persoană selectată este acasă.",
           "notify_only_when_home": "Dacă este activat, amânați notificările până când cel puțin o persoană selectată este acasă.",
           "notify_fire_events": "Dacă este activat, declanșează evenimente Home Assistant la startul și sfârșitul ciclului (ha_washdata_cycle_started și ha_washdata_cycle_ended) pentru a conduce automatizările.",
-          "notify_events": "Pentru ce evenimente să trimiteți notificări.",
           "notify_before_end_minutes": "Cu câte minute înainte de sfârșitul estimat al ciclului pentru a declanșa o notificare. Setați la 0 pentru a dezactiva. Implicit: 0.",
           "notify_title": "Titlu personalizat pentru notificări. Acceptă substituentul {device}.",
           "notify_icon": "Pictogramă de utilizat pentru notificări (de exemplu, mdi:washing-machine). Lăsați gol pentru a trimite fără pictogramă.",
           "notify_start_message": "Mesaj trimis când începe un ciclu. Acceptă substituentul {device}.",
           "notify_finish_message": "Mesaj trimis când un ciclu se termină. Acceptă substituenții {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Mesaj trimis înainte de finalizare. Acceptă substituenții {device}, {minutes}."
+          "notify_pre_complete_message": "Mesaj trimis înainte de finalizare. Acceptă substituenții {device}, {minutes}.",
+          "notify_start_services": "Unul sau mai multe servicii de notificare pentru a alerta când începe un ciclu. Lăsați gol pentru a sări peste notificările de pornire.",
+          "notify_finish_services": "Unul sau mai multe servicii de notificare pentru a alerta când un ciclu se termină sau se apropie de finalizare. Lăsați gol pentru a sări peste notificările de finalizare.",
+          "notify_live_services": "Unul sau mai multe servicii de notificare pentru a primi actualizări live despre progres în timp ce ciclul rulează (numai aplicația mobilă însoțitoare). Lăsați gol pentru a omite actualizările live."
         }
       },
       "notifications": {
         "title": "Notificări",
         "description": "Configurați canalele de notificare, șabloanele și actualizările opționale de progres live pe mobil.",
         "data": {
-          "notify_service": "Serviciul de notificare (de exemplu, notify.mobile_app)",
           "notify_actions": "Acțiuni de notificare",
           "notify_people": "Amânați livrarea până când aceste persoane sunt acasă",
           "notify_only_when_home": "Întârziați notificările până când persoana selectată este acasă",
           "notify_fire_events": "Declanșare evenimente de automatizare",
-          "notify_events": "Evenimente de notificat",
           "notify_before_end_minutes": "Notificare înainte de finalizare (minute înainte de sfârșit)",
           "notify_live_interval_seconds": "Interval de actualizare live (secunde)",
           "notify_live_overrun_percent": "Marja de depășire a actualizărilor live (%)",
@@ -116,23 +116,33 @@
           "notify_icon": "Pictograma de notificare",
           "notify_start_message": "Format mesaj de pornire",
           "notify_finish_message": "Format mesaj de finalizare",
-          "notify_pre_complete_message": "Format mesaj pre-finalizare"
+          "notify_pre_complete_message": "Format mesaj pre-finalizare",
+          "notify_start_services": "Cycle Start - Ținte de notificare",
+          "notify_finish_services": "Terminare ciclu - Ținte de notificare",
+          "notify_live_services": "Progres live - Ținte de notificare",
+          "notify_live_chronometer": "Cronometru cu numărătoare inversă",
+          "energy_price_entity": "Prețul energiei - Entitate (opțional)",
+          "energy_price_static": "Prețul energiei - Valoare statică (opțional)"
         },
         "data_description": {
-          "notify_service": "Serviciul de notificare Home Assistant de utilizat (opțional).",
           "notify_actions": "Secvență de acțiuni opțională Home Assistant care se rulează pentru notificări (scripturi, notify, TTS etc.). Dacă este setat, acțiunile rulează înaintea serviciului de notificare alternativă.",
           "notify_people": "Entități de persoane utilizate pentru controlul prezenței. Când este activată, livrarea notificărilor este întârziată până când cel puțin o persoană selectată este acasă.",
           "notify_only_when_home": "Dacă este activat, amânați notificările până când cel puțin o persoană selectată este acasă.",
           "notify_fire_events": "Dacă este activat, declanșează evenimente Home Assistant la startul și sfârșitul ciclului (ha_washdata_cycle_started și ha_washdata_cycle_ended) pentru a conduce automatizările.",
-          "notify_events": "Pentru ce evenimente să trimiteți notificări.",
           "notify_before_end_minutes": "Cu câte minute înainte de sfârșitul estimat al ciclului pentru a declanșa o notificare. Setați la 0 pentru a dezactiva. Implicit: 0.",
-          "notify_live_interval_seconds": "Cât de des sunt trimise actualizările de progres în timpul funcționării. Valorile mai mici sunt mai receptive, dar consumă mai multe notificări. Este impus un minim de 30 de secunde — valorile sub 30s sunt rotunjite automat la 30s.",
+          "notify_live_interval_seconds": "Cât de des sunt trimise actualizările de progres în timpul funcționării. Valorile mai mici sunt mai receptive, dar consumă mai multe notificări. Este impus un minim de 30 de secunde - valorile sub 30s sunt rotunjite automat la 30s.",
           "notify_live_overrun_percent": "Marja de siguranță peste numărul estimat de actualizări pentru cicluri lungi/depășite (de exemplu, 20% permite de 1,2 ori actualizările estimate).",
           "notify_title": "Titlu personalizat pentru notificări. Acceptă substituentul {device}.",
           "notify_icon": "Pictogramă de utilizat pentru notificări (de exemplu, mdi:washing-machine). Lăsați gol pentru a trimite fără pictogramă.",
           "notify_start_message": "Mesaj trimis când începe un ciclu. Acceptă substituentul {device}.",
           "notify_finish_message": "Mesaj trimis când un ciclu se termină. Acceptă substituenții {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Mesaj trimis înainte de finalizare. Acceptă substituenții {device}, {minutes}."
+          "notify_pre_complete_message": "Mesaj trimis înainte de finalizare. Acceptă substituenții {device}, {minutes}.",
+          "notify_start_services": "Unul sau mai multe servicii de notificare pentru a alerta când începe un ciclu (de exemplu, notify.mobile_app_my_phone). Lăsați gol pentru a sări peste notificările de pornire.",
+          "notify_finish_services": "Unul sau mai multe servicii de notificare pentru a alerta când un ciclu se termină sau se apropie de finalizare. Lăsați gol pentru a sări peste notificările de finalizare.",
+          "notify_live_services": "Unul sau mai multe servicii de notificare pentru a primi actualizări live despre progres în timp ce ciclul rulează (numai aplicația mobilă însoțitoare). Lăsați gol pentru a omite actualizările live.",
+          "notify_live_chronometer": "Când este activată, fiecare actualizare live include o numărătoare inversă a cronometrului până la ora estimată de terminare. Cronometrul de notificare se bifează automat pe dispozitiv între actualizări (numai aplicația însoțitoare Android).",
+          "energy_price_entity": "Selectați o entitate numerică care deține prețul curent al energiei electrice (de exemplu, senzor.electricity_price, input_number.energy_rate). Când este setat, activează substituentul {cost}. Are prioritate față de valoarea statică dacă ambele sunt configurate.",
+          "energy_price_static": "Preț fix al energiei electrice pe kWh. Când este setat, activează substituentul {cost}. Ignorat dacă o entitate este configurată mai sus. Adăugați simbolul valutar în șablonul de mesaj, de ex. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "Lățimea de bandă DTW",
           "external_end_trigger_enabled": "Activați declanșatorul extern de sfârșit de ciclu",
           "external_end_trigger": "Senzor extern de sfârșit de ciclu",
-          "external_end_trigger_inverted": "Inversați logica declanșării (declanșare la dezactivare)"
+          "external_end_trigger_inverted": "Inversați logica declanșării (declanșare la dezactivare)",
+          "suppress_feedback_notifications": "Suprimați notificările de feedback",
+          "pump_stuck_duration": "Pragul de alertă de blocare a pompei (doar pompă)",
+          "door_sensor_entity": "Senzor de ușă",
+          "pause_cuts_power": "Opriți puterea la pauză",
+          "notify_unload_delay_minutes": "Întârziere de notificare în așteptare pentru spălătorie (min.)"
         },
         "data_description": {
           "apply_suggestions": "Bifați această casetă pentru a deschide un pas de revizuire pentru valorile sugerate din algoritmul de învățare. Nimic nu este salvat automat.\n\nSugerat (din învățare):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Timpul maxim permis de deformare (întindere) ca raport al duratei ciclului. Valorile mai mari permit potrivirea ciclurilor foarte variabile, dar cresc costul CPU. Implicit: 0,20 (20%).",
           "external_end_trigger_enabled": "Activați monitorizarea unui senzor binar extern pentru a declanșa finalizarea ciclului.",
           "external_end_trigger": "Selectați o entitate senzor binar. Când acest senzor se declanșează, ciclul curent se va încheia cu starea „finalizat”.",
-          "external_end_trigger_inverted": "În mod implicit, declanșatorul se activează când senzorul este PORNIT. Bifați această casetă pentru a se activa când senzorul se OPRESTE."
+          "external_end_trigger_inverted": "În mod implicit, declanșatorul se activează când senzorul este PORNIT. Bifați această casetă pentru a se activa când senzorul se OPRESTE.",
+          "suppress_feedback_notifications": "Când este activat, WashData va urmări în continuare și va solicita feedback intern, dar nu va afișa notificări persistente care vă vor cere să confirmați ciclurile. Este util atunci când ciclurile sunt întotdeauna detectate corect și vi se pare că solicitările vă distrag atenția.",
+          "pump_stuck_duration": "Dacă un ciclu de pompă continuă să ruleze după atâtea secunde, un eveniment ha_washdata_pump_stuck este declanșat o dată. Utilizați acest lucru pentru a detecta un motor blocat (funcționarea tipică a pompei de carter este sub 60 s). Implicit: 1800 s (30 min). Numai tipul dispozitivului de pompare.",
+          "door_sensor_entity": "Senzor binar opțional pentru ușa mașinii (pornit = deschis, oprit = închis). Când ușa se deschide în timpul unui ciclu activ, WashData va confirma ciclul ca fiind întrerupt intenționat. După încheierea ciclului, dacă ușa este încă închisă, starea se schimbă în „Curățare” până când ușa este deschisă. Notă: închiderea ușii NU reia automat un ciclu întrerupt - reluarea trebuie declanșată manual prin intermediul butonului Reluare ciclu sau serviciu.",
+          "pause_cuts_power": "Când întrerupeți prin intermediul butonului sau al serviciului Pauză ciclu, dezactivați, de asemenea, entitatea de comutare configurată. Are efect numai dacă o entitate de comutare este configurată pentru acest dispozitiv.",
+          "notify_unload_delay_minutes": "Trimiteți o notificare prin canalul de notificare de terminare după ce ciclul se termină și ușa nu a fost deschisă timp de atâtea minute (necesită Senzor de ușă). Setați la 0 pentru a dezactiva. Implicit: 60 min."
         }
       },
       "diagnostics": {
@@ -446,14 +466,14 @@
         }
       },
       "cleanup_profile": {
-        "title": "Curățați istoricul — Selectați profilul",
+        "title": "Curățați istoricul - Selectați profilul",
         "description": "Selectați un profil de vizualizat. Aceasta va genera un grafic care arată toate ciclurile anterioare pentru acest profil pentru a ajuta la identificarea valorilor aberante.",
         "data": {
           "profile": "Profil"
         }
       },
       "cleanup_select": {
-        "title": "Curățați istoricul — Grafic și ștergere",
+        "title": "Curățați istoricul - Grafic și ștergere",
         "description": "![Grafic]({graph_url})\n\n**Vizualizarea {profile_name}**\n\nGraficul arată ciclurile individuale sub formă de linii colorate. Identificați valorile aberante (linii departe de grup) și potriviți culoarea lor în lista de mai jos pentru a le șterge.\n\n**Selectați ciclurile pentru a șterge DEFINITIV:**",
         "data": {
           "cycles_to_delete": "Cicluri de șters (verificați culorile potrivite)"
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Tăiere ciclu — Selectați ciclul",
+        "title": "Tăiere ciclu - Selectați ciclul",
         "description": "Selectați un ciclu de tăiat. ✓ = finalizat, ⚠ = reluat, ✗ = întrerupt",
         "data": {
           "cycle_id": "Ciclu"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: setări sugerate disponibile ({device})",
       "suggestions_ready_notification_message": "Senzorul **Setări sugerate** raportează acum **{count}** recomandări acționabile.\n\nPentru a le revizui și aplica: **Setări > Dispozitive și servicii > WashData > Configurare > Setări avansate > Aplicați valorile sugerate**.\n\nSugestiile sunt opționale și sunt afișate pentru examinare înainte de a salva.",
       "trim_range_invalid": "Începutul trebuie să fie înainte de sfârșit. Vă rugăm să vă ajustați punctele de tăiere.",
-      "trim_failed": "Tăierea a eșuat. Este posibil ca ciclul să nu mai existe sau fereastra este goală."
+      "trim_failed": "Tăierea a eșuat. Este posibil ca ciclul să nu mai existe sau fereastra este goală.",
+      "auto_tune_suggestion": "{device_type} {device_title} cicluri fantomă detectate. Modificare sugerată de min_power: {current_min}W -> {new_min}W (nu se aplică automat).",
+      "auto_tune_title": "Auto-Tune WashData",
+      "auto_tune_fallback": "{device_type} {device_title} cicluri fantomă detectate. Modificare sugerată de min_power: {current_min}W -> {new_min}W (nu se aplică automat)."
     },
     "abort": {
       "no_cycles_found": "Nu s-au găsit cicluri",
@@ -740,7 +763,7 @@
         "edit_profile": "Editați/redenumiți profilul",
         "delete_profile": "Ștergeți profilul",
         "profile_stats": "Statistici de profil",
-        "cleanup_profile": "Curățați istoricul — grafic și ștergere",
+        "cleanup_profile": "Curățați istoricul - grafic și ștergere",
         "assign_phases": "Atribuiți intervale de fază"
       }
     },
@@ -779,10 +802,10 @@
     },
     "resolve_feedback_action": {
       "options": {
-        "confirm": "Confirmare — detectare corectă",
-        "correct": "Corectare — alegeți program/durată",
-        "ignore": "Ignorare — ciclu fals pozitiv/zgomotos",
-        "delete": "Ștergere — eliminați din istoric"
+        "confirm": "Confirmare - detectare corectă",
+        "correct": "Corectare - alegeți program/durată",
+        "ignore": "Ignorare - ciclu fals pozitiv/zgomotos",
+        "delete": "Ștergere - eliminați din istoric"
       }
     },
     "assign_profile_phases_auto_detect_action": {
@@ -999,7 +1022,8 @@
           "interrupted": "Întrerupt",
           "force_stopped": "Oprit forțat",
           "rinse": "Clătire",
-          "unknown": "Necunoscut"
+          "unknown": "Necunoscut",
+          "clean": "Curat"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Setări sugerate disponibile"
+      },
+      "pump_runs_today": {
+        "name": "Funcționarea pompei (ultimele 24 de ore)"
+      },
+      "cycle_count": {
+        "name": "Număr de cicluri"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Forțați sfârșitul ciclului"
+      },
+      "pause_cycle": {
+        "name": "Ciclul de pauză"
+      },
+      "resume_cycle": {
+        "name": "Reluați ciclul"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "Ciclul nu a fost găsit sau nu are date de putere."
     },
     "trim_failed_empty_window": {
-      "message": "Eșec la tăiere — ciclul nu a fost găsit, nu există date de putere sau fereastra rezultată este goală."
+      "message": "Eșec la tăiere - ciclul nu a fost găsit, nu există date de putere sau fereastra rezultată este goală."
     },
     "trim_invalid_range": {
       "message": "trim_end_s trebuie să fie mai mare decât trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Este necesar un device_id valid."
     }
   }
 }

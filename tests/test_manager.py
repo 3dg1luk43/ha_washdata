@@ -507,7 +507,7 @@ async def test_start_notification_fires_immediately_in_fallback(manager: WashDat
     manager._match_persistence_counter = {}
     manager._current_match_candidate = None
 
-    # 1st Interval — fallback fires immediately without waiting for program detection
+    # 1st Interval - fallback fires immediately without waiting for program detection
     readings = [(dt_util.now(), 1000.0), (dt_util.now() + timedelta(seconds=10), 1000.0)]
     await manager._async_do_perform_matching(readings)
 
@@ -515,7 +515,7 @@ async def test_start_notification_fires_immediately_in_fallback(manager: WashDat
     assert manager._notified_start is True
     assert manager._current_program == "detecting..."  # Program not yet resolved
 
-    # 2nd and 3rd Intervals — no additional start notifications, program resolves on 3rd
+    # 2nd and 3rd Intervals - no additional start notifications, program resolves on 3rd
     mock_hass.services.async_call.reset_mock()
     await manager._async_do_perform_matching(readings)
     await manager._async_do_perform_matching(readings)

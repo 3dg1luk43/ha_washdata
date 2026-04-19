@@ -65,19 +65,20 @@
           "power_sensor": "功率感測器實體",
           "min_power": "最小功率（瓦）",
           "off_delay": "週期結束延遲（秒）",
-          "notify_service": "通知服務（例如notify.mobile_app）",
           "notify_actions": "通知操作",
           "notify_people": "延遲送貨，直到這些人回家",
           "notify_only_when_home": "延遲通知，直到選定的人在家",
           "notify_fire_events": "觸發自動化事件",
-          "notify_events": "要通知的事件",
           "notify_before_end_minutes": "預完成通知（結束前幾分鐘）",
           "notify_title": "通知標題",
           "notify_icon": "通知圖示",
           "notify_start_message": "啟動訊息格式",
           "notify_finish_message": "完成訊息格式",
           "notify_pre_complete_message": "預完成訊息格式",
-          "show_advanced": "編輯進階設定（下一步）"
+          "show_advanced": "編輯進階設定（下一步）",
+          "notify_start_services": "週期開始 - 通知目標",
+          "notify_finish_services": "週期完成 - 通知目標",
+          "notify_live_services": "即時進展 - 通知目標"
         },
         "data_description": {
           "apply_suggestions": "勾選此方塊可將學習演算法建議的值複製到表單中。保存前檢查。\n\n建議（來自學習）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "感測器實體報告即時功率（以瓦為單位）。您可以隨時更改此設置，而不會丟失歷史數據 - 如果您更換智慧插頭，這很有用。",
           "min_power": "功率讀數高於此閾值（以瓦為單位）表示設備正在運作。大多數設備從 2W 開始。",
           "off_delay": "平滑功率必須保持低於停止閾值的秒數才能標記完成。預設值：120 秒。",
-          "notify_service": "Home Assistant 通知要使用的服務（可選）。",
           "notify_actions": "用於執行通知的選用 Home Assistant 操作序列（腳本、通知、TTS 等）。如果設置，操作將在回退通知服務之前運行。",
           "notify_people": "用於存在門控的人員實體。啟用後，通知發送會延遲，直到至少有一名選定的人在家。",
           "notify_only_when_home": "如果啟用，則延遲通知，直到至少一個選定的人在家。",
           "notify_fire_events": "如果啟用，則觸發循環開始和結束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_ended）以驅動自動化。",
-          "notify_events": "要發送通知的事件。",
           "notify_before_end_minutes": "觸發通知的預計週期結束前的分鐘數。設定為 0 以停用。預設值：0。",
           "notify_title": "通知的自訂標題。支援 {device} 佔位符。",
           "notify_icon": "用於通知的圖示（例如 mdi：洗衣機）。留空以不傳送圖示。",
           "notify_start_message": "循環開始時發送的訊息。支援 {device} 佔位符。",
           "notify_finish_message": "循環結束時發送的訊息。支援 {device}、{duration}、{program} 佔位符。",
-          "notify_pre_complete_message": "訊息在完成之前發送。支援 {device}、{minutes} 佔位符。"
+          "notify_pre_complete_message": "訊息在完成之前發送。支援 {device}、{minutes} 佔位符。",
+          "notify_start_services": "一個或多個通知服務在周期開始時發出警報。留空以跳過開始通知。",
+          "notify_finish_services": "一個或多個通知服務在周期完成或接近完成時發出警報。留空以跳過完成通知。",
+          "notify_live_services": "一項或多項通知服務在週期運行時接收即時進度更新（僅限行動配套應用程式）。留空以跳過即時更新。"
         }
       },
       "notifications": {
         "title": "通知",
         "description": "配置通知頻道、模板和可選的即時行動進度更新。",
         "data": {
-          "notify_service": "通知服務（例如notify.mobile_app）",
           "notify_actions": "通知操作",
           "notify_people": "延遲送貨，直到這些人回家",
           "notify_only_when_home": "延遲通知，直到選定的人在家",
           "notify_fire_events": "觸發自動化事件",
-          "notify_events": "要通知的事件",
           "notify_before_end_minutes": "預完成通知（結束前幾分鐘）",
           "notify_live_interval_seconds": "即時更新間隔（秒）",
           "notify_live_overrun_percent": "即時更新超限容限 (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "通知圖示",
           "notify_start_message": "啟動訊息格式",
           "notify_finish_message": "完成訊息格式",
-          "notify_pre_complete_message": "預完成訊息格式"
+          "notify_pre_complete_message": "預完成訊息格式",
+          "notify_start_services": "週期開始 - 通知目標",
+          "notify_finish_services": "週期完成 - 通知目標",
+          "notify_live_services": "即時進展 - 通知目標",
+          "notify_live_chronometer": "天文台倒數計時器",
+          "energy_price_entity": "能源價格 - 實體（可選）",
+          "energy_price_static": "能源價格 - 靜態值（可選）"
         },
         "data_description": {
-          "notify_service": "Home Assistant 通知要使用的服務（可選）。",
           "notify_actions": "用於執行通知的選用 Home Assistant 操作序列（腳本、通知、TTS 等）。如果設置，操作將在回退通知服務之前運行。",
           "notify_people": "用於存在門控的人員實體。啟用後，通知發送會延遲，直到至少有一名選定的人在家。",
           "notify_only_when_home": "如果啟用，則延遲通知，直到至少一個選定的人在家。",
           "notify_fire_events": "如果啟用，則觸發循環開始和結束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_ended）以驅動自動化。",
-          "notify_events": "要發送通知的事件。",
           "notify_before_end_minutes": "觸發通知的預計週期結束前的分鐘數。設定為 0 以停用。預設值：0。",
           "notify_live_interval_seconds": "運行時發送進度更新的頻率。值越低，回應速度越快，但會消耗更多通知。強制執行至少 30 秒 - 低於 30 秒的值將自動四捨五入為 30 秒。",
           "notify_live_overrun_percent": "安全裕度高於長/超出週期的估計更新計數（例如 20% 允許 1.2 倍估計更新）。",
@@ -132,7 +136,13 @@
           "notify_icon": "用於通知的圖示（例如 mdi：洗衣機）。留空以不傳送圖示。",
           "notify_start_message": "循環開始時發送的訊息。支援 {device} 佔位符。",
           "notify_finish_message": "循環結束時發送的訊息。支援 {device}、{duration}、{program} 佔位符。",
-          "notify_pre_complete_message": "訊息在完成之前發送。支援 {device}、{minutes} 佔位符。"
+          "notify_pre_complete_message": "訊息在完成之前發送。支援 {device}、{minutes} 佔位符。",
+          "notify_start_services": "一個或多個通知服務在周期開始時發出警報（例如notify.mobile_app_my_phone）。留空以跳過開始通知。",
+          "notify_finish_services": "一個或多個通知服務在周期完成或接近完成時發出警報。留空以跳過完成通知。",
+          "notify_live_services": "一項或多項通知服務在週期運行時接收即時進度更新（僅限行動配套應用程式）。留空以跳過即時更新。",
+          "notify_live_chronometer": "啟用後，每次即時更新都會包含預計完成時間的計時器倒數。更新之間，通知計時器會在裝置上自動計時（僅限 Android 配套應用程式）。",
+          "energy_price_entity": "選擇保存目前電價的數位實體（例如sensor.electricity_price、input_number.energy_rate）。設定後，啟用 {cost} 佔位符。如果兩者都配置了，則優先於靜態值。",
+          "energy_price_static": "每度電固定電價。設定後，啟用 {cost} 佔位符。如果上面配置了實體，則忽略。在訊息範本中加入您的貨幣符號，例如{cost} 歐元。"
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "DTW 頻寬",
           "external_end_trigger_enabled": "啟用外部循環結束觸發器",
           "external_end_trigger": "外部循環結束感測器",
-          "external_end_trigger_inverted": "反轉觸發邏輯（觸發關閉）"
+          "external_end_trigger_inverted": "反轉觸發邏輯（觸發關閉）",
+          "suppress_feedback_notifications": "抑制回饋通知",
+          "pump_stuck_duration": "泵浦卡住警報閾值（僅限泵浦）",
+          "door_sensor_entity": "門磁",
+          "pause_cuts_power": "暫停時切斷電源",
+          "notify_unload_delay_minutes": "洗衣等待通知延遲（分鐘）"
         },
         "data_description": {
           "apply_suggestions": "勾選此方塊可開啟學習演算法建議值的檢查步驟。沒有任何內容會自動儲存。\n\n建議（來自學習）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "最大允許時間扭曲（拉伸）與週期持續時間的比率。较高的值允许匹配高度可变的周期，但会增加 CPU 成本。預設值：0.20 (20%)。",
           "external_end_trigger_enabled": "啟用對外部二進位感測器的監控以觸發循環完成。",
           "external_end_trigger": "選擇二進制感測器實體。當此感測器觸發時，當前週期將以「已完成」狀態結束。",
-          "external_end_trigger_inverted": "預設情況下，當感測器開啟時觸發器會觸發。選取此方塊以在感測器關閉時觸發。"
+          "external_end_trigger_inverted": "預設情況下，當感測器開啟時觸發器會觸發。選取此方塊以在感測器關閉時觸發。",
+          "suppress_feedback_notifications": "啟用後，WashData 仍將在內部追蹤和請求回饋，但不會顯示要求您確認週期的持續通知。當循環總是被正確檢測到並且您發現提示分散注意力時很有用。",
+          "pump_stuck_duration": "如果泵浦循環在這麼多秒後仍在運行，則會觸發一次 ha_washdata_pump_stuck 事件。用它來檢測堵塞的馬達（典型的污水泵運行時間低於 60 秒）。預設值：1800 秒（30 分鐘）。僅限泵浦設備類型。",
+          "door_sensor_entity": "用於機器門的可選二進位感測器（開=打開，關=關閉）。當門在活動週期期間打開時，WashData 將確認該週期是有意暫停的。循環結束後，如果門仍然關閉，則狀態變更為“清潔”，直到門打開。注意：關上門不會自動恢復暫停的循環 - 必須透過「恢復循環」按鈕或服務手動觸發恢復。",
+          "pause_cuts_power": "透過「暫停循環」按鈕或服務暫停時，也要關閉已配置的開關實體。僅當為該設備配置了交換實體時才生效。",
+          "notify_unload_delay_minutes": "循環結束且門在這麼多分鐘內未打開後，透過完成通知通道發送通知（需要門感應器）。設定為 0 以停用。預設值：60 分鐘"
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "修剪週期 — 選擇週期",
+        "title": "修剪週期 - 選擇週期",
         "description": "選擇要修剪的周期。 ✓ = 已完成，⚠ = 已恢復，✗ = 已中斷",
         "data": {
           "cycle_id": "循環"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData：建議設定已就緒 ({device})",
       "suggestions_ready_notification_message": "**建議設定**感測器現在報告 **{count}** 可操作的建議。\n\n若要查看並套用它們：**設定 > 裝置和服務 > WashData > 配置 > 進階設定 > 套用建議值**。\n\n建議是可選的，並會在您儲存之前顯示以供審核。",
       "trim_range_invalid": "開始必須在結束之前。請調整您的修剪點。",
-      "trim_failed": "修剪失敗。循環可能不再存在或視窗為空。"
+      "trim_failed": "修剪失敗。循環可能不再存在或視窗為空。",
+      "auto_tune_suggestion": "{device_type} {device_title} 偵測到幽靈週期。建議的 min_power 變更：{current_min}W -> {new_min}W（不會自動套用）。",
+      "auto_tune_title": "WashData 自動調整",
+      "auto_tune_fallback": "{device_type} {device_title} 偵測到幽靈週期。建議的 min_power 變更：{current_min}W -> {new_min}W（不會自動套用）。"
     },
     "abort": {
       "no_cycles_found": "沒有找到循環",
@@ -999,7 +1022,8 @@
           "interrupted": "被打斷",
           "force_stopped": "強制停止",
           "rinse": "沖洗",
-          "unknown": "未知"
+          "unknown": "未知",
+          "clean": "乾淨的"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "建議設定"
+      },
+      "pump_runs_today": {
+        "name": "泵浦運轉（過去 24 小時）"
+      },
+      "cycle_count": {
+        "name": "循環計數"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "強制結束循環"
+      },
+      "pause_cycle": {
+        "name": "暫停循環"
+      },
+      "resume_cycle": {
+        "name": "恢復週期"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "未找到週期或沒有功率數據。"
     },
     "trim_failed_empty_window": {
-      "message": "修剪失敗 — 未找到週期、無功率資料或產生的視窗為空。"
+      "message": "修剪失敗 - 未找到週期、無功率資料或產生的視窗為空。"
     },
     "trim_invalid_range": {
       "message": "trim_end_s必須大於trim_start_s。"
+    },
+    "device_id_required": {
+      "message": "需要有效的 device_id。"
     }
   }
 }

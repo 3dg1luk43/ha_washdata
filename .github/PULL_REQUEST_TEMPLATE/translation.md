@@ -6,7 +6,7 @@ Thank you for contributing a translation to WashData!
 
 - [ ] I am a native or fluent speaker of the language I am translating, or I have had the translation reviewed by one.
 - [ ] I have only modified files under `custom_components/ha_washdata/translations/`.
-- [ ] I have not changed any English (`en.json`) strings — only translated files.
+- [ ] I have not changed any English (`en.json`) strings - only translated files.
 - [ ] All keys present in `en.json` are present in my translation file (no keys added or removed).
 - [ ] I have tested the translation by loading it in Home Assistant and checking that strings display correctly.
 

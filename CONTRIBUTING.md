@@ -216,7 +216,7 @@ Example: `[FIX] Handle timezone-aware datetime in cycle detection`
 - **PEP 8** compliance (with Black formatter preferences)
 - **Type hints** for better IDE support
 - **Docstrings** for all public functions/classes (Google style)
-- **No hardcoded UI strings** — use `strings.json` and `translations/` for all user-facing text
+- **No hardcoded UI strings** - use `strings.json` and `translations/` for all user-facing text
 
 Example:
 
@@ -238,10 +238,10 @@ async def async_method(self, device_id: str, config: dict[str, Any]) -> None:
 ### Project Guardrails
 
 - **ONLY NumPy** for calculations (no SciPy or ML libraries)
-- **No external API calls** — all processing must be local
-- **Timezone-aware datetimes** — ALWAYS use `dt_util.now()`
-- **No inline UI strings** — use translation keys instead
-- **Respect 32KB event data limit** — exclude large data from fired events
+- **No external API calls** - all processing must be local
+- **Timezone-aware datetimes** - ALWAYS use `dt_util.now()`
+- **No inline UI strings** - use translation keys instead
+- **Respect 32KB event data limit** - exclude large data from fired events
 
 See [copilot-instructions.md](.github/copilot-instructions.md) for full technical details.
 
@@ -376,9 +376,9 @@ Fixes #123
 ### Communication
 
 - **Be respectful** and assume good intentions
-- **Search first** — your question may already be answered
-- **Provide context** — share relevant code/logs
-- **Be patient** — maintainers are volunteers
+- **Search first** - your question may already be answered
+- **Provide context** - share relevant code/logs
+- **Be patient** - maintainers are volunteers
 
 ---
 

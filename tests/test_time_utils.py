@@ -57,7 +57,7 @@ def test_detect_unknown():
 
 
 # ---------------------------------------------------------------------------
-# power_data_to_offsets — offset format (passthrough)
+# power_data_to_offsets - offset format (passthrough)
 # ---------------------------------------------------------------------------
 
 
@@ -78,7 +78,7 @@ def test_offset_passthrough_no_mutation():
 
 
 # ---------------------------------------------------------------------------
-# power_data_to_offsets — ISO string format
+# power_data_to_offsets - ISO string format
 # ---------------------------------------------------------------------------
 
 
@@ -110,7 +110,7 @@ def test_iso_skips_malformed_entries():
 
 
 # ---------------------------------------------------------------------------
-# power_data_to_offsets — datetime format
+# power_data_to_offsets - datetime format
 # ---------------------------------------------------------------------------
 
 
@@ -127,7 +127,7 @@ def test_datetime_format():
 
 
 # ---------------------------------------------------------------------------
-# power_data_to_offsets — empty and edge cases
+# power_data_to_offsets - empty and edge cases
 # ---------------------------------------------------------------------------
 
 

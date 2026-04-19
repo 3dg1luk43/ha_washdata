@@ -403,7 +403,7 @@ def merge_phase_catalog(device_type: str, custom_phases: list[PhaseItem] | None)
     seen_ids: set[str] = set(builtin_by_id.keys())
     seen_names: set[tuple[str, str]] = set(builtin_by_name.keys())
 
-    # All known built-in names — used to guard against polluting unrelated catalogs.
+    # All known built-in names - used to guard against polluting unrelated catalogs.
     all_builtin_names = {
         str(p.get("name", "")).strip().casefold()
         for phases_list in DEFAULT_PHASES_BY_DEVICE.values()

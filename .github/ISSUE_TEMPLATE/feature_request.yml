@@ -8,7 +8,7 @@ body:
       value: |
         Thanks for suggesting a new feature!
 
-        Please fill in only the sections that are relevant to your request. Fields marked as required must be completed — others can be skipped if they don't apply.
+        Please fill in only the sections that are relevant to your request. Fields marked as required must be completed - others can be skipped if they don't apply.
 
   - type: checkboxes
     id: preflight
@@ -61,7 +61,7 @@ body:
     attributes:
       label: Device Brand & Model (if device-specific)
       description: If this feature is only relevant for a specific device, provide the brand and model. Otherwise leave blank.
-      placeholder: "e.g. Miele W1 WCG370 — or leave blank"
+      placeholder: "e.g. Miele W1 WCG370 - or leave blank"
     validations:
       required: false
 

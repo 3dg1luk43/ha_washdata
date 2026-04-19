@@ -65,19 +65,20 @@
           "power_sensor": "Entitet senzora snage",
           "min_power": "Minimalna snaga (W)",
           "off_delay": "Kašnjenje završetka ciklusa (s)",
-          "notify_service": "Usluga obavještavanja (npr. notify.mobile_app)",
           "notify_actions": "Radnje obavještenja",
           "notify_people": "Odgodite isporuku dok ovi ljudi nisu kod kuće",
           "notify_only_when_home": "Odgodi obavještenja dok odabrana osoba nije kod kuće",
           "notify_fire_events": "Pokreni događaje automatizacije",
-          "notify_events": "Događaji koje treba obavijestiti",
           "notify_before_end_minutes": "Obavijest prije završetka (minuta prije kraja)",
           "notify_title": "Naslov obavijesti",
           "notify_icon": "Ikona obaveštenja",
           "notify_start_message": "Pokreni format poruke",
           "notify_finish_message": "Završi format poruke",
           "notify_pre_complete_message": "Format poruke prije završetka",
-          "show_advanced": "Uredite napredne postavke (sljedeći korak)"
+          "show_advanced": "Uredite napredne postavke (sljedeći korak)",
+          "notify_start_services": "Početak ciklusa - Ciljevi obavijesti",
+          "notify_finish_services": "Završetak ciklusa - Ciljevi obavijesti",
+          "notify_live_services": "Napredak uživo - Ciljevi obavještenja"
         },
         "data_description": {
           "apply_suggestions": "Označite ovo polje za kopiranje vrijednosti koje je predložio algoritam učenja u obrazac. Pregledajte prije spremanja.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "Senzorski entitet koji izvještava o snazi ​​u realnom vremenu (u vatima). Ovo možete promijeniti bilo kada bez gubitka historijskih podataka – korisno ako zamijenite pametni utikač.",
           "min_power": "Očitavanja snage iznad ovog praga (u vatima) pokazuju da uređaj radi. Počnite sa 2W za većinu uređaja.",
           "off_delay": "Sekunde izglađena snaga mora ostati ispod praga zaustavljanja da označi završetak. Podrazumevano: 120s.",
-          "notify_service": "Home Assistant servis za obavještavanje koji se koristi (opciono).",
           "notify_actions": "Opcioni niz akcija Home Assistant-a za pokretanje za obavještenja (skripte, obavijesti, TTS, itd.). Ako je postavljeno, radnje se pokreću prije servisa zamjenskog obavijesti.",
           "notify_people": "Entiteti osoba koji se koriste za praćenje prisutnosti. Kada je omogućeno, dostava obavještenja se odgađa sve dok barem jedna odabrana osoba ne bude kod kuće.",
           "notify_only_when_home": "Ako je omogućeno, odgodite obavještenja dok barem jedna odabrana osoba ne bude kod kuće.",
           "notify_fire_events": "Ako je omogućeno, aktivirajte događaje Home Assistant za početak i kraj ciklusa (ha_washdata_cycle_started i ha_washdata_cycle_ended) za pokretanje automatizacije.",
-          "notify_events": "Za koje događaje slati obavještenja.",
           "notify_before_end_minutes": "Nekoliko minuta prije procijenjenog kraja ciklusa za pokretanje obavještenja. Postavite na 0 da biste onemogućili. Podrazumevano: 0.",
           "notify_title": "Prilagođeni naslov za obavještenja. Podržava {device} čuvar mjesta.",
           "notify_icon": "Ikona za korištenje za obavještenja (npr. mdi:washing-machine). Ostavite prazno za slanje bez ikone.",
           "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava {device} čuvar mjesta.",
           "notify_finish_message": "Poruka se šalje kada se ciklus završi. Podržava {device}, {duration}, {program} čuvare mjesta.",
-          "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta."
+          "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta.",
+          "notify_start_services": "Jedan ili više servisa za obavještavanje da upozore kada ciklus počne. Ostavite prazno da preskočite obavještenja o početku.",
+          "notify_finish_services": "Jedna ili više službi za obavještavanje da upozore kada se ciklus završi ili se bliži završetku. Ostavite prazno da preskočite obavještenja o završetku.",
+          "notify_live_services": "Jedna ili više usluga obavještavanja za primanje ažuriranja napretka uživo dok ciklus traje (samo mobilna prateća aplikacija). Ostavite prazno da preskočite ažuriranja uživo."
         }
       },
       "notifications": {
         "title": "Obavještenja",
         "description": "Konfigurirajte kanale obavještenja, šablone i opcionalna ažuriranja napretka na mobilnom uređaju.",
         "data": {
-          "notify_service": "Usluga obavještavanja (npr. notify.mobile_app)",
           "notify_actions": "Radnje obavještenja",
           "notify_people": "Odgodite isporuku dok ovi ljudi nisu kod kuće",
           "notify_only_when_home": "Odgodi obavještenja dok odabrana osoba nije kod kuće",
           "notify_fire_events": "Pokreni događaje automatizacije",
-          "notify_events": "Događaji koje treba obavijestiti",
           "notify_before_end_minutes": "Obavijest prije završetka (minuta prije kraja)",
           "notify_live_interval_seconds": "Interval ažuriranja uživo (sekunde)",
           "notify_live_overrun_percent": "Dodatak za prekoračenje ažuriranja uživo (%)",
@@ -116,23 +116,33 @@
           "notify_icon": "Ikona obaveštenja",
           "notify_start_message": "Pokreni format poruke",
           "notify_finish_message": "Završi format poruke",
-          "notify_pre_complete_message": "Format poruke prije završetka"
+          "notify_pre_complete_message": "Format poruke prije završetka",
+          "notify_start_services": "Početak ciklusa - Ciljevi obavijesti",
+          "notify_finish_services": "Završetak ciklusa - Ciljevi obavijesti",
+          "notify_live_services": "Napredak uživo - Ciljevi obavještenja",
+          "notify_live_chronometer": "Tajmer za odbrojavanje hronometra",
+          "energy_price_entity": "Cijena energije - entitet (opcionalno)",
+          "energy_price_static": "Cijena energije - statička vrijednost (opcionalno)"
         },
         "data_description": {
-          "notify_service": "Home Assistant servis za obavještavanje koji se koristi (opciono).",
           "notify_actions": "Opcioni niz akcija Home Assistant-a za pokretanje za obavještenja (skripte, obavijesti, TTS, itd.). Ako je postavljeno, radnje se pokreću prije servisa zamjenskog obavijesti.",
           "notify_people": "Entiteti osoba koji se koriste za praćenje prisutnosti. Kada je omogućeno, dostava obavještenja se odgađa sve dok barem jedna odabrana osoba ne bude kod kuće.",
           "notify_only_when_home": "Ako je omogućeno, odgodite obavještenja dok barem jedna odabrana osoba ne bude kod kuće.",
           "notify_fire_events": "Ako je omogućeno, aktivirajte događaje Home Assistant za početak i kraj ciklusa (ha_washdata_cycle_started i ha_washdata_cycle_ended) za pokretanje automatizacije.",
-          "notify_events": "Za koje događaje slati obavještenja.",
           "notify_before_end_minutes": "Nekoliko minuta prije procijenjenog kraja ciklusa za pokretanje obavještenja. Postavite na 0 da biste onemogućili. Podrazumevano: 0.",
-          "notify_live_interval_seconds": "Koliko često se ažuriranja napretka šalju tokom rada. Niže vrijednosti bolje reagiraju, ali troše više obavijesti. Primjenjuje se minimalno 30 sekundi — vrijednosti ispod 30 s se automatski zaokružuju na 30 s.",
+          "notify_live_interval_seconds": "Koliko često se ažuriranja napretka šalju tokom rada. Niže vrijednosti bolje reagiraju, ali troše više obavijesti. Primjenjuje se minimalno 30 sekundi - vrijednosti ispod 30 s se automatski zaokružuju na 30 s.",
           "notify_live_overrun_percent": "Sigurnosna margina iznad procijenjenog broja ažuriranja za duge cikluse/prekoračivanje (na primjer, 20% dozvoljava 1,2x procijenjenih ažuriranja).",
           "notify_title": "Prilagođeni naslov za obavještenja. Podržava {device} čuvar mjesta.",
           "notify_icon": "Ikona za korištenje za obavještenja (npr. mdi:washing-machine). Ostavite prazno za slanje bez ikone.",
           "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava {device} čuvar mjesta.",
           "notify_finish_message": "Poruka se šalje kada se ciklus završi. Podržava {device}, {duration}, {program} čuvare mjesta.",
-          "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta."
+          "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta.",
+          "notify_start_services": "Jedan ili više servisa za obavještavanje za upozorenje kada ciklus počne (npr. notify.mobile_app_my_phone). Ostavite prazno da preskočite obavještenja o početku.",
+          "notify_finish_services": "Jedna ili više službi za obavještavanje da upozore kada se ciklus završi ili se bliži završetku. Ostavite prazno da preskočite obavještenja o završetku.",
+          "notify_live_services": "Jedna ili više usluga obavještavanja za primanje ažuriranja napretka uživo dok ciklus traje (samo mobilna prateća aplikacija). Ostavite prazno da preskočite ažuriranja uživo.",
+          "notify_live_chronometer": "Kada je omogućeno, svako ažuriranje uživo uključuje odbrojavanje kronometra do procijenjenog vremena završetka. Tajmer za obavještenja automatski otkucava na uređaju između ažuriranja (samo prateća aplikacija za Android).",
+          "energy_price_entity": "Odaberite numerički entitet koji drži trenutnu cijenu električne energije (npr. senzor.electricity_price, input_number.energy_rate). Kada je postavljeno, omogućava {cost} čuvar mjesta. Ima prednost u odnosu na statičku vrijednost ako su obje konfigurirane.",
+          "energy_price_static": "Fiksna cijena električne energije po kWh. Kada je postavljeno, omogućava {cost} čuvar mjesta. Zanemaruje se ako je entitet konfiguriran gore. Dodajte simbol valute u šablon poruke, npr. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "DTW Bandwidth",
           "external_end_trigger_enabled": "Omogući okidač za završetak eksternog ciklusa",
           "external_end_trigger": "Eksterni senzor završetka ciklusa",
-          "external_end_trigger_inverted": "Invertna logika okidača (okidač je isključen)"
+          "external_end_trigger_inverted": "Invertna logika okidača (okidač je isključen)",
+          "suppress_feedback_notifications": "Poništi obavještenja o povratnim informacijama",
+          "pump_stuck_duration": "Prag (s) upozorenja zastoja pumpe (samo pumpa)",
+          "door_sensor_entity": "Door Sensor",
+          "pause_cuts_power": "Isključite napajanje prilikom pauze",
+          "notify_unload_delay_minutes": "Kašnjenje obavijesti o čekanju rublja (min)"
         },
         "data_description": {
           "apply_suggestions": "Označite ovo polje za otvaranje koraka pregleda za predložene vrijednosti iz algoritma učenja. Ništa se ne pohranjuje automatski.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Maksimalno dozvoljeno vreme savijanja (istezanja) kao omjer trajanja ciklusa. Više vrijednosti omogućavaju uparivanje vrlo varijabilnih ciklusa, ali povećavaju troškove CPU-a. Podrazumevano: 0,20 (20%).",
           "external_end_trigger_enabled": "Omogućite praćenje eksternog binarnog senzora da biste pokrenuli završetak ciklusa.",
           "external_end_trigger": "Odaberite binarni senzorski entitet. Kada se ovaj senzor aktivira, trenutni ciklus će se završiti sa statusom 'dovršeno'.",
-          "external_end_trigger_inverted": "Standardno, okidač se aktivira kada se senzor uključi. Označite ovo polje da se aktivira kada se senzor ISKLJUČI."
+          "external_end_trigger_inverted": "Standardno, okidač se aktivira kada se senzor uključi. Označite ovo polje da se aktivira kada se senzor ISKLJUČI.",
+          "suppress_feedback_notifications": "Kada je omogućen, WashData će i dalje interno pratiti i tražiti povratne informacije, ali neće prikazivati ​​stalna obavještenja u kojima se od vas traži da potvrdite cikluse. Korisno kada se ciklusi uvijek ispravno detektuju i ako vam upute ometaju pažnju.",
+          "pump_stuck_duration": "Ako ciklus pumpe i dalje radi nakon ovoliko sekundi, događaj ha_washdata_pump_stuck se aktivira jednom. Upotrijebite ovo za otkrivanje zaglavljenog motora (uobičajeni rad pumpe ispod 60 s). Zadano: 1800 s (30 min). Samo tip uređaja za pumpu.",
+          "door_sensor_entity": "Opcioni binarni senzor za vrata mašine (uključeno = otvoreno, isključeno = zatvoreno). Kada se vrata otvore tokom aktivnog ciklusa, WashData će potvrditi da je ciklus namjerno pauziran. Nakon završetka ciklusa, ako su vrata i dalje zatvorena, stanje se mijenja u 'Clean' dok se vrata ne otvore. Napomena: zatvaranje vrata NE nastavlja automatski pauzirani ciklus - nastavak se mora pokrenuti ručno putem dugmeta Nastavi ciklus ili usluge.",
+          "pause_cuts_power": "Prilikom pauziranja pomoću tipke Pause Cycle ili usluge, također isključite konfigurirani entitet prekidača. Stupa na snagu samo ako je entitet prekidača konfiguriran za ovaj uređaj.",
+          "notify_unload_delay_minutes": "Pošaljite obavijest putem kanala obavijesti o završetku nakon što se ciklus završi, a vrata nisu bila otvorena ovoliko minuta (zahtijeva senzor vrata). Postavite na 0 da biste onemogućili. Podrazumevano: 60 min."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle — Odaberite Ciklus",
+        "title": "Trim Cycle - Odaberite Ciklus",
         "description": "Odaberite ciklus za podrezivanje. ✓ = završeno, ⚠ = nastavljeno, ✗ = prekinuto",
         "data": {
           "cycle_id": "Ciklus"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: Spremne predložene postavke ({device})",
       "suggestions_ready_notification_message": "Senzor **Predložene postavke** sada izvještava o **{count}** preporukama koje se mogu primijeniti.\n\nDa biste ih pregledali i primijenili: **Postavke > Uređaji i usluge > WashData > Konfiguriraj > Napredne postavke > Primijeni predložene vrijednosti**.\n\nPrijedlozi su opcioni i prikazani su za pregled prije nego što ih sačuvate.",
       "trim_range_invalid": "Početak mora biti prije kraja. Molimo prilagodite svoje trim tačke.",
-      "trim_failed": "Trim nije uspio. Ciklus možda više ne postoji ili je prozor prazan."
+      "trim_failed": "Trim nije uspio. Ciklus možda više ne postoji ili je prozor prazan.",
+      "auto_tune_suggestion": "{device_type} {device_title} je otkrio cikluse duhova. Predložena promjena min_power: {current_min}W -> {new_min}W (ne primjenjuje se automatski).",
+      "auto_tune_title": "WashData Auto-Tune",
+      "auto_tune_fallback": "{device_type} {device_title} je otkrio cikluse duhova. Predložena promjena min_power: {current_min}W -> {new_min}W (ne primjenjuje se automatski)."
     },
     "abort": {
       "no_cycles_found": "Nisu pronađeni ciklusi",
@@ -999,7 +1022,8 @@
           "interrupted": "Prekinut",
           "force_stopped": "Prisilno zaustavljeno",
           "rinse": "Isperite",
-          "unknown": "Nepoznato"
+          "unknown": "Nepoznato",
+          "clean": "Čisto"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Predložene postavke"
+      },
+      "pump_runs_today": {
+        "name": "Pumpa radi (posljednja 24 h)"
+      },
+      "cycle_count": {
+        "name": "Cycle Count"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Prisilno završi ciklus"
+      },
+      "pause_cycle": {
+        "name": "Pauziraj ciklus"
+      },
+      "resume_cycle": {
+        "name": "Nastavi ciklus"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "Ciklus nije pronađen ili nema podataka o snazi."
     },
     "trim_failed_empty_window": {
-      "message": "Trim nije uspio — ciklus nije pronađen, nema podataka o napajanju ili je rezultirajući prozor prazan."
+      "message": "Trim nije uspio - ciklus nije pronađen, nema podataka o napajanju ili je rezultirajući prozor prazan."
     },
     "trim_invalid_range": {
       "message": "trim_end_s mora biti veći od trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Potreban je važeći device_id."
     }
   }
 }

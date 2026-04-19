@@ -65,19 +65,20 @@
           "power_sensor": "Strømsensorenhet",
           "min_power": "Minimum effekt (W)",
           "off_delay": "Syklussluttforsinkelse (r)",
-          "notify_service": "Varslingstjeneste (f.eks. notify.mobile_app)",
           "notify_actions": "Varslingshandlinger",
           "notify_people": "Utsett levering til disse menneskene er hjemme",
           "notify_only_when_home": "Utsett varsler til valgt person er hjemme",
           "notify_fire_events": "Brannautomatiseringshendelser",
-          "notify_events": "Hendelser å varsle",
           "notify_before_end_minutes": "Varsling før fullføring (minutter før slutt)",
           "notify_title": "Meldingstittel",
           "notify_icon": "Varslingsikon",
           "notify_start_message": "Start meldingsformat",
           "notify_finish_message": "Fullfør meldingsformat",
           "notify_pre_complete_message": "Meldingsformat før fullføring",
-          "show_advanced": "Rediger avanserte innstillinger (neste trinn)"
+          "show_advanced": "Rediger avanserte innstillinger (neste trinn)",
+          "notify_start_services": "Syklusstart - varslingsmål",
+          "notify_finish_services": "Cycle Finish - Varslingsmål",
+          "notify_live_services": "Live Progress - Varslingsmål"
         },
         "data_description": {
           "apply_suggestions": "Kryss av i denne boksen for å kopiere verdier foreslått av læringsalgoritmen til skjemaet. Se gjennom før du lagrer.\n\nForeslått (fra læring):\n- min_effekt: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "Sensorenheten rapporterer sanntidseffekt (i watt). Du kan endre dette når som helst uten å miste historiske data – nyttig hvis du bytter ut en smartplugg.",
           "min_power": "Effektavlesninger over denne terskelen (i watt) indikerer at apparatet er i gang. Start med 2W for de fleste enheter.",
           "off_delay": "Sekunder må den utjevnede effekten holde seg under stoppterskelen for å markere fullføring. Standard: 120s.",
-          "notify_service": "Home Assistant varsler tjenesten som skal brukes (valgfritt).",
           "notify_actions": "Valgfri Home Assistant-handlingssekvens for å kjøre for varsler (skript, varsling, TTS, etc.). Hvis angitt, kjøres handlinger før reservevarslingstjenesten.",
           "notify_people": "Personenheter som brukes til tilstedeværelsesport. Når aktivert, forsinkes varslingsleveringen til minst én valgt person er hjemme.",
           "notify_only_when_home": "Hvis aktivert, utsett varsler til minst én valgt person er hjemme.",
           "notify_fire_events": "Hvis aktivert, utløs Home Assistant-hendelser for syklusstart og -slutt (ha_washdata_cycle_started og ha_washdata_cycle_ended) for å drive automatisering.",
-          "notify_events": "Hvilke hendelser du skal sende varsler om.",
           "notify_before_end_minutes": "Minutter før beregnet slutt på syklusen for å utløse et varsel. Sett til 0 for å deaktivere. Standard: 0.",
           "notify_title": "Egendefinert tittel for varsler. Støtter {device} plassholder.",
           "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å sende uten ikon.",
           "notify_start_message": "Melding sendt når en syklus starter. Støtter {device} plassholder.",
           "notify_finish_message": "Melding sendt når en syklus er ferdig. Støtter {device}, {duration}, {program} plassholdere.",
-          "notify_pre_complete_message": "Melding sendt før ferdigstillelse. Støtter {device}, {minutes} plassholdere."
+          "notify_pre_complete_message": "Melding sendt før ferdigstillelse. Støtter {device}, {minutes} plassholdere.",
+          "notify_start_services": "En eller flere varslingstjenester for å varsle når en syklus begynner. La stå tomt for å hoppe over startvarsler.",
+          "notify_finish_services": "En eller flere varslingstjenester for å varsle når en syklus avsluttes eller nærmer seg fullføring. La stå tomt for å hoppe over ferdigvarsler.",
+          "notify_live_services": "En eller flere varslingstjenester for å motta live fremdriftsoppdateringer mens syklusen kjører (kun mobilappen). La stå tomt for å hoppe over live-oppdateringer."
         }
       },
       "notifications": {
         "title": "Varsler",
         "description": "Konfigurer varslingskanaler, maler og valgfrie live-fremdriftsoppdateringer for mobil.",
         "data": {
-          "notify_service": "Varslingstjeneste (f.eks. notify.mobile_app)",
           "notify_actions": "Varslingshandlinger",
           "notify_people": "Utsett levering til disse menneskene er hjemme",
           "notify_only_when_home": "Utsett varsler til valgt person er hjemme",
           "notify_fire_events": "Brannautomatiseringshendelser",
-          "notify_events": "Hendelser å varsle",
           "notify_before_end_minutes": "Varsling før fullføring (minutter før slutt)",
           "notify_live_interval_seconds": "Live Update Interval (sekunder)",
           "notify_live_overrun_percent": "Live Update Overrun Allowance (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "Varslingsikon",
           "notify_start_message": "Start meldingsformat",
           "notify_finish_message": "Fullfør meldingsformat",
-          "notify_pre_complete_message": "Meldingsformat før fullføring"
+          "notify_pre_complete_message": "Meldingsformat før fullføring",
+          "notify_start_services": "Syklusstart - varslingsmål",
+          "notify_finish_services": "Cycle Finish - Varslingsmål",
+          "notify_live_services": "Live Progress - Varslingsmål",
+          "notify_live_chronometer": "Kronometer nedtellingstimer",
+          "energy_price_entity": "Energipris – enhet (valgfritt)",
+          "energy_price_static": "Energipris – Statisk verdi (valgfritt)"
         },
         "data_description": {
-          "notify_service": "Home Assistant varsler tjenesten som skal brukes (valgfritt).",
           "notify_actions": "Valgfri Home Assistant-handlingssekvens for å kjøre for varsler (skript, varsling, TTS, etc.). Hvis angitt, kjøres handlinger før reservevarslingstjenesten.",
           "notify_people": "Personenheter som brukes til tilstedeværelsesport. Når aktivert, forsinkes varslingsleveringen til minst én valgt person er hjemme.",
           "notify_only_when_home": "Hvis aktivert, utsett varsler til minst én valgt person er hjemme.",
           "notify_fire_events": "Hvis aktivert, utløs Home Assistant-hendelser for syklusstart og -slutt (ha_washdata_cycle_started og ha_washdata_cycle_ended) for å drive automatisering.",
-          "notify_events": "Hvilke hendelser du skal sende varsler om.",
           "notify_before_end_minutes": "Minutter før beregnet slutt på syklusen for å utløse et varsel. Sett til 0 for å deaktivere. Standard: 0.",
           "notify_live_interval_seconds": "Hvor ofte fremdriftsoppdateringer sendes mens du kjører. Lavere verdier er mer responsive, men bruker flere varsler. Minimum 30 sekunder håndheves – verdier under 30 s rundes automatisk av opp til 30 s.",
           "notify_live_overrun_percent": "Sikkerhetsmargin over det estimerte oppdateringsantallet for lange/overløpende sykluser (for eksempel tillater 20 % 1,2x estimerte oppdateringer).",
@@ -132,7 +136,13 @@
           "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å sende uten ikon.",
           "notify_start_message": "Melding sendt når en syklus starter. Støtter {device} plassholder.",
           "notify_finish_message": "Melding sendt når en syklus er ferdig. Støtter {device}, {duration}, {program} plassholdere.",
-          "notify_pre_complete_message": "Melding sendt før ferdigstillelse. Støtter {device}, {minutes} plassholdere."
+          "notify_pre_complete_message": "Melding sendt før ferdigstillelse. Støtter {device}, {minutes} plassholdere.",
+          "notify_start_services": "En eller flere varslingstjenester for å varsle når en syklus begynner (f.eks. notify.mobile_app_my_phone). La stå tomt for å hoppe over startvarsler.",
+          "notify_finish_services": "En eller flere varslingstjenester for å varsle når en syklus avsluttes eller nærmer seg fullføring. La stå tomt for å hoppe over ferdigvarsler.",
+          "notify_live_services": "En eller flere varslingstjenester for å motta live fremdriftsoppdateringer mens syklusen kjører (kun mobilappen). La stå tomt for å hoppe over live-oppdateringer.",
+          "notify_live_chronometer": "Når den er aktivert, inkluderer hver liveoppdatering en kronometernedtelling til estimert sluttid. Varslingstidtakeren tikker automatisk ned på enheten mellom oppdateringer (kun Android-appen).",
+          "energy_price_entity": "Velg en numerisk enhet som har gjeldende strømpris (f.eks. sensor.elektrisitetspris, input_number.energy_rate). Aktiverer plassholderen {cost} når den er angitt. Har forrang over den statiske verdien hvis begge er konfigurert.",
+          "energy_price_static": "Fast strømpris per kWh. Aktiverer plassholderen {cost} når den er angitt. Ignorert hvis en enhet er konfigurert ovenfor. Legg til ditt valutasymbol i meldingsmalen, f.eks. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "DTW-båndbredde",
           "external_end_trigger_enabled": "Aktiver ekstern syklussluttrigger",
           "external_end_trigger": "Ekstern syklusavslutningssensor",
-          "external_end_trigger_inverted": "Inverter triggerlogikk (trigger på AV)"
+          "external_end_trigger_inverted": "Inverter triggerlogikk (trigger på AV)",
+          "suppress_feedback_notifications": "Undertrykk tilbakemeldingsvarsler",
+          "pump_stuck_duration": "Varselterskel (er) for pumpe fastlåst (kun pumpe)",
+          "door_sensor_entity": "Dørsensor",
+          "pause_cuts_power": "Kutt strømmen under pause",
+          "notify_unload_delay_minutes": "Forsinkelse for varsel om klesvask (min)"
         },
         "data_description": {
           "apply_suggestions": "Merk av i denne boksen for å åpne et gjennomgangstrinn for foreslåtte verdier fra læringsalgoritmen. Ingenting lagres automatisk.\n\nForeslått (fra læring):\n- min_effekt: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Maksimal tillatt tidsforvrengning (strekk) som et forhold mellom syklusvarighet. Høyere verdier tillater matching av svært variable sykluser, men øker CPU-kostnadene. Standard: 0,20 (20 %).",
           "external_end_trigger_enabled": "Aktiver overvåking av en ekstern binær sensor for å utløse syklusfullføring.",
           "external_end_trigger": "Velg en binær sensorenhet. Når denne sensoren utløses, vil gjeldende syklus avsluttes med status \"fullført\".",
-          "external_end_trigger_inverted": "Som standard utløses utløseren når sensoren slås PÅ. Merk av i denne boksen for å utløses når sensoren slås AV i stedet."
+          "external_end_trigger_inverted": "Som standard utløses utløseren når sensoren slås PÅ. Merk av i denne boksen for å utløses når sensoren slås AV i stedet.",
+          "suppress_feedback_notifications": "Når aktivert, vil WashData fortsatt spore og be om tilbakemelding internt, men vil ikke vise vedvarende varsler som ber deg om å bekrefte sykluser. Nyttig når sykluser alltid oppdages på riktig måte og du synes meldingen er distraherende.",
+          "pump_stuck_duration": "Hvis en pumpesyklus fortsatt kjører etter så mange sekunder, utløses en ha_washdata_pump_stuck-hendelse én gang. Bruk denne til å oppdage en motor som har satt seg fast (typisk pumpekjøring er under 60 s). Standard: 1800 s (30 min). Kun type pumpeenhet.",
+          "door_sensor_entity": "Valgfri binær sensor for maskindøren (på = åpen, av = lukket). Når døren åpnes under en aktiv syklus, vil WashData bekrefte at syklusen er satt på pause. Etter at syklusen er ferdig, hvis døren fortsatt er lukket, endres tilstanden til 'Rengjør' til døren åpnes. Merk: lukking av døren gjenopptar IKKE en midlertidig stoppet syklus – gjenoppta må utløses manuelt via Gjenoppta syklus-knappen eller tjenesten.",
+          "pause_cuts_power": "Når du setter på pause via pausesyklus-knappen eller tjenesten, må du også slå av den konfigurerte bryterenheten. Trer bare i kraft hvis en bryterenhet er konfigurert for denne enheten.",
+          "notify_unload_delay_minutes": "Send et varsel via sluttmeldingskanalen etter at syklusen er ferdig og døren ikke har vært åpnet på så mange minutter (krever dørsensor). Sett til 0 for å deaktivere. Standard: 60 min."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle — Velg Cycle",
+        "title": "Trim Cycle - Velg Cycle",
         "description": "Velg en syklus å trimme. ✓ = fullført, ⚠ = gjenopptatt, ✗ = avbrutt",
         "data": {
           "cycle_id": "Syklus"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: Foreslåtte innstillinger klar ({device})",
       "suggestions_ready_notification_message": "Sensoren **Foreslåtte innstillinger** rapporterer nå **{count}** nyttige anbefalinger.\n\nSlik ser du og bruker dem: **Innstillinger > Enheter og tjenester > WashData > Konfigurer > Avanserte innstillinger > Bruk foreslåtte verdier**.\n\nForslag er valgfrie og vises for vurdering før du lagrer.",
       "trim_range_invalid": "Start må være før slutt. Juster trimpunktene dine.",
-      "trim_failed": "Trim mislyktes. Syklusen eksisterer kanskje ikke lenger eller vinduet er tomt."
+      "trim_failed": "Trim mislyktes. Syklusen eksisterer kanskje ikke lenger eller vinduet er tomt.",
+      "auto_tune_suggestion": "{device_type} {device_title} oppdaget spøkelsessykluser. Foreslått endring av min_effekt: {current_min}W -> {new_min}W (ikke brukt automatisk).",
+      "auto_tune_title": "WashData Auto-Tune",
+      "auto_tune_fallback": "{device_type} {device_title} oppdaget spøkelsessykluser. Foreslått endring av min_effekt: {current_min}W -> {new_min}W (ikke brukt automatisk)."
     },
     "abort": {
       "no_cycles_found": "Ingen sykluser funnet",
@@ -999,7 +1022,8 @@
           "interrupted": "Avbrutt",
           "force_stopped": "Tving stoppet",
           "rinse": "Skylle",
-          "unknown": "Ukjent"
+          "unknown": "Ukjent",
+          "clean": "Rengjøre"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Foreslåtte innstillinger"
+      },
+      "pump_runs_today": {
+        "name": "Pumpen går (siste 24 timer)"
+      },
+      "cycle_count": {
+        "name": "Syklustelling"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Tving sluttsyklus"
+      },
+      "pause_cycle": {
+        "name": "Pause syklus"
+      },
+      "resume_cycle": {
+        "name": "Fortsett syklus"
       }
     }
   },
@@ -1078,6 +1114,9 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s må være større enn trim_start_s."
+    },
+    "device_id_required": {
+      "message": "En gyldig device_id kreves."
     }
   }
 }

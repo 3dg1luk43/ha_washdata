@@ -65,19 +65,20 @@
           "power_sensor": "Tehoanturin kokonaisuus",
           "min_power": "Vähimmäisteho (W)",
           "off_delay": "Jakson päättymisviive (s)",
-          "notify_service": "Ilmoituspalvelu (esim. notify.mobile_app)",
           "notify_actions": "Ilmoitustoiminnot",
           "notify_people": "Viivästyy toimitusta, kunnes nämä ihmiset ovat kotona",
           "notify_only_when_home": "Viivästyttää ilmoituksia, kunnes valittu henkilö on kotona",
           "notify_fire_events": "Automaatiotapahtumien käynnistäminen",
-          "notify_events": "Ilmoitavat tapahtumat",
           "notify_before_end_minutes": "Ilmoitus ennen valmistumista (minuuttia ennen loppua)",
           "notify_title": "Ilmoituksen otsikko",
           "notify_icon": "Ilmoituskuvake",
           "notify_start_message": "Aloitusviestin muoto",
           "notify_finish_message": "Lopetusviesti muoto",
           "notify_pre_complete_message": "Esivalmistumisviestin muoto",
-          "show_advanced": "Muokkaa lisäasetuksia (seuraava vaihe)"
+          "show_advanced": "Muokkaa lisäasetuksia (seuraava vaihe)",
+          "notify_start_services": "Cycle Start - Ilmoituskohteet",
+          "notify_finish_services": "Cycle Finish - Ilmoituskohteet",
+          "notify_live_services": "Live Progress - ilmoituskohteet"
         },
         "data_description": {
           "apply_suggestions": "Valitse tämä valintaruutu kopioidaksesi oppimisalgoritmin ehdottamat arvot lomakkeeseen. Tarkista ennen tallentamista.\n\nSuositeltu (oppimisesta):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "Anturientiteetti, joka raportoi reaaliaikaisen tehon (watteina). Voit muuttaa tätä milloin tahansa menettämättä historiallisia tietoja – hyödyllistä, jos vaihdat älypistokkeen.",
           "min_power": "Tämän kynnyksen ylittävät teholukemat (watteina) osoittavat, että laite on käynnissä. Aloita 2 watilla useimmissa laitteissa.",
           "off_delay": "Sekunneissa tasoitetun tehon on pysyttävä pysäytyskynnyksen alapuolella, jotta se merkitsee valmistumista. Oletus: 120s.",
-          "notify_service": "Home Assistant ilmoittaa käytettävästä palvelusta (valinnainen).",
           "notify_actions": "Valinnainen Home Assistant -toimintosarja, joka suoritetaan ilmoituksia varten (skriptit, ilmoitus, TTS jne.). Jos asetettu, toiminnot suoritetaan ennen varailmoituspalvelua.",
           "notify_people": "Henkilökokonaisuudet, joita käytetään läsnäolon portittamiseen. Kun tämä on käytössä, ilmoitusten toimitus viivästyy, kunnes vähintään yksi valittu henkilö on kotona.",
           "notify_only_when_home": "Jos tämä on käytössä, viivytä ilmoituksia, kunnes vähintään yksi valittu henkilö on kotona.",
           "notify_fire_events": "Jos käytössä, käynnistä Home Assistant -tapahtumat syklin alkaessa ja lopussa (ha_washdata_cycle_started ja ha_washdata_cycle_ended) automaation ohjaamiseksi.",
-          "notify_events": "Mistä tapahtumista lähetetään ilmoituksia.",
           "notify_before_end_minutes": "Minuuttia ennen jakson arvioitua loppua ilmoituksen käynnistämiseksi. Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 0.",
           "notify_title": "Mukautettu otsikko ilmoituksille. Tukee paikkamerkkiä {device}.",
           "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi lähettääksesi ilman kuvaketta.",
           "notify_start_message": "Viesti lähetetään, kun sykli alkaa. Tukee paikkamerkkiä {device}.",
           "notify_finish_message": "Viesti lähetetään, kun jakso on päättynyt. Tukee paikkamerkkejä {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Viesti lähetetty ennen valmistumista. Tukee paikkamerkkejä {device}, {minutes}."
+          "notify_pre_complete_message": "Viesti lähetetty ennen valmistumista. Tukee paikkamerkkejä {device}, {minutes}.",
+          "notify_start_services": "Yksi tai useampi palvelu ilmoittaa syklin alkamisesta. Jätä tyhjäksi ohittaaksesi aloitusilmoitukset.",
+          "notify_finish_services": "Yksi tai useampi ilmoittaa palveluille, kun sykli päättyy tai lähestyy loppuaan. Jätä tyhjäksi ohittaaksesi lopetusilmoitukset.",
+          "notify_live_services": "Vähintään yksi ilmoitus palveluista saa reaaliaikaisia ​​edistymispäivityksiä syklin aikana (vain mobiilisovellus). Jätä tyhjäksi ohittaaksesi live-päivitykset."
         }
       },
       "notifications": {
         "title": "Ilmoitukset",
         "description": "Määritä ilmoituskanavia, malleja ja valinnaisia ​​reaaliaikaisia ​​mobiili edistymispäivityksiä.",
         "data": {
-          "notify_service": "Ilmoituspalvelu (esim. notify.mobile_app)",
           "notify_actions": "Ilmoitustoiminnot",
           "notify_people": "Viivästyy toimitusta, kunnes nämä ihmiset ovat kotona",
           "notify_only_when_home": "Viivästyttää ilmoituksia, kunnes valittu henkilö on kotona",
           "notify_fire_events": "Automaatiotapahtumien käynnistäminen",
-          "notify_events": "Ilmoitavat tapahtumat",
           "notify_before_end_minutes": "Ilmoitus ennen valmistumista (minuuttia ennen loppua)",
           "notify_live_interval_seconds": "Live-päivitysväli (sekuntia)",
           "notify_live_overrun_percent": "Live-päivityksen ylityskorvaus (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "Ilmoituskuvake",
           "notify_start_message": "Käynnistä Viestimuoto",
           "notify_finish_message": "Viimeistele viestin muoto",
-          "notify_pre_complete_message": "Esitäytetty viestin muoto"
+          "notify_pre_complete_message": "Esitäytetty viestin muoto",
+          "notify_start_services": "Cycle Start - Ilmoituskohteet",
+          "notify_finish_services": "Cycle Finish - Ilmoituskohteet",
+          "notify_live_services": "Live Progress - ilmoituskohteet",
+          "notify_live_chronometer": "Kronometrin ajastin",
+          "energy_price_entity": "Energian hinta – kokonaisuus (valinnainen)",
+          "energy_price_static": "Energian hinta – staattinen arvo (valinnainen)"
         },
         "data_description": {
-          "notify_service": "Home Assistant ilmoittaa käytettävästä palvelusta (valinnainen).",
           "notify_actions": "Valinnainen Home Assistant -toimintosarja, joka suoritetaan ilmoituksia varten (skriptit, ilmoitus, TTS jne.). Jos asetettu, toiminnot suoritetaan ennen varailmoituspalvelua.",
           "notify_people": "Henkilökokonaisuudet, joita käytetään läsnäolon portittamiseen. Kun tämä on käytössä, ilmoitusten toimitus viivästyy, kunnes vähintään yksi valittu henkilö on kotona.",
           "notify_only_when_home": "Jos tämä on käytössä, viivytä ilmoituksia, kunnes vähintään yksi valittu henkilö on kotona.",
           "notify_fire_events": "Jos käytössä, käynnistä Home Assistant -tapahtumat syklin alkaessa ja lopussa (ha_washdata_cycle_started ja ha_washdata_cycle_ended) automaation ohjaamiseksi.",
-          "notify_events": "Mistä tapahtumista lähetetään ilmoituksia.",
           "notify_before_end_minutes": "Minuuttia ennen jakson arvioitua loppua ilmoituksen käynnistämiseksi. Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 0.",
           "notify_live_interval_seconds": "Kuinka usein edistymispäivityksiä lähetetään suorituksen aikana. Pienemmät arvot reagoivat paremmin, mutta kuluttavat enemmän ilmoituksia. Vähintään 30 sekuntia pakotetaan – alle 30 sekuntia olevat arvot pyöristetään automaattisesti 30 sekuntiin.",
           "notify_live_overrun_percent": "Turvamarginaali yli arvioidut päivitysmäärät pitkille/ylitysjaksoille (esimerkiksi 20 % sallii 1,2-kertaiset arvioidut päivitykset).",
@@ -132,7 +136,13 @@
           "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi lähettääksesi ilman kuvaketta.",
           "notify_start_message": "Viesti lähetetään, kun sykli alkaa. Tukee paikkamerkkiä {device}.",
           "notify_finish_message": "Viesti lähetetään, kun jakso on päättynyt. Tukee paikkamerkkejä {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Viesti lähetetty ennen valmistumista. Tukee paikkamerkkejä {device}, {minutes}."
+          "notify_pre_complete_message": "Viesti lähetetty ennen valmistumista. Tukee paikkamerkkejä {device}, {minutes}.",
+          "notify_start_services": "Yksi tai useampi ilmoituspalvelu ilmoittaa syklin alkamisesta (esim. notify.mobile_app_my_phone). Jätä tyhjäksi ohittaaksesi aloitusilmoitukset.",
+          "notify_finish_services": "Yksi tai useampi ilmoittaa palveluille, kun sykli päättyy tai lähestyy loppuaan. Jätä tyhjäksi ohittaaksesi lopetusilmoitukset.",
+          "notify_live_services": "Vähintään yksi ilmoitus palveluista saa reaaliaikaisia ​​edistymispäivityksiä syklin aikana (vain mobiilisovellus). Jätä tyhjäksi ohittaaksesi live-päivitykset.",
+          "notify_live_chronometer": "Kun tämä on käytössä, jokainen live-päivitys sisältää kronometrin lähtölaskennan arvioituun päättymisaikaan. Ilmoitusajastin tikittää automaattisesti laitteeseen päivitysten välillä (vain Android-kumppanisovellus).",
+          "energy_price_entity": "Valitse numeerinen kokonaisuus, jolla on nykyinen sähkön hinta (esim. sensor.electricity_price, input_number.energy_rate). Kun asetettu, ottaa käyttöön paikkamerkin {cost}. Se on staattisen arvon edelle, jos molemmat on määritetty.",
+          "energy_price_static": "Kiinteä sähkön hinta per kWh. Kun asetettu, ottaa paikkamerkin {cost} käyttöön. Ohitetaan, jos entiteetti on määritetty yllä. Lisää viestipohjaan valuuttasymboli, esim. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "DTW-kaistanleveys",
           "external_end_trigger_enabled": "Ota käyttöön ulkoinen syklin lopetustriggeri",
           "external_end_trigger": "Ulkoinen jakson päättymisanturi",
-          "external_end_trigger_inverted": "Käänteinen laukaisulogiikka (liipaisu päällä OFF)"
+          "external_end_trigger_inverted": "Käänteinen laukaisulogiikka (liipaisu päällä OFF)",
+          "suppress_feedback_notifications": "Estä palauteilmoitukset",
+          "pump_stuck_duration": "Pumpun jumiutuneen hälytyskynnys (vain pumppu)",
+          "door_sensor_entity": "Oven anturi",
+          "pause_cuts_power": "Katkaise virta tauon aikana",
+          "notify_unload_delay_minutes": "Pyykin odotusilmoituksen viive (min)"
         },
         "data_description": {
           "apply_suggestions": "Valitse tämä valintaruutu avataksesi tarkistusvaiheen oppimisalgoritmin ehdotettujen arvojen tarkastelulle. Mitään ei tallenneta automaattisesti.\n\nSuositeltu (oppimisesta):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Suurin sallittu aikavääristymä (venytys) syklin keston suhteena. Suuremmat arvot mahdollistavat erittäin vaihtelevien syklien sovittamisen, mutta lisäävät suorittimen kustannuksia. Oletus: 0,20 (20 %).",
           "external_end_trigger_enabled": "Ota käyttöön ulkoisen binaarisensorin valvonta käynnistääksesi syklin valmistumisen.",
           "external_end_trigger": "Valitse binäärinen anturikokonaisuus. Kun tämä anturi laukeaa, nykyinen jakso päättyy tilaan \"valmis\".",
-          "external_end_trigger_inverted": "Oletuksena laukaisu laukeaa, kun anturi kytkeytyy PÄÄLLE. Valitse tämä ruutu, jos haluat sen sijaan laukeaa, kun anturi sammuu."
+          "external_end_trigger_inverted": "Oletuksena laukaisu laukeaa, kun anturi kytkeytyy PÄÄLLE. Valitse tämä ruutu, jos haluat sen sijaan laukeaa, kun anturi sammuu.",
+          "suppress_feedback_notifications": "Kun WashData on käytössä, se seuraa edelleen ja pyytää palautetta sisäisesti, mutta ei näytä jatkuvia ilmoituksia, joissa pyydetään vahvistamaan jaksot. Hyödyllinen, kun syklit tunnistetaan aina oikein ja kehotteet häiritsevät.",
+          "pump_stuck_duration": "Jos pumppujakso on edelleen käynnissä tämän monen sekunnin jälkeen, ha_washdata_pump_stuck -tapahtuma käynnistyy kerran. Käytä tätä havaitaksesi juuttunut moottori (tyypillinen öljypohjapumpun käynti on alle 60 s). Oletus: 1800 s (30 min). Vain pumppulaitetyyppi.",
+          "door_sensor_entity": "Valinnainen binäärianturi koneen ovelle (päällä = auki, pois = kiinni). Kun luukku avautuu aktiivisen jakson aikana, WashData vahvistaa ohjelman tahallisesti keskeytetyksi. Jakson päätyttyä, jos ovi on edelleen kiinni, tila muuttuu 'Clean'-tilaan, kunnes ovi avataan. Huomautus: luukun sulkeminen EI jatka automaattisesti keskeytettyä jaksoa – jatkaminen on käynnistettävä manuaalisesti Resume Cycle -painikkeen tai palvelun kautta.",
+          "pause_cuts_power": "Kun keskeytät Pause Cycle -painikkeen tai palvelun kautta, sammuta myös määritetty kytkinkokonaisuus. Tulee voimaan vain, jos tälle laitteelle on määritetty kytkinyksikkö.",
+          "notify_unload_delay_minutes": "Lähetä ilmoitus lopetusilmoituskanavan kautta, kun jakso on päättynyt ja ovea ei ole avattu näin moneen minuuttiin (vaatii ovitunnistimen). Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 60 min."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trimmausjakso — Valitse sykli",
+        "title": "Trimmausjakso - Valitse sykli",
         "description": "Valitse trimmattava sykli. ✓ = valmis, ⚠ = jatkunut, ✗ = keskeytetty",
         "data": {
           "cycle_id": "Syklin tunnus"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: Ehdotetut asetukset valmiina ({device})",
       "suggestions_ready_notification_message": "**Ehdotetut asetukset** -anturi raportoi nyt **{count}** toimivia suosituksia.\n\nTarkista ja ota ne käyttöön seuraavasti: **Asetukset > Laitteet ja palvelut > WashData > Määritä > Lisäasetukset > Käytä ehdotettuja arvoja**.\n\nEhdotukset ovat valinnaisia, ja ne näytetään tarkistettavaksi ennen tallentamista.",
       "trim_range_invalid": "Aloitus on oltava ennen loppua. Säädä leikkauspisteitäsi.",
-      "trim_failed": "Leikkaus epäonnistui. Jaksoa ei ehkä enää ole tai ikkuna on tyhjä."
+      "trim_failed": "Leikkaus epäonnistui. Jaksoa ei ehkä enää ole tai ikkuna on tyhjä.",
+      "auto_tune_suggestion": "{device_type} {device_title} havaitsi haamujaksoja. Ehdotettu minimitehon muutos: {current_min}W -> {new_min}W (ei käytössä automaattisesti).",
+      "auto_tune_title": "WashData automaattinen viritys",
+      "auto_tune_fallback": "{device_type} {device_title} havaitsi haamujaksoja. Ehdotettu minimitehon muutos: {current_min}W -> {new_min}W (ei käytössä automaattisesti)."
     },
     "abort": {
       "no_cycles_found": "Syklejä ei löytynyt",
@@ -699,7 +722,7 @@
         "profile_summary_header": "Profiilin yhteenveto",
         "recent_cycles_header": "Viimeaikaiset syklit",
         "no_power_preview": "*Tehotietoja ei ole saatavilla esikatseluun.*",
-        "trim_cycle_preview_title": "Sykli — trimmauksen esikatselu",
+        "trim_cycle_preview_title": "Sykli - trimmauksen esikatselu",
         "trim_cycle_preview_no_data": "Tälle jaksolle ei ole saatavilla tehotietoja.",
         "trim_cycle_preview_kept_suffix": "pidetty"
       }
@@ -999,7 +1022,8 @@
           "interrupted": "Keskeytynyt",
           "force_stopped": "Pakotettu pysäytys",
           "rinse": "Huuhtelu",
-          "unknown": "Tuntematon"
+          "unknown": "Tuntematon",
+          "clean": "Puhdas"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Saatavilla olevat suositellut asetukset"
+      },
+      "pump_runs_today": {
+        "name": "Pumppu käy (viimeiset 24 tuntia)"
+      },
+      "cycle_count": {
+        "name": "Cycle Count"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Pakota syklin lopetus"
+      },
+      "pause_cycle": {
+        "name": "Keskeytä sykli"
+      },
+      "resume_cycle": {
+        "name": "Jatka sykliä"
       }
     }
   },
@@ -1078,6 +1114,9 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s on oltava suurempi kuin trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Kelvollinen laitetunnus vaaditaan."
     }
   }
 }

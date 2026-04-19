@@ -65,19 +65,20 @@
           "power_sensor": "Power Sensor Entiteit",
           "min_power": "Minimum macht (W)",
           "off_delay": "Syklus einfertraging (s)",
-          "notify_service": "Notifikaasjetsjinst (bgl. notify.mobile_app)",
           "notify_actions": "Notifikaasje Aksjes",
           "notify_people": "Fertrage levering oant dizze minsken thús binne",
           "notify_only_when_home": "Notifikaasjes fertrage oant selekteare persoan thús is",
           "notify_fire_events": "Automatisearring eveneminten triggerje",
-          "notify_events": "Eveneminten om te notify",
           "notify_before_end_minutes": "Notifikaasje foar foltôging (minuten foar ein)",
           "notify_title": "Notifikaasje titel",
           "notify_icon": "Notifikaasje Ikoan",
           "notify_start_message": "Begjin berjochtformaat",
           "notify_finish_message": "Berjochtformaat foltôgje",
           "notify_pre_complete_message": "Pre-foltôging berjochtformaat",
-          "show_advanced": "Avansearre ynstellings bewurkje (Folgjende stap)"
+          "show_advanced": "Avansearre ynstellings bewurkje (Folgjende stap)",
+          "notify_start_services": "Cycle Start - Notifikaasjedoelen",
+          "notify_finish_services": "Cycle Finish - Notifikaasjedoelen",
+          "notify_live_services": "Live foarútgong - Notifikaasjedoelen"
         },
         "data_description": {
           "apply_suggestions": "Selektearje dit fakje om wearden foarsteld troch it learalgoritme nei it formulier te kopiearjen. Kontrolearje foardat jo bewarje.\n\nOanbefelle (fan learen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "De sensor-entiteit rapportearret real-time macht (yn watt). Jo kinne dit op elk momint feroarje sûnder histoaryske gegevens te ferliezen - nuttich as jo in smart plug ferfange.",
           "min_power": "Stromlêzingen boppe dizze drompel (yn watt) jouwe oan dat it apparaat wurket. Begjin mei 2W foar de measte apparaten.",
           "off_delay": "Sekonden moat de glêde krêft ûnder de stopdrompel bliuwe om foltôging te markearjen. Standert: 120s.",
-          "notify_service": "Home Assistant notify tsjinst om te brûken (opsjoneel).",
           "notify_actions": "Opsjonele aksjesekwinsje fan Home Assistant om te rinnen foar notifikaasjes (skripts, notify, TTS, ensfh.). As ynsteld, rinne aksjes foardat fallback notify tsjinst.",
           "notify_people": "Minsken entiteiten brûkt foar oanwêzigens gating. As ynskeakele, wurdt de levering fan notifikaasjes fertrage oant op syn minst ien selektearre persoan thús is.",
           "notify_only_when_home": "As ynskeakele, fertrage notifikaasjes oant op syn minst ien selektearre persoan thús is.",
           "notify_fire_events": "As ynskeakele, trigger Home Assistant-eveneminten foar syklusbegjin en -ein (ha_washdata_cycle_started en ha_washdata_cycle_ended) om automatisaasjes te riden.",
-          "notify_events": "Foar hokker eveneminten om notifikaasjes te stjoeren.",
           "notify_before_end_minutes": "Minuten foar it rûsde ein fan 'e syklus om in notifikaasje te triggerjen. Stel op 0 om út te skeakeljen. Standert: 0.",
           "notify_title": "Oanpaste titel foar notifikaasjes. Unterstützt {device} plakhâlder.",
           "notify_icon": "Ikoan om te brûken foar notifikaasjes (bgl. mdi:wasmachine). Lit leech om sûnder ikoan te stjoeren.",
           "notify_start_message": "Berjocht ferstjoerd as in syklus begjint. Unterstützt {device} plakhâlder.",
           "notify_finish_message": "Berjocht ferstjoerd as in syklus einiget. Unterstützt {device}, {duration}, {program} plakhâlders.",
-          "notify_pre_complete_message": "Berjocht ferstjoerd foar foltôging. Unterstützt {device}, {minutes} plakhâlders."
+          "notify_pre_complete_message": "Berjocht ferstjoerd foar foltôging. Unterstützt {device}, {minutes} plakhâlders.",
+          "notify_start_services": "Ien of mear notifikaasjetsjinsten om te warskôgjen as in syklus begjint. Lit leech om startnotifikaasjes oer te slaan.",
+          "notify_finish_services": "Ien of mear notifikaasjetsjinsten om te warskôgjen as in syklus einiget of tichtby foltôging. Lit leech om finishnotifikaasjes oer te slaan.",
+          "notify_live_services": "Ien of mear notifikaasjetsjinsten om live foarútgongsupdates te ûntfangen wylst de syklus rint (allinich mobile begelieder-app). Lit leech om live updates oer te slaan."
         }
       },
       "notifications": {
         "title": "Notifikaasjes",
         "description": "Konfigurearje notifikaasjekanalen, sjabloanen en opsjonele live updates foar mobile foarútgong.",
         "data": {
-          "notify_service": "Notifikaasjetsjinst (bgl. notify.mobile_app)",
           "notify_actions": "Notifikaasje Aksjes",
           "notify_people": "Fertrage levering oant dizze minsken thús binne",
           "notify_only_when_home": "Notifikaasjes fertrage oant selekteare persoan thús is",
           "notify_fire_events": "Automatisearring eveneminten triggerje",
-          "notify_events": "Eveneminten om te notify",
           "notify_before_end_minutes": "Notifikaasje foar foltôging (minuten foar ein)",
           "notify_live_interval_seconds": "Live Update-ynterval (sekonden)",
           "notify_live_overrun_percent": "Live Update Overrun Allowance (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "Notifikaasje Ikoan",
           "notify_start_message": "Begjin berjochtformaat",
           "notify_finish_message": "Berjochtformaat foltôgje",
-          "notify_pre_complete_message": "Pre-foltôging berjochtformaat"
+          "notify_pre_complete_message": "Pre-foltôging berjochtformaat",
+          "notify_start_services": "Cycle Start - Notifikaasjedoelen",
+          "notify_finish_services": "Cycle Finish - Notifikaasjedoelen",
+          "notify_live_services": "Live foarútgong - Notifikaasjedoelen",
+          "notify_live_chronometer": "Chronometer Countdown Timer",
+          "energy_price_entity": "Enerzjypriis - Entiteit (opsjoneel)",
+          "energy_price_static": "Enerzjypriis - Statyske wearde (opsjoneel)"
         },
         "data_description": {
-          "notify_service": "Home Assistant notify tsjinst om te brûken (opsjoneel).",
           "notify_actions": "Opsjonele aksjesekwinsje fan Home Assistant om te rinnen foar notifikaasjes (skripts, notify, TTS, ensfh.). As ynsteld, rinne aksjes foardat fallback notify tsjinst.",
           "notify_people": "Minsken entiteiten brûkt foar oanwêzigens gating. As ynskeakele, wurdt de levering fan notifikaasjes fertrage oant op syn minst ien selektearre persoan thús is.",
           "notify_only_when_home": "As ynskeakele, fertrage notifikaasjes oant op syn minst ien selektearre persoan thús is.",
           "notify_fire_events": "As ynskeakele, trigger Home Assistant-eveneminten foar syklusbegjin en -ein (ha_washdata_cycle_started en ha_washdata_cycle_ended) om automatisaasjes te riden.",
-          "notify_events": "Foar hokker eveneminten om notifikaasjes te stjoeren.",
           "notify_before_end_minutes": "Minuten foar it rûsde ein fan 'e syklus om in notifikaasje te triggerjen. Stel op 0 om út te skeakeljen. Standert: 0.",
           "notify_live_interval_seconds": "Hoe faak foarútgong updates wurde ferstjoerd wylst rinnen. Legere wearden binne responsiver, mar konsumearje mear notifikaasjes. In minimum fan 30 sekonden wurdt hanthavene - wearden ûnder 30 s wurde automatysk ôfrûn nei 30 s.",
           "notify_live_overrun_percent": "Feiligens marzje boppe de rûsde update count foar lange / oerrinnende syklusen (bygelyks 20% tastean 1.2x skatte updates).",
@@ -132,7 +136,13 @@
           "notify_icon": "Ikoan om te brûken foar notifikaasjes (bgl. mdi:wasmachine). Lit leech om sûnder ikoan te stjoeren.",
           "notify_start_message": "Berjocht ferstjoerd as in syklus begjint. Unterstützt {device} plakhâlder.",
           "notify_finish_message": "Berjocht ferstjoerd as in syklus einiget. Unterstützt {device}, {duration}, {program} plakhâlders.",
-          "notify_pre_complete_message": "Berjocht ferstjoerd foar foltôging. Unterstützt {device}, {minutes} plakhâlders."
+          "notify_pre_complete_message": "Berjocht ferstjoerd foar foltôging. Unterstützt {device}, {minutes} plakhâlders.",
+          "notify_start_services": "Ien of mear notifikaasjetsjinsten om te warskôgjen as in syklus begjint (bgl. notify.mobile_app_my_phone). Lit leech om startnotifikaasjes oer te slaan.",
+          "notify_finish_services": "Ien of mear notifikaasjetsjinsten om te warskôgjen as in syklus einiget of tichtby foltôging. Lit leech om finishnotifikaasjes oer te slaan.",
+          "notify_live_services": "Ien of mear notifikaasjetsjinsten om live foarútgongsupdates te ûntfangen wylst de syklus rint (allinich mobile begelieder-app). Lit leech om live updates oer te slaan.",
+          "notify_live_chronometer": "As ynskeakele, omfettet elke live update in chronometer countdown nei de rûsde eintiid. De notifikaasjetimer tikt automatysk del op it apparaat tusken updates (allinich Android-begelieder-app).",
+          "energy_price_entity": "Selektearje in numerike entiteit dy't de hjoeddeistige elektrisiteitspriis hâldt (bygelyks sensor.electricity_price, input_number.energy_rate). As ynsteld, aktivearret de {cost} plakhâlder. Nimt foarrang boppe de statyske wearde as beide binne konfigurearre.",
+          "energy_price_static": "Fêste elektrisiteitspriis per kWh. As ynsteld, aktivearret de {cost} plakhâlder. Negearre as in entiteit hjirboppe ynsteld is. Foegje jo falutasymboal ta yn it berjochtsjabloan, f.eks. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "DTW Bânbreedte",
           "external_end_trigger_enabled": "Ynskeakelje External Cycle End Trigger",
           "external_end_trigger": "Eksterne Cycle End Sensor",
-          "external_end_trigger_inverted": "Invert Trigger Logic (Trigger op OFF)"
+          "external_end_trigger_inverted": "Invert Trigger Logic (Trigger op OFF)",
+          "suppress_feedback_notifications": "Underdrukke feedbacknotifikaasjes",
+          "pump_stuck_duration": "Pomp fêst warskôgingsdrempel (s) (allinich pomp)",
+          "door_sensor_entity": "Door Sensor",
+          "pause_cuts_power": "Snij de macht by it pauze",
+          "notify_unload_delay_minutes": "Wasserij Wacht-notifikaasje fertraging (min)"
         },
         "data_description": {
           "apply_suggestions": "Selektearje dit fakje om in resinsjestap te iepenjen foar foarstelde wearden út it learalgoritme. Neat wurdt automatysk bewarre.\n\nOanbefelle (fan learen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Maksimum tastiene tiid warping (stretching) as in ferhâlding fan syklus doer. Hegere wearden tastean oerienkommende tige fariabele syklusen mar fergrutsje CPU kosten. Standert: 0,20 (20%).",
           "external_end_trigger_enabled": "Skeakelje tafersjoch fan in eksterne binêre sensor yn om syklusfoltôging te triggerjen.",
           "external_end_trigger": "Selektearje in binêre sensor-entiteit. As dizze sensor trigger, sil de hjoeddeistige syklus einigje mei de status 'foltôge'.",
-          "external_end_trigger_inverted": "Standert, de trekker fjoer as de sensor draait ON. Selektearje dit fakje om te sjitten as de sensor ynstee útskeakelt."
+          "external_end_trigger_inverted": "Standert, de trekker fjoer as de sensor draait ON. Selektearje dit fakje om te sjitten as de sensor ynstee útskeakelt.",
+          "suppress_feedback_notifications": "As ynskeakele, sil WashData noch yntern feedback folgje en freegje, mar sil gjin persistente notifikaasjes sjen litte dy't jo freegje om syklusen te befêstigjen. Nuttich as syklusen altyd goed wurde ûntdutsen en jo fine dat de prompts ôfliedend fine.",
+          "pump_stuck_duration": "As in pomp syklus noch rint nei dit protte sekonden, in ha_washdata_pump_stuck evenemint wurdt ûntslein ien kear. Brûk dit om in blokkearre motor te detektearjen (typyske sumppomp is ûnder 60 s). Standert: 1800 s (30 min). Allinnich type pompapparaat.",
+          "door_sensor_entity": "Opsjonele binêre sensor foar de masine doar (oan = iepen, út = sluten). As de doar iepenet tidens in aktive syklus, sil WashData de syklus befêstigje as opsetlik ûnderbrutsen. Nei't de syklus einiget, as de doar noch ticht is, feroaret de steat nei 'Skjin' oant de doar iepene wurdt. Opmerking: it sluten fan 'e doar sil NET in pauze syklus automatysk ferfetsje - ferfetsje moat manuell wurde aktivearre fia de knop Resume Cycle of tsjinst.",
+          "pause_cuts_power": "As jo ​​​​pauze fia de Pause Cycle knop of tsjinst, útsette ek de ynstelde switch entiteit. Allinnich effekt as in switch entiteit is konfigurearre foar dit apparaat.",
+          "notify_unload_delay_minutes": "Stjoer in notifikaasje fia it finish-notifikaasjekanaal nei't de syklus einiget en de doar foar dizze protte minuten net iepene is (fereasket Door Sensor). Stel op 0 om út te skeakeljen. Standert: 60 min."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Syklus trimme — Selektearje Syklus",
+        "title": "Syklus trimme - Selektearje Syklus",
         "description": "Selektearje in syklus om te trimmen. ✓ = foltôge, ⚠ = opnij, ✗ = ûnderbrutsen",
         "data": {
           "cycle_id": "Syklus"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: Foarstelde ynstellings klear ({device})",
       "suggestions_ready_notification_message": "De sensor **Foarstelde ynstellings** rapportearret no **{count}** aksjebere oanbefellings.\n\nOm se te besjen en ta te passen: **Ynstellings> Apparaten en tsjinsten> WashData> Konfigurearje> Avansearre ynstellings> Oanbefelle wearden tapasse**.\n\nSuggestjes binne opsjoneel en werjûn foar beoardieling foardat jo bewarje.",
       "trim_range_invalid": "Start moat foar ein wêze. Pas jo trimpunten asjebleaft oan.",
-      "trim_failed": "Trim mislearre. De syklus kin net mear bestean of it finster is leech."
+      "trim_failed": "Trim mislearre. De syklus kin net mear bestean of it finster is leech.",
+      "auto_tune_suggestion": "{device_type} {device_title} spoeksyklusen ûntdutsen. Foarstelde min_power feroaring: {current_min}W -> {new_min}W (net automatysk tapast).",
+      "auto_tune_title": "WashData Auto-Tune",
+      "auto_tune_fallback": "{device_type} {device_title} spoeksyklusen ûntdutsen. Foarstelde min_power feroaring: {current_min}W -> {new_min}W (net automatysk tapast)."
     },
     "abort": {
       "no_cycles_found": "Gjin cycles fûn",
@@ -999,7 +1022,8 @@
           "interrupted": "Underbrutsen",
           "force_stopped": "Twongen stoppe",
           "rinse": "Spoelje",
-          "unknown": "Ûnbekend"
+          "unknown": "Ûnbekend",
+          "clean": "Skjin"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Foarstelde ynstellings"
+      },
+      "pump_runs_today": {
+        "name": "Pomp rint (lêste 24 h)"
+      },
+      "cycle_count": {
+        "name": "Cycle Count"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Syklus twongen beeinigje"
+      },
+      "pause_cycle": {
+        "name": "Pause Cycle"
+      },
+      "resume_cycle": {
+        "name": "Resume Cycle"
       }
     }
   },
@@ -1078,6 +1114,9 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s moat grutter wêze as trim_start_s."
+    },
+    "device_id_required": {
+      "message": "In jildich device_id is fereaske."
     }
   }
 }

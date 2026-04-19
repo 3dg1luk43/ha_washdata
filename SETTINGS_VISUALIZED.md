@@ -187,7 +187,7 @@ Rate-limiting for sensor updates.
 
 ### `watchdog_interval`
 How often the background watchdog task runs its checks.
-- Default: **30s** — every 30 seconds, it checks if sensors are still updating and if timeouts have elapsed.
+- Default: **30s** - every 30 seconds, it checks if sensors are still updating and if timeouts have elapsed.
 - A smaller value catches issues faster but uses more resources.
 
 ### `profile_match_interval`
@@ -234,7 +234,7 @@ Minimum confidence to trigger a user verification request.
 ### `auto_label_confidence`
 Confidence threshold for automatic labeling.
 - If a cycle completes with confidence **above** this value, the integration automatically assigns the matched profile name without asking.
-- **Default: 0.9 (90%)** — only highly confident matches are auto-labeled.
+- **Default: 0.9 (90%)** - only highly confident matches are auto-labeled.
 
 ---
 

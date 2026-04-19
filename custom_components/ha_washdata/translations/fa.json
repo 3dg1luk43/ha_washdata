@@ -65,50 +65,50 @@
           "power_sensor": "موجودیت سنسور قدرت",
           "min_power": "حداقل توان (W)",
           "off_delay": "تأخیر (های) پایان چرخه",
-          "notify_service": "سرویس اعلان (به عنوان مثال notify.mobile_app)",
           "notify_actions": "اقدامات اطلاع رسانی",
           "notify_people": "تأخیر تحویل تا زمانی که این افراد در خانه هستند",
           "notify_only_when_home": "تأخیر اعلان‌ها تا زمانی که فرد منتخب در خانه باشد",
           "notify_fire_events": "فعال‌سازی رویدادهای اتوماسیون",
-          "notify_events": "رویدادهایی برای اطلاع رسانی",
           "notify_before_end_minutes": "اعلان پیش از اتمام (دقیقه قبل از پایان)",
           "notify_title": "عنوان اطلاعیه",
           "notify_icon": "نماد اعلان",
           "notify_start_message": "فرمت پیام را شروع کنید",
           "notify_finish_message": "فرمت پیام پایان",
           "notify_pre_complete_message": "قالب پیام قبل از تکمیل",
-          "show_advanced": "ویرایش تنظیمات پیشرفته (مرحله بعد)"
+          "show_advanced": "ویرایش تنظیمات پیشرفته (مرحله بعد)",
+          "notify_start_services": "شروع چرخه - اهداف اعلان",
+          "notify_finish_services": "چرخه پایان - اهداف اعلان",
+          "notify_live_services": "پیشرفت زنده - اهداف اعلان"
         },
         "data_description": {
           "apply_suggestions": "این کادر را علامت بزنید تا مقادیر پیشنهاد شده توسط الگوریتم یادگیری را در فرم کپی کنید. قبل از ذخیره بررسی کنید.\n\nپیشنهادی (از یادگیری):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "نوع دستگاه (ماشین لباسشویی، خشک کن، ماشین ظرفشویی، قهوه ساز، EV) را انتخاب کنید. این تگ با هر چرخه برای سازماندهی بهتر ذخیره می شود.",
-          "power_sensor": "موجودیت حسگر که توان آنی را گزارش می‌کند (بر حسب وات). می‌توانید هرزمان خواستید بدون از دست دادن داده‌های تاریخی این مورد را تغییر دهید—در صورت تعویض دوشاخه هوشمند مفید است.",
+          "power_sensor": "موجودیت حسگر که توان آنی را گزارش می‌کند (بر حسب وات). می‌توانید هرزمان خواستید بدون از دست دادن داده‌های تاریخی این مورد را تغییر دهید-در صورت تعویض دوشاخه هوشمند مفید است.",
           "min_power": "خوانش های توان بالاتر از این آستانه (بر حسب وات) نشان می دهد که دستگاه در حال کار است. برای اکثر دستگاه ها با 2W شروع کنید.",
           "off_delay": "چند ثانیه توان هموارسازی شده باید زیر آستانه توقف باقی بماند تا علامت اتمام باشد. پیش فرض: 120 ثانیه",
-          "notify_service": "برای استفاده از سرویس اطلاع رسانی Home Assistant (اختیاری).",
           "notify_actions": "دنباله اقدام اختیاری Home Assistant برای اجرای اعلان ها (اسکریپت ها، اطلاع رسانی، TTS و غیره). در صورت تنظیم، اقدامات قبل از سرویس اطلاع رسانی مجدد اجرا می شود.",
           "notify_people": "نهادهای افراد برای دروازه حضور استفاده می شود. در صورت فعال بودن، تحویل اعلان تا زمانی که حداقل یک نفر انتخاب شده در خانه باشد به تعویق می افتد.",
           "notify_only_when_home": "در صورت فعال بودن، اعلان ها را تا زمانی که حداقل یک نفر انتخاب شده در خانه باشد به تاخیر بیاندازید.",
           "notify_fire_events": "در صورت فعال بودن، رویدادهای Home Assistant را برای شروع و پایان چرخه (ha_washdata_cycle_started و ha_washdata_cycle_ended) برای رانندگی خودکار فعال کنید.",
-          "notify_events": "برای کدام رویدادها اعلان ارسال شود.",
           "notify_before_end_minutes": "چند دقیقه قبل از پایان تخمینی چرخه برای راه اندازی یک اعلان. برای غیرفعال کردن، روی 0 تنظیم کنید. پیش فرض: 0.",
           "notify_title": "عنوان سفارشی برای اعلان ها. از {device} متغیری پشتیبانی می کند.",
           "notify_icon": "نماد مورد استفاده برای اعلان‌ها (مانند mdi: ماشین لباسشویی). برای ارسال بدون نماد خالی بگذارید.",
           "notify_start_message": "هنگام شروع یک چرخه پیام ارسال می شود. از {device} متغیری پشتیبانی می کند.",
           "notify_finish_message": "پس از پایان یک چرخه، پیام ارسال می شود. از متغیرهای {device}، {duration}، {program} پشتیبانی می کند.",
-          "notify_pre_complete_message": "پیام قبل از تکمیل ارسال شد. از {device}، {minutes} متغیرهایی پشتیبانی می کند."
+          "notify_pre_complete_message": "پیام قبل از تکمیل ارسال شد. از {device}، {minutes} متغیرهایی پشتیبانی می کند.",
+          "notify_start_services": "یک یا چند سرویس را برای هشدار در هنگام شروع یک چرخه مطلع می کند. برای رد شدن از اعلان‌های شروع، خالی بگذارید.",
+          "notify_finish_services": "یک یا چند سرویس را مطلع می کنند تا در صورت اتمام یا نزدیک شدن به اتمام یک چرخه هشدار دهند. برای رد شدن از اعلان‌های پایان، خالی بگذارید.",
+          "notify_live_services": "یک یا چند سرویس برای دریافت به‌روزرسانی‌های پیشرفت زنده در حین اجرای چرخه (فقط برنامه همراه همراه) اطلاع رسانی می‌کنند. برای رد شدن از به‌روزرسانی‌های زنده، خالی بگذارید."
         }
       },
       "notifications": {
         "title": "اطلاعیه ها",
         "description": "کانال‌های اعلان، الگوها و به‌روزرسانی‌های پیشرفت زنده اختیاری تلفن همراه را پیکربندی کنید.",
         "data": {
-          "notify_service": "سرویس اعلان (به عنوان مثال notify.mobile_app)",
           "notify_actions": "اقدامات اطلاع رسانی",
           "notify_people": "تأخیر تحویل تا زمانی که این افراد در خانه هستند",
           "notify_only_when_home": "تأخیر اعلان‌ها تا زمانی که فرد منتخب در خانه باشد",
           "notify_fire_events": "فعال‌سازی رویدادهای اتوماسیون",
-          "notify_events": "رویدادهایی برای اطلاع رسانی",
           "notify_before_end_minutes": "اعلان پیش از اتمام (دقیقه قبل از پایان)",
           "notify_live_interval_seconds": "فاصله به روز رسانی زنده (ثانیه)",
           "notify_live_overrun_percent": "کمک هزینه به‌روزرسانی زنده (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "نماد اعلان",
           "notify_start_message": "فرمت پیام را شروع کنید",
           "notify_finish_message": "فرمت پیام پایان",
-          "notify_pre_complete_message": "قالب پیام قبل از تکمیل"
+          "notify_pre_complete_message": "قالب پیام قبل از تکمیل",
+          "notify_start_services": "شروع چرخه - اهداف اعلان",
+          "notify_finish_services": "چرخه پایان - اهداف اعلان",
+          "notify_live_services": "پیشرفت زنده - اهداف اعلان",
+          "notify_live_chronometer": "تایمر شمارش معکوس کرنومتر",
+          "energy_price_entity": "قیمت انرژی - نهاد (اختیاری)",
+          "energy_price_static": "قیمت انرژی - مقدار استاتیک (اختیاری)"
         },
         "data_description": {
-          "notify_service": "برای استفاده از سرویس اطلاع رسانی Home Assistant (اختیاری).",
           "notify_actions": "دنباله اقدام اختیاری Home Assistant برای اجرای اعلان ها (اسکریپت ها، اطلاع رسانی، TTS و غیره). در صورت تنظیم، اقدامات قبل از سرویس اطلاع رسانی مجدد اجرا می شود.",
           "notify_people": "نهادهای افراد برای دروازه حضور استفاده می شود. در صورت فعال بودن، تحویل اعلان تا زمانی که حداقل یک نفر انتخاب شده در خانه باشد به تعویق می افتد.",
           "notify_only_when_home": "در صورت فعال بودن، اعلان ها را تا زمانی که حداقل یک نفر انتخاب شده در خانه باشد به تاخیر بیاندازید.",
           "notify_fire_events": "در صورت فعال بودن، رویدادهای Home Assistant را برای شروع و پایان چرخه (ha_washdata_cycle_started و ha_washdata_cycle_ended) برای رانندگی خودکار فعال کنید.",
-          "notify_events": "برای کدام رویدادها اعلان ارسال شود.",
           "notify_before_end_minutes": "چند دقیقه قبل از پایان تخمینی چرخه برای راه اندازی یک اعلان. برای غیرفعال کردن، روی 0 تنظیم کنید. پیش فرض: 0.",
           "notify_live_interval_seconds": "هر چند وقت یک‌بار به‌روزرسانی‌های پیشرفت هنگام اجرا ارسال می‌شوند. مقادیر پایین تر پاسخگوتر هستند اما اعلان های بیشتری را مصرف می کنند. حداقل 30 ثانیه اعمال می شود - مقادیر کمتر از 30 ثانیه به طور خودکار به 30 ثانیه گرد می شوند.",
           "notify_live_overrun_percent": "حاشیه ایمنی بالاتر از تعداد به‌روزرسانی‌های تخمینی برای چرخه‌های طولانی/بیش از حد مجاز است (به عنوان مثال 20٪ به 1.2 برابر به‌روزرسانی‌های تخمینی اجازه می‌دهد).",
@@ -132,7 +136,13 @@
           "notify_icon": "نماد مورد استفاده برای اعلان‌ها (مانند mdi: ماشین لباسشویی). برای ارسال بدون نماد خالی بگذارید.",
           "notify_start_message": "هنگام شروع یک چرخه پیام ارسال می شود. از {device} متغیری پشتیبانی می کند.",
           "notify_finish_message": "پس از پایان یک چرخه، پیام ارسال می شود. از متغیرهای {device}، {duration}، {program} پشتیبانی می کند.",
-          "notify_pre_complete_message": "پیام قبل از تکمیل ارسال شد. از {device}، {minutes} متغیرهایی پشتیبانی می کند."
+          "notify_pre_complete_message": "پیام قبل از تکمیل ارسال شد. از {device}، {minutes} متغیرهایی پشتیبانی می کند.",
+          "notify_start_services": "یک یا چند سرویس اطلاع رسانی برای هشدار هنگام شروع یک چرخه (مانند notify.mobile_app_my_phone). برای رد شدن از اعلان‌های شروع، خالی بگذارید.",
+          "notify_finish_services": "یک یا چند سرویس را مطلع می کنند تا در صورت اتمام یا نزدیک شدن به اتمام یک چرخه هشدار دهند. برای رد شدن از اعلان‌های پایان، خالی بگذارید.",
+          "notify_live_services": "یک یا چند سرویس برای دریافت به‌روزرسانی‌های پیشرفت زنده در حین اجرای چرخه (فقط برنامه همراه همراه) اطلاع رسانی می‌کنند. برای رد شدن از به‌روزرسانی‌های زنده، خالی بگذارید.",
+          "notify_live_chronometer": "وقتی فعال باشد، هر به‌روزرسانی زنده شامل شمارش معکوس کرنومتر تا زمان تخمینی پایان می‌شود. تایمر اعلان بین به‌روزرسانی‌ها به‌طور خودکار روی دستگاه خاموش می‌شود (فقط برنامه همراه اندروید).",
+          "energy_price_entity": "یک موجود عددی را انتخاب کنید که دارای قیمت فعلی برق باشد (به عنوان مثال sensor.electricity_price، input_number.energy_rate). وقتی تنظیم شود، مکان‌دار {cost} را فعال می‌کند. اگر هر دو پیکربندی شده باشند، بر مقدار استاتیک اولویت دارد.",
+          "energy_price_static": "قیمت ثابت برق به ازای هر کیلووات ساعت وقتی تنظیم شود، مکان‌دار {cost} را فعال می‌کند. اگر موجودی در بالا پیکربندی شده باشد نادیده گرفته می شود. نماد ارز خود را در قالب پیام اضافه کنید، به عنوان مثال. {cost} یورو."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "پهنای باند DTW",
           "external_end_trigger_enabled": "فعال کردن External Cycle End Trigger",
           "external_end_trigger": "سنسور پایان سیکل خارجی",
-          "external_end_trigger_inverted": "معکوس کردن منطق ماشه (تریگر خاموش است)"
+          "external_end_trigger_inverted": "معکوس کردن منطق ماشه (تریگر خاموش است)",
+          "suppress_feedback_notifications": "سرکوب اعلان‌های بازخورد",
+          "pump_stuck_duration": "آستانه هشدار گیر کردن پمپ (فقط پمپ)",
+          "door_sensor_entity": "سنسور درب",
+          "pause_cuts_power": "قطع برق هنگام مکث",
+          "notify_unload_delay_minutes": "تأخیر اعلان انتظار لباسشویی (دقیقه)"
         },
         "data_description": {
           "apply_suggestions": "این کادر را علامت بزنید تا یک مرحله بررسی برای مقادیر پیشنهادی از الگوریتم یادگیری باز شود. هیچ چیزی به طور خودکار ذخیره نمی شود.\n\nپیشنهادی (از یادگیری):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "حداکثر زمان مجاز (کشش) به عنوان نسبت مدت چرخه. مقادیر بالاتر امکان تطبیق چرخه های بسیار متغیر را فراهم می کند اما هزینه CPU را افزایش می دهد. پیش فرض: 0.20 (20%).",
           "external_end_trigger_enabled": "نظارت بر حسگر باینری خارجی را برای شروع تکمیل چرخه فعال کنید.",
           "external_end_trigger": "یک موجودیت حسگر باینری را انتخاب کنید. هنگامی که این سنسور فعال می شود، چرخه فعلی با وضعیت \"تکمیل\" به پایان می رسد.",
-          "external_end_trigger_inverted": "به طور پیش فرض، هنگامی که سنسور روشن می شود، ماشه فعال می شود. این کادر را علامت بزنید تا زمانی که سنسور خاموش می شود، روشن شود."
+          "external_end_trigger_inverted": "به طور پیش فرض، هنگامی که سنسور روشن می شود، ماشه فعال می شود. این کادر را علامت بزنید تا زمانی که سنسور خاموش می شود، روشن شود.",
+          "suppress_feedback_notifications": "وقتی WashData فعال باشد، همچنان به صورت داخلی بازخورد را ردیابی و درخواست می‌کند، اما اعلان‌های دائمی که از شما می‌خواهند چرخه‌ها را تأیید کنید، نشان نمی‌دهد. زمانی مفید است که چرخه ها همیشه به درستی تشخیص داده می شوند و پیام ها را منحرف می کند.",
+          "pump_stuck_duration": "اگر چرخه پمپ پس از این چند ثانیه همچنان در حال اجرا باشد، یک رویداد ha_washdata_pump_stuck یک بار اجرا می شود. از این برای تشخیص موتور گیر کرده استفاده کنید (معمولاً پمپ کارکرد زیر 60 ثانیه است). پیش‌فرض: 1800 ثانیه (30 دقیقه). فقط نوع دستگاه پمپ",
+          "door_sensor_entity": "سنسور باینری اختیاری برای درب دستگاه (روشن = باز، خاموش = بسته). هنگامی که در در طول یک چرخه فعال باز می شود، WashData چرخه را به عنوان توقف عمدی تایید می کند. پس از پایان چرخه، اگر درب همچنان بسته باشد، وضعیت به \"تمیز\" تغییر می کند تا درب باز شود. توجه: بستن در، چرخه توقف موقت را به طور خودکار از سر نمی گیرد - رزومه باید به صورت دستی از طریق دکمه یا سرویس چرخه از سرگیری فعال شود.",
+          "pause_cuts_power": "هنگام مکث از طریق دکمه یا سرویس چرخه مکث، موجودیت سوئیچ پیکربندی شده را نیز خاموش کنید. فقط در صورتی اعمال می شود که یک موجودیت سوئیچ برای این دستگاه پیکربندی شده باشد.",
+          "notify_unload_delay_minutes": "پس از پایان چرخه و باز نشدن درب برای این چند دقیقه، از طریق کانال اعلان پایان، اعلان ارسال کنید (نیاز به سنسور درب دارد). برای غیرفعال کردن، روی 0 تنظیم کنید. پیش‌فرض: 60 دقیقه"
         }
       },
       "diagnostics": {
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: تنظیمات پیشنهادی آماده ({device})",
       "suggestions_ready_notification_message": "حسگر **تنظیمات پیشنهادی** اکنون **{count}** توصیه های قابل اجرا را گزارش می دهد.\n\nبرای بررسی و اعمال آنها: **تنظیمات > دستگاه‌ها و خدمات > WashData > پیکربندی > تنظیمات پیشرفته > اعمال مقادیر پیشنهادی**.\n\nپیشنهادات اختیاری هستند و قبل از ذخیره برای بررسی نشان داده می شوند.",
       "trim_range_invalid": "شروع باید قبل از پایان باشد. لطفا نقاط برش خود را تنظیم کنید.",
-      "trim_failed": "برش انجام نشد. ممکن است چرخه دیگر وجود نداشته باشد یا پنجره خالی باشد."
+      "trim_failed": "برش انجام نشد. ممکن است چرخه دیگر وجود نداشته باشد یا پنجره خالی باشد.",
+      "auto_tune_suggestion": "{device_type} {device_title} چرخه های ارواح را شناسایی کرد. حداقل تغییر توان پیشنهادی: {current_min}W -> {new_min}W (به طور خودکار اعمال نمی شود).",
+      "auto_tune_title": "تنظیم خودکار WashData",
+      "auto_tune_fallback": "{device_type} {device_title} چرخه های ارواح را شناسایی کرد. حداقل تغییر توان پیشنهادی: {current_min}W -> {new_min}W (به طور خودکار اعمال نمی شود)."
     },
     "abort": {
       "no_cycles_found": "هیچ چرخه ای یافت نشد",
@@ -999,7 +1022,8 @@
           "interrupted": "قطع شد",
           "force_stopped": "اجباری متوقف شد",
           "rinse": "آبکشی",
-          "unknown": "ناشناس"
+          "unknown": "ناشناس",
+          "clean": "تمیز"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "تنظیمات پیشنهادی موجود"
+      },
+      "pump_runs_today": {
+        "name": "کارکرد پمپ (24 ساعت گذشته)"
+      },
+      "cycle_count": {
+        "name": "تعداد چرخه"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "پایان اجباری چرخه"
+      },
+      "pause_cycle": {
+        "name": "چرخه مکث"
+      },
+      "resume_cycle": {
+        "name": "چرخه از سرگیری"
       }
     }
   },
@@ -1078,6 +1114,9 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s باید بزرگتر از trim_start_s باشد."
+    },
+    "device_id_required": {
+      "message": "یک device_id معتبر مورد نیاز است."
     }
   }
 }

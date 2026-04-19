@@ -33,7 +33,7 @@ See [../TESTING.md#mock-socket-reference](../TESTING.md#mock-socket-reference) f
 Analyses a WashData diagnostic export (JSON) and compares the device's
 **current settings** against **optimal settings derived from its own cycle
 history**.  Uses the same heuristics as the in-HA suggestion engine but runs
-fully offline — no Home Assistant required.
+fully offline - no Home Assistant required.
 
 ### Usage
 
@@ -47,7 +47,7 @@ python3 devtools/analyze_diag.py path/to/diagnostics_export.json
 # Or let it prompt you interactively
 python3 devtools/analyze_diag.py
 
-# Plain text output (no ANSI colours — good for CI or piping)
+# Plain text output (no ANSI colours - good for CI or piping)
 python3 devtools/analyze_diag.py --no-color export.json
 ```
 
@@ -62,7 +62,7 @@ python3 devtools/analyze_diag.py --no-color export.json
 
 Each row shows the **current value**, **suggested value**, a **% change arrow**, and a one-line **rationale**.  A summary at the end lists how many parameters can be improved and where to apply them in the HA UI.
 
-The report also surfaces any **suggestions already computed by live HA operation** (stored in `manager_state.suggestions` inside the export) alongside the offline analysis — useful for cross-checking.
+The report also surfaces any **suggestions already computed by live HA operation** (stored in `manager_state.suggestions` inside the export) alongside the offline analysis - useful for cross-checking.
 
 A **Cycle History** table at the bottom lists every detected programme with its average duration, standard deviation, and coefficient of variation so you can immediately see which programmes are consistently recognised vs. which are noisy.
 

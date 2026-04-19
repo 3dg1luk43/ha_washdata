@@ -65,50 +65,50 @@
           "power_sensor": "Thực thể cảm biến nguồn",
           "min_power": "Công suất tối thiểu (W)",
           "off_delay": "Độ trễ kết thúc chu kỳ (s)",
-          "notify_service": "Dịch vụ thông báo (ví dụ: notification.mobile_app)",
           "notify_actions": "Hành động thông báo",
           "notify_people": "Trì hoãn giao hàng cho đến khi những người này về nhà",
           "notify_only_when_home": "Trì hoãn thông báo cho đến khi người được chọn ở nhà",
           "notify_fire_events": "Kích hoạt sự kiện tự động hóa",
-          "notify_events": "Sự kiện cần thông báo",
           "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
           "notify_title": "Tiêu đề thông báo",
           "notify_icon": "Biểu tượng thông báo",
           "notify_start_message": "Bắt đầu định dạng tin nhắn",
           "notify_finish_message": "Hoàn tất định dạng tin nhắn",
           "notify_pre_complete_message": "Định dạng tin nhắn trước khi hoàn thành",
-          "show_advanced": "Chỉnh sửa cài đặt nâng cao (Bước tiếp theo)"
+          "show_advanced": "Chỉnh sửa cài đặt nâng cao (Bước tiếp theo)",
+          "notify_start_services": "Bắt đầu chu kỳ - Mục tiêu thông báo",
+          "notify_finish_services": "Kết thúc chu kỳ - Mục tiêu thông báo",
+          "notify_live_services": "Tiến trình trực tiếp - Mục tiêu thông báo"
         },
         "data_description": {
           "apply_suggestions": "Chọn hộp này để sao chép các giá trị do thuật toán học đề xuất vào biểu mẫu. Xem lại trước khi lưu.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Chọn loại thiết bị (Máy giặt, Máy sấy, Máy rửa chén, Máy pha cà phê, EV). Thẻ này được lưu trữ theo từng chu kỳ để tổ chức tốt hơn.",
-          "power_sensor": "Thực thể cảm biến báo cáo công suất theo thời gian thực (tính bằng watt). Bạn có thể thay đổi điều này bất kỳ lúc nào mà không làm mất dữ liệu lịch sử—hữu ích nếu bạn thay thế phích cắm thông minh.",
+          "power_sensor": "Thực thể cảm biến báo cáo công suất theo thời gian thực (tính bằng watt). Bạn có thể thay đổi điều này bất kỳ lúc nào mà không làm mất dữ liệu lịch sử-hữu ích nếu bạn thay thế phích cắm thông minh.",
           "min_power": "Chỉ số công suất trên ngưỡng này (tính bằng watt) cho biết thiết bị đang chạy. Bắt đầu với 2W cho hầu hết các thiết bị.",
           "off_delay": "Số giây công suất được làm mịn phải ở dưới ngưỡng dừng để đánh dấu mức hoàn thành. Mặc định: 120s.",
-          "notify_service": "Home Assistant thông báo dịch vụ sẽ sử dụng (tùy chọn).",
           "notify_actions": "Chuỗi hành động Home Assistant tùy chọn để chạy thông báo (tập lệnh, thông báo, TTS, v.v.). Nếu được đặt, các hành động sẽ chạy trước dịch vụ thông báo dự phòng.",
           "notify_people": "Các thực thể con người được sử dụng để kiểm soát sự hiện diện. Khi được bật, việc gửi thông báo sẽ bị trì hoãn cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_only_when_home": "Nếu được bật, hãy trì hoãn thông báo cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started và ha_washdata_cycle_ended) để thúc đẩy quá trình tự động hóa.",
-          "notify_events": "Những sự kiện nào cần gửi thông báo.",
           "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
           "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
           "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để gửi không có biểu tượng.",
           "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
           "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}."
+          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}.",
+          "notify_start_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu kỳ bắt đầu. Để trống để bỏ qua thông báo bắt đầu.",
+          "notify_finish_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu trình kết thúc hoặc gần hoàn thành. Để trống để bỏ qua thông báo kết thúc.",
+          "notify_live_services": "Một hoặc nhiều dịch vụ thông báo để nhận cập nhật tiến độ trực tiếp trong khi chu kỳ chạy (chỉ ứng dụng đồng hành trên thiết bị di động). Để trống để bỏ qua cập nhật trực tiếp."
         }
       },
       "notifications": {
         "title": "Thông báo",
         "description": "Định cấu hình các kênh thông báo, mẫu và cập nhật tiến trình di động trực tiếp tùy chọn.",
         "data": {
-          "notify_service": "Dịch vụ thông báo (ví dụ: notification.mobile_app)",
           "notify_actions": "Hành động thông báo",
           "notify_people": "Trì hoãn giao hàng cho đến khi những người này về nhà",
           "notify_only_when_home": "Trì hoãn thông báo cho đến khi người được chọn ở nhà",
           "notify_fire_events": "Kích hoạt sự kiện tự động hóa",
-          "notify_events": "Sự kiện cần thông báo",
           "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
           "notify_live_interval_seconds": "Khoảng thời gian cập nhật trực tiếp (giây)",
           "notify_live_overrun_percent": "Phụ cấp tràn cập nhật trực tiếp (%)",
@@ -116,23 +116,33 @@
           "notify_icon": "Biểu tượng thông báo",
           "notify_start_message": "Bắt đầu định dạng tin nhắn",
           "notify_finish_message": "Hoàn tất định dạng tin nhắn",
-          "notify_pre_complete_message": "Định dạng tin nhắn trước khi hoàn thành"
+          "notify_pre_complete_message": "Định dạng tin nhắn trước khi hoàn thành",
+          "notify_start_services": "Bắt đầu chu kỳ - Mục tiêu thông báo",
+          "notify_finish_services": "Kết thúc chu kỳ - Mục tiêu thông báo",
+          "notify_live_services": "Tiến trình trực tiếp - Mục tiêu thông báo",
+          "notify_live_chronometer": "Đồng hồ đếm ngược Chronometer",
+          "energy_price_entity": "Giá năng lượng - Thực thể (tùy chọn)",
+          "energy_price_static": "Giá năng lượng - Giá trị tĩnh (tùy chọn)"
         },
         "data_description": {
-          "notify_service": "Home Assistant thông báo dịch vụ sẽ sử dụng (tùy chọn).",
           "notify_actions": "Chuỗi hành động Home Assistant tùy chọn để chạy thông báo (tập lệnh, thông báo, TTS, v.v.). Nếu được đặt, các hành động sẽ chạy trước dịch vụ thông báo dự phòng.",
           "notify_people": "Các thực thể con người được sử dụng để kiểm soát sự hiện diện. Khi được bật, việc gửi thông báo sẽ bị trì hoãn cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_only_when_home": "Nếu được bật, hãy trì hoãn thông báo cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started và ha_washdata_cycle_ended) để thúc đẩy quá trình tự động hóa.",
-          "notify_events": "Những sự kiện nào cần gửi thông báo.",
           "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
-          "notify_live_interval_seconds": "Tần suất cập nhật tiến độ được gửi trong khi chạy. Giá trị thấp hơn phản hồi nhanh hơn nhưng tiêu thụ nhiều thông báo hơn. Tối thiểu 30 giây được thực thi — các giá trị dưới 30 giây sẽ tự động được làm tròn thành 30 giây.",
+          "notify_live_interval_seconds": "Tần suất cập nhật tiến độ được gửi trong khi chạy. Giá trị thấp hơn phản hồi nhanh hơn nhưng tiêu thụ nhiều thông báo hơn. Tối thiểu 30 giây được thực thi - các giá trị dưới 30 giây sẽ tự động được làm tròn thành 30 giây.",
           "notify_live_overrun_percent": "Biên độ an toàn cao hơn số lượng cập nhật ước tính cho các chu kỳ dài/chạy quá mức (ví dụ: 20% cho phép cập nhật ước tính gấp 1,2 lần).",
           "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
           "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để gửi không có biểu tượng.",
           "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
           "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}."
+          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}.",
+          "notify_start_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu kỳ bắt đầu (ví dụ: notification.mobile_app_my_phone). Để trống để bỏ qua thông báo bắt đầu.",
+          "notify_finish_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu trình kết thúc hoặc gần hoàn thành. Để trống để bỏ qua thông báo kết thúc.",
+          "notify_live_services": "Một hoặc nhiều dịch vụ thông báo để nhận cập nhật tiến độ trực tiếp trong khi chu kỳ chạy (chỉ ứng dụng đồng hành trên thiết bị di động). Để trống để bỏ qua cập nhật trực tiếp.",
+          "notify_live_chronometer": "Khi được bật, mỗi bản cập nhật trực tiếp sẽ bao gồm đồng hồ đếm ngược thời gian cho đến thời gian kết thúc ước tính. Đồng hồ thông báo tự động đếm ngược trên thiết bị giữa các lần cập nhật (chỉ ứng dụng đồng hành với Android).",
+          "energy_price_entity": "Chọn một thực thể số chứa giá điện hiện tại (ví dụ: cảm biến.điện_price, input_number.energy_rate). Khi được đặt, hãy bật trình giữ chỗ {cost}. Được ưu tiên hơn giá trị tĩnh nếu cả hai đều được cấu hình.",
+          "energy_price_static": "Giá điện cố định trên mỗi kWh. Khi được đặt, hãy bật trình giữ chỗ {cost}. Bị bỏ qua nếu một thực thể được định cấu hình ở trên. Thêm ký hiệu tiền tệ của bạn vào mẫu tin nhắn, ví dụ: {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "Băng thông DTW",
           "external_end_trigger_enabled": "Kích hoạt trình kích hoạt kết thúc chu kỳ bên ngoài",
           "external_end_trigger": "Cảm biến kết thúc chu kỳ bên ngoài",
-          "external_end_trigger_inverted": "Đảo ngược logic kích hoạt (Kích hoạt khi TẮT)"
+          "external_end_trigger_inverted": "Đảo ngược logic kích hoạt (Kích hoạt khi TẮT)",
+          "suppress_feedback_notifications": "Ngăn chặn thông báo phản hồi",
+          "pump_stuck_duration": "(Các) Ngưỡng cảnh báo bị kẹt máy bơm (Chỉ máy bơm)",
+          "door_sensor_entity": "Cảm biến cửa",
+          "pause_cuts_power": "Cắt điện khi tạm dừng",
+          "notify_unload_delay_minutes": "Độ trễ thông báo chờ giặt (phút)"
         },
         "data_description": {
           "apply_suggestions": "Chọn hộp này để mở bước xem xét các giá trị được đề xuất từ ​​thuật toán học. Không có gì được lưu tự động.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Thời gian cong vênh (kéo dài) tối đa cho phép theo tỷ lệ của thời lượng chu kỳ. Giá trị cao hơn cho phép khớp các chu kỳ biến đổi cao nhưng làm tăng chi phí CPU. Mặc định: 0,20 (20%).",
           "external_end_trigger_enabled": "Cho phép giám sát cảm biến nhị phân bên ngoài để kích hoạt hoàn thành chu trình.",
           "external_end_trigger": "Chọn thực thể cảm biến nhị phân. Khi cảm biến này kích hoạt, chu kỳ hiện tại sẽ kết thúc với trạng thái “đã hoàn thành”.",
-          "external_end_trigger_inverted": "Theo mặc định, trình kích hoạt sẽ kích hoạt khi cảm biến BẬT. Thay vào đó, hãy chọn hộp này để kích hoạt khi cảm biến TẮT."
+          "external_end_trigger_inverted": "Theo mặc định, trình kích hoạt sẽ kích hoạt khi cảm biến BẬT. Thay vào đó, hãy chọn hộp này để kích hoạt khi cảm biến TẮT.",
+          "suppress_feedback_notifications": "Khi được bật, WashData sẽ vẫn theo dõi và yêu cầu phản hồi nội bộ nhưng sẽ không hiển thị thông báo liên tục yêu cầu bạn xác nhận chu kỳ. Hữu ích khi các chu kỳ luôn được phát hiện chính xác và bạn thấy các lời nhắc khiến bạn mất tập trung.",
+          "pump_stuck_duration": "Nếu chu trình bơm vẫn chạy sau nhiều giây này, sự kiện ha_washdata_pump_stuck sẽ được kích hoạt một lần. Sử dụng tính năng này để phát hiện động cơ bị kẹt (thời gian chạy máy bơm bể phốt thông thường là dưới 60 giây). Mặc định: 1800 giây (30 phút). Chỉ loại thiết bị bơm.",
+          "door_sensor_entity": "Cảm biến nhị phân tùy chọn cho cửa máy (bật = mở, tắt = đóng). Khi cửa mở trong một chu trình đang hoạt động, WashData sẽ xác nhận chu trình đó được tạm dừng một cách có chủ ý. Sau khi chu trình kết thúc, nếu cửa vẫn đóng, trạng thái sẽ chuyển sang 'Sạch' cho đến khi cửa được mở. Lưu ý: việc đóng cửa KHÔNG tự động tiếp tục lại chu trình đã tạm dừng - việc tiếp tục phải được kích hoạt thủ công thông qua nút hoặc dịch vụ Tiếp tục chu trình.",
+          "pause_cuts_power": "Khi tạm dừng thông qua nút hoặc dịch vụ Tạm dừng Chu kỳ, hãy tắt cả thực thể chuyển đổi đã định cấu hình. Chỉ có hiệu lực nếu thực thể chuyển đổi được định cấu hình cho thiết bị này.",
+          "notify_unload_delay_minutes": "Gửi thông báo qua kênh thông báo kết thúc sau khi chu trình kết thúc và cửa chưa được mở trong nhiều phút này (yêu cầu Cảm biến cửa). Đặt thành 0 để tắt. Mặc định: 60 phút."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Chu trình cắt — Chọn chu trình",
+        "title": "Chu trình cắt - Chọn chu trình",
         "description": "Chọn một chu kỳ để cắt. ✓ = hoàn thành, ⚠ = tiếp tục, ✗ = bị gián đoạn",
         "data": {
           "cycle_id": "ID chu kỳ"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: Sẵn sàng cài đặt được đề xuất ({device})",
       "suggestions_ready_notification_message": "Cảm biến **Cài đặt được đề xuất** hiện báo cáo **{count}** đề xuất có thể thực hiện được.\n\nĐể xem xét và áp dụng chúng: **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Cài đặt nâng cao > Áp dụng các giá trị được đề xuất**.\n\nĐề xuất là tùy chọn và được hiển thị để xem xét trước khi bạn lưu.",
       "trim_range_invalid": "Bắt đầu phải trước khi kết thúc. Hãy điều chỉnh điểm cắt của bạn.",
-      "trim_failed": "Cắt không thành công. Chu trình có thể không còn tồn tại hoặc cửa sổ trống."
+      "trim_failed": "Cắt không thành công. Chu trình có thể không còn tồn tại hoặc cửa sổ trống.",
+      "auto_tune_suggestion": "{device_type} {device_title} đã phát hiện chu kỳ ma. Thay đổi công suất tối thiểu được đề xuất: {current_min}W -> {new_min}W (không được áp dụng tự động).",
+      "auto_tune_title": "Tự động điều chỉnh WashData",
+      "auto_tune_fallback": "{device_type} {device_title} đã phát hiện chu kỳ ma. Thay đổi công suất tối thiểu được đề xuất: {current_min}W -> {new_min}W (không được áp dụng tự động)."
     },
     "abort": {
       "no_cycles_found": "Không tìm thấy chu kỳ nào",
@@ -999,7 +1022,8 @@
           "interrupted": "Bị gián đoạn",
           "force_stopped": "Buộc dừng",
           "rinse": "Rửa sạch",
-          "unknown": "Không xác định"
+          "unknown": "Không xác định",
+          "clean": "Lau dọn"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Cài đặt được đề xuất"
+      },
+      "pump_runs_today": {
+        "name": "Máy bơm chạy (24 giờ qua)"
+      },
+      "cycle_count": {
+        "name": "Số chu kỳ"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Buộc kết thúc chu kỳ"
+      },
+      "pause_cycle": {
+        "name": "Chu kỳ tạm dừng"
+      },
+      "resume_cycle": {
+        "name": "Tiếp tục chu kỳ"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "Không tìm thấy chu trình hoặc không có dữ liệu nguồn."
     },
     "trim_failed_empty_window": {
-      "message": "Cắt không thành công — không tìm thấy chu kỳ, không có dữ liệu nguồn hoặc cửa sổ kết quả trống."
+      "message": "Cắt không thành công - không tìm thấy chu kỳ, không có dữ liệu nguồn hoặc cửa sổ kết quả trống."
     },
     "trim_invalid_range": {
       "message": "trim_end_s phải lớn hơn trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Cần có device_id hợp lệ."
     }
   }
 }

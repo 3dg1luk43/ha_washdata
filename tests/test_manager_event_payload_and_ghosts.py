@@ -178,7 +178,7 @@ async def test_dishwasher_pump_out_outside_window_is_stored(
     prev_end = datetime(2026, 3, 18, 13, 59, 54, tzinfo=timezone.utc)
     manager._last_cycle_end_time = prev_end
 
-    # Starts 15 minutes after previous — outside the 10-minute suppression window
+    # Starts 15 minutes after previous - outside the 10-minute suppression window
     cycle_start = prev_end + timedelta(seconds=900)
     cycle_data = {
         "start_time": cycle_start.isoformat(),
@@ -214,7 +214,7 @@ async def test_dishwasher_pump_out_high_energy_is_stored(
     prev_end = datetime(2026, 3, 18, 13, 59, 54, tzinfo=timezone.utc)
     manager._last_cycle_end_time = prev_end
 
-    # Starts 3 minutes after previous (within window) but uses 2 Wh — a real load
+    # Starts 3 minutes after previous (within window) but uses 2 Wh - a real load
     cycle_start = prev_end + timedelta(seconds=180)
     cycle_data = {
         "start_time": cycle_start.isoformat(),

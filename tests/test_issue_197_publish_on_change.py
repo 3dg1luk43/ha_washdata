@@ -70,7 +70,7 @@ def manager(hass: HomeAssistant, mock_entry: Any) -> WashDataManager:
 
 
 # ---------------------------------------------------------------------------
-# Bug 1 — misleading log message in update_match()
+# Bug 1 - misleading log message in update_match()
 # ---------------------------------------------------------------------------
 
 
@@ -105,7 +105,7 @@ def test_update_match_log_le_zero_says_le_zero(
 
     assert le_zero_msgs, "Expected a log message containing '(<= 0)' for value 0.0"
     assert not gt_6h_msgs, (
-        "Got '(> 6h)' log for value 0.0 — this is the misleading message that was fixed"
+        "Got '(> 6h)' log for value 0.0 - this is the misleading message that was fixed"
     )
 
 
@@ -121,14 +121,14 @@ def test_update_match_log_gt_6h_says_gt_6h(
     le_zero_msgs = [r.message for r in caplog.records if "<= 0" in r.message]
 
     assert gt_6h_msgs, "Expected a '(> 6h)' log message for a value over 6 hours"
-    assert not le_zero_msgs, "Got '(<= 0)' for a value > 6 h — wrong branch"
+    assert not le_zero_msgs, "Got '(<= 0)' for a value > 6 h - wrong branch"
 
 
 def test_update_match_valid_duration_no_warning(
     detector: CycleDetector, caplog: pytest.LogCaptureFixture
 ) -> None:
     """A valid expected_duration must be stored without any warning."""
-    valid_seconds = 9000.0  # 2 h 30 m — typical dryer programme
+    valid_seconds = 9000.0  # 2 h 30 m - typical dryer programme
     with caplog.at_level(logging.DEBUG, logger="custom_components.ha_washdata"):
         detector.update_match(("Tumble Cottons 02:30+", 0.82, valid_seconds, None, False))
 
@@ -141,7 +141,7 @@ def test_update_match_valid_duration_no_warning(
 
 
 # ---------------------------------------------------------------------------
-# Bug 2 — profile_store snapshot avg_duration fallback
+# Bug 2 - profile_store snapshot avg_duration fallback
 # ---------------------------------------------------------------------------
 
 
@@ -170,7 +170,7 @@ def test_profile_snapshot_uses_segment_duration_when_avg_duration_zero() -> None
     assert avg_dur == n_samples * used_dt, (
         f"Expected fallback estimate {n_samples * used_dt} s, got {avg_dur}"
     )
-    assert avg_dur > 0, "Snapshot avg_duration must never be zero — it breaks duration ratio checks"
+    assert avg_dur > 0, "Snapshot avg_duration must never be zero - it breaks duration ratio checks"
 
 
 def test_profile_snapshot_prefers_profile_avg_duration() -> None:
@@ -192,7 +192,7 @@ def test_profile_snapshot_prefers_profile_avg_duration() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Bug 3 — watchdog respects no_update_active_timeout in low-power silence
+# Bug 3 - watchdog respects no_update_active_timeout in low-power silence
 # ---------------------------------------------------------------------------
 
 
@@ -216,7 +216,7 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
     manager._last_real_reading_time = last_real
     manager._current_power = 1.0                    # 1 W: below stop_threshold (2 W)
     manager._current_program = "Tumble Cottons"
-    manager._low_power_no_update_timeout = 3600.0   # Default — should NOT be what closes the cycle
+    manager._low_power_no_update_timeout = 3600.0   # Default - should NOT be what closes the cycle
 
     # Wire detector mock: cycle is in RUNNING state, waiting in low-power.
     detector = manager.detector
@@ -235,7 +235,7 @@ async def test_watchdog_injects_keepalive_after_no_update_timeout(
 
     await manager._watchdog_check_stuck_cycle(now)
 
-    # Injection must have fired — process_reading(0.0, now) called.
+    # Injection must have fired - process_reading(0.0, now) called.
     detector.process_reading.assert_called_once_with(0.0, now)
     # No force-end: the cycle should close gracefully, not be aborted.
     detector.force_end.assert_not_called()
@@ -250,7 +250,7 @@ async def test_watchdog_does_not_inject_before_no_update_timeout(
     """
     now = datetime(2026, 3, 28, 12, 0, 0, tzinfo=timezone.utc)
 
-    # Sensor went silent only 80 s ago — below both thresholds (140 s and 120 s).
+    # Sensor went silent only 80 s ago - below both thresholds (140 s and 120 s).
     silence_duration = 80
     last_real = now - timedelta(seconds=silence_duration)
 
@@ -276,7 +276,7 @@ async def test_watchdog_does_not_inject_before_no_update_timeout(
 
     await manager._watchdog_check_stuck_cycle(now)
 
-    # Too early — neither injection path should have fired yet.
+    # Too early - neither injection path should have fired yet.
     detector.process_reading.assert_not_called()
     detector.force_end.assert_not_called()
 
@@ -291,7 +291,7 @@ async def test_watchdog_skips_injection_during_verified_pause(
     """
     now = datetime(2026, 3, 28, 12, 0, 0, tzinfo=timezone.utc)
 
-    # Sensor has been silent for 500 s — well past no_update_active_timeout (140 s).
+    # Sensor has been silent for 500 s - well past no_update_active_timeout (140 s).
     silence_duration = 500
     last_real = now - timedelta(seconds=silence_duration)
 

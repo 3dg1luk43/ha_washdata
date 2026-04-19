@@ -65,19 +65,20 @@
           "power_sensor": "Entiteta senzorja moči",
           "min_power": "Najmanjša moč (W)",
           "off_delay": "Zamik konca cikla (s)",
-          "notify_service": "Storitev obveščanja (npr. notify.mobile_app)",
           "notify_actions": "Dejanja obveščanja",
           "notify_people": "Odložite dostavo, dokler ti ljudje niso doma",
           "notify_only_when_home": "Odloži obvestila, dokler izbrana oseba ni doma",
           "notify_fire_events": "Sproži dogodke avtomatizacije",
-          "notify_events": "Dogodki za obveščanje",
           "notify_before_end_minutes": "Obvestilo pred zaključkom (minut pred koncem)",
           "notify_title": "Naslov obvestila",
           "notify_icon": "Ikona obvestila",
           "notify_start_message": "Oblika sporočila ob zagonu",
           "notify_finish_message": "Oblika sporočila ob zaključku",
           "notify_pre_complete_message": "Oblika sporočila pred dokončanjem",
-          "show_advanced": "Urejanje naprednih nastavitev (naslednji korak)"
+          "show_advanced": "Urejanje naprednih nastavitev (naslednji korak)",
+          "notify_start_services": "Začetek cikla - Cilji obvestil",
+          "notify_finish_services": "Konec cikla - Cilji obvestil",
+          "notify_live_services": "Napredek v živo - cilji obvestil"
         },
         "data_description": {
           "apply_suggestions": "Označite to polje, če želite v obrazec kopirati vrednosti, ki jih predlaga učni algoritem. Preglejte pred shranjevanjem.\n\nPredlagano (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "Entiteta senzorja, ki poroča o moči v realnem času (v vatih). To lahko kadar koli spremenite, ne da bi pri tem izgubili zgodovinske podatke – uporabno, če zamenjate pametni vtič.",
           "min_power": "Odčitki moči nad tem pragom (v vatih) pomenijo, da naprava deluje. Začnite z 2 W za večino naprav.",
           "off_delay": "Sekunde mora izravnana moč ostati pod pragom zaustavitve, da se označi zaključek. Privzeto: 120 s.",
-          "notify_service": "Storitev obveščanja Home Assistant za uporabo (neobvezno).",
           "notify_actions": "Izbirno zaporedje dejanj Home Assistant za zagon ob obvestilih (skripti, obvestilo, TTS itd.). Če je nastavljeno, se dejanja izvajajo pred nadomestno storitvijo obveščanja.",
           "notify_people": "Entitete oseb, ki se uporabljajo za preverjanje prisotnosti. Ko je omogočeno, je dostava obvestil zakasnjena, dokler vsaj ena izbrana oseba ni doma.",
           "notify_only_when_home": "Če je omogočeno, odloži obvestila, dokler vsaj ena izbrana oseba ni doma.",
           "notify_fire_events": "Če je omogočeno, sproži dogodke Home Assistant za začetek in konec cikla (ha_washdata_cycle_started in ha_washdata_cycle_ended), da omogoči avtomatizacijo.",
-          "notify_events": "Za katere dogodke poslati obvestila.",
           "notify_before_end_minutes": "Minute pred predvidenim koncem cikla za sprožitev obvestila. Nastavite na 0, da onemogočite. Privzeto: 0.",
           "notify_title": "Naslov po meri za obvestila. Podpira nadomestni znak {device}.",
           "notify_icon": "Ikona za uporabo pri obvestilih (npr. mdi:washing-machine). Pustite prazno za pošiljanje brez ikone.",
           "notify_start_message": "Sporočilo, poslano ob začetku cikla. Podpira nadomestni znak {device}.",
           "notify_finish_message": "Sporočilo, poslano, ko se cikel konča. Podpira nadomestne znake {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Sporočilo, poslano pred dokončanjem. Podpira nadomestne znake {device}, {minutes}."
+          "notify_pre_complete_message": "Sporočilo, poslano pred dokončanjem. Podpira nadomestne znake {device}, {minutes}.",
+          "notify_start_services": "Ena ali več storitev obveščanja, da vas opozorijo, ko se začne cikel. Pustite prazno, če želite preskočiti obvestila o začetku.",
+          "notify_finish_services": "Ena ali več storitev obveščanja, da vas opozorijo, ko se cikel konča ali bliža koncu. Pustite prazno, če želite preskočiti obvestila o zaključku.",
+          "notify_live_services": "Ena ali več storitev obveščanja za prejemanje posodobitev napredka v živo med potekom cikla (samo mobilna spremljevalna aplikacija). Pustite prazno, če želite preskočiti posodobitve v živo."
         }
       },
       "notifications": {
         "title": "Obvestila",
         "description": "Konfigurirajte kanale za obveščanje, predloge in izbirne posodobitve napredka v živo.",
         "data": {
-          "notify_service": "Storitev obveščanja (npr. notify.mobile_app)",
           "notify_actions": "Dejanja obveščanja",
           "notify_people": "Odložite dostavo, dokler ti ljudje niso doma",
           "notify_only_when_home": "Odloži obvestila, dokler izbrana oseba ni doma",
           "notify_fire_events": "Sproži dogodke avtomatizacije",
-          "notify_events": "Dogodki za obveščanje",
           "notify_before_end_minutes": "Obvestilo pred zaključkom (minut pred koncem)",
           "notify_live_interval_seconds": "Interval posodobitve v živo (sekunde)",
           "notify_live_overrun_percent": "Dovoljenje za prekoračitev posodobitve v živo (%)",
@@ -116,23 +116,33 @@
           "notify_icon": "Ikona obvestila",
           "notify_start_message": "Oblika sporočila ob zagonu",
           "notify_finish_message": "Oblika sporočila ob zaključku",
-          "notify_pre_complete_message": "Oblika sporočila pred dokončanjem"
+          "notify_pre_complete_message": "Oblika sporočila pred dokončanjem",
+          "notify_start_services": "Začetek cikla - Cilji obvestil",
+          "notify_finish_services": "Konec cikla - Cilji obvestil",
+          "notify_live_services": "Napredek v živo - cilji obvestil",
+          "notify_live_chronometer": "Odštevalnik kronometra",
+          "energy_price_entity": "Cena energije – subjekt (neobvezno)",
+          "energy_price_static": "Cena energije - statična vrednost (neobvezno)"
         },
         "data_description": {
-          "notify_service": "Storitev obveščanja Home Assistant za uporabo (neobvezno).",
           "notify_actions": "Izbirno zaporedje dejanj Home Assistant za zagon ob obvestilih (skripti, obvestilo, TTS itd.). Če je nastavljeno, se dejanja izvajajo pred nadomestno storitvijo obveščanja.",
           "notify_people": "Entitete oseb, ki se uporabljajo za preverjanje prisotnosti. Ko je omogočeno, je dostava obvestil zakasnjena, dokler vsaj ena izbrana oseba ni doma.",
           "notify_only_when_home": "Če je omogočeno, odloži obvestila, dokler vsaj ena izbrana oseba ni doma.",
           "notify_fire_events": "Če je omogočeno, sproži dogodke Home Assistant za začetek in konec cikla (ha_washdata_cycle_started in ha_washdata_cycle_ended), da omogoči avtomatizacijo.",
-          "notify_events": "Za katere dogodke poslati obvestila.",
           "notify_before_end_minutes": "Minute pred predvidenim koncem cikla za sprožitev obvestila. Nastavite na 0, da onemogočite. Privzeto: 0.",
-          "notify_live_interval_seconds": "Kako pogosto se pošiljajo posodobitve napredka med delovanjem. Nižje vrednosti so bolj odzivne, vendar porabijo več obvestil. Velja najmanj 30 sekund — vrednosti pod 30 s se samodejno zaokrožijo na 30 s.",
+          "notify_live_interval_seconds": "Kako pogosto se pošiljajo posodobitve napredka med delovanjem. Nižje vrednosti so bolj odzivne, vendar porabijo več obvestil. Velja najmanj 30 sekund - vrednosti pod 30 s se samodejno zaokrožijo na 30 s.",
           "notify_live_overrun_percent": "Varnostna meja nad ocenjenim številom posodobitev za dolge/prekoračljive cikle (na primer 20 % omogoča 1,2-kratno ocenjeno posodobitev).",
           "notify_title": "Naslov po meri za obvestila. Podpira nadomestni znak {device}.",
           "notify_icon": "Ikona za uporabo pri obvestilih (npr. mdi:washing-machine). Pustite prazno za pošiljanje brez ikone.",
           "notify_start_message": "Sporočilo, poslano ob začetku cikla. Podpira nadomestni znak {device}.",
           "notify_finish_message": "Sporočilo, poslano, ko se cikel konča. Podpira nadomestne znake {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Sporočilo, poslano pred dokončanjem. Podpira nadomestne znake {device}, {minutes}."
+          "notify_pre_complete_message": "Sporočilo, poslano pred dokončanjem. Podpira nadomestne znake {device}, {minutes}.",
+          "notify_start_services": "Ena ali več storitev obveščanja, ki vas opozorijo, ko se začne cikel (npr. notify.mobile_app_my_phone). Pustite prazno, če želite preskočiti obvestila o začetku.",
+          "notify_finish_services": "Ena ali več storitev obveščanja, da vas opozorijo, ko se cikel konča ali bliža koncu. Pustite prazno, če želite preskočiti obvestila o zaključku.",
+          "notify_live_services": "Ena ali več storitev obveščanja za prejemanje posodobitev napredka v živo med potekom cikla (samo mobilna spremljevalna aplikacija). Pustite prazno, če želite preskočiti posodobitve v živo.",
+          "notify_live_chronometer": "Ko je omogočeno, vsaka posodobitev v živo vključuje odštevanje kronometra do predvidenega časa cilja. Časovnik obvestil samodejno odšteka v napravi med posodobitvami (samo spremljevalna aplikacija za Android).",
+          "energy_price_entity": "Izberite številsko entiteto, ki vsebuje trenutno ceno električne energije (npr. sensor.electricity_price, input_number.energy_rate). Ko je nastavljeno, omogoči ogrado {cost}. Ima prednost pred statično vrednostjo, če sta konfigurirani obe.",
+          "energy_price_static": "Fiksna cena električne energije za kWh. Ko je nastavljeno, omogoči ogrado {cost}. Prezrto, če je entiteta konfigurirana zgoraj. V predlogo sporočila dodajte simbol svoje valute, npr. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,12 @@
           "dtw_bandwidth": "Pasovna širina DTW",
           "external_end_trigger_enabled": "Omogoči zunanji sprožilec konca cikla",
           "external_end_trigger": "Zunanji senzor konca cikla",
-          "external_end_trigger_inverted": "Obrni logiko sprožilca (sproži ob izklopu)"
+          "external_end_trigger_inverted": "Obrni logiko sprožilca (sproži ob izklopu)",
+          "suppress_feedback_notifications": "Zavrni obvestila o povratnih informacijah",
+          "pump_stuck_duration": "Opozorilni prag (s) zastoja črpalke (samo črpalka)",
+          "door_sensor_entity": "Senzor za vrata",
+          "pause_cuts_power": "Prekinite napajanje med premorom",
+          "notify_unload_delay_minutes": "Zakasnitev obvestila o čakanju na perilo (min.)"
         },
         "data_description": {
           "apply_suggestions": "Označite to polje, če želite odpreti korak pregleda za predlagane vrednosti iz učnega algoritma. Nič se samodejno ne shrani.\n\nPredlagano (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +243,12 @@
           "dtw_bandwidth": "Največja dovoljena časovna deformacija (raztezanje) kot razmerje trajanja cikla. Višje vrednosti omogočajo ujemanje zelo spremenljivih ciklov, vendar povečajo obremenitev procesorja. Privzeto: 0,20 (20 %).",
           "external_end_trigger_enabled": "Omogoči nadzor zunanjega binarnega senzorja za sprožitev zaključka cikla.",
           "external_end_trigger": "Izberite entiteto binarnega senzorja. Ko se ta senzor sproži, se trenutni cikel konča s statusom »zaključeno«.",
-          "external_end_trigger_inverted": "Privzeto se sprožilec aktivira, ko se senzor vklopi. Označite to polje, če želite, da se sproži, ko se senzor namesto tega izklopi."
+          "external_end_trigger_inverted": "Privzeto se sprožilec aktivira, ko se senzor vklopi. Označite to polje, če želite, da se sproži, ko se senzor namesto tega izklopi.",
+          "suppress_feedback_notifications": "Ko je omogočen, bo WashData še vedno interno sledil in zahteval povratne informacije, vendar ne bo prikazoval trajnih obvestil, ki bi zahtevala potrditev ciklov. Uporabno, kadar so cikli vedno pravilno zaznani in se vam zdijo pozivi moteči.",
+          "pump_stuck_duration": "Če se cikel črpalke po toliko sekundah še vedno izvaja, se enkrat sproži dogodek ha_washdata_pump_stuck. Uporabite to za odkrivanje zagozdenega motorja (običajno delovanje črpalke je pod 60 s). Privzeto: 1800 s (30 min). Samo tip črpalke.",
+          "door_sensor_entity": "Izbirni binarni senzor za vrata stroja (vklopljeno = odprto, izklopljeno = zaprto). Ko se vrata odprejo med aktivnim ciklom, bo WashData potrdil, da je cikel namerno zaustavljen. Če so vrata po koncu cikla še zaprta, se stanje spremeni v »Čisto«, dokler se vrata ne odprejo. Opomba: zapiranje vrat NE samodejno nadaljuje zaustavljenega cikla - nadaljevanje je treba sprožiti ročno prek gumba Nadaljuj cikel ali storitve.",
+          "pause_cuts_power": "Pri premoru prek gumba Pause Cycle ali storitve izklopite tudi konfigurirano entiteto stikala. Učinkuje le, če je za to napravo konfigurirana entiteta stikala.",
+          "notify_unload_delay_minutes": "Pošljite obvestilo prek kanala za obveščanje o zaključku, ko se cikel konča in vrata niso bila odprta toliko minut (potreben je senzor za vrata). Nastavite na 0, da onemogočite. Privzeto: 60 min."
         }
       },
       "diagnostics": {
@@ -565,7 +585,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Obrezovanje cikla — izberite cikel",
+        "title": "Obrezovanje cikla - izberite cikel",
         "description": "Izberite cikel za obrezovanje. ✓ = končano, ⚠ = nadaljevanje, ✗ = prekinjeno",
         "data": {
           "cycle_id": "Cikel"
@@ -613,7 +633,10 @@
       "suggestions_ready_notification_title": "WashData: predlagane nastavitve pripravljene ({device})",
       "suggestions_ready_notification_message": "Senzor **Predlagane nastavitve** zdaj poroča o **{count}** priporočilih za ukrepanje.\n\nČe jih želite pregledati in uporabiti: **Nastavitve > Naprave in storitve > WashData > Konfiguracija > Napredne nastavitve > Uporabi predlagane vrednosti**.\n\nPredlogi niso obvezni in so prikazani v pregledu, preden jih shranite.",
       "trim_range_invalid": "Začetek mora biti pred koncem. Prilagodite točke obrezovanja.",
-      "trim_failed": "Obrezovanje ni uspelo. Cikel morda ne obstaja več ali pa je okno prazno."
+      "trim_failed": "Obrezovanje ni uspelo. Cikel morda ne obstaja več ali pa je okno prazno.",
+      "auto_tune_suggestion": "{device_type} {device_title} zaznanih ciklov duhov. Predlagana sprememba najmanjše moči: {current_min}W -> {new_min}W (se ne uporabi samodejno).",
+      "auto_tune_title": "Samodejna nastavitev WashData",
+      "auto_tune_fallback": "{device_type} {device_title} zaznanih ciklov duhov. Predlagana sprememba najmanjše moči: {current_min}W -> {new_min}W (se ne uporabi samodejno)."
     },
     "abort": {
       "no_cycles_found": "Ni najdenih ciklov",
@@ -999,7 +1022,8 @@
           "interrupted": "Prekinjeno",
           "force_stopped": "Prisilno ustavljeno",
           "rinse": "Izpiranje",
-          "unknown": "Neznano"
+          "unknown": "Neznano",
+          "clean": "čisto"
         }
       },
       "washer_program": {
@@ -1044,6 +1068,12 @@
       },
       "suggestions": {
         "name": "Razpoložljive predlagane nastavitve"
+      },
+      "pump_runs_today": {
+        "name": "Črpalka deluje (zadnjih 24 ur)"
+      },
+      "cycle_count": {
+        "name": "Štetje ciklov"
       }
     },
     "select": {
@@ -1057,6 +1087,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Prisilni konec cikla"
+      },
+      "pause_cycle": {
+        "name": "Premor cikla"
+      },
+      "resume_cycle": {
+        "name": "Cikel nadaljevanja"
       }
     }
   },
@@ -1074,10 +1110,13 @@
       "message": "Cikel ni najden ali nima podatkov o moči."
     },
     "trim_failed_empty_window": {
-      "message": "Obrezovanje ni uspelo — cikel ni najden, ni podatkov o moči ali pa je nastalo okno prazno."
+      "message": "Obrezovanje ni uspelo - cikel ni najden, ni podatkov o moči ali pa je nastalo okno prazno."
     },
     "trim_invalid_range": {
       "message": "trim_end_s mora biti večje od trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Potreben je veljaven device_id."
     }
   }
 }

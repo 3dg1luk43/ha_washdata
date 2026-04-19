@@ -5,7 +5,7 @@
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Documentation update
-- [ ] Translation — **please use the [translation PR template](?expand=1&template=translation.md) instead**
+- [ ] Translation - **please use the [translation PR template](?expand=1&template=translation.md) instead**
 - [ ] Refactor / code quality
 - [ ] Other (describe below)
 
