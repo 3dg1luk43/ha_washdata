@@ -549,6 +549,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 user_input[CONF_ENERGY_PRICE_ENTITY] = None
             if user_input.get(CONF_ENERGY_PRICE_STATIC) in (None, ""):
                 user_input[CONF_ENERGY_PRICE_STATIC] = None
+            # Normalize per-event notification service lists: cleared multi-selects
+            # omit the key entirely, which would leave stale recipients in the merged
+            # options.  Explicitly setting [] ensures the merge overwrites old values.
+            for _svc_key in (
+                CONF_NOTIFY_START_SERVICES,
+                CONF_NOTIFY_FINISH_SERVICES,
+                CONF_NOTIFY_LIVE_SERVICES,
+            ):
+                if user_input.get(_svc_key) in (None, ""):
+                    user_input[_svc_key] = []
             merged_options = {
                 **self.config_entry.data,
                 **self.config_entry.options,

@@ -158,7 +158,8 @@ class LearningManager:
                 if current_val is not None and suggested_val is not None:
                     try:
                         if float(current_val) == float(suggested_val):
-                            continue  # already applied, skip
+                            self.profile_store.delete_suggestion(key)
+                            continue  # already applied, remove stale entry
                     except (TypeError, ValueError):
                         pass
             filtered_suggestions[key] = data

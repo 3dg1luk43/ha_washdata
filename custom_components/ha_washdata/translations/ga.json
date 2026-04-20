@@ -1038,6 +1038,7 @@
           "starting": "Ag Tosú",
           "running": "Ag Rith",
           "paused": "Ar Sos",
+          "user_paused": "Curtha ar sos ag an úsáideoir",
           "ending": "Ag Críochnú",
           "finished": "Críochnaithe",
           "anti_wrinkle": "Frith-Roc",

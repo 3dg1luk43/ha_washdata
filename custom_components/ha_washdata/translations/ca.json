@@ -1038,6 +1038,7 @@
           "starting": "Començant",
           "running": "Córrer",
           "paused": "En pausa",
+          "user_paused": "En pausa per l'usuari",
           "ending": "Finalització",
           "finished": "Acabat",
           "anti_wrinkle": "Antiarrugues",

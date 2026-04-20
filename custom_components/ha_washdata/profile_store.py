@@ -691,6 +691,11 @@ class ProfileStore:
             return suggestions.copy()
         return {}
 
+    def delete_suggestion(self, key: str) -> None:
+        """Remove a single suggestion entry by key."""
+        suggestions: JSONDict = self._data.setdefault("suggestions", {})
+        suggestions.pop(key, None)
+
     async def clear_suggestions(self) -> None:
         """Clear all pending suggestions and persist."""
         self._data["suggestions"] = {}
@@ -4187,9 +4192,7 @@ class ProfileStore:
                 continue
             points: list[tuple[float, float]] = []
             cycle_start_raw = c.get("start_time")
-            if not isinstance(cycle_start_raw, str):
-                continue
-            cycle_start_dt = dt_util.parse_datetime(cycle_start_raw)
+            cycle_start_dt = _parse_start_dt(cycle_start_raw)
             if cycle_start_dt is None:
                 continue
             cycle_start = cycle_start_dt.timestamp()

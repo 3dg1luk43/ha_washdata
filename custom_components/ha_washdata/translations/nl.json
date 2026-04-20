@@ -1038,6 +1038,7 @@
           "starting": "Opstarten",
           "running": "Actief",
           "paused": "Gepauzeerd",
+          "user_paused": "Gepauzeerd door gebruiker",
           "ending": "Eindigen",
           "finished": "Voltooid",
           "anti_wrinkle": "Anti-kreuk",

@@ -1038,6 +1038,7 @@
           "starting": "Bắt đầu",
           "running": "Đang chạy",
           "paused": "Đã tạm dừng",
+          "user_paused": "Tạm dừng bởi người dùng",
           "ending": "Kết thúc",
           "finished": "Hoàn thành",
           "anti_wrinkle": "Chống nhăn",

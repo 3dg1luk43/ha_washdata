@@ -1038,6 +1038,7 @@
           "starting": "Beginnt",
           "running": "Läuft",
           "paused": "Angehalten",
+          "user_paused": "Vum Benutzer pausiert",
           "ending": "Ende",
           "finished": "Fertig",
           "anti_wrinkle": "Anti-Falten",

@@ -1038,6 +1038,7 @@
           "starting": "Duke filluar",
           "running": "Në punë",
           "paused": "Në pauzë",
+          "user_paused": "Ndërprerë nga përdoruesi",
           "ending": "Duke përfunduar",
           "finished": "Përfunduar",
           "anti_wrinkle": "Kundër rrudhave",

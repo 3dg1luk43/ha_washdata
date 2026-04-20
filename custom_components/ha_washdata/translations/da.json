@@ -1038,6 +1038,7 @@
           "starting": "Starter",
           "running": "Løb",
           "paused": "Pause",
+          "user_paused": "Sat på pause af brugeren",
           "ending": "Slutning",
           "finished": "Færdig",
           "anti_wrinkle": "Anti-Rynke",

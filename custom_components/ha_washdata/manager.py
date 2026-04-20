@@ -2936,6 +2936,11 @@ class WashDataManager:
                         for entry in self._pending_notifications
                         if entry.get("event_type") != NOTIFY_EVENT_LIVE
                     ]
+                elif any(
+                    entry.get("event_type") == event_type
+                    for entry in self._pending_notifications
+                ):
+                    return False
                 self._pending_notifications.append(
                     {
                         "message": message,

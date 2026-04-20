@@ -1038,6 +1038,7 @@
           "starting": "Démarrage",
           "running": "En cours d'exécution",
           "paused": "En pause",
+          "user_paused": "En pause par l'utilisateur",
           "ending": "En cours d'arrêt",
           "finished": "Terminé",
           "anti_wrinkle": "Anti-faux plis",
