@@ -77,7 +77,7 @@
           "notify_pre_complete_message": "Format for forudgående færdiggørelsesbesked",
           "show_advanced": "Rediger avancerede indstillinger (næste trin)",
           "notify_start_services": "Cyklusstart - Notifikationsmål",
-          "notify_finish_services": "Cycle Finish - Notifikationsmål",
+          "notify_finish_services": "Cyklus afsluttet - notifikationsmål",
           "notify_live_services": "Live fremskridt - Notifikationsmål"
         },
         "data_description": {
@@ -118,7 +118,7 @@
           "notify_finish_message": "Afslut meddelelsesformat",
           "notify_pre_complete_message": "Format for forudgående færdiggørelsesbesked",
           "notify_start_services": "Cyklusstart - Notifikationsmål",
-          "notify_finish_services": "Cycle Finish - Notifikationsmål",
+          "notify_finish_services": "Cyklus afsluttet - notifikationsmål",
           "notify_live_services": "Live fremskridt - Notifikationsmål",
           "notify_live_chronometer": "Kronometer nedtællingstimer",
           "energy_price_entity": "Energipris – enhed (valgfrit)",
@@ -194,11 +194,11 @@
           "external_end_trigger": "Ekstern cyklusslutsensor",
           "external_end_trigger_inverted": "Inverter triggerlogik (trigger til FRA)",
           "suppress_feedback_notifications": "Undertrykk feedbackmeddelelser",
-          "pump_stuck_duration": "Advarselstærskel(r) for pumpen sidder fast (kun pumpen)",
+          "pump_stuck_duration": "Advarselsgrænse for pumpefejl (kun pumpe)",
           "door_sensor_entity": "Dørsensor",
           "pause_cuts_power": "Afbryd strømmen under pause",
           "notify_unload_delay_minutes": "Forsinkelse af besked om tøjvask (min.)",
-          "switch_entity": "Switch Entity (til pause strømafbrydelse)"
+          "switch_entity": "Kontaktenhed (til strømafbrydelse ved pause)"
         },
         "data_description": {
           "apply_suggestions": "Marker dette felt for at åbne et gennemgangstrin for foreslåede værdier fra indlæringsalgoritmen. Intet gemmes automatisk.\n\nForeslået (fra læring):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",

@@ -1038,6 +1038,7 @@
           "starting": "Comezando",
           "running": "Correndo",
           "paused": "En pausa",
+          "user_paused": "En pausa polo usuario",
           "ending": "Finalización",
           "finished": "Rematou",
           "anti_wrinkle": "Anti-engurras",

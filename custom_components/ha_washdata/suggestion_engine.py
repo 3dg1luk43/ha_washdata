@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 from typing import Any, TYPE_CHECKING, cast
 
 import numpy as np
@@ -33,6 +34,17 @@ if TYPE_CHECKING:
     from .profile_store import ProfileStore
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _parse_ts(v: Any) -> float | None:
+    """Parse a value into a unix timestamp float, supporting ISO strings."""
+    if isinstance(v, str):
+        try:
+            return datetime.fromisoformat(v.replace("Z", "+00:00")).timestamp()
+        except ValueError:
+            return None
+    return None
+
 
 class SuggestionEngine:
     """Refined engine for generating data-driven parameter suggestions."""
@@ -178,14 +190,6 @@ class SuggestionEngine:
                 end = float(c["end_time"]) if isinstance(c.get("end_time"), (int, float)) and not isinstance(c.get("end_time"), bool) else None
                 if start is None or end is None:
                     # Try ISO string parsing
-                    from datetime import datetime
-                    def _parse_ts(v: Any) -> float | None:
-                        if isinstance(v, str):
-                            try:
-                                return datetime.fromisoformat(v.replace("Z", "+00:00")).timestamp()
-                            except ValueError:
-                                return None
-                        return None
                     start = _parse_ts(c.get("start_time"))
                     end = _parse_ts(c.get("end_time"))
                 if start is None or end is None or end <= start:
@@ -217,6 +221,10 @@ class SuggestionEngine:
         )
         # Add a 20% safety margin so we never split a real gap into two cycles
         suggested = int(max(device_floor, min(p05_gap * 0.8, 3600)))
+        # When the data-derived value is equal to the device floor, we have no
+        # useful signal to surface — return None to suppress a misleading suggestion.
+        if suggested == device_floor:
+            return None
         reason = (
             f"Based on {len(gaps)} observed inter-cycle gaps "
             f"(p05={p05_gap:.0f}s). Device floor: {device_floor}s."
@@ -374,11 +382,7 @@ class SuggestionEngine:
                     pause_energy = 0.0
                     continue
                 avg_p = (p0 + p1) / 2.0
-                dt_h = (t1 - t0) / 3600.0
-                if t1 <= t0 or dt_h > _MAX_PAUSE_GAP_H:
-                    in_pause = False
-                    pause_energy = 0.0
-                    continue
+                dt_h = dt_s / 3600.0
                 if avg_p < stop_w:
                     if not in_pause:
                         in_pause = True

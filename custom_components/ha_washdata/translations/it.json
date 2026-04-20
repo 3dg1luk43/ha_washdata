@@ -94,7 +94,7 @@
           "notify_title": "Titolo personalizzato per le notifiche. Supporta il segnaposto {device}.",
           "notify_icon": "Icona da usare per le notifiche (es. mdi:washing-machine). Lascia vuoto per inviare senza icona.",
           "notify_start_message": "Messaggio inviato all'avvio di un ciclo. Supporta il segnaposto {device}.",
-          "notify_finish_message": "Messaggio inviato al termine di un ciclo. Supporta i segnaposto {device}, {duration}, {program}.",
+          "notify_finish_message": "Messaggio inviato al termine di un ciclo. Supporta i segnaposto {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Messaggio inviato prima del completamento. Supporta i segnaposto {device}, {minutes}.",
           "notify_start_services": "Uno o più servizi di notifica per avvisare quando inizia un ciclo. Lascia vuoto per saltare le notifiche di avvio.",
           "notify_finish_services": "Uno o più servizi di notifica per avvisare quando un ciclo termina o si avvicina al completamento. Lascia vuoto per saltare le notifiche di fine.",
@@ -135,7 +135,7 @@
           "notify_title": "Titolo personalizzato per le notifiche. Supporta il segnaposto {device}.",
           "notify_icon": "Icona da usare per le notifiche (es. mdi:washing-machine). Lascia vuoto per inviare senza icona.",
           "notify_start_message": "Messaggio inviato all'avvio di un ciclo. Supporta il segnaposto {device}.",
-          "notify_finish_message": "Messaggio inviato al termine di un ciclo. Supporta i segnaposto {device}, {duration}, {program}.",
+          "notify_finish_message": "Messaggio inviato al termine di un ciclo. Supporta i segnaposto {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Messaggio inviato prima del completamento. Supporta i segnaposto {device}, {minutes}.",
           "notify_start_services": "Uno o più servizi di notifica per avvisare quando un ciclo inizia (ad esempio notify.mobile_app_my_phone). Lascia vuoto per saltare le notifiche di avvio.",
           "notify_finish_services": "Uno o più servizi di notifica per avvisare quando un ciclo termina o si avvicina al completamento. Lascia vuoto per saltare le notifiche di fine.",
@@ -1038,6 +1038,7 @@
           "starting": "In avvio",
           "running": "In esecuzione",
           "paused": "In pausa",
+          "user_paused": "In pausa dall'utente",
           "ending": "In chiusura",
           "finished": "Completato",
           "anti_wrinkle": "Antirughe",
@@ -1092,7 +1093,7 @@
         "name": "Impostazioni suggerite disponibili"
       },
       "pump_runs_today": {
-        "name": "La pompa è in funzione (ultime 24 ore)"
+        "name": "Avvii pompa (ultime 24 ore)"
       },
       "cycle_count": {
         "name": "Conteggio cicli"

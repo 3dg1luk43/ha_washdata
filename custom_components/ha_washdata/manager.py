@@ -1189,7 +1189,21 @@ class WashDataManager:
                     self._start_event_fired = bool(
                         active_snapshot_to_restore.get("start_event_fired", False)
                     )
-                    
+
+                    # Restore user-pause state from snapshot.
+                    self._is_user_paused = bool(
+                        active_snapshot_to_restore.get("is_user_paused", False)
+                    )
+                    _pause_start_raw = active_snapshot_to_restore.get("user_pause_start")
+                    self._user_pause_start = (
+                        dt_util.parse_datetime(_pause_start_raw)
+                        if isinstance(_pause_start_raw, str) and _pause_start_raw
+                        else None
+                    )
+                    self._total_user_paused_seconds = float(
+                        active_snapshot_to_restore.get("total_user_paused_seconds", 0.0)
+                    )
+
                     self._start_watchdog()
                 else:
                     await self.profile_store.async_clear_active_cycle()
@@ -1715,6 +1729,11 @@ class WashDataManager:
             snapshot["manual_program"] = self._manual_program_active
             snapshot["notified_start"] = self._notified_start
             snapshot["start_event_fired"] = self._start_event_fired
+            snapshot["is_user_paused"] = self._is_user_paused
+            snapshot["user_pause_start"] = (
+                self._user_pause_start.isoformat() if self._user_pause_start else None
+            )
+            snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
             await self.profile_store.async_save_active_cycle(snapshot)
 
         self._last_reading_time = None
@@ -2028,6 +2047,11 @@ class WashDataManager:
             snapshot["manual_program"] = self._manual_program_active
             snapshot["notified_start"] = self._notified_start
             snapshot["start_event_fired"] = self._start_event_fired
+            snapshot["is_user_paused"] = self._is_user_paused
+            snapshot["user_pause_start"] = (
+                self._user_pause_start.isoformat() if self._user_pause_start else None
+            )
+            snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
 
             self.hass.async_create_task(
                 self.profile_store.async_save_active_cycle(snapshot)
@@ -3177,21 +3201,8 @@ class WashDataManager:
             current_min=f"{current_min:.1f}",
             new_min=f"{new_min:.1f}",
         )
-        autotune_services = (
-            self._notify_finish_services
-            or self._notify_start_services
-            or self._notify_live_services
-        )
-        if autotune_services:
-            for notify_service in autotune_services:
-                domain, service = (
-                    notify_service.split(".", 1)
-                    if "." in notify_service
-                    else ("notify", notify_service)
-                )
-                self.hass.async_create_task(
-                    self.hass.services.async_call(domain, service, {"message": message})
-                )
+        if self._notify_finish_services or self._notify_start_services or self._notify_actions:
+            self._dispatch_notification(message, title=_title, event_type=NOTIFY_EVENT_FINISH)
         else:
             _pn_create(self.hass, message, title=_title)
 
@@ -4109,7 +4120,7 @@ class WashDataManager:
                 )
                 try:
                     await self.hass.services.async_call(
-                        "switch", "turn_off", {"entity_id": switch_entity}
+                        "switch", "turn_off", {"entity_id": switch_entity}, blocking=True
                     )
                 except HomeAssistantError as err:
                     self._logger.warning(
@@ -4158,7 +4169,7 @@ class WashDataManager:
                 )
                 try:
                     await self.hass.services.async_call(
-                        "switch", "turn_on", {"entity_id": switch_entity}
+                        "switch", "turn_on", {"entity_id": switch_entity}, blocking=True
                     )
                 except HomeAssistantError as err:
                     self._logger.warning(

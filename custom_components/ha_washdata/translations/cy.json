@@ -1138,13 +1138,13 @@
       "message": "rhaid i trim_end_s fod yn fwy na trim_start_s."
     },
     "device_id_required": {
-      "message": "Mae angen ID device_ dilys."
+      "message": "Mae angen ID device_id dilys."
     },
     "cycle_id_required": {
       "message": "Mae angen cycle_id dilys."
     },
     "profile_name_required": {
-      "message": "Mae angen enw_proffil dilys."
+      "message": "Mae angen profile_name dilys."
     }
   }
 }

@@ -1010,7 +1010,7 @@
       }
     },
     "resume_cycle": {
-      "name": "Lean an Rothaíocht",
+      "name": "Atosaigh Timthriall",
       "description": "Lean ar aghaidh le timthriall sosaithe le haghaidh gléas WashData.",
       "fields": {
         "device_id": {
@@ -1092,7 +1092,7 @@
         "name": "Socruithe Molta ar Fáil"
       },
       "pump_runs_today": {
-        "name": "Ritheann Caidéil (24 h)"
+        "name": "Rití Caidéil (24 u.)"
       },
       "cycle_count": {
         "name": "Comhaireamh Rothaíochta"

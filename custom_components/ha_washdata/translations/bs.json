@@ -587,7 +587,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trim Cycle - Odaberite Ciklus",
+        "title": "Podrezivanje ciklusa - Odaberite Ciklus",
         "description": "Odaberite ciklus za podrezivanje. ✓ = završeno, ⚠ = nastavljeno, ✗ = prekinuto",
         "data": {
           "cycle_id": "Ciklus"
