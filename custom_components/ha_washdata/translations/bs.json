@@ -195,7 +195,7 @@
           "external_end_trigger_inverted": "Invertna logika okidača (okidač je isključen)",
           "suppress_feedback_notifications": "Poništi obavještenja o povratnim informacijama",
           "pump_stuck_duration": "Prag (s) upozorenja zastoja pumpe (samo pumpa)",
-          "door_sensor_entity": "Door Sensor",
+          "door_sensor_entity": "Senzor vrata",
           "pause_cuts_power": "Isključite napajanje prilikom pauze",
           "notify_unload_delay_minutes": "Kašnjenje obavijesti o čekanju rublja (min)",
           "switch_entity": "Prebacite entitet (za pauziranje isključenja struje)"
@@ -594,7 +594,7 @@
         }
       },
       "trim_cycle": {
-        "title": "Trim Cycle",
+        "title": "Podrezivanje ciklusa",
         "description": "Trenutni prozor: {trim_summary}\n\n{trim_svg}",
         "data": {
           "action": "Akcija"
@@ -978,7 +978,7 @@
       }
     },
     "trim_cycle": {
-      "name": "Trim Cycle",
+      "name": "Podrezivanje ciklusa",
       "description": "Skratite podatke o snazi ​​prošlog ciklusa na određeni vremenski prozor.",
       "fields": {
         "device_id": {
@@ -1095,7 +1095,7 @@
         "name": "Pumpa radi (posljednja 24 h)"
       },
       "cycle_count": {
-        "name": "Cycle Count"
+        "name": "Broj ciklusa"
       }
     },
     "select": {

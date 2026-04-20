@@ -141,7 +141,7 @@
           "notify_finish_services": "En eller flere underretningstjenester for at advare, når en cyklus afsluttes eller nærmer sig fuldførelse. Lad feltet stå tomt for at springe færdiggørelsesmeddelelser over.",
           "notify_live_services": "En eller flere underretningstjenester for at modtage live statusopdateringer, mens cyklussen kører (kun mobilapp). Lad stå tomt for at springe liveopdateringer over.",
           "notify_live_chronometer": "Når den er aktiveret, inkluderer hver liveopdatering en kronometernedtælling til den estimerede sluttid. Notifikationstimeren tikker automatisk ned på enheden mellem opdateringer (kun medfølgende Android-app).",
-          "energy_price_entity": "Vælg en numerisk enhed, der har den aktuelle elpris (f.eks. sensor.elektricitetspris, input_nummer.energipris). Når den er indstillet, aktiveres pladsholderen {cost}. Har forrang over den statiske værdi, hvis begge er konfigureret.",
+          "energy_price_entity": "Vælg en numerisk enhed, der har den aktuelle elpris (f.eks. sensor.electricity_price, input_number.energy_rate). Når den er indstillet, aktiveres pladsholderen {cost}. Har forrang over den statiske værdi, hvis begge er konfigureret.",
           "energy_price_static": "Fast elpris pr. kWh. Når den er indstillet, aktiveres pladsholderen {cost}. Ignoreres, hvis en enhed er konfigureret ovenfor. Tilføj dit valutasymbol i beskedskabelonen, f.eks. {cost} €."
         }
       },

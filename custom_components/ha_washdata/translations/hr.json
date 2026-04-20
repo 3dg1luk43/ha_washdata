@@ -192,7 +192,7 @@
           "dtw_bandwidth": "DTW širina pojasa",
           "external_end_trigger_enabled": "Omogući vanjski okidač završetka ciklusa",
           "external_end_trigger": "Vanjski senzor završetka ciklusa",
-          "external_end_trigger_inverted": "Invertiraj logiku okidača (okidač uključen)",
+          "external_end_trigger_inverted": "Invertiraj logiku okidača (okidač isključen)",
           "suppress_feedback_notifications": "Spriječi obavijesti o povratnim informacijama",
           "pump_stuck_duration": "Prag (s) upozorenja za blokiranje pumpe (samo pumpa)",
           "door_sensor_entity": "Senzor vrata",

@@ -46,6 +46,8 @@ body:
         - Electric Vehicle (EV)
         - Air Fryer
         - Heat Pump
+        - Bread Maker
+        - Pump
         - Other / Not applicable
     validations:
       required: true

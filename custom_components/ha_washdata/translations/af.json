@@ -120,7 +120,7 @@
           "notify_start_services": "Siklusbegin - Kennisgewingsteikens",
           "notify_finish_services": "Siklus Voltooi - Kennisgewing teikens",
           "notify_live_services": "Regstreekse vordering - Kennisgewingteikens",
-          "notify_live_chronometer": "Chronometer Countdown Timer",
+          "notify_live_chronometer": "Chronometer aftellingstimer",
           "energy_price_entity": "Energieprys – Entiteit (opsioneel)",
           "energy_price_static": "Energieprys – Statiese waarde (opsioneel)"
         },

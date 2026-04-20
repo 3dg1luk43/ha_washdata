@@ -194,7 +194,7 @@
           "external_end_trigger": "Sensor Akhir Siklus Eksternal",
           "external_end_trigger_inverted": "Pembalikan Logika Pemicu (Pemicu dalam keadaan MATI)",
           "suppress_feedback_notifications": "Menekan Pemberitahuan Umpan Balik",
-          "pump_stuck_duration": "Ambang Batas Peringatan Pompa Terjebak (Hanya Pompa)",
+          "pump_stuck_duration": "Ambang Batas Peringatan Pompa Terjebak (detik) (Hanya Pompa)",
           "door_sensor_entity": "Sensor Pintu",
           "pause_cuts_power": "Matikan Daya Saat Menjeda",
           "notify_unload_delay_minutes": "Penundaan Notifikasi Tunggu Laundry (mnt)",
@@ -1045,7 +1045,7 @@
           "force_stopped": "Paksa Berhenti",
           "rinse": "Membilas",
           "unknown": "Tidak dikenal",
-          "clean": "Membersihkan"
+          "clean": "Bersih"
         }
       },
       "washer_program": {

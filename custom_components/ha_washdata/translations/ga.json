@@ -257,7 +257,7 @@
           "door_sensor_entity": "Braiteoir dénártha roghnach do dhoras an mheaisín (ar = oscailte, as = dúnta). Nuair a osclaíonn an doras le linn timthriall gníomhach, deimhneoidh WashData go bhfuil an timthriall ar sos d’aon ghnó. Tar éis don timthriall críochnú, má tá an doras fós dúnta, athraíonn an stát go 'Glan' go dtí go n-osclaítear an doras. Tabhair faoi deara: NÍ dúnadh an doras go huathoibríoch-atosú ar thimthriall ar sos - ní mór atosú a thosú de láimh tríd an gcnaipe nó an tseirbhís Lean ar aghaidh ar an Rothaíocht.",
           "pause_cuts_power": "Nuair a bheidh tú ar sos tríd an gcnaipe nó an tseirbhís Sos Cycle, múch an t-aonán lasc cumraithe freisin. Ní thiocfaidh sé i bhfeidhm ach amháin má tá aonán lasc cumraithe don ghléas seo.",
           "notify_unload_delay_minutes": "Seol fógra tríd an gcainéal fógartha bailchríoch tar éis don timthriall críochnú agus níor osclaíodh an doras le fada an lá seo (tá Braiteoir Doras ag teastáil). Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 60 min.",
-          "switch_entity": "An t-aonán lasc le scoránú agus é ag sos nó ag atosú. Ag teastáil nuair atá 'Cut Power When Pausing' cumasaithe."
+          "switch_entity": "An t-aonán lasc le scoránú agus é ag sos nó ag atosú. Ag teastáil nuair atá 'Gearr Cumhacht Agus Sos' cumasaithe."
         }
       },
       "diagnostics": {
@@ -1138,13 +1138,13 @@
       "message": "Caithfidh trim_end_s a bheith níos mó ná trim_start_s."
     },
     "device_id_required": {
-      "message": "Teastaíonn aitheantas_gléas bailí."
+      "message": "Teastaíonn device_id bailí."
     },
     "cycle_id_required": {
       "message": "Tá cycle_id bailí ag teastáil."
     },
     "profile_name_required": {
-      "message": "Tá próifíl_ainm bailí ag teastáil."
+      "message": "Tá profile_name bailí ag teastáil."
     }
   }
 }

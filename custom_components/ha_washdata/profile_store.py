@@ -1313,7 +1313,11 @@ class ProfileStore:
                 ts_s = ts_arr[sort_idx]
                 p_s = p_arr[sort_idx]
                 dt_h = np.diff(ts_s) / 3600.0
-                _MAX_GAP_H = 1.0
+                # Use a data-driven gap threshold: 10× the median sampling interval,
+                # clamped to at least 60 s and at most 1 h, to skip sensor outages
+                # without masking valid slow-sampling configurations.
+                _gap_s = float(np.clip(10.0 * sampling_interval, 60.0, 3600.0))
+                _MAX_GAP_H = _gap_s / 3600.0
                 mask = (dt_h > 0) & (dt_h <= _MAX_GAP_H)
                 avg_p = (p_s[:-1] + p_s[1:]) / 2
                 cycle_data["energy_wh"] = round(float(np.sum(avg_p[mask] * dt_h[mask])), 3)
@@ -2684,7 +2688,6 @@ class ProfileStore:
                         "name": name,
                         "avg_duration": float(avg_duration),
                         "sample_power": avg_y,
-                        "sample_dt": used_dt,
                     })
                     continue
 
@@ -2716,9 +2719,13 @@ class ProfileStore:
                 avg_dur = (
                     profile.get("avg_duration") or
                     sample_cycle.get("duration") or
-                    _seg_ts_duration or
-                    len(sample_seg.power) * used_dt
+                    _seg_ts_duration
                 )
+                if not avg_dur:
+                    skipped_profiles.append(
+                        f"{name}: no valid duration (avg_duration, cycle duration, and timestamp span all zero/missing)"
+                    )
+                    continue
                 snapshots.append({
                     "name": name,
                     "avg_duration": float(avg_dur),

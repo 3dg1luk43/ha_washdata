@@ -1812,6 +1812,7 @@ class WashDataManager:
                 if not self._is_user_paused:
                     self._is_user_paused = True
                     self._user_pause_start = dt_util.now()
+                self._notify_update()
         # Door closing is intentionally not handled - no auto-resume
 
     async def _setup_notify_people_listener(self) -> None:
@@ -2244,16 +2245,24 @@ class WashDataManager:
 
         # 0. ZOMBIE KILLER (Hard Limit)
         # If cycle has run significantly longer than expected (300%), kill it.
-        # Only applies if we have a profile match.
-        if expected > 0 and elapsed > (expected * 3.0) and elapsed > 14400:
-            self._logger.warning(
-                "Watchdog: Zombie cycle detected (%.0fs > 300%% of expected %.0fs). Force-ending.",
-                elapsed, expected
-            )
-            self.detector.force_end(now)
-            self._current_power = 0.0  # Force 0W
-            self._notify_update()
-            return
+        # Only applies if we have a profile match. Skip while user-paused or
+        # detector-verified-pause to avoid killing legitimately paused cycles.
+        _verified_pause_zombie = getattr(self.detector, "_verified_pause", False)
+        if (
+            expected > 0
+            and not self._is_user_paused
+            and not _verified_pause_zombie
+        ):
+            adjusted_elapsed = elapsed - self._total_user_paused_seconds
+            if adjusted_elapsed > (expected * 3.0) and adjusted_elapsed > 14400:
+                self._logger.warning(
+                    "Watchdog: Zombie cycle detected (%.0fs net > 300%% of expected %.0fs). Force-ending.",
+                    adjusted_elapsed, expected
+                )
+                self.detector.force_end(now)
+                self._current_power = 0.0  # Force 0W
+                self._notify_update()
+                return
 
         # 1. GHOST CYCLE SUPPRESSOR
         # If we are "detecting" for more than 10 minutes and haven't seen an update for 5 minutes,
@@ -2567,7 +2576,7 @@ class WashDataManager:
                     mask = (dt_h > 0) & (dt_h <= _MAX_GAP_H)
                     avg_p = (ps[:-1] + ps[1:]) / 2
                     cycle_energy_wh = float(np.sum(avg_p[mask] * dt_h[mask]))
-                except Exception:
+                except (TypeError, ValueError, ArithmeticError):
                     cycle_energy_wh = 0.0
 
         # Ghost cycle: short AND low energy (real cycles have energy even if short)

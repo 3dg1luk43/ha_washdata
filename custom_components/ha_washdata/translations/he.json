@@ -636,9 +636,9 @@
       "suggestions_ready_notification_message": "חיישן **הגדרות מוצעות** מדווח כעת על המלצות **{count}** שניתן לפעול.\n\nכדי לסקור ולהחיל אותם: **הגדרות > מכשירים ושירותים > WashData > הגדר > הגדרות מתקדמות > החל ערכים מוצעים**.\n\nהצעות הן אופציונליות ומוצגות לבדיקה לפני השמירה.",
       "trim_range_invalid": "ההתחלה חייבת להיות לפני הסוף. נא להתאים את נקודות החיתוך שלך.",
       "trim_failed": "החיתוך נכשל. ייתכן שהמחזור כבר לא קיים או שהחלון ריק.",
-      "auto_tune_suggestion": "{device_type} {device_title} זוהו מחזורי רפאים. שינוי מינימלי_הספק: {current_min}W -> {new_min}W (לא מוחל אוטומטית).",
+      "auto_tune_suggestion": "{device_type} {device_title} זוהו מחזורי רפאים. שינוי הספק המינימלי: {current_min}W -> {new_min}W (לא מוחל אוטומטית).",
       "auto_tune_title": "כוונון אוטומטי של WashData",
-      "auto_tune_fallback": "{device_type} {device_title} זוהו מחזורי רפאים. שינוי מינימלי_הספק: {current_min}W -> {new_min}W (לא מוחל אוטומטית)."
+      "auto_tune_fallback": "{device_type} {device_title} זוהו מחזורי רפאים. שינוי הספק המינימלי: {current_min}W -> {new_min}W (לא מוחל אוטומטית)."
     },
     "abort": {
       "no_cycles_found": "לא נמצאו מחזורים",
@@ -1045,7 +1045,7 @@
           "force_stopped": "כוח נעצר",
           "rinse": "לִשְׁטוֹף",
           "unknown": "לֹא יְדוּעַ",
-          "clean": "לְנַקוֹת"
+          "clean": "נקי"
         }
       },
       "washer_program": {
@@ -1141,7 +1141,7 @@
       "message": "נדרש device_id חוקי."
     },
     "cycle_id_required": {
-      "message": "נדרש מזהה_cycle חוקי."
+      "message": "נדרש cycle_id חוקי."
     },
     "profile_name_required": {
       "message": "נדרש profile_name חוקי."

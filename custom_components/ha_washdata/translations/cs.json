@@ -141,7 +141,7 @@
           "notify_finish_services": "Jedna nebo více oznamovacích služeb, které upozorní, když cyklus skončí nebo se blíží dokončení. Chcete-li přeskočit oznámení o dokončení, ponechte prázdné.",
           "notify_live_services": "Jedna nebo více služeb upozorňujících na příjem aktuálních aktualizací průběhu cyklu (pouze mobilní doprovodná aplikace). Chcete-li přeskočit živé aktualizace, ponechte prázdné.",
           "notify_live_chronometer": "Je-li tato možnost povolena, každá živá aktualizace zahrnuje odpočítávání chronometru do odhadovaného času dokončení. Časovač upozornění na zařízení mezi aktualizacemi automaticky tiká (pouze doprovodná aplikace pro Android).",
-          "energy_price_entity": "Vyberte číselnou entitu, která obsahuje aktuální cenu elektřiny (např. sensor.electricity_price, input_number. energy_rate). Je-li nastaven, aktivuje zástupný symbol {cost}. Pokud jsou obě nakonfigurovány, má přednost před statickou hodnotou.",
+          "energy_price_entity": "Vyberte číselnou entitu, která obsahuje aktuální cenu elektřiny (např. sensor.electricity_price, input_number.energy_rate). Je-li nastaven, aktivuje zástupný symbol {cost}. Pokud jsou obě nakonfigurovány, má přednost před statickou hodnotou.",
           "energy_price_static": "Pevná cena elektřiny za kWh. Je-li nastaven, aktivuje zástupný symbol {cost}. Ignorováno, pokud je výše nakonfigurována entita. Přidejte svůj symbol měny do šablony zprávy, např. {cost} €."
         }
       },

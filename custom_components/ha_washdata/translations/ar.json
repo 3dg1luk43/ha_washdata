@@ -192,12 +192,12 @@
           "dtw_bandwidth": "عرض النطاق الترددي DTW",
           "external_end_trigger_enabled": "تمكين مشغل نهاية الدورة الخارجية",
           "external_end_trigger": "مستشعر نهاية الدورة الخارجية",
-          "external_end_trigger_inverted": "عكس منطق الزناد (تشغيل الزناد)",
+          "external_end_trigger_inverted": "عكس منطق الزناد (الزناد عند الإيقاف)",
           "suppress_feedback_notifications": "قمع إشعارات التعليقات",
           "pump_stuck_duration": "عتبة (عتبات) التنبيه بشأن توقف المضخة (المضخة فقط)",
           "door_sensor_entity": "مستشعر الباب",
           "pause_cuts_power": "قطع الطاقة عند التوقف",
-          "notify_unload_delay_minutes": "تأخير إشعار انتظار الغسيل (الحد الأدنى)",
+          "notify_unload_delay_minutes": "تأخير إشعار انتظار الغسيل (دقائق)",
           "switch_entity": "تبديل الكيان (لإيقاف انقطاع التيار الكهربائي مؤقتًا)"
         },
         "data_description": {
@@ -1045,7 +1045,7 @@
           "force_stopped": "توقفت القوة",
           "rinse": "شطف",
           "unknown": "مجهول",
-          "clean": "ينظف"
+          "clean": "نظيف"
         }
       },
       "washer_program": {

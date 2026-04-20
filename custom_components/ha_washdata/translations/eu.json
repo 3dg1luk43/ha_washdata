@@ -250,7 +250,7 @@
           "door_sensor_entity": "Makinaren atearen aukerako sentsore bitarra (aktibatuta = irekita, itzalita = itxita). Ziklo aktibo batean atea irekitzen denean, WashData-k zikloa nahita pausatu dela baieztatuko du. Zikloa amaitu ondoren, atea oraindik itxita badago, egoera 'Garbitu'-ra aldatzen da atea ireki arte. Oharra: atea ixteak EZ du pausatutako ziklo bat automatikoki berresten; eskuz abiarazi behar da berrezartzea Zikloa berrekin batera botoiaren edo zerbitzuaren bidez.",
           "pause_cuts_power": "Etenaldiaren zikloa botoiaren edo zerbitzuaren bidez pausatzen duzunean, desaktibatu konfiguratutako etengailu-entitatea ere. Gailu honetarako aldatzeko entitate bat konfiguratuta badago bakarrik izango du eragina.",
           "notify_unload_delay_minutes": "Bidali jakinarazpena amaierako jakinarazpen-kanalaren bidez, zikloa amaitu eta atea minutu askotan ireki ez denean (ate-sentsorea behar da). Ezarri 0 desgaitzeko. Lehenetsia: 60 min.",
-          "switch_entity": "Etenaldian edo berriro hastean aldatzeko entitatea. Beharrezkoa da \"Eztu energia pausatzean\" gaituta dagoenean."
+          "switch_entity": "Etenaldian edo berriro hastean aldatzeko entitatea. Beharrezkoa da \"Moztu energia pausatzean\" gaituta dagoenean."
         }
       },
       "diagnostics": {

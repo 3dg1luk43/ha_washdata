@@ -1144,7 +1144,7 @@
       "message": "Valida cycle_id estas bezonata."
     },
     "profile_name_required": {
-      "message": "Valida profilo_nomo estas bezonata."
+      "message": "Valida profile_name estas bezonata."
     }
   }
 }

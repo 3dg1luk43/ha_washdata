@@ -838,9 +838,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 user_input[CONF_DOOR_SENSOR_ENTITY] = None
 
             # Same treatment for switch entity
+            # Only normalize to None when key is present but empty; if the key
+            # is missing entirely (e.g. the step didn't expose the field) fall
+            # back to the already-configured value so we don't accidentally clear it.
             _switch_val = user_input.get(CONF_SWITCH_ENTITY)
-            if not _switch_val:
+            if CONF_SWITCH_ENTITY in user_input and not _switch_val:
                 user_input[CONF_SWITCH_ENTITY] = None
+            elif CONF_SWITCH_ENTITY not in user_input:
+                _existing_switch = self.config_entry.options.get(
+                    CONF_SWITCH_ENTITY,
+                    self.config_entry.data.get(CONF_SWITCH_ENTITY),
+                )
+                if _existing_switch:
+                    user_input[CONF_SWITCH_ENTITY] = _existing_switch
 
             # Final Save
             final_options = {

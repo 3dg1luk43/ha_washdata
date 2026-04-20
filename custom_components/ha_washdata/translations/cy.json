@@ -1000,7 +1000,7 @@
       }
     },
     "pause_cycle": {
-      "name": "Pause Cycle",
+      "name": "Seibio Beicio",
       "description": "Oedwch y cylch gweithredol ar gyfer dyfais WashData.",
       "fields": {
         "device_id": {
@@ -1111,7 +1111,7 @@
         "name": "Gorfodi Diwedd y Cylch"
       },
       "pause_cycle": {
-        "name": "Pause Cycle"
+        "name": "Seibio Beicio"
       },
       "resume_cycle": {
         "name": "Ail-ddechrau Beicio"
