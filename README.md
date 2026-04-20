@@ -276,7 +276,7 @@ If you'd like to help, you can submit a diagnostics export directly from Home As
 
 > 🔒 **Privacy:** The export contains your appliance's power data and integration settings. It does **not** include your name, home details, location, or any other personal information.
 
-> 💡 **Tip:** The same diagnostics file you download here can be pasted directly into **Configure → Diagnostic Settings → Import** to restore profiles and settings on a different HA instance — no manual format conversion needed.
+> 💡 **Tip:** The same diagnostics file you download here can be pasted directly into **Configure → Diagnostics & Maintenance → Export/Import JSON** to restore profiles and settings on a different HA instance — no manual format conversion needed.
 
 ➡️ **[Submit your data here](https://forms.gle/m6iGfP8QTasXWg5z7)**
 
