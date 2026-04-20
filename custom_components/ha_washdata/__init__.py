@@ -22,6 +22,9 @@ from .const import (
     CONF_DEVICE_TYPE,
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_START_SERVICES,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
     CONF_NOTIFY_ACTIONS,
     CONF_NOTIFY_PEOPLE,
     CONF_NOTIFY_ONLY_WHEN_HOME,
@@ -128,6 +131,18 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         options[CONF_POWER_SENSOR] = data[CONF_POWER_SENSOR]
     if CONF_NOTIFY_SERVICE not in options and CONF_NOTIFY_SERVICE in data:
         options[CONF_NOTIFY_SERVICE] = data[CONF_NOTIFY_SERVICE]
+
+    # Migrate legacy single CONF_NOTIFY_SERVICE into per-event service lists.
+    # Users who configured a notify service before 0.3.x would otherwise lose
+    # their notification settings entirely on upgrade.
+    legacy_svc = options.get(CONF_NOTIFY_SERVICE) or data.get(CONF_NOTIFY_SERVICE)
+    if legacy_svc and isinstance(legacy_svc, str):
+        if not options.get(CONF_NOTIFY_START_SERVICES):
+            options[CONF_NOTIFY_START_SERVICES] = [legacy_svc]
+        if not options.get(CONF_NOTIFY_FINISH_SERVICES):
+            options[CONF_NOTIFY_FINISH_SERVICES] = [legacy_svc]
+        if not options.get(CONF_NOTIFY_LIVE_SERVICES):
+            options[CONF_NOTIFY_LIVE_SERVICES] = [legacy_svc]
 
     options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
     options.setdefault(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE)

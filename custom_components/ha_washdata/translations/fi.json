@@ -76,9 +76,9 @@
           "notify_finish_message": "Lopetusviesti muoto",
           "notify_pre_complete_message": "Esivalmistumisviestin muoto",
           "show_advanced": "Muokkaa lisäasetuksia (seuraava vaihe)",
-          "notify_start_services": "Cycle Start - Ilmoituskohteet",
-          "notify_finish_services": "Cycle Finish - Ilmoituskohteet",
-          "notify_live_services": "Live Progress - ilmoituskohteet"
+          "notify_start_services": "Syklin aloitus - Ilmoituskohteet",
+          "notify_finish_services": "Syklin lopetus - Ilmoituskohteet",
+          "notify_live_services": "Reaaliaikainen edistyminen - Ilmoituskohteet"
         },
         "data_description": {
           "apply_suggestions": "Valitse tämä valintaruutu kopioidaksesi oppimisalgoritmin ehdottamat arvot lomakkeeseen. Tarkista ennen tallentamista.\n\nSuositeltu (oppimisesta):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -117,9 +117,9 @@
           "notify_start_message": "Käynnistä Viestimuoto",
           "notify_finish_message": "Viimeistele viestin muoto",
           "notify_pre_complete_message": "Esitäytetty viestin muoto",
-          "notify_start_services": "Cycle Start - Ilmoituskohteet",
-          "notify_finish_services": "Cycle Finish - Ilmoituskohteet",
-          "notify_live_services": "Live Progress - ilmoituskohteet",
+          "notify_start_services": "Syklin aloitus - Ilmoituskohteet",
+          "notify_finish_services": "Syklin lopetus - Ilmoituskohteet",
+          "notify_live_services": "Reaaliaikainen edistyminen - Ilmoituskohteet",
           "notify_live_chronometer": "Kronometrin ajastin",
           "energy_price_entity": "Energian hinta – kokonaisuus (valinnainen)",
           "energy_price_static": "Energian hinta – staattinen arvo (valinnainen)"

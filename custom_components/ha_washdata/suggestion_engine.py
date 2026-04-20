@@ -343,6 +343,8 @@ class SuggestionEngine:
         false_end_energies: list[float] = []
         dead_zone_candidates: list[int] = []
 
+        _MAX_PAUSE_GAP_H = 1.0
+        max_gap_s = _MAX_PAUSE_GAP_H * 3600
         for readings in valid_cycles:
             powers = np.array([p for _, p in readings])
             active = powers[powers > 0.5]
@@ -361,7 +363,6 @@ class SuggestionEngine:
             in_pause = False
             pause_energy = 0.0
             stop_w = 2.0
-            _MAX_PAUSE_GAP_H = 1.0
             for i in range(1, len(readings)):
                 t0, p0 = readings[i - 1]
                 t1, p1 = readings[i]

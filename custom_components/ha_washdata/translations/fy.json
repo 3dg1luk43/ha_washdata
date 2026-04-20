@@ -76,8 +76,8 @@
           "notify_finish_message": "Berjochtformaat foltôgje",
           "notify_pre_complete_message": "Pre-foltôging berjochtformaat",
           "show_advanced": "Avansearre ynstellings bewurkje (Folgjende stap)",
-          "notify_start_services": "Cycle Start - Notifikaasjedoelen",
-          "notify_finish_services": "Cycle Finish - Notifikaasjedoelen",
+          "notify_start_services": "Syklusbegjin - Notifikaasjedoelen",
+          "notify_finish_services": "Syklus foltôgje - Notifikaasjedoelen",
           "notify_live_services": "Live foarútgong - Notifikaasjedoelen"
         },
         "data_description": {
@@ -117,10 +117,10 @@
           "notify_start_message": "Begjin berjochtformaat",
           "notify_finish_message": "Berjochtformaat foltôgje",
           "notify_pre_complete_message": "Pre-foltôging berjochtformaat",
-          "notify_start_services": "Cycle Start - Notifikaasjedoelen",
-          "notify_finish_services": "Cycle Finish - Notifikaasjedoelen",
+          "notify_start_services": "Syklusbegjin - Notifikaasjedoelen",
+          "notify_finish_services": "Syklus foltôgje - Notifikaasjedoelen",
           "notify_live_services": "Live foarútgong - Notifikaasjedoelen",
-          "notify_live_chronometer": "Chronometer Countdown Timer",
+          "notify_live_chronometer": "Chronometer ôfteltimer",
           "energy_price_entity": "Enerzjypriis - Entiteit (opsjoneel)",
           "energy_price_static": "Enerzjypriis - Statyske wearde (opsjoneel)"
         },
@@ -1000,7 +1000,7 @@
       }
     },
     "pause_cycle": {
-      "name": "Pause Cycle",
+      "name": "Syklus pausearje",
       "description": "Pause de aktive syklus foar in WashData apparaat.",
       "fields": {
         "device_id": {
@@ -1010,7 +1010,7 @@
       }
     },
     "resume_cycle": {
-      "name": "Resume Cycle",
+      "name": "Syklus ferfetsje",
       "description": "Ferfetsje in pauze syklus foar in WashData-apparaat.",
       "fields": {
         "device_id": {
@@ -1095,7 +1095,7 @@
         "name": "Pomp rint (lêste 24 h)"
       },
       "cycle_count": {
-        "name": "Cycle Count"
+        "name": "Syklustal"
       }
     },
     "select": {
@@ -1111,10 +1111,10 @@
         "name": "Syklus twongen beeinigje"
       },
       "pause_cycle": {
-        "name": "Pause Cycle"
+        "name": "Syklus pausearje"
       },
       "resume_cycle": {
-        "name": "Resume Cycle"
+        "name": "Syklus ferfetsje"
       }
     }
   },

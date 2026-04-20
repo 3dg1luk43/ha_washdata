@@ -652,7 +652,7 @@ The integration includes specialized handling for different appliance types to a
 ## 9. Phase Management System
 
 ### Overview
-Phases are **purely informational labels** that segment a cycle into meaningful time-based regions (Wash, Rinse, Spin, etc.). They do **NOT** affect cycle detection, profile matching, or time estimation-these all use power-curve analysis independently.
+Phases are **purely informational labels** that segment a cycle into meaningful time-based regions (Wash, Rinse, Spin, etc.). They do **NOT** affect cycle detection, profile matching, or time estimation - these all use power-curve analysis independently.
 
 ### Architecture
 ```text

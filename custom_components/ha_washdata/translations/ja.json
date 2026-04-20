@@ -137,7 +137,7 @@
           "notify_start_message": "サイクル開始時に送信されるメッセージ。{device} プレースホルダーに対応。",
           "notify_finish_message": "サイクル終了時に送信されるメッセージ。{device}、{duration}、{program} プレースホルダーに対応。",
           "notify_pre_complete_message": "完了前に送信されるメッセージ。{device}、{minutes} プレースホルダーに対応。",
-          "notify_start_services": "One or more notify services to alert when a cycle begins (e.g. notify.mobile_app_my_phone).開始通知をスキップするには、空のままにします。",
+          "notify_start_services": "サイクルの開始時に警告する 1 つ以上の通知サービス (例: notify.mobile_app_my_phone)。開始通知をスキップするには、空のままにします。",
           "notify_finish_services": "サイクルが終了するか完了に近づくと警告を発する 1 つ以上の通知サービス。終了通知をスキップするには、空のままにします。",
           "notify_live_services": "サイクルの実行中にライブ進行状況の更新を受信する 1 つ以上の通知サービス (モバイル コンパニオン アプリのみ)。ライブ更新をスキップするには、空のままにします。",
           "notify_live_chronometer": "有効にすると、各ライブ アップデートに推定終了時間までのクロノメーター カウントダウンが含まれます。アップデートの間に、デバイス上で通知タイマーが自動的に作動します (Android コンパニオン アプリのみ)。",

@@ -194,7 +194,7 @@
           "external_end_trigger": "বাহ্যিক চক্র শেষ সেন্সর",
           "external_end_trigger_inverted": "ইনভার্ট ট্রিগার লজিক (ট্রিগার অন অফ)",
           "suppress_feedback_notifications": "প্রতিক্রিয়া বিজ্ঞপ্তি দমন করুন",
-          "pump_stuck_duration": "পাম্প আটকে সতর্কতা থ্রেশহোল্ড (গুলি) (শুধুমাত্র পাম্প)",
+          "pump_stuck_duration": "পাম্প আটকে সতর্কতা থ্রেশহোল্ড (সেকেন্ড) (শুধুমাত্র পাম্প)",
           "door_sensor_entity": "ডোর সেন্সর",
           "pause_cuts_power": "বিরাম দেওয়ার সময় পাওয়ার কাটা",
           "notify_unload_delay_minutes": "লন্ড্রি অপেক্ষার বিজ্ঞপ্তি বিলম্ব (মিনিট)",

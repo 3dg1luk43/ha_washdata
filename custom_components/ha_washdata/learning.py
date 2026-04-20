@@ -164,8 +164,6 @@ class LearningManager:
             filtered_suggestions[key] = data
 
         if not filtered_suggestions:
-            if self.profile_store.get_suggestions():
-                self.hass.async_create_task(self.profile_store.clear_suggestions())
             return
 
         def _count_actionable(s: dict) -> int:

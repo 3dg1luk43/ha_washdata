@@ -137,7 +137,7 @@
           "notify_start_message": "Messaggio inviato all'avvio di un ciclo. Supporta il segnaposto {device}.",
           "notify_finish_message": "Messaggio inviato al termine di un ciclo. Supporta i segnaposto {device}, {duration}, {program}.",
           "notify_pre_complete_message": "Messaggio inviato prima del completamento. Supporta i segnaposto {device}, {minutes}.",
-          "notify_start_services": "One or more notify services to alert when a cycle begins (e.g. notify.mobile_app_my_phone). Lascia vuoto per saltare le notifiche di avvio.",
+          "notify_start_services": "Uno o più servizi di notifica per avvisare quando un ciclo inizia (ad esempio notify.mobile_app_my_phone). Lascia vuoto per saltare le notifiche di avvio.",
           "notify_finish_services": "Uno o più servizi di notifica per avvisare quando un ciclo termina o si avvicina al completamento. Lascia vuoto per saltare le notifiche di fine.",
           "notify_live_services": "Uno o più servizi di notifica per ricevere aggiornamenti in tempo reale sui progressi durante l'esecuzione del ciclo (solo app complementare mobile). Lascia vuoto per saltare gli aggiornamenti in tempo reale.",
           "notify_live_chronometer": "Se abilitato, ogni aggiornamento live include un conto alla rovescia del cronometro fino all'ora di fine stimata. Il timer delle notifiche scorre automaticamente sul dispositivo tra gli aggiornamenti (solo app complementare Android).",
