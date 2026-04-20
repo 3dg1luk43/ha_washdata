@@ -39,3 +39,4 @@ tests/benchmarks/__pycache__/
 devtools/.mock_socket.pid
 bin
 CLAUDE.md
+.vscode/settings.json
