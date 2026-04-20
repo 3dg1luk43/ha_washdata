@@ -1141,10 +1141,10 @@
       "message": "Se requiere un ID de dispositivo válido."
     },
     "cycle_id_required": {
-      "message": "Se requiere un id_ciclo válido."
+      "message": "Se requiere un cycle_id válido."
     },
     "profile_name_required": {
-      "message": "Se requiere un nombre de perfil válido."
+      "message": "Se requiere un profile_name válido."
     }
   }
 }

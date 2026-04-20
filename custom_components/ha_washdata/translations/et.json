@@ -1038,6 +1038,7 @@
           "starting": "Käivitamine",
           "running": "Töötab",
           "paused": "Peatatud",
+          "user_paused": "Kasutaja peatatud",
           "ending": "Lõpetamine",
           "finished": "Valmis",
           "anti_wrinkle": "Kortsudevastane",

@@ -141,7 +141,7 @@
           "notify_finish_services": "Ein eða fleiri tilkynna þjónustur til að láta vita þegar lotu lýkur eða nálgast það að ljúka. Skildu autt til að sleppa tilkynningum um að ljúka.",
           "notify_live_services": "Ein eða fleiri tilkynningaþjónustur til að fá framfarauppfærslur í beinni á meðan lotan keyrir (aðeins farsímaforrit). Skildu eftir autt til að sleppa uppfærslum í beinni.",
           "notify_live_chronometer": "Þegar virkjað er, inniheldur hver lifandi uppfærsla niðurtalning á tímamæli að áætluðum lokatíma. Tilkynningatíminn tikkar sjálfkrafa niður á tækinu á milli uppfærslna (aðeins Android fylgiforrit).",
-          "energy_price_entity": "Veldu tölulega einingu sem heldur núverandi raforkuverði (t.d. skynjara.rafmagnsverð, inntaksnúmer.orkugjald). Þegar stillt er á {cost} staðgengillinn. Tekur forgang fram yfir fasta gildið ef bæði eru stillt.",
+          "energy_price_entity": "Veldu tölulega einingu sem heldur núverandi raforkuverði (t.d. sensor.electricity_price, input_number.energy_rate). Þegar stillt er á {cost} staðgengillinn. Tekur forgang fram yfir fasta gildið ef bæði eru stillt.",
           "energy_price_static": "Fast raforkuverð á kWst. Þegar stillt er á {cost} staðgengillinn. Hunsuð ef eining er stillt hér að ofan. Bættu gjaldmiðlinum þínum við í skilaboðasniðmátinu, t.d. {cost} €."
         }
       },

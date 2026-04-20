@@ -22,6 +22,8 @@ from .const import (
     CONF_DEVICE_TYPE,
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_EVENTS,
+    NOTIFY_EVENT_LIVE,
     CONF_NOTIFY_START_SERVICES,
     CONF_NOTIFY_FINISH_SERVICES,
     CONF_NOTIFY_LIVE_SERVICES,
@@ -137,11 +139,14 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # their notification settings entirely on upgrade.
     legacy_svc = options.get(CONF_NOTIFY_SERVICE) or data.get(CONF_NOTIFY_SERVICE)
     if legacy_svc and isinstance(legacy_svc, str):
+        # CONF_NOTIFY_EVENTS is a deprecated list of enabled event types.
+        # Only migrate live services when live events were explicitly opted in.
+        legacy_events = options.get(CONF_NOTIFY_EVENTS) or data.get(CONF_NOTIFY_EVENTS) or []
         if not options.get(CONF_NOTIFY_START_SERVICES):
             options[CONF_NOTIFY_START_SERVICES] = [legacy_svc]
         if not options.get(CONF_NOTIFY_FINISH_SERVICES):
             options[CONF_NOTIFY_FINISH_SERVICES] = [legacy_svc]
-        if not options.get(CONF_NOTIFY_LIVE_SERVICES):
+        if not options.get(CONF_NOTIFY_LIVE_SERVICES) and NOTIFY_EVENT_LIVE in legacy_events:
             options[CONF_NOTIFY_LIVE_SERVICES] = [legacy_svc]
 
     options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)

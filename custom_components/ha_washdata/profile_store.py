@@ -54,6 +54,30 @@ def _empty_ranking() -> list[dict[str, Any]]:
     return []
 
 
+def _parse_start_dt(value: Any) -> datetime | None:
+    """Parse a start_time value (ISO string or numeric timestamp) into a datetime.
+
+    Handles the case where legacy cycles stored numeric unix timestamps instead
+    of ISO-formatted strings, which dt_util.parse_datetime cannot handle.
+    """
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        try:
+            return datetime.fromtimestamp(float(value), tz=dt_util.UTC)
+        except (OSError, OverflowError, ValueError):
+            return None
+    if isinstance(value, str) and value:
+        parsed = dt_util.parse_datetime(value)
+        if parsed is not None:
+            return parsed
+        try:
+            return datetime.fromtimestamp(float(value), tz=dt_util.UTC)
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
 def _empty_debug_details() -> dict[str, Any]:
     """Typed default factory for debug details."""
     return {}
@@ -1237,10 +1261,13 @@ class ProfileStore:
         if raw_data:
             start_time_raw = cycle_data.get("start_time")
             start_time_iso: str | None = None
-            if isinstance(start_time_raw, str) and start_time_raw:
-                parsed_dt = dt_util.parse_datetime(start_time_raw)
+            if start_time_raw is not None:
+                parsed_dt = _parse_start_dt(start_time_raw)
                 if parsed_dt is not None:
-                    start_time_iso = start_time_raw
+                    start_time_iso = parsed_dt.isoformat()
+                    # Keep original ISO string as-is if it was already a valid ISO string
+                    if isinstance(start_time_raw, str) and dt_util.parse_datetime(start_time_raw) is not None:
+                        start_time_iso = start_time_raw
                 else:
                     try:
                         ts = float(start_time_raw)
@@ -1313,7 +1340,7 @@ class ProfileStore:
                 ts_s = ts_arr[sort_idx]
                 p_s = p_arr[sort_idx]
                 dt_h = np.diff(ts_s) / 3600.0
-                # Use a data-driven gap threshold: 10× the median sampling interval,
+                # Use a data-driven gap threshold: 10x the median sampling interval,
                 # clamped to at least 60 s and at most 1 h, to skip sensor outages
                 # without masking valid slow-sampling configurations.
                 _gap_s = float(np.clip(10.0 * sampling_interval, 60.0, 3600.0))
@@ -2666,9 +2693,15 @@ class ProfileStore:
                 # than the original sample alone, so confidence improves over
                 # time as the user keeps confirming correct detections.
                 envelope = self._data.get("envelopes", {}).get(name)
-                if envelope and envelope.get("cycle_count", 0) >= 2 and envelope.get("avg"):
-                    avg_y = [float(p[1]) for p in envelope["avg"]]
-                    _env_avg = envelope["avg"]
+                _env_avg = envelope.get("avg") if envelope else None
+                if (
+                    envelope
+                    and envelope.get("cycle_count", 0) >= 2
+                    and _env_avg
+                    and isinstance(_env_avg[0], (list, tuple))
+                    and len(_env_avg[0]) >= 2
+                ):
+                    avg_y = [float(p[1]) for p in _env_avg]
                     _env_ts_duration = (
                         float(_env_avg[-1][0]) - float(_env_avg[0][0])
                         if len(_env_avg) > 1 else 0.0
@@ -3379,7 +3412,7 @@ class ProfileStore:
         cycles.pop(idx)
         new_ids: list[str] = []
         original_profile = cycle.get("profile_name")
-        start_dt_base_parsed = dt_util.parse_datetime(cycle["start_time"])
+        start_dt_base_parsed = _parse_start_dt(cycle["start_time"])
         if not start_dt_base_parsed:
             # Should not happen as analyze checked it, but safety
             self._logger.warning("Failed to parse start time during split apply for %s", cycle_id)
@@ -3566,6 +3599,8 @@ class ProfileStore:
 
         # Strip diagnostic redaction sentinels so they don't overwrite real settings
         def _strip_redacted(d: dict) -> dict:
+            if not isinstance(d, dict):
+                return {}
             return {k: v for k, v in d.items() if v != "**REDACTED**"}
 
         return {
@@ -3775,7 +3810,7 @@ class ProfileStore:
 
         new_ids: list[str] = []
         original_profile = cycle.get("profile_name")
-        start_dt_base_parsed = dt_util.parse_datetime(cycle["start_time"])
+        start_dt_base_parsed = _parse_start_dt(cycle["start_time"])
         if not start_dt_base_parsed:
             return []
 
@@ -3917,7 +3952,7 @@ class ProfileStore:
         ids_to_remove: list[str] = []
 
         # Base setup
-        c1_start_dt = dt_util.parse_datetime(c1["start_time"])
+        c1_start_dt = _parse_start_dt(c1["start_time"])
         if not c1_start_dt:
             return None
 
@@ -3928,7 +3963,7 @@ class ProfileStore:
             res: list[tuple[float, float, float]] = []
             if not raw:
                 return []
-            base_dt = dt_util.parse_datetime(cy["start_time"])
+            base_dt = _parse_start_dt(cy["start_time"])
             if base_dt is None:
                 return []
             base_t = base_dt.timestamp()
@@ -3952,7 +3987,7 @@ class ProfileStore:
         max_power = c1.get("max_power", 0)
 
         for next_c in target_cycles[1:]:
-            c_start_dt = dt_util.parse_datetime(str(next_c.get("start_time", "")))
+            c_start_dt = _parse_start_dt(next_c.get("start_time"))
             if not c_start_dt:
                 continue
 
@@ -3986,7 +4021,7 @@ class ProfileStore:
             final_end_dt = dt_util.utc_from_timestamp(last_t_abs)
         else:
             last_cycle = target_cycles[-1]
-            fallback_end_dt = dt_util.parse_datetime(str(last_cycle.get("end_time", "")))
+            fallback_end_dt = _parse_start_dt(last_cycle.get("end_time"))
             if fallback_end_dt is not None:
                 final_end_dt = fallback_end_dt
             else:
@@ -4064,7 +4099,7 @@ class ProfileStore:
         if not p_data:
             return ""
 
-        start_dt = dt_util.parse_datetime(cycle["start_time"])
+        start_dt = _parse_start_dt(cycle["start_time"])
         if start_dt is None:
             return ""
         points: list[tuple[float, float]] = []
@@ -4130,7 +4165,7 @@ class ProfileStore:
             Returns:
                 float: UNIX timestamp in seconds parsed from `start_time`, or `float('inf')` when `start_time` is missing or cannot be parsed so the cycle sorts after valid-dated cycles.
             """
-            dt = dt_util.parse_datetime(str(c.get("start_time", "")))
+            dt = _parse_start_dt(c.get("start_time"))
             return dt.timestamp() if dt is not None else float("inf")
 
         cycles.sort(key=_sort_ts)
@@ -4138,7 +4173,7 @@ class ProfileStore:
         if not cycles:
             return ""
 
-        first_start_dt = dt_util.parse_datetime(str(cycles[0].get("start_time", "")))
+        first_start_dt = _parse_start_dt(cycles[0].get("start_time"))
         if first_start_dt is None:
             return ""
         first_start = first_start_dt.timestamp()

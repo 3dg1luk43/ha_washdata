@@ -94,7 +94,7 @@
           "notify_title": "Vlastní název pro oznámení. Podporuje zástupný symbol {device}.",
           "notify_icon": "Ikona pro upozornění (např. mdi:washing-machine). Chcete-li odeslat bez ikony, ponechte prázdné.",
           "notify_start_message": "Zpráva odeslaná při zahájení cyklu. Podporuje zástupný symbol {device}.",
-          "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
+          "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Zpráva odeslána před dokončením. Podporuje zástupné symboly {device}, {minutes}.",
           "notify_start_services": "Jedna nebo více služeb upozorňujících na zahájení cyklu. Chcete-li přeskočit oznámení o zahájení, ponechte prázdné.",
           "notify_finish_services": "Jedna nebo více oznamovacích služeb, které upozorní, když cyklus skončí nebo se blíží dokončení. Chcete-li přeskočit oznámení o dokončení, ponechte prázdné.",
@@ -135,7 +135,7 @@
           "notify_title": "Vlastní název pro oznámení. Podporuje zástupný symbol {device}.",
           "notify_icon": "Ikona pro upozornění (např. mdi:washing-machine). Chcete-li odeslat bez ikony, ponechte prázdné.",
           "notify_start_message": "Zpráva odeslaná při zahájení cyklu. Podporuje zástupný symbol {device}.",
-          "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
+          "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Zpráva odeslána před dokončením. Podporuje zástupné symboly {device}, {minutes}.",
           "notify_start_services": "Jedna nebo více služeb upozorňujících na zahájení cyklu (např. notify.mobile_app_my_phone). Chcete-li přeskočit oznámení o zahájení, ponechte prázdné.",
           "notify_finish_services": "Jedna nebo více oznamovacích služeb, které upozorní, když cyklus skončí nebo se blíží dokončení. Chcete-li přeskočit oznámení o dokončení, ponechte prázdné.",
@@ -1038,6 +1038,7 @@
           "starting": "Spouštění",
           "running": "Probíhá",
           "paused": "Pozastaveno",
+          "user_paused": "Pozastaveno uživatelem",
           "ending": "Dokončování",
           "finished": "Dokončeno",
           "anti_wrinkle": "Proti pomačkání",
@@ -1092,7 +1093,7 @@
         "name": "Doporučená nastavení"
       },
       "pump_runs_today": {
-        "name": "Pumpa běží (posledních 24 h)"
+        "name": "Spuštění čerpadla (posledních 24 h)"
       },
       "cycle_count": {
         "name": "Počet cyklů"

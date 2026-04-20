@@ -1141,10 +1141,10 @@
       "message": "'n Geldige toestel-ID word vereis."
     },
     "cycle_id_required": {
-      "message": "'n Geldige siklus_id word vereis."
+      "message": "'n Geldige cycle_id word vereis."
     },
     "profile_name_required": {
-      "message": "'n Geldige profielnaam word vereis."
+      "message": "'n Geldige profile_name word vereis."
     }
   }
 }

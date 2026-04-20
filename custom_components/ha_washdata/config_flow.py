@@ -1294,6 +1294,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             {
                 CONF_EXTERNAL_END_TRIGGER: get_val(CONF_EXTERNAL_END_TRIGGER, None),
                 CONF_DOOR_SENSOR_ENTITY: get_val(CONF_DOOR_SENSOR_ENTITY, None),
+                CONF_SWITCH_ENTITY: get_val(CONF_SWITCH_ENTITY, None),
             },
         )
 

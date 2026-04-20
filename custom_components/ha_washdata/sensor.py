@@ -7,7 +7,7 @@ import hashlib
 import logging
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass
+from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
@@ -857,6 +857,7 @@ class WasherCycleCountSensor(WasherBaseSensor):
             translation_key="cycle_count",
             icon="mdi:counter",
             native_unit_of_measurement="cycles",
+            state_class=SensorStateClass.TOTAL_INCREASING,
         )
         super().__init__(manager, entry)
 

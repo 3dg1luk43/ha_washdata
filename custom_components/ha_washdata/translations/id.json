@@ -1038,6 +1038,7 @@
           "starting": "Mulai",
           "running": "Berlari",
           "paused": "Dijeda",
+          "user_paused": "Dijeda oleh pengguna",
           "ending": "Akhir",
           "finished": "Selesai",
           "anti_wrinkle": "Anti-Kerut",

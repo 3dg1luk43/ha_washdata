@@ -1038,6 +1038,7 @@
           "starting": "Käynnistyy",
           "running": "Käynnissä",
           "paused": "Keskeytetty",
+          "user_paused": "Keskeytetty käyttäjän toimesta",
           "ending": "Loppuu",
           "finished": "Valmis",
           "anti_wrinkle": "Ryppyjenesto",
@@ -1095,7 +1096,7 @@
         "name": "Pumppu käy (viimeiset 24 tuntia)"
       },
       "cycle_count": {
-        "name": "Cycle Count"
+        "name": "Syklien määrä"
       }
     },
     "select": {
