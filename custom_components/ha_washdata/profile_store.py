@@ -3512,6 +3512,16 @@ class ProfileStore:
 
     async def async_import_data(self, payload: dict[str, Any]) -> dict[str, Any]:
         # Import data from JSON payload (migration aware).
+        # Unwrap HA diagnostics download file (outer HA wrapper: {home_assistant, data, ...})
+        if "home_assistant" in payload and "data" in payload:
+            payload = payload["data"]
+            self._logger.info("Detected HA diagnostics file wrapper, unwrapping 'data'")
+
+        # Unwrap our integration's diagnostics format ({entry, manager_state, store_export, ...})
+        if "store_export" in payload:
+            payload = payload["store_export"]
+            self._logger.info("Detected diagnostics store_export format, unwrapping")
+
         version = payload.get("version", 1)
 
         # Handle v1 format (flat structure) - convert to v2
@@ -3547,9 +3557,13 @@ class ProfileStore:
         self._data = data_dict
         await self.async_save()
 
+        # Strip diagnostic redaction sentinels so they don't overwrite real settings
+        def _strip_redacted(d: dict) -> dict:
+            return {k: v for k, v in d.items() if v != "**REDACTED**"}
+
         return {
-            "entry_data": payload.get("entry_data", {}),
-            "entry_options": payload.get("entry_options", {}),
+            "entry_data": _strip_redacted(payload.get("entry_data", {})),
+            "entry_options": _strip_redacted(payload.get("entry_options", {})),
         }
 
 
