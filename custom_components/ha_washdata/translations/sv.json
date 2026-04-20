@@ -1038,6 +1038,7 @@
           "starting": "Startar",
           "running": "Igång",
           "paused": "Pausad",
+          "user_paused": "Pausad av användare",
           "ending": "Avslutar",
           "finished": "Färdig",
           "anti_wrinkle": "Antirynkläge",

@@ -1038,6 +1038,7 @@
           "starting": "Yn dechrau",
           "running": "Rhedeg",
           "paused": "Wedi seibio",
+          "user_paused": "Wedi'i oedi gan y defnyddiwr",
           "ending": "Yn dod i ben",
           "finished": "Wedi gorffen",
           "anti_wrinkle": "Gwrth-Wrinkle",

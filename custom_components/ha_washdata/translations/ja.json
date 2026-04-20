@@ -1038,6 +1038,7 @@
           "starting": "起動中",
           "running": "動作中",
           "paused": "一時停止中",
+          "user_paused": "ユーザーにより一時停止中",
           "ending": "終了中",
           "finished": "完了",
           "anti_wrinkle": "しわ防止",

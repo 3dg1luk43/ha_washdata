@@ -1038,6 +1038,7 @@
           "starting": "Spúšťa sa",
           "running": "V prevádzke",
           "paused": "Pozastavené",
+          "user_paused": "Pozastavené používateľom",
           "ending": "Ukončuje sa",
           "finished": "Dokončené",
           "anti_wrinkle": "Ochrana proti vráskam",

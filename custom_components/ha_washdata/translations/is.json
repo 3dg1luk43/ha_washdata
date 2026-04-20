@@ -1038,6 +1038,7 @@
           "starting": "Byrjar",
           "running": "Hlaupandi",
           "paused": "Gert hlé",
+          "user_paused": "Í bið af notanda",
           "ending": "Endir",
           "finished": "Lokið",
           "anti_wrinkle": "Anti-hrukku",

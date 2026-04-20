@@ -1038,6 +1038,7 @@
           "starting": "Begin",
           "running": "Hardloop",
           "paused": "Onderbreek",
+          "user_paused": "Gepauseer deur gebruiker",
           "ending": "Einde",
           "finished": "Klaar",
           "anti_wrinkle": "Anti-rimpel",

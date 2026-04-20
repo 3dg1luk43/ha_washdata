@@ -1038,6 +1038,7 @@
           "starting": "Başlangıç",
           "running": "Koşma",
           "paused": "Duraklatıldı",
+          "user_paused": "Kullanıcı tarafından duraklatıldı",
           "ending": "Bitiş",
           "finished": "Bitti",
           "anti_wrinkle": "Kırışıklık Karşıtı",

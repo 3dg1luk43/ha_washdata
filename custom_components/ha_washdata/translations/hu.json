@@ -1038,6 +1038,7 @@
           "starting": "Indulás",
           "running": "Futás",
           "paused": "Szüneteltetve",
+          "user_paused": "Felhasználó által szüneteltetve",
           "ending": "Befejező",
           "finished": "Befejezett",
           "anti_wrinkle": "Ránctalanító",

@@ -1038,6 +1038,7 @@
           "starting": "در حال شروع",
           "running": "در حال کار",
           "paused": "مکث کرد",
+          "user_paused": "توسط کاربر مکث شد",
           "ending": "پایان یافتن",
           "finished": "تمام شد",
           "anti_wrinkle": "ضد چروک",

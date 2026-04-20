@@ -1038,6 +1038,7 @@
           "starting": "시작 중",
           "running": "실행 중",
           "paused": "일시 정지됨",
+          "user_paused": "사용자가 일시 정지함",
           "ending": "종료 중",
           "finished": "완료됨",
           "anti_wrinkle": "주름 방지",

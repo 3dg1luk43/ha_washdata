@@ -1038,6 +1038,7 @@
           "starting": "Iniciando",
           "running": "En funcionamiento",
           "paused": "En pausa",
+          "user_paused": "En pausa por el usuario",
           "ending": "Finalizando",
           "finished": "Finalizado",
           "anti_wrinkle": "Antiarrugas",

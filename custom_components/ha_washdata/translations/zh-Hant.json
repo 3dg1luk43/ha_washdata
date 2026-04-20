@@ -1038,6 +1038,7 @@
           "starting": "開始",
           "running": "跑步",
           "paused": "已暫停",
+          "user_paused": "使用者已暫停",
           "ending": "結束",
           "finished": "完成的",
           "anti_wrinkle": "抗皺",
