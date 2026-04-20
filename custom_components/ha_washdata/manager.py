@@ -177,6 +177,7 @@ from .const import (
     STATE_OFF,
     STATE_STARTING,
     STATE_PAUSED,
+    STATE_USER_PAUSED,
     STATE_ENDING,
     STATE_ANTI_WRINKLE,
     STATE_IDLE,
@@ -3903,6 +3904,8 @@ class WashDataManager:
             return STATE_RUNNING
         if self._is_clean_state and self.detector.state == STATE_OFF:
             return STATE_CLEAN
+        if self._is_user_paused:
+            return STATE_USER_PAUSED
         return self.detector.state
 
     def list_phase_catalog(self, device_type: str) -> list[dict[str, Any]]:
