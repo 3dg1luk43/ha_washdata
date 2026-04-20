@@ -194,7 +194,7 @@
           "external_end_trigger": "Externí snímač konce cyklu",
           "external_end_trigger_inverted": "Invertovat logiku spouštěče (spouštěč je vypnutý)",
           "suppress_feedback_notifications": "Potlačit upozornění na zpětnou vazbu",
-          "pump_stuck_duration": "Prah (y) upozornění na zaseknutí pumpy (pouze pumpa)",
+          "pump_stuck_duration": "Práh upozornění na zaseknutí pumpy (s, pouze pumpa)",
           "door_sensor_entity": "Snímač dveří",
           "pause_cuts_power": "Vypnout napájení při pozastavení",
           "notify_unload_delay_minutes": "Zpoždění oznámení o čekání na prádelnu (min)",
