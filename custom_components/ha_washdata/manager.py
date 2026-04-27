@@ -281,6 +281,7 @@ class WashDataManager:
         self._live_notification_cap = 0
         self._last_live_notification_time: datetime | None = None
         self._live_waiting_notification_sent = False
+        self._live_chronometer_overrun_sent = False
         self._live_notification_tag = f"ha_washdata_{self.entry_id}_live"
         self._start_event_fired = False
         self._cycle_start_time: datetime | None = None
@@ -2433,7 +2434,7 @@ class WashDataManager:
         # Fallback for old "Case 1.5" logic (Low Power but NOT is_waiting_low_power)
         # Check this BEFORE High Power timeout to prevent trapping "Not Yet Waiting" states
         # Inject as soon as the earliest of: off_delay silence OR no_update_active_timeout.
-        if self._current_power < self.detector.config.min_power and (
+        if self._current_power <= self.detector.config.min_power and (
             time_since_any_update > self._config.off_delay
             or time_since_real_update > self._no_update_active_timeout
         ):
@@ -2451,7 +2452,7 @@ class WashDataManager:
         if time_since_any_update > self._no_update_active_timeout:
 
             # Check if high power (running)
-            if self._current_power >= self.detector.config.min_power:
+            if self._current_power > self.detector.config.min_power:
                 # Allow extended silence if within reasonable cycle bounds
                 expected = getattr(self.detector, "expected_duration_seconds", 0)
                 elapsed = self.detector.get_elapsed_seconds()
@@ -3294,6 +3295,7 @@ class WashDataManager:
         self._live_notification_cap = 0
         self._last_live_notification_time = None
         self._live_waiting_notification_sent = False
+        self._live_chronometer_overrun_sent = False
 
     @staticmethod
     def _is_mobile_notify_service(notify_service: str | None) -> bool:
@@ -3366,8 +3368,6 @@ class WashDataManager:
         cap_candidate = self._estimate_live_notification_cap()
         if cap_candidate > self._live_notification_cap:
             self._live_notification_cap = cap_candidate
-        if self._live_notification_sent_count >= self._live_notification_cap:
-            return
 
         total_seconds = int(
             max(
@@ -3383,6 +3383,18 @@ class WashDataManager:
         )
         remaining_seconds = int(max(0, round(float(self._time_remaining or 0.0))))
         elapsed_seconds = max(0, total_seconds - remaining_seconds)
+
+        # When a chronometer notification is on the phone but the estimate has
+        # expired, bypass the cap once to replace the frozen "0:00" countdown
+        # with a plain text update so the user isn't left with a stale timer.
+        chronometer_overrun = (
+            self._notify_live_chronometer
+            and remaining_seconds <= 0
+            and self._live_notification_sent_count > 0
+            and not self._live_chronometer_overrun_sent
+        )
+        if not chronometer_overrun and self._live_notification_sent_count >= self._live_notification_cap:
+            return
         minutes_left = max(1, math.ceil(remaining_seconds / 60))
 
         msg_template = self.config_entry.options.get(
@@ -3419,7 +3431,10 @@ class WashDataManager:
             extra_vars=extra_vars,
         )
         if sent:
-            self._live_notification_sent_count += 1
+            if chronometer_overrun:
+                self._live_chronometer_overrun_sent = True
+            else:
+                self._live_notification_sent_count += 1
             self._last_live_notification_time = now
 
     def _clear_live_progress_notification(self) -> None:

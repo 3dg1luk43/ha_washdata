@@ -65,7 +65,9 @@ body:
     id: version
     attributes:
       label: WashData Integration Version
-      description: What version of WashData are you running? (found in HACS or Settings → Integrations)
+      description: >
+        What version of WashData are you running? (found in HACS or Settings → Integrations).
+        Check the [Releases page](https://github.com/3dg1luk43/ha_washdata/releases) to see if a newer version is available — bugs already fixed in a later release won't be re-investigated.
       placeholder: "vX.Y.Z"
     validations:
       required: true

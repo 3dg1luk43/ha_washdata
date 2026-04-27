@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Set Trim Start",
-        "description": "Enter the minute offset to start keeping data from (0 = cycle start).",
+        "description": "Cycle window: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nCurrent start: **{current_wallclock}** (+{current_offset_min} min from cycle start)\n\nPick a new start time using the clock picker below.",
         "data": {
-          "trim_start_min": "Start (minutes)"
+          "trim_start_time": "New start time",
+          "trim_start_min": "New start (minutes from cycle start)"
         }
       },
       "trim_cycle_end": {
         "title": "Set Trim End",
-        "description": "Enter the minute offset to stop keeping data at.",
+        "description": "Cycle window: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nCurrent end: **{current_wallclock}** (+{current_offset_min} min from cycle start)\n\nPick a new end time using the clock picker below.",
         "data": {
-          "trim_end_min": "End (minutes)"
+          "trim_end_time": "New end time",
+          "trim_end_min": "New end (minutes from cycle start)"
         }
       }
     },

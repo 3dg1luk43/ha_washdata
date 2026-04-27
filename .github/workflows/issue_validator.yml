@@ -86,11 +86,40 @@ jobs:
               problems.push('**Device Brand & Model** is missing or still set to the placeholder value. Provide the actual brand and model (e.g. `Miele W1 WCG370`), or enter `N/A` if this bug is not related to a specific device.');
             }
 
-            // 2. WashData version - must not be blank or the placeholder
+            // 2. WashData version - must not be blank or placeholder; warn if outdated
             const versionMatch = body.match(/###\s*WashData Integration Version\s*\n+([^\n#]+)/);
             const version = versionMatch ? versionMatch[1].trim() : '';
             if (!version || version === 'vX.Y.Z' || version === '_No response_') {
               problems.push('**WashData Integration Version** is missing. You can find it in HACS or Settings → Integrations.');
+            } else {
+              try {
+                const releasesResp = await github.rest.repos.listReleases({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  per_page: 10,
+                });
+                const published = releasesResp.data.filter(r => !r.draft);
+                const latestStable = published.find(r => !r.prerelease);
+                const latestPre = published.find(r => r.prerelease);
+
+                const normalize = v => v.replace(/^v/i, '').trim().toLowerCase();
+                const reported = normalize(version);
+                const isOnStable = latestStable && reported === normalize(latestStable.tag_name);
+                const isOnPre    = latestPre    && reported === normalize(latestPre.tag_name);
+
+                if (!isOnStable && !isOnPre && (latestStable || latestPre)) {
+                  const parts = [];
+                  if (latestStable) parts.push(`\`${latestStable.tag_name}\` (stable)`);
+                  if (latestPre)    parts.push(`\`${latestPre.tag_name}\` (pre-release)`);
+                  problems.push(
+                    `**Outdated version** (\`${version}\`): the current release${parts.length > 1 ? 's are' : ' is'} ${parts.join(' and ')}. ` +
+                    `Please upgrade and confirm the bug still exists on the latest version before we investigate — ` +
+                    `it may already be fixed. If it still reproduces, update this field with the version you tested.`
+                  );
+                }
+              } catch (releaseErr) {
+                console.log('Could not fetch releases for version check:', releaseErr.message);
+              }
             }
 
             // 3. HA version - must not be blank or the placeholder
