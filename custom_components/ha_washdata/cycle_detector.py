@@ -930,7 +930,13 @@ class CycleDetector:
                         if self._should_defer_finish(current_duration):
                             return
 
-                        self._finish_cycle(timestamp, status="completed")
+                        # For dishwashers, use the timeout timestamp as end_time
+                        # (keep_tail=True) so that the stored cycle duration includes
+                        # the passive drying phase.  Without this, end_time snaps back
+                        # to _last_active_time which may be set by a terminal drain
+                        # spike mid-ENDING, producing a falsely short cycle duration.
+                        keep_tail = self._config.device_type == "dishwasher"
+                        self._finish_cycle(timestamp, status="completed", keep_tail=keep_tail)
                         return
 
                     # Compute energy in recent window
@@ -945,7 +951,8 @@ class CycleDetector:
                         if self._should_defer_finish(current_duration):
                             return
 
-                        self._finish_cycle(timestamp, status="completed")
+                        keep_tail = self._config.device_type == "dishwasher"
+                        self._finish_cycle(timestamp, status="completed", keep_tail=keep_tail)
                     else:
 
                         self._logger.debug(
@@ -1023,6 +1030,30 @@ class CycleDetector:
                 DEFAULT_MAX_DEFERRAL_SECONDS,
             )
             return False
+
+        # Dishwasher passive drying protection:
+        # Dishwashers can have 2+ hour passive drying phases at near-0W.  A terminal
+        # drain spike that fires early in the ENDING state (e.g. at 120 min of a
+        # 233-min ECO cycle) resets _time_below_threshold, and the subsequent 60-min
+        # silence timeout would otherwise end the cycle at ~180 min — well before the
+        # real finish.  Defer until the cycle reaches 85% of expected so that smart
+        # termination can catch the true end (~99% of expected) instead.  Confidence
+        # may be low this early, so the normal confidence gate is bypassed here.
+        if (
+            self._config.device_type == "dishwasher"
+            and self._matched_profile
+            and self._expected_duration > 0
+            and duration < (self._expected_duration * 0.85)
+        ):
+            self._logger.debug(
+                "Deferring cycle finish: dishwasher drying phase protection "
+                "(%.0fs < 85%% of expected %.0fs, profile: %s, conf %.2f)",
+                duration,
+                self._expected_duration,
+                self._matched_profile,
+                self._last_match_confidence,
+            )
+            return True
 
         # If matched profile, enforce min duration ratio
         ratio = self._config.min_duration_ratio

@@ -1058,7 +1058,8 @@
           "force_stopped": "Force Stopped",
           "rinse": "Rinse",
           "unknown": "Unknown",
-          "clean": "Clean"
+          "clean": "Clean",
+          "delay_wait": "Delay Start"
         }
       },
       "washer_program": {

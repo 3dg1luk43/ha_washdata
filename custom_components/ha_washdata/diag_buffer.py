@@ -3,9 +3,9 @@
 Each WashDataManager owns one DiagBuffer instance that accumulates three
 independent time-series for the last 24 hours:
 
-  power_trace   – every raw power-sensor reading, before throttling
-  state_history – detector state transitions (off/starting/running/…)
-  logs          – DEBUG-and-above log lines emitted by this integration
+  power_trace   - every raw power-sensor reading, before throttling
+  state_history - detector state transitions (off/starting/running/...)
+  logs          - DEBUG-and-above log lines emitted by this integration
 
 All buffers are in-memory only (no disk writes) so they impose zero I/O
 overhead and vanish cleanly on HA restart.  The 24-hour window caps memory
@@ -24,7 +24,7 @@ from homeassistant.util import dt as dt_util
 _WINDOW = timedelta(hours=24)
 
 # Hard upper-bound on entries per buffer.  At a 1-second sensor interval,
-# 100 000 power entries ≈ 27 hours – enough to always cover the window.
+# 100 000 power entries ~= 27 hours - enough to always cover the window.
 _MAX_POWER = 100_000
 _MAX_LOGS = 5_000
 _MAX_STATES = 2_000
@@ -41,7 +41,7 @@ class _LogHandler(logging.Handler):
 
     Installed on the integration root logger so it receives all records
     produced anywhere inside *custom_components.ha_washdata*, then keeps
-    only the ones whose formatted message contains ``[device_name]`` –
+    only the ones whose formatted message contains ``[device_name]`` -
     the prefix injected by :class:`~.log_utils.DeviceLoggerAdapter`.
     """
 
@@ -100,7 +100,7 @@ class DiagBuffer:
         # State transitions: (unix_ts_float, from_state, to_state, program)
         self._states: deque[tuple[float, str, str, str]] = deque(maxlen=_MAX_STATES)
 
-        # Log handler – installed on the integration root logger
+        # Log handler - installed on the integration root logger
         self._log_handler = _LogHandler(device_name)
         logging.getLogger(_INTEGRATION_LOGGER_NAME).addHandler(self._log_handler)
 

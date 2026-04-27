@@ -257,6 +257,7 @@ class LearningManager:
         if (current_count - self._last_batch_simulation_count) < _BATCH_RERUN_DELTA:
             return
 
+        self._last_batch_simulation_count = current_count
         self.hass.async_create_task(self._async_run_batch_simulation(labeled_cycles, current_count))
 
     async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]], expected_count: int) -> None:
@@ -272,7 +273,6 @@ class LearningManager:
                     len(cycles),
                     list(new_suggestions.keys()),
                 )
-            self._last_batch_simulation_count = expected_count
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.error("Batch simulation failed: %s", e)
 
@@ -682,11 +682,9 @@ class LearningManager:
                         confirmed_cycle["duration"] = duration_sec
                 profiles_to_rebuild.add(profile_name)
         else:
-            # Correction path
-            # If corrected_profile is missing, fallback to the original detected profile.
-            # This ensures duration changes (Issue #155) are saved even if the profile
-            # remains unchanged.
-            target_profile = corrected_profile or pending.get("detected_profile")
+            # Correction path: only use corrected_profile when user_confirmed is False.
+            # Duration-only corrections (no profile specified) are handled by the elif branch below.
+            target_profile = corrected_profile
             detected_profile_name = pending.get("detected_profile")
 
             if isinstance(target_profile, str) and target_profile:

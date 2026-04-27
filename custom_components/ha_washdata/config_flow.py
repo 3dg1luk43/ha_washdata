@@ -439,6 +439,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 **self.config_entry.options,
                 **user_input,
             }
+            # Drop pump-only keys when the device type is not pump
+            if merged_options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE) != DEVICE_TYPE_PUMP:
+                merged_options.pop(CONF_PUMP_STUCK_DURATION, None)
             return self.async_create_entry(title="", data=merged_options)
 
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
@@ -4689,8 +4692,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     # Cycle Trimmer
     # ------------------------------------------------------------------
 
-    def _wallclock_to_offset(self, time_str: str, cycle_start_dt: datetime) -> float | None:
-        """Parse an HH:MM:SS time string and return offset seconds from cycle_start_dt."""
+    def _wallclock_to_offset(
+        self, time_str: str, cycle_start_dt: datetime, cycle_end_dt: datetime
+    ) -> float | None:
+        """Parse an HH:MM:SS time string and return offset seconds from cycle_start_dt.
+
+        Returns None if the time cannot be parsed or falls outside the recorded cycle.
+        """
         try:
             local_start = dt_util.as_local(cycle_start_dt)
             parts = time_str.split(":")
@@ -4700,7 +4708,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             candidate = local_start.replace(hour=h, minute=m, second=s, microsecond=0)
             if candidate < local_start:
                 candidate += timedelta(days=1)
-            return (candidate - local_start).total_seconds()
+            offset_seconds = (candidate - local_start).total_seconds()
+            cycle_duration = (cycle_end_dt - cycle_start_dt).total_seconds()
+            if offset_seconds < 0 or offset_seconds > cycle_duration:
+                return None
+            return offset_seconds
         except (ValueError, IndexError, AttributeError):
             return None
 
@@ -5042,7 +5054,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             time_str = (user_input.get("trim_start_time") or "").strip()
             if time_str and cycle_start_dt is not None:
-                new_start_s = self._wallclock_to_offset(time_str, cycle_start_dt)
+                cycle_end_dt = cycle_start_dt + timedelta(seconds=full_end_s)
+                new_start_s = self._wallclock_to_offset(time_str, cycle_start_dt, cycle_end_dt)
                 if new_start_s is None:
                     errors["trim_start_time"] = "trim_range_invalid"
                 elif new_start_s >= self._trim_end_s:
@@ -5125,7 +5138,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             time_str = (user_input.get("trim_end_time") or "").strip()
             if time_str and cycle_start_dt is not None:
-                new_end_s = self._wallclock_to_offset(time_str, cycle_start_dt)
+                cycle_end_dt = cycle_start_dt + timedelta(seconds=full_end_s)
+                new_end_s = self._wallclock_to_offset(time_str, cycle_start_dt, cycle_end_dt)
                 if new_end_s is None:
                     errors["trim_end_time"] = "trim_range_invalid"
                 elif new_end_s <= self._trim_start_s:

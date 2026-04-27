@@ -859,7 +859,6 @@ class WasherCycleCountSensor(WasherBaseSensor):
             translation_key="cycle_count",
             icon="mdi:counter",
             native_unit_of_measurement="cycles",
-            state_class=SensorStateClass.TOTAL_INCREASING,
         )
         super().__init__(manager, entry)
 

@@ -3004,11 +3004,6 @@ class WashDataManager:
                         for entry in self._pending_notifications
                         if entry.get("event_type") != NOTIFY_EVENT_LIVE
                     ]
-                elif any(
-                    entry.get("event_type") == event_type
-                    for entry in self._pending_notifications
-                ):
-                    return False
                 self._pending_notifications.append(
                     {
                         "message": message,
@@ -3275,7 +3270,11 @@ class WashDataManager:
             new_min=f"{new_min:.1f}",
         )
         if self._notify_finish_services or self._notify_start_services or self._notify_actions:
-            self._dispatch_notification(message, title=_title, event_type=NOTIFY_EVENT_FINISH)
+            _event_type = (
+                NOTIFY_EVENT_FINISH if self._notify_finish_services
+                else NOTIFY_EVENT_START
+            )
+            self._dispatch_notification(message, title=_title, event_type=_event_type)
         else:
             _pn_create(self.hass, message, title=_title)
 
@@ -4220,6 +4219,16 @@ class WashDataManager:
                     self.detector.set_verified_pause(prev_verified)
                     return
 
+        snapshot = self.detector.get_state_snapshot()
+        snapshot["manual_program"] = self._manual_program_active
+        snapshot["notified_start"] = self._notified_start
+        snapshot["start_event_fired"] = self._start_event_fired
+        snapshot["is_user_paused"] = self._is_user_paused
+        snapshot["user_pause_start"] = (
+            self._user_pause_start.isoformat() if self._user_pause_start else None
+        )
+        snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
+        self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
         self._notify_update()
 
     async def async_resume_cycle(self) -> None:
@@ -4270,6 +4279,16 @@ class WashDataManager:
                     self.detector.set_verified_pause(True)
                     return
 
+        snapshot = self.detector.get_state_snapshot()
+        snapshot["manual_program"] = self._manual_program_active
+        snapshot["notified_start"] = self._notified_start
+        snapshot["start_event_fired"] = self._start_event_fired
+        snapshot["is_user_paused"] = self._is_user_paused
+        snapshot["user_pause_start"] = (
+            self._user_pause_start.isoformat() if self._user_pause_start else None
+        )
+        snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
+        self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
         self._notify_update()
 
     async def async_terminate_cycle(self) -> None:
