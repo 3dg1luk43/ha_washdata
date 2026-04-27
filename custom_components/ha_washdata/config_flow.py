@@ -9,6 +9,7 @@ import logging
 import os
 import time
 import base64
+from datetime import datetime, timedelta
 from typing import Any
 
 import voluptuous as vol
@@ -286,6 +287,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._phase_assign_edit_index: int | None = None
         self._phase_assign_auto_detected: list[dict[str, Any]] = []
         self._trim_cycle_id: str | None = None
+        self._trim_cycle_start_dt: datetime | None = None
         self._trim_start_s: float = 0.0
         self._trim_end_s: float = 0.0
         self._selector_translations: dict[str, str] | None = None
@@ -4610,6 +4612,21 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     # Cycle Trimmer
     # ------------------------------------------------------------------
 
+    def _wallclock_to_offset(self, time_str: str, cycle_start_dt: datetime) -> float | None:
+        """Parse an HH:MM:SS time string and return offset seconds from cycle_start_dt."""
+        try:
+            local_start = dt_util.as_local(cycle_start_dt)
+            parts = time_str.split(":")
+            h = int(parts[0])
+            m = int(parts[1])
+            s = int(parts[2]) if len(parts) > 2 else 0
+            candidate = local_start.replace(hour=h, minute=m, second=s, microsecond=0)
+            if candidate < local_start:
+                candidate += timedelta(days=1)
+            return (candidate - local_start).total_seconds()
+        except (ValueError, IndexError, AttributeError):
+            return None
+
     def _trim_cycle_svg_markdown(
         self,
         p_data: list[tuple[float, float]],
@@ -4618,6 +4635,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         title: str = "Cycle Trim Preview",
         label_min: str = "min",
         no_data_text: str = "No power data available for this cycle.",
+        cycle_start_dt: datetime | None = None,
     ) -> str:
         """Render the cycle power curve with trim-region overlays as a base64 SVG."""
 
@@ -4630,13 +4648,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             )
 
         width = 1360
-        plot_left = 12
-        plot_right = 12
-        plot_top = 64
+        plot_left = 60
+        plot_right = 60
+        plot_top = 110
         plot_height = 300
         plot_width = width - plot_left - plot_right
-        axis_y = plot_top + plot_height + 32
-        total_height = axis_y + 32
+        axis_y = plot_top + plot_height + 52
+        axis_y2 = axis_y + 36
+        total_height = (axis_y2 + 32) if cycle_start_dt is not None else (axis_y + 40)
 
         if not p_data or len(p_data) < 2:
             empty_svg = (
@@ -4664,7 +4683,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return plot_top + plot_height - (max(0.0, min(max_power, p)) / max_power) * plot_height
 
         def pick_grid_interval(total_min_val: int) -> int:
-            label_w_px = 91
+            label_w_px = 130
             min_iv = (label_w_px / plot_width) * total_min_val
             for candidate in (1, 2, 5, 10, 15, 20, 30, 60):
                 if candidate > min_iv:
@@ -4681,7 +4700,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         # Title
         parts.append(
-            f"<text x='22' y='42' font-family='sans-serif' font-size='24'"
+            f"<text x='22' y='52' font-family='sans-serif' font-size='32'"
             f" fill='#f3f4f6' font-weight='bold'>{esc(title)}</text>"
         )
 
@@ -4694,11 +4713,30 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 f"<line x1='{tx:.2f}' y1='{plot_top}' x2='{tx:.2f}'"
                 f" y2='{plot_top + plot_height}' stroke='#2a2a2a' stroke-width='1'/>"
             )
-            parts.append(
-                f"<text x='{tx:.2f}' y='{axis_y}' font-family='sans-serif'"
-                f" font-size='20' fill='#64748b' text-anchor='middle'>"
-                f"{tick_min} {esc(label_min)}</text>"
-            )
+            if tx <= plot_left + 50:
+                t_anchor, t_x = "start", plot_left
+            elif tx >= width - plot_right - 50:
+                t_anchor, t_x = "end", width - plot_right
+            else:
+                t_anchor, t_x = "middle", tx
+            if cycle_start_dt is not None:
+                tick_dt = dt_util.as_local(cycle_start_dt + timedelta(seconds=tick_min * 60))
+                parts.append(
+                    f"<text x='{t_x:.2f}' y='{axis_y}' font-family='sans-serif'"
+                    f" font-size='30' fill='#94a3b8' text-anchor='{t_anchor}'>"
+                    f"{esc(tick_dt.strftime('%H:%M'))}</text>"
+                )
+                parts.append(
+                    f"<text x='{t_x:.2f}' y='{axis_y2}' font-family='sans-serif'"
+                    f" font-size='24' fill='#64748b' text-anchor='{t_anchor}'>"
+                    f"+{tick_min} {esc(label_min)}</text>"
+                )
+            else:
+                parts.append(
+                    f"<text x='{t_x:.2f}' y='{axis_y}' font-family='sans-serif'"
+                    f" font-size='30' fill='#64748b' text-anchor='{t_anchor}'>"
+                    f"{tick_min} {esc(label_min)}</text>"
+                )
 
         # Trimmed-region shading (before start and after end)
         x_start = to_x(trim_start_s)
@@ -4724,21 +4762,27 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         # Trim marker lines and labels
         _label_offset_y = plot_top - 10
+        _label_half_w = 105
         for t_s, color, key in (
             (trim_start_s, "#22c55e", "S"),
             (trim_end_s, "#ef4444", "E"),
         ):
             tx = to_x(t_s)
-            t_min_label = f"{int(t_s / 60)}:{int(t_s % 60):02d}"
+            if cycle_start_dt is not None:
+                t_dt = dt_util.as_local(cycle_start_dt + timedelta(seconds=t_s))
+                t_label = t_dt.strftime("%H:%M:%S")
+            else:
+                t_label = f"{int(t_s / 60)}:{int(t_s % 60):02d}"
+            label_x = max(plot_left + _label_half_w, min(width - plot_right - _label_half_w, tx))
             parts.append(
                 f"<line x1='{tx:.2f}' y1='{plot_top}' x2='{tx:.2f}'"
                 f" y2='{plot_top + plot_height}' stroke='{color}'"
                 " stroke-width='2.5' stroke-dasharray='8 4'/>"
             )
             parts.append(
-                f"<text x='{tx:.2f}' y='{_label_offset_y}' font-family='sans-serif'"
-                f" font-size='22' fill='{color}' text-anchor='middle'"
-                f" font-weight='bold'>{key}: {esc(t_min_label)}</text>"
+                f"<text x='{label_x:.2f}' y='{_label_offset_y}' font-family='sans-serif'"
+                f" font-size='28' fill='{color}' text-anchor='middle'"
+                f" font-weight='bold'>{key}: {esc(t_label)}</text>"
             )
 
         parts.append("</svg>")
@@ -4780,6 +4824,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self._trim_cycle_id = cycle_id
             self._trim_start_s = 0.0
             self._trim_end_s = p_data[-1][0]
+            cycle_obj = next((c for c in store.get_past_cycles() if c["id"] == cycle_id), None)
+            if cycle_obj and cycle_obj.get("start_time"):
+                self._trim_cycle_start_dt = dt_util.parse_datetime(cycle_obj["start_time"])
+            else:
+                self._trim_cycle_start_dt = None
             return await self.async_step_trim_cycle()
 
         return self.async_show_form(
@@ -4850,20 +4899,33 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             no_data_text=await self._options_text(
                 "trim_cycle_preview_no_data", "No power data available for this cycle."
             ),
+            cycle_start_dt=self._trim_cycle_start_dt,
         )
 
-        start_min = int(self._trim_start_s / 60)
-        start_sec = int(self._trim_start_s % 60)
-        end_min = int(self._trim_end_s / 60)
-        end_sec = int(self._trim_end_s % 60)
         kept_s = max(0.0, self._trim_end_s - self._trim_start_s)
         kept_min = int(kept_s / 60)
         kept_sec = int(kept_s % 60)
         kept_suffix = await self._options_text("trim_cycle_preview_kept_suffix", "kept")
-        summary = (
-            f"{start_min}:{start_sec:02d} - {end_min}:{end_sec:02d}"
-            f"  ({kept_min}:{kept_sec:02d} {kept_suffix})"
-        )
+        if self._trim_cycle_start_dt is not None:
+            start_dt = dt_util.as_local(
+                self._trim_cycle_start_dt + timedelta(seconds=self._trim_start_s)
+            )
+            end_dt = dt_util.as_local(
+                self._trim_cycle_start_dt + timedelta(seconds=self._trim_end_s)
+            )
+            summary = (
+                f"{start_dt.strftime('%H:%M:%S')} - {end_dt.strftime('%H:%M:%S')}"
+                f"  ({kept_min}:{kept_sec:02d} {kept_suffix})"
+            )
+        else:
+            start_min = int(self._trim_start_s / 60)
+            start_sec = int(self._trim_start_s % 60)
+            end_min = int(self._trim_end_s / 60)
+            end_sec = int(self._trim_end_s % 60)
+            summary = (
+                f"{start_min}:{start_sec:02d} - {end_min}:{end_sec:02d}"
+                f"  ({kept_min}:{kept_sec:02d} {kept_suffix})"
+            )
 
         return self.async_show_form(
             step_id="trim_cycle",
@@ -4885,7 +4947,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_trim_cycle_start(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Set the trim start point (minutes from cycle start)."""
+        """Set the trim start point."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
 
@@ -4897,40 +4959,78 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_abort(reason="no_power_data")
 
         full_end_s = p_data[-1][0]
-        total_min = max(1, int(full_end_s / 60))
-        default_min = int(self._trim_start_s / 60)
+        cycle_start_dt = self._trim_cycle_start_dt
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            new_start_s = float(user_input["trim_start_min"]) * 60.0
-            if new_start_s >= self._trim_end_s:
-                errors["trim_start_min"] = "trim_range_invalid"
+            time_str = (user_input.get("trim_start_time") or "").strip()
+            if time_str and cycle_start_dt is not None:
+                new_start_s = self._wallclock_to_offset(time_str, cycle_start_dt)
+                if new_start_s is None:
+                    errors["trim_start_time"] = "trim_range_invalid"
+                elif new_start_s >= self._trim_end_s:
+                    errors["trim_start_time"] = "trim_range_invalid"
+                else:
+                    self._trim_start_s = new_start_s
+                    return await self.async_step_trim_cycle()
             else:
-                self._trim_start_s = new_start_s
-                return await self.async_step_trim_cycle()
+                min_val = user_input.get("trim_start_min")
+                if min_val is not None:
+                    new_start_s = float(min_val) * 60.0
+                    if new_start_s >= self._trim_end_s:
+                        errors["trim_start_min"] = "trim_range_invalid"
+                    else:
+                        self._trim_start_s = new_start_s
+                        return await self.async_step_trim_cycle()
+
+        if cycle_start_dt is not None:
+            local_start = dt_util.as_local(cycle_start_dt)
+            local_end = dt_util.as_local(cycle_start_dt + timedelta(seconds=full_end_s))
+            current_wallclock = dt_util.as_local(
+                cycle_start_dt + timedelta(seconds=self._trim_start_s)
+            ).strftime("%H:%M:%S")
+            current_offset_min = int(self._trim_start_s / 60)
+            data_schema = vol.Schema({
+                vol.Required("trim_start_time", default=current_wallclock): selector.TimeSelector(),
+            })
+            desc_placeholders = {
+                "cycle_start_wallclock": local_start.strftime("%H:%M:%S"),
+                "cycle_end_wallclock": local_end.strftime("%H:%M:%S"),
+                "current_wallclock": current_wallclock,
+                "current_offset_min": str(current_offset_min),
+            }
+        else:
+            total_min = max(1, int(full_end_s / 60))
+            default_min = int(self._trim_start_s / 60)
+            data_schema = vol.Schema({
+                vol.Required("trim_start_min", default=default_min): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=total_min - 1,
+                        step=1,
+                        unit_of_measurement="min",
+                        mode=selector.NumberSelectorMode.BOX,
+                    )
+                ),
+            })
+            desc_placeholders = {
+                "cycle_start_wallclock": "unknown",
+                "cycle_end_wallclock": "unknown",
+                "current_wallclock": f"{int(self._trim_start_s / 60)} min",
+                "current_offset_min": str(int(self._trim_start_s / 60)),
+            }
 
         return self.async_show_form(
             step_id="trim_cycle_start",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("trim_start_min", default=default_min): selector.NumberSelector(
-                        selector.NumberSelectorConfig(
-                            min=0,
-                            max=total_min - 1,
-                            step=1,
-                            unit_of_measurement="min",
-                            mode=selector.NumberSelectorMode.BOX,
-                        )
-                    ),
-                }
-            ),
+            data_schema=data_schema,
             errors=errors,
+            description_placeholders=desc_placeholders,
         )
 
     async def async_step_trim_cycle_end(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Set the trim end point (minutes from cycle start)."""
+        """Set the trim end point."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
 
@@ -4942,32 +5042,70 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_abort(reason="no_power_data")
 
         full_end_s = p_data[-1][0]
-        total_min = max(1, int(full_end_s / 60) + 1)
-        default_min = int(self._trim_end_s / 60)
+        cycle_start_dt = self._trim_cycle_start_dt
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            new_end_s = float(user_input["trim_end_min"]) * 60.0
-            if new_end_s <= self._trim_start_s:
-                errors["trim_end_min"] = "trim_range_invalid"
+            time_str = (user_input.get("trim_end_time") or "").strip()
+            if time_str and cycle_start_dt is not None:
+                new_end_s = self._wallclock_to_offset(time_str, cycle_start_dt)
+                if new_end_s is None:
+                    errors["trim_end_time"] = "trim_range_invalid"
+                elif new_end_s <= self._trim_start_s:
+                    errors["trim_end_time"] = "trim_range_invalid"
+                else:
+                    self._trim_end_s = new_end_s
+                    return await self.async_step_trim_cycle()
             else:
-                self._trim_end_s = new_end_s
-                return await self.async_step_trim_cycle()
+                min_val = user_input.get("trim_end_min")
+                if min_val is not None:
+                    new_end_s = float(min_val) * 60.0
+                    if new_end_s <= self._trim_start_s:
+                        errors["trim_end_min"] = "trim_range_invalid"
+                    else:
+                        self._trim_end_s = new_end_s
+                        return await self.async_step_trim_cycle()
+
+        if cycle_start_dt is not None:
+            local_start = dt_util.as_local(cycle_start_dt)
+            local_end = dt_util.as_local(cycle_start_dt + timedelta(seconds=full_end_s))
+            current_wallclock = dt_util.as_local(
+                cycle_start_dt + timedelta(seconds=self._trim_end_s)
+            ).strftime("%H:%M:%S")
+            current_offset_min = int(self._trim_end_s / 60)
+            data_schema = vol.Schema({
+                vol.Required("trim_end_time", default=current_wallclock): selector.TimeSelector(),
+            })
+            desc_placeholders = {
+                "cycle_start_wallclock": local_start.strftime("%H:%M:%S"),
+                "cycle_end_wallclock": local_end.strftime("%H:%M:%S"),
+                "current_wallclock": current_wallclock,
+                "current_offset_min": str(current_offset_min),
+            }
+        else:
+            total_min = max(1, int(full_end_s / 60) + 1)
+            default_min = int(self._trim_end_s / 60)
+            data_schema = vol.Schema({
+                vol.Required("trim_end_min", default=default_min): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=total_min,
+                        step=1,
+                        unit_of_measurement="min",
+                        mode=selector.NumberSelectorMode.BOX,
+                    )
+                ),
+            })
+            desc_placeholders = {
+                "cycle_start_wallclock": "unknown",
+                "cycle_end_wallclock": "unknown",
+                "current_wallclock": f"{int(self._trim_end_s / 60)} min",
+                "current_offset_min": str(int(self._trim_end_s / 60)),
+            }
 
         return self.async_show_form(
             step_id="trim_cycle_end",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("trim_end_min", default=default_min): selector.NumberSelector(
-                        selector.NumberSelectorConfig(
-                            min=0,
-                            max=total_min,
-                            step=1,
-                            unit_of_measurement="min",
-                            mode=selector.NumberSelectorMode.BOX,
-                        )
-                    ),
-                }
-            ),
+            data_schema=data_schema,
             errors=errors,
+            description_placeholders=desc_placeholders,
         )

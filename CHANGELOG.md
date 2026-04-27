@@ -5,6 +5,23 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.4.1 - 2026-04-27
+
+### ✨ Features
+- **Wall-Clock Time in Trim Cycle Editor** (#212): The Trim Cycle graph now shows real wall-clock times (`HH:MM`) on the x-axis as the primary label, with the relative offset (`+N min`) shown below each tick as a secondary reference. The S and E trim-point markers display the exact wall-clock time (`HH:MM:SS`) instead of a relative offset. The **Set Trim Start** and **Set Trim End** forms have been redesigned: both now show the full cycle window (`start → end`), the current trim position in wall-clock time and minutes, and a single clock-picker field pre-populated with the current position — making it straightforward to set a trim point by entering a known time from another source (e.g. HA history graphs or a smart plug log) without having to calculate offsets manually.
+
+### 🛠️ Improvements
+- **Issue Template: Outdated Version Check**: The automated issue validator now fetches the latest stable and pre-release versions from the GitHub Releases API and flags any bug report submitted against an older version. The reporter is asked to confirm the bug still exists on the latest release before the issue is investigated. The version field description now links directly to the Releases page.
+- **Issue Template: Device Type Sync**: Added **Bread Maker** and **Pump / Sump Pump** to the Feature Request template's device type dropdown — these device types were supported since v0.4.4 but were missing from that template.
+- **Issue Automation: Auto-Assign**: All newly opened and reopened issues are now automatically assigned to the maintainer, so every report lands in the triage queue without a manual step.
+- **Issue Automation: Auto-Close Incomplete Reports**: A daily workflow scans open issues still carrying the `more info required` label. Issues that remain unfixed for 2 days receive a single reminder comment; issues that remain unfixed for 5 days are closed as `not_planned` with instructions to reopen a properly filled report.
+
+### 🐛 Bug Fixes
+- **Watchdog Boundary Condition: Standby Power Equal to Stop Threshold Not Recognised as Low Power** (#197 regression): When an appliance's standby power draw exactly equals the configured Stop Threshold (e.g. both at 2 W), the Watchdog's power classification used a strict less-than comparison (`< stop_threshold`) for the low-power silence path. A 2 W reading against a 2 W threshold evaluated to `False`, so the Watchdog fell through to the high-power stale path and injected a refresh keepalive instead of a 0 W keepalive — leaving the cycle stuck in `Running` state for the entire duration of sensor silence. On one reported case this produced a 136-minute close delay instead of the expected ~6 minutes. The low-power branch condition is now `<=` (and the high-power branch is `>`) so a standby value exactly equal to the stop threshold is correctly routed to the 0 W keepalive path that advances the cycle-closure accumulator.
+- **Chronometer Countdown Frozen at 0:00** (#194 follow-up): When the Chronometer Countdown Timer is enabled and the live progress notification cap is reached before the cycle ends, the Android companion app was left displaying a frozen `0:00` countdown with no further updates. The live notification sender now detects this condition — remaining time at or below zero, chronometer active, cap exhausted — and sends one additional plain-text update that replaces the stale countdown timer. This overrun update does not increment the sent-count, so a cap of N notifications remains N notifications for the purpose of normal cycle progress; the overrun is a single one-shot correction applied only once per cycle.
+
+<br>
+
 ## 0.4.4 - 2026-04-14
 
 ### ✨ Features
