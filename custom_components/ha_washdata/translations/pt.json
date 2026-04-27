@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Definir início do corte",
-        "description": "Introduza o deslocamento em minutos a partir do qual manter dados (0 = início do ciclo).",
+        "description": "Janela de ciclo: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nInício atual: **{current_wallclock}** (+{current_offset_min} min do início do ciclo)\n\nEscolha um novo horário de início usando o seletor de relógio abaixo.",
         "data": {
-          "trim_start_min": "Início (minutos)"
+          "trim_start_time": "Novo horário de início",
+          "trim_start_min": "Novo início (minutos desde o início do ciclo)"
         }
       },
       "trim_cycle_end": {
         "title": "Definir fim do corte",
-        "description": "Introduza o deslocamento em minutos até ao qual manter dados.",
+        "description": "Janela de ciclo: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFim atual: **{current_wallclock}** (+{current_offset_min} min do início do ciclo)\n\nEscolha um novo horário de término usando o seletor de relógio abaixo.",
         "data": {
-          "trim_end_min": "Fim (minutos)"
+          "trim_end_time": "Novo horário de término",
+          "trim_end_min": "Novo fim (minutos do início do ciclo)"
         }
       }
     },

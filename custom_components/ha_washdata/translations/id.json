@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Atur Mulai Pangkas",
-        "description": "Masukkan offset menit untuk mulai menyimpan data dari (0 = awal siklus).",
+        "description": "Jendela siklus: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAwal saat ini: **{current_wallclock}** (+{current_offset_min} mnt dari awal siklus)\n\nPilih waktu mulai yang baru menggunakan pemilih jam di bawah.",
         "data": {
-          "trim_start_min": "Mulai (menit)"
+          "trim_start_time": "Waktu mulai yang baru",
+          "trim_start_min": "Awal baru (menit dari awal siklus)"
         }
       },
       "trim_cycle_end": {
         "title": "Atur Akhir Pangkas",
-        "description": "Masukkan offset menit untuk berhenti menyimpan data.",
+        "description": "Jendela siklus: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAkhir saat ini: **{current_wallclock}** (+{current_offset_min} mnt dari awal siklus)\n\nPilih waktu berakhir yang baru menggunakan pemilih jam di bawah.",
         "data": {
-          "trim_end_min": "Selesai (menit)"
+          "trim_end_time": "Waktu akhir yang baru",
+          "trim_end_min": "Akhir baru (menit dari awal siklus)"
         }
       }
     },

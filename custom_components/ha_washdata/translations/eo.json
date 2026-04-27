@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Agordi tondadan komencon",
-        "description": "Enigu la minuton ofseton por komenci konservi datumojn de (0 = cikla komenco).",
+        "description": "Cikla fenestro: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNuna komenco: **{current_wallclock}** (+{current_offset_min} min de ciklokomenco)\n\nElektu novan komencan horon uzante la horloĝan elektilon sube.",
         "data": {
-          "trim_start_min": "Komenco (minutoj)"
+          "trim_start_time": "Nova komenca tempo",
+          "trim_start_min": "Nova komenco (minutoj de ciklokomenco)"
         }
       },
       "trim_cycle_end": {
         "title": "Agordi tondadan finon",
-        "description": "Enigu la minuton ofseton ĉe kiu ĉesi konservi datumojn.",
+        "description": "Cikla fenestro: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNuna fino: **{current_wallclock}** (+{current_offset_min} min de ciklokomenco)\n\nElektu novan fintempon uzante la horloĝan elektilon sube.",
         "data": {
-          "trim_end_min": "Fino (minutoj)"
+          "trim_end_time": "Nova fintempo",
+          "trim_end_min": "Nova fino (minutoj de ciklokomenco)"
         }
       }
     },

@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "트림 시작 설정",
-        "description": "데이터 보존을 시작할 분 오프셋을 입력하세요(0 = 사이클 시작).",
+        "description": "주기 창: {cycle_start_wallclock} → {cycle_end_wallclock}\n\n현재 시작: **{current_wallclock}** (주기 시작으로부터 +{current_offset_min}분)\n\n아래의 시계 선택기를 사용하여 새로운 시작 시간을 선택하세요.",
         "data": {
-          "trim_start_min": "시작 (분)"
+          "trim_start_time": "새로운 시작 시간",
+          "trim_start_min": "새로운 시작(사이클 시작 후 몇 분)"
         }
       },
       "trim_cycle_end": {
         "title": "트림 종료 설정",
-        "description": "데이터 보존을 중지할 분 오프셋을 입력하세요.",
+        "description": "주기 창: {cycle_start_wallclock} → {cycle_end_wallclock}\n\n현재 종료: **{current_wallclock}** (주기 시작으로부터 +{current_offset_min}분)\n\n아래의 시계 선택기를 사용하여 새로운 종료 시간을 선택하세요.",
         "data": {
-          "trim_end_min": "종료 (분)"
+          "trim_end_time": "새로운 종료 시간",
+          "trim_end_min": "새로운 종료(사이클 시작 후 몇 분)"
         }
       }
     },

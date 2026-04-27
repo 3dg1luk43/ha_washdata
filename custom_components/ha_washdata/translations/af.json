@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Stel Snoeibegin",
-        "description": "Voer die minuut-afset in om data vanaf te begin hou (0 = siklusbegin).",
+        "description": "Siklusvenster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nHuidige begin: **{current_wallclock}** (+{current_offset_min} min vanaf siklusbegin)\n\nKies 'n nuwe begintyd deur die horlosiekieser hieronder te gebruik.",
         "data": {
-          "trim_start_min": "Begin (minute)"
+          "trim_start_time": "Nuwe begin tyd",
+          "trim_start_min": "Nuwe begin (minute vanaf siklus begin)"
         }
       },
       "trim_cycle_end": {
         "title": "Stel Snoei-einde",
-        "description": "Voer die minuutverstelling in om op te hou om data te hou.",
+        "description": "Siklusvenster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nHuidige einde: **{current_wallclock}** (+{current_offset_min} min vanaf siklusbegin)\n\nKies 'n nuwe eindtyd deur die klokkieser hieronder te gebruik.",
         "data": {
-          "trim_end_min": "Einde (minute)"
+          "trim_end_time": "Nuwe eindtyd",
+          "trim_end_min": "Nuwe einde (minute vanaf siklus begin)"
         }
       }
     },

@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Stilltu klippiupphaf",
-        "description": "Sláðu inn mínútujöfnunina til að byrja að halda gögnum frá (0 = hringrás byrjun).",
+        "description": "Hringrás gluggi: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNúverandi byrjun: **{current_wallclock}** (+{current_offset_min} mín frá upphafi lotu)\n\nVeldu nýjan upphafstíma með því að nota klukkuvalið hér að neðan.",
         "data": {
-          "trim_start_min": "Byrja (mínútur)"
+          "trim_start_time": "Nýr upphafstími",
+          "trim_start_min": "Ný byrjun (mínútur frá byrjun hringrásar)"
         }
       },
       "trim_cycle_end": {
         "title": "Stilltu klippienda",
-        "description": "Sláðu inn mínútujöfnunina til að hætta að halda gögnum á.",
+        "description": "Hringrás gluggi: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNúverandi lok: **{current_wallclock}** (+{current_offset_min} mín frá upphafi lotu)\n\nVeldu nýjan lokatíma með því að nota klukkuvalið hér að neðan.",
         "data": {
-          "trim_end_min": "Lok (mínútur)"
+          "trim_end_time": "Nýr lokatími",
+          "trim_end_min": "Nýr endir (mínútur frá upphafi lotu)"
         }
       }
     },

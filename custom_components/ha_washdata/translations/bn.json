@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "ট্রিম স্টার্ট সেট করুন",
-        "description": "(0 = চক্র শুরু) থেকে ডেটা রাখা শুরু করতে অফসেট মিনিট লিখুন।",
+        "description": "সাইকেল উইন্ডো: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nবর্তমান শুরু: **{current_wallclock}** (সাইকেল শুরু থেকে +{current_offset_min} মিনিট)\n\nনীচের ঘড়ি পিকার ব্যবহার করে একটি নতুন শুরুর সময় বেছে নিন।",
         "data": {
-          "trim_start_min": "শুরু (মিনিট)"
+          "trim_start_time": "নতুন শুরুর সময়",
+          "trim_start_min": "নতুন শুরু (সাইকেল শুরু থেকে মিনিট)"
         }
       },
       "trim_cycle_end": {
         "title": "ট্রিম এন্ড সেট করুন",
-        "description": "ডেটা রাখা বন্ধ করতে অফসেট মিনিট লিখুন।",
+        "description": "সাইকেল উইন্ডো: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nবর্তমান শেষ: **{current_wallclock}** (সাইকেল শুরু থেকে +{current_offset_min} মিনিট)\n\nনিচের ক্লক পিকার ব্যবহার করে একটি নতুন শেষ সময় বেছে নিন।",
         "data": {
-          "trim_end_min": "শেষ (মিনিট)"
+          "trim_end_time": "নতুন শেষ সময়",
+          "trim_end_min": "নতুন শেষ (চক্র শুরু থেকে মিনিট)"
         }
       }
     },

@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Đặt bắt đầu cắt",
-        "description": "Nhập độ lệch phút để bắt đầu giữ dữ liệu từ (0 = bắt đầu chu kỳ).",
+        "description": "Cửa sổ chu kỳ: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nThời gian bắt đầu hiện tại: **{current_wallclock}** (+{current_offset_min} phút kể từ khi bắt đầu chu kỳ)\n\nChọn thời gian bắt đầu mới bằng cách sử dụng bộ chọn đồng hồ bên dưới.",
         "data": {
-          "trim_start_min": "Bắt đầu (phút)"
+          "trim_start_time": "Thời gian bắt đầu mới",
+          "trim_start_min": "Khởi đầu mới (phút kể từ khi bắt đầu chu kỳ)"
         }
       },
       "trim_cycle_end": {
         "title": "Đặt phần cuối",
-        "description": "Nhập độ lệch phút để ngừng lưu giữ dữ liệu.",
+        "description": "Cửa sổ chu kỳ: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nKết thúc hiện tại: **{current_wallclock}** (+{current_offset_min} phút kể từ khi bắt đầu chu kỳ)\n\nChọn thời gian kết thúc mới bằng cách sử dụng công cụ chọn đồng hồ bên dưới.",
         "data": {
-          "trim_end_min": "Kết thúc (phút)"
+          "trim_end_time": "Thời gian kết thúc mới",
+          "trim_end_min": "Kết thúc mới (phút kể từ khi bắt đầu chu kỳ)"
         }
       }
     },

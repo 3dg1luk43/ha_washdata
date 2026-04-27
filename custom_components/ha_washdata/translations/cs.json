@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Nastavte počáteční bod ořezu",
-        "description": "Zadejte minutovou odchylku, od které se mají začít uchovávat data (0 = začátek cyklu).",
+        "description": "Okno cyklu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAktuální začátek: **{current_wallclock}** (+{current_offset_min} min od začátku cyklu)\n\nPomocí níže uvedeného nástroje pro výběr hodin vyberte nový čas zahájení.",
         "data": {
-          "trim_start_min": "Začátek (minuty)"
+          "trim_start_time": "Nový čas zahájení",
+          "trim_start_min": "Nový start (minuty od začátku cyklu)"
         }
       },
       "trim_cycle_end": {
         "title": "Nastavte konec oříznutí",
-        "description": "Zadejte minutový posun, na kterém se data přestanou uchovávat.",
+        "description": "Okno cyklu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAktuální konec: **{current_wallclock}** (+{current_offset_min} min od začátku cyklu)\n\nPomocí níže uvedeného nástroje pro výběr hodin vyberte nový čas ukončení.",
         "data": {
-          "trim_end_min": "Konec (minuty)"
+          "trim_end_time": "Nový čas konce",
+          "trim_end_min": "Nový konec (minuty od začátku cyklu)"
         }
       }
     },

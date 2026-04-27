@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Setați începutul tăierii",
-        "description": "Introduceți decalajul în minute de la care să se păstreze datele (0 = începutul ciclului).",
+        "description": "Fereastra de ciclu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nPornire curentă: **{current_wallclock}** (+{current_offset_min} min de la începerea ciclului)\n\nAlegeți o nouă oră de începere folosind selectorul de ceas de mai jos.",
         "data": {
-          "trim_start_min": "Început (minute)"
+          "trim_start_time": "Noua ora de incepere",
+          "trim_start_min": "Pornire nouă (minute de la începerea ciclului)"
         }
       },
       "trim_cycle_end": {
         "title": "Setați sfârșitul tăierii",
-        "description": "Introduceți decalajul în minute până la care să se păstreze datele.",
+        "description": "Fereastra de ciclu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nSfârșit curent: **{current_wallclock}** (+{current_offset_min} min de la începutul ciclului)\n\nAlegeți o nouă oră de încheiere folosind selectorul de ceas de mai jos.",
         "data": {
-          "trim_end_min": "Sfârșit (minute)"
+          "trim_end_time": "Noua oră de sfârșit",
+          "trim_end_min": "Sfârșit nou (minute de la începerea ciclului)"
         }
       }
     },

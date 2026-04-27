@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "ضبط بداية القطع",
-        "description": "أدخل إزاحة الدقيقة لبدء حفظ البيانات من (0 = بداية الدورة).",
+        "description": "نافذة الدورة: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nالبداية الحالية: **{current_wallclock}** (+{current_offset_min} دقيقة من بداية الدورة)\n\nاختر وقت بدء جديدًا باستخدام منتقي الساعة أدناه.",
         "data": {
-          "trim_start_min": "البدء (دقيقة)"
+          "trim_start_time": "وقت البدء الجديد",
+          "trim_start_min": "بداية جديدة (دقائق من بداية الدورة)"
         }
       },
       "trim_cycle_end": {
         "title": "ضبط نهاية القطع",
-        "description": "أدخل إزاحة الدقيقة لإيقاف الاحتفاظ بالبيانات عندها.",
+        "description": "نافذة الدورة: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nالنهاية الحالية: **{current_wallclock}** (+{current_offset_min} دقيقة من بداية الدورة)\n\nاختر وقت انتهاء جديدًا باستخدام منتقي الساعة أدناه.",
         "data": {
-          "trim_end_min": "النهاية (دقائق)"
+          "trim_end_time": "وقت الانتهاء الجديد",
+          "trim_end_min": "النهاية الجديدة (دقائق من بداية الدورة)"
         }
       }
     },

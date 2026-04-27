@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "トリミング開始点を設定",
-        "description": "データを保持し始める分単位のオフセットを入力します（0 = サイクル開始）。",
+        "description": "サイクルウィンドウ: {cycle_start_wallclock} → {cycle_end_wallclock}\n\n現在の開始: **{current_wallclock}** (サイクル開始から +{current_offset_min} 分)\n\n以下のクロックピッカーを使用して、新しい開始時間を選択します。",
         "data": {
-          "trim_start_min": "開始（分）"
+          "trim_start_time": "新しい開始時間",
+          "trim_start_min": "新しい開始 (サイクル開始からの分)"
         }
       },
       "trim_cycle_end": {
         "title": "トリミング終了点を設定",
-        "description": "データの保持を停止する分単位のオフセットを入力します。",
+        "description": "サイクルウィンドウ: {cycle_start_wallclock} → {cycle_end_wallclock}\n\n現在の終了: **{current_wallclock}** (サイクル開始から +{current_offset_min} 分)\n\n以下のクロックピッカーを使用して、新しい終了時刻を選択します。",
         "data": {
-          "trim_end_min": "終了（分）"
+          "trim_end_time": "新しい終了時間",
+          "trim_end_min": "新しい終了 (サイクル開始からの分)"
         }
       }
     },

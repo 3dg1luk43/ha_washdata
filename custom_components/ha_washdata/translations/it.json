@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Imposta inizio taglio",
-        "description": "Inserisci l'offset in minuti da cui iniziare a conservare i dati (0 = inizio del ciclo).",
+        "description": "Finestra del ciclo: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nInizio attuale: **{current_wallclock}** (+{current_offset_min} min dall'inizio del ciclo)\n\nScegli una nuova ora di inizio utilizzando il selettore dell'orologio di seguito.",
         "data": {
-          "trim_start_min": "Inizio (minuti)"
+          "trim_start_time": "Nuova ora di inizio",
+          "trim_start_min": "Nuovo inizio (minuti dall'inizio del ciclo)"
         }
       },
       "trim_cycle_end": {
         "title": "Imposta fine taglio",
-        "description": "Inserisci l'offset in minuti al quale interrompere la conservazione dei dati.",
+        "description": "Finestra del ciclo: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFine attuale: **{current_wallclock}** (+{current_offset_min} min dall'inizio del ciclo)\n\nScegli una nuova ora di fine utilizzando il selettore dell'orologio di seguito.",
         "data": {
-          "trim_end_min": "Fine (minuti)"
+          "trim_end_time": "Nuova ora di fine",
+          "trim_end_min": "Nuova fine (minuti dall'inizio del ciclo)"
         }
       }
     },

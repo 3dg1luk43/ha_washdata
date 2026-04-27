@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Postavite početak trimanja",
-        "description": "Unesite minutni pomak od kojeg želite početi čuvati podatke (0 = početak ciklusa).",
+        "description": "Prozor ciklusa: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nTrenutačni početak: **{current_wallclock}** (+{current_offset_min} min od početka ciklusa)\n\nOdaberite novo vrijeme početka pomoću alata za odabir sata u nastavku.",
         "data": {
-          "trim_start_min": "Početak (minute)"
+          "trim_start_time": "Novo vrijeme početka",
+          "trim_start_min": "Novi početak (minute od početka ciklusa)"
         }
       },
       "trim_cycle_end": {
         "title": "Postavite završetak skraćivanja",
-        "description": "Unesite minutni pomak za prestanak čuvanja podataka.",
+        "description": "Prozor ciklusa: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nTrenutačni kraj: **{current_wallclock}** (+{current_offset_min} min od početka ciklusa)\n\nOdaberite novo vrijeme završetka pomoću alata za odabir sata u nastavku.",
         "data": {
-          "trim_end_min": "Kraj (minute)"
+          "trim_end_time": "Novo vrijeme završetka",
+          "trim_end_min": "Novi kraj (minute od početka ciklusa)"
         }
       }
     },

@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "تنظیم نقطه شروع کوتاه‌سازی",
-        "description": "فاصله دقیقه را برای شروع نگهداری داده ها از (0 = شروع چرخه) وارد کنید.",
+        "description": "پنجره چرخه: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nشروع فعلی: **{current_wallclock}** (+{current_offset_min} دقیقه از شروع چرخه)\n\nبا استفاده از انتخابگر ساعت زیر، زمان شروع جدیدی را انتخاب کنید.",
         "data": {
-          "trim_start_min": "شروع (دقیقه)"
+          "trim_start_time": "زمان شروع جدید",
+          "trim_start_min": "شروع جدید (دقیقه از شروع چرخه)"
         }
       },
       "trim_cycle_end": {
         "title": "تنظیم نقطه پایان کوتاه‌سازی",
-        "description": "برای توقف نگه‌داشتن داده‌ها، فاصله دقیقه را وارد کنید.",
+        "description": "پنجره چرخه: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nپایان فعلی: **{current_wallclock}** (+{current_offset_min} دقیقه از شروع چرخه)\n\nبا استفاده از انتخابگر ساعت زیر، زمان پایان جدیدی را انتخاب کنید.",
         "data": {
-          "trim_end_min": "پایان (دقیقه)"
+          "trim_end_time": "زمان پایان جدید",
+          "trim_end_min": "پایان جدید (دقیقه از شروع چرخه)"
         }
       }
     },

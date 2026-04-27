@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Estableix Trim Start",
-        "description": "Introduïu el desplaçament de minuts per començar a guardar les dades (0 = inici del cicle).",
+        "description": "Finestra de cicle: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nInici actual: **{current_wallclock}** (+{current_offset_min} min des de l'inici del cicle)\n\nTrieu una nova hora d'inici utilitzant el selector de rellotges que hi ha a continuació.",
         "data": {
-          "trim_start_min": "Inici (minuts)"
+          "trim_start_time": "Nova hora d'inici",
+          "trim_start_min": "Nou inici (minuts des de l'inici del cicle)"
         }
       },
       "trim_cycle_end": {
         "title": "Estableix el final de retall",
-        "description": "Introduïu el desplaçament de minuts per deixar de conservar les dades.",
+        "description": "Finestra de cicle: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFinal actual: **{current_wallclock}** (+{current_offset_min} min des de l'inici del cicle)\n\nTrieu una nova hora de finalització amb el selector de rellotge que hi ha a continuació.",
         "data": {
-          "trim_end_min": "Final (minuts)"
+          "trim_end_time": "Nova hora de finalització",
+          "trim_end_min": "Nou final (minuts des de l'inici del cicle)"
         }
       }
     },

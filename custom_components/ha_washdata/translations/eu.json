@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Ezarri Moztu Hasiera",
-        "description": "Idatzi minutuko desplazamendua datuak gordetzen hasteko (0 = zikloaren hasiera).",
+        "description": "Zikloaren leihoa: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nUneko hasiera: **{current_wallclock}** (zikloaren hasieratik {current_offset_min} min)\n\nAukeratu hasiera-ordu berria beheko erloju-hautatzailea erabiliz.",
         "data": {
-          "trim_start_min": "Hasiera (minutuak)"
+          "trim_start_time": "Hasiera ordu berria",
+          "trim_start_min": "Irteera berria (zikloaren hasieratik minutu batzuk)"
         }
       },
       "trim_cycle_end": {
         "title": "Ezarri Moztu Amaiera",
-        "description": "Idatzi minutuko desplazamendua datuak gordetzeari uzteko.",
+        "description": "Zikloaren leihoa: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nUneko amaiera: **{current_wallclock}** (zikloaren hasieratik {current_offset_min} min)\n\nAukeratu amaiera ordu berri bat beheko erloju-hautatzailea erabiliz.",
         "data": {
-          "trim_end_min": "Amaiera (minutuak)"
+          "trim_end_time": "Amaiera ordu berria",
+          "trim_end_min": "Amaiera berria (zikloaren hasieratik minutu batzuk)"
         }
       }
     },

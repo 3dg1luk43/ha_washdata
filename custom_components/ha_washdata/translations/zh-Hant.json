@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "設定修剪開始",
-        "description": "輸入開始保存資料的分鐘偏移量（0 = 循環開始）。",
+        "description": "循環視窗：{cycle_start_wallclock} → {cycle_end_wallclock}\n\n目前開始時間：**{current_wallclock}**（距離週期開始時間+{current_offset_min} 分鐘）\n\n使用下面的時鐘選擇器選擇新的開始時間。",
         "data": {
-          "trim_start_min": "開始（分鐘）"
+          "trim_start_time": "新的開始時間",
+          "trim_start_min": "新的開始（週期開始後的分鐘數）"
         }
       },
       "trim_cycle_end": {
         "title": "設定修剪結束",
-        "description": "輸入停止保存資料的分鐘偏移量。",
+        "description": "循環視窗：{cycle_start_wallclock} → {cycle_end_wallclock}\n\n目前結束：**{current_wallclock}**（距離週期開始+{current_offset_min} 分鐘）\n\n使用下面的時鐘選擇器選擇新的結束時間。",
         "data": {
-          "trim_end_min": "結束（分鐘）"
+          "trim_end_time": "新的結束時間",
+          "trim_end_min": "新的結束（距離週期開始的分鐘數）"
         }
       }
     },

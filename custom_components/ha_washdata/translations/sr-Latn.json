@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Postavi početak isecanja",
-        "description": "Unesi minutni pomak od kojeg počinje čuvanje podataka (0 = početak ciklusa).",
+        "description": "Прозор циклуса: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nТренутни почетак: **{current_wallclock}** (+{current_offset_min} мин од почетка циклуса)\n\nИзаберите ново време почетка користећи бирач сата у наставку.",
         "data": {
-          "trim_start_min": "Početak (minuti)"
+          "trim_start_time": "Ново време почетка",
+          "trim_start_min": "Нови почетак (минути од почетка циклуса)"
         }
       },
       "trim_cycle_end": {
         "title": "Postavi kraj isecanja",
-        "description": "Unesi minutni pomak do kojeg se čuvaju podaci.",
+        "description": "Прозор циклуса: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nТренутни крај: **{current_wallclock}** (+{current_offset_min} мин од почетка циклуса)\n\nИзаберите ново време завршетка користећи бирач сата у наставку.",
         "data": {
-          "trim_end_min": "Kraj (minuti)"
+          "trim_end_time": "Ново време завршетка",
+          "trim_end_min": "Нови крај (минути од почетка циклуса)"
         }
       }
     },

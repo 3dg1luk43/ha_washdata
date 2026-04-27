@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "ٹرم اسٹارٹ سیٹ کریں۔",
-        "description": "(0 = سائیکل شروع) سے ڈیٹا رکھنا شروع کرنے کے لیے آفسیٹ منٹ درج کریں۔",
+        "description": "سائیکل ونڈو: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nموجودہ آغاز: **{current_wallclock}** (سائیکل شروع ہونے سے +{current_offset_min} منٹ)\n\nنیچے دیے گئے گھڑی چنندہ کا استعمال کرتے ہوئے ایک نیا وقت شروع کریں۔",
         "data": {
-          "trim_start_min": "شروع کریں (منٹ)"
+          "trim_start_time": "نئے آغاز کا وقت",
+          "trim_start_min": "نیا آغاز (سائیکل شروع ہونے سے منٹ)"
         }
       },
       "trim_cycle_end": {
         "title": "ٹرم اینڈ سیٹ کریں۔",
-        "description": "ڈیٹا کو رکھنا بند کرنے کے لیے آفسیٹ منٹ درج کریں۔",
+        "description": "سائیکل ونڈو: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nموجودہ اختتام: **{current_wallclock}** (سائیکل کے آغاز سے +{current_offset_min} منٹ)\n\nذیل میں گھڑی چنندہ کا استعمال کرتے ہوئے ایک نیا اختتامی وقت منتخب کریں۔",
         "data": {
-          "trim_end_min": "اختتام (منٹ)"
+          "trim_end_time": "نیا اختتامی وقت",
+          "trim_end_min": "نیا اختتام (سائیکل شروع ہونے سے منٹ)"
         }
       }
     },

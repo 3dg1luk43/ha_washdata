@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Nustatyti apkarpymo pradžią",
-        "description": "Įveskite minutės poslinkį, nuo kurio pradėti saugoti duomenis (0 = ciklo pradžia).",
+        "description": "Ciklo langas: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nDabartinė pradžia: **{current_wallclock}** (+{current_offset_min} min. nuo ciklo pradžios)\n\nPasirinkite naują pradžios laiką naudodami toliau pateiktą laikrodžio parinkiklį.",
         "data": {
-          "trim_start_min": "Pradžia (minutės)"
+          "trim_start_time": "Naujas pradžios laikas",
+          "trim_start_min": "Nauja pradžia (minutės nuo ciklo pradžios)"
         }
       },
       "trim_cycle_end": {
         "title": "Nustatyti apkarpymo pabaigą",
-        "description": "Įveskite minutės poslinkį, iki kurio saugoti duomenis.",
+        "description": "Ciklo langas: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nDabartinė pabaiga: **{current_wallclock}** (+{current_offset_min} min. nuo ciklo pradžios)\n\nPasirinkite naują pabaigos laiką naudodami toliau pateiktą laikrodžio parinkiklį.",
         "data": {
-          "trim_end_min": "Pabaiga (minutės)"
+          "trim_end_time": "Naujas pabaigos laikas",
+          "trim_end_min": "Nauja pabaiga (minutės nuo ciklo pradžios)"
         }
       }
     },
