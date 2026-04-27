@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Przejrzyj sugerowane zmiany",
-        "description": "WashData znalazł {pending_count} sugerowanych wartości do zastosowania.\n\nZmiany do sprawdzenia:\n{changes}\n\nPotwierdź poniżej, aby umieścić te wartości w formularzu. Nie zostaną zapisane, dopóki nie prześlesz Ustawień zaawansowanych.",
+        "description": "WashData znalazł **{pending_count}** sugerowane wartości do zastosowania.\n\nZmiany:\n{changes}\n\n✅ Zaznacz pole poniżej i kliknij **Prześlij**, aby natychmiast zastosować i zapisać zmiany.\n❌ Pozostaw tę opcję niezaznaczoną i kliknij **Wyślij**, aby anulować i wrócić.",
         "data": {
-          "confirm_apply_suggestions": "Przenieś sugerowane wartości do Ustawień zaawansowanych"
+          "confirm_apply_suggestions": "Zastosuj i zapisz te zmiany"
         }
       },
       "settings": {
@@ -72,50 +72,50 @@
           "power_sensor": "Encja czujnika mocy",
           "min_power": "Minimalna moc (W)",
           "off_delay": "Opóźnienie zakończenia cyklu (s)",
-          "notify_service": "Usługa powiadomień (np. notify.mobile_app)",
           "notify_actions": "Akcje powiadomień",
           "notify_people": "Opóźnij dostarczenie, aż te osoby wrócą do domu",
           "notify_only_when_home": "Opóźnij powiadomienia, aż wybrana osoba będzie w domu",
           "notify_fire_events": "Wyzwalaj zdarzenia automatyzacji",
-          "notify_events": "Zdarzenia do powiadamiania",
           "notify_before_end_minutes": "Powiadomienie przed zakończeniem (minuty przed końcem)",
           "notify_title": "Tytuł powiadomienia",
           "notify_icon": "Ikona powiadomienia",
           "notify_start_message": "Format wiadomości startowej",
           "notify_finish_message": "Format wiadomości końcowej",
           "notify_pre_complete_message": "Format wiadomości przed zakończeniem",
-          "show_advanced": "Edytuj ustawienia zaawansowane (następny krok)"
+          "show_advanced": "Edytuj ustawienia zaawansowane (następny krok)",
+          "notify_start_services": "Rozpoczęcie cyklu - Cele powiadomień",
+          "notify_finish_services": "Zakończenie cyklu - Cele powiadomień",
+          "notify_live_services": "Postęp na żywo - cele powiadomień"
         },
         "data_description": {
           "apply_suggestions": "Zaznacz to pole, aby skopiować do formularza wartości sugerowane przez algorytm uczący. Przejrzyj przed zapisaniem.\n\nSugerowane (z algorytmu uczącego):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Wybierz typ urządzenia (pralka, suszarka, zmywarka, ekspres do kawy, EV). Ten znacznik jest zapisywany przy każdym cyklu dla lepszej organizacji.",
-          "power_sensor": "Encja czujnika raportująca moc w czasie rzeczywistym (w watach). Możesz to zmienić w dowolnym momencie bez utraty danych historycznych — przydatne przy wymianie inteligentnej wtyczki.",
+          "power_sensor": "Encja czujnika raportująca moc w czasie rzeczywistym (w watach). Możesz to zmienić w dowolnym momencie bez utraty danych historycznych - przydatne przy wymianie inteligentnej wtyczki.",
           "min_power": "Odczyty mocy powyżej tego progu (w watach) wskazują, że urządzenie pracuje. Zacznij od 2 W dla większości urządzeń.",
           "off_delay": "Wygładzona moc musi przez tyle sekund pozostać poniżej progu zatrzymania, aby oznaczyć zakończenie. Domyślnie: 120 s.",
-          "notify_service": "Usługa powiadomień Home Assistant do użycia (opcjonalnie).",
           "notify_actions": "Opcjonalna sekwencja akcji Home Assistant do uruchomienia przy powiadomieniach (skrypty, notify, TTS itp.). Jeśli ustawione, akcje są uruchamiane przed zapasową usługą powiadomień.",
           "notify_people": "Encje osób używane do kontroli obecności. Gdy włączone, dostarczanie powiadomień jest opóźniane do czasu, aż przynajmniej jedna wybrana osoba wróci do domu.",
           "notify_only_when_home": "Jeśli włączone, opóźnia powiadomienia do czasu, aż przynajmniej jedna wybrana osoba będzie w domu.",
           "notify_fire_events": "Jeśli włączone, wyzwala zdarzenia Home Assistant na początku i końcu cyklu (ha_washdata_cycle_started i ha_washdata_cycle_ended) do napędzania automatyzacji.",
-          "notify_events": "Dla jakich zdarzeń wysyłać powiadomienia.",
           "notify_before_end_minutes": "Minuty przed przewidywanym końcem cyklu, aby wywołać powiadomienie. Ustaw 0, aby wyłączyć. Domyślnie: 0.",
           "notify_title": "Niestandardowy tytuł powiadomień. Obsługuje symbol zastępczy {device}.",
           "notify_icon": "Ikona używana do powiadomień (np. mdi:washing-machine). Pozostaw puste, aby wysłać bez ikony.",
           "notify_start_message": "Wiadomość wysyłana po rozpoczęciu cyklu. Obsługuje symbol zastępczy {device}.",
           "notify_finish_message": "Wiadomość wysyłana po zakończeniu cyklu. Obsługuje symbole zastępcze {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Wiadomość wysyłana przed zakończeniem. Obsługuje symbole zastępcze {device}, {minutes}."
+          "notify_pre_complete_message": "Wiadomość wysyłana przed zakończeniem. Obsługuje symbole zastępcze {device}, {minutes}.",
+          "notify_start_services": "Jedna lub więcej usług powiadamiających o rozpoczęciu cyklu. Pozostaw puste, aby pominąć powiadomienia o uruchomieniu.",
+          "notify_finish_services": "Jedna lub więcej usług powiadamiających o zakończeniu cyklu lub jego zbliżaniu się do końca. Pozostaw puste, aby pominąć powiadomienia o zakończeniu.",
+          "notify_live_services": "Jedna lub więcej usług powiadamiania o konieczności otrzymywania aktualnych informacji o postępie podczas trwania cyklu (tylko aplikacja mobilna). Pozostaw puste, aby pominąć aktualizacje na żywo."
         }
       },
       "notifications": {
         "title": "Powiadomienia",
         "description": "Skonfiguruj kanały powiadomień, szablony i opcjonalne aktualizacje postępu na żywo na urządzeniach mobilnych.",
         "data": {
-          "notify_service": "Usługa powiadomień (np. notify.mobile_app)",
           "notify_actions": "Akcje powiadomień",
           "notify_people": "Opóźnij dostarczenie, aż te osoby wrócą do domu",
           "notify_only_when_home": "Opóźnij powiadomienia, aż wybrana osoba będzie w domu",
           "notify_fire_events": "Wyzwalaj zdarzenia automatyzacji",
-          "notify_events": "Zdarzenia do powiadamiania",
           "notify_before_end_minutes": "Powiadomienie przed zakończeniem (minuty przed końcem)",
           "notify_live_interval_seconds": "Interwał aktualizacji na żywo (sekundy)",
           "notify_live_overrun_percent": "Dopuszczalne przekroczenie aktualizacji na żywo (%)",
@@ -123,23 +123,33 @@
           "notify_icon": "Ikona powiadomienia",
           "notify_start_message": "Format wiadomości startowej",
           "notify_finish_message": "Format wiadomości końcowej",
-          "notify_pre_complete_message": "Format wiadomości przed zakończeniem"
+          "notify_pre_complete_message": "Format wiadomości przed zakończeniem",
+          "notify_start_services": "Rozpoczęcie cyklu - Cele powiadomień",
+          "notify_finish_services": "Zakończenie cyklu - Cele powiadomień",
+          "notify_live_services": "Postęp na żywo - cele powiadomień",
+          "notify_live_chronometer": "Minutnik chronometru",
+          "energy_price_entity": "Cena energii - jednostka (opcjonalnie)",
+          "energy_price_static": "Cena energii - wartość statyczna (opcjonalnie)"
         },
         "data_description": {
-          "notify_service": "Usługa powiadomień Home Assistant do użycia (opcjonalnie).",
           "notify_actions": "Opcjonalna sekwencja akcji Home Assistant do uruchomienia przy powiadomieniach (skrypty, notify, TTS itp.). Jeśli ustawione, akcje są uruchamiane przed zapasową usługą powiadomień.",
           "notify_people": "Encje osób używane do kontroli obecności. Gdy włączone, dostarczanie powiadomień jest opóźniane do czasu, aż przynajmniej jedna wybrana osoba wróci do domu.",
           "notify_only_when_home": "Jeśli włączone, opóźnia powiadomienia do czasu, aż przynajmniej jedna wybrana osoba będzie w domu.",
           "notify_fire_events": "Jeśli włączone, wyzwala zdarzenia Home Assistant na początku i końcu cyklu (ha_washdata_cycle_started i ha_washdata_cycle_ended) do napędzania automatyzacji.",
-          "notify_events": "Dla jakich zdarzeń wysyłać powiadomienia.",
           "notify_before_end_minutes": "Minuty przed przewidywanym końcem cyklu, aby wywołać powiadomienie. Ustaw 0, aby wyłączyć. Domyślnie: 0.",
-          "notify_live_interval_seconds": "Jak często aktualizacje postępu są wysyłane podczas pracy. Niższe wartości są bardziej responsywne, ale zużywają więcej powiadomień. Wymuszone jest minimum 30 sekund — wartości poniżej 30 s są automatycznie zaokrąglane do 30 s.",
+          "notify_live_interval_seconds": "Jak często aktualizacje postępu są wysyłane podczas pracy. Niższe wartości są bardziej responsywne, ale zużywają więcej powiadomień. Wymuszone jest minimum 30 sekund - wartości poniżej 30 s są automatycznie zaokrąglane do 30 s.",
           "notify_live_overrun_percent": "Margines bezpieczeństwa powyżej szacowanej liczby aktualizacji dla długich lub przekraczających cykli (np. 20% zezwala na 1,2× szacowanych aktualizacji).",
           "notify_title": "Niestandardowy tytuł powiadomień. Obsługuje symbol zastępczy {device}.",
           "notify_icon": "Ikona używana do powiadomień (np. mdi:washing-machine). Pozostaw puste, aby wysłać bez ikony.",
           "notify_start_message": "Wiadomość wysyłana po rozpoczęciu cyklu. Obsługuje symbol zastępczy {device}.",
           "notify_finish_message": "Wiadomość wysyłana po zakończeniu cyklu. Obsługuje symbole zastępcze {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Wiadomość wysyłana przed zakończeniem. Obsługuje symbole zastępcze {device}, {minutes}."
+          "notify_pre_complete_message": "Wiadomość wysyłana przed zakończeniem. Obsługuje symbole zastępcze {device}, {minutes}.",
+          "notify_start_services": "Jedna lub więcej usług powiadamiających o rozpoczęciu cyklu (np. notify.mobile_app_my_phone). Pozostaw puste, aby pominąć powiadomienia o uruchomieniu.",
+          "notify_finish_services": "Jedna lub więcej usług powiadamiających o zakończeniu cyklu lub jego zbliżaniu się do końca. Pozostaw puste, aby pominąć powiadomienia o zakończeniu.",
+          "notify_live_services": "Jedna lub więcej usług powiadamiania o konieczności otrzymywania aktualnych informacji o postępie podczas trwania cyklu (tylko aplikacja mobilna). Pozostaw puste, aby pominąć aktualizacje na żywo.",
+          "notify_live_chronometer": "Po włączeniu każda aktualizacja na żywo zawiera odliczanie chronometru do szacowanego czasu zakończenia. Licznik powiadomień odlicza automatycznie czas na urządzeniu pomiędzy aktualizacjami (tylko aplikacja towarzysząca na Androida).",
+          "energy_price_entity": "Wybierz jednostkę liczbową zawierającą aktualną cenę energii elektrycznej (np. czujnik.cena_elektryczności, numer_wejściowy.stawka_energii). Po ustawieniu włącza symbol zastępczy {cost}. Ma pierwszeństwo przed wartością statyczną, jeśli obie są skonfigurowane.",
+          "energy_price_static": "Stała cena energii elektrycznej za kWh. Po ustawieniu włącza symbol zastępczy {cost}. Ignorowane, jeśli jednostka jest skonfigurowana powyżej. Dodaj symbol swojej waluty w szablonie wiadomości, np. {cost} €."
         }
       },
       "advanced_settings": {
@@ -189,7 +199,18 @@
           "dtw_bandwidth": "Szerokość pasma DTW",
           "external_end_trigger_enabled": "Włącz zewnętrzny wyzwalacz zakończenia cyklu",
           "external_end_trigger": "Zewnętrzny czujnik końca cyklu",
-          "external_end_trigger_inverted": "Odwróć logikę wyzwalania (wyzwalaj przy WYŁĄCZENIU)"
+          "external_end_trigger_inverted": "Odwróć logikę wyzwalania (wyzwalaj przy WYŁĄCZENIU)",
+          "suppress_feedback_notifications": "Pomiń powiadomienia o opiniach",
+          "pump_stuck_duration": "Próg alarmu o zablokowaniu pompy (tylko pompa)",
+          "door_sensor_entity": "Czujnik drzwi",
+          "pause_cuts_power": "Odetnij zasilanie podczas pauzy",
+          "notify_unload_delay_minutes": "Opóźnienie powiadomienia o oczekiwaniu na pranie (min)",
+          "switch_entity": "Jednostka przełączająca (w celu wstrzymania przerwy w dostawie prądu)",
+          "delay_start_detect_enabled": "Włącz wykrywanie opóźnionego startu",
+          "delay_drain_min_power": "Opóźniony start: Skok spustu Min. moc (W)",
+          "delay_drain_max_power": "Opóźniony start: Skok spustowy Maksymalna moc (W)",
+          "delay_drain_max_duration": "Opóźniony start: Maksymalny czas trwania skoku drenażu (s)",
+          "delay_timeout_hours": "Opóźniony start: Maksymalny czas oczekiwania (h)"
         },
         "data_description": {
           "apply_suggestions": "Zaznacz to pole, aby otworzyć krok przeglądu sugerowanych wartości z algorytmu uczącego. Nic nie jest zapisywane automatycznie.\n\nSugerowane (z algorytmu uczącego):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -235,7 +256,18 @@
           "dtw_bandwidth": "Maksymalne dozwolone rozciąganie czasu jako stosunek czasu trwania cyklu. Wyższe wartości umożliwiają dopasowanie bardzo zmiennych cykli, ale zwiększają obciążenie CPU. Domyślnie: 0,20 (20%).",
           "external_end_trigger_enabled": "Włącz monitorowanie zewnętrznego czujnika binarnego, aby wyzwolić zakończenie cyklu.",
           "external_end_trigger": "Wybierz encję czujnika binarnego. Po uruchomieniu tego czujnika bieżący cykl zakończy się ze statusem „zakończony”.",
-          "external_end_trigger_inverted": "Domyślnie wyzwalacz uruchamia się, gdy czujnik się WŁĄCZY. Zaznacz to pole, aby wyzwalać, gdy czujnik się WYŁĄCZY."
+          "external_end_trigger_inverted": "Domyślnie wyzwalacz uruchamia się, gdy czujnik się WŁĄCZY. Zaznacz to pole, aby wyzwalać, gdy czujnik się WYŁĄCZY.",
+          "suppress_feedback_notifications": "Po włączeniu WashData będzie nadal wewnętrznie śledzić i żądać informacji zwrotnych, ale nie będzie wyświetlać trwałych powiadomień z prośbą o potwierdzenie cykli. Przydatne, gdy cykle są zawsze wykrywane prawidłowo, a monity rozpraszają.",
+          "pump_stuck_duration": "Jeżeli po tylu sekundach cykl pompy nadal trwa, jednokrotnie uruchamiane jest zdarzenie ha_washdata_pump_stuck. Użyj tego, aby wykryć zablokowany silnik (typowy czas pracy pompy ściekowej wynosi mniej niż 60 s). Domyślnie: 1800 s (30 min). Tylko typ urządzenia pompującego.",
+          "door_sensor_entity": "Opcjonalny czujnik binarny drzwi maszyny (wł. = otwarte, wył. = zamknięte). Kiedy drzwiczki zostaną otwarte podczas aktywnego cyklu, WashData potwierdzi, że cykl został celowo wstrzymany. Jeśli po zakończeniu cyklu drzwi są nadal zamknięte, stan zmienia się na „Czyszczenie” do czasu otwarcia drzwi. Uwaga: zamknięcie drzwi NIE powoduje automatycznego wznowienia wstrzymanego cyklu - wznowienie należy uruchomić ręcznie za pomocą przycisku Wznów cykl lub za pomocą usługi.",
+          "pause_cuts_power": "Wstrzymując się za pomocą przycisku lub usługi Wstrzymaj cykl, wyłącz także skonfigurowaną jednostkę przełączającą. Działa tylko wtedy, gdy dla tego urządzenia skonfigurowano jednostkę przełączającą.",
+          "notify_unload_delay_minutes": "Wyślij powiadomienie za pośrednictwem kanału powiadomień o zakończeniu, gdy cykl się zakończy, a drzwi nie zostaną otwarte przez tyle minut (wymaga czujnika drzwi). Ustaw na 0, aby wyłączyć. Domyślnie: 60 minut.",
+          "switch_entity": "Jednostka przełączająca do przełączania podczas wstrzymywania lub wznawiania. Wymagane, gdy włączona jest opcja „Odetnij zasilanie podczas pauzy”.",
+          "delay_start_detect_enabled": "Po włączeniu krótki skok poboru mocy przy niskim poborze mocy, po którym następuje utrzymujące się zasilanie w trybie gotowości, jest wykrywany jako opóźniony start. Podczas opóźnienia czujnik stanu wyświetla komunikat „Oczekiwanie na start”. Do momentu faktycznego rozpoczęcia cyklu nie jest śledzony czas trwania programu ani jego postęp. Wymaga ustawienia start_threshold_w powyżej szczytowej mocy drenu.",
+          "delay_drain_min_power": "Minimalna moc (W) rozpoznawana jako skok drenażu. Ustaw tuż powyżej poziomu całkowitego wyłączenia urządzenia w trybie gotowości. Domyślnie: 10 W.",
+          "delay_drain_max_power": "Maksymalna moc (W) dla iglicy spustowej — impulsy powyżej tej wartości są traktowane jako prawdziwy początek cyklu. Powinno być poniżej ustawienia start_threshold_w. Domyślnie: 80 W.",
+          "delay_drain_max_duration": "Aby można było potwierdzić, igła spustowa musi opaść poniżej okienka spustowego w ciągu tylu sekund. Dłuższe skoki traktowane są jako aktywność w cyklu rzeczywistym. Domyślnie: 60 s.",
+          "delay_timeout_hours": "Limit czasu bezpieczeństwa: jeśli po upływie tylu godzin urządzenie nadal znajduje się w stanie „Oczekiwanie na uruchomienie”, funkcja WashData zostaje zresetowana do ustawienia Wyłączone. Wartość domyślna: 8 godz."
         }
       },
       "diagnostics": {
@@ -453,14 +485,14 @@
         }
       },
       "cleanup_profile": {
-        "title": "Czyszczenie historii — wybierz profil",
+        "title": "Czyszczenie historii - wybierz profil",
         "description": "Wybierz profil do wizualizacji. Spowoduje to wygenerowanie wykresu przedstawiającego wszystkie poprzednie cykle dla tego profilu, co pomoże zidentyfikować wartości odstające.",
         "data": {
           "profile": "Profil"
         }
       },
       "cleanup_select": {
-        "title": "Czyszczenie historii — wykres i usuwanie",
+        "title": "Czyszczenie historii - wykres i usuwanie",
         "description": "![Wykres]({graph_url})\n\n**Wizualizacja: {profile_name}**\n\nWykres przedstawia poszczególne cykle w postaci kolorowych linii. Zidentyfikuj wartości odstające (linie oddalone od grupy) i dopasuj ich kolor na poniższej liście, aby je usunąć.\n\n**Wybierz cykle do TRWAŁEGO usunięcia:**",
         "data": {
           "cycles_to_delete": "Cykle do usunięcia (sprawdź pasujące kolory)"
@@ -565,7 +597,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Przytnij cykl — wybierz cykl",
+        "title": "Przytnij cykl - wybierz cykl",
         "description": "Wybierz cykl do przycięcia. ✓ = zakończone, ⚠ = wznowione, ✗ = przerwane",
         "data": {
           "cycle_id": "Cykl"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "Ustaw punkt początku przycięcia",
-        "description": "Wprowadź przesunięcie minutowe, od którego chcesz zachowywać dane (0 = początek cyklu).",
+        "description": "Okno cyklu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nBieżący początek: **{current_wallclock}** (+{current_offset_min} min od początku cyklu)\n\nWybierz nowy czas rozpoczęcia, korzystając z poniższego selektora zegara.",
         "data": {
-          "trim_start_min": "Początek (minuty)"
+          "trim_start_time": "Nowy czas rozpoczęcia",
+          "trim_start_min": "Nowy start (minuty od rozpoczęcia cyklu)"
         }
       },
       "trim_cycle_end": {
         "title": "Ustaw punkt końca przycięcia",
-        "description": "Wprowadź przesunięcie minutowe, w którym chcesz zakończyć zachowywanie danych.",
+        "description": "Okno cyklu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nBieżący koniec: **{current_wallclock}** (+{current_offset_min} min od początku cyklu)\n\nWybierz nową godzinę zakończenia, korzystając z poniższego selektora zegara.",
         "data": {
-          "trim_end_min": "Koniec (minuty)"
+          "trim_end_time": "Nowy czas zakończenia",
+          "trim_end_min": "Nowy koniec (minuty od rozpoczęcia cyklu)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: sugerowane ustawienia gotowe ({device})",
       "suggestions_ready_notification_message": "Czujnik **Sugerowane ustawienia** zgłasza teraz **{count}** możliwych do zastosowania zaleceń.\n\nAby je przejrzeć i zastosować: **Ustawienia > Urządzenia i usługi > WashData > Konfiguruj > Ustawienia zaawansowane > Zastosuj sugerowane wartości**.\n\nSugestie są opcjonalne i wyświetlane do przeglądu przed zapisaniem.",
       "trim_range_invalid": "Początek musi być przed końcem. Dostosuj punkty przycięcia.",
-      "trim_failed": "Przycinanie nie powiodło się. Cykl może już nie istnieć lub okno jest puste."
+      "trim_failed": "Przycinanie nie powiodło się. Cykl może już nie istnieć lub okno jest puste.",
+      "auto_tune_suggestion": "{device_type} {device_title} wykrył cykle duchów. Sugerowana zmiana min_power: {current_min}W -> {new_min}W (nie stosowana automatycznie).",
+      "auto_tune_title": "Automatyczne dostrajanie WashData",
+      "auto_tune_fallback": "{device_type} {device_title} wykrył cykle duchów. Sugerowana zmiana min_power: {current_min}W -> {new_min}W (nie stosowana automatycznie)."
     },
     "abort": {
       "no_cycles_found": "Nie znaleziono cykli",
@@ -740,7 +777,7 @@
         "edit_profile": "Edytuj/zmień nazwę profilu",
         "delete_profile": "Usuń profil",
         "profile_stats": "Statystyki profilu",
-        "cleanup_profile": "Czyszczenie historii — wykres i usuwanie",
+        "cleanup_profile": "Czyszczenie historii - wykres i usuwanie",
         "assign_phases": "Przypisz zakresy faz"
       }
     },
@@ -779,10 +816,10 @@
     },
     "resolve_feedback_action": {
       "options": {
-        "confirm": "Potwierdź — poprawne wykrycie",
-        "correct": "Popraw — wybierz program/czas trwania",
-        "ignore": "Ignoruj — fałszywy alarm/zakłócony cykl",
-        "delete": "Usuń — usuń z historii"
+        "confirm": "Potwierdź - poprawne wykrycie",
+        "correct": "Popraw - wybierz program/czas trwania",
+        "ignore": "Ignoruj - fałszywy alarm/zakłócony cykl",
+        "delete": "Usuń - usuń z historii"
       }
     },
     "assign_profile_phases_auto_detect_action": {
@@ -973,6 +1010,26 @@
           "description": "Zachowuj dane do tego przesunięcia w sekundach. Domyślnie = pełny czas trwania."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Wstrzymaj cykl",
+      "description": "Wstrzymaj aktywny cykl urządzenia WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie",
+          "description": "Urządzenie WashData do wstrzymania."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Wznów cykl",
+      "description": "Wznów wstrzymany cykl dla urządzenia WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Urządzenie",
+          "description": "Urządzenie WashData do wznowienia."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "Uruchamianie",
           "running": "Pracuje",
           "paused": "Wstrzymany",
+          "user_paused": "Wstrzymane przez użytkownika",
           "ending": "Kończenie",
           "finished": "Zakończony",
           "anti_wrinkle": "Antygniotowy",
+          "delay_wait": "Oczekiwanie na start",
           "interrupted": "Przerwany",
           "force_stopped": "Wymuszone zatrzymanie",
           "rinse": "Płukanie",
-          "unknown": "Nieznany"
+          "unknown": "Nieznany",
+          "clean": "Czysty"
         }
       },
       "washer_program": {
@@ -1039,11 +1099,17 @@
         "name": "Faza"
       },
       "profile_cycle_count": {
-        "name": "Profil {profile_name} — liczba",
+        "name": "Profil {profile_name} - liczba",
         "unit_of_measurement": "cykle"
       },
       "suggestions": {
         "name": "Dostępne sugerowane ustawienia"
+      },
+      "pump_runs_today": {
+        "name": "Pompa pracuje (ostatnie 24 godziny)"
+      },
+      "cycle_count": {
+        "name": "Liczba cykli"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Wymuś zakończenie cyklu"
+      },
+      "pause_cycle": {
+        "name": "Wstrzymaj cykl"
+      },
+      "resume_cycle": {
+        "name": "Wznów cykl"
       }
     }
   },
@@ -1074,10 +1146,19 @@
       "message": "Nie znaleziono cyklu lub brak danych mocy."
     },
     "trim_failed_empty_window": {
-      "message": "Przycinanie nie powiodło się — nie znaleziono cyklu, brak danych mocy lub wynikowe okno jest puste."
+      "message": "Przycinanie nie powiodło się - nie znaleziono cyklu, brak danych mocy lub wynikowe okno jest puste."
     },
     "trim_invalid_range": {
       "message": "trim_end_s musi być większe niż trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Wymagany jest prawidłowy identyfikator urządzenia."
+    },
+    "cycle_id_required": {
+      "message": "Wymagany jest prawidłowy identyfikator cyklu."
+    },
+    "profile_name_required": {
+      "message": "Wymagana jest prawidłowa nazwa_profilu."
     }
   }
 }

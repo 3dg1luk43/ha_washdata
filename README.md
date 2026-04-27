@@ -18,7 +18,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 
 ## ✨ Features
 
-- **Multi-Device Support**: Track Washing Machines, Dryers, Dishwashers, Coffee Machines, or Electric Vehicles (EV) with device-type tagging.
+- **Multi-Device Support**: Track Washing Machines, Dryers, Washer-Dryer Combos, Dishwashers, Coffee Machines, Electric Vehicles (EV), Air Fryers, Heat Pumps, Bread Makers, and Pumps/Sump Pumps — each with device-specific defaults and phases.
 - **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic. Includes **End Spike Protection** for dishwashers to capture final pump-outs.
 - **Power Spike Filtering**: Ignores brief boot spikes to prevent false starts.
 - **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles.
@@ -39,7 +39,9 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 - **Realistic Variance**: Handles natural cycle duration variations with configurable tolerance.
 - **Progress Tracking**: Clear cycle progress indicator with automatic reset after unload.
 - **Auto-Maintenance**: Nightly cleanup - removes broken profiles, merges fragmented cycles (**Empty/New profiles are safely preserved**).
-- **Export/Import**: Full configuration backup/restore with all settings and profiles via JSON.
+- **Export/Import**: Full configuration backup/restore with all settings and profiles via JSON. Import also accepts HA diagnostics download files directly.
+- **User-Triggered Pause/Resume**: Pause and resume active cycles via button entities or HA services. Elapsed time and time-remaining estimates automatically exclude the paused duration. Optional **Cut Power When Pausing** toggle for appliances that maintain their position after a power cut.
+- **Door Sensor & Clean State**: Optional binary sensor integration that sets verified pause when the door opens mid-cycle (add-clothes support), and tracks a **Clean** state after cycle end until the door is opened to remind you laundry is waiting.
 
 ---
 
@@ -104,7 +106,35 @@ If you prefer to just use it and label later:
    - Open **Manage Profiles**, click **Create Profile**, name it (e.g., "Cotton 40"), and Save.
 3. **Repeat**: Do this for your 2-3 most common programs.
 
-### 3. Verification & Learning
+### 3. Profile Granularity - How Detailed Should Profiles Be?
+
+WashData matches cycles using **power-consumption shape, cycle duration, and total energy** - not temperature or spin-speed settings directly. This affects how granular your profile library should be.
+
+#### What will be reliably auto-detected
+
+Programs with clearly different durations or power patterns are always distinguished well:
+
+| Example pair | Why it works |
+| :--- | :--- |
+| Quick Wash (~20 min) vs Cotton (~3 h) | Huge duration gap - no ambiguity |
+| Wash-only vs Wash+Dry | Drying adds 100–200 min and significant extra energy |
+| Cotton vs Delicates | Different agitation/heating patterns and often different durations |
+
+#### Temperature and spin-speed variants
+
+Programs that differ **only** in temperature or spin speed (e.g. Cotton 40°C vs Cotton 60°C) often produce similar power shapes and durations. The matcher will attempt to distinguish them using correlation and energy differences, but:
+
+- On first run the system may assign the wrong variant - **use the Learning Feedbacks menu to correct it**.
+- With a few confirmed corrections the system learns; 3–5 corrections per variant pair is usually enough.
+- If your machine's power draw barely changes between temperatures, the variants may remain hard to distinguish automatically. In that case, selecting the program manually via the Program Selector dropdown remains reliable.
+
+#### Practical advice for washer-dryer combos
+
+Create **separate profiles** for every wash+dry combination you use regularly (e.g. "Cotton 40°C Wash", "Cotton 40°C + Cupboard Dry"). The drying phase adds so much duration and energy that wash-only vs wash+dry is one of the easiest distinctions for the matcher to make.
+
+Start with a small set of your most-used and most-different programs, then add temperature/spin variants gradually as you accumulate history.
+
+### 4. Verification & Learning
 Once profiles are created, WashData starts **matching** new cycles automatically.
 - **Feedback**: If a match is found but confidence is moderate, you may get a "Verify Cycle" notification.
 - **Refinement**: Go to **Configure > Learning Feedbacks** to Confirm or Correct the detection.
@@ -150,7 +180,7 @@ Phases are descriptive labels for distinct power stages within a cycle (e.g., "P
 
 - **Manage Phase Catalog**: Go to **Configure > Manage Phase Catalog** to add, edit, or remove phase labels for each device type.
 - **Assign Phases to a Profile**: In **Manage Profiles**, select **Assign Phase Ranges** and use the phase range editor to map time regions to phase labels.
-- Phases are scoped to your device type — only relevant phases appear in the assignment dialog.
+- Phases are scoped to your device type - only relevant phases appear in the assignment dialog.
 
 ---
 
@@ -197,18 +227,27 @@ Run database cleanup, repair corrupted data, and export/import configurations.
 </details>
 
 ### Entities Provided
-- **`sensor.<name>_state`**: Current Status (Idle, Running, Detecting...).
-- **`sensor.<name>_program`**: Best-matched Profile Name.
-- **`sensor.<name>_time_remaining`**: Smart countdown (locks during high variance phases).
+- **`sensor.<name>_state`**: Current status (Idle / Running / Detecting... / Clean).
+- **`sensor.<name>_program`**: Best-matched profile name.
+- **`sensor.<name>_time_remaining`**: Smart countdown (locks during high-variance phases).
 - **`sensor.<name>_total_duration`**: Total predicted duration (Elapsed + Remaining). Ideal for `timer-bar-card`.
-- **`sensor.<name>_cycle_progress`**: 0-100% (Resets to 0% after unload timeout).
-- **`binary_sensor.<name>_running`**: Simple On/Off state.
-- **`switch.<name>_auto_maintenance`**: toggle nightly database cleanup.
+- **`sensor.<name>_cycle_progress`**: 0–100% (resets after unload timeout).
+- **`sensor.<name>_cycle_count`**: Total completed cycles stored — use in automations to schedule maintenance by cycle count.
+- **`sensor.<name>_current_phase`**: Active cycle phase label (e.g. "Rinsing", "Spin").
+- **`sensor.<name>_pump_runs_today`**: *(Pump device type only)* Completed pump cycles in a rolling 24-hour window.
+- **`binary_sensor.<name>_running`**: Simple on/off running state.
+- **`button.<name>_pause_cycle`**: Pause the active cycle (available while Running/Starting/Ending and not already paused).
+- **`button.<name>_resume_cycle`**: Resume a user-paused cycle.
+- **`button.<name>_force_end_cycle`**: Force-terminate a stuck cycle.
+- **`switch.<name>_auto_maintenance`**: Toggle nightly database cleanup.
 
 ### Services
-Most management is now done via the **Interactive UI** (Configure > Manage Data), but services are available for automation:
-- `ha_washdata.export_config`: Full JSON backup/restore.
-- **`ha_washdata.import_config`**: Import a JSON backup, restoring all custom thresholds and profiles.
+Most management is done via the **Interactive UI** (Configure > Manage Data), but services are available for automation:
+
+- **`ha_washdata.export_config`**: Full JSON backup of all settings, profiles, and cycle history.
+- **`ha_washdata.import_config`**: Restore from a JSON backup. Accepts regular WashData exports **and** HA diagnostics download files.
+- **`ha_washdata.pause_cycle`**: Pause the active cycle programmatically (e.g. from an energy-tariff automation).
+- **`ha_washdata.resume_cycle`**: Resume a user-paused cycle.
 
 **`ha_washdata.record_start` / `record_stop`**:
 Manually start/stop a recording. Useful for automations (e.g. triggering from a physical button or separate sensor).
@@ -217,12 +256,12 @@ service: ha_washdata.record_start
 data:
   device_id: "washer_device_id"
 ```
-- `ha_washdata.label_cycle`: Assign profile to history programmatically.
+- `ha_washdata.label_cycle`: Assign a profile to a cycle in history programmatically.
 
 
 ### 🤝 Contribute Training Data
 
-The more real-world cycle data WashData has, the smarter its detection becomes — across different appliance brands, ages, and programs.
+The more real-world cycle data WashData has, the smarter its detection becomes - across different appliance brands, ages, and programs.
 
 If you'd like to help, you can submit a diagnostics export directly from Home Assistant. It takes less than 2 minutes and requires no technical knowledge.
 
@@ -236,6 +275,8 @@ If you'd like to help, you can submit a diagnostics export directly from Home As
 6. A .json file will be downloaded to your device
 
 > 🔒 **Privacy:** The export contains your appliance's power data and integration settings. It does **not** include your name, home details, location, or any other personal information.
+
+> 💡 **Tip:** The same diagnostics file you download here can be pasted directly into **Configure → Diagnostics & Maintenance → Export/Import JSON** to restore profiles and settings on a different HA instance — no manual format conversion needed.
 
 ➡️ **[Submit your data here](https://forms.gle/m6iGfP8QTasXWg5z7)**
 

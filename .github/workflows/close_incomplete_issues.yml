@@ -1,0 +1,112 @@
+name: Close Incomplete Issues
+
+on:
+  schedule:
+    - cron: '0 10 * * *'  # daily at 10:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  issues: write
+
+jobs:
+  close-incomplete:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Warn and close issues still awaiting required info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const WARN_AFTER_DAYS  = 2;
+            const CLOSE_AFTER_DAYS = 5;
+            const LABEL = 'more info required';
+
+            const now = Date.now();
+            const warnCutoff  = new Date(now - WARN_AFTER_DAYS  * 86400_000);
+            const closeCutoff = new Date(now - CLOSE_AFTER_DAYS * 86400_000);
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: LABEL,
+              per_page: 100,
+            });
+
+            console.log(`Found ${issues.length} open issue(s) with "${LABEL}" label.`);
+
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                per_page: 100,
+              });
+
+              // Clock starts when the bot first flagged the issue as incomplete.
+              // If the reporter had fixed all problems, the validator would have removed the label;
+              // its continued presence means the info is still missing.
+              const firstBotFlag = comments.find(
+                c => c.user.type === 'Bot' && c.body != null && c.body.includes('missing that we need before we can investigate')
+              );
+
+              if (!firstBotFlag) {
+                console.log(`#${issue.number}: no bot validation comment found, skipping.`);
+                continue;
+              }
+
+              const flaggedAt = new Date(firstBotFlag.created_at);
+              console.log(`#${issue.number}: flagged at ${flaggedAt.toISOString()}`);
+
+              if (flaggedAt < closeCutoff) {
+                // ── 5+ days with no fix → close ────────────────────────────────
+                console.log(`#${issue.number}: past close deadline, closing.`);
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body:
+                    `Closing this issue after **${CLOSE_AFTER_DAYS} days** with no response to the missing-information request above.\n\n` +
+                    `If you still experience this problem, please open a **new issue** and make sure to fill in every required field — ` +
+                    `version, device details, reproduction steps, and debug logs. Without that information we can't investigate. 🙏`,
+                });
+
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed',
+                  state_reason: 'not_planned',
+                });
+
+              } else if (flaggedAt < warnCutoff) {
+                // ── 2–5 days → post a single reminder if not already warned ────
+                const alreadyWarned = comments.some(
+                  c => c.user.type === 'Bot' && c.body != null && c.body.includes('will be closed in')
+                );
+
+                if (alreadyWarned) {
+                  console.log(`#${issue.number}: reminder already posted, skipping.`);
+                  continue;
+                }
+
+                const daysLeft = CLOSE_AFTER_DAYS - WARN_AFTER_DAYS;
+                console.log(`#${issue.number}: posting ${WARN_AFTER_DAYS}-day warning.`);
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body:
+                    `👋 @${issue.user.login} — this issue is still waiting for the missing information flagged above. ` +
+                    `It will be closed in **${daysLeft} day${daysLeft !== 1 ? 's' : ''}** if no update is received.\n\n` +
+                    `> **How to update your report:** click the three-dot menu (⋯) at the top-right of your original post → *Edit*, ` +
+                    `then fill in the missing fields and save. The validator will re-check automatically.`,
+                });
+
+              } else {
+                console.log(`#${issue.number}: flagged less than ${WARN_AFTER_DAYS} days ago, no action yet.`);
+              }
+            }

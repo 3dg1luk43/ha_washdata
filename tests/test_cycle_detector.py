@@ -411,3 +411,126 @@ def test_dishwasher_end_spike_finishes_soon_after(mock_callbacks):
     cycle_data = mock_callbacks["on_cycle_end"].call_args[0][0]
     assert cycle_data["status"] == "completed"
     assert cycle_data["duration"] == pytest.approx(6420, abs=40)
+
+
+def test_dishwasher_unmatched_end_spike_caps_off_delay_at_1800s(mock_callbacks):
+    """Fix B: after a pump-out spike in ENDING, an unmatched dishwasher cycle
+    closes after 1800 s of low-power silence, not the full min_off_gap of 3600 s.
+
+    Without Fix B, effective_off_delay = max(off_delay=1800, min_off_gap=3600) = 3600 s.
+    With Fix B, unmatched + end_spike_seen → effective_off_delay = min(3600, 1800) = 1800 s.
+    """
+    config = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=1800,
+        min_off_gap=3600,
+        device_type=DEVICE_TYPE_DISHWASHER,
+        interrupted_min_seconds=150,
+        completion_min_seconds=600,
+        start_duration_threshold=0.0,
+    )
+    detector = CycleDetector(
+        config=config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+
+    # Build cadence at 30 s intervals; run at 100 W for 135 min.
+    # With p95_dt ≈ 30 s: pause_thresh ≈ 90 s, end_thresh ≈ 105 s.
+    HIGH, LOW = 100.0, 0.0
+    t = 0
+    detector.process_reading(HIGH, dt(t))   # → STARTING
+    t += 30
+    detector.process_reading(HIGH, dt(t))   # energy gate passed → RUNNING
+    t += 30
+    for _ in range(269):                    # 135 min total at 30 s steps
+        detector.process_reading(HIGH, dt(t))
+        t += 30
+
+    # Drop power.  15 low readings (450 s) is enough to transit RUNNING→PAUSED→ENDING
+    # (pause_thresh ≈ 90 s, end_thresh ≈ 105 s, reset on each transition).
+    for _ in range(15):
+        detector.process_reading(LOW, dt(t))
+        t += 30
+
+    assert detector.state == STATE_ENDING, (
+        f"Expected ENDING after 15 low readings, got {detector.state}"
+    )
+
+    # Accumulate ≥ 120 s in ENDING to satisfy long_ending_tail.
+    for _ in range(4):
+        detector.process_reading(LOW, dt(t))
+        t += 30
+
+    # Pump-out spike: high reading → _end_spike_seen = True.
+    # long_ending_tail is True, so the spike is terminal - stays in ENDING.
+    detector.process_reading(50.0, dt(t))
+    t += 30
+    assert detector._end_spike_seen, "Pump-out spike should set _end_spike_seen"
+    assert detector.state == STATE_ENDING, "Should remain in ENDING after terminal spike"
+
+    # Accumulate low readings after the spike.  Fix B caps effective_off_delay at
+    # 1800 s, so the cycle must end once _time_below_threshold >= 1800 s.
+    #
+    # Caveat: the energy gate checks the recent window (last off_delay=1800 s).
+    # The pump-out spike energy (~0.4 Wh) keeps the gate closed for one extra reading
+    # after the cap fires (at exactly t_spike + 1800 s the spike is still in-window).
+    # Therefore we need 62 readings (1860 s) to push the spike out of the window and
+    # let the energy gate pass.
+    for _ in range(65):  # 65 x 30 s = 1950 s -- comfortably past the gate
+        detector.process_reading(LOW, dt(t))
+        t += 30
+
+    assert mock_callbacks["on_cycle_end"].called, (
+        "Cycle should have ended within 1950 s of the pump-out spike (Fix B cap)"
+    )
+
+
+def test_dishwasher_no_spike_uses_full_off_delay(mock_callbacks):
+    """Fix B guard: without an end spike, the full effective_off_delay (3600 s) is used.
+
+    At 1800 s of continuous low-power silence - with no end spike - the cycle must
+    NOT yet be finished (it still needs the remaining 1800 s to reach 3600 s).
+    """
+    config = CycleDetectorConfig(
+        min_power=5.0,
+        off_delay=1800,
+        min_off_gap=3600,
+        device_type=DEVICE_TYPE_DISHWASHER,
+        interrupted_min_seconds=150,
+        completion_min_seconds=600,
+        start_duration_threshold=0.0,
+    )
+    detector = CycleDetector(
+        config=config,
+        on_state_change=mock_callbacks["on_state_change"],
+        on_cycle_end=mock_callbacks["on_cycle_end"],
+    )
+
+    HIGH, LOW = 100.0, 0.0
+    t = 0
+    detector.process_reading(HIGH, dt(t))
+    t += 30
+    detector.process_reading(HIGH, dt(t))
+    t += 30
+    for _ in range(269):
+        detector.process_reading(HIGH, dt(t))
+        t += 30
+
+    # Transition to ENDING via 15 low readings
+    for _ in range(15):
+        detector.process_reading(LOW, dt(t))
+        t += 30
+
+    assert detector.state == STATE_ENDING
+
+    # Feed 60 x 30 s = 1800 s of low readings -- no spike, so _end_spike_seen = False.
+    for _ in range(60):
+        detector.process_reading(LOW, dt(t))
+        t += 30
+
+    # Without a spike the cap does not apply: effective_off_delay = 3600 s.
+    # Only 1800 s have elapsed since ENDING entry, so cycle must still be open.
+    assert not mock_callbacks["on_cycle_end"].called, (
+        "Cycle must not end after only 1800 s of silence when no end spike occurred"
+    )

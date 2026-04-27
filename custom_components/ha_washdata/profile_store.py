@@ -54,6 +54,30 @@ def _empty_ranking() -> list[dict[str, Any]]:
     return []
 
 
+def _parse_start_dt(value: Any) -> datetime | None:
+    """Parse a start_time value (ISO string or numeric timestamp) into a datetime.
+
+    Handles the case where legacy cycles stored numeric unix timestamps instead
+    of ISO-formatted strings, which dt_util.parse_datetime cannot handle.
+    """
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        try:
+            return datetime.fromtimestamp(float(value), tz=dt_util.UTC)
+        except (OSError, OverflowError, ValueError):
+            return None
+    if isinstance(value, str) and value:
+        parsed = dt_util.parse_datetime(value)
+        if parsed is not None:
+            return parsed
+        try:
+            return datetime.fromtimestamp(float(value), tz=dt_util.UTC)
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
 def _empty_debug_details() -> dict[str, Any]:
     """Typed default factory for debug details."""
     return {}
@@ -667,6 +691,16 @@ class ProfileStore:
             return suggestions.copy()
         return {}
 
+    def delete_suggestion(self, key: str) -> None:
+        """Remove a single suggestion entry by key."""
+        suggestions: JSONDict = self._data.setdefault("suggestions", {})
+        suggestions.pop(key, None)
+
+    async def clear_suggestions(self) -> None:
+        """Clear all pending suggestions and persist."""
+        self._data["suggestions"] = {}
+        await self.async_save()
+
     def get_feedback_history(self) -> dict[str, dict[str, Any]]:
         """Return mutable feedback history mapping (cycle_id -> record)."""
         raw = self._data.setdefault("feedback_history", {})
@@ -1232,10 +1266,13 @@ class ProfileStore:
         if raw_data:
             start_time_raw = cycle_data.get("start_time")
             start_time_iso: str | None = None
-            if isinstance(start_time_raw, str) and start_time_raw:
-                parsed_dt = dt_util.parse_datetime(start_time_raw)
+            if start_time_raw is not None:
+                parsed_dt = _parse_start_dt(start_time_raw)
                 if parsed_dt is not None:
-                    start_time_iso = start_time_raw
+                    start_time_iso = parsed_dt.isoformat()
+                    # Keep original ISO string as-is if it was already a valid ISO string
+                    if isinstance(start_time_raw, str) and dt_util.parse_datetime(start_time_raw) is not None:
+                        start_time_iso = start_time_raw
                 else:
                     try:
                         ts = float(start_time_raw)
@@ -1301,6 +1338,21 @@ class ProfileStore:
             if len(ts_arr) > 1 and len(ts_arr) == len(p_arr):
                 sig = compute_signature(ts_arr, p_arr)
                 cycle_data["signature"] = dataclasses.asdict(sig)
+
+            # Compute and store energy (Wh) if not already set (e.g. by manager)
+            if "energy_wh" not in cycle_data and len(ts_arr) > 1:
+                sort_idx = np.argsort(ts_arr)
+                ts_s = ts_arr[sort_idx]
+                p_s = p_arr[sort_idx]
+                dt_h = np.diff(ts_s) / 3600.0
+                # Use a data-driven gap threshold: 10x the median sampling interval,
+                # clamped to at least 60 s and at most 1 h, to skip sensor outages
+                # without masking valid slow-sampling configurations.
+                _gap_s = float(np.clip(10.0 * sampling_interval, 60.0, 3600.0))
+                _MAX_GAP_H = _gap_s / 3600.0
+                mask = (dt_h > 0) & (dt_h <= _MAX_GAP_H)
+                avg_p = (p_s[:-1] + p_s[1:]) / 2
+                cycle_data["energy_wh"] = round(float(np.sum(avg_p[mask] * dt_h[mask])), 3)
 
             self._logger.debug(
                 "add_cycle: stored %s samples at %.1fs intervals",
@@ -1393,7 +1445,7 @@ class ProfileStore:
             key: str | None = key_any if isinstance(key_any, str) and key_any else None
             by_profile.setdefault(key, []).append(cy)
 
-        # Collect cycle IDs that have pending feedback — never strip their power_data
+        # Collect cycle IDs that have pending feedback - never strip their power_data
         pending_feedback_ids: set[str] = set(self._data.get("pending_feedback", {}).keys())
 
         for key, group in by_profile.items():
@@ -1755,7 +1807,7 @@ class ProfileStore:
                 except (TypeError, ValueError):
                     continue
             if not repaired_rows:
-                continue  # all rows malformed — leave original trace untouched
+                continue  # all rows malformed - leave original trace untouched
             cycle["power_data"] = repaired_rows
             repaired += 1
             repaired_data = cycle["power_data"]
@@ -1815,6 +1867,20 @@ class ProfileStore:
         )
 
         if not result_pkg:
+            # Envelope shape couldn't be built (no power data / too few points).
+            # Still update profile min/max/avg from raw cycle durations so that
+            # a duration correction via feedback is immediately reflected in stats.
+            if labeled_cycles and profile_name in self._data.get("profiles", {}):
+                raw_durs = [
+                    float(c.get("manual_duration") or c.get("duration", 0))
+                    for c in labeled_cycles
+                ]
+                raw_durs = [d for d in raw_durs if d > 60]
+                if raw_durs:
+                    raw_arr_fallback = np.array(raw_durs, dtype=float)
+                    self._data["profiles"][profile_name]["min_duration"] = float(np.min(raw_arr_fallback))
+                    self._data["profiles"][profile_name]["max_duration"] = float(np.max(raw_arr_fallback))
+                    self._data["profiles"][profile_name]["avg_duration"] = float(np.mean(raw_arr_fallback))
             if profile_name in self._data.get("envelopes", {}):
                 del self._data["envelopes"][profile_name]
             return False
@@ -2627,6 +2693,42 @@ class ProfileStore:
                           and c.get("power_data")),
                         None
                     )
+                # Prefer envelope avg curve when ≥2 labeled cycles have been
+                # confirmed - it gives a more representative reference signal
+                # than the original sample alone, so confidence improves over
+                # time as the user keeps confirming correct detections.
+                envelope = self._data.get("envelopes", {}).get(name)
+                _env_avg = envelope.get("avg") if envelope else None
+                if (
+                    envelope
+                    and envelope.get("cycle_count", 0) >= 2
+                    and _env_avg
+                    and isinstance(_env_avg[0], (list, tuple))
+                    and len(_env_avg[0]) >= 2
+                ):
+                    avg_y = [float(p[1]) for p in _env_avg]
+                    _env_ts_duration = (
+                        float(_env_avg[-1][0]) - float(_env_avg[0][0])
+                        if len(_env_avg) > 1 else 0.0
+                    )
+                    avg_duration = (
+                        envelope.get("target_duration") or
+                        profile.get("avg_duration") or
+                        _env_ts_duration or
+                        None
+                    )
+                    if not avg_duration:
+                        skipped_profiles.append(
+                            f"{name}: no valid duration (envelope has no target_duration, avg_duration, or timestamp span)"
+                        )
+                        continue
+                    snapshots.append({
+                        "name": name,
+                        "avg_duration": float(avg_duration),
+                        "sample_power": avg_y,
+                    })
+                    continue
+
                 if not sample_cycle:
                     skipped_profiles.append(
                         f"{name}: no sample cycle (sample_id={sample_id})"
@@ -2640,11 +2742,31 @@ class ProfileStore:
                         f"{name}: failed to resample cycle {sample_cycle.get('id')}"
                     )
                     continue
+                # avg_duration preference order:
+                #   1. profile["avg_duration"] (rolling average, most accurate)
+                #   2. sample_cycle["duration"] (raw cycle field)
+                #   3. timestamp span of sample_seg (estimate from the resampled data)
+                # Profiles created before avg_duration tracking was added may have
+                # 0 or a missing value; falling back to the segment estimate prevents
+                # update_match() from always seeing expected_duration=0, which
+                # silences time-remaining estimates and logs a misleading warning.
+                _seg_ts_duration = (
+                    float(sample_seg.timestamps[-1]) - float(sample_seg.timestamps[0])
+                    if len(sample_seg.timestamps) > 1 else 0.0
+                )
+                avg_dur = (
+                    profile.get("avg_duration") or
+                    sample_cycle.get("duration") or
+                    _seg_ts_duration
+                )
+                if not avg_dur:
+                    skipped_profiles.append(
+                        f"{name}: no valid duration (avg_duration, cycle duration, and timestamp span all zero/missing)"
+                    )
+                    continue
                 snapshots.append({
                     "name": name,
-                    "avg_duration": profile.get(
-                        "avg_duration", sample_cycle.get("duration", 0)
-                    ),
+                    "avg_duration": float(avg_dur),
                     "sample_power": sample_seg.power.tolist(),
                     "sample_dt": used_dt
                 })
@@ -3086,9 +3208,17 @@ class ProfileStore:
         return count
 
     async def clear_all_data(self) -> None:
-        """Clear all profiles and cycle data."""
+        """Clear all profiles, cycle data, and derived state."""
         self._data["past_cycles"] = []
         self._data["profiles"] = {}
+        self._data["envelopes"] = {}
+        self._data["suggestions"] = {}
+        self._data["feedback_history"] = {}
+        self._data["pending_feedback"] = {}
+        self._data["auto_adjustments"] = []
+        self._data["active_cycle"] = None
+        self._data["last_active_save"] = None
+        self._cached_sample_segments = {}
         await self.async_save()
         self._logger.info("Cleared all WashData storage")
 
@@ -3287,7 +3417,7 @@ class ProfileStore:
         cycles.pop(idx)
         new_ids: list[str] = []
         original_profile = cycle.get("profile_name")
-        start_dt_base_parsed = dt_util.parse_datetime(cycle["start_time"])
+        start_dt_base_parsed = _parse_start_dt(cycle["start_time"])
         if not start_dt_base_parsed:
             # Should not happen as analyze checked it, but safety
             self._logger.warning("Failed to parse start time during split apply for %s", cycle_id)
@@ -3427,6 +3557,16 @@ class ProfileStore:
 
     async def async_import_data(self, payload: dict[str, Any]) -> dict[str, Any]:
         # Import data from JSON payload (migration aware).
+        # Unwrap HA diagnostics download file (outer HA wrapper: {home_assistant, data, ...})
+        if "home_assistant" in payload and "data" in payload:
+            payload = payload["data"]
+            self._logger.info("Detected HA diagnostics file wrapper, unwrapping 'data'")
+
+        # Unwrap our integration's diagnostics format ({entry, manager_state, store_export, ...})
+        if "store_export" in payload:
+            payload = payload["store_export"]
+            self._logger.info("Detected diagnostics store_export format, unwrapping")
+
         version = payload.get("version", 1)
 
         # Handle v1 format (flat structure) - convert to v2
@@ -3460,11 +3600,18 @@ class ProfileStore:
         data_dict.setdefault("envelopes", {})
 
         self._data = data_dict
+        self._cached_sample_segments = {}
         await self.async_save()
 
+        # Strip diagnostic redaction sentinels so they don't overwrite real settings
+        def _strip_redacted(d: dict) -> dict:
+            if not isinstance(d, dict):
+                return {}
+            return {k: v for k, v in d.items() if v != "**REDACTED**"}
+
         return {
-            "entry_data": payload.get("entry_data", {}),
-            "entry_options": payload.get("entry_options", {}),
+            "entry_data": _strip_redacted(payload.get("entry_data", {})),
+            "entry_options": _strip_redacted(payload.get("entry_options", {})),
         }
 
 
@@ -3587,7 +3734,7 @@ class ProfileStore:
                 new_start_ts + new_duration
             ).isoformat()
 
-        # Clear manual_duration override — trimmed duration is now authoritative
+        # Clear manual_duration override - trimmed duration is now authoritative
         cycle.pop("manual_duration", None)
 
         # Invalidate cached sample segments for this cycle so future lookups
@@ -3669,7 +3816,7 @@ class ProfileStore:
 
         new_ids: list[str] = []
         original_profile = cycle.get("profile_name")
-        start_dt_base_parsed = dt_util.parse_datetime(cycle["start_time"])
+        start_dt_base_parsed = _parse_start_dt(cycle["start_time"])
         if not start_dt_base_parsed:
             return []
 
@@ -3791,19 +3938,10 @@ class ProfileStore:
         if len(target_cycles) != len(cycle_ids):
             return None
 
-        # Sort by time — use timestamp comparison to handle mixed timezone offsets correctly
+        # Sort by time - use timestamp comparison to handle mixed timezone offsets correctly
         def _cycle_start_ts(c: CycleDict) -> float:
-            """
-            Return the cycle's start time as a POSIX timestamp, or positive infinity if missing or unparsable.
-            
-            Parameters:
-                c (CycleDict): Cycle dictionary; expected to contain a 'start_time' value (ISO string or datetime) parseable by dt_util.parse_datetime.
-            
-            Returns:
-                float: Seconds since the epoch for the cycle's start time, or float('inf') when the start time is absent or cannot be parsed.
-            """
-            dt = dt_util.parse_datetime(str(c.get("start_time", "")))
-            return dt.timestamp() if dt is not None else float("inf")
+            ts = _value_to_timestamp(c.get("start_time"))
+            return ts if ts is not None else float("inf")
 
         target_cycles.sort(key=_cycle_start_ts)
 
@@ -3820,7 +3958,7 @@ class ProfileStore:
         ids_to_remove: list[str] = []
 
         # Base setup
-        c1_start_dt = dt_util.parse_datetime(c1["start_time"])
+        c1_start_dt = _parse_start_dt(c1["start_time"])
         if not c1_start_dt:
             return None
 
@@ -3831,7 +3969,7 @@ class ProfileStore:
             res: list[tuple[float, float, float]] = []
             if not raw:
                 return []
-            base_dt = dt_util.parse_datetime(cy["start_time"])
+            base_dt = _parse_start_dt(cy["start_time"])
             if base_dt is None:
                 return []
             base_t = base_dt.timestamp()
@@ -3855,7 +3993,7 @@ class ProfileStore:
         max_power = c1.get("max_power", 0)
 
         for next_c in target_cycles[1:]:
-            c_start_dt = dt_util.parse_datetime(str(next_c.get("start_time", "")))
+            c_start_dt = _parse_start_dt(next_c.get("start_time"))
             if not c_start_dt:
                 continue
 
@@ -3889,7 +4027,7 @@ class ProfileStore:
             final_end_dt = dt_util.utc_from_timestamp(last_t_abs)
         else:
             last_cycle = target_cycles[-1]
-            fallback_end_dt = dt_util.parse_datetime(str(last_cycle.get("end_time", "")))
+            fallback_end_dt = _parse_start_dt(last_cycle.get("end_time"))
             if fallback_end_dt is not None:
                 final_end_dt = fallback_end_dt
             else:
@@ -3967,7 +4105,7 @@ class ProfileStore:
         if not p_data:
             return ""
 
-        start_dt = dt_util.parse_datetime(cycle["start_time"])
+        start_dt = _parse_start_dt(cycle["start_time"])
         if start_dt is None:
             return ""
         points: list[tuple[float, float]] = []
@@ -4033,7 +4171,7 @@ class ProfileStore:
             Returns:
                 float: UNIX timestamp in seconds parsed from `start_time`, or `float('inf')` when `start_time` is missing or cannot be parsed so the cycle sorts after valid-dated cycles.
             """
-            dt = dt_util.parse_datetime(str(c.get("start_time", "")))
+            dt = _parse_start_dt(c.get("start_time"))
             return dt.timestamp() if dt is not None else float("inf")
 
         cycles.sort(key=_sort_ts)
@@ -4041,7 +4179,7 @@ class ProfileStore:
         if not cycles:
             return ""
 
-        first_start_dt = dt_util.parse_datetime(str(cycles[0].get("start_time", "")))
+        first_start_dt = _parse_start_dt(cycles[0].get("start_time"))
         if first_start_dt is None:
             return ""
         first_start = first_start_dt.timestamp()
@@ -4055,9 +4193,7 @@ class ProfileStore:
                 continue
             points: list[tuple[float, float]] = []
             cycle_start_raw = c.get("start_time")
-            if not isinstance(cycle_start_raw, str):
-                continue
-            cycle_start_dt = dt_util.parse_datetime(cycle_start_raw)
+            cycle_start_dt = _parse_start_dt(cycle_start_raw)
             if cycle_start_dt is None:
                 continue
             cycle_start = cycle_start_dt.timestamp()
@@ -4069,7 +4205,7 @@ class ProfileStore:
                 curves.append(SVGCurve(points=points, color=colors[i % len(colors)], stroke_width=2))
 
         if not curves:
-            # No power data available — return a placeholder SVG with a message
+            # No power data available - return a placeholder SVG with a message
             safe_title = html.escape(title)
             safe_label = html.escape(no_data_label or "")
             return (

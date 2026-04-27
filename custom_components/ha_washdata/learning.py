@@ -15,6 +15,7 @@ import homeassistant.util.dt as dt_util
 from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
+    CONF_END_ENERGY_THRESHOLD,
     CONF_LEARNING_CONFIDENCE,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
@@ -24,11 +25,16 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
+    CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_AUTO_LABEL_CONFIDENCE,
     DEFAULT_DURATION_TOLERANCE,
     DEFAULT_LEARNING_CONFIDENCE,
+    DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     DOMAIN,
     SIGNAL_WASHER_UPDATE,
 )
@@ -111,6 +117,7 @@ class LearningManager:
         # Operational Stats
         self._sample_interval_model = StatisticalModel(max_samples=200)
         self._last_suggestion_update: datetime | None = None
+        self._last_batch_simulation_count: int = 0  # track when to re-run batch
 
     def _apply_suggestions_and_notify(self, suggestions: dict[str, Any]) -> None:
         """Apply suggestions and notify once when they become actionable."""
@@ -130,7 +137,35 @@ class LearningManager:
             CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
             CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
             CONF_MIN_OFF_GAP,
+            CONF_STOP_THRESHOLD_W,
+            CONF_START_THRESHOLD_W,
+            CONF_END_ENERGY_THRESHOLD,
+            CONF_RUNNING_DEAD_ZONE,
         )
+
+        # Drop suggestions whose value already matches the current config - so
+        # that applied suggestions don't immediately reappear on the next cycle.
+        entry = self.hass.config_entries.async_get_entry(self.entry_id)
+        current_options: dict[str, Any] = {}
+        if entry:
+            current_options = {**entry.data, **entry.options}
+
+        filtered_suggestions: dict[str, Any] = {}
+        for key, data in suggestions.items():
+            if isinstance(data, dict) and "value" in data:
+                current_val = current_options.get(key)
+                suggested_val = data["value"]
+                if current_val is not None and suggested_val is not None:
+                    try:
+                        if float(current_val) == float(suggested_val):
+                            self.profile_store.delete_suggestion(key)
+                            continue  # already applied, remove stale entry
+                    except (TypeError, ValueError):
+                        pass
+            filtered_suggestions[key] = data
+
+        if not filtered_suggestions:
+            return
 
         def _count_actionable(s: dict) -> int:
             return sum(
@@ -141,13 +176,12 @@ class LearningManager:
         current = self.profile_store.get_suggestions()
         before_count = _count_actionable(current) if isinstance(current, dict) else 0
 
-        self.suggestion_engine.apply_suggestions(suggestions)
+        self.suggestion_engine.apply_suggestions(filtered_suggestions)
 
         updated = self.profile_store.get_suggestions()
         after_count = _count_actionable(updated) if isinstance(updated, dict) else 0
 
         if before_count == 0 and after_count > 0:
-            entry = self.hass.config_entries.async_get_entry(self.entry_id)
             device_title = entry.title if entry else DOMAIN
             self.hass.async_create_task(
                 self._async_send_suggestions_ready_notification(device_title, after_count)
@@ -199,6 +233,48 @@ class LearningManager:
 
         # 3. Update model-based suggestions (durations etc)
         self._update_model_suggestions(dt_util.now())
+
+        # 4. Run multi-cycle batch simulation when enough new labeled cycles have accumulated
+        self._maybe_run_batch_simulation()
+
+    def _maybe_run_batch_simulation(self) -> None:
+        """Schedule a batch simulation when enough new labeled cycles have arrived."""
+        _BATCH_MIN = 5
+        _BATCH_RERUN_DELTA = 5  # Re-run every 5 new labeled cycles
+
+        labeled_cycles = [
+            c for c in self.profile_store.get_past_cycles()
+            if isinstance(c, dict)
+            and c.get("profile_name")
+            and c.get("profile_name") != "noise"
+            and c.get("power_data")
+            and c.get("status") in ("completed", "force_stopped")
+        ]
+        current_count = len(labeled_cycles)
+
+        if current_count < _BATCH_MIN:
+            return
+        if (current_count - self._last_batch_simulation_count) < _BATCH_RERUN_DELTA:
+            return
+
+        self._last_batch_simulation_count = current_count
+        self.hass.async_create_task(self._async_run_batch_simulation(labeled_cycles, current_count))
+
+    async def _async_run_batch_simulation(self, cycles: list[dict[str, Any]], expected_count: int) -> None:
+        """Run multi-cycle batch simulation asynchronously."""
+        try:
+            new_suggestions = await self.hass.async_add_executor_job(
+                self.suggestion_engine.run_batch_simulation, cycles
+            )
+            if new_suggestions:
+                self._apply_suggestions_and_notify(new_suggestions)
+                self._logger.debug(
+                    "Batch simulation (%d cycles) produced suggestions: %s",
+                    len(cycles),
+                    list(new_suggestions.keys()),
+                )
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("Batch simulation failed: %s", e)
 
     async def _async_run_simulation(self, cycle_data: dict[str, Any]) -> None:
         """Run simulation asynchronously."""
@@ -375,12 +451,19 @@ class LearningManager:
         # Persist pending feedback request so it survives restart
         self.hass.async_create_task(self.profile_store.async_save())
 
-        # Create user-visible notification
-        self.hass.async_create_task(
-            self._async_send_feedback_notification(
-                entry.title, cycle_data, detected_profile, confidence
+        # Create user-visible notification (skipped when suppressed via option).
+        # Use `is True` so that un-configured mock objects in tests don't
+        # accidentally suppress notifications by being truthy.
+        suppress = entry.options.get(
+            CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+            DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+        ) is True
+        if not suppress:
+            self.hass.async_create_task(
+                self._async_send_feedback_notification(
+                    entry.title, cycle_data, detected_profile, confidence
+                )
             )
-        )
 
     async def _async_send_feedback_notification(
         self, device_title: str, cycle_data: dict[str, Any], profile: str, confidence: float
@@ -599,24 +682,39 @@ class LearningManager:
                         confirmed_cycle["duration"] = duration_sec
                 profiles_to_rebuild.add(profile_name)
         else:
-            # Correction path
-            # If corrected_profile is missing, fallback to the original detected profile
-            # This ensures duration changes (Issue #155) are saved even if the profile remains unchanged.
-            target_profile = corrected_profile or pending.get("detected_profile")
-            
-            if isinstance(target_profile, str) and target_profile:
-                detected_profile = pending.get("detected_profile")
+            # Correction path: only use corrected_profile when user_confirmed is False.
+            # Duration-only corrections (no profile specified) are handled by the elif branch below.
+            target_profile = corrected_profile
+            detected_profile_name = pending.get("detected_profile")
 
+            if isinstance(target_profile, str) and target_profile:
                 self._apply_correction_learning(
                     cycle_id, target_profile, duration_sec
                 )
                 profiles_to_rebuild.add(target_profile)
                 if (
-                    isinstance(detected_profile, str)
-                    and detected_profile
-                    and detected_profile != target_profile
+                    isinstance(detected_profile_name, str)
+                    and detected_profile_name
+                    and detected_profile_name != target_profile
                 ):
-                    profiles_to_rebuild.add(detected_profile)
+                    profiles_to_rebuild.add(detected_profile_name)
+            elif duration_sec is not None:
+                # No valid profile could be determined, but a duration correction was
+                # explicitly provided - apply it directly to the cycle so the value
+                # is never silently dropped.
+                cycles = self.profile_store.get_past_cycles()
+                cycle_to_fix = next((c for c in cycles if c["id"] == cycle_id), None)
+                if cycle_to_fix:
+                    cycle_to_fix["duration"] = duration_sec
+                    cycle_to_fix["manual_duration"] = duration_sec
+                    existing_profile = cycle_to_fix.get("profile_name")
+                    if isinstance(existing_profile, str) and existing_profile:
+                        profiles_to_rebuild.add(existing_profile)
+                else:
+                    self._logger.warning(
+                        "Duration correction skipped: cycle %s not found in past_cycles",
+                        cycle_id,
+                    )
 
         # Remove from pending (add_pending_feedback was wrapper, remove is direct)
         if cycle_id in self.profile_store.get_pending_feedback():

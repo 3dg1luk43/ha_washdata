@@ -65,50 +65,50 @@
           "power_sensor": "Njësia e sensorit të energjisë",
           "min_power": "Fuqia minimale (W)",
           "off_delay": "Vonesa e përfundimit të ciklit (s)",
-          "notify_service": "Shërbimi i njoftimeve (p.sh. notify.mobile_app)",
           "notify_actions": "Veprimet e njoftimit",
           "notify_people": "Vono dorëzimin derisa këta njerëz të jenë në shtëpi",
           "notify_only_when_home": "Vono njoftimet derisa personi i përzgjedhur të jetë në shtëpi",
           "notify_fire_events": "Aktivizo ngjarjet e automatizimit",
-          "notify_events": "Ngjarjet për të njoftuar",
           "notify_before_end_minutes": "Njoftim para përfundimit (minuta para fundit)",
           "notify_title": "Titulli i njoftimit",
           "notify_icon": "Ikona e njoftimit",
           "notify_start_message": "Formati i mesazhit të fillimit",
           "notify_finish_message": "Formati i mesazhit të përfundimit",
           "notify_pre_complete_message": "Formati i mesazhit para përfundimit",
-          "show_advanced": "Redakto cilësimet e avancuara (hapi tjetër)"
+          "show_advanced": "Redakto cilësimet e avancuara (hapi tjetër)",
+          "notify_start_services": "Fillimi i ciklit - Objektivat e njoftimit",
+          "notify_finish_services": "Përfundimi i ciklit - Objektivat e njoftimit",
+          "notify_live_services": "Progresi i drejtpërdrejtë - Objektivat e njoftimeve"
         },
         "data_description": {
           "apply_suggestions": "Zgjidhni këtë kuti për të kopjuar vlerat e sugjeruara nga algoritmi i të mësuarit në formë. Rishikoni përpara se të ruani.\n\nSugjeruar (nga të mësuarit):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Zgjidhni llojin e pajisjes (lavatriçe, tharëse, pjatalarëse, makinë kafeje, EV). Ky etiketë ruhet me çdo cikël për organizim më të mirë.",
-          "power_sensor": "Njësia e sensorit që raporton fuqinë në kohë reale (në vat). Mund ta ndryshoni këtë në çdo kohë pa humbur të dhënat historike — e dobishme nëse zëvendësoni një prizë inteligjente.",
+          "power_sensor": "Njësia e sensorit që raporton fuqinë në kohë reale (në vat). Mund ta ndryshoni këtë në çdo kohë pa humbur të dhënat historike - e dobishme nëse zëvendësoni një prizë inteligjente.",
           "min_power": "Leximet e fuqisë mbi këtë prag (në vat) tregojnë se pajisja është në punë. Filloni me 2 W për shumicën e pajisjeve.",
           "off_delay": "Sekonda fuqia e zbutur duhet të qëndrojë nën pragun e ndalimit për të shënuar përfundimin. Parazgjedhja: 120 s.",
-          "notify_service": "Shërbimi i njoftimit të Home Assistant për t'u përdorur (opsionale).",
           "notify_actions": "Sekuenca opsionale e veprimeve të Home Assistant për t'u ekzekutuar për njoftimet (skriptet, njoftimet, TTS, etj.). Nëse caktohet, veprimet ekzekutohen përpara shërbimit të njoftimit të sërishëm.",
           "notify_people": "Njësitë e njerëzve që përdoren për kontrollin e pranisë. Kur aktivizohet, dërgimi i njoftimit vonohet derisa të paktën një person i përzgjedhur të jetë në shtëpi.",
           "notify_only_when_home": "Nëse aktivizohet, vononi njoftimet derisa të paktën një person i zgjedhur të jetë në shtëpi.",
           "notify_fire_events": "Nëse aktivizohet, aktivizohen ngjarjet e Home Assistant për fillimin dhe përfundimin e ciklit (ha_washdata_cycle_started dhe ha_washdata_cycle_ended) për të drejtuar automatizimet.",
-          "notify_events": "Për cilat ngjarje të dërgohen njoftime.",
           "notify_before_end_minutes": "Minuta para përfundimit të parashikuar të ciklit për të aktivizuar një njoftim. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0.",
           "notify_title": "Titulli i personalizuar për njoftimet. Mbështet mbajtësin e vendndodhjes {device}.",
           "notify_icon": "Ikona për t'u përdorur për njoftime (p.sh. mdi:washing-machine). Lëreni bosh për të dërguar pa ikonë.",
           "notify_start_message": "Mesazhi dërgohet kur fillon një cikël. Mbështet mbajtësin e vendndodhjes {device}.",
           "notify_finish_message": "Mesazhi dërgohet kur përfundon një cikël. Mbështet {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Mesazhi dërguar para përfundimit. Mbështet {device}, {minutes}."
+          "notify_pre_complete_message": "Mesazhi dërguar para përfundimit. Mbështet {device}, {minutes}.",
+          "notify_start_services": "Një ose më shumë shërbime njoftojnë për të sinjalizuar kur fillon një cikël. Lëreni bosh për të kapërcyer njoftimet e fillimit.",
+          "notify_finish_services": "Një ose më shumë shërbime njoftojnë për të sinjalizuar kur një cikël përfundon ose i afrohet përfundimit. Lëreni bosh për të kapërcyer njoftimet e përfundimit.",
+          "notify_live_services": "Një ose më shumë shërbime të njoftimit për të marrë përditësime të drejtpërdrejta të progresit gjatë ekzekutimit të ciklit (vetëm aplikacioni shoqërues celular). Lëreni bosh për të kapërcyer përditësimet e drejtpërdrejta."
         }
       },
       "notifications": {
         "title": "Njoftimet",
         "description": "Konfiguro kanalet e njoftimeve, shabllonet dhe përditësimet opsionale të progresit të drejtpërdrejtë.",
         "data": {
-          "notify_service": "Shërbimi i njoftimeve (p.sh. notify.mobile_app)",
           "notify_actions": "Veprimet e njoftimit",
           "notify_people": "Vono dorëzimin derisa këta njerëz të jenë në shtëpi",
           "notify_only_when_home": "Vono njoftimet derisa personi i përzgjedhur të jetë në shtëpi",
           "notify_fire_events": "Aktivizo ngjarjet e automatizimit",
-          "notify_events": "Ngjarjet për të njoftuar",
           "notify_before_end_minutes": "Njoftim para përfundimit (minuta para fundit)",
           "notify_live_interval_seconds": "Intervali i përditësimit të drejtpërdrejtë (sekonda)",
           "notify_live_overrun_percent": "Leja e tejkalimit të përditësimeve të drejtpërdrejta (%)",
@@ -116,23 +116,33 @@
           "notify_icon": "Ikona e njoftimit",
           "notify_start_message": "Formati i mesazhit të fillimit",
           "notify_finish_message": "Formati i mesazhit të përfundimit",
-          "notify_pre_complete_message": "Formati i mesazhit para përfundimit"
+          "notify_pre_complete_message": "Formati i mesazhit para përfundimit",
+          "notify_start_services": "Fillimi i ciklit - Objektivat e njoftimit",
+          "notify_finish_services": "Përfundimi i ciklit - Objektivat e njoftimit",
+          "notify_live_services": "Progresi i drejtpërdrejtë - Objektivat e njoftimeve",
+          "notify_live_chronometer": "Kohëmatësi i numërimit të kronometrit",
+          "energy_price_entity": "Çmimi i energjisë - Njësia ekonomike (opsionale)",
+          "energy_price_static": "Çmimi i energjisë - Vlera statike (opsionale)"
         },
         "data_description": {
-          "notify_service": "Shërbimi i njoftimit të Home Assistant për t'u përdorur (opsionale).",
           "notify_actions": "Sekuenca opsionale e veprimeve të Home Assistant për t'u ekzekutuar për njoftimet (skriptet, njoftimet, TTS, etj.). Nëse caktohet, veprimet ekzekutohen përpara shërbimit të njoftimit të sërishëm.",
           "notify_people": "Njësitë e njerëzve që përdoren për kontrollin e pranisë. Kur aktivizohet, dërgimi i njoftimit vonohet derisa të paktën një person i përzgjedhur të jetë në shtëpi.",
           "notify_only_when_home": "Nëse aktivizohet, vononi njoftimet derisa të paktën një person i zgjedhur të jetë në shtëpi.",
           "notify_fire_events": "Nëse aktivizohet, aktivizohen ngjarjet e Home Assistant për fillimin dhe përfundimin e ciklit (ha_washdata_cycle_started dhe ha_washdata_cycle_ended) për të drejtuar automatizimet.",
-          "notify_events": "Për cilat ngjarje të dërgohen njoftime.",
           "notify_before_end_minutes": "Minuta para përfundimit të parashikuar të ciklit për të aktivizuar një njoftim. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0.",
-          "notify_live_interval_seconds": "Sa shpesh dërgohen përditësimet e progresit gjatë ekzekutimit. Vlerat më të ulëta janë më të përgjegjshme, por konsumojnë më shumë njoftime. Zbatohet një minimum prej 30 sekondash — vlerat nën 30 s rrumbullakohen automatikisht në 30 s.",
+          "notify_live_interval_seconds": "Sa shpesh dërgohen përditësimet e progresit gjatë ekzekutimit. Vlerat më të ulëta janë më të përgjegjshme, por konsumojnë më shumë njoftime. Zbatohet një minimum prej 30 sekondash - vlerat nën 30 s rrumbullakohen automatikisht në 30 s.",
           "notify_live_overrun_percent": "Marzhi i sigurisë mbi numrin e përllogaritur të përditësimeve për cikle të gjata/tejkaluese (për shembull 20% lejon 1.2 herë përditësimet e vlerësuara).",
           "notify_title": "Titulli i personalizuar për njoftimet. Mbështet mbajtësin e vendndodhjes {device}.",
           "notify_icon": "Ikona për t'u përdorur për njoftime (p.sh. mdi:washing-machine). Lëreni bosh për të dërguar pa ikonë.",
           "notify_start_message": "Mesazhi dërgohet kur fillon një cikël. Mbështet mbajtësin e vendndodhjes {device}.",
           "notify_finish_message": "Mesazhi dërgohet kur përfundon një cikël. Mbështet {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Mesazhi dërguar para përfundimit. Mbështet {device}, {minutes}."
+          "notify_pre_complete_message": "Mesazhi dërguar para përfundimit. Mbështet {device}, {minutes}.",
+          "notify_start_services": "Një ose më shumë shërbime të njoftimit për të sinjalizuar kur fillon një cikël (p.sh. notify.mobile_app_my_phone). Lëreni bosh për të kapërcyer njoftimet e fillimit.",
+          "notify_finish_services": "Një ose më shumë shërbime njoftojnë për të sinjalizuar kur një cikël përfundon ose i afrohet përfundimit. Lëreni bosh për të kapërcyer njoftimet e përfundimit.",
+          "notify_live_services": "Një ose më shumë shërbime të njoftimit për të marrë përditësime të drejtpërdrejta të progresit gjatë ekzekutimit të ciklit (vetëm aplikacioni shoqërues celular). Lëreni bosh për të kapërcyer përditësimet e drejtpërdrejta.",
+          "notify_live_chronometer": "Kur aktivizohet, çdo përditësim i drejtpërdrejtë përfshin një numërim kronometër deri në kohën e parashikuar të përfundimit. Kohëmatësi i njoftimeve shënon automatikisht në pajisje ndërmjet përditësimeve (vetëm aplikacioni shoqërues i Android).",
+          "energy_price_entity": "Zgjidh një entitet numerik që mban çmimin aktual të energjisë elektrike (p.sh. sensor.çmimi_energjisë_elektrike, numri_input.norma_energjie). Kur caktohet, aktivizon mbajtësin e vendndodhjes {cost}. Ka përparësi ndaj vlerës statike nëse të dyja janë të konfiguruara.",
+          "energy_price_static": "Çmimi fiks i energjisë elektrike për kWh. Kur caktohet, aktivizon mbajtësin e vendndodhjes {cost}. Injorohet nëse një entitet është konfiguruar më sipër. Shtoni simbolin tuaj të monedhës në shabllonin e mesazhit, p.sh. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,18 @@
           "dtw_bandwidth": "Gjerësia e brezit DTW",
           "external_end_trigger_enabled": "Aktivizo aktivizimin e jashtëm të fundit të ciklit",
           "external_end_trigger": "Sensori i jashtëm i fundit të ciklit",
-          "external_end_trigger_inverted": "Përmbys logjikën e aktivizuesit (aktivizohet kur fiket)"
+          "external_end_trigger_inverted": "Përmbys logjikën e aktivizuesit (aktivizohet kur fiket)",
+          "suppress_feedback_notifications": "Mbyll njoftimet e komenteve",
+          "pump_stuck_duration": "Pragu i alarmit të bllokimit të pompës (vetëm pompa)",
+          "door_sensor_entity": "Sensori i derës",
+          "pause_cuts_power": "Ndërpreni energjinë kur ndaloni",
+          "notify_unload_delay_minutes": "Vonesa e njoftimit në pritje të rrobave (min.)",
+          "switch_entity": "Ndërro entitetin (për ndërprerjen e energjisë në pauzë)",
+          "delay_start_detect_enabled": "Aktivizo zbulimin e fillimit të vonuar",
+          "delay_drain_min_power": "Nisja e vonuar: Fuqia minimale e pikës së shkarkimit (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Nisja e vonuar: Kohëzgjatja maksimale e pikës së shkarkimit (s)",
+          "delay_timeout_hours": "Fillimi i vonuar: Koha maksimale e pritjes (h)"
         },
         "data_description": {
           "apply_suggestions": "Zgjidhni këtë kuti për të hapur një hap rishikimi për vlerat e sugjeruara nga algoritmi i të mësuarit. Asgjë nuk ruhet automatikisht.\n\nSugjeruar (nga të mësuarit):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +249,18 @@
           "dtw_bandwidth": "Shtrembërimi maksimal i lejuar i kohës (shtrirjes) si raport i kohëzgjatjes së ciklit. Vlerat më të larta lejojnë përputhjen e cikleve shumë të ndryshueshme, por rrisin koston e CPU. Parazgjedhja: 0,20 (20%).",
           "external_end_trigger_enabled": "Aktivizo monitorimin e një sensori binar të jashtëm për të shkaktuar përfundimin e ciklit.",
           "external_end_trigger": "Zgjidhni një njësi sensor binar. Kur ky sensor aktivizohet, cikli aktual do të përfundojë me statusin \"përfunduar\".",
-          "external_end_trigger_inverted": "Si parazgjedhje, aktivizuesi ndizet kur sensori ndizet. Zgjidhni këtë kuti për të ndezur kur sensori fiket në vend të kësaj."
+          "external_end_trigger_inverted": "Si parazgjedhje, aktivizuesi ndizet kur sensori ndizet. Zgjidhni këtë kuti për të ndezur kur sensori fiket në vend të kësaj.",
+          "suppress_feedback_notifications": "Kur aktivizohet, WashData do të vazhdojë të gjurmojë dhe të kërkojë reagime nga brenda, por nuk do të shfaqë njoftime të vazhdueshme që ju kërkojnë të konfirmoni ciklet. E dobishme kur ciklet zbulohen gjithmonë në mënyrë korrekte dhe ju i shihni kërkesat që shpërqendrojnë.",
+          "pump_stuck_duration": "Nëse një cikël pompe vazhdon të funksionojë pas kaq shumë sekondash, një ngjarje ha_washdata_pump_stuck aktivizohet një herë. Përdoreni këtë për të zbuluar një motor të bllokuar (punimi tipik i pompës së gropës është nën 60 s). Parazgjedhja: 1800 s (30 min). Vetëm lloji i pajisjes së pompës.",
+          "door_sensor_entity": "Sensori binar opsional për derën e makinës (ndezur = hapur, fikur = mbyllur). Kur dera hapet gjatë një cikli aktiv, WashData do të konfirmojë ciklin si të ndërprerë qëllimisht. Pas përfundimit të ciklit, nëse dera është ende e mbyllur, gjendja ndryshon në \"Pastrim\" derisa të hapet dera. Shënim: mbyllja e derës NUK rifillon automatikisht një cikël të ndërprerë - rifillimi duhet të aktivizohet manualisht nëpërmjet butonit ose shërbimit të Ciklit të Rifillimit.",
+          "pause_cuts_power": "Kur bëni pauzë nëpërmjet butonit ose shërbimit të Ciklit të Pauzës, fikni gjithashtu entitetin e konfiguruar të ndërprerës. Hyn në fuqi vetëm nëse për këtë pajisje është konfiguruar një ent ndërruesi.",
+          "notify_unload_delay_minutes": "Dërgoni një njoftim nëpërmjet kanalit të njoftimit të përfundimit pasi të përfundojë cikli dhe dera nuk është hapur për kaq shumë minuta (kërkon Sensori i derës). Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 60 min.",
+          "switch_entity": "Njësia e ndërrimit për t'u ndërruar kur ndalon ose rifillon. Kërkohet kur aktivizohet \"Prini energjinë kur ndalon\".",
+          "delay_start_detect_enabled": "Kur aktivizohet, zbulohet si një nisje me vonesë, një rritje e shkurtër e shkarkimit me fuqi të ulët e ndjekur nga energjia e qëndrueshme e gatishmërisë. Sensori i gjendjes tregon 'Waiting to Start' gjatë vonesës. Asnjë kohë ose përparim i programit nuk gjurmohet derisa të fillojë realisht cikli. Kërkon që start_threshold_w të vendoset mbi fuqinë e pikës së shkarkimit.",
+          "delay_drain_min_power": "Fuqia minimale (W) për t'u njohur si një pikë kullimi. Vendoseni pak mbi nivelin e gatishmërisë reale të pajisjes suaj. Parazgjedhja: 10 W.",
+          "delay_drain_max_power": "Fuqia maksimale (W) për një pikë kullimi - shpërthimet mbi këtë trajtohen si fillim i vërtetë i ciklit. Duhet të jetë nën cilësimin tuaj start_threshold_w. Parazgjedhja: 80 W.",
+          "delay_drain_max_duration": "Pika e kullimit duhet të bjerë përsëri poshtë dritares së kullimit brenda kaq shumë sekondash për t'u konfirmuar. Pikat më të gjata trajtohen si aktivitet real të ciklit. Parazgjedhja: 60 s.",
+          "delay_timeout_hours": "Kohëzgjatja e sigurisë: nëse pajisja është ende në \"Prit për të nisur\" pas kaq shumë orësh, WashData rivendoset në Off. Parazgjedhja: 8 orë."
         }
       },
       "diagnostics": {
@@ -559,13 +591,13 @@
       },
       "apply_suggestions_confirm": {
         "title": "Rishiko ndryshimet e sugjeruara",
-        "description": "WashData gjeti {pending_count} vlera të sugjeruara për t'u aplikuar.\n\nNdryshimet për shqyrtim:\n{changes}\n\nKonfirmo më poshtë për të ngarkuar këto vlera në formë. Ato nuk ruhen derisa të paraqisni Cilësimet e Avancuara.",
+        "description": "WashData u gjet **{pending_count}** vlera(t) e sugjeruara për t'u aplikuar.\n\nNdryshimet:\n{changes}\n\n✅ Kontrolloni kutinë më poshtë dhe klikoni **Dërgo** për të aplikuar dhe ruajtur menjëherë këto ndryshime.\n❌ Lëreni të pazgjedhur dhe klikoni **Dërgo** për ta anuluar dhe për t'u kthyer prapa.",
         "data": {
-          "confirm_apply_suggestions": "Ngarko vlerat e sugjeruara në cilësimet e avancuara"
+          "confirm_apply_suggestions": "Aplikoni dhe ruani këto ndryshime"
         }
       },
       "trim_cycle_select": {
-        "title": "Prerja e ciklit — zgjidhni ciklin",
+        "title": "Prerja e ciklit - zgjidhni ciklin",
         "description": "Zgjidhni një cikël për të prerë. ✓ = përfunduar, ⚠ = rifilluar, ✗ = ndërprerë",
         "data": {
           "cycle_id": "Cikli"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "Cakto fillimin e prerjes",
-        "description": "Futni zhvendosjen e minutës për të filluar mbajtjen e të dhënave nga (0 = fillimi i ciklit).",
+        "description": "Dritarja e ciklit: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFillimi aktual: **{current_wallclock}** (+{current_offset_min} min nga fillimi i ciklit)\n\nZgjidh një orë të re fillimi duke përdorur zgjedhësin e orës më poshtë.",
         "data": {
-          "trim_start_min": "Fillimi (minuta)"
+          "trim_start_time": "Koha e re e fillimit",
+          "trim_start_min": "Fillimi i ri (minuta nga fillimi i ciklit)"
         }
       },
       "trim_cycle_end": {
         "title": "Cakto fundin e prerjes",
-        "description": "Fut zhvendosjen e minutës për të ndaluar mbajtjen e të dhënave.",
+        "description": "Dritarja e ciklit: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFundi aktual: **{current_wallclock}** (+{current_offset_min} min nga fillimi i ciklit)\n\nZgjidh një kohë të re përfundimi duke përdorur zgjedhësin e orës më poshtë.",
         "data": {
-          "trim_end_min": "Fundi (minuta)"
+          "trim_end_time": "Koha e re e përfundimit",
+          "trim_end_min": "Fundi i ri (minuta nga fillimi i ciklit)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: cilësimet e sugjeruara janë gati ({device})",
       "suggestions_ready_notification_message": "Sensori **Cilësimet e sugjeruara** raporton tani **{count}** rekomandime të zbatueshme.\n\nPër t'i rishikuar dhe zbatuar ato: **Cilësimet > Pajisjet dhe shërbimet > WashData > Konfiguro > Cilësimet e avancuara > Apliko vlerat e sugjeruara**.\n\nSugjerimet janë opsionale dhe shfaqen për shqyrtim përpara se të ruani.",
       "trim_range_invalid": "Fillimi duhet të jetë para fundit. Ju lutemi rregulloni pikat tuaja të prerjes.",
-      "trim_failed": "Prerja dështoi. Cikli mund të mos ekzistojë më ose dritarja është bosh."
+      "trim_failed": "Prerja dështoi. Cikli mund të mos ekzistojë më ose dritarja është bosh.",
+      "auto_tune_suggestion": "{device_type} {device_title} zbuloi cikle fantazmë. Ndryshimi i sugjeruar min_fuqi: {current_min}W -> {new_min}W (nuk zbatohet automatikisht).",
+      "auto_tune_title": "Përshtatja automatike e të dhënave të larjes",
+      "auto_tune_fallback": "{device_type} {device_title} zbuloi cikle fantazmë. Ndryshimi i sugjeruar min_fuqi: {current_min}W -> {new_min}W (nuk zbatohet automatikisht)."
     },
     "abort": {
       "no_cycles_found": "Nuk u gjetën cikle",
@@ -973,6 +1010,26 @@
           "description": "Mbani të dhënat deri në këtë kompensim në sekonda. Parazgjedhja = kohëzgjatja e plotë."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Cikli i pauzës",
+      "description": "Ndalo ciklin aktiv për një pajisje WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Pajisja",
+          "description": "Pajisja WashData në pauzë."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Cikli i rifillimit",
+      "description": "Rifilloni një cikël të ndërprerë për një pajisje WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Pajisja",
+          "description": "Pajisja WashData për të rifilluar."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "Duke filluar",
           "running": "Në punë",
           "paused": "Në pauzë",
+          "user_paused": "Ndërprerë nga përdoruesi",
           "ending": "Duke përfunduar",
           "finished": "Përfunduar",
           "anti_wrinkle": "Kundër rrudhave",
+          "delay_wait": "Në pritje për të filluar",
           "interrupted": "E ndërprerë",
           "force_stopped": "Ndaluar me forcë",
           "rinse": "Shpëlarje",
-          "unknown": "E panjohur"
+          "unknown": "E panjohur",
+          "clean": "I pastër"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "Cilësimet e sugjeruara të disponueshme"
+      },
+      "pump_runs_today": {
+        "name": "Punimet e pompës (24 orët e fundit)"
+      },
+      "cycle_count": {
+        "name": "Numërimi i ciklit"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Forco përfundimin e ciklit"
+      },
+      "pause_cycle": {
+        "name": "Cikli i pauzës"
+      },
+      "resume_cycle": {
+        "name": "Cikli i rifillimit"
       }
     }
   },
@@ -1074,10 +1146,19 @@
       "message": "Cikli nuk u gjet ose nuk ka të dhëna për energjinë."
     },
     "trim_failed_empty_window": {
-      "message": "Prerja dështoi — cikli nuk u gjet, nuk ka të dhëna të energjisë ose dritarja që rezulton është bosh."
+      "message": "Prerja dështoi - cikli nuk u gjet, nuk ka të dhëna të energjisë ose dritarja që rezulton është bosh."
     },
     "trim_invalid_range": {
       "message": "trim_end_s duhet të jetë më i madh se trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Kërkohet një ID e vlefshme e pajisjes."
+    },
+    "cycle_id_required": {
+      "message": "Kërkohet një cikli_id i vlefshëm."
+    },
+    "profile_name_required": {
+      "message": "Kërkohet një emër_profili i vlefshëm."
     }
   }
 }

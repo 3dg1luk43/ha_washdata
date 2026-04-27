@@ -65,19 +65,20 @@
           "power_sensor": "Entita snímača výkonu",
           "min_power": "Minimálny výkon (W)",
           "off_delay": "Oneskorenie konca cyklu (s)",
-          "notify_service": "Služba upozornení (napr. notify.mobile_app)",
           "notify_actions": "Akcie upozornení",
           "notify_people": "Oneskorené doručenie, kým títo ľudia nebudú doma",
           "notify_only_when_home": "Oneskorenie upozornení, kým nebude vybraná osoba doma",
           "notify_fire_events": "Spúšťať udalosti automatizácie",
-          "notify_events": "Udalosti na upozornenie",
           "notify_before_end_minutes": "Upozornenie pred dokončením (minúty pred koncom)",
           "notify_title": "Názov upozornenia",
           "notify_icon": "Ikona upozornenia",
           "notify_start_message": "Formát správy pri spustení",
           "notify_finish_message": "Formát správy po dokončení",
           "notify_pre_complete_message": "Formát správy pred dokončením",
-          "show_advanced": "Upraviť rozšírené nastavenia (ďalší krok)"
+          "show_advanced": "Upraviť rozšírené nastavenia (ďalší krok)",
+          "notify_start_services": "Začiatok cyklu - ciele upozornení",
+          "notify_finish_services": "Dokončenie cyklu - ciele upozornenia",
+          "notify_live_services": "Aktuálny pokrok - ciele upozornení"
         },
         "data_description": {
           "apply_suggestions": "Začiarknite toto políčko, ak chcete do formulára skopírovať hodnoty navrhnuté učiacim sa algoritmom. Pred uložením skontrolujte.\n\nOdporúčané (z učenia):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "Entita senzora hlási výkon v reálnom čase (vo wattoch). Toto môžete kedykoľvek zmeniť bez straty historických údajov – užitočné, ak vymeníte inteligentnú zástrčku.",
           "min_power": "Údaje o príkone nad touto hranicou (vo wattoch) indikujú, že spotrebič beží. Začnite s 2 W pre väčšinu zariadení.",
           "off_delay": "Vyhladený výkon musí zostať pod prahom zastavenia, aby sa označilo dokončenie. Predvolená hodnota: 120 s.",
-          "notify_service": "Na použitie služby upozornení Home Assistant (voliteľné).",
           "notify_actions": "Voliteľná postupnosť akcií Home Assistant, ktorá sa spustí pre upozornenia (skripty, notifikácia, TTS atď.). Ak je nastavené, akcie sa spustia pred záložnou službou upozornení.",
           "notify_people": "Osoby entity používané na kontrolu prítomnosti. Keď je táto možnosť povolená, doručenie upozornení sa oneskorí, kým aspoň jedna vybratá osoba nebude doma.",
           "notify_only_when_home": "Ak je táto možnosť povolená, upozornenia sa odložia, kým aspoň jedna vybraná osoba nebude doma.",
           "notify_fire_events": "Ak je táto možnosť povolená, spúšťajú sa udalosti Home Assistant pre začiatok a koniec cyklu (ha_washdata_cycle_started a ha_washdata_cycle_ended) na riadenie automatizácie.",
-          "notify_events": "Na ktoré udalosti posielať upozornenia.",
           "notify_before_end_minutes": "Minúty pred odhadovaným koncom cyklu na spustenie upozornenia. Pre deaktiváciu nastavte na 0. Predvolená hodnota: 0.",
           "notify_title": "Vlastný názov pre upozornenia. Podporuje zástupný symbol {device}.",
           "notify_icon": "Ikona, ktorá sa má použiť na upozornenia (napr. mdi:washing-machine). Ponechajte prázdne pre odoslanie bez ikony.",
           "notify_start_message": "Správa odoslaná pri spustení cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Správa odoslaná po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Správa odoslaná pred dokončením. Podporuje zástupné symboly {device}, {minutes}."
+          "notify_pre_complete_message": "Správa odoslaná pred dokončením. Podporuje zástupné symboly {device}, {minutes}.",
+          "notify_start_services": "Jedna alebo viacero oznamovacích služieb, ktoré upozornia na začiatok cyklu. Ak chcete preskočiť upozornenia na začiatok, nechajte prázdne.",
+          "notify_finish_services": "Jedna alebo viacero oznamovacích služieb, ktoré vás upozornia, keď sa cyklus skončí alebo sa blíži k dokončeniu. Ak chcete upozornenia na dokončenie preskočiť, nechajte prázdne.",
+          "notify_live_services": "Jedna alebo viacero oznamovacích služieb, aby dostávali aktuálne aktualizácie priebehu počas cyklu (iba mobilná sprievodná aplikácia). Ak chcete preskočiť aktuálne aktualizácie, nechajte prázdne."
         }
       },
       "notifications": {
         "title": "Upozornenia",
         "description": "Nakonfigurujte kanály upozornení, šablóny a voliteľné aktualizácie priebežného stavu.",
         "data": {
-          "notify_service": "Služba upozornení (napr. notify.mobile_app)",
           "notify_actions": "Akcie upozornení",
           "notify_people": "Oneskorené doručenie, kým títo ľudia nebudú doma",
           "notify_only_when_home": "Oneskorenie upozornení, kým nebude vybraná osoba doma",
           "notify_fire_events": "Spúšťať udalosti automatizácie",
-          "notify_events": "Udalosti na upozornenie",
           "notify_before_end_minutes": "Upozornenie pred dokončením (minúty pred koncom)",
           "notify_live_interval_seconds": "Interval živých aktualizácií (sekundy)",
           "notify_live_overrun_percent": "Povolenie na prekročenie živej aktualizácie (%)",
@@ -116,23 +116,33 @@
           "notify_icon": "Ikona upozornenia",
           "notify_start_message": "Formát správy pri spustení",
           "notify_finish_message": "Formát správy po dokončení",
-          "notify_pre_complete_message": "Formát správy pred dokončením"
+          "notify_pre_complete_message": "Formát správy pred dokončením",
+          "notify_start_services": "Začiatok cyklu - ciele upozornení",
+          "notify_finish_services": "Dokončenie cyklu - ciele upozornenia",
+          "notify_live_services": "Aktuálny pokrok - ciele upozornení",
+          "notify_live_chronometer": "Chronometer Časovač odpočítavania",
+          "energy_price_entity": "Cena energie – subjekt (voliteľné)",
+          "energy_price_static": "Cena energie – statická hodnota (voliteľné)"
         },
         "data_description": {
-          "notify_service": "Na použitie služby upozornení Home Assistant (voliteľné).",
           "notify_actions": "Voliteľná postupnosť akcií Home Assistant, ktorá sa spustí pre upozornenia (skripty, notifikácia, TTS atď.). Ak je nastavené, akcie sa spustia pred záložnou službou upozornení.",
           "notify_people": "Osoby entity používané na kontrolu prítomnosti. Keď je táto možnosť povolená, doručenie upozornení sa oneskorí, kým aspoň jedna vybratá osoba nebude doma.",
           "notify_only_when_home": "Ak je táto možnosť povolená, upozornenia sa odložia, kým aspoň jedna vybraná osoba nebude doma.",
           "notify_fire_events": "Ak je táto možnosť povolená, spúšťajú sa udalosti Home Assistant pre začiatok a koniec cyklu (ha_washdata_cycle_started a ha_washdata_cycle_ended) na riadenie automatizácie.",
-          "notify_events": "Na ktoré udalosti posielať upozornenia.",
           "notify_before_end_minutes": "Minúty pred odhadovaným koncom cyklu na spustenie upozornenia. Pre deaktiváciu nastavte na 0. Predvolená hodnota: 0.",
-          "notify_live_interval_seconds": "Ako často sa počas behu odosielajú aktualizácie priebehu. Nižšie hodnoty sú citlivejšie, ale spotrebujú viac upozornení. Vynucuje sa minimálne 30 sekúnd — hodnoty pod 30 s sa automaticky zaokrúhľujú na 30 s.",
+          "notify_live_interval_seconds": "Ako často sa počas behu odosielajú aktualizácie priebehu. Nižšie hodnoty sú citlivejšie, ale spotrebujú viac upozornení. Vynucuje sa minimálne 30 sekúnd - hodnoty pod 30 s sa automaticky zaokrúhľujú na 30 s.",
           "notify_live_overrun_percent": "Bezpečnostná rezerva nad odhadovaným počtom aktualizácií pre dlhé/prekračujúce cykly (napríklad 20 % umožňuje 1,2-násobok odhadovanej aktualizácie).",
           "notify_title": "Vlastný názov pre upozornenia. Podporuje zástupný symbol {device}.",
           "notify_icon": "Ikona, ktorá sa má použiť na upozornenia (napr. mdi:washing-machine). Ponechajte prázdne pre odoslanie bez ikony.",
           "notify_start_message": "Správa odoslaná pri spustení cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Správa odoslaná po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Správa odoslaná pred dokončením. Podporuje zástupné symboly {device}, {minutes}."
+          "notify_pre_complete_message": "Správa odoslaná pred dokončením. Podporuje zástupné symboly {device}, {minutes}.",
+          "notify_start_services": "Jedna alebo viacero oznamovacích služieb, ktoré vás upozornia na začiatok cyklu (napr. notify.mobile_app_my_phone). Ak chcete preskočiť upozornenia na začiatok, nechajte prázdne.",
+          "notify_finish_services": "Jedna alebo viacero oznamovacích služieb, ktoré vás upozornia, keď sa cyklus skončí alebo sa blíži k dokončeniu. Ak chcete upozornenia na dokončenie preskočiť, nechajte prázdne.",
+          "notify_live_services": "Jedna alebo viacero oznamovacích služieb, aby dostávali aktuálne aktualizácie priebehu počas cyklu (iba mobilná sprievodná aplikácia). Ak chcete preskočiť aktuálne aktualizácie, nechajte prázdne.",
+          "notify_live_chronometer": "Ak je táto možnosť povolená, každá aktuálna aktualizácia zahŕňa odpočítavanie chronometra do odhadovaného času dokončenia. Časovač upozornení na zariadení medzi aktualizáciami automaticky odtiká (iba sprievodná aplikácia pre Android).",
+          "energy_price_entity": "Vyberte číselnú entitu, ktorá obsahuje aktuálnu cenu elektriny (napr. senzor.cena_elektriny, číslo_vstupu.sadzba_energie). Keď je nastavený, povolí zástupný symbol {cost}. Ak sú obe nakonfigurované, má prednosť pred statickou hodnotou.",
+          "energy_price_static": "Pevná cena elektriny za kWh. Keď je nastavený, povolí zástupný symbol {cost}. Ignorované, ak je entita nakonfigurovaná vyššie. Do šablóny správy pridajte svoj symbol meny, napr. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,18 @@
           "dtw_bandwidth": "Šírka pásma DTW",
           "external_end_trigger_enabled": "Povoliť externý spúšťač ukončenia cyklu",
           "external_end_trigger": "Externý snímač konca cyklu",
-          "external_end_trigger_inverted": "Invertovať logiku spúšťača (spúšťač pri vypnutí)"
+          "external_end_trigger_inverted": "Invertovať logiku spúšťača (spúšťač pri vypnutí)",
+          "suppress_feedback_notifications": "Potlačiť upozornenia na spätnú väzbu",
+          "pump_stuck_duration": "Prah (y) upozornenia na zaseknutie pumpy (iba pumpa)",
+          "door_sensor_entity": "Senzor dverí",
+          "pause_cuts_power": "Vypnutie napájania pri pozastavení",
+          "notify_unload_delay_minutes": "Oneskorenie čakania na bielizeň (min)",
+          "switch_entity": "Prepnúť entitu (pre pozastavenie napájania)",
+          "delay_start_detect_enabled": "Povoliť detekciu oneskoreného spustenia",
+          "delay_drain_min_power": "Oneskorený štart: Vypúšťací hrot Min. výkon (W)",
+          "delay_drain_max_power": "Odložený štart: Maximálny výkon vypúšťacej špičky (W)",
+          "delay_drain_max_duration": "Oneskorený štart: Maximálne trvanie vypúšťacej špičky (s)",
+          "delay_timeout_hours": "Odložený štart: Max. čakacia doba (h)"
         },
         "data_description": {
           "apply_suggestions": "Začiarknutím tohto políčka otvoríte krok kontroly navrhovaných hodnôt zo vzdelávacieho algoritmu. Nič sa neukladá automaticky.\n\nOdporúčané (z učenia):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +249,18 @@
           "dtw_bandwidth": "Maximálna povolená časová deformácia (natiahnutie) ako pomer trvania cyklu. Vyššie hodnoty umožňujú porovnávanie vysoko variabilných cyklov, ale zvyšujú náklady na CPU. Predvolená hodnota: 0,20 (20 %).",
           "external_end_trigger_enabled": "Povoliť monitorovanie externého binárneho snímača na spustenie dokončenia cyklu.",
           "external_end_trigger": "Vyberte entitu binárneho senzora. Keď sa tento snímač spustí, aktuálny cyklus sa skončí so stavom „dokončený“.",
-          "external_end_trigger_inverted": "Štandardne sa spúšťač aktivuje, keď sa senzor zapne. Začiarknutím tohto políčka sa aktivuje, keď sa senzor namiesto toho vypne."
+          "external_end_trigger_inverted": "Štandardne sa spúšťač aktivuje, keď sa senzor zapne. Začiarknutím tohto políčka sa aktivuje, keď sa senzor namiesto toho vypne.",
+          "suppress_feedback_notifications": "Keď je funkcia WashData povolená, bude stále sledovať a interne požadovať spätnú väzbu, ale nebude zobrazovať trvalé upozornenia, ktoré vás žiadajú o potvrdenie cyklov. Užitočné, keď sú cykly vždy správne rozpoznané a výzvy vás rušia.",
+          "pump_stuck_duration": "Ak cyklus pumpy beží aj po tomto mnohých sekundách, udalosť ha_washdata_pump_stuck sa spustí raz. Použite to na zistenie zaseknutého motora (typický chod kalového čerpadla je kratší ako 60 s). Predvolené: 1800 s (30 min). Len typ čerpadla.",
+          "door_sensor_entity": "Voliteľný binárny snímač pre dvierka stroja (zapnuté = otvorené, vypnuté = zatvorené). Keď sa dvierka otvoria počas aktívneho cyklu, WashData potvrdí, že cyklus bol zámerne pozastavený. Po skončení cyklu, ak sú dvierka stále zatvorené, stav sa zmení na „Vyčistiť“, kým sa dvierka neotvoria. Poznámka: zatvorenie dvierok NEOBNOVÍ automaticky pozastavený cyklus – obnovenie sa musí spustiť manuálne pomocou tlačidla alebo služby Obnoviť cyklus.",
+          "pause_cuts_power": "Pri pozastavení pomocou tlačidla alebo služby Pause Cycle tiež vypnite nakonfigurovanú entitu prepínača. Nadobudne účinnosť iba vtedy, ak je pre toto zariadenie nakonfigurovaná entita prepínača.",
+          "notify_unload_delay_minutes": "Po skončení cyklu pošlite upozornenie cez kanál upozornenia na ukončenie a dvierka sa toľko minút neotvorili (vyžaduje snímač dverí). Pre deaktiváciu nastavte na 0. Predvolené: 60 min.",
+          "switch_entity": "Entita prepínania, ktorá sa má prepínať pri pozastavení alebo opätovnom spustení. Vyžaduje sa, keď je aktivovaná možnosť „Cut Power When Pausing“.",
+          "delay_start_detect_enabled": "Keď je aktivovaný, krátky výpadok pri nízkej spotrebe energie, po ktorom nasleduje trvalé napájanie v pohotovostnom režime, sa rozpozná ako oneskorený štart. Senzor stavu zobrazuje počas oneskorenia 'Waiting to Start'. Nesleduje sa žiadny čas programu ani priebeh, kým sa cyklus skutočne nezačne. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimálny výkon (W), ktorý sa rozpozná ako odtokový hrot. Nastavte tesne nad úrovňou skutočne vypnutého pohotovostného režimu vášho zariadenia. Predvolená hodnota: 10 W.",
+          "delay_drain_max_power": "Maximálny výkon (W) pre odtokovú špičku – prekročenie tejto hodnoty sa považuje za skutočný začiatok cyklu. Mala by byť pod vaším nastavením start_threshold_w. Predvolená hodnota: 80 W.",
+          "delay_drain_max_duration": "Odtokový hrot musí klesnúť späť pod vypúšťacie okienko v priebehu niekoľkých sekúnd, aby sa potvrdilo. Dlhšie hroty sa považujú za aktivitu skutočného cyklu. Predvolené: 60 s.",
+          "delay_timeout_hours": "Bezpečnostný časový limit: ak je práčka aj po tomto množstve hodín stále v režime „Čaká na spustenie“, WashData sa resetuje na Off. Predvolené: 8 h."
         }
       },
       "diagnostics": {
@@ -559,13 +591,13 @@
       },
       "apply_suggestions_confirm": {
         "title": "Skontrolovať navrhované zmeny",
-        "description": "WashData našiel {pending_count} navrhovaných hodnôt na použitie.\n\nZmeny na kontrolu:\n{changes}\n\nAk chcete tieto hodnoty uviesť do formulára, potvrďte nižšie. Neuložia sa, kým neodošlete Rozšírené nastavenia.",
+        "description": "WashData nájdené **{pending_count}** navrhované hodnoty, ktoré sa majú použiť.\n\nZmeny:\n{changes}\n\n✅ Začiarknutím políčka nižšie a kliknutím na **Odoslať** tieto zmeny ihneď použijete a uložíte.\n❌ Nechajte nezačiarknuté a kliknutím na **Odoslať** zrušte a vráťte sa späť.",
         "data": {
-          "confirm_apply_suggestions": "Načítať navrhované hodnoty do rozšírených nastavení"
+          "confirm_apply_suggestions": "Použiť a uložiť tieto zmeny"
         }
       },
       "trim_cycle_select": {
-        "title": "Orezanie cyklu — vyberte cyklus",
+        "title": "Orezanie cyklu - vyberte cyklus",
         "description": "Vyberte cyklus, ktorý chcete orezať. ✓ = dokončené, ⚠ = obnovené, ✗ = prerušené",
         "data": {
           "cycle_id": "Cyklus"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "Nastaviť začiatok orezania",
-        "description": "Zadajte minútový posun, od ktorého sa začnú uchovávať údaje (0 = začiatok cyklu).",
+        "description": "Okno cyklu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAktuálny začiatok: **{current_wallclock}** (+{current_offset_min} min od začiatku cyklu)\n\nVyberte si nový čas začiatku pomocou nástroja na výber hodín nižšie.",
         "data": {
-          "trim_start_min": "Začiatok (minúty)"
+          "trim_start_time": "Nový čas začiatku",
+          "trim_start_min": "Nový štart (minúty od začiatku cyklu)"
         }
       },
       "trim_cycle_end": {
         "title": "Nastaviť koniec orezania",
-        "description": "Zadajte minútový posun, na ktorom sa prestanú uchovávať údaje.",
+        "description": "Okno cyklu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAktuálny koniec: **{current_wallclock}** (+{current_offset_min} min od začiatku cyklu)\n\nVyberte si nový čas ukončenia pomocou nástroja na výber hodín nižšie.",
         "data": {
-          "trim_end_min": "Koniec (minúty)"
+          "trim_end_time": "Nový čas ukončenia",
+          "trim_end_min": "Nový koniec (minúty od začiatku cyklu)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: Navrhované nastavenia sú pripravené ({device})",
       "suggestions_ready_notification_message": "Senzor **Navrhované nastavenia** teraz hlási **{count}** odporúčaní pripravených na použitie.\n\nAk ich chcete skontrolovať a použiť: **Nastavenia > Zariadenia a služby > WashData > Konfigurovať > Rozšírené nastavenia > Použiť navrhované hodnoty**.\n\nNávrhy sú voliteľné a pred uložením sa zobrazia na kontrolu.",
       "trim_range_invalid": "Začiatok musí byť pred koncom. Upravte si body orezania.",
-      "trim_failed": "Orezanie zlyhalo. Cyklus už nemusí existovať alebo je okno prázdne."
+      "trim_failed": "Orezanie zlyhalo. Cyklus už nemusí existovať alebo je okno prázdne.",
+      "auto_tune_suggestion": "{device_type} {device_title} zistilo cykly duchov. Navrhovaná zmena minimálneho výkonu: {current_min}W -> {new_min}W (neaplikuje sa automaticky).",
+      "auto_tune_title": "Automatické ladenie WashData",
+      "auto_tune_fallback": "{device_type} {device_title} zistilo cykly duchov. Navrhovaná zmena minimálneho výkonu: {current_min}W -> {new_min}W (neaplikuje sa automaticky)."
     },
     "abort": {
       "no_cycles_found": "Nenašli sa žiadne cykly",
@@ -973,6 +1010,26 @@
           "description": "Uchovávajte údaje až do tohto posunu v sekundách. Predvolená hodnota = celé trvanie."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pozastaviť cyklus",
+      "description": "Pozastavte aktívny cyklus pre zariadenie WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Zariadenie",
+          "description": "Zariadenie WashData pozastavte."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Obnoviť cyklus",
+      "description": "Obnovte pozastavený cyklus pre zariadenie WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Zariadenie",
+          "description": "Zariadenie WashData na obnovenie."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "Spúšťa sa",
           "running": "V prevádzke",
           "paused": "Pozastavené",
+          "user_paused": "Pozastavené používateľom",
           "ending": "Ukončuje sa",
           "finished": "Dokončené",
           "anti_wrinkle": "Ochrana proti vráskam",
+          "delay_wait": "Čaká sa na spustenie",
           "interrupted": "Prerušený",
           "force_stopped": "Nútene zastavené",
           "rinse": "Oplachovanie",
-          "unknown": "Neznámy"
+          "unknown": "Neznámy",
+          "clean": "Čistý"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "Dostupné navrhované nastavenia"
+      },
+      "pump_runs_today": {
+        "name": "Pumpa beží (posledných 24 h)"
+      },
+      "cycle_count": {
+        "name": "Počet cyklov"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Vynútiť koniec cyklu"
+      },
+      "pause_cycle": {
+        "name": "Pozastaviť cyklus"
+      },
+      "resume_cycle": {
+        "name": "Obnoviť cyklus"
       }
     }
   },
@@ -1078,6 +1150,15 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s musí byť väčšie ako trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Vyžaduje sa platný identifikátor zariadenia."
+    },
+    "cycle_id_required": {
+      "message": "Vyžaduje sa platný cycle_id."
+    },
+    "profile_name_required": {
+      "message": "Vyžaduje sa platný názov profilu."
     }
   }
 }

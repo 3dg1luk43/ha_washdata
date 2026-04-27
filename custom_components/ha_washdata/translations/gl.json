@@ -65,19 +65,20 @@
           "power_sensor": "Entidade sensor de potencia",
           "min_power": "Potencia mínima (W)",
           "off_delay": "Retraso de fin de ciclo (s)",
-          "notify_service": "Servizo de notificacións (por exemplo, notify.mobile_app)",
           "notify_actions": "Accións de notificación",
           "notify_people": "Atrasa a entrega ata que estas persoas estean na casa",
           "notify_only_when_home": "Atrasa as notificacións ata que a persoa seleccionada estea na casa",
           "notify_fire_events": "Lanzar eventos de automatización",
-          "notify_events": "Eventos a notificar",
           "notify_before_end_minutes": "Notificación previa á finalización (minutos antes do final)",
           "notify_title": "Título da notificación",
           "notify_icon": "Icona de notificación",
           "notify_start_message": "Iniciar o formato da mensaxe",
           "notify_finish_message": "Finalizar o formato da mensaxe",
           "notify_pre_complete_message": "Formato de mensaxe precompletado",
-          "show_advanced": "Editar configuración avanzada (paso seguinte)"
+          "show_advanced": "Editar configuración avanzada (paso seguinte)",
+          "notify_start_services": "Inicio do ciclo - Obxectivos de notificación",
+          "notify_finish_services": "Finalización do ciclo - Obxectivos de notificación",
+          "notify_live_services": "Progreso en directo - Obxectivos de notificación"
         },
         "data_description": {
           "apply_suggestions": "Marque esta caixa para copiar os valores suxeridos polo algoritmo de aprendizaxe no formulario. Revisa antes de gardar.\n\nSuxerido (de aprendizaxe):\n- Potencia_mín: {suggested_min_power} W\n- retardo_desactivación: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerancia_duración: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- límite_enerxético_final: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "A entidade sensora que informa da potencia en tempo real (en vatios). Podes cambiar isto en calquera momento sen perder os datos históricos; é útil se substitúes un enchufe intelixente.",
           "min_power": "As lecturas de potencia por riba deste limiar (en vatios) indican que o aparello está funcionando. Comeza con 2 W para a maioría dos dispositivos.",
           "off_delay": "Segundos, a potencia suavizada debe permanecer por debaixo do limiar de parada para marcar a finalización. Predeterminado: 120 s.",
-          "notify_service": "Servizo de notificación de Home Assistant para usar (opcional).",
           "notify_actions": "Secuencia de acción opcional do Home Assistant para executar para notificacións (scripts, notificación, TTS, etc.). Se se establece, as accións execútanse antes do servizo de notificación alternativa.",
           "notify_people": "Entidades de persoas utilizadas para o control de presenza. Cando se activa, a entrega de notificacións atrasase ata que polo menos unha persoa seleccionada estea na casa.",
           "notify_only_when_home": "Se está activado, atrasa as notificacións ata que polo menos unha persoa seleccionada estea na casa.",
           "notify_fire_events": "Se está activado, activa os eventos do Home Assistant para o inicio e o final do ciclo (ha_washdata_cycle_started e ha_washdata_cycle_ended) para impulsar as automatizacións.",
-          "notify_events": "Para que eventos enviar notificacións.",
           "notify_before_end_minutes": "Minutos antes do final estimado do ciclo para activar unha notificación. Establécese en 0 para desactivar. Por defecto: 0.",
           "notify_title": "Título personalizado para notificacións. Admite o marcador de posición {device}.",
           "notify_icon": "Icona para usar para notificacións (por exemplo, mdi:washing-machine). Deixa en branco para enviar sen icona.",
           "notify_start_message": "Mensaxe enviada cando comeza un ciclo. Admite o marcador de posición {device}.",
           "notify_finish_message": "Mensaxe enviada cando remata un ciclo. Admite os marcadores de posición {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite os marcadores de posición {device}, {minutes}."
+          "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite os marcadores de posición {device}, {minutes}.",
+          "notify_start_services": "Un ou varios servizos de notificación para alertar cando comeza un ciclo. Deixa o campo baleiro para saltar as notificacións de inicio.",
+          "notify_finish_services": "Un ou máis servizos de notificación para alertar cando un ciclo remata ou se está preto da súa finalización. Deixa o campo baleiro para saltar as notificacións de finalización.",
+          "notify_live_services": "Un ou máis servizos de notificación para recibir actualizacións de progreso en directo mentres se executa o ciclo (só a aplicación complementaria para móbiles). Deixa o campo baleiro para saltar as actualizacións en directo."
         }
       },
       "notifications": {
         "title": "Notificacións",
         "description": "Configura as canles de notificación, os modelos e as actualizacións opcionais do progreso móbil en directo.",
         "data": {
-          "notify_service": "Servizo de notificacións (por exemplo, notify.mobile_app)",
           "notify_actions": "Accións de notificación",
           "notify_people": "Atrasa a entrega ata que estas persoas estean na casa",
           "notify_only_when_home": "Atrasa as notificacións ata que a persoa seleccionada estea na casa",
           "notify_fire_events": "Lanzar eventos de automatización",
-          "notify_events": "Eventos a notificar",
           "notify_before_end_minutes": "Notificación previa á finalización (minutos antes do final)",
           "notify_live_interval_seconds": "Intervalo de actualización en directo (segundos)",
           "notify_live_overrun_percent": "Subsidio de excedencia de actualizacións en directo (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "Icona de notificación",
           "notify_start_message": "Iniciar o formato da mensaxe",
           "notify_finish_message": "Finalizar o formato da mensaxe",
-          "notify_pre_complete_message": "Formato de mensaxe precompletado"
+          "notify_pre_complete_message": "Formato de mensaxe precompletado",
+          "notify_start_services": "Inicio do ciclo - Obxectivos de notificación",
+          "notify_finish_services": "Finalización do ciclo - Obxectivos de notificación",
+          "notify_live_services": "Progreso en directo - Obxectivos de notificación",
+          "notify_live_chronometer": "Temporizador de conta atrás do cronómetro",
+          "energy_price_entity": "Prezo da enerxía - Entidade (opcional)",
+          "energy_price_static": "Prezo da enerxía: valor estático (opcional)"
         },
         "data_description": {
-          "notify_service": "Servizo de notificación de Home Assistant para usar (opcional).",
           "notify_actions": "Secuencia de acción opcional do Home Assistant para executar para notificacións (scripts, notificación, TTS, etc.). Se se establece, as accións execútanse antes do servizo de notificación alternativa.",
           "notify_people": "Entidades de persoas utilizadas para o control de presenza. Cando se activa, a entrega de notificacións atrasase ata que polo menos unha persoa seleccionada estea na casa.",
           "notify_only_when_home": "Se está activado, atrasa as notificacións ata que polo menos unha persoa seleccionada estea na casa.",
           "notify_fire_events": "Se está activado, activa os eventos do Home Assistant para o inicio e o final do ciclo (ha_washdata_cycle_started e ha_washdata_cycle_ended) para impulsar as automatizacións.",
-          "notify_events": "Para que eventos enviar notificacións.",
           "notify_before_end_minutes": "Minutos antes do final estimado do ciclo para activar unha notificación. Establécese en 0 para desactivar. Por defecto: 0.",
           "notify_live_interval_seconds": "Con que frecuencia se envían as actualizacións de progreso durante a execución. Os valores máis baixos responden máis pero consomen máis notificacións. Aplícase un mínimo de 30 segundos; os valores inferiores a 30 s redondéanse automaticamente a 30 s.",
           "notify_live_overrun_percent": "A marxe de seguridade por riba do reconto de actualizacións estimado para ciclos longos ou superados (por exemplo, un 20 % permite actualizacións 1,2 veces estimadas).",
@@ -132,7 +136,13 @@
           "notify_icon": "Icona para usar para notificacións (por exemplo, mdi:washing-machine). Deixa en branco para enviar sen icona.",
           "notify_start_message": "Mensaxe enviada cando comeza un ciclo. Admite o marcador de posición {device}.",
           "notify_finish_message": "Mensaxe enviada cando remata un ciclo. Admite os marcadores de posición {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite os marcadores de posición {device}, {minutes}."
+          "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite os marcadores de posición {device}, {minutes}.",
+          "notify_start_services": "Un ou máis servizos de notificación para alertar cando comeza un ciclo (por exemplo, notify.mobile_app_my_phone). Deixa o campo baleiro para saltar as notificacións de inicio.",
+          "notify_finish_services": "Un ou máis servizos de notificación para alertar cando un ciclo remata ou se está preto da súa finalización. Deixa o campo baleiro para saltar as notificacións de finalización.",
+          "notify_live_services": "Un ou máis servizos de notificación para recibir actualizacións de progreso en directo mentres se executa o ciclo (só a aplicación complementaria para móbiles). Deixa o campo baleiro para saltar as actualizacións en directo.",
+          "notify_live_chronometer": "Cando está activada, cada actualización en directo inclúe unha conta atrás do cronómetro ata a hora de finalización estimada. O temporizador de notificacións desactiva automaticamente no dispositivo entre as actualizacións (só a aplicación complementaria de Android).",
+          "energy_price_entity": "Seleccione unha entidade numérica que conteña o prezo actual da electricidade (por exemplo, sensor.electricity_price, input_number.energy_rate). Cando se define, activa o marcador de posición {cost}. Ten prioridade sobre o valor estático se ambos están configurados.",
+          "energy_price_static": "Prezo fixo da electricidade por kWh. Cando se define, activa o marcador de posición {cost}. Ignorase se unha entidade está configurada anteriormente. Engade o teu símbolo de moeda no modelo de mensaxe, por exemplo. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,18 @@
           "dtw_bandwidth": "Ancho de banda DTW",
           "external_end_trigger_enabled": "Activar o disparador de fin de ciclo externo",
           "external_end_trigger": "Sensor externo de fin de ciclo",
-          "external_end_trigger_inverted": "Inverter lóxica de disparo (disparador activado)"
+          "external_end_trigger_inverted": "Inverter lóxica de disparo (disparador activado)",
+          "suppress_feedback_notifications": "Suprimir as notificacións de comentarios",
+          "pump_stuck_duration": "Limiar (s) de alerta de bomba atascada (só bomba)",
+          "door_sensor_entity": "Sensor de porta",
+          "pause_cuts_power": "Cortar a enerxía ao facer unha pausa",
+          "notify_unload_delay_minutes": "Atraso da notificación de espera de lavandería (min)",
+          "switch_entity": "Cambiar a entidade (para o corte de enerxía en pausa)",
+          "delay_start_detect_enabled": "Activar a detección de inicio retardado",
+          "delay_drain_min_power": "Inicio diferido: Potencia mínima do pico de drenaxe (W)",
+          "delay_drain_max_power": "Inicio diferido: Potencia máxima de pico de drenaxe (W)",
+          "delay_drain_max_duration": "Inicio diferido: Duración máxima do pico de drenaxe (s)",
+          "delay_timeout_hours": "Inicio diferido: tempo de espera máximo (h)"
         },
         "data_description": {
           "apply_suggestions": "Marque esta caixa para abrir un paso de revisión dos valores suxeridos do algoritmo de aprendizaxe. Non se garda nada automaticamente.\n\nSuxerido (de aprendizaxe):\n- Potencia_mín: {suggested_min_power} W\n- retardo_desactivación: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerancia_duración: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- límite_enerxético_final: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +249,18 @@
           "dtw_bandwidth": "Tempo máximo permitido deformación (estiramento) como relación coa duración do ciclo. Os valores máis altos permiten combinar ciclos moi variables pero aumentan o custo da CPU. Por defecto: 0,20 (20%).",
           "external_end_trigger_enabled": "Activa a monitorización dun sensor binario externo para activar a finalización do ciclo.",
           "external_end_trigger": "Seleccione unha entidade de sensor binario. Cando este sensor se activa, o ciclo actual finalizará co estado \"completado\".",
-          "external_end_trigger_inverted": "De forma predeterminada, o gatillo dispara cando o sensor se acende. Marca esta caixa para disparar cando o sensor se apague."
+          "external_end_trigger_inverted": "De forma predeterminada, o gatillo dispara cando o sensor se acende. Marca esta caixa para disparar cando o sensor se apague.",
+          "suppress_feedback_notifications": "Cando está activado, WashData seguirá facendo un seguimento e solicitará comentarios internamente, pero non mostrará notificacións persistentes que che soliciten que confirmes os ciclos. Útil cando os ciclos sempre se detectan correctamente e atopas que as indicacións distraen.",
+          "pump_stuck_duration": "Se un ciclo de bomba aínda está en execución despois destes segundos, desenvólvese unha vez un evento ha_washdata_pump_stuck. Use isto para detectar un motor atascado (o funcionamento típico da bomba de sumidoiro é inferior a 60 s). Predeterminado: 1800 s (30 min). Só tipo de dispositivo de bomba.",
+          "door_sensor_entity": "Sensor binario opcional para a porta da máquina (encendido = aberto, apagado = pechado). Cando a porta se abre durante un ciclo activo, WashData confirmará o ciclo como pausado intencionalmente. Despois de finalizar o ciclo, se a porta aínda está pechada, o estado cambia a \"Limpar\" ata que se abra a porta. Nota: pechar a porta NON reanuda automaticamente un ciclo en pausa; a continuación debe activarse manualmente mediante o botón Reanudar o ciclo ou o servizo.",
+          "pause_cuts_power": "Ao facer unha pausa mediante o botón ou o servizo Pause Cycle, tamén desactiva a entidade de conmutación configurada. Só ten efecto se se configura unha entidade de cambio para este dispositivo.",
+          "notify_unload_delay_minutes": "Envía unha notificación a través da canle de notificación de finalización despois de que o ciclo remate e a porta non se abriu durante tantos minutos (require sensor de porta). Establécese en 0 para desactivar. Por defecto: 60 min.",
+          "switch_entity": "A entidade de conmutación para alternar ao pausar ou retomar. Necesario cando se activa \"Cortar a enerxía ao facer unha pausa\".",
+          "delay_start_detect_enabled": "Cando está activado, detéctase como un inicio atrasado un breve pico de drenaxe de baixa potencia seguido dunha potencia en espera sostida. O sensor de estado mostra \"Esperando para comezar\" durante o atraso. Non se fai un seguimento do tempo nin do progreso do programa ata que comeza realmente o ciclo. Require que start_threshold_w se configure por riba da potencia do pico de drenaxe.",
+          "delay_drain_min_power": "Potencia mínima (W) para recoñecer como un pico de drenaxe. Establécese xusto por encima do nivel de espera de apagado real da súa máquina. Predeterminado: 10 W.",
+          "delay_drain_max_power": "Potencia máxima (W) para un pico de drenaxe: as ráfagas por riba deste trátanse como un inicio de ciclo real. Debe estar por debaixo da túa configuración start_threshold_w. Predeterminado: 80 W.",
+          "delay_drain_max_duration": "O pico de drenaxe debe caer debaixo da xanela de drenaxe dentro destes segundos para confirmarse. Os picos máis longos trátanse como actividade do ciclo real. Por defecto: 60 s.",
+          "delay_timeout_hours": "Tempo de espera de seguridade: se a máquina aínda está en \"Esperando para iniciar\" despois de tantas horas, WashData restablecerá a Desactivado. Por defecto: 8 h."
         }
       },
       "diagnostics": {
@@ -559,13 +591,13 @@
       },
       "apply_suggestions_confirm": {
         "title": "Revisa os cambios suxeridos",
-        "description": "WashData atopou {pending_count} valores suxeridos para aplicar.\n\nCambios para revisar:\n{changes}\n\nConfirma a continuación para organizar estes valores no formulario. Non se gardan ata que envíes Configuración avanzada.",
+        "description": "WashData atopou **{pending_count}** valor(s) suxerido(s) para aplicar.\n\nCambios:\n{changes}\n\n✅ Marca a caixa de abaixo e fai clic en **Enviar** para aplicar e gardar estes cambios inmediatamente.\n❌ Déixao desmarcado e fai clic en **Enviar** para cancelar e volver.",
         "data": {
-          "confirm_apply_suggestions": "Pon os valores suxeridos na configuración avanzada"
+          "confirm_apply_suggestions": "Aplica e garda estes cambios"
         }
       },
       "trim_cycle_select": {
-        "title": "Ciclo de recorte — Seleccione Ciclo",
+        "title": "Ciclo de recorte - Seleccione Ciclo",
         "description": "Seleccione un ciclo para cortar. ✓ = completado, ⚠ = retomado, ✗ = interrompido",
         "data": {
           "cycle_id": "Ciclo"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "Establece o inicio de recorte",
-        "description": "Introduza o desfase de minutos para comezar a gardar os datos (0 = inicio do ciclo).",
+        "description": "Ventá de ciclo: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nInicio actual: **{current_wallclock}** (+{current_offset_min} min desde o inicio do ciclo)\n\nEscolle unha nova hora de inicio usando o selector de reloxos que aparece a continuación.",
         "data": {
-          "trim_start_min": "Inicio (minutos)"
+          "trim_start_time": "Nova hora de inicio",
+          "trim_start_min": "Novo inicio (minutos desde o inicio do ciclo)"
         }
       },
       "trim_cycle_end": {
         "title": "Establecer o final do recorte",
-        "description": "Introduza o desfase de minutos para deixar de manter os datos.",
+        "description": "Ventá de ciclo: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFin actual: **{current_wallclock}** (+{current_offset_min} min desde o inicio do ciclo)\n\nEscolle unha nova hora de finalización usando o selector de reloxos que aparece a continuación.",
         "data": {
-          "trim_end_min": "Fin (minutos)"
+          "trim_end_time": "Nova hora de finalización",
+          "trim_end_min": "Novo fin (minutos desde o inicio do ciclo)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: configuracións suxeridas listas ({device})",
       "suggestions_ready_notification_message": "O sensor de **Configuración suxerida** agora informa de **{count}** recomendacións útiles.\n\nPara revisalos e aplicalos: **Configuración > Dispositivos e servizos > WashData > Configurar > Configuración avanzada > Aplicar valores suxeridos**.\n\nAs suxestións son opcionais e móstranse para revisar antes de gardar.",
       "trim_range_invalid": "O comezo debe ser antes do final. Axusta os teus puntos de recorte.",
-      "trim_failed": "Fallou o recorte. É posible que o ciclo xa non exista ou que a xanela estea baleira."
+      "trim_failed": "Fallou o recorte. É posible que o ciclo xa non exista ou que a xanela estea baleira.",
+      "auto_tune_suggestion": "{device_type} {device_title} detectaron ciclos pantasmas. Cambio de min_power suxerido: {current_min}W -> {new_min}W (non se aplica automaticamente).",
+      "auto_tune_title": "Sintonización automática de WashData",
+      "auto_tune_fallback": "{device_type} {device_title} detectaron ciclos pantasmas. Cambio de min_power suxerido: {current_min}W -> {new_min}W (non se aplica automaticamente)."
     },
     "abort": {
       "no_cycles_found": "Non se atoparon ciclos",
@@ -973,6 +1010,26 @@
           "description": "Mantén os datos ata esta compensación en segundos. Predeterminado = duración total."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Ciclo de pausa",
+      "description": "Pausa o ciclo activo para un dispositivo WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "O dispositivo WashData para pausar."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Reanudar Ciclo",
+      "description": "Retomar un ciclo en pausa para un dispositivo WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Dispositivo",
+          "description": "O dispositivo WashData para retomar."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "Comezando",
           "running": "Correndo",
           "paused": "En pausa",
+          "user_paused": "En pausa polo usuario",
           "ending": "Finalización",
           "finished": "Rematou",
           "anti_wrinkle": "Anti-engurras",
+          "delay_wait": "Agardando para comezar",
           "interrupted": "Interrompido",
           "force_stopped": "Forza detida",
           "rinse": "Enxágüe",
-          "unknown": "Descoñecido"
+          "unknown": "Descoñecido",
+          "clean": "Limpo"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "Configuración suxerida dispoñible"
+      },
+      "pump_runs_today": {
+        "name": "Funcións da bomba (últimas 24 h)"
+      },
+      "cycle_count": {
+        "name": "Conta de ciclos"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Forzar ciclo final"
+      },
+      "pause_cycle": {
+        "name": "Ciclo de pausa"
+      },
+      "resume_cycle": {
+        "name": "Reanudar Ciclo"
       }
     }
   },
@@ -1078,6 +1150,15 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s debe ser maior que trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Requírese un device_id válido."
+    },
+    "cycle_id_required": {
+      "message": "Requírese un cycle_id válido."
+    },
+    "profile_name_required": {
+      "message": "Requírese un profile_name válido."
     }
   }
 }

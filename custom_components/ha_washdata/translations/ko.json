@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "제안된 변경 사항 검토",
-        "description": "WashData가 적용할 제안 값 {pending_count}개를 찾았습니다.\n\n검토할 변경사항:\n{changes}\n\n아래를 확인하여 이 값을 양식에 스테이징하세요. 고급 설정을 제출할 때까지 저장되지 않습니다.",
+        "description": "WashData에서 **{pending_count}** 적용할 제안 값을 찾았습니다.\n\n변경사항:\n{changes}\n\n✅ 변경 사항을 즉시 적용하고 저장하려면 아래 확인란을 선택하고 **제출**을 클릭하세요.\n❌ 체크하지 않은 상태로 두고 **제출**을 클릭하여 취소하고 돌아갑니다.",
         "data": {
-          "confirm_apply_suggestions": "고급 설정에서 제안된 값을 스테이징"
+          "confirm_apply_suggestions": "변경사항 적용 및 저장"
         }
       },
       "settings": {
@@ -72,19 +72,20 @@
           "power_sensor": "전력 센서 엔터티",
           "min_power": "최소 전력 (W)",
           "off_delay": "사이클 종료 지연 (초)",
-          "notify_service": "알림 서비스 (예: notify.mobile_app)",
           "notify_actions": "알림 작업",
           "notify_people": "이 사람들이 귀가할 때까지 알림 지연",
           "notify_only_when_home": "선택한 사람이 귀가할 때까지 알림 지연",
           "notify_fire_events": "자동화 이벤트 실행",
-          "notify_events": "알림 이벤트",
           "notify_before_end_minutes": "완료 전 알림 (종료 몇 분 전)",
           "notify_title": "알림 제목",
           "notify_icon": "알림 아이콘",
           "notify_start_message": "시작 메시지 형식",
           "notify_finish_message": "완료 메시지 형식",
           "notify_pre_complete_message": "완료 전 메시지 형식",
-          "show_advanced": "고급 설정 편집 (다음 단계)"
+          "show_advanced": "고급 설정 편집 (다음 단계)",
+          "notify_start_services": "주기 시작 - 알림 대상",
+          "notify_finish_services": "주기 완료 - 알림 대상",
+          "notify_live_services": "실시간 진행 - 알림 대상"
         },
         "data_description": {
           "apply_suggestions": "학습 알고리즘에서 제안한 값을 양식에 복사하려면 이 상자를 선택하세요. 저장하기 전에 검토하세요.\n\n제안 (학습에서):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -92,30 +93,29 @@
           "power_sensor": "실시간 전력(와트)을 보고하는 센서 엔터티입니다. 기록 데이터 손실 없이 언제든지 변경할 수 있습니다. 스마트 플러그를 교체할 때 유용합니다.",
           "min_power": "이 임계값(와트)보다 높은 전력 수치는 가전제품이 작동 중임을 나타냅니다. 대부분의 장치에서는 2W로 시작하세요.",
           "off_delay": "완료를 표시하려면 평활화된 전력이 정지 임계값 아래에서 이 시간(초) 동안 유지되어야 합니다. 기본값: 120초.",
-          "notify_service": "사용할 Home Assistant 알림 서비스입니다(선택사항).",
           "notify_actions": "알림용으로 실행할 선택적 Home Assistant 작업 시퀀스입니다(스크립트, notify, TTS 등). 설정된 경우 대체 알림 서비스 전에 작업이 실행됩니다.",
           "notify_people": "재실 확인에 사용되는 사람 엔터티입니다. 활성화하면 선택한 사람 중 최소 한 명이 귀가할 때까지 알림 전달이 지연됩니다.",
           "notify_only_when_home": "활성화하면 선택한 사람 중 최소 한 명이 집에 있을 때까지 알림을 지연합니다.",
           "notify_fire_events": "활성화하면 사이클 시작 및 종료 시 Home Assistant 이벤트(ha_washdata_cycle_started, ha_washdata_cycle_ended)를 발생시켜 자동화를 구동합니다.",
-          "notify_events": "알림을 보낼 이벤트를 선택하세요.",
           "notify_before_end_minutes": "사이클의 예상 종료 몇 분 전에 알림을 발생시킵니다. 비활성화하려면 0으로 설정하세요. 기본값: 0.",
           "notify_title": "알림의 맞춤 제목입니다. {device} 자리 표시자를 지원합니다.",
           "notify_icon": "알림에 사용할 아이콘입니다(예: mdi:washing-machine). 아이콘 없이 보내려면 비워두세요.",
           "notify_start_message": "사이클이 시작될 때 전송되는 메시지입니다. {device} 자리 표시자를 지원합니다.",
           "notify_finish_message": "사이클이 완료될 때 전송되는 메시지입니다. {device}, {duration}, {program} 자리 표시자를 지원합니다.",
-          "notify_pre_complete_message": "완료 전에 전송되는 메시지입니다. {device}, {minutes} 자리 표시자를 지원합니다."
+          "notify_pre_complete_message": "완료 전에 전송되는 메시지입니다. {device}, {minutes} 자리 표시자를 지원합니다.",
+          "notify_start_services": "주기가 시작되면 경고할 하나 이상의 알림 서비스입니다. 시작 알림을 건너뛰려면 비워 두세요.",
+          "notify_finish_services": "주기가 완료되거나 완료에 가까워지면 경고할 하나 이상의 알림 서비스입니다. 완료 알림을 건너뛰려면 비워 두세요.",
+          "notify_live_services": "주기가 실행되는 동안 실시간 진행 상황 업데이트를 수신하는 하나 이상의 알림 서비스입니다(모바일 동반 앱만 해당). 실시간 업데이트를 건너뛰려면 비워 두세요."
         }
       },
       "notifications": {
         "title": "알림",
         "description": "알림 채널, 템플릿 및 선택적 실시간 모바일 진행 상황 업데이트를 구성합니다.",
         "data": {
-          "notify_service": "알림 서비스 (예: notify.mobile_app)",
           "notify_actions": "알림 작업",
           "notify_people": "이 사람들이 귀가할 때까지 알림 지연",
           "notify_only_when_home": "선택한 사람이 귀가할 때까지 알림 지연",
           "notify_fire_events": "자동화 이벤트 실행",
-          "notify_events": "알림 이벤트",
           "notify_before_end_minutes": "완료 전 알림 (종료 몇 분 전)",
           "notify_live_interval_seconds": "실시간 업데이트 간격 (초)",
           "notify_live_overrun_percent": "실시간 업데이트 초과 허용값 (%)",
@@ -123,15 +123,19 @@
           "notify_icon": "알림 아이콘",
           "notify_start_message": "시작 메시지 형식",
           "notify_finish_message": "완료 메시지 형식",
-          "notify_pre_complete_message": "완료 전 메시지 형식"
+          "notify_pre_complete_message": "완료 전 메시지 형식",
+          "notify_start_services": "주기 시작 - 알림 대상",
+          "notify_finish_services": "주기 완료 - 알림 대상",
+          "notify_live_services": "실시간 진행 - 알림 대상",
+          "notify_live_chronometer": "크로노미터 카운트다운 타이머",
+          "energy_price_entity": "에너지 가격 - 엔터티(선택 사항)",
+          "energy_price_static": "에너지 가격 - 정적 가치(선택 사항)"
         },
         "data_description": {
-          "notify_service": "사용할 Home Assistant 알림 서비스입니다(선택사항).",
           "notify_actions": "알림용으로 실행할 선택적 Home Assistant 작업 시퀀스입니다(스크립트, notify, TTS 등). 설정된 경우 대체 알림 서비스 전에 작업이 실행됩니다.",
           "notify_people": "재실 확인에 사용되는 사람 엔터티입니다. 활성화하면 선택한 사람 중 최소 한 명이 귀가할 때까지 알림 전달이 지연됩니다.",
           "notify_only_when_home": "활성화하면 선택한 사람 중 최소 한 명이 집에 있을 때까지 알림을 지연합니다.",
           "notify_fire_events": "활성화하면 사이클 시작 및 종료 시 Home Assistant 이벤트(ha_washdata_cycle_started, ha_washdata_cycle_ended)를 발생시켜 자동화를 구동합니다.",
-          "notify_events": "알림을 보낼 이벤트를 선택하세요.",
           "notify_before_end_minutes": "사이클의 예상 종료 몇 분 전에 알림을 발생시킵니다. 비활성화하려면 0으로 설정하세요. 기본값: 0.",
           "notify_live_interval_seconds": "실행 중 진행 상황 업데이트가 전송되는 빈도입니다. 값이 낮을수록 반응이 빠르지만 알림을 더 많이 사용합니다. 최소 30초가 적용됩니다. 30초 미만의 값은 자동으로 30초로 반올림됩니다.",
           "notify_live_overrun_percent": "장기/초과 실행 사이클에 대한 예상 업데이트 횟수 이상의 안전 마진입니다(예: 20%는 예상 업데이트의 1.2배를 허용).",
@@ -139,7 +143,13 @@
           "notify_icon": "알림에 사용할 아이콘입니다(예: mdi:washing-machine). 아이콘 없이 보내려면 비워두세요.",
           "notify_start_message": "사이클이 시작될 때 전송되는 메시지입니다. {device} 자리 표시자를 지원합니다.",
           "notify_finish_message": "사이클이 완료될 때 전송되는 메시지입니다. {device}, {duration}, {program} 자리 표시자를 지원합니다.",
-          "notify_pre_complete_message": "완료 전에 전송되는 메시지입니다. {device}, {minutes} 자리 표시자를 지원합니다."
+          "notify_pre_complete_message": "완료 전에 전송되는 메시지입니다. {device}, {minutes} 자리 표시자를 지원합니다.",
+          "notify_start_services": "주기가 시작될 때 경고할 하나 이상의 알림 서비스(예: notify.mobile_app_my_phone). 시작 알림을 건너뛰려면 비워 두세요.",
+          "notify_finish_services": "주기가 완료되거나 완료에 가까워지면 경고할 하나 이상의 알림 서비스입니다. 완료 알림을 건너뛰려면 비워 두세요.",
+          "notify_live_services": "주기가 실행되는 동안 실시간 진행 상황 업데이트를 수신하는 하나 이상의 알림 서비스입니다(모바일 동반 앱만 해당). 실시간 업데이트를 건너뛰려면 비워 두세요.",
+          "notify_live_chronometer": "활성화되면 각 실시간 업데이트에 예상 완료 시간까지의 크로노미터 카운트다운이 포함됩니다. 업데이트 사이에 기기에서 알림 타이머가 자동으로 꺼집니다(Android 도우미 앱만 해당).",
+          "energy_price_entity": "현재 전기 가격을 보유하는 숫자 엔터티를 선택합니다(예: sensor.electricity_price, input_number.energy_rate). 설정되면 {cost} 자리 표시자를 활성화합니다. 둘 다 구성된 경우 정적 값보다 우선합니다.",
+          "energy_price_static": "kWh당 전기요금이 고정되어 있습니다. 설정되면 {cost} 자리 표시자를 활성화합니다. 위에서 엔터티가 구성된 경우 무시됩니다. 메시지 템플릿에 통화 기호를 추가하세요. {cost} €."
         }
       },
       "advanced_settings": {
@@ -189,7 +199,18 @@
           "dtw_bandwidth": "DTW 대역폭",
           "external_end_trigger_enabled": "외부 사이클 종료 트리거 활성화",
           "external_end_trigger": "외부 사이클 종료 센서",
-          "external_end_trigger_inverted": "트리거 로직 반전 (OFF 시 트리거)"
+          "external_end_trigger_inverted": "트리거 로직 반전 (OFF 시 트리거)",
+          "suppress_feedback_notifications": "피드백 알림 억제",
+          "pump_stuck_duration": "펌프 정체 경고 임계값(펌프만 해당)",
+          "door_sensor_entity": "도어 센서",
+          "pause_cuts_power": "일시 정지 시 전원 차단",
+          "notify_unload_delay_minutes": "세탁 대기 알림 지연(분)",
+          "switch_entity": "스위치 엔터티(정전 일시 정지용)",
+          "delay_start_detect_enabled": "지연된 시작 감지 활성화",
+          "delay_drain_min_power": "지연된 시작: 배수 스파이크 최소 전력(W)",
+          "delay_drain_max_power": "지연된 시작: 드레인 스파이크 최대 전력(W)",
+          "delay_drain_max_duration": "지연된 시작: 최대 배수 스파이크 기간(초)",
+          "delay_timeout_hours": "지연된 시작: 최대 대기 시간(h)"
         },
         "data_description": {
           "apply_suggestions": "학습 알고리즘에서 제안된 값의 검토 단계를 열려면 이 상자를 선택하세요. 아무것도 자동으로 저장되지 않습니다.\n\n제안 (학습에서):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -235,7 +256,18 @@
           "dtw_bandwidth": "사이클 기간의 비율로 허용되는 최대 시간 왜곡(늘림)입니다. 높을수록 변동성이 큰 사이클을 일치시킬 수 있지만 CPU 비용이 증가합니다. 기본값: 0.20(20%).",
           "external_end_trigger_enabled": "사이클 완료를 트리거하기 위한 외부 이진 센서 모니터링을 활성화합니다.",
           "external_end_trigger": "이진 센서 엔터티를 선택하세요. 이 센서가 트리거되면 현재 사이클이 '완료' 상태로 종료됩니다.",
-          "external_end_trigger_inverted": "기본적으로 센서가 켜질 때 트리거됩니다. 대신 센서가 꺼질 때 트리거하려면 이 상자를 선택하세요."
+          "external_end_trigger_inverted": "기본적으로 센서가 켜질 때 트리거됩니다. 대신 센서가 꺼질 때 트리거하려면 이 상자를 선택하세요.",
+          "suppress_feedback_notifications": "활성화되면 WashData는 계속해서 내부적으로 피드백을 추적하고 요청하지만 주기 확인을 요청하는 지속적인 알림은 표시하지 않습니다. 주기가 항상 올바르게 감지되고 프롬프트가 산만하다고 느낄 때 유용합니다.",
+          "pump_stuck_duration": "이 시간이 지난 후에도 펌프 사이클이 계속 실행 중인 경우 ha_washdata_pump_stuck 이벤트가 한 번 실행됩니다. 이를 사용하여 걸린 모터를 감지합니다(일반적인 배수 펌프 작동 시간은 60초 미만입니다). 기본값: 1800초(30분) 펌프 장치 유형만 해당.",
+          "door_sensor_entity": "기계 도어용 옵션 바이너리 센서(켜짐 = 열림, 꺼짐 = 닫힘). 활성 사이클 중에 문이 열리면 WashData는 사이클이 의도적으로 일시 중지되었음을 확인합니다. 사이클 종료 후에도 도어가 여전히 닫혀 있으면 도어가 열릴 때까지 'Clean' 상태로 변경됩니다. 참고: 도어를 닫아도 일시 중지된 주기가 자동으로 재개되지 않습니다. 재개는 주기 재개 버튼 또는 서비스를 통해 수동으로 실행되어야 합니다.",
+          "pause_cuts_power": "Pause Cycle 버튼이나 서비스를 통해 일시 중지하는 경우 구성된 스위치 엔터티도 끄십시오. 이 장치에 스위치 엔터티가 구성된 경우에만 적용됩니다.",
+          "notify_unload_delay_minutes": "사이클이 종료되고 몇 분 동안 문이 열리지 않으면 완료 알림 채널을 통해 알림을 보냅니다(도어 센서 필요). 비활성화하려면 0으로 설정합니다. 기본값: 60분",
+          "switch_entity": "일시중지하거나 재개할 때 전환할 스위치 엔터티입니다. '일시 중지 시 전원 차단'이 활성화된 경우 필요합니다.",
+          "delay_start_detect_enabled": "활성화되면 짧은 저전력 소모 스파이크와 지속적인 대기 전력이 지연된 시작으로 감지됩니다. 지연되는 동안 상태 센서에 '시작 대기 중'이 표시됩니다. 사이클이 실제로 시작될 때까지는 프로그램 시간이나 진행 상황이 추적되지 않습니다. start_threshold_w를 드레인 스파이크 전력보다 높게 설정해야 합니다.",
+          "delay_drain_min_power": "드레인 스파이크로 인식하기 위한 최소 전력(W)입니다. 장비의 실제 대기 수준 바로 위에 설정하십시오. 기본값: 10W",
+          "delay_drain_max_power": "드레인 스파이크의 최대 전력(W) - 이보다 높은 버스트는 실제 사이클 시작으로 처리됩니다. start_threshold_w 설정보다 낮아야 합니다. 기본값: 80W",
+          "delay_drain_max_duration": "확인하려면 배수 스파이크가 이 몇 초 내에 배수 창 아래로 다시 떨어져야 합니다. 더 긴 스파이크는 실제 주기 활동으로 처리됩니다. 기본값: 60초",
+          "delay_timeout_hours": "안전 시간 초과: 이 시간이 지난 후에도 기기가 여전히 '시작 대기 중' 상태이면 WashData가 꺼짐으로 재설정됩니다. 기본값: 8시간"
         }
       },
       "diagnostics": {
@@ -565,7 +597,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "사이클 트림 — 사이클 선택",
+        "title": "사이클 트림 - 사이클 선택",
         "description": "트림할 사이클을 선택하세요. ✓ = 완료됨, ⚠ = 재개됨, ✗ = 중단됨",
         "data": {
           "cycle_id": "사이클"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "트림 시작 설정",
-        "description": "데이터 보존을 시작할 분 오프셋을 입력하세요(0 = 사이클 시작).",
+        "description": "주기 창: {cycle_start_wallclock} → {cycle_end_wallclock}\n\n현재 시작: **{current_wallclock}** (주기 시작으로부터 +{current_offset_min}분)\n\n아래의 시계 선택기를 사용하여 새로운 시작 시간을 선택하세요.",
         "data": {
-          "trim_start_min": "시작 (분)"
+          "trim_start_time": "새로운 시작 시간",
+          "trim_start_min": "새로운 시작(사이클 시작 후 몇 분)"
         }
       },
       "trim_cycle_end": {
         "title": "트림 종료 설정",
-        "description": "데이터 보존을 중지할 분 오프셋을 입력하세요.",
+        "description": "주기 창: {cycle_start_wallclock} → {cycle_end_wallclock}\n\n현재 종료: **{current_wallclock}** (주기 시작으로부터 +{current_offset_min}분)\n\n아래의 시계 선택기를 사용하여 새로운 종료 시간을 선택하세요.",
         "data": {
-          "trim_end_min": "종료 (분)"
+          "trim_end_time": "새로운 종료 시간",
+          "trim_end_min": "새로운 종료(사이클 시작 후 몇 분)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: 제안 설정 준비됨 ({device})",
       "suggestions_ready_notification_message": "**제안 설정** 센서가 이제 **{count}**개의 실행 가능한 권장사항을 보고합니다.\n\n검토 및 적용하려면: **설정 > 장치 및 서비스 > WashData > 구성 > 고급 설정 > 제안 값 적용**.\n\n제안사항은 선택사항이며 저장하기 전에 검토용으로 표시됩니다.",
       "trim_range_invalid": "시작은 종료 이전이어야 합니다. 트림 포인트를 조정해 주세요.",
-      "trim_failed": "트림에 실패했습니다. 사이클이 더 이상 존재하지 않거나 창이 비어 있습니다."
+      "trim_failed": "트림에 실패했습니다. 사이클이 더 이상 존재하지 않거나 창이 비어 있습니다.",
+      "auto_tune_suggestion": "{device_type} {device_title}이(가) 고스트 사이클을 감지했습니다. 권장되는 min_power 변경: {current_min}W -> {new_min}W(자동으로 적용되지 않음).",
+      "auto_tune_title": "WashData 자동 조정",
+      "auto_tune_fallback": "{device_type} {device_title}이(가) 고스트 사이클을 감지했습니다. 권장되는 min_power 변경: {current_min}W -> {new_min}W(자동으로 적용되지 않음)."
     },
     "abort": {
       "no_cycles_found": "사이클을 찾을 수 없습니다",
@@ -973,6 +1010,26 @@
           "description": "이 오프셋(초)까지 데이터를 유지합니다. 기본값 = 전체 기간."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "일시정지 주기",
+      "description": "WashData 장치의 활성 주기를 일시 중지합니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "일시중지할 WashData 장치입니다."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "재개주기",
+      "description": "WashData 장치에 대해 일시 중지된 주기를 재개합니다.",
+      "fields": {
+        "device_id": {
+          "name": "장치",
+          "description": "재개할 WashData 장치입니다."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "시작 중",
           "running": "실행 중",
           "paused": "일시 정지됨",
+          "user_paused": "사용자가 일시 정지함",
           "ending": "종료 중",
           "finished": "완료됨",
           "anti_wrinkle": "주름 방지",
+          "delay_wait": "시작을 기다리는 중",
           "interrupted": "중단됨",
           "force_stopped": "강제 정지됨",
           "rinse": "헹굼",
-          "unknown": "알 수 없음"
+          "unknown": "알 수 없음",
+          "clean": "깨끗한"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "이용 가능한 제안 설정"
+      },
+      "pump_runs_today": {
+        "name": "펌프 작동(지난 24시간)"
+      },
+      "cycle_count": {
+        "name": "사이클 수"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "사이클 강제 종료"
+      },
+      "pause_cycle": {
+        "name": "일시정지 주기"
+      },
+      "resume_cycle": {
+        "name": "재개주기"
       }
     }
   },
@@ -1074,10 +1146,19 @@
       "message": "사이클을 찾을 수 없거나 전력 데이터가 없습니다."
     },
     "trim_failed_empty_window": {
-      "message": "트림 실패 — 사이클을 찾을 수 없거나 전력 데이터가 없거나 결과 창이 비어 있습니다."
+      "message": "트림 실패 - 사이클을 찾을 수 없거나 전력 데이터가 없거나 결과 창이 비어 있습니다."
     },
     "trim_invalid_range": {
       "message": "trim_end_s는 trim_start_s보다 커야 합니다."
+    },
+    "device_id_required": {
+      "message": "유효한 device_id가 필요합니다."
+    },
+    "cycle_id_required": {
+      "message": "유효한 Cycle_id가 필요합니다."
+    },
+    "profile_name_required": {
+      "message": "유효한 profile_name이 필요합니다."
     }
   }
 }

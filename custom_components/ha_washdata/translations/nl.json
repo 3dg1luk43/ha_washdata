@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Voorgestelde wijzigingen bekijken",
-        "description": "WashData heeft {pending_count} voorgestelde waarden gevonden die kunnen worden toegepast.\n\nTe beoordelen wijzigingen:\n{changes}\n\nBevestig hieronder om deze waarden in het formulier in te vullen. Ze worden pas opgeslagen als u Geavanceerde instellingen indient.",
+        "description": "WashData heeft **{pending_count}** voorgestelde waarde(n) gevonden om toe te passen.\n\nVeranderingen:\n{changes}\n\n✅ Vink het onderstaande vakje aan en klik op **Verzenden** om deze wijzigingen onmiddellijk toe te passen en op te slaan.\n❌ Laat dit uitgeschakeld en klik op **Verzenden** om te annuleren en terug te gaan.",
         "data": {
-          "confirm_apply_suggestions": "Voorgestelde waarden klaarzetten in Geavanceerde instellingen"
+          "confirm_apply_suggestions": "Pas deze wijzigingen toe en sla ze op"
         }
       },
       "settings": {
@@ -72,50 +72,50 @@
           "power_sensor": "Vermogenssensor-entiteit",
           "min_power": "Minimaal vermogen (W)",
           "off_delay": "Vertraging cycluseinde (s)",
-          "notify_service": "Meldingsservice (bijv. notify.mobile_app)",
           "notify_actions": "Meldingsacties",
           "notify_people": "Bezorging uitstellen totdat deze personen thuis zijn",
           "notify_only_when_home": "Meldingen uitstellen totdat geselecteerde persoon thuis is",
           "notify_fire_events": "Automatiseringsgebeurtenissen activeren",
-          "notify_events": "Gebeurtenissen waarvoor te melden",
           "notify_before_end_minutes": "Melding vóór voltooiing (minuten voor einde)",
           "notify_title": "Meldingstitel",
           "notify_icon": "Meldingspictogram",
           "notify_start_message": "Startberichtopmaak",
           "notify_finish_message": "Voltooiingsberichtopmaak",
           "notify_pre_complete_message": "Berichtopmaak vóór voltooiing",
-          "show_advanced": "Geavanceerde instellingen bewerken (volgende stap)"
+          "show_advanced": "Geavanceerde instellingen bewerken (volgende stap)",
+          "notify_start_services": "Cyclusstart: meldingsdoelen",
+          "notify_finish_services": "Einde cyclus: meldingsdoelen",
+          "notify_live_services": "Live voortgang: meldingsdoelen"
         },
         "data_description": {
           "apply_suggestions": "Vink dit vakje aan om de door het leeralgoritme voorgestelde waarden naar het formulier te kopiëren. Controleer voordat u opslaat.\n\nVoorgesteld (door leeralgoritme):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Selecteer het type apparaat (wasmachine, droger, vaatwasser, koffiezetapparaat, EV). Deze tag wordt bij elke cyclus opgeslagen voor een betere organisatie.",
-          "power_sensor": "De sensorentiteit die realtime vermogen rapporteert (in watt). U kunt dit op elk moment wijzigen zonder dat historische gegevens verloren gaan — handig als u een slimme stekker vervangt.",
+          "power_sensor": "De sensorentiteit die realtime vermogen rapporteert (in watt). U kunt dit op elk moment wijzigen zonder dat historische gegevens verloren gaan - handig als u een slimme stekker vervangt.",
           "min_power": "Vermogensmetingen boven deze drempel (in watt) geven aan dat het apparaat werkt. Begin met 2W voor de meeste apparaten.",
           "off_delay": "Seconden dat het afgevlakte vermogen onder de stopdrempel moet blijven om voltooiing te markeren. Standaard: 120s.",
-          "notify_service": "Te gebruiken Home Assistant-meldingsservice (optioneel).",
           "notify_actions": "Optionele Home Assistant-actiereeks voor meldingen (scripts, meldingen, TTS, enz.). Indien ingesteld, worden acties uitgevoerd vóór de terugvalmeldingsservice.",
           "notify_people": "Persoonsentiteiten voor aanwezigheidscontrole. Indien ingeschakeld, wordt de bezorging van meldingen uitgesteld totdat ten minste één geselecteerde persoon thuis is.",
           "notify_only_when_home": "Indien ingeschakeld, worden meldingen uitgesteld totdat ten minste één geselecteerde persoon thuis is.",
           "notify_fire_events": "Indien ingeschakeld, worden Home Assistant-gebeurtenissen geactiveerd voor het begin en einde van de cyclus (ha_washdata_cycle_started en ha_washdata_cycle_ended) om automatiseringen aan te sturen.",
-          "notify_events": "Voor welke gebeurtenissen meldingen moeten worden verzonden.",
           "notify_before_end_minutes": "Minuten vóór het geschatte einde van de cyclus om een melding te activeren. Stel in op 0 om uit te schakelen. Standaard: 0.",
           "notify_title": "Aangepaste titel voor meldingen. Ondersteunt de tijdelijke aanduiding {device}.",
           "notify_icon": "Pictogram voor meldingen (bijv. mdi:washing-machine). Laat leeg om zonder pictogram te verzenden.",
           "notify_start_message": "Bericht verzonden wanneer een cyclus start. Ondersteunt de tijdelijke aanduiding {device}.",
           "notify_finish_message": "Bericht verzonden wanneer een cyclus is voltooid. Ondersteunt de tijdelijke aanduidingen {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Bericht verzonden vóór voltooiing. Ondersteunt de tijdelijke aanduidingen {device}, {minutes}."
+          "notify_pre_complete_message": "Bericht verzonden vóór voltooiing. Ondersteunt de tijdelijke aanduidingen {device}, {minutes}.",
+          "notify_start_services": "Een of meer meldingsservices om te waarschuwen wanneer een cyclus begint. Laat leeg om startmeldingen over te slaan.",
+          "notify_finish_services": "Een of meer waarschuwingsservices om te waarschuwen wanneer een cyclus is voltooid of bijna voltooid is. Laat leeg om finishmeldingen over te slaan.",
+          "notify_live_services": "Een of meer meldingsdiensten om live voortgangsupdates te ontvangen terwijl de cyclus loopt (alleen mobiele begeleidende app). Laat leeg om live updates over te slaan."
         }
       },
       "notifications": {
         "title": "Meldingen",
         "description": "Configureer meldingskanalen, sjablonen en optionele live voortgangsupdates op mobiel.",
         "data": {
-          "notify_service": "Meldingsservice (bijv. notify.mobile_app)",
           "notify_actions": "Meldingsacties",
           "notify_people": "Bezorging uitstellen totdat deze personen thuis zijn",
           "notify_only_when_home": "Meldingen uitstellen totdat geselecteerde persoon thuis is",
           "notify_fire_events": "Automatiseringsgebeurtenissen activeren",
-          "notify_events": "Gebeurtenissen waarvoor te melden",
           "notify_before_end_minutes": "Melding vóór voltooiing (minuten voor einde)",
           "notify_live_interval_seconds": "Live-updateinterval (seconden)",
           "notify_live_overrun_percent": "Overschrijdingstoeslag live updates (%)",
@@ -123,23 +123,33 @@
           "notify_icon": "Meldingspictogram",
           "notify_start_message": "Startberichtopmaak",
           "notify_finish_message": "Voltooiingsberichtopmaak",
-          "notify_pre_complete_message": "Berichtopmaak vóór voltooiing"
+          "notify_pre_complete_message": "Berichtopmaak vóór voltooiing",
+          "notify_start_services": "Cyclusstart: meldingsdoelen",
+          "notify_finish_services": "Einde cyclus: meldingsdoelen",
+          "notify_live_services": "Live voortgang: meldingsdoelen",
+          "notify_live_chronometer": "Chronometer afteltimer",
+          "energy_price_entity": "Energieprijs - Entiteit (optioneel)",
+          "energy_price_static": "Energieprijs - Statische waarde (optioneel)"
         },
         "data_description": {
-          "notify_service": "Te gebruiken Home Assistant-meldingsservice (optioneel).",
           "notify_actions": "Optionele Home Assistant-actiereeks voor meldingen (scripts, meldingen, TTS, enz.). Indien ingesteld, worden acties uitgevoerd vóór de terugvalmeldingsservice.",
           "notify_people": "Persoonsentiteiten voor aanwezigheidscontrole. Indien ingeschakeld, wordt de bezorging van meldingen uitgesteld totdat ten minste één geselecteerde persoon thuis is.",
           "notify_only_when_home": "Indien ingeschakeld, worden meldingen uitgesteld totdat ten minste één geselecteerde persoon thuis is.",
           "notify_fire_events": "Indien ingeschakeld, worden Home Assistant-gebeurtenissen geactiveerd voor het begin en einde van de cyclus (ha_washdata_cycle_started en ha_washdata_cycle_ended) om automatiseringen aan te sturen.",
-          "notify_events": "Voor welke gebeurtenissen meldingen moeten worden verzonden.",
           "notify_before_end_minutes": "Minuten vóór het geschatte einde van de cyclus om een melding te activeren. Stel in op 0 om uit te schakelen. Standaard: 0.",
-          "notify_live_interval_seconds": "Hoe vaak voortgangsupdates worden verzonden tijdens een actieve cyclus. Lagere waarden reageren beter, maar verbruiken meer meldingen. Er wordt een minimum van 30 seconden gehanteerd — waarden onder de 30 seconden worden automatisch afgerond naar 30 seconden.",
+          "notify_live_interval_seconds": "Hoe vaak voortgangsupdates worden verzonden tijdens een actieve cyclus. Lagere waarden reageren beter, maar verbruiken meer meldingen. Er wordt een minimum van 30 seconden gehanteerd - waarden onder de 30 seconden worden automatisch afgerond naar 30 seconden.",
           "notify_live_overrun_percent": "Veiligheidsmarge boven het geschatte aantal updates voor lange of uitlopende cycli (20% staat bijvoorbeeld 1,2× het geschatte aantal updates toe).",
           "notify_title": "Aangepaste titel voor meldingen. Ondersteunt de tijdelijke aanduiding {device}.",
           "notify_icon": "Pictogram voor meldingen (bijv. mdi:washing-machine). Laat leeg om zonder pictogram te verzenden.",
           "notify_start_message": "Bericht verzonden wanneer een cyclus start. Ondersteunt de tijdelijke aanduiding {device}.",
           "notify_finish_message": "Bericht verzonden wanneer een cyclus is voltooid. Ondersteunt de tijdelijke aanduidingen {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Bericht verzonden vóór voltooiing. Ondersteunt de tijdelijke aanduidingen {device}, {minutes}."
+          "notify_pre_complete_message": "Bericht verzonden vóór voltooiing. Ondersteunt de tijdelijke aanduidingen {device}, {minutes}.",
+          "notify_start_services": "Een of meer meldingsservices die waarschuwen wanneer een cyclus begint (bijvoorbeeld notificatie.mobile_app_my_phone). Laat leeg om startmeldingen over te slaan.",
+          "notify_finish_services": "Een of meer waarschuwingsservices om te waarschuwen wanneer een cyclus is voltooid of bijna voltooid is. Laat leeg om finishmeldingen over te slaan.",
+          "notify_live_services": "Een of meer meldingsdiensten om live voortgangsupdates te ontvangen terwijl de cyclus loopt (alleen mobiele begeleidende app). Laat leeg om live updates over te slaan.",
+          "notify_live_chronometer": "Indien ingeschakeld, bevat elke live update een aftelling van de chronometer naar de geschatte eindtijd. De meldingstimer tikt automatisch af op het apparaat tussen updates door (alleen Android-app).",
+          "energy_price_entity": "Selecteer een numerieke entiteit die de huidige elektriciteitsprijs bevat (bijvoorbeeld sensor.elektriciteitsprijs, invoernummer.energietarief). Indien ingesteld, wordt de tijdelijke aanduiding {cost} ingeschakeld. Heeft voorrang op de statische waarde als beide zijn geconfigureerd.",
+          "energy_price_static": "Vaste elektriciteitsprijs per kWh. Indien ingesteld, wordt de tijdelijke aanduiding {cost} ingeschakeld. Genegeerd als hierboven een entiteit is geconfigureerd. Voeg uw valutasymbool toe aan de berichtsjabloon, b.v. {cost} €."
         }
       },
       "advanced_settings": {
@@ -189,7 +199,18 @@
           "dtw_bandwidth": "DTW-bandbreedte",
           "external_end_trigger_enabled": "Externe cycluseinde-trigger inschakelen",
           "external_end_trigger": "Externe cycluseindesensor",
-          "external_end_trigger_inverted": "Triggerlogica omkeren (activeren bij UIT)"
+          "external_end_trigger_inverted": "Triggerlogica omkeren (activeren bij UIT)",
+          "suppress_feedback_notifications": "Feedbackmeldingen onderdrukken",
+          "pump_stuck_duration": "Waarschuwingsdrempel(s) voor pomp vastgelopen (alleen pomp)",
+          "door_sensor_entity": "Deursensor",
+          "pause_cuts_power": "Schakel de stroom uit tijdens het pauzeren",
+          "notify_unload_delay_minutes": "Vertraging wasgoed wachtmelding (min)",
+          "switch_entity": "Schakelentiteit (voor pauze stroomuitval)",
+          "delay_start_detect_enabled": "Schakel detectie van vertraagde start in",
+          "delay_drain_min_power": "Uitgestelde start: Min. vermogen afvoerpiek (W)",
+          "delay_drain_max_power": "Uitgestelde start: Afvoerpiek Max. vermogen (W)",
+          "delay_drain_max_duration": "Uitgestelde start: maximale afvoerpiekduur (s)",
+          "delay_timeout_hours": "Uitgestelde start: maximale wachttijd (u)"
         },
         "data_description": {
           "apply_suggestions": "Vink dit vakje aan om een beoordelingsstap te openen voor voorgestelde waarden van het leeralgoritme. Er wordt niets automatisch opgeslagen.\n\nVoorgesteld (door leeralgoritme):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -235,7 +256,18 @@
           "dtw_bandwidth": "Maximaal toegestane tijdvervorming (uitrekken) als verhouding van de cyclusduur. Hogere waarden maken het matchen van sterk variabele cycli mogelijk maar verhogen de CPU-belasting. Standaard: 0,20 (20%).",
           "external_end_trigger_enabled": "Bewaking van een externe binaire sensor inschakelen om cyclusvoltooiing te activeren.",
           "external_end_trigger": "Selecteer een binaire sensorentiteit. Wanneer deze sensor activeert, eindigt de huidige cyclus met de status 'voltooid'.",
-          "external_end_trigger_inverted": "Standaard wordt de trigger geactiveerd wanneer de sensor AAN gaat. Vink dit vakje aan om te activeren wanneer de sensor UIT gaat."
+          "external_end_trigger_inverted": "Standaard wordt de trigger geactiveerd wanneer de sensor AAN gaat. Vink dit vakje aan om te activeren wanneer de sensor UIT gaat.",
+          "suppress_feedback_notifications": "Indien ingeschakeld, zal WashData nog steeds intern feedback volgen en om feedback vragen, maar geen permanente meldingen weergeven waarin u wordt gevraagd cycli te bevestigen. Handig als cycli altijd correct worden gedetecteerd en u de aanwijzingen afleidend vindt.",
+          "pump_stuck_duration": "Als een pompcyclus na dit aantal seconden nog steeds actief is, wordt er één keer een ha_washdata_pump_stuck-gebeurtenis geactiveerd. Gebruik dit om een ​​vastgelopen motor te detecteren (de typische pomplooptijd van de pomp bedraagt ​​minder dan 60 s). Standaard: 1800 s (30 min). Alleen type pompapparaat.",
+          "door_sensor_entity": "Optionele binaire sensor voor de machinedeur (aan = open, uit = gesloten). Wanneer de deur opengaat tijdens een actieve cyclus, bevestigt WashData dat de cyclus opzettelijk is onderbroken. Nadat de cyclus is afgelopen en de deur nog steeds gesloten is, verandert de status in 'Reinigen' totdat de deur wordt geopend. Let op: als u de deur sluit, wordt een gepauzeerde cyclus NIET automatisch hervat; het hervatten moet handmatig worden geactiveerd via de knop Cyclus hervatten of via de service.",
+          "pause_cuts_power": "Wanneer u pauzeert via de knop Pause Cycle of service, schakelt u ook de geconfigureerde switch-entiteit uit. Wordt alleen van kracht als er voor dit apparaat een switch-entiteit is geconfigureerd.",
+          "notify_unload_delay_minutes": "Stuur een melding via het finishmeldingskanaal nadat de cyclus is afgelopen en de deur al zoveel minuten niet is geopend (vereist Door Sensor). Stel in op 0 om uit te schakelen. Standaard: 60 minuten.",
+          "switch_entity": "De schakelentiteit die moet worden omgeschakeld tijdens het pauzeren of hervatten. Vereist wanneer 'Cut Power When Pausing' is ingeschakeld.",
+          "delay_start_detect_enabled": "Indien ingeschakeld, wordt een korte stroompiek bij laag energieverbruik, gevolgd door aanhoudend stand-byvermogen, gedetecteerd als een vertraagde start. De statussensor geeft tijdens de vertraging 'Wachten op start' weer. Er wordt geen programmatijd of voortgang bijgehouden totdat de cyclus daadwerkelijk begint. Vereist dat start_threshold_w wordt ingesteld boven het drain-piekvermogen.",
+          "delay_drain_min_power": "Minimaal vermogen (W) om te herkennen als een afvoerpiek. Ingesteld net boven het werkelijke stand-byniveau van uw machine. Standaard: 10 W.",
+          "delay_drain_max_power": "Maximaal vermogen (W) voor een afvoerpiek – uitbarstingen daarboven worden behandeld als een echte cyclusstart. Moet onder uw start_threshold_w-instelling liggen. Standaard: 80 W.",
+          "delay_drain_max_duration": "De drainpiek moet binnen dit aantal seconden weer onder het drainvenster vallen om bevestigd te worden. Langere pieken worden behandeld als echte cyclusactiviteit. Standaard: 60 sec.",
+          "delay_timeout_hours": "Veiligheidstime-out: als de machine na dit aantal uren nog steeds in 'Wachten om te starten' staat, wordt WashData gereset naar Uit. Standaard: 8 uur."
         }
       },
       "diagnostics": {
@@ -453,14 +485,14 @@
         }
       },
       "cleanup_profile": {
-        "title": "Geschiedenis opschonen — Profiel selecteren",
+        "title": "Geschiedenis opschonen - Profiel selecteren",
         "description": "Selecteer een profiel om te visualiseren. Er wordt een grafiek gegenereerd met alle eerdere cycli voor dit profiel om uitschieters te kunnen identificeren.",
         "data": {
           "profile": "Profiel"
         }
       },
       "cleanup_select": {
-        "title": "Geschiedenis opschonen — Grafiek & verwijderen",
+        "title": "Geschiedenis opschonen - Grafiek & verwijderen",
         "description": "![Grafiek]({graph_url})\n\n**{profile_name} wordt gevisualiseerd**\n\nDe grafiek toont individuele cycli als gekleurde lijnen. Identificeer uitschieters (lijnen ver van de groep) en match hun kleur in de onderstaande lijst om ze te verwijderen.\n\n**Selecteer cycli om PERMANENT te verwijderen:**",
         "data": {
           "cycles_to_delete": "Te verwijderen cycli (controleer overeenkomende kleuren)"
@@ -565,7 +597,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Cyclus trimmen — Cyclus selecteren",
+        "title": "Cyclus trimmen - Cyclus selecteren",
         "description": "Selecteer een cyclus om te trimmen. ✓ = voltooid, ⚠ = hervat, ✗ = onderbroken",
         "data": {
           "cycle_id": "Cyclus"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "Trimbegin instellen",
-        "description": "Voer de minutenoffset in vanaf waar gegevens moeten worden bewaard (0 = cyclusstart).",
+        "description": "Cyclusvenster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nHuidige start: **{current_wallclock}** (+{current_offset_min} min vanaf cyclusstart)\n\nKies een nieuwe starttijd met behulp van de klokkiezer hieronder.",
         "data": {
-          "trim_start_min": "Begin (minuten)"
+          "trim_start_time": "Nieuwe starttijd",
+          "trim_start_min": "Nieuwe start (minuten vanaf het begin van de cyclus)"
         }
       },
       "trim_cycle_end": {
         "title": "Trimeinde instellen",
-        "description": "Voer de minutenoffset in waar het bewaren van gegevens moet stoppen.",
+        "description": "Cyclusvenster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nHuidig einde: **{current_wallclock}** (+{current_offset_min} min vanaf cyclusstart)\n\nKies een nieuwe eindtijd met behulp van de klokkiezer hieronder.",
         "data": {
-          "trim_end_min": "Einde (minuten)"
+          "trim_end_time": "Nieuwe eindtijd",
+          "trim_end_min": "Nieuw einde (minuten vanaf het begin van de cyclus)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: voorgestelde instellingen gereed ({device})",
       "suggestions_ready_notification_message": "De sensor **Voorgestelde instellingen** rapporteert nu **{count}** bruikbare aanbevelingen.\n\nOm ze te bekijken en toe te passen: **Instellingen > Apparaten en services > WashData > Configureren > Geavanceerde instellingen > Voorgestelde waarden toepassen**.\n\nSuggesties zijn optioneel en worden ter beoordeling getoond voordat u ze opslaat.",
       "trim_range_invalid": "Begin moet vóór het einde liggen. Pas uw trimpunten aan.",
-      "trim_failed": "Trimmen mislukt. De cyclus bestaat mogelijk niet meer of het venster is leeg."
+      "trim_failed": "Trimmen mislukt. De cyclus bestaat mogelijk niet meer of het venster is leeg.",
+      "auto_tune_suggestion": "{device_type} {device_title} heeft spookcycli gedetecteerd. Voorgestelde min_power wijziging: {current_min}W -> {new_min}W (niet automatisch toegepast).",
+      "auto_tune_title": "WashData automatisch afstemmen",
+      "auto_tune_fallback": "{device_type} {device_title} heeft spookcycli gedetecteerd. Voorgestelde min_power wijziging: {current_min}W -> {new_min}W (niet automatisch toegepast)."
     },
     "abort": {
       "no_cycles_found": "Geen cycli gevonden",
@@ -740,7 +777,7 @@
         "edit_profile": "Profiel bewerken/hernoemen",
         "delete_profile": "Profiel verwijderen",
         "profile_stats": "Profielstatistieken",
-        "cleanup_profile": "Geschiedenis opschonen — Grafiek & verwijderen",
+        "cleanup_profile": "Geschiedenis opschonen - Grafiek & verwijderen",
         "assign_phases": "Fasebereiken toewijzen"
       }
     },
@@ -779,10 +816,10 @@
     },
     "resolve_feedback_action": {
       "options": {
-        "confirm": "Bevestigen — Detectie correct",
-        "correct": "Corrigeren — Programma/duur kiezen",
-        "ignore": "Negeren — Vals positief/ruizige cyclus",
-        "delete": "Verwijderen — Uit geschiedenis verwijderen"
+        "confirm": "Bevestigen - Detectie correct",
+        "correct": "Corrigeren - Programma/duur kiezen",
+        "ignore": "Negeren - Vals positief/ruizige cyclus",
+        "delete": "Verwijderen - Uit geschiedenis verwijderen"
       }
     },
     "assign_profile_phases_auto_detect_action": {
@@ -973,6 +1010,26 @@
           "description": "Gegevens bewaren tot deze offset in seconden. Standaard = volledige duur."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pauzeer cyclus",
+      "description": "Pauzeer de actieve cyclus voor een WashData-apparaat.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Het WashData-apparaat om te pauzeren."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Hervat cyclus",
+      "description": "Hervat een gepauzeerde cyclus voor een WashData-apparaat.",
+      "fields": {
+        "device_id": {
+          "name": "Apparaat",
+          "description": "Het WashData-apparaat om te hervatten."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "Opstarten",
           "running": "Actief",
           "paused": "Gepauzeerd",
+          "user_paused": "Gepauzeerd door gebruiker",
           "ending": "Eindigen",
           "finished": "Voltooid",
           "anti_wrinkle": "Anti-kreuk",
+          "delay_wait": "Wachten om te beginnen",
           "interrupted": "Onderbroken",
           "force_stopped": "Geforceerd gestopt",
           "rinse": "Spoelen",
-          "unknown": "Onbekend"
+          "unknown": "Onbekend",
+          "clean": "Schoon"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "Beschikbare voorgestelde instellingen"
+      },
+      "pump_runs_today": {
+        "name": "Pomp draait (laatste 24 uur)"
+      },
+      "cycle_count": {
+        "name": "Cyclustelling"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Cyclus geforceerd beëindigen"
+      },
+      "pause_cycle": {
+        "name": "Pauzeer cyclus"
+      },
+      "resume_cycle": {
+        "name": "Hervat cyclus"
       }
     }
   },
@@ -1074,10 +1146,19 @@
       "message": "Cyclus niet gevonden of heeft geen vermogensgegevens."
     },
     "trim_failed_empty_window": {
-      "message": "Trimmen mislukt — cyclus niet gevonden, geen vermogensgegevens of het resulterende venster is leeg."
+      "message": "Trimmen mislukt - cyclus niet gevonden, geen vermogensgegevens of het resulterende venster is leeg."
     },
     "trim_invalid_range": {
       "message": "trim_end_s moet groter zijn dan trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Een geldige device_id is vereist."
+    },
+    "cycle_id_required": {
+      "message": "Een geldige cyclus_id is vereist."
+    },
+    "profile_name_required": {
+      "message": "Een geldige profielnaam is vereist."
     }
   }
 }

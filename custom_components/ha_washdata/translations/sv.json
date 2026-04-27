@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Granska föreslagna ändringar",
-        "description": "WashData hittade {pending_count} föreslagna värden att tillämpa.\n\nÄndringar att granska:\n{changes}\n\nBekräfta nedan för att föra in dessa värden i formuläret. De sparas inte förrän du skickar in avancerade inställningar.",
+        "description": "WashData hittades **{pending_count}** föreslagna värden att tillämpa.\n\nÄndringar:\n{changes}\n\n✅ Markera rutan nedan och klicka på **Skicka** för att tillämpa och spara dessa ändringar omedelbart.\n❌ Lämna det omarkerat och klicka på **Skicka** för att avbryta och gå tillbaka.",
         "data": {
-          "confirm_apply_suggestions": "Fyll i föreslagna värden i avancerade inställningar"
+          "confirm_apply_suggestions": "Tillämpa och spara dessa ändringar"
         }
       },
       "settings": {
@@ -72,19 +72,20 @@
           "power_sensor": "Effektsensorenhet",
           "min_power": "Minsta effekt (W)",
           "off_delay": "Cykelslutfördröjning (s)",
-          "notify_service": "Aviseringstjänst (t.ex. notify.mobile_app)",
           "notify_actions": "Aviseringsåtgärder",
           "notify_people": "Fördröj leveransen tills dessa personer är hemma",
           "notify_only_when_home": "Fördröj aviseringar tills den valda personen är hemma",
           "notify_fire_events": "Aktivera automationshändelser",
-          "notify_events": "Händelser att avisera om",
           "notify_before_end_minutes": "Förhandsavisering (minuter före slut)",
           "notify_title": "Aviseringsrubrik",
           "notify_icon": "Aviseringsikon",
           "notify_start_message": "Meddelandeformat för start",
           "notify_finish_message": "Meddelandeformat för slut",
           "notify_pre_complete_message": "Meddelandeformat för förhandsavisering",
-          "show_advanced": "Redigera avancerade inställningar (nästa steg)"
+          "show_advanced": "Redigera avancerade inställningar (nästa steg)",
+          "notify_start_services": "Cykelstart - Aviseringsmål",
+          "notify_finish_services": "Cykelavslutning - Notifieringsmål",
+          "notify_live_services": "Liveframsteg - Aviseringsmål"
         },
         "data_description": {
           "apply_suggestions": "Markera den här rutan för att kopiera värden som föreslås av inlärningsalgoritmen till formuläret. Granska innan du sparar.\n\nFöreslagna (från inlärning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -92,30 +93,29 @@
           "power_sensor": "Sensorenheten rapporterar effekt i realtid (i watt). Du kan ändra detta när som helst utan att förlora historisk data – användbart om du byter ut en smart kontakt.",
           "min_power": "Effektavläsningar över detta tröskelvärde (i watt) indikerar att apparaten är igång. Börja med 2W för de flesta enheter.",
           "off_delay": "Sekunder måste den utjämnade effekten hålla sig under stopptröskeln för att markera slutförande. Standard: 120s.",
-          "notify_service": "Home Assistant-aviseringstjänst att använda (valfritt).",
           "notify_actions": "Valfri Home Assistant-åtgärdssekvens att köra för aviseringar (skript, avisering, TTS, etc.). Om inställt körs åtgärder innan reservaviseringstjänst.",
           "notify_people": "Personenheter som används för närvarogrind. När det är aktiverat fördröjs aviseringsleveransen tills minst en vald person är hemma.",
           "notify_only_when_home": "Om aktiverat, fördröja aviseringar tills minst en vald person är hemma.",
           "notify_fire_events": "Om aktiverat, utlöser Home Assistant-händelser för cykelstart och -slut (ha_washdata_cycle_started och ha_washdata_cycle_ended) för att driva automatiseringar.",
-          "notify_events": "Vilka händelser aviseringar ska skickas för.",
           "notify_before_end_minutes": "Minuter före det beräknade slutet av cykeln för att utlösa ett meddelande. Ställ in på 0 för att inaktivera. Standard: 0.",
           "notify_title": "Anpassad rubrik för aviseringar. Stöder platshållaren {device}.",
           "notify_icon": "Ikon att använda för aviseringar (t.ex. mdi:washing-machine). Lämna tomt för att skicka utan ikon.",
           "notify_start_message": "Meddelande som skickas när en cykel startar. Stöder platshållaren {device}.",
           "notify_finish_message": "Meddelande som skickas när en cykel är klar. Stöder platshållarna {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Meddelande som skickas innan slutförandet. Stöder platshållarna {device}, {minutes}."
+          "notify_pre_complete_message": "Meddelande som skickas innan slutförandet. Stöder platshållarna {device}, {minutes}.",
+          "notify_start_services": "En eller flera aviseringstjänster för att varna när en cykel börjar. Lämna tomt för att hoppa över startaviseringar.",
+          "notify_finish_services": "En eller flera aviseringstjänster för att varna när en cykel avslutas eller närmar sig slutförd. Lämna tomt för att hoppa över slutaviseringar.",
+          "notify_live_services": "En eller flera aviseringstjänster för att ta emot förloppsuppdateringar i realtid medan cykeln körs (endast mobilappen). Lämna tomt för att hoppa över liveuppdateringar."
         }
       },
       "notifications": {
         "title": "Aviseringar",
         "description": "Konfigurera aviseringskanaler, mallar och valfria liveuppdateringar för mobila framsteg.",
         "data": {
-          "notify_service": "Aviseringstjänst (t.ex. notify.mobile_app)",
           "notify_actions": "Aviseringsåtgärder",
           "notify_people": "Fördröj leveransen tills dessa personer är hemma",
           "notify_only_when_home": "Fördröj aviseringar tills den valda personen är hemma",
           "notify_fire_events": "Aktivera automationshändelser",
-          "notify_events": "Händelser att avisera om",
           "notify_before_end_minutes": "Förhandsavisering (minuter före slut)",
           "notify_live_interval_seconds": "Liveuppdateringsintervall (sekunder)",
           "notify_live_overrun_percent": "Tillåten överskridning för liveuppdateringar (%)",
@@ -123,23 +123,33 @@
           "notify_icon": "Aviseringsikon",
           "notify_start_message": "Meddelandeformat för start",
           "notify_finish_message": "Meddelandeformat för slut",
-          "notify_pre_complete_message": "Meddelandeformat för förhandsavisering"
+          "notify_pre_complete_message": "Meddelandeformat för förhandsavisering",
+          "notify_start_services": "Cykelstart - Aviseringsmål",
+          "notify_finish_services": "Cykelavslutning - Notifieringsmål",
+          "notify_live_services": "Liveframsteg - Aviseringsmål",
+          "notify_live_chronometer": "Kronometer nedräkningstimer",
+          "energy_price_entity": "Energipris – enhet (valfritt)",
+          "energy_price_static": "Energipris – statiskt värde (valfritt)"
         },
         "data_description": {
-          "notify_service": "Home Assistant-aviseringstjänst att använda (valfritt).",
           "notify_actions": "Valfri Home Assistant-åtgärdssekvens att köra för aviseringar (skript, avisering, TTS, etc.). Om inställt körs åtgärder innan reservaviseringstjänst.",
           "notify_people": "Personenheter som används för närvarogrind. När det är aktiverat fördröjs aviseringsleveransen tills minst en vald person är hemma.",
           "notify_only_when_home": "Om aktiverat, fördröja aviseringar tills minst en vald person är hemma.",
           "notify_fire_events": "Om aktiverat, utlöser Home Assistant-händelser för cykelstart och -slut (ha_washdata_cycle_started och ha_washdata_cycle_ended) för att driva automatiseringar.",
-          "notify_events": "Vilka händelser aviseringar ska skickas för.",
           "notify_before_end_minutes": "Minuter före det beräknade slutet av cykeln för att utlösa ett meddelande. Ställ in på 0 för att inaktivera. Standard: 0.",
-          "notify_live_interval_seconds": "Hur ofta förloppsuppdateringar skickas under körning. Lägre värden är mer lyhörda men förbrukar fler aviseringar. Minst 30 sekunder tillämpas — värden under 30 s avrundas automatiskt uppåt till 30 s.",
+          "notify_live_interval_seconds": "Hur ofta förloppsuppdateringar skickas under körning. Lägre värden är mer lyhörda men förbrukar fler aviseringar. Minst 30 sekunder tillämpas - värden under 30 s avrundas automatiskt uppåt till 30 s.",
           "notify_live_overrun_percent": "Säkerhetsmarginal över det uppskattade uppdateringsantalet för långa/överskridande cykler (t.ex. 20 % tillåter 1,2x uppskattade uppdateringar).",
           "notify_title": "Anpassad rubrik för aviseringar. Stöder platshållaren {device}.",
           "notify_icon": "Ikon att använda för aviseringar (t.ex. mdi:washing-machine). Lämna tomt för att skicka utan ikon.",
           "notify_start_message": "Meddelande som skickas när en cykel startar. Stöder platshållaren {device}.",
           "notify_finish_message": "Meddelande som skickas när en cykel är klar. Stöder platshållarna {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "Meddelande som skickas innan slutförandet. Stöder platshållarna {device}, {minutes}."
+          "notify_pre_complete_message": "Meddelande som skickas innan slutförandet. Stöder platshållarna {device}, {minutes}.",
+          "notify_start_services": "En eller flera aviseringstjänster för att varna när en cykel börjar (t.ex. notify.mobile_app_my_phone). Lämna tomt för att hoppa över startaviseringar.",
+          "notify_finish_services": "En eller flera aviseringstjänster för att varna när en cykel avslutas eller närmar sig slutförd. Lämna tomt för att hoppa över slutaviseringar.",
+          "notify_live_services": "En eller flera aviseringstjänster för att ta emot förloppsuppdateringar i realtid medan cykeln körs (endast mobilappen). Lämna tomt för att hoppa över liveuppdateringar.",
+          "notify_live_chronometer": "När den är aktiverad inkluderar varje liveuppdatering en kronometernedräkning till den beräknade sluttiden. Aviseringstimern tickar ner automatiskt på enheten mellan uppdateringar (endast medföljande Android-app).",
+          "energy_price_entity": "Välj en numerisk enhet som har det aktuella elpriset (t.ex. sensor.elpris, input_number.energy_rate). När den är inställd aktiveras platshållaren {cost}. Har företräde framför det statiska värdet om båda är konfigurerade.",
+          "energy_price_static": "Fast elpris per kWh. När den är inställd aktiveras platshållaren {cost}. Ignoreras om en enhet är konfigurerad ovan. Lägg till din valutasymbol i meddelandemallen, t.ex. {cost} €."
         }
       },
       "advanced_settings": {
@@ -189,7 +199,18 @@
           "dtw_bandwidth": "DTW-bandbredd",
           "external_end_trigger_enabled": "Aktivera extern cykelslututlösare",
           "external_end_trigger": "Extern cykelslutsensor",
-          "external_end_trigger_inverted": "Invertera utlösarlogik (utlösning vid AV)"
+          "external_end_trigger_inverted": "Invertera utlösarlogik (utlösning vid AV)",
+          "suppress_feedback_notifications": "Undertryck feedbackmeddelanden",
+          "pump_stuck_duration": "Varningströskel för pump fastnat (er) (endast pump)",
+          "door_sensor_entity": "Dörrsensor",
+          "pause_cuts_power": "Bryt strömmen vid paus",
+          "notify_unload_delay_minutes": "Fördröjning av meddelande för tvätt som väntar (min)",
+          "switch_entity": "Switch Entity (för pausströmavbrott)",
+          "delay_start_detect_enabled": "Aktivera detektering av fördröjd start",
+          "delay_drain_min_power": "Fördröjd start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Fördröjd start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Fördröjd start: Max dräneringsspik varaktighet (s)",
+          "delay_timeout_hours": "Fördröjd start: Max väntetid (h)"
         },
         "data_description": {
           "apply_suggestions": "Markera den här rutan för att öppna ett granskningssteg för föreslagna värden från inlärningsalgoritmen. Ingenting sparas automatiskt.\n\nFöreslagna (från inlärning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -235,7 +256,18 @@
           "dtw_bandwidth": "Maximal tillåten tidssträckning som ett förhållande av cykelns varaktighet. Högre värden tillåter matchning av mycket varierande cykler men ökar CPU-kostnaden. Standard: 0,20 (20%).",
           "external_end_trigger_enabled": "Aktivera övervakning av en extern binär sensor för att utlösa cykelavslutning.",
           "external_end_trigger": "Välj en binär sensorenhet. När denna sensor utlöses avslutas den aktuella cykeln med status \"slutförd\".",
-          "external_end_trigger_inverted": "Som standard utlöses avtryckaren när sensorn slås PÅ. Markera den här rutan för att utlösa när sensorn stängs AV istället."
+          "external_end_trigger_inverted": "Som standard utlöses avtryckaren när sensorn slås PÅ. Markera den här rutan för att utlösa när sensorn stängs AV istället.",
+          "suppress_feedback_notifications": "När den är aktiverad kommer WashData fortfarande att spåra och begära feedback internt men kommer inte att visa beständiga meddelanden som ber dig att bekräfta cykler. Användbart när cykler alltid upptäcks korrekt och du tycker att uppmaningarna är distraherande.",
+          "pump_stuck_duration": "Om en pumpcykel fortfarande körs efter så här många sekunder, utlöses en ha_washdata_pump_stuck-händelse en gång. Använd denna för att upptäcka en motor som har fastnat (typisk drift av sumppumpen är under 60 s). Standard: 1800 s (30 min). Endast pumpenhetstyp.",
+          "door_sensor_entity": "Tillval binär sensor för maskindörren (på = öppen, av = stängd). När dörren öppnas under en aktiv cykel, kommer WashData att bekräfta att cykeln är avsiktlig pausad. Efter cykelns slut, om dörren fortfarande är stängd, ändras tillståndet till 'Rengör' tills dörren öppnas. Obs: att stänga dörren återupptar INTE en pausad cykel automatiskt – återuppta måste utlösas manuellt via knappen Återuppta cykel eller tjänst.",
+          "pause_cuts_power": "När du pausar via Pause Cycle-knappen eller tjänsten, stäng också av den konfigurerade switch-entiteten. träder endast i kraft om en switch-enhet är konfigurerad för den här enheten.",
+          "notify_unload_delay_minutes": "Skicka ett meddelande via aviseringskanalen för mål efter att cykeln är slut och dörren inte har öppnats på så många minuter (kräver Dörrsensor). Ställ in på 0 för att inaktivera. Standard: 60 min.",
+          "switch_entity": "Växlingsenheten att växla när du pausar eller återupptar. Krävs när \"Klipp av ström vid paus\" är aktiverat.",
+          "delay_start_detect_enabled": "När den är aktiverad, upptäcks en kort tömningsspets med låg effekt följt av ihållande standby-ström som en fördröjd start. Statussensorn visar 'Väntar på att starta' under fördröjningen. Ingen programtid eller framsteg spåras förrän cykeln faktiskt börjar. Kräver att start_threshold_w ställs in över dräneringsspetseffekten.",
+          "delay_drain_min_power": "Minsta effekt (W) för att känna igen som en dräneringsspets. Ställ in precis ovanför maskinens avstängda standby-nivå. Standard: 10 W.",
+          "delay_drain_max_power": "Maximal effekt (W) för en dräneringsspets — skurar ovanför detta behandlas som en riktig cykelstart. Bör vara under din start_threshold_w-inställning. Standard: 80 W.",
+          "delay_drain_max_duration": "Dräneringsspetsen måste falla tillbaka under dräneringsfönstret inom så många sekunder för att bekräftas. Längre spikar behandlas som riktig cykelaktivitet. Standard: 60 s.",
+          "delay_timeout_hours": "Säkerhetstidsgräns: om maskinen fortfarande är i 'Väntar på start' efter så många timmar, återställs WashData till Av. Standard: 8 timmar."
         }
       },
       "diagnostics": {
@@ -565,7 +597,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Trimma cykel — Välj cykel",
+        "title": "Trimma cykel - Välj cykel",
         "description": "Välj en cykel att trimma. ✓ = klar, ⚠ = återupptagen, ✗ = avbruten",
         "data": {
           "cycle_id": "Cykel"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "Ange trimstart",
-        "description": "Ange minutoffset att börja behålla data från (0 = cykelstart).",
+        "description": "Cykelfönster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNuvarande start: **{current_wallclock}** (+{current_offset_min} min från cykelstart)\n\nVälj en ny starttid med hjälp av klockväljaren nedan.",
         "data": {
-          "trim_start_min": "Start (minuter)"
+          "trim_start_time": "Ny starttid",
+          "trim_start_min": "Ny start (minuter från cykelstart)"
         }
       },
       "trim_cycle_end": {
         "title": "Ange trimslut",
-        "description": "Ange minutoffset att sluta behålla data vid.",
+        "description": "Cykelfönster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNuvarande slut: **{current_wallclock}** (+{current_offset_min} min från cykelstart)\n\nVälj en ny sluttid med hjälp av klockväljaren nedan.",
         "data": {
-          "trim_end_min": "Slut (minuter)"
+          "trim_end_time": "Ny sluttid",
+          "trim_end_min": "Nytt slut (minuter från cykelstart)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: Föreslagna inställningar klara ({device})",
       "suggestions_ready_notification_message": "Sensorn **Tillgängliga föreslagna inställningar** rapporterar nu **{count}** åtgärdbara rekommendationer.\n\nSå här granskar och tillämpar du dem: **Inställningar > Enheter och tjänster > WashData > Konfigurera > Avancerade inställningar > Tillämpa föreslagna värden**.\n\nFörslag är valfria och visas för granskning innan du sparar.",
       "trim_range_invalid": "Starten måste vara före slutet. Justera dina trimpunkter.",
-      "trim_failed": "Trimmningen misslyckades. Cykeln kanske inte längre finns eller så är fönstret tomt."
+      "trim_failed": "Trimmningen misslyckades. Cykeln kanske inte längre finns eller så är fönstret tomt.",
+      "auto_tune_suggestion": "{device_type} {device_title} upptäckte spökcykler. Föreslagen min_effektändring: {current_min}W -> {new_min}W (tillämpas inte automatiskt).",
+      "auto_tune_title": "WashData Auto-Tune",
+      "auto_tune_fallback": "{device_type} {device_title} upptäckte spökcykler. Föreslagen min_effektändring: {current_min}W -> {new_min}W (tillämpas inte automatiskt)."
     },
     "abort": {
       "no_cycles_found": "Inga cykler hittades",
@@ -973,6 +1010,26 @@
           "description": "Behåll data upp till denna offset i sekunder. Standard = full varaktighet."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pauscykel",
+      "description": "Pausa den aktiva cykeln för en WashData-enhet.",
+      "fields": {
+        "device_id": {
+          "name": "Anordning",
+          "description": "WashData-enheten att pausa."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Återuppta cykeln",
+      "description": "Återuppta en pausad cykel för en WashData-enhet.",
+      "fields": {
+        "device_id": {
+          "name": "Anordning",
+          "description": "WashData-enheten ska återupptas."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "Startar",
           "running": "Igång",
           "paused": "Pausad",
+          "user_paused": "Pausad av användare",
           "ending": "Avslutar",
           "finished": "Färdig",
           "anti_wrinkle": "Antirynkläge",
+          "delay_wait": "Väntar på att starta",
           "interrupted": "Avbruten",
           "force_stopped": "Tvångsstoppad",
           "rinse": "Sköljning",
-          "unknown": "Okänd"
+          "unknown": "Okänd",
+          "clean": "Rena"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "Tillgängliga föreslagna inställningar"
+      },
+      "pump_runs_today": {
+        "name": "Pumpen går (senaste 24 timmarna)"
+      },
+      "cycle_count": {
+        "name": "Cykelräkning"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Tvinga cykelavslut"
+      },
+      "pause_cycle": {
+        "name": "Pauscykel"
+      },
+      "resume_cycle": {
+        "name": "Återuppta cykeln"
       }
     }
   },
@@ -1078,6 +1150,15 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s måste vara större än trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Ett giltigt device_id krävs."
+    },
+    "cycle_id_required": {
+      "message": "Ett giltigt cycle_id krävs."
+    },
+    "profile_name_required": {
+      "message": "Ett giltigt profile_name krävs."
     }
   }
 }

@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN
 from .manager import WashDataManager
 
-# Keys that can identify the user or their home network — redacted in all contexts.
+# Keys that can identify the user or their home network - redacted in all contexts.
 _SENSITIVE_KEYS = {
     "auth",
     "entry_id",
@@ -24,10 +24,16 @@ _SENSITIVE_KEYS = {
     "user_id",
     # HA entity / service references that reveal home topology.
     "notify_service",
+    "notify_start_services",
+    "notify_finish_services",
+    "notify_live_services",
     "notify_people",
     "notify_actions",
     "power_sensor",
     "external_end_trigger",
+    "door_sensor_entity",
+    "switch_entity",
+    "energy_price_entity",
 }
 
 
@@ -48,7 +54,7 @@ async def async_get_config_entry_diagnostics(
     """Return diagnostics for a config entry."""
     manager: WashDataManager = hass.data[DOMAIN][entry.entry_id]
 
-    # Full store export — same payload as the export_config service, but the
+    # Full store export - same payload as the export_config service, but the
     # entry_data / entry_options pass through the redactor to strip personal keys.
     exported: dict[str, Any] = manager.profile_store.export_data(
         entry_data=dict(entry.data),
@@ -76,4 +82,9 @@ async def async_get_config_entry_diagnostics(
             },
         },
         "store_export": _redact(exported),
+        # Rolling 24-hour in-memory buffers (redacted: msg fields stripped from logs).
+        # power_trace:   [[iso_ts, watts], ...] - every raw sensor reading
+        # state_history: [{ts, from, to, program}, ...] - detector state changes
+        # logs:          [{ts, lvl}, ...] - log timestamps and levels (msg removed)
+        "live_diagnostics": manager.diag_buffer.redacted_snapshot(),
     }
