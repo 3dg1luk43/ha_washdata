@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Peržiūrėkite siūlomus pakeitimus",
-        "description": "WashData rado **{pending_count}** siūlomą(-as) reikšmę(-es) taikymui.\n\nPakeitimai:\n{changes}\n\n✅ Pažymėkite žemiau esantį laukelį ir spustelėkite **Pateikti**, kad nedelsiant pritaikytumėte ir išsaugotumėte šiuos pakeitimus.\n❌ Palikite nepažymėtą ir spustelėkite **Pateikti**, kad atšauktumėte ir grįžtumėte atgal.",
+        "description": "Rasta „WashData“ **{pending_count}** siūloma (-ių) taikyti vertė (-ės).\n\nPakeitimai:\n{changes}\n\n✅ Pažymėkite toliau esantį laukelį ir spustelėkite **Pateikti**, kad pritaikytumėte ir išsaugotumėte šiuos pakeitimus nedelsiant.\n❌ Palikite jį nepažymėtą ir spustelėkite **Pateikti**, kad atšauktumėte ir grįžtumėte atgal.",
         "data": {
-          "confirm_apply_suggestions": "Pritaikyti ir išsaugoti šiuos pakeitimus"
+          "confirm_apply_suggestions": "Taikykite ir išsaugokite šiuos pakeitimus"
         }
       },
       "settings": {
@@ -206,11 +206,11 @@
           "pause_cuts_power": "Išjunkite maitinimą pristabdydami",
           "notify_unload_delay_minutes": "Pranešimo apie skalbinių laukimą delsa (min.)",
           "switch_entity": "Jungiklio objektas (pristabdyti maitinimo nutraukimą)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Įgalinti atidėto paleidimo aptikimą",
+          "delay_drain_min_power": "Atidėtas paleidimas: išleidimo smaigalys, minimali galia (W)",
+          "delay_drain_max_power": "Atidėtas paleidimas: didžiausios galios nutekėjimo smaigalys (W)",
+          "delay_drain_max_duration": "Atidėtas paleidimas: maksimali nutekėjimo smaigalio trukmė (s)",
+          "delay_timeout_hours": "Atidėtas startas: maksimalus laukimo laikas (h)"
         },
         "data_description": {
           "apply_suggestions": "Pažymėkite šį laukelį, kad atidarytumėte siūlomų verčių iš mokymosi algoritmo peržiūros žingsnį. Niekas neišsaugoma automatiškai.\n\nSiūloma (iš mokymosi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -263,11 +263,11 @@
           "pause_cuts_power": "Pristabdydami naudodami mygtuką Pause Cycle arba paslaugą, taip pat išjunkite sukonfigūruotą jungiklio objektą. Įsigalioja tik tada, jei šiam įrenginiui sukonfigūruotas jungiklio objektas.",
           "notify_unload_delay_minutes": "Pasibaigus ciklui ir durims neatidarius tiek minučių, išsiųskite pranešimą per pranešimo apie pabaigą kanalą (reikalingas durų jutiklis). Norėdami išjungti, nustatykite 0. Numatytasis: 60 min.",
           "switch_entity": "Perjungimo objektas, perjungiamas pristabdant arba tęsiant. Reikalingas, kai įjungta parinktis „Išjungti maitinimą pristabdant“.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Kai įjungta, trumpas mažos galios nutekėjimo šuolis, po kurio eina nuolatinis budėjimo režimas, aptinkamas kaip atidėtas paleidimas. Vėlavimo metu būsenos jutiklis rodo pranešimą „Laukiama pradžios“. Joks programos laikas ar eiga nesekami tol, kol ciklas iš tikrųjų neprasideda. Reikalinga, kad start_threshold_w būtų nustatytas virš nutekėjimo smaigalio galios.",
+          "delay_drain_min_power": "Minimali galia (W), kurią galima atpažinti kaip nutekėjimo smaigalį. Nustatykite tiesiai virš įrenginio tikrojo budėjimo režimo lygio. Numatytoji galia: 10 W.",
+          "delay_drain_max_power": "Didžiausia galia (W) nutekėjimo smaigaliui – viršijantys sprogimai traktuojami kaip tikroji ciklo pradžia. Turėtų būti mažesnis nei start_threshold_w nustatymas. Numatytoji galia: 80 W.",
+          "delay_drain_max_duration": "Kad būtų patvirtinta, drenažo smaigalys turi nukristi žemiau išleidimo lango per tiek sekundžių. Ilgesni smaigai laikomi realia ciklo veikla. Numatytasis: 60 s.",
+          "delay_timeout_hours": "Saugos skirtasis laikas: jei aparatas po tiek valandų vis dar yra „Laukiama, kol bus paleista“, „WashData“ iš naujo nustatoma į „Išjungta“. Numatytasis: 8 val."
         }
       },
       "diagnostics": {
@@ -1054,7 +1054,7 @@
           "ending": "Baigiama",
           "finished": "Baigta",
           "anti_wrinkle": "Apsauga nuo raukšlių",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Laukiama pradžios",
           "interrupted": "Nutraukta",
           "force_stopped": "Priverstinai sustabdyta",
           "rinse": "Skalavimas",

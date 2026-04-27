@@ -199,11 +199,11 @@
           "pause_cuts_power": "இடைநிறுத்தப்படும் போது பவரை வெட்டுங்கள்",
           "notify_unload_delay_minutes": "சலவை காத்திருப்பு அறிவிப்பு தாமதம் (நிமிடம்)",
           "switch_entity": "நிறுவனத்தை மாற்றவும் (பவர் கட் இடைநிறுத்தப்படுவதற்கு)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "தாமதமான தொடக்கக் கண்டறிதலை இயக்கு",
+          "delay_drain_min_power": "தாமதமான தொடக்கம்: வடிகால் ஸ்பைக் மின் சக்தி (W)",
+          "delay_drain_max_power": "தாமதமான தொடக்கம்: வடிகால் ஸ்பைக் மேக்ஸ் பவர் (W)",
+          "delay_drain_max_duration": "தாமதமான தொடக்கம்: அதிகபட்ச வடிகால் ஸ்பைக் கால அளவு (கள்)",
+          "delay_timeout_hours": "தாமதமான தொடக்கம்: அதிகபட்ச காத்திருப்பு நேரம் (ம)"
         },
         "data_description": {
           "apply_suggestions": "கற்றல் அல்காரிதத்திலிருந்து பரிந்துரைக்கப்பட்ட மதிப்புகளுக்கான மதிப்பாய்வுப் படியைத் திறக்க இந்தப் பெட்டியைத் தேர்வு செய்யவும். எதுவும் தானாகவே சேமிக்கப்படாது.\n\nபரிந்துரைக்கப்படுகிறது (கற்றலில் இருந்து):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "இடைநிறுத்தம் சுழற்சி பொத்தான் அல்லது சேவை வழியாக இடைநிறுத்தப்படும் போது, ​​உள்ளமைக்கப்பட்ட சுவிட்ச் உட்பொருளையும் அணைக்கவும். இந்தச் சாதனத்தில் சுவிட்ச் உட்பொருளை உள்ளமைத்தால் மட்டுமே நடைமுறைக்கு வரும்.",
           "notify_unload_delay_minutes": "சுழற்சி முடிந்த பிறகும், பல நிமிடங்களுக்கு கதவு திறக்கப்படாமல் இருந்த பிறகு, பினிஷ் அறிவிப்பு சேனல் வழியாக அறிவிப்பை அனுப்பவும் (டோர் சென்சார் தேவை). முடக்க 0 என அமைக்கவும். இயல்புநிலை: 60 நிமிடம்.",
           "switch_entity": "இடைநிறுத்தப்படும்போது அல்லது மீண்டும் தொடங்கும் போது மாறுவதற்கான சுவிட்ச் நிறுவனம். 'இடைநிறுத்தும்போது மின்வெட்டு' இயக்கப்பட்டிருக்கும் போது தேவை.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "இயக்கப்படும் போது, ​​ஒரு சுருக்கமான குறைந்த-பவர் வடிகால் ஸ்பைக்கைத் தொடர்ந்து நிலையான காத்திருப்பு சக்தி தாமதமான தொடக்கமாகக் கண்டறியப்பட்டது. தாமதத்தின் போது 'ஸ்டார்ட் செய்ய காத்திருக்கிறது' என்பதை ஸ்டேட் சென்சார் காட்டுகிறது. சுழற்சி உண்மையில் தொடங்கும் வரை நிரல் நேரம் அல்லது முன்னேற்றம் கண்காணிக்கப்படாது. வடிகால் ஸ்பைக் சக்திக்கு மேலே அமைக்க start_threshold_w தேவை.",
+          "delay_drain_min_power": "வடிகால் ஸ்பைக்காக அங்கீகரிக்க குறைந்தபட்ச சக்தி (W). உங்கள் கணினியின் உண்மையான காத்திருப்பு நிலைக்கு சற்று மேலே அமைக்கவும். இயல்புநிலை: 10 W.",
+          "delay_drain_max_power": "வடிகால் ஸ்பைக்கிற்கான அதிகபட்ச சக்தி (W) - இதற்கு மேல் வெடிப்புகள் உண்மையான சுழற்சி தொடக்கமாகக் கருதப்படுகின்றன. உங்கள் start_threshold_w அமைப்பிற்குக் கீழே இருக்க வேண்டும். இயல்புநிலை: 80 W.",
+          "delay_drain_max_duration": "உறுதிப்படுத்தப்படுவதற்கு இந்த பல வினாடிகளுக்குள் வடிகால் ஸ்பைக் வடிகால் சாளரத்திற்கு கீழே திரும்ப வேண்டும். நீண்ட கூர்முனைகள் உண்மையான சுழற்சி நடவடிக்கையாகக் கருதப்படுகின்றன. இயல்புநிலை: 60 வி.",
+          "delay_timeout_hours": "பாதுகாப்பு நேரம் முடிந்தது: இந்த பல மணிநேரங்களுக்குப் பிறகும் இயந்திரம் 'தொடக்க காத்திருக்கிறது' எனில், WashData முடக்கத்தில் மீட்டமைக்கப்படும். இயல்புநிலை: 8 மணி."
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "பரிந்துரைக்கப்பட்ட மாற்றங்களை மதிப்பாய்வு செய்யவும்",
-        "description": "WashData **{pending_count}** பரிந்துரைக்கப்பட்ட மதிப்பு(கள்) பயன்படுத்த கண்டறிந்தது.\n\nமாற்றங்கள்:\n{changes}\n\n✅ கீழே உள்ள பெட்டியை சரிபார்த்து **சமர்ப்பி** கிளிக் செய்யவும், இந்த மாற்றங்கள் உடனடியாக பயன்படுத்தப்பட்டு சேமிக்கப்படும்.\n❌ அதை சரிபார்க்காமல் விட்டு **சமர்ப்பி** கிளிக் செய்யவும், ரத்துசெய்து திரும்பும்.",
+        "description": "WashData பயன்படுத்துவதற்கு **{pending_count}** பரிந்துரைக்கப்பட்ட மதிப்பு(கள்) கண்டறியப்பட்டது.\n\nமாற்றங்கள்:\n{changes}\n\n✅ கீழே உள்ள பெட்டியை சரிபார்த்து, இந்த மாற்றங்களை உடனடியாக விண்ணப்பிக்கவும் சேமிக்கவும் **சமர்ப்பி** என்பதைக் கிளிக் செய்யவும்.\n❌ அதைத் தேர்வு செய்யாமல் விட்டுவிட்டு, ரத்துசெய்து திரும்பிச் செல்ல **சமர்ப்பி** என்பதைக் கிளிக் செய்யவும்.",
         "data": {
-          "confirm_apply_suggestions": "இந்த மாற்றங்களை பயன்படுத்தி சேமி"
+          "confirm_apply_suggestions": "இந்த மாற்றங்களைப் பயன்படுத்தி சேமிக்கவும்"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "முடிவடைகிறது",
           "finished": "முடிந்தது",
           "anti_wrinkle": "சுருக்க எதிர்ப்பு",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "தொடங்குவதற்கு காத்திருக்கிறது",
           "interrupted": "குறுக்கிடப்பட்டது",
           "force_stopped": "படை நிறுத்தப்பட்டது",
           "rinse": "துவைக்க",

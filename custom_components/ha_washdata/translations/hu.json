@@ -199,11 +199,11 @@
           "pause_cuts_power": "Áramtalanítás szüneteltetéskor",
           "notify_unload_delay_minutes": "A mosásra váró értesítés késése (perc)",
           "switch_entity": "Kapcsoló entitás (az áramszünet szüneteltetéséhez)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Késleltetett indítás észlelésének engedélyezése",
+          "delay_drain_min_power": "Késleltetett indítás: leeresztő tüske minimális teljesítmény (W)",
+          "delay_drain_max_power": "Késleltetett indítás: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Késleltetett indítás: Maximális leeresztő tüske időtartama (s)",
+          "delay_timeout_hours": "Késleltetett indítás: maximális várakozási idő (h)"
         },
         "data_description": {
           "apply_suggestions": "Jelölje be ezt a jelölőnégyzetet a tanulási algoritmus által javasolt értékek áttekintési lépésének megnyitásához. Semmi sem kerül automatikusan mentésre.\n\nJavasolt (tanulásból):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "Ha a Pause Cycle gombbal vagy szolgáltatással szüneteltet, kapcsolja ki a konfigurált kapcsoló entitást is. Csak akkor lép életbe, ha kapcsoló entitás van konfigurálva ehhez az eszközhöz.",
           "notify_unload_delay_minutes": "Értesítés küldése a befejezésértesítési csatornán, miután a ciklus véget ért, és az ajtót ennyi percig nem nyitották ki (Ajtóérzékelő szükséges). A letiltáshoz állítsa 0-ra. Alapértelmezett: 60 perc.",
           "switch_entity": "A kapcsoló entitás, amely szüneteltetéskor vagy folytatáskor válthat. Szükséges, ha a „Tápellátás leállítása szüneteltetéskor” engedélyezve van.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Ha engedélyezve van, a rendszer késleltetett indításként egy rövid, alacsony fogyasztású lemerülési csúcsot, majd tartós készenléti tápellátást észlel. Az állapotérzékelő a „Várakozás az indításra” üzenetet mutatja a késleltetés alatt. A program nem követi nyomon a program idejét vagy előrehaladását, amíg a ciklus el nem kezdődik. A start_threshold_w értéket a leeresztőcsúcs-teljesítmény fölé kell beállítani.",
+          "delay_drain_min_power": "Minimális teljesítmény (W), amelyet leeresztőcsúcsként ismerhetünk fel. Állítsa közvetlenül a készülék készenléti szintje fölé. Alapértelmezett: 10 W.",
+          "delay_drain_max_power": "Maximális teljesítmény (W) egy leeresztő tüske esetén – az e feletti kitöréseket a rendszer valódi ciklusindításként kezeli. A start_threshold_w beállítás alatt kell lennie. Alapértelmezett: 80 W.",
+          "delay_drain_max_duration": "A leeresztő tüskének vissza kell esnie a leeresztőablak alá ennyi másodpercen belül, hogy megerősíthető legyen. A hosszabb tüskék valódi ciklustevékenységként kezelendők. Alapértelmezett: 60 s.",
+          "delay_timeout_hours": "Biztonsági időtúllépés: ha a gép ennyi óra elteltével is „Várakozás az indításra” üzemmódban van, a WashData visszaáll Ki értékre. Alapértelmezett: 8 óra."
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Tekintse át a javasolt változtatásokat",
-        "description": "A WashData **{pending_count}** javasolt értéket talált alkalmazásra.\n\nVáltozások:\n{changes}\n\n✅ Jelölje be az alábbi négyzetet, majd kattintson a **Küldés** gombra a változtatások azonnali alkalmazásához és mentéséhez.\n❌ Hagyja bejelöletlenül, majd kattintson a **Küldés** gombra a megszakításhoz és visszalépéshez.",
+        "description": "A WashData **{pending_count}** javasolt értéket talált az alkalmazásra.\n\nVáltozások:\n{changes}\n\n✅ Jelölje be az alábbi négyzetet, és kattintson a **Küldés** gombra a módosítások azonnali alkalmazásához és mentéséhez.\n❌ Hagyja bejelölés nélkül, és kattintson a **Küldés** gombra a visszavonáshoz és a visszalépéshez.",
         "data": {
-          "confirm_apply_suggestions": "Változtatások alkalmazása és mentése"
+          "confirm_apply_suggestions": "Alkalmazza és mentse el ezeket a módosításokat"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "Befejező",
           "finished": "Befejezett",
           "anti_wrinkle": "Ránctalanító",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Várakozás a kezdésre",
           "interrupted": "Megszakított",
           "force_stopped": "Kényszer leállított",
           "rinse": "Öblítés",

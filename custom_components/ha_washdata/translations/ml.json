@@ -199,11 +199,11 @@
           "pause_cuts_power": "താൽക്കാലികമായി നിർത്തുമ്പോൾ പവർ കട്ട് ചെയ്യുക",
           "notify_unload_delay_minutes": "അലക്കൽ കാത്തിരിപ്പ് അറിയിപ്പ് കാലതാമസം (മിനിറ്റ്)",
           "switch_entity": "എൻ്റിറ്റി മാറുക (താൽക്കാലികമായി പവർ കട്ടിനായി)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "വൈകി ആരംഭിക്കൽ കണ്ടെത്തൽ പ്രവർത്തനക്ഷമമാക്കുക",
+          "delay_drain_min_power": "വൈകിയുള്ള ആരംഭം: ഡ്രെയിൻ സ്പൈക്ക് മിനി പവർ (W)",
+          "delay_drain_max_power": "വൈകി ആരംഭിക്കുന്നത്: ഡ്രെയിൻ സ്പൈക്ക് മാക്സ് പവർ (W)",
+          "delay_drain_max_duration": "വൈകിയുള്ള ആരംഭം: പരമാവധി ഡ്രെയിൻ സ്പൈക്ക് ദൈർഘ്യം (കൾ)",
+          "delay_timeout_hours": "വൈകിയുള്ള ആരംഭം: പരമാവധി കാത്തിരിപ്പ് സമയം (മണിക്കൂർ)"
         },
         "data_description": {
           "apply_suggestions": "പഠന അൽഗോരിതത്തിൽ നിന്ന് നിർദ്ദേശിച്ച മൂല്യങ്ങൾക്കായി ഒരു അവലോകന ഘട്ടം തുറക്കാൻ ഈ ബോക്സ് പരിശോധിക്കുക. യാന്ത്രികമായി ഒന്നും സംരക്ഷിക്കപ്പെടുന്നില്ല.\n\nനിർദ്ദേശിച്ചത് (പഠനത്തിൽ നിന്ന്):\n- മിനി_പവർ: {suggested_min_power} W\n- ഓഫ്_ഡെലേ: {suggested_off_delay} സെ\n- watchdog_interval: {suggested_watchdog_interval} സെ\n- no_update_active_timeout: {suggested_no_update_active_timeout} സെ\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} സെ\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "പോസ് സൈക്കിൾ ബട്ടണിലൂടെയോ സേവനത്തിലൂടെയോ താൽക്കാലികമായി നിർത്തുമ്പോൾ, കോൺഫിഗർ ചെയ്‌ത സ്വിച്ച് എൻ്റിറ്റിയും ഓഫാക്കുക. ഈ ഉപകരണത്തിനായി ഒരു സ്വിച്ച് എൻ്റിറ്റി കോൺഫിഗർ ചെയ്‌തിട്ടുണ്ടെങ്കിൽ മാത്രമേ പ്രാബല്യത്തിൽ വരികയുള്ളൂ.",
           "notify_unload_delay_minutes": "സൈക്കിൾ അവസാനിച്ചതിന് ശേഷം ഫിനിഷ് അറിയിപ്പ് ചാനൽ വഴി ഒരു അറിയിപ്പ് അയയ്‌ക്കുക, ഇത്രയും മിനിറ്റായിട്ടും വാതിൽ തുറന്നിട്ടില്ല (ഡോർ സെൻസർ ആവശ്യമാണ്). പ്രവർത്തനരഹിതമാക്കാൻ 0 ആയി സജ്ജമാക്കുക. സ്ഥിരസ്ഥിതി: 60 മിനിറ്റ്.",
           "switch_entity": "താൽക്കാലികമായി നിർത്തുമ്പോഴോ പുനരാരംഭിക്കുമ്പോഴോ ടോഗിൾ ചെയ്യാനുള്ള സ്വിച്ച് എൻ്റിറ്റി. 'താൽക്കാലികമായി നിർത്തുമ്പോൾ കട്ട് പവർ' പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ ആവശ്യമാണ്.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ, ഒരു ഹ്രസ്വമായ ലോ-പവർ ഡ്രെയിൻ സ്പൈക്കും തുടർന്ന് സുസ്ഥിര സ്റ്റാൻഡ്‌ബൈ പവറും കാലതാമസം നേരിട്ട ആരംഭമായി കണ്ടെത്തും. കാലതാമസത്തിനിടയിൽ സ്റ്റേറ്റ് സെൻസർ 'വെയ്റ്റിംഗ് ടു സ്റ്റാർട്ട്' കാണിക്കുന്നു. സൈക്കിൾ യഥാർത്ഥത്തിൽ ആരംഭിക്കുന്നത് വരെ പ്രോഗ്രാമിൻ്റെ സമയമോ പുരോഗതിയോ ട്രാക്ക് ചെയ്യപ്പെടുന്നില്ല. ഡ്രെയിൻ സ്പൈക്ക് പവറിന് മുകളിൽ സജ്ജീകരിക്കാൻ start_threshold_w ആവശ്യമാണ്.",
+          "delay_drain_min_power": "ഒരു ഡ്രെയിൻ സ്പൈക്ക് ആയി തിരിച്ചറിയാനുള്ള ഏറ്റവും കുറഞ്ഞ പവർ (W). നിങ്ങളുടെ മെഷീൻ്റെ ട്രൂ ഓഫ് സ്റ്റാൻഡ്‌ബൈ ലെവലിന് മുകളിൽ സജ്ജീകരിക്കുക. സ്ഥിരസ്ഥിതി: 10 W.",
+          "delay_drain_max_power": "ഒരു ഡ്രെയിൻ സ്പൈക്കിനുള്ള പരമാവധി പവർ (W) - ഇതിന് മുകളിലുള്ള പൊട്ടിത്തെറികൾ ഒരു യഥാർത്ഥ സൈക്കിൾ ആരംഭമായി കണക്കാക്കുന്നു. നിങ്ങളുടെ start_threshold_w ക്രമീകരണത്തിന് താഴെയായിരിക്കണം. സ്ഥിരസ്ഥിതി: 80 W.",
+          "delay_drain_max_duration": "സ്ഥിരീകരിക്കാൻ ഇത്രയും സെക്കൻഡുകൾക്കുള്ളിൽ ഡ്രെയിൻ സ്‌പൈക്ക് ഡ്രെയിൻ വിൻഡോയ്ക്ക് താഴെയായി താഴേയ്‌ക്ക് വീഴണം. ദൈർഘ്യമേറിയ സ്പൈക്കുകൾ യഥാർത്ഥ സൈക്കിൾ പ്രവർത്തനമായി കണക്കാക്കുന്നു. സ്ഥിരസ്ഥിതി: 60 സെ.",
+          "delay_timeout_hours": "സുരക്ഷാ കാലഹരണപ്പെടൽ: ഇത്രയും മണിക്കൂറുകൾക്ക് ശേഷവും മെഷീൻ 'ആരംഭിക്കാൻ കാത്തിരിക്കുന്നു' എന്നതാണെങ്കിൽ, WashData ഓഫിലേക്ക് പുനഃസജ്ജമാക്കും. സ്ഥിരസ്ഥിതി: 8 മണിക്കൂർ."
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "നിർദ്ദേശിച്ച മാറ്റങ്ങൾ അവലോകനം ചെയ്യുക",
-        "description": "WashData **{pending_count}** നിർദ്ദേശിത മൂല്യ(ങ്ങൾ) പ്രയോഗിക്കുന്നതിന് കണ്ടെത്തി.\n\nമാറ്റങ്ങൾ:\n{changes}\n\n✅ ചുവടെയുള്ള ബോക്സ് ടിക്ക് ചെയ്ത് **സമർപ്പിക്കുക** ക്ലിക്ക് ചെയ്യുക, ഈ മാറ്റങ്ങൾ ഉടൻ പ്രയോഗിച്ച് സേവ് ചെയ്യും.\n❌ ടിക്ക് ഇടാതെ **സമർപ്പിക്കുക** ക്ലിക്ക് ചെയ്യുക, റദ്ദാക്കി തിരികെ പോകും.",
+        "description": "WashData കണ്ടെത്തി **{pending_count}** പ്രയോഗിക്കാൻ നിർദ്ദേശിച്ച മൂല്യം(ങ്ങൾ).\n\nമാറ്റങ്ങൾ:\n{changes}\n\n✅ ഈ മാറ്റങ്ങൾ ഉടനടി പ്രയോഗിക്കാനും സംരക്ഷിക്കാനും ചുവടെയുള്ള ബോക്‌സ് പരിശോധിച്ച് **സമർപ്പിക്കുക** ക്ലിക്ക് ചെയ്യുക.\n❌ ഇത് അൺചെക്ക് ചെയ്യാതെ വിട്ട് റദ്ദാക്കി തിരികെ പോകുന്നതിന് **സമർപ്പിക്കുക** ക്ലിക്ക് ചെയ്യുക.",
         "data": {
-          "confirm_apply_suggestions": "ഈ മാറ്റങ്ങൾ പ്രയോഗിച്ച് സേവ് ചെയ്യുക"
+          "confirm_apply_suggestions": "ഈ മാറ്റങ്ങൾ പ്രയോഗിക്കുകയും സംരക്ഷിക്കുകയും ചെയ്യുക"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "അവസാനിക്കുന്നു",
           "finished": "തീർന്നു",
           "anti_wrinkle": "വിരുദ്ധ ചുളിവുകൾ",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "ആരംഭിക്കാൻ കാത്തിരിക്കുന്നു",
           "interrupted": "തടസ്സപ്പെട്ടു",
           "force_stopped": "ബലപ്രയോഗം നിർത്തി",
           "rinse": "കഴുകിക്കളയുക",

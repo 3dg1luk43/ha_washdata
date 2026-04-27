@@ -199,11 +199,11 @@
           "pause_cuts_power": "Matikan Daya Saat Menjeda",
           "notify_unload_delay_minutes": "Penundaan Notifikasi Tunggu Laundry (mnt)",
           "switch_entity": "Ganti Entitas (untuk Jeda Pemadaman Listrik)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Aktifkan Deteksi Mulai Tertunda",
+          "delay_drain_min_power": "Start Tertunda: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Start Tertunda: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Mulai Tertunda: Durasi Lonjakan Pembuangan Maksimum",
+          "delay_timeout_hours": "Mulai Tertunda: Waktu Tunggu Maks (h)"
         },
         "data_description": {
           "apply_suggestions": "Centang kotak ini untuk membuka langkah peninjauan nilai yang disarankan dari algoritma pembelajaran. Tidak ada yang disimpan secara otomatis.\n\nDisarankan (dari pembelajaran):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "Saat menjeda melalui tombol atau layanan Pause Cycle, matikan juga entitas sakelar yang dikonfigurasi. Hanya berlaku jika entitas saklar dikonfigurasi untuk perangkat ini.",
           "notify_unload_delay_minutes": "Kirim notifikasi melalui saluran notifikasi selesai setelah siklus berakhir dan pintu belum dibuka selama beberapa menit (membutuhkan Sensor Pintu). Setel ke 0 untuk menonaktifkan. Default: 60 menit.",
           "switch_entity": "Entitas peralihan untuk beralih saat menjeda atau melanjutkan. Diperlukan ketika 'Memutus Daya Saat Menjeda' diaktifkan.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Saat diaktifkan, lonjakan pengurasan daya rendah yang diikuti dengan daya siaga berkelanjutan terdeteksi sebagai permulaan yang tertunda. Sensor status menunjukkan 'Menunggu Mulai' selama penundaan. Tidak ada waktu atau kemajuan program yang dilacak hingga siklus benar-benar dimulai. Membutuhkan start_threshold_w untuk disetel di atas daya spike saluran pembuangan.",
+          "delay_drain_min_power": "Daya minimum (W) untuk dikenali sebagai lonjakan saluran pembuangan. Atur tepat di atas tingkat siaga sebenarnya mesin Anda. Standar: 10W.",
+          "delay_drain_max_power": "Daya maksimum (W) untuk lonjakan saluran pembuangan — semburan di atas ini dianggap sebagai awal siklus yang sebenarnya. Harus berada di bawah pengaturan start_threshold_w Anda. Standar: 80 W.",
+          "delay_drain_max_duration": "Lonjakan saluran pembuangan harus turun kembali ke bawah jendela saluran pembuangan dalam beberapa detik untuk dapat dikonfirmasi. Lonjakan yang lebih panjang dianggap sebagai aktivitas siklus nyata. Bawaan: 60 detik.",
+          "delay_timeout_hours": "Batas waktu keselamatan: jika mesin masih berada dalam status 'Menunggu Mulai' setelah beberapa jam, WashData akan diatur ulang ke Mati. Default: 8 jam."
         }
       },
       "diagnostics": {
@@ -591,7 +591,7 @@
       },
       "apply_suggestions_confirm": {
         "title": "Tinjau Perubahan yang Disarankan",
-        "description": "WashData menemukan **{pending_count}** nilai yang disarankan untuk diterapkan.\n\nPerubahan:\n{changes}\n\n✅ Centang kotak di bawah dan klik **Kirim** untuk menerapkan dan menyimpan perubahan ini segera.\n❌ Biarkan tidak dicentang dan klik **Kirim** untuk membatalkan dan kembali.",
+        "description": "WashData menemukan **{pending_count}** nilai yang disarankan untuk diterapkan.\n\nPerubahan:\n{changes}\n\n✅ Centang kotak di bawah dan klik **Kirim** untuk segera menerapkan dan menyimpan perubahan ini.\n❌ Biarkan tidak dicentang dan klik **Kirim** untuk membatalkan dan kembali.",
         "data": {
           "confirm_apply_suggestions": "Terapkan dan simpan perubahan ini"
         }
@@ -1054,7 +1054,7 @@
           "ending": "Akhir",
           "finished": "Selesai",
           "anti_wrinkle": "Anti-Kerut",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Menunggu untuk Memulai",
           "interrupted": "Terganggu",
           "force_stopped": "Paksa Berhenti",
           "rinse": "Membilas",

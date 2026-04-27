@@ -199,11 +199,11 @@
           "pause_cuts_power": "Corte a energia ao pausar",
           "notify_unload_delay_minutes": "Atraso na notificação de espera de lavanderia (min)",
           "switch_entity": "Entidade de comutação (para pausar corte de energia)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Ativar detecção de início atrasado",
+          "delay_drain_min_power": "Início retardado: Potência mínima do pico de drenagem (W)",
+          "delay_drain_max_power": "Início retardado: Potência máxima do pico de drenagem (W)",
+          "delay_drain_max_duration": "Início atrasado: Duração(ões) máxima(s) do pico de drenagem",
+          "delay_timeout_hours": "Início atrasado: tempo máximo de espera (h)"
         },
         "data_description": {
           "apply_suggestions": "Marque esta caixa para abrir uma etapa de revisão dos valores sugeridos pelo algoritmo de aprendizagem. Nada é salvo automaticamente.\n\nSugerido (pelo aprendizado):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "Ao pausar por meio do botão Pause Cycle ou serviço, desligue também a entidade de switch configurada. Só entra em vigor se uma entidade de switch estiver configurada para este dispositivo.",
           "notify_unload_delay_minutes": "Envie uma notificação por meio do canal de notificação de término após o término do ciclo e a porta não tiver sido aberta por tantos minutos (requer Sensor de Porta). Defina como 0 para desativar. Padrão: 60 min.",
           "switch_entity": "A entidade switch a ser alternada ao pausar ou retomar. Obrigatório quando 'Cortar energia ao pausar' está ativado.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Quando ativado, um breve pico de consumo de baixa energia seguido por energia de espera sustentada é detectado como uma partida atrasada. O sensor de estado mostra 'Aguardando início' durante o atraso. Nenhum tempo ou progresso do programa é monitorado até que o ciclo realmente comece. Requer que start_threshold_w seja definido acima da potência do pico de drenagem.",
+          "delay_drain_min_power": "Potência mínima (W) para reconhecer como pico de drenagem. Defina logo acima do nível de espera real da sua máquina. Padrão: 10 W.",
+          "delay_drain_max_power": "Potência máxima (W) para um pico de drenagem — picos acima disso são tratados como um início de ciclo real. Deve estar abaixo da configuração start_threshold_w. Padrão: 80 W.",
+          "delay_drain_max_duration": "O pico de drenagem deve cair abaixo da janela de drenagem dentro de alguns segundos para ser confirmado. Picos mais longos são tratados como atividade de ciclo real. Padrão: 60 seg.",
+          "delay_timeout_hours": "Tempo limite de segurança: se a máquina ainda estiver em “Aguardando para iniciar” após tantas horas, WashData será redefinido para Desligado. Padrão: 8h."
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Revisar alterações sugeridas",
-        "description": "O WashData encontrou **{pending_count}** valor(es) sugerido(s) para aplicar.\n\nAlterações:\n{changes}\n\n✅ Marque a caixa abaixo e clique em **Enviar** para aplicar e salvar essas alterações imediatamente.\n❌ Deixe desmarcada e clique em **Enviar** para cancelar e voltar.",
+        "description": "WashData encontrou **{pending_count}** valores sugeridos para aplicação.\n\nMudanças:\n{changes}\n\n✅ Marque a caixa abaixo e clique em **Enviar** para aplicar e salvar essas alterações imediatamente.\n❌ Deixe desmarcado e clique em **Enviar** para cancelar e voltar.",
         "data": {
-          "confirm_apply_suggestions": "Aplicar e salvar estas alterações"
+          "confirm_apply_suggestions": "Aplicar e salvar essas alterações"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "Encerrando",
           "finished": "Concluído",
           "anti_wrinkle": "Anti-amasso",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Esperando para começar",
           "interrupted": "Interrompido",
           "force_stopped": "Parada forçada",
           "rinse": "Enxaguar",

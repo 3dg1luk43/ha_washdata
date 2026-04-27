@@ -58,7 +58,7 @@
       },
       "apply_suggestions_confirm": {
         "title": "Granska föreslagna ändringar",
-        "description": "WashData hittade **{pending_count}** föreslagen(a) värde(n) att tillämpa.\n\nÄndringar:\n{changes}\n\n✅ Markera rutan nedan och klicka på **Skicka** för att omedelbart tillämpa och spara dessa ändringar.\n❌ Lämna den omarkerad och klicka på **Skicka** för att avbryta och gå tillbaka.",
+        "description": "WashData hittades **{pending_count}** föreslagna värden att tillämpa.\n\nÄndringar:\n{changes}\n\n✅ Markera rutan nedan och klicka på **Skicka** för att tillämpa och spara dessa ändringar omedelbart.\n❌ Lämna det omarkerat och klicka på **Skicka** för att avbryta och gå tillbaka.",
         "data": {
           "confirm_apply_suggestions": "Tillämpa och spara dessa ändringar"
         }
@@ -206,11 +206,11 @@
           "pause_cuts_power": "Bryt strömmen vid paus",
           "notify_unload_delay_minutes": "Fördröjning av meddelande för tvätt som väntar (min)",
           "switch_entity": "Switch Entity (för pausströmavbrott)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Aktivera detektering av fördröjd start",
+          "delay_drain_min_power": "Fördröjd start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Fördröjd start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Fördröjd start: Max dräneringsspik varaktighet (s)",
+          "delay_timeout_hours": "Fördröjd start: Max väntetid (h)"
         },
         "data_description": {
           "apply_suggestions": "Markera den här rutan för att öppna ett granskningssteg för föreslagna värden från inlärningsalgoritmen. Ingenting sparas automatiskt.\n\nFöreslagna (från inlärning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -263,11 +263,11 @@
           "pause_cuts_power": "När du pausar via Pause Cycle-knappen eller tjänsten, stäng också av den konfigurerade switch-entiteten. träder endast i kraft om en switch-enhet är konfigurerad för den här enheten.",
           "notify_unload_delay_minutes": "Skicka ett meddelande via aviseringskanalen för mål efter att cykeln är slut och dörren inte har öppnats på så många minuter (kräver Dörrsensor). Ställ in på 0 för att inaktivera. Standard: 60 min.",
           "switch_entity": "Växlingsenheten att växla när du pausar eller återupptar. Krävs när \"Klipp av ström vid paus\" är aktiverat.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "När den är aktiverad, upptäcks en kort tömningsspets med låg effekt följt av ihållande standby-ström som en fördröjd start. Statussensorn visar 'Väntar på att starta' under fördröjningen. Ingen programtid eller framsteg spåras förrän cykeln faktiskt börjar. Kräver att start_threshold_w ställs in över dräneringsspetseffekten.",
+          "delay_drain_min_power": "Minsta effekt (W) för att känna igen som en dräneringsspets. Ställ in precis ovanför maskinens avstängda standby-nivå. Standard: 10 W.",
+          "delay_drain_max_power": "Maximal effekt (W) för en dräneringsspets — skurar ovanför detta behandlas som en riktig cykelstart. Bör vara under din start_threshold_w-inställning. Standard: 80 W.",
+          "delay_drain_max_duration": "Dräneringsspetsen måste falla tillbaka under dräneringsfönstret inom så många sekunder för att bekräftas. Längre spikar behandlas som riktig cykelaktivitet. Standard: 60 s.",
+          "delay_timeout_hours": "Säkerhetstidsgräns: om maskinen fortfarande är i 'Väntar på start' efter så många timmar, återställs WashData till Av. Standard: 8 timmar."
         }
       },
       "diagnostics": {
@@ -1054,7 +1054,7 @@
           "ending": "Avslutar",
           "finished": "Färdig",
           "anti_wrinkle": "Antirynkläge",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Väntar på att starta",
           "interrupted": "Avbruten",
           "force_stopped": "Tvångsstoppad",
           "rinse": "Sköljning",

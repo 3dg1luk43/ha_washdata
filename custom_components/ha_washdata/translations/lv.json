@@ -199,11 +199,11 @@
           "pause_cuts_power": "Apturot, pārtrauciet strāvu",
           "notify_unload_delay_minutes": "Veļas gaidīšanas paziņojuma aizkave (min)",
           "switch_entity": "Slēdža entītija (pauzēt strāvas padevei)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Iespējot atliktā starta noteikšanu",
+          "delay_drain_min_power": "Aizkavēts starts: iztukšošanas smaile Minimālā jauda (W)",
+          "delay_drain_max_power": "Atliktais starts: iztukšošanas smaile maksimālā jauda (W)",
+          "delay_drain_max_duration": "Atliktais starts: maksimālais aizplūdes ilgums (s)",
+          "delay_timeout_hours": "Atliktais starts: maksimālais gaidīšanas laiks (h)"
         },
         "data_description": {
           "apply_suggestions": "Atzīmējiet šo izvēles rūtiņu, lai atvērtu mācību algoritma ieteikto vērtību pārskatīšanas darbību. Nekas netiek saglabāts automātiski.\n\nIeteikts (no mācīšanās):\n- min_jauda: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_ trust: {suggested_auto_label_confidence}\n- ilgums_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- sākuma_slieksnis_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- darbojas_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "Apturot, izmantojot pogu Pause Cycle vai pakalpojumu, izslēdziet arī konfigurēto slēdža entītiju. Stājas spēkā tikai tad, ja šai ierīcei ir konfigurēta slēdža entītija.",
           "notify_unload_delay_minutes": "Nosūtiet paziņojumu pa finiša paziņojumu kanālu pēc tam, kad cikls ir beidzies un durvis nav atvērtas tik daudzas minūtes (nepieciešams durvju sensors). Iestatiet uz 0, lai atspējotu. Noklusējums: 60 min.",
           "switch_entity": "Slēdža entītija, lai pārslēgtos, kad tiek apturēta vai atsākta. Nepieciešams, ja ir iespējota funkcija “Izslēdziet strāvu, kad tiek apturēta”.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Kad tas ir iespējots, īss mazjaudas aizplūšana, kam seko ilgstoša gaidstāves barošana, tiek noteikts kā aizkavēts starts. Stāvokļa sensors aizkaves laikā parāda ziņojumu “Gaida palaišanu”. Kamēr cikls nav sācies, netiek izsekots neviens programmas laiks vai norise. Nepieciešams, lai start_threshold_w būtu iestatīts virs drenāžas smailes jaudas.",
+          "delay_drain_min_power": "Minimālā jauda (W), ko atpazīt kā drenāžas smaili. Iestatiet tieši virs ierīces patiesā izslēgšanas gaidstāves līmeņa. Noklusējums: 10 W.",
+          "delay_drain_max_power": "Maksimālā jauda (W) drenāžas smailei — pārrāvumi, kas pārsniedz šo vērtību, tiek uzskatīti par reālu cikla sākumu. Tam jābūt zem sākuma_sliekšņa_w iestatījuma. Noklusējums: 80 W.",
+          "delay_drain_max_duration": "Lai to apstiprinātu, šo dažu sekunžu laikā drenāžas smailei ir jānolaižas zem notekas loga. Garāki tapas tiek uzskatīti par reālu cikla darbību. Noklusējums: 60 s.",
+          "delay_timeout_hours": "Drošības taimauts: ja iekārta joprojām atrodas režīmā “Gaida palaišanu” pēc tik daudzām stundām, WashData tiek atiestatīta uz Off. Noklusējums: 8 h."
         }
       },
       "diagnostics": {
@@ -591,7 +591,7 @@
       },
       "apply_suggestions_confirm": {
         "title": "Pārskatiet ieteiktās izmaiņas",
-        "description": "WashData atrada **{pending_count}** ieteikto vērtību(-as) lietošanai.\n\nIzmaiņas:\n{changes}\n\n✅ Atzīmējiet zemāk esošo izvēles rūtiņu un noklikšķiniet uz **Iesniegt**, lai nekavējoties lietotu un saglabātu šīs izmaiņas.\n❌ Atstājiet to neatzīmētu un noklikšķiniet uz **Iesniegt**, lai atceltu un atgrieztos.",
+        "description": "Atrasti WashData **{pending_count}** ieteicamā(-ās) vērtība(-as).\n\nIzmaiņas:\n{changes}\n\n✅ Atzīmējiet tālāk esošo izvēles rūtiņu un noklikšķiniet uz **Iesniegt**, lai nekavējoties piemērotu un saglabātu šīs izmaiņas.\n❌ Atstājiet to neatzīmētu un noklikšķiniet uz **Iesniegt**, lai atceltu un atgrieztos.",
         "data": {
           "confirm_apply_suggestions": "Lietot un saglabāt šīs izmaiņas"
         }
@@ -1054,7 +1054,7 @@
           "ending": "Beigas",
           "finished": "Pabeigts",
           "anti_wrinkle": "Pretgrumbu",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Gaida sākumu",
           "interrupted": "Pārtrauca",
           "force_stopped": "Piespiedu kārtā apturēta",
           "rinse": "Noskalo",

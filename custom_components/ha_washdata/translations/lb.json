@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Proposéiert Ännerungen iwwerpréiwen",
-        "description": "WashData huet **{pending_count}** virgeschloe Wäert(er) fir d'Uwennung fonnt.\n\nÄnnerungen:\n{changes}\n\n✅ Häkt d'Këscht hei drënner an a klickt op **Schécken**, fir dës Ännerungen direkt unzewendelen a späicheren.\n❌ Loosst se oofgehäkt a klickt op **Schécken**, fir ofzebriechen a zréckzegoen.",
+        "description": "WashData fonnt **{pending_count}** proposéiert Wäert(e) fir ze bewerben.\n\nÄnnerungen:\n{changes}\n\n✅ Kuckt d'Këscht hei drënner a klickt op **Send** fir dës Ännerungen direkt z'applizéieren an ze späicheren.\n❌ Loosst et net ausgezeechent a klickt op **Soumissioun** fir ze annuléieren an zréck ze goen.",
         "data": {
-          "confirm_apply_suggestions": "Dës Ännerungen unwendelen a späicheren"
+          "confirm_apply_suggestions": "Gëlle a späicheren dës Ännerungen"
         }
       },
       "settings": {
@@ -206,11 +206,11 @@
           "pause_cuts_power": "Maacht Kraaft beim Pausen",
           "notify_unload_delay_minutes": "Wäschwart Notifikatioun Verspéidung (min)",
           "switch_entity": "Switch Entity (fir Pause Power Cut)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_start_detect_enabled": "Aktivéiert Delayed Start Detection",
           "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
           "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Dauer (s)",
+          "delay_timeout_hours": "Verspéiten Start: Max Waardezäit (h)"
         },
         "data_description": {
           "apply_suggestions": "Kuckt dës Këscht un fir e Iwwerpréiwungsschrëtt opzemaachen fir proposéiert Wäerter vum Léieralgorithmus. Näischt gëtt automatesch gespäichert.\n\nProposéiert (vum Léieren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -263,11 +263,11 @@
           "pause_cuts_power": "Wann Dir iwwer de Pause Cycle Knäppchen oder Service pauséiert, schalt och déi konfiguréiert Schalter Entitéit aus. Gëtt nëmme Kraaft wann eng Schalter Entitéit fir dësen Apparat konfiguréiert ass.",
           "notify_unload_delay_minutes": "Schéckt eng Notifikatioun iwwer d'Finish Notifikatiounskanal nodeems den Zyklus eriwwer ass an d'Dier fir dës vill Minutten net opgemaach gouf (erfuerdert Door Sensor). Setzt op 0 fir auszeschalten. Standard: 60 min.",
           "switch_entity": "D'Schalter Entitéit fir ze wiesselen wann Dir Paus oder weider geet. Obligatoresch wann 'Kraaft schneiden beim Pausen' aktivéiert ass.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Wann aktivéiert, gëtt e kuerze Low-Power Drain Spike gefollegt vun nohalteger Standby Kraaft als verspéiten Start festgestallt. De Staatssensor weist 'Waiting to Start' wärend der Verzögerung. Kee Programmzäit oder Fortschrëtter gëtt verfollegt bis den Zyklus tatsächlech ufänkt. Verlaangt start_threshold_w iwwer d'Drain Spike Muecht gesat ginn.",
+          "delay_drain_min_power": "Minimum Muecht (W) als Drain Spike ze erkennen. Setzt just iwwer dem richtege Standby-Niveau vun Ärer Maschinn. Standard: 10 W.",
+          "delay_drain_max_power": "Maximal Kraaft (W) fir en Drain Spike - Burst iwwer dëst ginn als e richtege Zyklusstart behandelt. Sollt ënner Ärem start_threshold_w Astellung sinn. Standard: 80 W.",
+          "delay_drain_max_duration": "Den Drain Spike muss bannent dëse ville Sekonnen ënner der Drainfenster zréckfalen fir ze bestätegen. Méi laang Spikes ginn als richteg Zyklusaktivitéit behandelt. Standard: 60 s.",
+          "delay_timeout_hours": "Sécherheetstimeout: wann d'Maschinn nach ëmmer am 'Waart op Start' no dëse ville Stonnen ass, setzt WashData op Off. Standard: 8 h."
         }
       },
       "diagnostics": {
@@ -1054,7 +1054,7 @@
           "ending": "Ofschléissen",
           "finished": "Fäerdeg",
           "anti_wrinkle": "Anti-Falten",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Waart op Start",
           "interrupted": "Ënnerbrach",
           "force_stopped": "Manuell gestoppt",
           "rinse": "Spülen",
