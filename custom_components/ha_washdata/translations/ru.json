@@ -199,11 +199,11 @@
           "pause_cuts_power": "Отключение питания при паузе",
           "notify_unload_delay_minutes": "Задержка уведомления об ожидании стирки (мин)",
           "switch_entity": "Объект переключения (для приостановки отключения электроэнергии)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Включить обнаружение отложенного старта",
+          "delay_drain_min_power": "Отложенный старт: пиковая минимальная мощность (Вт)",
+          "delay_drain_max_power": "Отложенный старт: максимальная мощность слива (Вт)",
+          "delay_drain_max_duration": "Отложенный старт: максимальная продолжительность пика дренажа (с)",
+          "delay_timeout_hours": "Отложенный старт: максимальное время ожидания (ч)"
         },
         "data_description": {
           "apply_suggestions": "Установите этот флажок, чтобы открыть шаг проверки предложенных значений алгоритма обучения. Ничего не сохраняется автоматически.\n\nПредлагается (из обучения):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} Вт\n- stop_threshold_w: {suggested_stop_threshold_w} Вт\n- end_energy_threshold: {suggested_end_energy_threshold} Втч\n- running_dead_zone: {suggested_running_dead_zone} с\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "При приостановке с помощью кнопки или службы «Пауза цикла» также отключите настроенный объект переключателя. Вступает в силу только в том случае, если для этого устройства настроен объект коммутатора.",
           "notify_unload_delay_minutes": "Отправьте уведомление через канал уведомления о завершении после того, как цикл завершится и дверь не будет открыта в течение указанного количества минут (требуется датчик двери). Установите значение 0, чтобы отключить. По умолчанию: 60 мин.",
           "switch_entity": "Объект-переключатель для переключения при приостановке или возобновлении. Требуется, если включена функция «Отключение питания при паузе».",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Если этот параметр включен, кратковременный всплеск потребления низкой мощности, за которым следует устойчивое питание в режиме ожидания, определяется как отложенный запуск. Во время задержки датчик состояния показывает «Ожидание запуска». Ни время выполнения программы, ни прогресс не отслеживаются до тех пор, пока цикл фактически не начнется. Требуется, чтобы start_threshold_w был установлен выше пиковой мощности стока.",
+          "delay_drain_min_power": "Минимальная мощность (Вт), которую можно распознать как пик утечки. Установите чуть выше уровня режима ожидания вашего устройства. По умолчанию: 10 Вт.",
+          "delay_drain_max_power": "Максимальная мощность (Вт) для всплеска стока — всплески выше этого значения считаются началом реального цикла. Должно быть ниже настройки start_threshold_w. По умолчанию: 80 Вт.",
+          "delay_drain_max_duration": "Для подтверждения сливной штырь должен опуститься ниже сливного окна в течение этого количества секунд. Более длинные всплески рассматриваются как реальная циклическая активность. По умолчанию: 60 с.",
+          "delay_timeout_hours": "Тайм-аут безопасности: если машина все еще находится в состоянии «Ожидание запуска» по истечении этого количества часов, WashData сбрасывается в состояние «Выкл.». По умолчанию: 8 часов."
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Просмотрите предлагаемые изменения",
-        "description": "WashData обнаружил **{pending_count}** предложенное(ых) значение(й) для применения.\n\nИзменения:\n{changes}\n\n✅ Отметьте флажок ниже и нажмите **Отправить**, чтобы немедленно применить и сохранить эти изменения.\n❌ Оставьте флажок снятым и нажмите **Отправить**, чтобы отменить и вернуться назад.",
+        "description": "WashData обнаружила **{pending_count}** рекомендуемые значения для применения.\n\nИзменения:\n{changes}\n\n✅ Установите флажок ниже и нажмите **Отправить**, чтобы немедленно применить и сохранить эти изменения.\n❌ Оставьте флажок снятым и нажмите **Отправить**, чтобы отменить действие и вернуться назад.",
         "data": {
-          "confirm_apply_suggestions": "Применить и сохранить эти изменения"
+          "confirm_apply_suggestions": "Примените и сохраните эти изменения"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "Завершение",
           "finished": "Завершено",
           "anti_wrinkle": "Защита от морщин",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Ожидание начала",
           "interrupted": "Прервано",
           "force_stopped": "Принудительная остановка",
           "rinse": "Полоскание",

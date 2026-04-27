@@ -199,11 +199,11 @@
           "pause_cuts_power": "موقوف کرتے وقت پاور کاٹ دیں۔",
           "notify_unload_delay_minutes": "لانڈری کے انتظار کی اطلاع میں تاخیر (منٹ)",
           "switch_entity": "سوئچ ہستی (پاور کٹ کو روکنے کے لیے)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "تاخیر سے آغاز کا پتہ لگانے کو فعال کریں۔",
+          "delay_drain_min_power": "تاخیر سے شروع: ڈرین اسپائک من پاور (W)",
+          "delay_drain_max_power": "تاخیر سے شروع: ڈرین اسپائک میکس پاور (W)",
+          "delay_drain_max_duration": "تاخیر سے شروع: زیادہ سے زیادہ ڈرین اسپائک کا دورانیہ",
+          "delay_timeout_hours": "تاخیر سے آغاز: زیادہ سے زیادہ انتظار کا وقت (h)"
         },
         "data_description": {
           "apply_suggestions": "سیکھنے کے الگورتھم سے تجویز کردہ اقدار کے لیے جائزہ لینے کا مرحلہ کھولنے کے لیے اس باکس کو چیک کریں۔ کچھ بھی خود بخود محفوظ نہیں ہوتا ہے۔\n\nتجویز کردہ (سیکھنے سے):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "پاز سائیکل بٹن یا سروس کے ذریعے توقف کرتے وقت، کنفیگر شدہ سوئچ ہستی کو بھی بند کر دیں۔ صرف اس صورت میں اثر انداز ہوتا ہے جب اس آلہ کے لیے ایک سوئچ ہستی کو کنفیگر کیا گیا ہو۔",
           "notify_unload_delay_minutes": "سائیکل ختم ہونے کے بعد فنش نوٹیفکیشن چینل کے ذریعے ایک اطلاع بھیجیں اور اس کئی منٹ تک دروازہ نہیں کھولا گیا (دروازے کے سینسر کی ضرورت ہے)۔ غیر فعال کرنے کے لیے 0 پر سیٹ کریں۔ ڈیفالٹ: 60 منٹ۔",
           "switch_entity": "موقوف یا دوبارہ شروع کرنے پر ٹوگل کرنے کے لیے سوئچ ہستی۔ جب 'روکتے وقت پاور کاٹنا' فعال ہو تو درکار ہے۔",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "فعال ہونے پر، ایک مختصر کم پاور ڈرین اسپائک جس کے بعد مستقل اسٹینڈ بائی پاور کا پتہ چلتا ہے کہ تاخیر سے آغاز ہوتا ہے۔ ریاستی سینسر تاخیر کے دوران 'شروع کا انتظار' دکھاتا ہے۔ کسی پروگرام کے وقت یا پیشرفت کا پتہ نہیں لگایا جاتا ہے جب تک کہ سائیکل اصل میں شروع نہ ہو۔ start_threshold_w کو ڈرین اسپائک پاور کے اوپر سیٹ کرنے کی ضرورت ہے۔",
+          "delay_drain_min_power": "ڈرین اسپائک کے طور پر پہچاننے کے لیے کم از کم پاور (W)۔ اپنی مشین کے سچے آف اسٹینڈ بائی لیول کے بالکل اوپر سیٹ کریں۔ ڈیفالٹ: 10 ڈبلیو۔",
+          "delay_drain_max_power": "ڈرین اسپائک کے لیے زیادہ سے زیادہ پاور (W) — اس کے اوپر پھٹ جانے کو ایک حقیقی سائیکل اسٹارٹ سمجھا جاتا ہے۔ آپ کی start_threshold_w ترتیب سے نیچے ہونی چاہیے۔ ڈیفالٹ: 80 ڈبلیو۔",
+          "delay_drain_max_duration": "اس بات کی تصدیق کے لیے ڈرین اسپائک کو ڈرین ونڈو کے نیچے کئی سیکنڈ کے اندر واپس آنا چاہیے۔ لمبے اسپائکس کو حقیقی سائیکل کی سرگرمی سمجھا جاتا ہے۔ ڈیفالٹ: 60 سیکنڈ۔",
+          "delay_timeout_hours": "سیفٹی ٹائم آؤٹ: اگر مشین اتنے گھنٹوں کے بعد بھی 'شروع ہونے کے انتظار میں' ہے، تو واش ڈیٹا دوبارہ آف پر سیٹ ہو جاتا ہے۔ پہلے سے طے شدہ: 8 گھنٹے۔"
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "تجویز کردہ تبدیلیوں کا جائزہ لیں۔",
-        "description": "WashData نے لاگو کرنے کے لیے **{pending_count}** تجویز کردہ قدر/قدریں پائیں۔\n\nتبدیلیاں:\n{changes}\n\n✅ نیچے دیے گئے باکس کو چیک کریں اور **جمع کریں** پر کلک کریں تاکہ یہ تبدیلیاں فوری طور پر لاگو اور محفوظ ہو جائیں۔\n❌ اسے غیر چیک چھوڑیں اور **جمع کریں** پر کلک کریں تاکہ منسوخ کر کے واپس جائیں۔",
+        "description": "WashData کو **{pending_count}** لاگو کرنے کے لیے تجویز کردہ قدریں ملیں۔\n\nتبدیلیاں:\n{changes}\n\n✅ نیچے دیے گئے باکس کو چیک کریں اور ان تبدیلیوں کو فوری طور پر لاگو کرنے اور محفوظ کرنے کے لیے **جمع کرائیں** پر کلک کریں۔\n❌ اسے غیر نشان زد رہنے دیں اور منسوخ کرنے اور واپس جانے کے لیے **جمع کرائیں** پر کلک کریں۔",
         "data": {
-          "confirm_apply_suggestions": "یہ تبدیلیاں لاگو کریں اور محفوظ کریں"
+          "confirm_apply_suggestions": "ان تبدیلیوں کو لاگو کریں اور محفوظ کریں۔"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "ختم ہونے والا",
           "finished": "ختم",
           "anti_wrinkle": "اینٹی شیکن",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "شروع ہونے کا انتظار ہے۔",
           "interrupted": "خلل ڈالا۔",
           "force_stopped": "زبردستی روکا گیا۔",
           "rinse": "کلی کریں۔",

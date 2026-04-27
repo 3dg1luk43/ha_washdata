@@ -199,11 +199,11 @@
           "pause_cuts_power": "Cắt điện khi tạm dừng",
           "notify_unload_delay_minutes": "Độ trễ thông báo chờ giặt (phút)",
           "switch_entity": "Chuyển đổi thực thể (để tạm dừng cắt điện)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Bật tính năng phát hiện khởi động bị trì hoãn",
+          "delay_drain_min_power": "Bắt đầu bị trì hoãn: Tiêu hao sức mạnh tối thiểu của Spike (W)",
+          "delay_drain_max_power": "Bắt đầu bị trì hoãn: Xả Spike Max Power (W)",
+          "delay_drain_max_duration": "Bắt đầu bị trì hoãn: Khoảng thời gian tăng đột biến tối đa",
+          "delay_timeout_hours": "Bắt đầu bị trì hoãn: Thời gian chờ tối đa (h)"
         },
         "data_description": {
           "apply_suggestions": "Chọn hộp này để mở bước xem xét các giá trị được đề xuất từ ​​thuật toán học. Không có gì được lưu tự động.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "Khi tạm dừng thông qua nút hoặc dịch vụ Tạm dừng Chu kỳ, hãy tắt cả thực thể chuyển đổi đã định cấu hình. Chỉ có hiệu lực nếu thực thể chuyển đổi được định cấu hình cho thiết bị này.",
           "notify_unload_delay_minutes": "Gửi thông báo qua kênh thông báo kết thúc sau khi chu trình kết thúc và cửa chưa được mở trong nhiều phút này (yêu cầu Cảm biến cửa). Đặt thành 0 để tắt. Mặc định: 60 phút.",
           "switch_entity": "Thực thể chuyển đổi để chuyển đổi khi tạm dừng hoặc tiếp tục. Bắt buộc khi bật 'Cắt nguồn khi tạm dừng'.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Khi được bật, một đợt tiêu hao năng lượng thấp trong thời gian ngắn, sau đó là nguồn điện dự phòng duy trì được phát hiện là khởi động chậm. Cảm biến trạng thái hiển thị 'Đang chờ bắt đầu' trong thời gian trễ. Không có thời gian hoặc tiến trình của chương trình nào được theo dõi cho đến khi chu kỳ thực sự bắt đầu. Yêu cầu phải đặt start_threshold_w trên mức công suất tăng đột biến.",
+          "delay_drain_min_power": "Công suất tối thiểu (W) để nhận biết là mức tăng đột biến. Đặt ngay trên mức chờ tắt của máy. Mặc định: 10 W.",
+          "delay_drain_max_power": "Công suất tối đa (W) cho một đợt xả tăng đột biến - các lần tăng trên mức này được coi là một chu kỳ bắt đầu thực sự. Phải ở dưới cài đặt start_threshold_w của bạn. Mặc định: 80 W.",
+          "delay_drain_max_duration": "Mũi thoát nước phải giảm trở lại bên dưới cửa sổ thoát nước trong vòng vài giây này để được xác nhận. Các gai dài hơn được coi là hoạt động chu kỳ thực. Mặc định: 60 giây.",
+          "delay_timeout_hours": "Hết thời gian chờ an toàn: nếu máy vẫn ở trạng thái 'Đang chờ khởi động' sau nhiều giờ như vậy, WashData sẽ đặt lại thành Tắt. Mặc định: 8 giờ."
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Xem lại các thay đổi được đề xuất",
-        "description": "WashData tìm thấy **{pending_count}** giá trị được đề xuất để áp dụng.\n\nThay đổi:\n{changes}\n\n✅ Đánh dấu vào ô bên dưới và nhấp **Gửi** để áp dụng và lưu các thay đổi này ngay lập tức.\n❌ Để không đánh dấu và nhấp **Gửi** để hủy và quay lại.",
+        "description": "WashData đã tìm thấy **{pending_count}** giá trị được đề xuất để áp dụng.\n\nThay đổi:\n{changes}\n\n✅ Đánh dấu vào ô bên dưới và nhấp vào **Gửi** để áp dụng và lưu những thay đổi này ngay lập tức.\n❌ Bỏ chọn và nhấp vào **Gửi** để hủy và quay lại.",
         "data": {
-          "confirm_apply_suggestions": "Áp dụng và lưu các thay đổi này"
+          "confirm_apply_suggestions": "Áp dụng và lưu những thay đổi này"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "Kết thúc",
           "finished": "Hoàn thành",
           "anti_wrinkle": "Chống nhăn",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Đang chờ bắt đầu",
           "interrupted": "Bị gián đoạn",
           "force_stopped": "Buộc dừng",
           "rinse": "Rửa sạch",

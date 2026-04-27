@@ -199,11 +199,11 @@
           "pause_cuts_power": "ตัดไฟเมื่อหยุดชั่วคราว",
           "notify_unload_delay_minutes": "การแจ้งเตือนการรอซักรีดล่าช้า (นาที)",
           "switch_entity": "สวิตช์เอนทิตี (สำหรับการหยุดตัดไฟชั่วคราว)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "เปิดใช้งานการตรวจจับการเริ่มต้นล่าช้า",
+          "delay_drain_min_power": "การเริ่มต้นล่าช้า: เดรนสไปค์กำลังขั้นต่ำ (W)",
+          "delay_drain_max_power": "สตาร์ทล่าช้า: เดรนสไปค์ กำลังสูงสุด (W)",
+          "delay_drain_max_duration": "การเริ่มต้นล่าช้า: ระยะเวลาสูงสุดของ Drain Spike (s)",
+          "delay_timeout_hours": "การเริ่มต้นล่าช้า: เวลารอสูงสุด (h)"
         },
         "data_description": {
           "apply_suggestions": "เลือกช่องนี้เพื่อเปิดขั้นตอนการทบทวนค่าที่แนะนำจากอัลกอริทึมการเรียนรู้ ไม่มีสิ่งใดถูกบันทึกโดยอัตโนมัติ\n\nข้อเสนอแนะ (จากการเรียนรู้):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "เมื่อหยุดชั่วคราวผ่านปุ่มหยุดรอบชั่วคราวหรือบริการ ให้ปิดเอนทิตีสวิตช์ที่กำหนดค่าไว้ด้วย จะมีผลเฉพาะเมื่อมีการกำหนดค่าเอนทิตีสวิตช์สำหรับอุปกรณ์นี้",
           "notify_unload_delay_minutes": "ส่งการแจ้งเตือนผ่านช่องทางแจ้งเตือนเมื่อสิ้นสุดรอบและไม่ได้เปิดประตูเป็นเวลาหลายนาที (ต้องใช้เซ็นเซอร์ประตู) ตั้งค่าเป็น 0 เพื่อปิดใช้งาน ค่าเริ่มต้น: 60 นาที",
           "switch_entity": "เอนทิตีสวิตช์เพื่อสลับเมื่อหยุดชั่วคราวหรือดำเนินการต่อ จำเป็นเมื่อเปิดใช้งาน 'ตัดไฟเมื่อหยุดชั่วคราว'",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "เมื่อเปิดใช้งาน ตรวจพบการระบายพลังงานต่ำที่พุ่งสูงขึ้นสั้นๆ ตามมาด้วยพลังงานสแตนด์บายอย่างต่อเนื่อง จะถูกตรวจพบว่าเป็นการสตาร์ทล่าช้า เซ็นเซอร์สถานะแสดง 'กำลังรอการเริ่มต้น' ในระหว่างความล่าช้า ไม่มีการติดตามเวลาของโปรแกรมหรือความคืบหน้าจนกว่ารอบจะเริ่มต้นจริง จำเป็นต้องตั้งค่า start_threshold_w เหนือกำลังขัดขวางการเดรน",
+          "delay_drain_min_power": "กำลังขั้นต่ำ (W) ที่จะรับรู้ว่าเป็นขัดขวางการระบายน้ำ ตั้งค่าให้อยู่เหนือระดับสแตนด์บายการปิดเครื่องของเครื่องของคุณ ค่าเริ่มต้น: 10 วัตต์",
+          "delay_drain_max_power": "กำลังสูงสุด (W) สำหรับท่อระบายที่พุ่งสูงขึ้น — การระเบิดที่สูงกว่านี้จะถือเป็นการเริ่มรอบจริง ควรอยู่ต่ำกว่าการตั้งค่า start_threshold_w ของคุณ ค่าเริ่มต้น: 80 วัตต์",
+          "delay_drain_max_duration": "ขัดขวางการระบายน้ำจะต้องลดลงกลับมาใต้หน้าต่างท่อระบายน้ำภายในไม่กี่วินาทีนี้เพื่อยืนยัน เดือยที่ยาวขึ้นจะถือเป็นกิจกรรมของวงจรจริง ค่าเริ่มต้น: 60 วินาที",
+          "delay_timeout_hours": "หมดเวลาเพื่อความปลอดภัย: หากเครื่องยังคงอยู่ใน 'กำลังรอการเริ่มต้น' หลังจากผ่านไปหลายชั่วโมง WashData จะรีเซ็ตเป็นปิด ค่าเริ่มต้น: 8 ชม."
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "ตรวจสอบการเปลี่ยนแปลงที่แนะนำ",
-        "description": "WashData พบค่าที่แนะนำ **{pending_count}** ค่าสำหรับใช้งาน\n\nการเปลี่ยนแปลง:\n{changes}\n\n✅ ทำเครื่องหมายในช่องด้านล่างและคลิก **ส่ง** เพื่อนำการเปลี่ยนแปลงเหล่านี้ไปใช้และบันทึกทันที\n❌ ปล่อยให้ไม่ถูกทำเครื่องหมายและคลิก **ส่ง** เพื่อยกเลิกและย้อนกลับ",
+        "description": "พบ WashData **{pending_count}** ค่าที่แนะนำเพื่อใช้\n\nการเปลี่ยนแปลง:\n{changes}\n\n✅ ทำเครื่องหมายในช่องด้านล่างแล้วคลิก **ส่ง** เพื่อนำไปใช้และบันทึกการเปลี่ยนแปลงเหล่านี้ทันที\n❌ ปล่อยว่างไว้โดยไม่เลือกแล้วคลิก **ส่ง** เพื่อยกเลิกและย้อนกลับ",
         "data": {
-          "confirm_apply_suggestions": "นำการเปลี่ยนแปลงเหล่านี้ไปใช้และบันทึก"
+          "confirm_apply_suggestions": "ใช้และบันทึกการเปลี่ยนแปลงเหล่านี้"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "ตอนจบ",
           "finished": "ที่เสร็จเรียบร้อย",
           "anti_wrinkle": "ต่อต้านริ้วรอย",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "กำลังรอการเริ่มต้น",
           "interrupted": "ขัดจังหวะ",
           "force_stopped": "บังคับหยุด",
           "rinse": "ล้าง",

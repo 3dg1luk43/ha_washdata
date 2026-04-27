@@ -199,11 +199,11 @@
           "pause_cuts_power": "Kutt strømmen under pause",
           "notify_unload_delay_minutes": "Forsinkelse for varsel om klesvask (min)",
           "switch_entity": "Bryterenhet (for Pause Power Cut)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Aktiver forsinket startdeteksjon",
+          "delay_drain_min_power": "Forsinket start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Forsinket start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Forsinket start: Maksimal dreneringsspydvarighet (r)",
+          "delay_timeout_hours": "Forsinket start: Maks ventetid (t)"
         },
         "data_description": {
           "apply_suggestions": "Merk av i denne boksen for å åpne et gjennomgangstrinn for foreslåtte verdier fra læringsalgoritmen. Ingenting lagres automatisk.\n\nForeslått (fra læring):\n- min_effekt: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "Når du setter på pause via pausesyklus-knappen eller tjenesten, må du også slå av den konfigurerte bryterenheten. Trer bare i kraft hvis en bryterenhet er konfigurert for denne enheten.",
           "notify_unload_delay_minutes": "Send et varsel via sluttmeldingskanalen etter at syklusen er ferdig og døren ikke har vært åpnet på så mange minutter (krever dørsensor). Sett til 0 for å deaktivere. Standard: 60 min.",
           "switch_entity": "Bytteenheten som skal veksles når du setter på pause eller gjenopptar. Nødvendig når 'Kutt strøm ved pause' er aktivert.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Når den er aktivert, oppdages en kort dreneringstopp med lav effekt etterfulgt av vedvarende standby-strøm som en forsinket start. Statussensoren viser 'Venter på å starte' under forsinkelsen. Ingen programtid eller fremgang spores før syklusen faktisk begynner. Krever at start_threshold_w settes over dreneringsspikekraften.",
+          "delay_drain_min_power": "Minimum effekt (W) for å gjenkjenne som en dreneringsspyd. Still inn like over maskinens standby-nivå. Standard: 10 W.",
+          "delay_drain_max_power": "Maksimal effekt (W) for en dreneringsspyd — utbrudd over dette blir behandlet som en ekte syklusstart. Bør være under start_threshold_w-innstillingen. Standard: 80 W.",
+          "delay_drain_max_duration": "Dreneringsspissen må falle tilbake under dreneringsvinduet innen så mange sekunder for å bli bekreftet. Lengre pigger behandles som ekte syklusaktivitet. Standard: 60 s.",
+          "delay_timeout_hours": "Sikkerhetstidsavbrudd: Hvis maskinen fortsatt er i 'Venter på å starte' etter disse mange timene, tilbakestilles WashData til Av. Standard: 8 timer."
         }
       },
       "diagnostics": {
@@ -591,7 +591,7 @@
       },
       "apply_suggestions_confirm": {
         "title": "Gjennomgå foreslåtte endringer",
-        "description": "WashData fant **{pending_count}** foreslått(e) verdi(er) for bruk.\n\nEndringer:\n{changes}\n\n✅ Merk av boksen nedenfor og klikk **Send** for å bruke og lagre disse endringene umiddelbart.\n❌ La den stå uavkrysset og klikk **Send** for å avbryte og gå tilbake.",
+        "description": "WashData funnet **{pending_count}** foreslåtte verdi(er) å bruke.\n\nEndringer:\n{changes}\n\n✅ Merk av i boksen nedenfor og klikk på **Send** for å bruke og lagre disse endringene umiddelbart.\n❌ La det være umerket og klikk på **Send** for å avbryte og gå tilbake.",
         "data": {
           "confirm_apply_suggestions": "Bruk og lagre disse endringene"
         }
@@ -1054,7 +1054,7 @@
           "ending": "Slutt",
           "finished": "Ferdig",
           "anti_wrinkle": "Anti-rynke",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Venter på å starte",
           "interrupted": "Avbrutt",
           "force_stopped": "Tving stoppet",
           "rinse": "Skylle",

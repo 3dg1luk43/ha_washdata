@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "제안된 변경 사항 검토",
-        "description": "WashData가 적용할 **{pending_count}**개의 추천 값을 찾았습니다.\n\n변경 사항:\n{changes}\n\n✅ 아래 체크박스를 선택하고 **제출**을 클릭하여 이 변경 사항을 즉시 적용 및 저장합니다.\n❌ 체크하지 않은 채로 **제출**을 클릭하면 취소하고 돌아갑니다.",
+        "description": "WashData에서 **{pending_count}** 적용할 제안 값을 찾았습니다.\n\n변경사항:\n{changes}\n\n✅ 변경 사항을 즉시 적용하고 저장하려면 아래 확인란을 선택하고 **제출**을 클릭하세요.\n❌ 체크하지 않은 상태로 두고 **제출**을 클릭하여 취소하고 돌아갑니다.",
         "data": {
-          "confirm_apply_suggestions": "이 변경 사항 적용 및 저장"
+          "confirm_apply_suggestions": "변경사항 적용 및 저장"
         }
       },
       "settings": {
@@ -206,11 +206,11 @@
           "pause_cuts_power": "일시 정지 시 전원 차단",
           "notify_unload_delay_minutes": "세탁 대기 알림 지연(분)",
           "switch_entity": "스위치 엔터티(정전 일시 정지용)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "지연된 시작 감지 활성화",
+          "delay_drain_min_power": "지연된 시작: 배수 스파이크 최소 전력(W)",
+          "delay_drain_max_power": "지연된 시작: 드레인 스파이크 최대 전력(W)",
+          "delay_drain_max_duration": "지연된 시작: 최대 배수 스파이크 기간(초)",
+          "delay_timeout_hours": "지연된 시작: 최대 대기 시간(h)"
         },
         "data_description": {
           "apply_suggestions": "학습 알고리즘에서 제안된 값의 검토 단계를 열려면 이 상자를 선택하세요. 아무것도 자동으로 저장되지 않습니다.\n\n제안 (학습에서):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -263,11 +263,11 @@
           "pause_cuts_power": "Pause Cycle 버튼이나 서비스를 통해 일시 중지하는 경우 구성된 스위치 엔터티도 끄십시오. 이 장치에 스위치 엔터티가 구성된 경우에만 적용됩니다.",
           "notify_unload_delay_minutes": "사이클이 종료되고 몇 분 동안 문이 열리지 않으면 완료 알림 채널을 통해 알림을 보냅니다(도어 센서 필요). 비활성화하려면 0으로 설정합니다. 기본값: 60분",
           "switch_entity": "일시중지하거나 재개할 때 전환할 스위치 엔터티입니다. '일시 중지 시 전원 차단'이 활성화된 경우 필요합니다.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "활성화되면 짧은 저전력 소모 스파이크와 지속적인 대기 전력이 지연된 시작으로 감지됩니다. 지연되는 동안 상태 센서에 '시작 대기 중'이 표시됩니다. 사이클이 실제로 시작될 때까지는 프로그램 시간이나 진행 상황이 추적되지 않습니다. start_threshold_w를 드레인 스파이크 전력보다 높게 설정해야 합니다.",
+          "delay_drain_min_power": "드레인 스파이크로 인식하기 위한 최소 전력(W)입니다. 장비의 실제 대기 수준 바로 위에 설정하십시오. 기본값: 10W",
+          "delay_drain_max_power": "드레인 스파이크의 최대 전력(W) - 이보다 높은 버스트는 실제 사이클 시작으로 처리됩니다. start_threshold_w 설정보다 낮아야 합니다. 기본값: 80W",
+          "delay_drain_max_duration": "확인하려면 배수 스파이크가 이 몇 초 내에 배수 창 아래로 다시 떨어져야 합니다. 더 긴 스파이크는 실제 주기 활동으로 처리됩니다. 기본값: 60초",
+          "delay_timeout_hours": "안전 시간 초과: 이 시간이 지난 후에도 기기가 여전히 '시작 대기 중' 상태이면 WashData가 꺼짐으로 재설정됩니다. 기본값: 8시간"
         }
       },
       "diagnostics": {
@@ -1054,7 +1054,7 @@
           "ending": "종료 중",
           "finished": "완료됨",
           "anti_wrinkle": "주름 방지",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "시작을 기다리는 중",
           "interrupted": "중단됨",
           "force_stopped": "강제 정지됨",
           "rinse": "헹굼",

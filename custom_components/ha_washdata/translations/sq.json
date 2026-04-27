@@ -199,11 +199,11 @@
           "pause_cuts_power": "Ndërpreni energjinë kur ndaloni",
           "notify_unload_delay_minutes": "Vonesa e njoftimit në pritje të rrobave (min.)",
           "switch_entity": "Ndërro entitetin (për ndërprerjen e energjisë në pauzë)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_start_detect_enabled": "Aktivizo zbulimin e fillimit të vonuar",
+          "delay_drain_min_power": "Nisja e vonuar: Fuqia minimale e pikës së shkarkimit (W)",
           "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_drain_max_duration": "Nisja e vonuar: Kohëzgjatja maksimale e pikës së shkarkimit (s)",
+          "delay_timeout_hours": "Fillimi i vonuar: Koha maksimale e pritjes (h)"
         },
         "data_description": {
           "apply_suggestions": "Zgjidhni këtë kuti për të hapur një hap rishikimi për vlerat e sugjeruara nga algoritmi i të mësuarit. Asgjë nuk ruhet automatikisht.\n\nSugjeruar (nga të mësuarit):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "Kur bëni pauzë nëpërmjet butonit ose shërbimit të Ciklit të Pauzës, fikni gjithashtu entitetin e konfiguruar të ndërprerës. Hyn në fuqi vetëm nëse për këtë pajisje është konfiguruar një ent ndërruesi.",
           "notify_unload_delay_minutes": "Dërgoni një njoftim nëpërmjet kanalit të njoftimit të përfundimit pasi të përfundojë cikli dhe dera nuk është hapur për kaq shumë minuta (kërkon Sensori i derës). Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 60 min.",
           "switch_entity": "Njësia e ndërrimit për t'u ndërruar kur ndalon ose rifillon. Kërkohet kur aktivizohet \"Prini energjinë kur ndalon\".",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Kur aktivizohet, zbulohet si një nisje me vonesë, një rritje e shkurtër e shkarkimit me fuqi të ulët e ndjekur nga energjia e qëndrueshme e gatishmërisë. Sensori i gjendjes tregon 'Waiting to Start' gjatë vonesës. Asnjë kohë ose përparim i programit nuk gjurmohet derisa të fillojë realisht cikli. Kërkon që start_threshold_w të vendoset mbi fuqinë e pikës së shkarkimit.",
+          "delay_drain_min_power": "Fuqia minimale (W) për t'u njohur si një pikë kullimi. Vendoseni pak mbi nivelin e gatishmërisë reale të pajisjes suaj. Parazgjedhja: 10 W.",
+          "delay_drain_max_power": "Fuqia maksimale (W) për një pikë kullimi - shpërthimet mbi këtë trajtohen si fillim i vërtetë i ciklit. Duhet të jetë nën cilësimin tuaj start_threshold_w. Parazgjedhja: 80 W.",
+          "delay_drain_max_duration": "Pika e kullimit duhet të bjerë përsëri poshtë dritares së kullimit brenda kaq shumë sekondash për t'u konfirmuar. Pikat më të gjata trajtohen si aktivitet real të ciklit. Parazgjedhja: 60 s.",
+          "delay_timeout_hours": "Kohëzgjatja e sigurisë: nëse pajisja është ende në \"Prit për të nisur\" pas kaq shumë orësh, WashData rivendoset në Off. Parazgjedhja: 8 orë."
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Rishiko ndryshimet e sugjeruara",
-        "description": "WashData gjeti **{pending_count}** vlerë/a të sugjeruara për zbatim.\n\nNdryshimet:\n{changes}\n\n✅ Kontrolloni kutinë më poshtë dhe klikoni **Dërgo** për të zbatuar dhe ruajtur menjëherë këto ndryshime.\n❌ Lëreni pa kontrolluar dhe klikoni **Dërgo** për të anuluar dhe shkuar mbrapa.",
+        "description": "WashData u gjet **{pending_count}** vlera(t) e sugjeruara për t'u aplikuar.\n\nNdryshimet:\n{changes}\n\n✅ Kontrolloni kutinë më poshtë dhe klikoni **Dërgo** për të aplikuar dhe ruajtur menjëherë këto ndryshime.\n❌ Lëreni të pazgjedhur dhe klikoni **Dërgo** për ta anuluar dhe për t'u kthyer prapa.",
         "data": {
-          "confirm_apply_suggestions": "Zbato dhe ruaj këto ndryshime"
+          "confirm_apply_suggestions": "Aplikoni dhe ruani këto ndryshime"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "Duke përfunduar",
           "finished": "Përfunduar",
           "anti_wrinkle": "Kundër rrudhave",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Në pritje për të filluar",
           "interrupted": "E ndërprerë",
           "force_stopped": "Ndaluar me forcë",
           "rinse": "Shpëlarje",

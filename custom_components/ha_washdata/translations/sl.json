@@ -199,11 +199,11 @@
           "pause_cuts_power": "Prekinite napajanje med premorom",
           "notify_unload_delay_minutes": "Zakasnitev obvestila o čakanju na perilo (min.)",
           "switch_entity": "Preklopna entiteta (za premor izklop napajanja)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Omogoči zaznavanje zakasnjenega začetka",
+          "delay_drain_min_power": "Zakasnitev zagona: Najmanjša moč drenažnega trna (W)",
+          "delay_drain_max_power": "Zakasnitev zagona: Največja moč izpusta konice (W)",
+          "delay_drain_max_duration": "Zakasnitev zagona: največje trajanje konice praznjenja (s)",
+          "delay_timeout_hours": "Zakasnitev zagona: Najdaljši čakalni čas (h)"
         },
         "data_description": {
           "apply_suggestions": "Označite to polje, če želite odpreti korak pregleda za predlagane vrednosti iz učnega algoritma. Nič se samodejno ne shrani.\n\nPredlagano (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "Pri premoru prek gumba Pause Cycle ali storitve izklopite tudi konfigurirano entiteto stikala. Učinkuje le, če je za to napravo konfigurirana entiteta stikala.",
           "notify_unload_delay_minutes": "Pošljite obvestilo prek kanala za obveščanje o zaključku, ko se cikel konča in vrata niso bila odprta toliko minut (potreben je senzor za vrata). Nastavite na 0, da onemogočite. Privzeto: 60 min.",
           "switch_entity": "Preklopna entiteta, ki jo želite preklopiti, ko zaustavite ali nadaljujete. Zahtevano, ko je omogočena možnost »Prekini napajanje ob premoru«.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Ko je omogočeno, je kot zakasnjen zagon zaznan kratek skok nizke porabe energije, ki mu sledi vzdržljivo napajanje v stanju pripravljenosti. Senzor stanja med zakasnitvijo prikazuje 'Čakanje na začetek'. Čas programa ali napredek se ne spremljata, dokler se cikel dejansko ne začne. Zahteva, da mora biti start_threshold_w nastavljen nad močjo odvajanja.",
+          "delay_drain_min_power": "Najmanjša moč (W), ki jo prepoznamo kot odtočno konico. Nastavite tik nad stopnjo pripravljenosti za pravi izklop vaše naprave. Privzeto: 10 W.",
+          "delay_drain_max_power": "Največja moč (W) za konico odtoka — izbruhi nad to se obravnavajo kot pravi začetek cikla. Biti mora pod vašo nastavitev start_threshold_w. Privzeto: 80 W.",
+          "delay_drain_max_duration": "Odtočna konica mora pasti nazaj pod odtočno okno v toliko sekundah, da se potrdi. Daljši skoki se obravnavajo kot dejanska ciklična aktivnost. Privzeto: 60 s.",
+          "delay_timeout_hours": "Varnostna časovna omejitev: če je stroj po toliko urah še vedno v stanju »Čakanje na zagon«, se WashData ponastavi na Off. Privzeto: 8 h."
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Pregled predlaganih sprememb",
-        "description": "WashData je našel **{pending_count}** predlagano(ih) vrednost(i) za uporabo.\n\nSpremembe:\n{changes}\n\n✅ Označite polje spodaj in kliknite **Pošlji**, da takoj uporabite in shranite te spremembe.\n❌ Pustite neoznačeno in kliknite **Pošlji** za preklic in vrnitev nazaj.",
+        "description": "WashData je našel **{pending_count}** predlagane vrednosti za uporabo.\n\nSpremembe:\n{changes}\n\n✅ Označite spodnje polje in kliknite **Pošlji**, da uporabite in takoj shranite te spremembe.\n❌ Pustite nepotrjeno in kliknite **Pošlji** za preklic in vrnitev.",
         "data": {
-          "confirm_apply_suggestions": "Uporabi in shrani te spremembe"
+          "confirm_apply_suggestions": "Uporabite in shranite te spremembe"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "Zaključuje se",
           "finished": "Končano",
           "anti_wrinkle": "Zaščita pred gubami",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Čakam na začetek",
           "interrupted": "Prekinjeno",
           "force_stopped": "Prisilno ustavljeno",
           "rinse": "Izpiranje",

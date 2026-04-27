@@ -199,11 +199,11 @@
           "pause_cuts_power": "Isključite napajanje prilikom pauziranja",
           "notify_unload_delay_minutes": "Odgoda obavijesti o čekanju praonice rublja (min.)",
           "switch_entity": "Preklopni entitet (za pauziranje isključenja struje)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+          "delay_start_detect_enabled": "Omogući otkrivanje odgođenog početka",
+          "delay_drain_min_power": "Odgođeni početak: minimalna snaga odvodnog šiljka (W)",
+          "delay_drain_max_power": "Odgođeni početak: Maks. snaga ispusta (W)",
+          "delay_drain_max_duration": "Odgođeni početak: maksimalno trajanje skoka ispuštanja (s)",
+          "delay_timeout_hours": "Odgođeni početak: maksimalno vrijeme čekanja (h)"
         },
         "data_description": {
           "apply_suggestions": "Označite ovaj okvir da biste otvorili korak pregleda za predložene vrijednosti iz algoritma učenja. Ništa se ne sprema automatski.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -256,11 +256,11 @@
           "pause_cuts_power": "Kada pauzirate putem gumba Pause Cycle ili usluge, također isključite konfigurirani entitet prekidača. Stupa na snagu samo ako je entitet prekidača konfiguriran za ovaj uređaj.",
           "notify_unload_delay_minutes": "Pošaljite obavijest putem kanala obavijesti o završetku nakon što ciklus završi i vrata nisu otvorena toliko minuta (potreban je senzor za vrata). Postavite na 0 za onemogućavanje. Zadano: 60 min.",
           "switch_entity": "Entitet prekidača koji se mijenja prilikom pauziranja ili nastavka. Potrebno kada je omogućeno \"Isključi napajanje prilikom pauziranja\".",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+          "delay_start_detect_enabled": "Kada je omogućeno, kratki skok niske potrošnje energije praćen kontinuiranim napajanjem u stanju pripravnosti otkriva se kao odgođeni početak. Senzor stanja pokazuje 'Čekanje na početak' tijekom odgode. Vrijeme trajanja programa ili napredak ne prati se dok ciklus zapravo ne započne. Zahtijeva da start_threshold_w bude postavljen iznad drain spike snage.",
+          "delay_drain_min_power": "Minimalna snaga (W) koja se prepoznaje kao odvodni šiljak. Postavite malo iznad razine pripravnosti istinskog isključenja vašeg uređaja. Zadano: 10 W.",
+          "delay_drain_max_power": "Maksimalna snaga (W) za šiljak odvoda — izbijanja iznad toga tretiraju se kao pravi početak ciklusa. Trebao bi biti ispod vaše postavke start_threshold_w. Zadano: 80 W.",
+          "delay_drain_max_duration": "Odvodni šiljak mora pasti natrag ispod odvodnog prozora unutar toliko sekundi da bi bio potvrđen. Dulji skokovi tretiraju se kao aktivnost stvarnog ciklusa. Zadano: 60 s.",
+          "delay_timeout_hours": "Sigurnosno vremensko ograničenje: ako je stroj još uvijek u 'Čekanju pokretanja' nakon toliko sati, WashData se vraća na Isključeno. Zadano: 8 h."
         }
       },
       "diagnostics": {
@@ -591,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Pregledajte predložene promjene",
-        "description": "WashData je pronašao **{pending_count}** predloženu(ih) vrijednost(i) za primjenu.\n\nPromjene:\n{changes}\n\n✅ Označite polje ispod i kliknite **Pošalji** da odmah primijenite i spremite ove promjene.\n❌ Ostavite neoznačeno i kliknite **Pošalji** za otkazivanje i povratak.",
+        "description": "WashData je pronašao **{pending_count}** predloženu vrijednost(i) za primjenu.\n\nPromjene:\n{changes}\n\n✅ Označite okvir u nastavku i kliknite **Pošalji** za primjenu i spremanje ovih promjena odmah.\n❌ Ostavite ga neoznačenim i kliknite **Pošalji** za odustajanje i povratak.",
         "data": {
-          "confirm_apply_suggestions": "Primijeni i spremi ove promjene"
+          "confirm_apply_suggestions": "Primijenite i spremite ove promjene"
         }
       },
       "trim_cycle_select": {
@@ -1054,7 +1054,7 @@
           "ending": "Završetak",
           "finished": "Gotovo",
           "anti_wrinkle": "Protiv bora",
-          "delay_wait": "Waiting to Start",
+          "delay_wait": "Čekanje na početak",
           "interrupted": "Prekinut",
           "force_stopped": "Prisilno zaustavljeno",
           "rinse": "Ispiranje",
