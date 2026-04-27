@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Peržiūrėkite siūlomus pakeitimus",
-        "description": "WashData rado {pending_count} siūlomas taikyti vertes.\n\nPakeitimai, kuriuos reikia peržiūrėti:\n{changes}\n\nPatvirtinkite toliau, kad nustatytumėte šias vertes formoje. Jie neišsaugomi, kol nepateiksite išplėstinių nustatymų.",
+        "description": "Rasta „WashData“ **{pending_count}** siūloma (-ių) taikyti vertė (-ės).\n\nPakeitimai:\n{changes}\n\n✅ Pažymėkite toliau esantį laukelį ir spustelėkite **Pateikti**, kad pritaikytumėte ir išsaugotumėte šiuos pakeitimus nedelsiant.\n❌ Palikite jį nepažymėtą ir spustelėkite **Pateikti**, kad atšauktumėte ir grįžtumėte atgal.",
         "data": {
-          "confirm_apply_suggestions": "Išplėstiniuose nustatymuose nustatykite siūlomas vertes"
+          "confirm_apply_suggestions": "Taikykite ir išsaugokite šiuos pakeitimus"
         }
       },
       "settings": {
@@ -72,19 +72,20 @@
           "power_sensor": "Galios jutiklio objektas",
           "min_power": "Minimali galia (W)",
           "off_delay": "Ciklo pabaigos delsa (s)",
-          "notify_service": "Pranešimų paslauga (pvz., notify.mobile_app)",
           "notify_actions": "Pranešimų veiksmai",
           "notify_people": "Atidėti pristatymą, kol šie žmonės grįš namo",
           "notify_only_when_home": "Atidėti pranešimus, kol pasirinktas asmuo bus namuose",
           "notify_fire_events": "Paleisti automatizavimo įvykius",
-          "notify_events": "Įvykiai, apie kuriuos pranešti",
           "notify_before_end_minutes": "Pranešimas prieš pabaigą (min. iki pabaigos)",
           "notify_title": "Pranešimo pavadinimas",
           "notify_icon": "Pranešimo piktograma",
           "notify_start_message": "Pradžios pranešimo formatas",
           "notify_finish_message": "Pabaigos pranešimo formatas",
           "notify_pre_complete_message": "Išankstinio pabaigos pranešimo formatas",
-          "show_advanced": "Redaguoti išplėstinius nustatymus (kitas žingsnis)"
+          "show_advanced": "Redaguoti išplėstinius nustatymus (kitas žingsnis)",
+          "notify_start_services": "Ciklo pradžia – pranešimų tikslai",
+          "notify_finish_services": "Ciklo pabaiga – pranešimų tikslai",
+          "notify_live_services": "Tiesioginė eiga – pranešimų tikslai"
         },
         "data_description": {
           "apply_suggestions": "Pažymėkite šį laukelį, jei norite kopijuoti mokymosi algoritmo siūlomas vertes į formą. Peržiūrėkite prieš išsaugodami.\n\nSiūloma (iš mokymosi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -92,30 +93,29 @@
           "power_sensor": "Jutiklio objektas, pranešantis apie galią realiuoju laiku (vatais). Tai galite bet kada pakeisti neprarasdami istorinių duomenų – tai naudinga, jei pakeisite išmanųjį kištuką.",
           "min_power": "Galios rodmenys, viršijantys šią ribą (vatais), rodo, kad prietaisas veikia. Pradėkite nuo 2 W daugeliui įrenginių.",
           "off_delay": "Sekundžių skaičius, kurį išlyginta galia turi išlikti žemiau stabdymo slenksčio, kad būtų pažymėta pabaiga. Numatytasis: 120 s.",
-          "notify_service": "Home Assistant pranešimų paslauga (neprivaloma).",
           "notify_actions": "Pasirenkama Home Assistant veiksmų seka pranešimams (scenarijai, pranešimas, TTS ir kt.). Jei nustatyta, veiksmai atliekami prieš atsarginę pranešimų paslaugą.",
           "notify_people": "Žmonių objektai, naudojami buvimo vietai patikrinti. Kai įjungta, pranešimų pristatymas atidedamas, kol bent vienas pasirinktas asmuo yra namuose.",
           "notify_only_when_home": "Jei įjungta, atideda pranešimus, kol bent vienas pasirinktas asmuo yra namuose.",
           "notify_fire_events": "Jei įjungta, paleidžia Home Assistant ciklo pradžios ir pabaigos įvykius (ha_washdata_cycle_started ir ha_washdata_cycle_ended) automatizavimams valdyti.",
-          "notify_events": "Apie kokius įvykius siųsti pranešimus.",
           "notify_before_end_minutes": "Minutės iki numatomos ciklo pabaigos, kad būtų suaktyvintas pranešimas. Norėdami išjungti, nustatykite 0. Numatytasis: 0.",
           "notify_title": "Pasirinktinis pranešimų pavadinimas. Palaikomas {device} rezervuotos vietos žymeklis.",
           "notify_icon": "Pranešimams naudojama piktograma (pvz., mdi:washing-machine). Palikite tuščią, kad siųstumėte be piktogramos.",
           "notify_start_message": "Pranešimas siunčiamas, kai prasideda ciklas. Palaikomas {device} rezervuotos vietos žymeklis.",
           "notify_finish_message": "Pranešimas siunčiamas, kai ciklas baigiasi. Palaikomi {device}, {duration}, {program} rezervuotų vietų žymekliai.",
-          "notify_pre_complete_message": "Pranešimas siunčiamas prieš pabaigą. Palaikomi {device}, {minutes} rezervuotų vietų žymekliai."
+          "notify_pre_complete_message": "Pranešimas siunčiamas prieš pabaigą. Palaikomi {device}, {minutes} rezervuotų vietų žymekliai.",
+          "notify_start_services": "Viena ar kelios tarnybos praneša, kai prasideda ciklas. Palikite tuščią, kad praleistumėte pradžios pranešimus.",
+          "notify_finish_services": "Viena ar kelios tarnybos įspėja, kai ciklas baigiasi arba artėja prie pabaigos. Palikite tuščią, kad praleistumėte pabaigos pranešimus.",
+          "notify_live_services": "Viena ar daugiau pranešimų paslaugų, kad gautų tiesioginius eigos atnaujinimus, kai ciklas vyksta (tik mobiliajai programai). Palikite tuščią, kad praleistumėte tiesioginius atnaujinimus."
         }
       },
       "notifications": {
         "title": "Pranešimai",
         "description": "Konfigūruokite pranešimų kanalus, šablonus ir pasirenkamus tiesioginius mobiliojo ryšio eigos naujinius.",
         "data": {
-          "notify_service": "Pranešimų paslauga (pvz., notify.mobile_app)",
           "notify_actions": "Pranešimų veiksmai",
           "notify_people": "Atidėti pristatymą, kol šie žmonės grįš namo",
           "notify_only_when_home": "Atidėti pranešimus, kol pasirinktas asmuo bus namuose",
           "notify_fire_events": "Paleisti automatizavimo įvykius",
-          "notify_events": "Įvykiai, apie kuriuos pranešti",
           "notify_before_end_minutes": "Pranešimas prieš pabaigą (min. iki pabaigos)",
           "notify_live_interval_seconds": "Tiesioginio atnaujinimo intervalas (sekundėmis)",
           "notify_live_overrun_percent": "Tiesioginio atnaujinimo viršijimo leistina norma (%)",
@@ -123,15 +123,19 @@
           "notify_icon": "Pranešimo piktograma",
           "notify_start_message": "Pradžios pranešimo formatas",
           "notify_finish_message": "Pabaigos pranešimo formatas",
-          "notify_pre_complete_message": "Išankstinio pabaigos pranešimo formatas"
+          "notify_pre_complete_message": "Išankstinio pabaigos pranešimo formatas",
+          "notify_start_services": "Ciklo pradžia – pranešimų tikslai",
+          "notify_finish_services": "Ciklo pabaiga – pranešimų tikslai",
+          "notify_live_services": "Tiesioginė eiga – pranešimų tikslai",
+          "notify_live_chronometer": "Chronometro atgalinės atskaitos laikmatis",
+          "energy_price_entity": "Energijos kaina – subjektas (neprivaloma)",
+          "energy_price_static": "Energijos kaina – statinė vertė (neprivaloma)"
         },
         "data_description": {
-          "notify_service": "„Home Assistant” pranešimų paslauga (neprivaloma).",
           "notify_actions": "Pasirenkama „Home Assistant” veiksmų seka pranešimams (scenarijai, pranešimas, TTS ir kt.). Jei nustatyta, veiksmai atliekami prieš atsarginę pranešimų paslaugą.",
           "notify_people": "Žmonių objektai, naudojami buvimo vietai patikrinti. Kai įjungta, pranešimų pristatymas atidedamas, kol bent vienas pasirinktas asmuo yra namuose.",
           "notify_only_when_home": "Jei įjungta, atideda pranešimus, kol bent vienas pasirinktas asmuo yra namuose.",
           "notify_fire_events": "Jei įjungta, paleidžia „Home Assistant” ciklo pradžios ir pabaigos įvykius (ha_washdata_cycle_started ir ha_washdata_cycle_ended) automatizavimams valdyti.",
-          "notify_events": "Apie kokius įvykius siųsti pranešimus.",
           "notify_before_end_minutes": "Minutės iki numatomos ciklo pabaigos, kad būtų suaktyvintas pranešimas. Norėdami išjungti, nustatykite 0. Numatytasis: 0.",
           "notify_live_interval_seconds": "Kaip dažnai veikiant siunčiami eigos naujiniai. Mažesnės reikšmės reaguoja greičiau, bet sunaudoja daugiau pranešimų. Taikoma ne mažiau kaip 30 sekundžių – mažesnės nei 30 s reikšmės automatiškai suapvalinamos iki 30 s.",
           "notify_live_overrun_percent": "Saugos atsarga, viršijanti numatomą naujinimų skaičių ilgiems / per ilgiems ciklams (pvz., 20 % leidžia 1,2 karto apskaičiuotus naujinius).",
@@ -139,7 +143,13 @@
           "notify_icon": "Pranešimams naudojama piktograma (pvz., mdi:washing-machine). Palikite tuščią, kad siųstumėte be piktogramos.",
           "notify_start_message": "Pranešimas siunčiamas, kai prasideda ciklas. Palaikomas {device} rezervuotos vietos žymeklis.",
           "notify_finish_message": "Pranešimas siunčiamas, kai ciklas baigiasi. Palaikomi {device}, {duration}, {program} rezervuotų vietų žymekliai.",
-          "notify_pre_complete_message": "Pranešimas siunčiamas prieš pabaigą. Palaikomi {device}, {minutes} rezervuotų vietų žymekliai."
+          "notify_pre_complete_message": "Pranešimas siunčiamas prieš pabaigą. Palaikomi {device}, {minutes} rezervuotų vietų žymekliai.",
+          "notify_start_services": "Viena ar daugiau pranešimų paslaugų, kurios įspėtų, kai ciklas prasideda (pvz., notify.mobile_app_my_phone). Palikite tuščią, kad praleistumėte pradžios pranešimus.",
+          "notify_finish_services": "Viena ar kelios tarnybos įspėja, kai ciklas baigiasi arba artėja prie pabaigos. Palikite tuščią, kad praleistumėte pabaigos pranešimus.",
+          "notify_live_services": "Viena ar daugiau pranešimų paslaugų gauti tiesioginius eigos naujinius, kai ciklas vyksta (tik mobilioji programa). Palikite tuščią, kad praleistumėte tiesioginius atnaujinimus.",
+          "notify_live_chronometer": "Kai įgalinta, į kiekvieną tiesioginį atnaujinimą įtraukiamas chronometro atgalinis skaičiavimas iki numatomo pabaigos laiko. Pranešimų laikmatis automatiškai įsijungia įrenginyje tarp atnaujinimų (tik „Android“ papildomai programai).",
+          "energy_price_entity": "Pasirinkite skaitmeninį objektą, kuriame yra dabartinė elektros kaina (pvz., jutiklis.elektros_kaina, įvesties_numeris.energijos_norma). Kai nustatyta, įgalina rezervuotą vietą {cost}. Turi viršenybę prieš statinę vertę, jei sukonfigūruotos abi.",
+          "energy_price_static": "Fiksuota elektros kaina už kWh. Kai nustatyta, įgalina rezervuotą vietą {cost}. Nepaisoma, jei subjektas sukonfigūruotas aukščiau. Pranešimo šablone pridėkite savo valiutos simbolį, pvz. {cost} €."
         }
       },
       "advanced_settings": {
@@ -189,7 +199,18 @@
           "dtw_bandwidth": "DTW juostos plotis",
           "external_end_trigger_enabled": "Įjungti išorinį ciklo pabaigos aktyviklį",
           "external_end_trigger": "Išorinis ciklo pabaigos jutiklis",
-          "external_end_trigger_inverted": "Apversti aktyviklio logiką (aktyvinti išjungus)"
+          "external_end_trigger_inverted": "Apversti aktyviklio logiką (aktyvinti išjungus)",
+          "suppress_feedback_notifications": "Neleiskite atsiliepimų pranešimų",
+          "pump_stuck_duration": "Siurblio užstrigimo įspėjimo slenkstis (-ai) (tik siurblys)",
+          "door_sensor_entity": "Durų jutiklis",
+          "pause_cuts_power": "Išjunkite maitinimą pristabdydami",
+          "notify_unload_delay_minutes": "Pranešimo apie skalbinių laukimą delsa (min.)",
+          "switch_entity": "Jungiklio objektas (pristabdyti maitinimo nutraukimą)",
+          "delay_start_detect_enabled": "Įgalinti atidėto paleidimo aptikimą",
+          "delay_drain_min_power": "Atidėtas paleidimas: išleidimo smaigalys, minimali galia (W)",
+          "delay_drain_max_power": "Atidėtas paleidimas: didžiausios galios nutekėjimo smaigalys (W)",
+          "delay_drain_max_duration": "Atidėtas paleidimas: maksimali nutekėjimo smaigalio trukmė (s)",
+          "delay_timeout_hours": "Atidėtas startas: maksimalus laukimo laikas (h)"
         },
         "data_description": {
           "apply_suggestions": "Pažymėkite šį laukelį, kad atidarytumėte siūlomų verčių iš mokymosi algoritmo peržiūros žingsnį. Niekas neišsaugoma automatiškai.\n\nSiūloma (iš mokymosi):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -235,7 +256,18 @@
           "dtw_bandwidth": "Didžiausias leistinas laiko deformavimas (tempimas) kaip ciklo trukmės santykis. Didesnės vertės leidžia suderinti labai kintamus ciklus, tačiau padidina procesoriaus sąnaudas. Numatytasis: 0,20 (20%).",
           "external_end_trigger_enabled": "Įjungti išorinio dvejetainio jutiklio stebėjimą, kad suaktyvintumėte ciklo pabaigą.",
           "external_end_trigger": "Pasirinkite dvejetainio jutiklio objektą. Kai šis jutiklis suveikia, dabartinis ciklas baigsis su būsena „baigta”.",
-          "external_end_trigger_inverted": "Pagal numatytuosius nustatymus aktyviklis suveikia, kai jutiklis įjungiamas. Pažymėkite šį laukelį, kad suveiktų, kai jutiklis išjungiamas."
+          "external_end_trigger_inverted": "Pagal numatytuosius nustatymus aktyviklis suveikia, kai jutiklis įjungiamas. Pažymėkite šį laukelį, kad suveiktų, kai jutiklis išjungiamas.",
+          "suppress_feedback_notifications": "Kai įjungta, WashData vis tiek stebės ir prašys atsiliepimų viduje, bet nerodys nuolatinių pranešimų, kuriuose prašoma patvirtinti ciklus. Naudinga, kai ciklai visada aptinkami teisingai, o raginimai blaško dėmesį.",
+          "pump_stuck_duration": "Jei po tiek sekundžių vis dar veikia siurblio ciklas, vieną kartą suaktyvinamas įvykis ha_washdata_pump_stuck. Naudokite tai norėdami aptikti užstrigusį variklį (įprastas karterio siurblio veikimas yra trumpesnis nei 60 s). Numatytasis: 1800 s (30 min.). Tik siurblio įrenginio tipas.",
+          "door_sensor_entity": "Pasirenkamas dvejetainis mašinos durelių jutiklis (įjungta = atidaryta, išjungta = uždaryta). Kai durelės atsidaro aktyvaus ciklo metu, WashData patvirtins, kad ciklas buvo tyčia pristabdytas. Pasibaigus ciklui, jei durelės vis dar uždarytos, būsena pasikeičia į „Clean“, kol durys bus atidarytos. Pastaba: uždarius dureles automatiškai NEatnaujinamas pristabdytas ciklas – atnaujinimas turi būti suaktyvintas rankiniu būdu, naudojant mygtuką Tęsti ciklą arba paslauga.",
+          "pause_cuts_power": "Pristabdydami naudodami mygtuką Pause Cycle arba paslaugą, taip pat išjunkite sukonfigūruotą jungiklio objektą. Įsigalioja tik tada, jei šiam įrenginiui sukonfigūruotas jungiklio objektas.",
+          "notify_unload_delay_minutes": "Pasibaigus ciklui ir durims neatidarius tiek minučių, išsiųskite pranešimą per pranešimo apie pabaigą kanalą (reikalingas durų jutiklis). Norėdami išjungti, nustatykite 0. Numatytasis: 60 min.",
+          "switch_entity": "Perjungimo objektas, perjungiamas pristabdant arba tęsiant. Reikalingas, kai įjungta parinktis „Išjungti maitinimą pristabdant“.",
+          "delay_start_detect_enabled": "Kai įjungta, trumpas mažos galios nutekėjimo šuolis, po kurio eina nuolatinis budėjimo režimas, aptinkamas kaip atidėtas paleidimas. Vėlavimo metu būsenos jutiklis rodo pranešimą „Laukiama pradžios“. Joks programos laikas ar eiga nesekami tol, kol ciklas iš tikrųjų neprasideda. Reikalinga, kad start_threshold_w būtų nustatytas virš nutekėjimo smaigalio galios.",
+          "delay_drain_min_power": "Minimali galia (W), kurią galima atpažinti kaip nutekėjimo smaigalį. Nustatykite tiesiai virš įrenginio tikrojo budėjimo režimo lygio. Numatytoji galia: 10 W.",
+          "delay_drain_max_power": "Didžiausia galia (W) nutekėjimo smaigaliui – viršijantys sprogimai traktuojami kaip tikroji ciklo pradžia. Turėtų būti mažesnis nei start_threshold_w nustatymas. Numatytoji galia: 80 W.",
+          "delay_drain_max_duration": "Kad būtų patvirtinta, drenažo smaigalys turi nukristi žemiau išleidimo lango per tiek sekundžių. Ilgesni smaigai laikomi realia ciklo veikla. Numatytasis: 60 s.",
+          "delay_timeout_hours": "Saugos skirtasis laikas: jei aparatas po tiek valandų vis dar yra „Laukiama, kol bus paleista“, „WashData“ iš naujo nustatoma į „Išjungta“. Numatytasis: 8 val."
         }
       },
       "diagnostics": {
@@ -565,7 +597,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Ciklo apkarpymas — pasirinkite ciklą",
+        "title": "Ciklo apkarpymas - pasirinkite ciklą",
         "description": "Pasirinkite ciklą, kurį norite apkarpyti. ✓ = baigta, ⚠ = atnaujinta, ✗ = nutraukta",
         "data": {
           "cycle_id": "Ciklas"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "Nustatyti apkarpymo pradžią",
-        "description": "Įveskite minutės poslinkį, nuo kurio pradėti saugoti duomenis (0 = ciklo pradžia).",
+        "description": "Ciklo langas: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nDabartinė pradžia: **{current_wallclock}** (+{current_offset_min} min. nuo ciklo pradžios)\n\nPasirinkite naują pradžios laiką naudodami toliau pateiktą laikrodžio parinkiklį.",
         "data": {
-          "trim_start_min": "Pradžia (minutės)"
+          "trim_start_time": "Naujas pradžios laikas",
+          "trim_start_min": "Nauja pradžia (minutės nuo ciklo pradžios)"
         }
       },
       "trim_cycle_end": {
         "title": "Nustatyti apkarpymo pabaigą",
-        "description": "Įveskite minutės poslinkį, iki kurio saugoti duomenis.",
+        "description": "Ciklo langas: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nDabartinė pabaiga: **{current_wallclock}** (+{current_offset_min} min. nuo ciklo pradžios)\n\nPasirinkite naują pabaigos laiką naudodami toliau pateiktą laikrodžio parinkiklį.",
         "data": {
-          "trim_end_min": "Pabaiga (minutės)"
+          "trim_end_time": "Naujas pabaigos laikas",
+          "trim_end_min": "Nauja pabaiga (minutės nuo ciklo pradžios)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "„WashData”: siūlomi nustatymai paruošti ({device})",
       "suggestions_ready_notification_message": "**Siūlomų nustatymų** jutiklis dabar praneša apie **{count}** įgyvendinamas rekomendacijas.\n\nNorėdami juos peržiūrėti ir pritaikyti: **Nustatymai > Įrenginiai ir paslaugos > „WashData” > Konfigūruoti > Išplėstiniai nustatymai > Taikyti siūlomas reikšmes**.\n\nPasiūlymai yra neprivalomi ir rodomi peržiūrėti prieš išsaugant.",
       "trim_range_invalid": "Pradžia turi būti prieš pabaigą. Sureguliuokite apkarpymo taškus.",
-      "trim_failed": "Apkarpyti nepavyko. Ciklo gali nebebūti arba langas tuščias."
+      "trim_failed": "Apkarpyti nepavyko. Ciklo gali nebebūti arba langas tuščias.",
+      "auto_tune_suggestion": "{device_type} {device_title} aptikta vaiduoklio ciklų. Siūlomas min_galios pokytis: {current_min}W -> {new_min}W (netaikomas automatiškai).",
+      "auto_tune_title": "„WashData“ automatinis derinimas",
+      "auto_tune_fallback": "{device_type} {device_title} aptikta vaiduoklio ciklų. Siūlomas min_galios pokytis: {current_min}W -> {new_min}W (netaikomas automatiškai)."
     },
     "abort": {
       "no_cycles_found": "Ciklų nerasta",
@@ -973,6 +1010,26 @@
           "description": "Išsaugoti duomenis iki šio poslinkio sekundėmis. Numatytasis = visa trukmė."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Pristabdyti ciklą",
+      "description": "Pristabdykite aktyvų WashData įrenginio ciklą.",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "„WashData“ įrenginį pristabdyti."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Tęsti ciklą",
+      "description": "Tęsti pristabdytą WashData įrenginio ciklą.",
+      "fields": {
+        "device_id": {
+          "name": "Įrenginys",
+          "description": "„WashData“ įrenginys, kad būtų atnaujintas."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "Pradedama",
           "running": "Veikia",
           "paused": "Pristabdyta",
+          "user_paused": "Vartotojo pristabdyta",
           "ending": "Baigiama",
           "finished": "Baigta",
           "anti_wrinkle": "Apsauga nuo raukšlių",
+          "delay_wait": "Laukiama pradžios",
           "interrupted": "Nutraukta",
           "force_stopped": "Priverstinai sustabdyta",
           "rinse": "Skalavimas",
-          "unknown": "Nežinoma"
+          "unknown": "Nežinoma",
+          "clean": "Švarus"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "Prieinami siūlomi nustatymai"
+      },
+      "pump_runs_today": {
+        "name": "Siurblys veikia (paskutines 24 val.)"
+      },
+      "cycle_count": {
+        "name": "Ciklų skaičius"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Priverstinai baigti ciklą"
+      },
+      "pause_cycle": {
+        "name": "Pristabdyti ciklą"
+      },
+      "resume_cycle": {
+        "name": "Tęsti ciklą"
       }
     }
   },
@@ -1078,6 +1150,15 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s turi būti didesnis nei trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Būtinas galiojantis įrenginio_id."
+    },
+    "cycle_id_required": {
+      "message": "Būtinas galiojantis ciklo_id."
+    },
+    "profile_name_required": {
+      "message": "Reikalingas galiojantis profile_name."
     }
   }
 }

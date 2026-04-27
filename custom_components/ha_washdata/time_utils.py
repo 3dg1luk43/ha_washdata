@@ -80,7 +80,7 @@ def power_data_to_offsets(
     fmt = detect_power_data_format(power_data)
 
     if fmt == "unix_timestamp":
-        # Absolute Unix epoch floats — subtract cycle start to get relative offsets.
+        # Absolute Unix epoch floats - subtract cycle start to get relative offsets.
         base_ts: float | None = None
         if start_time_iso:
             try:

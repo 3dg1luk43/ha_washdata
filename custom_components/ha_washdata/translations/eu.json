@@ -65,19 +65,20 @@
           "power_sensor": "Potentzia Sentsore Entitatea",
           "min_power": "Gutxieneko potentzia (W)",
           "off_delay": "Zikloaren amaierako atzerapena (k)",
-          "notify_service": "Jakinarazpen-zerbitzua (adibidez, notify.mobile_app)",
           "notify_actions": "Jakinarazpen Ekintzak",
           "notify_people": "Atzeratu Entrega Pertsona hauek Etxera arte",
           "notify_only_when_home": "Atzeratu jakinarazpenak hautatutako pertsona etxean egon arte",
           "notify_fire_events": "Automatizazio-gertaerak abiarazi",
-          "notify_events": "Jakinarazi beharreko gertaerak",
           "notify_before_end_minutes": "Osatu aurretiko jakinarazpena (amaitu baino minutu batzuk lehenago)",
           "notify_title": "Jakinarazpenaren izenburua",
           "notify_icon": "Jakinarazpenen ikonoa",
           "notify_start_message": "Hasi mezu formatua",
           "notify_finish_message": "Amaitu mezuen formatua",
           "notify_pre_complete_message": "Osatu aurretiko mezu formatua",
-          "show_advanced": "Editatu ezarpen aurreratuak (Hurrengo urratsa)"
+          "show_advanced": "Editatu ezarpen aurreratuak (Hurrengo urratsa)",
+          "notify_start_services": "Zikloaren hasiera - Jakinarazpen-helburuak",
+          "notify_finish_services": "Zikloaren amaiera - Jakinarazpen-helburuak",
+          "notify_live_services": "Zuzeneko aurrerapena - Jakinarazpen-helburuak"
         },
         "data_description": {
           "apply_suggestions": "Markatu lauki hau ikaskuntza-algoritmoak iradokitako balioak formulariora kopiatzeko. Berrikusi gorde aurretik.\n\nIradokitako (ikaskuntzatik):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "Denbora errealeko potentziaren berri ematen duen sentsore-entitatea (wattetan). Hau edonoiz alda dezakezu datu historikoak galdu gabe; erabilgarria entxufe adimenduna ordezkatzen baduzu.",
           "min_power": "Atalase horretatik gorako potentzia-irakurketak (wattetan) aparatua martxan dagoela adierazten du. Hasi 2W gailu gehienetarako.",
           "off_delay": "Segundotan, leundutako potentzia geldialdiaren atalasearen azpitik egon behar da amaitutakoa markatzeko. Lehenetsia: 120s.",
-          "notify_service": "Home Assistant-en jakinarazpen zerbitzua erabiltzeko (aukerakoa).",
           "notify_actions": "Home Assistant aukerako ekintza-sekuentzia jakinarazpenetarako exekutatzeko (scriptak, jakinarazpena, TTS, etab.). Ezarrita badago, ekintzak abiaraztearen jakinarazpen-zerbitzuaren aurretik egingo dira.",
           "notify_people": "Presentzia ateratzeko erabiltzen diren pertsona-entitateak. Gaituta dagoenean, jakinarazpenak bidaltzea atzeratzen da, gutxienez hautatutako pertsona bat etxean egon arte.",
           "notify_only_when_home": "Gaituta badago, atzeratu jakinarazpenak gutxienez hautatutako pertsona bat etxean egon arte.",
           "notify_fire_events": "Gaituta badago, piztu Home Assistant-eko gertaerak zikloaren hasiera eta amaierarako (ha_washdata_cycle_started eta ha_washdata_cycle_ended) automatizazioak gidatzeko.",
-          "notify_events": "Jakinarazpenak zein gertaeratara bidali.",
           "notify_before_end_minutes": "Zikloaren amaiera estimatua baino minutu batzuk lehenago jakinarazpen bat abiarazteko. Ezarri 0 desgaitzeko. Lehenetsia: 0.",
           "notify_title": "Jakinarazpenetarako izenburu pertsonalizatua. {device} leku-marka onartzen du.",
           "notify_icon": "Jakinarazpenetarako erabiltzeko ikonoa (adibidez, mdi:washing-machine). Utzi hutsik ikonorik gabe bidaltzeko.",
           "notify_start_message": "Ziklo bat hasten denean bidalitako mezua. {device} leku-marka onartzen du.",
           "notify_finish_message": "Ziklo bat amaitzean bidalitako mezua. {device}, {duration}, {program} leku-markak onartzen ditu.",
-          "notify_pre_complete_message": "Amaitu aurretik bidalitako mezua. {device}, {minutes} leku-markak onartzen ditu."
+          "notify_pre_complete_message": "Amaitu aurretik bidalitako mezua. {device}, {minutes} leku-markak onartzen ditu.",
+          "notify_start_services": "Zerbitzu bati edo gehiagori jakinaraztea ziklo bat hasten denean abisatzeko. Utzi hutsik hasierako jakinarazpenak saltatzeko.",
+          "notify_finish_services": "Zerbitzu bati edo gehiagori jakinaraztea ziklo bat amaitzen denean edo amaitzen denean abisatzeko. Utzi hutsik amaierako jakinarazpenak saltatzeko.",
+          "notify_live_services": "Zerbitzu bati edo gehiagori jakinarazpena eman diezaiokete zuzeneko aurrerapen-eguneratzeak zikloa martxan dagoen bitartean (mugikorretarako aplikazio osagarria soilik). Utzi hutsik zuzeneko eguneraketak saltatzeko."
         }
       },
       "notifications": {
         "title": "Jakinarazpenak",
         "description": "Konfiguratu jakinarazpen-kanalak, txantiloiak eta mugikorren zuzeneko aukerako aurrerapen eguneraketak.",
         "data": {
-          "notify_service": "Jakinarazpen-zerbitzua (adibidez, notify.mobile_app)",
           "notify_actions": "Jakinarazpen Ekintzak",
           "notify_people": "Atzeratu Entrega Pertsona hauek Etxera arte",
           "notify_only_when_home": "Atzeratu jakinarazpenak hautatutako pertsona etxean egon arte",
           "notify_fire_events": "Automatizazio-gertaerak abiarazi",
-          "notify_events": "Jakinarazi beharreko gertaerak",
           "notify_before_end_minutes": "Osatu aurretiko jakinarazpena (amaitu baino minutu batzuk lehenago)",
           "notify_live_interval_seconds": "Zuzeneko eguneratze-tartea (segundoak)",
           "notify_live_overrun_percent": "Zuzeneko eguneraketa gainditze hobaria (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "Jakinarazpenen ikonoa",
           "notify_start_message": "Hasi mezu formatua",
           "notify_finish_message": "Amaitu mezuen formatua",
-          "notify_pre_complete_message": "Osatu aurretiko mezu formatua"
+          "notify_pre_complete_message": "Osatu aurretiko mezu formatua",
+          "notify_start_services": "Zikloaren hasiera - Jakinarazpen-helburuak",
+          "notify_finish_services": "Zikloaren amaiera - Jakinarazpen-helburuak",
+          "notify_live_services": "Zuzeneko aurrerapena - Jakinarazpen-helburuak",
+          "notify_live_chronometer": "Kronometroa atzerako kontaketa tenporizadorea",
+          "energy_price_entity": "Energiaren prezioa - Entitatea (aukerakoa)",
+          "energy_price_static": "Energiaren prezioa - Balio estatikoa (aukerakoa)"
         },
         "data_description": {
-          "notify_service": "Home Assistant-en jakinarazpen zerbitzua erabiltzeko (aukerakoa).",
           "notify_actions": "Home Assistant aukerako ekintza-sekuentzia jakinarazpenetarako exekutatzeko (scriptak, jakinarazpena, TTS, etab.). Ezarrita badago, ekintzak abiaraztearen jakinarazpen-zerbitzuaren aurretik egingo dira.",
           "notify_people": "Presentzia ateratzeko erabiltzen diren pertsona-entitateak. Gaituta dagoenean, jakinarazpenak bidaltzea atzeratzen da, gutxienez hautatutako pertsona bat etxean egon arte.",
           "notify_only_when_home": "Gaituta badago, atzeratu jakinarazpenak gutxienez hautatutako pertsona bat etxean egon arte.",
           "notify_fire_events": "Gaituta badago, piztu Home Assistant-eko gertaerak zikloaren hasiera eta amaierarako (ha_washdata_cycle_started eta ha_washdata_cycle_ended) automatizazioak gidatzeko.",
-          "notify_events": "Jakinarazpenak zein gertaeratara bidali.",
           "notify_before_end_minutes": "Zikloaren amaiera estimatua baino minutu batzuk lehenago jakinarazpen bat abiarazteko. Ezarri 0 desgaitzeko. Lehenetsia: 0.",
           "notify_live_interval_seconds": "Aurrerapen-eguneratzeak zenbateko maiztasuna bidaltzen diren exekutatzen ari zaren bitartean. Balio baxuagoek erantzun handiagoa dute baina jakinarazpen gehiago kontsumitzen dute. Gutxienez 30 segundo behar dira; 30 s-tik beherako balioak automatikoki 30 s-ra biribiltzen dira.",
           "notify_live_overrun_percent": "Segurtasun-marjina zenbatetsitako eguneratze-kopurutik gorako ziklo luzeak/gainekotan (adibidez, % 20ak 1,2 aldiz zenbatetsitako eguneratzeak onartzen ditu).",
@@ -132,7 +136,13 @@
           "notify_icon": "Jakinarazpenetarako erabiltzeko ikonoa (adibidez, mdi:washing-machine). Utzi hutsik ikonorik gabe bidaltzeko.",
           "notify_start_message": "Ziklo bat hasten denean bidalitako mezua. {device} leku-marka onartzen du.",
           "notify_finish_message": "Ziklo bat amaitzean bidalitako mezua. {device}, {duration}, {program} leku-markak onartzen ditu.",
-          "notify_pre_complete_message": "Amaitu aurretik bidalitako mezua. {device}, {minutes} leku-markak onartzen ditu."
+          "notify_pre_complete_message": "Amaitu aurretik bidalitako mezua. {device}, {minutes} leku-markak onartzen ditu.",
+          "notify_start_services": "Ziklo bat hasten denean abisatzeko zerbitzu bat edo gehiago jakinarazteko (adibidez, notify.mobile_app_my_phone). Utzi hutsik hasierako jakinarazpenak saltatzeko.",
+          "notify_finish_services": "Zerbitzu bati edo gehiagori jakinaraztea ziklo bat amaitzen denean edo amaitzen denean abisatzeko. Utzi hutsik amaierako jakinarazpenak saltatzeko.",
+          "notify_live_services": "Zerbitzu bati edo gehiagori jakinarazpena eman diezaiokete zuzeneko aurrerapen-eguneratzeak zikloa martxan dagoen bitartean (mugikorretarako aplikazio osagarria soilik). Utzi hutsik zuzeneko eguneraketak saltatzeko.",
+          "notify_live_chronometer": "Gaituta dagoenean, zuzeneko eguneratze bakoitzak kronometroko atzerako kontaketa bat du estimatutako amaiera-orduraino. Jakinarazpen-tenporizadorea automatikoki deskargatzen da gailuan eguneratzeen artean (Android-en aplikazio osagarria soilik).",
+          "energy_price_entity": "Hautatu uneko elektrizitatearen prezioari eusten dion zenbakizko entitate bat (adibidez, sentsorea.electricity_price, input_number.energy_rate). Ezarritakoan, {cost} leku-marka gaitu. Balio estatikoari lehentasuna ematen dio biak konfiguratuta badaude.",
+          "energy_price_static": "Elektrizitatearen prezio finkoa kWh bakoitzeko. Ezarritakoan, {cost} leku-marka gaitu. Ez ikusi egingo da goiko entitate bat konfiguratuta badago. Gehitu zure moneta ikurra mezu-txantiloian, adibidez. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,18 @@
           "dtw_bandwidth": "DTW banda zabalera",
           "external_end_trigger_enabled": "Gaitu kanpoko ziklo amaierako abiarazlea",
           "external_end_trigger": "Kanpoko Ziklo amaierako sentsorea",
-          "external_end_trigger_inverted": "Alderantzikatu Trigger Logika (Trigger aktibatuta)"
+          "external_end_trigger_inverted": "Alderantzikatu Trigger Logika (Trigger aktibatuta)",
+          "suppress_feedback_notifications": "Ezabatu Iritzien jakinarazpenak",
+          "pump_stuck_duration": "Ponpa trabatuta dagoen alerta-atalasea (k) (ponpa soilik)",
+          "door_sensor_entity": "Ate-sentsorea",
+          "pause_cuts_power": "Moztu energia pausatzean",
+          "notify_unload_delay_minutes": "Garbitegia zain jakinarazpenaren atzerapena (min)",
+          "switch_entity": "Aldatu entitatea (Pausatu energia mozterako)",
+          "delay_start_detect_enabled": "Gaitu Abiatze atzeratua detektatzeko",
+          "delay_drain_min_power": "Hasiera atzeratua: drain Spike Min Potentzia (W)",
+          "delay_drain_max_power": "Hasiera atzeratua: drain Spike gehienezko potentzia (W)",
+          "delay_drain_max_duration": "Irteera atzeratua: drainatze-punta maximoaren iraupena (s)",
+          "delay_timeout_hours": "Hasiera atzeratua: Gehienezko itxaron-denbora (h)"
         },
         "data_description": {
           "apply_suggestions": "Markatu lauki hau ikaskuntza-algoritmoan iradokitako balioen berrikuspen-urrats bat irekitzeko. Ezer ez da automatikoki gordetzen.\n\nIradokitako (ikaskuntzatik):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +249,18 @@
           "dtw_bandwidth": "Onartutako gehienezko denbora deformazioa (luzaketa) zikloaren iraupenaren proportzioan. Balio altuagoek oso aldakorrak diren zikloak bat etortzea ahalbidetzen dute, baina CPU kostua handitzen dute. Lehenetsia: 0,20 (%20).",
           "external_end_trigger_enabled": "Gaitu kanpoko sentsore bitar baten jarraipena zikloa osatzea abiarazteko.",
           "external_end_trigger": "Hautatu sentsore entitate bitar bat. Sentsore hau abiaraztean, uneko zikloa 'osatu' egoerarekin amaituko da.",
-          "external_end_trigger_inverted": "Lehenespenez, abiarazleak sentsorea pizten denean pizten da. Markatu lauki hau sentsorea itzaltzen denean pizteko."
+          "external_end_trigger_inverted": "Lehenespenez, abiarazleak sentsorea pizten denean pizten da. Markatu lauki hau sentsorea itzaltzen denean pizteko.",
+          "suppress_feedback_notifications": "Gaituta dagoenean, WashData-k barnean jarraipena egingo du eta iritzia eskatuko du, baina ez du zikloak berresteko eskatzen dizuten jakinarazpen iraunkorrik erakutsiko. Erabilgarria zikloak beti behar bezala hautematen direnean eta oharrak distraitzen dizutenean.",
+          "pump_stuck_duration": "Segundo horren ondoren ponpaketa-ziklo bat martxan badago, ha_washdata_pump_stuck gertaera bat piztuko da behin. Erabili hau trabatuta dagoen motor bat detektatzeko (putzu-ponparen funtzionamendu arrunta 60 s baino gutxiagokoa da). Lehenetsia: 1800 s (30 min). Ponpa-gailu mota soilik.",
+          "door_sensor_entity": "Makinaren atearen aukerako sentsore bitarra (aktibatuta = irekita, itzalita = itxita). Ziklo aktibo batean atea irekitzen denean, WashData-k zikloa nahita pausatu dela baieztatuko du. Zikloa amaitu ondoren, atea oraindik itxita badago, egoera 'Garbitu'-ra aldatzen da atea ireki arte. Oharra: atea ixteak EZ du pausatutako ziklo bat automatikoki berresten; eskuz abiarazi behar da berrezartzea Zikloa berrekin batera botoiaren edo zerbitzuaren bidez.",
+          "pause_cuts_power": "Etenaldiaren zikloa botoiaren edo zerbitzuaren bidez pausatzen duzunean, desaktibatu konfiguratutako etengailu-entitatea ere. Gailu honetarako aldatzeko entitate bat konfiguratuta badago bakarrik izango du eragina.",
+          "notify_unload_delay_minutes": "Bidali jakinarazpena amaierako jakinarazpen-kanalaren bidez, zikloa amaitu eta atea minutu askotan ireki ez denean (ate-sentsorea behar da). Ezarri 0 desgaitzeko. Lehenetsia: 60 min.",
+          "switch_entity": "Etenaldian edo berriro hastean aldatzeko entitatea. Beharrezkoa da \"Moztu energia pausatzean\" gaituta dagoenean.",
+          "delay_start_detect_enabled": "Gaituta dagoenean, potentzia baxuko drainatze-puntu labur bat eta jarraian egonean dagoen potentziaren ondoren abiarazte atzeratu gisa hautematen da. Egoera-sentsoreak 'Hasteko zain' erakusten du atzerapenean. Ez da programaren denborarik edo aurrerapenik egiten zikloa benetan hasi arte. Start_threshold_w drainatze-potentziaren gainetik ezarri behar da.",
+          "delay_drain_min_power": "Gutxieneko potentzia (W) drainatze-punta gisa antzemateko. Ezarri zure makinaren benetako itzali egonean dagoen mailaren gainetik. Lehenetsia: 10 W.",
+          "delay_drain_max_power": "Gehienezko potentzia (W) drainatze-puntu baterako - honetatik gorako leherketak benetako zikloaren hasiera gisa hartzen dira. Zure start_threshold_w ezarpenaren azpitik egon beharko luke. Lehenetsia: 80 W.",
+          "delay_drain_max_duration": "Drainatze erpinak drainatze-leihoaren azpitik jaitsi behar du segundo horren barruan berretsi ahal izateko. Puntu luzeagoak zikloko jarduera erreal gisa hartzen dira. Lehenetsia: 60 s.",
+          "delay_timeout_hours": "Segurtasun-denbora-muga: ordu asko igaro ondoren makina oraindik 'Hasteko zain' moduan badago, WashData desaktibatuta berrezartzen da. Lehenetsia: 8 h."
         }
       },
       "diagnostics": {
@@ -559,13 +591,13 @@
       },
       "apply_suggestions_confirm": {
         "title": "Berrikusi Iradokitako Aldaketak",
-        "description": "WashData-k aplikatu beharreko iradokitako {pending_count} balio aurkitu ditu.\n\nBerrikusteko aldaketak:\n{changes}\n\nBerretsi behean balio hauek formularioan eszenifikatzeko. Ez dira gordetzen Ezarpen aurreratuak bidali arte.",
+        "description": "WashData-k aplikatu beharreko iradokitako balio(k) **{pending_count}** aurkitu du.\n\nAldaketak:\n{changes}\n\n✅ Markatu beheko laukia eta egin klik **Bidali** aldaketa hauek berehala aplikatzeko eta gordetzeko.\n❌ Utzi markarik gabe eta egin klik **Bidali** bertan behera uzteko eta atzera egiteko.",
         "data": {
-          "confirm_apply_suggestions": "Jarri iradokitako balioak Ezarpen aurreratuan"
+          "confirm_apply_suggestions": "Aplikatu eta gorde aldaketa hauek"
         }
       },
       "trim_cycle_select": {
-        "title": "Moztu Zikloa — Hautatu Zikloa",
+        "title": "Moztu Zikloa - Hautatu Zikloa",
         "description": "Hautatu mozteko ziklo bat. ✓ = amaitu, ⚠ = berriro hasi, ✗ = eten",
         "data": {
           "cycle_id": "Zikloa"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "Ezarri Moztu Hasiera",
-        "description": "Idatzi minutuko desplazamendua datuak gordetzen hasteko (0 = zikloaren hasiera).",
+        "description": "Zikloaren leihoa: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nUneko hasiera: **{current_wallclock}** (zikloaren hasieratik {current_offset_min} min)\n\nAukeratu hasiera-ordu berria beheko erloju-hautatzailea erabiliz.",
         "data": {
-          "trim_start_min": "Hasiera (minutuak)"
+          "trim_start_time": "Hasiera ordu berria",
+          "trim_start_min": "Irteera berria (zikloaren hasieratik minutu batzuk)"
         }
       },
       "trim_cycle_end": {
         "title": "Ezarri Moztu Amaiera",
-        "description": "Idatzi minutuko desplazamendua datuak gordetzeari uzteko.",
+        "description": "Zikloaren leihoa: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nUneko amaiera: **{current_wallclock}** (zikloaren hasieratik {current_offset_min} min)\n\nAukeratu amaiera ordu berri bat beheko erloju-hautatzailea erabiliz.",
         "data": {
-          "trim_end_min": "Amaiera (minutuak)"
+          "trim_end_time": "Amaiera ordu berria",
+          "trim_end_min": "Amaiera berria (zikloaren hasieratik minutu batzuk)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: iradokitako ezarpenak prest ({device})",
       "suggestions_ready_notification_message": "**Iradokitako ezarpenak** sentsoreak **{count}** gomendio akziogarriak ematen ditu orain.\n\nHoriek berrikusteko eta aplikatzeko: **Ezarpenak > Gailuak eta zerbitzuak > WashData > Konfiguratu > Ezarpen aurreratuak > Aplikatu iradokitako balioak**.\n\nIradokizunak aukerakoak dira eta gorde aurretik berrikusteko erakusten dira.",
       "trim_range_invalid": "Hasiera amaiera baino lehen izan behar da. Mesedez, egokitu zure mozketa-puntuak.",
-      "trim_failed": "Moztu huts egin du. Baliteke zikloa ez egotea edo leihoa hutsik egotea."
+      "trim_failed": "Moztu huts egin du. Baliteke zikloa ez egotea edo leihoa hutsik egotea.",
+      "auto_tune_suggestion": "{device_type} {device_title} mamu-zikloak detektatu ditu. Iradokitako potentzia minimoaren aldaketa: {current_min}W -> {new_min}W (ez da automatikoki aplikatu).",
+      "auto_tune_title": "WashData Auto-Tune",
+      "auto_tune_fallback": "{device_type} {device_title} mamu-zikloak detektatu ditu. Iradokitako potentzia minimoaren aldaketa: {current_min}W -> {new_min}W (ez da automatikoki aplikatu)."
     },
     "abort": {
       "no_cycles_found": "Ez da ziklorik aurkitu",
@@ -973,6 +1010,26 @@
           "description": "Mantendu datuak desplazamendu honetarako segundotan. Lehenetsia = iraupen osoa."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Eten zikloa",
+      "description": "Pausatu WashData gailu baten ziklo aktiboa.",
+      "fields": {
+        "device_id": {
+          "name": "Gailua",
+          "description": "WashData gailua pausatzeko."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Zikloa berreskuratzea",
+      "description": "Berrekin pausatutako ziklo bati WashData gailu baterako.",
+      "fields": {
+        "device_id": {
+          "name": "Gailua",
+          "description": "Berrekiteko WashData gailua."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "Abiatzen",
           "running": "Martxan",
           "paused": "Pausatuta",
+          "user_paused": "Erabiltzaileak pausatuta",
           "ending": "Amaitze bidean",
           "finished": "Amaituta",
           "anti_wrinkle": "Zimur-aurkakoa",
+          "delay_wait": "Hasteko zain",
           "interrupted": "Etenduta",
           "force_stopped": "Beharrez gelditu",
           "rinse": "Garbiketa",
-          "unknown": "Ezezaguna"
+          "unknown": "Ezezaguna",
+          "clean": "Garbitu"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "Iradokitako ezarpen erabilgarriak"
+      },
+      "pump_runs_today": {
+        "name": "Ponpa martxan (azken 24 orduak)"
+      },
+      "cycle_count": {
+        "name": "Zikloen Zenbaketa"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Behartuta amaitu zikloa"
+      },
+      "pause_cycle": {
+        "name": "Eten zikloa"
+      },
+      "resume_cycle": {
+        "name": "Zikloa berreskuratzea"
       }
     }
   },
@@ -1074,10 +1146,19 @@
       "message": "Zikloa ez da aurkitu edo ez du energia-daturik."
     },
     "trim_failed_empty_window": {
-      "message": "Moztu huts egin du — zikloa ez da aurkitu, ez dago energia-daturik edo ondoriozko leihoa hutsik dago."
+      "message": "Moztu huts egin du - zikloa ez da aurkitu, ez dago energia-daturik edo ondoriozko leihoa hutsik dago."
     },
     "trim_invalid_range": {
       "message": "trim_end_s trim_start_s baino handiagoa izan behar du."
+    },
+    "device_id_required": {
+      "message": "Baliozko device_id behar da."
+    },
+    "cycle_id_required": {
+      "message": "Baliozko cycle_id bat behar da."
+    },
+    "profile_name_required": {
+      "message": "Baliozko profile_name bat behar da."
     }
   }
 }

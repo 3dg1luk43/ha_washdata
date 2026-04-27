@@ -7,12 +7,15 @@ CONF_POWER_SENSOR = "power_sensor"
 CONF_NAME = "name"
 CONF_MIN_POWER = "min_power"
 CONF_OFF_DELAY = "off_delay"
-CONF_NOTIFY_SERVICE = "notify_service"
+CONF_NOTIFY_SERVICE = "notify_service"  # Deprecated - kept for migration only
 CONF_NOTIFY_ACTIONS = "notify_actions"
 CONF_NOTIFY_PEOPLE = "notify_people"
 CONF_NOTIFY_ONLY_WHEN_HOME = "notify_only_when_home"
 CONF_NOTIFY_FIRE_EVENTS = "notify_fire_events"
-CONF_NOTIFY_EVENTS = "notify_events"
+CONF_NOTIFY_EVENTS = "notify_events"  # Deprecated - kept for migration only
+CONF_NOTIFY_START_SERVICES = "notify_start_services"
+CONF_NOTIFY_FINISH_SERVICES = "notify_finish_services"
+CONF_NOTIFY_LIVE_SERVICES = "notify_live_services"
 CONF_NO_UPDATE_ACTIVE_TIMEOUT = "no_update_active_timeout"
 CONF_LOW_POWER_NO_UPDATE_TIMEOUT = "low_power_no_update_timeout"
 CONF_SMOOTHING_WINDOW = "smoothing_window"
@@ -67,11 +70,17 @@ CONF_ANTI_WRINKLE_ENABLED = "anti_wrinkle_enabled"  # Dryer anti-wrinkle shieldi
 CONF_ANTI_WRINKLE_MAX_POWER = "anti_wrinkle_max_power"  # W threshold for anti-wrinkle spikes
 CONF_ANTI_WRINKLE_MAX_DURATION = "anti_wrinkle_max_duration"  # Seconds to treat as anti-wrinkle
 CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true-off exit
+CONF_DELAY_START_DETECT_ENABLED = "delay_start_detect_enabled"  # Enable delayed-start detection
+CONF_DELAY_DRAIN_MIN_POWER = "delay_drain_min_power"  # Min W for a drain spike to be recognised
+CONF_DELAY_DRAIN_MAX_POWER = "delay_drain_max_power"  # Max W for a drain spike (above = real start)
+CONF_DELAY_DRAIN_MAX_DURATION = "delay_drain_max_duration"  # Max seconds a drain spike may last
+CONF_DELAY_TIMEOUT_HOURS = "delay_timeout_hours"  # Safety timeout (hours) while waiting to start
 
 
 NOTIFY_EVENT_START = "cycle_start"
 NOTIFY_EVENT_FINISH = "cycle_finish"
 NOTIFY_EVENT_LIVE = "cycle_live"
+NOTIFY_EVENT_CLEAN = "cycle_clean"  # Laundry still inside after cycle ends
 
 CONF_NOTIFY_TITLE = "notify_title"
 CONF_NOTIFY_ICON = "notify_icon"
@@ -80,9 +89,19 @@ CONF_NOTIFY_FINISH_MESSAGE = "notify_finish_message"
 CONF_NOTIFY_PRE_COMPLETE_MESSAGE = "notify_pre_complete_message"
 CONF_NOTIFY_LIVE_INTERVAL_SECONDS = "notify_live_interval_seconds"
 CONF_NOTIFY_LIVE_OVERRUN_PERCENT = "notify_live_overrun_percent"
+CONF_NOTIFY_LIVE_CHRONOMETER = "notify_live_chronometer"
+CONF_ENERGY_PRICE_STATIC = "energy_price_static"
+CONF_ENERGY_PRICE_ENTITY = "energy_price_entity"
+
+# Door sensor & pause
+CONF_DOOR_SENSOR_ENTITY = "door_sensor_entity"  # Optional binary_sensor for machine door
+CONF_PAUSE_CUTS_POWER = "pause_cuts_power"  # Also turn off switch entity when pausing
+CONF_SWITCH_ENTITY = "switch_entity"  # Optional switch entity toggled on pause/resume
+CONF_NOTIFY_UNLOAD_DELAY_MINUTES = "notify_unload_delay_minutes"  # Minutes before "laundry waiting" nag
+CONF_NOTIFY_UNLOAD_MESSAGE = "notify_unload_message"  # Template for the clean-laundry nag message
 
 DEFAULT_NOTIFY_TITLE = "WashData: {device}"
-DEFAULT_NOTIFY_START_MESSAGE = "{device} started {program}."
+DEFAULT_NOTIFY_START_MESSAGE = "{device} started."
 DEFAULT_NOTIFY_FINISH_MESSAGE = "{device} finished. Duration: {duration}m."
 DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE = "{device}: Less than {minutes} minutes remaining."
 DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE = "{device}: No profile matched yet."
@@ -90,6 +109,9 @@ DEFAULT_NOTIFY_ONLY_WHEN_HOME = False
 DEFAULT_NOTIFY_FIRE_EVENTS = True
 DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS = 300
 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
+DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
+DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES = 60  # 1 hour before "still waiting" nag notification
+DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago - laundry is still inside."
 
 # Defaults
 DEFAULT_MIN_POWER = 2.0  # Watts
@@ -145,6 +167,18 @@ DEFAULT_ANTI_WRINKLE_MAX_POWER = 400.0  # W
 DEFAULT_ANTI_WRINKLE_MAX_DURATION = 60.0  # s
 DEFAULT_ANTI_WRINKLE_EXIT_POWER = 0.8  # W
 
+# Delayed-start detection defaults (disabled by default)
+DEFAULT_DELAY_START_DETECT_ENABLED = False
+DEFAULT_DELAY_DRAIN_MIN_POWER = 10.0  # W — lower bound for a drain spike
+DEFAULT_DELAY_DRAIN_MAX_POWER = 80.0  # W — upper bound; power above this = real cycle start
+DEFAULT_DELAY_DRAIN_MAX_DURATION = 60.0  # s — drain must resolve within this window
+DEFAULT_DELAY_TIMEOUT_HOURS = 8.0  # h — give up waiting after this long
+
+# Pump Monitor settings (pump device type only)
+CONF_PUMP_STUCK_DURATION = "pump_stuck_duration"  # Seconds before a running pump is flagged as stuck
+DEFAULT_PUMP_STUCK_DURATION = 1800  # 30 min - typical sump pump runs <60 s; 30 min implies motor is jammed
+EVENT_PUMP_STUCK = "ha_washdata_pump_stuck"  # Fired when stuck-pump threshold is exceeded
+
 # Profile Matching Thresholds
 CONF_PROFILE_MATCH_THRESHOLD = "profile_match_threshold"
 CONF_PROFILE_UNMATCH_THRESHOLD = "profile_unmatch_threshold"
@@ -155,12 +189,17 @@ DEFAULT_PROFILE_UNMATCH_THRESHOLD = 0.35
 CONF_DTW_BANDWIDTH = "dtw_bandwidth"
 DEFAULT_DTW_BANDWIDTH = 0.20  # 20% Sakoe-Chiba constraint
 
+CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS = "suppress_feedback_notifications"
+DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS = False  # Show persistent notifications by default
+
 # States
 STATE_OFF = "off"
+STATE_DELAY_WAIT = "delay_wait"
 STATE_IDLE = "idle"
 STATE_STARTING = "starting"
 STATE_RUNNING = "running"
 STATE_PAUSED = "paused"
+STATE_USER_PAUSED = "user_paused"
 STATE_ENDING = "ending"
 STATE_FINISHED = "finished"
 STATE_ANTI_WRINKLE = "anti_wrinkle"
@@ -168,6 +207,7 @@ STATE_INTERRUPTED = "interrupted"
 STATE_FORCE_STOPPED = "force_stopped"
 STATE_RINSE = "rinse"
 STATE_UNKNOWN = "unknown"
+STATE_CLEAN = "clean"  # Cycle ended but door not yet opened (laundry still inside)
 
 # Cycle Status (how the cycle ended)
 CYCLE_STATUS_COMPLETED = "completed"  # Natural completion (power dropped)
@@ -186,6 +226,8 @@ DEVICE_TYPE_COFFEE_MACHINE = "coffee_machine"
 DEVICE_TYPE_EV = "ev"
 DEVICE_TYPE_AIR_FRYER = "air_fryer"
 DEVICE_TYPE_HEAT_PUMP = "heat_pump"
+DEVICE_TYPE_BREAD_MAKER = "bread_maker"
+DEVICE_TYPE_PUMP = "pump"
 
 DEVICE_TYPES = {
     DEVICE_TYPE_WASHING_MACHINE: "Washing Machine",
@@ -196,6 +238,8 @@ DEVICE_TYPES = {
     DEVICE_TYPE_EV: "Electric Vehicle",
     DEVICE_TYPE_AIR_FRYER: "Air Fryer",
     DEVICE_TYPE_HEAT_PUMP: "Heat Pump",
+    DEVICE_TYPE_BREAD_MAKER: "Bread Maker",
+    DEVICE_TYPE_PUMP: "Pump / Sump Pump",
 }
 
 # Device Type Defaults
@@ -204,6 +248,8 @@ DEVICE_TYPES = {
 DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 14400,  # 4 hours (Drying can be long)
     DEVICE_TYPE_HEAT_PUMP: 14400,  # 4 hours (Heat pumps can run a long time with slow updates)
+    DEVICE_TYPE_BREAD_MAKER: 7200,  # 2 hours (Proving/Rising is very low-power for extended periods)
+    DEVICE_TYPE_PUMP: DEFAULT_PUMP_STUCK_DURATION + 60,  # Must exceed stuck-alarm threshold so the alarm fires before the watchdog
 }
 
 DEFAULT_MAX_DEFERRAL_SECONDS = 14400  # 4 hours max safe deferral
@@ -212,6 +258,8 @@ DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
     DEVICE_TYPE_COFFEE_MACHINE: 300,  # 5 min (Warming/Pause handling)
     DEVICE_TYPE_HEAT_PUMP: 600,  # 10 min (Defrosting pauses)
+    DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
+    DEVICE_TYPE_PUMP: 20,  # 20 s (Pumps cut off sharply; no warm-down phase)
 }
 
 # Device-specific progress smoothing thresholds (percentage points)
@@ -224,6 +272,8 @@ DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_COFFEE_MACHINE: 2.0,  # Short cycles, rapid transitions, less tolerance
     DEVICE_TYPE_AIR_FRYER: 2.0,  # Constant load with sudden drop
     DEVICE_TYPE_HEAT_PUMP: 5.0,  # Variable load, long periods
+    DEVICE_TYPE_BREAD_MAKER: 5.0,  # Large power swings between kneading, proving, baking
+    DEVICE_TYPE_PUMP: 2.0,  # Binary on/off spikes; minimal smoothing needed
 }
 
 CONF_VERIFICATION_POLL_INTERVAL = "verification_poll_interval"  # Internal setting
@@ -239,6 +289,8 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_EV: 600,  # 10 min
     DEVICE_TYPE_AIR_FRYER: 300,  # 5 min minimum
     DEVICE_TYPE_HEAT_PUMP: 900,  # 15 min minimum
+    DEVICE_TYPE_BREAD_MAKER: 1800,  # 30 min (even express bread takes 30+ min)
+    DEVICE_TYPE_PUMP: 5,  # 5 s - pump cycles can be under 30 seconds
 }
 
 # Default min_off_gap by device type (seconds)
@@ -256,6 +308,8 @@ DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_EV: 900,  # 15 min (Brief unplug/replug)
     DEVICE_TYPE_AIR_FRYER: 120,  # 2 min (Shaking food)
     DEVICE_TYPE_HEAT_PUMP: 1800,  # 30 min (Defrost cycle / resting gap)
+    DEVICE_TYPE_BREAD_MAKER: 600,  # 10 min (Resting between knead/prove keeps same cycle together)
+    DEVICE_TYPE_PUMP: 60,  # 1 min (Pumps can cycle every 3-5 min in heavy rain)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
 
@@ -271,10 +325,13 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_EV: 0.5,  # High power charging
     DEVICE_TYPE_AIR_FRYER: 0.2,  # Heater kicks in
     DEVICE_TYPE_HEAT_PUMP: 0.2,  # Compressor spins up
+    DEVICE_TYPE_BREAD_MAKER: 0.2,  # Kneading motor starts (~200W for a few seconds)
+    DEVICE_TYPE_PUMP: 0.003,  # ~100W motor for ~0.1 s is enough to confirm a pump cycle
 }
 # Default sampling interval by device type
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
     DEVICE_TYPE_COFFEE_MACHINE: 10.0,  # 10s is sufficient for brew cycles
+    DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
 }
 
 # Default profile match min duration ratio by device type

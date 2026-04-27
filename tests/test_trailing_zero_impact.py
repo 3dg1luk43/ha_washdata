@@ -63,7 +63,7 @@ def _trim_trailing(power_data: list, threshold: float) -> list:
     for i in range(len(data) - 1, -1, -1):
         if data[i][1] > threshold:
             return data[: i + 1]
-    # all zero — keep one point
+    # all zero - keep one point
     return data[:1] if data else []
 
 

@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       issue_body:
-        description: "Paste a simulated issue body to validate (dry-run — nothing is posted)"
+        description: "Paste a simulated issue body to validate (dry-run - nothing is posted)"
         required: true
       issue_number:
         description: "Real issue number to post the result to (leave blank for dry-run only)"
@@ -50,7 +50,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issueNumber,
-              body: `✅ Cleared by @${context.payload.comment.user.login} — issue marked as fine and queued for review.`,
+              body: `✅ Cleared by @${context.payload.comment.user.login} - issue marked as fine and queued for review.`,
             });
 
   validate-bug-report:
@@ -78,7 +78,7 @@ jobs:
             // ── Checks ────────────────────────────────────────────────────────────
             const problems = [];
 
-            // 1. Device Brand & Model — must not be blank or the placeholder
+            // 1. Device Brand & Model - must not be blank or the placeholder
             const brandMatch = body.match(/###\s*Device Brand & Model\s*\n+([^\n#]+)/);
             const brand = brandMatch ? brandMatch[1].trim() : '';
             const brandIsNA = /^n\/?a$/i.test(brand);
@@ -86,21 +86,50 @@ jobs:
               problems.push('**Device Brand & Model** is missing or still set to the placeholder value. Provide the actual brand and model (e.g. `Miele W1 WCG370`), or enter `N/A` if this bug is not related to a specific device.');
             }
 
-            // 2. WashData version — must not be blank or the placeholder
+            // 2. WashData version - must not be blank or placeholder; warn if outdated
             const versionMatch = body.match(/###\s*WashData Integration Version\s*\n+([^\n#]+)/);
             const version = versionMatch ? versionMatch[1].trim() : '';
             if (!version || version === 'vX.Y.Z' || version === '_No response_') {
               problems.push('**WashData Integration Version** is missing. You can find it in HACS or Settings → Integrations.');
+            } else {
+              try {
+                const releasesResp = await github.rest.repos.listReleases({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  per_page: 10,
+                });
+                const published = releasesResp.data.filter(r => !r.draft);
+                const latestStable = published.find(r => !r.prerelease);
+                const latestPre = published.find(r => r.prerelease);
+
+                const normalize = v => v.replace(/^v/i, '').trim().toLowerCase();
+                const reported = normalize(version);
+                const isOnStable = latestStable && reported === normalize(latestStable.tag_name);
+                const isOnPre    = latestPre    && reported === normalize(latestPre.tag_name);
+
+                if (!isOnStable && !isOnPre && (latestStable || latestPre)) {
+                  const parts = [];
+                  if (latestStable) parts.push(`\`${latestStable.tag_name}\` (stable)`);
+                  if (latestPre)    parts.push(`\`${latestPre.tag_name}\` (pre-release)`);
+                  problems.push(
+                    `**Outdated version** (\`${version}\`): the current release${parts.length > 1 ? 's are' : ' is'} ${parts.join(' and ')}. ` +
+                    `Please upgrade and confirm the bug still exists on the latest version before we investigate — ` +
+                    `it may already be fixed. If it still reproduces, update this field with the version you tested.`
+                  );
+                }
+              } catch (releaseErr) {
+                console.log('Could not fetch releases for version check:', releaseErr.message);
+              }
             }
 
-            // 3. HA version — must not be blank or the placeholder
+            // 3. HA version - must not be blank or the placeholder
             const haVersionMatch = body.match(/###\s*Home Assistant Version\s*\n+([^\n#]+)/);
             const haVersion = haVersionMatch ? haVersionMatch[1].trim() : '';
             if (!haVersion || haVersion === '2024.12.0' || haVersion === '_No response_') {
               problems.push('**Home Assistant Version** is missing. You can find it in Settings → About.');
             }
 
-            // 4. Debug Logs — must contain actual log output, an attached file, or a clear N/A with stated reason
+            // 4. Debug Logs - must contain actual log output, an attached file, or a clear N/A with stated reason
             const logMatch = body.match(/###\s*Debug Logs\s*\n+([\s\S]*?)(?=\n###|$)/);
             const logContent = logMatch ? logMatch[1].trim() : '';
             const logIsExplainedNA = /^n\/?a/i.test(logContent);
@@ -127,7 +156,7 @@ jobs:
               const comment = `👋 Hey @${issue.user.login}, thanks for the report!\n\nLooks like a few things are missing that we need before we can investigate:\n\n${problemList}\n\nPlease update the issue with the missing information. Without it, we won't be able to reproduce or debug the problem, and the issue may be closed.\n\n> **How to edit this issue:** click the three-dot menu (⋯) at the top-right of your post → *Edit*.\n\n_This check runs automatically. Once the issue is updated, it will be re-evaluated._`;
 
               if (isDryRun) {
-                console.log('🧪 DRY RUN — validation result: INCOMPLETE');
+                console.log('🧪 DRY RUN - validation result: INCOMPLETE');
                 console.log('Problems found:\n' + problemList);
                 console.log('Comment that would be posted:\n' + comment);
                 if (!canPost) process.exit(0);
@@ -174,12 +203,12 @@ jobs:
               }
             } else if (hasIncompleteLabel || isDryRun) {
               if (isDryRun) {
-                console.log('✅ DRY RUN — validation result: COMPLETE (all required fields present)');
+                console.log('✅ DRY RUN - validation result: COMPLETE (all required fields present)');
                 if (!canPost) process.exit(0);
               }
 
               if (!isDryRun && hasIncompleteLabel) {
-                // Everything looks good — remove the label and leave a positive note
+                // Everything looks good - remove the label and leave a positive note
                 await github.rest.issues.removeLabel({
                   owner: context.repo.owner,
                   repo: context.repo.repo,

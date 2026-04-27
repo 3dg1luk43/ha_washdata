@@ -65,19 +65,20 @@
           "power_sensor": "功率传感器实体",
           "min_power": "最小功率（瓦）",
           "off_delay": "周期结束延迟（秒）",
-          "notify_service": "通知服务（例如notify.mobile_app）",
           "notify_actions": "通知操作",
           "notify_people": "延迟送货，直到这些人回家",
           "notify_only_when_home": "延迟通知，直到选定的人在家",
           "notify_fire_events": "触发自动化事件",
-          "notify_events": "要通知的事件",
           "notify_before_end_minutes": "预完成通知（结束前几分钟）",
           "notify_title": "通知标题",
           "notify_icon": "通知图标",
           "notify_start_message": "启动消息格式",
           "notify_finish_message": "完成消息格式",
           "notify_pre_complete_message": "预完成消息格式",
-          "show_advanced": "编辑高级设置（下一步）"
+          "show_advanced": "编辑高级设置（下一步）",
+          "notify_start_services": "周期开始 - 通知目标",
+          "notify_finish_services": "周期完成 - 通知目标",
+          "notify_live_services": "实时进展 - 通知目标"
         },
         "data_description": {
           "apply_suggestions": "选中此框可将学习算法建议的值复制到表单中。保存前检查。\n\n建议（来自学习）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "传感器实体报告实时功率（以瓦为单位）。您可以随时更改此设置，而不会丢失历史数据 - 如果您更换智能插头，这很有用。",
           "min_power": "功率读数高于此阈值（以瓦为单位）表明设备正在运行。大多数设备从 2W 开始。",
           "off_delay": "平滑功率必须保持低于停止阈值的秒数才能标记完成。默认值：120 秒。",
-          "notify_service": "Home Assistant 通知要使用的服务（可选）。",
           "notify_actions": "用于运行通知的可选 Home Assistant 操作序列（脚本、通知、TTS 等）。如果设置，操作将在回退通知服务之前运行。",
           "notify_people": "用于存在门控的人员实体。启用后，通知发送会延迟，直到至少一名选定的人在家。",
           "notify_only_when_home": "如果启用，则延迟通知，直到至少一个选定的人在家。",
           "notify_fire_events": "如果启用，则触发循环开始和结束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_ended）以驱动自动化。",
-          "notify_events": "要发送通知的事件。",
           "notify_before_end_minutes": "触发通知的预计周期结束前的分钟数。设置为 0 以禁用。默认值：0。",
           "notify_title": "通知的自定义标题。支持 {device} 占位符。",
           "notify_icon": "用于通知的图标（例如 mdi：洗衣机）。留空以不发送图标。",
           "notify_start_message": "循环开始时发送的消息。支持 {device} 占位符。",
           "notify_finish_message": "循环结束时发送的消息。支持 {device}、{duration}、{program} 占位符。",
-          "notify_pre_complete_message": "消息在完成之前发送。支持 {device}、{minutes} 占位符。"
+          "notify_pre_complete_message": "消息在完成之前发送。支持 {device}、{minutes} 占位符。",
+          "notify_start_services": "一个或多个通知服务在周期开始时发出警报。留空以跳过开始通知。",
+          "notify_finish_services": "一个或多个通知服务在周期完成或接近完成时发出警报。留空以跳过完成通知。",
+          "notify_live_services": "一项或多项通知服务在周期运行时接收实时进度更新（仅限移动配套应用程序）。留空以跳过实时更新。"
         }
       },
       "notifications": {
         "title": "通知",
         "description": "配置通知渠道、模板和可选的实时移动进度更新。",
         "data": {
-          "notify_service": "通知服务（例如notify.mobile_app）",
           "notify_actions": "通知操作",
           "notify_people": "延迟送货，直到这些人回家",
           "notify_only_when_home": "延迟通知，直到选定的人在家",
           "notify_fire_events": "触发自动化事件",
-          "notify_events": "要通知的事件",
           "notify_before_end_minutes": "预完成通知（结束前几分钟）",
           "notify_live_interval_seconds": "实时更新间隔（秒）",
           "notify_live_overrun_percent": "实时更新超限容限 (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "通知图标",
           "notify_start_message": "启动消息格式",
           "notify_finish_message": "完成消息格式",
-          "notify_pre_complete_message": "预完成消息格式"
+          "notify_pre_complete_message": "预完成消息格式",
+          "notify_start_services": "周期开始 - 通知目标",
+          "notify_finish_services": "周期完成 - 通知目标",
+          "notify_live_services": "实时进展 - 通知目标",
+          "notify_live_chronometer": "天文台倒计时器",
+          "energy_price_entity": "能源价格 - 实体（可选）",
+          "energy_price_static": "能源价格 - 静态值（可选）"
         },
         "data_description": {
-          "notify_service": "Home Assistant 通知要使用的服务（可选）。",
           "notify_actions": "用于运行通知的可选 Home Assistant 操作序列（脚本、通知、TTS 等）。如果设置，操作将在回退通知服务之前运行。",
           "notify_people": "用于存在门控的人员实体。启用后，通知发送会延迟，直到至少一名选定的人在家。",
           "notify_only_when_home": "如果启用，则延迟通知，直到至少一个选定的人在家。",
           "notify_fire_events": "如果启用，则触发循环开始和结束的 Home Assistant 事件（ha_washdata_cycle_started 和 ha_washdata_cycle_ended）以驱动自动化。",
-          "notify_events": "要发送通知的事件。",
           "notify_before_end_minutes": "触发通知的预计周期结束前的分钟数。设置为 0 以禁用。默认值：0。",
           "notify_live_interval_seconds": "运行时发送进度更新的频率。值越低，响应速度越快，但会消耗更多通知。强制执行至少 30 秒 - 低于 30 秒的值将自动四舍五入为 30 秒。",
           "notify_live_overrun_percent": "安全裕度高于长/超出周期的估计更新计数（例如 20% 允许 1.2 倍估计更新）。",
@@ -132,7 +136,13 @@
           "notify_icon": "用于通知的图标（例如 mdi：洗衣机）。留空以不发送图标。",
           "notify_start_message": "循环开始时发送的消息。支持 {device} 占位符。",
           "notify_finish_message": "循环结束时发送的消息。支持 {device}、{duration}、{program} 占位符。",
-          "notify_pre_complete_message": "消息在完成之前发送。支持 {device}、{minutes} 占位符。"
+          "notify_pre_complete_message": "消息在完成之前发送。支持 {device}、{minutes} 占位符。",
+          "notify_start_services": "一个或多个通知服务在周期开始时发出警报（例如notify.mobile_app_my_phone）。留空以跳过开始通知。",
+          "notify_finish_services": "一个或多个通知服务在周期完成或接近完成时发出警报。留空以跳过完成通知。",
+          "notify_live_services": "一项或多项通知服务在周期运行时接收实时进度更新（仅限移动配套应用程序）。留空以跳过实时更新。",
+          "notify_live_chronometer": "启用后，每次实时更新都会包含预计完成时间的计时器倒计时。更新之间，通知计时器会在设备上自动计时（仅限 Android 配套应用程序）。",
+          "energy_price_entity": "选择保存当前电价的数字实体（例如sensor.electricity_price、input_number.energy_rate）。设置后，启用 {cost} 占位符。如果两者都配置了，则优先于静态值。",
+          "energy_price_static": "每千瓦时固定电价。设置后，启用 {cost} 占位符。如果上面配置了实体，则忽略。在消息模板中添加您的货币符号，例如{cost} 欧元。"
         }
       },
       "advanced_settings": {
@@ -182,7 +192,18 @@
           "dtw_bandwidth": "DTW 带宽",
           "external_end_trigger_enabled": "启用外部循环结束触发器",
           "external_end_trigger": "外部循环结束传感器",
-          "external_end_trigger_inverted": "反转触发逻辑（触发关闭）"
+          "external_end_trigger_inverted": "反转触发逻辑（触发关闭）",
+          "suppress_feedback_notifications": "抑制反馈通知",
+          "pump_stuck_duration": "泵卡住警报阈值（仅限泵）",
+          "door_sensor_entity": "门磁",
+          "pause_cuts_power": "暂停时切断电源",
+          "notify_unload_delay_minutes": "洗衣等待通知延迟（分钟）",
+          "switch_entity": "开关实体（用于暂停断电）",
+          "delay_start_detect_enabled": "启用延迟启动检测",
+          "delay_drain_min_power": "延迟启动：消耗尖峰最小功率 (W)",
+          "delay_drain_max_power": "延迟启动：耗尽尖峰最大功率 (W)",
+          "delay_drain_max_duration": "延迟启动：最大漏电尖峰持续时间（秒）",
+          "delay_timeout_hours": "延迟启动：最长等待时间 (h)"
         },
         "data_description": {
           "apply_suggestions": "选中此框可打开学习算法建议值的检查步骤。没有任何内容会自动保存。\n\n建议（来自学习）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +249,18 @@
           "dtw_bandwidth": "最大允许时间扭曲（拉伸）与周期持续时间的比率。较高的值允许匹配高度可变的周期，但会增加 CPU 成本。默认值：0.20 (20%)。",
           "external_end_trigger_enabled": "启用对外部二进制传感器的监控以触发循环完成。",
           "external_end_trigger": "选择二进制传感器实体。当该传感器触发时，当前周期将以“已完成”状态结束。",
-          "external_end_trigger_inverted": "默认情况下，当传感器打开时触发器会触发。选中此框以在传感器关闭时触发。"
+          "external_end_trigger_inverted": "默认情况下，当传感器打开时触发器会触发。选中此框以在传感器关闭时触发。",
+          "suppress_feedback_notifications": "启用后，WashData 仍将在内部跟踪和请求反馈，但不会显示要求您确认周期的持续通知。当循环总是被正确检测到并且您发现提示分散注意力时很有用。",
+          "pump_stuck_duration": "如果泵循环在这么多秒后仍在运行，则会触发一次 ha_washdata_pump_stuck 事件。用它来检测堵塞的电机（典型的污水泵运行时间低于 60 秒）。默认值：1800 秒（30 分钟）。仅限泵设备类型。",
+          "door_sensor_entity": "用于机器门的可选二进制传感器（开=打开，关=关闭）。当门在活动周期期间打开时，WashData 将确认该周期是有意暂停的。循环结束后，如果门仍然关闭，则状态更改为“清洁”，直到门打开。注意：关上门不会自动恢复暂停的循环 - 必须通过“恢复循环”按钮或服务手动触发恢复。",
+          "pause_cuts_power": "通过“暂停循环”按钮或服务暂停时，还要关闭配置的开关实体。仅当为该设备配置了交换实体时才生效。",
+          "notify_unload_delay_minutes": "循环结束且门在这么多分钟内未打开后，通过完成通知通道发送通知（需要门传感器）。设置为 0 以禁用。默认值：60 分钟",
+          "switch_entity": "暂停或恢复时要切换的开关实体。启用“暂停时切断电源”时需要。",
+          "delay_start_detect_enabled": "启用后，会检测到短暂的低功耗峰值，然后持续待机功耗，作为延迟启动。延迟期间状态传感器显示“等待启动”。在周期实际开始之前，不会跟踪计划时间或进度。要求将 start_threshold_w 设置为高于漏极尖峰功率。",
+          "delay_drain_min_power": "识别为漏极尖峰的最小功率 (W)。设置为略高于机器的真正关闭待机级别。默认值：10 W。",
+          "delay_drain_max_power": "漏极尖峰的最大功率 (W) — 高于此值的突发被视为真正的周期开始。应低于您的 start_threshold_w 设置。默认值：80 W。",
+          "delay_drain_max_duration": "排水尖峰必须在如此多的秒内回落到排水窗口以下才能得到确认。较长的峰值被视为真实的周期活动。默认值：60 秒。",
+          "delay_timeout_hours": "安全超时：如果经过这么多小时机器仍处于“等待启动”状态，WashData 将重置为“关闭”。默认值：8 小时。"
         }
       },
       "diagnostics": {
@@ -559,13 +591,13 @@
       },
       "apply_suggestions_confirm": {
         "title": "查看建议的更改",
-        "description": "WashData 发现 {pending_count} 个要应用的建议值。\n\n审查变更：\n{changes}\n\n确认以下内容以在表单中暂存这些值。在您提交高级设置之前，它们不会保存。",
+        "description": "WashData 发现 **{pending_count}** 要应用的建议值。\n\n变化：\n{changes}\n\n✅ 选中下面的框并单击 **提交** 以立即应用并保存这些更改。\n❌ 不勾选并点击**提交**取消并返回。",
         "data": {
-          "confirm_apply_suggestions": "在高级设置中暂存建议值"
+          "confirm_apply_suggestions": "应用并保存这些更改"
         }
       },
       "trim_cycle_select": {
-        "title": "修剪周期 — 选择周期",
+        "title": "修剪周期 - 选择周期",
         "description": "选择要修剪的周期。 ✓ = 已完成，⚠ = 已恢复，✗ = 已中断",
         "data": {
           "cycle_id": "循环"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "设置修剪开始",
-        "description": "输入开始保存数据的分钟偏移量（0 = 循环开始）。",
+        "description": "循环窗口：{cycle_start_wallclock} → {cycle_end_wallclock}\n\n当前开始时间：**{current_wallclock}**（距周期开始时间+{current_offset_min} 分钟）\n\n使用下面的时钟选择器选择新的开始时间。",
         "data": {
-          "trim_start_min": "开始（分钟）"
+          "trim_start_time": "新的开始时间",
+          "trim_start_min": "新的开始（周期开始后的分钟数）"
         }
       },
       "trim_cycle_end": {
         "title": "设置修剪结束",
-        "description": "输入停止保存数据的分钟偏移量。",
+        "description": "循环窗口：{cycle_start_wallclock} → {cycle_end_wallclock}\n\n当前结束：**{current_wallclock}**（距离周期开始+{current_offset_min} 分钟）\n\n使用下面的时钟选择器选择新的结束时间。",
         "data": {
-          "trim_end_min": "结束（分钟）"
+          "trim_end_time": "新的结束时间",
+          "trim_end_min": "新的结束（距离周期开始的分钟数）"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData：建议设置已就绪 ({device})",
       "suggestions_ready_notification_message": "**建议设置**传感器现在报告 **{count}** 可操作的建议。\n\n要查看并应用它们：**设置 > 设备和服务 > WashData > 配置 > 高级设置 > 应用建议值**。\n\n建议是可选的，并会在您保存之前显示以供审核。",
       "trim_range_invalid": "开始必须在结束之前。请调整您的修剪点。",
-      "trim_failed": "修剪失败。周期可能已不存在或窗口为空。"
+      "trim_failed": "修剪失败。周期可能已不存在或窗口为空。",
+      "auto_tune_suggestion": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。",
+      "auto_tune_title": "WashData 自动调整",
+      "auto_tune_fallback": "{device_type} {device_title} 检测到幽灵周期。建议的 min_power 更改：{current_min}W -> {new_min}W（不会自动应用）。"
     },
     "abort": {
       "no_cycles_found": "没有找到循环",
@@ -973,6 +1010,26 @@
           "description": "在几秒钟内将数据保持到此偏移量。默认 = 完整持续时间。"
         }
       }
+    },
+    "pause_cycle": {
+      "name": "暂停循环",
+      "description": "暂停 WashData 设备的活动周期。",
+      "fields": {
+        "device_id": {
+          "name": "设备",
+          "description": "WashData 设备暂停。"
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "恢复周期",
+      "description": "恢复 WashData 设备的暂停周期。",
+      "fields": {
+        "device_id": {
+          "name": "设备",
+          "description": "WashData 设备恢复。"
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "开始",
           "running": "跑步",
           "paused": "已暂停",
+          "user_paused": "用户已暂停",
           "ending": "结束",
           "finished": "完成的",
           "anti_wrinkle": "抗皱",
+          "delay_wait": "等待开始",
           "interrupted": "被打断",
           "force_stopped": "强制停止",
           "rinse": "冲洗",
-          "unknown": "未知"
+          "unknown": "未知",
+          "clean": "干净的"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "建议设置"
+      },
+      "pump_runs_today": {
+        "name": "泵运行（过去 24 小时）"
+      },
+      "cycle_count": {
+        "name": "循环计数"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "强制结束循环"
+      },
+      "pause_cycle": {
+        "name": "暂停循环"
+      },
+      "resume_cycle": {
+        "name": "恢复周期"
       }
     }
   },
@@ -1074,10 +1146,19 @@
       "message": "未找到周期或没有功率数据。"
     },
     "trim_failed_empty_window": {
-      "message": "修剪失败 — 未找到周期、无功率数据或生成的窗口为空。"
+      "message": "修剪失败 - 未找到周期、无功率数据或生成的窗口为空。"
     },
     "trim_invalid_range": {
       "message": "trim_end_s必须大于trim_start_s。"
+    },
+    "device_id_required": {
+      "message": "需要有效的 device_id。"
+    },
+    "cycle_id_required": {
+      "message": "需要有效的cycle_id。"
+    },
+    "profile_name_required": {
+      "message": "需要有效的 profile_name。"
     }
   }
 }

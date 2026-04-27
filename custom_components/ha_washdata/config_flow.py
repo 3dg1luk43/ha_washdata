@@ -9,6 +9,7 @@ import logging
 import os
 import time
 import base64
+from datetime import datetime, timedelta
 from typing import Any
 
 import voluptuous as vol
@@ -34,6 +35,9 @@ from .const import (
     CONF_NOTIFY_ONLY_WHEN_HOME,
     CONF_NOTIFY_FIRE_EVENTS,
     CONF_NOTIFY_EVENTS,
+    CONF_NOTIFY_START_SERVICES,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
     CONF_SMOOTHING_WINDOW,
     CONF_START_DURATION_THRESHOLD,
@@ -44,6 +48,11 @@ from .const import (
     CONF_PROGRESS_RESET_DELAY,
     CONF_DURATION_TOLERANCE,
     CONF_AUTO_LABEL_CONFIDENCE,
+    DEFAULT_AUTO_LABEL_CONFIDENCE,
+    CONF_LEARNING_CONFIDENCE,
+    DEFAULT_LEARNING_CONFIDENCE,
+    CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+    DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
     CONF_EXPOSE_DEBUG_ENTITIES,
     CONF_SAVE_DEBUG_TRACES,
     CONF_PROFILE_MATCH_INTERVAL,
@@ -64,6 +73,11 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_DELAY_START_DETECT_ENABLED,
+    CONF_DELAY_DRAIN_MIN_POWER,
+    CONF_DELAY_DRAIN_MAX_POWER,
+    CONF_DELAY_DRAIN_MAX_DURATION,
+    CONF_DELAY_TIMEOUT_HOURS,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
@@ -104,6 +118,9 @@ from .const import (
     CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+    CONF_NOTIFY_LIVE_CHRONOMETER,
+    CONF_ENERGY_PRICE_STATIC,
+    CONF_ENERGY_PRICE_ENTITY,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
@@ -112,6 +129,7 @@ from .const import (
     DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
     DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+    DEFAULT_NOTIFY_LIVE_CHRONOMETER,
     DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO,
     DEFAULT_OFF_DELAY_BY_DEVICE,
     DEFAULT_SAMPLING_INTERVAL_BY_DEVICE,
@@ -121,6 +139,19 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
+    DEFAULT_DELAY_START_DETECT_ENABLED,
+    DEFAULT_DELAY_DRAIN_MIN_POWER,
+    DEFAULT_DELAY_DRAIN_MAX_POWER,
+    DEFAULT_DELAY_DRAIN_MAX_DURATION,
+    DEFAULT_DELAY_TIMEOUT_HOURS,
+    CONF_PUMP_STUCK_DURATION,
+    DEFAULT_PUMP_STUCK_DURATION,
+    DEVICE_TYPE_PUMP,
+    CONF_DOOR_SENSOR_ENTITY,
+    CONF_PAUSE_CUTS_POWER,
+    CONF_SWITCH_ENTITY,
+    CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
+    DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
 )
 from .profile_store import profile_sort_key
 
@@ -266,6 +297,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._phase_assign_edit_index: int | None = None
         self._phase_assign_auto_detected: list[dict[str, Any]] = []
         self._trim_cycle_id: str | None = None
+        self._trim_cycle_start_dt: datetime | None = None
         self._trim_start_s: float = 0.0
         self._trim_end_s: float = 0.0
         self._selector_translations: dict[str, str] | None = None
@@ -407,6 +439,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 **self.config_entry.options,
                 **user_input,
             }
+            # Drop pump-only keys when the device type is not pump
+            if merged_options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE) != DEVICE_TYPE_PUMP:
+                merged_options.pop(CONF_PUMP_STUCK_DURATION, None)
             return self.async_create_entry(title="", data=merged_options)
 
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
@@ -491,7 +526,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         if user_input is not None:
             if user_input.get("confirm_apply_suggestions"):
-                return await self.async_step_advanced_settings(user_input=None)
+                # Pass staged values directly as form input — saves immediately
+                # without bouncing back to Advanced Settings for a second submit.
+                return await self.async_step_advanced_settings(
+                    user_input=self._suggested_values
+                )
 
             # User declined, clear staged values and return to advanced form.
             self._suggested_values = None
@@ -522,29 +561,72 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # empty.  Set it explicitly so the merge below overwrites any
             # previously-saved value rather than keeping the stale one.
             user_input[CONF_NOTIFY_ICON] = user_input.get(CONF_NOTIFY_ICON) or ""
+            # Normalize energy price fields: selectors may omit the key entirely
+            # when the user clears them.  Explicitly writing None ensures the
+            # merged options dict overrides any previously-stored value.
+            if user_input.get(CONF_ENERGY_PRICE_ENTITY) in (None, ""):
+                user_input[CONF_ENERGY_PRICE_ENTITY] = None
+            if user_input.get(CONF_ENERGY_PRICE_STATIC) in (None, ""):
+                user_input[CONF_ENERGY_PRICE_STATIC] = None
+            # Normalize per-event notification service lists: cleared multi-selects
+            # omit the key entirely, which would leave stale recipients in the merged
+            # options.  Explicitly setting [] ensures the merge overwrites old values.
+            for _svc_key in (
+                CONF_NOTIFY_START_SERVICES,
+                CONF_NOTIFY_FINISH_SERVICES,
+                CONF_NOTIFY_LIVE_SERVICES,
+            ):
+                if user_input.get(_svc_key) in (None, ""):
+                    user_input[_svc_key] = []
             merged_options = {
                 **self.config_entry.data,
                 **self.config_entry.options,
                 **user_input,
             }
+            # Remove deprecated single-service keys now that per-event lists are saved.
+            merged_options.pop(CONF_NOTIFY_SERVICE, None)
+            merged_options.pop(CONF_NOTIFY_EVENTS, None)
+            # Also remove deprecated keys from entry.data so the manager doesn't fall back to them.
+            if CONF_NOTIFY_SERVICE in self.config_entry.data or CONF_NOTIFY_EVENTS in self.config_entry.data:
+                new_data = {
+                    k: v for k, v in self.config_entry.data.items()
+                    if k not in (CONF_NOTIFY_SERVICE, CONF_NOTIFY_EVENTS)
+                }
+                self.hass.config_entries.async_update_entry(self.config_entry, data=new_data)
             return self.async_create_entry(title="", data=merged_options)
 
-        notify_services: list[str] = []
-        services = self.hass.services.async_services()
-        for service in services.get("notify", {}):
-            notify_services.append(f"notify.{service}")
-        notify_services.sort()
-
-        current_notify = self.config_entry.options.get(
-            CONF_NOTIFY_SERVICE, self.config_entry.data.get(CONF_NOTIFY_SERVICE, "")
+        notify_services: list[str] = sorted(
+            f"notify.{s}"
+            for s in self.hass.services.async_services().get("notify", {})
         )
-        if current_notify and current_notify not in notify_services:
-            notify_services.append(current_notify)
 
         def get_val(key: str, default: Any) -> Any:
             return self.config_entry.options.get(
                 key, self.config_entry.data.get(key, default)
             )
+
+        # Migrate old single notify_service + notify_events to per-event service lists.
+        _old_svc: str = get_val(CONF_NOTIFY_SERVICE, "")
+        _old_events: list[str] = list(get_val(CONF_NOTIFY_EVENTS, []) or [])
+
+        def _migrate_or_load(new_key: str, event_type: str) -> list[str]:
+            existing = list(get_val(new_key, []) or [])
+            if existing:
+                return existing
+            if _old_svc and (not _old_events or event_type in _old_events):
+                return [_old_svc]
+            return []
+
+        start_services = _migrate_or_load(CONF_NOTIFY_START_SERVICES, NOTIFY_EVENT_START)
+        finish_services = _migrate_or_load(CONF_NOTIFY_FINISH_SERVICES, NOTIFY_EVENT_FINISH)
+        live_services = _migrate_or_load(CONF_NOTIFY_LIVE_SERVICES, NOTIFY_EVENT_LIVE)
+
+        # Ensure any already-saved custom service values appear in the dropdown.
+        known = set(notify_services)
+        for svc in start_services + finish_services + live_services:
+            if svc and svc not in known:
+                notify_services.append(svc)
+                known.add(svc)
 
         schema = {
             vol.Optional(
@@ -566,23 +648,37 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 default=get_val(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS),
             ): bool,
             vol.Optional(
-                CONF_NOTIFY_SERVICE,
-                default=get_val(CONF_NOTIFY_SERVICE, ""),
+                CONF_NOTIFY_START_SERVICES,
+                default=start_services,
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=notify_services,
+                    multiple=True,
                     mode=selector.SelectSelectorMode.DROPDOWN,
                     custom_value=True,
                 )
             ),
             vol.Optional(
-                CONF_NOTIFY_EVENTS,
-                default=list(get_val(CONF_NOTIFY_EVENTS, [])),
-            ): self._translated_select(
-                options=[NOTIFY_EVENT_START, NOTIFY_EVENT_FINISH, NOTIFY_EVENT_LIVE],
-                translation_key="notify_events_option",
-                multiple=True,
-                mode=selector.SelectSelectorMode.LIST,
+                CONF_NOTIFY_FINISH_SERVICES,
+                default=finish_services,
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=notify_services,
+                    multiple=True,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                    custom_value=True,
+                )
+            ),
+            vol.Optional(
+                CONF_NOTIFY_LIVE_SERVICES,
+                default=live_services,
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=notify_services,
+                    multiple=True,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                    custom_value=True,
+                )
             ),
             vol.Optional(
                 CONF_NOTIFY_BEFORE_END_MINUTES,
@@ -625,6 +721,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 )
             ),
             vol.Optional(
+                CONF_NOTIFY_LIVE_CHRONOMETER,
+                default=get_val(
+                    CONF_NOTIFY_LIVE_CHRONOMETER,
+                    DEFAULT_NOTIFY_LIVE_CHRONOMETER,
+                ),
+            ): selector.BooleanSelector(),
+            vol.Optional(
                 CONF_NOTIFY_TITLE,
                 default=get_val(CONF_NOTIFY_TITLE, DEFAULT_NOTIFY_TITLE),
             ): selector.TextSelector(),
@@ -647,6 +750,26 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
                 ),
             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+            vol.Optional(
+                CONF_ENERGY_PRICE_ENTITY,
+                description={"suggested_value": get_val(CONF_ENERGY_PRICE_ENTITY, None)},
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain=["sensor", "input_number", "number"],
+                    multiple=False,
+                )
+            ),
+            vol.Optional(
+                CONF_ENERGY_PRICE_STATIC,
+                description={"suggested_value": get_val(CONF_ENERGY_PRICE_STATIC, None)},
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=10,
+                    step=0.001,
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
         }
 
         return self.async_show_form(
@@ -657,6 +780,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "duration": "{duration}",
                 "program": "{program}",
                 "minutes": "{minutes}",
+                "energy_kwh": "{energy_kwh}",
+                "cost": "{cost}",
             },
         )
 
@@ -736,6 +861,26 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if not _trigger_val:
                 user_input[CONF_EXTERNAL_END_TRIGGER] = None
 
+            # Same treatment for door sensor entity
+            _door_val = user_input.get(CONF_DOOR_SENSOR_ENTITY)
+            if not _door_val:
+                user_input[CONF_DOOR_SENSOR_ENTITY] = None
+
+            # Same treatment for switch entity
+            # Only normalize to None when key is present but empty; if the key
+            # is missing entirely (e.g. the step didn't expose the field) fall
+            # back to the already-configured value so we don't accidentally clear it.
+            _switch_val = user_input.get(CONF_SWITCH_ENTITY)
+            if CONF_SWITCH_ENTITY in user_input and not _switch_val:
+                user_input[CONF_SWITCH_ENTITY] = None
+            elif CONF_SWITCH_ENTITY not in user_input:
+                _existing_switch = self.config_entry.options.get(
+                    CONF_SWITCH_ENTITY,
+                    self.config_entry.data.get(CONF_SWITCH_ENTITY),
+                )
+                if _existing_switch:
+                    user_input[CONF_SWITCH_ENTITY] = _existing_switch
+
             # Final Save
             final_options = {
                 **self.config_entry.data,
@@ -744,6 +889,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 **user_input,
             }
             final_options.pop(CONF_APPLY_SUGGESTIONS, None)
+            # Drop pump-only keys when the device type is not pump
+            if final_options.get(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE) != DEVICE_TYPE_PUMP:
+                final_options.pop(CONF_PUMP_STUCK_DURATION, None)
+            if self._suggested_values:
+                await manager.profile_store.clear_suggestions()
+                self._suggested_values = None
+                self._pending_suggestion_diffs_md = ""
+                self._pending_suggestion_count = 0
+                manager.notify_update()
             return self.async_create_entry(title="", data=final_options)
 
         # Helper to get current value
@@ -767,7 +921,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 else None
             )
             if val is None:
-                return "—"
+                return "-"
             try:
                 return str(int(val)) if float(val).is_integer() else f"{float(val):.2f}"
             except Exception:  # pylint: disable=broad-exception-caught
@@ -969,6 +1123,29 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 )
             ),
             vol.Optional(
+                CONF_AUTO_LABEL_CONFIDENCE,
+                default=get_val(CONF_AUTO_LABEL_CONFIDENCE, DEFAULT_AUTO_LABEL_CONFIDENCE),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.5, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX
+                )
+            ),
+            vol.Optional(
+                CONF_LEARNING_CONFIDENCE,
+                default=get_val(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.0, max=1.0, step=0.05, mode=selector.NumberSelectorMode.BOX
+                )
+            ),
+            vol.Optional(
+                CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+                default=get_val(
+                    CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+                    DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
+                ),
+            ): bool,
+            vol.Optional(
                 CONF_DURATION_TOLERANCE,
                 default=get_val(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE),
             ): selector.NumberSelector(
@@ -1069,6 +1246,69 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
+            # --- Delayed Start Detection ---
+            vol.Optional(
+                CONF_DELAY_START_DETECT_ENABLED,
+                default=get_val(
+                    CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
+                ),
+            ): bool,
+            vol.Optional(
+                CONF_DELAY_DRAIN_MIN_POWER,
+                default=get_val(
+                    CONF_DELAY_DRAIN_MIN_POWER, DEFAULT_DELAY_DRAIN_MIN_POWER
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=1.0,
+                    max=500.0,
+                    step=1.0,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_DELAY_DRAIN_MAX_POWER,
+                default=get_val(
+                    CONF_DELAY_DRAIN_MAX_POWER, DEFAULT_DELAY_DRAIN_MAX_POWER
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=1.0,
+                    max=2000.0,
+                    step=1.0,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_DELAY_DRAIN_MAX_DURATION,
+                default=get_val(
+                    CONF_DELAY_DRAIN_MAX_DURATION, DEFAULT_DELAY_DRAIN_MAX_DURATION
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5.0,
+                    max=600.0,
+                    step=1.0,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_DELAY_TIMEOUT_HOURS,
+                default=get_val(
+                    CONF_DELAY_TIMEOUT_HOURS, DEFAULT_DELAY_TIMEOUT_HOURS
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.5,
+                    max=24.0,
+                    step=0.5,
+                    unit_of_measurement="h",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
             # --- External Cycle End Trigger ---
             vol.Optional(
                 CONF_EXTERNAL_END_TRIGGER_ENABLED,
@@ -1086,12 +1326,68 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_EXTERNAL_END_TRIGGER_INVERTED,
                 default=get_val(CONF_EXTERNAL_END_TRIGGER_INVERTED, False),
             ): bool,
+            # --- Door Sensor & Pause ---
+            vol.Optional(
+                CONF_DOOR_SENSOR_ENTITY,
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="binary_sensor",
+                    multiple=False,
+                )
+            ),
+            vol.Optional(
+                CONF_PAUSE_CUTS_POWER,
+                default=get_val(CONF_PAUSE_CUTS_POWER, False),
+            ): bool,
+            vol.Optional(
+                CONF_SWITCH_ENTITY,
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="switch",
+                    multiple=False,
+                )
+            ),
+            vol.Optional(
+                CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
+                default=get_val(
+                    CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=480,
+                    step=5,
+                    unit_of_measurement="min",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
         }
+
+        # --- Pump Monitor (Pump / Sump Pump only) ---
+        if current_device_type == DEVICE_TYPE_PUMP:
+            schema[
+                vol.Optional(
+                    CONF_PUMP_STUCK_DURATION,
+                    default=get_val(CONF_PUMP_STUCK_DURATION, DEFAULT_PUMP_STUCK_DURATION),
+                )
+            ] = selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=60,
+                    max=86400,
+                    step=60,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            )
 
         data_schema = vol.Schema(schema)
         data_schema = self.add_suggested_values_to_schema(
             data_schema,
-            {CONF_EXTERNAL_END_TRIGGER: get_val(CONF_EXTERNAL_END_TRIGGER, None)},
+            {
+                CONF_EXTERNAL_END_TRIGGER: get_val(CONF_EXTERNAL_END_TRIGGER, None),
+                CONF_DOOR_SENSOR_ENTITY: get_val(CONF_DOOR_SENSOR_ENTITY, None),
+                CONF_SWITCH_ENTITY: get_val(CONF_SWITCH_ENTITY, None),
+            },
         )
 
         return self.async_show_form(
@@ -2262,7 +2558,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             f"<rect x='{plot_left}' y='{plot_top}' width='{plot_width}' height='{plot_height}' fill='#111111' stroke='#444' stroke-width='2' rx='8'/>",
         ]
 
-        # Adaptive time grid — vertical lines drawn first so they sit behind everything.
+        # Adaptive time grid - vertical lines drawn first so they sit behind everything.
         total_min = int(max_time / 60)
         grid_interval = pick_grid_interval(total_min)
         grid_ticks_min = list(range(0, total_min + 1, grid_interval))
@@ -2643,7 +2939,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             action = user_input.get("action")
             if action == "name_phases" and detected:
                 return await self.async_step_assign_profile_phases_auto_detect_name()
-            # "cancel" or no phases found — go back without changes.
+            # "cancel" or no phases found - go back without changes.
             return await self.async_step_assign_profile_phases()
 
         svg_labels = {
@@ -4396,6 +4692,30 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     # Cycle Trimmer
     # ------------------------------------------------------------------
 
+    def _wallclock_to_offset(
+        self, time_str: str, cycle_start_dt: datetime, cycle_end_dt: datetime
+    ) -> float | None:
+        """Parse an HH:MM:SS time string and return offset seconds from cycle_start_dt.
+
+        Returns None if the time cannot be parsed or falls outside the recorded cycle.
+        """
+        try:
+            local_start = dt_util.as_local(cycle_start_dt)
+            parts = time_str.split(":")
+            h = int(parts[0])
+            m = int(parts[1])
+            s = int(parts[2]) if len(parts) > 2 else 0
+            candidate = local_start.replace(hour=h, minute=m, second=s, microsecond=0)
+            if candidate < local_start:
+                candidate += timedelta(days=1)
+            offset_seconds = (candidate - local_start).total_seconds()
+            cycle_duration = (cycle_end_dt - cycle_start_dt).total_seconds()
+            if offset_seconds < 0 or offset_seconds > cycle_duration:
+                return None
+            return offset_seconds
+        except (ValueError, IndexError, AttributeError):
+            return None
+
     def _trim_cycle_svg_markdown(
         self,
         p_data: list[tuple[float, float]],
@@ -4404,6 +4724,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         title: str = "Cycle Trim Preview",
         label_min: str = "min",
         no_data_text: str = "No power data available for this cycle.",
+        cycle_start_dt: datetime | None = None,
     ) -> str:
         """Render the cycle power curve with trim-region overlays as a base64 SVG."""
 
@@ -4416,13 +4737,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             )
 
         width = 1360
-        plot_left = 12
-        plot_right = 12
-        plot_top = 64
+        plot_left = 60
+        plot_right = 60
+        plot_top = 110
         plot_height = 300
         plot_width = width - plot_left - plot_right
-        axis_y = plot_top + plot_height + 32
-        total_height = axis_y + 32
+        axis_y = plot_top + plot_height + 52
+        axis_y2 = axis_y + 36
+        total_height = (axis_y2 + 32) if cycle_start_dt is not None else (axis_y + 40)
 
         if not p_data or len(p_data) < 2:
             empty_svg = (
@@ -4450,7 +4772,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return plot_top + plot_height - (max(0.0, min(max_power, p)) / max_power) * plot_height
 
         def pick_grid_interval(total_min_val: int) -> int:
-            label_w_px = 91
+            label_w_px = 130
             min_iv = (label_w_px / plot_width) * total_min_val
             for candidate in (1, 2, 5, 10, 15, 20, 30, 60):
                 if candidate > min_iv:
@@ -4467,7 +4789,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         # Title
         parts.append(
-            f"<text x='22' y='42' font-family='sans-serif' font-size='24'"
+            f"<text x='22' y='52' font-family='sans-serif' font-size='32'"
             f" fill='#f3f4f6' font-weight='bold'>{esc(title)}</text>"
         )
 
@@ -4480,11 +4802,30 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 f"<line x1='{tx:.2f}' y1='{plot_top}' x2='{tx:.2f}'"
                 f" y2='{plot_top + plot_height}' stroke='#2a2a2a' stroke-width='1'/>"
             )
-            parts.append(
-                f"<text x='{tx:.2f}' y='{axis_y}' font-family='sans-serif'"
-                f" font-size='20' fill='#64748b' text-anchor='middle'>"
-                f"{tick_min} {esc(label_min)}</text>"
-            )
+            if tx <= plot_left + 50:
+                t_anchor, t_x = "start", plot_left
+            elif tx >= width - plot_right - 50:
+                t_anchor, t_x = "end", width - plot_right
+            else:
+                t_anchor, t_x = "middle", tx
+            if cycle_start_dt is not None:
+                tick_dt = dt_util.as_local(cycle_start_dt + timedelta(seconds=tick_min * 60))
+                parts.append(
+                    f"<text x='{t_x:.2f}' y='{axis_y}' font-family='sans-serif'"
+                    f" font-size='30' fill='#94a3b8' text-anchor='{t_anchor}'>"
+                    f"{esc(tick_dt.strftime('%H:%M'))}</text>"
+                )
+                parts.append(
+                    f"<text x='{t_x:.2f}' y='{axis_y2}' font-family='sans-serif'"
+                    f" font-size='24' fill='#64748b' text-anchor='{t_anchor}'>"
+                    f"+{tick_min} {esc(label_min)}</text>"
+                )
+            else:
+                parts.append(
+                    f"<text x='{t_x:.2f}' y='{axis_y}' font-family='sans-serif'"
+                    f" font-size='30' fill='#64748b' text-anchor='{t_anchor}'>"
+                    f"{tick_min} {esc(label_min)}</text>"
+                )
 
         # Trimmed-region shading (before start and after end)
         x_start = to_x(trim_start_s)
@@ -4510,21 +4851,27 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         # Trim marker lines and labels
         _label_offset_y = plot_top - 10
+        _label_half_w = 105
         for t_s, color, key in (
             (trim_start_s, "#22c55e", "S"),
             (trim_end_s, "#ef4444", "E"),
         ):
             tx = to_x(t_s)
-            t_min_label = f"{int(t_s / 60)}:{int(t_s % 60):02d}"
+            if cycle_start_dt is not None:
+                t_dt = dt_util.as_local(cycle_start_dt + timedelta(seconds=t_s))
+                t_label = t_dt.strftime("%H:%M:%S")
+            else:
+                t_label = f"{int(t_s / 60)}:{int(t_s % 60):02d}"
+            label_x = max(plot_left + _label_half_w, min(width - plot_right - _label_half_w, tx))
             parts.append(
                 f"<line x1='{tx:.2f}' y1='{plot_top}' x2='{tx:.2f}'"
                 f" y2='{plot_top + plot_height}' stroke='{color}'"
                 " stroke-width='2.5' stroke-dasharray='8 4'/>"
             )
             parts.append(
-                f"<text x='{tx:.2f}' y='{_label_offset_y}' font-family='sans-serif'"
-                f" font-size='22' fill='{color}' text-anchor='middle'"
-                f" font-weight='bold'>{key}: {esc(t_min_label)}</text>"
+                f"<text x='{label_x:.2f}' y='{_label_offset_y}' font-family='sans-serif'"
+                f" font-size='28' fill='{color}' text-anchor='middle'"
+                f" font-weight='bold'>{key}: {esc(t_label)}</text>"
             )
 
         parts.append("</svg>")
@@ -4552,7 +4899,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 else "⚠" if status == "resumed"
                 else "✗"
             )
-            label = f"[{status_icon}] {start} — {duration_min}m — {prof}"
+            label = f"[{status_icon}] {start} - {duration_min}m - {prof}"
             options.append(selector.SelectOptionDict(value=c["id"], label=label))
 
         if not options:
@@ -4566,6 +4913,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self._trim_cycle_id = cycle_id
             self._trim_start_s = 0.0
             self._trim_end_s = p_data[-1][0]
+            cycle_obj = next((c for c in store.get_past_cycles() if c["id"] == cycle_id), None)
+            if cycle_obj and cycle_obj.get("start_time"):
+                self._trim_cycle_start_dt = dt_util.parse_datetime(cycle_obj["start_time"])
+            else:
+                self._trim_cycle_start_dt = None
             return await self.async_step_trim_cycle()
 
         return self.async_show_form(
@@ -4636,20 +4988,33 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             no_data_text=await self._options_text(
                 "trim_cycle_preview_no_data", "No power data available for this cycle."
             ),
+            cycle_start_dt=self._trim_cycle_start_dt,
         )
 
-        start_min = int(self._trim_start_s / 60)
-        start_sec = int(self._trim_start_s % 60)
-        end_min = int(self._trim_end_s / 60)
-        end_sec = int(self._trim_end_s % 60)
         kept_s = max(0.0, self._trim_end_s - self._trim_start_s)
         kept_min = int(kept_s / 60)
         kept_sec = int(kept_s % 60)
         kept_suffix = await self._options_text("trim_cycle_preview_kept_suffix", "kept")
-        summary = (
-            f"{start_min}:{start_sec:02d} — {end_min}:{end_sec:02d}"
-            f"  ({kept_min}:{kept_sec:02d} {kept_suffix})"
-        )
+        if self._trim_cycle_start_dt is not None:
+            start_dt = dt_util.as_local(
+                self._trim_cycle_start_dt + timedelta(seconds=self._trim_start_s)
+            )
+            end_dt = dt_util.as_local(
+                self._trim_cycle_start_dt + timedelta(seconds=self._trim_end_s)
+            )
+            summary = (
+                f"{start_dt.strftime('%H:%M:%S')} - {end_dt.strftime('%H:%M:%S')}"
+                f"  ({kept_min}:{kept_sec:02d} {kept_suffix})"
+            )
+        else:
+            start_min = int(self._trim_start_s / 60)
+            start_sec = int(self._trim_start_s % 60)
+            end_min = int(self._trim_end_s / 60)
+            end_sec = int(self._trim_end_s % 60)
+            summary = (
+                f"{start_min}:{start_sec:02d} - {end_min}:{end_sec:02d}"
+                f"  ({kept_min}:{kept_sec:02d} {kept_suffix})"
+            )
 
         return self.async_show_form(
             step_id="trim_cycle",
@@ -4671,7 +5036,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_trim_cycle_start(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Set the trim start point (minutes from cycle start)."""
+        """Set the trim start point."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
 
@@ -4683,40 +5048,79 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_abort(reason="no_power_data")
 
         full_end_s = p_data[-1][0]
-        total_min = max(1, int(full_end_s / 60))
-        default_min = int(self._trim_start_s / 60)
+        cycle_start_dt = self._trim_cycle_start_dt
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            new_start_s = float(user_input["trim_start_min"]) * 60.0
-            if new_start_s >= self._trim_end_s:
-                errors["trim_start_min"] = "trim_range_invalid"
+            time_str = (user_input.get("trim_start_time") or "").strip()
+            if time_str and cycle_start_dt is not None:
+                cycle_end_dt = cycle_start_dt + timedelta(seconds=full_end_s)
+                new_start_s = self._wallclock_to_offset(time_str, cycle_start_dt, cycle_end_dt)
+                if new_start_s is None:
+                    errors["trim_start_time"] = "trim_range_invalid"
+                elif new_start_s >= self._trim_end_s:
+                    errors["trim_start_time"] = "trim_range_invalid"
+                else:
+                    self._trim_start_s = new_start_s
+                    return await self.async_step_trim_cycle()
             else:
-                self._trim_start_s = new_start_s
-                return await self.async_step_trim_cycle()
+                min_val = user_input.get("trim_start_min")
+                if min_val is not None:
+                    new_start_s = float(min_val) * 60.0
+                    if new_start_s >= self._trim_end_s:
+                        errors["trim_start_min"] = "trim_range_invalid"
+                    else:
+                        self._trim_start_s = new_start_s
+                        return await self.async_step_trim_cycle()
+
+        if cycle_start_dt is not None:
+            local_start = dt_util.as_local(cycle_start_dt)
+            local_end = dt_util.as_local(cycle_start_dt + timedelta(seconds=full_end_s))
+            current_wallclock = dt_util.as_local(
+                cycle_start_dt + timedelta(seconds=self._trim_start_s)
+            ).strftime("%H:%M:%S")
+            current_offset_min = int(self._trim_start_s / 60)
+            data_schema = vol.Schema({
+                vol.Required("trim_start_time", default=current_wallclock): selector.TimeSelector(),
+            })
+            desc_placeholders = {
+                "cycle_start_wallclock": local_start.strftime("%H:%M:%S"),
+                "cycle_end_wallclock": local_end.strftime("%H:%M:%S"),
+                "current_wallclock": current_wallclock,
+                "current_offset_min": str(current_offset_min),
+            }
+        else:
+            total_min = max(1, int(full_end_s / 60))
+            default_min = int(self._trim_start_s / 60)
+            data_schema = vol.Schema({
+                vol.Required("trim_start_min", default=default_min): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=total_min - 1,
+                        step=1,
+                        unit_of_measurement="min",
+                        mode=selector.NumberSelectorMode.BOX,
+                    )
+                ),
+            })
+            desc_placeholders = {
+                "cycle_start_wallclock": "unknown",
+                "cycle_end_wallclock": "unknown",
+                "current_wallclock": f"{int(self._trim_start_s / 60)} min",
+                "current_offset_min": str(int(self._trim_start_s / 60)),
+            }
 
         return self.async_show_form(
             step_id="trim_cycle_start",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("trim_start_min", default=default_min): selector.NumberSelector(
-                        selector.NumberSelectorConfig(
-                            min=0,
-                            max=total_min - 1,
-                            step=1,
-                            unit_of_measurement="min",
-                            mode=selector.NumberSelectorMode.BOX,
-                        )
-                    ),
-                }
-            ),
+            data_schema=data_schema,
             errors=errors,
+            description_placeholders=desc_placeholders,
         )
 
     async def async_step_trim_cycle_end(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Set the trim end point (minutes from cycle start)."""
+        """Set the trim end point."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
 
@@ -4728,32 +5132,71 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_abort(reason="no_power_data")
 
         full_end_s = p_data[-1][0]
-        total_min = max(1, int(full_end_s / 60) + 1)
-        default_min = int(self._trim_end_s / 60)
+        cycle_start_dt = self._trim_cycle_start_dt
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            new_end_s = float(user_input["trim_end_min"]) * 60.0
-            if new_end_s <= self._trim_start_s:
-                errors["trim_end_min"] = "trim_range_invalid"
+            time_str = (user_input.get("trim_end_time") or "").strip()
+            if time_str and cycle_start_dt is not None:
+                cycle_end_dt = cycle_start_dt + timedelta(seconds=full_end_s)
+                new_end_s = self._wallclock_to_offset(time_str, cycle_start_dt, cycle_end_dt)
+                if new_end_s is None:
+                    errors["trim_end_time"] = "trim_range_invalid"
+                elif new_end_s <= self._trim_start_s:
+                    errors["trim_end_time"] = "trim_range_invalid"
+                else:
+                    self._trim_end_s = new_end_s
+                    return await self.async_step_trim_cycle()
             else:
-                self._trim_end_s = new_end_s
-                return await self.async_step_trim_cycle()
+                min_val = user_input.get("trim_end_min")
+                if min_val is not None:
+                    new_end_s = float(min_val) * 60.0
+                    if new_end_s <= self._trim_start_s:
+                        errors["trim_end_min"] = "trim_range_invalid"
+                    else:
+                        self._trim_end_s = new_end_s
+                        return await self.async_step_trim_cycle()
+
+        if cycle_start_dt is not None:
+            local_start = dt_util.as_local(cycle_start_dt)
+            local_end = dt_util.as_local(cycle_start_dt + timedelta(seconds=full_end_s))
+            current_wallclock = dt_util.as_local(
+                cycle_start_dt + timedelta(seconds=self._trim_end_s)
+            ).strftime("%H:%M:%S")
+            current_offset_min = int(self._trim_end_s / 60)
+            data_schema = vol.Schema({
+                vol.Required("trim_end_time", default=current_wallclock): selector.TimeSelector(),
+            })
+            desc_placeholders = {
+                "cycle_start_wallclock": local_start.strftime("%H:%M:%S"),
+                "cycle_end_wallclock": local_end.strftime("%H:%M:%S"),
+                "current_wallclock": current_wallclock,
+                "current_offset_min": str(current_offset_min),
+            }
+        else:
+            total_min = max(1, int(full_end_s / 60) + 1)
+            default_min = int(self._trim_end_s / 60)
+            data_schema = vol.Schema({
+                vol.Required("trim_end_min", default=default_min): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=0,
+                        max=total_min,
+                        step=1,
+                        unit_of_measurement="min",
+                        mode=selector.NumberSelectorMode.BOX,
+                    )
+                ),
+            })
+            desc_placeholders = {
+                "cycle_start_wallclock": "unknown",
+                "cycle_end_wallclock": "unknown",
+                "current_wallclock": f"{int(self._trim_end_s / 60)} min",
+                "current_offset_min": str(int(self._trim_end_s / 60)),
+            }
 
         return self.async_show_form(
             step_id="trim_cycle_end",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("trim_end_min", default=default_min): selector.NumberSelector(
-                        selector.NumberSelectorConfig(
-                            min=0,
-                            max=total_min,
-                            step=1,
-                            unit_of_measurement="min",
-                            mode=selector.NumberSelectorMode.BOX,
-                        )
-                    ),
-                }
-            ),
+            data_schema=data_schema,
             errors=errors,
+            description_placeholders=desc_placeholders,
         )

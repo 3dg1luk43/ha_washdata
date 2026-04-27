@@ -65,19 +65,20 @@
           "power_sensor": "Teljesítményérzékelő entitás",
           "min_power": "Minimális teljesítmény (W)",
           "off_delay": "Ciklusvégi késleltetés (ek)",
-          "notify_service": "Értesítési szolgáltatás (pl. notify.mobile_app)",
           "notify_actions": "Értesítési műveletek",
           "notify_people": "Késlelteti a kézbesítést, amíg ezek az emberek otthon nem lesznek",
           "notify_only_when_home": "Az értesítések késleltetése, amíg a kiválasztott személy otthon van",
           "notify_fire_events": "Automatizálási esemény indítása",
-          "notify_events": "Értesítendő események",
           "notify_before_end_minutes": "Befejezés előtti értesítés (perccel a vége előtt)",
           "notify_title": "Értesítés címe",
           "notify_icon": "Értesítési ikon",
           "notify_start_message": "Indítsa el az Üzenetformátumot",
           "notify_finish_message": "Üzenetformátum befejezése",
           "notify_pre_complete_message": "Kitöltés előtti üzenetformátum",
-          "show_advanced": "Speciális beállítások szerkesztése (következő lépés)"
+          "show_advanced": "Speciális beállítások szerkesztése (következő lépés)",
+          "notify_start_services": "Ciklus indítása - Értesítési célok",
+          "notify_finish_services": "Ciklus befejezése - Értesítési célok",
+          "notify_live_services": "Élő folyamat – Értesítési célok"
         },
         "data_description": {
           "apply_suggestions": "Jelölje be ezt a négyzetet a tanulási algoritmus által javasolt értékek űrlapba másolásához. Mentés előtt tekintse át.\n\nJavasolt (tanulásból):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "Az érzékelő entitás, amely valós idejű teljesítményt jelent (wattban). Ezt bármikor módosíthatja anélkül, hogy elveszítené az előzményadatokat – hasznos lehet, ha kicseréli az intelligens csatlakozót.",
           "min_power": "Az e küszöbérték feletti teljesítményértékek (wattban) azt jelzik, hogy a készülék működik. Kezdje 2 W-tal a legtöbb eszköz esetében.",
           "off_delay": "Másodpercek alatt a simított teljesítménynek a leállítási küszöb alatt kell maradnia, hogy jelezze a befejezést. Alapértelmezett: 120 s.",
-          "notify_service": "Az Otthoni asszisztens értesíti a szolgáltatást (opcionális).",
           "notify_actions": "Opcionális Home Assistant műveletsor az értesítésekhez (szkriptek, értesítés, TTS stb.) Ha be van állítva, a műveletek a tartalék értesítési szolgáltatás előtt futnak le.",
           "notify_people": "Jelenlétkapuzáshoz használt személy entitások. Ha engedélyezve van, az értesítések kézbesítése addig késik, amíg legalább egy kiválasztott személy otthon nem lesz.",
           "notify_only_when_home": "Ha engedélyezve van, késleltesse az értesítéseket, amíg legalább egy kiválasztott személy otthon lesz.",
           "notify_fire_events": "Ha engedélyezve van, aktiválja a Home Assistant eseményeit a ciklus kezdetéhez és végéhez (ha_washdata_cycle_started és ha_washdata_cycle_ended) az automatizálások irányítása érdekében.",
-          "notify_events": "Mely eseményekről küldjön értesítést.",
           "notify_before_end_minutes": "Percekkel a ciklus becsült vége előtt az értesítés elindításához. A letiltáshoz állítsa 0-ra. Alapértelmezett: 0.",
           "notify_title": "Egyéni cím az értesítésekhez. Támogatja a {device} helyőrzőt.",
           "notify_icon": "Az értesítésekhez használandó ikon (pl. mdi:mosógép). Hagyja üresen, ha nem szeretne ikont küldeni.",
           "notify_start_message": "Üzenet elküldve, amikor egy ciklus elindul. Támogatja a {device} helyőrzőt.",
           "notify_finish_message": "Üzenet elküldve, amikor egy ciklus véget ért. Támogatja a {device}, {duration}, {program} helyőrzőket.",
-          "notify_pre_complete_message": "Üzenet elküldve a befejezés előtt. Támogatja a(z) {device}, {minutes} helyőrzőket."
+          "notify_pre_complete_message": "Üzenet elküldve a befejezés előtt. Támogatja a(z) {device}, {minutes} helyőrzőket.",
+          "notify_start_services": "Egy vagy több szolgáltatás értesíti, ha egy ciklus elkezdődik. Hagyja üresen az indítási értesítések kihagyásához.",
+          "notify_finish_services": "Egy vagy több szolgáltatás értesíti, ha egy ciklus véget ér vagy a végéhez közeledik. Hagyja üresen a befejezéssel kapcsolatos értesítések kihagyásához.",
+          "notify_live_services": "Egy vagy több értesítést küld a szolgáltatásnak, hogy a ciklus lefutása közben élő folyamatfrissítéseket kapjon (csak mobil kísérőalkalmazás). Hagyja üresen az élő frissítések kihagyásához."
         }
       },
       "notifications": {
         "title": "Értesítések",
         "description": "Konfigurálhatja az értesítési csatornákat, sablonokat és opcionális élő mobil-frissítéseket.",
         "data": {
-          "notify_service": "Értesítési szolgáltatás (pl. notify.mobile_app)",
           "notify_actions": "Értesítési műveletek",
           "notify_people": "Késlelteti a kézbesítést, amíg ezek az emberek otthon nem lesznek",
           "notify_only_when_home": "Az értesítések késleltetése, amíg a kiválasztott személy otthon van",
           "notify_fire_events": "Automatizálási esemény indítása",
-          "notify_events": "Értesítendő események",
           "notify_before_end_minutes": "Befejezés előtti értesítés (perccel a vége előtt)",
           "notify_live_interval_seconds": "Élő frissítési időköz (másodperc)",
           "notify_live_overrun_percent": "Élő frissítés túllépési engedmény (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "Értesítési ikon",
           "notify_start_message": "Indítsa el az Üzenetformátumot",
           "notify_finish_message": "Üzenetformátum befejezése",
-          "notify_pre_complete_message": "Kitöltés előtti üzenetformátum"
+          "notify_pre_complete_message": "Kitöltés előtti üzenetformátum",
+          "notify_start_services": "Ciklus indítása - Értesítési célok",
+          "notify_finish_services": "Ciklus befejezése - Értesítési célok",
+          "notify_live_services": "Élő folyamat – Értesítési célok",
+          "notify_live_chronometer": "Kronométer Visszaszámláló időzítő",
+          "energy_price_entity": "Energiaár – entitás (opcionális)",
+          "energy_price_static": "Energiaár – Statikus érték (opcionális)"
         },
         "data_description": {
-          "notify_service": "Az Otthoni asszisztens értesíti a szolgáltatást (opcionális).",
           "notify_actions": "Opcionális Home Assistant műveletsor az értesítésekhez (szkriptek, értesítés, TTS stb.) Ha be van állítva, a műveletek a tartalék értesítési szolgáltatás előtt futnak le.",
           "notify_people": "Jelenlétkapuzáshoz használt személy entitások. Ha engedélyezve van, az értesítések kézbesítése addig késik, amíg legalább egy kiválasztott személy otthon nem lesz.",
           "notify_only_when_home": "Ha engedélyezve van, késleltesse az értesítéseket, amíg legalább egy kiválasztott személy otthon lesz.",
           "notify_fire_events": "Ha engedélyezve van, aktiválja a Home Assistant eseményeit a ciklus kezdetéhez és végéhez (ha_washdata_cycle_started és ha_washdata_cycle_ended) az automatizálások irányítása érdekében.",
-          "notify_events": "Mely eseményekről küldjön értesítést.",
           "notify_before_end_minutes": "Percekkel a ciklus becsült vége előtt az értesítés elindításához. A letiltáshoz állítsa 0-ra. Alapértelmezett: 0.",
           "notify_live_interval_seconds": "Milyen gyakran küldenek frissítéseket futás közben. Az alacsonyabb értékek jobban reagálnak, de több értesítést igényelnek. A rendszer legalább 30 másodpercet kényszerít ki – a 30 másodperc alatti értékeket a rendszer automatikusan 30 másodpercre kerekíti.",
           "notify_live_overrun_percent": "A hosszú/túlfutási ciklusok becsült frissítésszáma feletti biztonsági ráhagyás (például a 20% 1,2-szeres becsült frissítést tesz lehetővé).",
@@ -132,7 +136,13 @@
           "notify_icon": "Az értesítésekhez használandó ikon (pl. mdi:mosógép). Hagyja üresen, ha nem szeretne ikont küldeni.",
           "notify_start_message": "Üzenet elküldve, amikor egy ciklus elindul. Támogatja a {device} helyőrzőt.",
           "notify_finish_message": "Üzenet elküldve, amikor egy ciklus véget ért. Támogatja a {device}, {duration}, {program} helyőrzőket.",
-          "notify_pre_complete_message": "Üzenet elküldve a befejezés előtt. Támogatja a(z) {device}, {minutes} helyőrzőket."
+          "notify_pre_complete_message": "Üzenet elküldve a befejezés előtt. Támogatja a(z) {device}, {minutes} helyőrzőket.",
+          "notify_start_services": "Egy vagy több értesítési szolgáltatás figyelmezteti a ciklus kezdetét (pl. notify.mobile_app_my_phone). Hagyja üresen az indítási értesítések kihagyásához.",
+          "notify_finish_services": "Egy vagy több szolgáltatás értesíti, ha egy ciklus véget ér vagy a végéhez közeledik. Hagyja üresen a befejezéssel kapcsolatos értesítések kihagyásához.",
+          "notify_live_services": "Egy vagy több értesítést küld a szolgáltatásnak, hogy a ciklus lefutása közben élő folyamatfrissítéseket kapjon (csak mobilalkalmazás esetén). Hagyja üresen az élő frissítések kihagyásához.",
+          "notify_live_chronometer": "Ha engedélyezve van, minden élő frissítés tartalmaz egy kronométer visszaszámlálást a becsült befejezési időig. Az értesítési időzítő automatikusan folytatja a visszaszámlálást az eszközön a frissítések között (csak Android kísérőalkalmazások esetén).",
+          "energy_price_entity": "Válasszon egy numerikus entitást, amely tartalmazza az aktuális villamosenergia-árat (pl. sensor.electricity_price, input_number.energy_rate). Ha be van állítva, engedélyezi a(z) {cost} helyőrzőt. Elsőbbséget élvez a statikus értékkel szemben, ha mindkettő be van állítva.",
+          "energy_price_static": "Fix villanyár kWh-nként. Ha be van állítva, engedélyezi a(z) {cost} helyőrzőt. Figyelmen kívül hagyva, ha egy entitás fent van konfigurálva. Adja hozzá a pénznem szimbólumát az üzenetsablonhoz, pl. {cost} €."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,18 @@
           "dtw_bandwidth": "DTW sávszélesség",
           "external_end_trigger_enabled": "Külső ciklusvégi trigger engedélyezése",
           "external_end_trigger": "Külső ciklusvég érzékelő",
-          "external_end_trigger_inverted": "Invert trigger logika (trigger KI)"
+          "external_end_trigger_inverted": "Invert trigger logika (trigger KI)",
+          "suppress_feedback_notifications": "A visszajelzési értesítések letiltása",
+          "pump_stuck_duration": "A szivattyú elakadt riasztási küszöbértéke (csak a szivattyú)",
+          "door_sensor_entity": "Ajtó érzékelő",
+          "pause_cuts_power": "Áramtalanítás szüneteltetéskor",
+          "notify_unload_delay_minutes": "A mosásra váró értesítés késése (perc)",
+          "switch_entity": "Kapcsoló entitás (az áramszünet szüneteltetéséhez)",
+          "delay_start_detect_enabled": "Késleltetett indítás észlelésének engedélyezése",
+          "delay_drain_min_power": "Késleltetett indítás: leeresztő tüske minimális teljesítmény (W)",
+          "delay_drain_max_power": "Késleltetett indítás: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Késleltetett indítás: Maximális leeresztő tüske időtartama (s)",
+          "delay_timeout_hours": "Késleltetett indítás: maximális várakozási idő (h)"
         },
         "data_description": {
           "apply_suggestions": "Jelölje be ezt a jelölőnégyzetet a tanulási algoritmus által javasolt értékek áttekintési lépésének megnyitásához. Semmi sem kerül automatikusan mentésre.\n\nJavasolt (tanulásból):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -228,7 +249,18 @@
           "dtw_bandwidth": "Maximális megengedett idővetemítés (nyújtás) a ciklus időtartamának arányában. A magasabb értékek lehetővé teszik az erősen változó ciklusok egyeztetését, de növelik a CPU költségét. Alapértelmezett: 0,20 (20%).",
           "external_end_trigger_enabled": "Külső bináris érzékelő felügyeletének engedélyezése a ciklus befejezésének indításához.",
           "external_end_trigger": "Válasszon ki egy bináris érzékelő entitást. Amikor ez az érzékelő aktiválódik, az aktuális ciklus „befejezett” állapottal ér véget.",
-          "external_end_trigger_inverted": "Alapértelmezés szerint a trigger akkor lép működésbe, amikor az érzékelő BEKAPCSOL. Jelölje be ezt a jelölőnégyzetet, ha ehelyett az érzékelő KIKAPCSOLÁSA esetén tüzel."
+          "external_end_trigger_inverted": "Alapértelmezés szerint a trigger akkor lép működésbe, amikor az érzékelő BEKAPCSOL. Jelölje be ezt a jelölőnégyzetet, ha ehelyett az érzékelő KIKAPCSOLÁSA esetén tüzel.",
+          "suppress_feedback_notifications": "Ha engedélyezve van, a WashData továbbra is nyomon követi és belső visszajelzést kér, de nem jelenít meg folyamatos értesítéseket, amelyek a ciklusok megerősítését kérik. Hasznos, ha a rendszer mindig megfelelően érzékeli a ciklusokat, és a figyelmeztetéseket elvonja a figyelmed.",
+          "pump_stuck_duration": "Ha egy szivattyúciklus ennyi másodperc után is fut, a ha_washdata_pump_stuck esemény egyszer aktiválódik. Használja ezt az elakadt motor észlelésére (tipikus olajteknő szivattyú futása 60 s alatt van). Alapértelmezett: 1800 s (30 perc). Csak a szivattyú készülék típusa.",
+          "door_sensor_entity": "Opcionális bináris érzékelő a gépajtóhoz (be = nyitva, ki = zárva). Ha az ajtó kinyílik egy aktív ciklus alatt, a WashData megerősíti, hogy a ciklus szándékosan szünetel. A ciklus végén, ha az ajtó még mindig zárva van, az állapot „Tiszta”-ra vált, amíg az ajtót ki nem nyitják. Megjegyzés: az ajtó bezárása NEM folytatja automatikusan a szünetelt ciklust – a folytatást manuálisan kell elindítani a Ciklus folytatása gombbal vagy a szervizzel.",
+          "pause_cuts_power": "Ha a Pause Cycle gombbal vagy szolgáltatással szüneteltet, kapcsolja ki a konfigurált kapcsoló entitást is. Csak akkor lép életbe, ha kapcsoló entitás van konfigurálva ehhez az eszközhöz.",
+          "notify_unload_delay_minutes": "Értesítés küldése a befejezésértesítési csatornán, miután a ciklus véget ért, és az ajtót ennyi percig nem nyitották ki (Ajtóérzékelő szükséges). A letiltáshoz állítsa 0-ra. Alapértelmezett: 60 perc.",
+          "switch_entity": "A kapcsoló entitás, amely szüneteltetéskor vagy folytatáskor válthat. Szükséges, ha a „Tápellátás leállítása szüneteltetéskor” engedélyezve van.",
+          "delay_start_detect_enabled": "Ha engedélyezve van, a rendszer késleltetett indításként egy rövid, alacsony fogyasztású lemerülési csúcsot, majd tartós készenléti tápellátást észlel. Az állapotérzékelő a „Várakozás az indításra” üzenetet mutatja a késleltetés alatt. A program nem követi nyomon a program idejét vagy előrehaladását, amíg a ciklus el nem kezdődik. A start_threshold_w értéket a leeresztőcsúcs-teljesítmény fölé kell beállítani.",
+          "delay_drain_min_power": "Minimális teljesítmény (W), amelyet leeresztőcsúcsként ismerhetünk fel. Állítsa közvetlenül a készülék készenléti szintje fölé. Alapértelmezett: 10 W.",
+          "delay_drain_max_power": "Maximális teljesítmény (W) egy leeresztő tüske esetén – az e feletti kitöréseket a rendszer valódi ciklusindításként kezeli. A start_threshold_w beállítás alatt kell lennie. Alapértelmezett: 80 W.",
+          "delay_drain_max_duration": "A leeresztő tüskének vissza kell esnie a leeresztőablak alá ennyi másodpercen belül, hogy megerősíthető legyen. A hosszabb tüskék valódi ciklustevékenységként kezelendők. Alapértelmezett: 60 s.",
+          "delay_timeout_hours": "Biztonsági időtúllépés: ha a gép ennyi óra elteltével is „Várakozás az indításra” üzemmódban van, a WashData visszaáll Ki értékre. Alapértelmezett: 8 óra."
         }
       },
       "diagnostics": {
@@ -559,13 +591,13 @@
       },
       "apply_suggestions_confirm": {
         "title": "Tekintse át a javasolt változtatásokat",
-        "description": "A WashData {pending_count} javasolt értéket talált az alkalmazásra.\n\nÁttekintendő változtatások:\n{changes}\n\nErősítse meg alább ezeket az értékeket az űrlapon. A rendszer nem menti őket, amíg el nem küldi a Speciális beállításokat.",
+        "description": "A WashData **{pending_count}** javasolt értéket talált az alkalmazásra.\n\nVáltozások:\n{changes}\n\n✅ Jelölje be az alábbi négyzetet, és kattintson a **Küldés** gombra a módosítások azonnali alkalmazásához és mentéséhez.\n❌ Hagyja bejelölés nélkül, és kattintson a **Küldés** gombra a visszavonáshoz és a visszalépéshez.",
         "data": {
-          "confirm_apply_suggestions": "Állítsa be a javasolt értékeket a Speciális beállításokban"
+          "confirm_apply_suggestions": "Alkalmazza és mentse el ezeket a módosításokat"
         }
       },
       "trim_cycle_select": {
-        "title": "Vágási ciklus — Válasszon ciklust",
+        "title": "Vágási ciklus - Válasszon ciklust",
         "description": "Válassza ki a vágni kívánt ciklust. ✓ = befejezve, ⚠ = folytatva, ✗ = megszakítva",
         "data": {
           "cycle_id": "Ciklus"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "Állítsa be a Vágás kezdetét",
-        "description": "Adja meg a perceltolást az adatok tárolásának megkezdéséhez (0 = ciklus indítása).",
+        "description": "Ciklusablak: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nJelenlegi kezdés: **{current_wallclock}** (+{current_offset_min} perc a ciklus kezdetétől)\n\nVálasszon új kezdési időpontot az alábbi óraválasztó segítségével.",
         "data": {
-          "trim_start_min": "Kezdés (perc)"
+          "trim_start_time": "Új kezdési időpont",
+          "trim_start_min": "Új kezdet (percek a ciklus kezdetétől)"
         }
       },
       "trim_cycle_end": {
         "title": "Állítsa be a Vágás végét",
-        "description": "Adja meg a perceltolást az adatok tárolásának leállításához.",
+        "description": "Ciklusablak: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nJelenlegi vége: **{current_wallclock}** (+{current_offset_min} perc a ciklus kezdetétől)\n\nVálasszon új befejezési időt az alábbi óraválasztó segítségével.",
         "data": {
-          "trim_end_min": "vége (perc)"
+          "trim_end_time": "Új befejezési idő",
+          "trim_end_min": "Új vége (percek a ciklus kezdetétől)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: A javasolt beállítások készen állnak ({device})",
       "suggestions_ready_notification_message": "A **Javasolt beállítások** érzékelő mostantól **{count}** használható javaslatokat közöl.\n\nÁttekintésük és alkalmazásuk: **Beállítások > Eszközök és szolgáltatások > WashData > Konfigurálás > Speciális beállítások > Javasolt értékek alkalmazása**.\n\nA javaslatok nem kötelezőek, és mentés előtt áttekinthetők.",
       "trim_range_invalid": "A kezdésnek a vége előtt kell lennie. Kérjük, módosítsa a vágási pontokat.",
-      "trim_failed": "A vágás nem sikerült. Lehetséges, hogy a ciklus már nem létezik, vagy az ablak üres."
+      "trim_failed": "A vágás nem sikerült. Lehetséges, hogy a ciklus már nem létezik, vagy az ablak üres.",
+      "auto_tune_suggestion": "{device_type} {device_title} szellemciklusokat észlelt. Javasolt minimális teljesítményváltozás: {current_min}W -> {new_min}W (nem alkalmazzák automatikusan).",
+      "auto_tune_title": "WashData automatikus hangolás",
+      "auto_tune_fallback": "{device_type} {device_title} szellemciklusokat észlelt. Javasolt minimális teljesítményváltozás: {current_min}W -> {new_min}W (nem alkalmazzák automatikusan)."
     },
     "abort": {
       "no_cycles_found": "Nem található ciklus",
@@ -973,6 +1010,26 @@
           "description": "Tartsa az adatokat másodpercek alatt ezen eltolásig. Alapértelmezett = teljes időtartam."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Ciklus szüneteltetése",
+      "description": "A WashData eszköz aktív ciklusának szüneteltetése.",
+      "fields": {
+        "device_id": {
+          "name": "Eszköz",
+          "description": "A WashData eszköz szüneteltetése."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Ciklus folytatása",
+      "description": "Szünetelt ciklus folytatása egy WashData eszköznél.",
+      "fields": {
+        "device_id": {
+          "name": "Eszköz",
+          "description": "A WashData eszköz a folytatáshoz."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "Indulás",
           "running": "Futás",
           "paused": "Szüneteltetve",
+          "user_paused": "Felhasználó által szüneteltetve",
           "ending": "Befejező",
           "finished": "Befejezett",
           "anti_wrinkle": "Ránctalanító",
+          "delay_wait": "Várakozás a kezdésre",
           "interrupted": "Megszakított",
           "force_stopped": "Kényszer leállított",
           "rinse": "Öblítés",
-          "unknown": "Ismeretlen"
+          "unknown": "Ismeretlen",
+          "clean": "Tiszta"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "Javasolt beállítások"
+      },
+      "pump_runs_today": {
+        "name": "A szivattyú üzemel (az elmúlt 24 órában)"
+      },
+      "cycle_count": {
+        "name": "Ciklusszám"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Ciklus kényszerítése"
+      },
+      "pause_cycle": {
+        "name": "Ciklus szüneteltetése"
+      },
+      "resume_cycle": {
+        "name": "Ciklus folytatása"
       }
     }
   },
@@ -1078,6 +1150,15 @@
     },
     "trim_invalid_range": {
       "message": "A trim_end_s nagyobbnak kell lennie, mint a trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Érvényes device_id megadása kötelező."
+    },
+    "cycle_id_required": {
+      "message": "Érvényes ciklusazonosító szükséges."
+    },
+    "profile_name_required": {
+      "message": "Érvényes profile_name megadása kötelező."
     }
   }
 }

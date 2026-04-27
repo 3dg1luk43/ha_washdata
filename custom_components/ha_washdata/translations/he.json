@@ -65,19 +65,20 @@
           "power_sensor": "ישות חיישן כוח",
           "min_power": "הספק מינימלי (W)",
           "off_delay": "עיכוב סיום מחזור (ים)",
-          "notify_service": "שירות התראות (למשל notify.mobile_app)",
           "notify_actions": "פעולות הודעה",
           "notify_people": "דחו את המשלוח עד שהאנשים האלה יהיו בבית",
           "notify_only_when_home": "עיכוב הודעות עד שהאדם הנבחר יהיה בבית",
           "notify_fire_events": "הפעלת אירועי אוטומציה",
-          "notify_events": "אירועים להודיע",
           "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
           "notify_title": "כותרת ההודעה",
           "notify_icon": "סמל הודעה",
           "notify_start_message": "התחל פורמט הודעה",
           "notify_finish_message": "סיים את פורמט ההודעה",
           "notify_pre_complete_message": "פורמט הודעת טרום השלמה",
-          "show_advanced": "ערוך הגדרות מתקדמות (השלב ​​הבא)"
+          "show_advanced": "ערוך הגדרות מתקדמות (השלב ​​הבא)",
+          "notify_start_services": "התחלת מחזור - יעדי הודעה",
+          "notify_finish_services": "סיום מחזור - יעדי הודעה",
+          "notify_live_services": "התקדמות חיה - יעדי התראות"
         },
         "data_description": {
           "apply_suggestions": "סמן תיבה זו כדי להעתיק ערכים שהוצעו על ידי אלגוריתם הלמידה לטופס. בדוק לפני השמירה.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- watchdog_interval: {suggested_watchdog_interval} שניות\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} שניות\n{suggested_reason}",
@@ -85,30 +86,29 @@
           "power_sensor": "ישות החיישן מדווחת על הספק בזמן אמת (בוואט). אתה יכול לשנות זאת בכל עת מבלי לאבד נתונים היסטוריים - שימושי אם אתה מחליף תקע חכם.",
           "min_power": "קריאות הספק מעל סף זה (בוואט) מצביעות על כך שהמכשיר פועל. התחל עם 2W עבור רוב המכשירים.",
           "off_delay": "שניות הכוח המוחלק חייב להישאר מתחת לסף העצירה כדי לסמן את ההשלמה. ברירת מחדל: 120 שניות.",
-          "notify_service": "Home Assistant מודיע לשירות לשימוש (אופציונלי).",
           "notify_actions": "רצף פעולה אופציונלי של Home Assistant להפעלת התראות (סקריפטים, התראה, TTS וכו'). אם הוגדר, הפעולות פועלות לפני שירות התראה חוזר.",
           "notify_people": "ישויות של אנשים המשמשות עבור שער נוכחות. כאשר מופעל, מסירת ההתראה מתעכבת עד שלפחות אדם נבחר אחד יהיה בבית.",
           "notify_only_when_home": "אם מופעל, דחה הודעות עד שלפחות אדם נבחר אחד יהיה בבית.",
           "notify_fire_events": "אם מופעל, הפעל אירועי Home Assistant עבור התחלה וסיום של מחזור (ha_washdata_cycle_started ו-ha_washdata_cycle_ended) כדי להניע אוטומציות.",
-          "notify_events": "עבור אילו אירועים לשלוח הודעות.",
           "notify_before_end_minutes": "דקות לפני סיום המחזור המשוער כדי להפעיל הודעה. הגדר ל-0 כדי להשבית. ברירת מחדל: 0.",
           "notify_title": "כותרת מותאמת אישית עבור התראות. תומך ב-{device} מציין מיקום.",
           "notify_icon": "סמל לשימוש עבור התראות (למשל mdi:washing-machine). השאר ריק כדי לשלוח ללא סמל.",
           "notify_start_message": "הודעה נשלחת כאשר מחזור מתחיל. תומך ב-{device} מציין מיקום.",
           "notify_finish_message": "הודעה נשלחת כאשר מחזור מסתיים. תומך במצייני מיקום של {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "הודעה נשלחה לפני ההשלמה. תומך ב-{device}, {minutes} מצייני מיקום."
+          "notify_pre_complete_message": "הודעה נשלחה לפני ההשלמה. תומך ב-{device}, {minutes} מצייני מיקום.",
+          "notify_start_services": "שירות הודעה אחד או יותר להתריע כאשר מחזור מתחיל. השאר ריק כדי לדלג על התראות התחלה.",
+          "notify_finish_services": "שירות הודעה אחד או יותר להתריע כאשר מחזור מסתיים או מתקרב לסיומו. השאר ריק כדי לדלג על הודעות סיום.",
+          "notify_live_services": "שירות הודעה אחד או יותר כדי לקבל עדכוני התקדמות בזמן שהמחזור פועל (אפליקציה נלווית לנייד בלבד). השאר ריק כדי לדלג על עדכונים חיים."
         }
       },
       "notifications": {
         "title": "התראות",
         "description": "הגדר ערוצי התראות, תבניות ועדכוני התקדמות אופציונליים לנייד.",
         "data": {
-          "notify_service": "שירות התראות (למשל notify.mobile_app)",
           "notify_actions": "פעולות הודעה",
           "notify_people": "דחו את המשלוח עד שהאנשים האלה יהיו בבית",
           "notify_only_when_home": "עיכוב הודעות עד שהאדם הנבחר יהיה בבית",
           "notify_fire_events": "הפעלת אירועי אוטומציה",
-          "notify_events": "אירועים להודיע",
           "notify_before_end_minutes": "הודעה מוקדמת על סיום (דקות לפני סיום)",
           "notify_live_interval_seconds": "מרווח עדכון חי (שניות)",
           "notify_live_overrun_percent": "קצבת חריגת עדכונים בזמן אמת (%)",
@@ -116,15 +116,19 @@
           "notify_icon": "סמל הודעה",
           "notify_start_message": "התחל פורמט הודעה",
           "notify_finish_message": "סיים את פורמט ההודעה",
-          "notify_pre_complete_message": "פורמט הודעת טרום השלמה"
+          "notify_pre_complete_message": "פורמט הודעת טרום השלמה",
+          "notify_start_services": "התחלת מחזור - יעדי הודעה",
+          "notify_finish_services": "סיום מחזור - יעדי הודעה",
+          "notify_live_services": "התקדמות חיה - יעדי התראות",
+          "notify_live_chronometer": "טיימר ספירה לאחור כרונומטר",
+          "energy_price_entity": "מחיר אנרגיה - ישות (אופציונלי)",
+          "energy_price_static": "מחיר אנרגיה - ערך סטטי (אופציונלי)"
         },
         "data_description": {
-          "notify_service": "Home Assistant מודיע לשירות לשימוש (אופציונלי).",
           "notify_actions": "רצף פעולה אופציונלי של Home Assistant להפעלת התראות (סקריפטים, התראה, TTS וכו'). אם הוגדר, הפעולות פועלות לפני שירות התראה חוזר.",
           "notify_people": "ישויות של אנשים המשמשות עבור שער נוכחות. כאשר מופעל, מסירת ההתראה מתעכבת עד שלפחות אדם נבחר אחד יהיה בבית.",
           "notify_only_when_home": "אם מופעל, דחה הודעות עד שלפחות אדם נבחר אחד יהיה בבית.",
           "notify_fire_events": "אם מופעל, הפעל אירועי Home Assistant עבור התחלה וסיום של מחזור (ha_washdata_cycle_started ו-ha_washdata_cycle_ended) כדי להניע אוטומציות.",
-          "notify_events": "עבור אילו אירועים לשלוח הודעות.",
           "notify_before_end_minutes": "דקות לפני סיום המחזור המשוער כדי להפעיל הודעה. הגדר ל-0 כדי להשבית. ברירת מחדל: 0.",
           "notify_live_interval_seconds": "באיזו תדירות נשלחים עדכוני התקדמות בזמן הריצה. ערכים נמוכים יותר מגיבים יותר אך צורכים יותר התראות. מינימום של 30 שניות נאכף - ערכים מתחת ל-30 שניות מעוגלים אוטומטית כלפי מעלה ל-30 שניות.",
           "notify_live_overrun_percent": "מרווח בטיחות מעל ספירת העדכונים המשוערת עבור מחזורים ארוכים/חורגים (לדוגמה 20% מאפשרים עדכונים משוערים פי 1.2).",
@@ -132,7 +136,13 @@
           "notify_icon": "סמל לשימוש עבור התראות (למשל mdi:washing-machine). השאר ריק כדי לשלוח ללא סמל.",
           "notify_start_message": "הודעה נשלחת כאשר מחזור מתחיל. תומך ב-{device} מציין מיקום.",
           "notify_finish_message": "הודעה נשלחת כאשר מחזור מסתיים. תומך במצייני מיקום של {device}, {duration}, {program}.",
-          "notify_pre_complete_message": "הודעה נשלחה לפני ההשלמה. תומך ב-{device}, {minutes} מצייני מיקום."
+          "notify_pre_complete_message": "הודעה נשלחה לפני ההשלמה. תומך ב-{device}, {minutes} מצייני מיקום.",
+          "notify_start_services": "שירות התראה אחד או יותר כדי להתריע כאשר מחזור מתחיל (למשל, notify.mobile_app_my_phone). השאר ריק כדי לדלג על התראות התחלה.",
+          "notify_finish_services": "שירות הודעה אחד או יותר להתריע כאשר מחזור מסתיים או מתקרב לסיומו. השאר ריק כדי לדלג על הודעות סיום.",
+          "notify_live_services": "שירות הודעה אחד או יותר כדי לקבל עדכוני התקדמות בזמן שהמחזור פועל (אפליקציה נלווית לנייד בלבד). השאר ריק כדי לדלג על עדכונים חיים.",
+          "notify_live_chronometer": "כאשר מופעל, כל עדכון חי כולל ספירה לאחור של כרונומטר לזמן הסיום המשוער. טיימר ההתראות מתקתק אוטומטית במכשיר בין עדכונים (אפליקציה נלווית לאנדרואיד בלבד).",
+          "energy_price_entity": "בחר ישות מספרית שמחזיקה את מחיר החשמל הנוכחי (למשל sensor.electricity_price, input_number.energy_rate). כאשר מוגדר, מפעיל את מציין המיקום {cost}. מקבל עדיפות על הערך הסטטי אם שניהם מוגדרים.",
+          "energy_price_static": "מחיר חשמל קבוע לקוט\"ש. כאשר מוגדר, מפעיל את מציין המיקום {cost}. התעלמות אם ישות מוגדרת למעלה. הוסף את סמל המטבע שלך בתבנית ההודעה, למשל. {cost} יורו."
         }
       },
       "advanced_settings": {
@@ -182,7 +192,18 @@
           "dtw_bandwidth": "רוחב פס DTW",
           "external_end_trigger_enabled": "אפשר את טריגר סיום מחזור חיצוני",
           "external_end_trigger": "חיישן סיום מחזור חיצוני",
-          "external_end_trigger_inverted": "היפוך היגיון טריגר (טריגר מופעל כבוי)"
+          "external_end_trigger_inverted": "היפוך היגיון טריגר (טריגר מופעל כבוי)",
+          "suppress_feedback_notifications": "דחק הודעות משוב",
+          "pump_stuck_duration": "סף התראה על משאבה תקועה (ים) (משאבה בלבד)",
+          "door_sensor_entity": "חיישן דלת",
+          "pause_cuts_power": "ניתוק חשמל בעת השהייה",
+          "notify_unload_delay_minutes": "עיכוב בהודעת כביסה ממתינה (דקות)",
+          "switch_entity": "מתג ישות (עבור הפסקת חשמל)",
+          "delay_start_detect_enabled": "אפשר זיהוי התחלה מושהית",
+          "delay_drain_min_power": "התחלה מושהית: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "התחלה מושהית: הספק מרבי של ספייק (W)",
+          "delay_drain_max_duration": "התחלה מושהית: משך ספייק ניקוז מקסימלי (ים)",
+          "delay_timeout_hours": "התחלה מושהית: זמן המתנה מרבי (שע')"
         },
         "data_description": {
           "apply_suggestions": "סמן תיבה זו כדי לפתוח שלב סקירה עבור ערכים מוצעים מאלגוריתם הלמידה. שום דבר לא נשמר אוטומטית.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- watchdog_interval: {suggested_watchdog_interval} שניות\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} שניות\n{suggested_reason}",
@@ -228,7 +249,18 @@
           "dtw_bandwidth": "עיוות זמן מקסימלי (מתיחה) מותר כיחס של משך המחזור. ערכים גבוהים יותר מאפשרים התאמה של מחזורים משתנים מאוד אך מגדילים את עלות המעבד. ברירת מחדל: 0.20 (20%).",
           "external_end_trigger_enabled": "אפשר ניטור של חיישן בינארי חיצוני כדי להפעיל השלמת מחזור.",
           "external_end_trigger": "בחר ישות חיישן בינארי. כאשר חיישן זה מופעל, המחזור הנוכחי יסתיים במצב 'הושלם'.",
-          "external_end_trigger_inverted": "כברירת מחדל, ההדק מופעל כאשר החיישן מופעל. סמן את התיבה הזו כדי להפעיל כאשר החיישן נכבה במקום זאת."
+          "external_end_trigger_inverted": "כברירת מחדל, ההדק מופעל כאשר החיישן מופעל. סמן את התיבה הזו כדי להפעיל כאשר החיישן נכבה במקום זאת.",
+          "suppress_feedback_notifications": "כאשר מופעל, WashData עדיין תעקוב ותבקש משוב באופן פנימי, אך לא תציג התראות מתמשכות המבקשות ממך לאשר מחזורים. שימושי כאשר מחזורים מזוהים תמיד כראוי ואתה מוצא שההנחיות מסיחות את הדעת.",
+          "pump_stuck_duration": "אם מחזור משאבה עדיין פועל לאחר שניות רבות כל כך, אירוע ha_washdata_pump_stuck מופעל פעם אחת. השתמש בזה כדי לזהות מנוע תקוע (הפעולה הטיפוסית של משאבת הבור היא מתחת ל-60 שניות). ברירת מחדל: 1800 שניות (30 דקות). סוג התקן משאבה בלבד.",
+          "door_sensor_entity": "חיישן בינארי אופציונלי לדלת המכונה (מופעל = פתוח, כבוי = סגור). כאשר הדלת נפתחת במהלך מחזור פעיל, WashData תאשר את המחזור כמושהה בכוונה. לאחר סיום המחזור, אם הדלת עדיין סגורה, המצב משתנה ל'נקי' עד לפתיחת הדלת. הערה: סגירת הדלת אינה ממשיכה אוטומטית מחזור מושהה - יש להפעיל את החידוש באופן ידני באמצעות לחצן חידוש מחזור או שירות.",
+          "pause_cuts_power": "בעת השהייה באמצעות לחצן או שירות השהה מחזור, כבה גם את ישות המתג המוגדרת. ייכנס לתוקף רק אם מוגדרת ישות מתג עבור מכשיר זה.",
+          "notify_unload_delay_minutes": "שלח הודעה דרך ערוץ הודעת הסיום לאחר סיום המחזור והדלת לא נפתחה במשך דקות רבות כל כך (דורש חיישן דלת). הגדר ל-0 כדי להשבית. ברירת מחדל: 60 דקות.",
+          "switch_entity": "ישות המתג למעבר בעת השהייה או חידוש. נדרש כאשר 'ניתוק חשמל בעת השהייה' מופעל.",
+          "delay_start_detect_enabled": "כאשר מופעל, זינוק ניקוז קצר בהספק נמוך ואחריו כוח המתנה מתמשך מזוהה כהתחלה מושהית. חיישן המצב מראה 'ממתין להתחלה' במהלך ההשהיה. אין מעקב אחר זמן התוכנית או ההתקדמות עד שהמחזור מתחיל בפועל. מחייב את הגדרת start_threshold_w מעל עוצמת ספייק הניקוז.",
+          "delay_drain_min_power": "הספק מינימלי (W) לזיהוי כנקודת ניקוז. הגדר בדיוק מעל רמת ההמתנה האמיתית של המכשיר שלך. ברירת מחדל: 10 W.",
+          "delay_drain_max_power": "הספק מרבי (W) עבור ספייק ניקוז - התפרצויות מעל זה מטופלות כהתחלה של מחזור אמיתי. אמור להיות מתחת להגדרת start_threshold_w שלך. ברירת מחדל: 80 W.",
+          "delay_drain_max_duration": "נקודת הניקוז חייבת לרדת מתחת לחלון הניקוז תוך שניות רבות כל כך כדי לאשר. קוצים ארוכים יותר מתייחסים כאל פעילות מחזורית אמיתית. ברירת מחדל: 60 שניות.",
+          "delay_timeout_hours": "פסק זמן בטיחות: אם המכונה עדיין במצב 'ממתין להפעלה' לאחר שעות רבות כל כך, WashData מתאפס למצב כבוי. ברירת מחדל: 8 שעות."
         }
       },
       "diagnostics": {
@@ -559,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "סקור שינויים מוצעים",
-        "description": "WashData מצא {pending_count} ערכים מוצעים ליישום.\n\nשינויים לסקירה:\n{changes}\n\nאשר למטה כדי לשלב ערכים אלה בטופס. הם לא נשמרים עד שתשלח הגדרות מתקדמות.",
+        "description": "נמצאו **{pending_count}** ערכים מוצעים ליישום WashData.\n\nשינויים:\n{changes}\n\n✅ סמן את התיבה למטה ולחץ על **שלח** כדי להחיל ולשמור שינויים אלה באופן מיידי.\n❌ השאר אותו לא מסומן ולחץ על **שלח** כדי לבטל ולחזור.",
         "data": {
-          "confirm_apply_suggestions": "ערכים מוצעים בשלב בהגדרות מתקדמות"
+          "confirm_apply_suggestions": "החל ושמור שינויים אלה"
         }
       },
       "trim_cycle_select": {
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "הגדר תחילת חיתוך",
-        "description": "הזן את קיזוז הדקות שממנו יש להתחיל לשמור נתונים (0 = תחילת מחזור).",
+        "description": "חלון מחזור: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nהתחלה נוכחית: **{current_wallclock}** (+{current_offset_min} דקות מתחילת המחזור)\n\nבחר שעת התחלה חדשה באמצעות בורר השעון למטה.",
         "data": {
-          "trim_start_min": "התחלה (דקות)"
+          "trim_start_time": "שעת התחלה חדשה",
+          "trim_start_min": "התחלה חדשה (דקות מתחילת המחזור)"
         }
       },
       "trim_cycle_end": {
         "title": "הגדר סיום חיתוך",
-        "description": "הזן את קיזוז הדקות כדי להפסיק לשמור נתונים.",
+        "description": "חלון מחזור: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nסיום נוכחי: **{current_wallclock}** (+{current_offset_min} דקות מתחילת המחזור)\n\nבחר שעת סיום חדשה באמצעות בורר השעון למטה.",
         "data": {
-          "trim_end_min": "סיום (דקות)"
+          "trim_end_time": "שעת סיום חדשה",
+          "trim_end_min": "סוף חדש (דקות מתחילת המחזור)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: הגדרות מוצעות מוכנות ({device})",
       "suggestions_ready_notification_message": "חיישן **הגדרות מוצעות** מדווח כעת על המלצות **{count}** שניתן לפעול.\n\nכדי לסקור ולהחיל אותם: **הגדרות > מכשירים ושירותים > WashData > הגדר > הגדרות מתקדמות > החל ערכים מוצעים**.\n\nהצעות הן אופציונליות ומוצגות לבדיקה לפני השמירה.",
       "trim_range_invalid": "ההתחלה חייבת להיות לפני הסוף. נא להתאים את נקודות החיתוך שלך.",
-      "trim_failed": "החיתוך נכשל. ייתכן שהמחזור כבר לא קיים או שהחלון ריק."
+      "trim_failed": "החיתוך נכשל. ייתכן שהמחזור כבר לא קיים או שהחלון ריק.",
+      "auto_tune_suggestion": "{device_type} {device_title} זוהו מחזורי רפאים. שינוי הספק המינימלי: {current_min}W -> {new_min}W (לא מוחל אוטומטית).",
+      "auto_tune_title": "כוונון אוטומטי של WashData",
+      "auto_tune_fallback": "{device_type} {device_title} זוהו מחזורי רפאים. שינוי הספק המינימלי: {current_min}W -> {new_min}W (לא מוחל אוטומטית)."
     },
     "abort": {
       "no_cycles_found": "לא נמצאו מחזורים",
@@ -973,6 +1010,26 @@
           "description": "שמור נתונים עד לקיזוז זה תוך שניות. ברירת מחדל = משך מלא."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "השהה מחזור",
+      "description": "השהה את המחזור הפעיל עבור התקן WashData.",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר ה-WashData להשהות."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "המשך מחזור",
+      "description": "המשך מחזור מושהה עבור מכשיר WashData.",
+      "fields": {
+        "device_id": {
+          "name": "הֶתקֵן",
+          "description": "מכשיר WashData לחידוש."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "מתחיל",
           "running": "רִיצָה",
           "paused": "מושהה",
+          "user_paused": "הושהה על ידי המשתמש",
           "ending": "סִיוּם",
           "finished": "גָמוּר",
           "anti_wrinkle": "נגד קמטים",
+          "delay_wait": "מחכה להתחלה",
           "interrupted": "מוּפרָע",
           "force_stopped": "כוח נעצר",
           "rinse": "לִשְׁטוֹף",
-          "unknown": "לֹא יְדוּעַ"
+          "unknown": "לֹא יְדוּעַ",
+          "clean": "נקי"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "הגדרות מוצעות"
+      },
+      "pump_runs_today": {
+        "name": "הפעלת המשאבה (24 השעות האחרונות)"
+      },
+      "cycle_count": {
+        "name": "ספירת מחזור"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "כוח סיום מחזור"
+      },
+      "pause_cycle": {
+        "name": "השהה מחזור"
+      },
+      "resume_cycle": {
+        "name": "המשך מחזור"
       }
     }
   },
@@ -1078,6 +1150,15 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s חייב להיות גדול יותר trim_start_s."
+    },
+    "device_id_required": {
+      "message": "נדרש device_id חוקי."
+    },
+    "cycle_id_required": {
+      "message": "נדרש cycle_id חוקי."
+    },
+    "profile_name_required": {
+      "message": "נדרש profile_name חוקי."
     }
   }
 }

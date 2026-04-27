@@ -25,6 +25,7 @@ from homeassistant.const import STATE_UNAVAILABLE, STATE_HOME
 from homeassistant.util import dt as dt_util
 import homeassistant.helpers.event as evt
 from homeassistant.helpers import script as script_helper
+from homeassistant.helpers import translation
 
 from .const import (
     DOMAIN,
@@ -33,6 +34,9 @@ from .const import (
     CONF_OFF_DELAY,
     CONF_NOTIFY_SERVICE,
     CONF_NOTIFY_ACTIONS,
+    CONF_NOTIFY_START_SERVICES,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
     CONF_NOTIFY_PEOPLE,
     CONF_NOTIFY_ONLY_WHEN_HOME,
     CONF_NOTIFY_FIRE_EVENTS,
@@ -81,10 +85,20 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_DELAY_START_DETECT_ENABLED,
+    CONF_DELAY_DRAIN_MIN_POWER,
+    CONF_DELAY_DRAIN_MAX_POWER,
+    CONF_DELAY_DRAIN_MAX_DURATION,
+    CONF_DELAY_TIMEOUT_HOURS,
+    CONF_PUMP_STUCK_DURATION,
+    DEFAULT_PUMP_STUCK_DURATION,
+    EVENT_PUMP_STUCK,
+    DEVICE_TYPE_PUMP,
     SIGNAL_WASHER_UPDATE,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
+    NOTIFY_EVENT_CLEAN,
     EVENT_CYCLE_STARTED,
     EVENT_CYCLE_ENDED,
     DEFAULT_MIN_POWER,
@@ -114,6 +128,11 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
+    DEFAULT_DELAY_START_DETECT_ENABLED,
+    DEFAULT_DELAY_DRAIN_MIN_POWER,
+    DEFAULT_DELAY_DRAIN_MAX_POWER,
+    DEFAULT_DELAY_DRAIN_MAX_DURATION,
+    DEFAULT_DELAY_TIMEOUT_HOURS,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_MAX_PAST_CYCLES,
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
@@ -124,6 +143,17 @@ from .const import (
     CONF_NOTIFY_PRE_COMPLETE_MESSAGE,
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+    CONF_NOTIFY_LIVE_CHRONOMETER,
+    CONF_ENERGY_PRICE_STATIC,
+    CONF_ENERGY_PRICE_ENTITY,
+    CONF_DOOR_SENSOR_ENTITY,
+    CONF_PAUSE_CUTS_POWER,
+    CONF_SWITCH_ENTITY,
+    CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
+    CONF_NOTIFY_UNLOAD_MESSAGE,
+    DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
+    DEFAULT_NOTIFY_UNLOAD_MESSAGE,
+    STATE_CLEAN,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
@@ -133,6 +163,7 @@ from .const import (
     DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
     DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+    DEFAULT_NOTIFY_LIVE_CHRONOMETER,
 
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
@@ -156,8 +187,10 @@ from .const import (
     STATE_OFF,
     STATE_STARTING,
     STATE_PAUSED,
+    STATE_USER_PAUSED,
     STATE_ENDING,
     STATE_ANTI_WRINKLE,
+    STATE_DELAY_WAIT,
     STATE_IDLE,
     STATE_UNKNOWN,
 )
@@ -165,6 +198,7 @@ from .cycle_detector import CycleDetector, CycleDetectorConfig
 from .learning import LearningManager
 from .profile_store import ProfileStore, decompress_power_data
 from .recorder import CycleRecorder
+from .diag_buffer import DiagBuffer
 from .log_utils import DeviceLoggerAdapter
 from .time_utils import power_data_to_offsets
 
@@ -204,6 +238,7 @@ class WashDataManager:
         self.config_entry = config_entry
         self.entry_id = config_entry.entry_id
         self._logger = DeviceLoggerAdapter(_LOGGER, config_entry.title)
+        self.diag_buffer = DiagBuffer(config_entry.title)
 
         # Prioritize options -> data for power sensor (allows changing it)
         self.power_sensor_entity_id = config_entry.options.get(
@@ -219,20 +254,45 @@ class WashDataManager:
         self._no_update_active_timeout = float(DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT)
         self._low_power_no_update_timeout = 3600.0 # Default 1h
         self._notify_before_end_minutes = float(DEFAULT_NOTIFY_BEFORE_END_MINUTES)
-        self._notify_service: str | None = ""
-        self._notify_events: list[str] = []
+        self._notify_start_services: list[str] = []
+        self._notify_finish_services: list[str] = []
+        self._notify_live_services: list[str] = []
         self._notify_actions: list[dict[str, Any]] = []
         self._notify_people: list[str] = []
         self._notify_only_when_home = DEFAULT_NOTIFY_ONLY_WHEN_HOME
         self._notify_fire_events = DEFAULT_NOTIFY_FIRE_EVENTS
         self._notify_live_interval_seconds = DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
         self._notify_live_overrun_percent = DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
+        self._notify_live_chronometer = DEFAULT_NOTIFY_LIVE_CHRONOMETER
         self._pending_notifications: list[dict[str, Any]] = []
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
+
+        # Pause tracking (user-triggered)
+        self._user_pause_start: datetime | None = None
+        self._total_user_paused_seconds: float = 0.0
+        self._is_user_paused: bool = False
+        self._pause_cuts_power: bool = bool(
+            config_entry.options.get(CONF_PAUSE_CUTS_POWER, False)
+        )
+
+        # Door sensor + clean state
+        self._door_sensor_entity: str | None = config_entry.options.get(
+            CONF_DOOR_SENSOR_ENTITY
+        ) or None
+        self._remove_door_sensor_listener = None
+        self._is_clean_state: bool = False
+        self._clean_state_start: datetime | None = None
+        self._notified_clean_laundry: bool = False
+        self._notify_unload_delay_minutes: int = int(
+            config_entry.options.get(
+                CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
+            )
+        )
         self._live_notification_cap = 0
         self._last_live_notification_time: datetime | None = None
         self._live_waiting_notification_sent = False
+        self._live_chronometer_overrun_sent = False
         self._live_notification_tag = f"ha_washdata_{self.entry_id}_live"
         self._start_event_fired = False
         self._cycle_start_time: datetime | None = None
@@ -326,8 +386,7 @@ class WashDataManager:
                 CONF_NOTIFY_BEFORE_END_MINUTES, DEFAULT_NOTIFY_BEFORE_END_MINUTES
             )
         )
-        self._notify_service = cast(str | None, config_entry.options.get(CONF_NOTIFY_SERVICE))
-        self._notify_events = list(cast(list[str], config_entry.options.get(CONF_NOTIFY_EVENTS, []) or []))
+        self._load_notify_services(config_entry)
         self._notify_actions = list(
             cast(list[dict[str, Any]], config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or [])
         )
@@ -352,6 +411,12 @@ class WashDataManager:
             config_entry.options.get(
                 CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
                 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+            )
+        )
+        self._notify_live_chronometer = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_CHRONOMETER,
+                DEFAULT_NOTIFY_LIVE_CHRONOMETER,
             )
         )
 
@@ -469,6 +534,31 @@ class WashDataManager:
                     CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
                 )
             ),
+            delay_detect_enabled=bool(
+                config_entry.options.get(
+                    CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
+                )
+            ),
+            delay_drain_min_power=float(
+                config_entry.options.get(
+                    CONF_DELAY_DRAIN_MIN_POWER, DEFAULT_DELAY_DRAIN_MIN_POWER
+                )
+            ),
+            delay_drain_max_power=float(
+                config_entry.options.get(
+                    CONF_DELAY_DRAIN_MAX_POWER, DEFAULT_DELAY_DRAIN_MAX_POWER
+                )
+            ),
+            delay_drain_max_duration=float(
+                config_entry.options.get(
+                    CONF_DELAY_DRAIN_MAX_DURATION, DEFAULT_DELAY_DRAIN_MAX_DURATION
+                )
+            ),
+            delay_timeout_seconds=float(
+                config_entry.options.get(
+                    CONF_DELAY_TIMEOUT_HOURS, DEFAULT_DELAY_TIMEOUT_HOURS
+                )
+            ) * 3600.0,
         )
         self._config = config
 
@@ -563,6 +653,12 @@ class WashDataManager:
         self._profile_sample_repair_stats: dict[str, int] | None = None
 
         self._last_suggestion_update: datetime | None = None
+
+        # Pump Monitor state
+        self._pump_stuck_duration: int = int(
+            config_entry.options.get(CONF_PUMP_STUCK_DURATION, DEFAULT_PUMP_STUCK_DURATION)
+        )
+        self._pump_stuck: bool = False  # True once the stuck threshold has fired for this cycle
 
         self._manual_program_active: bool = False
         self._notified_start: bool = False
@@ -878,11 +974,9 @@ class WashDataManager:
             self._update_remaining_only()
 
             # --- START NOTIFICATION LOGIC ---
-            # Send the start notification only after we confidently know the program
-            if (
-                not getattr(self, "_notified_start", False)
-                and self._current_program not in ("detecting...", "off", "starting", "unknown")
-            ):
+            # Fallback for restart-recovery: fires only if the immediate notification in
+            # _on_state_change was missed (e.g., HA restarted mid-cycle before snapshot).
+            if not getattr(self, "_notified_start", False):
                 if self._notify_fire_events and not self._start_event_fired:
                     self.hass.bus.async_fire(
                         EVENT_CYCLE_STARTED,
@@ -898,8 +992,7 @@ class WashDataManager:
                     )
                     self._start_event_fired = True
 
-                events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
-                if NOTIFY_EVENT_START in events:
+                if self._notify_start_services or self._notify_actions:
                     msg_template = self.config_entry.options.get(
                         CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE
                     )
@@ -1133,7 +1226,21 @@ class WashDataManager:
                     self._start_event_fired = bool(
                         active_snapshot_to_restore.get("start_event_fired", False)
                     )
-                    
+
+                    # Restore user-pause state from snapshot.
+                    self._is_user_paused = bool(
+                        active_snapshot_to_restore.get("is_user_paused", False)
+                    )
+                    _pause_start_raw = active_snapshot_to_restore.get("user_pause_start")
+                    self._user_pause_start = (
+                        dt_util.parse_datetime(_pause_start_raw)
+                        if isinstance(_pause_start_raw, str) and _pause_start_raw
+                        else None
+                    )
+                    self._total_user_paused_seconds = float(
+                        active_snapshot_to_restore.get("total_user_paused_seconds", 0.0)
+                    )
+
                     self._start_watchdog()
                 else:
                     await self.profile_store.async_clear_active_cycle()
@@ -1235,8 +1342,28 @@ class WashDataManager:
         # Subscribe to external cycle end trigger (if enabled)
         await self._setup_external_end_trigger()
 
+        # Subscribe to door sensor (if configured)
+        await self._setup_door_sensor_listener()
+
         # Subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
+
+    def _load_notify_services(self, config_entry: ConfigEntry) -> None:
+        """Load notification service lists, migrating legacy single-service config."""
+        self._notify_start_services = list(config_entry.options.get(CONF_NOTIFY_START_SERVICES, []) or [])
+        self._notify_finish_services = list(config_entry.options.get(CONF_NOTIFY_FINISH_SERVICES, []) or [])
+        self._notify_live_services = list(config_entry.options.get(CONF_NOTIFY_LIVE_SERVICES, []) or [])
+        # Backward compat: migrate old single notify_service + notify_events to new per-event lists
+        if not (self._notify_start_services or self._notify_finish_services or self._notify_live_services):
+            _old_svc = config_entry.options.get(CONF_NOTIFY_SERVICE, "")
+            _old_events = list(config_entry.options.get(CONF_NOTIFY_EVENTS, []) or [])
+            if _old_svc:
+                if not _old_events or NOTIFY_EVENT_START in _old_events:
+                    self._notify_start_services = [_old_svc]
+                if not _old_events or NOTIFY_EVENT_FINISH in _old_events:
+                    self._notify_finish_services = [_old_svc]
+                if not _old_events or NOTIFY_EVENT_LIVE in _old_events:
+                    self._notify_live_services = [_old_svc]
 
     async def async_reload_config(self, config_entry: ConfigEntry) -> None:
         """
@@ -1412,6 +1539,31 @@ class WashDataManager:
                 CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
             )
         )
+        new_delay_detect_enabled = bool(
+            config_entry.options.get(
+                CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
+            )
+        )
+        new_delay_drain_min_power = float(
+            config_entry.options.get(
+                CONF_DELAY_DRAIN_MIN_POWER, DEFAULT_DELAY_DRAIN_MIN_POWER
+            )
+        )
+        new_delay_drain_max_power = float(
+            config_entry.options.get(
+                CONF_DELAY_DRAIN_MAX_POWER, DEFAULT_DELAY_DRAIN_MAX_POWER
+            )
+        )
+        new_delay_drain_max_duration = float(
+            config_entry.options.get(
+                CONF_DELAY_DRAIN_MAX_DURATION, DEFAULT_DELAY_DRAIN_MAX_DURATION
+            )
+        )
+        new_delay_timeout_seconds = float(
+            config_entry.options.get(
+                CONF_DELAY_TIMEOUT_HOURS, DEFAULT_DELAY_TIMEOUT_HOURS
+            )
+        ) * 3600.0
 
         # Apply all detector config updates
         self.detector.config.min_power = new_min_power
@@ -1433,6 +1585,16 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_max_power = new_anti_wrinkle_max_power
         self.detector.config.anti_wrinkle_max_duration = new_anti_wrinkle_max_duration
         self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
+        self.detector.config.delay_detect_enabled = new_delay_detect_enabled
+        self.detector.config.delay_drain_min_power = new_delay_drain_min_power
+        self.detector.config.delay_drain_max_power = new_delay_drain_max_power
+        self.detector.config.delay_drain_max_duration = new_delay_drain_max_duration
+        self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds
+
+        # Pump Monitor setting
+        self._pump_stuck_duration = int(
+            config_entry.options.get(CONF_PUMP_STUCK_DURATION, DEFAULT_PUMP_STUCK_DURATION)
+        )
 
         if (
             old_min_power != new_min_power
@@ -1511,8 +1673,7 @@ class WashDataManager:
 
 
         # Update notification settings
-        self._notify_service = cast(str | None, config_entry.options.get(CONF_NOTIFY_SERVICE))
-        self._notify_events = list(cast(list[str], config_entry.options.get(CONF_NOTIFY_EVENTS, []) or []))
+        self._load_notify_services(config_entry)
         self._notify_actions = list(
             cast(list[dict[str, Any]], config_entry.options.get(CONF_NOTIFY_ACTIONS, []) or [])
         )
@@ -1544,9 +1705,27 @@ class WashDataManager:
                 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
             )
         )
+        self._notify_live_chronometer = bool(
+            config_entry.options.get(
+                CONF_NOTIFY_LIVE_CHRONOMETER,
+                DEFAULT_NOTIFY_LIVE_CHRONOMETER,
+            )
+        )
+
+        # Reload door sensor / pause config
+        self._pause_cuts_power = bool(config_entry.options.get(CONF_PAUSE_CUTS_POWER, False))
+        self._door_sensor_entity = config_entry.options.get(CONF_DOOR_SENSOR_ENTITY) or None
+        self._notify_unload_delay_minutes = int(
+            config_entry.options.get(
+                CONF_NOTIFY_UNLOAD_DELAY_MINUTES, DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES
+            )
+        )
 
         # Re-subscribe to external cycle end trigger
         await self._setup_external_end_trigger()
+
+        # Re-subscribe to door sensor
+        await self._setup_door_sensor_listener()
 
         # Re-subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
@@ -1555,7 +1734,7 @@ class WashDataManager:
         # reset counters and fire the first live notification immediately so the
         # user doesn't have to wait for the next power sensor poll.
         if self.detector.state in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
-            if NOTIFY_EVENT_LIVE in self._notify_events:
+            if self._notify_live_services or self._notify_actions:
                 self._reset_live_notification_state()
                 self._check_live_progress_notification()
 
@@ -1592,6 +1771,9 @@ class WashDataManager:
             self._remove_listener()
         if self._remove_external_trigger_listener:
             self._remove_external_trigger_listener()
+        if self._remove_door_sensor_listener:
+            self._remove_door_sensor_listener()
+            self._remove_door_sensor_listener = None
         if self._remove_notify_people_listener:
             self._remove_notify_people_listener()
             self._remove_notify_people_listener = None
@@ -1606,12 +1788,19 @@ class WashDataManager:
         if self._remove_maintenance_scheduler:
             self._remove_maintenance_scheduler()
 
+        self.diag_buffer.uninstall()
+
         # Save active state before shutdown
-        if self.detector.state == "running":
+        if self.detector.state in {STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING}:
             snapshot = self.detector.get_state_snapshot()
             snapshot["manual_program"] = self._manual_program_active
             snapshot["notified_start"] = self._notified_start
             snapshot["start_event_fired"] = self._start_event_fired
+            snapshot["is_user_paused"] = self._is_user_paused
+            snapshot["user_pause_start"] = (
+                self._user_pause_start.isoformat() if self._user_pause_start else None
+            )
+            snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
             await self.profile_store.async_save_active_cycle(snapshot)
 
         self._last_reading_time = None
@@ -1645,6 +1834,72 @@ class WashDataManager:
         self._remove_external_trigger_listener = async_track_state_change_event(
             self.hass, [entity_id], self._handle_external_trigger_change
         )
+
+    async def _setup_door_sensor_listener(self) -> None:
+        """Set up listener for optional door sensor binary sensor."""
+        if self._remove_door_sensor_listener:
+            self._remove_door_sensor_listener()
+            self._remove_door_sensor_listener = None
+
+        entity_id = self._door_sensor_entity
+        if not entity_id:
+            self._logger.debug("Door sensor not configured")
+            return
+
+        self._logger.info("Setting up door sensor listener: %s", entity_id)
+        self._remove_door_sensor_listener = async_track_state_change_event(
+            self.hass, [entity_id], self._handle_door_sensor_change
+        )
+
+    @callback
+    def _handle_door_sensor_change(self, event: Event[evt.EventStateChangedData]) -> None:
+        """Handle door sensor state changes.
+
+        Opening the door during an active cycle confirms an intentional pause (verified_pause).
+        Opening the door after a cycle clears the 'Clean' state.
+        Note: door closing does NOT auto-resume a cycle - the user must do this explicitly.
+        """
+        new_state = event.data.get("new_state")
+        old_state = event.data.get("old_state")
+
+        if new_state is None:
+            return
+
+        new_val = new_state.state
+        old_val = old_state.state if old_state else None
+
+        # Ignore unavailability transitions
+        if new_val in ("unavailable", "unknown") or (
+            old_val in ("unavailable", "unknown")
+        ):
+            return
+
+        door_open = new_val == "on"  # binary_sensor: on = open
+
+        if door_open:
+            if self._is_clean_state:
+                # User opened the door after the cycle - laundry retrieved
+                self._logger.debug("Door opened: clearing Clean state")
+                self._is_clean_state = False
+                self._clean_state_start = None
+                self._notified_clean_laundry = False
+                # Purge any deferred clean-laundry notifications from the queue
+                self._pending_notifications = [
+                    n for n in self._pending_notifications
+                    if n.get("event_type") != NOTIFY_EVENT_CLEAN
+                ]
+                self._notify_update()
+            elif self.detector.state in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
+                # Door opened during active cycle → soft pause confirmation
+                self._logger.debug(
+                    "Door opened during active cycle: setting verified_pause=True"
+                )
+                self.detector.set_verified_pause(True)
+                if not self._is_user_paused:
+                    self._is_user_paused = True
+                    self._user_pause_start = dt_util.now()
+                self._notify_update()
+        # Door closing is intentionally not handled - no auto-resume
 
     async def _setup_notify_people_listener(self) -> None:
         """Set up listener for person presence changes used by notification gating."""
@@ -1726,9 +1981,9 @@ class WashDataManager:
                 inverted
             )
             # End cycle with "completed" status (not interrupted)
-            if self.detector.state == STATE_ANTI_WRINKLE:
+            if self.detector.state in (STATE_ANTI_WRINKLE, STATE_DELAY_WAIT):
                 self.detector.reset(STATE_OFF)
-                self._logger.info("Anti-wrinkle exited via external trigger")
+                self._logger.info("%s exited via external trigger", self.detector.state)
             elif self.detector.state != STATE_OFF:
                 self.detector.user_stop()
                 self._logger.info("Cycle completed via external trigger")
@@ -1798,6 +2053,11 @@ class WashDataManager:
         except ValueError:
             return
 
+        # Capture every raw sensor reading before any throttling or processing.
+        # Use the sensor's own last_updated timestamp so the trace reflects
+        # when the plug actually reported the value, not when we received it.
+        self.diag_buffer.record_power(power, new_state.last_updated)
+
         # RECORD MODE INTERCEPTION
         if self.recorder.is_recording:
             self.recorder.process_reading(power)
@@ -1854,6 +2114,11 @@ class WashDataManager:
             snapshot["manual_program"] = self._manual_program_active
             snapshot["notified_start"] = self._notified_start
             snapshot["start_event_fired"] = self._start_event_fired
+            snapshot["is_user_paused"] = self._is_user_paused
+            snapshot["user_pause_start"] = (
+                self._user_pause_start.isoformat() if self._user_pause_start else None
+            )
+            snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
 
             self.hass.async_create_task(
                 self.profile_store.async_save_active_cycle(snapshot)
@@ -1961,13 +2226,55 @@ class WashDataManager:
             not self._cycle_completed_time
             or self.detector.state == STATE_RUNNING
             or self.detector.state == STATE_ANTI_WRINKLE
+            or self.detector.state == STATE_DELAY_WAIT
         ):
             # Cycle is running or not completed, don't reset
             return
 
         time_since_complete = (now - self._cycle_completed_time).total_seconds()
 
+        # Clean laundry nag notification
+        if (
+            self._is_clean_state
+            and not self._notified_clean_laundry
+            and self._clean_state_start is not None
+            and self._notify_unload_delay_minutes > 0
+        ):
+            time_in_clean = (now - self._clean_state_start).total_seconds()
+            if time_in_clean >= self._notify_unload_delay_minutes * 60:
+                if self._notify_finish_services or self._notify_actions:
+                    duration_min = int(time_since_complete / 60)
+                    msg_template = self.config_entry.options.get(
+                        CONF_NOTIFY_UNLOAD_MESSAGE, DEFAULT_NOTIFY_UNLOAD_MESSAGE
+                    )
+                    msg = self._safe_format_template(
+                        msg_template,
+                        fallback_template=DEFAULT_NOTIFY_UNLOAD_MESSAGE,
+                        device=self.config_entry.title,
+                        duration=duration_min,
+                        delay=self._notify_unload_delay_minutes,
+                    )
+                    sent = self._dispatch_notification(msg, event_type=NOTIFY_EVENT_CLEAN)
+                    if sent:
+                        self._notified_clean_laundry = True
+                        self._logger.info(
+                            "Sent clean laundry nag notification (%.0f min after cycle end)",
+                            time_since_complete / 60,
+                        )
+                else:
+                    self._notified_clean_laundry = True
+
         if time_since_complete > self._progress_reset_delay:
+            # Defer the reset when a clean-state unload notification is still pending.
+            # Without this guard the 30-min progress reset fires before the 60-min
+            # unload nag, clearing _is_clean_state before the notification can fire.
+            if (
+                self._is_clean_state
+                and not self._notified_clean_laundry
+                and self._notify_unload_delay_minutes > 0
+                and time_since_complete < self._notify_unload_delay_minutes * 60
+            ):
+                return
             # Auto-expire the "Finished" (or other terminal) state
             self._logger.debug(
                 "State expiry: cycle idle for %.0fs (threshold: %ss). Resetting to OFF.",
@@ -1976,6 +2283,10 @@ class WashDataManager:
             )
             self._cycle_progress = 0.0
             self._cycle_completed_time = None
+            # Clear clean state when progress expires
+            self._is_clean_state = False
+            self._clean_state_start = None
+            self._notified_clean_laundry = False
             self.detector.reset(STATE_OFF)
             self._stop_state_expiry_timer()
             self._notify_update()
@@ -1997,18 +2308,53 @@ class WashDataManager:
         elapsed = self.detector.get_elapsed_seconds()
         expected = getattr(self.detector, "expected_duration_seconds", 0)
 
+        # 0a. PUMP STUCK DETECTION (Pump Monitor only)
+        # If a pump cycle has been running longer than the configured stuck threshold,
+        # fire a single warning event so the user can wire an automation/alert.
+        # Skip while user-paused or detector-verified-pause to avoid false positives.
+        _verified_pause = getattr(self.detector, "_verified_pause", False)
+        if self.device_type == DEVICE_TYPE_PUMP and not self._pump_stuck and not self._is_user_paused and not _verified_pause:
+            adjusted_elapsed = elapsed - self._total_user_paused_seconds
+            if adjusted_elapsed >= self._pump_stuck_duration:
+                self._pump_stuck = True
+                self._logger.warning(
+                    "Pump stuck detected: cycle has been running for %.0fs net "
+                    "(threshold: %ds). Firing %s event.",
+                    adjusted_elapsed,
+                    self._pump_stuck_duration,
+                    EVENT_PUMP_STUCK,
+                )
+                self.hass.bus.async_fire(
+                    EVENT_PUMP_STUCK,
+                    {
+                        "device": self.config_entry.title,
+                        "entry_id": self.entry_id,
+                        "elapsed_seconds": round(adjusted_elapsed),
+                        "threshold_seconds": self._pump_stuck_duration,
+                    },
+                )
+                self._notify_update()
+
         # 0. ZOMBIE KILLER (Hard Limit)
         # If cycle has run significantly longer than expected (300%), kill it.
-        # Only applies if we have a profile match.
-        if expected > 0 and elapsed > (expected * 3.0) and elapsed > 14400:
-            self._logger.warning(
-                "Watchdog: Zombie cycle detected (%.0fs > 300%% of expected %.0fs). Force-ending.",
-                elapsed, expected
-            )
-            self.detector.force_end(now)
-            self._current_power = 0.0  # Force 0W
-            self._notify_update()
-            return
+        # Only applies if we have a profile match. Skip while user-paused or
+        # detector-verified-pause to avoid killing legitimately paused cycles.
+        _verified_pause_zombie = getattr(self.detector, "_verified_pause", False)
+        if (
+            expected > 0
+            and not self._is_user_paused
+            and not _verified_pause_zombie
+        ):
+            adjusted_elapsed = elapsed - self._total_user_paused_seconds
+            if adjusted_elapsed > (expected * 3.0) and adjusted_elapsed > 14400:
+                self._logger.warning(
+                    "Watchdog: Zombie cycle detected (%.0fs net > 300%% of expected %.0fs). Force-ending.",
+                    adjusted_elapsed, expected
+                )
+                self.detector.force_end(now)
+                self._current_power = 0.0  # Force 0W
+                self._notify_update()
+                return
 
         # 1. GHOST CYCLE SUPPRESSOR
         # If we are "detecting" for more than 10 minutes and haven't seen an update for 5 minutes,
@@ -2017,15 +2363,30 @@ class WashDataManager:
         cycle_start = self.detector.current_cycle_start
         is_suspicious = False
         if cycle_start and self._last_cycle_end_time:
-            # If started within 3 minutes of previous cycle finish (prevent back-to-back ghosting)
-            if (cycle_start - self._last_cycle_end_time).total_seconds() < 180:
+            # Dishwashers have a drain pump-out that fires 3-8 min after the main
+            # cycle ends; use a wider suspicious window so the ghost suppressor can
+            # catch it without false-positives on washing machines / dryers.
+            suspicious_window = 600 if self.device_type == "dishwasher" else 180
+            if (cycle_start - self._last_cycle_end_time).total_seconds() < suspicious_window:
                 is_suspicious = True
+
+        # For dishwashers in the suspicious window, kill pump-out ghosts faster.
+        # Pump-outs last 1-3 min then go silent; the standard 10-min wait allows
+        # them to accumulate too much runtime before suppression fires.
+        dishwasher_pump_out = (
+            is_suspicious
+            and self.device_type == "dishwasher"
+            and elapsed > 180   # 3 minutes
+            and time_since_real_update > 60  # 1 minute of silence
+        )
 
         if (
             self._current_program == "detecting..."
             and is_suspicious
-            and elapsed > 600  # 10 minutes
-            and time_since_real_update > 300  # 5 minutes of silence
+            and (
+                dishwasher_pump_out
+                or (elapsed > 600 and time_since_real_update > 300)
+            )
         ):
             self._logger.warning(
                 "Watchdog: Ghost cycle suppressed (within suspicious window). Detecting for %.0fs with %.0fs silence.",
@@ -2042,13 +2403,18 @@ class WashDataManager:
         # low_power_no_update_timeout is reached.
 
         # Dishwashers can have very long silent drying phases (up to 2h)
-        # We use the device-specific timeout as the floor for this effective timeout
+        # We use the device-specific timeout as the floor for this effective timeout.
+        # The floor is applied unconditionally - dishwashers have passive drying phases
+        # even when no profile has been matched yet.  The original restriction to matched
+        # cycles caused premature kills: with the default 3600s timeout, an unmatched
+        # dishwasher cycle was killed ~1h after the last sensor update, while the
+        # physical drying phase could still have 1-2h of silent runtime remaining.
         low_power_floor = DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE.get(
             self.device_type, 0
         )
-        effective_low_power_timeout = self._low_power_no_update_timeout
-        if self._current_program not in ("detecting...", "off"):
-            effective_low_power_timeout = max(low_power_floor, effective_low_power_timeout)
+        effective_low_power_timeout = max(
+            low_power_floor, self._low_power_no_update_timeout
+        )
 
         # Profile-Aware Extension:
         # If we have a matched profile, ensure we don't kill during the expected duration.
@@ -2089,8 +2455,34 @@ class WashDataManager:
                 return
 
             # 3. Injection Check (Keepalive)
-            # If silence > _config.off_delay, inject 0W to keep detector clock moving
-            # so it can evaluate profile logic (smart termination) or just mark time passing.
+            # 3a. Honour the user-configured no_update_active_timeout for low-power silence.
+            # Publish-on-change sensors go completely silent once they stabilise at a low
+            # standby value (e.g. 1 W).  The existing off_delay-based injection fires
+            # every 2 watchdog ticks, which is fine with a short watchdog interval but can
+            # take many minutes with a larger one.  Respecting no_update_active_timeout
+            # here gives users a predictable upper bound on how long a cycle lingers after
+            # the appliance reaches standby, consistent with what the setting implies.
+            # Verified pauses (e.g. dishwasher drying confirmed by envelope) are excluded
+            # so that legitimate long silent phases are not prematurely terminated.
+            if (
+                not getattr(self.detector, "_verified_pause", False)
+                and time_since_real_update > self._no_update_active_timeout
+            ):
+                self._logger.debug(
+                    "Watchdog: Low-power real-update silence (%.0fs) > no_update_active_timeout (%.0fs). "
+                    "Injecting 0W keepalive to advance accumulator.",
+                    time_since_real_update,
+                    self._no_update_active_timeout,
+                )
+                self.detector.process_reading(0.0, now)
+                self._last_reading_time = now
+                self._current_power = 0.0
+                self._notify_update()
+                return
+
+            # 3b. Fallback: inject 0W when any-update silence exceeds off_delay.
+            # This keeps the accumulator moving even when no_update_active_timeout has
+            # not been exceeded (e.g. the user left it at the default 600 s).
             if time_since_any_update > self._config.off_delay:
                 self._logger.debug(
                     "Watchdog: Low power silence (%.0fs). Injecting 0W keepalive.",
@@ -2108,9 +2500,10 @@ class WashDataManager:
 
         # Fallback for old "Case 1.5" logic (Low Power but NOT is_waiting_low_power)
         # Check this BEFORE High Power timeout to prevent trapping "Not Yet Waiting" states
-        if (
+        # Inject as soon as the earliest of: off_delay silence OR no_update_active_timeout.
+        if self._current_power <= self.detector.config.min_power and (
             time_since_any_update > self._config.off_delay
-            and self._current_power < self.detector.config.min_power
+            or time_since_real_update > self._no_update_active_timeout
         ):
             # Treating as start of low power wait
             self._logger.debug("Watchdog: Silence at low power (%.0fs). Injecting 0W.", time_since_any_update)
@@ -2126,7 +2519,7 @@ class WashDataManager:
         if time_since_any_update > self._no_update_active_timeout:
 
             # Check if high power (running)
-            if self._current_power >= self.detector.config.min_power:
+            if self._current_power > self.detector.config.min_power:
                 # Allow extended silence if within reasonable cycle bounds
                 expected = getattr(self.detector, "expected_duration_seconds", 0)
                 elapsed = self.detector.get_elapsed_seconds()
@@ -2156,6 +2549,9 @@ class WashDataManager:
     def _on_state_change(self, old_state: str, new_state: str) -> None:
         """Handle state change from detector."""
         self._logger.debug("Washer state changed: %s -> %s", old_state, new_state)
+        self.diag_buffer.record_state(
+            old_state, new_state, self._current_program, dt_util.now()
+        )
         if new_state == STATE_RUNNING:
             new_cycle_detected = old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN)
             # Only reset estimates if we are truly starting a NEW cycle (from off or starting)
@@ -2180,6 +2576,15 @@ class WashDataManager:
                 self._start_event_fired = False
                 self._cycle_start_time = self.detector.current_cycle_start or dt_util.now()
                 self._reset_live_notification_state()
+
+                # Reset pause tracking and clean state for new cycle
+                self._is_user_paused = False
+                self._user_pause_start = None
+                self._total_user_paused_seconds = 0.0
+                self._is_clean_state = False
+                self._clean_state_start = None
+                self._notified_clean_laundry = False
+
                 self._start_watchdog()  # Start watchdog when cycle starts
 
                 # Fire the start event immediately on cycle detection so listeners always
@@ -2196,6 +2601,28 @@ class WashDataManager:
                         },
                     )
                     self._start_event_fired = True
+
+                # Fire push notification immediately - do not wait for profile matching.
+                if not self._notified_start and (self._notify_start_services or self._notify_actions):
+                    msg_template = self.config_entry.options.get(
+                        CONF_NOTIFY_START_MESSAGE, DEFAULT_NOTIFY_START_MESSAGE
+                    )
+                    msg = self._safe_format_template(
+                        msg_template,
+                        fallback_template=DEFAULT_NOTIFY_START_MESSAGE,
+                        device=self.config_entry.title,
+                        program=self._current_program,
+                    )
+                    self._dispatch_notification(
+                        msg,
+                        event_type=NOTIFY_EVENT_START,
+                        extra_vars={"program": self._current_program},
+                    )
+                    self._notified_start = True
+                    self._logger.info(
+                        "Sent start notification for program '%s'", self._current_program
+                    )
+                    self._check_pre_completion_notification()
             else:
                 self._logger.debug("Cycle resumed from %s, preserving estimates", old_state)
                 # Ensure watchdog is running
@@ -2216,26 +2643,61 @@ class WashDataManager:
         # IMMEDIATELY stop all active timers when cycle determined to have ended
         self._stop_watchdog()  # Stop active cycle watchdog
         self._stop_state_expiry_timer()  # Cancel any pending progress reset
+        prev_cycle_end_time = self._last_cycle_end_time
         self._last_cycle_end_time = dt_util.now()
+        self._pump_stuck = False  # Reset for next pump cycle
 
         # Auto-Tune: Check for ghost cycles (short duration AND low energy)
         # Ghost = duration < 60s AND total energy < 0.05 Wh (avoids killing pump-out spikes)
         power_data = cycle_data.get("power_data", [])
         cycle_energy_wh = 0.0
         if power_data and len(power_data) >= 2:
-            try:
-                ts = np.array([float(p[0]) if isinstance(p[0], (int, float)) else 0 for p in power_data])
-                ps = np.array([float(p[1]) for p in power_data])
-                # Simple trapezoidal integration
-                dt_h = np.diff(ts) / 3600.0 if ts[0] > 1e9 else np.diff(ts) / 3600.0  # seconds -> hours
-                avg_p = (ps[:-1] + ps[1:]) / 2
-                cycle_energy_wh = float(np.sum(avg_p * np.abs(dt_h)))
-            except Exception:
-                cycle_energy_wh = 0.0
+            valid: list[tuple[float, float]] = []
+            for p in power_data:
+                try:
+                    valid.append((float(p[0]), float(p[1])))
+                except (TypeError, ValueError, IndexError):
+                    pass
+            if len(valid) >= 2:
+                try:
+                    valid.sort(key=lambda x: x[0])
+                    ts = np.array([v[0] for v in valid])
+                    ps = np.array([v[1] for v in valid])
+                    dt_h = np.diff(ts) / 3600.0
+                    _MAX_GAP_H = 1.0  # skip segments longer than 1 hour
+                    mask = (dt_h > 0) & (dt_h <= _MAX_GAP_H)
+                    avg_p = (ps[:-1] + ps[1:]) / 2
+                    cycle_energy_wh = float(np.sum(avg_p[mask] * dt_h[mask]))
+                except (TypeError, ValueError, ArithmeticError):
+                    cycle_energy_wh = 0.0
 
         # Ghost cycle: short AND low energy (real cycles have energy even if short)
         if duration < 60 and cycle_energy_wh < 0.05:
             self._handle_noise_cycle(max_power)
+        elif self.device_type == "dishwasher" and prev_cycle_end_time is not None:
+            # Pump-out suppression: dishwashers end cycles with a brief drain pump
+            # (typically 30-300 s, < 1 Wh) a few minutes after the main cycle
+            # finishes.  If a short, low-energy cycle starts within 10 minutes of
+            # the previous cycle, treat it as a pump-out ghost and do not store it.
+            cycle_start_str = cycle_data.get("start_time")
+            cycle_start_dt = (
+                dt_util.parse_datetime(cycle_start_str) if cycle_start_str else None
+            )
+            if cycle_start_dt is not None:
+                gap = (cycle_start_dt - prev_cycle_end_time).total_seconds()
+                if 0 < gap < 600 and duration < 300 and cycle_energy_wh < 1.0:
+                    self._logger.info(
+                        "Suppressing dishwasher pump-out ghost: "
+                        "gap=%.0fs, duration=%.0fs, energy=%.3f Wh",
+                        gap,
+                        duration,
+                        cycle_energy_wh,
+                    )
+                    self._handle_noise_cycle(max_power)
+                    return  # Do not store this as a real cycle
+
+        # Store energy for notification and persistence (calculated above for ghost detection)
+        cycle_data["energy_wh"] = round(cycle_energy_wh, 3)
 
         # Schedule heavy post-processing asynchronously
         self.hass.async_create_task(self._async_process_cycle_end(cycle_data))
@@ -2332,17 +2794,41 @@ class WashDataManager:
         self._clear_live_progress_notification()
 
         # Send notification if enabled
-        events = self.config_entry.options.get(CONF_NOTIFY_EVENTS, [])
-        if NOTIFY_EVENT_FINISH in events:
+        if self._notify_finish_services or self._notify_actions:
             msg_template = self.config_entry.options.get(CONF_NOTIFY_FINISH_MESSAGE, DEFAULT_NOTIFY_FINISH_MESSAGE)
             duration_min = int(cycle_data['duration'] / 60)
             program_name = event_cycle_data.get("profile_name", "unknown")
+
+            energy_kwh = round(cycle_data.get("energy_wh", 0.0) / 1000, 3)
+
+            # Resolve energy price: entity takes precedence over static value
+            options = self.config_entry.options
+            price: float | None = None
+            price_entity = options.get(CONF_ENERGY_PRICE_ENTITY)
+            if price_entity:
+                state = self.hass.states.get(price_entity)
+                if state is not None:
+                    try:
+                        price = float(state.state)
+                    except (ValueError, TypeError):
+                        price = None
+            if price is None:
+                static = options.get(CONF_ENERGY_PRICE_STATIC)
+                if static is not None:
+                    try:
+                        price = float(static)
+                    except (ValueError, TypeError):
+                        price = None
+            cost_str = f"{energy_kwh * price:.2f}" if price is not None else ""
+
             msg = self._safe_format_template(
                 msg_template,
                 fallback_template=DEFAULT_NOTIFY_FINISH_MESSAGE,
                 device=self.config_entry.title,
                 duration=duration_min,
                 program=program_name,
+                energy_kwh=f"{energy_kwh:.3f}",
+                cost=cost_str,
             )
             self._dispatch_notification(
                 msg,
@@ -2351,6 +2837,8 @@ class WashDataManager:
                     "duration_minutes": duration_min,
                     "duration_seconds": cycle_data["duration"],
                     "program": program_name,
+                    "energy_kwh": energy_kwh,
+                    "cost": cost_str,
                 },
             )
 
@@ -2372,10 +2860,29 @@ class WashDataManager:
         self._time_remaining = None
         self._matched_profile_duration = None
         self._last_estimate_time = None
+        self._last_match_result = None  # Clear so phase sensor resets to "Off" (issue #192)
         self._cycle_progress = 100.0  # 100% = cycle complete
         self._cycle_completed_time = dt_util.now()
         self._cycle_start_time = None
         self._reset_live_notification_state()
+
+        # Reset pause tracking for the next cycle
+        self._is_user_paused = False
+        self._user_pause_start = None
+        self._total_user_paused_seconds = 0.0
+
+        # Enter Clean state if door sensor is configured and door is currently closed
+        self._is_clean_state = False
+        self._clean_state_start = None
+        self._notified_clean_laundry = False
+        if self._door_sensor_entity:
+            door_state = self.hass.states.get(self._door_sensor_entity)
+            if door_state and door_state.state == "off":  # binary_sensor: off = closed
+                self._is_clean_state = True
+                self._clean_state_start = dt_util.now()
+                self._logger.debug(
+                    "Cycle ended with door closed: entering Clean state"
+                )
 
         # Start progress reset timer to go back to 0% after user unload window
         self._start_state_expiry_timer()
@@ -2431,6 +2938,16 @@ class WashDataManager:
         if program:
             return f"{device}: {program}"
         return device
+
+    def _get_services_for_event(self, event_type: str | None) -> list[str]:
+        """Return the configured notify service list for the given event type."""
+        if event_type == NOTIFY_EVENT_START:
+            return self._notify_start_services
+        if event_type in (NOTIFY_EVENT_FINISH, "pre_complete", NOTIFY_EVENT_CLEAN):
+            return self._notify_finish_services
+        if event_type == NOTIFY_EVENT_LIVE:
+            return self._notify_live_services
+        return []
 
     def _dispatch_notification(
         self,
@@ -2502,16 +3019,15 @@ class WashDataManager:
         if self._notify_actions:
             actions_sent = bool(self._run_notification_actions(variables))
 
-        # If actions fired and there is no notify service configured, skip the
+        # If actions fired and there are no per-event services, skip the
         # service/persistent-notification path entirely.
-        notify_service = self._notify_service or self.config_entry.options.get(
-            CONF_NOTIFY_SERVICE
-        )
-        if actions_sent and not notify_service:
+        services = self._get_services_for_event(event_type)
+        if actions_sent and not services:
             return True
 
         service_sent = self._send_notification_service(
             message,
+            services=services,
             title=title,
             icon=icon,
             event_type=event_type,
@@ -2522,16 +3038,14 @@ class WashDataManager:
     def _send_notification_service(
         self,
         message: str,
+        *,
+        services: list[str],
         title: str | None = None,
         icon: str | None = None,
         event_type: str | None = None,
         extra_vars: dict[str, Any] | None = None,
     ) -> bool:
-        """Send a notification via configured notify service or persistent notification."""
-        notify_service = self._notify_service or self.config_entry.options.get(
-            CONF_NOTIFY_SERVICE
-        )
-
+        """Send a notification to each configured notify service, or fall back to persistent notification."""
         data: dict[str, Any] = {}
         if icon:
             data["icon"] = icon
@@ -2548,11 +3062,15 @@ class WashDataManager:
                 "minutes_left",
                 "live_updates_sent",
                 "live_updates_cap",
+                "chronometer",
+                "when",
+                "countdown",
             ):
                 if key in extra_vars:
                     data[key] = extra_vars[key]
 
-        if notify_service:
+        sent = False
+        for notify_service in services:
             if event_type == NOTIFY_EVENT_LIVE and not self._is_mobile_notify_service(
                 notify_service
             ):
@@ -2560,7 +3078,7 @@ class WashDataManager:
                     "Skipping live notification for non-mobile notify service: %s",
                     notify_service,
                 )
-                return False
+                continue
 
             domain, service = (
                 notify_service.split(".", 1)
@@ -2574,13 +3092,15 @@ class WashDataManager:
             self.hass.async_create_task(
                 self.hass.services.async_call(domain, service, service_data)
             )
+            sent = True
+
+        if not sent:
+            if event_type == NOTIFY_EVENT_LIVE:
+                return False
+            _pn_create(self.hass, message, title=title)
             return True
 
-        if event_type == NOTIFY_EVENT_LIVE:
-            return False
-
-        _pn_create(self.hass, message, title=title)
-        return True
+        return sent
 
     def _run_notification_actions(self, variables: dict[str, Any]) -> bool:
         """Run configured notification actions."""
@@ -2727,26 +3247,36 @@ class WashDataManager:
         )
         await self.profile_store.async_save()
 
-        # Notify user
-        notify_service = self.config_entry.options.get(CONF_NOTIFY_SERVICE)
-        message = (
-            f"Washing Machine '{self.config_entry.title}' detected ghost cycles. "
-            f"Suggested min_power change: {current_min:.1f}W → {new_min:.1f}W "
-            f"(not applied automatically)."
+        # Notify user - use finish services as the natural channel for device suggestions
+        _translations = await translation.async_get_translations(
+            self.hass, self.hass.config.language, "options", {DOMAIN}
         )
-
-        if notify_service:
-            # call service notify.<name>
-            domain, service = (
-                notify_service.split(".", 1)
-                if "." in notify_service
-                else ("notify", notify_service)
+        _default_msg = (
+            "{device_type} {device_title} detected ghost cycles. "
+            "Suggested min_power change: {current_min}W -> {new_min}W "
+            "(not applied automatically)."
+        )
+        _default_title = "WashData Auto-Tune"
+        _msg_template = _translations.get(
+            f"component.{DOMAIN}.options.error.auto_tune_suggestion", _default_msg
+        )
+        _title = _translations.get(
+            f"component.{DOMAIN}.options.error.auto_tune_title", _default_title
+        )
+        message = _msg_template.format(
+            device_type=self.device_type,
+            device_title=self.config_entry.title,
+            current_min=f"{current_min:.1f}",
+            new_min=f"{new_min:.1f}",
+        )
+        if self._notify_finish_services or self._notify_start_services or self._notify_actions:
+            _event_type = (
+                NOTIFY_EVENT_FINISH if self._notify_finish_services
+                else NOTIFY_EVENT_START
             )
-            self.hass.async_create_task(
-                self.hass.services.async_call(domain, service, {"message": message})
-            )
+            self._dispatch_notification(message, title=_title, event_type=_event_type)
         else:
-            _pn_create(self.hass, message, title="WashData Auto-Tune")
+            _pn_create(self.hass, message, title=_title)
 
         # Reset trackers
         self._noise_events = []
@@ -2760,6 +3290,7 @@ class WashDataManager:
             STATE_IDLE,
             STATE_STARTING,
             STATE_ANTI_WRINKLE,
+            STATE_DELAY_WAIT,
         ):
             self._current_program = "off"
             self._time_remaining = None
@@ -2831,6 +3362,7 @@ class WashDataManager:
         self._live_notification_cap = 0
         self._last_live_notification_time = None
         self._live_waiting_notification_sent = False
+        self._live_chronometer_overrun_sent = False
 
     @staticmethod
     def _is_mobile_notify_service(notify_service: str | None) -> bool:
@@ -2858,7 +3390,7 @@ class WashDataManager:
 
     def _check_live_progress_notification(self) -> None:
         """Send throttled live progress notifications for compatible mobile targets."""
-        if NOTIFY_EVENT_LIVE not in self._notify_events:
+        if not self._notify_live_services and not self._notify_actions:
             return
         if self.detector.state not in (STATE_RUNNING, STATE_PAUSED, STATE_ENDING):
             return
@@ -2867,7 +3399,7 @@ class WashDataManager:
             self._matched_profile_duration and self._matched_profile_duration > 0
         )
         if has_profile_match:
-            # A profile has been matched — reset the waiting latch so future
+            # A profile has been matched - reset the waiting latch so future
             # "no profile yet" phases (e.g. after a cycle restart) will send
             # the waiting message again.
             self._live_waiting_notification_sent = False
@@ -2903,8 +3435,6 @@ class WashDataManager:
         cap_candidate = self._estimate_live_notification_cap()
         if cap_candidate > self._live_notification_cap:
             self._live_notification_cap = cap_candidate
-        if self._live_notification_sent_count >= self._live_notification_cap:
-            return
 
         total_seconds = int(
             max(
@@ -2920,6 +3450,18 @@ class WashDataManager:
         )
         remaining_seconds = int(max(0, round(float(self._time_remaining or 0.0))))
         elapsed_seconds = max(0, total_seconds - remaining_seconds)
+
+        # When a chronometer notification is on the phone but the estimate has
+        # expired, bypass the cap once to replace the frozen "0:00" countdown
+        # with a plain text update so the user isn't left with a stale timer.
+        chronometer_overrun = (
+            self._notify_live_chronometer
+            and remaining_seconds <= 0
+            and self._live_notification_sent_count > 0
+            and not self._live_chronometer_overrun_sent
+        )
+        if not chronometer_overrun and self._live_notification_sent_count >= self._live_notification_cap:
+            return
         minutes_left = max(1, math.ceil(remaining_seconds / 60))
 
         msg_template = self.config_entry.options.get(
@@ -2934,24 +3476,32 @@ class WashDataManager:
             program=self._current_program,
         )
 
+        extra_vars: dict[str, Any] = {
+            "tag": self._live_notification_tag,
+            "progress": elapsed_seconds,
+            "progress_max": total_seconds,
+            "live_update": True,
+            "alert_once": True,
+            "cycle_seconds": total_seconds,
+            "time_remaining_seconds": remaining_seconds,
+            "minutes_left": minutes_left,
+            "live_updates_sent": self._live_notification_sent_count + 1,
+            "live_updates_cap": self._live_notification_cap,
+        }
+        if self._notify_live_chronometer and remaining_seconds > 0:
+            extra_vars["chronometer"] = True
+            extra_vars["when"] = int(now.timestamp()) + remaining_seconds
+            extra_vars["countdown"] = True
         sent = self._dispatch_notification(
             msg,
             event_type=NOTIFY_EVENT_LIVE,
-            extra_vars={
-                "tag": self._live_notification_tag,
-                "progress": elapsed_seconds,
-                "progress_max": total_seconds,
-                "live_update": True,
-                "alert_once": True,
-                "cycle_seconds": total_seconds,
-                "time_remaining_seconds": remaining_seconds,
-                "minutes_left": minutes_left,
-                "live_updates_sent": self._live_notification_sent_count + 1,
-                "live_updates_cap": self._live_notification_cap,
-            },
+            extra_vars=extra_vars,
         )
         if sent:
-            self._live_notification_sent_count += 1
+            if chronometer_overrun:
+                self._live_chronometer_overrun_sent = True
+            else:
+                self._live_notification_sent_count += 1
             self._last_live_notification_time = now
 
     def _clear_live_progress_notification(self) -> None:
@@ -2996,6 +3546,7 @@ class WashDataManager:
 
         self._send_notification_service(
             "clear_notification",
+            services=self._notify_live_services,
             event_type=NOTIFY_EVENT_LIVE,
             extra_vars={
                 "tag": self._live_notification_tag,
@@ -3055,7 +3606,9 @@ class WashDataManager:
             return
         self._last_phase_estimate_time = now
 
-        duration_so_far = float(self.detector.get_elapsed_seconds())
+        # Use net elapsed (wall-clock minus user-paused time) for all time estimates
+        # so that paused time is excluded from progress / remaining / total duration.
+        duration_so_far = float(self.net_elapsed_seconds)
 
         if self._matched_profile_duration and self._matched_profile_duration > 0:
             # Get current power trace for phase analysis
@@ -3433,10 +3986,33 @@ class WashDataManager:
         """Public method to notify entities of update."""
         self._notify_update()
 
+    @property
+    def is_user_paused(self) -> bool:
+        """Return True if cycle is currently user-paused."""
+        return self._is_user_paused
+
+    @property
+    def is_clean_state(self) -> bool:
+        """Return True if machine is in Clean state (cycle ended, door not yet opened)."""
+        return self._is_clean_state
+
+    @property
+    def net_elapsed_seconds(self) -> float:
+        """Elapsed seconds in the current cycle, excluding user-paused time."""
+        raw = float(self.detector.get_elapsed_seconds())
+        paused = self._total_user_paused_seconds
+        if self._user_pause_start is not None:
+            paused += (dt_util.now() - self._user_pause_start).total_seconds()
+        return max(0.0, raw - paused)
+
     def check_state(self):
         """Return current detector state."""
         if self.recorder.is_recording:
             return STATE_RUNNING
+        if self._is_clean_state and self.detector.state == STATE_OFF:
+            return STATE_CLEAN
+        if self._is_user_paused:
+            return STATE_USER_PAUSED
         return self.detector.state
 
     def list_phase_catalog(self, device_type: str) -> list[dict[str, Any]]:
@@ -3513,6 +4089,45 @@ class WashDataManager:
         return self._sample_interval_stats
 
     @property
+    def pump_stuck(self) -> bool:
+        """Return True if the pump stuck threshold has fired for the current cycle."""
+        return self._pump_stuck
+
+    @property
+    def pump_runs_today(self) -> int:
+        """Return the number of completed pump cycles that started in the last 24 hours.
+
+        Counts all past cycles whose ``start_time`` falls within the rolling 24-hour
+        window ending now.  Returns 0 for non-pump device types.
+        """
+        if self.device_type != DEVICE_TYPE_PUMP:
+            return 0
+        cutoff = dt_util.now().timestamp() - 86400.0
+        count = 0
+        for cycle in self.profile_store.get_past_cycles():
+            start_raw = cycle.get("start_time")
+            if not start_raw:
+                continue
+            try:
+                if isinstance(start_raw, str):
+                    parsed = dt_util.parse_datetime(start_raw)
+                    if parsed is None:
+                        continue
+                    ts = parsed.timestamp()
+                else:
+                    ts = float(start_raw)
+                if ts >= cutoff:
+                    count += 1
+            except (TypeError, ValueError):
+                continue
+        return count
+
+    @property
+    def cycle_count(self) -> int:
+        """Return the total number of completed cycles stored for this device."""
+        return len(self.profile_store.get_past_cycles())
+
+    @property
     def manual_program_active(self) -> bool:
         """Return True if a manual program override is active."""
         return getattr(self, "_manual_program_active", False)
@@ -3559,6 +4174,122 @@ class WashDataManager:
                 # Update estimates if running
                 if self.detector.state == "running":
                     self._update_estimates()
+
+    async def async_pause_cycle(self) -> None:
+        """Pause the current cycle (user-triggered).
+
+        Sets verified_pause so the cycle is not finalized when power drops.
+        Optionally cuts power to the switch entity if CONF_PAUSE_CUTS_POWER is enabled.
+        """
+        if self.detector.state not in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
+            self._logger.debug(
+                "async_pause_cycle: ignored (detector state=%s)", self.detector.state
+            )
+            return
+
+        if self._is_user_paused:
+            self._logger.debug("async_pause_cycle: already user-paused, ignoring")
+            return
+
+        self._logger.info("Cycle paused by user")
+        prev_verified = self.detector._verified_pause
+        self._is_user_paused = True
+        self._user_pause_start = dt_util.now()
+        self.detector.set_verified_pause(True)
+
+        if self._pause_cuts_power:
+            switch_entity = self.config_entry.options.get(
+                CONF_SWITCH_ENTITY
+            ) or self.config_entry.data.get(CONF_SWITCH_ENTITY)
+            if switch_entity:
+                self._logger.info(
+                    "pause_cuts_power: turning off switch %s", switch_entity
+                )
+                try:
+                    await self.hass.services.async_call(
+                        "switch", "turn_off", {"entity_id": switch_entity}, blocking=True
+                    )
+                except HomeAssistantError as err:
+                    self._logger.warning(
+                        "pause_cuts_power: failed to turn off %s: %s - rolling back pause state",
+                        switch_entity, err,
+                    )
+                    self._is_user_paused = False
+                    self._user_pause_start = None
+                    self.detector.set_verified_pause(prev_verified)
+                    return
+
+        snapshot = self.detector.get_state_snapshot()
+        snapshot["manual_program"] = self._manual_program_active
+        snapshot["notified_start"] = self._notified_start
+        snapshot["start_event_fired"] = self._start_event_fired
+        snapshot["is_user_paused"] = self._is_user_paused
+        snapshot["user_pause_start"] = (
+            self._user_pause_start.isoformat() if self._user_pause_start else None
+        )
+        snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
+        self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
+        self._notify_update()
+
+    async def async_resume_cycle(self) -> None:
+        """Resume a user-paused cycle.
+
+        Accumulates elapsed paused time and clears the verified pause flag.
+        Optionally restores power via the switch entity if CONF_PAUSE_CUTS_POWER is enabled.
+        """
+        if not self._is_user_paused:
+            self._logger.debug("async_resume_cycle: not user-paused, ignoring")
+            return
+
+        now = dt_util.now()
+        prev_pause_start = self._user_pause_start
+        accumulated = (
+            (now - prev_pause_start).total_seconds()
+            if prev_pause_start is not None else 0.0
+        )
+
+        self._total_user_paused_seconds += accumulated
+        self._user_pause_start = None
+        self._is_user_paused = False
+        self.detector.set_verified_pause(False)
+        self._logger.info(
+            "Cycle resumed by user (total paused: %.0fs)", self._total_user_paused_seconds
+        )
+
+        if self._pause_cuts_power:
+            switch_entity = self.config_entry.options.get(
+                CONF_SWITCH_ENTITY
+            ) or self.config_entry.data.get(CONF_SWITCH_ENTITY)
+            if switch_entity:
+                self._logger.info(
+                    "pause_cuts_power: turning on switch %s", switch_entity
+                )
+                try:
+                    await self.hass.services.async_call(
+                        "switch", "turn_on", {"entity_id": switch_entity}, blocking=True
+                    )
+                except HomeAssistantError as err:
+                    self._logger.warning(
+                        "pause_cuts_power: failed to turn on %s: %s - rolling back resume state",
+                        switch_entity, err,
+                    )
+                    self._total_user_paused_seconds -= accumulated
+                    self._user_pause_start = prev_pause_start
+                    self._is_user_paused = True
+                    self.detector.set_verified_pause(True)
+                    return
+
+        snapshot = self.detector.get_state_snapshot()
+        snapshot["manual_program"] = self._manual_program_active
+        snapshot["notified_start"] = self._notified_start
+        snapshot["start_event_fired"] = self._start_event_fired
+        snapshot["is_user_paused"] = self._is_user_paused
+        snapshot["user_pause_start"] = (
+            self._user_pause_start.isoformat() if self._user_pause_start else None
+        )
+        snapshot["total_user_paused_seconds"] = self._total_user_paused_seconds
+        self.hass.async_create_task(self.profile_store.async_save_active_cycle(snapshot))
+        self._notify_update()
 
     async def async_terminate_cycle(self) -> None:
         """Force terminate the current cycle via user request."""

@@ -72,19 +72,31 @@ class DataLoader:
         with open(file_path, "r") as f:
             data = json.load(f)
 
-        # Check if it's a Config Entry dump (contains "data" -> "store_data" -> "past_cycles")
-        if "data" in data and "store_data" in data["data"]:
-            store_data = data["data"]["store_data"]
-            if "past_cycles" in store_data:
-                for cycle in store_data["past_cycles"]:
-                    # Enrich with source file for debugging
-                    cycle["_source"] = str(file_path)
-                    self.cycles.append(cycle)
-        
+        past_cycles: Optional[List[Dict[str, Any]]] = None
+
+        # New export format: data -> store_export -> data -> past_cycles
+        store_export = data.get("data", {}).get("store_export", {})
+        if isinstance(store_export, dict) and "data" in store_export:
+            export_inner = store_export["data"]
+            if isinstance(export_inner, dict) and "past_cycles" in export_inner:
+                past_cycles = export_inner["past_cycles"]
+
+        # Legacy format: data -> store_data -> past_cycles
+        if past_cycles is None:
+            store_data = data.get("data", {}).get("store_data", {})
+            if isinstance(store_data, dict) and "past_cycles" in store_data:
+                past_cycles = store_data["past_cycles"]
+
+        if past_cycles is not None:
+            for cycle in past_cycles:
+                cycle["_source"] = str(file_path)
+                self.cycles.append(cycle)
+            return
+
         # Check if it's a single cycle dump (direct structure)
-        elif "power_data" in data and "start_time" in data:
-             data["_source"] = str(file_path)
-             self.cycles.append(data)
+        if "power_data" in data and "start_time" in data:
+            data["_source"] = str(file_path)
+            self.cycles.append(data)
 
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
 

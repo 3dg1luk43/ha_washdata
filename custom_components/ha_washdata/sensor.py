@@ -7,7 +7,7 @@ import hashlib
 import logging
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass
+from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
@@ -21,6 +21,7 @@ from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
     DOMAIN,
+    CONF_END_ENERGY_THRESHOLD,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
     CONF_NO_UPDATE_ACTIVE_TIMEOUT,
@@ -29,22 +30,29 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
+    CONF_START_THRESHOLD_W,
+    CONF_STOP_THRESHOLD_W,
     SIGNAL_WASHER_UPDATE,
     CONF_WATCHDOG_INTERVAL,
     CONF_EXPOSE_DEBUG_ENTITIES,
+    DEVICE_TYPE_PUMP,
     STATE_OFF,
     STATE_IDLE,
     STATE_STARTING,
     STATE_RUNNING,
     STATE_PAUSED,
+    STATE_USER_PAUSED,
     STATE_ENDING,
     STATE_FINISHED,
     STATE_ANTI_WRINKLE,
+    STATE_DELAY_WAIT,
     STATE_INTERRUPTED,
     STATE_FORCE_STOPPED,
     STATE_RINSE,
     STATE_UNKNOWN,
+    STATE_CLEAN,
 )
 from .manager import WashDataManager
 
@@ -105,6 +113,13 @@ def cleanup_orphaned_diagnostic_entities(
             continue
 
         suffix = unique_id[len(entry_prefix) :]
+
+        # Remove stale pump_runs_today when device type has changed away from pump.
+        if suffix == "pump_runs_today" and manager.device_type != DEVICE_TYPE_PUMP:
+            ent_reg.async_remove(reg_entry.entity_id)
+            removed += 1
+            continue
+
         is_diagnostic_family = (
             suffix in _STATIC_DIAGNOSTIC_SUFFIXES
             or suffix.startswith("profile_count_")
@@ -145,7 +160,12 @@ async def async_setup_entry(
         WasherElapsedTimeSensor(manager, entry),
         WasherDebugSensor(manager, entry),
         WasherSuggestionsSensor(manager, entry),
+        WasherCycleCountSensor(manager, entry),
     ]
+
+    # Add pump-specific sensors
+    if manager.device_type == DEVICE_TYPE_PUMP:
+        entities.append(PumpRunsTodaySensor(manager, entry))
 
     # Add debug entities if enabled
     if entry.options.get(CONF_EXPOSE_DEBUG_ENTITIES):
@@ -214,13 +234,16 @@ class WasherStateSensor(WasherBaseSensor):
                 STATE_STARTING,
                 STATE_RUNNING,
                 STATE_PAUSED,
+                STATE_USER_PAUSED,
                 STATE_ENDING,
                 STATE_FINISHED,
                 STATE_ANTI_WRINKLE,
+                STATE_DELAY_WAIT,
                 STATE_INTERRUPTED,
                 STATE_FORCE_STOPPED,
                 STATE_RINSE,
                 STATE_UNKNOWN,
+                STATE_CLEAN,
             ],
         )
         super().__init__(manager, entry)
@@ -241,6 +264,8 @@ class WasherStateSensor(WasherBaseSensor):
             return "mdi:pot-steam"
         if dtype == "heat_pump":
             return "mdi:heat-pump"
+        if dtype == "pump":
+            return "mdi:water-pump"
         return "mdi:washing-machine"
 
     @property
@@ -254,6 +279,8 @@ class WasherStateSensor(WasherBaseSensor):
             "current_program_guess": self._manager.current_program,
             "sub_state": self._manager.sub_state,
         }
+        if self._manager.device_type == DEVICE_TYPE_PUMP:
+            attrs["pump_stuck"] = self._manager.pump_stuck
         return attrs
 
 
@@ -337,13 +364,13 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
     @property
     def native_unit_of_measurement(self) -> str | None:  # type: ignore[override]
         """Return the unit of measurement."""
-        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE):
+        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE, STATE_DELAY_WAIT):
             return None
         return "min"
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE):
+        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE, STATE_DELAY_WAIT):
             return None
         if self._manager.time_remaining is not None:
             return int(self._manager.time_remaining / 60)
@@ -763,6 +790,10 @@ class WasherSuggestionsSensor(WasherBaseSensor):
             CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
             CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
             CONF_MIN_OFF_GAP,
+            CONF_STOP_THRESHOLD_W,
+            CONF_START_THRESHOLD_W,
+            CONF_END_ENERGY_THRESHOLD,
+            CONF_RUNNING_DEAD_ZONE,
         )
 
     def _count_applicable_suggestions(self, suggestions: dict[str, Any]) -> int:
@@ -797,3 +828,40 @@ class WasherSuggestionsSensor(WasherBaseSensor):
             "suggestions": suggestions,
         }
         return attrs
+
+
+class PumpRunsTodaySensor(WasherBaseSensor):
+    """Sensor reporting how many pump cycles occurred in the last 24 hours.
+
+    Only created when device type is ``pump``.
+    """
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="pump_runs_today",
+            translation_key="pump_runs_today",
+            icon="mdi:counter",
+            native_unit_of_measurement="cycles",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self) -> int:  # type: ignore[override]
+        return self._manager.pump_runs_today
+
+
+class WasherCycleCountSensor(WasherBaseSensor):
+    """Sensor reporting the total number of completed cycles stored for this device."""
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="cycle_count",
+            translation_key="cycle_count",
+            icon="mdi:counter",
+            native_unit_of_measurement="cycles",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self) -> int:  # type: ignore[override]
+        return self._manager.cycle_count

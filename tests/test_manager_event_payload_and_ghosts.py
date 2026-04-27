@@ -123,3 +123,185 @@ async def test_short_high_energy_cycle_is_not_marked_noise(
     await hass.async_block_till_done()
 
     manager._handle_noise_cycle.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_dishwasher_pump_out_is_suppressed(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """Dishwasher pump-out (short, low-energy cycle shortly after main cycle) is suppressed."""
+    from datetime import datetime, timezone, timedelta
+
+    manager._handle_noise_cycle = MagicMock()
+    manager._async_process_cycle_end = AsyncMock()
+    manager.device_type = "dishwasher"
+
+    # Simulate a real cycle that ended 4 minutes ago
+    prev_end = datetime(2026, 3, 18, 13, 59, 54, tzinfo=timezone.utc)
+    manager._last_cycle_end_time = prev_end
+
+    # Pump-out: starts 4 min 7s after main cycle, lasts 105 s, energy ~0.47 Wh
+    pump_start = prev_end + timedelta(seconds=247)
+    cycle_data = {
+        "start_time": pump_start.isoformat(),
+        "duration": 105,
+        "max_power": 16.1,
+        "status": "interrupted",
+        # 16 W for 105 s → ~0.47 Wh
+        "power_data": [
+            [0.0, 6.6],
+            [20.0, 16.1],
+            [40.0, 15.5],
+            [100.0, 15.5],
+            [105.0, 0.5],
+        ],
+    }
+
+    manager._on_cycle_end(cycle_data)
+    await hass.async_block_till_done()
+
+    manager._handle_noise_cycle.assert_called_once_with(16.1)
+    manager._async_process_cycle_end.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_dishwasher_pump_out_outside_window_is_stored(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """A dishwasher cycle that starts more than 10 min after the previous is stored normally."""
+    from datetime import datetime, timezone, timedelta
+
+    manager._handle_noise_cycle = MagicMock()
+    manager._async_process_cycle_end = AsyncMock()
+    manager.device_type = "dishwasher"
+
+    prev_end = datetime(2026, 3, 18, 13, 59, 54, tzinfo=timezone.utc)
+    manager._last_cycle_end_time = prev_end
+
+    # Starts 15 minutes after previous - outside the 10-minute suppression window
+    cycle_start = prev_end + timedelta(seconds=900)
+    cycle_data = {
+        "start_time": cycle_start.isoformat(),
+        "duration": 105,
+        "max_power": 16.1,
+        "status": "interrupted",
+        "power_data": [
+            [0.0, 6.6],
+            [20.0, 16.1],
+            [100.0, 15.5],
+            [105.0, 0.5],
+        ],
+    }
+
+    manager._on_cycle_end(cycle_data)
+    await hass.async_block_till_done()
+
+    manager._handle_noise_cycle.assert_not_called()
+    manager._async_process_cycle_end.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_dishwasher_pump_out_high_energy_is_stored(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """A dishwasher cycle within the window but with high energy is stored as a real cycle."""
+    from datetime import datetime, timezone, timedelta
+
+    manager._handle_noise_cycle = MagicMock()
+    manager._async_process_cycle_end = AsyncMock()
+    manager.device_type = "dishwasher"
+
+    prev_end = datetime(2026, 3, 18, 13, 59, 54, tzinfo=timezone.utc)
+    manager._last_cycle_end_time = prev_end
+
+    # Starts 3 minutes after previous (within window) but uses 2 Wh - a real load
+    cycle_start = prev_end + timedelta(seconds=180)
+    cycle_data = {
+        "start_time": cycle_start.isoformat(),
+        "duration": 120,
+        "max_power": 500.0,
+        "status": "interrupted",
+        # ~500 W for 120 s → ~16.7 Wh → well above 1 Wh threshold
+        "power_data": [[0.0, 500.0], [60.0, 500.0], [120.0, 0.0]],
+    }
+
+    manager._on_cycle_end(cycle_data)
+    await hass.async_block_till_done()
+
+    manager._handle_noise_cycle.assert_not_called()
+    manager._async_process_cycle_end.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Fix A: unconditional low_power_floor for unmatched dishwasher cycles
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_dishwasher_unmatched_survives_7200s_silence(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """Fix A: an unmatched dishwasher cycle must NOT be force-ended at 7200s silence.
+
+    Before Fix A the 14400s device floor was only applied when a profile was matched.
+    An unmatched cycle (program == 'detecting...') used only the 3600s base timeout,
+    so 7200s of silence triggered a force-end during the passive drying phase.
+    After Fix A the floor is applied unconditionally: max(14400, 3600) = 14400s.
+    """
+    from datetime import datetime, timezone, timedelta
+
+    now = datetime(2026, 3, 18, 14, 0, 0, tzinfo=timezone.utc)
+
+    manager.device_type = "dishwasher"
+    manager._current_program = "detecting..."  # Unmatched
+    manager._low_power_no_update_timeout = 3600.0
+    # Set no_update_active_timeout high so the keepalive injection at step 3a
+    # does not fire before the staleness check we are testing.
+    manager._no_update_active_timeout = 14400.0
+
+    manager.detector.state = "ending"
+    manager.detector.is_waiting_low_power.return_value = True
+    manager.detector.current_cycle_start = None
+    manager.detector.get_elapsed_seconds.return_value = 7200
+    manager.detector.expected_duration_seconds = 0
+    manager.detector._verified_pause = False
+
+    # Silence for 7200s (above 3600s default, below 14400s floor)
+    manager._last_reading_time = now - timedelta(seconds=7200)
+    manager._last_real_reading_time = now - timedelta(seconds=7200)
+    manager._last_cycle_end_time = None  # Not within suspicious window
+
+    await manager._watchdog_check_stuck_cycle(now)
+
+    manager.detector.force_end.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_dishwasher_unmatched_force_ended_after_14400s_silence(
+    hass: HomeAssistant, manager: WashDataManager
+) -> None:
+    """Fix A: an unmatched dishwasher cycle IS force-ended after 14400s silence."""
+    from datetime import datetime, timezone, timedelta
+
+    now = datetime(2026, 3, 18, 14, 0, 0, tzinfo=timezone.utc)
+
+    manager.device_type = "dishwasher"
+    manager._current_program = "detecting..."
+    manager._low_power_no_update_timeout = 3600.0
+    manager._no_update_active_timeout = 14400.0
+
+    manager.detector.state = "ending"
+    manager.detector.is_waiting_low_power.return_value = True
+    manager.detector.current_cycle_start = None
+    manager.detector.get_elapsed_seconds.return_value = 15000
+    manager.detector.expected_duration_seconds = 0
+    manager.detector._verified_pause = False
+
+    # Silence for 15000s (above 14400s floor)
+    manager._last_reading_time = now - timedelta(seconds=15000)
+    manager._last_real_reading_time = now - timedelta(seconds=15000)
+    manager._last_cycle_end_time = None
+
+    await manager._watchdog_check_stuck_cycle(now)
+
+    manager.detector.force_end.assert_called_once()

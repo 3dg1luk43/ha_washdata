@@ -22,6 +22,11 @@ from .const import (
     CONF_DEVICE_TYPE,
     CONF_POWER_SENSOR,
     CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_EVENTS,
+    NOTIFY_EVENT_LIVE,
+    CONF_NOTIFY_START_SERVICES,
+    CONF_NOTIFY_FINISH_SERVICES,
+    CONF_NOTIFY_LIVE_SERVICES,
     CONF_NOTIFY_ACTIONS,
     CONF_NOTIFY_PEOPLE,
     CONF_NOTIFY_ONLY_WHEN_HOME,
@@ -92,7 +97,10 @@ PLATFORMS: list[Platform] = [
 
 def _require_str(value: Any, name: str) -> str:
     if not isinstance(value, str) or not value:
-        raise ValueError(f"{name} is required")
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key=f"{name}_required",
+        )
     return value
 
 
@@ -125,6 +133,21 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         options[CONF_POWER_SENSOR] = data[CONF_POWER_SENSOR]
     if CONF_NOTIFY_SERVICE not in options and CONF_NOTIFY_SERVICE in data:
         options[CONF_NOTIFY_SERVICE] = data[CONF_NOTIFY_SERVICE]
+
+    # Migrate legacy single CONF_NOTIFY_SERVICE into per-event service lists.
+    # Users who configured a notify service before 0.3.x would otherwise lose
+    # their notification settings entirely on upgrade.
+    legacy_svc = options.get(CONF_NOTIFY_SERVICE) or data.get(CONF_NOTIFY_SERVICE)
+    if legacy_svc and isinstance(legacy_svc, str):
+        # CONF_NOTIFY_EVENTS is a deprecated list of enabled event types.
+        # Only migrate live services when live events were explicitly opted in.
+        legacy_events = options.get(CONF_NOTIFY_EVENTS) or data.get(CONF_NOTIFY_EVENTS) or []
+        if CONF_NOTIFY_START_SERVICES not in options:
+            options[CONF_NOTIFY_START_SERVICES] = [legacy_svc]
+        if CONF_NOTIFY_FINISH_SERVICES not in options:
+            options[CONF_NOTIFY_FINISH_SERVICES] = [legacy_svc]
+        if CONF_NOTIFY_LIVE_SERVICES not in options and NOTIFY_EVENT_LIVE in legacy_events:
+            options[CONF_NOTIFY_LIVE_SERVICES] = [legacy_svc]
 
     options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)
     options.setdefault(CONF_LEARNING_CONFIDENCE, DEFAULT_LEARNING_CONFIDENCE)
@@ -413,7 +436,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             manager = hass.data[DOMAIN][entry_id]
             store = manager.profile_store
 
-            # Determine trim end — default to full cycle duration if not supplied
+            # Determine trim end - default to full cycle duration if not supplied
             raw_end = call.data.get("trim_end_s")
             if raw_end is not None:
                 trim_end_s = max(0.0, float(raw_end))
@@ -442,7 +465,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.services.async_register(DOMAIN, "trim_cycle", handle_trim_cycle)
 
-    # Register custom card via frontend.py — once per HA instance only.
+    # Register custom card via frontend.py - once per HA instance only.
     if not hass.data.get("ha_washdata_card_registered") and not hass.data.get(
         "ha_washdata_card_deferred"
     ) and not hass.data.get("ha_washdata_card_registering"):
@@ -674,6 +697,67 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await manager.async_stop_recording()
 
         hass.services.async_register(DOMAIN, "record_stop", handle_record_stop)
+
+    # Register pause/resume services
+    if not hass.services.has_service(DOMAIN, "pause_cycle"):
+        async def handle_pause_cycle(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="device_not_found",
+                )
+            entry_id = next(
+                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
+                None,
+            )
+            if not entry_id:
+                if any(eid for eid in device.config_entries):
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="integration_not_loaded",
+                    )
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="no_config_entry",
+                )
+
+            manager = hass.data[DOMAIN][entry_id]
+            await manager.async_pause_cycle()
+
+        hass.services.async_register(DOMAIN, "pause_cycle", handle_pause_cycle)
+
+    if not hass.services.has_service(DOMAIN, "resume_cycle"):
+        async def handle_resume_cycle(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="device_not_found",
+                )
+            entry_id = next(
+                (eid for eid in device.config_entries if eid in hass.data.get(DOMAIN, {})),
+                None,
+            )
+            if not entry_id:
+                if any(eid for eid in device.config_entries):
+                    raise ServiceValidationError(
+                        translation_domain=DOMAIN,
+                        translation_key="integration_not_loaded",
+                    )
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN,
+                    translation_key="no_config_entry",
+                )
+
+            manager = hass.data[DOMAIN][entry_id]
+            await manager.async_resume_cycle()
+
+        hass.services.async_register(DOMAIN, "resume_cycle", handle_resume_cycle)
 
     return True
 

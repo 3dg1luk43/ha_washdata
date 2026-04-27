@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Athbhreithnigh Athruithe Molta",
-        "description": "Fuair WashData {pending_count} luachanna molta le cur i bhfeidhm.\n\nAthruithe ar athbhreithniú:\n{changes}\n\nDeimhnigh thíos na luachanna seo a chéimniú san fhoirm. Ní shábhálfar iad go dtí go gcuireann tú Ardsocruithe isteach.",
+        "description": "Aimsíodh WashData **{pending_count}** luach(anna) molta le cur i bhfeidhm.\n\nAthruithe:\n{changes}\n\n✅ Ticeáil an bosca thíos agus cliceáil **Cuir isteach** chun iarratas a dhéanamh agus sábháil na hathruithe seo láithreach.\n❌ Fág gan é a sheiceáil agus cliceáil **Submit** chun é a chur ar ceal agus dul ar ais.",
         "data": {
-          "confirm_apply_suggestions": "Céimnigh na luachanna molta in Ardsocruithe"
+          "confirm_apply_suggestions": "Cuir na hathruithe seo i bhfeidhm agus sábháil iad"
         }
       },
       "settings": {
@@ -72,50 +72,50 @@
           "power_sensor": "Eintiteas Braiteora Cumhachta",
           "min_power": "Cumhacht Íosta (W)",
           "off_delay": "Moill Deireadh Timthrialla (s)",
-          "notify_service": "Seirbhís Fógraí (m.sh. notify.mobile_app)",
           "notify_actions": "Gníomhartha Fógra",
           "notify_people": "Moill ar Sheachadadh Go dtí go Bhfuil Na Daoine Seo Abhaile",
           "notify_only_when_home": "Moill ar Fhógraí Go dtí go mbeidh an Duine Roghnaithe sa Bhaile",
           "notify_fire_events": "Imeachtaí Uathoibrithe a Loisceadh",
-          "notify_events": "Imeachtaí le Fógairt",
           "notify_before_end_minutes": "Fógra Réamhchríochnaithe (nóiméad roimh dheireadh)",
           "notify_title": "Teideal an Fhógra",
           "notify_icon": "Deilbhín Fógraí",
           "notify_start_message": "Formáid Teachtaireachta Tosaigh",
           "notify_finish_message": "Formáid Teachtaireachta Críochnaithe",
           "notify_pre_complete_message": "Formáid Teachtaireachta Réamh-Chríochnaithe",
-          "show_advanced": "Cuir Ardsocruithe in Eagar (An Chéad Chéim Eile)"
+          "show_advanced": "Cuir Ardsocruithe in Eagar (An Chéad Chéim Eile)",
+          "notify_start_services": "Tús na Rothaíochta - Spriocanna Fógra",
+          "notify_finish_services": "Críoch na Rothaíochta - Spriocanna Fógra",
+          "notify_live_services": "Dul Chun Cinn Beo - Spriocanna Fógraí"
         },
         "data_description": {
           "apply_suggestions": "Ticeáil an bosca seo chun na luachanna a mhol an t-algartam foghlama a chóipeáil isteach san fhoirm. Déan athbhreithniú roimh shábháil.\n\nMolta (ó fhoghlaim):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Roghnaigh an cineál fearais (Meaisín Níocháin, Triomadóir, Miasniteoir, Meaisín Caife, EV). Stóráiltear an chlib seo le gach timthriall le haghaidh eagrú níos fearr.",
-          "power_sensor": "An t-eintiteas braiteora a thuairiscíonn cumhacht fíor-ama (i vata). Is féidir leat é seo a athrú am ar bith gan sonraí stairiúla a chailliúint — úsáideach má athsholáthróidh tú breiseán cliste.",
+          "power_sensor": "An t-eintiteas braiteora a thuairiscíonn cumhacht fíor-ama (i vata). Is féidir leat é seo a athrú am ar bith gan sonraí stairiúla a chailliúint - úsáideach má athsholáthróidh tú breiseán cliste.",
           "min_power": "Léiríonn léamha cumhachta os cionn na tairsí seo (i vata) go bhfuil an fearas ag rith. Tosaigh le 2W don chuid is mó de na feistí.",
           "off_delay": "Soicindí ní mór don chumhacht slíoctha fanacht faoi bhun na tairsí stoptha chun críochnú a mharcáil. Réamhshocrú: 120s.",
-          "notify_service": "An tseirbhís fógraí Home Assistant le húsáid (roghnach).",
           "notify_actions": "Seicheamh gníomhaíochta roghnach Home Assistant le rith le haghaidh fógraí (scripteanna, fógairt, TTS, etc.). Má tá sé socraithe, ritheann gníomhartha roimh an tseirbhís fógra cúltaca.",
           "notify_people": "Aonáin daoine a úsáidtear le haghaidh geataí láithreachta. Nuair a bhíonn sé cumasaithe, cuirtear moill ar sheachadadh an fhógra go dtí go mbíonn duine roghnaithe amháin ar a laghad sa bhaile.",
           "notify_only_when_home": "Má tá sé cumasaithe, cuir moill ar fhógraí go dtí go mbeidh duine roghnaithe amháin ar a laghad sa bhaile.",
           "notify_fire_events": "Má tá sé cumasaithe, loiscigh imeachtaí Home Assistant le haghaidh tús agus deireadh timthrialla (ha_washdata_cycle_started agus ha_washdata_cycle_ended) chun uathoibrithe a thiomáint.",
-          "notify_events": "Cad iad na himeachtaí ar cheart fógraí a sheoladh chucu.",
           "notify_before_end_minutes": "Nóiméid roimh dheireadh measta an timthrialla chun fógra a spreagadh. Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 0.",
           "notify_title": "Teideal saincheaptha le haghaidh fógraí. Tacaíonn sé le {device} ionadsealbhóir.",
           "notify_icon": "Deilbhín le húsáid le haghaidh fógraí (m.sh. mdi:washing-machine). Fág folamh chun seoladh gan deilbhín.",
           "notify_start_message": "Teachtaireacht seolta nuair a thosaíonn timthriall. Tacaíonn sé le {device} ionadsealbhóir.",
           "notify_finish_message": "Seoltar teachtaireacht nuair a chríochnaíonn timthriall. Tacaíonn sé le {device}, {duration}, {program} ionadsealbhóirí.",
-          "notify_pre_complete_message": "Teachtaireacht seolta roimh chríochnú. Tacaíonn sé le {device}, {minutes} ionadsealbhóirí."
+          "notify_pre_complete_message": "Teachtaireacht seolta roimh chríochnú. Tacaíonn sé le {device}, {minutes} ionadsealbhóirí.",
+          "notify_start_services": "Fógra a thabhairt do sheirbhís amháin nó níos mó chun foláireamh a thabhairt nuair a thosaíonn timthriall. Fág folamh chun fógraí tosaithe a scipeáil.",
+          "notify_finish_services": "Fógra a thabhairt do sheirbhís amháin nó níos mó chun foláireamh a thabhairt nuair a chríochnaíonn timthriall nó nuair a thagann deireadh le timthriall. Fág folamh chun fógraí críochnaithe a scipeáil.",
+          "notify_live_services": "Fógra a thabhairt do sheirbhís amháin nó níos mó chun nuashonruithe beo ar dhul chun cinn a fháil fad a bheidh an timthriall ar siúl (aip shoghluaiste compánach amháin). Fág folamh chun nuashonruithe beo a scipeáil."
         }
       },
       "notifications": {
         "title": "Fógraí",
         "description": "Cumraigh bealaí fógra, teimpléid, agus nuashonruithe roghnacha beo ar dhul chun cinn soghluaiste.",
         "data": {
-          "notify_service": "Seirbhís Fógraí (m.sh. notify.mobile_app)",
           "notify_actions": "Gníomhartha Fógra",
           "notify_people": "Moill ar Sheachadadh Go dtí go Bhfuil Na Daoine Seo Abhaile",
           "notify_only_when_home": "Moill ar Fhógraí Go dtí go mbeidh an Duine Roghnaithe sa Bhaile",
           "notify_fire_events": "Imeachtaí Uathoibrithe a Loisceadh",
-          "notify_events": "Imeachtaí le Fógairt",
           "notify_before_end_minutes": "Fógra Réamhchríochnaithe (nóiméad roimh dheireadh)",
           "notify_live_interval_seconds": "Eatramh Nuashonraithe Beo (soicindí)",
           "notify_live_overrun_percent": "Liúntas Forríthe Nuashonraithe Beo (%)",
@@ -123,23 +123,33 @@
           "notify_icon": "Deilbhín Fógraí",
           "notify_start_message": "Formáid Teachtaireachta Tosaigh",
           "notify_finish_message": "Formáid Teachtaireachta Críochnaithe",
-          "notify_pre_complete_message": "Formáid Teachtaireachta Réamh-Chríochnaithe"
+          "notify_pre_complete_message": "Formáid Teachtaireachta Réamh-Chríochnaithe",
+          "notify_start_services": "Tús na Rothaíochta - Spriocanna Fógra",
+          "notify_finish_services": "Críoch na Rothaíochta - Spriocanna Fógra",
+          "notify_live_services": "Dul Chun Cinn Beo - Spriocanna Fógraí",
+          "notify_live_chronometer": "Uaineadóir Comhaireamh Síos Chronometer",
+          "energy_price_entity": "Praghas Fuinnimh - Aonán (roghnach)",
+          "energy_price_static": "Praghas Fuinnimh - Luach statach (roghnach)"
         },
         "data_description": {
-          "notify_service": "An tseirbhís fógraí Home Assistant le húsáid (roghnach).",
           "notify_actions": "Seicheamh gníomhaíochta roghnach Home Assistant le rith le haghaidh fógraí (scripteanna, fógairt, TTS, etc.). Má tá sé socraithe, ritheann gníomhartha roimh an tseirbhís fógra cúltaca.",
           "notify_people": "Aonáin daoine a úsáidtear le haghaidh geataí láithreachta. Nuair a bhíonn sé cumasaithe, cuirtear moill ar sheachadadh an fhógra go dtí go mbíonn duine roghnaithe amháin ar a laghad sa bhaile.",
           "notify_only_when_home": "Má tá sé cumasaithe, cuir moill ar fhógraí go dtí go mbeidh duine roghnaithe amháin ar a laghad sa bhaile.",
           "notify_fire_events": "Má tá sé cumasaithe, loiscigh imeachtaí Home Assistant le haghaidh tús agus deireadh timthrialla (ha_washdata_cycle_started agus ha_washdata_cycle_ended) chun uathoibrithe a thiomáint.",
-          "notify_events": "Cad iad na himeachtaí ar cheart fógraí a sheoladh chucu.",
           "notify_before_end_minutes": "Nóiméid roimh dheireadh measta an timthrialla chun fógra a spreagadh. Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 0.",
-          "notify_live_interval_seconds": "Cé chomh minic is a sheoltar nuashonruithe ar dhul chun cinn agus tú ag rith. Tá luachanna níos ísle níos freagraí ach ídíonn siad níos mó fógraí. Cuirtear 30 soicind ar a laghad i bhfeidhm — déantar luachanna faoi 30 s a shlánú go huathoibríoch suas go 30 s.",
+          "notify_live_interval_seconds": "Cé chomh minic is a sheoltar nuashonruithe ar dhul chun cinn agus tú ag rith. Tá luachanna níos ísle níos freagraí ach ídíonn siad níos mó fógraí. Cuirtear 30 soicind ar a laghad i bhfeidhm - déantar luachanna faoi 30 s a shlánú go huathoibríoch suas go 30 s.",
           "notify_live_overrun_percent": "Lamháil sábháilteachta os cionn an chomhairimh nuashonraithe mheasta do thimthriallta fada nó forríofa (mar shampla ceadaíonn 20% 1.2x nuashonruithe measta).",
           "notify_title": "Teideal saincheaptha le haghaidh fógraí. Tacaíonn sé le {device} ionadsealbhóir.",
           "notify_icon": "Deilbhín le húsáid le haghaidh fógraí (m.sh. mdi:washing-machine). Fág folamh chun seoladh gan deilbhín.",
           "notify_start_message": "Teachtaireacht seolta nuair a thosaíonn timthriall. Tacaíonn sé le {device} ionadsealbhóir.",
           "notify_finish_message": "Seoltar teachtaireacht nuair a chríochnaíonn timthriall. Tacaíonn sé le {device}, {duration}, {program} ionadsealbhóirí.",
-          "notify_pre_complete_message": "Teachtaireacht seolta roimh chríochnú. Tacaíonn sé le {device}, {minutes} ionadsealbhóirí."
+          "notify_pre_complete_message": "Teachtaireacht seolta roimh chríochnú. Tacaíonn sé le {device}, {minutes} ionadsealbhóirí.",
+          "notify_start_services": "Fógra a thabhairt do sheirbhís amháin nó níos mó le foláireamh a thabhairt nuair a thosaíonn timthriall (m.sh. notify.mobile_app_my_phone). Fág folamh chun fógraí tosaithe a scipeáil.",
+          "notify_finish_services": "Fógra a thabhairt do sheirbhís amháin nó níos mó chun foláireamh a thabhairt nuair a chríochnaíonn timthriall nó nuair a thagann deireadh le timthriall. Fág folamh chun fógraí críochnaithe a scipeáil.",
+          "notify_live_services": "Fógra a thabhairt do sheirbhís amháin nó níos mó chun nuashonruithe beo ar dhul chun cinn a fháil fad a bheidh an timthriall ar siúl (aip shoghluaiste compánach amháin). Fág folamh chun nuashonruithe beo a scipeáil.",
+          "notify_live_chronometer": "Nuair a bheidh sé cumasaithe, cuimsíonn gach nuashonrú beo comhaireamh síos chronometer go dtí an t-am críochnaithe measta. Ticeáil an t-amadóir fógra síos go huathoibríoch ar an ngléas idir nuashonruithe (aip chompánach Android amháin).",
+          "energy_price_entity": "Roghnaigh aonán uimhriúil a bhfuil an praghas leictreachais reatha aige (m.sh. sensor.electricity_price, ionchur_number.energy_rate). Nuair a bheidh sé socraithe, cumasaigh an coinneálaí {cost}. Bíonn tosaíocht aige ar an luach statach má tá an dá cheann cumraithe.",
+          "energy_price_static": "Praghas seasta leictreachais in aghaidh an kWh. Nuair a bheidh sé socraithe, cumasaigh an coinneálaí {cost}. Neamhaird má tá aonán cumraithe thuas. Cuir do shiombail airgeadra leis sa teimpléad teachtaireachta, e.g. {cost} €."
         }
       },
       "advanced_settings": {
@@ -189,7 +199,18 @@
           "dtw_bandwidth": "Bandaleithid DTW",
           "external_end_trigger_enabled": "Cumasaigh Truicear Seachtrach Deiridh Timthrialla",
           "external_end_trigger": "Braiteoir Seachtrach Deiridh Timthrialla",
-          "external_end_trigger_inverted": "Inbhéartaigh Loighic Truicéara (Truicear ar MHÚCHADH)"
+          "external_end_trigger_inverted": "Inbhéartaigh Loighic Truicéara (Truicear ar MHÚCHADH)",
+          "suppress_feedback_notifications": "Faoi chois Fógraí Aiseolais",
+          "pump_stuck_duration": "Tairseach(í) Foláirimh Caidéil (Caidéil Amháin)",
+          "door_sensor_entity": "Braiteoir Doras",
+          "pause_cuts_power": "Gearr Cumhacht Agus Sos",
+          "notify_unload_delay_minutes": "Moill ar Fhógra Feithimh Níocháin (nóiméad)",
+          "switch_entity": "Aonán Athraigh (chun Power Cut a chur ar sos)",
+          "delay_start_detect_enabled": "Cumasaigh Brath Tosaigh Moillithe",
+          "delay_drain_min_power": "Tús Moillithe: Taosc an Spike Min Power (W)",
+          "delay_drain_max_power": "Tús Moillithe: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Tús Moillithe: Max Drain Spike Fad (í)",
+          "delay_timeout_hours": "Tús Moillithe: Uasmhéid Am Feithimh (h)"
         },
         "data_description": {
           "apply_suggestions": "Ticeáil an bosca seo chun céim athbhreithnithe a oscailt le haghaidh luachanna molta ón algartam foghlama. Ní dhéantar aon rud a shábháil go huathoibríoch.\n\nMolta (ó fhoghlaim):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -235,7 +256,18 @@
           "dtw_bandwidth": "Uasmhéid cuartha ama (síneadh) ceadaithe mar chóimheas ré timthrialla. Ceadaíonn luachanna níos airde timthriallta an-athraitheach a mheaitseáil ach méadaíonn siad costas CPU. Réamhshocrú: 0.20 (20%).",
           "external_end_trigger_enabled": "Cumasaigh monatóireacht ar bhraiteoir dénártha seachtrach chun críochnú timthrialla a spreagadh.",
           "external_end_trigger": "Roghnaigh eintiteas braiteora dénártha. Nuair a spreagann an braiteoir seo, cuirfear deireadh leis an timthriall reatha le stádas 'críochnaithe'.",
-          "external_end_trigger_inverted": "De réir réamhshocraithe, lasann an truicear nuair a chasann an braiteoir AIR. Ticeáil an bosca seo chun é a loisceadh nuair a mhúchtar an braiteoir ina ionad."
+          "external_end_trigger_inverted": "De réir réamhshocraithe, lasann an truicear nuair a chasann an braiteoir AIR. Ticeáil an bosca seo chun é a loisceadh nuair a mhúchtar an braiteoir ina ionad.",
+          "suppress_feedback_notifications": "Nuair a bheidh sé cumasaithe, déanfaidh WashData aiseolas a rianú agus a iarraidh go hinmheánach go fóill ach ní thaispeánfar fógraí leanúnacha ag iarraidh ort timthriallta a dhearbhú. Tá sé úsáideach nuair a aimsítear timthriallta i gceart i gcónaí agus nuair a bhraitheann tú go mbíonn na leideanna ag cur as d’aird.",
+          "pump_stuck_duration": "Má tá timthriall caidéil fós ar siúl tar éis an iliomad soicind seo, cuirtear imeacht ha_washdata_pump_stuck amach uair amháin. Bain úsáid as seo chun mótair jammed a bhrath (tá gnáth-rith caidéil sump faoi bhun 60 s). Réamhshocrú: 1800 s (30 min). Cineál gléas caidéil amháin.",
+          "door_sensor_entity": "Braiteoir dénártha roghnach do dhoras an mheaisín (ar = oscailte, as = dúnta). Nuair a osclaíonn an doras le linn timthriall gníomhach, deimhneoidh WashData go bhfuil an timthriall ar sos d’aon ghnó. Tar éis don timthriall críochnú, má tá an doras fós dúnta, athraíonn an stát go 'Glan' go dtí go n-osclaítear an doras. Tabhair faoi deara: NÍ dúnadh an doras go huathoibríoch-atosú ar thimthriall ar sos - ní mór atosú a thosú de láimh tríd an gcnaipe nó an tseirbhís Lean ar aghaidh ar an Rothaíocht.",
+          "pause_cuts_power": "Nuair a bheidh tú ar sos tríd an gcnaipe nó an tseirbhís Sos Cycle, múch an t-aonán lasc cumraithe freisin. Ní thiocfaidh sé i bhfeidhm ach amháin má tá aonán lasc cumraithe don ghléas seo.",
+          "notify_unload_delay_minutes": "Seol fógra tríd an gcainéal fógartha bailchríoch tar éis don timthriall críochnú agus níor osclaíodh an doras le fada an lá seo (tá Braiteoir Doras ag teastáil). Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 60 min.",
+          "switch_entity": "An t-aonán lasc le scoránú agus é ag sos nó ag atosú. Ag teastáil nuair atá 'Gearr Cumhacht Agus Sos' cumasaithe.",
+          "delay_start_detect_enabled": "Nuair a bhíonn sé cumasaithe, braitear spíc draenála ísealchumhachta agus cumhacht fuireachais marthanach mar thús moillithe. Taispeánann an braiteoir stáit 'Fan le Tosaigh' le linn na moille. Ní rianaítear am cláir ná dul chun cinn ar bith go dtí go dtosóidh an timthriall iarbhír. Éilíonn start_threshold_w a shocrú os cionn an spike draein cumhachta.",
+          "delay_drain_min_power": "Íoschumhacht (W) a aithint mar spíc draein. Socraigh díreach os cionn leibhéal fuireachais fíor-uaire do mheaisín. Réamhshocrú: 10 W.",
+          "delay_drain_max_power": "Uaschumhacht (W) do spíc draein - caitear le pléascanna os cionn seo mar thús timthrialla iarbhír. Ba chóir go mbeadh sé faoi do shocrú start_threshold_w. Réamhshocrú: 80 W.",
+          "delay_drain_max_duration": "Ní mór don spíc draein titim siar faoi fhuinneog an draein laistigh den iliomad soicind le deimhniú. Déileáiltear le spikes níos faide mar ghníomhaíocht timthriall fíor. Réamhshocrú: 60 s.",
+          "delay_timeout_hours": "Teorainn ama sábháilteachta: má tá an meaisín fós in 'Fan le Tosú' tar éis na n-uaireanta fada seo, athshocróidh WashData go Off. Réamhshocrú: 8 h."
         }
       },
       "diagnostics": {
@@ -565,7 +597,7 @@
         }
       },
       "trim_cycle_select": {
-        "title": "Bearradh Timthrialla — Roghnaigh Timthriall",
+        "title": "Bearradh Timthrialla - Roghnaigh Timthriall",
         "description": "Roghnaigh timthriall le bearradh. ✓ = críochnaithe, ⚠ = atosaithe, ✗ = idirbhriste",
         "data": {
           "cycle_id": "Timthriall"
@@ -580,16 +612,18 @@
       },
       "trim_cycle_start": {
         "title": "Socraigh Tús Bearrtha",
-        "description": "Cuir isteach an fritháireamh nóiméad chun tús a chur le sonraí a choinneáil ó (0 = tús timthrialla).",
+        "description": "Fuinneog rothaíochta: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nTús reatha: **{current_wallclock}** (+{current_offset_min} nóim ó thús an timthrialla)\n\nRoghnaigh am tosaithe nua ag baint úsáide as an roghnóir clog thíos.",
         "data": {
-          "trim_start_min": "Tosaigh (nóiméid)"
+          "trim_start_time": "Am tosaithe nua",
+          "trim_start_min": "Tús nua (nóiméad ó thús an timthrialla)"
         }
       },
       "trim_cycle_end": {
         "title": "Socraigh Deireadh Bearrtha",
-        "description": "Cuir isteach an fritháireamh nóiméad chun stop a chur le sonraí a choinneáil ag.",
+        "description": "Fuinneog rothaíochta: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAn deireadh reatha: **{current_wallclock}** (+{current_offset_min} nóim ó thús an timthrialla)\n\nRoghnaigh am deiridh nua ag baint úsáide as an roghnóir clog thíos.",
         "data": {
-          "trim_end_min": "Deireadh (nóiméid)"
+          "trim_end_time": "Am deiridh nua",
+          "trim_end_min": "Deireadh nua (nóiméad ó thús an timthrialla)"
         }
       }
     },
@@ -613,7 +647,10 @@
       "suggestions_ready_notification_title": "WashData: Socruithe Molta Réidh ({device})",
       "suggestions_ready_notification_message": "Tuairiscíonn an braiteoir **Socruithe Molta** anois **{count}** molta inghníomhaithe.\n\nChun iad a athbhreithniú agus a chur i bhfeidhm: **Socruithe > Gléasanna & Seirbhísí > WashData > Cumraigh > Ardsocruithe > Cuir Luachanna Molta i bhFeidhm**.\n\nTá na moltaí roghnach agus taispeántar iad le haghaidh athbhreithniú sula sábhálann tú.",
       "trim_range_invalid": "Ní mór tús a bheith roimh dheireadh. Coigeartaigh do phointí bearrtha.",
-      "trim_failed": "Theip ar an mbearradh. Seans nach bhfuil an timthriall ann a thuilleadh nó go bhfuil an fhuinneog folamh."
+      "trim_failed": "Theip ar an mbearradh. Seans nach bhfuil an timthriall ann a thuilleadh nó go bhfuil an fhuinneog folamh.",
+      "auto_tune_suggestion": "{device_type} {device_title} timthriallta taibhsí braite. Athrú molta min_power: {current_min}W -> {new_min}W (gan chur i bhfeidhm go huathoibríoch).",
+      "auto_tune_title": "WashData Auto-Tune",
+      "auto_tune_fallback": "{device_type} {device_title} timthriallta taibhsí braite. Athrú molta min_power: {current_min}W -> {new_min}W (gan chur i bhfeidhm go huathoibríoch)."
     },
     "abort": {
       "no_cycles_found": "Níor aimsíodh aon timthriallta",
@@ -973,6 +1010,26 @@
           "description": "Coinnigh sonraí suas go dtí an fritháireamh seo i soicindí. Réamhshocrú = fad iomlán."
         }
       }
+    },
+    "pause_cycle": {
+      "name": "Sos Timthriall",
+      "description": "Cuir an timthriall gníomhach do ghléas WashData ar sos.",
+      "fields": {
+        "device_id": {
+          "name": "Gléas",
+          "description": "An gléas WashData le sos."
+        }
+      }
+    },
+    "resume_cycle": {
+      "name": "Atosaigh Timthriall",
+      "description": "Lean ar aghaidh le timthriall sosaithe le haghaidh gléas WashData.",
+      "fields": {
+        "device_id": {
+          "name": "Gléas",
+          "description": "An gléas WashData le atosú."
+        }
+      }
     }
   },
   "entity": {
@@ -993,13 +1050,16 @@
           "starting": "Ag Tosú",
           "running": "Ag Rith",
           "paused": "Ar Sos",
+          "user_paused": "Curtha ar sos ag an úsáideoir",
           "ending": "Ag Críochnú",
           "finished": "Críochnaithe",
           "anti_wrinkle": "Frith-Roc",
+          "delay_wait": "Ag feitheamh le Tosaigh",
           "interrupted": "Idirbhriste",
           "force_stopped": "Stopadh Éignithe",
           "rinse": "Sruthladh",
-          "unknown": "Anaithnid"
+          "unknown": "Anaithnid",
+          "clean": "Glan"
         }
       },
       "washer_program": {
@@ -1044,6 +1104,12 @@
       },
       "suggestions": {
         "name": "Socruithe Molta ar Fáil"
+      },
+      "pump_runs_today": {
+        "name": "Rití Caidéil (24 u.)"
+      },
+      "cycle_count": {
+        "name": "Comhaireamh Rothaíochta"
       }
     },
     "select": {
@@ -1057,6 +1123,12 @@
     "button": {
       "force_end_cycle": {
         "name": "Cuir Deireadh Éignithe le Timthriall"
+      },
+      "pause_cycle": {
+        "name": "Sos Timthriall"
+      },
+      "resume_cycle": {
+        "name": "Lean an Rothaíocht"
       }
     }
   },
@@ -1074,10 +1146,19 @@
       "message": "Timthriall gan aimsiú nó níl aon sonraí cumhachta ann."
     },
     "trim_failed_empty_window": {
-      "message": "Theip ar an mbearradh — níor aimsíodh an timthriall, níl aon sonraí cumhachta ann, nó tá an fhuinneog mar thoradh folamh."
+      "message": "Theip ar an mbearradh - níor aimsíodh an timthriall, níl aon sonraí cumhachta ann, nó tá an fhuinneog mar thoradh folamh."
     },
     "trim_invalid_range": {
       "message": "Caithfidh trim_end_s a bheith níos mó ná trim_start_s."
+    },
+    "device_id_required": {
+      "message": "Teastaíonn device_id bailí."
+    },
+    "cycle_id_required": {
+      "message": "Tá cycle_id bailí ag teastáil."
+    },
+    "profile_name_required": {
+      "message": "Tá profile_name bailí ag teastáil."
     }
   }
 }

@@ -90,21 +90,26 @@ async def test_watchdog_low_power_survival(mock_hass, mock_entry):
 
 @pytest.mark.asyncio
 async def test_watchdog_low_power_termination(mock_hass, mock_entry):
-    """Test that watchdog kills cycle after low_power_timeout."""
+    """Test that watchdog kills a dishwasher cycle after the 14400s device floor.
+
+    Fix A: for dishwashers the 14400s floor is applied unconditionally (even when
+    no profile is matched).  The old 3600s base timeout alone no longer triggers a
+    force-end for dishwashers.  Only silence > 14400s (4 hours) does.
+    """
     with patch("custom_components.ha_washdata.manager.ProfileStore"):
         manager = WashDataManager(mock_hass, mock_entry)
         manager.detector._state = STATE_RUNNING
         import datetime as dt_module
         start_time = dt_module.datetime.now(dt_module.timezone.utc)
         manager.detector._time_below_threshold = 1.0 # Force low power state tracking
-        
-        # Last real reading was 61 minutes ago
-        old_time = start_time - timedelta(minutes=61)
+
+        # Last real reading was 241 minutes ago (just past the 14400s / 240-min floor)
+        old_time = start_time - timedelta(minutes=241)
         manager._last_real_reading_time = old_time
-        manager._last_reading_time = old_time # Or even recent synthetic updates
-        
+        manager._last_reading_time = old_time
+
     # Check
     with patch("homeassistant.util.dt.now", return_value=start_time):
         await manager._watchdog_check_stuck_cycle(start_time)
-        
-    assert manager.detector.state == STATE_OFF, "Watchdog failed to kill stale cycle!"    
+
+    assert manager.detector.state == STATE_OFF, "Watchdog failed to kill stale cycle!"
