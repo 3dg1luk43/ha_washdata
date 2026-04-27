@@ -198,7 +198,12 @@
           "door_sensor_entity": "Датчик двери",
           "pause_cuts_power": "Отключение питания при паузе",
           "notify_unload_delay_minutes": "Задержка уведомления об ожидании стирки (мин)",
-          "switch_entity": "Объект переключения (для приостановки отключения электроэнергии)"
+          "switch_entity": "Объект переключения (для приостановки отключения электроэнергии)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Установите этот флажок, чтобы открыть шаг проверки предложенных значений алгоритма обучения. Ничего не сохраняется автоматически.\n\nПредлагается (из обучения):\n- min_power: {suggested_min_power} Вт\n- off_delay: {suggested_off_delay} с\n- watchdog_interval: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} с\n- profile_match_interval: {suggested_profile_match_interval} с\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} Вт\n- stop_threshold_w: {suggested_stop_threshold_w} Вт\n- end_energy_threshold: {suggested_end_energy_threshold} Втч\n- running_dead_zone: {suggested_running_dead_zone} с\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Дополнительный бинарный датчик для дверцы машины (вкл. = открыто, выкл. = закрыто). Когда дверца откроется во время активного цикла, WashData подтвердит, что цикл был намеренно приостановлен. Если после завершения цикла дверца все еще закрыта, состояние меняется на «Очистка», пока дверца не откроется. Примечание. Закрытие двери НЕ приводит к автоматическому возобновлению приостановленного цикла - возобновление необходимо запускать вручную с помощью кнопки возобновления цикла или службы.",
           "pause_cuts_power": "При приостановке с помощью кнопки или службы «Пауза цикла» также отключите настроенный объект переключателя. Вступает в силу только в том случае, если для этого устройства настроен объект коммутатора.",
           "notify_unload_delay_minutes": "Отправьте уведомление через канал уведомления о завершении после того, как цикл завершится и дверь не будет открыта в течение указанного количества минут (требуется датчик двери). Установите значение 0, чтобы отключить. По умолчанию: 60 мин.",
-          "switch_entity": "Объект-переключатель для переключения при приостановке или возобновлении. Требуется, если включена функция «Отключение питания при паузе»."
+          "switch_entity": "Объект-переключатель для переключения при приостановке или возобновлении. Требуется, если включена функция «Отключение питания при паузе».",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Просмотрите предлагаемые изменения",
-        "description": "WashData обнаружила {pending_count} предложенных значений для применения.\n\nИзменения для просмотра:\n{changes}\n\nПодтвердите ниже, чтобы подготовить эти значения в форме. Они не сохраняются до отправки расширенных настроек.",
+        "description": "WashData обнаружил **{pending_count}** предложенное(ых) значение(й) для применения.\n\nИзменения:\n{changes}\n\n✅ Отметьте флажок ниже и нажмите **Отправить**, чтобы немедленно применить и сохранить эти изменения.\n❌ Оставьте флажок снятым и нажмите **Отправить**, чтобы отменить и вернуться назад.",
         "data": {
-          "confirm_apply_suggestions": "Подготовить предложенные значения в расширенных настройках"
+          "confirm_apply_suggestions": "Применить и сохранить эти изменения"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Завершение",
           "finished": "Завершено",
           "anti_wrinkle": "Защита от морщин",
+          "delay_wait": "Waiting to Start",
           "interrupted": "Прервано",
           "force_stopped": "Принудительная остановка",
           "rinse": "Полоскание",

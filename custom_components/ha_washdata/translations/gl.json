@@ -198,7 +198,12 @@
           "door_sensor_entity": "Sensor de porta",
           "pause_cuts_power": "Cortar a enerxía ao facer unha pausa",
           "notify_unload_delay_minutes": "Atraso da notificación de espera de lavandería (min)",
-          "switch_entity": "Cambiar a entidade (para o corte de enerxía en pausa)"
+          "switch_entity": "Cambiar a entidade (para o corte de enerxía en pausa)",
+          "delay_start_detect_enabled": "Activar a detección de inicio retardado",
+          "delay_drain_min_power": "Inicio diferido: Potencia mínima do pico de drenaxe (W)",
+          "delay_drain_max_power": "Inicio diferido: Potencia máxima de pico de drenaxe (W)",
+          "delay_drain_max_duration": "Inicio diferido: Duración máxima do pico de drenaxe (s)",
+          "delay_timeout_hours": "Inicio diferido: tempo de espera máximo (h)"
         },
         "data_description": {
           "apply_suggestions": "Marque esta caixa para abrir un paso de revisión dos valores suxeridos do algoritmo de aprendizaxe. Non se garda nada automaticamente.\n\nSuxerido (de aprendizaxe):\n- Potencia_mín: {suggested_min_power} W\n- retardo_desactivación: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- tolerancia_duración: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- límite_enerxético_final: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Sensor binario opcional para a porta da máquina (encendido = aberto, apagado = pechado). Cando a porta se abre durante un ciclo activo, WashData confirmará o ciclo como pausado intencionalmente. Despois de finalizar o ciclo, se a porta aínda está pechada, o estado cambia a \"Limpar\" ata que se abra a porta. Nota: pechar a porta NON reanuda automaticamente un ciclo en pausa; a continuación debe activarse manualmente mediante o botón Reanudar o ciclo ou o servizo.",
           "pause_cuts_power": "Ao facer unha pausa mediante o botón ou o servizo Pause Cycle, tamén desactiva a entidade de conmutación configurada. Só ten efecto se se configura unha entidade de cambio para este dispositivo.",
           "notify_unload_delay_minutes": "Envía unha notificación a través da canle de notificación de finalización despois de que o ciclo remate e a porta non se abriu durante tantos minutos (require sensor de porta). Establécese en 0 para desactivar. Por defecto: 60 min.",
-          "switch_entity": "A entidade de conmutación para alternar ao pausar ou retomar. Necesario cando se activa \"Cortar a enerxía ao facer unha pausa\"."
+          "switch_entity": "A entidade de conmutación para alternar ao pausar ou retomar. Necesario cando se activa \"Cortar a enerxía ao facer unha pausa\".",
+          "delay_start_detect_enabled": "Cando está activado, detéctase como un inicio atrasado un breve pico de drenaxe de baixa potencia seguido dunha potencia en espera sostida. O sensor de estado mostra \"Esperando para comezar\" durante o atraso. Non se fai un seguimento do tempo nin do progreso do programa ata que comeza realmente o ciclo. Require que start_threshold_w se configure por riba da potencia do pico de drenaxe.",
+          "delay_drain_min_power": "Potencia mínima (W) para recoñecer como un pico de drenaxe. Establécese xusto por encima do nivel de espera de apagado real da súa máquina. Predeterminado: 10 W.",
+          "delay_drain_max_power": "Potencia máxima (W) para un pico de drenaxe: as ráfagas por riba deste trátanse como un inicio de ciclo real. Debe estar por debaixo da túa configuración start_threshold_w. Predeterminado: 80 W.",
+          "delay_drain_max_duration": "O pico de drenaxe debe caer debaixo da xanela de drenaxe dentro destes segundos para confirmarse. Os picos máis longos trátanse como actividade do ciclo real. Por defecto: 60 s.",
+          "delay_timeout_hours": "Tempo de espera de seguridade: se a máquina aínda está en \"Esperando para iniciar\" despois de tantas horas, WashData restablecerá a Desactivado. Por defecto: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Revisa os cambios suxeridos",
-        "description": "WashData atopou {pending_count} valores suxeridos para aplicar.\n\nCambios para revisar:\n{changes}\n\nConfirma a continuación para organizar estes valores no formulario. Non se gardan ata que envíes Configuración avanzada.",
+        "description": "WashData atopou **{pending_count}** valor(s) suxerido(s) para aplicar.\n\nCambios:\n{changes}\n\n✅ Marca a caixa de abaixo e fai clic en **Enviar** para aplicar e gardar estes cambios inmediatamente.\n❌ Déixao desmarcado e fai clic en **Enviar** para cancelar e volver.",
         "data": {
-          "confirm_apply_suggestions": "Pon os valores suxeridos na configuración avanzada"
+          "confirm_apply_suggestions": "Aplica e garda estes cambios"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Finalización",
           "finished": "Rematou",
           "anti_wrinkle": "Anti-engurras",
+          "delay_wait": "Agardando para comezar",
           "interrupted": "Interrompido",
           "force_stopped": "Forza detida",
           "rinse": "Enxágüe",

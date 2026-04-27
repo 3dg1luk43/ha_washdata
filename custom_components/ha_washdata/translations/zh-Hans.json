@@ -198,7 +198,12 @@
           "door_sensor_entity": "门磁",
           "pause_cuts_power": "暂停时切断电源",
           "notify_unload_delay_minutes": "洗衣等待通知延迟（分钟）",
-          "switch_entity": "开关实体（用于暂停断电）"
+          "switch_entity": "开关实体（用于暂停断电）",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "选中此框可打开学习算法建议值的检查步骤。没有任何内容会自动保存。\n\n建议（来自学习）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "用于机器门的可选二进制传感器（开=打开，关=关闭）。当门在活动周期期间打开时，WashData 将确认该周期是有意暂停的。循环结束后，如果门仍然关闭，则状态更改为“清洁”，直到门打开。注意：关上门不会自动恢复暂停的循环 - 必须通过“恢复循环”按钮或服务手动触发恢复。",
           "pause_cuts_power": "通过“暂停循环”按钮或服务暂停时，还要关闭配置的开关实体。仅当为该设备配置了交换实体时才生效。",
           "notify_unload_delay_minutes": "循环结束且门在这么多分钟内未打开后，通过完成通知通道发送通知（需要门传感器）。设置为 0 以禁用。默认值：60 分钟",
-          "switch_entity": "暂停或恢复时要切换的开关实体。启用“暂停时切断电源”时需要。"
+          "switch_entity": "暂停或恢复时要切换的开关实体。启用“暂停时切断电源”时需要。",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "查看建议的更改",
-        "description": "WashData 发现 {pending_count} 个要应用的建议值。\n\n审查变更：\n{changes}\n\n确认以下内容以在表单中暂存这些值。在您提交高级设置之前，它们不会保存。",
+        "description": "WashData 找到了 **{pending_count}** 个建议值待应用。\n\n变更内容：\n{changes}\n\n✅ 勾选下方复选框并点击**提交**，立即应用并保存这些变更。\n❌ 取消勾选并点击**提交**以取消操作并返回。",
         "data": {
-          "confirm_apply_suggestions": "在高级设置中暂存建议值"
+          "confirm_apply_suggestions": "应用并保存这些变更"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "结束",
           "finished": "完成的",
           "anti_wrinkle": "抗皱",
+          "delay_wait": "Waiting to Start",
           "interrupted": "被打断",
           "force_stopped": "强制停止",
           "rinse": "冲洗",

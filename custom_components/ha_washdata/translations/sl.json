@@ -198,7 +198,12 @@
           "door_sensor_entity": "Senzor za vrata",
           "pause_cuts_power": "Prekinite napajanje med premorom",
           "notify_unload_delay_minutes": "Zakasnitev obvestila o čakanju na perilo (min.)",
-          "switch_entity": "Preklopna entiteta (za premor izklop napajanja)"
+          "switch_entity": "Preklopna entiteta (za premor izklop napajanja)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Označite to polje, če želite odpreti korak pregleda za predlagane vrednosti iz učnega algoritma. Nič se samodejno ne shrani.\n\nPredlagano (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Izbirni binarni senzor za vrata stroja (vklopljeno = odprto, izklopljeno = zaprto). Ko se vrata odprejo med aktivnim ciklom, bo WashData potrdil, da je cikel namerno zaustavljen. Če so vrata po koncu cikla še zaprta, se stanje spremeni v »Čisto«, dokler se vrata ne odprejo. Opomba: zapiranje vrat NE samodejno nadaljuje zaustavljenega cikla - nadaljevanje je treba sprožiti ročno prek gumba Nadaljuj cikel ali storitve.",
           "pause_cuts_power": "Pri premoru prek gumba Pause Cycle ali storitve izklopite tudi konfigurirano entiteto stikala. Učinkuje le, če je za to napravo konfigurirana entiteta stikala.",
           "notify_unload_delay_minutes": "Pošljite obvestilo prek kanala za obveščanje o zaključku, ko se cikel konča in vrata niso bila odprta toliko minut (potreben je senzor za vrata). Nastavite na 0, da onemogočite. Privzeto: 60 min.",
-          "switch_entity": "Preklopna entiteta, ki jo želite preklopiti, ko zaustavite ali nadaljujete. Zahtevano, ko je omogočena možnost »Prekini napajanje ob premoru«."
+          "switch_entity": "Preklopna entiteta, ki jo želite preklopiti, ko zaustavite ali nadaljujete. Zahtevano, ko je omogočena možnost »Prekini napajanje ob premoru«.",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Pregled predlaganih sprememb",
-        "description": "WashData je našel {pending_count} predlaganih vrednosti za uporabo.\n\nSpremembe za pregled:\n{changes}\n\nSpodaj potrdite, da naložite te vrednosti v obrazec. Shranijo se šele, ko oddate napredne nastavitve.",
+        "description": "WashData je našel **{pending_count}** predlagano(ih) vrednost(i) za uporabo.\n\nSpremembe:\n{changes}\n\n✅ Označite polje spodaj in kliknite **Pošlji**, da takoj uporabite in shranite te spremembe.\n❌ Pustite neoznačeno in kliknite **Pošlji** za preklic in vrnitev nazaj.",
         "data": {
-          "confirm_apply_suggestions": "Naloži predlagane vrednosti v napredne nastavitve"
+          "confirm_apply_suggestions": "Uporabi in shrani te spremembe"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Zaključuje se",
           "finished": "Končano",
           "anti_wrinkle": "Zaščita pred gubami",
+          "delay_wait": "Waiting to Start",
           "interrupted": "Prekinjeno",
           "force_stopped": "Prisilno ustavljeno",
           "rinse": "Izpiranje",

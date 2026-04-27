@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Athbhreithnigh Athruithe Molta",
-        "description": "Fuair WashData {pending_count} luachanna molta le cur i bhfeidhm.\n\nAthruithe ar athbhreithniú:\n{changes}\n\nDeimhnigh thíos na luachanna seo a chéimniú san fhoirm. Ní shábhálfar iad go dtí go gcuireann tú Ardsocruithe isteach.",
+        "description": "Aimsíodh WashData **{pending_count}** luach(anna) molta le cur i bhfeidhm.\n\nAthruithe:\n{changes}\n\n✅ Ticeáil an bosca thíos agus cliceáil **Cuir isteach** chun iarratas a dhéanamh agus sábháil na hathruithe seo láithreach.\n❌ Fág gan é a sheiceáil agus cliceáil **Submit** chun é a chur ar ceal agus dul ar ais.",
         "data": {
-          "confirm_apply_suggestions": "Céimnigh na luachanna molta in Ardsocruithe"
+          "confirm_apply_suggestions": "Cuir na hathruithe seo i bhfeidhm agus sábháil iad"
         }
       },
       "settings": {
@@ -205,7 +205,12 @@
           "door_sensor_entity": "Braiteoir Doras",
           "pause_cuts_power": "Gearr Cumhacht Agus Sos",
           "notify_unload_delay_minutes": "Moill ar Fhógra Feithimh Níocháin (nóiméad)",
-          "switch_entity": "Aonán Athraigh (chun Power Cut a chur ar sos)"
+          "switch_entity": "Aonán Athraigh (chun Power Cut a chur ar sos)",
+          "delay_start_detect_enabled": "Cumasaigh Brath Tosaigh Moillithe",
+          "delay_drain_min_power": "Tús Moillithe: Taosc an Spike Min Power (W)",
+          "delay_drain_max_power": "Tús Moillithe: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Tús Moillithe: Max Drain Spike Fad (í)",
+          "delay_timeout_hours": "Tús Moillithe: Uasmhéid Am Feithimh (h)"
         },
         "data_description": {
           "apply_suggestions": "Ticeáil an bosca seo chun céim athbhreithnithe a oscailt le haghaidh luachanna molta ón algartam foghlama. Ní dhéantar aon rud a shábháil go huathoibríoch.\n\nMolta (ó fhoghlaim):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -257,7 +262,12 @@
           "door_sensor_entity": "Braiteoir dénártha roghnach do dhoras an mheaisín (ar = oscailte, as = dúnta). Nuair a osclaíonn an doras le linn timthriall gníomhach, deimhneoidh WashData go bhfuil an timthriall ar sos d’aon ghnó. Tar éis don timthriall críochnú, má tá an doras fós dúnta, athraíonn an stát go 'Glan' go dtí go n-osclaítear an doras. Tabhair faoi deara: NÍ dúnadh an doras go huathoibríoch-atosú ar thimthriall ar sos - ní mór atosú a thosú de láimh tríd an gcnaipe nó an tseirbhís Lean ar aghaidh ar an Rothaíocht.",
           "pause_cuts_power": "Nuair a bheidh tú ar sos tríd an gcnaipe nó an tseirbhís Sos Cycle, múch an t-aonán lasc cumraithe freisin. Ní thiocfaidh sé i bhfeidhm ach amháin má tá aonán lasc cumraithe don ghléas seo.",
           "notify_unload_delay_minutes": "Seol fógra tríd an gcainéal fógartha bailchríoch tar éis don timthriall críochnú agus níor osclaíodh an doras le fada an lá seo (tá Braiteoir Doras ag teastáil). Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 60 min.",
-          "switch_entity": "An t-aonán lasc le scoránú agus é ag sos nó ag atosú. Ag teastáil nuair atá 'Gearr Cumhacht Agus Sos' cumasaithe."
+          "switch_entity": "An t-aonán lasc le scoránú agus é ag sos nó ag atosú. Ag teastáil nuair atá 'Gearr Cumhacht Agus Sos' cumasaithe.",
+          "delay_start_detect_enabled": "Nuair a bhíonn sé cumasaithe, braitear spíc draenála ísealchumhachta agus cumhacht fuireachais marthanach mar thús moillithe. Taispeánann an braiteoir stáit 'Fan le Tosaigh' le linn na moille. Ní rianaítear am cláir ná dul chun cinn ar bith go dtí go dtosóidh an timthriall iarbhír. Éilíonn start_threshold_w a shocrú os cionn an spike draein cumhachta.",
+          "delay_drain_min_power": "Íoschumhacht (W) a aithint mar spíc draein. Socraigh díreach os cionn leibhéal fuireachais fíor-uaire do mheaisín. Réamhshocrú: 10 W.",
+          "delay_drain_max_power": "Uaschumhacht (W) do spíc draein - caitear le pléascanna os cionn seo mar thús timthrialla iarbhír. Ba chóir go mbeadh sé faoi do shocrú start_threshold_w. Réamhshocrú: 80 W.",
+          "delay_drain_max_duration": "Ní mór don spíc draein titim siar faoi fhuinneog an draein laistigh den iliomad soicind le deimhniú. Déileáiltear le spikes níos faide mar ghníomhaíocht timthriall fíor. Réamhshocrú: 60 s.",
+          "delay_timeout_hours": "Teorainn ama sábháilteachta: má tá an meaisín fós in 'Fan le Tosú' tar éis na n-uaireanta fada seo, athshocróidh WashData go Off. Réamhshocrú: 8 h."
         }
       },
       "diagnostics": {
@@ -1044,6 +1054,7 @@
           "ending": "Ag Críochnú",
           "finished": "Críochnaithe",
           "anti_wrinkle": "Frith-Roc",
+          "delay_wait": "Ag feitheamh le Tosaigh",
           "interrupted": "Idirbhriste",
           "force_stopped": "Stopadh Éignithe",
           "rinse": "Sruthladh",

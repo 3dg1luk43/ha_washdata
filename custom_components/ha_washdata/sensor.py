@@ -47,6 +47,7 @@ from .const import (
     STATE_ENDING,
     STATE_FINISHED,
     STATE_ANTI_WRINKLE,
+    STATE_DELAY_WAIT,
     STATE_INTERRUPTED,
     STATE_FORCE_STOPPED,
     STATE_RINSE,
@@ -237,6 +238,7 @@ class WasherStateSensor(WasherBaseSensor):
                 STATE_ENDING,
                 STATE_FINISHED,
                 STATE_ANTI_WRINKLE,
+                STATE_DELAY_WAIT,
                 STATE_INTERRUPTED,
                 STATE_FORCE_STOPPED,
                 STATE_RINSE,
@@ -362,13 +364,13 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
     @property
     def native_unit_of_measurement(self) -> str | None:  # type: ignore[override]
         """Return the unit of measurement."""
-        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE):
+        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE, STATE_DELAY_WAIT):
             return None
         return "min"
 
     @property
     def native_value(self):  # type: ignore[override]
-        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE):
+        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE, STATE_DELAY_WAIT):
             return None
         if self._manager.time_remaining is not None:
             return int(self._manager.time_remaining / 60)

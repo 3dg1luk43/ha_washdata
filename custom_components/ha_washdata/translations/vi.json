@@ -198,7 +198,12 @@
           "door_sensor_entity": "Cảm biến cửa",
           "pause_cuts_power": "Cắt điện khi tạm dừng",
           "notify_unload_delay_minutes": "Độ trễ thông báo chờ giặt (phút)",
-          "switch_entity": "Chuyển đổi thực thể (để tạm dừng cắt điện)"
+          "switch_entity": "Chuyển đổi thực thể (để tạm dừng cắt điện)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Chọn hộp này để mở bước xem xét các giá trị được đề xuất từ ​​thuật toán học. Không có gì được lưu tự động.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Cảm biến nhị phân tùy chọn cho cửa máy (bật = mở, tắt = đóng). Khi cửa mở trong một chu trình đang hoạt động, WashData sẽ xác nhận chu trình đó được tạm dừng một cách có chủ ý. Sau khi chu trình kết thúc, nếu cửa vẫn đóng, trạng thái sẽ chuyển sang 'Sạch' cho đến khi cửa được mở. Lưu ý: việc đóng cửa KHÔNG tự động tiếp tục lại chu trình đã tạm dừng - việc tiếp tục phải được kích hoạt thủ công thông qua nút hoặc dịch vụ Tiếp tục chu trình.",
           "pause_cuts_power": "Khi tạm dừng thông qua nút hoặc dịch vụ Tạm dừng Chu kỳ, hãy tắt cả thực thể chuyển đổi đã định cấu hình. Chỉ có hiệu lực nếu thực thể chuyển đổi được định cấu hình cho thiết bị này.",
           "notify_unload_delay_minutes": "Gửi thông báo qua kênh thông báo kết thúc sau khi chu trình kết thúc và cửa chưa được mở trong nhiều phút này (yêu cầu Cảm biến cửa). Đặt thành 0 để tắt. Mặc định: 60 phút.",
-          "switch_entity": "Thực thể chuyển đổi để chuyển đổi khi tạm dừng hoặc tiếp tục. Bắt buộc khi bật 'Cắt nguồn khi tạm dừng'."
+          "switch_entity": "Thực thể chuyển đổi để chuyển đổi khi tạm dừng hoặc tiếp tục. Bắt buộc khi bật 'Cắt nguồn khi tạm dừng'.",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Xem lại các thay đổi được đề xuất",
-        "description": "WashData đã tìm thấy {pending_count} giá trị được đề xuất để áp dụng.\n\nNhững thay đổi để xem xét:\n{changes}\n\nXác nhận bên dưới để sắp xếp các giá trị này trong biểu mẫu. Chúng không được lưu cho đến khi bạn gửi Cài đặt nâng cao.",
+        "description": "WashData tìm thấy **{pending_count}** giá trị được đề xuất để áp dụng.\n\nThay đổi:\n{changes}\n\n✅ Đánh dấu vào ô bên dưới và nhấp **Gửi** để áp dụng và lưu các thay đổi này ngay lập tức.\n❌ Để không đánh dấu và nhấp **Gửi** để hủy và quay lại.",
         "data": {
-          "confirm_apply_suggestions": "Giai đoạn các giá trị được đề xuất trong Cài đặt nâng cao"
+          "confirm_apply_suggestions": "Áp dụng và lưu các thay đổi này"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Kết thúc",
           "finished": "Hoàn thành",
           "anti_wrinkle": "Chống nhăn",
+          "delay_wait": "Waiting to Start",
           "interrupted": "Bị gián đoạn",
           "force_stopped": "Buộc dừng",
           "rinse": "Rửa sạch",

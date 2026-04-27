@@ -198,7 +198,12 @@
           "door_sensor_entity": "Դռների սենսոր",
           "pause_cuts_power": "Անջատեք սնուցումը դադարի ժամանակ",
           "notify_unload_delay_minutes": "Լվացքի սպասման ծանուցման ուշացում (րոպե)",
-          "switch_entity": "Անջատիչ սարք (սնուցման անջատման դադարեցման համար)"
+          "switch_entity": "Անջատիչ սարք (սնուցման անջատման դադարեցման համար)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Նշեք այս վանդակը՝ ուսումնական ալգորիթմից առաջարկվող արժեքների վերանայման քայլ բացելու համար: Ոչինչ ինքնաբերաբար չի պահպանվում:\n\nԱռաջարկվում է (սովորելուց).\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Լրացուցիչ երկուական սենսոր մեքենայի դռան համար (միացված = բաց, անջատված = փակ): Երբ դուռը բացվում է ակտիվ ցիկլի ընթացքում, WashData-ն կհաստատի ցիկլը որպես միտումնավոր դադար: Ցիկլը ավարտվելուց հետո, եթե դուռը դեռ փակ է, վիճակը փոխվում է «Մաքուր» մինչև դուռը բացվի: Նշում․ դուռը փակելով չի վերսկսվում դադարեցված ցիկլը. ռեզյումեն պետք է գործարկվի ձեռքով Resume Cycle կոճակի կամ ծառայության միջոցով:",
           "pause_cuts_power": "Pause Cycle կոճակի կամ ծառայության միջոցով դադարեցնելիս անջատեք նաև կազմաձևված անջատիչ սարքը: Գործում է միայն այն դեպքում, եթե անջատիչի կազմաձևված է այս սարքի համար:",
           "notify_unload_delay_minutes": "Ուղարկեք ծանուցում ավարտի ծանուցման ալիքով այն բանից հետո, երբ ցիկլը ավարտվի, և դուռը այսքան րոպե չի բացվել (պահանջվում է Դռան ցուցիչ): Անջատելու համար դրեք 0: Կանխադրված՝ 60 րոպե:",
-          "switch_entity": "Անջատիչի միավորը պետք է փոխարկվի դադարի կամ վերսկսման ժամանակ: Պահանջվում է, երբ միացված է «Կտրել սնուցումը դադարեցման ժամանակ»:"
+          "switch_entity": "Անջատիչի միավորը պետք է փոխարկվի դադարի կամ վերսկսման ժամանակ: Պահանջվում է, երբ միացված է «Կտրել սնուցումը դադարեցման ժամանակ»:",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Վերանայեք առաջարկվող փոփոխությունները",
-        "description": "WashData-ն գտել է {pending_count} առաջարկվող արժեքներ կիրառելու համար:\n\nՓոփոխություններ վերանայման համար.\n{changes}\n\nՀաստատեք ստորև՝ այս արժեքները ձևի մեջ բեմադրելու համար: Դրանք չեն պահվում, մինչև չներկայացնեք Ընդլայնված կարգավորումները:",
+        "description": "WashData-ն գտել է **{pending_count}** առաջարկված արժեք(ներ) կիրառելու համար:\n\nՓոփոխություններ.\n{changes}\n\n✅ Նշեք ստորև բերված վանդակը և սեղմեք **Ուղարկել`** այս փոփոխությունները անմիջապես կիրառելու և պահպանելու համար:\n❌ Թողեք չնշված և սեղմեք **Ուղարկել`** չեղարկելու և վերադառնալու համար:",
         "data": {
-          "confirm_apply_suggestions": "Բեմադրեք առաջարկվող արժեքները Ընդլայնված կարգավորումներում"
+          "confirm_apply_suggestions": "Կիրառել և պահպանել այս փոփոխությունները"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Ավարտ",
           "finished": "Ավարտված",
           "anti_wrinkle": "Հակակնճիռների դեմ",
+          "delay_wait": "Waiting to Start",
           "interrupted": "Ընդհատվել է",
           "force_stopped": "Ուժը դադարեցրեց",
           "rinse": "Ողողել",

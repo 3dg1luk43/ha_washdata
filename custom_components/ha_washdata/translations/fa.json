@@ -198,7 +198,12 @@
           "door_sensor_entity": "سنسور درب",
           "pause_cuts_power": "قطع برق هنگام مکث",
           "notify_unload_delay_minutes": "تأخیر اعلان انتظار لباسشویی (دقیقه)",
-          "switch_entity": "سوئیچ نهاد (برای توقف موقت قطع برق)"
+          "switch_entity": "سوئیچ نهاد (برای توقف موقت قطع برق)",
+          "delay_start_detect_enabled": "تشخیص شروع تاخیری را فعال کنید",
+          "delay_drain_min_power": "شروع تاخیری: حداقل توان اسپایک تخلیه (W)",
+          "delay_drain_max_power": "شروع تأخیر: حداکثر توان تخلیه اسپایک (W)",
+          "delay_drain_max_duration": "شروع تاخیری: حداکثر مدت زمان سنبله تخلیه",
+          "delay_timeout_hours": "شروع تاخیر: حداکثر زمان انتظار (ساعت)"
         },
         "data_description": {
           "apply_suggestions": "این کادر را علامت بزنید تا یک مرحله بررسی برای مقادیر پیشنهادی از الگوریتم یادگیری باز شود. هیچ چیزی به طور خودکار ذخیره نمی شود.\n\nپیشنهادی (از یادگیری):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "سنسور باینری اختیاری برای درب دستگاه (روشن = باز، خاموش = بسته). هنگامی که در در طول یک چرخه فعال باز می شود، WashData چرخه را به عنوان توقف عمدی تایید می کند. پس از پایان چرخه، اگر درب همچنان بسته باشد، وضعیت به \"تمیز\" تغییر می کند تا درب باز شود. توجه: بستن در، چرخه توقف موقت را به طور خودکار از سر نمی گیرد - رزومه باید به صورت دستی از طریق دکمه یا سرویس چرخه از سرگیری فعال شود.",
           "pause_cuts_power": "هنگام مکث از طریق دکمه یا سرویس چرخه مکث، موجودیت سوئیچ پیکربندی شده را نیز خاموش کنید. فقط در صورتی اعمال می شود که یک موجودیت سوئیچ برای این دستگاه پیکربندی شده باشد.",
           "notify_unload_delay_minutes": "پس از پایان چرخه و باز نشدن درب برای این چند دقیقه، از طریق کانال اعلان پایان، اعلان ارسال کنید (نیاز به سنسور درب دارد). برای غیرفعال کردن، روی 0 تنظیم کنید. پیش‌فرض: 60 دقیقه",
-          "switch_entity": "موجودیت سوئیچ برای تغییر هنگام توقف یا از سرگیری. زمانی که «قطع برق هنگام مکث» فعال باشد، لازم است."
+          "switch_entity": "موجودیت سوئیچ برای تغییر هنگام توقف یا از سرگیری. زمانی که «قطع برق هنگام مکث» فعال باشد، لازم است.",
+          "delay_start_detect_enabled": "هنگامی که فعال می شود، یک جهش کوتاه تخلیه کم مصرف و به دنبال آن قدرت آماده به کار پایدار به عنوان شروع تاخیری تشخیص داده می شود. حسگر حالت \"در انتظار شروع\" را در طول تاخیر نشان می دهد. هیچ زمان یا پیشرفت برنامه تا زمانی که چرخه واقعاً شروع نشود ردیابی نمی شود. به start_threshold_w نیاز دارد که بالاتر از توان لوله تخلیه تنظیم شود.",
+          "delay_drain_min_power": "حداقل قدرت (W) برای تشخیص به عنوان سنبله تخلیه. درست بالاتر از سطح آماده به کار واقعی دستگاه خود تنظیم کنید. پیش فرض: 10 وات",
+          "delay_drain_max_power": "حداکثر توان (W) برای یک سنبله تخلیه - انفجارهای بالاتر از این به عنوان یک شروع چرخه واقعی در نظر گرفته می شود. باید زیر تنظیمات start_threshold_w شما باشد. پیش فرض: 80 وات",
+          "delay_drain_max_duration": "سنبله تخلیه باید در عرض این چند ثانیه به زیر پنجره تخلیه برود تا تأیید شود. سنبله های طولانی تر به عنوان فعالیت چرخه واقعی در نظر گرفته می شوند. پیش‌فرض: 60 ثانیه",
+          "delay_timeout_hours": "مهلت زمانی ایمنی: اگر دستگاه پس از این چند ساعت همچنان در «در انتظار راه‌اندازی» باشد، WashData به حالت خاموش بازنشانی می‌شود. پیش‌فرض: 8 ساعت"
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "بررسی تغییرات پیشنهادی",
-        "description": "WashData {pending_count} مقدار پیشنهادی را برای اعمال یافت.\n\nتغییرات برای بررسی:\n{changes}\n\nبرای مرحله بندی این مقادیر در فرم زیر را تأیید کنید. آنها تا زمانی که تنظیمات پیشرفته را ارسال نکنید ذخیره نمی شوند.",
+        "description": "WashData **{pending_count}** مقدار(های) پیشنهادی برای اعمال پیدا شد.\n\nتغییرات:\n{changes}\n\n✅ کادر زیر را علامت بزنید و روی **ارسال** کلیک کنید تا این تغییرات اعمال شود و فوراً ذخیره شوند.\n❌ آن را بدون علامت بگذارید و برای لغو و بازگشت روی **ارسال** کلیک کنید.",
         "data": {
-          "confirm_apply_suggestions": "مقادیر پیشنهادی را در تنظیمات پیشرفته قرار دهید"
+          "confirm_apply_suggestions": "این تغییرات را اعمال و ذخیره کنید"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "پایان یافتن",
           "finished": "تمام شد",
           "anti_wrinkle": "ضد چروک",
+          "delay_wait": "در انتظار شروع",
           "interrupted": "قطع شد",
           "force_stopped": "اجباری متوقف شد",
           "rinse": "آبکشی",

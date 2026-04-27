@@ -198,7 +198,12 @@
           "door_sensor_entity": "Kapı Sensörü",
           "pause_cuts_power": "Duraklatıldığında Gücü Kesin",
           "notify_unload_delay_minutes": "Çamaşır Bekleniyor Bildirim Gecikmesi (dk)",
-          "switch_entity": "Varlık Değiştir (Güç Kesintisini Duraklatmak için)"
+          "switch_entity": "Varlık Değiştir (Güç Kesintisini Duraklatmak için)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Öğrenme algoritmasından önerilen değerlere yönelik bir inceleme adımı açmak için bu kutuyu işaretleyin. Hiçbir şey otomatik olarak kaydedilmez.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} sn\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Makine kapısı için opsiyonel ikili sensör (açık = açık, kapalı = kapalı). Etkin bir döngü sırasında kapı açıldığında, WashData döngünün kasıtlı olarak duraklatıldığını onaylayacaktır. Döngü sona erdikten sonra kapı hala kapalıysa, kapı açılıncaya kadar durum 'Temiz' olarak değişir. Not: Kapının kapatılması, duraklatılmış bir döngüyü otomatik olarak DEVAM ETMEZ; devam ettirme, Döngüyü Sürdür düğmesi veya hizmet aracılığıyla manuel olarak tetiklenmelidir.",
           "pause_cuts_power": "Döngüyü Duraklat düğmesi veya hizmeti aracılığıyla duraklatırken, yapılandırılmış anahtar varlığını da kapatın. Yalnızca bu cihaz için bir anahtar varlığı yapılandırıldığında etkili olur.",
           "notify_unload_delay_minutes": "Döngü bittikten ve kapı bu kadar dakika boyunca açılmadıktan sonra bitiş bildirimi kanalı aracılığıyla bir bildirim gönderin (Kapı Sensörü gerektirir). Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 60 dk.",
-          "switch_entity": "Duraklatırken veya devam ettirirken geçiş yapılacak anahtar varlığı. 'Duraklatıldığında Gücü Kes' etkinleştirildiğinde gereklidir."
+          "switch_entity": "Duraklatırken veya devam ettirirken geçiş yapılacak anahtar varlığı. 'Duraklatıldığında Gücü Kes' etkinleştirildiğinde gereklidir.",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Önerilen Değişiklikleri İnceleyin",
-        "description": "WashData, uygulanacak {pending_count} önerilen değer buldu.\n\nİncelenecek değişiklikler:\n{changes}\n\nBu değerleri forma yerleştirmek için aşağıyı onaylayın. Siz Gelişmiş Ayarları gönderene kadar kaydedilmezler.",
+        "description": "WashData uygulanacak **{pending_count}** önerilen değer buldu.\n\nDeğişiklikler:\n{changes}\n\n✅ Aşağıdaki kutuyu işaretleyin ve bu değişiklikleri hemen uygulamak ve kaydetmek için **Gönder**'e tıklayın.\n❌ İşaretsiz bırakın ve iptal edip geri dönmek için **Gönder**'e tıklayın.",
         "data": {
-          "confirm_apply_suggestions": "Önerilen değerleri Gelişmiş Ayarlar'da aşamalandırın"
+          "confirm_apply_suggestions": "Bu değişiklikleri uygula ve kaydet"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Bitiş",
           "finished": "Bitti",
           "anti_wrinkle": "Kırışıklık Karşıtı",
+          "delay_wait": "Waiting to Start",
           "interrupted": "Kesintiye uğradı",
           "force_stopped": "Zorla Durduruldu",
           "rinse": "Durulmak",

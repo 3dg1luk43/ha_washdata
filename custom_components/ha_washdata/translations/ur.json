@@ -198,7 +198,12 @@
           "door_sensor_entity": "دروازے کا سینسر",
           "pause_cuts_power": "موقوف کرتے وقت پاور کاٹ دیں۔",
           "notify_unload_delay_minutes": "لانڈری کے انتظار کی اطلاع میں تاخیر (منٹ)",
-          "switch_entity": "سوئچ ہستی (پاور کٹ کو روکنے کے لیے)"
+          "switch_entity": "سوئچ ہستی (پاور کٹ کو روکنے کے لیے)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "سیکھنے کے الگورتھم سے تجویز کردہ اقدار کے لیے جائزہ لینے کا مرحلہ کھولنے کے لیے اس باکس کو چیک کریں۔ کچھ بھی خود بخود محفوظ نہیں ہوتا ہے۔\n\nتجویز کردہ (سیکھنے سے):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "مشین کے دروازے کے لیے اختیاری بائنری سینسر (آن = اوپن، آف = بند)۔ جب ایک فعال سائیکل کے دوران دروازہ کھلتا ہے، تو WashData سائیکل کی تصدیق کرے گا جیسا کہ جان بوجھ کر موقوف کیا گیا ہے۔ سائیکل ختم ہونے کے بعد، اگر دروازہ ابھی بھی بند ہے، تو حالت اس وقت تک 'کلین' میں بدل جاتی ہے جب تک کہ دروازہ کھلا نہ ہو۔ نوٹ: دروازہ بند کرنے سے رکے ہوئے سائیکل کو خودکار طور پر دوبارہ شروع نہیں کیا جاتا ہے - دوبارہ شروع کرنے کو دستی طور پر ریزیومے سائیکل بٹن یا سروس کے ذریعے متحرک ہونا چاہیے۔",
           "pause_cuts_power": "پاز سائیکل بٹن یا سروس کے ذریعے توقف کرتے وقت، کنفیگر شدہ سوئچ ہستی کو بھی بند کر دیں۔ صرف اس صورت میں اثر انداز ہوتا ہے جب اس آلہ کے لیے ایک سوئچ ہستی کو کنفیگر کیا گیا ہو۔",
           "notify_unload_delay_minutes": "سائیکل ختم ہونے کے بعد فنش نوٹیفکیشن چینل کے ذریعے ایک اطلاع بھیجیں اور اس کئی منٹ تک دروازہ نہیں کھولا گیا (دروازے کے سینسر کی ضرورت ہے)۔ غیر فعال کرنے کے لیے 0 پر سیٹ کریں۔ ڈیفالٹ: 60 منٹ۔",
-          "switch_entity": "موقوف یا دوبارہ شروع کرنے پر ٹوگل کرنے کے لیے سوئچ ہستی۔ جب 'روکتے وقت پاور کاٹنا' فعال ہو تو درکار ہے۔"
+          "switch_entity": "موقوف یا دوبارہ شروع کرنے پر ٹوگل کرنے کے لیے سوئچ ہستی۔ جب 'روکتے وقت پاور کاٹنا' فعال ہو تو درکار ہے۔",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "تجویز کردہ تبدیلیوں کا جائزہ لیں۔",
-        "description": "WashData کو لاگو کرنے کے لیے تجویز کردہ {pending_count} اقدار ملی ہیں۔\n\nجائزہ میں تبدیلیاں:\n{changes}\n\nفارم میں ان اقدار کو اسٹیج کرنے کے لیے نیچے تصدیق کریں۔ وہ اس وقت تک محفوظ نہیں ہوتے جب تک آپ ایڈوانسڈ سیٹنگز جمع نہیں کراتے ہیں۔",
+        "description": "WashData نے لاگو کرنے کے لیے **{pending_count}** تجویز کردہ قدر/قدریں پائیں۔\n\nتبدیلیاں:\n{changes}\n\n✅ نیچے دیے گئے باکس کو چیک کریں اور **جمع کریں** پر کلک کریں تاکہ یہ تبدیلیاں فوری طور پر لاگو اور محفوظ ہو جائیں۔\n❌ اسے غیر چیک چھوڑیں اور **جمع کریں** پر کلک کریں تاکہ منسوخ کر کے واپس جائیں۔",
         "data": {
-          "confirm_apply_suggestions": "اعلی درجے کی ترتیبات میں اسٹیج کی تجویز کردہ اقدار"
+          "confirm_apply_suggestions": "یہ تبدیلیاں لاگو کریں اور محفوظ کریں"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "ختم ہونے والا",
           "finished": "ختم",
           "anti_wrinkle": "اینٹی شیکن",
+          "delay_wait": "Waiting to Start",
           "interrupted": "خلل ڈالا۔",
           "force_stopped": "زبردستی روکا گیا۔",
           "rinse": "کلی کریں۔",

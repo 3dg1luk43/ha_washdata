@@ -198,7 +198,12 @@
           "door_sensor_entity": "Door Sensor",
           "pause_cuts_power": "Snij de macht by it pauze",
           "notify_unload_delay_minutes": "Wasserij Wacht-notifikaasje fertraging (min)",
-          "switch_entity": "Switch Entity (foar Pause Power Cut)"
+          "switch_entity": "Switch Entity (foar Pause Power Cut)",
+          "delay_start_detect_enabled": "Fertrage startdeteksje ynskeakelje",
+          "delay_drain_min_power": "Fertrage start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Fertrage start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Fertrage start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Fertrage start: Max Wachttiid (h)"
         },
         "data_description": {
           "apply_suggestions": "Selektearje dit fakje om in resinsjestap te iepenjen foar foarstelde wearden út it learalgoritme. Neat wurdt automatysk bewarre.\n\nOanbefelle (fan learen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Opsjonele binêre sensor foar de masine doar (oan = iepen, út = sluten). As de doar iepenet tidens in aktive syklus, sil WashData de syklus befêstigje as opsetlik ûnderbrutsen. Nei't de syklus einiget, as de doar noch ticht is, feroaret de steat nei 'Skjin' oant de doar iepene wurdt. Opmerking: it sluten fan 'e doar sil NET in pauze syklus automatysk ferfetsje - ferfetsje moat manuell wurde aktivearre fia de knop Resume Cycle of tsjinst.",
           "pause_cuts_power": "As jo ​​​​pauze fia de Pause Cycle knop of tsjinst, útsette ek de ynstelde switch entiteit. Allinnich effekt as in switch entiteit is konfigurearre foar dit apparaat.",
           "notify_unload_delay_minutes": "Stjoer in notifikaasje fia it finish-notifikaasjekanaal nei't de syklus einiget en de doar foar dizze protte minuten net iepene is (fereasket Door Sensor). Stel op 0 om út te skeakeljen. Standert: 60 min.",
-          "switch_entity": "De switch-entiteit om te wikseljen by pauze of trochstart. Fereaske as 'Stromje besunigje by pauze' ynskeakele is."
+          "switch_entity": "De switch-entiteit om te wikseljen by pauze of trochstart. Fereaske as 'Stromje besunigje by pauze' ynskeakele is.",
+          "delay_start_detect_enabled": "As it ynskeakele is, wurdt in koarte drainspike mei leech krêft folge troch oanhâldende standby-krêft ûntdutsen as in fertrage start. De tastânsensor lit 'Wachtsjen om te begjinnen' sjen tidens de fertraging. Gjin programma tiid of foarútgong wurdt folge oant de syklus eins begjint. Fereasket start_threshold_w boppe de drain spike macht ynsteld wurde.",
+          "delay_drain_min_power": "Minimum macht (W) te werkennen as in drain spike. Stel krekt boppe it wier-off standby-nivo fan jo masine. Standert: 10 W.",
+          "delay_drain_max_power": "Maksimum macht (W) foar in drain spike - bursts boppe dit wurde behannele as in echte syklus start. Moat ûnder jo start_threshold_w-ynstelling wêze. Standert: 80 W.",
+          "delay_drain_max_duration": "De drainspike moat binnen dizze protte sekonden weromkomme ûnder it drainfinster om te befêstigjen. Langere spikes wurde behannele as echte syklusaktiviteit. Standert: 60 s.",
+          "delay_timeout_hours": "Feiligens-time-out: as de masine nei dizze protte oeren noch yn 'Wachtsjen om te begjinnen' stiet, set WashData werom nei Off. Standert: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Foarstelde feroarings beoardielje",
-        "description": "WashData fûn {pending_count} foarstelde wearden om oan te passen.\n\nFeroarings om te besjen:\n{changes}\n\nBefêstigje hjirûnder om dizze wearden yn it formulier op te setten. Se wurde net bewarre oant jo Avansearre ynstellings yntsjinje.",
+        "description": "WashData fûn **{pending_count}** foarstelde wearde(n) om oan te passen.\n\nFeroarings:\n{changes}\n\n✅ Kontrolearje it fakje hjirûnder en klikje op **Ferstjoere** om dizze wizigingen direkt oan te passen en op te slaan.\n❌ Lit it net útskeakele en klikje op **Submit** om te annulearjen en werom te gean.",
         "data": {
-          "confirm_apply_suggestions": "Stage foarstelde wearden yn Avansearre ynstellings"
+          "confirm_apply_suggestions": "Tapasse en bewarje dizze wizigingen"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Oan it einigjen",
           "finished": "Klear",
           "anti_wrinkle": "Anti-rimpel",
+          "delay_wait": "Wachtsje op Start",
           "interrupted": "Underbrutsen",
           "force_stopped": "Twongen stoppe",
           "rinse": "Spoelje",

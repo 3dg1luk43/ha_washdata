@@ -198,7 +198,12 @@
           "door_sensor_entity": "Oven anturi",
           "pause_cuts_power": "Katkaise virta tauon aikana",
           "notify_unload_delay_minutes": "Pyykin odotusilmoituksen viive (min)",
-          "switch_entity": "Kytkinentiteetti (keskeytä virtakatkos)"
+          "switch_entity": "Kytkinentiteetti (keskeytä virtakatkos)",
+          "delay_start_detect_enabled": "Ota viivästetun käynnistyksen tunnistus käyttöön",
+          "delay_drain_min_power": "Viivästetty käynnistys: Tyhjennyspiikin minimiteho (W)",
+          "delay_drain_max_power": "Viivästetty käynnistys: Tyhjennyspiikin maksimiteho (W)",
+          "delay_drain_max_duration": "Viivästetty käynnistys: Suurin tyhjennyspiikin kesto (s)",
+          "delay_timeout_hours": "Viivästetty aloitus: maksimi odotusaika (h)"
         },
         "data_description": {
           "apply_suggestions": "Valitse tämä valintaruutu avataksesi tarkistusvaiheen oppimisalgoritmin ehdotettujen arvojen tarkastelulle. Mitään ei tallenneta automaattisesti.\n\nSuositeltu (oppimisesta):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Valinnainen binäärianturi koneen ovelle (päällä = auki, pois = kiinni). Kun luukku avautuu aktiivisen jakson aikana, WashData vahvistaa ohjelman tahallisesti keskeytetyksi. Jakson päätyttyä, jos ovi on edelleen kiinni, tila muuttuu 'Clean'-tilaan, kunnes ovi avataan. Huomautus: luukun sulkeminen EI jatka automaattisesti keskeytettyä jaksoa – jatkaminen on käynnistettävä manuaalisesti Resume Cycle -painikkeen tai palvelun kautta.",
           "pause_cuts_power": "Kun keskeytät Pause Cycle -painikkeen tai palvelun kautta, sammuta myös määritetty kytkinkokonaisuus. Tulee voimaan vain, jos tälle laitteelle on määritetty kytkinyksikkö.",
           "notify_unload_delay_minutes": "Lähetä ilmoitus lopetusilmoituskanavan kautta, kun jakso on päättynyt ja ovea ei ole avattu näin moneen minuuttiin (vaatii ovitunnistimen). Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 60 min.",
-          "switch_entity": "Vaihtoyksikkö, joka vaihtaa, kun keskeytetään tai jatketaan. Vaaditaan, kun \"Katkaise virta tauon aikana\" on käytössä."
+          "switch_entity": "Vaihtoyksikkö, joka vaihtaa, kun keskeytetään tai jatketaan. Vaaditaan, kun \"Katkaise virta tauon aikana\" on käytössä.",
+          "delay_start_detect_enabled": "Kun tämä on käytössä, lyhyt virrankulutuspiikki, jota seuraa jatkuva valmiustila, havaitaan viivästettynä käynnistyksenä. Tila-anturi näyttää 'Odottaa käynnistystä' viiveen aikana. Ohjelman aikaa tai edistymistä ei seurata ennen kuin sykli todella alkaa. Edellyttää start_threshold_w-arvon asettamisen tyhjennyspiikin tehon yläpuolelle.",
+          "delay_drain_min_power": "Vähimmäisteho (W), joka tunnistetaan tyhjennyspiikiksi. Aseta juuri koneen todellisen valmiustilan yläpuolelle. Oletus: 10 W.",
+          "delay_drain_max_power": "Suurin teho (W) tyhjennyspiikin osalta — tämän ylittäviä purskeita käsitellään todellisena syklin aloituksena. Sen pitäisi olla alle start_threshold_w-asetuksen. Oletus: 80 W.",
+          "delay_drain_max_duration": "Tyhjennyspiikin on pudottava takaisin tyhjennysikkunan alapuolelle tämän muutaman sekunnin kuluessa, jotta se voidaan vahvistaa. Pidempiä piikkejä käsitellään todellisena syklin aktiivisuutena. Oletus: 60 s.",
+          "delay_timeout_hours": "Turvaaikakatkaisu: jos kone on edelleen \"Odottaa käynnistystä\" -tilassa tämän monen tunnin jälkeen, WashData palautuu pois päältä. Oletus: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Tarkista ehdotetut muutokset",
-        "description": "WashData löysi {pending_count} ehdotettua arvoa käytettäväksi.\n\nTarkistettavat muutokset:\n{changes}\n\nVahvista alla asettaaksesi nämä arvot lomakkeeseen. Niitä ei tallenneta ennen kuin lähetät lisäasetukset.",
+        "description": "WashData löytyi **{pending_count}** ehdotettua arvoa käytettäväksi.\n\nMuutokset:\n{changes}\n\n✅ Valitse alla oleva ruutu ja napsauta **Lähetä** ottaaksesi muutokset käyttöön ja tallentaaksesi nämä muutokset välittömästi.\n❌ Jätä se valitsematta ja napsauta **Lähetä** peruuttaaksesi ja palataksesi takaisin.",
         "data": {
-          "confirm_apply_suggestions": "Aseta ehdotetut arvot lisäasetuksiin"
+          "confirm_apply_suggestions": "Ota nämä muutokset käyttöön ja tallenna ne"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Loppuu",
           "finished": "Valmis",
           "anti_wrinkle": "Ryppyjenesto",
+          "delay_wait": "Odotetaan aloitusta",
           "interrupted": "Keskeytynyt",
           "force_stopped": "Pakotettu pysäytys",
           "rinse": "Huuhtelu",

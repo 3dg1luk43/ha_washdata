@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "შემოთავაზებული ცვლილებების მიმოხილვა",
-        "description": "WashData-მ იპოვა გამოსაყენებლად {pending_count} შემოთავაზებული მნიშვნელობა.\n\nსაგადასინჯავი ცვლილებები:\n{changes}\n\nდაადასტურეთ ქვემოთ ამ მნიშვნელობების ფორმაში სასტადიებლად. ისინი არ შეინახება, სანამ გაფართოებულ პარამეტრებს არ გაგზავნით.",
+        "description": "WashData-მ **{pending_count}** შემოთავაზებული მნიშვნელობა/ები გამოსაყენებლად აღმოაჩინა.\n\nცვლილებები:\n{changes}\n\n✅ მონიშნეთ ქვემოთ მოცემული ველი და დააჭირეთ **გაგზავნა**-ს, რათა ეს ცვლილებები დაუყოვნებლივ გამოიყენოთ და შეინახოთ.\n❌ დატოვეთ მოუნიშნავი და დააჭირეთ **გაგზავნა**-ს გასაუქმებლად და უკან დასაბრუნებლად.",
         "data": {
-          "confirm_apply_suggestions": "შემოთავაზებული მნიშვნელობების გაფართოებულ პარამეტრებში სტადიება"
+          "confirm_apply_suggestions": "ამ ცვლილებების გამოყენება და შენახვა"
         }
       },
       "settings": {
@@ -205,7 +205,12 @@
           "door_sensor_entity": "კარის სენსორი",
           "pause_cuts_power": "გამორთეთ კვების ბლოკი პაუზის დროს",
           "notify_unload_delay_minutes": "სამრეცხაო ელოდება შეტყობინების დაგვიანება (წთ)",
-          "switch_entity": "ერთეულის გადართვა (ენერგიის გათიშვის პაუზისთვის)"
+          "switch_entity": "ერთეულის გადართვა (ენერგიის გათიშვის პაუზისთვის)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "მონიშნეთ ეს ველი სასწავლო ალგორითმის შემოთავაზებული მნიშვნელობების გადახედვის ეტაპის გასახსნელად. არაფერი ავტომატურად არ ინახება.\n\nშემოთავაზებული (სწავლიდან):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -257,7 +262,12 @@
           "door_sensor_entity": "არჩევითი ორობითი სენსორი მანქანის კარისთვის (ჩართული = ღია, გამორთული = დახურული). როდესაც კარი იხსნება აქტიური ციკლის დროს, WashData დაადასტურებს, რომ ციკლი განზრახ შეჩერებულია. ციკლის დასრულების შემდეგ, თუ კარი მაინც დაკეტილია, მდგომარეობა იცვლება „სუფთა“ კარის გახსნამდე. შენიშვნა: კარის დახურვა ავტომატურად არ განაახლებს შეჩერებულ ციკლს - რეზიუმე უნდა ამოქმედდეს ხელით განახლების ციკლი ღილაკის ან სერვისის მეშვეობით.",
           "pause_cuts_power": "პაუზის ციკლის ღილაკის ან სერვისის საშუალებით შეჩერებისას, ასევე გამორთეთ კონფიგურირებული გადამრთველი ერთეული. ძალაში შედის მხოლოდ იმ შემთხვევაში, თუ გადამრთველი ერთეული კონფიგურირებულია ამ მოწყობილობისთვის.",
           "notify_unload_delay_minutes": "გაგზავნეთ შეტყობინება დასრულების შეტყობინებების არხით ციკლის დასრულების შემდეგ და კარი არ გაიღო ამდენი წუთის განმავლობაში (საჭიროებს კარის სენსორს). გამორთვისთვის დააყენეთ 0. ნაგულისხმევი: 60 წთ.",
-          "switch_entity": "გადამრთველი ერთეულის გადართვა შეჩერების ან განახლებისას. საჭიროა, როცა ჩართულია \"გამორთეთ კვების ბლოკი პაუზის დროს\"."
+          "switch_entity": "გადამრთველი ერთეულის გადართვა შეჩერების ან განახლებისას. საჭიროა, როცა ჩართულია \"გამორთეთ კვების ბლოკი პაუზის დროს\".",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -1044,6 +1054,7 @@
           "ending": "სრულდება",
           "finished": "დასრულდა",
           "anti_wrinkle": "ნაოჭების საწინააღმდეგო",
+          "delay_wait": "Waiting to Start",
           "interrupted": "შეწყდა",
           "force_stopped": "ძალით შეჩერდა",
           "rinse": "ვლება",

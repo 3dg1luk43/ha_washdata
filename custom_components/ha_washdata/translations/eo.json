@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Revizii sugestitajn ŝanĝojn",
-        "description": "WashData trovis {pending_count} sugestitajn valorojn por apliki.\n\nŜanĝoj por revizii:\n{changes}\n\nKonfirmu sube por stadi ĉi tiujn valorojn en la formularo. Ili ne estas konservitaj ĝis vi sendas Altnivelajn Agordojn.",
+        "description": "WashData trovis **{pending_count}** proponitajn valorojn por apliki.\n\nŜanĝoj:\n{changes}\n\n✅ Marku la suban skatolon kaj alklaku **Submeti** por apliki kaj konservi ĉi tiujn ŝanĝojn tuj.\n❌ Lasu ĝin nemarkita kaj alklaku **Submeti** por nuligi kaj reiri.",
         "data": {
-          "confirm_apply_suggestions": "Stadi sugestitajn valorojn en Altnivelaj Agordoj"
+          "confirm_apply_suggestions": "Apliku kaj konservu ĉi tiujn ŝanĝojn"
         }
       },
       "settings": {
@@ -205,7 +205,12 @@
           "door_sensor_entity": "Porda Sensilo",
           "pause_cuts_power": "Tranĉi Potencon Kiam Paŭzo",
           "notify_unload_delay_minutes": "Prokrasto de Sciigo de Atendo de Lavejo (min)",
-          "switch_entity": "Ŝaltilo-Entaĵo (por Paŭzo-Potento)"
+          "switch_entity": "Ŝaltilo-Entaĵo (por Paŭzo-Potento)",
+          "delay_start_detect_enabled": "Ebligu Malfruan Komencan Detekton",
+          "delay_drain_min_power": "Prokrastita Komenco: Drenu Spike Min Power (W)",
+          "delay_drain_max_power": "Malfrua Komenco: Drenu Spike Max Power (W)",
+          "delay_drain_max_duration": "Prokrastita Komenco: Maksimuma Drena Pikilo Daŭro (j)",
+          "delay_timeout_hours": "Prokrastita Komenco: Maksimuma Atendotempo (h)"
         },
         "data_description": {
           "apply_suggestions": "Marku ĉi tiun skatolon por malfermi revizian paŝon por sugestitaj valoroj de la lerna algoritmo. Nenio estas konservita aŭtomate.\n\nSugesto (de lernado):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -257,7 +262,12 @@
           "door_sensor_entity": "Laŭvola binara sensilo por la maŝinpordo (ŝaltita = malfermita, malŝaltita = fermita). Kiam la pordo malfermiĝas dum aktiva ciklo, WashData konfirmos la ciklon kiel intencite paŭzitan. Post kiam la ciklo finiĝas, se la pordo ankoraŭ estas fermita, la stato ŝanĝiĝas al \"Puriga\" ĝis la pordo estas malfermita. Noto: fermi la pordon NE aŭtomate rekomencas paŭzitan ciklon - rekomenco devas esti ekigita permane per la butono aŭ servo de Rekomenco de Ciklo.",
           "pause_cuts_power": "Dum paŭzo per la butono aŭ servo de Paŭzo-Ciklo, ankaŭ malŝaltu la agorditan ŝaltilon. Nur efektiviĝas se ŝanĝa ento estas agordita por ĉi tiu aparato.",
           "notify_unload_delay_minutes": "Sendu sciigon per la finfina sciiga kanalo post kiam la ciklo finiĝas kaj la pordo ne estis malfermita dum tiom da minutoj (postulas Pordo-Sensilon). Agordu al 0 por malŝalti. Defaŭlte: 60 min.",
-          "switch_entity": "La ŝanĝa ento por ŝanĝi dum paŭzo aŭ rekomenco. Bezonata kiam 'Eltondi potencon dum paŭzo' estas ebligita."
+          "switch_entity": "La ŝanĝa ento por ŝanĝi dum paŭzo aŭ rekomenco. Bezonata kiam 'Eltondi potencon dum paŭzo' estas ebligita.",
+          "delay_start_detect_enabled": "Se ebligite, mallonga malalt-motora drenpiko sekvita per daŭranta ŝancatendopotenco estas detektita kiel prokrastita komenco. La ŝtatsensilo montras 'Atendante Komenci' dum la prokrasto. Neniu programa tempo aŭ progreso estas spurita ĝis la ciklo efektive komenciĝas. Postulas start_threshold_w esti agordita super la drenpika potenco.",
+          "delay_drain_min_power": "Minimuma potenco (W) por rekoni kiel drenpikilon. Agordu tuj super la vera-malŝaltita standby-nivelo de via maŝino. Defaŭlte: 10 W.",
+          "delay_drain_max_power": "Maksimuma potenco (W) por drenpiko - eksplodoj super ĉi tio estas traktataj kiel vera ciklokomenco. Devus esti sub via start_threshold_w agordo. Defaŭlte: 80 W.",
+          "delay_drain_max_duration": "La drenpiko devas reiri sub la drenfenestron ene de tiom da sekundoj por esti konfirmita. Pli longaj pikiloj estas traktataj kiel reala cikla aktiveco. Defaŭlte: 60 s.",
+          "delay_timeout_hours": "Sekureca tempodaŭro: se la maŝino ankoraŭ estas en \"Atendante komenci\" post ĉi tiuj multaj horoj, WashData rekomenciĝas al Off. Defaŭlte: 8 h."
         }
       },
       "diagnostics": {
@@ -1044,6 +1054,7 @@
           "ending": "Finiĝanta",
           "finished": "Finita",
           "anti_wrinkle": "Kontraŭfaldiga",
+          "delay_wait": "Atendante Komenci",
           "interrupted": "Interrompita",
           "force_stopped": "Perforte haltita",
           "rinse": "Rinso",

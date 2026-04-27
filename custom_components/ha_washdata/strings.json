@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Review Suggested Changes",
-        "description": "WashData found {pending_count} suggested values to apply.\n\nChanges to review:\n{changes}\n\nConfirm below to stage these values in the form. They are not saved until you submit Advanced Settings.",
+        "description": "WashData found **{pending_count}** suggested value(s) to apply.\n\nChanges:\n{changes}\n\n✅ Check the box below and click **Submit** to apply and save these changes immediately.\n❌ Leave it unchecked and click **Submit** to cancel and go back.",
         "data": {
-          "confirm_apply_suggestions": "Stage suggested values in Advanced Settings"
+          "confirm_apply_suggestions": "Apply and save these changes"
         }
       },
       "settings": {
@@ -197,6 +197,11 @@
           "anti_wrinkle_max_power": "Anti-Wrinkle Max Power (W) (Dryer/Washer-Dryer Only)",
           "anti_wrinkle_max_duration": "Anti-Wrinkle Max Duration (s) (Dryer/Washer-Dryer Only)",
           "anti_wrinkle_exit_power": "Anti-Wrinkle Exit Power (W) (Dryer/Washer-Dryer Only)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)",
           "dtw_bandwidth": "DTW Bandwidth",
           "external_end_trigger_enabled": "Enable External Cycle End Trigger",
           "external_end_trigger": "External Cycle End Sensor",
@@ -249,6 +254,11 @@
           "anti_wrinkle_max_power": "Bursts at or below this power are treated as anti-wrinkle rotations instead of new cycles. Only applies when Anti-Wrinkle Shield is enabled.",
           "anti_wrinkle_max_duration": "Maximum burst length to treat as anti-wrinkle rotation. Only applies when Anti-Wrinkle Shield is enabled.",
           "anti_wrinkle_exit_power": "If power drops below this level, exit anti-wrinkle immediately (true off). Only applies when Anti-Wrinkle Shield is enabled.",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h.",
           "dtw_bandwidth": "Maximum allowed time warping (stretching) as a ratio of cycle duration. Higher values allow matching highly variable cycles but increase CPU cost. Default: 0.20 (20%).",
           "external_end_trigger_enabled": "Enable monitoring of an external binary sensor to trigger cycle completion.",
           "external_end_trigger": "Select a binary sensor entity. When this sensor triggers, the current cycle will end with status 'completed'.",

@@ -73,6 +73,11 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_DELAY_START_DETECT_ENABLED,
+    CONF_DELAY_DRAIN_MIN_POWER,
+    CONF_DELAY_DRAIN_MAX_POWER,
+    CONF_DELAY_DRAIN_MAX_DURATION,
+    CONF_DELAY_TIMEOUT_HOURS,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
     NOTIFY_EVENT_LIVE,
@@ -134,6 +139,11 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
+    DEFAULT_DELAY_START_DETECT_ENABLED,
+    DEFAULT_DELAY_DRAIN_MIN_POWER,
+    DEFAULT_DELAY_DRAIN_MAX_POWER,
+    DEFAULT_DELAY_DRAIN_MAX_DURATION,
+    DEFAULT_DELAY_TIMEOUT_HOURS,
     CONF_PUMP_STUCK_DURATION,
     DEFAULT_PUMP_STUCK_DURATION,
     DEVICE_TYPE_PUMP,
@@ -513,7 +523,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         if user_input is not None:
             if user_input.get("confirm_apply_suggestions"):
-                return await self.async_step_advanced_settings(user_input=None)
+                # Pass staged values directly as form input — saves immediately
+                # without bouncing back to Advanced Settings for a second submit.
+                return await self.async_step_advanced_settings(
+                    user_input=self._suggested_values
+                )
 
             # User declined, clear staged values and return to advanced form.
             self._suggested_values = None
@@ -1226,6 +1240,69 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     max=10.0,
                     step=0.1,
                     unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            # --- Delayed Start Detection ---
+            vol.Optional(
+                CONF_DELAY_START_DETECT_ENABLED,
+                default=get_val(
+                    CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
+                ),
+            ): bool,
+            vol.Optional(
+                CONF_DELAY_DRAIN_MIN_POWER,
+                default=get_val(
+                    CONF_DELAY_DRAIN_MIN_POWER, DEFAULT_DELAY_DRAIN_MIN_POWER
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=1.0,
+                    max=500.0,
+                    step=1.0,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_DELAY_DRAIN_MAX_POWER,
+                default=get_val(
+                    CONF_DELAY_DRAIN_MAX_POWER, DEFAULT_DELAY_DRAIN_MAX_POWER
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=1.0,
+                    max=2000.0,
+                    step=1.0,
+                    unit_of_measurement="W",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_DELAY_DRAIN_MAX_DURATION,
+                default=get_val(
+                    CONF_DELAY_DRAIN_MAX_DURATION, DEFAULT_DELAY_DRAIN_MAX_DURATION
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=5.0,
+                    max=600.0,
+                    step=1.0,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_DELAY_TIMEOUT_HOURS,
+                default=get_val(
+                    CONF_DELAY_TIMEOUT_HOURS, DEFAULT_DELAY_TIMEOUT_HOURS
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.5,
+                    max=24.0,
+                    step=0.5,
+                    unit_of_measurement="h",
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
