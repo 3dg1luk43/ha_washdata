@@ -47,7 +47,7 @@ body:
         - Air Fryer
         - Heat Pump
         - Bread Maker
-        - Pump
+        - Pump / Sump Pump
         - Other / Not applicable
     validations:
       required: true

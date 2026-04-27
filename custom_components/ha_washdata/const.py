@@ -249,7 +249,7 @@ DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 14400,  # 4 hours (Drying can be long)
     DEVICE_TYPE_HEAT_PUMP: 14400,  # 4 hours (Heat pumps can run a long time with slow updates)
     DEVICE_TYPE_BREAD_MAKER: 7200,  # 2 hours (Proving/Rising is very low-power for extended periods)
-    DEVICE_TYPE_PUMP: 600,  # 10 min (Pumps cycle quickly; long silence = offline)
+    DEVICE_TYPE_PUMP: DEFAULT_PUMP_STUCK_DURATION + 60,  # Must exceed stuck-alarm threshold so the alarm fires before the watchdog
 }
 
 DEFAULT_MAX_DEFERRAL_SECONDS = 14400  # 4 hours max safe deferral

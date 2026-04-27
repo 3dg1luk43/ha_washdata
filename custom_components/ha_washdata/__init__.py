@@ -142,11 +142,11 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # CONF_NOTIFY_EVENTS is a deprecated list of enabled event types.
         # Only migrate live services when live events were explicitly opted in.
         legacy_events = options.get(CONF_NOTIFY_EVENTS) or data.get(CONF_NOTIFY_EVENTS) or []
-        if not options.get(CONF_NOTIFY_START_SERVICES):
+        if CONF_NOTIFY_START_SERVICES not in options:
             options[CONF_NOTIFY_START_SERVICES] = [legacy_svc]
-        if not options.get(CONF_NOTIFY_FINISH_SERVICES):
+        if CONF_NOTIFY_FINISH_SERVICES not in options:
             options[CONF_NOTIFY_FINISH_SERVICES] = [legacy_svc]
-        if not options.get(CONF_NOTIFY_LIVE_SERVICES) and NOTIFY_EVENT_LIVE in legacy_events:
+        if CONF_NOTIFY_LIVE_SERVICES not in options and NOTIFY_EVENT_LIVE in legacy_events:
             options[CONF_NOTIFY_LIVE_SERVICES] = [legacy_svc]
 
     options.setdefault(CONF_PROGRESS_RESET_DELAY, DEFAULT_PROGRESS_RESET_DELAY)

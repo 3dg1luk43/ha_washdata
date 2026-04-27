@@ -3600,6 +3600,7 @@ class ProfileStore:
         data_dict.setdefault("envelopes", {})
 
         self._data = data_dict
+        self._cached_sample_segments = {}
         await self.async_save()
 
         # Strip diagnostic redaction sentinels so they don't overwrite real settings

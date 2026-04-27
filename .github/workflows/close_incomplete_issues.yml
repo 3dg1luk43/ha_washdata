@@ -48,7 +48,7 @@ jobs:
               // If the reporter had fixed all problems, the validator would have removed the label;
               // its continued presence means the info is still missing.
               const firstBotFlag = comments.find(
-                c => c.user.type === 'Bot' && c.body.includes('missing that we need before we can investigate')
+                c => c.user.type === 'Bot' && c.body != null && c.body.includes('missing that we need before we can investigate')
               );
 
               if (!firstBotFlag) {
@@ -60,7 +60,7 @@ jobs:
               console.log(`#${issue.number}: flagged at ${flaggedAt.toISOString()}`);
 
               if (flaggedAt < closeCutoff) {
-                // ── 14+ days with no fix → close ────────────────────────────────
+                // ── 5+ days with no fix → close ────────────────────────────────
                 console.log(`#${issue.number}: past close deadline, closing.`);
 
                 await github.rest.issues.createComment({
@@ -82,9 +82,9 @@ jobs:
                 });
 
               } else if (flaggedAt < warnCutoff) {
-                // ── 7–14 days → post a single reminder if not already warned ────
+                // ── 2–5 days → post a single reminder if not already warned ────
                 const alreadyWarned = comments.some(
-                  c => c.user.type === 'Bot' && c.body.includes('will be closed in')
+                  c => c.user.type === 'Bot' && c.body != null && c.body.includes('will be closed in')
                 );
 
                 if (alreadyWarned) {
