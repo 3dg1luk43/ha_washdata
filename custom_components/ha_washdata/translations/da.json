@@ -198,7 +198,12 @@
           "door_sensor_entity": "Dørsensor",
           "pause_cuts_power": "Afbryd strømmen under pause",
           "notify_unload_delay_minutes": "Forsinkelse af besked om tøjvask (min.)",
-          "switch_entity": "Kontaktenhed (til strømafbrydelse ved pause)"
+          "switch_entity": "Kontaktenhed (til strømafbrydelse ved pause)",
+          "delay_start_detect_enabled": "Aktiver registrering af forsinket start",
+          "delay_drain_min_power": "Forsinket start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Forsinket start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Forsinket start: Maksimal dræningsspidsvarighed (r)",
+          "delay_timeout_hours": "Forsinket start: Maks. ventetid (h)"
         },
         "data_description": {
           "apply_suggestions": "Marker dette felt for at åbne et gennemgangstrin for foreslåede værdier fra indlæringsalgoritmen. Intet gemmes automatisk.\n\nForeslået (fra læring):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Valgfri binær sensor til maskindøren (tændt = åben, slukket = lukket). Når døren åbnes under en aktiv cyklus, vil WashData bekræfte cyklussen som bevidst sat på pause. Når cyklussen er afsluttet, hvis døren stadig er lukket, skifter tilstanden til 'Rens', indtil døren åbnes. Bemærk: lukning af døren genoptager IKKE automatisk en pauseret cyklus - genoptagelse skal udløses manuelt via knappen Genoptag cyklus eller service.",
           "pause_cuts_power": "Når du holder pause via Pause Cycle-knappen eller tjenesten, skal du også deaktivere den konfigurerede switch-entitet. Træder kun i kraft, hvis en switch-entitet er konfigureret til denne enhed.",
           "notify_unload_delay_minutes": "Send en meddelelse via slutmeddelelseskanalen, efter at cyklussen er afsluttet, og døren ikke er blevet åbnet i så mange minutter (kræver dørsensor). Indstil til 0 for at deaktivere. Standard: 60 min.",
-          "switch_entity": "Skiftenheden, der skal skiftes ved pause eller genoptagelse. Påkrævet, når 'Afbryd strøm ved pause' er aktiveret."
+          "switch_entity": "Skiftenheden, der skal skiftes ved pause eller genoptagelse. Påkrævet, når 'Afbryd strøm ved pause' er aktiveret.",
+          "delay_start_detect_enabled": "Når den er aktiveret, detekteres en kort dræningsspids med lav effekt efterfulgt af vedvarende standbystrøm som en forsinket start. Tilstandssensoren viser 'Venter på at starte' under forsinkelsen. Ingen programtid eller fremskridt spores, før cyklussen faktisk begynder. Kræver at start_threshold_w indstilles over dræningsspidseffekten.",
+          "delay_drain_min_power": "Minimum effekt (W) til at genkende som en drænspids. Indstil lige over maskinens true-off standby-niveau. Standard: 10 W.",
+          "delay_drain_max_power": "Maksimal effekt (W) for en drænspids — udbrud over dette behandles som en rigtig cyklusstart. Bør være under din start_threshold_w indstilling. Standard: 80 W.",
+          "delay_drain_max_duration": "Drænspidsen skal falde tilbage under drænvinduet inden for disse mange sekunder for at blive bekræftet. Længere pigge behandles som reel cyklusaktivitet. Standard: 60 s.",
+          "delay_timeout_hours": "Sikkerhedstimeout: Hvis maskinen stadig er i 'Venter på at starte' efter disse mange timer, nulstilles WashData til Off. Standard: 8 timer."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Gennemgå foreslåede ændringer",
-        "description": "WashData fandt {pending_count} foreslåede værdier at anvende.\n\nÆndringer til gennemgang:\n{changes}\n\nBekræft nedenfor for at placere disse værdier i formularen. De gemmes ikke, før du indsender avancerede indstillinger.",
+        "description": "WashData fundet **{pending_count}** foreslåede værdi(er) at anvende.\n\nÆndringer:\n{changes}\n\n✅ Marker afkrydsningsfeltet nedenfor, og klik på **Send** for at anvende og gemme disse ændringer med det samme.\n❌ Lad det være umarkeret, og klik på **Send** for at annullere og gå tilbage.",
         "data": {
-          "confirm_apply_suggestions": "Stage foreslåede værdier i avancerede indstillinger"
+          "confirm_apply_suggestions": "Anvend og gem disse ændringer"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Slutning",
           "finished": "Færdig",
           "anti_wrinkle": "Anti-Rynke",
+          "delay_wait": "Venter på at starte",
           "interrupted": "Afbrudt",
           "force_stopped": "Tving stoppet",
           "rinse": "Skylle",

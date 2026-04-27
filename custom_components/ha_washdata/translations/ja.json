@@ -198,7 +198,12 @@
           "door_sensor_entity": "ドアセンサー",
           "pause_cuts_power": "一時停止時に電源を切る",
           "notify_unload_delay_minutes": "ランドリー待機通知遅延 (分)",
-          "switch_entity": "スイッチエンティティ (一時停止電源切断用)"
+          "switch_entity": "スイッチエンティティ (一時停止電源切断用)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "このボックスにチェックを入れると、学習アルゴリズムの推奨値の確認ステップが開きます。何も自動的に保存されません。\n\n推奨値（学習より）：\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "機械ドア用のオプションのバイナリ センサー (オン = 開いている、オフ = 閉じている)。アクティブなサイクル中にドアが開くと、WashData はサイクルが意図的に一時停止されたことを確認します。サイクル終了後、ドアがまだ閉じている場合、ドアが開くまで状態は「Clean」に変わります。注: ドアを閉めても、一時停止したサイクルは自動的に再開されません。再開は、「サイクル再開」ボタンまたはサービスを介して手動でトリガーする必要があります。",
           "pause_cuts_power": "[Pause Cycle] ボタンまたはサービスを使用して一時停止する場合は、設定されたスイッチ エンティティもオフにします。スイッチ エンティティがこのデバイスに設定されている場合にのみ有効です。",
           "notify_unload_delay_minutes": "サイクルが終了し、一定時間ドアが開かなかった後、終了通知チャネル経由で通知を送信します (ドア センサーが必要)。無効にするには 0 に設定します。デフォルト: 60 分。",
-          "switch_entity": "一時停止または再開するときに切り替えるスイッチ エンティティ。 「一時停止時に電源を切る」が有効な場合に必要です。"
+          "switch_entity": "一時停止または再開するときに切り替えるスイッチ エンティティ。 「一時停止時に電源を切る」が有効な場合に必要です。",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "推奨された変更を確認",
-        "description": "WashData が {pending_count} 件の推奨値を適用する準備ができました。\n\n確認すべき変更：\n{changes}\n\n以下で確認すると、これらの値がフォームに準備されます。詳細設定を送信するまで保存されません。",
+        "description": "WashDataは適用すべき提案値を**{pending_count}**件見つけました。\n\n変更内容:\n{changes}\n\n✅ 下のチェックボックスをオンにして**送信**をクリックすると、これらの変更を即座に適用・保存します。\n❌ チェックをはずしたまま**送信**をクリックすると、キャンセルして戻ります。",
         "data": {
-          "confirm_apply_suggestions": "詳細設定に推奨値を準備"
+          "confirm_apply_suggestions": "これらの変更を適用して保存"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "終了中",
           "finished": "完了",
           "anti_wrinkle": "しわ防止",
+          "delay_wait": "Waiting to Start",
           "interrupted": "中断",
           "force_stopped": "強制停止",
           "rinse": "すすぎ",

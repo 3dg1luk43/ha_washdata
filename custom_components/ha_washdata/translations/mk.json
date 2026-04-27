@@ -198,7 +198,12 @@
           "door_sensor_entity": "Сензор за врата",
           "pause_cuts_power": "Исклучете го напојувањето кога паузирате",
           "notify_unload_delay_minutes": "Доцнење на известувањето за чекање перење (мин.)",
-          "switch_entity": "Префрли ентитет (за паузирање на прекин на струја)"
+          "switch_entity": "Префрли ентитет (за паузирање на прекин на струја)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Обележете го ова поле за да отворите чекор за преглед за предложените вредности од алгоритмот за учење. Ништо не се зачувува автоматски.\n\nПрепорачано (од учење):\n- мин_моќност: {suggested_min_power} В\n- off_delay: {suggested_off_delay} с\n- чувар_интервал: {suggested_watchdog_interval} с\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- профил_совпаѓање_интервал: {suggested_profile_match_interval} с\n- автоматска_етикета_доверба: {suggested_auto_label_confidence}\n- времетраење_толеранција: {suggested_duration_tolerance}\n- профил_траење_толеранција: {suggested_profile_duration_tolerance}\n- Сооднос_профил_совпаѓање_мин. времетраење: {suggested_profile_match_min_duration_ratio}\n- Сооднос_профил_совпаѓање_макс_времетраење: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} В\n- Краен_енергетски_праг: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Изборен бинарен сензор за вратата на машината (вклучено = отворено, исклучено = затворено). Кога вратата ќе се отвори за време на активен циклус, WashData ќе го потврди циклусот како намерно паузиран. По завршувањето на циклусот, ако вратата е сè уште затворена, состојбата се менува во 'Clean' додека вратата не се отвори. Забелешка: затворањето на вратата НЕ автоматско продолжување на паузиран циклус - продолжувањето мора да се активира рачно преку копчето или услугата Продолжи циклус.",
           "pause_cuts_power": "Кога паузирате преку копчето или услугата циклус на пауза, исклучете го и конфигурираниот ентитет на прекинувачот. Станува на сила само ако е конфигуриран ентитет на прекинувач за овој уред.",
           "notify_unload_delay_minutes": "Испратете известување преку каналот за известување за финиш откако циклусот ќе заврши и вратата не е отворена толку минути (потребен е сензор за врата). Поставете на 0 за да се оневозможи. Стандардно: 60 мин.",
-          "switch_entity": "Ентитетот на прекинувачот да се префрли кога се паузира или продолжува. Потребно е кога е овозможено „Исклучи напојување при паузирање“."
+          "switch_entity": "Ентитетот на прекинувачот да се префрли кога се паузира или продолжува. Потребно е кога е овозможено „Исклучи напојување при паузирање“.",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Прегледајте ги предложените промени",
-        "description": "WashData најде {pending_count} предложени вредности за примена.\n\nПромени за преглед:\n{changes}\n\nПотврдете подолу за да ги поставите овие вредности во формата. Тие не се зачувуваат додека не испратите Напредни поставки.",
+        "description": "WashData пронашол **{pending_count}** предложена(и) вредност(и) за примена.\n\nПромени:\n{changes}\n\n✅ Штиклирајте го полето подолу и кликнете **Испрати** за веднаш да ги примените и зачувате овие промени.\n❌ Оставете го неозначено и кликнете **Испрати** за откажување и враќање назад.",
         "data": {
-          "confirm_apply_suggestions": "Ставете ги предложените вредности во Напредни поставки"
+          "confirm_apply_suggestions": "Примени и зачувај ги овие промени"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Завршува",
           "finished": "Завршено",
           "anti_wrinkle": "Против брчки",
+          "delay_wait": "Waiting to Start",
           "interrupted": "Прекинато",
           "force_stopped": "Сила запре",
           "rinse": "Исплакнете",

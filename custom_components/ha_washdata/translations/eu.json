@@ -198,7 +198,12 @@
           "door_sensor_entity": "Ate-sentsorea",
           "pause_cuts_power": "Moztu energia pausatzean",
           "notify_unload_delay_minutes": "Garbitegia zain jakinarazpenaren atzerapena (min)",
-          "switch_entity": "Aldatu entitatea (Pausatu energia mozterako)"
+          "switch_entity": "Aldatu entitatea (Pausatu energia mozterako)",
+          "delay_start_detect_enabled": "Gaitu Abiatze atzeratua detektatzeko",
+          "delay_drain_min_power": "Hasiera atzeratua: drain Spike Min Potentzia (W)",
+          "delay_drain_max_power": "Hasiera atzeratua: drain Spike gehienezko potentzia (W)",
+          "delay_drain_max_duration": "Irteera atzeratua: drainatze-punta maximoaren iraupena (s)",
+          "delay_timeout_hours": "Hasiera atzeratua: Gehienezko itxaron-denbora (h)"
         },
         "data_description": {
           "apply_suggestions": "Markatu lauki hau ikaskuntza-algoritmoan iradokitako balioen berrikuspen-urrats bat irekitzeko. Ezer ez da automatikoki gordetzen.\n\nIradokitako (ikaskuntzatik):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Makinaren atearen aukerako sentsore bitarra (aktibatuta = irekita, itzalita = itxita). Ziklo aktibo batean atea irekitzen denean, WashData-k zikloa nahita pausatu dela baieztatuko du. Zikloa amaitu ondoren, atea oraindik itxita badago, egoera 'Garbitu'-ra aldatzen da atea ireki arte. Oharra: atea ixteak EZ du pausatutako ziklo bat automatikoki berresten; eskuz abiarazi behar da berrezartzea Zikloa berrekin batera botoiaren edo zerbitzuaren bidez.",
           "pause_cuts_power": "Etenaldiaren zikloa botoiaren edo zerbitzuaren bidez pausatzen duzunean, desaktibatu konfiguratutako etengailu-entitatea ere. Gailu honetarako aldatzeko entitate bat konfiguratuta badago bakarrik izango du eragina.",
           "notify_unload_delay_minutes": "Bidali jakinarazpena amaierako jakinarazpen-kanalaren bidez, zikloa amaitu eta atea minutu askotan ireki ez denean (ate-sentsorea behar da). Ezarri 0 desgaitzeko. Lehenetsia: 60 min.",
-          "switch_entity": "Etenaldian edo berriro hastean aldatzeko entitatea. Beharrezkoa da \"Moztu energia pausatzean\" gaituta dagoenean."
+          "switch_entity": "Etenaldian edo berriro hastean aldatzeko entitatea. Beharrezkoa da \"Moztu energia pausatzean\" gaituta dagoenean.",
+          "delay_start_detect_enabled": "Gaituta dagoenean, potentzia baxuko drainatze-puntu labur bat eta jarraian egonean dagoen potentziaren ondoren abiarazte atzeratu gisa hautematen da. Egoera-sentsoreak 'Hasteko zain' erakusten du atzerapenean. Ez da programaren denborarik edo aurrerapenik egiten zikloa benetan hasi arte. Start_threshold_w drainatze-potentziaren gainetik ezarri behar da.",
+          "delay_drain_min_power": "Gutxieneko potentzia (W) drainatze-punta gisa antzemateko. Ezarri zure makinaren benetako itzali egonean dagoen mailaren gainetik. Lehenetsia: 10 W.",
+          "delay_drain_max_power": "Gehienezko potentzia (W) drainatze-puntu baterako - honetatik gorako leherketak benetako zikloaren hasiera gisa hartzen dira. Zure start_threshold_w ezarpenaren azpitik egon beharko luke. Lehenetsia: 80 W.",
+          "delay_drain_max_duration": "Drainatze erpinak drainatze-leihoaren azpitik jaitsi behar du segundo horren barruan berretsi ahal izateko. Puntu luzeagoak zikloko jarduera erreal gisa hartzen dira. Lehenetsia: 60 s.",
+          "delay_timeout_hours": "Segurtasun-denbora-muga: ordu asko igaro ondoren makina oraindik 'Hasteko zain' moduan badago, WashData desaktibatuta berrezartzen da. Lehenetsia: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Berrikusi Iradokitako Aldaketak",
-        "description": "WashData-k aplikatu beharreko iradokitako {pending_count} balio aurkitu ditu.\n\nBerrikusteko aldaketak:\n{changes}\n\nBerretsi behean balio hauek formularioan eszenifikatzeko. Ez dira gordetzen Ezarpen aurreratuak bidali arte.",
+        "description": "WashData-k aplikatu beharreko iradokitako balio(k) **{pending_count}** aurkitu du.\n\nAldaketak:\n{changes}\n\n✅ Markatu beheko laukia eta egin klik **Bidali** aldaketa hauek berehala aplikatzeko eta gordetzeko.\n❌ Utzi markarik gabe eta egin klik **Bidali** bertan behera uzteko eta atzera egiteko.",
         "data": {
-          "confirm_apply_suggestions": "Jarri iradokitako balioak Ezarpen aurreratuan"
+          "confirm_apply_suggestions": "Aplikatu eta gorde aldaketa hauek"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Amaitze bidean",
           "finished": "Amaituta",
           "anti_wrinkle": "Zimur-aurkakoa",
+          "delay_wait": "Hasteko zain",
           "interrupted": "Etenduta",
           "force_stopped": "Beharrez gelditu",
           "rinse": "Garbiketa",

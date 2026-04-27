@@ -198,7 +198,12 @@
           "door_sensor_entity": "חיישן דלת",
           "pause_cuts_power": "ניתוק חשמל בעת השהייה",
           "notify_unload_delay_minutes": "עיכוב בהודעת כביסה ממתינה (דקות)",
-          "switch_entity": "מתג ישות (עבור הפסקת חשמל)"
+          "switch_entity": "מתג ישות (עבור הפסקת חשמל)",
+          "delay_start_detect_enabled": "אפשר זיהוי התחלה מושהית",
+          "delay_drain_min_power": "התחלה מושהית: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "התחלה מושהית: הספק מרבי של ספייק (W)",
+          "delay_drain_max_duration": "התחלה מושהית: משך ספייק ניקוז מקסימלי (ים)",
+          "delay_timeout_hours": "התחלה מושהית: זמן המתנה מרבי (שע')"
         },
         "data_description": {
           "apply_suggestions": "סמן תיבה זו כדי לפתוח שלב סקירה עבור ערכים מוצעים מאלגוריתם הלמידה. שום דבר לא נשמר אוטומטית.\n\nהצעה (מלמידה):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} שניות\n- watchdog_interval: {suggested_watchdog_interval} שניות\n- no_update_active_timeout: {suggested_no_update_active_timeout} שניות\n- profile_match_interval: {suggested_profile_match_interval} שניות\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} שניות\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "חיישן בינארי אופציונלי לדלת המכונה (מופעל = פתוח, כבוי = סגור). כאשר הדלת נפתחת במהלך מחזור פעיל, WashData תאשר את המחזור כמושהה בכוונה. לאחר סיום המחזור, אם הדלת עדיין סגורה, המצב משתנה ל'נקי' עד לפתיחת הדלת. הערה: סגירת הדלת אינה ממשיכה אוטומטית מחזור מושהה - יש להפעיל את החידוש באופן ידני באמצעות לחצן חידוש מחזור או שירות.",
           "pause_cuts_power": "בעת השהייה באמצעות לחצן או שירות השהה מחזור, כבה גם את ישות המתג המוגדרת. ייכנס לתוקף רק אם מוגדרת ישות מתג עבור מכשיר זה.",
           "notify_unload_delay_minutes": "שלח הודעה דרך ערוץ הודעת הסיום לאחר סיום המחזור והדלת לא נפתחה במשך דקות רבות כל כך (דורש חיישן דלת). הגדר ל-0 כדי להשבית. ברירת מחדל: 60 דקות.",
-          "switch_entity": "ישות המתג למעבר בעת השהייה או חידוש. נדרש כאשר 'ניתוק חשמל בעת השהייה' מופעל."
+          "switch_entity": "ישות המתג למעבר בעת השהייה או חידוש. נדרש כאשר 'ניתוק חשמל בעת השהייה' מופעל.",
+          "delay_start_detect_enabled": "כאשר מופעל, זינוק ניקוז קצר בהספק נמוך ואחריו כוח המתנה מתמשך מזוהה כהתחלה מושהית. חיישן המצב מראה 'ממתין להתחלה' במהלך ההשהיה. אין מעקב אחר זמן התוכנית או ההתקדמות עד שהמחזור מתחיל בפועל. מחייב את הגדרת start_threshold_w מעל עוצמת ספייק הניקוז.",
+          "delay_drain_min_power": "הספק מינימלי (W) לזיהוי כנקודת ניקוז. הגדר בדיוק מעל רמת ההמתנה האמיתית של המכשיר שלך. ברירת מחדל: 10 W.",
+          "delay_drain_max_power": "הספק מרבי (W) עבור ספייק ניקוז - התפרצויות מעל זה מטופלות כהתחלה של מחזור אמיתי. אמור להיות מתחת להגדרת start_threshold_w שלך. ברירת מחדל: 80 W.",
+          "delay_drain_max_duration": "נקודת הניקוז חייבת לרדת מתחת לחלון הניקוז תוך שניות רבות כל כך כדי לאשר. קוצים ארוכים יותר מתייחסים כאל פעילות מחזורית אמיתית. ברירת מחדל: 60 שניות.",
+          "delay_timeout_hours": "פסק זמן בטיחות: אם המכונה עדיין במצב 'ממתין להפעלה' לאחר שעות רבות כל כך, WashData מתאפס למצב כבוי. ברירת מחדל: 8 שעות."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "סקור שינויים מוצעים",
-        "description": "WashData מצא {pending_count} ערכים מוצעים ליישום.\n\nשינויים לסקירה:\n{changes}\n\nאשר למטה כדי לשלב ערכים אלה בטופס. הם לא נשמרים עד שתשלח הגדרות מתקדמות.",
+        "description": "נמצאו **{pending_count}** ערכים מוצעים ליישום WashData.\n\nשינויים:\n{changes}\n\n✅ סמן את התיבה למטה ולחץ על **שלח** כדי להחיל ולשמור שינויים אלה באופן מיידי.\n❌ השאר אותו לא מסומן ולחץ על **שלח** כדי לבטל ולחזור.",
         "data": {
-          "confirm_apply_suggestions": "ערכים מוצעים בשלב בהגדרות מתקדמות"
+          "confirm_apply_suggestions": "החל ושמור שינויים אלה"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "סִיוּם",
           "finished": "גָמוּר",
           "anti_wrinkle": "נגד קמטים",
+          "delay_wait": "מחכה להתחלה",
           "interrupted": "מוּפרָע",
           "force_stopped": "כוח נעצר",
           "rinse": "לִשְׁטוֹף",

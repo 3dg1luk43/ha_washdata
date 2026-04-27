@@ -198,7 +198,12 @@
           "door_sensor_entity": "Sensor de porta",
           "pause_cuts_power": "Talleu l'alimentació quan feu una pausa",
           "notify_unload_delay_minutes": "Retard de notificació d'espera de bugaderia (min)",
-          "switch_entity": "Canvia d'entitat (per a la pausa del tall d'alimentació)"
+          "switch_entity": "Canvia d'entitat (per a la pausa del tall d'alimentació)",
+          "delay_start_detect_enabled": "Activa la detecció d'inici retardat",
+          "delay_drain_min_power": "Inici retardat: potència mínima de pic de drenatge (W)",
+          "delay_drain_max_power": "Inici retardat: potència màxima de pic de drenatge (W)",
+          "delay_drain_max_duration": "Inici retardat: durada màxima de la punta de drenatge (s)",
+          "delay_timeout_hours": "Inici retardat: temps d'espera màxim (h)"
         },
         "data_description": {
           "apply_suggestions": "Marqueu aquesta casella per obrir un pas de revisió dels valors suggerits de l'algoritme d'aprenentatge. No es desa res automàticament.\n\nSuggerit (de l'aprenentatge):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Sensor binari opcional per a la porta de la màquina (encesa = oberta, apagada = tancada). Quan la porta s'obre durant un cicle actiu, WashData confirmarà el cicle com a pausa intencionada. Un cop finalitza el cicle, si la porta encara està tancada, l'estat canvia a \"Neteja\" fins que la porta s'obre. Nota: el tancament de la porta NO reprèn automàticament un cicle en pausa; el reinici s'ha d'activar manualment mitjançant el botó o el servei Reprèn el cicle.",
           "pause_cuts_power": "Quan feu una pausa mitjançant el botó o el servei de pausa del cicle, també desactiveu l'entitat de commutació configurada. Només té efecte si es configura una entitat de commutació per a aquest dispositiu.",
           "notify_unload_delay_minutes": "Envieu una notificació a través del canal de notificació d'acabament un cop finalitzi el cicle i la porta no s'hagi obert durant tants minuts (requereix el sensor de la porta). Establiu a 0 per desactivar. Per defecte: 60 min.",
-          "switch_entity": "L'entitat de commutació per alternar quan s'atura o es reprèn. Necessari quan l'opció \"Tallar l'alimentació en pausa\" està activada."
+          "switch_entity": "L'entitat de commutació per alternar quan s'atura o es reprèn. Necessari quan l'opció \"Tallar l'alimentació en pausa\" està activada.",
+          "delay_start_detect_enabled": "Quan està activat, es detecta un augment de drenatge breu de baixa potència seguit d'una potència en espera sostinguda com a inici retardat. El sensor d'estat mostra \"Esperant per començar\" durant el retard. No es fa un seguiment del temps ni del progrés del programa fins que el cicle comença realment. Requereix que start_threshold_w s'estableixi per sobre de la potència del pic de drenatge.",
+          "delay_drain_min_power": "Potència mínima (W) per reconèixer com a punt de drenatge. Establiu just per sobre del nivell d'espera d'apagat real de la vostra màquina. Per defecte: 10 W.",
+          "delay_drain_max_power": "Potència màxima (W) per a un pic de drenatge: les ràfegues per sobre d'aquesta es tracten com un inici de cicle real. Hauria d'estar per sota del vostre paràmetre start_threshold_w. Per defecte: 80 W.",
+          "delay_drain_max_duration": "La punta de drenatge ha de tornar a caure per sota de la finestra de drenatge en aquests segons per confirmar-se. Els pics més llargs es tracten com a activitat de cicle real. Per defecte: 60 s.",
+          "delay_timeout_hours": "Temps d'espera de seguretat: si la màquina encara està en \"Esperant per iniciar\" després d'aquestes moltes hores, WashData es restableix a Off. Per defecte: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Reviseu els canvis suggerits",
-        "description": "WashData ha trobat {pending_count} valors suggerits per aplicar.\n\nCanvis a revisar:\n{changes}\n\nConfirmeu a continuació per escenificar aquests valors al formulari. No es desaran fins que no envieu la configuració avançada.",
+        "description": "WashData ha trobat **{pending_count}** valors suggerits per aplicar.\n\nCanvis:\n{changes}\n\n✅ Marqueu la casella de sota i feu clic a **Envia** per aplicar i desar aquests canvis immediatament.\n❌ Deixeu-lo sense marcar i feu clic a **Envia** per cancel·lar-lo i tornar enrere.",
         "data": {
-          "confirm_apply_suggestions": "Escenifica els valors suggerits a la configuració avançada"
+          "confirm_apply_suggestions": "Apliqueu i deseu aquests canvis"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Finalització",
           "finished": "Acabat",
           "anti_wrinkle": "Antiarrugues",
+          "delay_wait": "Esperant per començar",
           "interrupted": "Interromput",
           "force_stopped": "Força aturada",
           "rinse": "Esbandida",

@@ -38,6 +38,9 @@ class MockProfileStore:
 
     def set_suggestion(self, key, value, reason):
         self.suggestions[key] = {"value": value, "reason": reason}
+
+    def delete_suggestion(self, key):
+        self.suggestions.pop(key, None)
     
     def add_pending_feedback(self, cycle_id, data):
         self.pending[cycle_id] = data

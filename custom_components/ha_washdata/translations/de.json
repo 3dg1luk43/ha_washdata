@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Vorgeschlagenen Änderungen überprüfen",
-        "description": "WashData hat {pending_count} vorgeschlagene Werte zur Anwendung gefunden.\n\nZu überprüfende Änderungen:\n{changes}\n\nBestätigen, um diese Werte in das Formular zu übernehmen. Sie werden erst gespeichert, wenn die erweiterten Einstellungen gespeichert werden.",
+        "description": "WashData hat **{pending_count}** vorgeschlagene(n) Wert(e) gefunden, die angewendet werden sollen.\n\nÄnderungen:\n{changes}\n\n✅ Aktivieren Sie das Kontrollkästchen unten und klicken Sie auf **Senden**, um diese Änderungen sofort zu übernehmen und zu speichern.\n❌ Lassen Sie es deaktiviert und klicken Sie auf **Senden**, um den Vorgang abzubrechen und zurückzukehren.",
         "data": {
-          "confirm_apply_suggestions": "Vorgeschlagene Werte in den erweiterten Einstellungen übernehmen"
+          "confirm_apply_suggestions": "Übernehmen und speichern Sie diese Änderungen"
         }
       },
       "settings": {
@@ -205,7 +205,12 @@
           "door_sensor_entity": "Türsensor",
           "pause_cuts_power": "Unterbrechen Sie die Stromversorgung, wenn Sie pausieren",
           "notify_unload_delay_minutes": "Verzögerung der Wäsche-Warten-Benachrichtigung (Min.)",
-          "switch_entity": "Entität wechseln (für Stromausfall pausieren)"
+          "switch_entity": "Entität wechseln (für Stromausfall pausieren)",
+          "delay_start_detect_enabled": "Aktivieren Sie die verzögerte Starterkennung",
+          "delay_drain_min_power": "Verzögerter Start: Min. Spitzenleistung (W) entziehen",
+          "delay_drain_max_power": "Verzögerter Start: Maximale Spike-Leistung (W) entziehen",
+          "delay_drain_max_duration": "Verzögerter Start: Max. Drain-Spike-Dauer (s)",
+          "delay_timeout_hours": "Verzögerter Start: Maximale Wartezeit (h)"
         },
         "data_description": {
           "apply_suggestions": "Aktivieren um einen Überprüfungsschritt für vorgeschlagene Werte vom Lernalgorithmus zu öffnen. Es wird nichts automatisch gespeichert.\n\nEmpfohlen (vom Lernen):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -257,7 +262,12 @@
           "door_sensor_entity": "Optionaler binärer Sensor für die Maschinentür (ein = offen, aus = geschlossen). Wenn sich die Tür während eines aktiven Zyklus öffnet, bestätigt WashData, dass der Zyklus absichtlich angehalten wurde. Wenn der Zyklus beendet ist und die Tür noch geschlossen ist, wechselt der Zustand zu „Sauber”, bis die Tür geöffnet wird. Hinweis: Durch das Schließen der Tür wird ein angehaltener Zyklus NICHT automatisch fortgesetzt. Die Wiederaufnahme muss manuell über die Schaltfläche „Zyklus fortsetzen“ oder den entsprechenden Dienst ausgelöst werden.",
           "pause_cuts_power": "Wenn Sie über die Schaltfläche „Zyklus anhalten“ oder den Dienst anhalten, schalten Sie auch die konfigurierte Schaltereinheit aus. Wird nur wirksam, wenn für dieses Gerät eine Switch-Entität konfiguriert ist.",
           "notify_unload_delay_minutes": "Senden Sie eine Benachrichtigung über den Abschlussbenachrichtigungskanal, nachdem der Zyklus beendet ist und die Tür so viele Minuten lang nicht geöffnet wurde (erfordert Türsensor). Zum Deaktivieren auf 0 setzen. Standard: 60 Min.",
-          "switch_entity": "Die Schalterentität, die beim Anhalten oder Fortsetzen umgeschaltet wird. Erforderlich, wenn „Stromversorgung bei Pause abschalten“ aktiviert ist."
+          "switch_entity": "Die Schalterentität, die beim Anhalten oder Fortsetzen umgeschaltet wird. Erforderlich, wenn „Stromversorgung bei Pause abschalten“ aktiviert ist.",
+          "delay_start_detect_enabled": "Wenn diese Option aktiviert ist, wird eine kurze Leistungsspitze bei geringem Stromverbrauch, gefolgt von einer anhaltenden Standby-Leistung, als verzögerter Start erkannt. Der Statussensor zeigt während der Verzögerung „Warten auf Start“ an. Es werden weder Programmzeit noch Fortschritt verfolgt, bis der Zyklus tatsächlich beginnt. Erfordert, dass start_threshold_w über der Drain-Spike-Leistung eingestellt wird.",
+          "delay_drain_min_power": "Mindestleistung (W), um als Abflussspitze erkannt zu werden. Stellen Sie die Einstellung knapp über dem True-Off-Standby-Pegel Ihrer Maschine ein. Standard: 10 W.",
+          "delay_drain_max_power": "Maximale Leistung (W) für eine Entleerungsspitze – Ausbrüche darüber werden als echter Zyklusstart behandelt. Sollte unter Ihrer start_threshold_w-Einstellung liegen. Standard: 80 W.",
+          "delay_drain_max_duration": "Zur Bestätigung muss die Ablaufspitze innerhalb dieser Sekunden wieder unter das Ablauffenster fallen. Längere Spitzen werden als echte Zyklusaktivität behandelt. Standard: 60 s.",
+          "delay_timeout_hours": "Sicherheits-Timeout: Wenn sich die Maschine nach dieser Anzahl von Stunden immer noch im Zustand „Warten auf Start“ befindet, wird WashData auf „Aus“ zurückgesetzt. Standard: 8 Stunden."
         }
       },
       "diagnostics": {
@@ -1044,6 +1054,7 @@
           "ending": "Ende",
           "finished": "Fertig",
           "anti_wrinkle": "Knitterschutz",
+          "delay_wait": "Warten auf den Start",
           "interrupted": "Unterbrochen",
           "force_stopped": "Erzwungen beendet",
           "rinse": "Spülen",

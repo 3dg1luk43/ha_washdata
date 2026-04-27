@@ -198,7 +198,12 @@
           "door_sensor_entity": "Deursensor",
           "pause_cuts_power": "Sny krag tydens pouse",
           "notify_unload_delay_minutes": "Wasgoedwagkennisgewingvertraging (min.)",
-          "switch_entity": "Skakel entiteit (vir pouse kragonderbreking)"
+          "switch_entity": "Skakel entiteit (vir pouse kragonderbreking)",
+          "delay_start_detect_enabled": "Aktiveer vertraagde beginopsporing",
+          "delay_drain_min_power": "Vertraagde begin: Dreineer Spike Min Power (W)",
+          "delay_drain_max_power": "Vertraagde begin: Dreineer Spike Max Power (W)",
+          "delay_drain_max_duration": "Vertraagde begin: maksimum dreineerpuntduur (s)",
+          "delay_timeout_hours": "Vertraagde begin: maksimum wagtyd (h)"
         },
         "data_description": {
           "apply_suggestions": "Merk hierdie blokkie om 'n hersieningstap oop te maak vir voorgestelde waardes van die leeralgoritme. Niks word outomaties gestoor nie.\n\nVoorgestelde (vanaf leer):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Opsionele binêre sensor vir die masjiendeur (aan = oop, af = toe). Wanneer die deur oopmaak tydens 'n aktiewe siklus, sal WashData die siklus bevestig as opsetlik onderbreek. Nadat die siklus geëindig het, as die deur nog gesluit is, verander die toestand na 'Skoon' totdat die deur oopgemaak word. Let wel: die sluiting van die deur hervat NIE 'n onderbreekte siklus outomaties nie - hervat moet handmatig geaktiveer word via die Hervat siklus-knoppie of diens.",
           "pause_cuts_power": "Skakel ook die gekonfigureerde skakelaar-entiteit af wanneer jy met die Pouse-siklus-knoppie of diens onderbreek. Tree slegs in werking as 'n skakelaar-entiteit vir hierdie toestel opgestel is.",
           "notify_unload_delay_minutes": "Stuur 'n kennisgewing via die afwerkingkennisgewingkanaal nadat die siklus geëindig het en die deur vir soveel minute nie oopgemaak is nie (vereis deursensor). Stel op 0 om te deaktiveer. Verstek: 60 min.",
-          "switch_entity": "Die skakel-entiteit om te wissel wanneer onderbreek of hervat word. Vereis wanneer 'Sny krag tydens pouse' geaktiveer is."
+          "switch_entity": "Die skakel-entiteit om te wissel wanneer onderbreek of hervat word. Vereis wanneer 'Sny krag tydens pouse' geaktiveer is.",
+          "delay_start_detect_enabled": "Wanneer dit geaktiveer is, word 'n kort lae-krag drein piek gevolg deur volgehoue ​​bystand krag bespeur as 'n vertraagde begin. Die toestandsensor wys 'Wag om te begin' tydens die vertraging. Geen programtyd of vordering word opgespoor totdat die siklus werklik begin nie. Vereis dat start_threshold_w bo die dreineerpuntkrag gestel word.",
+          "delay_drain_min_power": "Minimum krag (W) om as 'n dreinspiek te herken. Stel net bokant jou masjien se regte-af-standbyvlak. Verstek: 10 W.",
+          "delay_drain_max_power": "Maksimum krag (W) vir 'n dreinspiek - sarsies hierbo word as 'n werklike siklusbegin beskou. Behoort onder jou start_threshold_w instelling te wees. Verstek: 80 W.",
+          "delay_drain_max_duration": "Die dreinspiek moet binne soveel sekondes onder die dreinvenster terugsak om bevestig te word. Langer spykers word as werklike siklusaktiwiteit behandel. Verstek: 60 s.",
+          "delay_timeout_hours": "Veiligheidsonderbreking: as die masjien na soveel ure steeds in 'Wag om te begin' is, stel WashData terug na Af. Verstek: 8 uur."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Hersien voorgestelde veranderinge",
-        "description": "WashData het {pending_count} voorgestelde waardes gevind om toe te pas.\n\nVeranderinge om te hersien:\n{changes}\n\nBevestig hieronder om hierdie waardes in die vorm te verhoog. Hulle word nie gestoor totdat jy Gevorderde instellings indien nie.",
+        "description": "WashData gevind **{pending_count}** voorgestelde waarde(s) om toe te pas.\n\nVeranderinge:\n{changes}\n\n✅ Merk die blokkie hieronder en klik **Dien in** om hierdie veranderinge onmiddellik toe te pas en te stoor.\n❌ Laat dit ongemerk en klik **Dien in** om te kanselleer en terug te gaan.",
         "data": {
-          "confirm_apply_suggestions": "Stadium voorgestelde waardes in Gevorderde instellings"
+          "confirm_apply_suggestions": "Pas hierdie veranderinge toe en stoor dit"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Einde",
           "finished": "Klaar",
           "anti_wrinkle": "Anti-rimpel",
+          "delay_wait": "Wag om te begin",
           "interrupted": "Onderbreek",
           "force_stopped": "Geforseer gestop",
           "rinse": "Spoel af",

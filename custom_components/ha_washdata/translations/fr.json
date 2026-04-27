@@ -198,7 +198,12 @@
           "door_sensor_entity": "Capteur de porte",
           "pause_cuts_power": "Couper l'alimentation lors d'une pause",
           "notify_unload_delay_minutes": "Délai de notification d'attente de blanchisserie (min)",
-          "switch_entity": "Entité de commutation (pour pause de coupure de courant)"
+          "switch_entity": "Entité de commutation (pour pause de coupure de courant)",
+          "delay_start_detect_enabled": "Activer la détection de démarrage différé",
+          "delay_drain_min_power": "Démarrage différé : Puissance minimale du pic de vidange (W)",
+          "delay_drain_max_power": "Démarrage différé : Puissance maximale du pic de vidange (W)",
+          "delay_drain_max_duration": "Démarrage différé : durée maximale du pic de drainage (s)",
+          "delay_timeout_hours": "Démarrage différé : temps d'attente maximum (h)"
         },
         "data_description": {
           "apply_suggestions": "Cochez cette case pour ouvrir une étape de révision des valeurs suggérées par l'algorithme d'apprentissage. Rien n'est enregistré automatiquement.\n\nSuggéré (issu de l'apprentissage) :\n- min_power : {suggested_min_power} W\n- off_delay : {suggested_off_delay} s\n- watchdog_interval : {suggested_watchdog_interval} s\n- no_update_active_timeout : {suggested_no_update_active_timeout} s\n- profile_match_interval : {suggested_profile_match_interval} s\n- auto_label_confidence : {suggested_auto_label_confidence}\n- duration_tolerance : {suggested_duration_tolerance}\n- profile_duration_tolerance : {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio : {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio : {suggested_profile_match_max_duration_ratio}\n- start_threshold_w : {suggested_start_threshold_w} W\n- stop_threshold_w : {suggested_stop_threshold_w} W\n- end_energy_threshold : {suggested_end_energy_threshold} Wh\n- running_dead_zone : {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Capteur binaire en option pour la porte de la machine (on = ouvert, off = fermé). Lorsque la porte s'ouvre pendant un cycle actif, WashData confirmera que le cycle est intentionnellement mis en pause. Une fois le cycle terminé, si la porte est toujours fermée, l'état passe à « Nettoyer » jusqu'à ce que la porte soit ouverte. Remarque : la fermeture de la porte ne reprend PAS automatiquement un cycle en pause ; la reprise doit être déclenchée manuellement via le bouton ou le service Reprendre le cycle.",
           "pause_cuts_power": "Lors d'une pause via le bouton ou le service Pause Cycle, désactivez également l'entité de commutation configurée. Ne prend effet que si une entité de commutation est configurée pour cet appareil.",
           "notify_unload_delay_minutes": "Envoyez une notification via le canal de notification de fin une fois le cycle terminé et que la porte n'a pas été ouverte pendant ce nombre de minutes (nécessite un capteur de porte). Réglez sur 0 pour désactiver. Par défaut : 60 min.",
-          "switch_entity": "L'entité de commutation à activer lors de la pause ou de la reprise. Requis lorsque « Couper l'alimentation en pause » est activé."
+          "switch_entity": "L'entité de commutation à activer lors de la pause ou de la reprise. Requis lorsque « Couper l'alimentation en pause » est activé.",
+          "delay_start_detect_enabled": "Lorsqu'il est activé, un bref pic de consommation de faible consommation suivi d'une alimentation de veille soutenue est détecté comme un démarrage différé. Le capteur d'état affiche « En attente de démarrage » pendant le délai. Aucune durée ni progression du programme n'est suivie jusqu'à ce que le cycle commence réellement. Nécessite que start_threshold_w soit défini au-dessus de la puissance de pointe de drain.",
+          "delay_drain_min_power": "Puissance minimale (W) à reconnaître comme pointe de vidange. Réglez-le juste au-dessus du niveau de veille véritable de votre machine. Par défaut : 10 W.",
+          "delay_drain_max_power": "Puissance maximale (W) pour un pic de vidange — les sursauts supérieurs à cette valeur sont traités comme un véritable démarrage de cycle. Doit être inférieur à votre paramètre start_threshold_w. Par défaut : 80 W.",
+          "delay_drain_max_duration": "Le pic de vidange doit retomber sous la fenêtre de vidange dans ce délai pour être confirmé. Les pics plus longs sont traités comme une activité de cycle réelle. Par défaut : 60 s.",
+          "delay_timeout_hours": "Délai d'expiration de sécurité : si la machine est toujours en « En attente de démarrage » après ce nombre d'heures, WashData se réinitialise sur Off. Par défaut : 8 heures."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Examiner les modifications suggérées",
-        "description": "WashData a trouvé {pending_count} valeurs suggérées à appliquer.\n\nModifications à revoir :\n{changes}\n\nConfirmez ci-dessous pour mettre en scène ces valeurs dans le formulaire. Ils ne sont pas enregistrés tant que vous n'avez pas soumis les paramètres avancés.",
+        "description": "WashData a trouvé **{pending_count}** valeur(s) suggérée(s) à appliquer.\n\nModifications :\n{changes}\n\n✅ Cochez la case ci-dessous et cliquez sur **Soumettre** pour appliquer et enregistrer ces modifications immédiatement.\n❌ Laissez-la décochée et cliquez sur **Soumettre** pour annuler et revenir en arrière.",
         "data": {
-          "confirm_apply_suggestions": "Étapes des valeurs suggérées dans les paramètres avancés"
+          "confirm_apply_suggestions": "Appliquer et enregistrer ces modifications"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "En cours d'arrêt",
           "finished": "Terminé",
           "anti_wrinkle": "Anti-faux plis",
+          "delay_wait": "En attendant de commencer",
           "interrupted": "Interrompu",
           "force_stopped": "Arrêt forcé",
           "rinse": "Rinçage",

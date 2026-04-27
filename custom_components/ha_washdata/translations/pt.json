@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Rever alterações sugeridas",
-        "description": "O WashData encontrou {pending_count} valores sugeridos para aplicar.\n\nAlterações a rever:\n{changes}\n\nConfirme abaixo para colocar estes valores no formulário. Não são guardados até submeter as Definições avançadas.",
+        "description": "O WashData encontrou **{pending_count}** valor(es) sugerido(s) para aplicar.\n\nAlterações:\n{changes}\n\n✅ Marque a caixa abaixo e clique em **Enviar** para aplicar e guardar estas alterações imediatamente.\n❌ Deixe desmarcada e clique em **Enviar** para cancelar e voltar.",
         "data": {
-          "confirm_apply_suggestions": "Preparar valores sugeridos em Definições avançadas"
+          "confirm_apply_suggestions": "Aplicar e guardar estas alterações"
         }
       },
       "settings": {
@@ -205,7 +205,12 @@
           "door_sensor_entity": "Sensor de porta",
           "pause_cuts_power": "Corte a energia ao pausar",
           "notify_unload_delay_minutes": "Atraso na notificação de espera de lavanderia (min)",
-          "switch_entity": "Entidade de comutação (para pausar corte de energia)"
+          "switch_entity": "Entidade de comutação (para pausar corte de energia)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Assinale esta caixa para abrir um passo de revisão dos valores sugeridos pelo algoritmo de aprendizagem. Nada é guardado automaticamente.\n\nSugerido (por aprendizagem):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -257,7 +262,12 @@
           "door_sensor_entity": "Sensor binário opcional para a porta da máquina (ligado = aberto, desligado = fechado). Quando a porta abre durante um ciclo ativo, WashData confirmará o ciclo como pausado intencionalmente. Após o término do ciclo, se a porta ainda estiver fechada, o estado muda para 'Limpar' até que a porta seja aberta. Nota: fechar a porta NÃO retoma automaticamente um ciclo pausado – a retomada deve ser acionada manualmente por meio do botão Retomar Ciclo ou serviço.",
           "pause_cuts_power": "Ao pausar por meio do botão Pause Cycle ou serviço, desligue também a entidade de switch configurada. Só entra em vigor se uma entidade de switch estiver configurada para este dispositivo.",
           "notify_unload_delay_minutes": "Envie uma notificação por meio do canal de notificação de término após o término do ciclo e a porta não tiver sido aberta por tantos minutos (requer Sensor de Porta). Defina como 0 para desativar. Padrão: 60 min.",
-          "switch_entity": "A entidade switch a ser alternada ao pausar ou retomar. Obrigatório quando 'Cortar energia ao pausar' está ativado."
+          "switch_entity": "A entidade switch a ser alternada ao pausar ou retomar. Obrigatório quando 'Cortar energia ao pausar' está ativado.",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -1044,6 +1054,7 @@
           "ending": "A terminar",
           "finished": "Concluído",
           "anti_wrinkle": "Anti-vincos",
+          "delay_wait": "Waiting to Start",
           "interrupted": "Interrompido",
           "force_stopped": "Parado forçosamente",
           "rinse": "Enxaguar",

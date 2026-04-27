@@ -198,7 +198,12 @@
           "door_sensor_entity": "Snímač dveří",
           "pause_cuts_power": "Vypnout napájení při pozastavení",
           "notify_unload_delay_minutes": "Zpoždění oznámení o čekání na prádelnu (min)",
-          "switch_entity": "Přepnout entitu (pro pozastavení vypnutí)"
+          "switch_entity": "Přepnout entitu (pro pozastavení vypnutí)",
+          "delay_start_detect_enabled": "Povolit detekci odloženého startu",
+          "delay_drain_min_power": "Odložený start: vypouštění špičky Minimální výkon (W)",
+          "delay_drain_max_power": "Odložený start: Maximální výkon vypouštěcí špičky (W)",
+          "delay_drain_max_duration": "Odložený start: Maximální doba trvání vypouštěcí špičky (s)",
+          "delay_timeout_hours": "Odložený start: Maximální doba čekání (h)"
         },
         "data_description": {
           "apply_suggestions": "Zaškrtnutím tohoto políčka otevřete krok kontroly navrhovaných hodnot z algoritmu učení. Nic se neukládá automaticky.\n\nDoporučeno (z učení):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Volitelný binární senzor pro dvířka stroje (zapnuto = otevřeno, vypnuto = zavřeno). Když se dvířka otevřou během aktivního cyklu, WashData potvrdí cyklus jako záměrně pozastavený. Po skončení cyklu, pokud jsou dvířka stále zavřená, se stav změní na 'Vyčistit', dokud se dvířka neotevře. Poznámka: zavření dvířek NEOBNOVÍ automaticky pozastavený cyklus – obnovení musí být spuštěno ručně pomocí tlačítka nebo služby Resume Cycle.",
           "pause_cuts_power": "Při pozastavení pomocí tlačítka nebo služby Pause Cycle také vypněte nakonfigurovanou entitu přepínače. Platí pouze v případě, že je pro toto zařízení nakonfigurována entita přepínače.",
           "notify_unload_delay_minutes": "Odešlete upozornění prostřednictvím kanálu upozornění na ukončení poté, co cyklus skončí a dveře nebyly po tolik minut otevřeny (vyžaduje čidlo dveří). Nastavením na 0 deaktivujete. Výchozí: 60 min.",
-          "switch_entity": "Entita přepínače, která se má přepnout při pozastavení nebo obnovení. Vyžadováno, když je povolena možnost „Cut Power When Pausing“."
+          "switch_entity": "Entita přepínače, která se má přepnout při pozastavení nebo obnovení. Vyžadováno, když je povolena možnost „Cut Power When Pausing“.",
+          "delay_start_detect_enabled": "Je-li povoleno, krátký výpadek nízké spotřeby následovaný trvalým napájením v pohotovostním režimu je detekován jako zpožděný start. Senzor stavu zobrazuje během zpoždění 'Waiting to Start'. Dokud cyklus skutečně nezačne, není sledován žádný čas programu ani průběh. Vyžaduje, aby start_threshold_w byl nastaven nad odběrovou špičkou.",
+          "delay_drain_min_power": "Minimální výkon (W) rozpoznatelný jako odtokový hrot. Nastavte těsně nad skutečnou úroveň pohotovostního režimu vašeho stroje. Výchozí: 10 W.",
+          "delay_drain_max_power": "Maximální výkon (W) pro vypouštěcí špičku – výbuchy nad touto hodnotou jsou považovány za skutečný začátek cyklu. Mělo by být pod vaším nastavením start_threshold_w. Výchozí: 80 W.",
+          "delay_drain_max_duration": "Vypouštěcí hrot musí během několika sekund klesnout zpět pod vypouštěcí okénko, aby bylo možné potvrdit. Delší hroty jsou považovány za skutečnou aktivitu cyklu. Výchozí: 60 s.",
+          "delay_timeout_hours": "Bezpečnostní časový limit: pokud je stroj i po tomto počtu hodin stále ve stavu „Čekání na spuštění“, WashData se resetuje na Vypnuto. Výchozí: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Zkontrolujte navrhované změny",
-        "description": "WashData nalezl {pending_count} navrhovaných hodnot k použití.\n\nZměny ke kontrole:\n{changes}\n\nChcete-li tyto hodnoty zařadit do formuláře, potvrďte níže. Neuloží se, dokud neodešlete Pokročilá nastavení.",
+        "description": "WashData nalezeno **{pending_count}** navrhované hodnoty, které se mají použít.\n\nzměny:\n{changes}\n\n✅ Zaškrtněte políčko níže a kliknutím na **Odeslat** tyto změny okamžitě použijte a uložte.\n❌ Nechte to nezaškrtnuté a kliknutím na **Odeslat** zrušte a vraťte se zpět.",
         "data": {
-          "confirm_apply_suggestions": "Navrhované hodnoty nastavte v Pokročilých nastaveních"
+          "confirm_apply_suggestions": "Použít a uložit tyto změny"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Dokončování",
           "finished": "Dokončeno",
           "anti_wrinkle": "Proti pomačkání",
+          "delay_wait": "Čekání na spuštění",
           "interrupted": "Přerušeno",
           "force_stopped": "Nuceně zastaveno",
           "rinse": "Máchání",

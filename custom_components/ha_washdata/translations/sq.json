@@ -198,7 +198,12 @@
           "door_sensor_entity": "Sensori i derës",
           "pause_cuts_power": "Ndërpreni energjinë kur ndaloni",
           "notify_unload_delay_minutes": "Vonesa e njoftimit në pritje të rrobave (min.)",
-          "switch_entity": "Ndërro entitetin (për ndërprerjen e energjisë në pauzë)"
+          "switch_entity": "Ndërro entitetin (për ndërprerjen e energjisë në pauzë)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Zgjidhni këtë kuti për të hapur një hap rishikimi për vlerat e sugjeruara nga algoritmi i të mësuarit. Asgjë nuk ruhet automatikisht.\n\nSugjeruar (nga të mësuarit):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Sensori binar opsional për derën e makinës (ndezur = hapur, fikur = mbyllur). Kur dera hapet gjatë një cikli aktiv, WashData do të konfirmojë ciklin si të ndërprerë qëllimisht. Pas përfundimit të ciklit, nëse dera është ende e mbyllur, gjendja ndryshon në \"Pastrim\" derisa të hapet dera. Shënim: mbyllja e derës NUK rifillon automatikisht një cikël të ndërprerë - rifillimi duhet të aktivizohet manualisht nëpërmjet butonit ose shërbimit të Ciklit të Rifillimit.",
           "pause_cuts_power": "Kur bëni pauzë nëpërmjet butonit ose shërbimit të Ciklit të Pauzës, fikni gjithashtu entitetin e konfiguruar të ndërprerës. Hyn në fuqi vetëm nëse për këtë pajisje është konfiguruar një ent ndërruesi.",
           "notify_unload_delay_minutes": "Dërgoni një njoftim nëpërmjet kanalit të njoftimit të përfundimit pasi të përfundojë cikli dhe dera nuk është hapur për kaq shumë minuta (kërkon Sensori i derës). Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 60 min.",
-          "switch_entity": "Njësia e ndërrimit për t'u ndërruar kur ndalon ose rifillon. Kërkohet kur aktivizohet \"Prini energjinë kur ndalon\"."
+          "switch_entity": "Njësia e ndërrimit për t'u ndërruar kur ndalon ose rifillon. Kërkohet kur aktivizohet \"Prini energjinë kur ndalon\".",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Rishiko ndryshimet e sugjeruara",
-        "description": "WashData gjeti {pending_count} vlera të sugjeruara për t'u aplikuar.\n\nNdryshimet për shqyrtim:\n{changes}\n\nKonfirmo më poshtë për të ngarkuar këto vlera në formë. Ato nuk ruhen derisa të paraqisni Cilësimet e Avancuara.",
+        "description": "WashData gjeti **{pending_count}** vlerë/a të sugjeruara për zbatim.\n\nNdryshimet:\n{changes}\n\n✅ Kontrolloni kutinë më poshtë dhe klikoni **Dërgo** për të zbatuar dhe ruajtur menjëherë këto ndryshime.\n❌ Lëreni pa kontrolluar dhe klikoni **Dërgo** për të anuluar dhe shkuar mbrapa.",
         "data": {
-          "confirm_apply_suggestions": "Ngarko vlerat e sugjeruara në cilësimet e avancuara"
+          "confirm_apply_suggestions": "Zbato dhe ruaj këto ndryshime"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Duke përfunduar",
           "finished": "Përfunduar",
           "anti_wrinkle": "Kundër rrudhave",
+          "delay_wait": "Waiting to Start",
           "interrupted": "E ndërprerë",
           "force_stopped": "Ndaluar me forcë",
           "rinse": "Shpëlarje",

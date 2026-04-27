@@ -198,7 +198,12 @@
           "door_sensor_entity": "Synhwyrydd Drws",
           "pause_cuts_power": "Torri Pŵer Wrth Oedi",
           "notify_unload_delay_minutes": "Oedi Hysbysiad Aros Golchdy (munud)",
-          "switch_entity": "Newid Endid (ar gyfer Saib Power Cut)"
+          "switch_entity": "Newid Endid (ar gyfer Saib Power Cut)",
+          "delay_start_detect_enabled": "Galluogi Canfod Cychwyn Oedi",
+          "delay_drain_min_power": "Oedi Cychwyn: Draeniwch Pŵer Isafswm Spike (W)",
+          "delay_drain_max_power": "Oedi Cychwyn: Draeniwch Spike Max Power (W)",
+          "delay_drain_max_duration": "Oedi Cychwyn: Uchafswm Drain Spike Hyd(s)",
+          "delay_timeout_hours": "Oedi Cychwyn: Uchafswm Amser Aros (h)"
         },
         "data_description": {
           "apply_suggestions": "Ticiwch y blwch hwn i agor cam adolygu ar gyfer gwerthoedd a awgrymir o'r algorithm dysgu. Nid oes dim yn cael ei arbed yn awtomatig.\n\nAwgrymir (o ddysgu):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Synhwyrydd deuaidd dewisol ar gyfer drws y peiriant (ar = agored, i ffwrdd = ar gau). Pan fydd y drws yn agor yn ystod cylch gweithredol, bydd WashData yn cadarnhau bod y cylch wedi'i seibio'n fwriadol. Ar ôl i'r cylch ddod i ben, os yw'r drws yn dal i fod ar gau, mae'r cyflwr yn newid i 'Glan' nes bod y drws yn cael ei agor. Sylwch: NID yw cau'r drws yn ailddechrau cylch wedi'i seibio'n awtomatig - rhaid cychwyn ailddechrau â llaw trwy'r botwm neu'r gwasanaeth Ail-ddechrau Seiclo.",
           "pause_cuts_power": "Wrth oedi trwy'r botwm Pause Cycle neu'r gwasanaeth, trowch yr endid switsh ffurfweddu i ffwrdd hefyd. Dim ond os yw endid switsh wedi'i ffurfweddu ar gyfer y ddyfais hon y daw i rym.",
           "notify_unload_delay_minutes": "Anfonwch hysbysiad trwy'r sianel hysbysu gorffen ar ôl i'r cylch ddod i ben ac nid yw'r drws wedi'i agor am lawer o funudau (angen Synhwyrydd Drws). Gosodwch ar 0 i analluogi. Diofyn: 60 mun.",
-          "switch_entity": "Yr endid switsh i'w doglo wrth oedi neu ailddechrau. Yn ofynnol pan fydd 'Cut Power When Pausing' wedi'i alluogi."
+          "switch_entity": "Yr endid switsh i'w doglo wrth oedi neu ailddechrau. Yn ofynnol pan fydd 'Cut Power When Pausing' wedi'i alluogi.",
+          "delay_start_detect_enabled": "Pan fydd wedi'i alluogi, mae pigyn draen pŵer isel byr wedi'i ddilyn gan bŵer wrth gefn parhaus yn cael ei ganfod fel dechrau oedi. Mae'r synhwyrydd cyflwr yn dangos 'Aros i Gychwyn' yn ystod yr oedi. Ni chaiff unrhyw amser rhaglen na chynnydd ei olrhain nes bod y cylch yn dechrau. Mae angen gosod start_threshold_w uwchben pŵer pigyn y draen.",
+          "delay_drain_min_power": "Isafswm pŵer (W) i adnabod fel pigyn draen. Wedi'i osod ychydig yn uwch na lefel wrth gefn gwirioneddol eich peiriant. Diofyn: 10 W.",
+          "delay_drain_max_power": "Uchafswm pŵer (W) ar gyfer pigyn draen - mae pyliau uwchben hyn yn cael eu trin fel cychwyniad cylch go iawn. Dylai fod yn is na'ch gosodiad start_threshold_w. Diofyn: 80 W.",
+          "delay_drain_max_duration": "Rhaid i bigyn y draen ddisgyn yn ôl o dan ffenestr y draen o fewn yr eiliadau lawer hyn i'w gadarnhau. Mae pigau hirach yn cael eu trin fel gweithgaredd beicio go iawn. Diofyn: 60 s.",
+          "delay_timeout_hours": "Goramser diogelwch: os yw'r peiriant yn dal i fod yn 'Aros i Gychwyn' ar ôl yr oriau lawer hyn, mae WashData yn ailosod i Off. Diofyn: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Adolygu Newidiadau a Awgrymir",
-        "description": "Daeth WashData o hyd i {pending_count} o werthoedd awgrymedig i'w cymhwyso.\n\nNewidiadau i adolygiad:\n{changes}\n\nCadarnhewch isod i lwyfannu'r gwerthoedd hyn yn y ffurf. Nid ydynt yn cael eu cadw nes i chi gyflwyno Gosodiadau Uwch.",
+        "description": "Canfu WashData **{pending_count}** gwerth(au) awgrymedig i'w defnyddio.\n\nNewidiadau:\n{changes}\n\n✅ Ticiwch y blwch isod a chliciwch **Cyflwyno** i wneud cais ac arbedwch y newidiadau hyn ar unwaith.\n❌ Gadewch ef heb ei wirio a chliciwch **Cyflwyno** i ganslo a mynd yn ôl.",
         "data": {
-          "confirm_apply_suggestions": "Cam y gwerthoedd a awgrymir yn y Gosodiadau Uwch"
+          "confirm_apply_suggestions": "Gwneud cais ac arbed y newidiadau hyn"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Yn dod i ben",
           "finished": "Wedi gorffen",
           "anti_wrinkle": "Gwrth-Wrinkle",
+          "delay_wait": "Aros i Ddechrau",
           "interrupted": "Torri ar draws",
           "force_stopped": "Gorfod Wedi Stopio",
           "rinse": "Rinsiwch",

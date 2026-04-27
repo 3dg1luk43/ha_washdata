@@ -198,7 +198,12 @@
           "door_sensor_entity": "ডোর সেন্সর",
           "pause_cuts_power": "বিরাম দেওয়ার সময় পাওয়ার কাটা",
           "notify_unload_delay_minutes": "লন্ড্রি অপেক্ষার বিজ্ঞপ্তি বিলম্ব (মিনিট)",
-          "switch_entity": "সত্তা স্যুইচ করুন (পজ পাওয়ার কাটের জন্য)"
+          "switch_entity": "সত্তা স্যুইচ করুন (পজ পাওয়ার কাটের জন্য)",
+          "delay_start_detect_enabled": "বিলম্বিত শুরু সনাক্তকরণ সক্ষম করুন",
+          "delay_drain_min_power": "বিলম্বিত শুরু: ড্রেন স্পাইক মিন পাওয়ার (W)",
+          "delay_drain_max_power": "বিলম্বিত শুরু: ড্রেন স্পাইক ম্যাক্স পাওয়ার (W)",
+          "delay_drain_max_duration": "বিলম্বিত শুরু: সর্বাধিক ড্রেন স্পাইক সময়কাল (গুলি)",
+          "delay_timeout_hours": "বিলম্বিত শুরু: সর্বোচ্চ অপেক্ষার সময় (h)"
         },
         "data_description": {
           "apply_suggestions": "শেখার অ্যালগরিদম থেকে প্রস্তাবিত মানগুলির জন্য একটি পর্যালোচনা ধাপ খুলতে এই বাক্সটি চেক করুন। কিছুই স্বয়ংক্রিয়ভাবে সংরক্ষিত হয় না.\n\nপ্রস্তাবিত (শিক্ষা থেকে):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "মেশিনের দরজার জন্য ঐচ্ছিক বাইনারি সেন্সর (চালু = খোলা, বন্ধ = বন্ধ)। একটি সক্রিয় চক্র চলাকালীন দরজা খোলা হলে, WashData ইচ্ছাকৃতভাবে বিরতি হিসাবে চক্রটিকে নিশ্চিত করবে৷ চক্র শেষ হওয়ার পরে, যদি দরজাটি এখনও বন্ধ থাকে, তবে দরজা খোলা না হওয়া পর্যন্ত রাজ্যটি 'পরিষ্কার'-এ পরিবর্তিত হয়। দ্রষ্টব্য: দরজা বন্ধ করার ফলে একটি বিরতিকৃত চক্র স্বয়ংক্রিয়ভাবে পুনরায় শুরু হয় না - সারসংকলনটি অবশ্যই রিজিউম সাইকেল বোতাম বা পরিষেবার মাধ্যমে ম্যানুয়ালি ট্রিগার করতে হবে।",
           "pause_cuts_power": "পজ সাইকেল বোতাম বা পরিষেবার মাধ্যমে বিরতি দেওয়ার সময়, কনফিগার করা সুইচ সত্তাটিও বন্ধ করুন। এই ডিভাইসের জন্য একটি সুইচ সত্তা কনফিগার করা থাকলেই কেবল কার্যকর হয়৷",
           "notify_unload_delay_minutes": "চক্রটি শেষ হওয়ার পরে ফিনিস নোটিফিকেশন চ্যানেলের মাধ্যমে একটি বিজ্ঞপ্তি পাঠান এবং এই অনেক মিনিটের জন্য দরজা খোলা হয়নি (ডোর সেন্সর প্রয়োজন)। নিষ্ক্রিয় করতে 0 এ সেট করুন। ডিফল্ট: 60 মিনিট।",
-          "switch_entity": "বিরতি বা পুনরায় শুরু করার সময় টগল করার জন্য স্যুইচ সত্তা। যখন 'Cut Power when Pausing' সক্রিয় থাকে তখন প্রয়োজনীয়৷"
+          "switch_entity": "বিরতি বা পুনরায় শুরু করার সময় টগল করার জন্য স্যুইচ সত্তা। যখন 'Cut Power when Pausing' সক্রিয় থাকে তখন প্রয়োজনীয়৷",
+          "delay_start_detect_enabled": "যখন সক্রিয় করা হয়, একটি সংক্ষিপ্ত কম-পাওয়ার ড্রেন স্পাইক এবং টেকসই স্ট্যান্ডবাই পাওয়ার দ্বারা অনুসরণ করা বিলম্বিত শুরু হিসাবে সনাক্ত করা হয়। রাজ্য সেন্সর বিলম্বের সময় 'শুরু করার জন্য অপেক্ষা' দেখায়। চক্রটি আসলে শুরু না হওয়া পর্যন্ত কোনও প্রোগ্রামের সময় বা অগ্রগতি ট্র্যাক করা হয় না। ড্রেন স্পাইক পাওয়ারের উপরে সেট করার জন্য start_threshold_w প্রয়োজন।",
+          "delay_drain_min_power": "একটি ড্রেন স্পাইক হিসাবে চিনতে ন্যূনতম শক্তি (W)। আপনার মেশিনের ট্রু-অফ স্ট্যান্ডবাই লেভেলের ঠিক উপরে সেট করুন। ডিফল্ট: 10 W",
+          "delay_drain_max_power": "একটি ড্রেন স্পাইকের জন্য সর্বাধিক শক্তি (W) - এর উপরে বিস্ফোরণকে একটি বাস্তব চক্র শুরু হিসাবে বিবেচনা করা হয়। আপনার start_threshold_w সেটিং এর নিচে হওয়া উচিত। ডিফল্ট: 80 ওয়াট।",
+          "delay_drain_max_duration": "নিশ্চিত হওয়ার জন্য এই কয়েক সেকেন্ডের মধ্যে ড্রেন স্পাইকটি ড্রেন উইন্ডোর নীচে নেমে যেতে হবে। দীর্ঘ স্পাইকগুলিকে বাস্তব চক্র কার্যকলাপ হিসাবে বিবেচনা করা হয়। ডিফল্ট: 60 সেকেন্ড।",
+          "delay_timeout_hours": "সেফটি টাইমআউট: যদি অনেক ঘন্টা পরেও মেশিনটি 'শুরু হওয়ার অপেক্ষায়' থাকে, ওয়াশডেটা বন্ধ হয়ে যায়। ডিফল্ট: 8 ঘন্টা।"
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "প্রস্তাবিত পরিবর্তন পর্যালোচনা করুন",
-        "description": "WashData প্রয়োগ করার জন্য {pending_count}টি প্রস্তাবিত মান খুঁজে পেয়েছে।\n\nপর্যালোচনায় পরিবর্তন:\n{changes}\n\nফর্মে এই মানগুলি স্টেজ করার জন্য নীচে নিশ্চিত করুন। আপনি উন্নত সেটিংস জমা না দেওয়া পর্যন্ত সেগুলি সংরক্ষণ করা হয় না।",
+        "description": "WashData পাওয়া গেছে **{pending_count}** প্রস্তাবিত মান(গুলি) প্রয়োগ করার জন্য।\n\nপরিবর্তন:\n{changes}\n\n✅ নীচের বাক্সে টিক চিহ্ন দিন এবং এই পরিবর্তনগুলি অবিলম্বে প্রয়োগ করতে এবং সংরক্ষণ করতে **জমা দিন** এ ক্লিক করুন।\n❌ এটিকে টিক চিহ্ন ছাড়াই ছেড়ে দিন এবং বাতিল করতে **জমা দিন** এ ক্লিক করুন এবং ফিরে যান।",
         "data": {
-          "confirm_apply_suggestions": "উন্নত সেটিংসে পর্যায় প্রস্তাবিত মান"
+          "confirm_apply_suggestions": "এই পরিবর্তনগুলি প্রয়োগ করুন এবং সংরক্ষণ করুন"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "শেষ",
           "finished": "সমাপ্ত",
           "anti_wrinkle": "অ্যান্টি-রিঙ্কেল",
+          "delay_wait": "শুরু করার অপেক্ষায়",
           "interrupted": "বাধাপ্রাপ্ত",
           "force_stopped": "ফোর্স স্টপড",
           "rinse": "ধুয়ে ফেলুন",

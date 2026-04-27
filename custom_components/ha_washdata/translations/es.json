@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Revisar cambios sugeridos",
-        "description": "WashData encontró {pending_count} valores sugeridos para aplicar.\n\nCambios a revisar:\n{changes}\n\nConfirma a continuación para preparar estos valores en el formulario. No se guardan hasta que envíes la Configuración avanzada.",
+        "description": "WashData encontró **{pending_count}** valores sugeridos para aplicar.\n\nCambios:\n{changes}\n\n✅ Marque la casilla a continuación y haga clic en **Enviar** para aplicar y guardar estos cambios inmediatamente.\n❌ Déjalo sin marcar y haz clic en **Enviar** para cancelar y regresar.",
         "data": {
-          "confirm_apply_suggestions": "Preparar valores sugeridos en Configuración avanzada"
+          "confirm_apply_suggestions": "Aplicar y guardar estos cambios."
         }
       },
       "settings": {
@@ -205,7 +205,12 @@
           "door_sensor_entity": "Sensor de puerta",
           "pause_cuts_power": "Cortar la energía al hacer una pausa",
           "notify_unload_delay_minutes": "Retraso de notificación de espera de lavandería (min)",
-          "switch_entity": "Cambiar entidad (para pausar el corte de energía)"
+          "switch_entity": "Cambiar entidad (para pausar el corte de energía)",
+          "delay_start_detect_enabled": "Habilitar la detección de inicio retrasado",
+          "delay_drain_min_power": "Inicio retrasado: Potencia mínima del pico de drenaje (W)",
+          "delay_drain_max_power": "Inicio retrasado: Potencia máxima del pico de drenaje (W)",
+          "delay_drain_max_duration": "Inicio retrasado: duración máxima del pico de drenaje (s)",
+          "delay_timeout_hours": "Inicio retrasado: tiempo máximo de espera (h)"
         },
         "data_description": {
           "apply_suggestions": "Marca esta casilla para abrir un paso de revisión de los valores sugeridos por el algoritmo de aprendizaje. Nada se guarda automáticamente.\n\nSugerido (del aprendizaje):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -257,7 +262,12 @@
           "door_sensor_entity": "Sensor binario opcional para la puerta de la máquina (on = abierto, off = cerrado). Cuando la puerta se abre durante un ciclo activo, WashData confirmará que el ciclo está pausado intencionalmente. Una vez finalizado el ciclo, si la puerta aún está cerrada, el estado cambia a \"Limpiar\" hasta que se abre la puerta. Nota: cerrar la puerta NO reanuda automáticamente un ciclo en pausa; la reanudación debe activarse manualmente mediante el botón Reanudar ciclo o el servicio.",
           "pause_cuts_power": "Al hacer una pausa mediante el botón o servicio Pause Cycle, también apague la entidad de conmutación configurada. Solo tiene efecto si se configura una entidad de conmutación para este dispositivo.",
           "notify_unload_delay_minutes": "Envíe una notificación a través del canal de notificación de finalización después de que finalice el ciclo y la puerta no se haya abierto durante tantos minutos (requiere sensor de puerta). Establezca en 0 para desactivar. Predeterminado: 60 min.",
-          "switch_entity": "La entidad de cambio para alternar al pausar o reanudar. Requerido cuando está habilitado 'Cortar energía al pausar'."
+          "switch_entity": "La entidad de cambio para alternar al pausar o reanudar. Requerido cuando está habilitado 'Cortar energía al pausar'.",
+          "delay_start_detect_enabled": "Cuando está habilitado, se detecta un breve pico de consumo de baja potencia seguido de energía de reserva sostenida como un inicio retrasado. El sensor de estado muestra \"Esperando para comenzar\" durante el retraso. No se realiza un seguimiento del tiempo ni del progreso del programa hasta que el ciclo realmente comienza. Requiere que start_threshold_w se establezca por encima de la potencia del pico de drenaje.",
+          "delay_drain_min_power": "Potencia mínima (W) para reconocer como pico de drenaje. Configúrelo justo por encima del nivel de espera real de su máquina. Predeterminado: 10 W.",
+          "delay_drain_max_power": "Potencia máxima (W) para un pico de drenaje; las ráfagas por encima de esta se tratan como un inicio de ciclo real. Debe estar por debajo de su configuración start_threshold_w. Predeterminado: 80 W.",
+          "delay_drain_max_duration": "La punta de drenaje debe volver a caer por debajo de la ventana de drenaje dentro de estos segundos para ser confirmado. Los picos más largos se tratan como actividad de ciclo real. Predeterminado: 60 s.",
+          "delay_timeout_hours": "Tiempo de espera de seguridad: si la máquina todavía está en 'Esperando para iniciar' después de tantas horas, WashData se restablece en Apagado. Predeterminado: 8 h."
         }
       },
       "diagnostics": {
@@ -1044,6 +1054,7 @@
           "ending": "Finalizando",
           "finished": "Finalizado",
           "anti_wrinkle": "Antiarrugas",
+          "delay_wait": "Esperando para comenzar",
           "interrupted": "Interrumpido",
           "force_stopped": "Parada forzada",
           "rinse": "Aclarado",

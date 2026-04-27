@@ -198,7 +198,12 @@
           "door_sensor_entity": "Senzor dverí",
           "pause_cuts_power": "Vypnutie napájania pri pozastavení",
           "notify_unload_delay_minutes": "Oneskorenie čakania na bielizeň (min)",
-          "switch_entity": "Prepnúť entitu (pre pozastavenie napájania)"
+          "switch_entity": "Prepnúť entitu (pre pozastavenie napájania)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Začiarknutím tohto políčka otvoríte krok kontroly navrhovaných hodnôt zo vzdelávacieho algoritmu. Nič sa neukladá automaticky.\n\nOdporúčané (z učenia):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Voliteľný binárny snímač pre dvierka stroja (zapnuté = otvorené, vypnuté = zatvorené). Keď sa dvierka otvoria počas aktívneho cyklu, WashData potvrdí, že cyklus bol zámerne pozastavený. Po skončení cyklu, ak sú dvierka stále zatvorené, stav sa zmení na „Vyčistiť“, kým sa dvierka neotvoria. Poznámka: zatvorenie dvierok NEOBNOVÍ automaticky pozastavený cyklus – obnovenie sa musí spustiť manuálne pomocou tlačidla alebo služby Obnoviť cyklus.",
           "pause_cuts_power": "Pri pozastavení pomocou tlačidla alebo služby Pause Cycle tiež vypnite nakonfigurovanú entitu prepínača. Nadobudne účinnosť iba vtedy, ak je pre toto zariadenie nakonfigurovaná entita prepínača.",
           "notify_unload_delay_minutes": "Po skončení cyklu pošlite upozornenie cez kanál upozornenia na ukončenie a dvierka sa toľko minút neotvorili (vyžaduje snímač dverí). Pre deaktiváciu nastavte na 0. Predvolené: 60 min.",
-          "switch_entity": "Entita prepínania, ktorá sa má prepínať pri pozastavení alebo opätovnom spustení. Vyžaduje sa, keď je aktivovaná možnosť „Cut Power When Pausing“."
+          "switch_entity": "Entita prepínania, ktorá sa má prepínať pri pozastavení alebo opätovnom spustení. Vyžaduje sa, keď je aktivovaná možnosť „Cut Power When Pausing“.",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Skontrolovať navrhované zmeny",
-        "description": "WashData našiel {pending_count} navrhovaných hodnôt na použitie.\n\nZmeny na kontrolu:\n{changes}\n\nAk chcete tieto hodnoty uviesť do formulára, potvrďte nižšie. Neuložia sa, kým neodošlete Rozšírené nastavenia.",
+        "description": "WashData našiel **{pending_count}** navrhovanú(é) hodnotu(y) na použitie.\n\nZmeny:\n{changes}\n\n✅ Začiarknite políčko nižšie a kliknite na **Odoslať**, čím tieto zmeny okamžite použijete a uložíte.\n❌ Nechajte nezačiarknuté a kliknite na **Odoslať** pre zrušenie a návrat späť.",
         "data": {
-          "confirm_apply_suggestions": "Načítať navrhované hodnoty do rozšírených nastavení"
+          "confirm_apply_suggestions": "Použiť a uložiť tieto zmeny"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Ukončuje sa",
           "finished": "Dokončené",
           "anti_wrinkle": "Ochrana proti vráskam",
+          "delay_wait": "Waiting to Start",
           "interrupted": "Prerušený",
           "force_stopped": "Nútene zastavené",
           "rinse": "Oplachovanie",

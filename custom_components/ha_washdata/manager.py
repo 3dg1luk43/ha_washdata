@@ -85,6 +85,11 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_POWER,
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
+    CONF_DELAY_START_DETECT_ENABLED,
+    CONF_DELAY_DRAIN_MIN_POWER,
+    CONF_DELAY_DRAIN_MAX_POWER,
+    CONF_DELAY_DRAIN_MAX_DURATION,
+    CONF_DELAY_TIMEOUT_HOURS,
     CONF_PUMP_STUCK_DURATION,
     DEFAULT_PUMP_STUCK_DURATION,
     EVENT_PUMP_STUCK,
@@ -123,6 +128,11 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_POWER,
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
+    DEFAULT_DELAY_START_DETECT_ENABLED,
+    DEFAULT_DELAY_DRAIN_MIN_POWER,
+    DEFAULT_DELAY_DRAIN_MAX_POWER,
+    DEFAULT_DELAY_DRAIN_MAX_DURATION,
+    DEFAULT_DELAY_TIMEOUT_HOURS,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_MAX_PAST_CYCLES,
     DEFAULT_MAX_FULL_TRACES_PER_PROFILE,
@@ -180,6 +190,7 @@ from .const import (
     STATE_USER_PAUSED,
     STATE_ENDING,
     STATE_ANTI_WRINKLE,
+    STATE_DELAY_WAIT,
     STATE_IDLE,
     STATE_UNKNOWN,
 )
@@ -523,6 +534,31 @@ class WashDataManager:
                     CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
                 )
             ),
+            delay_detect_enabled=bool(
+                config_entry.options.get(
+                    CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
+                )
+            ),
+            delay_drain_min_power=float(
+                config_entry.options.get(
+                    CONF_DELAY_DRAIN_MIN_POWER, DEFAULT_DELAY_DRAIN_MIN_POWER
+                )
+            ),
+            delay_drain_max_power=float(
+                config_entry.options.get(
+                    CONF_DELAY_DRAIN_MAX_POWER, DEFAULT_DELAY_DRAIN_MAX_POWER
+                )
+            ),
+            delay_drain_max_duration=float(
+                config_entry.options.get(
+                    CONF_DELAY_DRAIN_MAX_DURATION, DEFAULT_DELAY_DRAIN_MAX_DURATION
+                )
+            ),
+            delay_timeout_seconds=float(
+                config_entry.options.get(
+                    CONF_DELAY_TIMEOUT_HOURS, DEFAULT_DELAY_TIMEOUT_HOURS
+                )
+            ) * 3600.0,
         )
         self._config = config
 
@@ -1503,6 +1539,31 @@ class WashDataManager:
                 CONF_ANTI_WRINKLE_EXIT_POWER, DEFAULT_ANTI_WRINKLE_EXIT_POWER
             )
         )
+        new_delay_detect_enabled = bool(
+            config_entry.options.get(
+                CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
+            )
+        )
+        new_delay_drain_min_power = float(
+            config_entry.options.get(
+                CONF_DELAY_DRAIN_MIN_POWER, DEFAULT_DELAY_DRAIN_MIN_POWER
+            )
+        )
+        new_delay_drain_max_power = float(
+            config_entry.options.get(
+                CONF_DELAY_DRAIN_MAX_POWER, DEFAULT_DELAY_DRAIN_MAX_POWER
+            )
+        )
+        new_delay_drain_max_duration = float(
+            config_entry.options.get(
+                CONF_DELAY_DRAIN_MAX_DURATION, DEFAULT_DELAY_DRAIN_MAX_DURATION
+            )
+        )
+        new_delay_timeout_seconds = float(
+            config_entry.options.get(
+                CONF_DELAY_TIMEOUT_HOURS, DEFAULT_DELAY_TIMEOUT_HOURS
+            )
+        ) * 3600.0
 
         # Apply all detector config updates
         self.detector.config.min_power = new_min_power
@@ -1524,6 +1585,11 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_max_power = new_anti_wrinkle_max_power
         self.detector.config.anti_wrinkle_max_duration = new_anti_wrinkle_max_duration
         self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
+        self.detector.config.delay_detect_enabled = new_delay_detect_enabled
+        self.detector.config.delay_drain_min_power = new_delay_drain_min_power
+        self.detector.config.delay_drain_max_power = new_delay_drain_max_power
+        self.detector.config.delay_drain_max_duration = new_delay_drain_max_duration
+        self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds
 
         # Pump Monitor setting
         self._pump_stuck_duration = int(
@@ -1915,9 +1981,9 @@ class WashDataManager:
                 inverted
             )
             # End cycle with "completed" status (not interrupted)
-            if self.detector.state == STATE_ANTI_WRINKLE:
+            if self.detector.state in (STATE_ANTI_WRINKLE, STATE_DELAY_WAIT):
                 self.detector.reset(STATE_OFF)
-                self._logger.info("Anti-wrinkle exited via external trigger")
+                self._logger.info("%s exited via external trigger", self.detector.state)
             elif self.detector.state != STATE_OFF:
                 self.detector.user_stop()
                 self._logger.info("Cycle completed via external trigger")
@@ -2160,6 +2226,7 @@ class WashDataManager:
             not self._cycle_completed_time
             or self.detector.state == STATE_RUNNING
             or self.detector.state == STATE_ANTI_WRINKLE
+            or self.detector.state == STATE_DELAY_WAIT
         ):
             # Cycle is running or not completed, don't reset
             return
@@ -3224,6 +3291,7 @@ class WashDataManager:
             STATE_IDLE,
             STATE_STARTING,
             STATE_ANTI_WRINKLE,
+            STATE_DELAY_WAIT,
         ):
             self._current_program = "off"
             self._time_remaining = None

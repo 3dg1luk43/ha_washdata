@@ -198,7 +198,12 @@
           "door_sensor_entity": "Ukse andur",
           "pause_cuts_power": "Katkesta voolu peatamise ajal",
           "notify_unload_delay_minutes": "Pesu ootamise teatise viivitus (min)",
-          "switch_entity": "Lüliti olem (toitekatkestuse peatamiseks)"
+          "switch_entity": "Lüliti olem (toitekatkestuse peatamiseks)",
+          "delay_start_detect_enabled": "Luba viivitusega käivitamise tuvastamine",
+          "delay_drain_min_power": "Viitkäivitus: tühjendusnäitaja minimaalne võimsus (W)",
+          "delay_drain_max_power": "Viitkäivitus: tühjendustoru maksimaalne võimsus (W)",
+          "delay_drain_max_duration": "Viitstart: maksimaalne tühjenduspiki kestus (s)",
+          "delay_timeout_hours": "Viitstart: maksimaalne ooteaeg (h)"
         },
         "data_description": {
           "apply_suggestions": "Märkige see ruut, et avada õppealgoritmi soovitatud väärtuste ülevaatamise etapp. Midagi ei salvestata automaatselt.\n\nSoovitatav (õppimisest):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Valikuline binaarandur masina ukse jaoks (sees = avatud, väljas = suletud). Kui uks aktiivse tsükli ajal avaneb, kinnitab WashData, et tsükkel on tahtlikult peatatud. Kui uks on endiselt suletud, muutub pärast tsükli lõppu olek \"Puhasta\", kuni uks avatakse. Märkus: ukse sulgemine EI jätka automaatselt peatatud tsüklit – jätkamine tuleb käivitada käsitsi nupu Resume Cycle või teenuse kaudu.",
           "pause_cuts_power": "Kui peatate nupu Pause Cycle või teenuse kaudu, lülitage välja ka konfigureeritud lüliti olem. Jõuab ainult siis, kui selle seadme jaoks on konfigureeritud lüliti olem.",
           "notify_unload_delay_minutes": "Kui tsükkel on lõppenud ja ust pole nii mitu minutit avatud, saatke teavitus finišiteatekanali kaudu (vajalik on ukseandur). Keelamiseks määrake 0. Vaikimisi: 60 min.",
-          "switch_entity": "Peatamisel või jätkamisel lülituv olem. Nõutav, kui 'Katkesta voolu peatamisel' on lubatud."
+          "switch_entity": "Peatamisel või jätkamisel lülituv olem. Nõutav, kui 'Katkesta voolu peatamisel' on lubatud.",
+          "delay_start_detect_enabled": "Kui see on lubatud, tuvastatakse viitkäivitusena lühike väikese võimsusega äravoolupiik, millele järgneb pidev ooterežiimi toide. Olekuandur näitab viivituse ajal teadet \"Ootab käivitumist\". Programmi aega ega edenemist ei jälgita enne, kui tsükkel tegelikult algab. Nõuab start_threshold_w seadistamist äravoolu võimsusest kõrgemale.",
+          "delay_drain_min_power": "Minimaalne võimsus (W), mida äravoolunaeluna ära tunda. Seadke oma masina tegelikust ooterežiimi tasemest veidi kõrgemale. Vaikimisi: 10 W.",
+          "delay_drain_max_power": "Maksimaalne võimsus (W) äravoolu naelu jaoks – sellest kõrgemaid katkestusi käsitletakse tegeliku tsükli algusena. Peaks olema väiksem kui seadistus start_threshold_w. Vaikimisi: 80 W.",
+          "delay_drain_max_duration": "Kinnitamiseks peab äravoolupiik selle mitme sekundi jooksul äravooluaknast allapoole langema. Pikemaid naelu käsitletakse tegeliku tsüklitegevusena. Vaikimisi: 60 s.",
+          "delay_timeout_hours": "Ohutuse ajalõpp: kui masin on pärast seda mitu tundi endiselt režiimis „Ootab käivitumist”, lähtestatakse WashData olekusse Väljas. Vaikimisi: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Vaadake üle soovitatud muudatused",
-        "description": "WashData leidis rakendamiseks {pending_count} soovitatud väärtust.\n\nÜlevaatavad muudatused:\n{changes}\n\nNende väärtuste vormistamiseks kinnitage allpool. Neid ei salvestata enne, kui saadate täpsemad sätted.",
+        "description": "WashData leitud **{pending_count}** soovitatud väärtus(t) rakendada.\n\nMuudatused:\n{changes}\n\n✅ Muudatuste koheseks rakendamiseks ja salvestamiseks märkige allolev ruut ja klõpsake nuppu **Esita**.\n❌ Jätke see märkimata ja klõpsake tühistamiseks ja tagasi minemiseks nuppu **Esita**.",
         "data": {
-          "confirm_apply_suggestions": "Määrake soovitatud väärtused jaotises Täpsemad seaded"
+          "confirm_apply_suggestions": "Rakendage ja salvestage need muudatused"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Lõpetamine",
           "finished": "Valmis",
           "anti_wrinkle": "Kortsudevastane",
+          "delay_wait": "Ootab algust",
           "interrupted": "Katkestatud",
           "force_stopped": "Sundpeatatud",
           "rinse": "Loputamine",

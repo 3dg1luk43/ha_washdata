@@ -198,7 +198,12 @@
           "door_sensor_entity": "Senzor vrata",
           "pause_cuts_power": "Isključite napajanje prilikom pauze",
           "notify_unload_delay_minutes": "Kašnjenje obavijesti o čekanju rublja (min)",
-          "switch_entity": "Prebacite entitet (za pauziranje isključenja struje)"
+          "switch_entity": "Prebacite entitet (za pauziranje isključenja struje)",
+          "delay_start_detect_enabled": "Omogući otkrivanje odgođenog starta",
+          "delay_drain_min_power": "Odgođeni početak: Min. snaga odvoda (W)",
+          "delay_drain_max_power": "Odgođeni početak: maksimalna snaga drenažne špice (W)",
+          "delay_drain_max_duration": "Odgođeni početak: maksimalno trajanje odvoda (s)",
+          "delay_timeout_hours": "Odgođeni početak: maksimalno vrijeme čekanja (h)"
         },
         "data_description": {
           "apply_suggestions": "Označite ovo polje za otvaranje koraka pregleda za predložene vrijednosti iz algoritma učenja. Ništa se ne pohranjuje automatski.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -250,7 +255,12 @@
           "door_sensor_entity": "Opcioni binarni senzor za vrata mašine (uključeno = otvoreno, isključeno = zatvoreno). Kada se vrata otvore tokom aktivnog ciklusa, WashData će potvrditi da je ciklus namjerno pauziran. Nakon završetka ciklusa, ako su vrata i dalje zatvorena, stanje se mijenja u 'Clean' dok se vrata ne otvore. Napomena: zatvaranje vrata NE nastavlja automatski pauzirani ciklus - nastavak se mora pokrenuti ručno putem dugmeta Nastavi ciklus ili usluge.",
           "pause_cuts_power": "Prilikom pauziranja pomoću tipke Pause Cycle ili usluge, također isključite konfigurirani entitet prekidača. Stupa na snagu samo ako je entitet prekidača konfiguriran za ovaj uređaj.",
           "notify_unload_delay_minutes": "Pošaljite obavijest putem kanala obavijesti o završetku nakon što se ciklus završi, a vrata nisu bila otvorena ovoliko minuta (zahtijeva senzor vrata). Postavite na 0 da biste onemogućili. Podrazumevano: 60 min.",
-          "switch_entity": "Prebacivanje entiteta za prebacivanje kada pauzirate ili nastavljate. Potrebno kada je omogućeno 'Prekini napajanje prilikom pauze'."
+          "switch_entity": "Prebacivanje entiteta za prebacivanje kada pauzirate ili nastavljate. Potrebno kada je omogućeno 'Prekini napajanje prilikom pauze'.",
+          "delay_start_detect_enabled": "Kada je omogućeno, kratak skok odvoda niske snage praćen stalnim napajanjem u stanju pripravnosti detektuje se kao odloženi početak. Senzor stanja pokazuje 'Waiting to Start' tokom kašnjenja. Ne prati se vrijeme programa ili napredak sve dok ciklus zapravo ne počne. Zahtijeva da se start_threshold_w postavi iznad snage odvoda.",
+          "delay_drain_min_power": "Minimalna snaga (W) za prepoznavanje kao odvodni šiljak. Postavite malo iznad istinskog nivoa pripravnosti vašeg uređaja. Podrazumevano: 10 W.",
+          "delay_drain_max_power": "Maksimalna snaga (W) za odvodni šiljak — rafali iznad ovog se tretiraju kao pravi početak ciklusa. Trebao bi biti ispod vaše postavke start_threshold_w. Podrazumevano: 80 W.",
+          "delay_drain_max_duration": "Odvodni šiljak mora pasti ispod prozora za odvod u roku od toliko sekundi da bi bio potvrđen. Duži šiljci se tretiraju kao stvarna ciklusna aktivnost. Standardno: 60 s.",
+          "delay_timeout_hours": "Sigurnosno vremensko ograničenje: ako je mašina i dalje u 'Waiting to Start' nakon ovoliko sati, WashData se vraća na Off. Standardno: 8 h."
         }
       },
       "diagnostics": {
@@ -581,9 +591,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Pregledajte predložene izmjene",
-        "description": "WashData je pronašao {pending_count} predloženih vrijednosti za primjenu.\n\nPromjene za pregled:\n{changes}\n\nPotvrdite ispod da biste ove vrijednosti postavili u obrazac. Ne pohranjuju se dok ne pošaljete Napredne postavke.",
+        "description": "WashData je pronašao **{pending_count}** predložene vrijednosti za primjenu.\n\nPromjene:\n{changes}\n\n✅ Označite polje ispod i kliknite na **Pošalji** da odmah primijenite i sačuvate ove promjene.\n❌ Ostavite neoznačeno i kliknite na **Pošalji** da otkažete i vratite se.",
         "data": {
-          "confirm_apply_suggestions": "Postavite predložene vrijednosti u Naprednim postavkama"
+          "confirm_apply_suggestions": "Primijenite i sačuvajte ove promjene"
         }
       },
       "trim_cycle_select": {
@@ -1044,6 +1054,7 @@
           "ending": "Kraj",
           "finished": "Završeno",
           "anti_wrinkle": "Anti-gužvanje",
+          "delay_wait": "Čeka se početak",
           "interrupted": "Prekinut",
           "force_stopped": "Prisilno zaustavljeno",
           "rinse": "Isperite",

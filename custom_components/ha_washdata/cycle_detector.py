@@ -14,6 +14,7 @@ from homeassistant.util import dt as dt_util
 from .log_utils import DeviceLoggerAdapter
 from .const import (
     STATE_OFF,
+    STATE_DELAY_WAIT,
     STATE_STARTING,
     STATE_RUNNING,
     STATE_PAUSED,
@@ -62,6 +63,11 @@ class CycleDetectorConfig:
     anti_wrinkle_max_power: float = 400.0
     anti_wrinkle_max_duration: float = 60.0
     anti_wrinkle_exit_power: float = 0.8
+    delay_detect_enabled: bool = False
+    delay_drain_min_power: float = 10.0
+    delay_drain_max_power: float = 80.0
+    delay_drain_max_duration: float = 60.0
+    delay_timeout_seconds: float = 28800.0
 
 
 @dataclass
@@ -200,6 +206,11 @@ class CycleDetector:
         self._anti_wrinkle_candidate_start_power: float = 0.0
         self._anti_wrinkle_idle_time: float = 0.0  # Track time spent below exit_power while in ANTI_WRINKLE
         self._anti_wrinkle_idle_timeout: float = 120.0
+
+        # Delayed-start drain candidate tracking
+        self._delay_drain_start: datetime | None = None
+        self._delay_drain_peak: float = 0.0
+        self._delay_wait_true_off_seconds: float = 0.0
 
     @property
     def _dynamic_pause_threshold(self) -> float:
@@ -394,6 +405,10 @@ class CycleDetector:
         self._anti_wrinkle_candidate_start_power = 0.0
         # Reset idle time tracker for anti-wrinkle
         self._anti_wrinkle_idle_time = 0.0
+        # Reset delayed-start tracking
+        self._delay_drain_start = None
+        self._delay_drain_peak = 0.0
+        self._delay_wait_true_off_seconds = 0.0
 
     @property
     def state(self) -> str:
@@ -465,7 +480,7 @@ class CycleDetector:
 
         # 2. Accumulators Update
         # Hysteresis Logic
-        if self._state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN):
+        if self._state in (STATE_OFF, STATE_DELAY_WAIT, STATE_STARTING, STATE_UNKNOWN):
             threshold = self._config.start_threshold_w
         else:
             threshold = self._config.stop_threshold_w
@@ -588,6 +603,45 @@ class CycleDetector:
                     self._transition_to(STATE_OFF, timestamp)
                 return
 
+            # Delayed-start drain detection (only from STATE_OFF, not terminal states)
+            if (
+                self._config.delay_detect_enabled
+                and self._state == STATE_OFF
+                and not started_from_anti_wrinkle
+            ):
+                drain_min = self._config.delay_drain_min_power
+                effective_drain_max = min(
+                    self._config.delay_drain_max_power, self._config.start_threshold_w
+                )
+                if drain_min < effective_drain_max and drain_min <= power < effective_drain_max:
+                    # Power is in the drain-spike window: track it
+                    if self._delay_drain_start is None:
+                        self._delay_drain_start = timestamp
+                        self._delay_drain_peak = power
+                    else:
+                        self._delay_drain_peak = max(self._delay_drain_peak, power)
+                    # Don't fall through to the normal start logic
+                    return
+                elif power < drain_min and self._delay_drain_start is not None:
+                    # Power dropped out of drain window: check if spike was short enough
+                    drain_duration = (timestamp - self._delay_drain_start).total_seconds()
+                    if drain_duration <= self._config.delay_drain_max_duration:
+                        self._logger.info(
+                            "Delayed start detected: drain spike %.1fW for %.0fs → DELAY_WAIT",
+                            self._delay_drain_peak,
+                            drain_duration,
+                        )
+                        self._transition_to(STATE_DELAY_WAIT, timestamp)
+                        return
+                    else:
+                        # Drain lasted too long — not a real drain, reset
+                        self._delay_drain_start = None
+                        self._delay_drain_peak = 0.0
+                elif power >= effective_drain_max:
+                    # Power shot above drain ceiling → real start, clear candidate
+                    self._delay_drain_start = None
+                    self._delay_drain_peak = 0.0
+
             if is_high and not started_from_anti_wrinkle:
                 # Transition to STARTING
                 self._transition_to(STATE_STARTING, timestamp)
@@ -602,6 +656,47 @@ class CycleDetector:
                     self._state_enter_time
                     and (timestamp - self._state_enter_time).total_seconds() > 1800
                 ):
+                    self._transition_to(STATE_OFF, timestamp)
+
+        elif self._state == STATE_DELAY_WAIT:
+            if power >= self._config.start_threshold_w:
+                # Real cycle started
+                self._logger.info(
+                    "Delayed start: cycle starting (power %.1fW ≥ %.1fW threshold)",
+                    power,
+                    self._config.start_threshold_w,
+                )
+                self._transition_to(STATE_STARTING, timestamp)
+                self._current_cycle_start = timestamp
+                self._power_readings = [(timestamp, power)]
+                self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
+                self._cycle_max_power = power
+                self._abrupt_drop = False
+            else:
+                if power < self._config.stop_threshold_w:
+                    # Power near zero: machine turned off, not just waiting
+                    self._delay_wait_true_off_seconds += dt
+                    if self._delay_wait_true_off_seconds >= 30.0:
+                        self._logger.info(
+                            "Delayed start cancelled: power dropped to off (%.1fW) for %.0fs",
+                            power,
+                            self._delay_wait_true_off_seconds,
+                        )
+                        self._transition_to(STATE_OFF, timestamp)
+                        return
+                else:
+                    self._delay_wait_true_off_seconds = 0.0
+
+                # Safety timeout
+                if (
+                    self._state_enter_time
+                    and (timestamp - self._state_enter_time).total_seconds()
+                    >= self._config.delay_timeout_seconds
+                ):
+                    self._logger.info(
+                        "Delayed start timeout after %.0fh → OFF",
+                        self._config.delay_timeout_seconds / 3600.0,
+                    )
                     self._transition_to(STATE_OFF, timestamp)
 
         elif self._state == STATE_STARTING:
@@ -875,10 +970,18 @@ class CycleDetector:
             self._energy_since_idle_wh = 0.0
             # Also reset idle time tracker when leaving ANTI_WRINKLE
             self._anti_wrinkle_idle_time = 0.0
+            self._delay_drain_start = None
+            self._delay_drain_peak = 0.0
+            self._delay_wait_true_off_seconds = 0.0
 
         # Reset end spike tracker when entering ENDING state
         if new_state == STATE_ENDING:
             self._end_spike_seen = False
+        elif new_state == STATE_DELAY_WAIT:
+            self._delay_drain_start = None
+            self._delay_drain_peak = 0.0
+            self._delay_wait_true_off_seconds = 0.0
+            self._sub_state = "Waiting to Start"
         elif new_state == STATE_ANTI_WRINKLE:
             self._anti_wrinkle_candidate_start = None
             self._anti_wrinkle_candidate_peak = 0.0

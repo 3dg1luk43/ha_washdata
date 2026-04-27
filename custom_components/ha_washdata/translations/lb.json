@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Proposéiert Ännerungen iwwerpréiwen",
-        "description": "WashData huet {pending_count} proposéiert Wäerter fonnt fir ze gëllen.\n\nÄnnerungen fir z'iwwerpréiwen:\n{changes}\n\nBestätegt hei drënner fir dës Wäerter an der Form ze staging. Si ginn net gespäichert bis Dir Advanced Astellungen ofgitt.",
+        "description": "WashData huet **{pending_count}** virgeschloe Wäert(er) fir d'Uwennung fonnt.\n\nÄnnerungen:\n{changes}\n\n✅ Häkt d'Këscht hei drënner an a klickt op **Schécken**, fir dës Ännerungen direkt unzewendelen a späicheren.\n❌ Loosst se oofgehäkt a klickt op **Schécken**, fir ofzebriechen a zréckzegoen.",
         "data": {
-          "confirm_apply_suggestions": "Proposéiert Wäerter an Advanced Astellungen staging"
+          "confirm_apply_suggestions": "Dës Ännerungen unwendelen a späicheren"
         }
       },
       "settings": {
@@ -205,7 +205,12 @@
           "door_sensor_entity": "Dier Sensor",
           "pause_cuts_power": "Maacht Kraaft beim Pausen",
           "notify_unload_delay_minutes": "Wäschwart Notifikatioun Verspéidung (min)",
-          "switch_entity": "Switch Entity (fir Pause Power Cut)"
+          "switch_entity": "Switch Entity (fir Pause Power Cut)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Kuckt dës Këscht un fir e Iwwerpréiwungsschrëtt opzemaachen fir proposéiert Wäerter vum Léieralgorithmus. Näischt gëtt automatesch gespäichert.\n\nProposéiert (vum Léieren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -257,7 +262,12 @@
           "door_sensor_entity": "Optional Binärsensor fir d'Maschinntür (an = oppen, aus = zou). Wann d'Dier während engem aktive Zyklus opmécht, wäert WashData den Zyklus bestätegen als bewosst gepaust. Nodeems den Zyklus eriwwer ass, wann d'Dier nach ëmmer zou ass, ännert den Zoustand op 'Clean' bis d'Dier opgemaach gëtt. Bemierkung: D'Zoumaache vun der Dier hëlt NET automatesch e gepauzten Zyklus weider - Resume muss manuell iwwer de Resume Cycle Knäppchen oder Service ausgeléist ginn.",
           "pause_cuts_power": "Wann Dir iwwer de Pause Cycle Knäppchen oder Service pauséiert, schalt och déi konfiguréiert Schalter Entitéit aus. Gëtt nëmme Kraaft wann eng Schalter Entitéit fir dësen Apparat konfiguréiert ass.",
           "notify_unload_delay_minutes": "Schéckt eng Notifikatioun iwwer d'Finish Notifikatiounskanal nodeems den Zyklus eriwwer ass an d'Dier fir dës vill Minutten net opgemaach gouf (erfuerdert Door Sensor). Setzt op 0 fir auszeschalten. Standard: 60 min.",
-          "switch_entity": "D'Schalter Entitéit fir ze wiesselen wann Dir Paus oder weider geet. Obligatoresch wann 'Kraaft schneiden beim Pausen' aktivéiert ass."
+          "switch_entity": "D'Schalter Entitéit fir ze wiesselen wann Dir Paus oder weider geet. Obligatoresch wann 'Kraaft schneiden beim Pausen' aktivéiert ass.",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -1044,6 +1054,7 @@
           "ending": "Ofschléissen",
           "finished": "Fäerdeg",
           "anti_wrinkle": "Anti-Falten",
+          "delay_wait": "Waiting to Start",
           "interrupted": "Ënnerbrach",
           "force_stopped": "Manuell gestoppt",
           "rinse": "Spülen",

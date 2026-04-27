@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Przejrzyj sugerowane zmiany",
-        "description": "WashData znalazł {pending_count} sugerowanych wartości do zastosowania.\n\nZmiany do sprawdzenia:\n{changes}\n\nPotwierdź poniżej, aby umieścić te wartości w formularzu. Nie zostaną zapisane, dopóki nie prześlesz Ustawień zaawansowanych.",
+        "description": "WashData znalazł **{pending_count}** sugerowaną(-e) wartość(-ci) do zastosowania.\n\nZmiany:\n{changes}\n\n✅ Zaznacz pole poniżej i kliknij **Prześlij**, aby natychmiast zastosować i zapisać te zmiany.\n❌ Pozostaw niezaznaczone i kliknij **Prześlij**, aby anulować i wrócić.",
         "data": {
-          "confirm_apply_suggestions": "Przenieś sugerowane wartości do Ustawień zaawansowanych"
+          "confirm_apply_suggestions": "Zastosuj i zapisz te zmiany"
         }
       },
       "settings": {
@@ -205,7 +205,12 @@
           "door_sensor_entity": "Czujnik drzwi",
           "pause_cuts_power": "Odetnij zasilanie podczas pauzy",
           "notify_unload_delay_minutes": "Opóźnienie powiadomienia o oczekiwaniu na pranie (min)",
-          "switch_entity": "Jednostka przełączająca (w celu wstrzymania przerwy w dostawie prądu)"
+          "switch_entity": "Jednostka przełączająca (w celu wstrzymania przerwy w dostawie prądu)",
+          "delay_start_detect_enabled": "Enable Delayed Start Detection",
+          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
+          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
+          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
+          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
         },
         "data_description": {
           "apply_suggestions": "Zaznacz to pole, aby otworzyć krok przeglądu sugerowanych wartości z algorytmu uczącego. Nic nie jest zapisywane automatycznie.\n\nSugerowane (z algorytmu uczącego):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -257,7 +262,12 @@
           "door_sensor_entity": "Opcjonalny czujnik binarny drzwi maszyny (wł. = otwarte, wył. = zamknięte). Kiedy drzwiczki zostaną otwarte podczas aktywnego cyklu, WashData potwierdzi, że cykl został celowo wstrzymany. Jeśli po zakończeniu cyklu drzwi są nadal zamknięte, stan zmienia się na „Czyszczenie” do czasu otwarcia drzwi. Uwaga: zamknięcie drzwi NIE powoduje automatycznego wznowienia wstrzymanego cyklu - wznowienie należy uruchomić ręcznie za pomocą przycisku Wznów cykl lub za pomocą usługi.",
           "pause_cuts_power": "Wstrzymując się za pomocą przycisku lub usługi Wstrzymaj cykl, wyłącz także skonfigurowaną jednostkę przełączającą. Działa tylko wtedy, gdy dla tego urządzenia skonfigurowano jednostkę przełączającą.",
           "notify_unload_delay_minutes": "Wyślij powiadomienie za pośrednictwem kanału powiadomień o zakończeniu, gdy cykl się zakończy, a drzwi nie zostaną otwarte przez tyle minut (wymaga czujnika drzwi). Ustaw na 0, aby wyłączyć. Domyślnie: 60 minut.",
-          "switch_entity": "Jednostka przełączająca do przełączania podczas wstrzymywania lub wznawiania. Wymagane, gdy włączona jest opcja „Odetnij zasilanie podczas pauzy”."
+          "switch_entity": "Jednostka przełączająca do przełączania podczas wstrzymywania lub wznawiania. Wymagane, gdy włączona jest opcja „Odetnij zasilanie podczas pauzy”.",
+          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
+          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
+          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
+          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
+          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
         }
       },
       "diagnostics": {
@@ -1044,6 +1054,7 @@
           "ending": "Kończenie",
           "finished": "Zakończony",
           "anti_wrinkle": "Antygniotowy",
+          "delay_wait": "Waiting to Start",
           "interrupted": "Przerwany",
           "force_stopped": "Wymuszone zatrzymanie",
           "rinse": "Płukanie",
