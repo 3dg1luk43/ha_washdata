@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Iestatiet apgriešanas sākumu",
-        "description": "Ievadiet minūšu nobīdi, lai sāktu datu saglabāšanu (0 = cikla sākums).",
+        "description": "Cikla logs: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nPašreizējais sākums: **{current_wallclock}** (+{current_offset_min} min no cikla sākuma)\n\nIzvēlieties jaunu sākuma laiku, izmantojot tālāk esošo pulksteņa atlasītāju.",
         "data": {
-          "trim_start_min": "Sākums (minūtes)"
+          "trim_start_time": "Jauns sākuma laiks",
+          "trim_start_min": "Jauns sākums (minūtes no cikla sākuma)"
         }
       },
       "trim_cycle_end": {
         "title": "Iestatiet Apgriešanas beigas",
-        "description": "Ievadiet minūšu nobīdi, lai pārtrauktu datu saglabāšanu.",
+        "description": "Cikla logs: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nPašreizējās beigas: **{current_wallclock}** (+{current_offset_min} min no cikla sākuma)\n\nIzvēlieties jaunu beigu laiku, izmantojot tālāk esošo pulksteņa atlasītāju.",
         "data": {
-          "trim_end_min": "Beigas (minūtes)"
+          "trim_end_time": "Jauns beigu laiks",
+          "trim_end_min": "Jaunas beigas (minūtes no cikla sākuma)"
         }
       }
     },

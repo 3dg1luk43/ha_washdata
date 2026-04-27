@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "ट्रिम स्टार्ट सेट करें",
-        "description": "(0 = चक्र प्रारंभ) से डेटा रखना शुरू करने के लिए मिनट ऑफसेट दर्ज करें।",
+        "description": "साइकिल विंडो: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nवर्तमान प्रारंभ: **{current_wallclock}** (चक्र प्रारंभ से +{current_offset_min} मिनट)\n\nनीचे दिए गए घड़ी पिकर का उपयोग करके एक नया प्रारंभ समय चुनें।",
         "data": {
-          "trim_start_min": "प्रारंभ (मिनट)"
+          "trim_start_time": "नई शुरुआत का समय",
+          "trim_start_min": "नई शुरुआत (साइकिल शुरू होने से कुछ मिनट)"
         }
       },
       "trim_cycle_end": {
         "title": "ट्रिम एंड सेट करें",
-        "description": "डेटा रखना बंद करने के लिए मिनट ऑफसेट दर्ज करें।",
+        "description": "साइकिल विंडो: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nवर्तमान समाप्ति: **{current_wallclock}** (चक्र प्रारंभ से +{current_offset_min} मिनट)\n\nनीचे दिए गए घड़ी पिकर का उपयोग करके एक नया समाप्ति समय चुनें।",
         "data": {
-          "trim_end_min": "समाप्ति (मिनट)"
+          "trim_end_time": "नया अंत समय",
+          "trim_end_min": "नया अंत (चक्र प्रारंभ से मिनट)"
         }
       }
     },

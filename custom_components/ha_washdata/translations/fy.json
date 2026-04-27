@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Trimstart ynstelle",
-        "description": "Fier de minút offset yn om te begjinnen mei it hâlden fan gegevens fan (0 = syklusstart).",
+        "description": "Syklusfinster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAktuele start: **{current_wallclock}** (+{current_offset_min} min fan syklusstart)\n\nKies in nije starttiid mei de klokkiezer hjirûnder.",
         "data": {
-          "trim_start_min": "Start (minuten)"
+          "trim_start_time": "Nije starttiid",
+          "trim_start_min": "Nije start (minuten fan syklusstart)"
         }
       },
       "trim_cycle_end": {
         "title": "Trimein ynstelle",
-        "description": "Fier de minút offset yn om te stopjen mei it hâlden fan gegevens op.",
+        "description": "Syklusfinster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAktuele ein: **{current_wallclock}** (+{current_offset_min} min fan syklusbegjin)\n\nKies in nije eintiid mei de klokkiezer hjirûnder.",
         "data": {
-          "trim_end_min": "Einde (minuten)"
+          "trim_end_time": "Nije eintiid",
+          "trim_end_min": "Nije ein (minuten fan syklusbegjin)"
         }
       }
     },

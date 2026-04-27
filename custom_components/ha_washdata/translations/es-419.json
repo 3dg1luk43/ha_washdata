@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Establecer inicio del recorte",
-        "description": "Introduce el desplazamiento en minutos desde el que empezar a conservar datos (0 = inicio del ciclo).",
+        "description": "Ventana de ciclo: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nInicio actual: **{current_wallclock}** (+{current_offset_min} min desde el inicio del ciclo)\n\nElija una nueva hora de inicio usando el selector de reloj a continuación.",
         "data": {
-          "trim_start_min": "Inicio (minutos)"
+          "trim_start_time": "Nueva hora de inicio",
+          "trim_start_min": "Nuevo inicio (minutos desde el inicio del ciclo)"
         }
       },
       "trim_cycle_end": {
         "title": "Establecer fin del recorte",
-        "description": "Introduce el desplazamiento en minutos en el que dejar de conservar datos.",
+        "description": "Ventana de ciclo: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFin actual: **{current_wallclock}** (+{current_offset_min} min desde el inicio del ciclo)\n\nElija una nueva hora de finalización utilizando el selector de reloj a continuación.",
         "data": {
-          "trim_end_min": "Fin (minutos)"
+          "trim_end_time": "Nuevo tiempo de finalización",
+          "trim_end_min": "Nuevo fin (minutos desde el inicio del ciclo)"
         }
       }
     },

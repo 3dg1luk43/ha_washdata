@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Anfang zuschneiden",
-        "description": "Daten ab diesem Zeitpunkt (in Minuten) behalten. (0 = Zyklusanfang).",
+        "description": "Zyklusfenster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAktueller Start: **{current_wallclock}** (+{current_offset_min} Min. ab Zyklusstart)\n\nWählen Sie mit der Uhrauswahl unten eine neue Startzeit aus.",
         "data": {
-          "trim_start_min": "Start (Minuten)"
+          "trim_start_time": "Neue Startzeit",
+          "trim_start_min": "Neustart (Minuten ab Zyklusstart)"
         }
       },
       "trim_cycle_end": {
         "title": "Ende zuschneiden",
-        "description": "Daten bis zu diesem Zeitpunkt (in Minuten) behalten.",
+        "description": "Zyklusfenster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nAktuelles Ende: **{current_wallclock}** (+{current_offset_min} Min. ab Zyklusstart)\n\nWählen Sie mit der Uhrauswahl unten eine neue Endzeit aus.",
         "data": {
-          "trim_end_min": "Ende (Minuten)"
+          "trim_end_time": "Neue Endzeit",
+          "trim_end_min": "Neues Ende (Minuten ab Zyklusbeginn)"
         }
       }
     },

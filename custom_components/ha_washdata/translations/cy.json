@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Gosod Trim Start",
-        "description": "Rhowch y munud gwrthbwyso i ddechrau cadw data o (0 = cychwyn cylch).",
+        "description": "Ffenestr feicio: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nCychwyn presennol: **{current_wallclock}** (+{current_offset_min} munud o ddechrau'r cylch)\n\nDewiswch amser cychwyn newydd gan ddefnyddio'r codwr cloc isod.",
         "data": {
-          "trim_start_min": "Dechrau (munudau)"
+          "trim_start_time": "Amser cychwyn newydd",
+          "trim_start_min": "Dechrau newydd (munudau o ddechrau'r beic)"
         }
       },
       "trim_cycle_end": {
         "title": "Gosod Trim End",
-        "description": "Rhowch y munud gwrthbwyso i roi'r gorau i gadw data ar.",
+        "description": "Ffenestr feicio: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nDiwedd presennol: **{current_wallclock}** (+{current_offset_min} munud o ddechrau'r cylch)\n\nDewiswch amser gorffen newydd gan ddefnyddio'r codwr cloc isod.",
         "data": {
-          "trim_end_min": "Diwedd (munudau)"
+          "trim_end_time": "Amser gorffen newydd",
+          "trim_end_min": "Diwedd newydd (munudau o ddechrau'r beic)"
         }
       }
     },

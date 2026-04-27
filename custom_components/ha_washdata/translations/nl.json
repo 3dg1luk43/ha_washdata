@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Trimbegin instellen",
-        "description": "Voer de minutenoffset in vanaf waar gegevens moeten worden bewaard (0 = cyclusstart).",
+        "description": "Cyclusvenster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nHuidige start: **{current_wallclock}** (+{current_offset_min} min vanaf cyclusstart)\n\nKies een nieuwe starttijd met behulp van de klokkiezer hieronder.",
         "data": {
-          "trim_start_min": "Begin (minuten)"
+          "trim_start_time": "Nieuwe starttijd",
+          "trim_start_min": "Nieuwe start (minuten vanaf het begin van de cyclus)"
         }
       },
       "trim_cycle_end": {
         "title": "Trimeinde instellen",
-        "description": "Voer de minutenoffset in waar het bewaren van gegevens moet stoppen.",
+        "description": "Cyclusvenster: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nHuidig einde: **{current_wallclock}** (+{current_offset_min} min vanaf cyclusstart)\n\nKies een nieuwe eindtijd met behulp van de klokkiezer hieronder.",
         "data": {
-          "trim_end_min": "Einde (minuten)"
+          "trim_end_time": "Nieuwe eindtijd",
+          "trim_end_min": "Nieuw einde (minuten vanaf het begin van de cyclus)"
         }
       }
     },

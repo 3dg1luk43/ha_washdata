@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Kesim Başlangıcını Ayarla",
-        "description": "Verileri tutmaya başlamak için dakika farkını girin (0 = döngü başlangıcı).",
+        "description": "Döngü penceresi: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nMevcut başlangıç: **{current_wallclock}** (döngü başlangıcından +{current_offset_min} dakika sonra)\n\nAşağıdaki saat seçiciyi kullanarak yeni bir başlangıç zamanı seçin.",
         "data": {
-          "trim_start_min": "Başlangıç ​​(dakika)"
+          "trim_start_time": "Yeni başlangıç ​​zamanı",
+          "trim_start_min": "Yeni başlangıç ​​(döngü başlangıcından dakikalar sonra)"
         }
       },
       "trim_cycle_end": {
         "title": "Kırpma Sonunu Ayarla",
-        "description": "Verileri saklamayı durdurmak için dakika farkını girin.",
+        "description": "Döngü penceresi: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nMevcut bitiş: **{current_wallclock}** (döngü başlangıcından +{current_offset_min} dakika sonra)\n\nAşağıdaki saat seçiciyi kullanarak yeni bir bitiş zamanı seçin.",
         "data": {
-          "trim_end_min": "Bitiş (dakika)"
+          "trim_end_time": "Yeni bitiş zamanı",
+          "trim_end_min": "Yeni son (döngü başlangıcından dakikalar sonra)"
         }
       }
     },

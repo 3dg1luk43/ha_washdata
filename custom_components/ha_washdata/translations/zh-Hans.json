@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "设置修剪开始",
-        "description": "输入开始保存数据的分钟偏移量（0 = 循环开始）。",
+        "description": "循环窗口：{cycle_start_wallclock} → {cycle_end_wallclock}\n\n当前开始时间：**{current_wallclock}**（距周期开始时间+{current_offset_min} 分钟）\n\n使用下面的时钟选择器选择新的开始时间。",
         "data": {
-          "trim_start_min": "开始（分钟）"
+          "trim_start_time": "新的开始时间",
+          "trim_start_min": "新的开始（周期开始后的分钟数）"
         }
       },
       "trim_cycle_end": {
         "title": "设置修剪结束",
-        "description": "输入停止保存数据的分钟偏移量。",
+        "description": "循环窗口：{cycle_start_wallclock} → {cycle_end_wallclock}\n\n当前结束：**{current_wallclock}**（距离周期开始+{current_offset_min} 分钟）\n\n使用下面的时钟选择器选择新的结束时间。",
         "data": {
-          "trim_end_min": "结束（分钟）"
+          "trim_end_time": "新的结束时间",
+          "trim_end_min": "新的结束（距离周期开始的分钟数）"
         }
       }
     },

@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Définir le début du découpage",
-        "description": "Entrez le décalage des minutes à partir duquel commencer à conserver les données (0 = début du cycle).",
+        "description": "Fenêtre de cycle : {cycle_start_wallclock} → {cycle_end_wallclock}\n\nDémarrage actuel : **{current_wallclock}** (+{current_offset_min} minutes à partir du début du cycle)\n\nChoisissez une nouvelle heure de début à l'aide du sélecteur d'horloge ci-dessous.",
         "data": {
-          "trim_start_min": "Début (minutes)"
+          "trim_start_time": "Nouvelle heure de début",
+          "trim_start_min": "Nouveau démarrage (minutes après le début du cycle)"
         }
       },
       "trim_cycle_end": {
         "title": "Définir la fin de la coupe",
-        "description": "Entrez le décalage des minutes auquel arrêter de conserver les données.",
+        "description": "Fenêtre de cycle : {cycle_start_wallclock} → {cycle_end_wallclock}\n\nFin actuelle : **{current_wallclock}** (+{current_offset_min} min depuis le début du cycle)\n\nChoisissez une nouvelle heure de fin à l'aide du sélecteur d'horloge ci-dessous.",
         "data": {
-          "trim_end_min": "Fin (minutes)"
+          "trim_end_time": "Nouvelle heure de fin",
+          "trim_end_min": "Nouvelle fin (minutes depuis le début du cycle)"
         }
       }
     },

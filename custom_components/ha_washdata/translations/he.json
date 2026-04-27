@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "הגדר תחילת חיתוך",
-        "description": "הזן את קיזוז הדקות שממנו יש להתחיל לשמור נתונים (0 = תחילת מחזור).",
+        "description": "חלון מחזור: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nהתחלה נוכחית: **{current_wallclock}** (+{current_offset_min} דקות מתחילת המחזור)\n\nבחר שעת התחלה חדשה באמצעות בורר השעון למטה.",
         "data": {
-          "trim_start_min": "התחלה (דקות)"
+          "trim_start_time": "שעת התחלה חדשה",
+          "trim_start_min": "התחלה חדשה (דקות מתחילת המחזור)"
         }
       },
       "trim_cycle_end": {
         "title": "הגדר סיום חיתוך",
-        "description": "הזן את קיזוז הדקות כדי להפסיק לשמור נתונים.",
+        "description": "חלון מחזור: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nסיום נוכחי: **{current_wallclock}** (+{current_offset_min} דקות מתחילת המחזור)\n\nבחר שעת סיום חדשה באמצעות בורר השעון למטה.",
         "data": {
-          "trim_end_min": "סיום (דקות)"
+          "trim_end_time": "שעת סיום חדשה",
+          "trim_end_min": "סוף חדש (דקות מתחילת המחזור)"
         }
       }
     },

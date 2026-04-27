@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Állítsa be a Vágás kezdetét",
-        "description": "Adja meg a perceltolást az adatok tárolásának megkezdéséhez (0 = ciklus indítása).",
+        "description": "Ciklusablak: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nJelenlegi kezdés: **{current_wallclock}** (+{current_offset_min} perc a ciklus kezdetétől)\n\nVálasszon új kezdési időpontot az alábbi óraválasztó segítségével.",
         "data": {
-          "trim_start_min": "Kezdés (perc)"
+          "trim_start_time": "Új kezdési időpont",
+          "trim_start_min": "Új kezdet (percek a ciklus kezdetétől)"
         }
       },
       "trim_cycle_end": {
         "title": "Állítsa be a Vágás végét",
-        "description": "Adja meg a perceltolást az adatok tárolásának leállításához.",
+        "description": "Ciklusablak: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nJelenlegi vége: **{current_wallclock}** (+{current_offset_min} perc a ciklus kezdetétől)\n\nVálasszon új befejezési időt az alábbi óraválasztó segítségével.",
         "data": {
-          "trim_end_min": "vége (perc)"
+          "trim_end_time": "Új befejezési idő",
+          "trim_end_min": "Új vége (percek a ciklus kezdetétől)"
         }
       }
     },

@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "Still inn trimstart",
-        "description": "Angi minuttforskyvningen for å begynne å holde data fra (0 = syklusstart).",
+        "description": "Syklusvindu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNåværende start: **{current_wallclock}** (+{current_offset_min} min fra syklusstart)\n\nVelg et nytt starttidspunkt ved å bruke klokkevelgeren nedenfor.",
         "data": {
-          "trim_start_min": "Start (minutter)"
+          "trim_start_time": "Ny starttid",
+          "trim_start_min": "Ny start (minutter fra syklusstart)"
         }
       },
       "trim_cycle_end": {
         "title": "Sett Trim End",
-        "description": "Angi minuttforskyvningen for å slutte å holde data på.",
+        "description": "Syklusvindu: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nNåværende slutt: **{current_wallclock}** (+{current_offset_min} min fra syklusstart)\n\nVelg en ny sluttid ved å bruke klokkevelgeren nedenfor.",
         "data": {
-          "trim_end_min": "Slutt (minutter)"
+          "trim_end_time": "Ny sluttid",
+          "trim_end_min": "Ny slutt (minutter fra syklusstart)"
         }
       }
     },

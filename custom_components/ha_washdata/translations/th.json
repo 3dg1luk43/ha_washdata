@@ -602,16 +602,18 @@
       },
       "trim_cycle_start": {
         "title": "ตั้งค่าเริ่มต้นการตัดแต่ง",
-        "description": "ป้อนค่าชดเชยนาทีเพื่อเริ่มเก็บข้อมูล (0 = เริ่มต้นรอบ)",
+        "description": "กรอบเวลาวงจร: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nการเริ่มต้นปัจจุบัน: **{current_wallclock}** (+{current_offset_min} นาทีจากการเริ่มต้นรอบ)\n\nเลือกเวลาเริ่มต้นใหม่โดยใช้ตัวเลือกนาฬิกาด้านล่าง",
         "data": {
-          "trim_start_min": "เริ่มต้น (นาที)"
+          "trim_start_time": "เวลาเริ่มต้นใหม่",
+          "trim_start_min": "เริ่มต้นใหม่ (นาทีจากการเริ่มต้นรอบ)"
         }
       },
       "trim_cycle_end": {
         "title": "ตั้งค่าการสิ้นสุดการตัดแต่ง",
-        "description": "ป้อนค่าชดเชยนาทีเพื่อหยุดเก็บข้อมูล",
+        "description": "กรอบเวลาวงจร: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nสิ้นสุดปัจจุบัน: **{current_wallclock}** (+{current_offset_min} นาทีจากการเริ่มต้นรอบ)\n\nเลือกเวลาสิ้นสุดใหม่โดยใช้ตัวเลือกนาฬิกาด้านล่าง",
         "data": {
-          "trim_end_min": "สิ้นสุด (นาที)"
+          "trim_end_time": "เวลาสิ้นสุดใหม่",
+          "trim_end_min": "สิ้นสุดใหม่ (นาทีจากการเริ่มต้นรอบ)"
         }
       }
     },
