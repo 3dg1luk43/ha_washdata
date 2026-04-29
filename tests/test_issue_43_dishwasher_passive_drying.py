@@ -36,6 +36,7 @@ from custom_components.ha_washdata.cycle_detector import (
 from custom_components.ha_washdata.const import (
     DEVICE_TYPE_DISHWASHER,
     DEVICE_TYPE_WASHING_MACHINE,
+    DISHWASHER_END_SPIKE_WAIT_SECONDS,
 )
 
 
@@ -150,16 +151,22 @@ class TestDishwasherDeferralProtection:
         )
 
     def test_lifts_after_expected_plus_wait_window(self) -> None:
-        """Hard upper bound: once we cross expected + 300s, deferral lifts even
-        without an end spike (smart termination's wait branch takes over).
+        """Hard upper bound: once we cross expected + the wait window, deferral
+        lifts even without an end spike (smart termination's wait branch takes
+        over).  Pulls the boundary from the production constant so the
+        assertion can never drift from the code under test.
         """
-        det = self._make_det_in_ending(expected_duration=14112.0, confidence=0.30)
+        expected_duration = 14112.0
+        det = self._make_det_in_ending(
+            expected_duration=expected_duration, confidence=0.30
+        )
         det._end_spike_seen = False
-        # expected + 5 min + 1s — past the wait window
-        duration_past_wait = 14112.0 + 301.0
+        duration_past_wait = (
+            expected_duration + DISHWASHER_END_SPIKE_WAIT_SECONDS + 1.0
+        )
         assert not det._should_defer_finish(duration_past_wait), (
-            "Once duration exceeds expected + 300s wait window, deferral "
-            "must release so the cycle can finalise."
+            "Once duration exceeds expected + DISHWASHER_END_SPIKE_WAIT_SECONDS, "
+            "deferral must release so the cycle can finalise."
         )
 
     def test_no_protection_without_matched_profile(self) -> None:
@@ -543,10 +550,21 @@ class TestEndSpikeProgressGate:
             f"Cycle duration {duration_min:.1f} min is too short — pump-out "
             f"appears to have been excluded.  Expected ≥ 230 min."
         )
-        # Last power reading in the cycle must include the pump-out (i.e. cycle
-        # was not closed at 222 min before the pump-out).
-        max_power = cycle.get("max_power", 0)
-        assert max_power >= 17.0, (
-            f"Cycle max_power {max_power}W indicates pump-out (~17W) was not "
-            f"part of the recorded cycle."
+        # The pump-out must actually be in the recorded power_data — checking
+        # max_power is insufficient because earlier wash peaks (≈90W) trivially
+        # satisfy a >=17W bound even if the pump-out window was excluded.
+        # Inspect a ±2-minute window around pump_start instead and require at
+        # least one sample matching the pump-out signature (in [10, 20]W).
+        power_data = cycle.get("power_data", [])
+        pump_window = [
+            (t, p) for t, p in power_data
+            if pump_start - 120 <= t <= pump_start + 120
+        ]
+        pump_signature_samples = [
+            (t, p) for t, p in pump_window if 10.0 <= p <= 20.0
+        ]
+        assert pump_signature_samples, (
+            f"No pump-out sample (10–20W) found in power_data within ±2 min of "
+            f"pump_start={pump_start}s. Window had {len(pump_window)} samples; "
+            f"pump-out appears to have been excluded from the recorded cycle."
         )
