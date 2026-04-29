@@ -254,6 +254,27 @@ DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE = {
 
 DEFAULT_MAX_DEFERRAL_SECONDS = 14400  # 4 hours max safe deferral
 
+# Issue #43: dishwasher end-of-cycle pump-out handling.
+#
+# A dishwasher's wash→drying drain wind-down produces brief power spikes mid
+# ENDING that, prior to the issue #43 fix, would set _end_spike_seen=True and
+# pre-arm Smart Termination — so the cycle closed at 99% of expected, BEFORE
+# the real end-of-cycle pump-out at ~99.5% of expected.  The pump-out then
+# registered as a brand-new cycle.
+#
+# Two coordinated thresholds gate the fix.  They MUST agree: the wait window
+# in _should_defer_finish (DISHWASHER_END_SPIKE_WAIT_SECONDS) is the upper
+# bound for keeping the cycle open without an end spike, and Smart
+# Termination's own wait branch in STATE_ENDING uses the SAME constant so the
+# two paths release the cycle at the same moment.
+#
+# A spike at < DISHWASHER_END_SPIKE_MIN_PROGRESS of expected duration is
+# ignored for end-spike tracking (the cycle still stays in ENDING via the
+# existing long_ending_tail path - this only governs the smart-termination
+# pre-arming).
+DISHWASHER_END_SPIKE_MIN_PROGRESS = 0.85
+DISHWASHER_END_SPIKE_WAIT_SECONDS = 300.0
+
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
     DEVICE_TYPE_COFFEE_MACHINE: 300,  # 5 min (Warming/Pause handling)
