@@ -121,16 +121,45 @@ class TestDishwasherDeferralProtection:
             "Expected deferral at 80% of expected duration for dishwasher"
         )
 
-    def test_does_not_defer_above_85_percent(self) -> None:
-        """Protection stops above 85% so the cycle can eventually end."""
+    def test_does_not_defer_above_85_percent_after_end_spike(self) -> None:
+        """Once the real end-of-cycle pump-out has fired (end_spike_seen=True),
+        the deferral lifts above 85% so the cycle can complete promptly.
+        """
         det = self._make_det_in_ending(expected_duration=14112.0, confidence=0.30)
+        det._end_spike_seen = True  # simulate pump-out already fired
         # 90% = 12700.8s ≈ 212 min
         duration_90pct = 14112.0 * 0.90
         # With confidence 0.30 < DEFAULT_DEFER_FINISH_CONFIDENCE (0.55), the
         # normal ratio path also won't defer. Overall result: no deferral.
         assert not det._should_defer_finish(duration_90pct), (
-            "Protection should NOT defer above 85% with low confidence — "
-            "cycle must be allowed to complete."
+            "Protection should NOT defer above 85% with low confidence once "
+            "the end spike has been seen — cycle must be allowed to complete."
+        )
+
+    def test_defers_above_85_percent_until_end_spike(self) -> None:
+        """Issue #43: between 85% expected and the end-of-cycle pump-out, the
+        cycle must stay deferred so the pump-out gets folded into the original
+        cycle instead of being treated as a brand-new cycle.
+        """
+        det = self._make_det_in_ending(expected_duration=14112.0, confidence=0.30)
+        det._end_spike_seen = False  # pump-out has not fired yet
+        duration_90pct = 14112.0 * 0.90  # 212 min — past 85%, before pump-out
+        assert det._should_defer_finish(duration_90pct), (
+            "Above 85% but with no end spike seen, the cycle must remain "
+            "deferred so the pump-out is captured as part of the original cycle."
+        )
+
+    def test_lifts_after_expected_plus_wait_window(self) -> None:
+        """Hard upper bound: once we cross expected + 300s, deferral lifts even
+        without an end spike (smart termination's wait branch takes over).
+        """
+        det = self._make_det_in_ending(expected_duration=14112.0, confidence=0.30)
+        det._end_spike_seen = False
+        # expected + 5 min + 1s — past the wait window
+        duration_past_wait = 14112.0 + 301.0
+        assert not det._should_defer_finish(duration_past_wait), (
+            "Once duration exceeds expected + 300s wait window, deferral "
+            "must release so the cycle can finalise."
         )
 
     def test_no_protection_without_matched_profile(self) -> None:
@@ -232,11 +261,17 @@ class TestDishwasherPassiveDryingIntegration:
         # Give enough time below threshold to enter ENDING
         assert det.state == STATE_ENDING, f"Expected ENDING after drying starts, got {det.state}"
 
-        # Inject terminal drain spike ~9 min into ENDING (simulates mid-cycle drain pump).
-        # Place it after the initial zero phase so it fires well inside ENDING.
+        # Inject mid-cycle drain spike ~9 min into ENDING (the dishwasher's
+        # wash→drying drain wind-down).  It occurs at ~49% of expected duration,
+        # well below the 85% end-spike-progress gate added for issue #43, so it
+        # must NOT pre-arm Smart Termination.  long_ending_tail still keeps the
+        # cycle in ENDING via the existing terminal_spike path.
         terminal_spike_t = 6900 + 30  # just past the ENDING entry
         det.process_reading(50.0, self.BASE + timedelta(seconds=terminal_spike_t))
-        assert det._end_spike_seen is True, "Terminal spike must set _end_spike_seen"
+        assert det._end_spike_seen is False, (
+            "Mid-cycle spike at 49% of expected duration must not arm "
+            "_end_spike_seen (issue #43 regression)"
+        )
         assert det.state == STATE_ENDING, "Cycle must stay in ENDING (terminal spike, not resume)"
 
         # Continue 0W drying phase — push _time_below_threshold well past effective_off_delay (3600s)
@@ -369,3 +404,149 @@ class TestDishwasherPassiveDryingIntegration:
                     f"Expected > 8000s (> 133 min). The terminal drain spike at 120 min "
                     f"must NOT be used as the cycle end_time."
                 )
+
+
+class TestEndSpikeProgressGate:
+    """Regression tests for the issue #43 end-spike progress gate.
+
+    Reproduces the full April 27 user scenario from
+    home-assistant_ha_washdata_2026-04-27T21-08-33.248Z.log:
+
+      18:08:35  STARTING → RUNNING (active wash, ~85W, then 2000W heating)
+      19:57:34  power drops to 0W → RUNNING → PAUSED
+      19:57:44  PAUSED → ENDING                  (~109 min, 47% of expected)
+      20:06:35  high-power spikes in ENDING       (~117 min, 50% of expected)
+      ...       passive drying at 0–0.5W          (~117 min → 234 min)
+      22:02:34  pump-out spike (16–20W, ~1 min)   (~234 min, 99% of expected)
+      22:03:34  pump-out finishes, power drops to 0
+      22:05:00  cycle should fully terminate
+
+    The pre-fix bug:
+      The mid-cycle spike at ~117 min (50% of expected) set _end_spike_seen=True,
+      which pre-armed Smart Termination so it fired at 99% of expected (~222 min)
+      and closed the cycle BEFORE the real pump-out arrived.  The pump-out at
+      ~234 min was then registered as a brand-new cycle.
+
+    The fix gates _end_spike_seen=True on duration >= 85% of expected, so the
+    mid-cycle spike is ignored, Smart Termination waits for the real end spike
+    (the pump-out), and the pump-out is folded into the original cycle.
+    """
+
+    BASE = datetime(2026, 4, 27, 18, 8, 35, tzinfo=timezone.utc)
+    EXPECTED_DURATION = 14112.0  # ~235 min ECO cycle
+
+    def _feed(self, det: CycleDetector, power: float, offset_s: float) -> None:
+        det.process_reading(power, self.BASE + timedelta(seconds=offset_s))
+
+    def _run_constant(self, det: CycleDetector, power: float, start_s: float, end_s: float, step_s: float = 30.0) -> float:
+        t = start_s
+        while t <= end_s:
+            self._feed(det, power, t)
+            t += step_s
+        return t - step_s
+
+    def _make_det(self) -> tuple[CycleDetector, list[dict]]:
+        cfg = _make_dishwasher_config(
+            off_delay=1800,
+            min_off_gap=3600,
+            stop_threshold_w=2.0,
+            start_threshold_w=5.0,
+            start_duration_threshold=1.0,
+            start_energy_threshold=0.001,
+            completion_min_seconds=60,
+        )
+        return _make_detector(cfg)
+
+    def test_mid_cycle_spike_does_not_arm_smart_termination(self) -> None:
+        """A spike at ~50% of expected duration must not set _end_spike_seen."""
+        det, _ = self._make_det()
+        det.update_match(("ECO", 0.65, self.EXPECTED_DURATION, None, False))
+
+        # Wash phase 0–110 min
+        self._run_constant(det, 90.0, 0, 6600)
+        # Drop to 0W → drying → PAUSED → ENDING
+        self._run_constant(det, 0.0, 6630, 6900)
+        assert det.state == STATE_ENDING
+
+        # Mid-cycle drain spike at ~117 min (50% of 235 min expected)
+        self._feed(det, 50.0, 7020)
+        assert det._end_spike_seen is False, (
+            "Spike at 50% of expected duration must be ignored for end-spike "
+            "tracking (issue #43)"
+        )
+        # But the cycle still stays in ENDING via long_ending_tail
+        assert det.state == STATE_ENDING
+
+    def test_real_end_spike_at_pump_out_arms_smart_termination(self) -> None:
+        """A spike at ~99% of expected duration must set _end_spike_seen."""
+        det, _ = self._make_det()
+        det.update_match(("ECO", 0.65, self.EXPECTED_DURATION, None, False))
+
+        # Wash 0–110 min, drop, ENDING
+        self._run_constant(det, 90.0, 0, 6600)
+        self._run_constant(det, 0.0, 6630, 6900)
+        assert det.state == STATE_ENDING
+
+        # Mid-cycle drain spike (ignored)
+        self._feed(det, 50.0, 7020)
+        assert det._end_spike_seen is False
+
+        # Long passive drying at 0W
+        self._run_constant(det, 0.0, 7050, 13950, step_s=60.0)
+
+        # Real end-of-cycle pump-out at ~234 min (99.5% of expected)
+        # Pump-out is 17W for ~60s, then drops back to 0W.
+        pump_start = 14040
+        self._run_constant(det, 17.0, pump_start, pump_start + 60, step_s=10.0)
+
+        # The pump-out is at 99.5% of expected → must arm _end_spike_seen
+        assert det._end_spike_seen is True, (
+            "Real end spike at 99.5% of expected duration must arm "
+            "_end_spike_seen so Smart Termination can fire"
+        )
+
+    def test_full_cycle_completes_with_pump_out_included(self) -> None:
+        """Smoke-test: full April 27 timeline produces exactly one cycle of
+        ~234 min, NOT a 222-min cycle followed by a 3-min ghost cycle."""
+        det, completed = self._make_det()
+        det.update_match(("ECO", 0.65, self.EXPECTED_DURATION, None, False))
+
+        # Wash phase
+        self._run_constant(det, 90.0, 0, 6600)
+        # Drop into ENDING
+        self._run_constant(det, 0.0, 6630, 6900)
+        # Mid-cycle drain spikes (multiple, like the user's log shows)
+        for offset in (7020, 7080, 7110, 7140):
+            self._feed(det, 50.0, offset)
+        # Long passive drying — keep cycle in ENDING via verified pause to model
+        # the dishwasher passive drying protection at the manager level.
+        det.set_verified_pause(True)
+        self._run_constant(det, 0.0, 7170, 13950, step_s=60.0)
+        det.set_verified_pause(False)
+        # Real pump-out
+        pump_start = 14040
+        self._run_constant(det, 17.0, pump_start, pump_start + 60, step_s=10.0)
+        # Power drops, cycle should smart-terminate shortly after
+        self._run_constant(det, 0.0, pump_start + 90, pump_start + 600, step_s=30.0)
+
+        # Exactly one cycle completed
+        assert len(completed) == 1, (
+            f"Expected exactly 1 completed cycle (full ECO), got {len(completed)}. "
+            f"This indicates the pump-out was treated as a separate cycle (the "
+            f"issue #43 regression)."
+        )
+        cycle = completed[0]
+        # Duration should be ~234 min (close to expected 235 min), NOT 222 min
+        # (the pre-fix Smart Termination misfire).
+        duration_min = cycle["duration"] / 60.0
+        assert duration_min > 230.0, (
+            f"Cycle duration {duration_min:.1f} min is too short — pump-out "
+            f"appears to have been excluded.  Expected ≥ 230 min."
+        )
+        # Last power reading in the cycle must include the pump-out (i.e. cycle
+        # was not closed at 222 min before the pump-out).
+        max_power = cycle.get("max_power", 0)
+        assert max_power >= 17.0, (
+            f"Cycle max_power {max_power}W indicates pump-out (~17W) was not "
+            f"part of the recorded cycle."
+        )
