@@ -5,6 +5,14 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.4.1 - 2026-04-29
+
+### 🐛 Bug Fixes
+- **Dishwasher Pump-Out Registers as a Ghost Cycle** (#43): On dishwashers with passive drying and an end-of-cycle drain pump, the integration was closing the cycle ~12 minutes before the real pump-out and then registering the pump-out itself as a brand-new "starting → running → ending" sequence visible in the UI. Root cause: a brief mid-cycle drain wind-down at ~50% of the expected duration set `_end_spike_seen=True`, which pre-armed Smart Termination so it fired at 99% of expected duration before the real pump-out arrived. After Smart Termination closed the cycle, the pump-out (a 16–20 W spike for ~1 min) was then 12 min outside the 600 s suspicious-window for ghost suppression on devices whose previous cycle had finished slightly earlier (e.g. a longer-trained profile), so it slipped through unsuppressed and started a fresh detection. Fix: the end-spike marker is now only armed when the spike occurs at ≥ 85% of the expected duration (mid-cycle drain spikes are ignored for end-spike tracking but still keep the cycle in ENDING via the existing `long_ending_tail` path). Additionally, between 85% expected and the smart-termination wait window (`expected + 300 s`), the dishwasher passive drying protection now defers the cycle finish whenever no end spike has been seen yet — so the pump-out gets folded into the original cycle instead of being treated as a new cycle. Verified against a real diag-export power trace from issue #43: pre-fix → 1 cycle (233 min) + 1 ghost cycle; post-fix → 1 cycle (234.3 min) + 0 ghost cycles. No behavioural change for non-dishwasher devices, for unmatched cycles (no profile), or for dishwashers whose end spike fires within the last 15% of expected duration.
+- **Translation Placeholder Mismatch in `notify_finish_message`** (#219): Home Assistant logged a startup validation error for all non-English locales because `en.json` described the finish notification format with only three placeholders (`{device}`, `{duration}`, `{program}`), while the German, Czech, and Italian translations already listed all five (`{energy_kwh}` and `{cost}` were added in v0.4.4 but the English source string was only partially updated). HA validates every localization against the English reference, so any language whose description matched the updated set was flagged as inconsistent. The English source string is now corrected to include all five placeholders, and the description in all 57 remaining language files has been updated accordingly so placeholder sets are consistent across all locales.
+
+<br>
+
 ## 0.4.4 - 2026-04-27
 
 ### ✨ Features
