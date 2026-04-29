@@ -287,6 +287,57 @@ class CycleDetector:
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.debug("Profile match failed: %s", e)
 
+    # Maximum reasonable cycle duration accepted by the detector.  Anything
+    # longer is rejected as corrupted data and replaced with the
+    # _SANITIZE_INVALID_SENTINEL so downstream gates fall through to the
+    # unmatched / no-expected-duration path.
+    _SANITIZE_MAX_EXPECTED_DURATION = 6 * 3600.0  # 6 hours
+    _SANITIZE_INVALID_SENTINEL = 0.0  # 0 == "no valid expected_duration"
+
+    def _sanitize_expected_duration(
+        self, raw: Any, *, source: str = "update_match"
+    ) -> float:
+        """Coerce ``raw`` into a finite float in (0, 6h] or return 0.0.
+
+        The class invariant is that ``self._expected_duration`` is either a
+        finite, strictly positive float ≤ 6 hours, or 0.0 meaning "no valid
+        expected duration".  Every code path that assigns ``_expected_duration``
+        (live profile-match callbacks AND restored snapshots) routes through
+        this helper so the gates in STATE_ENDING and ``_should_defer_finish``
+        can trust the value without re-validating.
+
+        Emits a DEBUG log line distinguishing the rejection reason — the
+        ``<= 0`` and ``> 6h`` markers are part of issue #197's regression
+        contract and tests assert on them.
+        """
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            self._logger.debug(
+                "%s: invalid raw_expected_duration %r, defaulting to 0.0",
+                source, raw,
+            )
+            return self._SANITIZE_INVALID_SENTINEL
+        if not math.isfinite(value):
+            self._logger.debug(
+                "%s: invalid raw_expected_duration %r, defaulting to 0.0",
+                source, raw,
+            )
+            return self._SANITIZE_INVALID_SENTINEL
+        if value <= 0:
+            self._logger.debug(
+                "%s: invalid raw_expected_duration %r (<= 0), defaulting to 0.0",
+                source, raw,
+            )
+            return self._SANITIZE_INVALID_SENTINEL
+        if value > self._SANITIZE_MAX_EXPECTED_DURATION:
+            self._logger.debug(
+                "%s: invalid raw_expected_duration %r (> 6h), defaulting to 0.0",
+                source, raw,
+            )
+            return self._SANITIZE_INVALID_SENTINEL
+        return value
+
     def update_match(self, result: tuple[Any, ...] | list[Any] | Any) -> None:  # type: ignore[misc]
         """Process a match result (synchronously).
 
@@ -321,20 +372,9 @@ class CycleDetector:
                 except (TypeError, ValueError):
                     confidence = 0.0
                     self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
-                try:
-                    expected_duration = float(raw_expected_duration)
-                    if not math.isfinite(expected_duration):
-                        expected_duration = 0.0
-                        self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
-                    elif expected_duration <= 0:
-                        expected_duration = 0.0
-                        self._logger.debug("update_match: invalid raw_expected_duration %r (<= 0), defaulting to 0.0", raw_expected_duration)
-                    elif expected_duration > 6 * 3600.0:
-                        expected_duration = 0.0
-                        self._logger.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
-                except (TypeError, ValueError):
-                    expected_duration = 0.0
-                    self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                expected_duration = self._sanitize_expected_duration(
+                    raw_expected_duration, source="update_match"
+                )
                 phase_name = str(raw_phase_name) if raw_phase_name is not None else None
                 is_match_mismatch = raw_mismatch if isinstance(raw_mismatch, bool) else bool(raw_mismatch)
             else:
@@ -355,20 +395,9 @@ class CycleDetector:
                     except (TypeError, ValueError):
                         confidence = 0.0
                         self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
-                    try:
-                        expected_duration = float(raw_expected_duration)
-                        if not math.isfinite(expected_duration):
-                            expected_duration = 0.0
-                            self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
-                        elif expected_duration <= 0:
-                            expected_duration = 0.0
-                            self._logger.debug("update_match: invalid raw_expected_duration %r (<= 0), defaulting to 0.0", raw_expected_duration)
-                        elif expected_duration > 6 * 3600.0:
-                            expected_duration = 0.0
-                            self._logger.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
-                    except (TypeError, ValueError):
-                        expected_duration = 0.0
-                        self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                    expected_duration = self._sanitize_expected_duration(
+                        raw_expected_duration, source="update_match"
+                    )
                     phase_name = (
                         str(raw_phase_name) if raw_phase_name is not None else None
                     )
@@ -1079,19 +1108,23 @@ class CycleDetector:
         # drain spike that fires early in the ENDING state (e.g. at 120 min of a
         # 233-min ECO cycle) resets _time_below_threshold, and the subsequent 60-min
         # silence timeout would otherwise end the cycle at ~180 min — well before the
-        # real finish.  Defer until the cycle reaches 85% of expected so that smart
-        # termination can catch the true end (~99% of expected) instead.  Confidence
-        # may be low this early, so the normal confidence gate is bypassed here.
+        # real finish.  Defer until the cycle reaches the late-phase threshold (the
+        # same one used by the end-spike arm gate, so both move together) so that
+        # smart termination can catch the true end (~99% of expected) instead.
+        # Confidence may be low this early, so the normal confidence gate is
+        # bypassed here.
         if (
             self._config.device_type == "dishwasher"
             and self._matched_profile
             and self._expected_duration > 0
-            and duration < (self._expected_duration * 0.85)
+            and duration
+            < (self._expected_duration * DISHWASHER_END_SPIKE_MIN_PROGRESS)
         ):
             self._logger.debug(
                 "Deferring cycle finish: dishwasher drying phase protection "
-                "(%.0fs < 85%% of expected %.0fs, profile: %s, conf %.2f)",
+                "(%.0fs < %.0f%% of expected %.0fs, profile: %s, conf %.2f)",
                 duration,
+                DISHWASHER_END_SPIKE_MIN_PROGRESS * 100,
                 self._expected_duration,
                 self._matched_profile,
                 self._last_match_confidence,
@@ -1341,7 +1374,13 @@ class CycleDetector:
             self._time_below_threshold = snapshot.get("time_below", 0.0)
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
             self._matched_profile = snapshot.get("matched_profile")
-            self._expected_duration = snapshot.get("expected_duration", 0.0)
+            # Sanitize via the same helper as update_match so the class
+            # invariant on _expected_duration holds across restarts and the
+            # gates in STATE_ENDING / _should_defer_finish can trust the value.
+            self._expected_duration = self._sanitize_expected_duration(
+                snapshot.get("expected_duration", 0.0),
+                source="restore_state_snapshot",
+            )
             self._end_spike_seen = snapshot.get("end_spike_seen", False)
 
             # Restore state enter time and recompute time_in_state from it
