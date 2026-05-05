@@ -228,6 +228,7 @@ DEVICE_TYPE_AIR_FRYER = "air_fryer"
 DEVICE_TYPE_HEAT_PUMP = "heat_pump"
 DEVICE_TYPE_BREAD_MAKER = "bread_maker"
 DEVICE_TYPE_PUMP = "pump"
+DEVICE_TYPE_OVEN = "oven"
 
 DEVICE_TYPES = {
     DEVICE_TYPE_WASHING_MACHINE: "Washing Machine",
@@ -240,6 +241,7 @@ DEVICE_TYPES = {
     DEVICE_TYPE_HEAT_PUMP: "Heat Pump",
     DEVICE_TYPE_BREAD_MAKER: "Bread Maker",
     DEVICE_TYPE_PUMP: "Pump / Sump Pump",
+    DEVICE_TYPE_OVEN: "Oven",
 }
 
 # Device Type Defaults
@@ -250,9 +252,31 @@ DEFAULT_NO_UPDATE_ACTIVE_TIMEOUT_BY_DEVICE = {
     DEVICE_TYPE_HEAT_PUMP: 14400,  # 4 hours (Heat pumps can run a long time with slow updates)
     DEVICE_TYPE_BREAD_MAKER: 7200,  # 2 hours (Proving/Rising is very low-power for extended periods)
     DEVICE_TYPE_PUMP: DEFAULT_PUMP_STUCK_DURATION + 60,  # Must exceed stuck-alarm threshold so the alarm fires before the watchdog
+    DEVICE_TYPE_OVEN: 14400,  # 4 hours (Slow roasts and pyrolytic self-clean can run for hours with thermostat-driven silence)
 }
 
 DEFAULT_MAX_DEFERRAL_SECONDS = 14400  # 4 hours max safe deferral
+
+# Issue #43: dishwasher end-of-cycle pump-out handling.
+#
+# A dishwasher's wash→drying drain wind-down produces brief power spikes mid
+# ENDING that, prior to the issue #43 fix, would set _end_spike_seen=True and
+# pre-arm Smart Termination — so the cycle closed at 99% of expected, BEFORE
+# the real end-of-cycle pump-out at ~99.5% of expected.  The pump-out then
+# registered as a brand-new cycle.
+#
+# Two coordinated thresholds gate the fix.  They MUST agree: the wait window
+# in _should_defer_finish (DISHWASHER_END_SPIKE_WAIT_SECONDS) is the upper
+# bound for keeping the cycle open without an end spike, and Smart
+# Termination's own wait branch in STATE_ENDING uses the SAME constant so the
+# two paths release the cycle at the same moment.
+#
+# A spike at < DISHWASHER_END_SPIKE_MIN_PROGRESS of expected duration is
+# ignored for end-spike tracking (the cycle still stays in ENDING via the
+# existing long_ending_tail path - this only governs the smart-termination
+# pre-arming).
+DISHWASHER_END_SPIKE_MIN_PROGRESS = 0.85
+DISHWASHER_END_SPIKE_WAIT_SECONDS = 300.0
 
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)
@@ -260,6 +284,7 @@ DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_HEAT_PUMP: 600,  # 10 min (Defrosting pauses)
     DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
     DEVICE_TYPE_PUMP: 20,  # 20 s (Pumps cut off sharply; no warm-down phase)
+    DEVICE_TYPE_OVEN: 600,  # 10 min (Thermostat off-cycles can be long while holding temp)
 }
 
 # Device-specific progress smoothing thresholds (percentage points)
@@ -274,6 +299,7 @@ DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_HEAT_PUMP: 5.0,  # Variable load, long periods
     DEVICE_TYPE_BREAD_MAKER: 5.0,  # Large power swings between kneading, proving, baking
     DEVICE_TYPE_PUMP: 2.0,  # Binary on/off spikes; minimal smoothing needed
+    DEVICE_TYPE_OVEN: 5.0,  # Bistable thermostat cycling between full heat and 0 W
 }
 
 CONF_VERIFICATION_POLL_INTERVAL = "verification_poll_interval"  # Internal setting
@@ -291,6 +317,7 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_HEAT_PUMP: 900,  # 15 min minimum
     DEVICE_TYPE_BREAD_MAKER: 1800,  # 30 min (even express bread takes 30+ min)
     DEVICE_TYPE_PUMP: 5,  # 5 s - pump cycles can be under 30 seconds
+    DEVICE_TYPE_OVEN: 600,  # 10 min (covers quick reheats and ignores brief preheating tests)
 }
 
 # Default min_off_gap by device type (seconds)
@@ -310,6 +337,7 @@ DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_HEAT_PUMP: 1800,  # 30 min (Defrost cycle / resting gap)
     DEVICE_TYPE_BREAD_MAKER: 600,  # 10 min (Resting between knead/prove keeps same cycle together)
     DEVICE_TYPE_PUMP: 60,  # 1 min (Pumps can cycle every 3-5 min in heavy rain)
+    DEVICE_TYPE_OVEN: 900,  # 15 min (Bridge thermostat off-windows so one bake stays a single cycle)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
 
@@ -327,6 +355,7 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
     DEVICE_TYPE_HEAT_PUMP: 0.2,  # Compressor spins up
     DEVICE_TYPE_BREAD_MAKER: 0.2,  # Kneading motor starts (~200W for a few seconds)
     DEVICE_TYPE_PUMP: 0.003,  # ~100W motor for ~0.1 s is enough to confirm a pump cycle
+    DEVICE_TYPE_OVEN: 0.5,  # Heating element kicks in hard (~2-3 kW) - high gate filters incidental light/fan draws
 }
 # Default sampling interval by device type
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {

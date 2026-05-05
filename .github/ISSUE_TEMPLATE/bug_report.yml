@@ -48,6 +48,7 @@ body:
         - Heat Pump
         - Bread Maker
         - Pump / Sump Pump
+        - Oven
         - Other / Not applicable
     validations:
       required: true

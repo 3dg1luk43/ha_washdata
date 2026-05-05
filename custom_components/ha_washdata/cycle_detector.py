@@ -29,6 +29,20 @@ from .const import (
     DEVICE_TYPE_WASHER_DRYER,
     DEFAULT_MAX_DEFERRAL_SECONDS,
     DEFAULT_DEFER_FINISH_CONFIDENCE,
+    DISHWASHER_END_SPIKE_MIN_PROGRESS,
+    DISHWASHER_END_SPIKE_WAIT_SECONDS,
+)
+
+# The dishwasher end-spike wait window is shared between two code paths
+# (Smart Termination's wait branch and _should_defer_finish's no-end-spike
+# branch).  They MUST release the cycle at the same instant — sanity-check
+# that the constants module loaded a sensible value rather than allowing the
+# paths to silently drift if one was changed and the other forgotten.
+assert DISHWASHER_END_SPIKE_WAIT_SECONDS > 0, (
+    "DISHWASHER_END_SPIKE_WAIT_SECONDS must be positive"
+)
+assert 0 < DISHWASHER_END_SPIKE_MIN_PROGRESS < 1, (
+    "DISHWASHER_END_SPIKE_MIN_PROGRESS must be a fraction in (0, 1)"
 )
 from .signal_processing import integrate_wh
 
@@ -273,6 +287,57 @@ class CycleDetector:
         except Exception as e:  # pylint: disable=broad-exception-caught
             self._logger.debug("Profile match failed: %s", e)
 
+    # Maximum reasonable cycle duration accepted by the detector.  Anything
+    # longer is rejected as corrupted data and replaced with the
+    # _SANITIZE_INVALID_SENTINEL so downstream gates fall through to the
+    # unmatched / no-expected-duration path.
+    _SANITIZE_MAX_EXPECTED_DURATION = 6 * 3600.0  # 6 hours
+    _SANITIZE_INVALID_SENTINEL = 0.0  # 0 == "no valid expected_duration"
+
+    def _sanitize_expected_duration(
+        self, raw: Any, *, source: str = "update_match"
+    ) -> float:
+        """Coerce ``raw`` into a finite float in (0, 6h] or return 0.0.
+
+        The class invariant is that ``self._expected_duration`` is either a
+        finite, strictly positive float ≤ 6 hours, or 0.0 meaning "no valid
+        expected duration".  Every code path that assigns ``_expected_duration``
+        (live profile-match callbacks AND restored snapshots) routes through
+        this helper so the gates in STATE_ENDING and ``_should_defer_finish``
+        can trust the value without re-validating.
+
+        Emits a DEBUG log line distinguishing the rejection reason — the
+        ``<= 0`` and ``> 6h`` markers are part of issue #197's regression
+        contract and tests assert on them.
+        """
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            self._logger.debug(
+                "%s: invalid raw_expected_duration %r, defaulting to 0.0",
+                source, raw,
+            )
+            return self._SANITIZE_INVALID_SENTINEL
+        if not math.isfinite(value):
+            self._logger.debug(
+                "%s: invalid raw_expected_duration %r, defaulting to 0.0",
+                source, raw,
+            )
+            return self._SANITIZE_INVALID_SENTINEL
+        if value <= 0:
+            self._logger.debug(
+                "%s: invalid raw_expected_duration %r (<= 0), defaulting to 0.0",
+                source, raw,
+            )
+            return self._SANITIZE_INVALID_SENTINEL
+        if value > self._SANITIZE_MAX_EXPECTED_DURATION:
+            self._logger.debug(
+                "%s: invalid raw_expected_duration %r (> 6h), defaulting to 0.0",
+                source, raw,
+            )
+            return self._SANITIZE_INVALID_SENTINEL
+        return value
+
     def update_match(self, result: tuple[Any, ...] | list[Any] | Any) -> None:  # type: ignore[misc]
         """Process a match result (synchronously).
 
@@ -307,20 +372,9 @@ class CycleDetector:
                 except (TypeError, ValueError):
                     confidence = 0.0
                     self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
-                try:
-                    expected_duration = float(raw_expected_duration)
-                    if not math.isfinite(expected_duration):
-                        expected_duration = 0.0
-                        self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
-                    elif expected_duration <= 0:
-                        expected_duration = 0.0
-                        self._logger.debug("update_match: invalid raw_expected_duration %r (<= 0), defaulting to 0.0", raw_expected_duration)
-                    elif expected_duration > 6 * 3600.0:
-                        expected_duration = 0.0
-                        self._logger.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
-                except (TypeError, ValueError):
-                    expected_duration = 0.0
-                    self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                expected_duration = self._sanitize_expected_duration(
+                    raw_expected_duration, source="update_match"
+                )
                 phase_name = str(raw_phase_name) if raw_phase_name is not None else None
                 is_match_mismatch = raw_mismatch if isinstance(raw_mismatch, bool) else bool(raw_mismatch)
             else:
@@ -341,20 +395,9 @@ class CycleDetector:
                     except (TypeError, ValueError):
                         confidence = 0.0
                         self._logger.debug("update_match: invalid raw_confidence %r, defaulting to 0.0", raw_confidence)
-                    try:
-                        expected_duration = float(raw_expected_duration)
-                        if not math.isfinite(expected_duration):
-                            expected_duration = 0.0
-                            self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
-                        elif expected_duration <= 0:
-                            expected_duration = 0.0
-                            self._logger.debug("update_match: invalid raw_expected_duration %r (<= 0), defaulting to 0.0", raw_expected_duration)
-                        elif expected_duration > 6 * 3600.0:
-                            expected_duration = 0.0
-                            self._logger.debug("update_match: invalid raw_expected_duration %r (> 6h), defaulting to 0.0", raw_expected_duration)
-                    except (TypeError, ValueError):
-                        expected_duration = 0.0
-                        self._logger.debug("update_match: invalid raw_expected_duration %r, defaulting to 0.0", raw_expected_duration)
+                    expected_duration = self._sanitize_expected_duration(
+                        raw_expected_duration, source="update_match"
+                    )
                     phase_name = (
                         str(raw_phase_name) if raw_phase_name is not None else None
                     )
@@ -372,12 +415,26 @@ class CycleDetector:
             self._matched_profile = None
 
         elif match_name:
-            self._matched_profile = match_name
-            # Sub-state can be set from phase_name if available
-            if phase_name:
-                self._sub_state = phase_name
-            # Wrapper provides it
-            self._expected_duration = expected_duration
+            # If sanitization rejected the expected_duration, treat the match
+            # as invalid: setting _matched_profile while _expected_duration is
+            # the 0.0 sentinel would let Smart Termination fire on the
+            # `current_duration >= 0` always-true comparison.  Drop both so
+            # the cycle stays in detecting/unmatched mode.
+            if expected_duration == self._SANITIZE_INVALID_SENTINEL:
+                self._logger.debug(
+                    "update_match: match %r ignored — expected_duration "
+                    "sanitized to invalid sentinel; treating as unmatched",
+                    match_name,
+                )
+                self._matched_profile = None
+                self._expected_duration = self._SANITIZE_INVALID_SENTINEL
+            else:
+                self._matched_profile = match_name
+                # Sub-state can be set from phase_name if available
+                if phase_name:
+                    self._sub_state = phase_name
+                # Wrapper provides it
+                self._expected_duration = expected_duration
 
     def set_verified_pause(self, verified: bool) -> None:
         """Set or clear the verified pause flag."""
@@ -754,16 +811,41 @@ class CycleDetector:
             self._power_readings.append((timestamp, power))
 
             if is_high:
-                # End spike detected! Mark it
-                self._end_spike_seen = True
-                self._logger.debug("End spike detected (power high in ENDING state)")
-
-                # Check if we're past expected duration - if so, DON'T resume to RUNNING
-                # This prevents the cycle from bouncing forever on pump-out spikes
                 start_time = self._current_cycle_start or timestamp
                 current_duration = (timestamp - start_time).total_seconds()
 
                 is_dishwasher = self._config.device_type == "dishwasher"
+
+                # Issue #43: only treat this as a *terminal* end spike (which then
+                # pre-arms Smart Termination) when it occurs near the end of the
+                # expected cycle.  Mid-cycle spikes - e.g. the dishwasher
+                # wash→drying drain wind-down at ~50% of expected duration - must
+                # not arm smart termination, otherwise the cycle finishes at 99%
+                # of expected *before* the real end-of-cycle pump-out, and that
+                # pump-out is then misread as a brand-new cycle.  Without a
+                # matched profile (expected==0) the gating is bypassed so the
+                # legacy "any spike counts" behaviour is preserved for unmatched
+                # cycles (relied on by the dishwasher unmatched-cap path).
+                if (
+                    self._expected_duration <= 0
+                    or current_duration
+                    >= self._expected_duration * DISHWASHER_END_SPIKE_MIN_PROGRESS
+                ):
+                    self._end_spike_seen = True
+                    self._logger.debug(
+                        "End spike detected (power high in ENDING state, "
+                        "%.0fs/%.0fs)",
+                        current_duration,
+                        self._expected_duration,
+                    )
+                else:
+                    self._logger.debug(
+                        "Mid-cycle spike in ENDING ignored for end-spike "
+                        "tracking (%.0fs < %.0f%% of expected %.0fs)",
+                        current_duration,
+                        DISHWASHER_END_SPIKE_MIN_PROGRESS * 100,
+                        self._expected_duration,
+                    )
 
                 # Sanity check: if expected_duration is unreasonable (>6 hours), use fallback
                 max_reasonable = 21600.0  # 6 hours
@@ -854,12 +936,16 @@ class CycleDetector:
 
                         if self._time_in_state >= smart_debounce:
                             # --- END SPIKE WAIT PERIOD (Dishwashers) ---
-                            # If we are a dishwasher and haven't seen a high-power spike since entering ENDING,
-                            # wait up to 5 extra minutes past expected_duration for the end spike.
-                            end_spike_wait = 300.0  # 5 minutes
+                            # If we are a dishwasher and haven't seen a high-power
+                            # spike since entering ENDING, wait up to
+                            # DISHWASHER_END_SPIKE_WAIT_SECONDS past
+                            # expected_duration for the end spike.  Shared with
+                            # _should_defer_finish so the two paths release the
+                            # cycle at the same instant (issue #43).
                             end_spike_seen = getattr(self, "_end_spike_seen", False)
                             past_wait_period = current_duration >= (
-                                self._expected_duration + end_spike_wait
+                                self._expected_duration
+                                + DISHWASHER_END_SPIKE_WAIT_SECONDS
                             )
 
                             if (
@@ -872,7 +958,7 @@ class CycleDetector:
                                     "%.0fs wait)",
                                     current_duration,
                                     self._expected_duration,
-                                    end_spike_wait,
+                                    DISHWASHER_END_SPIKE_WAIT_SECONDS,
                                 )
                                 return  # Don't finish yet, wait for spike or timeout
 
@@ -1036,22 +1122,55 @@ class CycleDetector:
         # drain spike that fires early in the ENDING state (e.g. at 120 min of a
         # 233-min ECO cycle) resets _time_below_threshold, and the subsequent 60-min
         # silence timeout would otherwise end the cycle at ~180 min — well before the
-        # real finish.  Defer until the cycle reaches 85% of expected so that smart
-        # termination can catch the true end (~99% of expected) instead.  Confidence
-        # may be low this early, so the normal confidence gate is bypassed here.
+        # real finish.  Defer until the cycle reaches the late-phase threshold (the
+        # same one used by the end-spike arm gate, so both move together) so that
+        # smart termination can catch the true end (~99% of expected) instead.
+        # Confidence may be low this early, so the normal confidence gate is
+        # bypassed here.
         if (
             self._config.device_type == "dishwasher"
             and self._matched_profile
             and self._expected_duration > 0
-            and duration < (self._expected_duration * 0.85)
+            and duration
+            < (self._expected_duration * DISHWASHER_END_SPIKE_MIN_PROGRESS)
         ):
             self._logger.debug(
                 "Deferring cycle finish: dishwasher drying phase protection "
-                "(%.0fs < 85%% of expected %.0fs, profile: %s, conf %.2f)",
+                "(%.0fs < %.0f%% of expected %.0fs, profile: %s, conf %.2f)",
                 duration,
+                DISHWASHER_END_SPIKE_MIN_PROGRESS * 100,
                 self._expected_duration,
                 self._matched_profile,
                 self._last_match_confidence,
+            )
+            return True
+
+        # Issue #43: dishwasher end-spike wait protection.  After 85% of expected
+        # the passive-drying gate above releases, but if we have not yet seen the
+        # real end-of-cycle pump-out (_end_spike_seen=False) we must keep the
+        # cycle in ENDING for a little longer — otherwise the fallback timeout
+        # would close it at ~85% of expected, BEFORE the pump-out fires, and the
+        # pump-out would then register as a brand-new cycle.  Defer until either
+        # the spike fires (which sets _end_spike_seen=True via the gated logic
+        # in STATE_ENDING) or we cross the smart-termination wait window
+        # (expected + DISHWASHER_END_SPIKE_WAIT_SECONDS), at which point Smart
+        # Termination's own wait branch takes over and finalises the cycle.
+        # Shares the same constant so the two paths cannot drift.
+        if (
+            self._config.device_type == "dishwasher"
+            and self._matched_profile
+            and self._expected_duration > 0
+            and not self._end_spike_seen
+            and duration
+            < (self._expected_duration + DISHWASHER_END_SPIKE_WAIT_SECONDS)
+        ):
+            self._logger.debug(
+                "Deferring cycle finish: dishwasher waiting for end-of-cycle "
+                "pump-out (%.0fs < expected %.0fs + %.0fs wait, profile: %s)",
+                duration,
+                self._expected_duration,
+                DISHWASHER_END_SPIKE_WAIT_SECONDS,
+                self._matched_profile,
             )
             return True
 
@@ -1268,8 +1387,30 @@ class CycleDetector:
             self._time_above_threshold = snapshot.get("time_above", 0.0)
             self._time_below_threshold = snapshot.get("time_below", 0.0)
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
-            self._matched_profile = snapshot.get("matched_profile")
-            self._expected_duration = snapshot.get("expected_duration", 0.0)
+            # Sanitize via the same helper as update_match so the class
+            # invariant on _expected_duration holds across restarts and the
+            # gates in STATE_ENDING / _should_defer_finish can trust the value.
+            # If sanitization rejects the snapshot's expected_duration, also
+            # clear the matched_profile so we don't restore a half-valid state
+            # where Smart Termination can fire on _expected_duration == 0.0.
+            restored_match = snapshot.get("matched_profile")
+            sanitized_expected = self._sanitize_expected_duration(
+                snapshot.get("expected_duration", 0.0),
+                source="restore_state_snapshot",
+            )
+            if (
+                restored_match is not None
+                and sanitized_expected == self._SANITIZE_INVALID_SENTINEL
+            ):
+                self._logger.debug(
+                    "restore_state_snapshot: dropping matched_profile %r "
+                    "because expected_duration sanitized to invalid sentinel",
+                    restored_match,
+                )
+                self._matched_profile = None
+            else:
+                self._matched_profile = restored_match
+            self._expected_duration = sanitized_expected
             self._end_spike_seen = snapshot.get("end_spike_seen", False)
 
             # Restore state enter time and recompute time_in_state from it

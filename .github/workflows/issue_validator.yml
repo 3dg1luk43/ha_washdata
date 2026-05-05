@@ -53,6 +53,44 @@ jobs:
               body: `✅ Cleared by @${context.payload.comment.user.login} - issue marked as fine and queued for review.`,
             });
 
+  handle-reporter-response:
+    runs-on: ubuntu-latest
+    # When the reporter responds via a comment (instead of editing the issue body),
+    # transition the issue from "more info required" to "awaiting maintainer review"
+    # so the auto-closer doesn't close it as unanswered. The validator can't re-check
+    # comment content (it inspects body fields), so a maintainer reviews instead.
+    if: >
+      github.event_name == 'issue_comment' &&
+      github.event.comment.user.type != 'Bot' &&
+      github.event.comment.user.login == github.event.issue.user.login &&
+      !startsWith(github.event.comment.body, '/fine') &&
+      contains(github.event.issue.labels.*.name, 'more info required')
+
+    steps:
+      - name: Swap labels on reporter response
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = context.payload.issue.number;
+            const incompleteLabel = 'more info required';
+            const reviewLabel = 'awaiting maintainer review';
+
+            await github.rest.issues.removeLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              name: incompleteLabel,
+            }).catch(e => console.log(`Could not remove ${incompleteLabel}: ${e.message}`));
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              labels: [reviewLabel],
+            });
+
+            console.log(`#${issueNumber}: reporter responded via comment, swapped to "${reviewLabel}".`);
+
   validate-bug-report:
     runs-on: ubuntu-latest
     if: >
