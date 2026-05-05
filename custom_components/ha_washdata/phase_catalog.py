@@ -14,6 +14,7 @@ from .const import (
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_EV,
     DEVICE_TYPE_HEAT_PUMP,
+    DEVICE_TYPE_OVEN,
     DEVICE_TYPE_WASHER_DRYER,
     DEVICE_TYPE_WASHING_MACHINE,
 )
@@ -317,6 +318,33 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
         {
             "name": "Keep Warm",
             "description": "Low-heat holding stage to keep the loaf warm after baking.",
+            "is_default": True,
+        },
+    ],
+    DEVICE_TYPE_OVEN: [
+        {
+            "name": "Pre-Heat",
+            "description": "Heating element runs continuously to bring the cavity up to the target temperature.",
+            "is_default": True,
+        },
+        {
+            "name": "Heating",
+            "description": "Active heater bursts during cooking when the thermostat calls for heat.",
+            "is_default": True,
+        },
+        {
+            "name": "Maintaining Temp",
+            "description": "Thermostat-regulated holding period: heater cycles on and off to keep the set temperature.",
+            "is_default": True,
+        },
+        {
+            "name": "Cool Down",
+            "description": "Heater off after the cycle ends; residual heat dissipates and the cooling fan may continue to run.",
+            "is_default": True,
+        },
+        {
+            "name": "Pyrolytic Clean",
+            "description": "High-temperature self-clean phase that burns off residue. Optional and only active during pyrolytic programs.",
             "is_default": True,
         },
     ],

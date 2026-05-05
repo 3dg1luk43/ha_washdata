@@ -415,12 +415,26 @@ class CycleDetector:
             self._matched_profile = None
 
         elif match_name:
-            self._matched_profile = match_name
-            # Sub-state can be set from phase_name if available
-            if phase_name:
-                self._sub_state = phase_name
-            # Wrapper provides it
-            self._expected_duration = expected_duration
+            # If sanitization rejected the expected_duration, treat the match
+            # as invalid: setting _matched_profile while _expected_duration is
+            # the 0.0 sentinel would let Smart Termination fire on the
+            # `current_duration >= 0` always-true comparison.  Drop both so
+            # the cycle stays in detecting/unmatched mode.
+            if expected_duration == self._SANITIZE_INVALID_SENTINEL:
+                self._logger.debug(
+                    "update_match: match %r ignored — expected_duration "
+                    "sanitized to invalid sentinel; treating as unmatched",
+                    match_name,
+                )
+                self._matched_profile = None
+                self._expected_duration = self._SANITIZE_INVALID_SENTINEL
+            else:
+                self._matched_profile = match_name
+                # Sub-state can be set from phase_name if available
+                if phase_name:
+                    self._sub_state = phase_name
+                # Wrapper provides it
+                self._expected_duration = expected_duration
 
     def set_verified_pause(self, verified: bool) -> None:
         """Set or clear the verified pause flag."""
@@ -1373,14 +1387,30 @@ class CycleDetector:
             self._time_above_threshold = snapshot.get("time_above", 0.0)
             self._time_below_threshold = snapshot.get("time_below", 0.0)
             self._cycle_max_power = snapshot.get("cycle_max_power", 0.0)
-            self._matched_profile = snapshot.get("matched_profile")
             # Sanitize via the same helper as update_match so the class
             # invariant on _expected_duration holds across restarts and the
             # gates in STATE_ENDING / _should_defer_finish can trust the value.
-            self._expected_duration = self._sanitize_expected_duration(
+            # If sanitization rejects the snapshot's expected_duration, also
+            # clear the matched_profile so we don't restore a half-valid state
+            # where Smart Termination can fire on _expected_duration == 0.0.
+            restored_match = snapshot.get("matched_profile")
+            sanitized_expected = self._sanitize_expected_duration(
                 snapshot.get("expected_duration", 0.0),
                 source="restore_state_snapshot",
             )
+            if (
+                restored_match is not None
+                and sanitized_expected == self._SANITIZE_INVALID_SENTINEL
+            ):
+                self._logger.debug(
+                    "restore_state_snapshot: dropping matched_profile %r "
+                    "because expected_duration sanitized to invalid sentinel",
+                    restored_match,
+                )
+                self._matched_profile = None
+            else:
+                self._matched_profile = restored_match
+            self._expected_duration = sanitized_expected
             self._end_spike_seen = snapshot.get("end_spike_seen", False)
 
             # Restore state enter time and recompute time_in_state from it

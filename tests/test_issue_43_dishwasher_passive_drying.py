@@ -201,6 +201,94 @@ class TestDishwasherDeferralProtection:
         )
 
 
+class TestMatchedProfileExpectedDurationInvariant:
+    """Class invariant: _matched_profile must only be set when
+    _expected_duration is a valid (finite, > 0, ≤ 6h) value.  Setting
+    _matched_profile while _expected_duration is the 0.0 sentinel would let
+    Smart Termination fire on the always-true `current_duration >= 0`
+    comparison.
+    """
+
+    def _make_det(self) -> CycleDetector:
+        cfg = _make_dishwasher_config()
+        det, _ = _make_detector(cfg)
+        return det
+
+    def test_update_match_drops_match_when_expected_duration_invalid(self) -> None:
+        """A match with invalid expected_duration (NaN, ≤0, >6h, garbage) must
+        not set _matched_profile — otherwise Smart Termination's
+        `current_duration >= expected_duration * smart_ratio` reduces to
+        `current_duration >= 0` and fires immediately."""
+        for raw_invalid in (0.0, -1.0, float("nan"), float("inf"), 6 * 3600 + 1, "not a number"):
+            det = self._make_det()
+            det.update_match(("ECO", 0.85, raw_invalid, None, False))
+            assert det._matched_profile is None, (
+                f"raw_expected_duration={raw_invalid!r}: _matched_profile must "
+                f"be None when sanitizer rejects the value, got "
+                f"{det._matched_profile!r}"
+            )
+            assert det._expected_duration == 0.0, (
+                f"raw_expected_duration={raw_invalid!r}: _expected_duration "
+                f"must be the 0.0 sentinel when sanitizer rejects the value"
+            )
+
+    def test_update_match_keeps_match_when_expected_duration_valid(self) -> None:
+        """A normal valid match must still set both fields together."""
+        det = self._make_det()
+        det.update_match(("ECO", 0.85, 14112.0, None, False))
+        assert det._matched_profile == "ECO"
+        assert det._expected_duration == 14112.0
+
+    def test_restore_snapshot_drops_match_when_expected_duration_invalid(self) -> None:
+        """Snapshot restore must apply the same invariant — a corrupted or
+        stale snapshot with matched_profile + bad expected_duration must not
+        come back as a half-valid match."""
+        det = self._make_det()
+        snapshot = {
+            "state": "ending",
+            "sub_state": "Drying",
+            "current_cycle_start": "2026-04-27T18:08:35+00:00",
+            "power_readings": [],
+            "accumulated_energy_wh": 0.0,
+            "time_above": 0.0,
+            "time_below": 0.0,
+            "cycle_max_power": 0.0,
+            "last_active_time": None,
+            "expected_duration": 99999.0,  # > 6h, will be rejected
+            "matched_profile": "ECO",
+            "state_enter_time": None,
+            "end_spike_seen": False,
+        }
+        det.restore_state_snapshot(snapshot)
+        assert det._matched_profile is None, (
+            "matched_profile must be dropped when restored expected_duration "
+            "fails sanitization (otherwise Smart Termination fires immediately)"
+        )
+        assert det._expected_duration == 0.0
+
+    def test_restore_snapshot_keeps_match_when_expected_duration_valid(self) -> None:
+        """A clean snapshot restore preserves both fields."""
+        det = self._make_det()
+        snapshot = {
+            "state": "ending",
+            "sub_state": "Drying",
+            "current_cycle_start": "2026-04-27T18:08:35+00:00",
+            "power_readings": [],
+            "accumulated_energy_wh": 0.0,
+            "time_above": 0.0,
+            "time_below": 0.0,
+            "cycle_max_power": 0.0,
+            "last_active_time": None,
+            "expected_duration": 14112.0,
+            "matched_profile": "ECO",
+            "state_enter_time": None,
+            "end_spike_seen": False,
+        }
+        det.restore_state_snapshot(snapshot)
+        assert det._matched_profile == "ECO"
+        assert det._expected_duration == 14112.0
+
+
 # ---------------------------------------------------------------------------
 # Integration test: power trace simulation
 # ---------------------------------------------------------------------------

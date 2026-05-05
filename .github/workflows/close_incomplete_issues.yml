@@ -59,6 +59,39 @@ jobs:
               const flaggedAt = new Date(firstBotFlag.created_at);
               console.log(`#${issue.number}: flagged at ${flaggedAt.toISOString()}`);
 
+              // Backstop for the comment-trigger handler in issue_validator.yml:
+              // if the reporter responded via a comment after the bot flag (e.g. they
+              // posted debug logs as an attachment instead of editing the issue body),
+              // do not close. Swap to the maintainer-review label so a human triages.
+              const reporterRepliesAfterFlag = comments.filter(
+                c => c.user.type !== 'Bot' &&
+                     c.user.login === issue.user.login &&
+                     new Date(c.created_at) > flaggedAt
+              );
+
+              if (reporterRepliesAfterFlag.length > 0) {
+                console.log(
+                  `#${issue.number}: reporter posted ${reporterRepliesAfterFlag.length} ` +
+                  `reply/replies after the bot flag, marking for maintainer review instead of closing.`
+                );
+
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  name: LABEL,
+                }).catch(e => console.log(`Could not remove ${LABEL}: ${e.message}`));
+
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  labels: ['awaiting maintainer review'],
+                });
+
+                continue;
+              }
+
               if (flaggedAt < closeCutoff) {
                 // ── 5+ days with no fix → close ────────────────────────────────
                 console.log(`#${issue.number}: past close deadline, closing.`);

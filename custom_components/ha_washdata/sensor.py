@@ -266,6 +266,8 @@ class WasherStateSensor(WasherBaseSensor):
             return "mdi:heat-pump"
         if dtype == "pump":
             return "mdi:water-pump"
+        if dtype == "oven":
+            return "mdi:stove"
         return "mdi:washing-machine"
 
     @property
