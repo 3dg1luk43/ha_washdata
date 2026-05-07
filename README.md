@@ -7,7 +7,7 @@
 
 # WashData Integration
 
-A Home Assistant custom component to monitor washing machines via smart sockets, learn power profiles, and estimate completion time using shape-correlation matching.
+A Home Assistant custom component to monitor appliances via smart power sockets, learn power profiles, and estimate completion time using shape-correlation matching.
 
 > [!CAUTION]  
 > **ELECTRICAL SAFETY WARNING**: Using smart plugs such as Shelly or Sonoff with high-amperage appliances (washing machines, dryers, dishwashers) carries significant risk.  
