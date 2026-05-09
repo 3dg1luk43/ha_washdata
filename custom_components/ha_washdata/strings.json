@@ -1098,6 +1098,15 @@
       "wash_phase": {
         "name": "Phase"
       },
+      "vacuum_phases": {
+        "name": "Vacuum Phases",
+        "state": {
+          "navigation": "Navigation",
+          "cleaning": "Cleaning",
+          "returning": "Returning",
+          "charging": "Charging"
+        }
+      },
       "profile_cycle_count": {
         "name": "Profile {profile_name} Count",
         "unit_of_measurement": "cycles"

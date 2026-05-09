@@ -229,6 +229,23 @@ def _pn_create(
         return
 
 
+def infer_vacuum_phase(current_power: float, is_waiting_low_power: bool) -> str | None:
+    """Infer vacuum phase based on power and idle state.
+    
+    Args:
+        current_power: Current power draw in watts
+        is_waiting_low_power: Whether detector is idle (waiting for power to drop)
+        
+    Returns:
+        Phase name ("Charging" or "Returning") or None if heuristic doesn't apply
+    """
+    if current_power > 50:
+        return "Charging"
+    if is_waiting_low_power:
+        return "Returning"
+    return None
+
+
 class WashDataManager:
     """Manages a single washing machine instance."""
 
@@ -959,10 +976,7 @@ class WashDataManager:
                     elif self.detector.is_waiting_low_power():
                         phase_name = "Maintenance"
                 elif self.device_type == "vacuum":
-                    if current_power > 50:
-                        phase_name = "Charging"
-                    elif self.detector.is_waiting_low_power():
-                        phase_name = "Docking"
+                    phase_name = infer_vacuum_phase(current_power, self.detector.is_waiting_low_power())
 
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)

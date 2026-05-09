@@ -184,14 +184,25 @@ def test_vacuum_cycle_detection():
     assert callbacks["on_cycle_end"].called, "Cycle end should fire"
 
 def test_vacuum_phase_heuristics():
-    """Verify vacuum phase hints are applied in manager."""
-    # This test validates that manager.py applies "Charging" phase for vacuum
-    # when power > 50W, and "Docking" when idle.
-    # Full integration test via manager mock is covered in test_manager_*.py
+    """Test vacuum phase heuristic function with actual power/idle states."""
+    from custom_components.ha_washdata.manager import infer_vacuum_phase
     
-    # Constants check (unit test of heuristic logic)
-    vacuum_high_power = 60  # > 50W threshold → "Charging"
-    vacuum_low_power = 5    # < 50W + idle → "Docking"
+    # Test 1: High power (>50W) → "Charging"
+    phase = infer_vacuum_phase(current_power=60, is_waiting_low_power=False)
+    assert phase == "Charging", f"High power should return 'Charging', got {phase}"
     
-    assert vacuum_high_power > 50, "High power should trigger 'Charging' phase"
-    assert vacuum_low_power <= 50, "Low power should trigger 'Docking' phase"
+    # Test 2: Low power + idle → "Returning"
+    phase = infer_vacuum_phase(current_power=5, is_waiting_low_power=True)
+    assert phase == "Returning", f"Low power + idle should return 'Returning', got {phase}"
+    
+    # Test 3: Low power but NOT idle → None (no heuristic applies)
+    phase = infer_vacuum_phase(current_power=5, is_waiting_low_power=False)
+    assert phase is None, f"Low power without idle should return None, got {phase}"
+    
+    # Test 4: Boundary condition (exactly 50W) → no heuristic
+    phase = infer_vacuum_phase(current_power=50, is_waiting_low_power=False)
+    assert phase is None, f"Boundary power (50W) should return None, got {phase}"
+    
+    # Test 5: Just above boundary → "Charging"
+    phase = infer_vacuum_phase(current_power=51, is_waiting_low_power=False)
+    assert phase == "Charging", f"51W power should return 'Charging', got {phase}"
