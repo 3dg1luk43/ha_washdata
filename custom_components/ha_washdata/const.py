@@ -229,6 +229,7 @@ DEVICE_TYPE_HEAT_PUMP = "heat_pump"
 DEVICE_TYPE_BREAD_MAKER = "bread_maker"
 DEVICE_TYPE_PUMP = "pump"
 DEVICE_TYPE_OVEN = "oven"
+DEVICE_TYPE_VACUUM = "vacuum"
 
 DEVICE_TYPES = {
     DEVICE_TYPE_WASHING_MACHINE: "Washing Machine",
@@ -242,6 +243,7 @@ DEVICE_TYPES = {
     DEVICE_TYPE_BREAD_MAKER: "Bread Maker",
     DEVICE_TYPE_PUMP: "Pump / Sump Pump",
     DEVICE_TYPE_OVEN: "Oven",
+    DEVICE_TYPE_VACUUM: "Vacuum Robot",
 }
 
 # Device Type Defaults
@@ -284,7 +286,8 @@ DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_HEAT_PUMP: 600,  # 10 min (Defrosting pauses)
     DEVICE_TYPE_BREAD_MAKER: 300,  # 5 min (Keep-warm phase after baking)
     DEVICE_TYPE_PUMP: 20,  # 20 s (Pumps cut off sharply; no warm-down phase)
-    DEVICE_TYPE_OVEN: 600,  # 10 min (Thermostat off-cycles can be long while holding temp)
+    DEVICE_TYPE_OVEN: 600,  # 10 min
+    DEVICE_TYPE_VACUUM: 600,  # 10 min (Thermostat off-cycles can be long while holding temp)
 }
 
 # Device-specific progress smoothing thresholds (percentage points)
@@ -317,7 +320,8 @@ DEVICE_COMPLETION_THRESHOLDS = {
     DEVICE_TYPE_HEAT_PUMP: 900,  # 15 min minimum
     DEVICE_TYPE_BREAD_MAKER: 1800,  # 30 min (even express bread takes 30+ min)
     DEVICE_TYPE_PUMP: 5,  # 5 s - pump cycles can be under 30 seconds
-    DEVICE_TYPE_OVEN: 600,  # 10 min (covers quick reheats and ignores brief preheating tests)
+    DEVICE_TYPE_OVEN: 600,  # 10 min
+    DEVICE_TYPE_VACUUM: 600,  # 10 min (covers quick reheats and ignores brief preheating tests)
 }
 
 # Default min_off_gap by device type (seconds)
@@ -337,7 +341,8 @@ DEFAULT_MIN_OFF_GAP_BY_DEVICE = {
     DEVICE_TYPE_HEAT_PUMP: 1800,  # 30 min (Defrost cycle / resting gap)
     DEVICE_TYPE_BREAD_MAKER: 600,  # 10 min (Resting between knead/prove keeps same cycle together)
     DEVICE_TYPE_PUMP: 60,  # 1 min (Pumps can cycle every 3-5 min in heavy rain)
-    DEVICE_TYPE_OVEN: 900,  # 15 min (Bridge thermostat off-windows so one bake stays a single cycle)
+    DEVICE_TYPE_OVEN: 900,  # 15 min
+    DEVICE_TYPE_VACUUM: 600,  # 10 min (dock charging cycles) (Bridge thermostat off-windows so one bake stays a single cycle)
 }
 DEFAULT_MIN_OFF_GAP = 60  # Scalar fallback
 

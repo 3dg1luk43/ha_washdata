@@ -958,6 +958,11 @@ class WashDataManager:
                         phase_name = "Charging"
                     elif self.detector.is_waiting_low_power():
                         phase_name = "Maintenance"
+                elif self.device_type == "vacuum":
+                    if current_power > 50:
+                        phase_name = "Charging"
+                    elif self.detector.is_waiting_low_power():
+                        phase_name = "Docking"
 
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)

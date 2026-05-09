@@ -348,6 +348,28 @@ DEFAULT_PHASES_BY_DEVICE: dict[str, list[PhaseItem]] = {
             "is_default": True,
         },
     ],
+    DEVICE_TYPE_VACUUM: [
+        {
+            "name": "Navigation",
+            "description": "Robot vacuum navigating and cleaning floors.",
+            "is_default": True,
+        },
+        {
+            "name": "Cleaning",
+            "description": "Active cleaning with brush and suction motor running.",
+            "is_default": True,
+        },
+        {
+            "name": "Returning",
+            "description": "Robot returning to dock for charging.",
+            "is_default": True,
+        },
+        {
+            "name": "Charging",
+            "description": "Robot docked and charging battery.",
+            "is_default": True,
+        },
+    ],
 }
 
 
