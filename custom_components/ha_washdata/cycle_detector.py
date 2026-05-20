@@ -65,9 +65,9 @@ class CycleDetectorConfig:
     abrupt_high_load_factor: float = 5.0
     completion_min_seconds: int = 600
     start_duration_threshold: float = 5.0
-    start_energy_threshold: float = DEFAULT_START_ENERGY_THRESHOLD
+    start_energy_threshold: float = 0.005
     end_energy_threshold: float = 0.05  # 50 Wh threshold for "still active"
-    running_dead_zone: int = DEFAULT_RUNNING_DEAD_ZONE
+    running_dead_zone: int = 0
     end_repeat_count: int = 1
     min_off_gap: int = 60
     start_threshold_w: float = 2.0
