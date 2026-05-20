@@ -1593,6 +1593,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             label = f"{start} - {duration_min}m - {prof}"
             options.append(selector.SelectOptionDict(value=c["id"], label=label))
 
+        info_text_key = {
+            "split": "editor_select_info_split",
+            "merge": "editor_select_info_merge",
+            "delete": "editor_select_info_delete",
+        }.get(self._editor_action or "", "editor_select_info")
+
         return self.async_show_form(
             step_id="editor_select",
             data_schema=vol.Schema(
@@ -1608,21 +1614,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             errors=errors,
             description_placeholders={
-                "info_text": await self._options_text(
-                    {
-                        "split": "editor_select_info_split",
-                        "merge": "editor_select_info_merge",
-                        "delete": "editor_select_info_delete",
-                    }.get(self._editor_action or "", "editor_select_info"),
-                    {
-                        "split": "Select 1 cycle to split.",
-                        "merge": "Select 2+ cycles to merge.",
-                        "delete": "Select 1+ cycle(s) to delete.",
-                    }.get(
-                        self._editor_action or "",
-                        "Select 1 cycle to split, or 2+ cycles to merge.",
-                    ),
-                )
+                "info_text": await self._options_text(info_text_key, "")
             }
         )
 
