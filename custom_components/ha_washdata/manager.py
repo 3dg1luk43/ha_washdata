@@ -86,9 +86,7 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_DELAY_START_DETECT_ENABLED,
-    CONF_DELAY_DRAIN_MIN_POWER,
-    CONF_DELAY_DRAIN_MAX_POWER,
-    CONF_DELAY_DRAIN_MAX_DURATION,
+    CONF_DELAY_CONFIRM_SECONDS,
     CONF_DELAY_TIMEOUT_HOURS,
     CONF_PUMP_STUCK_DURATION,
     DEFAULT_PUMP_STUCK_DURATION,
@@ -129,9 +127,7 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
     DEFAULT_DELAY_START_DETECT_ENABLED,
-    DEFAULT_DELAY_DRAIN_MIN_POWER,
-    DEFAULT_DELAY_DRAIN_MAX_POWER,
-    DEFAULT_DELAY_DRAIN_MAX_DURATION,
+    DEFAULT_DELAY_CONFIRM_SECONDS,
     DEFAULT_DELAY_TIMEOUT_HOURS,
     DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO,
     DEFAULT_MAX_PAST_CYCLES,
@@ -539,19 +535,9 @@ class WashDataManager:
                     CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
                 )
             ),
-            delay_drain_min_power=float(
+            delay_confirm_seconds=float(
                 config_entry.options.get(
-                    CONF_DELAY_DRAIN_MIN_POWER, DEFAULT_DELAY_DRAIN_MIN_POWER
-                )
-            ),
-            delay_drain_max_power=float(
-                config_entry.options.get(
-                    CONF_DELAY_DRAIN_MAX_POWER, DEFAULT_DELAY_DRAIN_MAX_POWER
-                )
-            ),
-            delay_drain_max_duration=float(
-                config_entry.options.get(
-                    CONF_DELAY_DRAIN_MAX_DURATION, DEFAULT_DELAY_DRAIN_MAX_DURATION
+                    CONF_DELAY_CONFIRM_SECONDS, DEFAULT_DELAY_CONFIRM_SECONDS
                 )
             ),
             delay_timeout_seconds=float(
@@ -1544,19 +1530,9 @@ class WashDataManager:
                 CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
             )
         )
-        new_delay_drain_min_power = float(
+        new_delay_confirm_seconds = float(
             config_entry.options.get(
-                CONF_DELAY_DRAIN_MIN_POWER, DEFAULT_DELAY_DRAIN_MIN_POWER
-            )
-        )
-        new_delay_drain_max_power = float(
-            config_entry.options.get(
-                CONF_DELAY_DRAIN_MAX_POWER, DEFAULT_DELAY_DRAIN_MAX_POWER
-            )
-        )
-        new_delay_drain_max_duration = float(
-            config_entry.options.get(
-                CONF_DELAY_DRAIN_MAX_DURATION, DEFAULT_DELAY_DRAIN_MAX_DURATION
+                CONF_DELAY_CONFIRM_SECONDS, DEFAULT_DELAY_CONFIRM_SECONDS
             )
         )
         new_delay_timeout_seconds = float(
@@ -1586,9 +1562,7 @@ class WashDataManager:
         self.detector.config.anti_wrinkle_max_duration = new_anti_wrinkle_max_duration
         self.detector.config.anti_wrinkle_exit_power = new_anti_wrinkle_exit_power
         self.detector.config.delay_detect_enabled = new_delay_detect_enabled
-        self.detector.config.delay_drain_min_power = new_delay_drain_min_power
-        self.detector.config.delay_drain_max_power = new_delay_drain_max_power
-        self.detector.config.delay_drain_max_duration = new_delay_drain_max_duration
+        self.detector.config.delay_confirm_seconds = new_delay_confirm_seconds
         self.detector.config.delay_timeout_seconds = new_delay_timeout_seconds
 
         # Pump Monitor setting
@@ -1789,6 +1763,14 @@ class WashDataManager:
             self._remove_maintenance_scheduler()
 
         self.diag_buffer.uninstall()
+
+        # Dismiss any active live/progress notification so it doesn't linger on
+        # mobile devices across HA restarts or integration unloads with a stale
+        # (and eventually negative) chronometer.
+        try:
+            self._clear_live_progress_notification()
+        except Exception:  # noqa: BLE001
+            self._logger.debug("Failed to clear live notification on shutdown", exc_info=True)
 
         # Save active state before shutdown
         if self.detector.state in {STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING}:
@@ -3542,7 +3524,12 @@ class WashDataManager:
             )
         ]
 
-        if self._live_notification_sent_count <= 0 and not self._live_waiting_notification_sent:
+        # Always emit the clear when the user has any live channel configured.
+        # The in-memory sent-count is unreliable after an HA restart (it resets
+        # to 0 while the notification still lives on the phone), and a no-op
+        # clear for a non-existent tag is harmless on the mobile_app side.
+        if not self._notify_live_services and not self._notify_actions:
+            self._reset_live_notification_state()
             return
 
         # Invoke notification actions to clear live notification in action-based setups

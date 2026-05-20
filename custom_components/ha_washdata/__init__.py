@@ -116,7 +116,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         return False
 
-    if version == 3 and minor_version >= 3:
+    if version == 3 and minor_version >= 4:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -213,15 +213,25 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     for k in keys_to_remove:
         data.pop(k, None)
 
+    # 3.4: drain-spike delayed-start model replaced by band-based DELAY_WAIT.
+    # Strip the obsolete drain knobs so they don't linger in options and
+    # confuse anyone inspecting entry.options.
+    for k in (
+        "delay_drain_min_power",
+        "delay_drain_max_power",
+        "delay_drain_max_duration",
+    ):
+        options.pop(k, None)
+
     hass.config_entries.async_update_entry(
         entry,
         data=data,
         options=options,
         version=3,
-        minor_version=3,
+        minor_version=4,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.3", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.4", version, minor_version
     )
     return True
 

@@ -78,9 +78,11 @@ class CycleDetectorConfig:
     anti_wrinkle_max_duration: float = 60.0
     anti_wrinkle_exit_power: float = 0.8
     delay_detect_enabled: bool = False
-    delay_drain_min_power: float = 10.0
-    delay_drain_max_power: float = 80.0
-    delay_drain_max_duration: float = 60.0
+    # Sustained seconds power must stay in the standby band (between
+    # stop_threshold_w and start_threshold_w) before DELAY_WAIT engages.
+    # Tuned to filter out brief menu-navigation peaks at the start of a
+    # delayed program.
+    delay_confirm_seconds: float = 60.0
     delay_timeout_seconds: float = 28800.0
 
 
@@ -221,10 +223,29 @@ class CycleDetector:
         self._anti_wrinkle_idle_time: float = 0.0  # Track time spent below exit_power while in ANTI_WRINKLE
         self._anti_wrinkle_idle_timeout: float = 120.0
 
-        # Delayed-start drain candidate tracking
-        self._delay_drain_start: datetime | None = None
-        self._delay_drain_peak: float = 0.0
+        # Delayed-start band tracking.
+        # _delay_band_seconds accumulates time spent with power inside the
+        # standby band [stop_threshold_w, start_threshold_w) while still in
+        # STATE_OFF. Once it crosses delay_confirm_seconds we hand over to
+        # STATE_DELAY_WAIT.
+        self._delay_band_seconds: float = 0.0
+        # _delay_band_peak is purely diagnostic — surfaced in the log line
+        # when the transition fires so users can see what their machine's
+        # actual standby plateau looked like.
+        self._delay_band_peak: float = 0.0
+        # _delay_wait_true_off_seconds tracks sustained "true off" (power
+        # below stop_threshold_w) inside DELAY_WAIT, so we can drop back to
+        # OFF only when the machine has clearly been switched off rather
+        # than briefly dipped.
         self._delay_wait_true_off_seconds: float = 0.0
+        # _delay_wait_high_start anchors the first high-power reading
+        # observed inside DELAY_WAIT.  We only transition to STARTING
+        # when the high-power streak has lasted at least
+        # start_duration_threshold real seconds — measured between two
+        # consecutive high readings, not from the dt to the previous
+        # (low) reading.  This prevents a single isolated spike from
+        # tripping STARTING just because the sampling interval is long.
+        self._delay_wait_high_start: datetime | None = None
 
     @property
     def _dynamic_pause_threshold(self) -> float:
@@ -463,9 +484,10 @@ class CycleDetector:
         # Reset idle time tracker for anti-wrinkle
         self._anti_wrinkle_idle_time = 0.0
         # Reset delayed-start tracking
-        self._delay_drain_start = None
-        self._delay_drain_peak = 0.0
+        self._delay_band_seconds = 0.0
+        self._delay_band_peak = 0.0
         self._delay_wait_true_off_seconds = 0.0
+        self._delay_wait_high_start = None
 
     @property
     def state(self) -> str:
@@ -660,44 +682,62 @@ class CycleDetector:
                     self._transition_to(STATE_OFF, timestamp)
                 return
 
-            # Delayed-start drain detection (only from STATE_OFF, not terminal states)
+            # Delayed-start "standby band" detection (only from STATE_OFF).
+            #
+            # A machine in delayed-start mode sits in a power band between
+            # the off-noise floor (stop_threshold_w) and the cycle-start
+            # threshold (start_threshold_w) — display, electronics, the
+            # occasional anti-damp tumble — for minutes to hours.  We
+            # accumulate dt while power is in that band; once it crosses
+            # delay_confirm_seconds we transition to DELAY_WAIT.
+            #
+            # Brief high-power excursions (menu navigation, button presses)
+            # don't break the candidate: they fall through to the normal
+            # start logic below, and unless they sustain for
+            # start_duration_threshold they get aborted as a false start
+            # and we re-enter the band on the next reading.  Excursions
+            # below stop_threshold_w (machine momentarily idle on the noise
+            # floor) DO reset the candidate, because that's the same
+            # signal we use to define "off".
             if (
                 self._config.delay_detect_enabled
                 and self._state == STATE_OFF
                 and not started_from_anti_wrinkle
+                and self._config.stop_threshold_w < self._config.start_threshold_w
             ):
-                drain_min = self._config.delay_drain_min_power
-                effective_drain_max = min(
-                    self._config.delay_drain_max_power, self._config.start_threshold_w
+                in_band = (
+                    self._config.stop_threshold_w
+                    <= power
+                    < self._config.start_threshold_w
                 )
-                if drain_min < effective_drain_max and drain_min <= power < effective_drain_max:
-                    # Power is in the drain-spike window: track it
-                    if self._delay_drain_start is None:
-                        self._delay_drain_start = timestamp
-                        self._delay_drain_peak = power
-                    else:
-                        self._delay_drain_peak = max(self._delay_drain_peak, power)
-                    # Don't fall through to the normal start logic
-                    return
-                elif power < drain_min and self._delay_drain_start is not None:
-                    # Power dropped out of drain window: check if spike was short enough
-                    drain_duration = (timestamp - self._delay_drain_start).total_seconds()
-                    if drain_duration <= self._config.delay_drain_max_duration:
+                if in_band:
+                    self._delay_band_seconds += dt
+                    self._delay_band_peak = max(self._delay_band_peak, power)
+                    if self._delay_band_seconds >= self._config.delay_confirm_seconds:
                         self._logger.info(
-                            "Delayed start detected: drain spike %.1fW for %.0fs → DELAY_WAIT",
-                            self._delay_drain_peak,
-                            drain_duration,
+                            "Delayed start detected: standby band held for %.0fs "
+                            "(peak %.1fW, current %.1fW) → DELAY_WAIT",
+                            self._delay_band_seconds,
+                            self._delay_band_peak,
+                            power,
                         )
                         self._transition_to(STATE_DELAY_WAIT, timestamp)
                         return
-                    else:
-                        # Drain lasted too long — not a real drain, reset
-                        self._delay_drain_start = None
-                        self._delay_drain_peak = 0.0
-                elif power >= effective_drain_max:
-                    # Power shot above drain ceiling → real start, clear candidate
-                    self._delay_drain_start = None
-                    self._delay_drain_peak = 0.0
+                    # Stay in OFF while we accumulate evidence — do not
+                    # fall through to the high-power start logic, the
+                    # reading is below threshold by definition.
+                    return
+                elif power < self._config.stop_threshold_w:
+                    # Machine genuinely idle: forget any band history.
+                    self._delay_band_seconds = 0.0
+                    self._delay_band_peak = 0.0
+                # power >= start_threshold_w: fall through to the normal
+                # start path below.  If it turns out to be a brief peak,
+                # STATE_STARTING will abort it as a false start and we'll
+                # re-enter the band check on the next sample without
+                # losing accumulated time (we don't reset on a high
+                # excursion — most users' "menu navigation" peaks last
+                # less than a sample interval anyway).
 
             if is_high and not started_from_anti_wrinkle:
                 # Transition to STARTING
@@ -717,21 +757,47 @@ class CycleDetector:
 
         elif self._state == STATE_DELAY_WAIT:
             if power >= self._config.start_threshold_w:
-                # Real cycle started
-                self._logger.info(
-                    "Delayed start: cycle starting (power %.1fW ≥ %.1fW threshold)",
-                    power,
-                    self._config.start_threshold_w,
-                )
-                self._transition_to(STATE_STARTING, timestamp)
-                self._current_cycle_start = timestamp
-                self._power_readings = [(timestamp, power)]
-                self._energy_since_idle_wh = power * (dt / 3600.0) if dt > 0 else 0.0
-                self._cycle_max_power = power
-                self._abrupt_drop = False
+                # Power is in cycle-start territory.  Require at least
+                # two consecutive high readings spanning
+                # start_duration_threshold real seconds before committing
+                # to STARTING, so a single isolated spike (a heavy menu
+                # interaction, an anti-damp pulse briefly crossing the
+                # threshold) doesn't false-trigger.  We anchor on the
+                # FIRST high reading instead of accumulating dt, because
+                # dt to the previous (low) reading is unrelated to how
+                # long the high power has actually persisted.
+                self._delay_wait_true_off_seconds = 0.0
+                if self._delay_wait_high_start is None:
+                    self._delay_wait_high_start = timestamp
+                else:
+                    elapsed_high = (
+                        timestamp - self._delay_wait_high_start
+                    ).total_seconds()
+                    if elapsed_high >= self._config.start_duration_threshold:
+                        self._logger.info(
+                            "Delayed start: cycle starting (power %.1fW sustained ≥ %.1fW for %.0fs)",
+                            power,
+                            self._config.start_threshold_w,
+                            elapsed_high,
+                        )
+                        self._transition_to(STATE_STARTING, timestamp)
+                        self._current_cycle_start = (
+                            self._delay_wait_high_start or timestamp
+                        )
+                        self._power_readings = [(timestamp, power)]
+                        self._energy_since_idle_wh = (
+                            power * (dt / 3600.0) if dt > 0 else 0.0
+                        )
+                        self._cycle_max_power = power
+                        self._abrupt_drop = False
             else:
+                # Power dropped back below start threshold — clear the
+                # high-power streak anchor so the next high reading
+                # starts a fresh confirmation window.
+                self._delay_wait_high_start = None
                 if power < self._config.stop_threshold_w:
-                    # Power near zero: machine turned off, not just waiting
+                    # Power near zero: machine genuinely turned off, not
+                    # just waiting.
                     self._delay_wait_true_off_seconds += dt
                     if self._delay_wait_true_off_seconds >= 30.0:
                         self._logger.info(
@@ -1071,17 +1137,21 @@ class CycleDetector:
             self._energy_since_idle_wh = 0.0
             # Also reset idle time tracker when leaving ANTI_WRINKLE
             self._anti_wrinkle_idle_time = 0.0
-            self._delay_drain_start = None
-            self._delay_drain_peak = 0.0
+            self._delay_band_seconds = 0.0
+            self._delay_band_peak = 0.0
             self._delay_wait_true_off_seconds = 0.0
+            self._delay_wait_high_start = None
 
         # Reset end spike tracker when entering ENDING state
         if new_state == STATE_ENDING:
             self._end_spike_seen = False
         elif new_state == STATE_DELAY_WAIT:
-            self._delay_drain_start = None
-            self._delay_drain_peak = 0.0
+            # Band-accumulation tracker already played its role getting us
+            # here; reset it so a future OFF→band cycle starts fresh.
+            self._delay_band_seconds = 0.0
+            self._delay_band_peak = 0.0
             self._delay_wait_true_off_seconds = 0.0
+            self._delay_wait_high_start = None
             self._sub_state = "Waiting to Start"
         elif new_state == STATE_ANTI_WRINKLE:
             self._anti_wrinkle_candidate_start = None

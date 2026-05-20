@@ -74,9 +74,7 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_DELAY_START_DETECT_ENABLED,
-    CONF_DELAY_DRAIN_MIN_POWER,
-    CONF_DELAY_DRAIN_MAX_POWER,
-    CONF_DELAY_DRAIN_MAX_DURATION,
+    CONF_DELAY_CONFIRM_SECONDS,
     CONF_DELAY_TIMEOUT_HOURS,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
@@ -140,9 +138,7 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
     DEFAULT_DELAY_START_DETECT_ENABLED,
-    DEFAULT_DELAY_DRAIN_MIN_POWER,
-    DEFAULT_DELAY_DRAIN_MAX_POWER,
-    DEFAULT_DELAY_DRAIN_MAX_DURATION,
+    DEFAULT_DELAY_CONFIRM_SECONDS,
     DEFAULT_DELAY_TIMEOUT_HOURS,
     CONF_PUMP_STUCK_DURATION,
     DEFAULT_PUMP_STUCK_DURATION,
@@ -1044,7 +1040,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0.0,
-                    max=100.0,
+                    # Issue #238: dryers with anti-damp/anti-crease tumbling
+                    # can sit at 200–300 W during a delayed-start window.
+                    # The cap used to be 100 W which made the new
+                    # delayed-start band detection impossible to configure
+                    # on those machines.  500 W gives headroom for high-
+                    # standby appliances without inviting nonsense values.
+                    max=500.0,
                     step=0.5,
                     unit_of_measurement="W",
                     mode=selector.NumberSelectorMode.BOX,
@@ -1284,43 +1286,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 ),
             ): bool,
             vol.Optional(
-                CONF_DELAY_DRAIN_MIN_POWER,
+                CONF_DELAY_CONFIRM_SECONDS,
                 default=get_val(
-                    CONF_DELAY_DRAIN_MIN_POWER, DEFAULT_DELAY_DRAIN_MIN_POWER
+                    CONF_DELAY_CONFIRM_SECONDS, DEFAULT_DELAY_CONFIRM_SECONDS
                 ),
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
-                    min=1.0,
-                    max=500.0,
-                    step=1.0,
-                    unit_of_measurement="W",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Optional(
-                CONF_DELAY_DRAIN_MAX_POWER,
-                default=get_val(
-                    CONF_DELAY_DRAIN_MAX_POWER, DEFAULT_DELAY_DRAIN_MAX_POWER
-                ),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=1.0,
-                    max=2000.0,
-                    step=1.0,
-                    unit_of_measurement="W",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Optional(
-                CONF_DELAY_DRAIN_MAX_DURATION,
-                default=get_val(
-                    CONF_DELAY_DRAIN_MAX_DURATION, DEFAULT_DELAY_DRAIN_MAX_DURATION
-                ),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=5.0,
+                    min=10.0,
                     max=600.0,
-                    step=1.0,
+                    step=5.0,
                     unit_of_measurement="s",
                     mode=selector.NumberSelectorMode.BOX,
                 )

@@ -71,10 +71,14 @@ CONF_ANTI_WRINKLE_MAX_POWER = "anti_wrinkle_max_power"  # W threshold for anti-w
 CONF_ANTI_WRINKLE_MAX_DURATION = "anti_wrinkle_max_duration"  # Seconds to treat as anti-wrinkle
 CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true-off exit
 CONF_DELAY_START_DETECT_ENABLED = "delay_start_detect_enabled"  # Enable delayed-start detection
-CONF_DELAY_DRAIN_MIN_POWER = "delay_drain_min_power"  # Min W for a drain spike to be recognised
-CONF_DELAY_DRAIN_MAX_POWER = "delay_drain_max_power"  # Max W for a drain spike (above = real start)
-CONF_DELAY_DRAIN_MAX_DURATION = "delay_drain_max_duration"  # Max seconds a drain spike may last
+CONF_DELAY_CONFIRM_SECONDS = "delay_confirm_seconds"  # Seconds power must stay in standby band before DELAY_WAIT engages
 CONF_DELAY_TIMEOUT_HOURS = "delay_timeout_hours"  # Safety timeout (hours) while waiting to start
+
+# Deprecated since 0.4.5: drain-spike model replaced by band-based DELAY_WAIT.
+# Kept only so older Store/options blobs don't raise KeyError during migration.
+CONF_DELAY_DRAIN_MIN_POWER = "delay_drain_min_power"
+CONF_DELAY_DRAIN_MAX_POWER = "delay_drain_max_power"
+CONF_DELAY_DRAIN_MAX_DURATION = "delay_drain_max_duration"
 
 
 NOTIFY_EVENT_START = "cycle_start"
@@ -167,11 +171,16 @@ DEFAULT_ANTI_WRINKLE_MAX_POWER = 400.0  # W
 DEFAULT_ANTI_WRINKLE_MAX_DURATION = 60.0  # s
 DEFAULT_ANTI_WRINKLE_EXIT_POWER = 0.8  # W
 
-# Delayed-start detection defaults (disabled by default)
+# Delayed-start detection defaults (disabled by default).
+#
+# The detector watches for sustained power between stop_threshold_w and
+# start_threshold_w (the "standby band"): a machine sitting in that band
+# for at least DEFAULT_DELAY_CONFIRM_SECONDS is in delayed-start mode, not
+# off and not running. Short menu-navigation peaks above the band are
+# ignored because they don't sustain long enough to satisfy the normal
+# start-duration gate.
 DEFAULT_DELAY_START_DETECT_ENABLED = False
-DEFAULT_DELAY_DRAIN_MIN_POWER = 10.0  # W — lower bound for a drain spike
-DEFAULT_DELAY_DRAIN_MAX_POWER = 80.0  # W — upper bound; power above this = real cycle start
-DEFAULT_DELAY_DRAIN_MAX_DURATION = 60.0  # s — drain must resolve within this window
+DEFAULT_DELAY_CONFIRM_SECONDS = 60.0  # s — sustained standby before DELAY_WAIT engages
 DEFAULT_DELAY_TIMEOUT_HOURS = 8.0  # h — give up waiting after this long
 
 # Pump Monitor settings (pump device type only)
