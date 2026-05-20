@@ -56,6 +56,13 @@
           "confirm": "Potvrdite radnju kopiranja"
         }
       },
+      "apply_suggestions_confirm": {
+        "title": "Pregledajte predložene izmjene",
+        "description": "WashData je pronašao **{pending_count}** predložene vrijednosti za primjenu.\n\nPromjene:\n{changes}\n\n✅ Označite polje ispod i kliknite na **Pošalji** da odmah primijenite i sačuvate ove promjene.\n❌ Ostavite neoznačeno i kliknite na **Pošalji** da otkažete i vratite se.",
+        "data": {
+          "confirm_apply_suggestions": "Primijenite i sačuvajte ove promjene"
+        }
+      },
       "settings": {
         "title": "Postavke",
         "description": "Podesite pragove detekcije, učenje i napredno ponašanje. Zadane postavke dobro rade za većinu postavki.\n\nTrenutno dostupne preporučene postavke: {suggestions_count}.\nAko je ovo iznad 0, otvorite Napredne postavke i koristite 'Primijeni predložene vrijednosti' za pregled preporuka.",
@@ -69,16 +76,16 @@
           "notify_people": "Odgodite isporuku dok ovi ljudi nisu kod kuće",
           "notify_only_when_home": "Odgodi obavještenja dok odabrana osoba nije kod kuće",
           "notify_fire_events": "Pokreni događaje automatizacije",
+          "notify_start_services": "Početak ciklusa - Ciljevi obavijesti",
+          "notify_finish_services": "Završetak ciklusa - Ciljevi obavijesti",
+          "notify_live_services": "Napredak uživo - Ciljevi obavještenja",
           "notify_before_end_minutes": "Obavijest prije završetka (minuta prije kraja)",
           "notify_title": "Naslov obavijesti",
           "notify_icon": "Ikona obaveštenja",
           "notify_start_message": "Pokreni format poruke",
           "notify_finish_message": "Završi format poruke",
           "notify_pre_complete_message": "Format poruke prije završetka",
-          "show_advanced": "Uredite napredne postavke (sljedeći korak)",
-          "notify_start_services": "Početak ciklusa - Ciljevi obavijesti",
-          "notify_finish_services": "Završetak ciklusa - Ciljevi obavijesti",
-          "notify_live_services": "Napredak uživo - Ciljevi obavještenja"
+          "show_advanced": "Uredite napredne postavke (sljedeći korak)"
         },
         "data_description": {
           "apply_suggestions": "Označite ovo polje za kopiranje vrijednosti koje je predložio algoritam učenja u obrazac. Pregledajte prije spremanja.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -90,15 +97,15 @@
           "notify_people": "Entiteti osoba koji se koriste za praćenje prisutnosti. Kada je omogućeno, dostava obavještenja se odgađa sve dok barem jedna odabrana osoba ne bude kod kuće.",
           "notify_only_when_home": "Ako je omogućeno, odgodite obavještenja dok barem jedna odabrana osoba ne bude kod kuće.",
           "notify_fire_events": "Ako je omogućeno, aktivirajte događaje Home Assistant za početak i kraj ciklusa (ha_washdata_cycle_started i ha_washdata_cycle_ended) za pokretanje automatizacije.",
+          "notify_start_services": "Jedan ili više servisa za obavještavanje da upozore kada ciklus počne. Ostavite prazno da preskočite obavještenja o početku.",
+          "notify_finish_services": "Jedna ili više službi za obavještavanje da upozore kada se ciklus završi ili se bliži završetku. Ostavite prazno da preskočite obavještenja o završetku.",
+          "notify_live_services": "Jedna ili više usluga obavještavanja za primanje ažuriranja napretka uživo dok ciklus traje (samo mobilna prateća aplikacija). Ostavite prazno da preskočite ažuriranja uživo.",
           "notify_before_end_minutes": "Nekoliko minuta prije procijenjenog kraja ciklusa za pokretanje obavještenja. Postavite na 0 da biste onemogućili. Podrazumevano: 0.",
           "notify_title": "Prilagođeni naslov za obavještenja. Podržava {device} čuvar mjesta.",
           "notify_icon": "Ikona za korištenje za obavještenja (npr. mdi:washing-machine). Ostavite prazno za slanje bez ikone.",
           "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava {device} čuvar mjesta.",
           "notify_finish_message": "Poruka se šalje kada se ciklus završi. Podržava {device}, {duration}, {program}, {energy_kwh}, {cost} čuvare mjesta.",
-          "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta.",
-          "notify_start_services": "Jedan ili više servisa za obavještavanje da upozore kada ciklus počne. Ostavite prazno da preskočite obavještenja o početku.",
-          "notify_finish_services": "Jedna ili više službi za obavještavanje da upozore kada se ciklus završi ili se bliži završetku. Ostavite prazno da preskočite obavještenja o završetku.",
-          "notify_live_services": "Jedna ili više usluga obavještavanja za primanje ažuriranja napretka uživo dok ciklus traje (samo mobilna prateća aplikacija). Ostavite prazno da preskočite ažuriranja uživo."
+          "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta."
         }
       },
       "notifications": {
@@ -109,163 +116,208 @@
           "notify_people": "Odgodite isporuku dok ovi ljudi nisu kod kuće",
           "notify_only_when_home": "Odgodi obavještenja dok odabrana osoba nije kod kuće",
           "notify_fire_events": "Pokreni događaje automatizacije",
+          "notify_start_services": "Početak ciklusa - Ciljevi obavijesti",
+          "notify_finish_services": "Završetak ciklusa - Ciljevi obavijesti",
+          "notify_live_services": "Napredak uživo - Ciljevi obavještenja",
           "notify_before_end_minutes": "Obavijest prije završetka (minuta prije kraja)",
           "notify_live_interval_seconds": "Interval ažuriranja uživo (sekunde)",
           "notify_live_overrun_percent": "Dodatak za prekoračenje ažuriranja uživo (%)",
+          "notify_live_chronometer": "Tajmer za odbrojavanje hronometra",
           "notify_title": "Naslov obavijesti",
           "notify_icon": "Ikona obaveštenja",
           "notify_start_message": "Pokreni format poruke",
           "notify_finish_message": "Završi format poruke",
           "notify_pre_complete_message": "Format poruke prije završetka",
-          "notify_start_services": "Početak ciklusa - Ciljevi obavijesti",
-          "notify_finish_services": "Završetak ciklusa - Ciljevi obavijesti",
-          "notify_live_services": "Napredak uživo - Ciljevi obavještenja",
-          "notify_live_chronometer": "Tajmer za odbrojavanje hronometra",
           "energy_price_entity": "Cijena energije - entitet (opcionalno)",
-          "energy_price_static": "Cijena energije - statička vrijednost (opcionalno)"
+          "energy_price_static": "Cijena energije - statička vrijednost (opcionalno)",
+          "go_back": "Vrati se bez spremanja"
         },
         "data_description": {
+          "go_back": "Označite ovo i kliknite Pošalji da odbacite sve gore navedene promjene i vratite se u glavni meni.",
           "notify_actions": "Opcioni niz akcija Home Assistant-a za pokretanje za obavještenja (skripte, obavijesti, TTS, itd.). Ako je postavljeno, radnje se pokreću prije servisa zamjenskog obavijesti.",
           "notify_people": "Entiteti osoba koji se koriste za praćenje prisutnosti. Kada je omogućeno, dostava obavještenja se odgađa sve dok barem jedna odabrana osoba ne bude kod kuće.",
           "notify_only_when_home": "Ako je omogućeno, odgodite obavještenja dok barem jedna odabrana osoba ne bude kod kuće.",
           "notify_fire_events": "Ako je omogućeno, aktivirajte događaje Home Assistant za početak i kraj ciklusa (ha_washdata_cycle_started i ha_washdata_cycle_ended) za pokretanje automatizacije.",
+          "notify_start_services": "Jedan ili više servisa za obavještavanje za upozorenje kada ciklus počne (npr. notify.mobile_app_my_phone). Ostavite prazno da preskočite obavještenja o početku.",
+          "notify_finish_services": "Jedna ili više službi za obavještavanje da upozore kada se ciklus završi ili se bliži završetku. Ostavite prazno da preskočite obavještenja o završetku.",
+          "notify_live_services": "Jedna ili više usluga obavještavanja za primanje ažuriranja napretka uživo dok ciklus traje (samo mobilna prateća aplikacija). Ostavite prazno da preskočite ažuriranja uživo.",
           "notify_before_end_minutes": "Nekoliko minuta prije procijenjenog kraja ciklusa za pokretanje obavještenja. Postavite na 0 da biste onemogućili. Podrazumevano: 0.",
           "notify_live_interval_seconds": "Koliko često se ažuriranja napretka šalju tokom rada. Niže vrijednosti bolje reagiraju, ali troše više obavijesti. Primjenjuje se minimalno 30 sekundi - vrijednosti ispod 30 s se automatski zaokružuju na 30 s.",
           "notify_live_overrun_percent": "Sigurnosna margina iznad procijenjenog broja ažuriranja za duge cikluse/prekoračivanje (na primjer, 20% dozvoljava 1,2x procijenjenih ažuriranja).",
+          "notify_live_chronometer": "Kada je omogućeno, svako ažuriranje uživo uključuje odbrojavanje kronometra do procijenjenog vremena završetka. Tajmer za obavještenja automatski otkucava na uređaju između ažuriranja (samo prateća aplikacija za Android).",
           "notify_title": "Prilagođeni naslov za obavještenja. Podržava {device} čuvar mjesta.",
           "notify_icon": "Ikona za korištenje za obavještenja (npr. mdi:washing-machine). Ostavite prazno za slanje bez ikone.",
           "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava {device} čuvar mjesta.",
           "notify_finish_message": "Poruka se šalje kada se ciklus završi. Podržava {device}, {duration}, {program}, {energy_kwh}, {cost} čuvare mjesta.",
           "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta.",
-          "notify_start_services": "Jedan ili više servisa za obavještavanje za upozorenje kada ciklus počne (npr. notify.mobile_app_my_phone). Ostavite prazno da preskočite obavještenja o početku.",
-          "notify_finish_services": "Jedna ili više službi za obavještavanje da upozore kada se ciklus završi ili se bliži završetku. Ostavite prazno da preskočite obavještenja o završetku.",
-          "notify_live_services": "Jedna ili više usluga obavještavanja za primanje ažuriranja napretka uživo dok ciklus traje (samo mobilna prateća aplikacija). Ostavite prazno da preskočite ažuriranja uživo.",
-          "notify_live_chronometer": "Kada je omogućeno, svako ažuriranje uživo uključuje odbrojavanje kronometra do procijenjenog vremena završetka. Tajmer za obavještenja automatski otkucava na uređaju između ažuriranja (samo prateća aplikacija za Android).",
           "energy_price_entity": "Odaberite numerički entitet koji drži trenutnu cijenu električne energije (npr. senzor.electricity_price, input_number.energy_rate). Kada je postavljeno, omogućava {cost} čuvar mjesta. Ima prednost u odnosu na statičku vrijednost ako su obje konfigurirane.",
           "energy_price_static": "Fiksna cijena električne energije po kWh. Kada je postavljeno, omogućava {cost} čuvar mjesta. Zanemaruje se ako je entitet konfiguriran gore. Dodajte simbol valute u šablon poruke, npr. {cost} €."
         }
       },
       "advanced_settings": {
         "title": "Napredne postavke",
-        "description": "Podesite pragove detekcije, učenje i napredno ponašanje. Zadane postavke dobro rade za većinu postavki.\n\nTrenutno dostupne preporučene postavke: {suggestions_count}. Koristite 'Primijeni predložene vrijednosti' za pregled promjena prije spremanja.",
-        "data": {
-          "apply_suggestions": "Primijenite predložene vrijednosti",
-          "start_threshold_w": "Početni prag (W)",
-          "stop_threshold_w": "Prag zaustavljanja (W)",
-          "min_off_gap": "Minimalni razmak između ciklusa (s)",
-          "start_duration_threshold": "Započni trajanje odbijanja (s)",
-          "progress_reset_delay": "Odgoda resetiranja napretka (sekunde)",
-          "no_update_active_timeout": "Istek bez ažuriranja (s)",
-          "sampling_interval": "Interval uzorkovanja (s)",
-          "auto_label_confidence": "Pouzdanost automatske oznake (0-1)",
-          "learning_confidence": "Zahtjev za povratne informacije povjerenje (0-1)",
-          "duration_tolerance": "Tolerancija trajanja (0-0,5)",
-          "profile_match_interval": "Interval podudaranja profila (sekunde)",
-          "profile_match_min_duration_ratio": "Profil podudaranja minimalnog omjera trajanja (0,1-1,0)",
-          "profile_match_max_duration_ratio": "Maks. omjer trajanja podudaranja profila (1,0-3,0)",
-          "smoothing_window": "Prozor za izglađivanje (uzorci)",
-          "profile_match_threshold": "Prag podudaranja profila",
-          "profile_unmatch_threshold": "Prag nepodudaranja profila",
-          "profile_duration_tolerance": "Tolerancija trajanja podudaranja profila (0-0,5)",
-          "interrupted_min_seconds": "Prekinut: minimalno vrijeme rada (sekunde)",
-          "abrupt_drop_watts": "Prekinut: nagli pad apsoluta (W)",
-          "abrupt_drop_ratio": "Prekinut: omjer naglog pada (0-1)",
-          "abrupt_high_load_factor": "Prekinut: faktor visokog opterećenja",
-          "max_past_cycles": "Zadržavanje: maksimalni broj sačuvanih ciklusa",
-          "max_full_traces_per_profile": "Zadržavanje: maksimalni puni tragovi po profilu",
-          "max_full_traces_unlabeled": "Zadržavanje: maksimalni puni tragovi bez oznaka",
-          "watchdog_interval": "Watchdog interval (sekunde)",
-          "completion_min_seconds": "Završetak Minimalno vrijeme rada (sekunde)",
-          "notify_before_end_minutes": "Obavijest prije završetka (minuta prije kraja)",
-          "auto_tune_noise_events_threshold": "Automatsko podešavanje: Prag za događaje buke",
-          "running_dead_zone": "Mrtva zona rada (sekunde)",
-          "end_repeat_count": "Broj ponavljanja kraja",
-          "start_energy_threshold": "Ulazni prag energije (Wh)",
-          "end_energy_threshold": "Izlazni prag energije (Wh)",
-          "auto_maintenance": "Omogućite automatsko održavanje",
-          "expose_debug_entities": "Izložite entitete za otklanjanje grešaka",
-          "save_debug_traces": "Sačuvajte tragove za otklanjanje grešaka",
-          "anti_wrinkle_enabled": "Štit protiv bora (samo sušilica)",
-          "anti_wrinkle_max_power": "Maksimalna snaga protiv bora (W)",
-          "anti_wrinkle_max_duration": "Maksimalno trajanje protiv bora (s)",
-          "anti_wrinkle_exit_power": "Izlazna snaga protiv bora (W)",
-          "dtw_bandwidth": "DTW Bandwidth",
-          "external_end_trigger_enabled": "Omogući okidač za završetak eksternog ciklusa",
-          "external_end_trigger": "Eksterni senzor završetka ciklusa",
-          "external_end_trigger_inverted": "Invertna logika okidača (okidač je isključen)",
-          "suppress_feedback_notifications": "Poništi obavještenja o povratnim informacijama",
-          "pump_stuck_duration": "Prag (s) upozorenja zastoja pumpe (samo pumpa)",
-          "door_sensor_entity": "Senzor vrata",
-          "pause_cuts_power": "Isključite napajanje prilikom pauze",
-          "notify_unload_delay_minutes": "Kašnjenje obavijesti o čekanju rublja (min)",
-          "switch_entity": "Prebacite entitet (za pauziranje isključenja struje)",
-          "delay_start_detect_enabled": "Omogući otkrivanje odgođenog starta",
-          "delay_drain_min_power": "Odgođeni početak: Min. snaga odvoda (W)",
-          "delay_drain_max_power": "Odgođeni početak: maksimalna snaga drenažne špice (W)",
-          "delay_drain_max_duration": "Odgođeni početak: maksimalno trajanje odvoda (s)",
-          "delay_timeout_hours": "Odgođeni početak: maksimalno vrijeme čekanja (h)"
-        },
-        "data_description": {
-          "apply_suggestions": "Označite ovo polje za otvaranje koraka pregleda za predložene vrijednosti iz algoritma učenja. Ništa se ne pohranjuje automatski.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "start_threshold_w": "Snaga mora porasti IZNAD ove granične vrijednosti da započne ciklus. Postavite više od vaše snage u stanju pripravnosti. Zadano: min_power + 1 W.",
-          "stop_threshold_w": "Snaga mora pasti ISPOD ovog praga da bi se KRAJO ciklus. Postavite malo iznad nule kako biste izbjegli šum koji pokreće lažne krajeve. Zadano: 0,6 * min_power.",
-          "min_off_gap": "Ako ciklus započne unutar ovoliko sekundi od završetka prethodnog, oni će biti SPOJENI u jedan ciklus.",
-          "start_duration_threshold": "Zanemarite kratke skokove snage kraće od ovog trajanja (sekunde). Filtrira skokove pri pokretanju (npr. 60W za 2s) prije početka pravog ciklusa. Podrazumevano: 5s.",
-          "progress_reset_delay": "Nakon što se ciklus završi (100%), pričekajte ovoliko sekundi mirovanja prije nego što vratite napredak na 0%. Podrazumevano: 300s.",
-          "no_update_active_timeout": "Za senzore za objavljivanje na promjeni: prisilno prekinuti AKTIVNI ciklus samo ako ažuriranja ne stignu ovoliko sekundi. Završetak sa malom potrošnjom još uvijek koristi odgodu isključivanja.",
-          "sampling_interval": "Minimalni interval uzorkovanja u sekundama. Ažuriranja brža od ove stope će biti zanemarena. Podrazumevano: 2.0s.",
-          "auto_label_confidence": "Automatski označi cikluse na ili iznad ove pouzdanosti po završetku (0,0–1,0).",
-          "learning_confidence": "Minimalno povjerenje za zahtjev za verifikaciju korisnika putem događaja (0,0–1,0).",
-          "duration_tolerance": "Tolerancija za procjene preostalog vremena tokom trčanja (0,0–0,5 odgovara 0–50%).",
-          "profile_match_interval": "Koliko često (u sekundama) pokušavati uparivanje profila tokom ciklusa. Niže vrijednosti omogućavaju brže otkrivanje, ali koriste više CPU-a. Podrazumevano: 300s (5 minuta).",
-          "profile_match_min_duration_ratio": "Minimalni omjer trajanja za podudaranje profila. Ciklus rada mora biti najmanje ovaj dio trajanja profila da bi se podudarao. Niže = ranije podudaranje. Podrazumevano: 0,50 (50%).",
-          "profile_match_max_duration_ratio": "Maksimalni omjer trajanja za podudaranje profila. Ciklus rada ne smije premašiti ovaj višekratnik trajanja profila. Viši = blaži. Podrazumevano: 1,50 (150%).",
-          "smoothing_window": "Broj nedavnih očitanja snage korištenih za izravnavanje pokretnog prosjeka.",
-          "profile_match_threshold": "Minimalni rezultat sličnosti DTW (0,0–1,0) potreban da bi se profil smatrao podudarnim. Više = strože podudaranje, manje lažnih pozitivnih rezultata. Podrazumevano: 0.4.",
-          "profile_unmatch_threshold": "DTW rezultat sličnosti (0,0–1,0) ispod kojeg se odbacuje prethodno podudarni profil. Trebao bi biti niži od praga podudaranja kako bi se spriječilo treperenje. Podrazumevano: 0,35.",
-          "profile_duration_tolerance": "Tolerancija koja se koristi za podudaranje profila za varijancu ukupnog trajanja (0,0–0,5). Zadano ponašanje: ±25%.",
-          "interrupted_min_seconds": "Trke kraće od ovoga mogu se klasificirati kao 'prekinute'.",
-          "abrupt_drop_watts": "Apsolutni pad snage (W) smatra se naglom liticom.",
-          "abrupt_drop_ratio": "Relativni omjer pada (0–1). Primjer: 0,6 znači da je pad od 60% nagli.",
-          "abrupt_high_load_factor": "Faktor iznad osnovne linije smatra se 'velikim opterećenjem' prije naglog pada (koristi se s naglom detekcijom).",
-          "max_past_cycles": "Ukupan broj ciklusa za zadržavanje (najstariji uklonjeni). Podrazumevano: 200.",
-          "max_full_traces_per_profile": "Broj nedavnih označenih ciklusa za održavanje s punim tragovima snage po profilu. Stariji tragovi su sumirani preko koverti. Podrazumevano: 20.",
-          "max_full_traces_unlabeled": "Broj nedavnih neobilježenih ciklusa za održavanje s punom snagom kako bi se podržalo automatsko označavanje. Podrazumevano: 20.",
-          "watchdog_interval": "Sekunde između nadzornih provjera tokom trčanja. Podrazumevano: 5s. UPOZORENJE: Uvjerite se da je ovo VIŠE od intervala ažuriranja vašeg senzora kako biste izbjegli lažna zaustavljanja (npr. ako se senzor ažurira svakih 60 s, koristite 65 s+).",
-          "completion_min_seconds": "Ciklusi kraći od ovoga će biti označeni kao 'prekinuti' čak i ako se završe prirodno. Podrazumevano: 600s.",
-          "notify_before_end_minutes": "Nekoliko minuta prije procijenjenog kraja ciklusa za pokretanje obavještenja. Postavite na 0 da biste onemogućili. Podrazumevano: 0.",
-          "auto_tune_noise_events_threshold": "Broj kratkih/niskih ciklusa 'šuma' unutar 24 sata potrebnih za automatsko podešavanje min_power. Podrazumevano: 3.",
-          "running_dead_zone": "Nakon što ciklus započne, zanemarite padove snage ovoliko sekundi kako biste spriječili lažno otkrivanje kraja tokom početne faze okretanja. Postavite na 0 da biste onemogućili. Podrazumevano: 0s.",
-          "end_repeat_count": "Koliko puta krajnji uslov (snaga ispod praga za off_delay) mora biti ispunjen uzastopno prije završetka ciklusa. Veće vrijednosti sprečavaju lažne završetak tokom pauza. Podrazumevano: 1.",
-          "start_energy_threshold": "Ciklus mora akumulirati najmanje ovoliko energije (Wh) tokom START faze da bi se potvrdio. Podrazumevano: 0,005 Wh.",
-          "end_energy_threshold": "Ciklus se završava samo ako je energija u posljednjem prozoru odgode isključenja ispod ove vrijednosti (Wh). Sprečava lažne krajeve ako snaga fluktuira blizu nule. Podrazumevano: 0,05 Wh.",
-          "auto_maintenance": "Omogućite automatsko održavanje (popravite uzorke, spojite fragmente).",
-          "expose_debug_entities": "Prikaži napredne senzore (pouzdanje, faza, dvosmislenost) za otklanjanje grešaka.",
-          "save_debug_traces": "Čuvajte detaljne podatke o rangiranju i tragovima napajanja u historiji (povećava korištenje memorije).",
-          "anti_wrinkle_enabled": "Zanemarite kratke rotacije bubnja male snage nakon završetka ciklusa kako biste spriječili cikluse duhova (samo sušilica/mašina za pranje i sušenje).",
-          "anti_wrinkle_max_power": "Rafali na ili ispod ove snage tretiraju se kao rotacije protiv bora umjesto novih ciklusa. Primjenjuje se samo kada je omogućena zaštita od bora.",
-          "anti_wrinkle_max_duration": "Maksimalna dužina praska za tretiranje kao rotacija protiv bora. Primjenjuje se samo kada je omogućena zaštita od bora.",
-          "anti_wrinkle_exit_power": "Ako snaga padne ispod ovog nivoa, odmah izađite iz anti-bora (true off). Primjenjuje se samo kada je omogućena zaštita od bora.",
-          "dtw_bandwidth": "Maksimalno dozvoljeno vreme savijanja (istezanja) kao omjer trajanja ciklusa. Više vrijednosti omogućavaju uparivanje vrlo varijabilnih ciklusa, ali povećavaju troškove CPU-a. Podrazumevano: 0,20 (20%).",
-          "external_end_trigger_enabled": "Omogućite praćenje eksternog binarnog senzora da biste pokrenuli završetak ciklusa.",
-          "external_end_trigger": "Odaberite binarni senzorski entitet. Kada se ovaj senzor aktivira, trenutni ciklus će se završiti sa statusom 'dovršeno'.",
-          "external_end_trigger_inverted": "Standardno, okidač se aktivira kada se senzor uključi. Označite ovo polje da se aktivira kada se senzor ISKLJUČI.",
-          "suppress_feedback_notifications": "Kada je omogućen, WashData će i dalje interno pratiti i tražiti povratne informacije, ali neće prikazivati ​​stalna obavještenja u kojima se od vas traži da potvrdite cikluse. Korisno kada se ciklusi uvijek ispravno detektuju i ako vam upute ometaju pažnju.",
-          "pump_stuck_duration": "Ako ciklus pumpe i dalje radi nakon ovoliko sekundi, događaj ha_washdata_pump_stuck se aktivira jednom. Upotrijebite ovo za otkrivanje zaglavljenog motora (uobičajeni rad pumpe ispod 60 s). Zadano: 1800 s (30 min). Samo tip uređaja za pumpu.",
-          "door_sensor_entity": "Opcioni binarni senzor za vrata mašine (uključeno = otvoreno, isključeno = zatvoreno). Kada se vrata otvore tokom aktivnog ciklusa, WashData će potvrditi da je ciklus namjerno pauziran. Nakon završetka ciklusa, ako su vrata i dalje zatvorena, stanje se mijenja u 'Clean' dok se vrata ne otvore. Napomena: zatvaranje vrata NE nastavlja automatski pauzirani ciklus - nastavak se mora pokrenuti ručno putem dugmeta Nastavi ciklus ili usluge.",
-          "pause_cuts_power": "Prilikom pauziranja pomoću tipke Pause Cycle ili usluge, također isključite konfigurirani entitet prekidača. Stupa na snagu samo ako je entitet prekidača konfiguriran za ovaj uređaj.",
-          "notify_unload_delay_minutes": "Pošaljite obavijest putem kanala obavijesti o završetku nakon što se ciklus završi, a vrata nisu bila otvorena ovoliko minuta (zahtijeva senzor vrata). Postavite na 0 da biste onemogućili. Podrazumevano: 60 min.",
-          "switch_entity": "Prebacivanje entiteta za prebacivanje kada pauzirate ili nastavljate. Potrebno kada je omogućeno 'Prekini napajanje prilikom pauze'.",
-          "delay_start_detect_enabled": "Kada je omogućeno, kratak skok odvoda niske snage praćen stalnim napajanjem u stanju pripravnosti detektuje se kao odloženi početak. Senzor stanja pokazuje 'Waiting to Start' tokom kašnjenja. Ne prati se vrijeme programa ili napredak sve dok ciklus zapravo ne počne. Zahtijeva da se start_threshold_w postavi iznad snage odvoda.",
-          "delay_drain_min_power": "Minimalna snaga (W) za prepoznavanje kao odvodni šiljak. Postavite malo iznad istinskog nivoa pripravnosti vašeg uređaja. Podrazumevano: 10 W.",
-          "delay_drain_max_power": "Maksimalna snaga (W) za odvodni šiljak — rafali iznad ovog se tretiraju kao pravi početak ciklusa. Trebao bi biti ispod vaše postavke start_threshold_w. Podrazumevano: 80 W.",
-          "delay_drain_max_duration": "Odvodni šiljak mora pasti ispod prozora za odvod u roku od toliko sekundi da bi bio potvrđen. Duži šiljci se tretiraju kao stvarna ciklusna aktivnost. Standardno: 60 s.",
-          "delay_timeout_hours": "Sigurnosno vremensko ograničenje: ako je mašina i dalje u 'Waiting to Start' nakon ovoliko sati, WashData se vraća na Off. Standardno: 8 h."
+        "description": "Podesite pragove detekcije, učenje i napredno ponašanje. Zadane postavke dobro rade za većinu konfiguracija.",
+        "sections": {
+          "suggestions_section": {
+            "name": "Predložene postavke",
+            "description": "Dostupno je {suggestions_count} naučenih prijedloga. Označite 'Primijeni predložene vrijednosti' da prije spremanja pregledate predložene promjene.",
+            "data": {
+              "apply_suggestions": "Primijenite predložene vrijednosti"
+            },
+            "data_description": {
+              "apply_suggestions": "Označite ovo polje za otvaranje koraka pregleda za predložene vrijednosti iz algoritma učenja. Ništa se ne pohranjuje automatski.\n\nPredloženo (iz učenja):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
+            }
+          },
+          "detection_section": {
+            "name": "Detekcija i pragovi snage",
+            "description": "Određuje kada se uređaj smatra UKLJUČENIM ili ISKLJUČENIM, energetske pragove i vremensko određivanje prijelaza stanja.",
+            "data": {
+              "start_duration_threshold": "Započni trajanje odbijanja (s)",
+              "start_energy_threshold": "Ulazni prag energije (Wh)",
+              "completion_min_seconds": "Završetak Minimalno vrijeme rada (sekunde)",
+              "start_threshold_w": "Početni prag (W)",
+              "stop_threshold_w": "Prag zaustavljanja (W)",
+              "end_energy_threshold": "Izlazni prag energije (Wh)",
+              "running_dead_zone": "Mrtva zona rada (sekunde)",
+              "end_repeat_count": "Broj ponavljanja kraja",
+              "min_off_gap": "Minimalni razmak između ciklusa (s)",
+              "sampling_interval": "Interval uzorkovanja (s)"
+            },
+            "data_description": {
+              "start_duration_threshold": "Zanemarite kratke skokove snage kraće od ovog trajanja (sekunde). Filtrira skokove pri pokretanju (npr. 60W za 2s) prije početka pravog ciklusa. Podrazumevano: 5s.",
+              "start_energy_threshold": "Ciklus mora akumulirati najmanje ovoliko energije (Wh) tokom START faze da bi se potvrdio. Podrazumevano: 0,005 Wh.",
+              "completion_min_seconds": "Ciklusi kraći od ovoga će biti označeni kao 'prekinuti' čak i ako se završe prirodno. Podrazumevano: 600s.",
+              "start_threshold_w": "Snaga mora porasti IZNAD ove granične vrijednosti da započne ciklus. Postavite više od vaše snage u stanju pripravnosti. Zadano: min_power + 1 W.",
+              "stop_threshold_w": "Snaga mora pasti ISPOD ovog praga da bi se KRAJO ciklus. Postavite malo iznad nule kako biste izbjegli šum koji pokreće lažne krajeve. Zadano: 0,6 * min_power.",
+              "end_energy_threshold": "Ciklus se završava samo ako je energija u posljednjem prozoru odgode isključenja ispod ove vrijednosti (Wh). Sprečava lažne krajeve ako snaga fluktuira blizu nule. Podrazumevano: 0,05 Wh.",
+              "running_dead_zone": "Nakon što ciklus započne, zanemarite padove snage ovoliko sekundi kako biste spriječili lažno otkrivanje kraja tokom početne faze okretanja. Postavite na 0 da biste onemogućili. Podrazumevano: 0s.",
+              "end_repeat_count": "Koliko puta krajnji uslov (snaga ispod praga za off_delay) mora biti ispunjen uzastopno prije završetka ciklusa. Veće vrijednosti sprečavaju lažne završetak tokom pauza. Podrazumevano: 1.",
+              "min_off_gap": "Ako ciklus započne unutar ovoliko sekundi od završetka prethodnog, oni će biti SPOJENI u jedan ciklus.",
+              "sampling_interval": "Minimalni interval uzorkovanja u sekundama. Ažuriranja brža od ove stope će biti zanemarena. Podrazumevano: 2.0s."
+            }
+          },
+          "matching_section": {
+            "name": "Usklađivanje profila i učenje",
+            "description": "Određuje koliko agresivno WashData upoređuje aktivne cikluse s naučenim profilima i kada tražiti povratne informacije.",
+            "data": {
+              "profile_match_min_duration_ratio": "Profil podudaranja minimalnog omjera trajanja (0,1-1,0)",
+              "profile_match_interval": "Interval podudaranja profila (sekunde)",
+              "profile_match_threshold": "Prag podudaranja profila",
+              "profile_unmatch_threshold": "Prag nepodudaranja profila",
+              "auto_label_confidence": "Pouzdanost automatske oznake (0-1)",
+              "learning_confidence": "Zahtjev za povratne informacije povjerenje (0-1)",
+              "suppress_feedback_notifications": "Poništi obavještenja o povratnim informacijama",
+              "duration_tolerance": "Tolerancija trajanja (0-0,5)",
+              "smoothing_window": "Prozor za izglađivanje (uzorci)",
+              "profile_duration_tolerance": "Tolerancija trajanja podudaranja profila (0-0,5)"
+            },
+            "data_description": {
+              "profile_match_min_duration_ratio": "Minimalni omjer trajanja za podudaranje profila. Ciklus rada mora biti najmanje ovaj dio trajanja profila da bi se podudarao. Niže = ranije podudaranje. Podrazumevano: 0,50 (50%).",
+              "profile_match_interval": "Koliko često (u sekundama) pokušavati uparivanje profila tokom ciklusa. Niže vrijednosti omogućavaju brže otkrivanje, ali koriste više CPU-a. Podrazumevano: 300s (5 minuta).",
+              "profile_match_threshold": "Minimalni rezultat sličnosti DTW (0,0–1,0) potreban da bi se profil smatrao podudarnim. Više = strože podudaranje, manje lažnih pozitivnih rezultata. Podrazumevano: 0.4.",
+              "profile_unmatch_threshold": "DTW rezultat sličnosti (0,0–1,0) ispod kojeg se odbacuje prethodno podudarni profil. Trebao bi biti niži od praga podudaranja kako bi se spriječilo treperenje. Podrazumevano: 0,35.",
+              "auto_label_confidence": "Automatski označi cikluse na ili iznad ove pouzdanosti po završetku (0,0–1,0).",
+              "learning_confidence": "Minimalno povjerenje za zahtjev za verifikaciju korisnika putem događaja (0,0–1,0).",
+              "suppress_feedback_notifications": "Kada je omogućen, WashData će i dalje interno pratiti i tražiti povratne informacije, ali neće prikazivati ​​stalna obavještenja u kojima se od vas traži da potvrdite cikluse. Korisno kada se ciklusi uvijek ispravno detektuju i ako vam upute ometaju pažnju.",
+              "duration_tolerance": "Tolerancija za procjene preostalog vremena tokom trčanja (0,0–0,5 odgovara 0–50%).",
+              "smoothing_window": "Broj nedavnih očitanja snage korištenih za izravnavanje pokretnog prosjeka.",
+              "profile_duration_tolerance": "Tolerancija koja se koristi za podudaranje profila za varijancu ukupnog trajanja (0,0–0,5). Zadano ponašanje: ±25%."
+            }
+          },
+          "timing_section": {
+            "name": "Vremenski parametri, održavanje i otklanjanje grešaka",
+            "description": "Watchdog, reset napretka, automatsko održavanje i izlaganje debug entiteta.",
+            "data": {
+              "watchdog_interval": "Watchdog interval (sekunde)",
+              "no_update_active_timeout": "Istek bez ažuriranja (s)",
+              "progress_reset_delay": "Odgoda resetiranja napretka (sekunde)",
+              "auto_maintenance": "Omogućite automatsko održavanje",
+              "expose_debug_entities": "Izložite entitete za otklanjanje grešaka",
+              "save_debug_traces": "Sačuvajte tragove za otklanjanje grešaka"
+            },
+            "data_description": {
+              "watchdog_interval": "Sekunde između nadzornih provjera tokom trčanja. Podrazumevano: 5s. UPOZORENJE: Uvjerite se da je ovo VIŠE od intervala ažuriranja vašeg senzora kako biste izbjegli lažna zaustavljanja (npr. ako se senzor ažurira svakih 60 s, koristite 65 s+).",
+              "no_update_active_timeout": "Za senzore za objavljivanje na promjeni: prisilno prekinuti AKTIVNI ciklus samo ako ažuriranja ne stignu ovoliko sekundi. Završetak sa malom potrošnjom još uvijek koristi odgodu isključivanja.",
+              "progress_reset_delay": "Nakon što se ciklus završi (100%), pričekajte ovoliko sekundi mirovanja prije nego što vratite napredak na 0%. Podrazumevano: 300s.",
+              "auto_maintenance": "Omogućite automatsko održavanje (popravite uzorke, spojite fragmente).",
+              "expose_debug_entities": "Prikaži napredne senzore (pouzdanje, faza, dvosmislenost) za otklanjanje grešaka.",
+              "save_debug_traces": "Čuvajte detaljne podatke o rangiranju i tragovima napajanja u historiji (povećava korištenje memorije)."
+            }
+          },
+          "anti_wrinkle_section": {
+            "name": "Štit protiv bora (sušilice)",
+            "description": "Zanemarite okretanja bubnja nakon završetka ciklusa kako biste spriječili fantomske cikluse. Samo sušilica / mašina za pranje i sušenje.",
+            "data": {
+              "anti_wrinkle_enabled": "Štit protiv bora (samo sušilica)",
+              "anti_wrinkle_max_power": "Maksimalna snaga protiv bora (W)",
+              "anti_wrinkle_max_duration": "Maksimalno trajanje protiv bora (s)",
+              "anti_wrinkle_exit_power": "Izlazna snaga protiv bora (W)"
+            },
+            "data_description": {
+              "anti_wrinkle_enabled": "Zanemarite kratke rotacije bubnja male snage nakon završetka ciklusa kako biste spriječili cikluse duhova (samo sušilica/mašina za pranje i sušenje).",
+              "anti_wrinkle_max_power": "Rafali na ili ispod ove snage tretiraju se kao rotacije protiv bora umjesto novih ciklusa. Primjenjuje se samo kada je omogućena zaštita od bora.",
+              "anti_wrinkle_max_duration": "Maksimalna dužina praska za tretiranje kao rotacija protiv bora. Primjenjuje se samo kada je omogućena zaštita od bora.",
+              "anti_wrinkle_exit_power": "Ako snaga padne ispod ovog nivoa, odmah izađite iz anti-bora (true off). Primjenjuje se samo kada je omogućena zaštita od bora."
+            }
+          },
+          "delay_start_section": {
+            "name": "Detekcija odgođenog starta",
+            "description": "Trajni standby s niskom potrošnjom tretirajte kao stanje 'Čekanje na početak' dok ciklus stvarno ne počne.",
+            "data": {
+              "delay_start_detect_enabled": "Omogući otkrivanje odgođenog starta",
+              "delay_confirm_seconds": "Odgođeni start: vrijeme potvrde standby režima (s)",
+              "delay_timeout_hours": "Odgođeni početak: maksimalno vrijeme čekanja (h)"
+            },
+            "data_description": {
+              "delay_start_detect_enabled": "Kada je omogućeno, kratak skok odvoda niske snage praćen stalnim napajanjem u stanju pripravnosti detektuje se kao odloženi početak. Senzor stanja pokazuje 'Čeka na pokretanje' tokom kašnjenja. Ne prati se vrijeme programa ili napredak sve dok ciklus zapravo ne počne. Zahtijeva da se start_threshold_w postavi iznad snage odvoda.",
+              "delay_confirm_seconds": "Snaga mora ostati između praga zaustavljanja (W) i praga pokretanja (W) ovoliko sekundi prije nego što WashData pređe u stanje 'Čekanje na početak'. Ovo filtrira kratke vrhove tokom navigacije kroz meni. Zadano: 60 s.",
+              "delay_timeout_hours": "Sigurnosno vremensko ograničenje: ako je mašina i dalje u 'Čeka na pokretanje' nakon ovoliko sati, WashData se vraća na Off. Standardno: 8 h."
+            }
+          },
+          "external_triggers_section": {
+            "name": "Eksterni okidači, vrata i pauza",
+            "description": "Opcioni eksterni senzor završetka ciklusa, senzor vrata za detekciju pauze / pražnjenja i prekidač za gašenje napajanja tokom pauze.",
+            "data": {
+              "external_end_trigger_enabled": "Omogući okidač za završetak eksternog ciklusa",
+              "external_end_trigger": "Eksterni senzor završetka ciklusa",
+              "external_end_trigger_inverted": "Invertna logika okidača (okidač je isključen)",
+              "door_sensor_entity": "Senzor vrata",
+              "pause_cuts_power": "Isključite napajanje prilikom pauze",
+              "switch_entity": "Prebacite entitet (za pauziranje isključenja struje)",
+              "notify_unload_delay_minutes": "Kašnjenje obavijesti o čekanju rublja (min)"
+            },
+            "data_description": {
+              "external_end_trigger_enabled": "Omogućite praćenje eksternog binarnog senzora da biste pokrenuli završetak ciklusa.",
+              "external_end_trigger": "Odaberite binarni senzorski entitet. Kada se ovaj senzor aktivira, trenutni ciklus će se završiti sa statusom 'dovršeno'.",
+              "external_end_trigger_inverted": "Standardno, okidač se aktivira kada se senzor uključi. Označite ovo polje da se aktivira kada se senzor ISKLJUČI.",
+              "door_sensor_entity": "Opcioni binarni senzor za vrata mašine (uključeno = otvoreno, isključeno = zatvoreno). Kada se vrata otvore tokom aktivnog ciklusa, WashData će potvrditi da je ciklus namjerno pauziran. Nakon završetka ciklusa, ako su vrata i dalje zatvorena, stanje se mijenja u 'Clean' dok se vrata ne otvore. Napomena: zatvaranje vrata NE nastavlja automatski pauzirani ciklus - nastavak se mora pokrenuti ručno putem dugmeta Nastavi ciklus ili usluge.",
+              "pause_cuts_power": "Prilikom pauziranja pomoću tipke Pause Cycle ili usluge, također isključite konfigurirani entitet prekidača. Stupa na snagu samo ako je entitet prekidača konfiguriran za ovaj uređaj.",
+              "switch_entity": "Prebacivanje entiteta za prebacivanje kada pauzirate ili nastavljate. Potrebno kada je omogućeno 'Prekini napajanje prilikom pauze'.",
+              "notify_unload_delay_minutes": "Pošaljite obavijest putem kanala obavijesti o završetku nakon što se ciklus završi, a vrata nisu bila otvorena ovoliko minuta (zahtijeva senzor vrata). Postavite na 0 da biste onemogućili. Podrazumevano: 60 min."
+            }
+          },
+          "pump_section": {
+            "name": "Nadzor pumpe",
+            "description": "Samo za uređaje tipa pumpa. Pokreće događaj ako ciklus pumpe traje duže od ovog vremena.",
+            "data": {
+              "pump_stuck_duration": "Prag (s) upozorenja zastoja pumpe (samo pumpa)"
+            },
+            "data_description": {
+              "pump_stuck_duration": "Ako ciklus pumpe i dalje radi nakon ovoliko sekundi, događaj ha_washdata_pump_stuck se aktivira jednom. Upotrijebite ovo za otkrivanje zaglavljenog motora (uobičajeni rad pumpe ispod 60 s). Zadano: 1800 s (30 min). Samo tip uređaja za pumpu."
+            }
+          }
         }
       },
       "diagnostics": {
         "title": "Dijagnostika i održavanje",
-        "description": "Pokrenite akcije održavanja kao što je spajanje fragmentiranih ciklusa ili migracija pohranjenih podataka.\n\n**Upotreba pohrane**\n\n- Veličina fajla: {file_size_kb} KB\n- Ciklusi: {cycle_count}\n- Profili: {profile_count}\n- Tragovi otklanjanja grešaka: {debug_count}"
+        "description": "Pokrenite akcije održavanja kao što je spajanje fragmentiranih ciklusa ili migracija pohranjenih podataka.\n\n**Upotreba pohrane**\n\n- Veličina fajla: {file_size_kb} KB\n- Ciklusi: {cycle_count}\n- Profili: {profile_count}\n- Tragovi otklanjanja grešaka: {debug_count}",
+        "menu_options": {
+          "reprocess_history": "Održavanje: ponovo obraditi i optimizirati podatke",
+          "clear_debug_data": "Obriši podatke za otklanjanje grešaka (oslobodite prostor)",
+          "wipe_history": "Obriši SVE podatke za ovaj uređaj (nepovratno)",
+          "export_import": "Izvezi/uvezi JSON sa postavkama (kopiraj/zalijepi)",
+          "menu_back": "← Nazad"
+        }
       },
       "clear_debug_data": {
         "title": "Obrišite podatke za otklanjanje grešaka",
@@ -274,36 +326,52 @@
       "manage_cycles": {
         "title": "Upravljanje ciklusima",
         "description": "Nedavni ciklusi:\n{recent_cycles}",
-        "data": {
-          "action": "Akcija"
+        "menu_options": {
+          "auto_label_cycles": "Automatski označi stare cikluse",
+          "select_cycle_to_label": "Oznaci specifican ciklus",
+          "select_cycle_to_delete": "Izbriši ciklus",
+          "interactive_editor": "Interaktivni uređivač spajanja/splitanja",
+          "trim_cycle_select": "Podaci ciklusa trim",
+          "menu_back": "← Nazad"
         }
       },
       "manage_cycles_empty": {
         "title": "Upravljanje ciklusima",
         "description": "Još uvijek nema zabilježenih ciklusa.",
-        "data": {
-          "action": "Akcija"
+        "menu_options": {
+          "auto_label_cycles": "Automatski označi stare cikluse",
+          "menu_back": "← Nazad"
         }
       },
       "manage_profiles": {
         "title": "Upravljanje profilima",
         "description": "Sažetak profila:\n{profile_summary}",
-        "data": {
-          "action": "Akcija"
+        "menu_options": {
+          "create_profile": "Kreirajte novi profil",
+          "edit_profile": "Uredi/Preimenuj profil",
+          "delete_profile_select": "Izbriši profil",
+          "profile_stats": "Statistika profila",
+          "cleanup_profile": "Čišćenje historije - Grafikon i brisanje",
+          "assign_profile_phases_select": "Dodijelite raspon faza",
+          "menu_back": "← Nazad"
         }
       },
       "manage_profiles_empty": {
         "title": "Upravljanje profilima",
         "description": "Još nema kreiranih profila.",
-        "data": {
-          "action": "Akcija"
+        "menu_options": {
+          "create_profile": "Kreirajte novi profil",
+          "menu_back": "← Nazad"
         }
       },
       "manage_phase_catalog": {
         "title": "Upravljanje katalogom faza",
         "description": "Katalog faza (zadano za ovaj uređaj + prilagođene faze):\n{phase_summary}",
-        "data": {
-          "action": "Akcija"
+        "menu_options": {
+          "phase_catalog_create": "Kreirajte novu fazu",
+          "phase_catalog_edit_select": "Uredi fazu",
+          "phase_catalog_delete": "Izbriši fazu",
+          "menu_back": "← Nazad"
         }
       },
       "phase_catalog_create": {
@@ -340,8 +408,14 @@
       "assign_profile_phases": {
         "title": "Dodijelite raspon faza",
         "description": "Pregled faze za profil: **{profile_name}**\n\n{timeline_svg}\n\n**Trenutni rasponi:**\n{current_ranges}\n\nKoristite radnje u nastavku za dodavanje, uređivanje, brisanje ili spremanje raspona.",
-        "data": {
-          "action": "Akcija"
+        "menu_options": {
+          "assign_profile_phases_add": "Dodaj fazni opseg",
+          "assign_profile_phases_edit_select": "Uredi raspon faza",
+          "assign_profile_phases_delete": "Izbriši raspon faza",
+          "phase_ranges_clear": "Obriši sve opsege",
+          "assign_profile_phases_auto_detect": "Automatsko otkrivanje faza",
+          "phase_ranges_save": "Sačuvaj i vrati",
+          "menu_back": "← Nazad"
         }
       },
       "assign_profile_phases_add": {
@@ -494,8 +568,11 @@
       "interactive_editor": {
         "title": "Interaktivni uređivač spajanja/splitanja",
         "description": "Odaberite ručnu radnju koju ćete izvršiti na historiji ciklusa.",
-        "data": {
-          "editor_action": "Akcija"
+        "menu_options": {
+          "editor_split": "Podijelite ciklus (Pronađite praznine)",
+          "editor_merge": "Spajanje ciklusa (spajanje fragmenata)",
+          "editor_delete": "Izbriši ciklus(e)",
+          "menu_back": "← Nazad"
         }
       },
       "editor_select": {
@@ -529,7 +606,21 @@
         "title": "Konfiguracija podjele",
         "description": "Podesite osjetljivost za podjelu ovog ciklusa. Svaki razmak u praznom hodu duži od ovoga će uzrokovati rascjep.",
         "data": {
-          "min_gap_seconds": "Prag podijeljenog jaza (sekunde)"
+          "split_mode": "Metoda podjele"
+        }
+      },
+      "editor_split_auto_params": {
+        "title": "Konfiguracija automatskog razdvajanja",
+        "description": "Prilagodite osjetljivost za razdvajanje ovog ciklusa. Svaki period mirovanja duži od ovoga uzrokovat će razdvajanje.",
+        "data": {
+          "min_gap_seconds": "Prag razmaka za razdvajanje (sekunde)"
+        }
+      },
+      "editor_split_manual_params": {
+        "title": "Ručne vremenske oznake razdvajanja",
+        "description": "{preview_md}Prozor ciklusa: **{cycle_start_wallclock} → {cycle_end_wallclock}** na {cycle_date}.\n\nUnesite jednu ili više vremenskih oznaka razdvajanja (`HH:MM` ili `HH:MM:SS`), po jednu u svakom redu. Ciklus će biti presječen na svakoj vremenskoj oznaci — N vremenskih oznaka daje N+1 segmenata.",
+        "data": {
+          "split_timestamps": "Vremenske oznake podjele"
         }
       },
       "reprocess_history": {
@@ -555,8 +646,13 @@
       "record_cycle": {
         "title": "Ciklus snimanja",
         "description": "Ručno snimite ciklus kako biste kreirali čist profil bez smetnji.\n\nStatus: **{status}**\nTrajanje: {duration}s\nUzorci: {samples}",
-        "data": {
-          "action": "Akcija"
+        "menu_options": {
+          "record_refresh": "Osvježi status",
+          "record_stop": "Zaustavi snimanje (Sačuvaj i obradi)",
+          "record_start": "Započni novo snimanje",
+          "record_process": "Obraditi posljednje snimanje (Podreži i sačuvaj)",
+          "record_discard": "Odbaci zadnji snimak",
+          "menu_back": "← Nazad"
         }
       },
       "record_process": {
@@ -571,14 +667,33 @@
       },
       "learning_feedbacks": {
         "title": "Povratne informacije o učenju",
-        "description": "Odaberite zahtjev za pregled ciklusa za obradu.",
+        "description": "Neriješene povratne informacije: {count}\n\n{pending_table}\n\nOdaberite zahtjev za pregled ciklusa za obradu.",
+        "menu_options": {
+          "learning_feedbacks_pick": "Pregledaj neriješenu povratnu informaciju",
+          "learning_feedbacks_dismiss_all": "Odbaci sve neriješene povratne informacije",
+          "menu_back": "← Nazad"
+        }
+      },
+      "learning_feedbacks_pick": {
+        "title": "Odaberite povratne informacije za pregled",
+        "description": "Odaberite zahtjev za pregled ciklusa koji želite otvoriti.",
         "data": {
           "selected_feedback": "Odaberite ciklus za pregled"
         }
       },
       "learning_feedbacks_empty": {
         "title": "Povratne informacije o učenju",
-        "description": "Nije pronađen nijedan zahtjev za povratne informacije na čekanju."
+        "description": "Nije pronađen nijedan zahtjev za povratne informacije na čekanju.",
+        "menu_options": {
+          "menu_back": "← Nazad"
+        }
+      },
+      "learning_feedbacks_dismiss_all": {
+        "title": "Odbaci sve povratne informacije na čekanju",
+        "description": "Upravo ćete odbaciti **{count}** zahtjeva za povratne informacije na čekanju. Odbijeni ciklusi ostaju u vašoj historiji, ali neće doprinositi novom signalu učenja. Ovo se ne može poništiti.\n\n✅ Označite polje ispod i kliknite na **Pošalji** da odbacite sve.\n❌ Ostavite neoznačeno i kliknite na **Pošalji** da otkažete i vratite se.",
+        "data": {
+          "confirm_dismiss_all": "Potvrdi: odbaci sve neriješene zahtjeve za povratne informacije"
+        }
       },
       "resolve_feedback": {
         "title": "Razriješi povratne informacije",
@@ -587,13 +702,6 @@
           "action": "šta biste željeli raditi?",
           "corrected_profile": "Ispravan program (ako se ispravlja)",
           "corrected_duration": "Ispravno trajanje u sekundama (ako se ispravlja)"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Pregledajte predložene izmjene",
-        "description": "WashData je pronašao **{pending_count}** predložene vrijednosti za primjenu.\n\nPromjene:\n{changes}\n\n✅ Označite polje ispod i kliknite na **Pošalji** da odmah primijenite i sačuvate ove promjene.\n❌ Ostavite neoznačeno i kliknite na **Pošalji** da otkažete i vratite se.",
-        "data": {
-          "confirm_apply_suggestions": "Primijenite i sačuvajte ove promjene"
         }
       },
       "trim_cycle_select": {
@@ -629,6 +737,9 @@
     },
     "error": {
       "import_failed": "Uvoz nije uspio. Zalijepite važeći JSON za izvoz WashData.",
+      "select_exactly_one": "Odaberite tačno jedan ciklus za ovu radnju.",
+      "select_at_least_one": "Odaberite najmanje jedan ciklus za ovu radnju.",
+      "select_at_least_two": "Odaberite najmanje dva ciklusa za ovu radnju.",
       "profile_exists": "Profil sa ovim imenom već postoji",
       "rename_failed": "Preimenovanje profila nije uspjelo. Profil možda ne postoji ili je novo ime već zauzeto.",
       "assignment_failed": "Dodjeljivanje profila ciklusu nije uspjelo",
@@ -648,12 +759,17 @@
       "suggestions_ready_notification_message": "Senzor **Predložene postavke** sada izvještava o **{count}** preporukama koje se mogu primijeniti.\n\nDa biste ih pregledali i primijenili: **Postavke > Uređaji i usluge > WashData > Konfiguriraj > Napredne postavke > Primijeni predložene vrijednosti**.\n\nPrijedlozi su opcioni i prikazani su za pregled prije nego što ih sačuvate.",
       "trim_range_invalid": "Početak mora biti prije kraja. Molimo prilagodite svoje trim tačke.",
       "trim_failed": "Trim nije uspio. Ciklus možda više ne postoji ili je prozor prazan.",
+      "invalid_split_timestamp": "Vremenska oznaka nije važeća ili je izvan prozora ciklusa. Koristite HH:MM ili HH:MM:SS unutar prozora ciklusa.",
+      "no_split_segments_found": "Iz ovih vremenskih oznaka nije bilo moguće napraviti važeće segmente. Provjerite da je svaka vremenska oznaka unutar prozora ciklusa i da segmenti traju najmanje 1 minutu.",
       "auto_tune_suggestion": "{device_type} {device_title} je otkrio cikluse duhova. Predložena promjena min_power: {current_min}W -> {new_min}W (ne primjenjuje se automatski).",
       "auto_tune_title": "WashData Auto-Tune",
       "auto_tune_fallback": "{device_type} {device_title} je otkrio cikluse duhova. Predložena promjena min_power: {current_min}W -> {new_min}W (ne primjenjuje se automatski)."
     },
     "abort": {
       "no_cycles_found": "Nisu pronađeni ciklusi",
+      "no_split_segments_found": "U odabranom ciklusu nisu pronađeni segmenti koji se mogu razdvojiti.",
+      "cycle_not_found": "Odabrani ciklus nije bilo moguće učitati.",
+      "no_power_data": "Nema dostupnih podataka o tragovima napajanja za odabrani ciklus.",
       "no_profiles_found": "Nema pronađenih profila. Prvo kreirajte profil.",
       "no_profiles_for_matching": "Nema dostupnih profila za podudaranje. Prvo kreirajte profile.",
       "no_unlabeled_cycles": "Svi ciklusi su već označeni",
@@ -661,8 +777,7 @@
       "no_predictions": "Nema predviđanja",
       "no_custom_phases": "Nisu pronađene prilagođene faze.",
       "reprocess_success": "Uspješno ponovno obrađeno {count} ciklusa.",
-      "debug_data_cleared": "Uspješno obrisani podaci za otklanjanje grešaka iz {count} ciklusa.",
-      "no_power_data": "Nema dostupnih podataka o tragovima napajanja za odabrani ciklus."
+      "debug_data_cleared": "Uspješno obrisani podaci za otklanjanje grešaka iz {count} ciklusa."
     }
   },
   "selector": {
@@ -682,6 +797,9 @@
         "all_device_types": "Sve vrste uređaja",
         "current_suffix": "(trenutni)",
         "editor_select_info": "Odaberite 1 ciklus za razdvajanje ili 2+ ciklusa za spajanje.",
+        "editor_select_info_split": "Odaberite 1 ciklus za podjelu.",
+        "editor_select_info_merge": "Odaberite 2+ ciklusa za spajanje.",
+        "editor_select_info_delete": "Odaberite 1+ ciklusa za brisanje.",
         "no_cycles_recorded": "Još uvijek nema zabilježenih ciklusa.",
         "profile_summary_line": "- **{name}**: {count} ciklusa, {avg}m pros",
         "no_profiles_created": "Još nema kreiranih profila.",
@@ -722,6 +840,10 @@
         "split_preview_confirm_fmt": "Kliknite na Potvrdi da podijelite ovaj ciklus na {count} zasebnih ciklusa.",
         "merge_preview_title": "Pregled spajanja",
         "merge_preview_joining_fmt": "Spajanje {count} ciklusa. Praznine će biti popunjene očitanjima od 0W.",
+        "editor_delete_preview_title": "Pregled brisanja",
+        "editor_delete_preview_intro": "Odabrani ciklusi bit će trajno izbrisani:",
+        "editor_delete_preview_confirm": "Kliknite Potvrdi da trajno izbrišete ove zapise ciklusa.",
+        "no_power_preview": "*Nema dostupnih podataka o snazi za pregled.*",
         "profile_comparison": "Poređenje profila",
         "actual_cycle_label": "Ovaj ciklus (stvarni)",
         "storage_usage_header": "Upotreba pohrane",
@@ -735,10 +857,21 @@
         "assign_phases_help": "Koristite radnje u nastavku za dodavanje, uređivanje, brisanje ili spremanje raspona.",
         "profile_summary_header": "Sažetak profila",
         "recent_cycles_header": "Nedavni ciklusi",
-        "no_power_preview": "*Nema dostupnih podataka o snazi za pregled.*",
         "trim_cycle_preview_title": "Cycle Trim Preview",
         "trim_cycle_preview_no_data": "Nema dostupnih podataka o snazi ​​za ovaj ciklus.",
-        "trim_cycle_preview_kept_suffix": "zadržao"
+        "trim_cycle_preview_kept_suffix": "zadržao",
+        "table_program": "Program",
+        "table_when": "Kada",
+        "table_length": "Trajanje",
+        "table_match": "Podudaranje",
+        "table_profile": "Profil",
+        "table_cycles": "Ciklusi",
+        "table_avg_length": "Prosj. trajanje",
+        "table_last_run": "Zadnje pokretanje",
+        "table_avg_energy": "Prosj. energija",
+        "table_detected_program": "Otkriveni program",
+        "table_confidence": "Samopouzdanje",
+        "table_reported": "Prijavljeno"
       }
     },
     "interactive_editor_action": {
@@ -746,6 +879,12 @@
         "split": "Podijelite ciklus (Pronađite praznine)",
         "merge": "Spajanje ciklusa (spajanje fragmenata)",
         "delete": "Izbriši ciklus(e)"
+      }
+    },
+    "split_mode": {
+      "options": {
+        "auto": "Automatski otkrij razmake neaktivnosti",
+        "manual": "Ručne vremenske oznake"
       }
     },
     "diagnostics_action": {
@@ -1133,6 +1272,15 @@
     }
   },
   "exceptions": {
+    "device_id_required": {
+      "message": "Potreban je važeći device_id."
+    },
+    "cycle_id_required": {
+      "message": "Potreban je važeći id_ciklusa."
+    },
+    "profile_name_required": {
+      "message": "Potrebno je važeće ime_profila."
+    },
     "device_not_found": {
       "message": "Uređaj nije pronađen."
     },
@@ -1150,15 +1298,6 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s mora biti veći od trim_start_s."
-    },
-    "device_id_required": {
-      "message": "Potreban je važeći device_id."
-    },
-    "cycle_id_required": {
-      "message": "Potreban je važeći id_ciklusa."
-    },
-    "profile_name_required": {
-      "message": "Potrebno je važeće ime_profila."
     }
   }
 }

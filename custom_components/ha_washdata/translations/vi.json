@@ -56,9 +56,16 @@
           "confirm": "Xác nhận hành động sao chép"
         }
       },
+      "apply_suggestions_confirm": {
+        "title": "Xem lại các thay đổi được đề xuất",
+        "description": "WashData đã tìm thấy **{pending_count}** giá trị được đề xuất để áp dụng.\n\nThay đổi:\n{changes}\n\n✅ Đánh dấu vào ô bên dưới và nhấp vào **Gửi** để áp dụng và lưu những thay đổi này ngay lập tức.\n❌ Bỏ chọn và nhấp vào **Gửi** để hủy và quay lại.",
+        "data": {
+          "confirm_apply_suggestions": "Áp dụng và lưu những thay đổi này"
+        }
+      },
       "settings": {
         "title": "Cài đặt",
-        "description": "Điều chỉnh các ngưỡng phát hiện, học tập và hành vi nâng cao. Mặc định hoạt động tốt cho hầu hết các thiết lập.",
+        "description": "Điều chỉnh các ngưỡng phát hiện, học tập và hành vi nâng cao. Mặc định hoạt động tốt cho hầu hết các thiết lập.\n\nCác cài đặt được đề xuất hiện có sẵn: {suggestions_count}.\nNếu giá trị này lớn hơn 0, hãy mở cài đặt nâng cao và dùng 'Áp dụng các giá trị được đề xuất' để xem lại các đề xuất.",
         "data": {
           "apply_suggestions": "Áp dụng các giá trị được đề xuất",
           "device_type": "Loại thiết bị",
@@ -69,16 +76,16 @@
           "notify_people": "Trì hoãn giao hàng cho đến khi những người này về nhà",
           "notify_only_when_home": "Trì hoãn thông báo cho đến khi người được chọn ở nhà",
           "notify_fire_events": "Kích hoạt sự kiện tự động hóa",
+          "notify_start_services": "Bắt đầu chu kỳ - Mục tiêu thông báo",
+          "notify_finish_services": "Kết thúc chu kỳ - Mục tiêu thông báo",
+          "notify_live_services": "Tiến trình trực tiếp - Mục tiêu thông báo",
           "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
           "notify_title": "Tiêu đề thông báo",
           "notify_icon": "Biểu tượng thông báo",
           "notify_start_message": "Bắt đầu định dạng tin nhắn",
           "notify_finish_message": "Hoàn tất định dạng tin nhắn",
           "notify_pre_complete_message": "Định dạng tin nhắn trước khi hoàn thành",
-          "show_advanced": "Chỉnh sửa cài đặt nâng cao (Bước tiếp theo)",
-          "notify_start_services": "Bắt đầu chu kỳ - Mục tiêu thông báo",
-          "notify_finish_services": "Kết thúc chu kỳ - Mục tiêu thông báo",
-          "notify_live_services": "Tiến trình trực tiếp - Mục tiêu thông báo"
+          "show_advanced": "Chỉnh sửa cài đặt nâng cao (Bước tiếp theo)"
         },
         "data_description": {
           "apply_suggestions": "Chọn hộp này để sao chép các giá trị do thuật toán học đề xuất vào biểu mẫu. Xem lại trước khi lưu.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -90,15 +97,15 @@
           "notify_people": "Các thực thể con người được sử dụng để kiểm soát sự hiện diện. Khi được bật, việc gửi thông báo sẽ bị trì hoãn cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_only_when_home": "Nếu được bật, hãy trì hoãn thông báo cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started và ha_washdata_cycle_ended) để thúc đẩy quá trình tự động hóa.",
+          "notify_start_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu kỳ bắt đầu. Để trống để bỏ qua thông báo bắt đầu.",
+          "notify_finish_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu trình kết thúc hoặc gần hoàn thành. Để trống để bỏ qua thông báo kết thúc.",
+          "notify_live_services": "Một hoặc nhiều dịch vụ thông báo để nhận cập nhật tiến độ trực tiếp trong khi chu kỳ chạy (chỉ ứng dụng đồng hành trên thiết bị di động). Để trống để bỏ qua cập nhật trực tiếp.",
           "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
           "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
           "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để gửi không có biểu tượng.",
           "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
           "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}.",
-          "notify_start_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu kỳ bắt đầu. Để trống để bỏ qua thông báo bắt đầu.",
-          "notify_finish_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu trình kết thúc hoặc gần hoàn thành. Để trống để bỏ qua thông báo kết thúc.",
-          "notify_live_services": "Một hoặc nhiều dịch vụ thông báo để nhận cập nhật tiến độ trực tiếp trong khi chu kỳ chạy (chỉ ứng dụng đồng hành trên thiết bị di động). Để trống để bỏ qua cập nhật trực tiếp."
+          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}."
         }
       },
       "notifications": {
@@ -109,38 +116,40 @@
           "notify_people": "Trì hoãn giao hàng cho đến khi những người này về nhà",
           "notify_only_when_home": "Trì hoãn thông báo cho đến khi người được chọn ở nhà",
           "notify_fire_events": "Kích hoạt sự kiện tự động hóa",
+          "notify_start_services": "Bắt đầu chu kỳ - Mục tiêu thông báo",
+          "notify_finish_services": "Kết thúc chu kỳ - Mục tiêu thông báo",
+          "notify_live_services": "Tiến trình trực tiếp - Mục tiêu thông báo",
           "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
           "notify_live_interval_seconds": "Khoảng thời gian cập nhật trực tiếp (giây)",
           "notify_live_overrun_percent": "Phụ cấp tràn cập nhật trực tiếp (%)",
+          "notify_live_chronometer": "Đồng hồ đếm ngược Chronometer",
           "notify_title": "Tiêu đề thông báo",
           "notify_icon": "Biểu tượng thông báo",
           "notify_start_message": "Bắt đầu định dạng tin nhắn",
           "notify_finish_message": "Hoàn tất định dạng tin nhắn",
           "notify_pre_complete_message": "Định dạng tin nhắn trước khi hoàn thành",
-          "notify_start_services": "Bắt đầu chu kỳ - Mục tiêu thông báo",
-          "notify_finish_services": "Kết thúc chu kỳ - Mục tiêu thông báo",
-          "notify_live_services": "Tiến trình trực tiếp - Mục tiêu thông báo",
-          "notify_live_chronometer": "Đồng hồ đếm ngược Chronometer",
           "energy_price_entity": "Giá năng lượng - Thực thể (tùy chọn)",
-          "energy_price_static": "Giá năng lượng - Giá trị tĩnh (tùy chọn)"
+          "energy_price_static": "Giá năng lượng - Giá trị tĩnh (tùy chọn)",
+          "go_back": "Quay lại mà không lưu"
         },
         "data_description": {
+          "go_back": "Chọn mục này rồi nhấp Gửi để bỏ mọi thay đổi ở trên và quay lại menu chính.",
           "notify_actions": "Chuỗi hành động Home Assistant tùy chọn để chạy thông báo (tập lệnh, thông báo, TTS, v.v.). Nếu được đặt, các hành động sẽ chạy trước dịch vụ thông báo dự phòng.",
           "notify_people": "Các thực thể con người được sử dụng để kiểm soát sự hiện diện. Khi được bật, việc gửi thông báo sẽ bị trì hoãn cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_only_when_home": "Nếu được bật, hãy trì hoãn thông báo cho đến khi có ít nhất một người được chọn ở nhà.",
           "notify_fire_events": "Nếu được bật, hãy kích hoạt các sự kiện Trợ lý gia đình để bắt đầu và kết thúc chu kỳ (ha_washdata_cycle_started và ha_washdata_cycle_ended) để thúc đẩy quá trình tự động hóa.",
+          "notify_start_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu kỳ bắt đầu (ví dụ: notification.mobile_app_my_phone). Để trống để bỏ qua thông báo bắt đầu.",
+          "notify_finish_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu trình kết thúc hoặc gần hoàn thành. Để trống để bỏ qua thông báo kết thúc.",
+          "notify_live_services": "Một hoặc nhiều dịch vụ thông báo để nhận cập nhật tiến độ trực tiếp trong khi chu kỳ chạy (chỉ ứng dụng đồng hành trên thiết bị di động). Để trống để bỏ qua cập nhật trực tiếp.",
           "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
           "notify_live_interval_seconds": "Tần suất cập nhật tiến độ được gửi trong khi chạy. Giá trị thấp hơn phản hồi nhanh hơn nhưng tiêu thụ nhiều thông báo hơn. Tối thiểu 30 giây được thực thi - các giá trị dưới 30 giây sẽ tự động được làm tròn thành 30 giây.",
           "notify_live_overrun_percent": "Biên độ an toàn cao hơn số lượng cập nhật ước tính cho các chu kỳ dài/chạy quá mức (ví dụ: 20% cho phép cập nhật ước tính gấp 1,2 lần).",
+          "notify_live_chronometer": "Khi được bật, mỗi bản cập nhật trực tiếp sẽ bao gồm đồng hồ đếm ngược thời gian cho đến thời gian kết thúc ước tính. Đồng hồ thông báo tự động đếm ngược trên thiết bị giữa các lần cập nhật (chỉ ứng dụng đồng hành với Android).",
           "notify_title": "Tiêu đề tùy chỉnh cho thông báo. Hỗ trợ trình giữ chỗ {device}.",
           "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để gửi không có biểu tượng.",
           "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
           "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}.",
-          "notify_start_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu kỳ bắt đầu (ví dụ: notification.mobile_app_my_phone). Để trống để bỏ qua thông báo bắt đầu.",
-          "notify_finish_services": "Một hoặc nhiều dịch vụ thông báo để cảnh báo khi một chu trình kết thúc hoặc gần hoàn thành. Để trống để bỏ qua thông báo kết thúc.",
-          "notify_live_services": "Một hoặc nhiều dịch vụ thông báo để nhận cập nhật tiến độ trực tiếp trong khi chu kỳ chạy (chỉ ứng dụng đồng hành trên thiết bị di động). Để trống để bỏ qua cập nhật trực tiếp.",
-          "notify_live_chronometer": "Khi được bật, mỗi bản cập nhật trực tiếp sẽ bao gồm đồng hồ đếm ngược thời gian cho đến thời gian kết thúc ước tính. Đồng hồ thông báo tự động đếm ngược trên thiết bị giữa các lần cập nhật (chỉ ứng dụng đồng hành với Android).",
           "energy_price_entity": "Chọn một thực thể số chứa giá điện hiện tại (ví dụ: cảm biến.điện_price, input_number.energy_rate). Khi được đặt, hãy bật trình giữ chỗ {cost}. Được ưu tiên hơn giá trị tĩnh nếu cả hai đều được cấu hình.",
           "energy_price_static": "Giá điện cố định trên mỗi kWh. Khi được đặt, hãy bật trình giữ chỗ {cost}. Bị bỏ qua nếu một thực thể được định cấu hình ở trên. Thêm ký hiệu tiền tệ của bạn vào mẫu tin nhắn, ví dụ: {cost} €."
         }
@@ -148,124 +157,167 @@
       "advanced_settings": {
         "title": "Cài đặt nâng cao",
         "description": "Điều chỉnh các ngưỡng phát hiện, học tập và hành vi nâng cao. Mặc định hoạt động tốt cho hầu hết các thiết lập.",
-        "data": {
-          "apply_suggestions": "Áp dụng các giá trị được đề xuất",
-          "start_threshold_w": "Ngưỡng bắt đầu (W)",
-          "stop_threshold_w": "Ngưỡng dừng (W)",
-          "min_off_gap": "Khoảng cách tối thiểu giữa các chu kỳ",
-          "start_duration_threshold": "Bắt đầu thời lượng gỡ lỗi (các)",
-          "progress_reset_delay": "Độ trễ thiết lập lại tiến trình (giây)",
-          "no_update_active_timeout": "Hết thời gian chờ không cập nhật",
-          "sampling_interval": "Khoảng thời gian lấy mẫu (s)",
-          "auto_label_confidence": "Độ tin cậy của nhãn tự động (0-1)",
-          "learning_confidence": "Độ tin cậy của yêu cầu phản hồi (0-1)",
-          "duration_tolerance": "Dung sai thời lượng (0-0,5)",
-          "profile_match_interval": "Khoảng thời gian khớp hồ sơ (giây)",
-          "profile_match_min_duration_ratio": "Tỷ lệ thời lượng tối thiểu phù hợp với hồ sơ (0,1-1,0)",
-          "profile_match_max_duration_ratio": "Tỷ lệ thời lượng tối đa phù hợp với hồ sơ (1,0-3,0)",
-          "smoothing_window": "Làm mịn cửa sổ (mẫu)",
-          "profile_match_threshold": "Ngưỡng đối sánh hồ sơ",
-          "profile_unmatch_threshold": "Ngưỡng không khớp hồ sơ",
-          "profile_duration_tolerance": "Dung sai thời lượng khớp hồ sơ (0-0,5)",
-          "interrupted_min_seconds": "Bị gián đoạn: Thời gian chạy tối thiểu (giây)",
-          "abrupt_drop_watts": "Bị gián đoạn: Giảm đột ngột tuyệt đối (W)",
-          "abrupt_drop_ratio": "Bị gián đoạn: Tỷ lệ giảm đột ngột (0-1)",
-          "abrupt_high_load_factor": "Bị gián đoạn: Hệ số tải cao",
-          "max_past_cycles": "Duy trì: Số chu kỳ đã lưu tối đa",
-          "max_full_traces_per_profile": "Lưu giữ: Dấu vết đầy đủ tối đa trên mỗi hồ sơ",
-          "max_full_traces_unlabeled": "Lưu giữ: Dấu vết đầy đủ tối đa không được gắn nhãn",
-          "watchdog_interval": "Khoảng thời gian giám sát (giây)",
-          "completion_min_seconds": "Thời gian chạy tối thiểu hoàn thành (giây)",
-          "notify_before_end_minutes": "Thông báo trước khi hoàn thành (phút trước khi kết thúc)",
-          "auto_tune_noise_events_threshold": "Auto-Tune: Ngưỡng sự kiện tiếng ồn",
-          "running_dead_zone": "Chạy vùng chết (giây)",
-          "end_repeat_count": "Số lần lặp lại kết thúc",
-          "start_energy_threshold": "Cổng năng lượng khởi động (Wh)",
-          "end_energy_threshold": "Cổng năng lượng cuối (Wh)",
-          "auto_maintenance": "Kích hoạt tính năng tự động bảo trì",
-          "expose_debug_entities": "Hiển thị các thực thể gỡ lỗi",
-          "save_debug_traces": "Lưu dấu vết gỡ lỗi",
-          "anti_wrinkle_enabled": "Tấm chắn chống nhăn (Chỉ dành cho máy sấy)",
-          "anti_wrinkle_max_power": "Công suất chống nhăn tối đa (W)",
-          "anti_wrinkle_max_duration": "Thời lượng chống nhăn tối đa (s)",
-          "anti_wrinkle_exit_power": "Công suất thoát nếp nhăn (W)",
-          "dtw_bandwidth": "Băng thông DTW",
-          "external_end_trigger_enabled": "Kích hoạt trình kích hoạt kết thúc chu kỳ bên ngoài",
-          "external_end_trigger": "Cảm biến kết thúc chu kỳ bên ngoài",
-          "external_end_trigger_inverted": "Đảo ngược logic kích hoạt (Kích hoạt khi TẮT)",
-          "suppress_feedback_notifications": "Ngăn chặn thông báo phản hồi",
-          "pump_stuck_duration": "(Các) Ngưỡng cảnh báo bị kẹt máy bơm (Chỉ máy bơm)",
-          "door_sensor_entity": "Cảm biến cửa",
-          "pause_cuts_power": "Cắt điện khi tạm dừng",
-          "notify_unload_delay_minutes": "Độ trễ thông báo chờ giặt (phút)",
-          "switch_entity": "Chuyển đổi thực thể (để tạm dừng cắt điện)",
-          "delay_start_detect_enabled": "Bật tính năng phát hiện khởi động bị trì hoãn",
-          "delay_drain_min_power": "Bắt đầu bị trì hoãn: Tiêu hao sức mạnh tối thiểu của Spike (W)",
-          "delay_drain_max_power": "Bắt đầu bị trì hoãn: Xả Spike Max Power (W)",
-          "delay_drain_max_duration": "Bắt đầu bị trì hoãn: Khoảng thời gian tăng đột biến tối đa",
-          "delay_timeout_hours": "Bắt đầu bị trì hoãn: Thời gian chờ tối đa (h)"
-        },
-        "data_description": {
-          "apply_suggestions": "Chọn hộp này để mở bước xem xét các giá trị được đề xuất từ ​​thuật toán học. Không có gì được lưu tự động.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "start_threshold_w": "Công suất phải tăng TRÊN ngưỡng này để BẮT ĐẦU một chu kỳ. Đặt cao hơn nguồn điện dự phòng của bạn. Mặc định: min_power + 1 W.",
-          "stop_threshold_w": "Công suất phải giảm xuống DƯỚI ngưỡng này để KẾT THÚC một chu kỳ. Đặt ngay trên 0 để tránh tiếng ồn gây ra các đầu sai. Mặc định: 0,6 * min_power.",
-          "min_off_gap": "Nếu một chu kỳ bắt đầu trong vòng nhiều giây này kể từ khi kết thúc chu kỳ trước đó, chúng sẽ được HỢP NHẤT thành một chu kỳ duy nhất.",
-          "start_duration_threshold": "Bỏ qua các đợt tăng sức mạnh ngắn hơn khoảng thời gian này (giây). Lọc ra các xung khởi động (ví dụ: 60W trong 2 giây) trước khi chu kỳ thực bắt đầu. Mặc định: 5s.",
-          "progress_reset_delay": "Sau khi một chu kỳ hoàn thành (100%), hãy đợi nhiều giây không hoạt động này trước khi đặt lại tiến trình về 0%. Mặc định: 300s.",
-          "no_update_active_timeout": "Đối với cảm biến xuất bản khi thay đổi: chỉ buộc kết thúc chu trình HOẠT ĐỘNG nếu không có bản cập nhật nào đến trong nhiều giây này. Hoàn thành ở mức năng lượng thấp vẫn sử dụng Độ trễ tắt.",
-          "sampling_interval": "Khoảng thời gian lấy mẫu tối thiểu tính bằng giây. Cập nhật nhanh hơn tốc độ này sẽ bị bỏ qua. Mặc định: 2.0s.",
-          "auto_label_confidence": "Tự động gắn nhãn chu kỳ ở mức hoặc cao hơn độ tin cậy này khi hoàn thành (0,0–1,0).",
-          "learning_confidence": "Độ tin cậy tối thiểu để yêu cầu xác minh người dùng thông qua một sự kiện (0,0–1,0).",
-          "duration_tolerance": "Dung sai cho ước tính thời gian còn lại trong quá trình chạy (0,0–0,5 tương ứng với 0–50%).",
-          "profile_match_interval": "Tần suất (tính bằng giây) để thử khớp hồ sơ trong một chu kỳ. Giá trị thấp hơn giúp phát hiện nhanh hơn nhưng sử dụng nhiều CPU hơn. Mặc định: 300s (5 phút).",
-          "profile_match_min_duration_ratio": "Tỷ lệ thời lượng tối thiểu để khớp hồ sơ. Chu kỳ chạy ít nhất phải bằng khoảng thời gian này của hồ sơ để khớp. Thấp hơn = khớp sớm hơn. Mặc định: 0,50 (50%).",
-          "profile_match_max_duration_ratio": "Tỷ lệ thời lượng tối đa để khớp hồ sơ. Chu kỳ chạy không được vượt quá bội số thời lượng hồ sơ này. Cao hơn = khoan dung hơn. Mặc định: 1,50 (150%).",
-          "smoothing_window": "Số chỉ số công suất gần đây được sử dụng để làm mịn đường trung bình động.",
-          "profile_match_threshold": "Cần có điểm tương tự DTW tối thiểu (0,0–1,0) để coi một hồ sơ là phù hợp. Cao hơn = kết hợp chặt chẽ hơn, ít kết quả sai hơn. Mặc định: 0,4.",
-          "profile_unmatch_threshold": "Điểm tương tự DTW (0,0–1,0) mà dưới mức đó hồ sơ phù hợp trước đó sẽ bị từ chối. Nên thấp hơn ngưỡng phù hợp để tránh hiện tượng nhấp nháy. Mặc định: 0,35.",
-          "profile_duration_tolerance": "Dung sai được sử dụng bằng cách so khớp hồ sơ cho tổng phương sai thời lượng (0,0–0,5). Hành vi mặc định: ±25%.",
-          "interrupted_min_seconds": "Chạy ngắn hơn thời gian này có thể được phân loại là 'bị gián đoạn'.",
-          "abrupt_drop_watts": "Sự sụt giảm sức mạnh tuyệt đối (W) được coi là một vách đá đột ngột.",
-          "abrupt_drop_ratio": "Tỷ lệ giảm tương đối (0–1). Ví dụ: 0,6 có nghĩa là mức giảm 60% là đột ngột.",
-          "abrupt_high_load_factor": "Hệ số trên mức cơ sở được coi là 'tải cao' trước khi giảm đột ngột (được sử dụng với tính năng phát hiện đột ngột).",
-          "max_past_cycles": "Tổng số chu kỳ cần giữ lại (đã xóa cũ nhất). Mặc định: 200.",
-          "max_full_traces_per_profile": "Số chu kỳ được dán nhãn gần đây để duy trì dấu vết nguồn đầy đủ cho mỗi cấu hình. Dấu vết cũ hơn được tóm tắt qua phong bì. Mặc định: 20.",
-          "max_full_traces_unlabeled": "Số chu kỳ chưa được gắn nhãn gần đây được duy trì ở mức công suất tối đa để hỗ trợ việc gắn nhãn tự động. Mặc định: 20.",
-          "watchdog_interval": "Giây giữa các lần kiểm tra của cơ quan giám sát trong khi chạy. Mặc định: 5s. CẢNH BÁO: Đảm bảo giá trị này CAO hơn khoảng thời gian cập nhật cảm biến của bạn để tránh dừng nhầm (ví dụ: nếu cảm biến cập nhật sau mỗi 60 giây, hãy sử dụng 65 giây+).",
-          "completion_min_seconds": "Các chu kỳ ngắn hơn thời gian này sẽ được đánh dấu là 'bị gián đoạn' ngay cả khi chúng kết thúc một cách tự nhiên. Mặc định: 600s.",
-          "notify_before_end_minutes": "Vài phút trước khi kết thúc chu kỳ ước tính để kích hoạt thông báo. Đặt thành 0 để tắt. Mặc định: 0.",
-          "auto_tune_noise_events_threshold": "Số chu kỳ 'nhiễu' ngắn/công suất thấp trong vòng 24 giờ cần thiết để tự động điều chỉnh min_power. Mặc định: 3.",
-          "running_dead_zone": "Sau khi chu kỳ bắt đầu, hãy bỏ qua tình trạng mất điện trong nhiều giây này để ngăn chặn việc phát hiện sai đầu cuối trong giai đoạn khởi động ban đầu. Đặt thành 0 để tắt. Mặc định: 0s.",
-          "end_repeat_count": "Số lần điều kiện kết thúc (công suất dưới ngưỡng cho off_delay) phải được đáp ứng liên tiếp trước khi kết thúc chu kỳ. Giá trị cao hơn ngăn chặn kết thúc sai trong quá trình tạm dừng. Mặc định: 1.",
-          "start_energy_threshold": "Chu trình phải tích lũy ít nhất mức năng lượng (Wh) này trong giai đoạn BẮT ĐẦU để được xác nhận. Mặc định: 0,005 Wh.",
-          "end_energy_threshold": "Chu kỳ chỉ kết thúc nếu năng lượng trong cửa sổ Tắt trễ cuối cùng thấp hơn giá trị này (Wh). Ngăn chặn các đầu sai nếu nguồn điện dao động gần bằng 0. Mặc định: 0,05 Wh.",
-          "auto_maintenance": "Cho phép tự động bảo trì (sửa chữa mẫu, hợp nhất các đoạn).",
-          "expose_debug_entities": "Hiển thị các cảm biến nâng cao (Độ tin cậy, Pha, Sự mơ hồ) để gỡ lỗi.",
-          "save_debug_traces": "Lưu trữ xếp hạng chi tiết và dữ liệu theo dõi sức mạnh trong lịch sử (Tăng mức sử dụng bộ nhớ).",
-          "anti_wrinkle_enabled": "Bỏ qua các vòng quay trống công suất thấp trong thời gian ngắn sau khi chu trình kết thúc để tránh chu kỳ ma (chỉ máy sấy/máy giặt-máy sấy).",
-          "anti_wrinkle_max_power": "Các lần tăng tốc bằng hoặc thấp hơn công suất này được coi là các vòng quay chống nếp nhăn thay vì các chu kỳ mới. Chỉ áp dụng khi Tấm chắn chống nhăn được bật.",
-          "anti_wrinkle_max_duration": "Chiều dài bùng nổ tối đa được coi là vòng xoay chống nhăn. Chỉ áp dụng khi Tấm chắn chống nhăn được bật.",
-          "anti_wrinkle_exit_power": "Nếu điện năng giảm xuống dưới mức này, hãy thoát khỏi tính năng chống nhăn ngay lập tức (tắt đúng). Chỉ áp dụng khi Tấm chắn chống nhăn được bật.",
-          "dtw_bandwidth": "Thời gian cong vênh (kéo dài) tối đa cho phép theo tỷ lệ của thời lượng chu kỳ. Giá trị cao hơn cho phép khớp các chu kỳ biến đổi cao nhưng làm tăng chi phí CPU. Mặc định: 0,20 (20%).",
-          "external_end_trigger_enabled": "Cho phép giám sát cảm biến nhị phân bên ngoài để kích hoạt hoàn thành chu trình.",
-          "external_end_trigger": "Chọn thực thể cảm biến nhị phân. Khi cảm biến này kích hoạt, chu kỳ hiện tại sẽ kết thúc với trạng thái “đã hoàn thành”.",
-          "external_end_trigger_inverted": "Theo mặc định, trình kích hoạt sẽ kích hoạt khi cảm biến BẬT. Thay vào đó, hãy chọn hộp này để kích hoạt khi cảm biến TẮT.",
-          "suppress_feedback_notifications": "Khi được bật, WashData sẽ vẫn theo dõi và yêu cầu phản hồi nội bộ nhưng sẽ không hiển thị thông báo liên tục yêu cầu bạn xác nhận chu kỳ. Hữu ích khi các chu kỳ luôn được phát hiện chính xác và bạn thấy các lời nhắc khiến bạn mất tập trung.",
-          "pump_stuck_duration": "Nếu chu trình bơm vẫn chạy sau nhiều giây này, sự kiện ha_washdata_pump_stuck sẽ được kích hoạt một lần. Sử dụng tính năng này để phát hiện động cơ bị kẹt (thời gian chạy máy bơm bể phốt thông thường là dưới 60 giây). Mặc định: 1800 giây (30 phút). Chỉ loại thiết bị bơm.",
-          "door_sensor_entity": "Cảm biến nhị phân tùy chọn cho cửa máy (bật = mở, tắt = đóng). Khi cửa mở trong một chu trình đang hoạt động, WashData sẽ xác nhận chu trình đó được tạm dừng một cách có chủ ý. Sau khi chu trình kết thúc, nếu cửa vẫn đóng, trạng thái sẽ chuyển sang 'Sạch' cho đến khi cửa được mở. Lưu ý: việc đóng cửa KHÔNG tự động tiếp tục lại chu trình đã tạm dừng - việc tiếp tục phải được kích hoạt thủ công thông qua nút hoặc dịch vụ Tiếp tục chu trình.",
-          "pause_cuts_power": "Khi tạm dừng thông qua nút hoặc dịch vụ Tạm dừng Chu kỳ, hãy tắt cả thực thể chuyển đổi đã định cấu hình. Chỉ có hiệu lực nếu thực thể chuyển đổi được định cấu hình cho thiết bị này.",
-          "notify_unload_delay_minutes": "Gửi thông báo qua kênh thông báo kết thúc sau khi chu trình kết thúc và cửa chưa được mở trong nhiều phút này (yêu cầu Cảm biến cửa). Đặt thành 0 để tắt. Mặc định: 60 phút.",
-          "switch_entity": "Thực thể chuyển đổi để chuyển đổi khi tạm dừng hoặc tiếp tục. Bắt buộc khi bật 'Cắt nguồn khi tạm dừng'.",
-          "delay_start_detect_enabled": "Khi được bật, một đợt tiêu hao năng lượng thấp trong thời gian ngắn, sau đó là nguồn điện dự phòng duy trì được phát hiện là khởi động chậm. Cảm biến trạng thái hiển thị 'Đang chờ bắt đầu' trong thời gian trễ. Không có thời gian hoặc tiến trình của chương trình nào được theo dõi cho đến khi chu kỳ thực sự bắt đầu. Yêu cầu phải đặt start_threshold_w trên mức công suất tăng đột biến.",
-          "delay_drain_min_power": "Công suất tối thiểu (W) để nhận biết là mức tăng đột biến. Đặt ngay trên mức chờ tắt của máy. Mặc định: 10 W.",
-          "delay_drain_max_power": "Công suất tối đa (W) cho một đợt xả tăng đột biến - các lần tăng trên mức này được coi là một chu kỳ bắt đầu thực sự. Phải ở dưới cài đặt start_threshold_w của bạn. Mặc định: 80 W.",
-          "delay_drain_max_duration": "Mũi thoát nước phải giảm trở lại bên dưới cửa sổ thoát nước trong vòng vài giây này để được xác nhận. Các gai dài hơn được coi là hoạt động chu kỳ thực. Mặc định: 60 giây.",
-          "delay_timeout_hours": "Hết thời gian chờ an toàn: nếu máy vẫn ở trạng thái 'Đang chờ khởi động' sau nhiều giờ như vậy, WashData sẽ đặt lại thành Tắt. Mặc định: 8 giờ."
+        "sections": {
+          "suggestions_section": {
+            "name": "Cài đặt đề xuất",
+            "description": "Có {suggestions_count} đề xuất đã học được. Hãy chọn 'Áp dụng các giá trị được đề xuất' để xem lại các thay đổi đề xuất trước khi lưu.",
+            "data": {
+              "apply_suggestions": "Áp dụng các giá trị được đề xuất"
+            },
+            "data_description": {
+              "apply_suggestions": "Chọn hộp này để mở bước xem xét các giá trị được đề xuất từ ​​thuật toán học. Không có gì được lưu tự động.\n\nĐề xuất (từ học tập):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
+            }
+          },
+          "detection_section": {
+            "name": "Phát hiện và ngưỡng công suất",
+            "description": "Khi nào thiết bị được coi là BẬT hoặc TẮT, các ngưỡng năng lượng và thời điểm chuyển trạng thái.",
+            "data": {
+              "start_duration_threshold": "Bắt đầu thời lượng gỡ lỗi (các)",
+              "start_energy_threshold": "Cổng năng lượng khởi động (Wh)",
+              "completion_min_seconds": "Thời gian chạy tối thiểu hoàn thành (giây)",
+              "start_threshold_w": "Ngưỡng bắt đầu (W)",
+              "stop_threshold_w": "Ngưỡng dừng (W)",
+              "end_energy_threshold": "Cổng năng lượng cuối (Wh)",
+              "running_dead_zone": "Chạy vùng chết (giây)",
+              "end_repeat_count": "Số lần lặp lại kết thúc",
+              "min_off_gap": "Khoảng cách tối thiểu giữa các chu kỳ",
+              "sampling_interval": "Khoảng thời gian lấy mẫu (s)"
+            },
+            "data_description": {
+              "start_duration_threshold": "Bỏ qua các đợt tăng sức mạnh ngắn hơn khoảng thời gian này (giây). Lọc ra các xung khởi động (ví dụ: 60W trong 2 giây) trước khi chu kỳ thực bắt đầu. Mặc định: 5s.",
+              "start_energy_threshold": "Chu trình phải tích lũy ít nhất mức năng lượng (Wh) này trong giai đoạn BẮT ĐẦU để được xác nhận. Mặc định: 0,005 Wh.",
+              "completion_min_seconds": "Các chu kỳ ngắn hơn thời gian này sẽ được đánh dấu là 'bị gián đoạn' ngay cả khi chúng kết thúc một cách tự nhiên. Mặc định: 600s.",
+              "start_threshold_w": "Công suất phải tăng TRÊN ngưỡng này để BẮT ĐẦU một chu kỳ. Đặt cao hơn nguồn điện dự phòng của bạn. Mặc định: min_power + 1 W.",
+              "stop_threshold_w": "Công suất phải giảm xuống DƯỚI ngưỡng này để KẾT THÚC một chu kỳ. Đặt ngay trên 0 để tránh tiếng ồn gây ra các đầu sai. Mặc định: 0,6 * min_power.",
+              "end_energy_threshold": "Chu kỳ chỉ kết thúc nếu năng lượng trong cửa sổ Tắt trễ cuối cùng thấp hơn giá trị này (Wh). Ngăn chặn các đầu sai nếu nguồn điện dao động gần bằng 0. Mặc định: 0,05 Wh.",
+              "running_dead_zone": "Sau khi chu kỳ bắt đầu, hãy bỏ qua tình trạng mất điện trong nhiều giây này để ngăn chặn việc phát hiện sai đầu cuối trong giai đoạn khởi động ban đầu. Đặt thành 0 để tắt. Mặc định: 0s.",
+              "end_repeat_count": "Số lần điều kiện kết thúc (công suất dưới ngưỡng cho off_delay) phải được đáp ứng liên tiếp trước khi kết thúc chu kỳ. Giá trị cao hơn ngăn chặn kết thúc sai trong quá trình tạm dừng. Mặc định: 1.",
+              "min_off_gap": "Nếu một chu kỳ bắt đầu trong vòng nhiều giây này kể từ khi kết thúc chu kỳ trước đó, chúng sẽ được HỢP NHẤT thành một chu kỳ duy nhất.",
+              "sampling_interval": "Khoảng thời gian lấy mẫu tối thiểu tính bằng giây. Cập nhật nhanh hơn tốc độ này sẽ bị bỏ qua. Mặc định: 2.0s."
+            }
+          },
+          "matching_section": {
+            "name": "Khớp hồ sơ và học tập",
+            "description": "WashData sẽ khớp các chu kỳ đang chạy với các hồ sơ đã học một cách quyết liệt đến mức nào và khi nào cần hỏi phản hồi.",
+            "data": {
+              "profile_match_min_duration_ratio": "Tỷ lệ thời lượng tối thiểu phù hợp với hồ sơ (0,1-1,0)",
+              "profile_match_interval": "Khoảng thời gian khớp hồ sơ (giây)",
+              "profile_match_threshold": "Ngưỡng đối sánh hồ sơ",
+              "profile_unmatch_threshold": "Ngưỡng không khớp hồ sơ",
+              "auto_label_confidence": "Độ tin cậy của nhãn tự động (0-1)",
+              "learning_confidence": "Độ tin cậy của yêu cầu phản hồi (0-1)",
+              "suppress_feedback_notifications": "Ngăn chặn thông báo phản hồi",
+              "duration_tolerance": "Dung sai thời lượng (0-0,5)",
+              "smoothing_window": "Làm mịn cửa sổ (mẫu)",
+              "profile_duration_tolerance": "Dung sai thời lượng khớp hồ sơ (0-0,5)"
+            },
+            "data_description": {
+              "profile_match_min_duration_ratio": "Tỷ lệ thời lượng tối thiểu để khớp hồ sơ. Chu kỳ chạy ít nhất phải bằng khoảng thời gian này của hồ sơ để khớp. Thấp hơn = khớp sớm hơn. Mặc định: 0,50 (50%).",
+              "profile_match_interval": "Tần suất (tính bằng giây) để thử khớp hồ sơ trong một chu kỳ. Giá trị thấp hơn giúp phát hiện nhanh hơn nhưng sử dụng nhiều CPU hơn. Mặc định: 300s (5 phút).",
+              "profile_match_threshold": "Cần có điểm tương tự DTW tối thiểu (0,0–1,0) để coi một hồ sơ là phù hợp. Cao hơn = kết hợp chặt chẽ hơn, ít kết quả sai hơn. Mặc định: 0,4.",
+              "profile_unmatch_threshold": "Điểm tương tự DTW (0,0–1,0) mà dưới mức đó hồ sơ phù hợp trước đó sẽ bị từ chối. Nên thấp hơn ngưỡng phù hợp để tránh hiện tượng nhấp nháy. Mặc định: 0,35.",
+              "auto_label_confidence": "Tự động gắn nhãn chu kỳ ở mức hoặc cao hơn độ tin cậy này khi hoàn thành (0,0–1,0).",
+              "learning_confidence": "Độ tin cậy tối thiểu để yêu cầu xác minh người dùng thông qua một sự kiện (0,0–1,0).",
+              "suppress_feedback_notifications": "Khi được bật, WashData sẽ vẫn theo dõi và yêu cầu phản hồi nội bộ nhưng sẽ không hiển thị thông báo liên tục yêu cầu bạn xác nhận chu kỳ. Hữu ích khi các chu kỳ luôn được phát hiện chính xác và bạn thấy các lời nhắc khiến bạn mất tập trung.",
+              "duration_tolerance": "Dung sai cho ước tính thời gian còn lại trong quá trình chạy (0,0–0,5 tương ứng với 0–50%).",
+              "smoothing_window": "Số chỉ số công suất gần đây được sử dụng để làm mịn đường trung bình động.",
+              "profile_duration_tolerance": "Dung sai được sử dụng bằng cách so khớp hồ sơ cho tổng phương sai thời lượng (0,0–0,5). Hành vi mặc định: ±25%."
+            }
+          },
+          "timing_section": {
+            "name": "Thời gian, bảo trì và gỡ lỗi",
+            "description": "Watchdog, đặt lại tiến trình, tự động bảo trì và hiển thị thực thể gỡ lỗi.",
+            "data": {
+              "watchdog_interval": "Khoảng thời gian giám sát (giây)",
+              "no_update_active_timeout": "Hết thời gian chờ không cập nhật",
+              "progress_reset_delay": "Độ trễ thiết lập lại tiến trình (giây)",
+              "auto_maintenance": "Kích hoạt tính năng tự động bảo trì",
+              "expose_debug_entities": "Hiển thị các thực thể gỡ lỗi",
+              "save_debug_traces": "Lưu dấu vết gỡ lỗi"
+            },
+            "data_description": {
+              "watchdog_interval": "Giây giữa các lần kiểm tra của cơ quan giám sát trong khi chạy. Mặc định: 5s. CẢNH BÁO: Đảm bảo giá trị này CAO hơn khoảng thời gian cập nhật cảm biến của bạn để tránh dừng nhầm (ví dụ: nếu cảm biến cập nhật sau mỗi 60 giây, hãy sử dụng 65 giây+).",
+              "no_update_active_timeout": "Đối với cảm biến xuất bản khi thay đổi: chỉ buộc kết thúc chu trình HOẠT ĐỘNG nếu không có bản cập nhật nào đến trong nhiều giây này. Hoàn thành ở mức năng lượng thấp vẫn sử dụng Độ trễ tắt.",
+              "progress_reset_delay": "Sau khi một chu kỳ hoàn thành (100%), hãy đợi nhiều giây không hoạt động này trước khi đặt lại tiến trình về 0%. Mặc định: 300s.",
+              "auto_maintenance": "Cho phép tự động bảo trì (sửa chữa mẫu, hợp nhất các đoạn).",
+              "expose_debug_entities": "Hiển thị các cảm biến nâng cao (Độ tin cậy, Pha, Sự mơ hồ) để gỡ lỗi.",
+              "save_debug_traces": "Lưu trữ xếp hạng chi tiết và dữ liệu theo dõi sức mạnh trong lịch sử (Tăng mức sử dụng bộ nhớ)."
+            }
+          },
+          "anti_wrinkle_section": {
+            "name": "Tấm chắn chống nhăn (Máy sấy)",
+            "description": "Bỏ qua các lần quay lồng sau khi kết thúc chu kỳ để tránh chu kỳ ma. Chỉ dành cho máy sấy / máy giặt-sấy.",
+            "data": {
+              "anti_wrinkle_enabled": "Tấm chắn chống nhăn (Chỉ dành cho máy sấy)",
+              "anti_wrinkle_max_power": "Công suất chống nhăn tối đa (W)",
+              "anti_wrinkle_max_duration": "Thời lượng chống nhăn tối đa (s)",
+              "anti_wrinkle_exit_power": "Công suất thoát nếp nhăn (W)"
+            },
+            "data_description": {
+              "anti_wrinkle_enabled": "Bỏ qua các vòng quay trống công suất thấp trong thời gian ngắn sau khi chu trình kết thúc để tránh chu kỳ ma (chỉ máy sấy/máy giặt-máy sấy).",
+              "anti_wrinkle_max_power": "Các lần tăng tốc bằng hoặc thấp hơn công suất này được coi là các vòng quay chống nếp nhăn thay vì các chu kỳ mới. Chỉ áp dụng khi Tấm chắn chống nhăn được bật.",
+              "anti_wrinkle_max_duration": "Chiều dài bùng nổ tối đa được coi là vòng xoay chống nhăn. Chỉ áp dụng khi Tấm chắn chống nhăn được bật.",
+              "anti_wrinkle_exit_power": "Nếu điện năng giảm xuống dưới mức này, hãy thoát khỏi tính năng chống nhăn ngay lập tức (tắt đúng). Chỉ áp dụng khi Tấm chắn chống nhăn được bật."
+            }
+          },
+          "delay_start_section": {
+            "name": "Phát hiện khởi động trễ",
+            "description": "Coi trạng thái chờ công suất thấp kéo dài là 'Đang chờ bắt đầu' cho đến khi chu kỳ thực sự bắt đầu.",
+            "data": {
+              "delay_start_detect_enabled": "Bật tính năng phát hiện khởi động bị trì hoãn",
+              "delay_confirm_seconds": "Khởi động trễ: Thời gian xác nhận chờ (giây)",
+              "delay_timeout_hours": "Bắt đầu bị trì hoãn: Thời gian chờ tối đa (h)"
+            },
+            "data_description": {
+              "delay_start_detect_enabled": "Khi được bật, một đợt tiêu hao năng lượng thấp trong thời gian ngắn, sau đó là nguồn điện dự phòng duy trì được phát hiện là khởi động chậm. Cảm biến trạng thái hiển thị 'Đang chờ bắt đầu' trong thời gian trễ. Không có thời gian hoặc tiến trình của chương trình nào được theo dõi cho đến khi chu kỳ thực sự bắt đầu. Yêu cầu phải đặt start_threshold_w trên mức công suất tăng đột biến.",
+              "delay_confirm_seconds": "Công suất phải nằm giữa Ngưỡng dừng (W) và Ngưỡng bắt đầu (W) trong khoảng thời gian này trước khi WashData chuyển sang trạng thái 'Đang chờ bắt đầu'. Giúp lọc các đỉnh ngắn khi điều hướng menu. Mặc định: 60 giây.",
+              "delay_timeout_hours": "Hết thời gian chờ an toàn: nếu máy vẫn ở trạng thái 'Đang chờ khởi động' sau nhiều giờ như vậy, WashData sẽ đặt lại thành Tắt. Mặc định: 8 giờ."
+            }
+          },
+          "external_triggers_section": {
+            "name": "Kích hoạt bên ngoài, cửa và tạm dừng",
+            "description": "Cảm biến kích hoạt kết thúc bên ngoài tùy chọn, cảm biến cửa để phát hiện tạm dừng/sạch, và công tắc cắt điện khi tạm dừng.",
+            "data": {
+              "external_end_trigger_enabled": "Kích hoạt trình kích hoạt kết thúc chu kỳ bên ngoài",
+              "external_end_trigger": "Cảm biến kết thúc chu kỳ bên ngoài",
+              "external_end_trigger_inverted": "Đảo ngược logic kích hoạt (Kích hoạt khi TẮT)",
+              "door_sensor_entity": "Cảm biến cửa",
+              "pause_cuts_power": "Cắt điện khi tạm dừng",
+              "switch_entity": "Chuyển đổi thực thể (để tạm dừng cắt điện)",
+              "notify_unload_delay_minutes": "Độ trễ thông báo chờ giặt (phút)"
+            },
+            "data_description": {
+              "external_end_trigger_enabled": "Cho phép giám sát cảm biến nhị phân bên ngoài để kích hoạt hoàn thành chu trình.",
+              "external_end_trigger": "Chọn thực thể cảm biến nhị phân. Khi cảm biến này kích hoạt, chu kỳ hiện tại sẽ kết thúc với trạng thái “đã hoàn thành”.",
+              "external_end_trigger_inverted": "Theo mặc định, trình kích hoạt sẽ kích hoạt khi cảm biến BẬT. Thay vào đó, hãy chọn hộp này để kích hoạt khi cảm biến TẮT.",
+              "door_sensor_entity": "Cảm biến nhị phân tùy chọn cho cửa máy (bật = mở, tắt = đóng). Khi cửa mở trong một chu trình đang hoạt động, WashData sẽ xác nhận chu trình đó được tạm dừng một cách có chủ ý. Sau khi chu trình kết thúc, nếu cửa vẫn đóng, trạng thái sẽ chuyển sang 'Sạch' cho đến khi cửa được mở. Lưu ý: việc đóng cửa KHÔNG tự động tiếp tục lại chu trình đã tạm dừng - việc tiếp tục phải được kích hoạt thủ công thông qua nút hoặc dịch vụ Tiếp tục chu trình.",
+              "pause_cuts_power": "Khi tạm dừng thông qua nút hoặc dịch vụ Tạm dừng Chu kỳ, hãy tắt cả thực thể chuyển đổi đã định cấu hình. Chỉ có hiệu lực nếu thực thể chuyển đổi được định cấu hình cho thiết bị này.",
+              "switch_entity": "Thực thể chuyển đổi để chuyển đổi khi tạm dừng hoặc tiếp tục. Bắt buộc khi bật 'Cắt nguồn khi tạm dừng'.",
+              "notify_unload_delay_minutes": "Gửi thông báo qua kênh thông báo kết thúc sau khi chu trình kết thúc và cửa chưa được mở trong nhiều phút này (yêu cầu Cảm biến cửa). Đặt thành 0 để tắt. Mặc định: 60 phút."
+            }
+          },
+          "pump_section": {
+            "name": "Giám sát bơm",
+            "description": "Chỉ dành cho loại thiết bị bơm. Sẽ phát một sự kiện nếu chu kỳ bơm vượt quá thời lượng này.",
+            "data": {
+              "pump_stuck_duration": "(Các) Ngưỡng cảnh báo bị kẹt máy bơm (Chỉ máy bơm)"
+            },
+            "data_description": {
+              "pump_stuck_duration": "Nếu chu trình bơm vẫn chạy sau nhiều giây này, sự kiện ha_washdata_pump_stuck sẽ được kích hoạt một lần. Sử dụng tính năng này để phát hiện động cơ bị kẹt (thời gian chạy máy bơm bể phốt thông thường là dưới 60 giây). Mặc định: 1800 giây (30 phút). Chỉ loại thiết bị bơm."
+            }
+          }
         }
       },
       "diagnostics": {
         "title": "Chẩn đoán & Bảo trì",
-        "description": "Chạy các hành động bảo trì như hợp nhất các chu trình bị phân mảnh hoặc di chuyển dữ liệu được lưu trữ.\n\n**Sử dụng bộ nhớ**\n\n- Kích thước Tệp: {file_size_kb} KB\n- Chu kỳ: {cycle_count}\n- Hồ sơ: {profile_count}\n- Dấu vết gỡ lỗi: {debug_count}"
+        "description": "Chạy các hành động bảo trì như hợp nhất các chu trình bị phân mảnh hoặc di chuyển dữ liệu được lưu trữ.\n\n**Sử dụng bộ nhớ**\n\n- Kích thước Tệp: {file_size_kb} KB\n- Chu kỳ: {cycle_count}\n- Hồ sơ: {profile_count}\n- Dấu vết gỡ lỗi: {debug_count}",
+        "menu_options": {
+          "reprocess_history": "Bảo trì: Tái xử lý & Tối ưu hóa dữ liệu",
+          "clear_debug_data": "Xóa dữ liệu gỡ lỗi (Giải phóng dung lượng)",
+          "wipe_history": "Xóa TẤT CẢ dữ liệu cho thiết bị này (không thể đảo ngược)",
+          "export_import": "Xuất/Nhập JSON kèm theo cài đặt (sao chép/dán)",
+          "menu_back": "← Quay lại"
+        }
       },
       "clear_debug_data": {
         "title": "Xóa dữ liệu gỡ lỗi",
@@ -274,36 +326,52 @@
       "manage_cycles": {
         "title": "Quản lý chu kỳ",
         "description": "Chu kỳ gần đây:\n{recent_cycles}",
-        "data": {
-          "action": "Hoạt động"
+        "menu_options": {
+          "auto_label_cycles": "Tự động dán nhãn chu kỳ cũ",
+          "select_cycle_to_label": "Chu kỳ cụ thể của nhãn",
+          "select_cycle_to_delete": "Xóa chu kỳ",
+          "interactive_editor": "Trình soạn thảo tương tác hợp nhất/tách",
+          "trim_cycle_select": "Dữ liệu chu kỳ cắt",
+          "menu_back": "← Quay lại"
         }
       },
       "manage_cycles_empty": {
         "title": "Quản lý chu kỳ",
         "description": "Chưa có chu kỳ nào được ghi lại.",
-        "data": {
-          "action": "Hoạt động"
+        "menu_options": {
+          "auto_label_cycles": "Tự động dán nhãn chu kỳ cũ",
+          "menu_back": "← Quay lại"
         }
       },
       "manage_profiles": {
         "title": "Quản lý hồ sơ",
         "description": "Tóm tắt hồ sơ:\n{profile_summary}",
-        "data": {
-          "action": "Hoạt động"
+        "menu_options": {
+          "create_profile": "Tạo hồ sơ mới",
+          "edit_profile": "Chỉnh sửa/Đổi tên hồ sơ",
+          "delete_profile_select": "Xóa hồ sơ",
+          "profile_stats": "Thống kê hồ sơ",
+          "cleanup_profile": "Dọn dẹp lịch sử - Biểu đồ & Xóa",
+          "assign_profile_phases_select": "Chỉ định phạm vi pha",
+          "menu_back": "← Quay lại"
         }
       },
       "manage_profiles_empty": {
         "title": "Quản lý hồ sơ",
         "description": "Chưa có hồ sơ nào được tạo.",
-        "data": {
-          "action": "Hoạt động"
+        "menu_options": {
+          "create_profile": "Tạo hồ sơ mới",
+          "menu_back": "← Quay lại"
         }
       },
       "manage_phase_catalog": {
         "title": "Quản lý danh mục giai đoạn",
         "description": "Danh mục pha (mặc định cho thiết bị này + các pha tùy chỉnh):\n{phase_summary}",
-        "data": {
-          "action": "Hoạt động"
+        "menu_options": {
+          "phase_catalog_create": "Tạo giai đoạn mới",
+          "phase_catalog_edit_select": "Chỉnh sửa giai đoạn",
+          "phase_catalog_delete": "Xóa giai đoạn",
+          "menu_back": "← Quay lại"
         }
       },
       "phase_catalog_create": {
@@ -340,8 +408,14 @@
       "assign_profile_phases": {
         "title": "Chỉ định phạm vi pha",
         "description": "Xem trước giai đoạn cho hồ sơ: **{profile_name}**\n\n{timeline_svg}\n\n**Phạm vi hiện tại:**\n{current_ranges}\n\nSử dụng các thao tác bên dưới để thêm, chỉnh sửa, xóa hoặc lưu phạm vi.",
-        "data": {
-          "action": "Hoạt động"
+        "menu_options": {
+          "assign_profile_phases_add": "Thêm phạm vi pha",
+          "assign_profile_phases_edit_select": "Chỉnh sửa phạm vi pha",
+          "assign_profile_phases_delete": "Xóa phạm vi pha",
+          "phase_ranges_clear": "Xóa tất cả các phạm vi",
+          "assign_profile_phases_auto_detect": "Tự động phát hiện các pha",
+          "phase_ranges_save": "Lưu và trả lại",
+          "menu_back": "← Quay lại"
         }
       },
       "assign_profile_phases_add": {
@@ -494,8 +568,11 @@
       "interactive_editor": {
         "title": "Trình soạn thảo tương tác hợp nhất/tách",
         "description": "Chọn một hành động thủ công để thực hiện trên lịch sử chu kỳ của bạn.",
-        "data": {
-          "editor_action": "Hoạt động"
+        "menu_options": {
+          "editor_split": "Tách một chu kỳ (Tìm khoảng trống)",
+          "editor_merge": "Hợp nhất các chu kỳ (Nối các đoạn)",
+          "editor_delete": "Xóa (các) chu kỳ",
+          "menu_back": "← Quay lại"
         }
       },
       "editor_select": {
@@ -529,7 +606,21 @@
         "title": "Cấu hình phân chia",
         "description": "Điều chỉnh độ nhạy để tách chu kỳ này. Bất kỳ khoảng trống nhàn rỗi nào dài hơn khoảng cách này sẽ gây ra sự phân chia.",
         "data": {
-          "min_gap_seconds": "Ngưỡng khoảng cách phân chia (giây)"
+          "split_mode": "Phương pháp tách"
+        }
+      },
+      "editor_split_auto_params": {
+        "title": "Cấu hình tách tự động",
+        "description": "Điều chỉnh độ nhạy để tách chu kỳ này. Bất kỳ khoảng nghỉ nào dài hơn mức này sẽ gây ra việc tách.",
+        "data": {
+          "min_gap_seconds": "Ngưỡng khoảng tách (giây)"
+        }
+      },
+      "editor_split_manual_params": {
+        "title": "Dấu thời gian tách thủ công",
+        "description": "{preview_md}Cửa sổ chu kỳ: **{cycle_start_wallclock} → {cycle_end_wallclock}** vào {cycle_date}.\n\nNhập một hoặc nhiều dấu thời gian tách (`HH:MM` hoặc `HH:MM:SS`), mỗi dòng một dấu. Chu kỳ sẽ bị cắt tại mỗi dấu thời gian — N dấu thời gian tạo ra N+1 phân đoạn.",
+        "data": {
+          "split_timestamps": "Dấu thời gian tách"
         }
       },
       "reprocess_history": {
@@ -555,8 +646,13 @@
       "record_cycle": {
         "title": "Chu kỳ ghi",
         "description": "Ghi lại chu trình theo cách thủ công để tạo hồ sơ rõ ràng mà không bị can thiệp.\n\nTrạng thái: **{status}**\nThời lượng: {duration} giây\nMẫu: {samples}",
-        "data": {
-          "action": "Hoạt động"
+        "menu_options": {
+          "record_refresh": "Trạng thái làm mới",
+          "record_stop": "Dừng ghi (Lưu & Xử lý)",
+          "record_start": "Bắt đầu ghi âm mới",
+          "record_process": "Xử lý bản ghi cuối cùng (Cắt & Lưu)",
+          "record_discard": "Hủy bản ghi cuối cùng",
+          "menu_back": "← Quay lại"
         }
       },
       "record_process": {
@@ -571,14 +667,33 @@
       },
       "learning_feedbacks": {
         "title": "Phản hồi học tập",
-        "description": "Chọn một yêu cầu xem xét chu kỳ để xử lý.",
+        "description": "Phản hồi đang chờ xử lý: {count}\n\n{pending_table}\n\nChọn một yêu cầu xem xét chu kỳ để xử lý.",
+        "menu_options": {
+          "learning_feedbacks_pick": "Xem lại một phản hồi đang chờ xử lý",
+          "learning_feedbacks_dismiss_all": "Bỏ qua toàn bộ phản hồi đang chờ xử lý",
+          "menu_back": "← Quay lại"
+        }
+      },
+      "learning_feedbacks_pick": {
+        "title": "Chọn phản hồi để xem lại",
+        "description": "Chọn một yêu cầu xem xét chu kỳ để mở.",
         "data": {
-          "selected_feedback": "Chọn chu kỳ để xem xét"
+          "selected_feedback": "Chọn chu kỳ để xem lại"
         }
       },
       "learning_feedbacks_empty": {
         "title": "Phản hồi học tập",
-        "description": "Không tìm thấy yêu cầu phản hồi đang chờ xử lý."
+        "description": "Không tìm thấy yêu cầu phản hồi đang chờ xử lý.",
+        "menu_options": {
+          "menu_back": "← Quay lại"
+        }
+      },
+      "learning_feedbacks_dismiss_all": {
+        "title": "Bỏ qua tất cả phản hồi đang chờ",
+        "description": "Bạn sắp bỏ qua **{count}** yêu cầu phản hồi đang chờ. Các chu kỳ bị bỏ qua vẫn nằm trong lịch sử của bạn nhưng sẽ không đóng góp tín hiệu học tập mới. Không thể hoàn tác việc này.\n\n✅ Đánh dấu vào ô bên dưới và nhấp vào **Gửi** để bỏ qua tất cả.\n❌ Bỏ chọn và nhấp vào **Gửi** để hủy và quay lại.",
+        "data": {
+          "confirm_dismiss_all": "Xác nhận: bỏ qua toàn bộ yêu cầu phản hồi đang chờ xử lý"
+        }
       },
       "resolve_feedback": {
         "title": "Giải quyết phản hồi",
@@ -587,13 +702,6 @@
           "action": "Bạn muốn làm gì?",
           "corrected_profile": "Đúng chương trình (nếu sửa)",
           "corrected_duration": "Thời lượng chính xác tính bằng giây (nếu sửa)"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Xem lại các thay đổi được đề xuất",
-        "description": "WashData đã tìm thấy **{pending_count}** giá trị được đề xuất để áp dụng.\n\nThay đổi:\n{changes}\n\n✅ Đánh dấu vào ô bên dưới và nhấp vào **Gửi** để áp dụng và lưu những thay đổi này ngay lập tức.\n❌ Bỏ chọn và nhấp vào **Gửi** để hủy và quay lại.",
-        "data": {
-          "confirm_apply_suggestions": "Áp dụng và lưu những thay đổi này"
         }
       },
       "trim_cycle_select": {
@@ -629,6 +737,9 @@
     },
     "error": {
       "import_failed": "Nhập không thành công. Vui lòng dán JSON xuất WashData hợp lệ.",
+      "select_exactly_one": "Chọn đúng một chu kỳ cho thao tác này.",
+      "select_at_least_one": "Chọn ít nhất một chu kỳ cho thao tác này.",
+      "select_at_least_two": "Chọn ít nhất hai chu kỳ cho thao tác này.",
       "profile_exists": "Hồ sơ có tên này đã tồn tại",
       "rename_failed": "Không đổi tên được hồ sơ. Hồ sơ có thể không tồn tại hoặc tên mới đã được sử dụng.",
       "assignment_failed": "Không thể chỉ định hồ sơ cho chu kỳ",
@@ -648,12 +759,17 @@
       "suggestions_ready_notification_message": "Cảm biến **Cài đặt được đề xuất** hiện báo cáo **{count}** đề xuất có thể thực hiện được.\n\nĐể xem xét và áp dụng chúng: **Cài đặt > Thiết bị & Dịch vụ > WashData > Định cấu hình > Cài đặt nâng cao > Áp dụng các giá trị được đề xuất**.\n\nĐề xuất là tùy chọn và được hiển thị để xem xét trước khi bạn lưu.",
       "trim_range_invalid": "Bắt đầu phải trước khi kết thúc. Hãy điều chỉnh điểm cắt của bạn.",
       "trim_failed": "Cắt không thành công. Chu trình có thể không còn tồn tại hoặc cửa sổ trống.",
+      "invalid_split_timestamp": "Dấu thời gian không hợp lệ hoặc nằm ngoài khung thời gian của chu kỳ. Hãy dùng HH:MM hoặc HH:MM:SS trong phạm vi của chu kỳ.",
+      "no_split_segments_found": "Không thể tạo đoạn hợp lệ từ các dấu thời gian này. Hãy đảm bảo mỗi dấu thời gian nằm trong khung thời gian của chu kỳ và mỗi đoạn dài ít nhất 1 phút.",
       "auto_tune_suggestion": "{device_type} {device_title} đã phát hiện chu kỳ ma. Thay đổi công suất tối thiểu được đề xuất: {current_min}W -> {new_min}W (không được áp dụng tự động).",
       "auto_tune_title": "Tự động điều chỉnh WashData",
       "auto_tune_fallback": "{device_type} {device_title} đã phát hiện chu kỳ ma. Thay đổi công suất tối thiểu được đề xuất: {current_min}W -> {new_min}W (không được áp dụng tự động)."
     },
     "abort": {
       "no_cycles_found": "Không tìm thấy chu kỳ nào",
+      "no_split_segments_found": "Không tìm thấy đoạn nào có thể tách trong chu kỳ đã chọn.",
+      "cycle_not_found": "Không thể tải chu kỳ đã chọn.",
+      "no_power_data": "Không có dữ liệu theo dõi nguồn điện cho chu kỳ đã chọn.",
       "no_profiles_found": "Không tìm thấy hồ sơ nào. Tạo một hồ sơ đầu tiên.",
       "no_profiles_for_matching": "Không có hồ sơ nào có sẵn để kết hợp. Tạo hồ sơ đầu tiên.",
       "no_unlabeled_cycles": "Tất cả các chu kỳ đã được dán nhãn",
@@ -661,8 +777,7 @@
       "no_predictions": "Không có dự đoán",
       "no_custom_phases": "Không tìm thấy giai đoạn tùy chỉnh nào.",
       "reprocess_success": "Đã xử lý lại thành công {count} chu kỳ.",
-      "debug_data_cleared": "Đã xóa thành công dữ liệu gỡ lỗi khỏi chu kỳ {count}.",
-      "no_power_data": "Không có dữ liệu theo dõi nguồn điện cho chu kỳ đã chọn."
+      "debug_data_cleared": "Đã xóa thành công dữ liệu gỡ lỗi khỏi chu kỳ {count}."
     }
   },
   "selector": {
@@ -682,6 +797,9 @@
         "all_device_types": "Tất cả các loại thiết bị",
         "current_suffix": "(hiện hành)",
         "editor_select_info": "Chọn 1 chu kỳ để tách hoặc hơn 2 chu kỳ để hợp nhất.",
+        "editor_select_info_split": "Chọn 1 chu kỳ để tách.",
+        "editor_select_info_merge": "Chọn từ 2 chu kỳ trở lên để gộp.",
+        "editor_select_info_delete": "Chọn từ 1 chu kỳ trở lên để xóa.",
         "no_cycles_recorded": "Chưa có chu kỳ nào được ghi lại.",
         "profile_summary_line": "- **{name}**: {count} chu kỳ, trung bình là {avg} tháng",
         "no_profiles_created": "Chưa có hồ sơ nào được tạo.",
@@ -722,6 +840,10 @@
         "split_preview_confirm_fmt": "Nhấp vào Xác nhận để chia chu kỳ này thành {count} chu kỳ riêng biệt.",
         "merge_preview_title": "Hợp nhất bản xem trước",
         "merge_preview_joining_fmt": "Tham gia {count} chu kỳ. Các khoảng trống sẽ được lấp đầy bằng số đọc 0W.",
+        "editor_delete_preview_title": "Xem trước khi xóa",
+        "editor_delete_preview_intro": "Các chu kỳ đã chọn sẽ bị xóa vĩnh viễn:",
+        "editor_delete_preview_confirm": "Nhấp Xác nhận để xóa vĩnh viễn các bản ghi chu kỳ này.",
+        "no_power_preview": "*Không có dữ liệu nguồn để xem trước.*",
         "profile_comparison": "So sánh hồ sơ",
         "actual_cycle_label": "Chu kỳ này (thực tế)",
         "storage_usage_header": "Sử dụng bộ nhớ",
@@ -735,10 +857,21 @@
         "assign_phases_help": "Sử dụng các thao tác bên dưới để thêm, chỉnh sửa, xóa hoặc lưu phạm vi.",
         "profile_summary_header": "Tóm tắt hồ sơ",
         "recent_cycles_header": "Chu kỳ gần đây",
-        "no_power_preview": "*Không có dữ liệu nguồn để xem trước.*",
         "trim_cycle_preview_title": "Xem trước chu kỳ cắt",
         "trim_cycle_preview_no_data": "Không có dữ liệu nguồn cho chu kỳ này.",
-        "trim_cycle_preview_kept_suffix": "giữ"
+        "trim_cycle_preview_kept_suffix": "giữ",
+        "table_program": "Chương trình",
+        "table_when": "Khi nào",
+        "table_length": "Thời lượng",
+        "table_match": "Khớp",
+        "table_profile": "Hồ sơ",
+        "table_cycles": "Chu kỳ",
+        "table_avg_length": "Thời lượng TB",
+        "table_last_run": "Lần chạy cuối cùng",
+        "table_avg_energy": "Năng lượng TB",
+        "table_detected_program": "Chương trình phát hiện",
+        "table_confidence": "Sự tự tin",
+        "table_reported": "Đã báo cáo"
       }
     },
     "interactive_editor_action": {
@@ -746,6 +879,12 @@
         "split": "Tách một chu kỳ (Tìm khoảng trống)",
         "merge": "Hợp nhất các chu kỳ (Nối các đoạn)",
         "delete": "Xóa (các) chu kỳ"
+      }
+    },
+    "split_mode": {
+      "options": {
+        "auto": "Tự động phát hiện khoảng nghỉ",
+        "manual": "Dấu thời gian thủ công"
       }
     },
     "diagnostics_action": {
@@ -1133,6 +1272,15 @@
     }
   },
   "exceptions": {
+    "device_id_required": {
+      "message": "Cần có device_id hợp lệ."
+    },
+    "cycle_id_required": {
+      "message": "Cần có Cycle_id hợp lệ."
+    },
+    "profile_name_required": {
+      "message": "Cần có profile_name hợp lệ."
+    },
     "device_not_found": {
       "message": "Không tìm thấy thiết bị."
     },
@@ -1150,15 +1298,6 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s phải lớn hơn trim_start_s."
-    },
-    "device_id_required": {
-      "message": "Cần có device_id hợp lệ."
-    },
-    "cycle_id_required": {
-      "message": "Cần có Cycle_id hợp lệ."
-    },
-    "profile_name_required": {
-      "message": "Cần có profile_name hợp lệ."
     }
   }
 }

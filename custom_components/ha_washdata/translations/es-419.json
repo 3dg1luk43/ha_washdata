@@ -76,16 +76,16 @@
           "notify_people": "Retrasar entrega hasta que estas personas estén en casa",
           "notify_only_when_home": "Retrasar notificaciones hasta que la persona seleccionada esté en casa",
           "notify_fire_events": "Disparar eventos de automatización",
+          "notify_start_services": "Inicio del ciclo: objetivos de notificación",
+          "notify_finish_services": "Fin del ciclo: objetivos de notificación",
+          "notify_live_services": "Progreso en vivo: objetivos de notificación",
           "notify_before_end_minutes": "Notificación previa a la finalización (minutos antes del final)",
           "notify_title": "Título de la notificación",
           "notify_icon": "Ícono de notificación",
           "notify_start_message": "Formato del mensaje de inicio",
           "notify_finish_message": "Formato del mensaje de finalización",
           "notify_pre_complete_message": "Formato del mensaje previo a la finalización",
-          "show_advanced": "Editar configuración avanzada (siguiente paso)",
-          "notify_start_services": "Inicio del ciclo: objetivos de notificación",
-          "notify_finish_services": "Fin del ciclo: objetivos de notificación",
-          "notify_live_services": "Progreso en vivo: objetivos de notificación"
+          "show_advanced": "Editar configuración avanzada (siguiente paso)"
         },
         "data_description": {
           "apply_suggestions": "Marca esta casilla para copiar los valores sugeridos por el algoritmo de aprendizaje en el formulario. Revisa antes de guardar.\n\nSugerido (del aprendizaje):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -97,15 +97,15 @@
           "notify_people": "Entidades de personas usadas para control de presencia. Cuando está habilitado, la entrega de notificaciones se retrasa hasta que al menos una persona seleccionada esté en casa.",
           "notify_only_when_home": "Si está habilitado, retrasa las notificaciones hasta que al menos una persona seleccionada esté en casa.",
           "notify_fire_events": "Si está habilitado, dispara eventos de Home Assistant para el inicio y fin de ciclo (ha_washdata_cycle_started y ha_washdata_cycle_ended) para automatizaciones.",
+          "notify_start_services": "Uno o más servicios de notificación para alertar cuando comienza un ciclo. Déjelo vacío para omitir las notificaciones de inicio.",
+          "notify_finish_services": "Uno o más servicios de notificación para alertar cuando un ciclo finaliza o está a punto de completarse. Déjelo vacío para omitir las notificaciones de finalización.",
+          "notify_live_services": "Uno o más servicios de notificación para recibir actualizaciones de progreso en vivo mientras se ejecuta el ciclo (solo aplicación móvil complementaria). Déjelo vacío para omitir las actualizaciones en vivo.",
           "notify_before_end_minutes": "Minutos antes del fin estimado del ciclo para activar una notificación. Pon 0 para deshabilitar. Predeterminado: 0.",
           "notify_title": "Título personalizado para notificaciones. Admite el marcador {device}.",
           "notify_icon": "Ícono para notificaciones (por ejemplo, mdi:washing-machine). Deja vacío para enviar sin ícono.",
           "notify_start_message": "Mensaje enviado cuando comienza un ciclo. Admite el marcador {device}.",
           "notify_finish_message": "Mensaje enviado cuando finaliza un ciclo. Admite los marcadores {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Mensaje enviado antes de la finalización. Admite los marcadores {device}, {minutes}.",
-          "notify_start_services": "Uno o más servicios de notificación para alertar cuando comienza un ciclo. Déjelo vacío para omitir las notificaciones de inicio.",
-          "notify_finish_services": "Uno o más servicios de notificación para alertar cuando un ciclo finaliza o está a punto de completarse. Déjelo vacío para omitir las notificaciones de finalización.",
-          "notify_live_services": "Uno o más servicios de notificación para recibir actualizaciones de progreso en vivo mientras se ejecuta el ciclo (solo aplicación móvil complementaria). Déjelo vacío para omitir las actualizaciones en vivo."
+          "notify_pre_complete_message": "Mensaje enviado antes de la finalización. Admite los marcadores {device}, {minutes}."
         }
       },
       "notifications": {
@@ -116,163 +116,208 @@
           "notify_people": "Retrasar entrega hasta que estas personas estén en casa",
           "notify_only_when_home": "Retrasar notificaciones hasta que la persona seleccionada esté en casa",
           "notify_fire_events": "Disparar eventos de automatización",
+          "notify_start_services": "Inicio del ciclo: objetivos de notificación",
+          "notify_finish_services": "Fin del ciclo: objetivos de notificación",
+          "notify_live_services": "Progreso en vivo: objetivos de notificación",
           "notify_before_end_minutes": "Notificación previa a la finalización (minutos antes del final)",
           "notify_live_interval_seconds": "Intervalo de actualización en vivo (segundos)",
           "notify_live_overrun_percent": "Margen de sobrepasar el tiempo estimado en actualizaciones en vivo (%)",
+          "notify_live_chronometer": "Temporizador de cuenta atrás del cronómetro",
           "notify_title": "Título de la notificación",
           "notify_icon": "Ícono de notificación",
           "notify_start_message": "Formato del mensaje de inicio",
           "notify_finish_message": "Formato del mensaje de finalización",
           "notify_pre_complete_message": "Formato del mensaje previo a la finalización",
-          "notify_start_services": "Inicio del ciclo: objetivos de notificación",
-          "notify_finish_services": "Fin del ciclo: objetivos de notificación",
-          "notify_live_services": "Progreso en vivo: objetivos de notificación",
-          "notify_live_chronometer": "Temporizador de cuenta atrás del cronómetro",
           "energy_price_entity": "Precio de la energía: entidad (opcional)",
-          "energy_price_static": "Precio de la energía: valor estático (opcional)"
+          "energy_price_static": "Precio de la energía: valor estático (opcional)",
+          "go_back": "Volver sin guardar"
         },
         "data_description": {
+          "go_back": "Marca esto y haz clic en Enviar para descartar los cambios anteriores y volver al menú principal.",
           "notify_actions": "Secuencia de acciones opcional de Home Assistant para notificaciones (scripts, notify, TTS, etc.). Si se configura, las acciones se ejecutan antes del servicio de notificación de reserva.",
           "notify_people": "Entidades de personas usadas para control de presencia. Cuando está habilitado, la entrega de notificaciones se retrasa hasta que al menos una persona seleccionada esté en casa.",
           "notify_only_when_home": "Si está habilitado, retrasa las notificaciones hasta que al menos una persona seleccionada esté en casa.",
           "notify_fire_events": "Si está habilitado, dispara eventos de Home Assistant para el inicio y fin de ciclo (ha_washdata_cycle_started y ha_washdata_cycle_ended) para automatizaciones.",
+          "notify_start_services": "Uno o más servicios de notificación para avisar cuando comienza un ciclo (por ejemplo, notify.mobile_app_my_phone). Déjelo vacío para omitir las notificaciones de inicio.",
+          "notify_finish_services": "Uno o más servicios de notificación para alertar cuando un ciclo finaliza o está a punto de completarse. Déjelo vacío para omitir las notificaciones de finalización.",
+          "notify_live_services": "Uno o más servicios de notificación para recibir actualizaciones de progreso en vivo mientras se ejecuta el ciclo (solo aplicación móvil complementaria). Déjelo vacío para omitir las actualizaciones en vivo.",
           "notify_before_end_minutes": "Minutos antes del fin estimado del ciclo para activar una notificación. Pon 0 para deshabilitar. Predeterminado: 0.",
           "notify_live_interval_seconds": "Con qué frecuencia se envían actualizaciones de progreso durante el funcionamiento. Los valores más bajos son más responsivos pero consumen más notificaciones. Se aplica un mínimo de 30 segundos; los valores por debajo de 30 s se redondean automáticamente a 30 s.",
           "notify_live_overrun_percent": "Margen de seguridad sobre el recuento estimado de actualizaciones para ciclos largos o que se extienden (por ejemplo, el 20% permite 1,2 veces las actualizaciones estimadas).",
+          "notify_live_chronometer": "Cuando está habilitada, cada actualización en vivo incluye una cuenta regresiva del cronómetro hasta el tiempo estimado de finalización. El temporizador de notificaciones avanza automáticamente en el dispositivo entre actualizaciones (solo aplicación complementaria de Android).",
           "notify_title": "Título personalizado para notificaciones. Admite el marcador {device}.",
           "notify_icon": "Ícono para notificaciones (por ejemplo, mdi:washing-machine). Deja vacío para enviar sin ícono.",
           "notify_start_message": "Mensaje enviado cuando comienza un ciclo. Admite el marcador {device}.",
           "notify_finish_message": "Mensaje enviado cuando finaliza un ciclo. Admite los marcadores {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Mensaje enviado antes de la finalización. Admite los marcadores {device}, {minutes}.",
-          "notify_start_services": "Uno o más servicios de notificación para avisar cuando comienza un ciclo (por ejemplo, notify.mobile_app_my_phone). Déjelo vacío para omitir las notificaciones de inicio.",
-          "notify_finish_services": "Uno o más servicios de notificación para alertar cuando un ciclo finaliza o está a punto de completarse. Déjelo vacío para omitir las notificaciones de finalización.",
-          "notify_live_services": "Uno o más servicios de notificación para recibir actualizaciones de progreso en vivo mientras se ejecuta el ciclo (solo aplicación móvil complementaria). Déjelo vacío para omitir las actualizaciones en vivo.",
-          "notify_live_chronometer": "Cuando está habilitada, cada actualización en vivo incluye una cuenta regresiva del cronómetro hasta el tiempo estimado de finalización. El temporizador de notificaciones avanza automáticamente en el dispositivo entre actualizaciones (solo aplicación complementaria de Android).",
           "energy_price_entity": "Seleccione una entidad numérica que contenga el precio actual de la electricidad (por ejemplo, sensor.electricity_price, input_number.energy_rate). Cuando está configurado, habilita el marcador de posición {cost}. Tiene prioridad sobre el valor estático si ambos están configurados.",
           "energy_price_static": "Precio fijo de la electricidad por kWh. Cuando está configurado, habilita el marcador de posición {cost}. Se ignora si una entidad está configurada arriba. Agregue su símbolo de moneda en la plantilla de mensaje, p. {cost}€."
         }
       },
       "advanced_settings": {
         "title": "Configuración avanzada",
-        "description": "Ajusta los umbrales de detección, el aprendizaje y el comportamiento avanzado. Los valores predeterminados funcionan bien para la mayoría de las configuraciones.\n\nAjustes sugeridos disponibles actualmente: {suggestions_count}. Usa Aplicar valores sugeridos para revisar los cambios antes de guardar.",
-        "data": {
-          "apply_suggestions": "Aplicar valores sugeridos",
-          "start_threshold_w": "Umbral de inicio (W)",
-          "stop_threshold_w": "Umbral de parada (W)",
-          "min_off_gap": "Brecha mínima entre ciclos (s)",
-          "start_duration_threshold": "Duración de antirrebote de inicio (s)",
-          "progress_reset_delay": "Retraso de restablecimiento del progreso (segundos)",
-          "no_update_active_timeout": "Tiempo de espera sin actualización (s)",
-          "sampling_interval": "Intervalo de muestreo (s)",
-          "auto_label_confidence": "Confianza de etiquetado automático (0-1)",
-          "learning_confidence": "Confianza mínima para solicitar retroalimentación (0-1)",
-          "duration_tolerance": "Tolerancia de duración (0-0,5)",
-          "profile_match_interval": "Intervalo de coincidencia de perfil (segundos)",
-          "profile_match_min_duration_ratio": "Proporción mínima de duración para coincidencia de perfil (0,1-1,0)",
-          "profile_match_max_duration_ratio": "Proporción máxima de duración para coincidencia de perfil (1,0-3,0)",
-          "smoothing_window": "Ventana de suavizado (muestras)",
-          "profile_match_threshold": "Umbral de coincidencia de perfil",
-          "profile_unmatch_threshold": "Umbral de no coincidencia de perfil",
-          "profile_duration_tolerance": "Tolerancia de duración para coincidencia de perfil (0-0,5)",
-          "interrupted_min_seconds": "Interrumpido: tiempo de ejecución mínimo (segundos)",
-          "abrupt_drop_watts": "Interrumpido: caída abrupta absoluta (W)",
-          "abrupt_drop_ratio": "Interrumpido: ratio de caída abrupta (0-1)",
-          "abrupt_high_load_factor": "Interrumpido: factor de carga alta",
-          "max_past_cycles": "Retención: máximo de ciclos guardados",
-          "max_full_traces_per_profile": "Retención: máximo de trazas completas por perfil",
-          "max_full_traces_unlabeled": "Retención: máximo de trazas completas sin etiquetar",
-          "watchdog_interval": "Intervalo de vigilancia (segundos)",
-          "completion_min_seconds": "Tiempo mínimo de ejecución para completar (segundos)",
-          "notify_before_end_minutes": "Notificación previa a la finalización (minutos antes del final)",
-          "auto_tune_noise_events_threshold": "Sintonización automática: umbral de eventos de ruido",
-          "running_dead_zone": "Zona muerta en ejecución (segundos)",
-          "end_repeat_count": "Recuento de repeticiones de fin",
-          "start_energy_threshold": "Umbral de energía de inicio (Wh)",
-          "end_energy_threshold": "Umbral de energía de fin (Wh)",
-          "auto_maintenance": "Habilitar mantenimiento automático",
-          "expose_debug_entities": "Exponer entidades de depuración",
-          "save_debug_traces": "Guardar trazas de depuración",
-          "anti_wrinkle_enabled": "Escudo antiarrugas (solo secadora/lavadora-secadora)",
-          "anti_wrinkle_max_power": "Potencia máxima antiarrugas (W) (solo secadora/lavadora-secadora)",
-          "anti_wrinkle_max_duration": "Duración máxima antiarrugas (s) (solo secadora/lavadora-secadora)",
-          "anti_wrinkle_exit_power": "Potencia de salida antiarrugas (W) (solo secadora/lavadora-secadora)",
-          "dtw_bandwidth": "Ancho de banda DTW",
-          "external_end_trigger_enabled": "Habilitar activador externo de fin de ciclo",
-          "external_end_trigger": "Sensor externo de fin de ciclo",
-          "external_end_trigger_inverted": "Invertir lógica de activación (activar en OFF)",
-          "suppress_feedback_notifications": "Suprimir notificaciones de comentarios",
-          "pump_stuck_duration": "Umbrales de alerta de bomba atascada (sólo bomba)",
-          "door_sensor_entity": "Sensor de puerta",
-          "pause_cuts_power": "Cortar la energía al hacer una pausa",
-          "notify_unload_delay_minutes": "Retraso de notificación de espera de lavandería (min)",
-          "switch_entity": "Cambiar entidad (para pausar el corte de energía)",
-          "delay_start_detect_enabled": "Habilitar la detección de inicio retrasado",
-          "delay_drain_min_power": "Inicio retrasado: Potencia mínima del pico de drenaje (W)",
-          "delay_drain_max_power": "Inicio retrasado: Potencia máxima del pico de drenaje (W)",
-          "delay_drain_max_duration": "Inicio retrasado: duración máxima del pico de drenaje (s)",
-          "delay_timeout_hours": "Inicio retrasado: tiempo máximo de espera (h)"
-        },
-        "data_description": {
-          "apply_suggestions": "Marca esta casilla para abrir un paso de revisión de los valores sugeridos por el algoritmo de aprendizaje. Nada se guarda automáticamente.\n\nSugerido (del aprendizaje):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "start_threshold_w": "La potencia debe superar ESTE umbral para INICIAR un ciclo. Configúralo por encima de tu potencia en espera. Predeterminado: min_power + 1 W.",
-          "stop_threshold_w": "La potencia debe caer POR DEBAJO de este umbral para FINALIZAR un ciclo. Configúralo justo por encima de cero para evitar que el ruido provoque finales falsos. Predeterminado: 0,6 × min_power.",
-          "min_off_gap": "Si un ciclo comienza dentro de estos segundos tras finalizar el anterior, se FUSIONARÁN en un único ciclo.",
-          "start_duration_threshold": "Ignora los picos breves de potencia más cortos que esta duración (segundos). Filtra picos de arranque (por ejemplo, 60 W durante 2 s) antes del inicio real del ciclo. Predeterminado: 5 s.",
-          "progress_reset_delay": "Tras completar un ciclo (100%), espera estos segundos de inactividad antes de restablecer el progreso al 0%. Predeterminado: 300 s.",
-          "no_update_active_timeout": "Para sensores que publican solo al cambiar: fuerza el fin de un ciclo ACTIVO solo si no llegan actualizaciones durante estos segundos. La finalización de bajo consumo sigue usando el retraso de apagado.",
-          "sampling_interval": "Intervalo mínimo de muestreo en segundos. Las actualizaciones más rápidas que esta tasa se ignorarán. Predeterminado: 2,0 s.",
-          "auto_label_confidence": "Etiqueta automáticamente los ciclos con esta confianza o superior al finalizar (0,0–1,0).",
-          "learning_confidence": "Confianza mínima para solicitar verificación del usuario mediante un evento (0,0–1,0).",
-          "duration_tolerance": "Tolerancia para las estimaciones de tiempo restante durante una ejecución (0,0–0,5 corresponde a 0–50%).",
-          "profile_match_interval": "Con qué frecuencia (en segundos) intentar la coincidencia de perfil durante un ciclo. Los valores más bajos dan una detección más rápida pero usan más CPU. Predeterminado: 300 s (5 minutos).",
-          "profile_match_min_duration_ratio": "Proporción mínima de duración para la coincidencia de perfil. El ciclo en ejecución debe ser al menos esta fracción de la duración del perfil para coincidir. Más bajo = coincidencia más temprana. Predeterminado: 0,50 (50%).",
-          "profile_match_max_duration_ratio": "Proporción máxima de duración para la coincidencia de perfil. El ciclo en ejecución no debe superar este múltiplo de la duración del perfil. Más alto = más permisivo. Predeterminado: 1,50 (150%).",
-          "smoothing_window": "Número de lecturas de potencia recientes usadas para el suavizado de media móvil.",
-          "profile_match_threshold": "Puntuación mínima de similitud DTW (0,0–1,0) requerida para considerar un perfil como coincidencia. Más alto = coincidencia más estricta, menos falsos positivos. Predeterminado: 0,4.",
-          "profile_unmatch_threshold": "Puntuación de similitud DTW (0,0–1,0) por debajo de la cual se rechaza un perfil previamente coincidente. Debe ser inferior al umbral de coincidencia para evitar parpadeos. Predeterminado: 0,35.",
-          "profile_duration_tolerance": "Tolerancia usada por la coincidencia de perfil para la variación de duración total (0,0–0,5). Comportamiento predeterminado: ±25%.",
-          "interrupted_min_seconds": "Las ejecuciones más cortas que esto pueden clasificarse como \"interrumpidas\".",
-          "abrupt_drop_watts": "Caída de potencia absoluta (W) considerada un descenso abrupto.",
-          "abrupt_drop_ratio": "Proporción de caída relativa (0–1). Ejemplo: 0,6 significa que una caída del 60% es abrupta.",
-          "abrupt_high_load_factor": "Factor por encima de la línea base considerado \"carga alta\" antes de una caída abrupta.",
-          "max_past_cycles": "Número total de ciclos a conservar (los más antiguos se eliminan). Predeterminado: 200.",
-          "max_full_traces_per_profile": "Número de ciclos etiquetados recientes a conservar con trazas de potencia completas por perfil. Las trazas más antiguas se resumen mediante envolventes. Predeterminado: 20.",
-          "max_full_traces_unlabeled": "Número de ciclos sin etiquetar recientes a conservar con trazas de potencia completas para el etiquetado automático. Predeterminado: 20.",
-          "watchdog_interval": "Segundos entre comprobaciones de vigilancia durante la ejecución. Predeterminado: 5 s. ADVERTENCIA: Asegúrate de que sea MAYOR que el intervalo de actualización de tu sensor para evitar paradas falsas (por ejemplo, si el sensor se actualiza cada 60 s, usa 65 s o más).",
-          "completion_min_seconds": "Los ciclos más cortos se marcarán como \"interrumpidos\" incluso si finalizan de forma natural. Predeterminado: 600 s.",
-          "notify_before_end_minutes": "Minutos antes del fin estimado del ciclo para activar una notificación. Pon 0 para deshabilitar. Predeterminado: 0.",
-          "auto_tune_noise_events_threshold": "Número de ciclos de \"ruido\" cortos/de bajo consumo en 24 h necesarios para ajustar automáticamente min_power. Predeterminado: 3.",
-          "running_dead_zone": "Tras el inicio del ciclo, ignora las caídas de potencia durante estos segundos para evitar la detección falsa del final durante la fase de arranque. Pon 0 para deshabilitar. Predeterminado: 0 s.",
-          "end_repeat_count": "Número de veces que la condición de fin (potencia por debajo del umbral durante off_delay) debe cumplirse consecutivamente antes de finalizar el ciclo. Valores más altos evitan finales falsos durante las pausas. Predeterminado: 1.",
-          "start_energy_threshold": "El ciclo debe acumular al menos esta energía (Wh) durante la fase de INICIO para confirmarse. Predeterminado: 0,005 Wh.",
-          "end_energy_threshold": "El ciclo finaliza solo si la energía en la última ventana de retraso de apagado está por debajo de este valor (Wh). Evita finales falsos si la potencia fluctúa cerca de cero. Predeterminado: 0,05 Wh.",
-          "auto_maintenance": "Habilitar mantenimiento automático (reparar muestras, fusionar fragmentos).",
-          "expose_debug_entities": "Mostrar sensores avanzados (Confianza, Fase, Ambigüedad) para depuración.",
-          "save_debug_traces": "Almacenar datos detallados de clasificación y trazas de potencia en el historial (aumenta el uso de almacenamiento).",
-          "anti_wrinkle_enabled": "Ignora las breves rotaciones del tambor a baja potencia tras el fin de un ciclo para evitar ciclos fantasma (solo secadora/lavadora-secadora).",
-          "anti_wrinkle_max_power": "Las ráfagas a esta potencia o por debajo se tratan como rotaciones antiarrugas en lugar de nuevos ciclos. Solo se aplica cuando el Escudo antiarrugas está habilitado.",
-          "anti_wrinkle_max_duration": "Duración máxima de ráfaga para tratar como rotación antiarrugas. Solo se aplica cuando el Escudo antiarrugas está habilitado.",
-          "anti_wrinkle_exit_power": "Si la potencia cae por debajo de este nivel, sale del modo antiarrugas inmediatamente (apagado real). Solo se aplica cuando el Escudo antiarrugas está habilitado.",
-          "dtw_bandwidth": "Distorsión temporal máxima permitida (estiramiento) como proporción de la duración del ciclo. Los valores más altos permiten coincidir ciclos muy variables pero aumentan el costo de CPU. Predeterminado: 0,20 (20%).",
-          "external_end_trigger_enabled": "Habilitar la monitorización de un sensor binario externo para activar la finalización del ciclo.",
-          "external_end_trigger": "Selecciona una entidad de sensor binario. Cuando este sensor se activa, el ciclo actual finalizará con el estado \"completado\".",
-          "external_end_trigger_inverted": "De forma predeterminada, el activador se dispara cuando el sensor se enciende (ON). Marca esta casilla para disparar cuando el sensor se apague (OFF).",
-          "suppress_feedback_notifications": "Cuando está habilitado, WashData seguirá rastreando y solicitando comentarios internamente, pero no mostrará notificaciones persistentes pidiéndole que confirme los ciclos. Útil cuando los ciclos siempre se detectan correctamente y las indicaciones le distraen.",
-          "pump_stuck_duration": "Si un ciclo de bomba sigue ejecutándose después de tantos segundos, se activa una vez un evento ha_washdata_pump_stuck. Utilícelo para detectar un motor atascado (el funcionamiento típico de la bomba de sumidero es inferior a 60 s). Predeterminado: 1800 s (30 min). Solo tipo de dispositivo de bomba.",
-          "door_sensor_entity": "Sensor binario opcional para la puerta de la máquina (on = abierto, off = cerrado). Cuando la puerta se abre durante un ciclo activo, WashData confirmará que el ciclo está pausado intencionalmente. Una vez finalizado el ciclo, si la puerta aún está cerrada, el estado cambia a \"Limpiar\" hasta que se abre la puerta. Nota: cerrar la puerta NO reanuda automáticamente un ciclo en pausa; la reanudación debe activarse manualmente mediante el botón Reanudar ciclo o el servicio.",
-          "pause_cuts_power": "Al hacer una pausa mediante el botón o servicio Pause Cycle, también apague la entidad de conmutación configurada. Solo tiene efecto si se configura una entidad de conmutación para este dispositivo.",
-          "notify_unload_delay_minutes": "Envíe una notificación a través del canal de notificación de finalización después de que finalice el ciclo y la puerta no se haya abierto durante tantos minutos (requiere sensor de puerta). Establezca en 0 para desactivar. Predeterminado: 60 min.",
-          "switch_entity": "La entidad de cambio para alternar al pausar o reanudar. Requerido cuando está habilitado 'Cortar energía al pausar'.",
-          "delay_start_detect_enabled": "Cuando está habilitado, se detecta un breve pico de consumo de baja potencia seguido de energía de reserva sostenida como un inicio retrasado. El sensor de estado muestra \"Esperando para comenzar\" durante el retraso. No se realiza un seguimiento del tiempo ni del progreso del programa hasta que el ciclo realmente comienza. Requiere que start_threshold_w se establezca por encima de la potencia del pico de drenaje.",
-          "delay_drain_min_power": "Potencia mínima (W) para reconocer como pico de drenaje. Configúrelo justo por encima del nivel de espera real de su máquina. Predeterminado: 10 W.",
-          "delay_drain_max_power": "Potencia máxima (W) para un pico de drenaje; las ráfagas por encima de esta se tratan como un inicio de ciclo real. Debe estar por debajo de su configuración start_threshold_w. Predeterminado: 80 W.",
-          "delay_drain_max_duration": "La punta de drenaje debe volver a caer por debajo de la ventana de drenaje dentro de estos segundos para ser confirmado. Los picos más largos se tratan como actividad de ciclo real. Predeterminado: 60 s.",
-          "delay_timeout_hours": "Tiempo de espera de seguridad: si la máquina todavía está en 'Esperando para iniciar' después de tantas horas, WashData se restablece en Apagado. Predeterminado: 8 h."
+        "description": "Ajusta los umbrales de detección, el aprendizaje y el comportamiento avanzado. Los valores predeterminados funcionan bien para la mayoría de las configuraciones.",
+        "sections": {
+          "suggestions_section": {
+            "name": "Ajustes sugeridos",
+            "description": "{suggestions_count} sugerencias aprendidas disponibles. Marca Aplicar valores sugeridos para revisar los cambios propuestos antes de guardar.",
+            "data": {
+              "apply_suggestions": "Aplicar valores sugeridos"
+            },
+            "data_description": {
+              "apply_suggestions": "Marca esta casilla para abrir un paso de revisión de los valores sugeridos por el algoritmo de aprendizaje. Nada se guarda automáticamente.\n\nSugerido (del aprendizaje):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
+            }
+          },
+          "detection_section": {
+            "name": "Detección y umbrales de potencia",
+            "description": "Cuándo se considera que el aparato está ENCENDIDO o APAGADO, umbrales de energía y temporización de las transiciones de estado.",
+            "data": {
+              "start_duration_threshold": "Duración de antirrebote de inicio (s)",
+              "start_energy_threshold": "Umbral de energía de inicio (Wh)",
+              "completion_min_seconds": "Tiempo mínimo de ejecución para completar (segundos)",
+              "start_threshold_w": "Umbral de inicio (W)",
+              "stop_threshold_w": "Umbral de parada (W)",
+              "end_energy_threshold": "Umbral de energía de fin (Wh)",
+              "running_dead_zone": "Zona muerta en ejecución (segundos)",
+              "end_repeat_count": "Recuento de repeticiones de fin",
+              "min_off_gap": "Brecha mínima entre ciclos (s)",
+              "sampling_interval": "Intervalo de muestreo (s)"
+            },
+            "data_description": {
+              "start_duration_threshold": "Ignora los picos breves de potencia más cortos que esta duración (segundos). Filtra picos de arranque (por ejemplo, 60 W durante 2 s) antes del inicio real del ciclo. Predeterminado: 5 s.",
+              "start_energy_threshold": "El ciclo debe acumular al menos esta energía (Wh) durante la fase de INICIO para confirmarse. Predeterminado: 0,005 Wh.",
+              "completion_min_seconds": "Los ciclos más cortos se marcarán como \"interrumpidos\" incluso si finalizan de forma natural. Predeterminado: 600 s.",
+              "start_threshold_w": "La potencia debe superar ESTE umbral para INICIAR un ciclo. Configúralo por encima de tu potencia en espera. Predeterminado: min_power + 1 W.",
+              "stop_threshold_w": "La potencia debe caer POR DEBAJO de este umbral para FINALIZAR un ciclo. Configúralo justo por encima de cero para evitar que el ruido provoque finales falsos. Predeterminado: 0,6 × min_power.",
+              "end_energy_threshold": "El ciclo finaliza solo si la energía en la última ventana de retraso de apagado está por debajo de este valor (Wh). Evita finales falsos si la potencia fluctúa cerca de cero. Predeterminado: 0,05 Wh.",
+              "running_dead_zone": "Tras el inicio del ciclo, ignora las caídas de potencia durante estos segundos para evitar la detección falsa del final durante la fase de arranque. Pon 0 para deshabilitar. Predeterminado: 0 s.",
+              "end_repeat_count": "Número de veces que la condición de fin (potencia por debajo del umbral durante off_delay) debe cumplirse consecutivamente antes de finalizar el ciclo. Valores más altos evitan finales falsos durante las pausas. Predeterminado: 1.",
+              "min_off_gap": "Si un ciclo comienza dentro de estos segundos tras finalizar el anterior, se FUSIONARÁN en un único ciclo.",
+              "sampling_interval": "Intervalo mínimo de muestreo en segundos. Las actualizaciones más rápidas que esta tasa se ignorarán. Predeterminado: 2,0 s."
+            }
+          },
+          "matching_section": {
+            "name": "Coincidencia de perfiles y aprendizaje",
+            "description": "Qué tan agresivamente WashData hace coincidir los ciclos en curso con los perfiles aprendidos y cuándo pedir comentarios.",
+            "data": {
+              "profile_match_min_duration_ratio": "Proporción mínima de duración para coincidencia de perfil (0,1-1,0)",
+              "profile_match_interval": "Intervalo de coincidencia de perfil (segundos)",
+              "profile_match_threshold": "Umbral de coincidencia de perfil",
+              "profile_unmatch_threshold": "Umbral de no coincidencia de perfil",
+              "auto_label_confidence": "Confianza de etiquetado automático (0-1)",
+              "learning_confidence": "Confianza mínima para solicitar retroalimentación (0-1)",
+              "suppress_feedback_notifications": "Suprimir notificaciones de comentarios",
+              "duration_tolerance": "Tolerancia de duración (0-0,5)",
+              "smoothing_window": "Ventana de suavizado (muestras)",
+              "profile_duration_tolerance": "Tolerancia de duración para coincidencia de perfil (0-0,5)"
+            },
+            "data_description": {
+              "profile_match_min_duration_ratio": "Proporción mínima de duración para la coincidencia de perfil. El ciclo en ejecución debe ser al menos esta fracción de la duración del perfil para coincidir. Más bajo = coincidencia más temprana. Predeterminado: 0,50 (50%).",
+              "profile_match_interval": "Con qué frecuencia (en segundos) intentar la coincidencia de perfil durante un ciclo. Los valores más bajos dan una detección más rápida pero usan más CPU. Predeterminado: 300 s (5 minutos).",
+              "profile_match_threshold": "Puntuación mínima de similitud DTW (0,0–1,0) requerida para considerar un perfil como coincidencia. Más alto = coincidencia más estricta, menos falsos positivos. Predeterminado: 0,4.",
+              "profile_unmatch_threshold": "Puntuación de similitud DTW (0,0–1,0) por debajo de la cual se rechaza un perfil previamente coincidente. Debe ser inferior al umbral de coincidencia para evitar parpadeos. Predeterminado: 0,35.",
+              "auto_label_confidence": "Etiqueta automáticamente los ciclos con esta confianza o superior al finalizar (0,0–1,0).",
+              "learning_confidence": "Confianza mínima para solicitar verificación del usuario mediante un evento (0,0–1,0).",
+              "suppress_feedback_notifications": "Cuando está habilitado, WashData seguirá rastreando y solicitando comentarios internamente, pero no mostrará notificaciones persistentes pidiéndole que confirme los ciclos. Útil cuando los ciclos siempre se detectan correctamente y las indicaciones le distraen.",
+              "duration_tolerance": "Tolerancia para las estimaciones de tiempo restante durante una ejecución (0,0–0,5 corresponde a 0–50%).",
+              "smoothing_window": "Número de lecturas de potencia recientes usadas para el suavizado de media móvil.",
+              "profile_duration_tolerance": "Tolerancia usada por la coincidencia de perfil para la variación de duración total (0,0–0,5). Comportamiento predeterminado: ±25%."
+            }
+          },
+          "timing_section": {
+            "name": "Tiempo, mantenimiento y depuración",
+            "description": "Watchdog, reinicio del progreso, mantenimiento automático y exposición de entidades de depuración.",
+            "data": {
+              "watchdog_interval": "Intervalo de vigilancia (segundos)",
+              "no_update_active_timeout": "Tiempo de espera sin actualización (s)",
+              "progress_reset_delay": "Retraso de restablecimiento del progreso (segundos)",
+              "auto_maintenance": "Habilitar mantenimiento automático",
+              "expose_debug_entities": "Exponer entidades de depuración",
+              "save_debug_traces": "Guardar trazas de depuración"
+            },
+            "data_description": {
+              "watchdog_interval": "Segundos entre comprobaciones de vigilancia durante la ejecución. Predeterminado: 5 s. ADVERTENCIA: Asegúrate de que sea MAYOR que el intervalo de actualización de tu sensor para evitar paradas falsas (por ejemplo, si el sensor se actualiza cada 60 s, usa 65 s o más).",
+              "no_update_active_timeout": "Para sensores que publican solo al cambiar: fuerza el fin de un ciclo ACTIVO solo si no llegan actualizaciones durante estos segundos. La finalización de bajo consumo sigue usando el retraso de apagado.",
+              "progress_reset_delay": "Tras completar un ciclo (100%), espera estos segundos de inactividad antes de restablecer el progreso al 0%. Predeterminado: 300 s.",
+              "auto_maintenance": "Habilitar mantenimiento automático (reparar muestras, fusionar fragmentos).",
+              "expose_debug_entities": "Mostrar sensores avanzados (Confianza, Fase, Ambigüedad) para depuración.",
+              "save_debug_traces": "Almacenar datos detallados de clasificación y trazas de potencia en el historial (aumenta el uso de almacenamiento)."
+            }
+          },
+          "anti_wrinkle_section": {
+            "name": "Escudo antiarrugas (secadoras)",
+            "description": "Ignora los giros del tambor tras el ciclo para evitar ciclos fantasma. Solo secadora / lavasecadora.",
+            "data": {
+              "anti_wrinkle_enabled": "Escudo antiarrugas (solo secadora/lavadora-secadora)",
+              "anti_wrinkle_max_power": "Potencia máxima antiarrugas (W) (solo secadora/lavadora-secadora)",
+              "anti_wrinkle_max_duration": "Duración máxima antiarrugas (s) (solo secadora/lavadora-secadora)",
+              "anti_wrinkle_exit_power": "Potencia de salida antiarrugas (W) (solo secadora/lavadora-secadora)"
+            },
+            "data_description": {
+              "anti_wrinkle_enabled": "Ignora las breves rotaciones del tambor a baja potencia tras el fin de un ciclo para evitar ciclos fantasma (solo secadora/lavadora-secadora).",
+              "anti_wrinkle_max_power": "Las ráfagas a esta potencia o por debajo se tratan como rotaciones antiarrugas en lugar de nuevos ciclos. Solo se aplica cuando el Escudo antiarrugas está habilitado.",
+              "anti_wrinkle_max_duration": "Duración máxima de ráfaga para tratar como rotación antiarrugas. Solo se aplica cuando el Escudo antiarrugas está habilitado.",
+              "anti_wrinkle_exit_power": "Si la potencia cae por debajo de este nivel, sale del modo antiarrugas inmediatamente (apagado real). Solo se aplica cuando el Escudo antiarrugas está habilitado."
+            }
+          },
+          "delay_start_section": {
+            "name": "Detección de inicio diferido",
+            "description": "Trata el modo de espera sostenido de baja potencia como 'Esperando para iniciar' hasta que el ciclo comience realmente.",
+            "data": {
+              "delay_start_detect_enabled": "Habilitar la detección de inicio retrasado",
+              "delay_confirm_seconds": "Inicio diferido: tiempo de confirmación en espera (s)",
+              "delay_timeout_hours": "Inicio retrasado: tiempo máximo de espera (h)"
+            },
+            "data_description": {
+              "delay_start_detect_enabled": "Cuando está habilitado, se detecta un breve pico de consumo de baja potencia seguido de energía de reserva sostenida como un inicio retrasado. El sensor de estado muestra \"Esperando para comenzar\" durante el retraso. No se realiza un seguimiento del tiempo ni del progreso del programa hasta que el ciclo realmente comienza. Requiere que start_threshold_w se establezca por encima de la potencia del pico de drenaje.",
+              "delay_confirm_seconds": "La potencia debe permanecer entre Umbral de parada (W) y Umbral de inicio (W) durante este número de segundos antes de que WashData pase a 'Esperando para iniciar'. Filtra picos breves al navegar por menús. Predeterminado: 60 s.",
+              "delay_timeout_hours": "Tiempo de espera de seguridad: si la máquina todavía está en 'Esperando para iniciar' después de tantas horas, WashData se restablece en Apagado. Predeterminado: 8 h."
+            }
+          },
+          "external_triggers_section": {
+            "name": "Disparadores externos, puerta y pausa",
+            "description": "Sensor externo opcional de fin de ciclo, sensor de puerta para detección de pausa/limpio e interruptor de corte de energía al pausar.",
+            "data": {
+              "external_end_trigger_enabled": "Habilitar activador externo de fin de ciclo",
+              "external_end_trigger": "Sensor externo de fin de ciclo",
+              "external_end_trigger_inverted": "Invertir lógica de activación (activar en OFF)",
+              "door_sensor_entity": "Sensor de puerta",
+              "pause_cuts_power": "Cortar la energía al hacer una pausa",
+              "switch_entity": "Cambiar entidad (para pausar el corte de energía)",
+              "notify_unload_delay_minutes": "Retraso de notificación de espera de lavandería (min)"
+            },
+            "data_description": {
+              "external_end_trigger_enabled": "Habilitar la monitorización de un sensor binario externo para activar la finalización del ciclo.",
+              "external_end_trigger": "Selecciona una entidad de sensor binario. Cuando este sensor se activa, el ciclo actual finalizará con el estado \"completado\".",
+              "external_end_trigger_inverted": "De forma predeterminada, el activador se dispara cuando el sensor se enciende (ON). Marca esta casilla para disparar cuando el sensor se apague (OFF).",
+              "door_sensor_entity": "Sensor binario opcional para la puerta de la máquina (on = abierto, off = cerrado). Cuando la puerta se abre durante un ciclo activo, WashData confirmará que el ciclo está pausado intencionalmente. Una vez finalizado el ciclo, si la puerta aún está cerrada, el estado cambia a \"Limpiar\" hasta que se abre la puerta. Nota: cerrar la puerta NO reanuda automáticamente un ciclo en pausa; la reanudación debe activarse manualmente mediante el botón Reanudar ciclo o el servicio.",
+              "pause_cuts_power": "Al hacer una pausa mediante el botón o servicio Pause Cycle, también apague la entidad de conmutación configurada. Solo tiene efecto si se configura una entidad de conmutación para este dispositivo.",
+              "switch_entity": "La entidad de cambio para alternar al pausar o reanudar. Requerido cuando está habilitado 'Cortar energía al pausar'.",
+              "notify_unload_delay_minutes": "Envíe una notificación a través del canal de notificación de finalización después de que finalice el ciclo y la puerta no se haya abierto durante tantos minutos (requiere sensor de puerta). Establezca en 0 para desactivar. Predeterminado: 60 min."
+            }
+          },
+          "pump_section": {
+            "name": "Monitor de bomba",
+            "description": "Solo para el tipo de dispositivo bomba. Dispara un evento si un ciclo de bomba supera esta duración.",
+            "data": {
+              "pump_stuck_duration": "Umbrales de alerta de bomba atascada (sólo bomba)"
+            },
+            "data_description": {
+              "pump_stuck_duration": "Si un ciclo de bomba sigue ejecutándose después de tantos segundos, se activa una vez un evento ha_washdata_pump_stuck. Utilícelo para detectar un motor atascado (el funcionamiento típico de la bomba de sumidero es inferior a 60 s). Predeterminado: 1800 s (30 min). Solo tipo de dispositivo de bomba."
+            }
+          }
         }
       },
       "diagnostics": {
         "title": "Diagnóstico y mantenimiento",
-        "description": "Ejecuta acciones de mantenimiento como fusionar ciclos fragmentados o migrar datos almacenados.\n\n**Uso de almacenamiento**\n\n- Tamaño del archivo: {file_size_kb} KB\n- Ciclos: {cycle_count}\n- Perfiles: {profile_count}\n- Trazas de depuración: {debug_count}"
+        "description": "Ejecuta acciones de mantenimiento como fusionar ciclos fragmentados o migrar datos almacenados.\n\n**Uso de almacenamiento**\n\n- Tamaño del archivo: {file_size_kb} KB\n- Ciclos: {cycle_count}\n- Perfiles: {profile_count}\n- Trazas de depuración: {debug_count}",
+        "menu_options": {
+          "reprocess_history": "Mantenimiento: reprocesar y optimizar datos",
+          "clear_debug_data": "Borrar datos de depuración (liberar espacio)",
+          "wipe_history": "Borrar TODOS los datos de este dispositivo (irreversible)",
+          "export_import": "Exportar/Importar JSON con ajustes (copiar/pegar)",
+          "menu_back": "← Volver"
+        }
       },
       "clear_debug_data": {
         "title": "Borrar datos de depuración",
@@ -281,36 +326,52 @@
       "manage_cycles": {
         "title": "Gestionar ciclos",
         "description": "Ciclos recientes:\n{recent_cycles}",
-        "data": {
-          "action": "Acción"
+        "menu_options": {
+          "auto_label_cycles": "Etiquetar automáticamente ciclos antiguos",
+          "select_cycle_to_label": "Etiquetar ciclo específico",
+          "select_cycle_to_delete": "Eliminar ciclo",
+          "interactive_editor": "Editor interactivo de fusión/división",
+          "trim_cycle_select": "Recortar datos del ciclo",
+          "menu_back": "← Volver"
         }
       },
       "manage_cycles_empty": {
         "title": "Gestionar ciclos",
         "description": "Todavía no se han registrado ciclos.",
-        "data": {
-          "action": "Acción"
+        "menu_options": {
+          "auto_label_cycles": "Etiquetar automáticamente ciclos antiguos",
+          "menu_back": "← Volver"
         }
       },
       "manage_profiles": {
         "title": "Gestionar perfiles",
         "description": "Resumen de perfiles:\n{profile_summary}",
-        "data": {
-          "action": "Acción"
+        "menu_options": {
+          "create_profile": "Crear nuevo perfil",
+          "edit_profile": "Editar/cambiar nombre del perfil",
+          "delete_profile_select": "Eliminar perfil",
+          "profile_stats": "Estadísticas de perfil",
+          "cleanup_profile": "Limpiar historial - Gráfico y eliminación",
+          "assign_profile_phases_select": "Asignar rangos de fase",
+          "menu_back": "← Volver"
         }
       },
       "manage_profiles_empty": {
         "title": "Gestionar perfiles",
         "description": "Todavía no se han creado perfiles.",
-        "data": {
-          "action": "Acción"
+        "menu_options": {
+          "create_profile": "Crear nuevo perfil",
+          "menu_back": "← Volver"
         }
       },
       "manage_phase_catalog": {
         "title": "Gestionar catálogo de fases",
         "description": "Catálogo de fases (predeterminados para este dispositivo + fases personalizadas):\n{phase_summary}",
-        "data": {
-          "action": "Acción"
+        "menu_options": {
+          "phase_catalog_create": "Crear nueva fase",
+          "phase_catalog_edit_select": "Editar fase",
+          "phase_catalog_delete": "Eliminar fase",
+          "menu_back": "← Volver"
         }
       },
       "phase_catalog_create": {
@@ -347,8 +408,14 @@
       "assign_profile_phases": {
         "title": "Asignar rangos de fase",
         "description": "Vista previa de fase para el perfil: **{profile_name}**\n\n{timeline_svg}\n\n**Rangos actuales:**\n{current_ranges}\n\nUsa las acciones de abajo para añadir, editar, eliminar o guardar rangos.",
-        "data": {
-          "action": "Acción"
+        "menu_options": {
+          "assign_profile_phases_add": "Añadir rango de fase",
+          "assign_profile_phases_edit_select": "Editar rango de fase",
+          "assign_profile_phases_delete": "Eliminar rango de fase",
+          "phase_ranges_clear": "Borrar todos los rangos",
+          "assign_profile_phases_auto_detect": "Detectar fases automáticamente",
+          "phase_ranges_save": "Guardar y volver",
+          "menu_back": "← Volver"
         }
       },
       "assign_profile_phases_add": {
@@ -501,8 +568,11 @@
       "interactive_editor": {
         "title": "Editor interactivo de fusión/división",
         "description": "Selecciona una acción manual para realizar en tu historial de ciclos.",
-        "data": {
-          "editor_action": "Acción"
+        "menu_options": {
+          "editor_split": "Dividir un ciclo (encontrar brechas)",
+          "editor_merge": "Fusionar ciclos (unir fragmentos)",
+          "editor_delete": "Eliminar ciclo(s)",
+          "menu_back": "← Volver"
         }
       },
       "editor_select": {
@@ -536,7 +606,21 @@
         "title": "Configuración de división",
         "description": "Ajusta la sensibilidad para dividir este ciclo. Cualquier pausa inactiva mayor que esta causará una división.",
         "data": {
-          "min_gap_seconds": "Umbral de brecha para división (segundos)"
+          "split_mode": "Método de división"
+        }
+      },
+      "editor_split_auto_params": {
+        "title": "Configuración de división automática",
+        "description": "Ajusta la sensibilidad para dividir este ciclo. Cualquier intervalo de inactividad más largo que este provocará una división.",
+        "data": {
+          "min_gap_seconds": "Umbral de intervalo de división (segundos)"
+        }
+      },
+      "editor_split_manual_params": {
+        "title": "Marcas de tiempo de división manual",
+        "description": "{preview_md}Ventana del ciclo: **{cycle_start_wallclock} → {cycle_end_wallclock}** el {cycle_date}.\n\nIngresa una o más marcas de tiempo de división (`HH:MM` o `HH:MM:SS`), una por línea. El ciclo se cortará en cada marca de tiempo — N marcas de tiempo producen N+1 segmentos.",
+        "data": {
+          "split_timestamps": "Marcas de tiempo de división"
         }
       },
       "reprocess_history": {
@@ -562,8 +646,13 @@
       "record_cycle": {
         "title": "Registrar ciclo",
         "description": "Registra manualmente un ciclo para crear un perfil limpio sin interferencias.\n\nEstado: **{status}**\nDuración: {duration} s\nMuestras: {samples}",
-        "data": {
-          "action": "Acción"
+        "menu_options": {
+          "record_refresh": "Actualizar estado",
+          "record_stop": "Detener grabación (guardar y procesar)",
+          "record_start": "Iniciar nueva grabación",
+          "record_process": "Procesar última grabación (recortar y guardar)",
+          "record_discard": "Descartar última grabación",
+          "menu_back": "← Volver"
         }
       },
       "record_process": {
@@ -578,14 +667,33 @@
       },
       "learning_feedbacks": {
         "title": "Retroalimentación de aprendizaje",
-        "description": "Selecciona una solicitud de revisión de ciclo para procesar.",
+        "description": "Comentarios pendientes: {count}\n\n{pending_table}\n\nSelecciona una solicitud de revisión de ciclo para procesar.",
+        "menu_options": {
+          "learning_feedbacks_pick": "Revisar un comentario pendiente",
+          "learning_feedbacks_dismiss_all": "Descartar todos los comentarios pendientes",
+          "menu_back": "← Volver"
+        }
+      },
+      "learning_feedbacks_pick": {
+        "title": "Seleccionar retroalimentación para revisar",
+        "description": "Seleccione una solicitud de revisión de ciclo para abrir.",
         "data": {
           "selected_feedback": "Seleccionar ciclo para revisar"
         }
       },
       "learning_feedbacks_empty": {
         "title": "Retroalimentación de aprendizaje",
-        "description": "No se encontraron solicitudes de retroalimentación pendientes."
+        "description": "No se encontraron solicitudes de retroalimentación pendientes.",
+        "menu_options": {
+          "menu_back": "← Volver"
+        }
+      },
+      "learning_feedbacks_dismiss_all": {
+        "title": "Descartar todas las solicitudes de retroalimentación pendientes",
+        "description": "Está a punto de descartar **{count}** solicitud(es) de retroalimentación pendiente(s). Los ciclos descartados permanecen en su historial, pero no aportarán nueva señal de aprendizaje. Esto no se puede deshacer.\n\n✅ Marque la casilla a continuación y haga clic en **Enviar** para descartar todo.\n❌ Déjela sin marcar y haga clic en **Enviar** para cancelar y regresar.",
+        "data": {
+          "confirm_dismiss_all": "Confirmar: descartar todas las solicitudes de comentarios pendientes"
+        }
       },
       "resolve_feedback": {
         "title": "Resolver retroalimentación",
@@ -629,6 +737,9 @@
     },
     "error": {
       "import_failed": "Error al importar. Pega un JSON de exportación de WashData válido.",
+      "select_exactly_one": "Selecciona exactamente un ciclo para esta acción.",
+      "select_at_least_one": "Selecciona al menos un ciclo para esta acción.",
+      "select_at_least_two": "Selecciona al menos dos ciclos para esta acción.",
       "profile_exists": "Ya existe un perfil con este nombre",
       "rename_failed": "No se pudo cambiar el nombre del perfil. Es posible que el perfil no exista o que el nuevo nombre ya esté en uso.",
       "assignment_failed": "No se pudo asignar el perfil al ciclo",
@@ -648,12 +759,16 @@
       "suggestions_ready_notification_message": "El sensor de **Ajustes sugeridos** ahora reporta **{count}** recomendaciones aplicables.\n\nPara revisarlas y aplicarlas: **Configuración > Dispositivos y servicios > WashData > Configurar > Configuración avanzada > Aplicar valores sugeridos**.\n\nLas sugerencias son opcionales y se muestran para revisar antes de guardar.",
       "trim_range_invalid": "El inicio debe ser anterior al fin. Por favor, ajusta los puntos de recorte.",
       "trim_failed": "El recorte falló. Es posible que el ciclo ya no exista o que la ventana esté vacía.",
+      "invalid_split_timestamp": "La marca de tiempo no es válida o está fuera de la ventana del ciclo. Usa HH:MM o HH:MM:SS dentro de la ventana del ciclo.",
+      "no_split_segments_found": "No se pudieron generar segmentos válidos a partir de estas marcas de tiempo. Asegúrate de que cada marca de tiempo esté dentro de la ventana del ciclo y de que los segmentos duren al menos 1 minuto.",
       "auto_tune_suggestion": "{device_type} {device_title} ciclos fantasma detectados. Cambio de min_power sugerido: {current_min}W -> {new_min}W (no se aplica automáticamente).",
       "auto_tune_title": "Ajuste automático de WashData",
       "auto_tune_fallback": "{device_type} {device_title} ciclos fantasma detectados. Cambio de min_power sugerido: {current_min}W -> {new_min}W (no se aplica automáticamente)."
     },
     "abort": {
       "no_cycles_found": "No se encontraron ciclos",
+      "no_split_segments_found": "No se encontraron segmentos divisibles en el ciclo seleccionado.",
+      "cycle_not_found": "No se pudo cargar el ciclo seleccionado.",
       "no_power_data": "No hay datos de traza de potencia disponibles para el ciclo seleccionado.",
       "no_profiles_found": "No se encontraron perfiles. Crea un perfil primero.",
       "no_profiles_for_matching": "No hay perfiles disponibles para la coincidencia. Crea perfiles primero.",
@@ -682,6 +797,9 @@
         "all_device_types": "Todos los tipos de dispositivo",
         "current_suffix": "(actual)",
         "editor_select_info": "Selecciona 1 ciclo para dividir, o 2 o más ciclos para fusionar.",
+        "editor_select_info_split": "Selecciona 1 ciclo para dividir.",
+        "editor_select_info_merge": "Selecciona 2 o más ciclos para fusionar.",
+        "editor_select_info_delete": "Selecciona 1 o más ciclos para eliminar.",
         "no_cycles_recorded": "Todavía no se han registrado ciclos.",
         "profile_summary_line": "- **{name}**: {count} ciclos, promedio {avg} min",
         "no_profiles_created": "Todavía no se han creado perfiles.",
@@ -722,6 +840,10 @@
         "split_preview_confirm_fmt": "Haz clic en Confirmar para dividir este ciclo en {count} ciclos separados.",
         "merge_preview_title": "Vista previa de fusión",
         "merge_preview_joining_fmt": "Uniendo {count} ciclos. Las brechas se rellenarán con lecturas de 0 W.",
+        "editor_delete_preview_title": "Vista previa de eliminación",
+        "editor_delete_preview_intro": "Los ciclos seleccionados se eliminarán permanentemente:",
+        "editor_delete_preview_confirm": "Haz clic en Confirmar para eliminar permanentemente estos registros de ciclos.",
+        "no_power_preview": "*No hay datos de potencia disponibles para vista previa.*",
         "profile_comparison": "Comparación de perfiles",
         "actual_cycle_label": "Este ciclo (real)",
         "storage_usage_header": "Uso de almacenamiento",
@@ -735,10 +857,21 @@
         "assign_phases_help": "Usa las acciones de abajo para añadir, editar, eliminar o guardar rangos.",
         "profile_summary_header": "Resumen de perfiles",
         "recent_cycles_header": "Ciclos recientes",
-        "no_power_preview": "*No hay datos de potencia disponibles para vista previa.*",
         "trim_cycle_preview_title": "Vista previa de recorte de ciclo",
         "trim_cycle_preview_no_data": "No hay datos de potencia disponibles para este ciclo.",
-        "trim_cycle_preview_kept_suffix": "conservado"
+        "trim_cycle_preview_kept_suffix": "conservado",
+        "table_program": "Programa",
+        "table_when": "Cuándo",
+        "table_length": "Duración",
+        "table_match": "Coincidencia",
+        "table_profile": "Perfil",
+        "table_cycles": "Ciclos",
+        "table_avg_length": "Duración prom.",
+        "table_last_run": "Última ejecución",
+        "table_avg_energy": "Energía prom.",
+        "table_detected_program": "Programa detectado",
+        "table_confidence": "Confianza",
+        "table_reported": "Informado"
       }
     },
     "interactive_editor_action": {
@@ -746,6 +879,12 @@
         "split": "Dividir un ciclo (encontrar brechas)",
         "merge": "Fusionar ciclos (unir fragmentos)",
         "delete": "Eliminar ciclo(s)"
+      }
+    },
+    "split_mode": {
+      "options": {
+        "auto": "Detectar automáticamente huecos de inactividad",
+        "manual": "Marcas de tiempo manuales"
       }
     },
     "diagnostics_action": {
@@ -1133,6 +1272,15 @@
     }
   },
   "exceptions": {
+    "device_id_required": {
+      "message": "Se requiere un ID de dispositivo válido."
+    },
+    "cycle_id_required": {
+      "message": "Se requiere un id_ciclo válido."
+    },
+    "profile_name_required": {
+      "message": "Se requiere un nombre de perfil válido."
+    },
     "device_not_found": {
       "message": "Dispositivo no encontrado."
     },
@@ -1150,15 +1298,6 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s debe ser mayor que trim_start_s."
-    },
-    "device_id_required": {
-      "message": "Se requiere un ID de dispositivo válido."
-    },
-    "cycle_id_required": {
-      "message": "Se requiere un id_ciclo válido."
-    },
-    "profile_name_required": {
-      "message": "Se requiere un nombre de perfil válido."
     }
   }
 }
