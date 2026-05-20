@@ -623,7 +623,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         notify_services: list[str] = sorted(
             f"notify.{s}"
             for s in self.hass.services.async_services().get("notify", {})
+            if s != "send_message"
         )
+        notify_entities: list[str] = [
+            state.entity_id for state in self.hass.states.async_all("notify")
+        ]
+        notify_services = sorted(set(notify_services) | set(notify_entities))
 
         def get_val(key: str, default: Any) -> Any:
             return self.config_entry.options.get(

@@ -3080,18 +3080,37 @@ class WashDataManager:
                 )
                 continue
 
-            domain, service = (
-                notify_service.split(".", 1)
-                if "." in notify_service
-                else ("notify", notify_service)
+            state = (
+                self.hass.states.get(notify_service)
+                if notify_service.startswith("notify.")
+                else None
             )
-            service_data: dict[str, Any] = {"message": message, "title": title}
-            if data:
-                service_data["data"] = data
-
-            self.hass.async_create_task(
-                self.hass.services.async_call(domain, service, service_data)
-            )
+            if state is not None and getattr(state, "domain", None) == "notify":
+                service_data: dict[str, Any] = {
+                    "entity_id": notify_service,
+                    "message": message,
+                }
+                if title:
+                    service_data["title"] = title
+                if data:
+                    service_data["data"] = data
+                self.hass.async_create_task(
+                    self.hass.services.async_call(
+                        "notify", "send_message", service_data
+                    )
+                )
+            else:
+                domain, service = (
+                    notify_service.split(".", 1)
+                    if "." in notify_service
+                    else ("notify", notify_service)
+                )
+                service_data = {"message": message, "title": title}
+                if data:
+                    service_data["data"] = data
+                self.hass.async_create_task(
+                    self.hass.services.async_call(domain, service, service_data)
+                )
             sent = True
 
         if not sent:
