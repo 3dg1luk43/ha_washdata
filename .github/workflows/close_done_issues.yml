@@ -18,6 +18,9 @@ jobs:
           script: |
             const OWNER_LOGIN = context.repo.owner;
             const INACTIVITY_DAYS = 5;
+            // Must match the marker emitted by release_references.yml.
+            const RELEASE_BOT_MARKER = '<!-- release-reference-bot -->';
+            const RELEASE_BOT_LOGIN = 'github-actions[bot]';
             const cutoff = new Date(Date.now() - INACTIVITY_DAYS * 24 * 60 * 60 * 1000);
 
             // Fetch all open issues with the "done" label
@@ -55,12 +58,17 @@ jobs:
               }
 
               const lastComment = allComments[allComments.length - 1];
-              if (lastComment.user.login !== OWNER_LOGIN) {
-                console.log(`#${issue.number}: last comment is from @${lastComment.user.login}, not owner - skipping.`);
+              const isOwner = lastComment.user.login === OWNER_LOGIN;
+              const isReleaseBot = lastComment.user.type === 'Bot'
+                && lastComment.user.login === RELEASE_BOT_LOGIN
+                && (lastComment.body || '').includes(RELEASE_BOT_MARKER);
+              if (!isOwner && !isReleaseBot) {
+                console.log(`#${issue.number}: last comment is from @${lastComment.user.login} (not owner or release-reference bot) - skipping.`);
                 continue;
               }
 
-              console.log(`#${issue.number}: closing - labeled "done", inactive for ${INACTIVITY_DAYS}+ days, owner's comment is last.`);
+              const lastCommentSource = isOwner ? "owner's comment" : 'release-reference bot comment';
+              console.log(`#${issue.number}: closing - labeled "done", inactive for ${INACTIVITY_DAYS}+ days, ${lastCommentSource} is last.`);
 
               await github.rest.issues.createComment({
                 owner: context.repo.owner,

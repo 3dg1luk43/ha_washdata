@@ -539,6 +539,54 @@ def test_notification_actions_run_alongside_notify_service(
     mock_hass.services.async_call.assert_called_once()
 
 
+def test_notify_entity_dispatched_via_send_message(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """A configured target that resolves to a notify entity should use notify.send_message with entity_id."""
+    manager._notify_finish_services = ["notify.telegram_morgantic"]
+    manager._notify_actions = []
+
+    notify_state = MagicMock()
+    notify_state.domain = "notify"
+    notify_state.entity_id = "notify.telegram_morgantic"
+    notify_state.state = "unknown"
+    mock_hass.states.get = MagicMock(return_value=notify_state)
+
+    manager._dispatch_notification(
+        "cycle done", title="WashData", event_type=NOTIFY_EVENT_FINISH
+    )
+
+    mock_hass.services.async_call.assert_called_once()
+    domain, service, payload = mock_hass.services.async_call.call_args[0]
+    assert domain == "notify"
+    assert service == "send_message"
+    assert payload["entity_id"] == "notify.telegram_morgantic"
+    assert payload["message"] == "cycle done"
+    assert payload["title"] == "WashData"
+
+
+def test_legacy_notify_service_still_dispatched_as_service(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """Targets that don't resolve to a notify entity should use the legacy notify.<service> path."""
+    manager._notify_finish_services = ["notify.mobile_app_test"]
+    manager._notify_actions = []
+
+    # No notify entity registered for this target - states.get returns None.
+    mock_hass.states.get = MagicMock(return_value=None)
+
+    manager._dispatch_notification(
+        "cycle done", title="WashData", event_type=NOTIFY_EVENT_FINISH
+    )
+
+    mock_hass.services.async_call.assert_called_once()
+    domain, service, payload = mock_hass.services.async_call.call_args[0]
+    assert domain == "notify"
+    assert service == "mobile_app_test"
+    assert payload["message"] == "cycle done"
+    assert "entity_id" not in payload
+
+
 def test_notification_is_deferred_when_no_person_home(
     manager: WashDataManager, mock_hass: Any
 ) -> None:

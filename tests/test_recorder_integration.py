@@ -30,21 +30,16 @@ async def test_record_flow_menu(mock_hass, mock_config_entry):
     
     # Step: record_cycle (Initial menu check)
     result = await flow.async_step_record_cycle()
-    assert result["type"] == FlowResultType.FORM
+    assert result["type"] == FlowResultType.MENU
     assert result["step_id"] == "record_cycle"
-    
-    # Should see "Start New Recording" in options
-    # schema = result["data_schema"]
-    # schema.schema is {Required('action'): In(...)}
-    # We can inspect schema structure if needed, or just assert we got a form.
-    # But let's verify options if we can easily inspect vol.In
-    
-    # Simulate User clicks "Start Recording"
-    result = await flow.async_step_record_cycle(user_input={"action": "start_recording"})
-    
+    assert "record_start" in result["menu_options"]
+
+    # Simulate user clicking "Start Recording" — menu dispatches directly to the step
+    result = await flow.async_step_record_start()
+
     # Should call start_recording and loop back to menu
     assert manager.async_start_recording.called
-    assert result["type"] == FlowResultType.FORM
+    assert result["type"] == FlowResultType.MENU
     assert result["step_id"] == "record_cycle"
 
 @pytest.mark.asyncio
@@ -80,10 +75,10 @@ async def test_record_flow_stop_process(mock_hass, mock_config_entry):
     flow.handler = mock_config_entry.entry_id
     flow._selector_translations = {}  # Skip translation fetch in tests
     
-    # 1. Stop Recording
-    result = await flow.async_step_record_cycle(user_input={"action": "stop_recording"})
+    # 1. Stop Recording — menu dispatches directly to the step
+    result = await flow.async_step_record_stop()
     assert manager.async_stop_recording.called
-    
+
     # Should transition directly to process step
     assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "record_process"

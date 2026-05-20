@@ -259,6 +259,74 @@ data:
 - `ha_washdata.label_cycle`: Assign a profile to a cycle in history programmatically.
 
 
+### Events
+
+WashData fires the following events on the Home Assistant event bus, suitable as automation triggers (e.g. `platform: event`, `event_type: ha_washdata_cycle_ended`). All three events are gated by the **Fire Events** toggle in the Notifications options page (default: on); disable it to suppress them globally without touching automations.
+
+#### `ha_washdata_cycle_started`
+Fired immediately when a cycle is detected (i.e. when the state machine first leaves `OFF`). The profile match has typically not run yet, so `program` is usually `"detecting..."` or `"unknown"` at this point; use `ha_washdata_cycle_ended` if you need the resolved profile name.
+
+```yaml
+event_type: ha_washdata_cycle_started
+data:
+  entry_id: 01KR1WGJYHJBTT5MEGS0VRXC4D     # config-entry id, stable across restarts
+  device_name: Waschmaschine                # the integration title you configured
+  device_type: washing_machine              # washing_machine | dryer | dishwasher | oven | bread_maker | pump | ...
+  program: "detecting..."                   # may resolve to a profile name later in the cycle
+  start_time: "2026-05-09T07:43:08.626640+02:00"
+```
+
+#### `ha_washdata_cycle_ended`
+Fired once the cycle has fully terminated and been written to history. Carries the full cycle record minus the raw power trace (`power_data`, `debug_data`, `power_trace` are stripped to stay under Home Assistant's 32 KB event payload limit; fetch them via the diagnostics download if you need the samples).
+
+```yaml
+event_type: ha_washdata_cycle_ended
+data:
+  entry_id: 01KR1WGJYHJBTT5MEGS0VRXC4D
+  device_name: WashingMachine
+  program: "40°C / 1200rpm / cotton"                    # resolved profile name, or "unknown" if no match
+  duration: 13784.144562                    # seconds (float)
+  start_time: "2026-05-09T07:43:08.626640+02:00"
+  end_time:   "2026-05-09T11:32:52.771202+02:00"
+  cycle_data:
+    id: db87b5b60b2e                        # 12-char hex, stable cycle identifier
+    start_time: "2026-05-09T07:43:08.626640+02:00"
+    end_time:   "2026-05-09T11:32:52.771202+02:00"
+    duration: 13784.144562                  # seconds (float)
+    max_power: 2063                         # watts (peak observed in the cycle)
+    energy_wh: 1564.04                      # integrated energy over the cycle
+    status: completed                       # completed | aborted | timeout
+    termination_reason: timeout             # off_delay | smart_termination | timeout | force_end | zombie | ghost_suppressed
+    profile_name: null                      # null when no profile was matched
+    sampling_interval: 43                   # mean seconds between power readings
+    device_type: washing_machine
+    signature:                              # feature vector used for matching
+      duration: 13784.1
+      total_energy: 1564.04
+      max_power: 2063
+      event_density: 0
+      time_to_first_high: 1416.1
+      high_phase_ratio: 0.149
+      p05: 17                               # 5th-percentile power (W)
+      p25: 38
+      p50: 91
+      p75: 203
+      p95: 2024.8
+```
+
+#### `ha_washdata_pump_stuck`
+*(Pump device type only.)* Fired once when an active pump cycle exceeds the configured stuck-pump duration. Useful for sump-pit, condensate, or borehole-pump alarms.
+
+```yaml
+event_type: ha_washdata_pump_stuck
+data:
+  entry_id: 01KR1WGJYHJBTT5MEGS0VRXC4D
+  device: Sumppumpe                         # the integration title (note: legacy key name)
+  elapsed_seconds: 1830                     # how long the pump had been running
+  threshold_seconds: 1800                   # the configured stuck-pump threshold
+```
+
+
 ### 🤝 Contribute Training Data
 
 The more real-world cycle data WashData has, the smarter its detection becomes - across different appliance brands, ages, and programs.

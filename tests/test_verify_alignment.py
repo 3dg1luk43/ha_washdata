@@ -13,6 +13,8 @@ from ha_washdata.profile_store import ProfileStore
 
 _LOGGER = logging.getLogger(__name__)
 
+pytestmark = pytest.mark.slow
+
 # Directory containing the data files
 DATA_DIR = os.path.join(os.path.dirname(__file__), "../cycle_data")
 

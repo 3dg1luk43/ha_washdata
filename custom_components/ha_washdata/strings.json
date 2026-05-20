@@ -129,9 +129,11 @@
           "notify_finish_message": "Finish Message Format",
           "notify_pre_complete_message": "Pre-Completion Message Format",
           "energy_price_entity": "Energy Price - Entity (optional)",
-          "energy_price_static": "Energy Price - Static value (optional)"
+          "energy_price_static": "Energy Price - Static value (optional)",
+          "go_back": "Go back without saving"
         },
         "data_description": {
+          "go_back": "Tick this and click Submit to discard any changes above and return to the main menu.",
           "notify_actions": "Optional Home Assistant action sequence to run for every notification event (scripts, notify, TTS, etc.). Actions fire before the per-event service targets.",
           "notify_people": "People entities used for presence gating. When enabled, notification delivery is delayed until at least one selected person is home.",
           "notify_only_when_home": "If enabled, delay notifications until at least one selected person is home.",
@@ -154,125 +156,168 @@
       },
       "advanced_settings": {
         "title": "Advanced Settings",
-        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.\n\nSuggested Settings currently available: {suggestions_count}. Use Apply Suggested Values to review changes before you save.",
-        "data": {
-          "apply_suggestions": "Apply Suggested Values",
-          "start_threshold_w": "Start Threshold (W)",
-          "stop_threshold_w": "Stop Threshold (W)",
-          "min_off_gap": "Min Gap Between Cycles (s)",
-          "start_duration_threshold": "Start Debounce Duration (s)",
-          "progress_reset_delay": "Progress Reset Delay (seconds)",
-          "no_update_active_timeout": "No-Update Timeout (s)",
-          "sampling_interval": "Sampling Interval (s)",
-          "auto_label_confidence": "Auto-Label Confidence (0-1)",
-          "learning_confidence": "Feedback Request Confidence (0-1)",
-          "suppress_feedback_notifications": "Suppress Feedback Notifications",
-          "duration_tolerance": "Duration Tolerance (0-0.5)",
-          "profile_match_interval": "Profile Match Interval (seconds)",
-          "profile_match_min_duration_ratio": "Profile Match Min Duration Ratio (0.1-1.0)",
-          "profile_match_max_duration_ratio": "Profile Match Max Duration Ratio (1.0-3.0)",
-          "smoothing_window": "Smoothing Window (samples)",
-          "profile_match_threshold": "Profile Match Threshold",
-          "profile_unmatch_threshold": "Profile Unmatch Threshold",
-          "profile_duration_tolerance": "Profile Match Duration Tolerance (0-0.5)",
-          "interrupted_min_seconds": "Interrupted: Minimum Runtime (seconds)",
-          "abrupt_drop_watts": "Interrupted: Abrupt Drop Absolute (W)",
-          "abrupt_drop_ratio": "Interrupted: Abrupt Drop Ratio (0-1)",
-          "abrupt_high_load_factor": "Interrupted: High-Load Factor",
-          "max_past_cycles": "Retention: Max Saved Cycles",
-          "max_full_traces_per_profile": "Retention: Max Full Traces per Profile",
-          "max_full_traces_unlabeled": "Retention: Max Full Traces Unlabeled",
-          "watchdog_interval": "Watchdog Interval (seconds)",
-          "completion_min_seconds": "Completion Minimum Runtime (seconds)",
-          "notify_before_end_minutes": "Pre-completion Notification (minutes before end)",
-          "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Threshold",
-          "running_dead_zone": "Running Dead Zone (seconds)",
-          "end_repeat_count": "End Repeat Count",
-          "start_energy_threshold": "Start Energy Gate (Wh)",
-          "end_energy_threshold": "End Energy Gate (Wh)",
-          "auto_maintenance": "Enable Auto-Maintenance",
-          "expose_debug_entities": "Expose Debug Entities",
-          "save_debug_traces": "Save Debug Traces",
-          "anti_wrinkle_enabled": "Anti-Wrinkle Shield (Dryer/Washer-Dryer Only)",
-          "anti_wrinkle_max_power": "Anti-Wrinkle Max Power (W) (Dryer/Washer-Dryer Only)",
-          "anti_wrinkle_max_duration": "Anti-Wrinkle Max Duration (s) (Dryer/Washer-Dryer Only)",
-          "anti_wrinkle_exit_power": "Anti-Wrinkle Exit Power (W) (Dryer/Washer-Dryer Only)",
-          "delay_start_detect_enabled": "Enable Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Duration (s)",
-          "delay_timeout_hours": "Delayed Start: Max Wait Time (h)",
-          "dtw_bandwidth": "DTW Bandwidth",
-          "external_end_trigger_enabled": "Enable External Cycle End Trigger",
-          "external_end_trigger": "External Cycle End Sensor",
-          "external_end_trigger_inverted": "Invert Trigger Logic (Trigger on OFF)",
-          "pump_stuck_duration": "Pump Stuck Alert Threshold (s) (Pump Only)",
-          "door_sensor_entity": "Door Sensor",
-          "pause_cuts_power": "Cut Power When Pausing",
-          "switch_entity": "Switch Entity (for Pause Power Cut)",
-          "notify_unload_delay_minutes": "Laundry Waiting Notification Delay (min)"
-        },
-        "data_description": {
-          "apply_suggestions": "Check this box to open a review step for suggested values from the learning algorithm. Nothing is saved automatically.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "start_threshold_w": "Power must rise ABOVE this threshold to START a cycle. Set higher than your standby power. Default: min_power + 1 W.",
-          "stop_threshold_w": "Power must fall BELOW this threshold to END a cycle. Set just above zero to avoid noise triggering false ends. Default: 0.6 * min_power.",
-          "min_off_gap": "If a cycle starts within this many seconds of the previous one ending, they will be MERGED into a single cycle.",
-          "start_duration_threshold": "Ignore brief power spikes shorter than this duration (seconds). Filters out boot spikes (e.g., 60W for 2s) before real cycle starts. Default: 5s.",
-          "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 300s.",
-          "no_update_active_timeout": "For publish-on-change sensors: only force-end an ACTIVE cycle if no updates arrive for this many seconds. Low-power completion still uses the Off Delay.",
-          "sampling_interval": "Minimum sampling interval in seconds. Updates faster than this rate will be ignored. Default: 2.0s.",
-          "auto_label_confidence": "Automatically label cycles at or above this confidence on completion (0.0–1.0).",
-          "learning_confidence": "Minimum confidence to request user verification via an event (0.0–1.0).",
-          "suppress_feedback_notifications": "When enabled, WashData will still track and request feedback internally but will not show persistent notifications asking you to confirm cycles. Useful when cycles are always detected correctly and you find the prompts distracting.",
-          "duration_tolerance": "Tolerance for time-remaining estimates during a run (0.0–0.5 corresponds to 0–50%).",
-          "profile_match_interval": "How often (in seconds) to attempt profile matching during a cycle. Lower values provide faster detection but use more CPU. Default: 300s (5 minutes).",
-          "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.50 (50%).",
-          "profile_match_max_duration_ratio": "Maximum duration ratio for profile matching. Running cycle must not exceed this multiple of profile duration. Higher = more lenient. Default: 1.50 (150%).",
-          "smoothing_window": "Number of recent power readings used for moving-average smoothing.",
-          "profile_match_threshold": "Minimum DTW similarity score (0.0–1.0) required to consider a profile as a match. Higher = stricter matching, fewer false positives. Default: 0.4.",
-          "profile_unmatch_threshold": "DTW similarity score (0.0–1.0) below which a previously matched profile is rejected. Should be lower than match threshold to prevent flickering. Default: 0.35.",
-          "profile_duration_tolerance": "Tolerance used by profile matching for total duration variance (0.0–0.5). Default behavior: ±25%.",
-          "interrupted_min_seconds": "Runs shorter than this may be classified as 'interrupted'.",
-          "abrupt_drop_watts": "Absolute power drop (W) considered an abrupt cliff.",
-          "abrupt_drop_ratio": "Relative drop ratio (0–1). Example: 0.6 means a 60% drop is abrupt.",
-          "abrupt_high_load_factor": "Factor above baseline considered 'high load' before an abrupt drop (used with abrupt detection).",
-          "max_past_cycles": "Total number of cycles to retain (oldest removed). Default: 200.",
-          "max_full_traces_per_profile": "Number of recent labeled cycles to keep with full power traces per profile. Older traces are summarized via envelopes. Default: 20.",
-          "max_full_traces_unlabeled": "Number of recent unlabeled cycles to keep with full power traces to support auto-labeling. Default: 20.",
-          "watchdog_interval": "Seconds between watchdog checks while running. Default: 5s. WARNING: Ensure this is HIGHER than your sensor's update interval to avoid false stops (e.g., if sensor updates every 60s, use 65s+).",
-          "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
-          "notify_before_end_minutes": "Minutes before the estimated end of the cycle to trigger a notification. Set to 0 to disable. Default: 0.",
-          "auto_tune_noise_events_threshold": "Number of short/low-power 'noise' cycles within 24h needed to auto-adjust min_power. Default: 3.",
-          "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
-          "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
-          "start_energy_threshold": "Cycle must accumulate at least this much energy (Wh) during the START phase to be confirmed. Default: 0.005 Wh.",
-          "end_energy_threshold": "Cycle ends only if energy in the last Off-Delay window is below this value (Wh). Prevents false ends if power fluctuates near zero. Default: 0.05 Wh.",
-          "auto_maintenance": "Enable auto-maintenance (repair samples, merge fragments).",
-          "expose_debug_entities": "Show advanced sensors (Confidence, Phase, Ambiguity) for debugging.",
-          "save_debug_traces": "Store detailed ranking and power trace data in history (Increases storage usage).",
-          "anti_wrinkle_enabled": "Ignore short low-power drum rotations after a cycle ends to prevent ghost cycles (dryer/washer-dryer only).",
-          "anti_wrinkle_max_power": "Bursts at or below this power are treated as anti-wrinkle rotations instead of new cycles. Only applies when Anti-Wrinkle Shield is enabled.",
-          "anti_wrinkle_max_duration": "Maximum burst length to treat as anti-wrinkle rotation. Only applies when Anti-Wrinkle Shield is enabled.",
-          "anti_wrinkle_exit_power": "If power drops below this level, exit anti-wrinkle immediately (true off). Only applies when Anti-Wrinkle Shield is enabled.",
-          "delay_start_detect_enabled": "When enabled, a brief low-power drain spike followed by sustained standby power is detected as a delayed start. The state sensor shows 'Waiting to Start' during the delay. No program time or progress is tracked until the cycle actually begins. Requires start_threshold_w to be set above the drain spike power.",
-          "delay_drain_min_power": "Minimum power (W) to recognise as a drain spike. Set just above your machine's true-off standby level. Default: 10 W.",
-          "delay_drain_max_power": "Maximum power (W) for a drain spike — bursts above this are treated as a real cycle start. Should be below your start_threshold_w setting. Default: 80 W.",
-          "delay_drain_max_duration": "The drain spike must drop back below the drain window within this many seconds to be confirmed. Longer spikes are treated as real cycle activity. Default: 60 s.",
-          "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h.",
-          "dtw_bandwidth": "Maximum allowed time warping (stretching) as a ratio of cycle duration. Higher values allow matching highly variable cycles but increase CPU cost. Default: 0.20 (20%).",
-          "external_end_trigger_enabled": "Enable monitoring of an external binary sensor to trigger cycle completion.",
-          "external_end_trigger": "Select a binary sensor entity. When this sensor triggers, the current cycle will end with status 'completed'.",
-          "external_end_trigger_inverted": "By default, the trigger fires when the sensor turns ON. Check this box to fire when the sensor turns OFF instead.",
-          "pump_stuck_duration": "If a pump cycle is still running after this many seconds, a ha_washdata_pump_stuck event is fired once. Use this to detect a jammed motor (typical sump pump run is under 60 s). Default: 1800 s (30 min). Pump device type only.",
-          "door_sensor_entity": "Optional binary sensor for the machine door (on = open, off = closed). When the door opens during an active cycle, WashData will confirm the cycle as intentionally paused. After the cycle ends, if the door is still closed, the state changes to 'Clean' until the door is opened. Note: closing the door does NOT auto-resume a paused cycle - resume must be triggered manually via the Resume Cycle button or service.",
-          "pause_cuts_power": "When pausing via the Pause Cycle button or service, also turn off the configured switch entity. Only takes effect if a switch entity is configured for this device.",
-          "switch_entity": "The switch entity to toggle when pausing or resuming. Required when 'Cut Power When Pausing' is enabled.",
-          "notify_unload_delay_minutes": "Send a notification via the finish notification channel after the cycle ends and the door has not been opened for this many minutes (requires Door Sensor). Set to 0 to disable. Default: 60 min."
+        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.",
+        "sections": {
+          "suggestions_section": {
+            "name": "Suggested Settings",
+            "description": "{suggestions_count} learned suggestions available. Tick Apply Suggested Values to review proposed changes before saving.",
+            "data": {
+              "apply_suggestions": "Apply Suggested Values"
+            },
+            "data_description": {
+              "apply_suggestions": "Check this box to open a review step for suggested values from the learning algorithm. Nothing is saved automatically.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
+            }
+          },
+          "detection_section": {
+            "name": "Detection & Power Thresholds",
+            "description": "When the appliance is considered ON or OFF, energy gates, and timing for state transitions.",
+            "data": {
+              "start_duration_threshold": "Start Debounce Duration (s)",
+              "start_energy_threshold": "Start Energy Gate (Wh)",
+              "completion_min_seconds": "Completion Minimum Runtime (seconds)",
+              "start_threshold_w": "Start Threshold (W)",
+              "stop_threshold_w": "Stop Threshold (W)",
+              "end_energy_threshold": "End Energy Gate (Wh)",
+              "running_dead_zone": "Running Dead Zone (seconds)",
+              "end_repeat_count": "End Repeat Count",
+              "min_off_gap": "Min Gap Between Cycles (s)",
+              "sampling_interval": "Sampling Interval (s)"
+            },
+            "data_description": {
+              "start_duration_threshold": "Ignore brief power spikes shorter than this duration (seconds). Filters out boot spikes (e.g., 60W for 2s) before real cycle starts. Default: 5s.",
+              "start_energy_threshold": "Cycle must accumulate at least this much energy (Wh) during the START phase to be confirmed. Default: 0.2 Wh.",
+              "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
+              "start_threshold_w": "Power must rise ABOVE this threshold to START a cycle. Set higher than your standby power. Default: min_power + 1 W.",
+              "stop_threshold_w": "Power must fall BELOW this threshold to END a cycle. Set just above zero to avoid noise triggering false ends. Default: 0.6 * min_power.",
+              "end_energy_threshold": "Cycle ends only if energy in the last Off-Delay window is below this value (Wh). Prevents false ends if power fluctuates near zero. Default: 0.05 Wh.",
+              "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 3s.",
+              "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
+              "min_off_gap": "If a cycle starts within this many seconds of the previous one ending, they will be MERGED into a single cycle.",
+              "sampling_interval": "Minimum sampling interval in seconds. Updates faster than this rate will be ignored. Default: 30s."
+            }
+          },
+          "matching_section": {
+            "name": "Profile Matching & Learning",
+            "description": "How aggressively WashData matches running cycles against learned profiles and when to ask for feedback.",
+            "data": {
+              "profile_match_min_duration_ratio": "Profile Match Min Duration Ratio (0.1-1.0)",
+              "profile_match_interval": "Profile Match Interval (seconds)",
+              "profile_match_threshold": "Profile Match Threshold",
+              "profile_unmatch_threshold": "Profile Unmatch Threshold",
+              "auto_label_confidence": "Auto-Label Confidence (0-1)",
+              "learning_confidence": "Feedback Request Confidence (0-1)",
+              "suppress_feedback_notifications": "Suppress Feedback Notifications",
+              "duration_tolerance": "Duration Tolerance (0-0.5)",
+              "smoothing_window": "Smoothing Window (samples)",
+              "profile_duration_tolerance": "Profile Match Duration Tolerance (0-0.5)"
+            },
+            "data_description": {
+              "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.10 (10%).",
+              "profile_match_interval": "How often (in seconds) to attempt profile matching during a cycle. Lower values provide faster detection but use more CPU. Default: 300s (5 minutes).",
+              "profile_match_threshold": "Minimum DTW similarity score (0.0–1.0) required to consider a profile as a match. Higher = stricter matching, fewer false positives. Default: 0.4.",
+              "profile_unmatch_threshold": "DTW similarity score (0.0–1.0) below which a previously matched profile is rejected. Should be lower than match threshold to prevent flickering. Default: 0.35.",
+              "auto_label_confidence": "Automatically label cycles at or above this confidence on completion (0.0–1.0).",
+              "learning_confidence": "Minimum confidence to request user verification via an event (0.0–1.0).",
+              "suppress_feedback_notifications": "When enabled, WashData will still track and request feedback internally but will not show persistent notifications asking you to confirm cycles. Useful when cycles are always detected correctly and you find the prompts distracting.",
+              "duration_tolerance": "Tolerance for time-remaining estimates during a run (0.0–0.5 corresponds to 0–50%).",
+              "smoothing_window": "Number of recent power readings used for moving-average smoothing.",
+              "profile_duration_tolerance": "Tolerance used by profile matching for total duration variance (0.0–0.5). Default behavior: ±25%."
+            }
+          },
+          "timing_section": {
+            "name": "Timing, Maintenance & Debug",
+            "description": "Watchdog, progress reset, auto-maintenance, and debug entity exposure.",
+            "data": {
+              "watchdog_interval": "Watchdog Interval (seconds)",
+              "no_update_active_timeout": "No-Update Timeout (s)",
+              "progress_reset_delay": "Progress Reset Delay (seconds)",
+              "auto_maintenance": "Enable Auto-Maintenance",
+              "expose_debug_entities": "Expose Debug Entities",
+              "save_debug_traces": "Save Debug Traces"
+            },
+            "data_description": {
+              "watchdog_interval": "Seconds between watchdog checks while running. Default: 30s. WARNING: Ensure this is HIGHER than your sensor's update interval to avoid false stops.",
+              "no_update_active_timeout": "For publish-on-change sensors: only force-end an ACTIVE cycle if no updates arrive for this many seconds. Low-power completion still uses the Off Delay.",
+              "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 1800s.",
+              "auto_maintenance": "Enable auto-maintenance (repair samples and perform routine cleanup).",
+              "expose_debug_entities": "Show advanced sensors (Confidence, Phase, Ambiguity) for debugging.",
+              "save_debug_traces": "Store detailed ranking and power trace data in history (Increases storage usage)."
+            }
+          },
+          "anti_wrinkle_section": {
+            "name": "Anti-Wrinkle Shield (Dryers)",
+            "description": "Ignore post-cycle drum rotations to prevent ghost cycles. Dryer / washer-dryer only.",
+            "data": {
+              "anti_wrinkle_enabled": "Anti-Wrinkle Shield (Dryer/Washer-Dryer Only)",
+              "anti_wrinkle_max_power": "Anti-Wrinkle Max Power (W)",
+              "anti_wrinkle_max_duration": "Anti-Wrinkle Max Duration (s)",
+              "anti_wrinkle_exit_power": "Anti-Wrinkle Exit Power (W)"
+            },
+            "data_description": {
+              "anti_wrinkle_enabled": "Ignore short low-power drum rotations after a cycle ends to prevent ghost cycles (dryer/washer-dryer only).",
+              "anti_wrinkle_max_power": "Bursts at or below this power are treated as anti-wrinkle rotations instead of new cycles. Only applies when Anti-Wrinkle Shield is enabled.",
+              "anti_wrinkle_max_duration": "Maximum burst length to treat as anti-wrinkle rotation. Only applies when Anti-Wrinkle Shield is enabled.",
+              "anti_wrinkle_exit_power": "If power drops below this level, exit anti-wrinkle immediately (true off). Only applies when Anti-Wrinkle Shield is enabled."
+            }
+          },
+          "delay_start_section": {
+            "name": "Delayed Start Detection",
+            "description": "Treat sustained low-power standby as 'Waiting to Start' until the cycle actually begins.",
+            "data": {
+              "delay_start_detect_enabled": "Enable Delayed Start Detection",
+              "delay_confirm_seconds": "Delayed Start: Standby Confirm Time (s)",
+              "delay_timeout_hours": "Delayed Start: Max Wait Time (h)"
+            },
+            "data_description": {
+              "delay_start_detect_enabled": "When enabled, sustained low power between Stop Threshold and Start Threshold (W) is treated as a delayed start. The state sensor shows 'Waiting to Start' until power crosses Start Threshold (W) for long enough to count as a real cycle. Tune Start Threshold (W) above any background tumble/anti-damp power your appliance draws while waiting.",
+              "delay_confirm_seconds": "Power must stay between Stop Threshold (W) and Start Threshold (W) for this many seconds before WashData enters 'Waiting to Start'. Filters out brief menu-navigation peaks. Default: 60 s.",
+              "delay_timeout_hours": "Safety timeout: if the machine is still in 'Waiting to Start' after this many hours, WashData resets to Off. Default: 8 h."
+            }
+          },
+          "external_triggers_section": {
+            "name": "External Triggers, Door & Pause",
+            "description": "Optional external end-trigger sensor, door sensor for pause/clean detection, and pause-power-cut switch.",
+            "data": {
+              "external_end_trigger_enabled": "Enable External Cycle End Trigger",
+              "external_end_trigger": "External Cycle End Sensor",
+              "external_end_trigger_inverted": "Invert Trigger Logic (Trigger on OFF)",
+              "door_sensor_entity": "Door Sensor",
+              "pause_cuts_power": "Cut Power When Pausing",
+              "switch_entity": "Switch Entity (for Pause Power Cut)",
+              "notify_unload_delay_minutes": "Laundry Waiting Notification Delay (min)"
+            },
+            "data_description": {
+              "external_end_trigger_enabled": "Enable monitoring of an external binary sensor to trigger cycle completion.",
+              "external_end_trigger": "Select a binary sensor entity. When this sensor triggers, the current cycle will end with status 'completed'.",
+              "external_end_trigger_inverted": "By default, the trigger fires when the sensor turns ON. Check this box to fire when the sensor turns OFF instead.",
+              "door_sensor_entity": "Optional binary sensor for the machine door (on = open, off = closed). When the door opens during an active cycle, WashData will confirm the cycle as intentionally paused. After the cycle ends, if the door is still closed, the state changes to 'Clean' until the door is opened. Note: closing the door does NOT auto-resume a paused cycle - resume must be triggered manually via the Resume Cycle button or service.",
+              "pause_cuts_power": "When pausing via the Pause Cycle button or service, also turn off the configured switch entity. Only takes effect if a switch entity is configured for this device.",
+              "switch_entity": "The switch entity to toggle when pausing or resuming. Required when 'Cut Power When Pausing' is enabled.",
+              "notify_unload_delay_minutes": "Send a notification via the finish notification channel after the cycle ends and the door has not been opened for this many minutes (requires Door Sensor). Set to 0 to disable. Default: 60 min."
+            }
+          },
+          "pump_section": {
+            "name": "Pump Monitor",
+            "description": "Pump device type only. Fires an event if a pump cycle runs past this duration.",
+            "data": {
+              "pump_stuck_duration": "Pump Stuck Alert Threshold (s) (Pump Only)"
+            },
+            "data_description": {
+              "pump_stuck_duration": "If a pump cycle is still running after this many seconds, a ha_washdata_pump_stuck event is fired once. Use this to detect a jammed motor (typical sump pump run is under 60 s). Default: 1800 s (30 min). Pump device type only."
+            }
+          }
         }
       },
       "diagnostics": {
         "title": "Diagnostics & Maintenance",
-        "description": "Run maintenance actions like merging fragmented cycles or migrating stored data.\n\n**Storage Usage**\n\n- File Size: {file_size_kb} KB\n- Cycles: {cycle_count}\n- Profiles: {profile_count}\n- Debug Traces: {debug_count}"
+        "description": "Run maintenance actions like merging fragmented cycles or migrating stored data.\n\n**Storage Usage**\n\n- File Size: {file_size_kb} KB\n- Cycles: {cycle_count}\n- Profiles: {profile_count}\n- Debug Traces: {debug_count}",
+        "menu_options": {
+          "reprocess_history": "Maintenance: Reprocess & Optimize Data",
+          "clear_debug_data": "Clear Debug Data (Free up space)",
+          "wipe_history": "Wipe ALL data for this device (irreversible)",
+          "export_import": "Export/Import JSON with settings (copy/paste)",
+          "menu_back": "← Back"
+        }
       },
       "clear_debug_data": {
         "title": "Clear Debug Data",
@@ -280,37 +325,53 @@
       },
       "manage_cycles": {
         "title": "Manage Cycles",
-        "description": "Recent cycles:\n{recent_cycles}",
-        "data": {
-          "action": "Action"
+        "description": "### Recent cycles\n\n{recent_cycles}",
+        "menu_options": {
+          "auto_label_cycles": "Auto-Label Old Cycles",
+          "select_cycle_to_label": "Label Specific Cycle",
+          "select_cycle_to_delete": "Delete Cycle",
+          "interactive_editor": "Merge/Split Interactive Editor",
+          "trim_cycle_select": "Trim Cycle Data",
+          "menu_back": "← Back"
         }
       },
       "manage_cycles_empty": {
         "title": "Manage Cycles",
         "description": "No cycles recorded yet.",
-        "data": {
-          "action": "Action"
+        "menu_options": {
+          "auto_label_cycles": "Auto-Label Old Cycles",
+          "menu_back": "← Back"
         }
       },
       "manage_profiles": {
         "title": "Manage Profiles",
         "description": "Profile Summary:\n{profile_summary}",
-        "data": {
-          "action": "Action"
+        "menu_options": {
+          "create_profile": "Create New Profile",
+          "edit_profile": "Edit/Rename Profile",
+          "delete_profile_select": "Delete Profile",
+          "profile_stats": "Profile Statistics",
+          "cleanup_profile": "Clean Up History - Graph & Delete",
+          "assign_profile_phases_select": "Assign Phase Ranges",
+          "menu_back": "← Back"
         }
       },
       "manage_profiles_empty": {
         "title": "Manage Profiles",
         "description": "No profiles created yet.",
-        "data": {
-          "action": "Action"
+        "menu_options": {
+          "create_profile": "Create New Profile",
+          "menu_back": "← Back"
         }
       },
       "manage_phase_catalog": {
         "title": "Manage Phase Catalog",
         "description": "Phase catalog (defaults for this device + custom phases):\n{phase_summary}",
-        "data": {
-          "action": "Action"
+        "menu_options": {
+          "phase_catalog_create": "Create New Phase",
+          "phase_catalog_edit_select": "Edit Phase",
+          "phase_catalog_delete": "Delete Phase",
+          "menu_back": "← Back"
         }
       },
       "phase_catalog_create": {
@@ -347,8 +408,14 @@
       "assign_profile_phases": {
         "title": "Assign Phase Ranges",
         "description": "Phase preview for profile: **{profile_name}**\n\n{timeline_svg}\n\n**Current ranges:**\n{current_ranges}\n\nUse actions below to add, edit, delete, or save ranges.",
-        "data": {
-          "action": "Action"
+        "menu_options": {
+          "assign_profile_phases_add": "Add Phase Range",
+          "assign_profile_phases_edit_select": "Edit Phase Range",
+          "assign_profile_phases_delete": "Delete Phase Range",
+          "phase_ranges_clear": "Clear All Ranges",
+          "assign_profile_phases_auto_detect": "Auto-detect Phases",
+          "phase_ranges_save": "Save and Return",
+          "menu_back": "← Back"
         }
       },
       "assign_profile_phases_add": {
@@ -501,8 +568,11 @@
       "interactive_editor": {
         "title": "Merge/Split Interactive Editor",
         "description": "Select a manual action to perform on your cycle history.",
-        "data": {
-          "editor_action": "Action"
+        "menu_options": {
+          "editor_split": "Split a Cycle (Find gaps)",
+          "editor_merge": "Merge Cycles (Join fragments)",
+          "editor_delete": "Delete Cycle(s)",
+          "menu_back": "← Back"
         }
       },
       "editor_select": {
@@ -533,10 +603,24 @@
         }
       },
       "editor_split_params": {
-        "title": "Split Configuration",
+        "title": "Split Method",
+        "description": "Choose how to split this cycle. **Auto-detect** finds idle gaps in the power data; **Manual timestamp** lets you set explicit split points (useful when one cycle ran straight into the next with no idle gap between them).",
+        "data": {
+          "split_mode": "Split Method"
+        }
+      },
+      "editor_split_auto_params": {
+        "title": "Auto-Split Configuration",
         "description": "Adjust the sensitivity for splitting this cycle. Any idle gap longer than this will cause a split.",
         "data": {
           "min_gap_seconds": "Split Gap Threshold (seconds)"
+        }
+      },
+      "editor_split_manual_params": {
+        "title": "Manual Split Timestamps",
+        "description": "{preview_md}Cycle window: **{cycle_start_wallclock} → {cycle_end_wallclock}** on {cycle_date}.\n\nEnter one or more split timestamps (`HH:MM` or `HH:MM:SS`), one per line. The cycle will be cut at each timestamp — N timestamps produce N+1 segments.",
+        "data": {
+          "split_timestamps": "Split Timestamps"
         }
       },
       "reprocess_history": {
@@ -562,8 +646,13 @@
       "record_cycle": {
         "title": "Record Cycle",
         "description": "Manually record a cycle to create a clean profile without interference.\n\nStatus: **{status}**\nDuration: {duration}s\nSamples: {samples}",
-        "data": {
-          "action": "Action"
+        "menu_options": {
+          "record_refresh": "Refresh Status",
+          "record_stop": "Stop Recording (Save & Process)",
+          "record_start": "Start New Recording",
+          "record_process": "Process Last Recording (Trim & Save)",
+          "record_discard": "Discard Last Recording",
+          "menu_back": "← Back"
         }
       },
       "record_process": {
@@ -578,14 +667,33 @@
       },
       "learning_feedbacks": {
         "title": "Learning Feedbacks",
-        "description": "Select a cycle review request to process.",
+        "description": "{count} pending review request(s).\n\n{pending_table}",
+        "menu_options": {
+          "learning_feedbacks_pick": "Review a pending feedback",
+          "learning_feedbacks_dismiss_all": "Dismiss all pending feedback",
+          "menu_back": "← Back"
+        }
+      },
+      "learning_feedbacks_pick": {
+        "title": "Pick Feedback to Review",
+        "description": "Select a cycle review request to open.",
         "data": {
           "selected_feedback": "Select Cycle to Review"
         }
       },
       "learning_feedbacks_empty": {
         "title": "Learning Feedbacks",
-        "description": "No pending feedback requests found."
+        "description": "No pending feedback requests found.",
+        "menu_options": {
+          "menu_back": "← Back"
+        }
+      },
+      "learning_feedbacks_dismiss_all": {
+        "title": "Dismiss All Pending Feedbacks",
+        "description": "You are about to dismiss **{count}** pending feedback request(s). Dismissed cycles remain in your history but will not contribute new learning signal. This cannot be undone.\n\n✅ Check the box below and click **Submit** to dismiss all.\n❌ Leave it unchecked and click **Submit** to cancel and go back.",
+        "data": {
+          "confirm_dismiss_all": "Confirm: dismiss all pending feedback requests"
+        }
       },
       "resolve_feedback": {
         "title": "Resolve Feedback",
@@ -629,6 +737,9 @@
     },
     "error": {
       "import_failed": "Import failed. Please paste a valid WashData export JSON.",
+      "select_exactly_one": "Select exactly one cycle for this action.",
+      "select_at_least_one": "Select at least one cycle for this action.",
+      "select_at_least_two": "Select at least two cycles for this action.",
       "profile_exists": "A profile with this name already exists",
       "rename_failed": "Failed to rename profile. Profile may not exist or new name is already taken.",
       "assignment_failed": "Failed to assign profile to cycle",
@@ -648,12 +759,16 @@
       "suggestions_ready_notification_message": "The **Suggested Settings** sensor now reports **{count}** actionable recommendations.\n\nTo review and apply them: **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSuggestions are optional and shown for review before you save.",
       "trim_range_invalid": "Start must be before end. Please adjust your trim points.",
       "trim_failed": "Trim failed. The cycle may no longer exist or the window is empty.",
+      "invalid_split_timestamp": "Timestamp is invalid or outside the cycle window. Use HH:MM or HH:MM:SS within the cycle's window.",
+      "no_split_segments_found": "No valid segments could be produced from these timestamps. Make sure each timestamp is inside the cycle window and segments are at least 1 minute long.",
       "auto_tune_suggestion": "{device_type} {device_title} detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically).",
       "auto_tune_title": "WashData Auto-Tune",
       "auto_tune_fallback": "{device_type} {device_title} detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically)."
     },
     "abort": {
       "no_cycles_found": "No cycles found",
+      "no_split_segments_found": "No splittable segments were found in the selected cycle.",
+      "cycle_not_found": "The selected cycle could not be loaded.",
       "no_power_data": "No power trace data available for the selected cycle.",
       "no_profiles_found": "No profiles found. Create a profile first.",
       "no_profiles_for_matching": "No profiles available for matching. Create profiles first.",
@@ -682,6 +797,9 @@
         "all_device_types": "All Device Types",
         "current_suffix": "(current)",
         "editor_select_info": "Select 1 cycle to split, or 2+ cycles to merge.",
+        "editor_select_info_split": "Select 1 cycle to split.",
+        "editor_select_info_merge": "Select 2+ cycles to merge.",
+        "editor_select_info_delete": "Select 1+ cycle(s) to delete.",
         "no_cycles_recorded": "No cycles recorded yet.",
         "profile_summary_line": "- **{name}**: {count} cycles, {avg}m avg",
         "no_profiles_created": "No profiles created yet.",
@@ -722,6 +840,9 @@
         "split_preview_confirm_fmt": "Click Confirm to split this cycle into {count} separate cycles.",
         "merge_preview_title": "Merge Preview",
         "merge_preview_joining_fmt": "Joining {count} cycles. Gaps will be filled with 0W readings.",
+        "editor_delete_preview_title": "Delete Preview",
+        "editor_delete_preview_intro": "The selected cycles will be permanently deleted:",
+        "editor_delete_preview_confirm": "Click Confirm to permanently delete these cycle records.",
         "no_power_preview": "*No power data available for preview.*",
         "profile_comparison": "Profile Comparison",
         "actual_cycle_label": "This cycle (actual)",
@@ -738,7 +859,19 @@
         "recent_cycles_header": "Recent cycles",
         "trim_cycle_preview_title": "Cycle Trim Preview",
         "trim_cycle_preview_no_data": "No power data available for this cycle.",
-        "trim_cycle_preview_kept_suffix": "kept"
+        "trim_cycle_preview_kept_suffix": "kept",
+        "table_program": "Program",
+        "table_when": "When",
+        "table_length": "Length",
+        "table_match": "Match",
+        "table_profile": "Profile",
+        "table_cycles": "Cycles",
+        "table_avg_length": "Avg Length",
+        "table_last_run": "Last Run",
+        "table_avg_energy": "Avg Energy",
+        "table_detected_program": "Detected Program",
+        "table_confidence": "Confidence",
+        "table_reported": "Reported"
       }
     },
     "interactive_editor_action": {
@@ -746,6 +879,12 @@
         "split": "Split a Cycle (Find gaps)",
         "merge": "Merge Cycles (Join fragments)",
         "delete": "Delete Cycle(s)"
+      }
+    },
+    "split_mode": {
+      "options": {
+        "auto": "Auto-detect idle gaps",
+        "manual": "Manual timestamp(s)"
       }
     },
     "diagnostics_action": {

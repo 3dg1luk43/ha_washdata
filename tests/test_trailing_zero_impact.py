@@ -27,6 +27,8 @@ import pytest
 CYCLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "../cycle_data")
 TRIM_THRESHOLD_W = 1.0  # matches add_cycle / trim_zero_power_data usage
 
+pytestmark = pytest.mark.slow
+
 
 # ---------------------------------------------------------------------------
 # Helpers

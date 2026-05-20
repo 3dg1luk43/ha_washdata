@@ -13,6 +13,8 @@ from custom_components.ha_washdata.const import (
     CONF_OFF_DELAY,
 )
 
+pytestmark = pytest.mark.slow
+
 def load_json_data(file_path):
     with open(file_path, 'r') as f:
         return json.load(f)

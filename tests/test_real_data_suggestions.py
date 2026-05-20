@@ -28,6 +28,8 @@ from custom_components.ha_washdata.const import (
 
 CYCLE_DATA_DIR = Path(__file__).parent.parent / "cycle_data"
 
+pytestmark = pytest.mark.slow
+
 
 # ---------------------------------------------------------------------------
 # Helpers

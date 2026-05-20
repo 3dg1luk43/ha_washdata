@@ -3302,6 +3302,7 @@ class ProfileStore:
                 if current_label:
                     if current_label != result.best_profile:
                         cycle["profile_name"] = result.best_profile
+                        cycle["match_confidence"] = float(result.confidence)
                         stats["relabeled"] += 1
                         self._logger.info(
                             "Relabeled cycle %s: '%s' -> '%s' (confidence: %.2f)",
@@ -3312,6 +3313,7 @@ class ProfileStore:
                         )
                 else:
                     cycle["profile_name"] = result.best_profile
+                    cycle["match_confidence"] = float(result.confidence)
                     stats["labeled"] += 1
                     self._logger.info(
                         "Auto-labeled cycle %s as '%s' (confidence: %.2f)",
@@ -3334,6 +3336,39 @@ class ProfileStore:
             stats["skipped"],
         )
         return stats
+
+    async def async_backfill_match_confidence(self) -> int:
+        """Populate match_confidence for labeled cycles that predate the field.
+
+        Runs the matcher once per cycle with profile_name set but no
+        match_confidence, and persists the resulting confidence if the same
+        profile is returned. Returns the number of cycles updated. Safe to
+        call repeatedly — already-backfilled cycles are skipped.
+        """
+        cycles = self._data.get("past_cycles", []) or []
+        updated = 0
+        for cycle in cycles:
+            if cycle.get("match_confidence") is not None:
+                continue
+            profile_name = cycle.get("profile_name")
+            if not profile_name:
+                continue
+            power_data = self._decompress_power_data(cycle)
+            if not power_data or len(power_data) < 10:
+                continue
+            try:
+                result = await self.async_match_profile(
+                    power_data, cycle.get("duration", 0)
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                continue
+            if result.best_profile == profile_name and result.confidence > 0:
+                cycle["match_confidence"] = float(result.confidence)
+                updated += 1
+        if updated:
+            await self.async_save()
+            self._logger.info("Backfilled match_confidence on %d cycles", updated)
+        return updated
 
     def _decompress_power_data(self, cycle: CycleDict) -> list[tuple[float, float]]:
         """Decompress cycle power data for matching (wrapper)."""
@@ -3796,6 +3831,65 @@ class ProfileStore:
             len(valid_segments)
         )
         return valid_segments
+
+    def build_split_segments_from_offsets(
+        self,
+        cycle: CycleDict,
+        split_offsets_s: list[float],
+        min_segment_s: float = 60.0,
+    ) -> list[tuple[float, float]]:
+        """Build segments for a manual split from explicit offsets (seconds from cycle start).
+
+        Returns adjacent [(start, end)] segments covering the cycle window, split at the
+        given offsets. Offsets are sorted and deduplicated; offsets outside the cycle window
+        or producing a sub-`min_segment_s` slice are dropped. Returns [] if fewer than two
+        segments would result.
+        """
+        p_data = self._decompress_power_data(cycle)
+        if not p_data:
+            return []
+
+        last_t = float(p_data[-1][0])
+        if last_t <= 0:
+            return []
+
+        unique_offsets = sorted(
+            {round(float(o), 3) for o in split_offsets_s if 0.0 < float(o) < last_t}
+        )
+        if not unique_offsets:
+            return []
+
+        filtered_offsets: list[float] = []
+        for offset in unique_offsets:
+            if offset <= min_segment_s:
+                continue
+            if offset >= (last_t - min_segment_s):
+                continue
+            if filtered_offsets and (offset - filtered_offsets[-1]) < min_segment_s:
+                continue
+            filtered_offsets.append(offset)
+
+        if not filtered_offsets:
+            return []
+
+        boundaries = [0.0, *filtered_offsets, last_t]
+        segments: list[tuple[float, float]] = []
+        for i in range(len(boundaries) - 1):
+            seg_start = boundaries[i]
+            seg_end = boundaries[i + 1]
+            if (seg_end - seg_start) >= min_segment_s:
+                segments.append((seg_start, seg_end))
+
+        if len(segments) < 2:
+            return []
+
+        self._logger.debug(
+            "Built manual split for %s: %d segments at offsets %s",
+            cycle.get("id"),
+            len(segments),
+            filtered_offsets,
+        )
+        return segments
 
     async def apply_split_interactive(
         self, cycle_id: str, segments: list[dict[str, Any]]

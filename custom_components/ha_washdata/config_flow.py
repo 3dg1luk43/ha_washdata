@@ -9,6 +9,7 @@ import logging
 import os
 import time
 import base64
+import html
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -16,7 +17,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.data_entry_flow import FlowResult, section
 from homeassistant.helpers import selector, translation
 from homeassistant.util import slugify
 from homeassistant.util import dt as dt_util
@@ -74,9 +75,7 @@ from .const import (
     CONF_ANTI_WRINKLE_MAX_DURATION,
     CONF_ANTI_WRINKLE_EXIT_POWER,
     CONF_DELAY_START_DETECT_ENABLED,
-    CONF_DELAY_DRAIN_MIN_POWER,
-    CONF_DELAY_DRAIN_MAX_POWER,
-    CONF_DELAY_DRAIN_MAX_DURATION,
+    CONF_DELAY_CONFIRM_SECONDS,
     CONF_DELAY_TIMEOUT_HOURS,
     NOTIFY_EVENT_START,
     NOTIFY_EVENT_FINISH,
@@ -140,9 +139,7 @@ from .const import (
     DEFAULT_ANTI_WRINKLE_MAX_DURATION,
     DEFAULT_ANTI_WRINKLE_EXIT_POWER,
     DEFAULT_DELAY_START_DETECT_ENABLED,
-    DEFAULT_DELAY_DRAIN_MIN_POWER,
-    DEFAULT_DELAY_DRAIN_MAX_POWER,
-    DEFAULT_DELAY_DRAIN_MAX_DURATION,
+    DEFAULT_DELAY_CONFIRM_SECONDS,
     DEFAULT_DELAY_TIMEOUT_HOURS,
     CONF_PUMP_STUCK_DURATION,
     DEFAULT_PUMP_STUCK_DURATION,
@@ -157,6 +154,15 @@ from .profile_store import profile_sort_key
 
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _format_duration_label(seconds: int) -> str:
+    """Render a duration in seconds as '1h 25m' or '42m'."""
+    minutes = max(0, int(seconds) // 60)
+    if minutes < 60:
+        return f"{minutes}m"
+    return f"{minutes // 60}h {minutes % 60:02d}m"
+
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -287,6 +293,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._editor_action: str | None = None
         self._editor_selected_ids: list[str] = []
         self._editor_split_gap: int = 900
+        self._editor_split_mode: str = "auto"
+        self._editor_split_manual_segments: list[tuple[float, float]] = []
         self._selected_phase_name: str | None = None
         self._selected_phase_device_type: str | None = None
         self._selected_phase_id: str | None = None
@@ -302,6 +310,24 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._trim_end_s: float = 0.0
         self._selector_translations: dict[str, str] | None = None
         self._options_translations: dict[str, str] | None = None
+        self._menu_stack: list[str] = []
+
+    def _push_menu(self, step_id: str) -> None:
+        """Track entry into a menu so Back can pop to the previous one."""
+        if not self._menu_stack or self._menu_stack[-1] != step_id:
+            self._menu_stack.append(step_id)
+
+    async def async_step_menu_back(
+        self, _user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Pop the menu stack and re-show the previous menu (or init)."""
+        if self._menu_stack:
+            self._menu_stack.pop()
+        target = self._menu_stack[-1] if self._menu_stack else "init"
+        # Clear so the parent re-pushes itself cleanly
+        if self._menu_stack:
+            self._menu_stack.pop()
+        return await getattr(self, f"async_step_{target}")()
 
     @staticmethod
     def _translated_select(
@@ -398,18 +424,42 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None  # pylint: disable=unused-argument
     ) -> FlowResult:
         """Manage the options."""
+        self._menu_stack = ["init"]
+        pending_count = 0
+        manager = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id)
+        if manager is not None and hasattr(manager, "profile_store"):
+            try:
+                pending_count = len(manager.profile_store.get_pending_feedback())
+            except Exception:  # pylint: disable=broad-exception-caught
+                pending_count = 0
+
+        lang = self.context.get("language") or self.hass.config.language
+        if self._options_translations is None:
+            self._options_translations = await translation.async_get_translations(
+                self.hass, lang, "options", {DOMAIN}
+            )
+
+        base_key = f"component.{DOMAIN}.options.step.init.menu_options"
+
+        def menu_label(key: str) -> str:
+            return self._options_translations.get(f"{base_key}.{key}", key)
+
+        learning_label = menu_label("learning_feedbacks")
+        if pending_count > 0:
+            learning_label = f"({pending_count}) {learning_label}"
+
         return self.async_show_menu(
             step_id="init",
-            menu_options=[
-                "settings",
-                "notifications",
-                "manage_cycles",
-                "manage_profiles",
-                "manage_phase_catalog",
-                "record_cycle",
-                "learning_feedbacks",
-                "diagnostics",
-            ],
+            menu_options={
+                "settings": menu_label("settings"),
+                "notifications": menu_label("notifications"),
+                "manage_cycles": menu_label("manage_cycles"),
+                "manage_profiles": menu_label("manage_profiles"),
+                "manage_phase_catalog": menu_label("manage_phase_catalog"),
+                "record_cycle": menu_label("record_cycle"),
+                "learning_feedbacks": learning_label,
+                "diagnostics": menu_label("diagnostics"),
+            },
         )
 
     async def async_step_settings(
@@ -501,7 +551,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_OFF_DELAY,
                 default=get_val(CONF_OFF_DELAY, default_off_delay),
             ): vol.Coerce(int),
-            vol.Optional(CONF_SHOW_ADVANCED, default=False): bool,
+            vol.Optional(CONF_SHOW_ADVANCED, default=False): selector.BooleanSelector(),
         }
 
         return self.async_show_form(
@@ -543,7 +593,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="apply_suggestions_confirm",
             data_schema=vol.Schema(
                 {
-                    vol.Required("confirm_apply_suggestions", default=False): bool,
+                    vol.Required("confirm_apply_suggestions", default=False): selector.BooleanSelector(),
                 }
             ),
             description_placeholders={
@@ -557,6 +607,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage notification settings."""
         if user_input is not None:
+            if user_input.pop("go_back", False):
+                return await self.async_step_init()
             # Normalize icon: if the user cleared the field it may be absent or
             # empty.  Set it explicitly so the merge below overwrites any
             # previously-saved value rather than keeping the stale one.
@@ -598,7 +650,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         notify_services: list[str] = sorted(
             f"notify.{s}"
             for s in self.hass.services.async_services().get("notify", {})
+            if s != "send_message"
         )
+        notify_entities: list[str] = [
+            state.entity_id for state in self.hass.states.async_all("notify")
+        ]
+        notify_services = sorted(set(notify_services) | set(notify_entities))
 
         def get_val(key: str, default: Any) -> Any:
             return self.config_entry.options.get(
@@ -642,11 +699,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_NOTIFY_ONLY_WHEN_HOME,
                 default=get_val(CONF_NOTIFY_ONLY_WHEN_HOME, DEFAULT_NOTIFY_ONLY_WHEN_HOME),
-            ): bool,
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_NOTIFY_FIRE_EVENTS,
                 default=get_val(CONF_NOTIFY_FIRE_EVENTS, DEFAULT_NOTIFY_FIRE_EVENTS),
-            ): bool,
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_NOTIFY_START_SERVICES,
                 default=start_services,
@@ -770,6 +827,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
+            vol.Optional("go_back", default=False): selector.BooleanSelector(),
         }
 
         return self.async_show_form(
@@ -800,6 +858,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             )
 
         if user_input is not None:
+            # Flatten section-wrapped fields back to a flat dict so the rest of
+            # the handler can keep treating user_input as {CONF_X: value, ...}.
+            flat_input: dict[str, Any] = {}
+            for _k, _v in user_input.items():
+                if isinstance(_v, dict):
+                    flat_input.update(_v)
+                else:
+                    flat_input[_k] = _v
+            user_input = flat_input
             # If "Apply Suggestions" checkbox was checked, merge suggested values into the input
             if user_input.get(CONF_APPLY_SUGGESTIONS):
                 keys_to_apply = self._suggestion_keys_to_apply()
@@ -974,9 +1041,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             current_device_type, DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO
         )
 
-        schema = {
-            vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): bool,
-            # --- Detection Settings ---
+        detection_schema = {
             vol.Optional(
                 CONF_START_DURATION_THRESHOLD,
                 default=get_val(
@@ -995,7 +1060,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_START_ENERGY_THRESHOLD,
                 default=get_val(CONF_START_ENERGY_THRESHOLD, default_start_energy),
             ): vol.Coerce(float),
-
             vol.Optional(
                 CONF_COMPLETION_MIN_SECONDS,
                 default=get_val(CONF_COMPLETION_MIN_SECONDS, default_completion_min),
@@ -1004,7 +1068,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     min=0, max=3600, mode=selector.NumberSelectorMode.BOX
                 )
             ),
-            # --- Advanced Power Thresholds ---
             vol.Optional(
                 CONF_START_THRESHOLD_W,
                 default=get_val(
@@ -1014,7 +1077,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0.0,
-                    max=100.0,
+                    # Issue #238: dryers with anti-damp/anti-crease tumbling
+                    # can sit at 200–300 W during a delayed-start window.
+                    max=500.0,
                     step=0.5,
                     unit_of_measurement="W",
                     mode=selector.NumberSelectorMode.BOX,
@@ -1035,25 +1100,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
-            # --- Deferral Logic ---
-            vol.Optional(
-                CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                default=get_val(
-                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
-                    default_min_duration_ratio,
-                ),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=0.1,
-                    max=1.0,
-                    step=0.01,
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
             vol.Optional(
                 CONF_END_ENERGY_THRESHOLD,
                 default=get_val(
-                CONF_END_ENERGY_THRESHOLD, DEFAULT_END_ENERGY_THRESHOLD
+                    CONF_END_ENERGY_THRESHOLD, DEFAULT_END_ENERGY_THRESHOLD
                 ),
             ): vol.Coerce(float),
             vol.Optional(
@@ -1080,8 +1130,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_MIN_OFF_GAP,
                 default=get_val(CONF_MIN_OFF_GAP, _default_min_off_gap),
             ): vol.Coerce(int),
-
-             vol.Optional(
+            vol.Optional(
                 CONF_SAMPLING_INTERVAL,
                 default=get_val(CONF_SAMPLING_INTERVAL, default_sampling),
             ): selector.NumberSelector(
@@ -1093,15 +1142,26 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
-            # --- Learning & Profiles ---
+        }
 
+        matching_schema = {
+            vol.Optional(
+                CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                default=get_val(
+                    CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+                    default_min_duration_ratio,
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.1, max=1.0, step=0.01, mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
             vol.Optional(
                 CONF_PROFILE_MATCH_INTERVAL,
                 default=get_val(
                     CONF_PROFILE_MATCH_INTERVAL, DEFAULT_PROFILE_MATCH_INTERVAL
                 ),
             ): vol.Coerce(int),
-
             vol.Optional(
                 CONF_PROFILE_MATCH_THRESHOLD,
                 default=get_val(
@@ -1144,7 +1204,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
                     DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS,
                 ),
-            ): bool,
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_DURATION_TOLERANCE,
                 default=get_val(CONF_DURATION_TOLERANCE, DEFAULT_DURATION_TOLERANCE),
@@ -1167,19 +1227,17 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     min=0.0, max=0.5, step=0.01, mode=selector.NumberSelectorMode.BOX
                 )
             ),
+        }
 
-
-
+        timing_schema = {
             vol.Optional(
                 CONF_WATCHDOG_INTERVAL,
                 default=get_val(CONF_WATCHDOG_INTERVAL, DEFAULT_WATCHDOG_INTERVAL),
             ): vol.Coerce(int),
-
             vol.Optional(
-                 CONF_NO_UPDATE_ACTIVE_TIMEOUT,
-                 default=get_val(CONF_NO_UPDATE_ACTIVE_TIMEOUT, default_no_update_timeout),
+                CONF_NO_UPDATE_ACTIVE_TIMEOUT,
+                default=get_val(CONF_NO_UPDATE_ACTIVE_TIMEOUT, default_no_update_timeout),
             ): vol.Coerce(int),
-
             vol.Optional(
                 CONF_PROGRESS_RESET_DELAY,
                 default=get_val(
@@ -1189,21 +1247,23 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_AUTO_MAINTENANCE,
                 default=get_val(CONF_AUTO_MAINTENANCE, DEFAULT_AUTO_MAINTENANCE),
-            ): bool,
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_EXPOSE_DEBUG_ENTITIES,
                 default=get_val(CONF_EXPOSE_DEBUG_ENTITIES, False),
-            ): bool,
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_SAVE_DEBUG_TRACES, default=get_val(CONF_SAVE_DEBUG_TRACES, False)
-            ): bool,
-            # --- Anti-Wrinkle (Dryer) ---
+            ): selector.BooleanSelector(),
+        }
+
+        anti_wrinkle_schema = {
             vol.Optional(
                 CONF_ANTI_WRINKLE_ENABLED,
                 default=get_val(
                     CONF_ANTI_WRINKLE_ENABLED, DEFAULT_ANTI_WRINKLE_ENABLED
                 ),
-            ): bool,
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_ANTI_WRINKLE_MAX_POWER,
                 default=get_val(
@@ -1246,51 +1306,25 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
-            # --- Delayed Start Detection ---
+        }
+
+        delay_start_schema = {
             vol.Optional(
                 CONF_DELAY_START_DETECT_ENABLED,
                 default=get_val(
                     CONF_DELAY_START_DETECT_ENABLED, DEFAULT_DELAY_START_DETECT_ENABLED
                 ),
-            ): bool,
+            ): selector.BooleanSelector(),
             vol.Optional(
-                CONF_DELAY_DRAIN_MIN_POWER,
+                CONF_DELAY_CONFIRM_SECONDS,
                 default=get_val(
-                    CONF_DELAY_DRAIN_MIN_POWER, DEFAULT_DELAY_DRAIN_MIN_POWER
+                    CONF_DELAY_CONFIRM_SECONDS, DEFAULT_DELAY_CONFIRM_SECONDS
                 ),
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
-                    min=1.0,
-                    max=500.0,
-                    step=1.0,
-                    unit_of_measurement="W",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Optional(
-                CONF_DELAY_DRAIN_MAX_POWER,
-                default=get_val(
-                    CONF_DELAY_DRAIN_MAX_POWER, DEFAULT_DELAY_DRAIN_MAX_POWER
-                ),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=1.0,
-                    max=2000.0,
-                    step=1.0,
-                    unit_of_measurement="W",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Optional(
-                CONF_DELAY_DRAIN_MAX_DURATION,
-                default=get_val(
-                    CONF_DELAY_DRAIN_MAX_DURATION, DEFAULT_DELAY_DRAIN_MAX_DURATION
-                ),
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=5.0,
+                    min=10.0,
                     max=600.0,
-                    step=1.0,
+                    step=5.0,
                     unit_of_measurement="s",
                     mode=selector.NumberSelectorMode.BOX,
                 )
@@ -1309,13 +1343,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
-            # --- External Cycle End Trigger ---
+        }
+
+        external_triggers_schema = {
             vol.Optional(
                 CONF_EXTERNAL_END_TRIGGER_ENABLED,
                 default=get_val(CONF_EXTERNAL_END_TRIGGER_ENABLED, False),
-            ): bool,
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_EXTERNAL_END_TRIGGER,
+                default=get_val(CONF_EXTERNAL_END_TRIGGER, None),
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain="binary_sensor",
@@ -1325,10 +1362,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_EXTERNAL_END_TRIGGER_INVERTED,
                 default=get_val(CONF_EXTERNAL_END_TRIGGER_INVERTED, False),
-            ): bool,
-            # --- Door Sensor & Pause ---
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_DOOR_SENSOR_ENTITY,
+                default=get_val(CONF_DOOR_SENSOR_ENTITY, None),
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain="binary_sensor",
@@ -1338,9 +1375,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(
                 CONF_PAUSE_CUTS_POWER,
                 default=get_val(CONF_PAUSE_CUTS_POWER, False),
-            ): bool,
+            ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_SWITCH_ENTITY,
+                default=get_val(CONF_SWITCH_ENTITY, None),
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain="switch",
@@ -1363,32 +1401,55 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
         }
 
+        suggestions_schema = {
+            vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): selector.BooleanSelector(),
+        }
+
+        schema: dict[Any, Any] = {
+            vol.Required("suggestions_section"): section(
+                vol.Schema(suggestions_schema), {"collapsed": False}
+            ),
+            vol.Required("detection_section"): section(
+                vol.Schema(detection_schema), {"collapsed": False}
+            ),
+            vol.Required("matching_section"): section(
+                vol.Schema(matching_schema), {"collapsed": True}
+            ),
+            vol.Required("timing_section"): section(
+                vol.Schema(timing_schema), {"collapsed": True}
+            ),
+            vol.Required("anti_wrinkle_section"): section(
+                vol.Schema(anti_wrinkle_schema), {"collapsed": True}
+            ),
+            vol.Required("delay_start_section"): section(
+                vol.Schema(delay_start_schema), {"collapsed": True}
+            ),
+            vol.Required("external_triggers_section"): section(
+                vol.Schema(external_triggers_schema), {"collapsed": True}
+            ),
+        }
+
         # --- Pump Monitor (Pump / Sump Pump only) ---
         if current_device_type == DEVICE_TYPE_PUMP:
-            schema[
+            pump_schema = {
                 vol.Optional(
                     CONF_PUMP_STUCK_DURATION,
                     default=get_val(CONF_PUMP_STUCK_DURATION, DEFAULT_PUMP_STUCK_DURATION),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=60,
+                        max=86400,
+                        step=60,
+                        unit_of_measurement="s",
+                        mode=selector.NumberSelectorMode.BOX,
+                    )
                 )
-            ] = selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=60,
-                    max=86400,
-                    step=60,
-                    unit_of_measurement="s",
-                    mode=selector.NumberSelectorMode.BOX,
-                )
+            }
+            schema[vol.Required("pump_section")] = section(
+                vol.Schema(pump_schema), {"collapsed": True}
             )
 
         data_schema = vol.Schema(schema)
-        data_schema = self.add_suggested_values_to_schema(
-            data_schema,
-            {
-                CONF_EXTERNAL_END_TRIGGER: get_val(CONF_EXTERNAL_END_TRIGGER, None),
-                CONF_DOOR_SENSOR_ENTITY: get_val(CONF_DOOR_SENSOR_ENTITY, None),
-                CONF_SWITCH_ENTITY: get_val(CONF_SWITCH_ENTITY, None),
-            },
-        )
 
         return self.async_show_form(
             step_id="advanced_settings",
@@ -1448,22 +1509,43 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_interactive_editor(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Step 1: Select Action (Merge or Split)."""
-        if user_input is not None:
-            self._editor_action = user_input["editor_action"]
-            return await self.async_step_editor_select()
-
-        return self.async_show_form(
+        """Step 1: Select Action (Merge or Split) as a button menu."""
+        self._editor_action = None
+        self._editor_selected_ids = []
+        self._editor_split_gap = 900
+        self._editor_split_mode = "auto"
+        self._editor_split_manual_segments = []
+        self._push_menu("interactive_editor")
+        return self.async_show_menu(
             step_id="interactive_editor",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("editor_action"): self._translated_select(
-                        options=["split", "merge", "delete"],
-                        translation_key="interactive_editor_action",
-                    )
-                }
-            ),
+            menu_options=[
+                "editor_split",
+                "editor_merge",
+                "editor_delete",
+                "menu_back",
+            ],
         )
+
+    async def async_step_editor_split(
+        self, _user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Menu wrapper: split action."""
+        self._editor_action = "split"
+        return await self.async_step_editor_select()
+
+    async def async_step_editor_merge(
+        self, _user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Menu wrapper: merge action."""
+        self._editor_action = "merge"
+        return await self.async_step_editor_select()
+
+    async def async_step_editor_delete(
+        self, _user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Menu wrapper: delete action."""
+        self._editor_action = "delete"
+        return await self.async_step_editor_select()
 
     async def async_step_editor_select(
         self, user_input: dict[str, Any] | None = None
@@ -1491,6 +1573,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 else:
                     return await self.async_step_editor_configure()
 
+            elif self._editor_action == "delete":
+                if len(selected) < 1:
+                    errors["base"] = "select_at_least_one"
+                else:
+                    return await self.async_step_editor_configure()
+
         # Build options (Recent 50 cycles)
         cycles = store.get_past_cycles()[-50:]
         cycles.sort(key=lambda x: x["start_time"], reverse=True)
@@ -1504,6 +1592,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             prof = c.get("profile_name") or unlabeled_text
             label = f"{start} - {duration_min}m - {prof}"
             options.append(selector.SelectOptionDict(value=c["id"], label=label))
+
+        info_text_key = {
+            "split": "editor_select_info_split",
+            "merge": "editor_select_info_merge",
+            "delete": "editor_select_info_delete",
+        }.get(self._editor_action or "", "editor_select_info")
 
         return self.async_show_form(
             step_id="editor_select",
@@ -1520,30 +1614,117 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             errors=errors,
             description_placeholders={
-                "info_text": await self._options_text(
-                    "editor_select_info",
-                    "Select 1 cycle to split, or 2+ cycles to merge.",
-                )
+                "info_text": await self._options_text(info_text_key, "")
             }
         )
 
     async def async_step_editor_split_params(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Step 2.5: Configure split parameter."""
+        """Step 2.5: Choose split method (auto-detect gaps or manual timestamps)."""
+        if user_input is not None:
+            mode = user_input.get("split_mode", "auto")
+            self._editor_split_mode = mode
+            self._editor_split_manual_segments = []
+            if mode == "manual":
+                return await self.async_step_editor_split_manual_params()
+            return await self.async_step_editor_split_auto_params()
+
+        return self.async_show_form(
+            step_id="editor_split_params",
+            data_schema=vol.Schema({
+                vol.Required("split_mode", default=self._editor_split_mode): self._translated_select(
+                    options=["auto", "manual"],
+                    translation_key="split_mode",
+                )
+            }),
+        )
+
+    async def async_step_editor_split_auto_params(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Configure auto-detect gap threshold."""
         if user_input is not None:
             self._editor_split_gap = int(user_input["min_gap_seconds"])
             return await self.async_step_editor_configure()
 
         return self.async_show_form(
-            step_id="editor_split_params",
+            step_id="editor_split_auto_params",
             data_schema=vol.Schema({
-                vol.Required("min_gap_seconds", default=900): selector.NumberSelector(
+                vol.Required("min_gap_seconds", default=self._editor_split_gap): selector.NumberSelector(
                     selector.NumberSelectorConfig(
                         min=60, max=3600, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s"
                     )
                 )
-            })
+            }),
+        )
+
+    async def async_step_editor_split_manual_params(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Configure manual split timestamps (wall-clock HH:MM[:SS], one per line)."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+
+        errors: dict[str, str] = {}
+        cid = self._editor_selected_ids[0] if self._editor_selected_ids else None
+        cycle = next((c for c in store.get_past_cycles() if c["id"] == cid), None) if cid else None
+        if not cycle:
+            return self.async_abort(reason="cycle_not_found")
+
+        cycle_start_dt = dt_util.parse_datetime(cycle["start_time"])
+        cycle_end_dt = dt_util.parse_datetime(cycle["end_time"])
+        if not cycle_start_dt or not cycle_end_dt:
+            return self.async_abort(reason="cycle_not_found")
+
+        if user_input is not None:
+            raw = user_input.get("split_timestamps", "") or ""
+            offsets: list[float] = []
+            for token in raw.replace(",", "\n").splitlines():
+                token = token.strip()
+                if not token:
+                    continue
+                off = self._wallclock_to_offset(token, cycle_start_dt, cycle_end_dt)
+                if off is None:
+                    errors["base"] = "invalid_split_timestamp"
+                    break
+                offsets.append(off)
+
+            if not errors:
+                segments = store.build_split_segments_from_offsets(cycle, offsets)
+                if not segments:
+                    errors["base"] = "no_split_segments_found"
+                else:
+                    self._editor_split_manual_segments = segments
+                    return await self.async_step_editor_configure()
+
+        local_start = dt_util.as_local(cycle_start_dt)
+        local_end = dt_util.as_local(cycle_end_dt)
+        preview_md = ""
+        svg = store.generate_interactive_split_svg(
+            cycle["id"],
+            [(0.0, (cycle_end_dt - cycle_start_dt).total_seconds())],
+            title_prefix=await self._options_text("split_preview_title", "Split Preview"),
+            unlabeled_text=await self._selector_text("unlabeled", "(Unlabeled)"),
+        )
+        if svg:
+            b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+            preview_md = f"![Preview](data:image/svg+xml;base64,{b64})\n\n"
+
+        return self.async_show_form(
+            step_id="editor_split_manual_params",
+            data_schema=vol.Schema({
+                vol.Required("split_timestamps", default=""): selector.TextSelector(
+                    selector.TextSelectorConfig(multiline=True)
+                )
+            }),
+            errors=errors,
+            description_placeholders={
+                "preview_md": preview_md,
+                "cycle_start_wallclock": local_start.strftime("%H:%M:%S"),
+                "cycle_end_wallclock": local_end.strftime("%H:%M:%S"),
+                "cycle_date": local_start.strftime("%Y-%m-%d"),
+            },
         )
 
     async def async_step_editor_configure(
@@ -1586,13 +1767,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     # as complex per-segment assignment in one form is hard in HA config flow.
                     # We'll rely on auto-labeling or user can label later.
 
-                    # Re-run analysis to get segments
+                    # Re-run analysis (auto) or reuse manual segments
                     cycle = next((c for c in store.get_past_cycles() if c["id"] in self._editor_selected_ids), None)
                     if cycle:
-
-                        segments = await self.hass.async_add_executor_job(
-                            store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
-                        )
+                        if self._editor_split_mode == "manual":
+                            segments = list(self._editor_split_manual_segments)
+                        else:
+                            segments = await self.hass.async_add_executor_job(
+                                store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
+                            )
                         if segments:
                             # Apply with profiles from user input
                             final_segments = []
@@ -1632,6 +1815,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     self.hass.async_create_task(store.async_rebuild_all_envelopes())
                     return self.async_create_entry(title="", data=dict(self.config_entry.options))
 
+            elif self._editor_action == "delete":
+                if user_input.get("confirm_commit"):
+                    deleted_any = False
+                    for cycle_id in self._editor_selected_ids:
+                        deleted_any = await store.delete_cycle(cycle_id) or deleted_any
+
+                    if deleted_any:
+                        manager.notify_update()
+                        self.hass.async_create_task(store.async_rebuild_all_envelopes())
+
+                    return self.async_create_entry(title="", data=dict(self.config_entry.options))
+
         # Generate Preview
         preview_md = ""
         schema = {}
@@ -1642,11 +1837,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if not cycle:
                 return self.async_abort(reason="cycle_not_found")
 
-            # Run Analysis
-
-            segments = await self.hass.async_add_executor_job(
-                store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
-            ) # Split params
+            # Run analysis (auto) or reuse manual segments
+            if self._editor_split_mode == "manual":
+                segments = list(self._editor_split_manual_segments)
+            else:
+                segments = await self.hass.async_add_executor_job(
+                    store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
+                )
 
             if not segments:
                 return self.async_abort(reason="no_split_segments_found")
@@ -1753,8 +1950,55 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     selector.SelectSelectorConfig(options=prof_options, mode=selector.SelectSelectorMode.DROPDOWN)
                 ),
                 vol.Optional("new_profile_name"): str,
-                vol.Required("confirm_commit"): bool
+                vol.Required("confirm_commit"): selector.BooleanSelector()
             }
+
+        elif self._editor_action == "delete":
+            cycles_to_delete = [
+                c for c in store.get_past_cycles() if c["id"] in self._editor_selected_ids
+            ]
+            cycles_to_delete.sort(key=lambda x: x["start_time"], reverse=True)
+
+            delete_title = await self._options_text(
+                "editor_delete_preview_title", "Delete Preview"
+            )
+            delete_intro = await self._options_text(
+                "editor_delete_preview_intro",
+                "The selected cycles will be permanently deleted:",
+            )
+            delete_confirm = await self._options_text(
+                "editor_delete_preview_confirm",
+                "Click Confirm to permanently delete these cycle records.",
+            )
+            unlabeled_text = await self._selector_text("unlabeled", "(Unlabeled)")
+
+            delete_rows: list[str] = []
+            for cycle in cycles_to_delete:
+                dt = dt_util.parse_datetime(cycle["start_time"])
+                when = (
+                    dt_util.as_local(dt).strftime("%b %d, %H:%M")
+                    if dt
+                    else str(cycle["start_time"])
+                )
+                duration = _format_duration_label(
+                    int(cycle.get("manual_duration", cycle["duration"]))
+                )
+                prof = cycle.get("profile_name") or unlabeled_text
+                delete_rows.append(
+                    "- "
+                    + f"{html.escape(str(when))} | {html.escape(duration)} | {html.escape(str(prof))}"
+                )
+
+            preview_md = "\n".join(
+                [
+                    f"### {delete_title}",
+                    delete_intro,
+                    *delete_rows,
+                    "",
+                    delete_confirm,
+                ]
+            )
+            schema = {vol.Required("confirm_commit"): selector.BooleanSelector()}
 
         return self.async_show_form(
             step_id="editor_configure",
@@ -1767,25 +2011,20 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_diagnostics(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Diagnostics submenu for maintenance actions."""
-        if user_input is not None:
-            choice = user_input["action"]
-
-            if choice == "reprocess_history":
-                return await self.async_step_reprocess_history()
-            if choice == "wipe_history":
-                return await self.async_step_wipe_history()
-            if choice == "export_import":
-                return await self.async_step_export_import()
-            if choice == "clear_debug_data":
-                return await self.async_step_clear_debug_data()
-
-        # Calculate storage usage stats
+        """Diagnostics submenu as a button menu with storage stats."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         stats = await manager.profile_store.get_storage_stats()
 
-        return self.async_show_form(
+        self._push_menu("diagnostics")
+        return self.async_show_menu(
             step_id="diagnostics",
+            menu_options=[
+                "reprocess_history",
+                "clear_debug_data",
+                "wipe_history",
+                "export_import",
+                "menu_back",
+            ],
             description_placeholders={
                 "storage_stats": (
                     f"- File Size: {stats.get('file_size_kb', 0):.1f} KB\n"
@@ -1799,19 +2038,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "profile_count": str(stats.get('total_profiles', 0)),
                 "debug_count": str(stats.get('debug_traces_count', 0)),
             },
-            data_schema=vol.Schema(
-                {
-                    vol.Required("action"): self._translated_select(
-                        options=[
-                            "reprocess_history",
-                            "clear_debug_data",
-                            "wipe_history",
-                            "export_import",
-                        ],
-                        translation_key="diagnostics_action",
-                    )
-                }
-            ),
         )
 
     async def async_step_clear_debug_data(
@@ -1956,138 +2182,182 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_manage_cycles(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Manage cycles submenu."""
+        """Manage cycles submenu (button menu with card-style preview)."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
 
         unlabeled_text = await self._selector_text("unlabeled", "(Unlabeled)")
 
-        # Build recent cycles list
         recent_cycles = store.get_past_cycles()[-8:]
-        recent_lines = []
+        rows: list[str] = []
         for c in reversed(recent_cycles):
             dt = dt_util.parse_datetime(c["start_time"])
-            start = dt_util.as_local(dt).strftime("%Y-%m-%d %H:%M") if dt else c["start_time"]
-            duration_min = int(c.get("manual_duration", c["duration"]) / 60)
+            when = (
+                dt_util.as_local(dt).strftime("%b %d, %H:%M")
+                if dt
+                else str(c["start_time"])
+            )
+            duration_s = int(c.get("manual_duration", c["duration"]))
+            duration_str = _format_duration_label(duration_s)
             prof = c.get("profile_name") or unlabeled_text
+            safe_prof = html.escape(str(prof))
+            safe_when = html.escape(str(when))
+            safe_duration = html.escape(duration_str)
             status = c.get("status", "completed")
             status_icon = (
                 "✓"
                 if status in ("completed", "force_stopped")
                 else "⚠" if status == "resumed" else "✗"
             )
-            recent_lines.append(f"{status_icon} {start} - {duration_min}m - {prof}")
-        has_cycles = bool(recent_lines)
-        recent_text = "\n".join(recent_lines)
+            conf = c.get("match_confidence")
+            if isinstance(conf, (int, float)) and conf > 0:
+                conf_text = f"{int(round(float(conf) * 100))}%"
+            else:
+                conf_text = "—"
+            rows.append(
+                f'<tr><td align="center">{status_icon}</td>'
+                f'<td><b>{safe_prof}</b></td>'
+                f'<td>{safe_when}</td>'
+                f'<td>{safe_duration}</td>'
+                f'<td align="center">{conf_text}</td></tr>'
+            )
 
-        if user_input is not None:
-            action = user_input["action"]
-            if action == "auto_label_cycles":
-                return await self.async_step_auto_label_cycles()
-            if action == "select_cycle_to_label":
-                return await self.async_step_select_cycle_to_label()
-            if action == "select_cycle_to_delete":
-                return await self.async_step_select_cycle_to_delete()
-            if action == "interactive_editor":
-                # Initialize state
-                self._editor_action = None
-                self._editor_selected_ids = []
-                self._editor_split_gap = 900
-                return await self.async_step_interactive_editor()
-            if action == "trim_cycle":
-                self._trim_cycle_id = None
-                self._trim_start_s = 0.0
-                self._trim_end_s = 0.0
-                return await self.async_step_trim_cycle_select()
+        recent_program = await self._options_text("table_program", "Program")
+        recent_when = await self._options_text("table_when", "When")
+        recent_length = await self._options_text("table_length", "Length")
+        recent_match = await self._options_text("table_match", "Match")
 
-        return self.async_show_form(
-            step_id="manage_cycles" if has_cycles else "manage_cycles_empty",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("action"): self._translated_select(
-                        options=[
-                            "auto_label_cycles",
-                            "select_cycle_to_label",
-                            "select_cycle_to_delete",
-                            "interactive_editor",
-                            "trim_cycle",
-                        ],
-                        translation_key="manage_cycles_action",
-                    )
-                }
-            ),
-            description_placeholders={"recent_cycles": recent_text} if has_cycles else {},
+        if not rows:
+            return await self.async_step_manage_cycles_empty()
+
+        recent_text = (
+            '<table width="100%">'
+            '<tr>'
+            '<th width="5%" align="center"></th>'
+            f'<th align="left">{html.escape(recent_program)}</th>'
+            f'<th width="22%" align="left">{html.escape(recent_when)}</th>'
+            f'<th width="14%" align="left">{html.escape(recent_length)}</th>'
+            f'<th width="10%" align="center">{html.escape(recent_match)}</th>'
+            '</tr>'
+            + "".join(rows)
+            + '</table>'
+        )
+
+        self._push_menu("manage_cycles")
+        return self.async_show_menu(
+            step_id="manage_cycles",
+            menu_options=[
+                "auto_label_cycles",
+                "select_cycle_to_label",
+                "select_cycle_to_delete",
+                "interactive_editor",
+                "trim_cycle_select",
+                "menu_back",
+            ],
+            description_placeholders={"recent_cycles": recent_text},
         )
 
     async def async_step_manage_cycles_empty(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage cycles submenu when no cycles are present."""
-        return await self.async_step_manage_cycles(user_input)
+        self._push_menu("manage_cycles_empty")
+        return self.async_show_menu(
+            step_id="manage_cycles_empty",
+            menu_options=["auto_label_cycles", "menu_back"],
+        )
 
 
 
     async def async_step_manage_profiles(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Manage profiles submenu."""
+        """Manage profiles submenu as a button menu with profile summary."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
         profiles = store.list_profiles()
 
-        profile_line_fmt = "- **{name}**: {count} • ~{avg}m"
+        if not profiles:
+            return await self.async_step_manage_profiles_empty()
 
-        # Build profile summary
-        summary_lines = []
+        rows: list[str] = []
         for p in profiles:
-            count = p["cycle_count"]
-            avg = int(p["avg_duration"] / 60) if p["avg_duration"] else 0
-            summary_lines.append(
-                profile_line_fmt.format(name=p["name"], count=count, avg=avg)
+            avg_s = int(p.get("avg_duration") or 0)
+            avg_str = _format_duration_label(avg_s) if avg_s > 0 else "—"
+            count = p.get("cycle_count", 0)
+            last_run_raw = p.get("last_run")
+            last_run_str = "—"
+            if last_run_raw:
+                dt = dt_util.parse_datetime(str(last_run_raw))
+                if dt:
+                    last_run_str = dt_util.as_local(dt).strftime("%b %d")
+            avg_energy = p.get("avg_energy")
+            if isinstance(avg_energy, (int, float)) and avg_energy > 0:
+                if avg_energy >= 1000:
+                    energy_str = f"{avg_energy / 1000:.2f} kWh"
+                else:
+                    energy_str = f"{int(round(avg_energy))} Wh"
+            else:
+                energy_str = "—"
+            safe_name = html.escape(str(p["name"]))
+            safe_avg = html.escape(avg_str)
+            safe_last_run = html.escape(last_run_str)
+            safe_energy = html.escape(energy_str)
+            rows.append(
+                f'<tr><td><b>{safe_name}</b></td>'
+                f'<td align="center">{count}</td>'
+                f'<td align="center">{safe_avg}</td>'
+                f'<td align="center">{safe_last_run}</td>'
+                f'<td align="center">{safe_energy}</td></tr>'
             )
-        has_profiles = bool(summary_lines)
-        summary_text = "\n".join(summary_lines)
 
-        if user_input is not None:
-            action = user_input["action"]
-            if action == "create_profile":
-                return await self.async_step_create_profile()
-            if action == "edit_profile":
-                return await self.async_step_edit_profile()
-            if action == "delete_profile":
-                return await self.async_step_delete_profile_select()
-            if action == "profile_stats":
-                return await self.async_step_profile_stats()
-            if action == "cleanup_profile":
-                return await self.async_step_cleanup_profile()
-            if action == "assign_phases":
-                return await self.async_step_assign_profile_phases_select()
+        profile_header = await self._options_text("table_profile", "Profile")
+        cycles_header = await self._options_text("table_cycles", "Cycles")
+        avg_length_header = await self._options_text(
+            "table_avg_length", "Avg Length"
+        )
+        last_run_header = await self._options_text("table_last_run", "Last Run")
+        avg_energy_header = await self._options_text(
+            "table_avg_energy", "Avg Energy"
+        )
 
-        return self.async_show_form(
-            step_id="manage_profiles" if has_profiles else "manage_profiles_empty",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("action"): self._translated_select(
-                        options=[
-                            "create_profile",
-                            "edit_profile",
-                            "delete_profile",
-                            "profile_stats",
-                            "cleanup_profile",
-                            "assign_phases",
-                        ],
-                        translation_key="manage_profiles_action",
-                    )
-                }
-            ),
-            description_placeholders={"profile_summary": summary_text} if has_profiles else {},
+        summary_text = (
+            '<table width="100%">'
+            '<tr>'
+            f'<th align="left">{html.escape(profile_header)}</th>'
+            f'<th width="12%" align="center">{html.escape(cycles_header)}</th>'
+            f'<th width="18%" align="center">{html.escape(avg_length_header)}</th>'
+            f'<th width="14%" align="center">{html.escape(last_run_header)}</th>'
+            f'<th width="18%" align="center">{html.escape(avg_energy_header)}</th>'
+            '</tr>'
+            + "".join(rows)
+            + '</table>'
+        )
+
+        self._push_menu("manage_profiles")
+        return self.async_show_menu(
+            step_id="manage_profiles",
+            menu_options=[
+                "create_profile",
+                "edit_profile",
+                "delete_profile_select",
+                "profile_stats",
+                "cleanup_profile",
+                "assign_profile_phases_select",
+                "menu_back",
+            ],
+            description_placeholders={"profile_summary": summary_text},
         )
 
     async def async_step_manage_profiles_empty(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Manage profiles submenu when no profiles are present."""
-        return await self.async_step_manage_profiles(user_input)
+        self._push_menu("manage_profiles_empty")
+        return self.async_show_menu(
+            step_id="manage_profiles_empty",
+            menu_options=["create_profile", "menu_back"],
+        )
 
     async def async_step_manage_phase_catalog(
         self, user_input: dict[str, Any] | None = None
@@ -2114,29 +2384,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         
         summary = "\n".join(summary_lines) if summary_lines else "No phases available."
 
-        if user_input is not None:
-            action = user_input["action"]
-            if action == "create_custom_phase":
-                return await self.async_step_phase_catalog_create()
-            if action == "edit_custom_phase":
-                return await self.async_step_phase_catalog_edit_select()
-            if action == "delete_custom_phase":
-                return await self.async_step_phase_catalog_delete()
-
-        return self.async_show_form(
+        self._push_menu("manage_phase_catalog")
+        return self.async_show_menu(
             step_id="manage_phase_catalog",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("action"): self._translated_select(
-                        options=[
-                            "create_custom_phase",
-                            "edit_custom_phase",
-                            "delete_custom_phase",
-                        ],
-                        translation_key="manage_phase_catalog_action",
-                    )
-                }
-            ),
+            menu_options=[
+                "phase_catalog_create",
+                "phase_catalog_edit_select",
+                "phase_catalog_delete",
+                "menu_back",
+            ],
             description_placeholders={"phase_summary": summary},
         )
 
@@ -2812,45 +3068,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_assign_profile_phases(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Phase assignment editor with visualization and guided actions."""
+        """Phase assignment editor as a button menu with visualization."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
 
         profile_name = self._phase_assign_profile
         if not profile_name:
             return await self.async_step_assign_profile_phases_select()
-
-        errors: dict[str, str] = {}
-        if user_input is not None:
-            action = user_input.get("action")
-            if action == "add_range":
-                return await self.async_step_assign_profile_phases_add()
-            if action == "edit_range":
-                if not self._phase_assign_draft:
-                    errors["base"] = "no_phase_ranges"
-                else:
-                    return await self.async_step_assign_profile_phases_edit_select()
-            if action == "delete_range":
-                if not self._phase_assign_draft:
-                    errors["base"] = "no_phase_ranges"
-                else:
-                    return await self.async_step_assign_profile_phases_delete()
-            if action == "clear_ranges":
-                self._phase_assign_draft = []
-            if action == "auto_detect_ranges":
-                return await self.async_step_assign_profile_phases_auto_detect()
-            if action == "save_ranges":
-                try:
-                    await store.async_set_profile_phase_ranges(profile_name, self._phase_assign_draft)
-                    manager.notify_update()
-                    self._phase_assign_profile = None
-                    self._phase_assign_mode = "offset_mode"
-                    self._phase_assign_cycle_id = None
-                    self._phase_assign_draft = []
-                    self._phase_assign_edit_index = None
-                    return await self.async_step_manage_profiles()
-                except ValueError as err:
-                    errors["base"] = str(err)
 
         draft_sorted = sorted(self._phase_assign_draft, key=lambda x: (float(x["start"]), float(x["end"])))
         summary = self._phase_assignment_summary(draft_sorted)
@@ -2878,30 +3102,54 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             },
         )
 
-        return self.async_show_form(
+        has_draft = bool(self._phase_assign_draft)
+        menu_options = ["assign_profile_phases_add"]
+        if has_draft:
+            menu_options.append("assign_profile_phases_edit_select")
+            menu_options.append("assign_profile_phases_delete")
+            menu_options.append("phase_ranges_clear")
+        menu_options.append("assign_profile_phases_auto_detect")
+        menu_options.append("phase_ranges_save")
+        menu_options.append("menu_back")
+
+        self._push_menu("assign_profile_phases")
+        return self.async_show_menu(
             step_id="assign_profile_phases",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("action"): self._translated_select(
-                        options=[
-                            "add_range",
-                            "edit_range",
-                            "delete_range",
-                            "clear_ranges",
-                            "auto_detect_ranges",
-                            "save_ranges",
-                        ],
-                        translation_key="assign_profile_phases_action",
-                    )
-                }
-            ),
-            errors=errors,
+            menu_options=menu_options,
             description_placeholders={
                 "profile_name": profile_name,
                 "current_ranges": summary,
                 "timeline_svg": timeline_svg,
             },
         )
+
+    async def async_step_phase_ranges_clear(
+        self, _user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Menu wrapper: clear draft phase ranges and re-show editor."""
+        self._phase_assign_draft = []
+        return await self.async_step_assign_profile_phases()
+
+    async def async_step_phase_ranges_save(
+        self, _user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Menu wrapper: commit draft phase ranges; aborts on validation error."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+        profile_name = self._phase_assign_profile
+        if not profile_name:
+            return await self.async_step_assign_profile_phases_select()
+        try:
+            await store.async_set_profile_phase_ranges(profile_name, self._phase_assign_draft)
+        except ValueError:
+            return self.async_abort(reason="phase_ranges_invalid")
+        manager.notify_update()
+        self._phase_assign_profile = None
+        self._phase_assign_mode = "offset_mode"
+        self._phase_assign_cycle_id = None
+        self._phase_assign_draft = []
+        self._phase_assign_edit_index = None
+        return await self.async_step_manage_profiles()
 
     async def async_step_assign_profile_phases_auto_detect(
         self, user_input: dict[str, Any] | None = None
@@ -4163,43 +4411,28 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_record_cycle(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handle Record Mode menu."""
+        """Handle Record Mode as a button menu with state-aware options."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
 
-        # Determine available actions based on state
         is_recording = manager.recorder.is_recording
         has_last_run = manager.recorder.last_run is not None
 
-        if user_input is not None:
-            action = user_input["action"]
-            if action == "start_recording":
-                return await self.async_step_record_start()
-            if action == "stop_recording":
-                return await self.async_step_record_stop()
-            if action == "process_recording":
-                return await self.async_step_record_process()
-            if action == "discard_recording":
-                await manager.recorder.clear_last_run()
-                return await self.async_step_record_cycle()
-            if action == "refresh_status":
-                return await self.async_step_record_cycle()
-
-        options = {}
+        menu_options: list[str] = []
         if is_recording:
-            options["refresh_status"] = "Refresh Status"
-            options["stop_recording"] = "Stop Recording (Save & Process)"
+            menu_options.append("record_refresh")
+            menu_options.append("record_stop")
             status = "ACTIVE"
             duration = int(manager.recorder.current_duration)
             samples = len(getattr(manager.recorder, "_buffer", []))
         else:
-            options["start_recording"] = "Start New Recording"
+            menu_options.append("record_start")
             status = "STOPPED"
             duration = 0
             samples = 0
 
             if has_last_run:
-                options["process_recording"] = "Process Last Recording (Trim & Save)"
-                options["discard_recording"] = "Discard Last Recording"
+                menu_options.append("record_process")
+                menu_options.append("record_discard")
 
                 last_run = manager.recorder.last_run
                 samples = len(last_run.get("data", []))
@@ -4211,22 +4444,31 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 except Exception:  # pylint: disable=broad-exception-caught
                     pass
 
-        return self.async_show_form(
+        menu_options.append("menu_back")
+        self._push_menu("record_cycle")
+        return self.async_show_menu(
             step_id="record_cycle",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("action"): self._translated_select(
-                        options=list(options.keys()),
-                        translation_key="record_cycle_action",
-                    )
-                }
-            ),
+            menu_options=menu_options,
             description_placeholders={
                 "status": status,
                 "duration": str(duration),
                 "samples": str(samples),
             },
         )
+
+    async def async_step_record_refresh(
+        self, _user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Menu wrapper: re-display recorder status."""
+        return await self.async_step_record_cycle()
+
+    async def async_step_record_discard(
+        self, _user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Menu wrapper: discard the last recording and re-display status."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        await manager.recorder.clear_last_run()
+        return await self.async_step_record_cycle()
 
     async def async_step_record_start(
         self, _user_input: dict[str, Any] | None = None
@@ -4422,60 +4664,118 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         )
 
     async def async_step_learning_feedbacks(
-        self, user_input: dict[str, Any] | None = None
+        self, _user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Step: List pending learning feedbacks."""
-        if user_input is not None:
-            cycle_id = user_input.get("selected_feedback")
-            if cycle_id:
-                self._selected_cycle_id = cycle_id
-                return await self.async_step_resolve_feedback()
-
-        # Access profile_store from manager
+        """Landing menu for pending feedback: Review / Dismiss All / Back."""
         manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
         profile_store = manager.profile_store
         pending = profile_store.get_pending_feedback()
 
         if not pending:
-            return self.async_show_form(
+            self._push_menu("learning_feedbacks_empty")
+            return self.async_show_menu(
                 step_id="learning_feedbacks_empty",
-                data_schema=vol.Schema({}),
-                last_step=False,
+                menu_options=["menu_back"],
             )
 
-        options = []
-        # Sort by creation time (newest first)
         sorted_pending = sorted(
             pending.values(),
             key=lambda x: x.get("created_at", ""),
-            reverse=True
+            reverse=True,
+        )
+        preview_rows: list[str] = []
+        for item in sorted_pending:
+            prof = item.get("detected_profile", "Unknown")
+            safe_prof = html.escape(str(prof))
+            conf = item.get("confidence", 0.0)
+            created_raw = item.get("created_at", "")
+            t_str = str(created_raw)
+            if created_raw:
+                try:
+                    dt = dt_util.parse_datetime(str(created_raw))
+                    if dt:
+                        t_str = dt_util.as_local(dt).strftime("%d %b %H:%M")
+                except Exception:  # pylint: disable=broad-exception-caught
+                    pass
+            preview_rows.append(
+                f"<tr><td><b>{safe_prof}</b></td>"
+                f'<td align="center">{int(conf * 100)}%</td>'
+                f'<td align="center">{html.escape(t_str)}</td></tr>'
+            )
+
+        detected_program = await self._options_text(
+            "table_detected_program", "Detected Program"
+        )
+        confidence_label = await self._options_text(
+            "table_confidence", "Confidence"
+        )
+        reported_label = await self._options_text("table_reported", "Reported")
+        preview = (
+            '<table width="100%">'
+            '<tr>'
+            f'<th align="left">{html.escape(detected_program)}</th>'
+            f'<th width="20%" align="center">{html.escape(confidence_label)}</th>'
+            f'<th width="30%" align="center">{html.escape(reported_label)}</th>'
+            '</tr>'
+            + "".join(preview_rows)
+            + '</table>'
         )
 
+        self._push_menu("learning_feedbacks")
+        return self.async_show_menu(
+            step_id="learning_feedbacks",
+            menu_options=[
+                "learning_feedbacks_pick",
+                "learning_feedbacks_dismiss_all",
+                "menu_back",
+            ],
+            description_placeholders={
+                "count": str(len(pending)),
+                "pending_table": preview,
+            },
+        )
+
+    async def async_step_learning_feedbacks_pick(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Step: pick a specific pending feedback to review."""
+        if user_input is not None:
+            cycle_id = user_input.get("selected_feedback")
+            if cycle_id:
+                self._selected_cycle_id = cycle_id
+                return await self.async_step_resolve_feedback()
+            return await self.async_step_learning_feedbacks()
+
+        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        profile_store = manager.profile_store
+        pending = profile_store.get_pending_feedback()
+        if not pending:
+            return await self.async_step_learning_feedbacks()
+
+        sorted_pending = sorted(
+            pending.values(),
+            key=lambda x: x.get("created_at", ""),
+            reverse=True,
+        )
+        options = []
         for item in sorted_pending:
             cid = item.get("cycle_id", "unknown")
             prof = item.get("detected_profile", "Unknown")
             conf = item.get("confidence", 0.0)
             created_raw = item.get("created_at", "")
-
-            # Formt timestamp: 2023-10-27T10:00... -> 27 Oct 10:00
             t_str = str(created_raw)
             if created_raw:
                 try:
-                    # Parse using HA util to be safe with timezones
                     dt = dt_util.parse_datetime(str(created_raw))
                     if dt:
-                        local_dt = dt_util.as_local(dt)
-                        # "27 Oct 10:00" - Short and readable
-                        t_str = local_dt.strftime("%d %b %H:%M")
+                        t_str = dt_util.as_local(dt).strftime("%d %b %H:%M")
                 except Exception:  # pylint: disable=broad-exception-caught
                     pass
-
-            # Format label
-            label = f"{prof} ({int(conf*100)}%) - {t_str}"
+            label = f"{prof} ({int(conf * 100)}%) - {t_str}"
             options.append(selector.SelectOptionDict(value=cid, label=label))
 
         return self.async_show_form(
-            step_id="learning_feedbacks",
+            step_id="learning_feedbacks_pick",
             data_schema=vol.Schema(
                 {
                     vol.Required("selected_feedback"): selector.SelectSelector(
@@ -4483,9 +4783,48 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             options=options,
                             mode=selector.SelectSelectorMode.LIST,
                         )
-                    )
+                    ),
                 }
             ),
+        )
+
+    async def async_step_learning_feedbacks_dismiss_all(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Step: Confirm bulk dismissal of all pending learning feedbacks."""
+        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        profile_store = manager.profile_store
+        pending = profile_store.get_pending_feedback()
+        count = len(pending)
+
+        if user_input is not None:
+            if (
+                user_input.get("confirm_dismiss_all")
+                and count > 0
+                and hasattr(manager, "learning_manager")
+            ):
+                # Snapshot IDs first since submit mutates the pending dict
+                cycle_ids = list(pending.keys())
+                for cid in cycle_ids:
+                    await manager.learning_manager.async_submit_cycle_feedback(
+                        cycle_id=cid,
+                        user_confirmed=False,
+                        corrected_profile=None,
+                        corrected_duration=None,
+                        dismiss=True,
+                    )
+            return await self.async_step_init()
+
+        return self.async_show_form(
+            step_id="learning_feedbacks_dismiss_all",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        "confirm_dismiss_all", default=False
+                    ): selector.BooleanSelector(),
+                }
+            ),
+            description_placeholders={"count": str(count)},
         )
 
     async def async_step_learning_feedbacks_empty(
