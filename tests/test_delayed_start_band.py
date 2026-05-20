@@ -88,6 +88,35 @@ def test_idle_resets_band_accumulator():
     assert det.state == STATE_OFF
 
 
+def test_first_band_sample_does_not_count_prior_gap():
+    """A long gap before the first standby-band sample must not immediately trip DELAY_WAIT."""
+    det = _make_detector(delay_confirm_seconds=60.0)
+    det.process_reading(0.0, dt(0))
+    det.process_reading(20.0, dt(300))
+    assert det.state == STATE_OFF
+    assert det._delay_band_seconds == 0.0
+
+
+def test_false_start_back_to_band_preserves_candidate():
+    """A brief high spike that falls back into the standby band should not discard delayed-start evidence."""
+    det = _make_detector(delay_confirm_seconds=60.0, start_duration_threshold=10.0)
+    det.process_reading(0.0, dt(0))
+    for i in range(1, 9):
+        det.process_reading(20.0, dt(i * 5))
+    assert det.state == STATE_OFF
+
+    det.process_reading(100.0, dt(45))
+    assert det.state == STATE_STARTING
+
+    det.process_reading(20.0, dt(50))
+    assert det.state == STATE_OFF
+
+    for offset in (55, 60, 65):
+        det.process_reading(20.0, dt(offset))
+
+    assert det.state == STATE_DELAY_WAIT
+
+
 def test_delay_wait_to_starting_requires_sustained_high_power():
     """A single high reading inside DELAY_WAIT must not jump to STARTING."""
     det = _make_detector(

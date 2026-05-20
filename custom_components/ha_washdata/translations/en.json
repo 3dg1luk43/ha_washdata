@@ -185,15 +185,15 @@
             },
             "data_description": {
               "start_duration_threshold": "Ignore brief power spikes shorter than this duration (seconds). Filters out boot spikes (e.g., 60W for 2s) before real cycle starts. Default: 5s.",
-              "start_energy_threshold": "Cycle must accumulate at least this much energy (Wh) during the START phase to be confirmed. Default: 0.005 Wh.",
+              "start_energy_threshold": "Cycle must accumulate at least this much energy (Wh) during the START phase to be confirmed. Default: 0.2 Wh.",
               "completion_min_seconds": "Cycles shorter than this will be marked as 'interrupted' even if they finish naturally. Default: 600s.",
               "start_threshold_w": "Power must rise ABOVE this threshold to START a cycle. Set higher than your standby power. Default: min_power + 1 W.",
               "stop_threshold_w": "Power must fall BELOW this threshold to END a cycle. Set just above zero to avoid noise triggering false ends. Default: 0.6 * min_power.",
               "end_energy_threshold": "Cycle ends only if energy in the last Off-Delay window is below this value (Wh). Prevents false ends if power fluctuates near zero. Default: 0.05 Wh.",
-              "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 0s.",
+              "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 3s.",
               "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
               "min_off_gap": "If a cycle starts within this many seconds of the previous one ending, they will be MERGED into a single cycle.",
-              "sampling_interval": "Minimum sampling interval in seconds. Updates faster than this rate will be ignored. Default: 2.0s."
+              "sampling_interval": "Minimum sampling interval in seconds. Updates faster than this rate will be ignored. Default: 30s."
             }
           },
           "matching_section": {
@@ -212,7 +212,7 @@
               "profile_duration_tolerance": "Profile Match Duration Tolerance (0-0.5)"
             },
             "data_description": {
-              "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.50 (50%).",
+              "profile_match_min_duration_ratio": "Minimum duration ratio for profile matching. Running cycle must be at least this fraction of profile duration to match. Lower = earlier matching. Default: 0.10 (10%).",
               "profile_match_interval": "How often (in seconds) to attempt profile matching during a cycle. Lower values provide faster detection but use more CPU. Default: 300s (5 minutes).",
               "profile_match_threshold": "Minimum DTW similarity score (0.0–1.0) required to consider a profile as a match. Higher = stricter matching, fewer false positives. Default: 0.4.",
               "profile_unmatch_threshold": "DTW similarity score (0.0–1.0) below which a previously matched profile is rejected. Should be lower than match threshold to prevent flickering. Default: 0.35.",
@@ -236,10 +236,10 @@
               "save_debug_traces": "Save Debug Traces"
             },
             "data_description": {
-              "watchdog_interval": "Seconds between watchdog checks while running. Default: 5s. WARNING: Ensure this is HIGHER than your sensor's update interval to avoid false stops (e.g., if sensor updates every 60s, use 65s+).",
+              "watchdog_interval": "Seconds between watchdog checks while running. Default: 30s. WARNING: Ensure this is HIGHER than your sensor's update interval to avoid false stops.",
               "no_update_active_timeout": "For publish-on-change sensors: only force-end an ACTIVE cycle if no updates arrive for this many seconds. Low-power completion still uses the Off Delay.",
-              "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 300s.",
-              "auto_maintenance": "Enable auto-maintenance (repair samples, merge fragments).",
+              "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 1800s.",
+              "auto_maintenance": "Enable auto-maintenance (repair samples and perform routine cleanup).",
               "expose_debug_entities": "Show advanced sensors (Confidence, Phase, Ambiguity) for debugging.",
               "save_debug_traces": "Store detailed ranking and power trace data in history (Increases storage usage)."
             }
@@ -737,6 +737,9 @@
     },
     "error": {
       "import_failed": "Import failed. Please paste a valid WashData export JSON.",
+      "select_exactly_one": "Select exactly one cycle for this action.",
+      "select_at_least_one": "Select at least one cycle for this action.",
+      "select_at_least_two": "Select at least two cycles for this action.",
       "profile_exists": "A profile with this name already exists",
       "rename_failed": "Failed to rename profile. Profile may not exist or new name is already taken.",
       "assignment_failed": "Failed to assign profile to cycle",
@@ -834,6 +837,9 @@
         "split_preview_confirm_fmt": "Click Confirm to split this cycle into {count} separate cycles.",
         "merge_preview_title": "Merge Preview",
         "merge_preview_joining_fmt": "Joining {count} cycles. Gaps will be filled with 0W readings.",
+        "editor_delete_preview_title": "Delete Preview",
+        "editor_delete_preview_intro": "The selected cycles will be permanently deleted:",
+        "editor_delete_preview_confirm": "Click Confirm to permanently delete these cycle records.",
         "no_power_preview": "*No power data available for preview.*",
         "profile_comparison": "Profile Comparison",
         "actual_cycle_label": "This cycle (actual)",
@@ -850,7 +856,19 @@
         "recent_cycles_header": "Recent cycles",
         "trim_cycle_preview_title": "Cycle Trim Preview",
         "trim_cycle_preview_no_data": "No power data available for this cycle.",
-        "trim_cycle_preview_kept_suffix": "kept"
+        "trim_cycle_preview_kept_suffix": "kept",
+        "table_program": "Program",
+        "table_when": "When",
+        "table_length": "Length",
+        "table_match": "Match",
+        "table_profile": "Profile",
+        "table_cycles": "Cycles",
+        "table_avg_length": "Avg Length",
+        "table_last_run": "Last Run",
+        "table_avg_energy": "Avg Energy",
+        "table_detected_program": "Detected Program",
+        "table_confidence": "Confidence",
+        "table_reported": "Reported"
       }
     },
     "interactive_editor_action": {

@@ -9,6 +9,7 @@ import logging
 import os
 import time
 import base64
+import html
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -1572,6 +1573,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 else:
                     return await self.async_step_editor_configure()
 
+            elif self._editor_action == "delete":
+                if len(selected) < 1:
+                    errors["base"] = "select_at_least_one"
+                else:
+                    return await self.async_step_editor_configure()
+
         # Build options (Recent 50 cycles)
         cycles = store.get_past_cycles()[-50:]
         cycles.sort(key=lambda x: x["start_time"], reverse=True)
@@ -1805,6 +1812,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     self.hass.async_create_task(store.async_rebuild_all_envelopes())
                     return self.async_create_entry(title="", data=dict(self.config_entry.options))
 
+            elif self._editor_action == "delete":
+                if user_input.get("confirm_commit"):
+                    deleted_any = False
+                    for cycle_id in self._editor_selected_ids:
+                        deleted_any = await store.delete_cycle(cycle_id) or deleted_any
+
+                    if deleted_any:
+                        manager.notify_update()
+                        self.hass.async_create_task(store.async_rebuild_all_envelopes())
+
+                    return self.async_create_entry(title="", data=dict(self.config_entry.options))
+
         # Generate Preview
         preview_md = ""
         schema = {}
@@ -1930,6 +1949,53 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional("new_profile_name"): str,
                 vol.Required("confirm_commit"): selector.BooleanSelector()
             }
+
+        elif self._editor_action == "delete":
+            cycles_to_delete = [
+                c for c in store.get_past_cycles() if c["id"] in self._editor_selected_ids
+            ]
+            cycles_to_delete.sort(key=lambda x: x["start_time"], reverse=True)
+
+            delete_title = await self._options_text(
+                "editor_delete_preview_title", "Delete Preview"
+            )
+            delete_intro = await self._options_text(
+                "editor_delete_preview_intro",
+                "The selected cycles will be permanently deleted:",
+            )
+            delete_confirm = await self._options_text(
+                "editor_delete_preview_confirm",
+                "Click Confirm to permanently delete these cycle records.",
+            )
+            unlabeled_text = await self._selector_text("unlabeled", "(Unlabeled)")
+
+            delete_rows: list[str] = []
+            for cycle in cycles_to_delete:
+                dt = dt_util.parse_datetime(cycle["start_time"])
+                when = (
+                    dt_util.as_local(dt).strftime("%b %d, %H:%M")
+                    if dt
+                    else str(cycle["start_time"])
+                )
+                duration = _format_duration_label(
+                    int(cycle.get("manual_duration", cycle["duration"]))
+                )
+                prof = cycle.get("profile_name") or unlabeled_text
+                delete_rows.append(
+                    "- "
+                    + f"{html.escape(str(when))} | {html.escape(duration)} | {html.escape(str(prof))}"
+                )
+
+            preview_md = "\n".join(
+                [
+                    f"### {delete_title}",
+                    delete_intro,
+                    *delete_rows,
+                    "",
+                    delete_confirm,
+                ]
+            )
+            schema = {vol.Required("confirm_commit"): selector.BooleanSelector()}
 
         return self.async_show_form(
             step_id="editor_configure",
@@ -2131,6 +2197,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             duration_s = int(c.get("manual_duration", c["duration"]))
             duration_str = _format_duration_label(duration_s)
             prof = c.get("profile_name") or unlabeled_text
+            safe_prof = html.escape(str(prof))
+            safe_when = html.escape(str(when))
+            safe_duration = html.escape(duration_str)
             status = c.get("status", "completed")
             status_icon = (
                 "✓"
@@ -2144,11 +2213,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 conf_text = "—"
             rows.append(
                 f'<tr><td align="center">{status_icon}</td>'
-                f'<td><b>{prof}</b></td>'
-                f'<td>{when}</td>'
-                f'<td>{duration_str}</td>'
+                f'<td><b>{safe_prof}</b></td>'
+                f'<td>{safe_when}</td>'
+                f'<td>{safe_duration}</td>'
                 f'<td align="center">{conf_text}</td></tr>'
             )
+
+        recent_program = await self._options_text("table_program", "Program")
+        recent_when = await self._options_text("table_when", "When")
+        recent_length = await self._options_text("table_length", "Length")
+        recent_match = await self._options_text("table_match", "Match")
 
         if not rows:
             return await self.async_step_manage_cycles_empty()
@@ -2157,10 +2231,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             '<table width="100%">'
             '<tr>'
             '<th width="5%" align="center"></th>'
-            '<th align="left">Program</th>'
-            '<th width="22%" align="left">When</th>'
-            '<th width="14%" align="left">Length</th>'
-            '<th width="10%" align="center">Match</th>'
+            f'<th align="left">{html.escape(recent_program)}</th>'
+            f'<th width="22%" align="left">{html.escape(recent_when)}</th>'
+            f'<th width="14%" align="left">{html.escape(recent_length)}</th>'
+            f'<th width="10%" align="center">{html.escape(recent_match)}</th>'
             '</tr>'
             + "".join(rows)
             + '</table>'
@@ -2222,22 +2296,36 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     energy_str = f"{int(round(avg_energy))} Wh"
             else:
                 energy_str = "—"
+            safe_name = html.escape(str(p["name"]))
+            safe_avg = html.escape(avg_str)
+            safe_last_run = html.escape(last_run_str)
+            safe_energy = html.escape(energy_str)
             rows.append(
-                f'<tr><td><b>{p["name"]}</b></td>'
+                f'<tr><td><b>{safe_name}</b></td>'
                 f'<td align="center">{count}</td>'
-                f'<td align="center">{avg_str}</td>'
-                f'<td align="center">{last_run_str}</td>'
-                f'<td align="center">{energy_str}</td></tr>'
+                f'<td align="center">{safe_avg}</td>'
+                f'<td align="center">{safe_last_run}</td>'
+                f'<td align="center">{safe_energy}</td></tr>'
             )
+
+        profile_header = await self._options_text("table_profile", "Profile")
+        cycles_header = await self._options_text("table_cycles", "Cycles")
+        avg_length_header = await self._options_text(
+            "table_avg_length", "Avg Length"
+        )
+        last_run_header = await self._options_text("table_last_run", "Last Run")
+        avg_energy_header = await self._options_text(
+            "table_avg_energy", "Avg Energy"
+        )
 
         summary_text = (
             '<table width="100%">'
             '<tr>'
-            '<th align="left">Profile</th>'
-            '<th width="12%" align="center">Cycles</th>'
-            '<th width="18%" align="center">Avg Length</th>'
-            '<th width="14%" align="center">Last Run</th>'
-            '<th width="18%" align="center">Avg Energy</th>'
+            f'<th align="left">{html.escape(profile_header)}</th>'
+            f'<th width="12%" align="center">{html.escape(cycles_header)}</th>'
+            f'<th width="18%" align="center">{html.escape(avg_length_header)}</th>'
+            f'<th width="14%" align="center">{html.escape(last_run_header)}</th>'
+            f'<th width="18%" align="center">{html.escape(avg_energy_header)}</th>'
             '</tr>'
             + "".join(rows)
             + '</table>'
@@ -4595,6 +4683,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         preview_rows: list[str] = []
         for item in sorted_pending:
             prof = item.get("detected_profile", "Unknown")
+            safe_prof = html.escape(str(prof))
             conf = item.get("confidence", 0.0)
             created_raw = item.get("created_at", "")
             t_str = str(created_raw)
@@ -4606,16 +4695,24 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 except Exception:  # pylint: disable=broad-exception-caught
                     pass
             preview_rows.append(
-                f"<tr><td><b>{prof}</b></td>"
+                f"<tr><td><b>{safe_prof}</b></td>"
                 f'<td align="center">{int(conf * 100)}%</td>'
-                f'<td align="center">{t_str}</td></tr>'
+                f'<td align="center">{html.escape(t_str)}</td></tr>'
             )
+
+        detected_program = await self._options_text(
+            "table_detected_program", "Detected Program"
+        )
+        confidence_label = await self._options_text(
+            "table_confidence", "Confidence"
+        )
+        reported_label = await self._options_text("table_reported", "Reported")
         preview = (
             '<table width="100%">'
             '<tr>'
-            '<th align="left">Detected Program</th>'
-            '<th width="20%" align="center">Confidence</th>'
-            '<th width="30%" align="center">Reported</th>'
+            f'<th align="left">{html.escape(detected_program)}</th>'
+            f'<th width="20%" align="center">{html.escape(confidence_label)}</th>'
+            f'<th width="30%" align="center">{html.escape(reported_label)}</th>'
             '</tr>'
             + "".join(preview_rows)
             + '</table>'

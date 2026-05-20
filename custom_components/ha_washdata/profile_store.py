@@ -3853,11 +3853,26 @@ class ProfileStore:
         if last_t <= 0:
             return []
 
-        cleaned = sorted({round(float(o), 3) for o in split_offsets_s if 0.0 < float(o) < last_t})
-        if not cleaned:
+        unique_offsets = sorted(
+            {round(float(o), 3) for o in split_offsets_s if 0.0 < float(o) < last_t}
+        )
+        if not unique_offsets:
             return []
 
-        boundaries = [0.0, *cleaned, last_t]
+        filtered_offsets: list[float] = []
+        for offset in unique_offsets:
+            if offset <= min_segment_s:
+                continue
+            if offset >= (last_t - min_segment_s):
+                continue
+            if filtered_offsets and (offset - filtered_offsets[-1]) < min_segment_s:
+                continue
+            filtered_offsets.append(offset)
+
+        if not filtered_offsets:
+            return []
+
+        boundaries = [0.0, *filtered_offsets, last_t]
         segments: list[tuple[float, float]] = []
         for i in range(len(boundaries) - 1):
             seg_start = boundaries[i]
@@ -3872,7 +3887,7 @@ class ProfileStore:
             "Built manual split for %s: %d segments at offsets %s",
             cycle.get("id"),
             len(segments),
-            cleaned,
+            filtered_offsets,
         )
         return segments
 

@@ -224,10 +224,11 @@ class CycleDetector:
         self._anti_wrinkle_idle_timeout: float = 120.0
 
         # Delayed-start band tracking.
-        # _delay_band_seconds accumulates time spent with power inside the
-        # standby band [stop_threshold_w, start_threshold_w) while still in
-        # STATE_OFF. Once it crosses delay_confirm_seconds we hand over to
-        # STATE_DELAY_WAIT.
+        # _delay_band_start anchors the first reading in the standby band
+        # [stop_threshold_w, start_threshold_w) while still in STATE_OFF.
+        # _delay_band_seconds mirrors the anchored elapsed time for
+        # diagnostics and tests.
+        self._delay_band_start: datetime | None = None
         self._delay_band_seconds: float = 0.0
         # _delay_band_peak is purely diagnostic — surfaced in the log line
         # when the transition fires so users can see what their machine's
@@ -246,6 +247,10 @@ class CycleDetector:
         # (low) reading.  This prevents a single isolated spike from
         # tripping STARTING just because the sampling interval is long.
         self._delay_wait_high_start: datetime | None = None
+        # Preserve a delayed-start candidate across a false STARTING probe
+        # that drops back into the standby band without the machine truly
+        # turning off.
+        self._preserve_delay_band_on_off: bool = False
 
     @property
     def _dynamic_pause_threshold(self) -> float:
@@ -688,8 +693,8 @@ class CycleDetector:
             # the off-noise floor (stop_threshold_w) and the cycle-start
             # threshold (start_threshold_w) — display, electronics, the
             # occasional anti-damp tumble — for minutes to hours.  We
-            # accumulate dt while power is in that band; once it crosses
-            # delay_confirm_seconds we transition to DELAY_WAIT.
+            # track anchored elapsed time while power is in that band; once
+            # it crosses delay_confirm_seconds we transition to DELAY_WAIT.
             #
             # Brief high-power excursions (menu navigation, button presses)
             # don't break the candidate: they fall through to the normal
@@ -711,7 +716,13 @@ class CycleDetector:
                     < self._config.start_threshold_w
                 )
                 if in_band:
-                    self._delay_band_seconds += dt
+                    if self._delay_band_start is None:
+                        self._delay_band_start = timestamp
+                        self._delay_band_seconds = 0.0
+                    else:
+                        self._delay_band_seconds = (
+                            timestamp - self._delay_band_start
+                        ).total_seconds()
                     self._delay_band_peak = max(self._delay_band_peak, power)
                     if self._delay_band_seconds >= self._config.delay_confirm_seconds:
                         self._logger.info(
@@ -729,8 +740,10 @@ class CycleDetector:
                     return
                 elif power < self._config.stop_threshold_w:
                     # Machine genuinely idle: forget any band history.
+                    self._delay_band_start = None
                     self._delay_band_seconds = 0.0
                     self._delay_band_peak = 0.0
+                    self._preserve_delay_band_on_off = False
                 # power >= start_threshold_w: fall through to the normal
                 # start path below.  If it turns out to be a brief peak,
                 # STATE_STARTING will abort it as a false start and we'll
@@ -741,6 +754,7 @@ class CycleDetector:
 
             if is_high and not started_from_anti_wrinkle:
                 # Transition to STARTING
+                self._preserve_delay_band_on_off = self._delay_band_start is not None
                 self._transition_to(STATE_STARTING, timestamp)
                 self._current_cycle_start = timestamp
                 self._power_readings = [(timestamp, power)]
@@ -1137,10 +1151,13 @@ class CycleDetector:
             self._energy_since_idle_wh = 0.0
             # Also reset idle time tracker when leaving ANTI_WRINKLE
             self._anti_wrinkle_idle_time = 0.0
-            self._delay_band_seconds = 0.0
-            self._delay_band_peak = 0.0
+            if not self._preserve_delay_band_on_off:
+                self._delay_band_start = None
+                self._delay_band_seconds = 0.0
+                self._delay_band_peak = 0.0
             self._delay_wait_true_off_seconds = 0.0
             self._delay_wait_high_start = None
+            self._preserve_delay_band_on_off = False
 
         # Reset end spike tracker when entering ENDING state
         if new_state == STATE_ENDING:
@@ -1148,11 +1165,13 @@ class CycleDetector:
         elif new_state == STATE_DELAY_WAIT:
             # Band-accumulation tracker already played its role getting us
             # here; reset it so a future OFF→band cycle starts fresh.
+            self._delay_band_start = None
             self._delay_band_seconds = 0.0
             self._delay_band_peak = 0.0
             self._delay_wait_true_off_seconds = 0.0
             self._delay_wait_high_start = None
             self._sub_state = "Waiting to Start"
+            self._preserve_delay_band_on_off = False
         elif new_state == STATE_ANTI_WRINKLE:
             self._anti_wrinkle_candidate_start = None
             self._anti_wrinkle_candidate_peak = 0.0
@@ -1162,6 +1181,8 @@ class CycleDetector:
         elif new_state == STATE_STARTING:
             # Reset idle time if exiting ANTI_WRINKLE to STARTING (high-power burst resumed)
             self._anti_wrinkle_idle_time = 0.0
+        elif new_state == STATE_RUNNING:
+            self._preserve_delay_band_on_off = False
 
         self._logger.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
         self._on_state_change(old_state, new_state)

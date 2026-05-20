@@ -7,7 +7,7 @@ import pytest
 
 from custom_components.ha_washdata.profile_store import ProfileStore
 
-logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -82,6 +82,13 @@ def test_build_segments_returns_empty_when_too_short(store):
 def test_build_segments_empty_input(store):
     cycle = _make_cycle(datetime(2026, 5, 11, 10, 0, 0), 3600.0)
     assert store.build_split_segments_from_offsets(cycle, []) == []
+
+
+def test_build_segments_filters_offsets_too_close_together(store):
+    """Offsets closer than min_segment_s should be filtered before boundaries are built."""
+    cycle = _make_cycle(datetime(2026, 5, 11, 10, 0, 0), 3600.0)
+    segments = store.build_split_segments_from_offsets(cycle, [1200.0, 1230.0])
+    assert segments == [(0.0, 1200.0), (1200.0, 3600.0)]
 
 
 @pytest.mark.asyncio

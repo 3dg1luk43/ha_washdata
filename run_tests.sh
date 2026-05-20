@@ -22,6 +22,11 @@ fi
 mode="${1:-fast}"
 
 case "$mode" in
+    --fast|fast)
+        shift
+        echo "Running FAST tests (skipping slow + benchmark)..."
+        exec "$VENV_PYTHON" -m pytest tests/ "$@"
+        ;;
     --slow|slow)
         shift
         echo "Running SLOW tests only..."
