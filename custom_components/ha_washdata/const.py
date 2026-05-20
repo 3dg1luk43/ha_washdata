@@ -276,7 +276,13 @@ DEFAULT_MAX_DEFERRAL_SECONDS = 14400  # 4 hours max safe deferral
 # existing long_ending_tail path - this only governs the smart-termination
 # pre-arming).
 DISHWASHER_END_SPIKE_MIN_PROGRESS = 0.85
-DISHWASHER_END_SPIKE_WAIT_SECONDS = 300.0
+# Widened from 300s to 1800s after issue #43 follow-up:
+# real-world user reports showed Smart Termination misfiring ~4 min before the
+# end-of-cycle pump-out, and the original 5-min escape hatch wasn't generous
+# enough to cover that gap before the next reading arrived.  30 min is plenty
+# to capture even the latest pump-outs while still guaranteeing the cycle
+# closes eventually for dishwashers that have no pump-out at all.
+DISHWASHER_END_SPIKE_WAIT_SECONDS = 1800.0
 
 DEFAULT_OFF_DELAY_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 1800,  # 30 min (Drying)

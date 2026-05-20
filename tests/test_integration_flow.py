@@ -13,6 +13,8 @@ from custom_components.ha_washdata.const import (
 from custom_components.ha_washdata.manager import WashDataManager
 from tests.utils.synthesizer import CycleSynthesizer
 
+pytestmark = pytest.mark.slow
+
 @pytest.fixture
 def mock_entry():
     entry = MagicMock()

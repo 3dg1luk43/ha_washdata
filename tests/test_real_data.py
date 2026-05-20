@@ -12,6 +12,8 @@ from custom_components.ha_washdata.const import STATE_RUNNING
 # Path to the data directory (relative to this test file)
 DATA_DIR = os.path.join(os.path.dirname(__file__), "../cycle_data")
 
+pytestmark = pytest.mark.slow
+
 def load_csv_data(filename, filter_date=None):
     """Parses a CSV file into a list of (timestamp, power) tuples."""
     path = os.path.join(DATA_DIR, filename)

@@ -936,31 +936,39 @@ class CycleDetector:
 
                         if self._time_in_state >= smart_debounce:
                             # --- END SPIKE WAIT PERIOD (Dishwashers) ---
-                            # If we are a dishwasher and haven't seen a high-power
-                            # spike since entering ENDING, wait up to
-                            # DISHWASHER_END_SPIKE_WAIT_SECONDS past
-                            # expected_duration for the end spike.  Shared with
-                            # _should_defer_finish so the two paths release the
-                            # cycle at the same instant (issue #43).
+                            # Dishwashers should see the real end-of-cycle
+                            # pump-out (which arms _end_spike_seen via the 85%
+                            # progress gate) before Smart Termination fires —
+                            # otherwise the pump-out arrives AFTER the cycle
+                            # has already closed and registers as a brand-new
+                            # "ghost" cycle.  User reports (issue #43) showed
+                            # the original 5-min past_wait_period escape hatch
+                            # closing the cycle ~4 min before the real pump-out
+                            # at ~99.5% of expected.  Widen the escape hatch
+                            # substantially (DISHWASHER_END_SPIKE_WAIT_SECONDS,
+                            # currently 30 min past expected) so it cannot
+                            # short-circuit a pump-out that fires within a
+                            # reasonable window around expected end, but still
+                            # guarantees the cycle terminates eventually for
+                            # dishwashers that have no pump-out at all.
                             end_spike_seen = getattr(self, "_end_spike_seen", False)
                             past_wait_period = current_duration >= (
                                 self._expected_duration
                                 + DISHWASHER_END_SPIKE_WAIT_SECONDS
                             )
-
                             if (
                                 self._config.device_type == "dishwasher"
                                 and not end_spike_seen
                                 and not past_wait_period
                             ):
                                 self._logger.debug(
-                                    "Waiting for end spike (duration %.0fs, expected %.0fs + "
-                                    "%.0fs wait)",
+                                    "Waiting for end spike (duration %.0fs, "
+                                    "expected %.0fs + %.0fs wait)",
                                     current_duration,
                                     self._expected_duration,
                                     DISHWASHER_END_SPIKE_WAIT_SECONDS,
                                 )
-                                return  # Don't finish yet, wait for spike or timeout
+                                return  # Don't finish yet, wait for spike
 
                             self._logger.info(
                                 "Smart Termination: Profile '%s' match confirmed (duration %.0fs, "
@@ -1145,17 +1153,17 @@ class CycleDetector:
             )
             return True
 
-        # Issue #43: dishwasher end-spike wait protection.  After 85% of expected
-        # the passive-drying gate above releases, but if we have not yet seen the
-        # real end-of-cycle pump-out (_end_spike_seen=False) we must keep the
-        # cycle in ENDING for a little longer — otherwise the fallback timeout
-        # would close it at ~85% of expected, BEFORE the pump-out fires, and the
-        # pump-out would then register as a brand-new cycle.  Defer until either
-        # the spike fires (which sets _end_spike_seen=True via the gated logic
-        # in STATE_ENDING) or we cross the smart-termination wait window
-        # (expected + DISHWASHER_END_SPIKE_WAIT_SECONDS), at which point Smart
-        # Termination's own wait branch takes over and finalises the cycle.
-        # Shares the same constant so the two paths cannot drift.
+        # Issue #43: dishwasher end-spike wait protection.  Once past the 85%
+        # passive-drying gate above, we still keep the cycle deferred until
+        # the real end-of-cycle pump-out fires (sets _end_spike_seen=True via
+        # the 85% progress gate in STATE_ENDING) or we cross the
+        # smart-termination wait window (expected + 30 min) — whichever comes
+        # first.  Shares DISHWASHER_END_SPIKE_WAIT_SECONDS with Smart
+        # Termination's wait branch so the two paths release the cycle at the
+        # same instant.  Beyond the wait window, Smart Termination's
+        # past_wait_period kicks in and finalises; below it, the fallback
+        # timeout's energy gate is the safety net for cycles whose pump-out
+        # never arrives.
         if (
             self._config.device_type == "dishwasher"
             and self._matched_profile

@@ -287,6 +287,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._editor_action: str | None = None
         self._editor_selected_ids: list[str] = []
         self._editor_split_gap: int = 900
+        self._editor_split_mode: str = "auto"
+        self._editor_split_manual_segments: list[tuple[float, float]] = []
         self._selected_phase_name: str | None = None
         self._selected_phase_device_type: str | None = None
         self._selected_phase_id: str | None = None
@@ -398,18 +400,41 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None  # pylint: disable=unused-argument
     ) -> FlowResult:
         """Manage the options."""
+        pending_count = 0
+        manager = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id)
+        if manager is not None and hasattr(manager, "profile_store"):
+            try:
+                pending_count = len(manager.profile_store.get_pending_feedback())
+            except Exception:  # pylint: disable=broad-exception-caught
+                pending_count = 0
+
+        lang = self.context.get("language") or self.hass.config.language
+        if self._options_translations is None:
+            self._options_translations = await translation.async_get_translations(
+                self.hass, lang, "options", {DOMAIN}
+            )
+
+        base_key = f"component.{DOMAIN}.options.step.init.menu_options"
+
+        def menu_label(key: str) -> str:
+            return self._options_translations.get(f"{base_key}.{key}", key)
+
+        learning_label = menu_label("learning_feedbacks")
+        if pending_count > 0:
+            learning_label = f"({pending_count}) {learning_label}"
+
         return self.async_show_menu(
             step_id="init",
-            menu_options=[
-                "settings",
-                "notifications",
-                "manage_cycles",
-                "manage_profiles",
-                "manage_phase_catalog",
-                "record_cycle",
-                "learning_feedbacks",
-                "diagnostics",
-            ],
+            menu_options={
+                "settings": menu_label("settings"),
+                "notifications": menu_label("notifications"),
+                "manage_cycles": menu_label("manage_cycles"),
+                "manage_profiles": menu_label("manage_profiles"),
+                "manage_phase_catalog": menu_label("manage_phase_catalog"),
+                "record_cycle": menu_label("record_cycle"),
+                "learning_feedbacks": learning_label,
+                "diagnostics": menu_label("diagnostics"),
+            },
         )
 
     async def async_step_settings(
@@ -1530,20 +1555,110 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_editor_split_params(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Step 2.5: Configure split parameter."""
+        """Step 2.5: Choose split method (auto-detect gaps or manual timestamps)."""
+        if user_input is not None:
+            mode = user_input.get("split_mode", "auto")
+            self._editor_split_mode = mode
+            self._editor_split_manual_segments = []
+            if mode == "manual":
+                return await self.async_step_editor_split_manual_params()
+            return await self.async_step_editor_split_auto_params()
+
+        return self.async_show_form(
+            step_id="editor_split_params",
+            data_schema=vol.Schema({
+                vol.Required("split_mode", default=self._editor_split_mode): self._translated_select(
+                    options=["auto", "manual"],
+                    translation_key="split_mode",
+                )
+            }),
+        )
+
+    async def async_step_editor_split_auto_params(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Configure auto-detect gap threshold."""
         if user_input is not None:
             self._editor_split_gap = int(user_input["min_gap_seconds"])
             return await self.async_step_editor_configure()
 
         return self.async_show_form(
-            step_id="editor_split_params",
+            step_id="editor_split_auto_params",
             data_schema=vol.Schema({
-                vol.Required("min_gap_seconds", default=900): selector.NumberSelector(
+                vol.Required("min_gap_seconds", default=self._editor_split_gap): selector.NumberSelector(
                     selector.NumberSelectorConfig(
                         min=60, max=3600, mode=selector.NumberSelectorMode.BOX, unit_of_measurement="s"
                     )
                 )
-            })
+            }),
+        )
+
+    async def async_step_editor_split_manual_params(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Configure manual split timestamps (wall-clock HH:MM[:SS], one per line)."""
+        manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
+        store = manager.profile_store
+
+        errors: dict[str, str] = {}
+        cid = self._editor_selected_ids[0] if self._editor_selected_ids else None
+        cycle = next((c for c in store.get_past_cycles() if c["id"] == cid), None) if cid else None
+        if not cycle:
+            return self.async_abort(reason="cycle_not_found")
+
+        cycle_start_dt = dt_util.parse_datetime(cycle["start_time"])
+        cycle_end_dt = dt_util.parse_datetime(cycle["end_time"])
+        if not cycle_start_dt or not cycle_end_dt:
+            return self.async_abort(reason="cycle_not_found")
+
+        if user_input is not None:
+            raw = user_input.get("split_timestamps", "") or ""
+            offsets: list[float] = []
+            for token in raw.replace(",", "\n").splitlines():
+                token = token.strip()
+                if not token:
+                    continue
+                off = self._wallclock_to_offset(token, cycle_start_dt, cycle_end_dt)
+                if off is None:
+                    errors["base"] = "invalid_split_timestamp"
+                    break
+                offsets.append(off)
+
+            if not errors:
+                segments = store.build_split_segments_from_offsets(cycle, offsets)
+                if not segments:
+                    errors["base"] = "no_split_segments_found"
+                else:
+                    self._editor_split_manual_segments = segments
+                    return await self.async_step_editor_configure()
+
+        local_start = dt_util.as_local(cycle_start_dt)
+        local_end = dt_util.as_local(cycle_end_dt)
+        preview_md = ""
+        svg = store.generate_interactive_split_svg(
+            cycle["id"],
+            [(0.0, (cycle_end_dt - cycle_start_dt).total_seconds())],
+            title_prefix=await self._options_text("split_preview_title", "Split Preview"),
+            unlabeled_text=await self._selector_text("unlabeled", "(Unlabeled)"),
+        )
+        if svg:
+            b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+            preview_md = f"![Preview](data:image/svg+xml;base64,{b64})\n\n"
+
+        return self.async_show_form(
+            step_id="editor_split_manual_params",
+            data_schema=vol.Schema({
+                vol.Required("split_timestamps", default=""): selector.TextSelector(
+                    selector.TextSelectorConfig(multiline=True)
+                )
+            }),
+            errors=errors,
+            description_placeholders={
+                "preview_md": preview_md,
+                "cycle_start_wallclock": local_start.strftime("%H:%M:%S"),
+                "cycle_end_wallclock": local_end.strftime("%H:%M:%S"),
+                "cycle_date": local_start.strftime("%Y-%m-%d"),
+            },
         )
 
     async def async_step_editor_configure(
@@ -1586,13 +1701,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     # as complex per-segment assignment in one form is hard in HA config flow.
                     # We'll rely on auto-labeling or user can label later.
 
-                    # Re-run analysis to get segments
+                    # Re-run analysis (auto) or reuse manual segments
                     cycle = next((c for c in store.get_past_cycles() if c["id"] in self._editor_selected_ids), None)
                     if cycle:
-
-                        segments = await self.hass.async_add_executor_job(
-                            store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
-                        )
+                        if self._editor_split_mode == "manual":
+                            segments = list(self._editor_split_manual_segments)
+                        else:
+                            segments = await self.hass.async_add_executor_job(
+                                store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
+                            )
                         if segments:
                             # Apply with profiles from user input
                             final_segments = []
@@ -1642,11 +1759,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if not cycle:
                 return self.async_abort(reason="cycle_not_found")
 
-            # Run Analysis
-
-            segments = await self.hass.async_add_executor_job(
-                store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
-            ) # Split params
+            # Run analysis (auto) or reuse manual segments
+            if self._editor_split_mode == "manual":
+                segments = list(self._editor_split_manual_segments)
+            else:
+                segments = await self.hass.async_add_executor_job(
+                    store.analyze_split_sync, cycle, self._editor_split_gap, 2.0
+                )
 
             if not segments:
                 return self.async_abort(reason="no_split_segments_found")
@@ -1993,6 +2112,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 self._editor_action = None
                 self._editor_selected_ids = []
                 self._editor_split_gap = 900
+                self._editor_split_mode = "auto"
+                self._editor_split_manual_segments = []
                 return await self.async_step_interactive_editor()
             if action == "trim_cycle":
                 self._trim_cycle_id = None
@@ -4426,6 +4547,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Step: List pending learning feedbacks."""
         if user_input is not None:
+            if user_input.get("dismiss_all"):
+                return await self.async_step_learning_feedbacks_dismiss_all()
             cycle_id = user_input.get("selected_feedback")
             if cycle_id:
                 self._selected_cycle_id = cycle_id
@@ -4478,14 +4601,57 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="learning_feedbacks",
             data_schema=vol.Schema(
                 {
-                    vol.Required("selected_feedback"): selector.SelectSelector(
+                    vol.Optional("selected_feedback"): selector.SelectSelector(
                         selector.SelectSelectorConfig(
                             options=options,
                             mode=selector.SelectSelectorMode.LIST,
                         )
-                    )
+                    ),
+                    vol.Optional(
+                        "dismiss_all", default=False
+                    ): selector.BooleanSelector(),
                 }
             ),
+            description_placeholders={"count": str(len(pending))},
+        )
+
+    async def async_step_learning_feedbacks_dismiss_all(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Step: Confirm bulk dismissal of all pending learning feedbacks."""
+        manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
+        profile_store = manager.profile_store
+        pending = profile_store.get_pending_feedback()
+        count = len(pending)
+
+        if user_input is not None:
+            if (
+                user_input.get("confirm_dismiss_all")
+                and count > 0
+                and hasattr(manager, "learning_manager")
+            ):
+                # Snapshot IDs first since submit mutates the pending dict
+                cycle_ids = list(pending.keys())
+                for cid in cycle_ids:
+                    await manager.learning_manager.async_submit_cycle_feedback(
+                        cycle_id=cid,
+                        user_confirmed=False,
+                        corrected_profile=None,
+                        corrected_duration=None,
+                        dismiss=True,
+                    )
+            return await self.async_step_init()
+
+        return self.async_show_form(
+            step_id="learning_feedbacks_dismiss_all",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        "confirm_dismiss_all", default=False
+                    ): selector.BooleanSelector(),
+                }
+            ),
+            description_placeholders={"count": str(count)},
         )
 
     async def async_step_learning_feedbacks_empty(

@@ -533,10 +533,24 @@
         }
       },
       "editor_split_params": {
-        "title": "Split Configuration",
+        "title": "Split Method",
+        "description": "Choose how to split this cycle. **Auto-detect** finds idle gaps in the power data; **Manual timestamp** lets you set explicit split points (useful when one cycle ran straight into the next with no idle gap between them).",
+        "data": {
+          "split_mode": "Split Method"
+        }
+      },
+      "editor_split_auto_params": {
+        "title": "Auto-Split Configuration",
         "description": "Adjust the sensitivity for splitting this cycle. Any idle gap longer than this will cause a split.",
         "data": {
           "min_gap_seconds": "Split Gap Threshold (seconds)"
+        }
+      },
+      "editor_split_manual_params": {
+        "title": "Manual Split Timestamps",
+        "description": "{preview_md}Cycle window: **{cycle_start_wallclock} → {cycle_end_wallclock}** on {cycle_date}.\n\nEnter one or more split timestamps (`HH:MM` or `HH:MM:SS`), one per line. The cycle will be cut at each timestamp — N timestamps produce N+1 segments.",
+        "data": {
+          "split_timestamps": "Split Timestamps"
         }
       },
       "reprocess_history": {
@@ -578,14 +592,22 @@
       },
       "learning_feedbacks": {
         "title": "Learning Feedbacks",
-        "description": "Select a cycle review request to process.",
+        "description": "Select a cycle review request to process, or check the box below to dismiss all {count} pending feedback request(s) at once.",
         "data": {
-          "selected_feedback": "Select Cycle to Review"
+          "selected_feedback": "Select Cycle to Review",
+          "dismiss_all": "Dismiss all pending feedback requests"
         }
       },
       "learning_feedbacks_empty": {
         "title": "Learning Feedbacks",
         "description": "No pending feedback requests found."
+      },
+      "learning_feedbacks_dismiss_all": {
+        "title": "Dismiss All Pending Feedbacks",
+        "description": "You are about to dismiss **{count}** pending feedback request(s). Dismissed cycles remain in your history but will not contribute new learning signal. This cannot be undone.\n\n✅ Check the box below and click **Submit** to dismiss all.\n❌ Leave it unchecked and click **Submit** to cancel and go back.",
+        "data": {
+          "confirm_dismiss_all": "Confirm: dismiss all pending feedback requests"
+        }
       },
       "resolve_feedback": {
         "title": "Resolve Feedback",
@@ -648,12 +670,16 @@
       "suggestions_ready_notification_message": "The **Suggested Settings** sensor now reports **{count}** actionable recommendations.\n\nTo review and apply them: **Settings > Devices & Services > WashData > Configure > Advanced Settings > Apply Suggested Values**.\n\nSuggestions are optional and shown for review before you save.",
       "trim_range_invalid": "Start must be before end. Please adjust your trim points.",
       "trim_failed": "Trim failed. The cycle may no longer exist or the window is empty.",
+      "invalid_split_timestamp": "Timestamp is invalid or outside the cycle window. Use HH:MM or HH:MM:SS within the cycle's window.",
+      "no_split_segments_found": "No valid segments could be produced from these timestamps. Make sure each timestamp is inside the cycle window and segments are at least 1 minute long.",
       "auto_tune_suggestion": "{device_type} {device_title} detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically).",
       "auto_tune_title": "WashData Auto-Tune",
       "auto_tune_fallback": "{device_type} {device_title} detected ghost cycles. Suggested min_power change: {current_min}W -> {new_min}W (not applied automatically)."
     },
     "abort": {
       "no_cycles_found": "No cycles found",
+      "no_split_segments_found": "No splittable segments were found in the selected cycle.",
+      "cycle_not_found": "The selected cycle could not be loaded.",
       "no_power_data": "No power trace data available for the selected cycle.",
       "no_profiles_found": "No profiles found. Create a profile first.",
       "no_profiles_for_matching": "No profiles available for matching. Create profiles first.",
@@ -746,6 +772,12 @@
         "split": "Split a Cycle (Find gaps)",
         "merge": "Merge Cycles (Join fragments)",
         "delete": "Delete Cycle(s)"
+      }
+    },
+    "split_mode": {
+      "options": {
+        "auto": "Auto-detect idle gaps",
+        "manual": "Manual timestamp(s)"
       }
     },
     "diagnostics_action": {

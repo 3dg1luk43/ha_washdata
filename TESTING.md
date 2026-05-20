@@ -7,6 +7,7 @@ Note: Despite the name, WashData also works well for other appliances (e.g., dry
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [Test Categories (fast / slow / benchmark)](#test-categories-fast--slow--benchmark)
 - [Test 1: Cycle Duration Variance](#test-1-cycle-duration-variance)
 - [Test 2: Progress Management](#test-2-progress-management)
 - [Test 3: Learning Feedback System](#test-3-learning-feedback-system)
@@ -33,16 +34,88 @@ pip install paho-mqtt
 ### Running Tests
 
 ```bash
-# Start mock socket simulator
-cd /root/ha_washdata
-python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
+# Fast suite (default) — ~30s, skips real-data replays and benchmarks
+./run_tests.sh
 
-# Or run unit tests
-pytest tests/test_cycle_detector.py -v
+# Run a single test file
+./.venv/bin/pytest tests/test_cycle_detector.py -v
 
-# Or check syntax
+# Syntax check
 python3 -m py_compile custom_components/ha_washdata/*.py
+
+# Start mock socket simulator (manual end-to-end)
+python3 devtools/mqtt_mock_socket.py --speedup 720 --default LONG
 ```
+
+See [Test Categories](#test-categories-fast--slow--benchmark) for the full
+suite and how to opt in to slow/benchmark runs.
+
+---
+
+## Test Categories (fast / slow / benchmark)
+
+Tests are split into three categories via pytest markers so the dev loop stays
+fast. The default `./run_tests.sh` (and raw `pytest tests/`) runs only the
+**fast** subset — about 30 seconds for UI / config / unit changes. The full
+suite is opt-in for releases and CI.
+
+| Category    | Marker                 | What it covers                                                              | Default? |
+|-------------|------------------------|------------------------------------------------------------------------------|----------|
+| **fast**    | (none)                 | Unit & integration tests with mocked dependencies, issue reproducers         | ✅ runs  |
+| **slow**    | `@pytest.mark.slow`    | Real-data replays from `cycle_data/`, stress simulations, full HA flow       | ❌ opt-in |
+| **benchmark** | `@pytest.mark.benchmark` | Performance characterization (timing prints, no functional assertions)    | ❌ opt-in |
+
+### Running each category
+
+```bash
+./run_tests.sh              # Fast suite only (default, ~30s)
+./run_tests.sh --slow       # Only slow tests (real-data replays, stress sims)
+./run_tests.sh --bench      # Only benchmarks
+./run_tests.sh --all        # Everything (~12 min)
+
+# Pass extra pytest args after the mode keyword:
+./run_tests.sh --slow -v -k verify_alignment
+./run_tests.sh -k cycle_detector            # fast subset, filtered
+```
+
+The default-skip filter lives in `pytest.ini` (`addopts = -m "not slow and not benchmark"`).
+Raw `pytest tests/` honors it too; pass `-m ""` to override.
+
+### What goes where
+
+A test should be marked `slow` if it:
+- loads files from `cycle_data/` (replays real appliance traces, ~hundreds of MB)
+- runs a parametrized fan-out over many cycles
+- boots the full Home Assistant fixture and synthesizes a complete cycle
+- takes more than ~1.5 seconds in isolation
+
+Add the marker at module level for whole files:
+
+```python
+import pytest
+
+pytestmark = pytest.mark.slow
+```
+
+…or per test for mixed files (see `tests/test_analysis_bench.py`):
+
+```python
+@pytest.mark.benchmark
+def test_dtw_lite_performance():
+    ...
+```
+
+### Currently-marked files
+
+**slow:** `tests/repro/test_comprehensive_stress_suite.py`,
+`tests/repro/test_stress_smart_termination.py`,
+`tests/repro/test_smart_termination.py`,
+`tests/test_verify_alignment.py`, `tests/test_real_data.py`,
+`tests/test_real_data_suggestions.py`, `tests/test_trailing_zero_impact.py`,
+`tests/test_integration_flow.py`
+
+**benchmark:** `tests/test_benchmark_matching.py`,
+`tests/test_analysis_bench.py::test_dtw_lite_performance`
 
 ---
 
@@ -830,16 +903,22 @@ grep "ha_washdata_cycle_started\|ha_washdata_cycle_ended" home-assistant.log | w
 ### Unit Tests
 
 ```bash
-# Run all tests
+# Run fast suite (default, ~30s)
 cd /root/ha_washdata
-pytest tests/ -v
+./run_tests.sh
+
+# Run everything (fast + slow + benchmark, ~12 min)
+./run_tests.sh --all
 
 # Run specific test
-pytest tests/test_cycle_detector.py::TestCycleDetector::test_state_machine -v
+./.venv/bin/pytest tests/test_cycle_detector.py::TestCycleDetector::test_state_machine -v
 
-# Run with coverage
-pytest tests/ --cov=custom_components/ha_washdata
+# Run with coverage (fast suite)
+./.venv/bin/pytest tests/ --cov=custom_components/ha_washdata
 ```
+
+See [Test Categories](#test-categories-fast--slow--benchmark) for the
+fast/slow/benchmark split.
 
 ---
 

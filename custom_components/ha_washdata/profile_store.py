@@ -3797,6 +3797,50 @@ class ProfileStore:
         )
         return valid_segments
 
+    def build_split_segments_from_offsets(
+        self,
+        cycle: CycleDict,
+        split_offsets_s: list[float],
+        min_segment_s: float = 60.0,
+    ) -> list[tuple[float, float]]:
+        """Build segments for a manual split from explicit offsets (seconds from cycle start).
+
+        Returns adjacent [(start, end)] segments covering the cycle window, split at the
+        given offsets. Offsets are sorted and deduplicated; offsets outside the cycle window
+        or producing a sub-`min_segment_s` slice are dropped. Returns [] if fewer than two
+        segments would result.
+        """
+        p_data = self._decompress_power_data(cycle)
+        if not p_data:
+            return []
+
+        last_t = float(p_data[-1][0])
+        if last_t <= 0:
+            return []
+
+        cleaned = sorted({round(float(o), 3) for o in split_offsets_s if 0.0 < float(o) < last_t})
+        if not cleaned:
+            return []
+
+        boundaries = [0.0, *cleaned, last_t]
+        segments: list[tuple[float, float]] = []
+        for i in range(len(boundaries) - 1):
+            seg_start = boundaries[i]
+            seg_end = boundaries[i + 1]
+            if (seg_end - seg_start) >= min_segment_s:
+                segments.append((seg_start, seg_end))
+
+        if len(segments) < 2:
+            return []
+
+        self._logger.debug(
+            "Built manual split for %s: %d segments at offsets %s",
+            cycle.get("id"),
+            len(segments),
+            cleaned,
+        )
+        return segments
+
     async def apply_split_interactive(
         self, cycle_id: str, segments: list[dict[str, Any]]
     ) -> list[str]:

@@ -15,6 +15,8 @@ from custom_components.ha_washdata.const import STATE_RUNNING, STATE_OFF
 
 _LOGGER = logging.getLogger(__name__)
 
+pytestmark = pytest.mark.slow
+
 # --- HELPERS (CycleSynthesizer from test_stress_smart_termination.py) ---
 class CycleSynthesizer:
     def __init__(self, template_cycle):

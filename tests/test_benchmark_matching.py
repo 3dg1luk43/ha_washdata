@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 import numpy as np
 from custom_components.ha_washdata.profile_store import ProfileStore, MatchResult
 
+pytestmark = pytest.mark.benchmark
+
 # Path to real data
 REAL_DATA_PATH = "/root/ha_washdata/cycle_data/me/washing_machine/real_export.json"
 

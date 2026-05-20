@@ -3,6 +3,7 @@ import numpy as np
 import time
 from custom_components.ha_washdata.analysis import compute_dtw_lite
 
+@pytest.mark.benchmark
 def test_dtw_lite_performance():
     # Generate some synthetic data
     n = 1000

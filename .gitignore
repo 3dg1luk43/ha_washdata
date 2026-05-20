@@ -40,3 +40,4 @@ devtools/.mock_socket.pid
 bin
 CLAUDE.md
 .vscode/settings.json
+.claude
