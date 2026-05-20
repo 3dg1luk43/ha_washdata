@@ -56,9 +56,16 @@
           "confirm": "Apstipriniet kopēšanas darbību"
         }
       },
+      "apply_suggestions_confirm": {
+        "title": "Pārskatiet ieteiktās izmaiņas",
+        "description": "Atrasti WashData **{pending_count}** ieteicamā(-ās) vērtība(-as).\n\nIzmaiņas:\n{changes}\n\n✅ Atzīmējiet tālāk esošo izvēles rūtiņu un noklikšķiniet uz **Iesniegt**, lai nekavējoties piemērotu un saglabātu šīs izmaiņas.\n❌ Atstājiet to neatzīmētu un noklikšķiniet uz **Iesniegt**, lai atceltu un atgrieztos.",
+        "data": {
+          "confirm_apply_suggestions": "Lietot un saglabāt šīs izmaiņas"
+        }
+      },
       "settings": {
         "title": "Iestatījumi",
-        "description": "Pielāgojiet noteikšanas sliekšņus, mācīšanos un uzlabotu darbību. Noklusējumi darbojas labi lielākajai daļai iestatījumu.",
+        "description": "Pielāgojiet noteikšanas sliekšņus, mācīšanos un uzlabotu darbību. Noklusējumi darbojas labi lielākajai daļai iestatījumu.\n\nPašlaik pieejamie ieteiktie iestatījumi: {suggestions_count}.\nJa tas ir lielāks par 0, atveriet papildu iestatījumus un izmantojiet 'Lietojiet ieteiktās vērtības', lai pārskatītu ieteikumus.",
         "data": {
           "apply_suggestions": "Lietojiet ieteiktās vērtības",
           "device_type": "Ierīces veids",
@@ -69,16 +76,16 @@
           "notify_people": "Atlikt piegādi, līdz šie cilvēki ir mājās",
           "notify_only_when_home": "Aizkavēt paziņojumus, līdz izvēlētā persona ir mājās",
           "notify_fire_events": "Ugunsgrēka automatizācijas pasākumi",
+          "notify_start_services": "Cikla sākums - paziņojumu mērķi",
+          "notify_finish_services": "Cikla pabeigšana - paziņojumu mērķi",
+          "notify_live_services": "Tiešraides norise - paziņojumu mērķi",
           "notify_before_end_minutes": "Paziņojums pirms pabeigšanas (minūtes pirms beigām)",
           "notify_title": "Paziņojuma nosaukums",
           "notify_icon": "Paziņojuma ikona",
           "notify_start_message": "Sāciet ziņojuma formātu",
           "notify_finish_message": "Pabeigt ziņojuma formātu",
           "notify_pre_complete_message": "Pirmspabeigšanas ziņojuma formāts",
-          "show_advanced": "Rediģēt papildu iestatījumus (nākamā darbība)",
-          "notify_start_services": "Cikla sākums - paziņojumu mērķi",
-          "notify_finish_services": "Cikla pabeigšana - paziņojumu mērķi",
-          "notify_live_services": "Tiešraides norise - paziņojumu mērķi"
+          "show_advanced": "Rediģēt papildu iestatījumus (nākamā darbība)"
         },
         "data_description": {
           "apply_suggestions": "Atzīmējiet šo izvēles rūtiņu, lai kopētu veidlapā mācību algoritma ieteiktās vērtības. Pārskatiet pirms saglabāšanas.\n\nIeteikts (no mācīšanās):\n- min_jauda: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_ trust: {suggested_auto_label_confidence}\n- ilgums_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- sākuma_slieksnis_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- darbojas_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -90,15 +97,15 @@
           "notify_people": "Personu entītijas, ko izmanto klātbūtnes noteikšanai. Ja tas ir iespējots, paziņojumu piegāde tiek aizkavēta, līdz vismaz viena atlasītā persona ir mājās.",
           "notify_only_when_home": "Ja tas ir iespējots, aizkavējiet paziņojumus, līdz vismaz viena atlasītā persona ir mājās.",
           "notify_fire_events": "Ja tas ir iespējots, aktivizējiet Home Assistant notikumus cikla sākumam un beigām (ha_washdata_cycle_started un ha_washdata_cycle_ended), lai veicinātu automatizāciju.",
+          "notify_start_services": "Viens vai vairāki paziņo pakalpojumus, lai brīdinātu, kad cikls sākas. Atstājiet tukšu, lai izlaistu sākuma paziņojumus.",
+          "notify_finish_services": "Viens vai vairāki paziņo pakalpojumus, lai brīdinātu, kad cikls beidzas vai tuvojas beigām. Atstājiet tukšu, lai izlaistu paziņojumus par pabeigšanu.",
+          "notify_live_services": "Viens vai vairāki paziņošanas pakalpojumi, lai cikla darbības laikā saņemtu tiešsaistes progresa atjauninājumus (tikai mobilā pavadošā lietotne). Atstājiet tukšu, lai izlaistu tiešraides atjauninājumus.",
           "notify_before_end_minutes": "Minūtes pirms paredzamā cikla beigām, lai aktivizētu paziņojumu. Iestatiet uz 0, lai atspējotu. Noklusējums: 0.",
           "notify_title": "Paziņojumu pielāgots nosaukums. Atbalsta vietturi {device}.",
           "notify_icon": "Paziņojumiem izmantojamā ikona (piemēram, mdi:veļas mašīna). Atstājiet tukšu, lai sūtītu bez ikonas.",
           "notify_start_message": "Ziņojums nosūtīts, kad sākas cikls. Atbalsta vietturi {device}.",
           "notify_finish_message": "Ziņojums nosūtīts, kad cikls beidzas. Atbalsta vietturus {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Ziņa nosūtīta pirms pabeigšanas. Atbalsta vietturi {device}, {minutes}.",
-          "notify_start_services": "Viens vai vairāki paziņo pakalpojumus, lai brīdinātu, kad cikls sākas. Atstājiet tukšu, lai izlaistu sākuma paziņojumus.",
-          "notify_finish_services": "Viens vai vairāki paziņo pakalpojumus, lai brīdinātu, kad cikls beidzas vai tuvojas beigām. Atstājiet tukšu, lai izlaistu paziņojumus par pabeigšanu.",
-          "notify_live_services": "Viens vai vairāki paziņošanas pakalpojumi, lai cikla darbības laikā saņemtu tiešsaistes progresa atjauninājumus (tikai mobilā pavadošā lietotne). Atstājiet tukšu, lai izlaistu tiešraides atjauninājumus."
+          "notify_pre_complete_message": "Ziņa nosūtīta pirms pabeigšanas. Atbalsta vietturi {device}, {minutes}."
         }
       },
       "notifications": {
@@ -109,163 +116,208 @@
           "notify_people": "Atlikt piegādi, līdz šie cilvēki ir mājās",
           "notify_only_when_home": "Aizkavēt paziņojumus, līdz izvēlētā persona ir mājās",
           "notify_fire_events": "Ugunsgrēka automatizācijas pasākumi",
+          "notify_start_services": "Cikla sākums - paziņojumu mērķi",
+          "notify_finish_services": "Cikla pabeigšana - paziņojumu mērķi",
+          "notify_live_services": "Tiešraides norise - paziņojumu mērķi",
           "notify_before_end_minutes": "Paziņojums pirms pabeigšanas (minūtes pirms beigām)",
           "notify_live_interval_seconds": "Tiešraides atjaunināšanas intervāls (sekundēs)",
           "notify_live_overrun_percent": "Tiešraides atjauninājumu pārsniegšanas pielaide (%)",
+          "notify_live_chronometer": "Hronometra atpakaļskaitīšanas taimeris",
           "notify_title": "Paziņojuma nosaukums",
           "notify_icon": "Paziņojuma ikona",
           "notify_start_message": "Sāciet ziņojuma formātu",
           "notify_finish_message": "Pabeigt ziņojuma formātu",
           "notify_pre_complete_message": "Pirmspabeigšanas ziņojuma formāts",
-          "notify_start_services": "Cikla sākums - paziņojumu mērķi",
-          "notify_finish_services": "Cikla pabeigšana - paziņojumu mērķi",
-          "notify_live_services": "Tiešraides norise - paziņojumu mērķi",
-          "notify_live_chronometer": "Hronometra atpakaļskaitīšanas taimeris",
           "energy_price_entity": "Enerģijas cena - vienība (pēc izvēles)",
-          "energy_price_static": "Enerģijas cena - statiskā vērtība (pēc izvēles)"
+          "energy_price_static": "Enerģijas cena - statiskā vērtība (pēc izvēles)",
+          "go_back": "Atgriezties bez saglabāšanas"
         },
         "data_description": {
+          "go_back": "Atzīmējiet šo un noklikšķiniet uz Iesniegt, lai atmestu visas iepriekš minētās izmaiņas un atgrieztos galvenajā izvēlnē.",
           "notify_actions": "Izvēles Home Assistant darbību secība, lai izpildītu paziņojumus (skripti, paziņojums, TTS utt.). Ja tas ir iestatīts, darbības tiek izpildītas pirms rezerves paziņojumu pakalpojuma.",
           "notify_people": "Personu entītijas, ko izmanto klātbūtnes noteikšanai. Ja tas ir iespējots, paziņojumu piegāde tiek aizkavēta, līdz vismaz viena atlasītā persona ir mājās.",
           "notify_only_when_home": "Ja tas ir iespējots, aizkavējiet paziņojumus, līdz vismaz viena atlasītā persona ir mājās.",
           "notify_fire_events": "Ja tas ir iespējots, aktivizējiet Home Assistant notikumus cikla sākumam un beigām (ha_washdata_cycle_started un ha_washdata_cycle_ended), lai veicinātu automatizāciju.",
+          "notify_start_services": "Viens vai vairāki paziņošanas pakalpojumi, lai brīdinātu, kad cikls sākas (piemēram, notify.mobile_app_my_phone). Atstājiet tukšu, lai izlaistu sākuma paziņojumus.",
+          "notify_finish_services": "Viens vai vairāki paziņo pakalpojumus, lai brīdinātu, kad cikls beidzas vai tuvojas beigām. Atstājiet tukšu, lai izlaistu paziņojumus par pabeigšanu.",
+          "notify_live_services": "Viens vai vairāki paziņošanas pakalpojumi, lai cikla darbības laikā saņemtu tiešsaistes progresa atjauninājumus (tikai mobilā pavadošā lietotne). Atstājiet tukšu, lai izlaistu tiešraides atjauninājumus.",
           "notify_before_end_minutes": "Minūtes pirms paredzamā cikla beigām, lai aktivizētu paziņojumu. Iestatiet uz 0, lai atspējotu. Noklusējums: 0.",
           "notify_live_interval_seconds": "Cik bieži darbības laikā tiek nosūtīti progresa atjauninājumi. Zemākas vērtības ir atsaucīgākas, taču patērē vairāk paziņojumu. Tiek ieviests vismaz 30 s - vērtības, kas ir mazākas par 30 s, tiek automātiski noapaļotas līdz 30 s.",
           "notify_live_overrun_percent": "Drošības rezerve pārsniedz aptuveno atjauninājumu skaitu gariem/pārsniegšanas cikliem (piemēram, 20% pieļauj 1,2 reizes aptuveno atjauninājumu skaitu).",
+          "notify_live_chronometer": "Kad tas ir iespējots, katrs tiešraides atjauninājums ietver hronometra atpakaļskaitīšanu līdz aptuvenajam beigu laikam. Paziņojumu taimeris ierīcē automātiski ieslēdzas starp atjauninājumiem (tikai Android pavadošajai lietotnei).",
           "notify_title": "Paziņojumu pielāgots nosaukums. Atbalsta vietturi {device}.",
           "notify_icon": "Paziņojumiem izmantojamā ikona (piemēram, mdi:veļas mašīna). Atstājiet tukšu, lai sūtītu bez ikonas.",
           "notify_start_message": "Ziņojums nosūtīts, kad sākas cikls. Atbalsta vietturi {device}.",
           "notify_finish_message": "Ziņojums nosūtīts, kad cikls beidzas. Atbalsta vietturus {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Ziņa nosūtīta pirms pabeigšanas. Atbalsta vietturi {device}, {minutes}.",
-          "notify_start_services": "Viens vai vairāki paziņošanas pakalpojumi, lai brīdinātu, kad cikls sākas (piemēram, notify.mobile_app_my_phone). Atstājiet tukšu, lai izlaistu sākuma paziņojumus.",
-          "notify_finish_services": "Viens vai vairāki paziņo pakalpojumus, lai brīdinātu, kad cikls beidzas vai tuvojas beigām. Atstājiet tukšu, lai izlaistu paziņojumus par pabeigšanu.",
-          "notify_live_services": "Viens vai vairāki paziņošanas pakalpojumi, lai cikla darbības laikā saņemtu tiešsaistes progresa atjauninājumus (tikai mobilā pavadošā lietotne). Atstājiet tukšu, lai izlaistu tiešraides atjauninājumus.",
-          "notify_live_chronometer": "Kad tas ir iespējots, katrs tiešraides atjauninājums ietver hronometra atpakaļskaitīšanu līdz aptuvenajam beigu laikam. Paziņojumu taimeris ierīcē automātiski ieslēdzas starp atjauninājumiem (tikai Android pavadošajai lietotnei).",
           "energy_price_entity": "Atlasiet skaitlisku vienību, kurā ir norādīta pašreizējā elektroenerģijas cena (piemēram, sensors.electricity_price, input_number.energy_rate). Kad tas ir iestatīts, tiek iespējots vietturis {cost}. Ja abi ir konfigurēti, ir prioritāte pār statisko vērtību.",
           "energy_price_static": "Fiksēta elektroenerģijas cena par kWh. Kad tas ir iestatīts, tiek iespējots vietturis {cost}. Ignorē, ja iepriekš ir konfigurēta entītija. Pievienojiet savas valūtas simbolu ziņojuma veidnē, piem. {cost} €."
         }
       },
       "advanced_settings": {
         "title": "Papildu iestatījumi",
-        "description": "Pielāgojiet noteikšanas sliekšņus, mācīšanos un uzlabotu darbību. Noklusējumi darbojas labi lielākajai daļai iestatījumu.",
-        "data": {
-          "apply_suggestions": "Lietojiet ieteiktās vērtības",
-          "start_threshold_w": "Sākuma slieksnis (W)",
-          "stop_threshold_w": "Apstāšanās slieksnis (W)",
-          "min_off_gap": "Minimālais attālums starp cikliem (s)",
-          "start_duration_threshold": "Atkāpšanās sākuma ilgums (-i)",
-          "progress_reset_delay": "Progresa atiestatīšanas aizkave (sekundēs)",
-          "no_update_active_timeout": "Noildze bez atjaunināšanas (-i)",
-          "sampling_interval": "Paraugu ņemšanas intervāls (-i)",
-          "auto_label_confidence": "Automātiskās etiķetes uzticamība (0-1)",
-          "learning_confidence": "Atsauksmju pieprasījuma pārliecība (0-1)",
-          "duration_tolerance": "Ilguma pielaide (0–0,5)",
-          "profile_match_interval": "Profila atbilstības intervāls (sekundēs)",
-          "profile_match_min_duration_ratio": "Profila atbilstības minimālā ilguma attiecība (0,1–1,0)",
-          "profile_match_max_duration_ratio": "Profila atbilstības maksimālā ilguma attiecība (1,0–3,0)",
-          "smoothing_window": "Izlīdzinošais logs (paraugi)",
-          "profile_match_threshold": "Profila atbilstības slieksnis",
-          "profile_unmatch_threshold": "Profila neatbilstības slieksnis",
-          "profile_duration_tolerance": "Profila atbilstības ilguma pielaide (0–0,5)",
-          "interrupted_min_seconds": "Pārtraukts: minimālais izpildes laiks (sekundēs)",
-          "abrupt_drop_watts": "Pārtraukts: Abrupt Drop Absolute (W)",
-          "abrupt_drop_ratio": "Pārtraukts: pēkšņa krituma attiecība (0-1)",
-          "abrupt_high_load_factor": "Pārtraukts: Augstas slodzes koeficients",
-          "max_past_cycles": "Saglabāšana: maksimāli saglabātie cikli",
-          "max_full_traces_per_profile": "Saglabāšana: maksimāli pilnas pēdas vienam profilam",
-          "max_full_traces_unlabeled": "Saglabāšana: maks. pilnas bez etiķetes",
-          "watchdog_interval": "Sargsuņa intervāls (sekundēs)",
-          "completion_min_seconds": "Minimālais izpildes laiks (sekundēs)",
-          "notify_before_end_minutes": "Paziņojums pirms pabeigšanas (minūtes pirms beigām)",
-          "auto_tune_noise_events_threshold": "Automātiskā noskaņošana: trokšņu notikumu slieksnis",
-          "running_dead_zone": "Skriešanas mirušā zona (sekundes)",
-          "end_repeat_count": "Beigt atkārtojumu skaitīšanu",
-          "start_energy_threshold": "Start Energy Gate (Wh)",
-          "end_energy_threshold": "Beigu enerģijas vārti (Wh)",
-          "auto_maintenance": "Iespējot automātisko apkopi",
-          "expose_debug_entities": "Atklājiet atkļūdošanas entītijas",
-          "save_debug_traces": "Saglabājiet atkļūdošanas pēdas",
-          "anti_wrinkle_enabled": "Pretgrumbu aizsargs (tikai žāvētājam)",
-          "anti_wrinkle_max_power": "Pretgrumbu maksimālā jauda (W)",
-          "anti_wrinkle_max_duration": "Pretgrumbu maksimālais ilgums (s)",
-          "anti_wrinkle_exit_power": "Pretgrumbu izejas jauda (W)",
-          "dtw_bandwidth": "DTW joslas platums",
-          "external_end_trigger_enabled": "Iespējot ārējā cikla beigu aktivizētāju",
-          "external_end_trigger": "Ārējais cikla beigu sensors",
-          "external_end_trigger_inverted": "Invertēt trigera loģiku (trigeris ir izslēgts)",
-          "suppress_feedback_notifications": "Izslēdziet atsauksmju paziņojumus",
-          "pump_stuck_duration": "Sūkņa iestrēgšanas brīdinājuma slieksnis (-i) (tikai sūknis)",
-          "door_sensor_entity": "Durvju sensors",
-          "pause_cuts_power": "Apturot, pārtrauciet strāvu",
-          "notify_unload_delay_minutes": "Veļas gaidīšanas paziņojuma aizkave (min)",
-          "switch_entity": "Slēdža entītija (pauzēt strāvas padevei)",
-          "delay_start_detect_enabled": "Iespējot atliktā starta noteikšanu",
-          "delay_drain_min_power": "Aizkavēts starts: iztukšošanas smaile Minimālā jauda (W)",
-          "delay_drain_max_power": "Atliktais starts: iztukšošanas smaile maksimālā jauda (W)",
-          "delay_drain_max_duration": "Atliktais starts: maksimālais aizplūdes ilgums (s)",
-          "delay_timeout_hours": "Atliktais starts: maksimālais gaidīšanas laiks (h)"
-        },
-        "data_description": {
-          "apply_suggestions": "Atzīmējiet šo izvēles rūtiņu, lai atvērtu mācību algoritma ieteikto vērtību pārskatīšanas darbību. Nekas netiek saglabāts automātiski.\n\nIeteikts (no mācīšanās):\n- min_jauda: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_ trust: {suggested_auto_label_confidence}\n- ilgums_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- sākuma_slieksnis_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- darbojas_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "start_threshold_w": "Lai sāktu ciklu, jaudai ir jāpalielinās PIRMS šī sliekšņa. Iestatiet augstāku par gaidstāves jaudu. Noklusējums: min_power + 1 W.",
-          "stop_threshold_w": "Lai BEIGTU ciklu, jaudai ir jāsamazinās ZEMĀK šī sliekšņa. Iestatiet nedaudz virs nulles, lai izvairītos no trokšņa, kas izraisa viltus galus. Noklusējums: 0,6 * min_power.",
-          "min_off_gap": "Ja cikls sākas šo sekunžu laikā pēc iepriekšējā cikla beigām, tie tiks APVIENOTI vienā ciklā.",
-          "start_duration_threshold": "Ignorējiet īsus jaudas palielinājumus, kas ir īsāki par šo ilgumu (sekundēs). Pirms reālā cikla sākuma filtrē sāknēšanas tapas (piemēram, 60 W uz 2 s). Noklusējums: 5s.",
-          "progress_reset_delay": "Kad cikls ir pabeigts (100%), pagaidiet tik daudz dīkstāves sekunžu, pirms atiestatāt progresu uz 0%. Noklusējums: 300 s.",
-          "no_update_active_timeout": "Sensoriem, kas tiek publicēti pēc maiņas: piespiedu kārtā pārtrauciet ciklu AKTĪVS tikai tad, ja tik daudz sekunžu laikā netiek saņemti atjauninājumi. Mazjaudas pabeigšanai joprojām tiek izmantota izslēgšanas aizkave.",
-          "sampling_interval": "Minimālais paraugu ņemšanas intervāls sekundēs. Atjauninājumi, kas ir ātrāki par šo ātrumu, tiks ignorēti. Noklusējums: 2,0 s.",
-          "auto_label_confidence": "Automātiski marķējiet ciklus ar šo pārliecību vai augstāku pēc pabeigšanas (0,0–1,0).",
-          "learning_confidence": "Minimālā pārliecība, lai pieprasītu lietotāja verifikāciju, izmantojot notikumu (0,0–1,0).",
-          "duration_tolerance": "Pielaide atlikušā laika aprēķiniem skrējiena laikā (0,0–0,5 atbilst 0–50%).",
-          "profile_match_interval": "Cik bieži (sekundēs) cikla laikā mēģināt izveidot profila saskaņošanu. Zemākas vērtības nodrošina ātrāku noteikšanu, bet izmanto vairāk CPU. Noklusējums: 300 s (5 minūtes).",
-          "profile_match_min_duration_ratio": "Minimālā ilguma attiecība profila saskaņošanai. Darbības ciklam ir jābūt vismaz šai profila ilguma daļai, lai tas atbilstu. Zemāks = agrāka atbilstība. Noklusējums: 0,50 (50%).",
-          "profile_match_max_duration_ratio": "Maksimālā ilguma attiecība profila saskaņošanai. Darbības cikls nedrīkst pārsniegt šo profila ilguma reizinājumu. Augstāks = pielaidīgāks. Noklusējums: 1,50 (150%).",
-          "smoothing_window": "Neseno jaudas rādījumu skaits, kas izmantots mainīgā vidējā izlīdzināšanai.",
-          "profile_match_threshold": "Minimālais DTW līdzības rādītājs (0,0–1,0), kas nepieciešams, lai profilu uzskatītu par atbilstošu. Augstāks = stingrāka atbilstība, mazāk viltus pozitīvu. Noklusējums: 0,4.",
-          "profile_unmatch_threshold": "DTW līdzības rādītājs (0,0–1,0), zem kura iepriekš saskaņotais profils tiek noraidīts. Tam jābūt zemākam par atbilstības slieksni, lai novērstu mirgošanu. Noklusējums: 0,35.",
-          "profile_duration_tolerance": "Pielaide, ko izmanto profila saskaņošanai kopējā ilguma dispersijai (0,0–0,5). Noklusējuma darbība: ±25%.",
-          "interrupted_min_seconds": "Darbības, kas ir īsākas par šo, var tikt klasificētas kā “pārtrauktas”.",
-          "abrupt_drop_watts": "Absolūtais jaudas kritums (W) tiek uzskatīts par strauju klinti.",
-          "abrupt_drop_ratio": "Relatīvais krituma koeficients (0–1). Piemērs: 0,6 nozīmē, ka 60% kritums ir pēkšņs.",
-          "abrupt_high_load_factor": "Koeficients virs sākotnējā līmeņa tiek uzskatīts par “lielu slodzi” pirms pēkšņa krituma (izmanto ar pēkšņu noteikšanu).",
-          "max_past_cycles": "Kopējais saglabājamo ciklu skaits (vecākais noņemts). Noklusējums: 200.",
-          "max_full_traces_per_profile": "Pēdējo marķēto ciklu skaits, lai saglabātu pilnas jaudas pēdas katrā profilā. Vecākās pēdas tiek apkopotas, izmantojot aploksnes. Noklusējums: 20.",
-          "max_full_traces_unlabeled": "Pēdējo neiezīmēto ciklu skaits, lai saglabātu pilnu jaudu, lai atbalstītu automātisko marķēšanu. Noklusējums: 20.",
-          "watchdog_interval": "Sekundes starp sargsuņa pārbaudēm skriešanas laikā. Noklusējums: 5s. BRĪDINĀJUMS. Pārliecinieties, ka tas ir AUGSTĀKS par sensora atjaunināšanas intervālu, lai izvairītos no viltus apstāšanās (piem., ja sensors tiek atjaunināts ik pēc 60 sekundēm, izmantojiet 65 s+).",
-          "completion_min_seconds": "Cikli, kas ir īsāki par šo, tiks atzīmēti kā “pārtraukti”, pat ja tie beidzas dabiski. Noklusējums: 600s.",
-          "notify_before_end_minutes": "Minūtes pirms paredzamā cikla beigām, lai aktivizētu paziņojumu. Iestatiet uz 0, lai atspējotu. Noklusējums: 0.",
-          "auto_tune_noise_events_threshold": "Īsu/mazjaudas “trokšņu” ciklu skaits 24 stundu laikā, kas nepieciešams, lai automātiski pielāgotu min_power. Noklusējums: 3.",
-          "running_dead_zone": "Pēc cikla sākuma ignorējiet jaudas kritumus tik sekundes, lai novērstu nepareizu beigu noteikšanu sākotnējās vērpšanas fāzes laikā. Iestatiet uz 0, lai atspējotu. Noklusējums: 0s.",
-          "end_repeat_count": "Beigu nosacījums (jauda zem off_delay sliekšņa) ir jāizpilda secīgi pirms cikla beigām. Augstākas vērtības novērš viltus galus paužu laikā. Noklusējums: 1.",
-          "start_energy_threshold": "Ciklam START fāzes laikā ir jāuzkrāj vismaz tik daudz enerģijas (Wh), lai tas tiktu apstiprināts. Noklusējums: 0,005 Wh.",
-          "end_energy_threshold": "Cikls beidzas tikai tad, ja enerģija pēdējā Off-Delay logā ir zem šīs vērtības (Wh). Novērš viltus galus, ja jauda svārstās tuvu nullei. Noklusējums: 0,05 Wh.",
-          "auto_maintenance": "Iespējot automātisko apkopi (labot paraugus, sapludināt fragmentus).",
-          "expose_debug_entities": "Rādīt uzlabotos sensorus (pārliecība, fāze, neskaidrība) atkļūdošanai.",
-          "save_debug_traces": "Saglabājiet detalizētus ranga un jaudas izsekošanas datus vēsturē (palielina krātuves lietojumu).",
-          "anti_wrinkle_enabled": "Ignorējiet īsas mazjaudas trumuļa rotācijas pēc cikla beigām, lai novērstu spoku ciklus (tikai žāvētājs/mazgāšanas-žāvētājs).",
-          "anti_wrinkle_max_power": "Uzliesmojumi ar šo jaudu vai zem tā tiek uzskatīti par pretgrumbu apgriezieniem, nevis jauniem cikliem. Attiecas tikai tad, ja ir iespējots pretgrumbu aizsargs.",
-          "anti_wrinkle_max_duration": "Maksimālais sprādziena garums, lai to uzskatītu par pretgrumbu rotāciju. Attiecas tikai tad, ja ir iespējots pretgrumbu aizsargs.",
-          "anti_wrinkle_exit_power": "Ja jauda nokrītas zem šī līmeņa, nekavējoties izejiet no pretgrumbu (true off). Attiecas tikai tad, ja ir iespējots pretgrumbu aizsargs.",
-          "dtw_bandwidth": "Maksimālā pieļaujamā laika deformācija (stiepšanās) kā cikla ilguma attiecība. Augstākas vērtības ļauj saskaņot ļoti mainīgus ciklus, bet palielina CPU izmaksas. Noklusējums: 0,20 (20%).",
-          "external_end_trigger_enabled": "Iespējot ārējā binārā sensora uzraudzību, lai aktivizētu cikla pabeigšanu.",
-          "external_end_trigger": "Atlasiet bināro sensoru entītiju. Kad šis sensors iedarbinās, pašreizējais cikls beigsies ar statusu “pabeigts”.",
-          "external_end_trigger_inverted": "Pēc noklusējuma trigeris tiek aktivizēts, kad sensors tiek IESLĒGTS. Atzīmējiet šo izvēles rūtiņu, lai aktivizētu, kad sensors tiek IZSLĒGTS.",
-          "suppress_feedback_notifications": "Kad tas ir iespējots, WashData joprojām izsekos un pieprasīs atgriezenisko saiti iekšēji, bet nerādīs pastāvīgus paziņojumus ar lūgumu apstiprināt ciklus. Noderīgi, ja cikli vienmēr tiek noteikti pareizi un uzvednes novērš uzmanību.",
-          "pump_stuck_duration": "Ja sūkņa cikls joprojām darbojas pēc šīm sekundēm, vienreiz tiek aktivizēts notikums ha_washdata_pump_stuck. Izmantojiet to, lai noteiktu iestrēgušu motoru (parasti sūkņa darbības laiks ir mazāks par 60 s). Noklusējums: 1800 s (30 min). Tikai sūkņa ierīces tips.",
-          "door_sensor_entity": "Izvēles binārais sensors mašīnas durvīm (ieslēgts = atvērts, izslēgts = aizvērts). Kad durvis atveras aktīvā cikla laikā, WashData apstiprinās ciklu kā apzināti apturētu. Pēc cikla beigām, ja durvis joprojām ir aizvērtas, stāvoklis mainās uz 'Clean', līdz durvis tiek atvērtas. Piezīme: durvju aizvēršana NAV automātiski atsākta apturēts cikls - atsākšana ir jāaktivizē manuāli, izmantojot pogu Resume Cycle vai pakalpojumu.",
-          "pause_cuts_power": "Apturot, izmantojot pogu Pause Cycle vai pakalpojumu, izslēdziet arī konfigurēto slēdža entītiju. Stājas spēkā tikai tad, ja šai ierīcei ir konfigurēta slēdža entītija.",
-          "notify_unload_delay_minutes": "Nosūtiet paziņojumu pa finiša paziņojumu kanālu pēc tam, kad cikls ir beidzies un durvis nav atvērtas tik daudzas minūtes (nepieciešams durvju sensors). Iestatiet uz 0, lai atspējotu. Noklusējums: 60 min.",
-          "switch_entity": "Slēdža entītija, lai pārslēgtos, kad tiek apturēta vai atsākta. Nepieciešams, ja ir iespējota funkcija “Izslēdziet strāvu, kad tiek apturēta”.",
-          "delay_start_detect_enabled": "Kad tas ir iespējots, īss mazjaudas aizplūšana, kam seko ilgstoša gaidstāves barošana, tiek noteikts kā aizkavēts starts. Stāvokļa sensors aizkaves laikā parāda ziņojumu “Gaida palaišanu”. Kamēr cikls nav sācies, netiek izsekots neviens programmas laiks vai norise. Nepieciešams, lai start_threshold_w būtu iestatīts virs drenāžas smailes jaudas.",
-          "delay_drain_min_power": "Minimālā jauda (W), ko atpazīt kā drenāžas smaili. Iestatiet tieši virs ierīces patiesā izslēgšanas gaidstāves līmeņa. Noklusējums: 10 W.",
-          "delay_drain_max_power": "Maksimālā jauda (W) drenāžas smailei — pārrāvumi, kas pārsniedz šo vērtību, tiek uzskatīti par reālu cikla sākumu. Tam jābūt zem sākuma_sliekšņa_w iestatījuma. Noklusējums: 80 W.",
-          "delay_drain_max_duration": "Lai to apstiprinātu, šo dažu sekunžu laikā drenāžas smailei ir jānolaižas zem notekas loga. Garāki tapas tiek uzskatīti par reālu cikla darbību. Noklusējums: 60 s.",
-          "delay_timeout_hours": "Drošības taimauts: ja iekārta joprojām atrodas režīmā “Gaida palaišanu” pēc tik daudzām stundām, WashData tiek atiestatīta uz Off. Noklusējums: 8 h."
+        "description": "Pielāgojiet noteikšanas sliekšņus, mācīšanos un uzlabotu darbību. Noklusējuma iestatījumi labi darbojas lielākajai daļai konfigurāciju.",
+        "sections": {
+          "suggestions_section": {
+            "name": "Ieteiktie iestatījumi",
+            "description": "Ir pieejami {suggestions_count} iemācīti ieteikumi. Atzīmējiet 'Lietot ieteiktās vērtības', lai pirms saglabāšanas pārskatītu piedāvātās izmaiņas.",
+            "data": {
+              "apply_suggestions": "Lietojiet ieteiktās vērtības"
+            },
+            "data_description": {
+              "apply_suggestions": "Atzīmējiet šo izvēles rūtiņu, lai atvērtu mācību algoritma ieteikto vērtību pārskatīšanas darbību. Nekas netiek saglabāts automātiski.\n\nIeteikts (no mācīšanās):\n- min_jauda: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_ trust: {suggested_auto_label_confidence}\n- ilgums_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- sākuma_slieksnis_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- darbojas_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
+            }
+          },
+          "detection_section": {
+            "name": "Noteikšana un jaudas sliekšņi",
+            "description": "Nosaka, kad ierīce tiek uzskatīta par IESLĒGTU vai IZSLĒGTU, enerģijas sliekšņus un stāvokļu pāreju laiku.",
+            "data": {
+              "start_duration_threshold": "Atkāpšanās sākuma ilgums (-i)",
+              "start_energy_threshold": "Start Energy Gate (Wh)",
+              "completion_min_seconds": "Minimālais izpildes laiks (sekundēs)",
+              "start_threshold_w": "Sākuma slieksnis (W)",
+              "stop_threshold_w": "Apstāšanās slieksnis (W)",
+              "end_energy_threshold": "Beigu enerģijas vārti (Wh)",
+              "running_dead_zone": "Skriešanas mirušā zona (sekundes)",
+              "end_repeat_count": "Beigt atkārtojumu skaitīšanu",
+              "min_off_gap": "Minimālais attālums starp cikliem (s)",
+              "sampling_interval": "Paraugu ņemšanas intervāls (-i)"
+            },
+            "data_description": {
+              "start_duration_threshold": "Ignorējiet īsus jaudas palielinājumus, kas ir īsāki par šo ilgumu (sekundēs). Pirms reālā cikla sākuma filtrē sāknēšanas tapas (piemēram, 60 W uz 2 s). Noklusējums: 5s.",
+              "start_energy_threshold": "Ciklam START fāzes laikā ir jāuzkrāj vismaz tik daudz enerģijas (Wh), lai tas tiktu apstiprināts. Noklusējums: 0,005 Wh.",
+              "completion_min_seconds": "Cikli, kas ir īsāki par šo, tiks atzīmēti kā “pārtraukti”, pat ja tie beidzas dabiski. Noklusējums: 600s.",
+              "start_threshold_w": "Lai sāktu ciklu, jaudai ir jāpalielinās PIRMS šī sliekšņa. Iestatiet augstāku par gaidstāves jaudu. Noklusējums: min_power + 1 W.",
+              "stop_threshold_w": "Lai BEIGTU ciklu, jaudai ir jāsamazinās ZEMĀK šī sliekšņa. Iestatiet nedaudz virs nulles, lai izvairītos no trokšņa, kas izraisa viltus galus. Noklusējums: 0,6 * min_power.",
+              "end_energy_threshold": "Cikls beidzas tikai tad, ja enerģija pēdējā Off-Delay logā ir zem šīs vērtības (Wh). Novērš viltus galus, ja jauda svārstās tuvu nullei. Noklusējums: 0,05 Wh.",
+              "running_dead_zone": "Pēc cikla sākuma ignorējiet jaudas kritumus tik sekundes, lai novērstu nepareizu beigu noteikšanu sākotnējās vērpšanas fāzes laikā. Iestatiet uz 0, lai atspējotu. Noklusējums: 0s.",
+              "end_repeat_count": "Beigu nosacījums (jauda zem off_delay sliekšņa) ir jāizpilda secīgi pirms cikla beigām. Augstākas vērtības novērš viltus galus paužu laikā. Noklusējums: 1.",
+              "min_off_gap": "Ja cikls sākas šo sekunžu laikā pēc iepriekšējā cikla beigām, tie tiks APVIENOTI vienā ciklā.",
+              "sampling_interval": "Minimālais paraugu ņemšanas intervāls sekundēs. Atjauninājumi, kas ir ātrāki par šo ātrumu, tiks ignorēti. Noklusējums: 2,0 s."
+            }
+          },
+          "matching_section": {
+            "name": "Profilu saskaņošana un mācīšanās",
+            "description": "Nosaka, cik agresīvi WashData saskaņo darbībā esošos ciklus ar iemācītajiem profiliem un kad prasīt atsauksmi.",
+            "data": {
+              "profile_match_min_duration_ratio": "Profila atbilstības minimālā ilguma attiecība (0,1–1,0)",
+              "profile_match_interval": "Profila atbilstības intervāls (sekundēs)",
+              "profile_match_threshold": "Profila atbilstības slieksnis",
+              "profile_unmatch_threshold": "Profila neatbilstības slieksnis",
+              "auto_label_confidence": "Automātiskās etiķetes uzticamība (0-1)",
+              "learning_confidence": "Atsauksmju pieprasījuma pārliecība (0-1)",
+              "suppress_feedback_notifications": "Izslēdziet atsauksmju paziņojumus",
+              "duration_tolerance": "Ilguma pielaide (0–0,5)",
+              "smoothing_window": "Izlīdzinošais logs (paraugi)",
+              "profile_duration_tolerance": "Profila atbilstības ilguma pielaide (0–0,5)"
+            },
+            "data_description": {
+              "profile_match_min_duration_ratio": "Minimālā ilguma attiecība profila saskaņošanai. Darbības ciklam ir jābūt vismaz šai profila ilguma daļai, lai tas atbilstu. Zemāks = agrāka atbilstība. Noklusējums: 0,50 (50%).",
+              "profile_match_interval": "Cik bieži (sekundēs) cikla laikā mēģināt izveidot profila saskaņošanu. Zemākas vērtības nodrošina ātrāku noteikšanu, bet izmanto vairāk CPU. Noklusējums: 300 s (5 minūtes).",
+              "profile_match_threshold": "Minimālais DTW līdzības rādītājs (0,0–1,0), kas nepieciešams, lai profilu uzskatītu par atbilstošu. Augstāks = stingrāka atbilstība, mazāk viltus pozitīvu. Noklusējums: 0,4.",
+              "profile_unmatch_threshold": "DTW līdzības rādītājs (0,0–1,0), zem kura iepriekš saskaņotais profils tiek noraidīts. Tam jābūt zemākam par atbilstības slieksni, lai novērstu mirgošanu. Noklusējums: 0,35.",
+              "auto_label_confidence": "Automātiski marķējiet ciklus ar šo pārliecību vai augstāku pēc pabeigšanas (0,0–1,0).",
+              "learning_confidence": "Minimālā pārliecība, lai pieprasītu lietotāja verifikāciju, izmantojot notikumu (0,0–1,0).",
+              "suppress_feedback_notifications": "Kad tas ir iespējots, WashData joprojām izsekos un pieprasīs atgriezenisko saiti iekšēji, bet nerādīs pastāvīgus paziņojumus ar lūgumu apstiprināt ciklus. Noderīgi, ja cikli vienmēr tiek noteikti pareizi un uzvednes novērš uzmanību.",
+              "duration_tolerance": "Pielaide atlikušā laika aprēķiniem skrējiena laikā (0,0–0,5 atbilst 0–50%).",
+              "smoothing_window": "Neseno jaudas rādījumu skaits, kas izmantots mainīgā vidējā izlīdzināšanai.",
+              "profile_duration_tolerance": "Pielaide, ko izmanto profila saskaņošanai kopējā ilguma dispersijai (0,0–0,5). Noklusējuma darbība: ±25%."
+            }
+          },
+          "timing_section": {
+            "name": "Laiks, apkope un atkļūdošana",
+            "description": "Watchdog, progresa atiestatīšana, automātiskā apkope un atkļūdošanas entītiju rādīšana.",
+            "data": {
+              "watchdog_interval": "Sargsuņa intervāls (sekundēs)",
+              "no_update_active_timeout": "Noildze bez atjaunināšanas (-i)",
+              "progress_reset_delay": "Progresa atiestatīšanas aizkave (sekundēs)",
+              "auto_maintenance": "Iespējot automātisko apkopi",
+              "expose_debug_entities": "Atklājiet atkļūdošanas entītijas",
+              "save_debug_traces": "Saglabājiet atkļūdošanas pēdas"
+            },
+            "data_description": {
+              "watchdog_interval": "Sekundes starp sargsuņa pārbaudēm skriešanas laikā. Noklusējums: 5s. BRĪDINĀJUMS. Pārliecinieties, ka tas ir AUGSTĀKS par sensora atjaunināšanas intervālu, lai izvairītos no viltus apstāšanās (piem., ja sensors tiek atjaunināts ik pēc 60 sekundēm, izmantojiet 65 s+).",
+              "no_update_active_timeout": "Sensoriem, kas tiek publicēti pēc maiņas: piespiedu kārtā pārtrauciet ciklu AKTĪVS tikai tad, ja tik daudz sekunžu laikā netiek saņemti atjauninājumi. Mazjaudas pabeigšanai joprojām tiek izmantota izslēgšanas aizkave.",
+              "progress_reset_delay": "Kad cikls ir pabeigts (100%), pagaidiet tik daudz dīkstāves sekunžu, pirms atiestatāt progresu uz 0%. Noklusējums: 300 s.",
+              "auto_maintenance": "Iespējot automātisko apkopi (labot paraugus, sapludināt fragmentus).",
+              "expose_debug_entities": "Rādīt uzlabotos sensorus (pārliecība, fāze, neskaidrība) atkļūdošanai.",
+              "save_debug_traces": "Saglabājiet detalizētus ranga un jaudas izsekošanas datus vēsturē (palielina krātuves lietojumu)."
+            }
+          },
+          "anti_wrinkle_section": {
+            "name": "Pretgrumbu aizsargs (žāvētājiem)",
+            "description": "Ignorējiet trumuļa pagriezienus pēc cikla beigām, lai novērstu spoku ciklus. Tikai žāvētājs / veļasmašīna-žāvētājs.",
+            "data": {
+              "anti_wrinkle_enabled": "Pretgrumbu aizsargs (tikai žāvētājam)",
+              "anti_wrinkle_max_power": "Pretgrumbu maksimālā jauda (W)",
+              "anti_wrinkle_max_duration": "Pretgrumbu maksimālais ilgums (s)",
+              "anti_wrinkle_exit_power": "Pretgrumbu izejas jauda (W)"
+            },
+            "data_description": {
+              "anti_wrinkle_enabled": "Ignorējiet īsas mazjaudas trumuļa rotācijas pēc cikla beigām, lai novērstu spoku ciklus (tikai žāvētājs/mazgāšanas-žāvētājs).",
+              "anti_wrinkle_max_power": "Uzliesmojumi ar šo jaudu vai zem tā tiek uzskatīti par pretgrumbu apgriezieniem, nevis jauniem cikliem. Attiecas tikai tad, ja ir iespējots pretgrumbu aizsargs.",
+              "anti_wrinkle_max_duration": "Maksimālais sprādziena garums, lai to uzskatītu par pretgrumbu rotāciju. Attiecas tikai tad, ja ir iespējots pretgrumbu aizsargs.",
+              "anti_wrinkle_exit_power": "Ja jauda nokrītas zem šī līmeņa, nekavējoties izejiet no pretgrumbu (true off). Attiecas tikai tad, ja ir iespējots pretgrumbu aizsargs."
+            }
+          },
+          "delay_start_section": {
+            "name": "Atliktā starta noteikšana",
+            "description": "Uztveriet ilgstošu zemas jaudas gaidstāvi kā stāvokli 'Gaida palaišanu', līdz cikls patiešām sākas.",
+            "data": {
+              "delay_start_detect_enabled": "Iespējot atliktā starta noteikšanu",
+              "delay_confirm_seconds": "Atliktais starts: gaidstāves apstiprināšanas laiks (s)",
+              "delay_timeout_hours": "Atliktais starts: maksimālais gaidīšanas laiks (h)"
+            },
+            "data_description": {
+              "delay_start_detect_enabled": "Kad tas ir iespējots, īss mazjaudas aizplūšana, kam seko ilgstoša gaidstāves barošana, tiek noteikts kā aizkavēts starts. Stāvokļa sensors aizkaves laikā parāda ziņojumu “Gaida palaišanu”. Kamēr cikls nav sācies, netiek izsekots neviens programmas laiks vai norise. Nepieciešams, lai start_threshold_w būtu iestatīts virs drenāžas smailes jaudas.",
+              "delay_confirm_seconds": "Jaudai jāpaliek starp apturēšanas slieksni (W) un starta slieksni (W) tik sekundes, pirms WashData pāriet stāvoklī 'Gaida palaišanu'. Tas filtrē īsus pīķus, pārvietojoties pa izvēlni. Noklusējums: 60 s.",
+              "delay_timeout_hours": "Drošības taimauts: ja iekārta joprojām atrodas režīmā “Gaida palaišanu” pēc tik daudzām stundām, WashData tiek atiestatīta uz Off. Noklusējums: 8 h."
+            }
+          },
+          "external_triggers_section": {
+            "name": "Ārējie aktivizētāji, durvis un pauze",
+            "description": "Izvēles ārējais cikla beigu sensors, durvju sensors pauzes / izkraušanas noteikšanai un strāvas atslēgšanas slēdzis pauzes laikā.",
+            "data": {
+              "external_end_trigger_enabled": "Iespējot ārējā cikla beigu aktivizētāju",
+              "external_end_trigger": "Ārējais cikla beigu sensors",
+              "external_end_trigger_inverted": "Invertēt trigera loģiku (trigeris ir izslēgts)",
+              "door_sensor_entity": "Durvju sensors",
+              "pause_cuts_power": "Apturot, pārtrauciet strāvu",
+              "switch_entity": "Slēdža entītija (pauzēt strāvas padevei)",
+              "notify_unload_delay_minutes": "Veļas gaidīšanas paziņojuma aizkave (min)"
+            },
+            "data_description": {
+              "external_end_trigger_enabled": "Iespējot ārējā binārā sensora uzraudzību, lai aktivizētu cikla pabeigšanu.",
+              "external_end_trigger": "Atlasiet bināro sensoru entītiju. Kad šis sensors iedarbinās, pašreizējais cikls beigsies ar statusu “pabeigts”.",
+              "external_end_trigger_inverted": "Pēc noklusējuma trigeris tiek aktivizēts, kad sensors tiek IESLĒGTS. Atzīmējiet šo izvēles rūtiņu, lai aktivizētu, kad sensors tiek IZSLĒGTS.",
+              "door_sensor_entity": "Izvēles binārais sensors mašīnas durvīm (ieslēgts = atvērts, izslēgts = aizvērts). Kad durvis atveras aktīvā cikla laikā, WashData apstiprinās ciklu kā apzināti apturētu. Pēc cikla beigām, ja durvis joprojām ir aizvērtas, stāvoklis mainās uz 'Clean', līdz durvis tiek atvērtas. Piezīme: durvju aizvēršana NAV automātiski atsākta apturēts cikls - atsākšana ir jāaktivizē manuāli, izmantojot pogu Resume Cycle vai pakalpojumu.",
+              "pause_cuts_power": "Apturot, izmantojot pogu Pause Cycle vai pakalpojumu, izslēdziet arī konfigurēto slēdža entītiju. Stājas spēkā tikai tad, ja šai ierīcei ir konfigurēta slēdža entītija.",
+              "switch_entity": "Slēdža entītija, lai pārslēgtos, kad tiek apturēta vai atsākta. Nepieciešams, ja ir iespējota funkcija “Izslēdziet strāvu, kad tiek apturēta”.",
+              "notify_unload_delay_minutes": "Nosūtiet paziņojumu pa finiša paziņojumu kanālu pēc tam, kad cikls ir beidzies un durvis nav atvērtas tik daudzas minūtes (nepieciešams durvju sensors). Iestatiet uz 0, lai atspējotu. Noklusējums: 60 min."
+            }
+          },
+          "pump_section": {
+            "name": "Sūkņa uzraudzība",
+            "description": "Tikai sūkņa tipa ierīcēm. Izsauc notikumu, ja sūkņa cikls ilgst ilgāk par šo laiku.",
+            "data": {
+              "pump_stuck_duration": "Sūkņa iestrēgšanas brīdinājuma slieksnis (-i) (tikai sūknis)"
+            },
+            "data_description": {
+              "pump_stuck_duration": "Ja sūkņa cikls joprojām darbojas pēc šīm sekundēm, vienreiz tiek aktivizēts notikums ha_washdata_pump_stuck. Izmantojiet to, lai noteiktu iestrēgušu motoru (parasti sūkņa darbības laiks ir mazāks par 60 s). Noklusējums: 1800 s (30 min). Tikai sūkņa ierīces tips."
+            }
+          }
         }
       },
       "diagnostics": {
         "title": "Diagnostika un apkope",
-        "description": "Veiciet uzturēšanas darbības, piemēram, sadrumstalotu ciklu sapludināšanu vai saglabāto datu migrēšanu.\n\n**Krātuves lietojums**\n\n- Faila lielums: {file_size_kb} KB\n- Cikli: {cycle_count}\n- Profili: {profile_count}\n- Atkļūdošanas pēdas: {debug_count}"
+        "description": "Veiciet uzturēšanas darbības, piemēram, sadrumstalotu ciklu sapludināšanu vai saglabāto datu migrēšanu.\n\n**Krātuves lietojums**\n\n- Faila lielums: {file_size_kb} KB\n- Cikli: {cycle_count}\n- Profili: {profile_count}\n- Atkļūdošanas pēdas: {debug_count}",
+        "menu_options": {
+          "reprocess_history": "Apkope: atkārtoti apstrādājiet un optimizējiet datus",
+          "clear_debug_data": "Notīrīt atkļūdošanas datus (atbrīvojiet vietu)",
+          "wipe_history": "Dzēst VISUS šīs ierīces datus (neatgriezeniski)",
+          "export_import": "Eksportēt/importēt JSON ar iestatījumiem (kopēt/ielīmēt)",
+          "menu_back": "← Atpakaļ"
+        }
       },
       "clear_debug_data": {
         "title": "Notīrīt atkļūdošanas datus",
@@ -274,36 +326,52 @@
       "manage_cycles": {
         "title": "Pārvaldīt ciklus",
         "description": "Pēdējie cikli:\n{recent_cycles}",
-        "data": {
-          "action": "Darbība"
+        "menu_options": {
+          "auto_label_cycles": "Automātiski iezīmējiet vecos ciklus",
+          "select_cycle_to_label": "Etiķetes specifiskais cikls",
+          "select_cycle_to_delete": "Dzēst ciklu",
+          "interactive_editor": "Apvienot/sadalīt interaktīvo redaktoru",
+          "trim_cycle_select": "Apgriešanas cikla dati",
+          "menu_back": "← Atpakaļ"
         }
       },
       "manage_cycles_empty": {
         "title": "Pārvaldīt ciklus",
         "description": "Vēl nav reģistrēts neviens cikls.",
-        "data": {
-          "action": "Darbība"
+        "menu_options": {
+          "auto_label_cycles": "Automātiski iezīmējiet vecos ciklus",
+          "menu_back": "← Atpakaļ"
         }
       },
       "manage_profiles": {
         "title": "Pārvaldīt profilus",
         "description": "Profila kopsavilkums:\n{profile_summary}",
-        "data": {
-          "action": "Darbība"
+        "menu_options": {
+          "create_profile": "Izveidot jaunu profilu",
+          "edit_profile": "Rediģēt/pārdēvēt profilu",
+          "delete_profile_select": "Dzēst profilu",
+          "profile_stats": "Profila statistika",
+          "cleanup_profile": "Vēstures tīrīšana - diagramma un dzēšana",
+          "assign_profile_phases_select": "Piešķiriet fāzes diapazonus",
+          "menu_back": "← Atpakaļ"
         }
       },
       "manage_profiles_empty": {
         "title": "Pārvaldīt profilus",
         "description": "Vēl nav izveidots neviens profils.",
-        "data": {
-          "action": "Darbība"
+        "menu_options": {
+          "create_profile": "Izveidot jaunu profilu",
+          "menu_back": "← Atpakaļ"
         }
       },
       "manage_phase_catalog": {
         "title": "Pārvaldīt fāzes katalogu",
         "description": "Fāžu katalogs (šīs ierīces noklusējuma iestatījumi + pielāgotas fāzes):\n{phase_summary}",
-        "data": {
-          "action": "Darbība"
+        "menu_options": {
+          "phase_catalog_create": "Izveidot jaunu fāzi",
+          "phase_catalog_edit_select": "Rediģēšanas fāze",
+          "phase_catalog_delete": "Dzēst fāzi",
+          "menu_back": "← Atpakaļ"
         }
       },
       "phase_catalog_create": {
@@ -340,8 +408,14 @@
       "assign_profile_phases": {
         "title": "Piešķiriet fāzes diapazonus",
         "description": "Profila fāzes priekšskatījums: **{profile_name}**\n\n{timeline_svg}\n\n**Pašreizējie diapazoni:**\n{current_ranges}\n\nIzmantojiet tālāk norādītās darbības, lai pievienotu, rediģētu, dzēstu vai saglabātu diapazonus.",
-        "data": {
-          "action": "Darbība"
+        "menu_options": {
+          "assign_profile_phases_add": "Pievienot fāzes diapazonu",
+          "assign_profile_phases_edit_select": "Rediģēt fāzes diapazonu",
+          "assign_profile_phases_delete": "Dzēst fāzes diapazonu",
+          "phase_ranges_clear": "Notīrīt visus diapazonus",
+          "assign_profile_phases_auto_detect": "Automātiski noteikt fāzes",
+          "phase_ranges_save": "Saglabāt un atgriezt",
+          "menu_back": "← Atpakaļ"
         }
       },
       "assign_profile_phases_add": {
@@ -494,8 +568,11 @@
       "interactive_editor": {
         "title": "Apvienot/sadalīt interaktīvo redaktoru",
         "description": "Atlasiet manuālu darbību, kas jāveic cikla vēsturē.",
-        "data": {
-          "editor_action": "Darbība"
+        "menu_options": {
+          "editor_split": "Sadaliet ciklu (atrodiet nepilnības)",
+          "editor_merge": "Apvienot ciklus (apvienot fragmentus)",
+          "editor_delete": "Dzēst ciklu(s)",
+          "menu_back": "← Atpakaļ"
         }
       },
       "editor_select": {
@@ -529,7 +606,21 @@
         "title": "Sadalītā konfigurācija",
         "description": "Pielāgojiet šī cikla sadalīšanas jutību. Jebkura tukšgaitas sprauga, kas ir garāka par šo, izraisīs šķelšanos.",
         "data": {
-          "min_gap_seconds": "Split Gap Threshold (sekundēs)"
+          "split_mode": "Sadalīšanas metode"
+        }
+      },
+      "editor_split_auto_params": {
+        "title": "Automātiskās sadalīšanas konfigurācija",
+        "description": "Pielāgojiet šī cikla sadalīšanas jutību. Jebkura neaktivitātes pauze, kas ir garāka par šo, izraisīs sadalīšanu.",
+        "data": {
+          "min_gap_seconds": "Sadalīšanas atstarpes slieksnis (sekundes)"
+        }
+      },
+      "editor_split_manual_params": {
+        "title": "Manuālās sadalīšanas laikspiedoli",
+        "description": "{preview_md}Cikla logs: **{cycle_start_wallclock} → {cycle_end_wallclock}** datumā {cycle_date}.\n\nIevadiet vienu vai vairākus sadalīšanas laikspiedolus (`HH:MM` vai `HH:MM:SS`), pa vienam katrā rindā. Cikls tiks pārgriezts pie katra laikspiedola — N laikspiedoli rada N+1 segmentus.",
+        "data": {
+          "split_timestamps": "Sadalīšanas laika zīmogi"
         }
       },
       "reprocess_history": {
@@ -555,8 +646,13 @@
       "record_cycle": {
         "title": "Ierakstu cikls",
         "description": "Manuāli ierakstiet ciklu, lai izveidotu tīru profilu bez traucējumiem.\n\nStatuss: **{status}**\nIlgums: {duration} s\nParaugi: {samples}",
-        "data": {
-          "action": "Darbība"
+        "menu_options": {
+          "record_refresh": "Atsvaidzināt statusu",
+          "record_stop": "Pārtraukt ierakstīšanu (saglabāt un apstrādāt)",
+          "record_start": "Sāciet jaunu ierakstu",
+          "record_process": "Apstrādāt pēdējo ierakstu (apgriezt un saglabāt)",
+          "record_discard": "Atmest pēdējo ierakstu",
+          "menu_back": "← Atpakaļ"
         }
       },
       "record_process": {
@@ -571,14 +667,33 @@
       },
       "learning_feedbacks": {
         "title": "Mācīšanās atsauksmes",
-        "description": "Atlasiet apstrādājamo cikla pārskatīšanas pieprasījumu.",
+        "description": "Gaidošās atsauksmes: {count}\n\n{pending_table}\n\nAtlasiet apstrādājamo cikla pārskatīšanas pieprasījumu.",
+        "menu_options": {
+          "learning_feedbacks_pick": "Pārskatīt gaidošu atsauksmi",
+          "learning_feedbacks_dismiss_all": "Noraidīt visas gaidošās atsauksmes",
+          "menu_back": "← Atpakaļ"
+        }
+      },
+      "learning_feedbacks_pick": {
+        "title": "Izvēlieties atsauksmi pārskatīšanai",
+        "description": "Izvēlieties cikla pārskatīšanas pieprasījumu, ko atvērt.",
         "data": {
-          "selected_feedback": "Atlasiet Cikls pārskatīšanai"
+          "selected_feedback": "Izvēlieties ciklu pārskatīšanai"
         }
       },
       "learning_feedbacks_empty": {
         "title": "Mācīšanās atsauksmes",
-        "description": "Netika atrasts neviens neapstiprināts atsauksmju pieprasījums."
+        "description": "Netika atrasts neviens neapstiprināts atsauksmju pieprasījums.",
+        "menu_options": {
+          "menu_back": "← Atpakaļ"
+        }
+      },
+      "learning_feedbacks_dismiss_all": {
+        "title": "Noraidīt visas gaidošās atsauksmes",
+        "description": "Jūs gatavojaties noraidīt **{count}** gaidošus atsauksmju pieprasījumus. Noraidītie cikli paliks jūsu vēsturē, taču tie neveidos jaunu mācīšanās signālu. To nevar atsaukt.\n\n✅ Atzīmējiet tālāk esošo izvēles rūtiņu un noklikšķiniet uz **Iesniegt**, lai noraidītu visu.\n❌ Atstājiet to neatzīmētu un noklikšķiniet uz **Iesniegt**, lai atceltu un atgrieztos.",
+        "data": {
+          "confirm_dismiss_all": "Apstiprināt: noraidīt visus gaidošos atsauksmju pieprasījumus"
+        }
       },
       "resolve_feedback": {
         "title": "Atrisiniet atsauksmes",
@@ -587,13 +702,6 @@
           "action": "Ko jūs vēlētos darīt?",
           "corrected_profile": "Pareiza programma (ja tiek labota)",
           "corrected_duration": "Pareizais ilgums sekundēs (ja tiek labots)"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Pārskatiet ieteiktās izmaiņas",
-        "description": "Atrasti WashData **{pending_count}** ieteicamā(-ās) vērtība(-as).\n\nIzmaiņas:\n{changes}\n\n✅ Atzīmējiet tālāk esošo izvēles rūtiņu un noklikšķiniet uz **Iesniegt**, lai nekavējoties piemērotu un saglabātu šīs izmaiņas.\n❌ Atstājiet to neatzīmētu un noklikšķiniet uz **Iesniegt**, lai atceltu un atgrieztos.",
-        "data": {
-          "confirm_apply_suggestions": "Lietot un saglabāt šīs izmaiņas"
         }
       },
       "trim_cycle_select": {
@@ -629,6 +737,9 @@
     },
     "error": {
       "import_failed": "Importēšana neizdevās. Lūdzu, ielīmējiet derīgu WashData eksportēšanas JSON.",
+      "select_exactly_one": "Atlasiet tieši vienu ciklu šai darbībai.",
+      "select_at_least_one": "Atlasiet vismaz vienu ciklu šai darbībai.",
+      "select_at_least_two": "Atlasiet vismaz divus ciklus šai darbībai.",
       "profile_exists": "Profils ar šādu nosaukumu jau pastāv",
       "rename_failed": "Neizdevās pārdēvēt profilu. Profils var neeksistēt vai jau ir pieņemts jauns vārds.",
       "assignment_failed": "Neizdevās piešķirt profilu ciklam",
@@ -648,12 +759,17 @@
       "suggestions_ready_notification_message": "Sensors **Ieteiktie iestatījumi** tagad ziņo par **{count}** praktiski izmantojamiem ieteikumiem.\n\nLai tos pārskatītu un lietotu: **Iestatījumi > Ierīces un pakalpojumi > WashData > Konfigurēt > Papildu iestatījumi > Lietot ieteiktās vērtības**.\n\nIeteikumi nav obligāti un tiek parādīti pārskatīšanai pirms saglabāšanas.",
       "trim_range_invalid": "Sākumam jābūt pirms beigām. Lūdzu, pielāgojiet apgriešanas punktus.",
       "trim_failed": "Apgriešana neizdevās. Cikls var vairs nepastāvēt vai logs ir tukšs.",
+      "invalid_split_timestamp": "Laika zīmogs nav derīgs vai atrodas ārpus cikla loga. Izmantojiet HH:MM vai HH:MM:SS cikla loga ietvaros.",
+      "no_split_segments_found": "No šiem laika zīmogiem nevarēja izveidot nevienu derīgu segmentu. Pārliecinieties, ka katrs laika zīmogs ir cikla logā un segmenti ir vismaz 1 minūti gari.",
       "auto_tune_suggestion": "{device_type} {device_title} konstatēja spoku ciklus. Ieteicamās minimālās jaudas izmaiņas: {current_min}W -> {new_min}W (nav lietots automātiski).",
       "auto_tune_title": "WashData automātiskā noregulēšana",
       "auto_tune_fallback": "{device_type} {device_title} konstatēja spoku ciklus. Ieteicamās minimālās jaudas izmaiņas: {current_min}W -> {new_min}W (nav lietots automātiski)."
     },
     "abort": {
       "no_cycles_found": "Nav atrasts neviens cikls",
+      "no_split_segments_found": "Atlasītajā ciklā netika atrasti sadalāmi segmenti.",
+      "cycle_not_found": "Neizdevās ielādēt atlasīto ciklu.",
+      "no_power_data": "Atlasītajam ciklam nav pieejami jaudas izsekošanas dati.",
       "no_profiles_found": "Nav atrasts neviens profils. Vispirms izveidojiet profilu.",
       "no_profiles_for_matching": "Atbilstībai nav pieejams neviens profils. Vispirms izveidojiet profilus.",
       "no_unlabeled_cycles": "Visi cikli jau ir marķēti",
@@ -661,8 +777,7 @@
       "no_predictions": "Nekādu prognožu",
       "no_custom_phases": "Nav atrasta neviena pielāgota fāze.",
       "reprocess_success": "Veiksmīgi atkārtoti apstrādāti {count} cikli.",
-      "debug_data_cleared": "Atkļūdošanas dati ir veiksmīgi notīrīti no {count} cikliem.",
-      "no_power_data": "Atlasītajam ciklam nav pieejami jaudas izsekošanas dati."
+      "debug_data_cleared": "Atkļūdošanas dati ir veiksmīgi notīrīti no {count} cikliem."
     }
   },
   "selector": {
@@ -682,6 +797,9 @@
         "all_device_types": "Visi ierīču veidi",
         "current_suffix": "(pašreizējais)",
         "editor_select_info": "Atlasiet 1 ciklu, lai sadalītu, vai 2+ ciklus, lai sapludinātu.",
+        "editor_select_info_split": "Atlasiet 1 ciklu sadalīšanai.",
+        "editor_select_info_merge": "Atlasiet 2+ ciklus apvienošanai.",
+        "editor_select_info_delete": "Atlasiet 1+ ciklus dzēšanai.",
         "no_cycles_recorded": "Vēl nav reģistrēts neviens cikls.",
         "profile_summary_line": "- **{name}**: {count} cikli, {avg} min vid",
         "no_profiles_created": "Vēl nav izveidots neviens profils.",
@@ -722,6 +840,10 @@
         "split_preview_confirm_fmt": "Noklikšķiniet uz Apstiprināt, lai sadalītu šo ciklu {count} atsevišķos ciklos.",
         "merge_preview_title": "Apvienot priekšskatījums",
         "merge_preview_joining_fmt": "Notiek pievienošanās {count} cikliem. Atstarpes tiks aizpildītas ar 0W rādījumiem.",
+        "editor_delete_preview_title": "Dzēšanas priekšskatījums",
+        "editor_delete_preview_intro": "Atlasītie cikli tiks neatgriezeniski dzēsti:",
+        "editor_delete_preview_confirm": "Noklikšķiniet uz Apstiprināt, lai neatgriezeniski dzēstu šos ciklu ierakstus.",
+        "no_power_preview": "*Priekšskatīšanai nav pieejami jaudas dati.*",
         "profile_comparison": "Profilu salīdzinājums",
         "actual_cycle_label": "Šis cikls (faktiskais)",
         "storage_usage_header": "Krātuves izmantošana",
@@ -735,10 +857,21 @@
         "assign_phases_help": "Izmantojiet tālāk norādītās darbības, lai pievienotu, rediģētu, dzēstu vai saglabātu diapazonus.",
         "profile_summary_header": "Profila kopsavilkums",
         "recent_cycles_header": "Pēdējie cikli",
-        "no_power_preview": "*Priekšskatīšanai nav pieejami jaudas dati.*",
         "trim_cycle_preview_title": "Cikla apgriešanas priekšskatījums",
         "trim_cycle_preview_no_data": "Šim ciklam nav pieejami dati par jaudu.",
-        "trim_cycle_preview_kept_suffix": "paturēja"
+        "trim_cycle_preview_kept_suffix": "paturēja",
+        "table_program": "Programma",
+        "table_when": "Kad",
+        "table_length": "Ilgums",
+        "table_match": "Sakritība",
+        "table_profile": "Profils",
+        "table_cycles": "Cikli",
+        "table_avg_length": "Vid. ilgums",
+        "table_last_run": "Pēdējais skrējiens",
+        "table_avg_energy": "Vid. enerģija",
+        "table_detected_program": "Atklātā programma",
+        "table_confidence": "Pārliecība",
+        "table_reported": "Ziņots"
       }
     },
     "interactive_editor_action": {
@@ -746,6 +879,12 @@
         "split": "Sadaliet ciklu (atrodiet nepilnības)",
         "merge": "Apvienot ciklus (apvienot fragmentus)",
         "delete": "Dzēst ciklu(s)"
+      }
+    },
+    "split_mode": {
+      "options": {
+        "auto": "Automātiski noteikt dīkstāves spraugas",
+        "manual": "Manuāli laika zīmogi"
       }
     },
     "diagnostics_action": {
@@ -1133,6 +1272,15 @@
     }
   },
   "exceptions": {
+    "device_id_required": {
+      "message": "Nepieciešams derīgs ierīces_id."
+    },
+    "cycle_id_required": {
+      "message": "Nepieciešams derīgs cikla_id."
+    },
+    "profile_name_required": {
+      "message": "Nepieciešams derīgs profila_nosaukums."
+    },
     "device_not_found": {
       "message": "Ierīce nav atrasta."
     },
@@ -1150,15 +1298,6 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s ir jābūt lielākam par trim_start_s."
-    },
-    "device_id_required": {
-      "message": "Nepieciešams derīgs ierīces_id."
-    },
-    "cycle_id_required": {
-      "message": "Nepieciešams derīgs cikla_id."
-    },
-    "profile_name_required": {
-      "message": "Nepieciešams derīgs profila_nosaukums."
     }
   }
 }

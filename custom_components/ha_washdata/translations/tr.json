@@ -56,9 +56,16 @@
           "confirm": "Kopyalama işlemini onaylayın"
         }
       },
+      "apply_suggestions_confirm": {
+        "title": "Önerilen Değişiklikleri İnceleyin",
+        "description": "WashData, **{pending_count}** önerilen değerlerin uygulanmasını buldu.\n\nDeğişiklikler:\n{changes}\n\n✅ Bu değişiklikleri hemen uygulamak ve kaydetmek için aşağıdaki kutuyu işaretleyin ve **Gönder**'i tıklayın.\n❌ İşaretlemeden bırakın ve iptal edip geri dönmek için **Gönder**'i tıklayın.",
+        "data": {
+          "confirm_apply_suggestions": "Bu değişiklikleri uygulayın ve kaydedin"
+        }
+      },
       "settings": {
         "title": "Ayarlar",
-        "description": "Algılama eşiklerini, öğrenmeyi ve gelişmiş davranışı ayarlayın. Varsayılanlar çoğu kurulum için iyi çalışır.",
+        "description": "Algılama eşiklerini, öğrenmeyi ve gelişmiş davranışı ayarlayın. Varsayılanlar çoğu kurulum için iyi çalışır.\n\nŞu anda kullanılabilir önerilen ayarlar: {suggestions_count}.\nBu değer 0'dan büyükse, önerileri gözden geçirmek için Gelişmiş Ayarlar'ı açın ve 'Önerilen Değerleri Uygula' seçeneğini kullanın.",
         "data": {
           "apply_suggestions": "Önerilen Değerleri Uygula",
           "device_type": "Cihaz Türü",
@@ -69,16 +76,16 @@
           "notify_people": "Bu İnsanlar Eve Gelene Kadar Teslimatı Erteleyin",
           "notify_only_when_home": "Seçilen Kişi Eve Gelene Kadar Bildirimleri Erteleyin",
           "notify_fire_events": "Otomasyon Olaylarını Tetikle",
+          "notify_start_services": "Döngü Başlatma - Bildirim Hedefleri",
+          "notify_finish_services": "Döngü Sonu - Bildirim Hedefleri",
+          "notify_live_services": "Canlı İlerleme - Bildirim Hedefleri",
           "notify_before_end_minutes": "Tamamlama Öncesi Bildirim (bitişten dakikalar önce)",
           "notify_title": "Bildirim Başlığı",
           "notify_icon": "Bildirim Simgesi",
           "notify_start_message": "Mesaj Formatını Başlat",
           "notify_finish_message": "Mesaj Formatını Bitir",
           "notify_pre_complete_message": "Tamamlanma Öncesi Mesaj Formatı",
-          "show_advanced": "Gelişmiş Ayarları Düzenle (Sonraki Adım)",
-          "notify_start_services": "Döngü Başlatma - Bildirim Hedefleri",
-          "notify_finish_services": "Döngü Sonu - Bildirim Hedefleri",
-          "notify_live_services": "Canlı İlerleme - Bildirim Hedefleri"
+          "show_advanced": "Gelişmiş Ayarları Düzenle (Sonraki Adım)"
         },
         "data_description": {
           "apply_suggestions": "Öğrenme algoritması tarafından önerilen değerleri forma kopyalamak için bu kutuyu işaretleyin. Kaydetmeden önce inceleyin.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} sn\n{suggested_reason}",
@@ -90,15 +97,15 @@
           "notify_people": "Varlık geçidi için kullanılan kişi varlıkları. Etkinleştirildiğinde, seçilen en az bir kişi evde olana kadar bildirim teslimi ertelenir.",
           "notify_only_when_home": "Etkinleştirilirse, seçilen en az bir kişi evde olana kadar bildirimleri erteleyin.",
           "notify_fire_events": "Etkinleştirilirse, otomasyonları desteklemek için döngü başlangıcı ve bitişi (ha_washdata_cycle_started ve ha_washdata_cycle_ended) için Home Assistant olaylarını tetikleyin.",
+          "notify_start_services": "Bir döngü başladığında uyarı verecek bir veya daha fazla bildirim hizmeti. Başlangıç ​​bildirimlerini atlamak için boş bırakın.",
+          "notify_finish_services": "Bir döngü tamamlandığında veya tamamlanmaya yaklaştığında uyarı verecek bir veya daha fazla bildirim hizmeti. Bitirme bildirimlerini atlamak için boş bırakın.",
+          "notify_live_services": "Döngü çalışırken canlı ilerleme güncellemelerini almak için bir veya daha fazla bildirim hizmeti (yalnızca mobil yardımcı uygulama). Canlı güncellemeleri atlamak için boş bırakın.",
           "notify_before_end_minutes": "Bir bildirimin tetiklenmesi için döngünün tahmini bitiminden dakikalar önce. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0.",
           "notify_title": "Bildirimler için özel başlık. {device} yer tutucusunu destekler.",
           "notify_icon": "Bildirimler için kullanılacak simge (ör. mdi:çamaşır makinesi). Simge göndermemek için boş bırakın.",
           "notify_start_message": "Bir döngü başladığında gönderilen mesaj. {device} yer tutucusunu destekler.",
           "notify_finish_message": "Bir döngü tamamlandığında gönderilen mesaj. {device}, {duration}, {program}, {energy_kwh}, {cost} yer tutucularını destekler.",
-          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler.",
-          "notify_start_services": "Bir döngü başladığında uyarı verecek bir veya daha fazla bildirim hizmeti. Başlangıç ​​bildirimlerini atlamak için boş bırakın.",
-          "notify_finish_services": "Bir döngü tamamlandığında veya tamamlanmaya yaklaştığında uyarı verecek bir veya daha fazla bildirim hizmeti. Bitirme bildirimlerini atlamak için boş bırakın.",
-          "notify_live_services": "Döngü çalışırken canlı ilerleme güncellemelerini almak için bir veya daha fazla bildirim hizmeti (yalnızca mobil yardımcı uygulama). Canlı güncellemeleri atlamak için boş bırakın."
+          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler."
         }
       },
       "notifications": {
@@ -109,38 +116,40 @@
           "notify_people": "Bu İnsanlar Eve Gelene Kadar Teslimatı Erteleyin",
           "notify_only_when_home": "Seçilen Kişi Eve Gelene Kadar Bildirimleri Erteleyin",
           "notify_fire_events": "Otomasyon Olaylarını Tetikle",
+          "notify_start_services": "Döngü Başlatma - Bildirim Hedefleri",
+          "notify_finish_services": "Döngü Sonu - Bildirim Hedefleri",
+          "notify_live_services": "Canlı İlerleme - Bildirim Hedefleri",
           "notify_before_end_minutes": "Tamamlama Öncesi Bildirim (bitişten dakikalar önce)",
           "notify_live_interval_seconds": "Canlı Güncelleme Aralığı (saniye)",
           "notify_live_overrun_percent": "Canlı Güncelleme Aşım İzinleri (%)",
+          "notify_live_chronometer": "Kronometre Geri Sayım Sayacı",
           "notify_title": "Bildirim Başlığı",
           "notify_icon": "Bildirim Simgesi",
           "notify_start_message": "Mesaj Formatını Başlat",
           "notify_finish_message": "Mesaj Formatını Bitir",
           "notify_pre_complete_message": "Tamamlanma Öncesi Mesaj Formatı",
-          "notify_start_services": "Döngü Başlatma - Bildirim Hedefleri",
-          "notify_finish_services": "Döngü Sonu - Bildirim Hedefleri",
-          "notify_live_services": "Canlı İlerleme - Bildirim Hedefleri",
-          "notify_live_chronometer": "Kronometre Geri Sayım Sayacı",
           "energy_price_entity": "Enerji Fiyatı – Varlık (isteğe bağlı)",
-          "energy_price_static": "Enerji Fiyatı - Statik değer (isteğe bağlı)"
+          "energy_price_static": "Enerji Fiyatı - Statik değer (isteğe bağlı)",
+          "go_back": "Kaydetmeden geri dön"
         },
         "data_description": {
+          "go_back": "Bunu işaretleyin ve yukarıdaki tüm değişiklikleri atıp ana menüye dönmek için Gönder'e tıklayın.",
           "notify_actions": "Bildirimler (komut dosyaları, bildirim, TTS vb.) için çalıştırılacak isteğe bağlı Ev Asistanı eylem dizisi. Ayarlanırsa eylemler, geri dönüş bildirim hizmetinden önce çalıştırılır.",
           "notify_people": "Varlık geçidi için kullanılan kişi varlıkları. Etkinleştirildiğinde, seçilen en az bir kişi evde olana kadar bildirim teslimi ertelenir.",
           "notify_only_when_home": "Etkinleştirilirse, seçilen en az bir kişi evde olana kadar bildirimleri erteleyin.",
           "notify_fire_events": "Etkinleştirilirse, otomasyonları desteklemek için döngü başlangıcı ve bitişi (ha_washdata_cycle_started ve ha_washdata_cycle_ended) için Home Assistant olaylarını tetikleyin.",
+          "notify_start_services": "Bir döngü başladığında uyarı verecek bir veya daha fazla bildirim hizmeti (ör. notify.mobile_app_my_phone). Başlangıç ​​bildirimlerini atlamak için boş bırakın.",
+          "notify_finish_services": "Bir döngü tamamlandığında veya tamamlanmaya yaklaştığında uyarı verecek bir veya daha fazla bildirim hizmeti. Bitirme bildirimlerini atlamak için boş bırakın.",
+          "notify_live_services": "Döngü çalışırken canlı ilerleme güncellemelerini almak için bir veya daha fazla bildirim hizmeti (yalnızca mobil yardımcı uygulama). Canlı güncellemeleri atlamak için boş bırakın.",
           "notify_before_end_minutes": "Bir bildirimin tetiklenmesi için döngünün tahmini bitiminden dakikalar önce. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0.",
           "notify_live_interval_seconds": "Çalıştırma sırasında ilerleme güncellemelerinin ne sıklıkta gönderildiği. Daha düşük değerler daha duyarlıdır ancak daha fazla bildirim tüketir. Minimum 30 saniye uygulanır; 30 saniyenin altındaki değerler otomatik olarak 30 saniyeye yuvarlanır.",
           "notify_live_overrun_percent": "Uzun/fazla çalıştırma döngüleri için tahmini güncelleme sayısının üzerindeki güvenlik marjı (örneğin %20, 1,2 kat tahmini güncellemeye izin verir).",
+          "notify_live_chronometer": "Etkinleştirildiğinde, her canlı güncelleme tahmini bitiş süresine kadar bir kronometre geri sayımı içerir. Güncellemeler arasında bildirim zamanlayıcısı cihazda otomatik olarak yavaşlar (yalnızca Android tamamlayıcı uygulaması).",
           "notify_title": "Bildirimler için özel başlık. {device} yer tutucusunu destekler.",
           "notify_icon": "Bildirimler için kullanılacak simge (ör. mdi:çamaşır makinesi). Simge göndermemek için boş bırakın.",
           "notify_start_message": "Bir döngü başladığında gönderilen mesaj. {device} yer tutucusunu destekler.",
           "notify_finish_message": "Bir döngü tamamlandığında gönderilen mesaj. {device}, {duration}, {program}, {energy_kwh}, {cost} yer tutucularını destekler.",
           "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler.",
-          "notify_start_services": "Bir döngü başladığında uyarı verecek bir veya daha fazla bildirim hizmeti (ör. notify.mobile_app_my_phone). Başlangıç ​​bildirimlerini atlamak için boş bırakın.",
-          "notify_finish_services": "Bir döngü tamamlandığında veya tamamlanmaya yaklaştığında uyarı verecek bir veya daha fazla bildirim hizmeti. Bitirme bildirimlerini atlamak için boş bırakın.",
-          "notify_live_services": "Döngü çalışırken canlı ilerleme güncellemelerini almak için bir veya daha fazla bildirim hizmeti (yalnızca mobil yardımcı uygulama). Canlı güncellemeleri atlamak için boş bırakın.",
-          "notify_live_chronometer": "Etkinleştirildiğinde, her canlı güncelleme tahmini bitiş süresine kadar bir kronometre geri sayımı içerir. Güncellemeler arasında bildirim zamanlayıcısı cihazda otomatik olarak yavaşlar (yalnızca Android tamamlayıcı uygulaması).",
           "energy_price_entity": "Geçerli elektrik fiyatını içeren sayısal bir varlık seçin (ör. sensör.elektrik_fiyat, giriş_numarası.enerji_oranı). Ayarlandığında, {cost} yer tutucusunu etkinleştirir. Her ikisi de yapılandırılmışsa statik değere göre önceliklidir.",
           "energy_price_static": "kWh başına sabit elektrik fiyatı. Ayarlandığında, {cost} yer tutucusunu etkinleştirir. Yukarıda bir varlık yapılandırılmışsa yoksayılır. Mesaj şablonuna para birimi simgenizi ekleyin, ör. {cost} €."
         }
@@ -148,124 +157,167 @@
       "advanced_settings": {
         "title": "Gelişmiş Ayarlar",
         "description": "Algılama eşiklerini, öğrenmeyi ve gelişmiş davranışı ayarlayın. Varsayılanlar çoğu kurulum için iyi çalışır.",
-        "data": {
-          "apply_suggestions": "Önerilen Değerleri Uygula",
-          "start_threshold_w": "Başlangıç ​​Eşiği (W)",
-          "stop_threshold_w": "Durdurma Eşiği (W)",
-          "min_off_gap": "Döngüler Arasındaki Minimum Boşluk",
-          "start_duration_threshold": "Geri Dönme Süresini Başlat",
-          "progress_reset_delay": "İlerleme Sıfırlama Gecikmesi (saniye)",
-          "no_update_active_timeout": "Güncelleme Olmayan Zaman Aşımı (s)",
-          "sampling_interval": "Örnekleme Aralığı (lar)",
-          "auto_label_confidence": "Otomatik Etiket Güveni (0-1)",
-          "learning_confidence": "Geribildirim Talebi Güven (0-1)",
-          "duration_tolerance": "Süre Toleransı (0-0,5)",
-          "profile_match_interval": "Profil Eşleşme Aralığı (saniye)",
-          "profile_match_min_duration_ratio": "Profil Eşleşmesi Minimum Süre Oranı (0,1-1,0)",
-          "profile_match_max_duration_ratio": "Profil Eşleşmesi Maksimum Süre Oranı (1,0-3,0)",
-          "smoothing_window": "Pencereyi Pürüzsüzleştirme (örnekler)",
-          "profile_match_threshold": "Profil Eşleşme Eşiği",
-          "profile_unmatch_threshold": "Profil Eşleşmeme Eşiği",
-          "profile_duration_tolerance": "Profil Eşleşme Süresi Toleransı (0-0,5)",
-          "interrupted_min_seconds": "Kesintiye uğradı: Minimum Çalışma Süresi (saniye)",
-          "abrupt_drop_watts": "Kesintili: Ani Düşüş Mutlak (W)",
-          "abrupt_drop_ratio": "Kesintiye Uğradı: Ani Düşme Oranı (0-1)",
-          "abrupt_high_load_factor": "Kesintili: Yüksek Yük Faktörü",
-          "max_past_cycles": "Saklama: Maksimum Kaydedilen Döngüler",
-          "max_full_traces_per_profile": "Saklama: Profil Başına Maksimum Tam İz",
-          "max_full_traces_unlabeled": "Saklama: Etiketlenmemiş Maksimum Tam İz Sayısı",
-          "watchdog_interval": "Watchdog Aralığı (saniye)",
-          "completion_min_seconds": "Tamamlanma Minimum Çalışma Süresi (saniye)",
-          "notify_before_end_minutes": "Tamamlama Öncesi Bildirim (bitişten dakikalar önce)",
-          "auto_tune_noise_events_threshold": "Otomatik Ayarlama: Gürültü Olayları Eşiği",
-          "running_dead_zone": "Çalışan Ölü Bölge (saniye)",
-          "end_repeat_count": "Tekrar Sayısını Sonlandır",
-          "start_energy_threshold": "Enerji Kapısını Başlat (Wh)",
-          "end_energy_threshold": "Son Enerji Kapısı (Wh)",
-          "auto_maintenance": "Otomatik Bakımı Etkinleştir",
-          "expose_debug_entities": "Hata Ayıklama Varlıklarını Açığa Çıkarın",
-          "save_debug_traces": "Hata Ayıklama İzlerini Kaydet",
-          "anti_wrinkle_enabled": "Kırışıklık Karşıtı Kalkan (Yalnızca Kurutucu)",
-          "anti_wrinkle_max_power": "Kırışıklık Karşıtı Maksimum Güç (W)",
-          "anti_wrinkle_max_duration": "Kırışıklık Karşıtı Maksimum Süre (ler)",
-          "anti_wrinkle_exit_power": "Kırışıklık Karşıtı Çıkış Gücü (W)",
-          "dtw_bandwidth": "DTW Bant Genişliği",
-          "external_end_trigger_enabled": "Harici Döngü Sonu Tetikleyicisini Etkinleştir",
-          "external_end_trigger": "Harici Döngü Sonu Sensörü",
-          "external_end_trigger_inverted": "Tetikleme Mantığını Tersine Çevir (Tetikleme KAPALI)",
-          "suppress_feedback_notifications": "Geri Bildirim Bildirimlerini Bastır",
-          "pump_stuck_duration": "Pompa Sıkışmış Uyarı Eşiği (ler) (Yalnızca Pompa)",
-          "door_sensor_entity": "Kapı Sensörü",
-          "pause_cuts_power": "Duraklatıldığında Gücü Kesin",
-          "notify_unload_delay_minutes": "Çamaşır Bekleniyor Bildirim Gecikmesi (dk)",
-          "switch_entity": "Varlık Değiştir (Güç Kesintisini Duraklatmak için)",
-          "delay_start_detect_enabled": "Gecikmeli Başlatma Algılamayı Etkinleştir",
-          "delay_drain_min_power": "Gecikmeli Başlatma: Tahliye Çivisi Min Gücü (W)",
-          "delay_drain_max_power": "Gecikmeli Başlatma: Maksimum Gücü Tahliye Et (W)",
-          "delay_drain_max_duration": "Gecikmeli Başlatma: Maksimum Tahliye Ani Çıkış Süresi (s)",
-          "delay_timeout_hours": "Gecikmeli Başlatma: Maksimum Bekleme Süresi (saat)"
-        },
-        "data_description": {
-          "apply_suggestions": "Öğrenme algoritmasından önerilen değerlere yönelik bir inceleme adımı açmak için bu kutuyu işaretleyin. Hiçbir şey otomatik olarak kaydedilmez.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} sn\n{suggested_reason}",
-          "start_threshold_w": "Bir döngüyü BAŞLATMAK için gücün bu eşiğin ÜZERİNDE yükselmesi gerekir. Bekleme gücünüzden daha yükseğe ayarlayın. Varsayılan: min_power + 1 W.",
-          "stop_threshold_w": "Bir döngüyü SONLANDIRMAK için gücün bu eşiğin ALTINA düşmesi gerekir. Gürültünün yanlış uçları tetiklemesini önlemek için sıfırın hemen üstüne ayarlayın. Varsayılan: 0,6 * min_power.",
-          "min_off_gap": "Bir döngü, bir öncekinin bitiminden bu kadar saniye sonra başlarsa, tek bir döngüde BİRLEŞTİRİLECEKTİR.",
-          "start_duration_threshold": "Bu süreden (saniye) daha kısa olan kısa güç artışlarını dikkate almayın. Gerçek döngü başlamadan önce önyükleme artışlarını (ör. 2 saniye için 60 W) filtreler. Varsayılan: 5s.",
-          "progress_reset_delay": "Bir döngü tamamlandıktan sonra (%100), ilerlemeyi %0'a sıfırlamadan önce bu kadar saniye boşta bekleyin. Varsayılan: 300s.",
-          "no_update_active_timeout": "Değişiklik üzerine yayınlama sensörleri için: yalnızca bu kadar saniye boyunca hiçbir güncelleme gelmezse AKTİF bir döngüyü zorla sonlandırın. Düşük güçte tamamlama hala Kapanma Gecikmesini kullanıyor.",
-          "sampling_interval": "Saniye cinsinden minimum örnekleme aralığı. Bu hızdan daha hızlı olan güncellemeler dikkate alınmayacaktır. Varsayılan: 2,0 sn.",
-          "auto_label_confidence": "Tamamlandığında bu güven düzeyinde veya üzerinde döngüleri otomatik olarak etiketleyin (0,0–1,0).",
-          "learning_confidence": "Bir etkinlik aracılığıyla kullanıcı doğrulaması istemek için minimum güven (0,0–1,0).",
-          "duration_tolerance": "Bir çalıştırma sırasında kalan süre tahminlerine yönelik tolerans (0,0–0,5, %0–50'ye karşılık gelir).",
-          "profile_match_interval": "Bir döngü sırasında profil eşleştirmenin ne sıklıkta (saniye olarak) deneneceği. Daha düşük değerler daha hızlı algılama sağlar ancak daha fazla CPU kullanır. Varsayılan: 300s (5 dakika).",
-          "profile_match_min_duration_ratio": "Profil eşleştirme için minimum süre oranı. Çalıştırma döngüsünün eşleşmesi için en azından profil süresinin bu kısmı kadar olması gerekir. Daha düşük = daha erken eşleşme. Varsayılan: 0,50 (%50).",
-          "profile_match_max_duration_ratio": "Profil eşleştirme için maksimum süre oranı. Çalıştırma döngüsü profil süresinin bu katını aşmamalıdır. Daha yüksek = daha hoşgörülü. Varsayılan: 1,50 (%150).",
-          "smoothing_window": "Hareketli ortalama yumuşatma için kullanılan son güç okumalarının sayısı.",
-          "profile_match_threshold": "Bir profili eşleşme olarak değerlendirmek için gereken minimum DTW benzerlik puanı (0,0–1,0). Daha yüksek = daha sıkı eşleştirme, daha az yanlış pozitif. Varsayılan: 0,4.",
-          "profile_unmatch_threshold": "Daha önce eşleşen profilin reddedildiği DTW benzerlik puanı (0,0–1,0). Titremeyi önlemek için eşleşme eşiğinden düşük olmalıdır. Varsayılan: 0,35.",
-          "profile_duration_tolerance": "Toplam süre farkı için profil eşleştirme tarafından kullanılan tolerans (0,0–0,5). Varsayılan davranış: ±%25.",
-          "interrupted_min_seconds": "Bundan daha kısa çalışmalar 'kesintiye uğramış' olarak sınıflandırılabilir.",
-          "abrupt_drop_watts": "Mutlak güç düşüşü (W), ani bir uçurum olarak kabul edilir.",
-          "abrupt_drop_ratio": "Göreceli düşme oranı (0–1). Örnek: 0,6, %60'lık bir düşüşün ani olduğu anlamına gelir.",
-          "abrupt_high_load_factor": "Taban çizgisinin üzerindeki faktör, ani bir düşüşten önce 'yüksek yük' olarak kabul edilir (ani tespitte kullanılır).",
-          "max_past_cycles": "Saklanacak toplam döngü sayısı (en eskisi kaldırıldı). Varsayılan: 200.",
-          "max_full_traces_per_profile": "Profil başına tam güç izleriyle tutulacak en son etiketlenmiş döngülerin sayısı. Daha eski izler zarflar aracılığıyla özetleniyor. Varsayılan: 20.",
-          "max_full_traces_unlabeled": "Otomatik etiketlemeyi desteklemek için tam güç izleriyle tutulacak en son etiketlenmemiş döngülerin sayısı. Varsayılan: 20.",
-          "watchdog_interval": "Çalışırken bekçi köpeği kontrolleri arasındaki saniyeler. Varsayılan: 5s. UYARI: Yanlış duraklamalardan kaçınmak için bunun sensörünüzün güncelleme aralığından DAHA YÜKSEK olduğundan emin olun (örn. sensör her 60 saniyede bir güncelleniyorsa 65 saniye+ kullanın).",
-          "completion_min_seconds": "Bundan daha kısa döngüler, doğal bir şekilde bitseler bile 'kesintiye uğradı' olarak işaretlenecektir. Varsayılan: 600s.",
-          "notify_before_end_minutes": "Bir bildirimin tetiklenmesi için döngünün tahmini bitiminden dakikalar önce. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0.",
-          "auto_tune_noise_events_threshold": "Min_power'ı otomatik olarak ayarlamak için 24 saat içinde gereken kısa/düşük güçlü 'gürültü' döngülerinin sayısı. Varsayılan: 3.",
-          "running_dead_zone": "Döngü başladıktan sonra, ilk dönüş aşaması sırasında hatalı uç tespitini önlemek için bu kadar saniye boyunca güç düşüşlerini göz ardı edin. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0s.",
-          "end_repeat_count": "Döngü sonlandırılmadan önce bitiş koşulunun (kapalı_gecikme için eşiğin altındaki güç) arka arkaya karşılanması gereken sayı. Daha yüksek değerler duraklamalar sırasında hatalı sonları önler. Varsayılan: 1.",
-          "start_energy_threshold": "Döngünün onaylanması için START aşamasında en az bu kadar enerji (Wh) biriktirmesi gerekir. Varsayılan: 0,005 Wh.",
-          "end_energy_threshold": "Döngü yalnızca son Düşmede Gecikme penceresindeki enerji bu değerin (Wh) altında olduğunda sona erer. Güç sıfıra yakın dalgalanırsa hatalı uçları önler. Varsayılan: 0,05 Wh.",
-          "auto_maintenance": "Otomatik bakımı etkinleştirin (örneklerin onarılması, parçaların birleştirilmesi).",
-          "expose_debug_entities": "Hata ayıklama için gelişmiş sensörleri (Güven, Faz, Belirsizlik) gösterin.",
-          "save_debug_traces": "Ayrıntılı sıralama ve güç izleme verilerini geçmişte saklayın (Depolama kullanımını artırır).",
-          "anti_wrinkle_enabled": "Hayalet döngüleri önlemek için, bir döngü sona erdikten sonra kısa süreli düşük güçlü tambur dönüşlerini göz ardı edin (yalnızca kurutucu/çamaşır-kurutucu).",
-          "anti_wrinkle_max_power": "Bu güçteki veya altındaki patlamalar, yeni döngüler yerine kırışık önleyici dönüşler olarak değerlendirilir. Yalnızca Kırışıklık Karşıtı Kalkan etkinleştirildiğinde geçerlidir.",
-          "anti_wrinkle_max_duration": "Kırışıklık karşıtı rotasyon olarak değerlendirilecek maksimum patlama uzunluğu. Yalnızca Kırışıklık Karşıtı Kalkan etkinleştirildiğinde geçerlidir.",
-          "anti_wrinkle_exit_power": "Güç bu seviyenin altına düşerse, kırışıklık önleme işleminden hemen çıkın (gerçek kapalı). Yalnızca Kırışıklık Karşıtı Kalkan etkinleştirildiğinde geçerlidir.",
-          "dtw_bandwidth": "Döngü süresinin bir oranı olarak izin verilen maksimum zaman bükülmesi (uzama). Daha yüksek değerler, oldukça değişken döngülerin eşleştirilmesine olanak tanır ancak CPU maliyetini artırır. Varsayılan: 0,20 (%20).",
-          "external_end_trigger_enabled": "Döngünün tamamlanmasını tetiklemek için harici bir ikili sensörün izlenmesini etkinleştirin.",
-          "external_end_trigger": "Bir ikili sensör varlığı seçin. Bu sensör tetiklendiğinde mevcut döngü 'tamamlandı' durumuyla sona erecektir.",
-          "external_end_trigger_inverted": "Varsayılan olarak tetik, sensör AÇIK konuma getirildiğinde etkinleşir. Bunun yerine sensör KAPALI duruma geldiğinde ateşleme yapmak için bu kutuyu işaretleyin.",
-          "suppress_feedback_notifications": "Etkinleştirildiğinde, WashData yine de dahili olarak takip edecek ve geri bildirim isteyecektir ancak döngüleri onaylamanızı isteyen kalıcı bildirimler göstermeyecektir. Döngüler her zaman doğru şekilde algılandığında ve istemlerin dikkatinizi dağıttığını düşündüğünüzde kullanışlıdır.",
-          "pump_stuck_duration": "Bu kadar saniyeden sonra bir pompa döngüsü hala çalışıyorsa, bir kez ha_washdata_pump_stuck olayı tetiklenir. Sıkışan bir motoru tespit etmek için bunu kullanın (tipik karter pompası çalışması 60 saniyenin altındadır). Varsayılan: 1800 sn (30 dk). Yalnızca pompa cihazı tipi.",
-          "door_sensor_entity": "Makine kapısı için opsiyonel ikili sensör (açık = açık, kapalı = kapalı). Etkin bir döngü sırasında kapı açıldığında, WashData döngünün kasıtlı olarak duraklatıldığını onaylayacaktır. Döngü sona erdikten sonra kapı hala kapalıysa, kapı açılıncaya kadar durum 'Temiz' olarak değişir. Not: Kapının kapatılması, duraklatılmış bir döngüyü otomatik olarak DEVAM ETMEZ; devam ettirme, Döngüyü Sürdür düğmesi veya hizmet aracılığıyla manuel olarak tetiklenmelidir.",
-          "pause_cuts_power": "Döngüyü Duraklat düğmesi veya hizmeti aracılığıyla duraklatırken, yapılandırılmış anahtar varlığını da kapatın. Yalnızca bu cihaz için bir anahtar varlığı yapılandırıldığında etkili olur.",
-          "notify_unload_delay_minutes": "Döngü bittikten ve kapı bu kadar dakika boyunca açılmadıktan sonra bitiş bildirimi kanalı aracılığıyla bir bildirim gönderin (Kapı Sensörü gerektirir). Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 60 dk.",
-          "switch_entity": "Duraklatırken veya devam ettirirken geçiş yapılacak anahtar varlığı. 'Duraklatıldığında Gücü Kes' etkinleştirildiğinde gereklidir.",
-          "delay_start_detect_enabled": "Etkinleştirildiğinde, kısa bir düşük güç tüketimi artışı ve ardından sürekli bekleme gücü, gecikmeli başlatma olarak algılanır. Durum sensörü gecikme sırasında 'Başlatmayı Bekliyor' mesajını gösteriyor. Döngü gerçekten başlayana kadar hiçbir program süresi veya ilerlemesi takip edilmez. Start_threshold_w'nin drenaj ani gücünün üzerinde ayarlanması gerekir.",
-          "delay_drain_min_power": "Drenaj artışı olarak algılanacak minimum güç (W). Makinenizin tam bekleme seviyesinin hemen üstüne ayarlayın. Varsayılan: 10 W.",
-          "delay_drain_max_power": "Bir drenaj artışı için maksimum güç (W) — bunun üzerindeki patlamalar, gerçek bir döngü başlangıcı olarak değerlendirilir. start_threshold_w ayarınızın altında olmalıdır. Varsayılan: 80 W.",
-          "delay_drain_max_duration": "Tahliye sivri ucunun onaylanması için bu birkaç saniye içinde tahliye penceresinin altına düşmesi gerekir. Daha uzun ani artışlar gerçek döngü aktivitesi olarak değerlendirilir. Varsayılan: 60 sn.",
-          "delay_timeout_hours": "Güvenlik zaman aşımı: Bu kadar saatten sonra makine hala 'Başlatmayı Bekliyor' durumundaysa, WashData Kapalı olarak sıfırlanır. Varsayılan: 8 sa."
+        "sections": {
+          "suggestions_section": {
+            "name": "Önerilen Ayarlar",
+            "description": "Kullanıma hazır {suggestions_count} öğrenilmiş öneri var. Kaydetmeden önce önerilen değişiklikleri gözden geçirmek için 'Önerilen Değerleri Uygula' seçeneğini işaretleyin.",
+            "data": {
+              "apply_suggestions": "Önerilen Değerleri Uygula"
+            },
+            "data_description": {
+              "apply_suggestions": "Öğrenme algoritmasından önerilen değerlere yönelik bir inceleme adımı açmak için bu kutuyu işaretleyin. Hiçbir şey otomatik olarak kaydedilmez.\n\nÖnerilen (öğrenmeden):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} sn\n- watchdog_interval: {suggested_watchdog_interval} sn\n- no_update_active_timeout: {suggested_no_update_active_timeout} sn\n- profile_match_interval: {suggested_profile_match_interval} sn\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} sn\n{suggested_reason}"
+            }
+          },
+          "detection_section": {
+            "name": "Algılama ve Güç Eşikleri",
+            "description": "Cihazın ne zaman AÇIK veya KAPALI kabul edildiğini, enerji eşiklerini ve durum geçişlerinin zamanlamasını belirler.",
+            "data": {
+              "start_duration_threshold": "Geri Dönme Süresini Başlat",
+              "start_energy_threshold": "Enerji Kapısını Başlat (Wh)",
+              "completion_min_seconds": "Tamamlanma Minimum Çalışma Süresi (saniye)",
+              "start_threshold_w": "Başlangıç ​​Eşiği (W)",
+              "stop_threshold_w": "Durdurma Eşiği (W)",
+              "end_energy_threshold": "Son Enerji Kapısı (Wh)",
+              "running_dead_zone": "Çalışan Ölü Bölge (saniye)",
+              "end_repeat_count": "Tekrar Sayısını Sonlandır",
+              "min_off_gap": "Döngüler Arasındaki Minimum Boşluk",
+              "sampling_interval": "Örnekleme Aralığı (lar)"
+            },
+            "data_description": {
+              "start_duration_threshold": "Bu süreden (saniye) daha kısa olan kısa güç artışlarını dikkate almayın. Gerçek döngü başlamadan önce önyükleme artışlarını (ör. 2 saniye için 60 W) filtreler. Varsayılan: 5s.",
+              "start_energy_threshold": "Döngünün onaylanması için START aşamasında en az bu kadar enerji (Wh) biriktirmesi gerekir. Varsayılan: 0,005 Wh.",
+              "completion_min_seconds": "Bundan daha kısa döngüler, doğal bir şekilde bitseler bile 'kesintiye uğradı' olarak işaretlenecektir. Varsayılan: 600s.",
+              "start_threshold_w": "Bir döngüyü BAŞLATMAK için gücün bu eşiğin ÜZERİNDE yükselmesi gerekir. Bekleme gücünüzden daha yükseğe ayarlayın. Varsayılan: min_power + 1 W.",
+              "stop_threshold_w": "Bir döngüyü SONLANDIRMAK için gücün bu eşiğin ALTINA düşmesi gerekir. Gürültünün yanlış uçları tetiklemesini önlemek için sıfırın hemen üstüne ayarlayın. Varsayılan: 0,6 * min_power.",
+              "end_energy_threshold": "Döngü yalnızca son Düşmede Gecikme penceresindeki enerji bu değerin (Wh) altında olduğunda sona erer. Güç sıfıra yakın dalgalanırsa hatalı uçları önler. Varsayılan: 0,05 Wh.",
+              "running_dead_zone": "Döngü başladıktan sonra, ilk dönüş aşaması sırasında hatalı uç tespitini önlemek için bu kadar saniye boyunca güç düşüşlerini göz ardı edin. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0s.",
+              "end_repeat_count": "Döngü sonlandırılmadan önce bitiş koşulunun (kapalı_gecikme için eşiğin altındaki güç) arka arkaya karşılanması gereken sayı. Daha yüksek değerler duraklamalar sırasında hatalı sonları önler. Varsayılan: 1.",
+              "min_off_gap": "Bir döngü, bir öncekinin bitiminden bu kadar saniye sonra başlarsa, tek bir döngüde BİRLEŞTİRİLECEKTİR.",
+              "sampling_interval": "Saniye cinsinden minimum örnekleme aralığı. Bu hızdan daha hızlı olan güncellemeler dikkate alınmayacaktır. Varsayılan: 2,0 sn."
+            }
+          },
+          "matching_section": {
+            "name": "Profil Eşleştirme ve Öğrenme",
+            "description": "WashData'nın çalışan döngüleri öğrenilmiş profillerle ne kadar agresif biçimde eşleştireceğini ve ne zaman geri bildirim isteyeceğini belirler.",
+            "data": {
+              "profile_match_min_duration_ratio": "Profil Eşleşmesi Minimum Süre Oranı (0,1-1,0)",
+              "profile_match_interval": "Profil Eşleşme Aralığı (saniye)",
+              "profile_match_threshold": "Profil Eşleşme Eşiği",
+              "profile_unmatch_threshold": "Profil Eşleşmeme Eşiği",
+              "auto_label_confidence": "Otomatik Etiket Güveni (0-1)",
+              "learning_confidence": "Geribildirim Talebi Güven (0-1)",
+              "suppress_feedback_notifications": "Geri Bildirim Bildirimlerini Bastır",
+              "duration_tolerance": "Süre Toleransı (0-0,5)",
+              "smoothing_window": "Pencereyi Pürüzsüzleştirme (örnekler)",
+              "profile_duration_tolerance": "Profil Eşleşme Süresi Toleransı (0-0,5)"
+            },
+            "data_description": {
+              "profile_match_min_duration_ratio": "Profil eşleştirme için minimum süre oranı. Çalıştırma döngüsünün eşleşmesi için en azından profil süresinin bu kısmı kadar olması gerekir. Daha düşük = daha erken eşleşme. Varsayılan: 0,50 (%50).",
+              "profile_match_interval": "Bir döngü sırasında profil eşleştirmenin ne sıklıkta (saniye olarak) deneneceği. Daha düşük değerler daha hızlı algılama sağlar ancak daha fazla CPU kullanır. Varsayılan: 300s (5 dakika).",
+              "profile_match_threshold": "Bir profili eşleşme olarak değerlendirmek için gereken minimum DTW benzerlik puanı (0,0–1,0). Daha yüksek = daha sıkı eşleştirme, daha az yanlış pozitif. Varsayılan: 0,4.",
+              "profile_unmatch_threshold": "Daha önce eşleşen profilin reddedildiği DTW benzerlik puanı (0,0–1,0). Titremeyi önlemek için eşleşme eşiğinden düşük olmalıdır. Varsayılan: 0,35.",
+              "auto_label_confidence": "Tamamlandığında bu güven düzeyinde veya üzerinde döngüleri otomatik olarak etiketleyin (0,0–1,0).",
+              "learning_confidence": "Bir etkinlik aracılığıyla kullanıcı doğrulaması istemek için minimum güven (0,0–1,0).",
+              "suppress_feedback_notifications": "Etkinleştirildiğinde, WashData yine de dahili olarak takip edecek ve geri bildirim isteyecektir ancak döngüleri onaylamanızı isteyen kalıcı bildirimler göstermeyecektir. Döngüler her zaman doğru şekilde algılandığında ve istemlerin dikkatinizi dağıttığını düşündüğünüzde kullanışlıdır.",
+              "duration_tolerance": "Bir çalıştırma sırasında kalan süre tahminlerine yönelik tolerans (0,0–0,5, %0–50'ye karşılık gelir).",
+              "smoothing_window": "Hareketli ortalama yumuşatma için kullanılan son güç okumalarının sayısı.",
+              "profile_duration_tolerance": "Toplam süre farkı için profil eşleştirme tarafından kullanılan tolerans (0,0–0,5). Varsayılan davranış: ±%25."
+            }
+          },
+          "timing_section": {
+            "name": "Zamanlama, Bakım ve Hata Ayıklama",
+            "description": "Watchdog, ilerleme sıfırlama, otomatik bakım ve hata ayıklama varlıklarının gösterilmesi.",
+            "data": {
+              "watchdog_interval": "Watchdog Aralığı (saniye)",
+              "no_update_active_timeout": "Güncelleme Olmayan Zaman Aşımı (s)",
+              "progress_reset_delay": "İlerleme Sıfırlama Gecikmesi (saniye)",
+              "auto_maintenance": "Otomatik Bakımı Etkinleştir",
+              "expose_debug_entities": "Hata Ayıklama Varlıklarını Açığa Çıkarın",
+              "save_debug_traces": "Hata Ayıklama İzlerini Kaydet"
+            },
+            "data_description": {
+              "watchdog_interval": "Çalışırken bekçi köpeği kontrolleri arasındaki saniyeler. Varsayılan: 5s. UYARI: Yanlış duraklamalardan kaçınmak için bunun sensörünüzün güncelleme aralığından DAHA YÜKSEK olduğundan emin olun (örn. sensör her 60 saniyede bir güncelleniyorsa 65 saniye+ kullanın).",
+              "no_update_active_timeout": "Değişiklik üzerine yayınlama sensörleri için: yalnızca bu kadar saniye boyunca hiçbir güncelleme gelmezse AKTİF bir döngüyü zorla sonlandırın. Düşük güçte tamamlama hala Kapanma Gecikmesini kullanıyor.",
+              "progress_reset_delay": "Bir döngü tamamlandıktan sonra (%100), ilerlemeyi %0'a sıfırlamadan önce bu kadar saniye boşta bekleyin. Varsayılan: 300s.",
+              "auto_maintenance": "Otomatik bakımı etkinleştirin (örneklerin onarılması, parçaların birleştirilmesi).",
+              "expose_debug_entities": "Hata ayıklama için gelişmiş sensörleri (Güven, Faz, Belirsizlik) gösterin.",
+              "save_debug_traces": "Ayrıntılı sıralama ve güç izleme verilerini geçmişte saklayın (Depolama kullanımını artırır)."
+            }
+          },
+          "anti_wrinkle_section": {
+            "name": "Kırışıklık Karşıtı Kalkan (Kurutucular)",
+            "description": "Hayalet döngüleri önlemek için döngü sonrası tambur dönüşlerini yok sayın. Yalnızca kurutucu / çamaşır-kurutucu için.",
+            "data": {
+              "anti_wrinkle_enabled": "Kırışıklık Karşıtı Kalkan (Yalnızca Kurutucu)",
+              "anti_wrinkle_max_power": "Kırışıklık Karşıtı Maksimum Güç (W)",
+              "anti_wrinkle_max_duration": "Kırışıklık Karşıtı Maksimum Süre (ler)",
+              "anti_wrinkle_exit_power": "Kırışıklık Karşıtı Çıkış Gücü (W)"
+            },
+            "data_description": {
+              "anti_wrinkle_enabled": "Hayalet döngüleri önlemek için, bir döngü sona erdikten sonra kısa süreli düşük güçlü tambur dönüşlerini göz ardı edin (yalnızca kurutucu/çamaşır-kurutucu).",
+              "anti_wrinkle_max_power": "Bu güçteki veya altındaki patlamalar, yeni döngüler yerine kırışık önleyici dönüşler olarak değerlendirilir. Yalnızca Kırışıklık Karşıtı Kalkan etkinleştirildiğinde geçerlidir.",
+              "anti_wrinkle_max_duration": "Kırışıklık karşıtı rotasyon olarak değerlendirilecek maksimum patlama uzunluğu. Yalnızca Kırışıklık Karşıtı Kalkan etkinleştirildiğinde geçerlidir.",
+              "anti_wrinkle_exit_power": "Güç bu seviyenin altına düşerse, kırışıklık önleme işleminden hemen çıkın (gerçek kapalı). Yalnızca Kırışıklık Karşıtı Kalkan etkinleştirildiğinde geçerlidir."
+            }
+          },
+          "delay_start_section": {
+            "name": "Gecikmeli Başlatma Algılama",
+            "description": "Sürekli düşük güçlü bekleme durumunu, döngü gerçekten başlayana kadar 'Başlatmayı Bekliyor' durumu olarak değerlendirin.",
+            "data": {
+              "delay_start_detect_enabled": "Gecikmeli Başlatma Algılamayı Etkinleştir",
+              "delay_confirm_seconds": "Gecikmeli Başlatma: Bekleme Onay Süresi (s)",
+              "delay_timeout_hours": "Gecikmeli Başlatma: Maksimum Bekleme Süresi (saat)"
+            },
+            "data_description": {
+              "delay_start_detect_enabled": "Etkinleştirildiğinde, kısa bir düşük güç tüketimi artışı ve ardından sürekli bekleme gücü, gecikmeli başlatma olarak algılanır. Durum sensörü gecikme sırasında 'Başlatmayı Bekliyor' mesajını gösteriyor. Döngü gerçekten başlayana kadar hiçbir program süresi veya ilerlemesi takip edilmez. Start_threshold_w'nin drenaj ani gücünün üzerinde ayarlanması gerekir.",
+              "delay_confirm_seconds": "WashData 'Başlatmayı Bekliyor' durumuna geçmeden önce güç, bu kadar saniye boyunca Durdurma Eşiği (W) ile Başlatma Eşiği (W) arasında kalmalıdır. Bu, menü gezinmesi sırasında oluşan kısa tepe değerlerini filtreler. Varsayılan: 60 s.",
+              "delay_timeout_hours": "Güvenlik zaman aşımı: Bu kadar saatten sonra makine hala 'Başlatmayı Bekliyor' durumundaysa, WashData Kapalı olarak sıfırlanır. Varsayılan: 8 sa."
+            }
+          },
+          "external_triggers_section": {
+            "name": "Harici Tetikleyiciler, Kapı ve Duraklatma",
+            "description": "İsteğe bağlı harici döngü sonu sensörü, duraklatma / boşaltma algılaması için kapı sensörü ve duraklatma sırasında gücü kesen anahtar.",
+            "data": {
+              "external_end_trigger_enabled": "Harici Döngü Sonu Tetikleyicisini Etkinleştir",
+              "external_end_trigger": "Harici Döngü Sonu Sensörü",
+              "external_end_trigger_inverted": "Tetikleme Mantığını Tersine Çevir (Tetikleme KAPALI)",
+              "door_sensor_entity": "Kapı Sensörü",
+              "pause_cuts_power": "Duraklatıldığında Gücü Kesin",
+              "switch_entity": "Varlık Değiştir (Güç Kesintisini Duraklatmak için)",
+              "notify_unload_delay_minutes": "Çamaşır Bekleniyor Bildirim Gecikmesi (dk)"
+            },
+            "data_description": {
+              "external_end_trigger_enabled": "Döngünün tamamlanmasını tetiklemek için harici bir ikili sensörün izlenmesini etkinleştirin.",
+              "external_end_trigger": "Bir ikili sensör varlığı seçin. Bu sensör tetiklendiğinde mevcut döngü 'tamamlandı' durumuyla sona erecektir.",
+              "external_end_trigger_inverted": "Varsayılan olarak tetik, sensör AÇIK konuma getirildiğinde etkinleşir. Bunun yerine sensör KAPALI duruma geldiğinde ateşleme yapmak için bu kutuyu işaretleyin.",
+              "door_sensor_entity": "Makine kapısı için opsiyonel ikili sensör (açık = açık, kapalı = kapalı). Etkin bir döngü sırasında kapı açıldığında, WashData döngünün kasıtlı olarak duraklatıldığını onaylayacaktır. Döngü sona erdikten sonra kapı hala kapalıysa, kapı açılıncaya kadar durum 'Temiz' olarak değişir. Not: Kapının kapatılması, duraklatılmış bir döngüyü otomatik olarak DEVAM ETMEZ; devam ettirme, Döngüyü Sürdür düğmesi veya hizmet aracılığıyla manuel olarak tetiklenmelidir.",
+              "pause_cuts_power": "Döngüyü Duraklat düğmesi veya hizmeti aracılığıyla duraklatırken, yapılandırılmış anahtar varlığını da kapatın. Yalnızca bu cihaz için bir anahtar varlığı yapılandırıldığında etkili olur.",
+              "switch_entity": "Duraklatırken veya devam ettirirken geçiş yapılacak anahtar varlığı. 'Duraklatıldığında Gücü Kes' etkinleştirildiğinde gereklidir.",
+              "notify_unload_delay_minutes": "Döngü bittikten ve kapı bu kadar dakika boyunca açılmadıktan sonra bitiş bildirimi kanalı aracılığıyla bir bildirim gönderin (Kapı Sensörü gerektirir). Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 60 dk."
+            }
+          },
+          "pump_section": {
+            "name": "Pompa İzleyici",
+            "description": "Yalnızca pompa cihaz türü içindir. Bir pompa döngüsü bu süreden uzun sürerse olay tetikler.",
+            "data": {
+              "pump_stuck_duration": "Pompa Sıkışmış Uyarı Eşiği (ler) (Yalnızca Pompa)"
+            },
+            "data_description": {
+              "pump_stuck_duration": "Bu kadar saniyeden sonra bir pompa döngüsü hala çalışıyorsa, bir kez ha_washdata_pump_stuck olayı tetiklenir. Sıkışan bir motoru tespit etmek için bunu kullanın (tipik karter pompası çalışması 60 saniyenin altındadır). Varsayılan: 1800 sn (30 dk). Yalnızca pompa cihazı tipi."
+            }
+          }
         }
       },
       "diagnostics": {
         "title": "Teşhis ve Bakım",
-        "description": "Parçalanmış döngüleri birleştirmek veya depolanan verileri taşımak gibi bakım işlemlerini gerçekleştirin.\n\n**Depolama Kullanımı**\n\n- Dosya Boyutu: {file_size_kb} KB\n- Döngüler: {cycle_count}\n- Profiller: {profile_count}\n- Hata Ayıklama İzleri: {debug_count}"
+        "description": "Parçalanmış döngüleri birleştirmek veya depolanan verileri taşımak gibi bakım işlemlerini gerçekleştirin.\n\n**Depolama Kullanımı**\n\n- Dosya Boyutu: {file_size_kb} KB\n- Döngüler: {cycle_count}\n- Profiller: {profile_count}\n- Hata Ayıklama İzleri: {debug_count}",
+        "menu_options": {
+          "reprocess_history": "Bakım: Verileri Yeniden İşleyin ve Optimize Edin",
+          "clear_debug_data": "Hata Ayıklama Verilerini Temizle (Yer açın)",
+          "wipe_history": "Bu cihaza ait TÜM verileri silin (geri döndürülemez)",
+          "export_import": "JSON'u ayarlarla dışa/içe aktar (kopyala/yapıştır)",
+          "menu_back": "← Geri"
+        }
       },
       "clear_debug_data": {
         "title": "Hata Ayıklama Verilerini Temizle",
@@ -274,36 +326,52 @@
       "manage_cycles": {
         "title": "Döngüleri Yönet",
         "description": "Son döngüler:\n{recent_cycles}",
-        "data": {
-          "action": "Aksiyon"
+        "menu_options": {
+          "auto_label_cycles": "Eski Döngüleri Otomatik Etiketle",
+          "select_cycle_to_label": "Etikete Özel Döngü",
+          "select_cycle_to_delete": "Döngüyü Sil",
+          "interactive_editor": "Birleştir/Böl İnteraktif Düzenleyici",
+          "trim_cycle_select": "Döngü Verilerini Kırp",
+          "menu_back": "← Geri"
         }
       },
       "manage_cycles_empty": {
         "title": "Döngüleri Yönet",
         "description": "Henüz kayıtlı döngü yok.",
-        "data": {
-          "action": "Aksiyon"
+        "menu_options": {
+          "auto_label_cycles": "Eski Döngüleri Otomatik Etiketle",
+          "menu_back": "← Geri"
         }
       },
       "manage_profiles": {
         "title": "Profilleri Yönet",
         "description": "Profil Özeti:\n{profile_summary}",
-        "data": {
-          "action": "Aksiyon"
+        "menu_options": {
+          "create_profile": "Yeni Profil Oluştur",
+          "edit_profile": "Profili Düzenle/Yeniden Adlandır",
+          "delete_profile_select": "Profili Sil",
+          "profile_stats": "Profil İstatistikleri",
+          "cleanup_profile": "Geçmişi Temizleme - Grafikleme ve Silme",
+          "assign_profile_phases_select": "Faz Aralıklarını Atayın",
+          "menu_back": "← Geri"
         }
       },
       "manage_profiles_empty": {
         "title": "Profilleri Yönet",
         "description": "Henüz profil oluşturulmadı.",
-        "data": {
-          "action": "Aksiyon"
+        "menu_options": {
+          "create_profile": "Yeni Profil Oluştur",
+          "menu_back": "← Geri"
         }
       },
       "manage_phase_catalog": {
         "title": "Aşama Kataloğunu Yönet",
         "description": "Aşama kataloğu (bu cihaz için varsayılanlar + özel aşamalar):\n{phase_summary}",
-        "data": {
-          "action": "Aksiyon"
+        "menu_options": {
+          "phase_catalog_create": "Yeni Aşama Oluştur",
+          "phase_catalog_edit_select": "Aşamayı Düzenle",
+          "phase_catalog_delete": "Aşamayı Sil",
+          "menu_back": "← Geri"
         }
       },
       "phase_catalog_create": {
@@ -340,8 +408,14 @@
       "assign_profile_phases": {
         "title": "Faz Aralıklarını Atayın",
         "description": "Profil için aşama önizlemesi: **{profile_name}**\n\n{timeline_svg}\n\n**Mevcut aralıklar:**\n{current_ranges}\n\nAralıkları eklemek, düzenlemek, silmek veya kaydetmek için aşağıdaki işlemleri kullanın.",
-        "data": {
-          "action": "Aksiyon"
+        "menu_options": {
+          "assign_profile_phases_add": "Faz Aralığı Ekle",
+          "assign_profile_phases_edit_select": "Faz Aralığını Düzenle",
+          "assign_profile_phases_delete": "Faz Aralığını Sil",
+          "phase_ranges_clear": "Tüm Aralıkları Temizle",
+          "assign_profile_phases_auto_detect": "Aşamaları Otomatik Algıla",
+          "phase_ranges_save": "Kaydet ve Geri Dön",
+          "menu_back": "← Geri"
         }
       },
       "assign_profile_phases_add": {
@@ -494,8 +568,11 @@
       "interactive_editor": {
         "title": "Birleştir/Böl İnteraktif Düzenleyici",
         "description": "Adet geçmişinizde gerçekleştirilecek manuel işlemi seçin.",
-        "data": {
-          "editor_action": "Aksiyon"
+        "menu_options": {
+          "editor_split": "Bir Döngüyü Böl (Boşlukları Bul)",
+          "editor_merge": "Döngüleri Birleştir (Parçaları birleştir)",
+          "editor_delete": "Döngüleri Sil",
+          "menu_back": "← Geri"
         }
       },
       "editor_select": {
@@ -529,7 +606,21 @@
         "title": "Bölünmüş Yapılandırma",
         "description": "Bu döngüyü bölmek için hassasiyeti ayarlayın. Bundan daha uzun herhangi bir rölanti boşluğu bölünmeye neden olacaktır.",
         "data": {
-          "min_gap_seconds": "Bölünmüş Boşluk Eşiği (saniye)"
+          "split_mode": "Bölme yöntemi"
+        }
+      },
+      "editor_split_auto_params": {
+        "title": "Otomatik Bölme Yapılandırması",
+        "description": "Bu döngünün bölünmesi için hassasiyeti ayarlayın. Bundan daha uzun herhangi bir boşta kalma aralığı bir bölünmeye neden olur.",
+        "data": {
+          "min_gap_seconds": "Bölme Boşluğu Eşiği (saniye)"
+        }
+      },
+      "editor_split_manual_params": {
+        "title": "Manuel Bölme Zaman Damgaları",
+        "description": "{preview_md}Döngü penceresi: **{cycle_start_wallclock} → {cycle_end_wallclock}** tarihinde {cycle_date}.\n\nBir veya daha fazla bölme zaman damgası (`HH:MM` veya `HH:MM:SS`) girin, her satıra bir tane. Döngü her zaman damgasında kesilir — N zaman damgası N+1 segment üretir.",
+        "data": {
+          "split_timestamps": "Bölme Zaman Damgaları"
         }
       },
       "reprocess_history": {
@@ -555,8 +646,13 @@
       "record_cycle": {
         "title": "Kayıt Döngüsü",
         "description": "Müdahale olmadan temiz bir profil oluşturmak için bir döngüyü manuel olarak kaydedin.\n\nDurum: **{status}**\nSüre: {duration}sn\nÖrnekler: {samples}",
-        "data": {
-          "action": "Aksiyon"
+        "menu_options": {
+          "record_refresh": "Durumu Yenile",
+          "record_stop": "Kaydı Durdur (Kaydet ve İşle)",
+          "record_start": "Yeni Kaydı Başlat",
+          "record_process": "Son Kaydı İşle (Kırp ve Kaydet)",
+          "record_discard": "Son Kaydı Sil",
+          "menu_back": "← Geri"
         }
       },
       "record_process": {
@@ -571,14 +667,33 @@
       },
       "learning_feedbacks": {
         "title": "Öğrenme Geri Bildirimleri",
-        "description": "İşlenecek bir döngü inceleme isteği seçin.",
+        "description": "Bekleyen geri bildirim: {count}\n\n{pending_table}\n\nİşlenecek bir döngü inceleme isteği seçin.",
+        "menu_options": {
+          "learning_feedbacks_pick": "Bekleyen bir geri bildirimi incele",
+          "learning_feedbacks_dismiss_all": "Bekleyen tüm geri bildirimleri kapat",
+          "menu_back": "← Geri"
+        }
+      },
+      "learning_feedbacks_pick": {
+        "title": "İncelenecek geri bildirimi seçin",
+        "description": "Açılacak bir döngü inceleme isteği seçin.",
         "data": {
           "selected_feedback": "İncelenecek Döngüyü Seçin"
         }
       },
       "learning_feedbacks_empty": {
         "title": "Öğrenme Geri Bildirimleri",
-        "description": "Bekleyen geri bildirim isteği bulunamadı."
+        "description": "Bekleyen geri bildirim isteği bulunamadı.",
+        "menu_options": {
+          "menu_back": "← Geri"
+        }
+      },
+      "learning_feedbacks_dismiss_all": {
+        "title": "Bekleyen Tüm Geri Bildirimleri Reddet",
+        "description": "**{count}** bekleyen geri bildirim isteğini reddetmek üzeresiniz. Reddedilen döngüler geçmişinizde kalır ancak yeni öğrenme sinyaline katkıda bulunmaz. Bu işlem geri alınamaz.\n\n✅ Tümünü reddetmek için aşağıdaki kutuyu işaretleyin ve **Gönder**'i tıklayın.\n❌ İşaretlemeden bırakın ve iptal edip geri dönmek için **Gönder**'i tıklayın.",
+        "data": {
+          "confirm_dismiss_all": "Onayla: bekleyen tüm geri bildirim isteklerini kapat"
+        }
       },
       "resolve_feedback": {
         "title": "Geri Bildirimi Çözümleyin",
@@ -587,13 +702,6 @@
           "action": "Ne yapmak istersin?",
           "corrected_profile": "Doğru Program (düzeltiliyorsa)",
           "corrected_duration": "Saniye cinsinden Doğru Süre (düzeltiliyorsa)"
-        }
-      },
-      "apply_suggestions_confirm": {
-        "title": "Önerilen Değişiklikleri İnceleyin",
-        "description": "WashData, **{pending_count}** önerilen değerlerin uygulanmasını buldu.\n\nDeğişiklikler:\n{changes}\n\n✅ Bu değişiklikleri hemen uygulamak ve kaydetmek için aşağıdaki kutuyu işaretleyin ve **Gönder**'i tıklayın.\n❌ İşaretlemeden bırakın ve iptal edip geri dönmek için **Gönder**'i tıklayın.",
-        "data": {
-          "confirm_apply_suggestions": "Bu değişiklikleri uygulayın ve kaydedin"
         }
       },
       "trim_cycle_select": {
@@ -629,6 +737,9 @@
     },
     "error": {
       "import_failed": "İçe aktarma başarısız oldu. Lütfen geçerli bir WashData dışa aktarma JSON'u yapıştırın.",
+      "select_exactly_one": "Bu işlem için tam olarak bir döngü seçin.",
+      "select_at_least_one": "Bu işlem için en az bir döngü seçin.",
+      "select_at_least_two": "Bu işlem için en az iki döngü seçin.",
       "profile_exists": "Bu ada sahip bir profil zaten mevcut",
       "rename_failed": "Profil yeniden adlandırılamadı. Profil mevcut olmayabilir veya yeni ad zaten alınmış olabilir.",
       "assignment_failed": "Profil döngüye atanamadı",
@@ -648,12 +759,17 @@
       "suggestions_ready_notification_message": "**Önerilen Ayarlar** sensörü artık **{count}** uygulanabilir öneriler raporluyor.\n\nBunları incelemek ve uygulamak için: **Ayarlar > Cihazlar ve Hizmetler > WashData > Yapılandır > Gelişmiş Ayarlar > Önerilen Değerleri Uygula**.\n\nÖneriler isteğe bağlıdır ve kaydetmeden önce incelenmek üzere gösterilir.",
       "trim_range_invalid": "Başlangıç ​​bitişten önce olmalıdır. Lütfen trim noktalarınızı ayarlayın.",
       "trim_failed": "Kırpma başarısız oldu. Döngü artık mevcut olmayabilir veya pencere boş olabilir.",
+      "invalid_split_timestamp": "Zaman damgası geçersiz veya döngü penceresinin dışında. Döngü penceresi içinde HH:MM veya HH:MM:SS kullanın.",
+      "no_split_segments_found": "Bu zaman damgalarından geçerli segmentler üretilemedi. Her zaman damgasının döngü penceresi içinde olduğundan ve segmentlerin en az 1 dakika uzunluğunda olduğundan emin olun.",
       "auto_tune_suggestion": "{device_type} {device_title} hayalet döngüleri algıladı. Önerilen min_güç değişikliği: {current_min}W -> {new_min}W (otomatik olarak uygulanmaz).",
       "auto_tune_title": "WashData Otomatik Ayarlama",
       "auto_tune_fallback": "{device_type} {device_title} hayalet döngüleri algıladı. Önerilen min_güç değişikliği: {current_min}W -> {new_min}W (otomatik olarak uygulanmaz)."
     },
     "abort": {
       "no_cycles_found": "Döngü bulunamadı",
+      "no_split_segments_found": "Seçilen döngüde bölünebilir segment bulunamadı.",
+      "cycle_not_found": "Seçilen döngü yüklenemedi.",
+      "no_power_data": "Seçilen döngü için güç izleme verileri mevcut değil.",
       "no_profiles_found": "Hiçbir profil bulunamadı. Önce bir profil oluşturun.",
       "no_profiles_for_matching": "Eşleştirilecek profil yok. Önce profiller oluşturun.",
       "no_unlabeled_cycles": "Tüm döngüler zaten etiketlenmiştir",
@@ -661,8 +777,7 @@
       "no_predictions": "Tahmin yok",
       "no_custom_phases": "Özel aşama bulunamadı.",
       "reprocess_success": "{count} döngü başarıyla yeniden işlendi.",
-      "debug_data_cleared": "{count} döngüdeki hata ayıklama verileri başarıyla temizlendi.",
-      "no_power_data": "Seçilen döngü için güç izleme verileri mevcut değil."
+      "debug_data_cleared": "{count} döngüdeki hata ayıklama verileri başarıyla temizlendi."
     }
   },
   "selector": {
@@ -682,6 +797,9 @@
         "all_device_types": "Tüm Cihaz Tipleri",
         "current_suffix": "(akım)",
         "editor_select_info": "Bölmek için 1 döngüyü veya birleştirmek için 2+ döngüyü seçin.",
+        "editor_select_info_split": "Bölmek için 1 döngü seçin.",
+        "editor_select_info_merge": "Birleştirmek için 2+ döngü seçin.",
+        "editor_select_info_delete": "Silmek için 1+ döngü seçin.",
         "no_cycles_recorded": "Henüz kayıtlı döngü yok.",
         "profile_summary_line": "- **{name}**: {count} döngü, {avg}m ort.",
         "no_profiles_created": "Henüz profil oluşturulmadı.",
@@ -722,6 +840,10 @@
         "split_preview_confirm_fmt": "Bu döngüyü {count} ayrı döngüye bölmek için Onayla'yı tıklayın.",
         "merge_preview_title": "Önizlemeyi Birleştir",
         "merge_preview_joining_fmt": "{count} döngüye katılıyoruz. Boşluklar 0W okumalarıyla doldurulacaktır.",
+        "editor_delete_preview_title": "Silme Önizlemesi",
+        "editor_delete_preview_intro": "Seçilen döngüler kalıcı olarak silinecek:",
+        "editor_delete_preview_confirm": "Bu döngü kayıtlarını kalıcı olarak silmek için Onayla'ya tıklayın.",
+        "no_power_preview": "*Önizleme için güç verisi yok.*",
         "profile_comparison": "Profil Karşılaştırması",
         "actual_cycle_label": "Bu döngü (gerçek)",
         "storage_usage_header": "Depolama Kullanımı",
@@ -735,10 +857,21 @@
         "assign_phases_help": "Aralıkları eklemek, düzenlemek, silmek veya kaydetmek için aşağıdaki işlemleri kullanın.",
         "profile_summary_header": "Profil Özeti",
         "recent_cycles_header": "Son döngüler",
-        "no_power_preview": "*Önizleme için güç verisi yok.*",
         "trim_cycle_preview_title": "Döngü Kırpma Önizlemesi",
         "trim_cycle_preview_no_data": "Bu döngü için güç verisi mevcut değil.",
-        "trim_cycle_preview_kept_suffix": "tutulmuş"
+        "trim_cycle_preview_kept_suffix": "tutulmuş",
+        "table_program": "programı",
+        "table_when": "Ne Zaman",
+        "table_length": "Süre",
+        "table_match": "Eşleşme",
+        "table_profile": "Profil",
+        "table_cycles": "Döngüler",
+        "table_avg_length": "Ort. Süre",
+        "table_last_run": "Son Çalıştırma",
+        "table_avg_energy": "Ort. Enerji",
+        "table_detected_program": "Algılanan Program",
+        "table_confidence": "Kendinden emin",
+        "table_reported": "Bildirildi"
       }
     },
     "interactive_editor_action": {
@@ -746,6 +879,12 @@
         "split": "Bir Döngüyü Böl (Boşlukları Bul)",
         "merge": "Döngüleri Birleştir (Parçaları birleştir)",
         "delete": "Döngüleri Sil"
+      }
+    },
+    "split_mode": {
+      "options": {
+        "auto": "Boşta kalma aralıklarını otomatik algıla",
+        "manual": "Manuel zaman damgaları"
       }
     },
     "diagnostics_action": {
@@ -1133,6 +1272,15 @@
     }
   },
   "exceptions": {
+    "device_id_required": {
+      "message": "Geçerli bir cihaz_kimliği gerekli."
+    },
+    "cycle_id_required": {
+      "message": "Geçerli bircycle_id gereklidir."
+    },
+    "profile_name_required": {
+      "message": "Geçerli bir profil_adı gerekli."
+    },
     "device_not_found": {
       "message": "Cihaz bulunamadı."
     },
@@ -1150,15 +1298,6 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s, trim_start_s'den büyük olmalıdır."
-    },
-    "device_id_required": {
-      "message": "Geçerli bir cihaz_kimliği gerekli."
-    },
-    "cycle_id_required": {
-      "message": "Geçerli bircycle_id gereklidir."
-    },
-    "profile_name_required": {
-      "message": "Geçerli bir profil_adı gerekli."
     }
   }
 }

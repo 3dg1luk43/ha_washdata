@@ -76,16 +76,16 @@
           "notify_people": "Liwwerung verzögeren bis dës Leit doheem sinn",
           "notify_only_when_home": "Notifikatiounen verzögeren bis déi gewielte Persoun doheem ass",
           "notify_fire_events": "Automatisatioun Eventer ausléisen",
+          "notify_start_services": "Cycle Start - Notifikatiounsziler",
+          "notify_finish_services": "Cycle Finish - Notifikatiounsziler",
+          "notify_live_services": "Live Progress - Notifikatiounsziler",
           "notify_before_end_minutes": "Virof-Notifikatioun (Minutten virum Enn)",
           "notify_title": "Notifikatioun Titel",
           "notify_icon": "Notifikatioun Ikon",
           "notify_start_message": "Start Message Format",
           "notify_finish_message": "Fäerdeg Message Format",
           "notify_pre_complete_message": "Virof-Ofschloss Message Format",
-          "show_advanced": "Advanced Astellungen änneren (nächste Schrëtt)",
-          "notify_start_services": "Cycle Start - Notifikatiounsziler",
-          "notify_finish_services": "Cycle Finish - Notifikatiounsziler",
-          "notify_live_services": "Live Progress - Notifikatiounsziler"
+          "show_advanced": "Advanced Astellungen änneren (nächste Schrëtt)"
         },
         "data_description": {
           "apply_suggestions": "Kuckt dës Këscht fir Wäerter ze kopéieren, déi vum Léieralgorithmus an d'Form proposéiert ginn. Iwwerpréift ier Dir späichert.\n\nProposéiert (vum Léieren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
@@ -97,15 +97,15 @@
           "notify_people": "Leit Entitéite benotzt fir Präsenz-Gating. Wann aktivéiert, gëtt d'Notifikatiounsliwwerung verspéit bis op d'mannst eng gewielte Persoun doheem ass.",
           "notify_only_when_home": "Wann aktivéiert, Notifikatiounen verzögeren bis op d'mannst eng gewielte Persoun doheem ass.",
           "notify_fire_events": "Wann aktivéiert, Home Assistant Eventer fir Zyklusstart an Enn ausléisen (ha_washdata_cycle_started an ha_washdata_cycle_ended) fir Automatisatiounen ze féieren.",
+          "notify_start_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus ufänkt. Loosst eidel fir Start Notifikatiounen ze sprangen.",
+          "notify_finish_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus fäerdeg ass oder bal fäerdeg ass. Loosst eidel fir fäerdeg Notifikatiounen ze sprangen.",
+          "notify_live_services": "Een oder méi Notifikatiounsservicer fir Live Fortschrëtterupdates ze kréien wärend den Zyklus leeft (nëmmen mobil Begleeder App). Loosst eidel fir Live Updates ze sprangen.",
           "notify_before_end_minutes": "Minutten virum geschätzte Enn vum Zyklus fir eng Notifikatioun auszeléisen. Op 0 setzen fir auszeschalten. Standard: 0.",
           "notify_title": "Benotzerdefinéierte Titel fir Notifikatiounen. Ënnerstëtzt {device} Plazhalter.",
           "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:washing-machine). Eidel loossen fir ouni Ikon ze schécken.",
           "notify_start_message": "Message geschéckt wann en Zyklus ufänkt. Ënnerstëtzt {device} Plazhalter.",
           "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program}, {energy_kwh}, {cost} Plazhalter.",
-          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter.",
-          "notify_start_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus ufänkt. Loosst eidel fir Start Notifikatiounen ze sprangen.",
-          "notify_finish_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus fäerdeg ass oder bal fäerdeg ass. Loosst eidel fir fäerdeg Notifikatiounen ze sprangen.",
-          "notify_live_services": "Een oder méi Notifikatiounsservicer fir Live Fortschrëtterupdates ze kréien wärend den Zyklus leeft (nëmmen mobil Begleeder App). Loosst eidel fir Live Updates ze sprangen."
+          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter."
         }
       },
       "notifications": {
@@ -116,163 +116,208 @@
           "notify_people": "Liwwerung verzögeren bis dës Leit doheem sinn",
           "notify_only_when_home": "Notifikatiounen verzögeren bis déi gewielte Persoun doheem ass",
           "notify_fire_events": "Automatisatioun Eventer ausléisen",
+          "notify_start_services": "Cycle Start - Notifikatiounsziler",
+          "notify_finish_services": "Cycle Finish - Notifikatiounsziler",
+          "notify_live_services": "Live Progress - Notifikatiounsziler",
           "notify_before_end_minutes": "Virof-Notifikatioun (Minutten virum Enn)",
           "notify_live_interval_seconds": "Live Update Intervall (Sekonnen)",
           "notify_live_overrun_percent": "Live Update Iwwerlaf Toleranz (%)",
+          "notify_live_chronometer": "Chronometer Countdown Timer",
           "notify_title": "Notifikatioun Titel",
           "notify_icon": "Notifikatioun Ikon",
           "notify_start_message": "Start Message Format",
           "notify_finish_message": "Fäerdeg Message Format",
           "notify_pre_complete_message": "Virof-Ofschloss Message Format",
-          "notify_start_services": "Cycle Start - Notifikatiounsziler",
-          "notify_finish_services": "Cycle Finish - Notifikatiounsziler",
-          "notify_live_services": "Live Progress - Notifikatiounsziler",
-          "notify_live_chronometer": "Chronometer Countdown Timer",
           "energy_price_entity": "Energiepräis - Entitéit (optional)",
-          "energy_price_static": "Energiepräis - Statesche Wäert (optional)"
+          "energy_price_static": "Energiepräis - Statesche Wäert (optional)",
+          "go_back": "Zréckgoen ouni ze späicheren"
         },
         "data_description": {
+          "go_back": "Hakt dëst un a klickt op Ofschécken, fir all Ännerungen hei uewen ze verwerfen an an den Haaptmenu zréckzegoen.",
           "notify_actions": "Fakultativ Home Assistant Aktiounssequenz fir Notifikatiounen ze lafen (Skripte, Notify, TTS, etc.). Wann agestallt, lafen Aktiounen virum Fallback Notify Service.",
           "notify_people": "Leit Entitéite benotzt fir Präsenz-Gating. Wann aktivéiert, gëtt d'Notifikatiounsliwwerung verspéit bis op d'mannst eng gewielte Persoun doheem ass.",
           "notify_only_when_home": "Wann aktivéiert, Notifikatiounen verzögeren bis op d'mannst eng gewielte Persoun doheem ass.",
           "notify_fire_events": "Wann aktivéiert, Home Assistant Eventer fir Zyklusstart an Enn ausléisen (ha_washdata_cycle_started an ha_washdata_cycle_ended) fir Automatisatiounen ze féieren.",
+          "notify_start_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus ufänkt (z.B. notify.mobile_app_my_phone). Loosst eidel fir Start Notifikatiounen ze sprangen.",
+          "notify_finish_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus fäerdeg ass oder bal fäerdeg ass. Loosst eidel fir fäerdeg Notifikatiounen ze sprangen.",
+          "notify_live_services": "Een oder méi Notifikatiounsservicer fir Live Fortschrëtterupdates ze kréien wärend den Zyklus leeft (nëmmen mobil Begleeder App). Loosst eidel fir Live Updates ze sprangen.",
           "notify_before_end_minutes": "Minutten virum geschätzte Enn vum Zyklus fir eng Notifikatioun auszeléisen. Op 0 setzen fir auszeschalten. Standard: 0.",
           "notify_live_interval_seconds": "Wéi oft Fortschrëtterupdates während dem Lafen geschéckt ginn. Méi niddereg Wäerter si méi reaktiounsfäeger awer konsuméieren méi Notifikatiounen. E Minimum vun 30 Sekonnen gëtt duerchgesat - Wäerter ënner 30 Sekonnen ginn automatesch op 30 Sekonnen ofgerënnt.",
           "notify_live_overrun_percent": "Sécherheetsmarge iwwer de geschätzte Updatezuel fir laang / iwwerlafend Zyklen (zum Beispill 20% erlaabt 1,2x geschätzte Updates).",
+          "notify_live_chronometer": "Wann aktivéiert, enthält all Live Update e Chronometer Countdown op déi geschätzte Schlusszäit. Den Notifikatiounstimer tickt automatesch op den Apparat tëscht Updates (nëmmen Android Begleeder App).",
           "notify_title": "Benotzerdefinéierte Titel fir Notifikatiounen. Ënnerstëtzt {device} Plazhalter.",
           "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:washing-machine). Eidel loossen fir ouni Ikon ze schécken.",
           "notify_start_message": "Message geschéckt wann en Zyklus ufänkt. Ënnerstëtzt {device} Plazhalter.",
           "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program}, {energy_kwh}, {cost} Plazhalter.",
           "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter.",
-          "notify_start_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus ufänkt (z.B. notify.mobile_app_my_phone). Loosst eidel fir Start Notifikatiounen ze sprangen.",
-          "notify_finish_services": "Een oder méi Notifikatiounsservicer fir ze alarméieren wann en Zyklus fäerdeg ass oder bal fäerdeg ass. Loosst eidel fir fäerdeg Notifikatiounen ze sprangen.",
-          "notify_live_services": "Een oder méi Notifikatiounsservicer fir Live Fortschrëtterupdates ze kréien wärend den Zyklus leeft (nëmmen mobil Begleeder App). Loosst eidel fir Live Updates ze sprangen.",
-          "notify_live_chronometer": "Wann aktivéiert, enthält all Live Update e Chronometer Countdown op déi geschätzte Schlusszäit. Den Notifikatiounstimer tickt automatesch op den Apparat tëscht Updates (nëmmen Android Begleeder App).",
           "energy_price_entity": "Wielt eng numeresch Entitéit déi den aktuellen Stroumpräis hält (zB Sensor.electricity_price, input_number.energy_rate). Wann agestallt, aktivéiert den {cost} Plazhalter. Huelt Virrang iwwer de statesche Wäert wa béid konfiguréiert sinn.",
           "energy_price_static": "Fixe Stroumpräis pro kWh. Wann agestallt, aktivéiert den {cost} Plazhalter. Ignoréiert wann eng Entitéit uewen konfiguréiert ass. Füügt Äert Währungssymbol an de Message Schabloun, z.B. {cost} €."
         }
       },
       "advanced_settings": {
         "title": "Advanced Astellungen",
-        "description": "Tune Detektiounsschwellen, Léieren a fortgeschratt Verhalen. Standardwäerter funktionnéieren gutt fir déi meescht Setups.\n\nProposéiert Astellungen aktuell verfügbar: {suggestions_count}. Benotzt 'Proposéiert Wäerter uwenden' fir Ännerungen z'iwwerpréiwen ier Dir späichert.",
-        "data": {
-          "apply_suggestions": "Proposéiert Wäerter uwenden",
-          "start_threshold_w": "Startschwell (W)",
-          "stop_threshold_w": "Stoppschwell (W)",
-          "min_off_gap": "Min Paus tëscht Zyklen (s)",
-          "start_duration_threshold": "Start Debounce Dauer (s)",
-          "progress_reset_delay": "Fortschrëtt Reset Verzögerung (Sekonnen)",
-          "no_update_active_timeout": "No-Update Timeout (s)",
-          "sampling_interval": "Sampling Intervall (s)",
-          "auto_label_confidence": "Auto-Etikett Vertrauen (0-1)",
-          "learning_confidence": "Feedback Ufro Vertrauen (0-1)",
-          "duration_tolerance": "Dauer Toleranz (0-0,5)",
-          "profile_match_interval": "Profil Match Intervall (Sekonnen)",
-          "profile_match_min_duration_ratio": "Profil Match Min Dauer Verhältnis (0,1-1,0)",
-          "profile_match_max_duration_ratio": "Profil Match Max Dauer Verhältnis (1,0-3,0)",
-          "smoothing_window": "Glättungsfenster (Proben)",
-          "profile_match_threshold": "Profil Match Schwell",
-          "profile_unmatch_threshold": "Profil Unmatch Schwell",
-          "profile_duration_tolerance": "Profil Match Dauer Toleranz (0-0,5)",
-          "interrupted_min_seconds": "Ënnerbrach: Minimum Lafzäit (Sekonnen)",
-          "abrupt_drop_watts": "Ënnerbrach: Abrupten Offall Absolut (W)",
-          "abrupt_drop_ratio": "Ënnerbrach: Abrupten Offall Verhältnis (0-1)",
-          "abrupt_high_load_factor": "Ënnerbrach: High-Load Faktor",
-          "max_past_cycles": "Opbewahrung: Max gespäichert Zyklen",
-          "max_full_traces_per_profile": "Opbewahrung: Max Voll Spuren pro Profil",
-          "max_full_traces_unlabeled": "Opbewahrung: Max Voll Spuren net markéiert",
-          "watchdog_interval": "Watchdog Intervall (Sekonnen)",
-          "completion_min_seconds": "Ofschloss Minimum Lafzäit (Sekonnen)",
-          "notify_before_end_minutes": "Virof-Notifikatioun (Minutten virum Enn)",
-          "auto_tune_noise_events_threshold": "Auto-Tune: Noise Events Schwell",
-          "running_dead_zone": "Lafen Dead Zone (Sekonnen)",
-          "end_repeat_count": "Enn Widderhuelen Zuel",
-          "start_energy_threshold": "Start Energie Gate (Wh)",
-          "end_energy_threshold": "Enn Energie Gate (Wh)",
-          "auto_maintenance": "Auto-Maintenance aktivéieren",
-          "expose_debug_entities": "Debug Entitéiten uleën",
-          "save_debug_traces": "Debug Spuren späicheren",
-          "anti_wrinkle_enabled": "Anti-Falten Schutz (nëmmen Trockner/Wäsch-Trockner)",
-          "anti_wrinkle_max_power": "Anti-Falten Max Power (W) (nëmmen Trockner/Wäsch-Trockner)",
-          "anti_wrinkle_max_duration": "Anti-Falten Max Dauer (s) (nëmmen Trockner/Wäsch-Trockner)",
-          "anti_wrinkle_exit_power": "Anti-Falten Exit Power (W) (nëmmen Trockner/Wäsch-Trockner)",
-          "dtw_bandwidth": "DTW Bandbreet",
-          "external_end_trigger_enabled": "Externen Zyklus Enn Ausléiser aktivéieren",
-          "external_end_trigger": "Externen Zyklus Enn Sensor",
-          "external_end_trigger_inverted": "Trigger Logik invertéieren (Trigger op OFF)",
-          "suppress_feedback_notifications": "Ënnerdréckt Feedback Notifikatiounen",
-          "pump_stuck_duration": "Pompel Stuck Alarmschwell (en) (nëmmen Pompel)",
-          "door_sensor_entity": "Dier Sensor",
-          "pause_cuts_power": "Maacht Kraaft beim Pausen",
-          "notify_unload_delay_minutes": "Wäschwart Notifikatioun Verspéidung (min)",
-          "switch_entity": "Switch Entity (fir Pause Power Cut)",
-          "delay_start_detect_enabled": "Aktivéiert Delayed Start Detection",
-          "delay_drain_min_power": "Delayed Start: Drain Spike Min Power (W)",
-          "delay_drain_max_power": "Delayed Start: Drain Spike Max Power (W)",
-          "delay_drain_max_duration": "Delayed Start: Max Drain Spike Dauer (s)",
-          "delay_timeout_hours": "Verspéiten Start: Max Waardezäit (h)"
-        },
-        "data_description": {
-          "apply_suggestions": "Kuckt dës Këscht un fir e Iwwerpréiwungsschrëtt opzemaachen fir proposéiert Wäerter vum Léieralgorithmus. Näischt gëtt automatesch gespäichert.\n\nProposéiert (vum Léieren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
-          "start_threshold_w": "D'Kraaft muss IWWER dës Schwell eropgoen fir en Zyklus ze STARTEN. Méi héich setzen wéi Är Standby Kraaft. Standard: min_power + 1 W.",
-          "stop_threshold_w": "D'Kraaft muss ËNNER dës Schwell falen fir en Zyklus ze STOPPEN. Knapp iwwer Null setzen fir Geräischer z'evitéieren déi falsch Enn ausléisen. Standard: 0,6 * min_power.",
-          "min_off_gap": "Wann en Zyklus bannent dëse ville Sekonnen vum viregten Enn ufänkt, gi se an engem eenzege Zyklus fusionéiert.",
-          "start_duration_threshold": "Kuerz Power Spikes méi kuerz wéi dës Dauer (Sekonnen) ignoréieren. Filtert Boot-Spikes (zB 60W fir 2s) ier de richtege Zyklus ufänkt. Standard: 5s.",
-          "progress_reset_delay": "Nodeems en Zyklus fäerdeg ass (100%), dës vill Sekonnen Idle waarden ier de Fortschrëtt op 0% zréckgesat gëtt. Standard: 300s.",
-          "no_update_active_timeout": "Fir Publish-on-Change Sensoren: nëmmen en AKTIVE Zyklus beenden wann keng Updates fir dës vill Sekonnen ukommen. Low-Power Ofschloss benotzt nach ëmmer den Off Delay.",
-          "sampling_interval": "Minimum Sampling Intervall a Sekonnen. Updates méi séier wéi dësen Taux ginn ignoréiert. Standard: 2,0s.",
-          "auto_label_confidence": "Zyklen automatesch etikettéieren op oder iwwer dëst Vertrauen beim Ofschloss (0,0-1,0).",
-          "learning_confidence": "Minimum Vertraue fir Benotzerverifikatioun iwwer en Event unzefroen (0,0–1,0).",
-          "duration_tolerance": "Toleranz fir Restzäitschätzungen während engem Laf (0,0-0,5 entsprécht 0-50%).",
-          "profile_match_interval": "Wéi dacks (a Sekonnen) Profilmatching während engem Zyklus versicht gëtt. Méi niddereg Wäerter bidden méi séier Detektioun awer benotzen méi CPU. Standard: 300s (5 Minutten).",
-          "profile_match_min_duration_ratio": "Minimum Dauererhältnis fir Profilmatching. Lafen Zyklus muss op d'mannst dës Fraktioun vun der Profildauer sinn fir ze matchen. Manner = méi fréi matchen. Standard: 0,50 (50%).",
-          "profile_match_max_duration_ratio": "Maximum Dauererhältnis fir Profilmatching. Lafen Zyklus däerf dës Multiple vun der Profildauer net iwwerschreiden. Méi héich = méi lenient. Standard: 1,50 (150%).",
-          "smoothing_window": "Zuel vun de rezente Power Liesungen déi fir glidderende Duerchschnëtt Glättung benotzt ginn.",
-          "profile_match_threshold": "Minimum DTW Ähnlechkeet Score (0,0-1,0) néideg fir e Profil als Match ze betrueweg. Méi héich = méi streng Matching, manner falsch Positiver. Standard: 0,4.",
-          "profile_unmatch_threshold": "DTW Ähnlechkeet Score (0,0-1,0) ënner deem e virdru gematchten Profil ofgeleent gëtt. Sollte méi niddereg wéi d'Matchschwell sinn fir Flackeren z'evitéieren. Standard: 0,35.",
-          "profile_duration_tolerance": "Toleranz benotzt duerch Profilmatching fir total Dauervarianz (0,0-0,5). Standardverhalen: ±25%.",
-          "interrupted_min_seconds": "Leefen méi kuerz wéi dëst kënnen als 'ënnerbrach' klasséiert ginn.",
-          "abrupt_drop_watts": "Absoluten Power Offall (W) deen als abrupten Cliff betruechtegt gëtt.",
-          "abrupt_drop_ratio": "Relativ Offall Verhältnis (0-1). Beispill: 0,6 heescht datt en Réckgang vun 60% abrupt ass.",
-          "abrupt_high_load_factor": "Faktor iwwer der Basislinn deen als 'héich Belaaschtung' virun engem abrupten Réckgang betruechtegt gëtt (benotzt mat abrupter Detektioun).",
-          "max_past_cycles": "Gesamtzuel vun Zyklen fir ze behalen (eelst ewechgeholl). Standard: 200.",
-          "max_full_traces_per_profile": "Zuel vu rezent markéierten Zyklen fir mat voller Power Spuren pro Profil ze behalen. Eeler Spuren ginn iwwer Enveloppen zesummegefaasst. Standard: 20.",
-          "max_full_traces_unlabeled": "Zuel vu rezenten net markéierten Zyklen fir mat voller Power Spuren ze behalen fir Auto-Etikettéierung z'ënnerstëtzen. Standard: 20.",
-          "watchdog_interval": "Sekonnen tëscht Watchdog-Kontrollen beim Lafen. Standard: 5s. OPGEPASST: Vergewëssert Iech datt dëst MÉI HÉICH ass wéi den Aktualiséierungsintervall vun Ärem Sensor fir falsch Stops z'evitéieren (zB wann de Sensor all 60s aktualiséiert, benotzt 65s+).",
-          "completion_min_seconds": "Zyklen méi kuerz wéi dëst ginn als 'ënnerbrach' markéiert, och wa se natierlech fäerdeg sinn. Standard: 600s.",
-          "notify_before_end_minutes": "Minutten virum geschätzte Enn vum Zyklus fir eng Notifikatioun auszeléisen. Op 0 setzen fir auszeschalten. Standard: 0.",
-          "auto_tune_noise_events_threshold": "Zuel vu kuerzen / Low-Power 'Noise' Zyklen bannent 24h néideg fir min_power automatesch unzepassen. Standard: 3.",
-          "running_dead_zone": "Nodeems de Zyklus ufänkt, Power Dips fir dës vill Sekonnen ignoréieren fir falsch Enn-Detektioun während der initialer Anlafphase z'evitéieren. Op 0 setzen fir auszeschalten. Standard: 0s.",
-          "end_repeat_count": "Unzuel vun Mol d'Endbedingung (Kraaft ënner der Schwell fir off_delay) konsekutiv erfëllt sinn muss ier de Zyklus ofgeschloss gëtt. Méi héich Wäerter verhënneren falsch Enn während Pausen. Standard: 1.",
-          "start_energy_threshold": "Zyklus muss op d'mannst esou vill Energie (Wh) während der START Phase accumuléieren fir ze bestätegen. Standard: 0,005 Wh.",
-          "end_energy_threshold": "De Zyklus endet nëmmen wann d'Energie an der leschter Off-Delay Fënster ënner dësem Wäert (Wh) ass. Verhënnert falsch Enn wann d'Kraaft no bei Null schwankt. Standard: 0,05 Wh.",
-          "auto_maintenance": "Auto-Maintenance aktivéieren (Proben reparéieren, Fragmenter fusionéieren).",
-          "expose_debug_entities": "Advanced Sensoren weisen (Vertrauen, Phase, Ambiguitéit) fir Debugging.",
-          "save_debug_traces": "Detailléiert Ranking an Power Trace Daten an der Geschicht späicheren (erhéicht d'Späicherverbrauch).",
-          "anti_wrinkle_enabled": "Kuerz Low-Power Trommelrotatiounen no engem Zyklus ignoréieren fir Geeschterzyklen z'evitéieren (nëmmen Trockner/Wäsch-Trockner).",
-          "anti_wrinkle_max_power": "Bursts op oder ënner dëser Kraaft ginn als Anti-Falten Rotatiounen behandelt anstatt nei Zyklen. Gëllt nëmmen wann Anti-Falten Schutz aktivéiert ass.",
-          "anti_wrinkle_max_duration": "Maximal Burst Längt fir als Anti-Falten Rotatioun behandelt ze ginn. Gëllt nëmmen wann Anti-Falten Schutz aktivéiert ass.",
-          "anti_wrinkle_exit_power": "Wann d'Kraaft ënner dëse Wäert fällt, gëtt de Anti-Falten direkt verlooss (richteg aus). Gëllt nëmmen wann Anti-Falten Schutz aktivéiert ass.",
-          "dtw_bandwidth": "Maximal erlaabt Zäit Warping (Stretching) als Verhältnis vun der Zyklusdauer. Méi héich Wäerter erlaben d'Matching vun héich variabelen Zyklen awer erhéijen d'CPU Käschten. Standard: 0,20 (20%).",
-          "external_end_trigger_enabled": "Iwwerwaachung vun engem externen Binärsensor aktivéieren fir den Zyklus ofzeschléissen.",
-          "external_end_trigger": "Eng binär Sensor Entitéit auswielen. Wann dëse Sensor ausléist, wäert den aktuellen Zyklus mat dem Status 'ofgeschloss' ophalen.",
-          "external_end_trigger_inverted": "Par défaut léist den Trigger aus wann de Sensor op ON dréit. Dës Këscht unklicken fir z'ausléisen wann de Sensor amplaz op OFF dréit.",
-          "suppress_feedback_notifications": "Wann et aktivéiert ass, wäert WashData nach ëmmer intern verfollegen an e Feedback froen, awer net persistent Notifikatiounen weisen, déi Iech froen Zyklen ze bestätegen. Nëtzlech wann Zyklen ëmmer korrekt festgestallt ginn an Dir fannt d'Uweisungen oflenken.",
-          "pump_stuck_duration": "Wann e Pompel Zyklus nach laafen no dëse ville Sekonnen, engem ha_washdata_pump_stuck Event eemol gebrannt. Benotzt dëst fir e verstoppte Motor z'entdecken (typesch Sumppompellaf ass ënner 60 s). Standard: 1800 s (30 min). Pompel Apparat Typ nëmmen.",
-          "door_sensor_entity": "Optional Binärsensor fir d'Maschinntür (an = oppen, aus = zou). Wann d'Dier während engem aktive Zyklus opmécht, wäert WashData den Zyklus bestätegen als bewosst gepaust. Nodeems den Zyklus eriwwer ass, wann d'Dier nach ëmmer zou ass, ännert den Zoustand op 'Clean' bis d'Dier opgemaach gëtt. Bemierkung: D'Zoumaache vun der Dier hëlt NET automatesch e gepauzten Zyklus weider - Resume muss manuell iwwer de Resume Cycle Knäppchen oder Service ausgeléist ginn.",
-          "pause_cuts_power": "Wann Dir iwwer de Pause Cycle Knäppchen oder Service pauséiert, schalt och déi konfiguréiert Schalter Entitéit aus. Gëtt nëmme Kraaft wann eng Schalter Entitéit fir dësen Apparat konfiguréiert ass.",
-          "notify_unload_delay_minutes": "Schéckt eng Notifikatioun iwwer d'Finish Notifikatiounskanal nodeems den Zyklus eriwwer ass an d'Dier fir dës vill Minutten net opgemaach gouf (erfuerdert Door Sensor). Setzt op 0 fir auszeschalten. Standard: 60 min.",
-          "switch_entity": "D'Schalter Entitéit fir ze wiesselen wann Dir Paus oder weider geet. Obligatoresch wann 'Kraaft schneiden beim Pausen' aktivéiert ass.",
-          "delay_start_detect_enabled": "Wann aktivéiert, gëtt e kuerze Low-Power Drain Spike gefollegt vun nohalteger Standby Kraaft als verspéiten Start festgestallt. De Staatssensor weist 'Waiting to Start' wärend der Verzögerung. Kee Programmzäit oder Fortschrëtter gëtt verfollegt bis den Zyklus tatsächlech ufänkt. Verlaangt start_threshold_w iwwer d'Drain Spike Muecht gesat ginn.",
-          "delay_drain_min_power": "Minimum Muecht (W) als Drain Spike ze erkennen. Setzt just iwwer dem richtege Standby-Niveau vun Ärer Maschinn. Standard: 10 W.",
-          "delay_drain_max_power": "Maximal Kraaft (W) fir en Drain Spike - Burst iwwer dëst ginn als e richtege Zyklusstart behandelt. Sollt ënner Ärem start_threshold_w Astellung sinn. Standard: 80 W.",
-          "delay_drain_max_duration": "Den Drain Spike muss bannent dëse ville Sekonnen ënner der Drainfenster zréckfalen fir ze bestätegen. Méi laang Spikes ginn als richteg Zyklusaktivitéit behandelt. Standard: 60 s.",
-          "delay_timeout_hours": "Sécherheetstimeout: wann d'Maschinn nach ëmmer am 'Waart op Start' no dëse ville Stonnen ass, setzt WashData op Off. Standard: 8 h."
+        "description": "Stëmmt Detektiounsschwellen, Léieren a fortgeschratt Verhalen of. Standardwäerter funktionéieren gutt fir déi meescht Astellungen.",
+        "sections": {
+          "suggestions_section": {
+            "name": "Virgeschloen Astellungen",
+            "description": "{suggestions_count} geléiert Virschléi verfügbar. Hakt Proposéiert Wäerter uwenden un, fir déi virgeschloen Ännerunge virum Späicheren ze iwwerpréiwen.",
+            "data": {
+              "apply_suggestions": "Proposéiert Wäerter uwenden"
+            },
+            "data_description": {
+              "apply_suggestions": "Kuckt dës Këscht un fir e Iwwerpréiwungsschrëtt opzemaachen fir proposéiert Wäerter vum Léieralgorithmus. Näischt gëtt automatesch gespäichert.\n\nProposéiert (vum Léieren):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}"
+            }
+          },
+          "detection_section": {
+            "name": "Detektioun & Leeschtungsschwellen",
+            "description": "Wéini den Apparat als UN oder AUS gëllt, Energie-Grenzen an Timing fir Zoustandswiessel.",
+            "data": {
+              "start_duration_threshold": "Start Debounce Dauer (s)",
+              "start_energy_threshold": "Start Energie Gate (Wh)",
+              "completion_min_seconds": "Ofschloss Minimum Lafzäit (Sekonnen)",
+              "start_threshold_w": "Startschwell (W)",
+              "stop_threshold_w": "Stoppschwell (W)",
+              "end_energy_threshold": "Enn Energie Gate (Wh)",
+              "running_dead_zone": "Lafen Dead Zone (Sekonnen)",
+              "end_repeat_count": "Enn Widderhuelen Zuel",
+              "min_off_gap": "Min Paus tëscht Zyklen (s)",
+              "sampling_interval": "Sampling Intervall (s)"
+            },
+            "data_description": {
+              "start_duration_threshold": "Kuerz Power Spikes méi kuerz wéi dës Dauer (Sekonnen) ignoréieren. Filtert Boot-Spikes (zB 60W fir 2s) ier de richtege Zyklus ufänkt. Standard: 5s.",
+              "start_energy_threshold": "Zyklus muss op d'mannst esou vill Energie (Wh) während der START Phase accumuléieren fir ze bestätegen. Standard: 0,005 Wh.",
+              "completion_min_seconds": "Zyklen méi kuerz wéi dëst ginn als 'ënnerbrach' markéiert, och wa se natierlech fäerdeg sinn. Standard: 600s.",
+              "start_threshold_w": "D'Kraaft muss IWWER dës Schwell eropgoen fir en Zyklus ze STARTEN. Méi héich setzen wéi Är Standby Kraaft. Standard: min_power + 1 W.",
+              "stop_threshold_w": "D'Kraaft muss ËNNER dës Schwell falen fir en Zyklus ze STOPPEN. Knapp iwwer Null setzen fir Geräischer z'evitéieren déi falsch Enn ausléisen. Standard: 0,6 * min_power.",
+              "end_energy_threshold": "De Zyklus endet nëmmen wann d'Energie an der leschter Off-Delay Fënster ënner dësem Wäert (Wh) ass. Verhënnert falsch Enn wann d'Kraaft no bei Null schwankt. Standard: 0,05 Wh.",
+              "running_dead_zone": "Nodeems de Zyklus ufänkt, Power Dips fir dës vill Sekonnen ignoréieren fir falsch Enn-Detektioun während der initialer Anlafphase z'evitéieren. Op 0 setzen fir auszeschalten. Standard: 0s.",
+              "end_repeat_count": "Unzuel vun Mol d'Endbedingung (Kraaft ënner der Schwell fir off_delay) konsekutiv erfëllt sinn muss ier de Zyklus ofgeschloss gëtt. Méi héich Wäerter verhënneren falsch Enn während Pausen. Standard: 1.",
+              "min_off_gap": "Wann en Zyklus bannent dëse ville Sekonnen vum viregten Enn ufänkt, gi se an engem eenzege Zyklus fusionéiert.",
+              "sampling_interval": "Minimum Sampling Intervall a Sekonnen. Updates méi séier wéi dësen Taux ginn ignoréiert. Standard: 2,0s."
+            }
+          },
+          "matching_section": {
+            "name": "Profil-Matching & Léieren",
+            "description": "Wéi aggressiv WashData lafend Zyklen mat geléierte Profiller ofgläicht a wéini no Feedback gefrot gëtt.",
+            "data": {
+              "profile_match_min_duration_ratio": "Profil Match Min Dauer Verhältnis (0,1-1,0)",
+              "profile_match_interval": "Profil Match Intervall (Sekonnen)",
+              "profile_match_threshold": "Profil Match Schwell",
+              "profile_unmatch_threshold": "Profil Unmatch Schwell",
+              "auto_label_confidence": "Auto-Etikett Vertrauen (0-1)",
+              "learning_confidence": "Feedback Ufro Vertrauen (0-1)",
+              "suppress_feedback_notifications": "Ënnerdréckt Feedback Notifikatiounen",
+              "duration_tolerance": "Dauer Toleranz (0-0,5)",
+              "smoothing_window": "Glättungsfenster (Proben)",
+              "profile_duration_tolerance": "Profil Match Dauer Toleranz (0-0,5)"
+            },
+            "data_description": {
+              "profile_match_min_duration_ratio": "Minimum Dauererhältnis fir Profilmatching. Lafen Zyklus muss op d'mannst dës Fraktioun vun der Profildauer sinn fir ze matchen. Manner = méi fréi matchen. Standard: 0,50 (50%).",
+              "profile_match_interval": "Wéi dacks (a Sekonnen) Profilmatching während engem Zyklus versicht gëtt. Méi niddereg Wäerter bidden méi séier Detektioun awer benotzen méi CPU. Standard: 300s (5 Minutten).",
+              "profile_match_threshold": "Minimum DTW Ähnlechkeet Score (0,0-1,0) néideg fir e Profil als Match ze betrueweg. Méi héich = méi streng Matching, manner falsch Positiver. Standard: 0,4.",
+              "profile_unmatch_threshold": "DTW Ähnlechkeet Score (0,0-1,0) ënner deem e virdru gematchten Profil ofgeleent gëtt. Sollte méi niddereg wéi d'Matchschwell sinn fir Flackeren z'evitéieren. Standard: 0,35.",
+              "auto_label_confidence": "Zyklen automatesch etikettéieren op oder iwwer dëst Vertrauen beim Ofschloss (0,0-1,0).",
+              "learning_confidence": "Minimum Vertraue fir Benotzerverifikatioun iwwer en Event unzefroen (0,0–1,0).",
+              "suppress_feedback_notifications": "Wann et aktivéiert ass, wäert WashData nach ëmmer intern verfollegen an e Feedback froen, awer net persistent Notifikatiounen weisen, déi Iech froen Zyklen ze bestätegen. Nëtzlech wann Zyklen ëmmer korrekt festgestallt ginn an Dir fannt d'Uweisungen oflenken.",
+              "duration_tolerance": "Toleranz fir Restzäitschätzungen während engem Laf (0,0-0,5 entsprécht 0-50%).",
+              "smoothing_window": "Zuel vun de rezente Power Liesungen déi fir glidderende Duerchschnëtt Glättung benotzt ginn.",
+              "profile_duration_tolerance": "Toleranz benotzt duerch Profilmatching fir total Dauervarianz (0,0-0,5). Standardverhalen: ±25%."
+            }
+          },
+          "timing_section": {
+            "name": "Timing, Ënnerhalt & Debug",
+            "description": "Watchdog, Fortschrëtt zrécksetzen, automateschen Ënnerhalt an d'Visibilitéit vu Debug-Entitéiten.",
+            "data": {
+              "watchdog_interval": "Watchdog Intervall (Sekonnen)",
+              "no_update_active_timeout": "No-Update Timeout (s)",
+              "progress_reset_delay": "Fortschrëtt Reset Verzögerung (Sekonnen)",
+              "auto_maintenance": "Auto-Maintenance aktivéieren",
+              "expose_debug_entities": "Debug Entitéiten uleën",
+              "save_debug_traces": "Debug Spuren späicheren"
+            },
+            "data_description": {
+              "watchdog_interval": "Sekonnen tëscht Watchdog-Kontrollen beim Lafen. Standard: 5s. OPGEPASST: Vergewëssert Iech datt dëst MÉI HÉICH ass wéi den Aktualiséierungsintervall vun Ärem Sensor fir falsch Stops z'evitéieren (zB wann de Sensor all 60s aktualiséiert, benotzt 65s+).",
+              "no_update_active_timeout": "Fir Publish-on-Change Sensoren: nëmmen en AKTIVE Zyklus beenden wann keng Updates fir dës vill Sekonnen ukommen. Low-Power Ofschloss benotzt nach ëmmer den Off Delay.",
+              "progress_reset_delay": "Nodeems en Zyklus fäerdeg ass (100%), dës vill Sekonnen Idle waarden ier de Fortschrëtt op 0% zréckgesat gëtt. Standard: 300s.",
+              "auto_maintenance": "Auto-Maintenance aktivéieren (Proben reparéieren, Fragmenter fusionéieren).",
+              "expose_debug_entities": "Advanced Sensoren weisen (Vertrauen, Phase, Ambiguitéit) fir Debugging.",
+              "save_debug_traces": "Detailléiert Ranking an Power Trace Daten an der Geschicht späicheren (erhéicht d'Späicherverbrauch)."
+            }
+          },
+          "anti_wrinkle_section": {
+            "name": "Knuetterschutz (Dréchner)",
+            "description": "Ignoréiert Trommel-Beweegungen nom Zyklus, fir Geeschterzyklen ze verhënneren. Nëmmen Dréchner / Wäschdréchner.",
+            "data": {
+              "anti_wrinkle_enabled": "Anti-Falten Schutz (nëmmen Trockner/Wäsch-Trockner)",
+              "anti_wrinkle_max_power": "Anti-Falten Max Power (W) (nëmmen Trockner/Wäsch-Trockner)",
+              "anti_wrinkle_max_duration": "Anti-Falten Max Dauer (s) (nëmmen Trockner/Wäsch-Trockner)",
+              "anti_wrinkle_exit_power": "Anti-Falten Exit Power (W) (nëmmen Trockner/Wäsch-Trockner)"
+            },
+            "data_description": {
+              "anti_wrinkle_enabled": "Kuerz Low-Power Trommelrotatiounen no engem Zyklus ignoréieren fir Geeschterzyklen z'evitéieren (nëmmen Trockner/Wäsch-Trockner).",
+              "anti_wrinkle_max_power": "Bursts op oder ënner dëser Kraaft ginn als Anti-Falten Rotatiounen behandelt anstatt nei Zyklen. Gëllt nëmmen wann Anti-Falten Schutz aktivéiert ass.",
+              "anti_wrinkle_max_duration": "Maximal Burst Längt fir als Anti-Falten Rotatioun behandelt ze ginn. Gëllt nëmmen wann Anti-Falten Schutz aktivéiert ass.",
+              "anti_wrinkle_exit_power": "Wann d'Kraaft ënner dëse Wäert fällt, gëtt de Anti-Falten direkt verlooss (richteg aus). Gëllt nëmmen wann Anti-Falten Schutz aktivéiert ass."
+            }
+          },
+          "delay_start_section": {
+            "name": "Verspéit-Start-Erkennung",
+            "description": "Behandelt dauerhaft niddreg Leeschtungs-Standby als 'Waart op Start', bis de Zyklus wierklech ufänkt.",
+            "data": {
+              "delay_start_detect_enabled": "Aktivéiert Delayed Start Detection",
+              "delay_confirm_seconds": "Verspéite Start: Standby-Bestätegungszäit (s)",
+              "delay_timeout_hours": "Verspéiten Start: Max Waardezäit (h)"
+            },
+            "data_description": {
+              "delay_start_detect_enabled": "Wann aktivéiert, gëtt e kuerze Low-Power Drain Spike gefollegt vun nohalteger Standby Kraaft als verspéiten Start festgestallt. De Staatssensor weist 'Waart op de Start' wärend der Verzögerung. Kee Programmzäit oder Fortschrëtter gëtt verfollegt bis den Zyklus tatsächlech ufänkt. Verlaangt start_threshold_w iwwer d'Drain Spike Muecht gesat ginn.",
+              "delay_confirm_seconds": "D'Leeschtung muss esou vill Sekonnen tëscht Stoppschwelle (W) a Startschwelle (W) bleiwen, éier WashData an de Status 'Waart op Start' geet. Filtert kuerz Spëtzen bei der Menü-Navigatioun eraus. Standard: 60 s.",
+              "delay_timeout_hours": "Sécherheetstimeout: wann d'Maschinn nach ëmmer am 'Waart op Start' no dëse ville Stonnen ass, setzt WashData op Off. Standard: 8 h."
+            }
+          },
+          "external_triggers_section": {
+            "name": "Extern Triggeren, Dier & Paus",
+            "description": "Optionalen externen Enn-Trigger-Sensor, Dier-Sensor fir Paus/propper-Erkennung, a Schalter fir de Stroum bei Paus auszeschalten.",
+            "data": {
+              "external_end_trigger_enabled": "Externen Zyklus Enn Ausléiser aktivéieren",
+              "external_end_trigger": "Externen Zyklus Enn Sensor",
+              "external_end_trigger_inverted": "Trigger Logik invertéieren (Trigger op OFF)",
+              "door_sensor_entity": "Dier Sensor",
+              "pause_cuts_power": "Maacht Kraaft beim Pausen",
+              "switch_entity": "Switch Entity (fir Pause Power Cut)",
+              "notify_unload_delay_minutes": "Wäschwart Notifikatioun Verspéidung (min)"
+            },
+            "data_description": {
+              "external_end_trigger_enabled": "Iwwerwaachung vun engem externen Binärsensor aktivéieren fir den Zyklus ofzeschléissen.",
+              "external_end_trigger": "Eng binär Sensor Entitéit auswielen. Wann dëse Sensor ausléist, wäert den aktuellen Zyklus mat dem Status 'ofgeschloss' ophalen.",
+              "external_end_trigger_inverted": "Par défaut léist den Trigger aus wann de Sensor op ON dréit. Dës Këscht unklicken fir z'ausléisen wann de Sensor amplaz op OFF dréit.",
+              "door_sensor_entity": "Optional Binärsensor fir d'Maschinntür (an = oppen, aus = zou). Wann d'Dier während engem aktive Zyklus opmécht, wäert WashData den Zyklus bestätegen als bewosst gepaust. Nodeems den Zyklus eriwwer ass, wann d'Dier nach ëmmer zou ass, ännert den Zoustand op 'Clean' bis d'Dier opgemaach gëtt. Bemierkung: D'Zoumaache vun der Dier hëlt NET automatesch e gepauzten Zyklus weider - Resume muss manuell iwwer de Resume Cycle Knäppchen oder Service ausgeléist ginn.",
+              "pause_cuts_power": "Wann Dir iwwer de Pause Cycle Knäppchen oder Service pauséiert, schalt och déi konfiguréiert Schalter Entitéit aus. Gëtt nëmme Kraaft wann eng Schalter Entitéit fir dësen Apparat konfiguréiert ass.",
+              "switch_entity": "D'Schalter Entitéit fir ze wiesselen wann Dir Paus oder weider geet. Obligatoresch wann 'Kraaft schneiden beim Pausen' aktivéiert ass.",
+              "notify_unload_delay_minutes": "Schéckt eng Notifikatioun iwwer d'Finish Notifikatiounskanal nodeems den Zyklus eriwwer ass an d'Dier fir dës vill Minutten net opgemaach gouf (erfuerdert Door Sensor). Setzt op 0 fir auszeschalten. Standard: 60 min."
+            }
+          },
+          "pump_section": {
+            "name": "Pompel-Iwwerwaachung",
+            "description": "Nëmmen fir den Apparattyp Pompel. Léisst en Event aus, wann e Pompelzyklus méi laang wéi dës Dauer leeft.",
+            "data": {
+              "pump_stuck_duration": "Pompel Stuck Alarmschwell (en) (nëmmen Pompel)"
+            },
+            "data_description": {
+              "pump_stuck_duration": "Wann e Pompel Zyklus nach laafen no dëse ville Sekonnen, engem ha_washdata_pump_stuck Event eemol gebrannt. Benotzt dëst fir e verstoppte Motor z'entdecken (typesch Sumppompellaf ass ënner 60 s). Standard: 1800 s (30 min). Pompel Apparat Typ nëmmen."
+            }
+          }
         }
       },
       "diagnostics": {
         "title": "Diagnostik & Ënnerhalt",
-        "description": "Ënnerhalt Aktiounen lafen wéi fragmentéiert Zyklen fusionéieren oder gespäichert Daten migréieren.\n\n**Späicherverbrauch**\n\n- Dateigréisst: {file_size_kb} KB\n- Zyklen: {cycle_count}\n- Profiler: {profile_count}\n- Debug Spuren: {debug_count}"
+        "description": "Ënnerhalt Aktiounen lafen wéi fragmentéiert Zyklen fusionéieren oder gespäichert Daten migréieren.\n\n**Späicherverbrauch**\n\n- Dateigréisst: {file_size_kb} KB\n- Zyklen: {cycle_count}\n- Profiler: {profile_count}\n- Debug Spuren: {debug_count}",
+        "menu_options": {
+          "reprocess_history": "Ënnerhalt: Daten nei veraarbecht & optimiséieren",
+          "clear_debug_data": "Debug Daten läschen (Plaz befreien)",
+          "wipe_history": "ALL Daten fir dësen Apparat läschen (irreversibel)",
+          "export_import": "Export / Import JSON mat Astellungen (kopéieren/ansetzen)",
+          "menu_back": "← Zréck"
+        }
       },
       "clear_debug_data": {
         "title": "Debug Daten läschen",
@@ -281,36 +326,52 @@
       "manage_cycles": {
         "title": "Zyklen verwalten",
         "description": "Rezent Zyklen:\n{recent_cycles}",
-        "data": {
-          "action": "Aktioun"
+        "menu_options": {
+          "auto_label_cycles": "Al Zyklen automatesch etikettéieren",
+          "select_cycle_to_label": "Spezifesche Zyklus etikettéieren",
+          "select_cycle_to_delete": "Zyklus läschen",
+          "interactive_editor": "Fusionéieren / Split Interaktiven Editor",
+          "trim_cycle_select": "Zyklus Daten trimmen",
+          "menu_back": "← Zréck"
         }
       },
       "manage_cycles_empty": {
         "title": "Zyklen verwalten",
         "description": "Nach keng Zyklen opgeholl.",
-        "data": {
-          "action": "Aktioun"
+        "menu_options": {
+          "auto_label_cycles": "Al Zyklen automatesch etikettéieren",
+          "menu_back": "← Zréck"
         }
       },
       "manage_profiles": {
         "title": "Profiler verwalten",
         "description": "Profil Resumé:\n{profile_summary}",
-        "data": {
-          "action": "Aktioun"
+        "menu_options": {
+          "create_profile": "Neie Profil erstellen",
+          "edit_profile": "Profil änneren / ëmbenennen",
+          "delete_profile_select": "Profil läschen",
+          "profile_stats": "Profil Statistiken",
+          "cleanup_profile": "Geschicht botzen - Grafik & Läschen",
+          "assign_profile_phases_select": "Phase Beräicher zouweisen",
+          "menu_back": "← Zréck"
         }
       },
       "manage_profiles_empty": {
         "title": "Profiler verwalten",
         "description": "Nach keng Profiler erstallt.",
-        "data": {
-          "action": "Aktioun"
+        "menu_options": {
+          "create_profile": "Neie Profil erstellen",
+          "menu_back": "← Zréck"
         }
       },
       "manage_phase_catalog": {
         "title": "Phase Katalog verwalten",
         "description": "Phase Katalog (Standard fir dësen Apparat + Benotzerdefinéiert Phasen):\n{phase_summary}",
-        "data": {
-          "action": "Aktioun"
+        "menu_options": {
+          "phase_catalog_create": "Nei Phase erstellen",
+          "phase_catalog_edit_select": "Phase änneren",
+          "phase_catalog_delete": "Phase läschen",
+          "menu_back": "← Zréck"
         }
       },
       "phase_catalog_create": {
@@ -347,8 +408,14 @@
       "assign_profile_phases": {
         "title": "Phase Beräicher zouweisen",
         "description": "Phase Virschau fir Profil: **{profile_name}**\n\n{timeline_svg}\n\n**Aktuelle Beräicher:**\n{current_ranges}\n\nBenotzt d'Aktiounen hei drënner fir Beräicher ze addéieren, z'änneren, ze läschen oder ze späicheren.",
-        "data": {
-          "action": "Aktioun"
+        "menu_options": {
+          "assign_profile_phases_add": "Phase Beräich addéieren",
+          "assign_profile_phases_edit_select": "Phase Beräich änneren",
+          "assign_profile_phases_delete": "Phase Beräich läschen",
+          "phase_ranges_clear": "All Beräicher läschen",
+          "assign_profile_phases_auto_detect": "Phasen auto-detektéieren",
+          "phase_ranges_save": "Späicheren an zréck",
+          "menu_back": "← Zréck"
         }
       },
       "assign_profile_phases_add": {
@@ -501,8 +568,11 @@
       "interactive_editor": {
         "title": "Fusionéieren / Split Interaktiven Editor",
         "description": "Wielt eng manuell Aktioun fir Är Zyklusgeschicht auszeféieren.",
-        "data": {
-          "editor_action": "Aktioun"
+        "menu_options": {
+          "editor_split": "Zyklus opdeelen (Lücken fannen)",
+          "editor_merge": "Zyklen fusionéieren (Fragmenter verbinden)",
+          "editor_delete": "Zyklus(en) läschen",
+          "menu_back": "← Zréck"
         }
       },
       "editor_select": {
@@ -536,7 +606,21 @@
         "title": "Split Konfiguratioun",
         "description": "D'Sensibilitéit fir dëse Zyklus opzedeelen upasssen. Jidderee Idle Spalt méi laang wéi dëst wäert eng Opdelung verursaachen.",
         "data": {
-          "min_gap_seconds": "Split Gap Schwell (Sekonnen)"
+          "split_mode": "Split-Method"
+        }
+      },
+      "editor_split_auto_params": {
+        "title": "Automatesch Split-Konfiguratioun",
+        "description": "Passt d'Sensibilitéit un fir dëse Zyklus ze splécken. All Idle-Lück déi méi laang ass wéi dëse Wäert verursaacht eng Split.",
+        "data": {
+          "min_gap_seconds": "Schwellwäert fir Split-Lück (Sekonnen)"
+        }
+      },
+      "editor_split_manual_params": {
+        "title": "Manuell Split-Zäitstempelen",
+        "description": "{preview_md}Zyklusfënster: **{cycle_start_wallclock} → {cycle_end_wallclock}** den {cycle_date}.\n\nGitt een oder méi Split-Zäitstempelen an (`HH:MM` oder `HH:MM:SS`), een pro Zeil. De Zyklus gëtt bei all Zäitstempel geschnidden — N Zäitstempelen erginn N+1 Segmenter.",
+        "data": {
+          "split_timestamps": "Split-Zäitstempelen"
         }
       },
       "reprocess_history": {
@@ -562,8 +646,13 @@
       "record_cycle": {
         "title": "Zyklus ophuelen",
         "description": "Manuell en Zyklus ophuelen fir e proppere Profil ouni Stéierung ze kreéieren.\n\nStatus: **{status}**\nDauer: {duration}s\nProben: {samples}",
-        "data": {
-          "action": "Aktioun"
+        "menu_options": {
+          "record_refresh": "Status erfrëschen",
+          "record_stop": "Opnam stoppen (Späicheren & Veraarbecht)",
+          "record_start": "Nei Opnam starten",
+          "record_process": "Lescht Opnam veraarbecht (Trim & Späicheren)",
+          "record_discard": "Lescht Opnam verworf",
+          "menu_back": "← Zréck"
         }
       },
       "record_process": {
@@ -578,14 +667,33 @@
       },
       "learning_feedbacks": {
         "title": "Léieren Feedbacks",
-        "description": "Eng Zyklus Bewäertungsufro fir ze veraarbecht auswielen.",
+        "description": "Pendent Feedbacks: {count}\n\n{pending_table}\n\nWielt eng Ufro fir eng Zyklus-Iwwerpréiwung fir ze veraarbechten.",
+        "menu_options": {
+          "learning_feedbacks_pick": "Pendent Feedback iwwerpréiwen",
+          "learning_feedbacks_dismiss_all": "All pendent Feedbacks verwerfen",
+          "menu_back": "← Zréck"
+        }
+      },
+      "learning_feedbacks_pick": {
+        "title": "Feedback fir Iwwerpréiwung auswielen",
+        "description": "Wielt eng Ufro fir Zyklus-Iwwerpréiwung fir opzemaachen.",
         "data": {
-          "selected_feedback": "Zyklus fir z'iwwerpréiwen auswielen"
+          "selected_feedback": "Zyklus fir Iwwerpréiwung auswielen"
         }
       },
       "learning_feedbacks_empty": {
         "title": "Léieren Feedbacks",
-        "description": "Keng pendend Feedback Ufroe fonnt."
+        "description": "Keng pendend Feedback Ufroe fonnt.",
+        "menu_options": {
+          "menu_back": "← Zréck"
+        }
+      },
+      "learning_feedbacks_dismiss_all": {
+        "title": "All waarden Feedbacken ofweisen",
+        "description": "Dir sidd amgaang **{count}** waarden Feedback-Ufroen ofzeweisen. Ofgewisene Zyklen bleiwen an Ärer Geschicht, mee droen net zu engem neie Léiersignal bäi. Dat kann net réckgängeg gemaach ginn.\n\n✅ Kuckt d'Këscht hei drënner a klickt op **Send** fir alles ofzeweisen.\n❌ Loosst se net ugekräizt a klickt op **Send** fir ze annuléieren an zréck ze goen.",
+        "data": {
+          "confirm_dismiss_all": "Bestätegen: all pendent Feedback-Ufroen verwerfen"
+        }
       },
       "resolve_feedback": {
         "title": "Feedback léisen",
@@ -629,6 +737,9 @@
     },
     "error": {
       "import_failed": "Import gescheitert. W.e.g. e gültege WashData Export JSON ansetzen.",
+      "select_exactly_one": "Wielt genee ee Zyklus fir dës Aktioun.",
+      "select_at_least_one": "Wielt op d'mannst ee Zyklus fir dës Aktioun.",
+      "select_at_least_two": "Wielt op d'mannst zwee Zyklen fir dës Aktioun.",
       "profile_exists": "E Profil mat dësem Numm gëtt et schonn",
       "rename_failed": "Profil ëmbenennen gescheitert. De Profil existéiert vläicht net oder den neie Numm ass scho benotzt.",
       "assignment_failed": "Profil dem Zyklus zouweisen gescheitert",
@@ -648,12 +759,17 @@
       "suggestions_ready_notification_message": "De Sensor **Proposéiert Astellungen** bericht elo **{count}** handlungsfäeg Empfehlungen.\n\nFir se z'iwwerpréiwen an unzewendeden: **Astellungen > Apparater & Servicer > WashData > Konfiguréieren > Advanced Astellungen > Proposéiert Wäerter uwenden**.\n\nVirschléi si fakultativ a ginn fir Iwwerpréiwung gewisen ier Dir späichert.",
       "trim_range_invalid": "Start muss virum Enn sinn. W.e.g. Är Trim Punkte upassen.",
       "trim_failed": "Trim gescheitert. De Zyklus existéiert vläicht net méi oder d'Fënster ass eidel.",
+      "invalid_split_timestamp": "Zäitstempel ass ongëlteg oder läit ausserhalb vum Zyklusfënster. Benotzt HH:MM oder HH:MM:SS am Zyklusfënster.",
+      "no_split_segments_found": "Et konnten aus dësen Zäitstempelen keng gülteg Segmenter erstallt ginn. Gitt sécher, datt all Zäitstempel am Zyklusfënster läit an d'Segmenter op d'mannst 1 Minutt laang sinn.",
       "auto_tune_suggestion": "{device_type} {device_title} entdeckt Geeschterzyklen. Proposéiert min_power Ännerung: {current_min}W -> {new_min}W (net automatesch ugewannt).",
       "auto_tune_title": "WashData Auto-Tune",
       "auto_tune_fallback": "{device_type} {device_title} entdeckt Geeschterzyklen. Proposéiert min_power Ännerung: {current_min}W -> {new_min}W (net automatesch ugewannt)."
     },
     "abort": {
       "no_cycles_found": "Keng Zyklen fonnt",
+      "no_split_segments_found": "Keng segmentéierbar Deeler am gewielte Zyklus fonnt.",
+      "cycle_not_found": "De gewielte Zyklus konnt net geluede ginn.",
+      "no_power_data": "Keng Power Spurdaten verfügbar fir den ausgewielten Zyklus.",
       "no_profiles_found": "Keng Profiler fonnt. Éischt e Profil erstellen.",
       "no_profiles_for_matching": "Keng Profiler fir Matching verfügbar. Éischt Profiler erstellen.",
       "no_unlabeled_cycles": "All Zyklen sinn scho markéiert",
@@ -661,8 +777,7 @@
       "no_predictions": "Keng Prognosen",
       "no_custom_phases": "Keng personaliséiert Phasen fonnt.",
       "reprocess_success": "{count} Zyklen erfollegräich nei veraarbecht.",
-      "debug_data_cleared": "Debug Daten aus {count} Zyklen erfollegräich geläscht.",
-      "no_power_data": "Keng Power Spurdaten verfügbar fir den ausgewielten Zyklus."
+      "debug_data_cleared": "Debug Daten aus {count} Zyklen erfollegräich geläscht."
     }
   },
   "selector": {
@@ -682,6 +797,9 @@
         "all_device_types": "All Apparat Zorte",
         "current_suffix": "(aktuell)",
         "editor_select_info": "1 Zyklus auswielen fir opzedeelen, oder 2+ Zyklen fir ze fusionéieren.",
+        "editor_select_info_split": "Wielt 1 Zyklus fir opzedeelen.",
+        "editor_select_info_merge": "Wielt 2+ Zyklen fir zesummenzeféieren.",
+        "editor_select_info_delete": "Wielt 1+ Zyklus/Zyklen fir ze läschen.",
         "no_cycles_recorded": "Nach keng Zyklen opgeholl.",
         "profile_summary_line": "- **{name}**: {count} Zyklen, {avg}m Duerchschnëtt",
         "no_profiles_created": "Nach keng Profiler erstallt.",
@@ -722,6 +840,10 @@
         "split_preview_confirm_fmt": "Klickt Bestätegen fir dëse Zyklus an {count} separat Zyklen opzedeelen.",
         "merge_preview_title": "Fusioun Virschau",
         "merge_preview_joining_fmt": "{count} Zyklen zesummefoueren. Lücken ginn mat 0W Liesungen gefëllt.",
+        "editor_delete_preview_title": "Läsch-Virschau",
+        "editor_delete_preview_intro": "Déi gewielte Zykle ginn permanent geläscht:",
+        "editor_delete_preview_confirm": "Klickt op Bestätegen, fir dës Zyklus-Opzeechnunge permanent ze läschen.",
+        "no_power_preview": "*Keng Power Daten verfügbar fir Virschau.*",
         "profile_comparison": "Profil Verglach",
         "actual_cycle_label": "Dëse Zyklus (tatsächlech)",
         "storage_usage_header": "Späicherverbrauch",
@@ -735,10 +857,21 @@
         "assign_phases_help": "Benotzt d'Aktiounen hei drënner fir Beräicher ze addéieren, z'änneren, ze läschen oder ze späicheren.",
         "profile_summary_header": "Profil Resumé",
         "recent_cycles_header": "Rezent Zyklen",
-        "no_power_preview": "*Keng Power Daten verfügbar fir Virschau.*",
         "trim_cycle_preview_title": "Zyklus Trim Virschau",
         "trim_cycle_preview_no_data": "Keng Power Daten verfügbar fir dëse Zyklus.",
-        "trim_cycle_preview_kept_suffix": "behalen"
+        "trim_cycle_preview_kept_suffix": "behalen",
+        "table_program": "Programm",
+        "table_when": "Wéini",
+        "table_length": "Längt",
+        "table_match": "Treffer",
+        "table_profile": "Profil",
+        "table_cycles": "Zyklen",
+        "table_avg_length": "Duerchschn. Längt",
+        "table_last_run": "Leschte Laf",
+        "table_avg_energy": "Duerchschn. Energie",
+        "table_detected_program": "Erkannt Programm",
+        "table_confidence": "Vertrauen",
+        "table_reported": "Gemellt"
       }
     },
     "interactive_editor_action": {
@@ -746,6 +879,12 @@
         "split": "Zyklus opdeelen (Lücken fannen)",
         "merge": "Zyklen fusionéieren (Fragmenter verbinden)",
         "delete": "Zyklus(en) läschen"
+      }
+    },
+    "split_mode": {
+      "options": {
+        "auto": "Idle-Lücken automatesch erkennen",
+        "manual": "Manuelle Zäitstempel(en)"
       }
     },
     "diagnostics_action": {
@@ -1133,6 +1272,15 @@
     }
   },
   "exceptions": {
+    "device_id_required": {
+      "message": "Eng valabel device_id ass erfuerderlech."
+    },
+    "cycle_id_required": {
+      "message": "Eng valabel cycle_id ass erfuerderlech."
+    },
+    "profile_name_required": {
+      "message": "E gültege Profilnumm ass erfuerderlech."
+    },
     "device_not_found": {
       "message": "Apparat net fonnt."
     },
@@ -1150,15 +1298,6 @@
     },
     "trim_invalid_range": {
       "message": "trim_end_s muss méi grouss sinn wéi trim_start_s."
-    },
-    "device_id_required": {
-      "message": "Eng valabel device_id ass erfuerderlech."
-    },
-    "cycle_id_required": {
-      "message": "Eng valabel cycle_id ass erfuerderlech."
-    },
-    "profile_name_required": {
-      "message": "E gültege Profilnumm ass erfuerderlech."
     }
   }
 }
