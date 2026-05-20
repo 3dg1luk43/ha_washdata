@@ -1279,7 +1279,7 @@
       "message": "Je vyžadován platný cycle_id."
     },
     "profile_name_required": {
-      "message": "Je vyžadován platný název_profilu."
+      "message": "Je vyžadován platný profile_name."
     },
     "device_not_found": {
       "message": "Zařízení nenalezeno."

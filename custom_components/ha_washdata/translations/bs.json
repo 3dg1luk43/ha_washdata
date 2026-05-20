@@ -1276,10 +1276,10 @@
       "message": "Potreban je važeći device_id."
     },
     "cycle_id_required": {
-      "message": "Potreban je važeći id_ciklusa."
+      "message": "Potreban je važeći cycle_id."
     },
     "profile_name_required": {
-      "message": "Potrebno je važeće ime_profila."
+      "message": "Potrebno je važeće profile_name."
     },
     "device_not_found": {
       "message": "Uređaj nije pronađen."

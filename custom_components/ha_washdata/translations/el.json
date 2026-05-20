@@ -1279,7 +1279,7 @@
       "message": "Απαιτείται έγκυρο cycle_id."
     },
     "profile_name_required": {
-      "message": "Απαιτείται έγκυρο όνομα_προφίλ."
+      "message": "Απαιτείται έγκυρο profile_name."
     },
     "device_not_found": {
       "message": "Η συσκευή δεν βρέθηκε."

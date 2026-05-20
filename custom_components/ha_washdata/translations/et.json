@@ -1273,10 +1273,10 @@
   },
   "exceptions": {
     "device_id_required": {
-      "message": "Nõutav on kehtiv seadme_id."
+      "message": "Nõutav on kehtiv device_id."
     },
     "cycle_id_required": {
-      "message": "Nõutav on kehtiv tsükli_id."
+      "message": "Nõutav on kehtiv cycle_id."
     },
     "profile_name_required": {
       "message": "Nõutav on kehtiv profile_name."

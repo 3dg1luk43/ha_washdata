@@ -1276,7 +1276,7 @@
       "message": "Eine gültige Geräte-ID ist erforderlich."
     },
     "cycle_id_required": {
-      "message": "Eine gültige Cycle_ID ist erforderlich."
+      "message": "Eine gültige cycle_id ist erforderlich."
     },
     "profile_name_required": {
       "message": "Ein gültiger Profilname ist erforderlich."

@@ -239,7 +239,7 @@
               "watchdog_interval": "Sekundoj inter gardohundaj kontroloj dum ekzekuto. Defaŭlte: 5s. AVERTO: Certigu ke ĉi tio estas PLI ALTA ol la ĝisdatiga intervalo de via sensilo por eviti falsajn haltojn (ekz. se sensilo ĝisdatigas ĉiun 60s, uzu 65s+).",
               "no_update_active_timeout": "Por publikigu-sur-ŝanĝo sensiloj: nur perforte fini AKTIVAN ciklon se neniuj ĝisdatigoj alvenas dum ĉi tiom da sekundoj. Malalta-pova kompletado ankoraŭ uzas la Malŝaltan Prokraston.",
               "progress_reset_delay": "Post kiam ciklo kompletaĵis (100%), atendi ĉi tiom da sekundoj da senaktiveco antaŭ restarigi progreson al 0%. Defaŭlte: 300s.",
-              "auto_maintenance": "Ŝalti aŭtomatan prizorgadon (ripari specimenov, kunfandi fragmentojn).",
+              "auto_maintenance": "Ŝalti aŭtomatan prizorgadon (ripari specimenojn, kunfandi fragmentojn).",
               "expose_debug_entities": "Montri altnivelaj sensilojn (Konfido, Fazo, Ambigueco) por sencimigado.",
               "save_debug_traces": "Konservi detalajn rangordajn kaj potencajn spurdatumojn en historio (Pliigas stokadan uzadon)."
             }
@@ -300,7 +300,7 @@
             "name": "Pumpila monitoro",
             "description": "Nur por pumpila aparatotipo. Sendas eventon se pumpila ciklo daŭras pli longe ol ĉi tiu daŭro.",
             "data": {
-              "pump_stuck_duration": "Pumpilo Ŝtopiĝinta Alerta Sojlo (j) (Pumpilo Nur)"
+              "pump_stuck_duration": "Pumpilo Ŝtopiĝinta Alerta Sojlo (s) (Pumpilo Nur)"
             },
             "data_description": {
               "pump_stuck_duration": "Se pumpciklo daŭre funkcias post tiom da sekundoj, evento ha_washdata_pump_stuck estas lanĉita unufoje. Uzu ĉi tion por detekti ŝtopiĝintan motoron (tipa sumppumpilfunkciado estas malpli ol 60 s). Defaŭlte: 1800 s (30 min). Tipo de pumpilo nur."

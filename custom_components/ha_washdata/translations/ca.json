@@ -1279,7 +1279,7 @@
       "message": "Es requereix un cycle_id vàlid."
     },
     "profile_name_required": {
-      "message": "Cal un perfil_name vàlid."
+      "message": "Cal un profile_name vàlid."
     },
     "device_not_found": {
       "message": "No s'ha trobat el dispositiu."
