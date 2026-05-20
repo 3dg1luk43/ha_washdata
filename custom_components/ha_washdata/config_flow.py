@@ -1609,8 +1609,19 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             errors=errors,
             description_placeholders={
                 "info_text": await self._options_text(
-                    "editor_select_info",
-                    "Select 1 cycle to split, or 2+ cycles to merge.",
+                    {
+                        "split": "editor_select_info_split",
+                        "merge": "editor_select_info_merge",
+                        "delete": "editor_select_info_delete",
+                    }.get(self._editor_action or "", "editor_select_info"),
+                    {
+                        "split": "Select 1 cycle to split.",
+                        "merge": "Select 2+ cycles to merge.",
+                        "delete": "Select 1+ cycle(s) to delete.",
+                    }.get(
+                        self._editor_action or "",
+                        "Select 1 cycle to split, or 2+ cycles to merge.",
+                    ),
                 )
             }
         )

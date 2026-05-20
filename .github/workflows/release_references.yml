@@ -39,10 +39,25 @@ jobs:
                   tag,
                 }));
               } else {
-                ({ data: release } = await github.rest.repos.getLatestRelease({
+                const { data: releases } = await github.rest.repos.listReleases({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                }));
+                  per_page: 100,
+                });
+
+                release = releases
+                  .filter(r => !r.draft && !r.prerelease)
+                  .reduce((latest, candidate) => {
+                    if (!latest) return candidate;
+                    const latestPublished = Date.parse(latest.published_at || latest.created_at || 0);
+                    const candidatePublished = Date.parse(candidate.published_at || candidate.created_at || 0);
+                    return candidatePublished > latestPublished ? candidate : latest;
+                  }, null);
+
+                if (!release) {
+                  console.log('No published releases found, skipping.');
+                  return;
+                }
               }
             }
 

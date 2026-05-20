@@ -27,6 +27,8 @@ from .const import (
     DEVICE_TYPE_WASHING_MACHINE,
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_WASHER_DRYER,
+    DEFAULT_RUNNING_DEAD_ZONE,
+    DEFAULT_START_ENERGY_THRESHOLD,
     DEFAULT_MAX_DEFERRAL_SECONDS,
     DEFAULT_DEFER_FINISH_CONFIDENCE,
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
@@ -63,9 +65,9 @@ class CycleDetectorConfig:
     abrupt_high_load_factor: float = 5.0
     completion_min_seconds: int = 600
     start_duration_threshold: float = 5.0
-    start_energy_threshold: float = 0.005  # 5 Wh default
+    start_energy_threshold: float = DEFAULT_START_ENERGY_THRESHOLD
     end_energy_threshold: float = 0.05  # 50 Wh threshold for "still active"
-    running_dead_zone: int = 0
+    running_dead_zone: int = DEFAULT_RUNNING_DEAD_ZONE
     end_repeat_count: int = 1
     min_off_gap: int = 60
     start_threshold_w: float = 2.0
@@ -1182,6 +1184,9 @@ class CycleDetector:
             # Reset idle time if exiting ANTI_WRINKLE to STARTING (high-power burst resumed)
             self._anti_wrinkle_idle_time = 0.0
         elif new_state == STATE_RUNNING:
+            self._delay_band_start = None
+            self._delay_band_seconds = 0.0
+            self._delay_band_peak = 0.0
             self._preserve_delay_band_on_off = False
 
         self._logger.debug("Transition: %s -> %s at %s", old_state, new_state, timestamp)
