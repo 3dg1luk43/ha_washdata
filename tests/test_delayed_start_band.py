@@ -97,8 +97,8 @@ def test_first_band_sample_does_not_count_prior_gap():
     assert det._delay_band_seconds == 0.0
 
 
-def test_false_start_back_to_band_preserves_candidate():
-    """A brief high spike that falls back into the standby band should not discard delayed-start evidence."""
+def test_false_start_back_to_band_clears_candidate():
+    """A false start that drops back below threshold should clear delayed-start evidence."""
     det = _make_detector(delay_confirm_seconds=60.0, start_duration_threshold=10.0)
     det.process_reading(0.0, dt(0))
     for i in range(1, 9):
@@ -114,7 +114,29 @@ def test_false_start_back_to_band_preserves_candidate():
     for offset in (55, 60, 65):
         det.process_reading(20.0, dt(offset))
 
+    assert det.state == STATE_OFF
+
+
+def test_delay_wait_start_bootstraps_from_first_high_sample():
+    """Delayed-start cycles should anchor start time and initial energy to the first confirmed-high sample."""
+    det = _make_detector(
+        delay_confirm_seconds=30.0,
+        start_duration_threshold=5.0,
+        start_threshold_w=100.0,
+    )
+    det.process_reading(0.0, dt(0))
+    for i in range(1, 11):
+        det.process_reading(25.0, dt(i * 5))
     assert det.state == STATE_DELAY_WAIT
+
+    det.process_reading(800.0, dt(55))
+    det.process_reading(800.0, dt(60))
+
+    assert det.state in (STATE_STARTING, STATE_RUNNING)
+    assert det._current_cycle_start == dt(55)
+    assert det._power_readings[0] == (dt(55), 800.0)
+    assert det._power_readings[1] == (dt(60), 800.0)
+    assert det._energy_since_idle_wh > 0.0
 
 
 def test_delay_wait_to_starting_requires_sustained_high_power():

@@ -27,8 +27,6 @@ from .const import (
     DEVICE_TYPE_WASHING_MACHINE,
     DEVICE_TYPE_DRYER,
     DEVICE_TYPE_WASHER_DRYER,
-    DEFAULT_RUNNING_DEAD_ZONE,
-    DEFAULT_START_ENERGY_THRESHOLD,
     DEFAULT_MAX_DEFERRAL_SECONDS,
     DEFAULT_DEFER_FINISH_CONFIDENCE,
     DISHWASHER_END_SPIKE_MIN_PROGRESS,
@@ -249,6 +247,7 @@ class CycleDetector:
         # (low) reading.  This prevents a single isolated spike from
         # tripping STARTING just because the sampling interval is long.
         self._delay_wait_high_start: datetime | None = None
+        self._delay_wait_high_power: float | None = None
         # Preserve a delayed-start candidate across a false STARTING probe
         # that drops back into the standby band without the machine truly
         # turning off.
@@ -785,6 +784,7 @@ class CycleDetector:
                 self._delay_wait_true_off_seconds = 0.0
                 if self._delay_wait_high_start is None:
                     self._delay_wait_high_start = timestamp
+                    self._delay_wait_high_power = power
                 else:
                     elapsed_high = (
                         timestamp - self._delay_wait_high_start
@@ -797,20 +797,26 @@ class CycleDetector:
                             elapsed_high,
                         )
                         self._transition_to(STATE_STARTING, timestamp)
-                        self._current_cycle_start = (
-                            self._delay_wait_high_start or timestamp
-                        )
-                        self._power_readings = [(timestamp, power)]
+                        start_timestamp = self._delay_wait_high_start or timestamp
+                        start_power = self._delay_wait_high_power or power
+                        self._current_cycle_start = start_timestamp
+                        self._power_readings = [(start_timestamp, start_power)]
+                        elapsed_from_anchor = (timestamp - start_timestamp).total_seconds()
                         self._energy_since_idle_wh = (
-                            power * (dt / 3600.0) if dt > 0 else 0.0
+                            start_power * (elapsed_from_anchor / 3600.0)
+                            if elapsed_from_anchor > 0
+                            else 0.0
                         )
-                        self._cycle_max_power = power
+                        if timestamp != start_timestamp:
+                            self._power_readings.append((timestamp, power))
+                        self._cycle_max_power = max(start_power, power)
                         self._abrupt_drop = False
             else:
                 # Power dropped back below start threshold — clear the
                 # high-power streak anchor so the next high reading
                 # starts a fresh confirmation window.
                 self._delay_wait_high_start = None
+                self._delay_wait_high_power = None
                 if power < self._config.stop_threshold_w:
                     # Power near zero: machine genuinely turned off, not
                     # just waiting.
@@ -853,6 +859,10 @@ class CycleDetector:
                     "False start detected: power dropped after %.2fs",
                     self._time_above_threshold,
                 )
+                self._delay_band_start = None
+                self._delay_band_seconds = 0.0
+                self._delay_band_peak = 0.0
+                self._preserve_delay_band_on_off = False
                 self._transition_to(STATE_OFF, timestamp)
 
         elif self._state == STATE_RUNNING:
@@ -1159,6 +1169,7 @@ class CycleDetector:
                 self._delay_band_peak = 0.0
             self._delay_wait_true_off_seconds = 0.0
             self._delay_wait_high_start = None
+            self._delay_wait_high_power = None
             self._preserve_delay_band_on_off = False
 
         # Reset end spike tracker when entering ENDING state
@@ -1172,6 +1183,7 @@ class CycleDetector:
             self._delay_band_peak = 0.0
             self._delay_wait_true_off_seconds = 0.0
             self._delay_wait_high_start = None
+            self._delay_wait_high_power = None
             self._sub_state = "Waiting to Start"
             self._preserve_delay_band_on_off = False
         elif new_state == STATE_ANTI_WRINKLE:
