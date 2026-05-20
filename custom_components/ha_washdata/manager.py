@@ -1325,6 +1325,11 @@ class WashDataManager:
         # This is safe to run repeatedly (it skips already compressed cycles)
         await self.profile_store.async_migrate_cycles_to_compressed()
 
+        # Backfill match_confidence for labeled cycles that predate the field
+        self.hass.async_create_task(
+            self.profile_store.async_backfill_match_confidence()
+        )
+
         # Subscribe to external cycle end trigger (if enabled)
         await self._setup_external_end_trigger()
 
@@ -2698,6 +2703,8 @@ class WashDataManager:
             and self._current_program in self.profile_store.get_profiles()
         ):
             cycle_data["profile_name"] = self._current_program
+            if self._last_match_confidence:
+                cycle_data["match_confidence"] = float(self._last_match_confidence)
 
         # Attach extensive debug data if available (and configured)
         if self._last_match_result:
@@ -2715,6 +2722,7 @@ class WashDataManager:
             )
             if res.best_profile and res.confidence >= self._auto_label_confidence:
                 cycle_data["profile_name"] = res.best_profile
+                cycle_data["match_confidence"] = float(res.confidence)
                 self._logger.info(
                     "Post-cycle auto-labeled as '%s' (confidence: %.2f)",
                     res.best_profile,

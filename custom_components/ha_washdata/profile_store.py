@@ -3302,6 +3302,7 @@ class ProfileStore:
                 if current_label:
                     if current_label != result.best_profile:
                         cycle["profile_name"] = result.best_profile
+                        cycle["match_confidence"] = float(result.confidence)
                         stats["relabeled"] += 1
                         self._logger.info(
                             "Relabeled cycle %s: '%s' -> '%s' (confidence: %.2f)",
@@ -3312,6 +3313,7 @@ class ProfileStore:
                         )
                 else:
                     cycle["profile_name"] = result.best_profile
+                    cycle["match_confidence"] = float(result.confidence)
                     stats["labeled"] += 1
                     self._logger.info(
                         "Auto-labeled cycle %s as '%s' (confidence: %.2f)",
@@ -3334,6 +3336,39 @@ class ProfileStore:
             stats["skipped"],
         )
         return stats
+
+    async def async_backfill_match_confidence(self) -> int:
+        """Populate match_confidence for labeled cycles that predate the field.
+
+        Runs the matcher once per cycle with profile_name set but no
+        match_confidence, and persists the resulting confidence if the same
+        profile is returned. Returns the number of cycles updated. Safe to
+        call repeatedly — already-backfilled cycles are skipped.
+        """
+        cycles = self._data.get("past_cycles", []) or []
+        updated = 0
+        for cycle in cycles:
+            if cycle.get("match_confidence") is not None:
+                continue
+            profile_name = cycle.get("profile_name")
+            if not profile_name:
+                continue
+            power_data = self._decompress_power_data(cycle)
+            if not power_data or len(power_data) < 10:
+                continue
+            try:
+                result = await self.async_match_profile(
+                    power_data, cycle.get("duration", 0)
+                )
+            except Exception:  # pylint: disable=broad-exception-caught
+                continue
+            if result.best_profile == profile_name and result.confidence > 0:
+                cycle["match_confidence"] = float(result.confidence)
+                updated += 1
+        if updated:
+            await self.async_save()
+            self._logger.info("Backfilled match_confidence on %d cycles", updated)
+        return updated
 
     def _decompress_power_data(self, cycle: CycleDict) -> list[tuple[float, float]]:
         """Decompress cycle power data for matching (wrapper)."""
