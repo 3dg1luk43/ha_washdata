@@ -1,0 +1,150 @@
+name: Notify Issues Referenced In Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to scan (defaults to latest published release)"
+        required: false
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment on issues referenced in the release notes
+        uses: actions/github-script@v7
+        env:
+          TAG_INPUT: ${{ inputs.tag }}
+        with:
+          script: |
+            // Marker is read by close_done_issues.yml — keep both files in sync.
+            const BOT_MARKER = '<!-- release-reference-bot -->';
+
+            // Resolve the release to scan.
+            let release;
+            if (context.eventName === 'release') {
+              release = context.payload.release;
+            } else {
+              const tag = process.env.TAG_INPUT;
+              if (tag) {
+                ({ data: release } = await github.rest.repos.getReleaseByTag({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag,
+                }));
+              } else {
+                ({ data: release } = await github.rest.repos.getLatestRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                }));
+              }
+            }
+
+            if (release.draft) {
+              console.log(`Release ${release.tag_name} is a draft, skipping.`);
+              return;
+            }
+
+            const releaseUrl = release.html_url;
+            const releaseName = release.name || release.tag_name;
+            const publishedAt = new Date(release.published_at || release.created_at);
+            const body = release.body || '';
+            console.log(`Scanning release "${releaseName}" published ${publishedAt.toISOString()}`);
+
+            // Extract referenced issue/PR numbers from the release body.
+            // Exclude commit-sha-style matches (alnum char immediately before "#").
+            const refSet = new Set();
+            for (const m of body.matchAll(/(?:^|[^a-zA-Z0-9/_-])#(\d+)\b/g)) {
+              refSet.add(Number(m[1]));
+            }
+            const urlRe = new RegExp(
+              `https?:\\/\\/github\\.com\\/${context.repo.owner}\\/${context.repo.repo}\\/issues\\/(\\d+)`,
+              'gi'
+            );
+            for (const m of body.matchAll(urlRe)) {
+              refSet.add(Number(m[1]));
+            }
+
+            if (refSet.size === 0) {
+              console.log('No issue references found in release body.');
+              return;
+            }
+            console.log(`Found references: ${[...refSet].sort((a, b) => a - b).join(', ')}`);
+
+            for (const num of refSet) {
+              let issue;
+              try {
+                ({ data: issue } = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: num,
+                }));
+              } catch (e) {
+                console.log(`#${num}: not found (${e.message}), skipping.`);
+                continue;
+              }
+
+              if (issue.pull_request) {
+                console.log(`#${num}: pull request, skipping.`);
+                continue;
+              }
+
+              if (issue.state !== 'open') {
+                console.log(`#${num}: state is ${issue.state}, skipping.`);
+                continue;
+              }
+
+              if (new Date(issue.created_at) > publishedAt) {
+                console.log(
+                  `#${num}: created ${issue.created_at} is after release published ${publishedAt.toISOString()}, skipping.`
+                );
+                continue;
+              }
+
+              // Skip if we have already posted for this exact release tag.
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: num,
+                per_page: 100,
+              });
+              const alreadyNotified = comments.some(
+                c => c.user.type === 'Bot'
+                  && c.body != null
+                  && c.body.includes(BOT_MARKER)
+                  && c.body.includes(`tag:${release.tag_name}`)
+              );
+              if (alreadyNotified) {
+                console.log(`#${num}: already notified for ${release.tag_name}, skipping.`);
+                continue;
+              }
+
+              const commentBody =
+                `${BOT_MARKER} tag:${release.tag_name}\n` +
+                `🎉 A fix or feature related to this issue shipped in [**${releaseName}**](${releaseUrl}).\n\n` +
+                `Please update WashData and verify the behavior on your setup. ` +
+                `If everything works for you, no action is needed — this issue will auto-close after **5 days** of inactivity. ` +
+                `If the problem still persists after updating, leave a comment here and @${context.repo.owner} will take another look. 🙏`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: num,
+                body: commentBody,
+              });
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: num,
+                labels: ['done'],
+              }).catch(e => console.log(`#${num}: could not add "done" label: ${e.message}`));
+
+              console.log(`#${num}: posted release-reference comment for ${release.tag_name}.`);
+            }
