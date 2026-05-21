@@ -5,7 +5,13 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.4.4.2 - 2026-05-11
+## 0.4.4.3 - 2026-05-21
+
+### 🐛 Bug Fixes
+
+- **Advanced Settings Save Blocked by "Entity None is neither a valid entity ID nor a valid UUID"** (#245): After upgrading to 0.4.4.2, submitting the Advanced Settings form (with or without the *Apply Suggested Values* checkbox) failed with three validation errors against `external_triggers_section`'s `external_end_trigger`, `door_sensor_entity`, and `switch_entity` fields, and none of the changes were persisted. When the Advanced Settings form was reorganised into collapsible sections, these three `EntitySelector` fields were declared with `default=None` for unset entities; voluptuous renders the form with `None` filled in, and on submit the `EntitySelector` validator rejects `None` because it is neither a valid entity ID nor a UUID. Fix: switched all three fields to the `description={"suggested_value": ...}` pattern already used for `energy_price_entity` elsewhere in the options flow, so the field renders as empty when unset and the validator only sees real entity IDs on submit. Users on 0.4.4.2 who never configured an external end trigger, door sensor, or pause switch can now save Advanced Settings (including suggested-value applications) without clearing the form first.
+
+## 0.4.4.2 - 2026-05-20
 
 ### ✨ Features
 - **Notify Entity Targets** (#230): Cycle Start / Finish / Live Progress notification target dropdowns now list notify entities (e.g. those exposed by `telegram_bot`) alongside legacy `notify.<service>` services. When the picked target is a notify entity, the dispatcher routes through the universal `notify.send_message` action with `entity_id` set; legacy `notify.*` services continue to be called directly. No reconfiguration is required — existing setups keep working unchanged, and users who could previously only reach a Telegram chat via the `CONF_NOTIFY_ACTIONS` script field or the `ha_washdata_cycle_ended` event can now pick the entity directly.

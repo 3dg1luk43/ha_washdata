@@ -1352,7 +1352,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_EXTERNAL_END_TRIGGER,
-                default=get_val(CONF_EXTERNAL_END_TRIGGER, None),
+                description={"suggested_value": get_val(CONF_EXTERNAL_END_TRIGGER, None)},
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain="binary_sensor",
@@ -1365,7 +1365,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_DOOR_SENSOR_ENTITY,
-                default=get_val(CONF_DOOR_SENSOR_ENTITY, None),
+                description={"suggested_value": get_val(CONF_DOOR_SENSOR_ENTITY, None)},
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain="binary_sensor",
@@ -1378,7 +1378,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.BooleanSelector(),
             vol.Optional(
                 CONF_SWITCH_ENTITY,
-                default=get_val(CONF_SWITCH_ENTITY, None),
+                description={"suggested_value": get_val(CONF_SWITCH_ENTITY, None)},
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain="switch",
