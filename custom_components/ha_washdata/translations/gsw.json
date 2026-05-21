@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Einstellungen",
-        "description": "Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.\n\nAktuell verfügbare Einstellungsvorschläge: {suggestions_count}.\nFalls dieser Wert über 0 liegt, öffnen Sie die Erweiterten Einstellungen und nutzen Sie „Vorgeschlagene Werte anwenden”, um die Empfehlungen zu prüfen.",
+        "description": "{deprecation_warning}Optimieren Sie Erkennungsschwellenwerte, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.\n\nAktuell verfügbare Einstellungsvorschläge: {suggestions_count}.\nFalls dieser Wert über 0 liegt, öffnen Sie die Erweiterten Einstellungen und nutzen Sie „Vorgeschlagene Werte anwenden”, um die Empfehlungen zu prüfen.",
         "data": {
           "apply_suggestions": "Vorgeschlagene Werte anwenden",
           "device_type": "Gerätetyp",

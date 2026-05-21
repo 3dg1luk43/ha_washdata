@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Setări",
-        "description": "Reglați pragurile de detectare, învățarea și comportamentul avansat. Valorile implicite funcționează bine pentru majoritatea configurațiilor.\n\nSetări sugerate disponibile: {suggestions_count}.\nDacă este mai mare decât 0, deschideți Setări avansate și folosiți Aplicați valorile sugerate pentru a revizui recomandările.",
+        "description": "{deprecation_warning}Reglați pragurile de detectare, învățarea și comportamentul avansat. Valorile implicite funcționează bine pentru majoritatea configurațiilor.\n\nSetări sugerate disponibile: {suggestions_count}.\nDacă este mai mare decât 0, deschideți Setări avansate și folosiți Aplicați valorile sugerate pentru a revizui recomandările.",
         "data": {
           "apply_suggestions": "Aplicați valorile sugerate",
           "device_type": "Tip de dispozitiv",

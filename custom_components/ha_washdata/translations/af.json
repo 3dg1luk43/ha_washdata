@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Instellings",
-        "description": "Pas opsporingsdrempels, leer en gevorderde gedrag aan. Verstekstellings werk goed vir die meeste opstellings.\n\nVoorgestelde instellings tans beskikbaar: {suggestions_count}.\nAs dit bo 0 is, maak Gevorderde instellings oop en gebruik 'Pas voorgestelde waardes toe' om aanbevelings te hersien.",
+        "description": "{deprecation_warning}Pas opsporingsdrempels, leer en gevorderde gedrag aan. Verstekstellings werk goed vir die meeste opstellings.\n\nVoorgestelde instellings tans beskikbaar: {suggestions_count}.\nAs dit bo 0 is, maak Gevorderde instellings oop en gebruik 'Pas voorgestelde waardes toe' om aanbevelings te hersien.",
         "data": {
           "apply_suggestions": "Pas voorgestelde waardes toe",
           "device_type": "Soort toestel",

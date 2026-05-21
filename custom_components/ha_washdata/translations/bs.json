@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Postavke",
-        "description": "Podesite pragove detekcije, učenje i napredno ponašanje. Zadane postavke dobro rade za većinu postavki.\n\nTrenutno dostupne preporučene postavke: {suggestions_count}.\nAko je ovo iznad 0, otvorite Napredne postavke i koristite 'Primijeni predložene vrijednosti' za pregled preporuka.",
+        "description": "{deprecation_warning}Podesite pragove detekcije, učenje i napredno ponašanje. Zadane postavke dobro rade za većinu postavki.\n\nTrenutno dostupne preporučene postavke: {suggestions_count}.\nAko je ovo iznad 0, otvorite Napredne postavke i koristite 'Primijeni predložene vrijednosti' za pregled preporuka.",
         "data": {
           "apply_suggestions": "Primijenite predložene vrijednosti",
           "device_type": "Tip uređaja",

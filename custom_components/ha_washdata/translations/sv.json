@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Inställningar",
-        "description": "Justera detektionströsklar, inlärning och avancerat beteende. Standardinställningarna fungerar bra för de flesta inställningar.\n\nTillgängliga föreslagna inställningar: {suggestions_count}.\nOm detta är över 0, öppna Avancerade inställningar och använd Tillämpa föreslagna värden för att granska rekommendationerna.",
+        "description": "{deprecation_warning}Justera detektionströsklar, inlärning och avancerat beteende. Standardinställningarna fungerar bra för de flesta inställningar.\n\nTillgängliga föreslagna inställningar: {suggestions_count}.\nOm detta är över 0, öppna Avancerade inställningar och använd Tillämpa föreslagna värden för att granska rekommendationerna.",
         "data": {
           "apply_suggestions": "Tillämpa föreslagna värden",
           "device_type": "Enhetstyp",

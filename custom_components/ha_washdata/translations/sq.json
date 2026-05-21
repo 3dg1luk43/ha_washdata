@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Cilësimet",
-        "description": "Rregulloni pragjet e zbulimit, të mësuarit dhe sjelljen e avancuar. Parazgjedhjet funksionojnë mirë për shumicën e konfigurimeve.\n\nCilësimet e sugjeruara aktualisht të disponueshme: {suggestions_count}.\nNëse kjo është mbi 0, hapni Cilësimet e Avancuara dhe përdorni Apliko Vlerat e Sugjeruara për të rishikuar rekomandimet.",
+        "description": "{deprecation_warning}Rregulloni pragjet e zbulimit, të mësuarit dhe sjelljen e avancuar. Parazgjedhjet funksionojnë mirë për shumicën e konfigurimeve.\n\nCilësimet e sugjeruara aktualisht të disponueshme: {suggestions_count}.\nNëse kjo është mbi 0, hapni Cilësimet e Avancuara dhe përdorni Apliko Vlerat e Sugjeruara për të rishikuar rekomandimet.",
         "data": {
           "apply_suggestions": "Apliko vlerat e sugjeruara",
           "device_type": "Lloji i pajisjes",

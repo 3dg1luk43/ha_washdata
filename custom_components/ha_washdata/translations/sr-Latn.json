@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Podešavanja",
-        "description": "Podesi pragove detekcije, učenje i napredno ponašanje. Podrazumevane vrednosti dobro funkcionišu za većinu podešavanja.\n\n{suggestions_count}",
+        "description": "{deprecation_warning}Podesi pragove detekcije, učenje i napredno ponašanje. Podrazumevane vrednosti dobro funkcionišu za većinu podešavanja.\n\n{suggestions_count}",
         "data": {
           "apply_suggestions": "Primeni predložene vrednosti",
           "device_type": "Tip uređaja",

@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Einstellungen",
-        "description": "Erkennungsschwellwerte optimieren, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.\n\nDerzeit verfügbare empfohlene Einstellungen: {suggestions_count}.\nWenn dies über 0 liegt, öffnen Sie die Erweiterten Einstellungen und verwenden Sie 'Vorgeschlagene Werte anwenden', um die Empfehlungen zu überprüfen.",
+        "description": "{deprecation_warning}Erkennungsschwellwerte optimieren, Lernen und erweitertes Verhalten. Die Standardeinstellungen funktionieren für die meisten Setups gut.\n\nDerzeit verfügbare empfohlene Einstellungen: {suggestions_count}.\nWenn dies über 0 liegt, öffnen Sie die Erweiterten Einstellungen und verwenden Sie 'Vorgeschlagene Werte anwenden', um die Empfehlungen zu überprüfen.",
         "data": {
           "apply_suggestions": "Vorgeschlagene Werte anwenden",
           "device_type": "Gerätetyp",

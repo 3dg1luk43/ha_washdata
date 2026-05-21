@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Cài đặt",
-        "description": "Điều chỉnh các ngưỡng phát hiện, học tập và hành vi nâng cao. Mặc định hoạt động tốt cho hầu hết các thiết lập.\n\nCác cài đặt được đề xuất hiện có sẵn: {suggestions_count}.\nNếu giá trị này lớn hơn 0, hãy mở cài đặt nâng cao và dùng 'Áp dụng các giá trị được đề xuất' để xem lại các đề xuất.",
+        "description": "{deprecation_warning}Điều chỉnh các ngưỡng phát hiện, học tập và hành vi nâng cao. Mặc định hoạt động tốt cho hầu hết các thiết lập.\n\nCác cài đặt được đề xuất hiện có sẵn: {suggestions_count}.\nNếu giá trị này lớn hơn 0, hãy mở cài đặt nâng cao và dùng 'Áp dụng các giá trị được đề xuất' để xem lại các đề xuất.",
         "data": {
           "apply_suggestions": "Áp dụng các giá trị được đề xuất",
           "device_type": "Loại thiết bị",

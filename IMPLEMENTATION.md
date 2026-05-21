@@ -643,9 +643,14 @@ The integration includes specialized handling for different appliance types to a
 
 - **Washing Machine**: Standard defaults; handles repeating wash/rinse phases.
 - **Dryer**: More linear power curve; shorter pauses.
+- **Washer-Dryer Combo**: Uses washing-machine defaults extended to cover the optional dry leg.
 - **Dishwasher**: Multi-hour silent drying phases; end pump-out spikes; requires multi-hour watchdog extensions and conservative smart termination.
-- **Electric Vehicle (EV)**: High-power charging cycles; supports "Charging" and "Maintenance" phase heuristics; 15-minute off-gap to handle brief charger disconnections.
-- **Coffee Machine**: Very short cycles; rapid sampling requirements.
+- **Air Fryer**: High constant load with thermostat-driven dropouts; explicit user-set timer per cycle.
+- **Bread Maker**: Long programs with low-power proving/rising phases; 2-hour active-timeout to bridge those silences.
+- **Pump / Sump Pump**: Sharp on/off with no warm-down; stuck-alarm watchdog rather than profile matching is the primary feature.
+- **Other (Advanced)**: Generic bucket for appliances that do not fit one of the supported classes. Ships intentionally generic defaults that are not tuned for any specific appliance; no curated phase catalog; no device-type-specific runtime branching. The user is expected to configure thresholds, timeouts, and matching parameters themselves. Also the runtime fallback for entries whose device type is hard-removed after deprecation.
+
+**Deprecated (0.4.4.3, scheduled removal 0.4.6)**: Electric Vehicle, Coffee Machine, Heat Pump, and Oven. Existing setups continue to work; these types fail at least one of WashData's three appliance fit tests (user-selected discrete program, reproducible power signature, clean return to OFF) so matching produces noise rather than signal. The new-entry dropdown filters them out; the options flow surfaces a yellow warning recommending migration to one of the supported types or to **Other (Advanced)**.
 
 ---
 

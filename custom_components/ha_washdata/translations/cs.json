@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Nastavení",
-        "description": "Vylaďte prahy detekce, učení a pokročilé chování. Výchozí nastavení funguje dobře pro většinu nastavení.\n\nAktuálně dostupná doporučená nastavení: {suggestions_count}.\nPokud je toto číslo nad 0, otevřete Pokročilá nastavení a použijte 'Použít navrhované hodnoty' pro přehled doporučení.",
+        "description": "{deprecation_warning}Vylaďte prahy detekce, učení a pokročilé chování. Výchozí nastavení funguje dobře pro většinu nastavení.\n\nAktuálně dostupná doporučená nastavení: {suggestions_count}.\nPokud je toto číslo nad 0, otevřete Pokročilá nastavení a použijte 'Použít navrhované hodnoty' pro přehled doporučení.",
         "data": {
           "apply_suggestions": "Použít navrhované hodnoty",
           "device_type": "Typ zařízení",

@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Ajustes",
-        "description": "Ajusta los umbrales de detección, el aprendizaje y el comportamiento avanzado. Los valores predeterminados funcionan bien para la mayoría de las configuraciones.\n\nAjustes sugeridos disponibles actualmente: {suggestions_count}.\nSi es mayor que 0, abre Configuración avanzada y usa Aplicar valores sugeridos para revisar las recomendaciones.",
+        "description": "{deprecation_warning}Ajusta los umbrales de detección, el aprendizaje y el comportamiento avanzado. Los valores predeterminados funcionan bien para la mayoría de las configuraciones.\n\nAjustes sugeridos disponibles actualmente: {suggestions_count}.\nSi es mayor que 0, abre Configuración avanzada y usa Aplicar valores sugeridos para revisar las recomendaciones.",
         "data": {
           "apply_suggestions": "Aplicar valores sugeridos",
           "device_type": "Tipo de dispositivo",

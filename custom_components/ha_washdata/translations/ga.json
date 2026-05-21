@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Socruithe",
-        "description": "Mionghléas tairseacha braite, foghlaim, agus iompar ardleibhéil. Oibríonn réamhshocraithe go maith don chuid is mó de na socruithe.\n\nSocruithe Molta ar fáil faoi láthair: {suggestions_count}.\nMá tá sé seo os cionn 0, oscail Ardsocruithe agus úsáid Cuir Luachanna Molta i bhFeidhm chun moltaí a athbhreithniú.",
+        "description": "{deprecation_warning}Mionghléas tairseacha braite, foghlaim, agus iompar ardleibhéil. Oibríonn réamhshocraithe go maith don chuid is mó de na socruithe.\n\nSocruithe Molta ar fáil faoi láthair: {suggestions_count}.\nMá tá sé seo os cionn 0, oscail Ardsocruithe agus úsáid Cuir Luachanna Molta i bhFeidhm chun moltaí a athbhreithniú.",
         "data": {
           "apply_suggestions": "Cuir Luachanna Molta i bhfeidhm",
           "device_type": "Cineál Gléas",

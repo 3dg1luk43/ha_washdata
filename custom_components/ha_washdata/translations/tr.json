@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Ayarlar",
-        "description": "Algılama eşiklerini, öğrenmeyi ve gelişmiş davranışı ayarlayın. Varsayılanlar çoğu kurulum için iyi çalışır.\n\nŞu anda kullanılabilir önerilen ayarlar: {suggestions_count}.\nBu değer 0'dan büyükse, önerileri gözden geçirmek için Gelişmiş Ayarlar'ı açın ve 'Önerilen Değerleri Uygula' seçeneğini kullanın.",
+        "description": "{deprecation_warning}Algılama eşiklerini, öğrenmeyi ve gelişmiş davranışı ayarlayın. Varsayılanlar çoğu kurulum için iyi çalışır.\n\nŞu anda kullanılabilir önerilen ayarlar: {suggestions_count}.\nBu değer 0'dan büyükse, önerileri gözden geçirmek için Gelişmiş Ayarlar'ı açın ve 'Önerilen Değerleri Uygula' seçeneğini kullanın.",
         "data": {
           "apply_suggestions": "Önerilen Değerleri Uygula",
           "device_type": "Cihaz Türü",

@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Nastavitve",
-        "description": "Prilagodite pragove zaznavanja, učenje in napredno vedenje. Privzete nastavitve delujejo dobro za večino konfiguracij.\n\nTrenutno razpoložljive predlagane nastavitve: {suggestions_count}.\nČe je ta vrednost nad 0, odprite Napredne nastavitve in uporabite Uporabi predlagane vrednosti za pregled priporočil.",
+        "description": "{deprecation_warning}Prilagodite pragove zaznavanja, učenje in napredno vedenje. Privzete nastavitve delujejo dobro za večino konfiguracij.\n\nTrenutno razpoložljive predlagane nastavitve: {suggestions_count}.\nČe je ta vrednost nad 0, odprite Napredne nastavitve in uporabite Uporabi predlagane vrednosti za pregled priporočil.",
         "data": {
           "apply_suggestions": "Uporabi predlagane vrednosti",
           "device_type": "Vrsta naprave",

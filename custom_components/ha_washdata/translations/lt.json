@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Nustatymai",
-        "description": "Nustatykite aptikimo slenksčius, mokymąsi ir išplėstinį elgesį. Numatytieji nustatymai gerai veikia daugumoje sąrankų.\n\nŠiuo metu galimų siūlomų nustatymų: {suggestions_count}.\nJei šis skaičius viršija 0, atidarykite Išplėstinius nustatymus ir naudokite 'Taikyti siūlomas reikšmes' rekomendacijoms peržiūrėti.",
+        "description": "{deprecation_warning}Nustatykite aptikimo slenksčius, mokymąsi ir išplėstinį elgesį. Numatytieji nustatymai gerai veikia daugumoje sąrankų.\n\nŠiuo metu galimų siūlomų nustatymų: {suggestions_count}.\nJei šis skaičius viršija 0, atidarykite Išplėstinius nustatymus ir naudokite 'Taikyti siūlomas reikšmes' rekomendacijoms peržiūrėti.",
         "data": {
           "apply_suggestions": "Taikyti siūlomas reikšmes",
           "device_type": "Įrenginio tipas",

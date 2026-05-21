@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Seaded",
-        "description": "Tuvastamise lävede, õppimise ja täiustatud käitumise häälestamine. Vaikimisi töötavad enamiku seadistuste puhul hästi.\n\nPraegu saadaolevate soovituslike seadete arv: {suggestions_count}.\nKui see on suurem kui 0, ava Täpsemad seaded ja kasuta Rakenda soovituslikud väärtused soovituste ülevaatamiseks.",
+        "description": "{deprecation_warning}Tuvastamise lävede, õppimise ja täiustatud käitumise häälestamine. Vaikimisi töötavad enamiku seadistuste puhul hästi.\n\nPraegu saadaolevate soovituslike seadete arv: {suggestions_count}.\nKui see on suurem kui 0, ava Täpsemad seaded ja kasuta Rakenda soovituslikud väärtused soovituste ülevaatamiseks.",
         "data": {
           "apply_suggestions": "Rakendage soovitatud väärtused",
           "device_type": "Seadme tüüp",

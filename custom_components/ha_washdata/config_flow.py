@@ -91,6 +91,7 @@ from .const import (
     DEFAULT_DEVICE_TYPE,
     DEFAULT_PROFILE_DURATION_TOLERANCE,
     DEVICE_TYPES,
+    DEPRECATED_DEVICE_TYPES,
     DEFAULT_PROGRESS_RESET_DELAY,
     DEFAULT_DURATION_TOLERANCE,
     DEFAULT_PROFILE_MATCH_INTERVAL,
@@ -164,6 +165,25 @@ def _format_duration_label(seconds: int) -> str:
     return f"{minutes // 60}h {minutes % 60:02d}m"
 
 
+def _device_type_options(
+    current: str | None = None,
+) -> list[selector.SelectOptionDict]:
+    """Build the device-type dropdown options.
+
+    Deprecated types are hidden for new entries; for existing entries whose
+    saved device_type is deprecated, the type is shown with a "(deprecated)"
+    suffix so the user can either keep it or switch without losing it from
+    the dropdown.
+    """
+    options: list[selector.SelectOptionDict] = []
+    for key, label in DEVICE_TYPES.items():
+        if key in DEPRECATED_DEVICE_TYPES and key != current:
+            continue
+        display = f"{label} (deprecated)" if key in DEPRECATED_DEVICE_TYPES else label
+        options.append(selector.SelectOptionDict(value=key, label=display))
+    return options
+
+
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME, default=DEFAULT_NAME): str,
@@ -171,10 +191,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
             CONF_DEVICE_TYPE, default=DEFAULT_DEVICE_TYPE
         ): selector.SelectSelector(
             selector.SelectSelectorConfig(
-                options=[
-                    selector.SelectOptionDict(value=k, label=v)
-                    for k, v in DEVICE_TYPES.items()
-                ],
+                options=_device_type_options(),
                 mode=selector.SelectSelectorMode.DROPDOWN,
             )
         ),
@@ -530,10 +547,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 default=get_val(CONF_DEVICE_TYPE, DEFAULT_DEVICE_TYPE),
             ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
-                    options=[
-                        selector.SelectOptionDict(value=k, label=v)
-                        for k, v in DEVICE_TYPES.items()
-                    ],
+                    options=_device_type_options(current=current_device_type),
                     mode=selector.SelectSelectorMode.DROPDOWN,
                 )
             ),
@@ -554,12 +568,33 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(CONF_SHOW_ADVANCED, default=False): selector.BooleanSelector(),
         }
 
+        if current_device_type in DEPRECATED_DEVICE_TYPES:
+            current_label = DEVICE_TYPES.get(current_device_type, current_device_type)
+            deprecation_warning = (
+                f"⚠️ **Deprecated device type:** {current_label} is scheduled "
+                f"for removal in a future release. WashData's matching pipeline "
+                f"does not produce reliable results for this appliance class. "
+                f"Your integration keeps working through the deprecation period; "
+                f"to silence this warning, switch **Device Type** below to one "
+                f"of the supported types (Washing Machine, Dryer, Washer-Dryer "
+                f"Combo, Dishwasher, Air Fryer, Bread Maker, or Pump), or to "
+                f"**Other (Advanced)** if your appliance does not match any of "
+                f"the supported types. **Other (Advanced)** ships intentionally "
+                f"generic defaults that are not tuned for any specific "
+                f"appliance, so you will need to configure thresholds, "
+                f"timeouts, and matching parameters yourself; all your existing "
+                f"settings are preserved when you switch.\n\n"
+            )
+        else:
+            deprecation_warning = ""
+
         return self.async_show_form(
             step_id="settings",
             data_schema=vol.Schema(schema),
             description_placeholders={
                 "error": "",
                 "suggestions_count": str(suggestions_count),
+                "deprecation_warning": deprecation_warning,
                 "device": "{device}",
                 "duration": "{duration}",
                 "program": "{program}",

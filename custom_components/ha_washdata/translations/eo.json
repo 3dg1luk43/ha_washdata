@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Agordoj",
-        "description": "Agordu detektajn sojlojn, lernadon kaj altnivelan konduton. La defaŭltaj valoroj funkcias bone por plej multaj agordoj.\n\nSugestitaj agordoj nuntempe disponeblaj: {suggestions_count}.\nSe ĉi tio estas super 0, malfermu Altnivelaj Agordoj kaj uzu Apliki Sugestitajn Valorojn por revizii rekomendojn.",
+        "description": "{deprecation_warning}Agordu detektajn sojlojn, lernadon kaj altnivelan konduton. La defaŭltaj valoroj funkcias bone por plej multaj agordoj.\n\nSugestitaj agordoj nuntempe disponeblaj: {suggestions_count}.\nSe ĉi tio estas super 0, malfermu Altnivelaj Agordoj kaj uzu Apliki Sugestitajn Valorojn por revizii rekomendojn.",
         "data": {
           "apply_suggestions": "Apliki sugestitajn valorojn",
           "device_type": "Tipo de aparato",

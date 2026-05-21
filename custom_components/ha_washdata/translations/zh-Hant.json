@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "設定",
-        "description": "調整檢測閾值、學習和高階行為。預設值適用於大多數設定。\n\n目前可用的建議設定：{suggestions_count}。\n如果此值大於 0，請開啟進階設定並使用「應用建議值」來檢視建議。",
+        "description": "{deprecation_warning}調整檢測閾值、學習和高階行為。預設值適用於大多數設定。\n\n目前可用的建議設定：{suggestions_count}。\n如果此值大於 0，請開啟進階設定並使用「應用建議值」來檢視建議。",
         "data": {
           "apply_suggestions": "應用建議值",
           "device_type": "設備類型",

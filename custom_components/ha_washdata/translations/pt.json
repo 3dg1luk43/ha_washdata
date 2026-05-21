@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Definições",
-        "description": "Ajuste os limiares de detecção, aprendizagem e comportamento avançado. As predefinições funcionam bem para a maioria das configurações.\n\nDefinições sugeridas disponíveis: {suggestions_count}.\nSe for acima de 0, abra as Definições avançadas e use Aplicar valores sugeridos para rever as recomendações.",
+        "description": "{deprecation_warning}Ajuste os limiares de detecção, aprendizagem e comportamento avançado. As predefinições funcionam bem para a maioria das configurações.\n\nDefinições sugeridas disponíveis: {suggestions_count}.\nSe for acima de 0, abra as Definições avançadas e use Aplicar valores sugeridos para rever as recomendações.",
         "data": {
           "apply_suggestions": "Aplicar valores sugeridos",
           "device_type": "Tipo de dispositivo",

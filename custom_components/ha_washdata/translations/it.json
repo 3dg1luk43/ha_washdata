@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Impostazioni",
-        "description": "Ottimizza le soglie di rilevamento, l'apprendimento e il comportamento avanzato. Le impostazioni predefinite funzionano bene per la maggior parte delle configurazioni.\n\nImpostazioni suggerite attualmente disponibili: {suggestions_count}.\nSe il valore è maggiore di 0, apri le Impostazioni avanzate e usa Applica valori suggeriti per esaminare i consigli.",
+        "description": "{deprecation_warning}Ottimizza le soglie di rilevamento, l'apprendimento e il comportamento avanzato. Le impostazioni predefinite funzionano bene per la maggior parte delle configurazioni.\n\nImpostazioni suggerite attualmente disponibili: {suggestions_count}.\nSe il valore è maggiore di 0, apri le Impostazioni avanzate e usa Applica valori suggeriti per esaminare i consigli.",
         "data": {
           "apply_suggestions": "Applica valori suggeriti",
           "device_type": "Tipo di dispositivo",

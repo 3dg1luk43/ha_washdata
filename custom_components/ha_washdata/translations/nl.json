@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Instellingen",
-        "description": "Stem detectiedrempels, leerprocessen en geavanceerd gedrag af. Standaardinstellingen werken goed voor de meeste configuraties.\n\nBeschikbare voorgestelde instellingen: {suggestions_count}.\nAls dit boven 0 is, open dan Geavanceerde instellingen en gebruik 'Voorgestelde waarden toepassen' om aanbevelingen te bekijken.",
+        "description": "{deprecation_warning}Stem detectiedrempels, leerprocessen en geavanceerd gedrag af. Standaardinstellingen werken goed voor de meeste configuraties.\n\nBeschikbare voorgestelde instellingen: {suggestions_count}.\nAls dit boven 0 is, open dan Geavanceerde instellingen en gebruik 'Voorgestelde waarden toepassen' om aanbevelingen te bekijken.",
         "data": {
           "apply_suggestions": "Voorgestelde waarden toepassen",
           "device_type": "Apparaattype",

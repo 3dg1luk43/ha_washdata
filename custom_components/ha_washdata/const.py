@@ -238,6 +238,14 @@ DEVICE_TYPE_HEAT_PUMP = "heat_pump"
 DEVICE_TYPE_BREAD_MAKER = "bread_maker"
 DEVICE_TYPE_PUMP = "pump"
 DEVICE_TYPE_OVEN = "oven"
+# Generic / unsupported bucket. Ships intentionally generic defaults that are
+# not tuned for any specific appliance, so the user must configure thresholds,
+# timeouts, and matching parameters themselves. Also serves as the runtime
+# fallback when a deprecated device type is hard-removed (see
+# DEPRECATED_DEVICE_TYPE_FALLBACK below). No curated phase catalog and no
+# device-type-specific branches in the runtime, so behavior is whatever the
+# user dials in.
+DEVICE_TYPE_OTHER = "other"
 
 DEVICE_TYPES = {
     DEVICE_TYPE_WASHING_MACHINE: "Washing Machine",
@@ -251,7 +259,31 @@ DEVICE_TYPES = {
     DEVICE_TYPE_BREAD_MAKER: "Bread Maker",
     DEVICE_TYPE_PUMP: "Pump / Sump Pump",
     DEVICE_TYPE_OVEN: "Oven",
+    DEVICE_TYPE_OTHER: "Other (Advanced)",
 }
+
+# Device types that ship as deprecated. They fail one of WashData's three fit
+# tests (user-selected discrete program, reproducible power signature, clean
+# return to OFF) so profile matching and time-remaining estimation produce
+# noise rather than signal. Kept in DEVICE_TYPES so existing config entries
+# load unchanged; filtered out of the new-entry picker in the config flow,
+# shown with a "(deprecated)" suffix when an existing entry already uses one,
+# and surfaced via a one-shot persistent_notification on integration startup.
+# Planned hard removal: 0.4.6 (two release cycles after this deprecation).
+DEPRECATED_DEVICE_TYPES = frozenset({
+    DEVICE_TYPE_COFFEE_MACHINE,
+    DEVICE_TYPE_EV,
+    DEVICE_TYPE_HEAT_PUMP,
+    DEVICE_TYPE_OVEN,
+})
+
+# Fallback device_type used at runtime once a deprecated type is hard-removed.
+# "Other (Advanced)" intentionally ships generic defaults so the integration
+# does not silently pretend an orphaned entry behaves like a washing machine.
+# Stored options are preserved as-is, so a user who had hand-tuned thresholds
+# on the old deprecated type keeps those values; the integration just stops
+# layering device-specific defaults underneath them.
+DEPRECATED_DEVICE_TYPE_FALLBACK = DEVICE_TYPE_OTHER
 
 # Device Type Defaults
 # Device Type Defaults (Maps)

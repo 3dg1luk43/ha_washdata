@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Nastavenia",
-        "description": "Vylaďte prahy detekcie, učenie a pokročilé správanie. Predvolené nastavenia fungujú dobre pre väčšinu konfigurácií.\n\nAktuálne dostupné navrhované nastavenia: {suggestions_count}.\nAk je toto číslo väčšie ako 0, otvorte Rozšírené nastavenia a použite Použiť navrhované hodnoty na prehliadnutie odporúčaní.",
+        "description": "{deprecation_warning}Vylaďte prahy detekcie, učenie a pokročilé správanie. Predvolené nastavenia fungujú dobre pre väčšinu konfigurácií.\n\nAktuálne dostupné navrhované nastavenia: {suggestions_count}.\nAk je toto číslo väčšie ako 0, otvorte Rozšírené nastavenia a použite Použiť navrhované hodnoty na prehliadnutie odporúčaní.",
         "data": {
           "apply_suggestions": "Použiť navrhované hodnoty",
           "device_type": "Typ zariadenia",
