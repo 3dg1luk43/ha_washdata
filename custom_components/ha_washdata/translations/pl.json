@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Ustawienia",
-        "description": "Dostosuj progi wykrywania, uczenie i zaawansowane zachowanie. Ustawienia domyślne działają dobrze dla większości konfiguracji.\n\nDostępne sugerowane ustawienia: {suggestions_count}.\nJeśli wartość jest powyżej 0, otwórz Ustawienia zaawansowane i użyj opcji Zastosuj sugerowane wartości, aby przejrzeć zalecenia.",
+        "description": "{deprecation_warning}Dostosuj progi wykrywania, uczenie i zaawansowane zachowanie. Ustawienia domyślne działają dobrze dla większości konfiguracji.\n\nDostępne sugerowane ustawienia: {suggestions_count}.\nJeśli wartość jest powyżej 0, otwórz Ustawienia zaawansowane i użyj opcji Zastosuj sugerowane wartości, aby przejrzeć zalecenia.",
         "data": {
           "apply_suggestions": "Zastosuj sugerowane wartości",
           "device_type": "Typ urządzenia",

@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "설정",
-        "description": "감지 임계값, 학습 및 고급 동작을 조정합니다. 기본값은 대부분의 설정에 적합합니다.\n\n현재 이용 가능한 제안 설정: {suggestions_count}개.\n0보다 크면 고급 설정을 열고 제안 값 적용을 사용하여 권장사항을 검토하세요.",
+        "description": "{deprecation_warning}감지 임계값, 학습 및 고급 동작을 조정합니다. 기본값은 대부분의 설정에 적합합니다.\n\n현재 이용 가능한 제안 설정: {suggestions_count}개.\n0보다 크면 고급 설정을 열고 제안 값 적용을 사용하여 권장사항을 검토하세요.",
         "data": {
           "apply_suggestions": "제안된 값 적용",
           "device_type": "장치 유형",

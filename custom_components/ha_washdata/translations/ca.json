@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Configuració",
-        "description": "Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.\n\nConfiguració suggerida disponible actualment: {suggestions_count}.\nSi és superior a 0, obre la Configuració avançada i usa 'Aplica els valors suggerits' per revisar les recomanacions.",
+        "description": "{deprecation_warning}Ajusta els llindars de detecció, l'aprenentatge i el comportament avançat. Els valors predeterminats funcionen bé per a la majoria de configuracions.\n\nConfiguració suggerida disponible actualment: {suggestions_count}.\nSi és superior a 0, obre la Configuració avançada i usa 'Aplica els valors suggerits' per revisar les recomanacions.",
         "data": {
           "apply_suggestions": "Aplicar els valors suggerits",
           "device_type": "Tipus de dispositiu",

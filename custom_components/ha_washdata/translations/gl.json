@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Configuración",
-        "description": "Axusta os limiares de detección, a aprendizaxe e o comportamento avanzado. Os valores predeterminados funcionan ben para a maioría das configuracións.\n\nConfiguración suxerida dispoñible actualmente: {suggestions_count}.\nSe isto supera 0, abre a Configuración avanzada e usa Aplicar valores suxeridos para revisar as recomendacións.",
+        "description": "{deprecation_warning}Axusta os limiares de detección, a aprendizaxe e o comportamento avanzado. Os valores predeterminados funcionan ben para a maioría das configuracións.\n\nConfiguración suxerida dispoñible actualmente: {suggestions_count}.\nSe isto supera 0, abre a Configuración avanzada e usa Aplicar valores suxeridos para revisar as recomendacións.",
         "data": {
           "apply_suggestions": "Aplicar os valores suxeridos",
           "device_type": "Tipo de dispositivo",

@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Astellungen",
-        "description": "Tune Detektiounsschwellen, Léieren a fortgeschratt Verhalen. Standardwäerter funktionnéieren gutt fir déi meescht Setups.\n\nProposéiert Astellungen aktuell verfügbar: {suggestions_count}.\nWann dëst iwwer 0 ass, maacht Advanced Astellungen op a benotzt 'Proposéiert Wäerter uwenden' fir Recommandatiounen z'iwwerpréiwen.",
+        "description": "{deprecation_warning}Tune Detektiounsschwellen, Léieren a fortgeschratt Verhalen. Standardwäerter funktionnéieren gutt fir déi meescht Setups.\n\nProposéiert Astellungen aktuell verfügbar: {suggestions_count}.\nWann dëst iwwer 0 ass, maacht Advanced Astellungen op a benotzt 'Proposéiert Wäerter uwenden' fir Recommandatiounen z'iwwerpréiwen.",
         "data": {
           "apply_suggestions": "Proposéiert Wäerter uwenden",
           "device_type": "Apparat Typ",

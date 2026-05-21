@@ -48,13 +48,14 @@ body:
         - Dryer
         - Washer-Dryer Combo
         - Dishwasher
-        - Coffee Machine
-        - Electric Vehicle (EV)
         - Air Fryer
-        - Heat Pump
         - Bread Maker
         - Pump / Sump Pump
-        - Oven
+        - Other (Advanced)
+        - Coffee Machine (deprecated)
+        - Electric Vehicle (EV) (deprecated)
+        - Heat Pump (deprecated)
+        - Oven (deprecated)
         - Other
     validations:
       required: true

@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Pengaturan",
-        "description": "Sesuaikan ambang deteksi, pembelajaran, dan perilaku tingkat lanjut. Default berfungsi dengan baik untuk sebagian besar pengaturan.\n\nPengaturan yang disarankan saat ini tersedia: {suggestions_count}.\nJika angka ini di atas 0, buka Pengaturan Lanjutan dan gunakan 'Terapkan Nilai yang Disarankan' untuk meninjau rekomendasi.",
+        "description": "{deprecation_warning}Sesuaikan ambang deteksi, pembelajaran, dan perilaku tingkat lanjut. Default berfungsi dengan baik untuk sebagian besar pengaturan.\n\nPengaturan yang disarankan saat ini tersedia: {suggestions_count}.\nJika angka ini di atas 0, buka Pengaturan Lanjutan dan gunakan 'Terapkan Nilai yang Disarankan' untuk meninjau rekomendasi.",
         "data": {
           "apply_suggestions": "Terapkan Nilai yang Disarankan",
           "device_type": "Jenis Perangkat",

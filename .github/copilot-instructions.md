@@ -3,7 +3,7 @@
 
 ## Project Summary
 
-**WashData** is a Home Assistant custom integration that monitors washing machines, dryers, dishwashers, and coffee machines via smart socket power readings. It uses NumPy-powered shape correlation matching to detect cycle programs and estimate completion times.
+**WashData** is a Home Assistant custom integration that monitors washing machines, dryers, washer-dryer combos, dishwashers, air fryers, bread makers, and pumps/sump pumps via smart socket power readings. It uses NumPy-powered shape correlation matching to detect cycle programs and estimate completion times. An **Other (Advanced)** bucket is available for appliances that do not fit one of the supported classes; it ships generic defaults that the user must tune themselves. Coffee machines, electric vehicles, heat pumps, and ovens were previously supported and are now deprecated (existing setups keep working; scheduled removal in 0.4.6).
 
 **Repository**: `/root/ha_washdata`
 **Current Version**: 0.4.3

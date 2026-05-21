@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Settings",
-        "description": "Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.\n\nSuggested Settings currently available: {suggestions_count}.\nIf this is above 0, open Advanced Settings and use Apply Suggested Values to review recommendations.",
+        "description": "{deprecation_warning}Tune detection thresholds, learning, and advanced behavior. Defaults work well for most setups.\n\nSuggested Settings currently available: {suggestions_count}.\nIf this is above 0, open Advanced Settings and use Apply Suggested Values to review recommendations.",
         "data": {
           "apply_suggestions": "Apply Suggested Values",
           "device_type": "Device Type",

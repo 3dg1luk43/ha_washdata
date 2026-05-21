@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Gosodiadau",
-        "description": "Trothwyon canfod tiwn, dysgu, ac ymddygiad uwch. Mae rhagosodiadau'n gweithio'n dda ar gyfer y rhan fwyaf o setiau.\n\nGosodiadau a awgrymir ar gael ar hyn o bryd: {suggestions_count}.\nOs yw hwn uwchlaw 0, agorwch Gosodiadau Uwch a defnyddiwch 'Cymhwyso Gwerthoedd a Awgrymir' i adolygu argymhellion.",
+        "description": "{deprecation_warning}Trothwyon canfod tiwn, dysgu, ac ymddygiad uwch. Mae rhagosodiadau'n gweithio'n dda ar gyfer y rhan fwyaf o setiau.\n\nGosodiadau a awgrymir ar gael ar hyn o bryd: {suggestions_count}.\nOs yw hwn uwchlaw 0, agorwch Gosodiadau Uwch a defnyddiwch 'Cymhwyso Gwerthoedd a Awgrymir' i adolygu argymhellion.",
         "data": {
           "apply_suggestions": "Cymhwyso Gwerthoedd a Awgrymir",
           "device_type": "Math o Ddyfais",

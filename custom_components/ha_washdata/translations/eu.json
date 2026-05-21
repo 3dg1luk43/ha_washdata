@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Ezarpenak",
-        "description": "Sintonizatu detektatzeko atalaseak, ikaskuntza eta portaera aurreratua. Lehenetsiek ondo funtzionatzen dute konfigurazio gehienetarako.\n\nEskuragarri dauden iradokizun-ezarpenen kopurua: {suggestions_count}.\n0 baino handiagoa bada, ireki Ezarpen aurreratuak eta erabili Aplikatu iradokitako balioak gomendazioak berrikusteko.",
+        "description": "{deprecation_warning}Sintonizatu detektatzeko atalaseak, ikaskuntza eta portaera aurreratua. Lehenetsiek ondo funtzionatzen dute konfigurazio gehienetarako.\n\nEskuragarri dauden iradokizun-ezarpenen kopurua: {suggestions_count}.\n0 baino handiagoa bada, ireki Ezarpen aurreratuak eta erabili Aplikatu iradokitako balioak gomendazioak berrikusteko.",
         "data": {
           "apply_suggestions": "Aplikatu iradokitako balioak",
           "device_type": "Gailu mota",

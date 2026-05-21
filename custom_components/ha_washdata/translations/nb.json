@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Innstillinger",
-        "description": "Juster deteksjonsterskler, læring og avansert atferd. Standarder fungerer bra for de fleste oppsett.\n\nForeslåtte innstillinger tilgjengelig nå: {suggestions_count}.\nHvis dette er over 0, åpner du avanserte innstillinger og bruker 'Bruk foreslåtte verdier' for å gå gjennom anbefalingene.",
+        "description": "{deprecation_warning}Juster deteksjonsterskler, læring og avansert atferd. Standarder fungerer bra for de fleste oppsett.\n\nForeslåtte innstillinger tilgjengelig nå: {suggestions_count}.\nHvis dette er over 0, åpner du avanserte innstillinger og bruker 'Bruk foreslåtte verdier' for å gå gjennom anbefalingene.",
         "data": {
           "apply_suggestions": "Bruk foreslåtte verdier",
           "device_type": "Enhetstype",

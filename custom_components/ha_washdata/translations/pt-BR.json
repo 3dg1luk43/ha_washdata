@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Configurações",
-        "description": "Ajuste limites de detecção, aprendizado e comportamento avançado. Os padrões funcionam bem para a maioria das configurações.\n\nConfigurações sugeridas disponíveis: {suggestions_count}.\nSe estiver acima de 0, abra as Configurações avançadas e use Aplicar valores sugeridos para revisar as recomendações.",
+        "description": "{deprecation_warning}Ajuste limites de detecção, aprendizado e comportamento avançado. Os padrões funcionam bem para a maioria das configurações.\n\nConfigurações sugeridas disponíveis: {suggestions_count}.\nSe estiver acima de 0, abra as Configurações avançadas e use Aplicar valores sugeridos para revisar as recomendações.",
         "data": {
           "apply_suggestions": "Aplicar valores sugeridos",
           "device_type": "Tipo de dispositivo",

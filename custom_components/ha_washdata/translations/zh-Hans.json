@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "设置",
-        "description": "调整检测阈值、学习和高级行为。默认值适用于大多数设置。\n\n当前可用的建议设置：{suggestions_count}。\n如果该值大于 0，请打开高级设置并使用“应用建议值”查看建议。",
+        "description": "{deprecation_warning}调整检测阈值、学习和高级行为。默认值适用于大多数设置。\n\n当前可用的建议设置：{suggestions_count}。\n如果该值大于 0，请打开高级设置并使用“应用建议值”查看建议。",
         "data": {
           "apply_suggestions": "应用建议值",
           "device_type": "设备类型",

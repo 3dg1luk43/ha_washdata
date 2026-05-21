@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Iestatījumi",
-        "description": "Pielāgojiet noteikšanas sliekšņus, mācīšanos un uzlabotu darbību. Noklusējumi darbojas labi lielākajai daļai iestatījumu.\n\nPašlaik pieejamie ieteiktie iestatījumi: {suggestions_count}.\nJa tas ir lielāks par 0, atveriet papildu iestatījumus un izmantojiet 'Lietojiet ieteiktās vērtības', lai pārskatītu ieteikumus.",
+        "description": "{deprecation_warning}Pielāgojiet noteikšanas sliekšņus, mācīšanos un uzlabotu darbību. Noklusējumi darbojas labi lielākajai daļai iestatījumu.\n\nPašlaik pieejamie ieteiktie iestatījumi: {suggestions_count}.\nJa tas ir lielāks par 0, atveriet papildu iestatījumus un izmantojiet 'Lietojiet ieteiktās vērtības', lai pārskatītu ieteikumus.",
         "data": {
           "apply_suggestions": "Lietojiet ieteiktās vērtības",
           "device_type": "Ierīces veids",

@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Asetukset",
-        "description": "Viritä tunnistuskynnykset, oppiminen ja edistynyt toiminta. Oletusasetukset toimivat hyvin useimmissa asetuksissa.\n\nNykyiset saatavilla olevat suositelut asetukset: {suggestions_count}.\nJos suurempi kuin 0, avaa Lisäasetukset ja käytä Käytä suositeltuja arvoja tarkastellaksesi suosituksia.",
+        "description": "{deprecation_warning}Viritä tunnistuskynnykset, oppiminen ja edistynyt toiminta. Oletusasetukset toimivat hyvin useimmissa asetuksissa.\n\nNykyiset saatavilla olevat suositelut asetukset: {suggestions_count}.\nJos suurempi kuin 0, avaa Lisäasetukset ja käytä Käytä suositeltuja arvoja tarkastellaksesi suosituksia.",
         "data": {
           "apply_suggestions": "Käytä ehdotettuja arvoja",
           "device_type": "Laitteen tyyppi",

@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Stillingar",
-        "description": "Stilla greiningarþröskuld, nám og háþróaða hegðun. Sjálfgefnar stillingar virka vel fyrir flestar uppsetningar.\n\nTillögðar stillingar í boði: {suggestions_count}.\nEf þetta er hærra en 0, opnaðu Ítarlegar stillingar og notaðu 'Notaðu tillögð gildi' til að fara yfir ráðleggingar.",
+        "description": "{deprecation_warning}Stilla greiningarþröskuld, nám og háþróaða hegðun. Sjálfgefnar stillingar virka vel fyrir flestar uppsetningar.\n\nTillögðar stillingar í boði: {suggestions_count}.\nEf þetta er hærra en 0, opnaðu Ítarlegar stillingar og notaðu 'Notaðu tillögð gildi' til að fara yfir ráðleggingar.",
         "data": {
           "apply_suggestions": "Notaðu tillögð gildi",
           "device_type": "Tegund tækis",

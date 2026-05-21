@@ -18,7 +18,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 
 ## ✨ Features
 
-- **Multi-Device Support**: Track Washing Machines, Dryers, Washer-Dryer Combos, Dishwashers, Coffee Machines, Electric Vehicles (EV), Air Fryers, Heat Pumps, Bread Makers, and Pumps/Sump Pumps — each with device-specific defaults and phases.
+- **Multi-Device Support**: Track Washing Machines, Dryers, Washer-Dryer Combos, Dishwashers, Air Fryers, Bread Makers, and Pumps/Sump Pumps, each with device-specific defaults and phases. An **Other (Advanced)** bucket is available for appliances that do not fit one of the supported classes; it ships intentionally generic defaults and expects the user to tune thresholds, timeouts, and matching parameters themselves. Coffee Machines, Electric Vehicles, Heat Pumps, and Ovens are supported in 0.4.4.3 as deprecated types (existing setups continue to work) and scheduled for removal in 0.4.6.
 - **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic. Includes **End Spike Protection** for dishwashers to capture final pump-outs.
 - **Power Spike Filtering**: Ignores brief boot spikes to prevent false starts.
 - **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles.
@@ -271,7 +271,7 @@ event_type: ha_washdata_cycle_started
 data:
   entry_id: 01KR1WGJYHJBTT5MEGS0VRXC4D     # config-entry id, stable across restarts
   device_name: Waschmaschine                # the integration title you configured
-  device_type: washing_machine              # washing_machine | dryer | dishwasher | oven | bread_maker | pump | ...
+  device_type: washing_machine              # washing_machine | dryer | washer_dryer | dishwasher | air_fryer | bread_maker | pump | other
   program: "detecting..."                   # may resolve to a profile name later in the cycle
   start_time: "2026-05-09T07:43:08.626640+02:00"
 ```

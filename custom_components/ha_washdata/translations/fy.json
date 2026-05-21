@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Ynstellings",
-        "description": "Tune detection drompels, learen, en avansearre gedrach. Standerts wurkje goed foar de measte opset.\n\nFoarstelde ynstellings beskikber: {suggestions_count}.\nAs dit boppe 0 is, iepenje Avansearre ynstellings en brûk Oanbefelle wearden tapasse.",
+        "description": "{deprecation_warning}Tune detection drompels, learen, en avansearre gedrach. Standerts wurkje goed foar de measte opset.\n\nFoarstelde ynstellings beskikber: {suggestions_count}.\nAs dit boppe 0 is, iepenje Avansearre ynstellings en brûk Oanbefelle wearden tapasse.",
         "data": {
           "apply_suggestions": "Oanbefelle wearden tapasse",
           "device_type": "Apparaat Type",

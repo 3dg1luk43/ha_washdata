@@ -65,7 +65,7 @@
       },
       "settings": {
         "title": "Indstillinger",
-        "description": "Indstil registreringstærskler, indlæring og avanceret adfærd. Standarder fungerer godt for de fleste opsætninger.\n\nForeslåede indstillinger tilgængelige nu: {suggestions_count}.\nHvis dette er over 0, åbn Avancerede indstillinger og brug 'Anvend foreslåede værdier' til at gennemgå anbefalingerne.",
+        "description": "{deprecation_warning}Indstil registreringstærskler, indlæring og avanceret adfærd. Standarder fungerer godt for de fleste opsætninger.\n\nForeslåede indstillinger tilgængelige nu: {suggestions_count}.\nHvis dette er over 0, åbn Avancerede indstillinger og brug 'Anvend foreslåede værdier' til at gennemgå anbefalingerne.",
         "data": {
           "apply_suggestions": "Anvend foreslåede værdier",
           "device_type": "Enhedstype",
