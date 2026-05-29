@@ -1,6 +1,5 @@
 {
-	"name": "WashData",
-	"render_readme": true,
-	"content_in_root": false,
-	"zip_release": false
+  "name": "WashData Tile Card",
+  "filename": "ha-washdata-card.js",
+  "render_readme": true
 }

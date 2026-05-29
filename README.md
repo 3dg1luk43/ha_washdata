@@ -1,357 +1,75 @@
-![Installs](https://img.shields.io/badge/dynamic/json?color=41BDF5&logo=home-assistant&label=Installations&cacheSeconds=15600&url=https://analytics.home-assistant.io/custom_integrations.json&query=$.ha_washdata.total)
-![Latest](https://img.shields.io/github/v/release/3dg1luk43/ha_washdata)
-![Hassfest](https://img.shields.io/github/actions/workflow/status/3dg1luk43/ha_washdata/hassfest.yml?label=hassfest)
-![HACS](https://img.shields.io/github/actions/workflow/status/3dg1luk43/ha_washdata/validate.yml?label=HACS)
-[![](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://ko-fi.com/3dg1luk43)
-[![Contribute Data](https://img.shields.io/badge/Contribute-Training%20Data-7B2FBE?style=flat&logo=googleforms&logoColor=white)](https://forms.gle/m6iGfP8QTasXWg5z7)
+# WashData Tile Card
 
-# WashData Integration
+Custom Lovelace tile card for the [WashData](https://github.com/3dg1luk43/ha_washdata) Home Assistant integration. Shows state, program, time remaining or progress in a compact tile.
 
-A Home Assistant custom component to monitor washing machines via smart sockets, learn power profiles, and estimate completion time using shape-correlation matching.
+This repo only ships the card. The WashData integration must be installed separately for the card to have data to display.
 
-> [!CAUTION]  
-> **ELECTRICAL SAFETY WARNING**: Using smart plugs such as Shelly or Sonoff with high-amperage appliances (washing machines, dryers, dishwashers) carries significant risk.  
-> 
-> *   **Fire Hazard**: Cheap or low-rated smart plugs may overheat, melt, or catch fire under sustained high loads (heating/drying phases).  
-> *   **Rating Check**: Ensure your smart plug is rated for the **maximum peak power** of your appliance (often >2500W). Standard 10A plugs may fail; 16A+ or hardwired modules are recommended.  
-> *   **Use at Your Own Risk**: The authors of this integration are not responsible for any electrical damage or fires caused by improper hardware usage. inspect your hardware regularly.
+## Installation
 
-## ✨ Features
+### HACS (Frontend / Lovelace)
 
-- **Multi-Device Support**: Track Washing Machines, Dryers, Washer-Dryer Combos, Dishwashers, Air Fryers, Bread Makers, and Pumps/Sump Pumps, each with device-specific defaults and phases. An **Other (Advanced)** bucket is available for appliances that do not fit one of the supported classes; it ships intentionally generic defaults and expects the user to tune thresholds, timeouts, and matching parameters themselves. Coffee Machines, Electric Vehicles, Heat Pumps, and Ovens are supported in 0.4.4.3 as deprecated types (existing setups continue to work) and scheduled for removal in 0.4.6.
-- **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic. Includes **End Spike Protection** for dishwashers to capture final pump-outs.
-- **Power Spike Filtering**: Ignores brief boot spikes to prevent false starts.
-- **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles.
-- **Manual Training**: You define your profiles (e.g., "Cotton", "Quick") once; the system learns to recognize them thereafter. Integration **does not** auto-create profiles.
-- **Smart Time Estimation**: "Phase-aware" prediction detects variance (e.g., heating) and locks the countdown to prevent erratic jumps.
-- **Changeable Power Sensor**: Switch plugs without losing history.
-- **Tile Card** (Minimal Status Card): Optional custom Lovelace card.
-- **Manual Program Override**: Select the correct program manually if detection is uncertain; the system learns from your input.
-- **Manual Profile Creation**: Create profiles even without historical cycles by specifying a baseline duration (e.g., "Eco Mode - 3h").
-- **Unified Phase Catalog**: Manage phase vocabulary across all supported device types from one catalog view.
-- **Scoped Phase Assignment**: Phase assignment dialogs show only phases relevant to the configured device type.
-- **Ghost Cycle Suppression**: Intelligent filtering with **"Suspicious Window"** (20 mins) prevents end-spikes from triggering duplicate cycles. **Now Persistent**: Remembers cycle history across HA restarts to prevent ghost detections after reboots.
-- **Robust vNext State Machine**: Advanced filtering with `start_energy` and `end_energy` gates prevents false starts/ends.
-- **Multi-Stage Matching Pipeline**: Uses Fast Reject -> Core Similarity -> DTW-Lite tie-breaking for superior accuracy.
-- **Local Only**: No cloud dependency, no external services. All data stays in your Home Assistant.
-- **Notifications**: Integrated alerts for cycle start, finish, and **pre-completion** (e.g., 5 mins before finish).
-- **Self-Learning**: Gradually adjusts expected durations based on your confirmed historical data.
-- **Realistic Variance**: Handles natural cycle duration variations with configurable tolerance.
-- **Progress Tracking**: Clear cycle progress indicator with automatic reset after unload.
-- **Auto-Maintenance**: Nightly cleanup - removes broken profiles, merges fragmented cycles (**Empty/New profiles are safely preserved**).
-- **Export/Import**: Full configuration backup/restore with all settings and profiles via JSON. Import also accepts HA diagnostics download files directly.
-- **User-Triggered Pause/Resume**: Pause and resume active cycles via button entities or HA services. Elapsed time and time-remaining estimates automatically exclude the paused duration. Optional **Cut Power When Pausing** toggle for appliances that maintain their position after a power cut.
-- **Door Sensor & Clean State**: Optional binary sensor integration that sets verified pause when the door opens mid-cycle (add-clothes support), and tracks a **Clean** state after cycle end until the door is opened to remind you laundry is waiting.
+1. HACS → Frontend → three-dot menu → Custom repositories.
+2. Add `https://github.com/kingpepe85/ha_washdata` as type **Lovelace**.
+3. Install **WashData Tile Card**.
+4. Refresh the browser (hard-reload).
 
----
+### Manual
 
-## 📘 Basic User Guide
+1. Copy `ha-washdata-card.js` into `<config>/www/`.
+2. Settings → Dashboards → Resources → Add: URL `/local/ha-washdata-card.js`, type **JavaScript Module**.
+3. Refresh the browser.
 
-Designed for new users to get up and running quickly.
+## Usage
 
-## 1. Installation
+Visual editor: Add Card → Search "WashData Tile Card".
 
-### Option A: HACS (Recommended)
-This integration is a default repository in HACS.
-
-1. Click the button below to open the repository in HACS:
-
-   [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=3dg1luk43&repository=ha_washdata&category=integration)
-2. Click **Download**.
-3. Restart Home Assistant.
-
-*Alternatively, open HACS > Integrations > Explore & Download Repositories > Search for "WashData".*
-
-### Option B: Manual Installation
-1. Download the `custom_components/ha_washdata` folder from the [latest release](https://github.com/3dg1luk43/ha_washdata/releases).
-2. Copy it to your Home Assistant `custom_components` directory.
-3. Restart Home Assistant.
-
-
----
-
-## ⚡ Getting Started (The "Happy Path")
-
-Follow these steps to get accurate results quickly.
-
-### 1. Initial Setup
-1. Go to **Settings > Devices & Services** > **Add Integration** > **WashData**.
-2. **Name**: Name your appliance (e.g., "Washing Machine").
-3. **Device Type**: Select the type (Washer, Dryer, etc.) - this sets smart defaults for the internal logic.
-4. **Power Sensor**: Select your smart plug's power entity (Watts). *Note: The system is now optimized for polling intervals of 30-60 seconds (defaults adjusted automatically).*
-5. **Initial Profile (Optional)**: If you know your standard program (e.g. "Cotton"), create it now.
-
-#### 💡 Tips for Zigbee2MQTT (Z2M) users
-If you are using Zigbee2MQTT with smart plugs, ensure your device reporting is responsive enough for accurate matching:
-- **Reporting Intervals**: Decrease the reporting intervals in Z2M (e.g., Min: 1s-10s, Max: 1200s).
-- **Power Threshold**: Decrease the minimum updating threshold (e.g., from 5W to 1W or 2W) to ensure small power changes are captured promptly.
-- *Note*: These changes may slightly increase Zigbee network traffic.
-
-### 2. The Golden Rule: "Teach" the Integration
-WashData **does not** come with pre-built profiles because every machine model is different. You must teach it what your cycles look like.
-#### Option A: Manual "Record Mode" (Recommended)
-This gives you the cleanest data.
-
-1. Go to **Settings > Devices & Services > WashData > Configure**.
-2. Open **Record Cycle (Manual)**, then start your machine.
-3. When finished, go to **Manage Cycles** and find the recording.
-4. Then open **Manage Profiles** and create a profile from that recording.
-
-#### Option B: The Natural Way
-If you prefer to just use it and label later:
-1. **Run a Cycle**: Use your machine as normal. WashData will track it as an "Unknown" cycle.
-2. **Label It**: After the cycle finishes:
-   - Go to **Manage Cycles** (via the Configure button or the Tile Card).
-   - Find the recent "Unknown" cycle.
-   - Open **Manage Profiles**, click **Create Profile**, name it (e.g., "Cotton 40"), and Save.
-3. **Repeat**: Do this for your 2-3 most common programs.
-
-### 3. Profile Granularity - How Detailed Should Profiles Be?
-
-WashData matches cycles using **power-consumption shape, cycle duration, and total energy** - not temperature or spin-speed settings directly. This affects how granular your profile library should be.
-
-#### What will be reliably auto-detected
-
-Programs with clearly different durations or power patterns are always distinguished well:
-
-| Example pair | Why it works |
-| :--- | :--- |
-| Quick Wash (~20 min) vs Cotton (~3 h) | Huge duration gap - no ambiguity |
-| Wash-only vs Wash+Dry | Drying adds 100–200 min and significant extra energy |
-| Cotton vs Delicates | Different agitation/heating patterns and often different durations |
-
-#### Temperature and spin-speed variants
-
-Programs that differ **only** in temperature or spin speed (e.g. Cotton 40°C vs Cotton 60°C) often produce similar power shapes and durations. The matcher will attempt to distinguish them using correlation and energy differences, but:
-
-- On first run the system may assign the wrong variant - **use the Learning Feedbacks menu to correct it**.
-- With a few confirmed corrections the system learns; 3–5 corrections per variant pair is usually enough.
-- If your machine's power draw barely changes between temperatures, the variants may remain hard to distinguish automatically. In that case, selecting the program manually via the Program Selector dropdown remains reliable.
-
-#### Practical advice for washer-dryer combos
-
-Create **separate profiles** for every wash+dry combination you use regularly (e.g. "Cotton 40°C Wash", "Cotton 40°C + Cupboard Dry"). The drying phase adds so much duration and energy that wash-only vs wash+dry is one of the easiest distinctions for the matcher to make.
-
-Start with a small set of your most-used and most-different programs, then add temperature/spin variants gradually as you accumulate history.
-
-### 4. Verification & Learning
-Once profiles are created, WashData starts **matching** new cycles automatically.
-- **Feedback**: If a match is found but confidence is moderate, you may get a "Verify Cycle" notification.
-- **Refinement**: Go to **Configure > Learning Feedbacks** to Confirm or Correct the detection.
-- **Self-Improving**: Confirming a cycle helps the system refine its duration models.
-
----
-
-## 🔧 Troubleshooting & Tuning
-
-If "Auto-Detect" isn't working perfectly, use **Advanced Settings** to tune the logic for your specific machine.
-
-> 📊 **[Click here for a Visual Guide to these settings](SETTINGS_VISUALIZED.md)** - Graphs explaining what the numbers actually do.
-
-| Problem | Likely Cause | Solution |
-| :--- | :--- | :--- |
-| **Cycle Starts Too Early** | Smart plug reports brief power spikes during boot/standby. | **Increase `Start Energy Threshold`** (e.g., to `2 Wh`). This forces the machine to consume actual energy before stating "Running". |
-| **Cycle Ends Too Early** | Machine pauses (soaking) or has long low-power intervals. | **Increase `Off Delay`**. Give it more time (e.g. 5 mins) to wait before deciding the cycle is truly finished. |
-| **False "Ghost" Cycles** | High-power usage at the very end (e.g. anti-crease or pump-out) triggers a new start. | **Increase `Minimum Off Gap`** (e.g. to `120s`). Forces a mandatory cooldown period between cycles. |
-| **"Unknown" Matches** | Your profiles are too strict or variance is high. | **Increase `Duration Tolerance`** (e.g. `0.25`). Allows ±25% duration difference when matching. |
-| **Notifications Too Late** | You want to know *before* it finishes. | **Set `Notify Before End Minutes`** (e.g. `5`). Get an alert 5 minutes before the estimated finish time. |
-| **Persistent 'Running' State** | Integration stays locked to a long profile after a short cycle diverged. | **Adjust Matching Stability Thresholds** in `const.py`. Divergence detection now automatically reverts to "Detecting..." if confidence drops below 60% of the peak score. |
-
-> **Pro Tip**: Use the **Apply Suggestions** button in Settings. It analyzes your history and calculates the perfect text-book values for your specific machine.
-
-### Suggested Settings Sensor: What To Do
-
-WashData exposes a diagnostic sensor: `sensor.<name>_suggested_settings`.
-
-- `0` means there are currently no actionable recommendations.
-- `> 0` means recommendations are ready to review.
-
-When this sensor is above 0:
-1. Go to **Settings > Devices & Services > WashData > Configure > Advanced Settings**.
-2. Enable **Apply Suggested Values**.
-3. Review the change summary step.
-4. Confirm to stage values, then save only the changes you agree with.
-
-Suggested values are optional and are never forced automatically.
-
-### 🏷️ Phase Catalog & Assignment
-
-Phases are descriptive labels for distinct power stages within a cycle (e.g., "Pre-Wash", "Heating", "Spin").
-
-- **Manage Phase Catalog**: Go to **Configure > Manage Phase Catalog** to add, edit, or remove phase labels for each device type.
-- **Assign Phases to a Profile**: In **Manage Profiles**, select **Assign Phase Ranges** and use the phase range editor to map time regions to phase labels.
-- Phases are scoped to your device type - only relevant phases appear in the assignment dialog.
-
----
-
-## 📊 Documentation & References
-
-- 📗 **[IMPLEMENTATION.md](IMPLEMENTATION.md)** - Deep dive into NumPy matching, State Machine logic, and Learning algorithms.
-- 🧪 **[TESTING.md](TESTING.md)** - How to test with the virtual socket.
-
-<details>
-<summary>📸 <b>Screenshots</b> (Click to expand)</summary>
-
-#### Devices Overview
-All your WashData-monitored appliances appear as devices with sensors and controls.
-![Devices](doc/images/devices.png)
-
-#### Main Menu
-The central hub for managing your appliance - access all features from here.
-![Main Menu](doc/images/main_menu.png)
-
-#### Basic Settings
-Configure power sensor, device type, off delay, and notification preferences.
-![Settings](doc/images/settings.png)
-
-#### Advanced Settings
-Fine-tune detection thresholds, matching parameters, and timeout values for your specific appliance.
-![Advanced Settings](doc/images/advanced_settings.png)
-
-#### Manage Profiles
-View, create, edit, or delete learned power profiles for different wash programs.
-![Manage Profiles](doc/images/manage_profiles.png)
-
-#### Manage Cycles
-Browse cycle history, label unknown cycles, merge fragments, or delete bad data.
-![Manage Cycles](doc/images/manage_cycles.png)
-
-#### Review Feedback
-Confirm or correct the system's profile matches to improve learning accuracy.
-![Review Feedback](doc/images/review_feedback.png)
-
-#### Diagnostics & Maintenance
-Run database cleanup, repair corrupted data, and export/import configurations.
-![Diagnostics & Maintenance](doc/images/diagnostics_maintenance.png)
-
-</details>
-
-### Entities Provided
-- **`sensor.<name>_state`**: Current status (Idle / Running / Detecting... / Clean).
-- **`sensor.<name>_program`**: Best-matched profile name.
-- **`sensor.<name>_time_remaining`**: Smart countdown (locks during high-variance phases).
-- **`sensor.<name>_total_duration`**: Total predicted duration (Elapsed + Remaining). Ideal for `timer-bar-card`.
-- **`sensor.<name>_cycle_progress`**: 0–100% (resets after unload timeout).
-- **`sensor.<name>_cycle_count`**: Total completed cycles stored — use in automations to schedule maintenance by cycle count.
-- **`sensor.<name>_current_phase`**: Active cycle phase label (e.g. "Rinsing", "Spin").
-- **`sensor.<name>_pump_runs_today`**: *(Pump device type only)* Completed pump cycles in a rolling 24-hour window.
-- **`binary_sensor.<name>_running`**: Simple on/off running state.
-- **`button.<name>_pause_cycle`**: Pause the active cycle (available while Running/Starting/Ending and not already paused).
-- **`button.<name>_resume_cycle`**: Resume a user-paused cycle.
-- **`button.<name>_force_end_cycle`**: Force-terminate a stuck cycle.
-- **`switch.<name>_auto_maintenance`**: Toggle nightly database cleanup.
-
-### Services
-Most management is done via the **Interactive UI** (Configure > Manage Data), but services are available for automation:
-
-- **`ha_washdata.export_config`**: Full JSON backup of all settings, profiles, and cycle history.
-- **`ha_washdata.import_config`**: Restore from a JSON backup. Accepts regular WashData exports **and** HA diagnostics download files.
-- **`ha_washdata.pause_cycle`**: Pause the active cycle programmatically (e.g. from an energy-tariff automation).
-- **`ha_washdata.resume_cycle`**: Resume a user-paused cycle.
-
-**`ha_washdata.record_start` / `record_stop`**:
-Manually start/stop a recording. Useful for automations (e.g. triggering from a physical button or separate sensor).
-```yaml
-service: ha_washdata.record_start
-data:
-  device_id: "washer_device_id"
-```
-- `ha_washdata.label_cycle`: Assign a profile to a cycle in history programmatically.
-
-
-### Events
-
-WashData fires the following events on the Home Assistant event bus, suitable as automation triggers (e.g. `platform: event`, `event_type: ha_washdata_cycle_ended`). All three events are gated by the **Fire Events** toggle in the Notifications options page (default: on); disable it to suppress them globally without touching automations.
-
-#### `ha_washdata_cycle_started`
-Fired immediately when a cycle is detected (i.e. when the state machine first leaves `OFF`). The profile match has typically not run yet, so `program` is usually `"detecting..."` or `"unknown"` at this point; use `ha_washdata_cycle_ended` if you need the resolved profile name.
+Minimal YAML:
 
 ```yaml
-event_type: ha_washdata_cycle_started
-data:
-  entry_id: 01KR1WGJYHJBTT5MEGS0VRXC4D     # config-entry id, stable across restarts
-  device_name: Waschmaschine                # the integration title you configured
-  device_type: washing_machine              # washing_machine | dryer | washer_dryer | dishwasher | air_fryer | bread_maker | pump | other
-  program: "detecting..."                   # may resolve to a profile name later in the cycle
-  start_time: "2026-05-09T07:43:08.626640+02:00"
+type: custom:ha-washdata-card
+entity: sensor.washing_machine_state
 ```
 
-#### `ha_washdata_cycle_ended`
-Fired once the cycle has fully terminated and been written to history. Carries the full cycle record minus the raw power trace (`power_data`, `debug_data`, `power_trace` are stripped to stay under Home Assistant's 32 KB event payload limit; fetch them via the diagnostics download if you need the samples).
+### Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `entity` | string | — | Main state sensor (required). |
+| `title` | string | `Washing Machine` | Static title text. |
+| `title_source` | `static` \| `program` \| `progress` | `static` | What the title shows. Falls back to `title` when empty. |
+| `icon` | string | `mdi:washing-machine` | Icon shown on the tile. |
+| `active_color` | rgb / string | primary color | Icon color while active. |
+| `show_state` | bool | `true` | Show state / sub-state in details. |
+| `show_program` | bool | `true` | Show matched program name in details. |
+| `show_details` | bool | `true` | Show time / percentage in details. |
+| `spin_icon` | bool | `true` | Spin icon while `running`. |
+| `display_mode` | `time` \| `percentage` | `time` | What progress to display. |
+| `program_entity` | entity_id | — | Override source for program name. |
+| `pct_entity` | entity_id | — | Override source for percentage. |
+| `time_entity` | entity_id | — | Override source for time remaining. |
+| `tap_action` | action object | `{ action: more-info }` | Standard HA action config. |
+| `hold_action` | action object | `{ action: none }` | Standard HA action config. |
+| `double_tap_action` | action object | `{ action: none }` | Standard HA action config. |
+
+### Actions
+
+Supports the standard HA action schema (`more-info`, `toggle`, `call-service`, `navigate`, `url`, `assist`, `none`). Example:
 
 ```yaml
-event_type: ha_washdata_cycle_ended
-data:
-  entry_id: 01KR1WGJYHJBTT5MEGS0VRXC4D
-  device_name: WashingMachine
-  program: "40°C / 1200rpm / cotton"                    # resolved profile name, or "unknown" if no match
-  duration: 13784.144562                    # seconds (float)
-  start_time: "2026-05-09T07:43:08.626640+02:00"
-  end_time:   "2026-05-09T11:32:52.771202+02:00"
-  cycle_data:
-    id: db87b5b60b2e                        # 12-char hex, stable cycle identifier
-    start_time: "2026-05-09T07:43:08.626640+02:00"
-    end_time:   "2026-05-09T11:32:52.771202+02:00"
-    duration: 13784.144562                  # seconds (float)
-    max_power: 2063                         # watts (peak observed in the cycle)
-    energy_wh: 1564.04                      # integrated energy over the cycle
-    status: completed                       # completed | aborted | timeout
-    termination_reason: timeout             # off_delay | smart_termination | timeout | force_end | zombie | ghost_suppressed
-    profile_name: null                      # null when no profile was matched
-    sampling_interval: 43                   # mean seconds between power readings
-    device_type: washing_machine
-    signature:                              # feature vector used for matching
-      duration: 13784.1
-      total_energy: 1564.04
-      max_power: 2063
-      event_density: 0
-      time_to_first_high: 1416.1
-      high_phase_ratio: 0.149
-      p05: 17                               # 5th-percentile power (W)
-      p25: 38
-      p50: 91
-      p75: 203
-      p95: 2024.8
+type: custom:ha-washdata-card
+entity: sensor.washing_machine_state
+tap_action:
+  action: navigate
+  navigation_path: /lovelace/laundry
+hold_action:
+  action: more-info
+double_tap_action:
+  action: call-service
+  service: ha_washdata.pause_cycle
+  data:
+    device_id: washer_device_id
 ```
 
-#### `ha_washdata_pump_stuck`
-*(Pump device type only.)* Fired once when an active pump cycle exceeds the configured stuck-pump duration. Useful for sump-pit, condensate, or borehole-pump alarms.
+## Credits
 
-```yaml
-event_type: ha_washdata_pump_stuck
-data:
-  entry_id: 01KR1WGJYHJBTT5MEGS0VRXC4D
-  device: Sumppumpe                         # the integration title (note: legacy key name)
-  elapsed_seconds: 1830                     # how long the pump had been running
-  threshold_seconds: 1800                   # the configured stuck-pump threshold
-```
-
-
-### 🤝 Contribute Training Data
-
-The more real-world cycle data WashData has, the smarter its detection becomes - across different appliance brands, ages, and programs.
-
-If you'd like to help, you can submit a diagnostics export directly from Home Assistant. It takes less than 2 minutes and requires no technical knowledge.
-
-**How to export:**
-
-1. Open Home Assistant and go to** Settings → Devices & Services**
-2. Find your **WashData** integration and click on it
-3. Open device you want to submit data for
-4. Navigate left, to **"Device info"** section
-5. Select **"Download diagnostics"**
-6. A .json file will be downloaded to your device
-
-> 🔒 **Privacy:** The export contains your appliance's power data and integration settings. It does **not** include your name, home details, location, or any other personal information.
-
-> 💡 **Tip:** The same diagnostics file you download here can be pasted directly into **Configure → Diagnostics & Maintenance → Export/Import JSON** to restore profiles and settings on a different HA instance — no manual format conversion needed.
-
-➡️ **[Submit your data here](https://forms.gle/m6iGfP8QTasXWg5z7)**
-
-All contributions are used solely to improve the WashData integration.
-
-### Supported Languages
-🇬🇧 English • 🇨🇿 Čeština • 🇩🇰 Dansk • 🇩🇪 Deutsch • 🇬🇷 Ελληνικά • 🇪🇸 Español • 🇪🇪 Eesti • 🇫🇮 Suomi • 🇫🇷 Français • 🇭🇷 Hrvatski • 🇭🇺 Magyar • 🇮🇹 Italiano • 🇯🇵 日本語 • 🇱🇹 Lietuvių • 🇱🇻 Latviešu • 🇳🇴 Norsk • 🇳🇱 Nederlands • 🇧🇪 Nederlands (BE) • 🇵🇱 Polski • 🇵🇹 Português • 🇷🇴 Română • 🇸🇰 Slovenčina • 🇸🇮 Slovenščina • 🇷🇸 Srpski • 🇸🇪 Svenska • 🇺🇦 Українська • 🇨🇳 简体中文
-
-## License
-Non-commercial use only. See [LICENSE](LICENSE) file.
+Card extracted from [3dg1luk43/ha_washdata](https://github.com/3dg1luk43/ha_washdata). License inherited (see `LICENSE`).

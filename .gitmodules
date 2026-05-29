@@ -1,4 +1,0 @@
-[submodule "scripts/ha_integration_translator"]
-	path = scripts/ha_integration_translator
-	url = https://github.com/3dg1luk43/ha_integration_translator.git
-	branch = main
