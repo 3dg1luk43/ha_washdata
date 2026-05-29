@@ -27,7 +27,14 @@ const TRANSLATIONS = {
     "display_mode": "Display Mode",
     "show_time_remaining": "Show Time Remaining",
     "show_percentage": "Show Percentage",
-    "entity_not_found": "Entity not found"
+    "entity_not_found": "Entity not found",
+    "tap_action": "Tap Action",
+    "hold_action": "Hold Action",
+    "double_tap_action": "Double Tap Action",
+    "title_source": "Title Source",
+    "title_source_static": "Static Title",
+    "title_source_program": "Program",
+    "title_source_progress": "Progress"
   },
   "af": {
     "washer_program": "Wasprogram",
@@ -1746,13 +1753,17 @@ class WashDataCard extends HTMLElement {
     return {
       entity: "sensor.washing_machine_state",
       title: "Washing Machine",
+      title_source: "static",
       icon: "mdi:washing-machine",
       display_mode: "time",
       active_color: [33, 150, 243],
       show_state: true,
       show_program: true,
       show_details: true,
-      spin_icon: true
+      spin_icon: true,
+      tap_action: { action: "more-info" },
+      hold_action: { action: "none" },
+      double_tap_action: { action: "none" }
     };
   }
 
@@ -1771,7 +1782,13 @@ class WashDataCard extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this._rendered = false;
-    this._handleClick = this._handleClick.bind(this);
+    this._holdTimer = null;
+    this._holdTriggered = false;
+    this._lastTapTime = 0;
+    this._pendingTapTimer = null;
+    this._onPointerDown = this._onPointerDown.bind(this);
+    this._onPointerUp = this._onPointerUp.bind(this);
+    this._onPointerCancel = this._onPointerCancel.bind(this);
   }
 
   setConfig(config) {
@@ -1791,14 +1808,129 @@ class WashDataCard extends HTMLElement {
     return 1;
   }
 
-  _handleClick() {
-    const entityId = this._cfg.entity;
-    const event = new CustomEvent("hass-more-info", {
-      detail: { entityId },
-      bubbles: true,
-      composed: true,
-    });
-    this.dispatchEvent(event);
+  _onPointerDown(ev) {
+    if (ev.button !== undefined && ev.button !== 0) return;
+    this._holdTriggered = false;
+    const holdCfg = this._cfg.hold_action;
+    if (holdCfg && holdCfg.action && holdCfg.action !== "none") {
+      this._holdTimer = window.setTimeout(() => {
+        this._holdTriggered = true;
+        this._holdTimer = null;
+        this._executeAction(holdCfg);
+      }, 500);
+    }
+  }
+
+  _onPointerCancel() {
+    if (this._holdTimer) {
+      clearTimeout(this._holdTimer);
+      this._holdTimer = null;
+    }
+  }
+
+  _onPointerUp(ev) {
+    if (this._holdTimer) {
+      clearTimeout(this._holdTimer);
+      this._holdTimer = null;
+    }
+    if (this._holdTriggered) return;
+
+    const doubleCfg = this._cfg.double_tap_action;
+    const hasDouble = doubleCfg && doubleCfg.action && doubleCfg.action !== "none";
+    const tapCfg = this._cfg.tap_action || { action: "more-info" };
+    const now = Date.now();
+
+    if (hasDouble) {
+      if (this._pendingTapTimer && now - this._lastTapTime < 250) {
+        clearTimeout(this._pendingTapTimer);
+        this._pendingTapTimer = null;
+        this._lastTapTime = 0;
+        this._executeAction(doubleCfg);
+        return;
+      }
+      this._lastTapTime = now;
+      this._pendingTapTimer = window.setTimeout(() => {
+        this._pendingTapTimer = null;
+        this._executeAction(tapCfg);
+      }, 250);
+    } else {
+      this._executeAction(tapCfg);
+    }
+  }
+
+  _executeAction(actionCfg) {
+    if (!actionCfg) return;
+    const action = actionCfg.action || "more-info";
+    const entityId = (actionCfg.entity || this._cfg.entity);
+
+    switch (action) {
+      case "none":
+        return;
+
+      case "more-info": {
+        const target = actionCfg.entity || this._cfg.entity;
+        this.dispatchEvent(new CustomEvent("hass-more-info", {
+          detail: { entityId: target },
+          bubbles: true,
+          composed: true,
+        }));
+        return;
+      }
+
+      case "toggle": {
+        if (!this._hass || !entityId) return;
+        const domain = entityId.split(".")[0];
+        const toggleDomains = ["light", "switch", "fan", "input_boolean", "automation", "script", "media_player", "cover", "humidifier", "climate", "siren", "remote", "valve", "lock"];
+        const svcDomain = toggleDomains.includes(domain) ? domain : "homeassistant";
+        this._hass.callService(svcDomain, "toggle", { entity_id: entityId });
+        return;
+      }
+
+      case "call-service":
+      case "perform-action": {
+        const svc = actionCfg.service || actionCfg.perform_action;
+        if (!svc || !this._hass) return;
+        const [d, s] = svc.split(".");
+        const data = { ...(actionCfg.data || actionCfg.service_data || {}) };
+        const target = actionCfg.target || undefined;
+        this._hass.callService(d, s, data, target);
+        return;
+      }
+
+      case "navigate": {
+        const path = actionCfg.navigation_path;
+        if (!path) return;
+        history.pushState(null, "", path);
+        window.dispatchEvent(new Event("location-changed"));
+        return;
+      }
+
+      case "url": {
+        const url = actionCfg.url_path;
+        if (!url) return;
+        window.open(url, actionCfg.new_tab === false ? "_self" : "_blank");
+        return;
+      }
+
+      case "assist": {
+        this.dispatchEvent(new CustomEvent("show-dialog", {
+          detail: {
+            dialogTag: "dialog-voice-command",
+            dialogImport: () => import("./dialog-voice-command"),
+            dialogParams: {
+              pipeline_id: actionCfg.pipeline_id,
+              start_listening: actionCfg.start_listening,
+            },
+          },
+          bubbles: true,
+          composed: true,
+        }));
+        return;
+      }
+
+      default:
+        return;
+    }
   }
 
   _render() {
@@ -1900,7 +2032,11 @@ class WashDataCard extends HTMLElement {
         </ha-card>
       `;
 
-      this.shadowRoot.getElementById("card").addEventListener("click", this._handleClick);
+      const cardEl = this.shadowRoot.getElementById("card");
+      cardEl.addEventListener("pointerdown", this._onPointerDown);
+      cardEl.addEventListener("pointerup", this._onPointerUp);
+      cardEl.addEventListener("pointercancel", this._onPointerCancel);
+      cardEl.addEventListener("pointerleave", this._onPointerCancel);
       this._rendered = true;
     }
 
@@ -1924,7 +2060,40 @@ class WashDataCard extends HTMLElement {
       return;
     }
 
-    const title = this._cfg.title || this._getTranslation("washing_machine");
+    const staticTitle = this._cfg.title || this._getTranslation("washing_machine");
+    const titleSource = this._cfg.title_source || "static";
+    const attrTmp = stateObj.attributes;
+    let title = staticTitle;
+    if (titleSource === "program") {
+      let prog = "";
+      if (this._cfg.program_entity) {
+        const ps = this._hass.states[this._cfg.program_entity];
+        if (ps) prog = ps.state;
+      } else if (attrTmp.program) {
+        prog = attrTmp.program;
+      }
+      if (prog && !["unknown", "none", "off", "unavailable"].includes(String(prog).toLowerCase())) {
+        title = prog;
+      }
+    } else if (titleSource === "progress") {
+      let pct = "";
+      if (this._cfg.pct_entity) {
+        pct = this._hass.states[this._cfg.pct_entity]?.state;
+      } else if (attrTmp.cycle_progress) {
+        pct = attrTmp.cycle_progress;
+      }
+      let remaining = "";
+      if (this._cfg.time_entity) {
+        remaining = this._hass.states[this._cfg.time_entity]?.state;
+      } else if (attrTmp.time_remaining) {
+        remaining = attrTmp.time_remaining;
+      }
+      if (this._cfg.display_mode === "percentage" && pct !== "" && pct != null) {
+        title = `${Math.round(pct)}%`;
+      } else if (remaining !== "" && remaining != null) {
+        title = !isNaN(remaining) ? `${remaining} ${this._getTranslation("minutes")}` : String(remaining);
+      }
+    }
     const icon = this._cfg.icon || stateObj.attributes.icon || "mdi:washing-machine";
     const activeColor = this._cfg.active_color;
 
@@ -2084,6 +2253,19 @@ class WashDataCardEditor extends HTMLElement {
 
       this._form.schema = [
         { name: "title", selector: { text: {} } },
+        {
+          name: "title_source",
+          selector: {
+            select: {
+              options: [
+                { value: "static", label: this._getTranslation("title_source_static") },
+                { value: "program", label: this._getTranslation("title_source_program") },
+                { value: "progress", label: this._getTranslation("title_source_progress") }
+              ],
+              mode: "dropdown"
+            }
+          }
+        },
         { name: "entity", selector: { entity: { domain: "sensor" } } },
         { name: "icon", selector: { icon: {} } },
         { name: "active_color", selector: { color_rgb: {} } },
@@ -2106,11 +2288,15 @@ class WashDataCardEditor extends HTMLElement {
         { name: "program_entity", selector: { entity: { domain: ["sensor", "select", "input_select", "input_text"] } } },
         { name: "pct_entity", selector: { entity: { domain: "sensor" } } },
         { name: "time_entity", selector: { entity: { domain: "sensor" } } },
+        { name: "tap_action", selector: { ui_action: {} } },
+        { name: "hold_action", selector: { ui_action: {} } },
+        { name: "double_tap_action", selector: { ui_action: {} } },
       ];
 
       this._form.computeLabel = (schema) => {
         const labels = {
           title: this._getTranslation("title"),
+          title_source: this._getTranslation("title_source"),
           entity: this._getTranslation("status_entity"),
           icon: this._getTranslation("icon"),
           active_color: this._getTranslation("active_color"),
@@ -2121,7 +2307,10 @@ class WashDataCardEditor extends HTMLElement {
           program_entity: this._getTranslation("program_entity"),
           pct_entity: this._getTranslation("pct_entity"),
           time_entity: this._getTranslation("time_entity"),
-          display_mode: this._getTranslation("display_mode")
+          display_mode: this._getTranslation("display_mode"),
+          tap_action: this._getTranslation("tap_action"),
+          hold_action: this._getTranslation("hold_action"),
+          double_tap_action: this._getTranslation("double_tap_action")
         };
         return labels[schema.name] || schema.name;
       };
