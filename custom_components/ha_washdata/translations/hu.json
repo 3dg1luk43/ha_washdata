@@ -245,10 +245,10 @@
             }
           },
           "anti_wrinkle_section": {
-            "name": "Ránctalanító pajzs (szárítók)",
+            "name": "Ránctalanító védelem (szárítók)",
             "description": "Hagyja figyelmen kívül a dob forgásait a ciklus vége után, hogy elkerülje a fantomciklusokat. Csak szárítógép / mosó-szárítógép.",
             "data": {
-              "anti_wrinkle_enabled": "Ránctalanító pajzs (csak szárítógépen)",
+              "anti_wrinkle_enabled": "Ránctalanító védelem (csak szárítógépen)",
               "anti_wrinkle_max_power": "Ránctalanító maximális teljesítmény (W)",
               "anti_wrinkle_max_duration": "Ránctalanító maximális időtartam (s)",
               "anti_wrinkle_exit_power": "Ránctalanító kilépési teljesítmény (W)"
@@ -597,8 +597,8 @@
           "segment_4_profile": "5. szegmens profilja",
           "segment_5_profile": "6. szegmens profilja",
           "segment_6_profile": "7. szegmens profilja",
-          "segment_7_profile": "8. szegmens Profil",
-          "segment_8_profile": "9. szegmens Profil",
+          "segment_7_profile": "8. szegmens profilja",
+          "segment_8_profile": "9. szegmens profilja",
           "segment_9_profile": "10. szegmens profilja"
         }
       },
@@ -801,18 +801,18 @@
         "editor_select_info_merge": "Válasszon 2+ ciklust egyesítéshez.",
         "editor_select_info_delete": "Válasszon 1+ ciklust törléshez.",
         "no_cycles_recorded": "Még nem rögzítettek ciklusokat.",
-        "profile_summary_line": "- **{name}**: {count} ciklus, {avg} m átl",
+        "profile_summary_line": "- **{name}**: {count} ciklus, {avg} m átlag",
         "no_profiles_created": "Még nincsenek profilok.",
         "phase_preview": "Fázis előnézete",
         "phase_preview_no_curve": "Átlagos profilgörbe még nem elérhető. További ciklusok futtatása/címkézése ehhez a profilhoz.",
         "average_power_curve": "Átlagos teljesítmény görbe",
-        "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} ciklus, ~{duration} m átlag)",
-        "profile_option_short_fmt": "{name} ({count} ciklus, ~{duration} m)",
+        "unit_min": "perc",
+        "profile_option_fmt": "{name} ({count} ciklus, ~{duration} perc átlag)",
+        "profile_option_short_fmt": "{name} ({count} ciklus, ~{duration} perc)",
         "deleted_cycles_from_profile": "{count} ciklus törölve innen: {profile}.",
         "not_enough_data_graph": "Nincs elég adat a grafikon létrehozásához.",
         "no_profiles_found": "Nem találhatók profilok.",
-        "cycle_info_fmt": "Ciklus: {start}, {duration} m, jelenlegi: {label}",
+        "cycle_info_fmt": "Ciklus: {start}, {duration} perc, jelenlegi: {label}",
         "top_candidates_header": "### Legjobb jelöltek",
         "tbl_profile": "Profil",
         "tbl_confidence": "Bizalom",
@@ -822,7 +822,7 @@
         "estimated_duration": "Becsült időtartam",
         "actual_duration": "Tényleges időtartam",
         "choose_action": "__Válasszon egy műveletet alább:__",
-        "tbl_count": "Gróf",
+        "tbl_count": "Db",
         "tbl_avg": "Átl",
         "tbl_min": "Min",
         "tbl_max": "Max",
@@ -850,7 +850,7 @@
         "storage_file_size": "Fájl mérete",
         "storage_cycles": "Ciklusok",
         "storage_profiles": "Profilok",
-        "storage_debug_traces": "Debug Traces",
+        "storage_debug_traces": "Hibakeresés adatok",
         "overview_suffix": "Áttekintés",
         "phase_preview_for_profile": "A profil fázis előnézete",
         "current_ranges_header": "Aktuális tartományok",
@@ -1177,14 +1177,14 @@
         "name": "Futás"
       },
       "match_ambiguity": {
-        "name": "Match Ambiguity"
+        "name": "Találat kétértelműsége"
       }
     },
     "sensor": {
       "washer_state": {
-        "name": "Állami",
+        "name": "Állapot",
         "state": {
-          "off": "Le",
+          "off": "Kikapcsolva",
           "idle": "Tétlen",
           "starting": "Indulás",
           "running": "Futás",
@@ -1211,7 +1211,7 @@
         "name": "Teljes időtartam"
       },
       "cycle_progress": {
-        "name": "Előrehalad"
+        "name": "Előrehaladás"
       },
       "current_power": {
         "name": "Jelenlegi teljesítmény"
