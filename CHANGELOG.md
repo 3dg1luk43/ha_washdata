@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📖 Documentation & Templates
 
+- **New Notifications & Events Guide** (#252): The notification options were under-documented, and the multiple ways of sending a notification (per-event target lists, notify entities, Notification Actions, and bus events) were a common source of confusion. A new **[NOTIFICATIONS.md](NOTIFICATIONS.md)** guide explains all three delivery paths and when to use each, documents every notification option in a single table, describes the cycle notification lifecycle (start -> live -> reminder -> finished and how they replace each other), lists the message placeholders and the companion-app payload keys, and folds in the full Events reference plus useful entity attributes. The README's inline Events section was condensed into a short summary that links to the new guide.
+
 - **Bug Report: "Debug Logs" Renamed to "Logs / Error Evidence"**: The field previously labelled **Debug Logs** in the bug report template has been renamed **Logs / Error Evidence** and its description rewritten to make explicit that _any_ log or error evidence is acceptable — a single error line from the HA logbook, a warning trace, or a full debug session all count. Several reporters were filling logs into the issue description body while marking the dedicated field as empty because they read "Debug Logs" as requiring HA-level debug output. The preflight checkbox, the issue-validator bot error message, and the heading regex in `issue_validator.yml` were all updated to match the new field name. The validator accepts `N/A` with a reason exactly as before.
 
 ### 🛠 Internal / Developer Experience
