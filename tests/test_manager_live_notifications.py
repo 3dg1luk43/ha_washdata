@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from custom_components.ha_washdata.const import NOTIFY_EVENT_LIVE
+from custom_components.ha_washdata.const import NOTIFY_EVENT_FINISH, NOTIFY_EVENT_LIVE
 from custom_components.ha_washdata.manager import WashDataManager
 
 
@@ -162,6 +162,40 @@ def test_clear_live_notification_sends_clear_message(
     assert service == "mobile_app_pixel"
     assert payload["message"] == "clear_notification"
     assert payload["data"]["tag"] == manager._live_notification_tag
+
+
+def test_finish_path_clear_skips_service_clear(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """On cycle finish the live card is replaced by the finished notification (same
+    tag), so no service-level clear_notification is sent; counters still reset."""
+    manager._notify_live_services = ["notify.mobile_app_pixel"]
+    manager._live_notification_sent_count = 1
+
+    manager._clear_live_progress_notification(clear_services=False)
+
+    mock_hass.services.async_call.assert_not_called()
+    assert manager._live_notification_sent_count == 0
+
+
+def test_finish_notification_shares_lifecycle_tag_without_live_keys(
+    manager: WashDataManager, mock_hass: Any
+) -> None:
+    """The finished notification reuses the lifecycle tag (so it replaces the live
+    card) but carries none of the live-only payload keys."""
+    manager._notify_finish_services = ["notify.mobile_app_pixel"]
+
+    manager._dispatch_notification(
+        "done",
+        event_type=NOTIFY_EVENT_FINISH,
+        extra_vars={"tag": manager._lifecycle_tag, "duration_minutes": 30},
+    )
+
+    _, _, payload = mock_hass.services.async_call.call_args[0]
+    assert payload["data"]["tag"] == manager._lifecycle_tag
+    assert "progress" not in payload["data"]
+    assert "live_update" not in payload["data"]
+    assert "alert_once" not in payload["data"]
 
 
 def test_live_notifications_continue_during_ending_state(

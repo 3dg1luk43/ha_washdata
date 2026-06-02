@@ -33,10 +33,18 @@ from .const import (
     CONF_NOTIFY_FIRE_EVENTS,
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+    CONF_NOTIFY_TIMEOUT_SECONDS,
+    CONF_NOTIFY_CHANNEL,
+    CONF_NOTIFY_FINISH_CHANNEL,
+    CONF_NOTIFY_REMINDER_MESSAGE,
     DEFAULT_NOTIFY_ONLY_WHEN_HOME,
     DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
     DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+    DEFAULT_NOTIFY_TIMEOUT_SECONDS,
+    DEFAULT_NOTIFY_CHANNEL,
+    DEFAULT_NOTIFY_FINISH_CHANNEL,
+    DEFAULT_NOTIFY_REMINDER_MESSAGE,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -116,7 +124,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         return False
 
-    if version == 3 and minor_version >= 4:
+    if version == 3 and minor_version >= 5:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -203,6 +211,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_NOTIFY_LIVE_OVERRUN_PERCENT, DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
     )
 
+    # 3.5: notification delivery overhaul (lifecycle tag, timeout, per-type channels,
+    # distinct reminder message).
+    options.setdefault(CONF_NOTIFY_TIMEOUT_SECONDS, DEFAULT_NOTIFY_TIMEOUT_SECONDS)
+    options.setdefault(CONF_NOTIFY_CHANNEL, DEFAULT_NOTIFY_CHANNEL)
+    options.setdefault(CONF_NOTIFY_FINISH_CHANNEL, DEFAULT_NOTIFY_FINISH_CHANNEL)
+    options.setdefault(CONF_NOTIFY_REMINDER_MESSAGE, DEFAULT_NOTIFY_REMINDER_MESSAGE)
+
     keys_to_remove = [
         CONF_MIN_POWER,
         CONF_OFF_DELAY,
@@ -228,10 +243,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data=data,
         options=options,
         version=3,
-        minor_version=4,
+        minor_version=5,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.4", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.5", version, minor_version
     )
     return True
 

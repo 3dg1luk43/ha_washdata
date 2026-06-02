@@ -119,12 +119,18 @@ from .const import (
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_NOTIFY_LIVE_CHRONOMETER,
+    CONF_NOTIFY_REMINDER_MESSAGE,
+    CONF_NOTIFY_TIMEOUT_SECONDS,
+    CONF_NOTIFY_CHANNEL,
+    CONF_NOTIFY_FINISH_CHANNEL,
     CONF_ENERGY_PRICE_STATIC,
     CONF_ENERGY_PRICE_ENTITY,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+    DEFAULT_NOTIFY_REMINDER_MESSAGE,
+    DEFAULT_NOTIFY_TIMEOUT_SECONDS,
     DEFAULT_NOTIFY_ONLY_WHEN_HOME,
     DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
@@ -648,6 +654,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # empty.  Set it explicitly so the merge below overwrites any
             # previously-saved value rather than keeping the stale one.
             user_input[CONF_NOTIFY_ICON] = user_input.get(CONF_NOTIFY_ICON) or ""
+            # Normalize channel text fields the same way: a cleared field must
+            # overwrite any previously-saved channel rather than leaving a stale one.
+            user_input[CONF_NOTIFY_CHANNEL] = user_input.get(CONF_NOTIFY_CHANNEL) or ""
+            user_input[CONF_NOTIFY_FINISH_CHANNEL] = (
+                user_input.get(CONF_NOTIFY_FINISH_CHANNEL) or ""
+            )
             # Normalize energy price fields: selectors may omit the key entirely
             # when the user clears them.  Explicitly writing None ensures the
             # merged options dict overrides any previously-stored value.
@@ -842,6 +854,36 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
                 ),
             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+            vol.Optional(
+                CONF_NOTIFY_REMINDER_MESSAGE,
+                default=get_val(
+                    CONF_NOTIFY_REMINDER_MESSAGE,
+                    DEFAULT_NOTIFY_REMINDER_MESSAGE,
+                ),
+            ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+            vol.Optional(
+                CONF_NOTIFY_TIMEOUT_SECONDS,
+                default=get_val(
+                    CONF_NOTIFY_TIMEOUT_SECONDS,
+                    DEFAULT_NOTIFY_TIMEOUT_SECONDS,
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=86400,
+                    step=1,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_NOTIFY_CHANNEL,
+                description={"suggested_value": get_val(CONF_NOTIFY_CHANNEL, "")},
+            ): selector.TextSelector(),
+            vol.Optional(
+                CONF_NOTIFY_FINISH_CHANNEL,
+                description={"suggested_value": get_val(CONF_NOTIFY_FINISH_CHANNEL, "")},
+            ): selector.TextSelector(),
             vol.Optional(
                 CONF_ENERGY_PRICE_ENTITY,
                 description={"suggested_value": get_val(CONF_ENERGY_PRICE_ENTITY, None)},

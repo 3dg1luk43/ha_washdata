@@ -94,6 +94,10 @@ CONF_NOTIFY_PRE_COMPLETE_MESSAGE = "notify_pre_complete_message"
 CONF_NOTIFY_LIVE_INTERVAL_SECONDS = "notify_live_interval_seconds"
 CONF_NOTIFY_LIVE_OVERRUN_PERCENT = "notify_live_overrun_percent"
 CONF_NOTIFY_LIVE_CHRONOMETER = "notify_live_chronometer"
+CONF_NOTIFY_REMINDER_MESSAGE = "notify_reminder_message"  # Distinct one-time pre-end alert
+CONF_NOTIFY_TIMEOUT_SECONDS = "notify_timeout_seconds"  # Auto-dismiss after N seconds (0 = never)
+CONF_NOTIFY_CHANNEL = "notify_channel"  # Android channel for status/live/reminder
+CONF_NOTIFY_FINISH_CHANNEL = "notify_finish_channel"  # Distinct Android channel for finished/clean
 CONF_ENERGY_PRICE_STATIC = "energy_price_static"
 CONF_ENERGY_PRICE_ENTITY = "energy_price_entity"
 
@@ -108,12 +112,16 @@ DEFAULT_NOTIFY_TITLE = "WashData: {device}"
 DEFAULT_NOTIFY_START_MESSAGE = "{device} started."
 DEFAULT_NOTIFY_FINISH_MESSAGE = "{device} finished. Duration: {duration}m."
 DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE = "{device}: Less than {minutes} minutes remaining."
+DEFAULT_NOTIFY_REMINDER_MESSAGE = "{device}: about {minutes} minutes left."
 DEFAULT_NOTIFY_LIVE_WAITING_MESSAGE = "{device}: No profile matched yet."
 DEFAULT_NOTIFY_ONLY_WHEN_HOME = False
 DEFAULT_NOTIFY_FIRE_EVENTS = True
 DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS = 300
 DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT = 20
 DEFAULT_NOTIFY_LIVE_CHRONOMETER = False
+DEFAULT_NOTIFY_TIMEOUT_SECONDS = 0  # 0 = notifications never auto-dismiss
+DEFAULT_NOTIFY_CHANNEL = ""  # Empty = omit channel (companion app default)
+DEFAULT_NOTIFY_FINISH_CHANNEL = ""  # Empty = reuse status channel
 DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES = 60  # 1 hour before "still waiting" nag notification
 DEFAULT_NOTIFY_UNLOAD_MESSAGE = "{device} finished {duration}m ago - laundry is still inside."
 
