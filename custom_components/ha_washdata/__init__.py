@@ -17,6 +17,7 @@ from homeassistant.helpers import device_registry as dr
 from .const import (
     DOMAIN,
     SERVICE_SUBMIT_FEEDBACK,
+    CONF_LINKED_DEVICE,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_DEVICE_TYPE,
@@ -307,6 +308,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 manager._logger.error("Failed to create initial profile: %s", e)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    _apply_device_link(hass, entry)
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
@@ -787,12 +790,39 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
+def _apply_device_link(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Sync the WashData device's via_device link with the configured option.
+
+    When CONF_LINKED_DEVICE points at an existing device (e.g. the smart plug or
+    appliance), the WashData device is shown as "Connected via <device>" in the
+    HA device registry. Clearing the option removes the link. Stale targets that
+    no longer exist are treated as "no link" so the registry never references a
+    deleted device.
+    """
+    registry = dr.async_get(hass)
+    washdata_device = registry.async_get_device(identifiers={(DOMAIN, entry.entry_id)})
+    if washdata_device is None:
+        return
+
+    linked_device_id = entry.options.get(CONF_LINKED_DEVICE) or None
+    if linked_device_id and registry.async_get(linked_device_id) is None:
+        linked_device_id = None
+
+    if washdata_device.via_device_id != linked_device_id:
+        registry.async_update_device(
+            washdata_device.id, via_device_id=linked_device_id
+        )
+
+
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload config entry - update settings without interrupting running cycles."""
     manager = hass.data[DOMAIN].get(entry.entry_id)
     if manager:
         # Update configuration without interrupting detector
         await manager.async_reload_config(entry)
+        # Options changes (e.g. linked device) reload in place without
+        # recreating entities, so apply the device link explicitly here.
+        _apply_device_link(hass, entry)
     else:
         # Full reload if manager not found
         await async_unload_entry(hass, entry)

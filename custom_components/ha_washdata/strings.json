@@ -304,6 +304,16 @@
               "notify_unload_delay_minutes": "Send a notification via the finish notification channel after the cycle ends and the door has not been opened for this many minutes (requires Door Sensor). Set to 0 to disable. Default: 60 min."
             }
           },
+          "device_link_section": {
+            "name": "Device Link",
+            "description": "Optionally link this WashData device to an existing Home Assistant device (for example the smart plug or the appliance itself). The WashData device is then shown as \"Connected via\" that device. Leave empty to keep WashData as a standalone device.",
+            "data": {
+              "linked_device": "Linked Device"
+            },
+            "data_description": {
+              "linked_device": "Select the device to connect WashData to. This adds a 'Connected via' reference in the device registry; WashData keeps its own device card and entities. Clear the selection to remove the link."
+            }
+          },
           "pump_section": {
             "name": "Pump Monitor",
             "description": "Pump device type only. Fires an event if a pump cycle runs past this duration.",

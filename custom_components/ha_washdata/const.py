@@ -108,6 +108,11 @@ CONF_SWITCH_ENTITY = "switch_entity"  # Optional switch entity toggled on pause/
 CONF_NOTIFY_UNLOAD_DELAY_MINUTES = "notify_unload_delay_minutes"  # Minutes before "laundry waiting" nag
 CONF_NOTIFY_UNLOAD_MESSAGE = "notify_unload_message"  # Template for the clean-laundry nag message
 
+# Optional link to an existing HA device (e.g. the smart plug or appliance).
+# When set, the WashData device is exposed as "Connected via <device>" through
+# the device registry's via_device relationship. Stores a device registry id.
+CONF_LINKED_DEVICE = "linked_device"
+
 DEFAULT_NOTIFY_TITLE = "WashData: {device}"
 DEFAULT_NOTIFY_START_MESSAGE = "{device} started."
 DEFAULT_NOTIFY_FINISH_MESSAGE = "{device} finished. Duration: {duration}m."

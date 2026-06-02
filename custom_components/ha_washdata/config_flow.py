@@ -154,6 +154,7 @@ from .const import (
     CONF_DOOR_SENSOR_ENTITY,
     CONF_PAUSE_CUTS_POWER,
     CONF_SWITCH_ENTITY,
+    CONF_LINKED_DEVICE,
     CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
 )
@@ -1010,6 +1011,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if not _door_val:
                 user_input[CONF_DOOR_SENSOR_ENTITY] = None
 
+            # Normalize a cleared linked device (empty selection) to None so the
+            # via_device link is removed rather than left dangling.
+            if CONF_LINKED_DEVICE in user_input and not user_input[CONF_LINKED_DEVICE]:
+                user_input[CONF_LINKED_DEVICE] = None
+
             # Same treatment for switch entity
             # Only normalize to None when key is present but empty; if the key
             # is missing entirely (e.g. the step didn't expose the field) fall
@@ -1482,6 +1488,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): selector.BooleanSelector(),
         }
 
+        device_link_schema = {
+            vol.Optional(
+                CONF_LINKED_DEVICE,
+                description={"suggested_value": get_val(CONF_LINKED_DEVICE, None)},
+            ): selector.DeviceSelector(selector.DeviceSelectorConfig()),
+        }
+
         schema: dict[Any, Any] = {
             vol.Required("suggestions_section"): section(
                 vol.Schema(suggestions_schema), {"collapsed": False}
@@ -1503,6 +1516,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             vol.Required("external_triggers_section"): section(
                 vol.Schema(external_triggers_schema), {"collapsed": True}
+            ),
+            vol.Required("device_link_section"): section(
+                vol.Schema(device_link_schema), {"collapsed": True}
             ),
         }
 
