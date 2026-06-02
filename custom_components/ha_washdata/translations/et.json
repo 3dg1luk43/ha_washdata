@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Lõpetamiseelne sõnumivorming",
           "energy_price_entity": "Energiahind – üksus (valikuline)",
           "energy_price_static": "Energia hind – staatiline väärtus (valikuline)",
-          "go_back": "Mine tagasi salvestamata"
+          "go_back": "Mine tagasi salvestamata",
+          "notify_reminder_message": "Meeldetuletuse kirja vorming",
+          "notify_timeout_seconds": "Automaatne loobumine pärast (sekundeid)",
+          "notify_channel": "Teavitamiskanal (staatus/otseülekanne/meeldetuletus)",
+          "notify_finish_channel": "Lõpetatud teavituskanal"
         },
         "data_description": {
           "go_back": "Märkige see ja klõpsake Esita, et ülaltoodud muudatused ära visata ja põhimenüüsse naasta.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Sõnum saadetakse pärast tsükli lõppemist. Toetab kohahoidjaid {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Sõnum saadeti enne valmimist. Toetab kohahoidjaid {device}, {minutes}.",
           "energy_price_entity": "Valige numbriline olem, millel on praegune elektrihind (nt sensor.electricity_price, input_number.energy_rate). Kui see on määratud, lubab kohahoidja {cost}. Kui mõlemad on konfigureeritud, on see ülimuslik staatilise väärtuse suhtes.",
-          "energy_price_static": "Fikseeritud elektrihind kWh kohta. Kui see on määratud, lubab kohahoidja {cost}. Ignoreeritakse, kui olem on ülal konfigureeritud. Lisa oma valuuta sümbol sõnumimalli, nt. {cost} €."
+          "energy_price_static": "Fikseeritud elektrihind kWh kohta. Kui see on määratud, lubab kohahoidja {cost}. Ignoreeritakse, kui olem on ülal konfigureeritud. Lisa oma valuuta sümbol sõnumimalli, nt. {cost} €.",
+          "notify_reminder_message": "Ühekordse meeldetuletuse tekst saatis seadistatud minutite arvu enne eeldatavat lõppu. Erinevus korduvatest live-uuendustest ülalpool. Toetab {device}, {minutes}, {program} kohahoidjaid.",
+          "notify_timeout_seconds": "Pärast seda mitu sekundit automaatselt teated välja jätta (edasi saadetud kui kaasrakenduse aegumine). Seadke 0, et hoida neid kuni vallandamiseni. Vaikimisi: 0.",
+          "notify_channel": "Android kaaslase rakenduse teavituskanal oleku, live progressi ja meeldetuletuste jaoks. Kanali heli ja tähtsus on konfigureeritud kaaslase rakenduses kanali nime esmakordsel kasutamisel - WashData määrab ainult kanali nime. Jäta rakenduse vaikeväärtus tühjaks.",
+          "notify_finish_channel": "Eraldi Android kanal lõpetatud hoiatuse jaoks (kasutab ka meeldetuletus ja pesupesemist ootav nag), et sellel oleks oma heli. Jäta tühjaks, et kanalit uuesti kasutada."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Kui pumbatsükkel töötab ka pärast seda mitu sekundit, käivitatakse üks kord sündmus ha_washdata_pump_stuck. Kasutage seda kinnikiilunud mootori tuvastamiseks (tavaline karteripumba tööaeg on alla 60 s). Vaikimisi: 1800 s (30 min). Ainult pumba seadme tüüp."
+            }
+          },
+          "device_link_section": {
+            "name": "Seadme link",
+            "description": "Lisavõimalusena ühendage see WashData seade olemasoleva Home Assistant seadmega (näiteks nutipistik või seade ise). Seejärel kuvatakse WashData seade selle seadme kaudu \"ühendatud\". Jäta tühjaks, et WashData jääks eraldiseisvaks seadmeks.",
+            "data": {
+              "linked_device": "Ühendatud seade"
+            },
+            "data_description": {
+              "linked_device": "Valige seade WashData ühendamiseks. See lisab seadmeregistrisse viite 'ühendatud läbi'; WashData säilitab oma seadmekaardi ja olemid. Puhasta valik lingi eemaldamiseks."
             }
           }
         }

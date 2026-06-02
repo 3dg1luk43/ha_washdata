@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format wiadomości przed zakończeniem",
           "energy_price_entity": "Cena energii - jednostka (opcjonalnie)",
           "energy_price_static": "Cena energii - wartość statyczna (opcjonalnie)",
-          "go_back": "Wróć bez zapisywania"
+          "go_back": "Wróć bez zapisywania",
+          "notify_reminder_message": "Format wiadomości przypomnienia",
+          "notify_timeout_seconds": "Automatyczne odrzucanie po (sekundach)",
+          "notify_channel": "Kanał powiadomień (status/na żywo/przypomnienie)",
+          "notify_finish_channel": "Zakończony kanał powiadomień"
         },
         "data_description": {
           "go_back": "Zaznacz to pole i kliknij Prześlij, aby odrzucić wszystkie powyższe zmiany i wrócić do menu głównego.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Wiadomość wysyłana po zakończeniu cyklu. Obsługuje symbole zastępcze {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Wiadomość wysyłana przed zakończeniem. Obsługuje symbole zastępcze {device}, {minutes}.",
           "energy_price_entity": "Wybierz jednostkę liczbową zawierającą aktualną cenę energii elektrycznej (np. czujnik.cena_elektryczności, numer_wejściowy.stawka_energii). Po ustawieniu włącza symbol zastępczy {cost}. Ma pierwszeństwo przed wartością statyczną, jeśli obie są skonfigurowane.",
-          "energy_price_static": "Stała cena energii elektrycznej za kWh. Po ustawieniu włącza symbol zastępczy {cost}. Ignorowane, jeśli jednostka jest skonfigurowana powyżej. Dodaj symbol swojej waluty w szablonie wiadomości, np. {cost} €."
+          "energy_price_static": "Stała cena energii elektrycznej za kWh. Po ustawieniu włącza symbol zastępczy {cost}. Ignorowane, jeśli jednostka jest skonfigurowana powyżej. Dodaj symbol swojej waluty w szablonie wiadomości, np. {cost} €.",
+          "notify_reminder_message": "Tekst jednorazowego przypomnienia wysyłany na skonfigurowaną liczbę minut przed przewidywanym zakończeniem. Różni się od powtarzających się aktualizacji na żywo powyżej. Obsługuje symbole zastępcze {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Automatycznie odrzucaj powiadomienia po tylu sekundach (przekazywane jako „przekroczenie limitu czasu” aplikacji towarzyszącej). Ustaw na 0, aby zachować je do momentu zwolnienia. Wartość domyślna: 0.",
+          "notify_channel": "Kanał powiadomień aplikacji towarzyszącej Android, zawierający powiadomienia o statusie, postępie na żywo i przypomnieniach. Dźwięk i ważność kanału konfiguruje się w aplikacji towarzyszącej przy pierwszym użyciu nazwy kanału – WashData ustawia jedynie nazwę kanału. Pozostaw puste, aby ustawić domyślną aplikację.",
+          "notify_finish_channel": "Oddzielny kanał Android dla powiadomienia o zakończeniu (wykorzystywany również przez przypomnienie i sygnał oczekiwania na pranie), aby mógł mieć własny dźwięk. Pozostaw puste, aby ponownie wykorzystać powyższy kanał."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Jeżeli po tylu sekundach cykl pompy nadal trwa, jednokrotnie uruchamiane jest zdarzenie ha_washdata_pump_stuck. Użyj tego, aby wykryć zablokowany silnik (typowy czas pracy pompy ściekowej wynosi mniej niż 60 s). Domyślnie: 1800 s (30 min). Tylko typ urządzenia pompującego."
+            }
+          },
+          "device_link_section": {
+            "name": "Połączenie urządzenia",
+            "description": "Opcjonalnie połącz to urządzenie WashData z istniejącym urządzeniem Home Assistant (na przykład inteligentną wtyczką lub samym urządzeniem). Urządzenie WashData zostanie wówczas pokazane jako „Połączone przez” to urządzenie. Pozostaw puste, aby WashData pozostała samodzielnym urządzeniem.",
+            "data": {
+              "linked_device": "Połączone urządzenie"
+            },
+            "data_description": {
+              "linked_device": "Wybierz urządzenie, z którym chcesz połączyć WashData. Spowoduje to dodanie odniesienia „Połączono przez” w rejestrze urządzeń; WashData utrzymuje własną kartę urządzenia i podmioty. Wyczyść zaznaczenie, aby usunąć łącze."
             }
           }
         }

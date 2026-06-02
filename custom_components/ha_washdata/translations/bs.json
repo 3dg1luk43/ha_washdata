@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format poruke prije završetka",
           "energy_price_entity": "Cijena energije - entitet (opcionalno)",
           "energy_price_static": "Cijena energije - statička vrijednost (opcionalno)",
-          "go_back": "Vrati se bez spremanja"
+          "go_back": "Vrati se bez spremanja",
+          "notify_reminder_message": "Format poruke podsjetnika",
+          "notify_timeout_seconds": "Automatsko odbacivanje nakon (sekunde)",
+          "notify_channel": "Kanal obavještenja (status/uživo/podsjetnik)",
+          "notify_finish_channel": "Završen kanal obavijesti"
         },
         "data_description": {
           "go_back": "Označite ovo i kliknite Pošalji da odbacite sve gore navedene promjene i vratite se u glavni meni.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Poruka se šalje kada se ciklus završi. Podržava {device}, {duration}, {program}, {energy_kwh}, {cost} čuvare mjesta.",
           "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta.",
           "energy_price_entity": "Odaberite numerički entitet koji drži trenutnu cijenu električne energije (npr. senzor.electricity_price, input_number.energy_rate). Kada je postavljeno, omogućava {cost} čuvar mjesta. Ima prednost u odnosu na statičku vrijednost ako su obje konfigurirane.",
-          "energy_price_static": "Fiksna cijena električne energije po kWh. Kada je postavljeno, omogućava {cost} čuvar mjesta. Zanemaruje se ako je entitet konfiguriran gore. Dodajte simbol valute u šablon poruke, npr. {cost} €."
+          "energy_price_static": "Fiksna cijena električne energije po kWh. Kada je postavljeno, omogućava {cost} čuvar mjesta. Zanemaruje se ako je entitet konfiguriran gore. Dodajte simbol valute u šablon poruke, npr. {cost} €.",
+          "notify_reminder_message": "Tekst jednokratnog podsjetnika poslao je konfigurirani broj minuta prije procijenjenog kraja. Za razliku od ponavljajućih ažuriranja uživo iznad. Podržava {device}, {minutes}, {program} čuvare mjesta.",
+          "notify_timeout_seconds": "Automatski odbaciti obavještenja nakon ovoliko sekundi (proslijeđeno kao \"vremensko ograničenje\" prateće aplikacije). Postavite na 0 da ih zadržite dok se ne odbace. Podrazumevano: 0.",
+          "notify_channel": "Android kanal za obavještenje prateće aplikacije za status, napredak uživo i obavještenja o podsjetnicima. Zvuk i važnost kanala se konfigurišu u pratećoj aplikaciji kada se prvi put koristi naziv kanala - WashData samo postavlja naziv kanala. Ostavite prazno za zadanu aplikaciju.",
+          "notify_finish_channel": "Odvojite Android kanal za završeno upozorenje (koji se također koristi za podsjetnik i zagovaranje na čekanju) tako da može imati svoj zvuk. Ostavite prazno da ponovo koristite kanal iznad."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Ako ciklus pumpe i dalje radi nakon ovoliko sekundi, događaj ha_washdata_pump_stuck se aktivira jednom. Upotrijebite ovo za otkrivanje zaglavljenog motora (uobičajeni rad pumpe ispod 60 s). Zadano: 1800 s (30 min). Samo tip uređaja za pumpu."
+            }
+          },
+          "device_link_section": {
+            "name": "Device Link",
+            "description": "Opciono povežite ovaj WashData uređaj sa postojećim Home Assistant uređajem (na primjer, pametni utikač ili sam uređaj). Uređaj WashData se tada prikazuje kao \"Povezan putem\" tog uređaja. Ostavite prazno da WashData ostane kao samostalan uređaj.",
+            "data": {
+              "linked_device": "Povezani uređaj"
+            },
+            "data_description": {
+              "linked_device": "Odaberite uređaj na koji želite povezati WashData. Ovo dodaje referencu 'Povezano putem' u registar uređaja; WashData čuva vlastitu karticu uređaja i entitete. Obrišite odabir da uklonite vezu."
             }
           }
         }

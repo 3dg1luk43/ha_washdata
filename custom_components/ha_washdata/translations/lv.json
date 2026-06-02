@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Pirmspabeigšanas ziņojuma formāts",
           "energy_price_entity": "Enerģijas cena - vienība (pēc izvēles)",
           "energy_price_static": "Enerģijas cena - statiskā vērtība (pēc izvēles)",
-          "go_back": "Atgriezties bez saglabāšanas"
+          "go_back": "Atgriezties bez saglabāšanas",
+          "notify_reminder_message": "Atgādinājuma ziņojuma formāts",
+          "notify_timeout_seconds": "Automātiski noraidīt pēc (sekundes)",
+          "notify_channel": "Paziņojumu kanāls (statuss/tiešraide/atgādinājums)",
+          "notify_finish_channel": "Pabeigts paziņojumu kanāls"
         },
         "data_description": {
           "go_back": "Atzīmējiet šo un noklikšķiniet uz Iesniegt, lai atmestu visas iepriekš minētās izmaiņas un atgrieztos galvenajā izvēlnē.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Ziņojums nosūtīts, kad cikls beidzas. Atbalsta vietturus {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Ziņa nosūtīta pirms pabeigšanas. Atbalsta vietturi {device}, {minutes}.",
           "energy_price_entity": "Atlasiet skaitlisku vienību, kurā ir norādīta pašreizējā elektroenerģijas cena (piemēram, sensors.electricity_price, input_number.energy_rate). Kad tas ir iestatīts, tiek iespējots vietturis {cost}. Ja abi ir konfigurēti, ir prioritāte pār statisko vērtību.",
-          "energy_price_static": "Fiksēta elektroenerģijas cena par kWh. Kad tas ir iestatīts, tiek iespējots vietturis {cost}. Ignorē, ja iepriekš ir konfigurēta entītija. Pievienojiet savas valūtas simbolu ziņojuma veidnē, piem. {cost} €."
+          "energy_price_static": "Fiksēta elektroenerģijas cena par kWh. Kad tas ir iestatīts, tiek iespējots vietturis {cost}. Ignorē, ja iepriekš ir konfigurēta entītija. Pievienojiet savas valūtas simbolu ziņojuma veidnē, piem. {cost} €.",
+          "notify_reminder_message": "Vienreizējā atgādinājuma teksts tika nosūtīts konfigurēto minūšu skaitu pirms paredzamās beigām. Atšķiras no iepriekš minētajiem regulāriem tiešraides atjauninājumiem. Atbalsta vietturus {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Automātiski noraidīt paziņojumus pēc šīm sekundēm (tiek pārsūtīti kā pavadošās lietotnes noildze). Iestatiet vērtību 0, lai tās saglabātu līdz atlaišanai. Noklusējums: 0.",
+          "notify_channel": "Android pavadošās lietotnes paziņojumu kanāls statusa, reāllaika norises un atgādinājumu paziņojumiem. Kanāla skaņa un svarīgums tiek konfigurēti pavadošajā lietotnē, kad pirmo reizi tiek izmantots kanāla nosaukums — WashData iestata tikai kanāla nosaukumu. Atstājiet tukšu lietotnes noklusējuma iestatīšanai.",
+          "notify_finish_channel": "Atsevišķs Android kanāls gatavajam brīdinājumam (to izmanto arī atgādinājums un veļas gaidīšanas zvans), lai tam būtu savs skaņa. Atstājiet tukšu, lai atkārtoti izmantotu iepriekš minēto kanālu."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Ja sūkņa cikls joprojām darbojas pēc šīm sekundēm, vienreiz tiek aktivizēts notikums ha_washdata_pump_stuck. Izmantojiet to, lai noteiktu iestrēgušu motoru (parasti sūkņa darbības laiks ir mazāks par 60 s). Noklusējums: 1800 s (30 min). Tikai sūkņa ierīces tips."
+            }
+          },
+          "device_link_section": {
+            "name": "Ierīces saite",
+            "description": "Pēc izvēles saistiet šo WashData ierīci ar esošu Home Assistant ierīci (piemēram, viedspraudni vai pašu ierīci). Pēc tam WashData ierīce tiek parādīta kā \"Savienots, izmantojot šo ierīci\". Atstājiet tukšu, lai WashData saglabātu kā atsevišķu ierīci.",
+            "data": {
+              "linked_device": "Saistītā ierīce"
+            },
+            "data_description": {
+              "linked_device": "Atlasiet ierīci, ar kuru savienot WashData. Tādējādi ierīces reģistrā tiek pievienota atsauce “Savienots, izmantojot”; WashData saglabā savu ierīces karti un entītijas. Notīriet atlasi, lai noņemtu saiti."
             }
           }
         }

@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Išankstinio pabaigos pranešimo formatas",
           "energy_price_entity": "Energijos kaina – subjektas (neprivaloma)",
           "energy_price_static": "Energijos kaina – statinė vertė (neprivaloma)",
-          "go_back": "Grįžti neišsaugant"
+          "go_back": "Grįžti neišsaugant",
+          "notify_reminder_message": "Priminimo pranešimo formatas",
+          "notify_timeout_seconds": "Automatiškai atsisakyti po (sekundėmis)",
+          "notify_channel": "Pranešimų kanalas (būsena / tiesioginis / priminimas)",
+          "notify_finish_channel": "Pranešimų kanalas baigtas"
         },
         "data_description": {
           "go_back": "Pažymėkite tai ir spustelėkite Pateikti, kad atmestumėte visus aukščiau pateiktus pakeitimus ir grįžtumėte į pagrindinį meniu.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Pranešimas siunčiamas, kai ciklas baigiasi. Palaikomi {device}, {duration}, {program}, {energy_kwh}, {cost} rezervuotų vietų žymekliai.",
           "notify_pre_complete_message": "Pranešimas siunčiamas prieš pabaigą. Palaikomi {device}, {minutes} rezervuotų vietų žymekliai.",
           "energy_price_entity": "Pasirinkite skaitmeninį objektą, kuriame yra dabartinė elektros kaina (pvz., jutiklis.elektros_kaina, įvesties_numeris.energijos_norma). Kai nustatyta, įgalina rezervuotą vietą {cost}. Turi viršenybę prieš statinę vertę, jei sukonfigūruotos abi.",
-          "energy_price_static": "Fiksuota elektros kaina už kWh. Kai nustatyta, įgalina rezervuotą vietą {cost}. Nepaisoma, jei subjektas sukonfigūruotas aukščiau. Pranešimo šablone pridėkite savo valiutos simbolį, pvz. {cost} €."
+          "energy_price_static": "Fiksuota elektros kaina už kWh. Kai nustatyta, įgalina rezervuotą vietą {cost}. Nepaisoma, jei subjektas sukonfigūruotas aukščiau. Pranešimo šablone pridėkite savo valiutos simbolį, pvz. {cost} €.",
+          "notify_reminder_message": "Vienkartinio priminimo tekstas išsiuntė sukonfigūruotą minučių skaičių iki numatomos pabaigos. Skirtingai nuo pasikartojančių tiesioginių atnaujinimų aukščiau. Palaikomos {device}, {minutes}, {program} rezervuotos vietos.",
+          "notify_timeout_seconds": "Automatiškai atsisakykite pranešimų po tiek sekundžių (persiunčiami kaip papildomos programos laikas). Nustatykite 0, kad jie liktų, kol bus atmesti. Numatytasis: 0.",
+          "notify_channel": "Android papildomos programos pranešimų kanalas, skirtas būsenos, tiesioginės eigos ir priminimų pranešimams. Kanalo garsas ir svarba sukonfigūruojami papildomoje programoje pirmą kartą naudojant kanalo pavadinimą – WashData nustato tik kanalo pavadinimą. Palikite tuščią, kad nustatytumėte numatytąją programą.",
+          "notify_finish_channel": "Atskiras Android kanalas baigtam perspėjimui (taip pat naudojamas priminimui ir skalbinių laukimo ragavimui), kad jis galėtų turėti savo garsą. Palikite tuščią, jei norite pakartotinai naudoti aukščiau esantį kanalą."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Jei po tiek sekundžių vis dar veikia siurblio ciklas, vieną kartą suaktyvinamas įvykis ha_washdata_pump_stuck. Naudokite tai norėdami aptikti užstrigusį variklį (įprastas karterio siurblio veikimas yra trumpesnis nei 60 s). Numatytasis: 1800 s (30 min.). Tik siurblio įrenginio tipas."
+            }
+          },
+          "device_link_section": {
+            "name": "Įrenginio nuoroda",
+            "description": "Pasirinktinai susiekite šį „WashData“ įrenginį su esamu Home Assistant įrenginiu (pvz., išmaniuoju kištuku arba pačiu prietaisu). Tada „WashData“ įrenginys rodomas kaip „Prisijungta per tą įrenginį“. Palikite tuščią, kad WashData liktų kaip atskiras įrenginys.",
+            "data": {
+              "linked_device": "Susietas įrenginys"
+            },
+            "data_description": {
+              "linked_device": "Pasirinkite įrenginį, prie kurio norite prijungti „WashData“. Tai prideda nuorodą „Prisijungta per“ įrenginių registre; „WashData“ saugo savo įrenginio kortelę ir objektus. Išvalykite pasirinkimą, kad pašalintumėte nuorodą."
             }
           }
         }

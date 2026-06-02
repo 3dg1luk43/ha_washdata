@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Pre-foltôging berjochtformaat",
           "energy_price_entity": "Enerzjypriis - Entiteit (opsjoneel)",
           "energy_price_static": "Enerzjypriis - Statyske wearde (opsjoneel)",
-          "go_back": "Gean werom sûnder op te slaan"
+          "go_back": "Gean werom sûnder op te slaan",
+          "notify_reminder_message": "Herinneringsberjochtformaat",
+          "notify_timeout_seconds": "Auto-dismiss Nei (sekonden)",
+          "notify_channel": "Notifikaasjekanaal (status / live / herinnering)",
+          "notify_finish_channel": "Foltôge Notifikaasjekanaal"
         },
         "data_description": {
           "go_back": "Tik dit oan en klik op Yntsjinje om alle boppesteande wizigingen fuort te smiten en werom te gean nei it haadmenu.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Berjocht ferstjoerd as in syklus einiget. Unterstützt {device}, {duration}, {program}, {energy_kwh}, {cost} plakhâlders.",
           "notify_pre_complete_message": "Berjocht ferstjoerd foar foltôging. Unterstützt {device}, {minutes} plakhâlders.",
           "energy_price_entity": "Selektearje in numerike entiteit dy't de hjoeddeistige elektrisiteitspriis hâldt (bygelyks sensor.electricity_price, input_number.energy_rate). As ynsteld, aktivearret de {cost} plakhâlder. Nimt foarrang boppe de statyske wearde as beide binne konfigurearre.",
-          "energy_price_static": "Fêste elektrisiteitspriis per kWh. As ynsteld, aktivearret de {cost} plakhâlder. Negearre as in entiteit hjirboppe ynsteld is. Foegje jo falutasymboal ta yn it berjochtsjabloan, f.eks. {cost} €."
+          "energy_price_static": "Fêste elektrisiteitspriis per kWh. As ynsteld, aktivearret de {cost} plakhâlder. Negearre as in entiteit hjirboppe ynsteld is. Foegje jo falutasymboal ta yn it berjochtsjabloan, f.eks. {cost} €.",
+          "notify_reminder_message": "Tekst fan 'e ienmalige herinnering stjoerde it ynstelde oantal minuten foar it rûsde ein. Ûnderskieden fan de weromkommende live updates hjirboppe. Unterstützt {device}, {minutes}, {program} plakhâlders.",
+          "notify_timeout_seconds": "Ferwiderje notifikaasjes automatysk nei dizze protte sekonden (trochstjoerd as 'timeout' fan 'e begelieder-app). Stel op 0 om se te hâlden oant se wurde wegere. Standert: 0.",
+          "notify_channel": "Android begeliedend app-notifikaasjekanaal foar notifikaasjes oer status, live foarútgong en herinnerings. It lûd en it belang fan in kanaal wurde konfigureare yn 'e begelieder-app de earste kear dat de kanaalnamme wurdt brûkt - WashData stelt allinich de kanaalnamme yn. Lit leech foar de app standert.",
+          "notify_finish_channel": "Separate Android kanaal foar de kleare warskôging (ek brûkt troch de herinnering en it wachtsjen fan 'e wask) sadat it in eigen lûd kin hawwe. Lit leech om it boppesteande kanaal opnij te brûken."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "As in pomp syklus noch rint nei dit protte sekonden, in ha_washdata_pump_stuck evenemint wurdt ûntslein ien kear. Brûk dit om in blokkearre motor te detektearjen (typyske sumppomp is ûnder 60 s). Standert: 1800 s (30 min). Allinnich type pompapparaat."
+            }
+          },
+          "device_link_section": {
+            "name": "Device Link",
+            "description": "Keppelje dit WashData-apparaat opsjoneel oan in besteand Home Assistant-apparaat (bygelyks de smart plug of it apparaat sels). It WashData-apparaat wurdt dan werjûn as \"Ferbûn fia\" dat apparaat. Lit leech om WashData as in standalone apparaat te hâlden.",
+            "data": {
+              "linked_device": "Keppele apparaat"
+            },
+            "data_description": {
+              "linked_device": "Selektearje it apparaat om WashData oan te ferbinen. Dit foeget in 'Ferbûn fia' referinsje ta yn it apparaatregister; WashData hâldt har eigen apparaatkaart en entiteiten. Wiskje de seleksje om de keppeling te ferwiderjen."
             }
           }
         }

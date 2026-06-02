@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Skilaboðasnið fyrir útfyllingu",
           "energy_price_entity": "Orkuverð – eining (valfrjálst)",
           "energy_price_static": "Orkuverð - Statískt gildi (valfrjálst)",
-          "go_back": "Fara til baka án vistunar"
+          "go_back": "Fara til baka án vistunar",
+          "notify_reminder_message": "Snið áminningarskilaboða",
+          "notify_timeout_seconds": "Loka sjálfkrafa eftir (sekúndur)",
+          "notify_channel": "Tilkynningarrás (staða/í beinni/áminning)",
+          "notify_finish_channel": "Tilkynningarás lokið"
         },
         "data_description": {
           "go_back": "Hakaðu við þetta og smelltu á Senda til að henda öllum breytingum hér að ofan og fara aftur í aðalvalmyndina.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Skilaboð send þegar lotu lýkur. Styður {device}, {duration}, {program}, {energy_kwh}, {cost} staðgengla.",
           "notify_pre_complete_message": "Skilaboð send áður en þeim er lokið. Styður {device}, {minutes} staðgengla.",
           "energy_price_entity": "Veldu tölulega einingu sem heldur núverandi raforkuverði (t.d. sensor.electricity_price, input_number.energy_rate). Þegar stillt er á {cost} staðgengillinn. Tekur forgang fram yfir fasta gildið ef bæði eru stillt.",
-          "energy_price_static": "Fast raforkuverð á kWst. Þegar stillt er á {cost} staðgengillinn. Hunsuð ef eining er stillt hér að ofan. Bættu gjaldmiðlinum þínum við í skilaboðasniðmátinu, t.d. {cost} €."
+          "energy_price_static": "Fast raforkuverð á kWst. Þegar stillt er á {cost} staðgengillinn. Hunsuð ef eining er stillt hér að ofan. Bættu gjaldmiðlinum þínum við í skilaboðasniðmátinu, t.d. {cost} €.",
+          "notify_reminder_message": "Texti í einu sinni áminningu sendi stilltan fjölda mínútna fyrir áætlaðan lokadag. Aðgreindur frá endurteknum lifandi uppfærslum hér að ofan. Styður {device}, {minutes}, {program} staðgengla.",
+          "notify_timeout_seconds": "Hunsa tilkynningar sjálfkrafa eftir þessar margar sekúndur (framsent sem „timeout“ fylgiforritinu). Stilltu á 0 til að halda þeim þar til þeim er vísað frá. Sjálfgefið: 0.",
+          "notify_channel": "Android tilkynningarás fyrir fylgiforrit fyrir stöðu, framfarir í beinni og áminningartilkynningar. Hljóð og mikilvægi rásar er stillt í fylgiforritinu í fyrsta skipti sem rásarheitið er notað - WashData stillir aðeins rásarnafnið. Skildu eftir tómt fyrir sjálfgefið forrit.",
+          "notify_finish_channel": "Aðskildu Android rás fyrir viðvörunina sem er lokið (einnig notuð af áminningunni og nöldrinu sem bíður þvotta) svo hún geti fengið sitt eigið hljóð. Skildu eftir tómt til að endurnýta rásina hér að ofan."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Ef dælulota er enn í gangi eftir þessar margar sekúndur, er ha_washdata_pump_stuck atvik ræst einu sinni. Notaðu þetta til að greina fastan mótor (venjulegur dælugangur er undir 60 sekúndum). Sjálfgefið: 1800 s (30 mín). Aðeins gerð dælubúnaðar."
+            }
+          },
+          "device_link_section": {
+            "name": "Tækjatenging",
+            "description": "Hægt er að tengja þetta WashData tæki við núverandi Home Assistant tæki (til dæmis snjallstunguna eða heimilistækið sjálft). WashData tækið er síðan sýnt sem „Tengt í gegnum“ það tæki. Skildu eftir tómt til að halda WashData sem sjálfstætt tæki.",
+            "data": {
+              "linked_device": "Tengt tæki"
+            },
+            "data_description": {
+              "linked_device": "Veldu tækið til að tengja WashData við. Þetta bætir við 'Connected via' tilvísun í tækjaskránni; WashData heldur sínu eigin tækjakorti og einingum. Hreinsaðu valið til að fjarlægja tengilinn."
             }
           }
         }

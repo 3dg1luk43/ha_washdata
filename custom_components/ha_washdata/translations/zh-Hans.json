@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "预完成消息格式",
           "energy_price_entity": "能源价格 - 实体（可选）",
           "energy_price_static": "能源价格 - 静态值（可选）",
-          "go_back": "不保存并返回"
+          "go_back": "不保存并返回",
+          "notify_reminder_message": "提醒消息格式",
+          "notify_timeout_seconds": "自动关闭后（秒）",
+          "notify_channel": "通知通道（状态/实时/提醒）",
+          "notify_finish_channel": "完成通知通道"
         },
         "data_description": {
           "go_back": "勾选此项并点击提交，以放弃上述任何更改并返回主菜单。",
@@ -151,7 +155,11 @@
           "notify_finish_message": "循环结束时发送的消息。支持 {device}、{duration}、{program}, {energy_kwh}, {cost} 占位符。",
           "notify_pre_complete_message": "消息在完成之前发送。支持 {device}、{minutes} 占位符。",
           "energy_price_entity": "选择保存当前电价的数字实体（例如sensor.electricity_price、input_number.energy_rate）。设置后，启用 {cost} 占位符。如果两者都配置了，则优先于静态值。",
-          "energy_price_static": "每千瓦时固定电价。设置后，启用 {cost} 占位符。如果上面配置了实体，则忽略。在消息模板中添加您的货币符号，例如{cost} 欧元。"
+          "energy_price_static": "每千瓦时固定电价。设置后，启用 {cost} 占位符。如果上面配置了实体，则忽略。在消息模板中添加您的货币符号，例如{cost} 欧元。",
+          "notify_reminder_message": "一次性提醒文本在预计结束前发送配置的分钟数。与上面的定期实时更新不同。支持 {device}、{minutes}、{program} 占位符。",
+          "notify_timeout_seconds": "在这么多秒后自动关闭通知（作为配套应用程序“超时”转发）。设置为 0 以保留它们直到被解雇。默认值：0。",
+          "notify_channel": "Android 配套应用通知渠道，用于显示状态、实时进度和提醒通知。频道的声音和重要性是在第一次使用频道名称时在配套应用程序中配置的 - WashData 仅设置频道名称。对于应用程序默认值，将其留空。",
+          "notify_finish_channel": "单独的 Android 通道用于已完成的警报（也由提醒和洗衣等待小车使用），以便它可以有自己的声音。留空以重复使用上面的通道。"
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "如果泵循环在这么多秒后仍在运行，则会触发一次 ha_washdata_pump_stuck 事件。用它来检测堵塞的电机（典型的污水泵运行时间低于 60 秒）。默认值：1800 秒（30 分钟）。仅限泵设备类型。"
+            }
+          },
+          "device_link_section": {
+            "name": "设备链接",
+            "description": "（可选）将此 WashData 设备链接到现有的 Home Assistant 设备（例如智能插头或设备本身）。然后，WashData 设备将显示为“通过该设备连接”。留空可将 WashData 保留为独立设备。",
+            "data": {
+              "linked_device": "链接设备"
+            },
+            "data_description": {
+              "linked_device": "选择要连接 WashData 的设备。这会在设备注册表中添加“连接方式”引用； WashData保留自己的设备卡和实体。清除选择以删除链接。"
             }
           }
         }

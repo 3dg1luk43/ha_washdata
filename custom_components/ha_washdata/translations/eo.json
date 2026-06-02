@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Formulo de antaŭ-kompletiga mesaĝo",
           "energy_price_entity": "Energia Prezo - Ento (laŭvola)",
           "energy_price_static": "Energia Prezo - Senmova valoro (laŭvola)",
-          "go_back": "Reiri sen konservi"
+          "go_back": "Reiri sen konservi",
+          "notify_reminder_message": "Memora Mesaĝo Pormat",
+          "notify_timeout_seconds": "Auto-dismiss After (sekundoj)",
+          "notify_channel": "Sciiga Kanalo (stato/viva/rememorigilo)",
+          "notify_finish_channel": "Finita Notification Channel"
         },
         "data_description": {
           "go_back": "Marku ĉi tion kaj alklaku Sendi por forĵeti iujn suprajn ŝanĝojn kaj reveni al la ĉefa menuo.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program}, {energy_kwh}, {cost} lokanombrojn.",
           "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn.",
           "energy_price_entity": "Elektu nombran enton, kiu tenas la nunan elektroprezon (ekz. sensor.electricity_price, input_number.energy_rate). Kiam agordita, ebligas la lokokupilon {cost}. Havas prioritaton super la senmova valoro se ambaŭ estas agorditaj.",
-          "energy_price_static": "Fiksa elektroprezo por kWh. Kiam agordita, ebligas la lokokupilon {cost}. Ignorita se ento estas agordita supre. Aldonu vian valutan simbolon en la mesaĝŝablono, ekz. {cost} €."
+          "energy_price_static": "Fiksa elektroprezo por kWh. Kiam agordita, ebligas la lokokupilon {cost}. Ignorita se ento estas agordita supre. Aldonu vian valutan simbolon en la mesaĝŝablono, ekz. {cost} €.",
+          "notify_reminder_message": "Teksto de la unufoja memorigilo sendis la agordita nombro da minutoj antaŭ la laŭtaksa fino. Distingu de la ripetaj vivaj ĝisdatigoj supre. Subtenas {device}, {minutes}, {program} anstataŭaĵojn.",
+          "notify_timeout_seconds": "aŭtomate malakceptas sciigojn post tiuj multaj sekundoj (antaŭjuĝitaj kiel la kunulprogramo \"tempon\". Agordu al 0 por teni ilin ĝis malakceptita. Defaŭlto: 0.",
+          "notify_channel": "Kunulprogramadkanalo por statuso, vivas progreson, kaj memor sciigojn. La sono kaj graveco de kanalo estas formitaj en la kunulprogramo la unuan fojon la kanalnomo estas uzita - WashData nur metas la kanalnomon. Lasu malplena por la app defaŭlto.",
+          "notify_finish_channel": "Aparta (0) kanalo por la preta alarmo (ankaŭ uzita per la memorigilo kaj la laundry-atendanta nag) tiel ĝi povas havi sian propran sonon. Lasu malplena recikli la kanalon supre."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Se pumpciklo daŭre funkcias post tiom da sekundoj, evento ha_washdata_pump_stuck estas lanĉita unufoje. Uzu ĉi tion por detekti ŝtopiĝintan motoron (tipa sumppumpilfunkciado estas malpli ol 60 s). Defaŭlte: 1800 s (30 min). Tipo de pumpilo nur."
+            }
+          },
+          "device_link_section": {
+            "name": "Device ligo",
+            "description": "Laŭvola ligo tiu WashData aparato al ekzistanta Home Assistant aparato (ekzemple la inteligenta ŝtopilo aŭ la aplaŭdo mem). La WashData aparato tiam estas montrita kiel \"Konsekcita per\" tiu aparato. Lasu malplena konservi WashData kiel memstara aparato.",
+            "data": {
+              "linked_device": "Aliĝilo Device"
+            },
+            "data_description": {
+              "linked_device": "Elekti la aparaton por ligi WashData al. Tio aldonas \"Connected per\" referenco en la aparatoregistro; WashData retenas sian propran aparatokarton kaj unuojn. Klara la elekto forigi la ligon."
             }
           }
         }

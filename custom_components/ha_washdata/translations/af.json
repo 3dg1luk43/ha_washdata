@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Pre-voltooiing Boodskap Formaat",
           "energy_price_entity": "Energieprys – Entiteit (opsioneel)",
           "energy_price_static": "Energieprys – Statiese waarde (opsioneel)",
-          "go_back": "Gaan terug sonder om te stoor"
+          "go_back": "Gaan terug sonder om te stoor",
+          "notify_reminder_message": "Herinnering Boodskap Formaat",
+          "notify_timeout_seconds": "Maak outomaties toe na (sekondes)",
+          "notify_channel": "Kennisgewingkanaal (status/regstreeks/herinnering)",
+          "notify_finish_channel": "Klaar kennisgewingkanaal"
         },
         "data_description": {
           "go_back": "Merk dit en klik Indien om enige bogenoemde veranderinge weg te gooi en na die hoofkieslys terug te keer.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program}, {energy_kwh}, {cost} plekhouers.",
           "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers.",
           "energy_price_entity": "Kies 'n numeriese entiteit wat die huidige elektrisiteitsprys hou (bv. sensor.electricity_price, input_number.energy_rate). As dit gestel is, aktiveer die {cost} plekhouer. Kry voorrang bo die statiese waarde as albei gekonfigureer is.",
-          "energy_price_static": "Vaste elektrisiteitsprys per kWh. As dit gestel is, aktiveer die {cost} plekhouer. Ignoreer as 'n entiteit hierbo gekonfigureer is. Voeg jou geldeenheid simbool in die boodskap sjabloon, bv. {cost} €."
+          "energy_price_static": "Vaste elektrisiteitsprys per kWh. As dit gestel is, aktiveer die {cost} plekhouer. Ignoreer as 'n entiteit hierbo gekonfigureer is. Voeg jou geldeenheid simbool in die boodskap sjabloon, bv. {cost} €.",
+          "notify_reminder_message": "Teks van die eenmalige herinnering het die gekonfigureerde aantal minute voor die geskatte einde gestuur. Onderskei van die herhalende regstreekse opdaterings hierbo. Ondersteun {device}, {minutes}, {program} plekhouers.",
+          "notify_timeout_seconds": "Verwerp kennisgewings outomaties na hierdie baie sekondes (aangestuur as die metgesel-toepassing 'time-out'). Stel op 0 om hulle te hou totdat dit verwerp word. Verstek: 0.",
+          "notify_channel": "Android metgeselprogramkennisgewingkanaal vir status, regstreekse vordering en herinneringkennisgewings. Die klank en belangrikheid van 'n kanaal word in die metgesel-toepassing gekonfigureer die eerste keer dat die kanaalnaam gebruik word - WashData stel net die kanaalnaam. Laat leeg vir die toepassing verstek.",
+          "notify_finish_channel": "Aparte Android-kanaal vir die voltooide waarskuwing (ook gebruik deur die aanmaning en die wasgoed-wag-knal) sodat dit sy eie klank kan hê. Laat leeg om die kanaal hierbo te hergebruik."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "As 'n pompsiklus na soveel sekondes steeds aan die gang is, word 'n ha_washdata_pump_stuck-gebeurtenis een keer afgevuur. Gebruik dit om 'n motor wat vasgesteek is op te spoor (tipiese sumppomploop is minder as 60 s). Verstek: 1800 s (30 min.). Slegs tipe pomptoestel."
+            }
+          },
+          "device_link_section": {
+            "name": "Toestel skakel",
+            "description": "Koppel hierdie WashData-toestel opsioneel aan 'n bestaande Home Assistant-toestel (byvoorbeeld die slimprop of die toestel self). Die WashData-toestel word dan gewys as \"Gekoppel via\" daardie toestel. Laat leeg om WashData as 'n selfstandige toestel te hou.",
+            "data": {
+              "linked_device": "Gekoppelde toestel"
+            },
+            "data_description": {
+              "linked_device": "Kies die toestel om WashData aan te koppel. Dit voeg 'n 'Gekoppel via'-verwysing by in die toestelregister; WashData hou sy eie toestelkaart en entiteite. Vee die keuse uit om die skakel te verwyder."
             }
           }
         }

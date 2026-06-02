@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Esitäytetty viestin muoto",
           "energy_price_entity": "Energian hinta – kokonaisuus (valinnainen)",
           "energy_price_static": "Energian hinta – staattinen arvo (valinnainen)",
-          "go_back": "Palaa takaisin tallentamatta"
+          "go_back": "Palaa takaisin tallentamatta",
+          "notify_reminder_message": "Muistutusviestin muoto",
+          "notify_timeout_seconds": "Automaattinen poisto jälkeen (sekuntia)",
+          "notify_channel": "Ilmoituskanava (status/live/reminder)",
+          "notify_finish_channel": "Päätetty ilmoituskanava"
         },
         "data_description": {
           "go_back": "Valitse tämä ja napsauta Lähetä hylätäksesi yllä olevat muutokset ja palataksesi päävalikkoon.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Viesti lähetetään, kun jakso on päättynyt. Tukee paikkamerkkejä {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Viesti lähetetty ennen valmistumista. Tukee paikkamerkkejä {device}, {minutes}.",
           "energy_price_entity": "Valitse numeerinen kokonaisuus, jolla on nykyinen sähkön hinta (esim. sensor.electricity_price, input_number.energy_rate). Kun asetettu, ottaa käyttöön paikkamerkin {cost}. Se on staattisen arvon edelle, jos molemmat on määritetty.",
-          "energy_price_static": "Kiinteä sähkön hinta per kWh. Kun asetettu, ottaa paikkamerkin {cost} käyttöön. Ohitetaan, jos entiteetti on määritetty yllä. Lisää viestipohjaan valuuttasymboli, esim. {cost} €."
+          "energy_price_static": "Kiinteä sähkön hinta per kWh. Kun asetettu, ottaa paikkamerkin {cost} käyttöön. Ohitetaan, jos entiteetti on määritetty yllä. Lisää viestipohjaan valuuttasymboli, esim. {cost} €.",
+          "notify_reminder_message": "Kertamuistimuistutuksen teksti lähetti vahvistetun minuuttimäärän ennen arvioitua loppua. Erona yllä olevista toistuvista päivityksistä. Tukee {device}, {minutes}, {program} paikkaa.",
+          "notify_timeout_seconds": "Hylätkää ilmoitukset automaattisesti näin monen sekunnin jälkeen (lähetetty kumppanisovelluksena \"timeout\"). Nolla pitää heidät poissa. Oletus: 0.",
+          "notify_channel": "Android kumppanisovelluksen ilmoituskanava tila, live etenemistä, ja muistutus ilmoitukset. Kanavan ääni ja merkitys määritetään kumppanisovelluksessa, kun ensimmäistä kertaa käytetään kanavan nimeä - WashData asettaa vain kanavan nimen. Jätä tyhjäksi sovelluksen oletusarvoon.",
+          "notify_finish_channel": "Erillinen Android-kanava valmiille hälytykselle (käytetään myös muistutuksessa ja pyykkiä odottavassa nalkussa), jotta sillä voi olla oma ääni. Jätä tyhjäksi käyttääksesi kanavaa yllä."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Jos pumppujakso on edelleen käynnissä tämän monen sekunnin jälkeen, ha_washdata_pump_stuck -tapahtuma käynnistyy kerran. Käytä tätä havaitaksesi juuttunut moottori (tyypillinen öljypohjapumpun käynti on alle 60 s). Oletus: 1800 s (30 min). Vain pumppulaitetyyppi."
+            }
+          },
+          "device_link_section": {
+            "name": "Laitelinkki",
+            "description": "Valinnaisesti liitä tämä WashData-laite olemassa olevaan Home Assistant laitteeseen (esimerkiksi älytulppaan tai itse laitteeseen). Tämän jälkeen WashData-laite näytetään \"Connected via\" -laitteena. Jätä tyhjäksi, jotta WashData pysyy erillisenä laitteena.",
+            "data": {
+              "linked_device": "Yhdistetty laite"
+            },
+            "data_description": {
+              "linked_device": "Valitse laite, johon WashData liitetään. Tämä lisää \"Connected via\" -viittauksen laiterekisteriin; WashData säilyttää oman laitekorttinsa ja yksikkönsä. Tyhjennä valinta linkin poistamiseksi."
             }
           }
         }

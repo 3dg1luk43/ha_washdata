@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Virof-Ofschloss Message Format",
           "energy_price_entity": "Energiepräis - Entitéit (optional)",
           "energy_price_static": "Energiepräis - Statesche Wäert (optional)",
-          "go_back": "Zréckgoen ouni ze späicheren"
+          "go_back": "Zréckgoen ouni ze späicheren",
+          "notify_reminder_message": "Erënnerung Message Format",
+          "notify_timeout_seconds": "Auto Entlooss No (Sekonnen)",
+          "notify_channel": "Notifikatiounskanal (Status / Live / Erënnerung)",
+          "notify_finish_channel": "Fäerdeg Notifikatioun Channel"
         },
         "data_description": {
           "go_back": "Hakt dëst un a klickt op Ofschécken, fir all Ännerungen hei uewen ze verwerfen an an den Haaptmenu zréckzegoen.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program}, {energy_kwh}, {cost} Plazhalter.",
           "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter.",
           "energy_price_entity": "Wielt eng numeresch Entitéit déi den aktuellen Stroumpräis hält (zB Sensor.electricity_price, input_number.energy_rate). Wann agestallt, aktivéiert den {cost} Plazhalter. Huelt Virrang iwwer de statesche Wäert wa béid konfiguréiert sinn.",
-          "energy_price_static": "Fixe Stroumpräis pro kWh. Wann agestallt, aktivéiert den {cost} Plazhalter. Ignoréiert wann eng Entitéit uewen konfiguréiert ass. Füügt Äert Währungssymbol an de Message Schabloun, z.B. {cost} €."
+          "energy_price_static": "Fixe Stroumpräis pro kWh. Wann agestallt, aktivéiert den {cost} Plazhalter. Ignoréiert wann eng Entitéit uewen konfiguréiert ass. Füügt Äert Währungssymbol an de Message Schabloun, z.B. {cost} €.",
+          "notify_reminder_message": "Den Text vun der eemoleger Erënnerung huet déi konfiguréiert Zuel vu Minutte virum geschätzte Enn geschéckt. Ënnerscheed vun de widderhuelende Live Updates hei uewen. Ënnerstëtzt {device}, {minutes}, {program} Plazhalter.",
+          "notify_timeout_seconds": "Entlooss automatesch Notifikatiounen no dëse ville Sekonnen (virgeschriwwe wéi d'Begleeder App 'Timeout'). Setzt op 0 fir se ze halen bis se entlooss ginn. Standard: 0.",
+          "notify_channel": "Android Begleeder App Notifikatiounskanal fir Status, Live Fortschrëtter, an Erënnerung Notifikatiounen. Den Sound an d'Wichtegkeet vun engem Kanal sinn an der Begleeder App konfiguréiert déi éischte Kéier de Kanalnumm benotzt gëtt - WashData setzt nëmmen de Kanalnumm. Loosst eidel fir d'App Default.",
+          "notify_finish_channel": "Separat Android Kanal fir de fäerdegen Alarm (och benotzt vun der Erënnerung an der Wäsch-Waart Nag) sou datt et säin eegene Sound kann hunn. Loosst eidel fir de Kanal uewen ze benotzen."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Wann e Pompel Zyklus nach laafen no dëse ville Sekonnen, engem ha_washdata_pump_stuck Event eemol gebrannt. Benotzt dëst fir e verstoppte Motor z'entdecken (typesch Sumppompellaf ass ënner 60 s). Standard: 1800 s (30 min). Pompel Apparat Typ nëmmen."
+            }
+          },
+          "device_link_section": {
+            "name": "Apparat Link",
+            "description": "Optional verbënnt dësen WashData Apparat mat engem existente Home Assistant Apparat (zum Beispill de Smart Plug oder den Apparat selwer). De WashData-Apparat gëtt dann als \"Connected via\" dat Apparat gewisen. Loosst eidel fir WashData als Standalone Apparat ze halen.",
+            "data": {
+              "linked_device": "Verknëppelt Gerät"
+            },
+            "data_description": {
+              "linked_device": "Wielt den Apparat fir WashData ze verbannen. Dëst füügt eng 'Connected via' Referenz an der Apparatregistrierung; WashData hält seng eege Apparat Kaart an Entitéite. D'Auswiel läschen fir de Link ze läschen."
             }
           }
         }

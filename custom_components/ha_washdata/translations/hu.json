@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Kitöltés előtti üzenetformátum",
           "energy_price_entity": "Energiaár – entitás (opcionális)",
           "energy_price_static": "Energiaár – Statikus érték (opcionális)",
-          "go_back": "Vissza mentés nélkül"
+          "go_back": "Vissza mentés nélkül",
+          "notify_reminder_message": "Emlékeztető üzenet formátuma",
+          "notify_timeout_seconds": "Automatikus elvetés után (másodperc)",
+          "notify_channel": "Értesítési csatorna (állapot/élő/emlékeztető)",
+          "notify_finish_channel": "Elkészült az értesítési csatorna"
         },
         "data_description": {
           "go_back": "Jelölje be ezt, majd kattintson a Beküldés gombra, hogy eldobja a fenti módosításokat és visszatérjen a főmenübe.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Üzenet elküldve, amikor egy ciklus véget ért. Támogatja a {device}, {duration}, {program}, {energy_kwh}, {cost} helyőrzőket.",
           "notify_pre_complete_message": "Üzenet elküldve a befejezés előtt. Támogatja a(z) {device}, {minutes} helyőrzőket.",
           "energy_price_entity": "Válasszon egy numerikus entitást, amely tartalmazza az aktuális villamosenergia-árat (pl. sensor.electricity_price, input_number.energy_rate). Ha be van állítva, engedélyezi a(z) {cost} helyőrzőt. Elsőbbséget élvez a statikus értékkel szemben, ha mindkettő be van állítva.",
-          "energy_price_static": "Fix villanyár kWh-nként. Ha be van állítva, engedélyezi a(z) {cost} helyőrzőt. Figyelmen kívül hagyva, ha egy entitás fent van konfigurálva. Adja hozzá a pénznem szimbólumát az üzenetsablonhoz, pl. {cost} €."
+          "energy_price_static": "Fix villanyár kWh-nként. Ha be van állítva, engedélyezi a(z) {cost} helyőrzőt. Figyelmen kívül hagyva, ha egy entitás fent van konfigurálva. Adja hozzá a pénznem szimbólumát az üzenetsablonhoz, pl. {cost} €.",
+          "notify_reminder_message": "Az egyszeri emlékeztető szövege elküldte a beállított számú percet a becsült vége előtt. Különbözik a fenti, ismétlődő élő frissítésektől. Támogatja a {device}, {minutes}, {program} helyőrzőket.",
+          "notify_timeout_seconds": "Az értesítések automatikus elvetése ennyi másodperc után (a kísérőalkalmazás „időtúllépéseként” továbbítása). Állítsa 0-ra, hogy megőrizze őket az elvetésig. Alapértelmezett: 0.",
+          "notify_channel": "Android kísérőalkalmazás-értesítési csatorna az állapotról, az élő folyamatról és az emlékeztetőkről. A csatorna hangja és fontossága a kísérőalkalmazásban állítható be a csatornanév első használatakor – a WashData csak a csatorna nevét állítja be. Hagyja üresen az alkalmazás alapértelmezett beállításához.",
+          "notify_finish_channel": "Külön Android csatorna a kész riasztáshoz (ezt az emlékeztető és a mosásra váró hang is használja), hogy saját hangja legyen. Hagyja üresen a fenti csatorna újrafelhasználásához."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Ha egy szivattyúciklus ennyi másodperc után is fut, a ha_washdata_pump_stuck esemény egyszer aktiválódik. Használja ezt az elakadt motor észlelésére (tipikus olajteknő szivattyú futása 60 s alatt van). Alapértelmezett: 1800 s (30 perc). Csak a szivattyú készülék típusa."
+            }
+          },
+          "device_link_section": {
+            "name": "Eszköz hivatkozás",
+            "description": "Opcionálisan kapcsolja össze ezt a WashData eszközt egy meglévő Home Assistant eszközzel (például az intelligens csatlakozóval vagy magával a készülékkel). Ezután a WashData eszköz „Csatlakozva” az adott eszközön keresztül jelenik meg. Hagyja üresen, hogy a WashData önálló eszköz maradjon.",
+            "data": {
+              "linked_device": "Kapcsolt eszköz"
+            },
+            "data_description": {
+              "linked_device": "Válassza ki azt az eszközt, amelyhez a WashData-t csatlakoztatni szeretné. Ez hozzáad egy „Csatlakozva” hivatkozást az eszköznyilvántartáshoz; A WashData megőrzi saját eszközkártyáját és entitásait. A hivatkozás eltávolításához törölje a kijelölést."
             }
           }
         }

@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format de missatge previ a la finalització",
           "energy_price_entity": "Preu de l'energia - Entitat (opcional)",
           "energy_price_static": "Preu de l'energia: valor estàtic (opcional)",
-          "go_back": "Torna enrere sense desar"
+          "go_back": "Torna enrere sense desar",
+          "notify_reminder_message": "Format de missatge de recordatori",
+          "notify_timeout_seconds": "Auto-ismes després (segons)",
+          "notify_channel": "Canal de notificació (estat/ viu/reminder)",
+          "notify_finish_channel": "Canal de notificació finalitzada"
         },
         "data_description": {
           "go_back": "Marqueu això i feu clic a Envia per descartar qualsevol canvi anterior i tornar al menú principal.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició.",
           "energy_price_entity": "Seleccioneu una entitat numèrica que contingui el preu actual de l'electricitat (p. ex., sensor.electricity_price, input_number.energy_rate). Quan s'estableix, activa el marcador de posició {cost}. Té prioritat sobre el valor estàtic si tots dos estan configurats.",
-          "energy_price_static": "Preu fix de l'electricitat per kWh. Quan s'estableix, activa el marcador de posició {cost}. S'ignora si una entitat està configurada més amunt. Afegiu el vostre símbol de moneda a la plantilla del missatge, p. ex. {cost} €."
+          "energy_price_static": "Preu fix de l'electricitat per kWh. Quan s'estableix, activa el marcador de posició {cost}. S'ignora si una entitat està configurada més amunt. Afegiu el vostre símbol de moneda a la plantilla del missatge, p. ex. {cost} €.",
+          "notify_reminder_message": "Text del recordatori d' una vegada enviat el nombre de minuts configurats abans del final estimat. Discinta des de les actualitzacions de la vida recurrent a dalt. Implementació {device}, {minutes}, variable {program}.",
+          "notify_timeout_seconds": "Mostra automàticament les notificacions després d' aquests molts segons (reprodueix- les com a 'timeout' del company). Posa a 0 per a mantenir-los fins que es desconnectin. Omissió: 0.",
+          "notify_channel": "Canal de notificació Android per a l' estat, progrés i notificacions de recordatori. El so i la importància d' un canal estan configurats en l' aplicació del company la primera vegada que s' usa el nom del canal - RenshData només estableix el nom del canal. Deixa buit per omissió l' aplicació.",
+          "notify_finish_channel": "Separa el canal Android per a l' alerta finalitzada (també usat pel recordatori i l' expulsió de la roba) per tal que pugui tenir el seu propi so. Deixa buit per a tornar a utilitzar el canal de dalt."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Si un cicle de bomba encara s'està executant després d'aquests segons, s'activa un esdeveniment ha_washdata_pump_stuck. Utilitzeu-ho per detectar un motor encallat (el funcionament típic de la bomba de carter és inferior a 60 s). Per defecte: 1800 s (30 min). Només tipus de dispositiu de bomba."
+            }
+          },
+          "device_link_section": {
+            "name": "Enllaç de dispositiu",
+            "description": "Enllaç opcional aquest dispositiu RenshData a un dispositiu Home Assistant existent (per exemple el connector intel· ligent o el mateix aparell). El dispositiu RenshData es mostra llavors com \"Connectat via\" aquest dispositiu. Deixa buit per mantenir RenshData com a un dispositiu independent.",
+            "data": {
+              "linked_device": "Dispositiu enllaçat"
+            },
+            "data_description": {
+              "linked_device": "Seleccioneu el dispositiu a on connectar RenshData. Això afegeix una 'Connectada via' referència al registre del dispositiu; RenshData manté la seva pròpia targeta de dispositiu i entitats. Neteja la selecció per eliminar l' enllaç."
             }
           }
         }

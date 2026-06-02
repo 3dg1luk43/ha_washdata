@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Formato da mensagem pré-conclusão",
           "energy_price_entity": "Preço da Energia - Entidade (opcional)",
           "energy_price_static": "Preço da Energia - Valor estático (opcional)",
-          "go_back": "Voltar sem guardar"
+          "go_back": "Voltar sem guardar",
+          "notify_reminder_message": "Formato de mensagem de lembrete",
+          "notify_timeout_seconds": "Dispensar automaticamente após (segundos)",
+          "notify_channel": "Canal de notificação (status/ao vivo/lembrete)",
+          "notify_finish_channel": "Canal de Notificação Concluído"
         },
         "data_description": {
           "go_back": "Assinale esta opção e clique em Submeter para descartar quaisquer alterações acima e voltar ao menu principal.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Mensagem enviada quando um ciclo termina. Suporta os marcadores de posição {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Mensagem enviada antes da conclusão. Suporta os marcadores de posição {device}, {minutes}.",
           "energy_price_entity": "Selecione uma entidade numérica que contenha o preço atual da eletricidade (por exemplo, sensor.electricity_price, input_number.energy_rate). Quando definido, ativa o espaço reservado {cost}. Tem precedência sobre o valor estático se ambos estiverem configurados.",
-          "energy_price_static": "Preço fixo da eletricidade por kWh. Quando definido, ativa o espaço reservado {cost}. Ignorado se uma entidade estiver configurada acima. Adicione o símbolo da sua moeda no modelo de mensagem, por exemplo. {cost} €."
+          "energy_price_static": "Preço fixo da eletricidade por kWh. Quando definido, ativa o espaço reservado {cost}. Ignorado se uma entidade estiver configurada acima. Adicione o símbolo da sua moeda no modelo de mensagem, por exemplo. {cost} €.",
+          "notify_reminder_message": "O texto do lembrete único enviou o número configurado de minutos antes do término estimado. Diferente das atualizações ao vivo recorrentes acima. Suporta marcadores de posição {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Ignore automaticamente as notificações após esses segundos (encaminhadas como 'tempo limite' do aplicativo complementar). Defina como 0 para mantê-los até serem descartados. Padrão: 0.",
+          "notify_channel": "Android canal de notificação de aplicativo complementar para notificações de status, progresso ao vivo e lembretes. O som e a importância de um canal são configurados no aplicativo complementar na primeira vez que o nome do canal é usado - WashData define apenas o nome do canal. Deixe em branco para o padrão do aplicativo.",
+          "notify_finish_channel": "Canal Android separado para o alerta finalizado (também usado pelo lembrete e pelo chato de espera da lavanderia) para que ele possa ter seu próprio som. Deixe em branco para reutilizar o canal acima."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Se um ciclo de bomba ainda estiver em execução após esses segundos, um evento ha_washdata_pump_stuck será acionado uma vez. Use isto para detectar um motor emperrado (o funcionamento típico da bomba do reservatório é inferior a 60 s). Padrão: 1800 s (30 min). Apenas tipo de dispositivo de bomba."
+            }
+          },
+          "device_link_section": {
+            "name": "Link do dispositivo",
+            "description": "Opcionalmente, vincule este dispositivo WashData a um dispositivo Home Assistant existente (por exemplo, o plugue inteligente ou o próprio aparelho). O dispositivo WashData é então mostrado como \"Conectado através\" desse dispositivo. Deixe em branco para manter o WashData como um dispositivo independente.",
+            "data": {
+              "linked_device": "Dispositivo vinculado"
+            },
+            "data_description": {
+              "linked_device": "Selecione o dispositivo ao qual conectar o WashData. Isso adiciona uma referência 'Conectado via' no registro do dispositivo; WashData mantém seu próprio cartão de dispositivo e entidades. Limpe a seleção para remover o link."
             }
           }
         }

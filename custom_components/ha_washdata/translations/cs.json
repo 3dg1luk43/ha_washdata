@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Formát zprávy před dokončením",
           "energy_price_entity": "Cena energie – entita (volitelné)",
           "energy_price_static": "Cena energie – statická hodnota (volitelné)",
-          "go_back": "Vrátit se bez uložení"
+          "go_back": "Vrátit se bez uložení",
+          "notify_reminder_message": "Name",
+          "notify_timeout_seconds": "Automatické propouštění po (sekundách)",
+          "notify_channel": "Kanál oznámení (stav / live / upomínka)",
+          "notify_finish_channel": "Dokončené oznámení kanál"
         },
         "data_description": {
           "go_back": "Zaškrtněte tuto možnost a kliknutím na Odeslat zahodíte všechny výše uvedené změny a vrátíte se do hlavní nabídky.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Zpráva odeslána před dokončením. Podporuje zástupné symboly {device}, {minutes}.",
           "energy_price_entity": "Vyberte číselnou entitu, která obsahuje aktuální cenu elektřiny (např. sensor.electricity_price, input_number.energy_rate). Je-li nastaven, aktivuje zástupný symbol {cost}. Pokud jsou obě nakonfigurovány, má přednost před statickou hodnotou.",
-          "energy_price_static": "Pevná cena elektřiny za kWh. Je-li nastaven, aktivuje zástupný symbol {cost}. Ignorováno, pokud je výše nakonfigurována entita. Přidejte svůj symbol měny do šablony zprávy, např. {cost} €."
+          "energy_price_static": "Pevná cena elektřiny za kWh. Je-li nastaven, aktivuje zástupný symbol {cost}. Ignorováno, pokud je výše nakonfigurována entita. Přidejte svůj symbol měny do šablony zprávy, např. {cost} €.",
+          "notify_reminder_message": "Text jednorázové upomínky odeslal nakonfigurovaný počet minut před odhadovaným koncem. Rozdíl od opakujících se živých aktualizací výše. Podporuje {device}, {minutes}, {program} stojany.",
+          "notify_timeout_seconds": "Automaticky zamítnout oznámení po tolika sekundách (předán jako společník aplikace 'timeout'). Nastavit na0, aby je udrželi, dokud nebudou propuštěni. Výchozí:0.",
+          "notify_channel": "Name Zvuk a význam kanálu jsou nakonfigurovány ve společné aplikaci při prvním použití názvu kanálu - WashData pouze nastavuje název kanálu. Zanechat prázdné pro výchozí aplikaci.",
+          "notify_finish_channel": "Samostatný Android kanál pro dokončený poplach (také používán upomínkou a laundry-waiting nag), takže může mít svůj vlastní zvuk. Nechte prázdné pro opětovné použití výše uvedeného kanálu."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Pokud cyklus pumpy stále běží i po tomto počtu sekund, událost ha_washdata_pump_stuck se spustí jednou. Použijte toto k detekci zaseknutého motoru (typický běh kalového čerpadla je kratší než 60 s). Výchozí: 1800 s (30 min). Pouze typ čerpadla."
+            }
+          },
+          "device_link_section": {
+            "name": "Odkaz na zařízení",
+            "description": "Volitelně připojte toto zařízení Washington Data k existujícímu zařízení Home Assistant (např. inteligentní zástrčka nebo samotný spotřebič). Zařízení Washington Data je pak zobrazeno jako \"Připojeno přes\" toto zařízení. Nechte prázdné, aby se Washington Data jako samostatné zařízení.",
+            "data": {
+              "linked_device": "Spojené zařízení"
+            },
+            "data_description": {
+              "linked_device": "Zvolte zařízení, ke kterému můžete připojit WashData. To přidává odkaz na \"Připojeno přes\" v registru zařízení; Washington Data si nechává svou vlastní kartu zařízení a subjekty. Vymazat výběr odstranit odkaz."
             }
           }
         }

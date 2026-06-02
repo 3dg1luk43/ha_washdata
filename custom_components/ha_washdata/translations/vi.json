@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Định dạng tin nhắn trước khi hoàn thành",
           "energy_price_entity": "Giá năng lượng - Thực thể (tùy chọn)",
           "energy_price_static": "Giá năng lượng - Giá trị tĩnh (tùy chọn)",
-          "go_back": "Quay lại mà không lưu"
+          "go_back": "Quay lại mà không lưu",
+          "notify_reminder_message": "Định dạng tin nhắn nhắc nhở",
+          "notify_timeout_seconds": "Tự động loại bỏ sau (giây)",
+          "notify_channel": "Kênh thông báo (trạng thái/trực tiếp/nhắc nhở)",
+          "notify_finish_channel": "Kênh thông báo đã hoàn thành"
         },
         "data_description": {
           "go_back": "Chọn mục này rồi nhấp Gửi để bỏ mọi thay đổi ở trên và quay lại menu chính.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}.",
           "energy_price_entity": "Chọn một thực thể số chứa giá điện hiện tại (ví dụ: cảm biến.điện_price, input_number.energy_rate). Khi được đặt, hãy bật trình giữ chỗ {cost}. Được ưu tiên hơn giá trị tĩnh nếu cả hai đều được cấu hình.",
-          "energy_price_static": "Giá điện cố định trên mỗi kWh. Khi được đặt, hãy bật trình giữ chỗ {cost}. Bị bỏ qua nếu một thực thể được định cấu hình ở trên. Thêm ký hiệu tiền tệ của bạn vào mẫu tin nhắn, ví dụ: {cost} €."
+          "energy_price_static": "Giá điện cố định trên mỗi kWh. Khi được đặt, hãy bật trình giữ chỗ {cost}. Bị bỏ qua nếu một thực thể được định cấu hình ở trên. Thêm ký hiệu tiền tệ của bạn vào mẫu tin nhắn, ví dụ: {cost} €.",
+          "notify_reminder_message": "Văn bản của lời nhắc một lần đã gửi số phút đã định cấu hình trước khi kết thúc dự kiến. Khác biệt với các cập nhật trực tiếp định kỳ ở trên. Hỗ trợ các phần giữ chỗ {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Tự động loại bỏ thông báo sau nhiều giây này (được chuyển tiếp dưới dạng 'hết thời gian chờ' của ứng dụng đồng hành). Đặt thành 0 để giữ chúng cho đến khi bị loại bỏ. Mặc định: 0.",
+          "notify_channel": "Android kênh thông báo ứng dụng đồng hành để biết trạng thái, tiến trình trực tiếp và thông báo lời nhắc. Âm thanh và tầm quan trọng của kênh được định cấu hình trong ứng dụng đồng hành khi sử dụng tên kênh lần đầu tiên - WashData chỉ đặt tên kênh. Để trống cho mặc định của ứng dụng.",
+          "notify_finish_channel": "Tách kênh Android cho cảnh báo kết thúc (cũng được sử dụng bởi lời nhắc và lời cằn nhằn khi chờ giặt) để kênh có thể có âm thanh riêng. Để trống để sử dụng lại kênh ở trên."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Nếu chu trình bơm vẫn chạy sau nhiều giây này, sự kiện ha_washdata_pump_stuck sẽ được kích hoạt một lần. Sử dụng tính năng này để phát hiện động cơ bị kẹt (thời gian chạy máy bơm bể phốt thông thường là dưới 60 giây). Mặc định: 1800 giây (30 phút). Chỉ loại thiết bị bơm."
+            }
+          },
+          "device_link_section": {
+            "name": "Liên kết thiết bị",
+            "description": "Tùy chọn liên kết thiết bị WashData này với thiết bị Home Assistant hiện có (ví dụ: phích cắm thông minh hoặc chính thiết bị đó). Sau đó, thiết bị WashData được hiển thị là \"Đã kết nối qua\" thiết bị đó. Để trống để giữ WashData làm thiết bị độc lập.",
+            "data": {
+              "linked_device": "Thiết bị được liên kết"
+            },
+            "data_description": {
+              "linked_device": "Chọn thiết bị để kết nối WashData. Điều này thêm tham chiếu 'Đã kết nối qua' trong sổ đăng ký thiết bị; WashData giữ thẻ thiết bị và các thực thể của riêng mình. Xóa lựa chọn để loại bỏ liên kết."
             }
           }
         }

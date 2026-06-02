@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Meddelandeformat för förhandsavisering",
           "energy_price_entity": "Energipris – enhet (valfritt)",
           "energy_price_static": "Energipris – statiskt värde (valfritt)",
-          "go_back": "Gå tillbaka utan att spara"
+          "go_back": "Gå tillbaka utan att spara",
+          "notify_reminder_message": "Format för påminnelsemeddelande",
+          "notify_timeout_seconds": "Stäng automatiskt efter (sekunder)",
+          "notify_channel": "Aviseringskanal (status/live/påminnelse)",
+          "notify_finish_channel": "Avslutad aviseringskanal"
         },
         "data_description": {
           "go_back": "Markera detta och klicka på Skicka för att kasta ändringarna ovan och återgå till huvudmenyn.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Meddelande som skickas när en cykel är klar. Stöder platshållarna {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Meddelande som skickas innan slutförandet. Stöder platshållarna {device}, {minutes}.",
           "energy_price_entity": "Välj en numerisk enhet som har det aktuella elpriset (t.ex. sensor.elpris, input_number.energy_rate). När den är inställd aktiveras platshållaren {cost}. Har företräde framför det statiska värdet om båda är konfigurerade.",
-          "energy_price_static": "Fast elpris per kWh. När den är inställd aktiveras platshållaren {cost}. Ignoreras om en enhet är konfigurerad ovan. Lägg till din valutasymbol i meddelandemallen, t.ex. {cost} €."
+          "energy_price_static": "Fast elpris per kWh. När den är inställd aktiveras platshållaren {cost}. Ignoreras om en enhet är konfigurerad ovan. Lägg till din valutasymbol i meddelandemallen, t.ex. {cost} €.",
+          "notify_reminder_message": "Texten till engångspåminnelsen skickade det konfigurerade antalet minuter före det beräknade slutet. Till skillnad från de återkommande liveuppdateringarna ovan. Stöder {device}, {minutes}, {program} platshållare.",
+          "notify_timeout_seconds": "Avvisa automatiskt aviseringar efter så här många sekunder (vidarebefordras som \"timeout\") för den kompletterande appen. Ställ in på 0 för att behålla dem tills de tas bort. Standard: 0.",
+          "notify_channel": "Android aviseringskanal för medföljande appar för status, liveframsteg och påminnelser. Ljudet och betydelsen av en kanal konfigureras i den medföljande appen första gången kanalnamnet används - WashData ställer bara in kanalnamnet. Lämna tomt för appens standard.",
+          "notify_finish_channel": "Separat Android-kanal för den färdiga aviseringen (används även av påminnelsen och tjatet som väntar på tvätten) så att den kan få sitt eget ljud. Lämna tomt för att återanvända kanalen ovan."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Om en pumpcykel fortfarande körs efter så här många sekunder, utlöses en ha_washdata_pump_stuck-händelse en gång. Använd denna för att upptäcka en motor som har fastnat (typisk drift av sumppumpen är under 60 s). Standard: 1800 s (30 min). Endast pumpenhetstyp."
+            }
+          },
+          "device_link_section": {
+            "name": "Enhetslänk",
+            "description": "Länka eventuellt den här WashData-enheten till en befintlig Home Assistant-enhet (till exempel den smarta kontakten eller själva apparaten). WashData-enheten visas sedan som \"Ansluten via\" den enheten. Lämna tomt för att behålla WashData som en fristående enhet.",
+            "data": {
+              "linked_device": "Länkad enhet"
+            },
+            "data_description": {
+              "linked_device": "Välj enheten att ansluta WashData till. Detta lägger till en \"Ansluten via\"-referens i enhetsregistret; WashData behåller sitt eget enhetskort och entiteter. Rensa markeringen för att ta bort länken."
             }
           }
         }

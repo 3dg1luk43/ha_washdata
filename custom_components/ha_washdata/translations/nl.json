@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Berichtopmaak vóór voltooiing",
           "energy_price_entity": "Energieprijs - Entiteit (optioneel)",
           "energy_price_static": "Energieprijs - Statische waarde (optioneel)",
-          "go_back": "Terug zonder op te slaan"
+          "go_back": "Terug zonder op te slaan",
+          "notify_reminder_message": "Herinneringsberichtformaat",
+          "notify_timeout_seconds": "Automatisch sluiten na (seconden)",
+          "notify_channel": "Meldingskanaal (status/live/herinnering)",
+          "notify_finish_channel": "Meldingskanaal voltooid"
         },
         "data_description": {
           "go_back": "Vink dit aan en klik op Verzenden om bovenstaande wijzigingen te verwerpen en terug te keren naar het hoofdmenu.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Bericht verzonden wanneer een cyclus is voltooid. Ondersteunt de tijdelijke aanduidingen {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Bericht verzonden vóór voltooiing. Ondersteunt de tijdelijke aanduidingen {device}, {minutes}.",
           "energy_price_entity": "Selecteer een numerieke entiteit die de huidige elektriciteitsprijs bevat (bijvoorbeeld sensor.elektriciteitsprijs, invoernummer.energietarief). Indien ingesteld, wordt de tijdelijke aanduiding {cost} ingeschakeld. Heeft voorrang op de statische waarde als beide zijn geconfigureerd.",
-          "energy_price_static": "Vaste elektriciteitsprijs per kWh. Indien ingesteld, wordt de tijdelijke aanduiding {cost} ingeschakeld. Genegeerd als hierboven een entiteit is geconfigureerd. Voeg uw valutasymbool toe aan de berichtsjabloon, b.v. {cost} €."
+          "energy_price_static": "Vaste elektriciteitsprijs per kWh. Indien ingesteld, wordt de tijdelijke aanduiding {cost} ingeschakeld. Genegeerd als hierboven een entiteit is geconfigureerd. Voeg uw valutasymbool toe aan de berichtsjabloon, b.v. {cost} €.",
+          "notify_reminder_message": "De tekst van de eenmalige herinnering verzendt het geconfigureerde aantal minuten vóór het geschatte einde. Anders dan de terugkerende live-updates hierboven. Ondersteunt tijdelijke aanduidingen voor {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Meldingen na dit aantal seconden automatisch negeren (doorgestuurd als 'time-out' van de bijbehorende app). Stel deze in op 0 om ze te behouden totdat ze worden verwijderd. Standaard: 0.",
+          "notify_channel": "Android meldingskanaal voor de begeleidende app voor status, live voortgang en herinneringsmeldingen. Het geluid en het belang van een kanaal worden geconfigureerd in de bijbehorende app wanneer de kanaalnaam voor het eerst wordt gebruikt - WashData stelt alleen de kanaalnaam in. Laat leeg voor de app-standaard.",
+          "notify_finish_channel": "Apart kanaal Android voor de klaar-waarschuwing (wordt ook gebruikt door de herinnering en het was-wacht-gezeur) zodat het een eigen geluid kan hebben. Laat leeg om het bovenstaande kanaal opnieuw te gebruiken."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Als een pompcyclus na dit aantal seconden nog steeds actief is, wordt er één keer een ha_washdata_pump_stuck-gebeurtenis geactiveerd. Gebruik dit om een ​​vastgelopen motor te detecteren (de typische pomplooptijd van de pomp bedraagt ​​minder dan 60 s). Standaard: 1800 s (30 min). Alleen type pompapparaat."
+            }
+          },
+          "device_link_section": {
+            "name": "Apparaatkoppeling",
+            "description": "Koppel dit WashData-apparaat optioneel aan een bestaand Home Assistant-apparaat (bijvoorbeeld de slimme stekker of het apparaat zelf). Het WashData-apparaat wordt dan weergegeven als \"Verbonden via\" dat apparaat. Laat dit leeg om WashData als zelfstandig apparaat te behouden.",
+            "data": {
+              "linked_device": "Gekoppeld apparaat"
+            },
+            "data_description": {
+              "linked_device": "Selecteer het apparaat waarmee u WashData wilt verbinden. Dit voegt een 'Verbonden via'-referentie toe in het apparaatregister; WashData behoudt zijn eigen apparaatkaart en entiteiten. Wis de selectie om de link te verwijderen."
             }
           }
         }

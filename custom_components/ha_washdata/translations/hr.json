@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format poruke prije završetka",
           "energy_price_entity": "Cijena energije - entitet (nije obavezno)",
           "energy_price_static": "Cijena energije - statička vrijednost (izborno)",
-          "go_back": "Vrati se bez spremanja"
+          "go_back": "Vrati se bez spremanja",
+          "notify_reminder_message": "Format poruke podsjetnika",
+          "notify_timeout_seconds": "Automatski odbaci nakon (sekundi)",
+          "notify_channel": "Kanal obavijesti (status/uživo/podsjetnik)",
+          "notify_finish_channel": "Završen kanal obavijesti"
         },
         "data_description": {
           "go_back": "Označite ovo i kliknite Pošalji kako biste odbacili sve gore navedene promjene i vratili se na glavni izbornik.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Poruka se šalje kada ciklus završi. Podržava rezervirana mjesta {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} rezervirana mjesta.",
           "energy_price_entity": "Odaberite numerički entitet koji sadrži trenutnu cijenu električne energije (npr. sensor.electricity_price, input_number.energy_rate). Kada je postavljeno, omogućuje rezervirano mjesto {cost}. Ima prednost nad statičkom vrijednošću ako su obje konfigurirane.",
-          "energy_price_static": "Fiksna cijena električne energije po kWh. Kada je postavljeno, omogućuje rezervirano mjesto {cost}. Ignorira se ako je entitet konfiguriran iznad. Dodajte simbol valute u predložak poruke, npr. {cost} €."
+          "energy_price_static": "Fiksna cijena električne energije po kWh. Kada je postavljeno, omogućuje rezervirano mjesto {cost}. Ignorira se ako je entitet konfiguriran iznad. Dodajte simbol valute u predložak poruke, npr. {cost} €.",
+          "notify_reminder_message": "Tekst jednokratnog podsjetnika šalje konfigurirani broj minuta prije procijenjenog završetka. Za razliku od gornjih ponavljajućih ažuriranja uživo. Podržava rezervirana mjesta {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Automatski odbaci obavijesti nakon toliko sekundi (prosljeđuje se kao 'vremensko ograničenje' popratne aplikacije). Postavite na 0 da ih zadržite do odbacivanja. Zadano: 0.",
+          "notify_channel": "Android kanal obavijesti popratne aplikacije za status, napredak uživo i obavijesti podsjetnika. Zvuk i važnost kanala konfiguriraju se u popratnoj aplikaciji prvi put kada se naziv kanala koristi - WashData samo postavlja naziv kanala. Ostavite prazno za zadanu aplikaciju.",
+          "notify_finish_channel": "Odvojite Android kanal za dovršeno upozorenje (također ga koriste podsjetnik i zanovijetanje za pranje rublja) tako da može imati vlastiti zvuk. Ostavite prazno za ponovno korištenje gornjeg kanala."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Ako ciklus pumpanja još uvijek traje nakon toliko sekundi, ha_washdata_pump_stuck događaj se aktivira jednom. Upotrijebite ovo za otkrivanje zaglavljenog motora (uobičajeni rad pumpe je ispod 60 s). Zadano: 1800 s (30 min). Samo tip uređaja pumpe."
+            }
+          },
+          "device_link_section": {
+            "name": "Veza uređaja",
+            "description": "Po želji povežite ovaj WashData uređaj s postojećim Home Assistant uređajem (na primjer pametnim utikačem ili samim uređajem). Uređaj WashData tada se prikazuje kao \"Povezan putem\" tog uređaja. Ostavite prazno kako bi WashData ostao samostalan uređaj.",
+            "data": {
+              "linked_device": "Povezani uređaj"
+            },
+            "data_description": {
+              "linked_device": "Odaberite uređaj s kojim želite povezati WashData. Ovo dodaje referencu 'Povezano putem' u registar uređaja; WashData čuva vlastitu karticu uređaja i entitete. Poništite odabir da biste uklonili vezu."
             }
           }
         }

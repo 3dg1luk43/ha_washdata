@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format Pesan Pra-Penyelesaian",
           "energy_price_entity": "Harga Energi - Entitas (opsional)",
           "energy_price_static": "Harga Energi - Nilai statis (opsional)",
-          "go_back": "Kembali tanpa menyimpan"
+          "go_back": "Kembali tanpa menyimpan",
+          "notify_reminder_message": "Format Pesan Pengingat",
+          "notify_timeout_seconds": "Tutup otomatis Setelah (detik)",
+          "notify_channel": "Saluran Pemberitahuan (status/langsung/pengingat)",
+          "notify_finish_channel": "Saluran Notifikasi Selesai"
         },
         "data_description": {
           "go_back": "Centang ini lalu klik Kirim untuk membuang perubahan apa pun di atas dan kembali ke menu utama.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Pesan dikirim ketika siklus selesai. Mendukung placeholder {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Pesan dikirim sebelum selesai. Mendukung {device}, {minutes} placeholder.",
           "energy_price_entity": "Pilih entitas numerik yang menyimpan harga listrik saat ini (misalnya sensor.electricity_price, input_number.energy_rate). Jika disetel, aktifkan placeholder {cost}. Diutamakan daripada nilai statis jika keduanya dikonfigurasi.",
-          "energy_price_static": "Harga listrik tetap per kWh. Jika disetel, aktifkan placeholder {cost}. Diabaikan jika entitas dikonfigurasi di atas. Tambahkan simbol mata uang Anda di templat pesan, mis. {cost}€."
+          "energy_price_static": "Harga listrik tetap per kWh. Jika disetel, aktifkan placeholder {cost}. Diabaikan jika entitas dikonfigurasi di atas. Tambahkan simbol mata uang Anda di templat pesan, mis. {cost}€.",
+          "notify_reminder_message": "Teks pengingat satu kali mengirimkan jumlah menit yang dikonfigurasi sebelum perkiraan akhir. Berbeda dengan live update berulang di atas. Mendukung placeholder {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Secara otomatis menutup notifikasi setelah beberapa detik ini (diteruskan sebagai 'batas waktu' aplikasi pendamping). Setel ke 0 untuk menyimpannya hingga ditutup. Bawaan: 0.",
+          "notify_channel": "Android saluran notifikasi aplikasi pendamping untuk status, kemajuan langsung, dan notifikasi pengingat. Suara dan pentingnya saluran dikonfigurasikan di aplikasi pendamping saat pertama kali nama saluran digunakan - WashData hanya menetapkan nama saluran. Biarkan kosong untuk default aplikasi.",
+          "notify_finish_channel": "Pisahkan saluran Android untuk peringatan yang sudah selesai (juga digunakan oleh pengingat dan cerewet menunggu cucian) sehingga dapat mempunyai bunyi sendiri. Biarkan kosong untuk menggunakan kembali saluran di atas."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Jika siklus pompa masih berjalan setelah beberapa detik ini, kejadian ha_washdata_pump_stuck dipicu satu kali. Gunakan ini untuk mendeteksi motor yang macet (umumnya pompa air bekerja di bawah 60 detik). Default: 1800 detik (30 menit). Hanya jenis perangkat pompa."
+            }
+          },
+          "device_link_section": {
+            "name": "Tautan Perangkat",
+            "description": "Secara opsional, tautkan perangkat WashData ini ke perangkat Home Assistant yang ada (misalnya smart plug atau peralatan itu sendiri). Perangkat WashData kemudian ditampilkan sebagai \"Terhubung melalui\" perangkat itu. Biarkan kosong untuk menjaga WashData sebagai perangkat mandiri.",
+            "data": {
+              "linked_device": "Perangkat Tertaut"
+            },
+            "data_description": {
+              "linked_device": "Pilih perangkat untuk menghubungkan WashData. Ini menambahkan referensi 'Terhubung melalui' di registri perangkat; WashData menyimpan kartu perangkat dan entitasnya sendiri. Hapus pilihan untuk menghapus tautan."
             }
           }
         }

@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "완료 전 메시지 형식",
           "energy_price_entity": "에너지 가격 - 엔터티(선택 사항)",
           "energy_price_static": "에너지 가격 - 정적 가치(선택 사항)",
-          "go_back": "저장하지 않고 돌아가기"
+          "go_back": "저장하지 않고 돌아가기",
+          "notify_reminder_message": "알림 메시지 형식",
+          "notify_timeout_seconds": "다음 시간 이후 자동 종료(초)",
+          "notify_channel": "알림 채널(상태/실시간/알림)",
+          "notify_finish_channel": "완료된 알림 채널"
         },
         "data_description": {
           "go_back": "위의 변경 사항을 모두 버리고 메인 메뉴로 돌아가려면 이 항목을 체크한 뒤 제출을 클릭하세요.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "사이클이 완료될 때 전송되는 메시지입니다. {device}, {duration}, {program}, {energy_kwh}, {cost} 자리 표시자를 지원합니다.",
           "notify_pre_complete_message": "완료 전에 전송되는 메시지입니다. {device}, {minutes} 자리 표시자를 지원합니다.",
           "energy_price_entity": "현재 전기 가격을 보유하는 숫자 엔터티를 선택합니다(예: sensor.electricity_price, input_number.energy_rate). 설정되면 {cost} 자리 표시자를 활성화합니다. 둘 다 구성된 경우 정적 값보다 우선합니다.",
-          "energy_price_static": "kWh당 전기요금이 고정되어 있습니다. 설정되면 {cost} 자리 표시자를 활성화합니다. 위에서 엔터티가 구성된 경우 무시됩니다. 메시지 템플릿에 통화 기호를 추가하세요. {cost} €."
+          "energy_price_static": "kWh당 전기요금이 고정되어 있습니다. 설정되면 {cost} 자리 표시자를 활성화합니다. 위에서 엔터티가 구성된 경우 무시됩니다. 메시지 템플릿에 통화 기호를 추가하세요. {cost} €.",
+          "notify_reminder_message": "일회성 알림 텍스트는 예상 종료 시간 이전에 구성된 시간(분)을 보냈습니다. 위의 반복되는 실시간 업데이트와 다릅니다. {device}, {minutes}, {program} 자리표시자를 지원합니다.",
+          "notify_timeout_seconds": "이 몇 초 후에 알림을 자동으로 해제합니다(컴패니언 앱 '시간 초과'로 전달됨). 해제될 때까지 유지하려면 0으로 설정합니다. 기본값: 0.",
+          "notify_channel": "상태, 실시간 진행 상황 및 알림 알림을 위한 Android 컴패니언 앱 알림 채널입니다. 채널의 사운드와 중요성은 채널 이름이 처음 사용될 때 동반 앱에서 구성됩니다. WashData는 채널 이름만 설정합니다. 앱 기본값은 비워 두세요.",
+          "notify_finish_channel": "완료 알림을 위한 별도의 Android 채널(알림 및 세탁 대기 잔소리에도 사용됨)이 자체 사운드를 가질 수 있도록 합니다. 위 채널을 재사용하려면 비워두세요."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "이 시간이 지난 후에도 펌프 사이클이 계속 실행 중인 경우 ha_washdata_pump_stuck 이벤트가 한 번 실행됩니다. 이를 사용하여 걸린 모터를 감지합니다(일반적인 배수 펌프 작동 시간은 60초 미만입니다). 기본값: 1800초(30분) 펌프 장치 유형만 해당."
+            }
+          },
+          "device_link_section": {
+            "name": "장치 링크",
+            "description": "선택적으로 이 WashData 장치를 기존 Home Assistant 장치(예: 스마트 플러그 또는 기기 자체)에 연결합니다. 그러면 WashData 장치가 해당 장치를 통해 \"연결됨\"으로 표시됩니다. WashData를 독립형 장치로 유지하려면 비워 두세요.",
+            "data": {
+              "linked_device": "연결된 장치"
+            },
+            "data_description": {
+              "linked_device": "WashData를 연결할 장치를 선택하세요. 이렇게 하면 장치 레지스트리에 'Connected via' 참조가 추가됩니다. WashData는 자체 장치 카드와 엔터티를 유지합니다. 링크를 제거하려면 선택을 취소하세요."
             }
           }
         }

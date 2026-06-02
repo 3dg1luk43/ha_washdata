@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format mesaj pre-finalizare",
           "energy_price_entity": "Prețul energiei - Entitate (opțional)",
           "energy_price_static": "Prețul energiei - Valoare statică (opțional)",
-          "go_back": "Reveniți fără salvare"
+          "go_back": "Reveniți fără salvare",
+          "notify_reminder_message": "Format mesaj de memento",
+          "notify_timeout_seconds": "Închidere automată după (secunde)",
+          "notify_channel": "Canal de notificare (stare/live/memento)",
+          "notify_finish_channel": "Canal de notificare terminat"
         },
         "data_description": {
           "go_back": "Bifați aceasta și faceți clic pe Trimitere pentru a renunța la orice modificări de mai sus și a reveni la meniul principal.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Mesaj trimis când un ciclu se termină. Acceptă substituenții {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Mesaj trimis înainte de finalizare. Acceptă substituenții {device}, {minutes}.",
           "energy_price_entity": "Selectați o entitate numerică care deține prețul curent al energiei electrice (de exemplu, senzor.electricity_price, input_number.energy_rate). Când este setat, activează substituentul {cost}. Are prioritate față de valoarea statică dacă ambele sunt configurate.",
-          "energy_price_static": "Preț fix al energiei electrice pe kWh. Când este setat, activează substituentul {cost}. Ignorat dacă o entitate este configurată mai sus. Adăugați simbolul valutar în șablonul de mesaj, de ex. {cost} €."
+          "energy_price_static": "Preț fix al energiei electrice pe kWh. Când este setat, activează substituentul {cost}. Ignorat dacă o entitate este configurată mai sus. Adăugați simbolul valutar în șablonul de mesaj, de ex. {cost} €.",
+          "notify_reminder_message": "Textul mementoului unic a trimis numărul configurat de minute înainte de sfârșitul estimat. Diferit de actualizările live recurente de mai sus. Acceptă substituenți {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Închideți automat notificările după atâtea secunde (redirecționate ca „timeout” pentru aplicația însoțitoare). Setați la 0 pentru a le păstra până la respingere. Implicit: 0.",
+          "notify_channel": "Android canal de notificare al aplicației însoțitoare pentru notificări privind starea, progresul live și notificările de memento. Sunetul și importanța unui canal sunt configurate în aplicația însoțitoare prima dată când numele canalului este utilizat - WashData setează doar numele canalului. Lăsați necompletat pentru aplicația implicită.",
+          "notify_finish_channel": "Separați canalul Android pentru alerta finală (utilizată și de memento și de mesajul de așteptare a rufelor), astfel încât să poată avea propriul sunet. Lăsați gol pentru a reutiliza canalul de mai sus."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Dacă un ciclu de pompă continuă să ruleze după atâtea secunde, un eveniment ha_washdata_pump_stuck este declanșat o dată. Utilizați acest lucru pentru a detecta un motor blocat (funcționarea tipică a pompei de carter este sub 60 s). Implicit: 1800 s (30 min). Numai tipul dispozitivului de pompare."
+            }
+          },
+          "device_link_section": {
+            "name": "Device Link",
+            "description": "Opțional, conectați acest dispozitiv WashData la un dispozitiv Home Assistant existent (de exemplu, priza inteligentă sau aparatul în sine). Dispozitivul WashData este apoi afișat ca „Conectat prin” dispozitivul respectiv. Lăsați gol pentru a păstra WashData ca dispozitiv autonom.",
+            "data": {
+              "linked_device": "Dispozitiv conectat"
+            },
+            "data_description": {
+              "linked_device": "Selectați dispozitivul la care să vă conectați WashData. Aceasta adaugă o referință „Conectat prin” în registrul dispozitivului; WashData își păstrează propriul card de dispozitiv și entități. Ștergeți selecția pentru a elimina legătura."
             }
           }
         }

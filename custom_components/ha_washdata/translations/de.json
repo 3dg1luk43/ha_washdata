@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format für Hinweis-Benachrichtigung",
           "energy_price_entity": "Energiepreis – Entität (optional)",
           "energy_price_static": "Energiepreis – Statischer Wert (optional)",
-          "go_back": "Ohne Speichern zurückgehen"
+          "go_back": "Ohne Speichern zurückgehen",
+          "notify_reminder_message": "Reminder-Nachrichtenformat",
+          "notify_timeout_seconds": "Auto-Demiss Nach (Sekunden)",
+          "notify_channel": "Benachrichtigungskanal (Status/Live/Erinnerung)",
+          "notify_finish_channel": "Fertiger Notifizierungskanal"
         },
         "data_description": {
           "go_back": "Aktivieren Sie dies und klicken Sie auf Senden, um alle obigen Änderungen zu verwerfen und zum Hauptmenü zurückzukehren.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Nachricht wird gesendet, wenn ein Zyklus beendet ist. Unterstützt die Platzhalter {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Nachricht wird einige Minuten vor Abschluss gesendet. Unterstützt die Platzhalter {device}, {minutes}.",
           "energy_price_entity": "Wählen Sie eine numerische Entität aus, die den aktuellen Strompreis enthält (z. B. sensor.electricity_price, input_number.energy_rate). Wenn festgelegt, wird der Platzhalter {cost} aktiviert. Hat Vorrang vor dem statischen Wert, wenn beide konfiguriert sind.",
-          "energy_price_static": "Fester Strompreis pro kWh. Wenn festgelegt, wird der Platzhalter {cost} aktiviert. Wird ignoriert, wenn oben eine Entität konfiguriert ist. Fügen Sie Ihr Währungssymbol in die Nachrichtenvorlage ein, z. B. {cost} €."
+          "energy_price_static": "Fester Strompreis pro kWh. Wenn festgelegt, wird der Platzhalter {cost} aktiviert. Wird ignoriert, wenn oben eine Entität konfiguriert ist. Fügen Sie Ihr Währungssymbol in die Nachrichtenvorlage ein, z. B. {cost} €.",
+          "notify_reminder_message": "Text der einmaligen Erinnerung schickte die konfigurierte Anzahl von Minuten vor dem geschätzten Ende. Unterscheiden Sie sich von den wiederkehrenden Live-Updates oben. Unterstützt {device}, {minutes}, {program} Platzhalter.",
+          "notify_timeout_seconds": "Automatische Kündigung von Benachrichtigungen nach diesen vielen Sekunden (vorüberwiesen als die Begleit-App 'Timeout'). Setzen Sie auf 0, um sie bis zur Entlassung zu halten. Standard: 0.",
+          "notify_channel": "Android Begleit-App-Benachrichtigungskanal für Status, Live-Fortschritt und Erinnerungs-Benachrichtigungen. Der Klang und die Bedeutung eines Kanals werden in der Begleit-App zum ersten Mal konfiguriert, wenn der Kanalname verwendet wird - WashData setzt nur den Kanalnamen. Lassen Sie für den App-Standard leer.",
+          "notify_finish_channel": "Separater Android-Kanal für den fertigen Alarm (auch von der Erinnerung und der Wäsche-Warte-Nag) so kann es seinen eigenen Klang haben. Lassen Sie leer, um den Kanal oben wieder zu verwenden."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Wenn nach dieser Anzahl von Sekunden immer noch ein Pumpenzyklus läuft, wird einmalig ein ha_washdata_pump_stuck-Ereignis ausgelöst. Verwenden Sie dies, um einen blockierten Motor zu erkennen (die typische Laufzeit der Sumpfpumpe beträgt weniger als 60 s). Standard: 1800 s (30 min). Nur Pumpengerätetyp."
+            }
+          },
+          "device_link_section": {
+            "name": "Link zur Übersicht",
+            "description": "Optional verbinden Sie dieses WashData-Gerät mit einem vorhandenen Home Assistant-Gerät (z.B. dem Smart Plug oder dem Gerät selbst). Das WashData-Gerät wird dann als \"Connected via\" dieses Geräts angezeigt. Lassen Sie die WashData als eigenständiges Gerät leer.",
+            "data": {
+              "linked_device": "Verknüpftes Gerät"
+            },
+            "data_description": {
+              "linked_device": "Wählen Sie das Gerät, um WashData zu verbinden. Dies fügt eine 'Connected via' Referenz in der Geräte-Registrierung hinzu; WashData hält seine eigene Gerätekarte und -einrichtungen. Löschen Sie die Auswahl, um den Link zu entfernen."
             }
           }
         }

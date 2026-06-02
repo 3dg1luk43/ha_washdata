@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "完了前メッセージの形式",
           "energy_price_entity": "エネルギー価格 - エンティティ (オプション)",
           "energy_price_static": "エネルギー価格 - 静的値 (オプション)",
-          "go_back": "保存せずに戻る"
+          "go_back": "保存せずに戻る",
+          "notify_reminder_message": "リマインダーメッセージのフォーマット",
+          "notify_timeout_seconds": "自動終了後 (秒)",
+          "notify_channel": "通知チャンネル (ステータス/ライブ/リマインダー)",
+          "notify_finish_channel": "完了した通知チャネル"
         },
         "data_description": {
           "go_back": "これにチェックを入れて送信をクリックすると、上の変更を破棄してメインメニューに戻ります。",
@@ -151,7 +155,11 @@
           "notify_finish_message": "サイクル終了時に送信されるメッセージ。{device}、{duration}、{program}, {energy_kwh}, {cost} プレースホルダーに対応。",
           "notify_pre_complete_message": "完了前に送信されるメッセージ。{device}、{minutes} プレースホルダーに対応。",
           "energy_price_entity": "現在の電力価格を保持する数値エンティティを選択します (例: sensor.electricity_price、input_number.energy_rate)。設定すると、{cost} プレースホルダーが有効になります。両方が設定されている場合は、静的な値よりも優先されます。",
-          "energy_price_static": "kWhあたりの固定電力料金。設定すると、{cost} プレースホルダーが有効になります。エンティティが上記で構成されている場合は無視されます。メッセージ テンプレートに通貨記号を追加します。 {cost} ユーロ。"
+          "energy_price_static": "kWhあたりの固定電力料金。設定すると、{cost} プレースホルダーが有効になります。エンティティが上記で構成されている場合は無視されます。メッセージ テンプレートに通貨記号を追加します。 {cost} ユーロ。",
+          "notify_reminder_message": "1 回限りのリマインダーのテキストは、終了予定時刻の設定された分数前に送信されます。上記の定期的なライブ アップデートとは異なります。 {device}、{minutes}、{program} プレースホルダーをサポートします。",
+          "notify_timeout_seconds": "この秒数が経過すると通知を自動的に消去します (コンパニオン アプリの「タイムアウト」として転送されます)。 0 に設定すると、破棄されるまで保持されます。デフォルト: 0。",
+          "notify_channel": "Android コンパニオン アプリのステータス、進行状況、リマインダー通知用の通知チャネル。チャンネルのサウンドと重要性は、チャンネル名が初めて使用されるときにコンパニオン アプリで設定されます。WashData はチャンネル名のみを設定します。アプリのデフォルトの場合は空のままにします。",
+          "notify_finish_channel": "終了アラート用に別の Android チャンネルを作成し (リマインダーや洗濯待ちの小言でも使用)、独自のサウンドを持たせることができます。上のチャネルを再利用するには、空のままにしておきます。"
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "この秒数が経過してもポンプ サイクルがまだ実行されている場合は、ha_washdata_pump_stuck イベントが 1 回発生します。これを使用してモーターの詰まりを検出します (通常、排水ポンプの動作は 60 秒未満です)。デフォルト: 1800 秒 (30 分)。ポンプ装置タイプのみ。"
+            }
+          },
+          "device_link_section": {
+            "name": "デバイスリンク",
+            "description": "必要に応じて、この WashData デバイスを既存の Home Assistant デバイス (スマート プラグやアプライアンス自体など) にリンクします。その後、WashData デバイスはそのデバイスを「経由して接続」として表示されます。 WashData をスタンドアロン デバイスとして維持するには、空のままにします。",
+            "data": {
+              "linked_device": "リンクされたデバイス"
+            },
+            "data_description": {
+              "linked_device": "WashData を接続するデバイスを選択します。これにより、デバイス レジストリに「接続経由」参照が追加されます。 WashData は独自のデバイス カードとエンティティを保持します。リンクを削除するには、選択を解除します。"
             }
           }
         }
