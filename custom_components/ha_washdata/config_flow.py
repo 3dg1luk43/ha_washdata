@@ -1077,6 +1077,36 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             except Exception:  # pylint: disable=broad-exception-caught
                 return str(val)
 
+        # Issue #257: high-power appliances (well pumps, EV chargers, ovens,
+        # heat pumps) legitimately need start/stop thresholds far above the
+        # friendly defaults below. Expand the selector ceiling so it always
+        # admits the currently-saved value and any pending suggestion -
+        # otherwise the form rejects a value the integration itself produced
+        # ("Value <n> is too large for dictionary value").
+        def _threshold_cap(base: float, key: str, current_default: float) -> float:
+            cap = base
+            candidates: list[Any] = [get_val(key, current_default)]
+            if isinstance(suggestions, dict):
+                candidates.append((suggestions.get(key) or {}).get("value"))
+            for cand in candidates:
+                try:
+                    cval = float(cand)
+                except (TypeError, ValueError):
+                    continue
+                if cval > cap:
+                    # Round up to the next clean 100 W so the BOX control keeps
+                    # a tidy bound with a little headroom above the value.
+                    cap = float((int(cval) // 100 + 1) * 100)
+            return cap
+
+        _min_power_val = float(get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER))
+        _start_threshold_cap = _threshold_cap(
+            500.0, CONF_START_THRESHOLD_W, _min_power_val + 1.0
+        )
+        _stop_threshold_cap = _threshold_cap(
+            100.0, CONF_STOP_THRESHOLD_W, max(0.0, _min_power_val - 0.5)
+        )
+
         reason_lines: list[str] = []
         for key in [
             CONF_MIN_POWER,
@@ -1161,8 +1191,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 selector.NumberSelectorConfig(
                     min=0.0,
                     # Issue #238: dryers with anti-damp/anti-crease tumbling
-                    # can sit at 200–300 W during a delayed-start window.
-                    max=500.0,
+                    # can sit at 200-300 W during a delayed-start window.
+                    # Issue #257: ceiling expands for high-power devices so a
+                    # suggested/saved value above the default is never rejected.
+                    max=_start_threshold_cap,
                     step=0.5,
                     unit_of_measurement="W",
                     mode=selector.NumberSelectorMode.BOX,
@@ -1177,7 +1209,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0.0,
-                    max=100.0,
+                    # Issue #257: ceiling expands for high-power devices so a
+                    # suggested/saved value above the default is never rejected.
+                    max=_stop_threshold_cap,
                     step=0.5,
                     unit_of_measurement="W",
                     mode=selector.NumberSelectorMode.BOX,

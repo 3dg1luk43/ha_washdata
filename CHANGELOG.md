@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Bug Fixes
 
+- **Suggested Thresholds Rejected for High-power Appliances** (#257): Applying suggested settings on a high-power device (e.g. a domestic well pump with a ~914 W active-power floor) failed with *"Value 1096.68 is too large for dictionary value @ data['detection_section']['start_threshold_w']"* and the form would not save. The detection-section **Start/Stop Threshold (W)** selectors were hard-capped at 500 W / 100 W, ceilings tuned for washers and dryers, so the form rejected the very values the suggestion engine produced and also locked the user out on re-open once such a value was saved. The two ceilings now expand automatically to admit the currently-saved value and any pending suggestion (rounded up to the next 100 W for headroom), while keeping the friendly 500 W / 100 W bounds for typical appliances.
+
 - **Pre-end Reminder No Longer Looks Like It Fires "5 Minutes Before End"**: The "X minutes before end" reminder previously reused the **same message text** as the recurring live progress updates ("Less than N minutes remaining"), so a routine live update near the end was indistinguishable from the reminder, making a reminder set to 20 minutes appear to fire at ~5 minutes. The reminder now has its own dedicated **Reminder Message Format** (default `{device}: about {minutes} minutes left.`), fires exactly once at the configured time, shares the lifecycle tag so it updates the thread in place, and is routed to the finished channel without the live `alert_once` flag so it makes a sound once. The live-update message field has been relabelled **Live Update Message Format** to reflect what it actually controls.
 
 ### 📖 Documentation & Templates
