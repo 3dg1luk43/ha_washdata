@@ -1,6 +1,12 @@
 const CARD_TAG = "ha-washdata-card";
 const EDITOR_TAG = "ha-washdata-card-editor";
 
+// Gesture timing (ms) and movement tolerance (px) for tap / hold / double-tap,
+// chosen to match Home Assistant's own action handler conventions.
+const HOLD_MS = 500;
+const DOUBLE_TAP_MS = 250;
+const TAP_MOVE_TOLERANCE = 10;
+
 const TRANSLATIONS = {
   "en": {
     "washer_program": "Washer Program",
@@ -27,7 +33,10 @@ const TRANSLATIONS = {
     "display_mode": "Display Mode",
     "show_time_remaining": "Show Time Remaining",
     "show_percentage": "Show Percentage",
-    "entity_not_found": "Entity not found"
+    "entity_not_found": "Entity not found",
+    "tap_action": "Tap Action",
+    "hold_action": "Hold Action",
+    "double_tap_action": "Double Tap Action"
   },
   "af": {
     "washer_program": "Wasprogram",
@@ -1752,7 +1761,10 @@ class WashDataCard extends HTMLElement {
       show_state: true,
       show_program: true,
       show_details: true,
-      spin_icon: true
+      spin_icon: true,
+      tap_action: { action: "more-info" },
+      hold_action: { action: "none" },
+      double_tap_action: { action: "none" }
     };
   }
 
@@ -1771,7 +1783,25 @@ class WashDataCard extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this._rendered = false;
-    this._handleClick = this._handleClick.bind(this);
+    // Gesture state for tap / hold / double-tap recognition.
+    this._holdTimer = null;
+    this._holdTriggered = false;
+    this._tapTimer = null;
+    this._lastTapTime = 0;
+    this._pointerStart = null;
+    this._onPointerDown = this._onPointerDown.bind(this);
+    this._onPointerMove = this._onPointerMove.bind(this);
+    this._onPointerUp = this._onPointerUp.bind(this);
+    this._onPointerCancel = this._onPointerCancel.bind(this);
+  }
+
+  disconnectedCallback() {
+    // Avoid stray actions firing after the card is removed from the DOM.
+    this._clearHoldTimer();
+    if (this._tapTimer) {
+      window.clearTimeout(this._tapTimer);
+      this._tapTimer = null;
+    }
   }
 
   setConfig(config) {
@@ -1791,14 +1821,153 @@ class WashDataCard extends HTMLElement {
     return 1;
   }
 
-  _handleClick() {
-    const entityId = this._cfg.entity;
-    const event = new CustomEvent("hass-more-info", {
-      detail: { entityId },
+  _clearHoldTimer() {
+    if (this._holdTimer) {
+      window.clearTimeout(this._holdTimer);
+      this._holdTimer = null;
+    }
+  }
+
+  _onPointerDown(ev) {
+    // Only react to the primary pointer (left mouse button / touch / pen).
+    if (ev.button !== undefined && ev.button !== 0) return;
+    this._holdTriggered = false;
+    this._pointerStart = { x: ev.clientX, y: ev.clientY };
+
+    const holdCfg = this._cfg && this._cfg.hold_action;
+    if (holdCfg && holdCfg.action && holdCfg.action !== "none") {
+      this._clearHoldTimer();
+      this._holdTimer = window.setTimeout(() => {
+        this._holdTimer = null;
+        this._holdTriggered = true;
+        this._fireHaptic("success");
+        this._executeAction(holdCfg);
+      }, HOLD_MS);
+    }
+  }
+
+  _onPointerMove(ev) {
+    // Cancel a pending hold if the pointer drifts (e.g. the user is scrolling).
+    if (!this._holdTimer || !this._pointerStart) return;
+    const dx = ev.clientX - this._pointerStart.x;
+    const dy = ev.clientY - this._pointerStart.y;
+    if (dx * dx + dy * dy > TAP_MOVE_TOLERANCE * TAP_MOVE_TOLERANCE) {
+      this._clearHoldTimer();
+    }
+  }
+
+  _onPointerCancel() {
+    this._clearHoldTimer();
+  }
+
+  _onPointerUp() {
+    this._clearHoldTimer();
+    // A hold already fired its action; the release should not also count as a tap.
+    if (this._holdTriggered) {
+      this._holdTriggered = false;
+      return;
+    }
+
+    const tapCfg = (this._cfg && this._cfg.tap_action) || { action: "more-info" };
+    const doubleCfg = this._cfg && this._cfg.double_tap_action;
+    const hasDouble = doubleCfg && doubleCfg.action && doubleCfg.action !== "none";
+
+    // With no double-tap action configured, fire the tap immediately (no latency).
+    if (!hasDouble) {
+      this._executeAction(tapCfg);
+      return;
+    }
+
+    const now = Date.now();
+    if (this._tapTimer && now - this._lastTapTime < DOUBLE_TAP_MS) {
+      window.clearTimeout(this._tapTimer);
+      this._tapTimer = null;
+      this._lastTapTime = 0;
+      this._executeAction(doubleCfg);
+      return;
+    }
+
+    // First tap: wait briefly to see whether a second one arrives.
+    this._lastTapTime = now;
+    this._tapTimer = window.setTimeout(() => {
+      this._tapTimer = null;
+      this._executeAction(tapCfg);
+    }, DOUBLE_TAP_MS);
+  }
+
+  _fireHaptic(type) {
+    this.dispatchEvent(new CustomEvent("haptic", {
+      detail: type,
       bubbles: true,
       composed: true,
-    });
-    this.dispatchEvent(event);
+    }));
+  }
+
+  _executeAction(actionCfg) {
+    if (!actionCfg) return;
+    const action = actionCfg.action || "more-info";
+    const entityId = actionCfg.entity || (this._cfg && this._cfg.entity);
+
+    switch (action) {
+      case "none":
+        return;
+
+      case "more-info": {
+        if (!entityId) return;
+        this.dispatchEvent(new CustomEvent("hass-more-info", {
+          detail: { entityId },
+          bubbles: true,
+          composed: true,
+        }));
+        return;
+      }
+
+      case "toggle": {
+        // homeassistant.toggle routes to the correct domain service for all
+        // common toggleable domains, so no per-domain table is needed.
+        if (!this._hass || !entityId) return;
+        this._hass.callService("homeassistant", "toggle", { entity_id: entityId });
+        return;
+      }
+
+      case "call-service":
+      case "perform-action": {
+        const svc = actionCfg.perform_action || actionCfg.service;
+        if (!svc || !this._hass) return;
+        const [svcDomain, svcName] = svc.split(".");
+        if (!svcDomain || !svcName) return;
+        const data = { ...(actionCfg.data || actionCfg.service_data || {}) };
+        this._hass.callService(svcDomain, svcName, data, actionCfg.target);
+        return;
+      }
+
+      case "navigate": {
+        const path = actionCfg.navigation_path;
+        if (!path) return;
+        if (actionCfg.navigation_replace) {
+          window.history.replaceState(window.history.state, "", path);
+        } else {
+          window.history.pushState(null, "", path);
+        }
+        window.dispatchEvent(new CustomEvent("location-changed", {
+          detail: { replace: !!actionCfg.navigation_replace },
+        }));
+        return;
+      }
+
+      case "url": {
+        const url = actionCfg.url_path;
+        if (!url) return;
+        window.open(url, "_blank");
+        return;
+      }
+
+      default:
+        // Unsupported actions (e.g. "assist") are intentionally ignored: a
+        // standalone card resource cannot resolve Home Assistant's internal
+        // dialog chunks, so attempting them would only throw at runtime.
+        return;
+    }
   }
 
   _render() {
@@ -1900,7 +2069,12 @@ class WashDataCard extends HTMLElement {
         </ha-card>
       `;
 
-      this.shadowRoot.getElementById("card").addEventListener("click", this._handleClick);
+      const cardEl = this.shadowRoot.getElementById("card");
+      cardEl.addEventListener("pointerdown", this._onPointerDown);
+      cardEl.addEventListener("pointermove", this._onPointerMove);
+      cardEl.addEventListener("pointerup", this._onPointerUp);
+      cardEl.addEventListener("pointercancel", this._onPointerCancel);
+      cardEl.addEventListener("pointerleave", this._onPointerCancel);
       this._rendered = true;
     }
 
@@ -1924,7 +2098,7 @@ class WashDataCard extends HTMLElement {
       return;
     }
 
-    const title = this._cfg.title || this._getTranslation("washing_machine");
+    const title = this._cfg.title || "Washing Machine";
     const icon = this._cfg.icon || stateObj.attributes.icon || "mdi:washing-machine";
     const activeColor = this._cfg.active_color;
 
@@ -2106,6 +2280,9 @@ class WashDataCardEditor extends HTMLElement {
         { name: "program_entity", selector: { entity: { domain: ["sensor", "select", "input_select", "input_text"] } } },
         { name: "pct_entity", selector: { entity: { domain: "sensor" } } },
         { name: "time_entity", selector: { entity: { domain: "sensor" } } },
+        { name: "tap_action", selector: { ui_action: {} } },
+        { name: "hold_action", selector: { ui_action: {} } },
+        { name: "double_tap_action", selector: { ui_action: {} } },
       ];
 
       this._form.computeLabel = (schema) => {
@@ -2121,7 +2298,10 @@ class WashDataCardEditor extends HTMLElement {
           program_entity: this._getTranslation("program_entity"),
           pct_entity: this._getTranslation("pct_entity"),
           time_entity: this._getTranslation("time_entity"),
-          display_mode: this._getTranslation("display_mode")
+          display_mode: this._getTranslation("display_mode"),
+          tap_action: this._getTranslation("tap_action"),
+          hold_action: this._getTranslation("hold_action"),
+          double_tap_action: this._getTranslation("double_tap_action")
         };
         return labels[schema.name] || schema.name;
       };

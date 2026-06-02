@@ -5,9 +5,11 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.4.4.4 - 2026-06-02
+## 0.4.5 - 2026-06-02
 
 ### ✨ Features
+
+- **Card Tap / Hold / Double-Tap Actions**: The WashData tile card now supports the standard Home Assistant gesture actions. Three new visual-editor options — **Tap Action**, **Hold Action**, and **Double Tap Action** — let each gesture trigger `more-info` (the previous and still-default tap behaviour), `toggle`, `call-service` / `perform-action`, `navigate`, `url`, or `none`. The card switched from a single `click` listener to pointer-event gesture recognition (500 ms hold, 250 ms double-tap window, with a small movement tolerance so a scroll or drag does not register as a tap); a single tap fires immediately unless a double-tap action is configured. Existing cards are unaffected — the default tap action is `more-info`, exactly as before. Originally submitted as PR by @kingpepe85 but did not satisfy the requirements to merge.
 
 - **Notification Lifecycle Is Now One Thread** (#248): Cycle start, live progress, the pre-end reminder, and the finished alert now share a single per-device notification `tag`, so each one **replaces** the previous on the mobile companion app instead of stacking up. The finished notification replaces the live progress card in place (rather than the old behaviour of dismissing the live card and posting a separate finished card). For setups with **no** notify service configured (the persistent-notification fallback shown in the Home Assistant *Notifications* panel), the same identity is reused as a stable `notification_id`, so the lifecycle collapses to a single card per device instead of accumulating one card per cycle. The clean-laundry "still inside" nag keeps its own separate tag because it can fire up to an hour after the finished alert.
 - **Notification Auto-dismiss Timeout** (#248): A new **Auto-dismiss After (seconds)** option forwards a `timeout` to the companion app so WashData notifications vanish automatically after the configured time (e.g. 3600 = one hour). Default `0` keeps the previous behaviour (notifications persist until dismissed). Applies to every notification type.
