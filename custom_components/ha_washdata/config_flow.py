@@ -2328,10 +2328,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     last_run_str = dt_util.as_local(dt).strftime("%b %d")
             avg_energy = p.get("avg_energy")
             if isinstance(avg_energy, (int, float)) and avg_energy > 0:
-                if avg_energy >= 1000:
-                    energy_str = f"{avg_energy / 1000:.2f} kWh"
+                if avg_energy >= 1.0:
+                    energy_str = f"{avg_energy:.2f} kWh"
                 else:
-                    energy_str = f"{int(round(avg_energy))} Wh"
+                    energy_str = f"{int(round(avg_energy * 1000))} Wh"
             else:
                 energy_str = "—"
             safe_name = html.escape(str(p["name"]))

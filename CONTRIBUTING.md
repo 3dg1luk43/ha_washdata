@@ -13,6 +13,7 @@ Before contributing, please review our [Code of Conduct](CODE_OF_CONDUCT.md). By
 - [Getting Started](#getting-started)
 - [Development Setup](#development-setup)
 - [Types of Contributions](#types-of-contributions)
+- [Contributor PR Flow (Non-Translation PRs)](#contributor-pr-flow-non-translation-prs)
 - [Pull Request Process](#pull-request-process)
 - [Coding Standards](#coding-standards)
 - [Testing](#testing)
@@ -115,7 +116,9 @@ Found a bug? Open an issue using our [bug report template](.github/ISSUE_TEMPLAT
 - Clear description of the issue
 - Steps to reproduce
 - Your WashData version and Home Assistant version
-- Relevant logs or error messages
+- Any logs or error evidence — a single error line from the HA logbook is fine; you don't need full debug-level output
+
+If you also want to submit a fix yourself, check the **"Contributing a Fix"** box at the bottom of the form and follow the [contributor PR flow](#contributor-pr-flow-non-translation-prs) below.
 
 ### ✨ Feature Requests
 
@@ -124,6 +127,8 @@ Have an idea? Open an issue using our [feature request template](.github/ISSUE_T
 - What the feature should do
 - Why it would be useful
 - How it should work (with examples if possible)
+
+If you also want to implement it yourself, check the **"Contributing an Implementation"** box at the bottom of the form and follow the [contributor PR flow](#contributor-pr-flow-non-translation-prs) below.
 
 ### 🌍 Translations
 
@@ -145,19 +150,32 @@ Review open PRs and provide constructive feedback. Even experienced contributors
 
 ---
 
+## Contributor PR Flow (Non-Translation PRs)
+
+**Translation PRs can be opened directly** — no issue required, no label needed. All other PRs must go through this flow:
+
+1. **Open an issue** — create a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml) describing what you want to fix or build.
+2. **Indicate your intent** — check the "Contributing a Fix" / "Contributing an Implementation" checkbox at the bottom of the issue form.
+3. **Wait for the `accepted` label** — the maintainer will review and add the `accepted` label to the issue if they approve you working on it. Only the maintainer can apply this label.
+4. **Open your PR** — once the issue is accepted, open a PR and reference the issue number (e.g. `Closes #NNN`).
+
+> **Why?** This prevents contributors from spending time on work that is already in the development pipeline, or on changes the maintainer would not merge. If you skip this step, an automated check will close your PR immediately with a pointer back to this flow.
+
+---
+
 ## Pull Request Process
 
 ### Before You Start
 
-1. **Sync with upstream**: Ensure your branch is up-to-date with `main`
+1. **Follow the contributor flow above** (for non-translation PRs): open an issue, get the `accepted` label, then come back here.
+
+2. **Sync with upstream**: Ensure your branch is up-to-date with `main`
    ```bash
    git fetch upstream
    git rebase upstream/main
    ```
 
-2. **Check for existing work**: Search issues and PRs to avoid duplicate efforts
-
-3. **For large changes**: Open an issue first to discuss with maintainers
+3. **Check for existing work**: Search issues and PRs to avoid duplicate efforts
 
 ### Making Your Changes
 
@@ -187,7 +205,7 @@ Review open PRs and provide constructive feedback. Even experienced contributors
 2. **Open a Pull Request** on GitHub with:
    - Clear title describing the change
    - Detailed description (use our PR template)
-   - Reference any related issues: `Closes #123`
+   - Reference the accepted issue: `Closes #NNN` (required — see [contributor PR flow](#contributor-pr-flow-non-translation-prs))
    - Screenshots for UI changes
 
 3. **Respond to reviews**:
@@ -394,4 +412,4 @@ Thank you for making WashData better! 🌟
 
 ---
 
-**Last Updated**: 2026-03-11
+**Last Updated**: 2026-06-02

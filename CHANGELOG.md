@@ -5,6 +5,18 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.4.4 - 2026-06-02
+
+### 📖 Documentation & Templates
+
+- **Bug Report: "Debug Logs" Renamed to "Logs / Error Evidence"**: The field previously labelled **Debug Logs** in the bug report template has been renamed **Logs / Error Evidence** and its description rewritten to make explicit that _any_ log or error evidence is acceptable — a single error line from the HA logbook, a warning trace, or a full debug session all count. Several reporters were filling logs into the issue description body while marking the dedicated field as empty because they read "Debug Logs" as requiring HA-level debug output. The preflight checkbox, the issue-validator bot error message, and the heading regex in `issue_validator.yml` were all updated to match the new field name. The validator accepts `N/A` with a reason exactly as before.
+
+### 🛠 Internal / Developer Experience
+
+- **Contributor PR Flow — Issue-First with Owner Acceptance**: Non-translation pull requests now require a linked issue carrying the `accepted` label before they are accepted. The intended flow is: open a bug report or feature request → check the new *"I plan to submit a PR"* checkbox → wait for the maintainer to add the `accepted` label → then open the PR referencing that issue. A new `validate_pr.yml` workflow enforces this on every PR open/edit/reopen event: translation-only PRs (where every changed file is under `translations/`) and PRs opened by the repository owner are exempt; all others that do not reference an accepted issue are closed immediately with an explanatory comment. A companion `protect_accepted_label.yml` workflow fires on `issues: labeled` and removes the `accepted` label if it was applied by anyone other than the repository owner, then leaves a comment explaining the restriction. Bug report and feature request issue templates each received a new optional *"Contributing a Fix / Implementation"* checkbox section at the bottom to signal contributor intent. The PR template gained a prominent `[!IMPORTANT]` callout at the top and a dedicated *Linked Accepted Issue* field. Two new repository labels are required: `accepted` and `needs description` (see below).
+
+- **PR Quality Gate with 5-Day Auto-Close**: The same `validate_pr.yml` workflow also checks whether the PR description template has been meaningfully filled in: it verifies that the Description section contains content beyond placeholder HTML comments and that at least one *Type of Change* checkbox is checked. Incomplete PRs receive a warning comment (updated in-place on re-check) and the `needs description` label. A separate `close_incomplete_prs.yml` workflow runs daily at 11:00 UTC and automatically closes any open PR carrying that label for more than 5 days. PRs that are later completed have the label and warning comment removed automatically. Both checks are skipped for the repository owner.
+
 ## 0.4.4.3 - 2026-05-21
 
 ### ✨ Features

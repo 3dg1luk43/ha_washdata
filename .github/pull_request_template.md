@@ -1,8 +1,16 @@
+> [!IMPORTANT]
+> **Translation PRs are exempt from the requirement below.**
+> For all other PRs: you must reference an issue that carries the `accepted` label.
+> If no accepted issue is linked, this PR will be closed automatically.
+> To get your work accepted: open a [Bug Report](https://github.com/3dg1luk43/ha_washdata/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/3dg1luk43/ha_washdata/issues/new?template=feature_request.yml) first, indicate you plan to submit a PR, and wait for the maintainer to add the `accepted` label before opening this PR.
+
+## Linked Accepted Issue (required for non-translation PRs)
+
+Closes #<!-- issue number — must have the `accepted` label -->
+
 ## Description
 
 <!-- Brief summary of the changes. What problem does this solve? -->
-
-Fixes #(issue number)
 
 ## Type of Change
 
@@ -84,10 +92,9 @@ After:
 
 ## Related Issues
 
-<!-- Link related issues or discussions -->
+<!-- Any additional related issues or discussions beyond the accepted issue above -->
 
 - Related to: #(issue number)
-- Closes: #(issue number)
 
 ## Notes for Reviewers
 

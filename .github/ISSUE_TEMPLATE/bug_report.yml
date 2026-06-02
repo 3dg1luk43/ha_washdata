@@ -18,7 +18,7 @@ body:
       options:
         - label: I have searched the [existing issues](https://github.com/3dg1luk43/ha_washdata/issues) and this is not a duplicate.
           required: true
-        - label: I have enabled debug logging and the logs below were captured while the bug was occurring (or entered `N/A` with a reason if genuinely not applicable).
+        - label: I have provided logs or error evidence in the field below (debug logs, error messages, warnings, or any relevant output), or entered `N/A` with a reason if genuinely not applicable.
           required: true
         - label: I have filled in all applicable fields with real values and used `N/A` only where the field is genuinely irrelevant to my bug.
           required: true
@@ -107,35 +107,30 @@ body:
   - type: textarea
     id: debug_log
     attributes:
-      label: Debug Logs
+      label: Logs / Error Evidence
       description: |
-        **This is required.** Logs without debug level enabled are rarely useful for troubleshooting.
+        **This is required.** Paste any relevant logs, error messages, or console output here. This does not have to be debug-level logs — any evidence of what went wrong is helpful: a single error line from the HA logbook, a warning trace, or a full debug log session. Paste whatever you have.
 
         > ⚠️ **Debug logs and the HA Diagnostics export are two different things.**
-        > - **Debug logs** = text output from `Settings → System → Logs`. This is what we need here.
-        > - **Diagnostics export** = the JSON file from `Settings → Devices → your device → Download Diagnostics`. This can be hundreds of lines and **must be attached as a file**, never pasted.
-        > If you have both, provide both - but in the right way (see below).
+        > - **Logs** = text output from `Settings → System → Logs`. Paste short excerpts directly; attach long files.
+        > - **Diagnostics export** = the JSON file from `Settings → Devices → your device → Download Diagnostics`. Always attach as a file — never paste inline.
 
-        **Step 1 - Enable debug logging** by adding this to your `configuration.yaml`:
+        **To get the most useful logs**, enable debug logging by adding this to your `configuration.yaml` and restarting HA:
         ```yaml
         logger:
           default: info
           logs:
             custom_components.ha_washdata: debug
         ```
-        Then restart Home Assistant.
+        Then reproduce the bug and collect the output from `Settings → System → Logs`.
 
-        **Step 2 - Reproduce the bug** so the relevant log lines are captured.
+        - **Short output (< ~50 lines):** paste directly below.
+        - **Long output:** download via `Settings → System → Logs → Download full log` and attach as a file.
 
-        **Step 3 - Provide the logs:**
-        - **Short logs (< ~50 lines):** copy and paste directly into the box below.
-        - **Long logs:** download the full log file from `Settings → System → Logs → Download full log` (top-right button) and attach it to this issue as a file.
-        - **Diagnostics export (device data):** always attach as a file - do not paste.
+        If you only have a brief error line or warning from the HA logbook, paste that — it is far better than nothing.
 
-        Include log output covering at least 30 seconds before and after the event.
-
-        > **Tip:** You can filter live logs by `ha_washdata` under `Settings → System → Logs` to quickly find relevant lines.
-      placeholder: "Paste short debug log output here, or describe what file(s) you have attached above..."
+        > **Tip:** Filter live logs by `ha_washdata` under `Settings → System → Logs` to quickly find relevant lines.
+      placeholder: "Paste log output or error messages here, or describe what file(s) you have attached above..."
       render: shell
     validations:
       required: true
@@ -147,3 +142,15 @@ body:
       description: Any other context about the problem (screenshots, related automations, unusual HA setup, etc.)
     validations:
       required: false
+
+  - type: checkboxes
+    id: pr_intention
+    attributes:
+      label: Contributing a Fix
+      description: >
+        If you intend to submit a PR fixing this bug yourself, check the box below.
+        The maintainer will review and — if approved — add the `accepted` label to this issue.
+        **You must wait for that label before opening a PR**, otherwise the PR will be closed automatically.
+      options:
+        - label: I plan to submit a PR fixing this and will wait for the `accepted` label before opening it
+          required: false

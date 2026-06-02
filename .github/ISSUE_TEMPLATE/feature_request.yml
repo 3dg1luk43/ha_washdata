@@ -84,3 +84,15 @@ body:
       description: Screenshots, links to related issues, or any other relevant context.
     validations:
       required: false
+
+  - type: checkboxes
+    id: pr_intention
+    attributes:
+      label: Contributing an Implementation
+      description: >
+        If you intend to implement this feature yourself and submit a PR, check the box below.
+        The maintainer will review and — if approved — add the `accepted` label to this issue.
+        **You must wait for that label before opening a PR**, otherwise the PR will be closed automatically.
+      options:
+        - label: I plan to submit a PR implementing this and will wait for the `accepted` label before opening it
+          required: false
