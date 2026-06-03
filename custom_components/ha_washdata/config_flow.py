@@ -192,6 +192,21 @@ def _device_type_options(
     ]
 
 
+def _escape_markdown(text: Any) -> str:
+    """Make a user-supplied label safe to embed in markdown descriptions.
+
+    Profile and phase names are free text, so collapse any whitespace runs
+    (including newlines, which would otherwise break list rendering) into single
+    spaces and escape the markdown metacharacters that would otherwise inject
+    emphasis, code spans, links, or table cells.
+    """
+    collapsed = " ".join(str(text).split())
+    # Backslash must be escaped first so the others are not double-escaped.
+    for char in ("\\", "`", "*", "_", "[", "]", "~", "|"):
+        collapsed = collapsed.replace(char, f"\\{char}")
+    return collapsed
+
+
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME, default=DEFAULT_NAME): str,
@@ -560,7 +575,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         }
 
         if current_device_type in DEPRECATED_DEVICE_TYPES:
-            current_label = DEVICE_TYPES.get(current_device_type, current_device_type)
             # Conditional flow text cannot be resolved per-user by the frontend
             # (it only translates static step descriptions), so this falls back
             # to the instance language via _options_text. Deprecated device
@@ -579,12 +593,23 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "generic defaults that are not tuned for any specific "
                 "appliance, so you will need to configure thresholds, "
                 "timeouts, and matching parameters yourself; all your existing "
-                "settings are preserved when you switch.\n\n",
+                "settings are preserved when you switch.",
+            )
+            # Resolve the interpolated device label through the same selector
+            # translations the rest of the warning uses (_options_text populated
+            # self._selector_translations above), so the name is localized to
+            # match instead of falling back to the raw English DEVICE_TYPES value.
+            current_label = (self._selector_translations or {}).get(
+                f"component.{DOMAIN}.selector.device_type.options.{current_device_type}",
+                DEVICE_TYPES.get(current_device_type, current_device_type),
             )
             try:
-                deprecation_warning = warning_template.format(device_type=current_label)
+                warning = warning_template.format(device_type=current_label)
             except (KeyError, IndexError, ValueError):
-                deprecation_warning = warning_template
+                warning = warning_template
+            # Trailing blank line lives in code, not the translation string: HA
+            # rejects translation values with leading/trailing whitespace.
+            deprecation_warning = f"{warning}\n\n"
         else:
             deprecation_warning = ""
 
@@ -2474,7 +2499,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         # Phase names/descriptions are runtime catalog data, but the static
         # wording around them is resolved via _options_text (instance language).
-        builtin_suffix = await self._options_text("phase_builtin_suffix", " (Built-in)")
+        builtin_suffix = await self._options_text("phase_builtin_suffix", "(Built-in)")
         no_phases = await self._options_text(
             "phase_none_available", "No phases available."
         )
@@ -2501,9 +2526,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 icon = "📌 " if phase.get("is_default") else "✏️ "
                 desc = str(phase.get("description", "")).strip()
                 short = desc if len(desc) <= 80 else f"{desc[:77]}..."
-                phase_type = builtin_suffix if phase.get("is_default") else ""
+                phase_type = f" {builtin_suffix}" if phase.get("is_default") else ""
+                name = _escape_markdown(phase.get("name", ""))
                 summary_lines.append(
-                    f"{icon}**{phase.get('name', '')}{phase_type}** - {short}"
+                    f"{icon}**{name}{phase_type}** - {_escape_markdown(short)}"
                 )
 
         other_counts = []
@@ -4241,7 +4267,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "total_count": str(total_count),
                 # Leading blank line so markdown renders the bulleted list
                 # instead of gluing the profile names onto the "Profiles:" label.
-                "profiles": "\n\n" + "\n".join(f"- {p['name']}" for p in profiles),
+                "profiles": "\n\n"
+                + "\n".join(f"- {_escape_markdown(p['name'])}" for p in profiles),
             },
         )
 

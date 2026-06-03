@@ -892,7 +892,7 @@
         "table_reported": "Pranešta",
         "phase_builtin_suffix": "(Įtaisytas)",
         "phase_none_available": "Fazių nėra.",
-        "settings_deprecation_warning": "⚠️ **Nebenaudojamo įrenginio tipas:** {device_type} planuojama pašalinti būsimame leidime. „WashData“ atitikimo vamzdynas neduoda patikimų rezultatų šiai prietaisų klasei. Jūsų integracija veikia per nusidėvėjimo laikotarpį; Norėdami nutildyti šį įspėjimą, perjunkite toliau pateiktą **Įrenginio tipą** į vieną iš palaikomų tipų (skalbimo mašina, džiovyklė, skalbimo mašina-džiovyklė kombinuota, indaplovė, oro gruzdintuvė, duonos gaminimo mašina arba siurblys) arba į **Kita (išplėstinė)**, jei jūsų prietaisas neatitinka nė vieno iš palaikomų tipų. **Other (Advanced)** tyčia pristato bendruosius numatytuosius nustatymus, kurie nėra pritaikyti jokiam konkrečiam įrenginiui, todėl turėsite patys sukonfigūruoti slenksčius, skirtąjį laiką ir atitinkamus parametrus; perjungus išsaugomi visi esami nustatymai.",
+        "settings_deprecation_warning": "⚠️ **Nebenaudojamo įrenginio tipas:** {device_type} planuojama pašalinti būsimame leidime. „WashData“ atitikimo vamzdynas neduoda patikimų rezultatų šiai prietaisų klasei. Jūsų integracija veikia per nusidėvėjimo laikotarpį; Norėdami nutildyti šį įspėjimą, perjunkite toliau pateiktą **Įrenginio tipą** į vieną iš palaikomų tipų (skalbimo mašina, džiovyklė, skalbimo mašina-džiovyklė kombinuota, indaplovė, oro gruzdintuvė, duonos gaminimo mašina arba siurblys) arba į **Kita (išplėstinė)**, jei jūsų prietaisas neatitinka nė vieno iš palaikomų tipų. **Kita (išplėstinė)** tyčia pristato bendruosius numatytuosius nustatymus, kurie nėra pritaikyti jokiam konkrečiam įrenginiui, todėl turėsite patys sukonfigūruoti slenksčius, skirtąjį laiką ir atitinkamus parametrus; perjungus išsaugomi visi esami nustatymai.",
         "phase_other_device_types": "Kiti įrenginių tipai:"
       }
     },
@@ -1009,7 +1009,7 @@
         "air_fryer": "Oro gruzdintuvė",
         "heat_pump": "Šilumos siurblys (nebenaudojamas)",
         "bread_maker": "Duonkepė",
-        "pump": "Siurblys / Siurblys",
+        "pump": "Siurblys / Drenažinis siurblys",
         "oven": "Orkaitė (nebenaudojama)",
         "other": "Kita (išplėstinė)"
       }

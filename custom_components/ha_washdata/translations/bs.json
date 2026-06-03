@@ -1006,11 +1006,11 @@
         "dishwasher": "Mašina za pranje sudova",
         "coffee_machine": "Aparat za kafu (zastario)",
         "ev": "Električno vozilo (zastarjelo)",
-        "air_fryer": "Air Fryer",
+        "air_fryer": "Friteza na vrući zrak",
         "heat_pump": "Toplotna pumpa (zastarjela)",
-        "bread_maker": "Bread Maker",
-        "pump": "Pumpa / Sump Pumpa",
-        "oven": "pećnica (zastarjela)",
+        "bread_maker": "Pekač hljeba",
+        "pump": "Pumpa / Drenažna pumpa",
+        "oven": "Pećnica (zastarjela)",
         "other": "Ostalo (napredno)"
       }
     }

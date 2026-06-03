@@ -892,7 +892,7 @@
         "table_reported": "Adroddwyd",
         "phase_builtin_suffix": "(Adeiledig)",
         "phase_none_available": "Dim cyfnodau ar gael.",
-        "settings_deprecation_warning": "⚠️ **Math o ddyfais anghymeradwy:** Mae {device_type} wedi'i drefnu i'w dynnu mewn datganiad yn y dyfodol. Nid yw piblinell baru WashData yn cynhyrchu canlyniadau dibynadwy ar gyfer y dosbarth offer hwn. Mae eich integreiddio yn parhau i weithio drwy'r cyfnod dibrisio; i dawelu’r rhybudd hwn, newidiwch **Math o Ddychymyg** isod i un o’r mathau a gefnogir (Peiriant Golchi, Sychwr, Combo Golchwr-Sychwr, Peiriant golchi llestri, ffrïwr aer, gwneuthurwr bara, neu bwmp), neu i **Arall (Uwch)** os nad yw’ch teclyn yn cyfateb i unrhyw un o’r mathau a gefnogir. Mae **Arall (Uwch)** yn cludo rhagosodiadau generig bwriadol nad ydynt wedi'u tiwnio ar gyfer unrhyw declyn penodol, felly bydd angen i chi ffurfweddu trothwyon, goramser a pharamedrau cyfatebol eich hun; cedwir eich holl osodiadau presennol pan fyddwch yn newid.",
+        "settings_deprecation_warning": "⚠️ **Math o ddyfais anghymeradwy:** Mae {device_type} wedi'i drefnu i'w dynnu mewn datganiad yn y dyfodol. Nid yw piblinell baru WashData yn cynhyrchu canlyniadau dibynadwy ar gyfer y dosbarth offer hwn. Mae eich integreiddio yn parhau i weithio drwy'r cyfnod dibrisio; i dawelu’r rhybudd hwn, newidiwch **Math o Ddyfais** isod i un o’r mathau a gefnogir (Peiriant Golchi, Sychwr, Combo Golchwr-Sychwr, Peiriant golchi llestri, ffrïwr aer, gwneuthurwr bara, neu bwmp), neu i **Arall (Uwch)** os nad yw’ch teclyn yn cyfateb i unrhyw un o’r mathau a gefnogir. Mae **Arall (Uwch)** yn cludo rhagosodiadau generig bwriadol nad ydynt wedi'u tiwnio ar gyfer unrhyw declyn penodol, felly bydd angen i chi ffurfweddu trothwyon, goramser a pharamedrau cyfatebol eich hun; cedwir eich holl osodiadau presennol pan fyddwch yn newid.",
         "phase_other_device_types": "Mathau eraill o ddyfeisiau:"
       }
     },
@@ -1010,7 +1010,7 @@
         "heat_pump": "Pwmp Gwres (anghymeradwy)",
         "bread_maker": "Gwneuthurwr Bara",
         "pump": "Pwmp / Swmp Pwmp",
-        "oven": "Popty (heb ei wrthod)",
+        "oven": "Popty (anghymeradwy)",
         "other": "Arall (Uwch)"
       }
     }

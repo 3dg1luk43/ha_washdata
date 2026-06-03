@@ -58,9 +58,9 @@
       },
       "apply_suggestions_confirm": {
         "title": "Pregljedaj predložene izmene",
-        "description": "ВасхДата је пронашао **{pending_count}** предложене вредности за примену.\n\nПромене:\n{changes}\n\n✅ Означите поље испод и кликните на **Пошаљи** да бисте одмах применили и сачували ове промене.\n❌ Оставите то неозначено и кликните на **Пошаљи** да бисте отказали и вратили се.",
+        "description": "WashData je pronašao **{pending_count}** predložene vrednosti za primenu.\n\nPromene:\n{changes}\n\n✅ Označite polje ispod i kliknite na **Pošalji** da biste odmah primenili i sačuvali ove promene.\n❌ Ostavite to neoznačeno i kliknite na **Pošalji** da biste otkazali i vratili se.",
         "data": {
-          "confirm_apply_suggestions": "Примените и сачувајте ове промене"
+          "confirm_apply_suggestions": "Primenite i sačuvajte ove promene"
         }
       },
       "settings": {
@@ -76,9 +76,9 @@
           "notify_people": "Odloži isporuku dok ovi ljudi nisu kod kuće",
           "notify_only_when_home": "Odloži obaveštenja dok izabrana osoba nije kod kuće",
           "notify_fire_events": "Aktiviraj događaje automatizacije",
-          "notify_start_services": "Почетак циклуса - Циљеви обавештења",
-          "notify_finish_services": "Завршетак циклуса - Циљеви обавештења",
-          "notify_live_services": "Напредак уживо - Циљеви обавештења",
+          "notify_start_services": "Početak ciklusa - Ciljevi obaveštenja",
+          "notify_finish_services": "Završetak ciklusa - Ciljevi obaveštenja",
+          "notify_live_services": "Napredak uživo - Ciljevi obaveštenja",
           "notify_before_end_minutes": "Obaveštenje pre završetka (minuta pre kraja)",
           "notify_title": "Naslov obaveštenja",
           "notify_icon": "Ikona obaveštenja",
@@ -97,9 +97,9 @@
           "notify_people": "Entiteti osoba koji se koriste za praćenje prisustva. Kada je omogućeno, isporuka obaveštenja se odlaže dok bar jedna izabrana osoba nije kod kuće.",
           "notify_only_when_home": "Ako je omogućeno, odloži obaveštenja dok bar jedna izabrana osoba nije kod kuće.",
           "notify_fire_events": "Ako je omogućeno, aktiviraj Home Assistant događaje za početak i kraj ciklusa (ha_washdata_cycle_started i ha_washdata_cycle_end) da pokreneš automatizacije.",
-          "notify_start_services": "Једна или више служби за обавештавање да обавесте када циклус почне. Оставите празно да бисте прескочили обавештења о почетку.",
-          "notify_finish_services": "Једна или више служби за обавештавање да обавесте када се циклус заврши или се ближи завршетку. Оставите празно да бисте прескочили обавештења о завршетку.",
-          "notify_live_services": "Једна или више услуга за обавештавање да примају ажурирања о напретку уживо док циклус траје (само пратећа апликација за мобилне уређаје). Оставите празно да бисте прескочили ажурирања уживо.",
+          "notify_start_services": "Jedna ili više službi za obaveštavanje da obaveste kada ciklus počne. Ostavite prazno da biste preskočili obaveštenja o početku.",
+          "notify_finish_services": "Jedna ili više službi za obaveštavanje da obaveste kada se ciklus završi ili se bliži završetku. Ostavite prazno da biste preskočili obaveštenja o završetku.",
+          "notify_live_services": "Jedna ili više usluga za obaveštavanje da primaju ažuriranja o napretku uživo dok ciklus traje (samo prateća aplikacija za mobilne uređaje). Ostavite prazno da biste preskočili ažuriranja uživo.",
           "notify_before_end_minutes": "Nekoliko minuta pre predviđenog kraja ciklusa za pokretanje obaveštenja. Postavi na 0 da onemogućiš. Podrazumevano: 0.",
           "notify_title": "Prilagođeni naslov za obaveštenja. Podržava {device} čuvar mesta.",
           "notify_icon": "Ikona za korišćenje u obaveštenjima (npr. mdi:washing-machine). Ostavi praznim da pošalješ bez ikone.",
@@ -116,25 +116,25 @@
           "notify_people": "Odloži isporuku dok ovi ljudi nisu kod kuće",
           "notify_only_when_home": "Odloži obaveštenja dok izabrana osoba nije kod kuće",
           "notify_fire_events": "Aktiviraj događaje automatizacije",
-          "notify_start_services": "Почетак циклуса - Циљеви обавештења",
-          "notify_finish_services": "Завршетак циклуса - Циљеви обавештења",
-          "notify_live_services": "Напредак уживо - Циљеви обавештења",
+          "notify_start_services": "Početak ciklusa - Ciljevi obaveštenja",
+          "notify_finish_services": "Završetak ciklusa - Ciljevi obaveštenja",
+          "notify_live_services": "Napredak uživo - Ciljevi obaveštenja",
           "notify_before_end_minutes": "Obaveštenje pre završetka (minuta pre kraja)",
           "notify_live_interval_seconds": "Interval ažuriranja uživo (sekunde)",
           "notify_live_overrun_percent": "Dozvola prekoračenja ažuriranja uživo (%)",
-          "notify_live_chronometer": "Тајмер за одбројавање хронометра",
+          "notify_live_chronometer": "Tajmer za odbrojavanje hronometra",
           "notify_title": "Naslov obaveštenja",
           "notify_icon": "Ikona obaveštenja",
           "notify_start_message": "Format poruke pri pokretanju",
           "notify_finish_message": "Format poruke pri završetku",
           "notify_pre_complete_message": "Format poruke pre završetka",
-          "energy_price_entity": "Цена енергије - ентитет (опционо)",
-          "energy_price_static": "Цена енергије - статичка вредност (опционо)",
+          "energy_price_entity": "Cena energije - entitet (opciono)",
+          "energy_price_static": "Cena energije - statička vrednost (opciono)",
           "go_back": "Vrati se bez čuvanja",
-          "notify_reminder_message": "Формат поруке подсетника",
-          "notify_timeout_seconds": "Аутоматско одбацивање после (секунде)",
-          "notify_channel": "Канал обавештења (статус/уживо/подсетник)",
-          "notify_finish_channel": "Завршен канал за обавештења"
+          "notify_reminder_message": "Format poruke podsetnika",
+          "notify_timeout_seconds": "Automatsko odbacivanje posle (sekunde)",
+          "notify_channel": "Kanal obaveštenja (status/uživo/podsetnik)",
+          "notify_finish_channel": "Završen kanal za obaveštenja"
         },
         "data_description": {
           "go_back": "Označi ovo i klikni na Pošalji da odbaciš sve gore navedene izmene i vratiš se u glavni meni.",
@@ -142,24 +142,24 @@
           "notify_people": "Entiteti osoba koji se koriste za praćenje prisustva. Kada je omogućeno, isporuka obaveštenja se odlaže dok bar jedna izabrana osoba nije kod kuće.",
           "notify_only_when_home": "Ako je omogućeno, odloži obaveštenja dok bar jedna izabrana osoba nije kod kuće.",
           "notify_fire_events": "Ako je omogućeno, aktiviraj Home Assistant događaje za početak i kraj ciklusa (ha_washdata_cycle_started i ha_washdata_cycle_end) da pokreneš automatizacije.",
-          "notify_start_services": "Једна или више услуга за обавештавање које ће вас обавестити када циклус почне (нпр. нотифи.мобиле_апп_ми_пхоне). Оставите празно да бисте прескочили обавештења о почетку.",
-          "notify_finish_services": "Једна или више служби за обавештавање да обавесте када се циклус заврши или се ближи завршетку. Оставите празно да бисте прескочили обавештења о завршетку.",
-          "notify_live_services": "Једна или више сервиса за обавештавање да би добијали ажурирања о напретку уживо док циклус траје (само пратећа апликација за мобилне уређаје). Оставите празно да бисте прескочили ажурирања уживо.",
+          "notify_start_services": "Jedna ili više usluga za obaveštavanje koje će vas obavestiti kada ciklus počne (npr. notifi.mobile_app_mi_phone). Ostavite prazno da biste preskočili obaveštenja o početku.",
+          "notify_finish_services": "Jedna ili više službi za obaveštavanje da obaveste kada se ciklus završi ili se bliži završetku. Ostavite prazno da biste preskočili obaveštenja o završetku.",
+          "notify_live_services": "Jedna ili više servisa za obaveštavanje da bi dobijali ažuriranja o napretku uživo dok ciklus traje (samo prateća aplikacija za mobilne uređaje). Ostavite prazno da biste preskočili ažuriranja uživo.",
           "notify_before_end_minutes": "Nekoliko minuta pre predviđenog kraja ciklusa za pokretanje obaveštenja. Postavi na 0 da onemogućiš. Podrazumevano: 0.",
           "notify_live_interval_seconds": "Koliko često se ažuriranja napretka šalju tokom rada. Niže vrednosti bolje reaguju, ali troše više obaveštenja. Primenjuje se minimum od 30 sekundi - vrednosti ispod 30s se automatski zaokružuju na 30s.",
           "notify_live_overrun_percent": "Sigurnosna granica iznad procenjenog broja ažuriranja za duge cikluse/cikluse prekoračenja (na primer, 20% dozvoljava 1,2× procenjenih ažuriranja).",
-          "notify_live_chronometer": "Када је омогућено, свако ажурирање уживо укључује одбројавање хронометра до процењеног времена завршетка. Тајмер обавештења аутоматски се смањује на уређају између ажурирања (само пратећа апликација за Андроид).",
+          "notify_live_chronometer": "Kada je omogućeno, svako ažuriranje uživo uključuje odbrojavanje hronometra do procenjenog vremena završetka. Tajmer obaveštenja automatski se smanjuje na uređaju između ažuriranja (samo prateća aplikacija za Android).",
           "notify_title": "Prilagođeni naslov za obaveštenja. Podržava {device} čuvar mesta.",
           "notify_icon": "Ikona za korišćenje u obaveštenjima (npr. mdi:washing-machine). Ostavi praznim da pošalješ bez ikone.",
           "notify_start_message": "Poruka koja se šalje kada ciklus počne. Podržava {device} čuvar mesta.",
           "notify_finish_message": "Poruka koja se šalje kada se ciklus završi. Podržava čuvare mesta {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Poruka poslata pre završetka. Podržava {device}, {minutes} čuvare mesta.",
-          "energy_price_entity": "Изаберите нумерички ентитет који држи тренутну цену електричне енергије (нпр. сензор. цена_електричне енергије, број_уноса. стопа_енергије). Када је подешено, омогућава чувар места {cost}. Има предност над статичком вредношћу ако су обе конфигурисане.",
-          "energy_price_static": "Фиксна цена електричне енергије по кВх. Када је подешено, омогућава чувар места {cost}. Игнорише се ако је ентитет конфигурисан горе. Додајте симбол валуте у шаблон поруке, нпр. {cost} €.",
-          "notify_reminder_message": "Текст једнократног подсетника послао је конфигурисани број минута пре процењеног краја. За разлику од понављајућих ажурирања уживо изнад. Подржава чуваре места {device}, {minutes}, {program}.",
-          "notify_timeout_seconds": "Аутоматски одбаци обавештења после оволико секунди (прослеђује се као „временско ограничење“ пратеће апликације). Поставите на 0 да бисте их задржали док их не одбаците. Подразумевано: 0.",
-          "notify_channel": "Android канал за обавештења пратеће апликације за статус, напредак уживо и обавештења о подсетницима. Звук и важност канала се конфигуришу у пратећој апликацији када се први пут користи назив канала - ВасхДата само поставља име канала. Оставите празно за подразумевану апликацију.",
-          "notify_finish_channel": "Одвојите Android канал за завршено упозорење (који се такође користи за подсетник и заговор за прање веша) како би могао да има свој звук. Оставите празно да поново користите канал изнад."
+          "energy_price_entity": "Izaberite numerički entitet koji drži trenutnu cenu električne energije (npr. senzor. cena_električne energije, broj_unosa. stopa_energije). Kada je podešeno, omogućava čuvar mesta {cost}. Ima prednost nad statičkom vrednošću ako su obe konfigurisane.",
+          "energy_price_static": "Fiksna cena električne energije po kVh. Kada je podešeno, omogućava čuvar mesta {cost}. Ignoriše se ako je entitet konfigurisan gore. Dodajte simbol valute u šablon poruke, npr. {cost} €.",
+          "notify_reminder_message": "Tekst jednokratnog podsetnika poslao je konfigurisani broj minuta pre procenjenog kraja. Za razliku od ponavljajućih ažuriranja uživo iznad. Podržava čuvare mesta {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Automatski odbaci obaveštenja posle ovoliko sekundi (prosleđuje se kao „vremensko ograničenje“ prateće aplikacije). Postavite na 0 da biste ih zadržali dok ih ne odbacite. Podrazumevano: 0.",
+          "notify_channel": "Android kanal za obaveštenja prateće aplikacije za status, napredak uživo i obaveštenja o podsetnicima. Zvuk i važnost kanala se konfigurišu u pratećoj aplikaciji kada se prvi put koristi naziv kanala - WashData samo postavlja ime kanala. Ostavite prazno za podrazumevanu aplikaciju.",
+          "notify_finish_channel": "Odvojite Android kanal za završeno upozorenje (koji se takođe koristi za podsetnik i zagovor za pranje veša) kako bi mogao da ima svoj zvuk. Ostavite prazno da ponovo koristite kanal iznad."
         }
       },
       "advanced_settings": {
@@ -214,7 +214,7 @@
               "profile_unmatch_threshold": "Prag nepodudaranja profila",
               "auto_label_confidence": "Pouzdanost automatske oznake (0–1)",
               "learning_confidence": "Pouzdanost zahteva za povratne informacije (0–1)",
-              "suppress_feedback_notifications": "Поништи обавештења о повратним информацијама",
+              "suppress_feedback_notifications": "Poništi obaveštenja o povratnim informacijama",
               "duration_tolerance": "Tolerancija trajanja (0–0,5)",
               "smoothing_window": "Prozor za izglađivanje (uzorci)",
               "profile_duration_tolerance": "Tolerancija trajanja podudaranja profila (0–0,5)"
@@ -226,7 +226,7 @@
               "profile_unmatch_threshold": "DTW rezultat sličnosti (0,0–1,0) ispod kojeg se profil koji se prethodno podudario odbacuje. Trebalo bi da bude niže od praga podudaranja da spreči treperenje. Podrazumevano: 0,35.",
               "auto_label_confidence": "Automatski označi cikluse na ili iznad ove pouzdanosti po završetku (0,0–1,0).",
               "learning_confidence": "Minimalna pouzdanost za zahtev za verifikaciju korisnika putem događaja (0,0–1,0).",
-              "suppress_feedback_notifications": "Када је омогућен, ВасхДата ће и даље интерно пратити и захтевати повратне информације, али неће приказивати стална обавештења која од вас траже да потврдите циклусе. Корисно када се циклуси увек исправно детектују и ако вам упутства ометају.",
+              "suppress_feedback_notifications": "Kada je omogućen, WashData će i dalje interno pratiti i zahtevati povratne informacije, ali neće prikazivati stalna obaveštenja koja od vas traže da potvrdite cikluse. Korisno kada se ciklusi uvek ispravno detektuju i ako vam uputstva ometaju.",
               "duration_tolerance": "Tolerancija za procene preostalog vremena tokom rada (0,0–0,5 odgovara 0–50%).",
               "smoothing_window": "Broj nedavnih očitavanja snage korišćenih za izravnavanje pokretnog proseka.",
               "profile_duration_tolerance": "Tolerancija koja se koristi za podudaranje profila za ukupnu varijansu trajanja (0,0–0,5). Podrazumevano ponašanje: ±25%."
@@ -272,14 +272,14 @@
             "name": "Detekcija odloženog starta",
             "description": "Trajan standby sa malom potrošnjom tretiraj kao stanje 'Čekanje na početak' dok ciklus stvarno ne počne.",
             "data": {
-              "delay_start_detect_enabled": "Омогући откривање одложеног старта",
+              "delay_start_detect_enabled": "Omogući otkrivanje odloženog starta",
               "delay_confirm_seconds": "Odloženi start: vreme potvrde standby režima (s)",
-              "delay_timeout_hours": "Одложен почетак: максимално време чекања (х)"
+              "delay_timeout_hours": "Odložen početak: maksimalno vreme čekanja (h)"
             },
             "data_description": {
-              "delay_start_detect_enabled": "Када је омогућено, кратак скок одвода мале снаге праћен сталним напајањем у стању приправности детектује се као одложени почетак. Сензор стања показује 'Ваитинг то Старт' током кашњења. Не прати се време програма или напредак све док циклус заправо не почне. Захтева да се старт_тхресхолд_в постави изнад снаге одводног скока.",
+              "delay_start_detect_enabled": "Kada je omogućeno, kratak skok odvoda male snage praćen stalnim napajanjem u stanju pripravnosti detektuje se kao odloženi početak. Senzor stanja pokazuje 'Vaiting to Start' tokom kašnjenja. Ne prati se vreme programa ili napredak sve dok ciklus zapravo ne počne. Zahteva da se start_threshold_v postavi iznad snage odvodnog skoka.",
               "delay_confirm_seconds": "Snaga mora ostati između praga zaustavljanja (W) i praga pokretanja (W) ovoliko sekundi pre nego što WashData pređe u stanje 'Čekanje na početak'. Time se filtriraju kratki vrhovi tokom kretanja kroz meni. Podrazumevano: 60 s.",
-              "delay_timeout_hours": "Безбедносно истекло: ако је машина и даље у „Чекању на покретање“ после оволико сати, ВасхДата се враћа на Офф. Подразумевано: 8 х."
+              "delay_timeout_hours": "Bezbednosno isteklo: ako je mašina i dalje u „Čekanju na pokretanje“ posle ovoliko sati, WashData se vraća na Off. Podrazumevano: 8 h."
             }
           },
           "external_triggers_section": {
@@ -289,39 +289,39 @@
               "external_end_trigger_enabled": "Omogući spoljni okidač za završetak ciklusa",
               "external_end_trigger": "Spoljni senzor kraja ciklusa",
               "external_end_trigger_inverted": "Invertovana logika okidača (okidač je isključen)",
-              "door_sensor_entity": "Доор Сенсор",
-              "pause_cuts_power": "Искључите напајање приликом паузе",
-              "switch_entity": "Пребаците ентитет (за паузирање искључења струје)",
-              "notify_unload_delay_minutes": "Кашњење обавештења о чекању веша (мин)"
+              "door_sensor_entity": "Door Sensor",
+              "pause_cuts_power": "Isključite napajanje prilikom pauze",
+              "switch_entity": "Prebacite entitet (za pauziranje isključenja struje)",
+              "notify_unload_delay_minutes": "Kašnjenje obaveštenja o čekanju veša (min)"
             },
             "data_description": {
               "external_end_trigger_enabled": "Omogući praćenje spoljnog binarnog senzora da pokrene završetak ciklusa.",
               "external_end_trigger": "Izaberi entitet binarnog senzora. Kada se ovaj senzor aktivira, trenutni ciklus će se završiti sa statusom 'završeno'.",
               "external_end_trigger_inverted": "Podrazumevano, okidač se aktivira kada se senzor uključi. Označi ovo polje da se aktivira kada se senzor isključi.",
-              "door_sensor_entity": "Опциони бинарни сензор за врата машине (укључено = отворено, искључено = затворено). Када се врата отворе током активног циклуса, ВасхДата ће потврдити да је циклус намерно паузиран. Након завршетка циклуса, ако су врата и даље затворена, стање се мења у 'Цлеан' док се врата не отворе. Напомена: затварање врата НЕ наставља аутоматски паузирани циклус - наставак се мора покренути ручно преко дугмета Настави циклус или услуге.",
-              "pause_cuts_power": "Када паузирате преко дугмета Паусе Цицле или услуге, такође искључите конфигурисани ентитет прекидача. Ступа на снагу само ако је ентитет прекидача конфигурисан за овај уређај.",
-              "switch_entity": "Ентитет прекидача за пребацивање када паузирате или настављате. Обавезно када је омогућено „Прекини напајање при паузирању“.",
-              "notify_unload_delay_minutes": "Пошаљите обавештење путем канала обавештења о завршетку након што се циклус заврши и врата нису била отворена оволико минута (захтева сензор врата). Поставите на 0 да бисте онемогућили. Подразумевано: 60 мин."
+              "door_sensor_entity": "Opcioni binarni senzor za vrata mašine (uključeno = otvoreno, isključeno = zatvoreno). Kada se vrata otvore tokom aktivnog ciklusa, WashData će potvrditi da je ciklus namerno pauziran. Nakon završetka ciklusa, ako su vrata i dalje zatvorena, stanje se menja u 'Clean' dok se vrata ne otvore. Napomena: zatvaranje vrata NE nastavlja automatski pauzirani ciklus - nastavak se mora pokrenuti ručno preko dugmeta Nastavi ciklus ili usluge.",
+              "pause_cuts_power": "Kada pauzirate preko dugmeta Pause Cicle ili usluge, takođe isključite konfigurisani entitet prekidača. Stupa na snagu samo ako je entitet prekidača konfigurisan za ovaj uređaj.",
+              "switch_entity": "Entitet prekidača za prebacivanje kada pauzirate ili nastavljate. Obavezno kada je omogućeno „Prekini napajanje pri pauziranju“.",
+              "notify_unload_delay_minutes": "Pošaljite obaveštenje putem kanala obaveštenja o završetku nakon što se ciklus završi i vrata nisu bila otvorena ovoliko minuta (zahteva senzor vrata). Postavite na 0 da biste onemogućili. Podrazumevano: 60 min."
             }
           },
           "pump_section": {
             "name": "Nadzor pumpe",
             "description": "Samo za uređaje tipa pumpa. Pokreće događaj ako ciklus pumpe traje duže od ovog vremena.",
             "data": {
-              "pump_stuck_duration": "Праг (с) упозорења застоја пумпе (само пумпа)"
+              "pump_stuck_duration": "Prag (s) upozorenja zastoja pumpe (samo pumpa)"
             },
             "data_description": {
-              "pump_stuck_duration": "Ако циклус пумпе и даље ради након оволико секунди, догађај ха_васхдата_пумп_стуцк се покреће једном. Користите ово за откривање заглављеног мотора (типични рад пумпе је испод 60 с). Подразумевано: 1800 с (30 мин). Само тип уређаја за пумпу."
+              "pump_stuck_duration": "Ako ciklus pumpe i dalje radi nakon ovoliko sekundi, događaj ha_vashdata_pump_stuck se pokreće jednom. Koristite ovo za otkrivanje zaglavljenog motora (tipični rad pumpe je ispod 60 s). Podrazumevano: 1800 s (30 min). Samo tip uređaja za pumpu."
             }
           },
           "device_link_section": {
-            "name": "Девице Линк",
-            "description": "Опционо повежите овај ВасхДата уређај са постојећим Home Assistant уређајем (на пример, паметним утикачем или самим уређајем). ВасхДата уређај се тада приказује као „Повезан преко“ тог уређаја. Оставите празно да бисте задржали ВасхДата као самосталан уређај.",
+            "name": "Device Link",
+            "description": "Opciono povežite ovaj WashData uređaj sa postojećim Home Assistant uređajem (na primer, pametnim utikačem ili samim uređajem). WashData uređaj se tada prikazuje kao „Povezan preko“ tog uređaja. Ostavite prazno da biste zadržali WashData kao samostalan uređaj.",
             "data": {
-              "linked_device": "Повезани уређај"
+              "linked_device": "Povezani uređaj"
             },
             "data_description": {
-              "linked_device": "Изаберите уређај са којим ћете повезати ВасхДата. Ово додаје референцу „Повезано путем“ у регистар уређаја; ВасхДата чува сопствену картицу уређаја и ентитете. Обришите избор да бисте уклонили везу."
+              "linked_device": "Izaberite uređaj sa kojim ćete povezati WashData. Ovo dodaje referencu „Povezano putem“ u registar uređaja; WashData čuva sopstvenu karticu uređaja i entitete. Obrišite izbor da biste uklonili vezu."
             }
           }
         }
@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automatski označi stare cikluse",
-        "description": "Укупно је пронађено {total_count} циклуса. Профили: {profiles}",
+        "description": "Ukupno je pronađeno {total_count} ciklusa. Profili: {profiles}",
         "data": {
           "confidence_threshold": "Minimalna pouzdanost (0,50–0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Obrada istorije (spajanje/deljenje)",
-        "description": "Очистите историју циклуса спајањем фрагментираних циклуса и раздвајањем погрешно спојених циклуса унутар временског прозора. Унесите број сати да погледате уназад (користите 999999 за све).",
+        "description": "Očistite istoriju ciklusa spajanjem fragmentiranih ciklusa i razdvajanjem pogrešno spojenih ciklusa unutar vremenskog prozora. Unesite broj sati da pogledate unazad (koristite 999999 za sve).",
         "data": {
           "time_range": "Period pregleda unazad (sati)",
           "gap_seconds": "Praznina spajanja/deljenja (sekunde)"
         },
         "data_description": {
-          "time_range": "Број сати за скенирање фрагментираних циклуса за спајање. Користите 999999 за обраду свих историјских података.",
+          "time_range": "Broj sati za skeniranje fragmentiranih ciklusa za spajanje. Koristite 999999 za obradu svih istorijskih podataka.",
           "gap_seconds": "Prag za odlučivanje o deljenju u odnosu na spajanje. Praznine KRAĆE od ovoga se spajaju. Praznine DUŽE od ovoga se dele. Smanji ovo da prisiliš deljenje ciklusa koji je pogrešno spojen."
         }
       },
@@ -738,18 +738,18 @@
       },
       "trim_cycle_start": {
         "title": "Postavi početak isecanja",
-        "description": "Прозор циклуса: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nТренутни почетак: **{current_wallclock}** (+{current_offset_min} мин од почетка циклуса)\n\nИзаберите ново време почетка користећи бирач сата у наставку.",
+        "description": "Prozor ciklusa: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nTrenutni početak: **{current_wallclock}** (+{current_offset_min} min od početka ciklusa)\n\nIzaberite novo vreme početka koristeći birač sata u nastavku.",
         "data": {
-          "trim_start_time": "Ново време почетка",
-          "trim_start_min": "Нови почетак (минути од почетка циклуса)"
+          "trim_start_time": "Novo vreme početka",
+          "trim_start_min": "Novi početak (minuti od početka ciklusa)"
         }
       },
       "trim_cycle_end": {
         "title": "Postavi kraj isecanja",
-        "description": "Прозор циклуса: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nТренутни крај: **{current_wallclock}** (+{current_offset_min} мин од почетка циклуса)\n\nИзаберите ново време завршетка користећи бирач сата у наставку.",
+        "description": "Prozor ciklusa: {cycle_start_wallclock} → {cycle_end_wallclock}\n\nTrenutni kraj: **{current_wallclock}** (+{current_offset_min} min od početka ciklusa)\n\nIzaberite novo vreme završetka koristeći birač sata u nastavku.",
         "data": {
-          "trim_end_time": "Ново време завршетка",
-          "trim_end_min": "Нови крај (минути од почетка циклуса)"
+          "trim_end_time": "Novo vreme završetka",
+          "trim_end_min": "Novi kraj (minuti od početka ciklusa)"
         }
       }
     },
@@ -779,9 +779,9 @@
       "trim_failed": "Isecanje nije uspelo. Ciklus možda više ne postoji ili je prozor prazan.",
       "invalid_split_timestamp": "Vremenska oznaka je nevažeća ili je van prozora ciklusa. Koristi HH:MM ili HH:MM:SS unutar prozora ciklusa.",
       "no_split_segments_found": "Iz ovih vremenskih oznaka nije bilo moguće napraviti važeće segmente. Proveri da je svaka vremenska oznaka unutar prozora ciklusa i da segmenti traju najmanje 1 minut.",
-      "auto_tune_suggestion": "{device_type} {device_title} је открио циклусе духова. Предложена промена мин_повер: {current_min}В -> {new_min}В (не примењује се аутоматски).",
-      "auto_tune_title": "ВасхДата Ауто-Туне",
-      "auto_tune_fallback": "{device_type} {device_title} је открио циклусе духова. Предложена промена мин_повер: {current_min}В -> {new_min}В (не примењује се аутоматски)."
+      "auto_tune_suggestion": "{device_type} {device_title} je otkrio cikluse duhova. Predložena promena min_pover: {current_min}V -> {new_min}V (ne primenjuje se automatski).",
+      "auto_tune_title": "WashData Auto-Tune",
+      "auto_tune_fallback": "{device_type} {device_title} je otkrio cikluse duhova. Predložena promena min_pover: {current_min}V -> {new_min}V (ne primenjuje se automatski)."
     },
     "abort": {
       "no_cycles_found": "Nisu pronađeni ciklusi",
@@ -890,10 +890,10 @@
         "table_detected_program": "Otkriveni program",
         "table_confidence": "Pouzdanost",
         "table_reported": "Prijavljeno",
-        "phase_builtin_suffix": "(уграђено)",
-        "phase_none_available": "Нема доступних фаза.",
-        "settings_deprecation_warning": "⚠ **Застарели тип уређаја:** {device_type} је заказано за уклањање у будућем издању. Подударни цевовод ВасхДата не даје поуздане резултате за ову класу уређаја. Ваша интеграција наставља да функционише током периода застарелости; да бисте утишали ово упозорење, пребаците **Тип уређаја** у наставку на један од подржаних типова (машина за прање веша, машина за сушење, комбинована машина за прање и сушење, машина за прање судова, фритеза за ваздух, пекач хлеба или пумпа) или на **Остало (напредно)** ако ваш уређај не одговара ниједном од подржаних типова. **Остало (напредно)** намерно испоручује генеричке подразумеване вредности које нису подешене за било који одређени уређај, тако да ћете морати сами да конфигуришете прагове, временска ограничења и одговарајуће параметре; сва ваша постојећа подешавања су сачувана када се пребаците.",
-        "phase_other_device_types": "Други типови уређаја:"
+        "phase_builtin_suffix": "(ugrađeno)",
+        "phase_none_available": "Nema dostupnih faza.",
+        "settings_deprecation_warning": "⚠ **Zastareli tip uređaja:** {device_type} je zakazano za uklanjanje u budućem izdanju. Podudarni cevovod WashData ne daje pouzdane rezultate za ovu klasu uređaja. Vaša integracija nastavlja da funkcioniše tokom perioda zastarelosti; da biste utišali ovo upozorenje, prebacite **Tip uređaja** u nastavku na jedan od podržanih tipova (mašina za pranje veša, mašina za sušenje, kombinovana mašina za pranje i sušenje, mašina za pranje sudova, friteza za vazduh, pekač hleba ili pumpa) ili na **Ostalo (napredno)** ako vaš uređaj ne odgovara nijednom od podržanih tipova. **Ostalo (napredno)** namerno isporučuje generičke podrazumevane vrednosti koje nisu podešene za bilo koji određeni uređaj, tako da ćete morati sami da konfigurišete pragove, vremenska ograničenja i odgovarajuće parametre; sva vaša postojeća podešavanja su sačuvana kada se prebacite.",
+        "phase_other_device_types": "Drugi tipovi uređaja:"
       }
     },
     "interactive_editor_action": {
@@ -1000,18 +1000,18 @@
     },
     "device_type": {
       "options": {
-        "washing_machine": "Машина за прање веша",
-        "dryer": "Сушач",
-        "washer_dryer": "Комбинована машина за прање и сушење",
-        "dishwasher": "Машина за прање судова",
-        "coffee_machine": "Апарат за кафу (застарео)",
-        "ev": "Електрично возило (застарело)",
-        "air_fryer": "Аир Фриер",
-        "heat_pump": "Топлотна пумпа (застарело)",
-        "bread_maker": "Бреад Макер",
-        "pump": "Пумпа / Сумп Пумпа",
-        "oven": "Рерна (застарела)",
-        "other": "Друго (напредно)"
+        "washing_machine": "Mašina za pranje veša",
+        "dryer": "Sušač",
+        "washer_dryer": "Kombinovana mašina za pranje i sušenje",
+        "dishwasher": "Mašina za pranje sudova",
+        "coffee_machine": "Aparat za kafu (zastareo)",
+        "ev": "Električno vozilo (zastarelo)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Toplotna pumpa (zastarelo)",
+        "bread_maker": "Bread Maker",
+        "pump": "Pumpa / Sump Pumpa",
+        "oven": "Rerna (zastarela)",
+        "other": "Drugo (napredno)"
       }
     }
   },
@@ -1189,22 +1189,22 @@
       }
     },
     "pause_cycle": {
-      "name": "Паузирај циклус",
-      "description": "Паузирајте активни циклус за ВасхДата уређај.",
+      "name": "Pauziraj ciklus",
+      "description": "Pauzirajte aktivni ciklus za WashData uređaj.",
       "fields": {
         "device_id": {
-          "name": "Уређај",
-          "description": "Уређај ВасхДата за паузирање."
+          "name": "Uređaj",
+          "description": "Uređaj WashData za pauziranje."
         }
       }
     },
     "resume_cycle": {
-      "name": "Настави циклус",
-      "description": "Наставите паузирани циклус за ВасхДата уређај.",
+      "name": "Nastavi ciklus",
+      "description": "Nastavite pauzirani ciklus za WashData uređaj.",
       "fields": {
         "device_id": {
-          "name": "Уређај",
-          "description": "Уређај ВасхДата за наставак."
+          "name": "Uređaj",
+          "description": "Uređaj WashData za nastavak."
         }
       }
     }
@@ -1231,12 +1231,12 @@
           "ending": "Završava se",
           "finished": "Završeno",
           "anti_wrinkle": "Zaštita od gužvanja",
-          "delay_wait": "Чека се почетак",
+          "delay_wait": "Čeka se početak",
           "interrupted": "Prekinuto",
           "force_stopped": "Prisilno zaustavljeno",
           "rinse": "Ispiranje",
           "unknown": "Nepoznato",
-          "clean": "Чисто"
+          "clean": "Čisto"
         }
       },
       "washer_program": {
@@ -1283,10 +1283,10 @@
         "name": "Dostupna predložena podešavanja"
       },
       "pump_runs_today": {
-        "name": "Пумпа ради (последња 24 х)"
+        "name": "Pumpa radi (poslednja 24 h)"
       },
       "cycle_count": {
-        "name": "Број циклуса"
+        "name": "Broj ciklusa"
       }
     },
     "select": {
@@ -1302,22 +1302,22 @@
         "name": "Prisilno završi ciklus"
       },
       "pause_cycle": {
-        "name": "Паузирај циклус"
+        "name": "Pauziraj ciklus"
       },
       "resume_cycle": {
-        "name": "Настави циклус"
+        "name": "Nastavi ciklus"
       }
     }
   },
   "exceptions": {
     "device_id_required": {
-      "message": "Неопходан је важећи ИД уређаја."
+      "message": "Neophodan je važeći ID uređaja."
     },
     "cycle_id_required": {
-      "message": "Потребан је важећи ид_циклуса."
+      "message": "Potreban je važeći id_ciklusa."
     },
     "profile_name_required": {
-      "message": "Потребно је важеће име_профила."
+      "message": "Potrebno je važeće ime_profila."
     },
     "device_not_found": {
       "message": "Uređaj nije pronađen."
