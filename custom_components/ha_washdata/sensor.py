@@ -360,16 +360,14 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
             key="time_remaining",
             translation_key="time_remaining",
             device_class=SensorDeviceClass.DURATION,
+            # Declare the unit statically (not as a state-dependent property) so
+            # Home Assistant always sees a duration entity and offers the
+            # duration display-format options, even while the appliance is idle
+            # and the value is unknown (see issue #261).
+            native_unit_of_measurement="min",
             icon="mdi:timer-sand",
         )
         super().__init__(manager, entry)
-
-    @property
-    def native_unit_of_measurement(self) -> str | None:  # type: ignore[override]
-        """Return the unit of measurement."""
-        if self._manager.check_state() in (STATE_OFF, STATE_ANTI_WRINKLE, STATE_DELAY_WAIT):
-            return None
-        return "min"
 
     @property
     def native_value(self):  # type: ignore[override]
@@ -389,16 +387,12 @@ class WasherTotalDurationSensor(WasherBaseSensor):
             key="total_duration",
             translation_key="total_duration",
             device_class=SensorDeviceClass.DURATION,
+            # See WasherTimeRemainingSensor / issue #261: keep the unit static so
+            # the duration display-format options are available even while idle.
+            native_unit_of_measurement="min",
             icon="mdi:timer-check-outline",
         )
         super().__init__(manager, entry)
-
-    @property
-    def native_unit_of_measurement(self) -> str | None:  # type: ignore[override]
-        """Return the unit of measurement."""
-        if self._manager.check_state() == STATE_OFF:
-            return None
-        return "min"
 
     @property
     def native_value(self):  # type: ignore[override]
