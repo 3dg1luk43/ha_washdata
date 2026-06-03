@@ -1900,11 +1900,9 @@ class WashDataManager:
                 self._is_clean_state = False
                 self._clean_state_start = None
                 self._notified_clean_laundry = False
-                # Purge any deferred clean-laundry notifications from the queue
-                self._pending_notifications = [
-                    n for n in self._pending_notifications
-                    if n.get("event_type") != NOTIFY_EVENT_CLEAN
-                ]
+                # Dismiss a delivered clean reminder (and purge any queued ones)
+                # so it does not linger on the phone after the laundry is taken.
+                self._clear_clean_notification()
                 self._notify_update()
             elif self.detector.state in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
                 # Door opened during active cycle → soft pause confirmation
@@ -3670,6 +3668,47 @@ class WashDataManager:
 
         # Reset live-update state flags and counters.
         self._reset_live_notification_state()
+
+    def _clear_clean_notification(self) -> None:
+        """Dismiss a delivered clean-laundry reminder and purge any queued ones.
+
+        The clean nag uses its own tag (``_clean_tag``) rather than the lifecycle
+        tag, so nothing replaces it once the clean state resolves. Mirror the
+        lifecycle clear here so a delivered reminder is removed from the mobile
+        app instead of lingering. A clear for a non-existent tag is harmless, so
+        this runs whenever the user has any clean/finish delivery configured.
+        """
+        # Drop any still-queued clean entries so they cannot replay later.
+        self._pending_notifications = [
+            n for n in self._pending_notifications
+            if n.get("event_type") != NOTIFY_EVENT_CLEAN
+        ]
+
+        services = self._get_services_for_event(NOTIFY_EVENT_CLEAN)
+        if not services and not self._notify_actions:
+            return
+
+        if self._notify_actions:
+            self._run_notification_actions(
+                {
+                    "device": self.config_entry.title,
+                    "program": "",
+                    "message": "clear_notification",
+                    "title": "",
+                    "icon": None,
+                    "event_type": NOTIFY_EVENT_CLEAN,
+                    "person_entity_id": None,
+                    "person_name": None,
+                    "tag": self._clean_tag,
+                }
+            )
+        if services:
+            self._send_notification_service(
+                "clear_notification",
+                services=services,
+                event_type=NOTIFY_EVENT_CLEAN,
+                extra_vars={"tag": self._clean_tag},
+            )
 
     def _check_pre_completion_notification(self) -> None:
         """Check and send pre-completion notification."""

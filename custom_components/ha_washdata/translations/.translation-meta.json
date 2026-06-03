@@ -3753,6 +3753,21 @@
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "3b99971ede0aaf7a",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "09d969ca84d54547",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "61ee7895dd6231cd",
+        "origin": "machine"
       }
     },
     "bs": {
@@ -3770,12 +3785,42 @@
         "src": "08303382bc087c9b",
         "val": "08303382bc087c9b",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "2941c1c04cb85f3a",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "76f6c5352d86854a",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "0124325aff09b12b",
+        "origin": "machine"
       }
     },
     "ca": {
       "minutes": {
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "6380bc33fbdad02d",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "c678b645fbf5641b",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "08dedd5ae04960af",
         "origin": "machine"
       }
     },
@@ -3784,12 +3829,42 @@
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "b3b91dcc446182c0",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "5d9a6c50610c196e",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "96ff8993b8ff8ee1",
+        "origin": "machine"
       }
     },
     "cy": {
       "minutes": {
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "ce3448d60f86755f",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "24197c881779c2a3",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "6a6d60370300a220",
         "origin": "machine"
       }
     },
@@ -3803,6 +3878,21 @@
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "f99aaa64fc477e91",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "0455f3fe3b4d9f3a",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "351c562dd2bcba40",
+        "origin": "machine"
       }
     },
     "de": {
@@ -3815,12 +3905,42 @@
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "1a888f718f10a349",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "75ccc2e21a09a559",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "3ef465fbe1b282c4",
+        "origin": "machine"
       }
     },
     "et": {
       "minutes": {
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "ed77074a2358743a",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "cad687216715da8a",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "35ae1d09c80d8398",
         "origin": "machine"
       }
     },
@@ -3829,6 +3949,21 @@
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "4c0d27b1298f3ce9",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "873a260ba4108788",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "728bb0f481c8ad60",
+        "origin": "machine"
       }
     },
     "fi": {
@@ -3836,12 +3971,42 @@
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "affe58c310117614",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "d9aabe6164c2dabc",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "e2f0bd78ca1d688c",
+        "origin": "machine"
       }
     },
     "fr": {
       "minutes": {
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "9ea21d5bb5fe3a76",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "8c2404ebc81f234d",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "0f4730dc13bb7531",
         "origin": "machine"
       }
     },
@@ -3870,12 +4035,42 @@
         "src": "ab106677edc710cd",
         "val": "ab106677edc710cd",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "d3420cca05c5d5a8",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "97f624701ac2cab5",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "77d4b05855119528",
+        "origin": "machine"
       }
     },
     "gl": {
       "minutes": {
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "d78b060fc4df7057",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "628988efb8ace444",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "bd8a7d6ed7dfd480",
         "origin": "machine"
       }
     },
@@ -3888,6 +4083,21 @@
       "status": {
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "a7585383b1eb561b",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "f2a3968964cd313d",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "3ef465fbe1b282c4",
         "origin": "machine"
       }
     },
@@ -3906,12 +4116,42 @@
         "src": "08303382bc087c9b",
         "val": "08303382bc087c9b",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "2941c1c04cb85f3a",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "79cba4ccb10ba9cd",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "eddc48b6412247e4",
+        "origin": "machine"
       }
     },
     "hu": {
       "minutes": {
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "46b7242b6d6800c4",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "95b6e9d77e4730dd",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "d1bb3b30c0698618",
         "origin": "machine"
       }
     },
@@ -3920,12 +4160,42 @@
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "3d2926e8e3f97268",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "0872c43738981561",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "11927a706936aef6",
+        "origin": "machine"
       }
     },
     "it": {
       "minutes": {
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "87e07713a0bfe969",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "0be536d0eaf873ec",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "9e0deaaef8334399",
         "origin": "machine"
       }
     },
@@ -3939,12 +4209,42 @@
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "28d068ee447184da",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "b92a73dc854f9206",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "4b1626b5887565c6",
+        "origin": "machine"
       }
     },
     "lt": {
       "minutes": {
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "0ad809a0ce24a5a7",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "14311d614c6accbf",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "a520f16a6faefe03",
         "origin": "machine"
       }
     },
@@ -3958,6 +4258,21 @@
         "src": "1b90271d66cf2d3a",
         "val": "1b90271d66cf2d3a",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "bacc602df3c68fe4",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "1808f69fc08f9b41",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "d3d573e0dce7a857",
+        "origin": "machine"
       }
     },
     "nb": {
@@ -3969,6 +4284,21 @@
       "status": {
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "241bbe7a28a9aaa8",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "0455f3fe3b4d9f3a",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "89ee3d7d28e72a22",
         "origin": "machine"
       }
     },
@@ -3987,6 +4317,21 @@
         "src": "716f63b96e0c2632",
         "val": "716f63b96e0c2632",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "fce96f6c185f22c7",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "38ec5c4d4957fcfa",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "5e36e1e18937d38b",
+        "origin": "machine"
       }
     },
     "pl": {
@@ -3998,6 +4343,21 @@
       "status": {
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "75a67c8b1d24fc51",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "f0c966c3c2db84da",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "d538cbddd581bf15",
         "origin": "machine"
       }
     },
@@ -4011,6 +4371,21 @@
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "52da8974f4ec27fa",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "03fa4bb1c0c51cbb",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "268d3494ad95e7f3",
+        "origin": "machine"
       }
     },
     "pt-BR": {
@@ -4023,6 +4398,21 @@
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "52da8974f4ec27fa",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "03fa4bb1c0c51cbb",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "268d3494ad95e7f3",
+        "origin": "machine"
       }
     },
     "ro": {
@@ -4030,12 +4420,42 @@
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "1608872d3d460c09",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "6abe0ec15790090f",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "28861cf3acdf8813",
+        "origin": "machine"
       }
     },
     "sk": {
       "minutes": {
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "54925846857a7607",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "d94475f59310e685",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "58a9f74a305ffc56",
         "origin": "machine"
       }
     },
@@ -4049,12 +4469,42 @@
         "src": "08303382bc087c9b",
         "val": "08303382bc087c9b",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "c052d0a5a924dcce",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "07ba5b892881fa05",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "e9348c5c94b10c4a",
+        "origin": "machine"
       }
     },
     "sq": {
       "minutes": {
         "src": "b6c935d4f3c7b220",
         "val": "b6c935d4f3c7b220",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "3f98fe837cd69c53",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "bb26490f0b84c7cb",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "2b6889329cdabc8c",
         "origin": "machine"
       }
     },
@@ -4068,12 +4518,518 @@
         "src": "bae7d5be70820ed5",
         "val": "bae7d5be70820ed5",
         "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "fd0f1bedb4f50003",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "de8e9080c6699c67",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "647b01e4e9326909",
+        "origin": "machine"
       }
     },
     "uk": {
       "status_entity": {
         "src": "bcbb6bff443af7df",
         "val": "bcbb6bff443af7df",
+        "origin": "machine"
+      },
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "3e36ac738266908a",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "14736c8125314057",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "0b9d37f2f00f7a65",
+        "origin": "machine"
+      }
+    },
+    "ar": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "483c816de3a7f039",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "bfc3318bde36322a",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "5756826926efbec6",
+        "origin": "machine"
+      }
+    },
+    "bg": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "1861f38b0d7f132c",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "b4860bf2bc3eb01a",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "1778303a61ae5539",
+        "origin": "machine"
+      }
+    },
+    "bn": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "66d772fd72ee9912",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "b89ea0b3109cbf12",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "fb92f3e1c9bc2a3b",
+        "origin": "machine"
+      }
+    },
+    "el": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "afff6c43bf3d4a07",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "86183af6b20a880d",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "6280734b3047f1dd",
+        "origin": "machine"
+      }
+    },
+    "eo": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "8c85d6505c46e5d0",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "cbf0bafe90030444",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "4e86138b87663479",
+        "origin": "machine"
+      }
+    },
+    "es": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "9ab0be24e24e8e5c",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "40e08a8a42a0ad36",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "64a8d318d8789780",
+        "origin": "machine"
+      }
+    },
+    "es-419": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "9ab0be24e24e8e5c",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "40e08a8a42a0ad36",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "64a8d318d8789780",
+        "origin": "machine"
+      }
+    },
+    "fa": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "a0f7a59049113aa9",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "201d3738e41a5513",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "40a744f62acfbb85",
+        "origin": "machine"
+      }
+    },
+    "ga": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "3e3ce389b217d5a9",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "96a88e166397e23a",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "ac076e3f0c2ca307",
+        "origin": "machine"
+      }
+    },
+    "he": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "e4e09e67f68ffef7",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "1bef06724d2a5617",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "43d87535ae2a6169",
+        "origin": "machine"
+      }
+    },
+    "hi": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "cc74133d3062ec76",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "ddf3c44215a9ca15",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "7aefcb1754dd220e",
+        "origin": "machine"
+      }
+    },
+    "hy": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "25af3433f20f0e95",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "8f3461ba9910d4e3",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "41e2bd14f30ef305",
+        "origin": "machine"
+      }
+    },
+    "is": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "26b8782d3fe6a6c2",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "9a0ff88c462d4889",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "ccf081a3662fded7",
+        "origin": "machine"
+      }
+    },
+    "ja": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "afbe64ea83fcd871",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "13c3438c1ca245a7",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "8ac6a80f263546e4",
+        "origin": "machine"
+      }
+    },
+    "ka": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "bb04125b317a4b03",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "7d3a3f66f34d079d",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "3f559391115f81c1",
+        "origin": "machine"
+      }
+    },
+    "ko": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "ed9286f9752a6772",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "ea81eb4dc902ba87",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "3e433f70711e0fd0",
+        "origin": "machine"
+      }
+    },
+    "mk": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "be479974eafb7db2",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "ff331763fcc100f3",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "b7a1713d796b344b",
+        "origin": "machine"
+      }
+    },
+    "ml": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "b786260285b23a80",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "b358892b0a97b7f4",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "bf6e85756dd04eaf",
+        "origin": "machine"
+      }
+    },
+    "ru": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "ff00595275943e14",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "a21df3c7f82a4ec4",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "1013eebbe24b0360",
+        "origin": "machine"
+      }
+    },
+    "sr-Latn": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "b0a38dcc5c202c83",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "3eacd5f644caa9f1",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "d02325f63d89ddc4",
+        "origin": "machine"
+      }
+    },
+    "ta": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "8d5949ce5cc05b18",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "5837f3a7f51e258a",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "d863393d936a1828",
+        "origin": "machine"
+      }
+    },
+    "te": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "c2306be687e5b3fa",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "1c79151437f3d86e",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "4e7ab747f4297971",
+        "origin": "machine"
+      }
+    },
+    "th": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "60cc60803c6e8d15",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "e9c8536e511799b7",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "8aa7fb4c6a4340ef",
+        "origin": "machine"
+      }
+    },
+    "tr": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "0a8bd01ef161a864",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "e81f890908bae598",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "2f78d7b0d6f21bc7",
+        "origin": "machine"
+      }
+    },
+    "ur": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "94c50b3c89d486a2",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "f1d42d927c7fd3bd",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "72aaaa39d20c1512",
+        "origin": "machine"
+      }
+    },
+    "vi": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "3d86a6e93f437add",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "cf7446c495ee982a",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "711d13aa776d1290",
+        "origin": "machine"
+      }
+    },
+    "zh-Hans": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "a2ca808795878f67",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "e504c58b05c0f347",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "e8113090dcc52d5d",
+        "origin": "machine"
+      }
+    },
+    "zh-Hant": {
+      "tap_action": {
+        "src": "d9914c3b2f14b3ac",
+        "val": "ed36ed31e03783de",
+        "origin": "machine"
+      },
+      "hold_action": {
+        "src": "d94475f59310e685",
+        "val": "781be2b99e5ac1f9",
+        "origin": "machine"
+      },
+      "double_tap_action": {
+        "src": "4b1626b5887565c6",
+        "val": "329d139677949670",
         "origin": "machine"
       }
     }
