@@ -1,6 +1,12 @@
 const CARD_TAG = "ha-washdata-card";
 const EDITOR_TAG = "ha-washdata-card-editor";
 
+// Gesture timing (ms) and movement tolerance (px) for tap / hold / double-tap,
+// chosen to match Home Assistant's own action handler conventions.
+const HOLD_MS = 500;
+const DOUBLE_TAP_MS = 250;
+const TAP_MOVE_TOLERANCE = 10;
+
 const TRANSLATIONS = {
   "en": {
     "washer_program": "Washer Program",
@@ -27,7 +33,10 @@ const TRANSLATIONS = {
     "display_mode": "Display Mode",
     "show_time_remaining": "Show Time Remaining",
     "show_percentage": "Show Percentage",
-    "entity_not_found": "Entity not found"
+    "entity_not_found": "Entity not found",
+    "tap_action": "Tap Action",
+    "hold_action": "Hold Action",
+    "double_tap_action": "Double Tap Action"
   },
   "af": {
     "washer_program": "Wasprogram",
@@ -54,7 +63,10 @@ const TRANSLATIONS = {
     "display_mode": "Vertoonmodus",
     "show_time_remaining": "Wys oorblywende tyd",
     "show_percentage": "Wys persentasie",
-    "entity_not_found": "Entiteit nie gevind nie"
+    "entity_not_found": "Entiteit nie gevind nie",
+    "tap_action": "Tik op Aksie",
+    "hold_action": "Hou Aksie",
+    "double_tap_action": "Dubbeltik-aksie"
   },
   "ar": {
     "washer_program": "برنامج الغساله",
@@ -81,7 +93,10 @@ const TRANSLATIONS = {
     "display_mode": "وضع العرض",
     "show_time_remaining": "عرض الوقت المتبقي",
     "show_percentage": "إظهار النسبة المئوية",
-    "entity_not_found": "لم يتم العثور على الكيان"
+    "entity_not_found": "لم يتم العثور على الكيان",
+    "tap_action": "اضغط على الإجراء",
+    "hold_action": "توقف",
+    "double_tap_action": "عمل مزدوج"
   },
   "bg": {
     "washer_program": "Програма за пране",
@@ -108,7 +123,10 @@ const TRANSLATIONS = {
     "display_mode": "Режим на показване",
     "show_time_remaining": "Показване на оставащото време",
     "show_percentage": "Показване на процента",
-    "entity_not_found": "Обектът не е намерен"
+    "entity_not_found": "Обектът не е намерен",
+    "tap_action": "Докосване на действие",
+    "hold_action": "Задръж действие",
+    "double_tap_action": "Двойно докосване"
   },
   "bn": {
     "washer_program": "ওয়াশার প্রোগ্রাম",
@@ -135,7 +153,10 @@ const TRANSLATIONS = {
     "display_mode": "প্রদর্শন মোড",
     "show_time_remaining": "অবশিষ্ট সময় দেখান",
     "show_percentage": "শতাংশ দেখান",
-    "entity_not_found": "সত্তা খুঁজে পাওয়া যায়নি"
+    "entity_not_found": "সত্তা খুঁজে পাওয়া যায়নি",
+    "tap_action": "কর্ম",
+    "hold_action": "কর্ম স্থগিত করুন",
+    "double_tap_action": "দুইবার ক্লিক কর্ম"
   },
   "bs": {
     "washer_program": "Program za pranje",
@@ -162,7 +183,10 @@ const TRANSLATIONS = {
     "display_mode": "Način prikaza",
     "show_time_remaining": "Prikaži preostalo vrijeme",
     "show_percentage": "Prikaži procenat",
-    "entity_not_found": "Entitet nije pronađen"
+    "entity_not_found": "Entitet nije pronađen",
+    "tap_action": "Dodirnite Akcija",
+    "hold_action": "Držite akciju",
+    "double_tap_action": "Dvostruki dodir Akcija"
   },
   "ca": {
     "washer_program": "Programa de rentadora",
@@ -189,7 +213,10 @@ const TRANSLATIONS = {
     "display_mode": "Mode de visualització",
     "show_time_remaining": "Mostra el temps restant",
     "show_percentage": "Mostra el percentatge",
-    "entity_not_found": "No s'ha trobat l'entitat"
+    "entity_not_found": "No s'ha trobat l'entitat",
+    "tap_action": "Acció de temps",
+    "hold_action": "Reté acció",
+    "double_tap_action": "Acció doble de temps"
   },
   "cs": {
     "washer_program": "Program pračky",
@@ -216,7 +243,10 @@ const TRANSLATIONS = {
     "display_mode": "Režim zobrazení",
     "show_time_remaining": "Zobrazit zbývající čas",
     "show_percentage": "Zobrazit procento",
-    "entity_not_found": "Entita nenalezena"
+    "entity_not_found": "Entita nenalezena",
+    "tap_action": "Klepněte na možnost Akce",
+    "hold_action": "Držet akci",
+    "double_tap_action": "Akce dvojitého klepnutí"
   },
   "cy": {
     "washer_program": "Rhaglen Wasier",
@@ -243,7 +273,10 @@ const TRANSLATIONS = {
     "display_mode": "Modd Arddangos",
     "show_time_remaining": "Dangos Amser ar ôl",
     "show_percentage": "Dangos Canran",
-    "entity_not_found": "Endid heb ei ganfod"
+    "entity_not_found": "Endid heb ei ganfod",
+    "tap_action": "Tap Gweithredu",
+    "hold_action": "Daliwch Weithredu",
+    "double_tap_action": "Gweithred Tap Dwbl"
   },
   "da": {
     "washer_program": "Vaskeprogram",
@@ -270,7 +303,10 @@ const TRANSLATIONS = {
     "display_mode": "Visningstilstand",
     "show_time_remaining": "Vis resterende tid",
     "show_percentage": "Vis procent",
-    "entity_not_found": "Enheden blev ikke fundet"
+    "entity_not_found": "Enheden blev ikke fundet",
+    "tap_action": "Tap på handling",
+    "hold_action": "Hold handling",
+    "double_tap_action": "Dobbelt tastehandling"
   },
   "de": {
     "washer_program": "Waschprogramm",
@@ -297,7 +333,10 @@ const TRANSLATIONS = {
     "display_mode": "Anzeigemodus",
     "show_time_remaining": "Verbleibende Zeit anzeigen",
     "show_percentage": "Prozentsatz anzeigen",
-    "entity_not_found": "Entität nicht gefunden"
+    "entity_not_found": "Entität nicht gefunden",
+    "tap_action": "Tippen Sie auf",
+    "hold_action": "Action spielen",
+    "double_tap_action": "Doppeltipp-Aktion"
   },
   "el": {
     "washer_program": "Πρόγραμμα πλύσης",
@@ -324,7 +363,10 @@ const TRANSLATIONS = {
     "display_mode": "Λειτουργία εμφάνισης",
     "show_time_remaining": "Εμφάνιση χρόνου που απομένει",
     "show_percentage": "Εμφάνιση ποσοστού",
-    "entity_not_found": "Η οντότητα δεν βρέθηκε"
+    "entity_not_found": "Η οντότητα δεν βρέθηκε",
+    "tap_action": "Πατήστε ενέργεια",
+    "hold_action": "Διατήρηση ενέργειας",
+    "double_tap_action": "Διπλή ενέργεια πατήματος"
   },
   "en-GB": {
     "washer_program": "Washer Program",
@@ -357,7 +399,7 @@ const TRANSLATIONS = {
     "washer_program": "Programo de Lavujo",
     "program_placeholder": "Elektu Programon",
     "duration": "Daŭro",
-    "minutes": "min",
+    "minutes": "Mi min",
     "time_remaining": "Tempo Restanta",
     "no_prediction": "Neniu Antaŭdiro",
     "cycle_in_progress": "Ciklo en progreso",
@@ -378,7 +420,10 @@ const TRANSLATIONS = {
     "display_mode": "Montra Reĝimo",
     "show_time_remaining": "Montru Restantan Tempon",
     "show_percentage": "Montru Procenton",
-    "entity_not_found": "Ento ne trovita"
+    "entity_not_found": "Ento ne trovita",
+    "tap_action": "Glubenda Ago",
+    "hold_action": "Tenu Agon",
+    "double_tap_action": "Duobla Tapa Ago"
   },
   "es": {
     "washer_program": "Programa de lavadora",
@@ -405,7 +450,10 @@ const TRANSLATIONS = {
     "display_mode": "Modo de visualización",
     "show_time_remaining": "Mostrar tiempo restante",
     "show_percentage": "Mostrar porcentaje",
-    "entity_not_found": "Entidad no encontrada"
+    "entity_not_found": "Entidad no encontrada",
+    "tap_action": "Toque Acción",
+    "hold_action": "Mantener acción",
+    "double_tap_action": "Doble toque de acción"
   },
   "es-419": {
     "washer_program": "Programa de lavadora",
@@ -432,7 +480,10 @@ const TRANSLATIONS = {
     "display_mode": "Modo de visualización",
     "show_time_remaining": "Mostrar tiempo restante",
     "show_percentage": "Mostrar porcentaje",
-    "entity_not_found": "Entidad no encontrada"
+    "entity_not_found": "Entidad no encontrada",
+    "tap_action": "Toque Acción",
+    "hold_action": "Mantener acción",
+    "double_tap_action": "Doble toque de acción"
   },
   "et": {
     "washer_program": "Pesumasina programm",
@@ -459,7 +510,10 @@ const TRANSLATIONS = {
     "display_mode": "Kuvamisrežiim",
     "show_time_remaining": "Näita järelejäänud aega",
     "show_percentage": "Näita protsenti",
-    "entity_not_found": "Üksust ei leitud"
+    "entity_not_found": "Üksust ei leitud",
+    "tap_action": "Puudutustoiming",
+    "hold_action": "Hoidke tegevust",
+    "double_tap_action": "Topeltpuutetoiming"
   },
   "eu": {
     "washer_program": "Garbigailuen programa",
@@ -486,7 +540,10 @@ const TRANSLATIONS = {
     "display_mode": "Bistaratzeko modua",
     "show_time_remaining": "Erakutsi falta den denbora",
     "show_percentage": "Erakutsi ehunekoa",
-    "entity_not_found": "Ez da aurkitu entitatea"
+    "entity_not_found": "Ez da aurkitu entitatea",
+    "tap_action": "Taparen ekintza",
+    "hold_action": "Mantendu ekintza",
+    "double_tap_action": "Tap bikoitzaren ekintza"
   },
   "fa": {
     "washer_program": "برنامه شستشو",
@@ -513,7 +570,10 @@ const TRANSLATIONS = {
     "display_mode": "حالت نمایش",
     "show_time_remaining": "نمایش زمان باقی مانده",
     "show_percentage": "نمایش درصد",
-    "entity_not_found": "موجودیت یافت نشد"
+    "entity_not_found": "موجودیت یافت نشد",
+    "tap_action": "ضربه زدن به Action",
+    "hold_action": "اقدام",
+    "double_tap_action": "عملکرد دو ضربه سریع"
   },
   "fi": {
     "washer_program": "Pesuohjelma",
@@ -523,11 +583,11 @@ const TRANSLATIONS = {
     "time_remaining": "Aikaa jäljellä",
     "no_prediction": "Ei ennustetta",
     "cycle_in_progress": "Kierto käynnissä",
-    "status": "Status",
+    "status": "Tila",
     "progress": "Edistyminen",
     "select_program": "Valitse ohjelma nähdäksesi tiedot",
     "title": "Otsikko",
-    "status_entity": "Status Entity",
+    "status_entity": "Tilayksikkö",
     "icon": "Kuvake",
     "active_color": "Aktiivinen kuvakkeen väri",
     "show_state": "Näytä tila",
@@ -540,7 +600,10 @@ const TRANSLATIONS = {
     "display_mode": "Näyttötila",
     "show_time_remaining": "Näytä jäljellä oleva aika",
     "show_percentage": "Näytä prosenttiosuus",
-    "entity_not_found": "Kokonaisuutta ei löydy"
+    "entity_not_found": "Kokonaisuutta ei löydy",
+    "tap_action": "Napauta toimintoa",
+    "hold_action": "Pidä toimintoa",
+    "double_tap_action": "Kaksoisnapaustoiminto"
   },
   "fr": {
     "washer_program": "Programme de laveuse",
@@ -567,7 +630,10 @@ const TRANSLATIONS = {
     "display_mode": "Mode d'affichage",
     "show_time_remaining": "Afficher le temps restant",
     "show_percentage": "Afficher le pourcentage",
-    "entity_not_found": "Entité introuvable"
+    "entity_not_found": "Entité introuvable",
+    "tap_action": "Appuyez sur Action",
+    "hold_action": "Maintenez l'action",
+    "double_tap_action": "Double action de la touche"
   },
   "fy": {
     "washer_program": "Washer programma",
@@ -594,7 +660,10 @@ const TRANSLATIONS = {
     "display_mode": "Display Mode",
     "show_time_remaining": "Lit de oerbleaune tiid sjen",
     "show_percentage": "Persintaazje sjen litte",
-    "entity_not_found": "Entiteit net fûn"
+    "entity_not_found": "Entiteit net fûn",
+    "tap_action": "Tap Aksje",
+    "hold_action": "Hâld aksje",
+    "double_tap_action": "Dûbel tapaksje"
   },
   "ga": {
     "washer_program": "Clár níocháin",
@@ -621,7 +690,10 @@ const TRANSLATIONS = {
     "display_mode": "Mód Taispeána",
     "show_time_remaining": "Taispeáin Am fágtha",
     "show_percentage": "Taispeáin Céatadán",
-    "entity_not_found": "Aonán gan aimsiú"
+    "entity_not_found": "Aonán gan aimsiú",
+    "tap_action": "Beartaíonn",
+    "hold_action": "Amharc ar ár liosta iomlán de shuíomhanna",
+    "double_tap_action": "Gníomh Dúbailte Bearta"
   },
   "gl": {
     "washer_program": "Programa Lavadora",
@@ -648,7 +720,10 @@ const TRANSLATIONS = {
     "display_mode": "Modo de visualización",
     "show_time_remaining": "Mostrar o tempo restante",
     "show_percentage": "Mostrar porcentaxe",
-    "entity_not_found": "Non se atopou a entidade"
+    "entity_not_found": "Non se atopou a entidade",
+    "tap_action": "Toca Acción",
+    "hold_action": "Manter acción",
+    "double_tap_action": "Double Tap Acción"
   },
   "gsw": {
     "washer_program": "Waschprogramm",
@@ -675,7 +750,10 @@ const TRANSLATIONS = {
     "display_mode": "Anzeigemodus",
     "show_time_remaining": "Verbleibende Zeit anzeigen",
     "show_percentage": "Prozentsatz anzeigen",
-    "entity_not_found": "Entität nicht gefunden"
+    "entity_not_found": "Entität nicht gefunden",
+    "tap_action": "Tippen Sie auf Aktion",
+    "hold_action": "Aktion halten",
+    "double_tap_action": "Doppeltipp-Aktion"
   },
   "he": {
     "washer_program": "תוכנית כביסה",
@@ -702,7 +780,10 @@ const TRANSLATIONS = {
     "display_mode": "מצב תצוגה",
     "show_time_remaining": "הצג את הזמן שנותר",
     "show_percentage": "הצג אחוז",
-    "entity_not_found": "הישות לא נמצאה"
+    "entity_not_found": "הישות לא נמצאה",
+    "tap_action": "תגית: Action",
+    "hold_action": "תגית: Hold",
+    "double_tap_action": "פעולה כפולה"
   },
   "hi": {
     "washer_program": "वॉशर कार्यक्रम",
@@ -729,7 +810,10 @@ const TRANSLATIONS = {
     "display_mode": "प्रदर्शन मोड",
     "show_time_remaining": "शेष समय दिखाएँ",
     "show_percentage": "प्रतिशत दिखाएँ",
-    "entity_not_found": "इकाई नहीं मिली"
+    "entity_not_found": "इकाई नहीं मिली",
+    "tap_action": "कार्रवाई टैप करें",
+    "hold_action": "कार्रवाई रोकें",
+    "double_tap_action": "डबल टैप एक्शन"
   },
   "hr": {
     "washer_program": "Program za pranje",
@@ -756,7 +840,10 @@ const TRANSLATIONS = {
     "display_mode": "Način prikaza",
     "show_time_remaining": "Prikaži preostalo vrijeme",
     "show_percentage": "Prikaži postotak",
-    "entity_not_found": "Entitet nije pronađen"
+    "entity_not_found": "Entitet nije pronađen",
+    "tap_action": "Dodirnite Akcija",
+    "hold_action": "Zadrži akciju",
+    "double_tap_action": "Akcija dvostrukog dodira"
   },
   "hu": {
     "washer_program": "Mosó program",
@@ -783,7 +870,10 @@ const TRANSLATIONS = {
     "display_mode": "Kijelző mód",
     "show_time_remaining": "Mutasd a hátralévő időt",
     "show_percentage": "Százalék megjelenítése",
-    "entity_not_found": "Az entitás nem található"
+    "entity_not_found": "Az entitás nem található",
+    "tap_action": "Koppintson a Művelet elemre",
+    "hold_action": "Tartsa akciót",
+    "double_tap_action": "Dupla koppintás művelet"
   },
   "hy": {
     "washer_program": "Լվացքի ծրագիր",
@@ -810,7 +900,10 @@ const TRANSLATIONS = {
     "display_mode": "Ցուցադրման ռեժիմ",
     "show_time_remaining": "Ցույց տալ Մնացած ժամանակը",
     "show_percentage": "Ցույց տալ տոկոսը",
-    "entity_not_found": "Կազմակերպությունը չի գտնվել"
+    "entity_not_found": "Կազմակերպությունը չի գտնվել",
+    "tap_action": "Կտտացրեք Գործողություն",
+    "hold_action": "Անցկացրեք գործողություն",
+    "double_tap_action": "Կրկնակի հպեք Գործողություն"
   },
   "id": {
     "washer_program": "Program Mesin Cuci",
@@ -837,7 +930,10 @@ const TRANSLATIONS = {
     "display_mode": "Modus Tampilan",
     "show_time_remaining": "Tampilkan Sisa Waktu",
     "show_percentage": "Tampilkan Persentase",
-    "entity_not_found": "Entitas tidak ditemukan"
+    "entity_not_found": "Entitas tidak ditemukan",
+    "tap_action": "Ketuk Tindakan",
+    "hold_action": "Tahan Aksi",
+    "double_tap_action": "Tindakan Ketuk Dua Kali"
   },
   "is": {
     "washer_program": "Þvottavélaforrit",
@@ -864,7 +960,10 @@ const TRANSLATIONS = {
     "display_mode": "Sýnastilling",
     "show_time_remaining": "Sýna tíma sem eftir er",
     "show_percentage": "Sýna hlutfall",
-    "entity_not_found": "Eining fannst ekki"
+    "entity_not_found": "Eining fannst ekki",
+    "tap_action": "Bankaðu á Aðgerð",
+    "hold_action": "Haltu Action",
+    "double_tap_action": "Tvíspikkaðu á Action"
   },
   "it": {
     "washer_program": "Programma Lavatrice",
@@ -891,7 +990,10 @@ const TRANSLATIONS = {
     "display_mode": "Modalità di visualizzazione",
     "show_time_remaining": "Mostra tempo rimanente",
     "show_percentage": "Mostra percentuale",
-    "entity_not_found": "Entità non trovata"
+    "entity_not_found": "Entità non trovata",
+    "tap_action": "Tocca Azione",
+    "hold_action": "Mantieni Azione",
+    "double_tap_action": "Azione doppio tocco"
   },
   "ja": {
     "washer_program": "ウォッシャープログラム",
@@ -918,7 +1020,10 @@ const TRANSLATIONS = {
     "display_mode": "表示モード",
     "show_time_remaining": "残りの上映時間",
     "show_percentage": "パーセンテージを表示",
-    "entity_not_found": "エンティティが見つかりません"
+    "entity_not_found": "エンティティが見つかりません",
+    "tap_action": "タップアクション",
+    "hold_action": "ホールドアクション",
+    "double_tap_action": "ダブルタップアクション"
   },
   "ka": {
     "washer_program": "სარეცხი პროგრამა",
@@ -945,7 +1050,10 @@ const TRANSLATIONS = {
     "display_mode": "ჩვენების რეჟიმი",
     "show_time_remaining": "დარჩენილი დროის ჩვენება",
     "show_percentage": "პროცენტის ჩვენება",
-    "entity_not_found": "ერთეული ვერ მოიძებნა"
+    "entity_not_found": "ერთეული ვერ მოიძებნა",
+    "tap_action": "შეეხეთ მოქმედებას",
+    "hold_action": "გააჩერეთ მოქმედება",
+    "double_tap_action": "ორმაგი შეხების მოქმედება"
   },
   "ko": {
     "washer_program": "세탁기 프로그램",
@@ -972,7 +1080,10 @@ const TRANSLATIONS = {
     "display_mode": "디스플레이 모드",
     "show_time_remaining": "남은 시간 표시",
     "show_percentage": "백분율 표시",
-    "entity_not_found": "엔터티를 찾을 수 없습니다."
+    "entity_not_found": "엔터티를 찾을 수 없습니다.",
+    "tap_action": "탭 동작",
+    "hold_action": "보류 조치",
+    "double_tap_action": "더블 탭 액션"
   },
   "lb": {
     "washer_program": "Wäschmaschinn Programm",
@@ -999,7 +1110,10 @@ const TRANSLATIONS = {
     "display_mode": "Display Modus",
     "show_time_remaining": "Show Rescht Zäit",
     "show_percentage": "Show Prozentsaz",
-    "entity_not_found": "Entitéit net fonnt"
+    "entity_not_found": "Entitéit net fonnt",
+    "tap_action": "Tippen op Aktioun",
+    "hold_action": "Halt Aktioun",
+    "double_tap_action": "Double Tap Action"
   },
   "lt": {
     "washer_program": "Skalbimo programa",
@@ -1026,7 +1140,10 @@ const TRANSLATIONS = {
     "display_mode": "Ekrano režimas",
     "show_time_remaining": "Rodyti likusį laiką",
     "show_percentage": "Rodyti procentą",
-    "entity_not_found": "Subjektas nerastas"
+    "entity_not_found": "Subjektas nerastas",
+    "tap_action": "Bakstelėkite Veiksmas",
+    "hold_action": "Laikyti veiksmą",
+    "double_tap_action": "Dukart bakstelėkite veiksmas"
   },
   "lv": {
     "washer_program": "Mazgāšanas programma",
@@ -1053,7 +1170,10 @@ const TRANSLATIONS = {
     "display_mode": "Displeja režīms",
     "show_time_remaining": "Rādīt atlikušo laiku",
     "show_percentage": "Rādīt procentus",
-    "entity_not_found": "Entītija nav atrasta"
+    "entity_not_found": "Entītija nav atrasta",
+    "tap_action": "Pieskarieties darbībai",
+    "hold_action": "Aizturēt darbību",
+    "double_tap_action": "Dubultskāriena darbība"
   },
   "mk": {
     "washer_program": "Програма за перење",
@@ -1080,7 +1200,10 @@ const TRANSLATIONS = {
     "display_mode": "Режим на прикажување",
     "show_time_remaining": "Прикажи преостанатото време",
     "show_percentage": "Прикажи процент",
-    "entity_not_found": "Субјектот не е пронајден"
+    "entity_not_found": "Субјектот не е пронајден",
+    "tap_action": "Допрете Акција",
+    "hold_action": "Држете акција",
+    "double_tap_action": "Акција со двоен допир"
   },
   "ml": {
     "washer_program": "വാഷർ പ്രോഗ്രാം",
@@ -1107,7 +1230,10 @@ const TRANSLATIONS = {
     "display_mode": "ഡിസ്പ്ലേ മോഡ്",
     "show_time_remaining": "ശേഷിക്കുന്ന സമയം കാണിക്കുക",
     "show_percentage": "ശതമാനം കാണിക്കുക",
-    "entity_not_found": "എൻ്റിറ്റി കണ്ടെത്തിയില്ല"
+    "entity_not_found": "എൻ്റിറ്റി കണ്ടെത്തിയില്ല",
+    "tap_action": "ആക്ഷൻ ടാപ്പ് ചെയ്യുക",
+    "hold_action": "ഹോൾഡ് ആക്ഷൻ",
+    "double_tap_action": "ഡബിൾ ടാപ്പ് ആക്ഷൻ"
   },
   "nb": {
     "washer_program": "Vaskeprogram",
@@ -1134,7 +1260,10 @@ const TRANSLATIONS = {
     "display_mode": "Visningsmodus",
     "show_time_remaining": "Vis gjenværende tid",
     "show_percentage": "Vis prosentandel",
-    "entity_not_found": "Enheten ble ikke funnet"
+    "entity_not_found": "Enheten ble ikke funnet",
+    "tap_action": "Trykk på Handling",
+    "hold_action": "Hold handling",
+    "double_tap_action": "Dobbelttrykk på handling"
   },
   "nl": {
     "washer_program": "Wasprogramma",
@@ -1161,7 +1290,10 @@ const TRANSLATIONS = {
     "display_mode": "Weergavemodus",
     "show_time_remaining": "Resterende tijd weergeven",
     "show_percentage": "Percentage weergeven",
-    "entity_not_found": "Entiteit niet gevonden"
+    "entity_not_found": "Entiteit niet gevonden",
+    "tap_action": "Tik op Actie",
+    "hold_action": "Actie vasthouden",
+    "double_tap_action": "Dubbeltikactie"
   },
   "nn": {
     "washer_program": "Washer Program",
@@ -1215,7 +1347,10 @@ const TRANSLATIONS = {
     "display_mode": "Tryb wyświetlania",
     "show_time_remaining": "Pokaż pozostały czas",
     "show_percentage": "Pokaż procent",
-    "entity_not_found": "Nie znaleziono elementu"
+    "entity_not_found": "Nie znaleziono elementu",
+    "tap_action": "Kliknij Akcja",
+    "hold_action": "Wstrzymaj akcję",
+    "double_tap_action": "Akcja podwójnego dotknięcia"
   },
   "pt": {
     "washer_program": "Programa de lavadora",
@@ -1242,7 +1377,10 @@ const TRANSLATIONS = {
     "display_mode": "Modo de exibição",
     "show_time_remaining": "Mostrar tempo restante",
     "show_percentage": "Mostrar porcentagem",
-    "entity_not_found": "Entidade não encontrada"
+    "entity_not_found": "Entidade não encontrada",
+    "tap_action": "Toque em Ação",
+    "hold_action": "Manter ação",
+    "double_tap_action": "Ação de toque duplo"
   },
   "pt-BR": {
     "washer_program": "Programa de lavadora",
@@ -1269,7 +1407,10 @@ const TRANSLATIONS = {
     "display_mode": "Modo de exibição",
     "show_time_remaining": "Mostrar tempo restante",
     "show_percentage": "Mostrar porcentagem",
-    "entity_not_found": "Entidade não encontrada"
+    "entity_not_found": "Entidade não encontrada",
+    "tap_action": "Toque em Ação",
+    "hold_action": "Manter ação",
+    "double_tap_action": "Ação de toque duplo"
   },
   "ro": {
     "washer_program": "Program de spălat",
@@ -1296,7 +1437,10 @@ const TRANSLATIONS = {
     "display_mode": "Modul de afișare",
     "show_time_remaining": "Arată timpul rămas",
     "show_percentage": "Arată procentul",
-    "entity_not_found": "Entitatea nu a fost găsită"
+    "entity_not_found": "Entitatea nu a fost găsită",
+    "tap_action": "Atingeți Acțiune",
+    "hold_action": "Țineți Acțiune",
+    "double_tap_action": "Atingeți de două ori Acțiune"
   },
   "ru": {
     "washer_program": "Программа стирки",
@@ -1323,7 +1467,10 @@ const TRANSLATIONS = {
     "display_mode": "Режим отображения",
     "show_time_remaining": "Показать оставшееся время",
     "show_percentage": "Показать процент",
-    "entity_not_found": "Объект не найден"
+    "entity_not_found": "Объект не найден",
+    "tap_action": "Нажмите «Действие».",
+    "hold_action": "Удерживать действие",
+    "double_tap_action": "Двойное нажатие"
   },
   "sk": {
     "washer_program": "Program práčky",
@@ -1350,7 +1497,10 @@ const TRANSLATIONS = {
     "display_mode": "Režim zobrazenia",
     "show_time_remaining": "Zobraziť zostávajúci čas",
     "show_percentage": "Zobraziť percento",
-    "entity_not_found": "Entita sa nenašla"
+    "entity_not_found": "Entita sa nenašla",
+    "tap_action": "Klepnite na položku Akcia",
+    "hold_action": "Hold Action",
+    "double_tap_action": "Akcia dvojitého klepnutia"
   },
   "sl": {
     "washer_program": "Program za pranje",
@@ -1377,7 +1527,10 @@ const TRANSLATIONS = {
     "display_mode": "Način prikaza",
     "show_time_remaining": "Prikaži preostali čas",
     "show_percentage": "Pokaži odstotek",
-    "entity_not_found": "Entiteta ni najdena"
+    "entity_not_found": "Entiteta ni najdena",
+    "tap_action": "Tapnite Dejanje",
+    "hold_action": "Zadrži akcijo",
+    "double_tap_action": "Dejanje dvojnega dotika"
   },
   "sq": {
     "washer_program": "Programi i larës",
@@ -1404,7 +1557,10 @@ const TRANSLATIONS = {
     "display_mode": "Modaliteti i shfaqjes",
     "show_time_remaining": "Shfaq kohën e mbetur",
     "show_percentage": "Shfaq përqindjen",
-    "entity_not_found": "Subjekti nuk u gjet"
+    "entity_not_found": "Subjekti nuk u gjet",
+    "tap_action": "Prekni Veprim",
+    "hold_action": "Mbajeni veprimin",
+    "double_tap_action": "Veprimi i prekjes së dyfishtë"
   },
   "sr": {
     "washer_program": "Washer Program",
@@ -1458,7 +1614,10 @@ const TRANSLATIONS = {
     "display_mode": "Режим приказа",
     "show_time_remaining": "Прикажи преостало време",
     "show_percentage": "Прикажи проценат",
-    "entity_not_found": "Ентитет није пронађен"
+    "entity_not_found": "Ентитет није пронађен",
+    "tap_action": "Додирните Акција",
+    "hold_action": "Задржите акцију",
+    "double_tap_action": "Радња двоструког додира"
   },
   "sv": {
     "washer_program": "Tvättprogram",
@@ -1485,7 +1644,10 @@ const TRANSLATIONS = {
     "display_mode": "Visningsläge",
     "show_time_remaining": "Visa återstående tid",
     "show_percentage": "Visa procent",
-    "entity_not_found": "Enheten hittades inte"
+    "entity_not_found": "Enheten hittades inte",
+    "tap_action": "Tryck på Åtgärd",
+    "hold_action": "Håll Action",
+    "double_tap_action": "Dubbeltrycksåtgärd"
   },
   "ta": {
     "washer_program": "வாஷர் திட்டம்",
@@ -1512,7 +1674,10 @@ const TRANSLATIONS = {
     "display_mode": "காட்சி முறை",
     "show_time_remaining": "மீதமுள்ள நேரத்தைக் காட்டு",
     "show_percentage": "சதவீதத்தைக் காட்டு",
-    "entity_not_found": "பொருள் கிடைக்கவில்லை"
+    "entity_not_found": "பொருள் கிடைக்கவில்லை",
+    "tap_action": "செயலைத் தட்டவும்",
+    "hold_action": "நடவடிக்கையை பிடி",
+    "double_tap_action": "இருமுறை தட்டுதல் செயல்"
   },
   "te": {
     "washer_program": "వాషర్ ప్రోగ్రామ్",
@@ -1539,7 +1704,10 @@ const TRANSLATIONS = {
     "display_mode": "ప్రదర్శన మోడ్",
     "show_time_remaining": "మిగిలిన సమయాన్ని చూపించు",
     "show_percentage": "శాతాన్ని చూపించు",
-    "entity_not_found": "ఎంటిటీ కనుగొనబడలేదు"
+    "entity_not_found": "ఎంటిటీ కనుగొనబడలేదు",
+    "tap_action": "చర్యను నొక్కండి",
+    "hold_action": "చర్యను పట్టుకోండి",
+    "double_tap_action": "రెండుసార్లు నొక్కండి చర్య"
   },
   "th": {
     "washer_program": "โปรแกรมเครื่องซักผ้า",
@@ -1566,7 +1734,10 @@ const TRANSLATIONS = {
     "display_mode": "โหมดการแสดงผล",
     "show_time_remaining": "แสดงเวลาที่เหลืออยู่",
     "show_percentage": "แสดงเปอร์เซ็นต์",
-    "entity_not_found": "ไม่พบเอนทิตี"
+    "entity_not_found": "ไม่พบเอนทิตี",
+    "tap_action": "แตะการดำเนินการ",
+    "hold_action": "ระงับการดำเนินการ",
+    "double_tap_action": "การกระทำแตะสองครั้ง"
   },
   "tr": {
     "washer_program": "Yıkama Programı",
@@ -1593,7 +1764,10 @@ const TRANSLATIONS = {
     "display_mode": "Ekran Modu",
     "show_time_remaining": "Kalan Süreyi Göster",
     "show_percentage": "Yüzdeyi Göster",
-    "entity_not_found": "Varlık bulunamadı"
+    "entity_not_found": "Varlık bulunamadı",
+    "tap_action": "Eylem'e dokunun",
+    "hold_action": "Eylemi Beklet",
+    "double_tap_action": "Çift Dokunma Eylemi"
   },
   "uk": {
     "washer_program": "Програма прання",
@@ -1620,7 +1794,10 @@ const TRANSLATIONS = {
     "display_mode": "Режим відображення",
     "show_time_remaining": "Показати час, що залишився",
     "show_percentage": "Показати відсоток",
-    "entity_not_found": "Об'єкт не знайдено"
+    "entity_not_found": "Об'єкт не знайдено",
+    "tap_action": "Натисніть Дія",
+    "hold_action": "Дія утримання",
+    "double_tap_action": "Подвійне торкання"
   },
   "ur": {
     "washer_program": "واشر پروگرام",
@@ -1647,7 +1824,10 @@ const TRANSLATIONS = {
     "display_mode": "ڈسپلے موڈ",
     "show_time_remaining": "باقی وقت دکھائیں۔",
     "show_percentage": "فیصد دکھائیں۔",
-    "entity_not_found": "ہستی نہیں ملی"
+    "entity_not_found": "ہستی نہیں ملی",
+    "tap_action": "ایکشن کو تھپتھپائیں۔",
+    "hold_action": "ایکشن پکڑو",
+    "double_tap_action": "ڈبل تھپتھپائیں کارروائی"
   },
   "vi": {
     "washer_program": "Chương trình máy giặt",
@@ -1674,7 +1854,10 @@ const TRANSLATIONS = {
     "display_mode": "Chế độ hiển thị",
     "show_time_remaining": "Hiển thị thời gian còn lại",
     "show_percentage": "Hiển thị phần trăm",
-    "entity_not_found": "Không tìm thấy thực thể"
+    "entity_not_found": "Không tìm thấy thực thể",
+    "tap_action": "Nhấn vào Hành động",
+    "hold_action": "Giữ hành động",
+    "double_tap_action": "Hành động nhấn đúp"
   },
   "zh-Hans": {
     "washer_program": "清洗程序",
@@ -1701,7 +1884,10 @@ const TRANSLATIONS = {
     "display_mode": "显示模式",
     "show_time_remaining": "显示剩余时间",
     "show_percentage": "显示百分比",
-    "entity_not_found": "未找到实体"
+    "entity_not_found": "未找到实体",
+    "tap_action": "点击操作",
+    "hold_action": "保持行动",
+    "double_tap_action": "双击操作"
   },
   "zh-Hant": {
     "washer_program": "清洗程序",
@@ -1728,7 +1914,10 @@ const TRANSLATIONS = {
     "display_mode": "顯示模式",
     "show_time_remaining": "顯示剩餘時間",
     "show_percentage": "顯示百分比",
-    "entity_not_found": "未找到實體"
+    "entity_not_found": "未找到實體",
+    "tap_action": "點選操作",
+    "hold_action": "保持行動",
+    "double_tap_action": "按兩下操作"
   }
 };
 
@@ -1752,7 +1941,10 @@ class WashDataCard extends HTMLElement {
       show_state: true,
       show_program: true,
       show_details: true,
-      spin_icon: true
+      spin_icon: true,
+      tap_action: { action: "more-info" },
+      hold_action: { action: "none" },
+      double_tap_action: { action: "none" }
     };
   }
 
@@ -1771,7 +1963,25 @@ class WashDataCard extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this._rendered = false;
-    this._handleClick = this._handleClick.bind(this);
+    // Gesture state for tap / hold / double-tap recognition.
+    this._holdTimer = null;
+    this._holdTriggered = false;
+    this._tapTimer = null;
+    this._lastTapTime = 0;
+    this._pointerStart = null;
+    this._onPointerDown = this._onPointerDown.bind(this);
+    this._onPointerMove = this._onPointerMove.bind(this);
+    this._onPointerUp = this._onPointerUp.bind(this);
+    this._onPointerCancel = this._onPointerCancel.bind(this);
+  }
+
+  disconnectedCallback() {
+    // Avoid stray actions firing after the card is removed from the DOM.
+    this._clearHoldTimer();
+    if (this._tapTimer) {
+      window.clearTimeout(this._tapTimer);
+      this._tapTimer = null;
+    }
   }
 
   setConfig(config) {
@@ -1791,14 +2001,164 @@ class WashDataCard extends HTMLElement {
     return 1;
   }
 
-  _handleClick() {
-    const entityId = this._cfg.entity;
-    const event = new CustomEvent("hass-more-info", {
-      detail: { entityId },
+  _clearHoldTimer() {
+    if (this._holdTimer) {
+      window.clearTimeout(this._holdTimer);
+      this._holdTimer = null;
+    }
+  }
+
+  _onPointerDown(ev) {
+    // Only react to the primary pointer (left mouse button / touch / pen).
+    if (ev.button !== undefined && ev.button !== 0) return;
+    this._holdTriggered = false;
+    this._pointerCanceled = false;
+    this._pointerStart = { x: ev.clientX, y: ev.clientY };
+
+    const holdCfg = this._cfg && this._cfg.hold_action;
+    if (holdCfg && holdCfg.action && holdCfg.action !== "none") {
+      this._clearHoldTimer();
+      this._holdTimer = window.setTimeout(() => {
+        this._holdTimer = null;
+        this._holdTriggered = true;
+        this._fireHaptic("success");
+        this._executeAction(holdCfg);
+      }, HOLD_MS);
+    }
+  }
+
+  _onPointerMove(ev) {
+    // Cancel the gesture if the pointer drifts (e.g. the user is scrolling), so
+    // neither the pending hold nor the release-tap fires.
+    if (!this._pointerStart) return;
+    const dx = ev.clientX - this._pointerStart.x;
+    const dy = ev.clientY - this._pointerStart.y;
+    if (dx * dx + dy * dy > TAP_MOVE_TOLERANCE * TAP_MOVE_TOLERANCE) {
+      this._clearHoldTimer();
+      this._pointerStart = null;
+      this._pointerCanceled = true;
+    }
+  }
+
+  _onPointerCancel() {
+    this._clearHoldTimer();
+  }
+
+  _onPointerUp() {
+    this._clearHoldTimer();
+    // The pointer drifted (scroll/drag): the release should not count as a tap.
+    if (this._pointerCanceled) {
+      this._pointerCanceled = false;
+      return;
+    }
+    // A hold already fired its action; the release should not also count as a tap.
+    if (this._holdTriggered) {
+      this._holdTriggered = false;
+      return;
+    }
+
+    const tapCfg = (this._cfg && this._cfg.tap_action) || { action: "more-info" };
+    const doubleCfg = this._cfg && this._cfg.double_tap_action;
+    const hasDouble = doubleCfg && doubleCfg.action && doubleCfg.action !== "none";
+
+    // With no double-tap action configured, fire the tap immediately (no latency).
+    if (!hasDouble) {
+      this._executeAction(tapCfg);
+      return;
+    }
+
+    const now = Date.now();
+    if (this._tapTimer && now - this._lastTapTime < DOUBLE_TAP_MS) {
+      window.clearTimeout(this._tapTimer);
+      this._tapTimer = null;
+      this._lastTapTime = 0;
+      this._executeAction(doubleCfg);
+      return;
+    }
+
+    // First tap: wait briefly to see whether a second one arrives.
+    this._lastTapTime = now;
+    this._tapTimer = window.setTimeout(() => {
+      this._tapTimer = null;
+      this._executeAction(tapCfg);
+    }, DOUBLE_TAP_MS);
+  }
+
+  _fireHaptic(type) {
+    this.dispatchEvent(new CustomEvent("haptic", {
+      detail: type,
       bubbles: true,
       composed: true,
-    });
-    this.dispatchEvent(event);
+    }));
+  }
+
+  _executeAction(actionCfg) {
+    if (!actionCfg) return;
+    const action = actionCfg.action || "more-info";
+    const entityId = actionCfg.entity || (this._cfg && this._cfg.entity);
+
+    switch (action) {
+      case "none":
+        return;
+
+      case "more-info": {
+        if (!entityId) return;
+        this.dispatchEvent(new CustomEvent("hass-more-info", {
+          detail: { entityId },
+          bubbles: true,
+          composed: true,
+        }));
+        return;
+      }
+
+      case "toggle": {
+        // homeassistant.toggle routes to the correct domain service for all
+        // common toggleable domains, so no per-domain table is needed.
+        if (!this._hass || !entityId) return;
+        this._hass.callService("homeassistant", "toggle", { entity_id: entityId });
+        return;
+      }
+
+      case "call-service":
+      case "perform-action": {
+        const svc = actionCfg.perform_action || actionCfg.service;
+        if (!svc || !this._hass) return;
+        const [svcDomain, svcName] = svc.split(".");
+        if (!svcDomain || !svcName) return;
+        const data = { ...(actionCfg.data || actionCfg.service_data || {}) };
+        this._hass.callService(svcDomain, svcName, data, actionCfg.target);
+        return;
+      }
+
+      case "navigate": {
+        const path = actionCfg.navigation_path;
+        if (!path) return;
+        if (actionCfg.navigation_replace) {
+          window.history.replaceState(window.history.state, "", path);
+        } else {
+          window.history.pushState(null, "", path);
+        }
+        window.dispatchEvent(new CustomEvent("location-changed", {
+          detail: { replace: !!actionCfg.navigation_replace },
+        }));
+        return;
+      }
+
+      case "url": {
+        const url = actionCfg.url_path;
+        if (!url) return;
+        // noopener/noreferrer prevents the opened page from reaching back via
+        // window.opener (reverse tabnabbing).
+        window.open(url, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      default:
+        // Unsupported actions (e.g. "assist") are intentionally ignored: a
+        // standalone card resource cannot resolve Home Assistant's internal
+        // dialog chunks, so attempting them would only throw at runtime.
+        return;
+    }
   }
 
   _render() {
@@ -1900,7 +2260,12 @@ class WashDataCard extends HTMLElement {
         </ha-card>
       `;
 
-      this.shadowRoot.getElementById("card").addEventListener("click", this._handleClick);
+      const cardEl = this.shadowRoot.getElementById("card");
+      cardEl.addEventListener("pointerdown", this._onPointerDown);
+      cardEl.addEventListener("pointermove", this._onPointerMove);
+      cardEl.addEventListener("pointerup", this._onPointerUp);
+      cardEl.addEventListener("pointercancel", this._onPointerCancel);
+      cardEl.addEventListener("pointerleave", this._onPointerCancel);
       this._rendered = true;
     }
 
@@ -1924,7 +2289,7 @@ class WashDataCard extends HTMLElement {
       return;
     }
 
-    const title = this._cfg.title || this._getTranslation("washing_machine");
+    const title = this._cfg.title || "Washing Machine";
     const icon = this._cfg.icon || stateObj.attributes.icon || "mdi:washing-machine";
     const activeColor = this._cfg.active_color;
 
@@ -2106,6 +2471,9 @@ class WashDataCardEditor extends HTMLElement {
         { name: "program_entity", selector: { entity: { domain: ["sensor", "select", "input_select", "input_text"] } } },
         { name: "pct_entity", selector: { entity: { domain: "sensor" } } },
         { name: "time_entity", selector: { entity: { domain: "sensor" } } },
+        { name: "tap_action", selector: { ui_action: {} } },
+        { name: "hold_action", selector: { ui_action: {} } },
+        { name: "double_tap_action", selector: { ui_action: {} } },
       ];
 
       this._form.computeLabel = (schema) => {
@@ -2121,7 +2489,10 @@ class WashDataCardEditor extends HTMLElement {
           program_entity: this._getTranslation("program_entity"),
           pct_entity: this._getTranslation("pct_entity"),
           time_entity: this._getTranslation("time_entity"),
-          display_mode: this._getTranslation("display_mode")
+          display_mode: this._getTranslation("display_mode"),
+          tap_action: this._getTranslation("tap_action"),
+          hold_action: this._getTranslation("hold_action"),
+          double_tap_action: this._getTranslation("double_tap_action")
         };
         return labels[schema.name] || schema.name;
       };

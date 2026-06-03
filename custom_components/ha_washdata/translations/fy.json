@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Pre-foltôging berjochtformaat",
           "energy_price_entity": "Enerzjypriis - Entiteit (opsjoneel)",
           "energy_price_static": "Enerzjypriis - Statyske wearde (opsjoneel)",
-          "go_back": "Gean werom sûnder op te slaan"
+          "go_back": "Gean werom sûnder op te slaan",
+          "notify_reminder_message": "Herinneringsberjochtformaat",
+          "notify_timeout_seconds": "Auto-dismiss Nei (sekonden)",
+          "notify_channel": "Notifikaasjekanaal (status / live / herinnering)",
+          "notify_finish_channel": "Foltôge Notifikaasjekanaal"
         },
         "data_description": {
           "go_back": "Tik dit oan en klik op Yntsjinje om alle boppesteande wizigingen fuort te smiten en werom te gean nei it haadmenu.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Berjocht ferstjoerd as in syklus einiget. Unterstützt {device}, {duration}, {program}, {energy_kwh}, {cost} plakhâlders.",
           "notify_pre_complete_message": "Berjocht ferstjoerd foar foltôging. Unterstützt {device}, {minutes} plakhâlders.",
           "energy_price_entity": "Selektearje in numerike entiteit dy't de hjoeddeistige elektrisiteitspriis hâldt (bygelyks sensor.electricity_price, input_number.energy_rate). As ynsteld, aktivearret de {cost} plakhâlder. Nimt foarrang boppe de statyske wearde as beide binne konfigurearre.",
-          "energy_price_static": "Fêste elektrisiteitspriis per kWh. As ynsteld, aktivearret de {cost} plakhâlder. Negearre as in entiteit hjirboppe ynsteld is. Foegje jo falutasymboal ta yn it berjochtsjabloan, f.eks. {cost} €."
+          "energy_price_static": "Fêste elektrisiteitspriis per kWh. As ynsteld, aktivearret de {cost} plakhâlder. Negearre as in entiteit hjirboppe ynsteld is. Foegje jo falutasymboal ta yn it berjochtsjabloan, f.eks. {cost} €.",
+          "notify_reminder_message": "Tekst fan 'e ienmalige herinnering stjoerde it ynstelde oantal minuten foar it rûsde ein. Ûnderskieden fan de weromkommende live updates hjirboppe. Unterstützt {device}, {minutes}, {program} plakhâlders.",
+          "notify_timeout_seconds": "Ferwiderje notifikaasjes automatysk nei dizze protte sekonden (trochstjoerd as 'timeout' fan 'e begelieder-app). Stel op 0 om se te hâlden oant se wurde wegere. Standert: 0.",
+          "notify_channel": "Android begeliedend app-notifikaasjekanaal foar notifikaasjes oer status, live foarútgong en herinnerings. It lûd en it belang fan in kanaal wurde konfigureare yn 'e begelieder-app de earste kear dat de kanaalnamme wurdt brûkt - WashData stelt allinich de kanaalnamme yn. Lit leech foar de app standert.",
+          "notify_finish_channel": "Separate Android kanaal foar de kleare warskôging (ek brûkt troch de herinnering en it wachtsjen fan 'e wask) sadat it in eigen lûd kin hawwe. Lit leech om it boppesteande kanaal opnij te brûken."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "As in pomp syklus noch rint nei dit protte sekonden, in ha_washdata_pump_stuck evenemint wurdt ûntslein ien kear. Brûk dit om in blokkearre motor te detektearjen (typyske sumppomp is ûnder 60 s). Standert: 1800 s (30 min). Allinnich type pompapparaat."
+            }
+          },
+          "device_link_section": {
+            "name": "Device Link",
+            "description": "Keppelje dit WashData-apparaat opsjoneel oan in besteand Home Assistant-apparaat (bygelyks de smart plug of it apparaat sels). It WashData-apparaat wurdt dan werjûn as \"Ferbûn fia\" dat apparaat. Lit leech om WashData as in standalone apparaat te hâlden.",
+            "data": {
+              "linked_device": "Keppele apparaat"
+            },
+            "data_description": {
+              "linked_device": "Selektearje it apparaat om WashData oan te ferbinen. Dit foeget in 'Ferbûn fia' referinsje ta yn it apparaatregister; WashData hâldt har eigen apparaatkaart en entiteiten. Wiskje de seleksje om de keppeling te ferwiderjen."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Auto-label âlde syklusen",
-        "description": "{info}",
+        "description": "Fûn {total_count} totale syklusen. Profilen: {profiles}",
         "data": {
           "confidence_threshold": "Minimum fertrouwen (0.50-0.95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Prosesskiednis (Fergearje / Splitsen)",
-        "description": "Syklusskiednis skjinmeitsje troch fersnippere runen te fusearjen en ferkeard gearfoege syklusen binnen in tiidfinster te splitsen. Fier oantal oeren yn om werom te sjen.\n{info}",
+        "description": "Syklusskiednis skjinmeitsje troch fersnippere runen te fusearjen en ferkeard gearfoege syklusen binnen in tiidfinster te splitsen. Fier it oantal oeren yn om werom te sjen (brûk 999999 foar allegear).",
         "data": {
           "time_range": "Oersjochfinster (oeren)",
           "gap_seconds": "Fuortsmite / Split Gap (sekonden)"
         },
         "data_description": {
-          "time_range": "Oantal oeren om te scannen foar fragmintele syklusen om te fusearjen. Brûk 999999 om alle histoaryske gegevens te ferwurkjen.\n{info}",
+          "time_range": "Oantal oeren om te scannen foar fragmintele syklusen om te fusearjen. Brûk 999999 om alle histoaryske gegevens te ferwurkjen.",
           "gap_seconds": "Drompel om te besluten split vs gearfoegje. Gaps KORTER as dit wurde gearfoege. Gaps LANGER as dit wurde splitst. Ferleegje dit om in split te twingen op in syklus dy't ferkeard gearfoege is."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Gem. enerzjy",
         "table_detected_program": "Detektearre programma",
         "table_confidence": "Betrouwen",
-        "table_reported": "Rapportearre"
+        "table_reported": "Rapportearre",
+        "phase_builtin_suffix": "(Ynboud)",
+        "phase_none_available": "Gjin fazen beskikber.",
+        "settings_deprecation_warning": "⚠️ ** Ferâldere apparaattype:** {device_type} is pland foar ferwidering yn in takomstige release. De oerienkommende pipeline fan WashData produseart gjin betroubere resultaten foar dizze apparaatklasse. Jo yntegraasje bliuwt wurkje troch de ôfskriuwingsperioade; om dizze warskôging stil te meitsjen, oerskeakelje **Apparaattype** hjirûnder nei ien fan 'e stipe typen (waskmasine, droeger, waskmasine-droegerkombinaasje, ôfwaskmasine, loftfriteuse, breamakker, of pomp), of nei **Oar (Avansearre)** as jo apparaat net oerienkomt mei ien fan 'e stipe typen. **Oar (Avansearre)** ferstjoert mei opsetsin algemiene standerts dy't net binne ôfstimd foar in spesifyk apparaat, dus jo moatte sels drompels, timeouts en oerienkommende parameters ynstelle; al jo besteande ynstellings wurde bewarre as jo wikselje.",
+        "phase_other_device_types": "Oare soarten apparaten:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Weromsette nei Folsleine Duration",
         "apply": "Trim tapasse",
         "cancel": "Ofbrekke"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Wasmachine",
+        "dryer": "Droger",
+        "washer_dryer": "Washer-Dryer Combo",
+        "dishwasher": "Dishwasher",
+        "coffee_machine": "Kofjemasine (ferâldere)",
+        "ev": "Elektrysk auto (ferâldere)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Warmtepomp (ferâldere)",
+        "bread_maker": "Bread Maker",
+        "pump": "Pomp / Sump Pomp",
+        "oven": "Oven (ferâldere)",
+        "other": "Oare (Avansearre)"
       }
     }
   },

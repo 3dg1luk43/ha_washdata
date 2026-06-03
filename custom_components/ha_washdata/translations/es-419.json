@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Formato del mensaje previo a la finalización",
           "energy_price_entity": "Precio de la energía: entidad (opcional)",
           "energy_price_static": "Precio de la energía: valor estático (opcional)",
-          "go_back": "Volver sin guardar"
+          "go_back": "Volver sin guardar",
+          "notify_reminder_message": "Formato de mensaje de recordatorio",
+          "notify_timeout_seconds": "Auto-desestimación Después (segundos)",
+          "notify_channel": "Canal de notificación (Estado/live/reminder)",
+          "notify_finish_channel": "Canal de notificación terminado"
         },
         "data_description": {
           "go_back": "Marca esto y haz clic en Enviar para descartar los cambios anteriores y volver al menú principal.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Mensaje enviado cuando finaliza un ciclo. Admite los marcadores {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Mensaje enviado antes de la finalización. Admite los marcadores {device}, {minutes}.",
           "energy_price_entity": "Seleccione una entidad numérica que contenga el precio actual de la electricidad (por ejemplo, sensor.electricity_price, input_number.energy_rate). Cuando está configurado, habilita el marcador de posición {cost}. Tiene prioridad sobre el valor estático si ambos están configurados.",
-          "energy_price_static": "Precio fijo de la electricidad por kWh. Cuando está configurado, habilita el marcador de posición {cost}. Se ignora si una entidad está configurada arriba. Agregue su símbolo de moneda en la plantilla de mensaje, p. {cost}€."
+          "energy_price_static": "Precio fijo de la electricidad por kWh. Cuando está configurado, habilita el marcador de posición {cost}. Se ignora si una entidad está configurada arriba. Agregue su símbolo de moneda en la plantilla de mensaje, p. {cost}€.",
+          "notify_reminder_message": "Texto del recordatorio de una sola vez envió el número configurado de minutos antes del final estimado. Distinto de las actualizaciones en vivo recurrentes arriba. Apoyo {device}, {minutes}, {program} propietarios de puestos.",
+          "notify_timeout_seconds": "Descargue automáticamente las notificaciones después de estos muchos segundos (en adelante como la aplicación de acompañamiento 'timeout'). Se establece a 0 para mantenerlos hasta que sea despedido. Predeterminado: 0.",
+          "notify_channel": "Android canal de notificación de aplicaciones acompañantes para el estado, progreso en vivo y notificaciones de recordatorio. El sonido y la importancia de un canal se configuran en la aplicación compañera la primera vez que se utiliza el nombre del canal - WashData sólo establece el nombre del canal. Deja vacío para el defecto de la aplicación.",
+          "notify_finish_channel": "Separar Android canal para la alerta terminada (también utilizado por el recordatorio y la nag que espera la colada) para que pueda tener su propio sonido. Deja vacío para reutilizar el canal de arriba."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Si un ciclo de bomba sigue ejecutándose después de tantos segundos, se activa una vez un evento ha_washdata_pump_stuck. Utilícelo para detectar un motor atascado (el funcionamiento típico de la bomba de sumidero es inferior a 60 s). Predeterminado: 1800 s (30 min). Solo tipo de dispositivo de bomba."
+            }
+          },
+          "device_link_section": {
+            "name": "Enlace de dispositivo",
+            "description": "Opcionalmente vincula este dispositivo WashData a un dispositivo existente Home Assistant (por ejemplo, el plug inteligente o el propio aparato). El dispositivo WashData se muestra entonces como \"Connected via\" ese dispositivo. Deja vacío para mantener a WashData como un dispositivo independiente.",
+            "data": {
+              "linked_device": "Dispositivo vinculado"
+            },
+            "data_description": {
+              "linked_device": "Seleccione el dispositivo para conectar WashData a. Esto agrega una referencia 'Connected via' en el registro del dispositivo; WashData mantiene su propia tarjeta de dispositivo y entidades. Limpiar la selección para eliminar el enlace."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Etiquetar automáticamente ciclos antiguos",
-        "description": "{info}",
+        "description": "Se encontraron {total_count} ciclos en total. Perfiles: {profiles}",
         "data": {
           "confidence_threshold": "Confianza mínima (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Procesar historial (fusionar/dividir)",
-        "description": "Limpia el historial de ciclos fusionando ejecuciones fragmentadas y dividiendo ciclos fusionados incorrectamente dentro de una ventana de tiempo. Introduce el número de horas hacia atrás.\n{info}",
+        "description": "Limpie el historial de ciclos fusionando ejecuciones fragmentadas y dividiendo ciclos fusionados incorrectamente dentro de una ventana de tiempo. Ingrese el número de horas para mirar hacia atrás (use 999999 para todas).",
         "data": {
           "time_range": "Ventana de retrospección (horas)",
           "gap_seconds": "Brecha para fusión/división (segundos)"
         },
         "data_description": {
-          "time_range": "Número de horas para buscar ciclos fragmentados a fusionar. Usa 999999 para procesar todos los datos históricos.\n{info}",
+          "time_range": "Número de horas para buscar ciclos fragmentados que se fusionarán. Utilice 999999 para procesar todos los datos históricos.",
           "gap_seconds": "Umbral para decidir dividir o fusionar. Las brechas MÁS CORTAS que esto se fusionan. Las brechas MÁS LARGAS que esto se dividen. Reduce esto para forzar una división en un ciclo fusionado incorrectamente."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Energía prom.",
         "table_detected_program": "Programa detectado",
         "table_confidence": "Confianza",
-        "table_reported": "Informado"
+        "table_reported": "Informado",
+        "phase_builtin_suffix": "(Incorporado)",
+        "phase_none_available": "No hay fases disponibles.",
+        "settings_deprecation_warning": "⚠️ **Tipo de dispositivo obsoleto:** {device_type} está programado para eliminarse en una versión futura. El proceso de coincidencia de WashData no produce resultados confiables para esta clase de electrodomésticos. Su integración sigue funcionando durante el período de desuso; Para silenciar esta advertencia, cambie el **Tipo de dispositivo** a continuación a uno de los tipos admitidos (lavadora, secadora, combinación de lavadora y secadora, lavavajillas, freidora, máquina para hacer pan o bomba), o a **Otro (avanzado)** si su electrodoméstico no coincide con ninguno de los tipos admitidos. **Otro (Avanzado)** incluye valores predeterminados intencionalmente genéricos que no están ajustados para ningún dispositivo específico, por lo que deberá configurar los umbrales, los tiempos de espera y los parámetros coincidentes usted mismo; todas sus configuraciones existentes se conservan cuando cambia.",
+        "phase_other_device_types": "Otros tipos de dispositivos:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Restablecer a duración completa",
         "apply": "Aplicar recorte",
         "cancel": "Cancelar"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Lavadora",
+        "dryer": "Secadora",
+        "washer_dryer": "Combinación de lavadora y secadora",
+        "dishwasher": "Lavavajillas",
+        "coffee_machine": "Máquina de café (obsoleta)",
+        "ev": "Vehículo eléctrico (obsoleto)",
+        "air_fryer": "Freidora de aire",
+        "heat_pump": "Bomba de calor (obsoleta)",
+        "bread_maker": "fabricante de pan",
+        "pump": "Bomba / Bomba de sumidero",
+        "oven": "Horno (obsoleto)",
+        "other": "Otro (avanzado)"
       }
     }
   },

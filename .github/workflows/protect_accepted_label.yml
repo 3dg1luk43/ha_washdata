@@ -1,0 +1,40 @@
+name: Protect Accepted Label
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  issues: write
+
+jobs:
+  guard:
+    name: Remove accepted label if applied by non-owner
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'accepted' && github.event.sender.login != github.repository_owner
+    steps:
+      - name: Remove label and notify
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issueNumber = context.issue.number;
+            const actor = context.payload.sender.login;
+
+            await github.rest.issues.removeLabel({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              name: 'accepted',
+            });
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              body: `@${actor} The \`accepted\` label can only be applied by the repository maintainer. It has been removed.`,
+            });
+
+            console.log(`Removed 'accepted' label applied by ${actor} on issue #${issueNumber}.`);

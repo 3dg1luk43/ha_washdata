@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Tamamlanma Öncesi Mesaj Formatı",
           "energy_price_entity": "Enerji Fiyatı – Varlık (isteğe bağlı)",
           "energy_price_static": "Enerji Fiyatı - Statik değer (isteğe bağlı)",
-          "go_back": "Kaydetmeden geri dön"
+          "go_back": "Kaydetmeden geri dön",
+          "notify_reminder_message": "Hatırlatma Mesajı Formatı",
+          "notify_timeout_seconds": "Şu Süreden Sonra Otomatik Kapat (saniye)",
+          "notify_channel": "Bildirim Kanalı (durum/canlı/hatırlatma)",
+          "notify_finish_channel": "Biten Bildirim Kanalı"
         },
         "data_description": {
           "go_back": "Bunu işaretleyin ve yukarıdaki tüm değişiklikleri atıp ana menüye dönmek için Gönder'e tıklayın.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Bir döngü tamamlandığında gönderilen mesaj. {device}, {duration}, {program}, {energy_kwh}, {cost} yer tutucularını destekler.",
           "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler.",
           "energy_price_entity": "Geçerli elektrik fiyatını içeren sayısal bir varlık seçin (ör. sensör.elektrik_fiyat, giriş_numarası.enerji_oranı). Ayarlandığında, {cost} yer tutucusunu etkinleştirir. Her ikisi de yapılandırılmışsa statik değere göre önceliklidir.",
-          "energy_price_static": "kWh başına sabit elektrik fiyatı. Ayarlandığında, {cost} yer tutucusunu etkinleştirir. Yukarıda bir varlık yapılandırılmışsa yoksayılır. Mesaj şablonuna para birimi simgenizi ekleyin, ör. {cost} €."
+          "energy_price_static": "kWh başına sabit elektrik fiyatı. Ayarlandığında, {cost} yer tutucusunu etkinleştirir. Yukarıda bir varlık yapılandırılmışsa yoksayılır. Mesaj şablonuna para birimi simgenizi ekleyin, ör. {cost} €.",
+          "notify_reminder_message": "Tek seferlik hatırlatma metni, tahmini bitiş süresinden önce yapılandırılmış dakika sayısını gönderdi. Yukarıdaki yinelenen canlı güncellemelerden farklıdır. {device}, {minutes}, {program} yer tutucularını destekler.",
+          "notify_timeout_seconds": "Bu kadar saniyeden sonra bildirimleri otomatik olarak kapat (tamamlayıcı uygulama 'zaman aşımı' olarak iletilir). Kapatılana kadar bunları tutmak için 0'a ayarlayın. Varsayılan: 0.",
+          "notify_channel": "Durum, canlı ilerleme ve hatırlatma bildirimleri için Android tamamlayıcı uygulama bildirim kanalı. Bir kanalın sesi ve önemi, kanal adı ilk kez kullanıldığında yardımcı uygulamada yapılandırılır - WashData yalnızca kanal adını ayarlar. Uygulama varsayılanı için boş bırakın.",
+          "notify_finish_channel": "Bitti uyarısı için ayrı bir Android kanalı (aynı zamanda hatırlatıcı ve çamaşır bekleyen dırdırı tarafından da kullanılır), böylece kendi sesine sahip olabilir. Yukarıdaki kanalı yeniden kullanmak için boş bırakın."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Bu kadar saniyeden sonra bir pompa döngüsü hala çalışıyorsa, bir kez ha_washdata_pump_stuck olayı tetiklenir. Sıkışan bir motoru tespit etmek için bunu kullanın (tipik karter pompası çalışması 60 saniyenin altındadır). Varsayılan: 1800 sn (30 dk). Yalnızca pompa cihazı tipi."
+            }
+          },
+          "device_link_section": {
+            "name": "Cihaz Bağlantısı",
+            "description": "İsteğe bağlı olarak bu WashData cihazını mevcut bir Home Assistant cihazına (örneğin akıllı priz veya cihazın kendisi) bağlayın. WashData cihazı daha sonra bu cihaza \"Bağlandı\" olarak gösterilir. WashData'yı bağımsız bir cihaz olarak tutmak için boş bırakın.",
+            "data": {
+              "linked_device": "Bağlı Cihaz"
+            },
+            "data_description": {
+              "linked_device": "WashData'nın bağlanacağı cihazı seçin. Bu, cihaz kaydına 'Şununla bağlanıldı' referansını ekler; WashData kendi cihaz kartını ve varlıklarını saklar. Bağlantıyı kaldırmak için seçimi temizleyin."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Eski Döngüleri Otomatik Etiketle",
-        "description": "{info}",
+        "description": "Toplam {total_count} döngü bulundu. Profiller: {profiles}",
         "data": {
           "confidence_threshold": "Minimum Güven (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "İşlem Geçmişi (Birleştir/Böl)",
-        "description": "Parçalanmış işlemleri birleştirerek ve yanlış birleştirilmiş döngüleri bir zaman penceresi içinde bölerek döngü geçmişini temizleyin. Geriye bakılacak saat sayısını girin.\n{info}",
+        "description": "Parçalanmış işlemleri birleştirerek ve yanlış birleştirilmiş döngüleri bir zaman penceresi içinde bölerek döngü geçmişini temizleyin. Geriye dönüp bakılacak saat sayısını girin (hepsi için 999999 kullanın).",
         "data": {
           "time_range": "Yeniden İnceleme Aralığı (saat)",
           "gap_seconds": "Boşluğu Birleştir/Böl (saniye)"
         },
         "data_description": {
-          "time_range": "Birleştirilecek parçalanmış döngülerin taranması için gereken saat sayısı. Tüm geçmiş verileri işlemek için 999999'u kullanın.\n{info}",
+          "time_range": "Birleştirilecek parçalanmış döngülerin taranması için gereken saat sayısı. Tüm geçmiş verileri işlemek için 999999'u kullanın.",
           "gap_seconds": "Bölünmeye mi yoksa birleştirmeye mi karar verecek eşik. Bundan DAHA KISA boşluklar birleştirilir. Bundan daha uzun boşluklar bölünür. Yanlış birleştirilmiş bir döngüde bölünmeyi zorlamak için bunu düşürün."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Ort. Enerji",
         "table_detected_program": "Algılanan Program",
         "table_confidence": "Kendinden emin",
-        "table_reported": "Bildirildi"
+        "table_reported": "Bildirildi",
+        "phase_builtin_suffix": "(Yerleşik)",
+        "phase_none_available": "Hiçbir aşama mevcut değil.",
+        "settings_deprecation_warning": "⚠️ **Kullanımdan kaldırılan cihaz türü:** {device_type}'nin gelecekteki bir sürümde kaldırılması planlanıyor. WashData'nın eşleşen işlem hattı bu cihaz sınıfı için güvenilir sonuçlar üretmiyor. Entegrasyonunuz kullanımdan kaldırma süresi boyunca çalışmaya devam eder; Bu uyarıyı susturmak için aşağıdaki **Cihaz Tipi** seçeneğini desteklenen türlerden birine (Çamaşır Makinesi, Kurutucu, Çamaşır Makinesi-Kurutucu Kombinesi, Bulaşık Makinesi, Hava Fritözü, Ekmek Makinesi veya Pompa) veya cihazınız desteklenen türlerden herhangi biriyle eşleşmiyorsa **Diğer (Gelişmiş)** olarak değiştirin. **Diğer (Gelişmiş)** herhangi bir belirli uygulama için ayarlanmayan genel varsayılanları kasıtlı olarak gönderir; bu nedenle eşikleri, zaman aşımlarını ve eşleşen parametreleri kendiniz yapılandırmanız gerekir; Geçiş yaptığınızda mevcut tüm ayarlarınız korunur.",
+        "phase_other_device_types": "Diğer cihaz türleri:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Tam Süreye Sıfırla",
         "apply": "Kırpmayı Uygula",
         "cancel": "İptal et"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Çamaşır makinesi",
+        "dryer": "Kurutma makinesi",
+        "washer_dryer": "Yıkama-Kurutma Makinesi Kombinasyonu",
+        "dishwasher": "Bulaşık makinesi",
+        "coffee_machine": "Kahve Makinesi (kullanımdan kaldırıldı)",
+        "ev": "Elektrikli Araç (kullanımdan kaldırıldı)",
+        "air_fryer": "Hava Fritözü",
+        "heat_pump": "Isı Pompası (kullanımdan kaldırıldı)",
+        "bread_maker": "Ekmek Makinesi",
+        "pump": "Pompa / Karter Pompası",
+        "oven": "Fırın (kullanımdan kaldırıldı)",
+        "other": "Diğer (Gelişmiş)"
       }
     }
   },

@@ -7,7 +7,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 from homeassistant.core import HomeAssistant
 
-from custom_components.ha_washdata.const import CONF_NOTIFY_EVENTS, NOTIFY_EVENT_FINISH
+from custom_components.ha_washdata.const import (
+    CONF_NOTIFY_CHANNEL,
+    CONF_NOTIFY_EVENTS,
+    CONF_NOTIFY_FINISH_CHANNEL,
+    NOTIFY_EVENT_FINISH,
+)
 from custom_components.ha_washdata.manager import WashDataManager
 
 
@@ -80,3 +85,33 @@ def test_precompletion_is_not_sent_twice(manager: WashDataManager) -> None:
     manager._check_pre_completion_notification()
 
     manager._dispatch_notification.assert_called_once()
+
+
+def test_reminder_uses_distinct_message_and_shares_tag(manager: WashDataManager) -> None:
+    """Reminder uses its own message (not the live template), shares the lifecycle
+    tag, omits alert_once, and is high priority so it makes a sound once."""
+    _set_precompletion_ready_state(manager)
+    manager._last_match_ambiguous = False
+    manager._dispatch_notification = MagicMock()
+
+    manager._check_pre_completion_notification()
+
+    msg = manager._dispatch_notification.call_args.args[0]
+    _, kwargs = manager._dispatch_notification.call_args
+    # Distinct from the recurring live "Less than N minutes remaining" template.
+    assert "Less than" not in msg
+    assert "5" in msg
+    assert kwargs["extra_vars"]["tag"] == manager._lifecycle_tag
+    assert "alert_once" not in kwargs["extra_vars"]
+    assert kwargs["extra_vars"]["priority"] == "high"
+
+
+def test_reminder_routes_to_finish_channel(manager: WashDataManager) -> None:
+    """The reminder shares the lifecycle tag but resolves to the finish channel so
+    it is audible even when the status channel is quiet."""
+    manager.config_entry.options = {
+        **manager.config_entry.options,
+        CONF_NOTIFY_CHANNEL: "Status",
+        CONF_NOTIFY_FINISH_CHANNEL: "Done",
+    }
+    assert manager._resolve_channel("pre_complete") == "Done"

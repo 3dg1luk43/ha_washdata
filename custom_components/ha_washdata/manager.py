@@ -140,6 +140,10 @@ from .const import (
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_NOTIFY_LIVE_CHRONOMETER,
+    CONF_NOTIFY_REMINDER_MESSAGE,
+    CONF_NOTIFY_TIMEOUT_SECONDS,
+    CONF_NOTIFY_CHANNEL,
+    CONF_NOTIFY_FINISH_CHANNEL,
     CONF_ENERGY_PRICE_STATIC,
     CONF_ENERGY_PRICE_ENTITY,
     CONF_DOOR_SENSOR_ENTITY,
@@ -160,6 +164,10 @@ from .const import (
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
     DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
     DEFAULT_NOTIFY_LIVE_CHRONOMETER,
+    DEFAULT_NOTIFY_REMINDER_MESSAGE,
+    DEFAULT_NOTIFY_TIMEOUT_SECONDS,
+    DEFAULT_NOTIFY_CHANNEL,
+    DEFAULT_NOTIFY_FINISH_CHANNEL,
 
     DEFAULT_MAX_FULL_TRACES_UNLABELED,
     DEFAULT_DTW_BANDWIDTH,
@@ -260,6 +268,7 @@ class WashDataManager:
         self._notify_live_interval_seconds = DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS
         self._notify_live_overrun_percent = DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
         self._notify_live_chronometer = DEFAULT_NOTIFY_LIVE_CHRONOMETER
+        self._notify_timeout_seconds = DEFAULT_NOTIFY_TIMEOUT_SECONDS
         self._pending_notifications: list[dict[str, Any]] = []
         self._remove_notify_people_listener = None
         self._live_notification_sent_count = 0
@@ -289,7 +298,15 @@ class WashDataManager:
         self._last_live_notification_time: datetime | None = None
         self._live_waiting_notification_sent = False
         self._live_chronometer_overrun_sent = False
-        self._live_notification_tag = f"ha_washdata_{self.entry_id}_live"
+        # Single per-device identity shared by start/live/reminder/finished so each
+        # replaces the previous on the mobile app (and collapses to one entry on the
+        # persistent-notification fallback). The clean-laundry nag uses its own tag
+        # since it fires up to an hour after finish and should not clobber the thread.
+        self._lifecycle_tag = f"ha_washdata_{self.entry_id}_lifecycle"
+        self._lifecycle_pn_id = self._lifecycle_tag
+        self._clean_tag = f"ha_washdata_{self.entry_id}_clean"
+        # Backwards-compatible alias for existing live-notification call sites/tests.
+        self._live_notification_tag = self._lifecycle_tag
         self._start_event_fired = False
         self._cycle_start_time: datetime | None = None
 
@@ -413,6 +430,11 @@ class WashDataManager:
             config_entry.options.get(
                 CONF_NOTIFY_LIVE_CHRONOMETER,
                 DEFAULT_NOTIFY_LIVE_CHRONOMETER,
+            )
+        )
+        self._notify_timeout_seconds = int(
+            config_entry.options.get(
+                CONF_NOTIFY_TIMEOUT_SECONDS, DEFAULT_NOTIFY_TIMEOUT_SECONDS
             )
         )
 
@@ -992,7 +1014,10 @@ class WashDataManager:
                     self._dispatch_notification(
                         msg,
                         event_type=NOTIFY_EVENT_START,
-                        extra_vars={"program": self._current_program},
+                        extra_vars={
+                            "program": self._current_program,
+                            "tag": self._lifecycle_tag,
+                        },
                     )
                     self._notified_start = True
                     self._logger.info("Sent start notification for program '%s'", self._current_program)
@@ -1690,6 +1715,11 @@ class WashDataManager:
                 DEFAULT_NOTIFY_LIVE_CHRONOMETER,
             )
         )
+        self._notify_timeout_seconds = int(
+            config_entry.options.get(
+                CONF_NOTIFY_TIMEOUT_SECONDS, DEFAULT_NOTIFY_TIMEOUT_SECONDS
+            )
+        )
 
         # Reload door sensor / pause config
         self._pause_cuts_power = bool(config_entry.options.get(CONF_PAUSE_CUTS_POWER, False))
@@ -1870,11 +1900,9 @@ class WashDataManager:
                 self._is_clean_state = False
                 self._clean_state_start = None
                 self._notified_clean_laundry = False
-                # Purge any deferred clean-laundry notifications from the queue
-                self._pending_notifications = [
-                    n for n in self._pending_notifications
-                    if n.get("event_type") != NOTIFY_EVENT_CLEAN
-                ]
+                # Dismiss a delivered clean reminder (and purge any queued ones)
+                # so it does not linger on the phone after the laundry is taken.
+                self._clear_clean_notification()
                 self._notify_update()
             elif self.detector.state in (STATE_RUNNING, STATE_STARTING, STATE_PAUSED, STATE_ENDING):
                 # Door opened during active cycle → soft pause confirmation
@@ -2241,7 +2269,11 @@ class WashDataManager:
                         duration=duration_min,
                         delay=self._notify_unload_delay_minutes,
                     )
-                    sent = self._dispatch_notification(msg, event_type=NOTIFY_EVENT_CLEAN)
+                    sent = self._dispatch_notification(
+                        msg,
+                        event_type=NOTIFY_EVENT_CLEAN,
+                        extra_vars={"tag": self._clean_tag},
+                    )
                     if sent:
                         self._notified_clean_laundry = True
                         self._logger.info(
@@ -2603,7 +2635,10 @@ class WashDataManager:
                     self._dispatch_notification(
                         msg,
                         event_type=NOTIFY_EVENT_START,
-                        extra_vars={"program": self._current_program},
+                        extra_vars={
+                            "program": self._current_program,
+                            "tag": self._lifecycle_tag,
+                        },
                     )
                     self._notified_start = True
                     self._logger.info(
@@ -2781,7 +2816,11 @@ class WashDataManager:
                 },
             )
 
-        self._clear_live_progress_notification()
+        # Purge pending live entries and reset counters, but don't send a service-level
+        # clear: the finished notification below reuses the lifecycle tag and replaces
+        # the live card in place (sending a clear first would cause a dismiss/recreate
+        # flicker). The action-based clear marker still fires for action templates.
+        self._clear_live_progress_notification(clear_services=False)
 
         # Send notification if enabled
         if self._notify_finish_services or self._notify_actions:
@@ -2829,6 +2868,10 @@ class WashDataManager:
                     "program": program_name,
                     "energy_kwh": energy_kwh,
                     "cost": cost_str,
+                    # Same lifecycle tag as start/live so the finished alert replaces
+                    # the live notification in place. No live_update/alert_once here,
+                    # so the companion app surfaces it with sound.
+                    "tag": self._lifecycle_tag,
                 },
             )
 
@@ -2939,6 +2982,24 @@ class WashDataManager:
             return self._notify_live_services
         return []
 
+    def _resolve_channel(self, event_type: str | None) -> str | None:
+        """Resolve the Android notification channel name for an event type.
+
+        Finished, the clean-laundry nag, and the pre-completion reminder route to the
+        dedicated finish channel (so they can carry their own sound), falling back to
+        the status channel. Start/live use the status channel. An empty configured
+        value means "omit channel" so existing setups are unchanged.
+        """
+        status_channel = self.config_entry.options.get(
+            CONF_NOTIFY_CHANNEL, DEFAULT_NOTIFY_CHANNEL
+        )
+        finish_channel = self.config_entry.options.get(
+            CONF_NOTIFY_FINISH_CHANNEL, DEFAULT_NOTIFY_FINISH_CHANNEL
+        )
+        if event_type in (NOTIFY_EVENT_FINISH, NOTIFY_EVENT_CLEAN, "pre_complete"):
+            return (finish_channel or status_channel) or None
+        return status_channel or None
+
     def _dispatch_notification(
         self,
         message: str,
@@ -2985,6 +3046,17 @@ class WashDataManager:
         }
         if extra_vars:
             variables.update(extra_vars)
+
+        # Channel + auto-dismiss timeout apply to every event type. Inject into both
+        # the action variables and the notify-service extra_vars so both delivery
+        # paths honour them. Empty channel / zero timeout are omitted (no-op default).
+        channel = self._resolve_channel(event_type)
+        if channel:
+            variables["channel"] = channel
+            extra_vars = {**(extra_vars or {}), "channel": channel}
+        if self._notify_timeout_seconds > 0:
+            variables["timeout"] = self._notify_timeout_seconds
+            extra_vars = {**(extra_vars or {}), "timeout": self._notify_timeout_seconds}
 
         if allow_deferral and self._notify_only_when_home and self._notify_people:
             if not self._is_any_notify_person_home():
@@ -3040,9 +3112,16 @@ class WashDataManager:
         if icon:
             data["icon"] = icon
 
-        if event_type == NOTIFY_EVENT_LIVE and extra_vars:
+        ev = extra_vars or {}
+        # Common payload keys forwarded for every event type so start/live/reminder/
+        # finished share a tag (replace each other) and honour timeout/channel/priority.
+        for key in ("tag", "timeout", "channel", "priority"):
+            if key in ev:
+                data[key] = ev[key]
+
+        # Live-progress-only payload keys (countdown, progress bar, throttle markers).
+        if event_type == NOTIFY_EVENT_LIVE:
             for key in (
-                "tag",
                 "progress",
                 "progress_max",
                 "live_update",
@@ -3056,8 +3135,8 @@ class WashDataManager:
                 "when",
                 "countdown",
             ):
-                if key in extra_vars:
-                    data[key] = extra_vars[key]
+                if key in ev:
+                    data[key] = ev[key]
 
         sent = False
         for notify_service in services:
@@ -3106,7 +3185,15 @@ class WashDataManager:
         if not sent:
             if event_type == NOTIFY_EVENT_LIVE:
                 return False
-            _pn_create(self.hass, message, title=title)
+            # Reuse the notification's tag as a stable persistent-notification id so
+            # the HA notifications tab collapses the lifecycle thread to one entry
+            # instead of accumulating a new card per cycle (issue #248/#249 clutter).
+            _pn_create(
+                self.hass,
+                message,
+                title=title,
+                notification_id=ev.get("tag"),
+            )
             return True
 
         return sent
@@ -3513,8 +3600,17 @@ class WashDataManager:
                 self._live_notification_sent_count += 1
             self._last_live_notification_time = now
 
-    def _clear_live_progress_notification(self) -> None:
-        """Clear active live/progress notifications and purge stale deferred alerts."""
+    def _clear_live_progress_notification(self, clear_services: bool = True) -> None:
+        """Clear active live/progress notifications and purge stale deferred alerts.
+
+        On cycle finish (``clear_services=False``) the finished notification carries
+        the same lifecycle tag and replaces the live notification in place, so we must
+        NOT also send a service-level ``clear_notification`` (it would briefly dismiss
+        then re-create the card). The pending-purge, the action-based clear marker
+        (kept for backward compatibility with custom action templates), and the state
+        reset still run. On shutdown (``clear_services=True``) no finished notification
+        follows, so the explicit service clear is required to dismiss the live card.
+        """
         # Purge queued live-progress entries and stale start/pre-complete entries
         # so a completed cycle cannot replay them later.
         live_tag = self._live_notification_tag
@@ -3558,19 +3654,61 @@ class WashDataManager:
             }
         )
 
-        self._send_notification_service(
-            "clear_notification",
-            services=self._notify_live_services,
-            event_type=NOTIFY_EVENT_LIVE,
-            extra_vars={
-                "tag": self._live_notification_tag,
-                "live_update": True,
-                "alert_once": True,
-            },
-        )
+        if clear_services:
+            self._send_notification_service(
+                "clear_notification",
+                services=self._notify_live_services,
+                event_type=NOTIFY_EVENT_LIVE,
+                extra_vars={
+                    "tag": self._live_notification_tag,
+                    "live_update": True,
+                    "alert_once": True,
+                },
+            )
 
         # Reset live-update state flags and counters.
         self._reset_live_notification_state()
+
+    def _clear_clean_notification(self) -> None:
+        """Dismiss a delivered clean-laundry reminder and purge any queued ones.
+
+        The clean nag uses its own tag (``_clean_tag``) rather than the lifecycle
+        tag, so nothing replaces it once the clean state resolves. Mirror the
+        lifecycle clear here so a delivered reminder is removed from the mobile
+        app instead of lingering. A clear for a non-existent tag is harmless, so
+        this runs whenever the user has any clean/finish delivery configured.
+        """
+        # Drop any still-queued clean entries so they cannot replay later.
+        self._pending_notifications = [
+            n for n in self._pending_notifications
+            if n.get("event_type") != NOTIFY_EVENT_CLEAN
+        ]
+
+        services = self._get_services_for_event(NOTIFY_EVENT_CLEAN)
+        if not services and not self._notify_actions:
+            return
+
+        if self._notify_actions:
+            self._run_notification_actions(
+                {
+                    "device": self.config_entry.title,
+                    "program": "",
+                    "message": "clear_notification",
+                    "title": "",
+                    "icon": None,
+                    "event_type": NOTIFY_EVENT_CLEAN,
+                    "person_entity_id": None,
+                    "person_name": None,
+                    "tag": self._clean_tag,
+                }
+            )
+        if services:
+            self._send_notification_service(
+                "clear_notification",
+                services=services,
+                event_type=NOTIFY_EVENT_CLEAN,
+                extra_vars={"tag": self._clean_tag},
+            )
 
     def _check_pre_completion_notification(self) -> None:
         """Check and send pre-completion notification."""
@@ -3585,12 +3723,17 @@ class WashDataManager:
             # Send notification!
             self._notified_pre_completion = True
 
-            msg_template = self.config_entry.options.get(CONF_NOTIFY_PRE_COMPLETE_MESSAGE, DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE)
+            # Distinct reminder message (not the live-update template) so the one-time
+            # "X minutes left" alert is not confused with the recurring live ticks that
+            # reuse CONF_NOTIFY_PRE_COMPLETE_MESSAGE.
+            msg_template = self.config_entry.options.get(
+                CONF_NOTIFY_REMINDER_MESSAGE, DEFAULT_NOTIFY_REMINDER_MESSAGE
+            )
             minutes_left = self._notify_before_end_minutes
 
             msg = self._safe_format_template(
                 msg_template,
-                fallback_template=DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+                fallback_template=DEFAULT_NOTIFY_REMINDER_MESSAGE,
                 device=self.config_entry.title,
                 minutes=minutes_left,
                 program=self._current_program,
@@ -3598,7 +3741,15 @@ class WashDataManager:
             self._dispatch_notification(
                 msg,
                 event_type="pre_complete",
-                extra_vars={"minutes_left": minutes_left, "minutes": minutes_left},
+                extra_vars={
+                    # Share the lifecycle tag so the reminder updates the live thread in
+                    # place. No alert_once -> the companion app makes a sound once; it is
+                    # routed to the finish channel (see _resolve_channel) for audibility.
+                    "tag": self._lifecycle_tag,
+                    "minutes_left": minutes_left,
+                    "minutes": minutes_left,
+                    "priority": "high",
+                },
             )
             self._logger.info("Sent pre-completion notification: %s", msg)
 

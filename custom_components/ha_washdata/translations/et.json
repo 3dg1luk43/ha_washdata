@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Lõpetamiseelne sõnumivorming",
           "energy_price_entity": "Energiahind – üksus (valikuline)",
           "energy_price_static": "Energia hind – staatiline väärtus (valikuline)",
-          "go_back": "Mine tagasi salvestamata"
+          "go_back": "Mine tagasi salvestamata",
+          "notify_reminder_message": "Meeldetuletuse kirja vorming",
+          "notify_timeout_seconds": "Automaatne loobumine pärast (sekundeid)",
+          "notify_channel": "Teavitamiskanal (staatus/otseülekanne/meeldetuletus)",
+          "notify_finish_channel": "Lõpetatud teavituskanal"
         },
         "data_description": {
           "go_back": "Märkige see ja klõpsake Esita, et ülaltoodud muudatused ära visata ja põhimenüüsse naasta.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Sõnum saadetakse pärast tsükli lõppemist. Toetab kohahoidjaid {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Sõnum saadeti enne valmimist. Toetab kohahoidjaid {device}, {minutes}.",
           "energy_price_entity": "Valige numbriline olem, millel on praegune elektrihind (nt sensor.electricity_price, input_number.energy_rate). Kui see on määratud, lubab kohahoidja {cost}. Kui mõlemad on konfigureeritud, on see ülimuslik staatilise väärtuse suhtes.",
-          "energy_price_static": "Fikseeritud elektrihind kWh kohta. Kui see on määratud, lubab kohahoidja {cost}. Ignoreeritakse, kui olem on ülal konfigureeritud. Lisa oma valuuta sümbol sõnumimalli, nt. {cost} €."
+          "energy_price_static": "Fikseeritud elektrihind kWh kohta. Kui see on määratud, lubab kohahoidja {cost}. Ignoreeritakse, kui olem on ülal konfigureeritud. Lisa oma valuuta sümbol sõnumimalli, nt. {cost} €.",
+          "notify_reminder_message": "Ühekordse meeldetuletuse tekst saatis seadistatud minutite arvu enne eeldatavat lõppu. Erinevus korduvatest live-uuendustest ülalpool. Toetab {device}, {minutes}, {program} kohahoidjaid.",
+          "notify_timeout_seconds": "Pärast seda mitu sekundit automaatselt teated välja jätta (edasi saadetud kui kaasrakenduse aegumine). Seadke 0, et hoida neid kuni vallandamiseni. Vaikimisi: 0.",
+          "notify_channel": "Android kaaslase rakenduse teavituskanal oleku, live progressi ja meeldetuletuste jaoks. Kanali heli ja tähtsus on konfigureeritud kaaslase rakenduses kanali nime esmakordsel kasutamisel - WashData määrab ainult kanali nime. Jäta rakenduse vaikeväärtus tühjaks.",
+          "notify_finish_channel": "Eraldi Android kanal lõpetatud hoiatuse jaoks (kasutab ka meeldetuletus ja pesupesemist ootav nag), et sellel oleks oma heli. Jäta tühjaks, et kanalit uuesti kasutada."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Kui pumbatsükkel töötab ka pärast seda mitu sekundit, käivitatakse üks kord sündmus ha_washdata_pump_stuck. Kasutage seda kinnikiilunud mootori tuvastamiseks (tavaline karteripumba tööaeg on alla 60 s). Vaikimisi: 1800 s (30 min). Ainult pumba seadme tüüp."
+            }
+          },
+          "device_link_section": {
+            "name": "Seadme link",
+            "description": "Lisavõimalusena ühendage see WashData seade olemasoleva Home Assistant seadmega (näiteks nutipistik või seade ise). Seejärel kuvatakse WashData seade selle seadme kaudu \"ühendatud\". Jäta tühjaks, et WashData jääks eraldiseisvaks seadmeks.",
+            "data": {
+              "linked_device": "Ühendatud seade"
+            },
+            "data_description": {
+              "linked_device": "Valige seade WashData ühendamiseks. See lisab seadmeregistrisse viite 'ühendatud läbi'; WashData säilitab oma seadmekaardi ja olemid. Puhasta valik lingi eemaldamiseks."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Vanade tsüklite automaatne sildistamine",
-        "description": "{info}",
+        "description": "Leiti kokku {total_count} tsüklit. Profiilid: {profiles}",
         "data": {
           "confidence_threshold": "Minimaalne usaldus (0,50–0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Protsessi ajalugu (ühenda/jaga)",
-        "description": "Puhastage tsüklite ajalugu, ühendades killustatud jooksud ja jagades valesti ühendatud tsüklid ajaaknas. Sisestage tagasivaatamiseks tundide arv.\n{info}",
+        "description": "Puhastage tsüklite ajalugu, ühendades killustatud jooksud ja jagades valesti ühendatud tsüklid ajaaknas. Sisestage tagasivaatamiseks kuluvate tundide arv (kasutage kõigi jaoks 999999).",
         "data": {
           "time_range": "Tagasivaate aken (tundides)",
           "gap_seconds": "Ühenda/jaga vahe (sekundites)"
         },
         "data_description": {
-          "time_range": "Tundide arv killustatud tsüklite ühendamiseks otsimiseks. Kasutage kõigi ajalooliste andmete töötlemiseks numbrit 999999.\n{info}",
+          "time_range": "Tundide arv killustatud tsüklite ühendamiseks otsimiseks. Kasutage kõigi ajalooliste andmete töötlemiseks numbrit 999999.",
           "gap_seconds": "Lõikamise ja ühendamise otsustamise künnis. Sellest LÜHEMEMAD lüngad liidetakse. Sellest PIKEMAD lüngad on jagatud. Valesti liidetud tsükli jagamise sundimiseks langetage seda."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Keskm. energia",
         "table_detected_program": "Tuvastatud programm",
         "table_confidence": "Usaldus",
-        "table_reported": "Teatatud"
+        "table_reported": "Teatatud",
+        "phase_builtin_suffix": "(sisseehitatud)",
+        "phase_none_available": "Faase pole saadaval.",
+        "settings_deprecation_warning": "⚠️ **Tuginemata seadme tüüp:** {device_type} eemaldatakse tulevases versioonis. WashData sobituskonveier ei anna selle seadmeklassi jaoks usaldusväärseid tulemusi. Teie integratsioon toimib kogu aegumisperioodi jooksul; selle hoiatuse vaigistamiseks valige **Seadme tüüp** allpool ühele toetatud tüübile (pesumasin, kuivati, pesumasin-kuivati, nõudepesumasin, õhufritüür, leivamasin või pump) või valikule **Muu (täiustatud)**, kui teie seade ei vasta ühelegi toetatud tüübile. **Muu (täiustatud)** tarnib tahtlikult üldisi vaikeseadeid, mis ei ole häälestatud ühegi konkreetse seadme jaoks, seega peate läved, ajalõpud ja sobivad parameetrid ise konfigureerima; vahetamisel säilitatakse kõik teie olemasolevad seaded.",
+        "phase_other_device_types": "Muud seadmetüübid:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Lähtestage täiskestusele",
         "apply": "Rakenda kärpimine",
         "cancel": "Tühista"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Pesumasin",
+        "dryer": "Kuivati",
+        "washer_dryer": "Kombineeritud pesumasin-kuivati",
+        "dishwasher": "Nõudepesumasin",
+        "coffee_machine": "Kohvimasin (aegunud)",
+        "ev": "Elektrisõiduk (aegunud)",
+        "air_fryer": "Õhufritüür",
+        "heat_pump": "Soojuspump (aegunud)",
+        "bread_maker": "Leivaküpsetaja",
+        "pump": "Pump / Äravoolupump",
+        "oven": "Ahi (aegunud)",
+        "other": "Muu (täpsem)"
       }
     }
   },

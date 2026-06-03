@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Pirmspabeigšanas ziņojuma formāts",
           "energy_price_entity": "Enerģijas cena - vienība (pēc izvēles)",
           "energy_price_static": "Enerģijas cena - statiskā vērtība (pēc izvēles)",
-          "go_back": "Atgriezties bez saglabāšanas"
+          "go_back": "Atgriezties bez saglabāšanas",
+          "notify_reminder_message": "Atgādinājuma ziņojuma formāts",
+          "notify_timeout_seconds": "Automātiski noraidīt pēc (sekundes)",
+          "notify_channel": "Paziņojumu kanāls (statuss/tiešraide/atgādinājums)",
+          "notify_finish_channel": "Pabeigts paziņojumu kanāls"
         },
         "data_description": {
           "go_back": "Atzīmējiet šo un noklikšķiniet uz Iesniegt, lai atmestu visas iepriekš minētās izmaiņas un atgrieztos galvenajā izvēlnē.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Ziņojums nosūtīts, kad cikls beidzas. Atbalsta vietturus {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Ziņa nosūtīta pirms pabeigšanas. Atbalsta vietturi {device}, {minutes}.",
           "energy_price_entity": "Atlasiet skaitlisku vienību, kurā ir norādīta pašreizējā elektroenerģijas cena (piemēram, sensors.electricity_price, input_number.energy_rate). Kad tas ir iestatīts, tiek iespējots vietturis {cost}. Ja abi ir konfigurēti, ir prioritāte pār statisko vērtību.",
-          "energy_price_static": "Fiksēta elektroenerģijas cena par kWh. Kad tas ir iestatīts, tiek iespējots vietturis {cost}. Ignorē, ja iepriekš ir konfigurēta entītija. Pievienojiet savas valūtas simbolu ziņojuma veidnē, piem. {cost} €."
+          "energy_price_static": "Fiksēta elektroenerģijas cena par kWh. Kad tas ir iestatīts, tiek iespējots vietturis {cost}. Ignorē, ja iepriekš ir konfigurēta entītija. Pievienojiet savas valūtas simbolu ziņojuma veidnē, piem. {cost} €.",
+          "notify_reminder_message": "Vienreizējā atgādinājuma teksts tika nosūtīts konfigurēto minūšu skaitu pirms paredzamās beigām. Atšķiras no iepriekš minētajiem regulāriem tiešraides atjauninājumiem. Atbalsta vietturus {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Automātiski noraidīt paziņojumus pēc šīm sekundēm (tiek pārsūtīti kā pavadošās lietotnes noildze). Iestatiet vērtību 0, lai tās saglabātu līdz atlaišanai. Noklusējums: 0.",
+          "notify_channel": "Android pavadošās lietotnes paziņojumu kanāls statusa, reāllaika norises un atgādinājumu paziņojumiem. Kanāla skaņa un svarīgums tiek konfigurēti pavadošajā lietotnē, kad pirmo reizi tiek izmantots kanāla nosaukums — WashData iestata tikai kanāla nosaukumu. Atstājiet tukšu lietotnes noklusējuma iestatīšanai.",
+          "notify_finish_channel": "Atsevišķs Android kanāls gatavajam brīdinājumam (to izmanto arī atgādinājums un veļas gaidīšanas zvans), lai tam būtu savs skaņa. Atstājiet tukšu, lai atkārtoti izmantotu iepriekš minēto kanālu."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Ja sūkņa cikls joprojām darbojas pēc šīm sekundēm, vienreiz tiek aktivizēts notikums ha_washdata_pump_stuck. Izmantojiet to, lai noteiktu iestrēgušu motoru (parasti sūkņa darbības laiks ir mazāks par 60 s). Noklusējums: 1800 s (30 min). Tikai sūkņa ierīces tips."
+            }
+          },
+          "device_link_section": {
+            "name": "Ierīces saite",
+            "description": "Pēc izvēles saistiet šo WashData ierīci ar esošu Home Assistant ierīci (piemēram, viedspraudni vai pašu ierīci). Pēc tam WashData ierīce tiek parādīta kā \"Savienots, izmantojot šo ierīci\". Atstājiet tukšu, lai WashData saglabātu kā atsevišķu ierīci.",
+            "data": {
+              "linked_device": "Saistītā ierīce"
+            },
+            "data_description": {
+              "linked_device": "Atlasiet ierīci, ar kuru savienot WashData. Tādējādi ierīces reģistrā tiek pievienota atsauce “Savienots, izmantojot”; WashData saglabā savu ierīces karti un entītijas. Notīriet atlasi, lai noņemtu saiti."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automātiski iezīmējiet vecos ciklus",
-        "description": "{info}",
+        "description": "Kopā atrasti {total_count} cikli. Profili: {profiles}",
         "data": {
           "confidence_threshold": "Minimālā uzticamība (0,50–0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Procesu vēsture (apvienošana/sadaļa)",
-        "description": "Notīriet ciklu vēsturi, sapludinot sadrumstalotas darbības un sadalot nepareizi sapludinātos ciklus laika logā. Ievadiet stundu skaitu, lai atskatītos atpakaļ.\n{info}",
+        "description": "Notīriet ciklu vēsturi, sapludinot sadrumstalotas darbības un sadalot nepareizi sapludinātos ciklus laika logā. Ievadiet stundu skaitu, lai atskatītos atpakaļ (visiem izmantojiet 999999).",
         "data": {
           "time_range": "Atskata logs (stundas)",
           "gap_seconds": "Apvienot/sadalīt intervālu (sekundēs)"
         },
         "data_description": {
-          "time_range": "Stundu skaits, lai meklētu sadrumstalotos ciklus, lai sapludinātu. Izmantojiet 999999, lai apstrādātu visus vēsturiskos datus.\n{info}",
+          "time_range": "Stundu skaits, lai meklētu sadrumstalotos ciklus, lai sapludinātu. Izmantojiet 999999, lai apstrādātu visus vēsturiskos datus.",
           "gap_seconds": "Slieksnis, lai izlemtu par sadalīšanu vai apvienošanu. Atstarpes, kas ir ĪSĀKAS par šo, ir apvienotas. Atšķirības, kas ir garākas par šo, ir sadalītas. Nolaidiet to, lai piespiestu sadalīt ciklu, kas tika sapludināts nepareizi."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Vid. enerģija",
         "table_detected_program": "Atklātā programma",
         "table_confidence": "Pārliecība",
-        "table_reported": "Ziņots"
+        "table_reported": "Ziņots",
+        "phase_builtin_suffix": "(Iebūvēts)",
+        "phase_none_available": "Nav pieejamas fāzes.",
+        "settings_deprecation_warning": "⚠️ **Novecojis ierīces veids:** {device_type} ir plānots noņemt nākamajā laidienā. WashData atbilstības cauruļvads nesniedz ticamus rezultātus šai ierīču klasei. Jūsu integrācija turpinās darboties nolietojuma periodā; lai izslēgtu šo brīdinājumu, tālāk pārslēdziet **Ierīces veidu** uz kādu no atbalstītajiem veidiem (veļas mazgājamā mašīna, žāvētājs, veļas mazgājamās mašīnas-žāvēšanas mašīna, trauku mazgājamā mašīna, gaisa cepeškrāsns, maizes automāts vai sūknis) vai **Cits (uzlabots)**, ja jūsu ierīce neatbilst nevienam no atbalstītajiem veidiem. **Other (Advanced)** apzināti piegādā vispārīgus noklusējuma iestatījumus, kas nav pielāgoti nevienai konkrētai ierīcei, tāpēc jums pašam būs jākonfigurē sliekšņi, noildzes un atbilstošie parametri; pārslēdzoties, visi esošie iestatījumi tiek saglabāti.",
+        "phase_other_device_types": "Citi ierīču veidi:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Atiestatīt uz pilnu ilgumu",
         "apply": "Uzklājiet apgriešanu",
         "cancel": "Atcelt"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Veļas mašīna",
+        "dryer": "Žāvētājs",
+        "washer_dryer": "Kombinētais veļas mazgājamās mašīnas-žāvētājs",
+        "dishwasher": "Trauku mazgājamā mašīna",
+        "coffee_machine": "Kafijas automāts (novecojis)",
+        "ev": "Elektriskais transportlīdzeklis (novecojis)",
+        "air_fryer": "Gaisa cepeškrāsns",
+        "heat_pump": "Siltumsūknis (novecojis)",
+        "bread_maker": "Maizes gatavotājs",
+        "pump": "Sūknis / Sūknis",
+        "oven": "Cepeškrāsns (novecojusi)",
+        "other": "Cits (uzlabots)"
       }
     }
   },

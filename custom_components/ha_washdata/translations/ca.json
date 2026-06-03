@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format de missatge previ a la finalització",
           "energy_price_entity": "Preu de l'energia - Entitat (opcional)",
           "energy_price_static": "Preu de l'energia: valor estàtic (opcional)",
-          "go_back": "Torna enrere sense desar"
+          "go_back": "Torna enrere sense desar",
+          "notify_reminder_message": "Format de missatge de recordatori",
+          "notify_timeout_seconds": "Auto-ismes després (segons)",
+          "notify_channel": "Canal de notificació (estat/ viu/reminder)",
+          "notify_finish_channel": "Canal de notificació finalitzada"
         },
         "data_description": {
           "go_back": "Marqueu això i feu clic a Envia per descartar qualsevol canvi anterior i tornar al menú principal.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició.",
           "energy_price_entity": "Seleccioneu una entitat numèrica que contingui el preu actual de l'electricitat (p. ex., sensor.electricity_price, input_number.energy_rate). Quan s'estableix, activa el marcador de posició {cost}. Té prioritat sobre el valor estàtic si tots dos estan configurats.",
-          "energy_price_static": "Preu fix de l'electricitat per kWh. Quan s'estableix, activa el marcador de posició {cost}. S'ignora si una entitat està configurada més amunt. Afegiu el vostre símbol de moneda a la plantilla del missatge, p. ex. {cost} €."
+          "energy_price_static": "Preu fix de l'electricitat per kWh. Quan s'estableix, activa el marcador de posició {cost}. S'ignora si una entitat està configurada més amunt. Afegiu el vostre símbol de moneda a la plantilla del missatge, p. ex. {cost} €.",
+          "notify_reminder_message": "Text del recordatori d' una vegada enviat el nombre de minuts configurats abans del final estimat. Discinta des de les actualitzacions de la vida recurrent a dalt. Implementació {device}, {minutes}, variable {program}.",
+          "notify_timeout_seconds": "Mostra automàticament les notificacions després d' aquests molts segons (reprodueix- les com a 'timeout' del company). Posa a 0 per a mantenir-los fins que es desconnectin. Omissió: 0.",
+          "notify_channel": "Canal de notificació Android per a l' estat, progrés i notificacions de recordatori. El so i la importància d' un canal estan configurats en l' aplicació del company la primera vegada que s' usa el nom del canal - RenshData només estableix el nom del canal. Deixa buit per omissió l' aplicació.",
+          "notify_finish_channel": "Separa el canal Android per a l' alerta finalitzada (també usat pel recordatori i l' expulsió de la roba) per tal que pugui tenir el seu propi so. Deixa buit per a tornar a utilitzar el canal de dalt."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Si un cicle de bomba encara s'està executant després d'aquests segons, s'activa un esdeveniment ha_washdata_pump_stuck. Utilitzeu-ho per detectar un motor encallat (el funcionament típic de la bomba de carter és inferior a 60 s). Per defecte: 1800 s (30 min). Només tipus de dispositiu de bomba."
+            }
+          },
+          "device_link_section": {
+            "name": "Enllaç de dispositiu",
+            "description": "Enllaç opcional aquest dispositiu RenshData a un dispositiu Home Assistant existent (per exemple el connector intel· ligent o el mateix aparell). El dispositiu RenshData es mostra llavors com \"Connectat via\" aquest dispositiu. Deixa buit per mantenir RenshData com a un dispositiu independent.",
+            "data": {
+              "linked_device": "Dispositiu enllaçat"
+            },
+            "data_description": {
+              "linked_device": "Seleccioneu el dispositiu a on connectar RenshData. Això afegeix una 'Connectada via' referència al registre del dispositiu; RenshData manté la seva pròpia targeta de dispositiu i entitats. Neteja la selecció per eliminar l' enllaç."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Etiqueta automàtica de cicles antics",
-        "description": "{info}",
+        "description": "S'han trobat {total_count} cicles totals. Perfils: {profiles}",
         "data": {
           "confidence_threshold": "Confiança mínima (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Historial de processos (fusionar/dividir)",
-        "description": "Netegeu l'historial de cicles combinant execucions fragmentades i dividint cicles combinats incorrectament dins d'una finestra de temps. Introduïu el nombre d'hores per mirar enrere.\n{info}",
+        "description": "Netegeu l'historial de cicles combinant execucions fragmentades i dividint cicles combinats incorrectament dins d'una finestra de temps. Introduïu el nombre d'hores per mirar enrere (utilitza 999999 per a tots).",
         "data": {
           "time_range": "Finestra de consulta (hores)",
           "gap_seconds": "Combinació/Divisió de la bretxa (segons)"
         },
         "data_description": {
-          "time_range": "Nombre d'hores per buscar cicles fragmentats per combinar-los. Utilitzeu 999999 per processar totes les dades històriques.\n{info}",
+          "time_range": "Nombre d'hores per buscar cicles fragmentats per combinar-los. Utilitzeu 999999 per processar totes les dades històriques.",
           "gap_seconds": "Llindar per decidir dividir o combinar. Els buits MÉS CURTS que aquest es combinen. Els buits MÉS LLARG que aquest es divideixen. Baixeu-ho per forçar una divisió en un cicle que s'ha fusionat incorrectament."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Energia mitjana",
         "table_detected_program": "Programa detectat",
         "table_confidence": "Confiança",
-        "table_reported": "Informat"
+        "table_reported": "Informat",
+        "phase_builtin_suffix": "(Incorporat)",
+        "phase_none_available": "No hi ha fases disponibles.",
+        "settings_deprecation_warning": "⚠️ **Tipus de dispositiu obsolet:** {device_type} està previst que s'elimini en una versió futura. El pipeline de concordança de WashData no produeix resultats fiables per a aquesta classe d'aparell. La vostra integració continua funcionant durant el període d'abandonament; per silenciar aquest avís, canvieu el **Tipus de dispositiu** a continuació a un dels tipus admesos (rentadora, assecadora, rentadora-assecadora combinada, rentavaixelles, fregidora d'aire, màquina de pa o bomba) o a **Altres (avançat)** si el vostre aparell no coincideix amb cap dels tipus admesos. **Altres (avançat)** inclou valors predeterminats genèrics intencionadament que no estan ajustats per a cap aparell específic, de manera que haureu de configurar vosaltres mateixos els llindars, els temps d'espera i els paràmetres coincidents; tots els vostres paràmetres existents es conserven quan canvieu.",
+        "phase_other_device_types": "Altres tipus de dispositius:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Restableix a la durada completa",
         "apply": "Aplicar Trim",
         "cancel": "Cancel·la"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Rentadora",
+        "dryer": "Assecador",
+        "washer_dryer": "Combo de rentadora-assecadora",
+        "dishwasher": "Rentaplats",
+        "coffee_machine": "Màquina de cafè (obsoleta)",
+        "ev": "Vehicle elèctric (obsolet)",
+        "air_fryer": "Fregidora d'aire",
+        "heat_pump": "Bomba de calor (obsoleta)",
+        "bread_maker": "Panificadora",
+        "pump": "Bomba / Bomba de sumidero",
+        "oven": "Forn (obsolet)",
+        "other": "Altres (avançat)"
       }
     }
   },

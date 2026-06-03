@@ -101,7 +101,9 @@ def test_check_pre_completion_notification(manager: WashDataManager, mock_hass: 
     # Verify persistent notification called since no notify_service configured
     mock_hass.components.persistent_notification.async_create.assert_called_once()
     args = mock_hass.components.persistent_notification.async_create.call_args[0]
-    assert "5 minutes remaining" in args[0]
+    # Reminder now uses its own distinct message (DEFAULT_NOTIFY_REMINDER_MESSAGE),
+    # not the live "Less than N minutes remaining" template.
+    assert "5 minutes left" in args[0]
 
 def test_check_pre_completion_notification_already_sent(manager: WashDataManager, mock_hass: Any) -> None:
     """Test it doesn't send twice."""

@@ -1,0 +1,65 @@
+name: Close Incomplete PRs
+
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+
+jobs:
+  close-stale:
+    name: Close PRs missing description after 5 days
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find and close incomplete PRs
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const LABEL = 'needs description';
+            const GRACE_DAYS = 5;
+            const cutoff = new Date(Date.now() - GRACE_DAYS * 24 * 60 * 60 * 1000);
+
+            // Fetch all open PRs with the label (paginate to be safe)
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            });
+
+            const targets = prs.filter(pr => {
+              const hasLabel = pr.labels.some(l => l.name === LABEL);
+              const olderThanGrace = new Date(pr.created_at) < cutoff;
+              return hasLabel && olderThanGrace;
+            });
+
+            console.log(`Found ${targets.length} PR(s) to close.`);
+
+            for (const pr of targets) {
+              const body = [
+                `Hi @${pr.user.login}! This PR has been automatically closed because the description was not completed within ${GRACE_DAYS} days of the warning.`,
+                '',
+                "You're welcome to open a new PR once the template is filled in. See the PR template for guidance on what's required.",
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body,
+              });
+
+              await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: pr.number,
+                state: 'closed',
+              });
+
+              console.log(`Closed PR #${pr.number} (${pr.title})`);
+            }

@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format mesaj pre-finalizare",
           "energy_price_entity": "Prețul energiei - Entitate (opțional)",
           "energy_price_static": "Prețul energiei - Valoare statică (opțional)",
-          "go_back": "Reveniți fără salvare"
+          "go_back": "Reveniți fără salvare",
+          "notify_reminder_message": "Format mesaj de memento",
+          "notify_timeout_seconds": "Închidere automată după (secunde)",
+          "notify_channel": "Canal de notificare (stare/live/memento)",
+          "notify_finish_channel": "Canal de notificare terminat"
         },
         "data_description": {
           "go_back": "Bifați aceasta și faceți clic pe Trimitere pentru a renunța la orice modificări de mai sus și a reveni la meniul principal.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Mesaj trimis când un ciclu se termină. Acceptă substituenții {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Mesaj trimis înainte de finalizare. Acceptă substituenții {device}, {minutes}.",
           "energy_price_entity": "Selectați o entitate numerică care deține prețul curent al energiei electrice (de exemplu, senzor.electricity_price, input_number.energy_rate). Când este setat, activează substituentul {cost}. Are prioritate față de valoarea statică dacă ambele sunt configurate.",
-          "energy_price_static": "Preț fix al energiei electrice pe kWh. Când este setat, activează substituentul {cost}. Ignorat dacă o entitate este configurată mai sus. Adăugați simbolul valutar în șablonul de mesaj, de ex. {cost} €."
+          "energy_price_static": "Preț fix al energiei electrice pe kWh. Când este setat, activează substituentul {cost}. Ignorat dacă o entitate este configurată mai sus. Adăugați simbolul valutar în șablonul de mesaj, de ex. {cost} €.",
+          "notify_reminder_message": "Textul mementoului unic a trimis numărul configurat de minute înainte de sfârșitul estimat. Diferit de actualizările live recurente de mai sus. Acceptă substituenți {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Închideți automat notificările după atâtea secunde (redirecționate ca „timeout” pentru aplicația însoțitoare). Setați la 0 pentru a le păstra până la respingere. Implicit: 0.",
+          "notify_channel": "Android canal de notificare al aplicației însoțitoare pentru notificări privind starea, progresul live și notificările de memento. Sunetul și importanța unui canal sunt configurate în aplicația însoțitoare prima dată când numele canalului este utilizat - WashData setează doar numele canalului. Lăsați necompletat pentru aplicația implicită.",
+          "notify_finish_channel": "Separați canalul Android pentru alerta finală (utilizată și de memento și de mesajul de așteptare a rufelor), astfel încât să poată avea propriul sunet. Lăsați gol pentru a reutiliza canalul de mai sus."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Dacă un ciclu de pompă continuă să ruleze după atâtea secunde, un eveniment ha_washdata_pump_stuck este declanșat o dată. Utilizați acest lucru pentru a detecta un motor blocat (funcționarea tipică a pompei de carter este sub 60 s). Implicit: 1800 s (30 min). Numai tipul dispozitivului de pompare."
+            }
+          },
+          "device_link_section": {
+            "name": "Device Link",
+            "description": "Opțional, conectați acest dispozitiv WashData la un dispozitiv Home Assistant existent (de exemplu, priza inteligentă sau aparatul în sine). Dispozitivul WashData este apoi afișat ca „Conectat prin” dispozitivul respectiv. Lăsați gol pentru a păstra WashData ca dispozitiv autonom.",
+            "data": {
+              "linked_device": "Dispozitiv conectat"
+            },
+            "data_description": {
+              "linked_device": "Selectați dispozitivul la care să vă conectați WashData. Aceasta adaugă o referință „Conectat prin” în registrul dispozitivului; WashData își păstrează propriul card de dispozitiv și entități. Ștergeți selecția pentru a elimina legătura."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Etichetare automată a ciclurilor vechi",
-        "description": "{info}",
+        "description": "S-au găsit {total_count} cicluri totale. Profiluri: {profiles}",
         "data": {
           "confidence_threshold": "Încredere minimă (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Procesare istoric (îmbinare/împărțire)",
-        "description": "Curățați istoricul ciclului prin îmbinarea execuțiilor fragmentate și împărțirea ciclurilor îmbinate incorect într-o fereastră de timp. Introduceți numărul de ore pentru a privi înapoi.\n{info}",
+        "description": "Curățați istoricul ciclului prin îmbinarea execuțiilor fragmentate și împărțirea ciclurilor îmbinate incorect într-o fereastră de timp. Introduceți numărul de ore pentru a vă uita înapoi (utilizați 999999 pentru toți).",
         "data": {
           "time_range": "Fereastra de retrospectivă (ore)",
           "gap_seconds": "Limita de îmbinare/împărțire (secunde)"
         },
         "data_description": {
-          "time_range": "Numărul de ore de scanat pentru cicluri fragmentate care urmează să fie îmbinate. Utilizați 999999 pentru a procesa toate datele istorice.\n{info}",
+          "time_range": "Numărul de ore de scanare pentru cicluri fragmentate care urmează să fie îmbinate. Utilizați 999999 pentru a procesa toate datele istorice.",
           "gap_seconds": "Prag pentru a decide împărțire vs. îmbinare. Lacunele MAI SCURTE decât aceasta sunt îmbinate. Lacunele MAI LUNGI decât aceasta sunt împărțite. Scădeți aceasta pentru a forța o împărțire pe un ciclu îmbinat incorect."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Energie medie",
         "table_detected_program": "Program detectat",
         "table_confidence": "Încredere",
-        "table_reported": "Raportat"
+        "table_reported": "Raportat",
+        "phase_builtin_suffix": "(încorporat)",
+        "phase_none_available": "Nu există faze disponibile.",
+        "settings_deprecation_warning": "⚠️ **Tip de dispozitiv învechit:** {device_type} este programat pentru eliminare într-o versiune viitoare. Conducta de potrivire a lui WashData nu produce rezultate fiabile pentru această clasă de aparate. Integrarea dvs. continuă să funcționeze pe parcursul perioadei de depreciere; pentru a opri acest avertisment, comutați **Tipul dispozitiv** de mai jos la unul dintre tipurile acceptate (Mașină de spălat, Uscător, Mașină de spălat-Uscător combinată, Mașină de spălat vase, Friteuză cu aer, Mașină de făcut pâine sau Pompă) sau la **Altele (Avansat)** dacă aparatul dvs. nu se potrivește cu niciunul dintre tipurile acceptate. **Altele (Avansate)** furnizează intenționat valori implicite generice care nu sunt reglate pentru niciun dispozitiv specific, așa că va trebui să configurați singur pragurile, timeout-urile și parametrii de potrivire; toate setările existente sunt păstrate atunci când comutați.",
+        "phase_other_device_types": "Alte tipuri de dispozitive:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Resetați la durata completă",
         "apply": "Aplicați tăierea",
         "cancel": "Anulați"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Maşină de spălat",
+        "dryer": "Uscător",
+        "washer_dryer": "Combo mașină de spălat cu uscător",
+        "dishwasher": "Maşină de spălat vase",
+        "coffee_machine": "Aparat de cafea (învechit)",
+        "ev": "Vehicul electric (învechit)",
+        "air_fryer": "Friteuza cu aer",
+        "heat_pump": "Pompă de căldură (învechită)",
+        "bread_maker": "Aparat de paine",
+        "pump": "Pompă / Pompă de colector",
+        "oven": "Cuptor (depreciat)",
+        "other": "Altele (avansate)"
       }
     }
   },

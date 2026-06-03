@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Fformat Neges Cyn Cwblhau",
           "energy_price_entity": "Pris Ynni - Endid (dewisol)",
           "energy_price_static": "Pris Ynni - Gwerth statig (dewisol)",
-          "go_back": "Ewch yn ôl heb gadw"
+          "go_back": "Ewch yn ôl heb gadw",
+          "notify_reminder_message": "Fformat Neges Atgoffa",
+          "notify_timeout_seconds": "Diswyddo'n awtomatig ar ôl (eiliadau)",
+          "notify_channel": "Sianel Hysbysu (statws / byw / nodyn atgoffa)",
+          "notify_finish_channel": "Sianel Hysbysu Gorffen"
         },
         "data_description": {
           "go_back": "Ticiwch hwn a chliciwch Cyflwyno i daflu unrhyw newidiadau uchod a dychwelyd i'r brif ddewislen.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Neges wedi'i hanfon pan fydd cylch yn gorffen. Yn cefnogi {device}, {duration}, {program}, {energy_kwh}, {cost} dalfan.",
           "notify_pre_complete_message": "Anfonwyd y neges cyn ei chwblhau. Yn cefnogi {device}, {minutes} dalfan.",
           "energy_price_entity": "Dewiswch endid rhifol sy'n dal y pris trydan cyfredol (e.e. sensor.electricity_price, mewnbwn_number.energy_rate). Pan fydd wedi'i osod, mae'n galluogi'r dalfan {cost}. Yn cael blaenoriaeth dros y gwerth statig os yw'r ddau wedi'u ffurfweddu.",
-          "energy_price_static": "Pris trydan sefydlog fesul kWh. Pan fydd wedi'i osod, mae'n galluogi'r dalfan {cost}. Wedi'i anwybyddu os yw endid wedi'i ffurfweddu uchod. Ychwanegwch eich symbol arian cyfred yn y templed neges, e.e. {cost} €."
+          "energy_price_static": "Pris trydan sefydlog fesul kWh. Pan fydd wedi'i osod, mae'n galluogi'r dalfan {cost}. Wedi'i anwybyddu os yw endid wedi'i ffurfweddu uchod. Ychwanegwch eich symbol arian cyfred yn y templed neges, e.e. {cost} €.",
+          "notify_reminder_message": "Anfonodd testun y nodyn atgoffa un-amser y nifer cyfluniedig o funudau cyn y diwedd amcangyfrifedig. Yn wahanol i'r diweddariadau byw cylchol uchod. Yn cefnogi {device}, {minutes}, {program} dalfan.",
+          "notify_timeout_seconds": "Diystyru hysbysiadau yn awtomatig ar ôl hyn lawer o eiliadau (a anfonwyd ymlaen fel 'amser terfyn' yr ap cydymaith). Gosodwch ar 0 i'w cadw nes eu bod yn cael eu diswyddo. Rhagosodedig: 0.",
+          "notify_channel": "Android sianel hysbysu ap cydymaith ar gyfer statws, cynnydd byw a hysbysiadau atgoffa. Mae sain a phwysigrwydd sianel yn cael eu ffurfweddu yn yr app cydymaith y tro cyntaf i enw'r sianel gael ei ddefnyddio - mae WashData yn gosod enw'r sianel yn unig. Gadael yn wag ar gyfer y rhagosodiad app.",
+          "notify_finish_channel": "Sianel Android ar wahân ar gyfer y rhybudd gorffenedig (a ddefnyddir hefyd gan y nodyn atgoffa a'r peiriant aros golchi dillad) fel y gall gael ei sain ei hun. Gadewch yn wag i ailddefnyddio'r sianel uchod."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Os yw cylch pwmp yn dal i redeg ar ôl yr eiliadau lawer hyn, mae digwyddiad ha_washdata_pump_stuck yn cael ei danio unwaith. Defnyddiwch hwn i ganfod modur wedi'i jamio (mae rhediad pwmp swmp nodweddiadol o dan 60 s). Diofyn: 1800 s (30 mun). Math o ddyfais pwmp yn unig."
+            }
+          },
+          "device_link_section": {
+            "name": "Cyswllt Dyfais",
+            "description": "Cysylltwch y ddyfais WashData hon â dyfais Home Assistant sy'n bodoli eisoes (er enghraifft y plwg clyfar neu'r teclyn ei hun). Yna dangosir y ddyfais WashData fel \"Connected through\" y ddyfais honno. Gadewch yn wag i gadw WashData fel dyfais annibynnol.",
+            "data": {
+              "linked_device": "Dyfais Cysylltiedig"
+            },
+            "data_description": {
+              "linked_device": "Dewiswch y ddyfais i gysylltu WashData ag ef. Mae hyn yn ychwanegu cyfeirnod 'Connected through' yng nghofrestrfa'r dyfeisiau; Mae WashData yn cadw ei gerdyn dyfais a'i endidau ei hun. Cliriwch y dewisiad i ddileu'r ddolen."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Awto-Labelu Hen Feiciau",
-        "description": "{info}",
+        "description": "Wedi canfod cyfanswm o {total_count} gylchred. Proffiliau: {profiles}",
         "data": {
           "confidence_threshold": "Isafswm Hyder (0.50-0.95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Hanes Proses (Uno/Hollti)",
-        "description": "Glanhewch hanes beicio trwy gyfuno rhediadau tameidiog a hollti cylchoedd a gyfunwyd yn anghywir o fewn ffenestr amser. Rhowch nifer yr oriau i edrych yn ôl.\n{info}",
+        "description": "Glanhewch hanes beicio trwy gyfuno rhediadau tameidiog a hollti cylchoedd a gyfunwyd yn anghywir o fewn ffenestr amser. Nodwch nifer yr oriau i edrych yn ôl (defnyddiwch 999999 i bawb).",
         "data": {
           "time_range": "Ffenest edrych yn ôl (oriau)",
           "gap_seconds": "Cyfuno/Rhannu Bwlch (eiliadau)"
         },
         "data_description": {
-          "time_range": "Nifer yr oriau i'w sganio am gylchoedd tameidiog i uno. Defnyddiwch 999999 i brosesu'r holl ddata hanesyddol.\n{info}",
+          "time_range": "Nifer yr oriau i'w sganio am gylchoedd tameidiog i uno. Defnyddiwch 999999 i brosesu'r holl ddata hanesyddol.",
           "gap_seconds": "Trothwy i benderfynu ar hollt yn erbyn uno. Mae bylchau SY'N BYTHACH na hyn yn cael eu huno. Mae bylchau HWY na hyn wedi'u hollti. Gostyngwch hyn i orfodi hollt ar gylchred a gyfunwyd yn anghywir."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Ynni Cyf.",
         "table_detected_program": "Rhaglen a Ganfuwyd",
         "table_confidence": "Hyder",
-        "table_reported": "Adroddwyd"
+        "table_reported": "Adroddwyd",
+        "phase_builtin_suffix": "(Adeiledig)",
+        "phase_none_available": "Dim cyfnodau ar gael.",
+        "settings_deprecation_warning": "⚠️ **Math o ddyfais anghymeradwy:** Mae {device_type} wedi'i drefnu i'w dynnu mewn datganiad yn y dyfodol. Nid yw piblinell baru WashData yn cynhyrchu canlyniadau dibynadwy ar gyfer y dosbarth offer hwn. Mae eich integreiddio yn parhau i weithio drwy'r cyfnod dibrisio; i dawelu’r rhybudd hwn, newidiwch **Math o Ddyfais** isod i un o’r mathau a gefnogir (Peiriant Golchi, Sychwr, Combo Golchwr-Sychwr, Peiriant golchi llestri, ffrïwr aer, gwneuthurwr bara, neu bwmp), neu i **Arall (Uwch)** os nad yw’ch teclyn yn cyfateb i unrhyw un o’r mathau a gefnogir. Mae **Arall (Uwch)** yn cludo rhagosodiadau generig bwriadol nad ydynt wedi'u tiwnio ar gyfer unrhyw declyn penodol, felly bydd angen i chi ffurfweddu trothwyon, goramser a pharamedrau cyfatebol eich hun; cedwir eich holl osodiadau presennol pan fyddwch yn newid.",
+        "phase_other_device_types": "Mathau eraill o ddyfeisiau:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Ailosod i Hyd Llawn",
         "apply": "Gwneud cais Trim",
         "cancel": "Canslo"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Peiriant Golchi",
+        "dryer": "Sychwr",
+        "washer_dryer": "Combo Golchwr-Sychwr",
+        "dishwasher": "Peiriant golchi llestri",
+        "coffee_machine": "Peiriant Coffi (anghymeradwy)",
+        "ev": "Cerbyd Trydan (anghymeradwy)",
+        "air_fryer": "Fryer aer",
+        "heat_pump": "Pwmp Gwres (anghymeradwy)",
+        "bread_maker": "Gwneuthurwr Bara",
+        "pump": "Pwmp / Swmp Pwmp",
+        "oven": "Popty (anghymeradwy)",
+        "other": "Arall (Uwch)"
       }
     }
   },

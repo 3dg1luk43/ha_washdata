@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format for forudgående færdiggørelsesbesked",
           "energy_price_entity": "Energipris – enhed (valgfrit)",
           "energy_price_static": "Energipris - Statisk værdi (valgfrit)",
-          "go_back": "Gå tilbage uden at gemme"
+          "go_back": "Gå tilbage uden at gemme",
+          "notify_reminder_message": "Brevformat",
+          "notify_timeout_seconds": "Auto- afskedige efter (sekunder)",
+          "notify_channel": "Meddelelseskanal (status / live / påmindelse)",
+          "notify_finish_channel": "Færdig meddelelseskanal"
         },
         "data_description": {
           "go_back": "Sæt flueben her og klik på Send for at kassere eventuelle ændringer ovenfor og vende tilbage til hovedmenuen.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Besked sendt, når en cyklus afsluttes. Understøtter {device}, {duration}, {program}, {energy_kwh}, {cost} pladsholdere.",
           "notify_pre_complete_message": "Besked sendt før færdiggørelse. Understøtter {device}, {minutes} pladsholdere.",
           "energy_price_entity": "Vælg en numerisk enhed, der har den aktuelle elpris (f.eks. sensor.electricity_price, input_number.energy_rate). Når den er indstillet, aktiveres pladsholderen {cost}. Har forrang over den statiske værdi, hvis begge er konfigureret.",
-          "energy_price_static": "Fast elpris pr. kWh. Når den er indstillet, aktiveres pladsholderen {cost}. Ignoreres, hvis en enhed er konfigureret ovenfor. Tilføj dit valutasymbol i beskedskabelonen, f.eks. {cost} €."
+          "energy_price_static": "Fast elpris pr. kWh. Når den er indstillet, aktiveres pladsholderen {cost}. Ignoreres, hvis en enhed er konfigureret ovenfor. Tilføj dit valutasymbol i beskedskabelonen, f.eks. {cost} €.",
+          "notify_reminder_message": "Tekst af one-time påmindelse sendt det indstillede antal minutter før den anslåede afslutning. Diskret fra de tilbagevendende live opdateringer ovenfor. Understøtter {device}, {minutes}, {program} pladsholdere.",
+          "notify_timeout_seconds": "Automatisk afvise meddelelser efter dette mange sekunder (fremsendes som følgesvend app \"timeout\"). Sætter til 0 for at beholde dem, indtil de bliver afskediget. Standard: 0.",
+          "notify_channel": "Android følgesvend app meddelelse kanal for status, live fremskridt, og påmindelse meddelelser. Lyden og betydningen af en kanal er konfigureret i følgesvend app første gang kanalnavnet bruges - WashData kun sætter kanalnavnet. Efterlad tom for appen standard.",
+          "notify_finish_channel": "Separat Android kanal til den færdige alarm (bruges også af påmindelsen og vasketøjet-venter nag), så det kan have sin egen lyd. Lad det være tomt at genbruge kanalen ovenfor."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Hvis en pumpecyklus stadig kører efter så mange sekunder, udløses en ha_washdata_pump_stuck hændelse én gang. Brug denne til at detektere en blokeret motor (typisk pumpeløb er under 60 s). Standard: 1800 s (30 min). Kun pumpeenhedstype."
+            }
+          },
+          "device_link_section": {
+            "name": "Enhedslink",
+            "description": "Du kan vælge at forbinde denne Washington Data enhed til en eksisterende Home Assistant enhed (for eksempel smart plug eller selve apparatet). WashData-enheden vises derefter som \"Forbundet via\" enheden. Efterlad tom for at holde WashData som en standalone enhed.",
+            "data": {
+              "linked_device": "Forbundet enhed"
+            },
+            "data_description": {
+              "linked_device": "Vælg den enhed, der skal forbinde WashData til. Dette tilføjer en 'Forbundet via' reference i enhedsregistret; WashData holder sin egen enhed kort og enheder. Ryd markeringen for at fjerne linket."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Auto-mærke gamle cyklusser",
-        "description": "{info}",
+        "description": "Fundet {total_count} cyklusser i alt. Profiler: {profiles}",
         "data": {
           "confidence_threshold": "Minimum tillid (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Proceshistorik (flet/opdel)",
-        "description": "Ryd op i cyklushistorikken ved at flette fragmenterede kørsler og opdele forkert flettede cyklusser inden for et tidsvindue. Indtast antal timer for at se tilbage.\n{info}",
+        "description": "Ryd op i cyklushistorikken ved at flette fragmenterede kørsler og opdele forkert flettede cyklusser inden for et tidsvindue. Indtast antal timer for at se tilbage (brug 999999 for alle).",
         "data": {
           "time_range": "Tilbagebliksvindue (timer)",
           "gap_seconds": "Flet/opdel hul (sekunder)"
         },
         "data_description": {
-          "time_range": "Antal timer at scanne for fragmenterede cyklusser at flette. Brug 999999 til at behandle alle historiske data.\n{info}",
+          "time_range": "Antal timer at scanne for fragmenterede cyklusser at flette. Brug 999999 til at behandle alle historiske data.",
           "gap_seconds": "Tærskel for at beslutte split vs merge. Mellemrum, der er KORTERE end dette, slås sammen. Længere huller end dette opdeles. Sænk denne for at fremtvinge en opdeling på en cyklus, der blev flettet forkert."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Gns. energi",
         "table_detected_program": "Registreret program",
         "table_confidence": "Tillid",
-        "table_reported": "Rapporteret"
+        "table_reported": "Rapporteret",
+        "phase_builtin_suffix": "(Indbygget)",
+        "phase_none_available": "Ingen faser tilgængelige.",
+        "settings_deprecation_warning": "⚠️ **Udgået enhedstype:** {device_type} er planlagt til fjernelse i en fremtidig udgivelse. WashDatas matchende pipeline giver ikke pålidelige resultater for denne apparatklasse. Din integration bliver ved med at fungere gennem afskrivningsperioden; For at slå denne advarsel fra, skal du skifte **Enhedstype** nedenfor til en af ​​de understøttede typer (vaskemaskine, tørretumbler, vaskemaskine-tørretumbler, opvaskemaskine, luftfrituregryde, brødmaskine eller pumpe), eller til **Andet (avanceret)**, hvis dit apparat ikke matcher nogen af ​​de understøttede typer. **Andet (avanceret)** sender bevidst generiske standardindstillinger, der ikke er indstillet til nogen specifik enhed, så du skal selv konfigurere tærskler, timeouts og matchende parametre; alle dine eksisterende indstillinger bevares, når du skifter.",
+        "phase_other_device_types": "Andre enhedstyper:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Nulstil til fuld varighed",
         "apply": "Påfør Trim",
         "cancel": "Ophæve"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Vaskemaskine",
+        "dryer": "Tørretumbler",
+        "washer_dryer": "Vaske-tørretumbler kombi",
+        "dishwasher": "Opvaskemaskine",
+        "coffee_machine": "Kaffemaskine (forældet)",
+        "ev": "Elektrisk køretøj (udfaset)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Varmepumpe (udgået)",
+        "bread_maker": "Brødmaskine",
+        "pump": "Pumpe / Sump Pumpe",
+        "oven": "Ovn (forældet)",
+        "other": "Andet (avanceret)"
       }
     }
   },

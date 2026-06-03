@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Išankstinio pabaigos pranešimo formatas",
           "energy_price_entity": "Energijos kaina – subjektas (neprivaloma)",
           "energy_price_static": "Energijos kaina – statinė vertė (neprivaloma)",
-          "go_back": "Grįžti neišsaugant"
+          "go_back": "Grįžti neišsaugant",
+          "notify_reminder_message": "Priminimo pranešimo formatas",
+          "notify_timeout_seconds": "Automatiškai atsisakyti po (sekundėmis)",
+          "notify_channel": "Pranešimų kanalas (būsena / tiesioginis / priminimas)",
+          "notify_finish_channel": "Pranešimų kanalas baigtas"
         },
         "data_description": {
           "go_back": "Pažymėkite tai ir spustelėkite Pateikti, kad atmestumėte visus aukščiau pateiktus pakeitimus ir grįžtumėte į pagrindinį meniu.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Pranešimas siunčiamas, kai ciklas baigiasi. Palaikomi {device}, {duration}, {program}, {energy_kwh}, {cost} rezervuotų vietų žymekliai.",
           "notify_pre_complete_message": "Pranešimas siunčiamas prieš pabaigą. Palaikomi {device}, {minutes} rezervuotų vietų žymekliai.",
           "energy_price_entity": "Pasirinkite skaitmeninį objektą, kuriame yra dabartinė elektros kaina (pvz., jutiklis.elektros_kaina, įvesties_numeris.energijos_norma). Kai nustatyta, įgalina rezervuotą vietą {cost}. Turi viršenybę prieš statinę vertę, jei sukonfigūruotos abi.",
-          "energy_price_static": "Fiksuota elektros kaina už kWh. Kai nustatyta, įgalina rezervuotą vietą {cost}. Nepaisoma, jei subjektas sukonfigūruotas aukščiau. Pranešimo šablone pridėkite savo valiutos simbolį, pvz. {cost} €."
+          "energy_price_static": "Fiksuota elektros kaina už kWh. Kai nustatyta, įgalina rezervuotą vietą {cost}. Nepaisoma, jei subjektas sukonfigūruotas aukščiau. Pranešimo šablone pridėkite savo valiutos simbolį, pvz. {cost} €.",
+          "notify_reminder_message": "Vienkartinio priminimo tekstas išsiuntė sukonfigūruotą minučių skaičių iki numatomos pabaigos. Skirtingai nuo pasikartojančių tiesioginių atnaujinimų aukščiau. Palaikomos {device}, {minutes}, {program} rezervuotos vietos.",
+          "notify_timeout_seconds": "Automatiškai atsisakykite pranešimų po tiek sekundžių (persiunčiami kaip papildomos programos laikas). Nustatykite 0, kad jie liktų, kol bus atmesti. Numatytasis: 0.",
+          "notify_channel": "Android papildomos programos pranešimų kanalas, skirtas būsenos, tiesioginės eigos ir priminimų pranešimams. Kanalo garsas ir svarba sukonfigūruojami papildomoje programoje pirmą kartą naudojant kanalo pavadinimą – WashData nustato tik kanalo pavadinimą. Palikite tuščią, kad nustatytumėte numatytąją programą.",
+          "notify_finish_channel": "Atskiras Android kanalas baigtam perspėjimui (taip pat naudojamas priminimui ir skalbinių laukimo ragavimui), kad jis galėtų turėti savo garsą. Palikite tuščią, jei norite pakartotinai naudoti aukščiau esantį kanalą."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Jei po tiek sekundžių vis dar veikia siurblio ciklas, vieną kartą suaktyvinamas įvykis ha_washdata_pump_stuck. Naudokite tai norėdami aptikti užstrigusį variklį (įprastas karterio siurblio veikimas yra trumpesnis nei 60 s). Numatytasis: 1800 s (30 min.). Tik siurblio įrenginio tipas."
+            }
+          },
+          "device_link_section": {
+            "name": "Įrenginio nuoroda",
+            "description": "Pasirinktinai susiekite šį „WashData“ įrenginį su esamu Home Assistant įrenginiu (pvz., išmaniuoju kištuku arba pačiu prietaisu). Tada „WashData“ įrenginys rodomas kaip „Prisijungta per tą įrenginį“. Palikite tuščią, kad WashData liktų kaip atskiras įrenginys.",
+            "data": {
+              "linked_device": "Susietas įrenginys"
+            },
+            "data_description": {
+              "linked_device": "Pasirinkite įrenginį, prie kurio norite prijungti „WashData“. Tai prideda nuorodą „Prisijungta per“ įrenginių registre; „WashData“ saugo savo įrenginio kortelę ir objektus. Išvalykite pasirinkimą, kad pašalintumėte nuorodą."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automatinis senų ciklų žymėjimas",
-        "description": "{info}",
+        "description": "Iš viso rasta {total_count} ciklai. Profiliai: {profiles}",
         "data": {
           "confidence_threshold": "Minimalus patikimumas (0,50–0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Apdoroti istoriją (sujungti / išskaidyti)",
-        "description": "Išvalykite ciklų istoriją sujungdami suskaidytus paleidimus ir išskaidydami neteisingai sujungtus ciklus per laiko langą. Įveskite valandų skaičių, kad galėtumėte žiūrėti atgal.\n{info}",
+        "description": "Išvalykite ciklo istoriją sujungdami suskaidytus paleidimus ir išskaidydami neteisingai sujungtus ciklus per laiko langą. Įveskite valandų skaičių, kiek norite peržiūrėti (visiems naudokite 999999).",
         "data": {
           "time_range": "Peržiūros langas (valandomis)",
           "gap_seconds": "Sujungimo / padalijimo tarpas (sekundėmis)"
         },
         "data_description": {
-          "time_range": "Valandų skaičius, per kurį reikia nuskaityti suskaidytus ciklus sujungimui. Naudokite 999999 visų istorinių duomenų apdorojimui.\n{info}",
+          "time_range": "Valandų skaičius, per kurį reikia nuskaityti suskaidytus ciklus, kad būtų sujungti. Norėdami apdoroti visus istorinius duomenis, naudokite 999999.",
           "gap_seconds": "Slenkstis, kada sujungti, o kada skaidyti. Tarpai TRUMPESNI nei šis bus sujungti. Tarpai ILGESNI nei šis bus išskaidyti. Sumažinkite, kad priverstinai padalintumėte neteisingai sujungtą ciklą."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Vid. energija",
         "table_detected_program": "Aptikta programa",
         "table_confidence": "Patikimumas",
-        "table_reported": "Pranešta"
+        "table_reported": "Pranešta",
+        "phase_builtin_suffix": "(Įtaisytas)",
+        "phase_none_available": "Fazių nėra.",
+        "settings_deprecation_warning": "⚠️ **Nebenaudojamo įrenginio tipas:** {device_type} planuojama pašalinti būsimame leidime. „WashData“ atitikimo vamzdynas neduoda patikimų rezultatų šiai prietaisų klasei. Jūsų integracija veikia per nusidėvėjimo laikotarpį; Norėdami nutildyti šį įspėjimą, perjunkite toliau pateiktą **Įrenginio tipą** į vieną iš palaikomų tipų (skalbimo mašina, džiovyklė, skalbimo mašina-džiovyklė kombinuota, indaplovė, oro gruzdintuvė, duonos gaminimo mašina arba siurblys) arba į **Kita (išplėstinė)**, jei jūsų prietaisas neatitinka nė vieno iš palaikomų tipų. **Kita (išplėstinė)** tyčia pristato bendruosius numatytuosius nustatymus, kurie nėra pritaikyti jokiam konkrečiam įrenginiui, todėl turėsite patys sukonfigūruoti slenksčius, skirtąjį laiką ir atitinkamus parametrus; perjungus išsaugomi visi esami nustatymai.",
+        "phase_other_device_types": "Kiti įrenginių tipai:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Iš naujo nustatyti visą trukmę",
         "apply": "Taikyti apkarpymą",
         "cancel": "Atšaukti"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Skalbimo mašina",
+        "dryer": "Džiovintuvas",
+        "washer_dryer": "Skalbimo-džiovinimo kombinacija",
+        "dishwasher": "Indaplovė",
+        "coffee_machine": "Kavos aparatas (nebenaudojamas)",
+        "ev": "Elektrinė transporto priemonė (nebenaudojama)",
+        "air_fryer": "Oro gruzdintuvė",
+        "heat_pump": "Šilumos siurblys (nebenaudojamas)",
+        "bread_maker": "Duonkepė",
+        "pump": "Siurblys / Drenažinis siurblys",
+        "oven": "Orkaitė (nebenaudojama)",
+        "other": "Kita (išplėstinė)"
       }
     }
   },

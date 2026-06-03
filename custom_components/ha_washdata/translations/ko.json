@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "완료 전 메시지 형식",
           "energy_price_entity": "에너지 가격 - 엔터티(선택 사항)",
           "energy_price_static": "에너지 가격 - 정적 가치(선택 사항)",
-          "go_back": "저장하지 않고 돌아가기"
+          "go_back": "저장하지 않고 돌아가기",
+          "notify_reminder_message": "알림 메시지 형식",
+          "notify_timeout_seconds": "다음 시간 이후 자동 종료(초)",
+          "notify_channel": "알림 채널(상태/실시간/알림)",
+          "notify_finish_channel": "완료된 알림 채널"
         },
         "data_description": {
           "go_back": "위의 변경 사항을 모두 버리고 메인 메뉴로 돌아가려면 이 항목을 체크한 뒤 제출을 클릭하세요.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "사이클이 완료될 때 전송되는 메시지입니다. {device}, {duration}, {program}, {energy_kwh}, {cost} 자리 표시자를 지원합니다.",
           "notify_pre_complete_message": "완료 전에 전송되는 메시지입니다. {device}, {minutes} 자리 표시자를 지원합니다.",
           "energy_price_entity": "현재 전기 가격을 보유하는 숫자 엔터티를 선택합니다(예: sensor.electricity_price, input_number.energy_rate). 설정되면 {cost} 자리 표시자를 활성화합니다. 둘 다 구성된 경우 정적 값보다 우선합니다.",
-          "energy_price_static": "kWh당 전기요금이 고정되어 있습니다. 설정되면 {cost} 자리 표시자를 활성화합니다. 위에서 엔터티가 구성된 경우 무시됩니다. 메시지 템플릿에 통화 기호를 추가하세요. {cost} €."
+          "energy_price_static": "kWh당 전기요금이 고정되어 있습니다. 설정되면 {cost} 자리 표시자를 활성화합니다. 위에서 엔터티가 구성된 경우 무시됩니다. 메시지 템플릿에 통화 기호를 추가하세요. {cost} €.",
+          "notify_reminder_message": "일회성 알림 텍스트는 예상 종료 시간 이전에 구성된 시간(분)을 보냈습니다. 위의 반복되는 실시간 업데이트와 다릅니다. {device}, {minutes}, {program} 자리표시자를 지원합니다.",
+          "notify_timeout_seconds": "이 몇 초 후에 알림을 자동으로 해제합니다(컴패니언 앱 '시간 초과'로 전달됨). 해제될 때까지 유지하려면 0으로 설정합니다. 기본값: 0.",
+          "notify_channel": "상태, 실시간 진행 상황 및 알림 알림을 위한 Android 컴패니언 앱 알림 채널입니다. 채널의 사운드와 중요성은 채널 이름이 처음 사용될 때 동반 앱에서 구성됩니다. WashData는 채널 이름만 설정합니다. 앱 기본값은 비워 두세요.",
+          "notify_finish_channel": "완료 알림을 위한 별도의 Android 채널(알림 및 세탁 대기 잔소리에도 사용됨)이 자체 사운드를 가질 수 있도록 합니다. 위 채널을 재사용하려면 비워두세요."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "이 시간이 지난 후에도 펌프 사이클이 계속 실행 중인 경우 ha_washdata_pump_stuck 이벤트가 한 번 실행됩니다. 이를 사용하여 걸린 모터를 감지합니다(일반적인 배수 펌프 작동 시간은 60초 미만입니다). 기본값: 1800초(30분) 펌프 장치 유형만 해당."
+            }
+          },
+          "device_link_section": {
+            "name": "장치 링크",
+            "description": "선택적으로 이 WashData 장치를 기존 Home Assistant 장치(예: 스마트 플러그 또는 기기 자체)에 연결합니다. 그러면 WashData 장치가 해당 장치를 통해 \"연결됨\"으로 표시됩니다. WashData를 독립형 장치로 유지하려면 비워 두세요.",
+            "data": {
+              "linked_device": "연결된 장치"
+            },
+            "data_description": {
+              "linked_device": "WashData를 연결할 장치를 선택하세요. 이렇게 하면 장치 레지스트리에 'Connected via' 참조가 추가됩니다. WashData는 자체 장치 카드와 엔터티를 유지합니다. 링크를 제거하려면 선택을 취소하세요."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "기존 사이클 자동 라벨 지정",
-        "description": "{info}",
+        "description": "총 {total_count}주기를 찾았습니다. 프로필: {profiles}",
         "data": {
           "confidence_threshold": "최소 신뢰도 (0.50-0.95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "기록 처리 (병합/분할)",
-        "description": "조각난 실행을 병합하고 기간 내에서 잘못 병합된 사이클을 분할하여 사이클 기록을 정리합니다. 되돌아볼 시간(시간)을 입력하세요.\n{info}",
+        "description": "조각난 실행을 병합하고 기간 내에서 잘못 병합된 주기를 분할하여 주기 기록을 정리합니다. 되돌아볼 시간을 입력하세요(모두 999999 사용).",
         "data": {
           "time_range": "검색 기간 (시간)",
           "gap_seconds": "병합/분할 간격 (초)"
         },
         "data_description": {
-          "time_range": "조각난 사이클을 병합하기 위해 검색할 시간(시간)입니다. 모든 기록 데이터를 처리하려면 999999를 사용하세요.\n{info}",
+          "time_range": "분할된 주기를 병합하기 위해 검색하는 데 걸리는 시간입니다. 모든 과거 데이터를 처리하려면 999999를 사용하세요.",
           "gap_seconds": "분할과 병합을 결정하는 임계값입니다. 이보다 짧은 간격은 병합됩니다. 이보다 긴 간격은 분할됩니다. 잘못 병합된 사이클을 강제로 분할하려면 이 값을 낮추세요."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "평균 에너지",
         "table_detected_program": "감지된 프로그램",
         "table_confidence": "신뢰도",
-        "table_reported": "보고됨"
+        "table_reported": "보고됨",
+        "phase_builtin_suffix": "(내장)",
+        "phase_none_available": "사용 가능한 단계가 없습니다.",
+        "settings_deprecation_warning": "⚠️ **더 이상 사용되지 않는 장치 유형:** {device_type}은(는) 향후 릴리스에서 제거될 예정입니다. WashData의 일치 파이프라인은 이 어플라이언스 클래스에 대해 신뢰할 수 있는 결과를 생성하지 않습니다. 통합은 지원 중단 기간 동안 계속 작동합니다. 이 경고를 끄려면 아래의 **장치 유형**을 지원되는 유형(세탁기, 건조기, 세탁기-건조기 콤보, 식기세척기, 에어프라이어, 제빵기 또는 펌프) 중 하나로 전환하거나 가전제품이 지원되는 유형과 일치하지 않는 경우 **기타(고급)**로 전환하세요. **기타(고급)**은 특정 어플라이언스에 맞게 조정되지 않은 의도적으로 일반 기본값을 제공하므로 임계값, 시간 초과 및 일치 매개변수를 직접 구성해야 합니다. 전환하면 모든 기존 설정이 유지됩니다.",
+        "phase_other_device_types": "기타 장치 유형:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "전체 기간으로 초기화",
         "apply": "트림 적용",
         "cancel": "취소"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "세탁기",
+        "dryer": "건조기",
+        "washer_dryer": "세탁기-건조기 콤보",
+        "dishwasher": "식기세척기",
+        "coffee_machine": "커피 머신(더 이상 사용되지 않음)",
+        "ev": "전기 자동차(더 이상 사용되지 않음)",
+        "air_fryer": "에어프라이어",
+        "heat_pump": "열 펌프(더 이상 사용되지 않음)",
+        "bread_maker": "빵 제조기",
+        "pump": "펌프 / 배수 펌프",
+        "oven": "오븐(지원 중단됨)",
+        "other": "기타(고급)"
       }
     }
   },

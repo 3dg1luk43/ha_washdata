@@ -359,6 +359,7 @@ class WasherTimeRemainingSensor(WasherBaseSensor):
         self.entity_description = SensorEntityDescription(
             key="time_remaining",
             translation_key="time_remaining",
+            device_class=SensorDeviceClass.DURATION,
             icon="mdi:timer-sand",
         )
         super().__init__(manager, entry)

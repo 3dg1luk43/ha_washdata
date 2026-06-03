@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Oblika sporočila pred dokončanjem",
           "energy_price_entity": "Cena energije – subjekt (neobvezno)",
           "energy_price_static": "Cena energije - statična vrednost (neobvezno)",
-          "go_back": "Vrni se brez shranjevanja"
+          "go_back": "Vrni se brez shranjevanja",
+          "notify_reminder_message": "Oblika sporočila opomnika",
+          "notify_timeout_seconds": "Samodejno opusti po (sekundah)",
+          "notify_channel": "Kanal za obvestila (stanje/v živo/opomnik)",
+          "notify_finish_channel": "Končan obvestilni kanal"
         },
         "data_description": {
           "go_back": "Označite to možnost in kliknite Pošlji, da zavržete vse zgornje spremembe in se vrnete v glavni meni.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Sporočilo, poslano, ko se cikel konča. Podpira nadomestne znake {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Sporočilo, poslano pred dokončanjem. Podpira nadomestne znake {device}, {minutes}.",
           "energy_price_entity": "Izberite številsko entiteto, ki vsebuje trenutno ceno električne energije (npr. sensor.electricity_price, input_number.energy_rate). Ko je nastavljeno, omogoči ogrado {cost}. Ima prednost pred statično vrednostjo, če sta konfigurirani obe.",
-          "energy_price_static": "Fiksna cena električne energije za kWh. Ko je nastavljeno, omogoči ogrado {cost}. Prezrto, če je entiteta konfigurirana zgoraj. V predlogo sporočila dodajte simbol svoje valute, npr. {cost} €."
+          "energy_price_static": "Fiksna cena električne energije za kWh. Ko je nastavljeno, omogoči ogrado {cost}. Prezrto, če je entiteta konfigurirana zgoraj. V predlogo sporočila dodajte simbol svoje valute, npr. {cost} €.",
+          "notify_reminder_message": "Besedilo enkratnega opomnika je poslalo nastavljeno število minut pred predvidenim koncem. Za razliko od zgornjih ponavljajočih se posodobitev v živo. Podpira nadomestne oznake {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Samodejno opusti obvestila po toliko sekundah (posredovana kot 'časovna omejitev' spremljevalne aplikacije). Nastavite na 0, da jih obdržite, dokler jih ne zavržete. Privzeto: 0.",
+          "notify_channel": "Android kanal za obvestila spremljevalne aplikacije za stanje, napredek v živo in obvestila o opomnikih. Zvok in pomembnost kanala se konfigurirata v spremljevalni aplikaciji, ko prvič uporabite ime kanala - WashData nastavi samo ime kanala. Pustite prazno za privzeto aplikacijo.",
+          "notify_finish_channel": "Ločite Android kanal za končano opozorilo (uporabljata ga tudi opomnik in nagovarjanje, ki čaka na perilo), da bo lahko imelo svoj zvok. Pustite prazno za ponovno uporabo zgornjega kanala."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Če se cikel črpalke po toliko sekundah še vedno izvaja, se enkrat sproži dogodek ha_washdata_pump_stuck. Uporabite to za odkrivanje zagozdenega motorja (običajno delovanje črpalke je pod 60 s). Privzeto: 1800 s (30 min). Samo tip črpalke."
+            }
+          },
+          "device_link_section": {
+            "name": "Povezava naprave",
+            "description": "Po želji lahko povežete to napravo WashData z obstoječo napravo Home Assistant (na primer s pametnim vtičem ali samo napravo). Naprava WashData je nato prikazana kot \"Povezana prek\" te naprave. Pustite prazno, da ostane WashData kot samostojna naprava.",
+            "data": {
+              "linked_device": "Povezana naprava"
+            },
+            "data_description": {
+              "linked_device": "Izberite napravo, s katero želite povezati WashData. To doda sklic »Povezano prek« v register naprave; WashData hrani lastno kartico naprave in entitete. Počistite izbiro, da odstranite povezavo."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Samodejno označevanje starih ciklov",
-        "description": "{info}",
+        "description": "Skupno najdenih {total_count} ciklov. Profili: {profiles}",
         "data": {
           "confidence_threshold": "Najmanjše zaupanje (0,50–0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Obdelava zgodovine (združi/razdeli)",
-        "description": "Počistite zgodovino ciklov tako, da združite razdrobljene cikle in razdelite nepravilno združene cikle znotraj časovnega okna. Vnesite število ur za ogled nazaj.\n{info}",
+        "description": "Počistite zgodovino ciklov tako, da združite razdrobljene poteke in razdelite nepravilno združene cikle znotraj časovnega okna. Vnesite število ur za ogled nazaj (za vse uporabite 999999).",
         "data": {
           "time_range": "Okno za pregled nazaj (ure)",
           "gap_seconds": "Vrzel za združitev/razdelitev (sekunde)"
         },
         "data_description": {
-          "time_range": "Število ur za iskanje razdrobljenih ciklov za združitev. Za obdelavo vseh zgodovinskih podatkov uporabite 999999.\n{info}",
+          "time_range": "Število ur za iskanje razdrobljenih ciklov za združitev. Za obdelavo vseh zgodovinskih podatkov uporabite 999999.",
           "gap_seconds": "Prag za odločitev o razdelitvi ali združitvi. Vrzeli, KRAJŠE od tega, so združene. Vrzeli, DALJŠE od tega, so razdeljene. Znižajte to vrednost, da prisilite razdelitev cikla, ki je bil nepravilno združen."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Povp. energija",
         "table_detected_program": "Zaznani program",
         "table_confidence": "Zaupanje",
-        "table_reported": "Prijavljeno"
+        "table_reported": "Prijavljeno",
+        "phase_builtin_suffix": "(vgrajeno)",
+        "phase_none_available": "Na voljo ni nobenih faz.",
+        "settings_deprecation_warning": "⚠️ **Zastarela vrsta naprave:** {device_type} je predvidena za odstranitev v prihodnji izdaji. Ujemanje cevovoda WashData ne daje zanesljivih rezultatov za ta razred aparata. Vaša integracija še naprej deluje skozi obdobje opustitve; če želite utišati to opozorilo, preklopite **Vrsto naprave** spodaj na eno od podprtih vrst (pralni stroj, sušilni stroj, kombinirani pralno-sušilni stroj, pomivalni stroj, cvrtnik, pekač kruha ali črpalka) ali na **Drugo (napredno)**, če vaša naprava ne ustreza nobeni od podprtih vrst. **Drugo (napredno)** namenoma posreduje generične privzete nastavitve, ki niso nastavljene za nobeno specifično napravo, zato boste morali sami konfigurirati pragove, časovne omejitve in ustrezne parametre; ob preklopu se ohranijo vse vaše obstoječe nastavitve.",
+        "phase_other_device_types": "Druge vrste naprav:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Ponastavi na polno trajanje",
         "apply": "Uporabi obrezovanje",
         "cancel": "Prekliči"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "pralni stroj",
+        "dryer": "Sušilnik",
+        "washer_dryer": "Pralno-sušilni stroj Combo",
+        "dishwasher": "Pomivalni stroj",
+        "coffee_machine": "Aparat za kavo (zastarelo)",
+        "ev": "Električno vozilo (zastarelo)",
+        "air_fryer": "Zračni cvrtnik",
+        "heat_pump": "Toplotna črpalka (zastarelo)",
+        "bread_maker": "pekač kruha",
+        "pump": "Črpalka / zbiralna črpalka",
+        "oven": "Pečica (zastarelo)",
+        "other": "Drugo (napredno)"
       }
     }
   },

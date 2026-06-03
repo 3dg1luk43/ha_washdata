@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Định dạng tin nhắn trước khi hoàn thành",
           "energy_price_entity": "Giá năng lượng - Thực thể (tùy chọn)",
           "energy_price_static": "Giá năng lượng - Giá trị tĩnh (tùy chọn)",
-          "go_back": "Quay lại mà không lưu"
+          "go_back": "Quay lại mà không lưu",
+          "notify_reminder_message": "Định dạng tin nhắn nhắc nhở",
+          "notify_timeout_seconds": "Tự động loại bỏ sau (giây)",
+          "notify_channel": "Kênh thông báo (trạng thái/trực tiếp/nhắc nhở)",
+          "notify_finish_channel": "Kênh thông báo đã hoàn thành"
         },
         "data_description": {
           "go_back": "Chọn mục này rồi nhấp Gửi để bỏ mọi thay đổi ở trên và quay lại menu chính.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}.",
           "energy_price_entity": "Chọn một thực thể số chứa giá điện hiện tại (ví dụ: cảm biến.điện_price, input_number.energy_rate). Khi được đặt, hãy bật trình giữ chỗ {cost}. Được ưu tiên hơn giá trị tĩnh nếu cả hai đều được cấu hình.",
-          "energy_price_static": "Giá điện cố định trên mỗi kWh. Khi được đặt, hãy bật trình giữ chỗ {cost}. Bị bỏ qua nếu một thực thể được định cấu hình ở trên. Thêm ký hiệu tiền tệ của bạn vào mẫu tin nhắn, ví dụ: {cost} €."
+          "energy_price_static": "Giá điện cố định trên mỗi kWh. Khi được đặt, hãy bật trình giữ chỗ {cost}. Bị bỏ qua nếu một thực thể được định cấu hình ở trên. Thêm ký hiệu tiền tệ của bạn vào mẫu tin nhắn, ví dụ: {cost} €.",
+          "notify_reminder_message": "Văn bản của lời nhắc một lần đã gửi số phút đã định cấu hình trước khi kết thúc dự kiến. Khác biệt với các cập nhật trực tiếp định kỳ ở trên. Hỗ trợ các phần giữ chỗ {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Tự động loại bỏ thông báo sau nhiều giây này (được chuyển tiếp dưới dạng 'hết thời gian chờ' của ứng dụng đồng hành). Đặt thành 0 để giữ chúng cho đến khi bị loại bỏ. Mặc định: 0.",
+          "notify_channel": "Android kênh thông báo ứng dụng đồng hành để biết trạng thái, tiến trình trực tiếp và thông báo lời nhắc. Âm thanh và tầm quan trọng của kênh được định cấu hình trong ứng dụng đồng hành khi sử dụng tên kênh lần đầu tiên - WashData chỉ đặt tên kênh. Để trống cho mặc định của ứng dụng.",
+          "notify_finish_channel": "Tách kênh Android cho cảnh báo kết thúc (cũng được sử dụng bởi lời nhắc và lời cằn nhằn khi chờ giặt) để kênh có thể có âm thanh riêng. Để trống để sử dụng lại kênh ở trên."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Nếu chu trình bơm vẫn chạy sau nhiều giây này, sự kiện ha_washdata_pump_stuck sẽ được kích hoạt một lần. Sử dụng tính năng này để phát hiện động cơ bị kẹt (thời gian chạy máy bơm bể phốt thông thường là dưới 60 giây). Mặc định: 1800 giây (30 phút). Chỉ loại thiết bị bơm."
+            }
+          },
+          "device_link_section": {
+            "name": "Liên kết thiết bị",
+            "description": "Tùy chọn liên kết thiết bị WashData này với thiết bị Home Assistant hiện có (ví dụ: phích cắm thông minh hoặc chính thiết bị đó). Sau đó, thiết bị WashData được hiển thị là \"Đã kết nối qua\" thiết bị đó. Để trống để giữ WashData làm thiết bị độc lập.",
+            "data": {
+              "linked_device": "Thiết bị được liên kết"
+            },
+            "data_description": {
+              "linked_device": "Chọn thiết bị để kết nối WashData. Điều này thêm tham chiếu 'Đã kết nối qua' trong sổ đăng ký thiết bị; WashData giữ thẻ thiết bị và các thực thể của riêng mình. Xóa lựa chọn để loại bỏ liên kết."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Tự động dán nhãn chu kỳ cũ",
-        "description": "{info}",
+        "description": "Đã tìm thấy tổng cộng {total_count} chu kỳ. Hồ sơ: {profiles}",
         "data": {
           "confidence_threshold": "Độ tin cậy tối thiểu (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Lịch sử quy trình (Hợp nhất/Tách)",
-        "description": "Dọn dẹp lịch sử chu trình bằng cách hợp nhất các lần chạy bị phân mảnh và tách các chu kỳ được hợp nhất không chính xác trong một khoảng thời gian. Nhập số giờ để nhìn lại.\n{info}",
+        "description": "Dọn dẹp lịch sử chu trình bằng cách hợp nhất các lần chạy bị phân mảnh và tách các chu kỳ được hợp nhất không chính xác trong một khoảng thời gian. Nhập số giờ để nhìn lại (dùng 999999 cho tất cả).",
         "data": {
           "time_range": "Khoảng thời gian xem lại (giờ)",
           "gap_seconds": "Khoảng cách Hợp nhất/Tách (giây)"
         },
         "data_description": {
-          "time_range": "Số giờ quét các chu kỳ phân mảnh để hợp nhất. Sử dụng 999999 để xử lý tất cả dữ liệu lịch sử.\n{info}",
+          "time_range": "Số giờ quét các chu kỳ phân mảnh để hợp nhất. Sử dụng 999999 để xử lý tất cả dữ liệu lịch sử.",
           "gap_seconds": "Ngưỡng để quyết định chia tách và hợp nhất. Khoảng trống NGẮN HƠN hơn mức này sẽ được hợp nhất. Khoảng trống dài hơn khoảng trống này sẽ được chia ra. Hạ thấp mức này để buộc phân tách trên một chu kỳ được hợp nhất không chính xác."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Năng lượng TB",
         "table_detected_program": "Chương trình phát hiện",
         "table_confidence": "Sự tự tin",
-        "table_reported": "Đã báo cáo"
+        "table_reported": "Đã báo cáo",
+        "phase_builtin_suffix": "(Tích hợp)",
+        "phase_none_available": "Không có giai đoạn nào có sẵn.",
+        "settings_deprecation_warning": "⚠️ **Loại thiết bị không được dùng nữa:** {device_type} được lên lịch xóa trong bản phát hành trong tương lai. Quy trình phù hợp của WashData không tạo ra kết quả đáng tin cậy cho loại thiết bị này. Tích hợp của bạn tiếp tục hoạt động trong suốt thời gian ngừng sử dụng; để tắt tiếng cảnh báo này, hãy chuyển **Loại thiết bị** bên dưới sang một trong các loại được hỗ trợ (Máy giặt, Máy sấy, Combo máy giặt-máy sấy, Máy rửa chén, Nồi chiên không khí, Máy làm bánh mì hoặc Máy bơm) hoặc sang **Khác (Nâng cao)** nếu thiết bị của bạn không phù hợp với bất kỳ loại nào được hỗ trợ. **Khác (Nâng cao)** cung cấp các giá trị mặc định chung có chủ ý không được điều chỉnh cho bất kỳ thiết bị cụ thể nào, do đó, bạn sẽ cần phải tự mình định cấu hình ngưỡng, thời gian chờ và các thông số phù hợp; tất cả cài đặt hiện có của bạn sẽ được giữ nguyên khi bạn chuyển đổi.",
+        "phase_other_device_types": "Các loại thiết bị khác:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Đặt lại về thời lượng đầy đủ",
         "apply": "Áp dụng Cắt",
         "cancel": "Hủy bỏ"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Máy giặt",
+        "dryer": "Máy sấy",
+        "washer_dryer": "Combo Máy Giặt-Sấy",
+        "dishwasher": "Máy rửa chén",
+        "coffee_machine": "Máy pha cà phê (không dùng nữa)",
+        "ev": "Xe điện (không dùng nữa)",
+        "air_fryer": "Nồi chiên không khí",
+        "heat_pump": "Bơm nhiệt (không dùng nữa)",
+        "bread_maker": "Máy làm bánh mì",
+        "pump": "Máy bơm / Máy bơm bể phốt",
+        "oven": "Lò nướng (không dùng nữa)",
+        "other": "Khác (Nâng cao)"
       }
     }
   },

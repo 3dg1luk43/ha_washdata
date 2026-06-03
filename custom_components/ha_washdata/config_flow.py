@@ -119,12 +119,18 @@ from .const import (
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
     CONF_NOTIFY_LIVE_CHRONOMETER,
+    CONF_NOTIFY_REMINDER_MESSAGE,
+    CONF_NOTIFY_TIMEOUT_SECONDS,
+    CONF_NOTIFY_CHANNEL,
+    CONF_NOTIFY_FINISH_CHANNEL,
     CONF_ENERGY_PRICE_STATIC,
     CONF_ENERGY_PRICE_ENTITY,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
     DEFAULT_NOTIFY_PRE_COMPLETE_MESSAGE,
+    DEFAULT_NOTIFY_REMINDER_MESSAGE,
+    DEFAULT_NOTIFY_TIMEOUT_SECONDS,
     DEFAULT_NOTIFY_ONLY_WHEN_HOME,
     DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
@@ -148,6 +154,7 @@ from .const import (
     CONF_DOOR_SENSOR_ENTITY,
     CONF_PAUSE_CUTS_POWER,
     CONF_SWITCH_ENTITY,
+    CONF_LINKED_DEVICE,
     CONF_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
 )
@@ -167,21 +174,37 @@ def _format_duration_label(seconds: int) -> str:
 
 def _device_type_options(
     current: str | None = None,
-) -> list[selector.SelectOptionDict]:
-    """Build the device-type dropdown options.
+) -> list[str]:
+    """Build the device-type dropdown option keys.
 
-    Deprecated types are hidden for new entries; for existing entries whose
-    saved device_type is deprecated, the type is shown with a "(deprecated)"
-    suffix so the user can either keep it or switch without losing it from
-    the dropdown.
+    Returns plain option keys so the frontend resolves the labels per user from
+    the ``selector.device_type`` translations (passing pre-built labels would
+    lock them to the server language). Deprecated types are hidden for new
+    entries; for an existing entry whose saved device_type is deprecated, that
+    type is kept in the list so the user can either keep it or switch without
+    losing it from the dropdown. The "(deprecated)" wording lives in the
+    translated labels for the deprecated keys.
     """
-    options: list[selector.SelectOptionDict] = []
-    for key, label in DEVICE_TYPES.items():
-        if key in DEPRECATED_DEVICE_TYPES and key != current:
-            continue
-        display = f"{label} (deprecated)" if key in DEPRECATED_DEVICE_TYPES else label
-        options.append(selector.SelectOptionDict(value=key, label=display))
-    return options
+    return [
+        key
+        for key in DEVICE_TYPES
+        if key not in DEPRECATED_DEVICE_TYPES or key == current
+    ]
+
+
+def _escape_markdown(text: Any) -> str:
+    """Make a user-supplied label safe to embed in markdown descriptions.
+
+    Profile and phase names are free text, so collapse any whitespace runs
+    (including newlines, which would otherwise break list rendering) into single
+    spaces and escape the markdown metacharacters that would otherwise inject
+    emphasis, code spans, links, or table cells.
+    """
+    collapsed = " ".join(str(text).split())
+    # Backslash must be escaped first so the others are not double-escaped.
+    for char in ("\\", "`", "*", "_", "[", "]", "~", "|"):
+        collapsed = collapsed.replace(char, f"\\{char}")
+    return collapsed
 
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
@@ -193,6 +216,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
             selector.SelectSelectorConfig(
                 options=_device_type_options(),
                 mode=selector.SelectSelectorMode.DROPDOWN,
+                translation_key="device_type",
             )
         ),
         vol.Required(CONF_POWER_SENSOR): selector.EntitySelector(
@@ -326,7 +350,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         self._trim_start_s: float = 0.0
         self._trim_end_s: float = 0.0
         self._selector_translations: dict[str, str] | None = None
-        self._options_translations: dict[str, str] | None = None
         self._menu_stack: list[str] = []
 
     def _push_menu(self, step_id: str) -> None:
@@ -442,41 +465,23 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the options."""
         self._menu_stack = ["init"]
-        pending_count = 0
-        manager = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id)
-        if manager is not None and hasattr(manager, "profile_store"):
-            try:
-                pending_count = len(manager.profile_store.get_pending_feedback())
-            except Exception:  # pylint: disable=broad-exception-caught
-                pending_count = 0
-
-        lang = self.context.get("language") or self.hass.config.language
-        if self._options_translations is None:
-            self._options_translations = await translation.async_get_translations(
-                self.hass, lang, "options", {DOMAIN}
-            )
-
-        base_key = f"component.{DOMAIN}.options.step.init.menu_options"
-
-        def menu_label(key: str) -> str:
-            return self._options_translations.get(f"{base_key}.{key}", key)
-
-        learning_label = menu_label("learning_feedbacks")
-        if pending_count > 0:
-            learning_label = f"({pending_count}) {learning_label}"
-
+        # Pass menu_options as a list of step ids (not a {step_id: label} dict)
+        # so the frontend resolves each label in the user's profile language. A
+        # dict would lock the labels to the server language for every user. The
+        # pending-feedback count is surfaced inside the learning_feedbacks step
+        # description rather than on the menu label.
         return self.async_show_menu(
             step_id="init",
-            menu_options={
-                "settings": menu_label("settings"),
-                "notifications": menu_label("notifications"),
-                "manage_cycles": menu_label("manage_cycles"),
-                "manage_profiles": menu_label("manage_profiles"),
-                "manage_phase_catalog": menu_label("manage_phase_catalog"),
-                "record_cycle": menu_label("record_cycle"),
-                "learning_feedbacks": learning_label,
-                "diagnostics": menu_label("diagnostics"),
-            },
+            menu_options=[
+                "settings",
+                "notifications",
+                "manage_cycles",
+                "manage_profiles",
+                "manage_phase_catalog",
+                "record_cycle",
+                "learning_feedbacks",
+                "diagnostics",
+            ],
         )
 
     async def async_step_settings(
@@ -549,6 +554,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 selector.SelectSelectorConfig(
                     options=_device_type_options(current=current_device_type),
                     mode=selector.SelectSelectorMode.DROPDOWN,
+                    translation_key="device_type",
                 )
             ),
             vol.Optional(
@@ -569,22 +575,41 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         }
 
         if current_device_type in DEPRECATED_DEVICE_TYPES:
-            current_label = DEVICE_TYPES.get(current_device_type, current_device_type)
-            deprecation_warning = (
-                f"⚠️ **Deprecated device type:** {current_label} is scheduled "
-                f"for removal in a future release. WashData's matching pipeline "
-                f"does not produce reliable results for this appliance class. "
-                f"Your integration keeps working through the deprecation period; "
-                f"to silence this warning, switch **Device Type** below to one "
-                f"of the supported types (Washing Machine, Dryer, Washer-Dryer "
-                f"Combo, Dishwasher, Air Fryer, Bread Maker, or Pump), or to "
-                f"**Other (Advanced)** if your appliance does not match any of "
-                f"the supported types. **Other (Advanced)** ships intentionally "
-                f"generic defaults that are not tuned for any specific "
-                f"appliance, so you will need to configure thresholds, "
-                f"timeouts, and matching parameters yourself; all your existing "
-                f"settings are preserved when you switch.\n\n"
+            # Conditional flow text cannot be resolved per-user by the frontend
+            # (it only translates static step descriptions), so this falls back
+            # to the instance language via _options_text. Deprecated device
+            # types are removed in 0.4.6 regardless.
+            warning_template = await self._options_text(
+                "settings_deprecation_warning",
+                "⚠️ **Deprecated device type:** {device_type} is scheduled "
+                "for removal in a future release. WashData's matching pipeline "
+                "does not produce reliable results for this appliance class. "
+                "Your integration keeps working through the deprecation period; "
+                "to silence this warning, switch **Device Type** below to one "
+                "of the supported types (Washing Machine, Dryer, Washer-Dryer "
+                "Combo, Dishwasher, Air Fryer, Bread Maker, or Pump), or to "
+                "**Other (Advanced)** if your appliance does not match any of "
+                "the supported types. **Other (Advanced)** ships intentionally "
+                "generic defaults that are not tuned for any specific "
+                "appliance, so you will need to configure thresholds, "
+                "timeouts, and matching parameters yourself; all your existing "
+                "settings are preserved when you switch.",
             )
+            # Resolve the interpolated device label through the same selector
+            # translations the rest of the warning uses (_options_text populated
+            # self._selector_translations above), so the name is localized to
+            # match instead of falling back to the raw English DEVICE_TYPES value.
+            current_label = (self._selector_translations or {}).get(
+                f"component.{DOMAIN}.selector.device_type.options.{current_device_type}",
+                DEVICE_TYPES.get(current_device_type, current_device_type),
+            )
+            try:
+                warning = warning_template.format(device_type=current_label)
+            except (KeyError, IndexError, ValueError):
+                warning = warning_template
+            # Trailing blank line lives in code, not the translation string: HA
+            # rejects translation values with leading/trailing whitespace.
+            deprecation_warning = f"{warning}\n\n"
         else:
             deprecation_warning = ""
 
@@ -648,6 +673,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # empty.  Set it explicitly so the merge below overwrites any
             # previously-saved value rather than keeping the stale one.
             user_input[CONF_NOTIFY_ICON] = user_input.get(CONF_NOTIFY_ICON) or ""
+            # Normalize channel text fields the same way: a cleared field must
+            # overwrite any previously-saved channel rather than leaving a stale one.
+            user_input[CONF_NOTIFY_CHANNEL] = user_input.get(CONF_NOTIFY_CHANNEL) or ""
+            user_input[CONF_NOTIFY_FINISH_CHANNEL] = (
+                user_input.get(CONF_NOTIFY_FINISH_CHANNEL) or ""
+            )
             # Normalize energy price fields: selectors may omit the key entirely
             # when the user clears them.  Explicitly writing None ensures the
             # merged options dict overrides any previously-stored value.
@@ -843,6 +874,36 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 ),
             ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
             vol.Optional(
+                CONF_NOTIFY_REMINDER_MESSAGE,
+                default=get_val(
+                    CONF_NOTIFY_REMINDER_MESSAGE,
+                    DEFAULT_NOTIFY_REMINDER_MESSAGE,
+                ),
+            ): selector.TextSelector(selector.TextSelectorConfig(multiline=True)),
+            vol.Optional(
+                CONF_NOTIFY_TIMEOUT_SECONDS,
+                default=get_val(
+                    CONF_NOTIFY_TIMEOUT_SECONDS,
+                    DEFAULT_NOTIFY_TIMEOUT_SECONDS,
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0,
+                    max=86400,
+                    step=1,
+                    unit_of_measurement="s",
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                CONF_NOTIFY_CHANNEL,
+                description={"suggested_value": get_val(CONF_NOTIFY_CHANNEL, "")},
+            ): selector.TextSelector(),
+            vol.Optional(
+                CONF_NOTIFY_FINISH_CHANNEL,
+                description={"suggested_value": get_val(CONF_NOTIFY_FINISH_CHANNEL, "")},
+            ): selector.TextSelector(),
+            vol.Optional(
                 CONF_ENERGY_PRICE_ENTITY,
                 description={"suggested_value": get_val(CONF_ENERGY_PRICE_ENTITY, None)},
             ): selector.EntitySelector(
@@ -968,6 +1029,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if not _door_val:
                 user_input[CONF_DOOR_SENSOR_ENTITY] = None
 
+            # Normalize a cleared linked device (empty selection) to None so the
+            # via_device link is removed rather than left dangling.
+            if CONF_LINKED_DEVICE in user_input and not user_input[CONF_LINKED_DEVICE]:
+                user_input[CONF_LINKED_DEVICE] = None
+
             # Same treatment for switch entity
             # Only normalize to None when key is present but empty; if the key
             # is missing entirely (e.g. the step didn't expose the field) fall
@@ -1028,6 +1094,36 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 return str(int(val)) if float(val).is_integer() else f"{float(val):.2f}"
             except Exception:  # pylint: disable=broad-exception-caught
                 return str(val)
+
+        # Issue #257: high-power appliances (well pumps, EV chargers, ovens,
+        # heat pumps) legitimately need start/stop thresholds far above the
+        # friendly defaults below. Expand the selector ceiling so it always
+        # admits the currently-saved value and any pending suggestion -
+        # otherwise the form rejects a value the integration itself produced
+        # ("Value <n> is too large for dictionary value").
+        def _threshold_cap(base: float, key: str, current_default: float) -> float:
+            cap = base
+            candidates: list[Any] = [get_val(key, current_default)]
+            if isinstance(suggestions, dict):
+                candidates.append((suggestions.get(key) or {}).get("value"))
+            for cand in candidates:
+                try:
+                    cval = float(cand)
+                except (TypeError, ValueError):
+                    continue
+                if cval > cap:
+                    # Round up to the next clean 100 W so the BOX control keeps
+                    # a tidy bound with a little headroom above the value.
+                    cap = float((int(cval) // 100 + 1) * 100)
+            return cap
+
+        _min_power_val = float(get_val(CONF_MIN_POWER, DEFAULT_MIN_POWER))
+        _start_threshold_cap = _threshold_cap(
+            500.0, CONF_START_THRESHOLD_W, _min_power_val + 1.0
+        )
+        _stop_threshold_cap = _threshold_cap(
+            100.0, CONF_STOP_THRESHOLD_W, max(0.0, _min_power_val - 0.5)
+        )
 
         reason_lines: list[str] = []
         for key in [
@@ -1113,8 +1209,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 selector.NumberSelectorConfig(
                     min=0.0,
                     # Issue #238: dryers with anti-damp/anti-crease tumbling
-                    # can sit at 200–300 W during a delayed-start window.
-                    max=500.0,
+                    # can sit at 200-300 W during a delayed-start window.
+                    # Issue #257: ceiling expands for high-power devices so a
+                    # suggested/saved value above the default is never rejected.
+                    max=_start_threshold_cap,
                     step=0.5,
                     unit_of_measurement="W",
                     mode=selector.NumberSelectorMode.BOX,
@@ -1129,7 +1227,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0.0,
-                    max=100.0,
+                    # Issue #257: ceiling expands for high-power devices so a
+                    # suggested/saved value above the default is never rejected.
+                    max=_stop_threshold_cap,
                     step=0.5,
                     unit_of_measurement="W",
                     mode=selector.NumberSelectorMode.BOX,
@@ -1440,6 +1540,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Optional(CONF_APPLY_SUGGESTIONS, default=False): selector.BooleanSelector(),
         }
 
+        device_link_schema = {
+            vol.Optional(
+                CONF_LINKED_DEVICE,
+                description={"suggested_value": get_val(CONF_LINKED_DEVICE, None)},
+            ): selector.DeviceSelector(selector.DeviceSelectorConfig()),
+        }
+
         schema: dict[Any, Any] = {
             vol.Required("suggestions_section"): section(
                 vol.Schema(suggestions_schema), {"collapsed": False}
@@ -1461,6 +1568,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             vol.Required("external_triggers_section"): section(
                 vol.Schema(external_triggers_schema), {"collapsed": True}
+            ),
+            vol.Required("device_link_section"): section(
+                vol.Schema(device_link_schema), {"collapsed": True}
             ),
         }
 
@@ -2061,13 +2171,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 "menu_back",
             ],
             description_placeholders={
-                "storage_stats": (
-                    f"- File Size: {stats.get('file_size_kb', 0):.1f} KB\n"
-                    f"- Cycles: {stats.get('total_cycles', 0)}\n"
-                    f"- Profiles: {stats.get('total_profiles', 0)}\n"
-                    + (f"- Debug Traces: {stats.get('debug_traces_count', 0)}\n"
-                       if stats.get('debug_traces_count', 0) > 0 else "")
-                ),
                 "file_size_kb": f"{stats.get('file_size_kb', 0):.1f}",
                 "cycle_count": str(stats.get('total_cycles', 0)),
                 "profile_count": str(stats.get('total_profiles', 0)),
@@ -2108,13 +2211,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="reprocess_history",
             data_schema=vol.Schema({}),
-            description_placeholders={
-                "warning": (
-                    "This will recalculate all cycle signatures and rebuild profile "
-                    "models (envelopes) using the latest logic.\n\nRaw cycle data is preserved. "
-                    "This may take a moment for large histories."
-                )
-            },
         )
 
     async def async_step_export_import(
@@ -2328,10 +2424,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     last_run_str = dt_util.as_local(dt).strftime("%b %d")
             avg_energy = p.get("avg_energy")
             if isinstance(avg_energy, (int, float)) and avg_energy > 0:
-                if avg_energy >= 1000:
-                    energy_str = f"{avg_energy / 1000:.2f} kWh"
+                if avg_energy >= 1.0:
+                    energy_str = f"{avg_energy:.2f} kWh"
                 else:
-                    energy_str = f"{int(round(avg_energy))} Wh"
+                    energy_str = f"{int(round(avg_energy * 1000))} Wh"
             else:
                 energy_str = "—"
             safe_name = html.escape(str(p["name"]))
@@ -2401,23 +2497,54 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
 
-        # Gather phases organized by device type
-        summary_lines = []
-        for device_type in DEVICE_TYPES.keys():
-            phases = store.list_phase_catalog(device_type)
-            if phases:
-                # Add section header for this device type
-                device_label = DEVICE_TYPES.get(device_type, device_type)
-                summary_lines.append(f"\n**{device_label}**")
-                
-                for phase in phases:
-                    icon = "📌 " if phase.get("is_default") else "✏️ "
-                    desc = str(phase.get("description", "")).strip()
-                    short = desc if len(desc) <= 80 else f"{desc[:77]}..."
-                    phase_type = " (Built-in)" if phase.get("is_default") else ""
-                    summary_lines.append(f"{icon}**{phase.get('name', '')}{phase_type}** - {short}")
-        
-        summary = "\n".join(summary_lines) if summary_lines else "No phases available."
+        # Phase names/descriptions are runtime catalog data, but the static
+        # wording around them is resolved via _options_text (instance language).
+        builtin_suffix = await self._options_text("phase_builtin_suffix", "(Built-in)")
+        no_phases = await self._options_text(
+            "phase_none_available", "No phases available."
+        )
+        other_types_label = await self._options_text(
+            "phase_other_device_types", "Other device types:"
+        )
+
+        def _device_label(dtype: str) -> str:
+            # Reuse the (now translated) device-type selector labels.
+            return self._selector_translations.get(
+                f"component.{DOMAIN}.selector.device_type.options.{dtype}",
+                DEVICE_TYPES.get(dtype, dtype),
+            )
+
+        # Show this device's phases in full; summarise every other device type
+        # as a one-line count so the landing page stays short. The create / edit
+        # / delete steps still operate on every device type's phases.
+        current_type = manager.device_type
+        summary_lines: list[str] = []
+        current_phases = store.list_phase_catalog(current_type)
+        if current_phases:
+            summary_lines.append(f"**{_device_label(current_type)}**")
+            for phase in current_phases:
+                icon = "📌 " if phase.get("is_default") else "✏️ "
+                desc = str(phase.get("description", "")).strip()
+                short = desc if len(desc) <= 80 else f"{desc[:77]}..."
+                phase_type = f" {builtin_suffix}" if phase.get("is_default") else ""
+                name = _escape_markdown(phase.get("name", ""))
+                summary_lines.append(
+                    f"{icon}**{name}{phase_type}** - {_escape_markdown(short)}"
+                )
+
+        other_counts = []
+        for device_type in DEVICE_TYPES:
+            if device_type == current_type:
+                continue
+            count = len(store.list_phase_catalog(device_type))
+            if count:
+                other_counts.append(f"{_device_label(device_type)} ({count})")
+        if other_counts:
+            if summary_lines:
+                summary_lines.append("")
+            summary_lines.append(f"{other_types_label} " + ", ".join(other_counts))
+
+        summary = "\n".join(summary_lines) if summary_lines else no_phases
 
         self._push_menu("manage_phase_catalog")
         return self.async_show_menu(
@@ -4090,7 +4217,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             ),
             description_placeholders={
                 "profile_name": self._selected_profile or "",
-                "warning": "⚠️ This will permanently delete the profile.",
             },
         )
 
@@ -4138,10 +4264,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 }
             ),
             description_placeholders={
-                "info": (
-                    f"Found {total_count} total cycles. "
-                    f"Profiles: {', '.join(p['name'] for p in profiles)}"
-                )
+                "total_count": str(total_count),
+                # Leading blank line so markdown renders the bulleted list
+                # instead of gluing the profile names onto the "Profiles:" label.
+                "profiles": "\n\n"
+                + "\n".join(f"- {_escape_markdown(p['name'])}" for p in profiles),
             },
         )
 
@@ -4242,9 +4369,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     )
                 }
             ),
-            description_placeholders={
-                "warning": "⚠️ This will permanently delete the selected cycle"
-            },
         )
 
     async def async_step_label_cycle(
@@ -4403,14 +4527,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             mode=selector.NumberSelectorMode.BOX,
                         )
                     ),
-
                 }
             ),
-            description_placeholders={
-                "info": (
-                    "Enter number of past hours to process (or use 999999 for all).\n\n"
-                )
-            },
         )
 
 
@@ -4435,12 +4553,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="wipe_history",
             data_schema=vol.Schema({}),
-            description_placeholders={
-                "warning": (
-                    "⚠️ This will permanently delete ALL stored cycles and profiles for "
-                    "this device. This cannot be undone!"
-                )
-            },
         )
 
     async def async_step_record_cycle(

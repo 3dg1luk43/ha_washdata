@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Format poruke prije završetka",
           "energy_price_entity": "Cijena energije - entitet (opcionalno)",
           "energy_price_static": "Cijena energije - statička vrijednost (opcionalno)",
-          "go_back": "Vrati se bez spremanja"
+          "go_back": "Vrati se bez spremanja",
+          "notify_reminder_message": "Format poruke podsjetnika",
+          "notify_timeout_seconds": "Automatsko odbacivanje nakon (sekunde)",
+          "notify_channel": "Kanal obavještenja (status/uživo/podsjetnik)",
+          "notify_finish_channel": "Završen kanal obavijesti"
         },
         "data_description": {
           "go_back": "Označite ovo i kliknite Pošalji da odbacite sve gore navedene promjene i vratite se u glavni meni.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Poruka se šalje kada se ciklus završi. Podržava {device}, {duration}, {program}, {energy_kwh}, {cost} čuvare mjesta.",
           "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} čuvare mjesta.",
           "energy_price_entity": "Odaberite numerički entitet koji drži trenutnu cijenu električne energije (npr. senzor.electricity_price, input_number.energy_rate). Kada je postavljeno, omogućava {cost} čuvar mjesta. Ima prednost u odnosu na statičku vrijednost ako su obje konfigurirane.",
-          "energy_price_static": "Fiksna cijena električne energije po kWh. Kada je postavljeno, omogućava {cost} čuvar mjesta. Zanemaruje se ako je entitet konfiguriran gore. Dodajte simbol valute u šablon poruke, npr. {cost} €."
+          "energy_price_static": "Fiksna cijena električne energije po kWh. Kada je postavljeno, omogućava {cost} čuvar mjesta. Zanemaruje se ako je entitet konfiguriran gore. Dodajte simbol valute u šablon poruke, npr. {cost} €.",
+          "notify_reminder_message": "Tekst jednokratnog podsjetnika poslao je konfigurirani broj minuta prije procijenjenog kraja. Za razliku od ponavljajućih ažuriranja uživo iznad. Podržava {device}, {minutes}, {program} čuvare mjesta.",
+          "notify_timeout_seconds": "Automatski odbaciti obavještenja nakon ovoliko sekundi (proslijeđeno kao \"vremensko ograničenje\" prateće aplikacije). Postavite na 0 da ih zadržite dok se ne odbace. Podrazumevano: 0.",
+          "notify_channel": "Android kanal za obavještenje prateće aplikacije za status, napredak uživo i obavještenja o podsjetnicima. Zvuk i važnost kanala se konfigurišu u pratećoj aplikaciji kada se prvi put koristi naziv kanala - WashData samo postavlja naziv kanala. Ostavite prazno za zadanu aplikaciju.",
+          "notify_finish_channel": "Odvojite Android kanal za završeno upozorenje (koji se također koristi za podsjetnik i zagovaranje na čekanju) tako da može imati svoj zvuk. Ostavite prazno da ponovo koristite kanal iznad."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Ako ciklus pumpe i dalje radi nakon ovoliko sekundi, događaj ha_washdata_pump_stuck se aktivira jednom. Upotrijebite ovo za otkrivanje zaglavljenog motora (uobičajeni rad pumpe ispod 60 s). Zadano: 1800 s (30 min). Samo tip uređaja za pumpu."
+            }
+          },
+          "device_link_section": {
+            "name": "Device Link",
+            "description": "Opciono povežite ovaj WashData uređaj sa postojećim Home Assistant uređajem (na primjer, pametni utikač ili sam uređaj). Uređaj WashData se tada prikazuje kao \"Povezan putem\" tog uređaja. Ostavite prazno da WashData ostane kao samostalan uređaj.",
+            "data": {
+              "linked_device": "Povezani uređaj"
+            },
+            "data_description": {
+              "linked_device": "Odaberite uređaj na koji želite povezati WashData. Ovo dodaje referencu 'Povezano putem' u registar uređaja; WashData čuva vlastitu karticu uređaja i entitete. Obrišite odabir da uklonite vezu."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automatski označi stare cikluse",
-        "description": "{info}",
+        "description": "Ukupno pronađeno {total_count} ciklusa. Profili: {profiles}",
         "data": {
           "confidence_threshold": "Minimalno povjerenje (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Historija procesa (Spajanje/Splitanje)",
-        "description": "Očistite istoriju ciklusa spajanjem fragmentiranih ciklusa i cijepanjem pogrešno spojenih ciklusa unutar vremenskog prozora. Unesite broj sati da pogledate unazad.\n{info}",
+        "description": "Očistite istoriju ciklusa spajanjem fragmentiranih ciklusa i cijepanjem pogrešno spojenih ciklusa unutar vremenskog prozora. Unesite broj sati da pogledate unazad (koristite 999999 za sve).",
         "data": {
           "time_range": "Vremenski okvir za pregled (sati)",
           "gap_seconds": "Spajanje/razdvajanje jaza (sekunde)"
         },
         "data_description": {
-          "time_range": "Broj sati za skeniranje fragmentiranih ciklusa za spajanje. Koristite 999999 za obradu svih historijskih podataka.\n{info}",
+          "time_range": "Broj sati za skeniranje fragmentiranih ciklusa za spajanje. Koristite 999999 za obradu svih historijskih podataka.",
           "gap_seconds": "Prag za odlučivanje o razdvajanju ili spajanju. Spajaju se praznine KRAĆE od ovoga. Praznine DUGE od ovoga su podijeljene. Smanjite ovo da biste prisilili podjelu na ciklus koji je spojen pogrešno."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Prosj. energija",
         "table_detected_program": "Otkriveni program",
         "table_confidence": "Samopouzdanje",
-        "table_reported": "Prijavljeno"
+        "table_reported": "Prijavljeno",
+        "phase_builtin_suffix": "(ugrađeno)",
+        "phase_none_available": "Nema dostupnih faza.",
+        "settings_deprecation_warning": "⚠️ **Zastarjeli tip uređaja:** {device_type} je zakazano za uklanjanje u budućem izdanju. WashData-ov odgovarajući cevovod ne daje pouzdane rezultate za ovu klasu uređaja. Vaša integracija nastavlja raditi kroz period zastare; da biste utišali ovo upozorenje, prebacite **Tip uređaja** u nastavku na jedan od podržanih tipova (mašina za pranje rublja, mašina za sušenje, kombinovana mašina za pranje i sušenje, mašina za pranje sudova, friteza za vazduh, pekač hleba ili pumpa) ili na **Ostalo (napredno)** ako vaš uređaj ne odgovara nijednom od podržanih tipova. **Ostalo (Napredno)** namerno isporučuje generičke zadane postavke koje nisu podešene za bilo koji određeni uređaj, tako da ćete morati sami da konfigurišete pragove, vremenska ograničenja i odgovarajuće parametre; sva vaša postojeća podešavanja su sačuvana kada se prebacite.",
+        "phase_other_device_types": "Ostale vrste uređaja:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Vratite na puno trajanje",
         "apply": "Primijenite Trim",
         "cancel": "Otkaži"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Mašina za pranje veša",
+        "dryer": "Sušilica",
+        "washer_dryer": "Kombinirana perilica-sušilica",
+        "dishwasher": "Mašina za pranje sudova",
+        "coffee_machine": "Aparat za kafu (zastario)",
+        "ev": "Električno vozilo (zastarjelo)",
+        "air_fryer": "Friteza na vrući zrak",
+        "heat_pump": "Toplotna pumpa (zastarjela)",
+        "bread_maker": "Pekač hljeba",
+        "pump": "Pumpa / Drenažna pumpa",
+        "oven": "Pećnica (zastarjela)",
+        "other": "Ostalo (napredno)"
       }
     }
   },

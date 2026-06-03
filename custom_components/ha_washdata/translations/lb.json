@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Virof-Ofschloss Message Format",
           "energy_price_entity": "Energiepräis - Entitéit (optional)",
           "energy_price_static": "Energiepräis - Statesche Wäert (optional)",
-          "go_back": "Zréckgoen ouni ze späicheren"
+          "go_back": "Zréckgoen ouni ze späicheren",
+          "notify_reminder_message": "Erënnerung Message Format",
+          "notify_timeout_seconds": "Auto Entlooss No (Sekonnen)",
+          "notify_channel": "Notifikatiounskanal (Status / Live / Erënnerung)",
+          "notify_finish_channel": "Fäerdeg Notifikatioun Channel"
         },
         "data_description": {
           "go_back": "Hakt dëst un a klickt op Ofschécken, fir all Ännerungen hei uewen ze verwerfen an an den Haaptmenu zréckzegoen.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program}, {energy_kwh}, {cost} Plazhalter.",
           "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter.",
           "energy_price_entity": "Wielt eng numeresch Entitéit déi den aktuellen Stroumpräis hält (zB Sensor.electricity_price, input_number.energy_rate). Wann agestallt, aktivéiert den {cost} Plazhalter. Huelt Virrang iwwer de statesche Wäert wa béid konfiguréiert sinn.",
-          "energy_price_static": "Fixe Stroumpräis pro kWh. Wann agestallt, aktivéiert den {cost} Plazhalter. Ignoréiert wann eng Entitéit uewen konfiguréiert ass. Füügt Äert Währungssymbol an de Message Schabloun, z.B. {cost} €."
+          "energy_price_static": "Fixe Stroumpräis pro kWh. Wann agestallt, aktivéiert den {cost} Plazhalter. Ignoréiert wann eng Entitéit uewen konfiguréiert ass. Füügt Äert Währungssymbol an de Message Schabloun, z.B. {cost} €.",
+          "notify_reminder_message": "Den Text vun der eemoleger Erënnerung huet déi konfiguréiert Zuel vu Minutte virum geschätzte Enn geschéckt. Ënnerscheed vun de widderhuelende Live Updates hei uewen. Ënnerstëtzt {device}, {minutes}, {program} Plazhalter.",
+          "notify_timeout_seconds": "Entlooss automatesch Notifikatiounen no dëse ville Sekonnen (virgeschriwwe wéi d'Begleeder App 'Timeout'). Setzt op 0 fir se ze halen bis se entlooss ginn. Standard: 0.",
+          "notify_channel": "Android Begleeder App Notifikatiounskanal fir Status, Live Fortschrëtter, an Erënnerung Notifikatiounen. Den Sound an d'Wichtegkeet vun engem Kanal sinn an der Begleeder App konfiguréiert déi éischte Kéier de Kanalnumm benotzt gëtt - WashData setzt nëmmen de Kanalnumm. Loosst eidel fir d'App Default.",
+          "notify_finish_channel": "Separat Android Kanal fir de fäerdegen Alarm (och benotzt vun der Erënnerung an der Wäsch-Waart Nag) sou datt et säin eegene Sound kann hunn. Loosst eidel fir de Kanal uewen ze benotzen."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Wann e Pompel Zyklus nach laafen no dëse ville Sekonnen, engem ha_washdata_pump_stuck Event eemol gebrannt. Benotzt dëst fir e verstoppte Motor z'entdecken (typesch Sumppompellaf ass ënner 60 s). Standard: 1800 s (30 min). Pompel Apparat Typ nëmmen."
+            }
+          },
+          "device_link_section": {
+            "name": "Apparat Link",
+            "description": "Optional verbënnt dësen WashData Apparat mat engem existente Home Assistant Apparat (zum Beispill de Smart Plug oder den Apparat selwer). De WashData-Apparat gëtt dann als \"Connected via\" dat Apparat gewisen. Loosst eidel fir WashData als Standalone Apparat ze halen.",
+            "data": {
+              "linked_device": "Verknëppelt Gerät"
+            },
+            "data_description": {
+              "linked_device": "Wielt den Apparat fir WashData ze verbannen. Dëst füügt eng 'Connected via' Referenz an der Apparatregistrierung; WashData hält seng eege Apparat Kaart an Entitéite. D'Auswiel läschen fir de Link ze läschen."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Al Zyklen automatesch etikettéieren",
-        "description": "{info}",
+        "description": "{total_count} Gesamtzyklen fonnt. Profiler: {profiles}",
         "data": {
           "confidence_threshold": "Minimum Vertrauen (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Geschicht veraarbecht (Fusionéieren / Split)",
-        "description": "Zyklusgeschicht botzen andeems fragmentéiert Leefen fusionéiert an falsch fusionéiert Zyklen bannent enger Zäitfenster opgedeelt ginn. Gitt d'Zuel vun de Stonnen un fir zréck ze kucken.\n{info}",
+        "description": "Propper Zyklusgeschicht andeems se fragmentéiert Runen fusionéieren an falsch fusionéierte Zyklen bannent enger Zäitfenster opzedeelen. Gitt d'Zuel vun Stonnen un fir zréck ze kucken (benotzt 999999 fir all).",
         "data": {
           "time_range": "Réckbléckfenster (Stonnen)",
           "gap_seconds": "Fusionéieren / Split Gap (Sekonnen)"
         },
         "data_description": {
-          "time_range": "Unzuel vun Stonnen fir fragmentéiert Zyklen ze scannen a fusionéieren. 999999 benotzen fir all historesch Daten ze veraarbecht.\n{info}",
+          "time_range": "Unzuel vun Stonnen fir ze scannen fir fragmentéiert Zyklen ze fusionéieren. Benotzt 999999 fir all historesch Daten ze veraarbecht.",
           "gap_seconds": "Schwell fir Split géint Fusioun z'entscheeden. Lücken KÜRZER wéi dëst ginn fusionéiert. Lücken MÉI LAANG wéi dëst ginn opgedeelt. Méi niddereg setzen fir en Zyklus opzedeelen deen falsch fusionéiert gouf."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Duerchschn. Energie",
         "table_detected_program": "Erkannt Programm",
         "table_confidence": "Vertrauen",
-        "table_reported": "Gemellt"
+        "table_reported": "Gemellt",
+        "phase_builtin_suffix": "(Built-in)",
+        "phase_none_available": "Keng Phasen verfügbar.",
+        "settings_deprecation_warning": "⚠️ **Deprecéiert Apparattyp:** {device_type} ass geplangt fir an enger zukünfteg Verëffentlechung ze läschen. WashData's passende Pipeline produzéiert keng zouverlässeg Resultater fir dës Apparatklass. Är Integratioun schafft weider duerch d'Deprecatiounsperiod; fir dës Warnung z'ënnerhalen, wiesselt ** Apparat Typ** hei ënnen op eng vun den ënnerstëtzten Typen (Wäschmaschinn, Dryer, Wäschmaschinn Combo, Spullmaschinn, Air Fryer, Broutmaschinn oder Pompel), oder op **Aner (Fortgeschratt)** wann Ären Apparat net mat enger vun den ënnerstëtzten Typen entsprécht. ** Aner (Fortgeschratt) ** Schëffer bewosst generesch Defaults déi net fir all spezifescht Apparat ofgestëmmt sinn, sou datt Dir selwer Schwellen, Timeouts a passende Parameteren konfiguréiere musst; all Är bestehend Astellunge sinn preservéiert wann Dir wiesselt.",
+        "phase_other_device_types": "Aner Zorte vun Apparater:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Op voll Dauer zrécksetzen",
         "apply": "Trim uwenden",
         "cancel": "Ofbriechen"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Wäschmaschinn",
+        "dryer": "Dryer",
+        "washer_dryer": "Wäschmaschinn-Trockner Combo",
+        "dishwasher": "Spullmaschinn",
+        "coffee_machine": "Kaffismaschinn (ofgeschaaft)",
+        "ev": "Elektresch Gefier (ofgeschaaft)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Wärmepompel (deprecéiert)",
+        "bread_maker": "Brout Maker",
+        "pump": "Pompel / Pompel Pompel",
+        "oven": "Uewen (ofgeschaaft)",
+        "other": "Aner (fortgeschratt)"
       }
     }
   },

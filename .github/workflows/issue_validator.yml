@@ -167,8 +167,8 @@ jobs:
               problems.push('**Home Assistant Version** is missing. You can find it in Settings → About.');
             }
 
-            // 4. Debug Logs - must contain actual log output, an attached file, or a clear N/A with stated reason
-            const logMatch = body.match(/###\s*Debug Logs\s*\n+([\s\S]*?)(?=\n###|$)/);
+            // 4. Logs / Error Evidence - must contain actual log/error output, an attached file, or a clear N/A with stated reason
+            const logMatch = body.match(/###\s*Logs \/ Error Evidence\s*\n+([\s\S]*?)(?=\n###|$)/);
             const logContent = logMatch ? logMatch[1].trim() : '';
             const logIsExplainedNA = /^n\/?a/i.test(logContent);
             // Detect GitHub file attachments (pasted as markdown links)
@@ -176,12 +176,13 @@ jobs:
               /https:\/\/github\.com\/user-attachments\//.test(logContent);
             const hasLogs = logContent &&
               logContent !== '_No response_' &&
-              logContent !== 'Paste debug log output here...' &&
+              logContent !== 'Paste log output or error messages here, or describe what file(s) you have attached above...' &&
               (logContent.length > 50 || hasAttachment);
             if (!hasLogs && !logIsExplainedNA) {
               problems.push(
-                '**Debug Logs** are missing or appear empty. This is the most important piece of information for diagnosing bugs. ' +
-                'Please enable debug logging (see the instructions in the **Debug Logs** section of the issue form) and either paste the relevant log lines or attach a log file. ' +
+                '**Logs / Error Evidence** are missing or appear empty. This is the most important piece of information for diagnosing bugs. ' +
+                'Please paste any relevant logs, error messages, or console output — debug logs if you have them, but even a single error line from the HA logbook is helpful. ' +
+                'See the **Logs / Error Evidence** section of the issue form for instructions on enabling debug logging. ' +
                 'If logs are **genuinely not applicable** to this report (for example: a documentation typo, a translation string fix, or a pure UI/config-flow layout issue where no runtime code path is exercised), ' +
                 'replace the placeholder with `N/A` followed by a short one-line reason — for example: `N/A - typo in README, no runtime behavior involved`. ' +
                 'Do not write `N/A` just because collecting logs is inconvenient; bug reports without logs and without a valid N/A reason cannot be investigated.'

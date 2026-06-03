@@ -12,9 +12,15 @@ from custom_components.ha_washdata import async_migrate_entry
 from custom_components.ha_washdata.const import (
     CONF_DEVICE_TYPE,
     CONF_MIN_POWER,
+    CONF_NOTIFY_CHANNEL,
+    CONF_NOTIFY_FINISH_CHANNEL,
+    CONF_NOTIFY_REMINDER_MESSAGE,
     CONF_NOTIFY_SERVICE,
+    CONF_NOTIFY_TIMEOUT_SECONDS,
     CONF_OFF_DELAY,
     CONF_POWER_SENSOR,
+    DEFAULT_NOTIFY_REMINDER_MESSAGE,
+    DEFAULT_NOTIFY_TIMEOUT_SECONDS,
     DOMAIN,
 )
 
@@ -69,13 +75,25 @@ async def test_migration_with_harness_moves_and_preserves_fields(
     hass.config_entries.async_update_entry.assert_called_once()
 
     assert legacy_entry.version == 3
-    assert legacy_entry.minor_version == 4
+    assert legacy_entry.minor_version == 5
 
     assert legacy_entry.options[CONF_MIN_POWER] == 5.0
     assert legacy_entry.options[CONF_OFF_DELAY] == 120
     assert legacy_entry.options[CONF_DEVICE_TYPE] == "Washing Machine"
     assert legacy_entry.options[CONF_POWER_SENSOR] == "sensor.washer_power"
     assert legacy_entry.options[CONF_NOTIFY_SERVICE] == "notify.mobile_app"
+
+    # 3.5 notification delivery options are populated with defaults.
+    assert (
+        legacy_entry.options[CONF_NOTIFY_TIMEOUT_SECONDS]
+        == DEFAULT_NOTIFY_TIMEOUT_SECONDS
+    )
+    assert legacy_entry.options[CONF_NOTIFY_CHANNEL] == ""
+    assert legacy_entry.options[CONF_NOTIFY_FINISH_CHANNEL] == ""
+    assert (
+        legacy_entry.options[CONF_NOTIFY_REMINDER_MESSAGE]
+        == DEFAULT_NOTIFY_REMINDER_MESSAGE
+    )
 
     assert CONF_MIN_POWER not in legacy_entry.data
     assert CONF_OFF_DELAY not in legacy_entry.data
@@ -89,7 +107,7 @@ async def test_migration_with_harness_moves_and_preserves_fields(
 async def test_migration_is_idempotent_after_first_run(
     hass: HomeAssistant, legacy_entry: DummyEntry
 ) -> None:
-    """Once migrated to 3.4, additional migration calls should no-op."""
+    """Once migrated to 3.5, additional migration calls should no-op."""
 
     def _apply_update(entry: DummyEntry, **kwargs: Any) -> None:
         entry.data = kwargs["data"]
@@ -112,8 +130,8 @@ async def test_migration_is_idempotent_after_first_run(
 
 @pytest.mark.asyncio
 async def test_migration_latest_version_is_noop(hass: HomeAssistant) -> None:
-    """Entries already at 3.4 should not trigger updates."""
-    entry = DummyEntry(version=3, minor_version=4, data={}, options={})
+    """Entries already at 3.5 should not trigger updates."""
+    entry = DummyEntry(version=3, minor_version=5, data={}, options={})
     hass.config_entries.async_update_entry = MagicMock()
 
     migrated = await async_migrate_entry(hass, entry)

@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Formát správy pred dokončením",
           "energy_price_entity": "Cena energie – subjekt (voliteľné)",
           "energy_price_static": "Cena energie – statická hodnota (voliteľné)",
-          "go_back": "Vrátiť sa bez uloženia"
+          "go_back": "Vrátiť sa bez uloženia",
+          "notify_reminder_message": "Formát pripomenutia",
+          "notify_timeout_seconds": "Automaticky zrušiť po (sekundách)",
+          "notify_channel": "Kanál upozornení (stav/naživo/pripomienka)",
+          "notify_finish_channel": "Dokončený kanál upozornení"
         },
         "data_description": {
           "go_back": "Zaškrtnite túto možnosť a kliknutím na Odoslať zahodíte všetky vyššie uvedené zmeny a vrátite sa do hlavnej ponuky.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Správa odoslaná po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Správa odoslaná pred dokončením. Podporuje zástupné symboly {device}, {minutes}.",
           "energy_price_entity": "Vyberte číselnú entitu, ktorá obsahuje aktuálnu cenu elektriny (napr. senzor.cena_elektriny, číslo_vstupu.sadzba_energie). Keď je nastavený, povolí zástupný symbol {cost}. Ak sú obe nakonfigurované, má prednosť pred statickou hodnotou.",
-          "energy_price_static": "Pevná cena elektriny za kWh. Keď je nastavený, povolí zástupný symbol {cost}. Ignorované, ak je entita nakonfigurovaná vyššie. Do šablóny správy pridajte svoj symbol meny, napr. {cost} €."
+          "energy_price_static": "Pevná cena elektriny za kWh. Keď je nastavený, povolí zástupný symbol {cost}. Ignorované, ak je entita nakonfigurovaná vyššie. Do šablóny správy pridajte svoj symbol meny, napr. {cost} €.",
+          "notify_reminder_message": "Text jednorazovej pripomienky odoslal nakonfigurovaný počet minút pred odhadovaným koncom. Na rozdiel od opakujúcich sa živých aktualizácií vyššie. Podporuje zástupné symboly {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Automaticky zavrieť upozornenia po uplynutí tohto počtu sekúnd (preposlané ako „časový limit“ sprievodnej aplikácie). Nastavte na 0, aby ste ich ponechali, kým sa nezatvoria. Predvolená hodnota: 0.",
+          "notify_channel": "Android kanál upozornení sprievodnej aplikácie pre stav, aktuálny priebeh a upozornenia na pripomienky. Zvuk a dôležitosť kanála sa konfigurujú v sprievodnej aplikácii pri prvom použití názvu kanála – WashData nastavuje iba názov kanála. Pre predvolenú aplikáciu nechajte prázdne.",
+          "notify_finish_channel": "Samostatný kanál Android pre dokončené upozornenie (používané aj pripomenutím a čakaním na bielizeň), aby mohlo mať svoj vlastný zvuk. Ak chcete znova použiť kanál vyššie, nechajte prázdne."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Ak cyklus pumpy beží aj po tomto mnohých sekundách, udalosť ha_washdata_pump_stuck sa spustí raz. Použite to na zistenie zaseknutého motora (typický chod kalového čerpadla je kratší ako 60 s). Predvolené: 1800 s (30 min). Len typ čerpadla."
+            }
+          },
+          "device_link_section": {
+            "name": "Odkaz na zariadenie",
+            "description": "Voliteľne prepojte toto zariadenie WashData s existujúcim zariadením Home Assistant (napríklad inteligentnou zástrčkou alebo samotným zariadením). Zariadenie WashData sa potom zobrazí ako „Pripojené cez“ toto zariadenie. Nechajte prázdne, aby WashData zostala ako samostatné zariadenie.",
+            "data": {
+              "linked_device": "Prepojené zariadenie"
+            },
+            "data_description": {
+              "linked_device": "Vyberte zariadenie, ku ktorému chcete pripojiť WashData. Tým sa do registra zariadenia pridá odkaz „Pripojené cez“; WashData uchováva svoju vlastnú kartu zariadenia a entity. Ak chcete odkaz odstrániť, zrušte výber."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automatické označovanie starých cyklov",
-        "description": "{info}",
+        "description": "Celkový počet nájdených cyklov: {total_count}. Profily: {profiles}",
         "data": {
           "confidence_threshold": "Minimálna spoľahlivosť (0,50–0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Spracovanie histórie (zlúčenie/rozdelenie)",
-        "description": "Vyčistite históriu cyklov zlúčením fragmentovaných cyklov a rozdelením nesprávne zlúčených cyklov v rámci časového okna. Zadajte počet hodín na spätné zobrazenie.\n{info}",
+        "description": "Vyčistite históriu cyklov zlúčením fragmentovaných cyklov a rozdelením nesprávne zlúčených cyklov v rámci časového okna. Zadajte počet hodín na spätný pohľad (pre všetky použite 999999).",
         "data": {
           "time_range": "Okno spätného náhľadu (hodiny)",
           "gap_seconds": "Medzera pre zlúčenie/rozdelenie (sekundy)"
         },
         "data_description": {
-          "time_range": "Počet hodín na vyhľadávanie fragmentovaných cyklov na zlúčenie. Na spracovanie všetkých historických údajov použite 999999.\n{info}",
+          "time_range": "Počet hodín na vyhľadávanie fragmentovaných cyklov na zlúčenie. Na spracovanie všetkých historických údajov použite 999999.",
           "gap_seconds": "Hranica pre rozhodnutie o rozdelení vs. zlúčení. Medzery KRATŠIE ako toto sú zlúčené. Medzery DLHŠIE ako toto sú rozdelené. Znížte túto hodnotu, ak chcete vynútiť rozdelenie cyklu, ktorý bol zlúčený nesprávne."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Priem. energia",
         "table_detected_program": "Zistený program",
         "table_confidence": "Spoľahlivosť",
-        "table_reported": "Nahlásené"
+        "table_reported": "Nahlásené",
+        "phase_builtin_suffix": "(Vstavaný)",
+        "phase_none_available": "Nie sú k dispozícii žiadne fázy.",
+        "settings_deprecation_warning": "⚠️ **Zastaraný typ zariadenia:** Odstránenie zariadenia {device_type} je naplánované v budúcom vydaní. Zodpovedajúci kanál WashData neposkytuje spoľahlivé výsledky pre túto triedu spotrebičov. Vaša integrácia funguje aj počas obdobia ukončenia podpory; ak chcete toto varovanie stlmiť, prepnite **Typ zariadenia** nižšie na jeden z podporovaných typov (práčka, sušička, kombinovaná práčka so sušičkou, umývačka riadu, fritéza, pekáreň chleba alebo čerpadlo) alebo na **Iné (pokročilé)**, ak váš spotrebič nezodpovedá žiadnemu z podporovaných typov. **Iné (pokročilé)** dodáva zámerne všeobecné predvolené nastavenia, ktoré nie sú vyladené pre žiadne konkrétne zariadenie, takže si budete musieť sami nakonfigurovať prahové hodnoty, časové limity a zodpovedajúce parametre; všetky vaše existujúce nastavenia sa po prepnutí zachovajú.",
+        "phase_other_device_types": "Ďalšie typy zariadení:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Obnoviť na plnú dĺžku",
         "apply": "Použiť orezanie",
         "cancel": "Zrušiť"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Práčka",
+        "dryer": "Sušička",
+        "washer_dryer": "Kombinovaná práčka so sušičkou",
+        "dishwasher": "Umývačka riadu",
+        "coffee_machine": "Kávovar (zastaraný)",
+        "ev": "Elektrické vozidlo (zastarané)",
+        "air_fryer": "Vzduchová fritéza",
+        "heat_pump": "Tepelné čerpadlo (zastarané)",
+        "bread_maker": "Pekáreň na chlieb",
+        "pump": "Čerpadlo / Kalové čerpadlo",
+        "oven": "Rúra (zastaraná)",
+        "other": "Iné (pokročilé)"
       }
     }
   },

@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "預完成訊息格式",
           "energy_price_entity": "能源價格 - 實體（可選）",
           "energy_price_static": "能源價格 - 靜態值（可選）",
-          "go_back": "不儲存並返回"
+          "go_back": "不儲存並返回",
+          "notify_reminder_message": "提醒訊息格式",
+          "notify_timeout_seconds": "自動關閉後（秒）",
+          "notify_channel": "通知頻道（狀態/即時/提醒）",
+          "notify_finish_channel": "完成通知頻道"
         },
         "data_description": {
           "go_back": "勾選此項並點擊提交，以放棄上述任何變更並返回主選單。",
@@ -151,7 +155,11 @@
           "notify_finish_message": "循環結束時發送的訊息。支援 {device}、{duration}、{program}, {energy_kwh}, {cost} 佔位符。",
           "notify_pre_complete_message": "訊息在完成之前發送。支援 {device}、{minutes} 佔位符。",
           "energy_price_entity": "選擇保存目前電價的數位實體（例如sensor.electricity_price、input_number.energy_rate）。設定後，啟用 {cost} 佔位符。如果兩者都配置了，則優先於靜態值。",
-          "energy_price_static": "每度電固定電價。設定後，啟用 {cost} 佔位符。如果上面配置了實體，則忽略。在訊息範本中加入您的貨幣符號，例如{cost} 歐元。"
+          "energy_price_static": "每度電固定電價。設定後，啟用 {cost} 佔位符。如果上面配置了實體，則忽略。在訊息範本中加入您的貨幣符號，例如{cost} 歐元。",
+          "notify_reminder_message": "一次性提醒文字在預計結束前發送配置的分鐘數。與上面的定期即時更新不同。支援 {device}、{minutes}、{program} 佔位符。",
+          "notify_timeout_seconds": "在這麼多秒後自動關閉通知（作為配套應用程式「超時」轉發）。設定為 0 以保留它們直到被解僱。預設值：0。",
+          "notify_channel": "Android 配套應用程式通知管道，用於顯示狀態、即時進度和提醒通知。頻道的聲音和重要性是在第一次使用頻道名稱時在配套應用程式中配置的 - WashData 僅設定頻道名稱。對於應用程式預設值，將其留空。",
+          "notify_finish_channel": "單獨的 Android 通道用於已完成的警報（也由提醒和洗衣等待小車使用），以便它可以有自己的聲音。留空以重複使用上面的通道。"
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "如果泵浦循環在這麼多秒後仍在運行，則會觸發一次 ha_washdata_pump_stuck 事件。用它來檢測堵塞的馬達（典型的污水泵運行時間低於 60 秒）。預設值：1800 秒（30 分鐘）。僅限泵浦設備類型。"
+            }
+          },
+          "device_link_section": {
+            "name": "裝置連結",
+            "description": "（可選）將此 WashData 裝置連結到現有的 Home Assistant 裝置（例如智慧插頭或裝置本身）。然後，WashData 裝置將顯示為「透過該裝置連線」。留空可將 WashData 保留為獨立裝置。",
+            "data": {
+              "linked_device": "連結設備"
+            },
+            "data_description": {
+              "linked_device": "選擇要連接 WashData 的裝置。這會在裝置登錄中新增「連線方式」參考； WashData保留自己的裝置卡和實體。清除選擇以刪除連結。"
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "自動標記舊自行車",
-        "description": "{info}",
+        "description": "共找到 {total_count} 個週期。個人資料：{profiles}",
         "data": {
           "confidence_threshold": "最低信賴度 (0.50-0.95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "流程歷史記錄（合併/拆分）",
-        "description": "透過合併碎片運行並在時間視窗內分割錯誤合併的周期來清理週期歷史記錄。輸入要回顧的小時數。\n{info}",
+        "description": "透過合併碎片運行並在時間視窗內分割錯誤合併的周期來清理週期歷史記錄。輸入要回顧的小時數（全部使用 999999）。",
         "data": {
           "time_range": "回顧視窗（小時）",
           "gap_seconds": "合併/拆分間隙（秒）"
         },
         "data_description": {
-          "time_range": "掃描要合併的碎片週期的小時數。使用999999處理所有歷史資料。\n{info}",
+          "time_range": "掃描要合併的碎片週期的小時數。使用999999處理所有歷史資料。",
           "gap_seconds": "決定拆分還是合併的閾值。比這更短的間隙將被合併。比這更長的間隙被分開。降低此值可強制對錯誤合併的循環進行拆分。"
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "平均能耗",
         "table_detected_program": "檢測到的程式",
         "table_confidence": "信心",
-        "table_reported": "已回報"
+        "table_reported": "已回報",
+        "phase_builtin_suffix": "(內建)",
+        "phase_none_available": "沒有可用的階段。",
+        "settings_deprecation_warning": "⚠️ **已棄用的裝置類型：** {device_type} 計劃在未來版本中刪除。 WashData 的匹配管道不會為此類設備產生可靠的結果。您的整合在棄用期內繼續有效；要消除此警告，請將下面的**設備類型**切換為受支援的類型之一（洗衣機、烘乾機、洗衣乾衣機組合、洗碗機、空氣炸鍋、麵包機或泵），或者如果您的設備與任何受支援的類型不匹配，則切換為**其他（高級）**。 **其他（進階）** 故意提供通用預設值，未針對任何特定裝置進行調整，因此您需要自行配置閾值、逾時和匹配參數；切換時，所有現有設定都會保留。",
+        "phase_other_device_types": "其他設備類型："
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "重置為完整持續時間",
         "apply": "應用修剪",
         "cancel": "取消"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "洗衣機",
+        "dryer": "烘乾機",
+        "washer_dryer": "洗衣機烘乾機組合",
+        "dishwasher": "洗碗機",
+        "coffee_machine": "咖啡機（已棄用）",
+        "ev": "電動車（已棄用）",
+        "air_fryer": "氣炸鍋",
+        "heat_pump": "熱泵（已棄用）",
+        "bread_maker": "麵包機",
+        "pump": "泵浦/污水泵",
+        "oven": "烤箱（已棄用）",
+        "other": "其他（高級）"
       }
     }
   },

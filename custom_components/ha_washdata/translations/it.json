@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Formato messaggio pre-completamento",
           "energy_price_entity": "Prezzo dell'energia - Entità (facoltativo)",
           "energy_price_static": "Prezzo dell'energia: valore statico (facoltativo)",
-          "go_back": "Torna indietro senza salvare"
+          "go_back": "Torna indietro senza salvare",
+          "notify_reminder_message": "Formato del messaggio di promemoria",
+          "notify_timeout_seconds": "Ignora automaticamente dopo (secondi)",
+          "notify_channel": "Canale di notifica (stato/live/promemoria)",
+          "notify_finish_channel": "Canale di notifica terminato"
         },
         "data_description": {
           "go_back": "Seleziona questa opzione e fai clic su Invia per scartare le modifiche sopra e tornare al menu principale.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Messaggio inviato al termine di un ciclo. Supporta i segnaposto {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Messaggio inviato prima del completamento. Supporta i segnaposto {device}, {minutes}.",
           "energy_price_entity": "Seleziona un'entità numerica che contiene il prezzo corrente dell'elettricità (ad esempio sensor.electricity_price, input_number.energy_rate). Se impostato, abilita il segnaposto {cost}. Ha la precedenza sul valore statico se entrambi sono configurati.",
-          "energy_price_static": "Prezzo fisso dell'elettricità per kWh. Se impostato, abilita il segnaposto {cost}. Ignorato se un'entità è configurata sopra. Aggiungi il simbolo della tua valuta nel modello di messaggio, ad es. {cost} €."
+          "energy_price_static": "Prezzo fisso dell'elettricità per kWh. Se impostato, abilita il segnaposto {cost}. Ignorato se un'entità è configurata sopra. Aggiungi il simbolo della tua valuta nel modello di messaggio, ad es. {cost} €.",
+          "notify_reminder_message": "Il testo del promemoria una tantum inviato il numero configurato di minuti prima della fine prevista. Distinto dagli aggiornamenti live ricorrenti di cui sopra. Supporta i segnaposto {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Ignora automaticamente le notifiche dopo questo numero di secondi (inoltrate come \"timeout\" dell'app complementare). Impostarli su 0 per mantenerli fino allo scioglimento. Impostazione predefinita: 0.",
+          "notify_channel": "Android canale di notifica dell'app complementare per notifiche di stato, progressi in tempo reale e promemoria. Il suono e l'importanza di un canale vengono configurati nell'app complementare la prima volta che viene utilizzato il nome del canale: WashData imposta solo il nome del canale. Lascia vuoto per l'impostazione predefinita dell'app.",
+          "notify_finish_channel": "Canale Android separato per l'avviso di fine lavoro (utilizzato anche dal promemoria e dal ronzino di lavanderia in attesa) in modo che possa avere il proprio suono. Lascia vuoto per riutilizzare il canale sopra."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Se un ciclo della pompa è ancora in esecuzione dopo questo numero di secondi, viene generato un evento ha_washdata_pump_stuck una volta. Utilizzarlo per rilevare un motore bloccato (il funzionamento tipico della pompa di raccolta è inferiore a 60 s). Impostazione predefinita: 1800 s (30 min). Solo tipo di dispositivo pompa."
+            }
+          },
+          "device_link_section": {
+            "name": "Collegamento del dispositivo",
+            "description": "Facoltativamente, collega questo dispositivo WashData a un dispositivo Home Assistant esistente (ad esempio la presa intelligente o l'elettrodomestico stesso). Il dispositivo WashData viene quindi visualizzato come \"Connesso tramite\" quel dispositivo. Lasciare vuoto per mantenere WashData come dispositivo autonomo.",
+            "data": {
+              "linked_device": "Dispositivo collegato"
+            },
+            "data_description": {
+              "linked_device": "Seleziona il dispositivo a cui connettere WashData. Ciò aggiunge un riferimento \"Connesso tramite\" nel registro del dispositivo; WashData mantiene la propria scheda dispositivo ed entità. Deselezionare la selezione per rimuovere il collegamento."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Etichettatura automatica dei cicli precedenti",
-        "description": "{info}",
+        "description": "Trovati {total_count} cicli totali. Profili: {profiles}",
         "data": {
           "confidence_threshold": "Confidenza minima (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Elabora cronologia (Unisci/Dividi)",
-        "description": "Pulisci la cronologia dei cicli unendo esecuzioni frammentate e dividendo i cicli uniti in modo errato all'interno di una finestra temporale. Inserisci il numero di ore da esaminare.\n{info}",
+        "description": "Pulisci la cronologia dei cicli unendo corse frammentate e suddividendo i cicli uniti in modo errato all'interno di una finestra temporale. Inserisci il numero di ore da guardare indietro (usa 999999 per tutte).",
         "data": {
           "time_range": "Finestra di ricerca (ore)",
           "gap_seconds": "Gap unisci/dividi (secondi)"
         },
         "data_description": {
-          "time_range": "Numero di ore da analizzare per trovare cicli frammentati da unire. Usa 999999 per elaborare tutti i dati storici.\n{info}",
+          "time_range": "Numero di ore per la scansione dei cicli frammentati da unire. Utilizzare 999999 per elaborare tutti i dati storici.",
           "gap_seconds": "Soglia per decidere se dividere o unire. I gap PIÙ BREVI di questo valore vengono uniti. I gap PIÙ LUNGHI vengono divisi. Riduci questo valore per forzare la divisione di un ciclo unito in modo errato."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Energia media",
         "table_detected_program": "Programma rilevato",
         "table_confidence": "Confidenza",
-        "table_reported": "Segnalato"
+        "table_reported": "Segnalato",
+        "phase_builtin_suffix": "(Incorporato)",
+        "phase_none_available": "Nessuna fase disponibile.",
+        "settings_deprecation_warning": "⚠️ **Tipo di dispositivo obsoleto:** è prevista la rimozione di {device_type} in una versione futura. La pipeline di corrispondenza di WashData non produce risultati affidabili per questa classe di apparecchi. La tua integrazione continua a funzionare durante il periodo di deprecazione; per disattivare questo avviso, imposta il **Tipo di dispositivo** di seguito su uno dei tipi supportati (lavatrice, asciugatrice, lavatrice-asciugatrice combinata, lavastoviglie, friggitrice ad aria, macchina per il pane o pompa) o su **Altro (avanzato)** se il tuo elettrodomestico non corrisponde a nessuno dei tipi supportati. **Altro (Avanzato)** fornisce impostazioni predefinite intenzionalmente generiche che non sono ottimizzate per alcun dispositivo specifico, quindi dovrai configurare tu stesso le soglie, i timeout e i parametri di corrispondenza; tutte le impostazioni esistenti vengono conservate quando cambi.",
+        "phase_other_device_types": "Altri tipi di dispositivi:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Ripristina durata completa",
         "apply": "Applica taglio",
         "cancel": "Annulla"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Lavatrice",
+        "dryer": "Asciugatrice",
+        "washer_dryer": "Combinazione lavatrice-asciugatrice",
+        "dishwasher": "Lavastoviglie",
+        "coffee_machine": "Macchina da caffè (obsoleta)",
+        "ev": "Veicolo elettrico (obsoleto)",
+        "air_fryer": "Friggitrice ad aria",
+        "heat_pump": "Pompa di calore (obsoleto)",
+        "bread_maker": "Macchina per il pane",
+        "pump": "Pompa / Pompa di raccolta",
+        "oven": "Forno (deprecato)",
+        "other": "Altro (Avanzato)"
       }
     }
   },

@@ -17,6 +17,7 @@ from homeassistant.helpers import device_registry as dr
 from .const import (
     DOMAIN,
     SERVICE_SUBMIT_FEEDBACK,
+    CONF_LINKED_DEVICE,
     CONF_MIN_POWER,
     CONF_OFF_DELAY,
     CONF_DEVICE_TYPE,
@@ -33,10 +34,18 @@ from .const import (
     CONF_NOTIFY_FIRE_EVENTS,
     CONF_NOTIFY_LIVE_INTERVAL_SECONDS,
     CONF_NOTIFY_LIVE_OVERRUN_PERCENT,
+    CONF_NOTIFY_TIMEOUT_SECONDS,
+    CONF_NOTIFY_CHANNEL,
+    CONF_NOTIFY_FINISH_CHANNEL,
+    CONF_NOTIFY_REMINDER_MESSAGE,
     DEFAULT_NOTIFY_ONLY_WHEN_HOME,
     DEFAULT_NOTIFY_FIRE_EVENTS,
     DEFAULT_NOTIFY_LIVE_INTERVAL_SECONDS,
     DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT,
+    DEFAULT_NOTIFY_TIMEOUT_SECONDS,
+    DEFAULT_NOTIFY_CHANNEL,
+    DEFAULT_NOTIFY_FINISH_CHANNEL,
+    DEFAULT_NOTIFY_REMINDER_MESSAGE,
     CONF_PROGRESS_RESET_DELAY,
     CONF_LEARNING_CONFIDENCE,
     CONF_DURATION_TOLERANCE,
@@ -116,7 +125,7 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         return False
 
-    if version == 3 and minor_version >= 4:
+    if version == 3 and minor_version >= 5:
         return True
 
     data: dict[str, Any] = dict(entry.data)
@@ -203,6 +212,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_NOTIFY_LIVE_OVERRUN_PERCENT, DEFAULT_NOTIFY_LIVE_OVERRUN_PERCENT
     )
 
+    # 3.5: notification delivery overhaul (lifecycle tag, timeout, per-type channels,
+    # distinct reminder message).
+    options.setdefault(CONF_NOTIFY_TIMEOUT_SECONDS, DEFAULT_NOTIFY_TIMEOUT_SECONDS)
+    options.setdefault(CONF_NOTIFY_CHANNEL, DEFAULT_NOTIFY_CHANNEL)
+    options.setdefault(CONF_NOTIFY_FINISH_CHANNEL, DEFAULT_NOTIFY_FINISH_CHANNEL)
+    options.setdefault(CONF_NOTIFY_REMINDER_MESSAGE, DEFAULT_NOTIFY_REMINDER_MESSAGE)
+
     keys_to_remove = [
         CONF_MIN_POWER,
         CONF_OFF_DELAY,
@@ -228,10 +244,10 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data=data,
         options=options,
         version=3,
-        minor_version=4,
+        minor_version=5,
     )
     _log.info(
-        "Migrated WashData entry from version %s.%s to 3.4", version, minor_version
+        "Migrated WashData entry from version %s.%s to 3.5", version, minor_version
     )
     return True
 
@@ -292,6 +308,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 manager._logger.error("Failed to create initial profile: %s", e)
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    _apply_device_link(hass, entry)
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
@@ -772,12 +790,39 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
+def _apply_device_link(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Sync the WashData device's via_device link with the configured option.
+
+    When CONF_LINKED_DEVICE points at an existing device (e.g. the smart plug or
+    appliance), the WashData device is shown as "Connected via <device>" in the
+    HA device registry. Clearing the option removes the link. Stale targets that
+    no longer exist are treated as "no link" so the registry never references a
+    deleted device.
+    """
+    registry = dr.async_get(hass)
+    washdata_device = registry.async_get_device(identifiers={(DOMAIN, entry.entry_id)})
+    if washdata_device is None:
+        return
+
+    linked_device_id = entry.options.get(CONF_LINKED_DEVICE) or None
+    if linked_device_id and registry.async_get(linked_device_id) is None:
+        linked_device_id = None
+
+    if washdata_device.via_device_id != linked_device_id:
+        registry.async_update_device(
+            washdata_device.id, via_device_id=linked_device_id
+        )
+
+
 async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload config entry - update settings without interrupting running cycles."""
     manager = hass.data[DOMAIN].get(entry.entry_id)
     if manager:
         # Update configuration without interrupting detector
         await manager.async_reload_config(entry)
+        # Options changes (e.g. linked device) reload in place without
+        # recreating entities, so apply the device link explicitly here.
+        _apply_device_link(hass, entry)
     else:
         # Full reload if manager not found
         await async_unload_entry(hass, entry)

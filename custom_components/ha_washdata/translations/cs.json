@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Formát zprávy před dokončením",
           "energy_price_entity": "Cena energie – entita (volitelné)",
           "energy_price_static": "Cena energie – statická hodnota (volitelné)",
-          "go_back": "Vrátit se bez uložení"
+          "go_back": "Vrátit se bez uložení",
+          "notify_reminder_message": "Name",
+          "notify_timeout_seconds": "Automatické propouštění po (sekundách)",
+          "notify_channel": "Kanál oznámení (stav / live / upomínka)",
+          "notify_finish_channel": "Dokončené oznámení kanál"
         },
         "data_description": {
           "go_back": "Zaškrtněte tuto možnost a kliknutím na Odeslat zahodíte všechny výše uvedené změny a vrátíte se do hlavní nabídky.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Zpráva odeslána před dokončením. Podporuje zástupné symboly {device}, {minutes}.",
           "energy_price_entity": "Vyberte číselnou entitu, která obsahuje aktuální cenu elektřiny (např. sensor.electricity_price, input_number.energy_rate). Je-li nastaven, aktivuje zástupný symbol {cost}. Pokud jsou obě nakonfigurovány, má přednost před statickou hodnotou.",
-          "energy_price_static": "Pevná cena elektřiny za kWh. Je-li nastaven, aktivuje zástupný symbol {cost}. Ignorováno, pokud je výše nakonfigurována entita. Přidejte svůj symbol měny do šablony zprávy, např. {cost} €."
+          "energy_price_static": "Pevná cena elektřiny za kWh. Je-li nastaven, aktivuje zástupný symbol {cost}. Ignorováno, pokud je výše nakonfigurována entita. Přidejte svůj symbol měny do šablony zprávy, např. {cost} €.",
+          "notify_reminder_message": "Text jednorázové upomínky odeslal nakonfigurovaný počet minut před odhadovaným koncem. Rozdíl od opakujících se živých aktualizací výše. Podporuje {device}, {minutes}, {program} stojany.",
+          "notify_timeout_seconds": "Automaticky zamítnout oznámení po tolika sekundách (předán jako společník aplikace 'timeout'). Nastavit na0, aby je udrželi, dokud nebudou propuštěni. Výchozí:0.",
+          "notify_channel": "Name Zvuk a význam kanálu jsou nakonfigurovány ve společné aplikaci při prvním použití názvu kanálu - WashData pouze nastavuje název kanálu. Zanechat prázdné pro výchozí aplikaci.",
+          "notify_finish_channel": "Samostatný Android kanál pro dokončený poplach (také používán upomínkou a laundry-waiting nag), takže může mít svůj vlastní zvuk. Nechte prázdné pro opětovné použití výše uvedeného kanálu."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Pokud cyklus pumpy stále běží i po tomto počtu sekund, událost ha_washdata_pump_stuck se spustí jednou. Použijte toto k detekci zaseknutého motoru (typický běh kalového čerpadla je kratší než 60 s). Výchozí: 1800 s (30 min). Pouze typ čerpadla."
+            }
+          },
+          "device_link_section": {
+            "name": "Odkaz na zařízení",
+            "description": "Volitelně připojte toto zařízení Washington Data k existujícímu zařízení Home Assistant (např. inteligentní zástrčka nebo samotný spotřebič). Zařízení Washington Data je pak zobrazeno jako \"Připojeno přes\" toto zařízení. Nechte prázdné, aby se Washington Data jako samostatné zařízení.",
+            "data": {
+              "linked_device": "Spojené zařízení"
+            },
+            "data_description": {
+              "linked_device": "Zvolte zařízení, ke kterému můžete připojit WashData. To přidává odkaz na \"Připojeno přes\" v registru zařízení; Washington Data si nechává svou vlastní kartu zařízení a subjekty. Vymazat výběr odstranit odkaz."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automatické označení starých cyklů",
-        "description": "{info}",
+        "description": "Nalezeno celkem {total_count} cyklů. Profily: {profiles}",
         "data": {
           "confidence_threshold": "Minimální důvěra (0,50–0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Historie procesů (sloučení/rozdělení)",
-        "description": "Vyčistěte historii cyklů sloučením fragmentovaných běhů a rozdělením nesprávně sloučených cyklů v rámci časového okna. Zadejte počet hodin pro ohlédnutí zpět.\n{info}",
+        "description": "Vyčistěte historii cyklů sloučením fragmentovaných běhů a rozdělením nesprávně sloučených cyklů v rámci časového okna. Zadejte počet hodin pro ohlédnutí zpět (pro všechny použijte 999999).",
         "data": {
           "time_range": "Hloubka pohledu (hodiny)",
           "gap_seconds": "Sloučení/rozdělení mezery (v sekundách)"
         },
         "data_description": {
-          "time_range": "Počet hodin pro vyhledávání fragmentovaných cyklů ke sloučení. Ke zpracování všech historických dat použijte číslo 999999.\n{info}",
+          "time_range": "Počet hodin pro vyhledávání fragmentovaných cyklů ke sloučení. Ke zpracování všech historických dat použijte číslo 999999.",
           "gap_seconds": "Práh pro rozhodnutí rozdělení vs. sloučení. Mezery KRATŠÍ než toto jsou sloučeny. Mezery DELŠÍ než toto jsou rozděleny. Snižte toto, chcete-li vynutit rozdělení u cyklu, který byl sloučen nesprávně."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Prům. energie",
         "table_detected_program": "Detekovaný program",
         "table_confidence": "Důvěra",
-        "table_reported": "Nahlášeno"
+        "table_reported": "Nahlášeno",
+        "phase_builtin_suffix": "(Vestavěný)",
+        "phase_none_available": "Nejsou k dispozici žádné fáze.",
+        "settings_deprecation_warning": "⚠️ **Zastaralý typ zařízení:** Odstranění zařízení {device_type} je naplánováno v budoucí verzi. Porovnávací kanál WashData neposkytuje spolehlivé výsledky pro tuto třídu zařízení. Vaše integrace bude fungovat i během období ukončení podpory; chcete-li toto varování ztišit, přepněte **Typ zařízení** níže na jeden z podporovaných typů (pračka, sušička, kombinovaná pračka se sušičkou, myčka nádobí, fritéza, pekárna chleba nebo pumpa), nebo na **Jiné (pokročilé)**, pokud váš spotřebič neodpovídá žádnému z podporovaných typů. **Jiné (pokročilé)** dodává záměrně generická výchozí nastavení, která nejsou vyladěna pro žádné konkrétní zařízení, takže si budete muset sami nakonfigurovat prahové hodnoty, časové limity a odpovídající parametry; všechna vaše stávající nastavení jsou po přepnutí zachována.",
+        "phase_other_device_types": "Další typy zařízení:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Resetovat na plnou dobu trvání",
         "apply": "Použít Trim",
         "cancel": "Zrušit"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Pračka",
+        "dryer": "Sušička",
+        "washer_dryer": "Kombinovaná pračka-sušička",
+        "dishwasher": "Myčka nádobí",
+        "coffee_machine": "Kávovar (zastaralý)",
+        "ev": "Elektrické vozidlo (zastaralé)",
+        "air_fryer": "Vzduchová fritéza",
+        "heat_pump": "Tepelné čerpadlo (zastaralé)",
+        "bread_maker": "Pekárna na chleba",
+        "pump": "Pumpa / Kalová pumpa",
+        "oven": "Trouba (zastaralé)",
+        "other": "Jiné (pokročilé)"
       }
     }
   },

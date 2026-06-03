@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Osatu aurretiko mezu formatua",
           "energy_price_entity": "Energiaren prezioa - Entitatea (aukerakoa)",
           "energy_price_static": "Energiaren prezioa - Balio estatikoa (aukerakoa)",
-          "go_back": "Itzuli gorde gabe"
+          "go_back": "Itzuli gorde gabe",
+          "notify_reminder_message": "Mezuaren formatua",
+          "notify_timeout_seconds": "Auto-desmuntatu ondoren (segundoak)",
+          "notify_channel": "Jakinarazpen-kanala (egoera/bizitza/irakurlea)",
+          "notify_finish_channel": "Jakinarazpen-kanala amaituta"
         },
         "data_description": {
           "go_back": "Markatu hau eta egin klik Bidali aukeran goiko aldaketak baztertzeko eta menu nagusira itzultzeko.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Ziklo bat amaitzean bidalitako mezua. {device}, {duration}, {program}, {energy_kwh}, {cost} leku-markak onartzen ditu.",
           "notify_pre_complete_message": "Amaitu aurretik bidalitako mezua. {device}, {minutes} leku-markak onartzen ditu.",
           "energy_price_entity": "Hautatu uneko elektrizitatearen prezioari eusten dion zenbakizko entitate bat (adibidez, sentsorea.electricity_price, input_number.energy_rate). Ezarritakoan, {cost} leku-marka gaitu. Balio estatikoari lehentasuna ematen dio biak konfiguratuta badaude.",
-          "energy_price_static": "Elektrizitatearen prezio finkoa kWh bakoitzeko. Ezarritakoan, {cost} leku-marka gaitu. Ez ikusi egingo da goiko entitate bat konfiguratuta badago. Gehitu zure moneta ikurra mezu-txantiloian, adibidez. {cost} €."
+          "energy_price_static": "Elektrizitatearen prezio finkoa kWh bakoitzeko. Ezarritakoan, {cost} leku-marka gaitu. Ez ikusi egingo da goiko entitate bat konfiguratuta badago. Gehitu zure moneta ikurra mezu-txantiloian, adibidez. {cost} €.",
+          "notify_reminder_message": "Ordu bateko oroigarriaren testuak aurreikusitako amaiera baino minutu batzuk lehenago bidali zuen konfiguratutako kopurua. Goiko zuzeneko eguneraketa errepikatuetatik aldendu. {device}, {minutes}, {program} leku-markak onartzen ditu.",
+          "notify_timeout_seconds": "Automatikoki baztertu jakinarazpenak segundo askoren ondoren (lagunaren aplikazioaren 'denbora-muga' gisa aurrera). '0' balioarekin itxi arte. Lehenetsia: 0.",
+          "notify_channel": "Android aplikazio lagunaren jakinarazpen-kanala egoerarako, aurrerapen bizietarako eta abisuetarako. Kanal baten soinua eta garrantzia kanalaren aplikazioan konfiguratzen dira kanalaren izena erabiltzen den lehen aldian - WashData-k kanalaren izena bakarrik ezartzen du. Utzi hutsik aplikazioa lehenetsi gisa.",
+          "notify_finish_channel": "Android kanala bereizia amaitutako alertarako (abisuak eta garbitegiaren zain dagoen nagak ere erabiltzen dute) bere soinua izan dezan. Utzi hutsik goiko kanala berrerabiltzeko."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Segundo horren ondoren ponpaketa-ziklo bat martxan badago, ha_washdata_pump_stuck gertaera bat piztuko da behin. Erabili hau trabatuta dagoen motor bat detektatzeko (putzu-ponparen funtzionamendu arrunta 60 s baino gutxiagokoa da). Lehenetsia: 1800 s (30 min). Ponpa-gailu mota soilik."
+            }
+          },
+          "device_link_section": {
+            "name": "Gailuaren esteka",
+            "description": "Aukeran, konektatu WashData gailu hau lehendik dagoen Home Assistant gailu batera (adibidez, entxufe azkarra edo aplikazioa bera). Orduan, WashData gailua gailu hori \"Konektatuta\" gisa erakusten da. Utzi hutsik WashData gailu bakar gisa mantentzeko.",
+            "data": {
+              "linked_device": "Konektatutako gailua"
+            },
+            "data_description": {
+              "linked_device": "Hautatu gailua WashData konektatzeko. Honek \"Konektatutako bidez\" erreferentzia gehitzen du gailuen erregistroan; WashData-k bere gailu-txartela eta entitateak gordetzen ditu. Garbitu hautapena esteka kentzeko."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Auto-etiketatu Ziklo Zaharrak",
-        "description": "{info}",
+        "description": "Guztira {total_count} ziklo aurkitu dira. Profilak: {profiles}",
         "data": {
           "confidence_threshold": "Gutxieneko konfiantza (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Prozesuaren historia (Bateatu/Zatitu)",
-        "description": "Garbitu zikloaren historia zatitutako exekuzioak batuz eta gaizki bateratutako zikloak denbora-leiho batean banatuz. Idatzi atzera begiratzeko ordu kopurua.\n{info}",
+        "description": "Garbitu zikloaren historia zatitutako exekuzioak batuz eta gaizki bateratutako zikloak denbora-leiho batean banatuz. Idatzi atzera begiratzeko ordu kopurua (erabili 999999 guztientzako).",
         "data": {
           "time_range": "Atzera begiratzeko leihoa (orduak)",
           "gap_seconds": "Batu/Zatitu hutsunea (segundoak)"
         },
         "data_description": {
-          "time_range": "Ziklo zatikatuak batzeko eskaneatzeko ordu kopurua. Erabili 999999 datu historiko guztiak prozesatzeko.\n{info}",
+          "time_range": "Ziklo zatikatuak batzeko eskaneatzeko ordu kopurua. Erabili 999999 datu historiko guztiak prozesatzeko.",
           "gap_seconds": "Banaketa eta batzea erabakitzeko atalasea. Hau baino LABURRATZEKO hutsuneak batzen dira. Hau baino LUZEAGOKO hutsuneak banatuta daude. Jaitsi hau gaizki batu den ziklo batean zatiketa bat behartzeko."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Batez best. energia",
         "table_detected_program": "Detektatutako programa",
         "table_confidence": "Konfiantza",
-        "table_reported": "Jakinarazia"
+        "table_reported": "Jakinarazia",
+        "phase_builtin_suffix": "(Sortua)",
+        "phase_none_available": "Ez dago faserik eskuragarri.",
+        "settings_deprecation_warning": "⚠️ **Gailu mota zaharkitua:** {device_type} etorkizuneko bertsio batean kentzeko aurreikusita dago. WashData-ren bat datorren kanalizazioak ez du emaitza fidagarriak ematen tresna-klase honetarako. Zure integrazioak funtzionatzen jarraitzen du zaharkitze-aldian zehar; abisu hau isilarazteko, aldatu beheko **Gailu mota** onartzen den mota batera (garbigailua, lehorgailua, garbigailua-lehorgailua konbinatua, ontzi-garbigailua, aire frijigailua, ogi-egilea edo ponpa) edo **Besteak (aurreratua)** aukerara, zure gailuak onartzen ez badituzu. **Beste batzuk (Aurreratuak)** nahita inongo tresna zehatzetarako sintonizatuta ez dauden lehenespen generikoak bidaltzen ditu, beraz, zuk zeuk konfiguratu beharko dituzu atalaseak, denbora-muga eta bat datozen parametroak; Lehendik dituzun ezarpen guztiak gordetzen dira aldatzen zarenean.",
+        "phase_other_device_types": "Beste gailu mota batzuk:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Berrezarri iraupen osoa",
         "apply": "Aplikatu mozketa",
         "cancel": "Utzi"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Garbigailua",
+        "dryer": "Lehorgailua",
+        "washer_dryer": "Garbigailua-lehorgailua konbinazioa",
+        "dishwasher": "Ontzi-garbigailua",
+        "coffee_machine": "Kafe-makina (zaharkitua)",
+        "ev": "Ibilgailu elektrikoa (zaharkitua)",
+        "air_fryer": "Aire frijigailua",
+        "heat_pump": "Bero-ponpa (zaharkitua)",
+        "bread_maker": "Ogi Egilea",
+        "pump": "Ponpa",
+        "oven": "Labea (zaharkitua)",
+        "other": "Beste batzuk (aurreratua)"
       }
     }
   },

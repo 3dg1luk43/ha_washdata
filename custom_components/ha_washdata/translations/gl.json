@@ -130,7 +130,11 @@
           "notify_pre_complete_message": "Formato de mensaxe precompletado",
           "energy_price_entity": "Prezo da enerxía - Entidade (opcional)",
           "energy_price_static": "Prezo da enerxía: valor estático (opcional)",
-          "go_back": "Volver sen gardar"
+          "go_back": "Volver sen gardar",
+          "notify_reminder_message": "Formato de mensaxe",
+          "notify_timeout_seconds": "Auto-desistencia (segundos)",
+          "notify_channel": "Canle de notificación (estado/live/reminder)",
+          "notify_finish_channel": "Canle de notificación finalizada"
         },
         "data_description": {
           "go_back": "Marca isto e fai clic en Enviar para descartar os cambios anteriores e volver ao menú principal.",
@@ -151,7 +155,11 @@
           "notify_finish_message": "Mensaxe enviada cando remata un ciclo. Admite os marcadores de posición {device}, {duration}, {program}, {energy_kwh}, {cost}.",
           "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite os marcadores de posición {device}, {minutes}.",
           "energy_price_entity": "Seleccione unha entidade numérica que conteña o prezo actual da electricidade (por exemplo, sensor.electricity_price, input_number.energy_rate). Cando se define, activa o marcador de posición {cost}. Ten prioridade sobre o valor estático se ambos están configurados.",
-          "energy_price_static": "Prezo fixo da electricidade por kWh. Cando se define, activa o marcador de posición {cost}. Ignorase se unha entidade está configurada anteriormente. Engade o teu símbolo de moeda no modelo de mensaxe, por exemplo. {cost} €."
+          "energy_price_static": "Prezo fixo da electricidade por kWh. Cando se define, activa o marcador de posición {cost}. Ignorase se unha entidade está configurada anteriormente. Engade o teu símbolo de moeda no modelo de mensaxe, por exemplo. {cost} €.",
+          "notify_reminder_message": "O texto do recordatorio único enviou o número configurado de minutos antes do final estimado. Distinción das actualizacións en directo recorrentes anteriores. Admite os marcadores de posición {device}, {minutes}, {program}.",
+          "notify_timeout_seconds": "Desestima automaticamente as notificacións despois de tantos segundos (previado como a aplicación compañeira \"tempo de espera\"). 0 para mantelos ata que sexan eliminados. Por defecto: 0.",
+          "notify_channel": "Android canle de notificación de estado, progreso en directo e notificacións de recordatorios. O son e a importancia dunha canle configúrase na aplicación compañeira a primeira vez que se usa o nome da canle: WashData só establece o nome da canle. Deixe baleiro para a aplicación por defecto.",
+          "notify_finish_channel": "1 Aplicar o sentido do olfacto para percibir o olor de [algo]. Deixar baleiro para reutilizar o canal superior."
         }
       },
       "advanced_settings": {
@@ -304,6 +312,16 @@
             },
             "data_description": {
               "pump_stuck_duration": "Se un ciclo de bomba aínda está en execución despois destes segundos, desenvólvese unha vez un evento ha_washdata_pump_stuck. Use isto para detectar un motor atascado (o funcionamento típico da bomba de sumidoiro é inferior a 60 s). Predeterminado: 1800 s (30 min). Só tipo de dispositivo de bomba."
+            }
+          },
+          "device_link_section": {
+            "name": "Dispositivo Link",
+            "description": "Facultativamente vincular este dispositivo a un dispositivo existente (por exemplo, o enchufe intelixente ou o propio electrodomésticos). O dispositivo WashData móstrase entón como \"conectado a través\" do dispositivo. Deixar baleiro para manter os datos como un dispositivo autónomo.",
+            "data": {
+              "linked_device": "Dispositivo conectado"
+            },
+            "data_description": {
+              "linked_device": "Seleccione o dispositivo para conectar WashData. Isto engade unha referencia \"conectada vía\" no rexistro de dispositivos; WashData mantén a súa propia tarxeta de dispositivo e entidades. Borrar a selección para eliminar o enlace."
             }
           }
         }
@@ -512,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Etiqueta automática de ciclos antigos",
-        "description": "{info}",
+        "description": "Atopáronse {total_count} ciclos totais. Perfís: {profiles}",
         "data": {
           "confidence_threshold": "Confianza mínima (0,50-0,95)"
         }
@@ -541,13 +559,13 @@
       },
       "post_process": {
         "title": "Historial do proceso (fusionar/dividir)",
-        "description": "Limpa o historial de ciclos fusionando execucións fragmentadas e dividindo ciclos combinados incorrectamente nunha xanela de tempo. Introduce o número de horas para mirar atrás.\n{info}",
+        "description": "Limpa o historial de ciclos fusionando execucións fragmentadas e dividindo ciclos combinados incorrectamente nunha xanela de tempo. Introduza o número de horas para mirar atrás (use 999999 para todos).",
         "data": {
           "time_range": "Ventá retrospectiva (horas)",
           "gap_seconds": "Combinar/dividir o intervalo (segundos)"
         },
         "data_description": {
-          "time_range": "Número de horas para buscar ciclos fragmentados para combinar. Use 999999 para procesar todos os datos históricos.\n{info}",
+          "time_range": "Número de horas para buscar ciclos fragmentados para fusionar. Use 999999 para procesar todos os datos históricos.",
           "gap_seconds": "Limiar para decidir división vs fusión. Os espazos máis curtos que este únense. Os espazos máis longos que este están divididos. Baixa isto para forzar unha división nun ciclo que se fusionou incorrectamente."
         }
       },
@@ -871,7 +889,11 @@
         "table_avg_energy": "Enerxía media",
         "table_detected_program": "Programa detectado",
         "table_confidence": "Confianza",
-        "table_reported": "Informado"
+        "table_reported": "Informado",
+        "phase_builtin_suffix": "(Incorporado)",
+        "phase_none_available": "Non hai fases dispoñibles.",
+        "settings_deprecation_warning": "⚠️ **Tipo de dispositivo en desuso:** {device_type} está programado para a súa eliminación nunha versión futura. A canalización de coincidencias de WashData non produce resultados fiables para esta clase de dispositivo. A súa integración segue funcionando durante o período de desuso; para silenciar esta advertencia, cambia o **Tipo de dispositivo** a continuación a un dos tipos admitidos (lavadora, secadora, lavadora-secadora combinada, lavavajillas, freidora de aire, máquina de pan ou bomba) ou a **Outro (avanzado)** se o teu aparello non coincide con ningún dos tipos admitidos. **Outro (Avanzado)** envía valores predeterminados xenéricos intencionadamente que non están axustados para ningún dispositivo específico, polo que terás que configurar ti mesmo os limiares, os tempos de espera e os parámetros coincidentes; toda a súa configuración existente consérvase cando cambia.",
+        "phase_other_device_types": "Outros tipos de dispositivos:"
       }
     },
     "interactive_editor_action": {
@@ -974,6 +996,22 @@
         "reset": "Restablecer a duración completa",
         "apply": "Aplicar Trim",
         "cancel": "Cancelar"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Lavadora",
+        "dryer": "Secador",
+        "washer_dryer": "Combo lavadora-secadora",
+        "dishwasher": "Lavalouza",
+        "coffee_machine": "Máquina de café (obsoleta)",
+        "ev": "Vehículo eléctrico (obsoleto)",
+        "air_fryer": "Freidora de aire",
+        "heat_pump": "Bomba de calor (obsoleta)",
+        "bread_maker": "Máquina de Pan",
+        "pump": "Bomba / Bomba de sumidoiro",
+        "oven": "Forno (obsoleto)",
+        "other": "Outros (Avanzado)"
       }
     }
   },
