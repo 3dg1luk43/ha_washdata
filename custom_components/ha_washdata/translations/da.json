@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Auto-mærke gamle cyklusser",
-        "description": "{info}",
+        "description": "Fundet {total_count} cyklusser i alt. Profiler: {profiles}",
         "data": {
           "confidence_threshold": "Minimum tillid (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Proceshistorik (flet/opdel)",
-        "description": "Ryd op i cyklushistorikken ved at flette fragmenterede kørsler og opdele forkert flettede cyklusser inden for et tidsvindue. Indtast antal timer for at se tilbage.\n{info}",
+        "description": "Ryd op i cyklushistorikken ved at flette fragmenterede kørsler og opdele forkert flettede cyklusser inden for et tidsvindue. Indtast antal timer for at se tilbage (brug 999999 for alle).",
         "data": {
           "time_range": "Tilbagebliksvindue (timer)",
           "gap_seconds": "Flet/opdel hul (sekunder)"
         },
         "data_description": {
-          "time_range": "Antal timer at scanne for fragmenterede cyklusser at flette. Brug 999999 til at behandle alle historiske data.\n{info}",
+          "time_range": "Antal timer at scanne for fragmenterede cyklusser at flette. Brug 999999 til at behandle alle historiske data.",
           "gap_seconds": "Tærskel for at beslutte split vs merge. Mellemrum, der er KORTERE end dette, slås sammen. Længere huller end dette opdeles. Sænk denne for at fremtvinge en opdeling på en cyklus, der blev flettet forkert."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Gns. energi",
         "table_detected_program": "Registreret program",
         "table_confidence": "Tillid",
-        "table_reported": "Rapporteret"
+        "table_reported": "Rapporteret",
+        "phase_builtin_suffix": "(Indbygget)",
+        "phase_none_available": "Ingen faser tilgængelige.",
+        "settings_deprecation_warning": "⚠️ **Udgået enhedstype:** {device_type} er planlagt til fjernelse i en fremtidig udgivelse. WashDatas matchende pipeline giver ikke pålidelige resultater for denne apparatklasse. Din integration bliver ved med at fungere gennem afskrivningsperioden; For at slå denne advarsel fra, skal du skifte **Enhedstype** nedenfor til en af ​​de understøttede typer (vaskemaskine, tørretumbler, vaskemaskine-tørretumbler, opvaskemaskine, luftfrituregryde, brødmaskine eller pumpe), eller til **Andet (avanceret)**, hvis dit apparat ikke matcher nogen af ​​de understøttede typer. **Andet (avanceret)** sender bevidst generiske standardindstillinger, der ikke er indstillet til nogen specifik enhed, så du skal selv konfigurere tærskler, timeouts og matchende parametre; alle dine eksisterende indstillinger bevares, når du skifter.",
+        "phase_other_device_types": "Andre enhedstyper:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Nulstil til fuld varighed",
         "apply": "Påfør Trim",
         "cancel": "Ophæve"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Vaskemaskine",
+        "dryer": "Tørretumbler",
+        "washer_dryer": "Vaske-tørretumbler kombi",
+        "dishwasher": "Opvaskemaskine",
+        "coffee_machine": "Kaffemaskine (forældet)",
+        "ev": "Elektrisk køretøj (udfaset)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Varmepumpe (udgået)",
+        "bread_maker": "Brødmaskine",
+        "pump": "Pumpe / Sump Pumpe",
+        "oven": "Ovn (forældet)",
+        "other": "Andet (avanceret)"
       }
     }
   },

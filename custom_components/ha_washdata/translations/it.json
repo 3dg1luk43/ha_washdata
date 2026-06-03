@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Etichettatura automatica dei cicli precedenti",
-        "description": "{info}",
+        "description": "Trovati {total_count} cicli totali. Profili: {profiles}",
         "data": {
           "confidence_threshold": "Confidenza minima (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Elabora cronologia (Unisci/Dividi)",
-        "description": "Pulisci la cronologia dei cicli unendo esecuzioni frammentate e dividendo i cicli uniti in modo errato all'interno di una finestra temporale. Inserisci il numero di ore da esaminare.\n{info}",
+        "description": "Pulisci la cronologia dei cicli unendo corse frammentate e suddividendo i cicli uniti in modo errato all'interno di una finestra temporale. Inserisci il numero di ore da guardare indietro (usa 999999 per tutte).",
         "data": {
           "time_range": "Finestra di ricerca (ore)",
           "gap_seconds": "Gap unisci/dividi (secondi)"
         },
         "data_description": {
-          "time_range": "Numero di ore da analizzare per trovare cicli frammentati da unire. Usa 999999 per elaborare tutti i dati storici.\n{info}",
+          "time_range": "Numero di ore per la scansione dei cicli frammentati da unire. Utilizzare 999999 per elaborare tutti i dati storici.",
           "gap_seconds": "Soglia per decidere se dividere o unire. I gap PIÙ BREVI di questo valore vengono uniti. I gap PIÙ LUNGHI vengono divisi. Riduci questo valore per forzare la divisione di un ciclo unito in modo errato."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Energia media",
         "table_detected_program": "Programma rilevato",
         "table_confidence": "Confidenza",
-        "table_reported": "Segnalato"
+        "table_reported": "Segnalato",
+        "phase_builtin_suffix": "(Incorporato)",
+        "phase_none_available": "Nessuna fase disponibile.",
+        "settings_deprecation_warning": "⚠️ **Tipo di dispositivo obsoleto:** è prevista la rimozione di {device_type} in una versione futura. La pipeline di corrispondenza di WashData non produce risultati affidabili per questa classe di apparecchi. La tua integrazione continua a funzionare durante il periodo di deprecazione; per disattivare questo avviso, imposta il **Tipo di dispositivo** di seguito su uno dei tipi supportati (lavatrice, asciugatrice, lavatrice-asciugatrice combinata, lavastoviglie, friggitrice ad aria, macchina per il pane o pompa) o su **Altro (avanzato)** se il tuo elettrodomestico non corrisponde a nessuno dei tipi supportati. **Altro (Avanzato)** fornisce impostazioni predefinite intenzionalmente generiche che non sono ottimizzate per alcun dispositivo specifico, quindi dovrai configurare tu stesso le soglie, i timeout e i parametri di corrispondenza; tutte le impostazioni esistenti vengono conservate quando cambi.",
+        "phase_other_device_types": "Altri tipi di dispositivi:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Ripristina durata completa",
         "apply": "Applica taglio",
         "cancel": "Annulla"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Lavatrice",
+        "dryer": "Asciugatrice",
+        "washer_dryer": "Combinazione lavatrice-asciugatrice",
+        "dishwasher": "Lavastoviglie",
+        "coffee_machine": "Macchina da caffè (obsoleta)",
+        "ev": "Veicolo elettrico (obsoleto)",
+        "air_fryer": "Friggitrice ad aria",
+        "heat_pump": "Pompa di calore (obsoleto)",
+        "bread_maker": "Macchina per il pane",
+        "pump": "Pompa / Pompa di raccolta",
+        "oven": "Forno (deprecato)",
+        "other": "Altro (Avanzato)"
       }
     }
   },

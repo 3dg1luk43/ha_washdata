@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Al Zyklen automatesch etikettéieren",
-        "description": "{info}",
+        "description": "{total_count} Gesamtzyklen fonnt. Profiler: {profiles}",
         "data": {
           "confidence_threshold": "Minimum Vertrauen (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Geschicht veraarbecht (Fusionéieren / Split)",
-        "description": "Zyklusgeschicht botzen andeems fragmentéiert Leefen fusionéiert an falsch fusionéiert Zyklen bannent enger Zäitfenster opgedeelt ginn. Gitt d'Zuel vun de Stonnen un fir zréck ze kucken.\n{info}",
+        "description": "Propper Zyklusgeschicht andeems se fragmentéiert Runen fusionéieren an falsch fusionéierte Zyklen bannent enger Zäitfenster opzedeelen. Gitt d'Zuel vun Stonnen un fir zréck ze kucken (benotzt 999999 fir all).",
         "data": {
           "time_range": "Réckbléckfenster (Stonnen)",
           "gap_seconds": "Fusionéieren / Split Gap (Sekonnen)"
         },
         "data_description": {
-          "time_range": "Unzuel vun Stonnen fir fragmentéiert Zyklen ze scannen a fusionéieren. 999999 benotzen fir all historesch Daten ze veraarbecht.\n{info}",
+          "time_range": "Unzuel vun Stonnen fir ze scannen fir fragmentéiert Zyklen ze fusionéieren. Benotzt 999999 fir all historesch Daten ze veraarbecht.",
           "gap_seconds": "Schwell fir Split géint Fusioun z'entscheeden. Lücken KÜRZER wéi dëst ginn fusionéiert. Lücken MÉI LAANG wéi dëst ginn opgedeelt. Méi niddereg setzen fir en Zyklus opzedeelen deen falsch fusionéiert gouf."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Duerchschn. Energie",
         "table_detected_program": "Erkannt Programm",
         "table_confidence": "Vertrauen",
-        "table_reported": "Gemellt"
+        "table_reported": "Gemellt",
+        "phase_builtin_suffix": "(Built-in)",
+        "phase_none_available": "Keng Phasen verfügbar.",
+        "settings_deprecation_warning": "⚠️ **Deprecéiert Apparattyp:** {device_type} ass geplangt fir an enger zukünfteg Verëffentlechung ze läschen. WashData's passende Pipeline produzéiert keng zouverlässeg Resultater fir dës Apparatklass. Är Integratioun schafft weider duerch d'Deprecatiounsperiod; fir dës Warnung z'ënnerhalen, wiesselt ** Apparat Typ** hei ënnen op eng vun den ënnerstëtzten Typen (Wäschmaschinn, Dryer, Wäschmaschinn Combo, Spullmaschinn, Air Fryer, Broutmaschinn oder Pompel), oder op **Aner (Fortgeschratt)** wann Ären Apparat net mat enger vun den ënnerstëtzten Typen entsprécht. ** Aner (Fortgeschratt) ** Schëffer bewosst generesch Defaults déi net fir all spezifescht Apparat ofgestëmmt sinn, sou datt Dir selwer Schwellen, Timeouts a passende Parameteren konfiguréiere musst; all Är bestehend Astellunge sinn preservéiert wann Dir wiesselt.",
+        "phase_other_device_types": "Aner Zorte vun Apparater:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Op voll Dauer zrécksetzen",
         "apply": "Trim uwenden",
         "cancel": "Ofbriechen"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Wäschmaschinn",
+        "dryer": "Dryer",
+        "washer_dryer": "Wäschmaschinn-Trockner Combo",
+        "dishwasher": "Spullmaschinn",
+        "coffee_machine": "Kaffismaschinn (ofgeschaaft)",
+        "ev": "Elektresch Gefier (ofgeschaaft)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Wärmepompel (deprecéiert)",
+        "bread_maker": "Brout Maker",
+        "pump": "Pompel / Pompel Pompel",
+        "oven": "Uewen (ofgeschaaft)",
+        "other": "Aner (fortgeschratt)"
       }
     }
   },

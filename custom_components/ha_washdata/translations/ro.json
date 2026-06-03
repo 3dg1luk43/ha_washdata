@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Etichetare automată a ciclurilor vechi",
-        "description": "{info}",
+        "description": "S-au găsit {total_count} cicluri totale. Profiluri: {profiles}",
         "data": {
           "confidence_threshold": "Încredere minimă (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Procesare istoric (îmbinare/împărțire)",
-        "description": "Curățați istoricul ciclului prin îmbinarea execuțiilor fragmentate și împărțirea ciclurilor îmbinate incorect într-o fereastră de timp. Introduceți numărul de ore pentru a privi înapoi.\n{info}",
+        "description": "Curățați istoricul ciclului prin îmbinarea execuțiilor fragmentate și împărțirea ciclurilor îmbinate incorect într-o fereastră de timp. Introduceți numărul de ore pentru a vă uita înapoi (utilizați 999999 pentru toți).",
         "data": {
           "time_range": "Fereastra de retrospectivă (ore)",
           "gap_seconds": "Limita de îmbinare/împărțire (secunde)"
         },
         "data_description": {
-          "time_range": "Numărul de ore de scanat pentru cicluri fragmentate care urmează să fie îmbinate. Utilizați 999999 pentru a procesa toate datele istorice.\n{info}",
+          "time_range": "Numărul de ore de scanare pentru cicluri fragmentate care urmează să fie îmbinate. Utilizați 999999 pentru a procesa toate datele istorice.",
           "gap_seconds": "Prag pentru a decide împărțire vs. îmbinare. Lacunele MAI SCURTE decât aceasta sunt îmbinate. Lacunele MAI LUNGI decât aceasta sunt împărțite. Scădeți aceasta pentru a forța o împărțire pe un ciclu îmbinat incorect."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Energie medie",
         "table_detected_program": "Program detectat",
         "table_confidence": "Încredere",
-        "table_reported": "Raportat"
+        "table_reported": "Raportat",
+        "phase_builtin_suffix": "(încorporat)",
+        "phase_none_available": "Nu există faze disponibile.",
+        "settings_deprecation_warning": "⚠️ **Tip de dispozitiv învechit:** {device_type} este programat pentru eliminare într-o versiune viitoare. Conducta de potrivire a lui WashData nu produce rezultate fiabile pentru această clasă de aparate. Integrarea dvs. continuă să funcționeze pe parcursul perioadei de depreciere; pentru a opri acest avertisment, comutați **Tipul dispozitiv** de mai jos la unul dintre tipurile acceptate (Mașină de spălat, Uscător, Mașină de spălat-Uscător combinată, Mașină de spălat vase, Friteuză cu aer, Mașină de făcut pâine sau Pompă) sau la **Altele (Avansat)** dacă aparatul dvs. nu se potrivește cu niciunul dintre tipurile acceptate. **Altele (Avansate)** furnizează intenționat valori implicite generice care nu sunt reglate pentru niciun dispozitiv specific, așa că va trebui să configurați singur pragurile, timeout-urile și parametrii de potrivire; toate setările existente sunt păstrate atunci când comutați.",
+        "phase_other_device_types": "Alte tipuri de dispozitive:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Resetați la durata completă",
         "apply": "Aplicați tăierea",
         "cancel": "Anulați"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Maşină de spălat",
+        "dryer": "Uscător",
+        "washer_dryer": "Combo mașină de spălat cu uscător",
+        "dishwasher": "Maşină de spălat vase",
+        "coffee_machine": "Aparat de cafea (învechit)",
+        "ev": "Vehicul electric (învechit)",
+        "air_fryer": "Friteuza cu aer",
+        "heat_pump": "Pompă de căldură (învechită)",
+        "bread_maker": "Aparat de paine",
+        "pump": "Pompă / Pompă de colector",
+        "oven": "Cuptor (depreciat)",
+        "other": "Altele (avansate)"
       }
     }
   },

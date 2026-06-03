@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Sjálfvirk merking á gömlum hringrásum",
-        "description": "{info}",
+        "description": "Fann {total_count} lotur samtals. Prófílar: {profiles}",
         "data": {
           "confidence_threshold": "Lágmarksöryggi (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Ferlissaga (sameina/skipt)",
-        "description": "Hreinsaðu upp lotuferil með því að sameina sundurliðaðar keyrslur og skipta ranglega sameinuðum lotum innan tímaglugga. Sláðu inn fjölda klukkustunda til að líta til baka.\n{info}",
+        "description": "Hreinsaðu upp lotuferil með því að sameina sundurliðaðar keyrslur og skipta ranglega sameinuðum lotum innan tímaglugga. Sláðu inn fjölda klukkustunda til að líta til baka (notaðu 999999 fyrir alla).",
         "data": {
           "time_range": "Yfirlitsgluggi (klst.)",
           "gap_seconds": "Sameina/skipta bili (sekúndur)"
         },
         "data_description": {
-          "time_range": "Fjöldi klukkustunda til að leita að sundurliðuðum lotum til að sameinast. Notaðu 999999 til að vinna úr öllum sögulegum gögnum.\n{info}",
+          "time_range": "Fjöldi klukkustunda til að leita að sundurliðuðum lotum til að sameinast. Notaðu 999999 til að vinna úr öllum sögulegum gögnum.",
           "gap_seconds": "Þröskuldur til að ákveða skiptingu vs sameiningu. Skýmri eyður en þetta sameinast. LENGRI eyður en þetta skiptast. Lækkaðu þetta til að þvinga fram skiptingu á hringrás sem var sameinuð rangt."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Meðalorka",
         "table_detected_program": "Greint forrit",
         "table_confidence": "Sjálfstraust",
-        "table_reported": "Tilkynnt"
+        "table_reported": "Tilkynnt",
+        "phase_builtin_suffix": "(Innbyggt)",
+        "phase_none_available": "Engir áfangar í boði.",
+        "settings_deprecation_warning": "⚠️ **Undanleg tækisgerð:** Áætlað er að {device_type} verði fjarlægður í framtíðarútgáfu. Samsvarandi leiðsla WashData gefur ekki áreiðanlegar niðurstöður fyrir þennan tækjaflokk. Samþætting þín heldur áfram að virka í gegnum afskriftartímabilið; til að þagga niður í þessari viðvörun skaltu skipta **Tegun tækis** hér að neðan yfir í eina af studdu gerðunum (þvottavél, þurrkara, þvottavél-þurrkara, uppþvottavél, loftsteikingarvél, brauðvél eða dælu), eða í **Annað (íþróað)** ef heimilistækið þitt passar ekki við neinar af þeim studdu gerðum. **Annað (Advanced)** sendir viljandi almennar sjálfgefnar stillingar sem eru ekki stilltar fyrir neitt sérstakt tæki, svo þú þarft að stilla þröskulda, tímamörk og samsvarandi færibreytur sjálfur; allar núverandi stillingar þínar varðveitast þegar þú skiptir.",
+        "phase_other_device_types": "Aðrar gerðir tækja:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Endurstilla á fulla lengd",
         "apply": "Beita klippingu",
         "cancel": "Hætta við"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Þvottavél",
+        "dryer": "Þurrkari",
+        "washer_dryer": "Þvottavél-þurrkari samsettur",
+        "dishwasher": "Uppþvottavél",
+        "coffee_machine": "Kaffivél (úrelt)",
+        "ev": "Rafmagns ökutæki (úrelt)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Varmadæla (úrelt)",
+        "bread_maker": "Brauðgerðarmaður",
+        "pump": "Dæla / Sump Pump",
+        "oven": "Ofn (úreltur)",
+        "other": "Annað (háþróað)"
       }
     }
   },

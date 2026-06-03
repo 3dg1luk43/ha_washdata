@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Aŭtomate etikedi malnovajn ciklojn",
-        "description": "{info}",
+        "description": "Trovis {total_count} entutajn ciklojn. Profiloj: {profiles}",
         "data": {
           "confidence_threshold": "Minimuma konfido (0.50-0.95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Procezi historion (Kunfandi/Dividi)",
-        "description": "Purigu ciklohistorion kunfandante fragmentitajn ekzekutojn kaj dividante malĝuste kunfanditajn ciklojn ene de tempofenestro. Enigu nombron da horoj por retrorigardi.\n{info}",
+        "description": "Purigu ciklohistorion kunfandante fragmentajn kurojn kaj dividante malĝuste kunfanditajn ciklojn ene de tempofenestro. Enigu nombron da horoj por retrorigardi (uzu 999999 por ĉiuj).",
         "data": {
           "time_range": "Retrorigarda fenestro (horoj)",
           "gap_seconds": "Kunfandi/Dividi intertempo (sekundoj)"
         },
         "data_description": {
-          "time_range": "Nombro da horoj por skani por kunfandi fragmentitajn ciklojn. Uzu 999999 por procezi ĉiujn historiajn datumojn.\n{info}",
+          "time_range": "Nombro da horoj por skani por kunfandi fragmentajn ciklojn. Uzu 999999 por prilabori ĉiujn historiajn datumojn.",
           "gap_seconds": "Sojlo por decidi divido kontraŭ kunfando. Intertempoj PLI MALLONGAJ ol ĉi tio estas kunfanditaj. Intertempoj PLI LONGAJ ol ĉi tio estas dividitaj. Malaltigu ĉi tion por devigi dividon sur ciklo kiu estis kunfandita malĝuste."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Meza Energio",
         "table_detected_program": "Detektita Programo",
         "table_confidence": "Konfido",
-        "table_reported": "Raportita"
+        "table_reported": "Raportita",
+        "phase_builtin_suffix": "(Enkonstruita)",
+        "phase_none_available": "Neniuj fazoj haveblaj.",
+        "settings_deprecation_warning": "⚠️ **Malrekomendita aparato-tipo:** {device_type} estas planita por forigo en estonta eldono. La kongrua dukto de WashData ne produktas fidindajn rezultojn por ĉi tiu aparato-klaso. Via integriĝo daŭre funkcias tra la malrekomendita periodo; por silentigi ĉi tiun averton, ŝanĝu **Aparato-Tipo** malsupre al unu el la subtenataj tipoj (Lavmaŝino, Sekigilo, Lavmaŝino-Sekigilo Kombo, Vazlavilo, Aerfritilo, Panmaŝino aŭ Pumpilo), aŭ al **Aliaj (Altnivelaj)** se via aparato ne kongruas kun iu ajn el la subtenataj tipoj. **Aliaj (Altnivelaj)** sendas intencite senmarkajn defaŭltojn kiuj ne estas agorditaj por iu specifa aparato, do vi devos mem agordi sojlojn, tempomalpermesojn kaj kongruajn parametrojn; ĉiuj viaj ekzistantaj agordoj estas konservitaj kiam vi ŝanĝas.",
+        "phase_other_device_types": "Aliaj aparatoj:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Restarigi al plena daŭro",
         "apply": "Apliki tondadon",
         "cancel": "Nuligi"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Lavmaŝino",
+        "dryer": "Sekigilo",
+        "washer_dryer": "Kombo Lav-Sekigilo",
+        "dishwasher": "Vazlavilo",
+        "coffee_machine": "Kafomaŝino (malrekomendita)",
+        "ev": "Elektra Veturilo (malrekomendita)",
+        "air_fryer": "Aera Fritilo",
+        "heat_pump": "Varmopumpilo (malrekomendita)",
+        "bread_maker": "Panfaristo",
+        "pump": "Pumpilo / Pumpilo",
+        "oven": "Forno (malrekomendita)",
+        "other": "Aliaj (Altnivelaj)"
       }
     }
   },

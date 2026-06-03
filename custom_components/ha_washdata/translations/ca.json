@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Etiqueta automàtica de cicles antics",
-        "description": "{info}",
+        "description": "S'han trobat {total_count} cicles totals. Perfils: {profiles}",
         "data": {
           "confidence_threshold": "Confiança mínima (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Historial de processos (fusionar/dividir)",
-        "description": "Netegeu l'historial de cicles combinant execucions fragmentades i dividint cicles combinats incorrectament dins d'una finestra de temps. Introduïu el nombre d'hores per mirar enrere.\n{info}",
+        "description": "Netegeu l'historial de cicles combinant execucions fragmentades i dividint cicles combinats incorrectament dins d'una finestra de temps. Introduïu el nombre d'hores per mirar enrere (utilitza 999999 per a tots).",
         "data": {
           "time_range": "Finestra de consulta (hores)",
           "gap_seconds": "Combinació/Divisió de la bretxa (segons)"
         },
         "data_description": {
-          "time_range": "Nombre d'hores per buscar cicles fragmentats per combinar-los. Utilitzeu 999999 per processar totes les dades històriques.\n{info}",
+          "time_range": "Nombre d'hores per buscar cicles fragmentats per combinar-los. Utilitzeu 999999 per processar totes les dades històriques.",
           "gap_seconds": "Llindar per decidir dividir o combinar. Els buits MÉS CURTS que aquest es combinen. Els buits MÉS LLARG que aquest es divideixen. Baixeu-ho per forçar una divisió en un cicle que s'ha fusionat incorrectament."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Energia mitjana",
         "table_detected_program": "Programa detectat",
         "table_confidence": "Confiança",
-        "table_reported": "Informat"
+        "table_reported": "Informat",
+        "phase_builtin_suffix": "(Incorporat)",
+        "phase_none_available": "No hi ha fases disponibles.",
+        "settings_deprecation_warning": "⚠️ **Tipus de dispositiu obsolet:** {device_type} està previst que s'elimini en una versió futura. El pipeline de concordança de WashData no produeix resultats fiables per a aquesta classe d'aparell. La vostra integració continua funcionant durant el període d'abandonament; per silenciar aquest avís, canvieu el **Tipus de dispositiu** a continuació a un dels tipus admesos (rentadora, assecadora, rentadora-assecadora combinada, rentavaixelles, fregidora d'aire, màquina de pa o bomba) o a **Altres (avançat)** si el vostre aparell no coincideix amb cap dels tipus admesos. **Altres (avançat)** inclou valors predeterminats genèrics intencionadament que no estan ajustats per a cap aparell específic, de manera que haureu de configurar vosaltres mateixos els llindars, els temps d'espera i els paràmetres coincidents; tots els vostres paràmetres existents es conserven quan canvieu.",
+        "phase_other_device_types": "Altres tipus de dispositius:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Restableix a la durada completa",
         "apply": "Aplicar Trim",
         "cancel": "Cancel·la"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Rentadora",
+        "dryer": "Assecador",
+        "washer_dryer": "Combo de rentadora-assecadora",
+        "dishwasher": "Rentaplats",
+        "coffee_machine": "Màquina de cafè (obsoleta)",
+        "ev": "Vehicle elèctric (obsolet)",
+        "air_fryer": "Fregidora d'aire",
+        "heat_pump": "Bomba de calor (obsoleta)",
+        "bread_maker": "Panificadora",
+        "pump": "Bomba / Bomba de sumidero",
+        "oven": "Forn (obsolet)",
+        "other": "Altres (avançat)"
       }
     }
   },

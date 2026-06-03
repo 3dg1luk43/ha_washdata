@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Etiqueta automática de ciclos antigos",
-        "description": "{info}",
+        "description": "Atopáronse {total_count} ciclos totais. Perfís: {profiles}",
         "data": {
           "confidence_threshold": "Confianza mínima (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Historial do proceso (fusionar/dividir)",
-        "description": "Limpa o historial de ciclos fusionando execucións fragmentadas e dividindo ciclos combinados incorrectamente nunha xanela de tempo. Introduce o número de horas para mirar atrás.\n{info}",
+        "description": "Limpa o historial de ciclos fusionando execucións fragmentadas e dividindo ciclos combinados incorrectamente nunha xanela de tempo. Introduza o número de horas para mirar atrás (use 999999 para todos).",
         "data": {
           "time_range": "Ventá retrospectiva (horas)",
           "gap_seconds": "Combinar/dividir o intervalo (segundos)"
         },
         "data_description": {
-          "time_range": "Número de horas para buscar ciclos fragmentados para combinar. Use 999999 para procesar todos os datos históricos.\n{info}",
+          "time_range": "Número de horas para buscar ciclos fragmentados para fusionar. Use 999999 para procesar todos os datos históricos.",
           "gap_seconds": "Limiar para decidir división vs fusión. Os espazos máis curtos que este únense. Os espazos máis longos que este están divididos. Baixa isto para forzar unha división nun ciclo que se fusionou incorrectamente."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Enerxía media",
         "table_detected_program": "Programa detectado",
         "table_confidence": "Confianza",
-        "table_reported": "Informado"
+        "table_reported": "Informado",
+        "phase_builtin_suffix": "(Incorporado)",
+        "phase_none_available": "Non hai fases dispoñibles.",
+        "settings_deprecation_warning": "⚠️ **Tipo de dispositivo en desuso:** {device_type} está programado para a súa eliminación nunha versión futura. A canalización de coincidencias de WashData non produce resultados fiables para esta clase de dispositivo. A súa integración segue funcionando durante o período de desuso; para silenciar esta advertencia, cambia o **Tipo de dispositivo** a continuación a un dos tipos admitidos (lavadora, secadora, lavadora-secadora combinada, lavavajillas, freidora de aire, máquina de pan ou bomba) ou a **Outro (avanzado)** se o teu aparello non coincide con ningún dos tipos admitidos. **Outro (Avanzado)** envía valores predeterminados xenéricos intencionadamente que non están axustados para ningún dispositivo específico, polo que terás que configurar ti mesmo os limiares, os tempos de espera e os parámetros coincidentes; toda a súa configuración existente consérvase cando cambia.",
+        "phase_other_device_types": "Outros tipos de dispositivos:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Restablecer a duración completa",
         "apply": "Aplicar Trim",
         "cancel": "Cancelar"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Lavadora",
+        "dryer": "Secador",
+        "washer_dryer": "Combo lavadora-secadora",
+        "dishwasher": "Lavalouza",
+        "coffee_machine": "Máquina de café (obsoleta)",
+        "ev": "Vehículo eléctrico (obsoleto)",
+        "air_fryer": "Freidora de aire",
+        "heat_pump": "Bomba de calor (obsoleta)",
+        "bread_maker": "Máquina de Pan",
+        "pump": "Bomba / Bomba de sumidoiro",
+        "oven": "Forno (obsoleto)",
+        "other": "Outros (Avanzado)"
       }
     }
   },

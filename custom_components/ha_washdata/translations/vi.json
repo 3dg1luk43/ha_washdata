@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Tự động dán nhãn chu kỳ cũ",
-        "description": "{info}",
+        "description": "Đã tìm thấy tổng cộng {total_count} chu kỳ. Hồ sơ: {profiles}",
         "data": {
           "confidence_threshold": "Độ tin cậy tối thiểu (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Lịch sử quy trình (Hợp nhất/Tách)",
-        "description": "Dọn dẹp lịch sử chu trình bằng cách hợp nhất các lần chạy bị phân mảnh và tách các chu kỳ được hợp nhất không chính xác trong một khoảng thời gian. Nhập số giờ để nhìn lại.\n{info}",
+        "description": "Dọn dẹp lịch sử chu trình bằng cách hợp nhất các lần chạy bị phân mảnh và tách các chu kỳ được hợp nhất không chính xác trong một khoảng thời gian. Nhập số giờ để nhìn lại (dùng 999999 cho tất cả).",
         "data": {
           "time_range": "Khoảng thời gian xem lại (giờ)",
           "gap_seconds": "Khoảng cách Hợp nhất/Tách (giây)"
         },
         "data_description": {
-          "time_range": "Số giờ quét các chu kỳ phân mảnh để hợp nhất. Sử dụng 999999 để xử lý tất cả dữ liệu lịch sử.\n{info}",
+          "time_range": "Số giờ quét các chu kỳ phân mảnh để hợp nhất. Sử dụng 999999 để xử lý tất cả dữ liệu lịch sử.",
           "gap_seconds": "Ngưỡng để quyết định chia tách và hợp nhất. Khoảng trống NGẮN HƠN hơn mức này sẽ được hợp nhất. Khoảng trống dài hơn khoảng trống này sẽ được chia ra. Hạ thấp mức này để buộc phân tách trên một chu kỳ được hợp nhất không chính xác."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Năng lượng TB",
         "table_detected_program": "Chương trình phát hiện",
         "table_confidence": "Sự tự tin",
-        "table_reported": "Đã báo cáo"
+        "table_reported": "Đã báo cáo",
+        "phase_builtin_suffix": "(Tích hợp)",
+        "phase_none_available": "Không có giai đoạn nào có sẵn.",
+        "settings_deprecation_warning": "⚠️ **Loại thiết bị không được dùng nữa:** {device_type} được lên lịch xóa trong bản phát hành trong tương lai. Quy trình phù hợp của WashData không tạo ra kết quả đáng tin cậy cho loại thiết bị này. Tích hợp của bạn tiếp tục hoạt động trong suốt thời gian ngừng sử dụng; để tắt tiếng cảnh báo này, hãy chuyển **Loại thiết bị** bên dưới sang một trong các loại được hỗ trợ (Máy giặt, Máy sấy, Combo máy giặt-máy sấy, Máy rửa chén, Nồi chiên không khí, Máy làm bánh mì hoặc Máy bơm) hoặc sang **Khác (Nâng cao)** nếu thiết bị của bạn không phù hợp với bất kỳ loại nào được hỗ trợ. **Khác (Nâng cao)** cung cấp các giá trị mặc định chung có chủ ý không được điều chỉnh cho bất kỳ thiết bị cụ thể nào, do đó, bạn sẽ cần phải tự mình định cấu hình ngưỡng, thời gian chờ và các thông số phù hợp; tất cả cài đặt hiện có của bạn sẽ được giữ nguyên khi bạn chuyển đổi.",
+        "phase_other_device_types": "Các loại thiết bị khác:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Đặt lại về thời lượng đầy đủ",
         "apply": "Áp dụng Cắt",
         "cancel": "Hủy bỏ"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Máy giặt",
+        "dryer": "Máy sấy",
+        "washer_dryer": "Combo Máy Giặt-Sấy",
+        "dishwasher": "Máy rửa chén",
+        "coffee_machine": "Máy pha cà phê (không dùng nữa)",
+        "ev": "Xe điện (không dùng nữa)",
+        "air_fryer": "Nồi chiên không khí",
+        "heat_pump": "Bơm nhiệt (không dùng nữa)",
+        "bread_maker": "Máy làm bánh mì",
+        "pump": "Máy bơm / Máy bơm bể phốt",
+        "oven": "Lò nướng (không dùng nữa)",
+        "other": "Khác (Nâng cao)"
       }
     }
   },

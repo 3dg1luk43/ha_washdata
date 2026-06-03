@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Auto-label âlde syklusen",
-        "description": "{info}",
+        "description": "Fûn {total_count} totale syklusen. Profilen: {profiles}",
         "data": {
           "confidence_threshold": "Minimum fertrouwen (0.50-0.95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Prosesskiednis (Fergearje / Splitsen)",
-        "description": "Syklusskiednis skjinmeitsje troch fersnippere runen te fusearjen en ferkeard gearfoege syklusen binnen in tiidfinster te splitsen. Fier oantal oeren yn om werom te sjen.\n{info}",
+        "description": "Syklusskiednis skjinmeitsje troch fersnippere runen te fusearjen en ferkeard gearfoege syklusen binnen in tiidfinster te splitsen. Fier it oantal oeren yn om werom te sjen (brûk 999999 foar allegear).",
         "data": {
           "time_range": "Oersjochfinster (oeren)",
           "gap_seconds": "Fuortsmite / Split Gap (sekonden)"
         },
         "data_description": {
-          "time_range": "Oantal oeren om te scannen foar fragmintele syklusen om te fusearjen. Brûk 999999 om alle histoaryske gegevens te ferwurkjen.\n{info}",
+          "time_range": "Oantal oeren om te scannen foar fragmintele syklusen om te fusearjen. Brûk 999999 om alle histoaryske gegevens te ferwurkjen.",
           "gap_seconds": "Drompel om te besluten split vs gearfoegje. Gaps KORTER as dit wurde gearfoege. Gaps LANGER as dit wurde splitst. Ferleegje dit om in split te twingen op in syklus dy't ferkeard gearfoege is."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Gem. enerzjy",
         "table_detected_program": "Detektearre programma",
         "table_confidence": "Betrouwen",
-        "table_reported": "Rapportearre"
+        "table_reported": "Rapportearre",
+        "phase_builtin_suffix": "(Ynboud)",
+        "phase_none_available": "Gjin fazen beskikber.",
+        "settings_deprecation_warning": "⚠️ ** Ferâldere apparaattype:** {device_type} is pland foar ferwidering yn in takomstige release. De oerienkommende pipeline fan WashData produseart gjin betroubere resultaten foar dizze apparaatklasse. Jo yntegraasje bliuwt wurkje troch de ôfskriuwingsperioade; om dizze warskôging stil te meitsjen, oerskeakelje **Apparaattype** hjirûnder nei ien fan 'e stipe typen (waskmasine, droeger, waskmasine-droegerkombinaasje, ôfwaskmasine, loftfriteuse, breamakker, of pomp), of nei **Oar (Avansearre)** as jo apparaat net oerienkomt mei ien fan 'e stipe typen. **Oar (Avansearre)** ferstjoert mei opsetsin algemiene standerts dy't net binne ôfstimd foar in spesifyk apparaat, dus jo moatte sels drompels, timeouts en oerienkommende parameters ynstelle; al jo besteande ynstellings wurde bewarre as jo wikselje.",
+        "phase_other_device_types": "Oare soarten apparaten:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Weromsette nei Folsleine Duration",
         "apply": "Trim tapasse",
         "cancel": "Ofbrekke"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Wasmachine",
+        "dryer": "Droger",
+        "washer_dryer": "Washer-Dryer Combo",
+        "dishwasher": "Dishwasher",
+        "coffee_machine": "Kofjemasine (ferâldere)",
+        "ev": "Elektrysk auto (ferâldere)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Warmtepomp (ferâldere)",
+        "bread_maker": "Bread Maker",
+        "pump": "Pomp / Sump Pomp",
+        "oven": "Oven (ferâldere)",
+        "other": "Oare (Avansearre)"
       }
     }
   },

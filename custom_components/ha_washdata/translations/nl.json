@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Oude cycli automatisch labelen",
-        "description": "{info}",
+        "description": "In totaal {total_count} cycli gevonden. Profielen: {profiles}",
         "data": {
           "confidence_threshold": "Minimaal vertrouwen (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Geschiedenis verwerken (samenvoegen/splitsen)",
-        "description": "Ruim de cyclusgeschiedenis op door gefragmenteerde cycli samen te voegen en onjuist samengevoegde cycli binnen een tijdsvenster op te splitsen. Voer het aantal uren in dat u terug wilt kijken.\n{info}",
+        "description": "Ruim de cyclusgeschiedenis op door gefragmenteerde runs samen te voegen en onjuist samengevoegde cycli binnen een tijdsvenster op te splitsen. Voer het aantal uren in dat u wilt terugkijken (gebruik 999999 voor alles).",
         "data": {
           "time_range": "Terugkijkperiode (uren)",
           "gap_seconds": "Samenvoeg-/splitsingsdrempel (seconden)"
         },
         "data_description": {
-          "time_range": "Aantal uren dat wordt gescand op gefragmenteerde cycli om samen te voegen. Gebruik 999999 om alle historische gegevens te verwerken.\n{info}",
+          "time_range": "Aantal uren dat moet worden gescand om gefragmenteerde cycli samen te voegen. Gebruik 999999 om alle historische gegevens te verwerken.",
           "gap_seconds": "Drempel om te beslissen of cycli worden gesplitst of samengevoegd. Gaten KORTER dan dit worden samengevoegd. Gaten LANGER dan dit worden gesplitst. Verlaag dit om een splitsing te forceren voor een onjuist samengevoegde cyclus."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Gem. energie",
         "table_detected_program": "Gedetecteerd programma",
         "table_confidence": "Betrouwbaarheid",
-        "table_reported": "Gemeld"
+        "table_reported": "Gemeld",
+        "phase_builtin_suffix": "(ingebouwd)",
+        "phase_none_available": "Geen fasen beschikbaar.",
+        "settings_deprecation_warning": "⚠️ **Verouderd apparaattype:** {device_type} zal in een toekomstige release worden verwijderd. De matchingpijplijn van WashData levert geen betrouwbare resultaten op voor deze apparaatklasse. Uw integratie blijft gedurende de beëindigingsperiode werken; Om deze waarschuwing uit te zetten, schakelt u **Apparaattype** hieronder over naar een van de ondersteunde typen (wasmachine, droger, was-droogcombinatie, vaatwasser, luchtfriteuse, broodbakmachine of pomp), of naar **Overig (geavanceerd)** als uw apparaat niet overeenkomt met een van de ondersteunde typen. **Overig (geavanceerd)** levert opzettelijk generieke standaardwaarden die niet zijn afgestemd op een specifiek apparaat, dus u zult zelf drempels, time-outs en overeenkomende parameters moeten configureren; al uw bestaande instellingen blijven behouden wanneer u overstapt.",
+        "phase_other_device_types": "Andere apparaattypen:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Terugzetten naar volledige duur",
         "apply": "Trim toepassen",
         "cancel": "Annuleren"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Wasmachine",
+        "dryer": "Droger",
+        "washer_dryer": "Was-droog combinatie",
+        "dishwasher": "Afwasmachine",
+        "coffee_machine": "Koffiezetapparaat (verouderd)",
+        "ev": "Elektrisch voertuig (verouderd)",
+        "air_fryer": "Lucht friteuse",
+        "heat_pump": "Warmtepomp (verouderd)",
+        "bread_maker": "Broodbakmachine",
+        "pump": "Pomp / Sumppomp",
+        "oven": "Oven (verouderd)",
+        "other": "Anders (geavanceerd)"
       }
     }
   },

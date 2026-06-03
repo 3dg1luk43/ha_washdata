@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Vanade tsüklite automaatne sildistamine",
-        "description": "{info}",
+        "description": "Leiti kokku {total_count} tsüklit. Profiilid: {profiles}",
         "data": {
           "confidence_threshold": "Minimaalne usaldus (0,50–0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Protsessi ajalugu (ühenda/jaga)",
-        "description": "Puhastage tsüklite ajalugu, ühendades killustatud jooksud ja jagades valesti ühendatud tsüklid ajaaknas. Sisestage tagasivaatamiseks tundide arv.\n{info}",
+        "description": "Puhastage tsüklite ajalugu, ühendades killustatud jooksud ja jagades valesti ühendatud tsüklid ajaaknas. Sisestage tagasivaatamiseks kuluvate tundide arv (kasutage kõigi jaoks 999999).",
         "data": {
           "time_range": "Tagasivaate aken (tundides)",
           "gap_seconds": "Ühenda/jaga vahe (sekundites)"
         },
         "data_description": {
-          "time_range": "Tundide arv killustatud tsüklite ühendamiseks otsimiseks. Kasutage kõigi ajalooliste andmete töötlemiseks numbrit 999999.\n{info}",
+          "time_range": "Tundide arv killustatud tsüklite ühendamiseks otsimiseks. Kasutage kõigi ajalooliste andmete töötlemiseks numbrit 999999.",
           "gap_seconds": "Lõikamise ja ühendamise otsustamise künnis. Sellest LÜHEMEMAD lüngad liidetakse. Sellest PIKEMAD lüngad on jagatud. Valesti liidetud tsükli jagamise sundimiseks langetage seda."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Keskm. energia",
         "table_detected_program": "Tuvastatud programm",
         "table_confidence": "Usaldus",
-        "table_reported": "Teatatud"
+        "table_reported": "Teatatud",
+        "phase_builtin_suffix": "(sisseehitatud)",
+        "phase_none_available": "Faase pole saadaval.",
+        "settings_deprecation_warning": "⚠️ **Tuginemata seadme tüüp:** {device_type} eemaldatakse tulevases versioonis. WashData sobituskonveier ei anna selle seadmeklassi jaoks usaldusväärseid tulemusi. Teie integratsioon toimib kogu aegumisperioodi jooksul; selle hoiatuse vaigistamiseks valige **Seadme tüüp** allpool ühele toetatud tüübile (pesumasin, kuivati, pesumasin-kuivati, nõudepesumasin, õhufritüür, leivamasin või pump) või valikule **Muu (täiustatud)**, kui teie seade ei vasta ühelegi toetatud tüübile. **Muu (täiustatud)** tarnib tahtlikult üldisi vaikeseadeid, mis ei ole häälestatud ühegi konkreetse seadme jaoks, seega peate läved, ajalõpud ja sobivad parameetrid ise konfigureerima; vahetamisel säilitatakse kõik teie olemasolevad seaded.",
+        "phase_other_device_types": "Muud seadmetüübid:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Lähtestage täiskestusele",
         "apply": "Rakenda kärpimine",
         "cancel": "Tühista"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Pesumasin",
+        "dryer": "Kuivati",
+        "washer_dryer": "Kombineeritud pesumasin-kuivati",
+        "dishwasher": "Nõudepesumasin",
+        "coffee_machine": "Kohvimasin (aegunud)",
+        "ev": "Elektrisõiduk (aegunud)",
+        "air_fryer": "Õhufritüür",
+        "heat_pump": "Soojuspump (aegunud)",
+        "bread_maker": "Leivaküpsetaja",
+        "pump": "Pump / Sump Pump",
+        "oven": "Ahi (aegunud)",
+        "other": "Muu (täpsem)"
       }
     }
   },

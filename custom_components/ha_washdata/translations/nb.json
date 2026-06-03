@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Auto-merk gamle sykluser",
-        "description": "{info}",
+        "description": "Fant {total_count} totale sykluser. Profiler: {profiles}",
         "data": {
           "confidence_threshold": "Minimum konfidens (0,50–0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Prosesshistorikk (slå sammen/delt)",
-        "description": "Rydd opp i syklushistorikk ved å slå sammen fragmenterte kjøringer og dele opp feil sammenslåtte sykluser innenfor et tidsvindu. Angi antall timer for å se tilbake.\n{info}",
+        "description": "Rydd opp i syklushistorikk ved å slå sammen fragmenterte kjøringer og dele opp feil sammenslåtte sykluser innenfor et tidsvindu. Angi antall timer for å se tilbake (bruk 999999 for alle).",
         "data": {
           "time_range": "Tilbakeblikk-vindu (timer)",
           "gap_seconds": "Slå sammen/delt gap (sekunder)"
         },
         "data_description": {
-          "time_range": "Antall timer å skanne etter fragmenterte sykluser for å slå sammen. Bruk 999999 til å behandle alle historiske data.\n{info}",
+          "time_range": "Antall timer å skanne etter fragmenterte sykluser for å slå sammen. Bruk 999999 til å behandle alle historiske data.",
           "gap_seconds": "Terskel for å bestemme splitt vs sammenslåing. Mellomrom KORTERE enn dette slås sammen. Mellomrom LENGER enn dette deles. Senk denne for å tvinge frem en splittelse på en syklus som ble slått sammen feil."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Gj.sn. energi",
         "table_detected_program": "Oppdaget program",
         "table_confidence": "Selvtillit",
-        "table_reported": "Rapportert"
+        "table_reported": "Rapportert",
+        "phase_builtin_suffix": "(innebygd)",
+        "phase_none_available": "Ingen faser tilgjengelig.",
+        "settings_deprecation_warning": "⚠️ **Utviklet enhetstype:** {device_type} er planlagt for fjerning i en fremtidig utgivelse. WashDatas matchende rørledning gir ikke pålitelige resultater for denne apparatklassen. Integrasjonen din fortsetter å fungere gjennom avskrivningsperioden; for å dempe denne advarselen, bytt **Enhetstype** nedenfor til en av de støttede typene (vaskemaskin, tørketrommel, vaskemaskin-tørketrommel, oppvaskmaskin, luftfrityrkoker, brødbakemaskin eller pumpe), eller til **Annet (avansert)** hvis apparatet ditt ikke samsvarer med noen av de støttede typene. **Annet (avansert)** sender med vilje generiske standardinnstillinger som ikke er innstilt for noen spesifikke enheter, så du må konfigurere terskler, tidsavbrudd og samsvarende parametere selv; alle eksisterende innstillinger bevares når du bytter.",
+        "phase_other_device_types": "Andre enhetstyper:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Tilbakestill til full varighet",
         "apply": "Påfør Trim",
         "cancel": "Kansellere"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Vaskemaskin",
+        "dryer": "Tørketrommel",
+        "washer_dryer": "Vaske-tørketrommel kombi",
+        "dishwasher": "Oppvaskmaskin",
+        "coffee_machine": "Kaffemaskin (avviklet)",
+        "ev": "Elektrisk kjøretøy (avviklet)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Varmepumpe (avviklet)",
+        "bread_maker": "Brødbaker",
+        "pump": "Pumpe / Sump Pump",
+        "oven": "Ovn (avviklet)",
+        "other": "Annet (avansert)"
       }
     }
   },

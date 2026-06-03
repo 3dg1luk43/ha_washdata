@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Etiketimi automatik i cikleve të vjetra",
-        "description": "{info}",
+        "description": "U gjetën {total_count} cikle gjithsej. Profilet: {profiles}",
         "data": {
           "confidence_threshold": "Besueshmëria minimale (0,50–0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Historiku i procesit (bashkim/ndarje)",
-        "description": "Pastroni historikun e ciklit duke bashkuar ekzekutimet e fragmentuara dhe duke ndarë ciklet e bashkuara gabimisht brenda një dritareje kohore. Fut numrin e orëve për të parë prapa.\n{info}",
+        "description": "Pastroni historinë e ciklit duke bashkuar ekzekutimet e fragmentuara dhe duke ndarë ciklet e bashkuara gabimisht brenda një dritareje kohore. Fut numrin e orëve për të parë prapa (përdor 999999 për të gjithë).",
         "data": {
           "time_range": "Dritarja e rishikimit (orë)",
           "gap_seconds": "Hendeku bashkim/ndarje (sekonda)"
         },
         "data_description": {
-          "time_range": "Numri i orëve për të skanuar për cikle të fragmentuara për t'u bashkuar. Përdorni 999999 për të përpunuar të gjitha të dhënat historike.\n{info}",
+          "time_range": "Numri i orëve për të skanuar për cikle të fragmentuara për t'u bashkuar. Përdorni 999999 për të përpunuar të gjitha të dhënat historike.",
           "gap_seconds": "Pragu për të vendosur ndarjen kundër bashkimit. Boshllëqet MË SHKURTËR se kjo bashkohen. Boshllëqet MË TË GJATA se kjo ndahen. Uleni këtë për të detyruar një ndarje në një cikël që është bashkuar gabimisht."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Mes. energji",
         "table_detected_program": "Programi i zbuluar",
         "table_confidence": "Besueshmëria",
-        "table_reported": "Raportuar"
+        "table_reported": "Raportuar",
+        "phase_builtin_suffix": "(I integruar)",
+        "phase_none_available": "Nuk ka faza të disponueshme.",
+        "settings_deprecation_warning": "⚠️ **Lloji i vjetër i pajisjes:** {device_type} është planifikuar të hiqet në një version të ardhshëm. Tubacioni i përputhjes së WashData nuk prodhon rezultate të besueshme për këtë klasë pajisjesh. Integrimi juaj vazhdon të funksionojë gjatë periudhës së zhvlerësimit; për të heshtur këtë paralajmërim, kaloni **Lloji i pajisjes** më poshtë në një nga llojet e mbështetura (Makineri larëse, Tharëse, Kombinimi Lavastovilje-Tharrëse, Enëlarëse, Frytese me ajër, Prodhues buke ose Pompë) ose në **Të tjera (të avancuara)** nëse pajisja juaj nuk përputhet me asnjë nga llojet e mbështetur. **Të tjera (të avancuara)** dërgon qëllimisht standarde gjenerike që nuk janë të akorduara për ndonjë pajisje specifike, kështu që do t'ju duhet të konfiguroni vetë pragjet, afatet kohore dhe parametrat që përputhen; të gjitha cilësimet tuaja ekzistuese ruhen kur kaloni.",
+        "phase_other_device_types": "Llojet e tjera të pajisjeve:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Rivendos në kohëzgjatje të plotë",
         "apply": "Apliko prerjen",
         "cancel": "Anulo"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Makinë larëse",
+        "dryer": "Tharëse",
+        "washer_dryer": "Kombinim larëse-tharëse",
+        "dishwasher": "Lavastovilje",
+        "coffee_machine": "Makinë kafeje (e vjetëruar)",
+        "ev": "Automjeti elektrik (i vjetëruar)",
+        "air_fryer": "Fryerja e ajrit",
+        "heat_pump": "Pompë nxehtësie (e vjetëruar)",
+        "bread_maker": "Bukëbërës",
+        "pump": "Pompë / Pompë gropë",
+        "oven": "Furra (e vjetëruar)",
+        "other": "Të tjera (të avancuara)"
       }
     }
   },

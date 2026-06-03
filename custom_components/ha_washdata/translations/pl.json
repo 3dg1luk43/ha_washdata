@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automatyczne etykietowanie starych cykli",
-        "description": "{info}",
+        "description": "Znaleziono łącznie {total_count} cykli. Profile: {profiles}",
         "data": {
           "confidence_threshold": "Minimalna pewność (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Przetwarzanie historii (scalanie/podział)",
-        "description": "Wyczyść historię cykli, scalając fragmentaryczne przebiegi i dzieląc nieprawidłowo scalone cykle w oknie czasowym. Wprowadź liczbę godzin do przejrzenia wstecz.\n{info}",
+        "description": "Wyczyść historię cykli, łącząc fragmentaryczne przebiegi i dzieląc niepoprawnie połączone cykle w oknie czasowym. Wprowadź liczbę godzin do sprawdzenia (wpisz 999999 dla wszystkich).",
         "data": {
           "time_range": "Okres wsteczny (godziny)",
           "gap_seconds": "Próg scalania/podziału (sekundy)"
         },
         "data_description": {
-          "time_range": "Liczba godzin do skanowania w celu scalenia fragmentarycznych cykli. Użyj 999999, aby przetworzyć wszystkie dane historyczne.\n{info}",
+          "time_range": "Liczba godzin skanowania w celu połączenia fragmentarycznych cykli. Użyj 999999, aby przetworzyć wszystkie dane historyczne.",
           "gap_seconds": "Próg decydujący o podziale lub scaleniu. Luki KRÓTSZE niż ten czas są scalane. Luki DŁUŻSZE są dzielone. Obniż tę wartość, aby wymusić podział cyklu, który został nieprawidłowo scalony."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Śr. energia",
         "table_detected_program": "Wykryty program",
         "table_confidence": "Pewność",
-        "table_reported": "Zgłoszono"
+        "table_reported": "Zgłoszono",
+        "phase_builtin_suffix": "(Wbudowany)",
+        "phase_none_available": "Brak dostępnych faz.",
+        "settings_deprecation_warning": "⚠️ **Wycofany typ urządzenia:** Urządzenie {device_type} ma zostać usunięte w przyszłej wersji. Potok dopasowujący WashData nie zapewnia wiarygodnych wyników dla tej klasy urządzeń. Twoja integracja będzie działać przez cały okres wycofania; aby wyciszyć to ostrzeżenie, przełącz **Typ urządzenia** poniżej na jeden z obsługiwanych typów (pralka, suszarka, pralko-suszarka, zmywarka, frytownica, wypiekacz do chleba lub pompa) lub na **Inny (zaawansowany)**, jeśli Twoje urządzenie nie pasuje do żadnego z obsługiwanych typów. **Inne (zaawansowane)** zawiera celowo ogólne ustawienia domyślne, które nie są dostrojone do żadnego konkretnego urządzenia, dlatego konieczne będzie samodzielne skonfigurowanie progów, limitów czasu i dopasowywania parametrów; wszystkie istniejące ustawienia zostaną zachowane po przełączeniu.",
+        "phase_other_device_types": "Inne typy urządzeń:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Zresetuj do pełnego czasu trwania",
         "apply": "Zastosuj przycięcie",
         "cancel": "Anuluj"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Pralka",
+        "dryer": "Suszarka",
+        "washer_dryer": "Zestaw pralko-suszarki",
+        "dishwasher": "Pomywaczka",
+        "coffee_machine": "Ekspres do kawy (przestarzały)",
+        "ev": "Pojazd elektryczny (przestarzałe)",
+        "air_fryer": "Frytkownica powietrzna",
+        "heat_pump": "Pompa ciepła (przestarzała)",
+        "bread_maker": "Wypiekacz chleba",
+        "pump": "Pompa/pompa ściekowa",
+        "oven": "Piekarnik (przestarzały)",
+        "other": "Inne (zaawansowane)"
       }
     }
   },

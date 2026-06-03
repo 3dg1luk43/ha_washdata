@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Uath-Lipéadaigh Seantimthriallta",
-        "description": "{info}",
+        "description": "Aimsíodh {total_count} timthriall iomlán. Próifílí: {profiles}",
         "data": {
           "confidence_threshold": "Íos-Mhuinín (0.50-0.95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Próiseáil Staire (Cumasc/Scoilt)",
-        "description": "Glan suas stair timthriallta trí rití ilroinnte a chumasc agus trí thimthriallta atá cumasctha go mícheart a scoilteadh laistigh d'fhuinneog ama. Cuir isteach líon na n-uaireanta chun breathnú siar.\n{info}",
+        "description": "Glan suas stair timthriallta trí rití ilroinnte a chumasc agus trí thimthriallta atá cumasctha go mícheart a roinnt laistigh d'fhuinneog ama. Cuir isteach líon na n-uaireanta chun breathnú siar (úsáid 999999 do chách).",
         "data": {
           "time_range": "Fuinneog Amhairc Siar (uaireanta)",
           "gap_seconds": "Bearna Cumaisc/Scoilte (soicindí)"
         },
         "data_description": {
-          "time_range": "Líon uaireanta le scanadh le haghaidh timthriallta ilroinnte le cumasc. Úsáid 999999 chun na sonraí stairiúla go léir a phróiseáil.\n{info}",
+          "time_range": "Líon uaireanta le scanadh le haghaidh timthriallta ilroinnte le cumasc. Úsáid 999999 chun na sonraí stairiúla go léir a phróiseáil.",
           "gap_seconds": "Tairseach chun scoilt vs cumasc a chinneadh. CUMASCTAR bearnaí NÍOS GIORRA ná seo. SCOILTEAR bearnaí NÍOS FAIDE ná seo. Laghdaigh é seo chun scoilt a bhrú ar thimthriall a cumascadh go mícheart."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Fuinneamh Meán.",
         "table_detected_program": "Clár Braite",
         "table_confidence": "Muinín",
-        "table_reported": "Tuairiscithe"
+        "table_reported": "Tuairiscithe",
+        "phase_builtin_suffix": "(Tógtha isteach)",
+        "phase_none_available": "Níl aon chéimeanna ar fáil.",
+        "settings_deprecation_warning": "⚠️ **Cineál gléis astaithe:** Tá {device_type} sceidealaithe lena bhaint in eisiúint amach anseo. Ní thugann píblíne meaitseála WashData torthaí iontaofa don aicme fearais seo. Coinníonn do chomhtháthú ag obair tríd an tréimhse dímheasa; chun an rabhadh seo a chur ina thost, athraigh **Cineál Gléas** thíos go ceann de na cineálacha tacaithe (Meaisín Níocháin, Triomadóir, Teaglama Níochán-Triomadóir, Miasniteoir, Aer-frithire, Déantóir Aráin, nó Caidéal), nó go **Eile (Ardleibhéal)** mura bhfuil d’fhearas ag teacht le haon cheann de na cineálacha a dtacaítear leis. Déanann **Eile (Ardleibhéal)** mainneachtainí cineálacha d’aon ghnó nach bhfuil tiúnta d’aon fhearas ar leith á loingsiú acu, mar sin beidh ort tairseacha, teorainn ama agus paraiméadair mheaitseála a chumrú tú féin; coinnítear na socruithe atá agat cheana féin nuair a athraíonn tú.",
+        "phase_other_device_types": "Cineálacha gléasanna eile:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Athshocraigh go Fad Iomlán",
         "apply": "Cuir Bearradh i bhFeidhm",
         "cancel": "Cealaigh"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Meaisín Níochán",
+        "dryer": "Triomadóir",
+        "washer_dryer": "Teaglama Washer-Triomadóir",
+        "dishwasher": "Miasniteoir",
+        "coffee_machine": "Meaisín Caife (neamhcheadaithe)",
+        "ev": "Feithicil Leictreach (neamhlaghdaithe)",
+        "air_fryer": "Fryer Aeir",
+        "heat_pump": "Caidéal Teasa (neamhlaghdaithe)",
+        "bread_maker": "Déantóir Arán",
+        "pump": "Caidéal / Sump Caidéal",
+        "oven": "oigheann (neamhlaghdaithe)",
+        "other": "Eile (Ardleibhéal)"
       }
     }
   },

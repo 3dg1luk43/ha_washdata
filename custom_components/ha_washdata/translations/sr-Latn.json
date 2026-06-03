@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automatski označi stare cikluse",
-        "description": "{info}",
+        "description": "Укупно је пронађено {total_count} циклуса. Профили: {profiles}",
         "data": {
           "confidence_threshold": "Minimalna pouzdanost (0,50–0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Obrada istorije (spajanje/deljenje)",
-        "description": "Očisti istoriju ciklusa spajanjem fragmentiranih ciklusa i razdvajanjem pogrešno spojenih ciklusa unutar vremenskog prozora. Unesi broj sati za pregled unazad.\n{info}",
+        "description": "Очистите историју циклуса спајањем фрагментираних циклуса и раздвајањем погрешно спојених циклуса унутар временског прозора. Унесите број сати да погледате уназад (користите 999999 за све).",
         "data": {
           "time_range": "Period pregleda unazad (sati)",
           "gap_seconds": "Praznina spajanja/deljenja (sekunde)"
         },
         "data_description": {
-          "time_range": "Broj sati za skeniranje fragmentiranih ciklusa za spajanje. Koristi 999999 za obradu svih istorijskih podataka.\n{info}",
+          "time_range": "Број сати за скенирање фрагментираних циклуса за спајање. Користите 999999 за обраду свих историјских података.",
           "gap_seconds": "Prag za odlučivanje o deljenju u odnosu na spajanje. Praznine KRAĆE od ovoga se spajaju. Praznine DUŽE od ovoga se dele. Smanji ovo da prisiliš deljenje ciklusa koji je pogrešno spojen."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Prosečna energija",
         "table_detected_program": "Otkriveni program",
         "table_confidence": "Pouzdanost",
-        "table_reported": "Prijavljeno"
+        "table_reported": "Prijavljeno",
+        "phase_builtin_suffix": "(уграђено)",
+        "phase_none_available": "Нема доступних фаза.",
+        "settings_deprecation_warning": "⚠ **Застарели тип уређаја:** {device_type} је заказано за уклањање у будућем издању. Подударни цевовод ВасхДата не даје поуздане резултате за ову класу уређаја. Ваша интеграција наставља да функционише током периода застарелости; да бисте утишали ово упозорење, пребаците **Тип уређаја** у наставку на један од подржаних типова (машина за прање веша, машина за сушење, комбинована машина за прање и сушење, машина за прање судова, фритеза за ваздух, пекач хлеба или пумпа) или на **Остало (напредно)** ако ваш уређај не одговара ниједном од подржаних типова. **Остало (напредно)** намерно испоручује генеричке подразумеване вредности које нису подешене за било који одређени уређај, тако да ћете морати сами да конфигуришете прагове, временска ограничења и одговарајуће параметре; сва ваша постојећа подешавања су сачувана када се пребаците.",
+        "phase_other_device_types": "Други типови уређаја:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Resetuj na puno trajanje",
         "apply": "Primeni isecanje",
         "cancel": "Otkaži"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Машина за прање веша",
+        "dryer": "Сушач",
+        "washer_dryer": "Комбинована машина за прање и сушење",
+        "dishwasher": "Машина за прање судова",
+        "coffee_machine": "Апарат за кафу (застарео)",
+        "ev": "Електрично возило (застарело)",
+        "air_fryer": "Аир Фриер",
+        "heat_pump": "Топлотна пумпа (застарело)",
+        "bread_maker": "Бреад Макер",
+        "pump": "Пумпа / Сумп Пумпа",
+        "oven": "Рерна (застарела)",
+        "other": "Друго (напредно)"
       }
     }
   },

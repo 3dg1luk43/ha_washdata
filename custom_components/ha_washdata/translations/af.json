@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Outo-etiketteer ou siklusse",
-        "description": "{info}",
+        "description": "Het {total_count} totale siklusse gevind. Profiele: {profiles}",
         "data": {
           "confidence_threshold": "Minimum vertroue (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Prosesgeskiedenis (samevoeg/verdeel)",
-        "description": "Maak siklusgeskiedenis skoon deur gefragmenteerde lopies saam te voeg en verkeerd saamgevoegde siklusse binne 'n tydvenster te verdeel. Voer die aantal ure in om terug te kyk.\n{info}",
+        "description": "Maak siklusgeskiedenis skoon deur gefragmenteerde lopies saam te voeg en verkeerd saamgevoegde siklusse binne 'n tydvenster te verdeel. Voer die aantal ure in om terug te kyk (gebruik 999999 vir almal).",
         "data": {
           "time_range": "Terugkykvenster (ure)",
           "gap_seconds": "Voeg saam/Verdeel gaping (sekondes)"
         },
         "data_description": {
-          "time_range": "Aantal ure om te skandeer vir gefragmenteerde siklusse om saam te smelt. Gebruik 999999 om alle historiese data te verwerk.\n{info}",
+          "time_range": "Aantal ure om te skandeer vir gefragmenteerde siklusse om saam te smelt. Gebruik 999999 om alle historiese data te verwerk.",
           "gap_seconds": "Drempel om te besluit split vs samesmelting. Gapings KORTER as dit word saamgevoeg. Gapings LANGER as dit word verdeel. Verlaag dit om 'n verdeling af te dwing op 'n siklus wat verkeerd saamgevoeg is."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Gem. energie",
         "table_detected_program": "Bespeurde program",
         "table_confidence": "Vertroue",
-        "table_reported": "Gerapporteer"
+        "table_reported": "Gerapporteer",
+        "phase_builtin_suffix": "(Ingeboude)",
+        "phase_none_available": "Geen fases beskikbaar nie.",
+        "settings_deprecation_warning": "⚠️ **Verouderde toesteltipe:** {device_type} is geskeduleer vir verwydering in 'n toekomstige vrystelling. WashData se bypassende pyplyn lewer nie betroubare resultate vir hierdie toestelklas nie. Jou integrasie bly deur die afskaffingstydperk werk; om hierdie waarskuwing stil te maak, skakel **Toesteltipe** hieronder na een van die ondersteunde tipes (wasmasjien, droër, wasmasjien-droër-kombinasie, skottelgoedwasser, lugbraaier, broodmaker of pomp), of na **Ander (Gevorderd)** as jou toestel nie by enige van die ondersteunde tipes pas nie. **Ander (Gevorderd)** stuur opsetlik generiese verstekwaardes wat nie vir enige spesifieke toestel ingestel is nie, so jy sal self drempels, uitteltyd en bypassende parameters moet opstel; al jou bestaande instellings word bewaar wanneer jy oorskakel.",
+        "phase_other_device_types": "Ander tipes toestel:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Stel terug na volle duur",
         "apply": "Pas Trim toe",
         "cancel": "Kanselleer"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Wasmasjien",
+        "dryer": "Droër",
+        "washer_dryer": "Wasmasjien-droër kombinasie",
+        "dishwasher": "Skottelgoedwasser",
+        "coffee_machine": "Koffiemasjien (verouderd)",
+        "ev": "Elektriese voertuig (opgeskort)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Hittepomp (verwerp)",
+        "bread_maker": "Broodmaker",
+        "pump": "Pomp / Sump Pomp",
+        "oven": "Oond (verouderd)",
+        "other": "Ander (gevorderd)"
       }
     }
   },

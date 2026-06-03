@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Auto-Label Old Cycles",
-        "description": "{info}",
+        "description": "Found {total_count} total cycles. Profiles: {profiles}",
         "data": {
           "confidence_threshold": "Minimum Confidence (0.50-0.95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Process History (Merge/Split)",
-        "description": "Clean up cycle history by merging fragmented runs and splitting incorrectly merged cycles within a time window. Enter number of hours to look back.\n{info}",
+        "description": "Clean up cycle history by merging fragmented runs and splitting incorrectly merged cycles within a time window. Enter number of hours to look back (use 999999 for all).",
         "data": {
           "time_range": "Lookback Window (hours)",
           "gap_seconds": "Merge/Split Gap (seconds)"
         },
         "data_description": {
-          "time_range": "Number of hours to scan for fragmented cycles to merge. Use 999999 to process all historical data.\n{info}",
+          "time_range": "Number of hours to scan for fragmented cycles to merge. Use 999999 to process all historical data.",
           "gap_seconds": "Threshold to decide split vs merge. Gaps SHORTER than this are merged. Gaps LONGER than this are split. Lower this to force a split on a cycle that was merged incorrectly."
         }
       },
@@ -806,6 +806,22 @@
         "cycle_live": "Live Progress"
       }
     },
+    "device_type": {
+      "options": {
+        "washing_machine": "Washing Machine",
+        "dryer": "Dryer",
+        "washer_dryer": "Washer-Dryer Combo",
+        "dishwasher": "Dishwasher",
+        "coffee_machine": "Coffee Machine (deprecated)",
+        "ev": "Electric Vehicle (deprecated)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Heat Pump (deprecated)",
+        "bread_maker": "Bread Maker",
+        "pump": "Pump / Sump Pump",
+        "oven": "Oven (deprecated)",
+        "other": "Other (Advanced)"
+      }
+    },
     "common_text": {
       "options": {
         "unlabeled": "(Unlabeled)",
@@ -814,6 +830,10 @@
         "no_reference_cycle": "(No reference cycle)",
         "all_device_types": "All Device Types",
         "current_suffix": "(current)",
+        "phase_builtin_suffix": " (Built-in)",
+        "phase_none_available": "No phases available.",
+        "phase_other_device_types": "Other device types:",
+        "settings_deprecation_warning": "⚠️ **Deprecated device type:** {device_type} is scheduled for removal in a future release. WashData's matching pipeline does not produce reliable results for this appliance class. Your integration keeps working through the deprecation period; to silence this warning, switch **Device Type** below to one of the supported types (Washing Machine, Dryer, Washer-Dryer Combo, Dishwasher, Air Fryer, Bread Maker, or Pump), or to **Other (Advanced)** if your appliance does not match any of the supported types. **Other (Advanced)** ships intentionally generic defaults that are not tuned for any specific appliance, so you will need to configure thresholds, timeouts, and matching parameters yourself; all your existing settings are preserved when you switch.\n\n",
         "editor_select_info": "Select 1 cycle to split, or 2+ cycles to merge.",
         "editor_select_info_split": "Select 1 cycle to split.",
         "editor_select_info_merge": "Select 2+ cycles to merge.",

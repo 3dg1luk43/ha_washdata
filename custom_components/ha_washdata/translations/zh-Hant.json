@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "自動標記舊自行車",
-        "description": "{info}",
+        "description": "共找到 {total_count} 個週期。個人資料：{profiles}",
         "data": {
           "confidence_threshold": "最低信賴度 (0.50-0.95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "流程歷史記錄（合併/拆分）",
-        "description": "透過合併碎片運行並在時間視窗內分割錯誤合併的周期來清理週期歷史記錄。輸入要回顧的小時數。\n{info}",
+        "description": "透過合併碎片運行並在時間視窗內分割錯誤合併的周期來清理週期歷史記錄。輸入要回顧的小時數（全部使用 999999）。",
         "data": {
           "time_range": "回顧視窗（小時）",
           "gap_seconds": "合併/拆分間隙（秒）"
         },
         "data_description": {
-          "time_range": "掃描要合併的碎片週期的小時數。使用999999處理所有歷史資料。\n{info}",
+          "time_range": "掃描要合併的碎片週期的小時數。使用999999處理所有歷史資料。",
           "gap_seconds": "決定拆分還是合併的閾值。比這更短的間隙將被合併。比這更長的間隙被分開。降低此值可強制對錯誤合併的循環進行拆分。"
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "平均能耗",
         "table_detected_program": "檢測到的程式",
         "table_confidence": "信心",
-        "table_reported": "已回報"
+        "table_reported": "已回報",
+        "phase_builtin_suffix": "(內建)",
+        "phase_none_available": "沒有可用的階段。",
+        "settings_deprecation_warning": "⚠️ **已棄用的裝置類型：** {device_type} 計劃在未來版本中刪除。 WashData 的匹配管道不會為此類設備產生可靠的結果。您的整合在棄用期內繼續有效；要消除此警告，請將下面的**設備類型**切換為受支援的類型之一（洗衣機、烘乾機、洗衣乾衣機組合、洗碗機、空氣炸鍋、麵包機或泵），或者如果您的設備與任何受支援的類型不匹配，則切換為**其他（高級）**。 **其他（進階）** 故意提供通用預設值，未針對任何特定裝置進行調整，因此您需要自行配置閾值、逾時和匹配參數；切換時，所有現有設定都會保留。",
+        "phase_other_device_types": "其他設備類型："
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "重置為完整持續時間",
         "apply": "應用修剪",
         "cancel": "取消"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "洗衣機",
+        "dryer": "烘乾機",
+        "washer_dryer": "洗衣機烘乾機組合",
+        "dishwasher": "洗碗機",
+        "coffee_machine": "咖啡機（已棄用）",
+        "ev": "電動車（已棄用）",
+        "air_fryer": "氣炸鍋",
+        "heat_pump": "熱泵（已棄用）",
+        "bread_maker": "麵包機",
+        "pump": "泵浦/污水泵",
+        "oven": "烤箱（已棄用）",
+        "other": "其他（高級）"
       }
     }
   },

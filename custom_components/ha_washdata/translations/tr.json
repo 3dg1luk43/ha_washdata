@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Eski Döngüleri Otomatik Etiketle",
-        "description": "{info}",
+        "description": "Toplam {total_count} döngü bulundu. Profiller: {profiles}",
         "data": {
           "confidence_threshold": "Minimum Güven (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "İşlem Geçmişi (Birleştir/Böl)",
-        "description": "Parçalanmış işlemleri birleştirerek ve yanlış birleştirilmiş döngüleri bir zaman penceresi içinde bölerek döngü geçmişini temizleyin. Geriye bakılacak saat sayısını girin.\n{info}",
+        "description": "Parçalanmış işlemleri birleştirerek ve yanlış birleştirilmiş döngüleri bir zaman penceresi içinde bölerek döngü geçmişini temizleyin. Geriye dönüp bakılacak saat sayısını girin (hepsi için 999999 kullanın).",
         "data": {
           "time_range": "Yeniden İnceleme Aralığı (saat)",
           "gap_seconds": "Boşluğu Birleştir/Böl (saniye)"
         },
         "data_description": {
-          "time_range": "Birleştirilecek parçalanmış döngülerin taranması için gereken saat sayısı. Tüm geçmiş verileri işlemek için 999999'u kullanın.\n{info}",
+          "time_range": "Birleştirilecek parçalanmış döngülerin taranması için gereken saat sayısı. Tüm geçmiş verileri işlemek için 999999'u kullanın.",
           "gap_seconds": "Bölünmeye mi yoksa birleştirmeye mi karar verecek eşik. Bundan DAHA KISA boşluklar birleştirilir. Bundan daha uzun boşluklar bölünür. Yanlış birleştirilmiş bir döngüde bölünmeyi zorlamak için bunu düşürün."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Ort. Enerji",
         "table_detected_program": "Algılanan Program",
         "table_confidence": "Kendinden emin",
-        "table_reported": "Bildirildi"
+        "table_reported": "Bildirildi",
+        "phase_builtin_suffix": "(Yerleşik)",
+        "phase_none_available": "Hiçbir aşama mevcut değil.",
+        "settings_deprecation_warning": "⚠️ **Kullanımdan kaldırılan cihaz türü:** {device_type}'nin gelecekteki bir sürümde kaldırılması planlanıyor. WashData'nın eşleşen işlem hattı bu cihaz sınıfı için güvenilir sonuçlar üretmiyor. Entegrasyonunuz kullanımdan kaldırma süresi boyunca çalışmaya devam eder; Bu uyarıyı susturmak için aşağıdaki **Cihaz Tipi** seçeneğini desteklenen türlerden birine (Çamaşır Makinesi, Kurutucu, Çamaşır Makinesi-Kurutucu Kombinesi, Bulaşık Makinesi, Hava Fritözü, Ekmek Makinesi veya Pompa) veya cihazınız desteklenen türlerden herhangi biriyle eşleşmiyorsa **Diğer (Gelişmiş)** olarak değiştirin. **Diğer (Gelişmiş)** herhangi bir belirli uygulama için ayarlanmayan genel varsayılanları kasıtlı olarak gönderir; bu nedenle eşikleri, zaman aşımlarını ve eşleşen parametreleri kendiniz yapılandırmanız gerekir; Geçiş yaptığınızda mevcut tüm ayarlarınız korunur.",
+        "phase_other_device_types": "Diğer cihaz türleri:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Tam Süreye Sıfırla",
         "apply": "Kırpmayı Uygula",
         "cancel": "İptal et"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Çamaşır makinesi",
+        "dryer": "Kurutma makinesi",
+        "washer_dryer": "Yıkama-Kurutma Makinesi Kombinasyonu",
+        "dishwasher": "Bulaşık makinesi",
+        "coffee_machine": "Kahve Makinesi (kullanımdan kaldırıldı)",
+        "ev": "Elektrikli Araç (kullanımdan kaldırıldı)",
+        "air_fryer": "Hava Fritözü",
+        "heat_pump": "Isı Pompası (kullanımdan kaldırıldı)",
+        "bread_maker": "Ekmek Makinesi",
+        "pump": "Pompa / Karter Pompası",
+        "oven": "Fırın (kullanımdan kaldırıldı)",
+        "other": "Diğer (Gelişmiş)"
       }
     }
   },

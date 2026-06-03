@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Awto-Labelu Hen Feiciau",
-        "description": "{info}",
+        "description": "Wedi canfod cyfanswm o {total_count} gylchred. Proffiliau: {profiles}",
         "data": {
           "confidence_threshold": "Isafswm Hyder (0.50-0.95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Hanes Proses (Uno/Hollti)",
-        "description": "Glanhewch hanes beicio trwy gyfuno rhediadau tameidiog a hollti cylchoedd a gyfunwyd yn anghywir o fewn ffenestr amser. Rhowch nifer yr oriau i edrych yn ôl.\n{info}",
+        "description": "Glanhewch hanes beicio trwy gyfuno rhediadau tameidiog a hollti cylchoedd a gyfunwyd yn anghywir o fewn ffenestr amser. Nodwch nifer yr oriau i edrych yn ôl (defnyddiwch 999999 i bawb).",
         "data": {
           "time_range": "Ffenest edrych yn ôl (oriau)",
           "gap_seconds": "Cyfuno/Rhannu Bwlch (eiliadau)"
         },
         "data_description": {
-          "time_range": "Nifer yr oriau i'w sganio am gylchoedd tameidiog i uno. Defnyddiwch 999999 i brosesu'r holl ddata hanesyddol.\n{info}",
+          "time_range": "Nifer yr oriau i'w sganio am gylchoedd tameidiog i uno. Defnyddiwch 999999 i brosesu'r holl ddata hanesyddol.",
           "gap_seconds": "Trothwy i benderfynu ar hollt yn erbyn uno. Mae bylchau SY'N BYTHACH na hyn yn cael eu huno. Mae bylchau HWY na hyn wedi'u hollti. Gostyngwch hyn i orfodi hollt ar gylchred a gyfunwyd yn anghywir."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Ynni Cyf.",
         "table_detected_program": "Rhaglen a Ganfuwyd",
         "table_confidence": "Hyder",
-        "table_reported": "Adroddwyd"
+        "table_reported": "Adroddwyd",
+        "phase_builtin_suffix": "(Adeiledig)",
+        "phase_none_available": "Dim cyfnodau ar gael.",
+        "settings_deprecation_warning": "⚠️ **Math o ddyfais anghymeradwy:** Mae {device_type} wedi'i drefnu i'w dynnu mewn datganiad yn y dyfodol. Nid yw piblinell baru WashData yn cynhyrchu canlyniadau dibynadwy ar gyfer y dosbarth offer hwn. Mae eich integreiddio yn parhau i weithio drwy'r cyfnod dibrisio; i dawelu’r rhybudd hwn, newidiwch **Math o Ddychymyg** isod i un o’r mathau a gefnogir (Peiriant Golchi, Sychwr, Combo Golchwr-Sychwr, Peiriant golchi llestri, ffrïwr aer, gwneuthurwr bara, neu bwmp), neu i **Arall (Uwch)** os nad yw’ch teclyn yn cyfateb i unrhyw un o’r mathau a gefnogir. Mae **Arall (Uwch)** yn cludo rhagosodiadau generig bwriadol nad ydynt wedi'u tiwnio ar gyfer unrhyw declyn penodol, felly bydd angen i chi ffurfweddu trothwyon, goramser a pharamedrau cyfatebol eich hun; cedwir eich holl osodiadau presennol pan fyddwch yn newid.",
+        "phase_other_device_types": "Mathau eraill o ddyfeisiau:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Ailosod i Hyd Llawn",
         "apply": "Gwneud cais Trim",
         "cancel": "Canslo"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Peiriant Golchi",
+        "dryer": "Sychwr",
+        "washer_dryer": "Combo Golchwr-Sychwr",
+        "dishwasher": "Peiriant golchi llestri",
+        "coffee_machine": "Peiriant Coffi (anghymeradwy)",
+        "ev": "Cerbyd Trydan (anghymeradwy)",
+        "air_fryer": "Fryer aer",
+        "heat_pump": "Pwmp Gwres (anghymeradwy)",
+        "bread_maker": "Gwneuthurwr Bara",
+        "pump": "Pwmp / Swmp Pwmp",
+        "oven": "Popty (heb ei wrthod)",
+        "other": "Arall (Uwch)"
       }
     }
   },

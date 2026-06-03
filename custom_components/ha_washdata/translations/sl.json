@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Samodejno označevanje starih ciklov",
-        "description": "{info}",
+        "description": "Skupno najdenih {total_count} ciklov. Profili: {profiles}",
         "data": {
           "confidence_threshold": "Najmanjše zaupanje (0,50–0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Obdelava zgodovine (združi/razdeli)",
-        "description": "Počistite zgodovino ciklov tako, da združite razdrobljene cikle in razdelite nepravilno združene cikle znotraj časovnega okna. Vnesite število ur za ogled nazaj.\n{info}",
+        "description": "Počistite zgodovino ciklov tako, da združite razdrobljene poteke in razdelite nepravilno združene cikle znotraj časovnega okna. Vnesite število ur za ogled nazaj (za vse uporabite 999999).",
         "data": {
           "time_range": "Okno za pregled nazaj (ure)",
           "gap_seconds": "Vrzel za združitev/razdelitev (sekunde)"
         },
         "data_description": {
-          "time_range": "Število ur za iskanje razdrobljenih ciklov za združitev. Za obdelavo vseh zgodovinskih podatkov uporabite 999999.\n{info}",
+          "time_range": "Število ur za iskanje razdrobljenih ciklov za združitev. Za obdelavo vseh zgodovinskih podatkov uporabite 999999.",
           "gap_seconds": "Prag za odločitev o razdelitvi ali združitvi. Vrzeli, KRAJŠE od tega, so združene. Vrzeli, DALJŠE od tega, so razdeljene. Znižajte to vrednost, da prisilite razdelitev cikla, ki je bil nepravilno združen."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Povp. energija",
         "table_detected_program": "Zaznani program",
         "table_confidence": "Zaupanje",
-        "table_reported": "Prijavljeno"
+        "table_reported": "Prijavljeno",
+        "phase_builtin_suffix": "(vgrajeno)",
+        "phase_none_available": "Na voljo ni nobenih faz.",
+        "settings_deprecation_warning": "⚠️ **Zastarela vrsta naprave:** {device_type} je predvidena za odstranitev v prihodnji izdaji. Ujemanje cevovoda WashData ne daje zanesljivih rezultatov za ta razred aparata. Vaša integracija še naprej deluje skozi obdobje opustitve; če želite utišati to opozorilo, preklopite **Vrsto naprave** spodaj na eno od podprtih vrst (pralni stroj, sušilni stroj, kombinirani pralno-sušilni stroj, pomivalni stroj, cvrtnik, pekač kruha ali črpalka) ali na **Drugo (napredno)**, če vaša naprava ne ustreza nobeni od podprtih vrst. **Drugo (napredno)** namenoma posreduje generične privzete nastavitve, ki niso nastavljene za nobeno specifično napravo, zato boste morali sami konfigurirati pragove, časovne omejitve in ustrezne parametre; ob preklopu se ohranijo vse vaše obstoječe nastavitve.",
+        "phase_other_device_types": "Druge vrste naprav:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Ponastavi na polno trajanje",
         "apply": "Uporabi obrezovanje",
         "cancel": "Prekliči"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "pralni stroj",
+        "dryer": "Sušilnik",
+        "washer_dryer": "Pralno-sušilni stroj Combo",
+        "dishwasher": "Pomivalni stroj",
+        "coffee_machine": "Aparat za kavo (zastarelo)",
+        "ev": "Električno vozilo (zastarelo)",
+        "air_fryer": "Zračni cvrtnik",
+        "heat_pump": "Toplotna črpalka (zastarelo)",
+        "bread_maker": "pekač kruha",
+        "pump": "Črpalka / zbiralna črpalka",
+        "oven": "Pečica (zastarelo)",
+        "other": "Drugo (napredno)"
       }
     }
   },

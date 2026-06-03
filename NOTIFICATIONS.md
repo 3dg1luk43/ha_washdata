@@ -161,6 +161,26 @@ lifecycle tag) so it stays audible even if your status channel is silenced.
 | `{duration}` | finish, laundry nag |
 | `{energy_kwh}`, `{cost}` | finish (cost needs an energy price configured) |
 
+### A note on language
+
+Notification text is composed by WashData in Python, so any wording it generates
+(default message templates, the learning "verify cycle" / "suggested settings" prompts,
+and the auto-tune notice) follows the **server/instance language** set under
+**Settings > System > General** - not each individual user's profile language. This is a
+Home Assistant platform limitation: integrations are not told which user a notification is
+for, so there is no per-user language to translate into. (Config and options dialogs *are*
+translated per user, because the frontend resolves those.)
+
+You have two ways to get notifications in the language you want:
+
+- **Edit the templates.** `notify_title` and the `notify_*_message` options are free text -
+  write them in any language; the `{device}`, `{program}`, `{minutes}`, `{duration}`,
+  `{energy_kwh}`, and `{cost}` placeholders work regardless of language.
+- **Use the automation events (recommended for multi-user / multi-language setups).** The
+  bus events below carry language-neutral data (device name, program, durations,
+  timestamps), so you can build the notification text yourself in your automation - in
+  whatever language each recipient prefers - and send it with your own `notify` action.
+
 ### Companion-app data payload keys
 
 When sending to a `mobile_app` target, WashData forwards these keys in the

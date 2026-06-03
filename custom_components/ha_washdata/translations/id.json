@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Beri Label Otomatis pada Siklus Lama",
-        "description": "{info}",
+        "description": "Ditemukan {total_count} total siklus. Profil: {profiles}",
         "data": {
           "confidence_threshold": "Keyakinan Minimum (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Riwayat Proses (Gabung/Pisahkan)",
-        "description": "Bersihkan riwayat siklus dengan menggabungkan proses yang terfragmentasi dan memisahkan siklus yang digabungkan secara tidak benar dalam jangka waktu tertentu. Masukkan jumlah jam untuk melihat ke belakang.\n{info}",
+        "description": "Bersihkan riwayat siklus dengan menggabungkan proses yang terfragmentasi dan memisahkan siklus yang digabungkan secara tidak benar dalam jangka waktu tertentu. Masukkan jumlah jam untuk melihat ke belakang (gunakan 999999 untuk semua).",
         "data": {
           "time_range": "Periode Lihat Balik (jam)",
           "gap_seconds": "Gabungkan/Pisahkan Jarak (detik)"
         },
         "data_description": {
-          "time_range": "Jumlah jam untuk memindai siklus terfragmentasi untuk digabungkan. Gunakan 999999 untuk memproses semua data historis.\n{info}",
+          "time_range": "Jumlah jam untuk memindai siklus terfragmentasi untuk digabungkan. Gunakan 999999 untuk memproses semua data historis.",
           "gap_seconds": "Ambang batas untuk memutuskan pemisahan vs penggabungan. Kesenjangan yang LEBIH PENDEK dari ini digabungkan. Kesenjangan yang LEBIH PANJANG dari ini akan terpecah. Turunkan ini untuk memaksa pemisahan pada siklus yang digabungkan secara tidak benar."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Energi Rata-rata",
         "table_detected_program": "Program Terdeteksi",
         "table_confidence": "Kepercayaan diri",
-        "table_reported": "Dilaporkan"
+        "table_reported": "Dilaporkan",
+        "phase_builtin_suffix": "(Bawaan)",
+        "phase_none_available": "Tidak ada fase yang tersedia.",
+        "settings_deprecation_warning": "⚠️ **Jenis perangkat yang tidak digunakan lagi:** {device_type} dijadwalkan untuk dihapus pada rilis mendatang. Alur pencocokan WashData tidak memberikan hasil yang dapat diandalkan untuk kelas peralatan ini. Integrasi Anda terus berjalan selama periode penghentian; untuk menonaktifkan peringatan ini, alihkan **Jenis Perangkat** di bawah ke salah satu jenis yang didukung (Mesin Cuci, Pengering, Kombinasi Mesin Cuci-Pengering, Mesin Pencuci Piring, Penggoreng Udara, Pembuat Roti, atau Pompa), atau ke **Lainnya (Lanjutan)** jika peralatan Anda tidak cocok dengan jenis apa pun yang didukung. **Lainnya (Lanjutan)** sengaja mengirimkan default generik yang tidak disetel untuk peralatan tertentu, sehingga Anda perlu mengonfigurasi sendiri ambang batas, batas waktu, dan parameter yang cocok; semua pengaturan yang ada dipertahankan saat Anda beralih.",
+        "phase_other_device_types": "Jenis perangkat lainnya:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Reset ke Durasi Penuh",
         "apply": "Terapkan Pangkas",
         "cancel": "Membatalkan"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Mesin cuci",
+        "dryer": "Pengering",
+        "washer_dryer": "Kombo Mesin Cuci-Pengering",
+        "dishwasher": "Mesin pencuci piring",
+        "coffee_machine": "Mesin Kopi (tidak digunakan lagi)",
+        "ev": "Kendaraan Listrik (tidak digunakan lagi)",
+        "air_fryer": "Penggorengan Udara",
+        "heat_pump": "Pompa Panas (tidak digunakan lagi)",
+        "bread_maker": "Pembuat Roti",
+        "pump": "Pompa / Pompa Bah",
+        "oven": "Oven (tidak digunakan lagi)",
+        "other": "Lainnya (Lanjutan)"
       }
     }
   },

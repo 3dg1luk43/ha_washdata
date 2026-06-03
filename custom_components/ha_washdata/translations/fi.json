@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Merkitse vanhat syklit automaattisesti",
-        "description": "{info}",
+        "description": "Löytyi yhteensä {total_count} sykliä. Profiilit: {profiles}",
         "data": {
           "confidence_threshold": "Vähimmäisluottamus (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Prosessihistoria (yhdistä/jakaa)",
-        "description": "Puhdista syklihistoria yhdistämällä hajanaiset ajot ja jakamalla väärin yhdistetyt jaksot aikaikkunassa. Anna tuntien määrä katsoaksesi taaksepäin.\n{info}",
+        "description": "Puhdista syklihistoria yhdistämällä hajanaiset ajot ja jakamalla väärin yhdistetyt jaksot aikaikkunassa. Anna, kuinka monta tuntia haluat katsoa taaksepäin (käytä 999999 kaikille).",
         "data": {
           "time_range": "Katsausikkuna (tuntia)",
           "gap_seconds": "Yhdistä/jakaa väli (sekuntia)"
         },
         "data_description": {
-          "time_range": "Tuntimäärä, jonka aikana hajautettujen syklien etsiminen yhdistetään. Käytä numeroa 999999 kaikkien historiallisten tietojen käsittelemiseen.\n{info}",
+          "time_range": "Tuntimäärä, jonka aikana hajautettujen syklien etsiminen yhdistetään. Käytä numeroa 999999 kaikkien historiallisten tietojen käsittelemiseen.",
           "gap_seconds": "Kynnys päättää jakamisesta vs yhdistämisestä. Tätä LYHEMMÄT aukot yhdistetään. Tätä PIDEMMÄT aukot jaetaan. Laske tätä pakottaaksesi jakamaan syklin, joka on yhdistetty väärin."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Keskim. energia",
         "table_detected_program": "Tunnistettu ohjelma",
         "table_confidence": "Luottamus",
-        "table_reported": "Ilmoitettu"
+        "table_reported": "Ilmoitettu",
+        "phase_builtin_suffix": "(Sisäänrakennettu)",
+        "phase_none_available": "Vaiheita ei ole saatavilla.",
+        "settings_deprecation_warning": "⚠️ **Käytöstä poistettu laitetyyppi:** {device_type} on ajoitettu poistettavaksi tulevassa julkaisussa. WashDatan täsmäysputki ei tuota luotettavia tuloksia tälle laiteluokalle. Integraatiosi toimii edelleen poistojakson ajan; vaimentaa tämä varoitus valitsemalla alla oleva **Laitetyyppi** jollekin tuetuista tyypeistä (pesukone, kuivausrumpu, pesukone-kuivausrumpu, astianpesukone, ilmakeitin, leipäkone tai pumppu) tai **Muu (Lisäasetukset)** -kohtaan, jos laitteesi ei vastaa mitään tuetuista tyypeistä. **Other (Advanced)** toimittaa tarkoituksella yleisiä oletusasetuksia, joita ei ole viritetty millekään tietylle laitteelle, joten sinun on määritettävä kynnykset, aikakatkaisut ja vastaavat parametrit itse. kaikki nykyiset asetuksesi säilyvät, kun vaihdat.",
+        "phase_other_device_types": "Muut laitetyypit:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Palauta täysi kesto",
         "apply": "Käytä trimmaa",
         "cancel": "Peruuttaa"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Pesukone",
+        "dryer": "Kuivausrumpu",
+        "washer_dryer": "Pesukone-kuivausrumpu yhdistelmä",
+        "dishwasher": "Astianpesukone",
+        "coffee_machine": "Kahvinkeitin (poistettu käytöstä)",
+        "ev": "Sähköajoneuvo (vanhentunut)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Lämpöpumppu (vanhentunut)",
+        "bread_maker": "Leipäkone",
+        "pump": "Pumppu / sumpupumppu",
+        "oven": "Uuni (poistettu käytöstä)",
+        "other": "Muu (edistynyt)"
       }
     }
   },

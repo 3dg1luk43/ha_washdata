@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Rotular automaticamente ciclos antigos",
-        "description": "{info}",
+        "description": "Foram encontrados {total_count} ciclos no total. Perfis: {profiles}",
         "data": {
           "confidence_threshold": "Confiança mínima (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Processar histórico (fusão/divisão)",
-        "description": "Limpe o histórico de ciclos fundindo execuções fragmentadas e dividindo ciclos fundidos incorrectamente dentro de uma janela temporal. Introduza o número de horas a retroceder.\n{info}",
+        "description": "Limpe o histórico do ciclo mesclando execuções fragmentadas e dividindo ciclos mesclados incorretamente dentro de uma janela de tempo. Insira o número de horas para olhar para trás (use 999999 para todas).",
         "data": {
           "time_range": "Janela de retrocesso (horas)",
           "gap_seconds": "Intervalo de fusão/divisão (segundos)"
         },
         "data_description": {
-          "time_range": "Número de horas a verificar para ciclos fragmentados a fundir. Use 999999 para processar todos os dados históricos.\n{info}",
+          "time_range": "Número de horas para verificar ciclos fragmentados para mesclar. Use 999999 para processar todos os dados históricos.",
           "gap_seconds": "Limiar para decidir divisão vs. fusão. Lacunas MAIS CURTAS do que isto são fundidas. Lacunas MAIS LONGAS são divididas. Reduza para forçar uma divisão num ciclo fundido incorrectamente."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Energia média",
         "table_detected_program": "Programa detetado",
         "table_confidence": "Confiança",
-        "table_reported": "Reportado"
+        "table_reported": "Reportado",
+        "phase_builtin_suffix": "(Embutido)",
+        "phase_none_available": "Não há fases disponíveis.",
+        "settings_deprecation_warning": "⚠️ **Tipo de dispositivo obsoleto:** {device_type} está programado para remoção em uma versão futura. O pipeline correspondente do WashData não produz resultados confiáveis ​​para esta classe de dispositivo. Sua integração continua funcionando durante o período de descontinuação; para silenciar este aviso, mude **Tipo de dispositivo** abaixo para um dos tipos suportados (Máquina de lavar, Secadora, Combinação de lavadora e secadora, Máquina de lavar louça, Fritadeira de ar, Máquina de fazer pão ou Bomba) ou para **Outro (Avançado)** se o seu aparelho não corresponder a nenhum dos tipos suportados. **Outros (Avançado)** fornece padrões intencionalmente genéricos que não são ajustados para nenhum dispositivo específico, portanto, você mesmo precisará configurar limites, tempos limite e parâmetros correspondentes; todas as suas configurações existentes são preservadas quando você muda.",
+        "phase_other_device_types": "Outros tipos de dispositivos:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Repor para duração total",
         "apply": "Aplicar corte",
         "cancel": "Cancelar"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Máquina de lavar",
+        "dryer": "Secador",
+        "washer_dryer": "Combinação Lavadora e Secadora",
+        "dishwasher": "Máquina de lavar louça",
+        "coffee_machine": "Máquina de café (obsoleta)",
+        "ev": "Veículo elétrico (obsoleto)",
+        "air_fryer": "Fritadeira de ar",
+        "heat_pump": "Bomba de calor (obsoleta)",
+        "bread_maker": "Máquina de fazer pão",
+        "pump": "Bomba / Bomba de depósito",
+        "oven": "Forno (obsoleto)",
+        "other": "Outro (avançado)"
       }
     }
   },

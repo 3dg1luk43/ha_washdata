@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Alte Zyklen automatisch kennzeichnen",
-        "description": "{info}",
+        "description": "Insgesamt {total_count} Zyklen gefunden. Profile: {profiles}",
         "data": {
           "confidence_threshold": "Minimales Vertrauen (0,50–0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Prozessverlauf (Zusammenführen/Aufteilen)",
-        "description": "Bereinigen Sie den Zyklusverlauf, indem Sie fragmentierte Läufe zusammenführen und falsch zusammengeführte Zyklen innerhalb eines Zeitfensters aufteilen. Geben Sie die Anzahl der Stunden ein, in denen Sie zurückblicken möchten.\n{info}",
+        "description": "Bereinigen Sie den Zyklusverlauf, indem Sie fragmentierte Läufe zusammenführen und falsch zusammengeführte Zyklen innerhalb eines Zeitfensters aufteilen. Geben Sie die Anzahl der Stunden ein, in denen Sie zurückblicken möchten (verwenden Sie 999999 für alle).",
         "data": {
           "time_range": "Lookback-Fenster (Stunden)",
           "gap_seconds": "Zusammenführungs-/Aufteilungslücke (Sekunden)"
         },
         "data_description": {
-          "time_range": "Anzahl der Stunden, die nach fragmentierten Zyklen zum Zusammenführen gescannt werden sollen. Verwenden Sie 999999, um alle historischen Daten zu verarbeiten.\n{info}",
+          "time_range": "Anzahl der Stunden, die nach fragmentierten Zyklen zum Zusammenführen gescannt werden sollen. Verwenden Sie 999999, um alle historischen Daten zu verarbeiten.",
           "gap_seconds": "Schwellenwert für die Entscheidung über Aufteilung oder Zusammenführung. Lücken, die kürzer sind, werden zusammengeführt. Längere Lücken werden geteilt. Verringern Sie diesen Wert, um eine Teilung eines Zyklus zu erzwingen, der falsch zusammengeführt wurde."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Ø Energie",
         "table_detected_program": "Erkanntes Programm",
         "table_confidence": "Vertrauen",
-        "table_reported": "Gemeldet"
+        "table_reported": "Gemeldet",
+        "phase_builtin_suffix": "(Eingebaut)",
+        "phase_none_available": "Keine Phasen verfügbar.",
+        "settings_deprecation_warning": "⚠️ **Veralteter Gerätetyp:** {device_type} soll in einer zukünftigen Version entfernt werden. Die Matching-Pipeline von WashData liefert für diese Appliance-Klasse keine zuverlässigen Ergebnisse. Ihre Integration funktioniert während des veralteten Zeitraums weiterhin. Um diese Warnung auszuschalten, schalten Sie **Gerätetyp** unten auf einen der unterstützten Typen um (Waschmaschine, Trockner, Wasch-Trockner-Kombi, Geschirrspüler, Heißluftfritteuse, Brotbackautomat oder Pumpe) oder auf **Andere (Erweitert)**, wenn Ihr Gerät keinem der unterstützten Typen entspricht. **Andere (Erweiterte)** liefert absichtlich generische Standardeinstellungen, die nicht auf eine bestimmte Appliance abgestimmt sind, sodass Sie Schwellenwerte, Zeitüberschreitungen und passende Parameter selbst konfigurieren müssen; Alle Ihre bestehenden Einstellungen bleiben beim Wechsel erhalten.",
+        "phase_other_device_types": "Weitere Gerätetypen:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Auf volle Dauer zurücksetzen",
         "apply": "Trimmen anwenden",
         "cancel": "Stornieren"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Waschmaschine",
+        "dryer": "Trockner",
+        "washer_dryer": "Waschmaschine-Trockner-Kombination",
+        "dishwasher": "Spülmaschine",
+        "coffee_machine": "Kaffeemaschine (veraltet)",
+        "ev": "Elektrofahrzeug (veraltet)",
+        "air_fryer": "Luftfritteuse",
+        "heat_pump": "Wärmepumpe (veraltet)",
+        "bread_maker": "Brotbackautomat",
+        "pump": "Pumpe / Sumpfpumpe",
+        "oven": "Ofen (veraltet)",
+        "other": "Andere (Fortgeschrittene)"
       }
     }
   },

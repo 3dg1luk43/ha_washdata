@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "기존 사이클 자동 라벨 지정",
-        "description": "{info}",
+        "description": "총 {total_count}주기를 찾았습니다. 프로필: {profiles}",
         "data": {
           "confidence_threshold": "최소 신뢰도 (0.50-0.95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "기록 처리 (병합/분할)",
-        "description": "조각난 실행을 병합하고 기간 내에서 잘못 병합된 사이클을 분할하여 사이클 기록을 정리합니다. 되돌아볼 시간(시간)을 입력하세요.\n{info}",
+        "description": "조각난 실행을 병합하고 기간 내에서 잘못 병합된 주기를 분할하여 주기 기록을 정리합니다. 되돌아볼 시간을 입력하세요(모두 999999 사용).",
         "data": {
           "time_range": "검색 기간 (시간)",
           "gap_seconds": "병합/분할 간격 (초)"
         },
         "data_description": {
-          "time_range": "조각난 사이클을 병합하기 위해 검색할 시간(시간)입니다. 모든 기록 데이터를 처리하려면 999999를 사용하세요.\n{info}",
+          "time_range": "분할된 주기를 병합하기 위해 검색하는 데 걸리는 시간입니다. 모든 과거 데이터를 처리하려면 999999를 사용하세요.",
           "gap_seconds": "분할과 병합을 결정하는 임계값입니다. 이보다 짧은 간격은 병합됩니다. 이보다 긴 간격은 분할됩니다. 잘못 병합된 사이클을 강제로 분할하려면 이 값을 낮추세요."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "평균 에너지",
         "table_detected_program": "감지된 프로그램",
         "table_confidence": "신뢰도",
-        "table_reported": "보고됨"
+        "table_reported": "보고됨",
+        "phase_builtin_suffix": "(내장)",
+        "phase_none_available": "사용 가능한 단계가 없습니다.",
+        "settings_deprecation_warning": "⚠️ **더 이상 사용되지 않는 장치 유형:** {device_type}은(는) 향후 릴리스에서 제거될 예정입니다. WashData의 일치 파이프라인은 이 어플라이언스 클래스에 대해 신뢰할 수 있는 결과를 생성하지 않습니다. 통합은 지원 중단 기간 동안 계속 작동합니다. 이 경고를 끄려면 아래의 **장치 유형**을 지원되는 유형(세탁기, 건조기, 세탁기-건조기 콤보, 식기세척기, 에어프라이어, 제빵기 또는 펌프) 중 하나로 전환하거나 가전제품이 지원되는 유형과 일치하지 않는 경우 **기타(고급)**로 전환하세요. **기타(고급)**은 특정 어플라이언스에 맞게 조정되지 않은 의도적으로 일반 기본값을 제공하므로 임계값, 시간 초과 및 일치 매개변수를 직접 구성해야 합니다. 전환하면 모든 기존 설정이 유지됩니다.",
+        "phase_other_device_types": "기타 장치 유형:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "전체 기간으로 초기화",
         "apply": "트림 적용",
         "cancel": "취소"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "세탁기",
+        "dryer": "건조기",
+        "washer_dryer": "세탁기-건조기 콤보",
+        "dishwasher": "접시 닦는 사람",
+        "coffee_machine": "커피 머신(더 이상 사용되지 않음)",
+        "ev": "전기 자동차(더 이상 사용되지 않음)",
+        "air_fryer": "에어프라이어",
+        "heat_pump": "열 펌프(더 이상 사용되지 않음)",
+        "bread_maker": "빵 제조기",
+        "pump": "펌프 / 배수 펌프",
+        "oven": "오븐(지원 중단됨)",
+        "other": "기타(고급)"
       }
     }
   },

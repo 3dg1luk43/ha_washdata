@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automatické označovanie starých cyklov",
-        "description": "{info}",
+        "description": "Celkový počet nájdených cyklov: {total_count}. Profily: {profiles}",
         "data": {
           "confidence_threshold": "Minimálna spoľahlivosť (0,50–0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Spracovanie histórie (zlúčenie/rozdelenie)",
-        "description": "Vyčistite históriu cyklov zlúčením fragmentovaných cyklov a rozdelením nesprávne zlúčených cyklov v rámci časového okna. Zadajte počet hodín na spätné zobrazenie.\n{info}",
+        "description": "Vyčistite históriu cyklov zlúčením fragmentovaných cyklov a rozdelením nesprávne zlúčených cyklov v rámci časového okna. Zadajte počet hodín na spätný pohľad (pre všetky použite 999999).",
         "data": {
           "time_range": "Okno spätného náhľadu (hodiny)",
           "gap_seconds": "Medzera pre zlúčenie/rozdelenie (sekundy)"
         },
         "data_description": {
-          "time_range": "Počet hodín na vyhľadávanie fragmentovaných cyklov na zlúčenie. Na spracovanie všetkých historických údajov použite 999999.\n{info}",
+          "time_range": "Počet hodín na vyhľadávanie fragmentovaných cyklov na zlúčenie. Na spracovanie všetkých historických údajov použite 999999.",
           "gap_seconds": "Hranica pre rozhodnutie o rozdelení vs. zlúčení. Medzery KRATŠIE ako toto sú zlúčené. Medzery DLHŠIE ako toto sú rozdelené. Znížte túto hodnotu, ak chcete vynútiť rozdelenie cyklu, ktorý bol zlúčený nesprávne."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Priem. energia",
         "table_detected_program": "Zistený program",
         "table_confidence": "Spoľahlivosť",
-        "table_reported": "Nahlásené"
+        "table_reported": "Nahlásené",
+        "phase_builtin_suffix": "(Vstavaný)",
+        "phase_none_available": "Nie sú k dispozícii žiadne fázy.",
+        "settings_deprecation_warning": "⚠️ **Zastaraný typ zariadenia:** Odstránenie zariadenia {device_type} je naplánované v budúcom vydaní. Zodpovedajúci kanál WashData neposkytuje spoľahlivé výsledky pre túto triedu spotrebičov. Vaša integrácia funguje aj počas obdobia ukončenia podpory; ak chcete toto varovanie stlmiť, prepnite **Typ zariadenia** nižšie na jeden z podporovaných typov (práčka, sušička, kombinovaná práčka so sušičkou, umývačka riadu, fritéza, pekáreň chleba alebo čerpadlo) alebo na **Iné (pokročilé)**, ak váš spotrebič nezodpovedá žiadnemu z podporovaných typov. **Iné (pokročilé)** dodáva zámerne všeobecné predvolené nastavenia, ktoré nie sú vyladené pre žiadne konkrétne zariadenie, takže si budete musieť sami nakonfigurovať prahové hodnoty, časové limity a zodpovedajúce parametre; všetky vaše existujúce nastavenia sa po prepnutí zachovajú.",
+        "phase_other_device_types": "Ďalšie typy zariadení:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Obnoviť na plnú dĺžku",
         "apply": "Použiť orezanie",
         "cancel": "Zrušiť"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Práčka",
+        "dryer": "Sušička",
+        "washer_dryer": "Kombinovaná práčka so sušičkou",
+        "dishwasher": "Umývačka riadu",
+        "coffee_machine": "Kávovar (zastaraný)",
+        "ev": "Elektrické vozidlo (zastarané)",
+        "air_fryer": "Vzduchová fritéza",
+        "heat_pump": "Tepelné čerpadlo (zastarané)",
+        "bread_maker": "Pekáreň na chlieb",
+        "pump": "Pumpa/Sump Pump",
+        "oven": "Rúra (zastaraná)",
+        "other": "Iné (pokročilé)"
       }
     }
   },

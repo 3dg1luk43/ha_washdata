@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Régi ciklusok automatikus címkézése",
-        "description": "{info}",
+        "description": "Összesen {total_count} ciklust találtunk. Profilok: {profiles}",
         "data": {
           "confidence_threshold": "Minimális bizalom (0,50-0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Folyamatelőzmények (egyesítés/felosztás)",
-        "description": "Tisztítsa meg a cikluselőzményeket a töredezett futtatások egyesítésével és a helytelenül egyesített ciklusok időablakon belüli felosztásával. Adja meg az órák számát a visszatekintéshez.\n{info}",
+        "description": "Tisztítsa meg a cikluselőzményeket a töredezett futtatások egyesítésével és a helytelenül egyesített ciklusok időablakon belüli felosztásával. Adja meg a visszatekintéshez szükséges órák számát (mindenhez használjon 999999-et).",
         "data": {
           "time_range": "Visszatekintési ablak (óra)",
           "gap_seconds": "Egyesítés/felosztás (másodperc)"
         },
         "data_description": {
-          "time_range": "Az órák száma a töredezett ciklusok egyesítéséhez való kereséséhez. Használja a 999999-et az összes előzményadat feldolgozásához.\n{info}",
+          "time_range": "Az órák száma a töredezett ciklusok egyesítéséhez szükséges kereséshez. Használja a 999999-et az összes előzményadat feldolgozásához.",
           "gap_seconds": "A felosztás és az összevonás eldöntésének küszöbe. Az ennél RÖVIDEBB hézagok összevonásra kerülnek. Ennél HOSSZABB rések hasadnak. Csökkentse ezt, hogy felosztást kényszerítsen ki egy hibásan összevont ciklusra."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Átl. energia",
         "table_detected_program": "Észlelt program",
         "table_confidence": "Bizalom",
-        "table_reported": "Jelentve"
+        "table_reported": "Jelentve",
+        "phase_builtin_suffix": "(Beépített)",
+        "phase_none_available": "Nincs elérhető fázis.",
+        "settings_deprecation_warning": "⚠️ **Elavult eszköztípus:** A(z) {device_type} eltávolítása egy jövőbeli kiadásban várható. A WashData egyező folyamata nem ad megbízható eredményeket ehhez a készülékosztályhoz. Az integráció az elavulási időszakon keresztül is működik; a figyelmeztetés elnémításához állítsa az alábbi **Eszköztípus** lehetőséget a támogatott típusok egyikére (mosógép, szárítógép, mosó-szárítógép kombináció, mosogatógép, légsütő, kenyérsütő vagy szivattyú), vagy az **Egyéb (speciális)** lehetőségre, ha a készülék nem egyezik a támogatott típusok egyikével sem. Az **Other (Advanced)** szándékosan olyan általános alapértelmezett beállításokat szállít, amelyek nincsenek beállítva egyetlen készülékhez sem, ezért Önnek kell konfigurálnia a küszöbértékeket, az időtúllépéseket és a megfelelő paramétereket; váltáskor az összes meglévő beállítás megmarad.",
+        "phase_other_device_types": "Egyéb készüléktípusok:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Állítsa vissza a teljes időtartamra",
         "apply": "Vágás alkalmazása",
         "cancel": "Mégsem"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Mosógép",
+        "dryer": "Szárítógép",
+        "washer_dryer": "Mosó-szárító kombó",
+        "dishwasher": "Mosogatógép",
+        "coffee_machine": "Kávéfőző (elavult)",
+        "ev": "Elektromos jármű (elavult)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Hőszivattyú (elavult)",
+        "bread_maker": "Kenyérsütő",
+        "pump": "Szivattyú / olajteknő szivattyú",
+        "oven": "Sütő (elavult)",
+        "other": "Egyéb (haladó)"
       }
     }
   },

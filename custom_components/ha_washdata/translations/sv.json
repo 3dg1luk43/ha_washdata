@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automatisk märkning av gamla cykler",
-        "description": "{info}",
+        "description": "Hittade {total_count} totala cykler. Profiler: {profiles}",
         "data": {
           "confidence_threshold": "Minsta konfidens (0,50–0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Bearbeta historik (Slå samman/Dela)",
-        "description": "Rensa upp cykelhistoriken genom att slå samman fragmenterade körningar och dela upp felaktigt sammanslagna cykler inom ett tidsfönster. Ange antal timmar att se tillbaka.\n{info}",
+        "description": "Rensa upp cykelhistoriken genom att slå samman fragmenterade körningar och dela upp felaktigt sammanslagna cykler inom ett tidsfönster. Ange antal timmar för att se tillbaka (använd 999999 för alla).",
         "data": {
           "time_range": "Tillbakablicksfönster (timmar)",
           "gap_seconds": "Sammanfoga/dela-mellanrum (sekunder)"
         },
         "data_description": {
-          "time_range": "Antal timmar att skanna för fragmenterade cykler att sammanfoga. Använd 999999 för att bearbeta alla historiska data.\n{info}",
+          "time_range": "Antal timmar att skanna för att fragmenterade cykler ska sammanfogas. Använd 999999 för att bearbeta alla historiska data.",
           "gap_seconds": "Tröskel för att avgöra delning kontra sammanslagning. Luckor KORTARE än detta slås samman. Luckor LÄNGRE än detta delas. Sänk detta för att tvinga en delning på en cykel som sammanfogats felaktigt."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Gen. energi",
         "table_detected_program": "Identifierat program",
         "table_confidence": "Konfidens",
-        "table_reported": "Rapporterad"
+        "table_reported": "Rapporterad",
+        "phase_builtin_suffix": "(Inbyggt)",
+        "phase_none_available": "Inga faser tillgängliga.",
+        "settings_deprecation_warning": "⚠️ **Föråldrad enhetstyp:** {device_type} är planerad att tas bort i en framtida version. WashDatas matchande pipeline ger inte tillförlitliga resultat för denna apparatklass. Din integration fortsätter att fungera under utfasningsperioden; för att tysta denna varning byter du **Enhetstyp** nedan till en av de stödda typerna (tvättmaskin, torktumlare, tvättmaskin-torktumlare, diskmaskin, luftfritös, brödbakare eller pump), eller till **Annan (avancerat)** om din apparat inte matchar någon av de stödda typerna. **Övrigt (avancerat)** skickar avsiktligt generiska standardinställningar som inte är inställda för någon specifik apparat, så du måste konfigurera trösklar, tidsgränser och matchande parametrar själv; alla dina befintliga inställningar bevaras när du byter.",
+        "phase_other_device_types": "Andra enhetstyper:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Återställ till full varaktighet",
         "apply": "Tillämpa trim",
         "cancel": "Avbryt"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Tvättmaskin",
+        "dryer": "Torktumlare",
+        "washer_dryer": "Kombination av tvättmaskin och torktumlare",
+        "dishwasher": "Diskmaskin",
+        "coffee_machine": "Kaffemaskin (utfasad)",
+        "ev": "Elfordon (utfasad)",
+        "air_fryer": "Air Fryer",
+        "heat_pump": "Värmepump (utfasad)",
+        "bread_maker": "Brödmaskin",
+        "pump": "Pump / Sump Pump",
+        "oven": "Ugn (utfasad)",
+        "other": "Annat (avancerat)"
       }
     }
   },

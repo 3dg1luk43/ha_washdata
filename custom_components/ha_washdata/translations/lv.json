@@ -530,7 +530,7 @@
       },
       "auto_label_cycles": {
         "title": "Automātiski iezīmējiet vecos ciklus",
-        "description": "{info}",
+        "description": "Kopā atrasti {total_count} cikli. Profili: {profiles}",
         "data": {
           "confidence_threshold": "Minimālā uzticamība (0,50–0,95)"
         }
@@ -559,13 +559,13 @@
       },
       "post_process": {
         "title": "Procesu vēsture (apvienošana/sadaļa)",
-        "description": "Notīriet ciklu vēsturi, sapludinot sadrumstalotas darbības un sadalot nepareizi sapludinātos ciklus laika logā. Ievadiet stundu skaitu, lai atskatītos atpakaļ.\n{info}",
+        "description": "Notīriet ciklu vēsturi, sapludinot sadrumstalotas darbības un sadalot nepareizi sapludinātos ciklus laika logā. Ievadiet stundu skaitu, lai atskatītos atpakaļ (visiem izmantojiet 999999).",
         "data": {
           "time_range": "Atskata logs (stundas)",
           "gap_seconds": "Apvienot/sadalīt intervālu (sekundēs)"
         },
         "data_description": {
-          "time_range": "Stundu skaits, lai meklētu sadrumstalotos ciklus, lai sapludinātu. Izmantojiet 999999, lai apstrādātu visus vēsturiskos datus.\n{info}",
+          "time_range": "Stundu skaits, lai meklētu sadrumstalotos ciklus, lai sapludinātu. Izmantojiet 999999, lai apstrādātu visus vēsturiskos datus.",
           "gap_seconds": "Slieksnis, lai izlemtu par sadalīšanu vai apvienošanu. Atstarpes, kas ir ĪSĀKAS par šo, ir apvienotas. Atšķirības, kas ir garākas par šo, ir sadalītas. Nolaidiet to, lai piespiestu sadalīt ciklu, kas tika sapludināts nepareizi."
         }
       },
@@ -889,7 +889,11 @@
         "table_avg_energy": "Vid. enerģija",
         "table_detected_program": "Atklātā programma",
         "table_confidence": "Pārliecība",
-        "table_reported": "Ziņots"
+        "table_reported": "Ziņots",
+        "phase_builtin_suffix": "(Iebūvēts)",
+        "phase_none_available": "Nav pieejamas fāzes.",
+        "settings_deprecation_warning": "⚠️ **Novecojis ierīces veids:** {device_type} ir plānots noņemt nākamajā laidienā. WashData atbilstības cauruļvads nesniedz ticamus rezultātus šai ierīču klasei. Jūsu integrācija turpinās darboties nolietojuma periodā; lai izslēgtu šo brīdinājumu, tālāk pārslēdziet **Ierīces veidu** uz kādu no atbalstītajiem veidiem (veļas mazgājamā mašīna, žāvētājs, veļas mazgājamās mašīnas-žāvēšanas mašīna, trauku mazgājamā mašīna, gaisa cepeškrāsns, maizes automāts vai sūknis) vai **Cits (uzlabots)**, ja jūsu ierīce neatbilst nevienam no atbalstītajiem veidiem. **Other (Advanced)** apzināti piegādā vispārīgus noklusējuma iestatījumus, kas nav pielāgoti nevienai konkrētai ierīcei, tāpēc jums pašam būs jākonfigurē sliekšņi, noildzes un atbilstošie parametri; pārslēdzoties, visi esošie iestatījumi tiek saglabāti.",
+        "phase_other_device_types": "Citi ierīču veidi:"
       }
     },
     "interactive_editor_action": {
@@ -992,6 +996,22 @@
         "reset": "Atiestatīt uz pilnu ilgumu",
         "apply": "Uzklājiet apgriešanu",
         "cancel": "Atcelt"
+      }
+    },
+    "device_type": {
+      "options": {
+        "washing_machine": "Veļas mašīna",
+        "dryer": "Žāvētājs",
+        "washer_dryer": "Kombinētais veļas mazgājamās mašīnas-žāvētājs",
+        "dishwasher": "Trauku mazgājamā mašīna",
+        "coffee_machine": "Kafijas automāts (novecojis)",
+        "ev": "Elektriskais transportlīdzeklis (novecojis)",
+        "air_fryer": "Gaisa cepeškrāsns",
+        "heat_pump": "Siltumsūknis (novecojis)",
+        "bread_maker": "Maizes gatavotājs",
+        "pump": "Sūknis / Sūknis",
+        "oven": "Cepeškrāsns (novecojusi)",
+        "other": "Cits (uzlabots)"
       }
     }
   },
