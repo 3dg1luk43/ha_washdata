@@ -15,7 +15,8 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
+from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntry, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_NAME
 from homeassistant.data_entry_flow import section
 from homeassistant.helpers import selector, translation
@@ -227,7 +228,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 )
 
 
-class WashDataConfigFlow(ConfigFlow, domain=DOMAIN):  # pylint: disable=abstract-method
+class WashDataConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=abstract-method
     """Handle a config flow for WashData."""
 
     VERSION = 3
