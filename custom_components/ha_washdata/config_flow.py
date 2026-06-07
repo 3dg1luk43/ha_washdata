@@ -17,7 +17,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
-from homeassistant.data_entry_flow import FlowResult, section
+from homeassistant.data_entry_flow import ConfigFlowResult, section
 from homeassistant.helpers import selector, translation
 from homeassistant.util import slugify
 from homeassistant.util import dt as dt_util
@@ -244,7 +244,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None  # pylint: disable=unused-argument
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
         if user_input is None:
@@ -272,7 +272,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
 
     async def async_step_first_profile(
         self, user_input: dict[str, Any] | None = None  # pylint: disable=unused-argument
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Step to optionally create the first profile."""
 
         if user_input is not None:
@@ -359,7 +359,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_menu_back(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Pop the menu stack and re-show the previous menu (or init)."""
         if self._menu_stack:
             self._menu_stack.pop()
@@ -462,7 +462,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None  # pylint: disable=unused-argument
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage the options."""
         self._menu_stack = ["init"]
         # Pass menu_options as a list of step ids (not a {step_id: label} dict)
@@ -486,7 +486,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_settings(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage configuration settings (Basic Step)."""
         # Initialize or clear stored basic options
         if not hasattr(self, "_basic_options"):
@@ -629,7 +629,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_apply_suggestions_confirm(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Review and confirm suggested values before applying them."""
         if not self._suggested_values:
             return self.async_abort(reason="no_suggestions")
@@ -664,7 +664,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_notifications(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage notification settings."""
         if user_input is not None:
             if user_input.pop("go_back", False):
@@ -941,7 +941,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_advanced_settings(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage advanced configuration settings (Step 2)."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         suggestions = manager.suggestions if manager else {}
@@ -1653,7 +1653,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_interactive_editor(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Step 1: Select Action (Merge or Split) as a button menu."""
         self._editor_action = None
         self._editor_selected_ids = []
@@ -1673,28 +1673,28 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_editor_split(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Menu wrapper: split action."""
         self._editor_action = "split"
         return await self.async_step_editor_select()
 
     async def async_step_editor_merge(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Menu wrapper: merge action."""
         self._editor_action = "merge"
         return await self.async_step_editor_select()
 
     async def async_step_editor_delete(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Menu wrapper: delete action."""
         self._editor_action = "delete"
         return await self.async_step_editor_select()
 
     async def async_step_editor_select(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Step 2: Select Cycles."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -1765,7 +1765,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_editor_split_params(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Step 2.5: Choose split method (auto-detect gaps or manual timestamps)."""
         if user_input is not None:
             mode = user_input.get("split_mode", "auto")
@@ -1787,7 +1787,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_editor_split_auto_params(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Configure auto-detect gap threshold."""
         if user_input is not None:
             self._editor_split_gap = int(user_input["min_gap_seconds"])
@@ -1806,7 +1806,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_editor_split_manual_params(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Configure manual split timestamps (wall-clock HH:MM[:SS], one per line)."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -1874,7 +1874,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_editor_configure(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """
         Render the interactive editor preview and apply split or merge actions for selected cycles.
         
@@ -1897,7 +1897,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     - "new_profile_name" (str): when "create_new" is selected, name for the new profile.
         
         Returns:
-            FlowResult: A flow result that either shows the preview form, creates an entry after applying changes, or aborts with an error if required data (e.g., cycles or segments) is missing.
+            ConfigFlowResult: A flow result that either shows the preview form, creates an entry after applying changes, or aborts with an error if required data (e.g., cycles or segments) is missing.
         """
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -2155,7 +2155,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_diagnostics(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Diagnostics submenu as a button menu with storage stats."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         stats = await manager.profile_store.get_storage_stats()
@@ -2180,7 +2180,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_clear_debug_data(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Confirm clearing debug data."""
         if user_input is not None:
             manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
@@ -2196,7 +2196,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_reprocess_history(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle request to reprocess all history."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
 
@@ -2215,7 +2215,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_export_import(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Export or import profile/cycle data via JSON copy/paste."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         export_payload = manager.profile_store.export_data(
@@ -2312,7 +2312,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_manage_cycles(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage cycles submenu (button menu with card-style preview)."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -2390,7 +2390,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_manage_cycles_empty(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage cycles submenu when no cycles are present."""
         self._push_menu("manage_cycles_empty")
         return self.async_show_menu(
@@ -2402,7 +2402,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_manage_profiles(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage profiles submenu as a button menu with profile summary."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -2482,7 +2482,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_manage_profiles_empty(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage profiles submenu when no profiles are present."""
         self._push_menu("manage_profiles_empty")
         return self.async_show_menu(
@@ -2492,7 +2492,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_manage_phase_catalog(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Manage phase catalog for all device types."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -2560,7 +2560,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_phase_catalog_create(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Create custom phase for a selected device type."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -2623,7 +2623,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_phase_catalog_edit_select(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Select phase to edit from all device types."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -2694,7 +2694,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_phase_catalog_edit(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Edit selected phase from all device types."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -2751,7 +2751,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_phase_catalog_delete(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Delete custom phase from any device type."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -3183,7 +3183,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_assign_profile_phases_select(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Select profile before opening the phase editor."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -3229,7 +3229,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_assign_profile_phases(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Phase assignment editor as a button menu with visualization."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -3287,14 +3287,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_phase_ranges_clear(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Menu wrapper: clear draft phase ranges and re-show editor."""
         self._phase_assign_draft = []
         return await self.async_step_assign_profile_phases()
 
     async def async_step_phase_ranges_save(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Menu wrapper: commit draft phase ranges; aborts on validation error."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -3315,7 +3315,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_assign_profile_phases_auto_detect(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Show auto-detected phase ranges with an action choice (name & apply, or go back)."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -3383,7 +3383,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_assign_profile_phases_auto_detect_name(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Assign a name to each auto-detected phase range."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -3442,7 +3442,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_assign_profile_phases_add(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Add a phase range to the current draft."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -3513,7 +3513,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_assign_profile_phases_edit_select(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Select a phase range index to edit."""
         if not self._phase_assign_draft:
             return await self.async_step_assign_profile_phases()
@@ -3550,7 +3550,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_assign_profile_phases_edit(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Edit the selected phase range in the current draft."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -3623,7 +3623,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_assign_profile_phases_delete(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Delete one phase range from the current draft."""
         ranges = sorted(self._phase_assign_draft, key=lambda x: (float(x["start"]), float(x["end"])))
         if not ranges:
@@ -3663,7 +3663,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_cleanup_profile(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Select a profile to clean up (via graph)."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -3703,7 +3703,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_cleanup_select(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Show graph and select cycles to delete."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -3848,7 +3848,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_profile_stats(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Show detailed profile statistics with graphs."""
         if user_input is not None:
             # Back to manage profiles
@@ -3985,7 +3985,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_create_profile(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Create a new profile."""
         errors = {}
 
@@ -4064,7 +4064,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_edit_profile(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Select profile to edit/rename."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -4100,7 +4100,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_rename_profile(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Edit profile settings (Name and Duration)."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         errors = {}
@@ -4161,7 +4161,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_delete_profile_select(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Select profile to delete."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -4197,7 +4197,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_delete_profile_confirm(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Confirm profile deletion."""
         if user_input is not None:
             unlabel = user_input["unlabel_cycles"]
@@ -4222,7 +4222,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_auto_label_cycles(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Auto-label all cycles retroactively."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -4274,7 +4274,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_select_cycle_to_label(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Select a cycle to label."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -4321,7 +4321,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_select_cycle_to_delete(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Select a cycle to delete."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -4373,7 +4373,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_label_cycle(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Assign profile to the selected cycle."""
         errors = {}
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
@@ -4490,7 +4490,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_post_process(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle post-processing options."""
         if user_input is not None:
             choice = user_input["time_range"]
@@ -4535,7 +4535,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_wipe_history(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Wipe all stored cycles and profiles for this device (for testing)."""
         if user_input is not None:
             manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
@@ -4557,7 +4557,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_record_cycle(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Handle Record Mode as a button menu with state-aware options."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
 
@@ -4605,13 +4605,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_record_refresh(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Menu wrapper: re-display recorder status."""
         return await self.async_step_record_cycle()
 
     async def async_step_record_discard(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Menu wrapper: discard the last recording and re-display status."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         await manager.recorder.clear_last_run()
@@ -4619,7 +4619,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_record_start(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Start a recording."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         await manager.async_start_recording()
@@ -4627,7 +4627,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_record_stop(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Stop a recording."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         await manager.async_stop_recording()
@@ -4637,7 +4637,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_record_process(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Process (Trim & Save) the recorded cycle."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         last_run = manager.recorder.last_run
@@ -4812,7 +4812,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_learning_feedbacks(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Landing menu for pending feedback: Review / Dismiss All / Back."""
         manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
         profile_store = manager.profile_store
@@ -4884,7 +4884,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_learning_feedbacks_pick(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Step: pick a specific pending feedback to review."""
         if user_input is not None:
             cycle_id = user_input.get("selected_feedback")
@@ -4937,7 +4937,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_learning_feedbacks_dismiss_all(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Step: Confirm bulk dismissal of all pending learning feedbacks."""
         manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
         profile_store = manager.profile_store
@@ -4976,13 +4976,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_learning_feedbacks_empty(
         self, _user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Step: Handle empty feedback list (go back)."""
         return await self.async_step_init()
 
     async def async_step_resolve_feedback(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Step: Resolve a specific feedback request."""
         manager = self.hass.data[DOMAIN][self._config_entry.entry_id]
         profile_store = manager.profile_store
@@ -5367,7 +5367,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_trim_cycle_select(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Select a cycle to trim."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -5422,7 +5422,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_trim_cycle(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Main cycle trimmer editor."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -5521,7 +5521,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_trim_cycle_start(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Set the trim start point."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
@@ -5605,7 +5605,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_trim_cycle_end(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Set the trim end point."""
         manager = self.hass.data[DOMAIN][self.config_entry.entry_id]
         store = manager.profile_store
