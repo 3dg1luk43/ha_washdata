@@ -317,10 +317,10 @@ class WashDataConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: d
         config_entry: ConfigEntry,
     ) -> OptionsFlow:
         """Create the options flow."""
-        return WashDataOptionsFlowHandler(config_entry)
+        return OptionsFlowHandler(config_entry)
 
 
-class WashDataOptionsFlowHandler(OptionsFlow):
+class OptionsFlowHandler(OptionsFlow):
     """Handle a options flow for WashData."""
 
     def __init__(self, config_entry: ConfigEntry) -> None:
