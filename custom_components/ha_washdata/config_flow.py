@@ -15,9 +15,9 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_NAME
-from homeassistant.data_entry_flow import ConfigFlowResult, section
+from homeassistant.data_entry_flow import section
 from homeassistant.helpers import selector, translation
 from homeassistant.util import slugify
 from homeassistant.util import dt as dt_util
@@ -227,7 +227,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 )
 
 
-class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=abstract-method
+class WashDataConfigFlow(ConfigFlow, domain=DOMAIN):  # pylint: disable=abstract-method
     """Handle a config flow for WashData."""
 
     VERSION = 3
@@ -313,16 +313,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
 
     @staticmethod
     def async_get_options_flow(
-        config_entry: config_entries.ConfigEntry,
-    ) -> config_entries.OptionsFlow:
+        config_entry: ConfigEntry,
+    ) -> OptionsFlow:
         """Create the options flow."""
-        return OptionsFlowHandler(config_entry)
+        return WashDataOptionsFlowHandler(config_entry)
 
 
-class OptionsFlowHandler(config_entries.OptionsFlow):
+class WashDataOptionsFlowHandler(OptionsFlow):
     """Handle a options flow for WashData."""
 
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+    def __init__(self, config_entry: ConfigEntry) -> None:
         """Initialize options flow."""
         self._config_entry = config_entry
         self._selected_cycle_id: str | None = None
