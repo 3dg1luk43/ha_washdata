@@ -201,7 +201,7 @@
               "running_dead_zone": "Nach dem Start des Zyklus Stromeinbrüche für diesen Zeitraum (in Sekunden) ignorieren, um eine falsche Enderkennung während der anfänglichen Hochlaufphase zu verhindern. Zum Deaktivieren auf 0 setzen. Standard: 0s.",
               "end_repeat_count": "Gibt an, wie oft die Endbedingung (Leistung unter dem Schwellwert für Ausschaltverzögerung) nacheinander erfüllt sein muss, bevor der Zyklus beendet wird. Höhere Werte verhindern falsches Ende während Pausen. Standard: 1.",
               "min_off_gap": "Wenn ein Zyklus innerhalb dieser Anzahl von Sekunden nach dem Ende des vorherigen beginnt, werden sie zu einem einzigen Zyklus zusammengeführt.",
-              "sampling_interval": "Mindestabtastintervall in Sekunden. Aktualisierungen, die schneller als diese Rate sind, werden ignoriert. Standard: 2,0 s."
+              "sampling_interval": "Mindestabtastintervall in Sekunden. Aktualisierungen, die schneller als diese Rate sind, werden ignoriert. Standard: 30 s."
             }
           },
           "matching_section": {

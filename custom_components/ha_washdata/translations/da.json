@@ -201,7 +201,7 @@
               "running_dead_zone": "Efter cyklus starter, ignorer strømfald i disse mange sekunder for at forhindre falsk slutdetektion under den indledende spin-up fase. Indstil til 0 for at deaktivere. Standard: 0s.",
               "end_repeat_count": "Antal gange, slutbetingelsen (effekt under tærsklen for off_delay) skal opfyldes fortløbende, før cyklussen afsluttes. Højere værdier forhindrer falske afslutninger under pauser. Standard: 1.",
               "min_off_gap": "Hvis en cyklus starter inden for så mange sekunder efter, at den forrige sluttede, vil de blive fusioneret til en enkelt cyklus.",
-              "sampling_interval": "Minimum prøvetagningsinterval i sekunder. Opdateringer hurtigere end denne hastighed vil blive ignoreret. Standard: 2,0s."
+              "sampling_interval": "Minimum prøvetagningsinterval i sekunder. Opdateringer hurtigere end denne hastighed vil blive ignoreret. Standard: 30s."
             }
           },
           "matching_section": {

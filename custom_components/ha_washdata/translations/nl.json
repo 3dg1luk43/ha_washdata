@@ -201,7 +201,7 @@
               "running_dead_zone": "Nadat de cyclus is gestart, worden vermogensdips gedurende dit aantal seconden genegeerd om valse einddetectie tijdens de initiële opstartfase te voorkomen. Stel in op 0 om uit te schakelen. Standaard: 0s.",
               "end_repeat_count": "Aantal keren dat de eindconditie (vermogen onder de drempel gedurende de uitschakelvertraging) achtereenvolgens moet worden bereikt voordat de cyclus eindigt. Hogere waarden voorkomen valse eindpunten tijdens pauzes. Standaard: 1.",
               "min_off_gap": "Als een cyclus binnen dit aantal seconden na het einde van de vorige begint, worden ze SAMENGEVOEGD tot één cyclus.",
-              "sampling_interval": "Minimaal bemonsteringsinterval in seconden. Updates sneller dan dit tempo worden genegeerd. Standaard: 2,0s."
+              "sampling_interval": "Minimaal bemonsteringsinterval in seconden. Updates sneller dan dit tempo worden genegeerd. Standaard: 30s."
             }
           },
           "matching_section": {

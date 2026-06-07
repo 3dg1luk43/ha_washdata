@@ -201,7 +201,7 @@
               "running_dead_zone": "Després d'iniciar el cicle, ignoreu les caigudes de potència durant aquests segons per evitar la detecció de finals falsos durant la fase inicial d'engegada. Establiu a 0 per desactivar. Per defecte: 0 s.",
               "end_repeat_count": "Nombre de vegades que la condició final (potència per sota del llindar per off_delay) s'ha de complir consecutivament abans d'acabar el cicle. Els valors més alts eviten finals falsos durant les pauses. Per defecte: 1.",
               "min_off_gap": "Si un cicle s'inicia en tants segons des de la finalització de l'anterior, es FUSIONARÀ en un sol cicle.",
-              "sampling_interval": "Interval mínim de mostreig en segons. Les actualitzacions més ràpides que aquesta velocitat s'ignoraran. Per defecte: 2,0 s."
+              "sampling_interval": "Interval mínim de mostreig en segons. Les actualitzacions més ràpides que aquesta velocitat s'ignoraran. Per defecte: 30 s."
             }
           },
           "matching_section": {

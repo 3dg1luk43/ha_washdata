@@ -201,7 +201,7 @@
               "running_dead_zone": "Après le démarrage du cycle, ignorez les baisses de puissance pendant ce nombre de secondes afin d'éviter toute détection de fausse fin pendant la phase de démarrage initiale. Réglez sur 0 pour désactiver. Par défaut : 0s.",
               "end_repeat_count": "Nombre de fois où la condition de fin (puissance inférieure au seuil pour off_delay) doit être remplie consécutivement avant de terminer le cycle. Des valeurs plus élevées évitent les fausses fins pendant les pauses. Par défaut : 1.",
               "min_off_gap": "Si un cycle commence dans ce nombre de secondes après la fin du précédent, ils seront FUSIONNÉS en un seul cycle.",
-              "sampling_interval": "Intervalle d'échantillonnage minimum en secondes. Les mises à jour plus rapides que ce taux seront ignorées. Par défaut : 2,0 s."
+              "sampling_interval": "Intervalle d'échantillonnage minimum en secondes. Les mises à jour plus rapides que ce taux seront ignorées. Par défaut : 30 s."
             }
           },
           "matching_section": {

@@ -201,7 +201,7 @@
               "running_dead_zone": "Sau khi chu kỳ bắt đầu, hãy bỏ qua tình trạng mất điện trong nhiều giây này để ngăn chặn việc phát hiện sai đầu cuối trong giai đoạn khởi động ban đầu. Đặt thành 0 để tắt. Mặc định: 0s.",
               "end_repeat_count": "Số lần điều kiện kết thúc (công suất dưới ngưỡng cho off_delay) phải được đáp ứng liên tiếp trước khi kết thúc chu kỳ. Giá trị cao hơn ngăn chặn kết thúc sai trong quá trình tạm dừng. Mặc định: 1.",
               "min_off_gap": "Nếu một chu kỳ bắt đầu trong vòng nhiều giây này kể từ khi kết thúc chu kỳ trước đó, chúng sẽ được HỢP NHẤT thành một chu kỳ duy nhất.",
-              "sampling_interval": "Khoảng thời gian lấy mẫu tối thiểu tính bằng giây. Cập nhật nhanh hơn tốc độ này sẽ bị bỏ qua. Mặc định: 2.0s."
+              "sampling_interval": "Khoảng thời gian lấy mẫu tối thiểu tính bằng giây. Cập nhật nhanh hơn tốc độ này sẽ bị bỏ qua. Mặc định: 30s."
             }
           },
           "matching_section": {

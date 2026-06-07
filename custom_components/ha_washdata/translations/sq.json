@@ -201,7 +201,7 @@
               "running_dead_zone": "Pas fillimit të ciklit, injoroni uljen e energjisë për kaq shumë sekonda për të parandaluar zbulimin e rremë të fundit gjatë fazës fillestare të rrotullimit. Vendoseni në 0 për ta çaktivizuar. Parazgjedhja: 0 s.",
               "end_repeat_count": "Numri i herëve që kushti i fundit (energjia nën pragun për off_delay) duhet të plotësohet njëpasnjëshëm përpara përfundimit të ciklit. Vlerat më të larta parandalojnë përfundimet e rreme gjatë pauzave. Parazgjedhja: 1.",
               "min_off_gap": "Nëse një cikël fillon brenda kaq shumë sekondash nga mbarimi i atij të mëparshëm, ato do të shkrihen në një cikël të vetëm.",
-              "sampling_interval": "Intervali minimal i marrjes së mostrave në sekonda. Përditësimet më të shpejta se kjo normë do të shpërfillen. Parazgjedhja: 2,0 s."
+              "sampling_interval": "Intervali minimal i marrjes së mostrave në sekonda. Përditësimet më të shpejta se kjo normë do të shpërfillen. Parazgjedhja: 30 s."
             }
           },
           "matching_section": {

@@ -201,7 +201,7 @@
               "running_dead_zone": "Setelah siklus dimulai, abaikan penurunan daya selama beberapa detik untuk mencegah deteksi ujung yang salah selama fase pemutaran awal. Setel ke 0 untuk menonaktifkan. Bawaan: 0 detik.",
               "end_repeat_count": "Berapa kali kondisi akhir (daya di bawah ambang batas untuk off_delay) harus dipenuhi secara berurutan sebelum mengakhiri siklus. Nilai yang lebih tinggi mencegah tujuan yang salah selama jeda. Bawaan: 1.",
               "min_off_gap": "Jika sebuah siklus dimulai dalam beberapa detik dari akhir siklus sebelumnya, siklus tersebut akan DIGABUNG menjadi satu siklus.",
-              "sampling_interval": "Interval pengambilan sampel minimum dalam hitungan detik. Pembaruan yang lebih cepat dari kecepatan ini akan diabaikan. Bawaan: 2,0 detik."
+              "sampling_interval": "Interval pengambilan sampel minimum dalam hitungan detik. Pembaruan yang lebih cepat dari kecepatan ini akan diabaikan. Bawaan: 30 detik."
             }
           },
           "matching_section": {

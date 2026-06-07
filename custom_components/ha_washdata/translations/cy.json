@@ -201,7 +201,7 @@
               "running_dead_zone": "Ar ôl i'r cylch ddechrau, anwybyddwch dipiau pŵer am yr eiliadau lawer hyn i atal canfod diwedd ffug yn ystod y cyfnod deillio cychwynnol. Gosodwch ar 0 i analluogi. Rhagosodiad: 0s.",
               "end_repeat_count": "Nifer o weithiau mae'n rhaid bodloni'r amod terfynol (pŵer o dan y trothwy ar gyfer off_delay) yn olynol cyn dod â'r cylch i ben. Mae gwerthoedd uwch yn atal pennau ffug yn ystod seibiannau. Diofyn: 1.",
               "min_off_gap": "Os bydd cylchred yn dechrau o fewn yr eiliadau lawer hyn i'r diwedd un blaenorol, byddant yn cael eu HUNOD yn un gylchred.",
-              "sampling_interval": "Isafswm cyfwng samplu mewn eiliadau. Bydd diweddariadau cyflymach na'r gyfradd hon yn cael eu hanwybyddu. Diofyn: 2.0s."
+              "sampling_interval": "Isafswm cyfwng samplu mewn eiliadau. Bydd diweddariadau cyflymach na'r gyfradd hon yn cael eu hanwybyddu. Diofyn: 30s."
             }
           },
           "matching_section": {

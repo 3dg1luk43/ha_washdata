@@ -201,7 +201,7 @@
               "running_dead_zone": "Tar éis tús a chur leis an timthriall, déan neamhaird de laghduithe cumhachta ar feadh an méid soicindí seo chun cosc a chur ar bhrath deiridh bréagach le linn na céime tosaigh. Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 0s.",
               "end_repeat_count": "Líon uaireanta ní mór an coinníoll deiridh (cumhacht faoi bhun na tairsí ar feadh off_delay) a shásamh as a chéile sula gcuirfear deireadh leis an timthriall. Coscann luachanna níos airde deireadh bréagach le linn sosanna. Réamhshocrú: 1.",
               "min_off_gap": "Má thosaíonn timthriall laistigh den méid soicindí seo ón gceann roimhe sin ag críochnú, déanfar iad a CHUMASC ina timthriall amháin.",
-              "sampling_interval": "Íos-eatramh samplála i soicindí. Ní thabharfar aird ar nuashonruithe níos tapúla ná an ráta seo. Réamhshocrú: 2.0s."
+              "sampling_interval": "Íos-eatramh samplála i soicindí. Ní thabharfar aird ar nuashonruithe níos tapúla ná an ráta seo. Réamhshocrú: 30s."
             }
           },
           "matching_section": {

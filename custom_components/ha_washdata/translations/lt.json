@@ -201,7 +201,7 @@
               "running_dead_zone": "Prasidėjus ciklui, tiek sekundžių ignoruoti galios sumažėjimus, kad išvengtumėte klaidingo pabaigos aptikimo pradinėje sūkavimosi fazėje. Norėdami išjungti, nustatykite 0. Numatytasis: 0 s.",
               "end_repeat_count": "Skaičius, kiek kartų iš eilės turi būti įvykdyta pabaigos sąlyga (galia mažesnė už slenkstį off_delay laiku) prieš baigiant ciklą. Didesnės vertės apsaugo nuo klaidingų galų pauzių metu. Numatytasis: 1.",
               "min_off_gap": "Jei ciklas prasideda per tiek sekundžių nuo ankstesnio pabaigos, jie bus SUJUNGTI į vieną ciklą.",
-              "sampling_interval": "Minimalus mėginių ėmimo intervalas sekundėmis. Naujiniai greitesni nei šis dažnis bus ignoruojami. Numatytasis: 2,0 s."
+              "sampling_interval": "Minimalus mėginių ėmimo intervalas sekundėmis. Naujiniai greitesni nei šis dažnis bus ignoruojami. Numatytasis: 30 s."
             }
           },
           "matching_section": {

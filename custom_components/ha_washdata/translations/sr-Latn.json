@@ -201,7 +201,7 @@
               "running_dead_zone": "Nakon što ciklus počne, zanemari padove snage ovoliko sekundi da spreči lažno otkrivanje kraja tokom početne faze okretanja. Postavi na 0 da onemogućiš. Podrazumevano: 0s.",
               "end_repeat_count": "Koliko puta krajnji uslov (snaga ispod praga za off_delay) mora biti ispunjen uzastopno pre završetka ciklusa. Više vrednosti sprečavaju lažne završetke tokom pauza. Podrazumevano: 1.",
               "min_off_gap": "Ako ciklus počne u roku od toliko sekundi od završetka prethodnog, oni će biti SPOJENI u jedan ciklus.",
-              "sampling_interval": "Minimalni interval uzorkovanja u sekundama. Ažuriranja brža od ove stope biće zanemarena. Podrazumevano: 2,0s."
+              "sampling_interval": "Minimalni interval uzorkovanja u sekundama. Ažuriranja brža od ove stope biće zanemarena. Podrazumevano: 30s."
             }
           },
           "matching_section": {

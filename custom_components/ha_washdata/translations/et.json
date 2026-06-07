@@ -201,7 +201,7 @@
               "running_dead_zone": "Pärast tsükli algust ignoreerige võimsuse langusi nii paljude sekundite jooksul, et vältida vale lõpu tuvastamist esialgses pöörlemisfaasis. Keelamiseks määrake 0. Vaikimisi: 0s.",
               "end_repeat_count": "Enne tsükli lõpetamist tuleb lõputingimuse (võimsus alla väljalülitusviivituse läve) järjestikuste täitmiste arv. Kõrgemad väärtused hoiavad ära valelõpud pauside ajal. Vaikimisi: 1.",
               "min_off_gap": "Kui tsükkel algab selle mitme sekundi jooksul pärast eelmise lõppemist, LIIDEtakse need üheks tsükliks.",
-              "sampling_interval": "Minimaalne proovivõtu intervall sekundites. Sellest kiirusest kiiremaid värskendusi eiratakse. Vaikimisi: 2,0 s."
+              "sampling_interval": "Minimaalne proovivõtu intervall sekundites. Sellest kiirusest kiiremaid värskendusi eiratakse. Vaikimisi: 30 s."
             }
           },
           "matching_section": {

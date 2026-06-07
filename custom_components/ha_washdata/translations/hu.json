@@ -201,7 +201,7 @@
               "running_dead_zone": "A ciklus indítása után hagyja figyelmen kívül a teljesítménycsökkenéseket ennyi másodpercig, hogy elkerülje a téves végérzékelést a kezdeti felpörgetési fázisban. A letiltáshoz állítsa 0-ra. Alapértelmezett: 0s.",
               "end_repeat_count": "A befejezési feltételnek (az off_delay küszöbértéke alatti teljesítmény) egymás után teljesülnie kell a ciklus befejezése előtt. A magasabb értékek megakadályozzák a hamis befejezést a szünetek alatt. Alapértelmezett: 1.",
               "min_off_gap": "Ha egy ciklus az előző befejezésétől számított ennyi másodpercen belül kezdődik, akkor ezek egyetlen ciklusba egyesülnek.",
-              "sampling_interval": "Minimális mintavételi intervallum másodpercben. Az ennél gyorsabb frissítéseket figyelmen kívül hagyja. Alapértelmezett: 2.0s."
+              "sampling_interval": "Minimális mintavételi intervallum másodpercben. Az ennél gyorsabb frissítéseket figyelmen kívül hagyja. Alapértelmezett: 30s."
             }
           },
           "matching_section": {

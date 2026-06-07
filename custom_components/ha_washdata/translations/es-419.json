@@ -201,7 +201,7 @@
               "running_dead_zone": "Tras el inicio del ciclo, ignora las caídas de potencia durante estos segundos para evitar la detección falsa del final durante la fase de arranque. Pon 0 para deshabilitar. Predeterminado: 0 s.",
               "end_repeat_count": "Número de veces que la condición de fin (potencia por debajo del umbral durante off_delay) debe cumplirse consecutivamente antes de finalizar el ciclo. Valores más altos evitan finales falsos durante las pausas. Predeterminado: 1.",
               "min_off_gap": "Si un ciclo comienza dentro de estos segundos tras finalizar el anterior, se FUSIONARÁN en un único ciclo.",
-              "sampling_interval": "Intervalo mínimo de muestreo en segundos. Las actualizaciones más rápidas que esta tasa se ignorarán. Predeterminado: 2,0 s."
+              "sampling_interval": "Intervalo mínimo de muestreo en segundos. Las actualizaciones más rápidas que esta tasa se ignorarán. Predeterminado: 30 s."
             }
           },
           "matching_section": {

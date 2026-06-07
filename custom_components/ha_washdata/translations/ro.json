@@ -201,7 +201,7 @@
               "running_dead_zone": "După începerea ciclului, ignorați scăderile de putere timp de atâtea secunde pentru a preveni detectarea falsă a finalului în timpul fazei inițiale de pornire. Setați la 0 pentru a dezactiva. Implicit: 0s.",
               "end_repeat_count": "De câte ori condiția de final (putere sub pragul pentru off_delay) trebuie îndeplinită consecutiv înainte de încheierea ciclului. Valorile mai mari previn finaluri false în timpul pauzelor. Implicit: 1.",
               "min_off_gap": "Dacă un ciclu începe în atâtea secunde de la încheierea celui precedent, ele vor fi FUZIONATE într-un singur ciclu.",
-              "sampling_interval": "Interval minim de eșantionare în secunde. Actualizările mai rapide decât această rată vor fi ignorate. Implicit: 2,0s."
+              "sampling_interval": "Interval minim de eșantionare în secunde. Actualizările mai rapide decât această rată vor fi ignorate. Implicit: 30s."
             }
           },
           "matching_section": {

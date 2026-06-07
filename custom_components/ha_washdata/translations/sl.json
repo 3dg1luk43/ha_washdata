@@ -201,7 +201,7 @@
               "running_dead_zone": "Po začetku cikla ignorirajte padce moči toliko sekund, da preprečite lažno zaznavo konca med fazo začetnega vrtenja. Nastavite na 0, da onemogočite. Privzeto: 0 s.",
               "end_repeat_count": "Kolikokrat mora biti končni pogoj (moč pod pragom za off_delay) zaporedoma izpolnjen pred zaključkom cikla. Višje vrednosti preprečujejo napačne konce med premori. Privzeto: 1.",
               "min_off_gap": "Če se cikel začne v toliko sekundah po koncu prejšnjega, bodo ZDRUŽENI v en sam cikel.",
-              "sampling_interval": "Najmanjši interval vzorčenja v sekundah. Posodobitve, hitrejše od te stopnje, bodo prezrte. Privzeto: 2,0 s."
+              "sampling_interval": "Najmanjši interval vzorčenja v sekundah. Posodobitve, hitrejše od te stopnje, bodo prezrte. Privzeto: 30 s."
             }
           },
           "matching_section": {

@@ -201,7 +201,7 @@
               "running_dead_zone": "Nodeems de Zyklus ufänkt, Power Dips fir dës vill Sekonnen ignoréieren fir falsch Enn-Detektioun während der initialer Anlafphase z'evitéieren. Op 0 setzen fir auszeschalten. Standard: 0s.",
               "end_repeat_count": "Unzuel vun Mol d'Endbedingung (Kraaft ënner der Schwell fir off_delay) konsekutiv erfëllt sinn muss ier de Zyklus ofgeschloss gëtt. Méi héich Wäerter verhënneren falsch Enn während Pausen. Standard: 1.",
               "min_off_gap": "Wann en Zyklus bannent dëse ville Sekonnen vum viregten Enn ufänkt, gi se an engem eenzege Zyklus fusionéiert.",
-              "sampling_interval": "Minimum Sampling Intervall a Sekonnen. Updates méi séier wéi dësen Taux ginn ignoréiert. Standard: 2,0s."
+              "sampling_interval": "Minimum Sampling Intervall a Sekonnen. Updates méi séier wéi dësen Taux ginn ignoréiert. Standard: 30s."
             }
           },
           "matching_section": {

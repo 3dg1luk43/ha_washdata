@@ -201,7 +201,7 @@
               "running_dead_zone": "Após o início do ciclo, ignore quedas de potência durante esses segundos para evitar detecção falsa de fim durante a fase inicial. Defina como 0 para desativar. Padrão: 0s.",
               "end_repeat_count": "Número de vezes que a condição de fim (potência abaixo do limite durante off_delay) deve ser atendida consecutivamente antes de encerrar o ciclo. Valores mais altos evitam fins falsos durante pausas. Padrão: 1.",
               "min_off_gap": "Se um ciclo começar poucos segundos após o término do anterior, eles serão MESCLADOS em um único ciclo.",
-              "sampling_interval": "Intervalo mínimo de amostragem em segundos. Atualizações mais rápidas que essa taxa serão ignoradas. Padrão: 2,0s."
+              "sampling_interval": "Intervalo mínimo de amostragem em segundos. Atualizações mais rápidas que essa taxa serão ignoradas. Padrão: 30s."
             }
           },
           "matching_section": {

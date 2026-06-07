@@ -201,7 +201,7 @@
               "running_dead_zone": "Dopo l'avvio del ciclo, ignora i cali di potenza per questo numero di secondi per evitare il rilevamento di false terminazioni durante la fase di avviamento iniziale. Imposta su 0 per disabilitare. Predefinito: 0 s.",
               "end_repeat_count": "Numero di volte consecutive in cui la condizione di fine (potenza sotto la soglia per off_delay) deve essere soddisfatta prima di terminare il ciclo. Valori più alti prevengono false terminazioni durante le pause. Predefinito: 1.",
               "min_off_gap": "Se un ciclo inizia entro questo numero di secondi dalla fine del precedente, i due cicli verranno UNITI in un unico ciclo.",
-              "sampling_interval": "Intervallo di campionamento minimo in secondi. Gli aggiornamenti più rapidi di questo intervallo vengono ignorati. Predefinito: 2,0 s."
+              "sampling_interval": "Intervallo di campionamento minimo in secondi. Gli aggiornamenti più rapidi di questo intervallo vengono ignorati. Predefinito: 30 s."
             }
           },
           "matching_section": {

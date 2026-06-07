@@ -201,7 +201,7 @@
               "running_dead_zone": "Após o início do ciclo, ignore quedas de potência durante este número de segundos para evitar detecção falsa de fim durante a fase inicial de arranque. Defina como 0 para desactivar. Predefinição: 0s.",
               "end_repeat_count": "Número de vezes que a condição de fim (potência abaixo do limiar durante off_delay) deve ser satisfeita consecutivamente antes de terminar o ciclo. Valores mais altos evitam fins falsos durante pausas. Predefinição: 1.",
               "min_off_gap": "Se um ciclo começar dentro deste número de segundos após o fim do anterior, serão FUNDIDOS num único ciclo.",
-              "sampling_interval": "Intervalo mínimo de amostragem em segundos. Actualizações mais rápidas do que esta taxa serão ignoradas. Predefinição: 2,0s."
+              "sampling_interval": "Intervalo mínimo de amostragem em segundos. Actualizações mais rápidas do que esta taxa serão ignoradas. Predefinição: 30s."
             }
           },
           "matching_section": {

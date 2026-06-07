@@ -201,7 +201,7 @@
               "running_dead_zone": "Po rozpoczęciu cyklu ignoruj spadki mocy przez tyle sekund, aby zapobiec fałszywemu wykryciu końca podczas fazy rozruchu. Ustaw 0, aby wyłączyć. Domyślnie: 0 s.",
               "end_repeat_count": "Liczba kolejnych spełnień warunku końca (moc poniżej progu przez czas opóźnienia wyłączenia) wymagana przed zakończeniem cyklu. Wyższe wartości zapobiegają fałszywym zakończeniom podczas pauz. Domyślnie: 1.",
               "min_off_gap": "Jeśli cykl rozpocznie się w ciągu tylu sekund od zakończenia poprzedniego, zostaną POŁĄCZONE w jeden cykl.",
-              "sampling_interval": "Minimalny interwał próbkowania w sekundach. Aktualizacje szybsze niż ta częstotliwość będą ignorowane. Domyślnie: 2,0 s."
+              "sampling_interval": "Minimalny interwał próbkowania w sekundach. Aktualizacje szybsze niż ta częstotliwość będą ignorowane. Domyślnie: 30 s."
             }
           },
           "matching_section": {

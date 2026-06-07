@@ -201,7 +201,7 @@
               "running_dead_zone": "Döngü başladıktan sonra, ilk dönüş aşaması sırasında hatalı uç tespitini önlemek için bu kadar saniye boyunca güç düşüşlerini göz ardı edin. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0s.",
               "end_repeat_count": "Döngü sonlandırılmadan önce bitiş koşulunun (kapalı_gecikme için eşiğin altındaki güç) arka arkaya karşılanması gereken sayı. Daha yüksek değerler duraklamalar sırasında hatalı sonları önler. Varsayılan: 1.",
               "min_off_gap": "Bir döngü, bir öncekinin bitiminden bu kadar saniye sonra başlarsa, tek bir döngüde BİRLEŞTİRİLECEKTİR.",
-              "sampling_interval": "Saniye cinsinden minimum örnekleme aralığı. Bu hızdan daha hızlı olan güncellemeler dikkate alınmayacaktır. Varsayılan: 2,0 sn."
+              "sampling_interval": "Saniye cinsinden minimum örnekleme aralığı. Bu hızdan daha hızlı olan güncellemeler dikkate alınmayacaktır. Varsayılan: 30 sn."
             }
           },
           "matching_section": {

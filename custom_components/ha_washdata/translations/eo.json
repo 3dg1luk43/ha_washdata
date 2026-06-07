@@ -201,7 +201,7 @@
               "running_dead_zone": "Post kiam ciklo komenciĝas, ignori potencajn falojn dum ĉi tiom da sekundoj por malhelpi falsajn fin-detektojn dum komenca startfazo. Agordu al 0 por malŝalti. Defaŭlte: 0s.",
               "end_repeat_count": "Nombro da fojoj kiom la fina kondiĉo (potenco sub sojlo dum off_delay) devas esti plenumita sinsekve antaŭ fini la ciklon. Pli altaj valoroj malhelpos falsajn finojn dum paŭzoj. Defaŭlte: 1.",
               "min_off_gap": "Se ciklo komenciĝas ene de ĉi tiom da sekundoj post la fino de la antaŭa, ili estos KUNFANDITAJ en ununuran ciklon.",
-              "sampling_interval": "Minimuma specimena intervalo en sekundoj. Ĝisdatigoj pli rapidaj ol ĉi tiu rapideco estos ignoritaj. Defaŭlte: 2.0s."
+              "sampling_interval": "Minimuma specimena intervalo en sekundoj. Ĝisdatigoj pli rapidaj ol ĉi tiu rapideco estos ignoritaj. Defaŭlte: 30s."
             }
           },
           "matching_section": {

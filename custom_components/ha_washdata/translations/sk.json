@@ -201,7 +201,7 @@
               "running_dead_zone": "Po spustení cyklu ignorujte poklesy výkonu na toľko sekúnd, aby ste zabránili detekcii falošného konca počas počiatočnej fázy roztočenia. Pre deaktiváciu nastavte na 0. Predvolená hodnota: 0 s.",
               "end_repeat_count": "Počet, koľkokrát musí byť splnená podmienka ukončenia (výkon pod prahovou hodnotou pre oneskorenie vypnutia) za sebou pred ukončením cyklu. Vyššie hodnoty zabraňujú falošným koncom počas prestávok. Predvolená hodnota: 1.",
               "min_off_gap": "Ak cyklus začne v priebehu tohto počtu sekúnd od skončenia predchádzajúceho, zlúčia sa do jedného cyklu.",
-              "sampling_interval": "Minimálny interval vzorkovania v sekundách. Aktualizácie rýchlejšie ako táto rýchlosť budú ignorované. Predvolená hodnota: 2,0 s."
+              "sampling_interval": "Minimálny interval vzorkovania v sekundách. Aktualizácie rýchlejšie ako táto rýchlosť budú ignorované. Predvolená hodnota: 30 s."
             }
           },
           "matching_section": {

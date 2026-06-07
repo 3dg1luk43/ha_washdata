@@ -201,7 +201,7 @@
               "running_dead_zone": "Neidat syklus begjint, negearje macht dips foar dizze protte sekonden om foar te kommen falske ein deteksje tidens de earste spin-up faze. Stel op 0 om út te skeakeljen. Standert: 0s.",
               "end_repeat_count": "Oantal kearen moat de einbetingst (krêft ûnder drompel foar off_delay) efterinoar foldien wurde foardat de syklus einiget. Hegere wearden foarkomme falske eintsjes tidens pauzes. Standert: 1.",
               "min_off_gap": "As in syklus begjint binnen safolle sekonden fan 'e foarige ein, sille se wurde gearfoege yn ien syklus.",
-              "sampling_interval": "Minimum sampling ynterval yn sekonden. Updates rapper dan dit taryf sille wurde negearre. Standert: 2.0s."
+              "sampling_interval": "Minimum sampling ynterval yn sekonden. Updates rapper dan dit taryf sille wurde negearre. Standert: 30s."
             }
           },
           "matching_section": {

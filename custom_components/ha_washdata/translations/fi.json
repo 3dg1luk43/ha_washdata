@@ -201,7 +201,7 @@
               "running_dead_zone": "Kun sykli on alkanut, jätä tehohäviöt huomioimatta näin monen sekunnin ajan estääksesi väärän lopputunnistuksen alkupyöritysvaiheen aikana. Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 0s.",
               "end_repeat_count": "Kuinka monta kertaa lopetusehto (teho alle off_delay-kynnyksen) on täytyttävä peräkkäin ennen jakson lopettamista. Suuremmat arvot estävät vääriä loppuja taukojen aikana. Oletus: 1.",
               "min_off_gap": "Jos sykli alkaa näin monen sekunnin sisällä edellisen päättymisestä, ne YHDISTÄÄN yhdeksi sykliksi.",
-              "sampling_interval": "Vähimmäisnäytteenottoväli sekunneissa. Tätä nopeammat päivitykset ohitetaan. Oletus: 2.0s."
+              "sampling_interval": "Vähimmäisnäytteenottoväli sekunneissa. Tätä nopeammat päivitykset ohitetaan. Oletus: 30s."
             }
           },
           "matching_section": {

@@ -201,7 +201,7 @@
               "running_dead_zone": "Zikloa hasi ondoren, jaramonik egin segundo horrenbesteko potentzia-jauziak, hasierako biraketa fasean amaiera faltsuak hautemateko saihesteko. Ezarri 0 desgaitzeko. Lehenetsia: 0s.",
               "end_repeat_count": "Amaiera-baldintza (off_delay-ren atalasearen azpiko potentzia) jarraian bete behar den zikloa amaitu aurretik. Balio altuagoek amaiera faltsuak saihesten dituzte pausaldietan. Lehenetsia: 1.",
               "min_off_gap": "Ziklo bat aurrekoa amaitzen denetik segundo horren barruan hasten bada, ziklo bakarrean BATUA izango dira.",
-              "sampling_interval": "Laginketa-tarte minimoa segundotan. Tarifa hori baino azkarrago eguneratzeak ez dira aintzat hartuko. Lehenetsia: 2,0 s."
+              "sampling_interval": "Laginketa-tarte minimoa segundotan. Tarifa hori baino azkarrago eguneratzeak ez dira aintzat hartuko. Lehenetsia: 30 s."
             }
           },
           "matching_section": {

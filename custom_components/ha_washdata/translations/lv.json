@@ -201,7 +201,7 @@
               "running_dead_zone": "Pēc cikla sākuma ignorējiet jaudas kritumus tik sekundes, lai novērstu nepareizu beigu noteikšanu sākotnējās vērpšanas fāzes laikā. Iestatiet uz 0, lai atspējotu. Noklusējums: 0s.",
               "end_repeat_count": "Beigu nosacījums (jauda zem off_delay sliekšņa) ir jāizpilda secīgi pirms cikla beigām. Augstākas vērtības novērš viltus galus paužu laikā. Noklusējums: 1.",
               "min_off_gap": "Ja cikls sākas šo sekunžu laikā pēc iepriekšējā cikla beigām, tie tiks APVIENOTI vienā ciklā.",
-              "sampling_interval": "Minimālais paraugu ņemšanas intervāls sekundēs. Atjauninājumi, kas ir ātrāki par šo ātrumu, tiks ignorēti. Noklusējums: 2,0 s."
+              "sampling_interval": "Minimālais paraugu ņemšanas intervāls sekundēs. Atjauninājumi, kas ir ātrāki par šo ātrumu, tiks ignorēti. Noklusējums: 30 s."
             }
           },
           "matching_section": {

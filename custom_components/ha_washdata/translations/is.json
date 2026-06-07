@@ -201,7 +201,7 @@
               "running_dead_zone": "Eftir að lotan byrjar skaltu hunsa afllækkanir í þessar margar sekúndur til að koma í veg fyrir falska endagreiningu á upphafsstigi. Stilltu á 0 til að slökkva á. Sjálfgefið: 0s.",
               "end_repeat_count": "Fjöldi skipta þarf að uppfylla lokaskilyrði (afl undir þröskuldi fyrir off_delay) í röð áður en lotunni lýkur. Hærri gildi koma í veg fyrir falskar endir í hléum. Sjálfgefið: 1.",
               "min_off_gap": "Ef lota byrjar innan margra sekúndna frá því að fyrri lýkur, verða þær sameinaðar í eina lotu.",
-              "sampling_interval": "Lágmarks sýnatökutímabil í sekúndum. Uppfærslur hraðar en þetta hlutfall verða hunsaðar. Sjálfgefið: 2,0s."
+              "sampling_interval": "Lágmarks sýnatökutímabil í sekúndum. Uppfærslur hraðar en þetta hlutfall verða hunsaðar. Sjálfgefið: 30s."
             }
           },
           "matching_section": {

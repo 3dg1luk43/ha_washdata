@@ -201,7 +201,7 @@
               "running_dead_zone": "Nadat die siklus begin het, ignoreer kragdalings vir soveel sekondes om valse eindbespeuring tydens die aanvanklike spin-up fase te voorkom. Stel op 0 om te deaktiveer. Verstek: 0s.",
               "end_repeat_count": "Aantal kere wat die eindvoorwaarde (krag onder die drempel vir af_vertraging) agtereenvolgens nagekom moet word voordat die siklus beëindig word. Hoër waardes verhoed vals eindes tydens pouses. Verstek: 1.",
               "min_off_gap": "As 'n siklus begin binne soveel sekondes nadat die vorige een geëindig het, sal hulle in 'n enkele siklus saamgesmelt word.",
-              "sampling_interval": "Minimum steekproefinterval in sekondes. Opdaterings vinniger as hierdie koers sal geïgnoreer word. Verstek: 2.0s."
+              "sampling_interval": "Minimum steekproefinterval in sekondes. Opdaterings vinniger as hierdie koers sal geïgnoreer word. Verstek: 30s."
             }
           },
           "matching_section": {
