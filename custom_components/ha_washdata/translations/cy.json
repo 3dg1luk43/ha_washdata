@@ -105,7 +105,7 @@
           "notify_icon": "Eicon i'w ddefnyddio ar gyfer hysbysiadau (e.e. mdi: peiriant golchi). Gadewch yn wag i anfon heb eicon.",
           "notify_start_message": "Neges wedi'i hanfon pan fydd cylch yn dechrau. Yn cefnogi {device} dalfan.",
           "notify_finish_message": "Neges wedi'i hanfon pan fydd cylch yn gorffen. Yn cefnogi {device}, {duration}, {program}, {energy_kwh}, {cost} dalfan.",
-          "notify_pre_complete_message": "Anfonwyd y neges cyn ei chwblhau. Yn cefnogi {device}, {minutes} dalfan."
+          "notify_pre_complete_message": "Testun y diweddariadau cynnydd byw cylchol tra bod y cylch yn rhedeg. Yn cefnogi {device}, {minutes}, {program} dalfan."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Eicon i'w ddefnyddio ar gyfer hysbysiadau (e.e. mdi: peiriant golchi). Gadewch yn wag i anfon heb eicon.",
           "notify_start_message": "Neges wedi'i hanfon pan fydd cylch yn dechrau. Yn cefnogi {device} dalfan.",
           "notify_finish_message": "Neges wedi'i hanfon pan fydd cylch yn gorffen. Yn cefnogi {device}, {duration}, {program}, {energy_kwh}, {cost} dalfan.",
-          "notify_pre_complete_message": "Anfonwyd y neges cyn ei chwblhau. Yn cefnogi {device}, {minutes} dalfan.",
           "energy_price_entity": "Dewiswch endid rhifol sy'n dal y pris trydan cyfredol (e.e. sensor.electricity_price, mewnbwn_number.energy_rate). Pan fydd wedi'i osod, mae'n galluogi'r dalfan {cost}. Yn cael blaenoriaeth dros y gwerth statig os yw'r ddau wedi'u ffurfweddu.",
           "energy_price_static": "Pris trydan sefydlog fesul kWh. Pan fydd wedi'i osod, mae'n galluogi'r dalfan {cost}. Wedi'i anwybyddu os yw endid wedi'i ffurfweddu uchod. Ychwanegwch eich symbol arian cyfred yn y templed neges, e.e. {cost} €.",
           "notify_reminder_message": "Anfonodd testun y nodyn atgoffa un-amser y nifer cyfluniedig o funudau cyn y diwedd amcangyfrifedig. Yn wahanol i'r diweddariadau byw cylchol uchod. Yn cefnogi {device}, {minutes}, {program} dalfan.",
           "notify_timeout_seconds": "Diystyru hysbysiadau yn awtomatig ar ôl hyn lawer o eiliadau (a anfonwyd ymlaen fel 'amser terfyn' yr ap cydymaith). Gosodwch ar 0 i'w cadw nes eu bod yn cael eu diswyddo. Rhagosodedig: 0.",
           "notify_channel": "Android sianel hysbysu ap cydymaith ar gyfer statws, cynnydd byw a hysbysiadau atgoffa. Mae sain a phwysigrwydd sianel yn cael eu ffurfweddu yn yr app cydymaith y tro cyntaf i enw'r sianel gael ei ddefnyddio - mae WashData yn gosod enw'r sianel yn unig. Gadael yn wag ar gyfer y rhagosodiad app.",
-          "notify_finish_channel": "Sianel Android ar wahân ar gyfer y rhybudd gorffenedig (a ddefnyddir hefyd gan y nodyn atgoffa a'r peiriant aros golchi dillad) fel y gall gael ei sain ei hun. Gadewch yn wag i ailddefnyddio'r sianel uchod."
+          "notify_finish_channel": "Sianel Android ar wahân ar gyfer y rhybudd gorffenedig (a ddefnyddir hefyd gan y nodyn atgoffa a'r peiriant aros golchi dillad) fel y gall gael ei sain ei hun. Gadewch yn wag i ailddefnyddio'r sianel uchod.",
+          "notify_pre_complete_message": "Testun y diweddariadau cynnydd byw cylchol tra bod y cylch yn rhedeg. Yn cefnogi {device}, {minutes}, {program} dalfan."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Ar ôl i'r cylch ddechrau, anwybyddwch dipiau pŵer am yr eiliadau lawer hyn i atal canfod diwedd ffug yn ystod y cyfnod deillio cychwynnol. Gosodwch ar 0 i analluogi. Rhagosodiad: 0s.",
               "end_repeat_count": "Nifer o weithiau mae'n rhaid bodloni'r amod terfynol (pŵer o dan y trothwy ar gyfer off_delay) yn olynol cyn dod â'r cylch i ben. Mae gwerthoedd uwch yn atal pennau ffug yn ystod seibiannau. Diofyn: 1.",
               "min_off_gap": "Os bydd cylchred yn dechrau o fewn yr eiliadau lawer hyn i'r diwedd un blaenorol, byddant yn cael eu HUNOD yn un gylchred.",
-              "sampling_interval": "Isafswm cyfwng samplu mewn eiliadau. Bydd diweddariadau cyflymach na'r gyfradd hon yn cael eu hanwybyddu. Diofyn: 2.0s."
+              "sampling_interval": "Isafswm cyfwng samplu mewn eiliadau. Bydd diweddariadau cyflymach na'r gyfradd hon yn cael eu hanwybyddu. Diofyn: 30s (2s ar gyfer peiriannau golchi, peiriannau golchi a pheiriannau golchi llestri)."
             }
           },
           "matching_section": {

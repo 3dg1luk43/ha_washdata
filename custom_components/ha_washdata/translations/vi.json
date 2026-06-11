@@ -105,7 +105,7 @@
           "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để gửi không có biểu tượng.",
           "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
           "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}."
+          "notify_pre_complete_message": "Văn bản cập nhật tiến trình trực tiếp định kỳ trong khi chu kỳ chạy. Hỗ trợ phần giữ chỗ {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Biểu tượng dùng cho thông báo (ví dụ: mdi:washing-machine). Để trống để gửi không có biểu tượng.",
           "notify_start_message": "Tin nhắn được gửi khi một chu kỳ bắt đầu. Hỗ trợ trình giữ chỗ {device}.",
           "notify_finish_message": "Tin nhắn được gửi khi một chu kỳ kết thúc. Hỗ trợ các phần giữ chỗ {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Tin nhắn được gửi trước khi hoàn thành. Hỗ trợ phần giữ chỗ {device}, {minutes}.",
           "energy_price_entity": "Chọn một thực thể số chứa giá điện hiện tại (ví dụ: cảm biến.điện_price, input_number.energy_rate). Khi được đặt, hãy bật trình giữ chỗ {cost}. Được ưu tiên hơn giá trị tĩnh nếu cả hai đều được cấu hình.",
           "energy_price_static": "Giá điện cố định trên mỗi kWh. Khi được đặt, hãy bật trình giữ chỗ {cost}. Bị bỏ qua nếu một thực thể được định cấu hình ở trên. Thêm ký hiệu tiền tệ của bạn vào mẫu tin nhắn, ví dụ: {cost} €.",
           "notify_reminder_message": "Văn bản của lời nhắc một lần đã gửi số phút đã định cấu hình trước khi kết thúc dự kiến. Khác biệt với các cập nhật trực tiếp định kỳ ở trên. Hỗ trợ các phần giữ chỗ {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Tự động loại bỏ thông báo sau nhiều giây này (được chuyển tiếp dưới dạng 'hết thời gian chờ' của ứng dụng đồng hành). Đặt thành 0 để giữ chúng cho đến khi bị loại bỏ. Mặc định: 0.",
           "notify_channel": "Android kênh thông báo ứng dụng đồng hành để biết trạng thái, tiến trình trực tiếp và thông báo lời nhắc. Âm thanh và tầm quan trọng của kênh được định cấu hình trong ứng dụng đồng hành khi sử dụng tên kênh lần đầu tiên - WashData chỉ đặt tên kênh. Để trống cho mặc định của ứng dụng.",
-          "notify_finish_channel": "Tách kênh Android cho cảnh báo kết thúc (cũng được sử dụng bởi lời nhắc và lời cằn nhằn khi chờ giặt) để kênh có thể có âm thanh riêng. Để trống để sử dụng lại kênh ở trên."
+          "notify_finish_channel": "Tách kênh Android cho cảnh báo kết thúc (cũng được sử dụng bởi lời nhắc và lời cằn nhằn khi chờ giặt) để kênh có thể có âm thanh riêng. Để trống để sử dụng lại kênh ở trên.",
+          "notify_pre_complete_message": "Văn bản cập nhật tiến trình trực tiếp định kỳ trong khi chu kỳ chạy. Hỗ trợ phần giữ chỗ {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Sau khi chu kỳ bắt đầu, hãy bỏ qua tình trạng mất điện trong nhiều giây này để ngăn chặn việc phát hiện sai đầu cuối trong giai đoạn khởi động ban đầu. Đặt thành 0 để tắt. Mặc định: 0s.",
               "end_repeat_count": "Số lần điều kiện kết thúc (công suất dưới ngưỡng cho off_delay) phải được đáp ứng liên tiếp trước khi kết thúc chu kỳ. Giá trị cao hơn ngăn chặn kết thúc sai trong quá trình tạm dừng. Mặc định: 1.",
               "min_off_gap": "Nếu một chu kỳ bắt đầu trong vòng nhiều giây này kể từ khi kết thúc chu kỳ trước đó, chúng sẽ được HỢP NHẤT thành một chu kỳ duy nhất.",
-              "sampling_interval": "Khoảng thời gian lấy mẫu tối thiểu tính bằng giây. Cập nhật nhanh hơn tốc độ này sẽ bị bỏ qua. Mặc định: 2.0s."
+              "sampling_interval": "Khoảng thời gian lấy mẫu tối thiểu tính bằng giây. Cập nhật nhanh hơn tốc độ này sẽ bị bỏ qua. Mặc định: 30 giây (2 giây đối với máy giặt, máy giặt-sấy và máy rửa chén)."
             }
           },
           "matching_section": {

@@ -105,7 +105,7 @@
           "notify_icon": "Tákn til að nota fyrir tilkynningar (t.d. mdi: þvottavél). Skildu eftir tómt til að senda án tákns.",
           "notify_start_message": "Skilaboð send þegar hringrás byrjar. Styður {device} staðgengil.",
           "notify_finish_message": "Skilaboð send þegar lotu lýkur. Styður {device}, {duration}, {program}, {energy_kwh}, {cost} staðgengla.",
-          "notify_pre_complete_message": "Skilaboð send áður en þeim er lokið. Styður {device}, {minutes} staðgengla."
+          "notify_pre_complete_message": "Texti endurtekinna framfarauppfærslur í beinni á meðan lotan keyrir. Styður {device}, {minutes}, {program} staðgengla."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Tákn til að nota fyrir tilkynningar (t.d. mdi: þvottavél). Skildu eftir tómt til að senda án tákns.",
           "notify_start_message": "Skilaboð send þegar hringrás byrjar. Styður {device} staðgengil.",
           "notify_finish_message": "Skilaboð send þegar lotu lýkur. Styður {device}, {duration}, {program}, {energy_kwh}, {cost} staðgengla.",
-          "notify_pre_complete_message": "Skilaboð send áður en þeim er lokið. Styður {device}, {minutes} staðgengla.",
           "energy_price_entity": "Veldu tölulega einingu sem heldur núverandi raforkuverði (t.d. sensor.electricity_price, input_number.energy_rate). Þegar stillt er á {cost} staðgengillinn. Tekur forgang fram yfir fasta gildið ef bæði eru stillt.",
           "energy_price_static": "Fast raforkuverð á kWst. Þegar stillt er á {cost} staðgengillinn. Hunsuð ef eining er stillt hér að ofan. Bættu gjaldmiðlinum þínum við í skilaboðasniðmátinu, t.d. {cost} €.",
           "notify_reminder_message": "Texti í einu sinni áminningu sendi stilltan fjölda mínútna fyrir áætlaðan lokadag. Aðgreindur frá endurteknum lifandi uppfærslum hér að ofan. Styður {device}, {minutes}, {program} staðgengla.",
           "notify_timeout_seconds": "Hunsa tilkynningar sjálfkrafa eftir þessar margar sekúndur (framsent sem „timeout“ fylgiforritinu). Stilltu á 0 til að halda þeim þar til þeim er vísað frá. Sjálfgefið: 0.",
           "notify_channel": "Android tilkynningarás fyrir fylgiforrit fyrir stöðu, framfarir í beinni og áminningartilkynningar. Hljóð og mikilvægi rásar er stillt í fylgiforritinu í fyrsta skipti sem rásarheitið er notað - WashData stillir aðeins rásarnafnið. Skildu eftir tómt fyrir sjálfgefið forrit.",
-          "notify_finish_channel": "Aðskildu Android rás fyrir viðvörunina sem er lokið (einnig notuð af áminningunni og nöldrinu sem bíður þvotta) svo hún geti fengið sitt eigið hljóð. Skildu eftir tómt til að endurnýta rásina hér að ofan."
+          "notify_finish_channel": "Aðskildu Android rás fyrir viðvörunina sem er lokið (einnig notuð af áminningunni og nöldrinu sem bíður þvotta) svo hún geti fengið sitt eigið hljóð. Skildu eftir tómt til að endurnýta rásina hér að ofan.",
+          "notify_pre_complete_message": "Texti endurtekinna framfarauppfærslur í beinni á meðan lotan keyrir. Styður {device}, {minutes}, {program} staðgengla."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Eftir að lotan byrjar skaltu hunsa afllækkanir í þessar margar sekúndur til að koma í veg fyrir falska endagreiningu á upphafsstigi. Stilltu á 0 til að slökkva á. Sjálfgefið: 0s.",
               "end_repeat_count": "Fjöldi skipta þarf að uppfylla lokaskilyrði (afl undir þröskuldi fyrir off_delay) í röð áður en lotunni lýkur. Hærri gildi koma í veg fyrir falskar endir í hléum. Sjálfgefið: 1.",
               "min_off_gap": "Ef lota byrjar innan margra sekúndna frá því að fyrri lýkur, verða þær sameinaðar í eina lotu.",
-              "sampling_interval": "Lágmarks sýnatökutímabil í sekúndum. Uppfærslur hraðar en þetta hlutfall verða hunsaðar. Sjálfgefið: 2,0s."
+              "sampling_interval": "Lágmarks sýnatökutímabil í sekúndum. Uppfærslur hraðar en þetta hlutfall verða hunsaðar. Sjálfgefið: 30s (2s fyrir þvottavélar, þvottavél-þurrkara og uppþvottavélar)."
             }
           },
           "matching_section": {

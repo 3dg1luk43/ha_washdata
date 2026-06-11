@@ -105,7 +105,7 @@
           "notify_icon": "Märguannete jaoks kasutatav ikoon (nt mdi:pesumasin). Ikooni saatmata jätmiseks jätke tühjaks.",
           "notify_start_message": "Sõnum saadetakse, kui tsükkel algab. Toetab kohatäidet {device}.",
           "notify_finish_message": "Sõnum saadetakse pärast tsükli lõppemist. Toetab kohahoidjaid {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Sõnum saadeti enne valmimist. Toetab kohahoidjaid {device}, {minutes}."
+          "notify_pre_complete_message": "Korduva reaalajas edenemise tekst värskendatakse tsükli jooksul. Toetab kohahoidjaid {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Märguannete jaoks kasutatav ikoon (nt mdi:pesumasin). Ikooni saatmata jätmiseks jätke tühjaks.",
           "notify_start_message": "Sõnum saadetakse, kui tsükkel algab. Toetab kohatäidet {device}.",
           "notify_finish_message": "Sõnum saadetakse pärast tsükli lõppemist. Toetab kohahoidjaid {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Sõnum saadeti enne valmimist. Toetab kohahoidjaid {device}, {minutes}.",
           "energy_price_entity": "Valige numbriline olem, millel on praegune elektrihind (nt sensor.electricity_price, input_number.energy_rate). Kui see on määratud, lubab kohahoidja {cost}. Kui mõlemad on konfigureeritud, on see ülimuslik staatilise väärtuse suhtes.",
           "energy_price_static": "Fikseeritud elektrihind kWh kohta. Kui see on määratud, lubab kohahoidja {cost}. Ignoreeritakse, kui olem on ülal konfigureeritud. Lisa oma valuuta sümbol sõnumimalli, nt. {cost} €.",
           "notify_reminder_message": "Ühekordse meeldetuletuse tekst saatis seadistatud minutite arvu enne eeldatavat lõppu. Erinevus korduvatest live-uuendustest ülalpool. Toetab {device}, {minutes}, {program} kohahoidjaid.",
           "notify_timeout_seconds": "Pärast seda mitu sekundit automaatselt teated välja jätta (edasi saadetud kui kaasrakenduse aegumine). Seadke 0, et hoida neid kuni vallandamiseni. Vaikimisi: 0.",
           "notify_channel": "Android kaaslase rakenduse teavituskanal oleku, live progressi ja meeldetuletuste jaoks. Kanali heli ja tähtsus on konfigureeritud kaaslase rakenduses kanali nime esmakordsel kasutamisel - WashData määrab ainult kanali nime. Jäta rakenduse vaikeväärtus tühjaks.",
-          "notify_finish_channel": "Eraldi Android kanal lõpetatud hoiatuse jaoks (kasutab ka meeldetuletus ja pesupesemist ootav nag), et sellel oleks oma heli. Jäta tühjaks, et kanalit uuesti kasutada."
+          "notify_finish_channel": "Eraldi Android kanal lõpetatud hoiatuse jaoks (kasutab ka meeldetuletus ja pesupesemist ootav nag), et sellel oleks oma heli. Jäta tühjaks, et kanalit uuesti kasutada.",
+          "notify_pre_complete_message": "Korduva reaalajas edenemise tekst värskendatakse tsükli jooksul. Toetab kohahoidjaid {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Pärast tsükli algust ignoreerige võimsuse langusi nii paljude sekundite jooksul, et vältida vale lõpu tuvastamist esialgses pöörlemisfaasis. Keelamiseks määrake 0. Vaikimisi: 0s.",
               "end_repeat_count": "Enne tsükli lõpetamist tuleb lõputingimuse (võimsus alla väljalülitusviivituse läve) järjestikuste täitmiste arv. Kõrgemad väärtused hoiavad ära valelõpud pauside ajal. Vaikimisi: 1.",
               "min_off_gap": "Kui tsükkel algab selle mitme sekundi jooksul pärast eelmise lõppemist, LIIDEtakse need üheks tsükliks.",
-              "sampling_interval": "Minimaalne proovivõtu intervall sekundites. Sellest kiirusest kiiremaid värskendusi eiratakse. Vaikimisi: 2,0 s."
+              "sampling_interval": "Minimaalne proovivõtu intervall sekundites. Sellest kiirusest kiiremaid värskendusi eiratakse. Vaikimisi: 30 s (2 s pesumasinate, pesumasin-kuivatite ja nõudepesumasinate jaoks)."
             }
           },
           "matching_section": {

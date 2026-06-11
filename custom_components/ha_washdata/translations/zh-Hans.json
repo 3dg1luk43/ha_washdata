@@ -105,7 +105,7 @@
           "notify_icon": "用于通知的图标（例如 mdi：洗衣机）。留空以不发送图标。",
           "notify_start_message": "循环开始时发送的消息。支持 {device} 占位符。",
           "notify_finish_message": "循环结束时发送的消息。支持 {device}、{duration}、{program}, {energy_kwh}, {cost} 占位符。",
-          "notify_pre_complete_message": "消息在完成之前发送。支持 {device}、{minutes} 占位符。"
+          "notify_pre_complete_message": "循环运行时，循环实时进度的文本会更新。支持 {device}、{minutes}、{program} 占位符。"
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "用于通知的图标（例如 mdi：洗衣机）。留空以不发送图标。",
           "notify_start_message": "循环开始时发送的消息。支持 {device} 占位符。",
           "notify_finish_message": "循环结束时发送的消息。支持 {device}、{duration}、{program}, {energy_kwh}, {cost} 占位符。",
-          "notify_pre_complete_message": "消息在完成之前发送。支持 {device}、{minutes} 占位符。",
           "energy_price_entity": "选择保存当前电价的数字实体（例如sensor.electricity_price、input_number.energy_rate）。设置后，启用 {cost} 占位符。如果两者都配置了，则优先于静态值。",
           "energy_price_static": "每千瓦时固定电价。设置后，启用 {cost} 占位符。如果上面配置了实体，则忽略。在消息模板中添加您的货币符号，例如{cost} 欧元。",
           "notify_reminder_message": "一次性提醒文本在预计结束前发送配置的分钟数。与上面的定期实时更新不同。支持 {device}、{minutes}、{program} 占位符。",
           "notify_timeout_seconds": "在这么多秒后自动关闭通知（作为配套应用程序“超时”转发）。设置为 0 以保留它们直到被解雇。默认值：0。",
           "notify_channel": "Android 配套应用通知渠道，用于显示状态、实时进度和提醒通知。频道的声音和重要性是在第一次使用频道名称时在配套应用程序中配置的 - WashData 仅设置频道名称。对于应用程序默认值，将其留空。",
-          "notify_finish_channel": "单独的 Android 通道用于已完成的警报（也由提醒和洗衣等待小车使用），以便它可以有自己的声音。留空以重复使用上面的通道。"
+          "notify_finish_channel": "单独的 Android 通道用于已完成的警报（也由提醒和洗衣等待小车使用），以便它可以有自己的声音。留空以重复使用上面的通道。",
+          "notify_pre_complete_message": "循环运行时，循环实时进度的文本会更新。支持 {device}、{minutes}、{program} 占位符。"
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "周期开始后，忽略如此多秒的功率骤降，以防止初始旋转阶段期间的错误结束检测。设置为 0 以禁用。默认值：0 秒。",
               "end_repeat_count": "在结束周期之前必须连续满足结束条件（功率低于 off_delay 阈值）的次数。较高的值可防止暂停期间出现错误结束。默认值：1。",
               "min_off_gap": "如果一个周期在前一个周期结束后的这么多秒内开始，它们将被合并为一个周期。",
-              "sampling_interval": "最小采样间隔（以秒为单位）。超过此速率的更新将被忽略。默认值：2.0 秒。"
+              "sampling_interval": "最小采样间隔（以秒为单位）。超过此速率的更新将被忽略。默认值：30 秒（洗衣机、洗衣干衣机和洗碗机为 2 秒）。"
             }
           },
           "matching_section": {

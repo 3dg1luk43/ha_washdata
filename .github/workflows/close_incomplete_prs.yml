@@ -1,30 +1,54 @@
-name: Close Incomplete PRs
+name: Close Stale PRs
 
 on:
   schedule:
     - cron: '0 11 * * *'
   workflow_dispatch:
 
+# Comments via the issues API (issues: write) and closes PRs (pull-requests: write).
 permissions:
+  issues: write
   pull-requests: write
 
 jobs:
   close-stale:
-    name: Close PRs missing description after 5 days
+    name: Close PRs past their grace period
     runs-on: ubuntu-latest
     steps:
-      - name: Find and close incomplete PRs
+      - name: Find and close stale PRs
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const LABEL = 'needs description';
-            const GRACE_DAYS = 5;
-            const cutoff = new Date(Date.now() - GRACE_DAYS * 24 * 60 * 60 * 1000);
 
-            // Fetch all open PRs with the label (paginate to be safe)
+            // Each rule closes PRs carrying `label`, `graceDays` after the label was
+            // applied. PRs awaiting maintainer approval (label "awaiting maintainer")
+            // are intentionally NOT listed here — they stay open until the maintainer
+            // accepts the linked issue or closes the PR manually.
+            const RULES = [
+              {
+                label: 'needs description',
+                graceDays: 5,
+                message: (pr) => [
+                  `Hi @${pr.user.login}! This PR has been automatically closed because the description was not completed within 5 days of the warning.`,
+                  '',
+                  "You're welcome to open a new PR once the template is filled in. See the PR template for guidance on what's required.",
+                ].join('\n'),
+              },
+              {
+                label: 'needs accepted issue',
+                graceDays: 3,
+                message: (pr) => [
+                  `Hi @${pr.user.login}! This PR has been automatically closed because it was not linked to an issue with the \`accepted\` label within 3 days.`,
+                  '',
+                  'Please open an issue, wait for it to receive the `accepted` label, then open a new PR referencing it. Thanks for contributing!',
+                ].join('\n'),
+              },
+            ];
+
+            // Fetch all open PRs once (paginate to be safe).
             const prs = await github.paginate(github.rest.pulls.list, {
               owner,
               repo,
@@ -32,34 +56,46 @@ jobs:
               per_page: 100,
             });
 
-            const targets = prs.filter(pr => {
-              const hasLabel = pr.labels.some(l => l.name === LABEL);
-              const olderThanGrace = new Date(pr.created_at) < cutoff;
-              return hasLabel && olderThanGrace;
-            });
+            // When the label was applied — the grace runs from this, NOT from PR
+            // creation. A PR can be labeled long after it was opened, and measuring from
+            // creation would close it earlier than the warning comment promises.
+            const labelAppliedAt = async (prNumber, label) => {
+              let appliedAt = null;
+              try {
+                const events = await github.paginate(github.rest.issues.listEvents, {
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  per_page: 100,
+                });
+                // Events are chronological; keep the most recent time the label was added.
+                for (const ev of events) {
+                  if (ev.event === 'labeled' && ev.label && ev.label.name === label) {
+                    appliedAt = ev.created_at;
+                  }
+                }
+              } catch (e) {
+                console.warn(`Could not fetch events for PR #${prNumber}: ${e.message}`);
+              }
+              return appliedAt;
+            };
 
-            console.log(`Found ${targets.length} PR(s) to close.`);
+            const closed = new Set();
+            for (const rule of RULES) {
+              const cutoff = new Date(Date.now() - rule.graceDays * 24 * 60 * 60 * 1000);
+              for (const pr of prs) {
+                if (closed.has(pr.number)) continue; // already closed under an earlier rule
+                if (!pr.labels.some(l => l.name === rule.label)) continue;
 
-            for (const pr of targets) {
-              const body = [
-                `Hi @${pr.user.login}! This PR has been automatically closed because the description was not completed within ${GRACE_DAYS} days of the warning.`,
-                '',
-                "You're welcome to open a new PR once the template is filled in. See the PR template for guidance on what's required.",
-              ].join('\n');
+                const appliedAt = await labelAppliedAt(pr.number, rule.label);
+                const anchor = appliedAt ? new Date(appliedAt) : new Date(pr.created_at);
+                if (anchor >= cutoff) continue; // still within grace
 
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number: pr.number,
-                body,
-              });
-
-              await github.rest.pulls.update({
-                owner,
-                repo,
-                pull_number: pr.number,
-                state: 'closed',
-              });
-
-              console.log(`Closed PR #${pr.number} (${pr.title})`);
+                await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: rule.message(pr) });
+                await github.rest.pulls.update({ owner, repo, pull_number: pr.number, state: 'closed' });
+                closed.add(pr.number);
+                console.log(`Closed PR #${pr.number} (${pr.title}) — rule: "${rule.label}".`);
+              }
             }
+
+            console.log(`Closed ${closed.size} PR(s).`);

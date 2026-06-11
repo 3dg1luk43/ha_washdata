@@ -105,7 +105,7 @@
           "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi lähettääksesi ilman kuvaketta.",
           "notify_start_message": "Viesti lähetetään, kun sykli alkaa. Tukee paikkamerkkiä {device}.",
           "notify_finish_message": "Viesti lähetetään, kun jakso on päättynyt. Tukee paikkamerkkejä {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Viesti lähetetty ennen valmistumista. Tukee paikkamerkkejä {device}, {minutes}."
+          "notify_pre_complete_message": "Toistuvan live-edistyksen teksti päivittyy syklin aikana. Tukee paikkamerkkejä {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ilmoituksiin käytettävä kuvake (esim. mdi:washing-machine). Jätä tyhjäksi lähettääksesi ilman kuvaketta.",
           "notify_start_message": "Viesti lähetetään, kun sykli alkaa. Tukee paikkamerkkiä {device}.",
           "notify_finish_message": "Viesti lähetetään, kun jakso on päättynyt. Tukee paikkamerkkejä {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Viesti lähetetty ennen valmistumista. Tukee paikkamerkkejä {device}, {minutes}.",
           "energy_price_entity": "Valitse numeerinen kokonaisuus, jolla on nykyinen sähkön hinta (esim. sensor.electricity_price, input_number.energy_rate). Kun asetettu, ottaa käyttöön paikkamerkin {cost}. Se on staattisen arvon edelle, jos molemmat on määritetty.",
           "energy_price_static": "Kiinteä sähkön hinta per kWh. Kun asetettu, ottaa paikkamerkin {cost} käyttöön. Ohitetaan, jos entiteetti on määritetty yllä. Lisää viestipohjaan valuuttasymboli, esim. {cost} €.",
           "notify_reminder_message": "Kertamuistimuistutuksen teksti lähetti vahvistetun minuuttimäärän ennen arvioitua loppua. Erona yllä olevista toistuvista päivityksistä. Tukee {device}, {minutes}, {program} paikkaa.",
           "notify_timeout_seconds": "Hylätkää ilmoitukset automaattisesti näin monen sekunnin jälkeen (lähetetty kumppanisovelluksena \"timeout\"). Nolla pitää heidät poissa. Oletus: 0.",
           "notify_channel": "Android kumppanisovelluksen ilmoituskanava tila, live etenemistä, ja muistutus ilmoitukset. Kanavan ääni ja merkitys määritetään kumppanisovelluksessa, kun ensimmäistä kertaa käytetään kanavan nimeä - WashData asettaa vain kanavan nimen. Jätä tyhjäksi sovelluksen oletusarvoon.",
-          "notify_finish_channel": "Erillinen Android-kanava valmiille hälytykselle (käytetään myös muistutuksessa ja pyykkiä odottavassa nalkussa), jotta sillä voi olla oma ääni. Jätä tyhjäksi käyttääksesi kanavaa yllä."
+          "notify_finish_channel": "Erillinen Android-kanava valmiille hälytykselle (käytetään myös muistutuksessa ja pyykkiä odottavassa nalkussa), jotta sillä voi olla oma ääni. Jätä tyhjäksi käyttääksesi kanavaa yllä.",
+          "notify_pre_complete_message": "Toistuvan live-edistyksen teksti päivittyy syklin aikana. Tukee paikkamerkkejä {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Kun sykli on alkanut, jätä tehohäviöt huomioimatta näin monen sekunnin ajan estääksesi väärän lopputunnistuksen alkupyöritysvaiheen aikana. Aseta arvoksi 0 poistaaksesi käytöstä. Oletus: 0s.",
               "end_repeat_count": "Kuinka monta kertaa lopetusehto (teho alle off_delay-kynnyksen) on täytyttävä peräkkäin ennen jakson lopettamista. Suuremmat arvot estävät vääriä loppuja taukojen aikana. Oletus: 1.",
               "min_off_gap": "Jos sykli alkaa näin monen sekunnin sisällä edellisen päättymisestä, ne YHDISTÄÄN yhdeksi sykliksi.",
-              "sampling_interval": "Vähimmäisnäytteenottoväli sekunneissa. Tätä nopeammat päivitykset ohitetaan. Oletus: 2.0s."
+              "sampling_interval": "Vähimmäisnäytteenottoväli sekunneissa. Tätä nopeammat päivitykset ohitetaan. Oletus: 30 s (2 s pesukoneille, pesukone-kuivauskoneille ja astianpesukoneille)."
             }
           },
           "matching_section": {

@@ -105,7 +105,7 @@
           "notify_icon": "Az értesítésekhez használandó ikon (pl. mdi:mosógép). Hagyja üresen, ha nem szeretne ikont küldeni.",
           "notify_start_message": "Üzenet elküldve, amikor egy ciklus elindul. Támogatja a {device} helyőrzőt.",
           "notify_finish_message": "Üzenet elküldve, amikor egy ciklus véget ért. Támogatja a {device}, {duration}, {program}, {energy_kwh}, {cost} helyőrzőket.",
-          "notify_pre_complete_message": "Üzenet elküldve a befejezés előtt. Támogatja a(z) {device}, {minutes} helyőrzőket."
+          "notify_pre_complete_message": "Az ismétlődő élő haladás szövege a ciklus futása közben frissül. Támogatja a {device}, {minutes}, {program} helyőrzőket."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Az értesítésekhez használandó ikon (pl. mdi:mosógép). Hagyja üresen, ha nem szeretne ikont küldeni.",
           "notify_start_message": "Üzenet elküldve, amikor egy ciklus elindul. Támogatja a {device} helyőrzőt.",
           "notify_finish_message": "Üzenet elküldve, amikor egy ciklus véget ért. Támogatja a {device}, {duration}, {program}, {energy_kwh}, {cost} helyőrzőket.",
-          "notify_pre_complete_message": "Üzenet elküldve a befejezés előtt. Támogatja a(z) {device}, {minutes} helyőrzőket.",
           "energy_price_entity": "Válasszon egy numerikus entitást, amely tartalmazza az aktuális villamosenergia-árat (pl. sensor.electricity_price, input_number.energy_rate). Ha be van állítva, engedélyezi a(z) {cost} helyőrzőt. Elsőbbséget élvez a statikus értékkel szemben, ha mindkettő be van állítva.",
           "energy_price_static": "Fix villanyár kWh-nként. Ha be van állítva, engedélyezi a(z) {cost} helyőrzőt. Figyelmen kívül hagyva, ha egy entitás fent van konfigurálva. Adja hozzá a pénznem szimbólumát az üzenetsablonhoz, pl. {cost} €.",
           "notify_reminder_message": "Az egyszeri emlékeztető szövege elküldte a beállított számú percet a becsült vége előtt. Különbözik a fenti, ismétlődő élő frissítésektől. Támogatja a {device}, {minutes}, {program} helyőrzőket.",
           "notify_timeout_seconds": "Az értesítések automatikus elvetése ennyi másodperc után (a kísérőalkalmazás „időtúllépéseként” továbbítása). Állítsa 0-ra, hogy megőrizze őket az elvetésig. Alapértelmezett: 0.",
           "notify_channel": "Android kísérőalkalmazás-értesítési csatorna az állapotról, az élő folyamatról és az emlékeztetőkről. A csatorna hangja és fontossága a kísérőalkalmazásban állítható be a csatornanév első használatakor – a WashData csak a csatorna nevét állítja be. Hagyja üresen az alkalmazás alapértelmezett beállításához.",
-          "notify_finish_channel": "Külön Android csatorna a kész riasztáshoz (ezt az emlékeztető és a mosásra váró hang is használja), hogy saját hangja legyen. Hagyja üresen a fenti csatorna újrafelhasználásához."
+          "notify_finish_channel": "Külön Android csatorna a kész riasztáshoz (ezt az emlékeztető és a mosásra váró hang is használja), hogy saját hangja legyen. Hagyja üresen a fenti csatorna újrafelhasználásához.",
+          "notify_pre_complete_message": "Az ismétlődő élő haladás szövege a ciklus futása közben frissül. Támogatja a {device}, {minutes}, {program} helyőrzőket."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "A ciklus indítása után hagyja figyelmen kívül a teljesítménycsökkenéseket ennyi másodpercig, hogy elkerülje a téves végérzékelést a kezdeti felpörgetési fázisban. A letiltáshoz állítsa 0-ra. Alapértelmezett: 0s.",
               "end_repeat_count": "A befejezési feltételnek (az off_delay küszöbértéke alatti teljesítmény) egymás után teljesülnie kell a ciklus befejezése előtt. A magasabb értékek megakadályozzák a hamis befejezést a szünetek alatt. Alapértelmezett: 1.",
               "min_off_gap": "Ha egy ciklus az előző befejezésétől számított ennyi másodpercen belül kezdődik, akkor ezek egyetlen ciklusba egyesülnek.",
-              "sampling_interval": "Minimális mintavételi intervallum másodpercben. Az ennél gyorsabb frissítéseket figyelmen kívül hagyja. Alapértelmezett: 2.0s."
+              "sampling_interval": "Minimális mintavételi intervallum másodpercben. Az ennél gyorsabb frissítéseket figyelmen kívül hagyja. Alapértelmezés: 30 s (2 mp mosógépeknél, mosó-szárítógépeknél és mosogatógépeknél)."
             }
           },
           "matching_section": {

@@ -105,7 +105,7 @@
           "notify_icon": "Ikon til brug for meddelelser (f.eks. mdi:vaskemaskine). Lad være tom for at sende uden ikon.",
           "notify_start_message": "Besked sendt, når en cyklus starter. Understøtter {device} pladsholder.",
           "notify_finish_message": "Besked sendt, når en cyklus afsluttes. Understøtter {device}, {duration}, {program}, {energy_kwh}, {cost} pladsholdere.",
-          "notify_pre_complete_message": "Besked sendt før færdiggørelse. Understøtter {device}, {minutes} pladsholdere."
+          "notify_pre_complete_message": "Tekst af de tilbagevendende live-fremskridtsopdateringer, mens cyklussen kører. Understøtter {device}, {minutes}, {program} pladsholdere."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikon til brug for meddelelser (f.eks. mdi:vaskemaskine). Lad være tom for at sende uden ikon.",
           "notify_start_message": "Besked sendt, når en cyklus starter. Understøtter {device} pladsholder.",
           "notify_finish_message": "Besked sendt, når en cyklus afsluttes. Understøtter {device}, {duration}, {program}, {energy_kwh}, {cost} pladsholdere.",
-          "notify_pre_complete_message": "Besked sendt før færdiggørelse. Understøtter {device}, {minutes} pladsholdere.",
           "energy_price_entity": "Vælg en numerisk enhed, der har den aktuelle elpris (f.eks. sensor.electricity_price, input_number.energy_rate). Når den er indstillet, aktiveres pladsholderen {cost}. Har forrang over den statiske værdi, hvis begge er konfigureret.",
           "energy_price_static": "Fast elpris pr. kWh. Når den er indstillet, aktiveres pladsholderen {cost}. Ignoreres, hvis en enhed er konfigureret ovenfor. Tilføj dit valutasymbol i beskedskabelonen, f.eks. {cost} €.",
           "notify_reminder_message": "Tekst af one-time påmindelse sendt det indstillede antal minutter før den anslåede afslutning. Diskret fra de tilbagevendende live opdateringer ovenfor. Understøtter {device}, {minutes}, {program} pladsholdere.",
           "notify_timeout_seconds": "Automatisk afvise meddelelser efter dette mange sekunder (fremsendes som følgesvend app \"timeout\"). Sætter til 0 for at beholde dem, indtil de bliver afskediget. Standard: 0.",
           "notify_channel": "Android følgesvend app meddelelse kanal for status, live fremskridt, og påmindelse meddelelser. Lyden og betydningen af en kanal er konfigureret i følgesvend app første gang kanalnavnet bruges - WashData kun sætter kanalnavnet. Efterlad tom for appen standard.",
-          "notify_finish_channel": "Separat Android kanal til den færdige alarm (bruges også af påmindelsen og vasketøjet-venter nag), så det kan have sin egen lyd. Lad det være tomt at genbruge kanalen ovenfor."
+          "notify_finish_channel": "Separat Android kanal til den færdige alarm (bruges også af påmindelsen og vasketøjet-venter nag), så det kan have sin egen lyd. Lad det være tomt at genbruge kanalen ovenfor.",
+          "notify_pre_complete_message": "Tekst af de tilbagevendende live-fremskridtsopdateringer, mens cyklussen kører. Understøtter {device}, {minutes}, {program} pladsholdere."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Efter cyklus starter, ignorer strømfald i disse mange sekunder for at forhindre falsk slutdetektion under den indledende spin-up fase. Indstil til 0 for at deaktivere. Standard: 0s.",
               "end_repeat_count": "Antal gange, slutbetingelsen (effekt under tærsklen for off_delay) skal opfyldes fortløbende, før cyklussen afsluttes. Højere værdier forhindrer falske afslutninger under pauser. Standard: 1.",
               "min_off_gap": "Hvis en cyklus starter inden for så mange sekunder efter, at den forrige sluttede, vil de blive fusioneret til en enkelt cyklus.",
-              "sampling_interval": "Minimum prøvetagningsinterval i sekunder. Opdateringer hurtigere end denne hastighed vil blive ignoreret. Standard: 2,0s."
+              "sampling_interval": "Minimum prøvetagningsinterval i sekunder. Opdateringer hurtigere end denne hastighed vil blive ignoreret. Standard: 30s (2s for vaskemaskiner, vaskemaskine-tørretumblere og opvaskemaskiner)."
             }
           },
           "matching_section": {

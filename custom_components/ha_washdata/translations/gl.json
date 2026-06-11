@@ -105,7 +105,7 @@
           "notify_icon": "Icona para usar para notificacións (por exemplo, mdi:washing-machine). Deixa en branco para enviar sen icona.",
           "notify_start_message": "Mensaxe enviada cando comeza un ciclo. Admite o marcador de posición {device}.",
           "notify_finish_message": "Mensaxe enviada cando remata un ciclo. Admite os marcadores de posición {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite os marcadores de posición {device}, {minutes}."
+          "notify_pre_complete_message": "Texto das actualizacións recorrentes do progreso en directo mentres se executa o ciclo. Admite os marcadores de posición {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Icona para usar para notificacións (por exemplo, mdi:washing-machine). Deixa en branco para enviar sen icona.",
           "notify_start_message": "Mensaxe enviada cando comeza un ciclo. Admite o marcador de posición {device}.",
           "notify_finish_message": "Mensaxe enviada cando remata un ciclo. Admite os marcadores de posición {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Mensaxe enviada antes de completar. Admite os marcadores de posición {device}, {minutes}.",
           "energy_price_entity": "Seleccione unha entidade numérica que conteña o prezo actual da electricidade (por exemplo, sensor.electricity_price, input_number.energy_rate). Cando se define, activa o marcador de posición {cost}. Ten prioridade sobre o valor estático se ambos están configurados.",
           "energy_price_static": "Prezo fixo da electricidade por kWh. Cando se define, activa o marcador de posición {cost}. Ignorase se unha entidade está configurada anteriormente. Engade o teu símbolo de moeda no modelo de mensaxe, por exemplo. {cost} €.",
           "notify_reminder_message": "O texto do recordatorio único enviou o número configurado de minutos antes do final estimado. Distinción das actualizacións en directo recorrentes anteriores. Admite os marcadores de posición {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Desestima automaticamente as notificacións despois de tantos segundos (previado como a aplicación compañeira \"tempo de espera\"). 0 para mantelos ata que sexan eliminados. Por defecto: 0.",
           "notify_channel": "Android canle de notificación de estado, progreso en directo e notificacións de recordatorios. O son e a importancia dunha canle configúrase na aplicación compañeira a primeira vez que se usa o nome da canle: WashData só establece o nome da canle. Deixe baleiro para a aplicación por defecto.",
-          "notify_finish_channel": "1 Aplicar o sentido do olfacto para percibir o olor de [algo]. Deixar baleiro para reutilizar o canal superior."
+          "notify_finish_channel": "1 Aplicar o sentido do olfacto para percibir o olor de [algo]. Deixar baleiro para reutilizar o canal superior.",
+          "notify_pre_complete_message": "Texto das actualizacións recorrentes do progreso en directo mentres se executa o ciclo. Admite os marcadores de posición {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Despois de comezar o ciclo, ignore as caídas de enerxía durante estes segundos para evitar a detección de final falso durante a fase de arranque inicial. Establécese en 0 para desactivar. Predeterminado: 0s.",
               "end_repeat_count": "Número de veces que se debe cumprir consecutivamente a condición de final (potencia por debaixo do limiar para off_delay) antes de finalizar o ciclo. Os valores máis altos evitan finalidades falsas durante as pausas. Por defecto: 1.",
               "min_off_gap": "Se un ciclo comeza dentro destes segundos desde que remate o anterior, uniranse nun único ciclo.",
-              "sampling_interval": "Intervalo mínimo de mostraxe en segundos. Ignoraranse as actualizacións máis rápidas que esta taxa. Predeterminado: 2,0 s."
+              "sampling_interval": "Intervalo mínimo de mostraxe en segundos. Ignoraranse as actualizacións máis rápidas que esta taxa. Predeterminado: 30 s (2 s para lavadoras, lavadoras-secadoras e lavalouzas)."
             }
           },
           "matching_section": {

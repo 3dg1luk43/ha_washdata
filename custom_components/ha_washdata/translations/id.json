@@ -105,7 +105,7 @@
           "notify_icon": "Ikon yang digunakan untuk notifikasi (misalnya mdi:mesin cuci). Biarkan kosong untuk mengirim tanpa ikon.",
           "notify_start_message": "Pesan dikirim ketika siklus dimulai. Mendukung {device} pengganti.",
           "notify_finish_message": "Pesan dikirim ketika siklus selesai. Mendukung placeholder {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Pesan dikirim sebelum selesai. Mendukung {device}, {minutes} placeholder."
+          "notify_pre_complete_message": "Teks pembaruan kemajuan langsung yang berulang saat siklus berjalan. Mendukung placeholder {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikon yang digunakan untuk notifikasi (misalnya mdi:mesin cuci). Biarkan kosong untuk mengirim tanpa ikon.",
           "notify_start_message": "Pesan dikirim ketika siklus dimulai. Mendukung {device} pengganti.",
           "notify_finish_message": "Pesan dikirim ketika siklus selesai. Mendukung placeholder {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Pesan dikirim sebelum selesai. Mendukung {device}, {minutes} placeholder.",
           "energy_price_entity": "Pilih entitas numerik yang menyimpan harga listrik saat ini (misalnya sensor.electricity_price, input_number.energy_rate). Jika disetel, aktifkan placeholder {cost}. Diutamakan daripada nilai statis jika keduanya dikonfigurasi.",
           "energy_price_static": "Harga listrik tetap per kWh. Jika disetel, aktifkan placeholder {cost}. Diabaikan jika entitas dikonfigurasi di atas. Tambahkan simbol mata uang Anda di templat pesan, mis. {cost}€.",
           "notify_reminder_message": "Teks pengingat satu kali mengirimkan jumlah menit yang dikonfigurasi sebelum perkiraan akhir. Berbeda dengan live update berulang di atas. Mendukung placeholder {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Secara otomatis menutup notifikasi setelah beberapa detik ini (diteruskan sebagai 'batas waktu' aplikasi pendamping). Setel ke 0 untuk menyimpannya hingga ditutup. Bawaan: 0.",
           "notify_channel": "Android saluran notifikasi aplikasi pendamping untuk status, kemajuan langsung, dan notifikasi pengingat. Suara dan pentingnya saluran dikonfigurasikan di aplikasi pendamping saat pertama kali nama saluran digunakan - WashData hanya menetapkan nama saluran. Biarkan kosong untuk default aplikasi.",
-          "notify_finish_channel": "Pisahkan saluran Android untuk peringatan yang sudah selesai (juga digunakan oleh pengingat dan cerewet menunggu cucian) sehingga dapat mempunyai bunyi sendiri. Biarkan kosong untuk menggunakan kembali saluran di atas."
+          "notify_finish_channel": "Pisahkan saluran Android untuk peringatan yang sudah selesai (juga digunakan oleh pengingat dan cerewet menunggu cucian) sehingga dapat mempunyai bunyi sendiri. Biarkan kosong untuk menggunakan kembali saluran di atas.",
+          "notify_pre_complete_message": "Teks pembaruan kemajuan langsung yang berulang saat siklus berjalan. Mendukung placeholder {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Setelah siklus dimulai, abaikan penurunan daya selama beberapa detik untuk mencegah deteksi ujung yang salah selama fase pemutaran awal. Setel ke 0 untuk menonaktifkan. Bawaan: 0 detik.",
               "end_repeat_count": "Berapa kali kondisi akhir (daya di bawah ambang batas untuk off_delay) harus dipenuhi secara berurutan sebelum mengakhiri siklus. Nilai yang lebih tinggi mencegah tujuan yang salah selama jeda. Bawaan: 1.",
               "min_off_gap": "Jika sebuah siklus dimulai dalam beberapa detik dari akhir siklus sebelumnya, siklus tersebut akan DIGABUNG menjadi satu siklus.",
-              "sampling_interval": "Interval pengambilan sampel minimum dalam hitungan detik. Pembaruan yang lebih cepat dari kecepatan ini akan diabaikan. Bawaan: 2,0 detik."
+              "sampling_interval": "Interval pengambilan sampel minimum dalam hitungan detik. Pembaruan yang lebih cepat dari kecepatan ini akan diabaikan. Default: 30 detik (2 detik untuk mesin cuci, mesin cuci-pengering, dan mesin pencuci piring)."
             }
           },
           "matching_section": {

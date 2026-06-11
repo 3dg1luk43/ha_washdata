@@ -105,7 +105,7 @@
           "notify_icon": "Icône à utiliser pour les notifications (par exemple mdi:washing-machine). Laissez vide pour envoyer sans icône.",
           "notify_start_message": "Message envoyé au démarrage d'un cycle. Prend en charge l'espace réservé {device}.",
           "notify_finish_message": "Message envoyé lorsqu'un cycle se termine. Prend en charge les espaces réservés {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Message envoyé avant la fin. Prend en charge les espaces réservés {device}, {minutes}."
+          "notify_pre_complete_message": "Texte des mises à jour récurrentes de la progression en direct pendant l'exécution du cycle. Prend en charge les espaces réservés {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Icône à utiliser pour les notifications (par exemple mdi:washing-machine). Laissez vide pour envoyer sans icône.",
           "notify_start_message": "Message envoyé au démarrage d'un cycle. Prend en charge l'espace réservé {device}.",
           "notify_finish_message": "Message envoyé lorsqu'un cycle se termine. Prend en charge les espaces réservés {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Message envoyé avant la fin. Prend en charge les espaces réservés {device}, {minutes}.",
           "energy_price_entity": "Sélectionnez une entité numérique qui contient le prix actuel de l'électricité (par exemple, sensor.electricity_price, input_number.energy_rate). Lorsqu'il est défini, active l'espace réservé {cost}. A priorité sur la valeur statique si les deux sont configurées.",
           "energy_price_static": "Prix ​​fixe de l'électricité par kWh. Lorsqu'il est défini, active l'espace réservé {cost}. Ignoré si une entité est configurée ci-dessus. Ajoutez votre symbole monétaire dans le modèle de message, par ex. {cost} €.",
           "notify_reminder_message": "Le texte du rappel unique a envoyé le nombre de minutes configuré avant la fin estimée. Distinct des mises à jour récurrentes ci-dessus. Prend en charge {device}, {minutes}, {program} placeholders.",
           "notify_timeout_seconds": "Rejeter automatiquement les notifications après cela plusieurs secondes (transféré comme l'application compagne 'timeout'). Réglez à 0 pour les garder jusqu'à ce qu'ils soient renvoyés. Par défaut : 0.",
           "notify_channel": "Android canal de notification de l'application compagnon pour l'état, le progrès en direct et les notifications de rappel. Le son et l'importance d'un canal sont configurés dans l'application compagnon la première fois que le nom du canal est utilisé - WashData ne définit que le nom du canal. Laisser vide pour l'application par défaut.",
-          "notify_finish_channel": "Séparer le canal Android pour l'alerte terminée (également utilisé par le rappel et le nag d'attente de linge) afin qu'il puisse avoir son propre son. Laissez vide pour réutiliser le canal ci-dessus."
+          "notify_finish_channel": "Séparer le canal Android pour l'alerte terminée (également utilisé par le rappel et le nag d'attente de linge) afin qu'il puisse avoir son propre son. Laissez vide pour réutiliser le canal ci-dessus.",
+          "notify_pre_complete_message": "Texte des mises à jour récurrentes de la progression en direct pendant l'exécution du cycle. Prend en charge les espaces réservés {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Après le démarrage du cycle, ignorez les baisses de puissance pendant ce nombre de secondes afin d'éviter toute détection de fausse fin pendant la phase de démarrage initiale. Réglez sur 0 pour désactiver. Par défaut : 0s.",
               "end_repeat_count": "Nombre de fois où la condition de fin (puissance inférieure au seuil pour off_delay) doit être remplie consécutivement avant de terminer le cycle. Des valeurs plus élevées évitent les fausses fins pendant les pauses. Par défaut : 1.",
               "min_off_gap": "Si un cycle commence dans ce nombre de secondes après la fin du précédent, ils seront FUSIONNÉS en un seul cycle.",
-              "sampling_interval": "Intervalle d'échantillonnage minimum en secondes. Les mises à jour plus rapides que ce taux seront ignorées. Par défaut : 2,0 s."
+              "sampling_interval": "Intervalle d'échantillonnage minimum en secondes. Les mises à jour plus rapides que ce taux seront ignorées. Par défaut : 30 s (2 s pour les lave-linge, les lave-linge séchants et les lave-vaisselle)."
             }
           },
           "matching_section": {

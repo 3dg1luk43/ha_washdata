@@ -5,9 +5,11 @@ from datetime import datetime, timedelta, timezone
 from custom_components.ha_washdata.cycle_detector import CycleDetector, CycleDetectorConfig
 from custom_components.ha_washdata.const import (
     DEVICE_TYPE_DRYER, DEVICE_TYPE_COFFEE_MACHINE,
+    DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_WASHER_DRYER, DEVICE_TYPE_DISHWASHER,
     STATE_RUNNING, STATE_OFF, STATE_PAUSED,
     DEFAULT_OFF_DELAY, DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE,
-    DEVICE_COMPLETION_THRESHOLDS
+    DEVICE_COMPLETION_THRESHOLDS,
+    DEFAULT_SAMPLING_INTERVAL, DEFAULT_SAMPLING_INTERVAL_BY_DEVICE,
 )
 
 def dt(seconds):
@@ -16,6 +18,11 @@ def dt(seconds):
 def flush_buffer(detector, start_t_offset):
     for i in range(1, 81):
         detector.process_reading(0.0, dt(start_t_offset + i))
+
+def test_wet_appliance_sampling_interval_overrides():
+    assert DEFAULT_SAMPLING_INTERVAL == 30.0
+    for dt_ in (DEVICE_TYPE_WASHING_MACHINE, DEVICE_TYPE_WASHER_DRYER, DEVICE_TYPE_DISHWASHER):
+        assert DEFAULT_SAMPLING_INTERVAL_BY_DEVICE[dt_] == 2.0
 
 def test_dryer_thresholds():
     # Verify defaults

@@ -419,6 +419,11 @@ DEFAULT_START_ENERGY_THRESHOLDS_BY_DEVICE = {
 }
 # Default sampling interval by device type
 DEFAULT_SAMPLING_INTERVAL_BY_DEVICE = {
+    # 2s captures the rapid 0<->150W motor/heater oscillation in wet appliances;
+    # the 30s global default discards those spikes and undersamples the cycle.
+    DEVICE_TYPE_WASHING_MACHINE: 2.0,
+    DEVICE_TYPE_WASHER_DRYER: 2.0,
+    DEVICE_TYPE_DISHWASHER: 2.0,
     DEVICE_TYPE_COFFEE_MACHINE: 10.0,  # 10s is sufficient for brew cycles
     DEVICE_TYPE_PUMP: 10.0,  # 10s - pump cycles can be <30 s; 30s default would miss them
 }

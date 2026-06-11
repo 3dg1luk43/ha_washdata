@@ -105,7 +105,7 @@
           "notify_icon": "Ikona za uporabo pri obvestilih (npr. mdi:washing-machine). Pustite prazno za pošiljanje brez ikone.",
           "notify_start_message": "Sporočilo, poslano ob začetku cikla. Podpira nadomestni znak {device}.",
           "notify_finish_message": "Sporočilo, poslano, ko se cikel konča. Podpira nadomestne znake {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Sporočilo, poslano pred dokončanjem. Podpira nadomestne znake {device}, {minutes}."
+          "notify_pre_complete_message": "Besedilo ponavljajočih se posodobitev napredka v živo med potekom cikla. Podpira nadomestne oznake {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikona za uporabo pri obvestilih (npr. mdi:washing-machine). Pustite prazno za pošiljanje brez ikone.",
           "notify_start_message": "Sporočilo, poslano ob začetku cikla. Podpira nadomestni znak {device}.",
           "notify_finish_message": "Sporočilo, poslano, ko se cikel konča. Podpira nadomestne znake {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Sporočilo, poslano pred dokončanjem. Podpira nadomestne znake {device}, {minutes}.",
           "energy_price_entity": "Izberite številsko entiteto, ki vsebuje trenutno ceno električne energije (npr. sensor.electricity_price, input_number.energy_rate). Ko je nastavljeno, omogoči ogrado {cost}. Ima prednost pred statično vrednostjo, če sta konfigurirani obe.",
           "energy_price_static": "Fiksna cena električne energije za kWh. Ko je nastavljeno, omogoči ogrado {cost}. Prezrto, če je entiteta konfigurirana zgoraj. V predlogo sporočila dodajte simbol svoje valute, npr. {cost} €.",
           "notify_reminder_message": "Besedilo enkratnega opomnika je poslalo nastavljeno število minut pred predvidenim koncem. Za razliko od zgornjih ponavljajočih se posodobitev v živo. Podpira nadomestne oznake {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Samodejno opusti obvestila po toliko sekundah (posredovana kot 'časovna omejitev' spremljevalne aplikacije). Nastavite na 0, da jih obdržite, dokler jih ne zavržete. Privzeto: 0.",
           "notify_channel": "Android kanal za obvestila spremljevalne aplikacije za stanje, napredek v živo in obvestila o opomnikih. Zvok in pomembnost kanala se konfigurirata v spremljevalni aplikaciji, ko prvič uporabite ime kanala - WashData nastavi samo ime kanala. Pustite prazno za privzeto aplikacijo.",
-          "notify_finish_channel": "Ločite Android kanal za končano opozorilo (uporabljata ga tudi opomnik in nagovarjanje, ki čaka na perilo), da bo lahko imelo svoj zvok. Pustite prazno za ponovno uporabo zgornjega kanala."
+          "notify_finish_channel": "Ločite Android kanal za končano opozorilo (uporabljata ga tudi opomnik in nagovarjanje, ki čaka na perilo), da bo lahko imelo svoj zvok. Pustite prazno za ponovno uporabo zgornjega kanala.",
+          "notify_pre_complete_message": "Besedilo ponavljajočih se posodobitev napredka v živo med potekom cikla. Podpira nadomestne oznake {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Po začetku cikla ignorirajte padce moči toliko sekund, da preprečite lažno zaznavo konca med fazo začetnega vrtenja. Nastavite na 0, da onemogočite. Privzeto: 0 s.",
               "end_repeat_count": "Kolikokrat mora biti končni pogoj (moč pod pragom za off_delay) zaporedoma izpolnjen pred zaključkom cikla. Višje vrednosti preprečujejo napačne konce med premori. Privzeto: 1.",
               "min_off_gap": "Če se cikel začne v toliko sekundah po koncu prejšnjega, bodo ZDRUŽENI v en sam cikel.",
-              "sampling_interval": "Najmanjši interval vzorčenja v sekundah. Posodobitve, hitrejše od te stopnje, bodo prezrte. Privzeto: 2,0 s."
+              "sampling_interval": "Najmanjši interval vzorčenja v sekundah. Posodobitve, hitrejše od te hitrosti, bodo prezrte. Privzeto: 30 s (2 s za pralne, pralno-sušilne in pomivalne stroje)."
             }
           },
           "matching_section": {

@@ -105,7 +105,7 @@
           "notify_icon": "알림에 사용할 아이콘입니다(예: mdi:washing-machine). 아이콘 없이 보내려면 비워두세요.",
           "notify_start_message": "사이클이 시작될 때 전송되는 메시지입니다. {device} 자리 표시자를 지원합니다.",
           "notify_finish_message": "사이클이 완료될 때 전송되는 메시지입니다. {device}, {duration}, {program}, {energy_kwh}, {cost} 자리 표시자를 지원합니다.",
-          "notify_pre_complete_message": "완료 전에 전송되는 메시지입니다. {device}, {minutes} 자리 표시자를 지원합니다."
+          "notify_pre_complete_message": "주기가 실행되는 동안 반복되는 실시간 진행 상황의 텍스트가 업데이트됩니다. {device}, {minutes}, {program} 자리표시자를 지원합니다."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "알림에 사용할 아이콘입니다(예: mdi:washing-machine). 아이콘 없이 보내려면 비워두세요.",
           "notify_start_message": "사이클이 시작될 때 전송되는 메시지입니다. {device} 자리 표시자를 지원합니다.",
           "notify_finish_message": "사이클이 완료될 때 전송되는 메시지입니다. {device}, {duration}, {program}, {energy_kwh}, {cost} 자리 표시자를 지원합니다.",
-          "notify_pre_complete_message": "완료 전에 전송되는 메시지입니다. {device}, {minutes} 자리 표시자를 지원합니다.",
           "energy_price_entity": "현재 전기 가격을 보유하는 숫자 엔터티를 선택합니다(예: sensor.electricity_price, input_number.energy_rate). 설정되면 {cost} 자리 표시자를 활성화합니다. 둘 다 구성된 경우 정적 값보다 우선합니다.",
           "energy_price_static": "kWh당 전기요금이 고정되어 있습니다. 설정되면 {cost} 자리 표시자를 활성화합니다. 위에서 엔터티가 구성된 경우 무시됩니다. 메시지 템플릿에 통화 기호를 추가하세요. {cost} €.",
           "notify_reminder_message": "일회성 알림 텍스트는 예상 종료 시간 이전에 구성된 시간(분)을 보냈습니다. 위의 반복되는 실시간 업데이트와 다릅니다. {device}, {minutes}, {program} 자리표시자를 지원합니다.",
           "notify_timeout_seconds": "이 몇 초 후에 알림을 자동으로 해제합니다(컴패니언 앱 '시간 초과'로 전달됨). 해제될 때까지 유지하려면 0으로 설정합니다. 기본값: 0.",
           "notify_channel": "상태, 실시간 진행 상황 및 알림 알림을 위한 Android 컴패니언 앱 알림 채널입니다. 채널의 사운드와 중요성은 채널 이름이 처음 사용될 때 동반 앱에서 구성됩니다. WashData는 채널 이름만 설정합니다. 앱 기본값은 비워 두세요.",
-          "notify_finish_channel": "완료 알림을 위한 별도의 Android 채널(알림 및 세탁 대기 잔소리에도 사용됨)이 자체 사운드를 가질 수 있도록 합니다. 위 채널을 재사용하려면 비워두세요."
+          "notify_finish_channel": "완료 알림을 위한 별도의 Android 채널(알림 및 세탁 대기 잔소리에도 사용됨)이 자체 사운드를 가질 수 있도록 합니다. 위 채널을 재사용하려면 비워두세요.",
+          "notify_pre_complete_message": "주기가 실행되는 동안 반복되는 실시간 진행 상황의 텍스트가 업데이트됩니다. {device}, {minutes}, {program} 자리표시자를 지원합니다."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "사이클 시작 후 초기 스핀업 단계에서 오탐 종료를 방지하기 위해 이 시간(초) 동안 전력 강하를 무시합니다. 비활성화하려면 0으로 설정하세요. 기본값: 0초.",
               "end_repeat_count": "사이클을 종료하기 전에 종료 조건(off_delay 동안 임계값 아래의 전력)이 연속으로 충족되어야 하는 횟수입니다. 높을수록 일시 정지 중 오탐 종료를 방지합니다. 기본값: 1.",
               "min_off_gap": "이전 사이클 종료 후 이 시간(초) 이내에 새 사이클이 시작되면 하나로 병합됩니다.",
-              "sampling_interval": "최소 샘플링 간격(초)입니다. 이보다 빠른 업데이트는 무시됩니다. 기본값: 2.0초."
+              "sampling_interval": "최소 샘플링 간격(초)입니다. 이 속도보다 빠른 업데이트는 무시됩니다. 기본값: 30초(세탁기, 세탁기-건조기, 식기세척기의 경우 2초)."
             }
           },
           "matching_section": {

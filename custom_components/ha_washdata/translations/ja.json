@@ -105,7 +105,7 @@
           "notify_icon": "通知に使用するアイコン（例：mdi:washing-machine）。空白にするとアイコンなしで送信。",
           "notify_start_message": "サイクル開始時に送信されるメッセージ。{device} プレースホルダーに対応。",
           "notify_finish_message": "サイクル終了時に送信されるメッセージ。{device}、{duration}、{program}, {energy_kwh}, {cost} プレースホルダーに対応。",
-          "notify_pre_complete_message": "完了前に送信されるメッセージ。{device}、{minutes} プレースホルダーに対応。"
+          "notify_pre_complete_message": "サイクルの実行中に定期的に更新されるライブ進行状況のテキスト。 {device}、{minutes}、{program} プレースホルダーをサポートします。"
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "通知に使用するアイコン（例：mdi:washing-machine）。空白にするとアイコンなしで送信。",
           "notify_start_message": "サイクル開始時に送信されるメッセージ。{device} プレースホルダーに対応。",
           "notify_finish_message": "サイクル終了時に送信されるメッセージ。{device}、{duration}、{program}, {energy_kwh}, {cost} プレースホルダーに対応。",
-          "notify_pre_complete_message": "完了前に送信されるメッセージ。{device}、{minutes} プレースホルダーに対応。",
           "energy_price_entity": "現在の電力価格を保持する数値エンティティを選択します (例: sensor.electricity_price、input_number.energy_rate)。設定すると、{cost} プレースホルダーが有効になります。両方が設定されている場合は、静的な値よりも優先されます。",
           "energy_price_static": "kWhあたりの固定電力料金。設定すると、{cost} プレースホルダーが有効になります。エンティティが上記で構成されている場合は無視されます。メッセージ テンプレートに通貨記号を追加します。 {cost} ユーロ。",
           "notify_reminder_message": "1 回限りのリマインダーのテキストは、終了予定時刻の設定された分数前に送信されます。上記の定期的なライブ アップデートとは異なります。 {device}、{minutes}、{program} プレースホルダーをサポートします。",
           "notify_timeout_seconds": "この秒数が経過すると通知を自動的に消去します (コンパニオン アプリの「タイムアウト」として転送されます)。 0 に設定すると、破棄されるまで保持されます。デフォルト: 0。",
           "notify_channel": "Android コンパニオン アプリのステータス、進行状況、リマインダー通知用の通知チャネル。チャンネルのサウンドと重要性は、チャンネル名が初めて使用されるときにコンパニオン アプリで設定されます。WashData はチャンネル名のみを設定します。アプリのデフォルトの場合は空のままにします。",
-          "notify_finish_channel": "終了アラート用に別の Android チャンネルを作成し (リマインダーや洗濯待ちの小言でも使用)、独自のサウンドを持たせることができます。上のチャネルを再利用するには、空のままにしておきます。"
+          "notify_finish_channel": "終了アラート用に別の Android チャンネルを作成し (リマインダーや洗濯待ちの小言でも使用)、独自のサウンドを持たせることができます。上のチャネルを再利用するには、空のままにしておきます。",
+          "notify_pre_complete_message": "サイクルの実行中に定期的に更新されるライブ進行状況のテキスト。 {device}、{minutes}、{program} プレースホルダーをサポートします。"
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "サイクル開始後、初期スピンアップ中の誤終了検知を防ぐため、この秒数の間は電力降下を無視します。0に設定すると無効になります。デフォルト：0秒。",
               "end_repeat_count": "サイクルを終了する前に終了条件（off_delay の間しきい値を下回る電力）が連続して満たされる必要がある回数。高い値は一時停止中の誤終了を防ぎます。デフォルト：1。",
               "min_off_gap": "前のサイクル終了からこの秒数以内に新しいサイクルが開始した場合、2つのサイクルは1つに統合されます。",
-              "sampling_interval": "最小サンプリング間隔（秒）。この間隔より速い更新は無視されます。デフォルト：2.0秒。"
+              "sampling_interval": "最小サンプリング間隔 (秒単位)。この速度よりも速い更新は無視されます。デフォルト: 30 秒 (洗濯機、洗濯乾燥機、食器洗い機の場合は 2 秒)。"
             }
           },
           "matching_section": {

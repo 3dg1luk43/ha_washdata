@@ -9,6 +9,14 @@ on:
 permissions:
   contents: read
 
+# pull_request_target re-fires on every edit/synchronize. Bots (e.g. CodeRabbit
+# editing the PR body) can trigger several events in quick succession, which
+# previously produced overlapping runs that each posted a duplicate comment.
+# Serialize per PR and cancel superseded runs so only the latest state is acted on.
+concurrency:
+  group: validate-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   check-completeness:
     name: Check PR Description
@@ -34,6 +42,11 @@ jobs:
               return;
             }
 
+            if (pr.state === 'closed') {
+              console.log('PR is closed — skipping completeness check.');
+              return;
+            }
+
             const BOT_MARKER = '<!-- pr-validator-completeness-bot -->';
             const LABEL = 'needs description';
 
@@ -51,9 +64,9 @@ jobs:
 
             const isComplete = descriptionOk && typeOk;
 
-            // Find existing bot comment
-            const comments = await github.rest.issues.listComments({ owner, repo, issue_number: prNumber });
-            const existing = comments.data.find(c => c.body && c.body.includes(BOT_MARKER));
+            // Find existing bot comment (paginate so the marker is not missed on busy PRs)
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: prNumber, per_page: 100 });
+            const existing = comments.find(c => c.body && c.body.includes(BOT_MARKER));
 
             if (isComplete) {
               // Remove warning label if present
@@ -117,22 +130,38 @@ jobs:
               return;
             }
 
+            if (pr.state === 'closed') {
+              console.log('PR already closed — skipping issue link check.');
+              return;
+            }
+
             const BOT_MARKER = '<!-- pr-validator-issue-link-bot -->';
 
-            // Determine if this is a translation-only PR
-            let isTranslationPR = false;
+            // Determine if this PR only touches localization assets. Translation work is
+            // exempt from the accepted-issue requirement. A UI-text change necessarily
+            // edits strings.json (the source of truth) AND regenerates every
+            // translations/*.json file, so strings.json counts as a localization asset
+            // too — otherwise a one-line UI string fix would be wrongly treated as a code
+            // PR just because of the retranslation churn it drags along.
+            //
+            // Paginate the file list: listFiles returns only the first page (30) by
+            // default, so a PR with many files could be misclassified if a
+            // non-localization file fell beyond the first page.
+            const TRANSLATIONS_DIR = 'custom_components/ha_washdata/translations/';
+            const STRINGS_SOURCE = 'custom_components/ha_washdata/strings.json';
+            const isLocalizationFile = (f) => f.startsWith(TRANSLATIONS_DIR) || f === STRINGS_SOURCE;
+
+            let isLocalizationPR = false;
             try {
-              const filesResp = await github.rest.pulls.listFiles({ owner, repo, pull_number: prNumber });
-              const files = filesResp.data.map(f => f.filename);
-              isTranslationPR = files.length > 0 && files.every(f =>
-                f.startsWith('custom_components/ha_washdata/translations/')
-              );
+              const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: prNumber, per_page: 100 });
+              const filenames = files.map(f => f.filename);
+              isLocalizationPR = filenames.length > 0 && filenames.every(isLocalizationFile);
             } catch (e) {
               console.warn(`Could not fetch changed files: ${e.message}`);
             }
 
-            if (isTranslationPR) {
-              console.log('Translation-only PR — skipping issue link check.');
+            if (isLocalizationPR) {
+              console.log('Localization-only PR (translations/strings.json) — skipping issue link check.');
               return;
             }
 
@@ -150,43 +179,118 @@ jobs:
               }
             }
 
-            // Check if any referenced issue carries the 'accepted' label
+            // Resolve referenced issues: keep those that exist and are real issues
+            // (not PRs). Track whether any carries the 'accepted' label.
+            const referencedIssues = [];
             let hasAccepted = false;
             for (const num of issueNums) {
               try {
                 const issue = await github.rest.issues.get({ owner, repo, issue_number: num });
                 if (issue.data.pull_request) continue; // skip PR references
+                referencedIssues.push(issue.data);
                 if (issue.data.labels.some(l => l.name === 'accepted')) {
                   hasAccepted = true;
-                  break;
                 }
               } catch (_) {}
             }
 
+            // Labels: NEEDS_ISSUE drives the scheduled 3-day auto-close; AWAITING parks
+            // the PR while the maintainer reviews a linked-but-unapproved issue (the
+            // auto-closer ignores AWAITING, so these PRs are not closed automatically).
+            const NEEDS_ISSUE_LABEL = 'needs accepted issue';
+            const AWAITING_LABEL = 'awaiting maintainer';
+
+            const removeLabelSafe = async (name) => {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number: prNumber, name });
+              } catch (_) {}
+            };
+            const addLabelSafe = async (name) => {
+              try {
+                await github.rest.issues.addLabels({ owner, repo, issue_number: prNumber, labels: [name] });
+              } catch (e) {
+                console.warn(`Could not add label "${name}": ${e.message}. Make sure the label exists in the repo.`);
+              }
+            };
+
+            // Existing bot notice on the PR (paginate so it is not missed on busy PRs).
+            const prComments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: prNumber, per_page: 100 });
+            const existingNotice = prComments.find(c => c.body && c.body.includes(BOT_MARKER));
+            const upsertNotice = async (body) => {
+              if (existingNotice) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existingNotice.id, body });
+              } else {
+                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
+              }
+            };
+
+            // Case 1 — linked to an accepted issue: pass and clear any prior warning.
             if (hasAccepted) {
               console.log('PR is linked to an accepted issue. ✓');
+              await removeLabelSafe(NEEDS_ISSUE_LABEL);
+              await removeLabelSafe(AWAITING_LABEL);
+              if (existingNotice) {
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: existingNotice.id });
+              }
               return;
             }
 
-            // No accepted issue found — close the PR immediately
-            const closeBody = [
+            // Case 2 — an issue is linked but not yet accepted: wait on the maintainer.
+            // Do NOT close; ping the maintainer once per (issue, PR) pair.
+            if (referencedIssues.length > 0) {
+              await removeLabelSafe(NEEDS_ISSUE_LABEL); // not on the auto-close track
+              await addLabelSafe(AWAITING_LABEL);
+
+              const issueList = referencedIssues.map(i => `#${i.number}`).join(', ');
+              const plural = referencedIssues.length > 1;
+              await upsertNotice([
+                BOT_MARKER,
+                `Hi @${prAuthor}! This PR references ${issueList}, which ${plural ? 'have' : 'has'} not yet received the \`accepted\` label.`,
+                '',
+                `@${owner} has been notified and will review the linked ${plural ? 'issues' : 'issue'}. Once the \`accepted\` label is added there, this PR will pass the check automatically.`,
+                '',
+                'Nothing more is needed from you for now — thanks for your patience!',
+              ].join('\n'));
+
+              for (const issue of referencedIssues) {
+                const PING_MARKER = `<!-- washdata-pending-approval-ping:pr-${prNumber} -->`;
+                try {
+                  const issueComments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: issue.number, per_page: 100 });
+                  if (issueComments.some(c => c.body && c.body.includes(PING_MARKER))) continue; // pinged already
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    body: [
+                      PING_MARKER,
+                      `@${owner} — PR #${prNumber} by @${prAuthor} is linked to this issue and is **waiting for your approval**.`,
+                      '',
+                      'If you approve this work, add the `accepted` label to this issue and the PR check will pass automatically.',
+                    ].join('\n'),
+                  });
+                  console.log(`Pinged @${owner} on issue #${issue.number} for PR #${prNumber}.`);
+                } catch (e) {
+                  console.warn(`Could not ping on issue #${issue.number}: ${e.message}`);
+                }
+              }
+              return;
+            }
+
+            // Case 3 — no valid issue linked at all: warn and start the 3-day grace.
+            await removeLabelSafe(AWAITING_LABEL);
+            await addLabelSafe(NEEDS_ISSUE_LABEL);
+            await upsertNotice([
               BOT_MARKER,
               `Hi @${prAuthor}, thank you for your interest in contributing to WashData!`,
               '',
-              'This PR has been **automatically closed** because it is not linked to an issue with the `accepted` label.',
-              '',
-              'To have your contribution considered, please follow this process:',
+              'This PR is **not yet linked to an issue with the `accepted` label**. To have your contribution considered, please follow this process:',
               '',
               `1. **Open an issue** — create a [Bug Report](https://github.com/${owner}/${repo}/issues/new?template=bug_report.yml) or [Feature Request](https://github.com/${owner}/${repo}/issues/new?template=feature_request.yml) describing what you want to fix or build.`,
               '2. **Indicate your intent** — check the box at the bottom of the issue form confirming you plan to submit a PR.',
-              '3. **Wait for the `accepted` label** — the maintainer will review your issue and add the `accepted` label if they approve you working on it.',
-              '4. **Open a new PR** — once the issue is accepted, open a PR and reference the issue number (e.g. `Closes #NNN`).',
+              '3. **Reference it here** — edit this PR description to include `Closes #NNN`. The maintainer will then be pinged to review and approve.',
               '',
-              '> **Translation PRs are exempt** from this requirement and can be opened directly without a linked issue.',
+              '> **Localization PRs** (files under `translations/` and `strings.json`) are exempt and can be opened directly.',
               '',
-              'Feel free to start a new PR once your issue has been accepted!',
-            ].join('\n');
-
-            await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body: closeBody });
-            await github.rest.pulls.update({ owner, repo, pull_number: prNumber, state: 'closed' });
-            console.log(`PR #${prNumber} closed — no accepted issue linked.`);
+              '> ⏳ This PR will be **automatically closed in 3 days** if no issue is linked. Linking an issue stops the timer.',
+            ].join('\n'));
+            console.log(`PR #${prNumber} flagged — no accepted issue linked (3-day grace started).`);
