@@ -105,7 +105,7 @@
           "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:washing-machine). Eidel loossen fir ouni Ikon ze schécken.",
           "notify_start_message": "Message geschéckt wann en Zyklus ufänkt. Ënnerstëtzt {device} Plazhalter.",
           "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program}, {energy_kwh}, {cost} Plazhalter.",
-          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter."
+          "notify_pre_complete_message": "Text vun de widderhuelende Live Fortschrëtterupdates wärend den Zyklus leeft. Ënnerstëtzt {device}, {minutes}, {program} Plazhalter."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikon fir Notifikatiounen ze benotzen (zB mdi:washing-machine). Eidel loossen fir ouni Ikon ze schécken.",
           "notify_start_message": "Message geschéckt wann en Zyklus ufänkt. Ënnerstëtzt {device} Plazhalter.",
           "notify_finish_message": "Message geschéckt wann en Zyklus fäerdeg ass. Ënnerstëtzt {device}, {duration}, {program}, {energy_kwh}, {cost} Plazhalter.",
-          "notify_pre_complete_message": "Message virum Ofschloss geschéckt. Ënnerstëtzt {device}, {minutes} Plazhalter.",
           "energy_price_entity": "Wielt eng numeresch Entitéit déi den aktuellen Stroumpräis hält (zB Sensor.electricity_price, input_number.energy_rate). Wann agestallt, aktivéiert den {cost} Plazhalter. Huelt Virrang iwwer de statesche Wäert wa béid konfiguréiert sinn.",
           "energy_price_static": "Fixe Stroumpräis pro kWh. Wann agestallt, aktivéiert den {cost} Plazhalter. Ignoréiert wann eng Entitéit uewen konfiguréiert ass. Füügt Äert Währungssymbol an de Message Schabloun, z.B. {cost} €.",
           "notify_reminder_message": "Den Text vun der eemoleger Erënnerung huet déi konfiguréiert Zuel vu Minutte virum geschätzte Enn geschéckt. Ënnerscheed vun de widderhuelende Live Updates hei uewen. Ënnerstëtzt {device}, {minutes}, {program} Plazhalter.",
           "notify_timeout_seconds": "Entlooss automatesch Notifikatiounen no dëse ville Sekonnen (virgeschriwwe wéi d'Begleeder App 'Timeout'). Setzt op 0 fir se ze halen bis se entlooss ginn. Standard: 0.",
           "notify_channel": "Android Begleeder App Notifikatiounskanal fir Status, Live Fortschrëtter, an Erënnerung Notifikatiounen. Den Sound an d'Wichtegkeet vun engem Kanal sinn an der Begleeder App konfiguréiert déi éischte Kéier de Kanalnumm benotzt gëtt - WashData setzt nëmmen de Kanalnumm. Loosst eidel fir d'App Default.",
-          "notify_finish_channel": "Separat Android Kanal fir de fäerdegen Alarm (och benotzt vun der Erënnerung an der Wäsch-Waart Nag) sou datt et säin eegene Sound kann hunn. Loosst eidel fir de Kanal uewen ze benotzen."
+          "notify_finish_channel": "Separat Android Kanal fir de fäerdegen Alarm (och benotzt vun der Erënnerung an der Wäsch-Waart Nag) sou datt et säin eegene Sound kann hunn. Loosst eidel fir de Kanal uewen ze benotzen.",
+          "notify_pre_complete_message": "Text vun de widderhuelende Live Fortschrëtterupdates wärend den Zyklus leeft. Ënnerstëtzt {device}, {minutes}, {program} Plazhalter."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Nodeems de Zyklus ufänkt, Power Dips fir dës vill Sekonnen ignoréieren fir falsch Enn-Detektioun während der initialer Anlafphase z'evitéieren. Op 0 setzen fir auszeschalten. Standard: 0s.",
               "end_repeat_count": "Unzuel vun Mol d'Endbedingung (Kraaft ënner der Schwell fir off_delay) konsekutiv erfëllt sinn muss ier de Zyklus ofgeschloss gëtt. Méi héich Wäerter verhënneren falsch Enn während Pausen. Standard: 1.",
               "min_off_gap": "Wann en Zyklus bannent dëse ville Sekonnen vum viregten Enn ufänkt, gi se an engem eenzege Zyklus fusionéiert.",
-              "sampling_interval": "Minimum Sampling Intervall a Sekonnen. Updates méi séier wéi dësen Taux ginn ignoréiert. Standard: 2,0s."
+              "sampling_interval": "Minimum Sampling Intervall a Sekonnen. Updates méi séier wéi dësen Taux ginn ignoréiert. Standard: 30s (2s fir Wäschmaschinnen, Wäschmaschinn-Trockner, an Spullmaschinnen)."
             }
           },
           "matching_section": {

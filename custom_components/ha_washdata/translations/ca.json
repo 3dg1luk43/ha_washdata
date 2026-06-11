@@ -105,7 +105,7 @@
           "notify_icon": "Icona per utilitzar per a les notificacions (p. ex. mdi:washing-machine). Deixeu-lo en blanc per enviar sense icona.",
           "notify_start_message": "Missatge enviat quan comença un cicle. Admet {device} marcador de posició.",
           "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició."
+          "notify_pre_complete_message": "El text de les actualitzacions recurrents de progrés en directe mentre s'executa el cicle. Admet marcadors de posició {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Icona per utilitzar per a les notificacions (p. ex. mdi:washing-machine). Deixeu-lo en blanc per enviar sense icona.",
           "notify_start_message": "Missatge enviat quan comença un cicle. Admet {device} marcador de posició.",
           "notify_finish_message": "Missatge enviat quan acaba un cicle. Admet marcadors de posició {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Missatge enviat abans de finalitzar. Admet {device}, {minutes} marcadors de posició.",
           "energy_price_entity": "Seleccioneu una entitat numèrica que contingui el preu actual de l'electricitat (p. ex., sensor.electricity_price, input_number.energy_rate). Quan s'estableix, activa el marcador de posició {cost}. Té prioritat sobre el valor estàtic si tots dos estan configurats.",
           "energy_price_static": "Preu fix de l'electricitat per kWh. Quan s'estableix, activa el marcador de posició {cost}. S'ignora si una entitat està configurada més amunt. Afegiu el vostre símbol de moneda a la plantilla del missatge, p. ex. {cost} €.",
           "notify_reminder_message": "Text del recordatori d' una vegada enviat el nombre de minuts configurats abans del final estimat. Discinta des de les actualitzacions de la vida recurrent a dalt. Implementació {device}, {minutes}, variable {program}.",
           "notify_timeout_seconds": "Mostra automàticament les notificacions després d' aquests molts segons (reprodueix- les com a 'timeout' del company). Posa a 0 per a mantenir-los fins que es desconnectin. Omissió: 0.",
           "notify_channel": "Canal de notificació Android per a l' estat, progrés i notificacions de recordatori. El so i la importància d' un canal estan configurats en l' aplicació del company la primera vegada que s' usa el nom del canal - RenshData només estableix el nom del canal. Deixa buit per omissió l' aplicació.",
-          "notify_finish_channel": "Separa el canal Android per a l' alerta finalitzada (també usat pel recordatori i l' expulsió de la roba) per tal que pugui tenir el seu propi so. Deixa buit per a tornar a utilitzar el canal de dalt."
+          "notify_finish_channel": "Separa el canal Android per a l' alerta finalitzada (també usat pel recordatori i l' expulsió de la roba) per tal que pugui tenir el seu propi so. Deixa buit per a tornar a utilitzar el canal de dalt.",
+          "notify_pre_complete_message": "El text de les actualitzacions recurrents de progrés en directe mentre s'executa el cicle. Admet marcadors de posició {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Després d'iniciar el cicle, ignoreu les caigudes de potència durant aquests segons per evitar la detecció de finals falsos durant la fase inicial d'engegada. Establiu a 0 per desactivar. Per defecte: 0 s.",
               "end_repeat_count": "Nombre de vegades que la condició final (potència per sota del llindar per off_delay) s'ha de complir consecutivament abans d'acabar el cicle. Els valors més alts eviten finals falsos durant les pauses. Per defecte: 1.",
               "min_off_gap": "Si un cicle s'inicia en tants segons des de la finalització de l'anterior, es FUSIONARÀ en un sol cicle.",
-              "sampling_interval": "Interval mínim de mostreig en segons. Les actualitzacions més ràpides que aquesta velocitat s'ignoraran. Per defecte: 2,0 s."
+              "sampling_interval": "Interval mínim de mostreig en segons. Les actualitzacions més ràpides que aquesta velocitat s'ignoraran. Per defecte: 30 s (2 s per a rentadores, rentadores-assecadores i rentavaixelles)."
             }
           },
           "matching_section": {

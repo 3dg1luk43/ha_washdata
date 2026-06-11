@@ -201,7 +201,7 @@
               "running_dead_zone": "After cycle starts, ignore power dips for this many seconds to prevent false end detection during initial spin-up phase. Set to 0 to disable. Default: 3s.",
               "end_repeat_count": "Number of times the end condition (power below threshold for off_delay) must be met consecutively before ending the cycle. Higher values prevent false ends during pauses. Default: 1.",
               "min_off_gap": "If a cycle starts within this many seconds of the previous one ending, they will be MERGED into a single cycle.",
-              "sampling_interval": "Minimum sampling interval in seconds. Updates faster than this rate will be ignored. Default: 30s."
+              "sampling_interval": "Minimum sampling interval in seconds. Updates faster than this rate will be ignored. Default: 30s (2s for washing machines, washer-dryers, and dishwashers)."
             }
           },
           "matching_section": {

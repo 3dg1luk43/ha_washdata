@@ -105,7 +105,7 @@
           "notify_icon": "Symbol zur Verwendung für Benachrichtigungen (z. B. mdi:washing-machine). Lassen Sie das Feld leer, um ohne Symbol zu senden.",
           "notify_start_message": "Nachricht wird gesendet, wenn ein Zyklus beginnt. Unterstützt den Platzhalter {device}.",
           "notify_finish_message": "Nachricht wird gesendet, wenn ein Zyklus beendet ist. Unterstützt die Platzhalter {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Nachricht vor Abschluss gesendet. Unterstützt die Platzhalter {device}, {minutes}."
+          "notify_pre_complete_message": "Text der wiederkehrenden Live-Fortschrittsaktualisierungen während der Ausführung des Zyklus. Unterstützt die Platzhalter {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Symbol zur Verwendung für Benachrichtigungen (z. B. mdi:washing-machine). Lassen Sie das Feld leer, um ohne Symbol zu senden.",
           "notify_start_message": "Nachricht wird gesendet, wenn ein Zyklus beginnt. Unterstützt den Platzhalter {device}.",
           "notify_finish_message": "Nachricht wird gesendet, wenn ein Zyklus beendet ist. Unterstützt die Platzhalter {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Nachricht vor Abschluss gesendet. Unterstützt die Platzhalter {device}, {minutes}.",
           "energy_price_entity": "Wählen Sie eine numerische Entität aus, die den aktuellen Strompreis enthält (z. B. sensor.electricity_price, input_number.energy_rate). Wenn festgelegt, wird der Platzhalter {cost} aktiviert. Hat Vorrang vor dem statischen Wert, wenn beide konfiguriert sind.",
           "energy_price_static": "Fester Strompreis pro kWh. Wenn festgelegt, wird der Platzhalter {cost} aktiviert. Wird ignoriert, wenn oben eine Entität konfiguriert ist. Fügen Sie Ihr Währungssymbol in die Nachrichtenvorlage ein, z. B. {cost} €.",
           "notify_reminder_message": "Text der einmaligen Erinnerung, der die konfigurierte Anzahl von Minuten vor dem voraussichtlichen Ende gesendet hat. Unterscheidet sich von den oben genannten wiederkehrenden Live-Updates. Unterstützt die Platzhalter {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Benachrichtigungen werden nach dieser Anzahl von Sekunden automatisch verworfen (weitergeleitet als „Timeout“ der Begleit-App). Auf 0 setzen, um sie bis zur Entlassung beizubehalten. Standard: 0.",
           "notify_channel": "Android Begleit-App-Benachrichtigungskanal für Status, Live-Fortschritt und Erinnerungsbenachrichtigungen. Der Ton und die Wichtigkeit eines Kanals werden bei der ersten Verwendung des Kanalnamens in der Begleit-App konfiguriert – WashData legt nur den Kanalnamen fest. Für die App-Standardeinstellung leer lassen.",
-          "notify_finish_channel": "Separater Android-Kanal für die fertige Warnung (wird auch von der Erinnerung und dem Wäsche-Warten-Meckern verwendet), damit er seinen eigenen Ton haben kann. Lassen Sie das Feld leer, um den Kanal oben wiederzuverwenden."
+          "notify_finish_channel": "Separater Android-Kanal für die fertige Warnung (wird auch von der Erinnerung und dem Wäsche-Warten-Meckern verwendet), damit er seinen eigenen Ton haben kann. Lassen Sie das Feld leer, um den Kanal oben wiederzuverwenden.",
+          "notify_pre_complete_message": "Text der wiederkehrenden Live-Fortschrittsaktualisierungen während der Ausführung des Zyklus. Unterstützt die Platzhalter {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Ignorieren Sie nach dem Start des Zyklus Stromeinbrüche für diese Anzahl von Sekunden, um eine falsche Enderkennung während der anfänglichen Hochlaufphase zu verhindern. Zum Deaktivieren auf 0 setzen. Standard: 0s.",
               "end_repeat_count": "Gibt an, wie oft die Endbedingung (Leistung unter dem Schwellenwert für Ausschaltverzögerung) nacheinander erfüllt sein muss, bevor der Zyklus beendet wird. Höhere Werte verhindern falsches Ende während Pausen. Standard: 1.",
               "min_off_gap": "Wenn ein Zyklus innerhalb dieser Anzahl von Sekunden nach dem Ende des vorherigen beginnt, werden sie zu einem einzigen Zyklus zusammengeführt.",
-              "sampling_interval": "Mindestabtastintervall in Sekunden. Aktualisierungen, die schneller als diese Rate sind, werden ignoriert. Standard: 2,0 s."
+              "sampling_interval": "Mindestabtastintervall in Sekunden. Aktualisierungen, die schneller als diese Rate sind, werden ignoriert. Standard: 30 Sek. (2 Sek. für Waschmaschinen, Waschtrockner und Geschirrspüler)."
             }
           },
           "matching_section": {

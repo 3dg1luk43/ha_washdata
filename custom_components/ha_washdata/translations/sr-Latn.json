@@ -105,7 +105,7 @@
           "notify_icon": "Ikona za korišćenje u obaveštenjima (npr. mdi:washing-machine). Ostavi praznim da pošalješ bez ikone.",
           "notify_start_message": "Poruka koja se šalje kada ciklus počne. Podržava {device} čuvar mesta.",
           "notify_finish_message": "Poruka koja se šalje kada se ciklus završi. Podržava čuvare mesta {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Poruka poslata pre završetka. Podržava {device}, {minutes} čuvare mesta."
+          "notify_pre_complete_message": "Tekst ponavljajućih ažuriranja napretka uživo dok ciklus traje. Podržava čuvare mesta {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikona za korišćenje u obaveštenjima (npr. mdi:washing-machine). Ostavi praznim da pošalješ bez ikone.",
           "notify_start_message": "Poruka koja se šalje kada ciklus počne. Podržava {device} čuvar mesta.",
           "notify_finish_message": "Poruka koja se šalje kada se ciklus završi. Podržava čuvare mesta {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Poruka poslata pre završetka. Podržava {device}, {minutes} čuvare mesta.",
           "energy_price_entity": "Izaberite numerički entitet koji drži trenutnu cenu električne energije (npr. senzor. cena_električne energije, broj_unosa. stopa_energije). Kada je podešeno, omogućava čuvar mesta {cost}. Ima prednost nad statičkom vrednošću ako su obe konfigurisane.",
           "energy_price_static": "Fiksna cena električne energije po kVh. Kada je podešeno, omogućava čuvar mesta {cost}. Ignoriše se ako je entitet konfigurisan gore. Dodajte simbol valute u šablon poruke, npr. {cost} €.",
           "notify_reminder_message": "Tekst jednokratnog podsetnika poslao je konfigurisani broj minuta pre procenjenog kraja. Za razliku od ponavljajućih ažuriranja uživo iznad. Podržava čuvare mesta {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Automatski odbaci obaveštenja posle ovoliko sekundi (prosleđuje se kao „vremensko ograničenje“ prateće aplikacije). Postavite na 0 da biste ih zadržali dok ih ne odbacite. Podrazumevano: 0.",
           "notify_channel": "Android kanal za obaveštenja prateće aplikacije za status, napredak uživo i obaveštenja o podsetnicima. Zvuk i važnost kanala se konfigurišu u pratećoj aplikaciji kada se prvi put koristi naziv kanala - WashData samo postavlja ime kanala. Ostavite prazno za podrazumevanu aplikaciju.",
-          "notify_finish_channel": "Odvojite Android kanal za završeno upozorenje (koji se takođe koristi za podsetnik i zagovor za pranje veša) kako bi mogao da ima svoj zvuk. Ostavite prazno da ponovo koristite kanal iznad."
+          "notify_finish_channel": "Odvojite Android kanal za završeno upozorenje (koji se takođe koristi za podsetnik i zagovor za pranje veša) kako bi mogao da ima svoj zvuk. Ostavite prazno da ponovo koristite kanal iznad.",
+          "notify_pre_complete_message": "Tekst ponavljajućih ažuriranja napretka uživo dok ciklus traje. Podržava čuvare mesta {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Nakon što ciklus počne, zanemari padove snage ovoliko sekundi da spreči lažno otkrivanje kraja tokom početne faze okretanja. Postavi na 0 da onemogućiš. Podrazumevano: 0s.",
               "end_repeat_count": "Koliko puta krajnji uslov (snaga ispod praga za off_delay) mora biti ispunjen uzastopno pre završetka ciklusa. Više vrednosti sprečavaju lažne završetke tokom pauza. Podrazumevano: 1.",
               "min_off_gap": "Ako ciklus počne u roku od toliko sekundi od završetka prethodnog, oni će biti SPOJENI u jedan ciklus.",
-              "sampling_interval": "Minimalni interval uzorkovanja u sekundama. Ažuriranja brža od ove stope biće zanemarena. Podrazumevano: 2,0s."
+              "sampling_interval": "Minimalni interval uzorkovanja u sekundama. Ažuriranja brža od ove stope će biti zanemarena. Podrazumevano: 30s (2s za mašine za pranje veša, mašine za sušenje veša i mašine za pranje sudova)."
             }
           },
           "matching_section": {

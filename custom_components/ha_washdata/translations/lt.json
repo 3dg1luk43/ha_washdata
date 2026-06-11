@@ -105,7 +105,7 @@
           "notify_icon": "Pranešimams naudojama piktograma (pvz., mdi:washing-machine). Palikite tuščią, kad siųstumėte be piktogramos.",
           "notify_start_message": "Pranešimas siunčiamas, kai prasideda ciklas. Palaikomas {device} rezervuotos vietos žymeklis.",
           "notify_finish_message": "Pranešimas siunčiamas, kai ciklas baigiasi. Palaikomi {device}, {duration}, {program}, {energy_kwh}, {cost} rezervuotų vietų žymekliai.",
-          "notify_pre_complete_message": "Pranešimas siunčiamas prieš pabaigą. Palaikomi {device}, {minutes} rezervuotų vietų žymekliai."
+          "notify_pre_complete_message": "Pasikartojančios tiesioginės eigos tekstas atnaujinamas, kol vyksta ciklas. Palaikomos {device}, {minutes}, {program} rezervuotos vietos."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Pranešimams naudojama piktograma (pvz., mdi:washing-machine). Palikite tuščią, kad siųstumėte be piktogramos.",
           "notify_start_message": "Pranešimas siunčiamas, kai prasideda ciklas. Palaikomas {device} rezervuotos vietos žymeklis.",
           "notify_finish_message": "Pranešimas siunčiamas, kai ciklas baigiasi. Palaikomi {device}, {duration}, {program}, {energy_kwh}, {cost} rezervuotų vietų žymekliai.",
-          "notify_pre_complete_message": "Pranešimas siunčiamas prieš pabaigą. Palaikomi {device}, {minutes} rezervuotų vietų žymekliai.",
           "energy_price_entity": "Pasirinkite skaitmeninį objektą, kuriame yra dabartinė elektros kaina (pvz., jutiklis.elektros_kaina, įvesties_numeris.energijos_norma). Kai nustatyta, įgalina rezervuotą vietą {cost}. Turi viršenybę prieš statinę vertę, jei sukonfigūruotos abi.",
           "energy_price_static": "Fiksuota elektros kaina už kWh. Kai nustatyta, įgalina rezervuotą vietą {cost}. Nepaisoma, jei subjektas sukonfigūruotas aukščiau. Pranešimo šablone pridėkite savo valiutos simbolį, pvz. {cost} €.",
           "notify_reminder_message": "Vienkartinio priminimo tekstas išsiuntė sukonfigūruotą minučių skaičių iki numatomos pabaigos. Skirtingai nuo pasikartojančių tiesioginių atnaujinimų aukščiau. Palaikomos {device}, {minutes}, {program} rezervuotos vietos.",
           "notify_timeout_seconds": "Automatiškai atsisakykite pranešimų po tiek sekundžių (persiunčiami kaip papildomos programos laikas). Nustatykite 0, kad jie liktų, kol bus atmesti. Numatytasis: 0.",
           "notify_channel": "Android papildomos programos pranešimų kanalas, skirtas būsenos, tiesioginės eigos ir priminimų pranešimams. Kanalo garsas ir svarba sukonfigūruojami papildomoje programoje pirmą kartą naudojant kanalo pavadinimą – WashData nustato tik kanalo pavadinimą. Palikite tuščią, kad nustatytumėte numatytąją programą.",
-          "notify_finish_channel": "Atskiras Android kanalas baigtam perspėjimui (taip pat naudojamas priminimui ir skalbinių laukimo ragavimui), kad jis galėtų turėti savo garsą. Palikite tuščią, jei norite pakartotinai naudoti aukščiau esantį kanalą."
+          "notify_finish_channel": "Atskiras Android kanalas baigtam perspėjimui (taip pat naudojamas priminimui ir skalbinių laukimo ragavimui), kad jis galėtų turėti savo garsą. Palikite tuščią, jei norite pakartotinai naudoti aukščiau esantį kanalą.",
+          "notify_pre_complete_message": "Pasikartojančios tiesioginės eigos tekstas atnaujinamas, kol vyksta ciklas. Palaikomos {device}, {minutes}, {program} rezervuotos vietos."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Prasidėjus ciklui, tiek sekundžių ignoruoti galios sumažėjimus, kad išvengtumėte klaidingo pabaigos aptikimo pradinėje sūkavimosi fazėje. Norėdami išjungti, nustatykite 0. Numatytasis: 0 s.",
               "end_repeat_count": "Skaičius, kiek kartų iš eilės turi būti įvykdyta pabaigos sąlyga (galia mažesnė už slenkstį off_delay laiku) prieš baigiant ciklą. Didesnės vertės apsaugo nuo klaidingų galų pauzių metu. Numatytasis: 1.",
               "min_off_gap": "Jei ciklas prasideda per tiek sekundžių nuo ankstesnio pabaigos, jie bus SUJUNGTI į vieną ciklą.",
-              "sampling_interval": "Minimalus mėginių ėmimo intervalas sekundėmis. Naujiniai greitesni nei šis dažnis bus ignoruojami. Numatytasis: 2,0 s."
+              "sampling_interval": "Minimalus mėginių ėmimo intervalas sekundėmis. Atnaujinimai, greitesni nei šis rodiklis, bus ignoruojami. Numatytasis: 30 s (2 s skalbimo mašinoms, skalbimo mašinoms-džiovykloms ir indaplovėms)."
             }
           },
           "matching_section": {

@@ -105,7 +105,7 @@
           "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om sonder ikoon te stuur.",
           "notify_start_message": "Boodskap gestuur wanneer 'n siklus begin. Ondersteun {device} plekhouer.",
           "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program}, {energy_kwh}, {cost} plekhouers.",
-          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers."
+          "notify_pre_complete_message": "Teks van die herhalende regstreekse vordering word opgedateer terwyl die siklus loop. Ondersteun {device}, {minutes}, {program} plekhouers."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikoon om vir kennisgewings te gebruik (bv. mdi:wasmasjien). Laat leeg om sonder ikoon te stuur.",
           "notify_start_message": "Boodskap gestuur wanneer 'n siklus begin. Ondersteun {device} plekhouer.",
           "notify_finish_message": "Boodskap gestuur wanneer 'n siklus klaar is. Ondersteun {device}, {duration}, {program}, {energy_kwh}, {cost} plekhouers.",
-          "notify_pre_complete_message": "Boodskap gestuur voor voltooiing. Ondersteun {device}, {minutes} plekhouers.",
           "energy_price_entity": "Kies 'n numeriese entiteit wat die huidige elektrisiteitsprys hou (bv. sensor.electricity_price, input_number.energy_rate). As dit gestel is, aktiveer die {cost} plekhouer. Kry voorrang bo die statiese waarde as albei gekonfigureer is.",
           "energy_price_static": "Vaste elektrisiteitsprys per kWh. As dit gestel is, aktiveer die {cost} plekhouer. Ignoreer as 'n entiteit hierbo gekonfigureer is. Voeg jou geldeenheid simbool in die boodskap sjabloon, bv. {cost} €.",
           "notify_reminder_message": "Teks van die eenmalige herinnering het die gekonfigureerde aantal minute voor die geskatte einde gestuur. Onderskei van die herhalende regstreekse opdaterings hierbo. Ondersteun {device}, {minutes}, {program} plekhouers.",
           "notify_timeout_seconds": "Verwerp kennisgewings outomaties na hierdie baie sekondes (aangestuur as die metgesel-toepassing 'time-out'). Stel op 0 om hulle te hou totdat dit verwerp word. Verstek: 0.",
           "notify_channel": "Android metgeselprogramkennisgewingkanaal vir status, regstreekse vordering en herinneringkennisgewings. Die klank en belangrikheid van 'n kanaal word in die metgesel-toepassing gekonfigureer die eerste keer dat die kanaalnaam gebruik word - WashData stel net die kanaalnaam. Laat leeg vir die toepassing verstek.",
-          "notify_finish_channel": "Aparte Android-kanaal vir die voltooide waarskuwing (ook gebruik deur die aanmaning en die wasgoed-wag-knal) sodat dit sy eie klank kan hê. Laat leeg om die kanaal hierbo te hergebruik."
+          "notify_finish_channel": "Aparte Android-kanaal vir die voltooide waarskuwing (ook gebruik deur die aanmaning en die wasgoed-wag-knal) sodat dit sy eie klank kan hê. Laat leeg om die kanaal hierbo te hergebruik.",
+          "notify_pre_complete_message": "Teks van die herhalende regstreekse vordering word opgedateer terwyl die siklus loop. Ondersteun {device}, {minutes}, {program} plekhouers."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Nadat die siklus begin het, ignoreer kragdalings vir soveel sekondes om valse eindbespeuring tydens die aanvanklike spin-up fase te voorkom. Stel op 0 om te deaktiveer. Verstek: 0s.",
               "end_repeat_count": "Aantal kere wat die eindvoorwaarde (krag onder die drempel vir af_vertraging) agtereenvolgens nagekom moet word voordat die siklus beëindig word. Hoër waardes verhoed vals eindes tydens pouses. Verstek: 1.",
               "min_off_gap": "As 'n siklus begin binne soveel sekondes nadat die vorige een geëindig het, sal hulle in 'n enkele siklus saamgesmelt word.",
-              "sampling_interval": "Minimum steekproefinterval in sekondes. Opdaterings vinniger as hierdie koers sal geïgnoreer word. Verstek: 2.0s."
+              "sampling_interval": "Minimum steekproefinterval in sekondes. Opdaterings vinniger as hierdie koers sal geïgnoreer word. Verstek: 30s (2s vir wasmasjiene, wasdroërs en skottelgoedwassers)."
             }
           },
           "matching_section": {

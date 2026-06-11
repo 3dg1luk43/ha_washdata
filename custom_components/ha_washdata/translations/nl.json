@@ -105,7 +105,7 @@
           "notify_icon": "Pictogram voor meldingen (bijv. mdi:washing-machine). Laat leeg om zonder pictogram te verzenden.",
           "notify_start_message": "Bericht verzonden wanneer een cyclus start. Ondersteunt de tijdelijke aanduiding {device}.",
           "notify_finish_message": "Bericht verzonden wanneer een cyclus is voltooid. Ondersteunt de tijdelijke aanduidingen {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Bericht verzonden vóór voltooiing. Ondersteunt de tijdelijke aanduidingen {device}, {minutes}."
+          "notify_pre_complete_message": "Tekst van de terugkerende live voortgangsupdates terwijl de cyclus loopt. Ondersteunt tijdelijke aanduidingen voor {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Pictogram voor meldingen (bijv. mdi:washing-machine). Laat leeg om zonder pictogram te verzenden.",
           "notify_start_message": "Bericht verzonden wanneer een cyclus start. Ondersteunt de tijdelijke aanduiding {device}.",
           "notify_finish_message": "Bericht verzonden wanneer een cyclus is voltooid. Ondersteunt de tijdelijke aanduidingen {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Bericht verzonden vóór voltooiing. Ondersteunt de tijdelijke aanduidingen {device}, {minutes}.",
           "energy_price_entity": "Selecteer een numerieke entiteit die de huidige elektriciteitsprijs bevat (bijvoorbeeld sensor.elektriciteitsprijs, invoernummer.energietarief). Indien ingesteld, wordt de tijdelijke aanduiding {cost} ingeschakeld. Heeft voorrang op de statische waarde als beide zijn geconfigureerd.",
           "energy_price_static": "Vaste elektriciteitsprijs per kWh. Indien ingesteld, wordt de tijdelijke aanduiding {cost} ingeschakeld. Genegeerd als hierboven een entiteit is geconfigureerd. Voeg uw valutasymbool toe aan de berichtsjabloon, b.v. {cost} €.",
           "notify_reminder_message": "De tekst van de eenmalige herinnering verzendt het geconfigureerde aantal minuten vóór het geschatte einde. Anders dan de terugkerende live-updates hierboven. Ondersteunt tijdelijke aanduidingen voor {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Meldingen na dit aantal seconden automatisch negeren (doorgestuurd als 'time-out' van de bijbehorende app). Stel deze in op 0 om ze te behouden totdat ze worden verwijderd. Standaard: 0.",
           "notify_channel": "Android meldingskanaal voor de begeleidende app voor status, live voortgang en herinneringsmeldingen. Het geluid en het belang van een kanaal worden geconfigureerd in de bijbehorende app wanneer de kanaalnaam voor het eerst wordt gebruikt - WashData stelt alleen de kanaalnaam in. Laat leeg voor de app-standaard.",
-          "notify_finish_channel": "Apart kanaal Android voor de klaar-waarschuwing (wordt ook gebruikt door de herinnering en het was-wacht-gezeur) zodat het een eigen geluid kan hebben. Laat leeg om het bovenstaande kanaal opnieuw te gebruiken."
+          "notify_finish_channel": "Apart kanaal Android voor de klaar-waarschuwing (wordt ook gebruikt door de herinnering en het was-wacht-gezeur) zodat het een eigen geluid kan hebben. Laat leeg om het bovenstaande kanaal opnieuw te gebruiken.",
+          "notify_pre_complete_message": "Tekst van de terugkerende live voortgangsupdates terwijl de cyclus loopt. Ondersteunt tijdelijke aanduidingen voor {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Nadat de cyclus is gestart, worden vermogensdips gedurende dit aantal seconden genegeerd om valse einddetectie tijdens de initiële opstartfase te voorkomen. Stel in op 0 om uit te schakelen. Standaard: 0s.",
               "end_repeat_count": "Aantal keren dat de eindconditie (vermogen onder de drempel gedurende de uitschakelvertraging) achtereenvolgens moet worden bereikt voordat de cyclus eindigt. Hogere waarden voorkomen valse eindpunten tijdens pauzes. Standaard: 1.",
               "min_off_gap": "Als een cyclus binnen dit aantal seconden na het einde van de vorige begint, worden ze SAMENGEVOEGD tot één cyclus.",
-              "sampling_interval": "Minimaal bemonsteringsinterval in seconden. Updates sneller dan dit tempo worden genegeerd. Standaard: 2,0s."
+              "sampling_interval": "Minimaal bemonsteringsinterval in seconden. Updates sneller dan dit tempo worden genegeerd. Standaard: 30s (2s voor wasmachines, was-droogcombinaties en vaatwassers)."
             }
           },
           "matching_section": {

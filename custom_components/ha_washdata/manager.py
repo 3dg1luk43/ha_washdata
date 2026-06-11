@@ -2571,6 +2571,18 @@ class WashDataManager:
         self.diag_buffer.record_state(
             old_state, new_state, self._current_program, dt_util.now()
         )
+        # A new cycle starting while we are still showing the completed/Clean
+        # overlay (the progress-reset window) must clear that overlay and cancel
+        # the expiry timer right away, so the UI leaves "Finished" and the unload
+        # nag stops immediately instead of waiting for the reset window - and so
+        # the expiry timer cannot race the new cycle and reset us to OFF (#267).
+        if new_state == STATE_STARTING and self._cycle_completed_time is not None:
+            self._cycle_completed_time = None
+            self._is_clean_state = False
+            self._clean_state_start = None
+            self._notified_clean_laundry = False
+            self._cycle_progress = 0.0
+            self._stop_state_expiry_timer()
         if new_state == STATE_RUNNING:
             new_cycle_detected = old_state in (STATE_OFF, STATE_STARTING, STATE_UNKNOWN)
             # Only reset estimates if we are truly starting a NEW cycle (from off or starting)

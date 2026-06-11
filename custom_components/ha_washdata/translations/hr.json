@@ -105,7 +105,7 @@
           "notify_icon": "Ikona koja se koristi za obavijesti (npr. mdi:washing-machine). Ostavite prazno za slanje bez ikone.",
           "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava rezervirano mjesto {device}.",
           "notify_finish_message": "Poruka se šalje kada ciklus završi. Podržava rezervirana mjesta {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} rezervirana mjesta."
+          "notify_pre_complete_message": "Tekst ponavljajućeg ažuriranja napretka uživo tijekom ciklusa. Podržava rezervirana mjesta {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikona koja se koristi za obavijesti (npr. mdi:washing-machine). Ostavite prazno za slanje bez ikone.",
           "notify_start_message": "Poruka se šalje kada ciklus započne. Podržava rezervirano mjesto {device}.",
           "notify_finish_message": "Poruka se šalje kada ciklus završi. Podržava rezervirana mjesta {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Poruka poslana prije završetka. Podržava {device}, {minutes} rezervirana mjesta.",
           "energy_price_entity": "Odaberite numerički entitet koji sadrži trenutnu cijenu električne energije (npr. sensor.electricity_price, input_number.energy_rate). Kada je postavljeno, omogućuje rezervirano mjesto {cost}. Ima prednost nad statičkom vrijednošću ako su obje konfigurirane.",
           "energy_price_static": "Fiksna cijena električne energije po kWh. Kada je postavljeno, omogućuje rezervirano mjesto {cost}. Ignorira se ako je entitet konfiguriran iznad. Dodajte simbol valute u predložak poruke, npr. {cost} €.",
           "notify_reminder_message": "Tekst jednokratnog podsjetnika šalje konfigurirani broj minuta prije procijenjenog završetka. Za razliku od gornjih ponavljajućih ažuriranja uživo. Podržava rezervirana mjesta {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Automatski odbaci obavijesti nakon toliko sekundi (prosljeđuje se kao 'vremensko ograničenje' popratne aplikacije). Postavite na 0 da ih zadržite do odbacivanja. Zadano: 0.",
           "notify_channel": "Android kanal obavijesti popratne aplikacije za status, napredak uživo i obavijesti podsjetnika. Zvuk i važnost kanala konfiguriraju se u popratnoj aplikaciji prvi put kada se naziv kanala koristi - WashData samo postavlja naziv kanala. Ostavite prazno za zadanu aplikaciju.",
-          "notify_finish_channel": "Odvojite Android kanal za dovršeno upozorenje (također ga koriste podsjetnik i zanovijetanje za pranje rublja) tako da može imati vlastiti zvuk. Ostavite prazno za ponovno korištenje gornjeg kanala."
+          "notify_finish_channel": "Odvojite Android kanal za dovršeno upozorenje (također ga koriste podsjetnik i zanovijetanje za pranje rublja) tako da može imati vlastiti zvuk. Ostavite prazno za ponovno korištenje gornjeg kanala.",
+          "notify_pre_complete_message": "Tekst ponavljajućeg ažuriranja napretka uživo tijekom ciklusa. Podržava rezervirana mjesta {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Nakon što ciklus započne, zanemarite padove snage toliko sekundi kako biste spriječili otkrivanje lažnog kraja tijekom početne faze vrtnje. Postavite na 0 za onemogućavanje. Zadano: 0s.",
               "end_repeat_count": "Koliko puta se uvjet završetka (snaga ispod praga za off_delay) mora ispuniti uzastopno prije završetka ciklusa. Više vrijednosti sprječavaju lažne završetke tijekom pauza. Zadano: 1.",
               "min_off_gap": "Ako ciklus započne unutar toliko sekundi od završetka prethodnog, bit će SPOJENI u jedan ciklus.",
-              "sampling_interval": "Minimalni interval uzorkovanja u sekundama. Ažuriranja brža od ove stope bit će zanemarena. Zadano: 2,0s."
+              "sampling_interval": "Minimalni interval uzorkovanja u sekundama. Ažuriranja brža od ove stope bit će zanemarena. Zadano: 30 s (2 s za perilice rublja, perilice-sušilice i perilice posuđa)."
             }
           },
           "matching_section": {

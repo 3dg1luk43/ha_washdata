@@ -48,6 +48,15 @@ from .signal_processing import integrate_wh
 
 _LOGGER = logging.getLogger(__name__)
 
+# After a user/external stop the manual-stop lockout swallows the machine's
+# spin-down/drain so it is not logged as a fresh cycle. The lockout normally
+# clears as soon as power drops to idle. As a safety net, if power instead stays
+# at or above the start threshold for longer than any plausible spin-down, the
+# device is running a genuinely new (back-to-back) load: release the lockout so
+# the new cycle is detected instead of being pinned until the progress-reset
+# window expires (issue #267).
+STOP_LOCKOUT_RELEASE_SECONDS = 180.0
+
 
 @dataclass
 class CycleDetectorConfig:
@@ -181,6 +190,9 @@ class CycleDetector:
         self._state = STATE_OFF
         self._sub_state: str | None = None
         self._ignore_power_until_idle: bool = False
+        # Sustained high-power time accrued while the stop lockout is armed; used
+        # to release the lockout for a genuinely new back-to-back load (#267).
+        self._lockout_high_seconds: float = 0.0
 
         # Data
         self._power_readings: list[tuple[datetime, float]] = []  # (time, raw_power)
@@ -484,6 +496,7 @@ class CycleDetector:
         self._last_match_time = None
         self._matched_profile = None
         self._ignore_power_until_idle = False  # Reset lockout
+        self._lockout_high_seconds = 0.0
         self._anti_wrinkle_candidate_start = None
         self._anti_wrinkle_candidate_peak = 0.0
         self._anti_wrinkle_candidate_start_power = 0.0
@@ -533,19 +546,7 @@ class CycleDetector:
     def process_reading(self, power: float, timestamp: datetime) -> None:
         """Process a new power reading using robust dt-aware logic."""
 
-        # Manual Stop Lockout:
-        # If user forced a stop, ignore high power readings until machine goes idle.
-        if self._ignore_power_until_idle:
-            if power < self._config.start_threshold_w:
-                self._ignore_power_until_idle = False
-                self._logger.debug(
-                    "Power dropped below start threshold. Manual stop lockout cleared."
-                )
-            else:
-                # Still high after manual stop - ignore reading
-                return
-
-        # Calculate dt
+        # Calculate dt (needed by the stop lockout below and the state machine).
         dt = 0.0
         if self._last_process_time:
             dt = (timestamp - self._last_process_time).total_seconds()
@@ -554,6 +555,36 @@ class CycleDetector:
         if dt < 0:
             self._last_process_time = timestamp
             return
+
+        # Manual Stop Lockout:
+        # If user/external stop forced an end, ignore the machine's spin-down so
+        # it is not logged as a new cycle. The lockout clears the moment power
+        # drops to idle. As a safety net, if power instead stays high far longer
+        # than any plausible spin-down, treat it as a genuinely new back-to-back
+        # load and release the lockout so the cycle is detected immediately
+        # rather than pinned until the progress-reset window expires (#267).
+        if self._ignore_power_until_idle:
+            if power < self._config.start_threshold_w:
+                self._ignore_power_until_idle = False
+                self._lockout_high_seconds = 0.0
+                self._logger.debug(
+                    "Power dropped below start threshold. Manual stop lockout cleared."
+                )
+            else:
+                self._lockout_high_seconds += dt
+                if self._lockout_high_seconds < STOP_LOCKOUT_RELEASE_SECONDS:
+                    # Still within the spin-down window - ignore reading.
+                    self._last_process_time = timestamp
+                    return
+                self._ignore_power_until_idle = False
+                self._lockout_high_seconds = 0.0
+                self._logger.info(
+                    "Manual stop lockout released after sustained power "
+                    "(>= %.1fs at/above start threshold): treating as a new "
+                    "cycle (#267).",
+                    STOP_LOCKOUT_RELEASE_SECONDS,
+                )
+                # Fall through: the state machine will start a new cycle.
 
         self._update_cadence(dt)
         self._last_process_time = timestamp
@@ -1431,14 +1462,21 @@ class CycleDetector:
     def user_stop(self) -> None:
         """Handle user-initiated stop."""
         if self._state != STATE_OFF:
+            now = dt_util.now()
             self._finish_cycle(
-                dt_util.now(),
+                now,
                 status="completed",
                 termination_reason="user",
                 keep_tail=True,  # User implies "Done Now"
             )
             # Prevent immediate restart if power is still high
             self._ignore_power_until_idle = True
+            # Anchor the lockout clock to this stop instant. The next reading's
+            # dt is measured from the last processed sample, which predates the
+            # stop, so without this the high-power accumulator would count the
+            # pre-stop gap and release the lockout early (#267).
+            self._lockout_high_seconds = 0.0
+            self._last_process_time = now
 
 
     def get_power_trace(self) -> list[tuple[datetime, float]]:

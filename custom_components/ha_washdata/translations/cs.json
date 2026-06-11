@@ -105,7 +105,7 @@
           "notify_icon": "Ikona pro upozornění (např. mdi:washing-machine). Chcete-li odeslat bez ikony, ponechte prázdné.",
           "notify_start_message": "Zpráva odeslaná při zahájení cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Zpráva odeslána před dokončením. Podporuje zástupné symboly {device}, {minutes}."
+          "notify_pre_complete_message": "Text opakujícího se živého průběhu se aktualizuje během běhu cyklu. Podporuje zástupné symboly {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikona pro upozornění (např. mdi:washing-machine). Chcete-li odeslat bez ikony, ponechte prázdné.",
           "notify_start_message": "Zpráva odeslaná při zahájení cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Zpráva odeslána po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Zpráva odeslána před dokončením. Podporuje zástupné symboly {device}, {minutes}.",
           "energy_price_entity": "Vyberte číselnou entitu, která obsahuje aktuální cenu elektřiny (např. sensor.electricity_price, input_number.energy_rate). Je-li nastaven, aktivuje zástupný symbol {cost}. Pokud jsou obě nakonfigurovány, má přednost před statickou hodnotou.",
           "energy_price_static": "Pevná cena elektřiny za kWh. Je-li nastaven, aktivuje zástupný symbol {cost}. Ignorováno, pokud je výše nakonfigurována entita. Přidejte svůj symbol měny do šablony zprávy, např. {cost} €.",
           "notify_reminder_message": "Text jednorázové upomínky odeslal nakonfigurovaný počet minut před odhadovaným koncem. Rozdíl od opakujících se živých aktualizací výše. Podporuje {device}, {minutes}, {program} stojany.",
           "notify_timeout_seconds": "Automaticky zamítnout oznámení po tolika sekundách (předán jako společník aplikace 'timeout'). Nastavit na0, aby je udrželi, dokud nebudou propuštěni. Výchozí:0.",
           "notify_channel": "Name Zvuk a význam kanálu jsou nakonfigurovány ve společné aplikaci při prvním použití názvu kanálu - WashData pouze nastavuje název kanálu. Zanechat prázdné pro výchozí aplikaci.",
-          "notify_finish_channel": "Samostatný Android kanál pro dokončený poplach (také používán upomínkou a laundry-waiting nag), takže může mít svůj vlastní zvuk. Nechte prázdné pro opětovné použití výše uvedeného kanálu."
+          "notify_finish_channel": "Samostatný Android kanál pro dokončený poplach (také používán upomínkou a upozorněním na čekající prádlo), takže může mít svůj vlastní zvuk. Nechte prázdné pro opětovné použití výše uvedeného kanálu.",
+          "notify_pre_complete_message": "Text opakujícího se živého průběhu se aktualizuje během běhu cyklu. Podporuje zástupné symboly {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Po spuštění cyklu ignorujte poklesy výkonu na mnoho sekund, abyste zabránili detekci falešného konce během počáteční fáze roztočení. Nastavením na 0 deaktivujete. Výchozí: 0s.",
               "end_repeat_count": "Kolikrát musí být splněna podmínka ukončení (výkon pod prahovou hodnotou pro off_delay) za sebou před ukončením cyklu. Vyšší hodnoty zabraňují falešným koncům během pauz. Výchozí: 1.",
               "min_off_gap": "Pokud cyklus začne během těchto mnoha sekund od konce předchozího, budou SLOŽENY do jediného cyklu.",
-              "sampling_interval": "Minimální interval vzorkování v sekundách. Aktualizace rychlejší než tato rychlost budou ignorovány. Výchozí: 2,0 s."
+              "sampling_interval": "Minimální interval vzorkování v sekundách. Aktualizace rychlejší než tato rychlost budou ignorovány. Výchozí: 30 s (2 s pro pračky, pračky se sušičkou a myčky nádobí)."
             }
           },
           "matching_section": {

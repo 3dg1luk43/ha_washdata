@@ -105,7 +105,7 @@
           "notify_icon": "Deilbhín le húsáid le haghaidh fógraí (m.sh. mdi:washing-machine). Fág folamh chun seoladh gan deilbhín.",
           "notify_start_message": "Teachtaireacht seolta nuair a thosaíonn timthriall. Tacaíonn sé le {device} ionadsealbhóir.",
           "notify_finish_message": "Seoltar teachtaireacht nuair a chríochnaíonn timthriall. Tacaíonn sé le {device}, {duration}, {program}, {energy_kwh}, {cost} ionadsealbhóirí.",
-          "notify_pre_complete_message": "Teachtaireacht seolta roimh chríochnú. Tacaíonn sé le {device}, {minutes} ionadsealbhóirí."
+          "notify_pre_complete_message": "Téacs an nuashonraithe dul chun cinn beo athfhillteach agus an timthriall ar siúl. Tacaíonn {device}, {minutes}, {program} sealbhóirí áite."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Deilbhín le húsáid le haghaidh fógraí (m.sh. mdi:washing-machine). Fág folamh chun seoladh gan deilbhín.",
           "notify_start_message": "Teachtaireacht seolta nuair a thosaíonn timthriall. Tacaíonn sé le {device} ionadsealbhóir.",
           "notify_finish_message": "Seoltar teachtaireacht nuair a chríochnaíonn timthriall. Tacaíonn sé le {device}, {duration}, {program}, {energy_kwh}, {cost} ionadsealbhóirí.",
-          "notify_pre_complete_message": "Teachtaireacht seolta roimh chríochnú. Tacaíonn sé le {device}, {minutes} ionadsealbhóirí.",
           "energy_price_entity": "Roghnaigh aonán uimhriúil a bhfuil an praghas leictreachais reatha aige (m.sh. sensor.electricity_price, ionchur_number.energy_rate). Nuair a bheidh sé socraithe, cumasaigh an coinneálaí {cost}. Bíonn tosaíocht aige ar an luach statach má tá an dá cheann cumraithe.",
           "energy_price_static": "Praghas seasta leictreachais in aghaidh an kWh. Nuair a bheidh sé socraithe, cumasaigh an coinneálaí {cost}. Neamhaird má tá aonán cumraithe thuas. Cuir do shiombail airgeadra leis sa teimpléad teachtaireachta, e.g. {cost} €.",
           "notify_reminder_message": "Téacs an meabhrúcháin aon-uaire sheoladh an líon cumraithe de nóiméad roimh an deireadh measta. Deireadh ó na nuashonruithe beo athfhillteach thuas. Tacaíochtaí {device}, {minutes}, {program} sealbhóirí áite.",
           "notify_timeout_seconds": "Go huathoibríoch fógraí a dhíbhe tar éis an soicind go leor (ar aghaidh mar an app chompánach 'timeout'). Socraigh go 0 iad a choinneáil go dtí go dhíbhe. Réamhshocrú: 0.",
           "notify_channel": "Android cainéal fógra app compánach do stádas, dul chun cinn beo, agus fógraí i gcuimhne. An fhuaim agus tábhacht a bhaineann le cainéal atá cumraithe sa app compánach an chéad uair an t-ainm cainéal a úsáidtear - NighData Leagann ach an t-ainm cainéal. Fág folamh don mhainneachtain app.",
-          "notify_finish_channel": "Ar leithligh Android cainéal don airdeall críochnaithe (a úsáidtear freisin ag an meabhrúchán agus an níocháin-ag fanacht nag) ionas gur féidir é a fuaime féin. Fág folamh chun an cainéal thuas a athúsáid."
+          "notify_finish_channel": "Ar leithligh Android cainéal don airdeall críochnaithe (a úsáidtear freisin ag an meabhrúchán agus an meabhrúchán leanúnach fanachta níocháin) ionas gur féidir é a fuaime féin. Fág folamh chun an cainéal thuas a athúsáid.",
+          "notify_pre_complete_message": "Téacs an nuashonraithe dul chun cinn beo athfhillteach agus an timthriall ar siúl. Tacaíonn {device}, {minutes}, {program} sealbhóirí áite."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Tar éis tús a chur leis an timthriall, déan neamhaird de laghduithe cumhachta ar feadh an méid soicindí seo chun cosc a chur ar bhrath deiridh bréagach le linn na céime tosaigh. Socraigh ar 0 chun é a dhíchumasú. Réamhshocrú: 0s.",
               "end_repeat_count": "Líon uaireanta ní mór an coinníoll deiridh (cumhacht faoi bhun na tairsí ar feadh off_delay) a shásamh as a chéile sula gcuirfear deireadh leis an timthriall. Coscann luachanna níos airde deireadh bréagach le linn sosanna. Réamhshocrú: 1.",
               "min_off_gap": "Má thosaíonn timthriall laistigh den méid soicindí seo ón gceann roimhe sin ag críochnú, déanfar iad a CHUMASC ina timthriall amháin.",
-              "sampling_interval": "Íos-eatramh samplála i soicindí. Ní thabharfar aird ar nuashonruithe níos tapúla ná an ráta seo. Réamhshocrú: 2.0s."
+              "sampling_interval": "Íos-eatramh samplála i soicindí. Ní thabharfar aird ar nuashonruithe níos tapúla ná an ráta seo. Réamhshocrú: 30s (2s le haghaidh meaisíní níocháin, triomadóirí níocháin, agus miasniteoirí)."
             }
           },
           "matching_section": {

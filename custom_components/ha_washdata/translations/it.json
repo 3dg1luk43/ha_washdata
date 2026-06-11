@@ -105,7 +105,7 @@
           "notify_icon": "Icona da usare per le notifiche (es. mdi:washing-machine). Lascia vuoto per inviare senza icona.",
           "notify_start_message": "Messaggio inviato all'avvio di un ciclo. Supporta il segnaposto {device}.",
           "notify_finish_message": "Messaggio inviato al termine di un ciclo. Supporta i segnaposto {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Messaggio inviato prima del completamento. Supporta i segnaposto {device}, {minutes}."
+          "notify_pre_complete_message": "Testo degli aggiornamenti ricorrenti sull'avanzamento in tempo reale durante l'esecuzione del ciclo. Supporta i segnaposto {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Icona da usare per le notifiche (es. mdi:washing-machine). Lascia vuoto per inviare senza icona.",
           "notify_start_message": "Messaggio inviato all'avvio di un ciclo. Supporta il segnaposto {device}.",
           "notify_finish_message": "Messaggio inviato al termine di un ciclo. Supporta i segnaposto {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Messaggio inviato prima del completamento. Supporta i segnaposto {device}, {minutes}.",
           "energy_price_entity": "Seleziona un'entità numerica che contiene il prezzo corrente dell'elettricità (ad esempio sensor.electricity_price, input_number.energy_rate). Se impostato, abilita il segnaposto {cost}. Ha la precedenza sul valore statico se entrambi sono configurati.",
           "energy_price_static": "Prezzo fisso dell'elettricità per kWh. Se impostato, abilita il segnaposto {cost}. Ignorato se un'entità è configurata sopra. Aggiungi il simbolo della tua valuta nel modello di messaggio, ad es. {cost} €.",
           "notify_reminder_message": "Il testo del promemoria una tantum inviato il numero configurato di minuti prima della fine prevista. Distinto dagli aggiornamenti live ricorrenti di cui sopra. Supporta i segnaposto {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Ignora automaticamente le notifiche dopo questo numero di secondi (inoltrate come \"timeout\" dell'app complementare). Impostarli su 0 per mantenerli fino allo scioglimento. Impostazione predefinita: 0.",
           "notify_channel": "Android canale di notifica dell'app complementare per notifiche di stato, progressi in tempo reale e promemoria. Il suono e l'importanza di un canale vengono configurati nell'app complementare la prima volta che viene utilizzato il nome del canale: WashData imposta solo il nome del canale. Lascia vuoto per l'impostazione predefinita dell'app.",
-          "notify_finish_channel": "Canale Android separato per l'avviso di fine lavoro (utilizzato anche dal promemoria e dal ronzino di lavanderia in attesa) in modo che possa avere il proprio suono. Lascia vuoto per riutilizzare il canale sopra."
+          "notify_finish_channel": "Canale Android separato per l'avviso di fine lavoro (utilizzato anche dal promemoria e dal ronzino di lavanderia in attesa) in modo che possa avere il proprio suono. Lascia vuoto per riutilizzare il canale sopra.",
+          "notify_pre_complete_message": "Testo degli aggiornamenti ricorrenti sull'avanzamento in tempo reale durante l'esecuzione del ciclo. Supporta i segnaposto {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Dopo l'avvio del ciclo, ignora i cali di potenza per questo numero di secondi per evitare il rilevamento di false terminazioni durante la fase di avviamento iniziale. Imposta su 0 per disabilitare. Predefinito: 0 s.",
               "end_repeat_count": "Numero di volte consecutive in cui la condizione di fine (potenza sotto la soglia per off_delay) deve essere soddisfatta prima di terminare il ciclo. Valori più alti prevengono false terminazioni durante le pause. Predefinito: 1.",
               "min_off_gap": "Se un ciclo inizia entro questo numero di secondi dalla fine del precedente, i due cicli verranno UNITI in un unico ciclo.",
-              "sampling_interval": "Intervallo di campionamento minimo in secondi. Gli aggiornamenti più rapidi di questo intervallo vengono ignorati. Predefinito: 2,0 s."
+              "sampling_interval": "Intervallo minimo di campionamento in secondi. Gli aggiornamenti più veloci di questa velocità verranno ignorati. Default: 30s (2s per lavatrici, lavasciuga e lavastoviglie)."
             }
           },
           "matching_section": {

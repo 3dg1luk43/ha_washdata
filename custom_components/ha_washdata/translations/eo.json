@@ -105,7 +105,7 @@
           "notify_icon": "Piktogramo por sciigoj (ekz. mdi:washing-machine). Lasu malplena por sendi sen piktogramo.",
           "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokanombron.",
           "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program}, {energy_kwh}, {cost} lokanombrojn.",
-          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn."
+          "notify_pre_complete_message": "Teksto de la ripetaj vivaj progresaj ĝisdatigoj dum la ciklo funkcias. Subtenas {device}, {minutes}, {program} anstataŭaĵojn."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Piktogramo por sciigoj (ekz. mdi:washing-machine). Lasu malplena por sendi sen piktogramo.",
           "notify_start_message": "Mesaĝo sendita kiam ciklo komenciĝas. Subtenas {device} lokanombron.",
           "notify_finish_message": "Mesaĝo sendita kiam ciklo finiĝas. Subtenas {device}, {duration}, {program}, {energy_kwh}, {cost} lokanombrojn.",
-          "notify_pre_complete_message": "Mesaĝo sendita antaŭ kompletado. Subtenas {device}, {minutes} lokanombrojn.",
           "energy_price_entity": "Elektu nombran enton, kiu tenas la nunan elektroprezon (ekz. sensor.electricity_price, input_number.energy_rate). Kiam agordita, ebligas la lokokupilon {cost}. Havas prioritaton super la senmova valoro se ambaŭ estas agorditaj.",
           "energy_price_static": "Fiksa elektroprezo por kWh. Kiam agordita, ebligas la lokokupilon {cost}. Ignorita se ento estas agordita supre. Aldonu vian valutan simbolon en la mesaĝŝablono, ekz. {cost} €.",
           "notify_reminder_message": "Teksto de la unufoja memorigilo sendis la agordita nombro da minutoj antaŭ la laŭtaksa fino. Distingu de la ripetaj vivaj ĝisdatigoj supre. Subtenas {device}, {minutes}, {program} anstataŭaĵojn.",
           "notify_timeout_seconds": "aŭtomate malakceptas sciigojn post tiuj multaj sekundoj (antaŭjuĝitaj kiel la kunulprogramo \"tempon\". Agordu al 0 por teni ilin ĝis malakceptita. Defaŭlto: 0.",
           "notify_channel": "Kunulprogramadkanalo por statuso, vivas progreson, kaj memor sciigojn. La sono kaj graveco de kanalo estas formitaj en la kunulprogramo la unuan fojon la kanalnomo estas uzita - WashData nur metas la kanalnomon. Lasu malplena por la app defaŭlto.",
-          "notify_finish_channel": "Aparta (0) kanalo por la preta alarmo (ankaŭ uzita per la memorigilo kaj la laundry-atendanta nag) tiel ĝi povas havi sian propran sonon. Lasu malplena recikli la kanalon supre."
+          "notify_finish_channel": "Aparta kanalo por la preta alarmo (ankaŭ uzata de la memorigilo kaj la atend-alarmo pri lavotaĵo) tiel ĝi povas havi sian propran sonon. Lasu malplena recikli la kanalon supre.",
+          "notify_pre_complete_message": "Teksto de la ripetaj vivaj progresaj ĝisdatigoj dum la ciklo funkcias. Subtenas {device}, {minutes}, {program} anstataŭaĵojn."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Post kiam ciklo komenciĝas, ignori potencajn falojn dum ĉi tiom da sekundoj por malhelpi falsajn fin-detektojn dum komenca startfazo. Agordu al 0 por malŝalti. Defaŭlte: 0s.",
               "end_repeat_count": "Nombro da fojoj kiom la fina kondiĉo (potenco sub sojlo dum off_delay) devas esti plenumita sinsekve antaŭ fini la ciklon. Pli altaj valoroj malhelpos falsajn finojn dum paŭzoj. Defaŭlte: 1.",
               "min_off_gap": "Se ciklo komenciĝas ene de ĉi tiom da sekundoj post la fino de la antaŭa, ili estos KUNFANDITAJ en ununuran ciklon.",
-              "sampling_interval": "Minimuma specimena intervalo en sekundoj. Ĝisdatigoj pli rapidaj ol ĉi tiu rapideco estos ignoritaj. Defaŭlte: 2.0s."
+              "sampling_interval": "Minimuma specimena intervalo en sekundoj. Ĝisdatigoj pli rapide ol ĉi tiu tarifo estos ignoritaj. Defaŭlte: 30s (2s por lavmaŝinoj, lavsekigiloj kaj vazlaviloj)."
             }
           },
           "matching_section": {

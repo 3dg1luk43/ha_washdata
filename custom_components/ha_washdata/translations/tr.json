@@ -105,7 +105,7 @@
           "notify_icon": "Bildirimler için kullanılacak simge (ör. mdi:çamaşır makinesi). Simge göndermemek için boş bırakın.",
           "notify_start_message": "Bir döngü başladığında gönderilen mesaj. {device} yer tutucusunu destekler.",
           "notify_finish_message": "Bir döngü tamamlandığında gönderilen mesaj. {device}, {duration}, {program}, {energy_kwh}, {cost} yer tutucularını destekler.",
-          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler."
+          "notify_pre_complete_message": "Döngü çalışırken yinelenen canlı ilerlemenin metni güncellenir. {device}, {minutes}, {program} yer tutucularını destekler."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Bildirimler için kullanılacak simge (ör. mdi:çamaşır makinesi). Simge göndermemek için boş bırakın.",
           "notify_start_message": "Bir döngü başladığında gönderilen mesaj. {device} yer tutucusunu destekler.",
           "notify_finish_message": "Bir döngü tamamlandığında gönderilen mesaj. {device}, {duration}, {program}, {energy_kwh}, {cost} yer tutucularını destekler.",
-          "notify_pre_complete_message": "Tamamlanmadan önce mesaj gönderildi. {device}, {minutes} yer tutucularını destekler.",
           "energy_price_entity": "Geçerli elektrik fiyatını içeren sayısal bir varlık seçin (ör. sensör.elektrik_fiyat, giriş_numarası.enerji_oranı). Ayarlandığında, {cost} yer tutucusunu etkinleştirir. Her ikisi de yapılandırılmışsa statik değere göre önceliklidir.",
           "energy_price_static": "kWh başına sabit elektrik fiyatı. Ayarlandığında, {cost} yer tutucusunu etkinleştirir. Yukarıda bir varlık yapılandırılmışsa yoksayılır. Mesaj şablonuna para birimi simgenizi ekleyin, ör. {cost} €.",
           "notify_reminder_message": "Tek seferlik hatırlatma metni, tahmini bitiş süresinden önce yapılandırılmış dakika sayısını gönderdi. Yukarıdaki yinelenen canlı güncellemelerden farklıdır. {device}, {minutes}, {program} yer tutucularını destekler.",
           "notify_timeout_seconds": "Bu kadar saniyeden sonra bildirimleri otomatik olarak kapat (tamamlayıcı uygulama 'zaman aşımı' olarak iletilir). Kapatılana kadar bunları tutmak için 0'a ayarlayın. Varsayılan: 0.",
           "notify_channel": "Durum, canlı ilerleme ve hatırlatma bildirimleri için Android tamamlayıcı uygulama bildirim kanalı. Bir kanalın sesi ve önemi, kanal adı ilk kez kullanıldığında yardımcı uygulamada yapılandırılır - WashData yalnızca kanal adını ayarlar. Uygulama varsayılanı için boş bırakın.",
-          "notify_finish_channel": "Bitti uyarısı için ayrı bir Android kanalı (aynı zamanda hatırlatıcı ve çamaşır bekleyen dırdırı tarafından da kullanılır), böylece kendi sesine sahip olabilir. Yukarıdaki kanalı yeniden kullanmak için boş bırakın."
+          "notify_finish_channel": "Bitti uyarısı için ayrı bir Android kanalı (aynı zamanda hatırlatıcı ve çamaşır bekleyen dırdırı tarafından da kullanılır), böylece kendi sesine sahip olabilir. Yukarıdaki kanalı yeniden kullanmak için boş bırakın.",
+          "notify_pre_complete_message": "Döngü çalışırken yinelenen canlı ilerlemenin metni güncellenir. {device}, {minutes}, {program} yer tutucularını destekler."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Döngü başladıktan sonra, ilk dönüş aşaması sırasında hatalı uç tespitini önlemek için bu kadar saniye boyunca güç düşüşlerini göz ardı edin. Devre dışı bırakmak için 0'a ayarlayın. Varsayılan: 0s.",
               "end_repeat_count": "Döngü sonlandırılmadan önce bitiş koşulunun (kapalı_gecikme için eşiğin altındaki güç) arka arkaya karşılanması gereken sayı. Daha yüksek değerler duraklamalar sırasında hatalı sonları önler. Varsayılan: 1.",
               "min_off_gap": "Bir döngü, bir öncekinin bitiminden bu kadar saniye sonra başlarsa, tek bir döngüde BİRLEŞTİRİLECEKTİR.",
-              "sampling_interval": "Saniye cinsinden minimum örnekleme aralığı. Bu hızdan daha hızlı olan güncellemeler dikkate alınmayacaktır. Varsayılan: 2,0 sn."
+              "sampling_interval": "Saniye cinsinden minimum örnekleme aralığı. Bu hızdan daha hızlı olan güncellemeler dikkate alınmayacaktır. Varsayılan: 30s (çamaşır makineleri, çamaşır-kurutma makineleri ve bulaşık makineleri için 2s)."
             }
           },
           "matching_section": {

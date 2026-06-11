@@ -105,7 +105,7 @@
           "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å sende uten ikon.",
           "notify_start_message": "Melding sendt når en syklus starter. Støtter {device} plassholder.",
           "notify_finish_message": "Melding sendt når en syklus er ferdig. Støtter {device}, {duration}, {program}, {energy_kwh}, {cost} plassholdere.",
-          "notify_pre_complete_message": "Melding sendt før ferdigstillelse. Støtter {device}, {minutes} plassholdere."
+          "notify_pre_complete_message": "Tekst til gjentakende fremdriftsoppdateringer mens syklusen kjører. Støtter {device}, {minutes}, {program} plassholdere."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikon som skal brukes for varsler (f.eks. mdi:vaskemaskin). La stå tomt for å sende uten ikon.",
           "notify_start_message": "Melding sendt når en syklus starter. Støtter {device} plassholder.",
           "notify_finish_message": "Melding sendt når en syklus er ferdig. Støtter {device}, {duration}, {program}, {energy_kwh}, {cost} plassholdere.",
-          "notify_pre_complete_message": "Melding sendt før ferdigstillelse. Støtter {device}, {minutes} plassholdere.",
           "energy_price_entity": "Velg en numerisk enhet som har gjeldende strømpris (f.eks. sensor.elektrisitetspris, input_number.energy_rate). Aktiverer plassholderen {cost} når den er angitt. Har forrang over den statiske verdien hvis begge er konfigurert.",
           "energy_price_static": "Fast strømpris per kWh. Aktiverer plassholderen {cost} når den er angitt. Ignorert hvis en enhet er konfigurert ovenfor. Legg til ditt valutasymbol i meldingsmalen, f.eks. {cost} €.",
           "notify_reminder_message": "Teksten til engangspåminnelsen sendte det konfigurerte antallet minutter før beregnet slutt. Forskjellig fra de gjentatte liveoppdateringene ovenfor. Støtter {device}, {minutes}, {program} plassholdere.",
           "notify_timeout_seconds": "Avvis automatisk varslinger etter så mange sekunder (videresendt som «timeout» for følgeappen). Sett til 0 for å beholde dem til de avvises. Standard: 0.",
           "notify_channel": "Android varslingskanal for følgeapper for status, fremdrift og påminnelsesvarsler. Lyden og viktigheten til en kanal konfigureres i følgeappen første gang kanalnavnet brukes - WashData angir kun kanalnavnet. La stå tomt for appens standard.",
-          "notify_finish_channel": "Separat Android-kanal for det ferdige varselet (brukes også av påminnelsen og tøyet som venter), slik at det kan ha sin egen lyd. La stå tomt for å gjenbruke kanalen ovenfor."
+          "notify_finish_channel": "Separat Android-kanal for det ferdige varselet (brukes også av påminnelsen og tøyet som venter), slik at det kan ha sin egen lyd. La stå tomt for å gjenbruke kanalen ovenfor.",
+          "notify_pre_complete_message": "Tekst til gjentakende fremdriftsoppdateringer mens syklusen kjører. Støtter {device}, {minutes}, {program} plassholdere."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Etter at syklusen starter, ignorer strømfall i så mange sekunder for å forhindre falsk sluttdeteksjon under den første spin-up-fasen. Sett til 0 for å deaktivere. Standard: 0s.",
               "end_repeat_count": "Antall ganger sluttbetingelsen (effekt under terskelen for off_delay) må oppfylles fortløpende før syklusen avsluttes. Høyere verdier forhindrer falske slutter under pauser. Standard: 1.",
               "min_off_gap": "Hvis en syklus starter innen så mange sekunder etter at den forrige slutter, vil de bli slått sammen til en enkelt syklus.",
-              "sampling_interval": "Minimum prøvetakingsintervall i sekunder. Oppdateringer raskere enn denne hastigheten vil bli ignorert. Standard: 2,0s."
+              "sampling_interval": "Minimum prøvetakingsintervall i sekunder. Oppdateringer raskere enn denne hastigheten vil bli ignorert. Standard: 30s (2s for vaskemaskiner, kombimaskiner og oppvaskmaskiner)."
             }
           },
           "matching_section": {

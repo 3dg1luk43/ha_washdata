@@ -105,7 +105,7 @@
           "notify_icon": "Ikon att använda för aviseringar (t.ex. mdi:washing-machine). Lämna tomt för att skicka utan ikon.",
           "notify_start_message": "Meddelande som skickas när en cykel startar. Stöder platshållaren {device}.",
           "notify_finish_message": "Meddelande som skickas när en cykel är klar. Stöder platshållarna {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Meddelande som skickas innan slutförandet. Stöder platshållarna {device}, {minutes}."
+          "notify_pre_complete_message": "Text för de återkommande liveförloppsuppdateringarna medan cykeln körs. Stöder {device}, {minutes}, {program} platshållare."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikon att använda för aviseringar (t.ex. mdi:washing-machine). Lämna tomt för att skicka utan ikon.",
           "notify_start_message": "Meddelande som skickas när en cykel startar. Stöder platshållaren {device}.",
           "notify_finish_message": "Meddelande som skickas när en cykel är klar. Stöder platshållarna {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Meddelande som skickas innan slutförandet. Stöder platshållarna {device}, {minutes}.",
           "energy_price_entity": "Välj en numerisk enhet som har det aktuella elpriset (t.ex. sensor.elpris, input_number.energy_rate). När den är inställd aktiveras platshållaren {cost}. Har företräde framför det statiska värdet om båda är konfigurerade.",
           "energy_price_static": "Fast elpris per kWh. När den är inställd aktiveras platshållaren {cost}. Ignoreras om en enhet är konfigurerad ovan. Lägg till din valutasymbol i meddelandemallen, t.ex. {cost} €.",
           "notify_reminder_message": "Texten till engångspåminnelsen skickade det konfigurerade antalet minuter före det beräknade slutet. Till skillnad från de återkommande liveuppdateringarna ovan. Stöder {device}, {minutes}, {program} platshållare.",
           "notify_timeout_seconds": "Avvisa automatiskt aviseringar efter så här många sekunder (vidarebefordras som \"timeout\") för den kompletterande appen. Ställ in på 0 för att behålla dem tills de tas bort. Standard: 0.",
           "notify_channel": "Android aviseringskanal för medföljande appar för status, liveframsteg och påminnelser. Ljudet och betydelsen av en kanal konfigureras i den medföljande appen första gången kanalnamnet används - WashData ställer bara in kanalnamnet. Lämna tomt för appens standard.",
-          "notify_finish_channel": "Separat Android-kanal för den färdiga aviseringen (används även av påminnelsen och tjatet som väntar på tvätten) så att den kan få sitt eget ljud. Lämna tomt för att återanvända kanalen ovan."
+          "notify_finish_channel": "Separat Android-kanal för den färdiga aviseringen (används även av påminnelsen och tjatet som väntar på tvätten) så att den kan få sitt eget ljud. Lämna tomt för att återanvända kanalen ovan.",
+          "notify_pre_complete_message": "Text för de återkommande liveförloppsuppdateringarna medan cykeln körs. Stöder {device}, {minutes}, {program} platshållare."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Efter cykelstart, ignorera effektsänkningar i så många sekunder för att förhindra falsk slutdetektering under den inledande uppstartsfasen. Ställ in på 0 för att inaktivera. Standard: 0s.",
               "end_repeat_count": "Antal gånger avslutsvillkoret (effekt under tröskelvärde i off_delay) måste uppfyllas i följd innan cykeln avslutas. Högre värden förhindrar falska avslut under pauser. Standard: 1.",
               "min_off_gap": "Om en cykel startar inom så många sekunder efter att den föregående slutade, kommer de att slås samman till en enda cykel.",
-              "sampling_interval": "Minsta samplingsintervall i sekunder. Uppdateringar snabbare än denna takt ignoreras. Standard: 2,0s."
+              "sampling_interval": "Minsta provtagningsintervall i sekunder. Uppdateringar snabbare än denna takt kommer att ignoreras. Standard: 30s (2s för tvättmaskiner, tvättmaskin-torktumlare och diskmaskiner)."
             }
           },
           "matching_section": {

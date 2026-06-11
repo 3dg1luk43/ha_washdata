@@ -105,7 +105,7 @@
           "notify_icon": "Icono para notificaciones (p. ej., mdi:washing-machine). Deja vacío para enviar sin icono.",
           "notify_start_message": "Mensaje enviado cuando comienza un ciclo. Admite el marcador {device}.",
           "notify_finish_message": "Mensaje enviado cuando finaliza un ciclo. Admite los marcadores {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Mensaje enviado antes de la finalización. Admite los marcadores {device}, {minutes}."
+          "notify_pre_complete_message": "Texto de las actualizaciones recurrentes del progreso en vivo mientras se ejecuta el ciclo. Admite marcadores de posición {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Icono para notificaciones (p. ej., mdi:washing-machine). Deja vacío para enviar sin icono.",
           "notify_start_message": "Mensaje enviado cuando comienza un ciclo. Admite el marcador {device}.",
           "notify_finish_message": "Mensaje enviado cuando finaliza un ciclo. Admite los marcadores {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Mensaje enviado antes de la finalización. Admite los marcadores {device}, {minutes}.",
           "energy_price_entity": "Seleccione una entidad numérica que contenga el precio actual de la electricidad (por ejemplo, sensor.electricity_price, input_number.energy_rate). Cuando está configurado, habilita el marcador de posición {cost}. Tiene prioridad sobre el valor estático si ambos están configurados.",
           "energy_price_static": "Precio fijo de la electricidad por kWh. Cuando está configurado, habilita el marcador de posición {cost}. Se ignora si una entidad está configurada arriba. Agregue su símbolo de moneda en la plantilla de mensaje, p. {cost}€.",
           "notify_reminder_message": "Texto del recordatorio de una sola vez envió el número configurado de minutos antes del final estimado. Distinto de las actualizaciones en vivo recurrentes arriba. Apoyo {device}, {minutes}, {program} propietarios de puestos.",
           "notify_timeout_seconds": "Descargue automáticamente las notificaciones después de estos muchos segundos (en adelante como la aplicación de acompañamiento 'timeout'). Se establece a 0 para mantenerlos hasta que sea despedido. Predeterminado: 0.",
           "notify_channel": "Android canal de notificación de aplicaciones acompañantes para el estado, progreso en vivo y notificaciones de recordatorio. El sonido y la importancia de un canal se configuran en la aplicación compañera la primera vez que se utiliza el nombre del canal - WashData sólo establece el nombre del canal. Deja vacío para el defecto de la aplicación.",
-          "notify_finish_channel": "Separar Android canal para la alerta terminada (también utilizado por el recordatorio y la nag que espera la colada) para que pueda tener su propio sonido. Deja vacío para reutilizar el canal de arriba."
+          "notify_finish_channel": "Separar Android canal para la alerta terminada (también utilizado por el recordatorio y el aviso persistente de espera de la colada) para que pueda tener su propio sonido. Deja vacío para reutilizar el canal de arriba.",
+          "notify_pre_complete_message": "Texto de las actualizaciones recurrentes del progreso en vivo mientras se ejecuta el ciclo. Admite marcadores de posición {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Tras el inicio del ciclo, ignora las caídas de potencia durante estos segundos para evitar la detección falsa del final durante la fase de arranque. Pon 0 para deshabilitar. Predeterminado: 0 s.",
               "end_repeat_count": "Número de veces que la condición de fin (potencia por debajo del umbral durante off_delay) debe cumplirse consecutivamente antes de finalizar el ciclo. Valores más altos evitan finales falsos durante las pausas. Predeterminado: 1.",
               "min_off_gap": "Si un ciclo comienza dentro de estos segundos tras finalizar el anterior, se FUSIONARÁN en un único ciclo.",
-              "sampling_interval": "Intervalo mínimo de muestreo en segundos. Las actualizaciones más rápidas que esta tasa se ignorarán. Predeterminado: 2,0 s."
+              "sampling_interval": "Intervalo mínimo de muestreo en segundos. Se ignorarán las actualizaciones más rápidas que esta velocidad. Valor predeterminado: 30 s (2 s para lavadoras, lavadoras-secadoras y lavavajillas)."
             }
           },
           "matching_section": {

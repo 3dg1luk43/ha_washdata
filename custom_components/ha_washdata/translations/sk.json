@@ -105,7 +105,7 @@
           "notify_icon": "Ikona, ktorá sa má použiť na upozornenia (napr. mdi:washing-machine). Ponechajte prázdne pre odoslanie bez ikony.",
           "notify_start_message": "Správa odoslaná pri spustení cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Správa odoslaná po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Správa odoslaná pred dokončením. Podporuje zástupné symboly {device}, {minutes}."
+          "notify_pre_complete_message": "Text opakujúcich sa živých aktualizácií priebehu cyklu. Podporuje zástupné symboly {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Ikona, ktorá sa má použiť na upozornenia (napr. mdi:washing-machine). Ponechajte prázdne pre odoslanie bez ikony.",
           "notify_start_message": "Správa odoslaná pri spustení cyklu. Podporuje zástupný symbol {device}.",
           "notify_finish_message": "Správa odoslaná po skončení cyklu. Podporuje zástupné symboly {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Správa odoslaná pred dokončením. Podporuje zástupné symboly {device}, {minutes}.",
           "energy_price_entity": "Vyberte číselnú entitu, ktorá obsahuje aktuálnu cenu elektriny (napr. senzor.cena_elektriny, číslo_vstupu.sadzba_energie). Keď je nastavený, povolí zástupný symbol {cost}. Ak sú obe nakonfigurované, má prednosť pred statickou hodnotou.",
           "energy_price_static": "Pevná cena elektriny za kWh. Keď je nastavený, povolí zástupný symbol {cost}. Ignorované, ak je entita nakonfigurovaná vyššie. Do šablóny správy pridajte svoj symbol meny, napr. {cost} €.",
           "notify_reminder_message": "Text jednorazovej pripomienky odoslal nakonfigurovaný počet minút pred odhadovaným koncom. Na rozdiel od opakujúcich sa živých aktualizácií vyššie. Podporuje zástupné symboly {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Automaticky zavrieť upozornenia po uplynutí tohto počtu sekúnd (preposlané ako „časový limit“ sprievodnej aplikácie). Nastavte na 0, aby ste ich ponechali, kým sa nezatvoria. Predvolená hodnota: 0.",
           "notify_channel": "Android kanál upozornení sprievodnej aplikácie pre stav, aktuálny priebeh a upozornenia na pripomienky. Zvuk a dôležitosť kanála sa konfigurujú v sprievodnej aplikácii pri prvom použití názvu kanála – WashData nastavuje iba názov kanála. Pre predvolenú aplikáciu nechajte prázdne.",
-          "notify_finish_channel": "Samostatný kanál Android pre dokončené upozornenie (používané aj pripomenutím a čakaním na bielizeň), aby mohlo mať svoj vlastný zvuk. Ak chcete znova použiť kanál vyššie, nechajte prázdne."
+          "notify_finish_channel": "Samostatný kanál Android pre dokončené upozornenie (používané aj pripomenutím a čakaním na bielizeň), aby mohlo mať svoj vlastný zvuk. Ak chcete znova použiť kanál vyššie, nechajte prázdne.",
+          "notify_pre_complete_message": "Text opakujúcich sa živých aktualizácií priebehu cyklu. Podporuje zástupné symboly {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Po spustení cyklu ignorujte poklesy výkonu na toľko sekúnd, aby ste zabránili detekcii falošného konca počas počiatočnej fázy roztočenia. Pre deaktiváciu nastavte na 0. Predvolená hodnota: 0 s.",
               "end_repeat_count": "Počet, koľkokrát musí byť splnená podmienka ukončenia (výkon pod prahovou hodnotou pre oneskorenie vypnutia) za sebou pred ukončením cyklu. Vyššie hodnoty zabraňujú falošným koncom počas prestávok. Predvolená hodnota: 1.",
               "min_off_gap": "Ak cyklus začne v priebehu tohto počtu sekúnd od skončenia predchádzajúceho, zlúčia sa do jedného cyklu.",
-              "sampling_interval": "Minimálny interval vzorkovania v sekundách. Aktualizácie rýchlejšie ako táto rýchlosť budú ignorované. Predvolená hodnota: 2,0 s."
+              "sampling_interval": "Minimálny interval vzorkovania v sekundách. Aktualizácie rýchlejšie ako táto rýchlosť budú ignorované. Predvolené: 30 s (2 s pre práčky, práčky so sušičkou a umývačky riadu)."
             }
           },
           "matching_section": {

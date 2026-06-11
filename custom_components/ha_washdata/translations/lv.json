@@ -105,7 +105,7 @@
           "notify_icon": "Paziņojumiem izmantojamā ikona (piemēram, mdi:veļas mašīna). Atstājiet tukšu, lai sūtītu bez ikonas.",
           "notify_start_message": "Ziņojums nosūtīts, kad sākas cikls. Atbalsta vietturi {device}.",
           "notify_finish_message": "Ziņojums nosūtīts, kad cikls beidzas. Atbalsta vietturus {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Ziņa nosūtīta pirms pabeigšanas. Atbalsta vietturi {device}, {minutes}."
+          "notify_pre_complete_message": "Cikla darbības laikā tiek atjaunināts periodisko tiešraides norises teksts. Atbalsta vietturus {device}, {minutes}, {program}."
         }
       },
       "notifications": {
@@ -153,13 +153,13 @@
           "notify_icon": "Paziņojumiem izmantojamā ikona (piemēram, mdi:veļas mašīna). Atstājiet tukšu, lai sūtītu bez ikonas.",
           "notify_start_message": "Ziņojums nosūtīts, kad sākas cikls. Atbalsta vietturi {device}.",
           "notify_finish_message": "Ziņojums nosūtīts, kad cikls beidzas. Atbalsta vietturus {device}, {duration}, {program}, {energy_kwh}, {cost}.",
-          "notify_pre_complete_message": "Ziņa nosūtīta pirms pabeigšanas. Atbalsta vietturi {device}, {minutes}.",
           "energy_price_entity": "Atlasiet skaitlisku vienību, kurā ir norādīta pašreizējā elektroenerģijas cena (piemēram, sensors.electricity_price, input_number.energy_rate). Kad tas ir iestatīts, tiek iespējots vietturis {cost}. Ja abi ir konfigurēti, ir prioritāte pār statisko vērtību.",
           "energy_price_static": "Fiksēta elektroenerģijas cena par kWh. Kad tas ir iestatīts, tiek iespējots vietturis {cost}. Ignorē, ja iepriekš ir konfigurēta entītija. Pievienojiet savas valūtas simbolu ziņojuma veidnē, piem. {cost} €.",
           "notify_reminder_message": "Vienreizējā atgādinājuma teksts tika nosūtīts konfigurēto minūšu skaitu pirms paredzamās beigām. Atšķiras no iepriekš minētajiem regulāriem tiešraides atjauninājumiem. Atbalsta vietturus {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Automātiski noraidīt paziņojumus pēc šīm sekundēm (tiek pārsūtīti kā pavadošās lietotnes noildze). Iestatiet vērtību 0, lai tās saglabātu līdz atlaišanai. Noklusējums: 0.",
           "notify_channel": "Android pavadošās lietotnes paziņojumu kanāls statusa, reāllaika norises un atgādinājumu paziņojumiem. Kanāla skaņa un svarīgums tiek konfigurēti pavadošajā lietotnē, kad pirmo reizi tiek izmantots kanāla nosaukums — WashData iestata tikai kanāla nosaukumu. Atstājiet tukšu lietotnes noklusējuma iestatīšanai.",
-          "notify_finish_channel": "Atsevišķs Android kanāls gatavajam brīdinājumam (to izmanto arī atgādinājums un veļas gaidīšanas zvans), lai tam būtu savs skaņa. Atstājiet tukšu, lai atkārtoti izmantotu iepriekš minēto kanālu."
+          "notify_finish_channel": "Atsevišķs Android kanāls gatavajam brīdinājumam (to izmanto arī atgādinājums un veļas gaidīšanas zvans), lai tam būtu savs skaņa. Atstājiet tukšu, lai atkārtoti izmantotu iepriekš minēto kanālu.",
+          "notify_pre_complete_message": "Cikla darbības laikā tiek atjaunināts periodisko tiešraides norises teksts. Atbalsta vietturus {device}, {minutes}, {program}."
         }
       },
       "advanced_settings": {
@@ -201,7 +201,7 @@
               "running_dead_zone": "Pēc cikla sākuma ignorējiet jaudas kritumus tik sekundes, lai novērstu nepareizu beigu noteikšanu sākotnējās vērpšanas fāzes laikā. Iestatiet uz 0, lai atspējotu. Noklusējums: 0s.",
               "end_repeat_count": "Beigu nosacījums (jauda zem off_delay sliekšņa) ir jāizpilda secīgi pirms cikla beigām. Augstākas vērtības novērš viltus galus paužu laikā. Noklusējums: 1.",
               "min_off_gap": "Ja cikls sākas šo sekunžu laikā pēc iepriekšējā cikla beigām, tie tiks APVIENOTI vienā ciklā.",
-              "sampling_interval": "Minimālais paraugu ņemšanas intervāls sekundēs. Atjauninājumi, kas ir ātrāki par šo ātrumu, tiks ignorēti. Noklusējums: 2,0 s."
+              "sampling_interval": "Minimālais paraugu ņemšanas intervāls sekundēs. Atjauninājumi, kas ir ātrāki par šo ātrumu, tiks ignorēti. Noklusējums: 30 s (2 s veļas mašīnām, veļas mazgājamām-žāvējamām mašīnām un trauku mazgājamām mašīnām)."
             }
           },
           "matching_section": {
