@@ -158,7 +158,7 @@
           "notify_reminder_message": "O texto do lembrete único enviou o número configurado de minutos antes do término estimado. Diferente das atualizações ao vivo recorrentes acima. Suporta marcadores de posição {device}, {minutes}, {program}.",
           "notify_timeout_seconds": "Ignore automaticamente as notificações após esses segundos (encaminhadas como 'tempo limite' do aplicativo complementar). Defina como 0 para mantê-los até serem descartados. Padrão: 0.",
           "notify_channel": "Android canal de notificação de aplicativo complementar para notificações de status, progresso ao vivo e lembretes. O som e a importância de um canal são configurados no aplicativo complementar na primeira vez que o nome do canal é usado - WashData define apenas o nome do canal. Deixe em branco para o padrão do aplicativo.",
-          "notify_finish_channel": "Canal Android separado para o alerta finalizado (também usado pelo lembrete e pelo chato de espera da lavanderia) para que ele possa ter seu próprio som. Deixe em branco para reutilizar o canal acima.",
+          "notify_finish_channel": "Canal Android separado para o alerta finalizado (também usado pelo lembrete e pelo aviso de espera da lavanderia) para que ele possa ter seu próprio som. Deixe em branco para reutilizar o canal acima.",
           "notify_pre_complete_message": "Texto das atualizações recorrentes do progresso ao vivo enquanto o ciclo é executado. Suporta marcadores de posição {device}, {minutes}, {program}."
         }
       },

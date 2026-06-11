@@ -158,7 +158,7 @@
           "notify_reminder_message": "Teksto de la unufoja memorigilo sendis la agordita nombro da minutoj antaŭ la laŭtaksa fino. Distingu de la ripetaj vivaj ĝisdatigoj supre. Subtenas {device}, {minutes}, {program} anstataŭaĵojn.",
           "notify_timeout_seconds": "aŭtomate malakceptas sciigojn post tiuj multaj sekundoj (antaŭjuĝitaj kiel la kunulprogramo \"tempon\". Agordu al 0 por teni ilin ĝis malakceptita. Defaŭlto: 0.",
           "notify_channel": "Kunulprogramadkanalo por statuso, vivas progreson, kaj memor sciigojn. La sono kaj graveco de kanalo estas formitaj en la kunulprogramo la unuan fojon la kanalnomo estas uzita - WashData nur metas la kanalnomon. Lasu malplena por la app defaŭlto.",
-          "notify_finish_channel": "Aparta (0) kanalo por la preta alarmo (ankaŭ uzita per la memorigilo kaj la laundry-atendanta nag) tiel ĝi povas havi sian propran sonon. Lasu malplena recikli la kanalon supre.",
+          "notify_finish_channel": "Aparta kanalo por la preta alarmo (ankaŭ uzata de la memorigilo kaj la atend-alarmo pri lavotaĵo) tiel ĝi povas havi sian propran sonon. Lasu malplena recikli la kanalon supre.",
           "notify_pre_complete_message": "Teksto de la ripetaj vivaj progresaj ĝisdatigoj dum la ciklo funkcias. Subtenas {device}, {minutes}, {program} anstataŭaĵojn."
         }
       },

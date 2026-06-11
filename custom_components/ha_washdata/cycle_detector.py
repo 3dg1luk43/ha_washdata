@@ -1462,14 +1462,21 @@ class CycleDetector:
     def user_stop(self) -> None:
         """Handle user-initiated stop."""
         if self._state != STATE_OFF:
+            now = dt_util.now()
             self._finish_cycle(
-                dt_util.now(),
+                now,
                 status="completed",
                 termination_reason="user",
                 keep_tail=True,  # User implies "Done Now"
             )
             # Prevent immediate restart if power is still high
             self._ignore_power_until_idle = True
+            # Anchor the lockout clock to this stop instant. The next reading's
+            # dt is measured from the last processed sample, which predates the
+            # stop, so without this the high-power accumulator would count the
+            # pre-stop gap and release the lockout early (#267).
+            self._lockout_high_seconds = 0.0
+            self._last_process_time = now
 
 
     def get_power_trace(self) -> list[tuple[datetime, float]]:

@@ -158,7 +158,7 @@
           "notify_reminder_message": "Tekst af one-time påmindelse sendt det indstillede antal minutter før den anslåede afslutning. Diskret fra de tilbagevendende live opdateringer ovenfor. Understøtter {device}, {minutes}, {program} pladsholdere.",
           "notify_timeout_seconds": "Automatisk afvise meddelelser efter dette mange sekunder (fremsendes som følgesvend app \"timeout\"). Sætter til 0 for at beholde dem, indtil de bliver afskediget. Standard: 0.",
           "notify_channel": "Android følgesvend app meddelelse kanal for status, live fremskridt, og påmindelse meddelelser. Lyden og betydningen af en kanal er konfigureret i følgesvend app første gang kanalnavnet bruges - WashData kun sætter kanalnavnet. Efterlad tom for appen standard.",
-          "notify_finish_channel": "Separat Android kanal til den færdige alarm (bruges også af påmindelsen og vasketøjet-venter nag), så det kan have sin egen lyd. Lad det være tomt at genbruge kanalen ovenfor.",
+          "notify_finish_channel": "Separat Android kanal til den færdige alarm (bruges også af påmindelsen og den vedvarende påmindelse om ventende vasketøj), så det kan have sin egen lyd. Lad det være tomt at genbruge kanalen ovenfor.",
           "notify_pre_complete_message": "Tekst af de tilbagevendende live-fremskridtsopdateringer, mens cyklussen kører. Understøtter {device}, {minutes}, {program} pladsholdere."
         }
       },

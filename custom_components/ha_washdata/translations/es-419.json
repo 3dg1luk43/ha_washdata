@@ -158,7 +158,7 @@
           "notify_reminder_message": "Texto del recordatorio de una sola vez envió el número configurado de minutos antes del final estimado. Distinto de las actualizaciones en vivo recurrentes arriba. Apoyo {device}, {minutes}, {program} propietarios de puestos.",
           "notify_timeout_seconds": "Descargue automáticamente las notificaciones después de estos muchos segundos (en adelante como la aplicación de acompañamiento 'timeout'). Se establece a 0 para mantenerlos hasta que sea despedido. Predeterminado: 0.",
           "notify_channel": "Android canal de notificación de aplicaciones acompañantes para el estado, progreso en vivo y notificaciones de recordatorio. El sonido y la importancia de un canal se configuran en la aplicación compañera la primera vez que se utiliza el nombre del canal - WashData sólo establece el nombre del canal. Deja vacío para el defecto de la aplicación.",
-          "notify_finish_channel": "Separar Android canal para la alerta terminada (también utilizado por el recordatorio y la nag que espera la colada) para que pueda tener su propio sonido. Deja vacío para reutilizar el canal de arriba.",
+          "notify_finish_channel": "Separar Android canal para la alerta terminada (también utilizado por el recordatorio y el aviso persistente de espera de la colada) para que pueda tener su propio sonido. Deja vacío para reutilizar el canal de arriba.",
           "notify_pre_complete_message": "Texto de las actualizaciones recurrentes del progreso en vivo mientras se ejecuta el ciclo. Admite marcadores de posición {device}, {minutes}, {program}."
         }
       },

@@ -158,7 +158,7 @@
           "notify_reminder_message": "Téacs an meabhrúcháin aon-uaire sheoladh an líon cumraithe de nóiméad roimh an deireadh measta. Deireadh ó na nuashonruithe beo athfhillteach thuas. Tacaíochtaí {device}, {minutes}, {program} sealbhóirí áite.",
           "notify_timeout_seconds": "Go huathoibríoch fógraí a dhíbhe tar éis an soicind go leor (ar aghaidh mar an app chompánach 'timeout'). Socraigh go 0 iad a choinneáil go dtí go dhíbhe. Réamhshocrú: 0.",
           "notify_channel": "Android cainéal fógra app compánach do stádas, dul chun cinn beo, agus fógraí i gcuimhne. An fhuaim agus tábhacht a bhaineann le cainéal atá cumraithe sa app compánach an chéad uair an t-ainm cainéal a úsáidtear - NighData Leagann ach an t-ainm cainéal. Fág folamh don mhainneachtain app.",
-          "notify_finish_channel": "Ar leithligh Android cainéal don airdeall críochnaithe (a úsáidtear freisin ag an meabhrúchán agus an níocháin-ag fanacht nag) ionas gur féidir é a fuaime féin. Fág folamh chun an cainéal thuas a athúsáid.",
+          "notify_finish_channel": "Ar leithligh Android cainéal don airdeall críochnaithe (a úsáidtear freisin ag an meabhrúchán agus an meabhrúchán leanúnach fanachta níocháin) ionas gur féidir é a fuaime féin. Fág folamh chun an cainéal thuas a athúsáid.",
           "notify_pre_complete_message": "Téacs an nuashonraithe dul chun cinn beo athfhillteach agus an timthriall ar siúl. Tacaíonn {device}, {minutes}, {program} sealbhóirí áite."
         }
       },

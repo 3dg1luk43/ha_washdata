@@ -158,7 +158,7 @@
           "notify_reminder_message": "Text jednorázové upomínky odeslal nakonfigurovaný počet minut před odhadovaným koncem. Rozdíl od opakujících se živých aktualizací výše. Podporuje {device}, {minutes}, {program} stojany.",
           "notify_timeout_seconds": "Automaticky zamítnout oznámení po tolika sekundách (předán jako společník aplikace 'timeout'). Nastavit na0, aby je udrželi, dokud nebudou propuštěni. Výchozí:0.",
           "notify_channel": "Name Zvuk a význam kanálu jsou nakonfigurovány ve společné aplikaci při prvním použití názvu kanálu - WashData pouze nastavuje název kanálu. Zanechat prázdné pro výchozí aplikaci.",
-          "notify_finish_channel": "Samostatný Android kanál pro dokončený poplach (také používán upomínkou a laundry-waiting nag), takže může mít svůj vlastní zvuk. Nechte prázdné pro opětovné použití výše uvedeného kanálu.",
+          "notify_finish_channel": "Samostatný Android kanál pro dokončený poplach (také používán upomínkou a upozorněním na čekající prádlo), takže může mít svůj vlastní zvuk. Nechte prázdné pro opětovné použití výše uvedeného kanálu.",
           "notify_pre_complete_message": "Text opakujícího se živého průběhu se aktualizuje během běhu cyklu. Podporuje zástupné symboly {device}, {minutes}, {program}."
         }
       },

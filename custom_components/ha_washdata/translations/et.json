@@ -158,7 +158,7 @@
           "notify_reminder_message": "Ühekordse meeldetuletuse tekst saatis seadistatud minutite arvu enne eeldatavat lõppu. Erinevus korduvatest live-uuendustest ülalpool. Toetab {device}, {minutes}, {program} kohahoidjaid.",
           "notify_timeout_seconds": "Pärast seda mitu sekundit automaatselt teated välja jätta (edasi saadetud kui kaasrakenduse aegumine). Seadke 0, et hoida neid kuni vallandamiseni. Vaikimisi: 0.",
           "notify_channel": "Android kaaslase rakenduse teavituskanal oleku, live progressi ja meeldetuletuste jaoks. Kanali heli ja tähtsus on konfigureeritud kaaslase rakenduses kanali nime esmakordsel kasutamisel - WashData määrab ainult kanali nime. Jäta rakenduse vaikeväärtus tühjaks.",
-          "notify_finish_channel": "Eraldi Android kanal lõpetatud hoiatuse jaoks (kasutab ka meeldetuletus ja pesupesemist ootav nag), et sellel oleks oma heli. Jäta tühjaks, et kanalit uuesti kasutada.",
+          "notify_finish_channel": "Eraldi Android kanal lõpetatud hoiatuse jaoks (kasutab ka meeldetuletus ja pesu ootamise korduv meeldetuletus), et sellel oleks oma heli. Jäta tühjaks, et kanalit uuesti kasutada.",
           "notify_pre_complete_message": "Korduva reaalajas edenemise tekst värskendatakse tsükli jooksul. Toetab kohahoidjaid {device}, {minutes}, {program}."
         }
       },

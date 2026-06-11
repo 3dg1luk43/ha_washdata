@@ -158,7 +158,7 @@
           "notify_reminder_message": "Le texte du rappel unique a envoyé le nombre de minutes configuré avant la fin estimée. Distinct des mises à jour récurrentes ci-dessus. Prend en charge {device}, {minutes}, {program} placeholders.",
           "notify_timeout_seconds": "Rejeter automatiquement les notifications après cela plusieurs secondes (transféré comme l'application compagne 'timeout'). Réglez à 0 pour les garder jusqu'à ce qu'ils soient renvoyés. Par défaut : 0.",
           "notify_channel": "Android canal de notification de l'application compagnon pour l'état, le progrès en direct et les notifications de rappel. Le son et l'importance d'un canal sont configurés dans l'application compagnon la première fois que le nom du canal est utilisé - WashData ne définit que le nom du canal. Laisser vide pour l'application par défaut.",
-          "notify_finish_channel": "Séparer le canal Android pour l'alerte terminée (également utilisé par le rappel et le nag d'attente de linge) afin qu'il puisse avoir son propre son. Laissez vide pour réutiliser le canal ci-dessus.",
+          "notify_finish_channel": "Séparer le canal Android pour l'alerte terminée (également utilisé par le rappel et la relance d'attente de linge) afin qu'il puisse avoir son propre son. Laissez vide pour réutiliser le canal ci-dessus.",
           "notify_pre_complete_message": "Texte des mises à jour récurrentes de la progression en direct pendant l'exécution du cycle. Prend en charge les espaces réservés {device}, {minutes}, {program}."
         }
       },

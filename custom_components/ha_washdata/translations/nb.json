@@ -201,7 +201,7 @@
               "running_dead_zone": "Etter at syklusen starter, ignorer strømfall i så mange sekunder for å forhindre falsk sluttdeteksjon under den første spin-up-fasen. Sett til 0 for å deaktivere. Standard: 0s.",
               "end_repeat_count": "Antall ganger sluttbetingelsen (effekt under terskelen for off_delay) må oppfylles fortløpende før syklusen avsluttes. Høyere verdier forhindrer falske slutter under pauser. Standard: 1.",
               "min_off_gap": "Hvis en syklus starter innen så mange sekunder etter at den forrige slutter, vil de bli slått sammen til en enkelt syklus.",
-              "sampling_interval": "Minimum prøvetakingsintervall i sekunder. Oppdateringer raskere enn denne hastigheten vil bli ignorert. Standard: 30s (2s for vaskemaskiner, vaskemaskiner, tørketromler og oppvaskmaskiner)."
+              "sampling_interval": "Minimum prøvetakingsintervall i sekunder. Oppdateringer raskere enn denne hastigheten vil bli ignorert. Standard: 30s (2s for vaskemaskiner, kombimaskiner og oppvaskmaskiner)."
             }
           },
           "matching_section": {
