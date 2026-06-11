@@ -5,6 +5,12 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🐛 Bug Fixes
+
+- **New Cycle Now Detected While Still Showing "Finished"** (#267): Starting a new run while the device was still in the **Finished** (or Clean) display window could leave WashData pinned in that state until the progress-reset window expired (~30 min), only then dropping to **Off** and detecting the new cycle. The cause was the manual-stop lockout that arms after a user/external cycle-end stop: it only cleared once power dropped below the start threshold, so a machine that kept drawing power (a back-to-back load, or standby/door-lock draw) was never released. The lockout now also releases once power stays at or above the start threshold for longer than any plausible spin-down, so a genuinely new load is detected immediately and resets everything as a fresh cycle. The brief post-stop spin-down is still ignored, exactly as before. The options/UI also leaves the Finished overlay and cancels the reset timer the moment a new cycle starts, so the state and the "still inside" reminder no longer lag behind.
+
 ## 0.4.5 - 2026-06-02
 
 ### ✨ Features
