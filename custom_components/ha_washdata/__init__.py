@@ -418,7 +418,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 raise ValueError("Integration not loaded for this device")
 
             manager = hass.data[DOMAIN][entry_id]
-            stats = await manager.profile_store.auto_label_unlabeled_cycles(
+            stats = await manager.profile_store.auto_label_cycles(
                 confidence_threshold
             )
             manager.notify_update()
