@@ -1,8 +1,48 @@
 
+import ast
+from pathlib import Path
+
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import datetime, timedelta
 from custom_components.ha_washdata.profile_store import ProfileStore, MatchResult
+
+
+def test_service_handlers_call_existing_profile_store_methods():
+    """Every ``...profile_store.<attr>`` call in __init__.py must resolve to a
+    real ProfileStore attribute.
+
+    Regression guard for the ``auto_label_cycles`` service handler, which
+    called the non-existent ``profile_store.auto_label_unlabeled_cycles``.
+    The service registered fine, so this was invisible until invoked, where
+    it raised ``AttributeError`` (surfaced as an HTTP 500). The existing
+    tests only exercised ``ProfileStore.auto_label_cycles`` directly and
+    never the handler, so the name mismatch slipped through.
+    """
+    init_path = (
+        Path(__file__).resolve().parents[1]
+        / "custom_components"
+        / "ha_washdata"
+        / "__init__.py"
+    )
+    tree = ast.parse(init_path.read_text(encoding="utf-8"))
+    valid = set(dir(ProfileStore))
+
+    missing = sorted(
+        {
+            node.attr
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Attribute)
+            and isinstance(node.value, ast.Attribute)
+            and node.value.attr == "profile_store"
+            and node.attr not in valid
+        }
+    )
+
+    assert not missing, (
+        "__init__.py calls ProfileStore methods that do not exist: "
+        f"{missing}"
+    )
 
 @pytest.fixture
 def mock_hass():
