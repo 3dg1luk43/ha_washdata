@@ -154,6 +154,7 @@ from .const import (
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_MESSAGE,
     STATE_CLEAN,
+    STATE_FINISHED,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
@@ -4186,7 +4187,12 @@ class WashDataManager:
         """Return current detector state."""
         if self.recorder.is_recording:
             return STATE_RUNNING
-        if self._is_clean_state and self.detector.state == STATE_OFF:
+        # A completed cycle ends in STATE_FINISHED, not STATE_OFF; accept both
+        # or the door-sensor Clean state (#153) is never surfaced (#282).
+        if self._is_clean_state and self.detector.state in (
+            STATE_OFF,
+            STATE_FINISHED,
+        ):
             return STATE_CLEAN
         if self._is_user_paused:
             return STATE_USER_PAUSED
