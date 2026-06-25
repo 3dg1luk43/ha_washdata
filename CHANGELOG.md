@@ -5,6 +5,12 @@ All notable changes to WashData will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🐛 Bug Fixes
+
+- **`Clean` State Never Shown for Washing Machines** (#282): A completed cycle ends in `STATE_FINISHED`, but `check_state()` only surfaced `STATE_CLEAN` for `STATE_OFF`, so with a Door Sensor configured the `Clean` state was unreachable and `sensor.<name>_state` showed `Finished`. `check_state()` now reports `Clean` for finished cycles too.
+
 ## 0.4.5.1 - 2026-06-11
 
 ### 🐛 Bug Fixes
