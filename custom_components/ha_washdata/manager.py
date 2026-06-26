@@ -154,7 +154,6 @@ from .const import (
     DEFAULT_NOTIFY_UNLOAD_DELAY_MINUTES,
     DEFAULT_NOTIFY_UNLOAD_MESSAGE,
     STATE_CLEAN,
-    STATE_FINISHED,
     DEFAULT_NOTIFY_TITLE,
     DEFAULT_NOTIFY_START_MESSAGE,
     DEFAULT_NOTIFY_FINISH_MESSAGE,
@@ -310,6 +309,8 @@ class WashDataManager:
         self._live_notification_tag = self._lifecycle_tag
         self._start_event_fired = False
         self._cycle_start_time: datetime | None = None
+        self._accumulated_cycle_cost: float = 0.0  # Cost accumulated at live rate during current cycle
+        self._last_cycle_cost: float | None = None  # Cost of last completed cycle
 
         # State
         self._current_power = 0.0
@@ -2098,6 +2099,18 @@ class WashDataManager:
 
         # Track observed power readings for learning
         self.learning_manager.process_power_reading(power, now, self._last_reading_time)
+
+        # Accumulate cycle cost at the live rate for each sample interval.
+        # Using dt between samples so cost tracks the actual Agile rate in effect
+        # at each moment rather than whatever the rate happens to be at cycle end.
+        if self._last_reading_time and self.detector.state in (
+            STATE_RUNNING, STATE_PAUSED, STATE_ENDING, STATE_STARTING
+        ):
+            _price = self.get_price()
+            if _price is not None:
+                _dt_hours = (now - self._last_reading_time).total_seconds() / 3600
+                self._accumulated_cycle_cost += power / 1000 * _dt_hours * _price
+
         self._last_reading_time = now
         self._last_real_reading_time = now # Track real update
         self._current_power = power
@@ -2105,6 +2118,7 @@ class WashDataManager:
 
         if self._cycle_start_time is None and self.detector.current_cycle_start is not None:
             self._cycle_start_time = self.detector.current_cycle_start
+            self._accumulated_cycle_cost = 0.0  # Reset on new cycle start
 
         # If running (or paused/ending), try to match profile and update estimates
         if self.detector.state in (
@@ -2815,6 +2829,13 @@ class WashDataManager:
         if "profile_name" not in event_cycle_data and self._current_program:
             event_cycle_data["profile_name"] = self._current_program
 
+        _event_energy_kwh = round(cycle_data.get("energy_wh", 0.0) / 1000, 3)
+        # Use the live-accumulated cost (integrated at the Agile rate each sample)
+        # rather than energy * current_rate, which would be wrong on a variable tariff.
+        _event_cost = round(self._accumulated_cycle_cost, 4) if self._accumulated_cycle_cost else None
+        self._last_cycle_cost = _event_cost
+        self._accumulated_cycle_cost = 0.0
+
         if self._notify_fire_events:
             self.hass.bus.async_fire(
                 EVENT_CYCLE_ENDED,
@@ -2824,8 +2845,12 @@ class WashDataManager:
                     "cycle_data": event_cycle_data,
                     "program": event_cycle_data.get("profile_name", "unknown"),
                     "duration": event_cycle_data.get("duration"),
+                    "duration_min": round(cycle_data.get("duration", 0) / 60, 1),
                     "start_time": event_cycle_data.get("start_time"),
                     "end_time": event_cycle_data.get("end_time") or dt_util.now().isoformat(),
+                    "energy_kwh": _event_energy_kwh,
+                    "cost": _event_cost,
+                    "currency": self.hass.config.currency,
                 },
             )
 
@@ -4187,12 +4212,7 @@ class WashDataManager:
         """Return current detector state."""
         if self.recorder.is_recording:
             return STATE_RUNNING
-        # A completed cycle ends in STATE_FINISHED, not STATE_OFF; accept both
-        # or the door-sensor Clean state (#153) is never surfaced (#282).
-        if self._is_clean_state and self.detector.state in (
-            STATE_OFF,
-            STATE_FINISHED,
-        ):
+        if self._is_clean_state and self.detector.state == STATE_OFF:
             return STATE_CLEAN
         if self._is_user_paused:
             return STATE_USER_PAUSED
@@ -4249,6 +4269,29 @@ class WashDataManager:
     def current_power(self):
         """Return current power reading in watts."""
         return self._current_power
+
+    def get_price(self) -> float | None:
+        """Return the configured electricity price (£/kWh), or None if not set.
+
+        Entity sensor takes precedence over the static value, matching the logic
+        used when composing finish notifications.
+        """
+        options = self.config_entry.options
+        price_entity = options.get(CONF_ENERGY_PRICE_ENTITY)
+        if price_entity:
+            state = self.hass.states.get(price_entity)
+            if state is not None:
+                try:
+                    return float(state.state)
+                except (ValueError, TypeError):
+                    pass
+        static = options.get(CONF_ENERGY_PRICE_STATIC)
+        if static is not None:
+            try:
+                return float(static)
+            except (ValueError, TypeError):
+                pass
+        return None
 
     @property
     def cycle_start_time(self) -> datetime | None:

@@ -157,6 +157,9 @@ async def async_setup_entry(
         WasherTotalDurationSensor(manager, entry),
         WasherProgressSensor(manager, entry),
         WasherPowerSensor(manager, entry),
+        WasherCycleEnergySensor(manager, entry),
+        WasherCycleCostSensor(manager, entry),
+        WasherLastCycleCostSensor(manager, entry),
         WasherElapsedTimeSensor(manager, entry),
         WasherDebugSensor(manager, entry),
         WasherSuggestionsSensor(manager, entry),
@@ -446,6 +449,92 @@ class WasherPowerSensor(WasherBaseSensor):
     @property
     def native_value(self):  # type: ignore[override]
         return self._manager.current_power
+
+
+class WasherCycleCostSensor(WasherBaseSensor):
+    """Accumulated cost of the current cycle, integrated at the live rate each sample."""
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="cycle_cost",
+            translation_key="cycle_cost",
+            suggested_display_precision=4,
+            device_class=SensorDeviceClass.MONETARY,
+            state_class=SensorStateClass.MEASUREMENT,
+            icon="mdi:cash-clock",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_unit_of_measurement(self) -> str:  # type: ignore[override]
+        return self.hass.config.currency
+
+    @property
+    def native_value(self) -> float | None:  # type: ignore[override]
+        if self._manager.check_state() == STATE_OFF:
+            return None
+        if self._manager.get_price() is None:
+            return None
+        return round(self._manager._accumulated_cycle_cost, 4)
+
+
+class WasherLastCycleCostSensor(WasherBaseSensor):
+    """Cost of the most recently completed cycle (accumulated at live rate during that cycle)."""
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="last_cycle_cost",
+            translation_key="last_cycle_cost",
+            suggested_display_precision=4,
+            device_class=SensorDeviceClass.MONETARY,
+            state_class=SensorStateClass.MEASUREMENT,
+            icon="mdi:cash-check",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_unit_of_measurement(self) -> str:  # type: ignore[override]
+        return self.hass.config.currency
+
+    @property
+    def native_value(self) -> float | None:  # type: ignore[override]
+        return self._manager._last_cycle_cost
+
+    @property
+    def extra_state_attributes(self):  # type: ignore[override]
+        past = self._manager.profile_store.get_past_cycles()
+        if not past:
+            return None
+        last = past[-1]
+        energy_wh = last.get("energy_wh", 0.0)
+        return {
+            "energy_kwh": round(energy_wh / 1000, 3) if energy_wh else None,
+            "profile": last.get("profile_name"),
+            "duration_min": round(last.get("duration", 0) / 60, 1),
+            "cycle_end": last.get("end_time"),
+        }
+
+
+class WasherCycleEnergySensor(WasherBaseSensor):
+    """Sensor for energy accumulated during the current cycle (Wh, resets each cycle)."""
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="cycle_energy",
+            translation_key="cycle_energy",
+            native_unit_of_measurement="Wh",
+            suggested_display_precision=1,
+            device_class=SensorDeviceClass.ENERGY,
+            state_class=SensorStateClass.MEASUREMENT,
+            icon="mdi:lightning-bolt-circle",
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self) -> float | None:  # type: ignore[override]
+        if self._manager.check_state() == STATE_OFF:
+            return None
+        return round(getattr(self._manager.detector, "_energy_since_idle_wh", 0.0), 2)
 
 
 class WasherElapsedTimeSensor(WasherBaseSensor):

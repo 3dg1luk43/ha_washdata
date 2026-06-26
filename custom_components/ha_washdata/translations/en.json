@@ -1254,6 +1254,15 @@
       "current_power": {
         "name": "Current Power"
       },
+      "cycle_energy": {
+        "name": "Accumulated Cycle Energy"
+      },
+      "cycle_cost": {
+        "name": "Accumulated Cycle Cost"
+      },
+      "last_cycle_cost": {
+        "name": "Last Cycle Cost"
+      },
       "elapsed_time": {
         "name": "Elapsed Time"
       },
