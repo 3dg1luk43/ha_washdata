@@ -235,6 +235,9 @@ Run database cleanup, repair corrupted data, and export/import configurations.
 - **`sensor.<name>_cycle_progress`**: 0–100% (resets after unload timeout).
 - **`sensor.<name>_cycle_count`**: Total completed cycles stored — use in automations to schedule maintenance by cycle count.
 - **`sensor.<name>_current_phase`**: Active cycle phase label (e.g. "Rinsing", "Spin").
+- **`sensor.<name>_cycle_energy`**: Energy (Wh) accumulated during the current cycle; resets at cycle start. Unavailable when idle.
+- **`sensor.<name>_cycle_cost`**: Running cost of the current cycle integrated at the live electricity rate each sample interval (supports variable/Agile tariffs). Unavailable when idle or no price is configured.
+- **`sensor.<name>_last_cycle_cost`**: Cost of the most recently completed cycle, integrated at the live rate during that cycle. Includes `energy_kwh`, `profile`, `duration_min`, and `cycle_end` attributes.
 - **`sensor.<name>_pump_runs_today`**: *(Pump device type only)* Completed pump cycles in a rolling 24-hour window.
 - **`binary_sensor.<name>_running`**: Simple on/off running state.
 - **`button.<name>_pause_cycle`**: Pause the active cycle (available while Running/Starting/Ending and not already paused).
