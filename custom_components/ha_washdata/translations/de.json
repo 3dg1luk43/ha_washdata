@@ -663,7 +663,7 @@
       },
       "record_cycle": {
         "title": "Aufnahmezyklus",
-        "description": "Einen Zyklus manuell aufzeichnen, um ein sauberes Profil ohne Störungen zu erstellen.\n\nStatus: **{status}**\nDauer: {duration}s\nBeispiele: {samples}",
+        "description": "Einen Zyklus manuell aufzeichnen, um ein sauberes Profil ohne Störungen zu erstellen.\n\nStatus: **{status}**\nDauer: {duration} s\nBeispiele: {samples}",
         "menu_options": {
           "record_refresh": "Status aktualisieren",
           "record_stop": "Aufnahme beenden (Speichern und verarbeiten)",
@@ -825,12 +825,12 @@
         "phase_preview_no_curve": "Die durchschnittliche Profilkurve ist noch nicht verfügbar. Weitere Zyklen für dieses Profil ausführen/zuordnen.",
         "average_power_curve": "Durchschnittliche Leistungskurve",
         "unit_min": "min",
-        "profile_option_fmt": "{name} ({count} Zyklen, ~{duration}m Durchschnitt)",
-        "profile_option_short_fmt": "{name} ({count} Zyklen, ~{duration}m)",
+        "profile_option_fmt": "{name} ({count} Zyklen, ~{duration} min Durchschnitt)",
+        "profile_option_short_fmt": "{name} ({count} Zyklen, ~{duration} min)",
         "deleted_cycles_from_profile": "{count} Zyklen von {profile} gelöscht.",
         "not_enough_data_graph": "Nicht genügend Daten, um ein Diagramm zu erstellen.",
         "no_profiles_found": "Keine Profile gefunden.",
-        "cycle_info_fmt": "Zyklus: {start}, {duration}m, Strom: {label}",
+        "cycle_info_fmt": "Zyklus: {start}, {duration} min, Strom: {label}",
         "top_candidates_header": "### Top-Kandidaten",
         "tbl_profile": "Profil",
         "tbl_confidence": "Vertrauen",
@@ -1240,7 +1240,11 @@
         }
       },
       "washer_program": {
-        "name": "Programm"
+        "name": "Programm",
+        "state": {
+          "off": "Aus",
+          "detecting...": "Erkennung läuft..."
+        }
       },
       "time_remaining": {
         "name": "Verbleibende Zeit"
@@ -1270,7 +1274,13 @@
         }
       },
       "current_phase": {
-        "name": "Aktuelle Phase"
+        "name": "Aktuelle Phase",
+        "state": {
+          "off": "Aus",
+          "Starting": "Beginnt",
+          "Running": "Läuft",
+          "Finished": "Fertig"
+        }
       },
       "wash_phase": {
         "name": "Phase"
@@ -1286,7 +1296,8 @@
         "name": "Pumpenläufe (letzte 24 Stunden)"
       },
       "cycle_count": {
-        "name": "Zyklusanzahl"
+        "name": "Zyklusanzahl",
+        "unit_of_measurement": "Zyklen"
       }
     },
     "select": {
