@@ -7,9 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## 0.5.0 - 2026-06-29
+
+This release adds a full management UI for WashData. Everything that previously lived only in the Settings options flow is now also reachable from a dedicated full-screen panel, alongside live dashboards, interactive editors, and per-user access control. The options flow is unchanged and keeps working.
+
+### ✨ Features
+
+- **Full-Screen Management Panel**: A new **WashData** entry in the Home Assistant sidebar opens a dedicated panel with Status, Cycles, Profiles, Settings, Tools, Logs, and Panel tabs. It is backed by a new WebSocket API and provides the same operations as the in-Settings options flow (which remains as a fallback). The layout is mobile and touch friendly (responsive grids, larger touch targets, portrait support) and auto-busts its browser cache on every update.
+
+- **Status dashboard**: Live state, power, progress, and time remaining, with attention cards that surface pending tuning suggestions, learning feedbacks, and active recording, and jump straight to them. A labelled live power chart, served from the integration so it survives a browser refresh (and the in-progress cycle trace survives a restart), with a cursor-following readout showing time from start, time to end, power, and envelope range. When a profile is matched its full expected curve is overlaid in faint orange; an optional **Raw socket** overlay draws the configured power sensor's recorder history for the running cycle side by side with the integration's processed and sampled trace. An optional **Live Match Debug** card shows confidence, match ambiguity, and the top candidate profiles.
+
+- **Program selector on Status**: Choose the running program, or return to auto-detect, directly from the dashboard. The selection is tagged **(auto-detected)** or **(manually selected)** and drives the same manual-program mechanism as the program-select entity, so the panel, the entity, and automations stay in sync.
+
+- **Interactive Cycles tab** (formerly History): A compact, history-sorted list. Click a cycle to inspect its power curve and label, delete, trim, or split it. Trimming uses draggable handles with a **seconds-from-start** or **clock-time** input toggle. Splitting auto-detects idle gaps or lets you place split points on the graph, assigning a profile per segment. A selection mode adds multi-cycle **Merge** and bulk delete, and retroactive auto-label moved into the toolbar.
+
+- **Profile control panel**: Open any profile for statistics (cycle count, durations, average and total energy, consistency, last run), its average envelope graph, an interactive **phase-range editor** with draggable boundaries over the average curve, **history cleanup** (every member cycle overlaid; hover to identify a curve and click or tick it to delete outliers), and rename / rebuild / delete.
+
+- **Inline tuning suggestions**: Suggested values appear beside the relevant settings fields with a one-click **Use** and an **Apply all** banner. Each setting has a hover explainer with a small diagram drawn in the browser, and the Settings layout was reworked to be roomier and grouped.
+
+- **Tools**: Manual recording, learning-feedback resolution with a candidate comparison graph, phase-catalog management, diagnostics, and config export / import (paste JSON or load a file).
+
+- **Role-Based Access Control**: Administrators can grant each Home Assistant user a per-device access level (none, read, edit, or full) with a per-user default, from the Panel tab. Access is enforced on every WebSocket command on the server, not only hidden in the UI: read users get a view-only panel with hidden devices removed, edit users can operate normally, and destructive or export actions require full access. Administrators always have full access. Access control is **off by default**, so existing single-user setups are unaffected.
+
+- **Preferences and panel settings**: Each user can set their own default tab and Status chart toggles. Administrators can set a global refresh interval, default tab, hide tabs for non-admins, and hide deprecated device types. These are stored independently of device config and preserved across restarts.
+
+- **Logs page** (administrators): A live, level-filterable view of recent WashData log records from an in-memory ring buffer, with export and a resizable view.
+
 ### 🐛 Bug Fixes
 
-- **`Clean` State Never Shown for Washing Machines** (#282): A completed cycle ends in `STATE_FINISHED`, but `check_state()` only surfaced `STATE_CLEAN` for `STATE_OFF`, so with a Door Sensor configured the `Clean` state was unreachable and `sensor.<name>_state` showed `Finished`. `check_state()` now reports `Clean` for finished cycles too.
+- **`Clean` State Never Shown for Washing Machines** (#282, #283): A completed cycle ends in `STATE_FINISHED`, but `check_state()` only surfaced `STATE_CLEAN` for `STATE_OFF`, so with a Door Sensor configured the `Clean` state was unreachable and `sensor.<name>_state` showed `Finished`. `check_state()` now reports `Clean` for finished cycles too. Reported and fixed by @Olen.
+
+### 🛠 Internal / Developer Experience
+
+- New WebSocket command surface (`ws_api.py`) backing the panel (settings, profiles, cycles, phases, recording, feedback, diagnostics, suggestions, curve and envelope data, merge / split / trim, logs, panel config, and RBAC). Every async handler is registered with `@websocket_api.async_response`, and all commands pass through a single server-side RBAC guard.
+- `ProfileStore.get_storage_stats()` no longer runs blocking file I/O or serialises the full dataset on the event loop, which could stall the diagnostics view.
+- `manifest.json` declares the panel's prerequisites: `frontend`, `websocket_api`, and `recorder` are added as `after_dependencies` (the recorder is optional and used only for the raw-socket overlay).
+
+### ⚠️ Notes & Prerequisites
+
+- After updating, perform a **full Home Assistant restart** (not just an integration reload) so the new WebSocket commands register, then hard-refresh the panel.
+- This release sets a minimum Home Assistant version of **2026.5.0**.
+- The raw-socket overlay needs the Recorder to be retaining history for the configured power sensor; it degrades gracefully if the recorder is unavailable.
+- Deprecated device types (Coffee Machine, Electric Vehicle, Heat Pump, Oven) remain available in 0.5.0; their planned hard removal is deferred from 0.4.6 to **0.6.0**.
+
+## 0.4.5.2 - 2026-06-13
+
+### 🐛 Bug Fixes
+
+- **rename ProfileStore method** (#278 ): __init__.py: rename profile_store.auto_label_unlabeled_cycles(...) → profile_store.auto_label_cycles(...) in handle_auto_label_cycles. The ha_washdata.auto_label_cycles service handler calls manager.profile_store.auto_label_unlabeled_cycles(...), which does not exist — the actual ProfileStore method is auto_label_cycles(confidence_threshold, overwrite=False). The service registers fine, so the bug is invisible until invoked, where it raises AttributeError and surfaces as HTTP 500.
+
+## New Contributors
+* @agjendem made their first contribution in https://github.com/3dg1luk43/ha_washdata/pull/278
 
 ## 0.4.5.1 - 2026-06-11
 

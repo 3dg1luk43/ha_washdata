@@ -1,4 +1,4 @@
-"""Frontend card registration for WashData."""
+"""Frontend card and panel registration for WashData."""
 
 import logging
 import os
@@ -13,6 +13,14 @@ LOCAL_SUBDIR = "ha_washdata"
 CARD_NAME = "ha-washdata-card.js"
 INTEGRATION_URL = f"/{LOCAL_SUBDIR}/{CARD_NAME}"
 CARD_REGISTERED = "registered"
+
+# Full-screen panel constants
+PANEL_JS_NAME = "ha-washdata-panel.js"
+PANEL_JS_URL = f"/{LOCAL_SUBDIR}/{PANEL_JS_NAME}"
+PANEL_ELEMENT = "ha-washdata-panel"
+PANEL_URL_PATH = "ha-washdata"
+PANEL_REGISTERED_KEY = "ha_washdata_panel_registered"
+PANEL_STATIC_REGISTERED = "ha_washdata_panel_static_registered"
 CARD_DEFERRED = "deferred"
 CARD_FAILED = "failed"
 CardRegisterResult = Literal["registered", "deferred", "failed"]
@@ -26,10 +34,10 @@ class LovelaceResourceItem(TypedDict, total=False):
     res_type: str
 
 
-def get_cache_buster() -> str:
-    """Generate a stable cache buster based on card asset mtime."""
+def get_cache_buster(filename: str = CARD_NAME) -> str:
+    """Generate a stable cache buster based on a www asset's mtime."""
     try:
-        src = Path(__file__).parent / "www" / CARD_NAME
+        src = Path(__file__).parent / "www" / filename
         return str(int(os.path.getmtime(src)))
     except OSError:
         # Deterministic fallback when file is unavailable.
@@ -221,3 +229,82 @@ class WashDataCardRegistration:
             _LOGGER.debug("Auto-registered lovelace resource for %s", INTEGRATION_URL)
             return CARD_REGISTERED
         return CARD_FAILED
+
+
+async def async_register_panel(hass: HomeAssistant) -> bool:
+    """Serve ha-washdata-panel.js and register a sidebar panel with Home Assistant.
+
+    Safe to call on every integration setup; subsequent calls are no-ops once
+    hass.data[PANEL_REGISTERED_KEY] is set.  Returns True on success.
+    """
+    if hass.data.get(PANEL_REGISTERED_KEY):
+        return True
+
+    src = Path(__file__).parent / "www" / PANEL_JS_NAME
+    if not src.exists():
+        _LOGGER.warning("Panel JS not found at %s — sidebar panel not registered", src)
+        return False
+
+    # Serve the JS module under /ha_washdata/ha-washdata-panel.js.
+    # Await the static path registration directly so the file is available
+    # before HA fires EVENT_PANELS_UPDATED and the frontend tries to import it.
+    # Guard with a flag set *before* the await so two concurrent setup_entry
+    # calls (multiple devices) don't both try to register the same route and
+    # log a benign "method GET is already registered" debug line.
+    if not hass.data.get(PANEL_STATIC_REGISTERED):
+        hass.data[PANEL_STATIC_REGISTERED] = True
+        try:
+            from homeassistant.components.http import StaticPathConfig  # pylint: disable=import-outside-toplevel
+
+            if hasattr(hass.http, "async_register_static_paths"):
+                await hass.http.async_register_static_paths(
+                    [StaticPathConfig(PANEL_JS_URL, str(src), True)]
+                )
+            else:
+                _register_static_path(hass, PANEL_JS_URL, str(src))
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("Panel static path registration failed, falling back: %s", exc)
+            _register_static_path(hass, PANEL_JS_URL, str(src))
+
+    # Re-check after the await: with multiple WashData devices, all concurrent
+    # setup_entry calls pass the initial guard before any one of them sets the
+    # key. The first to resume after the await wins; the rest bail out here.
+    if hass.data.get(PANEL_REGISTERED_KEY):
+        return True
+
+    # Register the sidebar panel using the built-in "custom" component type.
+    # ha-panel-custom reads panel.config.module_url and imports it dynamically,
+    # then instantiates the element named in panel.config.name.
+    try:
+        from homeassistant.components import frontend  # pylint: disable=import-outside-toplevel
+
+        # Cache-buster query so browsers refetch the module after each update
+        # while still honoring immutable cache headers between releases.
+        panel_version = get_cache_buster(PANEL_JS_NAME)
+
+        # HA's ha-panel-custom.ts reads panel.config._panel_custom for the
+        # loading parameters (name, module_url, etc.).  Flat config keys at the
+        # top level are NOT read by the frontend — only _panel_custom is.
+        # This matches what panel_custom.async_register_panel() produces.
+        frontend.async_register_built_in_panel(
+            hass,
+            component_name="custom",
+            sidebar_title="WashData",
+            sidebar_icon="mdi:washing-machine",
+            frontend_url_path=PANEL_URL_PATH,
+            config={
+                "_panel_custom": {
+                    "name": PANEL_ELEMENT,
+                    "module_url": f"{PANEL_JS_URL}?v={panel_version}",
+                    "embed_iframe": False,
+                    "trust_external": False,
+                }
+            },
+            require_admin=False,
+        )
+        hass.data[PANEL_REGISTERED_KEY] = True
+        _LOGGER.debug("WashData sidebar panel registered at /%s", PANEL_URL_PATH)
+        return True
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.warning("Failed to register WashData panel: %s", exc)
+        return False

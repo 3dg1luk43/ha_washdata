@@ -112,6 +112,12 @@ class DiagBuffer:
         """Record one raw power-sensor reading (call *before* any throttling)."""
         self._power.append((ts.timestamp(), watts))
 
+    def power_samples(self, since_ts: float | None = None) -> list[tuple[float, float]]:
+        """Return raw (unix_ts, watts) readings, optionally only those at/after since_ts."""
+        if since_ts is None:
+            return list(self._power)
+        return [(ts, w) for ts, w in self._power if ts >= since_ts]
+
     def record_state(
         self,
         from_state: str,

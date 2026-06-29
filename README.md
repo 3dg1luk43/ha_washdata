@@ -18,7 +18,7 @@ A Home Assistant custom component to monitor washing machines via smart sockets,
 
 ## ✨ Features
 
-- **Multi-Device Support**: Track Washing Machines, Dryers, Washer-Dryer Combos, Dishwashers, Air Fryers, Bread Makers, and Pumps/Sump Pumps, each with device-specific defaults and phases. An **Other (Advanced)** bucket is available for appliances that do not fit one of the supported classes; it ships intentionally generic defaults and expects the user to tune thresholds, timeouts, and matching parameters themselves. Coffee Machines, Electric Vehicles, Heat Pumps, and Ovens are supported in 0.4.4.3 as deprecated types (existing setups continue to work) and scheduled for removal in 0.4.6.
+- **Multi-Device Support**: Track Washing Machines, Dryers, Washer-Dryer Combos, Dishwashers, Air Fryers, Bread Makers, and Pumps/Sump Pumps, each with device-specific defaults and phases. An **Other (Advanced)** bucket is available for appliances that do not fit one of the supported classes; it ships intentionally generic defaults and expects the user to tune thresholds, timeouts, and matching parameters themselves. Coffee Machines, Electric Vehicles, Heat Pumps, and Ovens are supported in 0.4.4.3 as deprecated types (existing setups continue to work) and scheduled for removal in 0.6.0.
 - **Smart Cycle Detection**: Automatically detects starts/stops with **Predictive End** logic. Includes **End Spike Protection** for dishwashers to capture final pump-outs.
 - **Power Spike Filtering**: Ignores brief boot spikes to prevent false starts.
 - **Shape-Correlation Matching**: Uses `numpy.corrcoef` with **Confidence Boosting** to distinguish similar cycles.

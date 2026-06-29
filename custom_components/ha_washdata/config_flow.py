@@ -320,7 +320,39 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # pylint: disable=a
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
-    """Handle a options flow for WashData."""
+    """Handle a options flow for WashData.
+
+    MIGRATION NOTE: every capability in this OptionsFlow is also available in the
+    full-screen WashData panel, backed by ws_api.py and www/ha-washdata-panel.js.
+    This flow is retained as-is (the in-Settings fallback) and must keep working.
+
+    Migrated to the panel (WebSocket command -> panel UI):
+      - settings + advanced + notifications  -> get_options / set_options
+        (the panel shows all sections ungated; it has no "Show Advanced" gate,
+         which only existed here to work around OptionsFlow's single-form limit)
+      - suggested settings apply flow         -> get_suggestions / apply_suggestions
+                                                  / clear_suggestions (inline chips)
+      - device link (linked_device)           -> set_options (HA device picker)
+      - manage cycles, label, delete          -> label_cycle / delete_cycle
+      - auto-label                            -> auto_label_cycles
+      - interactive editor (merge / split)    -> analyze_split / apply_split /
+                                                  apply_merge (interactive JS graph)
+      - trim cycle data                       -> get_cycle_power_data / trim_cycle
+                                                  (draggable handles on the curve)
+      - manage profiles + rename + delete     -> create_profile / rename_profile /
+                                                  delete_profile (profile control panel)
+      - profile statistics                    -> get_profiles / get_profile_envelope
+      - history cleanup (spaghetti + delete)  -> get_profile_cycles + delete_cycle
+      - assign profile phase ranges           -> get_profile_phases / set_profile_phases
+                                                  (+ get_profile_envelope overlay)
+      - phase catalog CRUD                    -> get/create/update/delete_phase
+      - record cycle                          -> *_recording commands
+      - learning feedbacks                    -> get_feedbacks / resolve_feedback /
+                                                  dismiss_all_feedbacks
+      - diagnostics + reprocess + wipe + I/O  -> get_diagnostics / reprocess_history /
+                                                  clear_debug_data / wipe_history /
+                                                  export_config / import_config
+    """
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
@@ -578,7 +610,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             # Conditional flow text cannot be resolved per-user by the frontend
             # (it only translates static step descriptions), so this falls back
             # to the instance language via _options_text. Deprecated device
-            # types are removed in 0.4.6 regardless.
+            # types are removed in 0.6.0 regardless.
             warning_template = await self._options_text(
                 "settings_deprecation_warning",
                 "⚠️ **Deprecated device type:** {device_type} is scheduled "

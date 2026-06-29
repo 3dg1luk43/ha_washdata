@@ -231,6 +231,31 @@ STATE_RINSE = "rinse"
 STATE_UNKNOWN = "unknown"
 STATE_CLEAN = "clean"  # Cycle ended but door not yet opened (laundry still inside)
 
+# Authoritative state -> display color map. Single source of truth for the
+# full-screen panel (and any other frontend), surfaced over the WebSocket
+# get_constants command so colors are defined in exactly one place. Values are
+# CSS colors using Home Assistant theme variables with a hex fallback, so they
+# adapt to the active theme. The "recording" key mirrors STATE_RECORDING, which
+# is defined later in this module alongside the recorder constants.
+STATE_COLORS = {
+    STATE_OFF: "var(--state-inactive-color, #9e9e9e)",
+    STATE_IDLE: "var(--state-inactive-color, #9e9e9e)",
+    STATE_DELAY_WAIT: "var(--secondary-text-color, #757575)",
+    STATE_STARTING: "var(--warning-color, #ff9800)",
+    STATE_RUNNING: "var(--success-color, #4caf50)",
+    STATE_PAUSED: "var(--warning-color, #ff9800)",
+    STATE_USER_PAUSED: "var(--warning-color, #ff9800)",
+    STATE_ENDING: "var(--info-color, #2196f3)",
+    STATE_FINISHED: "var(--success-color, #4caf50)",
+    STATE_ANTI_WRINKLE: "var(--info-color, #2196f3)",
+    STATE_INTERRUPTED: "var(--error-color, #f44336)",
+    STATE_FORCE_STOPPED: "var(--error-color, #f44336)",
+    STATE_RINSE: "var(--info-color, #2196f3)",
+    STATE_CLEAN: "var(--teal-color, #009688)",
+    STATE_UNKNOWN: "var(--disabled-color, #bdbdbd)",
+    "recording": "var(--error-color, #f44336)",
+}
+
 # Cycle Status (how the cycle ended)
 CYCLE_STATUS_COMPLETED = "completed"  # Natural completion (power dropped)
 CYCLE_STATUS_INTERRUPTED = (
@@ -282,7 +307,7 @@ DEVICE_TYPES = {
 # load unchanged; filtered out of the new-entry picker in the config flow,
 # shown with a "(deprecated)" suffix when an existing entry already uses one,
 # and surfaced via a one-shot persistent_notification on integration startup.
-# Planned hard removal: 0.4.6 (two release cycles after this deprecation).
+# Planned hard removal: 0.6.0 (deferred from 0.4.6, which 0.5.0 superseded).
 DEPRECATED_DEVICE_TYPES = frozenset({
     DEVICE_TYPE_COFFEE_MACHINE,
     DEVICE_TYPE_EV,

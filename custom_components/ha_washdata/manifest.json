@@ -3,7 +3,10 @@
   "name": "WashData",
   "after_dependencies": [
     "lovelace",
-    "http"
+    "http",
+    "frontend",
+    "websocket_api",
+    "recorder"
   ],
   "codeowners": [
     "@3dg1luk43"
@@ -16,5 +19,5 @@
   "requirements": [
     "numpy"
   ],
-  "version": "0.4.5.1"
+  "version": "0.5.0"
 }

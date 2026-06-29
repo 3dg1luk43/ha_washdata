@@ -524,6 +524,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 hass.data["ha_washdata_card_registered"] = False
                 _log.warning("Card registration failed and was not deferred")
 
+    # Register full-screen sidebar panel - once per HA instance only.
+    # pylint: disable=import-outside-toplevel
+    from .frontend import async_register_panel, PANEL_REGISTERED_KEY
+
+    if not hass.data.get(PANEL_REGISTERED_KEY):
+        await async_register_panel(hass)
+
+    # Register WebSocket API commands for the panel - once per HA instance only.
+    if not hass.data.get("ha_washdata_ws_registered"):
+        from .ws_api import (  # pylint: disable=import-outside-toplevel
+            async_load_panel_config,
+            async_register_commands,
+        )
+
+        await async_load_panel_config(hass)
+        async_register_commands(hass)
+        hass.data["ha_washdata_ws_registered"] = True
+
     # Register feedback service
     if not hass.services.has_service(
         DOMAIN, SERVICE_SUBMIT_FEEDBACK.rsplit(".", maxsplit=1)[-1]

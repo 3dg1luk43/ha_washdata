@@ -341,6 +341,17 @@ class MatchResult:
 
 
 
+def _safe_file_size_kb(path: str) -> float:
+    """Return the size of ``path`` in KiB, or 0.0 if it cannot be read.
+
+    Runs blocking os.path calls; intended to be offloaded to the executor.
+    """
+    try:
+        return os.path.getsize(path) / 1024 if os.path.exists(path) else 0.0
+    except OSError:
+        return 0.0
+
+
 def decompress_power_data(cycle: CycleDict) -> list[tuple[float, float]]:
     """Return power data as ``[(offset_seconds, power), ...]`` for a cycle.
 
@@ -1679,21 +1690,24 @@ class ProfileStore:
         return processed_count
 
     async def get_storage_stats(self) -> dict[str, Any]:
-        """Get storage usage stats."""
+        """Get storage usage stats.
+
+        The on-disk size lookup uses blocking os.path calls, so it is offloaded
+        to the executor. We deliberately never json.dumps(self._data) as a
+        fallback: with power_data included the dataset can be many megabytes and
+        serialising it on the event loop previously stalled the loop long enough
+        that the diagnostics view appeared to hang on a spinner.
+        """
         cycles = self._data.get("past_cycles", [])
         profiles = self._data.get("profiles", {})
         debug_traces_count = sum(1 for c in cycles if c.get("debug_data"))
 
-        file_size_kb = 0
-        try:
-            # Attempt to get real file size from store
-            if hasattr(self._store, "path") and os.path.exists(self._store.path):
-                file_size_kb = os.path.getsize(self._store.path) / 1024
-            else:
-                # Fallback: estimate
-                file_size_kb = len(json.dumps(self._data, default=str)) / 1024
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
+        file_size_kb = 0.0
+        path = getattr(self._store, "path", None)
+        if path:
+            file_size_kb = await self.hass.async_add_executor_job(
+                _safe_file_size_kb, path
+            )
 
         return {
             "file_size_kb": round(file_size_kb, 1),
