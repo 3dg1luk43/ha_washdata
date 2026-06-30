@@ -214,6 +214,10 @@ _OPEN_COMMANDS = frozenset({
 })
 # Admin-only commands.
 _ADMIN_COMMANDS = frozenset({"set_panel_config", "get_logs"})
+# Mutating commands intentionally allowed at the 'read' level. Picking the live
+# program is a benign runtime action (it changes detection, not stored data), so
+# read users may use the Status program selector.
+_READ_WRITE_COMMANDS = frozenset({"set_program"})
 
 _LOG_BUFFER_KEY = "ha_washdata_log_buffer"
 _LOG_LEVELS = {"DEBUG": 10, "INFO": 20, "WARNING": 30, "ERROR": 40, "CRITICAL": 50}
@@ -321,7 +325,14 @@ def _rbac_ok(hass: HomeAssistant, connection: websocket_api.ActiveConnection, ms
     entry_id = msg.get("entry_id")
     if not entry_id:
         return True  # no device context and not admin/open: harmless read-style command
-    required = "full" if cmd in _FULL_COMMANDS else ("read" if cmd.startswith("get_") else "edit")
+    if cmd in _READ_WRITE_COMMANDS:
+        required = "read"
+    elif cmd in _FULL_COMMANDS:
+        required = "full"
+    elif cmd.startswith("get_"):
+        required = "read"
+    else:
+        required = "edit"
     have = _effective_level(hass, user, entry_id)
     if _LEVEL_RANK.get(have, 0) >= _LEVEL_RANK[required]:
         return True

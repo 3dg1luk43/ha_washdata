@@ -184,6 +184,9 @@ const _CSS = `
 }
 .wd-header h1 { margin: 0; font-size: 1.25em; font-weight: 600; letter-spacing: .01em; }
 .wd-logo { flex-shrink: 0; opacity: .95; }
+.wd-burger { display: none; align-items: center; justify-content: center; background: transparent; border: none; color: inherit; cursor: pointer; padding: 5px; margin: -2px 2px -2px -4px; border-radius: 8px; flex-shrink: 0; }
+.wd-burger:hover { background: rgba(255,255,255,.16); }
+@media (max-width: 870px) { .wd-burger { display: inline-flex; } }
 .wd-header .wd-sub { font-size: .72em; opacity: .75; margin-top: 2px; }
 .wd-header .wd-ts { margin-left: auto; font-size: .7em; opacity: .65; white-space: nowrap; }
 .wd-body { max-width: 1160px; margin: 0 auto; padding: 20px 16px 60px; }
@@ -1040,8 +1043,12 @@ class HaWashdataPanel extends HTMLElement {
       <circle cx="12" cy="14" r="5"/>
       <circle cx="12" cy="14" r="2"/>
     </svg>`;
+    const burger = `<button class="wd-burger" id="wd-burger" aria-label="Toggle sidebar" title="Toggle Home Assistant sidebar">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>`;
     return `
       <div class="wd-header">
+        ${burger}
         ${logo}
         <div><h1>WashData</h1><div class="wd-sub">Appliance monitor</div></div>
         ${working}
@@ -1117,13 +1124,13 @@ class HaWashdataPanel extends HTMLElement {
       `<option value="${_esc(n)}" ${selVal === n ? 'selected' : ''}>${_esc(n)}</option>`).join('');
     const suffix = matched ? (manual ? '(manually selected)' : '(auto-detected)') : '';
     const tag = suffix ? `<span class="wd-prog-tag ${manual ? 'manual' : 'auto'}">${suffix}</span>` : '';
-    const programCtl = this._canEdit()
-      ? `<div class="wd-prog-ctl"><label>Program</label>
+    // Program selection is allowed for any user who can see the device (read+),
+    // since it only changes live detection, not stored data.
+    const programCtl = `<div class="wd-prog-ctl"><label>Program</label>
           <select id="wd-status-prog">
             <option value="auto_detect" ${selVal === 'auto_detect' ? 'selected' : ''}>Auto-detect</option>
             ${profOpts}
-          </select>${tag}</div>`
-      : `<div class="wd-prog-ctl"><label>Program</label><span>${matched ? `${_esc(matched)} ${suffix}` : 'Auto-detect'}</span></div>`;
+          </select>${tag}</div>`;
 
     const attn = [];
     if (dev.recording && this._canEdit()) attn.push(`<div class="wd-attn-card" data-action="goto-recording"><span class="wd-attn-icon">●</span><div class="wd-attn-body"><div class="wd-attn-title">Recording in progress</div><div class="wd-attn-sub">Open the recorder</div></div></div>`);
@@ -2185,6 +2192,12 @@ class HaWashdataPanel extends HTMLElement {
   _wire() {
     const sr = this.shadowRoot;
     if (!sr) return;
+
+    // Hamburger: toggle the HA sidebar (no app bar is provided for custom panels).
+    const burger = sr.getElementById('wd-burger');
+    if (burger) burger.addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('hass-toggle-menu', { bubbles: true, composed: true }));
+    });
 
     sr.querySelectorAll('[data-idx]').forEach(btn => btn.addEventListener('click', () => this._selectDevice(parseInt(btn.dataset.idx, 10))));
 

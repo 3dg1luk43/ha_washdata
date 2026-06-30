@@ -27,7 +27,7 @@ This release adds a full management UI for WashData. Everything that previously 
 
 - **Tools**: Manual recording, learning-feedback resolution with a candidate comparison graph, phase-catalog management, diagnostics, and config export / import (paste JSON or load a file).
 
-- **Role-Based Access Control**: Administrators can grant each Home Assistant user a per-device access level (none, read, edit, or full) with a per-user default, from the Panel tab. Access is enforced on every WebSocket command on the server, not only hidden in the UI: read users get a view-only panel with hidden devices removed, edit users can operate normally, and destructive or export actions require full access. Administrators always have full access. Access control is **off by default**, so existing single-user setups are unaffected.
+- **Role-Based Access Control**: Administrators can grant each Home Assistant user a per-device access level (none, read, edit, or full) with a per-user default, from the Panel tab. Access is enforced on every WebSocket command on the server, not only hidden in the UI: read users get a mostly view-only panel with hidden devices removed (but may pick the running program, a live-only action), edit users can operate normally, and destructive or export actions require full access. Administrators always have full access. Access control is **off by default**, so existing single-user setups are unaffected.
 
 - **Preferences and panel settings**: Each user can set their own default tab and Status chart toggles. Administrators can set a global refresh interval, default tab, hide tabs for non-admins, and hide deprecated device types. These are stored independently of device config and preserved across restarts.
 
