@@ -744,6 +744,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.services.async_register(DOMAIN, "record_stop", handle_record_stop)
 
+    # Register on-device ML training trigger (Stage 4, gated by ENABLE_ML_TRAINING)
+    from .const import ENABLE_ML_TRAINING, SERVICE_TRIGGER_ML_TRAINING
+
+    if ENABLE_ML_TRAINING and not hass.services.has_service(
+        DOMAIN, SERVICE_TRIGGER_ML_TRAINING
+    ):
+        async def handle_trigger_ml_training(call: ServiceCall) -> None:
+            device_id = _require_str(call.data.get("device_id"), "device_id")
+            registry = dr.async_get(hass)
+            device = registry.async_get(device_id)
+            if not device:
+                raise ValueError("Device not found")
+            entry_id = next(iter(device.config_entries), None)
+            if not entry_id or entry_id not in hass.data[DOMAIN]:
+                raise ValueError("Integration not loaded")
+
+            manager = hass.data[DOMAIN][entry_id]
+            summary = await manager.async_run_ml_training(force=True)
+            manager._logger.info("Manual ML training: %s", summary)
+
+        hass.services.async_register(
+            DOMAIN, SERVICE_TRIGGER_ML_TRAINING, handle_trigger_ml_training
+        )
+
     # Register pause/resume services
     if not hass.services.has_service(DOMAIN, "pause_cycle"):
         async def handle_pause_cycle(call: ServiceCall) -> None:

@@ -173,6 +173,7 @@ async def async_setup_entry(
             [
                 WasherMatchConfidenceSensor(manager, entry),
                 WasherTopCandidatesSensor(manager, entry),
+                WasherAmbiguitySensor(manager, entry),
             ]
         )
 
@@ -555,6 +556,38 @@ class WasherTopCandidatesSensor(WasherBaseSensor):
     @property
     def extra_state_attributes(self):  # type: ignore[override]
         return {"candidates": self._manager.top_candidates}
+
+
+class WasherAmbiguitySensor(WasherBaseSensor):
+    """Diagnostic sensor for how ambiguous the last profile match was.
+
+    Reports the score margin between the top-1 and top-2 candidates as a
+    percentage: a small margin means the matcher could not confidently
+    distinguish the best profile from the runner-up.
+    """
+
+    def __init__(self, manager: WashDataManager, entry: ConfigEntry) -> None:
+        self.entity_description = SensorEntityDescription(
+            key="ambiguity",
+            translation_key="ambiguity",
+            icon="mdi:help-rhombus-outline",
+            state_class="measurement",
+            native_unit_of_measurement="%",
+            entity_category=EntityCategory.DIAGNOSTIC,
+        )
+        super().__init__(manager, entry)
+
+    @property
+    def native_value(self):  # type: ignore[override]
+        result = getattr(self._manager, "_last_match_result", None)
+        margin = getattr(result, "ambiguity_margin", None) if result is not None else None
+        if margin is None:
+            return None
+        return round(float(margin) * 100, 1)
+
+    @property
+    def extra_state_attributes(self):  # type: ignore[override]
+        return {"is_ambiguous": self._manager.match_ambiguity}
 
 
 class WasherCurrentPhaseSensor(WasherBaseSensor):

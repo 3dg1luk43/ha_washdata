@@ -1,0 +1,42 @@
+[
+  {
+    "feature": "match_progress_top1",
+    "group": "live_match",
+    "runtime_source": "elapsed_seconds / top-1 candidate expected duration"
+  },
+  {
+    "feature": "top1_distance",
+    "group": "live_match",
+    "runtime_source": "blended RMSE+DTW shape distance to the top-1 candidate prefix"
+  },
+  {
+    "feature": "margin",
+    "group": "live_match",
+    "runtime_source": "top-2 distance minus top-1 distance (decision confidence)"
+  },
+  {
+    "feature": "distance_ratio",
+    "group": "live_match",
+    "runtime_source": "top-1 distance / top-2 distance"
+  },
+  {
+    "feature": "candidate_count_log",
+    "group": "live_match",
+    "runtime_source": "log1p(number of candidate profiles on the device)"
+  },
+  {
+    "feature": "prefix_active_fraction",
+    "group": "live_match",
+    "runtime_source": "fraction of the observed prefix above the active threshold"
+  },
+  {
+    "feature": "duration_ratio_top1",
+    "group": "live_match",
+    "runtime_source": "elapsed / top-1 expected duration (clipped)"
+  },
+  {
+    "feature": "elapsed_log",
+    "group": "live_match",
+    "runtime_source": "log1p(elapsed seconds since cycle start)"
+  }
+]

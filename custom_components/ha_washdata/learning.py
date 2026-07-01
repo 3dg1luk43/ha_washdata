@@ -14,8 +14,10 @@ import homeassistant.util.dt as dt_util
 
 from .const import (
     CONF_AUTO_LABEL_CONFIDENCE,
+    CONF_COMPLETION_MIN_SECONDS,
     CONF_DURATION_TOLERANCE,
     CONF_END_ENERGY_THRESHOLD,
+    CONF_END_REPEAT_COUNT,
     CONF_LEARNING_CONFIDENCE,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
@@ -25,8 +27,11 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_PROFILE_MATCH_THRESHOLD,
     CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
+    CONF_SMOOTHING_WINDOW,
+    CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS,
@@ -141,6 +146,13 @@ class LearningManager:
             CONF_START_THRESHOLD_W,
             CONF_END_ENERGY_THRESHOLD,
             CONF_RUNNING_DEAD_ZONE,
+            # Stage 1 detection suggestions
+            CONF_SMOOTHING_WINDOW,
+            CONF_START_DURATION_THRESHOLD,
+            CONF_COMPLETION_MIN_SECONDS,
+            CONF_LEARNING_CONFIDENCE,
+            CONF_PROFILE_MATCH_THRESHOLD,
+            CONF_END_REPEAT_COUNT,
         )
 
         # Drop suggestions whose value already matches the current config - so
@@ -234,6 +246,9 @@ class LearningManager:
         # 3. Update model-based suggestions (durations etc)
         self._update_model_suggestions(dt_util.now())
 
+        # 3b. Update statistical detection suggestions (thresholds, gates, etc.)
+        self._update_detection_suggestions()
+
         # 4. Run multi-cycle batch simulation when enough new labeled cycles have accumulated
         self._maybe_run_batch_simulation()
 
@@ -309,6 +324,58 @@ class LearningManager:
         """Generate suggestions for model parameters (tolerances, ratios)."""
         suggestions = self.suggestion_engine.generate_model_suggestions()
         self._apply_suggestions_and_notify(suggestions)
+
+    def _update_detection_suggestions(self) -> None:
+        """Generate statistical detection suggestions from clean cycles.
+
+        Offloaded to an executor because it scans power traces across up to 200
+        cycles for the clean-cycle health checks.
+        """
+        self.hass.async_create_task(self._async_run_detection_suggestions())
+
+    async def _async_run_detection_suggestions(self) -> None:
+        """Run the detection-suggestion pass off the event loop."""
+        try:
+            new_suggestions = await self.hass.async_add_executor_job(
+                self.suggestion_engine.generate_detection_suggestions
+            )
+            if new_suggestions:
+                self._apply_suggestions_and_notify(new_suggestions)
+                self._logger.debug(
+                    "Detection suggestions produced: %s", list(new_suggestions.keys())
+                )
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("Detection suggestion pass failed: %s", e)
+
+    async def async_run_full_analysis(self) -> dict[str, int]:
+        """Run every suggestion pass now (manual trigger from the panel).
+
+        Runs the operational (cadence), model, detection and batch-simulation
+        passes over the accumulated cycle history and reconciles the result.
+        Returns ``{"count": <actionable suggestions>}``.
+        """
+        self._logger.info("Manual suggestion analysis requested")
+        try:
+            model = self._sample_interval_model
+            if model.count >= 20 and model.p95 is not None and model.median is not None:
+                self._apply_suggestions_and_notify(
+                    self.suggestion_engine.generate_operational_suggestions(model.p95, model.median)
+                )
+            self._apply_suggestions_and_notify(
+                self.suggestion_engine.generate_model_suggestions()
+            )
+            await self._async_run_detection_suggestions()
+            cycles = self.profile_store.get_past_cycles()
+            batch = await self.hass.async_add_executor_job(
+                self.suggestion_engine.run_batch_simulation, cycles
+            )
+            if batch:
+                self._apply_suggestions_and_notify(batch)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            self._logger.error("Manual suggestion analysis failed: %s", e)
+        count = len(self.profile_store.get_suggestions() or {})
+        self._logger.info("Manual suggestion analysis complete: %d suggestion(s)", count)
+        return {"count": count}
 
     async def _async_send_suggestions_ready_notification(
         self, device_title: str, suggestions_count: int

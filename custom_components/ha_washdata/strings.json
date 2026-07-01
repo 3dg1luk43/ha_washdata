@@ -90,7 +90,7 @@
         "data_description": {
           "apply_suggestions": "Check this box to copy values suggested by the learning algorithm into the form. Review before saving.\n\nSuggested (from learning):\n- min_power: {suggested_min_power} W\n- off_delay: {suggested_off_delay} s\n- watchdog_interval: {suggested_watchdog_interval} s\n- no_update_active_timeout: {suggested_no_update_active_timeout} s\n- profile_match_interval: {suggested_profile_match_interval} s\n- auto_label_confidence: {suggested_auto_label_confidence}\n- duration_tolerance: {suggested_duration_tolerance}\n- profile_duration_tolerance: {suggested_profile_duration_tolerance}\n- profile_match_min_duration_ratio: {suggested_profile_match_min_duration_ratio}\n- profile_match_max_duration_ratio: {suggested_profile_match_max_duration_ratio}\n- start_threshold_w: {suggested_start_threshold_w} W\n- stop_threshold_w: {suggested_stop_threshold_w} W\n- end_energy_threshold: {suggested_end_energy_threshold} Wh\n- running_dead_zone: {suggested_running_dead_zone} s\n{suggested_reason}",
           "device_type": "Select the type of appliance (Washing Machine, Dryer, Dishwasher, Coffee Machine, EV, Bread Maker, Pump). This tag is stored with each cycle for better organization.",
-          "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data — useful if you replace a smart plug.",
+          "power_sensor": "The sensor entity reporting real-time power (in watts). You can change this anytime without losing historical data - useful if you replace a smart plug.",
           "min_power": "Power readings above this threshold (in watts) indicate the appliance is running. Start with 2W for most devices.",
           "off_delay": "Seconds the smoothed power must stay below the stop threshold to mark completion. Default: 120s.",
           "notify_actions": "Optional Home Assistant action sequence to run for notifications (scripts, notify, TTS, etc.). If set, actions run before per-event service targets.",
@@ -241,7 +241,9 @@
               "progress_reset_delay": "Progress Reset Delay (seconds)",
               "auto_maintenance": "Enable Auto-Maintenance",
               "expose_debug_entities": "Expose Debug Entities",
-              "save_debug_traces": "Save Debug Traces"
+              "save_debug_traces": "Save Debug Traces",
+              "ml_training_enabled": "Enable On-Device ML Training",
+              "ml_training_hour": "ML Training Hour (0-23)"
             },
             "data_description": {
               "watchdog_interval": "Seconds between watchdog checks while running. Default: 30s. WARNING: Ensure this is HIGHER than your sensor's update interval to avoid false stops.",
@@ -249,7 +251,9 @@
               "progress_reset_delay": "After a cycle completes (100%), wait this many seconds of idle before resetting progress to 0%. Default: 1800s.",
               "auto_maintenance": "Enable auto-maintenance (repair samples and perform routine cleanup).",
               "expose_debug_entities": "Show advanced sensors (Confidence, Phase, Ambiguity) for debugging.",
-              "save_debug_traces": "Store detailed ranking and power trace data in history (Increases storage usage)."
+              "save_debug_traces": "Store detailed ranking and power trace data in history (Increases storage usage).",
+              "ml_training_enabled": "Experimental: nightly retrain the ML models on this device's own labelled cycles. Falls back to the shipped models unless a retrain scores better.",
+              "ml_training_hour": "Local hour of day to run training (a quiet hour is best). Default: 2 (02:00)."
             }
           },
           "anti_wrinkle_section": {
@@ -636,7 +640,7 @@
       },
       "editor_split_manual_params": {
         "title": "Manual Split Timestamps",
-        "description": "{preview_md}Cycle window: **{cycle_start_wallclock} → {cycle_end_wallclock}** on {cycle_date}.\n\nEnter one or more split timestamps (`HH:MM` or `HH:MM:SS`), one per line. The cycle will be cut at each timestamp — N timestamps produce N+1 segments.",
+        "description": "{preview_md}Cycle window: **{cycle_start_wallclock} → {cycle_end_wallclock}** on {cycle_date}.\n\nEnter one or more split timestamps (`HH:MM` or `HH:MM:SS`), one per line. The cycle will be cut at each timestamp - N timestamps produce N+1 segments.",
         "data": {
           "split_timestamps": "Split Timestamps"
         }
@@ -1207,6 +1211,16 @@
           "description": "The WashData device to resume."
         }
       }
+    },
+    "trigger_ml_training": {
+      "name": "Trigger ML Training",
+      "description": "Manually retrain the on-device ML models from this device's own labelled cycles (experimental).",
+      "fields": {
+        "device_id": {
+          "name": "Device",
+          "description": "The WashData device to retrain models for."
+        }
+      }
     }
   },
   "entity": {
@@ -1268,6 +1282,9 @@
         "state": {
           "none": "None"
         }
+      },
+      "ambiguity": {
+        "name": "Match Ambiguity"
       },
       "current_phase": {
         "name": "Current Phase"

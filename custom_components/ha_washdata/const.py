@@ -1,6 +1,25 @@
 """Constants for the WashData integration."""
 
+from enum import StrEnum
+
 DOMAIN = "ha_washdata"
+
+
+class TerminationReason(StrEnum):
+    """Why a cycle ended. StrEnum members equal their string value, so existing
+    string comparisons and JSON serialisation keep working unchanged."""
+
+    TIMEOUT = "timeout"          # low-power off_delay elapsed (normal completion)
+    SMART = "smart"              # smart-termination heuristic finished the cycle
+    FORCE_STOPPED = "force_stopped"  # watchdog / no-update force end
+    USER = "user"                # user manually stopped the cycle
+
+
+# Completed dryers stay eligible for anti-wrinkle handling only for these
+# reasons (a user-stopped cycle is intentionally excluded).
+ANTI_WRINKLE_ELIGIBLE_REASONS = frozenset(
+    {TerminationReason.TIMEOUT, TerminationReason.SMART}
+)
 
 # Configuration keys
 CONF_POWER_SENSOR = "power_sensor"
@@ -73,12 +92,8 @@ CONF_ANTI_WRINKLE_EXIT_POWER = "anti_wrinkle_exit_power"  # W threshold for true
 CONF_DELAY_START_DETECT_ENABLED = "delay_start_detect_enabled"  # Enable delayed-start detection
 CONF_DELAY_CONFIRM_SECONDS = "delay_confirm_seconds"  # Seconds power must stay in standby band before DELAY_WAIT engages
 CONF_DELAY_TIMEOUT_HOURS = "delay_timeout_hours"  # Safety timeout (hours) while waiting to start
-
-# Deprecated since 0.4.5: drain-spike model replaced by band-based DELAY_WAIT.
-# Kept only so older Store/options blobs don't raise KeyError during migration.
-CONF_DELAY_DRAIN_MIN_POWER = "delay_drain_min_power"
-CONF_DELAY_DRAIN_MAX_POWER = "delay_drain_max_power"
-CONF_DELAY_DRAIN_MAX_DURATION = "delay_drain_max_duration"
+# Note: the deprecated 0.4.5 drain-spike keys (delay_drain_*) are stripped during
+# config migration in __init__.py using raw string literals; no constants needed.
 
 
 NOTIFY_EVENT_START = "cycle_start"
@@ -157,9 +172,11 @@ DEFAULT_PROFILE_MATCH_INTERVAL = (
     300  # Seconds between profile matching attempts (5 minutes)
 )
 DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO = 0.10  # Allow match after 10% of expected duration
-DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = (
-    1.3  # Maximum duration ratio (130% of profile) - hidden default
-)
+# 1.5 = up to 150% of the profile's average duration. Tuned via the precision
+# harness in devtools/dtw_ab_eval.py: widening 1.3->1.5 lifts commit-recall
+# 71.6%->73.4% for a negligible false-positive change; 1.3 was rejecting normal
+# longer-than-average runs (extended/anti-wrinkle variants).
+DEFAULT_PROFILE_MATCH_MAX_DURATION_RATIO = 1.5
 DEFAULT_MAX_PAST_CYCLES = 200
 DEFAULT_MAX_FULL_TRACES_PER_PROFILE = 20
 DEFAULT_MAX_FULL_TRACES_UNLABELED = 20
@@ -193,8 +210,8 @@ DEFAULT_ANTI_WRINKLE_EXIT_POWER = 0.8  # W
 # ignored because they don't sustain long enough to satisfy the normal
 # start-duration gate.
 DEFAULT_DELAY_START_DETECT_ENABLED = False
-DEFAULT_DELAY_CONFIRM_SECONDS = 60.0  # s — sustained standby before DELAY_WAIT engages
-DEFAULT_DELAY_TIMEOUT_HOURS = 8.0  # h — give up waiting after this long
+DEFAULT_DELAY_CONFIRM_SECONDS = 60.0  # s - sustained standby before DELAY_WAIT engages
+DEFAULT_DELAY_TIMEOUT_HOURS = 8.0  # h - give up waiting after this long
 
 # Pump Monitor settings (pump device type only)
 CONF_PUMP_STUCK_DURATION = "pump_stuck_duration"  # Seconds before a running pump is flagged as stuck
@@ -210,6 +227,69 @@ DEFAULT_PROFILE_UNMATCH_THRESHOLD = 0.35
 
 CONF_DTW_BANDWIDTH = "dtw_bandwidth"
 DEFAULT_DTW_BANDWIDTH = 0.20  # 20% Sakoe-Chiba constraint
+
+# ─── Matching pipeline scoring constants (analysis.py) ────────────────────────
+# Previously scattered as magic numbers in analysis.py / profile_store.py.
+# Centralised here so the scoring formula is auditable in one place and the
+# ambiguity threshold cannot drift between its two call sites.
+#
+# Core similarity (Stage 2): score = CORR_WEIGHT*max(0,corr) + MAE_WEIGHT*mae_score
+# where mae_score = MAE_SCALE / (MAE_SCALE + scaled_mae). See MATCH_MAE_SCALE_MODE
+# in analysis.py for how scaled_mae is normalised across device power scales.
+# 0.45 tuned via devtools/dtw_ab_eval.py: weighting MAE more (0.6->0.45 corr)
+# lifted leave-one-out top-1 74%->79.5% AND the recall/FP net 10.7%->13.7% (FP
+# flat), i.e. a genuine discrimination gain, not confidence inflation. 0.35-0.45
+# is a broad plateau; 0.45 is best on top-1/MRR.
+MATCH_CORR_WEIGHT = 0.45
+MATCH_MAE_WEIGHT = 0.55
+MATCH_MAE_SCALE = 100.0            # half-saturation point of the MAE score curve
+# Scale-invariant MAE (5c): the raw MAE is expressed relative to the current
+# cycle's peak power before scoring, so the same *proportional* error yields the
+# same confidence on a 200 W dishwasher and a 2000 W dryer. Calibrated to be
+# behaviour-neutral at MATCH_MAE_REF_PEAK: at that peak scaled_mae == raw mae, so
+# existing thresholds keep their meaning. The current cycle's peak is common to
+# every candidate in a match, so this does not change candidate ranking.
+MATCH_MAE_REF_PEAK = 1000.0        # peak (W) at which scoring matches the legacy formula
+MATCH_MAE_PEAK_FLOOR = 50.0        # floor so tiny/idle traces don't explode the ratio
+MATCH_KEEP_MIN_SCORE = 0.1         # candidates scoring below this are discarded
+# DTW refinement (Stage 3): blended = DTW_BLEND*core + (1-DTW_BLEND)*dtw_score,
+# dtw_score = DIST_SCALE / (DIST_SCALE + scaled_dtw_distance).
+MATCH_DTW_BLEND = 0.5
+MATCH_DTW_DIST_SCALE = 50.0
+MATCH_DTW_REFINE_TOP_N = 5         # DTW is applied to this many top candidates
+                                   # (5 tuned via dtw_ab_eval: rescues correct
+                                   #  profiles Stage-2 ranked 4th-5th; +1.8pp)
+# Stage-3 DTW modes (config key "dtw_mode"):
+#   "legacy" - original: raw sequences, distance / len(current), fixed 50 W scale.
+#   "scaled" - both sequences resampled to MATCH_DTW_RESAMPLE_N and the distance
+#              expressed relative to the current peak (behaviour-neutral at
+#              MATCH_MAE_REF_PEAK), matching the Stage-2 MAE treatment. Default.
+#   "ddtw"   - like "scaled" but warps on the first derivative (slope) of the
+#              curves, so alignment is driven by shape rather than absolute level.
+#   "ensemble" - blend of "scaled" and "ddtw": ENSEMBLE_W*L1 + (1-W)*DDTW.
+# Defaults tuned via devtools/dtw_ab_eval.py on cycle_data/ (leave-one-out top-1):
+# off 62.4%, legacy 66.4%, scaled 69.9%, ddtw 69.0%, ensemble(w=0.7,dd=30) 70.7%.
+DEFAULT_DTW_MODE = "ensemble"
+MATCH_DTW_RESAMPLE_N = 200         # common grid length for "scaled"/"ddtw" DTW
+MATCH_DDTW_DIST_SCALE = 30.0       # half-saturation for derivative-DTW distance
+MATCH_DTW_ENSEMBLE_W = 0.7         # weight on L1 vs DDTW in "ensemble" mode
+# Ambiguity: top1-top2 score gap below this flags the match as ambiguous.
+MATCH_AMBIGUITY_MARGIN = 0.05
+# Duration + energy agreement blended into the final score. Shape correlation
+# alone cannot separate profiles that differ mainly in duration/energy (a real
+# weakness on multi-program washing machines), so the final score is
+# (1 - dur_w - en_w)*shape + dur_w*dur_agreement + en_w*energy_agreement, where
+# agreement = 1/(1 + |ln(observed/expected)| / scale) is 1.0 on a perfect match.
+# Weights 0.22 and scales tuned via devtools/dtw_ab_eval.py (weight x scale grid):
+# a SHARPER agreement scale (halved) plus a moderately higher weight separates
+# near-duplicate profiles on the same device rather than inflating confidence.
+# This lifted the recall/FP net 13.7%->17.4% with the false-positive rate
+# actually DROPPING (62.7%->59.9%). Raising weight alone at the old loose scale
+# inflated both recall and FP (net-negative), so both knobs move together.
+MATCH_DURATION_WEIGHT = 0.22
+MATCH_ENERGY_WEIGHT = 0.22
+MATCH_DURATION_SCALE = 0.175       # ~ln ratio at which duration agreement halves
+MATCH_ENERGY_SCALE = 0.25          # ~ln ratio at which energy agreement halves
 
 CONF_SUPPRESS_FEEDBACK_NOTIFICATIONS = "suppress_feedback_notifications"
 DEFAULT_SUPPRESS_FEEDBACK_NOTIFICATIONS = False  # Show persistent notifications by default
@@ -340,7 +420,7 @@ DEFAULT_MAX_DEFERRAL_SECONDS = 14400  # 4 hours max safe deferral
 #
 # A dishwasher's wash→drying drain wind-down produces brief power spikes mid
 # ENDING that, prior to the issue #43 fix, would set _end_spike_seen=True and
-# pre-arm Smart Termination — so the cycle closed at 99% of expected, BEFORE
+# pre-arm Smart Termination - so the cycle closed at 99% of expected, BEFORE
 # the real end-of-cycle pump-out at ~99.5% of expected.  The pump-out then
 # registered as a brand-new cycle.
 #
@@ -386,9 +466,6 @@ DEVICE_SMOOTHING_THRESHOLDS = {
     DEVICE_TYPE_PUMP: 2.0,  # Binary on/off spikes; minimal smoothing needed
     DEVICE_TYPE_OVEN: 5.0,  # Bistable thermostat cycling between full heat and 0 W
 }
-
-CONF_VERIFICATION_POLL_INTERVAL = "verification_poll_interval"  # Internal setting
-DEFAULT_VERIFICATION_POLL_INTERVAL = 15  # Seconds (rapid checks after delay)
 
 # Device specific completion thresholds (min run time to be considered a valid "completed" cycle)
 DEVICE_COMPLETION_THRESHOLDS = {
@@ -458,8 +535,20 @@ DEFAULT_PROFILE_MATCH_MIN_DURATION_RATIO_BY_DEVICE = {
     DEVICE_TYPE_DISHWASHER: 0.10,
 }
 
+# Profile groups (Stage 5): the matcher only collapses a group into one
+# aggregate candidate when its members' minimum pairwise shape similarity is at
+# least this. Similarity is DTW/Sakoe-Chiba on peak-normalised envelopes, so it
+# tolerates the duration (longer heating/draining) and amplitude (temp/spin)
+# variation between real members. Looser groups stay individual (a blurry generic
+# aggregate could out-match unrelated profiles) and are flagged in the UI.
+# Calibrated on real profiles: genuine temp/spin variants score ~0.86-0.95,
+# distinct programs <~0.6; 0.80 leaves margin below the 0.85 suggestion bar.
+GROUP_MIN_COHESION = 0.80
+
 # Storage
-STORAGE_VERSION = 5
+# v6: backfill ml_review.golden=True for manually-recorded cycles (recorded ==
+# golden reference; a single flag, no duplicate "recorded" field).
+STORAGE_VERSION = 6
 STORAGE_KEY = "ha_washdata"
 
 # Notification events
@@ -477,10 +566,50 @@ SERVICE_SUBMIT_FEEDBACK = (
 
 # Recorder
 STATE_RECORDING = "recording"
-CONF_RECORD_MODE = "record_mode"
 SERVICE_RECORD_START = "record_start"
 SERVICE_RECORD_STOP = "record_stop"
 
 # Thresholds for trim suggestions
 SHORT_SILENCE_THRESHOLD_S = 600  # 10 minutes
 TRIM_BUFFER_S = 60.0  # 1 minute buffer
+
+# ─── Feature flags (staged rollout) ───────────────────────────────────────────
+# These gate preproduction / ML features so they can be shipped dark and unlocked
+# in stages. When a flag is False the corresponding UI *and* logic stay hidden:
+# no panel sections render and no background work runs.
+#
+#   SHOW_ML_LAB           ML Lab comparison tab in the WashData panel.
+#   ENABLE_ML_SUGGESTIONS ML-model-driven setting suggestions (Stage 3), shown
+#                         side-by-side with the classic statistical suggestions.
+#   ENABLE_ML_TRAINING    On-device model training loop (Stage 4): scheduled
+#                         retraining on the user's own labeled cycles.
+#
+# Stage 1 (new statistical suggestions) and Stage 2 (fixed classic algorithms)
+# are always on - they only improve the existing suggestion engine and add no
+# new surfaces, so they need no flag.
+SHOW_ML_LAB = True
+ENABLE_ML_SUGGESTIONS = True
+ENABLE_ML_TRAINING = True
+
+# ─── On-device ML training (Stage 4) ──────────────────────────────────────────
+# Config keys for the scheduled, opt-in retraining loop. All gated behind
+# ENABLE_ML_TRAINING; nothing runs and no options render when that flag is False.
+CONF_ML_TRAINING_ENABLED = "ml_training_enabled"        # per-device opt-in
+CONF_ML_TRAINING_HOUR = "ml_training_hour"              # local hour (0-23) to train
+CONF_ML_TRAINING_MIN_CYCLES = "ml_training_min_cycles"  # min labelled clean cycles before training
+CONF_ML_TRAINING_INTERVAL_DAYS = "ml_training_interval_days"  # min days between retrains
+
+DEFAULT_ML_TRAINING_ENABLED = False
+DEFAULT_ML_TRAINING_HOUR = 2          # 02:00 local - quiet hour
+DEFAULT_ML_TRAINING_MIN_CYCLES = 30   # need a meaningful corpus first
+DEFAULT_ML_TRAINING_INTERVAL_DAYS = 7 # retrain at most weekly
+
+# A newly trained model is only promoted over the shipped baseline when its
+# held-out AUC is at least (baseline AUC - this margin). Small negative slack is
+# allowed so personalisation can win even at a tiny AUC cost.
+ML_TRAINING_AUC_MARGIN = 0.02
+ML_TRAINING_MIN_POSITIVES = 20  # need at least this many positive examples to trust a fit
+
+# Service + event names for the training loop.
+SERVICE_TRIGGER_ML_TRAINING = "trigger_ml_training"
+EVENT_ML_TRAINING_COMPLETE = "ha_washdata_ml_training_complete"

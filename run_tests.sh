@@ -18,12 +18,26 @@ if [ ! -f "$VENV_PYTHON" ]; then
     exit 1
 fi
 
+# Panel JS guard: syntax + a headless render smoke test that instantiates the
+# panel and calls every tab/modal renderer, catching load-time (TDZ) and
+# template ReferenceErrors that `node --check` alone cannot. Skipped if node is
+# unavailable; fatal on failure.
+js_check() {
+    local panel="custom_components/ha_washdata/www/ha-washdata-panel.js"
+    if command -v node >/dev/null 2>&1; then
+        echo "Checking panel JS (syntax + render smoke)..."
+        node --check "$panel" || exit 1
+        [ -f devtools/panel_smoke.js ] && { node devtools/panel_smoke.js || exit 1; }
+    fi
+}
+
 # First arg may select a category; remaining args pass through to pytest.
 mode="${1:-fast}"
 
 case "$mode" in
     --fast|fast)
         shift
+        js_check
         echo "Running FAST tests (skipping slow + benchmark)..."
         exec "$VENV_PYTHON" -m pytest tests/ "$@"
         ;;
@@ -39,6 +53,7 @@ case "$mode" in
         ;;
     --all|all)
         shift
+        js_check
         echo "Running ALL tests (fast + slow + benchmark)..."
         # Override the pytest.ini default -m filter.
         exec "$VENV_PYTHON" -m pytest tests/ -m "" "$@"
@@ -49,6 +64,7 @@ case "$mode" in
         ;;
     *)
         # No mode keyword -> default fast suite, pass all args through.
+        js_check
         echo "Running FAST tests (skipping slow + benchmark)..."
         exec "$VENV_PYTHON" -m pytest tests/ "$@"
         ;;

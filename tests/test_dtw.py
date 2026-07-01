@@ -2,7 +2,11 @@
 
 import pytest
 import numpy as np
-from custom_components.ha_washdata.analysis import compute_dtw_lite
+from custom_components.ha_washdata.analysis import (
+    compute_dtw_lite,
+    compute_matches_worker,
+    _resample_to,
+)
 
 
 def test_dtw_band_constraint():
@@ -39,3 +43,48 @@ def test_dtw_normalization():
 
     # Total cost = 100 * 1 = 100 (unnormalized)
     assert d == 100.0
+
+
+def test_dtw_derivative_ignores_constant_offset():
+    """DDTW warps on slope, so a pure vertical offset costs ~0 (unlike L1)."""
+    x = np.linspace(0, 100, 60)
+    y = x + 500.0  # same shape, shifted up 500 W
+    assert compute_dtw_lite(x, y) > 1000  # level-based DTW sees the offset
+    assert compute_dtw_lite(x, y, derivative=True) < 1e-6  # slope-based ignores it
+
+
+def test_resample_to_length_and_endpoints():
+    r = _resample_to([0.0, 10.0], 5)
+    assert len(r) == 5
+    assert r[0] == pytest.approx(0.0)
+    assert r[-1] == pytest.approx(10.0)
+    # already-correct length is returned as-is
+    same = _resample_to([1.0, 2.0, 3.0], 3)
+    assert list(same) == [1.0, 2.0, 3.0]
+
+
+def _snap(name, curve, dur):
+    return {"name": name, "avg_duration": float(dur), "sample_power": list(curve)}
+
+
+@pytest.mark.parametrize("mode", ["legacy", "scaled", "ddtw", "ensemble"])
+def test_matcher_dtw_modes_rank_correct_profile(mode):
+    """Each DTW mode should still rank the matching profile first on a clear case."""
+    ramp = [float(v) for v in range(0, 300, 6)]          # rising ramp
+    flat = [200.0] * 50                                   # flat plateau
+    cfg = {"dtw_bandwidth": 0.2, "dtw_mode": mode, "min_duration_ratio": 0.07, "max_duration_ratio": 1.3}
+    snaps = [_snap("ramp", ramp, len(ramp)), _snap("flat", flat, len(flat))]
+    cands = compute_matches_worker(ramp, float(len(ramp)), snaps, cfg)
+    assert cands and cands[0]["name"] == "ramp"
+
+
+def test_matcher_default_mode_ranks():
+    """Omitting dtw_mode uses the tuned default (ensemble); still ranks correctly."""
+    from custom_components.ha_washdata.const import DEFAULT_DTW_MODE
+    assert DEFAULT_DTW_MODE == "ensemble"
+    ramp = [float(v) for v in range(0, 300, 6)]
+    flat = [200.0] * 50
+    cfg = {"dtw_bandwidth": 0.2, "min_duration_ratio": 0.07, "max_duration_ratio": 1.3}
+    snaps = [_snap("ramp", ramp, len(ramp)), _snap("flat", flat, len(flat))]
+    cands = compute_matches_worker(ramp, float(len(ramp)), snaps, cfg)
+    assert cands[0]["name"] == "ramp"

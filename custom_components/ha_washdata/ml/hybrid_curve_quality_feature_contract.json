@@ -1,0 +1,157 @@
+[
+  {
+    "feature": "duration_log_ratio",
+    "group": "profile_context",
+    "runtime_source": "log(cycle_duration / profile_target_duration)"
+  },
+  {
+    "feature": "energy_log_ratio",
+    "group": "profile_context",
+    "runtime_source": "log(cycle_energy_wh / profile_median_energy_wh)"
+  },
+  {
+    "feature": "peak_log_ratio",
+    "group": "profile_context",
+    "runtime_source": "log(max_power_w / profile_median_peak_w)"
+  },
+  {
+    "feature": "profile_distance",
+    "group": "match",
+    "runtime_source": "MatchResult distance to assigned profile envelope"
+  },
+  {
+    "feature": "label_margin_positive",
+    "group": "match",
+    "runtime_source": "max(0, score margin between top-1 and top-2 profile candidates)"
+  },
+  {
+    "feature": "max_gap_ratio",
+    "group": "sampling",
+    "runtime_source": "max sample gap seconds / cycle duration seconds"
+  },
+  {
+    "feature": "low_power_gap_ratio",
+    "group": "sampling",
+    "runtime_source": "longest low-power gap seconds / cycle duration seconds"
+  },
+  {
+    "feature": "false_end_energy_ratio",
+    "group": "tail",
+    "runtime_source": "energy after first apparent end / total energy"
+  },
+  {
+    "feature": "sample_density_log",
+    "group": "sampling",
+    "runtime_source": "log1p(sample_count * 60 / duration_s)"
+  },
+  {
+    "feature": "peak_density_log",
+    "group": "sampling",
+    "runtime_source": "log1p(power_peak_count * 3600 / duration_s)"
+  },
+  {
+    "feature": "local_spike_score",
+    "group": "noise",
+    "runtime_source": "trace-local spike magnitude score"
+  },
+  {
+    "feature": "local_spike_rate",
+    "group": "noise",
+    "runtime_source": "trace-local spike rate"
+  },
+  {
+    "feature": "local_noise_score",
+    "group": "noise",
+    "runtime_source": "trace-local noise floor score"
+  },
+  {
+    "feature": "leading_idle_ratio",
+    "group": "trim",
+    "runtime_source": "leading 0W padding fraction before true start"
+  },
+  {
+    "feature": "trailing_idle_ratio",
+    "group": "trim",
+    "runtime_source": "trailing 0W padding fraction after true end"
+  },
+  {
+    "feature": "trimmed_duration_log_ratio",
+    "group": "trim",
+    "runtime_source": "log(trimmed duration / raw duration)"
+  },
+  {
+    "feature": "flag_pressure",
+    "group": "flags",
+    "runtime_source": "count of detection/anomaly flags raised for the cycle"
+  },
+  {
+    "feature": "shape_fit_penalty",
+    "group": "match",
+    "runtime_source": "max(0, 1 - profile_fit_score)"
+  },
+  {
+    "feature": "shape_active_fraction",
+    "group": "trace_shape",
+    "runtime_source": "fraction of normalized trace above 0.5"
+  },
+  {
+    "feature": "shape_early_energy_fraction",
+    "group": "trace_shape",
+    "runtime_source": "energy share in first 25% of trace"
+  },
+  {
+    "feature": "shape_late_energy_fraction",
+    "group": "trace_shape",
+    "runtime_source": "energy share in last 25% of trace"
+  },
+  {
+    "feature": "shape_mid_trough_depth",
+    "group": "trace_shape",
+    "runtime_source": "1 - min(mid trace)/median active (split/pause depth)"
+  },
+  {
+    "feature": "shape_peak_density",
+    "group": "trace_shape",
+    "runtime_source": "prominent local maxima per sample"
+  },
+  {
+    "feature": "shape_max_step_drop",
+    "group": "trace_shape",
+    "runtime_source": "largest single-step drop (false-end signature)"
+  },
+  {
+    "feature": "shape_max_step_rise",
+    "group": "trace_shape",
+    "runtime_source": "largest single-step rise"
+  },
+  {
+    "feature": "shape_active_cv",
+    "group": "trace_shape",
+    "runtime_source": "std/mean over active region"
+  },
+  {
+    "feature": "shape_autocorr_lag1",
+    "group": "trace_shape",
+    "runtime_source": "lag-1 autocorrelation (smoothness)"
+  },
+  {
+    "feature": "shape_derivative_sign_changes",
+    "group": "trace_shape",
+    "runtime_source": "derivative sign-change rate (oscillation)"
+  },
+  {
+    "feature": "shape_plateau_ratio",
+    "group": "trace_shape",
+    "runtime_source": "fraction within band of running active level"
+  },
+  {
+    "feature": "shape_tail_slope",
+    "group": "trace_shape",
+    "runtime_source": "slope across the last 25% of trace"
+  },
+  {
+    "feature": "has_trace",
+    "group": "availability",
+    "runtime_source": "1.0 when a usable power trace exists, else 0.0"
+  }
+]

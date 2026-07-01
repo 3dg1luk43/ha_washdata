@@ -13,6 +13,8 @@ from homeassistant.util import dt as dt_util
 
 from .log_utils import DeviceLoggerAdapter
 from .const import (
+    ANTI_WRINKLE_ELIGIBLE_REASONS,
+    TerminationReason,
     STATE_OFF,
     STATE_DELAY_WAIT,
     STATE_STARTING,
@@ -35,7 +37,7 @@ from .const import (
 
 # The dishwasher end-spike wait window is shared between two code paths
 # (Smart Termination's wait branch and _should_defer_finish's no-end-spike
-# branch).  They MUST release the cycle at the same instant — sanity-check
+# branch).  They MUST release the cycle at the same instant - sanity-check
 # that the constants module loaded a sensible value rather than allowing the
 # paths to silently drift if one was changed and the other forgotten.
 assert DISHWASHER_END_SPIKE_WAIT_SECONDS > 0, (
@@ -227,6 +229,7 @@ class CycleDetector:
         self._expected_duration: float = 0.0
         self._last_match_confidence: float = 0.0
         self._end_spike_seen: bool = False
+        self._match_ambiguous: bool = False  # last live match was ambiguous (gates predictive end)
 
         # Anti-wrinkle tracking (dryers only)
         self._anti_wrinkle_candidate_start: datetime | None = None
@@ -242,7 +245,7 @@ class CycleDetector:
         # diagnostics and tests.
         self._delay_band_start: datetime | None = None
         self._delay_band_seconds: float = 0.0
-        # _delay_band_peak is purely diagnostic — surfaced in the log line
+        # _delay_band_peak is purely diagnostic - surfaced in the log line
         # when the transition fires so users can see what their machine's
         # actual standby plateau looked like.
         self._delay_band_peak: float = 0.0
@@ -254,7 +257,7 @@ class CycleDetector:
         # _delay_wait_high_start anchors the first high-power reading
         # observed inside DELAY_WAIT.  We only transition to STARTING
         # when the high-power streak has lasted at least
-        # start_duration_threshold real seconds — measured between two
+        # start_duration_threshold real seconds - measured between two
         # consecutive high readings, not from the dt to the previous
         # (low) reading.  This prevents a single isolated spike from
         # tripping STARTING just because the sampling interval is long.
@@ -345,7 +348,7 @@ class CycleDetector:
         this helper so the gates in STATE_ENDING and ``_should_defer_finish``
         can trust the value without re-validating.
 
-        Emits a DEBUG log line distinguishing the rejection reason — the
+        Emits a DEBUG log line distinguishing the rejection reason - the
         ``<= 0`` and ``> 6h`` markers are part of issue #197's regression
         contract and tests assert on them.
         """
@@ -391,9 +394,15 @@ class CycleDetector:
         phase_name: str | None = None
         confidence: float = 0.0
         expected_duration: float = 0.0
+        ambiguous: bool = False
 
         if isinstance(result, (list, tuple)):  # type: ignore[misc]
             result_seq = cast(tuple[Any, ...] | list[Any], result)
+            # Optional 6th element: whether the live match is ambiguous
+            # (top-1 vs top-2 within MATCH_AMBIGUITY_MARGIN). Used to gate the
+            # predictive Smart Termination below.
+            if len(result_seq) >= 6:
+                ambiguous = bool(result_seq[5])
             if len(result_seq) >= 5:
                 (
                     raw_name,
@@ -442,8 +451,9 @@ class CycleDetector:
                     )
                     is_match_mismatch = False
 
-            # Store confidence for Smart Termination checks
+            # Store confidence + ambiguity for Smart Termination checks
             self._last_match_confidence = confidence or 0.0
+            self._match_ambiguous = ambiguous
         else:
             # Assume MatchResult object or similar (future proofing)
             # But for now wrapper returns tuple
@@ -452,6 +462,7 @@ class CycleDetector:
         if is_match_mismatch and self._matched_profile:
             # Confident non-match - revert to detecting if previously matched
             self._matched_profile = None
+            self._match_ambiguous = False
 
         elif match_name:
             # If sanitization rejected the expected_duration, treat the match
@@ -461,7 +472,7 @@ class CycleDetector:
             # the cycle stays in detecting/unmatched mode.
             if expected_duration == self._SANITIZE_INVALID_SENTINEL:
                 self._logger.debug(
-                    "update_match: match %r ignored — expected_duration "
+                    "update_match: match %r ignored - expected_duration "
                     "sanitized to invalid sentinel; treating as unmatched",
                     match_name,
                 )
@@ -723,8 +734,8 @@ class CycleDetector:
             #
             # A machine in delayed-start mode sits in a power band between
             # the off-noise floor (stop_threshold_w) and the cycle-start
-            # threshold (start_threshold_w) — display, electronics, the
-            # occasional anti-damp tumble — for minutes to hours.  We
+            # threshold (start_threshold_w) - display, electronics, the
+            # occasional anti-damp tumble - for minutes to hours.  We
             # track anchored elapsed time while power is in that band; once
             # it crosses delay_confirm_seconds we transition to DELAY_WAIT.
             #
@@ -766,7 +777,7 @@ class CycleDetector:
                         )
                         self._transition_to(STATE_DELAY_WAIT, timestamp)
                         return
-                    # Stay in OFF while we accumulate evidence — do not
+                    # Stay in OFF while we accumulate evidence - do not
                     # fall through to the high-power start logic, the
                     # reading is below threshold by definition.
                     return
@@ -781,7 +792,7 @@ class CycleDetector:
                 # STATE_STARTING will abort it as a false start and we'll
                 # re-enter the band check on the next sample without
                 # losing accumulated time (we don't reset on a high
-                # excursion — most users' "menu navigation" peaks last
+                # excursion - most users' "menu navigation" peaks last
                 # less than a sample interval anyway).
 
             if is_high and not started_from_anti_wrinkle:
@@ -843,7 +854,7 @@ class CycleDetector:
                         self._cycle_max_power = max(start_power, power)
                         self._abrupt_drop = False
             else:
-                # Power dropped back below start threshold — clear the
+                # Power dropped back below start threshold - clear the
                 # high-power streak anchor so the next high reading
                 # starts a fresh confirmation window.
                 self._delay_wait_high_start = None
@@ -1047,9 +1058,15 @@ class CycleDetector:
                         getattr(self, "_last_match_confidence", 0.0) >= 0.4
                     )
 
+                    # Gate the predictive end on match certainty: when the live
+                    # match is ambiguous (top-1 vs top-2 within the ambiguity
+                    # margin) the chosen profile's expected duration is
+                    # unreliable, so we must NOT smart-terminate on it - fall
+                    # through to the power-based fallback timeout instead.
                     if (
                         current_duration >= (self._expected_duration * smart_ratio)
                         and is_confident_match
+                        and not self._match_ambiguous
                     ):
                         # Dynamic confirmation window
                         if self._config.device_type == "dishwasher":
@@ -1061,7 +1078,7 @@ class CycleDetector:
                             # --- END SPIKE WAIT PERIOD (Dishwashers) ---
                             # Dishwashers should see the real end-of-cycle
                             # pump-out (which arms _end_spike_seen via the 85%
-                            # progress gate) before Smart Termination fires —
+                            # progress gate) before Smart Termination fires -
                             # otherwise the pump-out arrives AFTER the cycle
                             # has already closed and registers as a brand-new
                             # "ghost" cycle.  User reports (issue #43) showed
@@ -1105,7 +1122,7 @@ class CycleDetector:
                             self._finish_cycle(
                                 timestamp,
                                 status="completed",
-                                termination_reason="smart",
+                                termination_reason=TerminationReason.SMART,
                                 keep_tail=True,
                             )
                             return
@@ -1268,7 +1285,7 @@ class CycleDetector:
         # Dishwashers can have 2+ hour passive drying phases at near-0W.  A terminal
         # drain spike that fires early in the ENDING state (e.g. at 120 min of a
         # 233-min ECO cycle) resets _time_below_threshold, and the subsequent 60-min
-        # silence timeout would otherwise end the cycle at ~180 min — well before the
+        # silence timeout would otherwise end the cycle at ~180 min - well before the
         # real finish.  Defer until the cycle reaches the late-phase threshold (the
         # same one used by the end-spike arm gate, so both move together) so that
         # smart termination can catch the true end (~99% of expected) instead.
@@ -1296,7 +1313,7 @@ class CycleDetector:
         # passive-drying gate above, we still keep the cycle deferred until
         # the real end-of-cycle pump-out fires (sets _end_spike_seen=True via
         # the 85% progress gate in STATE_ENDING) or we cross the
-        # smart-termination wait window (expected + 30 min) — whichever comes
+        # smart-termination wait window (expected + 30 min) - whichever comes
         # first.  Shares DISHWASHER_END_SPIKE_WAIT_SECONDS with Smart
         # Termination's wait branch so the two paths release the cycle at the
         # same instant.  Beyond the wait window, Smart Termination's
@@ -1365,7 +1382,7 @@ class CycleDetector:
         self,
         timestamp: datetime,
         status: str = "completed",
-        termination_reason: str = "timeout",
+        termination_reason: str = TerminationReason.TIMEOUT,
         keep_tail: bool = False,
     ) -> None:
         """Finalize cycle.
@@ -1439,7 +1456,7 @@ class CycleDetector:
             target = STATE_FORCE_STOPPED
         elif (
             status == "completed"
-            and termination_reason in {"timeout", "smart"}
+            and termination_reason in ANTI_WRINKLE_ELIGIBLE_REASONS
             and self._config.anti_wrinkle_enabled
             and self._config.device_type in (DEVICE_TYPE_DRYER, DEVICE_TYPE_WASHER_DRYER)
         ):
@@ -1454,7 +1471,7 @@ class CycleDetector:
             self._finish_cycle(
                 timestamp,
                 status="force_stopped",
-                termination_reason="force_stopped",
+                termination_reason=TerminationReason.FORCE_STOPPED,
                 keep_tail=False,  # Force stop usually implies snap back to reality
             )
             self._ignore_power_until_idle = False
@@ -1466,7 +1483,7 @@ class CycleDetector:
             self._finish_cycle(
                 now,
                 status="completed",
-                termination_reason="user",
+                termination_reason=TerminationReason.USER,
                 keep_tail=True,  # User implies "Done Now"
             )
             # Prevent immediate restart if power is still high
@@ -1507,6 +1524,7 @@ class CycleDetector:
                 self._state_enter_time.isoformat() if self._state_enter_time else None
             ),
             "end_spike_seen": self._end_spike_seen,
+            "match_ambiguous": self._match_ambiguous,
         }
 
     def get_elapsed_seconds(self) -> float:
@@ -1566,6 +1584,7 @@ class CycleDetector:
                 self._matched_profile = restored_match
             self._expected_duration = sanitized_expected
             self._end_spike_seen = snapshot.get("end_spike_seen", False)
+            self._match_ambiguous = snapshot.get("match_ambiguous", False)
 
             # Restore state enter time and recompute time_in_state from it
             enter_time = snapshot.get("state_enter_time")

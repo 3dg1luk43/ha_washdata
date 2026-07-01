@@ -17,11 +17,14 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_APPLY_SUGGESTIONS,
     CONF_AUTO_LABEL_CONFIDENCE,
+    CONF_COMPLETION_MIN_SECONDS,
     CONF_DEVICE_TYPE,
     CONF_DOOR_SENSOR_ENTITY,
     CONF_DURATION_TOLERANCE,
     CONF_END_ENERGY_THRESHOLD,
+    CONF_END_REPEAT_COUNT,
     CONF_EXTERNAL_END_TRIGGER,
+    CONF_LEARNING_CONFIDENCE,
     CONF_LINKED_DEVICE,
     CONF_MIN_OFF_GAP,
     CONF_MIN_POWER,
@@ -31,18 +34,26 @@ from .const import (
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
+    CONF_PROFILE_MATCH_THRESHOLD,
     CONF_PUMP_STUCK_DURATION,
     CONF_RUNNING_DEAD_ZONE,
     CONF_SAMPLING_INTERVAL,
+    CONF_SMOOTHING_WINDOW,
+    CONF_START_DURATION_THRESHOLD,
     CONF_START_THRESHOLD_W,
     CONF_STOP_THRESHOLD_W,
     CONF_SWITCH_ENTITY,
     CONF_WATCHDOG_INTERVAL,
     DEFAULT_DEVICE_TYPE,
+    DEFAULT_OFF_DELAY,
+    DEFAULT_OFF_DELAY_BY_DEVICE,
     DEPRECATED_DEVICE_TYPES,
     DEVICE_TYPE_PUMP,
     DEVICE_TYPES,
     DOMAIN,
+    ENABLE_ML_SUGGESTIONS,
+    ENABLE_ML_TRAINING,
+    SHOW_ML_LAB,
     STATE_COLORS,
 )
 
@@ -70,6 +81,13 @@ _SUGGESTION_KEYS: tuple[str, ...] = (
     CONF_STOP_THRESHOLD_W,
     CONF_END_ENERGY_THRESHOLD,
     CONF_RUNNING_DEAD_ZONE,
+    # Stage 1 detection suggestions
+    CONF_SMOOTHING_WINDOW,
+    CONF_START_DURATION_THRESHOLD,
+    CONF_COMPLETION_MIN_SECONDS,
+    CONF_LEARNING_CONFIDENCE,
+    CONF_PROFILE_MATCH_THRESHOLD,
+    CONF_END_REPEAT_COUNT,
 )
 
 # Suggestion keys coerced to int when applied (mirrors the OptionsFlow).
@@ -80,7 +98,40 @@ _SUGGESTION_INT_KEYS: frozenset[str] = frozenset({
     CONF_PROFILE_MATCH_INTERVAL,
     CONF_MIN_OFF_GAP,
     CONF_RUNNING_DEAD_ZONE,
+    CONF_SMOOTHING_WINDOW,
+    CONF_COMPLETION_MIN_SECONDS,
+    CONF_END_REPEAT_COUNT,
 })
+
+
+def _suggestion_equivalent(suggested: Any, current: Any) -> bool:
+    """True when a suggested value is effectively the same as the current one.
+
+    Numeric-tolerant so an int option (30) matches a float suggestion (30.0);
+    a missing current value never counts as equivalent (so it still surfaces).
+    Used to hide suggestions that would not change anything.
+    """
+    if current is None:
+        return False
+    try:
+        return abs(float(suggested) - float(current)) < 1e-6
+    except (TypeError, ValueError):
+        return str(suggested) == str(current)
+
+# Settings surfaced in the ML Lab side-by-side comparison: key -> (label, unit).
+# Order defines display order. Only keys either engine produces are shown.
+_ML_COMPARE_SETTINGS: tuple[tuple[str, str, str], ...] = (
+    (CONF_OFF_DELAY, "Off Delay", "s"),
+    (CONF_END_REPEAT_COUNT, "End Repeat Count", "x"),
+    (CONF_AUTO_LABEL_CONFIDENCE, "Auto-label Confidence", ""),
+    (CONF_STOP_THRESHOLD_W, "Stop Threshold", "W"),
+    (CONF_START_THRESHOLD_W, "Start Threshold", "W"),
+    (CONF_END_ENERGY_THRESHOLD, "End Energy Threshold", "Wh"),
+    (CONF_RUNNING_DEAD_ZONE, "Running Dead Zone", "s"),
+    (CONF_MIN_POWER, "Min Power", "W"),
+    (CONF_MIN_OFF_GAP, "Min Off Gap", "s"),
+    (CONF_DURATION_TOLERANCE, "Duration Tolerance", ""),
+)
 
 
 def _downsample(samples: Any, max_points: int = 240) -> list[list[float]]:
@@ -202,15 +253,16 @@ _PANEL_STORE_FILE = "ha_washdata_panel"
 _PANEL_DATA_KEY = "ha_washdata_panel_cfg"
 
 _LEVEL_RANK = {"none": 0, "read": 1, "edit": 2, "full": 3}
-_PANEL_TABS = ("status", "history", "profiles", "settings", "tools", "panel")
+_PANEL_TABS = ("status", "history", "profiles", "settings", "tools", "panel", "ml_lab")
 
 # Commands that require 'full' (destructive or full-data export/import).
 _FULL_COMMANDS = frozenset({
     "wipe_history", "import_config", "export_config", "clear_debug_data", "reprocess_history",
+    "trigger_ml_training",
 })
 # Commands allowed for any authenticated user regardless of device permissions.
 _OPEN_COMMANDS = frozenset({
-    "get_constants", "get_notify_services", "get_panel_config", "set_user_prefs",
+    "get_constants", "get_panel_config", "set_user_prefs",
 })
 # Admin-only commands.
 _ADMIN_COMMANDS = frozenset({"set_panel_config", "get_logs"})
@@ -400,10 +452,12 @@ def async_register_commands(hass: HomeAssistant) -> None:
     handlers = [
         ws_get_devices, ws_get_device_cycles,
         # Settings
-        ws_get_options, ws_set_options, ws_get_notify_services,
+        ws_get_options, ws_set_options,
         # Profiles
         ws_get_profiles, ws_create_profile, ws_rename_profile, ws_delete_profile,
         ws_rebuild_envelopes, ws_get_profile_phases, ws_set_profile_phases,
+        # Profile groups (Stage 5)
+        ws_get_profile_groups, ws_save_profile_group, ws_rename_profile_group, ws_delete_profile_group,
         # Cycles
         ws_label_cycle, ws_delete_cycle, ws_auto_label_cycles,
         # Phase catalog
@@ -419,7 +473,7 @@ def async_register_commands(hass: HomeAssistant) -> None:
         # Shared constants
         ws_get_constants,
         # Suggestions
-        ws_get_suggestions, ws_apply_suggestions, ws_clear_suggestions,
+        ws_get_suggestions, ws_apply_suggestions, ws_clear_suggestions, ws_run_suggestion_analysis,
         # Cycle curve / interactive editing
         ws_get_cycle_power_data, ws_trim_cycle, ws_analyze_split, ws_apply_split, ws_apply_merge,
         # Profile envelope / member cycles
@@ -436,6 +490,14 @@ def async_register_commands(hass: HomeAssistant) -> None:
         ws_set_program,
         # Live match debug
         ws_get_match_debug,
+        # ML Lab shadow-mode comparison
+        ws_get_ml_comparison,
+        # ML Lab review write-back (Stage 4b)
+        ws_set_ml_review,
+        # On-device ML training (status + manual trigger + matcher-tuning revert)
+        ws_get_ml_training_status, ws_trigger_ml_training, ws_revert_matching_config,
+        # Cycle controls (pause / resume / force-stop)
+        ws_pause_cycle, ws_resume_cycle, ws_terminate_cycle,
     ]
     for handler in handlers:
         websocket_api.async_register_command(hass, _guard(handler))
@@ -476,6 +538,7 @@ def ws_get_devices(
             "suggestions_count": 0,
             "feedback_count": 0,
             "recording": False,
+            "is_user_paused": False,
             "manual_program": False,
             "options": dict(entry.options),
         }
@@ -517,6 +580,7 @@ def ws_get_devices(
                         info["feedback_count"] = len(store.get_pending_feedback() or {})
                     except Exception:  # pylint: disable=broad-exception-caught
                         pass
+                info["is_user_paused"] = bool(getattr(manager, "is_user_paused", False))
                 recorder = getattr(manager, "recorder", None)
                 if recorder is not None:
                     info["recording"] = bool(getattr(recorder, "is_recording", False))
@@ -625,25 +689,6 @@ async def ws_set_options(
 
     hass.config_entries.async_update_entry(entry, options=new_options)
     connection.send_result(msg["id"], {"success": True})
-
-
-@websocket_api.websocket_command(
-    {vol.Required("type"): "ha_washdata/get_notify_services"}
-)
-@callback
-def ws_get_notify_services(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-) -> None:
-    """Return all registered notify.* service names."""
-    services: list[str] = []
-    try:
-        notify_domain = hass.services.async_services().get("notify", {})
-        services = sorted(f"notify.{name}" for name in notify_domain)
-    except Exception as exc:  # pylint: disable=broad-exception-caught
-        _LOGGER.debug("Error listing notify services: %s", exc)
-    connection.send_result(msg["id"], {"services": services})
 
 
 # ─── Profiles ─────────────────────────────────────────────────────────────────
@@ -785,6 +830,128 @@ async def ws_delete_profile(
         await manager.profile_store.delete_profile(
             msg["profile_name"], msg.get("unlabel_cycles", True)
         )
+        manager.notify_update()
+        connection.send_result(msg["id"], {"success": True})
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+# ─── Profile groups (Stage 5) ──────────────────────────────────────────────
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): "ha_washdata/get_profile_groups", vol.Required("entry_id"): str}
+)
+@websocket_api.async_response
+async def ws_get_profile_groups(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return profile groups with member lists, cohesion, and near-duplicate
+    suggestions the user can act on."""
+    from .const import GROUP_MIN_COHESION  # pylint: disable=import-outside-toplevel
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    store = manager.profile_store
+    groups = []
+    for name, g in store.get_profile_groups().items():
+        members = list(g.get("members") or [])
+        coh = store.group_cohesion(members) if len(members) >= 2 else 1.0
+        groups.append({
+            "name": name,
+            "members": members,
+            "cohesion": round(coh, 3),
+            "cohesive": coh >= GROUP_MIN_COHESION,  # False => not aggregated by matcher; UI warns
+        })
+    connection.send_result(msg["id"], {
+        "groups": groups,
+        "min_cohesion": GROUP_MIN_COHESION,
+        "suggestions": store.suggest_profile_groups(),
+    })
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/save_profile_group",
+        vol.Required("entry_id"): str,
+        vol.Required("name"): str,
+        vol.Required("members"): [str],
+    }
+)
+@websocket_api.async_response
+async def ws_save_profile_group(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Create a group or replace an existing group's members."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        store = manager.profile_store
+        if msg["name"] in store.get_profile_groups():
+            await store.set_profile_group_members(msg["name"], msg["members"])
+        else:
+            await store.create_profile_group(msg["name"], msg["members"])
+        manager.notify_update()
+        connection.send_result(msg["id"], {"success": True})
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/rename_profile_group",
+        vol.Required("entry_id"): str,
+        vol.Required("name"): str,
+        vol.Required("new_name"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_rename_profile_group(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        await manager.profile_store.rename_profile_group(msg["name"], msg["new_name"])
+        manager.notify_update()
+        connection.send_result(msg["id"], {"success": True})
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/delete_profile_group",
+        vol.Required("entry_id"): str,
+        vol.Required("name"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_delete_profile_group(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        await manager.profile_store.delete_profile_group(msg["name"])
         manager.notify_update()
         connection.send_result(msg["id"], {"success": True})
     except Exception as exc:  # pylint: disable=broad-exception-caught
@@ -1279,6 +1446,14 @@ async def ws_process_recording(
             "power_data": trimmed_data,
             "status": "completed",
             "meta": {"source": "recorder", "original_samples": len(data)},
+            # A recorded cycle is a hand-picked clean example -> it IS the golden
+            # reference. Prefill the single ml_review flag (recorded == golden;
+            # no separate "recorded" field) so it seeds matching immediately.
+            "ml_review": {
+                "golden": True,
+                "quality": "good",
+                "reviewed_at": dt_util.now().isoformat(),
+            },
         }
 
         if save_mode == "new_profile":
@@ -1469,17 +1644,61 @@ async def ws_reprocess_history(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Reprocess all historical cycle data."""
+    """Full processing pass over historical data.
+
+    Runs, in order: reprocess (rematch + rebuild envelopes) -> backfill the
+    recorded/golden flag -> refresh tuning suggestions -> on-device ML training
+    (when enabled) -> recompute per-cycle ML health against the resulting model.
+    This is the single "Process history" trigger in Diagnostics.
+    """
     entry_id: str = msg["entry_id"]
     manager = _get_manager(hass, entry_id)
     if manager is None:
         _err_not_found(connection, msg["id"], entry_id)
         return
 
+    store = manager.profile_store
+    summary: dict[str, Any] = {"success": True}
     try:
-        count = await manager.profile_store.async_reprocess_all_data()
+        summary["count"] = await store.async_reprocess_all_data()
+
+        # Recorded cycles are golden references - backfill the single flag.
+        try:
+            summary["golden_backfilled"] = await store.async_backfill_recorded_golden()
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            _LOGGER.debug("golden backfill failed for %s: %s", entry_id, exc)
+
+        # Refresh tuning suggestions.
+        learning = getattr(manager, "learning_manager", None)
+        if learning is not None and hasattr(learning, "async_run_full_analysis"):
+            try:
+                res = await learning.async_run_full_analysis()
+                summary["suggestions"] = (res or {}).get("count", 0)
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                _LOGGER.debug("suggestion analysis failed for %s: %s", entry_id, exc)
+
+        # On-device ML training (bypasses schedule guards; safe when disabled).
+        if ENABLE_ML_TRAINING:
+            try:
+                tr = await manager.async_run_ml_training(force=True)
+                summary["ml_training"] = {
+                    "ok": bool(tr.get("ok")),
+                    "promoted": tr.get("promoted", []),
+                    "reason": tr.get("reason"),
+                }
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                _LOGGER.debug("ML training failed for %s: %s", entry_id, exc)
+
+        # Recompute per-cycle health against the (possibly retrained) model.
+        # Skip when training already recomputed it (a promotion refreshes health).
+        if not (summary.get("ml_training", {}) or {}).get("promoted"):
+            try:
+                summary["health_recomputed"] = await manager.async_recompute_cycle_health()
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                _LOGGER.debug("health recompute failed for %s: %s", entry_id, exc)
+
         manager.notify_update()
-        connection.send_result(msg["id"], {"success": True, "count": count})
+        connection.send_result(msg["id"], summary)
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -1620,7 +1839,13 @@ def ws_get_constants(
     ]
     connection.send_result(
         msg["id"],
-        {"device_types": device_types, "state_colors": dict(STATE_COLORS)},
+        {
+            "device_types": device_types,
+            "state_colors": dict(STATE_COLORS),
+            "ml_lab_enabled": SHOW_ML_LAB,
+            "ml_suggestions_enabled": ENABLE_ML_SUGGESTIONS,
+            "ml_training_available": ENABLE_ML_TRAINING,
+        },
     )
 
 
@@ -1656,12 +1881,16 @@ def ws_get_suggestions(
             suggested = (
                 int(float(val)) if key in _SUGGESTION_INT_KEYS else round(float(val), 4)
             )
+            current = merged.get(key)
+            # Hide suggestions that would not change the current value.
+            if _suggestion_equivalent(suggested, current):
+                continue
             out.append(
                 {
                     "key": key,
                     "suggested": suggested,
                     "reason": item.get("reason", ""),
-                    "current": merged.get(key),
+                    "current": current,
                     "updated": item.get("updated"),
                 }
             )
@@ -1745,6 +1974,33 @@ async def ws_clear_suggestions(
         await manager.profile_store.clear_suggestions()
         manager.notify_update()
         connection.send_result(msg["id"], {"success": True})
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): "ha_washdata/run_suggestion_analysis", vol.Required("entry_id"): str}
+)
+@websocket_api.async_response
+async def ws_run_suggestion_analysis(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Run all suggestion passes on demand (manual 'analyze now' trigger)."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    learning = getattr(manager, "learning_manager", None)
+    if learning is None or not hasattr(learning, "async_run_full_analysis"):
+        connection.send_error(msg["id"], "unavailable", "Suggestion analysis unavailable")
+        return
+    try:
+        result = await learning.async_run_full_analysis()
+        manager.notify_update()
+        connection.send_result(msg["id"], {"success": True, **(result or {})})
     except Exception as exc:  # pylint: disable=broad-exception-caught
         connection.send_error(msg["id"], "unknown_error", str(exc))
 
@@ -2434,3 +2690,723 @@ def ws_get_logs(
         recs = [r for r in recs if _LOG_LEVELS.get(r["level"], 0) >= minl]
     limit = msg.get("limit", 200)
     connection.send_result(msg["id"], {"logs": recs[-limit:]})
+
+
+# ─── ML Lab (shadow-mode comparison) ──────────────────────────────────────────
+
+def _ml_median(values: list[float]) -> float | None:
+    if not values:
+        return None
+    s = sorted(values)
+    n = len(s)
+    return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2
+
+
+def _compute_cycle_events(
+    points: list[tuple[float, float]],
+    expectation: dict[str, float],
+    end_feat_fn: Any,
+    end_score_fn: Any,
+    max_events: int = 20,
+) -> list[dict[str, Any]]:
+    """Find all low-power events in a trace and score each with the ML end detector.
+
+    Each event represents a contiguous below-threshold power segment.  Events that
+    were followed by power resumption are classified as pauses (``is_end=False``);
+    the last event is marked as the end trigger (``is_end=True``).
+
+    Motor-cycling appliances (washing machines) produce tens of micro-dips per cycle
+    from drum motor switching.  A 30 s minimum filters these while still capturing
+    genuine pause events which are typically > 1 min.
+    """
+    _MIN_EVENT_S = 30.0
+    if not points or len(points) < 4:
+        return []
+    powers = [p for _, p in points]
+    peak = max(powers) if powers else 0.0
+    low_thresh = max(1.0, 0.05 * peak)
+
+    events: list[dict[str, Any]] = []
+    in_low = False
+    seg_start_s = 0.0
+
+    for i, (offset_s, pwr) in enumerate(points):
+        if not in_low and pwr < low_thresh:
+            in_low = True
+            seg_start_s = offset_s
+        elif in_low and pwr >= low_thresh:
+            seg_end_s = points[i - 1][0] if i > 0 else offset_s
+            low_run_s = seg_end_s - seg_start_s
+            if low_run_s >= _MIN_EVENT_S:
+                ml_conf: float | None = None
+                try:
+                    feat = end_feat_fn(points[:i], expectation)
+                    if feat is not None:
+                        ml_conf = round(float(end_score_fn(feat)), 3)
+                except Exception:  # pylint: disable=broad-exception-caught
+                    pass
+                events.append({"offset_s": float(round(seg_start_s, 0)), "low_run_s": float(round(low_run_s, 0)), "ml_end_confidence": ml_conf, "is_end": False})
+            in_low = False
+            if len(events) >= max_events:
+                break
+
+    if in_low:
+        low_run_s = points[-1][0] - seg_start_s
+        if low_run_s >= _MIN_EVENT_S:
+            ml_conf = None
+            try:
+                feat = end_feat_fn(points, expectation)
+                if feat is not None:
+                    ml_conf = round(float(end_score_fn(feat)), 3)
+            except Exception:  # pylint: disable=broad-exception-caught
+                pass
+            events.append({"offset_s": float(round(seg_start_s, 0)), "low_run_s": float(round(low_run_s, 0)), "ml_end_confidence": ml_conf, "is_end": True})
+
+    if events and not events[-1]["is_end"]:
+        events[-1]["is_end"] = True
+    return events[:max_events]
+
+
+def _health_model_sig(store: Any) -> str:
+    """Signature of the active health/end models, so persisted per-cycle health
+    can be invalidated (recomputed) whenever the model changes or is retrained.
+    """
+    versions = store.get_ml_model_versions() or {}
+    parts = []
+    for cap in ("quality", "end"):
+        v = versions.get(cap)
+        ts = v.get("trained_at") if isinstance(v, dict) else None
+        parts.append(f"{cap}:{ts or 'base'}")
+    return "|".join(parts)
+
+
+def _compute_ml_comparison(
+    store: Any, current_off_delay: int, *, force_recompute: bool = False
+) -> dict[str, Any]:
+    """Build the ML shadow-mode comparison report (CPU-intensive; runs in executor).
+
+    Iterates all stored cycles, extracts features, and scores them against the
+    embedded ML models.  Original detection logic is completely untouched; this
+    is read-only analysis for the ML Lab panel page.
+
+    Per-cycle health (quality + end scores, labels and the events timeline) is
+    **persisted** on each cycle under ``ml_health`` keyed by the active model
+    signature. Subsequent calls reuse the cached value instead of re-scoring on
+    every panel load; it is only recomputed when the model changes (signature
+    mismatch), when ``force_recompute`` is set (reprocess / maintenance /
+    processing trigger), or for cycles that have never been assessed. The caller
+    persists the store when ``result['_health_dirty']`` is true.
+    """
+    # Lazy imports so this module loads instantly even when ML deps are absent.
+    try:
+        from .ml.engine import resolve_scorer
+        from .ml.feature_extraction import latest_end_event_features, quality_features
+        from .profile_store import decompress_power_data
+    except Exception:  # pylint: disable=broad-exception-caught
+        return {"enabled": False, "error": "ML models not available", "cycles": [], "settings_comparison": {}}
+
+    # Prefer on-device trained models when present, else the embedded baseline.
+    quality_score_fn, quality_source = resolve_scorer("quality", store)
+    end_score_fn, end_source = resolve_scorer("end", store)
+    if quality_score_fn is None and end_score_fn is None:
+        return {"enabled": False, "error": "ML models not available", "cycles": [], "settings_comparison": {}}
+
+    model_sig = _health_model_sig(store)
+    health_dirty = False
+    cycles: list[Any] = store.get_past_cycles()
+
+    # --- Build per-profile statistics from cycle history ---
+    raw_stats: dict[str, dict[str, list[float]]] = {}
+    for cycle in cycles:
+        name = cycle.get("profile_name")
+        if not name:
+            continue
+        s = raw_stats.setdefault(name, {"durations": [], "energies": [], "peaks": []})
+        dur = cycle.get("duration")
+        energy = cycle.get("energy_wh")
+        peak = cycle.get("max_power")
+        if dur is not None:
+            s["durations"].append(float(dur))
+        if energy is not None:
+            s["energies"].append(float(energy))
+        if peak is not None:
+            s["peaks"].append(float(peak))
+
+    profile_medians: dict[str, dict[str, float]] = {}
+    for name, s in raw_stats.items():
+        profile_medians[name] = {
+            "duration_s": _ml_median(s["durations"]) or 1800.0,
+            "energy_wh": _ml_median(s["energies"]) or 500.0,
+            "peak_w": _ml_median(s["peaks"]) or 500.0,
+            "count": len(s["durations"]),
+        }
+
+    # --- Evaluate cycles (most recent 200 for display; all for pause analysis) ---
+    intra_pauses: list[float] = []
+    evaluated: list[dict[str, Any]] = []
+
+    for cycle in cycles:
+        profile_name: str | None = cycle.get("profile_name")
+        duration: float = float(cycle.get("duration") or 0)
+        energy_wh: float = float(cycle.get("energy_wh") or 0)
+        status: str = cycle.get("status", "completed")
+
+        # A stored confidence of 0 most likely means the field wasn't recorded
+        # (manually-labeled or pre-confidence cycles), not that the match was bad.
+        # Treat 0 as "unknown" so we don't poison every quality feature with
+        # worst-case proxies.
+        raw_conf = cycle.get("match_confidence")
+        conf_known: bool = isinstance(raw_conf, (int, float)) and raw_conf > 0
+        match_conf: float = float(raw_conf) if conf_known else 0.0
+
+        # Proxy feature values for quality scoring.  When confidence is known,
+        # derive distance/margin/fit from it.  When unknown, use neutral values
+        # so the model scores on trace shape alone.
+        if conf_known:
+            proxy_dist = max(0.0, 1.0 - match_conf)
+            proxy_margin = match_conf
+            proxy_fit = match_conf
+        else:
+            proxy_dist, proxy_margin, proxy_fit = 0.25, 0.30, 0.75
+
+        points = decompress_power_data(cycle)
+
+        # Collect intra-cycle pauses for off_delay recommendation (all cycles).
+        if points and len(points) >= 4 and status == "completed":
+            powers = [p for _, p in points]
+            peak = max(powers) if powers else 0.0
+            low_thresh = max(1.0, 0.05 * peak)
+            in_pause = False
+            pause_start_s = 0.0
+            for offset_s, pwr in points:
+                if not in_pause and pwr < low_thresh:
+                    in_pause = True
+                    pause_start_s = offset_s
+                elif in_pause and pwr >= low_thresh:
+                    pause_dur = offset_s - pause_start_s
+                    if 5.0 <= pause_dur <= 1800.0:
+                        intra_pauses.append(pause_dur)
+                    in_pause = False
+
+        # Only score and display the most recent 200 cycles.
+        if len(evaluated) >= 200:
+            continue
+
+        # Reuse persisted per-cycle health when it was computed against the
+        # current model (unless a recompute is forced). This is what keeps the
+        # panel from re-scoring every cycle on every load.
+        cached = cycle.get("ml_health")
+        if (
+            not force_recompute
+            and isinstance(cached, dict)
+            and cached.get("model_sig") == model_sig
+        ):
+            ml_quality = cached.get("score")
+            quality_label = cached.get("label", "no_data")
+            ml_end_conf = cached.get("end_score")
+            end_label = cached.get("end_label", "no_event")
+            events = cached.get("events") or []
+        else:
+            ml_quality = None
+            if profile_name and profile_name in profile_medians:
+                pm = profile_medians[profile_name]
+                try:
+                    feat = quality_features(
+                        points=points,
+                        profile_median_duration_s=pm["duration_s"],
+                        profile_median_energy_wh=pm["energy_wh"],
+                        profile_median_peak_w=pm["peak_w"],
+                        profile_distance=proxy_dist,
+                        label_margin=proxy_margin,
+                        profile_fit_score=proxy_fit,
+                        flag_count=0,
+                    )
+                    if quality_score_fn is not None:
+                        ml_quality = float(quality_score_fn(feat))
+                except Exception:  # pylint: disable=broad-exception-caught
+                    pass
+
+            expectation: dict[str, float] = {}
+            if profile_name and profile_name in profile_medians:
+                pm = profile_medians[profile_name]
+                expectation = {"duration": pm["duration_s"], "energy": pm["energy_wh"], "peak": pm["peak_w"]}
+
+            ml_end_conf = None
+            if expectation and points:
+                try:
+                    end_feat = latest_end_event_features(points, expectation)
+                    if end_feat is not None and end_score_fn is not None:
+                        ml_end_conf = float(end_score_fn(end_feat))
+                except Exception:  # pylint: disable=broad-exception-caught
+                    pass
+
+            # Per-cycle events timeline for the modal
+            events = []
+            if expectation and points and end_score_fn is not None:
+                events = _compute_cycle_events(points, expectation, latest_end_event_features, end_score_fn)
+
+            if ml_quality is None:
+                quality_label = "no_data"
+            elif ml_quality < 0.3:
+                quality_label = "ok"
+            elif ml_quality < 0.6:
+                quality_label = "uncertain"
+            else:
+                quality_label = "review"
+
+            if ml_end_conf is None:
+                end_label = "no_event"
+            elif ml_end_conf >= 0.6:
+                end_label = "likely_end"
+            elif ml_end_conf >= 0.35:
+                end_label = "uncertain"
+            else:
+                end_label = "likely_pause"
+
+            # Persist the freshly-computed health on the cycle for reuse.
+            cycle["ml_health"] = {
+                "score": round(ml_quality, 3) if ml_quality is not None else None,
+                "label": quality_label,
+                "end_score": round(ml_end_conf, 3) if ml_end_conf is not None else None,
+                "end_label": end_label,
+                "events": events,
+                "model_sig": model_sig,
+                "at": dt_util.now().isoformat(),
+            }
+            health_dirty = True
+
+        start_raw = cycle.get("start_time", "")
+        evaluated.append({
+            "id": cycle.get("id", ""),
+            "start_time": start_raw if isinstance(start_raw, str) else "",
+            "duration_s": round(duration, 0),
+            "status": status,
+            "profile_name": profile_name,
+            "match_confidence": round(match_conf, 3),
+            "confidence_known": conf_known,
+            "energy_wh": round(energy_wh, 1),
+            "ml_quality_score": round(ml_quality, 3) if ml_quality is not None else None,
+            "ml_quality_label": quality_label,
+            "ml_end_confidence": round(ml_end_conf, 3) if ml_end_conf is not None else None,
+            "ml_end_label": end_label,
+            "has_power_data": len(points) > 0,
+            "events": events,
+            "ml_review": cycle.get("ml_review") or {},
+        })
+
+    # --- Settings comparison: off_delay ---
+    settings_comparison: dict[str, Any] = {}
+    ml_off_delay: int | None = None
+    pause_p95: float | None = None
+    if intra_pauses:
+        intra_pauses.sort()
+        p95_idx = min(int(len(intra_pauses) * 0.95), len(intra_pauses) - 1)
+        pause_p95 = intra_pauses[p95_idx]
+        ml_off_delay = max(60, int(pause_p95) + 60)
+
+    original_suggestions = store.get_suggestions() or {}
+    orig_off = original_suggestions.get(CONF_OFF_DELAY)
+    settings_comparison["off_delay"] = {
+        "key": CONF_OFF_DELAY,
+        "label": "Off Delay",
+        "unit": "s",
+        "current_value": current_off_delay,
+        "original_suggestion": orig_off.get("value") if isinstance(orig_off, dict) else None,
+        "original_reason": orig_off.get("reason") if isinstance(orig_off, dict) else None,
+        "ml_recommendation": ml_off_delay,
+        "ml_reasoning": (
+            f"p95 intra-cycle pause: {int(pause_p95)}s + 60s buffer = {ml_off_delay}s "
+            f"(from {len(intra_pauses)} observed pauses)"
+            if ml_off_delay is not None else "Not enough pause data to recommend"
+        ),
+        "pause_count": len(intra_pauses),
+    }
+
+    return {
+        "enabled": True,
+        "cycle_count": len(cycles),
+        "evaluated_count": sum(1 for e in evaluated if e["ml_quality_score"] is not None),
+        "cycles": evaluated,
+        "settings_comparison": settings_comparison,
+        "model_source": {"quality": quality_source, "end": end_source},
+        "_health_dirty": health_dirty,
+        "profile_stats": {
+            name: {"count": int(m["count"]), "median_duration_s": int(m["duration_s"]), "median_energy_wh": round(m["energy_wh"], 1)}
+            for name, m in profile_medians.items()
+        },
+    }
+
+
+def _build_settings_comparison(manager: Any, merged: dict[str, Any]) -> dict[str, Any]:
+    """Build the enriched Classic-vs-ML settings comparison (executor-safe).
+
+    Runs both the classic :class:`SuggestionEngine` and the
+    :class:`MLSuggestionEngine` against clean cycle history and merges their
+    recommendations with the current option values. Gated by the caller behind
+    ``ENABLE_ML_SUGGESTIONS``.
+    """
+    try:
+        from .suggestion_engine import (  # pylint: disable=import-outside-toplevel
+            MLSuggestionEngine,
+            select_clean_cycles,
+        )
+    except Exception:  # pylint: disable=broad-exception-caught
+        return {}
+
+    learning = getattr(manager, "learning_manager", None)
+    classic = getattr(learning, "suggestion_engine", None)
+    if classic is None:
+        return {}
+
+    stop_thr = classic._current_stop_threshold(merged)  # pylint: disable=protected-access
+    raw_cycles = classic.profile_store.get_past_cycles()
+
+    # Classic recommendations pooled from every classic pass.
+    classic_vals: dict[str, Any] = {}
+    for producer in (
+        classic.generate_detection_suggestions,
+        classic.generate_model_suggestions,
+    ):
+        try:
+            classic_vals.update(producer() or {})
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
+    try:
+        classic_vals.update(classic.run_batch_simulation(raw_cycles) or {})
+    except Exception:  # pylint: disable=broad-exception-caught
+        pass
+    # Classic off_delay via the (Stage 2) pause analysis.
+    try:
+        clean, _excl = select_clean_cycles(raw_cycles[-200:], stop_threshold_w=stop_thr)
+        device_floor = DEFAULT_OFF_DELAY_BY_DEVICE.get(
+            classic.device_type, DEFAULT_OFF_DELAY
+        ) if classic.device_type else DEFAULT_OFF_DELAY
+        od = classic._suggest_off_delay_from_pauses(clean, stop_thr, device_floor)  # pylint: disable=protected-access
+        if od is not None:
+            classic_vals[CONF_OFF_DELAY] = {"value": od[0], "reason": od[1]}
+    except Exception:  # pylint: disable=broad-exception-caught
+        pass
+
+    # ML recommendations.
+    ml_vals: dict[str, Any] = {}
+    try:
+        ml_vals = MLSuggestionEngine(classic).generate_ml_suggestions() or {}
+    except Exception:  # pylint: disable=broad-exception-caught
+        pass
+
+    def _val(entry: Any) -> Any:
+        return entry.get("value") if isinstance(entry, dict) else None
+
+    def _reason(entry: Any) -> str:
+        return entry.get("reason", "") if isinstance(entry, dict) else ""
+
+    comparison: dict[str, Any] = {}
+    for key, label, unit in _ML_COMPARE_SETTINGS:
+        cv, mv = classic_vals.get(key), ml_vals.get(key)
+        if cv is None and mv is None:
+            continue
+        current = merged.get(key)
+        classic_value = _val(cv)
+        ml_value = _val(mv)
+        # Hide a recommendation that would not change the current value.
+        if classic_value is not None and _suggestion_equivalent(classic_value, current):
+            classic_value = None
+        if ml_value is not None and _suggestion_equivalent(ml_value, current):
+            ml_value = None
+        if classic_value is None and ml_value is None:
+            continue
+        comparison[key] = {
+            "key": key,
+            "label": label,
+            "unit": unit,
+            "current_value": current,
+            "classic_value": classic_value,
+            "classic_reason": _reason(cv) if classic_value is not None else "",
+            "ml_value": ml_value,
+            "ml_reason": _reason(mv) if ml_value is not None else "",
+        }
+    return comparison
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_ml_comparison",
+        vol.Required("entry_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_get_ml_comparison(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the ML shadow-mode comparison report for the ML Lab panel page.
+
+    Runs the embedded ML models against stored cycle history and compares with
+    the existing detection/suggestion logic.  Read-only: no side effects on the
+    proven algorithms.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+
+    try:
+        store = manager.profile_store
+        entry = _get_entry(hass, entry_id)
+        merged: dict[str, Any] = {**(entry.data if entry else {}), **(entry.options if entry else {})}
+        current_off_delay = int(merged.get(CONF_OFF_DELAY, 120))
+
+        result = await hass.async_add_executor_job(
+            _compute_ml_comparison, store, current_off_delay
+        )
+        # Persist any newly-computed per-cycle health so the next load reuses it.
+        if result.pop("_health_dirty", False):
+            await store.async_save()
+        result["ml_suggestions_enabled"] = ENABLE_ML_SUGGESTIONS
+
+        # Stage 3: replace the basic off_delay-only comparison with the full
+        # Classic-vs-ML settings table when ML suggestions are unlocked.
+        if ENABLE_ML_SUGGESTIONS:
+            enriched = await hass.async_add_executor_job(
+                _build_settings_comparison, manager, merged
+            )
+            if enriched:
+                result["settings_comparison"] = enriched
+
+        connection.send_result(msg["id"], result)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        _LOGGER.warning("ML comparison failed for %s: %s", entry_id, exc)
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/get_ml_training_status",
+        vol.Required("entry_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_get_ml_training_status(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return on-device ML training status for the Tuning > ML Training panel."""
+    from .const import (  # pylint: disable=import-outside-toplevel
+        CONF_ML_TRAINING_ENABLED,
+        CONF_ML_TRAINING_HOUR,
+        CONF_ML_TRAINING_INTERVAL_DAYS,
+        CONF_ML_TRAINING_MIN_CYCLES,
+        DEFAULT_ML_TRAINING_ENABLED,
+        DEFAULT_ML_TRAINING_HOUR,
+        DEFAULT_ML_TRAINING_INTERVAL_DAYS,
+        DEFAULT_ML_TRAINING_MIN_CYCLES,
+        MATCH_CORR_WEIGHT,
+        MATCH_DTW_ENSEMBLE_W,
+        MATCH_DURATION_WEIGHT,
+        MATCH_ENERGY_WEIGHT,
+    )
+
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    entry = _get_entry(hass, entry_id)
+    merged: dict[str, Any] = {**(entry.data if entry else {}), **(entry.options if entry else {})}
+    store = manager.profile_store
+    versions = store.get_ml_model_versions() or {}
+    last = manager._last_ml_training_at()  # pylint: disable=protected-access
+    models = {
+        cap: {"trained_at": v.get("trained_at")}
+        for cap, v in versions.items()
+        if isinstance(v, dict)
+    }
+    # Matcher scoring-weight tuning (Stage 4/5): current shipped defaults, the
+    # on-device tuned record (if promoted), and which set is actually in use.
+    tuned_rec = store.get_matching_config()
+    tuned_cfg = tuned_rec.get("config") if isinstance(tuned_rec, dict) else None
+    matching = {
+        "defaults": {
+            "corr_weight": MATCH_CORR_WEIGHT,
+            "duration_weight": MATCH_DURATION_WEIGHT,
+            "energy_weight": MATCH_ENERGY_WEIGHT,
+            "dtw_ensemble_w": MATCH_DTW_ENSEMBLE_W,
+        },
+        "tuned": tuned_rec or None,
+        "active": "tuned" if tuned_cfg else "default",
+    }
+    connection.send_result(
+        msg["id"],
+        {
+            "available": ENABLE_ML_TRAINING,
+            "enabled": bool(merged.get(CONF_ML_TRAINING_ENABLED, DEFAULT_ML_TRAINING_ENABLED)),
+            "running": bool(getattr(manager, "_ml_training_running", False)),
+            "last_trained": last.isoformat() if last else None,
+            "cycle_count": len(store.get_past_cycles()),
+            "min_cycles": int(merged.get(CONF_ML_TRAINING_MIN_CYCLES, DEFAULT_ML_TRAINING_MIN_CYCLES)),
+            "interval_days": int(merged.get(CONF_ML_TRAINING_INTERVAL_DAYS, DEFAULT_ML_TRAINING_INTERVAL_DAYS)),
+            "hour": int(merged.get(CONF_ML_TRAINING_HOUR, DEFAULT_ML_TRAINING_HOUR)),
+            "on_device_models": models,
+            "matching": matching,
+        },
+    )
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/trigger_ml_training",
+        vol.Required("entry_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_trigger_ml_training(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Run on-device ML training now (manual, bypasses the schedule guards)."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    if not ENABLE_ML_TRAINING:
+        connection.send_error(msg["id"], "not_available", "ML training is not enabled in this build")
+        return
+    summary = await manager.async_run_ml_training(force=True)
+    connection.send_result(msg["id"], summary)
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/revert_matching_config",
+        vol.Required("entry_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_revert_matching_config(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Revert the matcher's scoring weights to the shipped defaults.
+
+    Drops the on-device tuned override so matching falls back to the const
+    defaults. The next training pass may re-promote a new one if it wins.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    await manager.profile_store.clear_matching_config()
+    manager.notify_update()
+    connection.send_result(msg["id"], {"success": True})
+
+
+_ML_REVIEW_QUALITIES = {"", "good", "bad", "unusable"}
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "ha_washdata/set_ml_review",
+        vol.Required("entry_id"): str,
+        vol.Required("cycle_id"): str,
+        vol.Optional("quality"): vol.In(sorted(_ML_REVIEW_QUALITIES)),
+        vol.Optional("golden"): bool,
+        vol.Optional("tags"): [str],
+        vol.Optional("notes"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_set_ml_review(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Attach an ML-Lab review (quality / golden / tags / notes) to a cycle.
+
+    This is the write-back that turns the read-only shadow view into a feedback
+    loop: reviews become strong training labels for the on-device quality model.
+    """
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    try:
+        await manager.profile_store.set_cycle_review(
+            msg["cycle_id"],
+            quality=msg.get("quality"),
+            golden=msg.get("golden"),
+            tags=msg.get("tags"),
+            notes=msg.get("notes"),
+        )
+        manager.notify_update()
+        connection.send_result(msg["id"], {"success": True})
+    except ValueError as exc:
+        connection.send_error(msg["id"], "not_found", str(exc))
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        connection.send_error(msg["id"], "unknown_error", str(exc))
+
+
+# ── Cycle Controls ────────────────────────────────────────────────────────────
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): "ha_washdata/pause_cycle", vol.Required("entry_id"): str}
+)
+@websocket_api.async_response
+async def ws_pause_cycle(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """User-pause the active cycle."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    await manager.async_pause_cycle()
+    connection.send_result(msg["id"], {"ok": True})
+
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): "ha_washdata/resume_cycle", vol.Required("entry_id"): str}
+)
+@websocket_api.async_response
+async def ws_resume_cycle(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Resume a user-paused cycle."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    await manager.async_resume_cycle()
+    connection.send_result(msg["id"], {"ok": True})
+
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): "ha_washdata/terminate_cycle", vol.Required("entry_id"): str}
+)
+@websocket_api.async_response
+async def ws_terminate_cycle(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Force-terminate the active cycle."""
+    entry_id: str = msg["entry_id"]
+    manager = _get_manager(hass, entry_id)
+    if manager is None:
+        _err_not_found(connection, msg["id"], entry_id)
+        return
+    await manager.async_terminate_cycle()
+    connection.send_result(msg["id"], {"ok": True})

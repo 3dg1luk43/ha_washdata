@@ -659,6 +659,9 @@ class WashDataManager:
 
 
         self._remove_maintenance_scheduler = None
+        self._remove_ml_training_scheduler = None
+        self._ml_training_failures = 0  # consecutive gate failures for auto-disable
+        self._ml_training_running = False  # True while a training run is in flight
         self._profile_sample_repair_stats: dict[str, int] | None = None
 
         self._last_suggestion_update: datetime | None = None
@@ -971,7 +974,8 @@ class WashDataManager:
             # Push updates to detector
             self.detector.set_verified_pause(verified_pause)
             self.detector.update_match(
-                (profile_name, confidence, matched_duration, phase_name, result.is_confident_mismatch)
+                (profile_name, confidence, matched_duration, phase_name,
+                 result.is_confident_mismatch, result.is_ambiguous)
             )
 
             # --- LOGGING (Unified) ---
@@ -1759,6 +1763,9 @@ class WashDataManager:
         # Schedule midnight maintenance if enabled
         await self._setup_maintenance_scheduler()
 
+        # Schedule on-device ML retraining if enabled (Stage 4, gated)
+        self._setup_ml_training_scheduler()
+
         # Update sampling interval
         old_sampling = self._sampling_interval
         new_sampling = float(
@@ -1797,6 +1804,9 @@ class WashDataManager:
             self._remove_state_expiry_timer()
         if self._remove_maintenance_scheduler:
             self._remove_maintenance_scheduler()
+        if self._remove_ml_training_scheduler:
+            self._remove_ml_training_scheduler()
+            self._remove_ml_training_scheduler = None
 
         self.diag_buffer.uninstall()
 
@@ -2020,41 +2030,241 @@ class WashDataManager:
             self._logger.debug("Auto-maintenance disabled")
             return
 
-        # Calculate next midnight
-        now = dt_util.now()
-        tomorrow = now + timedelta(days=1)
-        next_midnight = tomorrow.replace(hour=0, minute=0, second=0, microsecond=0)
-
-        # Schedule first run at midnight
         async def run_maintenance(_now: datetime | None = None) -> None:
             """Run maintenance task."""
             self._logger.info("Running scheduled maintenance")
             try:
                 stats = await self.profile_store.async_run_maintenance()
                 self._logger.info("Maintenance completed: %s", stats)
-            except Exception as err:
+                # Refresh persisted cycle health as part of nightly maintenance.
+                await self.async_recompute_cycle_health()
+            except Exception as err:  # pylint: disable=broad-exception-caught
                 self._logger.error("Maintenance failed: %s", err, exc_info=True)
 
-        # Use async_track_point_in_time for midnight, then reschedule daily
-        self._remove_maintenance_scheduler = evt.async_track_point_in_time(
-            self.hass, run_maintenance, next_midnight
+        # Fire daily at local midnight with a single, cleanly-cancellable handle.
+        # async_track_time_change auto-repeats every day, so there is no manual
+        # rescheduling that could leak handles or double-register the callback.
+        self._remove_maintenance_scheduler = evt.async_track_time_change(
+            self.hass, run_maintenance, hour=0, minute=0, second=0
+        )
+        self._logger.info("Scheduled daily maintenance at local midnight")
+
+    def _setup_ml_training_scheduler(self) -> None:
+        """Schedule the daily on-device ML retraining (Stage 4, gated).
+
+        Uses ``async_track_time_change`` which fires every day at the configured
+        hour with a single, cleanly-cancellable handle (no manual rescheduling).
+        No-op unless the ``ENABLE_ML_TRAINING`` build flag and the per-device
+        opt-in are both set.
+        """
+        from .const import (
+            ENABLE_ML_TRAINING,
+            CONF_ML_TRAINING_ENABLED,
+            CONF_ML_TRAINING_HOUR,
+            DEFAULT_ML_TRAINING_ENABLED,
+            DEFAULT_ML_TRAINING_HOUR,
         )
 
-        self._logger.info("Scheduled maintenance at %s", next_midnight)
+        if self._remove_ml_training_scheduler:
+            self._remove_ml_training_scheduler()
+            self._remove_ml_training_scheduler = None
 
-        # Also schedule daily repeat after first run
-        async def maintenance_wrapper(_now: datetime) -> None:
-            await run_maintenance(_now)
-            # Reschedule for next day
-            next_run = dt_util.now() + timedelta(days=1)
-            next_run = next_run.replace(hour=0, minute=0, second=0, microsecond=0)
-            self._remove_maintenance_scheduler = evt.async_track_point_in_time(
-                self.hass, maintenance_wrapper, next_run
+        if not ENABLE_ML_TRAINING:
+            return
+        opts = {**self.config_entry.data, **self.config_entry.options}
+        if not opts.get(CONF_ML_TRAINING_ENABLED, DEFAULT_ML_TRAINING_ENABLED):
+            self._logger.debug("On-device ML training disabled")
+            return
+
+        try:
+            hour = int(opts.get(CONF_ML_TRAINING_HOUR, DEFAULT_ML_TRAINING_HOUR))
+        except (TypeError, ValueError):
+            hour = DEFAULT_ML_TRAINING_HOUR
+        hour = max(0, min(23, hour))
+
+        async def _scheduled(_now: datetime) -> None:
+            await self.async_run_ml_training(force=False)
+
+        self._remove_ml_training_scheduler = evt.async_track_time_change(
+            self.hass, _scheduled, hour=hour, minute=0, second=0
+        )
+        self._logger.info("Scheduled on-device ML training daily at %02d:00", hour)
+
+    async def async_run_ml_training(self, force: bool = False) -> dict[str, Any]:
+        """Retrain the ML models from this device's own cycles (gated + guarded).
+
+        Returns a summary dict. ``force`` bypasses the min-cycle / interval /
+        idle guards (used by the manual service). Never raises to the caller.
+        """
+        from .const import (
+            ENABLE_ML_TRAINING,
+            CONF_ML_TRAINING_MIN_CYCLES,
+            CONF_ML_TRAINING_INTERVAL_DAYS,
+            DEFAULT_ML_TRAINING_MIN_CYCLES,
+            DEFAULT_ML_TRAINING_INTERVAL_DAYS,
+            EVENT_ML_TRAINING_COMPLETE,
+        )
+
+        if not ENABLE_ML_TRAINING:
+            return {"ok": False, "reason": "ml_training_disabled"}
+
+        opts = {**self.config_entry.data, **self.config_entry.options}
+        cycles = self.profile_store.get_past_cycles()
+
+        if not force:
+            # Don't train mid-cycle; wait for a quiet moment.
+            if self.detector and self.detector.state in {
+                STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING
+            }:
+                return {"ok": False, "reason": "device_active"}
+            min_cycles = int(opts.get(CONF_ML_TRAINING_MIN_CYCLES, DEFAULT_ML_TRAINING_MIN_CYCLES))
+            if len(cycles) < min_cycles:
+                return {"ok": False, "reason": f"need {min_cycles} cycles, have {len(cycles)}"}
+            # Respect the minimum retrain interval.
+            interval_days = int(
+                opts.get(CONF_ML_TRAINING_INTERVAL_DAYS, DEFAULT_ML_TRAINING_INTERVAL_DAYS)
+            )
+            last = self._last_ml_training_at()
+            if last is not None:
+                age_days = (dt_util.now() - last).total_seconds() / 86400.0
+                if age_days < interval_days:
+                    return {"ok": False, "reason": f"retrained {age_days:.1f}d ago (<{interval_days}d)"}
+
+        if self._ml_training_running:
+            return {"ok": False, "reason": "already_running"}
+        self._ml_training_running = True
+        self.notify_update()
+        try:
+            from .ml.training_task import async_run_training
+
+            summary = await async_run_training(self.hass, self)
+        except Exception as err:  # noqa: BLE001 - training must never break the integration
+            self._logger.error("On-device ML training failed: %s", err, exc_info=True)
+            return {"ok": False, "reason": "exception", "error": str(err)}
+        finally:
+            self._ml_training_running = False
+            self.notify_update()
+
+        promoted = list(summary.get("promoted", {}).keys())
+        if promoted:
+            self._ml_training_failures = 0
+            # Consumers (ML Lab, MLSuggestionEngine) read the trained specs live
+            # from the store via ml.engine.resolve_scorer, so no refresh is needed.
+            self._logger.info("On-device ML training promoted models: %s", promoted)
+        else:
+            self._ml_training_failures += 1
+            self._logger.info(
+                "On-device ML training produced no promotable models (attempt %d)",
+                self._ml_training_failures,
             )
 
-        self._remove_maintenance_scheduler = evt.async_track_point_in_time(
-            self.hass, maintenance_wrapper, next_midnight
+        # Stage 4/5: tune the matcher's scoring weights from this device's own
+        # cycles (same held-out promotion discipline as the models). Independent
+        # of model promotion; runs on every training pass.
+        matching = await self._tune_matching_config(cycles)
+
+        self.hass.bus.async_fire(
+            EVENT_ML_TRAINING_COMPLETE,
+            {
+                "entry_id": self.entry_id,
+                "device_name": self.config_entry.title,
+                "promoted": promoted,
+                "results": summary.get("results", []),
+                "matching": matching,
+            },
         )
+        # A promoted model changes the health-model signature, so recompute the
+        # persisted per-cycle health now rather than lazily on the next view.
+        if promoted:
+            try:
+                await self.async_recompute_cycle_health()
+            except Exception as err:  # noqa: BLE001
+                self._logger.debug("Post-training health recompute failed: %s", err)
+
+        return {
+            "ok": True,
+            "promoted": promoted,
+            "results": summary.get("results", []),
+            "matching": matching,
+        }
+
+    async def _tune_matching_config(self, cycles: list[dict[str, Any]]) -> dict[str, Any]:
+        """Tune + (if it beats the shipped defaults on a held-out split) persist
+        the matcher's scoring weights for this device. Executor-offloaded and
+        never raises. Returns the tuner status dict for logging / the UI event.
+        """
+        try:
+            from .ml.matching_tuner import tune_matching_config
+
+            result = await self.hass.async_add_executor_job(tune_matching_config, cycles)
+        except Exception as err:  # noqa: BLE001 - tuning must never break training
+            self._logger.debug("Matching-config tuning failed: %s", err)
+            return {"promoted": False, "reason": "exception", "error": str(err)}
+
+        if result.get("promoted") and result.get("config"):
+            record = {
+                "config": result["config"],
+                "trained_at": dt_util.now().isoformat(),
+                "cycle_count": len(cycles),
+                "baseline_test_top1": result.get("baseline_test_top1"),
+                "tuned_test_top1": result.get("tuned_test_top1"),
+            }
+            await self.profile_store.set_matching_config(record)
+            self._logger.info(
+                "On-device matcher tuning promoted (top-1 %.3f -> %.3f): %s",
+                result.get("baseline_test_top1") or 0.0,
+                result.get("tuned_test_top1") or 0.0,
+                result["config"],
+            )
+        else:
+            self._logger.debug(
+                "On-device matcher tuning not promoted: %s", result.get("reason")
+            )
+        return result
+
+    async def async_recompute_cycle_health(self) -> int:
+        """Recompute + persist per-cycle ML health against the current model.
+
+        Health is cached on each cycle and only recomputed at defined triggers
+        (this method): on-device retraining, scheduled auto-maintenance and the
+        Diagnostics "Process History" action. Panel loads reuse the cache. Runs
+        the CPU work in an executor and never raises to the caller.
+        """
+        import functools  # pylint: disable=import-outside-toplevel
+
+        try:
+            from .ws_api import _compute_ml_comparison  # pylint: disable=import-outside-toplevel
+        except Exception:  # pylint: disable=broad-exception-caught
+            return 0
+        opts = {**self.config_entry.data, **self.config_entry.options}
+        off_delay = int(opts.get(CONF_OFF_DELAY, DEFAULT_OFF_DELAY))
+        try:
+            result = await self.hass.async_add_executor_job(
+                functools.partial(
+                    _compute_ml_comparison, self.profile_store, off_delay, force_recompute=True
+                )
+            )
+        except Exception as err:  # noqa: BLE001
+            self._logger.debug("Cycle-health recompute failed: %s", err)
+            return 0
+        if result.get("_health_dirty"):
+            await self.profile_store.async_save()
+        return int(result.get("evaluated_count", 0))
+
+    def _last_ml_training_at(self) -> datetime | None:
+        """Most recent trained_at across stored on-device models, or None."""
+        latest: datetime | None = None
+        for record in (self.profile_store.get_ml_model_versions() or {}).values():
+            ts = record.get("trained_at") if isinstance(record, dict) else None
+            if not isinstance(ts, str):
+                continue
+            try:
+                parsed = dt_util.parse_datetime(ts)
+            except (ValueError, TypeError):
+                parsed = None
+            if parsed is not None and (latest is None or parsed > latest):
+                latest = parsed
+        return latest
 
     @callback
     def _async_power_changed(self, event: Any) -> None:
@@ -2751,13 +2961,17 @@ class WashDataManager:
             and self._current_program in self.profile_store.get_profiles()
         ):
             cycle_data["profile_name"] = self._current_program
+            cycle_data["label_source"] = "auto_match"
             if self._last_match_confidence:
                 cycle_data["match_confidence"] = float(self._last_match_confidence)
 
         # Attach extensive debug data if available (and configured)
         if self._last_match_result:
+            ranking = getattr(self._last_match_result, "ranking", [])
+            # Top-5 ranking stored unconditionally (small, high training value)
+            cycle_data["match_ranking_top5"] = ranking[:5]
             cycle_data["debug_data"] = {
-                "ranking": getattr(self._last_match_result, "ranking", []),
+                "ranking": ranking,
                 "details": getattr(self._last_match_result, "debug_details", {}),
                 "ambiguous": getattr(self._last_match_result, "is_ambiguous", False),
             }
@@ -2770,7 +2984,10 @@ class WashDataManager:
             )
             if res.best_profile and res.confidence >= self._auto_label_confidence:
                 cycle_data["profile_name"] = res.best_profile
+                cycle_data["label_source"] = "auto_label_post"
                 cycle_data["match_confidence"] = float(res.confidence)
+                # Top-5 from post-cycle match (may differ from live match ranking)
+                cycle_data["match_ranking_top5"] = getattr(res, "ranking", [])[:5]
                 self._logger.info(
                     "Post-cycle auto-labeled as '%s' (confidence: %.2f)",
                     res.best_profile,

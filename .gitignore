@@ -41,3 +41,4 @@ bin
 CLAUDE.md
 .vscode/settings.json
 .claude
+custom_components/ha_washdata/ml/__pycache__

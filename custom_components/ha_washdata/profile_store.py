@@ -6,6 +6,7 @@ import dataclasses
 import hashlib
 import html
 import logging
+import math
 import os
 import re
 import uuid
@@ -20,6 +21,8 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    GROUP_MIN_COHESION,
+    MATCH_AMBIGUITY_MARGIN,
     STORAGE_KEY,
     STORAGE_VERSION,
     DEFAULT_MAX_PAST_CYCLES,
@@ -45,8 +48,46 @@ from .log_utils import DeviceLoggerAdapter
 
 _LOGGER = logging.getLogger(__name__)
 
+# Absolute peak-power floor below which a cycle trace is considered a
+# mis-capture (e.g. the power sensor wasn't reporting), regardless of profile.
+# Used together with a relative (10% of median peak) test in envelope rebuild
+# and reference selection so degenerate cycles never become the matching template.
+_DEGENERATE_POWER_FLOOR = 15.0  # watts
+
 JSONDict: TypeAlias = dict[str, Any]
 CycleDict: TypeAlias = dict[str, Any]
+
+
+def _flag_recorded_cycles_golden(cycles: list[dict[str, Any]]) -> int:
+    """Mark manually-recorded cycles as golden references (recorded == golden).
+
+    A recorded cycle carries ``meta.source == "recorder"``; such cycles are, by
+    definition, hand-picked clean examples, so they become the profile's golden
+    reference. The flag lives in the single ``ml_review`` dict (no duplicate
+    ``recorded`` field). Idempotent: already-golden cycles are skipped, so it is
+    safe to re-run from the migration and the diagnostics processing trigger.
+
+    Returns the number of cycles newly flagged.
+    """
+    flagged = 0
+    for cycle in cycles:
+        if not isinstance(cycle, dict):
+            continue
+        review = cycle.get("ml_review")
+        if isinstance(review, dict) and review.get("golden"):
+            continue
+        meta = cycle.get("meta")
+        if not (isinstance(meta, dict) and meta.get("source") == "recorder"):
+            continue
+        review = dict(review) if isinstance(review, dict) else {}
+        review["golden"] = True
+        if not review.get("quality"):
+            review["quality"] = "good"  # recorded cycles are clean by definition
+        if not review.get("reviewed_at"):
+            review["reviewed_at"] = dt_util.now().isoformat()
+        cycle["ml_review"] = review
+        flagged += 1
+    return flagged
 
 
 def _empty_ranking() -> list[dict[str, Any]]:
@@ -582,6 +623,15 @@ class WashDataStore(Store[JSONDict]):
             else:
                 old_data["custom_phases"] = []
 
+        if old_major_version < 6:
+            _LOGGER.info("Migrating storage from v%s to v6", old_major_version)
+            cycles_raw = old_data.get("past_cycles", [])
+            cycles = cast(list[dict[str, Any]], cycles_raw) if isinstance(cycles_raw, list) else []
+            flagged = _flag_recorded_cycles_golden(cycles)
+            _LOGGER.info(
+                "Migration v5->v6: flagged %s recorded cycle(s) as golden references", flagged
+            )
+
         return old_data
 
     async def get_storage_stats(self) -> dict[str, Any]:
@@ -680,6 +730,8 @@ class ProfileStore:
             "feedback_history": {},  # Persisted user feedback (cycle_id -> record)
             "pending_feedback": {},  # Persisted pending feedback requests
             "custom_phases": [],  # Shared custom phase catalog
+            "ml_model_versions": {},  # On-device trained model specs (Stage 4)
+            "profile_groups": {},  # Named groups of near-duplicate profiles (Stage 5)
         }
 
 
@@ -711,6 +763,130 @@ class ProfileStore:
         """Clear all pending suggestions and persist."""
         self._data["suggestions"] = {}
         await self.async_save()
+
+    # ─── On-device ML model versions (Stage 4) ────────────────────────────────
+
+    def get_ml_model_versions(self) -> dict[str, Any]:
+        """Return the map of on-device trained model specs (capability -> record).
+
+        Each record is ``{spec, trained_at, cycle_count, metrics, baseline_auc}``
+        where ``spec`` is a NumPy-only standardized-logistic model produced by
+        :mod:`.ml.trainer`. Empty when nothing has been trained on-device.
+        """
+        raw = self._data.get("ml_model_versions")
+        if isinstance(raw, dict):
+            return cast(JSONDict, raw).copy()
+        return {}
+
+    async def set_ml_model_version(self, capability: str, record: dict[str, Any]) -> None:
+        """Persist a trained model record for a capability (quality/live_match/end)."""
+        versions: JSONDict = self._data.setdefault("ml_model_versions", {})
+        versions[capability] = record
+        await self.async_save()
+
+    async def clear_ml_model_versions(self) -> None:
+        """Drop all on-device trained models (reverts to embedded baselines)."""
+        self._data["ml_model_versions"] = {}
+        await self.async_save()
+
+    # ─── On-device matching-config tuning (Stage 4/5, opt-in) ──────────────────
+
+    #: Only these bounded scoring weights (all in [0, 1]) may be overridden
+    #: on-device, so a stored record can never change structural matching
+    #: behaviour. Mirrors ml.matching_tuner.OVERRIDE_KEYS.
+    _MATCHING_OVERRIDE_KEYS = ("corr_weight", "duration_weight", "energy_weight", "dtw_ensemble_w")
+
+    def get_matching_config(self) -> dict[str, Any]:
+        """Return the on-device tuned matcher scoring-weight record, if any.
+
+        Record shape: ``{config, trained_at, cycle_count, baseline_test_top1,
+        tuned_test_top1}`` where ``config`` holds the bounded scoring weights
+        (``corr_weight``/``duration_weight``/``energy_weight``). Empty when the
+        matcher is using the shipped defaults.
+        """
+        raw = self._data.get("matching_config")
+        if isinstance(raw, dict):
+            return cast(JSONDict, raw).copy()
+        return {}
+
+    async def set_matching_config(self, record: dict[str, Any]) -> None:
+        """Persist the tuned matcher scoring-weight override + metadata."""
+        self._data["matching_config"] = record
+        await self.async_save()
+
+    async def clear_matching_config(self) -> None:
+        """Revert the matcher to the shipped default scoring weights."""
+        self._data.pop("matching_config", None)
+        await self.async_save()
+
+    def _matching_overrides(self) -> dict[str, float]:
+        """Bounded scoring-weight overrides to merge into the matcher config.
+
+        Only the whitelisted keys are honoured, each clamped to ``[0, 1]``, so a
+        stored record can never alter structural matching behaviour - only the
+        emphasis between shape, level and energy agreement.
+        """
+        rec = self._data.get("matching_config")
+        cfg = rec.get("config") if isinstance(rec, dict) else None
+        out: dict[str, float] = {}
+        if isinstance(cfg, dict):
+            for k in self._MATCHING_OVERRIDE_KEYS:
+                try:
+                    out[k] = min(1.0, max(0.0, float(cfg[k])))
+                except (KeyError, TypeError, ValueError):
+                    continue
+        return out
+
+    async def set_cycle_review(
+        self,
+        cycle_id: str,
+        *,
+        quality: str | None = None,
+        golden: bool | None = None,
+        tags: list[str] | None = None,
+        notes: str | None = None,
+    ) -> bool:
+        """Attach an ML-Lab review to a cycle (Stage 4b).
+
+        The review (``quality``/``golden``/``tags``/``notes``) is stored under the
+        cycle's ``ml_review`` key and becomes a strong training label for the
+        on-device quality model. Only the provided fields are updated. Returns
+        True when the cycle was found and updated.
+        """
+        cycle = next(
+            (c for c in self._data.get("past_cycles", []) if c.get("id") == cycle_id),
+            None,
+        )
+        if not cycle:
+            raise ValueError(f"Cycle {cycle_id} not found")
+        review = dict(cycle.get("ml_review") or {})
+        if quality is not None:
+            review["quality"] = quality
+        if golden is not None:
+            review["golden"] = bool(golden)
+        if tags is not None:
+            review["tags"] = list(tags)
+        if notes is not None:
+            review["notes"] = notes
+        review["reviewed_at"] = dt_util.now().isoformat()
+        cycle["ml_review"] = review
+        await self.async_save()
+        self._logger.info("Recorded ML review for cycle %s: %s", cycle_id, review)
+        return True
+
+    async def async_backfill_recorded_golden(self) -> int:
+        """Flag manually-recorded cycles (meta.source == 'recorder') as golden
+        references. Recorded == golden: a single stored flag, no duplicate field.
+        Idempotent; saves only when something changed. Returns the count flagged.
+        """
+        cycles = self._data.get("past_cycles", [])
+        if not isinstance(cycles, list):
+            return 0
+        flagged = _flag_recorded_cycles_golden(cycles)
+        if flagged:
+            await self.async_save()
+            self._logger.info("Backfilled golden flag on %s recorded cycle(s)", flagged)
+        return flagged
 
     def get_feedback_history(self) -> dict[str, dict[str, Any]]:
         """Return mutable feedback history mapping (cycle_id -> record)."""
@@ -758,6 +934,283 @@ class ProfileStore:
         if isinstance(raw, list):
             return cast(list[CycleDict], raw)
         return []
+
+    # ── Profile groups (Stage 5: near-duplicate variants) ──────────────────────
+
+    def get_profile_groups(self) -> dict[str, JSONDict]:
+        """Return mutable profile-groups mapping (group_name -> {members, created_at}).
+
+        A group bundles near-duplicate profiles (e.g. the same program at
+        different temperature/spin). The matcher treats the group as one
+        aggregate candidate and only picks the exact member once the group wins.
+        Groups with fewer than 2 present members are ignored by the matcher.
+        """
+        raw = self._data.setdefault("profile_groups", {})
+        if not isinstance(raw, dict):
+            self._data["profile_groups"] = {}
+            return self._data["profile_groups"]
+        # Drop members that no longer exist as profiles (kept consistent lazily).
+        profiles = self.get_profiles()
+        for g in raw.values():
+            if isinstance(g, dict) and isinstance(g.get("members"), list):
+                g["members"] = [m for m in g["members"] if m in profiles]
+        return cast(dict[str, JSONDict], raw)
+
+    async def create_profile_group(self, name: str, members: list[str]) -> bool:
+        """Create (or overwrite) a group with the given member profile names."""
+        name = (name or "").strip()
+        if not name:
+            raise ValueError("Group name is required")
+        profiles = self.get_profiles()
+        members = [m for m in dict.fromkeys(members or []) if m in profiles]
+        groups = self.get_profile_groups()
+        groups[name] = {"members": members, "created_at": dt_util.now().isoformat()}
+        await self.async_save()
+        self._logger.info("Created profile group %r with %d members", name, len(members))
+        return True
+
+    async def set_profile_group_members(self, name: str, members: list[str]) -> bool:
+        """Replace a group's member list. Deletes the group if left empty."""
+        groups = self.get_profile_groups()
+        if name not in groups:
+            raise ValueError(f"Group {name} not found")
+        profiles = self.get_profiles()
+        members = [m for m in dict.fromkeys(members or []) if m in profiles]
+        if members:
+            groups[name]["members"] = members
+        else:
+            groups.pop(name, None)
+        await self.async_save()
+        return True
+
+    async def rename_profile_group(self, name: str, new_name: str) -> bool:
+        groups = self.get_profile_groups()
+        new_name = (new_name or "").strip()
+        if name not in groups or not new_name:
+            raise ValueError("Group not found or new name empty")
+        if new_name != name:
+            groups[new_name] = groups.pop(name)
+        await self.async_save()
+        return True
+
+    async def delete_profile_group(self, name: str) -> bool:
+        groups = self.get_profile_groups()
+        if groups.pop(name, None) is None:
+            return False
+        await self.async_save()
+        self._logger.info("Deleted profile group %r", name)
+        return True
+
+    def _group_of(self, profile_name: str) -> str | None:
+        """Return the group name a profile belongs to, or None."""
+        for gname, g in self.get_profile_groups().items():
+            if isinstance(g, dict) and profile_name in (g.get("members") or []):
+                return gname
+        return None
+
+    def _profile_curve(self, name: str, n: int = 150) -> np.ndarray | None:
+        """A profile's envelope average resampled to n points, or None."""
+        env = self._data.get("envelopes", {}).get(name) if isinstance(self._data.get("envelopes"), dict) else None
+        avg = env.get("avg") if isinstance(env, dict) else None
+        if not avg or not isinstance(avg[0], (list, tuple)):
+            return None
+        ys = np.asarray([float(p[1]) for p in avg], dtype=float)
+        if ys.size < 4:
+            return None
+        return np.interp(np.linspace(0, 1, n), np.linspace(0, 1, ys.size), ys)
+
+    @staticmethod
+    def _shape_similarity(a: np.ndarray, b: np.ndarray) -> float:
+        """Duration- and amplitude-tolerant shape similarity in (0,1].
+
+        Peak-normalises both curves (so temperature/spin amplitude differences
+        don't count against membership) then aligns them with a Sakoe-Chiba-band
+        DTW (so a longer heating or draining phase at a different setting warps
+        into alignment instead of being penalised as a different shape). 1.0 =
+        identical shape; genuinely different programs score low even after warping.
+        """
+        na = a / (float(a.max()) or 1.0)
+        nb = b / (float(b.max()) or 1.0)
+        dist = analysis.compute_dtw_lite(na, nb, band_width_ratio=0.2)
+        norm = dist / max(len(na), 1)  # mean per-sample distance on [0,1] curves
+        return 1.0 / (1.0 + norm / 0.15)
+
+    def group_cohesion(self, members: list[str]) -> float:
+        """Minimum pairwise shape similarity among a group's members (1.0 =
+        identical shapes; see _shape_similarity for the DTW/peak-normalised
+        metric). Low cohesion means the members are not really the same program,
+        so their averaged aggregate would be too generic and could out-match
+        unrelated profiles - the matcher refuses to aggregate below
+        GROUP_MIN_COHESION and the UI warns the user.
+        """
+        curves = [c for c in (self._profile_curve(m) for m in members) if c is not None]
+        if len(curves) < 2:
+            return 1.0
+        worst = 1.0
+        for i in range(len(curves)):
+            for j in range(i + 1, len(curves)):
+                worst = min(worst, self._shape_similarity(curves[i], curves[j]))
+        return worst
+
+    def _grouped_snapshots(
+        self, snapshots: list[dict[str, Any]]
+    ) -> tuple[list[dict[str, Any]], dict[str, list[str]], dict[str, dict[str, Any]]]:
+        """Collapse each *cohesive* group into one aggregate candidate snapshot.
+
+        Returns (snapshots, group_members, member_snaps). Groups with <2 present
+        members, or cohesion below GROUP_MIN_COHESION (too generic an aggregate),
+        are left as individual member snapshots. Aggregate name is prefixed
+        ``__group__`` and mapped to its member profile names in group_members.
+        """
+        groups = self.get_profile_groups()
+        if not groups:
+            return snapshots, {}, {}
+        by_name = {s["name"]: s for s in snapshots}
+        member_to_group: dict[str, str] = {}
+        for gname, g in groups.items():
+            present = [m for m in (g.get("members") or []) if m in by_name]
+            if len(present) < 2 or self.group_cohesion(present) < GROUP_MIN_COHESION:
+                continue  # keep members individual
+            for m in present:
+                member_to_group[m] = gname
+        if not member_to_group:
+            return snapshots, {}, {}
+        n = 200
+        agg_curves: dict[str, list[np.ndarray]] = {}
+        agg_durs: dict[str, list[float]] = {}
+        member_snaps: dict[str, dict[str, Any]] = {}
+        out: list[dict[str, Any]] = []
+        for s in snapshots:
+            g = member_to_group.get(s["name"])
+            if g is None:
+                out.append(s)
+                continue
+            member_snaps[s["name"]] = s
+            sp = s.get("sample_power") or []
+            if len(sp) >= 2:
+                arr = np.asarray(sp, dtype=float)
+                agg_curves.setdefault(g, []).append(
+                    np.interp(np.linspace(0, 1, n), np.linspace(0, 1, arr.size), arr)
+                )
+                agg_durs.setdefault(g, []).append(float(s.get("avg_duration") or 0.0))
+        group_members: dict[str, list[str]] = {}
+        for g, curves in agg_curves.items():
+            key = f"__group__{g}"
+            durs = [d for d in agg_durs[g] if d > 0]
+            out.append({
+                "name": key,
+                "avg_duration": float(np.mean(durs)) if durs else 0.0,
+                "sample_power": np.mean(np.array(curves), axis=0).tolist(),
+            })
+            group_members[key] = [m for m in member_to_group if member_to_group[m] == g and m in member_snaps]
+        return out, group_members, member_snaps
+
+    def _stage5_pick_member(
+        self, current_power: list[float], current_duration: float,
+        members: list[str], member_snaps: dict[str, dict[str, Any]],
+    ) -> tuple[str, float | None, float | None]:
+        """Within a winning group, pick the member whose duration + mean power +
+        peak best match the cycle (temperature -> mean power, spin -> peak).
+        Returns (member_name, individual_fit_score, member_avg_duration). The fit
+        score is the chosen member's own alignment score, used as a sanity check."""
+        cur = np.asarray(current_power, dtype=float)
+        if cur.size == 0 or not members:
+            return (members[0] if members else ""), None, None
+        cur_mp = float(cur.mean()); cur_pk = float(cur.max())
+
+        def agree(a: float, b: float, scale: float) -> float:
+            if a <= 0 or b <= 0:
+                return 0.0
+            return 1.0 / (1.0 + abs(math.log(a / b)) / scale)
+
+        best_m, best_sc, best_dur = members[0], -1.0, None
+        for m in members:
+            snap = member_snaps.get(m)
+            if not snap:
+                continue
+            sp = np.asarray(snap.get("sample_power") or [], dtype=float)
+            if sp.size == 0:
+                continue
+            md = float(snap.get("avg_duration") or 0.0)
+            sc = (agree(current_duration, md, 0.15)
+                  * agree(cur_mp, float(sp.mean()), 0.20)
+                  * agree(cur_pk, float(sp.max()), 0.20))
+            if sc > best_sc:
+                best_sc, best_m, best_dur = sc, m, md
+        fit = None
+        snap = member_snaps.get(best_m)
+        if snap and snap.get("sample_power"):
+            try:
+                fit = float(analysis.find_best_alignment(current_power, snap["sample_power"], 1.0)[0])
+            except Exception:  # pylint: disable=broad-exception-caught
+                fit = None
+        return best_m, fit, best_dur
+
+    def suggest_profile_groups(self, dur_tol: float = 0.60, sim_min: float = 0.85) -> list[dict[str, Any]]:
+        """Detect clusters of near-duplicate profiles not already fully grouped.
+
+        Two profiles cluster when their durations are within a (loose) ``dur_tol``
+        sanity bound AND their DTW/peak-normalised shape similarity exceeds
+        ``sim_min`` (same program shape; they may differ in temperature/spin and in
+        phase length, which the DTW alignment tolerates). The duration bound is
+        loose because higher-temp/lower-rpm variants legitimately run longer - it
+        only rules out grouping, say, a 20-min rinse with a 3-hour cotton.
+        Returns {"members": [...], "existing_group": name|None} suggestions the
+        user confirms. Never mutates state.
+        """
+        profiles = self.get_profiles()
+        envelopes = self._data.get("envelopes", {})
+        # Build per-profile (avg curve resampled to N, avg duration).
+        N = 150
+        reps: dict[str, tuple[np.ndarray, float]] = {}
+        for name, prof in profiles.items():
+            env = envelopes.get(name) if isinstance(envelopes, dict) else None
+            avg = env.get("avg") if isinstance(env, dict) else None
+            dur = float(prof.get("avg_duration") or 0.0)
+            if not avg or dur <= 0 or not isinstance(avg[0], (list, tuple)):
+                continue
+            ys = np.asarray([float(p[1]) for p in avg], dtype=float)
+            if ys.size < 4:
+                continue
+            curve = np.interp(np.linspace(0, 1, N), np.linspace(0, 1, ys.size), ys)
+            reps[name] = (curve, dur)
+        names = list(reps)
+        # Union-find near-duplicates.
+        parent = {n: n for n in names}
+        def find(x: str) -> str:
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]; x = parent[x]
+            return x
+        lim = math.log(1.0 + dur_tol)
+        for i in range(len(names)):
+            for j in range(i + 1, len(names)):
+                a, b = names[i], names[j]
+                (ca, da), (cb, db) = reps[a], reps[b]
+                if da <= 0 or db <= 0 or abs(math.log(da / db)) > lim:
+                    continue
+                if self._shape_similarity(ca, cb) > sim_min:
+                    parent[find(a)] = find(b)
+        clusters: dict[str, list[str]] = {}
+        for n in names:
+            clusters.setdefault(find(n), []).append(n)
+        # Only clusters of >=2; annotate with any existing group overlap; skip
+        # clusters already fully contained in one group.
+        out: list[dict[str, Any]] = []
+        groups = self.get_profile_groups()
+        for members in clusters.values():
+            if len(members) < 2:
+                continue
+            existing = None
+            for gname, g in groups.items():
+                gmembers = set(g.get("members") or [])
+                if gmembers & set(members):
+                    existing = gname
+                    if set(members) <= gmembers:
+                        members = []  # already grouped
+                    break
+            if members:
+                out.append({"members": sorted(members), "existing_group": existing})
+        return out
 
     def _get_shared_custom_phases(self) -> list[dict[str, Any]]:
         """Return mutable shared custom phase list with legacy flattening."""
@@ -1548,11 +2001,23 @@ class ProfileStore:
         label_stats = await self.auto_label_cycles(confidence_threshold=0.75, overwrite=False)
         stats["labeled_cycles"] = label_stats.get("labeled", 0)
 
-        # 2. Smart Process History (Merge/Split/Rebuild)
+        # 3. Smart Process History (Merge/Split/Rebuild)
         proc_stats = await self.async_smart_process_history()
         stats["merged_cycles"] = proc_stats.get("merged", 0)
         stats["split_cycles"] = proc_stats.get("split", 0)
-        stats["rebuilt_envelopes"] = len(self._data.get("profiles", {})) # Approximation of rebuilt count
+
+        # 4. Rebuild every profile's envelope so bands stay fresh, and report the
+        # real count of successful rebuilds (not an approximation).
+        rebuilt = 0
+        for profile_name in list(self._data.get("profiles", {}).keys()):
+            try:
+                await self.async_rebuild_envelope(profile_name)
+                rebuilt += 1
+            except Exception:  # pylint: disable=broad-exception-caught
+                self._logger.debug(
+                    "Envelope rebuild failed for %s during maintenance", profile_name, exc_info=True
+                )
+        stats["rebuilt_envelopes"] = rebuilt
 
         # 4. Save if any changes made (smart process saves internally if needed, but explicit save safe)
         if any(stats.values()):
@@ -1736,47 +2201,126 @@ class ProfileStore:
     def _rebuild_envelope_sync(
         self, labeled_cycles: list[CycleDict]
     ) -> tuple[Any, list[float]] | None:
-        """Sync worker to parse data and build envelope (run in executor)."""
-        raw_cycles_data: list[tuple[list[float], list[float], float]] = []
-        durations: list[float] = []
+        """Sync worker to parse data and build envelope (run in executor).
 
+        Degenerate cycles (a near-flat trace whose peak is a tiny fraction of the
+        profile's typical peak - e.g. a run where the power sensor wasn't
+        reporting) are excluded so they cannot pollute the envelope average that
+        the live matcher scores against, or drag ``avg_duration`` around.
+        User-pinned golden cycles are always kept.
+        """
+        # First pass: decompress everything and record each cycle's peak so we
+        # can judge degeneracy relative to the profile (works for both a 2000W
+        # dishwasher and a low-power pump).
+        parsed: list[tuple[list[float], list[float], float, bool, float]] = []
         for cycle in labeled_cycles:
-            # Use the shared decompressor so both legacy ISO-timestamp format
-            # and the current offset-float format are handled transparently.
             pairs = self._decompress_power_data(cycle)
-
             if len(pairs) < 3:
                 continue
-
-            offsets: list[float] = [p[0] for p in pairs]
-            values: list[float] = [p[1] for p in pairs]
-
+            offsets = [p[0] for p in pairs]
+            values = [p[1] for p in pairs]
             stored_dur = float(cycle.get("duration", 0.0) or 0.0)
             authoritative_dur = float(max(offsets[-1], stored_dur))
-
-            # Use manual duration if available (e.g. from feedback correction)
             man_dur = cycle.get("manual_duration")
-            if man_dur:
-                final_dur = float(man_dur)
-            else:
-                final_dur = authoritative_dur
+            final_dur = float(man_dur) if man_dur else authoritative_dur
+            review = cycle.get("ml_review")
+            is_golden = bool(review.get("golden")) if isinstance(review, dict) else False
+            peak = max(values) if values else 0.0
+            parsed.append((offsets, values, final_dur, is_golden, peak))
 
+        if not parsed:
+            return None
+
+        # Degeneracy floor: below max(_DEGENERATE_POWER_FLOOR, 10% of the median
+        # peak) a cycle is treated as a mis-capture and dropped (unless golden).
+        peaks = sorted(p[4] for p in parsed)
+        median_peak = peaks[len(peaks) // 2] if peaks else 0.0
+        degen_floor = max(_DEGENERATE_POWER_FLOOR, 0.10 * median_peak)
+
+        raw_cycles_data: list[tuple[list[float], list[float], float]] = []
+        durations: list[float] = []
+        golden_mask: list[bool] = []
+        dropped = 0
+        for offsets, values, final_dur, is_golden, peak in parsed:
+            if peak < degen_floor and not is_golden:
+                dropped += 1
+                continue
             raw_cycles_data.append((offsets, values, final_dur))
             durations.append(final_dur)
+            golden_mask.append(is_golden)
+
+        # Never drop everything: if the filter removed all cycles (e.g. a truly
+        # low-power profile misjudged), fall back to using them all.
+        if not raw_cycles_data:
+            for offsets, values, final_dur, is_golden, _peak in parsed:
+                raw_cycles_data.append((offsets, values, final_dur))
+                durations.append(final_dur)
+                golden_mask.append(is_golden)
+        elif dropped:
+            self._logger.debug(
+                "Envelope rebuild: excluded %d degenerate cycle(s) below %.0fW "
+                "(median peak %.0fW)", dropped, degen_floor, median_peak,
+            )
 
         if not raw_cycles_data:
             return None
 
-        # Run Heavy Computation
+        # Run Heavy Computation. When the profile has user-verified "golden"
+        # cycles, they define the reference shape (see compute_envelope_worker).
         result = analysis.compute_envelope_worker(
             cast(Any, raw_cycles_data),
-            self.dtw_bandwidth
+            self.dtw_bandwidth,
+            reference_mask=golden_mask if any(golden_mask) else None,
         )
 
         if not result:
             return None
 
         return result, durations
+
+    def _cycle_peak(self, cycle: CycleDict) -> float:
+        """Peak power of a cycle's trace (0.0 if it has none)."""
+        pairs = self._decompress_power_data(cycle)
+        return max((p[1] for p in pairs), default=0.0) if pairs else 0.0
+
+    def _select_reference_cycle_id(
+        self, profile_name: str, target_duration: float | None = None
+    ) -> str | None:
+        """Choose the best reference cycle for a profile's matching template.
+
+        Preference order: user-pinned golden cycles first, then non-degenerate
+        cycles (peak not a tiny fraction of the profile's median peak - this
+        rejects mis-captured near-flat traces), and among those the one closest
+        to the profile's representative duration (so a truncated half-cycle is
+        not chosen). Returns a cycle id, or None if there are no usable cycles.
+        """
+        cands = [
+            c for c in self._data.get("past_cycles", [])
+            if c.get("profile_name") == profile_name
+            and c.get("status") in ("completed", "force_stopped")
+            and isinstance(c.get("power_data"), list) and len(c["power_data"]) >= 3
+        ]
+        if not cands:
+            return None
+        peaks = {c["id"]: self._cycle_peak(c) for c in cands}
+        med_peak = sorted(peaks.values())[len(peaks) // 2] if peaks else 0.0
+        degen_floor = max(_DEGENERATE_POWER_FLOOR, 0.10 * med_peak)
+
+        golden = [
+            c for c in cands
+            if isinstance(c.get("ml_review"), dict) and c["ml_review"].get("golden")
+        ]
+        if golden:
+            pool = golden
+        else:
+            pool = [c for c in cands if peaks.get(c["id"], 0.0) >= degen_floor] or cands
+
+        if target_duration and target_duration > 0:
+            best = min(pool, key=lambda c: abs(float(c.get("duration") or 0.0) - target_duration))
+        else:
+            # No duration hint: prefer the longest (avoids truncated half-cycles).
+            best = max(pool, key=lambda c: float(c.get("duration") or 0.0))
+        return best.get("id")
 
     async def async_rebuild_all_envelopes(self) -> int:
         """Rebuild envelopes for all profiles. Returns count of envelopes rebuilt."""
@@ -1913,6 +2457,18 @@ class ProfileStore:
             self._data["profiles"][profile_name]["min_duration"] = min_duration
             self._data["profiles"][profile_name]["max_duration"] = max_duration
             self._data["profiles"][profile_name]["avg_duration"] = avg_duration
+
+            # Re-point the matching reference to a golden / non-degenerate cycle
+            # near the representative duration, so a mis-captured (flat) or
+            # truncated cycle can never remain the profile's template.
+            ref_id = self._select_reference_cycle_id(profile_name, avg_duration)
+            if ref_id and self._data["profiles"][profile_name].get("sample_cycle_id") != ref_id:
+                old = self._data["profiles"][profile_name].get("sample_cycle_id")
+                self._data["profiles"][profile_name]["sample_cycle_id"] = ref_id
+                self._logger.debug(
+                    "Re-selected reference cycle for %s: %s -> %s",
+                    profile_name, old, ref_id,
+                )
 
         if not result:
             if profile_name in self._data.get("envelopes", {}):
@@ -2648,6 +3204,8 @@ class ProfileStore:
     ) -> MatchResult:
         """Run profile matching asynchronously in executor."""
         # 1. Prepare data in main thread (Access ProfileStore state safely)
+        group_members: dict[str, list[str]] = {}
+        member_snaps: dict[str, dict[str, Any]] = {}
 
         # Convert to list of floats for current power (uniform resampling)
         if not current_power_data:
@@ -2707,14 +3265,30 @@ class ProfileStore:
                           and c.get("power_data")),
                         None
                     )
+                # Boost user-pinned "golden" cycles: when a profile has one, use
+                # its sharp single-cycle trace as the matching template instead
+                # of the envelope average. The envelope average smears the
+                # wash-phase peaks (each cycle's spikes land at slightly
+                # different times), which hurts correlation for sharply-shaped
+                # programs; a trusted golden cycle preserves that shape.
+                has_golden = any(
+                    c.get("profile_name") == name
+                    and isinstance(c.get("ml_review"), dict)
+                    and c["ml_review"].get("golden")
+                    and c.get("power_data")
+                    for c in self._data["past_cycles"]
+                )
+
                 # Prefer envelope avg curve when ≥2 labeled cycles have been
                 # confirmed - it gives a more representative reference signal
                 # than the original sample alone, so confidence improves over
-                # time as the user keeps confirming correct detections.
+                # time as the user keeps confirming correct detections. Skipped
+                # when a golden cycle is pinned (see above).
                 envelope = self._data.get("envelopes", {}).get(name)
                 _env_avg = envelope.get("avg") if envelope else None
                 if (
-                    envelope
+                    not has_golden
+                    and envelope
                     and envelope.get("cycle_count", 0) >= 2
                     and _env_avg
                     and isinstance(_env_avg[0], (list, tuple))
@@ -2792,10 +3366,16 @@ class ProfileStore:
                     "; ".join(skipped_profiles)
                 )
 
+            # Stage 5: collapse cohesive near-duplicate groups into one aggregate
+            # candidate each (loose groups stay individual). No-op without groups.
+            snapshots, group_members, member_snaps = self._grouped_snapshots(snapshots)
+
             config = {
                 "min_duration_ratio": self._min_duration_ratio,
                 "max_duration_ratio": self._max_duration_ratio,
-                "dtw_bandwidth": self.dtw_bandwidth
+                "dtw_bandwidth": self.dtw_bandwidth,
+                # On-device tuned scoring weights (opt-in); empty = shipped defaults.
+                **self._matching_overrides(),
             }
 
         except Exception as e:  # pylint: disable=broad-exception-caught
@@ -2833,22 +3413,38 @@ class ProfileStore:
         if len(candidates) > 1:
             margin = best["score"] - candidates[1]["score"]
 
-        is_ambiguous = margin < 0.05
+        # Top-level ambiguity (safeguard #1): a close group-vs-runner-up call is
+        # flagged so it goes to the uncertain/feedback path, not a confident commit.
+        is_ambiguous = margin < MATCH_AMBIGUITY_MARGIN
 
-        # Phase Detection (Sync on main thread, fast enough? Phase check is O(N) but simple bounds check)
-        # We can run check_phase_match logic here or defer it.
-        # Let's run it here since we have the data.
-        # But check_phase_match uses wrappers.
+        best_name = best["name"]
+        best_duration = best["profile_duration"]
+        # Stage 5: if a group won, pick the best-fitting member.
+        if best_name in group_members:
+            chosen, member_fit, member_dur = self._stage5_pick_member(
+                current_power_list, current_duration, group_members[best_name], member_snaps
+            )
+            best_name = chosen
+            if member_dur:
+                best_duration = member_dur
+            # Safeguard #2: the group aggregate matched but if the chosen member
+            # does not individually fit reasonably (vs the group score), the real
+            # program may be a different single profile -> treat as uncertain.
+            if member_fit is not None and best["score"] > 0 and member_fit < 0.7 * best["score"]:
+                is_ambiguous = True
+            # Relabel the winning candidate for the ranking / diagnostics.
+            candidates = [{**best, "name": best_name, "profile_duration": best_duration}, *candidates[1:]]
+
         matched_phase = None
-        if best.get("name"):
+        if best_name:
             # Always resolve phase for the matched profile so phase sensors can
             # show user-assigned phase names even when confidence is moderate.
-            matched_phase = self.check_phase_match(best["name"], current_duration)
+            matched_phase = self.check_phase_match(best_name, current_duration)
 
         return MatchResult(
-            best["name"],
+            best_name,
             best["score"],
-            best["profile_duration"],
+            best_duration,
             matched_phase,
             candidates[:5], # Ranking
             is_ambiguous,
@@ -2886,7 +3482,9 @@ class ProfileStore:
         config = {
             "min_duration_ratio": self._min_duration_ratio,
             "max_duration_ratio": self._max_duration_ratio,
-            "dtw_bandwidth": self.dtw_bandwidth
+            "dtw_bandwidth": self.dtw_bandwidth,
+            # On-device tuned scoring weights (opt-in); empty = shipped defaults.
+            **self._matching_overrides(),
         }
 
         candidates = analysis.compute_matches_worker(
@@ -2903,7 +3501,7 @@ class ProfileStore:
         if len(candidates) > 1:
             margin = best["score"] - candidates[1]["score"]
 
-        is_ambiguous = margin < 0.05
+        is_ambiguous = margin < MATCH_AMBIGUITY_MARGIN
 
         return MatchResult(
             best["name"],
@@ -3187,6 +3785,12 @@ class ProfileStore:
                 if record.get("corrected_profile") == old_name:
                     record["corrected_profile"] = new_name
 
+            # 4. Update group membership (rename the member in any group)
+            for g in self._data.get("profile_groups", {}).values():
+                mems = g.get("members") if isinstance(g, dict) else None
+                if isinstance(mems, list) and old_name in mems:
+                    g["members"] = [new_name if m == old_name else m for m in mems]
+
             self._logger.info(
                 "Renamed profile '%s' to '%s', updated %s cycles and associated feedback",
                 old_name,
@@ -3253,8 +3857,15 @@ class ProfileStore:
         if profile_name and profile_name not in self._data.get("profiles", {}):
             raise ValueError(f"Profile '{profile_name}' not found. Create it first.")
 
+        # Preserve original auto-assigned label before first manual relabeling
+        if profile_name and old_profile and not cycle.get("original_auto_label"):
+            orig_src = cycle.get("label_source", "")
+            if orig_src in ("auto_match", "auto_label_post", "auto_label_service"):
+                cycle["original_auto_label"] = old_profile
+
         # Update cycle
         cycle["profile_name"] = profile_name if profile_name else None
+        cycle["label_source"] = "manual" if profile_name else None
 
         # Update profile metadata if this is the first cycle
         if profile_name:
@@ -3311,12 +3922,21 @@ class ProfileStore:
 
             if result.best_profile and result.confidence >= confidence_threshold:
                 current_label = cycle.get("profile_name")
+                ranking_top5 = getattr(result, "ranking", [])[:5]
 
                 # If overwriting, check if new match is different and better/valid
                 if current_label:
                     if current_label != result.best_profile:
+                        # Preserve original label before first auto-service relabeling
+                        if not cycle.get("original_auto_label"):
+                            orig_src = cycle.get("label_source", "")
+                            if orig_src in ("auto_match", "auto_label_post", "auto_label_service"):
+                                cycle["original_auto_label"] = current_label
                         cycle["profile_name"] = result.best_profile
                         cycle["match_confidence"] = float(result.confidence)
+                        cycle["label_source"] = "auto_label_service"
+                        if ranking_top5:
+                            cycle["match_ranking_top5"] = ranking_top5
                         stats["relabeled"] += 1
                         self._logger.info(
                             "Relabeled cycle %s: '%s' -> '%s' (confidence: %.2f)",
@@ -3328,6 +3948,9 @@ class ProfileStore:
                 else:
                     cycle["profile_name"] = result.best_profile
                     cycle["match_confidence"] = float(result.confidence)
+                    cycle["label_source"] = "auto_label_service"
+                    if ranking_top5:
+                        cycle["match_ranking_top5"] = ranking_top5
                     stats["labeled"] += 1
                     self._logger.info(
                         "Auto-labeled cycle %s as '%s' (confidence: %.2f)",
@@ -3357,7 +3980,7 @@ class ProfileStore:
         Runs the matcher once per cycle with profile_name set but no
         match_confidence, and persists the resulting confidence if the same
         profile is returned. Returns the number of cycles updated. Safe to
-        call repeatedly — already-backfilled cycles are skipped.
+        call repeatedly - already-backfilled cycles are skipped.
         """
         cycles = self._data.get("past_cycles", []) or []
         updated = 0
@@ -3595,13 +4218,28 @@ class ProfileStore:
     ) -> JSONDict:
         # Return a serializable snapshot of the store for backup/export.
         # Includes config entry data/options so users can transfer fine-tuned settings.
+        opts = entry_options or {}
+        data = entry_data or {}
+        _FINGERPRINT_KEYS = (
+            "off_delay", "min_power", "sampling_interval",
+            "start_power_threshold", "idle_power_threshold",
+            "min_cycle_duration", "max_cycle_duration",
+            "delay_start_detect_enabled",
+        )
+        device_fingerprint: JSONDict = {
+            "device_type": data.get("device_type") or opts.get("device_type", "unknown"),
+        }
+        for key in _FINGERPRINT_KEYS:
+            if key in opts:
+                device_fingerprint[key] = opts[key]
         return {
             "version": STORAGE_VERSION,
             "entry_id": self.entry_id,
             "exported_at": dt_util.now().isoformat(),
+            "device_fingerprint": device_fingerprint,
             "data": self._data,
-            "entry_data": entry_data or {},
-            "entry_options": entry_options or {},
+            "entry_data": data,
+            "entry_options": opts,
         }
 
     async def async_import_data(self, payload: dict[str, Any]) -> dict[str, Any]:

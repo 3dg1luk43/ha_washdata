@@ -60,6 +60,11 @@ from .const import (
     CONF_PROFILE_MATCH_MIN_DURATION_RATIO,
     CONF_PROFILE_MATCH_MAX_DURATION_RATIO,
     CONF_AUTO_MAINTENANCE,
+    CONF_ML_TRAINING_ENABLED,
+    CONF_ML_TRAINING_HOUR,
+    DEFAULT_ML_TRAINING_ENABLED,
+    DEFAULT_ML_TRAINING_HOUR,
+    ENABLE_ML_TRAINING,
     CONF_WATCHDOG_INTERVAL,
     CONF_COMPLETION_MIN_SECONDS,
     CONF_NOTIFY_BEFORE_END_MINUTES,
@@ -455,6 +460,13 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             CONF_STOP_THRESHOLD_W,
             CONF_END_ENERGY_THRESHOLD,
             CONF_RUNNING_DEAD_ZONE,
+            # Stage 1 detection suggestions
+            CONF_SMOOTHING_WINDOW,
+            CONF_START_DURATION_THRESHOLD,
+            CONF_COMPLETION_MIN_SECONDS,
+            CONF_LEARNING_CONFIDENCE,
+            CONF_PROFILE_MATCH_THRESHOLD,
+            CONF_END_REPEAT_COUNT,
         ]
 
     @staticmethod
@@ -668,7 +680,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         if user_input is not None:
             if user_input.get("confirm_apply_suggestions"):
-                # Pass staged values directly as form input — saves immediately
+                # Pass staged values directly as form input - saves immediately
                 # without bouncing back to Advanced Settings for a second submit.
                 return await self.async_step_advanced_settings(
                     user_input=self._suggested_values
@@ -1019,6 +1031,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             CONF_PROFILE_MATCH_INTERVAL,
                             CONF_MIN_OFF_GAP,
                             CONF_RUNNING_DEAD_ZONE,
+                            CONF_SMOOTHING_WINDOW,
+                            CONF_COMPLETION_MIN_SECONDS,
+                            CONF_END_REPEAT_COUNT,
                         ):
                             suggested_val: Any = int(float(val))
                         else:
@@ -1423,6 +1438,25 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_SAVE_DEBUG_TRACES, default=get_val(CONF_SAVE_DEBUG_TRACES, False)
             ): selector.BooleanSelector(),
         }
+
+        # On-device ML retraining (Stage 4, gated by the build flag).
+        if ENABLE_ML_TRAINING:
+            timing_schema[
+                vol.Optional(
+                    CONF_ML_TRAINING_ENABLED,
+                    default=get_val(CONF_ML_TRAINING_ENABLED, DEFAULT_ML_TRAINING_ENABLED),
+                )
+            ] = selector.BooleanSelector()
+            timing_schema[
+                vol.Optional(
+                    CONF_ML_TRAINING_HOUR,
+                    default=get_val(CONF_ML_TRAINING_HOUR, DEFAULT_ML_TRAINING_HOUR),
+                )
+            ] = selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0, max=23, step=1, mode=selector.NumberSelectorMode.BOX
+                )
+            )
 
         anti_wrinkle_schema = {
             vol.Optional(
@@ -2376,7 +2410,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             if isinstance(conf, (int, float)) and conf > 0:
                 conf_text = f"{int(round(float(conf) * 100))}%"
             else:
-                conf_text = "—"
+                conf_text = "-"
             rows.append(
                 f'<tr><td align="center">{status_icon}</td>'
                 f'<td><b>{safe_prof}</b></td>'
@@ -2446,10 +2480,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         rows: list[str] = []
         for p in profiles:
             avg_s = int(p.get("avg_duration") or 0)
-            avg_str = _format_duration_label(avg_s) if avg_s > 0 else "—"
+            avg_str = _format_duration_label(avg_s) if avg_s > 0 else "-"
             count = p.get("cycle_count", 0)
             last_run_raw = p.get("last_run")
-            last_run_str = "—"
+            last_run_str = "-"
             if last_run_raw:
                 dt = dt_util.parse_datetime(str(last_run_raw))
                 if dt:
@@ -2461,7 +2495,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 else:
                     energy_str = f"{int(round(avg_energy * 1000))} Wh"
             else:
-                energy_str = "—"
+                energy_str = "-"
             safe_name = html.escape(str(p["name"]))
             safe_avg = html.escape(avg_str)
             safe_last_run = html.escape(last_run_str)
