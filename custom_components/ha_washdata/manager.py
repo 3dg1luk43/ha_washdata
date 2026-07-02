@@ -1369,6 +1369,12 @@ class WashDataManager:
         # Subscribe to person presence changes for notification gating
         await self._setup_notify_people_listener()
 
+        # Register schedulers (maintenance + ML training). These are also re-
+        # registered on every config reload; calling them here ensures they
+        # survive HA restarts without requiring the user to re-save settings.
+        await self._setup_maintenance_scheduler()
+        self._setup_ml_training_scheduler()
+
     def _load_notify_services(self, config_entry: ConfigEntry) -> None:
         """Load notification service lists, migrating legacy single-service config."""
         self._notify_start_services = list(config_entry.options.get(CONF_NOTIFY_START_SERVICES, []) or [])
@@ -2116,9 +2122,15 @@ class WashDataManager:
             if self.detector and self.detector.state in {
                 STATE_RUNNING, STATE_PAUSED, STATE_STARTING, STATE_ENDING
             }:
+                self._logger.debug("Skipping scheduled ML training: device active")
                 return {"ok": False, "reason": "device_active"}
             min_cycles = int(opts.get(CONF_ML_TRAINING_MIN_CYCLES, DEFAULT_ML_TRAINING_MIN_CYCLES))
             if len(cycles) < min_cycles:
+                self._logger.debug(
+                    "Skipping scheduled ML training: need %d cycles, have %d",
+                    min_cycles,
+                    len(cycles),
+                )
                 return {"ok": False, "reason": f"need {min_cycles} cycles, have {len(cycles)}"}
             # Respect the minimum retrain interval.
             interval_days = int(
@@ -2128,6 +2140,11 @@ class WashDataManager:
             if last is not None:
                 age_days = (dt_util.now() - last).total_seconds() / 86400.0
                 if age_days < interval_days:
+                    self._logger.debug(
+                        "Skipping scheduled ML training: retrained %.1fd ago (<%dd)",
+                        age_days,
+                        interval_days,
+                    )
                     return {"ok": False, "reason": f"retrained {age_days:.1f}d ago (<{interval_days}d)"}
 
         if self._ml_training_running:
